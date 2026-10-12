@@ -80,6 +80,10 @@ FLUIDS = {
                       "tick_delay": 3, "slope": 4, "drop_off": 1},
 }
 
+FLUIDS["hydrochloric_acid"] = {"display": "Hydrochloric Acid", "feature": "machines",
+    "colors": [(98, 125, 78), (146, 173, 114), (175, 202, 145), (220, 238, 196)],
+    "tick_delay": 5, "slope": 4, "drop_off": 1}
+
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
 GASES = {
     # colors: the swirl drawn for recipe viewers and tank gauges (gases are never placed in the world).
@@ -229,7 +233,7 @@ FLUID_MACHINES = {
     "advanced_engine": {"inputs": [8_000, 4_000], "outputs": [], "item_inputs": 1, "item_outputs": 0, "recipe_type": None},
     # Sulfur + water -> sulfuric acid; bauxite + lye -> alumina; phosphate + acid -> fertilizer (batch 5). Batch 24:
     # also the mixing jobs (brine, fracking fluid), replacing the chemical mixer. 96 JE/t.
-    "chemical_reactor": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
+    "chemical_reactor": {"inputs": [8_000, 8_000, 1_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
                          "recipe_type": "chemical_reaction"},
     # Electronics (batch 7): a wafer and copper wire etched with sulfuric acid into microchips. 192 JE/t.
     "lithography_station": {"inputs": [4_000], "outputs": [], "item_inputs": 2, "item_outputs": 1,
@@ -324,6 +328,12 @@ FLUID_RECIPES = {
     # Sulfur burnt to sulfur trioxide and absorbed in water (the contact process, simplified): two sulfur dust and a
     # bucket of water make a bucket of sulfuric acid.
     "chemical_reactor": [
+        {"name": "absorb_hydrogen_chloride", "fluids": [("minecraft:water", 500), ("jugcraft:hydrogen_chloride", 500)],
+         "fluid_results": [("jugcraft:hydrochloric_acid", 1000)], "ticks": 100, "features": ["machines"]},
+        {"name": "absorb_sulfur_trioxide", "fluids": [("minecraft:water", 250), ("jugcraft:sulfur_trioxide", 250), ("jugcraft:sulfuric_acid", 1000)],
+         "retained_inputs": [2], "fluid_results": [("jugcraft:sulfuric_acid", 500)], "ticks": 100, "features": ["machines", "sulfur"]},
+        {"name": "hydrochloric_copper", "items": [("minecraft:raw_copper", 1)], "fluids": [("jugcraft:hydrochloric_acid", 250)],
+         "results": [("jugcraft:washed_copper_ore", 1)], "ticks": 160, "features": ["machines"]},
         {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
         # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).
@@ -509,7 +519,7 @@ def fluid_recipe_files(condition):
             if recipe.get("items"):
                 data["items"] = [{"ingredient": item, "count": count} for item, count in recipe["items"]]
             if recipe.get("fluids"):
-                data["fluids"] = [{"fluid": fluid, "amount": mb} for fluid, mb in recipe["fluids"]]
+                data["fluids"] = [{"fluid": fluid, "amount": mb} | ({"retained": True} if i in recipe.get("retained_inputs", []) else {}) for i, (fluid, mb) in enumerate(recipe["fluids"])]
             if recipe.get("fluid_results"):
                 data["fluid_results"] = [{"fluid": r[0], "amount": r[1]} | ({"tank": r[2]} if len(r) > 2 else {})
                                          for r in recipe["fluid_results"]]

@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:hydrochloric_acid_bucket"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_hydrochloric_acid_bucket.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_hydrochloric_acid_bucket.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:hydrochloric_acid_bucket"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

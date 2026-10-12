@@ -137,12 +137,13 @@ public final class JugcraftClient implements ClientModInitializer {
 						.withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
 		});
-		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
+		EngineersHandbookItem.openScreen = () -> EncyclopediaClient.open(null);
 		// Gear traits' descriptions show while Shift is held (gear/TraitTooltips.java, docs/features/trait-details.md).
 		io.github.jimbozoomer.jugcraft.gear.TraitTooltips.details = () -> Minecraft.getInstance().hasShiftDown();
 		SeasonColors.register();
 		WoodColors.register();
 		PartyClient.register();
+        EncyclopediaClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,

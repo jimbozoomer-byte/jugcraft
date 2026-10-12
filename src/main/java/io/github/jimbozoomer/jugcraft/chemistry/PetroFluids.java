@@ -116,6 +116,7 @@ public final class PetroFluids {
 	public static Gas HYDROGEN;
 	/** Sulfur burnt and absorbed in water: the acid for fertilizer and leaching. */
 	public static Entry SULFURIC_ACID;
+	public static Entry HYDROCHLORIC_ACID;
 	/** Nitrogen chemistry (batch 12): air separated into nitrogen and oxygen; ammonia from them and hydrogen. */
 	public static Gas NITROGEN;
 	public static Gas OXYGEN;
@@ -207,6 +208,8 @@ public final class PetroFluids {
 		NUTRIENT_SOLUTION = fluid("nutrient_solution", 5, 4, 1, 0xFF6EAA64, MapColor.COLOR_GREEN);
 		KEROSENE = fluid("kerosene", 5, 4, 1, 0xFFE0E0C4, MapColor.SAND);
 		LIQUID_OXYGEN = fluid("liquid_oxygen", 3, 4, 1, 0xFFA0C8EC, MapColor.COLOR_LIGHT_BLUE);
+
+		HYDROCHLORIC_ACID = fluid("hydrochloric_acid", 5, 4, 1, 0xFFAFCA91, MapColor.COLOR_LIGHT_GREEN);
 
 		CARBON_MONOXIDE = gas("carbon_monoxide", 0xFF88978F);
 		CARBON_DIOXIDE = gas("carbon_dioxide", 0xFF9C9180);

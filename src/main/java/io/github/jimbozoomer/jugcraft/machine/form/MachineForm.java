@@ -433,7 +433,8 @@ public final class MachineForm {
 
 	/** Whether this form may run {@code recipe}: it must declare the recipe's capability. */
 	public boolean runs(FluidRecipe recipe) {
-		return recipe.machine() == family && capabilities.contains(recipe.capability());
+		return recipe.machine() == family && capabilities.contains(recipe.capability())
+				&& recipe.fluids().stream().noneMatch(FluidRecipe.FluidAmount::retained);
 	}
 
 	/** Whether this is a generator form: it burns {@link #fuels()} and gives power out. */

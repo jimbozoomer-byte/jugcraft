@@ -74,6 +74,7 @@ public class HandbookScreen extends Screen {
 	private static final int TAB_SELECTED = 0xFF7A4A24;
 	private static final int TAB_HOVER = 0xFF5E3820;
 
+	private Screen returnTo;
 	private final List<JsonObject> chapters = new ArrayList<>();
 	private int chapter;
 	private int page;
@@ -103,6 +104,15 @@ public class HandbookScreen extends Screen {
 		load();
 	}
 
+    /** Reuses the canonical handbook renderer for Encyclopedia entries, preserving inventory/back navigation. */
+    public HandbookScreen(Screen parent, JsonObject entry) {
+        super(Component.literal(entry.get("title").getAsString()));
+        returnTo=parent;
+        JsonObject chapter=new JsonObject();chapter.addProperty("title","Entry");
+        JsonArray pages=new JsonArray();pages.add(entry);chapter.add("pages",pages);chapters.add(chapter);
+    }
+    @Override public void onClose(){minecraft.gui.setScreen(returnTo);}
+
 	private void load() {
 		Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(CONTENT);
 		if (resource.isEmpty()) {
@@ -128,6 +138,13 @@ public class HandbookScreen extends Screen {
 				.bounds(left + SIDE_WIDTH + 8, top + bookHeight - FOOTER + 2, 16, 14).build());
 		next = addRenderableWidget(Button.builder(Component.literal(">"), button -> turn(1))
 				.bounds(left + bookWidth - 24, top + bookHeight - FOOTER + 2, 16, 14).build());
+        if (returnTo != null) addRenderableWidget(Button.builder(Component.literal("Back to guide"), b -> onClose())
+                .bounds(left + SIDE_WIDTH + 8, top + bookHeight - FOOTER + 2, 80, 14).build());
+        if (returnTo instanceof EncyclopediaScreen guide && !pages().isEmpty() && pages().get(0).getAsJsonObject().has("related")) {
+            String query = pages().get(0).getAsJsonObject().get("related").getAsString();
+            addRenderableWidget(Button.builder(Component.literal("Related guide"), b -> { minecraft.gui.setScreen(guide); guide.searchFor(query); })
+                    .bounds(left + bookWidth - 86, top + bookHeight - FOOTER + 2, 78, 14).build());
+        }
 		revealOpenPage();
 	}
 

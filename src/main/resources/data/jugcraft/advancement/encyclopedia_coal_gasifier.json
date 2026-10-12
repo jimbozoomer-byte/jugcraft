@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:coal_gasifier"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_coal_gasifier.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_coal_gasifier.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:coal_gasifier"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

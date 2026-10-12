@@ -68,6 +68,7 @@ def write_dynamic_sockets(root, models, footprints):
         body = models[name]
         entries[name] = [{"offset": p[0], "face": p[1],
                           "quads": quads(with_sockets(body, [p])[len(body):])} for p in ports]
+    Path(root).mkdir(parents=True, exist_ok=True)
     (Path(root) / "machine_connection_quads.json").write_text(json.dumps(entries, separators=(",", ":")) + "\n", encoding="utf-8")
 
 

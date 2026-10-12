@@ -125,6 +125,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftWorldgen.register();
 		JugcraftParties.register();
 		registerMachineStylePack();
+		io.github.jimbozoomer.jugcraft.guide.EncyclopediaProgress.register();
 		LOGGER.info("Jugcraft loaded");
 	}
 

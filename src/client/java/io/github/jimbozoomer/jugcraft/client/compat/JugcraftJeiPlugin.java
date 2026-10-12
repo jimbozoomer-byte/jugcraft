@@ -55,7 +55,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 	/** A fluid machine's recipe (FLUID_RECIPES in tools/petro.py): items and fluids in, fluids and items out, in mB. */
 	public record FluidViewRecipe(List<List<ItemStack>> items, List<FluidAmount> fluids, List<FluidAmount> fluidResults,
-			List<ItemStack> results, int ticks, List<ItemStack> tool, int energyPerTick) {
+			List<ItemStack> results, int ticks, List<ItemStack> tool, int energyPerTick, List<Integer> retainedInputs) {
 	}
 
 	public record FluidAmount(Fluid fluid, int mb) {
@@ -202,7 +202,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 					recipes.add(new FluidViewRecipe(items, fluids(recipe.getAsJsonArray("fluids")),
 							fluids(recipe.getAsJsonArray("fluid_results")), results, recipe.get("ticks").getAsInt(),
 							recipe.has("tool") && !recipe.get("tool").getAsString().isEmpty() ? stacks(recipe.get("tool").getAsString(), 1) : List.of(),
-							recipe.has("energy_per_tick") ? recipe.get("energy_per_tick").getAsInt() : 0));
+							recipe.has("energy_per_tick") ? recipe.get("energy_per_tick").getAsInt() : 0,
+                                recipe.has("retained_inputs") ? java.util.stream.StreamSupport.stream(recipe.getAsJsonArray("retained_inputs").spliterator(),false).map(JsonElement::getAsInt).toList() : List.of()));
 				}
 				result.add(new FluidMachine(block, type, recipes));
 			}
@@ -526,8 +527,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 				builder.addInputSlot(x, SLOT_Y).setStandardSlotBackground().addItemStacks(input);
 				x += 18;
 			}
-			for (FluidAmount fluid : recipe.fluids()) {
-				builder.addInputSlot(x, SLOT_Y).setStandardSlotBackground().add(fluid.fluid(), fluid.mb() * bucketVolume / 1000);
+			for (int i = 0; i < recipe.fluids().size(); i++) {
+                FluidAmount fluid = recipe.fluids().get(i);
+				builder.addSlot(recipe.retainedInputs().contains(i) ? mezz.jei.api.recipe.RecipeIngredientRole.CRAFTING_STATION : mezz.jei.api.recipe.RecipeIngredientRole.INPUT, x, SLOT_Y).setStandardSlotBackground().add(fluid.fluid(), fluid.mb() * bucketVolume / 1000);
 				x += 18;
 			}
 			x = 92;
@@ -552,6 +554,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0)
 					+ (recipe.energyPerTick() > 0 ? " / " + recipe.energyPerTick() + " JE/t" : ""), 0, 28, TEXT, false);
 			if (!recipe.tool().isEmpty()) graphics.text(font, "Reusable catalyst", 22, 43, TEXT, false);
+            if (!recipe.retainedInputs().isEmpty()) graphics.text(font, "Acid charge retained (top)", 0, 43, TEXT, false);
 		}
 	}
 }

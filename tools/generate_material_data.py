@@ -1063,7 +1063,7 @@ def petro_assets(lang):
 # Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
 # multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
 # breaks the master too (machine/LargeMachineBlock).
-TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True}
+TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
 
 
 def tank_drop(block):
@@ -1648,6 +1648,11 @@ def main():
     for key, advancement in advancements.generate(MOD)[0].items():
         write(DATA / MOD / "advancement" / f"{key}.json", advancement)
     agriculture_data.advancements(DATA, write)
+    import encyclopedia
+    lang_path = ASSETS / "lang/en_us.json"
+    lang = json.loads(lang_path.read_text(encoding="utf-8"))
+    encyclopedia.write_content(write, ASSETS, DATA, lang)
+    write(lang_path, lang)
     import town
     for problem in town.write():
         print("town:", problem)

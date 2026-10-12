@@ -5509,7 +5509,8 @@
             ]
           ],
           "results": [],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -5531,7 +5532,8 @@
               2
             ]
           ],
-          "ticks": 120
+          "ticks": 120,
+          "retained_inputs": []
         }
       ]
     },
@@ -5571,7 +5573,8 @@
             ]
           ],
           "results": [],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5597,7 +5600,8 @@
             ]
           ],
           "results": [],
-          "ticks": 120
+          "ticks": 120,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5627,7 +5631,8 @@
             ]
           ],
           "results": [],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         }
       ]
     },
@@ -5650,7 +5655,8 @@
               4
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -5667,7 +5673,8 @@
               4
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -5684,7 +5691,8 @@
               4
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         }
       ]
     },
@@ -5715,7 +5723,8 @@
             ]
           ],
           "results": [],
-          "ticks": 400
+          "ticks": 400,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5736,7 +5745,8 @@
               2
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -5757,7 +5767,8 @@
             ]
           ],
           "results": [],
-          "ticks": 800
+          "ticks": 800,
+          "retained_inputs": []
         }
       ]
     },
@@ -5765,6 +5776,79 @@
       "block": "jugcraft:chemical_reactor",
       "type": "chemical_reaction",
       "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:hydrochloric_acid",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ],
+            [
+              "jugcraft:sulfur_trioxide",
+              250
+            ],
+            [
+              "jugcraft:sulfuric_acid",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfuric_acid",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "retained_inputs": [
+            2
+          ]
+        },
+        {
+          "items": [
+            [
+              "minecraft:raw_copper",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:hydrochloric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:washed_copper_ore",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "retained_inputs": []
+        },
         {
           "items": [
             [
@@ -5785,7 +5869,8 @@
             ]
           ],
           "results": [],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5807,7 +5892,8 @@
               2
             ]
           ],
-          "ticks": 120
+          "ticks": 120,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5829,7 +5915,8 @@
               4
             ]
           ],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5851,7 +5938,8 @@
               4
             ]
           ],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -5868,7 +5956,8 @@
             ]
           ],
           "results": [],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5890,7 +5979,8 @@
               6
             ]
           ],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5916,7 +6006,8 @@
               1
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5938,7 +6029,8 @@
               2
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5960,7 +6052,8 @@
               2
             ]
           ],
-          "ticks": 140
+          "ticks": 140,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -5982,7 +6075,8 @@
               2
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6008,7 +6102,8 @@
               2
             ]
           ],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6034,7 +6129,8 @@
               2
             ]
           ],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6060,7 +6156,8 @@
               1
             ]
           ],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6082,7 +6179,8 @@
             ]
           ],
           "results": [],
-          "ticks": 40
+          "ticks": 40,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6108,7 +6206,8 @@
               2
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6134,7 +6233,8 @@
               1
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6160,7 +6260,8 @@
               1
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6182,7 +6283,8 @@
             ]
           ],
           "results": [],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6204,7 +6306,8 @@
             ]
           ],
           "results": [],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -6221,7 +6324,8 @@
               1
             ]
           ],
-          "ticks": 60
+          "ticks": 60,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6247,7 +6351,8 @@
             ]
           ],
           "results": [],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6269,7 +6374,8 @@
             ]
           ],
           "results": [],
-          "ticks": 60
+          "ticks": 60,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6291,7 +6397,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6313,7 +6420,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6335,7 +6443,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6357,7 +6466,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6379,7 +6489,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6401,7 +6512,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6423,7 +6535,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6445,7 +6558,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6467,7 +6581,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6489,7 +6604,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6511,7 +6627,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6533,7 +6650,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6555,7 +6673,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6577,7 +6696,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6599,7 +6719,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6621,7 +6742,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6643,7 +6765,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6665,7 +6788,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6687,7 +6811,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6709,7 +6834,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6731,7 +6857,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6753,7 +6880,8 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6775,7 +6903,8 @@
               1
             ]
           ],
-          "ticks": 120
+          "ticks": 120,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6797,7 +6926,8 @@
               2
             ]
           ],
-          "ticks": 120
+          "ticks": 120,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6819,7 +6949,8 @@
               1
             ]
           ],
-          "ticks": 60
+          "ticks": 60,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6841,7 +6972,8 @@
               1
             ]
           ],
-          "ticks": 60
+          "ticks": 60,
+          "retained_inputs": []
         }
       ]
     },
@@ -6872,7 +7004,8 @@
             ]
           ],
           "results": [],
-          "ticks": 120
+          "ticks": 120,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -6893,7 +7026,8 @@
             ]
           ],
           "results": [],
-          "ticks": 40
+          "ticks": 40,
+          "retained_inputs": []
         }
       ]
     },
@@ -6925,7 +7059,8 @@
               4
             ]
           ],
-          "ticks": 200
+          "ticks": 200,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -6951,7 +7086,8 @@
               4
             ]
           ],
-          "ticks": 200
+          "ticks": 200,
+          "retained_inputs": []
         }
       ]
     },
@@ -6978,7 +7114,8 @@
             ]
           ],
           "results": [],
-          "ticks": 40
+          "ticks": 40,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -6999,7 +7136,8 @@
             ]
           ],
           "results": [],
-          "ticks": 40
+          "ticks": 40,
+          "retained_inputs": []
         },
         {
           "items": [],
@@ -7024,7 +7162,8 @@
             ]
           ],
           "results": [],
-          "ticks": 40
+          "ticks": 40,
+          "retained_inputs": []
         }
       ]
     },
@@ -7052,7 +7191,8 @@
               1
             ]
           ],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -7079,7 +7219,8 @@
               1
             ]
           ],
-          "ticks": 160
+          "ticks": 160,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -7101,7 +7242,8 @@
             ]
           ],
           "results": [],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -7123,7 +7265,8 @@
               4
             ]
           ],
-          "ticks": 60
+          "ticks": 60,
+          "retained_inputs": []
         }
       ]
     },
@@ -7150,7 +7293,8 @@
               1
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -7172,7 +7316,8 @@
               1
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         },
         {
           "items": [
@@ -7194,7 +7339,8 @@
               1
             ]
           ],
-          "ticks": 100
+          "ticks": 100,
+          "retained_inputs": []
         }
       ]
     },
@@ -7217,7 +7363,8 @@
             ]
           ],
           "results": [],
-          "ticks": 80
+          "ticks": 80,
+          "retained_inputs": []
         }
       ]
     },

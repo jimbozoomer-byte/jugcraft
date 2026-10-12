@@ -1,6 +1,6 @@
 # Jugcraft Encyclopedia
 
-Status: owner-approved feature direction, recorded 6 October 2026; UI and quest implementation not started by this contribution.
+Status: original owner-approved brief, recorded 6 October 2026. A [first local implementation](acid-factory-and-encyclopedia.md) now provides item-free access, guides/search/routes and advancement-backed goals; the original broader requirements and future acceptance items below remain the design reference.
 Proposal issue: direct owner request during progression planning; this feature is independently documented and tracked in the [TODO list](../TODO.md#jugcraft-encyclopedia).
 Owner: jimbozoomer-byte.
 Target milestone and tier: guidance available from the beginning of a world and useful throughout technology, magic and their specialties. No delivery date is assigned.

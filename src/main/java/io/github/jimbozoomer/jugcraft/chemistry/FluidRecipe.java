@@ -55,18 +55,23 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	 * A fluid and an amount in millibuckets. A fluid result may name the output {@code tank} it goes to (batch 24: a
 	 * machine with several jobs keeps each product in its own tank); -1, the default, means the result's position.
 	 */
-	public record FluidAmount(Fluid fluid, int amount, int tank) {
+	public record FluidAmount(Fluid fluid, int amount, int tank, boolean retained) {
 		static final Codec<FluidAmount> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BuiltInRegistries.FLUID.byNameCodec().fieldOf("fluid").forGetter(FluidAmount::fluid),
 				ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(FluidAmount::amount),
-				Codec.INT.optionalFieldOf("tank", -1).forGetter(FluidAmount::tank)
+				Codec.INT.optionalFieldOf("tank", -1).forGetter(FluidAmount::tank),
+				Codec.BOOL.optionalFieldOf("retained", false).forGetter(FluidAmount::retained)
 		).apply(i, FluidAmount::new));
 		static final StreamCodec<RegistryFriendlyByteBuf, FluidAmount> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.registry(Registries.FLUID), FluidAmount::fluid, ByteBufCodecs.VAR_INT, FluidAmount::amount,
-				ByteBufCodecs.VAR_INT, FluidAmount::tank, FluidAmount::new);
+				ByteBufCodecs.VAR_INT, FluidAmount::tank, ByteBufCodecs.BOOL, FluidAmount::retained, FluidAmount::new);
+
+		public FluidAmount(Fluid fluid, int amount, int tank) {
+			this(fluid, amount, tank, false);
+		}
 
 		public FluidAmount(Fluid fluid, int amount) {
-			this(fluid, amount, -1);
+			this(fluid, amount, -1, false);
 		}
 	}
 

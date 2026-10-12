@@ -13,6 +13,8 @@ This is future gameplay, as recorded in the [roadmap](ROADMAP.md#owner-requested
 
 ## Jugcraft Encyclopedia
 
+Local implementation, 12 October: [acid factory and first Encyclopedia](features/acid-factory-and-encyclopedia.md) adds inventory/K access, searchable canonical guides, suggested route diagrams and personal advancement-backed goals. Await local review; the broader polish/editorial checklist below is not all complete.
+
 Owner-requested 6 October 2026. Independent feature brief: [Jugcraft Encyclopedia](features/jugcraft-encyclopedia.md). All ten supplied screenshots are included in the [reference gallery](#reference-gallery) below and archived in the [reference folder](images/jugcraft-encyclopedia/README.md).
 
 - [ ] **Build the full Jugcraft Encyclopedia UI**, covering technology, magic, detailed pathways and integrated quests.
@@ -60,7 +62,7 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.
 
-  Local owner-playtest branch, 12 October: [starter chemistry slice](features/starter-chemistry-playtest.md) implements the four entry forms, gas recipes, permanent catalyst beds, recovered-water control, methane generation and a mixed-residue construction route. Existing portable gas cylinders handle the new gases. Await the owner's local visual/gameplay review before merging. Wet acid absorption in the Chemical Reactor, retained acid carrier, broader pollution integration and larger variants remain open; this does not mark the entire package finished.
+  Local owner-playtest branch, 12 October: [starter chemistry slice](features/starter-chemistry-playtest.md) implements the four entry forms, gas recipes, permanent catalyst beds, recovered-water control, methane generation and a mixed-residue construction route. Existing portable gas cylinders handle the new gases. Await the owner's local visual/gameplay review before merging. The [acid factory follow-up](features/acid-factory-and-encyclopedia.md) now implements wet absorption in the Chemical Reactor and its retained acid carrier locally. Broader pollution integration and larger variants remain open; owner acceptance is still pending.
 
   Enforce the electrolysis energy floor before any expanded or bulk Separator.
 - [ ] Inspect every completed form from all sides in-game, including idle/running states, module arrangements and lighting; verify bounds, placement and persistence. The current brief provides descriptions only.

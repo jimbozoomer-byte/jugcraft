@@ -97,7 +97,7 @@ HANDBOOK = {
         "Two wide, three deep and three tall. Join the upper front collars to first and second reagent supplies. The product leaves the middle back left; recovered water leaves low at the back right. Power joins the front control box.",
         "Hydrogen + chlorine makes hydrogen chloride gas. Carbon monoxide or dioxide + hydrogen makes methane with a Nickel Catalyst Bed. Sulfur dioxide + oxygen makes sulfur trioxide with a Vanadium Contact Bed. Put the reusable bed in the protected tool socket, not an input slot. It cannot be removed during a batch.",
         "Drain excess water is ON by default. It collects water that fits and drains only excess plain water. Switch to Keep water to stop when the water tank is full. The selection applies to the next batch; a running batch keeps its original setting. No gases, lye or acids are dumped.",
-        "Nickel bed: nickel ingot between two bricks. Vanadium bed: wash Vanadium-bearing Iron Concentrate, obtained by crafting four raw iron together, into oxide, then put the oxide between two bricks. This starter route needs no acid. Wet acid absorption is a later Chemical Reactor integration; the existing sulfur-and-water acid recipe still works."],
+        "Nickel bed: nickel ingot between two bricks. Vanadium bed: wash Vanadium-bearing Iron Concentrate, obtained by crafting four raw iron together, into oxide, then put the oxide between two bricks. This starter route needs no acid. Pipe product gas to a Chemical Reactor side, with water in its first tank. For sulfuric acid, charge the top with one bucket of sulfuric acid made by the original sulfur-and-water recipe or obtained by trade. The charge stays inside and is retained when the reactor is broken."],
     "chemical_oxidizer": [
         "Two wide and deep, three tall. Place sulfur dust in the feed slot and pipe 250 mB oxygen into the low front right collar. In five seconds at 96 JE/t it makes 250 mB sulfur dioxide. Charcoal instead makes carbon dioxide for methanation. Pipe the product out of the upper rear collar.",
         "The rear hopper, guarded feed drive, lined reaction throat and capped collector stay closed during work. A spinning feed coupling and amber inspection slit show that it is running. Its burner subassembly is a furnace plus glass, so the final crafting grid fits the full steel-entry bill."],
@@ -112,6 +112,8 @@ HANDBOOK = {
 }
 
 def write_extras(write, assets, data, lang, condition):
+    for index, title in enumerate(["Liquid feed (sides)", "Absorption gas (sides)", "Retained acid charge (top)", "Product (sides)"]):
+        lang[f"container.jugcraft.reactor.tank.{index}"] = title
     from steampunk_models import box, cyl
     import model_writer
     write(data / "tags/item/infuser_catalysts.json", {"replace": False, "values": ["jugcraft:nickel_catalyst_bed", "jugcraft:vanadium_contact_bed"]})

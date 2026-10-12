@@ -6,7 +6,7 @@ Owner request, 12 October 2026: implement the next listed machines in the select
 
 Four entry forms extend the existing IndustrialForms controller, JE energy, pipe, tank, upgrade and renderer systems. Coal, coke or charcoal becomes dirty synthesis gas. A combined cleaner separates usable CO and hydrogen and captures one mixed residue. A reusable nickel bed lets the Infuser turn CO/CO2 and hydrogen into methane. The existing Gas Burning Generator burns methane for 448 JE/mB at 256 JE/t. Sulfur oxidation, contact conversion and hydrogen chloride synthesis are also included. The Engineer's Handbook describes ports, recipes and tools.
 
-This is the next **machine playtest slice**, not a claim that all of roadmap package 2 is finished. Wet absorption of HCl and SO3 in the existing Chemical Reactor, its retained acid carrier, and map-wide pollution remain to be implemented. The original sulfur + water acid recipe remains available. HCl and SO3 can be stored now; they are not yet the new aqueous-acid route. No new world generation or changes to the other roadmap packages.
+This is the next **machine playtest slice**, not a claim that all of roadmap package 2 is finished. The later local [acid factory follow-up](acid-factory-and-encyclopedia.md) implements wet absorption of HCl/SO3 and the retained reactor charge. Map-wide pollution remains open. The original sulfur + water acid recipe remains available. HCl and SO3 also feed the aqueous-acid routes in that follow-up. No new world generation or changes to the other roadmap packages.
 
 ## Construction and appearance
 
