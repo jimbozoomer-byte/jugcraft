@@ -54,8 +54,10 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [x] Build the shared form foundation, package 1 of the [factory implementation plan (PR #302)](https://github.com/jimbozoomer-byte/jugcraft/pull/302): validated 2–6-block envelopes with structure/clearance/access positions, placement that names obstructions, port-only transfers, protected tool sockets, eight-state status, durable batch escrow with reserved outputs, entry/expanded/bulk lanes and legacy tank-layout migration. See [industrial machine foundation](features/industrial-machine-foundation.md); tested on test-mod forms only.
 - [x] Package 2, first slice: the Electrolytic Separator, the first real form, with its sliced model from the art brief, the selected 20-plate construction, capability recipes for water and brine at the selected baseline, and lye kept with brine stopping when full. See [Electrolytic Separator](features/industrial-electrolytic-separator.md).
 - [x] Package 2, second slice: the Gas Burning Generator, the shared hydrogen/methane generator and the first generator form, burning hydrogen at the selected 128 JE/t from the plan's steel bill, with its turning coupling and fan. Generator forms join the foundation: fuels listed on the form and power-out ports. See [Gas Burning Generator](features/industrial-gas-burning-generator.md).
+- [x] Package 2, third slice: the Chemical Infuser, the shared gas-reaction form, with its sliced model and turning fan from the art brief, the plan's starter bill, its water drain and hydrogen chloride from hydrogen and chlorine at the plan's 9,600 JE a batch. See [Chemical Infuser](features/industrial-chemical-infuser.md).
 - [ ] Package 2, the rest of the starter gas and acid factory:
-  - the Chemical Infuser: HCl, and methanation with its nickel bed and the selected water drain, then methane as the generator's second fuel (256 JE/t);
+  - the Infuser's methanation with its nickel bed, then methane as the generator's second fuel (256 JE/t); it needs a CO or CO2 feed first;
+  - hydrogen chloride absorption into aqueous acid, and its consumers;
   - the Chemical Oxidizer and contact conversion, for the sulfuric acid chain;
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.

@@ -34,7 +34,7 @@ The table lists **outer construction ingredients**, not a flattened raw-material
 | Starter role | Proposed construction ingredients | Entry capability and later usefulness |
 | --- | --- | --- |
 | Electrolytic Separator | 4 steel plates, 2 Steel Tanks, 1 copper cable, 1 basic circuit, 1 Machine Casing | Water and ordinary-brine electrolysis; later metals use appropriate process capabilities rather than a self-output construction gate |
-| Chemical Infuser | 4 steel plates, 2 steel fluid pipes, 1 Tinplate Tank, 1 copper cable, 1 basic circuit | Two gas inputs; HCl synthesis and methane reactions. Methane needs an independently made nickel bed and a water output alongside the gas |
+| Chemical Infuser | 4 steel plates, 2 steel fluid pipes, 1 Tinplate Tank, 1 copper cable, 1 basic circuit | Two gas inputs; HCl synthesis and methane reactions. Methane needs an independently made nickel bed and a water output alongside the gas. Implemented with this bill and HCl synthesis as the [Chemical Infuser](industrial-chemical-infuser.md); methanation follows |
 | Chemical Oxidizer | 4 steel plates, 1 furnace, 1 electric motor, 1 glass, 1 basic circuit, 1 Machine Casing | Sulfur dust and metered oxygen produce SO2; other compatible solid/gas recipes can follow |
 | Absorption and ordinary reactions | Initially reuse the existing Chemical Reactor and its construction | HCl absorption, ordinary sulfuric-acid supply and other compatible wet reactions. Its future capacity/interface changes must be explicit |
 | Coal Gasifier | 4 steel plates, 2 bricks, 1 furnace, 1 steel fluid pipe, 1 Machine Casing | Coal/steam preparation with paid heat, dirty CO/H2 mixture and substantial numeric pollution |

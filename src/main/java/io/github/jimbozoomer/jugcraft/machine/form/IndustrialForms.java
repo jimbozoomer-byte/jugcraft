@@ -19,8 +19,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
  * The industrial machine forms the game registers, from the owner's factory plan (docs/features/
- * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md)
- * and Gas Burning Generator (docs/features/industrial-gas-burning-generator.md). Each form is also described in
+ * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md),
+ * Gas Burning Generator (docs/features/industrial-gas-burning-generator.md) and Chemical Infuser
+ * (docs/features/industrial-chemical-infuser.md). Each form is also described in
  * tools/industrial_forms.py for its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form
  * shares the one controller block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when
  * more forms join this list.
@@ -28,6 +29,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 public final class IndustrialForms {
 	/** Splitting water and ordinary brine. */
 	public static final String AQUEOUS_ELECTROLYSIS = "jugcraft:aqueous_electrolysis";
+	/** Joining two gases with no catalyst bed, such as hydrogen burnt in chlorine. */
+	public static final String GAS_COMBINATION = "jugcraft:gas_combination";
 
 	/**
 	 * The Electrolytic Separator: the steel-entry form of the Electrolytic Cell family, two wide, two deep and three
@@ -76,8 +79,36 @@ public final class IndustrialForms {
 			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 2, 4, 1, FormSide.BACK)
 			.build();
 
+	/**
+	 * The Chemical Infuser: the starter form of the synthesis family (the Synthesis Converter's energy figures), two
+	 * wide, three deep and three tall, every position a block, the controller (its control box) front left on the
+	 * ground. Hydrogen comes in at the left shoulder and the other gas at the right; the product gas and the water a
+	 * reaction gives off leave at the back, by the cooling jacket, with the power socket low on the right at the back.
+	 * Hydrogen chloride is its first recipe; methanation, with its nickel bed, follows.
+	 */
+	public static final MachineForm CHEMICAL_INFUSER_FORM = MachineForm.builder(Jugcraft.id("chemical_infuser"),
+					MachineKind.SYNTHESIS_CONVERTER)
+			.layer("C#", "##", "##")
+			.layer("##", "##", "##")
+			.layer("##", "##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("hydrogen")
+			.inputTank("reactant")
+			.outputTank("product")
+			.outputTank("water")
+			.capability(GAS_COMBINATION)
+			.upgrades()
+			.warmup(40)
+			.port("hydrogen_in", FormPort.Kind.FLUID_IN, 0, 0, 1, 1, FormSide.LEFT)
+			.port("reactant_in", FormPort.Kind.FLUID_IN, 1, 1, 1, 1, FormSide.RIGHT)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 1, 2, 1, FormSide.BACK)
+			.port("water_out", FormPort.Kind.FLUID_OUT, 1, 0, 2, 0, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 1, 2, 0, FormSide.RIGHT)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
+	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	private IndustrialForms() {
@@ -86,7 +117,8 @@ public final class IndustrialForms {
 	public static void register() {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR);
+		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

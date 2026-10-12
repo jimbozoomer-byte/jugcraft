@@ -1013,6 +1013,7 @@ def build():
                 "Nitric acid etches microchips with half as much acid as sulfuric."]},
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
+            form_page("chemical_infuser"),
             machine_page("ammonia_chiller"),
             machine_page("cryogenic_liquefier"),
             {"title": "Gas Cylinders", "icon": f"{MOD}:gas_cylinder", "text": [

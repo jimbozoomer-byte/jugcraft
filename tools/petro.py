@@ -110,6 +110,10 @@ GASES = {
     # chemical reactor recovers it as sulfur (the Claus process). A sickly yellow-green.
     "hydrogen_sulfide": {"display": "Hydrogen Sulfide", "feature": "crude_oil",
                          "colors": [(150, 150, 70), (178, 178, 96), (204, 204, 126), (230, 230, 170)]},
+    # The starter factory's hydrogen chloride (tools/industrial_forms.py): hydrogen burnt in chlorine in the Chemical
+    # Infuser. Colourless, fuming white in damp air: a cool grey-white.
+    "hydrogen_chloride": {"display": "Hydrogen Chloride", "feature": "salt",
+                          "colors": [(160, 172, 170), (188, 198, 196), (212, 220, 218), (238, 242, 241)]},
 }
 
 

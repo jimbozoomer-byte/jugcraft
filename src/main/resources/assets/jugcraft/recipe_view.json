@@ -7258,6 +7258,33 @@
           "ticks": 800
         }
       ]
+    },
+    {
+      "block": "jugcraft:chemical_infuser",
+      "type": "chemical_infuser",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              250
+            ],
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:hydrogen_chloride",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 75
+        }
+      ]
     }
   ],
   "concordance": {

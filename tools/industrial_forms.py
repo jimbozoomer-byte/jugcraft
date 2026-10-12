@@ -1,6 +1,7 @@
 """Industrial machine forms the game registers (docs/features/industrial-machine-foundation.md): the starter factory's
-Electrolytic Separator (docs/features/industrial-electrolytic-separator.md) and Gas Burning Generator
-(docs/features/industrial-gas-burning-generator.md), package 2 of the owner's factory plan.
+Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), Gas Burning Generator
+(docs/features/industrial-gas-burning-generator.md) and Chemical Infuser (docs/features/industrial-chemical-infuser.md),
+package 2 of the owner's factory plan.
 
 Each form is described here for its art, recipes and data, and in IndustrialForms.java for the game;
 tools/check_mod_data.py checks that the two agree. Layers are given bottom first, each as rows from the front to the
@@ -23,6 +24,8 @@ MOD = "jugcraft"
 
 # Splitting water and ordinary brine: what the Separator offers its family's recipes.
 AQUEOUS_ELECTROLYSIS = f"{MOD}:aqueous_electrolysis"
+# Joining two gases with no catalyst bed (hydrogen burnt in chlorine): what the Infuser offers its family's recipes.
+GAS_COMBINATION = f"{MOD}:gas_combination"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
@@ -32,6 +35,9 @@ STRIP = "dr_amber"
 # The Gas Burning Generator's materials (the art brief): graphite ribs, olive combustion covers, a pale heat shield,
 # a ribbed generator housing, and mint lamps at the electrical output that light while it runs.
 SHIELD, RIBBED, MINT = "el_ribbed", "dw_ribbed_steel", "el_lamp"
+# The Chemical Infuser's materials (the art brief): a pale ceramic collar where the chamber steps in, grey bolted
+# flanges where pipes meet it, a ringed inspection port and a red-painted handwheel on each inlet valve.
+CERAMIC, FLANGE, PORTHOLE, HANDWHEEL = "sp_ceramic", "dr_flange", "dw_porthole_steel", "dr_red_paint"
 # What lights while a form works: steampunk_models.GLOW and the mint lamp.
 FORM_GLOW = dict(GLOW, el_lamp="el_lamp_on")
 # What the generator burns (tools/petro.py FLUID_FUELS keeps the Fuel Cell's value): (fluid, JE per mB, JE a tick).
@@ -99,6 +105,37 @@ FORMS = {
                                            "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "chemical_infuser": {
+        "display": "Chemical Infuser",
+        # The synthesis family (the Synthesis Converter's energy figures: 128 JE/t, a 60,000 JE store); it runs only the
+        # recipes that ask for its capability, and the converter never runs those.
+        "family": "synthesis_converter",
+        "layers": [["C#", "##", "##"], ["##", "##", "##"], ["##", "##", "##"]],
+        "profile": "ENTRY",
+        "tank_mb": 2_000,
+        # Hydrogen always comes in on the left; the gas it joins (chlorine now, carbon oxides with the nickel bed later)
+        # on the right. The product gas and the water a reaction gives off leave by the cooling jacket at the back.
+        "input_tanks": ["hydrogen", "reactant"],
+        "output_tanks": ["product", "water"],
+        "capabilities": [GAS_COMBINATION],
+        # Speed and efficiency cards, and the warm-up label for the first two seconds after a cold start, inside the
+        # paid work (the owner's choice: heating included in the processing power).
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("hydrogen_in", "FLUID_IN", 0, 0, 1, 1, "LEFT"),
+            ("reactant_in", "FLUID_IN", 1, 1, 1, 1, "RIGHT"),
+            ("product_out", "FLUID_OUT", 0, 1, 2, 1, "BACK"),
+            ("water_out", "FLUID_OUT", 1, 0, 2, 0, "BACK"),
+            ("power", "ENERGY_IN", 0, 1, 2, 0, "RIGHT"),
+        ],
+        # The plan's starter bill (docs/features/industrial-starter-gas-and-acid-factory.md): 4 steel plates, 2 steel
+        # fluid pipes, a Tinplate Tank, copper cable and a basic circuit, with no titanium or advanced circuit, unlike the
+        # Synthesis Converter.
+        "recipe": (["PIP", "WTC", "PIP"], {"P": "#c:plates/steel", "I": f"{MOD}:steel_fluid_pipe", "W": f"{MOD}:copper_cable",
+                                           "T": f"{MOD}:fluid_tank", "C": f"{MOD}:basic_circuit"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -125,6 +162,16 @@ HANDBOOK = {
         "screen says when the fuel tank is empty or the store is full. Methane, at 256 JE/t, comes with the methane "
         "Infuser.",
     ],
+    "chemical_infuser": [
+        "Two wide, three deep and three tall: a stepped reaction chamber with an inlet on each shoulder, a catalyst-bed "
+        "drawer at its foot and a cooling jacket behind, built from steel plates, two steel fluid pipes, a Tinplate "
+        "Tank, copper cable and a basic circuit. Every block it fills must be free when it is placed.",
+        "Pipe hydrogen into the left inlet and chlorine into the right. 250 mB of each burn together into 500 mB of "
+        "hydrogen chloride in under four seconds, which leaves at the top collar at the back. It draws 128 JE/t "
+        "through the socket low on the right side at the back.",
+        "The lower collar at the back is its water drain, for the methane reactions its nickel bed will run. Its "
+        "screen says what it is waiting for, and upgrade cards fit its terminal.",
+    ],
 }
 
 # Tank labels on the screen and in its reasons (MachineStatus.tankLabel), by role.
@@ -134,6 +181,9 @@ TANK_NAMES = {
     "anode_gas": "Oxygen/chlorine tank",
     "hydrogen": "Hydrogen tank",
     "lye": "Lye tank",
+    "reactant": "Reactant gas tank",
+    "product": "Product gas tank",
+    "water": "Water tank",
 }
 
 # Recipes only forms run: each names the capability a form must offer. Fluid results go to output tanks by their
@@ -150,6 +200,14 @@ FORM_RECIPES = {
         {"name": "separator_water", "capability": AQUEOUS_ELECTROLYSIS, "fluids": [("minecraft:water", 1000)],
          "fluid_results": [(f"{MOD}:oxygen", 250, 0), (f"{MOD}:hydrogen", 500, 1)],
          "ticks": 800, "features": ["machines"]},
+    ],
+    "chemical_infuser": [
+        # Hydrogen chloride: hydrogen burnt in chlorine, equal gas amounts making twice as much
+        # (docs/features/industrial-starter-gas-and-acid-factory.md). The plan's budget, 9,600 JE a batch, at the
+        # synthesis family's 128 JE/t: 75 ticks.
+        {"name": "infuser_hydrogen_chloride", "capability": GAS_COMBINATION,
+         "fluids": [(f"{MOD}:hydrogen", 250), (f"{MOD}:chlorine", 250)],
+         "fluid_results": [(f"{MOD}:hydrogen_chloride", 500, 0)], "ticks": 75, "features": ["salt"]},
     ],
 }
 
@@ -406,6 +464,127 @@ def gas_burning_generator_still():
             + cyl("z", cu, cv, 7, 44.5, 46, CHROME, "dr_flange"))
 
 
+# The Infuser's cooling fan, on the jacket's axis at the back, turning about y: its hub's centre (x, y, z).
+INFUSER_FAN = (0, 35.5, 40)
+
+
+def chemical_infuser():
+    """Two wide, three deep and three tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a
+    central stepped reaction chamber of cool gunmetal on a shared plinth, its lower body carrying olive service plates
+    and stepping in at a pale ceramic collar. A substantial inlet branch enters each shoulder, with a valve and a
+    red handwheel: hydrogen on the left, the other gas on the right, banded in their colours. At the front, the thick
+    catalyst-bed drawer with a raised handle and its bed-face marker; above it the ringed inspection port, the heat
+    gauge and the amber process band; at the front left the control box with its gauge and amber lamp (the controller).
+    Behind the chamber a closed loop runs into the short ribbed cooling jacket, with its fan (drawn turning by
+    MachineRotors) under a guard on top, the product collar high at the back and the water drain low beside it. The
+    power socket sits on a junction box low on the right side at the back. Each port is at the middle of its block's
+    face, where pipes and cables meet it."""
+    m = [box((-16, 0, 0), (16, 2, 48), GUNMETAL)]
+    # The reaction chamber: a skirt, the lower body with an olive service plate on either side, the ceramic collar
+    # where it steps in, the middle body with its lip, and the crown with a relief valve.
+    m.append(box((-13, 2, 3), (13, 4, 29), GUNMETAL))
+    m.append(box((-12, 4, 4), (12, 22, 28), {"*": OLIVE, "up": GUNMETAL}))
+    for sign, face in ((1, "east"), (-1, "west")):
+        lo, hi = sorted((sign * 12, sign * 12.75))
+        m.append(box((lo, 6, 7), (hi, 18, 25), {"*": GUNMETAL, face: STENCIL}))
+    m.append(box((-12.5, 22, 3.5), (12.5, 24, 28.5), CERAMIC))
+    m.append(box((-10, 24, 6), (10, 36, 27.5), GUNMETAL))
+    m.append(box((-10.5, 36, 5.5), (10.5, 37.5, 28), GUNMETAL))
+    m.append(box((-7, 37.5, 9), (7, 42, 23), {"*": GUNMETAL, "up": OLIVE}))
+    m += cyl("y", 0, 16, 1.5, 42, 44.5, CHROME)
+    m += cyl("y", 0, 16, 2.5, 44.5, 46, GUNMETAL)
+    # The thick catalyst-bed drawer at the foot of the front: a frame, the olive drawer, a raised chrome handle on two
+    # posts and the small plate marking the bed it holds.
+    m.append(box((-7.5, 4.5, 3.25), (7.5, 15.5, 4), GUNMETAL))
+    m.append(box((-6.5, 5.5, 1.75), (6.5, 14.5, 3.25), {"*": GUNMETAL, "north": OLIVE}))
+    for x in (-4, 4):
+        m.append(box((x - 0.5, 8.75, 0.75), (x + 0.5, 10.25, 1.75), CHROME))
+    m.append(box((-4.5, 9, 0.25), (4.5, 10, 0.75), CHROME))
+    m.append(box((-2, 11.5, 1.5), (2, 13.25, 1.75), CHROME))
+    # The reaction zone: the ringed inspection port and the heat gauge on the middle body, and the amber process band
+    # round it above the collar, which lights while it works.
+    m.append(box((-7.5, 25.75, 5.5), (2.5, 35.25, 6), FLANGE))
+    m.append(dial("north", (-2.5, 30.5, 4.75), 7.5, texture=PORTHOLE, body=CHROME))
+    m.append(dial("north", (6, 31, 5.25), 4, texture=GAUGE, body=CHROME))
+    m.append(box((-9.5, 24.25, 5.5), (9.5, 25.25, 6), STRIP))
+    for sign in (1, -1):
+        lo, hi = sorted((sign * 10, sign * 10.5))
+        m.append(box((lo, 24.25, 6.5), (hi, 25.25, 18), STRIP))
+    # The control box (the controller) at the front left, on the plinth: a gauge and the amber running lamp.
+    m.append(box((8.5, 2, 0.75), (15.5, 14, 4), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (12, 10, 0.5), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (12, 5, 0.5), 2.5, texture=LAMP, body=GUNMETAL))
+    # An inlet branch on each shoulder, from a flange at the middle of the side face into the chamber: a charcoal pipe
+    # banded in its gas's colour, a valve with a red handwheel and a chrome collar where it meets the chamber.
+    for sign, face, band in ((1, "east", "hydrogen_still"), (-1, "west", "chlorine_still")):
+        lo, hi = sorted((sign * 10, sign * 15))
+        m += cyl("x", 24, 24, 2.75, lo, hi, RUBBER)
+        lo, hi = sorted((sign * 10, sign * 11))
+        m += cyl("x", 24, 24, 3.5, lo, hi, CHROME)
+        lo, hi = sorted((sign * 13.25, sign * 14.25))
+        m += cyl("x", 24, 24, 3.1, lo, hi, band)
+        lo, hi = sorted((sign * 11.5, sign * 13))
+        m.append(box((lo, 26.5, 22), (hi, 28.5, 26), GUNMETAL))
+        m += cyl("y", sign * 12.25, 24, 0.5, 28.5, 30, CHROME)
+        m += cyl("y", sign * 12.25, 24, 2.25, 30, 30.75, HANDWHEEL)
+        lo, hi = sorted((sign * 15, sign * 15.75))
+        m.append(box((lo, 19.5, 19.5), (hi, 28.5, 28.5), {"*": CHROME, face: f"{FLANGE}!"}))
+    # The closed loop from the chamber's back into the cooling jacket: hot gas out high, the cooled return low.
+    m += cyl("z", 0, 31, 2, 27, 34, RUBBER)
+    m += cyl("z", 0, 10, 2, 28, 34, RUBBER)
+    for y in (31, 10):
+        m += cyl("z", 0, y, 2.5, 32, 33, CHROME)
+    # The short cooling jacket: a ribbed drum on the plinth, gunmetal banded, a cap and the fan shroud on top, its fan
+    # under two guard bars.
+    m += cyl("y", 0, 40, 6.5, 2, 30, RIBBED, GUNMETAL)
+    for y in (8, 17, 26):
+        m += cyl("y", 0, 40, 7, y, y + 1.5, GUNMETAL)
+    m += cyl("y", 0, 40, 7, 30, 33, GUNMETAL)
+    m += octagon_ring("y", 0, 40, 7, 5.5, 33, 38.5, GUNMETAL)
+    m.append(box((-5.75, 37.5, 39.5), (5.75, 38.25, 40.5), CHROME))
+    m.append(box((-0.5, 37.75, 34.25), (0.5, 38, 45.75), CHROME))
+    # The product collar high at the back (on the right) and the water drain low (on the left): charcoal pipes out of
+    # the jacket, banded hydrogen chloride and water, with chrome collars.
+    m += cyl("z", -8, 24, 2.25, 42, 47, RUBBER)
+    m += cyl("z", -8, 24, 2.6, 44.5, 45.5, "hydrogen_chloride_still")
+    m.append(box((-11, 21, 47), (-5, 27, 47.75), {"*": CHROME, "south": f"{FLANGE}!"}))
+    m += cyl("z", 8, 8, 1.75, 38, 47, RUBBER)
+    m += cyl("z", 8, 8, 2.1, 44.5, 45.5, "sp_water")
+    m.append(box((5, 5, 47), (11, 11, 47.75), {"*": CHROME, "south": f"{FLANGE}!"}))
+    # The junction box low on the right side at the back: its power socket, a hazard band, two insulators and a
+    # conduit into the jacket.
+    m.append(box((-15, 2, 34), (-9, 14, 46), GUNMETAL))
+    m.append(box((-15.25, 14, 33.75), (-8.75, 15, 46.25), HAZARD))
+    m.append(box((-15.75, 5, 37), (-15, 11, 43), {"*": CHROME, "west": "power_port!"}))
+    for z in (37, 43):
+        m += cyl("y", -12, z, 1, 15, 18, INSULATOR)
+        m.append(box((-12.5, 18, z - 0.5), (-11.5, 18.5, z + 0.5), COPPER))
+    m += cyl("x", 9, 40, 1.25, -9, -6, RUBBER)
+    return m
+
+
+def chemical_infuser_rotor():
+    """The Infuser's cooling fan inside the shroud on top of the jacket, turning about y (client/MachineRotors draws
+    it): a hub and five blades."""
+    import machine_rotors as rotors
+    cx, y, cz = INFUSER_FAN
+    quads = rotors.disc("y", y - 1.25, y + 1.25, cx, cz, 1.25, CHROME, CHROME)
+    for blade in range(5):
+        angle = math.radians(72 * blade)
+        c, s = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cx + r * c - w * s, cz + r * s + w * c)
+        quads += rotors.prism("y", y - 0.5, y + 0.5, [at(1.6, -0.55), at(4.75, -1.6), at(4.75, 1.6), at(1.6, 0.55)], GUNMETAL, GUNMETAL)
+    return quads
+
+
+def chemical_infuser_still():
+    """The fan standing still, for the item model only (the block models leave it to MachineRotors)."""
+    cx, y, cz = INFUSER_FAN
+    return cyl("y", cx, cz, 4.75, y - 0.5, y + 0.5, GUNMETAL, "dr_fan") + cyl("y", cx, cz, 1.25, y - 1.25, y + 1.25, CHROME)
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -413,11 +592,17 @@ ROTORS = {
         "block": "gas_burning_generator", "axis": "z", "center": [-16, 26, 24], "property": "lit", "speed": 12,
         "ease": 40, "always": True, "quads": gas_burning_generator_rotor(),
     },
+    # The Infuser's cooling fan, running while it works.
+    "chemical_infuser_fan": {
+        "block": "chemical_infuser", "axis": "y", "center": list(INFUSER_FAN), "property": "lit", "speed": 18,
+        "ease": 30, "always": True, "quads": chemical_infuser_rotor(),
+    },
 }
 
-MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator()}
+MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
+          "chemical_infuser": chemical_infuser()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
-ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still()}
+ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still()}
 PARTICLE = "dp_olive"
 
 

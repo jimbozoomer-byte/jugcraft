@@ -4023,6 +4023,30 @@
           }
         },
         {
+          "title": "Chemical Infuser",
+          "icon": "jugcraft:chemical_infuser",
+          "text": [
+            "Two wide, three deep and three tall: a stepped reaction chamber with an inlet on each shoulder, a catalyst-bed drawer at its foot and a cooling jacket behind, built from steel plates, two steel fluid pipes, a Tinplate Tank, copper cable and a basic circuit. Every block it fills must be free when it is placed.",
+            "Pipe hydrogen into the left inlet and chlorine into the right. 250 mB of each burn together into 500 mB of hydrogen chloride in under four seconds, which leaves at the top collar at the back. It draws 128 JE/t through the socket low on the right side at the back.",
+            "The lower collar at the back is its water drain, for the methane reactions its nickel bed will run. Its screen says what it is waiting for, and upgrade cards fit its terminal."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:fluid_tank",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:chemical_infuser",
+            "count": 1
+          }
+        },
+        {
           "title": "Ammonia Chiller",
           "icon": "jugcraft:ammonia_chiller",
           "text": [
