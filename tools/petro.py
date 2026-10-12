@@ -113,6 +113,9 @@ GASES = {
 }
 
 
+from starter_chemistry import GASES as STARTER_GASES, ITEMS as STARTER_ITEMS
+GASES.update(STARTER_GASES)
+
 # Plain items (chemistry/PetroItems.java): display name.
 ITEMS = {
     # Bauxite (alumina) and sand (silica) with a little nickel: used up, one per bucket of heavy fuel oil cracked.
@@ -514,3 +517,5 @@ def fluid_recipe_files(condition):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
+
+ITEMS.update(STARTER_ITEMS)

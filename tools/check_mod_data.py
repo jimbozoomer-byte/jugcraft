@@ -2890,12 +2890,13 @@ def machines_stats(family):
 
 
 def cheapest_electrolysis(fluid):
-    """The least JE any recipe spends per mB of `fluid` it makes, with the most efficiency cards its machine takes (the
-    legacy fluid machines take none), or None when no recipe makes it. All the recipe's energy counts against `fluid`,
-    so a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too."""
+    """Least electrolysis JE per mB, including efficiency. Fuel-consuming gasification and hydrogen-consuming
+    synthesis are not free electrolysis; their feedstock ledger is checked separately below."""
     import machines
     costs = []
     for machine, recipes in petro.FLUID_RECIPES.items():
+        if machine != "electrolytic_cell":
+            continue
         use = machines.STATS.get(machine, {}).get("use_per_tick", 0)
         for recipe in recipes:
             for result in recipe.get("fluid_results", []):
@@ -2903,6 +2904,8 @@ def cheapest_electrolysis(fluid):
                     costs.append(recipe["ticks"] * use / result[1])
     for form, recipes in industrial_forms.FORM_RECIPES.items():
         info = industrial_forms.FORMS[form]
+        if info["family"] != "electrolytic_cell":
+            continue
         use = machines.STATS[info["family"]]["use_per_tick"]
         # MachineUpgrades.Effect.use with four efficiency cards, the most that count.
         cheapest = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
@@ -3003,6 +3006,23 @@ def check_industrial_forms():
                 err(f"{label}: takes no time")
         if len(tanks) != len(set(tanks)):
             err(f"{form}: two tanks share a role")
+    # Methanation pays for its hydrogen as well as its processing. Treat CO/CO2 as free here for a conservative
+    # bound; gasification instead pays a finite carbon item. Speed never reduces total energy per batch.
+    hydrogen_cost = cheapest_electrolysis("jugcraft:hydrogen")
+    methane_value = dict((f, v) for f, v, _ in industrial_forms.GAS_GENERATOR_FUELS).get("jugcraft:methane")
+    if methane_value is not None:
+        import math
+        for recipe in industrial_forms.FORM_RECIPES.get("chemical_infuser", []):
+            made = sum(r[1] for r in recipe.get("fluid_results", []) if r[0] == "jugcraft:methane")
+            if not made:
+                continue
+            hydrogen = sum(mb for fluid, mb in recipe["fluids"] if fluid == "jugcraft:hydrogen")
+            for speed in range(5):
+                for efficiency in range(5):
+                    ticks = math.ceil(recipe["ticks"] / (1 + .5 * speed))
+                    draw = max(1, math.floor(recipe["energy_per_tick"] * (1 + .5 * speed) * (1 + .25 * speed) * .8**efficiency + .5))
+                    if hydrogen_cost is None or hydrogen * hydrogen_cost + ticks * draw <= made * methane_value:
+                        err(f"{recipe['name']}: methanation can profit from electrolytic hydrogen")
     # The Separator's construction: the owner's selected 20 steel plates, counting the Steel Tanks' own.
     pattern, key = industrial_forms.FORMS["electrolytic_separator"]["recipe"]
     tank = load(DATA / MOD / "recipe" / "steel_tank.json") or {}

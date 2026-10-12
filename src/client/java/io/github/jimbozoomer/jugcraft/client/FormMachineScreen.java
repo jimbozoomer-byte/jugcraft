@@ -50,21 +50,37 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 
 	private final MachineScreenThemes.Theme theme;
 	private Button pauseButton;
+	private Button drainButton;
 
 	public FormMachineScreen(FormMachineMenu menu, Inventory inventory, Component title) {
-		super(menu, inventory, title, BAY_WIDTH + TERMINAL_WIDTH, 166);
+		super(menu, inventory, menu.form().id().getPath().equals("gas_cleaning_rack")
+				? Component.translatable("container.jugcraft.form.cleaning_title") : title, BAY_WIDTH + TERMINAL_WIDTH, 166);
 		this.theme = MachineScreenThemes.of(menu.form().family());
 	}
 
 	@Override
 	protected void init() {
 		super.init();
+		if (menu.form().waterDrainOutput() >= 0) {
+			drainButton = addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.drain_on"),
+					button -> click(FormMachineBlockEntity.BUTTON_DRAIN)).bounds(leftPos + SCREEN_X, topPos + 143, 74, 14).build());
+			drainButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("container.jugcraft.form.drain_hint")));
+		}
 		titleLabelX = (BAY_WIDTH - font.width(title)) / 2;
 		pauseButton = addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.pause"),
 				button -> click(FormMachineBlockEntity.BUTTON_PAUSE)).bounds(leftPos + SCREEN_X, topPos + BUTTON_Y, 36, 12).build());
 		if (!menu.form().generator()) {
 			addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.cancel"),
 					button -> click(FormMachineBlockEntity.BUTTON_CANCEL)).bounds(leftPos + SCREEN_X + 38, topPos + BUTTON_Y, 36, 12).build());
+		}
+	}
+
+	@Override
+	protected void containerTick() {
+		super.containerTick();
+		if (drainButton != null) {
+			drainButton.setMessage(Component.translatable(menu.data(FormMachineBlockEntity.DATA_DRAIN) != 0
+					? "container.jugcraft.form.drain_on" : "container.jugcraft.form.drain_off"));
 		}
 	}
 
@@ -141,6 +157,11 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		graphics.text(font, title, titleLabelX, titleLabelY, theme.label(), false);
 		graphics.text(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, theme.label(), false);
 		terminal(graphics);
+		if (menu.form().id().getPath().equals("coal_gasifier")) {
+			long units = ((long) menu.data(FormMachineBlockEntity.DATA_EMISSIONS_HIGH) << 16)
+					| menu.data(FormMachineBlockEntity.DATA_EMISSIONS_LOW);
+			graphics.text(font, "Emissions " + units, SCREEN_X, 145, theme.dim(), false);
+		}
 	}
 
 	/** The terminal: state, then the reason, progress, power and lanes. */

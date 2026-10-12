@@ -142,6 +142,14 @@ public final class PetroFluids {
 	public static Entry KEROSENE;
 	public static Entry LIQUID_OXYGEN;
 
+	public static Gas CARBON_MONOXIDE;
+	public static Gas CARBON_DIOXIDE;
+	public static Gas METHANE;
+	public static Gas HYDROGEN_CHLORIDE;
+	public static Gas SULFUR_DIOXIDE;
+	public static Gas SULFUR_TRIOXIDE;
+	public static Gas DIRTY_SYNTHESIS_GAS;
+
 	private PetroFluids() {
 	}
 
@@ -199,6 +207,14 @@ public final class PetroFluids {
 		NUTRIENT_SOLUTION = fluid("nutrient_solution", 5, 4, 1, 0xFF6EAA64, MapColor.COLOR_GREEN);
 		KEROSENE = fluid("kerosene", 5, 4, 1, 0xFFE0E0C4, MapColor.SAND);
 		LIQUID_OXYGEN = fluid("liquid_oxygen", 3, 4, 1, 0xFFA0C8EC, MapColor.COLOR_LIGHT_BLUE);
+
+		CARBON_MONOXIDE = gas("carbon_monoxide", 0xFF88978F);
+		CARBON_DIOXIDE = gas("carbon_dioxide", 0xFF9C9180);
+		METHANE = gas("methane", 0xFF85B4A9);
+		HYDROGEN_CHLORIDE = gas("hydrogen_chloride", 0xFFB2B98C);
+		SULFUR_DIOXIDE = gas("sulfur_dioxide", 0xFFBDAC71);
+		SULFUR_TRIOXIDE = gas("sulfur_trioxide", 0xFFACA996);
+		DIRTY_SYNTHESIS_GAS = gas("dirty_synthesis_gas", 0xFF625B4A);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

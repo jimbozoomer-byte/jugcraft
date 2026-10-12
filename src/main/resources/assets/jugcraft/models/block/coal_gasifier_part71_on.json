@@ -1,0 +1,6 @@
+{
+  "parent": "jugcraft:block/coal_gasifier_part71",
+  "textures": {
+    "dr_amber": "jugcraft:block/dr_amber_on"
+  }
+}

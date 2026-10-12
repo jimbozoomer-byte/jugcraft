@@ -55,7 +55,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 	/** A fluid machine's recipe (FLUID_RECIPES in tools/petro.py): items and fluids in, fluids and items out, in mB. */
 	public record FluidViewRecipe(List<List<ItemStack>> items, List<FluidAmount> fluids, List<FluidAmount> fluidResults,
-			List<ItemStack> results, int ticks) {
+			List<ItemStack> results, int ticks, List<ItemStack> tool, int energyPerTick) {
 	}
 
 	public record FluidAmount(Fluid fluid, int mb) {
@@ -200,7 +200,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 						results.add(new ItemStack(item(pair.get(0).getAsString()), pair.get(1).getAsInt()));
 					}
 					recipes.add(new FluidViewRecipe(items, fluids(recipe.getAsJsonArray("fluids")),
-							fluids(recipe.getAsJsonArray("fluid_results")), results, recipe.get("ticks").getAsInt()));
+							fluids(recipe.getAsJsonArray("fluid_results")), results, recipe.get("ticks").getAsInt(),
+							recipe.has("tool") && !recipe.get("tool").getAsString().isEmpty() ? stacks(recipe.get("tool").getAsString(), 1) : List.of(),
+							recipe.has("energy_per_tick") ? recipe.get("energy_per_tick").getAsInt() : 0));
 				}
 				result.add(new FluidMachine(block, type, recipes));
 			}
@@ -506,7 +508,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 		@Override
 		public int getHeight() {
-			return 38;
+			return machine.recipes().stream().anyMatch(r -> !r.tool().isEmpty()) ? 58 : 38;
 		}
 
 		@Override
@@ -516,6 +518,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 		@Override
 		public void setRecipe(IRecipeLayoutBuilder builder, FluidViewRecipe recipe, IFocusGroup focuses) {
+			if (!recipe.tool().isEmpty()) {
+				builder.addSlot(mezz.jei.api.recipe.RecipeIngredientRole.CRAFTING_STATION, 0, 39).setStandardSlotBackground().addItemStacks(recipe.tool());
+			}
 			int x = 0;
 			for (List<ItemStack> input : recipe.items()) {
 				builder.addInputSlot(x, SLOT_Y).setStandardSlotBackground().addItemStacks(input);
@@ -544,7 +549,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		@Override
 		public void draw(FluidViewRecipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
 			var font = Minecraft.getInstance().font;
-			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0), 0, 28, TEXT, false);
+			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0)
+					+ (recipe.energyPerTick() > 0 ? " / " + recipe.energyPerTick() + " JE/t" : ""), 0, 28, TEXT, false);
+			if (!recipe.tool().isEmpty()) graphics.text(font, "Reusable catalyst", 22, 43, TEXT, false);
 		}
 	}
 }

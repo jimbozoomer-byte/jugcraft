@@ -256,7 +256,7 @@ public class GasBurningGeneratorGameTests {
 	public void itsFuelItsBalanceAndItsBill(GameTestHelper helper) {
 		MachineForm form = IndustrialForms.GAS_BURNING_GENERATOR_FORM;
 		FormFuel hydrogen = form.fuel(PetroFluids.HYDROGEN.fluid());
-		helper.assertTrue(form.fuels().size() == 1 && hydrogen != null && hydrogen.jePerMb() == PER_MB && hydrogen.jePerTick() == PER_TICK
+		helper.assertTrue(form.fuels().size() == 2 && hydrogen != null && hydrogen.jePerMb() == PER_MB && hydrogen.jePerTick() == PER_TICK
 				&& PER_MB == FluidFuels.jePerMb(MachineKind.FUEL_CELL, PetroFluids.HYDROGEN.fluid()), "Hydrogen at 128 JE/mB and 128 JE/t");
 		helper.assertTrue(form.fuel(PetroFluids.REFINERY_GAS.fluid()) == null && FluidFuels.jePerMb(MachineKind.GAS_TURBINE, PetroFluids.HYDROGEN.fluid()) == 0,
 				"It never burns the turbine's fuels, nor the turbine hydrogen");

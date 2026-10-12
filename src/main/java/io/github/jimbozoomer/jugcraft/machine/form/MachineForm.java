@@ -77,6 +77,7 @@ public final class MachineForm {
 	private final int itemOutputs;
 	private final boolean upgrades;
 	private final int warmupTicks;
+	private final int waterDrainOutput;
 	private final List<FormFuel> fuels;
 
 	private MachineForm(Builder builder) {
@@ -86,6 +87,10 @@ public final class MachineForm {
 		this.profile = builder.profile;
 		this.upgrades = builder.upgrades;
 		this.warmupTicks = builder.warmup;
+		this.waterDrainOutput = builder.waterDrainOutput;
+		if (waterDrainOutput < -1 || waterDrainOutput >= builder.outputTanks.size()) {
+			throw invalid("has no output tank for its water drain");
+		}
 		this.fuels = List.copyOf(builder.fuels);
 		if (builder.layers.isEmpty() || builder.layers.getFirst().length == 0) {
 			throw invalid("has no layers");
@@ -502,6 +507,9 @@ public final class MachineForm {
 	 * Paid ticks at the start of a batch begun from cold that the machine reports as warming. The owner chose heating
 	 * included in the processing power: warming is part of a batch's paid work, never an extra charge.
 	 */
+	/** Output that may drain excess plain water; -1 means every output must be retained. */
+	public int waterDrainOutput() { return waterDrainOutput; }
+
 	public int warmupTicks() {
 		return warmupTicks;
 	}
@@ -527,6 +535,7 @@ public final class MachineForm {
 		private final Map<String, String> aliases = new LinkedHashMap<>();
 		private boolean upgrades;
 		private int warmup;
+		private int waterDrainOutput = -1;
 		private final List<FormFuel> fuels = new ArrayList<>();
 
 		private Builder(Identifier id, MachineKind family) {
@@ -584,6 +593,11 @@ public final class MachineForm {
 
 		public Builder upgrades() {
 			this.upgrades = true;
+			return this;
+		}
+
+		public Builder waterDrainOutput(int output) {
+			this.waterDrainOutput = output;
 			return this;
 		}
 

@@ -43,6 +43,13 @@ public final class PetroItems {
 	/** Power (batch 19): fitted in the advanced engine's slot for half as much power again. */
 	public static Item TURBOCHARGER;
 
+	public static Item NICKEL_CATALYST_BED;
+	public static Item VANADIUM_CONTACT_BED;
+	public static Item VANADIUM_IRON_CONCENTRATE;
+	public static Item VANADIUM_OXIDE;
+	public static Item MIXED_GAS_RESIDUE;
+	public static Item OXIDIZER_BURNER;
+
 	private PetroItems() {
 	}
 
@@ -68,7 +75,20 @@ public final class PetroItems {
 		GRENADE_LAUNCHER = JugcraftRegistry.item("grenade_launcher", GrenadeLauncherItem::new);
 		TURBOCHARGER = JugcraftRegistry.item("turbocharger", properties -> new Item(properties.stacksTo(1)));
 
+		NICKEL_CATALYST_BED = JugcraftRegistry.item("nickel_catalyst_bed");
+		VANADIUM_CONTACT_BED = JugcraftRegistry.item("vanadium_contact_bed");
+		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
+		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
+		MIXED_GAS_RESIDUE = JugcraftRegistry.item("mixed_gas_residue");
+		OXIDIZER_BURNER = JugcraftRegistry.item("oxidizer_burner");
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			output.accept(NICKEL_CATALYST_BED);
+			output.accept(VANADIUM_CONTACT_BED);
+			output.accept(VANADIUM_IRON_CONCENTRATE);
+			output.accept(VANADIUM_OXIDE);
+			output.accept(MIXED_GAS_RESIDUE);
+			output.accept(OXIDIZER_BURNER);
 			output.accept(CRACKING_CATALYST);
 			output.accept(ASPHALT_BINDER);
 			output.accept(PLASTIC_PELLETS);

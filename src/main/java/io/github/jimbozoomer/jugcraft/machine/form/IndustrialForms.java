@@ -72,10 +72,100 @@ public final class IndustrialForms {
 			.profile(OperatingProfile.ENTRY)
 			.inputTank("fuel")
 			.fuel(Jugcraft.id("hydrogen"), FluidFuels.HYDROGEN, FluidFuels.GAS_BURNING_HYDROGEN)
+			.fuel(Jugcraft.id("methane"), FluidFuels.METHANE, FluidFuels.GAS_BURNING_METHANE)
 			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 3, 1, 0, FormSide.RIGHT)
 			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 2, 4, 1, FormSide.BACK)
 			.build();
 
+
+	public static final MachineForm CHEMICAL_INFUSER_FORM = MachineForm.builder(Jugcraft.id("chemical_infuser"),
+			MachineKind.SYNTHESIS_CONVERTER)
+			.layer("C#", "##", "##")
+			.layer("##", "##", "##")
+			.layer("##", "##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("reagent_a")
+			.inputTank("reagent_b")
+			.outputTank("product_gas")
+			.outputTank("process_water")
+			.socket("catalyst_bed", net.minecraft.tags.TagKey.create(Registries.ITEM, Jugcraft.id("infuser_catalysts")))
+			.waterDrainOutput(1)
+			.capability("jugcraft:starter_gas_infusing")
+			.upgrades()
+			.warmup(40)
+			.port("reagent_a_in", FormPort.Kind.FLUID_IN, 0, 0, 0, 2, FormSide.FRONT)
+			.port("reagent_b_in", FormPort.Kind.FLUID_IN, 1, 1, 0, 2, FormSide.FRONT)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 0, 2, 1, FormSide.BACK)
+			.port("water_out", FormPort.Kind.FLUID_OUT, 1, 1, 2, 0, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.build();
+
+	public static final MachineForm CHEMICAL_OXIDIZER_FORM = MachineForm.builder(Jugcraft.id("chemical_oxidizer"),
+			MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##")
+			.layer("##", "##")
+			.layer("##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("oxidant")
+			.outputTank("product_gas")
+			.items(1, 0)
+			.capability("jugcraft:starter_gas_oxidizing")
+			.upgrades()
+			.warmup(40)
+			.port("oxygen_in", FormPort.Kind.FLUID_IN, 0, 1, 0, 0, FormSide.FRONT)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 1, 2, FormSide.BACK)
+			.port("gas_out", FormPort.Kind.FLUID_OUT, 0, 1, 1, 2, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.build();
+
+	public static final MachineForm COAL_GASIFIER_FORM = MachineForm.builder(Jugcraft.id("coal_gasifier"),
+			MachineKind.CHEMICAL_REACTOR)
+			.layer("C###", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("feed_water")
+			.outputTank("dirty_gas")
+			.items(1, 0)
+			.capability("jugcraft:starter_gasification")
+			.upgrades()
+			.warmup(40)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 3, 0, FormSide.BACK)
+			.port("carbon_in", FormPort.Kind.ITEM_IN, 0, 0, 1, 3, FormSide.LEFT)
+			.port("dirty_gas_out", FormPort.Kind.FLUID_OUT, 0, 3, 3, 5, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.build();
+
+	public static final MachineForm GAS_CLEANING_RACK_FORM = MachineForm.builder(Jugcraft.id("gas_cleaning_rack"),
+			MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("dirty_gas")
+			.inputTank("wash_water")
+			.outputTank("carbon_monoxide")
+			.outputTank("hydrogen")
+			.items(0, 1)
+			.capability("jugcraft:starter_gas_cleaning")
+			.upgrades()
+			.warmup(40)
+			.port("dirty_gas_in", FormPort.Kind.FLUID_IN, 0, 2, 4, 3, FormSide.BACK)
+			.port("wash_water_in", FormPort.Kind.FLUID_IN, 1, 0, 0, 0, FormSide.LEFT)
+			.port("co_out", FormPort.Kind.FLUID_OUT, 0, 0, 0, 2, FormSide.FRONT)
+			.port("hydrogen_out", FormPort.Kind.FLUID_OUT, 1, 1, 0, 2, FormSide.FRONT)
+			.port("residue_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 2, 0, 0, FormSide.FRONT)
+			.build();
+
+	public static FormMachineBlock CHEMICAL_INFUSER;
+	public static FormMachineBlock CHEMICAL_OXIDIZER;
+	public static FormMachineBlock COAL_GASIFIER;
+	public static FormMachineBlock GAS_CLEANING_RACK;
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
@@ -86,7 +176,11 @@ public final class IndustrialForms {
 	public static void register() {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR);
+		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
+		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
+		COAL_GASIFIER = block("coal_gasifier", COAL_GASIFIER_FORM);
+		GAS_CLEANING_RACK = block("gas_cleaning_rack", GAS_CLEANING_RACK_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, COAL_GASIFIER, GAS_CLEANING_RACK);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

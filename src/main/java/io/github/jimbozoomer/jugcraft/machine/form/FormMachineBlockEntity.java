@@ -50,6 +50,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
@@ -109,11 +110,15 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	public static final int DATA_TANKS = DATA_LANES + 2 * MAX_LANES;
 	/** One value per tank: millibuckets reserved for running batches. */
 	public static final int DATA_RESERVED = DATA_TANKS + 2 * FluidMachineSpec.MAX_TANKS;
-	public static final int DATA_COUNT = DATA_RESERVED + FluidMachineSpec.MAX_TANKS;
+	public static final int DATA_DRAIN = DATA_RESERVED + FluidMachineSpec.MAX_TANKS;
+	public static final int DATA_EMISSIONS_LOW = DATA_DRAIN + 1;
+	public static final int DATA_EMISSIONS_HIGH = DATA_EMISSIONS_LOW + 1;
+	public static final int DATA_COUNT = DATA_EMISSIONS_HIGH + 1;
 
 	/** Menu buttons. */
 	public static final int BUTTON_PAUSE = 0;
 	public static final int BUTTON_CANCEL = 1;
+	public static final int BUTTON_DRAIN = 2;
 
 	private final MachineForm form;
 	private final SimpleEnergyStorage energy;
@@ -126,6 +131,9 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	/** Null while formed; otherwise what is wrong with the structure. */
 	private @Nullable MachineStatus structure;
 	private boolean paused;
+	private boolean drainWater = true;
+	private long drainedWater;
+	private long processEmissions;
 	private long nextCheck;
 	/** The game time of the last paid tick: a batch started long after it starts cold. Not saved. */
 	private long lastWorked = Long.MIN_VALUE / 2;
@@ -159,7 +167,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			if (index >= DATA_TANKS && index < DATA_RESERVED) {
 				return index - DATA_TANKS < 2 * tanks.size() ? tanks.data(index - DATA_TANKS) : 0;
 			}
-			if (index >= DATA_RESERVED && index < DATA_COUNT) {
+			if (index >= DATA_RESERVED && index < DATA_DRAIN) {
 				int tank = index - DATA_RESERVED;
 				int inputs = form.tanks().inputTanks().size();
 				return tank >= inputs && tank < tanks.size() ? reservedMb(tank - inputs) : 0;
@@ -172,6 +180,9 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				case DATA_PAUSED -> paused ? 1 : 0;
 				case DATA_LANE_USE -> (int) Math.min(0xFFFF, form.generator() ? made : lanePrice);
 				case DATA_LOCKS -> locks();
+				case DATA_DRAIN -> drainWater ? 1 : 0;
+				case DATA_EMISSIONS_LOW -> (int) (processEmissions & 0xFFFF);
+				case DATA_EMISSIONS_HIGH -> (int) ((processEmissions >>> 16) & 0xFFFF);
 				default -> 0;
 			};
 		}
@@ -236,6 +247,17 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 
 	public MachineStatus status() {
 		return status;
+	}
+
+	public boolean drainsWater() { return drainWater; }
+	public long drainedWater() { return drainedWater; }
+	public long processEmissions() { return processEmissions; }
+	/** Applies to newly started batches; a running batch keeps its saved reservation policy. */
+	public void toggleWaterDrain() {
+		if (form.waterDrainOutput() >= 0) { drainWater = !drainWater; setChanged(); }
+	}
+	private boolean mayDrain(int output, Fluid fluid, boolean enabled) {
+		return enabled && output == form.waterDrainOutput() && fluid == Fluids.WATER;
 	}
 
 	public boolean paused() {
@@ -379,6 +401,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			if (lane == null) {
 				continue;
 			}
+			lanePrice = form.profile().lanePerTick(upgrades.use(lane.energyPerTick() > 0
+					? lane.energyPerTick() : form.family().usePerTick));
 			int required = upgrades.ticks(lane.duration());
 			if (lane.progress() < required) {
 				if (lane.tool() >= 0 && !form.sockets().get(lane.tool()).accepts(items.get(form.firstSocketSlot() + lane.tool()))) {
@@ -589,7 +613,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				return MachineStatus.fluid(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_OTHER_FLUID, inputs + out, reserved, 0);
 			}
 			int need = fluidNeeds.merge(out, result.amount(), Integer::sum);
-			if (tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
+			if (!mayDrain(out, result.fluid(), drainWater) && tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + out);
 			}
 		}
@@ -628,7 +652,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		for (WorkLane lane : lanes) {
 			if (lane != null) {
 				for (WorkLane.FluidPart part : lane.fluidResults()) {
-					if (part.tank() == out) {
+					if (part.tank() == out && !mayDrain(out, part.fluid().getFluid(), lane.drainWater())) {
 						total += part.mb();
 					}
 				}
@@ -676,7 +700,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			fluidResults.add(new WorkLane.FluidPart(recipe.resultTank(i), FluidVariant.of(result.fluid()), result.amount()));
 		}
 		boolean cold = now - lastWorked > Math.max(1, form.warmupTicks());
-		return new WorkLane(id, taken, drained, itemResults, fluidResults, recipe.time(), tool, cold, 0);
+		return new WorkLane(id, taken, drained, itemResults, fluidResults, recipe.time(), tool, cold, 0, recipe.energyPerTick(), drainWater, recipe.emissions());
 	}
 
 	/** Moves a finished batch's results out of the lane, all or nothing; null when done, else what blocks it. */
@@ -686,7 +710,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		for (WorkLane.FluidPart part : lane.fluidResults()) {
 			FluidTank tank = tanks.output(part.tank());
 			int total = fluidOut.merge(part.tank(), part.mb(), Integer::sum);
-			if (!tank.variant.isBlank() && !tank.variant.equals(part.fluid()) || tank.millibuckets() + total > tank.capacityMb()) {
+			if (!tank.variant.isBlank() && !tank.variant.equals(part.fluid()) || !mayDrain(part.tank(), part.fluid().getFluid(), lane.drainWater()) && tank.millibuckets() + total > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + part.tank());
 			}
 		}
@@ -702,7 +726,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			if (tank.variant.isBlank()) {
 				tank.variant = part.fluid();
 			}
-			tank.amount += (long) part.mb() * FluidNetworks.DROPLETS_PER_MB;
+			int retained = mayDrain(part.tank(), part.fluid().getFluid(), lane.drainWater())
+					? Math.min(part.mb(), Math.max(0, tank.capacityMb() - tank.millibuckets() - reservedMb(part.tank()))) : part.mb();
+			drainedWater += Math.min(Long.MAX_VALUE - drainedWater, part.mb() - retained);
+			tank.amount += (long) retained * FluidNetworks.DROPLETS_PER_MB;
 		}
 		for (WorkLane.ItemPart part : lane.itemResults()) {
 			ItemStack held = items.get(part.slot());
@@ -712,6 +739,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				held.grow(part.stack().getCount());
 			}
 		}
+		processEmissions = Math.min(0xFFFF_FFFFL, processEmissions + lane.emissions());
 		setChanged();
 		return null;
 	}
@@ -928,6 +956,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			togglePause();
 			return true;
 		}
+		if (button == BUTTON_DRAIN && form.waterDrainOutput() >= 0) {
+			toggleWaterDrain();
+			return true;
+		}
 		if (button == BUTTON_CANCEL) {
 			int[] result = cancel();
 			player.sendOverlayMessage(result[1] > 0
@@ -1082,6 +1114,9 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		ContainerHelper.loadAllItems(input, items);
 		energy.setAmount(input.getLongOr("energy", 0L));
 		paused = input.getBooleanOr("paused", false);
+		drainWater = input.getBooleanOr("drain_water", true);
+		drainedWater = Math.max(0, input.getLongOr("drained_water", 0));
+		processEmissions = Math.clamp(input.getLongOr("process_emissions", 0), 0, 0xFFFF_FFFFL);
 		burn = Math.max(0, input.getLongOr("burn", 0L));
 		burnRate = Math.max(0, input.getIntOr("burn_rate", 0));
 		List<String> roles = form.tankRoles();
@@ -1112,6 +1147,9 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		output.putInt("form_version", form.version());
 		output.putLong("energy", energy.getAmount());
 		output.putBoolean("paused", paused);
+		output.putBoolean("drain_water", drainWater);
+		output.putLong("drained_water", drainedWater);
+		output.putLong("process_emissions", processEmissions);
 		if (burn > 0) {
 			output.putLong("burn", burn);
 			output.putInt("burn_rate", burnRate);

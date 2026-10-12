@@ -2467,6 +2467,20 @@
           ],
           "extra": [],
           "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:vanadium_iron_concentrate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:vanadium_oxide",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
         }
       ]
     },
@@ -7234,7 +7248,9 @@
             ]
           ],
           "results": [],
-          "ticks": 400
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 0
         },
         {
           "items": [],
@@ -7255,7 +7271,285 @@
             ]
           ],
           "results": [],
-          "ticks": 800
+          "ticks": 800,
+          "tool": "",
+          "energy_per_tick": 0
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:chemical_infuser",
+      "type": "chemical_infuser",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              250
+            ],
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:hydrogen_chloride",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:carbon_monoxide",
+              100
+            ],
+            [
+              "jugcraft:hydrogen",
+              300
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              200
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "jugcraft:nickel_catalyst_bed",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:carbon_dioxide",
+              100
+            ],
+            [
+              "jugcraft:hydrogen",
+              400
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "jugcraft:nickel_catalyst_bed",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:sulfur_dioxide",
+              250
+            ],
+            [
+              "jugcraft:oxygen",
+              125
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfur_trioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "jugcraft:vanadium_contact_bed",
+          "energy_per_tick": 128
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:chemical_oxidizer",
+      "type": "chemical_oxidizer",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:sulfur_dust",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:oxygen",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfur_dioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "minecraft:charcoal",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:oxygen",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 96
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:coal_gasifier",
+      "type": "coal_gasifier",
+      "recipes": [
+        {
+          "items": [
+            [
+              "minecraft:coal",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:dirty_synthesis_gas",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "minecraft:charcoal",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:dirty_synthesis_gas",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:dirty_synthesis_gas",
+              1500
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:gas_cleaning_rack",
+      "type": "gas_cleaning_rack",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:dirty_synthesis_gas",
+              500
+            ],
+            [
+              "minecraft:water",
+              125
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:carbon_monoxide",
+              250
+            ],
+            [
+              "jugcraft:hydrogen",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:mixed_gas_residue",
+              1
+            ]
+          ],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 48
         }
       ]
     }

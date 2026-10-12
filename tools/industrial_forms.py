@@ -37,7 +37,7 @@ FORM_GLOW = dict(GLOW, el_lamp="el_lamp_on")
 # What the generator burns (tools/petro.py FLUID_FUELS keeps the Fuel Cell's value): (fluid, JE per mB, JE a tick).
 # Hydrogen at the Fuel Cell's 128 JE/mB and the owner's selected 128 JE/t; methane (256 JE/t) joins it with the
 # methane Infuser.
-GAS_GENERATOR_FUELS = [(f"{MOD}:hydrogen", 128, 128)]
+GAS_GENERATOR_FUELS = [(f"{MOD}:hydrogen", 128, 128), (f"{MOD}:methane", 448, 256)]
 
 FORMS = {
     "electrolytic_separator": {
@@ -455,6 +455,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
             "fabric:load_conditions": [c for f in info["features"] for c in condition(f)],
             "type": "minecraft:crafting_shaped", "category": "misc", "pattern": pattern, "key": key,
             "result": {"id": f"{MOD}:{form}", "count": 1}})
+    import starter_chemistry
+    starter_chemistry.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -476,6 +478,9 @@ def form_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
+            for field in ("tool", "energy_per_tick", "emissions"):
+                if field in recipe:
+                    data[field] = recipe[field]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
 
@@ -488,5 +493,18 @@ def recipe_view():
                           "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
                           "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],
                           "results": [[item, count] for item, count in recipe.get("results", [])],
-                          "ticks": recipe["ticks"]} for recipe in FORM_RECIPES[form]]}
+                          "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "energy_per_tick": recipe.get("energy_per_tick", 0)} for recipe in FORM_RECIPES[form]]}
             for form in FORMS if FORM_RECIPES.get(form)]
+
+
+# Package 2's four further entry forms. Keep each physical machine in the common controller/renderer pipeline.
+import starter_chemistry
+import starter_chemistry_models
+FORMS.update(starter_chemistry.FORMS)
+FORM_RECIPES.update(starter_chemistry.RECIPES)
+HANDBOOK.update(starter_chemistry.HANDBOOK)
+TANK_NAMES.update(starter_chemistry.TANK_NAMES)
+MODELS.update(starter_chemistry_models.MODELS)
+ROTORS.update(starter_chemistry_models.ROTORS)
+ITEM_EXTRAS.update(starter_chemistry_models.ITEM_EXTRAS)
+HANDBOOK["gas_burning_generator"][-1] = "Methane from the Infuser now burns here too: 448 JE per mB, up to 256 JE/t. Fractional fuel credit is saved, so switching loads or restarting loses and duplicates no fuel. This generator has no upgrade slots."
