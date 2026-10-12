@@ -20,8 +20,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 /**
  * The industrial machine forms the game registers, from the owner's factory plan (docs/features/
  * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md),
- * Gas Burning Generator (docs/features/industrial-gas-burning-generator.md) and Chemical Infuser
- * (docs/features/industrial-chemical-infuser.md). Each form is also described in
+ * Gas Burning Generator (docs/features/industrial-gas-burning-generator.md), Chemical Infuser
+ * (docs/features/industrial-chemical-infuser.md) and Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md).
+ * Each form is also described in
  * tools/industrial_forms.py for its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form
  * shares the one controller block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when
  * more forms join this list.
@@ -31,6 +32,8 @@ public final class IndustrialForms {
 	public static final String AQUEOUS_ELECTROLYSIS = "jugcraft:aqueous_electrolysis";
 	/** Joining two gases with no catalyst bed, such as hydrogen burnt in chlorine. */
 	public static final String GAS_COMBINATION = "jugcraft:gas_combination";
+	/** Burning a solid feed in a metered oxidant gas, such as sulfur in oxygen. */
+	public static final String SOLID_OXIDATION = "jugcraft:solid_oxidation";
 
 	/**
 	 * The Electrolytic Separator: the steel-entry form of the Electrolytic Cell family, two wide, two deep and three
@@ -106,9 +109,35 @@ public final class IndustrialForms {
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 1, 2, 0, FormSide.RIGHT)
 			.build();
 
+	/**
+	 * The Chemical Oxidizer: the starter solid-feed oxidation form of the chemical reactor family (the Chemical Reactor's
+	 * energy figures), two wide, two deep and three tall, every position a block, the controller (its control panel)
+	 * front left on the ground. Sulfur dust goes into the hopper on top at the back and a feed screw carries it into the
+	 * lined reaction throat; oxygen comes in low on the right; the gas leaves at the top of the collector hood, and the
+	 * power socket is low on the left side at the back.
+	 */
+	public static final MachineForm CHEMICAL_OXIDIZER_FORM = MachineForm.builder(Jugcraft.id("chemical_oxidizer"),
+					MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##")
+			.layer("##", "##")
+			.layer("##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("oxidant")
+			.outputTank("product")
+			.items(1, 0)
+			.capability(SOLID_OXIDATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 1, 2, FormSide.TOP)
+			.port("oxidant_in", FormPort.Kind.FLUID_IN, 0, 1, 0, 0, FormSide.RIGHT)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 1, 0, 2, FormSide.TOP)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 1, 0, FormSide.LEFT)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
+	public static FormMachineBlock CHEMICAL_OXIDIZER;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	private IndustrialForms() {
@@ -118,7 +147,8 @@ public final class IndustrialForms {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER);
+		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

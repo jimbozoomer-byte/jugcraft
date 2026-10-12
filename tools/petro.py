@@ -114,6 +114,10 @@ GASES = {
     # Infuser. Colourless, fuming white in damp air: a cool grey-white.
     "hydrogen_chloride": {"display": "Hydrogen Chloride", "feature": "salt",
                           "colors": [(160, 172, 170), (188, 198, 196), (212, 220, 218), (238, 242, 241)]},
+    # The starter factory's sulfur dioxide (tools/industrial_forms.py): sulfur burnt in oxygen in the Chemical
+    # Oxidizer, the first step of the contact acid chain. Colourless and choking: a pale sulfur-tinted grey.
+    "sulfur_dioxide": {"display": "Sulfur Dioxide", "feature": "sulfur",
+                       "colors": [(166, 162, 126), (194, 190, 156), (216, 212, 182), (240, 238, 220)]},
 }
 
 

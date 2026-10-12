@@ -58,7 +58,7 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [ ] Package 2, the rest of the starter gas and acid factory:
   - the Infuser's methanation with its nickel bed, then methane as the generator's second fuel (256 JE/t); it needs a CO or CO2 feed first;
   - hydrogen chloride absorption into aqueous acid, and its consumers;
-  - the Chemical Oxidizer and contact conversion, for the sulfuric acid chain;
+  - contact conversion and absorption, for the sulfuric acid chain (the [Chemical Oxidizer](features/industrial-chemical-oxidizer.md) now makes its sulfur dioxide);
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.
 

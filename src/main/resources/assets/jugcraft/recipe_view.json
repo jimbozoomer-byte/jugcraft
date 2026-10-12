@@ -7285,6 +7285,34 @@
           "ticks": 75
         }
       ]
+    },
+    {
+      "block": "jugcraft:chemical_oxidizer",
+      "type": "chemical_oxidizer",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:sulfur_dust",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:oxygen",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfur_dioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        }
+      ]
     }
   ],
   "concordance": {

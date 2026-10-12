@@ -143,6 +143,8 @@ public final class PetroFluids {
 	public static Entry LIQUID_OXYGEN;
 	/** The starter gas and acid factory: hydrogen burnt in chlorine in the Chemical Infuser. */
 	public static Gas HYDROGEN_CHLORIDE;
+	/** The starter gas and acid factory: sulfur burnt in oxygen in the Chemical Oxidizer. */
+	public static Gas SULFUR_DIOXIDE;
 
 	private PetroFluids() {
 	}
@@ -202,6 +204,7 @@ public final class PetroFluids {
 		KEROSENE = fluid("kerosene", 5, 4, 1, 0xFFE0E0C4, MapColor.SAND);
 		LIQUID_OXYGEN = fluid("liquid_oxygen", 3, 4, 1, 0xFFA0C8EC, MapColor.COLOR_LIGHT_BLUE);
 		HYDROGEN_CHLORIDE = gas("hydrogen_chloride", 0xFFD4DCDA);
+		SULFUR_DIOXIDE = gas("sulfur_dioxide", 0xFFDAD6B8);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

@@ -3850,6 +3850,30 @@
           }
         },
         {
+          "title": "Chemical Oxidizer",
+          "icon": "jugcraft:chemical_oxidizer",
+          "text": [
+            "Two wide, two deep and three tall: a lined reaction throat fed by a hopper and a feed screw at the back, with a gas column and collector hood on top, built from steel plates, a furnace, an electric motor, glass, a basic circuit and a Machine Casing. Every block it fills must be free when it is placed.",
+            "Drop sulfur dust into the hopper on top at the back and pipe oxygen into the capped inlet low on the right. Each dust burns with 250 mB of oxygen into 250 mB of sulfur dioxide in five seconds, which leaves at the collar on top of the hood. It draws 96 JE/t through the socket low on the left side at the back.",
+            "Sulfur dioxide is the first step of the contact acid route; its screen says what it is waiting for, and upgrade cards fit its terminal."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:furnace",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "minecraft:glass",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:chemical_oxidizer",
+            "count": 1
+          }
+        },
+        {
           "title": "Fuel Cell",
           "icon": "jugcraft:fuel_cell",
           "text": [
