@@ -1,6 +1,6 @@
 # Gasification residue: the Coal Gasifier's ash, bound into concrete and asphalt
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 Stacked on [vent or hold](industrial-vent-or-hold.md) and the branches below it, down to [coal gasification](industrial-coal-gasification.md).
 
 Proposal issue: none. TODO item: the Coal Gasifier package's remaining "cleaning residue".
@@ -88,7 +88,8 @@ For CI, server game tests in `CoalGasificationGameTests`:
 
 ### Results
 
-Not yet run in CI.
+- **Run [38462095868](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38462095868) on the contributor's fork (commit 24b2886e): green.** Everything compiled; the data checks passed; every server game test passed, the residue checks in `CoalGasificationGameTests` among them; the build without optional integrations and all five client shards passed.
+- The client screenshots have not yet been looked at by a person.
 
 No survival playtest, two-client test or performance measurement has been done.
 
