@@ -55,7 +55,7 @@ public class CombinedCyclePowerPlantGameTests {
 	private static final int HYDROGEN_RATE = 1_024;
 
 	/**
-	 * In every orientation it fills its 108 blocks, and its faces answer pipes, cables and conveyors only at its inlet
+	 * In every orientation it fills its 88 blocks, and its faces answer pipes, cables and conveyors only at its inlet
 	 * and socket: methane, raw syngas and hydrogen go in and nothing else, and the socket only gives power.
 	 */
 	@GameTest(structure = ARENA)
@@ -63,9 +63,9 @@ public class CombinedCyclePowerPlantGameTests {
 		ServerLevel level = helper.getLevel();
 		MachineForm form = IndustrialForms.COMBINED_CYCLE_PLANT_FORM;
 		int parts = form.footprint().size();
-		helper.assertTrue(form.generator() && form.positions() == 140 && parts == 108
+		helper.assertTrue(form.generator() && form.positions() == 120 && parts == 88
 				&& IndustrialForms.COMBINED_CYCLE_PLANT.partProperty().getPossibleValues().size() == parts,
-				"108 blocks in a 7x4x5 envelope, not " + parts + " of " + form.positions());
+				"88 blocks in a 6x4x5 envelope, not " + parts + " of " + form.positions());
 		// Each orientation in turn at the arena's middle, cleared before the next.
 		BlockPos middle = new BlockPos(8, 1, 8);
 		for (Direction facing : new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {

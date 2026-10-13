@@ -34,13 +34,39 @@
         0
       ],
       "to": [
-        12.0,
-        16,
+        14.0,
+        14.0,
         16
       ],
       "faces": {
         "east": {
-          "texture": "#dw_ribbed_steel"
+          "texture": "#dp_grille"
+        },
+        "up": {
+          "texture": "#dp_olive_stencil"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        14.0,
+        0
+      ],
+      "to": [
+        15.0,
+        15.5,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#dp_chrome"
+        },
+        "up": {
+          "texture": "#dp_chrome"
+        },
+        "down": {
+          "texture": "#dp_chrome"
         }
       }
     }

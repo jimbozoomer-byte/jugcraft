@@ -26,5 +26,49 @@
     "tk_body": "jugcraft:block/tk_body",
     "particle": "jugcraft:block/dp_olive"
   },
-  "elements": []
+  "elements": [
+    {
+      "from": [
+        2.0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        14.0,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#dp_grille"
+        },
+        "up": {
+          "texture": "#dp_olive_stencil"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        14.0,
+        0
+      ],
+      "to": [
+        16,
+        15.5,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#dp_chrome"
+        },
+        "up": {
+          "texture": "#dp_chrome"
+        },
+        "down": {
+          "texture": "#dp_chrome"
+        }
+      }
+    }
+  ]
 }

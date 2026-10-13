@@ -2977,6 +2977,10 @@ def check_industrial_forms():
             described = info.get(key, []) if key == "fuels" else info[key]
             if [tuple(item) for item in described] != [tuple(item) for item in built] if key == "fuels" else described != built:
                 err(f"{form}: {key} is {built} in IndustrialForms.java but {described} in tools/industrial_forms.py")
+        # MachineForm's own rule: every form is 2 to 6 blocks on each axis (it refuses to load otherwise).
+        extents = (len(info["layers"][0][0]), len(info["layers"][0]), len(info["layers"]))
+        if any(not 2 <= extent <= 6 for extent in extents):
+            err(f"{form}: must be 2 to 6 blocks on every axis, not {'x'.join(map(str, extents))}")
         if profiles.get(info["profile"]) != info["tank_mb"]:
             err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
         parts = len(industrial_forms.footprint(info["layers"]))

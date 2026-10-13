@@ -31,15 +31,15 @@
       "from": [
         2.0,
         0,
-        3.0
+        0
       ],
       "to": [
         16,
         14.0,
-        16
+        13.0
       ],
       "faces": {
-        "north": {
+        "south": {
           "texture": "#dp_grille"
         },
         "west": {
@@ -54,15 +54,15 @@
       "from": [
         1.0,
         14.0,
-        2.0
+        0
       ],
       "to": [
         16,
         15.5,
-        16
+        14.0
       ],
       "faces": {
-        "north": {
+        "south": {
           "texture": "#dp_chrome"
         },
         "west": {
