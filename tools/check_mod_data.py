@@ -8362,15 +8362,18 @@ def check_model_uvs():
 
 def check_lairs():
     """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
-    tools/cinder_kiln.py, tools/lantern_fen.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md,
-    docs/features/glacier-hall.md, docs/features/cinder-kiln.md, docs/features/lantern-fen.md): the Java's numbers are the
-    tables' and the layouts', every lair has its dimension, dimension type, biome (no spawns), template and words for
-    coming in, the rituals' blocks, items, recipes and tags are there, the Spindle Loft's lace patterns and thread
-    colours, the Glacier Hall's icicle parts and snow heights, the Cinder Kiln's slag, troughs and sluices and the
-    Lantern Fen's lamps are the tables', every server option has its default, every message the Java sends has its
-    words, and the Glacier Hall, the Cinder Kiln and the Lantern Fen are laid out as their records say
-    (check_glacier_hall, check_cinder_kiln, check_lantern_fen)."""
+    tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, docs/features/hollow-acre.md,
+    docs/features/spindle-loft.md, docs/features/glacier-hall.md, docs/features/cinder-kiln.md,
+    docs/features/lantern-fen.md, docs/features/crypt-archive.md): the Java's numbers are the tables' and the layouts',
+    every lair has its dimension, dimension type, biome (no spawns), template and words for coming in, the rituals'
+    blocks, items, recipes and tags are there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's
+    icicle parts and snow heights, the Cinder Kiln's slag, troughs and sluices, the Lantern Fen's lamps and the Archive of
+    Last Names' names, stones, seals, lectern and phylactery are the tables', every server option has its default, every
+    message the Java sends has its words, and the Glacier Hall, the Cinder Kiln, the Lantern Fen and the Archive of Last
+    Names are laid out as their records say (check_glacier_hall, check_cinder_kiln, check_lantern_fen,
+    check_crypt_archive)."""
     import cinder_kiln as ck
+    import crypt_archive as ca
     import glacier_hall as gh
     import hollow_acre as ha
     import lair_data as ld
@@ -8382,7 +8385,8 @@ def check_lairs():
     # Each lair's line in Lair.java, from its layout: size, arrival and its facing, centre, bounds, floor and moon.
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
                                        ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
-                                       ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None)):
+                                       ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
+                                       ("crypt_archive", ca, ca.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8415,7 +8419,8 @@ def check_lairs():
     for block in la.LAIR_BLOCKS:
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
-    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", la.GATE["entity"]):
+    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
+                 la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8483,6 +8488,40 @@ def check_lairs():
             err(f"tools/lairs.py STONE_LANDS names {land}, which is no biome or biome tag")
     if f'fixture("fen_lamp", FenLampBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -{la.FEN_LAMP["light"]},' not in registry:
         err(f"JugcraftLairs does not register the fen lamp burning at tools/lairs.py FEN_LAMP light {la.FEN_LAMP['light']}")
+    # The Archive of Last Names': the writ's rest and reach and the tombs it is served on; the names and their runes, the
+    # stones' glows and light, the lectern's rest, the phylactery's light, and the fixtures' registrations.
+    writ = (folder / "ExhumationRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(writ, name, la.WRIT[key]):
+            err(f"ExhumationRite.{name} is not tools/lairs.py WRIT {key} ({la.WRIT[key]})")
+    tombs = (load(DATA / MOD / "tags" / "block" / "writ_tombs.json") or {}).get("values", [])
+    if sorted(tombs) != sorted(la.WRIT_TOMBS):
+        err(f"#jugcraft:writ_tombs is not tools/lairs.py WRIT_TOMBS: {tombs}")
+    for tomb in la.WRIT_TOMBS:
+        if not (ASSETS / "blockstates" / f"{tomb.split(':')[1]}.json").is_file():
+            err(f"tools/lairs.py WRIT_TOMBS names {tomb}, which is no block of Jugcraft's")
+    stone_java = (folder / "NameStoneBlock.java").read_text(encoding="utf-8")
+    runes = re.search(r"enum Rune implements StringRepresentable \{\s*([^;]+);", stone_java)
+    found = re.findall(r'([A-Z_]+)\("([a-z_]+)"\)', runes.group(1)) if runes else []
+    if [(rune.lower(), title) for rune, title in found] != [(rune, title) for title, rune in la.NAMES.items()]:
+        err(f"NameStoneBlock.Rune is not tools/lairs.py NAMES {la.NAMES} in order: {found}")
+    glows = re.search(r"enum Glow implements StringRepresentable \{\s*([A-Z_, ]+);", stone_java)
+    if not glows or tuple(g.strip().lower() for g in glows.group(1).split(",")) != la.NAME_GLOWS:
+        err(f"NameStoneBlock.Glow is not tools/lairs.py NAME_GLOWS {la.NAME_GLOWS}")
+    for cls, name, value in (("NameStoneBlock", "LIGHT", la.NAME_STONE["light"]), ("PhylacteryBlock", "LIGHT", la.PHYLACTERY["light"]),
+                             ("ArchiveLecternBlock", "REST", la.LECTERN["cooldown"])):
+        if not java_number((folder / f"{cls}.java").read_text(encoding="utf-8"), name, value):
+            err(f"{cls}.{name} is not tools/lairs.py's {value}")
+    for line in ('fixture("name_stone", p -> new NameStoneBlock(p.lightLevel(NameStoneBlock::light))',
+                 'fixture("phylactery", p -> new PhylacteryBlock(p.lightLevel(PhylacteryBlock::light))',
+                 'fixture("grave_seal", GraveSealBlock::new', 'fixture("archive_lectern", ArchiveLecternBlock::new'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in ("sexton", "crowned", "scribe"):
+        if f"lair.{MOD}.crypt_archive.name.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Crypt Lich's name {name}")
+    if "ExhumationRite.register();" not in registry or "output.accept(EXHUMATION_WRIT);" not in registry:
+        err("JugcraftLairs does not register the Writ of Exhumation's rite or put the writ in the creative tab")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8533,6 +8572,7 @@ def check_lairs():
     check_glacier_hall(gh)
     check_cinder_kiln(ck)
     check_lantern_fen(lf)
+    check_crypt_archive(ca)
 
 
 def check_glacier_hall(gh):
@@ -8911,6 +8951,171 @@ def check_lantern_fen(lf):
             break
         if state[0] == "minecraft:grass_block" and name((x, y + 1, z)) in covers:
             err(f"The Lantern Fen's grass at {(x, y, z)} is under {name((x, y + 1, z))} and would turn to dirt")
+            break
+
+
+def check_crypt_archive(ca):
+    """The Archive of Last Names as tools/crypt_archive.py builds it is the archive its record describes
+    (docs/features/crypt-archive.md), and where the Java looks for its parts (CryptArchive.java) is where the layout puts
+    them: the arrival stands on the landing with room overhead, and the Grey Mist fills the stair's way back up; a walk
+    from the arrival, never stepping more than half a block, goes down the stair to every open cell of the hall's floor,
+    up the throne's apse, and within reach of each name's grave seal and of the Lectern of Last Names; the four lanes are
+    open and paved; each ledger stone lies in the floor with room over it; the pillars stand; each alcove's sarcophagus,
+    whole seal and dark name-stone carry its name's rune and face the hall, against their wall; the throne, the lectern and
+    the whole phylactery stand where they should; light flooded from the hidden lights, the soul lanterns and the
+    phylactery, as the game floods it, is at least HALL_LIGHT on every open cell of the hall's floor; and nothing in it
+    changes by itself once placed."""
+    from collections import deque
+    import lairs as la
+    blocks = ca.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CryptArchive.java").read_text(encoding="utf-8"))
+    for jname, value in (("STAND", ca.STAND), ("APSE_STAND", ca.APSE_STAND), ("LANDING_STAND", ca.LANDING_STAND),
+                         ("HALL_WEST", ca.HALL["x"][0]), ("HALL_EAST", ca.HALL["x"][1]), ("HALL_NORTH", ca.HALL["z"][0]),
+                         ("HALL_SOUTH", ca.HALL["z"][1])):
+        if not java_number(java, jname, value):
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's {value}")
+    for jname, pos in (("LECTERN", ca.LECTERN), ("PHYLACTERY", ca.PHYLACTERY), ("THRONE", ca.THRONE)):
+        if "{} = new BlockPos({}, {}, {});".format(jname, *pos) not in java:
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's {pos}")
+    order = list(la.NAMES)
+    for jname, cells in (("SEALS", ca.seal_cells()), ("STONES", ca.stone_cells())):
+        expected = "{} = {{{}}};".format(jname, ", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in order))
+        if expected not in java:
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's, in the order of tools/lairs.py NAMES: expected {expected}")
+
+    passable = {None, "minecraft:light", "minecraft:cobweb"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = ca.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "minecraft:deepslate_tiles" or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The archive's arrival at {feet} does not stand on the landing with room overhead")
+    for pos in ca.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the archive's way back up at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block, on a slab, or on either half of a stair.
+    whole = {"minecraft:deepslate_tiles", "minecraft:cracked_deepslate_tiles", "minecraft:polished_deepslate",
+             "minecraft:bone_block", "minecraft:deepslate_bricks", "jugcraft:chiseled_crypt_stone", "jugcraft:crypt_stone"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if not (free((x, y + 1, z)) and free((x, y + 2, z))):
+            continue
+        if state[0] in whole:
+            stands.setdefault((x, z), []).append(y + 1.0)
+        elif state[0] == "minecraft:polished_blackstone_slab":
+            stands.setdefault((x, z), []).append(y + 0.5)
+        elif state[0] == "minecraft:deepslate_brick_stairs":
+            stands.setdefault((x, z), []).extend((y + 0.5, y + 1.0))
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    floor = {(x, z) for x, z, h in seen if h == float(ca.STAND)}
+    stranded = [(x, z) for (x, z), heights in stands.items() if ca.in_hall(x, z) and float(ca.STAND) in heights
+                and (x, z) not in floor]
+    if stranded:
+        err(f"{len(stranded)} cells of the archive's hall floor cannot be walked to from the arrival, e.g. {stranded[0]}")
+
+    def within(target, reach):
+        tx, ty, tz = (c + 0.5 for c in target)
+        return any(((x + 0.5 - tx) ** 2 + (h + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach for x, z, h in seen)
+
+    for rune_name, pos in ca.seal_cells().items():
+        if not within(pos, 4.0):
+            err(f"No walk from the archive's arrival comes within reach of the {rune_name}'s grave seal at {pos}")
+    if not within(ca.LECTERN, 3.5):
+        err(f"No walk from the archive's arrival comes within reach of the Lectern of Last Names at {ca.LECTERN}")
+    if not any(h == float(ca.APSE_STAND) for x, z, h in seen if ca.in_alcove("crowned", x, z)):
+        err("No walk from the archive's arrival climbs into the throne's apse")
+
+    # The lanes, open and paved; the ledger stones in the floor with room over them; the pillars standing.
+    for lane in ca.LANES:
+        for x, z in sorted(ca.lane_cells(lane)):
+            if name((x, ca.PAVE, z)) not in ("minecraft:polished_deepslate", "minecraft:bone_block") \
+                    or not all(free((x, y, z)) for y in range(ca.STAND, ca.STAND + 3)):
+                err(f"The archive's {lane} lane is not open and paved at {(x, z)}")
+                break
+    for x, z in sorted(ca.grave_cells()):
+        if name((x, ca.PAVE, z)) != "jugcraft:chiseled_crypt_stone" or not free((x, ca.STAND, z)) \
+                or not free((x, ca.STAND + 1, z)):
+            err(f"The archive's ledger stone at {(x, z)} is not in the floor with room over it")
+    for x, z in sorted(ca.pillar_cells()):
+        if any(free((x, y, z)) for y in range(ca.STAND, ca.STAND + 3)):
+            err(f"The archive's pillar at {(x, z)} does not stand from the floor")
+            break
+
+    # The fixtures.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    seals, stones = ca.seal_cells(), ca.stone_cells()
+    for rune_name, info in ca.ALCOVES.items():
+        rune, face = la.NAMES[rune_name], info["face"]
+        if info["rune"] != rune:
+            err(f"tools/crypt_archive.py gives the {rune_name} the rune {info['rune']}, not tools/lairs.py's {rune}")
+        for pos, block, extra, word in ((seals[rune_name], "jugcraft:grave_seal", ("broken", "false"), "whole"),
+                                        (stones[rune_name], "jugcraft:name_stone", ("glow", "dark"), "dark")):
+            state = props(pos)
+            if name(pos) != block or state.get("rune") != rune or state.get("facing") != face or state.get(extra[0]) != extra[1]:
+                err(f"No {word} {block} with the rune {rune} facing {face} at {pos}")
+            dx, dz = steps[face]
+            if free((pos[0] - dx, pos[1], pos[2] - dz)):
+                err(f"The {block} at {pos} hangs on no wall")
+        for part in ("head", "foot"):
+            px, pz = info[part]
+            state = props((px, info["stand"], pz))
+            if name((px, info["stand"], pz)) != "jugcraft:deepslate_sarcophagus" or state.get("part") != part \
+                    or state.get("facing") != info["facing"] or state.get("open") != "false":
+                err(f"The {rune_name}'s sarcophagus has no shut {part} facing {info['facing']} at {(px, info['stand'], pz)}")
+    tx, ty, tz = ca.THRONE
+    if props(ca.THRONE).get("half") != "lower" or props((tx, ty + 1, tz)).get("half") != "upper" \
+            or name(ca.THRONE) != "jugcraft:bone_throne":
+        err(f"No bone throne in the archive's apse at {ca.THRONE}")
+    if name(ca.LECTERN) != "jugcraft:archive_lectern" or props(ca.LECTERN).get("facing") != "south":
+        err(f"No Lectern of Last Names facing the stair at {ca.LECTERN}")
+    if name(ca.PHYLACTERY) != "jugcraft:phylactery" or props(ca.PHYLACTERY).get("cracked") != "false" \
+            or name(ca.PLINTH) != "jugcraft:chiseled_crypt_stone":
+        err(f"No whole phylactery on its plinth at {ca.PHYLACTERY}")
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"minecraft:soul_lantern": 10, "jugcraft:phylactery": la.PHYLACTERY["light"]}
+    through = passable | {"minecraft:soul_lantern", "minecraft:iron_chain", "jugcraft:candle_skull",
+                          "jugcraft:skeleton_hand_sconce", "jugcraft:bone_pile", "jugcraft:phylactery", "jugcraft:archive_lectern",
+                          "jugcraft:name_stone", "jugcraft:grave_seal", "jugcraft:lair_exit"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and 0 <= n[1] < ca.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    hall = sorted((light.get((x, ca.STAND, z), 0), (x, ca.STAND, z)) for x, z in floor if ca.in_hall(x, z))
+    if not hall or hall[0][0] < ca.HALL_LIGHT:
+        dark = [cell for level, cell in hall if level < ca.HALL_LIGHT]
+        err(f"{len(dark)} open cells of the archive's hall have less block light than HALL_LIGHT {ca.HALL_LIGHT}, "
+            f"the darkest {hall[0] if hall else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CryptArchiveClientGameTests.java"
+    if not client.is_file() or not java_number(client.read_text(encoding="utf-8"), "HALL_LIGHT", ca.HALL_LIGHT):
+        err(f"CryptArchiveClientGameTests does not read the hall's light against HALL_LIGHT {ca.HALL_LIGHT}")
+
+    # Nothing that changes by itself once placed.
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                                                        "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
+            err(f"The archive has {state[0]} at {(x, y, z)}, which would change once placed")
             break
 
 

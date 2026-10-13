@@ -28,7 +28,9 @@ import org.jspecify.annotations.Nullable;
  * into the Glacier Hall as the horn's blower did ({@link FrostHornRite#follow}); on the Kiln Seal's magma a vent of sparks
  * and smoke, through which followers sink into the Cinder Kiln ({@link KilnSealRite#follow}); and where the Hag Stone was
  * looked through, mist rising from the water with a marsh-light bobbing in it, which closes round followers and takes them
- * to the Lantern Fen ({@link HagStoneRite#follow}).
+ * to the Lantern Fen ({@link HagStoneRite#follow}); and over a sarcophagus the Writ of Exhumation opened, grey mist and
+ * cold blue fire welling up out of the dark under its lid, souls rising in it, down which followers go to the Archive of
+ * Last Names ({@link ExhumationRite#follow}).
  */
 public class MistGateEntity extends Entity {
 	private @Nullable Lair lair;
@@ -76,6 +78,7 @@ public class MistGateEntity extends Entity {
 		boolean snow = lair == Lair.GLACIER_HALL;
 		boolean vent = lair == Lair.CINDER_KILN;
 		boolean fen = lair == Lair.LANTERN_FEN;
+		boolean tomb = lair == Lair.CRYPT_ARCHIVE;
 		if (instance() == null || level.getGameTime() >= until) {
 			if (vent) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.6, getZ(), 24, 0.4, 0.6, 0.4, 0.03);
@@ -103,6 +106,15 @@ public class MistGateEntity extends Entity {
 			double angle = tickCount * 0.08;
 			level.sendParticles(ParticleTypes.GLOW, getX() + Math.cos(angle) * 0.4, getY() + 1.3 + Math.sin(tickCount * 0.15) * 0.25,
 					getZ() + Math.sin(angle) * 0.4, 1, 0.0, 0.0, 0.0, 0.0);
+		} else if (tomb) {
+			// The open tomb: grey mist and cold blue fire welling up out of it, and now and then a soul rising.
+			if (tickCount % 2 == 0) {
+				level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.2, getZ(), 2, 0.4, 0.15, 0.4, 0.0);
+				level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 0.05, getZ(), 1, 0.35, 0.02, 0.35, 0.01);
+			}
+			if (tickCount % 7 == 0) {
+				level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.3, getZ(), 1, 0.2, 0.1, 0.2, 0.02);
+			}
 		} else if (tickCount % 2 == 0) {
 			if (snow) {
 				// A whirl: three flakes circling and rising round it, white mist welling up in it.
@@ -147,6 +159,8 @@ public class MistGateEntity extends Entity {
 			KilnSealRite.follow(server, open);
 		} else if (open.lair == Lair.LANTERN_FEN) {
 			HagStoneRite.follow(server, open);
+		} else if (open.lair == Lair.CRYPT_ARCHIVE) {
+			ExhumationRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}

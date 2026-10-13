@@ -22,8 +22,8 @@ EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below h
 
 # The lair-only blocks: unbreakable fixtures, in the wither_immune and dragon_immune tags, with no item and no drops.
 # The Hollow Acre's, the exit (every lair's), the Spindle Loft's (docs/features/spindle-loft.md), the Glacier Hall's
-# (docs/features/glacier-hall.md), the Cinder Kiln's (docs/features/cinder-kiln.md), then the Lantern Fen's
-# (docs/features/lantern-fen.md).
+# (docs/features/glacier-hall.md), the Cinder Kiln's (docs/features/cinder-kiln.md), the Lantern Fen's
+# (docs/features/lantern-fen.md), then the Archive of Last Names' (docs/features/crypt-archive.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -55,6 +55,10 @@ LAIR_BLOCKS = {
     "trough_stone": "Trough Stone",
     "sluice_gate": "Sluice Gate",
     "fen_lamp": "Fen Lamp",
+    "name_stone": "Name-Stone",
+    "grave_seal": "Grave Seal",
+    "archive_lectern": "Lectern of Last Names",
+    "phylactery": "Phylactery",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
@@ -78,8 +82,8 @@ SLUICE = {"flood_ticks": 200, "refill_ticks": 400, "gate_blocks": 40, "trough_bl
 SLUICE_PARTS = ("frame", "panel", "wheel")
 SLUICE_FLOWS = ("ready", "open", "filling", "choked")   # choked: by the Cinder Tyrant's slag
 # Fixtures a player in a lair may use (everything else is refused): the exits, the braziers Vesperine's fight lights, the
-# Cinder Kiln's sluice gates and the Lantern Fen's lamps.
-FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp")
+# Cinder Kiln's sluice gates, the Lantern Fen's lamps, and the Archive of Last Names' grave seals and lectern.
+FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp", "grave_seal", "archive_lectern")
 
 # The Last Rites (the Hollow Acre's ritual): a grave in the Overworld at night, lit candles round it, a Mourning Wreath
 # laid on it and the Death Knell rung beside it.
@@ -140,6 +144,24 @@ STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "ju
 # The Lantern Fen's lamps: lit, they burn at this light level; one gone out is lit again by using it.
 FEN_LAMP = {"light": 15}
 
+# The Writ of Exhumation (the Archive of Last Names' ritual): served on a stone sarcophagus (#jugcraft:writ_tombs) in the
+# Overworld, in a crypt: under a roof, no sky to be seen from the cell over its lid. Any hour, all year. The lid grinds
+# aside (the sarcophagus's own open state), and soul-fire and grey mist rise from it, the gate for lairs.gate_seconds;
+# whoever goes in wakes on the archive's landing. Then the lid grinds shut.
+WRIT = {
+    "cooldown": 40,            # ticks between servings of one writ, answered or not
+    "mist_range": 3,           # how near another open mist into the archive must not be (blocks)
+}
+WRIT_TOMBS = ["jugcraft:stone_brick_sarcophagus", "jugcraft:deepslate_sarcophagus", "jugcraft:blackstone_sarcophagus"]
+# The archive's fixtures. The Lich's three names, each with its rune; a name-stone is dark, lit (the one he answers to)
+# or erased (scraped blank; read back at the lectern), and gives this light lit. A grave seal is whole or broken. The
+# phylactery is whole or cracked, and gives this light whole.
+NAMES = {"sexton": "spade", "crowned": "crown", "scribe": "quill"}
+NAME_GLOWS = ("dark", "lit", "erased")
+NAME_STONE = {"light": 9}
+PHYLACTERY = {"light": 10}
+LECTERN = {"cooldown": 20}     # ticks between readings of the lectern by one player
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
@@ -147,6 +169,7 @@ ITEMS = {
     "frost_horn": "Frost Horn",
     "kiln_seal": "Kiln Seal",
     "hag_stone": "Hag Stone",
+    "exhumation_writ": "Writ of Exhumation",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -173,6 +196,10 @@ RECIPES = {
     "hag_stone": {"pattern": ["MSM", "GFG", " E "], "key": {
         "M": "minecraft:mud", "S": "minecraft:string", "G": "minecraft:gold_ingot", "F": "minecraft:flint",
         "E": "minecraft:fermented_spider_eye"}},
+    # A writ: three sheets of paper over two bones and a bottle of ectoplasm (from a restless spirit), signed with an ink
+    # sac. Used up by its serving.
+    "exhumation_writ": {"pattern": ["PPP", "BEB", " I "], "key": {
+        "P": "minecraft:paper", "B": "minecraft:bone", "E": "jugcraft:ectoplasm", "I": "minecraft:ink_sac"}},
 }
 
 # Each lair's dimension: a void with its own biome; fixed time, no weather, no beds or respawn anchors. Its sky, fog and
@@ -223,12 +250,21 @@ LAIRS = {
         "ambient_light": 0.2,
         "motes": ("minecraft:glow", 0.002),
     },
+    "crypt_archive": {
+        "display": "The Archive of Last Names",
+        "enter": "You go down the stair under the lid, and come to %s",
+        "sky": "#06080c", "fog": "#1c2430", "water_fog": "#141a22", "water": "#2c3a4a",
+        "ambient_light_color": "#26344a", "sky_light_color": "#30405a",
+        "music": "minecraft:music.nether.soul_sand_valley",
+        "ambient_light": 0.18,
+        "motes": ("minecraft:white_ash", 0.004),
+    },
 }
 
 
 def blocks():
     """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle, the Frost Horn, the
-    Kiln Seal and the Hag Stone are items)."""
+    Kiln Seal, the Hag Stone and the Writ of Exhumation are items)."""
     return list(LAIR_BLOCKS) + ["mourning_wreath"]
 
 

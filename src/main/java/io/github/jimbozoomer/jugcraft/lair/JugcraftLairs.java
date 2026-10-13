@@ -23,9 +23,10 @@ import net.minecraft.world.level.material.PushReaction;
 
 /**
  * The lairs' registrations (docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
- * docs/features/cinder-kiln.md, docs/features/lantern-fen.md): the lair-only blocks (unbreakable, no items, no drops), the
- * Mourning Wreath and the Death Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Hag Stone,
- * the Mist Gate, and the lairs' events, rules, rituals and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
+ * docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md): the lair-only blocks
+ * (unbreakable, no items, no drops), the Mourning Wreath and the Death Knell of the Last Rites, the Cursed Spindle, the
+ * Frost Horn, the Kiln Seal, the Hag Stone, the Writ of Exhumation, the Mist Gate, and the lairs' events, rules, rituals
+ * and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
  * ({@value #FEATURE}) stops the rituals.
  */
 public final class JugcraftLairs {
@@ -62,6 +63,10 @@ public final class JugcraftLairs {
 	public static Block TROUGH_STONE;
 	public static Block SLUICE_GATE;
 	public static Block FEN_LAMP;
+	public static Block NAME_STONE;
+	public static Block GRAVE_SEAL;
+	public static Block ARCHIVE_LECTERN;
+	public static Block PHYLACTERY;
 	public static Block MOURNING_WREATH;
 	public static Item MOURNING_WREATH_ITEM;
 	public static Item DEATH_KNELL;
@@ -69,6 +74,7 @@ public final class JugcraftLairs {
 	public static Item FROST_HORN;
 	public static Item KILN_SEAL;
 	public static Item HAG_STONE;
+	public static Item EXHUMATION_WRIT;
 	public static EntityType<MistGateEntity> MIST_GATE;
 
 	private JugcraftLairs() {
@@ -111,6 +117,14 @@ public final class JugcraftLairs {
 		SLUICE_GATE = fixture("sluice_gate", SluiceGateBlock::new, MapColor.METAL, SoundType.METAL, 0, Fit.SEE_THROUGH);
 		// The Lantern Fen's (docs/features/lantern-fen.md): its lamps burn, and go out.
 		FEN_LAMP = fixture("fen_lamp", FenLampBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -15, Fit.SEE_THROUGH);
+		// The Archive of Last Names' (docs/features/crypt-archive.md): its name-stones and its phylactery burn, and go dark.
+		NAME_STONE = fixture("name_stone", p -> new NameStoneBlock(p.lightLevel(NameStoneBlock::light)), MapColor.STONE,
+				SoundType.STONE, 0, Fit.SEE_THROUGH);
+		GRAVE_SEAL = fixture("grave_seal", GraveSealBlock::new, MapColor.COLOR_RED, SoundType.METAL, 0, Fit.SEE_THROUGH);
+		ARCHIVE_LECTERN = fixture("archive_lectern", ArchiveLecternBlock::new, MapColor.COLOR_BLACK, SoundType.BONE_BLOCK, 0,
+				Fit.SEE_THROUGH);
+		PHYLACTERY = fixture("phylactery", p -> new PhylacteryBlock(p.lightLevel(PhylacteryBlock::light)), MapColor.GOLD,
+				SoundType.BONE_BLOCK, 0, Fit.SEE_THROUGH);
 
 		ResourceKey<Block> wreathKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("mourning_wreath"));
 		MOURNING_WREATH = Registry.register(BuiltInRegistries.BLOCK, wreathKey, new MourningWreathBlock(BlockBehaviour.Properties.of()
@@ -130,6 +144,9 @@ public final class JugcraftLairs {
 		KILN_SEAL = Registry.register(BuiltInRegistries.ITEM, sealKey, new KilnSealItem(new Item.Properties().stacksTo(16).setId(sealKey)));
 		ResourceKey<Item> stoneKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("hag_stone"));
 		HAG_STONE = Registry.register(BuiltInRegistries.ITEM, stoneKey, new HagStoneItem(new Item.Properties().stacksTo(16).setId(stoneKey)));
+		ResourceKey<Item> writKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("exhumation_writ"));
+		EXHUMATION_WRIT = Registry.register(BuiltInRegistries.ITEM, writKey, new ExhumationWritItem(new Item.Properties().stacksTo(16)
+				.setId(writKey)));
 
 		ResourceKey<EntityType<?>> gateKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("mist_gate"));
 		MIST_GATE = Registry.register(BuiltInRegistries.ENTITY_TYPE, gateKey, EntityType.Builder.<MistGateEntity>of(MistGateEntity::new,
@@ -140,6 +157,7 @@ public final class JugcraftLairs {
 		Lairs.register();
 		LairRules.register();
 		SpindleRite.register();
+		ExhumationRite.register();
 		LairCommands.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(DEATH_KNELL);
@@ -147,6 +165,7 @@ public final class JugcraftLairs {
 			output.accept(FROST_HORN);
 			output.accept(KILN_SEAL);
 			output.accept(HAG_STONE);
+			output.accept(EXHUMATION_WRIT);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(MOURNING_WREATH_ITEM));
 	}

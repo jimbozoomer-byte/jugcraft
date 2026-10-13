@@ -12,8 +12,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * A lair: a pocket dimension of its own, into whose instance slots its structure template is placed fresh by
  * {@link Lairs}. Every position here is relative to the template's corner; the numbers are its layout tool's
- * (tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py; checked
- * by tools/check_mod_data.py).
+ * (tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py,
+ * tools/crypt_archive.py; checked by tools/check_mod_data.py).
  */
 public enum Lair {
 	/** Vesperine's lair (docs/features/hollow-acre.md). */
@@ -25,7 +25,9 @@ public enum Lair {
 	/** The Cinder Tyrant's lair (docs/features/cinder-kiln.md): a kiln under a volcano, its vent open to a smoky sky. */
 	CINDER_KILN("cinder_kiln", 72, 46, 80, new Vec3(41.5, 13.0, 63.5), 165.0F, 35.5, 38.5, 40, 1, null, 0),
 	/** The Mire Hag's lair (docs/features/lantern-fen.md): a drowned fen floating in a night of mist, no moon over it. */
-	LANTERN_FEN("lantern_fen", 80, 40, 88, new Vec3(40.0, 10.0, 80.5), 180.0F, 40.0, 43.0, 44, -4, null, 0);
+	LANTERN_FEN("lantern_fen", 80, 40, 88, new Vec3(40.0, 10.0, 80.5), 180.0F, 40.0, 43.0, 44, -4, null, 0),
+	/** The Crypt Lich's lair (docs/features/crypt-archive.md): a vaulted crypt under the graves, closed all round, so no moon. */
+	CRYPT_ARCHIVE("crypt_archive", 64, 26, 70, new Vec3(32.5, 11.0, 63.5), 180.0F, 32.5, 34.5, 40, 1, null, 0);
 
 	/** Blocks between one instance slot and the next, along X (tools/lairs.py SPACING). */
 	public static final int SPACING = 1024;
