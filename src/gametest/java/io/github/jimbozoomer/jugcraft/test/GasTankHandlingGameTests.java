@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -58,6 +59,47 @@ public class GasTankHandlingGameTests {
 		helper.assertTrue(!ItemStack.isSameItemSameComponents(drops.get(0), fuller),
 				"Tanks holding different amounts would stack into one");
 		helper.succeed();
+	}
+
+	/**
+	 * Two players reach a dropped tank of gas in the same tick: exactly one of them picks it up, carrying exactly the
+	 * tank's contents, and the other gets nothing; no tank or gas is made or lost.
+	 */
+	@GameTest(maxTicks = 80)
+	public void twoPlayersPickingUpOneTankGetOne(GameTestHelper helper) {
+		BlockPos tank = new BlockPos(2, 1, 2);
+		helper.setBlock(tank, JugcraftFluids.FLUID_TANK);
+		insert(helper, helper.getBlockEntity(tank, FluidTankBlockEntity.class), PetroFluids.HYDROGEN.fluid(), ODD);
+		helper.getLevel().destroyBlock(helper.absolutePos(tank), true);
+		ServerPlayer first = helper.makeMockServerPlayerInLevel();
+		ServerPlayer second = helper.makeMockServerPlayerInLevel();
+		for (ServerPlayer player : List.of(first, second)) {
+			player.getInventory().clearContent();
+		}
+		// Past the drop's pickup delay, both touch it in one tick.
+		helper.runAfterDelay(20, () -> {
+			List<ItemEntity> items = helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(tank)).inflate(3),
+					item -> item.getItem().is(JugcraftFluids.FLUID_TANK.asItem()));
+			helper.assertTrue(items.size() == 1, "Breaking the tank dropped " + items.size() + " tank stacks");
+			ItemEntity drop = items.get(0);
+			drop.playerTouch(first);
+			drop.playerTouch(second);
+			int firstTanks = count(first);
+			int secondTanks = count(second);
+			helper.assertTrue(firstTanks + secondTanks == 1, "The players hold " + firstTanks + " and " + secondTanks + " tanks, not one between them");
+			ServerPlayer holder = firstTanks == 1 ? first : second;
+			StoredFluid stored = null;
+			for (int slot = 0; slot < holder.getInventory().getContainerSize(); slot++) {
+				ItemStack stack = holder.getInventory().getItem(slot);
+				if (stack.is(JugcraftFluids.FLUID_TANK.asItem())) {
+					stored = stack.get(JugcraftFluids.STORED_FLUID);
+				}
+			}
+			helper.assertTrue(stored != null && stored.variant().isOf(PetroFluids.HYDROGEN.fluid()) && stored.amount() == ODD,
+					"The picked-up tank carries " + stored + ", not " + ODD + " droplets of hydrogen");
+			helper.assertTrue(drop.isRemoved() || drop.getItem().isEmpty(), "The drop is still in the world after being picked up");
+			helper.succeed();
+		});
 	}
 
 	/**
@@ -216,5 +258,16 @@ public class GasTankHandlingGameTests {
 			helper.assertTrue(moved == droplets, "Only " + moved + " of " + droplets + " droplets went in");
 			transaction.commit();
 		}
+	}
+
+	private static int count(ServerPlayer player) {
+		int count = 0;
+		for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+			ItemStack stack = player.getInventory().getItem(slot);
+			if (stack.is(JugcraftFluids.FLUID_TANK.asItem())) {
+				count += stack.getCount();
+			}
+		}
+		return count;
 	}
 }
