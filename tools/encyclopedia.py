@@ -70,6 +70,10 @@ def build():
         'Fuel route: Heated Mashing Station -> Industrial Fermenter -> Chemical Distillation Station -> existing Bio-Generator or compatible engines. Stillage feeds the Anaerobic Digester. Optional wet CO2 cleanup in the Biogas Cleaner supplies methane synthesis; fermentation keeps running with excess gas venting unless you select Keep gas.',
         'Aluminum route: Bauxite Digestion Vessel -> Aluminate Recovery Press -> Alumina Calciner -> Aluminum Reduction Cell. Recover 200 of 250 mB lye per bauxite, return the press and calciner water, and bind residue into game construction filler. Each bauxite still yields two ingots; electrolysis consumes coke. Copper and steel build the first machines.',
         'Search each machine for precise recipes and visible port positions. The earlier reactor recipes and aluminum consumers remain compatible. Fuel dehydration, larger plants and new aluminum alloys/products are later expansions.']))
+    overviews.insert(2,('coastal_metals','Coastal magnesium, titanium and molded parts','jugcraft:magnesium_electrolysis_cell',[
+        'Coastal Seawater Intake -> Brine Concentrator -> Mineral Conditioning Station -> Chloride Drying Oven -> Magnesium Electrolysis Cell. Intake water must be at sea level in a beach/ocean area beside an ocean, not just beneath a coastal machine. Lye and hydrochloric acid come from the existing starter factory.',
+        'Raw Titanium + coke + chlorine -> Titanium Chlorination Vessel -> existing Chemical Distillation Station -> Titanium Reduction Retort with magnesium -> existing Arc Furnace. Re-electrolyze the returned dry salt to recover magnesium and chlorine with paid power. Treat spent mineral wash in the Conditioner.',
+        'The Polymer Molding Press uses six earlier-steel reusable molds. Rigid pellets/PVC supply housings and panels, PVC supplies fittings, and rubber supplies insulation/gaskets/hoses. Molded products have additional construction recipes; old routes remain useful. Search each machine for exact recipes and locations.']))
     for key,title,icon,text in reversed(overviews):
         entries.insert(0,dict(id='guide/'+key,group='Home',chapter='Start here',gate='',page=dict(title=title,icon=icon,text=text)))
     return dict(version=1,entries=entries)
@@ -83,6 +87,8 @@ def write_content(write,assets,data,lang):
     acquire={"chemical_infuser":"Chemical Infuser", "chemical_oxidizer":"Chemical Oxidizer", "coal_gasifier":"Coal Gasifier", "gas_cleaning_rack":"Gas Cleaning and Separation Rack", "hydrochloric_acid_bucket":"Hydrochloric Acid"}
     import anaerobic
     import biorefinery
+    import coastal_metals
+    acquire.update({name:info["display"] for name,info in coastal_metals.FORMS.items()})
     acquire.update({name:info['display'] for name,info in biorefinery.FORMS.items()})
     acquire.update({name:info['display'] for name,info in anaerobic.FORMS.items()})
     for item,title in acquire.items():

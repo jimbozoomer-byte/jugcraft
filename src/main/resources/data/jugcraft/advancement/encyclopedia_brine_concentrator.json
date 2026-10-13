@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:brine_concentrator"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_brine_concentrator.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_brine_concentrator.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:brine_concentrator"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:chloride_dryer"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_chloride_dryer.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_chloride_dryer.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:chloride_dryer"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

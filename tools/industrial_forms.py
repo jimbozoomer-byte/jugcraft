@@ -464,6 +464,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     import anaerobic
     anaerobic.write_extras(write, assets, data, lang, condition)
     biorefinery.write_extras(write, assets, data, lang, condition)
+    coastal_metals.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -537,5 +538,16 @@ TANK_NAMES.update(biorefinery.TANK_NAMES)
 MODELS.update(biorefinery_models.MODELS)
 ROTORS.update(biorefinery_models.ROTORS)
 ITEM_EXTRAS.update(biorefinery_models.ITEM_EXTRAS)
+
+import coastal_metals
+import coastal_metals_models
+FORMS.update(coastal_metals.FORMS)
+FORM_RECIPES.update(coastal_metals.RECIPES)
+for name, recipes in coastal_metals.EXTRA_RECIPES.items(): FORM_RECIPES[name].extend(recipes)
+HANDBOOK.update(coastal_metals.HANDBOOK)
+TANK_NAMES.update(coastal_metals.TANK_NAMES)
+MODELS.update(coastal_metals_models.MODELS)
+ROTORS.update(coastal_metals_models.ROTORS)
+ITEM_EXTRAS.update(coastal_metals_models.ITEM_EXTRAS)
 
 HANDBOOK['biogas_cleaner'].append('Also cleans wet fermentation CO2: 250 mB gas + 250 mB wash water -> 250 mB usable CO2 + 250 mB recovered water, 100 ticks at 24 JE/t. Drain both previous products before switching between biogas and fermentation gas. No new disposable filter or separate gas-cleaning machine is needed.')

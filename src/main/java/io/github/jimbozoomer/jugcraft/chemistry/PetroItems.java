@@ -54,6 +54,21 @@ public final class PetroItems {
 	public static Item ALUMINUM_HYDROXIDE;
 	public static Item BAUXITE_RESIDUE;
 
+	public static Item MAGNESIUM_HYDROXIDE;
+	public static Item DRY_MAGNESIUM_CHLORIDE;
+	public static Item MAGNESIUM_INGOT;
+	public static Item POLYMER_HOUSING;
+	public static Item POLYMER_FITTING;
+	public static Item CABLE_INSULATION;
+	public static Item FLEXIBLE_HOSE;
+	public static Item POLYMER_VEHICLE_PANEL;
+	public static Item HOUSING_MOLD;
+	public static Item FITTING_MOLD;
+	public static Item INSULATION_MOLD;
+	public static Item GASKET_MOLD;
+	public static Item HOSE_MOLD;
+	public static Item PANEL_MOLD;
+
 	private PetroItems() {
 	}
 
@@ -89,7 +104,36 @@ public final class PetroItems {
 		ALUMINUM_HYDROXIDE = JugcraftRegistry.item("aluminum_hydroxide");
 		BAUXITE_RESIDUE = JugcraftRegistry.item("bauxite_residue");
 
+		MAGNESIUM_HYDROXIDE = JugcraftRegistry.item("magnesium_hydroxide");
+		DRY_MAGNESIUM_CHLORIDE = JugcraftRegistry.item("dry_magnesium_chloride");
+		MAGNESIUM_INGOT = JugcraftRegistry.item("magnesium_ingot");
+		POLYMER_HOUSING = JugcraftRegistry.item("polymer_housing");
+		POLYMER_FITTING = JugcraftRegistry.item("polymer_fitting");
+		CABLE_INSULATION = JugcraftRegistry.item("cable_insulation");
+		FLEXIBLE_HOSE = JugcraftRegistry.item("flexible_hose");
+		POLYMER_VEHICLE_PANEL = JugcraftRegistry.item("polymer_vehicle_panel");
+		HOUSING_MOLD = JugcraftRegistry.item("housing_mold");
+		FITTING_MOLD = JugcraftRegistry.item("fitting_mold");
+		INSULATION_MOLD = JugcraftRegistry.item("insulation_mold");
+		GASKET_MOLD = JugcraftRegistry.item("gasket_mold");
+		HOSE_MOLD = JugcraftRegistry.item("hose_mold");
+		PANEL_MOLD = JugcraftRegistry.item("panel_mold");
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			output.accept(MAGNESIUM_HYDROXIDE);
+			output.accept(DRY_MAGNESIUM_CHLORIDE);
+			output.accept(MAGNESIUM_INGOT);
+			output.accept(POLYMER_HOUSING);
+			output.accept(POLYMER_FITTING);
+			output.accept(CABLE_INSULATION);
+			output.accept(FLEXIBLE_HOSE);
+			output.accept(POLYMER_VEHICLE_PANEL);
+			output.accept(HOUSING_MOLD);
+			output.accept(FITTING_MOLD);
+			output.accept(INSULATION_MOLD);
+			output.accept(GASKET_MOLD);
+			output.accept(HOSE_MOLD);
+			output.accept(PANEL_MOLD);
 			output.accept(NICKEL_CATALYST_BED);
 			output.accept(VANADIUM_CONTACT_BED);
 			output.accept(VANADIUM_IRON_CONCENTRATE);

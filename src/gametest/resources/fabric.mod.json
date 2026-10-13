@@ -11,6 +11,7 @@
 			"io.github.jimbozoomer.jugcraft.test.TestForms"
 		],
 		"fabric-gametest": [
+            "io.github.jimbozoomer.jugcraft.test.CoastalMetalsGameTests",
             "io.github.jimbozoomer.jugcraft.test.AnaerobicGameTests",
             "io.github.jimbozoomer.jugcraft.test.BiorefineryGameTests",
             "io.github.jimbozoomer.jugcraft.test.EncyclopediaGameTests",
@@ -182,6 +183,7 @@
 			"io.github.jimbozoomer.jugcraft.test.StarterChemistryGameTests"
 		],
 		"fabric-client-gametest": [
+            "io.github.jimbozoomer.jugcraft.test.CoastalMetalsClientGameTests",
             "io.github.jimbozoomer.jugcraft.test.AnaerobicClientGameTests",
             "io.github.jimbozoomer.jugcraft.test.BiorefineryClientGameTests",
             "io.github.jimbozoomer.jugcraft.test.EncyclopediaClientGameTests",

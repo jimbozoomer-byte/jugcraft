@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BTP",
+    "MCM",
+    "WKW"
+  ],
+  "key": {
+    "W": "jugcraft:copper_cable",
+    "T": "jugcraft:steel_tank",
+    "K": "jugcraft:machine_casing",
+    "M": "jugcraft:electric_motor",
+    "P": "#c:plates/steel",
+    "B": "minecraft:bricks",
+    "C": "jugcraft:basic_circuit"
+  },
+  "result": {
+    "id": "jugcraft:titanium_chlorinator",
+    "count": 1
+  }
+}

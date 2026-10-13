@@ -239,12 +239,26 @@ public final class PetroFluids {
 
 		FERMENTATION_EXHAUST = gas("fermentation_exhaust", 0xFF928C76);
 
+		SEAWATER = fluid("seawater", 8, 3, 1, 0xFF30687C, MapColor.COLOR_LIGHT_GRAY);
+		MAGNESIUM_BRINE = fluid("magnesium_brine", 8, 3, 1, 0xFF5B7965, MapColor.COLOR_LIGHT_GRAY);
+		MAGNESIUM_CHLORIDE_SOLUTION = fluid("magnesium_chloride_solution", 8, 3, 1, 0xFF77818B, MapColor.COLOR_LIGHT_GRAY);
+		CRUDE_TITANIUM_CHLORIDE = fluid("crude_titanium_chloride", 8, 3, 1, 0xFF7D683B, MapColor.COLOR_LIGHT_GRAY);
+		PURIFIED_TITANIUM_CHLORIDE = fluid("purified_titanium_chloride", 8, 3, 1, 0xFF6E8088, MapColor.COLOR_LIGHT_GRAY);
+		SPENT_MINERAL_WASH = fluid("spent_mineral_wash", 8, 3, 1, 0xFF5A6948, MapColor.COLOR_LIGHT_GRAY);
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
 				output.accept(entry.bucket());
 			}
 		});
 	}
+
+	public static Entry SEAWATER;
+	public static Entry MAGNESIUM_BRINE;
+	public static Entry MAGNESIUM_CHLORIDE_SOLUTION;
+	public static Entry CRUDE_TITANIUM_CHLORIDE;
+	public static Entry PURIFIED_TITANIUM_CHLORIDE;
+	public static Entry SPENT_MINERAL_WASH;
 
 	private static Gas gas(String id, int color) {
 		Gas gas = new Gas(id, Registry.register(BuiltInRegistries.FLUID, Jugcraft.id(id), new GasFluid()), color);

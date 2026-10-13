@@ -4523,6 +4523,196 @@
             "result": "jugcraft:aluminum_reduction_cell",
             "count": 1
           }
+        },
+        {
+          "title": "Coastal Seawater Intake",
+          "icon": "jugcraft:coastal_seawater_intake",
+          "text": [
+            "Renewable coastal resource collection: 200 mB seawater for 320 JE per one-second stroke (average 10 mB and 16 JE/t). Place the lower front-right intake against open water at sea level (water surface block Y = sea level - 1) in the Overworld. It samples a 3 by 3 water patch extending forward from its mouth, two source-water blocks deep. Every column must be beach/ocean-tagged and open to the sky; the loaded surrounding region must contain ocean biome. No shoreline blocks are removed.",
+            "An inland pond, elevated bucket pool, flowing water, sodium-chloride brine or pipe-fed ordinary water cannot provide this mineral feed. Coastal restoration of a qualifying shore is allowed; vanilla does not record historical ownership of water blocks. No remote intake or chunk loading. Power and output space are required; pause stops collection.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_tank",
+              "jugcraft:copper_cable",
+              "jugcraft:machine_casing",
+              "jugcraft:copper_cable"
+            ],
+            "result": "jugcraft:coastal_seawater_intake",
+            "count": 1
+          }
+        },
+        {
+          "title": "Brine Concentrator",
+          "icon": "jugcraft:brine_concentrator",
+          "text": [
+            "1000 mB distinct coastal seawater -> 250 mB magnesium-bearing brine + 750 mB recovered water. 200 ticks at 32 JE/t. The short evaporator column, supported condenser and collection sump share one skid. Ordinary water and sodium-chloride brine are rejected.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:bricks",
+              "jugcraft:steel_tank",
+              "minecraft:bricks",
+              "jugcraft:steel_tank",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_tank",
+              "jugcraft:copper_cable",
+              "jugcraft:electric_motor",
+              "jugcraft:copper_cable"
+            ],
+            "result": "jugcraft:brine_concentrator",
+            "count": 1
+          }
+        },
+        {
+          "title": "Mineral Conditioning Station",
+          "icon": "jugcraft:mineral_conditioner",
+          "text": [
+            "250 mB magnesium brine + 250 mB lye -> one magnesium hydroxide + 500 mB spent mineral wash; 160 ticks at 24 JE/t. Then change feeds: one hydroxide + 500 mB existing hydrochloric acid -> 500 mB prepared chloride solution and 250 mB water; 160 ticks at 32 JE/t.",
+            "Drain old tanks before switching recipes. Settle 500 mB spent wash into one existing salt and 250 mB water for 120 ticks at 16 JE/t; the rest is evaporation/loss in game accounting. The same station treats titanium-distillation wash. Neither wash nor ordinary salt brine supplies magnesium.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "minecraft:bricks",
+              "jugcraft:machine_casing",
+              "minecraft:bricks"
+            ],
+            "result": "jugcraft:mineral_conditioner",
+            "count": 1
+          }
+        },
+        {
+          "title": "Chloride Drying Oven",
+          "icon": "jugcraft:chloride_dryer",
+          "text": [
+            "500 mB prepared magnesium chloride solution -> one Dry Magnesium Chloride and 500 mB recovered condensate. 160 ticks at 48 JE/t includes paid conditioning/drying. Feed the dry item to the magnesium cell, never aqueous solution.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:bricks",
+              "jugcraft:steel_gear",
+              "minecraft:bricks",
+              "jugcraft:steel_tank",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_tank",
+              "jugcraft:copper_cable",
+              "jugcraft:machine_casing",
+              "jugcraft:copper_cable"
+            ],
+            "result": "jugcraft:chloride_dryer",
+            "count": 1
+          }
+        },
+        {
+          "title": "Magnesium Electrolysis Cell",
+          "icon": "jugcraft:magnesium_electrolysis_cell",
+          "text": [
+            "One dry prepared MgCl2 -> one Magnesium Ingot + 250 mB chlorine; 400 ticks at 64 JE/t. Automatic internal heating is included in paid work. Capture all chlorine: a full outlet stops the batch. Steel, copper and clay build the first cell. Titanium recovery returns the same dry chloride, not extra metal; the same paid recipe handles both supplies.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:copper_cable",
+              "minecraft:bricks",
+              "jugcraft:copper_cable",
+              "minecraft:bricks",
+              "jugcraft:machine_casing",
+              "minecraft:bricks",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:magnesium_electrolysis_cell",
+            "count": 1
+          }
+        },
+        {
+          "title": "Titanium Chlorination Vessel",
+          "icon": "jugcraft:titanium_chlorinator",
+          "text": [
+            "One existing Raw Titanium + one Coke + 500 mB chlorine -> 1000 mB crude titanium chloride + 250 mB CO2. 240 ticks at 64 JE/t. Default captures CO2 that fits and vents excess; Keep gas stops for full storage. The crude product always needs room.",
+            "Existing Chemical Distillation Station: 1000 mB crude chloride -> 750 mB purified chloride + 250 mB spent mineral wash, 240 ticks at 48 JE/t. Empty ethanol/stillage before changing jobs. Process wash in the Mineral Conditioning Station.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:bricks",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:electric_motor",
+              "jugcraft:copper_cable",
+              "jugcraft:machine_casing",
+              "jugcraft:copper_cable"
+            ],
+            "result": "jugcraft:titanium_chlorinator",
+            "count": 1
+          }
+        },
+        {
+          "title": "Titanium Reduction Retort",
+          "icon": "jugcraft:titanium_reduction_retort",
+          "text": [
+            "750 mB purified titanium chloride + two Magnesium Ingots -> one existing clean Titanium Sponge + two Dry Magnesium Chloride. 400 ticks at 96 JE/t includes internal separation and sponge cleanup. Both drawers must fit. Re-electrolyze both salt items to recover two Mg and 500 mB chlorine; it costs power, never generates it.",
+            "The existing Arc Furnace melts each sponge into one titanium ingot. Existing titanium tools, armor and components use it. Old titanium recipes remain available. First construction uses steel/copper/ceramics, never its own titanium or magnesium output.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:bricks",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_tank",
+              "jugcraft:electric_motor",
+              "jugcraft:machine_casing",
+              "jugcraft:electric_motor"
+            ],
+            "result": "jugcraft:titanium_reduction_retort",
+            "count": 1
+          }
+        },
+        {
+          "title": "Polymer Molding Press",
+          "icon": "jugcraft:polymer_molding_press",
+          "text": [
+            "Fit one reusable mold in the mold socket; it is locked during a batch and never consumed or worn. All six products take 120 ticks at 32 JE/t. Housings/panels accept existing plastic pellets or PVC resin through an explicit rigid-polymer tag. Fittings require PVC. Insulation, gaskets and hoses require rubber.",
+            "Four rigid stock -> one housing or panel; two PVC -> two fittings; two rubber -> three insulation pieces or two existing gaskets; three rubber -> one hose. Housing assembles machine casings; fittings reinforce bronze pipes into steel pipes; insulation assembles copper cable; hoses assemble pipe valves; panels combine with coke into existing carbon-composite building/vehicle panels. These are additional routes, not new gates on old recipes.",
+            "Six distinct molds are made from earlier steel plates and simple pattern items. There is no free offcut award: all allocated feed becomes the listed parts. Grade-specific recycling, named new polymer grades and extended monomer chemistry remain later work.",
+            "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:electric_motor",
+              "minecraft:bricks",
+              "jugcraft:machine_casing",
+              "minecraft:bricks"
+            ],
+            "result": "jugcraft:polymer_molding_press",
+            "count": 1
+          }
         }
       ]
     },

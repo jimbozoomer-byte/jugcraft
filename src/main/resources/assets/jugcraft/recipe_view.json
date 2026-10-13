@@ -7959,6 +7959,29 @@
           "ticks": 200,
           "tool": "",
           "energy_per_tick": 32
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:crude_titanium_chloride",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:purified_titanium_chloride",
+              750
+            ],
+            [
+              "jugcraft:spent_mineral_wash",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 48
         }
       ]
     },
@@ -8095,6 +8118,373 @@
           "ticks": 400,
           "tool": "",
           "energy_per_tick": 96
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:brine_concentrator",
+      "type": "brine_concentrator",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:seawater",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:magnesium_brine",
+              250
+            ],
+            [
+              "minecraft:water",
+              750
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 32
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:mineral_conditioner",
+      "type": "mineral_conditioner",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:magnesium_brine",
+              250
+            ],
+            [
+              "jugcraft:lye",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:spent_mineral_wash",
+              500
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:magnesium_hydroxide",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 24
+        },
+        {
+          "items": [
+            [
+              "jugcraft:magnesium_hydroxide",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:hydrochloric_acid",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:magnesium_chloride_solution",
+              500
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:spent_mineral_wash",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:salt",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 16
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:chloride_dryer",
+      "type": "chloride_dryer",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:magnesium_chloride_solution",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:dry_magnesium_chloride",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:magnesium_electrolysis_cell",
+      "type": "magnesium_electrolysis_cell",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:dry_magnesium_chloride",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:magnesium_ingot",
+              1
+            ]
+          ],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:titanium_chlorinator",
+      "type": "titanium_chlorinator",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:raw_titanium",
+              1
+            ],
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:chlorine",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:crude_titanium_chloride",
+              1000
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:titanium_reduction_retort",
+      "type": "titanium_reduction_retort",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:magnesium_ingot",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:purified_titanium_chloride",
+              750
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:titanium_sponge",
+              1
+            ],
+            [
+              "jugcraft:dry_magnesium_chloride",
+              2
+            ]
+          ],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 96
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:polymer_molding_press",
+      "type": "polymer_molding_press",
+      "recipes": [
+        {
+          "items": [
+            [
+              "#jugcraft:moldable_rigid_polymers",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:polymer_housing",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "jugcraft:housing_mold",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pvc_resin",
+              2
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:polymer_fitting",
+              2
+            ]
+          ],
+          "ticks": 120,
+          "tool": "jugcraft:fitting_mold",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rubber",
+              2
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:cable_insulation",
+              3
+            ]
+          ],
+          "ticks": 120,
+          "tool": "jugcraft:insulation_mold",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rubber",
+              2
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:gasket",
+              2
+            ]
+          ],
+          "ticks": 120,
+          "tool": "jugcraft:gasket_mold",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rubber",
+              3
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:flexible_hose",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "jugcraft:hose_mold",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "#jugcraft:moldable_rigid_polymers",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:polymer_vehicle_panel",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "jugcraft:panel_mold",
+          "energy_per_tick": 32
         }
       ]
     }

@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:magnesium_electrolysis_cell"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_magnesium_electrolysis_cell.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_magnesium_electrolysis_cell.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:magnesium_electrolysis_cell"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

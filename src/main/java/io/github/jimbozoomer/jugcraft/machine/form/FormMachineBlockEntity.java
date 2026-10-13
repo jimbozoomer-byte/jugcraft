@@ -309,7 +309,17 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			if (now % PUSH_INTERVAL == 0) {
 				push(level, pos, state);
 			}
-			next = paused ? MachineStatus.PAUSED : work(level.getServer(), now);
+			if (paused) {
+				next = MachineStatus.PAUSED;
+			} else if (CoastalSeawaterIntake.matches(form)) {
+				if (now >= nextCoastalStroke) {
+					coastalStatus = CoastalSeawaterIntake.pump(this, level);
+					nextCoastalStroke = now + 20;
+				}
+				next = coastalStatus;
+			} else {
+				next = work(level.getServer(), now);
+			}
 		}
 		if (!next.equals(status)) {
 			status = next;
@@ -344,6 +354,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		}
 		level.setBlock(pos, state.setValue(MachineBlock.LIT, lit), Block.UPDATE_ALL);
 	}
+
+	// Scheduling only; each stroke pays in full. Reload cannot duplicate unpaid output.
+	private long nextCoastalStroke = Long.MIN_VALUE;
+	private MachineStatus coastalStatus = MachineStatus.IDLE;
 
 	/** Checks the structure on the next tick (a part's neighbour changed). */
 	public void requestCheck() {

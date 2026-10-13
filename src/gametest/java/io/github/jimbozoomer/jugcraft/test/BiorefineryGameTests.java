@@ -84,7 +84,7 @@ public class BiorefineryGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 7, "All seven refinery stages exercised, found " + checked);
+        h.assertTrue(checked == 8, "Seven refinery stages plus titanium purification exercised, found " + checked);
         h.succeed();
     }
 

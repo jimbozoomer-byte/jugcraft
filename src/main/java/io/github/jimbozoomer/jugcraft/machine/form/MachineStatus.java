@@ -26,7 +26,8 @@ public record MachineStatus(MachineLifecycle state, Reason reason, int index, in
 		/** A generator's fuel tank is empty and it has nothing left in hand. */
 		NO_FUEL,
 		/** A generator's store is full: nothing is drawing its power. */
-		POWER_FULL;
+		POWER_FULL,
+		COASTAL_SOURCE;
 
 		public String translationKey() {
 			return "container.jugcraft.form.reason." + name().toLowerCase();

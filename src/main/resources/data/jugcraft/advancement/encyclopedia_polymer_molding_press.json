@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:polymer_molding_press"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_polymer_molding_press.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_polymer_molding_press.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:polymer_molding_press"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
