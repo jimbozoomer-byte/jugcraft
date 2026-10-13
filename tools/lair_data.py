@@ -1,8 +1,9 @@
 """JSON resources for the lairs (tools/lairs.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md,
-docs/features/glacier-hall.md, docs/features/cinder-kiln.md): the lair-only blocks, the Last Rites' Mourning Wreath and
-Death Knell, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Mist Gate's name, the lairs' messages, and each lair's
-dimension (its dimension type, level stem and biome) and structure template (tools/hollow_acre.py, tools/spindle_loft.py,
-tools/glacier_hall.py, tools/cinder_kiln.py).
+docs/features/glacier-hall.md, docs/features/cinder-kiln.md, docs/features/lantern-fen.md): the lair-only blocks, the
+Last Rites' Mourning Wreath and Death Knell, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Hag Stone, the Mist
+Gate's name, the lairs' messages, and each lair's dimension (its dimension type, level stem and biome) and structure
+template (tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py, tools/cinder_kiln.py,
+tools/lantern_fen.py).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
@@ -12,13 +13,15 @@ from decor_data import MOD, HORIZONTAL, rid, self_drop
 import cinder_kiln
 import glacier_hall
 import hollow_acre
+import lantern_fen
 import spindle_loft
 from lairs import (FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS, MOURNING_FLOWERS,
-                   RECIPES, RITE_CANDLES, SEAL_GROUND, SEAL_LANDS, SLUICE_FLOWS, SLUICE_PARTS, THREAD_COLOURS)
+                   RECIPES, RITE_CANDLES, SEAL_GROUND, SEAL_LANDS, SLUICE_FLOWS, SLUICE_PARTS, STONE_GROUND, STONE_LANDS,
+                   THREAD_COLOURS)
 
 # Each lair's template, by the lair's id.
 TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft, "glacier_hall": glacier_hall,
-             "cinder_kiln": cinder_kiln}
+             "cinder_kiln": cinder_kiln, "lantern_fen": lantern_fen}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -280,6 +283,34 @@ def cinder_kiln_assets(models, states, write, simple):
     write(states / "sluice_gate.json", {"variants": variants})
 
 
+def fen_lamp(lit):
+    """A fen lamp: a great lantern of blackened iron, its base and cap a plate wider than its panes, a post up each
+    corner and a knob on the cap; lit, its panes burn with the marsh-light, at full light whatever lights them."""
+    sides = ("north", "south", "east", "west")
+    panes = cube([3, 2, 3], [13, 13, 13], sides, "#glass", shade=not lit)
+    if lit:
+        panes["light_emission"] = 15
+    cap = cube([2, 13, 2], [14, 15, 14], ALL, "#frame")
+    cap["faces"]["up"]["texture"] = "#top"
+    elements = [cube([2, 0, 2], [14, 2, 14], ALL, "#frame"), panes, cap, cube([6, 15, 6], [10, 16, 10], ALL, "#frame")]
+    for x in (2, 12):
+        for z in (2, 12):
+            elements.append(cube([x, 2, z], [x + 2, 13, z + 2], sides, "#frame"))
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/fen_lamp_frame"), "frame": rid("block/fen_lamp_frame"),
+                         "top": rid("block/fen_lamp_top"),
+                         "glass": rid("block/fen_lamp_glass_lit" if lit else "block/fen_lamp_glass")},
+            "elements": elements}
+
+
+def lantern_fen_assets(models, states, write):
+    """The Lantern Fen's lair-only block, the fen lamp (tools/lantern_fen.py), lit and gone out."""
+    write(models / "fen_lamp.json", fen_lamp(True))
+    write(models / "fen_lamp_unlit.json", fen_lamp(False))
+    write(states / "fen_lamp.json", {"variants": {"lit=true": {"model": rid("block/fen_lamp")},
+                                                  "lit=false": {"model": rid("block/fen_lamp_unlit")}}})
+
+
 def assets(root, write, lang):
     models, states, items = root / "models" / "block", root / "blockstates", root / "items"
 
@@ -305,6 +336,7 @@ def assets(root, write, lang):
     spindle_loft_assets(models, states, write, simple)
     glacier_hall_assets(models, states, write, simple)
     cinder_kiln_assets(models, states, write, simple)
+    lantern_fen_assets(models, states, write)
     for name, display in LAIR_BLOCKS.items():
         lang[f"block.{MOD}.{name}"] = display
 
@@ -321,12 +353,15 @@ def assets(root, write, lang):
     lang[f"item.{MOD}.cursed_spindle"] = ITEMS["cursed_spindle"]
     lang[f"item.{MOD}.frost_horn"] = ITEMS["frost_horn"]
     lang[f"item.{MOD}.kiln_seal"] = ITEMS["kiln_seal"]
+    lang[f"item.{MOD}.hag_stone"] = ITEMS["hag_stone"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
     lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
     lang[f"tooltip.{MOD}.frost_horn"] = "Blown at night, standing on snow or ice: the snow opens onto the Glacier Hall"
     lang[f"tooltip.{MOD}.kiln_seal"] = ("Pressed into a magma block in the Nether or a volcanic land: the magma opens onto "
                                         "the Cinder Kiln")
+    lang[f"tooltip.{MOD}.hag_stone"] = ("Looked through at night, standing in shallow water or on mud in a wetland: a lantern "
+                                        "burns far off, and the mist takes you to the Lantern Fen")
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
@@ -359,6 +394,12 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.seal.not_volcanic": "The seal takes only in the Nether, or in a volcanic land",
         f"message.{MOD}.lair.seal.venting": "The magma already vents here: use the vent to follow",
         f"message.{MOD}.lair.seal.opened": "The magma cracks open, and a vent of sparks and smoke rises from it",
+        f"message.{MOD}.lair.stone.not_overworld": "Through the stone you see only stone",
+        f"message.{MOD}.lair.stone.not_night": "By day the stone shows nothing but the sky",
+        f"message.{MOD}.lair.stone.not_wetland": "The stone shows its lantern only in a wetland",
+        f"message.{MOD}.lair.stone.not_wet": "Stand in shallow water or on mud to look through it",
+        f"message.{MOD}.lair.stone.misting": "The mist has already risen here: use it to follow",
+        f"message.{MOD}.lair.stone.opened": "Through the stone a lantern burns far off; the water stills, and mist rises from it",
         f"message.{MOD}.lair.sluice.open": "The sluice is already open",
         f"message.{MOD}.lair.sluice.filling": "The sluice is filling again",
         f"message.{MOD}.lair.sluice.choked": "Slag chokes the sluice: it will not turn",
@@ -408,6 +449,10 @@ def tags(tags):
         tags.add("block", f"{MOD}:kiln_seal_ground", block)
     for biome in SEAL_LANDS:
         tags.add("worldgen/biome", f"{MOD}:kiln_seal_lands", biome)
+    for block in STONE_GROUND:
+        tags.add("block", f"{MOD}:hag_stone_ground", block)
+    for biome in STONE_LANDS:
+        tags.add("worldgen/biome", f"{MOD}:hag_stone_lands", biome)
     # Blighted soil is earth: plants stand on it.
     tags.add("block", "minecraft:dirt", rid("blighted_soil"))
     tags.add("block", "minecraft:mineable/hoe", rid("mourning_wreath"))

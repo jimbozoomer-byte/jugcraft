@@ -68,6 +68,8 @@ YETI_FUR = Material((40, 50, 76), (70, 84, 114), (112, 136, 184), (174, 198, 234
 # an accent.
 OBSIDIAN = Material((14, 8, 24), (30, 20, 46), (50, 36, 76), (72, 54, 106), (104, 84, 148), (156, 134, 206))
 MAGMA = Material((60, 14, 6), (96, 28, 10), (124, 40, 12), (178, 66, 16), (230, 116, 30), (250, 176, 70), shine=False)
+# The Lantern Fen's: the Hag Stone's flint, a dark green-grey worn smooth by the fen.
+FEN_FLINT = Material((24, 32, 30), (36, 46, 44), (60, 78, 70), (88, 118, 100), (130, 156, 140), (196, 216, 202))
 PAPER = Material((80, 64, 40), (124, 104, 74), (170, 152, 116), (214, 200, 166), (236, 226, 198), (250, 246, 230),
                  shine=False)
 # The Greenwardens' garden (roadmap step 14; tools/item_icons/: the four crops, Verdant Chaff and the living devices).
@@ -112,6 +114,8 @@ MATERIALS = {
     "horn": HORN, "yeti_fur": YETI_FUR,
     # the Cinder Kiln's
     "obsidian": OBSIDIAN, "magma": MAGMA,
+    # the Lantern Fen's
+    "fen_flint": FEN_FLINT,
 }
 
 # Materials meant to be vanilla's own metal: the distance test against copper, iron and gold is skipped for them.

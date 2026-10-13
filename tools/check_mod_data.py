@@ -627,10 +627,12 @@ def check_tags():
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
             known |= set(re.findall(r'Registry\.register\(BuiltInRegistries\.ENTITY_TYPE,\s*id\("([a-z_]+)"\)', scary))
+        # A worldgen tag's registry is two folders deep (worldgen/biome): a tag it names lives beside it there.
+        tag_registry = "/".join(path.relative_to(DATA).parts[2:4]) if registry == "worldgen" else registry
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
-                if not tag_exists(registry, value[1:]):
+                if not tag_exists(tag_registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
             elif registry == "damage_type":
                 ns, name = split(value)
@@ -8360,25 +8362,27 @@ def check_model_uvs():
 
 def check_lairs():
     """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
-    tools/cinder_kiln.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
-    docs/features/cinder-kiln.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
-    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
-    there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts and snow heights and the
-    Cinder Kiln's slag, troughs and sluices are the tables', every server option has its default, every message the Java
-    sends has its words, and the Glacier Hall and the Cinder Kiln are laid out as their records say (check_glacier_hall,
-    check_cinder_kiln)."""
+    tools/cinder_kiln.py, tools/lantern_fen.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md,
+    docs/features/glacier-hall.md, docs/features/cinder-kiln.md, docs/features/lantern-fen.md): the Java's numbers are the
+    tables' and the layouts', every lair has its dimension, dimension type, biome (no spawns), template and words for
+    coming in, the rituals' blocks, items, recipes and tags are there, the Spindle Loft's lace patterns and thread
+    colours, the Glacier Hall's icicle parts and snow heights, the Cinder Kiln's slag, troughs and sluices and the
+    Lantern Fen's lamps are the tables', every server option has its default, every message the Java sends has its
+    words, and the Glacier Hall, the Cinder Kiln and the Lantern Fen are laid out as their records say
+    (check_glacier_hall, check_cinder_kiln, check_lantern_fen)."""
     import cinder_kiln as ck
     import glacier_hall as gh
     import hollow_acre as ha
     import lair_data as ld
     import lairs as la
+    import lantern_fen as lf
     import spindle_loft as sl
     folder = JAVA_ROOT / "lair"
     lair = (folder / "Lair.java").read_text(encoding="utf-8")
     # Each lair's line in Lair.java, from its layout: size, arrival and its facing, centre, bounds, floor and moon.
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
                                        ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
-                                       ("cinder_kiln", ck, ck.CENTRE, None)):
+                                       ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8411,7 +8415,7 @@ def check_lairs():
     for block in la.LAIR_BLOCKS:
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
-    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", la.GATE["entity"]):
+    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8460,6 +8464,25 @@ def check_lairs():
     for land in la.SEAL_LANDS:
         if not (DATA / MOD / "worldgen" / "biome" / f"{land.split(':')[1]}.json").is_file():
             err(f"tools/lairs.py SEAL_LANDS names {land}, which is no biome of Jugcraft's")
+    # The Lantern Fen's: the Hag Stone's rest and reach, its ground and lands, and the lamps' light.
+    stone = (folder / "HagStoneRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(stone, name, la.STONE[key]):
+            err(f"HagStoneRite.{name} is not tools/lairs.py STONE {key} ({la.STONE[key]})")
+    stone_ground = (load(DATA / MOD / "tags" / "block" / "hag_stone_ground.json") or {}).get("values", [])
+    if sorted(stone_ground) != sorted(la.STONE_GROUND):
+        err(f"#jugcraft:hag_stone_ground is not tools/lairs.py STONE_GROUND: {stone_ground}")
+    stone_lands = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "hag_stone_lands.json") or {}).get("values", [])
+    if sorted(stone_lands) != sorted(la.STONE_LANDS):
+        err(f"#jugcraft:hag_stone_lands is not tools/lairs.py STONE_LANDS: {stone_lands}")
+    for land in la.STONE_LANDS:
+        ns, path = split(land.lstrip("#"))
+        found = tag_exists("worldgen/biome", land[1:]) if land.startswith("#") else \
+            ns == "minecraft" or (DATA / ns / "worldgen" / "biome" / f"{path}.json").is_file()
+        if not found:
+            err(f"tools/lairs.py STONE_LANDS names {land}, which is no biome or biome tag")
+    if f'fixture("fen_lamp", FenLampBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -{la.FEN_LAMP["light"]},' not in registry:
+        err(f"JugcraftLairs does not register the fen lamp burning at tools/lairs.py FEN_LAMP light {la.FEN_LAMP['light']}")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8509,6 +8532,7 @@ def check_lairs():
             err(f"No words for coming into the lair {name} (message.{MOD}.lair.enter.{name})")
     check_glacier_hall(gh)
     check_cinder_kiln(ck)
+    check_lantern_fen(lf)
 
 
 def check_glacier_hall(gh):
@@ -8747,6 +8771,147 @@ def java_number(source, name, value):
     if isinstance(value, int) and not isinstance(value, bool):
         return re.search(rf"\bint {name} = {value};", source) is not None
     return re.search(rf"\b(?:float|double) {name} = {float(value)}F?;", source) is not None
+
+
+def check_lantern_fen(lf):
+    """The Lantern Fen as tools/lantern_fen.py builds it is the fen its record describes (docs/features/lantern-fen.md):
+    the arrival stands on the jetty's planks with room overhead, and the Grey Mist hangs between the willows; a walk along
+    the boardwalks and banks from the arrival, never stepping more than half a block nor into the water, reaches every
+    lamp's platform and the porch where the Hag waits; the water is one block deep on mud wherever the layout says, and
+    held in on every side, so none of it can flow; each lamp burns on its willow post; the porch has room for her, and
+    her cauldron stands on it; light flooded from the hidden lights, the lamps, the lanterns and the cauldron, as the game
+    floods it, is at least MARSH_LIGHT on every open cell of the marsh; and nothing in it changes by itself once placed
+    (the templates are placed without updates: no leaves, which would decay, no vines, which spread, no grass under a
+    whole block, which would turn to dirt, and nothing that burns or flows)."""
+    from collections import deque
+    import agriculture as agt
+    import decor15
+    import lairs as la
+    blocks = lf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    # What anyone can be in: nothing, or a block with no collision.
+    passable = {None, "minecraft:light", "jugcraft:lair_exit", "minecraft:short_grass", "minecraft:fern",
+                "jugcraft:ghost_fern", "jugcraft:withered_grass", "jugcraft:deadly_nightshade", "jugcraft:cattail",
+                "jugcraft:shroud_moss", "jugcraft:creeping_ivy", "minecraft:dead_bush", "minecraft:hanging_roots"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = lf.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "jugcraft:willow_planks" or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The Lantern Fen's arrival at {feet} does not stand on the jetty's planks with room overhead")
+    for pos in lf.exit_mist():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist between the Lantern Fen's willows at {pos}")
+
+    # Where anyone can stand out of the water, column by column: on a whole block, or on either half of a stair.
+    ground = {"jugcraft:willow_planks", "jugcraft:dead_planks", "minecraft:grass_block", "minecraft:moss_block",
+              "minecraft:podzol", "minecraft:packed_mud"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if not (free((x, y + 1, z)) and free((x, y + 2, z))):
+            continue
+        if state[0] in ground:
+            stands.setdefault((x, z), []).append(y + 1.0)
+        elif state[0] == "minecraft:mud":
+            stands.setdefault((x, z), []).append(y + 14 / 16)
+        elif state[0] == "jugcraft:willow_stairs":
+            stands.setdefault((x, z), []).extend((y + 0.5, y + 1.0))
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    wx, wy, wz, _ = lf.WAIT
+    wait = (int(wx), int(wy), int(wz))
+    if (wait[0], wait[2], float(wy)) not in seen:
+        err("No walk from the Lantern Fen's arrival to the porch where the Hag waits, along the boardwalks and the stair "
+            "without a step of more than half a block")
+    if name((wait[0], wait[1] - 1, wait[2])) != "jugcraft:dead_planks" \
+            or not all(free((wait[0], wait[1] + dy, wait[2])) for dy in range(3)):
+        err(f"The Hag has no room to wait on the Lantern Fen's porch at {wait}")
+    if name(lf.CAULDRON) != "jugcraft:bubbling_cauldron":
+        err(f"The Hag's cauldron is not on the Lantern Fen's porch at {lf.CAULDRON}")
+    for x, y, z in lf.lamp_blocks():
+        if name((x, y, z)) != "jugcraft:fen_lamp" or props((x, y, z)).get("lit") != "true":
+            err(f"No lit fen lamp at {(x, y, z)}")
+        if any(name((x, post, z)) != "jugcraft:willow_fence" for post in range(lf.STAND, y)):
+            err(f"The fen lamp at {(x, y, z)} does not stand on its willow post")
+        if not any(abs(nx - x) <= lf.PLATFORM and abs(nz - z) <= lf.PLATFORM and nh == float(lf.STAND)
+                   for nx, nz, nh in seen):
+            err(f"No walk from the Lantern Fen's arrival reaches the platform of the lamp at {(x, y, z)}")
+
+    # The water: one block deep on mud wherever the layout puts it (but where a stump, a stilt, a stair's support or the
+    # punt's sunk stern stands in it), and held in on every side and below.
+    holds = {"minecraft:water", "minecraft:seagrass", "minecraft:mud", "minecraft:packed_mud", "minecraft:dirt",
+             "minecraft:rooted_dirt", "minecraft:clay", "minecraft:grass_block", "minecraft:moss_block",
+             "minecraft:podzol", "jugcraft:willow_planks", "jugcraft:dead_planks", "jugcraft:willow_log",
+             "jugcraft:stripped_willow_log", "jugcraft:dead_log", "jugcraft:dead_slab"}
+    for x in range(lf.SIZE[0]):
+        for z in range(lf.SIZE[2]):
+            if not lf.is_water(x, z):
+                continue
+            if name((x, lf.WATER, z)) not in ("minecraft:water", "minecraft:seagrass", "jugcraft:dead_log",
+                                              "jugcraft:stripped_willow_log", "jugcraft:willow_planks", "jugcraft:dead_slab") \
+                    or name((x, lf.MUD, z)) not in ("minecraft:mud", "minecraft:packed_mud") \
+                    or name((x, lf.STAND, z)) == "minecraft:water":
+                err(f"The Lantern Fen's water is not one block deep on mud at {(x, z)}")
+                break
+    for (x, y, z), state in blocks.items():
+        if state[0] in ("minecraft:water", "minecraft:seagrass"):
+            leak = [n for n in ((x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1), (x, y - 1, z))
+                    if name(n) not in holds]
+            if leak:
+                err(f"The Lantern Fen's water at {(x, y, z)} would flow into {leak[0]} ({name(leak[0])})")
+                break
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"jugcraft:fen_lamp": la.FEN_LAMP["light"], "jugcraft:witchs_lantern": decor15.WITCHS_LANTERN["light"],
+            "jugcraft:bubbling_cauldron": agt.CAULDRON["light"]}
+    through = passable | {"minecraft:water", "minecraft:seagrass", "minecraft:lily_pad", "jugcraft:duckweed",
+                          "jugcraft:willow_fence", "jugcraft:dead_fence", "minecraft:skeleton_skull",
+                          "minecraft:moss_carpet", "jugcraft:fen_lamp", "jugcraft:witchs_lantern", "jugcraft:bramble"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if state[0] == "jugcraft:fen_lamp" and dict(state[1]).get("lit") != "true":
+            level = 0
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and -1 <= n[1] <= lf.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    marsh = sorted((light.get((x, lf.STAND, z), 0), (x, lf.STAND, z)) for x in range(lf.SIZE[0]) for z in range(lf.SIZE[2])
+                   if lf.in_marsh(x, z) and lf.on_island(x, z) and name((x, lf.STAND, z)) in through)
+    if not marsh or marsh[0][0] < lf.MARSH_LIGHT:
+        dark = [cell for level, cell in marsh if level < lf.MARSH_LIGHT]
+        err(f"{len(dark)} open cells of the Lantern Fen's marsh have less block light than MARSH_LIGHT {lf.MARSH_LIGHT}, "
+            f"the darkest {marsh[0] if marsh else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "LanternFenClientGameTests.java"
+    if not client.is_file() or not java_number(client.read_text(encoding="utf-8"), "MARSH_LIGHT", lf.MARSH_LIGHT):
+        err(f"LanternFenClientGameTests does not read the marsh's light against MARSH_LIGHT {lf.MARSH_LIGHT}")
+
+    # Nothing that changes by itself once placed.
+    covers = {"jugcraft:willow_planks", "jugcraft:dead_planks", "jugcraft:willow_log", "jugcraft:stripped_willow_log",
+              "jugcraft:dead_log", "minecraft:mud", "minecraft:packed_mud", "minecraft:dirt", "minecraft:moss_block"}
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire",
+                                                        "minecraft:magma_block"):
+            err(f"The Lantern Fen has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+        if state[0] == "minecraft:grass_block" and name((x, y + 1, z)) in covers:
+            err(f"The Lantern Fen's grass at {(x, y, z)} is under {name((x, y + 1, z))} and would turn to dirt")
+            break
 
 
 def check_vesperine():

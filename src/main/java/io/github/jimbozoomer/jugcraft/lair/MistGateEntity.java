@@ -26,7 +26,9 @@ import org.jspecify.annotations.Nullable;
  * instance too), cannot be harmed, and is drawn only as its mist (particles the server sends): over the Last Rites' grave
  * grey mist and soul flames; in the Frost Horn's snow a whirl of white mist and snowflakes, through which followers fall
  * into the Glacier Hall as the horn's blower did ({@link FrostHornRite#follow}); on the Kiln Seal's magma a vent of sparks
- * and smoke, through which followers sink into the Cinder Kiln ({@link KilnSealRite#follow}).
+ * and smoke, through which followers sink into the Cinder Kiln ({@link KilnSealRite#follow}); and where the Hag Stone was
+ * looked through, mist rising from the water with a marsh-light bobbing in it, which closes round followers and takes them
+ * to the Lantern Fen ({@link HagStoneRite#follow}).
  */
 public class MistGateEntity extends Entity {
 	private @Nullable Lair lair;
@@ -73,6 +75,7 @@ public class MistGateEntity extends Entity {
 		}
 		boolean snow = lair == Lair.GLACIER_HALL;
 		boolean vent = lair == Lair.CINDER_KILN;
+		boolean fen = lair == Lair.LANTERN_FEN;
 		if (instance() == null || level.getGameTime() >= until) {
 			if (vent) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.6, getZ(), 24, 0.4, 0.6, 0.4, 0.03);
@@ -92,6 +95,14 @@ public class MistGateEntity extends Entity {
 				level.sendParticles(ParticleTypes.LAVA, getX(), getY() + 0.1, getZ(), 1, 0.3, 0.05, 0.3, 0.0);
 				level.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.1, getZ(), 2, 0.3, 0.05, 0.3, 0.02);
 			}
+		} else if (fen) {
+			// Mist rising off the still water, and in it a marsh-light bobbing and circling slowly.
+			if (tickCount % 2 == 0) {
+				level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.3, getZ(), 2, 0.5, 0.3, 0.5, 0.0);
+			}
+			double angle = tickCount * 0.08;
+			level.sendParticles(ParticleTypes.GLOW, getX() + Math.cos(angle) * 0.4, getY() + 1.3 + Math.sin(tickCount * 0.15) * 0.25,
+					getZ() + Math.sin(angle) * 0.4, 1, 0.0, 0.0, 0.0, 0.0);
 		} else if (tickCount % 2 == 0) {
 			if (snow) {
 				// A whirl: three flakes circling and rising round it, white mist welling up in it.
@@ -112,6 +123,8 @@ public class MistGateEntity extends Entity {
 				level.playSound(null, blockPosition(), SoundEvents.BREEZE_IDLE_AIR, SoundSource.AMBIENT, 0.8F, 0.6F);
 			} else if (vent) {
 				level.playSound(null, blockPosition(), SoundEvents.FIRE_AMBIENT, SoundSource.AMBIENT, 1.0F, 0.5F);
+			} else if (fen) {
+				level.playSound(null, blockPosition(), SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.AMBIENT, 0.6F, 0.5F);
 			} else {
 				level.playSound(null, blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.AMBIENT, 0.6F, 0.6F);
 			}
@@ -132,6 +145,8 @@ public class MistGateEntity extends Entity {
 			FrostHornRite.follow(server, open);
 		} else if (open.lair == Lair.CINDER_KILN) {
 			KilnSealRite.follow(server, open);
+		} else if (open.lair == Lair.LANTERN_FEN) {
+			HagStoneRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}

@@ -23,9 +23,9 @@ import net.minecraft.world.level.material.PushReaction;
 
 /**
  * The lairs' registrations (docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
- * docs/features/cinder-kiln.md): the lair-only blocks (unbreakable, no items, no drops), the Mourning Wreath and the Death
- * Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Mist Gate, and the lairs' events, rules,
- * rituals and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
+ * docs/features/cinder-kiln.md, docs/features/lantern-fen.md): the lair-only blocks (unbreakable, no items, no drops), the
+ * Mourning Wreath and the Death Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Hag Stone,
+ * the Mist Gate, and the lairs' events, rules, rituals and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
  * ({@value #FEATURE}) stops the rituals.
  */
 public final class JugcraftLairs {
@@ -61,12 +61,14 @@ public final class JugcraftLairs {
 	public static Block MOLTEN_SLAG;
 	public static Block TROUGH_STONE;
 	public static Block SLUICE_GATE;
+	public static Block FEN_LAMP;
 	public static Block MOURNING_WREATH;
 	public static Item MOURNING_WREATH_ITEM;
 	public static Item DEATH_KNELL;
 	public static Item CURSED_SPINDLE;
 	public static Item FROST_HORN;
 	public static Item KILN_SEAL;
+	public static Item HAG_STONE;
 	public static EntityType<MistGateEntity> MIST_GATE;
 
 	private JugcraftLairs() {
@@ -77,7 +79,7 @@ public final class JugcraftLairs {
 		BLIGHTED_SOIL = fixture("blighted_soil", Block::new, MapColor.COLOR_BLACK, SoundType.ROOTED_DIRT, 0, Fit.SOLID);
 		BLACK_WHEAT = fixture("black_wheat", p -> new LairPlantBlock(14, p), MapColor.COLOR_BLACK, SoundType.CROP, 0, Fit.PASSABLE);
 		MOWN_STUBBLE = fixture("mown_stubble", p -> new LairPlantBlock(4, p), MapColor.TERRACOTTA_BROWN, SoundType.CROP, 0, Fit.PASSABLE);
-		LAIR_BRAZIER = fixture("lair_brazier", LairBrazierBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -1, Fit.SOLID);
+		LAIR_BRAZIER = fixture("lair_brazier", LairBrazierBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -12, Fit.SOLID);
 		LAIR_MOON = fixture("lair_moon", LairMoonBlock::new, MapColor.GOLD, SoundType.STONE, 15, Fit.SOLID);
 		LAIR_EXIT = fixture("lair_exit", LairExitBlock::new, MapColor.COLOR_LIGHT_GRAY, SoundType.WOOL, 6, Fit.PASSABLE);
 		// The Spindle Loft's (docs/features/spindle-loft.md).
@@ -107,6 +109,8 @@ public final class JugcraftLairs {
 		MOLTEN_SLAG = fixture("molten_slag", MoltenSlagBlock::new, MapColor.COLOR_ORANGE, SoundType.DEEPSLATE, 10, Fit.SOLID);
 		TROUGH_STONE = fixture("trough_stone", TroughStoneBlock::new, MapColor.STONE, SoundType.STONE, 0, Fit.SOLID);
 		SLUICE_GATE = fixture("sluice_gate", SluiceGateBlock::new, MapColor.METAL, SoundType.METAL, 0, Fit.SEE_THROUGH);
+		// The Lantern Fen's (docs/features/lantern-fen.md): its lamps burn, and go out.
+		FEN_LAMP = fixture("fen_lamp", FenLampBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -15, Fit.SEE_THROUGH);
 
 		ResourceKey<Block> wreathKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("mourning_wreath"));
 		MOURNING_WREATH = Registry.register(BuiltInRegistries.BLOCK, wreathKey, new MourningWreathBlock(BlockBehaviour.Properties.of()
@@ -124,6 +128,8 @@ public final class JugcraftLairs {
 		FROST_HORN = Registry.register(BuiltInRegistries.ITEM, hornKey, new FrostHornItem(new Item.Properties().stacksTo(16).setId(hornKey)));
 		ResourceKey<Item> sealKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("kiln_seal"));
 		KILN_SEAL = Registry.register(BuiltInRegistries.ITEM, sealKey, new KilnSealItem(new Item.Properties().stacksTo(16).setId(sealKey)));
+		ResourceKey<Item> stoneKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("hag_stone"));
+		HAG_STONE = Registry.register(BuiltInRegistries.ITEM, stoneKey, new HagStoneItem(new Item.Properties().stacksTo(16).setId(stoneKey)));
 
 		ResourceKey<EntityType<?>> gateKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("mist_gate"));
 		MIST_GATE = Registry.register(BuiltInRegistries.ENTITY_TYPE, gateKey, EntityType.Builder.<MistGateEntity>of(MistGateEntity::new,
@@ -140,6 +146,7 @@ public final class JugcraftLairs {
 			output.accept(CURSED_SPINDLE);
 			output.accept(FROST_HORN);
 			output.accept(KILN_SEAL);
+			output.accept(HAG_STONE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(MOURNING_WREATH_ITEM));
 	}
@@ -157,7 +164,8 @@ public final class JugcraftLairs {
 		if (light > 0) {
 			properties = properties.lightLevel(state -> light);
 		} else if (light < 0) {
-			properties = properties.lightLevel(state -> state.getValue(LairBrazierBlock.LIT) ? 12 : 0);
+			// A fixture that burns and goes out (a brazier, a lamp): -light while lit, dark when out.
+			properties = properties.lightLevel(state -> state.getValue(LairBrazierBlock.LIT) ? -light : 0);
 		}
 		if (fit == Fit.PASSABLE) {
 			properties = properties.noCollision().noOcclusion();

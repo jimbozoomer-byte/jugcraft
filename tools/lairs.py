@@ -22,7 +22,8 @@ EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below h
 
 # The lair-only blocks: unbreakable fixtures, in the wither_immune and dragon_immune tags, with no item and no drops.
 # The Hollow Acre's, the exit (every lair's), the Spindle Loft's (docs/features/spindle-loft.md), the Glacier Hall's
-# (docs/features/glacier-hall.md), then the Cinder Kiln's (docs/features/cinder-kiln.md).
+# (docs/features/glacier-hall.md), the Cinder Kiln's (docs/features/cinder-kiln.md), then the Lantern Fen's
+# (docs/features/lantern-fen.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -53,6 +54,7 @@ LAIR_BLOCKS = {
     "molten_slag": "Molten Slag",
     "trough_stone": "Trough Stone",
     "sluice_gate": "Sluice Gate",
+    "fen_lamp": "Fen Lamp",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
@@ -75,9 +77,9 @@ SLAG = {"damage": 1.0, "burn_seconds": 3}
 SLUICE = {"flood_ticks": 200, "refill_ticks": 400, "gate_blocks": 40, "trough_blocks": 96}
 SLUICE_PARTS = ("frame", "panel", "wheel")
 SLUICE_FLOWS = ("ready", "open", "filling", "choked")   # choked: by the Cinder Tyrant's slag
-# Fixtures a player in a lair may use (everything else is refused): the exits, the braziers Vesperine's fight lights, and
-# the Cinder Kiln's sluice gates.
-FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate")
+# Fixtures a player in a lair may use (everything else is refused): the exits, the braziers Vesperine's fight lights, the
+# Cinder Kiln's sluice gates and the Lantern Fen's lamps.
+FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp")
 
 # The Last Rites (the Hollow Acre's ritual): a grave in the Overworld at night, lit candles round it, a Mourning Wreath
 # laid on it and the Death Knell rung beside it.
@@ -122,12 +124,29 @@ SEAL = {
 SEAL_GROUND = ["minecraft:magma_block"]
 SEAL_LANDS = ["jugcraft:volcano", "jugcraft:cinder_barrens"]
 
+# The Hag Stone (the Lantern Fen's ritual): looked through at night in the Overworld, standing in shallow water or on mud
+# (#jugcraft:hag_stone_ground) in a wetland (#jugcraft:hag_stone_lands). Through its hole a lantern burns far off in mist;
+# the water stills and mist rises from it with a marsh-light in it, the gate for lairs.gate_seconds; whoever goes in wakes
+# on the fen's jetty. Not a Witching Season ritual: it works all year, at night, whatever lairs.off_season says.
+STONE = {
+    "cooldown": 40,            # ticks between lookings through one stone, answered or not
+    "mist_range": 3,           # how near another open mist into the fen must not be (blocks)
+}
+# What may be stood on instead of shallow water: mud, in it or on it.
+STONE_GROUND = ["minecraft:mud", "minecraft:muddy_mangrove_roots"]
+# The wetlands: every swamp (#c:is_swamp, Jugcraft's own and vanilla's), the Floodplain and the Muskeg.
+STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "jugcraft:floodplain", "jugcraft:muskeg"]
+
+# The Lantern Fen's lamps: lit, they burn at this light level; one gone out is lit again by using it.
+FEN_LAMP = {"light": 15}
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
     "cursed_spindle": "Cursed Spindle",
     "frost_horn": "Frost Horn",
     "kiln_seal": "Kiln Seal",
+    "hag_stone": "Hag Stone",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -149,6 +168,11 @@ RECIPES = {
     # by its pressing.
     "kiln_seal": {"pattern": ["BOB", "OMO", "GOG"], "key": {
         "B": "minecraft:blaze_powder", "O": "minecraft:obsidian", "M": "minecraft:magma_block", "G": "minecraft:gold_ingot"}},
+    # A flint with a hole worn through it, threaded on string, bound with two gold ingots and two blocks of mud, and set
+    # with a fermented spider eye. Used up by its looking.
+    "hag_stone": {"pattern": ["MSM", "GFG", " E "], "key": {
+        "M": "minecraft:mud", "S": "minecraft:string", "G": "minecraft:gold_ingot", "F": "minecraft:flint",
+        "E": "minecraft:fermented_spider_eye"}},
 }
 
 # Each lair's dimension: a void with its own biome; fixed time, no weather, no beds or respawn anchors. Its sky, fog and
@@ -190,12 +214,21 @@ LAIRS = {
         "ambient_light": 0.2,
         "motes": ("minecraft:ash", 0.012),
     },
+    "lantern_fen": {
+        "display": "The Lantern Fen",
+        "enter": "The mist closes round you, and you wake in %s",
+        "sky": "#0b120f", "fog": "#4a5a4c", "water_fog": "#26301f", "water": "#4c5a36",
+        "ambient_light_color": "#2c3a2e", "sky_light_color": "#3c4c3e",
+        "music": "minecraft:music.overworld.swamp",
+        "ambient_light": 0.2,
+        "motes": ("minecraft:glow", 0.002),
+    },
 }
 
 
 def blocks():
-    """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle, the Frost Horn and
-    the Kiln Seal are items)."""
+    """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle, the Frost Horn, the
+    Kiln Seal and the Hag Stone are items)."""
     return list(LAIR_BLOCKS) + ["mourning_wreath"]
 
 

@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: The Lantern Fen and the Hag Stone (boss 5, the Mire Hag, part 1)
+- **The Lantern Fen,** a fifth lair: a drowned fen floating in a night of mist, black water knee-deep over mud in a marsh 44 blocks across, tussocks and drowned stumps in it, dead willows hung with shroud moss on the banks round it, motes of marsh-light in the air and low mist over the water. Boardwalks of willow planks a block over the mud ring the marsh, join four lamp platforms and run north to the Mire Hag's hut on stilts, her cauldron on its porch, and south down a jetty to the arrival, a punt moored at its end; the Grey Mist home hangs between two willows behind it.
+- **Four fen lamps,** the fen's working fixture: great iron lanterns on willow posts, burning with a yellow-green marsh-light at 15. Any player in the fen lights one that has gone out; in part 2 the Hag puts them out. Every open cell of the marsh has block light 8 or more.
+- **The Hag Stone** (a flint, string, two mud, two gold and a fermented spider eye) opens it: at night, standing in shallow water or on mud in any swamp, the Floodplain or the Muskeg, look through it. A lantern burns far off, the water stills and mist rises from it, which others can follow through for a minute. Refused, it says why and is kept. The Hag herself and her loot are part 2. Record: [lantern-fen.md](docs/features/lantern-fen.md).
+- **The data audit now finds a tag named inside a biome tag** (the stone's lands name `#c:is_swamp`); it looked for it among the wrong folder.
+
 ### Added: The Cinder Tyrant (boss 4, part 2)
 - **The Cinder Tyrant,** the Cinder Kiln's boss: a salamander lord the size of a cart, armoured in obsidian plates with magma glowing in their seams. He waits sunk in the crucible, only his crest over the slag, and wakes when a player steps down onto the bowl's floor or strikes him: 440 health scaled for the party, armour 10, never hurt by fire. Left alone, he sinks back, healed, and the kiln resets.
 - **His rule, the heat is his:** hot, he takes half of every blow. Turn a sluice and bait his Body Slam into its flooded trough, and the steam quenches him for 8 seconds: his seams go dark, blows do a quarter more and he slows.
