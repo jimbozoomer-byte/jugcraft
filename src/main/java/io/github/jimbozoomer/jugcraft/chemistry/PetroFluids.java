@@ -150,6 +150,7 @@ public final class PetroFluids {
 	public static Gas CARBON_DIOXIDE;
 	/** Carbon dioxide and hydrogen over the Chemical Infuser's nickel bed: the Gas Burning Generator's second fuel. */
 	public static Gas METHANE;
+	public static Gas BIOGAS;
 
 	private PetroFluids() {
 	}
@@ -213,6 +214,7 @@ public final class PetroFluids {
 		SULFUR_DIOXIDE = gas("sulfur_dioxide", 0xFFDAD6B8);
 		CARBON_DIOXIDE = gas("carbon_dioxide", 0xFFC4CAD4);
 		METHANE = gas("methane", 0xFFAED4D0);
+		BIOGAS = gas("biogas", 0xFFB8C2AA);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

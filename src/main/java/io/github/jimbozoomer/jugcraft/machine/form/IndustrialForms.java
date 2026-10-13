@@ -23,8 +23,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md),
  * Gas Burning Generator (docs/features/industrial-gas-burning-generator.md), Chemical Infuser
  * (docs/features/industrial-chemical-infuser.md), Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md),
- * Industrial Fermenter (docs/features/industrial-fermenter.md) and Bulk Chemical Reactor
- * (docs/features/industrial-bulk-chemical-reactor.md).
+ * Industrial Fermenter (docs/features/industrial-fermenter.md), Bulk Chemical Reactor
+ * (docs/features/industrial-bulk-chemical-reactor.md) and Anaerobic Digester (docs/features/industrial-anaerobic-digester.md).
  * Each form is also described in
  * tools/industrial_forms.py for its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form
  * shares the one controller block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when
@@ -43,6 +43,8 @@ public final class IndustrialForms {
 	public static final String ACID_ABSORPTION = "jugcraft:acid_absorption";
 	/** Leaching ores in hydrochloric acid. */
 	public static final String CHLORIDE_LEACHING = "jugcraft:chloride_leaching";
+	/** Digesting organic waste in a sealed, stirred tank into raw biogas. */
+	public static final String ANAEROBIC_DIGESTION = "jugcraft:anaerobic_digestion";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
 	/** What the Infuser's bed socket holds: the nickel catalyst bed. */
@@ -208,12 +210,41 @@ public final class IndustrialForms {
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 3, 3, 0, FormSide.RIGHT)
 			.build();
 
+	/**
+	 * The Anaerobic Digester: the owner's selected substantial first bulk digester, a six-block cube of the chemical
+	 * reactor family (its energy figures) in the bulk profile, four batches at once from 16,000 mB tanks. Waste goes in at
+	 * the feed auger and water low on the left; raw biogas leaves at the header flange high on the right and digestate at
+	 * the chute low on the right; the power socket is at the back.
+	 */
+	public static final MachineForm ANAEROBIC_DIGESTER_FORM = MachineForm.builder(Jugcraft.id("anaerobic_digester"),
+					MachineKind.CHEMICAL_REACTOR)
+			.layer("C#####", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.layer("######", "######", "######", "######", "######", "######")
+			.profile(OperatingProfile.BULK)
+			.inputTank("water")
+			.outputTank("biogas")
+			.items(1, 1)
+			.capability(ANAEROBIC_DIGESTION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 2, 1, FormSide.LEFT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 4, 0, FormSide.LEFT)
+			.port("biogas_out", FormPort.Kind.FLUID_OUT, 0, 5, 4, 5, FormSide.RIGHT)
+			.port("digestate_out", FormPort.Kind.ITEM_OUT, FormPort.ALL, 5, 2, 0, FormSide.RIGHT)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 3, 5, 0, FormSide.BACK)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock CHEMICAL_OXIDIZER;
 	public static FormMachineBlock INDUSTRIAL_FERMENTER;
 	public static FormMachineBlock BULK_CHEMICAL_REACTOR;
+	public static FormMachineBlock ANAEROBIC_DIGESTER;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	private IndustrialForms() {
@@ -226,8 +257,9 @@ public final class IndustrialForms {
 		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
 		INDUSTRIAL_FERMENTER = block("industrial_fermenter", INDUSTRIAL_FERMENTER_FORM);
 		BULK_CHEMICAL_REACTOR = block("bulk_chemical_reactor", BULK_CHEMICAL_REACTOR_FORM);
+		ANAEROBIC_DIGESTER = block("anaerobic_digester", ANAEROBIC_DIGESTER_FORM);
 		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER,
-				INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR);
+				INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

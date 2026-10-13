@@ -2,8 +2,8 @@
 Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), Gas Burning Generator
 (docs/features/industrial-gas-burning-generator.md), Chemical Infuser (docs/features/industrial-chemical-infuser.md) and
 Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md), Industrial Fermenter
-(docs/features/industrial-fermenter.md) and Bulk Chemical Reactor (docs/features/industrial-bulk-chemical-reactor.md), of
-the owner's factory plan.
+(docs/features/industrial-fermenter.md), Bulk Chemical Reactor (docs/features/industrial-bulk-chemical-reactor.md) and
+Anaerobic Digester (docs/features/industrial-anaerobic-digester.md), of the owner's factory plan.
 
 Each form is described here for its art, recipes and data, and in IndustrialForms.java for the game;
 tools/check_mod_data.py checks that the two agree. Layers are given bottom first, each as rows from the front to the
@@ -36,6 +36,10 @@ CONTROLLED_FERMENTATION = f"{MOD}:controlled_fermentation"
 # Chemical Reactor offers its family's recipes.
 ACID_ABSORPTION = f"{MOD}:acid_absorption"
 CHLORIDE_LEACHING = f"{MOD}:chloride_leaching"
+# Digesting organic waste in a sealed, stirred tank into raw biogas: what the Anaerobic Digester offers, and the item tag
+# of what it takes.
+ANAEROBIC_DIGESTION = f"{MOD}:anaerobic_digestion"
+DIGESTIBLE = "digestible"
 # Joining a carbon oxide and hydrogen into methane over the nickel bed, and the item tag the Infuser's bed socket holds.
 NICKEL_METHANATION = f"{MOD}:nickel_methanation"
 METHANATION_BEDS = "methanation_beds"
@@ -245,6 +249,35 @@ FORMS = {
                                            "C": f"{MOD}:basic_circuit", "T": f"{MOD}:steel_tank"}),
         "features": ["machines"],
     },
+    "anaerobic_digester": {
+        "display": "Anaerobic Digester",
+        # The chemical reactor family (96 JE/t) in the bulk profile: four batches side by side, 16,000 mB tanks and 80%
+        # of the draw a batch. The owner's selected substantial first digester, six blocks every way.
+        "family": "chemical_reactor",
+        "layers": [["C#####"] + ["######"] * 5] + [["######"] * 6] * 5,
+        "profile": "BULK",
+        "tank_mb": 16_000,
+        # Waste at the feed auger and water; raw biogas at the top header, digestate (bone meal) at the low chute.
+        "input_tanks": ["water"],
+        "output_tanks": ["biogas"],
+        "item_inputs": 1,
+        "item_outputs": 1,
+        "capabilities": [ANAEROBIC_DIGESTION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "ITEM_IN", 0, 0, 2, 1, "LEFT"),
+            ("water_in", "FLUID_IN", 0, 0, 4, 0, "LEFT"),
+            ("biogas_out", "FLUID_OUT", 0, 5, 4, 5, "RIGHT"),
+            ("digestate_out", "ITEM_OUT", "FormPort.ALL", 5, 2, 0, "RIGHT"),
+            ("power", "ENERGY_IN", 0, 3, 5, 0, "BACK"),
+        ],
+        # No bill in the plan (this change's choice, open for review): four Steel Tanks, two electric motors, a steel
+        # plate, a basic circuit and a Machine Casing.
+        "recipe": (["TPT", "MCM", "TKT"], {"T": f"{MOD}:steel_tank", "P": "#c:plates/steel", "M": f"{MOD}:electric_motor",
+                                           "C": f"{MOD}:basic_circuit", "K": f"{MOD}:machine_casing"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -318,6 +351,18 @@ HANDBOOK["bulk_chemical_reactor"] = [
     "into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace.",
 ]
 
+HANDBOOK["anaerobic_digester"] = [
+    "Six wide, six deep and six tall: a huge sealed tank on four foundation shoes, with a feed auger on its left side, a "
+    "digestate chute low on its right, a gas header over its dome and a mixer gearbox at the back, built from four "
+    "Steel Tanks, two electric motors, a steel plate, a basic circuit and a Machine Casing. Every block it fills must be "
+    "free when it is placed. It runs four batches at once, from 16,000 mB tanks, at 80% of the reactor's draw.",
+    "Feed it organic waste at the auger: crops, rotten flesh, poisonous potatoes, kelp, pumpkins or seeds. Pipe water "
+    "into the inlet low on the left. Sixteen items and a bucket of water digest over twenty seconds into 1,000 mB of raw "
+    "biogas (60% methane, 40% carbon dioxide) at the header flange high on the right, and two bone meal at the chute.",
+    "Biogas upgrades into pure methane in the Chemical Infuser with its Nickel Catalyst Bed: 250 mB of biogas and 400 "
+    "mB of hydrogen give 250 mB of methane and 400 mB of water.",
+]
+
 # Tank labels on the screen and in its reasons (MachineStatus.tankLabel), by role.
 TANK_NAMES = {
     "fuel": "Fuel tank",
@@ -332,6 +377,7 @@ TANK_NAMES = {
     "co2": "Carbon dioxide tank",
     "liquid": "Liquid tank",
     "gas": "Gas tank",
+    "biogas": "Biogas tank",
 }
 
 # Recipes only forms run: each names the capability a form must offer. Fluid results go to output tanks by their
@@ -362,6 +408,20 @@ FORM_RECIPES = {
          "tool": f"{MOD}:nickel_catalyst_bed",
          "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:carbon_dioxide", 100)],
          "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 400, 1)], "ticks": 200, "features": ["machines"]},
+        # Biogas upgrading over the same bed (docs/features/industrial-starter-gas-and-acid-factory.md, the 60/40
+        # mapping): 250 mB of biogas holds 150 of methane and 100 of carbon dioxide; the carbon dioxide takes 400 mB of
+        # hydrogen as in methanation, giving 250 mB of methane in all and 400 mB of water. 200 ticks at 128 JE/t.
+        {"name": "infuser_biogas_upgrading", "capability": NICKEL_METHANATION, "tool": f"{MOD}:nickel_catalyst_bed",
+         "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:biogas", 250)],
+         "fluid_results": [(f"{MOD}:methane", 250, 0), ("minecraft:water", 400, 1)], "ticks": 200, "features": ["machines"]},
+    ],
+    "anaerobic_digester": [
+        # Organic waste digested (this change's proposal): sixteen items and a bucket of water make a bucket of raw biogas
+        # in the selected 60/40 methane/carbon dioxide mixture, and two bone meal of digestate, about what a composter
+        # gives for as many items. 400 ticks at the reactor family's 96 JE/t, 38,400 JE (30,800 in the bulk profile).
+        {"name": "digester_biogas", "capability": ANAEROBIC_DIGESTION, "items": [(f"#{MOD}:{DIGESTIBLE}", 16)],
+         "fluids": [("minecraft:water", 1000)], "fluid_results": [(f"{MOD}:biogas", 1000, 0)],
+         "results": [("minecraft:bone_meal", 2)], "ticks": 400, "features": ["machines"]},
     ],
     "industrial_fermenter": [
         # The Chemical Reactor's fermentation (eight fermentable crops and a bucket of water, 250 mB of bioethanol, 100 ticks)
@@ -1069,6 +1129,111 @@ def bulk_chemical_reactor_still():
     return cyl("y", cx, cz, 3.75, y - 1.25, y + 0.75, COPPER, "dr_pulley")
 
 
+# The Anaerobic Digester's mixer coupling on the back of its gearbox, turning about z: its centre (x, y, z).
+DIGESTER_COUPLING = (-24, 16, 95.25)
+
+
+def anaerobic_digester():
+    """Six wide, six deep and six tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a factory
+    landmark, a huge closed cylindrical tank of the owner's white tank panels on four broad foundation shoes, ringed by
+    thick graphite compression rings, under a faceted domed cap with a raised upper ring. A ladder climbs the front to the
+    ring. Across the front runs the sheltered feed gallery: a canopy on posts over the control panel (the controller,
+    with its amber and green lamps), the digestate sight windows and the gas-status lamp. The capped feed auger enters
+    the left side with its hopper, the water inlet low beside it; the low digestate chute leaves the right side; the dark
+    gas header slopes from the dome to its flange high on the right. At the back, the heavy mixer gearbox with its motor
+    and coupling (drawn turning by MachineRotors) and the junction box with the power socket. Each port is at the middle
+    of its block's face."""
+    cx, cz = -32, 48
+    m = []
+    # Four broad foundation shoes under the tank.
+    for sx in (cx - 27, cx + 27):
+        for sz in (cz - 27, cz + 27):
+            m.append(box((sx - 7, 0, sz - 7), (sx + 7, 6, sz + 7), {"*": GUNMETAL, "up": STENCIL}))
+    # The tank: white panels, graphite compression rings, the raised upper ring and the faceted dome.
+    m += cyl("y", cx, cz, 42, 6, 76, TANK_BODY, TANK_TOP)
+    for y in (12, 28, 44, 60):
+        m += cyl("y", cx, cz, 42.75, y, y + 2.5, GUNMETAL)
+    m += cyl("y", cx, cz, 43.5, 74, 77, GUNMETAL)
+    m += cyl("y", cx, cz, 38, 76, 82, TANK_BODY, TANK_TOP)
+    m += cyl("y", cx, cz, 30, 82, 86, TANK_BODY, TANK_TOP)
+    m += cyl("y", cx, cz, 20, 86, 89, TANK_BODY, TANK_TOP)
+    m += cyl("y", cx, cz, 8, 89, 91, GUNMETAL, CHROME)
+    # The ladder up the front to the upper ring.
+    for x in (-13.5, -8):
+        m.append(box((x - 0.5, 6, 3.5), (x + 0.5, 74, 4.5), GUNMETAL))
+    for y in range(10, 74, 5):
+        m.append(box((-13, y, 3.75), (-8.5, y + 0.75, 4.25), CHROME))
+    # The sheltered feed gallery: a canopy on posts across the front, the control panel under it at the left, the
+    # digestate sight windows and the gas-status lamp on the tank.
+    m.append(box((-60, 34, 0.5), (15, 35.5, 10), {"*": GUNMETAL, "north": HAZARD}))
+    for x in (-58, 12):
+        m.append(box((x, 0, 1), (x + 2, 34, 3), GUNMETAL))
+    m.append(box((2, 0, 1), (11, 18, 8), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (6.5, 13.5, 0.75), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (4.5, 7, 0.75), 2.5, texture=LAMP, body=GUNMETAL))
+    m.append(dial("north", (8.5, 7, 0.75), 2.5, texture=MINT, body=GUNMETAL))
+    for y in (14, 24):
+        m.append(dial("north", (cx - 6, y, 5.25), 6, texture=PORTHOLE, body=CHROME))
+    m.append(box((cx + 1, 10, 5.25), (cx + 3, 30, 6.25), STRIP))
+    m.append(dial("north", (cx, 52, 5.25), 3, texture=MINT, body=GUNMETAL))
+    # The capped feed auger into the left side, its hopper on top and its cap at the port.
+    m += cyl("x", 24, 40, 4, 6, 15.25, OLIVE, GUNMETAL)
+    for x in (8, 12):
+        m += cyl("x", 24, 40, 4.4, x, x + 1, GUNMETAL)
+    m.append(box((7, 28, 35), (14, 33, 45), OLIVE))
+    m.append(box((6.5, 33, 34.5), (14.5, 34, 45.5), HAZARD))
+    m.append(box((7.5, 33.25, 35.5), (13.5, 33.5, 44.5), MOUTH))
+    m.append(box((15.25, 19, 35), (16, 29, 45), {"*": CHROME, "east": MOUTH}))
+    # The water inlet low on the left.
+    m += cyl("x", 8, 72, 2, 6, 15.25, RUBBER)
+    m += cyl("x", 8, 72, 2.4, 11, 12, "sp_water")
+    m.append(box((15.25, 5, 69), (16, 11, 75), {"*": CHROME, "east": f"{FLANGE}!"}))
+    # The low digestate chute out of the right side.
+    m.append(box((-79.25, 3, 36), (-73, 13, 44), GUNMETAL))
+    m.append(box((-80, 3, 35), (-79.25, 13, 45), {"*": GUNMETAL, "west": MOUTH}))
+    m.append(box((-80, 13, 34.5), (-72, 14, 45.5), HAZARD))
+    # The dark gas header from the dome to its flange high on the right, banded in biogas.
+    m += cyl("x", 88, 72, 3, -79.25, -40, EXHAUST, GUNMETAL)
+    m += cyl("x", 88, 72, 3.4, -72, -71, "biogas_still")
+    m += cyl("y", -40, 72, 3, 80, 88, EXHAUST, GUNMETAL)
+    m.append(box((-80, 84, 68), (-79.25, 92, 76), {"*": CHROME, "west": f"{FLANGE}!"}))
+    # The heavy mixer gearbox at the back, its motor on top and the coupling's guard ring.
+    m.append(box((-34, 6, 86), (-14, 26, 94.5), GUNMETAL))
+    m.append(box((-34.25, 26, 85.75), (-13.75, 27, 94.75), HAZARD))
+    m += cyl("z", -24, 33, 4, 80, 92, OLIVE, GUNMETAL)
+    for z in (83, 87):
+        m += cyl("z", -24, 33, 4.4, z, z + 1, GUNMETAL)
+    m += cyl("z", -24, 33, 4.2, 92, 93, GUNMETAL, GRILLE)
+    m += octagon_ring("z", -24, 16, 6, 5, 94.5, 95.75, CHROME)
+    # The junction box at the back right: its power socket and a hazard band.
+    m.append(box((-48, 6, 88), (-34, 18, 95.25), GUNMETAL))
+    m.append(box((-48.25, 18, 87.75), (-33.75, 19, 95.5), HAZARD))
+    m.append(box((-43, 5, 95.25), (-37, 11, 96), {"*": CHROME, "south": "power_port!"}))
+    return m
+
+
+def anaerobic_digester_rotor():
+    """The Digester's mixer coupling on the back of its gearbox (client/MachineRotors draws it): a hub and four arms, so
+    its slow turn reads from behind."""
+    import machine_rotors as rotors
+    cx, cy, z = DIGESTER_COUPLING
+    quads = rotors.disc("z", z - 0.75, z + 0.5, cx, cy, 1.75, CHROME, CHROME)
+    for arm in range(4):
+        angle = math.radians(90 * arm)
+        c, s_ = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cx + r * c - w * s_, cy + r * s_ + w * c)
+        quads += rotors.prism("z", z - 0.5, z + 0.25, [at(1.9, -0.9), at(4.5, -0.9), at(4.5, 0.9), at(1.9, 0.9)], COPPER, COPPER)
+    return quads
+
+
+def anaerobic_digester_still():
+    """The coupling standing still, for the item model only."""
+    cx, cy, z = DIGESTER_COUPLING
+    return cyl("z", cx, cy, 4.5, z - 0.5, z + 0.25, COPPER) + cyl("z", cx, cy, 1.75, z - 0.75, z + 0.5, CHROME)
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -1096,15 +1261,21 @@ ROTORS = {
         "block": "bulk_chemical_reactor", "axis": "y", "center": list(BULK_REACTOR_DRIVE), "property": "lit", "speed": 6,
         "ease": 30, "always": True, "quads": bulk_chemical_reactor_rotor(),
     },
+    # The Digester's mixer coupling, turning slowly while it digests.
+    "anaerobic_digester_coupling": {
+        "block": "anaerobic_digester", "axis": "z", "center": list(DIGESTER_COUPLING), "property": "lit", "speed": 3,
+        "ease": 40, "always": True, "quads": anaerobic_digester_rotor(),
+    },
 }
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
           "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer(),
-          "industrial_fermenter": industrial_fermenter(), "bulk_chemical_reactor": bulk_chemical_reactor()}
+          "industrial_fermenter": industrial_fermenter(), "bulk_chemical_reactor": bulk_chemical_reactor(),
+          "anaerobic_digester": anaerobic_digester()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
-               "bulk_chemical_reactor": bulk_chemical_reactor_still()}
+               "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still()}
 PARTICLE = "dp_olive"
 
 
@@ -1117,6 +1288,11 @@ def write_all(write, assets, data, lang, condition, self_drop):
     # The Infuser's bed socket holds the nickel catalyst bed: the owner's selected one nickel ingot on two ordinary fired
     # bricks (docs/features/industrial-starter-gas-and-acid-factory.md), made once and never used up.
     write(data / "tags" / "item" / f"{METHANATION_BEDS}.json", {"values": [f"{MOD}:nickel_catalyst_bed"]})
+    # What the Anaerobic Digester takes: the fermentable crops and farm and kitchen waste.
+    write(data / "tags" / "item" / f"{DIGESTIBLE}.json", {"values": [
+        f"#{MOD}:fermentable", "minecraft:rotten_flesh", "minecraft:poisonous_potato", "minecraft:kelp",
+        "minecraft:pumpkin", "minecraft:wheat_seeds", "minecraft:beetroot_seeds", "minecraft:melon_seeds",
+        "minecraft:pumpkin_seeds"]})
     write(data / "recipe" / "nickel_catalyst_bed.json", {
         "fabric:load_conditions": condition("machines"),
         "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["BNB"],

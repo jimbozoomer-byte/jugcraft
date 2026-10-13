@@ -34,7 +34,7 @@ Hydrogen chloride is unchanged and needs no bed. The Engineer's Handbook pages o
   - carbon dioxide 351.6 JE per mB, mostly its electrolysed oxygen;
   - methane 1,127.6 JE per mB, against the 448 JE per mB it burns for (40%).
 
-  Coal's own fuel value is not counted, so the real margin is wider. Without the change, the check would have seen only the 104 JE per mB of the methanation step and reported a loop. Hydrogen's figure is unchanged.
+  Coal's own fuel value is not counted, so the real margin is wider. (The [Anaerobic Digester](industrial-anaerobic-digester.md) later refined the audit to cost only electricity-only routes; methane, whose carbon always comes from coal, crops or waste, is now a primary fuel there.) Without the change, the check would have seen only the 104 JE per mB of the methanation step and reported a loop. Hydrogen's figure is unchanged.
 - **Carbon conservation.** A coal or charcoal counts as 250 reaction amounts of carbon, like a sulfur dust, giving 250 mB of carbon dioxide, enough for 250 mB of methane. Burning it in the Oxidizer recovers no heat.
 - **Water.** Methanation gives back 400 mB of water per 100 mB of methane, the plan's liquid anchor of 2 mB per reaction amount. It leaves at the drain and stops the Infuser when the water tank fills (2,000 mB), like any output.
 - **Tool.** The bed is a one-time purchase with no wear, as selected.

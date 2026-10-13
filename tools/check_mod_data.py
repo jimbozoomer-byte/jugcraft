@@ -2890,11 +2890,14 @@ def machines_stats(family):
 
 
 def cheapest_electrolysis(fluid, _seen=None):
-    """The least JE any recipe spends per mB of `fluid` it makes, with the most efficiency cards its machine takes (the
+    """The least JE electricity alone spends per mB of `fluid`, with the most efficiency cards its machine takes (the
     legacy fluid machines take none), counting the cheapest cost of the fluids it uses up as well (methane's hydrogen,
-    say; water is free), or None when no recipe makes it. All of a recipe's cost counts against `fluid`, so a fuel burning for less
-    than this cannot pay back the electricity that made it, whatever else came out too. A fluid nothing makes, or one
-    already being costed further up (a cycle), adds nothing."""
+    say; water is free), or None when electricity alone cannot make it. All of a recipe's cost counts against `fluid`, so
+    a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too.
+
+    A recipe that uses up items (coal, crops, waste) draws its energy partly from them, so it is not an electricity
+    route, and neither is one using a fluid only such recipes make: a fuel with no other route is a primary fuel, never
+    an electricity loop. A fluid already being costed further up (a cycle) adds nothing."""
     import machines
     seen = (_seen or set()) | {fluid}
 
@@ -2903,24 +2906,32 @@ def cheapest_electrolysis(fluid, _seen=None):
         for source, mb in recipe.get("fluids", []):
             # Water and lava are free in the world, whatever else also gives some off.
             if source not in seen and not source.startswith("minecraft:"):
-                total += (cheapest_electrolysis(source, seen) or 0) * mb
+                cost = cheapest_electrolysis(source, seen)
+                if cost is None:
+                    return None
+                total += cost * mb
         return total
     costs = []
+
+    def offer(recipe, per_tick):
+        if recipe.get("items"):
+            return
+        for result in recipe.get("fluid_results", []):
+            if result[0] == fluid and per_tick:
+                spent = inputs(recipe)
+                if spent is not None:
+                    costs.append((recipe["ticks"] * per_tick + spent) / result[1])
     for machine, recipes in petro.FLUID_RECIPES.items():
         use = machines.STATS.get(machine, {}).get("use_per_tick", 0)
         for recipe in recipes:
-            for result in recipe.get("fluid_results", []):
-                if result[0] == fluid and use:
-                    costs.append((recipe["ticks"] * use + inputs(recipe)) / result[1])
+            offer(recipe, use)
     for form, recipes in industrial_forms.FORM_RECIPES.items():
         info = industrial_forms.FORMS[form]
         use = machines.STATS[info["family"]]["use_per_tick"]
         # MachineUpgrades.Effect.use with four efficiency cards, the most that count.
         cheapest = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
         for recipe in recipes:
-            for result in recipe.get("fluid_results", []):
-                if result[0] == fluid:
-                    costs.append((recipe["ticks"] * cheapest + inputs(recipe)) / result[1])
+            offer(recipe, cheapest)
     return min(costs) if costs else None
 
 

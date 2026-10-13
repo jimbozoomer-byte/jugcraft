@@ -7308,6 +7308,31 @@
           ],
           "results": [],
           "ticks": 200
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              400
+            ],
+            [
+              "jugcraft:biogas",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              250
+            ],
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 200
         }
       ]
     },
@@ -7901,6 +7926,39 @@
             ]
           ],
           "ticks": 160
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:anaerobic_digester",
+      "type": "anaerobic_digester",
+      "recipes": [
+        {
+          "items": [
+            [
+              "#jugcraft:digestible",
+              16
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:biogas",
+              1000
+            ]
+          ],
+          "results": [
+            [
+              "minecraft:bone_meal",
+              2
+            ]
+          ],
+          "ticks": 400
         }
       ]
     }

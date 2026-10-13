@@ -130,6 +130,10 @@ GASES = {
     # A pale blue-green.
     "methane": {"display": "Methane", "feature": "machines",
                 "colors": [(130, 170, 170), (160, 196, 194), (190, 218, 214), (222, 240, 236)]},
+    # Raw biogas from the Anaerobic Digester: the selected 60/40 methane and carbon dioxide game mixture. A dull
+    # grey-green.
+    "biogas": {"display": "Biogas", "feature": "machines",
+               "colors": [(128, 140, 118), (156, 168, 144), (184, 194, 170), (214, 222, 202)]},
 }
 
 

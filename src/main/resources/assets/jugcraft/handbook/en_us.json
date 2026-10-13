@@ -3922,6 +3922,30 @@
           }
         },
         {
+          "title": "Anaerobic Digester",
+          "icon": "jugcraft:anaerobic_digester",
+          "text": [
+            "Six wide, six deep and six tall: a huge sealed tank on four foundation shoes, with a feed auger on its left side, a digestate chute low on its right, a gas header over its dome and a mixer gearbox at the back, built from four Steel Tanks, two electric motors, a steel plate, a basic circuit and a Machine Casing. Every block it fills must be free when it is placed. It runs four batches at once, from 16,000 mB tanks, at 80% of the reactor's draw.",
+            "Feed it organic waste at the auger: crops, rotten flesh, poisonous potatoes, kelp, pumpkins or seeds. Pipe water into the inlet low on the left. Sixteen items and a bucket of water digest over twenty seconds into 1,000 mB of raw biogas (60% methane, 40% carbon dioxide) at the header flange high on the right, and two bone meal at the chute.",
+            "Biogas upgrades into pure methane in the Chemical Infuser with its Nickel Catalyst Bed: 250 mB of biogas and 400 mB of hydrogen give 250 mB of methane and 400 mB of water."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:electric_motor",
+              "jugcraft:steel_tank",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_tank"
+            ],
+            "result": "jugcraft:anaerobic_digester",
+            "count": 1
+          }
+        },
+        {
           "title": "Fuel Cell",
           "icon": "jugcraft:fuel_cell",
           "text": [
