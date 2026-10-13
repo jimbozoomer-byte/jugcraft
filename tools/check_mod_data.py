@@ -3036,6 +3036,116 @@ def check_industrial_forms():
         err(f"The Electrolytic Separator costs {plates} steel plates, not the owner's selected 20")
 
 
+def check_self_output_gates():
+    """No machine's construction needs an item that only that machine can make (docs/features/
+    industrial-copper-entry-aluminum.md): for every machine that runs recipes, each ingredient of its crafting recipe,
+    tags resolved, must be reachable from the world and vanilla items through recipes some other machine or crafting
+    runs. Items no recipe makes (ores, crops, mob drops) and vanilla items count as found in the world."""
+    import recipe_view
+    recipe_dir = DATA / MOD / "recipe"
+
+    def outputs(data):
+        found = []
+        result = data.get("result")
+        if isinstance(result, dict) and "id" in result:
+            found.append(result["id"])
+        elif isinstance(result, str):
+            found.append(result)
+        found += [r["id"] for r in data.get("results", []) or [] if isinstance(r, dict) and "id" in r]
+        if isinstance(data.get("output"), str):
+            found.append(data["output"])
+        return found
+
+    def refs(value):
+        if isinstance(value, str):
+            return [value]
+        if isinstance(value, list):
+            return [ref for item in value for ref in refs(item)]
+        if isinstance(value, dict):
+            if "tag" in value:
+                return ["#" + value["tag"]]
+            for key in ("item", "ingredient", "id"):
+                if key in value:
+                    return refs(value[key])
+        return []
+
+    def ingredients(data):
+        found = [ref for value in data.get("key", {}).values() for ref in refs(value)]
+        for key in ("ingredients", "items", "inputs"):
+            found += [ref for item in data.get(key, []) or [] for ref in refs(item)]
+        for key in ("input", "ingredient", "tool"):
+            if key in data:
+                found += refs(data[key])
+        return found
+
+    type_blocks = {}
+    for block, (_, kind) in recipe_view.LISTS.items():
+        type_blocks.setdefault(f"{MOD}:{kind}", set()).add(f"{MOD}:{block}")
+    for name, spec in petro.FLUID_MACHINES.items():
+        if spec.get("recipe_type"):
+            type_blocks.setdefault(f"{MOD}:{spec['recipe_type']}", set()).add(f"{MOD}:{name}")
+    capability_blocks = {}
+    for form, info in industrial_forms.FORMS.items():
+        for capability in info["capabilities"]:
+            capability_blocks.setdefault(capability, set()).add(f"{MOD}:{form}")
+    recipes = []
+    for path in recipe_dir.rglob("*.json"):
+        data = load(path) or {}
+        kind = data.get("type", "")
+        if data.get("capability"):
+            makers = capability_blocks.get(data["capability"], {"?"})
+        else:
+            makers = type_blocks.get(kind, {kind or "?"})
+        made = outputs(data)
+        if made:
+            recipes.append((makers, ingredients(data), made, path.relative_to(recipe_dir).as_posix()))
+    produced = {item for _, _, made, _ in recipes for item in made}
+    tag_cache = {}
+
+    def tag_values(tag, seen=()):
+        if tag in tag_cache:
+            return tag_cache[tag]
+        namespace, _, path = tag[1:].partition(":")
+        values = []
+        for folder in ("item", "items"):
+            file = DATA / namespace / "tags" / folder / f"{path}.json"
+            if file.is_file():
+                for value in (load(file) or {}).get("values", []):
+                    value = value["id"] if isinstance(value, dict) else value
+                    values += (tag_values(value, seen + (tag,)) if value not in seen else []) if value.startswith("#") else [value]
+        tag_cache[tag] = values
+        return values
+
+    def available(ref, reached):
+        if ref.startswith("#"):
+            values = tag_values(ref)
+            return not values or any(available(value, reached) for value in values)
+        return ref.startswith("minecraft:") or ref not in produced or ref in reached
+
+    def reachable_without(block):
+        reached, changed = set(), True
+        while changed:
+            changed = False
+            for makers, needs, made, _ in recipes:
+                if makers - {block} and all(available(ref, reached) for ref in needs):
+                    for item in made:
+                        if item not in reached:
+                            reached.add(item)
+                            changed = True
+        return reached
+
+    crafting = {"minecraft:crafting_shaped", "minecraft:crafting_shapeless"}
+    for block in sorted(set().union(*type_blocks.values(), *capability_blocks.values())):
+        builds = [r for r in recipes if block in r[2] and r[0] & crafting]
+        if not builds:
+            continue
+        reached = reachable_without(block)
+        for _, needs, _, name in builds:
+            gated = [ref for ref in needs if not available(ref, reached)]
+            if gated:
+                err(f"{block}: its recipe {name} needs {gated}, which only it can make: a self-output gate")
+
+
 def check_large_machines():
     """Footprints must match MachineKind.footprint(); model elements must stay in Minecraft's -16..32 range."""
     from large_machines import FOOTPRINTS
@@ -13205,6 +13315,7 @@ def main():
     check_machine_recipe_files(registered)
     check_fluid_recipes(registered)
     check_industrial_forms()
+    check_self_output_gates()
     check_tags()
     check_worldgen()
     check_java()

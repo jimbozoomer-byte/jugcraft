@@ -117,7 +117,7 @@ FORMS = {
             ("power", "ENERGY_IN", 0, 1, 0, 0, "FRONT"),
         ],
         # The owner's selected construction: 4 steel plates and two Steel Tanks (8 plates each), 20 plates in all,
-        # with copper cable and a basic circuit where the Electrolytic Cell needs aluminum cable and an advanced one.
+        # with copper cable and a basic circuit where the Electrolytic Cell needs an advanced one.
         "recipe": (["PWP", "TCT", "PMP"], {"P": "#c:plates/steel", "W": f"{MOD}:copper_cable", "T": f"{MOD}:steel_tank",
                                            "C": f"{MOD}:basic_circuit", "M": f"{MOD}:machine_casing"}),
         "features": ["machines"],
@@ -421,7 +421,7 @@ FORMS = {
 HANDBOOK = {
     "electrolytic_separator": [
         "Two wide, two deep and three tall: the first of the big industrial machines, built from steel, copper cable "
-        "and a basic circuit, before the Electrolytic Cell's aluminum cable and advanced circuit. It is placed from "
+        "and a basic circuit, before the Electrolytic Cell's advanced circuit. It is placed from "
         "the front; every block it fills must be free, or it says what is in the way and where.",
         "Pipe water or brine into the inlet low at the back. A bucket of water gives 500 mB of hydrogen (the top "
         "left collar) and 250 mB of oxygen (top right) in 40 seconds; a bucket of brine gives 250 mB of hydrogen, "
