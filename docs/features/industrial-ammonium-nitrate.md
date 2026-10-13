@@ -1,6 +1,6 @@
 # Ammonium nitrate: fertilizer and explosive filling from nitric acid and ammonia
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 Stacked on [gasification residue](industrial-gasification-residue.md) and the branches below it, down to the [Bulk Chemical Reactor](industrial-bulk-chemical-reactor.md).
 
 Proposal issue: none. TODO item: "Extend nitric/ammonia chemistry for ammonium-nitrate fertilizer and compatible finished game ammunition/rocketry products".
@@ -96,7 +96,7 @@ The existing `itRunsItsOwnRecipesAndIsBuiltFromItsBill` still checks that every 
 
 ### Results
 
-Not yet run in CI.
+- **Run [38463142878](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38463142878) on the contributor's fork (commit f365ca00): green.** Everything compiled; the data checks passed; every server game test passed, `nitricAcidAndAmmoniaGiveAmmoniumNitrate` among them; the build without optional integrations and all five client shards passed. Later commits on the branch change only documentation.
 
 No survival playtest, two-client test or performance measurement has been done.
 
