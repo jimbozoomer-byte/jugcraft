@@ -115,6 +115,29 @@ public class FluoriteClientGameTests implements FabricClientGameTest {
 		Jugcraft.LOGGER.info("[fluorite] {}: persisted {} underground and {} surface blocks", seed, sample.underground.size(), sample.surface.size());
 	}
 
+	/** Add natural fluorite to the spodumene inspection save without importing artificial fixtures. */
+	static Set<BlockPos> addToCombinedTour(ClientGameTestContext context, TestSingleplayerContext world) {
+		Sample sample = world.getServer().computeOnServer(server -> {
+			var level = server.overworld();
+			var found = level.findClosestBiome3d(b -> b.is(Biomes.SNOWY_PLAINS), BlockPos.ZERO.atY(80), 8192, 32, 64);
+			check(found != null, "No snowy region for the combined tour");
+			var nearby = sample(level, found.getFirst(), 8, "combined mineral tour fluorite");
+			return nearby.surface.isEmpty() ? sample(level, found.getFirst(), 16, "combined mineral tour fluorite expanded") : nearby;
+		});
+		check(!sample.surface.isEmpty() && !sample.underground.isEmpty(), "No natural fluorite outcrop in the combined tour");
+		BlockPos marker = sample.surface.getFirst();
+		world.getServer().runCommand("tp @a " + xyz(marker.offset(7, 5, 9)));
+		context.waitTicks(50); world.getConnection().waitForChunksRender();
+		context.getInput().lookAt(marker); context.waitTicks(10);
+		screenshot(context, "combined-fluorite-stone-outcrop");
+		try {
+			Files.writeString(Path.of("combined-fluorite-tour.txt"), "Natural fluorite stone outcrop: /tp @s " + xyz(marker.offset(7, 5, 9))
+					+ "\nLook toward the mineral at " + xyz(marker) + "\nUntouched pocket (spectator): /tp @s "
+					+ xyz(components(sample.underground).stream().max(Comparator.comparingInt(Set::size)).orElseThrow().iterator().next()) + "\n");
+		} catch (IOException e) { throw new RuntimeException(e); }
+		Set<BlockPos> all = new HashSet<>(sample.underground); all.addAll(sample.surface); return Set.copyOf(all);
+	}
+
 	private static Sample sample(ServerLevel level, BlockPos center, int radius, String label) {
 		Set<BlockPos> underground = new HashSet<>(); List<BlockPos> surface = new ArrayList<>();
 		int minX = (center.getX() >> 4) - radius, minZ = (center.getZ() >> 4) - radius;
