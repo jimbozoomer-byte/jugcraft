@@ -230,13 +230,13 @@ Ran here (11 October 2026):
   in the world). Run with a piece nothing makes, and with one that needs the Nether's blaze powder (the Hearthstone),
   each was reported.
 
-Added, not yet run: the server game test `ConcordanceGameTests.theFirstLoadoutIsMadeInSurvival`, which asks the server
+Passed in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953)): the server game test `ConcordanceGameTests.theFirstLoadoutIsMadeInSurvival`, which asks the server
 for the recipe of every first-loadout piece a crafting table makes (the optional trinkets and the Focus of Fire
 included); `check_acquisition` keeps its list the generator's. The Kindled Lantern's working is already exercised by
 `ConcordanceGameTests.benchWorkingsMakeAndChargeALantern`, and the Adept's Attunement by `ConcordanceRitualGameTests`.
 
-Not run (nothing here can build or run the game): compiling `JugcraftJeiPlugin` and the test (CI will); any game test;
-the pages in a client with JEI (no test opens JEI); a person following the route in survival.
+`JugcraftJeiPlugin` compiles in CI. Not run: the pages in a client with JEI (no test opens JEI); a person following
+the route in survival.
 
 ## World and event applicability
 

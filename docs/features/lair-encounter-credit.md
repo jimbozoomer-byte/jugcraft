@@ -1,7 +1,7 @@
 # Lair encounter credit: support earns a boss's reward
 
-Status: implemented for Concordance Chunk A (unit 3: tickets A-05 and A-06); not yet compiled in CI. See Verification
-for what has run.
+Status: implemented for Concordance Chunk A (unit 3: tickets A-05 and A-06); its tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on
+`aa4d06c4e`). See Verification for what has run.
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -136,7 +136,7 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
 ## Verification
 
 - `python3 tools/check_mod_data.py` and `python3 scripts/check_repository.py` pass locally.
-- Game tests added (not yet run): `LairEncounterGameTests` (healing counts only the fight's hurt; what rest healed
+- Game tests, passed in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953), with the optional integrations and without): `LairEncounterGameTests` (healing counts only the fight's hurt; what rest healed
   earns nothing; a ward is credited for what it soaks; a tamed creature's blow is its owner's; a left fight pays no
   one; one who came back is paid like anyone else; a kept reward is paid once; kept rewards survive a save: a player saved
   owing one and loaded again as the same player joining is owed it once, the world's record reads back the same, and
@@ -147,8 +147,7 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   kills, disconnects, rejoins or respawns a player. The existing loot tests still use the bosses' `took`,
   `participants` and `reward`, which keep their signatures.
 
-Not yet run: any compilation or game test (this branch has not been through CI); a real fight with a healer in a
-lair; a real death, disconnect, rejoin or respawn; two clients; a crash between saves.
+Not run: a real fight with a healer in a lair; a real death, disconnect, rejoin or respawn; two clients; a crash between saves.
 
 ## World and event applicability
 

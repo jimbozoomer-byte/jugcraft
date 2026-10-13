@@ -216,7 +216,7 @@ The game tests (`TatterlaceGameTests`) show what a game-test server can, with a 
 8. the Golden Thimble turns aside one projectile, then cools down;
 9. a snare lets go of a player half a second after it stops holding them;
 10. a struck Binding Thread snaps;
-11. (added for [Concordance Chunk A](lair-encounter-credit.md), not yet run) cutting another player free of her Binding Thread is a deed of her fight, once a thread; cutting your own is not.
+11. (added for [Concordance Chunk A](lair-encounter-credit.md), passed in CI run 38435014953) cutting another player free of her Binding Thread is a deed of her fight, once a thread; cutting your own is not.
 
 The client game test (`TatterlaceClientGameTests`, CI job `client`) runs her fight in a real Spindle Loft, with its one player in survival under Resistance:
 1. an instance opens with her waiting on her silk;

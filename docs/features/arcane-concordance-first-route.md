@@ -1,7 +1,7 @@
 # The Jugcraft Encyclopedia's first slice: the First Light route
 
-Status: implemented for Concordance Chunk A (unit 4: ticket A-04, the encyclopedia entry and first route); the data
-checks pass locally; nothing is compiled or run in a game yet (see Verification).
+Status: implemented for Concordance Chunk A (unit 4: ticket A-04, the encyclopedia entry and first route); its server
+and client tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on `aa4d06c4e`; see Verification).
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope, [the first-chunk tickets](../plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md) (A-04)
 the ask, and [the encyclopedia's own record](jugcraft-encyclopedia.md) the owner's requirements for the whole feature.
@@ -152,7 +152,7 @@ not known here; the owner's 9 October declaration says the library was remade fr
 
 - `python3 tools/check_mod_data.py` (with the new `check_encyclopedia`) and `python3 scripts/check_repository.py` pass
   locally; `python3 tools/owner_art.py --check` matches.
-- Game tests added (not yet run): `EncyclopediaGameTests` (a newcomer sees only the first steps; the route follows the
+- Game tests, passed in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953)): `EncyclopediaGameTests` (a newcomer sees only the first steps; the route follows the
   research; every recipe shown is on the server; an absent recipe is never advertised; switched-off features have no
   pages; Spellcraft shows what is held; a boss is hidden until discovered; the route names only real sales; the pages
   survive the trip; requests are gated, answered at their tick and the Inspect page reads only a near, loaded block;
@@ -169,16 +169,20 @@ not known here; the owner's 9 October declaration says the library was remade fr
   `_creative_button`, `_scale4` and `_small`, and, for the first loadout's A-07 view, `jugcraft_first_loadout_kindled_lantern`
   and `jugcraft_first_loadout_adept_wand` (each held in hand).
 
-Not yet run: any compilation or game test (this branch has not been through CI), the client test above included; the
-full route by keys from a fresh world to a lair win (unit 5's A-08 test); a person following the route from a fresh
-world without reading source (A-04's acceptance is a human judgement); readability at GUI scales; the narrator heard;
-two clients.
+CI's history: the first run (38424079157) found Iris 1.11.7's *Shader pack selection* on the default key, I, so the
+default became B (A-D7); the test now also logs every loaded default. A later run (38433352364) failed once on the
+route step after R, because the test waited for the Spellcraft page, which is already there once First Light is
+begun, and could read the pages from before the refresh; the test now waits for the answer to the request it sent.
 
-Unverified, and where the tests will settle it: vanilla 26.3's B is free (its Ctrl+B narrator shortcut is not a key
-mapping, and acts only while the narrator is available); the recipe-book button being the inventory's only image button, and the
-creative tab's free space right of the inventory grid (below the slots Trinkets puts at its top right: a review found the
-first place, right of the armour slots, on Spell Engine's spell-book slot); `BookGuiManager.openEntry` in Modonomicon
-2.16.0 (read in 2.15.0's source); a placeable specimen being placed when aimed at a block.
+Settled in CI by the client test: B is shared with no other loaded default; the button covers no slot or widget,
+beside the recipe book or on the creative Survival Inventory tab (below the slots Trinkets adds there).
+
+Not run: the full route by keys from a fresh world to a lair win as one test (the chunk's handoff maps each A-08 step
+to the separate tests that cover it: [Unit 5](concordance-chunk-a.md#unit-5-evidence-and-handoff-a-08)); a person
+following the route from a fresh world without reading source (A-04's acceptance is a human judgement); readability
+judged by a person at other GUI scales (the screenshots are there); the narrator heard; two clients. Still unverified:
+`BookGuiManager.openEntry` in Modonomicon 2.16.0 (read in 2.15.0's source; no test opens a codex link); a placeable
+specimen being placed when aimed at a block.
 
 ## World and event applicability
 

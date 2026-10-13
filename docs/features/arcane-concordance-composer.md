@@ -1,7 +1,7 @@
 # Arcane Concordance: the Spell Composer
 
-Status: implemented for Concordance Chunk A (units 1 and 2: tickets A-01 to A-03); not yet compiled in CI. See
-Verification for what has run.
+Status: implemented for Concordance Chunk A (units 1 and 2: tickets A-01 to A-03); its tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953)
+on `aa4d06c4e`). See Verification for what has run.
 Proposal: the owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Practitioner and up (First Light understood). Builds on
@@ -135,12 +135,15 @@ art: the screens are drawn in code and CSS.
   `check_composer` audit checks the service's order of questions, that only `Composing` makes a composed inscription,
   that the command and the screen answer through it, the request's bound, the gated opening, the GuiLib guard, the
   stylesheet and every word the screens use.
-- Game tests added (not yet run): `ConcordanceComposeGameTests.oneServiceAnswersCommandAndScreen`,
+- Game tests, passed in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953)): `ConcordanceComposeGameTests.oneServiceAnswersCommandAndScreen`,
   `theDraftWritesWhatTheGrammarWants`, `theComposerAnswersAsTheCommandDoes` and `composerMessagesSurviveTheTrip`.
-- Client game test added (not yet run): `ConcordanceComposerClientGameTests`, on a dedicated server, with screenshots.
+- Client game test, passed in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953)): `ConcordanceComposerClientGameTests`, on a dedicated server, with
+  screenshots. Its first CI screenshot of the GuiLib workspace (run 38428501876) showed the spell box squeezed to a
+  sliver with its text cut off: GuiLib's inputs clip, so the panel's column shrank it to its padding. Unit 5 fixed the
+  stylesheet (the box keeps its height and the scrolling body takes what is left), and `check_composer` requires both.
 
-Not yet run: any compilation or game test (this branch has not been through CI); the narrator heard by a person; the
-GuiLib workspace by keyboard by hand; two clients.
+Not run: the narrator heard by a person; the GuiLib workspace by keyboard by hand; two clients; a person judging the
+screenshots.
 
 ## Rollout and open questions
 

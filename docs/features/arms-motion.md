@@ -108,7 +108,7 @@ cast's pose plays over a guard, a stroke or a weapon art:
   hand, and a wand in the main hand still casts with its gesture.
 
 [The Concordance presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07) has
-the details and the test (`ConcordanceJourneyClientGameTests.aCastGivesWayToAGunOrAnArm`, not yet run).
+the details and the test (`ConcordanceJourneyClientGameTests.aCastGivesWayToAGunOrAnArm`, passed in CI run 38435014953).
 
 ## Connections
 - Input producer: the arms of batch 42 (`weapons/ArmItem.kind()`).

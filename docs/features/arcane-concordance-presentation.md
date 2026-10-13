@@ -147,7 +147,8 @@ a gun or an arm in the main hand (below).
 
 ### One owner for the arms (Chunk A, ticket A-07)
 
-Added in Concordance Chunk A, unit 4, on 11 October 2026; not yet compiled or run in CI (see Verification). The
+Added in Concordance Chunk A, unit 4, on 11 October 2026; its client test passes in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953); see
+Verification). The
 ticket's rule: a cast's pose cannot override an active gun reload or an action ArmsMotion owns. A gun or a Jugcraft arm
 in the main hand now owns the player's arms, and no cast's pose plays over it.
 
@@ -318,7 +319,7 @@ Minecraft jar, so nothing was compiled or run in a game.
   twelfth, `VigilClient` ignoring guns, was reported by `check_crimson`.
 - `python3 scripts/check_repository.py`: PASS. `python3 tools/concordance_delivery.py`: the matrix holds; its Player
   Animation Library row now names the client test below.
-- Client game test added, not yet run: `ConcordanceJourneyClientGameTests.aCastGivesWayToAGunOrAnArm`, in a second
+- Client game test, passed in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953)): `ConcordanceJourneyClientGameTests.aCastGivesWayToAGunOrAnArm`, in a second
   world after the journey. It starts Kindle's release clip on the player the way Spell Engine's handler does for the
   server's packet, and checks:
   - with the wand in hand the clip plays, laid over the player by Player Animation Library (so the test can see one);

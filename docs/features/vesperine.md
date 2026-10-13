@@ -207,8 +207,8 @@ The game tests (`VesperineGameTests`) show what a game-test server can, with a r
 6. left alone, she returns to her seat, healed;
 7. her loot is each participant's own: two who struck her each get Reaper's Shade and, on a first kill, their own Vesper Scythe, and both earn The Last Harvest; a bystander who never struck her gets nothing;
 8. a kill with the Vesper Scythe heals two hearts;
-9. (added for [Concordance Chunk A](lair-encounter-credit.md), not yet run) support shares her harvest: a healer who mended 4 of what she did to a fighter, and a striker who fell in her arena and stands elsewhere now, are paid when she falls; one who walked away alive, a bystander and the fighter she only hurt are not; and her fall reported again pays no one twice;
-10. (added for Chunk A, not yet run) in her Harvest, relighting one of her wards is a deed of her fight, once a ward; before her Harvest, or at a brazier that is not a ward, it is nothing.
+9. (added for [Concordance Chunk A](lair-encounter-credit.md), passed in CI run 38435014953) support shares her harvest: a healer who mended 4 of what she did to a fighter, and a striker who fell in her arena and stands elsewhere now, are paid when she falls; one who walked away alive, a bystander and the fighter she only hurt are not; and her fall reported again pays no one twice;
+10. (added for Chunk A, passed in CI run 38435014953) in her Harvest, relighting one of her wards is a deed of her fight, once a ward; before her Harvest, or at a brazier that is not a ward, it is nothing.
 
 The client game test (`VesperineClientGameTests`, CI job `client`) runs her fight in a real Hollow Acre, with its one player in survival under Resistance:
 1. an instance opens with her seated on the throne, her skulls beside her;

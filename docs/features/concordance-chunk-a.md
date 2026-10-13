@@ -1,6 +1,7 @@
 # Concordance Chunk A: usable foundations (contract and handoff)
 
-Status: in progress (units 1 to 4 implemented, not yet compiled in CI); see each unit's record.
+Status: every unit implemented; the tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953)
+on `aa4d06c4e`); waiting for the owner's checkpoint before Chunk B. Not merged. See each unit's record.
 Proposal: the owner chose Chunk A ("usable magic") on 10 October 2026, from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) and
 [its first-chunk tickets](../plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md) (A-00 to A-08).
@@ -18,11 +19,11 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 
 | Unit | Tickets | What it delivers | Record | State |
 |---|---|---|---|---|
-| 1 | A-00, A-01 | Baseline; one composition service behind the command and the screen | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
-| 2 | A-02, A-03 | Bounded screen protocol; the plain composer screen and the GuiLib workspace over one draft | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI not yet run |
-| 3 | A-05, A-06 | Encounter contribution (healing, warding, objectives) and the reward lifecycle | [Lair encounter credit](lair-encounter-credit.md) | Implemented; CI not yet run |
-| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | [The encyclopedia's first route](arcane-concordance-first-route.md); [first loadout and acquisition](concordance-first-loadout.md); [one owner for the arms](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07) | Implemented; CI not yet run |
-| 5 | A-08 | Combined fixes and the evidence for the owner's checkpoint | this page | Not started |
+| 1 | A-00, A-01 | Baseline; one composition service behind the command and the screen | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI passed (run 38435014953) |
+| 2 | A-02, A-03 | Bounded screen protocol; the plain composer screen and the GuiLib workspace over one draft | [Spell Composer](arcane-concordance-composer.md) | Implemented; CI passed (run 38435014953) |
+| 3 | A-05, A-06 | Encounter contribution (healing, warding, objectives) and the reward lifecycle | [Lair encounter credit](lair-encounter-credit.md) | Implemented; CI passed (run 38435014953) |
+| 4 | A-04, A-07 | The encyclopedia's entry and first route; acquisition and presentation | [The encyclopedia's first route](arcane-concordance-first-route.md); [first loadout and acquisition](concordance-first-loadout.md); [one owner for the arms](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07) | Implemented; CI passed (run 38435014953) |
+| 5 | A-08 | Combined fixes and the evidence for the owner's checkpoint | [below](#unit-5-evidence-and-handoff-a-08) | Done; CI passed (run 38435014953) |
 
 ## Baseline (A-00)
 
@@ -86,6 +87,67 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 - Not available here: a person playing, two independent clients, the narrator heard by a person. These are recorded as
   not run in each record.
 
+## Unit 5: evidence and handoff (A-08)
+
+- Candidate: `aa4d06c4e` on `claude/awesome-davinci-iwv3b9`, rebased on main `b73f51c8a`. CI run
+  [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) (workflow_dispatch): every job
+  passed, namely the generated-files and material-data checks with the build and server game tests (`mod`), the build
+  and server game tests without the optional integrations, and the five client shards (every client test class). The
+  commit after it changes only these records.
+- CI runs on the way (workflow_dispatch; this branch has no open pull request):
+  - [38424079157](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38424079157) on `4467975ce`: everything
+    passed but client shard 2, where `EncyclopediaClientGameTests.theKey` found Iris 1.11.7's *Shader pack selection*
+    also on I. The default became B (A-D7); the check now also logs every loaded default.
+  - [38428501876](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38428501876) on `14fba1778`: everything
+    passed. Its screenshot of the GuiLib composer showed the spell box squeezed to a sliver (fixed below).
+  - [38433352364](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38433352364) on `5345f56d1`: both server
+    jobs passed with the new save test; client shard 2 failed once on the route step after R (a race in the test, fixed
+    below); cancelled for the next run.
+- Local, at the candidate: `python3 tools/check_mod_data.py` (2189 IDs) and `python3 scripts/check_repository.py` pass.
+- Unit 5's own fixes:
+  - the encyclopedia's default key, I to B (above);
+  - `LairEncounterGameTests.keptRewardsSurviveASave`: unit 3's two saved formats (the player attachment and the world
+    record `jugcraft:lair_rewards`) had no save test;
+  - the GuiLib composer's spell box no longer shrinks (GuiLib's inputs clip, so the column squeezed it to its padding),
+    and the scrolling body takes the space left; `check_composer` requires both;
+  - `EncyclopediaClientGameTests` waits for the answer to the request it sent, not for a page that may already be
+    there (`Navigator.applied()` and `EncyclopediaClient.sequence()` make the numbers readable).
+
+### The demonstration, step by step (A-08)
+
+| A-08 step | Evidence (one client on a dedicated server unless marked "server") |
+|---|---|
+| 1. A clue, then learning by ordinary practice | singleplayer: `ConcordanceJourneyClientGameTests.theFirstSuccessByOrdinaryControls` (three specimens, given rather than found, examined in the dark by sneak and use; First Light understood; Kindle and Aegis cast by their keys; the journal by J); `EncyclopediaClientGameTests` (Discover opens with *find* next; with the examination recorded the dark step is done); server: `EncyclopediaGameTests` |
+| 2. Opening the composer | `ConcordanceComposerClientGameTests` (the journal's Compose button) and `EncyclopediaClientGameTests` (Spellcraft's composer link) |
+| 3. A clear illegal-edit error | `ConcordanceComposerClientGameTests`: the word is marked, the reason given, Inscribe disabled (`jugcraft_concordance_composer_problem`) |
+| 4. Inscribing and casting, paid correctly | `ConcordanceComposerClientGameTests`: Inscribe, then a cast through Spell Engine that lights the wall and takes its 2 Focus once; server: `ConcordanceComposeGameTests.aWardForAFriendIsComposedAndCast` (3 Focus, cooldown; nothing when no one is touched) |
+| 5. Useful equipment in survival | `check_acquisition` (every selected item's survival route, from data); server: `EncyclopediaGameTests` (every recipe the route shows is on the server); in-hand screenshots `jugcraft_first_loadout_kindled_lantern`, `jugcraft_first_loadout_adept_wand` |
+| 6. Support at an existing boss | server: `VesperineGameTests.supportSharesHerHarvestOnce`, `aWardRelitInHerHarvestCounts`; `TatterlaceGameTests.cuttingAFriendFreeCounts`; `LairEncounterGameTests` |
+| 7. The right reward, and home again | server: the same, and `LairEncounterGameTests.aKeptRewardIsPaidOnce`; `LairClientGameTests` (a closed instance sends anyone inside home) |
+| 8. Saved and reopened | server: `LairEncounterGameTests.keptRewardsSurviveASave`; the research record's round trip in `ConcordanceGameTests`; the encyclopedia keeps no saved state (A-D9) |
+
+These are separate automated tests, each from its own fresh world; no single test walks one player from a fresh world
+to a lair win, and no person has played the route.
+
+### Not run
+
+A person playing the route; two clients in one fight (a healer and a fighter at Vesperine); a real death, disconnect,
+rejoin or respawn in a fight (the tests mark the player); a crash between saves; the narrator heard by a person;
+readability judged by a person at other GUI scales (the screenshots are there).
+
+### Known defects and limits
+
+- The Yeti King and the Cinder Tyrant (on main through #320) credit damage only: no support credit, no rewards kept
+  for the fallen or the away, no encyclopedia dossier, no JEI acquisition pages (Deferrals).
+- Outside this chunk: Jugcraft's older keys Party (P) and Reload (G) share their defaults with vanilla 26.3's Social
+  Interactions (P) and Quick Actions (G).
+
+### Where to resume
+
+Every unit is implemented and its tests ran in CI. The decisions in the table below are proposed, not accepted;
+nothing in Chunk B is started. The smallest next step is bringing the Yeti King and the Cinder Tyrant into the
+encounter credit, the dossiers and JEI's pages, which Chunk B's B3 (Yeti rewards) builds on.
+
 ## Deferrals
 
 - New delivery types, moving projectiles, unrestricted scripting and raised compiler caps (A-03 says so).
@@ -116,3 +178,4 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | A-D13 | 11 October 2026 | The route's support spell is `touch struck ward`, added to the codex examples | Proposed | Unit 4 |
 | A-D14 | 11 October 2026 | The CHANGELOG's reconciliation (stale "Unmerged" headings, the entries #277 dropped) goes in its own docs-only pull request | Superseded: #320 renamed the merged entries (13 October) | Unit 4 |
 | A-D15 | 11 October 2026 | JEI's acquisition pages and the encyclopedia's lair dossiers state exact drop chances and the first-win guarantee, "with the default data" (the alternative: name the boss and say "sometimes") | Proposed | Unit 4 |
+| A-D16 | 13 October 2026 | The composer's verdict (what the spell does and costs, or why it cannot work) stays at the end of the word lists, where at the usual window size a player scrolls to read it; the word a problem names is marked and Inscribe is disabled at once. Recommended instead: one line of the verdict under the spell box, the details where they are | Open (owner) | Unit 2 |
