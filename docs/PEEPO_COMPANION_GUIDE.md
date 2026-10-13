@@ -122,7 +122,7 @@ Filters are available for Cooking Pots, supported standard processors, Hearth Ov
 | Cutting Board | Provide a knife and valid cutting inputs. Peepo stands at the board and makes a two-handed chop. The knife loses durability; all recipe results are retained for Output. |
 | Skillet | Heat it from below. Supply brings compatible raw food and Output collects fried food. Cooking continues without a resident helper; no speed bonus is added. |
 | Kitchen Stove | Light it and keep its top clear for its own cooking. Supply brings cookable food and Output collects cooked food. A pot/skillet on top uses the stove as heat instead; assign that upper station for its workflow. |
-| Cider Press | Supply valid press ingredients and glass bottles. Peepo loads, presses, bottles and collects products through the press's normal workflow. |
+| Cider Press | Supply valid press ingredients and glass bottles. Peepo loads, sits on the rotating handle with dangling legs while operating it, then bottles and collects products through the press's normal workflow. |
 | Candy Kettle | Supply sugar, a water bottle or milk bucket, and an empty Candy Tray. The Filter selects candy types. Peepo cooks, pours, finishes the tray and delivers candy/empty containers; the tray is reused. |
 | Cider Barrel | Supply Sweet Cider. Open its **Filter** and choose **Sparkling** or **Aged**; Peepo reuses the emptied bottles and delivers ready cider to Output. |
 | Canning Kettle | Provide active heat, a water bucket when dry, and **full, fresh, unsealed preserve jars**. It holds four jars and processes them together; Output takes sealed jars, rejected spoiled jars and the returned empty water bucket. Empty Mason Jars are not ingredients. |
@@ -141,6 +141,8 @@ The Electrolytic Separator is the first supported machine using the new industri
 One helper costs **16 reserve JE/t (320 JE/s)**; two cost 32 JE/t combined. These are gross work costs before any applicable regeneration. The Separator's unmodified electrical draw is 256 JE per processing step: assistance raises average demand to roughly **320 JE/t with one helper or 384 JE/t with two**, without reducing a batch's total electrical cost. Upgrades retain their native effects. Missing power for extra work limits assistance; full outputs, missing feed, pause and incomplete structures stop useful work. The Jobs display reports the blocking condition.
 
 There is no item hauling for this fluid-only machine. Its gases and lye still leave through native fluid ports. The new shared helper support is opt-in for future processing forms; the Gas Burning Generator is not enabled. See the [industrial companion record](features/companion-industrial-machines.md).
+
+During Supply/Output trips, companions carry a visible example of their real cargo in both hands and reach to pick up or put down items. Ground planting and hand picking have their own motions; water collection holds the container in one hand and bends over to scoop, and Sprinkler filling tips the water bucket. Skillet and Kitchen Stove loading includes a brief spatula motion. These animations add no work delays, extra trips or energy costs. The existing pie/cake, hoe and overhead harvesting animations remain in use. See [task animations](features/companion-task-animations.md) for details.
 
 ### Vanilla stations and special-machine supplies
 

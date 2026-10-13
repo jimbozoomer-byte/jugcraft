@@ -121,7 +121,7 @@ final class MachineWorkClip {
         }
         grips(gripY,spread,gripSeparation);
     }
-    private void grips(float gripY,float spread,float gripSeparation){
+    void grips(float gripY,float spread,float gripSeparation){
         float cosX=Mth.cos(xRot), sinX=Mth.sin(xRot), cosZ=Mth.cos(zRot), sinZ=Mth.sin(zRot);
         // ModelPart applies Z * Y * X. These clips have no Y rotation.
         float leftGrip=gripY-gripSeparation,rightGrip=gripY+gripSeparation;

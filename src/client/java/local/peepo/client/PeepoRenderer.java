@@ -20,6 +20,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         addLayer(new KnifeLayer(this));
         addLayer(new HoeLayer(this));
         addLayer(new AnimalWorkLayer(this));
+        addLayer(new ActionItemLayer(this));
         addLayer(new PieLayer(this));
         addLayer(new SpoonLayer(this,new StirringSpoonModel(context.bakeLayer(PeepoClient.SPOON))));
         addLayer(new WorkPropsLayer(this,new WorkPropsModel(context.bakeLayer(PeepoClient.WORK_WOOD)),
@@ -29,6 +30,9 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         });
     }
     @Override public PeepoState createRenderState() { return new PeepoState(); }
+    @Override public net.minecraft.world.phys.Vec3 getRenderOffset(PeepoState state){
+        return super.getRenderOffset(state).add(state.pressOffset);
+    }
     @Override protected void setupRotations(PeepoState state, PoseStack pose, float bodyRot, float scale) {
         super.setupRotations(state, pose, bodyRot, scale);
         if (state.sleeping && state.deathTime <= 0) {
@@ -204,8 +208,20 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         items.updateForLiving(state.knife,state.work==WorkAnimation.CHOP?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         items.updateForLiving(state.hoe,state.work==WorkAnimation.HARVEST?entity.getMainHandItem():net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.NONE,entity);
         state.eatingTime=PeepoEntity.EAT_DURATION-entity.getEatingTicks()+partialTick;
-        items.updateForLiving(state.held,!state.eating && !state.sleeping && (state.work==WorkAnimation.NONE || state.work==WorkAnimation.SLAUGHTER || state.work==WorkAnimation.INTERACT && local.peepo.CompanionGarden.cuttingTool(entity.getMainHandItem())) ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
+        CompanionActionPose.extract(entity,state,partialTick,items);
+        items.updateForLiving(state.held,!state.actionPose && !state.eating && !state.sleeping && (state.work==WorkAnimation.NONE || state.work==WorkAnimation.SLAUGHTER || state.work==WorkAnimation.INTERACT && local.peepo.CompanionGarden.cuttingTool(entity.getMainHandItem())) ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,state.holdingLight ? ItemDisplayContext.NONE : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,entity);
         items.updateForLiving(state.food,state.eating ? entity.getMainHandItem() : net.minecraft.world.item.ItemStack.EMPTY,ItemDisplayContext.FIXED,entity);
+    }
+    private static final class ActionItemLayer extends RenderLayer<PeepoState,PeepoModel>{
+        ActionItemLayer(PeepoRenderer renderer){super(renderer);}
+        @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState s,float yaw,float pitch){
+            if(s.isInvisible || !s.actionPose || s.actionItem.isEmpty())return;
+            var p=s.toolPose;pose.pushPose();pose.translate(p.x/16,p.y/16,p.z/16);
+            pose.rotateDegrees(com.mojang.math.Axis.ZP,p.zRot*net.minecraft.util.Mth.RAD_TO_DEG);
+            pose.rotateDegrees(com.mojang.math.Axis.XP,180+p.xRot*net.minecraft.util.Mth.RAD_TO_DEG);
+            pose.scale(s.actionScale,s.actionScale,s.actionScale);
+            s.actionItem.submit(pose,collector,light,OverlayTexture.NO_OVERLAY,s.outlineColor);pose.popPose();
+        }
     }
     private static final class KnifeLayer extends RenderLayer<PeepoState,PeepoModel>{
         KnifeLayer(PeepoRenderer renderer){super(renderer);}
@@ -257,8 +273,8 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         private final WorkPropsModel wood,metal;
         WorkPropsLayer(PeepoRenderer parent,WorkPropsModel wood,WorkPropsModel metal){super(parent);this.wood=wood;this.metal=metal;}
         @Override public void submit(PoseStack pose,SubmitNodeCollector collector,int light,PeepoState state,float yaw,float pitch){
-            if(state.isInvisible || !state.work.hasTool())return;
-            if(state.work==WorkAnimation.LEVER || state.work==WorkAnimation.MALLET)
+            if(state.isInvisible || !state.work.hasTool() && !state.spatula)return;
+            if(state.work==WorkAnimation.LEVER || state.work==WorkAnimation.MALLET || state.spatula)
                 collector.order(1).submitModel(wood,state,pose,RenderTypes.entitySolid(WOOD),light,OverlayTexture.NO_OVERLAY,state.outlineColor);
             collector.order(1).submitModel(metal,state,pose,RenderTypes.entitySolid(METAL),light,OverlayTexture.NO_OVERLAY,state.outlineColor);
         }

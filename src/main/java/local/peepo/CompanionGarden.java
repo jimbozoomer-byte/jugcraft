@@ -332,10 +332,16 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         private CompanionStatus status=CompanionStatus.IDLE;
         Job(CompanionAssignments.Target target){this.target=target;}
         public Kind kind(){return Kind.WORK;}
-        public WorkAnimation animation(){return !magicCell() && !target.orchard() && !hanging(target) && !mushrooms(target) && hoe() && expected!=null && (action==1 || action==0 && ripe(expected))?progress>0?WorkAnimation.HARVEST:WorkAnimation.NONE:WorkAnimation.INTERACT;}
+        public WorkAnimation animation(){
+            if(!magicCell() && !target.orchard() && !hanging(target) && !mushrooms(target) && hoe() && expected!=null && (action==1 || action==0 && ripe(expected)))return progress>0?WorkAnimation.HARVEST:WorkAnimation.NONE;
+            if(action!=0 || expected==null)return WorkAnimation.INTERACT;
+            // Keep distant overhead work on its existing pose; ground picking uses a close reach.
+            if(target.orchard() || hanging(target))return WorkAnimation.INTERACT;
+            return expected.isAir() || expected.is(Blocks.WATER) || expected.getBlock() instanceof TrellisBlock?WorkAnimation.PLANT:WorkAnimation.PICK;
+        }
         private boolean magicCell(){return soil!=null && npc.level().getBlockState(soil).getBlock() instanceof VerdantBedBlock;}
         boolean benefitsFromTool(){return action!=2 && !magicCell();}
-        public BlockPos animationTarget(){return soil==null?stationPosition():hanging(target)?soil.below():soil;}
+        public BlockPos animationTarget(){return soil==null?stationPosition():animation()==WorkAnimation.PLANT || animation()==WorkAnimation.PICK?cropPosition(target,soil):hanging(target)?soil.below():soil;}
         public BlockPos stationPosition(){return target.at().pos();}
         public Vec3 approachPosition(){return approach==null?Vec3.atBottomCenterOf(stationPosition().above()):approach;}
         private boolean assigned(){int row=npc.assignments.workPriority(stationPosition());return row<5 && target.equals(npc.assignments.get(row)) && target.present(npc.level());}
@@ -470,6 +476,8 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
             }
             float yaw=(float)Math.toDegrees(Math.atan2(-(cropPos.getX()+.5-npc.getX()),cropPos.getZ()+.5-npc.getZ()));
             npc.setYRot(yaw);npc.yBodyRot=yaw;npc.setYHeadRot(yaw);
+            if(animation()==WorkAnimation.PLANT){int slot=seedSlot(target,cropPos);if(slot>=0)npc.setWorkPie(npc.belongings.getItem(slot));}
+            else if(animation()==WorkAnimation.PICK)npc.setWorkPie(expected.getBlock() instanceof MushroomColonyBlock?npc.assignedHand():ItemStack.EMPTY);
             if(++progress<(tool?HOE_TICKS:WORK_TICKS))return CompanionStatus.WORKING;
             status=finish(cropPos);
             nextScan=npc.level().getGameTime()+(status==CompanionStatus.FULL?200:1);

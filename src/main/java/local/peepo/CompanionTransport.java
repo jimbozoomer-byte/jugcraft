@@ -315,7 +315,7 @@ public final class CompanionTransport extends Goal {
         handoffUntil=0;active=true;npc.resetCompanionRoutine();npc.leaveCompanionBed();npc.setRestMode(CompanionEnergy.Rest.NONE);
         deadline=npc.level().getGameTime()+600;nextPath=nextValidity=0;approach=null;travel.reset();lastPosition=npc.position();
     }
-    @Override public void stop(){handoffUntil=0;active=false;clearPiePose();npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
+    @Override public void stop(){handoffUntil=0;active=false;clearPiePose();npc.clearCarryGesture();npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
     private CompanionAssignments.Target destination(){return manifest.isEmpty()?(supply?store:workstation):supply && !returning?workstation:store;}
     private void fail(CompanionStatus why){
         if(why==CompanionStatus.BLOCKED)rememberDetail("Last attempt: cannot reach "+(destination()==store?storeName():"the workstation")+". Clear a safe path and standing space.");
@@ -408,6 +408,7 @@ public final class CompanionTransport extends Goal {
             clearPiePose();approach=null;nextPath=0;
         }
         var visibleCargo=carried();
+        if(!hearthRoute() && !visibleCargo.isEmpty())npc.showGesture(CompanionGesture.CARRY,visibleCargo,destination().at().pos());
         if(pieAction!=WorkAnimation.PIE_LOAD && hearthRoute() && !visibleCargo.isEmpty()
             && (HearthOvenBlockEntity.selectedFilling(visibleCargo)!=null || (visibleCargo.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("burnt_pie")) || visibleCargo.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.item("burnt_cake")))))
             piePose(WorkAnimation.PIE_CARRY,visibleCargo);
@@ -485,6 +486,7 @@ public final class CompanionTransport extends Goal {
         }
         approach=null;nextPath=0;deadline=npc.level().getGameTime()+600;
         if(hearthRoute() && !supply)animatePie(WorkAnimation.PIE_TAKE,carried());
+        else transferGesture(true,carried());
     }
     private void pickupBatch(){
         var port=porter?null:CompanionLogistics.resolve(npc,workstation);
@@ -507,6 +509,7 @@ public final class CompanionTransport extends Goal {
         for(int i=0;i<batch.size();i++)pending.add(new Cargo(slots.get(i),batch.get(i).copy()));
         advanceCargo();approach=null;nextPath=0;deadline=npc.level().getGameTime()+600;
         if(hearthRoute() && !supply)animatePie(WorkAnimation.PIE_TAKE,carried());
+        else transferGesture(true,carried());
     }
     private void deliver(){
         if(tooling && !returning){deliverTool();return;}
@@ -532,11 +535,24 @@ public final class CompanionTransport extends Goal {
             if(npc.food.takeCargo(cargoSlot,stack,inserted,tx)!=inserted)return;
             tx.commit();
         }
+        transferGesture(false,stack);
         manifest.shrink(inserted);
         clearPiePose();
         if(manifest.isEmpty())finishCargo();
         else if(supply && !returning)deferUnused();
         else fail(CompanionStatus.FULL);
+    }
+    private void transferGesture(boolean pickup,ItemStack stack){
+        if(hearthRoute() || stack.isEmpty())return;
+        var target=pickup?(porter?workstation:supply?store:workstation):destination();
+        if(target==null)return;
+        var kind=pickup?CompanionGesture.TAKE:CompanionGesture.PUT;
+        if(!pickup && supply && !returning){
+            var block=npc.level().getBlockEntity(target.at().pos());
+            if(block instanceof io.github.jimbozoomer.jugcraft.agriculture.SkilletBlockEntity || block instanceof io.github.jimbozoomer.jugcraft.agriculture.KitchenStoveBlockEntity)kind=CompanionGesture.TURN_FOOD;
+            else if(block instanceof io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity && stack.is(net.minecraft.world.item.Items.WATER_BUCKET))kind=CompanionGesture.POUR;
+        }
+        npc.showGesture(kind,stack,target.at().pos());
     }
     /** Bounded counts by item type, matching the user-facing ghost filter. */
     private Map<net.minecraft.world.item.Item,Integer> counts(Storage<ItemVariant> storage){

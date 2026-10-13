@@ -105,7 +105,7 @@ final class CompanionWorkPose {
     private static void lean(ModelPart part,MachineWorkClip pose){
         lean(part,pose.bodyPitch,pose.bodyRoll,pose.bodyX,pose.bodyY);
     }
-    private static void lean(ModelPart part,float pitch,float roll,float bodyX,float bodyY){
+    static void lean(ModelPart part,float pitch,float roll,float bodyX,float bodyY){
         // The rig's parts have different pivots (some at y=9.6). Rotate all around the hips,
         // so head, shirt, bare torso, shorts and costume move together with the feet braced.
         float dy=part.y-22.5F,cosX=Mth.cos(pitch),sinX=Mth.sin(pitch);

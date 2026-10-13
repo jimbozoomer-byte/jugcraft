@@ -64,6 +64,7 @@ public final class CompanionWater {
         private boolean room,claimed;
         Job(CompanionAssignments.Target target){this.target=target;}
         public Kind kind(){return Kind.WORK;}
+        public WorkAnimation animation(){return WorkAnimation.WATER_FILL;}
         public BlockPos stationPosition(){return target.at().pos();}
         public Vec3 approachPosition(){return entrance==null?Vec3.atBottomCenterOf(stationPosition().above()):entrance;}
         // Reach the dry bank before stopping; ordinary workstation reach can stop a short NPC in the water.
@@ -121,6 +122,7 @@ public final class CompanionWater {
         public CompanionStatus work(PeepoEntity other){
             if(!npc.preferences.canWork() || !npc.orders.station(this) || !occupy(other))return CompanionStatus.IDLE;
             var status=workStatus(other);if(status!=CompanionStatus.READY)return status;
+            int displaySlot=slot();if(displaySlot>=0)npc.setWorkPie(npc.belongings.getItem(displaySlot));
             boolean finishing=progress+1>=WORK_TICKS;boolean bucket=false;
             int selected=finishing?fittingSlot():-1;if(finishing && selected<0)return CompanionStatus.FULL;
             try(var tx=Transaction.openOuter()){
