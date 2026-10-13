@@ -8576,8 +8576,9 @@ def check_cinder_kiln(ck):
     in, and the channel is slag from the slag fall over the forge's lip down to it; the lip has room over it; each
     sluice's gate is whole and faces into the kiln, the walk SluiceGateBlock makes from any of its blocks finds all of it
     and nothing of another's, and the walk from under it finds all of its trough and no other; each shelf is a raised
-    step inside the bowl with room over it, more than SPILL blocks from the slag; no magma lies where anyone stands; and
-    nothing in it burns."""
+    step inside the bowl with room over it, more than SPILL blocks from the slag; no magma lies where anyone stands;
+    nothing in it burns; and the light, flooded from its hidden lights, slag and magma as the game floods it, is at least
+    BOWL_LIGHT on every cell of the bowl's floor (the client test reads the same in the game)."""
     import math
     from collections import deque
     import lairs as la
@@ -8740,6 +8741,34 @@ def check_cinder_kiln(ck):
     burns = sorted({state[0] for state in blocks.values()} - allowed)
     if burns:
         err(f"The Cinder Kiln has {burns}: only its stone, slag, troughs, gates and mist (nothing that burns)")
+
+    # The light, as the game floods it: a level less for each block on from a hidden light (its level), the slag (10) or
+    # magma (3), through the kiln's open cells and what light passes (the mist, the gates and the stair's slabs); stone
+    # stops it. Every cell of the bowl's floor has at least BOWL_LIGHT, so the Tyrant and whoever fights him are seen.
+    gives = {"jugcraft:molten_slag": 10, "minecraft:magma_block": 3}
+    through = {None, "minecraft:light", "jugcraft:lair_exit", "jugcraft:sluice_gate", "minecraft:polished_blackstone_slab"}
+    lit, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else gives.get(state[0], 0)
+        if level:
+            lit[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = lit[(x, y, z)] - 1
+        for dx, dy, dz in six:
+            n = (x + dx, y + dy, z + dz)
+            if level > lit.get(n, 0) and n in cavern and name(n) in through:
+                lit[n] = level
+                queue.append(n)
+    floor = sorted((lit.get((x, ck.BOWL + 1, z), 0), (x, z)) for x, z in bowl)
+    if floor and floor[0][0] < ck.BOWL_LIGHT:
+        dark = [cell for level, cell in floor if level < ck.BOWL_LIGHT]
+        err(f"The Cinder Kiln's bowl is lit at only {floor[0][0]} at {floor[0][1]} ({len(dark)} cells of its floor under "
+            f"BOWL_LIGHT {ck.BOWL_LIGHT})")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CinderKilnClientGameTests.java"
+    if not java_number(client.read_text(encoding="utf-8"), "BOWL_LIGHT", ck.BOWL_LIGHT):
+        err(f"CinderKilnClientGameTests does not read the bowl's light against BOWL_LIGHT {ck.BOWL_LIGHT}")
 
 
 def java_number(source, name, value):
