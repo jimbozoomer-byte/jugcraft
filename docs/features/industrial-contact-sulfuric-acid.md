@@ -1,6 +1,6 @@
 # Contact sulfuric acid: the vanadium bed, contact conversion and absorption (factory package 2)
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 Stacked on [coal gasification](industrial-coal-gasification.md) and the branches below it. It uses:
 - the [Chemical Oxidizer](industrial-chemical-oxidizer.md)'s sulfur dioxide;
 - the [Chemical Infuser](industrial-chemical-infuser.md)'s bed socket;
@@ -104,7 +104,7 @@ For CI, server game tests:
 
 ### Results
 
-Not yet run in CI.
+- **Run [38438099938](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38438099938) on the contributor's fork (commit b325ef6e): green.** Everything compiled; every server game test passed, including the vanadium bed, sulfur trioxide, absorption and vanadium tests; the build without optional integrations and all five client shards passed.
 
 No survival playtest, two-client test or performance measurement has been done.
 
