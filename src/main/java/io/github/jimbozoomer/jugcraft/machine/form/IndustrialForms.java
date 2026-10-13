@@ -253,7 +253,8 @@ public final class IndustrialForms {
 	/**
 	 * The Coal Gasifier: the selected earlier gas-production form of the chemical reactor family (its energy figures, the
 	 * plan's paid electrical heat), four wide, four deep and six tall in the expanded profile. The carbon feed goes in at
-	 * the side charging chute and water low on the left; raw syngas leaves at the header flange high on the right.
+	 * the side charging chute and water low on the left; raw syngas leaves at the header flange high on the right and the
+	 * ash chamber's residue at the chute low on the right.
 	 */
 	public static final MachineForm COAL_GASIFIER_FORM = MachineForm.builder(Jugcraft.id("coal_gasifier"), MachineKind.CHEMICAL_REACTOR)
 			.layer("C###", "####", "####", "####")
@@ -265,13 +266,14 @@ public final class IndustrialForms {
 			.profile(OperatingProfile.EXPANDED)
 			.inputTank("water")
 			.outputTank("product")
-			.items(1, 0)
+			.items(1, 1)
 			.capability(COAL_GASIFICATION)
 			.upgrades()
 			.warmup(40)
 			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 1, 2, FormSide.LEFT)
 			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 3, 0, FormSide.LEFT)
 			.port("syngas_out", FormPort.Kind.FLUID_OUT, 0, 3, 2, 5, FormSide.RIGHT)
+			.port("residue_out", FormPort.Kind.ITEM_OUT, FormPort.ALL, 3, 1, 0, FormSide.RIGHT)
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 2, 3, 0, FormSide.BACK)
 			.build();
 

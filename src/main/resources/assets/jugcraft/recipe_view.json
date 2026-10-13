@@ -8141,7 +8141,12 @@
               500
             ]
           ],
-          "results": [],
+          "results": [
+            [
+              "jugcraft:gasification_residue",
+              1
+            ]
+          ],
           "ticks": 200
         },
         {
@@ -8163,7 +8168,12 @@
               500
             ]
           ],
-          "results": [],
+          "results": [
+            [
+              "jugcraft:gasification_residue",
+              1
+            ]
+          ],
           "ticks": 200
         },
         {

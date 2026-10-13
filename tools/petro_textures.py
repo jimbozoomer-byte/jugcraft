@@ -173,6 +173,38 @@ def vanadium_pentoxide():
     return img
 
 
+def gasification_residue():
+    """Gasification residue: a heap of dark grey clinker lumps with a few rust-brown grains, lit from the top left, each
+    lump outlined in its own darkest tone (docs/ITEM_ICONS.md)."""
+    grey = [(38, 38, 42), (70, 70, 76), (104, 104, 110), (142, 142, 148)]
+    rust = [(84, 44, 26), (138, 78, 44)]
+    rows = [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "......ggg.......",
+        ".....gHMmg..ggg.",
+        "....gHMmmmggHmg.",
+        "..gggMmrmmgHMmmg",
+        ".gHMgmmmmgMmRmmg",
+        ".gMmmgggggmmmmgg",
+        "gHMmrmmgHMmgmmmg",
+        "gMmmmmmgMmmmgggg",
+        "gggggggggggggg..",
+        "................",
+        "................",
+    ]
+    tones = {"g": grey[0], "m": grey[1], "M": grey[2], "H": grey[3], "r": rust[0], "R": rust[1]}
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def vanadium_contact_bed():
     """Vanadium contact bed: the nickel bed's fired-brick tray, heaped with orange-ochre vanadium oxide pellets. Drawn
     flat in the item icon manner (docs/ITEM_ICONS.md): each part outlined in its own darkest tone, lit from the top
@@ -540,6 +572,7 @@ def draw_all(save, save_animation):
     save(nickel_catalyst_bed(), "item", "nickel_catalyst_bed")
     save(vanadium_pentoxide(), "item", "vanadium_pentoxide")
     save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
+    save(gasification_residue(), "item", "gasification_residue")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")

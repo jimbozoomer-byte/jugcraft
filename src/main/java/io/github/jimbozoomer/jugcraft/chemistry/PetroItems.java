@@ -45,6 +45,7 @@ public final class PetroItems {
 	/** The Chemical Infuser's reusable methanation catalyst: held in its bed socket, never used up. */
 	public static Item NICKEL_CATALYST_BED;
 	public static Item VANADIUM_PENTOXIDE;
+	public static Item GASIFICATION_RESIDUE;
 	public static Item VANADIUM_CONTACT_BED;
 
 	private PetroItems() {
@@ -74,6 +75,7 @@ public final class PetroItems {
 		NICKEL_CATALYST_BED = JugcraftRegistry.item("nickel_catalyst_bed", properties -> new Item(properties.stacksTo(1)));
 		VANADIUM_PENTOXIDE = JugcraftRegistry.item("vanadium_pentoxide");
 		VANADIUM_CONTACT_BED = JugcraftRegistry.item("vanadium_contact_bed", properties -> new Item(properties.stacksTo(1)));
+		GASIFICATION_RESIDUE = JugcraftRegistry.item("gasification_residue");
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -92,6 +94,7 @@ public final class PetroItems {
 			output.accept(TURBOCHARGER);
 			output.accept(NICKEL_CATALYST_BED);
 			output.accept(VANADIUM_PENTOXIDE);
+			output.accept(GASIFICATION_RESIDUE);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

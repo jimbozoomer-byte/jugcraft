@@ -59,7 +59,7 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [ ] Package 2, the rest of the starter gas and acid factory:
   - hydrogen chloride absorption into aqueous acid, and its consumers (the [Bulk Chemical Reactor](features/industrial-bulk-chemical-reactor.md) now makes hydrochloric acid and leaches ores with it; later consumers remain);
   - contact conversion and absorption, for the sulfuric acid chain (implemented in [contact sulfuric acid](features/industrial-contact-sulfuric-acid.md), with the vanadium contact bed; the retained carrier-acid charge remains);
-  - the Coal Gasifier with Gas Cleanup and Separation (implemented in [coal gasification](features/industrial-coal-gasification.md); numeric pollution and the cleaning residue remain);
+  - the Coal Gasifier with Gas Cleanup and Separation (implemented in [coal gasification](features/industrial-coal-gasification.md); its mixed residue and road/filler use are in [gasification residue](features/industrial-gasification-residue.md); numeric pollution remains);
   - portable handling.
 
   Enforce the electrolysis energy floor before any expanded or bulk Separator.

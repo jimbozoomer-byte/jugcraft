@@ -194,6 +194,8 @@ ITEMS = {
     # lye in the Bulk Chemical Reactor, then laid on two fired bricks. The Infuser's bed socket holds it, never used up.
     "vanadium_pentoxide": "Vanadium Pentoxide",
     "vanadium_contact_bed": "Vanadium Contact Bed",
+    # The Coal Gasifier's ash: one mixed residue (tools/industrial_forms.py), bound into concrete or asphalt.
+    "gasification_residue": "Gasification Residue",
 }
 
 

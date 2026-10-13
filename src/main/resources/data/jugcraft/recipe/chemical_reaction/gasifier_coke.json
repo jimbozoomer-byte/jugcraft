@@ -26,5 +26,11 @@
       "tank": 0
     }
   ],
+  "results": [
+    {
+      "id": "jugcraft:gasification_residue",
+      "count": 1
+    }
+  ],
   "time": 200
 }

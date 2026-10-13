@@ -3951,6 +3951,7 @@
           "text": [
             "Four wide, four deep and six tall: a tall lined reaction column over a broad ash chamber, with a charging chute on its left side and a gas header high on its right, built from steel plates, bricks, a furnace, a steel fluid pipe and a Machine Casing. Every block it fills must be free when it is placed. It runs two batches at once.",
             "Drop coal or coal coke into the charging chute and pipe water into the inlet low on its left side. Each piece and 500 mB of water (as steam) become 500 mB of raw syngas (half carbon monoxide, half hydrogen) in ten seconds, which leaves at the header flange high on its right. Charcoal gives 400 mB from 400 mB of water.",
+            "Coal and coke each leave a Gasification Residue at the chute low on its right side. Bound with cement it makes concrete, and with asphalt binder road asphalt, in place of gravel.",
             "Raw syngas is dirty: the Gas Cleanup and Separation Rack divides it into carbon monoxide and hydrogen."
           ],
           "craft": {

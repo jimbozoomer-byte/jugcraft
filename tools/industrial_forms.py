@@ -303,10 +303,13 @@ FORMS = {
         "layers": [["C###", "####", "####", "####"]] + [["####", "####", "####", "####"]] * 5,
         "profile": "EXPANDED",
         "tank_mb": 8_000,
-        # The carbon feed at the side charging chute, water low on the left; the raw gas at the upper header.
+        # The carbon feed at the side charging chute, water low on the left; the raw gas at the upper header and the ash
+        # chamber's residue at the chute low on the right.
         "input_tanks": ["water"],
         "output_tanks": ["product"],
         "item_inputs": 1,
+        # The ash chamber's residue leaves at the chute low on the right.
+        "item_outputs": 1,
         "capabilities": [COAL_GASIFICATION],
         "upgrades": True,
         "warmup": 40,
@@ -314,6 +317,7 @@ FORMS = {
             ("feed_in", "ITEM_IN", 0, 0, 1, 2, "LEFT"),
             ("water_in", "FLUID_IN", 0, 0, 3, 0, "LEFT"),
             ("syngas_out", "FLUID_OUT", 0, 3, 2, 5, "RIGHT"),
+            ("residue_out", "ITEM_OUT", "FormPort.ALL", 3, 1, 0, "RIGHT"),
             ("power", "ENERGY_IN", 0, 2, 3, 0, "BACK"),
         ],
         # The plan's bill (docs/features/industrial-starter-gas-and-acid-factory.md): 4 steel plates, 2 bricks, a furnace,
@@ -464,6 +468,8 @@ HANDBOOK["coal_gasifier"] = [
     "Drop coal or coal coke into the charging chute and pipe water into the inlet low on its left side. Each piece and "
     "500 mB of water (as steam) become 500 mB of raw syngas (half carbon monoxide, half hydrogen) in ten seconds, which leaves at "
     "the header flange high on its right. Charcoal gives 400 mB from 400 mB of water.",
+    "Coal and coke each leave a Gasification Residue at the chute low on its right side. Bound with cement it makes "
+    "concrete, and with asphalt binder road asphalt, in place of gravel.",
     "Raw syngas is dirty: the Gas Cleanup and Separation Rack divides it into carbon monoxide and hydrogen.",
 ]
 HANDBOOK["gas_cleanup_rack"] = [
@@ -594,12 +600,15 @@ FORM_RECIPES = {
         # Steam gasification (this change's proposal for the pending carbon ledger): a coal or coke counts as 250 reaction
         # amounts of carbon, like a sulfur dust, C + H2O -> CO + H2: 250 mB of each gas, 500 mB of the mixture. The steam
         # is fed in excess, 500 mB of water, as a steam gasifier runs; no fluid comes from nothing. 200 ticks at 96 JE/t,
-        # 19,200 JE of paid heat.
+        # 19,200 JE of paid heat. The ash chamber keeps the mineral matter as one mixed residue a piece (the plan's single
+        # initial cleaning residue, this change's quantity); charcoal, nearly ash-free, leaves none.
         {"name": "gasifier_coal", "capability": COAL_GASIFICATION, "items": [("minecraft:coal", 1)],
-         "fluids": [("minecraft:water", 500)], "fluid_results": [(f"{MOD}:raw_syngas", 500, 0)], "ticks": 200,
+         "fluids": [("minecraft:water", 500)], "fluid_results": [(f"{MOD}:raw_syngas", 500, 0)],
+         "results": [(f"{MOD}:gasification_residue", 1)], "ticks": 200,
          "features": ["machines"]},
         {"name": "gasifier_coke", "capability": COAL_GASIFICATION, "items": [(f"{MOD}:coke", 1)],
-         "fluids": [("minecraft:water", 500)], "fluid_results": [(f"{MOD}:raw_syngas", 500, 0)], "ticks": 200,
+         "fluids": [("minecraft:water", 500)], "fluid_results": [(f"{MOD}:raw_syngas", 500, 0)],
+         "results": [(f"{MOD}:gasification_residue", 1)], "ticks": 200,
          "features": ["machines"]},
         # Charcoal: the owner's selected lower-yield alternative, 200 reaction amounts of carbon.
         {"name": "gasifier_charcoal", "capability": COAL_GASIFICATION, "items": [("minecraft:charcoal", 1)],
@@ -1420,8 +1429,8 @@ def coal_gasifier():
     works, the heat throat's slit beneath it and the control panel (the controller) at the front left. A sloped charging
     chute meets the column halfway up on the left, with the dark feed-drive cabinet below it (its pulley drawn turning by
     MachineRotors) and the water inlet low behind it. The capped top stack carries the short gas header to its flange high
-    on the right, banded in raw syngas; the power socket sits on a junction box at the back. Each port is at the middle of
-    its block's face."""
+    on the right, banded in raw syngas; the residue chute sits low on the ash chamber's right side and the power socket on a
+    junction box at the back. Each port is at the middle of its block's face."""
     cx, cz = -16, 32
     m = []
     # Four large braced feet and the broad ash chamber, its refractory border at the top.
@@ -1439,6 +1448,10 @@ def coal_gasifier():
     m += cyl("y", cx, cz, 12, 84, 88, GUNMETAL)
     m += cyl("y", cx, cz, 8, 88, 92, GUNMETAL, CHROME)
     m += cyl("y", cx, cz, 10, 92, 94, GUNMETAL, "dr_soot")
+    # The residue chute low on the ash chamber's right side, its olive hood and hazard-banded mouth.
+    m.append(box((-47.25, 4, 18), (-44, 15, 30), OLIVE))
+    m.append(box((-47.75, 15, 17.5), (-43.5, 16, 30.5), HAZARD))
+    m.append(box((-48, 5, 19), (-47.25, 13, 29), {"*": CHROME, "west": MOUTH}))
     # The thick closed fire door on the ash chamber, the heat throat's slit under it and a soot seam above.
     m.append(box((-28, 9, 4.5), (-4, 25, 6), {"*": GUNMETAL, "north": "dr_fire_door"}))
     m.append(box((-24, 7, 5.25), (-8, 8, 6), STRIP))
@@ -1768,6 +1781,19 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "fabric:load_conditions": condition("machines"),
         "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["BVB"],
         "key": {"B": "minecraft:brick", "V": f"{MOD}:vanadium_pentoxide"}, "result": {"id": f"{MOD}:vanadium_contact_bed", "count": 1}})
+    # The Coal Gasifier's mixed residue stabilized into road and filler stock with a paid binder (the plan's selected
+    # modest product; this change's quantities): in place of gravel, with cement and water into concrete, or with
+    # asphalt binder into road asphalt, the same yields as the gravel recipes.
+    write(data / "recipe" / "concrete_from_gasification_residue.json", {
+        "fabric:load_conditions": condition("machines"),
+        "type": "minecraft:crafting_shaped", "category": "building", "pattern": ["CRC", "RWR", "CRC"],
+        "key": {"C": f"{MOD}:cement", "R": f"{MOD}:gasification_residue", "W": "minecraft:water_bucket"},
+        "result": {"id": f"{MOD}:concrete", "count": 8}})
+    write(data / "recipe" / "asphalt_from_gasification_residue.json", {
+        "fabric:load_conditions": condition("machines") + condition("crude_oil"),
+        "type": "minecraft:crafting_shaped", "category": "building", "pattern": ["RRR", "RBR", "RRR"],
+        "key": {"R": f"{MOD}:gasification_residue", "B": f"{MOD}:asphalt_binder"},
+        "result": {"id": f"{MOD}:asphalt", "count": 8}})
     # What the Anaerobic Digester takes: the fermentable crops and farm and kitchen waste.
     write(data / "tags" / "item" / f"{DIGESTIBLE}.json", {"values": [
         f"#{MOD}:fermentable", "minecraft:rotten_flesh", "minecraft:poisonous_potato", "minecraft:kelp",

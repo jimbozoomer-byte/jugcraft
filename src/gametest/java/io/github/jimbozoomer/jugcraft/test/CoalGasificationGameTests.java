@@ -99,6 +99,8 @@ public class CoalGasificationGameTests {
 						facing + ": the inlet refuses hydrogen");
 				helper.assertTrue(port(helper, machine, "syngas_out").insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction) == 0,
 						facing + ": nothing goes in at the header");
+				helper.assertTrue(itemPort(helper, machine, "residue_out").insert(ItemVariant.of(Items.COAL), 1, transaction) == 0,
+						facing + ": nothing goes in at the residue chute");
 				helper.assertTrue(chute.insert(ItemVariant.of(Items.COAL), 4, transaction) == 4
 						&& water.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction) == FluidConstants.BUCKET,
 						facing + ": the chute takes coal and the inlet water");
@@ -108,7 +110,10 @@ public class CoalGasificationGameTests {
 		helper.succeed();
 	}
 
-	/** A coal and 500 mB of water: 200 paid ticks at 87 JE, then 500 mB of raw syngas leaving at the header flange. */
+	/**
+	 * A coal and 500 mB of water: 200 paid ticks at 87 JE, then 500 mB of raw syngas leaving at the header flange and one
+	 * gasification residue at the chute.
+	 */
 	@GameTest(structure = ARENA, maxTicks = 400)
 	public void coalGasifiesIntoRawSyngas(GameTestHelper helper) {
 		FormMachineBlockEntity machine = place(helper, IndustrialForms.COAL_GASIFIER, new BlockPos(6, 1, 2), Direction.NORTH);
@@ -125,10 +130,12 @@ public class CoalGasificationGameTests {
 			helper.assertTrue(used == GASIFIER_TICKS * GASIFIER_DRAW, "Paid " + used + " JE, not " + GASIFIER_TICKS * GASIFIER_DRAW);
 			helper.assertTrue(extract(helper, port(helper, machine, "syngas_out"), PetroFluids.RAW_SYNGAS.fluid()) == 500,
 					"The raw syngas leaves at the header flange");
+			helper.assertTrue(extractItems(helper, itemPort(helper, machine, "residue_out"), item("gasification_residue")) == 1,
+					"One gasification residue leaves at the chute");
 		});
 	}
 
-	/** Charcoal, the lower-yield alternative: 400 mB of raw syngas from 400 mB of water. */
+	/** Charcoal, the lower-yield alternative: 400 mB of raw syngas from 400 mB of water, and no residue. */
 	@GameTest(structure = ARENA, maxTicks = 400)
 	public void charcoalGivesLessSyngas(GameTestHelper helper) {
 		FormMachineBlockEntity machine = place(helper, IndustrialForms.COAL_GASIFIER, new BlockPos(6, 1, 2), Direction.NORTH);
@@ -136,7 +143,8 @@ public class CoalGasificationGameTests {
 		machine.container().setItem(0, new ItemStack(Items.CHARCOAL));
 		machine.tanks().input(0).fill(Fluids.WATER, 400);
 		helper.succeedWhen(() -> helper.assertTrue(machine.lane(0) == null
-				&& amount(machine.tanks().output(0), PetroFluids.RAW_SYNGAS.fluid()) == 400, "400 mB of raw syngas from charcoal"));
+				&& amount(machine.tanks().output(0), PetroFluids.RAW_SYNGAS.fluid()) == 400
+				&& machine.container().getItem(machine.form().firstOutputSlot()).isEmpty(), "400 mB of raw syngas and no residue from charcoal"));
 	}
 
 	/** While the Gasifier works every part shows lit, but only the controller gives off light; paused, it goes dark. */
@@ -177,6 +185,18 @@ public class CoalGasificationGameTests {
 		Optional<RecipeHolder<CraftingRecipe>> built = crafting.getRecipeFor(gasifier, level);
 		helper.assertTrue(built.isPresent() && built.get().value().assemble(gasifier).is(IndustrialForms.COAL_GASIFIER.asItem()),
 				"Four plates, two bricks, a furnace, a casing and a pipe make the Coal Gasifier");
+		// Its residue, bound in place of gravel: with cement and water into concrete, with asphalt binder into asphalt.
+		ItemStack residue = stack("gasification_residue");
+		ItemStack cement = stack("cement");
+		CraftingInput concrete = CraftingInput.of(3, 3, List.of(cement, residue, cement, residue, new ItemStack(Items.WATER_BUCKET), residue,
+				cement, residue, cement));
+		Optional<RecipeHolder<CraftingRecipe>> bound = crafting.getRecipeFor(concrete, level);
+		ItemStack made = bound.map(holder -> holder.value().assemble(concrete)).orElse(ItemStack.EMPTY);
+		helper.assertTrue(made.is(item("concrete")) && made.getCount() == 8, "Residue, cement and water make 8 concrete, not " + made);
+		CraftingInput road = CraftingInput.of(3, 3, List.of(residue, residue, residue, residue, stack("asphalt_binder"), residue,
+				residue, residue, residue));
+		ItemStack paved = crafting.getRecipeFor(road, level).map(holder -> holder.value().assemble(road)).orElse(ItemStack.EMPTY);
+		helper.assertTrue(paved.is(item("asphalt")) && paved.getCount() == 8, "Residue and asphalt binder make 8 asphalt, not " + paved);
 		helper.succeed();
 	}
 

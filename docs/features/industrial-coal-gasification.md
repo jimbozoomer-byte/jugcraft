@@ -80,7 +80,7 @@ Primary specialty and supported player role: fuel and chemical processing
   - the rack in the synthesis family, entry profile.
 - **Not built:**
   - numeric pollution, which has no system yet;
-  - the plan's "one initial cleaning residue" and its road/filler use;
+  - the plan's "one initial cleaning residue" and its road/filler use (since added in [gasification residue](industrial-gasification-residue.md));
   - optional oxygen assistance.
 
 ## Multiplayer and persistence
@@ -134,4 +134,4 @@ No survival playtest, two-client test or performance measurement has been done.
 ## Rollout and open questions
 
 - The quantities, times and families await the owner's review, along with the carbon ledger.
-- Still to come: numeric pollution, the cleaning residue and its stabilized filler use, and oxygen assistance.
+- Still to come: numeric pollution and oxygen assistance. The residue and its filler use are in [gasification residue](industrial-gasification-residue.md).
