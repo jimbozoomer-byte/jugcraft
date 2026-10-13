@@ -25,7 +25,7 @@ import net.minecraft.world.phys.HitResult;
  * The Jugcraft Encyclopedia on the client (Concordance Chunk A, A-04): its two ways in, the pages the server last sent
  * with the client's own Keys page after them, and the page being read (in memory only, forgotten on leaving a world).
  * <ul>
- * <li>A key (Controls: Jugcraft Encyclopedia, I unless remapped) opens it from the game, never while another screen is
+ * <li>A key (Controls: Jugcraft Encyclopedia, B unless remapped) opens it from the game, never while another screen is
  * open, so it cannot fire while typing; inside the encyclopedia the same key, or Esc, closes it.</li>
  * <li>A scroll button in the survival inventory ({@link EncyclopediaInventoryButton}) closes the inventory as Esc would
  * (the carried stack and the crafting grid go back) and opens it; Back opens a fresh inventory.</li>
@@ -36,7 +36,7 @@ import net.minecraft.world.phys.HitResult;
  */
 public final class EncyclopediaClient {
 	/** The proposed default key (A-D7): I, which vanilla and the locked pack's mods leave free. */
-	public static final int DEFAULT_KEY = InputConstants.KEY_I;
+	public static final int DEFAULT_KEY = InputConstants.KEY_B;
 	/** The server's Inspect page (concordance.encyclopedia.InspectPage.PAGE). */
 	private static final String INSPECT = "inspect";
 	private static final List<Runnable> LISTENERS = new CopyOnWriteArrayList<>();

@@ -14,7 +14,7 @@ Primary specialty and supported player role: a new caster, and anyone helping on
 
 **Two ways in, no item.** The Jugcraft Encyclopedia opens:
 
-- with its key (Controls, *Jugcraft Encyclopedia*; **I** unless remapped), only from the game itself, so it never fires
+- with its key (Controls, *Jugcraft Encyclopedia*; **B** unless remapped), only from the game itself, so it never fires
   while typing in chat, a sign, an anvil or a book. Inside the encyclopedia the same key closes it, as Esc does;
 - with the small scroll button in the survival inventory, right of the recipe-book button (it moves with it when the
   recipe book opens). In the creative inventory it is on the Survival Inventory tab only. Pressing it closes the

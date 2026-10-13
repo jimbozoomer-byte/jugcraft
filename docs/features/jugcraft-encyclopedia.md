@@ -94,7 +94,7 @@ No reward economy, repeatable material farm or new currency is approved by this 
 
 [The first route's record](arcane-concordance-first-route.md) holds the details and the evidence. In short:
 
-- **Ways in:** the key *Jugcraft Encyclopedia* (proposed default I, A-D7), only from the game, and closing the
+- **Ways in:** the key *Jugcraft Encyclopedia* (proposed default B, A-D7), only from the game, and closing the
   encyclopedia from inside; and a scroll button with the owner's sprite in the survival inventory, right of the
   recipe-book button, and on the creative Survival Inventory tab (A-D8). The button closes the inventory as Esc would,
   and Back reopens it. Neither needs an item.

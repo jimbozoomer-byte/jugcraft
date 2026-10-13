@@ -96,6 +96,11 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		String clash = context.computeOnClient(client -> Arrays.stream(client.options.keyMappings)
 				.filter(other -> other != key && other.getCategory() != KeyMapping.Category.DEBUG && other.getDefaultKey().equals(key.getDefaultKey()))
 				.map(KeyMapping::getName).toList().toString());
+		// Every loaded default outside the debug keys, so one run shows which keys a new default could still take.
+		String taken = context.computeOnClient(client -> Arrays.stream(client.options.keyMappings)
+				.filter(other -> other.getCategory() != KeyMapping.Category.DEBUG && !other.getDefaultKey().equals(InputConstants.UNKNOWN))
+				.map(other -> other.getDefaultKey().getName() + "=" + other.getName()).sorted().toList().toString());
+		Jugcraft.LOGGER.info("[encyclopedia-check] loaded defaults: {}", taken);
 		Jugcraft.LOGGER.info("[encyclopedia-check] the default key {}; other keys with that default: {}", key.getDefaultKey().getName(), clash);
 		check(!key.isUnbound() && clash.equals("[]"), "The encyclopedia's default key should be bound and shared with no other key: " + clash);
 
@@ -119,7 +124,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		// Typing the key's letter in chat types it; the encyclopedia does not open.
 		context.getInput().pressKey(options -> options.keyChat);
 		context.waitForScreen(ChatScreen.class);
-		context.getInput().typeChars("i");
+		context.getInput().typeChars("b");
 		context.waitTicks(5);
 		check(context.computeOnClient(client -> client.gui.screen() instanceof ChatScreen), "Typing in chat should not open the encyclopedia");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);

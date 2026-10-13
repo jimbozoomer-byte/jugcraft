@@ -40,7 +40,7 @@ your server actually has.
 | Compose a spell | Hold an instrument, press J and choose **Compose**; or bind *Open the Spell Composer* in Controls (unbound at first) |
 | See your Focus | The Focus line at the bottom right while an instrument is in hand |
 | Open your journal | J (remappable in Controls) |
-| Open the Jugcraft Encyclopedia | I (remappable in Controls), or the scroll button in your inventory |
+| Open the Jugcraft Encyclopedia | B (remappable in Controls), or the scroll button in your inventory |
 | Concordance settings | Its key in Controls (unbound at first), or Mod Menu if installed |
 | Look at a device's state | Jade, if installed; the encyclopedia opened while looking at a Circle Anchor or Ley Pylon; otherwise the device's own messages and the journal |
 
