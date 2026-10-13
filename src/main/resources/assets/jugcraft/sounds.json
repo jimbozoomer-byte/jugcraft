@@ -1004,6 +1004,33 @@
       }
     ]
   },
+  "guns.chitin_smg.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/greaser_smg_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.hermit_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/shulker_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.borer.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/scorched_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

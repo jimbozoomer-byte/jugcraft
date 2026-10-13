@@ -537,6 +537,33 @@ GUNS = {
         "damage": 4.0, "pellets": 6, "interval": 20, "auto": False, "capacity": 5,
         "reload": (6, 10, 11), "spread": (5.0, 3.0), "range": 36, "ammo": "buckshot_shell",
     },
+    # Slice 12A: the End guns, in the shulkers' purpur, each fed from a shulker box with the shulker peering out of it:
+    # a machine gun, a rifle and a heavy machine gun carried at the hip. Their shots make what they hit float, as a
+    # shulker's do (LEVITATING).
+    "chitin_smg": {
+        "display": "Chitin SMG",
+        "source": "carapice",
+        "tooltip": "An End-forged machine gun fed from a shulker box, firing for as long as the trigger is held; its "
+                   "shots make what they hit float. Fires light rounds.",
+        "damage": 3.0, "pellets": 1, "interval": 3, "auto": True, "capacity": 24,
+        "reload": 56, "spread": (3.5, 1.2), "range": 48, "ammo": "light_round",
+    },
+    "hermit_rifle": {
+        "display": "Hermit Rifle",
+        "source": "shellurker",
+        "tooltip": "An End-forged rifle in a shulker's shell, fed from a shulker box and firing for as long as the "
+                   "trigger is held; its shots make what they hit float. Fires rifle rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 20,
+        "reload": 51, "spread": (3.0, 0.5), "range": 80, "ammo": "rifle_round",
+    },
+    "borer": {
+        "display": "Borer",
+        "source": "weevil",
+        "tooltip": "An End-forged machine gun carried at the hip, fed from a shulker box under its long barrel and "
+                   "charged with a crank; its shots make what they hit float. Fires rifle rounds.",
+        "damage": 5.5, "pellets": 1, "interval": 5, "auto": True, "capacity": 40,
+        "reload": 78, "spread": (4.0, 1.5), "range": 72, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -706,6 +733,14 @@ RECIPES = {
                                              "B": "minecraft:gilded_blackstone"}),
     "crackling": (["GGS", "SLB"], {"S": "#c:ingots/steel", "G": "minecraft:gold_ingot", "L": "minecraft:lever",
                                    "B": "minecraft:gilded_blackstone"}),
+    # Slice 12A: steel and a lever, as the other steel guns; a shulker shell and purpur from the End's cities. The
+    # Borer, the heaviest, takes two shells.
+    "chitin_smg": (["SSH", " LP"], {"S": "#c:ingots/steel", "H": "minecraft:shulker_shell", "L": "minecraft:lever",
+                                    "P": "minecraft:purpur_block"}),
+    "hermit_rifle": (["SSS", "HLP"], {"S": "#c:ingots/steel", "H": "minecraft:shulker_shell", "L": "minecraft:lever",
+                                      "P": "minecraft:purpur_block"}),
+    "borer": (["SSS", "HLH", " P "], {"S": "#c:ingots/steel", "H": "minecraft:shulker_shell", "L": "minecraft:lever",
+                                      "P": "minecraft:purpur_block"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1712,6 +1747,60 @@ BUILDS = {
         "sight": (8.0, 6.45, 9.1),
         "eye_relief": 6.0,
     },
+    # Slice 12A, the End guns. The Carapice and the Shellurker share their animations and the back of their body. The
+    # magazine is the shulker box under the receiver (the main part's last six elements: the shell, its lid plates and
+    # the shulker's head), with the two cables plugged into its top and the loop of cable ahead of it; magazine_2 and
+    # scriptures hold nothing. The bolt is the owner's receiver part, the block on top of the receiver, driven back
+    # with each shot and held back through the reload. The sight is the owner's ring ahead of it, the front post on
+    # the shroud.
+    "chitin_smg": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.4, 14.7)),
+            ("gun_body", "gun_body2", ["main-#9,10,11,22,23,24,25,26,27", "sights"], (8.0, 2.4, 14.7)),
+            ("bolt", "gun_body", ["receiver"], (8.0, 5.6, 12.4)),
+            ("magazine", "gun_body", ["main#9,10,11,22,23,24,25,26,27"], (8.0, 3.24, 9.43)),
+            ("magazine_2", "gun_body", [], (8.0, 3.24, 9.43)),
+            ("scriptures", "gun_body", [], (8.0, 6.0, 12.0)),
+        ],
+        "hands": {"right": (8.0, 2.4, 14.7), "left": (8.0, 2.0, 6.3)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 3.28, 3.1),
+        "sight": (8.0, 7.0, 10.94),
+    },
+    "hermit_rifle": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 2.4, 14.7)),
+            ("gun_body", "gun_body2", ["main-#27,28,29,41,42,43,44,45,46", "sights"], (8.0, 2.4, 14.7)),
+            ("bolt", "gun_body", ["receiver"], (8.0, 6.1, 9.9)),
+            ("magazine", "gun_body", ["main#27,28,29,41,42,43,44,45,46"], (8.0, 3.24, 9.43)),
+            ("magazine_2", "gun_body", [], (8.0, 3.24, 9.43)),
+            ("default_mag", "gun_body", [], (8.0, 3.24, 9.43)),
+            ("scriptures", "gun_body", [], (8.0, 6.0, 12.0)),
+        ],
+        "hands": {"right": (8.0, 2.4, 14.7), "left": (8.0, 2.0, 5.5)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.25, -0.55),
+        "sight": (8.0, 7.25, 7.94),
+        "eye_relief": 2.0,
+    },
+    # The Weevil is carried at the hip, as the Gattaler is: the right hand holds the D handle at the back. Its barrel
+    # part slides back with each shot and through the reload; its magazine is the owner's group of the shulker box under
+    # the front (the main part's first nine elements); its "grip" is the crank on the left (the 37th, 38th, 45th and
+    # 48th to 52nd), turned as the reload ends. The drum on the left side stays. It has no sights to aim down: its
+    # receiver stands above the line from its front post.
+    "borer": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 6.75, 18.25)),
+            ("gun_body", "gun_body2", ["main-#0,1,2,3,4,5,6,7,8,36,37,44,47,48,49,50,51"], (8.0, 6.75, 18.25)),
+            ("barrel", "gun_body", ["barrel"], (8.0, 4.18, -3.4)),
+            ("magazine", "gun_body", ["main#0,1,2,3,4,5,6,7,8"], (8.0, 2.09, 4.51)),
+            ("grip", "gun_body", ["main#36,37,44,47,48,49,50,51"], (5.0, 4.25, 8.53)),
+        ],
+        "hands": {"right": (8.0, 6.75, 18.25), "left": (8.0, 2.4, 1.5)},
+        "arms": {"right": (0.1576, -0.588, 0.7934), "left": (-0.5272, -0.3044, 0.7934)},
+        "muzzle": (8.0, 4.18, -8.3),
+        "sight": None,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2206,6 +2295,8 @@ ZOOM = {
     # The Nether guns (slice 11A): a shotgun, a repeater and a rifle; (slice 11B) a pistol, a carbine and a shotgun.
     "tusker": 0.9, "cinder_repeater": 0.88, "bastion_rifle": 0.8,
     "ashfall_pistol": 0.9, "goldbristle_carbine": 0.85, "crackling": 0.9,
+    # The End guns (slice 12A): a machine gun, a rifle, and a heavy machine gun fired from the hip.
+    "chitin_smg": 0.88, "hermit_rifle": 0.85, "borer": 0.95,
 }
 
 
@@ -2388,6 +2479,10 @@ SHOT_SOUNDS = {
     "ashfall_pistol": "item/scrapper/fire.ogg",
     "goldbristle_carbine": "item/makeshift_rifle/fire.ogg",
     "crackling": "item/brass_shotgun/fire.ogg",
+    # Slice 12A: the Riveter's shot; the library's shulker shot, the Reverb's; the Garrison Rifle's.
+    "chitin_smg": "item/greaser_smg/fire.ogg",
+    "hermit_rifle": "item/shulker/fire.ogg",
+    "borer": "item/scorched_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -2529,6 +2624,15 @@ def one_handed():
 # water puts out. No block is set alight (JugcraftGuns.INCENDIARY).
 INCENDIARY = ("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling")
 BURN_SECONDS = 4
+
+
+# ------------------------------------------------------------------ the End guns' float (slice 12A)
+
+# Each creature an End gun's bullet hurts floats up for LIFT_TICKS, as a shulker's bullet lifts it: the game's own
+# Levitation, at its first level (about three quarters of a block a second hit). A longer spell already on it is kept.
+# It falls when it ends, and takes the fall's damage (JugcraftGuns.LEVITATING).
+LEVITATING = ("chitin_smg", "hermit_rifle", "borer")
+LIFT_TICKS = 20
 
 
 def cell_rack_model():

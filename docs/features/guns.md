@@ -1,7 +1,7 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G) and the Nether guns (slices 11A and 11B)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B) and the End guns (slice 12A)
 
 Status:
-- **Slices 1 to 9G are in `main`:** the last of them, 8C to 9G, with #277 on 10 October 2026. The lines below say where each was built.
+- **Slices 1 to 11B are in `main`:** the last of them, 10A to 11B, with #320 on 11 October 2026. The lines below say where each was built.
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
 - **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron` (#252), stacked on slice 1, awaiting review.
 - **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever` (#253), stacked on slice 2, awaiting review.
@@ -30,6 +30,7 @@ Status:
 - **Slice 10G** (two guns at once: a one-handed gun in each hand, both fired; [below](#slice-10g-two-guns-at-once)): implemented on `claude/guns-dual-pistols`, stacked on slice 10F, awaiting review.
 - **Slice 11A** (the Nether guns: the Tusker, Cinder Repeater and Bastion Rifle; [below](#slice-11a-the-nether-guns)): implemented on `claude/guns-nether`, stacked on slice 10G, awaiting review.
 - **Slice 11B** (the rest of the Nether guns: the Ashfall Pistol, Goldbristle Carbine and Crackling; [below](#slice-11b-the-rest-of-the-nether-guns)): implemented on `claude/guns-nether-2`, stacked on slice 11A, awaiting review.
+- **Slice 12A** (the End guns: the Chitin SMG, Hermit Rifle and Borer; [below](#slice-12a-the-end-guns)): implemented on `claude/guns-12a`, off `main`, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -45,6 +46,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the next part: on 10 October 2026, "Ok lets do the next part". Offered four more gun sets and three smaller follow-ups, each its own pull request, they chose all of them: "Marksman rifles (Recommended), Automatic weapons, Energy weapons II, Pump shotguns" and "Tactical grip + laser, Aiming polish, Lobber gas grenades". The marksman rifles are slice 9A, the automatic weapons slice 9B, the second energy weapons slice 9C, the pump shotguns slice 9D, the first follow-up, the tactical grip and the laser sight, slice 9E, the second, the aiming polish, slice 9F, and the third, the Lobber's grenades, slice 9G.
 - the round after: on 10 October 2026, asked "Look good what do we need next", and offered more of their gun sets and some systems to add alongside them, each its own pull request, they chose "Launchers (Recommended), Coil and plasma, Double-barrels, Sculk guns" and "Energy Cell rack (Recommended), Enemies with guns, Dual pistols, Javelin test fix". The launchers are slice 10A, coil and plasma slice 10B, the double-barrels slice 10C and the sculk guns slice 10D; the Energy Cell rack is slice 10E, the enemies with guns slice 10F and the dual pistols slice 10G.
 - the next round: on 10 October 2026, with those built, they asked "Ok lets continue and do the next thing we need to". No choice was offered this time: the next of their unbuilt guns were taken up, a set at a time, each its own pull request, starting with three of the six they made in the piglins' crimson, blackstone and gold. The Nether guns are slice 11A, and the other three slice 11B.
+- the round after: on 13 October 2026, with the Nether guns in `main`, they asked "Ok lets continue and do the next thing". The next of their unbuilt guns were taken up as before: the three they made in the shulkers' purpur, each fed from a shulker box, are slice 12A.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1732,6 +1734,88 @@ The reload times and the Crackling's rate are the owner's animations': its pump 
 - **In the Nether** most creatures are fireproof, as for slice 11A's.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 12A: the End guns
+The next of the owner's guns, taken up after the Nether guns reached `main` (on 13 October 2026 the owner asked "Ok lets continue and do the next thing"): the three they made in the shulkers' purpur, the Carapice, Shellurker and Weevil. Each is fed from a shulker box with the shulker peering out of it, cabled into the gun. Their bullets make what they hit float, as a shulker's do.
+
+| | Chitin SMG | Hermit Rifle | Borer |
+|---|---|---|---|
+| The owner's gun | Carapice | Shellurker | Weevil |
+| What it is | a short machine gun in purpur: a curved grip, a block on top of its receiver behind a ring sight, a short shroud with a post, and the shulker box under its receiver | the same body, longer: its muzzle wrapped in a curled purpur shell | a heavy machine gun carried at the hip: a D handle at its back, a long pale barrel with a post at its muzzle, an eight-sided drum and a crank on its left side, and the shulker box under its front |
+| Fires | for as long as the trigger is held | the same | the same |
+| Damage | 3 | 5 | 5.5 |
+| Rate | 6.7 a second (every 3 ticks) | 5 a second (every 4 ticks) | 4 a second (every 5 ticks) |
+| Holds | 24 | 20 | 40 |
+| Reload | 2.8 s: the magazine | 2.55 s: the magazine | 3.9 s: the magazine |
+| Spread, hip / aimed | 3.5° / 1.2° | 3° / 0.5° | 4° / 1.5° |
+| Range | 48 blocks | 80 | 72 |
+| The view aimed | narrowed to 0.88 | 0.85 | 0.95 |
+| Round | Light Round | Rifle Round | Rifle Round |
+| Takes | the scopes and the Laser Sight | the three stocks, the scopes and the Laser Sight | nothing |
+
+The reload times are the owner's animations'.
+
+**Crafting** (a crafting table; the guns switch, as every gun). Each takes steel and a lever, as the other steel guns, and a shulker shell and purpur, from the End's cities:
+- **Chitin SMG:** two steel ingots and a shulker shell over a lever and a purpur block.
+- **Hermit Rifle:** three steel ingots over a shulker shell, a lever and a purpur block.
+- **Borer:** three steel ingots over a lever between two shulker shells, over a purpur block.
+
+**How they fire:** as the other bullet guns: each bullet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. A magazine loads at the end of its reload.
+- **Float:** each creature their bullets hurt floats for 1 second (`GunShots.LIFT_TICKS`, 20 ticks): the game's own Levitation at its first level, as a shulker's bullet gives it (a shulker's lasts 10 seconds). It rises about three quarters of a block in that second. Each hit starts it again, so under steady fire it goes on rising, nearly a block a second. When it ends the creature falls, and a fall of more than 3 blocks hurts it, as any fall does. A longer spell of Levitation already on it is kept.
+- **Only where the shot may strike:** a creature the shooter may not hurt (`GunShots.allowed`) is neither hurt nor lifted.
+- The server works it out with the shot (`JugcraftGuns.LEVITATING`); nothing new is sent to clients, which show the effect as the game always does.
+
+**What you see:** the owner's animations.
+- **Chitin SMG:** each shot kicks it back and drives the block on top of its receiver back and home. To reload, the gun is lifted and tipped up toward the face, the block held back; the left hand draws the shulker box down and away, brings it back and pushes it home, and the block is let go.
+- **Hermit Rifle:** each shot kicks it back and drives the block back, as the Chitin SMG's. To reload, the gun is lifted and tipped toward the face; the left hand draws the box down and away and pushes it home; then the block is worked.
+- **Borer:** each shot drives the barrel 2.9 px back into the body and out again. To reload, the gun is pushed out and tipped; the left hand pulls the box down and away and brings it back; then the crank on its left is pushed forward and let back.
+- **Spent rounds:** the Chitin SMG and the Hermit Rifle throw a case with each shot; the Borer's animations cue none.
+- **Sounds:** the Riveter SMG's shot (the Chitin SMG); the library's shulker shot, the Reverb's (the Hermit Rifle); the Garrison Rifle's (the Borer). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source (slice 11A), so none was added. The boxes go out and in with the magazine's sounds, the Borer's crank with the lever's.
+
+**How the models were built:**
+- **Chitin SMG:**
+  - **Bolt:** the owner's receiver part, the block on top of the receiver.
+  - **Magazine:** the shulker box under the receiver: the main part's last six elements (the box's tray and lid plates and the shulker's head), with the two cables into its top and the loop of cable ahead of it (the 10th to 12th), so they go with it. Its `magazine_2` and `scriptures` bones hold nothing.
+  - **The whole gun** rides `gun_body2`, which the reload eases back and forth.
+  - **Sights:** the owner's ring ahead of the receiver block, over the post on its shroud. A scope stands on the owner's rail (its `no_sights` part).
+  - **Aiming:** at the hip's depth: through the aimed shot its back stays 1.69 px from the eye.
+- **Hermit Rifle:**
+  - **The same body** as the Chitin SMG's (the owner's two share their back half and their animations), its bolt the receiver part and its magazine the shulker box with its cables (the main part's 28th to 30th and last six elements). Its `magazine_2`, `default_mag` and `scriptures` bones hold nothing.
+  - **The curled shell** at its muzzle is part of its body.
+  - **Sights:** the owner's ring on its receiver, over the post at its muzzle.
+  - **Aiming:** held 2 px further out (`"eye_relief"`): the shot's kick brought the back of its receiver to the eye.
+- **Borer:**
+  - **At the hip,** as the Thresher (slice 8C), whose poses the owner's Weevil shares: the right hand holds the D handle at its back, the left the barrel's root, just ahead of the box. Seen from outside it is carried low, as the owner's third-person transform tilts it 66.75° (`GunLooks.TILT`).
+  - **Barrel:** its own part, slid back with each shot and through the reload.
+  - **Magazine:** the owner's group so named in the main part (its first nine elements: the box, the shulker's head and the cables).
+  - **Grip:** the owner's name for the crank on the left (the main part's 37th, 38th, 45th and 48th to 52nd elements), turned about its foot as the reload ends. The drum stays.
+  - **No sights:** its receiver stands above the line from its front post, and the owner made it no aimed shot. Aiming steadies it and narrows the view, as the Thresher's.
+- **The arms:**
+  - **The Chitin SMG and the Hermit Rifle** take the Solenoid Rifle's arms (slice 10B), whose poses theirs are. Their reloads, like the Solenoid's, lift the gun toward the face while the left hand changes the box beneath it, so the left arm covers part of the view for a moment. A search over the arm's direction found at best about an eighth less, as for the Solenoid, so the usual direction stayed.
+  - **The Borer's** were both chosen in first-person previews to cover as little of the screen as they can, still running back toward the shoulders: the left arm's share of the screen about seven tenths of what it was with the Thresher's directions, the right arm's about half.
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload, draw and inspection; the receiver blocks, the boxes, the Borer's barrel and crank through their animations; the scopes, the stocks and the Laser Sight; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Light Round and the Rifle Round; nothing new.
+- **Parts:** steel and a lever, as the steel guns; shulker shells and purpur from the End's cities (purpur is also made from chorus fruit).
+- **Their place:** past steel, a reward for reaching the End's cities.
+- **The float** is the game's own Levitation, as a shulker's bullet gives.
+
+**Balance:** starting numbers, at point blank with every shot landing.
+- **Chitin SMG:** 3 a shot, 20 a second while it fires, for 3.6 s; over a magazine and its 2.8 s reload about 11 a second, as the Riveter SMG's and the Rattler Pistol's (11), below the Cinder Repeater's (13).
+- **Hermit Rifle:** 5 a shot, 25 a second while it fires, for 4 s; over a magazine and its 2.55 s reload about 15 a second, as the Squall Rifle's (15), below the Garrison Rifle's (17). It reaches as far (80 blocks) and is a little steadier aimed (0.5° against 0.6°).
+- **Borer:** 5.5 a shot, 22 a second while it fires, for 10 s; over its forty rounds and their 3.9 s reload about 16 a second, below the Thresher's (17), which fires faster but must spin up first.
+- **The float** does no damage of its own. Held up under fire a creature climbs nearly a block a second: a whole magazine of the Borer's, every shot landing, lifts it about ten blocks, and the fall then costs it about 7. A magazine of the Chitin SMG's or the Hermit's lifts it about four, a fall that costs 1 or 2.
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:chitin_smg`, `hermit_rifle` and `borer`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Chitin SMG's and the Hermit Rifle's reloads** bring the left arm across part of the view for a moment, as the Solenoid Rifle's does.
+- **The Borer has no sights:** it is fired from the hip, as the Thresher is.
+- **Attachments:** the owner made no barrel parts, magazines or grips for these three, and no stocks for the Chitin SMG or anything for the Borer, so those take none.
+- **The float lifts what the game lets float:** the game's own rules for Levitation apply.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2861,6 +2945,41 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | crackling | `Guns/models/special/ribs_glory/tact_grip.json` | `e116a28a23644cef` |
 | crackling | `Guns/models/special/ribs_glory/bolt.json` | `650fcf80f52af042` |
 | crackling | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
+| chitin_smg | `Guns/models/item/carapice.json` | `9c7fd2500de2eec0` |
+| chitin_smg | `Guns/item/carapice.png` | `dbb4252f2a894972` |
+| chitin_smg | `Guns/item/carapice.animation.json` | `51cfe99c8591815e` |
+| chitin_smg | `Guns/models/special/carapice/main.json` | `4c8827ca7b72b9ce` |
+| chitin_smg | `Guns/models/special/carapice/sights.json` | `05ae7722c245bee9` |
+| chitin_smg | `Guns/models/special/carapice/no_sights.json` | `d00a8489b4a21b5b` |
+| chitin_smg | `Guns/models/special/carapice/receiver.json` | `2b23d62be150547f` |
+| chitin_smg | `Guns/sounds/item/greaser_smg/fire.ogg` | `201fd4258dea84a2` |
+| chitin_smg | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| chitin_smg | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| chitin_smg | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| chitin_smg | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| chitin_smg | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| hermit_rifle | `Guns/models/item/shellurker.json` | `2706d7f49c7aa19e` |
+| hermit_rifle | `Guns/item/shellurker.png` | `d3f7c77e46cdc7b0` |
+| hermit_rifle | `Guns/item/shellurker.animation.json` | `d6ede559f8613f4f` |
+| hermit_rifle | `Guns/models/special/shellurker/main.json` | `bc593446eb3b40de` |
+| hermit_rifle | `Guns/models/special/shellurker/light_stock.json` | `e0f565b913ead028` |
+| hermit_rifle | `Guns/models/special/shellurker/heavy_stock.json` | `b531eaab81b6035d` |
+| hermit_rifle | `Guns/models/special/shellurker/wooden_stock.json` | `e8c7d791f589adfc` |
+| hermit_rifle | `Guns/models/special/shellurker/sights.json` | `b0f71acd3eb9d1c3` |
+| hermit_rifle | `Guns/models/special/shellurker/no_sights.json` | `21a1d0e8ee891834` |
+| hermit_rifle | `Guns/models/special/shellurker/receiver.json` | `e0d4428d618163a8` |
+| hermit_rifle | `Guns/sounds/item/shulker/fire.ogg` | `6c116009b62adfb6` |
+| hermit_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| hermit_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| hermit_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| hermit_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| hermit_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| borer | `Guns/models/item/weevil.json` | `99dd246512007be7` |
+| borer | `Guns/item/weevil.png` | `cb35813e29e094d1` |
+| borer | `Guns/item/weevil.animation.json` | `34f343b3ee93ee6c` |
+| borer | `Guns/models/special/weevil/main.json` | `33630abf4a584e59` |
+| borer | `Guns/models/special/weevil/barrel.json` | `c10feb4040b6441a` |
+| borer | `Guns/sounds/item/scorched_rifle/fire.ogg` | `5a52d37065a09a8c` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -3602,13 +3721,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Aimed:** the Ashfall Pistol's notch and the Goldbristle Carbine's ring on the husk over the crimson backs of their receivers; the Crackling's posts on the husk over its narrow back and the right hand, as the Sledge's in the same run.
     - **Reloading:** the Ashfall Pistol and the Goldbristle Carbine tipped in their reloads, the husk burning behind both. The Crackling's left arm comes up across the middle of the view with its shell, as the Sledge's does in the same run.
     - **Inspection, attachments and third person:** each turned over in the hand; each with the stocks; the Goldbristle Carbine with its barrel devices, magazines, bayonet and grips, the Crackling with its grips and bayonet, the pistol and the carbine with the Laser Sight. Seen from outside, the Ashfall Pistol is raised in one hand and the others in both, each flashing as it fires.
+- **Slice 12A, run locally (13 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2192 material IDs), with `check_guns` (the numbers, attachments, looks, tilts and `JugcraftGuns.LEVITATING` and `GunShots.LIFT_TICKS` against tools/guns.py).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 12A game tests (to run in CI):**
+  - `EndGunsGameTests`:
+    - `endGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires bullets that make what they hit float, as no other gun's do, and sets nothing alight. Each is an automatic held in both hands, loaded a magazine at a time: the Chitin SMG of twenty-four light rounds, the Hermit Rifle of twenty rifle rounds, the Borer of forty. The Chitin SMG takes the scopes and the Laser Sight, the Hermit Rifle the stocks too, the Borer nothing.
+    - `endGunsFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: each fires its last round at a pig and lands it, then loads from the inventory in its own time.
+    - `endGunsMakeWhatTheyHitFloat`: each End gun's shot gives its pig Levitation, and three quarters of a second on it has risen off the floor; an Undertone Rifle's shot beside them leaves its pig standing. Once the spell has ended, each pig is back on the floor, unhurt by the fall.
+  - `GunsGameTests` counts 57 guns.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
