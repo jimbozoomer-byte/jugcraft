@@ -176,7 +176,8 @@
 			"io.github.jimbozoomer.jugcraft.test.LanternFenGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CryptArchiveGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantGameTests",
-			"io.github.jimbozoomer.jugcraft.test.MireHagGameTests"
+			"io.github.jimbozoomer.jugcraft.test.MireHagGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CryptLichGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationClientGameTests",
@@ -318,7 +319,8 @@
 			"io.github.jimbozoomer.jugcraft.test.LanternFenClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CryptArchiveClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.MireHagClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.MireHagClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CryptLichClientGameTests"
 		]
 	},
 	"depends": {

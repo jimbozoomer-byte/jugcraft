@@ -84,7 +84,8 @@ STAIR = {"x": (30, 34), "z": (55, 60)}
 LANDING = {"x": (29, 35), "z": (61, 65)}
 LANDING_STAND = STAND + (STAIR["z"][1] - STAIR["z"][0] + 1)
 ARRIVAL = (32.5, LANDING_STAND, 63.5, 180.0)  # x, y, z and yaw: on the landing, facing north down the stair
-DAIS_EXIT = {"x": (31, 33), "z": 34}          # where the Grey Mist opens on the dais when the Lich falls (part 2)
+# Where the Grey Mist opens on the dais when the Lich falls: two high from STAND + 1, where the phylactery stood.
+DAIS_EXIT = {"x": (31, 33), "z": 34}
 EXIT = {"x": (31, 33), "z": 66}               # the Grey Mist's columns and row, three blocks high from LANDING_STAND
 # Where the mist throws back whoever strays: farther than BOUNDS (horizontally) from CENTRE, or below FLOOR.
 BOUNDS = 40
