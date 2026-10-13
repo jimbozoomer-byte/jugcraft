@@ -7541,7 +7541,7 @@
           "fluid_results": [
             [
               "jugcraft:bioethanol",
-              250
+              375
             ],
             [
               "jugcraft:carbon_dioxide",
@@ -7583,7 +7583,7 @@
           "fluids": [
             [
               "minecraft:water",
-              500
+              750
             ],
             [
               "jugcraft:sulfur_trioxide",
@@ -7593,7 +7593,7 @@
           "fluid_results": [
             [
               "jugcraft:sulfuric_acid",
-              500
+              1000
             ]
           ],
           "results": [],
@@ -7662,7 +7662,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7684,7 +7684,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7706,7 +7706,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7728,7 +7728,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7750,7 +7750,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7772,7 +7772,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7794,7 +7794,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7816,7 +7816,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7838,7 +7838,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7860,7 +7860,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7882,7 +7882,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7904,7 +7904,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7926,7 +7926,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7948,7 +7948,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7970,7 +7970,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -7992,7 +7992,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -8014,7 +8014,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -8036,7 +8036,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -8058,7 +8058,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -8080,7 +8080,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -8102,7 +8102,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         },
         {
           "items": [
@@ -8124,7 +8124,7 @@
               4
             ]
           ],
-          "ticks": 160
+          "ticks": 80
         }
       ]
     },

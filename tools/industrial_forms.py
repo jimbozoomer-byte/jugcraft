@@ -81,6 +81,12 @@ GAS_GENERATOR_FUELS = [(f"{MOD}:hydrogen", 128, 128), (f"{MOD}:methane", 448, 25
 # generator's output; and the Anaerobic Digester's biogas at the plan's 64 JE/t, its 60% methane share worth 268 JE/mB
 # (60% of methane's 448, rounded down: the carbon dioxide burns for nothing).
 BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 192, 96), (f"{MOD}:biogas", 268, 64)]
+# What the Combined Cycle Power Plant burns, the factory's big power station: methane at a quarter more than the gas
+# generator's 448 JE/mB (its exhaust raises steam for a second turbine) and 2,048 JE/t, four times the gas turbine; the
+# Coal Gasifier's raw syngas whole at 256 JE/mB and the same rate; hydrogen at the Fuel Cell's 128 JE/mB at 1,024 JE/t.
+COMBINED_CYCLE_FUELS = [(f"{MOD}:methane", 560, 2048), (f"{MOD}:raw_syngas", 256, 2048), (f"{MOD}:hydrogen", 128, 1024)]
+# Where its shaft runs: along x, at this height and depth (pixels).
+PLANT_AXIS = (20, 32)
 # The Bio Generator's materials (the art brief): pale ceramic heat shields over the combustion body.
 HEAT_SHIELD, FLANGE_FACE = "sp_ceramic", "dr_flange"
 
@@ -378,6 +384,34 @@ FORMS = {
                                            "T": f"{MOD}:steel_tank", "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "combined_cycle_power_plant": {
+        "display": "Combined Cycle Power Plant",
+        # The gas turbine's family (a 120,000 JE store, 2,048 JE/t out); the form's fuel list says what it burns.
+        "family": "gas_turbine",
+        # The skid, generator, gas turbine and boiler fill the two lower layers; the filter house stands over the generator
+        # end and the heat-recovery boiler rises at the right, its steam drum and stack on top.
+        "layers": [["C######", "#######", "#######", "#######"], ["#######", "#######", "#######", "#######"],
+                   ["##..###", "##..###", "##..###", "##..###"], ["##..###", "##..###", "##..###", "##..###"],
+                   ["....###", "....###", "....###", "....###"]],
+        "profile": "ENTRY",
+        "tank_mb": 2_000,
+        "input_tanks": ["fuel"],
+        "output_tanks": [],
+        "capabilities": [],
+        "fuels": COMBINED_CYCLE_FUELS,
+        "upgrades": False,
+        "warmup": 0,
+        "ports": [
+            ("fuel_in", "FLUID_IN", 0, 2, 3, 0, "BACK"),
+            ("power_out", "ENERGY_OUT", 0, 0, 2, 0, "LEFT"),
+        ],
+        # This change's bill, for review: the big station is built from a Gas Turbine and a Heat Recovery Unit (the two
+        # halves of a combined cycle), two Steel Tanks, an advanced circuit, a Machine Casing and three steel plates.
+        "recipe": (["TCT", "GKH", "PPP"], {"T": f"{MOD}:steel_tank", "C": f"{MOD}:advanced_circuit", "G": f"{MOD}:gas_turbine",
+                                           "K": f"{MOD}:machine_casing", "H": f"{MOD}:heat_recovery_unit",
+                                           "P": "#c:plates/steel"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -421,9 +455,9 @@ HANDBOOK = {
         "glass, an electric motor, a basic circuit and a Machine Casing. Every block it fills must be free when it is "
         "placed.",
         "Drop eight crops (wheat, sugar cane, potatoes, carrots, beetroot, berries, melon or apples) into the hatch on its "
-        "crown and pipe water into the inlet low at the back left. With a bucket of water they ferment into 250 mB of "
-        "bioethanol at the broth outlet low at the front, and 250 mB of carbon dioxide at the flange high at the back, in "
-        "five seconds at 96 JE/t.",
+        "crown and pipe water into the inlet low at the back left. With a bucket of water they ferment into 375 mB of "
+        "bioethanol at the broth outlet low at the front (half again what the Chemical Reactor gets from the same crops), "
+        "and 250 mB of carbon dioxide at the flange high at the back, in five seconds at 96 JE/t.",
         "The carbon dioxide feeds the Chemical Infuser's methane. Collecting it is optional: when its tank is full the "
         "rest is vented and fermentation goes on.",
     ],
@@ -448,7 +482,10 @@ HANDBOOK["bulk_chemical_reactor"] = [
     "absorption inlet on its lid: 500 mB of the gas dissolves in a bucket of water into a bucket of hydrochloric acid "
     "in five seconds, which leaves at the outlet low at the front.",
     "Hydrochloric acid leaches ore like sulfuric acid: drop an ore into the hatch on its lid, pipe 250 mB of the acid "
-    "into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace.",
+    "into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace, in four "
+    "seconds: two at a time, four times as fast as the Chemical Reactor leaches.",
+    "Sulfur trioxide from the Chemical Infuser dissolves in water here: 250 mB of it in 750 mB of water make a bucket of "
+    "sulfuric acid, twice the acid a sulfur dust gives in the Chemical Reactor.",
     "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of "
     "ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and "
     "high-explosive rockets in place of guncotton.",
@@ -488,6 +525,18 @@ HANDBOOK["gas_cleanup_rack"] = [
     "hydrogen give 100 mB of methane and 200 mB of water.",
 ]
 
+HANDBOOK["combined_cycle_power_plant"] = [
+    "Seven wide, four deep and five tall: the factory's power station. A gas turbine on a long skid draws air through "
+    "the filter house over its generator, and its hot exhaust raises steam in the tall heat-recovery boiler on the right "
+    "for a second turbine on the same shaft. It is built from a Gas Turbine, a Heat Recovery Unit, two Steel Tanks, an "
+    "advanced circuit, a Machine Casing and steel plates. Every block it fills must be free when it is placed.",
+    "Pipe fuel into the flange low at the back. Methane gives 560 JE a millibucket, a quarter more than any other "
+    "generator, at 2,048 JE/t: four times the Gas Turbine. Raw syngas straight from the Coal Gasifier burns whole at "
+    "256 JE a millibucket and the same 2,048 JE/t, and hydrogen at 128 JE a millibucket and 1,024 JE/t.",
+    "The power leaves at the generator's terminal low on its left side. It makes only as much as its store has room "
+    "for, and its shaft turns while it runs. Feeding it takes a real gas works: two Coal Gasifiers, or a large digester "
+    "and methane plant.",
+]
 HANDBOOK["bio_generator"] = [
         "Three wide, four deep and three tall: a compact engine-generator on a thick skid, built from a Steel Tank, an "
         "electric motor, a steel gear, a basic circuit and a Machine Casing. Every block it fills must be free when it is "
@@ -514,6 +563,12 @@ TANK_NAMES = {
     "liquid": "Liquid tank",
     "gas": "Gas tank",
     "biogas": "Biogas tank",
+}
+
+# A form's own names for tanks that hold different fluids for different recipes (MachineStatus.tankLabel): the
+# Infuser's first inlet takes hydrogen for its hydrogen recipes but oxygen for contact conversion.
+FORM_TANK_NAMES = {
+    "chemical_infuser": {"hydrogen": "Left inlet tank", "reactant": "Right inlet tank"},
 }
 
 # Recipes only forms run: each names the capability a form must offer. Fluid results go to output tanks by their
@@ -577,10 +632,11 @@ FORM_RECIPES = {
     ],
     "industrial_fermenter": [
         # The Chemical Reactor's fermentation (eight fermentable crops and a bucket of water, 250 mB of bioethanol, 100 ticks)
-        # with its carbon dioxide collected: one reaction amount of gas for each of alcohol, 250 mB. Vented when not taken.
+        # done properly: controlled yeast and temperature draw half again as much alcohol from the same crops, 375 mB, and
+        # the carbon dioxide is collected, 250 mB. Vented when not taken. The dedicated machine is worth building.
         {"name": "fermenter_bioethanol", "capability": CONTROLLED_FERMENTATION, "items": [("#jugcraft:fermentable", 8)],
          "fluids": [("minecraft:water", 1000)],
-         "fluid_results": [(f"{MOD}:bioethanol", 250, 0), (f"{MOD}:carbon_dioxide", 250, 1)], "ticks": 100,
+         "fluid_results": [(f"{MOD}:bioethanol", 375, 0), (f"{MOD}:carbon_dioxide", 250, 1)], "ticks": 100,
          "features": ["machines"]},
     ],
     "bulk_chemical_reactor": [
@@ -590,11 +646,12 @@ FORM_RECIPES = {
         {"name": "bulk_hydrochloric_acid", "capability": ACID_ABSORPTION,
          "fluids": [("minecraft:water", 1000), (f"{MOD}:hydrogen_chloride", 500)],
          "fluid_results": [(f"{MOD}:hydrochloric_acid", 1000, 0)], "ticks": 100, "features": ["salt"]},
-        # Ordinary sulfuric-acid absorption (the plan's row): 250 mB of sulfur trioxide in 500 mB of water make 500 mB of
-        # acid, 100 ticks at 96 JE/t, the plan's 9,600 JE.
+        # Sulfuric-acid absorption: 250 mB of sulfur trioxide in 750 mB of water make a bucket of acid, 100 ticks at 96
+        # JE/t, 9,600 JE. One sulfur dust becomes 1,000 mB of acid this way, twice the simple recipe's 500: the contact
+        # process trades power and plant for sulfur.
         {"name": "bulk_sulfuric_acid", "capability": ACID_ABSORPTION,
-         "fluids": [("minecraft:water", 500), (f"{MOD}:sulfur_trioxide", 250)],
-         "fluid_results": [(f"{MOD}:sulfuric_acid", 500, 0)], "ticks": 100, "features": ["sulfur", "machines"]},
+         "fluids": [("minecraft:water", 750), (f"{MOD}:sulfur_trioxide", 250)],
+         "fluid_results": [(f"{MOD}:sulfuric_acid", 1000, 0)], "ticks": 100, "features": ["sulfur", "machines"]},
         # The contact bed's vanadium, from the owner's selected vanadium-bearing iron concentrate: four washed iron ores
         # roasted with 500 mB of lye (a salt roast, no sulfuric acid) give a vanadium pentoxide. 200 ticks at 96 JE/t.
         {"name": "bulk_vanadium_pentoxide", "capability": VANADIUM_RECOVERY, "items": [(f"{MOD}:washed_iron_ore", 4)],
@@ -650,12 +707,13 @@ FORM_RECIPES = {
 
 def _chloride_leaching():
     """Each ore dissolved in 250 mB of hydrochloric acid gives four washed ores, as sulfuric acid does in the Chemical
-    Reactor (tools/petro.py _leaching): a second, sulfur-free route to the best ore yield, never a better one."""
+    Reactor (tools/petro.py _leaching): the best ore yield, never a better one, but in half the time, and two at once in
+    the Bulk Chemical Reactor: four times the Chemical Reactor's leaching rate."""
     from machines import ORE_LEACHING_MULTIPLIER, _metal_features
     from materials import WASHED_ORES, ore_ids
     return [{"name": f"bulk_chloride_{ore.split(':')[1]}", "capability": CHLORIDE_LEACHING, "items": [(ore, 1)],
              "fluids": [(f"{MOD}:hydrochloric_acid", 250)],
-             "results": [(f"{MOD}:washed_{metal}_ore", ORE_LEACHING_MULTIPLIER)], "ticks": 160,
+             "results": [(f"{MOD}:washed_{metal}_ore", ORE_LEACHING_MULTIPLIER)], "ticks": 80,
              "ore_bonus": ORE_LEACHING_MULTIPLIER, "features": ["salt"] + _metal_features(metal)}
             for metal in WASHED_ORES for ore in ore_ids(metal)]
 
@@ -1710,6 +1768,102 @@ def bio_generator_still():
             + cyl("z", cu, 25, 7.5, BIO_FAN_Z - 0.5, BIO_FAN_Z + 0.5, GUNMETAL, "dr_fan"))
 
 
+def combined_cycle_power_plant():
+    """Seven wide, four deep and five tall: the factory's power station. On a long gunmetal skid, from the left: the olive
+    generator with its terminal box (the power socket, mint lamps and copper terminals) under the gridded air-filter
+    house, the controller cabinet at the front left; the guarded shaft coupling (drawn turning by MachineRotors); the gas
+    turbine, a ringed compressor stepping out to the copper-banded combustor and the heat-shielded turbine; the exhaust
+    diffuser widening into the tall heat-recovery boiler at the right, ribbed and buttressed, with its white steam drum
+    across the top and the hazard-banded stack at the back right. Behind the train the small steam turbine takes its steam
+    from the boiler, and the fuel skid at the back carries the inlet flange, banded in methane."""
+    cy, cz = PLANT_AXIS
+    m = [box((-96, 0, 0), (16, 4, 64), GUNMETAL)]
+    m.append(box((-96, 3, 0.5), (16, 4, 1.5), HAZARD))
+    # The generator under the filter house: olive, ribbed, on gunmetal saddles.
+    for x in (3, 8):
+        m.append(box((x - 1.5, 4, cz - 10), (x + 1.5, 10, cz + 10), GUNMETAL))
+    m += cyl("x", cy, cz, 11, 1, 11, OLIVE, GUNMETAL)
+    for x in (3, 7):
+        m += cyl("x", cy, cz, 11.75, x, x + 1.5, RIBBED)
+    # Its terminal box on the left end: the power socket (the port), a mint lamp and copper terminals on ceramic.
+    m.append(box((11, 4, 34), (15.25, 22, 47), GUNMETAL))
+    m.append(box((10.75, 22, 33.75), (15.5, 23, 47.25), HAZARD))
+    m.append(box((15.25, 5, 37), (16, 11, 43), {"*": CHROME, "east": "power_port!"}))
+    m.append(dial("east", (16, 16, 40.5), 2.5, texture=MINT, body=CHROME))
+    for z in (37, 44):
+        m += cyl("y", 13, z, 1, 23, 26, INSULATOR)
+        m.append(box((12.5, 26, z - 0.5), (13.5, 26.5, z + 0.5), COPPER))
+    # The controller cabinet at the front left: gauges, the amber lamp and an amber activity strip.
+    m.append(box((2, 4, 1), (15, 30, 11), {"*": OLIVE, "up": STENCIL, "north": GUNMETAL}))
+    m.append(dial("north", (11.5, 24, 0.75), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (5.5, 24, 0.75), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (8.5, 16, 0.75), 2.5, texture=LAMP, body=GUNMETAL))
+    m.append(box((4, 8, 0.25), (13, 10, 1), STRIP))
+    # The air-filter house over the generator end, its grille faces, and the intake duct down to the compressor.
+    m.append(box((-14, 33, 3), (14, 62, 61), {"*": GUNMETAL, "north": GRILLE, "south": GRILLE, "east": GRILLE,
+                                              "west": GRILLE, "up": STENCIL}))
+    m.append(box((-15, 62, 2), (15, 63.5, 62), CHROME))
+    m.append(box((-12, 28, 24), (-4, 33, 40), CHROME))
+    # The gas turbine: the ringed compressor, the copper-banded combustor and the heat-shielded turbine section.
+    m += cyl("x", cy, cz, 8, -20, -2, CHROME, GUNMETAL)
+    for x in (-6, -11, -16):
+        m += cyl("x", cy, cz, 8.75, x, x + 1, GUNMETAL)
+    m += cyl("x", cy, cz, 11, -32, -20, GUNMETAL, GUNMETAL)
+    for x in (-29, -25, -21):
+        m += cyl("x", cy, cz, 11.75, x, x + 1.5, COPPER)
+    m += cyl("x", cy, cz, 10, -46, -32, SHIELD, GUNMETAL)
+    for x in (-44, -38):
+        m += cyl("x", cy, cz, 10.75, x, x + 1.5, GUNMETAL)
+    for x in (-40, -26, -10):
+        m.append(box((x - 2, 4, cz - 9), (x + 2, 10, cz + 9), GUNMETAL))
+    # The exhaust diffuser widening into the boiler.
+    m.append(box((-52, 7, 18), (-46, 31, 46), GUNMETAL))
+    # The heat-recovery steam generator: a tall ribbed casing with buttresses, a cream band and an inspection door.
+    m.append(box((-94, 4, 4), (-52, 62, 60), {"*": RIBBED, "up": GUNMETAL}))
+    for x in (-91, -80, -69, -58):
+        m.append(box((x, 4, 3), (x + 2, 62, 4), GUNMETAL))
+        m.append(box((x, 4, 60), (x + 2, 62, 61), GUNMETAL))
+    for z in (4, 32):
+        m.append(box((-95, 4, z), (-94, 62, z + 2), GUNMETAL))
+    m.append(box((-94.5, 54, 3.5), (-51.5, 57, 60.5), CERAMIC))
+    m.append(box((-80, 8, 3.25), (-66, 30, 4), {"*": GUNMETAL, "north": PORTHOLE}))
+    # The white steam drum across the top, on saddles, capped in chrome.
+    for z in (14, 44):
+        m.append(box((-78, 62, z - 2), (-66, 66, z + 2), GUNMETAL))
+    m += cyl("z", -72, 70, 6, 6, 58, TANK_BODY, CHROME)
+    for z in (10, 54):
+        m += cyl("z", -72, 70, 6.5, z, z + 1, CHROME)
+    # The stack at the back right, banded in hazard stripes near its lip.
+    m += cyl("y", -86, 50, 7, 62, 80, EXHAUST, "dr_soot")
+    m += cyl("y", -86, 50, 7.5, 74, 76, HAZARD)
+    # The small steam turbine behind the generator end, and its steam main from the boiler.
+    m += cyl("x", 16, 54, 7, -16, -2, OLIVE, CHROME)
+    m += cyl("x", 16, 54, 7.75, -10, -8.5, GUNMETAL)
+    m += cyl("x", 27, 54, 2, -52, -16, COPPER)
+    m.append(box((-18, 23, 52), (-14, 29, 56), COPPER))
+    # The fuel skid at the back: the inlet flange (the port), banded in methane, and the fuel line to the combustor.
+    m.append(box((-30, 4, 50), (-18, 14, 63.25), {"*": OLIVE, "up": STENCIL}))
+    m.append(box((-28, 4.5, 63.25), (-20, 12.5, 64), {"*": CHROME, "south": f"{FLANGE}!"}))
+    m += cyl("z", -24, 9, 2.4, 60, 61, "methane_still")
+    m += cyl("z", -24, 12, 1.75, 43, 50, RUBBER)
+    return m
+
+
+def combined_cycle_power_plant_shaft():
+    """The plant's shaft coupling between the generator and the compressor (client/MachineRotors)."""
+    import machine_rotors as rotors
+    cy, cz = PLANT_AXIS
+    quads = rotors.disc("x", -2.5, 1.5, cy, cz, 2, CHROME, CHROME)
+    quads += rotors.disc("x", -1, 0, cy, cz, 5, CHROME, "dr_flange")
+    return quads
+
+
+def combined_cycle_power_plant_still():
+    """The coupling standing still, for the item model only."""
+    cy, cz = PLANT_AXIS
+    return cyl("x", cy, cz, 2, -2.5, 1.5, CHROME) + cyl("x", cy, cz, 5, -1, 0, CHROME, "dr_flange")
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -1753,6 +1907,10 @@ ROTORS = {
         "ease": 30, "always": True, "quads": gas_cleanup_rack_rotor(),
     },
     # The Bio Generator's coupling and radiator fan, on two axes along z, spinning up as it starts.
+    "combined_cycle_power_plant_shaft": {
+        "block": "combined_cycle_power_plant", "axis": "x", "center": [0, PLANT_AXIS[0], PLANT_AXIS[1]], "property": "lit",
+        "speed": 18, "ease": 60, "always": True, "quads": combined_cycle_power_plant_shaft(),
+    },
     "bio_generator_coupling": {
         "block": "bio_generator", "axis": "z", "center": [BIO_AXIS[0], BIO_AXIS[1], 29.5], "property": "lit", "speed": 12,
         "ease": 40, "always": True, "quads": bio_generator_coupling(),
@@ -1767,13 +1925,14 @@ MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_gener
           "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer(),
           "industrial_fermenter": industrial_fermenter(), "bulk_chemical_reactor": bulk_chemical_reactor(),
           "anaerobic_digester": anaerobic_digester(), "coal_gasifier": coal_gasifier(),
-          "gas_cleanup_rack": gas_cleanup_rack(), "bio_generator": bio_generator()}
+          "gas_cleanup_rack": gas_cleanup_rack(), "bio_generator": bio_generator(),
+          "combined_cycle_power_plant": combined_cycle_power_plant()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
                "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still(),
                "coal_gasifier": coal_gasifier_still(), "gas_cleanup_rack": gas_cleanup_rack_still(),
-               "bio_generator": bio_generator_still()}
+               "bio_generator": bio_generator_still(), "combined_cycle_power_plant": combined_cycle_power_plant_still()}
 PARTICLE = "dp_olive"
 
 
@@ -1782,6 +1941,9 @@ def write_all(write, assets, data, lang, condition, self_drop):
     out = model_writer.StyleWriter(assets)
     for role, name in TANK_NAMES.items():
         lang[f"container.{MOD}.form.tank.{role}"] = name
+    for form, names in FORM_TANK_NAMES.items():
+        for role, name in names.items():
+            lang[f"container.{MOD}.form.{form}.tank.{role}"] = name
     lang[f"container.{MOD}.form.socket.bed"] = "Catalyst bed"
     # The Infuser's bed socket holds the nickel catalyst bed: the owner's selected one nickel ingot on two ordinary fired
     # bricks (docs/features/industrial-starter-gas-and-acid-factory.md), made once and never used up.
