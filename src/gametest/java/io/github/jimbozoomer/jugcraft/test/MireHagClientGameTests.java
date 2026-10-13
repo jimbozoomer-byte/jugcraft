@@ -253,7 +253,7 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 					.noneMatch(MireHagEntity::isAlive), "She is still there"));
 
 			// A fresh instance in her slot is placed anew: the Grey Mist she left is gone with the old one, every lamp burns,
-			// and she waits on her porch again.
+			// and, once the player has gone in again (onto the jetty, far from her), she waits on her porch again.
 			server.runOnServer(minecraft -> {
 				LairInstance used = Lairs.instance(FEN, 0);
 				check(used != null, "Her instance is not open");
@@ -267,9 +267,13 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 				for (BlockPos lamp : LanternFen.LAMPS) {
 					check(level.getBlockState(lamp.offset(o)).getValue(FenLampBlock.LIT), "A lamp of the fresh fen is out at " + lamp);
 				}
+				check(Lairs.enter(player(minecraft), fresh), "The player did not go into the fresh fen");
+			});
+			context.waitTicks(40);
+			server.runOnServer(minecraft -> {
 				MireHagEntity again = hag(minecraft);
 				check(again.phase() == MireHagEntity.Phase.WAITING && again.position().distanceTo(again.waiting()) < 0.1,
-						"She does not wait on the fresh fen's porch");
+						"She does not wait on the fresh fen's porch: " + again.phase() + " at " + again.position());
 			});
 			System.out.println("[hag] client game test: her fight passed end to end");
 			server.runOnServer(minecraft -> Lairs.reset());

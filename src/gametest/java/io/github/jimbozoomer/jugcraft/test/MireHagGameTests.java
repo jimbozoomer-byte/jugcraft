@@ -161,7 +161,8 @@ public class MireHagGameTests {
 						helper.assertTrue(woken, "A player in the marsh did not wake her at full health");
 						helper.assertTrue(unhurt, "Waking, she was harmed");
 						helper.assertTrue(hag.phase() == MireHagEntity.Phase.LURE, "She did not come down to fight: " + hag.phase());
-						helper.assertTrue(Math.abs(hag.getY() - woke.y) < 0.1 && Math.hypot(hag.getX() - woke.x, hag.getZ() - woke.z) < 2.0,
+						// Down for up to 26 ticks by now, she has waded toward the player at most 3.9 blocks.
+						helper.assertTrue(Math.abs(hag.getY() - woke.y) < 0.1 && Math.hypot(hag.getX() - woke.x, hag.getZ() - woke.z) < 4.5,
 								"She did not come down into the water where she wakes but to " + hag.position());
 						helper.assertTrue(hag.likenesses().size() == MireHagEntity.LIKENESSES, hag.likenesses().size() + " Likenesses walk with her, not "
 								+ MireHagEntity.LIKENESSES);
@@ -711,9 +712,11 @@ public class MireHagGameTests {
 
 	/**
 	 * The Hag's Eye held in the offhand: an invisible creature near its holder glows, and a visible one and an invisible one
-	 * far off do not; the server looks again every {@value HagsEye#EVERY} ticks, and once the Eye is put away, no more.
+	 * far off do not; the server looks again every {@value HagsEye#EVERY} ticks, and once the Eye is put away, no more. The
+	 * creatures are made invisible by the Invisibility effect, as the game makes them: a creature's invisibility follows its
+	 * effects whenever they change.
 	 */
-	@GameTest(maxTicks = 80)
+	@GameTest(maxTicks = 100)
 	public void theHagsEyeShowsWhatHides(GameTestHelper helper) {
 		ServerPlayer seer = helper.makeMockServerPlayerInLevel();
 		seer.setGameMode(GameType.CREATIVE);
@@ -724,26 +727,32 @@ public class MireHagGameTests {
 		Pig far = helper.spawn(EntityTypes.PIG, new BlockPos(3, 1, 3));
 		List<Pig> pigs = List.of(hidden, plain, far);
 		pigs.forEach(pig -> pig.setNoGravity(true));
-		hidden.setInvisible(true);
-		far.setInvisible(true);
+		for (Pig unseen : List.of(hidden, far)) {
+			unseen.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 1200, 0, false, false));
+		}
 		far.teleportTo(seer.getX() + HagsEye.RANGE + 4.0, seer.getY(), seer.getZ());
-		boolean bare = !HagsEye.holds(seer);
-		seer.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(JugcraftHag.HAGS_EYE));
-		int seen = HagsEye.see(seer);
-		boolean shown = hidden.hasEffect(MobEffects.GLOWING) && !plain.hasEffect(MobEffects.GLOWING) && !far.hasEffect(MobEffects.GLOWING);
-		hidden.removeEffect(MobEffects.GLOWING);
-		helper.runAfterDelay(HagsEye.EVERY + 2, () -> {
-			boolean again = hidden.hasEffect(MobEffects.GLOWING);
-			seer.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+		// The effect makes them invisible on their next tick.
+		helper.runAfterDelay(2, () -> {
+			boolean hiding = hidden.isInvisible() && far.isInvisible() && !plain.isInvisible();
+			boolean bare = !HagsEye.holds(seer);
+			seer.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(JugcraftHag.HAGS_EYE));
+			int seen = HagsEye.see(seer);
+			boolean shown = hidden.hasEffect(MobEffects.GLOWING) && !plain.hasEffect(MobEffects.GLOWING) && !far.hasEffect(MobEffects.GLOWING);
 			hidden.removeEffect(MobEffects.GLOWING);
 			helper.runAfterDelay(HagsEye.EVERY + 2, () -> {
-				helper.assertTrue(bare, "With nothing in the offhand, the Eye is held");
-				helper.assertTrue(seen == 1 && shown, "The Eye showed " + seen + " creatures, not the one invisible creature near");
-				helper.assertTrue(again, "Held, the Eye was not looked through again on the server's tick");
-				helper.assertTrue(!hidden.hasEffect(MobEffects.GLOWING), "Put away, the Eye still shows what hides");
-				pigs.forEach(Pig::discard);
-				seer.discard();
-				helper.succeed();
+				boolean again = hidden.hasEffect(MobEffects.GLOWING) && hidden.isInvisible();
+				seer.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+				hidden.removeEffect(MobEffects.GLOWING);
+				helper.runAfterDelay(HagsEye.EVERY + 2, () -> {
+					helper.assertTrue(hiding, "The Invisibility effect did not hide the pigs");
+					helper.assertTrue(bare, "With nothing in the offhand, the Eye is held");
+					helper.assertTrue(seen == 1 && shown, "The Eye showed " + seen + " creatures, not the one invisible creature near");
+					helper.assertTrue(again, "Held, the Eye was not looked through again on the server's tick");
+					helper.assertTrue(!hidden.hasEffect(MobEffects.GLOWING) && hidden.isInvisible(), "Put away, the Eye still shows what hides");
+					pigs.forEach(Pig::discard);
+					seer.discard();
+					helper.succeed();
+				});
 			});
 		});
 	}
