@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: Guns, slice 12B (the copper guns)
+- **Three copper guns** from the owner's copper models and animations, early guns of copper and iron as the Rust Midge is: the **Penny Pistol**, held in one hand (so it pairs with another one-handed gun), fed from a long magazine at its left side; the **Conductor Carbine**, a slide-action carbine of eight rifle rounds, its slide worked after every shot; and the **Magpie SMG**, an automatic of thirty-two light rounds from a long magazine at its left side.
+- Each is made from copper ingots, an iron ingot and a lever; the Penny Pistol's recipe fits the inventory's own grid. The Penny Pistol takes the barrel attachments and the stocks; the other two the grips, bayonets, scopes and Laser Sight too, and the Conductor Carbine the magazines.
+- Record: [guns.md, slice 12B](docs/features/guns.md#slice-12b-the-copper-guns).
+
 ### Added: Guns, slice 12A (the End guns)
 - **Three End guns** from the owner's purpur models and animations, each fed from a shulker box with the shulker peering out of it, whose bullets make what they hit float for a second, as a shulker's do (the game's own Levitation; each hit starts it again): the **Chitin SMG**, an automatic of twenty-four light rounds; the **Hermit Rifle**, an automatic of twenty rifle rounds, its muzzle in a curled shell; and the **Borer**, a machine gun of forty rifle rounds carried at the hip, charged with a crank.
 - Each is made from steel, a lever, a shulker shell (two for the Borer) and a purpur block. The Chitin SMG takes the scopes and Laser Sight, the Hermit Rifle the stocks too; the Borer takes none.

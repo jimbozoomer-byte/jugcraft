@@ -564,6 +564,31 @@ GUNS = {
         "damage": 5.5, "pellets": 1, "interval": 5, "auto": True, "capacity": 40,
         "reload": 78, "spread": (4.0, 1.5), "range": 72, "ammo": "rifle_round",
     },
+    # Slice 12B: the copper guns, early guns of copper and iron as the Rust Midge is: a pistol held in one hand, a
+    # slide-action carbine and a submachine gun, the pistol and the submachine gun fed from magazines at their left side.
+    "penny_pistol": {
+        "display": "Penny Pistol",
+        "source": "scrapper",
+        "tooltip": "A copper pistol held in one hand, fed from a magazine at its left side. Fires light rounds.",
+        "damage": 4.0, "pellets": 1, "interval": 6, "auto": False, "capacity": 10,
+        "reload": 56, "spread": (3.0, 1.0), "range": 48, "ammo": "light_round",
+    },
+    "conductor_carbine": {
+        "display": "Conductor Carbine",
+        "source": "llr_director",
+        "tooltip": "A copper slide-action carbine, its fore-end worked after every shot: one hard round each pull. Fires "
+                   "rifle rounds.",
+        "damage": 8.0, "pellets": 1, "interval": 15, "auto": False, "capacity": 8,
+        "reload": 49, "spread": (2.0, 0.3), "range": 96, "ammo": "rifle_round",
+    },
+    "magpie_smg": {
+        "display": "Magpie SMG",
+        "source": "birdfeeder",
+        "tooltip": "A copper submachine gun fed from a long magazine at its left side, firing for as long as the trigger "
+                   "is held. Fires light rounds.",
+        "damage": 2.5, "pellets": 1, "interval": 4, "auto": True, "capacity": 32,
+        "reload": 53, "spread": (3.5, 1.5), "range": 40, "ammo": "light_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -741,6 +766,11 @@ RECIPES = {
                                       "P": "minecraft:purpur_block"}),
     "borer": (["SSS", "HLH", " P "], {"S": "#c:ingots/steel", "H": "minecraft:shulker_shell", "L": "minecraft:lever",
                                       "P": "minecraft:purpur_block"}),
+    # Slice 12B: copper, iron and a lever, as the Rust Midge.
+    "penny_pistol": (["CC", "LI"], {"C": "minecraft:copper_ingot", "L": "minecraft:lever", "I": "minecraft:iron_ingot"}),
+    "conductor_carbine": (["CCC", "ILI"], {"C": "minecraft:copper_ingot", "L": "minecraft:lever",
+                                           "I": "minecraft:iron_ingot"}),
+    "magpie_smg": (["CCC", " LI"], {"C": "minecraft:copper_ingot", "L": "minecraft:lever", "I": "minecraft:iron_ingot"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1801,6 +1831,61 @@ BUILDS = {
         "muzzle": (8.0, 4.18, -8.3),
         "sight": None,
     },
+    # Slice 12B, the copper guns. The Scrapper is held in one hand: its idle hides the left arm, which comes in through
+    # the reload, first under the frame (0.25 s), then to change the magazine. Its magazine goes in at the left side and
+    # rides the sliding_magazine bone, which the reload draws out to the left and drops away, a new one swung in; the
+    # magazine and magazine_2 bones its shots scale hold nothing. Its bolt is the pair of knobs on its sides, driven
+    # back with each shot and racked as the reload ends. Its sight is the notch on its back over the post on its front.
+    "penny_pistol": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel"], (8.0, 2.9, 14.6)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 4.65, 12.43)),
+            ("magazine", "gun_body", [], (4.91, 4.63, 10.93)),
+            ("magazine_2", "gun_body", [], (4.91, 4.63, 10.93)),
+            ("sliding_magazine", "gun_body", ["magazine"], (4.91, 4.63, 10.93)),
+        ],
+        "hands": {"right": (8.0, 2.9, 14.6), "left": (8.0, 2.2, 10.5)},
+        "hand_pose": {"left": ("reload", "0.25")},
+        "arms": {"right": (-0.5272, -0.3044, 0.7934), "left": (0.2706, -0.2706, 0.9239)},
+        "muzzle": (8.0, 4.4, 7.8),
+        "sight": (8.0, 6.1, 14.0),
+    },
+    # The LLR Director is a slide-action carbine: its bolt part is the fore-end under the barrel with the knob on the
+    # right of the receiver, which the left hand works back and forward after each shot and as the reload ends. Its
+    # magazine goes in at the left side and swings out down and away to reload; magazine_2 holds nothing. Its sight is
+    # the owner's ring at the back of the receiver, over the post at the front.
+    "conductor_carbine": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights", "stan_grip"], (8.0, 3.0, 16.6)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 3.0, 9.0)),
+            ("magazine", "gun_body", ["stan_mag"], (6.6, 4.68, 12.1)),
+            ("magazine_2", "gun_body", [], (6.6, 4.68, 12.1)),
+        ],
+        "hands": {"right": (8.0, 3.0, 16.6), "left": (8.0, 1.9, 7.3)},
+        "arms": {"right": (0.05, -0.3794, 0.9239), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.9, 0.0),
+        "sight": (8.0, 6.25, 15.18),
+        "eye_relief": 2.5,
+    },
+    # The Birdfeeder's long magazine goes in at its left side (the owner's sliding_magazine group, its standard
+    # magazine part). The reload slides it out along its length on the sliding_magazine bone, which hangs from the
+    # magazine bone that swings it down and away, and slides the new one home. Its bolt bones, named "bolt" in some of
+    # its animations and "Bolt" in others, hold nothing. Its sight is the owner's ring at the back of the receiver, over
+    # the post at the front.
+    "magpie_smg": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights", "stan_grip"], (8.0, 3.3, 17.0)),
+            ("bolt", "gun_body", [], (8.0, 4.8, 10.7)),
+            ("Bolt", "gun_body", [], (8.0, 4.8, 10.7)),
+            ("magazine", "gun_body", [], (7.37, 5.2, 14.77)),
+            ("sliding_magazine", "magazine", ["stan_mag"], (4.6, 5.2, 14.77)),
+        ],
+        "hands": {"right": (8.0, 3.3, 17.0), "left": (8.0, 2.4, 8.5)},
+        "arms": {"right": (-0.05, -0.3794, 0.9239), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 5.1, -0.35),
+        "sight": (8.0, 6.9, 15.18),
+        "eye_relief": 2.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2297,6 +2382,8 @@ ZOOM = {
     "ashfall_pistol": 0.9, "goldbristle_carbine": 0.85, "crackling": 0.9,
     # The End guns (slice 12A): a machine gun, a rifle, and a heavy machine gun fired from the hip.
     "chitin_smg": 0.88, "hermit_rifle": 0.85, "borer": 0.95,
+    # The copper guns (slice 12B): a pistol, a carbine and a submachine gun.
+    "penny_pistol": 0.9, "conductor_carbine": 0.82, "magpie_smg": 0.88,
 }
 
 
@@ -2324,9 +2411,11 @@ CASINGS = {"light_round": "small_copper_casing", "rifle_round": "large_brass_cas
 # owner's red dot (Guns/effect/red_dot_reticle.png, the Reflex Sight's), copied to textures/particle/laser_dot.png.
 LASER_DOT = "red_dot_reticle"
 # The animations' particle cues: GunAnimations ejects a casing at EJECT_CUE; the others mark points in a reload that
-# the server's timing already covers, and show nothing.
+# the server's timing already covers, and show nothing. Slice 12B: a side magazine's tracking cues (the owner's mod
+# slid such a magazine along as its rounds were spent; here it stays where the animations put it).
 EJECT_CUE = "eject_casing"
-QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end", "stop_mag_tracking")
+QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end", "stop_mag_tracking", "reset_mag_position",
+              "resume_mag_tracking")
 # The muzzle flash: the owner's four flash frames, copied to textures/item/guns/flash/flash_<n>.png; each shot shows
 # one, turned at random about the barrel. A silencer hides it ("hides_flash").
 FLASH_FRAMES = ["muzzleflash", "muzzleflash2", "muzzleflash3", "muzzleflash4"]
@@ -2483,6 +2572,10 @@ SHOT_SOUNDS = {
     "chitin_smg": "item/greaser_smg/fire.ogg",
     "hermit_rifle": "item/shulker/fire.ogg",
     "borer": "item/scorched_rifle/fire.ogg",
+    # Slice 12B: the library's Scrapper shot (the Sentry Pistol's), the Drover Rifle's and the Rust Midge's.
+    "penny_pistol": "item/scrapper/fire.ogg",
+    "conductor_carbine": "item/cowboy/fire.ogg",
+    "magpie_smg": "item/rusty_gnat/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3576,7 +3669,8 @@ def check():
                 if event["effect"] not in EVENT_SOUNDS:
                     problems.append(f"{gun}: animation {name} plays {event['effect']}, which has no sound")
             for event in (data.get("particle_effects") or {}).values():
-                if event["effect"] != EJECT_CUE and event["effect"] not in QUIET_CUES:
+                # (the Scrapper's carbine reload names "end_reload " with a space after it)
+                if event["effect"].strip() != EJECT_CUE and event["effect"].strip() not in QUIET_CUES:
                     problems.append(f"{gun}: animation {name} cues particle {event['effect']}, which nothing shows")
         for kind in fits(gun):
             if ATTACHMENTS[kind]["slot"] == "barrel" and f"muzzle_{kind}" not in bones.get(f"att_{kind}", {}).get("locators", {}):
