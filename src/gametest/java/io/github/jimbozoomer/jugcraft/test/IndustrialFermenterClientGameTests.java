@@ -93,7 +93,7 @@ public class IndustrialFermenterClientGameTests implements FabricClientGameTest 
 				FormMachineBlockEntity machine = machine(minecraft.overworld(), fermenter);
 				machine.cancel();
 				machine.tanks().output(0).drain(machine.tanks().output(0).millibuckets());
-				machine.tanks().output(0).fill(PetroFluids.BIOETHANOL.fluid(), machine.form().profile().bufferMb());
+				machine.tanks().output(0).fill(PetroFluids.BIOETHANOL.source(), machine.form().profile().bufferMb());
 			});
 			context.waitTicks(10);
 			MachineLifecycle state = server.computeOnServer(minecraft -> machine(minecraft.overworld(), fermenter).status().state());

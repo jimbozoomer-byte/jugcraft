@@ -128,13 +128,13 @@ public class IndustrialFermenterGameTests {
 		insert(helper, port(helper, machine, "water_in"), Fluids.WATER, 1000);
 		helper.succeedWhen(() -> {
 			helper.assertTrue(machine.lane(0) == null, "Still fermenting");
-			helper.assertTrue(amount(machine.tanks().output(0), PetroFluids.BIOETHANOL.fluid()) == 250
+			helper.assertTrue(amount(machine.tanks().output(0), PetroFluids.BIOETHANOL.source()) == 250
 					&& amount(machine.tanks().output(1), PetroFluids.CARBON_DIOXIDE.fluid()) == 250
 					&& machine.container().getItem(0).isEmpty() && machine.tanks().input(0).millibuckets() == 0,
 					"The wheat and water used, 250 mB of bioethanol and 250 mB of carbon dioxide made");
 			long used = used(machine, supplied);
 			helper.assertTrue(used == TICKS * DRAW, "Paid " + used + " JE, not " + TICKS * DRAW);
-			helper.assertTrue(extract(helper, port(helper, machine, "product_out"), PetroFluids.BIOETHANOL.fluid()) == 250,
+			helper.assertTrue(extract(helper, port(helper, machine, "product_out"), PetroFluids.BIOETHANOL.source()) == 250,
 					"The bioethanol leaves at the broth outlet");
 			helper.assertTrue(extract(helper, port(helper, machine, "co2_out"), PetroFluids.CARBON_DIOXIDE.fluid()) == 250,
 					"The carbon dioxide leaves at the upper flange");
@@ -156,10 +156,10 @@ public class IndustrialFermenterGameTests {
 		helper.runAfterDelay(10, () -> helper.assertTrue(machine.lane(0) != null && machine.status().state().working(),
 				"A full carbon dioxide tank does not stop it: " + machine.status()));
 		helper.runAfterDelay(160, () -> {
-			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(0), PetroFluids.BIOETHANOL.fluid()) == 250
+			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(0), PetroFluids.BIOETHANOL.source()) == 250
 					&& amount(machine.tanks().output(1), PetroFluids.CARBON_DIOXIDE.fluid()) == full,
 					"The batch finished, the gas tank still exactly full: " + machine.tanks().output(1).millibuckets() + " mB");
-			machine.tanks().output(0).fill(PetroFluids.BIOETHANOL.fluid(), full - 250);
+			machine.tanks().output(0).fill(PetroFluids.BIOETHANOL.source(), full - 250);
 			machine.container().setItem(0, new ItemStack(Items.WHEAT, 8));
 			machine.tanks().input(0).fill(Fluids.WATER, 1000);
 		});
