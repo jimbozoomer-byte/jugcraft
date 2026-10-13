@@ -47,7 +47,12 @@ COAL_GASIFICATION = f"{MOD}:coal_gasification"
 GAS_SEPARATION = f"{MOD}:gas_separation"
 # Joining a carbon oxide and hydrogen into methane over the nickel bed, and the item tag the Infuser's bed socket holds.
 NICKEL_METHANATION = f"{MOD}:nickel_methanation"
-METHANATION_BEDS = "methanation_beds"
+# What the Infuser's bed socket holds: the nickel bed and the vanadium contact bed.
+CATALYST_BEDS = "catalyst_beds"
+# Oxidizing sulfur dioxide over the vanadium contact bed (the Infuser), and roasting the bed's vanadium oxide out of
+# washed iron ore with lye (the Bulk Chemical Reactor).
+CONTACT_CONVERSION = f"{MOD}:contact_conversion"
+VANADIUM_RECOVERY = f"{MOD}:vanadium_recovery"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
@@ -143,8 +148,8 @@ FORMS = {
         "input_tanks": ["hydrogen", "reactant"],
         "output_tanks": ["product", "water"],
         # The bed socket holds the nickel catalyst bed that methanation needs; hydrogen chloride needs none.
-        "sockets": [("bed", METHANATION_BEDS)],
-        "capabilities": [GAS_COMBINATION, NICKEL_METHANATION],
+        "sockets": [("bed", CATALYST_BEDS)],
+        "capabilities": [GAS_COMBINATION, NICKEL_METHANATION, CONTACT_CONVERSION],
         # Speed and efficiency cards, and the warm-up label for the first two seconds after a cold start, inside the
         # paid work (the owner's choice: heating included in the processing power).
         "upgrades": True,
@@ -236,7 +241,7 @@ FORMS = {
         "output_tanks": ["product"],
         "item_inputs": 1,
         "item_outputs": 1,
-        "capabilities": [ACID_ABSORPTION, CHLORIDE_LEACHING],
+        "capabilities": [ACID_ABSORPTION, CHLORIDE_LEACHING, VANADIUM_RECOVERY],
         "upgrades": True,
         "warmup": 40,
         "ports": [
@@ -484,6 +489,12 @@ FORM_RECIPES = {
          "tool": f"{MOD}:nickel_catalyst_bed",
          "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:carbon_dioxide", 100)],
          "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 400, 1)], "ticks": 200, "features": ["machines"]},
+        # Contact conversion (docs/features/industrial-starter-gas-and-acid-factory.md, the plan's row): 250 mB of sulfur
+        # dioxide and 125 mB of oxygen over the vanadium contact bed give 250 mB of sulfur trioxide. 100 ticks at 128 JE/t,
+        # the plan's 12,800 JE.
+        {"name": "infuser_sulfur_trioxide", "capability": CONTACT_CONVERSION, "tool": f"{MOD}:vanadium_contact_bed",
+         "fluids": [(f"{MOD}:oxygen", 125), (f"{MOD}:sulfur_dioxide", 250)],
+         "fluid_results": [(f"{MOD}:sulfur_trioxide", 250, 0)], "ticks": 100, "features": ["sulfur", "machines"]},
         # CO methanation over the same bed (the plan's distinct CO + 3 H2 recipe): CO + 3 H2 -> CH4 + H2O, the water at the
         # liquid anchor of 2 mB a reaction amount. 150 ticks at 128 JE/t, 19,200 JE.
         {"name": "infuser_carbon_monoxide_methanation", "capability": NICKEL_METHANATION,
@@ -519,6 +530,16 @@ FORM_RECIPES = {
         {"name": "bulk_hydrochloric_acid", "capability": ACID_ABSORPTION,
          "fluids": [("minecraft:water", 1000), (f"{MOD}:hydrogen_chloride", 500)],
          "fluid_results": [(f"{MOD}:hydrochloric_acid", 1000, 0)], "ticks": 100, "features": ["salt"]},
+        # Ordinary sulfuric-acid absorption (the plan's row): 250 mB of sulfur trioxide in 500 mB of water make 500 mB of
+        # acid, 100 ticks at 96 JE/t, the plan's 9,600 JE.
+        {"name": "bulk_sulfuric_acid", "capability": ACID_ABSORPTION,
+         "fluids": [("minecraft:water", 500), (f"{MOD}:sulfur_trioxide", 250)],
+         "fluid_results": [(f"{MOD}:sulfuric_acid", 500, 0)], "ticks": 100, "features": ["sulfur", "machines"]},
+        # The contact bed's vanadium, from the owner's selected vanadium-bearing iron concentrate: four washed iron ores
+        # roasted with 500 mB of lye (a salt roast, no sulfuric acid) give a vanadium pentoxide. 200 ticks at 96 JE/t.
+        {"name": "bulk_vanadium_pentoxide", "capability": VANADIUM_RECOVERY, "items": [(f"{MOD}:washed_iron_ore", 4)],
+         "fluids": [(f"{MOD}:lye", 500)], "results": [(f"{MOD}:vanadium_pentoxide", 1)], "ticks": 200,
+         "features": ["salt", "machines"]},
     ],
     "coal_gasifier": [
         # Steam gasification (this change's proposal for the pending carbon ledger): a coal or coke counts as 250 reaction
@@ -1559,7 +1580,13 @@ def write_all(write, assets, data, lang, condition, self_drop):
     lang[f"container.{MOD}.form.socket.bed"] = "Catalyst bed"
     # The Infuser's bed socket holds the nickel catalyst bed: the owner's selected one nickel ingot on two ordinary fired
     # bricks (docs/features/industrial-starter-gas-and-acid-factory.md), made once and never used up.
-    write(data / "tags" / "item" / f"{METHANATION_BEDS}.json", {"values": [f"{MOD}:nickel_catalyst_bed"]})
+    write(data / "tags" / "item" / f"{CATALYST_BEDS}.json", {"values": [f"{MOD}:nickel_catalyst_bed", f"{MOD}:vanadium_contact_bed"]})
+    # The vanadium contact bed: the owner's selected reusable vanadium-oxide/ceramic bed, its oxide on two fired bricks
+    # like the nickel bed, made once and never used up.
+    write(data / "recipe" / "vanadium_contact_bed.json", {
+        "fabric:load_conditions": condition("machines"),
+        "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["BVB"],
+        "key": {"B": "minecraft:brick", "V": f"{MOD}:vanadium_pentoxide"}, "result": {"id": f"{MOD}:vanadium_contact_bed", "count": 1}})
     # What the Anaerobic Digester takes: the fermentable crops and farm and kitchen waste.
     write(data / "tags" / "item" / f"{DIGESTIBLE}.json", {"values": [
         f"#{MOD}:fermentable", "minecraft:rotten_flesh", "minecraft:poisonous_potato", "minecraft:kelp",

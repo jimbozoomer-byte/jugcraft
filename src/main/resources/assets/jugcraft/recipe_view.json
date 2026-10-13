@@ -7313,6 +7313,27 @@
           "items": [],
           "fluids": [
             [
+              "jugcraft:oxygen",
+              125
+            ],
+            [
+              "jugcraft:sulfur_dioxide",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfur_trioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
               "jugcraft:hydrogen",
               300
             ],
@@ -7467,6 +7488,49 @@
           ],
           "results": [],
           "ticks": 100
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ],
+            [
+              "jugcraft:sulfur_trioxide",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sulfuric_acid",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "jugcraft:washed_iron_ore",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:vanadium_pentoxide",
+              1
+            ]
+          ],
+          "ticks": 200
         },
         {
           "items": [

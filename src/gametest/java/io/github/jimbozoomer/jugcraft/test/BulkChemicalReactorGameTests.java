@@ -169,6 +169,49 @@ public class BulkChemicalReactorGameTests {
 		});
 	}
 
+	/**
+	 * The contact process's absorption: 250 mB of sulfur trioxide in 500 mB of water make 500 mB of sulfuric acid, 100
+	 * ticks at 87 JE.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 300)
+	public void sulfurTrioxideDissolvesIntoSulfuricAcid(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		insert(helper, port(helper, machine, "liquid_in"), Fluids.WATER, 500);
+		insert(helper, port(helper, machine, "gas_in"), PetroFluids.SULFUR_TRIOXIDE.fluid(), 250);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(0), PetroFluids.SULFURIC_ACID.source()) == 500,
+					"500 mB of sulfuric acid made");
+			helper.assertTrue(used(machine, supplied) == TICKS * DRAW, "Paid " + used(machine, supplied) + " JE");
+		});
+	}
+
+	/**
+	 * The contact bed's vanadium: four washed iron ores roasted with 500 mB of lye give a vanadium pentoxide at the chute,
+	 * and that oxide on two bricks crafts the vanadium contact bed.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 400)
+	public void washedIronOreGivesTheContactBedsVanadium(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
+		supply(helper, machine);
+		try (Transaction transaction = Transaction.openOuter()) {
+			itemPort(helper, machine, "feed_in").insert(ItemVariant.of(item("washed_iron_ore")), 4, transaction);
+			transaction.commit();
+		}
+		machine.tanks().input(0).fill(PetroFluids.LYE.source(), 500);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0, "The lye used");
+			helper.assertTrue(extractItems(helper, itemPort(helper, machine, "items_out"), item("vanadium_pentoxide")) == 1,
+					"A vanadium pentoxide leaves at the chute");
+			RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+			ItemStack brick = new ItemStack(Items.BRICK);
+			CraftingInput bed = CraftingInput.of(3, 1, List.of(brick, stack("vanadium_pentoxide"), brick));
+			Optional<RecipeHolder<CraftingRecipe>> built = crafting.getRecipeFor(bed, helper.getLevel());
+			helper.assertTrue(built.isPresent() && built.get().value().assemble(bed).is(item("vanadium_contact_bed")),
+					"The oxide on two bricks makes the contact bed");
+		});
+	}
+
 	/** While it works every part shows lit, but only the controller gives off light; paused, it goes dark. */
 	@GameTest(structure = ARENA, maxTicks = 200)
 	public void everyPartLightsWhileItWorks(GameTestHelper helper) {

@@ -58,7 +58,7 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [x] Package 2, methane power: carbon dioxide from coal in the Oxidizer, CO2 methanation over the Nickel Catalyst Bed in the Infuser with its water drain, and methane as the Gas Burning Generator's second fuel at 256 JE/t. See [methane power](features/industrial-methane-power.md).
 - [ ] Package 2, the rest of the starter gas and acid factory:
   - hydrogen chloride absorption into aqueous acid, and its consumers (the [Bulk Chemical Reactor](features/industrial-bulk-chemical-reactor.md) now makes hydrochloric acid and leaches ores with it; later consumers remain);
-  - contact conversion and absorption, for the sulfuric acid chain (the [Chemical Oxidizer](features/industrial-chemical-oxidizer.md) now makes its sulfur dioxide);
+  - contact conversion and absorption, for the sulfuric acid chain (implemented in [contact sulfuric acid](features/industrial-contact-sulfuric-acid.md), with the vanadium contact bed; the retained carrier-acid charge remains);
   - the Coal Gasifier with Gas Cleanup and Separation (implemented in [coal gasification](features/industrial-coal-gasification.md); numeric pollution and the cleaning residue remain);
   - portable handling.
 

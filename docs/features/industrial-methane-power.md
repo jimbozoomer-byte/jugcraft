@@ -48,7 +48,7 @@ Hydrogen chloride is unchanged and needs no bed. The Engineer's Handbook pages o
 
 - The server decides everything; the bed socket takes items only from a player at the screen, never from pipes or hoppers.
 - The Infuser's form gains its socket before its first release, so no saved Infuser lacks it and its form version stays 1.
-- New registrations: the item `jugcraft:nickel_catalyst_bed`, its item tag `jugcraft:methanation_beds`, and the gases `jugcraft:carbon_dioxide` and `jugcraft:methane`.
+- New registrations: the item `jugcraft:nickel_catalyst_bed`, its item tag (now `jugcraft:catalyst_beds`, shared with the vanadium contact bed), and the gases `jugcraft:carbon_dioxide` and `jugcraft:methane`.
 - Not done: two-client and dedicated-server play.
 
 ## Dependencies and assets

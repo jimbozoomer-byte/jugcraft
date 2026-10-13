@@ -143,6 +143,70 @@ def nickel_catalyst_bed():
     return img
 
 
+def vanadium_pentoxide():
+    """Vanadium pentoxide: a heap of orange-ochre powder, lit from the top left, outlined in its own darkest tone."""
+    ochre = [(112, 58, 14), (170, 94, 26), (212, 132, 40), (240, 176, 78)]
+    rows = [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "......oooo......",
+        "....ooHHMMoo....",
+        "...oHHMMMMmmo...",
+        "..oHMMMMMmmmmo..",
+        ".oHMMMMMmmmmmmo.",
+        ".oMMMMMmmmmmmmo.",
+        ".ooommmmmmmmooo.",
+        "...oooooooooo...",
+        "................",
+        "................",
+    ]
+    tones = {"o": ochre[0], "m": ochre[1], "M": ochre[2], "H": ochre[3]}
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
+def vanadium_contact_bed():
+    """Vanadium contact bed: the nickel bed's fired-brick tray, heaped with orange-ochre vanadium oxide pellets. Drawn
+    flat in the item icon manner (docs/ITEM_ICONS.md): each part outlined in its own darkest tone, lit from the top
+    left."""
+    brick = [(92, 40, 28), (134, 62, 42), (166, 86, 58), (198, 118, 84)]
+    ochre = [(112, 58, 14), (170, 94, 26), (212, 132, 40), (240, 176, 78)]
+    rows = [
+        "................",
+        "................",
+        "................",
+        "................",
+        "......nnn.......",
+        "...nnnHMnnnn....",
+        "..nHMmnmmnHMn...",
+        "..nMmmnnmnMmnn..",
+        ".nnmmnHMnnmnHMn.",
+        ".nHMnnMmmnnnMmn.",
+        "bbbbbbbbbbbbbbbb",
+        "bLLLLLLLLLLLLLRb",
+        "bLRRRRRRRRRRRRSb",
+        ".bRRRRRRRRRRRSb.",
+        "..bbbbbbbbbbbb..",
+        "................",
+    ]
+    tones = {"n": ochre[0], "m": ochre[1], "M": ochre[2], "H": ochre[3],
+             "b": brick[0], "S": brick[1], "R": brick[2], "L": brick[3]}
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def asphalt_binder():
     """Asphalt binder: a glossy black lump of tar with a dull sheen and a few stuck grains."""
     img = ms.lumps([(6.6, 9.6, 4.2), (10.4, 8.4, 3.6), (8.4, 6.2, 3.0)],
@@ -474,6 +538,8 @@ def turbocharger():
 def draw_all(save, save_animation):
     save(turbocharger(), "item", "turbocharger")
     save(nickel_catalyst_bed(), "item", "nickel_catalyst_bed")
+    save(vanadium_pentoxide(), "item", "vanadium_pentoxide")
+    save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")

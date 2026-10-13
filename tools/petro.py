@@ -140,6 +140,9 @@ GASES = {
     # Carbon monoxide separated from it: methanation's second carbon feed. A faint grey-violet.
     "carbon_monoxide": {"display": "Carbon Monoxide", "feature": "machines",
                         "colors": [(138, 134, 156), (166, 162, 184), (194, 190, 210), (226, 224, 238)]},
+    # Sulfur dioxide oxidized over the vanadium contact bed, before its absorption into acid. A dense pale cream.
+    "sulfur_trioxide": {"display": "Sulfur Trioxide", "feature": "machines",
+                        "colors": [(176, 168, 132), (204, 196, 160), (226, 220, 188), (244, 240, 218)]},
 }
 
 
@@ -183,6 +186,10 @@ ITEMS = {
     # The starter factory's reusable methanation catalyst (tools/industrial_forms.py): one nickel ingot on two fired
     # bricks, held in the Chemical Infuser's bed socket and never used up.
     "nickel_catalyst_bed": "Nickel Catalyst Bed",
+    # The sulfuric acid contact catalyst (tools/industrial_forms.py): vanadium oxide roasted out of washed iron ore with
+    # lye in the Bulk Chemical Reactor, then laid on two fired bricks. The Infuser's bed socket holds it, never used up.
+    "vanadium_pentoxide": "Vanadium Pentoxide",
+    "vanadium_contact_bed": "Vanadium Contact Bed",
 }
 
 

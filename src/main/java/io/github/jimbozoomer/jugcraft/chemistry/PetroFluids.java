@@ -153,6 +153,7 @@ public final class PetroFluids {
 	public static Gas BIOGAS;
 	public static Gas RAW_SYNGAS;
 	public static Gas CARBON_MONOXIDE;
+	public static Gas SULFUR_TRIOXIDE;
 
 	private PetroFluids() {
 	}
@@ -219,6 +220,7 @@ public final class PetroFluids {
 		BIOGAS = gas("biogas", 0xFFB8C2AA);
 		RAW_SYNGAS = gas("raw_syngas", 0xFF9A9286);
 		CARBON_MONOXIDE = gas("carbon_monoxide", 0xFFC2BED2);
+		SULFUR_TRIOXIDE = gas("sulfur_trioxide", 0xFFE2DCBC);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

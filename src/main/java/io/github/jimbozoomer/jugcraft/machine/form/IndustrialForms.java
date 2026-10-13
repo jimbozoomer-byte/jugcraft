@@ -50,10 +50,14 @@ public final class IndustrialForms {
 	public static final String COAL_GASIFICATION = "jugcraft:coal_gasification";
 	/** Cleaning and dividing a gas mixture into its gases. */
 	public static final String GAS_SEPARATION = "jugcraft:gas_separation";
+	/** Oxidizing sulfur dioxide into sulfur trioxide over the vanadium contact bed. */
+	public static final String CONTACT_CONVERSION = "jugcraft:contact_conversion";
+	/** Roasting vanadium oxide out of washed iron ore with lye. */
+	public static final String VANADIUM_RECOVERY = "jugcraft:vanadium_recovery";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
-	/** What the Infuser's bed socket holds: the nickel catalyst bed. */
-	public static final TagKey<Item> METHANATION_BEDS = TagKey.create(Registries.ITEM, Jugcraft.id("methanation_beds"));
+	/** What the Infuser's bed socket holds: the nickel catalyst bed and the vanadium contact bed. */
+	public static final TagKey<Item> CATALYST_BEDS = TagKey.create(Registries.ITEM, Jugcraft.id("catalyst_beds"));
 
 	/**
 	 * The Electrolytic Separator: the steel-entry form of the Electrolytic Cell family, two wide, two deep and three
@@ -120,9 +124,10 @@ public final class IndustrialForms {
 			.inputTank("reactant")
 			.outputTank("product")
 			.outputTank("water")
-			.socket("bed", METHANATION_BEDS)
+			.socket("bed", CATALYST_BEDS)
 			.capability(GAS_COMBINATION)
 			.capability(NICKEL_METHANATION)
+			.capability(CONTACT_CONVERSION)
 			.upgrades()
 			.warmup(40)
 			.port("hydrogen_in", FormPort.Kind.FLUID_IN, 0, 0, 1, 1, FormSide.LEFT)
@@ -205,6 +210,7 @@ public final class IndustrialForms {
 			.items(1, 1)
 			.capability(ACID_ABSORPTION)
 			.capability(CHLORIDE_LEACHING)
+			.capability(VANADIUM_RECOVERY)
 			.upgrades()
 			.warmup(40)
 			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 1, 1, 3, FormSide.TOP)
