@@ -1420,6 +1420,8 @@ def tags():
         for placed, gen in ore_gens(name, info):
             for biome in gen.get("biomes", []):
                 tags.add("worldgen/biome", f"{MOD}:has_ore/{placed}", biome)
+            for biome in gen.get("surface_biomes", []):
+                tags.add("worldgen/biome", f"{MOD}:has_surface_ore/{placed}", biome)
 
     for block in machine_blocks():
         if block not in CROPS:
@@ -1524,15 +1526,15 @@ def placed_feature(name, gen):
     write(DATA / MOD / "worldgen" / "placed_feature" / f"ore_{name}.json", {
         "feature": rid(f"ore_{name}"),
         "placement": [
-            {"type": "minecraft:count", "count": gen["count"]},
+            ({"type": "minecraft:rarity_filter", "chance": gen["rarity"]} if "rarity" in gen
+             else {"type": "minecraft:count", "count": gen["count"]}),
             {"type": "minecraft:in_square"},
             {"type": "minecraft:height_range", "height": {
                 "type": "minecraft:trapezoid",
                 "min_inclusive": {"absolute": gen["min_y"]},
                 "max_inclusive": {"absolute": gen["max_y"]},
             }},
-            {"type": "minecraft:biome"},
-        ],
+        ] + ([] if gen.get("surface_biomes") else [{"type": "minecraft:biome"}]),
     })
 
 
@@ -1548,7 +1550,16 @@ def layered_targets(ore, deep):
 def worldgen():
     for name, info in list(METALS.items()) + list(MINERALS.items()):
         for placed, gen in ore_gens(name, info):
-            ore_feature(placed, gen["size"], layered_targets(f"{name}_ore", f"deepslate_{name}_ore"))
+            targets = layered_targets(f"{name}_ore", f"deepslate_{name}_ore")
+            if gen.get("surface_biomes"):
+                write(DATA / MOD / "worldgen" / "feature" / f"ore_{placed}.json", {
+                    "type": rid("surface_linked_ore"),
+                    "ore": {"size": gen["size"], "discard_chance_on_air_exposure": 0.0, "targets": targets},
+                    "surface_biomes": rid(f"has_surface_ore/{placed}"),
+                    "outcrop": rid(f"{name}_ore"), "outcrop_chance": gen["outcrop_chance"],
+                })
+            else:
+                ore_feature(placed, gen["size"], targets)
             placed_feature(placed, gen)
     for rock, info in ROCKS.items():
         gen = info["gen"]

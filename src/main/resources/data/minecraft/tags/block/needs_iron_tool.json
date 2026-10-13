@@ -24,6 +24,8 @@
     "jugcraft:lepidolite_ore",
     "jugcraft:deepslate_lepidolite_ore",
     "jugcraft:monazite_ore",
-    "jugcraft:deepslate_monazite_ore"
+    "jugcraft:deepslate_monazite_ore",
+    "jugcraft:fluorite_ore",
+    "jugcraft:deepslate_fluorite_ore"
   ]
 }

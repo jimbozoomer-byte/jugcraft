@@ -783,9 +783,15 @@ def ores_page():
             lines.append(line)
     for mineral, info in MINERALS.items():
         gen = info["gen"]
-        lines.append(f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}.")
+        line = f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}."
+        if gen.get("surface_biomes"):
+            line += (f" Large pockets below permanently snowy inland biomes; needs an {info['tool']} pickaxe. "
+                     "Small exposed outcrops can point to a pocket below. Seasonal snow, beaches, rivers and oceans do not qualify. "
+                     "The prospector and ore drill work here; nine fluorite make a decorative storage block. "
+                     "Fluorite chemistry is planned separately.")
+        lines.append(line)
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
-            "text": ["Jugcraft ores appear in the stone and deepslate of every Overworld biome:"] + lines}
+            "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}
 
 
 # The path through the mod, stage by stage (the "Progression" chapter). Each stage: title, icon, what it is for, a

@@ -730,7 +730,7 @@
           "title": "Ores",
           "icon": "jugcraft:tin_ore",
           "text": [
-            "Jugcraft ores appear in the stone and deepslate of every Overworld biome:",
+            "Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:",
             "Tin: Y -32 to 96, needs a stone pickaxe.",
             "Zinc: Y -16 to 80, needs a stone pickaxe.",
             "Lead: Y -48 to 64, needs a stone pickaxe.",
@@ -743,7 +743,8 @@
             "Rock Salt: Y 0 to 64.",
             "Phosphorite: Y -16 to 48.",
             "Lepidolite: Y -48 to 32.",
-            "Monazite: Y -64 to 16."
+            "Monazite: Y -64 to 16.",
+            "Fluorite: Y -32 to 48. Large pockets below permanently snowy inland biomes; needs an iron pickaxe. Small exposed outcrops can point to a pocket below. Seasonal snow, beaches, rivers and oceans do not qualify. The prospector and ore drill work here; nine fluorite make a decorative storage block. Fluorite chemistry is planned separately."
           ]
         },
         {
