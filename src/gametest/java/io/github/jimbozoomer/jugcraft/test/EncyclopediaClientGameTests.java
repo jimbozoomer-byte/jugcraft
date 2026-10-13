@@ -239,7 +239,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		});
 		context.waitTicks(15);
 		context.getInput().pressKey(InputConstants.KEY_R);
-		context.waitFor(client -> EncyclopediaClient.navigator().pages().stream().anyMatch(page -> page.id().equals("spellcraft")), WAIT);
+		answered(context);
 		EncyclopediaPayload.StepState cast = step(context, "cast");
 		check(cast == EncyclopediaPayload.StepState.NEXT, "Understood with a wand in hand, casting comes next: " + cast);
 		context.runOnClient(client -> {
@@ -403,7 +403,17 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 	private static void open(ClientGameTestContext context) {
 		context.getInput().pressKey(EncyclopediaClient.key());
 		context.waitForScreen(EncyclopediaScreen.class);
+		answered(context);
 		context.waitTicks(15);
+	}
+
+	/**
+	 * Waits for the server's answer to the client's latest request, not the pages it already holds (a page that was
+	 * already there, such as Spellcraft once First Light is begun, says nothing about whether the answer has come).
+	 */
+	private static void answered(ClientGameTestContext context) {
+		int asked = context.computeOnClient(client -> EncyclopediaClient.sequence());
+		context.waitFor(client -> EncyclopediaClient.navigator().applied() >= asked, WAIT);
 	}
 
 	/** Where a step of the route stands on the Discover page as the client has it. */

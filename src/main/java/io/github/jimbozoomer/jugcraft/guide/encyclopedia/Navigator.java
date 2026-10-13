@@ -60,6 +60,11 @@ public final class Navigator {
 		return received;
 	}
 
+	/** The request the answer last taken was for (-1 before any). */
+	public int applied() {
+		return applied;
+	}
+
 	public List<EncyclopediaPayload.Page> pages() {
 		return pages;
 	}

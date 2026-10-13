@@ -98,6 +98,11 @@ public final class EncyclopediaClient {
 		open(client, EncyclopediaScreen.Back.INVENTORY);
 	}
 
+	/** The latest request's number: its answer is the one the navigator takes with it ({@link Navigator#applied}). */
+	public static int sequence() {
+		return sequence;
+	}
+
 	/** Asks the server again for this player's pages (it answers at most twice a second). */
 	public static void request() {
 		sequence++;

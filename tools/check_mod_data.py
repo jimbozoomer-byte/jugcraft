@@ -13572,6 +13572,15 @@ def check_composer(co, root, lang):
             err(f"{path.name}: only ComposerClient reaches the composer's GuiLib workspace (behind its isModLoaded check)")
     if '"jugcraft:ui/composer.css"' not in workspace or not (ASSETS / "ui" / "composer.css").is_file():
         err("composer: the GuiLib workspace's stylesheet assets/jugcraft/ui/composer.css must exist and be the one it opens")
+    # GuiLib's inputs clip (overflow: hidden), so a flex column may squeeze one to its padding: CI's screenshot of the
+    # workspace showed the spell box a sliver. The box keeps its height and the scrolling body takes what is left.
+    stylesheet = (ASSETS / "ui" / "composer.css").read_text(encoding="utf-8") if (ASSETS / "ui" / "composer.css").is_file() else ""
+    spell_rule = re.search(r"^\.spell\s*\{([^}]*)\}", stylesheet, re.M)
+    body_rule = re.search(r"^\.body\s*\{([^}]*)\}", stylesheet, re.M)
+    if not spell_rule or not re.search(r"(^|;|\s)flex-shrink:\s*0\s*;", spell_rule.group(1)):
+        err("composer.css: the spell box (.spell) must not shrink (flex-shrink: 0)")
+    if not body_rule or not re.search(r"(^|;|\s)flex:\s*1\s*;", body_rule.group(1)) or "min-height: 0" not in body_rule.group(1):
+        err("composer.css: the scrolling body (.body) takes the space left (flex: 1; min-height: 0)")
     for source, name in ((screens, "the composer's screens"), (workspace, "ComposerWorkspace.kt")):
         for key in re.findall(r'"((?:screen|key|compose|message)\.jugcraft\.[a-z_.]+)"', source):
             if not key.endswith(".") and key not in lang:
