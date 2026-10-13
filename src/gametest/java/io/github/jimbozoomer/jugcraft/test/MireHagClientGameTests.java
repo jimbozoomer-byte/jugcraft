@@ -139,9 +139,22 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 			});
 			shotFrom(context, singleplayer, fen, centre, -2.5, 4.0, -5.0, 0.0, 0.0, 6.0, "jugcraft_mire_hag_root_lanes");
 			pose(context, server, centre, (hag, level, player) -> hag.begin(level, MireHagEntity.Attack.POISON_BREW, player),
-					MireHagEntity.Attack.POISON_BREW.windup + 5);
-			server.runOnServer(minecraft -> check(!lair(minecraft).getEntitiesOfClass(PoisonBrewEntity.class, slot()).isEmpty(),
-					"No flask of her brew is flying"));
+					MireHagEntity.Attack.POISON_BREW.windup - 4);
+			// Her flask is in the air for under half a second, and the server can run a few ticks ahead of the client's
+			// count: the world runs on until a flask has flown a few ticks, and the server freezes it in the step that sees it.
+			server.runCommand("tick unfreeze");
+			boolean flying = false;
+			for (int wait = 0; wait < 40 && !flying; wait++) {
+				context.waitTick();
+				flying = server.computeOnServer(minecraft -> {
+					boolean thrown = lair(minecraft).getEntitiesOfClass(PoisonBrewEntity.class, slot()).stream().anyMatch(brew -> brew.tickCount >= 3);
+					if (thrown) {
+						minecraft.tickRateManager().setFrozen(true);
+					}
+					return thrown;
+				});
+			}
+			check(flying, "No flask of her brew is flying");
 			shotFrom(context, singleplayer, fen, centre, 6.0, 0.5, 2.5, 0.0, 2.0, 2.5, "jugcraft_mire_hag_poison_brew");
 			server.runCommand("tick unfreeze");
 			context.waitTicks(20);
@@ -302,8 +315,9 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 	}
 
 	/**
-	 * Unfreezes the world, puts her in the marsh's middle facing south and the player five blocks in front of her (so her
-	 * attacks land in view), does what {@code posing} asks, waits {@code ticks} for the pose and freezes the world on it.
+	 * Unfreezes the world, puts her in the marsh's middle facing south, the player five blocks in front of her (so her
+	 * attacks land in view) and her Likenesses behind her, does what {@code posing} asks, waits {@code ticks} for the pose
+	 * and freezes the world on it.
 	 * Every pose waits at least 10 ticks: the client learns where she was put only on the server's next updates, and a
 	 * frozen world sends none.
 	 */
@@ -318,6 +332,14 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 			hag.setYRot(0.0F);
 			hag.setYBodyRot(0.0F);
 			hag.setYHeadRot(0.0F);
+			// Her Likenesses stand behind her in the dark, out of the camera's way; while she strikes they hold still there.
+			List<UUID> walking = hag.likenesses();
+			for (int i = 0; i < walking.size(); i++) {
+				if (level.getEntity(walking.get(i)) instanceof HagLikenessEntity likeness) {
+					double side = i % 2 == 0 ? 1.0 : -1.0;
+					likeness.teleportTo(centre.x + side * (i < 2 ? 3.0 : 5.5), centre.y, centre.z - (i < 2 ? 3.5 : 1.5));
+				}
+			}
 			posing.pose(hag, level, player);
 		});
 		context.waitTicks(Math.max(10, ticks));
