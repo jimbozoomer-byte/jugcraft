@@ -64,8 +64,19 @@ public final class PowerLineShowcase {
 		BlockPos previous = null;
 		int placed = 0;
 		for (int i = 0; i < kinds.length; i++) {
-			// Load the chunk first: the heightmap of an unloaded chunk reads as below the world.
-			level.getChunk(net.minecraft.core.SectionPos.blockToSectionCoord(spots[i][0]), net.minecraft.core.SectionPos.blockToSectionCoord(spots[i][1]));
+			// This operator command explicitly builds distant structures. Load their whole footprints, including
+			// corner footings, before the placement helper checks them; ordinary item placement never loads chunks.
+			int r = kinds[i].halfWidth();
+			int minX = -r, maxX = r, minZ = -r, maxZ = r;
+			for (BlockPos cell : kinds[i].frames()) {
+				minX = Math.min(minX, cell.getX()); maxX = Math.max(maxX, cell.getX());
+				minZ = Math.min(minZ, cell.getZ()); maxZ = Math.max(maxZ, cell.getZ());
+			}
+			for (int cx = Math.floorDiv(spots[i][0] + minX, 16); cx <= Math.floorDiv(spots[i][0] + maxX, 16); cx++) {
+				for (int cz = Math.floorDiv(spots[i][1] + minZ, 16); cz <= Math.floorDiv(spots[i][1] + maxZ, 16); cz++) {
+					level.getChunk(cx, cz);
+				}
+			}
 			int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, spots[i][0], spots[i][1]);
 			BlockPos anchor = LinePlacement.place(level, new BlockPos(spots[i][0], y, spots[i][1]), kinds[i], null);
 			if (anchor == null) {

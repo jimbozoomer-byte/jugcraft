@@ -44,6 +44,9 @@ attribution are preserved. Conflict resolution and additional fixes use OpenAI C
 - Register the encyclopedia once: duplicate registration from the two source branches crashed client startup.
 - Close exposed nuclear model backs/end caps through `model_writer.finish_closed`, retaining the art audit without
   new exemptions. Round ladder-tray bend coordinates so Windows and Linux generate identical geometry JSON.
+- The operator-only power-line showcase loads each tower's complete footprint before checking its footings.
+  Normal player placement still rejects unloaded/protected cells. Nuclear frame naming uses the pinned Jade
+  version's common `blockOperations().pick` API instead of a removed reflective client method.
 
 ## Verification
 
@@ -51,7 +54,7 @@ Final results are recorded in [integration PR #352](https://github.com/jimbozoom
 the source PRs' individual CI as the result for this integration. The combined build at `c3a7538b` passed all 1,564
 server game tests locally. The later client registration, geometry and plant-support fixes require a fresh CI run.
 Repository structure/link checks, all 14 Python packaging/selection tests and 11 world-designer tests passed. The client
-planner includes all 160 registered client test classes, distributed across five jobs (about 23 minutes estimated
+planner includes all 161 registered client test classes, distributed across five jobs (about 23 minutes estimated
 per job). Full server, optional-absent, data, and client results will be recorded in that PR before merge.
 
 Human two-client play, nuclear plant load profiling, survival balance and owner visual acceptance are not claimed.
