@@ -26,6 +26,12 @@ public final class FluidFuels {
 	 * output: a millibucket a tick. Its fuels are listed on the form, so the gas turbine never burns hydrogen.
 	 */
 	public static final int GAS_BURNING_HYDROGEN = 128;
+	/**
+	 * The Bio Generator (docs/features/industrial-bio-generator.md), the lower-output generator for bioethanol and later
+	 * cleaned biogas, burns bioethanol at {@link #BIOETHANOL}, the gas turbine's value, at the plan's proposed 96 JE a
+	 * tick: below the gas-burning generator's 128.
+	 */
+	public static final int BIO_GENERATOR_BIOETHANOL = 96;
 	/** The gas turbine's lubricant upkeep: 1 mB for every this many ticks it runs (a bucket lasts 20,000 ticks). */
 	public static final int LUBRICANT_TICKS = 20;
 	/** The advanced combustion engine (KE per mB): turbocharged, it gets a quarter more from diesel than the diesel

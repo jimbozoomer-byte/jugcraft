@@ -2976,6 +2976,12 @@ def check_industrial_forms():
                     err(f"{form}: burns unknown fluid {fluid}")
                 if per_mb <= 0 or per_tick <= 0 or per_tick > machines_stats(info["family"]).get("capacity", 0):
                     err(f"{form}: burns {fluid} for nothing or makes more a tick than it stores")
+                # A fuel only ever made by using up items (crops into bioethanol) is a primary fuel, like coal: its energy
+                # comes from what was grown or mined, not from the electricity spent processing it, so it cannot loop.
+                makers = [r for recipes in list(petro.FLUID_RECIPES.values()) + list(industrial_forms.FORM_RECIPES.values())
+                          for r in recipes if any(res[0] == fluid for res in r.get("fluid_results", []))]
+                if makers and all(r.get("items") for r in makers):
+                    continue
                 cost = cheapest_electrolysis(fluid)
                 if cost is not None and per_mb >= cost:
                     err(f"{form}: {fluid} burns for {per_mb} JE/mB, at least the {cost:.1f} JE/mB its cheapest making costs: a power loop")

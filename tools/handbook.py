@@ -981,6 +981,7 @@ def build():
             machine_page("chemical_reactor"),
             machine_page("fuel_cell"),
             form_page("gas_burning_generator"),
+            form_page("bio_generator"),
             machine_page("electroplating_bath"),
             {"title": "Rubber", "icon": f"{MOD}:rubber", "text": [
                 "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor "

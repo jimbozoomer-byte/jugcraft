@@ -1,6 +1,7 @@
 """Industrial machine forms the game registers (docs/features/industrial-machine-foundation.md): the starter factory's
-Electrolytic Separator (docs/features/industrial-electrolytic-separator.md) and Gas Burning Generator
-(docs/features/industrial-gas-burning-generator.md), package 2 of the owner's factory plan.
+Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), Gas Burning Generator
+(docs/features/industrial-gas-burning-generator.md) and Bio Generator (docs/features/industrial-bio-generator.md),
+package 2 of the owner's factory plan.
 
 Each form is described here for its art, recipes and data, and in IndustrialForms.java for the game;
 tools/check_mod_data.py checks that the two agree. Layers are given bottom first, each as rows from the front to the
@@ -38,6 +39,11 @@ FORM_GLOW = dict(GLOW, el_lamp="el_lamp_on")
 # Hydrogen at the Fuel Cell's 128 JE/mB and the owner's selected 128 JE/t; methane (256 JE/t) joins it with the
 # methane Infuser.
 GAS_GENERATOR_FUELS = [(f"{MOD}:hydrogen", 128, 128)]
+# What the Bio Generator burns: bioethanol at the gas turbine's 192 JE/mB and the plan's proposed 96 JE/t, below the gas
+# generator's output. Cleaned biogas (the plan's 64 JE/t) joins it with the Anaerobic Digester.
+BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 192, 96)]
+# The Bio Generator's materials (the art brief): pale ceramic heat shields over the combustion body.
+HEAT_SHIELD, FLANGE_FACE = "sp_ceramic", "dr_flange"
 
 FORMS = {
     "electrolytic_separator": {
@@ -99,6 +105,32 @@ FORMS = {
                                            "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "bio_generator": {
+        "display": "Bio Generator",
+        # The diesel generator's family (its energy figures: a 60,000 JE store, 1,024 JE/t out); the form's fuel list says
+        # what it burns, so the Diesel Generator itself is unchanged.
+        "family": "diesel_generator",
+        # The skid and the train fill the two lower layers; above them the exhaust along the middle and the radiator.
+        "layers": [["C##", "###", "###", "###"], ["###", "###", "###", "###"], [".#.", ".#.", ".#.", "###"]],
+        "profile": "ENTRY",
+        "tank_mb": 2_000,
+        "input_tanks": ["fuel"],
+        "output_tanks": [],
+        "capabilities": [],
+        "fuels": BIO_GENERATOR_FUELS,
+        "upgrades": False,
+        "warmup": 0,
+        "ports": [
+            ("fuel_in", "FLUID_IN", 0, 2, 2, 0, "RIGHT"),
+            ("power_out", "ENERGY_OUT", 0, 0, 2, 0, "LEFT"),
+        ],
+        # The plan's bill (docs/features/industrial-machine-construction-and-operation.md): 8 steel plates, a motor, a steel
+        # gear, a Tinplate Tank, a basic circuit and a casing. Eight plates round a Tinplate Tank are a Steel Tank, so the
+        # grid takes one: the same materials in one crafting.
+        "recipe": (["MGC", " T ", " K "], {"M": f"{MOD}:electric_motor", "G": f"{MOD}:steel_gear", "C": f"{MOD}:basic_circuit",
+                                           "T": f"{MOD}:steel_tank", "K": f"{MOD}:machine_casing"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -124,6 +156,16 @@ HANDBOOK = {
         "It makes only as much as its store has room for, so no fuel is wasted when nothing draws its power, and its "
         "screen says when the fuel tank is empty or the store is full. Methane, at 256 JE/t, comes with the methane "
         "Infuser.",
+    ],
+    "bio_generator": [
+        "Three wide, four deep and three tall: a compact engine-generator on a thick skid, built from a Steel Tank, an "
+        "electric motor, a steel gear, a basic circuit and a Machine Casing. Every block it fills must be free when it is "
+        "placed.",
+        "Pipe bioethanol into the low liquid inlet on its right side. It burns 192 JE a millibucket at 96 JE/t, a bucket "
+        "lasting 100 seconds, and sends the power out of the socket on the terminal box low on its left side. Its "
+        "coupling and radiator fan turn while it runs.",
+        "It makes only as much as its store has room for. The capped gas inlet above the liquid one is for cleaned "
+        "biogas, which comes with the Anaerobic Digester.",
     ],
 }
 
@@ -406,6 +448,128 @@ def gas_burning_generator_still():
             + cyl("z", cu, cv, 7, 44.5, 46, CHROME, "dr_flange"))
 
 
+# The Bio Generator's train axis (x, y) and where its turning parts sit along z: the coupling and the radiator fan.
+BIO_AXIS = (-8, 19)
+BIO_COUPLING_Z = (27, 32)
+BIO_FAN_Z = 58.5
+
+
+def bio_generator():
+    """Three wide, four deep and three tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a
+    compact engine-generator on a thick gunmetal skid. At the front the ringed olive combustion body with a round bolted
+    inspection cover, thick mounting bolts and pale ceramic heat shields on its flanks; at the front left the sheltered
+    instrument panel (the controller) with its gauges and warm amber lamp. Behind it the guarded coupling (drawn turning
+    by MachineRotors) and the ribbed generator housing, and at the back the radiator with its fan (also turning). Beside
+    the train on the right the low fuel-handling box, with the liquid inlet low on its side and the capped gas inlet above
+    it; on the left the terminal box with its power socket, mint lamp and copper terminals. A short black exhaust rises
+    from the combustion body and folds back along the top to a rain cap."""
+    cu, cv = BIO_AXIS
+    m = [box((-32, 0, 0), (16, 4, 64), GUNMETAL)]
+    for z in (6, 18, 36, 50):
+        m.append(box((cu - 10, 4, z), (cu + 10, 8, z + 4), GUNMETAL))
+    # The combustion body: olive, ringed in gunmetal, with ceramic heat shields on either flank.
+    m += cyl("z", cu, cv, 11, 4, 26, OLIVE, GUNMETAL)
+    for z in (8, 14, 20):
+        m += cyl("z", cu, cv, 11.75, z, z + 1.5, GUNMETAL)
+    for sign in (1, -1):
+        lo, hi = sorted((cu + sign * 11.5, cu + sign * 12.5))
+        m.append(box((lo, 14, 6), (hi, 25, 24), HEAT_SHIELD))
+    # The round bolted inspection cover on its front, and four thick mounting bolts on the saddles.
+    m += cyl("z", cu, cv, 7.5, 3, 4, CHROME, FLANGE_FACE)
+    m += cyl("z", cu, cv, 3, 2.25, 3, GUNMETAL)
+    for x in (cu - 8, cu + 8):
+        for z in (7, 19):
+            m.append(box((x - 1, 8, z), (x + 1, 9.5, z + 2), CHROME))
+    # The guarded coupling: hazard-banded hoops on bars, the shaft turning inside (MachineRotors).
+    z0, z1 = BIO_COUPLING_Z
+    m += octagon_ring("z", cu, cv, 7.5, 6.5, z0 - 1, z0, HAZARD)
+    m += octagon_ring("z", cu, cv, 7.5, 6.5, z1, z1 + 1, HAZARD)
+    for su in (1, -1):
+        for sv in (1, -1):
+            m.append(box((cu + su * 5 - 0.5, cv + sv * 5 - 0.5, z0), (cu + su * 5 + 0.5, cv + sv * 5 + 0.5, z1), GUNMETAL))
+    # The ribbed generator housing, a bearing boss at its front.
+    m += cyl("z", cu, cv, 12, 33, 54, OLIVE, GUNMETAL)
+    for z in (35, 39.5, 44, 48.5):
+        m += cyl("z", cu, cv, 12.75, z, z + 1.5, RIBBED)
+    m += cyl("z", cu, cv, 5, 32, 33, GUNMETAL)
+    # The radiator at the back: a gunmetal frame with a grille, its fan turning behind a guard (MachineRotors).
+    m.append(box((cu - 13, 4, 54), (cu + 13, 44, 57), {"*": GUNMETAL, "north": GRILLE, "south": GRILLE}))
+    for lo, hi in (((cu - 13, 4, 61), (cu - 10.5, 44, 63)), ((cu + 10.5, 4, 61), (cu + 13, 44, 63)),
+                   ((cu - 10.5, 4, 61), (cu + 10.5, 13.5, 63)), ((cu - 10.5, 36.5, 61), (cu + 10.5, 44, 63))):
+        m.append(box(lo, hi, GUNMETAL))
+    m.append(box((cu - 12, 6, 57), (cu + 12, 8, 61), GUNMETAL))
+    m.append(box((cu - 12, 41, 57), (cu + 12, 43, 61), GUNMETAL))
+    m += octagon_ring("z", cu, 25, 10, 8.5, 62.5, 63.5, CHROME)
+    m.append(box((cu - 8.5, 24.5, 63.25), (cu + 8.5, 25.5, 63.75), CHROME))
+    # The sheltered instrument panel (the controller) at the front left: gauges and the amber lamp under a hood.
+    m.append(box((4, 4, 2), (15, 16, 9), {"*": OLIVE, "north": GUNMETAL}))
+    m.append(box((3.5, 16, 0.75), (15.5, 17, 9.5), GUNMETAL))
+    m.append(dial("north", (12, 12, 1.75), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (7.25, 12, 1.75), 3, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (9.5, 7, 1.75), 2.5, texture=LAMP, body=GUNMETAL))
+    # The low fuel-handling box on the right: the liquid inlet low on its side (the port) banded in bioethanol colour, the
+    # capped gas inlet above it for biogas, and a hose into the combustion body.
+    m.append(box((-31, 4, 33), (-22, 18, 51), {"*": OLIVE, "up": STENCIL}))
+    m.append(box((-31.75, 3.5, 36.5), (-31, 12.5, 45.5), {"*": CHROME, "west": f"{FLANGE_FACE}!"}))
+    m += cyl("x", 8, 41, 2.5, -31, -30, "bioethanol_still")
+    m += cyl("x", 15, 47.5, 1.75, -32, -31, RUBBER)
+    m.append(box((-32.25, 13, 45.5), (-31.75, 17, 49.5), CHROME))
+    m += cyl("z", -26.5, 14, 1.5, 22, 33, RUBBER)
+    m.append(box((-27.75, 12.5, 20), (-19, 15.5, 23), RUBBER))
+    # The terminal box on the left: the power socket on its side (the port), a mint lamp and copper terminals on ceramic.
+    m.append(box((7, 4, 33), (15, 20, 47), GUNMETAL))
+    m.append(box((6.75, 20, 32.75), (15.25, 21, 47.25), HAZARD))
+    m.append(box((15, 5, 37), (15.75, 11, 43), {"*": CHROME, "east": "power_port!"}))
+    m.append(dial("east", (15.75, 15.5, 40), 2.5, texture=MINT, body=CHROME))
+    for z in (36, 44):
+        m += cyl("y", 11, z, 1, 21, 24, INSULATOR)
+        m.append(box((10.5, 24, z - 0.5), (11.5, 24.5, z + 0.5), COPPER))
+    m.append(box((4, 13, 39), (7, 15, 41), RUBBER))
+    # The short black exhaust: up out of the combustion body, folded back along the top to a rain cap.
+    m.append(box((cu - 2, 29, 9), (cu + 2, 38, 13), EXHAUST))
+    m.append(box((cu - 2, 34, 13), (cu + 2, 38, 44), EXHAUST))
+    for z in (20, 32):
+        m.append(box((cu - 2.25, 33.75, z), (cu + 2.25, 38.25, z + 1), CHROME))
+    m.append(box((cu - 2.5, 38, 42), (cu + 2.5, 39, 46), {"*": CHROME, "up": EXHAUST}))
+    return m
+
+
+def bio_generator_coupling():
+    """The Bio Generator's coupling shaft and flanges (client/MachineRotors)."""
+    import machine_rotors as rotors
+    cu, cv = BIO_AXIS
+    z0, z1 = BIO_COUPLING_Z
+    quads = rotors.disc("z", z0 - 1, z1 + 1, cu, cv, 1.75, CHROME, CHROME)
+    quads += rotors.disc("z", z0 + 0.5, z0 + 2, cu, cv, 4.5, CHROME, "dr_flange")
+    quads += rotors.disc("z", z1 - 2, z1 - 0.5, cu, cv, 4.5, CHROME, "dr_flange")
+    return quads
+
+
+def bio_generator_fan():
+    """The radiator fan behind its guard (client/MachineRotors): a hub and six blades."""
+    import machine_rotors as rotors
+    cu = BIO_AXIS[0]
+    cv, z = 25, BIO_FAN_Z
+    quads = rotors.disc("z", z - 1.25, z + 1.25, cu, cv, 1.5, CHROME, CHROME)
+    for blade in range(6):
+        angle = math.radians(60 * blade + 10)
+        c, s_ = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cu + r * c - w * s_, cv + r * s_ + w * c)
+        quads += rotors.prism("z", z - 0.5, z + 0.5, [at(2, -0.75), at(7.5, -1.75), at(7.5, 1.75), at(2, 0.75)], GUNMETAL, GUNMETAL)
+    return quads
+
+
+def bio_generator_still():
+    """The turning parts standing still, for the item model only."""
+    cu, cv = BIO_AXIS
+    z0, z1 = BIO_COUPLING_Z
+    return (cyl("z", cu, cv, 1.75, z0 - 1, z1 + 1, CHROME) + cyl("z", cu, cv, 4.5, z0 + 0.5, z0 + 2, CHROME, "dr_flange")
+            + cyl("z", cu, cv, 4.5, z1 - 2, z1 - 0.5, CHROME, "dr_flange")
+            + cyl("z", cu, 25, 7.5, BIO_FAN_Z - 0.5, BIO_FAN_Z + 0.5, GUNMETAL, "dr_fan"))
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -413,11 +577,21 @@ ROTORS = {
         "block": "gas_burning_generator", "axis": "z", "center": [-16, 26, 24], "property": "lit", "speed": 12,
         "ease": 40, "always": True, "quads": gas_burning_generator_rotor(),
     },
+    # The Bio Generator's coupling and radiator fan, on two axes along z, spinning up as it starts.
+    "bio_generator_coupling": {
+        "block": "bio_generator", "axis": "z", "center": [BIO_AXIS[0], BIO_AXIS[1], 29.5], "property": "lit", "speed": 12,
+        "ease": 40, "always": True, "quads": bio_generator_coupling(),
+    },
+    "bio_generator_fan": {
+        "block": "bio_generator", "axis": "z", "center": [BIO_AXIS[0], 25, BIO_FAN_Z], "property": "lit", "speed": 18,
+        "ease": 40, "always": True, "quads": bio_generator_fan(),
+    },
 }
 
-MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator()}
+MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
+          "bio_generator": bio_generator()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
-ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still()}
+ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "bio_generator": bio_generator_still()}
 PARTICLE = "dp_olive"
 
 

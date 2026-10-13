@@ -19,8 +19,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
  * The industrial machine forms the game registers, from the owner's factory plan (docs/features/
- * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md)
- * and Gas Burning Generator (docs/features/industrial-gas-burning-generator.md). Each form is also described in
+ * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md),
+ * Gas Burning Generator (docs/features/industrial-gas-burning-generator.md) and Bio Generator
+ * (docs/features/industrial-bio-generator.md). Each form is also described in
  * tools/industrial_forms.py for its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form
  * shares the one controller block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when
  * more forms join this list.
@@ -76,8 +77,28 @@ public final class IndustrialForms {
 			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 2, 4, 1, FormSide.BACK)
 			.build();
 
+	/**
+	 * The Bio Generator: the lower-output generator for biological fuels, a form of the diesel generator's family (its
+	 * energy figures: a 60,000 JE store, 1,024 JE/t out), three wide, four deep and three tall. The skid and the
+	 * engine-generator train fill the two lower layers; above them only the exhaust's run along the middle and the
+	 * radiator at the back. The controller is the sheltered instrument panel at the front left. Bioethanol comes in low on
+	 * the right side; power leaves at the terminal box low on the left. Cleaned biogas joins its fuels with the Digester.
+	 */
+	public static final MachineForm BIO_GENERATOR_FORM = MachineForm.builder(Jugcraft.id("bio_generator"),
+					MachineKind.DIESEL_GENERATOR)
+			.layer("C##", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer(".#.", ".#.", ".#.", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("fuel")
+			.fuel(Jugcraft.id("bioethanol"), FluidFuels.BIOETHANOL, FluidFuels.BIO_GENERATOR_BIOETHANOL)
+			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 2, 2, 0, FormSide.RIGHT)
+			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 0, 2, 0, FormSide.LEFT)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
+	public static FormMachineBlock BIO_GENERATOR;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	private IndustrialForms() {
@@ -86,7 +107,8 @@ public final class IndustrialForms {
 	public static void register() {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR);
+		BIO_GENERATOR = block("bio_generator", BIO_GENERATOR_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, BIO_GENERATOR);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

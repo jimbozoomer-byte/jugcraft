@@ -3897,6 +3897,30 @@
           }
         },
         {
+          "title": "Bio Generator",
+          "icon": "jugcraft:bio_generator",
+          "text": [
+            "Three wide, four deep and three tall: a compact engine-generator on a thick skid, built from a Steel Tank, an electric motor, a steel gear, a basic circuit and a Machine Casing. Every block it fills must be free when it is placed.",
+            "Pipe bioethanol into the low liquid inlet on its right side. It burns 192 JE a millibucket at 96 JE/t, a bucket lasting 100 seconds, and sends the power out of the socket on the terminal box low on its left side. Its coupling and radiator fan turn while it runs.",
+            "It makes only as much as its store has room for. The capped gas inlet above the liquid one is for cleaned biogas, which comes with the Anaerobic Digester."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:electric_motor",
+              "jugcraft:steel_gear",
+              "jugcraft:basic_circuit",
+              null,
+              "jugcraft:steel_tank",
+              null,
+              null,
+              "jugcraft:machine_casing",
+              null
+            ],
+            "result": "jugcraft:bio_generator",
+            "count": 1
+          }
+        },
+        {
           "title": "Electroplating Bath",
           "icon": "jugcraft:electroplating_bath",
           "text": [
