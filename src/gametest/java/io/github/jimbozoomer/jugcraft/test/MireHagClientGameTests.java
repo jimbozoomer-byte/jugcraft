@@ -124,13 +124,13 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 					}
 				}
 			}, 10);
-			shotFrom(context, singleplayer, fen, centre, 0.5, 4.0, 13.0, 0.0, 1.2, 0.0, "jugcraft_mire_hag_likenesses");
+			shotFrom(context, singleplayer, fen, centre, 0.5, 3.0, 10.0, 0.0, 1.2, 0.0, "jugcraft_mire_hag_likenesses");
 
 			// The Lure, in the marsh: each attack caught as it lands, she in the marsh's middle facing south, the player five
 			// blocks in front of her; the camera then stands where it shows the attack best, turned towards the point named.
 			pose(context, server, centre, (hag, level, player) -> hag.begin(level, MireHagEntity.Attack.CLAWING_SWIPE, player),
 					MireHagEntity.Attack.CLAWING_SWIPE.windup + 2);
-			shotFrom(context, singleplayer, fen, centre, 4.5, 0.5, 2.0, 0.0, 1.6, 1.0, "jugcraft_mire_hag_swipe");
+			shotFrom(context, singleplayer, fen, centre, 4.5, 1.5, 3.0, 0.0, 1.6, 1.0, "jugcraft_mire_hag_swipe");
 			pose(context, server, centre, (hag, level, player) -> hag.begin(level, MireHagEntity.Attack.ROOT_LANES, player),
 					MireHagEntity.Attack.ROOT_LANES.windup + 6);
 			server.runOnServer(minecraft -> {
@@ -155,7 +155,7 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 				});
 			}
 			check(flying, "No flask of her brew is flying");
-			shotFrom(context, singleplayer, fen, centre, 6.0, 0.5, 2.5, 0.0, 2.0, 2.5, "jugcraft_mire_hag_poison_brew");
+			shotFrom(context, singleplayer, fen, centre, 5.5, 2.0, 2.5, 0.0, 2.0, 2.5, "jugcraft_mire_hag_poison_brew");
 			server.runCommand("tick unfreeze");
 			context.waitTicks(20);
 			server.runCommand("tick freeze");
@@ -164,6 +164,21 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 			pose(context, server, centre, (hag, level, player) -> hag.begin(level, MireHagEntity.Attack.LIKENESS_EXCHANGE, player),
 					MireHagEntity.Attack.LIKENESS_EXCHANGE.windup - 12);
 			shotFrom(context, singleplayer, fen, centre, 3.0, 1.0, 6.5, 0.0, 1.5, 0.0, "jugcraft_mire_hag_exchange");
+			// The Exchange is caught in its wind-up: the world runs on until it is done (she has traded places), so it does not
+			// move her out of the next pose. She then rests a second before she can strike again.
+			server.runCommand("tick unfreeze");
+			boolean done = false;
+			for (int wait = 0; wait < 60 && !done; wait++) {
+				context.waitTick();
+				done = server.computeOnServer(minecraft -> {
+					boolean over = hag(minecraft).attack() == null;
+					if (over) {
+						minecraft.tickRateManager().setFrozen(true);
+					}
+					return over;
+				});
+			}
+			check(done, "Her Likeness Exchange never ended");
 
 			// Her rule: in a lamp's light her outline shows, wherever her Likenesses walk.
 			BlockPos northEast = o.offset(LanternFen.LAMPS.get(1));
