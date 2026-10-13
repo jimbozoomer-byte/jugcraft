@@ -178,7 +178,6 @@ public final class JugcraftClient implements ClientModInitializer {
 		SeasonColors.register();
 		WoodColors.register();
 		PartyClient.register();
-		EncyclopediaClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();
 		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).

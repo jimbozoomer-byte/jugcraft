@@ -1882,7 +1882,10 @@ def fuel_building(s, ox, oz):
     b.rail_round(px1 + 2, 6, px1 + 5, 10, deck + 1)
     for z in range(pz0 - 2, pz1 + 3):
         for x in (px0 - 1, px1 + 1):
-            if b.get(x, deck + 1, z) == 0 or b.get(x, deck + 1, z) == 0:
+            if b.get(x, deck + 1, z) == 0:
+                # Carry the rail across the water-filled transfer canal on a steel beam.
+                if b.get(x, deck, z) == WATER:
+                    b.p(x, deck, z, LINER)
                 b.p(x, deck + 1, z, RAIL_NS)
     b.prop("fuel_handling_machine", px0 - 1, deck + 2, 12, "north")
     # The truck bay: roller door south, dry casks, new fuel on racking.

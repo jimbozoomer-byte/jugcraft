@@ -87,9 +87,20 @@ def core_glow(lo, hi):
     return out
 
 
+# Nuclear components must keep their exposed backs and end caps when viewed on their own, as items or disconnected
+# from neighbouring equipment. Use the established closed-geometry pass; do not exempt them from the art audit.
+NUCLEAR_CLOSED_MODELS = (
+    "circulating_water_conduit_arm", "reactor_coolant_pipe_arm", "insulated_steam_line_arm", "isolated_phase_bus_arm",
+    "geiger_counter", "geiger_needle", "hv_chw", "hv_expansion_tank", "hv_plenum", "lead_pig", "waste_drum", "warning_beacon",
+)
+
+
 def write(path, obj):
     if isinstance(obj, dict) and obj.get("elements"):
-        model_writer.finish_elements(obj["elements"])
+        if any(path.stem == name or path.stem.startswith(name + "_") for name in NUCLEAR_CLOSED_MODELS):
+            model_writer.finish_closed(obj["elements"])
+        else:
+            model_writer.finish_elements(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 

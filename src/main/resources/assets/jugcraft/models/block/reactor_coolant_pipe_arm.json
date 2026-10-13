@@ -34,6 +34,9 @@
         },
         "north": {
           "texture": "#end"
+        },
+        "south": {
+          "texture": "#end"
         }
       }
     }

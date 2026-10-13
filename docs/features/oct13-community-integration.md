@@ -22,7 +22,7 @@ attribution are preserved. Conflict resolution and additional fixes use OpenAI C
 
 ## Integration corrections
 
-- Preserve both encyclopedia contributions behind one K key and one inventory entry point. **Technology & Magic
+- Preserve both encyclopedia contributions behind one B key and one inventory entry point. **Technology & Magic
   Guides** opens the community directory; Back returns to the live progression/inspection encyclopedia. Renamed its
   data generator and audit to avoid duplicate Python function names silently replacing validation.
 - Combine registrations, test entrypoints, language keys, generators and feature records without discarding either
@@ -40,14 +40,19 @@ attribution are preserved. Conflict resolution and additional fixes use OpenAI C
 - Support the medium plant's annulus ladders, extended crane rails and outer airlock door. These previously broke
   when Minecraft updated their shapes. The plant runtime test now requires every non-equipment blueprint block to
   remain after placement. Scope station-battery circuit tests to station chargers, separate from diesel starters.
+- Support the fuel-handling rail over its water canal; keep the canal open below its steel beam.
+- Register the encyclopedia once: duplicate registration from the two source branches crashed client startup.
+- Close exposed nuclear model backs/end caps through `model_writer.finish_closed`, retaining the art audit without
+  new exemptions. Round ladder-tray bend coordinates so Windows and Linux generate identical geometry JSON.
 
 ## Verification
 
-Pending combined validation; do not treat the source PRs' individual CI as the result for this integration.
-The initial combined common/client/test compile passed before the final encyclopedia reconciliation and permission
-regression test. Repository structure/link checks and all 14 Python packaging/selection tests passed. The client
+Final results are recorded in [integration PR #352](https://github.com/jimbozoomer-byte/jugcraft/pull/352); do not treat
+the source PRs' individual CI as the result for this integration. The combined build at `c3a7538b` passed all 1,564
+server game tests locally. The later client registration, geometry and plant-support fixes require a fresh CI run.
+Repository structure/link checks, all 14 Python packaging/selection tests and 11 world-designer tests passed. The client
 planner includes all 160 registered client test classes, distributed across five jobs (about 23 minutes estimated
-per job). Full server, optional-absent, data, and client results will be recorded before merge.
+per job). Full server, optional-absent, data, and client results will be recorded in that PR before merge.
 
 Human two-client play, nuclear plant load profiling, survival balance and owner visual acceptance are not claimed.
 No live-server deployment or public modpack release is part of this merge.

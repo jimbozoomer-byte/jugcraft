@@ -467,7 +467,8 @@ def _tray_bend(rungs=(22.5, 45.0, 67.5)):
     # The rungs, across the corner from the inner rail to the outer.
     for theta in rungs:
         t = math.radians(theta)
-        out += _seg(8 * math.sin(t), 16 - 8 * math.cos(t), theta - 90, 9.2, 0.9, y0 + 0.05, 11.85, _GALV)
+        # Pin sub-pixel coordinates so Windows and Linux libm serialize the same generated model.
+        out += _seg(round(8 * math.sin(t), 10), round(16 - 8 * math.cos(t), 10), theta - 90, 9.2, 0.9, y0 + 0.05, 11.85, _GALV)
     out += [(1.55, y0 + 0.05, 3.4, 2.45, 11.85, 12.6, _GALV), (3.4, y0 + 0.05, 13.55, 12.6, 11.85, 14.45, _GALV)]
     # The cables round the bend.
     for z in TRAY_CABLES:
