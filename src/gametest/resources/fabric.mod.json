@@ -184,8 +184,12 @@
 			"local.peepo.PeepoKitchenAnimationClientTests",
 			"local.peepo.PeepoSuppliesClientTests",
 			"local.peepo.PeepoDeliveryClientTests",
+			"local.peepo.PeepoCookingBatchClientTests",
+			"local.peepo.PeepoActionClientTests",
 			"local.peepo.PeepoWorkSessionClientTests",
 			"local.peepo.PeepoHarvestClientTests",
+			"local.peepo.PeepoPopulationClientTests",
+			"local.peepo.PeepoGardenExpansionClientTests",
 			"local.peepo.TransportCrateClientTests",
 			"local.peepo.TikiTorchClientTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceJournalClientGameTests",
@@ -312,7 +316,8 @@
 			"io.github.jimbozoomer.jugcraft.test.GlacierHallClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.YetiKingClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderKilnClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.CinderTyrantClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.CinderTyrantClientGameTests",
+			"local.peepo.PeepoIntegrationClientTests"
 		]
 	},
 	"depends": {

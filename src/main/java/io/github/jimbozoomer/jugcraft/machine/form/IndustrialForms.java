@@ -46,6 +46,7 @@ public final class IndustrialForms {
 			.outputTank("hydrogen")
 			.outputTank("lye")
 			.capability(AQUEOUS_ELECTROLYSIS)
+			.companionAssistance()
 			.upgrades()
 			.warmup(40)
 			.port("feed_in", FormPort.Kind.FLUID_IN, 0, 0, 1, 0, FormSide.BACK)
