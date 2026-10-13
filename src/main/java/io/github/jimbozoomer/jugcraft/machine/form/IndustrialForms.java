@@ -197,6 +197,34 @@ public final class IndustrialForms {
 			.build();
 
 	/**
+	 * The Bulk Fermenter: the art brief's 5x5x6 variant of the Industrial Fermenter, the same vessel enlarged and the same
+	 * controlled fermentation in the bulk profile, four batches at once from 16,000 mB tanks at 80% of the draw a batch.
+	 * Its carbon dioxide tank vents what it cannot hold, like the smaller one's.
+	 */
+	public static final MachineForm BULK_FERMENTER_FORM = MachineForm.builder(Jugcraft.id("bulk_fermenter"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.profile(OperatingProfile.BULK)
+			.inputTank("water")
+			.outputTank("product")
+			.outputTank("co2")
+			.vent("co2")
+			.items(1, 0)
+			.capability(CONTROLLED_FERMENTATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 2, 5, FormSide.TOP)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 4, 1, FormSide.BACK)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 2, 0, 0, FormSide.FRONT)
+			.port("co2_out", FormPort.Kind.FLUID_OUT, 1, 2, 4, 4, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 4, 4, 0, FormSide.BACK)
+			.build();
+
+	/**
 	 * The Bulk Chemical Reactor: the Chemical Reactor enlarged (the chemical reactor family's energy figures) into a
 	 * four-block cube in the expanded profile, two batches at once from 8,000 mB tanks. Water or acid goes in at the side,
 	 * gas at the short absorption inlet on the lid and ore at the hatch beside it; acid leaves at the outlet low at the
@@ -355,6 +383,7 @@ public final class IndustrialForms {
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock CHEMICAL_OXIDIZER;
 	public static FormMachineBlock INDUSTRIAL_FERMENTER;
+	public static FormMachineBlock BULK_FERMENTER;
 	public static FormMachineBlock BULK_CHEMICAL_REACTOR;
 	public static FormMachineBlock ANAEROBIC_DIGESTER;
 	public static FormMachineBlock COAL_GASIFIER;
@@ -372,6 +401,7 @@ public final class IndustrialForms {
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
 		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
 		INDUSTRIAL_FERMENTER = block("industrial_fermenter", INDUSTRIAL_FERMENTER_FORM);
+		BULK_FERMENTER = block("bulk_fermenter", BULK_FERMENTER_FORM);
 		BULK_CHEMICAL_REACTOR = block("bulk_chemical_reactor", BULK_CHEMICAL_REACTOR_FORM);
 		ANAEROBIC_DIGESTER = block("anaerobic_digester", ANAEROBIC_DIGESTER_FORM);
 		COAL_GASIFIER = block("coal_gasifier", COAL_GASIFIER_FORM);
@@ -379,7 +409,7 @@ public final class IndustrialForms {
 		BIO_GENERATOR = block("bio_generator", BIO_GENERATOR_FORM);
 		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
 		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER,
-				INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR,
+				INDUSTRIAL_FERMENTER, BULK_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR,
 				COMBINED_CYCLE_PLANT);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));

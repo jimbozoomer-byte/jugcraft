@@ -244,6 +244,35 @@ FORMS = {
                                            "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "bulk_fermenter": {
+        "display": "Bulk Fermenter",
+        # The art brief's 5x5x6 variant: the same vessel enlarged, the same controlled fermentation, in the bulk profile
+        # (four batches side by side from 16,000 mB tanks at 80% of the draw a batch).
+        "family": "chemical_reactor",
+        "layers": [["C####", "#####", "#####", "#####", "#####"]] + [["#####"] * 5] * 5,
+        "profile": "BULK",
+        "tank_mb": 16_000,
+        "input_tanks": ["water"],
+        "output_tanks": ["product", "co2"],
+        "vents": ["co2"],
+        "item_inputs": 1,
+        "capabilities": [CONTROLLED_FERMENTATION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "ITEM_IN", 0, 0, 2, 5, "TOP"),
+            ("water_in", "FLUID_IN", 0, 0, 4, 1, "BACK"),
+            ("product_out", "FLUID_OUT", 0, 2, 0, 0, "FRONT"),
+            ("co2_out", "FLUID_OUT", 1, 2, 4, 4, "BACK"),
+            ("power", "ENERGY_IN", 0, 4, 4, 0, "BACK"),
+        ],
+        # This change's bill (open for review): an Industrial Fermenter enlarged with two Steel Tanks, steel plates, an
+        # electric motor and a basic circuit.
+        "recipe": (["TFT", "PMP", "PCP"], {"T": f"{MOD}:steel_tank", "F": f"{MOD}:industrial_fermenter",
+                                           "P": "#c:plates/steel", "M": f"{MOD}:electric_motor",
+                                           "C": f"{MOD}:basic_circuit"}),
+        "features": ["machines"],
+    },
     "bulk_chemical_reactor": {
         "display": "Bulk Chemical Reactor",
         # The chemical reactor family (96 JE/t), in the expanded profile: two batches side by side, 8,000 mB tanks and
@@ -477,6 +506,18 @@ HANDBOOK = {
         "Its screen says what it is waiting for, and upgrade cards fit its terminal.",
     ],
 }
+
+HANDBOOK["bulk_fermenter"] = [
+    "Five wide, five deep and six tall: the Industrial Fermenter's vessel enlarged, built from an Industrial Fermenter, "
+    "two Steel Tanks, steel plates, an electric motor and a basic circuit. Every block it fills must be free when it is "
+    "placed.",
+    "It ferments like the Industrial Fermenter, eight crops and a bucket of water into 375 mB of bioethanol and 250 mB "
+    "of carbon dioxide, but runs four batches at once from 16,000 mB tanks, at 80% of the draw a batch. Crops go in at "
+    "the hatch on its crown, water at the inlet low at the back left; the alcohol leaves at the outlet low at the front "
+    "and the gas at the flange high at the back, which vents what is not collected.",
+    "It draws its power through the services box low at the back right. Its screen says what it is waiting for, and "
+    "upgrade cards fit its terminal.",
+]
 
 HANDBOOK["bulk_chemical_reactor"] = [
     "Four wide, four deep and four tall: the Chemical Reactor enlarged into a jacketed vessel with a stirring drive on "
@@ -1297,6 +1338,105 @@ def industrial_fermenter():
     return m
 
 
+# The Bulk Fermenter's vessel axis and its agitator drive pulley (x, y, z).
+BULK_FERMENTER_AXIS = (-24, 40)
+BULK_FERMENTER_DRIVE = (-24, 94.75, 40)
+
+
+def bulk_fermenter():
+    """Five wide, five deep and six tall (the art brief's larger variant): the Industrial Fermenter's stepped vessel
+    enlarged, not a second brewery. Dull stainless steel on four stout legs over a sloping cone; the cream jacket between
+    charcoal bands with the amber level strip on its front; the ringed manway on the upper body; the shallow domed crown
+    with the enclosed agitator drive (its pulley drawn turning by MachineRotors) and the motor lying towards the back. The
+    feed hatch rises beside the crown at the top on the left; the broth outlet leaves the cone low at the front, banded in
+    bioethanol with a red-wheeled valve; the carbon dioxide outlet leaves the upper body high at the back; the water inlet
+    enters low at the back left; and the heat-services box at the back right carries the power socket. At the front left,
+    under the vessel, the instrument box (the controller). Each port is at the middle of its block's face."""
+    cx, cz = BULK_FERMENTER_AXIS
+    m = []
+    # Four stout legs on feet, and the sloping bottom cone.
+    for lx in (cx - 24, cx + 24):
+        for lz in (cz - 24, cz + 24):
+            m.append(box((lx - 3.5, 0, lz - 3.5), (lx + 3.5, 1.5, lz + 3.5), GUNMETAL))
+            m.append(box((lx - 2.5, 1.5, lz - 2.5), (lx + 2.5, 22, lz + 2.5), GUNMETAL))
+    m += cyl("y", cx, cz, 16, 10, 16, GUNMETAL)
+    m += cyl("y", cx, cz, 24, 16, 21, GUNMETAL)
+    # The vessel: the lower body and its support ring, the cream jacket between charcoal bands, the shoulder ring, the
+    # stepped upper body with a band, and the shallow domed crown.
+    m += cyl("y", cx, cz, 31, 21, 60, STAINLESS, GUNMETAL)
+    m += cyl("y", cx, cz, 31.75, 21, 23.5, GUNMETAL)
+    m += cyl("y", cx, cz, 31.5, 27, 48, JACKET)
+    for y in (25.5, 48):
+        m += cyl("y", cx, cz, 31.75, y, y + 1.5, GUNMETAL)
+    m += cyl("y", cx, cz, 31.25, 59, 61.5, GUNMETAL)
+    m += cyl("y", cx, cz, 28, 61.5, 84, STAINLESS, GUNMETAL)
+    m += cyl("y", cx, cz, 28.5, 70, 72.5, GUNMETAL)
+    m += cyl("y", cx, cz, 23, 84, 87, STAINLESS)
+    m += cyl("y", cx, cz, 18, 87, 90, STAINLESS)
+    # The narrow level strip on the jacket's front, in a charcoal frame, and the ringed manway on the upper body.
+    m.append(box((cx - 2.5, 28, 8), (cx + 2.5, 47, 9.25), GUNMETAL))
+    m.append(box((cx - 1.5, 29, 7.75), (cx + 1.5, 46, 8), STRIP))
+    m += cyl("z", cx, 76, 8, 10.5, 12.25, GUNMETAL, FLANGE)
+    m.append(dial("north", (cx, 76, 10.5), 9, texture=PORTHOLE, body=CHROME))
+    # The instrument box (the controller) at the front left under the vessel: the amber gauge and the green batch lamp.
+    m.append(box((3, 0, 1), (15.5, 20, 9), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (11.5, 14, 0.75), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (6.5, 14, 0.75), 2, texture=MINT, body=GUNMETAL))
+    m.append(dial("north", (9, 6.5, 0.75), 2, texture=LAMP, body=GUNMETAL))
+    # The low broth outlet from the cone to its flange at the front: a charcoal pipe banded in bioethanol, a riser into
+    # the cone, and a valve with a red handwheel.
+    m += cyl("z", cx, 8, 3, 0.75, 32, RUBBER)
+    m += cyl("y", cx, 32, 2.5, 8, 10.5, RUBBER)
+    m += cyl("z", cx, 8, 3.4, 4, 5.5, "bioethanol_still")
+    m.append(box((cx - 4.5, 3.5, 0), (cx + 4.5, 12.5, 0.75), {"*": CHROME, "north": f"{FLANGE}!"}))
+    m.append(box((cx - 2.5, 11, 10), (cx + 2.5, 13, 14), GUNMETAL))
+    m += cyl("y", cx, 12, 0.75, 13, 15, CHROME)
+    m += cyl("y", cx, 12, 3, 15, 16, HANDWHEEL)
+    # The enclosed agitator drive on the crown: a gearbox under the pulley and the motor lying towards the back.
+    m.append(box((cx - 6, 90, cz - 6), (cx + 6, 94, cz + 6), GUNMETAL))
+    m += cyl("z", cx, 92, 3.5, cz + 6, cz + 20, OLIVE, GUNMETAL)
+    for z in (cz + 9, cz + 14):
+        m += cyl("z", cx, 92, 4, z, z + 1.5, GUNMETAL)
+    m += cyl("z", cx, 92, 3.75, cz + 20, cz + 21.5, GUNMETAL, GRILLE)
+    # The feed hatch rising beside the crown at the top on the left, joined to the upper body, its hazard-banded rim.
+    m.append(box((2, 76, 36), (5, 82, 44), GUNMETAL))
+    m += cyl("y", 8, 40, 4.5, 74, 94, GUNMETAL)
+    m.append(box((1.5, 94, 33.5), (14.5, 95.25, 46.5), HAZARD))
+    m.append(box((3, 95.25, 35), (13, 96, 45), {"*": CHROME, "up": MOUTH}))
+    # The closed carbon dioxide outlet from the upper body to its flange high at the back.
+    m += cyl("z", cx, 72, 3, 66, 79.25, RUBBER)
+    m += cyl("z", cx, 72, 3.4, 74, 75.5, "carbon_dioxide_still")
+    m.append(box((cx - 4.5, 67.5, 79.25), (cx + 4.5, 76.5, 80), {"*": CHROME, "south": f"{FLANGE}!"}))
+    # The water inlet: from its flange low at the back left, forward and into the lower body.
+    m += cyl("z", 8, 24, 2.5, 52, 79.25, RUBBER)
+    m += cyl("z", 8, 24, 2.9, 74, 75.5, "sp_water")
+    m += cyl("x", 24, 52, 2.5, -6, 8, RUBBER)
+    m.append(box((3.5, 19.5, 79.25), (12.5, 28.5, 80), {"*": CHROME, "south": f"{FLANGE}!"}))
+    # The heat-services box at the back right: the power socket, a hazard band and a copper riser into the jacket.
+    m.append(box((-63, 1.5, 70), (-49, 20, 79.25), GUNMETAL))
+    m.append(box((-63.25, 20, 69.75), (-48.75, 21, 79.5), HAZARD))
+    m.append(box((-59, 5, 79.25), (-53, 11, 80), {"*": CHROME, "south": "power_port!"}))
+    m += cyl("y", -52, 72, 1.25, 21, 40, COPPER)
+    m += cyl("z", -52, 40, 1.25, 58, 72, COPPER)
+    return m
+
+
+def bulk_fermenter_rotor():
+    """The Bulk Fermenter's agitator drive pulley on its gearbox (client/MachineRotors)."""
+    import machine_rotors as rotors
+    cx, y, cz = BULK_FERMENTER_DRIVE
+    quads = rotors.disc("y", y - 0.75, y + 0.5, cx, cz, 5, COPPER, "dr_pulley")
+    quads += rotors.prism("y", y + 0.5, y + 1, [(cx - 4.5, cz - 0.75), (cx + 4.5, cz - 0.75), (cx + 4.5, cz + 0.75),
+                                               (cx - 4.5, cz + 0.75)], CHROME, CHROME)
+    return quads
+
+
+def bulk_fermenter_still():
+    """The pulley standing still, for the item model only."""
+    cx, y, cz = BULK_FERMENTER_DRIVE
+    return cyl("y", cx, cz, 5, y - 0.75, y + 0.5, COPPER, "dr_pulley")
+
+
 def industrial_fermenter_rotor():
     """The Fermenter's agitator drive pulley on its gearbox (client/MachineRotors draws it): a spoked pulley and a
     drive key across it, so its slow turn reads from the floor."""
@@ -1908,6 +2048,10 @@ ROTORS = {
         "ease": 20, "always": True, "quads": chemical_oxidizer_rotor(),
     },
     # The Fermenter's agitator drive, turning slowly while a batch works.
+    "bulk_fermenter_drive": {
+        "block": "bulk_fermenter", "axis": "y", "center": list(BULK_FERMENTER_DRIVE), "property": "lit", "speed": 3,
+        "ease": 30, "always": True, "quads": bulk_fermenter_rotor(),
+    },
     "industrial_fermenter_drive": {
         "block": "industrial_fermenter", "axis": "y", "center": list(FERMENTER_DRIVE), "property": "lit", "speed": 4,
         "ease": 30, "always": True, "quads": industrial_fermenter_rotor(),
@@ -1949,13 +2093,15 @@ ROTORS = {
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
           "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer(),
-          "industrial_fermenter": industrial_fermenter(), "bulk_chemical_reactor": bulk_chemical_reactor(),
+          "industrial_fermenter": industrial_fermenter(), "bulk_fermenter": bulk_fermenter(),
+          "bulk_chemical_reactor": bulk_chemical_reactor(),
           "anaerobic_digester": anaerobic_digester(), "coal_gasifier": coal_gasifier(),
           "gas_cleanup_rack": gas_cleanup_rack(), "bio_generator": bio_generator(),
           "combined_cycle_power_plant": combined_cycle_power_plant()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
+               "bulk_fermenter": bulk_fermenter_still(),
                "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still(),
                "coal_gasifier": coal_gasifier_still(), "gas_cleanup_rack": gas_cleanup_rack_still(),
                "bio_generator": bio_generator_still(), "combined_cycle_power_plant": combined_cycle_power_plant_still()}
