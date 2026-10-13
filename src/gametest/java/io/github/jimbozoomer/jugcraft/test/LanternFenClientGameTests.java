@@ -198,18 +198,24 @@ public class LanternFenClientGameTests implements FabricClientGameTest {
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftLairs.HAG_STONE, 2));
 			check(HagStoneRite.feet(player).equals(spot) && overworld.getBlockState(spot).is(Blocks.WATER),
 					"The player is not standing in the pool: feet " + HagStoneRite.feet(player));
-			check(HagStoneRite.look(overworld, player, player.getMainHandItem()).missing() == HagStoneRite.Missing.NOT_WETLAND
-					&& player.getMainHandItem().getCount() == 2, "In the plains, the stone was not refused, or was used up");
+			HagStoneRite.Look look = HagStoneRite.look(overworld, player, player.getMainHandItem());
+			check(look.missing() == HagStoneRite.Missing.NOT_WETLAND && player.getMainHandItem().getCount() == 2,
+					"In the plains, the stone was not refused, or was used up: " + look + ", " + player.getMainHandItem());
 		});
-		server.runCommand("fillbiome %d %d %d %d %d %d jugcraft:bog".formatted(spot.getX() - 12, spot.getY() - 4, spot.getZ() - 12,
+		// The pool lies a block below the ground, so its land is a bog's from no lower than the plains' (the world's floor here).
+		server.runCommand("fillbiome %d %d %d %d %d %d jugcraft:bog".formatted(spot.getX() - 12, spot.getY() - 3, spot.getZ() - 12,
 				spot.getX() + 12, spot.getY() + 12, spot.getZ() + 12));
 		server.runCommand("time set noon");
 		context.waitTicks(10);
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
 			ServerLevel overworld = minecraft.overworld();
-			check(HagStoneRite.look(overworld, player, player.getMainHandItem()).missing() == HagStoneRite.Missing.NOT_NIGHT
-					&& player.getMainHandItem().getCount() == 2, "By day, the stone was not refused, or was used up");
+			check(overworld.getBiome(spot).is(HagStoneRite.LANDS) && overworld.getBiome(dry).is(HagStoneRite.LANDS),
+					"The land did not become a bog's: the pool's is " + overworld.getBiome(spot).getRegisteredName() + ", the stone's "
+							+ overworld.getBiome(dry).getRegisteredName());
+			HagStoneRite.Look look = HagStoneRite.look(overworld, player, player.getMainHandItem());
+			check(look.missing() == HagStoneRite.Missing.NOT_NIGHT && player.getMainHandItem().getCount() == 2,
+					"By day, the stone was not refused, or was used up: " + look + ", " + player.getMainHandItem());
 		});
 		server.runCommand("time set midnight");
 		context.waitTicks(10);
@@ -217,8 +223,9 @@ public class LanternFenClientGameTests implements FabricClientGameTest {
 			ServerPlayer player = player(minecraft);
 			ServerLevel overworld = minecraft.overworld();
 			player.teleportTo(overworld, dry.getX() + 0.5, dry.getY(), dry.getZ() + 0.5, Set.of(), 180.0F, 0.0F, true);
-			check(HagStoneRite.look(overworld, player, player.getMainHandItem()).missing() == HagStoneRite.Missing.NOT_WET
-					&& player.getMainHandItem().getCount() == 2, "On stone, out of the water, the stone was not refused, or was used up");
+			HagStoneRite.Look look = HagStoneRite.look(overworld, player, player.getMainHandItem());
+			check(look.missing() == HagStoneRite.Missing.NOT_WET && player.getMainHandItem().getCount() == 2,
+					"On stone, out of the water, the stone was not refused, or was used up: " + look + ", " + player.getMainHandItem());
 			player.teleportTo(overworld, spot.getX() + 0.5, spot.getY() - 1 + 14 / 16.0, spot.getZ() + 0.5, Set.of(), 180.0F, 0.0F, true);
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftLairs.HAG_STONE));
 		});
