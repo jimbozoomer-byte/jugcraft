@@ -9783,22 +9783,24 @@ def check_cinder_tyrant():
                 err(f"{cls}.java {why} ({banned})")
 
 def check_mire_hag():
-    """The Mire Hag (tools/mire_hag.py, docs/features/mire-hag.md): every number the Java uses is the table's; her attacks
-    are the table's, and her rule can be played (the marsh's middle lies beyond every lamp's light, so her Likenesses
-    have somewhere to walk; her Likenesses' places round her foe never meet behind it; the Root Knot gives players time
-    to cut it down; her roots never hold anyone longer than her Root Lanes take to come round again; her brew reaches its
-    farthest mark well within its life, and her pools poison again before the last poisoning wears off); where her fight
-    looks for the Lantern Fen's parts (LanternFen.java) is where tools/lantern_fen.py builds them: she waits on the porch
-    with room over her, comes down into open water, the Grey Mist she leaves opens in water with air over it, the Root
-    Knot crawls the ring on its boards (or through a drowned stump), and each lamp is the fen lamp on its post; her brews
-    leave from where her model's left hand is as she throws; her Likenesses are she to look at (her model, her clips and
-    her sheet, her size and her name), but cast no shadow while she does; whoever her roots hold has no speed left and
-    no jump, until a tick of the server lets them go; every entity is registered, named and drawn; each GeckoLib body has
-    its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet without overlapping, its
-    sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is animated by both of her
-    controllers; her loot table is the table's and her trophies are Arms VII's; her recipes (none of which makes
-    Hagmoss), tags and advancement are there; the Hag's Eye is held in the offhand and looked at on the server; every
-    message she sends has its words; and nothing of hers loads a chunk or leaves its dimension."""
+    """The Mire Hag (tools/mire_hag.py, docs/features/mire-hag.md): every number the Java uses is the table's; her
+    attacks are the table's, and her rule can be played (the marsh's middle lies beyond every lamp's light and the little
+    way her Likenesses keep from it, so they have somewhere to walk; every step a Likeness takes passes keepDark, so none
+    walks into a lamp's light of its own accord; her Likenesses' places round her foe never meet behind it; the Root Knot
+    gives players time to cut it down; her roots never hold anyone longer than her Root Lanes take to come round again;
+    her brew reaches its farthest mark well within its life, and her pools poison again before the last poisoning wears
+    off); where her fight looks for the Lantern Fen's parts (LanternFen.java) is where tools/lantern_fen.py builds them:
+    she waits on the porch with room over her, comes down into open water, the Grey Mist she leaves opens in water with
+    air over it, the Root Knot crawls the ring on its boards (or through a drowned stump), and each lamp is the fen lamp
+    on its post; her brews leave from where her model's left hand is as she throws; her Likenesses are she to look at
+    (her model, her clips and her sheet, her size and her name), but cast no shadow while she does; whoever her roots
+    hold has no speed left and no jump, until a tick of the server lets them go; every entity is registered, named and
+    drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the
+    sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no
+    bone is animated by both of her controllers; her loot table is the table's and her trophies are Arms VII's; her
+    recipes (none of which makes Hagmoss), tags and advancement are there; the Hag's Eye is held in the offhand and
+    looked at on the server; every message she sends has its words; and nothing of hers loads a chunk or leaves its
+    dimension."""
     import math
     import arms_variants
     import lantern_fen as lf
@@ -9809,8 +9811,8 @@ def check_mire_hag():
     if not sources:
         err("lair/hag: no Java")
         return
-    for cls, table in (("MireHagEntity", mh.MIRE_HAG), ("RootKnotEntity", mh.ROOT_KNOT), ("PoisonBrewEntity", mh.BREW),
-                       ("HagRootsEntity", {"SINK": mh.SINK}), ("HagsEye", mh.EYE)):
+    for cls, table in (("MireHagEntity", mh.MIRE_HAG), ("HagLikenessEntity", mh.LIKENESS), ("RootKnotEntity", mh.ROOT_KNOT),
+                       ("PoisonBrewEntity", mh.BREW), ("HagRootsEntity", {"SINK": mh.SINK}), ("HagsEye", mh.EYE)):
         for name, value in table.items():
             if not java_number(sources.get(cls, ""), name, value):
                 err(f"{cls}.{name} is not tools/mire_hag.py's {value}")
@@ -9834,8 +9836,19 @@ def check_mire_hag():
         err("tools/mire_hag.py: her Likenesses' places round her foe (LIKENESS_SPREAD apart, either side) would meet behind it")
     centre = lf.CENTRE
     for x, z in lf.LAMPS:
-        if math.hypot(x + 0.5 - centre[0], z + 0.5 - centre[1]) <= h["LAMP_REACH"]:
-            err(f"The lamp at ({x}, {z}) lights the marsh's middle (LAMP_REACH): her Likenesses would have nowhere to walk")
+        if math.hypot(x + 0.5 - centre[0], z + 0.5 - centre[1]) <= h["LAMP_REACH"] + mh.LIKENESS["SHY"]:
+            err(f"The lamp at ({x}, {z}) lights the marsh's middle (LAMP_REACH, and the Likenesses' SHY): her Likenesses "
+                "would have nowhere to walk")
+    if not 0.0 < mh.LIKENESS["SHY"] < 1.0:
+        err("tools/mire_hag.py LIKENESS SHY: a Likeness keeps a little way (more than nothing, less than a block) from a "
+            "lamp's light")
+    likeness = sources.get("HagLikenessEntity", "")
+    walk = likeness.split("protected void customServerAiStep(", 1)[-1].split("\n\t}\n", 1)[0]
+    if ("step = keepDark(level, found, step);" not in walk
+            or walk.find("step = keepDark(") > walk.find("setDeltaMovement(step.x")
+            or "then <= MireHagEntity.LAMP_REACH + SHY;" not in likeness):
+        err("HagLikenessEntity: a Likeness's every step must pass keepDark before it is taken, so it never walks into a "
+            "lamp's light of its own accord")
     if (mh.ROOT_KNOT["START"] - mh.ROOT_KNOT["REACH"]) / mh.ROOT_KNOT["SPEED"] < 100:
         err("tools/mire_hag.py: the Root Knot must give players five seconds at least to cut it down")
     if h["ROOT_HOLD"] >= mh.ATTACKS["ROOT_LANES"][3]:

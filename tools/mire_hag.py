@@ -58,6 +58,9 @@ ATTACKS = {
     "MIRE_GRASP": (24, 20, 10, 160, 0, 16, False, True),
     "SNUFF": (30, 1, 10, 400, 0, 40, False, True),
 }
+# Her Likenesses (HagLikenessEntity) never walk into a burning lamp's light of their own accord: a step that would take
+# one nearer a lamp's light than SHY blocks turns aside, and it skirts the light.
+LIKENESS = {"SHY": 0.5}
 # The Root Knot: it bursts from the water on the ring KNOT_START blocks (along the ring) from the lamp it heads for, and
 # crawls along the ring toward it at SPEED; within REACH (flat) of the lamp's post, the lamp goes out.
 ROOT_KNOT = {"HEALTH": 30.0, "SPEED": 0.06, "START": 10.0, "REACH": 2.0}

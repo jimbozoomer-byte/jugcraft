@@ -6,6 +6,7 @@ import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.util.GeckoLibUtil;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -49,6 +50,8 @@ public class HagLikenessEntity extends Monster implements GeoEntity {
 	private int sidestep;
 	private boolean sidestepLeft;
 	private static final int LOOK_EVERY = 5;
+	/** How near the edge of a burning lamp's light it walks of its own accord: it keeps this far off. */
+	public static final double SHY = 0.5;
 
 	public HagLikenessEntity(EntityType<? extends HagLikenessEntity> type, Level level) {
 		super(type, level);
@@ -137,12 +140,46 @@ public class HagLikenessEntity extends Monster implements GeoEntity {
 			sidestep--;
 			step = MireHagEntity.rotate(step, Math.toRadians(sidestepLeft ? 70.0 : -70.0));
 		}
+		step = keepDark(level, found, step);
 		setDeltaMovement(step.x, -0.3, step.z);
 		if (step.lengthSqr() > 1.0E-4) {
 			face(step);
 		} else if (foe != null) {
 			face(foe.position().subtract(position()));
 		}
+	}
+
+	/**
+	 * It never walks into a burning lamp's light of its own accord: a step that would take it nearer a lamp's light than
+	 * {@value #SHY} blocks turns aside, away from the lamp first, a little and then more, until it skirts the light;
+	 * if no way does, it waits where it is. Only a lamp lit again, her Exchange or a blow puts a Likeness in the light.
+	 */
+	private Vec3 keepDark(ServerLevel level, MireHagEntity found, Vec3 step) {
+		BlockPos lamp = step.lengthSqr() > 1.0E-4 ? found.nearestLitLamp(level, position()) : null;
+		if (lamp == null) {
+			return step;
+		}
+		Vec3 light = Vec3.atBottomCenterOf(lamp);
+		if (!intoLight(light, step)) {
+			return step;
+		}
+		double away = step.x * (light.z - getZ()) - step.z * (light.x - getX()) >= 0.0 ? -1.0 : 1.0;
+		for (double turn = 30.0; turn <= 90.0; turn += 30.0) {
+			for (double side : new double[] {away, -away}) {
+				Vec3 turned = MireHagEntity.rotate(step, Math.toRadians(turn * side));
+				if (!intoLight(light, turned)) {
+					return turned;
+				}
+			}
+		}
+		return Vec3.ZERO;
+	}
+
+	/** Whether {@code step} takes it nearer the lamp at {@code light}, to within {@value #SHY} blocks of its light. */
+	private boolean intoLight(Vec3 light, Vec3 step) {
+		double now = Math.hypot(getX() - light.x, getZ() - light.z);
+		double then = Math.hypot(getX() + step.x - light.x, getZ() + step.z - light.z);
+		return then < now && then <= MireHagEntity.LAMP_REACH + SHY;
 	}
 
 	private void face(Vec3 way) {

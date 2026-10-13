@@ -16,6 +16,7 @@ import io.github.jimbozoomer.jugcraft.lair.hag.PoisonBrewEntity;
 import io.github.jimbozoomer.jugcraft.lair.hag.RootKnotEntity;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -43,6 +44,11 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 	private static final Lair FEN = Lair.LANTERN_FEN;
 	/** A standing player's eyes over their feet, where the camera looks from. */
 	private static final double EYE = 1.62;
+	/**
+	 * How long, once she has come down, her Likenesses may take to form: she has none until there is a place for one out
+	 * of the lamps' light, and looks again every second. Far short of the 10 seconds a faded one takes to form again.
+	 */
+	private static final int LIKENESSES_FORM = 60;
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -92,7 +98,12 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 			server.runCommand("tick unfreeze");
 			server.runOnServer(minecraft -> player(minecraft).teleportTo(centre.x + 0.5, centre.y, centre.z + 5.0));
 			context.waitTicks(MireHagEntity.WAKE_TICKS + 10);
-			AtomicReference<Vec3> standing = new AtomicReference<>();
+			// Her Likenesses form as soon as there is a place for one out of the lamps' light (she looks again every second):
+			// a second or so. One that had walked into a lamp's light would not form again for 10 seconds.
+			for (int wait = 0; wait < LIKENESSES_FORM && server.computeOnServer(minecraft -> hag(minecraft).likenesses().size())
+					< MireHagEntity.LIKENESSES; wait++) {
+				context.waitTick();
+			}
 			server.runOnServer(minecraft -> {
 				MireHagEntity hag = hag(minecraft);
 				check(hag.phase() == MireHagEntity.Phase.LURE, "She did not come down to fight: " + hag.phase());
@@ -100,15 +111,20 @@ public class MireHagClientGameTests implements FabricClientGameTest {
 						"She is not in the marsh but at " + hag.position());
 				check(hag.likenesses().size() == MireHagEntity.LIKENESSES, hag.likenesses().size() + " Likenesses walk with her, not "
 						+ MireHagEntity.LIKENESSES);
-				standing.set(hag.position());
 			});
-			server.runCommand("tick freeze");
-			// She and her Likenesses, from above and behind the player: which is she?
-			Vec3 her = standing.get();
-			Vec3 looking = her.add(0.0, 1.2, 0.0);
-			Vec3 above = her.add(6.0, 4.5, 6.0);
-			shoot(context, singleplayer, fen, above.x, above.y, above.z, aimYaw(above, looking), aimPitch(above, looking), true,
-					"jugcraft_mire_hag_likenesses");
+			// She and her Likenesses, from behind the player: which is she? She is put in the marsh's middle with the player
+			// five blocks in front of her, as for her attacks, and each Likeness at its place round the player.
+			pose(context, server, centre, (hag, level, player) -> {
+				for (UUID id : hag.likenesses()) {
+					if (level.getEntity(id) instanceof HagLikenessEntity likeness) {
+						Vec3 place = hag.likenessSpot(level, likeness.slot());
+						if (place != null) {
+							likeness.teleportTo(place.x, place.y, place.z);
+						}
+					}
+				}
+			}, 10);
+			shotFrom(context, singleplayer, fen, centre, 0.5, 4.0, 13.0, 0.0, 1.2, 0.0, "jugcraft_mire_hag_likenesses");
 
 			// The Lure, in the marsh: each attack caught as it lands, she in the marsh's middle facing south, the player five
 			// blocks in front of her; the camera then stands where it shows the attack best, turned towards the point named.

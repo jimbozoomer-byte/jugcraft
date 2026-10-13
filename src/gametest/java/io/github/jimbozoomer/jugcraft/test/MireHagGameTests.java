@@ -39,12 +39,13 @@ import net.minecraft.world.phys.Vec3;
  * places are all loaded; each test lays the marsh's mud and the lamps it needs) waits on her porch until a player who may
  * fight her comes into the marsh, then steps down into the water with her Likenesses; her health grows with the party,
  * and the Last Light shortens her cooldowns; the lamps' light finds her and fades her Likenesses, and a lamp lit again
- * shows her and bursts the Likenesses in its light; a blow bursts a Likeness and counts as taking part; her Clawing Swipe
- * strikes before her; her Root Lanes burst along three ways and hold fast, then let go; her Mire Grasp slows and her brew
- * leaves a pool of venom; Lights Out puts out the two lamps nearest her foe and sends the Root Knot on a third, which puts
- * it out unless it is cut down; the Snuff and the Likeness Exchange; the Last Light; left alone she climbs back onto her
- * porch and the lamps burn again; her loot is each participant's own; and the Hag's Eye shows what hides. Her fight in the
- * Lantern Fen itself runs in a real world, in {@link MireHagClientGameTests}.
+ * shows her and bursts the Likenesses in its light; her Likenesses walk round the lamps' light, never into it; a blow
+ * bursts a Likeness and counts as taking part; her Clawing Swipe strikes before her; her Root Lanes burst along three
+ * ways and hold fast, then let go; her Mire Grasp slows and her brew leaves a pool of venom; Lights Out puts out the two
+ * lamps nearest her foe and sends the Root Knot on a third, which puts it out unless it is cut down; the Snuff and the
+ * Likeness Exchange; the Last Light; left alone she climbs back onto her porch and the lamps burn again; her loot is
+ * each participant's own; and the Hag's Eye shows what hides. Her fight in the Lantern Fen itself runs in a real world,
+ * in {@link MireHagClientGameTests}.
  *
  * <p>She fights any player within 38 blocks of her marsh's middle; the arena keeps every other test's players farther off
  * than that. Each test sends her back to her porch, with her Likenesses, roots, hands, brews and knot, and takes her away.
@@ -57,6 +58,8 @@ public class MireHagGameTests {
 	 * a test that hurts one waits this long first.
 	 */
 	private static final int LOADING_TICKS = 80;
+	/** How long the Likenesses' walk round the lamps' light is watched: long enough for both, as they were, to fade. */
+	private static final int SWING_TICKS = 80;
 
 	/** The origin of a fen laid out from the arena's corner, seven blocks under it: its mud bed a block over the arena's floor. */
 	private static BlockPos origin(GameTestHelper helper) {
@@ -258,6 +261,52 @@ public class MireHagGameTests {
 					helper.assertTrue(hag.revealTicks() == MireHagEntity.REVEAL_TICKS && hag.revealed(), "The lamp lit again did not show her");
 					helper.assertTrue(other.isRemoved(), "The Likeness in the lamp's light did not burst as it was lit");
 					lighter.discard();
+				});
+				helper.succeed();
+			});
+		});
+	}
+
+	/**
+	 * Her Likenesses keep to the dark of their own accord. Woken with no foe, she comes down and they form round her; when
+	 * she takes the player in the marsh's middle for her foe, their places swing round to either side of the marsh, past
+	 * the two northern lamps, and they walk round those lamps' light, not through it: at no tick of the next
+	 * {@value #SWING_TICKS} does one stand in a lamp's light, none fades, and both still walk with her.
+	 */
+	@GameTest(structure = FEN, padding = 8, maxTicks = 200)
+	public void herLikenessesWalkRoundTheLampsLight(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		MireHagEntity hag = waiting(helper, origin);
+		marsh(level, origin);
+		lamps(level, hag);
+		// A block west of the middle, so that her own way to the player passes clear of the lamps' light too: her Likeness
+		// Exchange puts a Likeness where she stood.
+		ServerPlayer foe = player(helper, hag, -1.0, 5.0);
+		foe.setGameMode(GameType.CREATIVE);
+		foe.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 400, 4, false, false));
+		hag.wake(level);
+		helper.runAfterDelay(MireHagEntity.WAKE_TICKS + 10, () -> {
+			boolean formed = hag.likenesses().size() == MireHagEntity.LIKENESSES && hag.foe(level) == null;
+			foe.setGameMode(GameType.SURVIVAL);
+			boolean[] lit = {false};
+			for (int tick = 1; tick <= SWING_TICKS; tick++) {
+				helper.runAfterDelay(tick, () -> {
+					for (UUID id : hag.likenesses()) {
+						if (level.getEntity(id) instanceof HagLikenessEntity likeness && hag.inLampLight(level, likeness.position())) {
+							lit[0] = true;
+						}
+					}
+				});
+			}
+			helper.runAfterDelay(SWING_TICKS + 1, () -> {
+				ending(level, hag, () -> {
+					helper.assertTrue(formed, "Her Likenesses did not form round her before she had a foe");
+					helper.assertTrue(hag.foe(level) == foe, "She did not take the player in the marsh for her foe");
+					helper.assertTrue(!lit[0], "A Likeness walked into a lamp's light");
+					helper.assertTrue(hag.likenesses().size() == MireHagEntity.LIKENESSES && hag.returns().isEmpty(), "A Likeness faded on its way: "
+							+ hag.likenesses().size() + " walk with her and " + hag.returns().size() + " will form again");
+					foe.discard();
 				});
 				helper.succeed();
 			});
