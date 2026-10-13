@@ -3727,12 +3727,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2192 material IDs), with `check_guns` (the numbers, attachments, looks, tilts and `JugcraftGuns.LEVITATING` and `GunShots.LIFT_TICKS` against tools/guns.py).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 12A game tests (to run in CI):**
+- **Slice 12A game tests (all passed in CI, below):**
   - `EndGunsGameTests`:
     - `endGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires bullets that make what they hit float, as no other gun's do, and sets nothing alight. Each is an automatic held in both hands, loaded a magazine at a time: the Chitin SMG of twenty-four light rounds, the Hermit Rifle of twenty rifle rounds, the Borer of forty. The Chitin SMG takes the scopes and the Laser Sight, the Hermit Rifle the stocks too, the Borer nothing.
     - `endGunsFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: each fires its last round at a pig and lands it, then loads from the inventory in its own time.
     - `endGunsMakeWhatTheyHitFloat`: each End gun's shot gives its pig Levitation, and three quarters of a second on it has risen off the floor; an Undertone Rifle's shot beside them leaves its pig standing. Once the spell has ended, each pig is back on the floor, unhurt by the fall.
   - `GunsGameTests` counts 57 guns.
+- **Slice 12A in CI** ([run 38433095782](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38433095782), on b1f946f3b): every check passed.
+  - **Server game tests:** 1382 in each job, the `mod` job's and the one without the optional integrations. All passed, `EndGunsGameTests` among them.
+  - **Client game tests:** the changed files chose `GunsClientGameTests` alone, and it passed. In it each new gun, in its turn:
+    - held and aimed, its arms drawn at full size and then half (the Borer's at full size both times, as a gun without sights), the view narrowed to 0.88 (Chitin SMG), 0.85 (Hermit Rifle) and 0.95 (Borer);
+    - fired at the husk, each spending one round, with 5 frames of flash: the Chitin SMG took it from 390.47 to 387.47 (3), the Hermit Rifle 5 and the Borer 5.5;
+    - reloaded from the inventory, 31 rounds left each time; the Chitin SMG and the Hermit Rifle threw 3 casings each, the Borer none, as its animations cue none;
+    - with each set of attachments it takes, held and aimed: the Hermit Rifle with each stock, the stock left out aimed (in 33 frames, none held); both with the Laser Sight.
+  - **After the shots:** the husk lost nothing more between the End guns' shots, so no fall hurt it. Between the Crackling's shot and the Chitin SMG's it lost 3, the Crackling's fire.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar. The Chitin SMG and the Hermit Rifle show the ring on top and the shulker box and its cables under the receiver, the Hermit Rifle its curled shell at the muzzle. The Borer is at the hip, its crank out to the left and its pale barrel toward the husk.
+    - **Aimed:** the Chitin SMG's and the Hermit Rifle's rings over the husk's head, the Hermit Rifle's shell either side. The Borer stays at the hip, the view narrowed a little.
+    - **Reloading:** the Chitin SMG's and the Hermit Rifle's left arms come up over the right of the view (see the known limits); the Borer is pushed out and tipped, its box out.
+    - **Inspection, attachments and third person:** each turned up toward the eye. The Laser Sight stands on the receiver of each, as it does on the Solenoid and Votive Rifles, the Ashfall Pistol and the Goldbristle Carbine in the same run. Seen from outside, the Chitin SMG and the Hermit Rifle are raised in both hands and the Borer carried low at the hip, each flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
