@@ -1,7 +1,14 @@
-"""The Howitzer Walker model, after the owner's own render of 9 October 2026: a tall two-legged artillery walker, a
-riveted olive hull carrying a big howitzer in an open cradle, three headlamps, bumper rails round every edge, grab
-hoops on the roof, and reverse-jointed legs on coil-sprung shock absorbers over broad hinged feet. A model only, by the
-owner's choice (9 October 2026: "I just want you to model stuff, don't implement"): no entity, recipe or renderer yet.
+"""The Howitzer Walker (docs/features/howitzer-walker.md), after the owner's own render of 9 October 2026: a tall
+two-legged artillery walker, a riveted olive hull carrying a big howitzer in an open cradle, three headlamps, bumper
+rails round every edge, grab hoops on the roof, and reverse-jointed legs on coil-sprung shock absorbers over broad
+hinged feet. Modelled first on its own (9 October 2026), then made playable when the owner asked on 13 October 2026:
+"implement the Howitzer-Walker into the game using its animations and add functionality to it".
+
+The pilot walks it as the Diesel Walker (its controls and fuel), holds use to lay and fire the howitzer (the walker
+turns to face the target and the barrel elevates to the arc that lands a Heavy Shell on it), jumps with a crouch and a
+spring, and presses attack to stomp. walker/HowitzerWalker.java holds the game side; client/HowitzerWalkerRenderer
+draws the parts exported here (assets/jugcraft/howitzer_walker_quads.json) with the same curves the clips sample.
+tools/check_mod_data.py keeps the numbers, joints and curves' constants the same as the Java.
 
 - Hull: a riveted olive box notched at its front top left, where the gun's cradle lies; round bumper rails along
   every edge; a big pivot axle with hubs under its nose and an A-arm linkage on its right down to the hip; dark
@@ -28,11 +35,45 @@ import math
 from pathlib import Path
 
 import clean_metal
+import item_icons
 from steampunk_models import box, cyl
 
 MOD = "jugcraft"
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "art" / "howitzer_walker"
+
+# ------------------------------------------------------------------ the game (walker/HowitzerWalker.java)
+# Movement and fuel are the Diesel Walker's. The howitzer fires Heavy Shells (artillery.py's HEAVY_SPEED and
+# HEAVY_GRAVITY): ticks between shots, degrees the barrel elevates a tick, its limits (the cradle stays inside the hull's
+# notch from -15 to 60 degrees: below -15 the breech pokes up through the roof) and its rest, and how far the pilot's
+# look is traced for a target. The leap: its speed (about three blocks up) after a crouch of CROUCH_TICKS. The stomp: the
+# hop, the slam's speed when it is already in the air, its damage, reach in blocks, throw and ticks between stomps.
+GUN_COOLDOWN = 80
+LAY_RATE = 3.0
+MIN_ELEVATION = -15.0
+MAX_ELEVATION = 60.0
+REST_ELEVATION = 25.0
+AIM_REACH = 128
+LEAP = 0.7
+CROUCH_TICKS = 6
+STOMP_HOP = 0.45
+SLAM = -1.2
+STOMP_DAMAGE = 14
+STOMP_RADIUS = 3.5
+STOMP_KNOCKBACK = 1.2
+STOMP_COOLDOWN = 40
+HEALTH = 80
+WIDTH = 2.75
+HEIGHT = 5.4
+# The roof hatch the pilot sits in, in pixels: the hatch ring's middle, a little over a block under the roof.
+HATCH = (-8, 60.8, -7)
+
+ITEMS = {"howitzer_walker": "Howitzer Walker"}
+TOOLTIPS = {"howitzer_walker": "A tall artillery walker with a howitzer. Walk with the movement keys; hold use to lay "
+                               "the gun on what you look at (or your Range Finder mark) and fire Heavy Shells; jump to "
+                               "spring up; press attack to stomp. Refuel with a diesel or kerosene bucket."}
+MESSAGES = {"on_mark": "Laying on your Range Finder mark",
+            "out_of_range": "Out of the howitzer's range"}
 
 PLATE, DARK, LEG = "hw_plate", "hw_plate_dark", "hw_leg"
 FLASH, FLASH_RIM, SMOKE = "hw_flash", "hw_flash_rim", "hw_smoke"
@@ -257,6 +298,12 @@ def parts():
             "puff": puff()}
 
 
+def export():
+    """The parts as quads for client/HowitzerWalkerRenderer, named howitzer_walker_<part>."""
+    from zeppelin import tiled_quads
+    return {f"howitzer_walker_{name}": tiled_quads(elements) for name, elements in parts().items()}
+
+
 def shifted(item, offset, pose=None):
     """An element moved by `offset` (and, with `pose`, turned about the offset by that angle about x: a part at rest)."""
     frm, to, texture = item[:3]
@@ -451,6 +498,31 @@ def animations():
             blockbench_export.animation("jump", JUMP_TICKS / 20, clean(jump), loop=False)]
 
 
+# ------------------------------------------------------------------ data
+
+def write_all(write, assets, data, lang, condition):
+    for item, name in ITEMS.items():
+        lang[f"item.{MOD}.{item}"] = name
+        write(assets / "models" / "item" / f"{item}.json",
+              {"parent": "minecraft:item/generated", "textures": {"layer0": f"{MOD}:item/{item}"}})
+        write(assets / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}})
+    for key, text in TOOLTIPS.items():
+        lang[f"tooltip.{MOD}.{key}"] = text
+    for key, text in MESSAGES.items():
+        lang[f"message.{MOD}.howitzer_walker.{key}"] = text
+    lang[f"entity.{MOD}.howitzer_walker"] = "Howitzer Walker"
+    # Written compact: it is thousands of quads.
+    (assets / "howitzer_walker_quads.json").write_text(json.dumps(export(), separators=(",", ":")) + "\n", encoding="utf-8")
+    # A Diesel Walker given a howitzer: two steel blocks for the barrel, a dispenser for its breech, steel plate for the
+    # cradle and pistons for the coil-sprung legs. A branch beside the Armoured Walker, not an upgrade of it.
+    write(data / "recipe" / "howitzer_walker.json", {
+        "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped", "category": "misc",
+        "pattern": ["SDS", "PWP", "R R"],
+        "key": {"S": f"{MOD}:steel_block", "D": "minecraft:dispenser", "P": "#c:plates/steel", "W": f"{MOD}:diesel_walker",
+                "R": "minecraft:piston"},
+        "result": {"id": f"{MOD}:howitzer_walker", "count": 1}})
+
+
 def write_bbmodel(folder=ART):
     import blockbench_export
     return blockbench_export.write(folder / "howitzer_walker.bbmodel", "howitzer_walker", groups(),
@@ -501,6 +573,8 @@ TEXTURES = {PLATE: lambda: riveted(OLIVE), DARK: lambda: plain(DARK_OLIVE), LEG:
 def draw_all(save):
     for name, draw in TEXTURES.items():
         save(draw(), "block", name)
+    for item in ITEMS:
+        save(item_icons.draw(item), "item", item)
 
 
 if __name__ == "__main__":
