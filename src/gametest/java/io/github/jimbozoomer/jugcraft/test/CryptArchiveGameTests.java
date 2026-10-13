@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -68,6 +69,33 @@ public class CryptArchiveGameTests {
 		BlockPos absolute = helper.absolutePos(standAt);
 		player.snapTo(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5, 90.0F, 0.0F);
 		return player;
+	}
+
+	/** The most ticks a test waits for the sky light to settle after laying or lifting a roof. */
+	private static final int LIGHT_TICKS = 60;
+
+	/**
+	 * Runs {@code then} once {@code settled} holds, looking each tick: the sky light under a roof laid (or lifted) in a test
+	 * is worked out by the light engine a tick or more later, not as the blocks are set, and the writ asks whether the sky
+	 * can be seen. Fails if it has not settled within {@value #LIGHT_TICKS} ticks.
+	 */
+	private static void whenSettled(GameTestHelper helper, BooleanSupplier settled, String what, Runnable then) {
+		whenSettled(helper, settled, what, then, LIGHT_TICKS);
+	}
+
+	private static void whenSettled(GameTestHelper helper, BooleanSupplier settled, String what, Runnable then, int left) {
+		if (settled.getAsBoolean()) {
+			then.run();
+			return;
+		}
+		helper.assertTrue(left > 0, "The sky light never settled: " + what);
+		helper.runAfterDelay(1, () -> whenSettled(helper, settled, what, then, left - 1));
+	}
+
+	/** Whether the sky can be seen from over either half of the sarcophagus at HEAD and FOOT. */
+	private static boolean skyOver(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		return level.canSeeSky(helper.absolutePos(HEAD).above()) || level.canSeeSky(helper.absolutePos(FOOT).above());
 	}
 
 	/** Lays a deepslate sarcophagus at HEAD and FOOT, and (if {@code roofed}) a roof of stone over both. */
@@ -137,9 +165,10 @@ public class CryptArchiveGameTests {
 	/**
 	 * The writ's checks, changing nothing: served on a stone sarcophagus under a roof, it takes; under the open sky over
 	 * either half it is refused. Either half finds the head. The three stone sarcophagi are tombs it is served on; a coffin
-	 * is not. No mist rises where nobody served a writ. The lid grinds aside and shut on both halves.
+	 * is not. No mist rises where nobody served a writ. The lid grinds aside and shut on both halves. Each check under a
+	 * roof laid or lifted waits for the sky light to settle ({@link #whenSettled}).
 	 */
-	@GameTest
+	@GameTest(maxTicks = 200)
 	public void theWritNeedsAStoneSarcophagusUnderARoof(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		tomb(helper, true);
@@ -147,63 +176,75 @@ public class CryptArchiveGameTests {
 		BlockPos foot = helper.absolutePos(FOOT);
 		helper.assertTrue(ExhumationRite.head(level.getBlockState(foot), foot).equals(head)
 				&& ExhumationRite.head(level.getBlockState(head), head).equals(head), "Either half does not find the head");
-		helper.assertTrue(ExhumationRite.check(level, head) == null, "Under a roof the writ was refused: " + ExhumationRite.check(level, head));
-		helper.setBlock(new BlockPos(2, 5, 3), Blocks.AIR.defaultBlockState());
-		helper.assertTrue(ExhumationRite.check(level, head) == ExhumationRite.Missing.OPEN_SKY,
-				"With the sky over its foot the writ was not refused");
-		tomb(helper, false);
-		helper.assertTrue(ExhumationRite.check(level, head) == ExhumationRite.Missing.OPEN_SKY, "Under the open sky the writ was not refused");
 		for (String stone : List.of("stone_brick", "deepslate", "blackstone")) {
 			helper.assertTrue(JugcraftAgriculture.block(stone + "_sarcophagus").defaultBlockState().is(ExhumationRite.TOMBS),
 					"The " + stone + " sarcophagus is not a tomb for the writ");
 		}
 		helper.assertTrue(!JugcraftAgriculture.block("coffin").defaultBlockState().is(ExhumationRite.TOMBS), "A coffin is a tomb for the writ");
 		helper.assertTrue(ExhumationRite.mist(level, head) == null, "A mist rose where nobody served a writ");
-		helper.assertTrue(ExhumationRite.setLid(level, head, true) && level.getBlockState(head).getValue(SarcophagusBlock.OPEN)
-				&& level.getBlockState(foot).getValue(SarcophagusBlock.OPEN), "The lid did not grind aside on both halves");
-		helper.assertTrue(!ExhumationRite.setLid(level, head, true), "An open lid was opened again");
-		helper.assertTrue(ExhumationRite.setLid(level, head, false) && !level.getBlockState(head).getValue(SarcophagusBlock.OPEN)
-				&& !level.getBlockState(foot).getValue(SarcophagusBlock.OPEN), "The lid did not grind shut on both halves");
-		helper.succeed();
+		whenSettled(helper, () -> !skyOver(helper), "under the roof", () -> {
+			helper.assertTrue(ExhumationRite.check(level, head) == null, "Under a roof the writ was refused: " + ExhumationRite.check(level, head));
+			helper.setBlock(new BlockPos(2, 5, 3), Blocks.AIR.defaultBlockState());
+			whenSettled(helper, () -> level.canSeeSky(foot.above()), "over the foot", () -> {
+				helper.assertTrue(ExhumationRite.check(level, head) == ExhumationRite.Missing.OPEN_SKY,
+						"With the sky over its foot the writ was not refused");
+				tomb(helper, false);
+				whenSettled(helper, () -> level.canSeeSky(head.above()), "over the head", () -> {
+					helper.assertTrue(ExhumationRite.check(level, head) == ExhumationRite.Missing.OPEN_SKY,
+							"Under the open sky the writ was not refused");
+					helper.assertTrue(ExhumationRite.setLid(level, head, true) && level.getBlockState(head).getValue(SarcophagusBlock.OPEN)
+							&& level.getBlockState(foot).getValue(SarcophagusBlock.OPEN), "The lid did not grind aside on both halves");
+					helper.assertTrue(!ExhumationRite.setLid(level, head, true), "An open lid was opened again");
+					helper.assertTrue(ExhumationRite.setLid(level, head, false) && !level.getBlockState(head).getValue(SarcophagusBlock.OPEN)
+							&& !level.getBlockState(foot).getValue(SarcophagusBlock.OPEN), "The lid did not grind shut on both halves");
+					helper.succeed();
+				});
+			});
+		});
 	}
 
 	/**
 	 * The writ served by a player's hand when no instance can open (a game-test server has no lair dimension, and the one
 	 * slot {@code lairs.instances} allows is taken if it has): the archive is full, the writ is kept and rested, the tomb's
-	 * slots are not opened, its lid stays shut, nobody moves and no mist rises. Under the open sky it is refused the same way.
+	 * slots are not opened, its lid stays shut, nobody moves and no mist rises. Under the open sky it is refused the same way. Each waits for the sky
+	 * light to settle under the roof laid, and lifted ({@link #whenSettled}).
 	 */
-	@GameTest
+	@GameTest(maxTicks = 200)
 	public void theWritUsesNothingWhenNoArchiveCanOpen(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		String instances = JugcraftConfig.textOption("lairs.instances");
-		try {
-			JugcraftConfig.setTextOption("lairs.instances", "1");
-			Lairs.open(level.getServer(), ARCHIVE);  // null here; takes the only slot where there is an archive
-			tomb(helper, true);
+		tomb(helper, true);
+		whenSettled(helper, () -> !skyOver(helper), "under the roof", () -> {
 			ServerPlayer player = player(helper, STAND);
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftLairs.EXHUMATION_WRIT, 2));
-			Vec3 stood = player.position();
 			BlockPos foot = helper.absolutePos(FOOT);
-			BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(foot), Direction.UP, foot, false);
-			InteractionResult used = player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);
-			helper.assertTrue(used.consumesAction(), "Serving the writ was not taken as the use: " + used);
-			helper.assertTrue(player.containerMenu == player.inventoryMenu, "The writ opened the tomb's slots");
-			helper.assertTrue(player.getMainHandItem().getCount() == 2, "The writ was used up: " + player.getMainHandItem());
-			helper.assertTrue(player.getCooldowns().isOnCooldown(player.getMainHandItem()), "The writ was not rested after its serving");
-			helper.assertTrue(!helper.getBlockState(HEAD).getValue(SarcophagusBlock.OPEN), "The lid ground aside into no archive");
-			helper.assertTrue(player.level() == level && player.position().distanceTo(stood) < 1.0E-6 && player.getAttached(Lairs.VISIT) == null,
-					"The player was moved");
-			helper.assertTrue(ExhumationRite.mist(level, helper.absolutePos(HEAD)) == null, "A mist rose into no archive");
-			ExhumationRite.Serving full = ExhumationRite.serve(level, player, foot, player.getMainHandItem());
-			helper.assertTrue(full.missing() == ExhumationRite.Missing.FULL && full.instance() == null, "The archive was not full: " + full);
+			String instances = JugcraftConfig.textOption("lairs.instances");
+			try {
+				JugcraftConfig.setTextOption("lairs.instances", "1");
+				Lairs.open(level.getServer(), ARCHIVE);  // null here; takes the only slot where there is an archive
+				Vec3 stood = player.position();
+				BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(foot), Direction.UP, foot, false);
+				InteractionResult used = player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);
+				helper.assertTrue(used.consumesAction(), "Serving the writ was not taken as the use: " + used);
+				helper.assertTrue(player.containerMenu == player.inventoryMenu, "The writ opened the tomb's slots");
+				helper.assertTrue(player.getMainHandItem().getCount() == 2, "The writ was used up: " + player.getMainHandItem());
+				helper.assertTrue(player.getCooldowns().isOnCooldown(player.getMainHandItem()), "The writ was not rested after its serving");
+				helper.assertTrue(!helper.getBlockState(HEAD).getValue(SarcophagusBlock.OPEN), "The lid ground aside into no archive");
+				helper.assertTrue(player.level() == level && player.position().distanceTo(stood) < 1.0E-6 && player.getAttached(Lairs.VISIT) == null,
+						"The player was moved");
+				helper.assertTrue(ExhumationRite.mist(level, helper.absolutePos(HEAD)) == null, "A mist rose into no archive");
+				ExhumationRite.Serving full = ExhumationRite.serve(level, player, foot, player.getMainHandItem());
+				helper.assertTrue(full.missing() == ExhumationRite.Missing.FULL && full.instance() == null, "The archive was not full: " + full);
+			} finally {
+				JugcraftConfig.setTextOption("lairs.instances", instances);
+				Lairs.reset();
+			}
 			tomb(helper, false);
-			helper.assertTrue(ExhumationRite.serve(level, player, foot, player.getMainHandItem()).missing() == ExhumationRite.Missing.OPEN_SKY
-					&& player.getMainHandItem().getCount() == 2, "Under the open sky the writ was not refused, or was used up");
-		} finally {
-			JugcraftConfig.setTextOption("lairs.instances", instances);
-			Lairs.reset();
-		}
-		helper.succeed();
+			whenSettled(helper, () -> skyOver(helper), "under the open sky", () -> {
+				helper.assertTrue(ExhumationRite.serve(level, player, foot, player.getMainHandItem()).missing() == ExhumationRite.Missing.OPEN_SKY
+						&& player.getMainHandItem().getCount() == 2, "Under the open sky the writ was not refused, or was used up");
+				helper.succeed();
+			});
+		});
 	}
 
 	/**

@@ -49,7 +49,7 @@ import net.minecraft.world.phys.Vec3;
  * ({@link #endToEnd}); then pictures: the mist welling up from a sarcophagus in a crypt where the writ was served, and, in
  * the archive, the view down the stair from the landing, the hall from the stair's foot, the dais and the phylactery, the
  * Sexton's alcove with its seal and name-stone, a name-stone lit and one scraped blank, the throne's apse, the Lectern of
- * Last Names, the hall from a high corner and the Grey Mist in the way back up; last, the game's own block light on every
+ * Last Names, the hall from the throne's apse and the Grey Mist in the way back up; last, the game's own block light on every
  * open cell of the hall's floor. CI job {@code client}.
  */
 public class CryptArchiveClientGameTests implements FabricClientGameTest {
@@ -139,10 +139,12 @@ public class CryptArchiveClientGameTests implements FabricClientGameTest {
 				shootAt(context, singleplayer, dim, o.getX() + 29.5, o.getY() + CryptArchive.APSE_STAND, o.getZ() + 7.5, o.getX() + 32.5,
 						o.getY() + CryptArchive.APSE_STAND + 2.5, o.getZ() + 5.5, "jugcraft_crypt_archive_name_erased");
 				shoot(context, singleplayer, dim, o.getX() + 32.5, o.getY() + stand, o.getZ() + 23.5, 180, -6, "jugcraft_crypt_archive_throne");
-				shootAt(context, singleplayer, dim, o.getX() + 35.5, o.getY() + stand, o.getZ() + 50.5, o.getX() + 32.5, o.getY() + stand + 1.0,
-						o.getZ() + 53.5, "jugcraft_crypt_archive_lectern");
-				shootAt(context, singleplayer, dim, o.getX() + 13.5, o.getY() + stand + 9, o.getZ() + 15.5, o.getX() + 32.5, o.getY() + stand,
-						o.getZ() + 34.5, "jugcraft_crypt_archive_from_corner");
+				// The lectern from the stair behind it (its book faces the stair), the hall beyond.
+				shootAt(context, singleplayer, dim, o.getX() + 32.5, o.getY() + stand + 2, o.getZ() + 56.5, o.getX() + 32.5, o.getY() + stand + 0.5,
+						o.getZ() + 50.5, "jugcraft_crypt_archive_lectern");
+				// The hall from the throne's apse, down the north lane over the dais to the stair: the Lich's own view.
+				shootAt(context, singleplayer, dim, o.getX() + 32.5, o.getY() + CryptArchive.APSE_STAND + 2, o.getZ() + 11.5, o.getX() + 32.5,
+						o.getY() + stand, o.getZ() + 40.5, "jugcraft_crypt_archive_from_throne");
 				shoot(context, singleplayer, dim, o.getX() + 32.5, o.getY() + CryptArchive.LANDING_STAND, o.getZ() + 62.5, 0, 0,
 						"jugcraft_crypt_archive_exit");
 

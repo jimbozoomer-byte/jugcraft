@@ -139,6 +139,7 @@ What the building found:
 - The hidden lights' lattice at first started four blocks in from the west wall, and left the cells along the walls and behind the pillars too dark; the audit's flood of the light found 79 cells under 7. The lattice now runs from wall to wall, its rows staggered, at level 14, as the fen's is.
 - The throne's apse was carved after the alcoves were furnished, and carved away the Crowned's sarcophagus, seal and name-stone; a plan view of the template showed it. The apse is now carved first.
 - The tablets' models drew the face and the rest of the tablet as two boxes, and the art check found the face of the one left open; each is now one box.
+- CI's first run (`69c5d40`) failed two of the game tests: each laid a roof over the sarcophagus and asked the writ at once, on the same tick, but the game works out the sky light under a new roof a tick or more later. The writ is right to ask whether the sky can be seen; the two tests now wait for the light to settle under the roof laid, and lifted, before they ask. Its client pictures were taken on that run; two of them were re-aimed: the lectern is now pictured from the stair behind it, and the hall from the throne's apse rather than from high in a corner, where a pair of pillars and the vault hid the most of it.
 
 The game tests (`CryptArchiveGameTests`) show what a game-test server can:
 1. the archive's dimension type and biome load from their files;
@@ -154,7 +155,7 @@ The client game test (`CryptArchiveClientGameTests`, CI job `client`) runs the w
 4. leaving takes the player back to where they stood. A second writ at the risen mist is refused and kept, and using the open sarcophagus with an empty hand takes the player back into the same archive;
 5. when the instance closes, the player goes home, the mist is gone and the lid grinds shut.
 
-Then it takes eleven pictures: the open tomb in the crypt, and in the archive the view down the stair from the landing, the hall from the stair's foot, the dais and the phylactery, the Sexton's alcove, the Scribe's name lit, the Crowned's name scraped, the throne's apse, the Lectern of Last Names, the hall from a high corner, and the Grey Mist in the way back up. Last it reads the game's own block light on every open cell of the hall's floor, and fails under 7.
+Then it takes eleven pictures: the open tomb in the crypt, and in the archive the view down the stair from the landing, the hall from the stair's foot, the dais and the phylactery, the Sexton's alcove, the Scribe's name lit, the Crowned's name scraped, the throne's apse, the Lectern of Last Names from the stair, the hall from the throne's apse, and the Grey Mist in the way back up. Last it reads the game's own block light on every open cell of the hall's floor, and fails under 7.
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 
