@@ -7314,6 +7314,31 @@
           "fluids": [
             [
               "jugcraft:hydrogen",
+              300
+            ],
+            [
+              "jugcraft:carbon_monoxide",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              200
+            ]
+          ],
+          "results": [],
+          "ticks": 150
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
               400
             ],
             [
@@ -7959,6 +7984,105 @@
             ]
           ],
           "ticks": 400
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:coal_gasifier",
+      "type": "coal_gasifier",
+      "recipes": [
+        {
+          "items": [
+            [
+              "minecraft:coal",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:raw_syngas",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 200
+        },
+        {
+          "items": [
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:raw_syngas",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 200
+        },
+        {
+          "items": [
+            [
+              "minecraft:charcoal",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:raw_syngas",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 200
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:gas_cleanup_rack",
+      "type": "gas_cleanup_rack",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:raw_syngas",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:carbon_monoxide",
+              250
+            ],
+            [
+              "jugcraft:hydrogen",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100
         }
       ]
     }

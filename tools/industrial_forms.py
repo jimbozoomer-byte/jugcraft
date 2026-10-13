@@ -2,8 +2,9 @@
 Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), Gas Burning Generator
 (docs/features/industrial-gas-burning-generator.md), Chemical Infuser (docs/features/industrial-chemical-infuser.md) and
 Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md), Industrial Fermenter
-(docs/features/industrial-fermenter.md), Bulk Chemical Reactor (docs/features/industrial-bulk-chemical-reactor.md) and
-Anaerobic Digester (docs/features/industrial-anaerobic-digester.md), of the owner's factory plan.
+(docs/features/industrial-fermenter.md), Bulk Chemical Reactor (docs/features/industrial-bulk-chemical-reactor.md),
+Anaerobic Digester (docs/features/industrial-anaerobic-digester.md), Coal Gasifier and Gas Cleanup and Separation Rack
+(docs/features/industrial-coal-gasification.md), of the owner's factory plan.
 
 Each form is described here for its art, recipes and data, and in IndustrialForms.java for the game;
 tools/check_mod_data.py checks that the two agree. Layers are given bottom first, each as rows from the front to the
@@ -40,6 +41,10 @@ CHLORIDE_LEACHING = f"{MOD}:chloride_leaching"
 # of what it takes.
 ANAEROBIC_DIGESTION = f"{MOD}:anaerobic_digestion"
 DIGESTIBLE = "digestible"
+# Gasifying a carbon feed with steam into a dirty carbon monoxide and hydrogen mixture (the Coal Gasifier), and cleaning
+# and dividing that mixture into its gases (the Gas Cleanup and Separation Rack).
+COAL_GASIFICATION = f"{MOD}:coal_gasification"
+GAS_SEPARATION = f"{MOD}:gas_separation"
 # Joining a carbon oxide and hydrogen into methane over the nickel bed, and the item tag the Infuser's bed socket holds.
 NICKEL_METHANATION = f"{MOD}:nickel_methanation"
 METHANATION_BEDS = "methanation_beds"
@@ -278,6 +283,57 @@ FORMS = {
                                            "C": f"{MOD}:basic_circuit", "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "coal_gasifier": {
+        "display": "Coal Gasifier",
+        # The chemical reactor family (96 JE/t: the plan's paid automatic electrical heat), in the expanded profile: two
+        # batches side by side, 8,000 mB tanks and 90% of the draw a batch.
+        "family": "chemical_reactor",
+        "layers": [["C###", "####", "####", "####"]] + [["####", "####", "####", "####"]] * 5,
+        "profile": "EXPANDED",
+        "tank_mb": 8_000,
+        # The carbon feed at the side charging chute, water low on the left; the raw gas at the upper header.
+        "input_tanks": ["water"],
+        "output_tanks": ["product"],
+        "item_inputs": 1,
+        "capabilities": [COAL_GASIFICATION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "ITEM_IN", 0, 0, 1, 2, "LEFT"),
+            ("water_in", "FLUID_IN", 0, 0, 3, 0, "LEFT"),
+            ("syngas_out", "FLUID_OUT", 0, 3, 2, 5, "RIGHT"),
+            ("power", "ENERGY_IN", 0, 2, 3, 0, "BACK"),
+        ],
+        # The plan's bill (docs/features/industrial-starter-gas-and-acid-factory.md): 4 steel plates, 2 bricks, a furnace,
+        # a steel fluid pipe and a Machine Casing.
+        "recipe": (["PBP", "FKI", "PBP"], {"P": "#c:plates/steel", "B": "minecraft:brick", "F": "minecraft:furnace",
+                                           "K": f"{MOD}:machine_casing", "I": f"{MOD}:steel_fluid_pipe"}),
+        "features": ["machines"],
+    },
+    "gas_cleanup_rack": {
+        "display": "Gas Cleanup and Separation Rack",
+        # The synthesis family (128 JE/t), like the Infuser.
+        "family": "synthesis_converter",
+        "layers": [["C##", "###", "###", "###", "###"]] + [["###", "###", "###", "###", "###"]] * 3,
+        "profile": "ENTRY",
+        "tank_mb": 2_000,
+        # The raw gas in low on the left; carbon monoxide and hydrogen out at the tops of their towers at the back.
+        "input_tanks": ["feed"],
+        "output_tanks": ["product", "hydrogen"],
+        "capabilities": [GAS_SEPARATION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "FLUID_IN", 0, 0, 2, 0, "LEFT"),
+            ("product_out", "FLUID_OUT", 0, 2, 4, 3, "TOP"),
+            ("hydrogen_out", "FLUID_OUT", 1, 0, 4, 3, "TOP"),
+            ("power", "ENERGY_IN", 0, 1, 4, 0, "BACK"),
+        ],
+        # The plan's bill: 4 steel plates, a Steel Tank, 2 Tinplate Tanks, an electric motor and a basic circuit.
+        "recipe": (["PTP", "SMS", "PCP"], {"P": "#c:plates/steel", "T": f"{MOD}:steel_tank", "S": f"{MOD}:fluid_tank",
+                                           "M": f"{MOD}:electric_motor", "C": f"{MOD}:basic_circuit"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -363,6 +419,26 @@ HANDBOOK["anaerobic_digester"] = [
     "mB of hydrogen give 250 mB of methane and 400 mB of water.",
 ]
 
+HANDBOOK["coal_gasifier"] = [
+    "Four wide, four deep and six tall: a tall lined reaction column over a broad ash chamber, with a charging chute on "
+    "its left side and a gas header high on its right, built from steel plates, bricks, a furnace, a steel fluid pipe "
+    "and a Machine Casing. Every block it fills must be free when it is placed. It runs two batches at once.",
+    "Drop coal or coal coke into the charging chute and pipe water into the inlet low on its left side. Each piece and "
+    "500 mB of water (as steam) become 500 mB of raw syngas (half carbon monoxide, half hydrogen) in ten seconds, which leaves at "
+    "the header flange high on its right. Charcoal gives 400 mB from 400 mB of water.",
+    "Raw syngas is dirty: the Gas Cleanup and Separation Rack divides it into carbon monoxide and hydrogen.",
+]
+HANDBOOK["gas_cleanup_rack"] = [
+    "Three wide, five deep and four tall: a scrubber column and two separation towers on a steel skid, built from "
+    "steel plates, a Steel Tank, two Tinplate Tanks, an electric motor and a basic circuit. Every block it fills must "
+    "be free when it is placed.",
+    "Pipe raw syngas into the inlet low on its left side. 500 mB of it is cleaned and divided into 250 mB of carbon "
+    "monoxide (the tower at the back on the right) and 250 mB of hydrogen (the tower at the back on the left) in five "
+    "seconds at 128 JE/t.",
+    "Carbon monoxide becomes methane in the Chemical Infuser with its Nickel Catalyst Bed: 100 mB of it and 300 mB of "
+    "hydrogen give 100 mB of methane and 200 mB of water.",
+]
+
 # Tank labels on the screen and in its reasons (MachineStatus.tankLabel), by role.
 TANK_NAMES = {
     "fuel": "Fuel tank",
@@ -408,6 +484,11 @@ FORM_RECIPES = {
          "tool": f"{MOD}:nickel_catalyst_bed",
          "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:carbon_dioxide", 100)],
          "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 400, 1)], "ticks": 200, "features": ["machines"]},
+        # CO methanation over the same bed (the plan's distinct CO + 3 H2 recipe): CO + 3 H2 -> CH4 + H2O, the water at the
+        # liquid anchor of 2 mB a reaction amount. 150 ticks at 128 JE/t, 19,200 JE.
+        {"name": "infuser_carbon_monoxide_methanation", "capability": NICKEL_METHANATION,
+         "tool": f"{MOD}:nickel_catalyst_bed", "fluids": [(f"{MOD}:hydrogen", 300), (f"{MOD}:carbon_monoxide", 100)],
+         "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 200, 1)], "ticks": 150, "features": ["machines"]},
         # Biogas upgrading over the same bed (docs/features/industrial-starter-gas-and-acid-factory.md, the 60/40
         # mapping): 250 mB of biogas holds 150 of methane and 100 of carbon dioxide; the carbon dioxide takes 400 mB of
         # hydrogen as in methanation, giving 250 mB of methane in all and 400 mB of water. 200 ticks at 128 JE/t.
@@ -438,6 +519,28 @@ FORM_RECIPES = {
         {"name": "bulk_hydrochloric_acid", "capability": ACID_ABSORPTION,
          "fluids": [("minecraft:water", 1000), (f"{MOD}:hydrogen_chloride", 500)],
          "fluid_results": [(f"{MOD}:hydrochloric_acid", 1000, 0)], "ticks": 100, "features": ["salt"]},
+    ],
+    "coal_gasifier": [
+        # Steam gasification (this change's proposal for the pending carbon ledger): a coal or coke counts as 250 reaction
+        # amounts of carbon, like a sulfur dust, C + H2O -> CO + H2: 250 mB of each gas, 500 mB of the mixture. The steam
+        # is fed in excess, 500 mB of water, as a steam gasifier runs; no fluid comes from nothing. 200 ticks at 96 JE/t,
+        # 19,200 JE of paid heat.
+        {"name": "gasifier_coal", "capability": COAL_GASIFICATION, "items": [("minecraft:coal", 1)],
+         "fluids": [("minecraft:water", 500)], "fluid_results": [(f"{MOD}:raw_syngas", 500, 0)], "ticks": 200,
+         "features": ["machines"]},
+        {"name": "gasifier_coke", "capability": COAL_GASIFICATION, "items": [(f"{MOD}:coke", 1)],
+         "fluids": [("minecraft:water", 500)], "fluid_results": [(f"{MOD}:raw_syngas", 500, 0)], "ticks": 200,
+         "features": ["machines"]},
+        # Charcoal: the owner's selected lower-yield alternative, 200 reaction amounts of carbon.
+        {"name": "gasifier_charcoal", "capability": COAL_GASIFICATION, "items": [("minecraft:charcoal", 1)],
+         "fluids": [("minecraft:water", 400)], "fluid_results": [(f"{MOD}:raw_syngas", 400, 0)], "ticks": 200,
+         "features": ["machines"]},
+    ],
+    "gas_cleanup_rack": [
+        # Cleaning and dividing the mixture: each gas once, never more than went in. 100 ticks at 128 JE/t, 12,800 JE.
+        {"name": "rack_raw_syngas", "capability": GAS_SEPARATION, "fluids": [(f"{MOD}:raw_syngas", 500)],
+         "fluid_results": [(f"{MOD}:carbon_monoxide", 250, 0), (f"{MOD}:hydrogen", 250, 1)], "ticks": 100,
+         "features": ["machines"]},
     ],
     "chemical_oxidizer": [
         # Sulfur oxidation (docs/features/industrial-starter-gas-and-acid-factory.md): a dust counts as 250 reaction
@@ -1234,6 +1337,163 @@ def anaerobic_digester_still():
     return cyl("z", cx, cy, 4.5, z - 0.5, z + 0.25, COPPER) + cyl("z", cx, cy, 1.75, z - 0.75, z + 0.5, CHROME)
 
 
+# The Coal Gasifier's feed-drive pulley on its cabinet, turning about x: its centre (x, y, z).
+GASIFIER_DRIVE = (15.5, 18, 43)
+# The Gas Cleanup and Separation Rack's blower fan on the scrubber's crown, turning about y: its centre (x, y, z).
+RACK_FAN = (-8, 53.5, 24)
+
+
+def coal_gasifier():
+    """Four wide, four deep and six tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a tall
+    reaction column of blackened steel with cream refractory borders and copper pipe rings rises above a broad lower ash
+    chamber on four large braced feet. The ash chamber's front carries the thick closed fire door, which glows while it
+    works, the heat throat's slit beneath it and the control panel (the controller) at the front left. A sloped charging
+    chute meets the column halfway up on the left, with the dark feed-drive cabinet below it (its pulley drawn turning by
+    MachineRotors) and the water inlet low behind it. The capped top stack carries the short gas header to its flange high
+    on the right, banded in raw syngas; the power socket sits on a junction box at the back. Each port is at the middle of
+    its block's face."""
+    cx, cz = -16, 32
+    m = []
+    # Four large braced feet and the broad ash chamber, its refractory border at the top.
+    for fx in (-40, 4):
+        for fz in (8, 52):
+            m.append(box((fx - 5, 0, fz - 5), (fx + 5, 6, fz + 5), {"*": GUNMETAL, "up": STENCIL}))
+    m.append(box((-44, 6, 6), (12, 28, 58), GUNMETAL))
+    m.append(box((-45, 28, 5), (13, 31, 59), REFRACTORY))
+    # The reaction column, its refractory borders and copper pipe rings, and the capped stack.
+    m += cyl("y", cx, cz, 16, 31, 84, GUNMETAL, CHROME)
+    for y in (44, 64):
+        m += cyl("y", cx, cz, 16.6, y, y + 2, REFRACTORY)
+    for y in (38, 56, 74):
+        m += cyl("y", cx, cz, 16.4, y, y + 1, COPPER)
+    m += cyl("y", cx, cz, 12, 84, 88, GUNMETAL)
+    m += cyl("y", cx, cz, 8, 88, 92, GUNMETAL, CHROME)
+    m += cyl("y", cx, cz, 10, 92, 94, GUNMETAL, "dr_soot")
+    # The thick closed fire door on the ash chamber, the heat throat's slit under it and a soot seam above.
+    m.append(box((-28, 9, 4.5), (-4, 25, 6), {"*": GUNMETAL, "north": "dr_fire_door"}))
+    m.append(box((-24, 7, 5.25), (-8, 8, 6), STRIP))
+    m.append(box((-28, 26, 5.25), (-4, 27, 6), "dr_soot"))
+    # The control panel (the controller) at the front left.
+    m.append(box((2, 6, 1), (15.5, 20, 6), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (11.5, 15, 0.75), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (6, 15, 0.75), 2.5, texture=LAMP, body=GUNMETAL))
+    m.append(dial("north", (6, 10, 0.75), 2, texture=MINT, body=GUNMETAL))
+    # The sloped charging chute meeting the column halfway up on the left, its olive guard and hazard-banded mouth.
+    m.append(box((-1, 34, 19), (8, 42, 29), GUNMETAL))
+    m.append(box((8, 36, 18), (15.25, 46, 30), OLIVE))
+    m.append(box((7.5, 46, 17.5), (15.75, 47, 30.5), HAZARD))
+    m.append(box((15.25, 35, 19), (16, 45, 29), {"*": CHROME, "east": MOUTH}))
+    # The dark feed-drive cabinet below the chute (its pulley turns while it feeds).
+    m.append(box((4, 6, 36), (15, 26, 50), {"*": "dr_soot", "east": GUNMETAL}))
+    # The water inlet low on the left.
+    m += cyl("x", 8, 56, 2, 12, 15.25, RUBBER)
+    m += cyl("x", 8, 56, 2.4, 13, 14, "sp_water")
+    m.append(box((15.25, 5, 53), (16, 11, 59), {"*": CHROME, "east": f"{FLANGE}!"}))
+    # The short gas header from the stack to its flange high on the right, banded in raw syngas.
+    m += cyl("x", 88, 40, 3, -47.25, -20, EXHAUST, GUNMETAL)
+    m += cyl("x", 88, 40, 3.4, -42, -41, "raw_syngas_still")
+    for x in (-36, -28):
+        m += cyl("x", 88, 40, 3.4, x, x + 1, COPPER)
+    m.append(box((-48, 84, 36), (-47.25, 92, 44), {"*": CHROME, "west": f"{FLANGE}!"}))
+    # The junction box at the back: its power socket and a hazard band.
+    m.append(box((-31, 6, 58), (-17, 18, 63.25), GUNMETAL))
+    m.append(box((-31.25, 18, 57.75), (-16.75, 19, 63.5), HAZARD))
+    m.append(box((-27, 5, 63.25), (-21, 11, 64), {"*": CHROME, "south": "power_port!"}))
+    return m
+
+
+def coal_gasifier_rotor():
+    """The Gasifier's feed-drive pulley on the side of its cabinet (client/MachineRotors draws it)."""
+    import machine_rotors as rotors
+    x, cy, cz = GASIFIER_DRIVE
+    quads = rotors.disc("x", x - 0.5, x + 0.25, cy, cz, 4, COPPER, "dr_pulley")
+    quads += rotors.prism("x", x + 0.25, x + 0.5, [(cy - 0.5, cz - 3.5), (cy + 0.5, cz - 3.5), (cy + 0.5, cz + 3.5),
+                                                   (cy - 0.5, cz + 3.5)], CHROME, CHROME)
+    return quads
+
+
+def coal_gasifier_still():
+    """The pulley standing still, for the item model only."""
+    x, cy, cz = GASIFIER_DRIVE
+    return cyl("x", cy, cz, 4, x - 0.5, x + 0.25, COPPER, "dr_pulley")
+
+
+def gas_cleanup_rack():
+    """Three wide, five deep and four tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a
+    steel skid carrying a scrubber column at the front, its blower fan (drawn turning by MachineRotors) under a guard on
+    its crown, and two separation towers at the back, joined by a pipe bridge: carbon monoxide on the right, hydrogen on
+    the left, each banded in its gas's colour and rising to a flange on top. The raw gas enters low on the left through a
+    valve; a residue drawer sits at the scrubber's foot; the control panel (the controller) stands at the front left and
+    the power socket on a junction box at the back. Each port is at the middle of its block's face."""
+    m = [box((-31, 0, 1), (15, 3, 79), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # Frame posts at the corners with a top rail, olive guards.
+    for x in (-30, 12):
+        for z in (2, 76):
+            m.append(box((x, 3, z), (x + 2, 52, z + 2), OLIVE))
+    for z in (2, 76):
+        m.append(box((-28, 50, z), (12, 52, z + 2), OLIVE))
+    # The scrubber column at the front middle, its cream lining bands, crown and the blower fan's guard ring.
+    m += cyl("y", -8, 24, 9, 3, 48, STAINLESS, CHROME)
+    for y in (14, 32):
+        m += cyl("y", -8, 24, 9.5, y, y + 2, CERAMIC)
+    m += cyl("y", -8, 24, 6, 48, 52, GUNMETAL)
+    m += octagon_ring("y", -8, 24, 6, 5, 52, 55, CHROME)
+    # The residue drawer at the scrubber's foot.
+    m.append(box((-13, 4, 13.5), (-3, 10, 15.5), {"*": GUNMETAL, "north": OLIVE}))
+    m.append(box((-10, 6.5, 12.75), (-6, 7.5, 13.5), CHROME))
+    # The two separation towers at the back: carbon monoxide on the right, hydrogen on the left.
+    for x, gas in ((-24, "carbon_monoxide_still"), (8, "hydrogen_still")):
+        m += cyl("y", x, 64, 6.5, 3, 58, STAINLESS, CHROME)
+        for y in (12, 30, 48):
+            m += cyl("y", x, 64, 7, y, y + 1.5, GUNMETAL)
+        m += cyl("y", x, 64, 7, 40, 42, gas)
+        m += cyl("y", x, 72, 2.5, 50, 63.25, RUBBER)
+        m.append(box((x - 3, 63.25, 69), (x + 3, 64, 75), {"*": CHROME, "up": f"{FLANGE}!"}))
+        m.append(box((x - 2.5, 50, 64), (x + 2.5, 54, 72), GUNMETAL))
+    # The pipe bridge from the scrubber to both towers.
+    m += cyl("z", -8, 44, 2, 30, 64, RUBBER)
+    m += cyl("x", 44, 64, 2, -24, 8, RUBBER)
+    # The raw gas inlet low on the left, its valve with a red handwheel.
+    m += cyl("x", 8, 40, 2.25, -2, 15.25, RUBBER)
+    m += cyl("x", 8, 40, 2.6, 11, 12, "raw_syngas_still")
+    m.append(box((4, 10, 38.5), (7, 11.5, 41.5), GUNMETAL))
+    m += cyl("y", 5.5, 40, 0.5, 11.5, 12.5, CHROME)
+    m += cyl("y", 5.5, 40, 2, 12.5, 13.25, HANDWHEEL)
+    m.append(box((15.25, 5, 37), (16, 11, 43), {"*": CHROME, "east": f"{FLANGE}!"}))
+    m += cyl("z", -2, 8, 1.5, 24, 40, RUBBER)
+    # The control panel (the controller) at the front left.
+    m.append(box((3, 3, 1), (11, 16, 7), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (7, 12, 0.75), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (5, 6.5, 0.75), 2, texture=LAMP, body=GUNMETAL))
+    m.append(dial("north", (9, 6.5, 0.75), 2, texture=MINT, body=GUNMETAL))
+    # The junction box at the back: its power socket and a hazard band.
+    m.append(box((-14, 3, 73), (-2, 14, 79.25), GUNMETAL))
+    m.append(box((-14.25, 14, 72.75), (-1.75, 15, 79.5), HAZARD))
+    m.append(box((-11, 5, 79.25), (-5, 11, 80), {"*": CHROME, "south": "power_port!"}))
+    return m
+
+
+def gas_cleanup_rack_rotor():
+    """The rack's blower fan on the scrubber's crown (client/MachineRotors draws it): a hub and five blades."""
+    import machine_rotors as rotors
+    cx, y, cz = RACK_FAN
+    quads = rotors.disc("y", y - 1, y + 1, cx, cz, 1.25, CHROME, CHROME)
+    for blade in range(5):
+        angle = math.radians(72 * blade)
+        c, s_ = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cx + r * c - w * s_, cz + r * s_ + w * c)
+        quads += rotors.prism("y", y - 0.5, y + 0.5, [at(1.6, -0.55), at(4.5, -1.5), at(4.5, 1.5), at(1.6, 0.55)], GUNMETAL, GUNMETAL)
+    return quads
+
+
+def gas_cleanup_rack_still():
+    """The fan standing still, for the item model only."""
+    cx, y, cz = RACK_FAN
+    return cyl("y", cx, cz, 4.5, y - 0.5, y + 0.5, GUNMETAL, "dr_fan") + cyl("y", cx, cz, 1.25, y - 1, y + 1, CHROME)
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -1266,16 +1526,28 @@ ROTORS = {
         "block": "anaerobic_digester", "axis": "z", "center": list(DIGESTER_COUPLING), "property": "lit", "speed": 3,
         "ease": 40, "always": True, "quads": anaerobic_digester_rotor(),
     },
+    # The Gasifier's feed drive, turning while it feeds.
+    "coal_gasifier_drive": {
+        "block": "coal_gasifier", "axis": "x", "center": list(GASIFIER_DRIVE), "property": "lit", "speed": 6,
+        "ease": 30, "always": True, "quads": coal_gasifier_rotor(),
+    },
+    # The rack's blower fan, running while it cleans.
+    "gas_cleanup_rack_fan": {
+        "block": "gas_cleanup_rack", "axis": "y", "center": list(RACK_FAN), "property": "lit", "speed": 18,
+        "ease": 30, "always": True, "quads": gas_cleanup_rack_rotor(),
+    },
 }
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
           "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer(),
           "industrial_fermenter": industrial_fermenter(), "bulk_chemical_reactor": bulk_chemical_reactor(),
-          "anaerobic_digester": anaerobic_digester()}
+          "anaerobic_digester": anaerobic_digester(), "coal_gasifier": coal_gasifier(),
+          "gas_cleanup_rack": gas_cleanup_rack()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
-               "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still()}
+               "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still(),
+               "coal_gasifier": coal_gasifier_still(), "gas_cleanup_rack": gas_cleanup_rack_still()}
 PARTICLE = "dp_olive"
 
 

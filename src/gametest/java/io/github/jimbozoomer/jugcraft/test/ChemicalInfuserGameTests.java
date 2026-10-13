@@ -187,6 +187,24 @@ public class ChemicalInfuserGameTests {
 		});
 	}
 
+	/**
+	 * With the bed, 100 mB of carbon monoxide from the gas cleanup rack and 300 mB of hydrogen give 100 mB of methane and
+	 * 200 mB of water (CO + 3 H2 -> CH4 + H2O), 150 ticks at 128 JE/t.
+	 */
+	@GameTest(maxTicks = 300)
+	public void theNickelBedTurnsCarbonMonoxideIntoMethane(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		machine.container().setItem(machine.form().firstSocketSlot(), stack("nickel_catalyst_bed"));
+		insert(helper, port(helper, machine, "hydrogen_in"), PetroFluids.HYDROGEN.fluid(), 300);
+		insert(helper, port(helper, machine, "reactant_in"), PetroFluids.CARBON_MONOXIDE.fluid(), 100);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(PRODUCT), PetroFluids.METHANE.fluid()) == 100
+					&& amount(machine.tanks().output(WATER), Fluids.WATER) == 200, "100 mB of methane and 200 mB of water");
+			helper.assertTrue(used(machine, supplied) == 150 * DRAW, "Paid " + used(machine, supplied) + " JE");
+		});
+	}
+
 	/** Without a bed, methane's gases wait and the screen names the bed socket; nothing is taken or spent. */
 	@GameTest(maxTicks = 60)
 	public void methanationWaitsForItsBed(GameTestHelper helper) {
@@ -269,12 +287,14 @@ public class ChemicalInfuserGameTests {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
 		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
-		helper.assertTrue(own.size() == 3 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_biogas_upgrading"))
+		helper.assertTrue(own.size() == 4 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_biogas_upgrading"))
 				&& own.get(0).recipe().time() == METHANATION_TICKS && own.get(0).recipe().tool().isPresent()
 				&& own.get(1).id().equals(Jugcraft.id("gas_synthesis/infuser_carbon_dioxide_methanation"))
 				&& own.get(1).recipe().time() == METHANATION_TICKS && own.get(1).recipe().tool().isPresent()
-				&& own.get(2).id().equals(Jugcraft.id("gas_synthesis/infuser_hydrogen_chloride")) && own.get(2).recipe().time() == TICKS
-				&& own.get(2).recipe().tool().isEmpty(), "Its three recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
+				&& own.get(2).id().equals(Jugcraft.id("gas_synthesis/infuser_carbon_monoxide_methanation"))
+				&& own.get(2).recipe().time() == 150 && own.get(2).recipe().tool().isPresent()
+				&& own.get(3).id().equals(Jugcraft.id("gas_synthesis/infuser_hydrogen_chloride")) && own.get(3).recipe().time() == TICKS
+				&& own.get(3).recipe().tool().isEmpty(), "Its four recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
 		long converter = FluidRecipes.recipes(level.getServer(), MachineKind.SYNTHESIS_CONVERTER).stream()
 				.filter(recipe -> recipe.fluidResults().stream().anyMatch(result -> result.fluid() == PetroFluids.HYDROGEN_CHLORIDE.fluid()))
 				.count();

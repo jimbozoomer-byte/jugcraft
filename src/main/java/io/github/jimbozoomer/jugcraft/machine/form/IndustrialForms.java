@@ -24,7 +24,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * Gas Burning Generator (docs/features/industrial-gas-burning-generator.md), Chemical Infuser
  * (docs/features/industrial-chemical-infuser.md), Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md),
  * Industrial Fermenter (docs/features/industrial-fermenter.md), Bulk Chemical Reactor
- * (docs/features/industrial-bulk-chemical-reactor.md) and Anaerobic Digester (docs/features/industrial-anaerobic-digester.md).
+ * (docs/features/industrial-bulk-chemical-reactor.md), Anaerobic Digester (docs/features/industrial-anaerobic-digester.md),
+ * Coal Gasifier and Gas Cleanup and Separation Rack (docs/features/industrial-coal-gasification.md).
  * Each form is also described in
  * tools/industrial_forms.py for its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form
  * shares the one controller block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when
@@ -45,6 +46,10 @@ public final class IndustrialForms {
 	public static final String CHLORIDE_LEACHING = "jugcraft:chloride_leaching";
 	/** Digesting organic waste in a sealed, stirred tank into raw biogas. */
 	public static final String ANAEROBIC_DIGESTION = "jugcraft:anaerobic_digestion";
+	/** Gasifying a carbon feed with steam into a dirty carbon monoxide and hydrogen mixture. */
+	public static final String COAL_GASIFICATION = "jugcraft:coal_gasification";
+	/** Cleaning and dividing a gas mixture into its gases. */
+	public static final String GAS_SEPARATION = "jugcraft:gas_separation";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
 	/** What the Infuser's bed socket holds: the nickel catalyst bed. */
@@ -238,6 +243,55 @@ public final class IndustrialForms {
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 3, 5, 0, FormSide.BACK)
 			.build();
 
+	/**
+	 * The Coal Gasifier: the selected earlier gas-production form of the chemical reactor family (its energy figures, the
+	 * plan's paid electrical heat), four wide, four deep and six tall in the expanded profile. The carbon feed goes in at
+	 * the side charging chute and water low on the left; raw syngas leaves at the header flange high on the right.
+	 */
+	public static final MachineForm COAL_GASIFIER_FORM = MachineForm.builder(Jugcraft.id("coal_gasifier"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C###", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.layer("####", "####", "####", "####")
+			.profile(OperatingProfile.EXPANDED)
+			.inputTank("water")
+			.outputTank("product")
+			.items(1, 0)
+			.capability(COAL_GASIFICATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 1, 2, FormSide.LEFT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 3, 0, FormSide.LEFT)
+			.port("syngas_out", FormPort.Kind.FLUID_OUT, 0, 3, 2, 5, FormSide.RIGHT)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 2, 3, 0, FormSide.BACK)
+			.build();
+
+	/**
+	 * The Gas Cleanup and Separation Rack: the selected combined cleanup and separation form of the synthesis family (the
+	 * Infuser's energy figures), three wide, five deep and four tall. Raw syngas goes in low on the left; carbon monoxide
+	 * and hydrogen leave at the tops of their towers at the back.
+	 */
+	public static final MachineForm GAS_CLEANUP_RACK_FORM = MachineForm.builder(Jugcraft.id("gas_cleanup_rack"),
+					MachineKind.SYNTHESIS_CONVERTER)
+			.layer("C##", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("feed")
+			.outputTank("product")
+			.outputTank("hydrogen")
+			.capability(GAS_SEPARATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.FLUID_IN, 0, 0, 2, 0, FormSide.LEFT)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 2, 4, 3, FormSide.TOP)
+			.port("hydrogen_out", FormPort.Kind.FLUID_OUT, 1, 0, 4, 3, FormSide.TOP)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 1, 4, 0, FormSide.BACK)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
@@ -245,6 +299,8 @@ public final class IndustrialForms {
 	public static FormMachineBlock INDUSTRIAL_FERMENTER;
 	public static FormMachineBlock BULK_CHEMICAL_REACTOR;
 	public static FormMachineBlock ANAEROBIC_DIGESTER;
+	public static FormMachineBlock COAL_GASIFIER;
+	public static FormMachineBlock GAS_CLEANUP_RACK;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	private IndustrialForms() {
@@ -258,8 +314,10 @@ public final class IndustrialForms {
 		INDUSTRIAL_FERMENTER = block("industrial_fermenter", INDUSTRIAL_FERMENTER_FORM);
 		BULK_CHEMICAL_REACTOR = block("bulk_chemical_reactor", BULK_CHEMICAL_REACTOR_FORM);
 		ANAEROBIC_DIGESTER = block("anaerobic_digester", ANAEROBIC_DIGESTER_FORM);
+		COAL_GASIFIER = block("coal_gasifier", COAL_GASIFIER_FORM);
+		GAS_CLEANUP_RACK = block("gas_cleanup_rack", GAS_CLEANUP_RACK_FORM);
 		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER,
-				INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER);
+				INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

@@ -134,6 +134,12 @@ GASES = {
     # grey-green.
     "biogas": {"display": "Biogas", "feature": "machines",
                "colors": [(128, 140, 118), (156, 168, 144), (184, 194, 170), (214, 222, 202)]},
+    # The Coal Gasifier's dirty mixture of carbon monoxide and hydrogen, before the cleanup rack. A smoky brown-grey.
+    "raw_syngas": {"display": "Raw Syngas", "feature": "machines",
+                   "colors": [(96, 88, 80), (124, 116, 106), (154, 146, 134), (188, 182, 170)]},
+    # Carbon monoxide separated from it: methanation's second carbon feed. A faint grey-violet.
+    "carbon_monoxide": {"display": "Carbon Monoxide", "feature": "machines",
+                        "colors": [(138, 134, 156), (166, 162, 184), (194, 190, 210), (226, 224, 238)]},
 }
 
 

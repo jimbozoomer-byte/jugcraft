@@ -3946,6 +3946,54 @@
           }
         },
         {
+          "title": "Coal Gasifier",
+          "icon": "jugcraft:coal_gasifier",
+          "text": [
+            "Four wide, four deep and six tall: a tall lined reaction column over a broad ash chamber, with a charging chute on its left side and a gas header high on its right, built from steel plates, bricks, a furnace, a steel fluid pipe and a Machine Casing. Every block it fills must be free when it is placed. It runs two batches at once.",
+            "Drop coal or coal coke into the charging chute and pipe water into the inlet low on its left side. Each piece and 500 mB of water (as steam) become 500 mB of raw syngas (half carbon monoxide, half hydrogen) in ten seconds, which leaves at the header flange high on its right. Charcoal gives 400 mB from 400 mB of water.",
+            "Raw syngas is dirty: the Gas Cleanup and Separation Rack divides it into carbon monoxide and hydrogen."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:brick",
+              "jugcraft:steel_plate",
+              "minecraft:furnace",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "minecraft:brick",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:coal_gasifier",
+            "count": 1
+          }
+        },
+        {
+          "title": "Gas Cleanup and Separation Rack",
+          "icon": "jugcraft:gas_cleanup_rack",
+          "text": [
+            "Three wide, five deep and four tall: a scrubber column and two separation towers on a steel skid, built from steel plates, a Steel Tank, two Tinplate Tanks, an electric motor and a basic circuit. Every block it fills must be free when it is placed.",
+            "Pipe raw syngas into the inlet low on its left side. 500 mB of it is cleaned and divided into 250 mB of carbon monoxide (the tower at the back on the right) and 250 mB of hydrogen (the tower at the back on the left) in five seconds at 128 JE/t.",
+            "Carbon monoxide becomes methane in the Chemical Infuser with its Nickel Catalyst Bed: 100 mB of it and 300 mB of hydrogen give 100 mB of methane and 200 mB of water."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:fluid_tank",
+              "jugcraft:electric_motor",
+              "jugcraft:fluid_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:gas_cleanup_rack",
+            "count": 1
+          }
+        },
+        {
           "title": "Fuel Cell",
           "icon": "jugcraft:fuel_cell",
           "text": [
