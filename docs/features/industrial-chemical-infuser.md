@@ -1,6 +1,6 @@
 # Chemical Infuser (factory package 2, third slice)
 
-Status: implemented (pending CI and review). Built on the [shared machine foundation](industrial-machine-foundation.md), after the [Electrolytic Separator](industrial-electrolytic-separator.md) and [Gas Burning Generator](industrial-gas-burning-generator.md).
+Status: implemented (CI green on the contributor's fork; pending review). Built on the [shared machine foundation](industrial-machine-foundation.md), after the [Electrolytic Separator](industrial-electrolytic-separator.md) and [Gas Burning Generator](industrial-gas-burning-generator.md).
 Proposal issue: none. The next unchecked item of package 2, "Starter steel chemistry", in the owner's [factory implementation plan (PR #302)](https://github.com/jimbozoomer-byte/jugcraft/pull/302) and the [TODO list](../TODO.md#industrial-machine-models-textures-and-dimensions). Its construction bill, the hydrogen chloride quantities and the 9,600 JE batch budget are the proposals in the [starter gas and acid factory](industrial-starter-gas-and-acid-factory.md); its look is the [art brief](industrial-machine-models-and-textures.md#chemical-infuser).
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era chemistry, the gas-reaction machine of the starter gas and acid factory
@@ -91,7 +91,14 @@ For CI:
 
 ### Results
 
-Pending: no Gradle build, game test or in-game look has run on this change yet.
+- **Run [38294467085](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38294467085) on the contributor's fork (commit 618e3638): green.**
+  - Everything compiled. "All 1384 required tests passed", the five new Infuser tests among them; the build without optional integrations passed too.
+  - All five client test jobs passed, every client test class included, with no model or loading errors.
+  - Screenshots, looked at in the job's previews:
+    - `jugcraft_chemical_infuser`, `_front`, `_back`: the whole machine on its plinth from the front left, straight on and the back right. The olive lower body and drawer, the ceramic collar, the inspection port and gauge, both inlet branches with their handwheels, the ribbed cooling jacket with its fan shroud and the junction box all render, matching the offline drawing;
+    - `_night`: the same view at midnight, the machine working;
+    - `_screen`: "Processing", 28%, power 56k/60k, batches 1/1, with hydrogen and chlorine in their tanks;
+    - `_product_full`: "Output blocked" over "Product gas tank is full".
 
 No survival playtest, two-client test or performance measurement has been done.
 
