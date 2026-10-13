@@ -3908,7 +3908,8 @@
             "Pipe water into the inlet on its left side and hydrogen chloride from the Chemical Infuser into the short absorption inlet on its lid: 500 mB of the gas dissolves in a bucket of water into a bucket of hydrochloric acid in five seconds, which leaves at the outlet low at the front.",
             "Hydrochloric acid leaches ore like sulfuric acid: drop an ore into the hatch on its lid, pipe 250 mB of the acid into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace, in four seconds: two at a time, four times as fast as the Chemical Reactor leaches.",
             "Sulfur trioxide from the Chemical Infuser dissolves in water here: 250 mB of it in 750 mB of water make a bucket of sulfuric acid, twice the acid a sulfur dust gives in the Chemical Reactor.",
-            "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and high-explosive rockets in place of guncotton."
+            "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and high-explosive rockets in place of guncotton.",
+            "Eight washed nickel ores in the hatch, a bucket of hydrochloric acid and 250 mB of chlorine leave one ruthenium powder in twenty seconds: the metal of the Chemical Infuser's faster methanation bed."
           ],
           "craft": {
             "grid": [
@@ -4202,7 +4203,8 @@
           "text": [
             "Two wide, three deep and three tall: a stepped reaction chamber with an inlet on each shoulder, a catalyst-bed drawer at its foot and a cooling jacket behind, built from steel plates, two steel fluid pipes, a Tinplate Tank, copper cable and a basic circuit. Every block it fills must be free when it is placed.",
             "Pipe hydrogen into the left inlet and chlorine into the right. 250 mB of each burn together into 500 mB of hydrogen chloride in under four seconds, which leaves at the top collar at the back. It draws 128 JE/t through the socket low on the right side at the back.",
-            "With a Nickel Catalyst Bed in its bed socket it makes methane: 400 mB of hydrogen and 100 mB of carbon dioxide (the right inlet) give 100 mB of methane at the top collar and 400 mB of water at the drain below it in ten seconds. The bed is never used up. Its screen says what it is waiting for, and upgrade cards fit its terminal."
+            "With a Nickel Catalyst Bed in its bed socket it makes methane: 400 mB of hydrogen and 100 mB of carbon dioxide (the right inlet) give 100 mB of methane at the top collar and 400 mB of water at the drain below it in ten seconds. The bed is never used up. Its screen says what it is waiting for, and upgrade cards fit its terminal.",
+            "A Ruthenium Catalyst Bed (ruthenium powder from the Bulk Chemical Reactor, laid on a nickel bed) does every methanation in half the time and for half the energy, from the same gases."
           ],
           "craft": {
             "grid": [

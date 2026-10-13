@@ -56,6 +56,8 @@ CONTACT_CONVERSION = f"{MOD}:contact_conversion"
 VANADIUM_RECOVERY = f"{MOD}:vanadium_recovery"
 # Neutralizing nitric acid with ammonia into solid ammonium nitrate (the Bulk Chemical Reactor).
 NITRATE_NEUTRALIZATION = f"{MOD}:nitrate_neutralization"
+# Recovering the ruthenium bed's metal from washed nickel ore (the Bulk Chemical Reactor).
+PRECIOUS_METAL_RECOVERY = f"{MOD}:precious_metal_recovery"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
@@ -256,7 +258,8 @@ FORMS = {
         "output_tanks": ["product"],
         "item_inputs": 1,
         "item_outputs": 1,
-        "capabilities": [ACID_ABSORPTION, CHLORIDE_LEACHING, VANADIUM_RECOVERY, NITRATE_NEUTRALIZATION],
+        "capabilities": [ACID_ABSORPTION, CHLORIDE_LEACHING, VANADIUM_RECOVERY, NITRATE_NEUTRALIZATION,
+                         PRECIOUS_METAL_RECOVERY],
         "upgrades": True,
         "warmup": 40,
         "ports": [
@@ -449,6 +452,8 @@ HANDBOOK = {
         "dioxide (the right inlet) give 100 mB of methane at the top collar and 400 mB of water at the drain below it "
         "in ten seconds. The bed is never used up. Its screen says what it is waiting for, and upgrade cards fit its "
         "terminal.",
+        "A Ruthenium Catalyst Bed (ruthenium powder from the Bulk Chemical Reactor, laid on a nickel bed) does every "
+        "methanation in half the time and for half the energy, from the same gases.",
     ],
     "industrial_fermenter": [
         "Three wide, three deep and four tall: a tall stirred vessel on four legs, built from steel plates, a Steel Tank, "
@@ -489,6 +494,8 @@ HANDBOOK["bulk_chemical_reactor"] = [
     "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of "
     "ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and "
     "high-explosive rockets in place of guncotton.",
+    "Eight washed nickel ores in the hatch, a bucket of hydrochloric acid and 250 mB of chlorine leave one ruthenium "
+    "powder in twenty seconds: the metal of the Chemical Infuser's faster methanation bed.",
 ]
 
 HANDBOOK["anaerobic_digester"] = [
@@ -621,6 +628,20 @@ FORM_RECIPES = {
         {"name": "infuser_biogas_upgrading", "capability": NICKEL_METHANATION, "tool": f"{MOD}:nickel_catalyst_bed",
          "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:biogas", 250)],
          "fluid_results": [(f"{MOD}:methane", 250, 0), ("minecraft:water", 400, 1)], "ticks": 200, "features": ["machines"]},
+        # The owner's optional ruthenium improvement: the same three methanations over the ruthenium bed, the same gases
+        # in and out (a catalyst never makes more methane than its charge), in half the time and so half the energy.
+        {"name": "infuser_ruthenium_carbon_dioxide_methanation", "capability": NICKEL_METHANATION,
+         "tool": f"{MOD}:ruthenium_catalyst_bed", "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:carbon_dioxide", 100)],
+         "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 400, 1)], "ticks": 100,
+         "features": ["machines", "nickel"]},
+        {"name": "infuser_ruthenium_carbon_monoxide_methanation", "capability": NICKEL_METHANATION,
+         "tool": f"{MOD}:ruthenium_catalyst_bed", "fluids": [(f"{MOD}:hydrogen", 300), (f"{MOD}:carbon_monoxide", 100)],
+         "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 200, 1)], "ticks": 75,
+         "features": ["machines", "nickel"]},
+        {"name": "infuser_ruthenium_biogas_upgrading", "capability": NICKEL_METHANATION,
+         "tool": f"{MOD}:ruthenium_catalyst_bed", "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:biogas", 250)],
+         "fluid_results": [(f"{MOD}:methane", 250, 0), ("minecraft:water", 400, 1)], "ticks": 100,
+         "features": ["machines", "nickel"]},
     ],
     "anaerobic_digester": [
         # Organic waste digested (this change's proposal): sixteen items and a bucket of water make a bucket of raw biogas
@@ -663,6 +684,12 @@ FORM_RECIPES = {
         {"name": "bulk_ammonium_nitrate", "capability": NITRATE_NEUTRALIZATION,
          "fluids": [(f"{MOD}:nitric_acid", 250), (f"{MOD}:ammonia", 125)],
          "results": [(f"{MOD}:ammonium_nitrate", 4)], "ticks": 100, "features": ["salt", "machines"]},
+        # Ruthenium for the faster methanation bed (this change's proposal): the platinum-group metals ride along in nickel
+        # ores. Eight washed nickel ores dissolved in a bucket of hydrochloric acid under 250 mB of chlorine leave one
+        # ruthenium powder; the nickel itself is spent. 400 ticks at 96 JE/t.
+        {"name": "bulk_ruthenium_powder", "capability": PRECIOUS_METAL_RECOVERY, "items": [(f"{MOD}:washed_nickel_ore", 8)],
+         "fluids": [(f"{MOD}:hydrochloric_acid", 1000), (f"{MOD}:chlorine", 250)],
+         "results": [(f"{MOD}:ruthenium_powder", 1)], "ticks": 400, "features": ["salt", "nickel"]},
     ],
     "coal_gasifier": [
         # Steam gasification (this change's proposal for the pending carbon ledger): a coal or coke counts as 250 reaction
@@ -1947,7 +1974,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     lang[f"container.{MOD}.form.socket.bed"] = "Catalyst bed"
     # The Infuser's bed socket holds the nickel catalyst bed: the owner's selected one nickel ingot on two ordinary fired
     # bricks (docs/features/industrial-starter-gas-and-acid-factory.md), made once and never used up.
-    write(data / "tags" / "item" / f"{CATALYST_BEDS}.json", {"values": [f"{MOD}:nickel_catalyst_bed", f"{MOD}:vanadium_contact_bed"]})
+    write(data / "tags" / "item" / f"{CATALYST_BEDS}.json", {"values": [f"{MOD}:nickel_catalyst_bed", f"{MOD}:vanadium_contact_bed",
+                                                                        f"{MOD}:ruthenium_catalyst_bed"]})
     # The vanadium contact bed: the owner's selected reusable vanadium-oxide/ceramic bed, its oxide on two fired bricks
     # like the nickel bed, made once and never used up.
     write(data / "recipe" / "vanadium_contact_bed.json", {
@@ -1967,6 +1995,12 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "type": "minecraft:crafting_shaped", "category": "building", "pattern": ["RRR", "RBR", "RRR"],
         "key": {"R": f"{MOD}:gasification_residue", "B": f"{MOD}:asphalt_binder"},
         "result": {"id": f"{MOD}:asphalt", "count": 8}})
+    # The ruthenium bed: the recovered ruthenium laid on an existing nickel bed, made once and never used up.
+    write(data / "recipe" / "ruthenium_catalyst_bed.json", {
+        "fabric:load_conditions": condition("machines") + condition("nickel"),
+        "type": "minecraft:crafting_shapeless", "category": "misc",
+        "ingredients": [f"{MOD}:nickel_catalyst_bed", f"{MOD}:ruthenium_powder"],
+        "result": {"id": f"{MOD}:ruthenium_catalyst_bed", "count": 1}})
     # What the Anaerobic Digester takes: the fermentable crops and farm and kitchen waste.
     write(data / "tags" / "item" / f"{DIGESTIBLE}.json", {"values": [
         f"#{MOD}:fermentable", "minecraft:rotten_flesh", "minecraft:poisonous_potato", "minecraft:kelp",

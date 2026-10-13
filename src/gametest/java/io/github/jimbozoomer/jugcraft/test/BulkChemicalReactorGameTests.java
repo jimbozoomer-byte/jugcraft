@@ -245,6 +245,33 @@ public class BulkChemicalReactorGameTests {
 		});
 	}
 
+	/**
+	 * Ruthenium for the faster methanation bed: eight washed nickel ores in a bucket of hydrochloric acid under 250 mB of
+	 * chlorine leave one ruthenium powder at the chute, and the powder on a nickel bed crafts the ruthenium bed.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 600)
+	public void washedNickelOreGivesRuthenium(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
+		supply(helper, machine);
+		try (Transaction transaction = Transaction.openOuter()) {
+			itemPort(helper, machine, "feed_in").insert(ItemVariant.of(item("washed_nickel_ore")), 8, transaction);
+			transaction.commit();
+		}
+		machine.tanks().input(0).fill(PetroFluids.HYDROCHLORIC_ACID.source(), 1000);
+		machine.tanks().input(1).fill(PetroFluids.CHLORINE.fluid(), 250);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0
+					&& machine.tanks().input(1).millibuckets() == 0, "The acid and the chlorine used");
+			helper.assertTrue(extractItems(helper, itemPort(helper, machine, "items_out"), item("ruthenium_powder")) == 1,
+					"A ruthenium powder leaves at the chute");
+			RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+			CraftingInput bed = CraftingInput.of(2, 1, List.of(stack("nickel_catalyst_bed"), stack("ruthenium_powder")));
+			Optional<RecipeHolder<CraftingRecipe>> built = crafting.getRecipeFor(bed, helper.getLevel());
+			helper.assertTrue(built.isPresent() && built.get().value().assemble(bed).is(item("ruthenium_catalyst_bed")),
+					"The powder on a nickel bed makes the ruthenium bed");
+		});
+	}
+
 	/** While it works every part shows lit, but only the controller gives off light; paused, it goes dark. */
 	@GameTest(structure = ARENA, maxTicks = 200)
 	public void everyPartLightsWhileItWorks(GameTestHelper helper) {

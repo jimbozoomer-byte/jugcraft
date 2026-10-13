@@ -7468,6 +7468,81 @@
           ],
           "results": [],
           "ticks": 200
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              400
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              300
+            ],
+            [
+              "jugcraft:carbon_monoxide",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              200
+            ]
+          ],
+          "results": [],
+          "ticks": 75
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              400
+            ],
+            [
+              "jugcraft:biogas",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              250
+            ],
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 100
         }
       ]
     },
@@ -7641,6 +7716,32 @@
             ]
           ],
           "ticks": 100
+        },
+        {
+          "items": [
+            [
+              "jugcraft:washed_nickel_ore",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:hydrochloric_acid",
+              1000
+            ],
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ruthenium_powder",
+              1
+            ]
+          ],
+          "ticks": 400
         },
         {
           "items": [

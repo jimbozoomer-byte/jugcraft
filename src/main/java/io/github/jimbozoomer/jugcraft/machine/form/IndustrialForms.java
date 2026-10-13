@@ -57,6 +57,8 @@ public final class IndustrialForms {
 	public static final String VANADIUM_RECOVERY = "jugcraft:vanadium_recovery";
 	/** Neutralizing nitric acid with ammonia into solid ammonium nitrate. */
 	public static final String NITRATE_NEUTRALIZATION = "jugcraft:nitrate_neutralization";
+	/** Recovering ruthenium from washed nickel ore with hydrochloric acid and chlorine. */
+	public static final String PRECIOUS_METAL_RECOVERY = "jugcraft:precious_metal_recovery";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
 	/** What the Infuser's bed socket holds: the nickel catalyst bed and the vanadium contact bed. */
@@ -215,6 +217,7 @@ public final class IndustrialForms {
 			.capability(CHLORIDE_LEACHING)
 			.capability(VANADIUM_RECOVERY)
 			.capability(NITRATE_NEUTRALIZATION)
+			.capability(PRECIOUS_METAL_RECOVERY)
 			.upgrades()
 			.warmup(40)
 			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 1, 1, 3, FormSide.TOP)

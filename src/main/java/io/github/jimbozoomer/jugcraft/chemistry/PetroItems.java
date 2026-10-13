@@ -47,6 +47,8 @@ public final class PetroItems {
 	public static Item VANADIUM_PENTOXIDE;
 	public static Item GASIFICATION_RESIDUE;
 	public static Item AMMONIUM_NITRATE;
+	public static Item RUTHENIUM_POWDER;
+	public static Item RUTHENIUM_CATALYST_BED;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -82,6 +84,8 @@ public final class PetroItems {
 		// A nitrogen fertilizer: superphosphate's 5x5 area, three doses a crop instead of two.
 		AMMONIUM_NITRATE = JugcraftRegistry.item("ammonium_nitrate",
 				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
+		RUTHENIUM_POWDER = JugcraftRegistry.item("ruthenium_powder");
+		RUTHENIUM_CATALYST_BED = JugcraftRegistry.item("ruthenium_catalyst_bed", properties -> new Item(properties.stacksTo(1)));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -102,6 +106,8 @@ public final class PetroItems {
 			output.accept(VANADIUM_PENTOXIDE);
 			output.accept(GASIFICATION_RESIDUE);
 			output.accept(AMMONIUM_NITRATE);
+			output.accept(RUTHENIUM_POWDER);
+			output.accept(RUTHENIUM_CATALYST_BED);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
