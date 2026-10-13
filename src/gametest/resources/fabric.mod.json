@@ -12,6 +12,7 @@
 		],
 		"fabric-gametest": [
             "io.github.jimbozoomer.jugcraft.test.AnaerobicGameTests",
+            "io.github.jimbozoomer.jugcraft.test.BiorefineryGameTests",
             "io.github.jimbozoomer.jugcraft.test.EncyclopediaGameTests",
             "io.github.jimbozoomer.jugcraft.test.AcidFactoryGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MachineConnectionGameTests",
@@ -182,6 +183,7 @@
 		],
 		"fabric-client-gametest": [
             "io.github.jimbozoomer.jugcraft.test.AnaerobicClientGameTests",
+            "io.github.jimbozoomer.jugcraft.test.BiorefineryClientGameTests",
             "io.github.jimbozoomer.jugcraft.test.EncyclopediaClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorClientGameTests",

@@ -154,6 +154,13 @@ public final class PetroFluids {
 	public static Gas SULFUR_TRIOXIDE;
 	public static Gas DIRTY_SYNTHESIS_GAS;
 
+	public static Entry GRAIN_MASH;
+	public static Entry ETHANOL_BROTH;
+	public static Entry STILLAGE;
+	public static Entry ALUMINATE_SLURRY;
+
+	public static Gas FERMENTATION_EXHAUST;
+
 	private PetroFluids() {
 	}
 
@@ -224,6 +231,13 @@ public final class PetroFluids {
 		DIGESTATE = fluid("digestate", 12, 2, 2, 0xFF5D4E2F, MapColor.COLOR_BROWN);
 		RAW_BIOGAS = gas("raw_biogas", 0xFF697446);
 		CLEAN_BIOGAS = gas("clean_biogas", 0xFF76965E);
+
+		GRAIN_MASH = fluid("grain_mash", 8, 3, 1, 0xFF77552B, MapColor.COLOR_BROWN);
+		ETHANOL_BROTH = fluid("ethanol_broth", 8, 3, 1, 0xFF8B7240, MapColor.COLOR_BROWN);
+		STILLAGE = fluid("stillage", 8, 3, 1, 0xFF5E452A, MapColor.COLOR_BROWN);
+		ALUMINATE_SLURRY = fluid("aluminate_slurry", 8, 3, 1, 0xFF7D452E, MapColor.COLOR_BROWN);
+
+		FERMENTATION_EXHAUST = gas("fermentation_exhaust", 0xFF928C76);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

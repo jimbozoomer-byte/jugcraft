@@ -78,6 +78,7 @@ public final class MachineForm {
 	private final boolean upgrades;
 	private final int warmupTicks;
 	private final int waterDrainOutput;
+	private final @Nullable Identifier ventGas;
 	private final List<FormFuel> fuels;
 
 	private MachineForm(Builder builder) {
@@ -88,6 +89,7 @@ public final class MachineForm {
 		this.upgrades = builder.upgrades;
 		this.warmupTicks = builder.warmup;
 		this.waterDrainOutput = builder.waterDrainOutput;
+		this.ventGas = builder.ventGas;
 		if (waterDrainOutput < -1 || waterDrainOutput >= builder.outputTanks.size()) {
 			throw invalid("has no output tank for its water drain");
 		}
@@ -508,8 +510,9 @@ public final class MachineForm {
 	 * Paid ticks at the start of a batch begun from cold that the machine reports as warming. The owner chose heating
 	 * included in the processing power: warming is part of a batch's paid work, never an extra charge.
 	 */
-	/** Output that may drain excess plain water; -1 means every output must be retained. */
+	/** Overflow output: plain water, or the exact gas declared by ventGas; -1 retains every output. */
 	public int waterDrainOutput() { return waterDrainOutput; }
+	public @Nullable Identifier ventGas() { return ventGas; }
 
 	public int warmupTicks() {
 		return warmupTicks;
@@ -537,6 +540,7 @@ public final class MachineForm {
 		private boolean upgrades;
 		private int warmup;
 		private int waterDrainOutput = -1;
+		private @Nullable Identifier ventGas;
 		private final List<FormFuel> fuels = new ArrayList<>();
 
 		private Builder(Identifier id, MachineKind family) {
@@ -594,6 +598,12 @@ public final class MachineForm {
 
 		public Builder upgrades() {
 			this.upgrades = true;
+			return this;
+		}
+
+		public Builder gasVentOutput(int output, Identifier gas) {
+			this.waterDrainOutput = output;
+			this.ventGas = java.util.Objects.requireNonNull(gas);
 			return this;
 		}
 

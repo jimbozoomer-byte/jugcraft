@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:bauxite_digester"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_bauxite_digester.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_bauxite_digester.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:bauxite_digester"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

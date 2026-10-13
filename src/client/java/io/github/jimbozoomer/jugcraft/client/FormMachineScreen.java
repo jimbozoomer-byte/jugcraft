@@ -58,13 +58,17 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		this.theme = MachineScreenThemes.of(menu.form().family());
 	}
 
+	private String overflowKey(String suffix) {
+		return "container.jugcraft.form." + (menu.form().ventGas() == null ? "drain_" : "vent_") + suffix;
+	}
+
 	@Override
 	protected void init() {
 		super.init();
 		if (menu.form().waterDrainOutput() >= 0) {
-			drainButton = addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.drain_on"),
+			drainButton = addRenderableWidget(Button.builder(Component.translatable(overflowKey("on")),
 					button -> click(FormMachineBlockEntity.BUTTON_DRAIN)).bounds(leftPos + SCREEN_X, topPos + 143, 74, 14).build());
-			drainButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("container.jugcraft.form.drain_hint")));
+			drainButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable(overflowKey("hint"))));
 		}
 		titleLabelX = (BAY_WIDTH - font.width(title)) / 2;
 		pauseButton = addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.pause"),
@@ -80,7 +84,7 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		super.containerTick();
 		if (drainButton != null) {
 			drainButton.setMessage(Component.translatable(menu.data(FormMachineBlockEntity.DATA_DRAIN) != 0
-					? "container.jugcraft.form.drain_on" : "container.jugcraft.form.drain_off"));
+					? overflowKey("on") : overflowKey("off")));
 		}
 	}
 

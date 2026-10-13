@@ -257,7 +257,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		if (form.waterDrainOutput() >= 0) { drainWater = !drainWater; setChanged(); }
 	}
 	private boolean mayDrain(int output, Fluid fluid, boolean enabled) {
-		return enabled && output == form.waterDrainOutput() && fluid == Fluids.WATER;
+		return enabled && output == form.waterDrainOutput()
+				&& (form.ventGas() == null ? fluid == Fluids.WATER : form.ventGas().equals(net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluid)));
 	}
 
 	public boolean paused() {
@@ -729,6 +730,9 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			int retained = mayDrain(part.tank(), part.fluid().getFluid(), lane.drainWater())
 					? Math.min(part.mb(), Math.max(0, tank.capacityMb() - tank.millibuckets() - reservedMb(part.tank()))) : part.mb();
 			drainedWater += Math.min(Long.MAX_VALUE - drainedWater, part.mb() - retained);
+			if (form.ventGas() != null) {
+				processEmissions = Math.min(0xFFFF_FFFFL, processEmissions + part.mb() - retained);
+			}
 			tank.amount += (long) retained * FluidNetworks.DROPLETS_PER_MB;
 		}
 		for (WorkLane.ItemPart part : lane.itemResults()) {

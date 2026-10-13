@@ -2958,6 +2958,17 @@ def check_industrial_forms():
             described = info.get(key, []) if key == "fuels" else info[key]
             if [tuple(item) for item in described] != [tuple(item) for item in built] if key == "fuels" else described != built:
                 err(f"{form}: {key} is {built} in IndustrialForms.java but {described} in tools/industrial_forms.py")
+        vents = re.findall(r'\.gasVentOutput\((\d+), Jugcraft\.id\("(\w+)"\)\)', body)
+        actual_vent = (int(vents[0][0]), f"{MOD}:{vents[0][1]}") if len(vents) == 1 else None
+        if len(vents) > 1 or actual_vent != info.get("gas_vent"):
+            err(f"{form}: Java gas overflow must match its declared output and exact gas")
+        if actual_vent is not None:
+            output, gas = actual_vent
+            if not 0 <= output < len(info["output_tanks"]) or gas not in {f"{MOD}:{g}" for g in petro.GASES}:
+                err(f"{form}: overflow must target a real output and registered gas, never a liquid")
+            for row in industrial_forms.FORM_RECIPES.get(form, []):
+                if any(petro.result_tank(i, r) == output and r[0] != gas for i, r in enumerate(row.get("fluid_results", []))):
+                    err(f"{form}: declared gas overflow disagrees with a recipe product")
         if profiles.get(info["profile"]) != info["tank_mb"]:
             err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
         parts = len(industrial_forms.footprint(info["layers"]))

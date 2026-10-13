@@ -66,6 +66,10 @@ def build():
         '16 farm items + 1000 mB water become 1000 mB raw 60/40 methane/CO2 biogas and 750 mB digestate. Clean the gas with 250 mB water; combine its 250 mB wash digestate with the main residue. The separator recovers 750 mB water and one fiber. Eight fibers craft Fertilizer. Collect every outlet: full tanks stop the line.',
         'Burn cleaned biogas in the Bio-Generator at 64 JE/t. Existing bioethanol also works. Reuse the Chemical Infuser and nickel bed to upgrade biogas with hydrogen into pure methane; collect its water or use its existing excess-water drain. Pure methane feeds the higher-output Gas Burning Generator.',
         'Existing pipes, gas cylinders, tanks, cables and conveyors handle the line. Search a machine name for exact port locations and recipes. This guide records game balance, not real industrial procedures.']))
+    overviews.insert(2,('biorefinery','Crops to fuel and bauxite to aluminum','jugcraft:industrial_fermenter',[
+        'Fuel route: Heated Mashing Station -> Industrial Fermenter -> Chemical Distillation Station -> existing Bio-Generator or compatible engines. Stillage feeds the Anaerobic Digester. Optional wet CO2 cleanup in the Biogas Cleaner supplies methane synthesis; fermentation keeps running with excess gas venting unless you select Keep gas.',
+        'Aluminum route: Bauxite Digestion Vessel -> Aluminate Recovery Press -> Alumina Calciner -> Aluminum Reduction Cell. Recover 200 of 250 mB lye per bauxite, return the press and calciner water, and bind residue into game construction filler. Each bauxite still yields two ingots; electrolysis consumes coke. Copper and steel build the first machines.',
+        'Search each machine for precise recipes and visible port positions. The earlier reactor recipes and aluminum consumers remain compatible. Fuel dehydration, larger plants and new aluminum alloys/products are later expansions.']))
     for key,title,icon,text in reversed(overviews):
         entries.insert(0,dict(id='guide/'+key,group='Home',chapter='Start here',gate='',page=dict(title=title,icon=icon,text=text)))
     return dict(version=1,entries=entries)
@@ -78,6 +82,8 @@ def write_content(write,assets,data,lang):
     book=build();goals=[]
     acquire={"chemical_infuser":"Chemical Infuser", "chemical_oxidizer":"Chemical Oxidizer", "coal_gasifier":"Coal Gasifier", "gas_cleaning_rack":"Gas Cleaning and Separation Rack", "hydrochloric_acid_bucket":"Hydrochloric Acid"}
     import anaerobic
+    import biorefinery
+    acquire.update({name:info['display'] for name,info in biorefinery.FORMS.items()})
     acquire.update({name:info['display'] for name,info in anaerobic.FORMS.items()})
     for item,title in acquire.items():
         lang[f'advancements.jugcraft.encyclopedia_{item}.title']=title

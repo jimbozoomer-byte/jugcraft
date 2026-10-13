@@ -7758,6 +7758,29 @@
           "ticks": 400,
           "tool": "",
           "energy_per_tick": 32
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:stillage",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:raw_biogas",
+              250
+            ],
+            [
+              "jugcraft:digestate",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 300,
+          "tool": "",
+          "energy_per_tick": 24
         }
       ]
     },
@@ -7784,6 +7807,33 @@
             ],
             [
               "jugcraft:digestate",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 24
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:fermentation_exhaust",
+              250
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ],
+            [
+              "minecraft:water",
               250
             ]
           ],
@@ -7821,6 +7871,230 @@
           "ticks": 100,
           "tool": "",
           "energy_per_tick": 16
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:mashing_station",
+      "type": "mashing_station",
+      "recipes": [
+        {
+          "items": [
+            [
+              "#jugcraft:fermentable",
+              16
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:grain_mash",
+              1250
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 24
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:industrial_fermenter",
+      "type": "industrial_fermenter",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:grain_mash",
+              1250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethanol_broth",
+              1000
+            ],
+            [
+              "jugcraft:fermentation_exhaust",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 8
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:chemical_distillation_station",
+      "type": "chemical_distillation_station",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ethanol_broth",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:bioethanol",
+              500
+            ],
+            [
+              "jugcraft:stillage",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 32
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:bauxite_digester",
+      "type": "bauxite_digester",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:bauxite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              250
+            ],
+            [
+              "minecraft:water",
+              750
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:aluminate_slurry",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:aluminate_filter_press",
+      "type": "aluminate_filter_press",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:aluminate_slurry",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:lye",
+              200
+            ],
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:aluminum_hydroxide",
+              2
+            ],
+            [
+              "jugcraft:bauxite_residue",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:alumina_calciner",
+      "type": "alumina_calciner",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:aluminum_hydroxide",
+              2
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:alumina",
+              2
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:aluminum_reduction_cell",
+      "type": "aluminum_reduction_cell",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:alumina",
+              2
+            ],
+            [
+              "jugcraft:coke",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:aluminum_ingot",
+              2
+            ]
+          ],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 96
         }
       ]
     }

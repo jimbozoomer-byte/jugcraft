@@ -77,7 +77,7 @@ public class AnaerobicGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 3, "All three digestion processes exercised, found " + checked);
+        h.assertTrue(checked == 5, "All five digestion/cleanup processes exercised, found " + checked);
         h.succeed();
     }
 

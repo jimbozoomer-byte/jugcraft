@@ -1,5 +1,7 @@
 # Jugcraft TODO list
 
+**12 October local implementation:** [Expanded fermentation and first aluminum refinery](features/biorefinery-and-aluminum-playtest.md) adds seven stations, connected ethanol/stillage processing and staged bauxite/lye recovery to existing aluminum products. Local playtest branch; not published to main. Larger variants, demanding fuel dehydration, alloys and new specialized aluminum products remain future work.
+
 This list tracks concrete owner-requested follow-ups. An unchecked task is planned work, not implemented gameplay. See the [roadmap](ROADMAP.md) for the wider delivery direction and [existing-content map](WHAT_EXISTS.md) for current source. Feature details and dependencies belong in their linked briefs.
 
 See the [organized implementation and next-work index](INTEGRATION_STATUS.md) for the current integration and priorities.

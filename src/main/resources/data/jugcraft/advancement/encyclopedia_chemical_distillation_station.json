@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:chemical_distillation_station"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_chemical_distillation_station.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_chemical_distillation_station.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:chemical_distillation_station"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

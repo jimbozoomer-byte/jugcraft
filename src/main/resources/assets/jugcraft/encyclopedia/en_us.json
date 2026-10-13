@@ -37,6 +37,21 @@
       }
     },
     {
+      "id": "guide/biorefinery",
+      "group": "Home",
+      "chapter": "Start here",
+      "gate": "",
+      "page": {
+        "title": "Crops to fuel and bauxite to aluminum",
+        "icon": "jugcraft:industrial_fermenter",
+        "text": [
+          "Fuel route: Heated Mashing Station -> Industrial Fermenter -> Chemical Distillation Station -> existing Bio-Generator or compatible engines. Stillage feeds the Anaerobic Digester. Optional wet CO2 cleanup in the Biogas Cleaner supplies methane synthesis; fermentation keeps running with excess gas venting unless you select Keep gas.",
+          "Aluminum route: Bauxite Digestion Vessel -> Aluminate Recovery Press -> Alumina Calciner -> Aluminum Reduction Cell. Recover 200 of 250 mB lye per bauxite, return the press and calciner water, and bind residue into game construction filler. Each bauxite still yields two ingots; electrolysis consumes coke. Copper and steel build the first machines.",
+          "Search each machine for precise recipes and visible port positions. The earlier reactor recipes and aluminum consumers remain compatible. Fuel dehydration, larger plants and new aluminum alloys/products are later expansions."
+        ]
+      }
+    },
+    {
       "id": "guide/biogas",
       "group": "Home",
       "chapter": "Start here",
@@ -5398,7 +5413,8 @@
         "icon": "jugcraft:biogas_cleaner",
         "text": [
           "Two wide, three deep and three tall. The sealed wash tower and demister clean biogas without splitting its 60/40 composition. Raw gas enters upper rear right; wash water enters lower rear left. Cleaned gas leaves upper front right; dirty wash leaves lower front right. Power enters front left.",
-          "1000 mB raw biogas + 250 mB water -> 1000 mB cleaned biogas + 250 mB wash digestate, 100 ticks at 24 JE/t. Route that wash to the Digestate Separator with the digester residue. No disposable filter is needed. Full product tanks stop processing without wasting inputs."
+          "1000 mB raw biogas + 250 mB water -> 1000 mB cleaned biogas + 250 mB wash digestate, 100 ticks at 24 JE/t. Route that wash to the Digestate Separator with the digester residue. No disposable filter is needed. Full product tanks stop processing without wasting inputs.",
+          "Also cleans wet fermentation CO2: 250 mB gas + 250 mB wash water -> 250 mB usable CO2 + 250 mB recovered water, 100 ticks at 24 JE/t. Drain both previous products before switching between biogas and fermentation gas. No new disposable filter or separate gas-cleaning machine is needed."
         ],
         "craft": {
           "grid": [
@@ -5472,6 +5488,213 @@
             "jugcraft:steel_plate"
           ],
           "result": "jugcraft:bio_generator",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/32",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Heated Mashing Station",
+        "icon": "jugcraft:mashing_station",
+        "text": [
+          "Three wide, deep and tall. Mill and heat 16 fermentable crops with 1000 mB water into 1250 mB mash, 200 ticks at 24 JE/t. The grain hopper, guarded milling drive and insulated mash kettle share one machine. Existing crop and water producers supply it; water alone cannot make fuel.",
+          "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: water low left, mash low middle. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:steel_gear",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:electric_motor",
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:basic_circuit",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:mashing_station",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/33",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Industrial Fermenter",
+        "icon": "jugcraft:industrial_fermenter",
+        "text": [
+          "Three wide/deep, four tall. Process 1250 mB heated mash into 1000 mB broth and 250 mB wet CO2 in 400 ticks at 8 JE/t. Its sealed jacketed vessel and slow top agitator have a high rear gas outlet.",
+          "Default: collect exhaust that fits, vent only the excess. Select Keep gas before starting to stop for a full gas output instead. Running batches retain their selected mode through saves. Broth always needs space. The Biogas Cleaner uses 250 mB water to clean 250 mB wet gas into usable CO2, returning its water; empty its old biogas contents before changing jobs. CO2 feeds existing methane synthesis.",
+          "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: mash low right, broth low left, wet CO2 high middle. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:basic_circuit",
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:electric_motor",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:industrial_fermenter",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/34",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Chemical Distillation Station",
+        "icon": "jugcraft:chemical_distillation_station",
+        "text": [
+          "Four wide/deep and six tall. Feed 1000 mB fermented broth; collect 500 mB existing Bioethanol and 500 mB Stillage, 200 ticks at 32 JE/t. A heated column, condenser, reboiler, pump and service ladder separate these products. Both outputs must fit.",
+          "Ethanol already fuels the Bio-Generator and existing compatible engines. The digester accepts 1000 mB stillage instead of solid farm feed, producing 250 mB raw biogas and 500 mB digestate in 300 ticks at 22 JE/t per expanded lane. Continue through the existing cleaner and separator. Pure water and digestate cannot make ethanol. Dehydration is reserved for a future real consumer; the original direct reactor ethanol recipe remains.",
+          "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: broth midway up toward the right, ethanol midway up at the left, stillage low toward the right. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:electric_motor",
+            "jugcraft:basic_circuit",
+            "jugcraft:machine_casing",
+            "jugcraft:copper_cable",
+            "minecraft:bricks",
+            "jugcraft:copper_cable"
+          ],
+          "result": "jugcraft:chemical_distillation_station",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/35",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Bauxite Digestion Vessel",
+        "icon": "jugcraft:bauxite_digester",
+        "text": [
+          "Three wide, four deep and three tall. One existing Bauxite + 250 mB lye + 750 mB water -> 1000 mB aluminate slurry, 200 ticks at 64 JE/t. The sealed horizontal vessel has a locking cover, heat jacket, feed hatch and service pipes. Mine or trade bauxite and make lye with the copper-built Electrolytic Separator.",
+          "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: lye midway up at the left, water midway up in the middle, slurry low right. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:steel_tank",
+            "jugcraft:steel_plate",
+            "minecraft:bricks",
+            "jugcraft:electric_motor",
+            "minecraft:bricks",
+            "jugcraft:copper_cable",
+            "jugcraft:basic_circuit",
+            "jugcraft:copper_cable"
+          ],
+          "result": "jugcraft:bauxite_digester",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/36",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Aluminate Recovery Press",
+        "icon": "jugcraft:aluminate_filter_press",
+        "text": [
+          "Three wide, four deep and three tall. 1000 mB slurry -> two Aluminum Hydroxide, one Bauxite Residue, 200 mB recovered lye and 500 mB water, 160 ticks at 32 JE/t. Return lye to digestion, adding 50 mB makeup per bauxite. Both liquid and both solid outputs must have room.",
+          "One residue + one clay ball + two gravel craft two cobblestone as stabilized game filler. Raw bauxite residue is not fertilizer or digester feed. The press uses visible filter plates, clamping rods, a collection trough and separate output drawers.",
+          "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: slurry midway up in the middle, recovered lye low left and water low middle. Two solid output hatches sit on the right. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:steel_plate",
+            "jugcraft:steel_gear",
+            "jugcraft:steel_plate",
+            "jugcraft:electric_motor",
+            "jugcraft:basic_circuit",
+            "jugcraft:electric_motor",
+            "jugcraft:steel_tank",
+            "jugcraft:machine_casing",
+            "jugcraft:steel_tank"
+          ],
+          "result": "jugcraft:aluminate_filter_press",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/37",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Alumina Calciner",
+        "icon": "jugcraft:alumina_calciner",
+        "text": [
+          "Three wide, four deep and three tall. Two hydroxide -> two existing Alumina + 250 mB recovered water, 200 ticks at 64 JE/t. Reuse this water with the press water. Enclosed ceramic kiln, guarded drive, insulated service hood and front charge door; all heating is paid electricity. Alumina keeps its existing catalyst and metal consumers.",
+          "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: recovered water midway up at the left, alumina in the right hatch. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
+        ],
+        "craft": {
+          "grid": [
+            "minecraft:bricks",
+            "jugcraft:steel_plate",
+            "minecraft:bricks",
+            "jugcraft:electric_motor",
+            "jugcraft:basic_circuit",
+            "jugcraft:electric_motor",
+            "jugcraft:copper_cable",
+            "jugcraft:machine_casing",
+            "jugcraft:copper_cable"
+          ],
+          "result": "jugcraft:alumina_calciner",
+          "count": 1
+        }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/38",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Aluminum Reduction Cell",
+        "icon": "jugcraft:aluminum_reduction_cell",
+        "text": [
+          "Three wide/deep and four tall. Two Alumina + one Coke -> two existing Aluminum Ingots + 250 mB CO2, 400 ticks at 96 JE/t. Copper busbars and clay bricks start the line without requiring its own aluminum. Carbon is consumed once per batch; there is no electrode repair meter.",
+          "Default collect-and-vent excess CO2, or select Keep gas before starting. Ingots must always fit. Existing aluminum wire, cable, plates and structural/vehicle recipes remain the useful destinations. The larger molten-salt hall, alloy expansion and new specialized products are later work.",
+          "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: CO2 midway up at the left, ingots in the right hatch. Front right: lower hatch takes alumina, upper hatch takes coke. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
+        ],
+        "craft": {
+          "grid": [
+            "jugcraft:copper_cable",
+            "minecraft:bricks",
+            "jugcraft:copper_cable",
+            "minecraft:bricks",
+            "jugcraft:basic_circuit",
+            "minecraft:bricks",
+            "jugcraft:steel_plate",
+            "jugcraft:machine_casing",
+            "jugcraft:steel_plate"
+          ],
+          "result": "jugcraft:aluminum_reduction_cell",
           "count": 1
         }
       },
@@ -8157,6 +8380,24 @@
       }
     },
     {
+      "id": "process/anaerobic_digester/digest_distillery_stillage",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Digest Distillery Stillage",
+        "icon": "jugcraft:anaerobic_digester",
+        "text": [
+          "Machine: Anaerobic Digester",
+          "Inputs: 1000 mB Stillage",
+          "Outputs: 250 mB Raw Biogas, 500 mB Digestate",
+          "Work: 300 ticks (15 seconds).",
+          "Power: 24 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
       "id": "process/biogas_cleaner/clean_biogas",
       "group": "Technology",
       "chapter": "Processes",
@@ -8168,6 +8409,24 @@
           "Machine: Biogas Cleaner",
           "Inputs: 1000 mB Raw Biogas, 250 mB Water",
           "Outputs: 1000 mB Clean Biogas, 250 mB Digestate",
+          "Work: 100 ticks (5 seconds).",
+          "Power: 24 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/biogas_cleaner/clean_fermentation_co2",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Clean Fermentation Co2",
+        "icon": "jugcraft:biogas_cleaner",
+        "text": [
+          "Machine: Biogas Cleaner",
+          "Inputs: 250 mB Fermentation Exhaust, 250 mB Water",
+          "Outputs: 250 mB Carbon Dioxide, 250 mB Water",
           "Work: 100 ticks (5 seconds).",
           "Power: 24 JE/t before upgrades.",
           "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
@@ -8188,6 +8447,132 @@
           "Outputs: 1 x Digestate Fiber, 750 mB Water",
           "Work: 100 ticks (5 seconds).",
           "Power: 16 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/mashing_station/heat_crop_mash",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Heat Crop Mash",
+        "icon": "jugcraft:mashing_station",
+        "text": [
+          "Machine: Mashing Station",
+          "Inputs: 16 x Fermentable, 1000 mB Water",
+          "Outputs: 1250 mB Grain Mash",
+          "Work: 200 ticks (10 seconds).",
+          "Power: 24 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/industrial_fermenter/ferment_crop_mash",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Ferment Crop Mash",
+        "icon": "jugcraft:industrial_fermenter",
+        "text": [
+          "Machine: Industrial Fermenter",
+          "Inputs: 1250 mB Grain Mash",
+          "Outputs: 1000 mB Ethanol Broth, 250 mB Fermentation Exhaust",
+          "Work: 400 ticks (20 seconds).",
+          "Power: 8 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/chemical_distillation_station/distill_ethanol_broth",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Distill Ethanol Broth",
+        "icon": "jugcraft:chemical_distillation_station",
+        "text": [
+          "Machine: Chemical Distillation Station",
+          "Inputs: 1000 mB Ethanol Broth",
+          "Outputs: 500 mB Bioethanol, 500 mB Stillage",
+          "Work: 200 ticks (10 seconds).",
+          "Power: 32 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/bauxite_digester/digest_bauxite",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Digest Bauxite",
+        "icon": "jugcraft:bauxite_digester",
+        "text": [
+          "Machine: Bauxite Digester",
+          "Inputs: 1 x Bauxite, 250 mB Lye, 750 mB Water",
+          "Outputs: 1000 mB Aluminate Slurry",
+          "Work: 200 ticks (10 seconds).",
+          "Power: 64 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/aluminate_filter_press/recover_aluminate",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Recover Aluminate",
+        "icon": "jugcraft:aluminate_filter_press",
+        "text": [
+          "Machine: Aluminate Filter Press",
+          "Inputs: 1000 mB Aluminate Slurry",
+          "Outputs: 2 x Aluminum Hydroxide, 1 x Bauxite Residue, 200 mB Lye, 500 mB Water",
+          "Work: 160 ticks (8 seconds).",
+          "Power: 32 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/alumina_calciner/calcine_hydroxide",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Calcine Hydroxide",
+        "icon": "jugcraft:alumina_calciner",
+        "text": [
+          "Machine: Alumina Calciner",
+          "Inputs: 2 x Aluminum Hydroxide",
+          "Outputs: 2 x Alumina, 250 mB Water",
+          "Work: 200 ticks (10 seconds).",
+          "Power: 64 JE/t before upgrades.",
+          "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
+        ]
+      }
+    },
+    {
+      "id": "process/aluminum_reduction_cell/reduce_alumina",
+      "group": "Technology",
+      "chapter": "Processes",
+      "gate": "",
+      "page": {
+        "title": "Reduce Alumina",
+        "icon": "jugcraft:aluminum_reduction_cell",
+        "text": [
+          "Machine: Aluminum Reduction Cell",
+          "Inputs: 2 x Alumina, 1 x Coke",
+          "Outputs: 2 x Aluminum Ingot, 250 mB Carbon Dioxide",
+          "Work: 400 ticks (20 seconds).",
+          "Power: 96 JE/t before upgrades.",
           "Recipe conditions: machines. Installed-build reference; server datapacks may differ."
         ]
       }
@@ -11586,6 +11971,55 @@
       "title": "Hydrochloric Acid",
       "description": "Obtain Hydrochloric Acid by crafting, trade or collection.",
       "icon": "jugcraft:hydrochloric_acid_bucket",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_mashing_station",
+      "title": "Heated Mashing Station",
+      "description": "Obtain Heated Mashing Station by crafting, trade or collection.",
+      "icon": "jugcraft:mashing_station",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_industrial_fermenter",
+      "title": "Industrial Fermenter",
+      "description": "Obtain Industrial Fermenter by crafting, trade or collection.",
+      "icon": "jugcraft:industrial_fermenter",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_chemical_distillation_station",
+      "title": "Chemical Distillation Station",
+      "description": "Obtain Chemical Distillation Station by crafting, trade or collection.",
+      "icon": "jugcraft:chemical_distillation_station",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_bauxite_digester",
+      "title": "Bauxite Digestion Vessel",
+      "description": "Obtain Bauxite Digestion Vessel by crafting, trade or collection.",
+      "icon": "jugcraft:bauxite_digester",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_aluminate_filter_press",
+      "title": "Aluminate Recovery Press",
+      "description": "Obtain Aluminate Recovery Press by crafting, trade or collection.",
+      "icon": "jugcraft:aluminate_filter_press",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_alumina_calciner",
+      "title": "Alumina Calciner",
+      "description": "Obtain Alumina Calciner by crafting, trade or collection.",
+      "icon": "jugcraft:alumina_calciner",
+      "group": "Technology"
+    },
+    {
+      "id": "jugcraft:encyclopedia_aluminum_reduction_cell",
+      "title": "Aluminum Reduction Cell",
+      "description": "Obtain Aluminum Reduction Cell by crafting, trade or collection.",
+      "icon": "jugcraft:aluminum_reduction_cell",
       "group": "Technology"
     },
     {
