@@ -769,11 +769,17 @@ def ores_page():
     for mineral, info in MINERALS.items():
         gen = info["gen"]
         line = f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}."
-        if gen.get("surface_biomes"):
+        if mineral == "fluorite":
             line += (f" Large pockets below permanently snowy inland biomes; needs an {info['tool']} pickaxe. "
-                     "Small exposed outcrops can point to a pocket below. Seasonal snow, beaches, rivers and oceans do not qualify. "
+                     "Mineral faces in small stone outcrops can point to a pocket below. Seasonal snow, beaches, rivers and oceans do not qualify. "
                      "The prospector and ore drill work here; nine fluorite make a decorative storage block. "
                      "Fluorite chemistry is planned separately.")
+        elif mineral == "spodumene":
+            line += (" Large pockets below Shield, Highland, Basin, Windswept Hills, Windswept Gravelly Hills, "
+                     "Windswept Forest and Stony Peaks; most centers are near Y 24. Needs an iron pickaxe. "
+                     "Look for pale-green mineral faces in small stone outcrops, or use the prospector and ore drill. "
+                     "The crusher gives two spodumene per ore; nine compact into a storage block. "
+                     "Expanded lithium refining is planned separately; existing lepidolite processing remains available.")
         lines.append(line)
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
             "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}

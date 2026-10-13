@@ -76,6 +76,11 @@ MINERALS = {
                      "minecraft:snowy_slopes", "minecraft:frozen_peaks", "minecraft:jagged_peaks",
                      "jugcraft:snowy_coniferous_forest", "jugcraft:snowy_forest", "jugcraft:muskeg",
                      "jugcraft:frostlight_garden", "jugcraft:snowpetal_grove"]}},
+    "spodumene": {"display": "Spodumene", "ore_display": "Spodumene", "feature": "lithium", "drops": [1, 1],
+                  "tool": "iron", "gen": {"size": 40, "rarity": 12, "min_y": -16, "max_y": 64,
+                  "outcrop_chance": 4, "surface_biomes": [
+                      "jugcraft:shield", "jugcraft:highland", "jugcraft:basin", "minecraft:windswept_hills",
+                      "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_peaks"]}},
 }
 
 # Surface rocks with their own blocks. copy: vanilla block whose properties are copied.

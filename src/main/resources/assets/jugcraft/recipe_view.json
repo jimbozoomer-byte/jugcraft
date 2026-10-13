@@ -455,6 +455,34 @@
         {
           "in": [
             [
+              "jugcraft:spodumene_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:spodumene",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_spodumene_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:spodumene",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "minecraft:sulfur",
               1
             ]
