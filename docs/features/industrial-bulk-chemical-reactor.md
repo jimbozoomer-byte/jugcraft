@@ -1,6 +1,6 @@
 # Bulk Chemical Reactor: hydrochloric acid and chloride leaching (factory package 2)
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 Stacked on the [Industrial Fermenter](industrial-fermenter.md), which is stacked on [methane power](industrial-methane-power.md), the [Chemical Oxidizer](industrial-chemical-oxidizer.md) and the [Chemical Infuser](industrial-chemical-infuser.md). The Infuser makes the hydrogen chloride this machine uses.
 Proposal issue: none. It takes up two TODO items:
 - "hydrogen chloride absorption into aqueous acid, and its consumers" (package 2);
@@ -107,7 +107,8 @@ Client game test: `BulkChemicalReactorClientGameTests` takes four views (front l
 
 ### Results
 
-Not yet run in CI.
+- **Run [38423386376](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38423386376) on the contributor's fork (commit d2d426b8): green.** It compiled; the data checks passed; every server game test passed, the six `BulkChemicalReactorGameTests` among them; the build without optional integrations passed; and all five client shards passed, `BulkChemicalReactorClientGameTests` included.
+- The client screenshots have not yet been looked at by a person.
 
 No survival playtest, two-client test or performance measurement has been done.
 
