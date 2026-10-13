@@ -205,23 +205,34 @@ public class FluoriteClientGameTests implements FabricClientGameTest {
 		var alwaysOutcrop = new SurfaceLinkedOreFeature(configured.ore(), configured.surfaceBiomes(), configured.outcrop(), 1);
 		BlockPos center = new BlockPos(-320, -24, -320);
 		// Isolated artificial fixtures above/inside the Designed world, never included in the inspection save.
-		for (String scenario : List.of("air", "snow", "water", "roof", "obstruction")) {
+		for (String scenario : List.of("air", "snow", "slope", "water", "roof", "obstruction", "hollow")) {
 			fill(level, center.offset(-12, -8, -12), center.offset(12, 8, 12), scenario.equals("air") ? Blocks.AIR : Blocks.DEEPSLATE);
-			fill(level, new BlockPos(-332, 199, -332), new BlockPos(-308, 207, -308), Blocks.AIR);
+			fill(level, new BlockPos(-332, 197, -332), new BlockPos(-308, 207, -308), Blocks.AIR);
+			if (!scenario.equals("hollow")) fill(level, new BlockPos(-332, 197, -332), new BlockPos(-308, 199, -308), Blocks.DIRT);
 			fill(level, new BlockPos(-332, 200, -332), new BlockPos(-308, 200, -308), Blocks.GRASS_BLOCK);
+			if (scenario.equals("slope")) fill(level, new BlockPos(-320, 201, -332), new BlockPos(-308, 201, -308), Blocks.GRASS_BLOCK);
 			if (scenario.equals("snow")) fill(level, new BlockPos(-332, 201, -332), new BlockPos(-308, 201, -308), Blocks.SNOW);
 			if (scenario.equals("water")) fill(level, new BlockPos(-332, 201, -332), new BlockPos(-308, 201, -308), Blocks.WATER);
 			if (scenario.equals("roof")) fill(level, new BlockPos(-332, 204, -332), new BlockPos(-308, 204, -308), Blocks.OAK_PLANKS);
 			if (scenario.equals("obstruction")) fill(level, new BlockPos(-332, 201, -332), new BlockPos(-308, 201, -308), Blocks.GLASS);
 			boolean placed = alwaysOutcrop.place(level, level.getChunkSource().getGenerator(), RandomSource.create(721), center);
-			int count = 0;
-			for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(-332, 199, -332), new BlockPos(-308, 207, -308))) if (ore(level, pos)) {
-				count++; int dx = pos.getX() - center.getX(), dz = pos.getZ() - center.getZ();
-				check(dx * dx + dz * dz <= 64, "Outcrop beyond eight blocks");
+			int count = 0, stone = 0, buried = 0;
+			for (BlockPos pos : BlockPos.betweenClosed(new BlockPos(-332, 197, -332), new BlockPos(-308, 207, -308))) {
+				if (level.getBlockState(pos).is(Blocks.STONE)) { stone++; if (pos.getY() <= 200) buried++; }
+				if (ore(level, pos)) {
+					count++; int dx = pos.getX() - center.getX(), dz = pos.getZ() - center.getZ();
+					check(dx * dx + dz * dz <= 64, "Outcrop beyond eight blocks");
+					check(level.getBlockState(pos.below()).is(Blocks.STONE), "Outcrop ore has no stone support");
+					boolean exposed = false;
+					for (var direction : net.minecraft.core.Direction.Plane.HORIZONTAL) if (level.getBlockState(pos.relative(direction)).isAir()) exposed = true;
+					check(exposed, "Outcrop ore has no visible side for snowy weather");
+				}
 			}
 			check(placed != scenario.equals("air"), "Underground placement mismatch: " + scenario);
-			check(scenario.equals("snow") ? count >= 3 && count <= 8 : count == 0, "Outcrop safety mismatch: " + scenario + " has " + count);
-			Jugcraft.LOGGER.info("[fluorite] fixture {}: underground {}, surface {}", scenario, placed, count);
+			boolean supported = scenario.equals("snow") || scenario.equals("slope");
+			check(supported ? count >= 3 && count <= 8 && stone > count && buried >= 10 : count == 0 && stone == 0,
+					"Outcrop safety mismatch: " + scenario + " has " + count + " ore / " + stone + " stone / " + buried + " buried");
+			Jugcraft.LOGGER.info("[fluorite] fixture {}: underground {}, surface {}, stone {}, buried {}", scenario, placed, count, stone, buried);
 		}
 	}
 

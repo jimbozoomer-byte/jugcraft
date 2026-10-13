@@ -1,8 +1,10 @@
 # Snow-country fluorite deposits
 
-Status: implemented and locally validated on `codex/fluorite-deposits`, 13 October 2026. Public [draft PR #343](https://github.com/jimbozoomer-byte/jugcraft/pull/343) awaits the owner's visual review. Implementation commit: `5bc2af7af84824456ed61864c7f3a62597ce3b65`.
+Status: implemented on `codex/fluorite-deposits`, 13 October 2026. Public [PR #343](https://github.com/jimbozoomer-byte/jugcraft/pull/343). The owner accepted the first inspection world, then requested stone around and beneath the surface ore. The revised outcrops passed the rendered generation/persistence suite before starting spodumene. Original implementation commit: `5bc2af7af84824456ed61864c7f3a62597ce3b65`.
 
 ## Approved player result
+
+The 13 October stone-outcrop follow-up passed `runClientGameTest -PclientTests=FluoriteClientGameTests`: two normal seeds, Designed snow/desert boundaries, save/reopen, snowy and sloped foundations, and rejection of air-only deposits, water, roofs, glass obstructions and hollow ground. The rock includes at least twice as many above-ground stone blocks as ore. Underground generation settings are unchanged. Repository/link and whitespace checks passed. The older artifact hashes below identify the original preview; a new combined spodumene/fluorite preview will supersede it for visual review. AI-assisted follow-up: OpenAI Codex (GPT-6), explicitly authorized by the owner.
 
 Find large, finite fluorite ore pockets below permanently snowy inland biomes. Small surface outcrops occasionally point to a successfully generated pocket below. Mine with an iron pickaxe, locate supplies with the existing prospector and automate extraction with the existing ore drill. Preserve the shared mineral, tag, configuration and world-generation systems.
 
@@ -10,7 +12,7 @@ Find large, finite fluorite ore pockets below permanently snowy inland biomes. S
 - Jugcraft: snowy coniferous forest, snowy forest, muskeg, frostlight garden and snowpetal grove.
 - Eligibility comes from the surface biome above the deposit, including authored World Designer paint; cave biomes below do not remove eligibility. Seasonal snow, Alpine Spawn, Tundra, Cold Desert, beaches, rivers and oceans do not qualify.
 - Underground centers: Y -32 through 48, triangular distribution peaking at Y 8; native ore size 48; one attempt in eight eligible chunks on average; exposed cave faces allowed.
-- Outcrops: attempt above one quarter of successful deposits, three to eight exposed ore blocks within eight horizontal blocks of the deposit center. Skip water, structures and obstructed surfaces. Never create an outcrop for a failed underground placement.
+- Outcrops: attempt above one quarter of successful deposits, three to eight exposed ore blocks within eight horizontal blocks of the deposit center. The ore sits in an irregular, mostly-stone outcrop approximately four to six blocks across, rising one or two blocks above local ground with one or two buried stone layers. Gentle slopes are followed; unsupported ground, steep ledges, water, structures and obstructions reject the entire surface placement. Never create an outcrop for a failed underground placement.
 - Stone/deepslate forms and one canonical fluorite item. New chunks only, no regeneration or rewriting existing saves. Disabling acquisition must retain registrations and saved items.
 
 ## Progression and integration
@@ -38,7 +40,7 @@ AI-assisted implementation: OpenAI Codex (GPT-6), under the owner's direct instr
 
 `tools/materials.py` owns the mineral, feature switch and balance values. The shared generator writes both ore forms, their loot, iron-tier and `c:ores/fluorite` tags, reversible nine-item storage, and the existing crusher's standard two-item ore output. `OreSurvey` includes the new tag; the ore drill requires no special-case mining code. These are finite ordinary blocks with normal Silk Touch and Fortune behavior.
 
-`SurfaceLinkedOreFeature` delegates underground geometry to Minecraft's `OreFeature`. The placed feature supplies rarity, horizontal spread and triangular depth. It deliberately has no underground `minecraft:biome` filter: the wrapper samples the actual surface biome from the world generation region. The Overworld dimension check prevents reused biomes in other dimensions acquiring deposits. The outcrop is a bounded connected footprint, with all candidate cells checked before any surface write. Water, non-natural supports, obstructions and native structure pieces reject it; structure lookups use the generation region's cached starts.
+`SurfaceLinkedOreFeature` delegates underground geometry to Minecraft's `OreFeature`. The placed feature supplies rarity, horizontal spread and triangular depth. It deliberately has no underground `minecraft:biome` filter: the wrapper samples the actual surface biome from the world generation region. The Overworld dimension check prevents reused biomes in other dimensions acquiring deposits. Outcrops vary their elliptical footprint, trimmed edges and upper shoulder using the worldgen random source. All foundation, rock and clearance cells are checked before any surface write, with at most eight 6x6 candidates. Water, non-natural supports, block entities, obstructions and native structure pieces reject it; structure lookups use the generation region's cached starts. Ore replaces exposed top cells with an open side and stone directly beneath, so settled snow still leaves a visible mineral face. Only new chunks receive the revision; existing outcrops are retained.
 
 Surface heights use the live `OCEAN_FLOOR` map, which is maintained during decoration, rather than the earlier terrain-only `_WG` map. Grass/podzol support uses 26.3's separate `grass_blocks` tag. The pocket's center determines regional eligibility; the native ore shape can extend across a neighboring chunk or biome edge. Each outcrop cell independently checks the eligible surface biome.
 

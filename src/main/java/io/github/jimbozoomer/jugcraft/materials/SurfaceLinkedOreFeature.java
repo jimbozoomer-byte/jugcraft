@@ -4,8 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.BlockTags;
@@ -44,42 +45,70 @@ public record SurfaceLinkedOreFeature(OreFeature ore, TagKey<Biome> surfaceBiome
 	}
 
 	private void placeOutcrop(WorldGenLevel level, RandomSource random, BlockPos origin) {
-		int count = 3 + random.nextInt(6);
 		var structures = level instanceof WorldGenRegion region
 				? level.getLevel().structureManager().forWorldGenRegion(region) : level.getLevel().structureManager();
-		// A compact connected footprint, rotated each attempt. Eight bounded candidates; no chunk loading or scans.
-		int[][] footprint = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {0, -1}, {1, -1}, {-1, 1}, {2, -1}};
+		// At most eight 6x6 candidates. Plan every block before writing, including buried foundations.
 		for (int attempt = 0; attempt < 8; attempt++) {
-			int dx = random.nextInt(11) - 5, dz = random.nextInt(11) - 5;
-			int rotation = random.nextInt(4);
-			List<BlockPos> positions = new ArrayList<>(count);
-			for (int n = 0; n < count; n++) {
-				int x = footprint[n][0], z = footprint[n][1];
-				for (int r = 0; r < rotation; r++) { int oldX = x; x = -z; z = oldX; }
-				x += origin.getX() + dx; z += origin.getZ() + dz;
+			int dx = random.nextInt(7) - 3, dz = random.nextInt(7) - 3;
+			int width = 4 + random.nextInt(3), depth = 4 + random.nextInt(3);
+			var columns = new ArrayList<OutcropColumn>();
+			boolean valid = true;
+			int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+			for (int ix = 0; ix < width && valid; ix++) for (int iz = 0; iz < depth && valid; iz++) {
+				double nx = (ix - (width - 1) / 2.0) / (width / 2.0);
+				double nz = (iz - (depth - 1) / 2.0) / (depth / 2.0);
+				double radius = nx * nx + nz * nz;
+				if (radius > 1.0 || (radius > 0.65 && random.nextInt(4) == 0)) continue;
+				int x = origin.getX() + dx + ix - width / 2, z = origin.getZ() + dz + iz - depth / 2;
 				int ox = x - origin.getX(), oz = z - origin.getZ();
-				if (ox * ox + oz * oz > 64) break;
+				if (ox * ox + oz * oz > 64) { valid = false; break; }
 				BlockPos pos = new BlockPos(x, level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z), z);
-				// Heightmaps include snow blocks, but the thin snow layer may be above the ground.
-				if (!level.ensureCanWrite(pos) || !level.getBiome(pos).is(surfaceBiomes)) break;
-				BlockState ground = level.getBlockState(pos.below());
-				BlockState cover = level.getBlockState(pos);
-				if (!naturalGround(ground) || !ground.getFluidState().isEmpty()
-						|| !(cover.isAir() || cover.is(Blocks.SNOW)) || !cover.getFluidState().isEmpty()
-						|| !level.getBlockState(pos.above()).isAir() || level.getBlockEntity(pos.below()) != null) break;
-				// Stay on a single terrace, so every ore has an exposed side even after seasonal snow settles.
-				if (!positions.isEmpty() && pos.getY() != positions.getFirst().getY()) break;
-				// Natural-looking stone roofs also occur in structures. Use the region's cached structure starts,
-				// not the ServerLevel's chunk loader, while decoration is running on a worldgen worker.
-				if (structures.getStructureWithPieceAt(pos.below(), holder -> true).isValid()) break;
-				positions.add(pos);
+				minY = Math.min(minY, pos.getY()); maxY = Math.max(maxY, pos.getY());
+				int height = radius < 0.45 && random.nextInt(4) != 0 ? 2 : 1;
+				int roots = radius < 0.65 ? 2 : 1;
+				if (maxY - minY > 2 || !level.getBiome(pos).is(surfaceBiomes)) { valid = false; break; }
+				for (int y = -roots - 1; y <= height; y++) {
+					BlockPos cell = pos.offset(0, y, 0);
+					if (!level.ensureCanWrite(cell)) { valid = false; break; }
+					BlockState old = level.getBlockState(cell);
+					if (!old.getFluidState().isEmpty() || level.getBlockEntity(cell) != null
+							|| (y < 0 ? !naturalGround(old) : !(old.isAir() || (y == 0 && old.is(Blocks.SNOW))))
+							|| structures.getStructureWithPieceAt(cell, holder -> true).isValid()) { valid = false; break; }
+				}
+				columns.add(new OutcropColumn(pos, height, roots));
 			}
-			if (positions.size() == count) {
-				for (BlockPos pos : positions) level.setBlock(pos, outcrop, 2);
-				return;
+			if (!valid || columns.size() < 10) continue;
+			// Follow gentle terrain, but never build a stone curtain over a ledge.
+			for (var a : columns) for (var b : columns) {
+				if (Math.abs(a.base.getX() - b.base.getX()) + Math.abs(a.base.getZ() - b.base.getZ()) == 1
+						&& Math.abs(a.base.getY() - b.base.getY()) > 1) valid = false;
 			}
+			if (!valid) continue;
+			var blocks = new LinkedHashMap<BlockPos, BlockState>();
+			var exposed = new ArrayList<BlockPos>();
+			for (var column : columns) {
+				for (int y = -column.roots; y < column.height; y++) blocks.put(column.base.offset(0, y, 0), Blocks.STONE.defaultBlockState());
+			}
+			for (var column : columns) {
+				BlockPos top = column.base.above(column.height - 1);
+				for (var direction : Direction.Plane.HORIZONTAL) {
+					BlockPos side = top.relative(direction);
+					if (!blocks.containsKey(side) && level.ensureCanWrite(side) && level.getBlockState(side).isAir()) {
+						exposed.add(top); break;
+					}
+				}
+			}
+			if (exposed.size() < 3) continue;
+			// Tops with an open side stay visible after snow settles. Every ore keeps a stone support.
+			int aboveGround = columns.stream().mapToInt(OutcropColumn::height).sum();
+			int count = Math.min(Math.min(exposed.size(), aboveGround / 3), 3 + random.nextInt(6));
+			for (int n = 0; n < count; n++) blocks.put(exposed.remove(random.nextInt(exposed.size())), outcrop);
+			blocks.forEach((pos, state) -> level.setBlock(pos, state, 2));
+			return;
 		}
 	}
+
+	private record OutcropColumn(BlockPos base, int height, int roots) { }
 
 	private static boolean naturalGround(BlockState state) {
 		return state.is(BlockTags.STONE_ORE_REPLACEABLES) || state.is(BlockTags.DIRT) || state.is(BlockTags.GRASS_BLOCKS)
