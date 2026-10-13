@@ -93,6 +93,7 @@ ORE_RAMPS = {
     "lepidolite": ramp("5a3c6a 966eaa ba92cc d4b6e2 f4e4fa"),  # lilac mica
     "monazite": ramp("5a3010 965a28 ba7838 d49c52 f6d696"),    # honey-brown
     "thallite": ramp("4a5a2e 6e8048 98a86a c0cc8e e4ecb8"),    # the owner's sheet: sage green, the mineral as dug
+    "fluorite": ramp("315a67 558d9e 88bdc9 bae2e7 edffff"),    # icy cyan, matching the owner's fluorite storage block
 }
 
 # The three overlay layouts, taken in turn down ORE_RAMPS, so neighbouring ores do not look alike.
@@ -201,6 +202,8 @@ def material_textures():
         palette = tones(ORE_RAMPS[metal])
         out[("item", f"raw_{metal}")] = draw("raw", palette)
         out[("block", f"raw_{metal}_block")] = draw("raw_block", palette)
+    # Fluorite is a single mineral crystal, using the existing hand-drawn raw-mineral map.
+    out[("item", "fluorite")] = draw("raw", tones(ORE_RAMPS["fluorite"]))
     return out
 
 

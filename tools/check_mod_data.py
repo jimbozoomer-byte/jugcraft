@@ -2812,6 +2812,25 @@ def check_java():
         tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_ore" / f"{placed}.json") or {}
         if tag.get("values") != gens[placed]["biomes"]:
             err(f"#{MOD}:has_ore/{placed} {tag.get('values')} != tools/materials.py {gens[placed]['biomes']}")
+    for placed, gen in gens.items():
+        if not gen.get("surface_biomes"):
+            continue
+        tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_surface_ore" / f"{placed}.json") or {}
+        if tag.get("values") != gen["surface_biomes"]:
+            err(f"#{MOD}:has_surface_ore/{placed} differs from tools/materials.py")
+        feature = load(DATA / MOD / "worldgen" / "feature" / f"ore_{placed}.json") or {}
+        if feature.get("type") != f"{MOD}:surface_linked_ore" or feature.get("ore", {}).get("size") != gen["size"]:
+            err(f"Surface-linked ore {placed} is not its configured native-size pocket")
+        modifiers = (load(DATA / MOD / "worldgen" / "placed_feature" / f"ore_{placed}.json") or {}).get("placement", [])
+        if any(m.get("type") == "minecraft:biome" for m in modifiers):
+            err(f"Surface-linked ore {placed} must not filter by the underground cave biome")
+        rarity = next((m.get("chance") for m in modifiers if m.get("type") == "minecraft:rarity_filter"), None)
+        height = next((m.get("height", {}) for m in modifiers if m.get("type") == "minecraft:height_range"), {})
+        if rarity != gen["rarity"] or height != {"type": "minecraft:trapezoid",
+                "min_inclusive": {"absolute": gen["min_y"]}, "max_inclusive": {"absolute": gen["max_y"]}}:
+            err(f"Surface-linked ore {placed} rarity/depth differs from tools/materials.py")
+        if feature.get("outcrop_chance") != gen["outcrop_chance"]:
+            err(f"Surface-linked ore {placed} outcrop probability differs from tools/materials.py")
 
 
 def check_machines(registered):

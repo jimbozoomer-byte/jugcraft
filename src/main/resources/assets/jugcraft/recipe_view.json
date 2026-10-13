@@ -427,6 +427,34 @@
         {
           "in": [
             [
+              "jugcraft:fluorite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fluorite",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_fluorite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fluorite",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "minecraft:sulfur",
               1
             ]
