@@ -1,6 +1,6 @@
 # The Mire Hag
 
-Status: implemented in source; CI has found faults in two of her tests and in how her Likenesses walk, each fixed (results below), and is to run on the last fix. This is part 2 of boss 5 in the [bosses plan](../branches/BOSSES.md#the-mire-hag-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Lantern Fen, her Likenesses, her Root Knot, her roots, hands and brews, and her loot. It is built on part 1, the fen and the Hag Stone that opens it ([lantern-fen.md](lantern-fen.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes on `1ca6ba4` (every server game test with and without the optional integrations, and every client test class, her whole fight among them). On the way CI found faults in her tests and in how her Likenesses walk, each fixed (results below). This is part 2 of boss 5 in the [bosses plan](../branches/BOSSES.md#the-mire-hag-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Lantern Fen, her Likenesses, her Root Knot, her roots, hands and brews, and her loot. It is built on part 1, the fen and the Hag Stone that opens it ([lantern-fen.md](lantern-fen.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 13 October 2026 the owner answered the Cinder Tyrant's checkpoint with "Go with recommendations", whose next chunk was "The Mire Hag, built the same two-part way: her bog lair and summoning, then her fight among illusions of herself and her loot"; the Mire Hag is the next of the first eight in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -172,6 +172,24 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
+![Waiting: she stands on her hut's porch over her cauldron, a lantern on its post by the door, the stair running down to the marsh](../images/ingame_mire_hag_waiting.jpg)
+![Woken: she looks up from the porch, the boardwalk spur running from its stair to the marsh, reeds in front](../images/ingame_mire_hag_wakes.jpg)
+![Three of her in the dark middle of the marsh, she and her two Likenesses alike in every way, her hut on its stilts beyond](../images/ingame_mire_hag_likenesses.jpg)
+![Clawing Swipe: a white arc of claws across her front in the dark water](../images/ingame_mire_hag_swipe.jpg)
+![Root Lanes: clumps of roots burst up from the water in lanes before her, her Likenesses held still behind her](../images/ingame_mire_hag_root_lanes.jpg)
+![Poison Brew: a flask of her brew, glowing green, in the air between her and where the player stood](../images/ingame_mire_hag_poison_brew.jpg)
+![A pool of her green venom spread on the water where the flask fell](../images/ingame_mire_hag_venom_pool.jpg)
+![The Likeness Exchange winding up: she and two Likenesses side by side in the marsh, mist rising round them](../images/ingame_mire_hag_exchange.jpg)
+![In a lamp's light her outline shows: she glows beside the north-east lamp, her hut beyond](../images/ingame_mire_hag_lamplight.jpg)
+![Lights Out: she cackles in the marsh with her Likenesses, the lamps nearest the player gone dark](../images/ingame_mire_hag_lights_out.jpg)
+![The Root Knot crawling along the ring's boards toward a lamp](../images/ingame_mire_hag_root_knot.jpg)
+![Mire Grasp: hands of mud rising from the water round where the player stood, her Likenesses beyond](../images/ingame_mire_hag_mire_grasp.jpg)
+![The Drowned Dark: she and four Likenesses in the marsh, the lamp nearest her snuffed](../images/ingame_mire_hag_drowned_dark.jpg)
+![The Last Light: close, her lantern flaring on its staff, her outline lit](../images/ingame_mire_hag_last_light.jpg)
+![She falls in the marsh's middle, red with her death, reeds and her hut beyond](../images/ingame_mire_hag_defeated.jpg)
+
+*The client game test's pictures (CI, commit `501a096`): waiting and waking; she and her Likenesses; the Lure's Clawing Swipe, Root Lanes, Poison Brew in the air and its pool, and the Exchange winding up; her outline in a lamp's light; Lights Out; the Root Knot; the Drowned Dark's Mire Grasp and Snuff; the Last Light; and her fall. Each attack is posed and frozen mid-move. The fen is a dark bog and the test client renders at 480x270: several of these, Lights Out and her fall most, are hard to read at that size.*
+
 CI (13 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 
 | Commit | What ran | Result |
@@ -180,6 +198,8 @@ CI (13 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 | `14ec3a6` | The same | The waking test now allows the 3.9 blocks she can wade before it looks, and the Eye test hides its pigs with the Invisibility effect. **Her client test failed; all else passed.** Both server jobs passed all 1400 required game tests, her sixteen among them, and four of the five client jobs passed (15 to 38 minutes). The fifth, which runs her fight in the real fen, stopped once she had come down to fight: one Likeness walked with her, not two. The log says only that; the cause, found from her code and a model of the walk, is that the other had walked through the north-east lamp's light on its way to its place round the player, and faded (the server tests had no burning lamp on such a way). A Likeness now goes round a lamp's light (above), and a server test walks two past the northern lamps. Her first two pictures were taken, her fight's were not |
 | `33d87a3` | The same | **The server game tests crashed, and her client test failed further on.** Both server jobs stopped partway, the game-test server crashed by a NullPointerException in its own list of a test's timed checks: the new walk test had set 80 per-tick looks from inside one of those checks, and the list broke as it grew while being gone through. Every test before the crash passed. Her client test, now in the first client job, got past her Likenesses (both walked with her) and stopped at her brew: no flask was in the air when it looked. The flask flies for under half a second, and the test had looked a fixed count of the client's ticks after the throw, which the server can run ahead of. Its swipe picture also had a Likeness standing in front of the camera. The walk test now sets its looks as it begins; the client test runs the world on until a flask has flown a few ticks and freezes it in the same server step, and each pose stands her Likenesses behind her |
 | `fe1f3ae`, `19e8c1e` | The same | **Her client test failed further on; all else so far passed.** Both server jobs passed all 1401 required game tests, the new walk test among them: two Likenesses walked past the northern lamps and neither stood in their light. Her client test caught her brew in the air, her pool and her Exchange's wind-up, then stopped at the lamp's light: the Exchange begun for the picture before went on, and traded her into the dark marsh in the very tick the test looked for her glow. Its swipe and brew pictures were spoiled by splashes and reeds close to the camera. The test now runs the world on until her Exchange is done, and those cameras stand higher |
+| `501a096` | The same | **Her client test passed, from end to end; one server test failed once.** All five client jobs passed (her fight's in 36 minutes, with every check and all fifteen pictures above). `optional integrations absent` passed all 1401 required game tests; `mod` failed one, "the Likeness Exchange and the Snuff" ("She did not trade places with her Likeness"): her Exchange picks one of the Likenesses walking with her at random, and the test checked the trade against the first in her list only, so with two walking it failed half the time. It had passed in each of the seven runs of it before. The test now accepts the trade with whichever she picks |
+| `1ca6ba4` | The same | **All passed.** Both server jobs passed all 1401 required game tests, the Exchange test among them; all five client jobs passed, the one with her fight in 34 minutes, taking all fifteen pictures again. The build and the data audit (2194 IDs) passed |
 
 Run locally (13 October 2026):
 
