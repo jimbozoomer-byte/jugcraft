@@ -771,6 +771,10 @@ def machine_assets(lang):
     lang[f"container.{MOD}.form.pause"] = "Pause"
     lang[f"container.{MOD}.form.resume"] = "Resume"
     lang[f"container.{MOD}.form.cancel"] = "Cancel"
+    lang[f"container.{MOD}.form.excess_vent"] = "Excess: vent"
+    lang[f"container.{MOD}.form.excess_hold"] = "Excess: hold"
+    lang[f"container.{MOD}.form.excess_tooltip"] = ("Vent releases what a full byproduct tank cannot hold, so the work "
+                                                    "goes on. Hold keeps it, and a full tank stops the work instead.")
     lang[f"container.{MOD}.form.lanes"] = "Batches"
     lang[f"container.{MOD}.form.reserved"] = "(%s mB reserved)"
     lang[f"container.{MOD}.form.locked"] = "(in use)"

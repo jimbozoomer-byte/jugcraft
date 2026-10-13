@@ -478,6 +478,16 @@ public final class MachineForm {
 		return out >= 0 && out < vented.length && vented[out];
 	}
 
+	/** Whether any output tank vents, so the screen offers the stop-instead choice. */
+	public boolean ventsAny() {
+		for (boolean vents : vented) {
+			if (vents) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** The role name of every tank, inputs first. */
 	public List<String> tankRoles() {
 		return tankRoles;

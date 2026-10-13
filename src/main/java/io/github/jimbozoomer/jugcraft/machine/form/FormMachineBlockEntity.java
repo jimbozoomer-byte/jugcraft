@@ -109,11 +109,14 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	public static final int DATA_TANKS = DATA_LANES + 2 * MAX_LANES;
 	/** One value per tank: millibuckets reserved for running batches. */
 	public static final int DATA_RESERVED = DATA_TANKS + 2 * FluidMachineSpec.MAX_TANKS;
-	public static final int DATA_COUNT = DATA_RESERVED + FluidMachineSpec.MAX_TANKS;
+	/** 1 when the vented tanks hold their gas and stop the work instead of releasing it. */
+	public static final int DATA_HOLD_VENTED = DATA_RESERVED + FluidMachineSpec.MAX_TANKS;
+	public static final int DATA_COUNT = DATA_HOLD_VENTED + 1;
 
 	/** Menu buttons. */
 	public static final int BUTTON_PAUSE = 0;
 	public static final int BUTTON_CANCEL = 1;
+	public static final int BUTTON_HOLD_VENTED = 2;
 
 	private final MachineForm form;
 	private final SimpleEnergyStorage energy;
@@ -126,6 +129,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	/** Null while formed; otherwise what is wrong with the structure. */
 	private @Nullable MachineStatus structure;
 	private boolean paused;
+	/** The player's stop-instead choice: vented tanks keep their excess and a full one stops the work. */
+	private boolean holdVented;
 	private long nextCheck;
 	/** The game time of the last paid tick: a batch started long after it starts cold. Not saved. */
 	private long lastWorked = Long.MIN_VALUE / 2;
@@ -170,6 +175,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				case DATA_CAPACITY_LOW -> (int) (energy.getCapacity() & 0xFFFF);
 				case DATA_CAPACITY_HIGH -> (int) ((energy.getCapacity() >>> 16) & 0xFFFF);
 				case DATA_PAUSED -> paused ? 1 : 0;
+				case DATA_HOLD_VENTED -> holdVented ? 1 : 0;
 				case DATA_LANE_USE -> (int) Math.min(0xFFFF, form.generator() ? made : lanePrice);
 				case DATA_LOCKS -> locks();
 				default -> 0;
@@ -589,7 +595,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				return MachineStatus.fluid(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_OTHER_FLUID, inputs + out, reserved, 0);
 			}
 			int need = fluidNeeds.merge(out, result.amount(), Integer::sum);
-			if (!form.vents(out) && tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
+			if (!vents(out) && tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + out);
 			}
 		}
@@ -687,7 +693,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			FluidTank tank = tanks.output(part.tank());
 			int total = fluidOut.merge(part.tank(), part.mb(), Integer::sum);
 			if (!tank.variant.isBlank() && !tank.variant.equals(part.fluid())
-					|| !form.vents(part.tank()) && tank.millibuckets() + total > tank.capacityMb()) {
+					|| !vents(part.tank()) && tank.millibuckets() + total > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + part.tank());
 			}
 		}
@@ -705,7 +711,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			}
 			// A vented tank keeps what fits; the rest is released.
 			tank.amount = Math.min(tank.amount + (long) part.mb() * FluidNetworks.DROPLETS_PER_MB,
-					form.vents(part.tank()) ? (long) tank.capacityMb() * FluidNetworks.DROPLETS_PER_MB : Long.MAX_VALUE);
+					vents(part.tank()) ? (long) tank.capacityMb() * FluidNetworks.DROPLETS_PER_MB : Long.MAX_VALUE);
 		}
 		for (WorkLane.ItemPart part : lane.itemResults()) {
 			ItemStack held = items.get(part.slot());
@@ -855,6 +861,26 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		return bits;
 	}
 
+	/** Whether output tank {@code out} releases its excess now: the form vents it and the player has not chosen to hold. */
+	private boolean vents(int out) {
+		return form.vents(out) && !holdVented;
+	}
+
+	public boolean holdsVented() {
+		return holdVented;
+	}
+
+	/**
+	 * Switches the vented tanks between releasing their excess (the default) and holding it, when a full one stops the
+	 * work like any tank. Running batches are unaffected until they finish; nothing already released comes back.
+	 */
+	public void toggleHoldVented() {
+		if (form.ventsAny()) {
+			holdVented = !holdVented;
+			setChanged();
+		}
+	}
+
 	/** Pauses or resumes the machine (running batches keep their escrow and progress). */
 	public void togglePause() {
 		paused = !paused;
@@ -925,7 +951,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		return true;
 	}
 
-	/** A menu button: 0 pauses or resumes, 1 cancels the running batches. Only the server applies them. */
+	/**
+	 * A menu button: 0 pauses or resumes, 1 cancels the running batches, 2 switches the vented tanks between venting
+	 * and holding. Only the server applies them.
+	 */
 	public boolean clickButton(ServerPlayer player, int button) {
 		if (button == BUTTON_PAUSE) {
 			togglePause();
@@ -936,6 +965,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			player.sendOverlayMessage(result[1] > 0
 					? Component.translatable("message.jugcraft.form.cancel_blocked", result[0], result[1])
 					: Component.translatable("message.jugcraft.form.cancelled", result[0]));
+			return true;
+		}
+		if (button == BUTTON_HOLD_VENTED && form.ventsAny()) {
+			toggleHoldVented();
 			return true;
 		}
 		return false;
@@ -1085,6 +1118,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		ContainerHelper.loadAllItems(input, items);
 		energy.setAmount(input.getLongOr("energy", 0L));
 		paused = input.getBooleanOr("paused", false);
+		holdVented = input.getBooleanOr("hold_vented", false);
 		burn = Math.max(0, input.getLongOr("burn", 0L));
 		burnRate = Math.max(0, input.getIntOr("burn_rate", 0));
 		List<String> roles = form.tankRoles();
@@ -1115,6 +1149,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		output.putInt("form_version", form.version());
 		output.putLong("energy", energy.getAmount());
 		output.putBoolean("paused", paused);
+		output.putBoolean("hold_vented", holdVented);
 		if (burn > 0) {
 			output.putLong("burn", burn);
 			output.putInt("burn_rate", burnRate);

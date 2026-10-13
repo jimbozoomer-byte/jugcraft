@@ -178,6 +178,37 @@ public class IndustrialFermenterGameTests {
 		});
 	}
 
+	/**
+	 * The stop-instead choice: switched to hold from its screen's button, a full carbon dioxide tank stops the Fermenter
+	 * like any full tank, saying so; switched back to vent, it goes on. The choice is saved with the machine.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 200)
+	public void holdingTheGasStopsInsteadOfVenting(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
+		supply(helper, machine);
+		helper.assertTrue(machine.form().ventsAny() && !machine.holdsVented(), "It vents by default");
+		helper.assertTrue(machine.clickButton(helper.makeMockServerPlayerInLevel(), FormMachineBlockEntity.BUTTON_HOLD_VENTED)
+				&& machine.holdsVented(), "The screen's button switches it to hold");
+		helper.assertTrue(machine.saveWithoutMetadata(helper.getLevel().registryAccess()).getBooleanOr("hold_vented", false),
+				"The choice is saved");
+		int full = machine.form().profile().bufferMb();
+		machine.tanks().output(1).fill(PetroFluids.CARBON_DIOXIDE.fluid(), full);
+		machine.container().setItem(0, new ItemStack(Items.WHEAT, 8));
+		machine.tanks().input(0).fill(Fluids.WATER, 1000);
+		helper.runAfterDelay(10, () -> {
+			MachineStatus status = machine.status();
+			helper.assertTrue(status.state() == MachineLifecycle.OUTPUT_BLOCKED && status.reason() == MachineStatus.Reason.OUTPUT_FULL
+					&& status.index() == machine.form().tanks().inputTanks().size() + 1, "Holding, it waits on the full gas tank: " + status);
+			helper.assertTrue(machine.lane(0) == null, "Nothing started");
+			machine.toggleHoldVented();
+		});
+		helper.runAfterDelay(20, () -> {
+			helper.assertTrue(!machine.holdsVented() && machine.lane(0) != null && machine.status().state().working(),
+					"Venting again, it goes on: " + machine.status());
+			helper.succeed();
+		});
+	}
+
 	/** While it works every part shows lit, but only the controller gives off light; paused, it goes dark. */
 	@GameTest(structure = ARENA, maxTicks = 200)
 	public void everyPartLightsWhileItWorks(GameTestHelper helper) {

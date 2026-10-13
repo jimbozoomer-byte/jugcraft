@@ -57,7 +57,7 @@ The **Industrial Fermenter** is a 3×3×4 multi-block: a tall stepped steel vess
   - This change uses 4 steel plates, 1 glass, a Steel Tank, an electric motor, a basic circuit and a Machine Casing (`PGP / PTP / MCK`).
   - The Steel Tank and the casing already carry the plan's other 8 plates.
 - **250 mB of carbon dioxide per batch**, as above.
-- **The vent mechanism.** Excess venting is a property of the form's tank (`vent("co2")`), not of the recipe. The plan's "optional stop-instead" setting is not built yet.
+- **The vent mechanism.** Excess venting is a property of the form's tank (`vent("co2")`), not of the recipe. The plan's "optional stop-instead" setting is now built separately ([vent or hold](industrial-vent-or-hold.md)).
 - **Not built yet:** the larger 5×5×6 variant and the separate milling/mashing and distillation steps.
 
 ## Multiplayer and persistence
@@ -106,4 +106,4 @@ No survival playtest, two-client test or performance measurement has been done.
 ## Rollout and open questions
 
 - The bill and the carbon dioxide amount await the owner's review.
-- Still to come: the 5×5×6 bulk variant, milling/mashing, distillation and dehydration, and an optional stop-instead setting for vented tanks.
+- Still to come: the 5×5×6 bulk variant, milling/mashing, distillation and dehydration.
