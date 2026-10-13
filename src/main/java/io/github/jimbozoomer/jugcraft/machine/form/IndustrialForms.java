@@ -325,7 +325,7 @@ public final class IndustrialForms {
 			.build();
 
 	/**
-	 * The Combined Cycle Power Plant: the factory's big power station, seven wide, four deep and five tall. A gas turbine
+	 * The Combined Cycle Power Plant: the factory's big power station, six wide, four deep and five tall, the largest a form may be. A gas turbine
 	 * on its skid draws air from the filter house over its generator end and blows its exhaust through a tall heat-recovery
 	 * steam generator to the stack; the steam turns a second turbine on the same shaft. It burns methane (560 JE/mB) and the
 	 * Coal Gasifier's raw syngas (256 JE/mB) at 2,048 JE/t and hydrogen (128 JE/mB) at 1,024 JE/t, from one inlet at the
@@ -333,11 +333,11 @@ public final class IndustrialForms {
 	 */
 	public static final MachineForm COMBINED_CYCLE_PLANT_FORM = MachineForm.builder(Jugcraft.id("combined_cycle_power_plant"),
 					MachineKind.GAS_TURBINE)
-			.layer("C######", "#######", "#######", "#######")
-			.layer("#######", "#######", "#######", "#######")
-			.layer("##..###", "##..###", "##..###", "##..###")
-			.layer("##..###", "##..###", "##..###", "##..###")
-			.layer("....###", "....###", "....###", "....###")
+			.layer("C#####", "######", "######", "######")
+			.layer("######", "######", "######", "######")
+			.layer("##..##", "##..##", "##..##", "##..##")
+			.layer("##..##", "##..##", "##..##", "##..##")
+			.layer("....##", "....##", "....##", "....##")
 			.profile(OperatingProfile.ENTRY)
 			.inputTank("fuel")
 			.fuel(Jugcraft.id("methane"), FluidFuels.COMBINED_CYCLE_METHANE, FluidFuels.COMBINED_CYCLE_METHANE_RATE)

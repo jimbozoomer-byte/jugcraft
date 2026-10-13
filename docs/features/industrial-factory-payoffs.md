@@ -33,9 +33,9 @@ Each step is a real jump, and the last one is the factory's goal.
 | Bio Generator | 3×4×3 | 64–96 JE/t | biogas, bioethanol |
 | Gas Burning Generator | 4×5×4 | 128–256 JE/t | hydrogen, methane |
 | Gas Turbine | — | 512 JE/t | gasoline, refinery gas |
-| **Combined Cycle Power Plant** | **7×4×5** | **2,048 JE/t** | methane, raw syngas (1,024 JE/t on hydrogen) |
+| **Combined Cycle Power Plant** | **6×4×5** | **2,048 JE/t** | methane, raw syngas (1,024 JE/t on hydrogen) |
 
-**The Combined Cycle Power Plant** is the new top of that ladder, a 108-block landmark:
+**The Combined Cycle Power Plant** is the new top of that ladder, a 88-block landmark, as large as a form may be:
 - **Layout.** A gas turbine on a long skid draws air through the filter house over its generator. Its exhaust raises steam in a tall heat-recovery boiler, which has a white steam drum on top and a stack. The steam turns a second turbine on the same shaft.
 - **Methane.** It gives **560 JE per millibucket**, a quarter more than any other generator, at 2,048 JE/t. That is 8× the Gas Burning Generator and 4× the Gas Turbine.
 - **Raw syngas.** Straight from the Coal Gasifier, it burns whole at 256 JE/mB and the same 2,048 JE/t. Coal, gasified and fired here, becomes a real power station. The cleanup rack is now for chemistry, not power.
@@ -105,7 +105,7 @@ The Fermenter, Oxidizer, cleanup rack, Bio Generator and the other smaller machi
   - methane at 560 JE/mB and 2,048 JE/t;
   - raw syngas at 256 JE/mB and 2,048 JE/t;
   - hydrogen at 128 JE/mB and 1,024 JE/t;
-  - its 7×4×5 size;
+  - its 6×4×5 size;
   - its bill.
 - **The Fermenter's 375 mB.**
 - **Contact absorption's 750 mB of water → 1,000 mB of acid.**
@@ -137,7 +137,7 @@ Locally, without Gradle or a game:
 
 For CI, server game tests:
 - **`CombinedCyclePowerPlantGameTests`:**
-  - `itStandsWholeAndOnlyItsPortsAnswer`: 108 blocks in every orientation, ports only. Methane and raw syngas go in; water and biogas do not.
+  - `itStandsWholeAndOnlyItsPortsAnswer`: 88 blocks in every orientation, ports only. Methane and raw syngas go in; water and biogas do not.
   - `methaneBurnsAt2048JEATick`, `rawSyngasBurnsAt2048JEATick` and `hydrogenBurnsAt1024JEATick`: exact energy per millibucket and per tick.
   - `itIsTheBigPowerSpike`: 8× the gas generator's rate and more per millibucket; at least 4× the Gas Turbine; hydrogen below electrolysis's cost.
   - `theBigMilestonesAreAdvancements`: the three load, and the smaller machines have none.
@@ -149,7 +149,8 @@ Client game test: `CombinedCyclePowerPlantClientGameTests` takes five views (fro
 
 ### Results
 
-Not yet run in CI.
+- **The first run, [38466660997](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38466660997) (commit 719fba66), failed at startup.** The form foundation refuses machines wider than 6 blocks, and the Plant was drawn 7 wide. It is now 6×4×5, and `tools/check_mod_data.py` checks the 2–6 rule so this is caught locally.
+- The fixed branch has not yet run in CI.
 
 No survival playtest, two-client test or performance measurement has been done. The fun of these numbers needs a real playthrough to confirm.
 

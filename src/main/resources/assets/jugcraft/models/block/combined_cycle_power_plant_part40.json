@@ -26,5 +26,23 @@
     "tk_body": "jugcraft:block/tk_body",
     "particle": "jugcraft:block/dp_olive"
   },
-  "elements": []
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16.0,
+        16,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    }
+  ]
 }

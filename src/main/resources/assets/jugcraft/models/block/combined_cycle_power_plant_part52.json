@@ -30,78 +30,20 @@
     {
       "from": [
         0,
-        9.0,
-        4.75
+        1.0,
+        0
       ],
       "to": [
+        14.0,
         16,
-        13.0,
-        7.25
+        16
       ],
       "faces": {
-        "north": {
-          "texture": "#sp_copper"
-        },
-        "south": {
-          "texture": "#sp_copper"
-        },
-        "up": {
-          "texture": "#sp_copper"
+        "east": {
+          "texture": "#dp_grille"
         },
         "down": {
-          "texture": "#sp_copper"
-        }
-      }
-    },
-    {
-      "from": [
-        0,
-        9.5,
-        7.25
-      ],
-      "to": [
-        16,
-        12.5,
-        8.0
-      ],
-      "faces": {
-        "north": {
-          "texture": "#sp_copper"
-        },
-        "south": {
-          "texture": "#sp_copper"
-        },
-        "up": {
-          "texture": "#sp_copper"
-        },
-        "down": {
-          "texture": "#sp_copper"
-        }
-      }
-    },
-    {
-      "from": [
-        0,
-        9.5,
-        4.0
-      ],
-      "to": [
-        16,
-        12.5,
-        4.75
-      ],
-      "faces": {
-        "north": {
-          "texture": "#sp_copper"
-        },
-        "south": {
-          "texture": "#sp_copper"
-        },
-        "up": {
-          "texture": "#sp_copper"
-        },
-        "down": {
-          "texture": "#sp_copper"
+          "texture": "#dp_gunmetal"
         }
       }
     }

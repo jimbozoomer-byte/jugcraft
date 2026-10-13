@@ -54,7 +54,7 @@ public class CombinedCyclePowerPlantClientGameTests implements FabricClientGameT
 			server.runCommand("fill %d %d %d %d %d %d minecraft:smooth_stone".formatted(x - 14, y - 3, z - 24, x + 14, y - 1, z + 4));
 			server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x - 14, y, z - 24, x + 14, y + 12, z + 4));
 			context.waitTicks(10);
-			// Facing south, towards the camera: seven blocks across from x-3, five tall and four deep back from z-8; the
+			// Facing south, towards the camera: six blocks across from x-3, five tall and four deep back from z-8; the
 			// controller cabinet at x-3, z-8.
 			BlockPos generator = origin.offset(-3, 0, -8);
 			server.runOnServer(minecraft -> build(minecraft.overworld(), generator));
@@ -65,7 +65,7 @@ public class CombinedCyclePowerPlantClientGameTests implements FabricClientGameT
 
 			// Its store fills in about a minute with nothing drawing it: emptied before each picture, as a cable would, and
 			// its fuel topped up.
-			double cx = x + 0.5;
+			double cx = x;
 			double cz = z - 9.5;
 			feed(server, generator);
 			shoot(context, singleplayer, x - 9.5, y + 2, z + 2.5, cx, y + 2.0, cz, "jugcraft_combined_cycle_power_plant");

@@ -26,5 +26,29 @@
     "tk_body": "jugcraft:block/tk_body",
     "particle": "jugcraft:block/dp_olive"
   },
-  "elements": []
+  "elements": [
+    {
+      "from": [
+        2.0,
+        1.0,
+        3.0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_grille"
+        },
+        "west": {
+          "texture": "#dp_grille"
+        },
+        "down": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    }
+  ]
 }
