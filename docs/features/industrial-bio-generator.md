@@ -1,6 +1,6 @@
 # Bio Generator (factory package 2, biological power)
 
-Status: implemented (pending CI and review). Built on the [shared machine foundation](industrial-machine-foundation.md) and its generator forms, beside the [Gas Burning Generator](industrial-gas-burning-generator.md).
+Status: implemented (CI green on the contributor's fork; pending review). Built on the [shared machine foundation](industrial-machine-foundation.md) and its generator forms, beside the [Gas Burning Generator](industrial-gas-burning-generator.md).
 Proposal issue: none. The TODO list's "separate lower-output Bio-Generator for cleaned biogas and bioethanol" (the bioethanol half). Its size and look are the [art brief](industrial-machine-models-and-textures.md#bio-generator); its bill is the [construction and operation](industrial-machine-construction-and-operation.md) proposal; its 96 JE/t on bioethanol is the [implementation plan](industrial-factory-implementation-plan.md)'s proposed value for testing.
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era power from farming
