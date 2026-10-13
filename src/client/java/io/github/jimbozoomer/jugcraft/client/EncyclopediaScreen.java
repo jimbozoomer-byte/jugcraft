@@ -102,6 +102,11 @@ public class EncyclopediaScreen extends Screen {
 		}
 		body = addRenderableWidget(new ComposerScroll(minecraft, left, bodyTop, contentWidth + SCROLLBAR, Math.max(ROW, footerY - 4 - bodyTop), this::focused));
 		int y = 0;
+		Button guides = Button.builder(Component.translatable("screen.jugcraft.routes.open"),
+				button -> minecraft.gui.setScreen(new EncyclopediaRoutesScreen(this)))
+				.bounds(left, 0, contentWidth, ROW).build();
+		body.add(keyed("guides", guides), y);
+		y += ROW + GAP;
 		if (!EncyclopediaClient.available()) {
 			y = line(y, Component.translatable("screen.jugcraft.encyclopedia.unavailable").withStyle(ChatFormatting.YELLOW), 0, "unavailable");
 		}

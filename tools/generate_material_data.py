@@ -241,6 +241,8 @@ def assets():
     # The Jugcraft Encyclopedia's words (tools/encyclopedia.py, Concordance Chunk A, A-04).
     import encyclopedia
     encyclopedia.lang_entries(lang)
+    import encyclopedia_routes
+    encyclopedia_routes.lang(lang)
     drone_assets(lang)
     import tower
     tower.write_assets(write, rid, ASSETS, lang)
@@ -1711,8 +1713,8 @@ def main():
     import handbook
     book = handbook.build()
     write(ASSETS / "handbook" / "en_us.json", book)
-    import encyclopedia
-    write(ASSETS / "encyclopedia" / "en_us.json", encyclopedia.build(book))
+    import encyclopedia_routes
+    write(ASSETS / "encyclopedia" / "en_us.json", encyclopedia_routes.build(book))
     import recipe_view
     write(ASSETS / "recipe_view.json", recipe_view.build())
     loot_tables()

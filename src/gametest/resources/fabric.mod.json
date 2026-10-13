@@ -362,7 +362,8 @@
 			"io.github.jimbozoomer.jugcraft.test.GasCleanupRackClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.BioGeneratorClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MbsPreviewClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.NuclearClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.NuclearClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.EncyclopediaRoutesClientGameTests"
 		]
 	},
 	"depends": {

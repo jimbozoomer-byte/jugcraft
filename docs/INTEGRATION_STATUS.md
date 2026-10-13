@@ -1,5 +1,14 @@
 # Jugcraft implementation and remaining work
 
+## October 13 integration
+
+The [October 13 integration record](features/oct13-community-integration.md) tracks the 30 current source PRs,
+their exact heads, integration corrections and verification. It includes community chemistry, Peepo automation,
+guns, bosses/lairs, Concordance/encyclopedia, mineral deposits, power lines/wall runs and nuclear power.
+Check the integration PR's merge state before treating these as shipped on main. The owner's separate local machine
+consolidation and recipe-picker playtest remains outside this batch.
+
+
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
 ## October 11 additions

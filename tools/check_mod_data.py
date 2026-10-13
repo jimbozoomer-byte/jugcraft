@@ -3274,8 +3274,8 @@ def check_handbook(registered):
             err(f"handbook: unknown item {ref}")
 
 
-def check_encyclopedia(registered):
-    """The Jugcraft Encyclopedia (tools/encyclopedia.py): both routes are there, every Jugcraft item it shows exists,
+def check_encyclopedia_routes(registered):
+    """The Jugcraft Encyclopedia (tools/encyclopedia_routes.py): both routes are there, every Jugcraft item it shows exists,
     every link opens a real handbook page or codex category, and its screen's words are translated."""
     data = load(ASSETS / "encyclopedia" / "en_us.json")
     if data is None:
@@ -3309,10 +3309,10 @@ def check_encyclopedia(registered):
                 err(f"{name}: {entry['title']} has a link of unknown type {link['type']}")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     java = "".join((CLIENT_JAVA_ROOT / name).read_text(encoding="utf-8")
-                   for name in ("EncyclopediaScreen.java", "EncyclopediaClient.java"))
+                   for name in ("EncyclopediaRoutesScreen.java",))
     # Whole keys in the Java, and the link descriptions it builds from "...opens." and the link's type.
-    keys = {key for key in re.findall(r'"((?:key|screen)\.jugcraft\.encyclopedia[a-z_.]*)"', java) if not key.endswith(".")}
-    keys |= {f"screen.jugcraft.encyclopedia.opens.{kind}" for kind in ("handbook", "codex", "journal")}
+    keys = {key for key in re.findall(r'"((?:key|screen)\.jugcraft\.routes[a-z_.]*)"', java) if not key.endswith(".")}
+    keys |= {f"screen.jugcraft.routes.opens.{kind}" for kind in ("handbook", "codex", "journal")}
     for key in sorted(keys - set(lang)):
         err(f"encyclopedia: untranslated {key}")
 
@@ -14438,7 +14438,7 @@ def main():
     check_nuclear()
     check_guide_books()
     check_handbook(registered)
-    check_encyclopedia(registered)
+    check_encyclopedia_routes(registered)
     check_agriculture()
     check_kitchen()
     check_feasts()
