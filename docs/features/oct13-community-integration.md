@@ -88,5 +88,5 @@ before replacing the owner's test profile. The Howitzer-Walker remains planned i
 | [#347](https://github.com/jimbozoomer-byte/jugcraft/pull/347) | `f823e3d2a1068750b80cdbaed777a9dc500a00a8` | Power lines, stage 1: supports, grid boxes and hanging wires |
 | [#348](https://github.com/jimbozoomer-byte/jugcraft/pull/348) | `64ab5ef9748823cb2d097d4b117acb46c1357462` | Pipes and cables inside made walls |
 | [#349](https://github.com/jimbozoomer-byte/jugcraft/pull/349) | `d05685d11e3338751aa618ab62037b99999644b2` | Nuclear power: reactor, pre-made plants, storage tanks, MBS placement |
-| [#350](https://github.com/jimbozoomer-byte/jugcraft/pull/350) | `a3165b9454dd8f6d353610a2b90a977c7c28c672` | Add the Archive of Last Names and the Writ of Exhumation (the Crypt Lich, part 1) |
+| [#350](https://github.com/jimbozoomer-byte/jugcraft/pull/350) | `86456ab5cad5346c4184907b8cd4d7d2015df3ca` | Add the Archive of Last Names and the Writ of Exhumation (the Crypt Lich, part 1) |
 | [#351](https://github.com/jimbozoomer-byte/jugcraft/pull/351) | `b09481a0f0437d8df1746f4bb62dec779171e61a` | Add rocky-upland spodumene deposits with stone outcrops |

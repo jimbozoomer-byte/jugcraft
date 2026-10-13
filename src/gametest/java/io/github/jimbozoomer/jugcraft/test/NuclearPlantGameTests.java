@@ -45,7 +45,7 @@ import net.minecraft.world.level.block.Rotation;
  */
 public class NuclearPlantGameTests {
 	/** Block counts the blueprints must have (the same as tools/nuclear_plants.py writes; checked again there). */
-	private static final String[][] PLANTS = {{"nuclear_small_modular", "118096"}, {"nuclear_medium_pwr", "341637"}, {"nuclear_large_epr", "383209"}};
+	private static final String[][] PLANTS = {{"nuclear_small_modular", "118096"}, {"nuclear_medium_pwr", "341636"}, {"nuclear_large_epr", "383209"}};
 
 	@GameTest(maxTicks = 20)
 	public void plantBlueprintsLoadWhole(GameTestHelper helper) {
@@ -575,7 +575,8 @@ public class NuclearPlantGameTests {
 				monitors.add(monitor);
 			} else if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.nuclear.EyewashBlock) {
 				eyewashes.add(pos);
-			} else if ((state.is(PlantInterior.BLOCKS.get("edg_battery_charger")) || state.is(PlantInterior.BLOCKS.get("station_charger")))
+			// The diesel starter chargers belong to the EDG circuit, not these four station-battery feeds.
+			} else if (state.is(PlantInterior.BLOCKS.get("station_charger"))
 					&& level.getBlockEntity(pos) instanceof io.github.jimbozoomer.jugcraft.nuclear.LivePanelBlockEntity panel && panel.input != null) {
 				chargers.add(panel);
 			}

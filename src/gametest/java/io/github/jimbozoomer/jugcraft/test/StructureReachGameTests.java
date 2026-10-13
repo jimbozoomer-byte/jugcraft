@@ -99,6 +99,8 @@ public class StructureReachGameTests {
 		var pos = helper.absolutePos(new BlockPos(4, 2, 4));
 		for (GameType mode : new GameType[] {GameType.SPECTATOR, GameType.ADVENTURE}) {
 			Player player = helper.makeMockPlayer(mode);
+			// Mock players report the mode but do not apply its abilities like ServerPlayer.setGameMode does.
+			mode.updatePlayerAbilities(player.getAbilities());
 			helper.assertFalse(io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, pos, player),
 					mode + " cannot modify structures");
 			helper.assertFalse(io.github.jimbozoomer.jugcraft.nuclear.EquipmentPlacement.place(level, pos,
