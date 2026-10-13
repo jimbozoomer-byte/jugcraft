@@ -1000,8 +1000,15 @@ def build():
             machine_page("electrolytic_cell"),
             form_page("electrolytic_separator"),
             machine_page("chemical_reactor"),
+            form_page("chemical_oxidizer"),
+            form_page("industrial_fermenter"),
+            form_page("bulk_chemical_reactor"),
+            form_page("anaerobic_digester"),
+            form_page("coal_gasifier"),
+            form_page("gas_cleanup_rack"),
             machine_page("fuel_cell"),
             form_page("gas_burning_generator"),
+            form_page("bio_generator"),
             machine_page("electroplating_bath"),
             {"title": "Rubber", "icon": f"{MOD}:rubber", "text": [
                 "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor "
@@ -1034,6 +1041,7 @@ def build():
                 "Nitric acid etches microchips with half as much acid as sulfuric."]},
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
+            form_page("chemical_infuser"),
             machine_page("ammonia_chiller"),
             machine_page("cryogenic_liquefier"),
             {"title": "Gas Cylinders", "icon": f"{MOD}:gas_cylinder", "text": [

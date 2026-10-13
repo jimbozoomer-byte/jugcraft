@@ -185,7 +185,14 @@
 			"io.github.jimbozoomer.jugcraft.test.EncyclopediaGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LairEncounterGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PowerLineGameTests",
-			"io.github.jimbozoomer.jugcraft.test.WallRunGameTests"
+			"io.github.jimbozoomer.jugcraft.test.WallRunGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ChemicalInfuserGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ChemicalOxidizerGameTests",
+			"io.github.jimbozoomer.jugcraft.test.IndustrialFermenterGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BulkChemicalReactorGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AnaerobicDigesterGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CoalGasificationGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BioGeneratorGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.FluoriteClientGameTests",
@@ -336,7 +343,15 @@
 			"io.github.jimbozoomer.jugcraft.test.MireHagClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceComposerClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.EncyclopediaClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.PowerLineClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.PowerLineClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ChemicalInfuserClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.ChemicalOxidizerClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.IndustrialFermenterClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BulkChemicalReactorClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AnaerobicDigesterClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CoalGasifierClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GasCleanupRackClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BioGeneratorClientGameTests"
 		]
 	},
 	"depends": {

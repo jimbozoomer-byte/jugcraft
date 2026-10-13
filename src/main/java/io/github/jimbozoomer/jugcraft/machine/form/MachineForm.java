@@ -79,6 +79,8 @@ public final class MachineForm {
 	private final int warmupTicks;
 	private final boolean companionAssistance;
 	private final List<FormFuel> fuels;
+	/** Output tanks (by index) whose excess is vented: a full one never stops the work. */
+	private final boolean[] vented;
 
 	private MachineForm(Builder builder) {
 		this.id = builder.id;
@@ -201,6 +203,14 @@ public final class MachineForm {
 			throw invalid("has two tanks with the same role");
 		}
 		this.tankRoles = List.copyOf(roles);
+		this.vented = new boolean[builder.outputTanks.size()];
+		for (String role : builder.vents) {
+			int out = builder.outputTanks.indexOf(role);
+			if (out < 0) {
+				throw invalid("vents " + role + ", which is not one of its output tanks");
+			}
+			vented[out] = true;
+		}
 		this.tanks = new FluidMachineSpec(Collections.nCopies(builder.inputTanks.size(), profile.bufferMb()),
 				Collections.nCopies(builder.outputTanks.size(), profile.bufferMb()), builder.itemInputs, builder.itemOutputs);
 		for (Map.Entry<String, String> alias : builder.aliases.entrySet()) {
@@ -470,6 +480,24 @@ public final class MachineForm {
 		return tanks;
 	}
 
+	/**
+	 * Whether output tank {@code out} vents its excess: a batch whose result does not fit tops it up and the rest is
+	 * released, so a full tank never stops the work (a byproduct gas whose capture is optional).
+	 */
+	public boolean vents(int out) {
+		return out >= 0 && out < vented.length && vented[out];
+	}
+
+	/** Whether any output tank vents, so the screen offers the stop-instead choice. */
+	public boolean ventsAny() {
+		for (boolean vents : vented) {
+			if (vents) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** The role name of every tank, inputs first. */
 	public List<String> tankRoles() {
 		return tankRoles;
@@ -539,6 +567,7 @@ public final class MachineForm {
 		private int warmup;
 		private boolean companionAssistance;
 		private final List<FormFuel> fuels = new ArrayList<>();
+		private final List<String> vents = new ArrayList<>();
 
 		private Builder(Identifier id, MachineKind family) {
 			this.id = id;
@@ -614,6 +643,12 @@ public final class MachineForm {
 		 */
 		public Builder fuel(Identifier fluid, int jePerMb, int jePerTick) {
 			fuels.add(new FormFuel(fluid, jePerMb, jePerTick));
+			return this;
+		}
+
+		/** Output tank {@code role} vents what does not fit instead of stopping the work (see {@link MachineForm#vents}). */
+		public Builder vent(String role) {
+			vents.add(role);
 			return this;
 		}
 

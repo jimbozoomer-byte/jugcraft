@@ -788,6 +788,10 @@ def machine_assets(lang):
     lang[f"container.{MOD}.form.pause"] = "Pause"
     lang[f"container.{MOD}.form.resume"] = "Resume"
     lang[f"container.{MOD}.form.cancel"] = "Cancel"
+    lang[f"container.{MOD}.form.excess_vent"] = "Excess: vent"
+    lang[f"container.{MOD}.form.excess_hold"] = "Excess: hold"
+    lang[f"container.{MOD}.form.excess_tooltip"] = ("Vent releases what a full byproduct tank cannot hold, so the work "
+                                                    "goes on. Hold keeps it, and a full tank stops the work instead.")
     lang[f"container.{MOD}.form.lanes"] = "Batches"
     lang[f"container.{MOD}.form.reserved"] = "(%s mB reserved)"
     lang[f"container.{MOD}.form.locked"] = "(in use)"
@@ -1263,6 +1267,10 @@ def recipes():
             ("grenade", shaped(MACHINE_FEATURE, [" N ", "PGP", " P "],
                                {"N": "minecraft:iron_nugget", "P": "#c:plates/steel", "G": rid("guncotton")},
                                "grenade", 4, "equipment")),
+            # Ammonium nitrate (the Bulk Chemical Reactor's) packs a grenade in place of guncotton.
+            ("grenade_from_ammonium_nitrate", shaped(MACHINE_FEATURE, [" N ", "PGP", " P "],
+                                                     {"N": "minecraft:iron_nugget", "P": "#c:plates/steel",
+                                                      "G": rid("ammonium_nitrate")}, "grenade", 4, "equipment")),
             ("grenade_launcher", shaped(MACHINE_FEATURE, ["PPG", "RCS"],
                                         {"P": "#c:plates/steel", "G": "#c:gears/steel", "R": rid("rubber"),
                                          "C": rid("basic_circuit"), "S": "#c:ingots/steel"},
