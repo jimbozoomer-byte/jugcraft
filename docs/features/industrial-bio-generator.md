@@ -73,7 +73,8 @@ For CI:
 
 ### Results
 
-Pending: no Gradle build, game test or in-game look has run on this change yet.
+- **Run [38333756008](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38333756008) on the contributor's fork (commit b015cc4e): green.** It compiled, the data checks passed, every server game test passed (the new Bio Generator tests among them), the build without optional integrations passed, and all five client shards passed, `BioGeneratorClientGameTests` included.
+- The client screenshots were taken but have not yet been looked at by a person.
 
 No survival playtest, two-client test or performance measurement has been done.
 
