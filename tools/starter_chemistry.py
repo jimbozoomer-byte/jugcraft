@@ -118,7 +118,7 @@ def write_extras(write, assets, data, lang, condition):
     import model_writer
     write(data / "tags/item/infuser_catalysts.json", {"replace": False, "values": ["jugcraft:nickel_catalyst_bed", "jugcraft:vanadium_contact_bed"]})
     lang["container.jugcraft.form.socket.catalyst_bed"] = "Reusable catalyst bed"
-    lang["container.jugcraft.form.cleaning_title"] = "Gas Cleaning Rack"
+    lang["container.jugcraft.form.cleaning_title"] = "Gas Scrubber"
     lang["container.jugcraft.form.drain_on"] = "Drain excess"
     lang["container.jugcraft.form.drain_off"] = "Keep water"
     lang["container.jugcraft.form.drain_hint"] = "Next batch: collect water that fits and drain only excess water. Running batches keep their setting."

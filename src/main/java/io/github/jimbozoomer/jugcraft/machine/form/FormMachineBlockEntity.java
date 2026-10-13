@@ -74,7 +74,7 @@ import org.jspecify.annotations.Nullable;
  * <p>The block entity is deliberately not itself a container: its slots are reachable only through its screen and its
  * ports, so no generic container lookup can reach a tool socket or an output through a closed face.
  */
-public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuProvider<Identifier> {
+public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuProvider<FormRecipeCatalog> {
 	/**
 	 * Ticks between periodic structure checks, besides the check a part asks for when a neighbour changes; one check
 	 * examines at most {@link MachineForm#MAX_POSITIONS} positions.
@@ -131,6 +131,23 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	/** Null while formed; otherwise what is wrong with the structure. */
 	private @Nullable MachineStatus structure;
 	private boolean paused;
+	private @Nullable Identifier recipeLock;
+
+	public @Nullable Identifier recipeLock() { return recipeLock; }
+
+	/** Null restores automatic mode. Running escrowed batches are deliberately untouched. */
+	public boolean selectRecipe(@Nullable Identifier id) {
+		if (!(level instanceof ServerLevel server) || form.generator()) return false;
+		if (id != null && recipes(server.getServer()).stream().noneMatch(e -> e.id().equals(id))) return false;
+		recipeLock = id;
+		setChanged();
+		return true;
+	}
+
+	private List<FluidRecipes.Entry> allowedRecipes(MinecraftServer server) {
+		var all = recipes(server);
+		return recipeLock == null ? all : all.stream().filter(e -> e.id().equals(recipeLock)).toList();
+	}
 	private boolean drainWater = true;
 	private long drainedWater;
 	private long processEmissions;
@@ -224,7 +241,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		};
 		this.items = slots.getItems();
 		this.tanks = new FluidTanks(form.tanks(), (tank, variant) -> form.generator() ? form.fuel(variant.getFluid()) != null
-				: level instanceof ServerLevel server && usesFluid(recipes(server.getServer()), tank, variant), this::setChanged);
+				: level instanceof ServerLevel server && usesFluid(allowedRecipes(server.getServer()), tank, variant), this::setChanged);
 		this.lanes = new WorkLane[form.profile().lanes()];
 	}
 
@@ -392,7 +409,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 
 	/** Starts what batches it can, pays and advances the running ones, and says what the machine is doing. */
 	private MachineStatus work(MinecraftServer server, long now) {
-		List<FluidRecipes.Entry> runs = recipes(server);
+		List<FluidRecipes.Entry> runs = allowedRecipes(server);
 		MachineStatus blocked = null;
 		for (int lane = 0; lane < lanes.length; lane++) {
 			if (lanes[lane] == null) {
@@ -535,7 +552,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 */
 	private Start start(List<FluidRecipes.Entry> runs, long now) {
 		List<ItemStack> inputs = items.subList(0, form.itemInputs());
-		if (inputsEmpty()) {
+		if (recipeLock != null && runs.isEmpty()) {
+			return new Start(null, MachineStatus.of(MachineLifecycle.WAITING_INPUT, MachineStatus.Reason.RECIPE_UNAVAILABLE));
+		}
+		if (recipeLock == null && inputsEmpty()) {
 			return new Start(null, MachineStatus.IDLE);
 		}
 		MachineStatus first = null;
@@ -543,7 +563,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			FluidRecipe recipe = entry.recipe();
 			// Shared process families must not ignore another job's leftover liquid.
 			// Leave original single-capability machinery and already escrowed batches unchanged.
-			if (form.capabilities().size() > 1 && !consistent(recipe, inputs)) {
+			if ((recipeLock != null || form.capabilities().size() > 1) && !consistent(recipe, inputs)) {
 				continue;
 			}
 			if (!recipe.itemsMatch(inputs) || !recipe.fluidsMatch(tanks)) {
@@ -1088,7 +1108,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 */
 	public boolean canPlaceItem(int slot, ItemStack stack) {
 		if (slot < form.firstOutputSlot()) {
-			return !(level instanceof ServerLevel server) || usesItem(recipes(server.getServer()), slot, stack);
+			return !(level instanceof ServerLevel server) || usesItem(allowedRecipes(server.getServer()), slot, stack);
 		}
 		if (slot < form.firstSocketSlot()) {
 			return false;
@@ -1106,8 +1126,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 
 	/** The client builds the screen's layout from the form, found by its id. */
 	@Override
-	public Identifier getScreenOpeningData(ServerPlayer player) {
-		return form.id();
+	public FormRecipeCatalog getScreenOpeningData(ServerPlayer player) {
+		return new FormRecipeCatalog(form.id(), form.generator() ? List.of() : recipes(player.level().getServer()));
 	}
 
 	/** Breaking the machine drops its slots and every lane's untransformed inputs, once each. */
@@ -1138,6 +1158,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		ContainerHelper.loadAllItems(input, items);
 		energy.setAmount(input.getLongOr("energy", 0L));
 		paused = input.getBooleanOr("paused", false);
+		recipeLock = input.read("recipe_lock", Identifier.CODEC).orElse(null);
 		drainWater = input.getBooleanOr("drain_water", true);
 		drainedWater = Math.max(0, input.getLongOr("drained_water", 0));
 		processEmissions = Math.clamp(input.getLongOr("process_emissions", 0), 0, 0xFFFF_FFFFL);
@@ -1171,6 +1192,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		output.putInt("form_version", form.version());
 		output.putLong("energy", energy.getAmount());
 		output.putBoolean("paused", paused);
+		if (recipeLock != null) output.store("recipe_lock", Identifier.CODEC, recipeLock);
 		output.putBoolean("drain_water", drainWater);
 		output.putLong("drained_water", drainedWater);
 		output.putLong("process_emissions", processEmissions);

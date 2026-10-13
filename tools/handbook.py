@@ -1185,5 +1185,5 @@ def build():
     chemistry["pages"].append({"title": "Four shared process machines", "icon": "jugcraft:brine_concentrator", "text": [
         "Build a Concentrator for seawater or acid; a Gas Scrubber for synthesis gas, biogas or fermentation gas; a Filter Press for aluminate or digestate; and an Industrial Oven for drying, calcination or PTFE sintering. Each handles multiple resources without a separate named machine for every output.",
         "The five older specialist designs stay craftable and continue working in existing factories. The four recommended machines also keep their original saved block IDs, inventories and ports. The Oven gains one connected solution inlet on its lower rear face.",
-        "Inputs currently choose the job. Drain incompatible fluids from inputs AND outputs before switching. Clear other feed items, retain enough output space, and consult JEI for exact receipts. Recipe selection and a persistent automation lock are required future interface work."]})
+        "Open Recipes to search and preview inputs, outputs and costs. Lock recipe chooses the only job new batches may start; Automatic restores input-driven selection. Saved locks also filter automated inputs. Drain incompatible input AND output fluids and clear other feed items when changing jobs; running batches finish unchanged."]})
     return {"chapters": chapters}

@@ -162,6 +162,87 @@ public class MachineConsolidationGameTests {
         h.assertTrue(m.paused(),"Paused state retained");clear(h,m);h.succeed();
     }
 
+    @GameTest(structure = ARENA)
+    public void recipeLockPersistsAndNeverFallsBack(GameTestHelper h) {
+        var m = place(h, IndustrialForms.ALUMINA_CALCINER);
+        var all = m.recipes(h.getLevel().getServer());
+        var locked = all.stream().filter(e -> e.id().getPath().endsWith("sinter_ptfe_seal")).findFirst().orElseThrow();
+        var wrong = recipe(m,h,"calcine_hydroxide");
+        h.assertTrue(m.selectRecipe(locked.id()),"Supported job can be locked before feeding");
+        h.assertTrue(!m.selectRecipe(Jugcraft.id("not_a_recipe")) && locked.id().equals(m.recipeLock()),"Invalid job cannot clear the lock");
+        feed(m,wrong); ticks(h,m,3);
+        h.assertTrue(m.lane(0)==null && m.container().getItem(0).getCount()==wrong.items().getFirst().count(),"Lock must not spend wrong inputs");
+        var saved=m.saveWithoutMetadata(h.getLevel().registryAccess());
+        m.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,h.getLevel().registryAccess(),saved));
+        h.assertTrue(locked.id().equals(m.recipeLock()),"Saved lock survives reload");
+        m.container().setItem(0,ItemStack.EMPTY);
+        feed(m,locked.recipe()); ticks(h,m,1);
+        h.assertTrue(m.lane(0)!=null && m.lane(0).recipe().equals(locked.id()),"Only selected job starts");
+        clear(h,m);h.succeed();
+    }
+
+    @GameTest(structure = ARENA)
+    public void changingRecipePreservesPaidBatchesAndAutomationFilters(GameTestHelper h) {
+        var m=place(h,IndustrialForms.ALUMINA_CALCINER);
+        var all=m.recipes(h.getLevel().getServer());
+        var old=all.stream().filter(e->e.id().getPath().endsWith("calcine_hydroxide")).findFirst().orElseThrow();
+        var next=all.stream().filter(e->e.id().getPath().endsWith("sinter_ptfe_seal")).findFirst().orElseThrow();
+        m.selectRecipe(old.id());feed(m,old.recipe());ticks(h,m,3);
+        var lane=m.lane(0);int paid=lane.progress();
+        h.assertTrue(m.selectRecipe(next.id()) && m.lane(0)==lane && lane.progress()==paid,"Changing selection preserves paid batch");
+        h.assertTrue(!m.container().canPlaceItem(0,new ItemStack(PetroItems.ALUMINUM_HYDROXIDE)),"Hoppers reject nonselected feed");
+        var inputPort=m.form().ports().stream().filter(p->p.kind()==FormPort.Kind.FLUID_IN).findFirst().orElseThrow();
+        var solution=recipe(m,h,"dry_magnesium_chloride").fluids().getFirst().fluid();
+        try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()) {
+            long inserted=m.fluidPort(inputPort).insert(net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant.of(solution),81000,tx);
+            h.assertTrue(inserted==0,"Fluid automation rejects a different recipe's feed");
+            tx.commit();
+        }
+        ticks(h,m,old.recipe().time()+1);
+        h.assertTrue(m.lane(0)==null && m.container().getItem(m.form().firstOutputSlot()).getCount()==old.recipe().results().getFirst().create().getCount(),"Original batch finishes exactly once after selection changes");
+        h.assertTrue(m.selectRecipe(null) && m.recipeLock()==null,"Automatic is explicit and reversible");
+        h.assertTrue(m.container().canPlaceItem(0,new ItemStack(PetroItems.ALUMINUM_HYDROXIDE)),"Automatic restores broad feed acceptance");
+        clear(h,m);h.succeed();
+    }
+
+    @GameTest(structure = ARENA)
+    public void removedRecipeStaysLockedAndOldSavesStayAutomatic(GameTestHelper h) {
+        var m=place(h,IndustrialForms.BRINE_CONCENTRATOR);
+        var saved=m.saveWithoutMetadata(h.getLevel().registryAccess());
+        saved.putString("recipe_lock","jugcraft:removed_by_datapack");
+        m.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,h.getLevel().registryAccess(),saved));
+        feed(m,recipe(m,h,"concentrate_coastal_seawater"));ticks(h,m,2);
+        h.assertTrue(m.lane(0)==null && m.status().reason()==MachineStatus.Reason.RECIPE_UNAVAILABLE,"Missing recipe cannot silently unlock or choose another job");
+        saved.remove("recipe_lock");
+        m.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,h.getLevel().registryAccess(),saved));
+        h.assertTrue(m.recipeLock()==null,"Old saves default to Automatic");clear(h,m);h.succeed();
+    }
+
+    @GameTest(structure = ARENA)
+    public void menuRejectsRemoteInvalidAndStaleSelection(GameTestHelper h) {
+        var m=place(h,IndustrialForms.BRINE_CONCENTRATOR);
+        var player=h.makeMockServerPlayerInLevel();
+        player.setPos(m.getBlockPos().getX()+.5,m.getBlockPos().getY(),m.getBlockPos().getZ()+.5);
+        var menu=(FormMachineMenu)m.createMenu(7,player.getInventory(),player);player.containerMenu=menu;
+        h.assertTrue(!menu.clickMenuButton(player,1000000) && m.recipeLock()==null,"Forged index is rejected");
+        h.assertTrue(menu.clickMenuButton(player,FormMachineMenu.BUTTON_RECIPE),"Valid open nearby menu selects a job");
+        h.assertTrue(!menu.clickMenuButton(player,FormMachineMenu.BUTTON_AUTO),"Same-tick repeated selection is bounded");
+        var other=(FormMachineMenu)m.createMenu(8,player.getInventory(),player);
+        h.assertTrue(other.selectedRecipe()==1,"Second viewer sees the shared selected recipe");
+        h.assertTrue(!other.clickMenuButton(player,FormMachineMenu.BUTTON_AUTO),"Unopened menu cannot mutate machine");
+        player.setPos(m.getBlockPos().getX()+100,m.getBlockPos().getY(),m.getBlockPos().getZ());
+        h.assertTrue(!menu.clickMenuButton(player,FormMachineMenu.BUTTON_AUTO),"Remote player cannot change selection");
+        // Exercise the exact recipe-cache invalidation performed by the datapack reload callback.
+        try {
+            var invalidate=io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes.class.getDeclaredMethod("clearCache");
+            invalidate.setAccessible(true);invalidate.invoke(null);
+        } catch (ReflectiveOperationException e) { throw new AssertionError(e); }
+        h.assertTrue(menu.catalogStale(),"Open menu detects changed server recipe catalog");
+        player.setPos(m.getBlockPos().getX()+.5,m.getBlockPos().getY(),m.getBlockPos().getZ()+.5);
+        h.assertTrue(!menu.clickMenuButton(player,FormMachineMenu.BUTTON_AUTO),"Stale menu cannot change selection");
+        player.containerMenu=player.inventoryMenu;clear(h,m);h.succeed();
+    }
+
     private static FormMachineBlockEntity place(GameTestHelper h, FormMachineBlock block) {
         var state = block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH);
         h.setBlock(AT, state);

@@ -51,6 +51,17 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 	private final MachineScreenThemes.Theme theme;
 	private Button pauseButton;
 	private Button drainButton;
+	private Button recipeButton;
+	private boolean recipePageOpen;
+
+	public void openRecipes() {
+		recipePageOpen = true;
+		minecraft.gui.setScreen(new MachineRecipeScreen(this, menu));
+	}
+
+	void returnFromRecipes() { recipePageOpen = false; }
+
+	@Override public void removed() { if (!recipePageOpen) super.removed(); }
 
 	public FormMachineScreen(FormMachineMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, menu.form().id().getPath().equals("gas_cleaning_rack")
@@ -71,6 +82,11 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 			drainButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable(overflowKey("hint"))));
 		}
 		titleLabelX = (BAY_WIDTH - font.width(title)) / 2;
+        if (!menu.form().generator()) {
+            recipeButton = addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.recipes"),
+                    b -> openRecipes()).bounds(leftPos + 56, topPos + 71, 88, 11).build());
+            recipeButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("container.jugcraft.form.recipes_hint")));
+        }
 		pauseButton = addRenderableWidget(Button.builder(Component.translatable("container.jugcraft.form.pause"),
 				button -> click(FormMachineBlockEntity.BUTTON_PAUSE)).bounds(leftPos + SCREEN_X, topPos + BUTTON_Y, 36, 12).build());
 		if (!menu.form().generator()) {
@@ -82,6 +98,8 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 	@Override
 	protected void containerTick() {
 		super.containerTick();
+		if (recipeButton != null) recipeButton.setMessage(Component.translatable(menu.selectedRecipe() == 0
+				? "container.jugcraft.form.recipes" : "container.jugcraft.form.recipes_locked"));
 		if (drainButton != null) {
 			drainButton.setMessage(Component.translatable(menu.data(FormMachineBlockEntity.DATA_DRAIN) != 0
 					? overflowKey("on") : overflowKey("off")));

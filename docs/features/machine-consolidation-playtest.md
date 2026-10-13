@@ -25,6 +25,8 @@ Tank labels for the four shared machines are now generic and specific to that fo
 
 ## Controls and required next UI
 
+Follow-up: the [recipe interface playtest](machine-recipe-interface-playtest.md) implements the mandatory picker, previews and saved lock locally. The paragraphs below describe this earlier consolidation checkpoint.
+
 This build uses the existing input-driven recipe matching, pause, cancellation, tank inspection and JEI/Encyclopedia. Before changing jobs, drain incompatible input/output liquids and clear incompatible feed items. A different fluid in an output blocks production rather than being replaced. Unused inputs also block an unrelated recipe. Costs are paid per actual batch.
 
 The new mixed-feed regression test exposed that the old matching path ignored input tanks a candidate recipe did not use. Shared families (more than one capability) now require all present feeds to belong to the candidate before starting a batch; otherwise they show a mixed-jobs message. Single-capability specialists keep their earlier matching behavior. Existing escrowed work is not reselected or discarded when feeds change. This is a safe automatic-mode rule, not the planned persistent recipe lock.

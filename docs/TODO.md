@@ -1,15 +1,19 @@
 # Jugcraft TODO list
 
+## Howitzer-Walker (owner request, 13 October 2026)
+
+- [ ] **Add the Howitzer-Walker using the owner's existing model and animations in GitHub.** Locate and record their exact source paths before implementation; preserve the supplied design and clips. Import through the shared walker/vehicle systems, with grounded walking/turning, firing/recoil, idle and entry/exit behavior; add crafting, fuel/ammunition, controls, collision, sound, server-authoritative damage and multiplayer synchronization. Test the actual model/animations locally before main. This is future gameplay work, distinct from the already registered Self-Propelled Howitzer. The specific Howitzer-Walker source is not identified in this local checkout yet.
+
 ## MUST: consolidated machine recipe interface
 
-Owner requirement, 13 October 2026, for the Concentrator, Gas Scrubber, Filter Press and Industrial Oven, then other multi-recipe machinery. See [consolidation and compatibility](features/machine-consolidation-playtest.md). These unchecked items are mandatory follow-up work; the first consolidation build still chooses recipes from supplied inputs.
+Owner requirement, 13 October 2026, for the Concentrator, Gas Scrubber, Filter Press and Industrial Oven, then other multi-recipe machinery. See [consolidation and compatibility](features/machine-consolidation-playtest.md). Implemented locally in the [recipe interface playtest](features/machine-recipe-interface-playtest.md), pending owner review before main. Automatic mode remains available; choosing a row only previews it until Lock recipe is clicked.
 
-- [ ] **MUST provide a searchable recipe/product picker** so players can choose what to make before inserting materials; show supported recipes and any unmet upgrade requirements.
-- [ ] **MUST preview exact inputs, retained catalysts/tools, outputs, byproducts, time and power**, including which tank/hatch receives each output.
-- [ ] **MUST implement a persistent, server-authoritative recipe lock for automation.** A locked machine may only start the selected recipe; it must not silently switch when other inputs arrive. Save/reload and multiplayer must preserve this selection.
-- [ ] **MUST explain why work cannot start**: missing ingredients, incompatible leftovers, missing upgrade, full/wrong output, power or pause. Never delete tank contents or consumed batch inputs when changing selection.
-- [ ] **MUST preserve running batches when selection changes** and apply a new selection only to subsequent work; validate permissions, recipe eligibility and all client requests on the server.
-- [ ] **MUST test selection, lock, automation, blocked outputs, reload and multiplayer**, plus readable layouts for every consolidated machine. Existing input-driven automation remains a deliberate selectable automatic mode.
+- [x] **MUST provide a searchable recipe/product picker** so players can choose what to make before inserting materials; show supported recipes and any unmet upgrade requirements.
+- [x] **MUST preview exact inputs, retained catalysts/tools, outputs, byproducts, time and power**, including which tank/hatch receives each output.
+- [x] **MUST implement a persistent, server-authoritative recipe lock for automation.** A locked machine may only start the selected recipe; it must not silently switch when other inputs arrive. Save/reload and multiplayer must preserve this selection.
+- [x] **MUST explain why work cannot start**: missing ingredients, incompatible leftovers, missing upgrade, full/wrong output, power or pause. Never delete tank contents or consumed batch inputs when changing selection.
+- [x] **MUST preserve running batches when selection changes** and apply a new selection only to subsequent work; validate permissions, recipe eligibility and all client requests on the server.
+- [ ] **MUST complete a two-player manual server playtest** of selection, lock, automation and reload before release. Automated server tests cover selection, persistence, input/output blocking and shared viewer state; the native client test covers controls and readable layouts. Automatic remains an explicit selectable mode.
 
 Local consolidation checkpoint: four recommended machines share the former nine specialists' processes. Old block IDs and construction recipes remain supported. This is local playtest work, not merged to main.
 

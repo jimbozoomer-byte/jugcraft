@@ -89,7 +89,49 @@ public class MachineConsolidationClientGameTests implements FabricClientGameTest
                 BlockPos pos=spawn.offset((i%6)*10,0,(i/6)*14-4);
                 server.runCommand("tp @p %d %d %d 180 0".formatted(pos.getX(),y,pos.getZ()+3));context.waitTicks(3);
                 server.runOnServer(t -> t.getPlayerList().getPlayers().getFirst().openMenu(machine(t.overworld(),pos)));
-                context.waitForScreen(FormMachineScreen.class);context.takeScreenshot("consolidation_menu_"+i);context.setScreen(()->null);
+                context.waitForScreen(FormMachineScreen.class);context.takeScreenshot("consolidation_menu_"+i);
+                context.clickScreenButton("Recipes");
+                context.waitForScreen(io.github.jimbozoomer.jugcraft.client.MachineRecipeScreen.class);
+                context.waitTicks(3);context.takeScreenshot("recipe_picker_"+i);
+                context.clickScreenButton("Lock recipe");context.waitTicks(3);
+                context.runOnClient(c -> {
+                    var menu=(io.github.jimbozoomer.jugcraft.machine.form.FormMachineMenu)c.player.containerMenu;
+                    if(menu.selectedRecipe()==0 || menu.catalog().isEmpty()) throw new AssertionError("Recipe selection did not synchronize");
+                });
+                context.takeScreenshot("recipe_locked_"+i);
+                context.runOnClient(c -> c.gui.screen().mouseScrolled(c.getWindow().getGuiScaledWidth()-20,100,0,-12));
+                context.takeScreenshot("recipe_outputs_"+i);
+                if(i==7) {
+                    context.runOnClient(c -> c.gui.screen().children().stream()
+                        .filter(child -> child instanceof net.minecraft.client.gui.components.EditBox).findFirst()
+                        .ifPresent(child -> ((net.minecraft.client.gui.components.EditBox)child).setValue("ptfe")));
+                    context.runOnClient(c -> {
+                        long count=c.gui.screen().children().stream().filter(child -> child instanceof net.minecraft.client.gui.components.Button button
+                            && button.visible && button.getMessage().getString().toLowerCase(java.util.Locale.ROOT).contains("ptfe")).count();
+                        if(count!=3)throw new AssertionError("Search must show all three PTFE processes, found "+count);
+                    });
+                    context.clickScreenButton("Sinter ptfe seal");context.waitTicks(2);
+                    context.clickScreenButton("Lock recipe");context.waitTicks(3);
+                    context.runOnClient(c -> {
+                        var menu=(io.github.jimbozoomer.jugcraft.machine.form.FormMachineMenu)c.player.containerMenu;
+                        if(menu.selectedRecipe()==0 || !menu.catalog().get(menu.selectedRecipe()-1).id().getPath().endsWith("sinter_ptfe_seal"))
+                            throw new AssertionError("Filtered recipe row did not select and lock PTFE seal");
+                    });
+                    context.takeScreenshot("recipe_search_ptfe");
+                    int previousScale=context.computeOnClient(c->c.options.guiScale().get());
+                    for(int scale:List.of(2,3)) {
+                        context.runOnClient(c->{c.options.guiScale().set(scale);c.resizeGui();});
+                        context.waitTicks(2);context.takeScreenshot("recipe_scale_"+scale);
+                    }
+                    context.runOnClient(c->{c.options.guiScale().set(previousScale);c.resizeGui();});
+                }
+                context.clickScreenButton("Automatic");context.waitTicks(3);
+                context.runOnClient(c -> {
+                    if(((io.github.jimbozoomer.jugcraft.machine.form.FormMachineMenu)c.player.containerMenu).selectedRecipe()!=0)
+                        throw new AssertionError("Automatic mode did not synchronize");
+                });
+                context.clickScreenButton("Back to machine");context.waitForScreen(FormMachineScreen.class);
+                context.setScreen(()->null);
             }
             // End with a stocked, paused factory so the owner can start each machine when ready.
             server.runOnServer(s -> {
