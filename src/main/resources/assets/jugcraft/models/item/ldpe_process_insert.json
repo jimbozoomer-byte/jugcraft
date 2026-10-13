@@ -2,7 +2,8 @@
   "parent": "minecraft:block/block",
   "textures": {
     "dp_gunmetal": "jugcraft:block/dp_gunmetal",
-    "dp_olive": "jugcraft:block/dp_olive"
+    "dp_olive": "jugcraft:block/dp_olive",
+    "particle": "jugcraft:block/dp_olive"
   },
   "elements": [
     {

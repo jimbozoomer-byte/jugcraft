@@ -2,7 +2,8 @@
   "parent": "minecraft:block/block",
   "textures": {
     "bio_fiber_owner": "jugcraft:block/bio_fiber_owner",
-    "ceramic_insulator": "jugcraft:block/ceramic_insulator"
+    "ceramic_insulator": "jugcraft:block/ceramic_insulator",
+    "particle": "jugcraft:block/dp_olive"
   },
   "elements": [
     {

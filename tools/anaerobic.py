@@ -81,5 +81,5 @@ def write_extras(write,assets,data,lang,condition):
     import model_writer
     out=model_writer.StyleWriter(assets)
     elements=[box((3,3,4),(13,7,12),'bio_fiber_owner'),box((7,2.9,3.9),(9,7.1,12.1),'ceramic_insulator')]
-    out.item_model('digestate_fiber',dict(parent='minecraft:block/block',textures={n:'jugcraft:block/'+n for n in model_writer.texture_names(elements)},elements=model_writer.scaled_elements(elements)))
+    out.item_model('digestate_fiber',dict(parent='minecraft:block/block',textures=dict({n:'jugcraft:block/'+n for n in model_writer.texture_names(elements)},particle='jugcraft:block/dp_olive'),elements=model_writer.scaled_elements(elements)))
     out.item('digestate_fiber','jugcraft:item/digestate_fiber')

@@ -97,7 +97,7 @@ def write_extras(write,assets,data,lang,condition):
  }
  writer=model_writer.StyleWriter(assets)
  for name,elements in models.items():
-  writer.item_model(name,dict(parent='minecraft:block/block',textures={t:'jugcraft:block/'+t for t in model_writer.texture_names(elements)},elements=model_writer.scaled_elements(elements)))
+  writer.item_model(name,dict(parent='minecraft:block/block',textures=dict({t:'jugcraft:block/'+t for t in model_writer.texture_names(elements)},particle='jugcraft:block/dp_olive'),elements=model_writer.scaled_elements(elements)))
  for name,display in ITEMS.items():
   lang['item.jugcraft.'+name]=display
   write(assets/'items'/f'{name}.json',dict(model=dict(type='minecraft:model',model='jugcraft:item/'+name)))

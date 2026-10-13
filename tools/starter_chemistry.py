@@ -144,5 +144,6 @@ def write_extras(write, assets, data, lang, condition):
             coating = "sp_copper" if name == "vanadium_oxide" else "dp_gunmetal"
             elements = [box((3, 2, 3), (13, 5, 13), coating), box((5, 5, 5), (11, 7, 11), coating)]
         textures = {n: f"jugcraft:block/{n}" for n in model_writer.texture_names(elements)}
+        textures['particle'] = 'jugcraft:block/dp_olive'
         out.item_model(name, {"parent": "minecraft:block/block", "textures": textures, "elements": model_writer.scaled_elements(elements)})
         out.item(name, f"jugcraft:item/{name}")

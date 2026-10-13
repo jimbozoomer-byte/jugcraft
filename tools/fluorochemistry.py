@@ -82,7 +82,7 @@ def write_extras(write,assets,data,lang,condition):
   models['ptfe_liner'+suffix]=[box((2,2,2),(14,3,14),texture),box((2,3,2),(4,8,14),texture),box((12,3,2),(14,8,14),texture)]
  models['ptfe_offcut']=[box((2,2,2),(5,4,13),OLIVE),box((7,2,5),(13,4,8),OLIVE)]
  for name,elements in models.items():
-  writer.item_model(name,dict(parent='minecraft:block/block',textures={t:'jugcraft:block/'+t for t in model_writer.texture_names(elements)},elements=model_writer.scaled_elements(elements)))
+  writer.item_model(name,dict(parent='minecraft:block/block',textures=dict({t:'jugcraft:block/'+t for t in model_writer.texture_names(elements)},particle='jugcraft:block/dp_olive'),elements=model_writer.scaled_elements(elements)))
   write(assets/'items'/f'{name}.json',dict(model=dict(type='minecraft:model',model='jugcraft:item/'+name)))
   lang['item.jugcraft.'+name]=ITEMS[name]
  p=data/'tags/item/polymer_process_inserts.json'

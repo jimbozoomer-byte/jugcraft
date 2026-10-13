@@ -72,7 +72,7 @@ def write_extras(write,assets,data,lang,condition):
  }
  for grade,texture in [('hdpe',CERAMIC),('ldpe',OLIVE),('pvc',STEEL),('rubber',RUBBER)]:
   models[grade+'_offcut']=[box((2,2,2),(5,4,13),texture),box((7,2,5),(13,4,8),texture),box((9,2,10),(12,4,14),texture)]
- for name,elements in models.items():writer.item_model(name,dict(parent='minecraft:block/block',textures={t:'jugcraft:block/'+t for t in model_writer.texture_names(elements)},elements=model_writer.scaled_elements(elements)))
+ for name,elements in models.items():writer.item_model(name,dict(parent='minecraft:block/block',textures=dict({t:'jugcraft:block/'+t for t in model_writer.texture_names(elements)},particle='jugcraft:block/dp_olive'),elements=model_writer.scaled_elements(elements)))
  for name,label in ITEMS.items():
   lang['item.jugcraft.'+name]=label
   write(assets/'items'/f'{name}.json',dict(model=dict(type='minecraft:model',model='jugcraft:item/'+name)))

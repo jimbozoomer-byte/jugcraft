@@ -1,7 +1,8 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "dp_rubber": "jugcraft:block/dp_rubber"
+    "dp_rubber": "jugcraft:block/dp_rubber",
+    "particle": "jugcraft:block/dp_olive"
   },
   "elements": [
     {

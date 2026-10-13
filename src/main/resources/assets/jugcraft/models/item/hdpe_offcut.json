@@ -1,7 +1,8 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "ceramic_insulator": "jugcraft:block/ceramic_insulator"
+    "ceramic_insulator": "jugcraft:block/ceramic_insulator",
+    "particle": "jugcraft:block/dp_olive"
   },
   "elements": [
     {
