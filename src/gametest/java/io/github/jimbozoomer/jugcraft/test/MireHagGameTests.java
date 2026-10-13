@@ -773,17 +773,19 @@ public class MireHagGameTests {
 	 * creatures are made invisible by the Invisibility effect, as the game makes them: a creature's invisibility follows its
 	 * effects whenever they change.
 	 */
-	@GameTest(maxTicks = 100)
+	@GameTest(structure = FEN, padding = 8, maxTicks = 100)
 	public void theHagsEyeShowsWhatHides(GameTestHelper helper) {
 		ServerPlayer seer = helper.makeMockServerPlayerInLevel();
 		seer.setGameMode(GameType.CREATIVE);
-		BlockPos at = helper.absolutePos(new BlockPos(1, 1, 1));
+		// Keep even the out-of-range subject inside this test's ticking arena. Teleporting it outside the small
+		// default structure made its effect tick depend on whether a neighbouring test happened to load its chunk.
+		BlockPos at = helper.absolutePos(new BlockPos(20, 1, 20));
 		seer.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);
-		Pig hidden = helper.spawn(EntityTypes.PIG, new BlockPos(3, 1, 1));
-		Pig plain = helper.spawn(EntityTypes.PIG, new BlockPos(1, 1, 3));
-		Pig far = helper.spawn(EntityTypes.PIG, new BlockPos(3, 1, 3));
+		Pig hidden = helper.spawn(EntityTypes.PIG, new BlockPos(22, 1, 20));
+		Pig plain = helper.spawn(EntityTypes.PIG, new BlockPos(20, 1, 22));
+		Pig far = helper.spawn(EntityTypes.PIG, new BlockPos(40, 1, 20));
 		List<Pig> pigs = List.of(hidden, plain, far);
-		pigs.forEach(pig -> pig.setNoGravity(true));
+		pigs.forEach(pig -> { pig.setNoGravity(true); pig.setNoAi(true); });
 		for (Pig unseen : List.of(hidden, far)) {
 			unseen.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 1200, 0, false, false));
 		}
