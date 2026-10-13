@@ -243,7 +243,7 @@ Nothing a tier needs comes only from him: Fire Resistance and magma cream come f
 
 ## The Mire Hag: the plan (being built)
 
-The third of the first eight, built by [the boss playbook](BOSS_PLAYBOOK.md) as the Yeti King and the Cinder Tyrant were: first her lair and the summoning that opens it, then the Hag herself and her loot, each its own pull request with tests and pictures. On 13 October 2026 the owner chose her as the next boss ("Go with recommendations" on the Cinder Tyrant's checkpoint). Part 1, the fen and the stone: [features/lantern-fen.md](../features/lantern-fen.md).
+The third of the first eight, built by [the boss playbook](BOSS_PLAYBOOK.md) as the Yeti King and the Cinder Tyrant were: first her lair and the summoning that opens it, then the Hag herself and her loot, each its own pull request with tests and pictures. On 13 October 2026 the owner chose her as the next boss ("Go with recommendations" on the Cinder Tyrant's checkpoint). Part 1, the fen and the stone: [features/lantern-fen.md](../features/lantern-fen.md). Part 2, the Hag and her loot: [features/mire-hag.md](../features/mire-hag.md).
 
 The design joins two sources:
 - this page's own idea for her: a witch who hides in the fog among illusions of herself, throws poison brews and binds players with roots, and must be struck where she truly is, the one who casts a shadow;
@@ -324,7 +324,7 @@ A participant is a player who hurt her, her Likenesses or the Root Knot, and is 
 | 300 experience, shared out | always |
 | The advancement **Seen Through** | always |
 
-- **Hagmoss:** a cheaper Hag Stone, her part of what summons her; and a use for those who never fight her, to be settled in part 2.
+- **Hagmoss:** a cheaper Hag Stone, her part of what summons her; and for those who never fight her, light grey dye or compost (settled in part 2).
 - **The Hag's Eye:** a hag stone that has seen through her. Held in the offhand, it makes invisible creatures near you glow.
 - **The Hag's Shawl:** a costume worn on the head, her hood of grey moss and sedge.
 - **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Venom boon; until now they were in the creative tab only.

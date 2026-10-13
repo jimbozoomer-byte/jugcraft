@@ -1,7 +1,10 @@
 package io.github.jimbozoomer.jugcraft.lair;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -18,11 +21,24 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /**
  * A fen lamp of the Lantern Fen (docs/features/lantern-fen.md): a great lantern of blackened iron on a willow post, its
  * panes burning with the marsh-light. A lair fixture: it cannot be broken, and any player in the fen lights one that has
- * gone out by using it ({@link #light}). The Mire Hag's fight puts them out (part 2). Lit, it gives light 15
- * (tools/lairs.py FEN_LAMP), and now and then a mote of marsh-light drifts up from its cap.
+ * gone out by using it ({@link #light}). The Mire Hag's fight puts them out, and is told when a player lights one again
+ * ({@link #onLitByHand}). Lit, it gives light 15 (tools/lairs.py FEN_LAMP), and now and then a mote of marsh-light drifts
+ * up from its cap.
  */
 public class FenLampBlock extends LairBrazierBlock {
 	private static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 16, 14);
+	private static final List<LitByHand> LIT_BY_HAND = new ArrayList<>();
+
+	/** Told when a player lights a fen lamp that had gone out. */
+	@FunctionalInterface
+	public interface LitByHand {
+		void lit(ServerLevel level, BlockPos pos, Player player);
+	}
+
+	/** Calls {@code listener} whenever a player lights a fen lamp that had gone out (the Mire Hag's fight listens). */
+	public static void onLitByHand(LitByHand listener) {
+		LIT_BY_HAND.add(listener);
+	}
 
 	public FenLampBlock(Properties properties) {
 		super(properties);
@@ -38,8 +54,10 @@ public class FenLampBlock extends LairBrazierBlock {
 		if (state.getValue(LIT)) {
 			return InteractionResult.PASS;
 		}
-		if (!level.isClientSide()) {
-			light(level, pos);
+		if (level instanceof ServerLevel server && light(level, pos)) {
+			for (LitByHand listener : LIT_BY_HAND) {
+				listener.lit(server, pos, player);
+			}
 		}
 		return InteractionResult.SUCCESS;
 	}

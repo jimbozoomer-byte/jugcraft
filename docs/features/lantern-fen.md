@@ -1,6 +1,6 @@
 # The Lantern Fen
 
-Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 5, the Mire Hag, in the [bosses plan](../branches/BOSSES.md#the-mire-hag-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Lantern Fen, a fifth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Hag Stone that opens it. The Mire Hag and her loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 5, the Mire Hag, in the [bosses plan](../branches/BOSSES.md#the-mire-hag-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Lantern Fen, a fifth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Hag Stone that opens it. The Mire Hag and her loot are part 2, in their own pull request ([mire-hag.md](mire-hag.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 13 October 2026 the owner chose the recommendation at the Cinder Tyrant's checkpoint ("Go with recommendations"): the Mire Hag next, built the same two-part way, her bog lair and summoning first.
 Owner: @jimbozoomer-byte
 

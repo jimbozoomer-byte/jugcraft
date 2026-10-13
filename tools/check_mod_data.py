@@ -9782,6 +9782,316 @@ def check_cinder_tyrant():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def check_mire_hag():
+    """The Mire Hag (tools/mire_hag.py, docs/features/mire-hag.md): every number the Java uses is the table's; her attacks
+    are the table's, and her rule can be played (the marsh's middle lies beyond every lamp's light, so her Likenesses
+    have somewhere to walk; her Likenesses' places round her foe never meet behind it; the Root Knot gives players time
+    to cut it down; her roots never hold anyone longer than her Root Lanes take to come round again; her brew reaches its
+    farthest mark well within its life, and her pools poison again before the last poisoning wears off); where her fight
+    looks for the Lantern Fen's parts (LanternFen.java) is where tools/lantern_fen.py builds them: she waits on the porch
+    with room over her, comes down into open water, the Grey Mist she leaves opens in water with air over it, the Root
+    Knot crawls the ring on its boards (or through a drowned stump), and each lamp is the fen lamp on its post; her brews
+    leave from where her model's left hand is as she throws; her Likenesses are she to look at (her model, her clips and
+    her sheet, her size and her name), but cast no shadow while she does; whoever her roots hold has no speed left and
+    no jump, until a tick of the server lets them go; every entity is registered, named and drawn; each GeckoLib body has
+    its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet without overlapping, its
+    sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is animated by both of her
+    controllers; her loot table is the table's and her trophies are Arms VII's; her recipes (none of which makes
+    Hagmoss), tags and advancement are there; the Hag's Eye is held in the offhand and looked at on the server; every
+    message she sends has its words; and nothing of hers loads a chunk or leaves its dimension."""
+    import math
+    import arms_variants
+    import lantern_fen as lf
+    import mire_hag as mh
+    import mire_hag_models as hm
+    folder = JAVA_ROOT / "lair" / "hag"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/hag: no Java")
+        return
+    for cls, table in (("MireHagEntity", mh.MIRE_HAG), ("RootKnotEntity", mh.ROOT_KNOT), ("PoisonBrewEntity", mh.BREW),
+                       ("HagRootsEntity", {"SINK": mh.SINK}), ("HagsEye", mh.EYE)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/mire_hag.py's {value}")
+    boss = sources.get("MireHagEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, lure, drowned) in mh.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(lure).lower()}, {str(drowned).lower()})")
+        if expected not in boss:
+            err(f"MireHagEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"MireHagEntity does not scale as every lair boss does ({call})")
+    h = mh.MIRE_HAG
+    if not 0.0 < h["LAST_AT"] < h["DARK_AT"] < 1.0:
+        err("tools/mire_hag.py: the Last Light (LAST_AT) must come after Lights Out (DARK_AT)")
+    if not 0.0 < h["LAST_COOLDOWN"] < 1.0:
+        err("tools/mire_hag.py: the Last Light must make her cooldowns shorter (0 < LAST_COOLDOWN < 1)")
+    if not 0 < h["LIKENESSES"] <= h["DARK_LIKENESSES"]:
+        err("tools/mire_hag.py: more Likenesses walk with her after Lights Out than before, and some before")
+    if h["LIKENESS_SPREAD"] * ((h["DARK_LIKENESSES"] + 1) // 2) >= 180.0:
+        err("tools/mire_hag.py: her Likenesses' places round her foe (LIKENESS_SPREAD apart, either side) would meet behind it")
+    centre = lf.CENTRE
+    for x, z in lf.LAMPS:
+        if math.hypot(x + 0.5 - centre[0], z + 0.5 - centre[1]) <= h["LAMP_REACH"]:
+            err(f"The lamp at ({x}, {z}) lights the marsh's middle (LAMP_REACH): her Likenesses would have nowhere to walk")
+    if (mh.ROOT_KNOT["START"] - mh.ROOT_KNOT["REACH"]) / mh.ROOT_KNOT["SPEED"] < 100:
+        err("tools/mire_hag.py: the Root Knot must give players five seconds at least to cut it down")
+    if h["ROOT_HOLD"] >= mh.ATTACKS["ROOT_LANES"][3]:
+        err("tools/mire_hag.py: her roots must let go before her Root Lanes can come round again (ROOT_HOLD)")
+    if h["POISON_TICKS"] <= h["POOL_EVERY"]:
+        err("tools/mire_hag.py: her pools must poison again before the last poisoning wears off (POISON_TICKS > POOL_EVERY)")
+    if mh.ATTACKS["POISON_BREW"][5] / mh.BREW["SPEED"] >= mh.BREW["LIFE"]:
+        err("tools/mire_hag.py: a brew must reach her farthest mark within its LIFE")
+    if hm.HAND_Z != -16 * mh.BREW["HAND_AHEAD"] or hm.HAND_Y != 16 * mh.BREW["HAND_UP"]:
+        err("tools/mire_hag.py BREW HAND_AHEAD and HAND_UP must be where tools/mire_hag_models.py's left hand is as she "
+            f"throws: {-hm.HAND_Z / 16} and {hm.HAND_Y / 16}")
+    # Where her fight looks for the Lantern Fen's parts is where tools/lantern_fen.py builds them.
+    fen = re.sub(r"\s+", " ", sources.get("LanternFen", ""))
+    wx, wy, wz, _ = lf.WAIT
+    for name, value in (("CENTRE_X", float(centre[0])), ("CENTRE_Z", float(centre[1])), ("MARSH_RADIUS", lf.MARSH_RADIUS),
+                        ("MUD", lf.MUD), ("WATER", lf.WATER), ("STAND", lf.STAND), ("RING_INNER", lf.RING[0]),
+                        ("RING_OUTER", lf.RING[1]), ("WAIT_X", float(wx)), ("WAIT_Y", float(wy)), ("WAIT_Z", float(wz)),
+                        ("WOKE_X", float(lf.WOKE[0])), ("WOKE_Z", float(lf.WOKE[1])), ("EXIT_WEST", lf.MIDDLE_EXIT["x"][0]),
+                        ("EXIT_EAST", lf.MIDDLE_EXIT["x"][1]), ("EXIT_Z", lf.MIDDLE_EXIT["z"])):
+        if not java_number(fen, name, value):
+            err(f"LanternFen.{name} is not {value} (tools/lantern_fen.py)")
+    if "MUD_TOP = 14.0 / 16.0;" not in fen:
+        err("LanternFen.MUD_TOP must be mud's height, 14/16 of a block")
+    lamps = ", ".join(f"new BlockPos({x}, {y}, {z})" for x, y, z in lf.lamp_blocks())
+    if f"LAMPS = List.of({lamps});" not in fen:
+        err(f"LanternFen.LAMPS are not tools/lantern_fen.py's lamps: {lamps}")
+    blocks = lf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light")
+    cell = (math.floor(wx), int(wy), math.floor(wz))
+    if name((cell[0], cell[1] - 1, cell[2])) != "jugcraft:dead_planks" or not all(
+            free((cell[0], cell[1] + dy, cell[2])) for dy in range(3)):
+        err(f"Where the Mire Hag waits, {cell}, is not on the porch's planks with room for her over them")
+    wokex, wokez = (math.floor(v) for v in lf.WOKE)
+    if math.hypot(lf.WOKE[0] - centre[0], lf.WOKE[1] - centre[1]) > lf.MARSH_RADIUS - 1.0 or name((wokex, lf.MUD, wokez)) != "minecraft:mud" \
+            or name((wokex, lf.WATER, wokez)) != "minecraft:water" or not all(free((wokex, lf.STAND + dy, wokez)) for dy in range(2)):
+        err(f"Where the Mire Hag comes down, ({wokex}, {wokez}), is not open water on mud in the marsh, with air over it")
+    for x in lf.MIDDLE_EXIT["x"]:
+        z = lf.MIDDLE_EXIT["z"]
+        if name((x, lf.WATER, z)) != "minecraft:water" or not free((x, lf.STAND, z)) or name((x, lf.MUD, z)) != "minecraft:mud":
+            err(f"The Grey Mist she leaves at ({x}, {z}) must open in the marsh's water on mud, with air over it")
+    ring = (lf.RING[0] + lf.RING[1]) / 2.0
+    if "RING = (LanternFen.RING_INNER + LanternFen.RING_OUTER) / 2.0;" not in sources.get("RootKnotEntity", ""):
+        err("RootKnotEntity must crawl the ring's middle, between LanternFen.RING_INNER and RING_OUTER")
+    stumps = {(x, z) for x, z, _ in lf.STUMPS}
+    for degrees in range(360):
+        angle = math.radians(degrees)
+        x, z = math.floor(centre[0] + math.cos(angle) * ring), math.floor(centre[1] + math.sin(angle) * ring)
+        if name((x, lf.DECK, z)) != "jugcraft:willow_planks" and (x, z) not in stumps:
+            err(f"The Root Knot's way round the ring crosses ({x}, {z}), which is no boardwalk ({name((x, lf.DECK, z))})")
+            break
+    for x, y, z in lf.lamp_blocks():
+        if name((x, y, z)) != "jugcraft:fen_lamp":
+            err(f"No fen lamp at {(x, y, z)}")
+    # Her Likenesses are she to look at: her model under their name, her clips, her sheet and glowmask; her size and name.
+    gecko = ASSETS / "geckolib"
+    hag_geo = load(gecko / "models" / "entity" / "mire_hag.geo.json") or {}
+    likeness_geo = load(gecko / "models" / "entity" / "hag_likeness.geo.json") or {}
+    strip = lambda geo: json.dumps([{**g, "description": {**g.get("description", {}), "identifier": None}}
+                                    for g in geo.get("minecraft:geometry", [])], sort_keys=True)
+    if mh.GECKO.get("hag_likeness") != "mire_hag" or strip(hag_geo) != strip(likeness_geo):
+        err("hag_likeness.geo.json must be the Mire Hag's model under the Likeness's name")
+    if (load(gecko / "animations" / "entity" / "mire_hag.animation.json")
+            != load(gecko / "animations" / "entity" / "hag_likeness.animation.json")):
+        err("hag_likeness.animation.json must be the Mire Hag's clips")
+    for suffix in ("", "_glowmask"):
+        sheets = [ASSETS / "textures" / "entity" / f"{who}{suffix}.png" for who in ("mire_hag", "hag_likeness")]
+        if all(sheet.is_file() for sheet in sheets) and sheets[0].read_bytes() != sheets[1].read_bytes():
+            with Image.open(sheets[0]) as a, Image.open(sheets[1]) as b:
+                if a.convert("RGBA").tobytes() != b.convert("RGBA").tobytes():
+                    err(f"textures/entity/hag_likeness{suffix}.png must be the Mire Hag's")
+    registry = sources.get("JugcraftHag", "")
+    sizes = {who: re.search(rf'entity\("{who}",.*?\.sized\(([0-9.F, ]+)\)\.eyeHeight\(([0-9.F]+)\)', registry, re.S)
+             for who in ("mire_hag", "hag_likeness")}
+    if None in sizes.values() or sizes["mire_hag"].groups() != sizes["hag_likeness"].groups():
+        err("JugcraftHag: the Likeness must be the Mire Hag's size")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.{MOD}.hag_likeness") != lang.get(f"entity.{MOD}.mire_hag"):
+        err("The Likeness must go by the Mire Hag's name")
+    client = (CLIENT_JAVA_ROOT / "MireHagClient.java").read_text(encoding="utf-8")
+    def drawn(entity):
+        start = client.find(f"register(JugcraftHag.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if "shadowRadius = 0.0F;" not in drawn("hag_likeness") or "shadowRadius = SHADOW;" not in drawn("mire_hag") \
+            or not re.search(r"float SHADOW = 0\.[1-9][0-9]*F;", client):
+        err("MireHagClient: the Mire Hag casts a shadow (SHADOW) and her Likenesses none")
+    likeness = sources.get("HagLikenessEntity", "")
+    for needed, why in (("MireHagEntity.BODY[action.ordinal()]", "plays her clips"), ("MireHagEntity.FLAME[", "plays her lantern"),
+                        ("found.burst(level, this)", "bursts when struck"), ("found.took(player,", "counts who struck it"),
+                        ("MireHagEntity.wade(this,", "wades as she does")):
+        if needed not in likeness:
+            err(f"HagLikenessEntity must be she to look at: it {why} ({needed})")
+    # Held fast: no speed left (Slowness takes 15% a level) and no jump, given back by the server's tick.
+    roots = sources.get("HagRootsEntity", "")
+    held = re.search(r"int HELD_AMPLIFIER = (\d+);", roots)
+    if held is None or (int(held.group(1)) + 1) * 0.15 < 1.0:
+        err("HagRootsEntity.HELD_AMPLIFIER must take all of a player's speed ((amplifier + 1) x 15% >= 100%)")
+    for needed in ("Attributes.JUMP_STRENGTH", "addTransientModifier(", "ServerTickEvents.END_SERVER_TICK.register(HagRootsEntity::release)",
+                   "ServerLifecycleEvents.SERVER_STOPPED"):
+        if needed not in roots:
+            err(f"HagRootsEntity must hold players fast with a transient jump modifier the server's tick takes off ({needed})")
+    if "HagRootsEntity.register();" not in registry:
+        err("JugcraftHag must register HagRootsEntity's release")
+    loot_java = sources.get("MireHagLoot", "")
+    if f'ADVANCEMENT = "{mh.ADVANCEMENT["key"]}";' not in loot_java:
+        err("MireHagLoot's advancement differs from tools/mire_hag.py")
+    for entity in mh.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftHag does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != mh.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {mh.ENTITIES[entity]!r}")
+        if f"JugcraftHag.{entity.upper()}," not in client:
+            err(f"MireHagClient draws no {entity}")
+    for item in mh.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftHag does not register {item}")
+    if "Lairs.onPlaced(Lair.LANTERN_FEN, MireHagEntity::summon)" not in registry:
+        err("JugcraftHag must seat the Mire Hag on the porch of every Lantern Fen as it is placed")
+    if "FenLampBlock.onLitByHand(JugcraftHag::lampLit)" not in registry or "hag.lampLit(level, lamp, player)" not in registry:
+        err("JugcraftHag must tell the Mire Hag when a player lights one of her lamps again")
+    lamp_block = (JAVA_ROOT / "lair" / "FenLampBlock.java").read_text(encoding="utf-8")
+    if "level instanceof ServerLevel server && light(level, pos)" not in lamp_block:
+        err("FenLampBlock must tell its listeners on the server only, and only when the lamp was out")
+    # The GeckoLib bodies.
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    # Her body's clips are named from a prefix (MireHagEntity's BODY table).
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("mire_hag", set()).add(f"animation.mire_hag.{clip}")
+    for entity, body in mh.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in hm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        # A body with a glow layer has a glowmask; one without has none (it would be a texture nothing draws).
+        glows = entity in mh.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"MireHagClient: the {entity}'s glow layer must match tools/mire_hag.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * hm.TEXTURE_SCALE, height * hm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * hm.TEXTURE_SCALE}x{height * hm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # Her controllers own their bones: the body's clips never key her lantern's flame, nor the lantern's a body bone.
+    owned = {bone: controller for controller, bones in hm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in hm.ANIMATIONS["mire_hag"]()["animations"].items():
+        controller = "lantern" if clip_name.split(".")[-1].startswith("lantern_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"mire_hag: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for cls in ("MireHagEntity", "HagLikenessEntity"):
+        for controller in ("body", *hm.CONTROLLERS):
+            if f'new AnimationController<{cls}>("{controller}"' not in sources.get(cls, ""):
+                err(f"{cls} has no {controller} controller (tools/mire_hag_models.py CONTROLLERS)")
+    # Her loot, and her trophies: Arms VII's, as her bosses/mire_hag table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "mire_hag.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/mire_hag.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"hagmoss": mh.HAGMOSS, **{item: mh.TROPHY_CHANCE for item in mh.TROPHIES}, **mh.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/mire_hag.json gives {found_loot}, not tools/mire_hag.py's {expected}")
+    if tuple(arms_variants.trophies("mire_hag")) != tuple(mh.TROPHIES):
+        err(f"tools/mire_hag.py TROPHIES {mh.TROPHIES} are not Arms VII's: {arms_variants.trophies('mire_hag')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "mire_hag.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in mh.TROPHIES]:
+        err(f"loot_table/bosses/mire_hag.json holds {held_items}, not her trophies {mh.TROPHIES}")
+    for table_id in ("entities/mire_hag", "bosses/mire_hag"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"MireHagLoot must roll loot_table/{table_id}.json")
+    for trophy in mh.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftHag must find the {trophy} (Arms VII registers it)")
+    for key, recipe in mh.RECIPES.items():
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Hagmoss comes only from her: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:hagmoss":
+            err(f"recipe/{path.name} makes Hagmoss, which only the Mire Hag gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in mh.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{mh.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{mh.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in mh.MESSAGES:
+        if f'"message.jugcraft.mire_hag.{key}"' not in sent:
+            err(f"tools/mire_hag.py MESSAGES has {key}, which the Java never sends")
+    # The Hag's Eye sees what hides: held in the offhand, looked at on the server's tick.
+    eye = sources.get("HagsEye", "")
+    if "getOffhandItem().is(JugcraftHag.HAGS_EYE)" not in eye or "ServerTickEvents.END_SERVER_TICK" not in eye \
+            or "HagsEye.register();" not in registry:
+        err("HagsEye must look at each player's offhand on the server's tick")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -13419,6 +13729,7 @@ def main():
     check_tatterlace()
     check_yeti()
     check_cinder_tyrant()
+    check_mire_hag()
     check_material_sets()
     check_art()
     check_pixel_hollows()

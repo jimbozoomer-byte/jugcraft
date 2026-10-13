@@ -62,6 +62,8 @@ PORCH_STAIR = (20, 21)
 CAULDRON = (38, HUT["floor"] + 1, 18)        # the Hag's cauldron on the porch
 WAIT = (40.5, HUT["floor"] + 1, 17.5, 0.0)   # where she waits (part 2): x, y, z and yaw (facing south, over the marsh)
 ARRIVAL = (40.0, STAND, 80.5, 180.0)          # x, y, z and yaw: at the jetty's end, facing north
+WOKE = (42.5, 24.5)                           # where she comes down into the water as she wakes (part 2): x, z
+MIDDLE_EXIT = {"x": (39, 40), "z": 43}        # where the Grey Mist opens when she falls (part 2): in the water and over it
 EXIT = {"x": (39, 40), "z": 83}               # the Grey Mist's columns and row, three blocks high from STAND
 # Where the mist throws back whoever strays: farther than BOUNDS (horizontally) from CENTRE, or below FLOOR.
 BOUNDS = 44
