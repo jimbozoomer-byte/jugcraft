@@ -1,0 +1,32 @@
+{
+  "parent": "jugcraft:root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:monomer_preparation_unit"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.encyclopedia_monomer_preparation_unit.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.encyclopedia_monomer_preparation_unit.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "obtain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "jugcraft:monomer_preparation_unit"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

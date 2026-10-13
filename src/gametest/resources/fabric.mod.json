@@ -11,11 +11,11 @@
 			"io.github.jimbozoomer.jugcraft.test.TestForms"
 		],
 		"fabric-gametest": [
-            "io.github.jimbozoomer.jugcraft.test.CoastalMetalsGameTests",
-            "io.github.jimbozoomer.jugcraft.test.AnaerobicGameTests",
-            "io.github.jimbozoomer.jugcraft.test.BiorefineryGameTests",
-            "io.github.jimbozoomer.jugcraft.test.EncyclopediaGameTests",
-            "io.github.jimbozoomer.jugcraft.test.AcidFactoryGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CoastalMetalsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AnaerobicGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiorefineryGameTests",
+			"io.github.jimbozoomer.jugcraft.test.EncyclopediaGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AcidFactoryGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MachineConnectionGameTests",
 			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorGameTests",
@@ -180,13 +180,14 @@
 			"io.github.jimbozoomer.jugcraft.test.YetiKingGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderKilnGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantGameTests",
-			"io.github.jimbozoomer.jugcraft.test.StarterChemistryGameTests"
+			"io.github.jimbozoomer.jugcraft.test.StarterChemistryGameTests",
+			"io.github.jimbozoomer.jugcraft.test.PolymerGameTests"
 		],
 		"fabric-client-gametest": [
-            "io.github.jimbozoomer.jugcraft.test.CoastalMetalsClientGameTests",
-            "io.github.jimbozoomer.jugcraft.test.AnaerobicClientGameTests",
-            "io.github.jimbozoomer.jugcraft.test.BiorefineryClientGameTests",
-            "io.github.jimbozoomer.jugcraft.test.EncyclopediaClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CoastalMetalsClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.AnaerobicClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.BiorefineryClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.EncyclopediaClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorClientGameTests",
@@ -324,7 +325,8 @@
 			"io.github.jimbozoomer.jugcraft.test.YetiKingClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderKilnClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.StarterChemistryClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.StarterChemistryClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.PolymerClientGameTests"
 		]
 	},
 	"depends": {

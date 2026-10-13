@@ -8487,6 +8487,446 @@
           "energy_per_tick": 32
         }
       ]
+    },
+    {
+      "block": "jugcraft:monomer_preparation_unit",
+      "type": "monomer_preparation_unit",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:refinery_gas",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethylene",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:bioethanol",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethylene",
+              500
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ethylene",
+              500
+            ],
+            [
+              "jugcraft:chlorine",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethylene_dichloride",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ethylene_dichloride",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:vinyl_chloride",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 96
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:polymerization_kettle",
+      "type": "polymerization_kettle",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ethylene",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:hdpe_pellets",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:hdpe_process_insert",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ethylene",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ldpe_pellets",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:ldpe_process_insert",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:vinyl_chloride",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pvc_resin",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:butadiene",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rubber",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:polymer_extruder",
+      "type": "polymer_extruder",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:hdpe_pellets",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:plastic_sheet",
+              3
+            ],
+            [
+              "jugcraft:hdpe_offcut",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:sheet_extrusion_die",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ldpe_pellets",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ldpe_film",
+              3
+            ],
+            [
+              "jugcraft:ldpe_offcut",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:film_extrusion_die",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pvc_resin",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pvc_profile",
+              3
+            ],
+            [
+              "jugcraft:pvc_offcut",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:profile_extrusion_die",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rubber",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:flexible_hose",
+              1
+            ],
+            [
+              "jugcraft:rubber_offcut",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:hose_extrusion_die",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rubber",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:cable_insulation",
+              3
+            ],
+            [
+              "jugcraft:rubber_offcut",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:insulation_extrusion_die",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pvc_resin",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:plastic_sheet",
+              3
+            ],
+            [
+              "jugcraft:pvc_offcut",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:sheet_extrusion_die",
+          "energy_per_tick": 48
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:polymer_reclaimer",
+      "type": "polymer_reclaimer",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:hdpe_offcut",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:hdpe_pellets",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ldpe_offcut",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ldpe_pellets",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pvc_offcut",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pvc_resin",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rubber_offcut",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rubber",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ldpe_film",
+              3
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ldpe_pellets",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pvc_profile",
+              3
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pvc_resin",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
+        }
+      ]
     }
   ],
   "concordance": {

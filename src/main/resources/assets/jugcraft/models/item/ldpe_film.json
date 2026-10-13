@@ -1,0 +1,416 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "ceramic_insulator": "jugcraft:block/ceramic_insulator"
+  },
+  "elements": [
+    {
+      "from": [
+        0.0,
+        1.2333,
+        3.6667
+      ],
+      "to": [
+        16.0,
+        14.6667,
+        9.6667
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            13.333
+          ]
+        },
+        "south": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            13.333
+          ]
+        },
+        "east": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            6.0,
+            13.333
+          ]
+        },
+        "west": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            6.0,
+            13.333
+          ]
+        },
+        "up": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            6.0
+          ]
+        },
+        "down": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            6.0
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0.0,
+        2.0,
+        9.6667
+      ],
+      "to": [
+        16.0,
+        14.0,
+        12.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            12.0
+          ]
+        },
+        "south": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            12.0
+          ]
+        },
+        "east": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            2.333,
+            12.0
+          ]
+        },
+        "west": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            2.333,
+            12.0
+          ]
+        },
+        "up": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            2.333
+          ]
+        },
+        "down": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            2.333
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0.0,
+        2.0,
+        1.3333
+      ],
+      "to": [
+        16.0,
+        14.0,
+        3.6667
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            12.0
+          ]
+        },
+        "south": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            12.0
+          ]
+        },
+        "east": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            2.333,
+            12.0
+          ]
+        },
+        "west": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            2.333,
+            12.0
+          ]
+        },
+        "up": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            2.333
+          ]
+        },
+        "down": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            2.333
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0.0,
+        4.0,
+        12.0
+      ],
+      "to": [
+        16.0,
+        12.0,
+        13.3333
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            8.0
+          ]
+        },
+        "south": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            8.0
+          ]
+        },
+        "east": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            1.333,
+            8.0
+          ]
+        },
+        "west": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            1.333,
+            8.0
+          ]
+        },
+        "up": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            1.333
+          ]
+        },
+        "down": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            1.333
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        0.0,
+        4.0,
+        0.0
+      ],
+      "to": [
+        16.0,
+        12.0,
+        1.3333
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            8.0
+          ]
+        },
+        "south": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            8.0
+          ]
+        },
+        "east": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            1.333,
+            8.0
+          ]
+        },
+        "west": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            1.333,
+            8.0
+          ]
+        },
+        "up": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            1.333
+          ]
+        },
+        "down": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            1.333
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        -0.1,
+        1.3333,
+        6.6667
+      ],
+      "to": [
+        16.1,
+        2.6667,
+        16.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            1.333
+          ]
+        },
+        "south": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            1.333
+          ]
+        },
+        "east": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            9.333,
+            1.333
+          ]
+        },
+        "west": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            9.333,
+            1.333
+          ]
+        },
+        "up": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            9.333
+          ]
+        },
+        "down": {
+          "texture": "#ceramic_insulator",
+          "uv": [
+            0,
+            0,
+            16,
+            9.333
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -13,13 +13,13 @@
     "WKW"
   ],
   "key": {
-    "W": "jugcraft:copper_cable",
-    "T": "jugcraft:steel_tank",
+    "C": "jugcraft:basic_circuit",
     "G": "jugcraft:steel_gear",
     "K": "jugcraft:machine_casing",
     "M": "jugcraft:electric_motor",
     "P": "#c:plates/steel",
-    "C": "jugcraft:basic_circuit"
+    "T": "jugcraft:steel_tank",
+    "W": "jugcraft:copper_cable"
   },
   "result": {
     "id": "jugcraft:coastal_seawater_intake",

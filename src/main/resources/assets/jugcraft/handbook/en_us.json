@@ -4693,9 +4693,9 @@
           "title": "Polymer Molding Press",
           "icon": "jugcraft:polymer_molding_press",
           "text": [
-            "Fit one reusable mold in the mold socket; it is locked during a batch and never consumed or worn. All six products take 120 ticks at 32 JE/t. Housings/panels accept existing plastic pellets or PVC resin through an explicit rigid-polymer tag. Fittings require PVC. Insulation, gaskets and hoses require rubber.",
+            "Fit one reusable mold in the mold socket; it is locked during a batch and never consumed or worn. All six products take 120 ticks at 32 JE/t. Housings/panels accept existing plastic pellets, PVC resin or new HDPE pellets through an explicit rigid-polymer tag. Fittings require PVC. Insulation, gaskets and hoses require rubber.",
             "Four rigid stock -> one housing or panel; two PVC -> two fittings; two rubber -> three insulation pieces or two existing gaskets; three rubber -> one hose. Housing assembles machine casings; fittings reinforce bronze pipes into steel pipes; insulation assembles copper cable; hoses assemble pipe valves; panels combine with coke into existing carbon-composite building/vehicle panels. These are additional routes, not new gates on old recipes.",
-            "Six distinct molds are made from earlier steel plates and simple pattern items. There is no free offcut award: all allocated feed becomes the listed parts. Grade-specific recycling, named new polymer grades and extended monomer chemistry remain later work.",
+            "Six distinct molds are made from earlier steel plates and simple pattern items. There is no free offcut award: all allocated feed becomes the listed parts. The Polymer Extruder and Clean Polymer Reclaimer add continuous shaping and same-grade offcut recovery. Named ethylene, HDPE, LDPE and staged PVC now connect through the Monomer Preparation Unit and Polymerization Kettle.",
             "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
           ],
           "craft": {
@@ -4711,6 +4711,102 @@
               "minecraft:bricks"
             ],
             "result": "jugcraft:polymer_molding_press",
+            "count": 1
+          }
+        },
+        {
+          "title": "Monomer Preparation Unit",
+          "icon": "jugcraft:monomer_preparation_unit",
+          "text": [
+            "Refinery gas (1000 mB) yields 500 mB named ethylene. Renewable route: 1000 mB bioethanol yields 500 mB ethylene and 250 mB water, with paid dehydration. All process heat is included in JE use; no manual pressure controls.",
+            "500 mB ethylene + 500 mB chlorine -> 1000 mB ethylene dichloride; then 1000 mB dichloride -> 500 mB vinyl chloride and 500 mB hydrogen chloride gas. Absorb recovered HCl in the existing Chemical Reactor. Empty incompatible tank contents before switching jobs. Both outlets must fit; nothing is silently vented. Earlier PVC routes remain available.",
+            "Power: lower front-left. Solid feed: front-right. Finished product: rear-right middle; extrusion offcuts: rear-right upper. Fluid feed: rear middle; fluid products: rear bottom. Pause, Cancel, progress, tank levels, energy, tool locks and upgrade slots use the shared factory screen. Recipes are fictional game quantities."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:bricks",
+              "jugcraft:steel_tank",
+              "minecraft:bricks",
+              "jugcraft:copper_cable",
+              "jugcraft:basic_circuit",
+              "jugcraft:copper_cable",
+              "jugcraft:electric_motor",
+              "jugcraft:machine_casing",
+              "jugcraft:electric_motor"
+            ],
+            "result": "jugcraft:monomer_preparation_unit",
+            "count": 1
+          }
+        },
+        {
+          "title": "Polymerization Kettle",
+          "icon": "jugcraft:polymerization_kettle",
+          "text": [
+            "1000 mB ethylene makes four HDPE or LDPE pellets according to the reusable insert in the protected socket. HDPE uses a catalyst cartridge; LDPE uses its process insert. These select distinct paid processing recipes; they are not consumed. PVC and rubber use existing vinyl chloride and butadiene respectively and need no insert.",
+            "HDPE substitutes for ordinary rigid stock in the existing Molding Press, making housings and vehicle panels. LDPE belongs to flexible film, not the rigid-stock tag. The kettle needs only earlier steel, copper and ceramics; HDPE tooling adds existing titanium/magnesium stock.",
+            "Power: lower front-left. Solid feed: front-right. Finished product: rear-right middle; extrusion offcuts: rear-right upper. Fluid feed: rear middle; fluid products: rear bottom. Pause, Cancel, progress, tank levels, energy, tool locks and upgrade slots use the shared factory screen. Recipes are fictional game quantities."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_tank",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_tank",
+              "minecraft:bricks",
+              "jugcraft:basic_circuit",
+              "minecraft:bricks",
+              "jugcraft:electric_motor",
+              "jugcraft:machine_casing",
+              "jugcraft:electric_motor"
+            ],
+            "result": "jugcraft:polymerization_kettle",
+            "count": 1
+          }
+        },
+        {
+          "title": "Polymer Extruder",
+          "icon": "jugcraft:polymer_extruder",
+          "text": [
+            "Continuous shaping on a supported heated barrel, cooling bed and draw rollers. Install a reusable sheet, film, profile, hose or insulation die. Feed HDPE or existing PVC for sheets, LDPE for film, PVC for profiles, or rubber for hoses/insulation. Tool sockets lock during a batch; automation handles feed and both products through their marked hatches.",
+            "Each 160-tick batch at 48 JE/t consumes four stock units. It produces three sheets, films, profiles or insulation pieces, or one hose, plus one matching clean offcut. Both output drawers must have room before work starts. The existing Molding Press keeps its six molds and all prior recipes.",
+            "Power: lower front-left. Solid feed: front-right. Finished product: rear-right middle; extrusion offcuts: rear-right upper. Fluid feed: rear middle; fluid products: rear bottom. Pause, Cancel, progress, tank levels, energy, tool locks and upgrade slots use the shared factory screen. Recipes are fictional game quantities."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:electric_motor",
+              "jugcraft:copper_cable",
+              "jugcraft:machine_casing",
+              "jugcraft:copper_cable"
+            ],
+            "result": "jugcraft:polymer_extruder",
+            "count": 1
+          }
+        },
+        {
+          "title": "Clean Polymer Reclaimer",
+          "icon": "jugcraft:polymer_reclaimer",
+          "text": [
+            "Four same-grade clean offcuts return one stock unit for 120 ticks at 32 JE/t. Three unused LDPE films or PVC profiles also return one matching stock. There is no recipe for mixed trash, other grades, placed blocks or assembled machinery. Recycling pays power and loses material every cycle.",
+            "Film wraps cable insulation and cushions machine housings. PVC profiles brace housings and assemble existing colored-plastic blocks. Sheets, insulation and hoses use all their existing recipes. Look up exact construction uses in JEI.",
+            "Power: lower front-left. Solid feed: front-right. Finished product: rear-right middle; extrusion offcuts: rear-right upper. Fluid feed: rear middle; fluid products: rear bottom. Pause, Cancel, progress, tank levels, energy, tool locks and upgrade slots use the shared factory screen. Recipes are fictional game quantities."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:electric_motor",
+              "minecraft:bricks",
+              "jugcraft:machine_casing",
+              "minecraft:bricks"
+            ],
+            "result": "jugcraft:polymer_reclaimer",
             "count": 1
           }
         }

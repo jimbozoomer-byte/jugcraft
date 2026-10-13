@@ -13,11 +13,11 @@
     "PCP"
   ],
   "key": {
-    "W": "jugcraft:copper_cable",
+    "B": "minecraft:bricks",
+    "C": "jugcraft:basic_circuit",
     "K": "jugcraft:machine_casing",
     "P": "#c:plates/steel",
-    "B": "minecraft:bricks",
-    "C": "jugcraft:basic_circuit"
+    "W": "jugcraft:copper_cable"
   },
   "result": {
     "id": "jugcraft:magnesium_electrolysis_cell",

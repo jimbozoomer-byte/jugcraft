@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "jugcraft:plastic_pellets",
-    "jugcraft:pvc_resin"
+    "jugcraft:pvc_resin",
+    "jugcraft:hdpe_pellets"
   ]
 }

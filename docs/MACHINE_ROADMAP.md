@@ -1,5 +1,7 @@
 # Machine roadmap
 
+Local October 13 checkpoint: [ordinary polymer factory](features/polymer-factory-playtest.md) adds monomer preparation, HDPE/LDPE tooling, a shared Extruder and clean same-grade recycling; the existing Molding Press accepts appropriate HDPE stock. Local playtest only, not merged. PTFE chemistry remains separate.
+
 
 Local implementation, 12 October: [coastal magnesium, staged titanium and Polymer Molding Press playtest](features/coastal-metals-and-polymer-playtest.md). Eight new stations, six reusable molds and current product consumers; validation/package details are tracked in that record. Local-only, not merged to main. Broader alloys, polymer grades and bulk plants remain follow-ups.
 

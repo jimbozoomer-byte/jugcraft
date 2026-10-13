@@ -542,6 +542,77 @@ public final class IndustrialForms {
 			.build();
 	public static FormMachineBlock POLYMER_MOLDING_PRESS;
 
+	public static final MachineForm MONOMER_PREPARATION_UNIT_FORM = MachineForm.builder(Jugcraft.id("monomer_preparation_unit"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("monomer_feed")
+			.inputTank("monomer_reagent")
+			.outputTank("prepared_monomer")
+			.outputTank("monomer_recovery")
+			.items(0, 0)
+			.capability("jugcraft:monomer_preparation")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_0", FormPort.Kind.FLUID_IN, 0, 0, 3, 1, FormSide.BACK)
+			.port("feed_1", FormPort.Kind.FLUID_IN, 1, 1, 3, 1, FormSide.BACK)
+			.port("product_0", FormPort.Kind.FLUID_OUT, 0, 0, 3, 0, FormSide.BACK)
+			.port("product_1", FormPort.Kind.FLUID_OUT, 1, 1, 3, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock MONOMER_PREPARATION_UNIT;
+
+	public static final MachineForm POLYMERIZATION_KETTLE_FORM = MachineForm.builder(Jugcraft.id("polymerization_kettle"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###")
+			.layer("###", "###", "###")
+			.layer("###", "###", "###")
+			.layer("###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("polymer_monomer")
+			.items(0, 1)
+			.capability("jugcraft:graded_polymerization")
+			.upgrades()
+			.warmup(40)
+			.socket("process_insert", net.minecraft.tags.TagKey.create(Registries.ITEM, Jugcraft.id("polymer_process_inserts")))
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_0", FormPort.Kind.FLUID_IN, 0, 0, 2, 1, FormSide.BACK)
+			.port("solid_out_0", FormPort.Kind.ITEM_OUT, 0, 2, 2, 1, FormSide.BACK)
+			.build();
+	public static FormMachineBlock POLYMERIZATION_KETTLE;
+
+	public static final MachineForm POLYMER_EXTRUDER_FORM = MachineForm.builder(Jugcraft.id("polymer_extruder"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.items(1, 2)
+			.capability("jugcraft:polymer_extrusion")
+			.upgrades()
+			.warmup(40)
+			.socket("extrusion_die", net.minecraft.tags.TagKey.create(Registries.ITEM, Jugcraft.id("polymer_extrusion_dies")))
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("solid_in_0", FormPort.Kind.ITEM_IN, 0, 2, 0, 1, FormSide.FRONT)
+			.port("solid_out_0", FormPort.Kind.ITEM_OUT, 0, 2, 4, 1, FormSide.BACK)
+			.port("solid_out_1", FormPort.Kind.ITEM_OUT, 1, 2, 4, 2, FormSide.BACK)
+			.build();
+	public static FormMachineBlock POLYMER_EXTRUDER;
+
+	public static final MachineForm POLYMER_RECLAIMER_FORM = MachineForm.builder(Jugcraft.id("polymer_reclaimer"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###")
+			.layer("###", "###", "###")
+			.layer("###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.items(1, 1)
+			.capability("jugcraft:polymer_reclaiming")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("solid_in_0", FormPort.Kind.ITEM_IN, 0, 2, 0, 1, FormSide.FRONT)
+			.port("solid_out_0", FormPort.Kind.ITEM_OUT, 0, 2, 2, 1, FormSide.BACK)
+			.build();
+	public static FormMachineBlock POLYMER_RECLAIMER;
+
 	private IndustrialForms() {
 	}
 
@@ -571,7 +642,11 @@ public final class IndustrialForms {
 		TITANIUM_CHLORINATOR = block("titanium_chlorinator", TITANIUM_CHLORINATOR_FORM);
 		TITANIUM_REDUCTION_RETORT = block("titanium_reduction_retort", TITANIUM_REDUCTION_RETORT_FORM);
 		POLYMER_MOLDING_PRESS = block("polymer_molding_press", POLYMER_MOLDING_PRESS_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, COAL_GASIFIER, GAS_CLEANING_RACK, ANAEROBIC_DIGESTER, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, BIO_GENERATOR, MASHING_STATION, INDUSTRIAL_FERMENTER, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS);
+		MONOMER_PREPARATION_UNIT = block("monomer_preparation_unit", MONOMER_PREPARATION_UNIT_FORM);
+		POLYMERIZATION_KETTLE = block("polymerization_kettle", POLYMERIZATION_KETTLE_FORM);
+		POLYMER_EXTRUDER = block("polymer_extruder", POLYMER_EXTRUDER_FORM);
+		POLYMER_RECLAIMER = block("polymer_reclaimer", POLYMER_RECLAIMER_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, COAL_GASIFIER, GAS_CLEANING_RACK, ANAEROBIC_DIGESTER, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, BIO_GENERATOR, MASHING_STATION, INDUSTRIAL_FERMENTER, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

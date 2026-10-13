@@ -69,6 +69,22 @@ public final class PetroItems {
 	public static Item HOSE_MOLD;
 	public static Item PANEL_MOLD;
 
+	public static Item HDPE_PELLETS;
+	public static Item LDPE_PELLETS;
+	public static Item LDPE_FILM;
+	public static Item PVC_PROFILE;
+	public static Item HDPE_PROCESS_INSERT;
+	public static Item LDPE_PROCESS_INSERT;
+	public static Item SHEET_EXTRUSION_DIE;
+	public static Item FILM_EXTRUSION_DIE;
+	public static Item PROFILE_EXTRUSION_DIE;
+	public static Item HOSE_EXTRUSION_DIE;
+	public static Item INSULATION_EXTRUSION_DIE;
+	public static Item HDPE_OFFCUT;
+	public static Item LDPE_OFFCUT;
+	public static Item PVC_OFFCUT;
+	public static Item RUBBER_OFFCUT;
+
 	private PetroItems() {
 	}
 
@@ -119,7 +135,38 @@ public final class PetroItems {
 		HOSE_MOLD = JugcraftRegistry.item("hose_mold");
 		PANEL_MOLD = JugcraftRegistry.item("panel_mold");
 
+		HDPE_PELLETS = JugcraftRegistry.item("hdpe_pellets");
+		LDPE_PELLETS = JugcraftRegistry.item("ldpe_pellets");
+		LDPE_FILM = JugcraftRegistry.item("ldpe_film");
+		PVC_PROFILE = JugcraftRegistry.item("pvc_profile");
+		HDPE_PROCESS_INSERT = JugcraftRegistry.item("hdpe_process_insert");
+		LDPE_PROCESS_INSERT = JugcraftRegistry.item("ldpe_process_insert");
+		SHEET_EXTRUSION_DIE = JugcraftRegistry.item("sheet_extrusion_die");
+		FILM_EXTRUSION_DIE = JugcraftRegistry.item("film_extrusion_die");
+		PROFILE_EXTRUSION_DIE = JugcraftRegistry.item("profile_extrusion_die");
+		HOSE_EXTRUSION_DIE = JugcraftRegistry.item("hose_extrusion_die");
+		INSULATION_EXTRUSION_DIE = JugcraftRegistry.item("insulation_extrusion_die");
+		HDPE_OFFCUT = JugcraftRegistry.item("hdpe_offcut");
+		LDPE_OFFCUT = JugcraftRegistry.item("ldpe_offcut");
+		PVC_OFFCUT = JugcraftRegistry.item("pvc_offcut");
+		RUBBER_OFFCUT = JugcraftRegistry.item("rubber_offcut");
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			output.accept(HDPE_PELLETS);
+			output.accept(LDPE_PELLETS);
+			output.accept(LDPE_FILM);
+			output.accept(PVC_PROFILE);
+			output.accept(HDPE_PROCESS_INSERT);
+			output.accept(LDPE_PROCESS_INSERT);
+			output.accept(SHEET_EXTRUSION_DIE);
+			output.accept(FILM_EXTRUSION_DIE);
+			output.accept(PROFILE_EXTRUSION_DIE);
+			output.accept(HOSE_EXTRUSION_DIE);
+			output.accept(INSULATION_EXTRUSION_DIE);
+			output.accept(HDPE_OFFCUT);
+			output.accept(LDPE_OFFCUT);
+			output.accept(PVC_OFFCUT);
+			output.accept(RUBBER_OFFCUT);
 			output.accept(MAGNESIUM_HYDROXIDE);
 			output.accept(DRY_MAGNESIUM_CHLORIDE);
 			output.accept(MAGNESIUM_INGOT);

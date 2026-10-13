@@ -13,11 +13,11 @@
     "WMW"
   ],
   "key": {
-    "W": "jugcraft:copper_cable",
-    "T": "jugcraft:steel_tank",
-    "M": "jugcraft:electric_motor",
     "B": "minecraft:bricks",
-    "C": "jugcraft:basic_circuit"
+    "C": "jugcraft:basic_circuit",
+    "M": "jugcraft:electric_motor",
+    "T": "jugcraft:steel_tank",
+    "W": "jugcraft:copper_cable"
   },
   "result": {
     "id": "jugcraft:brine_concentrator",

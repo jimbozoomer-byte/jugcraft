@@ -13,12 +13,12 @@
     "WKW"
   ],
   "key": {
-    "W": "jugcraft:copper_cable",
-    "T": "jugcraft:steel_tank",
+    "B": "minecraft:bricks",
+    "C": "jugcraft:basic_circuit",
     "G": "jugcraft:steel_gear",
     "K": "jugcraft:machine_casing",
-    "B": "minecraft:bricks",
-    "C": "jugcraft:basic_circuit"
+    "T": "jugcraft:steel_tank",
+    "W": "jugcraft:copper_cable"
   },
   "result": {
     "id": "jugcraft:chloride_dryer",

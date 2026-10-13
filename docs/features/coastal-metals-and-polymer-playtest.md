@@ -2,6 +2,8 @@
 
 Owner-requested local playtest, 12 October 2026. Implemented with OpenAI Codex (GPT-6 family), on `feature/starter-chemistry-playtest` after the biorefinery/aluminum checkpoint. No push or main merge is authorized by this delivery; the owner wants to test new machinery locally first.
 
+Follow-up: the [October 13 polymer factory](polymer-factory-playtest.md) adds named HDPE/LDPE, staged monomers, continuous extrusion and clean recycling. The record below describes the October 12 checkpoint.
+
 ## Implemented player routes
 
 Coastal Seawater Intake -> Brine Concentrator -> Mineral Conditioning Station (hydroxide, then acid preparation) -> Chloride Drying Oven -> Magnesium Electrolysis Cell. Existing starter chemistry supplies lye and hydrochloric acid. Magnesium and the recovered chlorine supply titanium processing; players may trade for any intermediate.

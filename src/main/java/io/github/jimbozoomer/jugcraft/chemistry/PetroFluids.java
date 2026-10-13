@@ -246,6 +246,9 @@ public final class PetroFluids {
 		PURIFIED_TITANIUM_CHLORIDE = fluid("purified_titanium_chloride", 8, 3, 1, 0xFF6E8088, MapColor.COLOR_LIGHT_GRAY);
 		SPENT_MINERAL_WASH = fluid("spent_mineral_wash", 8, 3, 1, 0xFF5A6948, MapColor.COLOR_LIGHT_GRAY);
 
+		ETHYLENE_DICHLORIDE = fluid("ethylene_dichloride", 8, 3, 1, 0xFF6E8562, MapColor.COLOR_LIGHT_GRAY);
+		ETHYLENE = gas("ethylene", 0xFF648787);
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
 				output.accept(entry.bucket());
@@ -259,6 +262,9 @@ public final class PetroFluids {
 	public static Entry CRUDE_TITANIUM_CHLORIDE;
 	public static Entry PURIFIED_TITANIUM_CHLORIDE;
 	public static Entry SPENT_MINERAL_WASH;
+
+	public static Entry ETHYLENE_DICHLORIDE;
+	public static Gas ETHYLENE;
 
 	private static Gas gas(String id, int color) {
 		Gas gas = new Gas(id, Registry.register(BuiltInRegistries.FLUID, Jugcraft.id(id), new GasFluid()), color);

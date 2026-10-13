@@ -465,6 +465,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     anaerobic.write_extras(write, assets, data, lang, condition)
     biorefinery.write_extras(write, assets, data, lang, condition)
     coastal_metals.write_extras(write, assets, data, lang, condition)
+    polymers.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -551,3 +552,13 @@ ROTORS.update(coastal_metals_models.ROTORS)
 ITEM_EXTRAS.update(coastal_metals_models.ITEM_EXTRAS)
 
 HANDBOOK['biogas_cleaner'].append('Also cleans wet fermentation CO2: 250 mB gas + 250 mB wash water -> 250 mB usable CO2 + 250 mB recovered water, 100 ticks at 24 JE/t. Drain both previous products before switching between biogas and fermentation gas. No new disposable filter or separate gas-cleaning machine is needed.')
+
+import polymers
+import polymer_models
+FORMS.update(polymers.FORMS)
+FORM_RECIPES.update(polymers.RECIPES)
+HANDBOOK.update(polymers.HANDBOOK)
+TANK_NAMES.update(polymers.TANK_NAMES)
+MODELS.update(polymer_models.MODELS)
+ROTORS.update(polymer_models.ROTORS)
+ITEM_EXTRAS.update(polymer_models.ITEM_EXTRAS)

@@ -13,12 +13,12 @@
     "MKM"
   ],
   "key": {
-    "T": "jugcraft:steel_tank",
+    "B": "minecraft:bricks",
+    "C": "jugcraft:basic_circuit",
     "K": "jugcraft:machine_casing",
     "M": "jugcraft:electric_motor",
     "P": "#c:plates/steel",
-    "B": "minecraft:bricks",
-    "C": "jugcraft:basic_circuit"
+    "T": "jugcraft:steel_tank"
   },
   "result": {
     "id": "jugcraft:titanium_reduction_retort",

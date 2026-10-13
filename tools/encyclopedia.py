@@ -70,6 +70,10 @@ def build():
         'Fuel route: Heated Mashing Station -> Industrial Fermenter -> Chemical Distillation Station -> existing Bio-Generator or compatible engines. Stillage feeds the Anaerobic Digester. Optional wet CO2 cleanup in the Biogas Cleaner supplies methane synthesis; fermentation keeps running with excess gas venting unless you select Keep gas.',
         'Aluminum route: Bauxite Digestion Vessel -> Aluminate Recovery Press -> Alumina Calciner -> Aluminum Reduction Cell. Recover 200 of 250 mB lye per bauxite, return the press and calciner water, and bind residue into game construction filler. Each bauxite still yields two ingots; electrolysis consumes coke. Copper and steel build the first machines.',
         'Search each machine for precise recipes and visible port positions. The earlier reactor recipes and aluminum consumers remain compatible. Fuel dehydration, larger plants and new aluminum alloys/products are later expansions.']))
+    overviews.insert(2,('polymer_factory','From oil or crops to useful polymer parts','jugcraft:polymer_extruder',[
+        'Monomer Preparation Unit: refinery gas or renewable bioethanol -> ethylene. Add chlorine for dichloride; crack it into vinyl chloride and recovered hydrogen chloride for existing acid absorption.',
+        'Polymerization Kettle selects HDPE and LDPE with reusable inserts. Existing PVC and rubber supplies also work. The Molding Press keeps six molds; HDPE joins compatible rigid stock. The Extruder uses five reusable dies for sheets, film, profiles, hoses and insulation.',
+        'Clean Polymer Reclaimer returns only matching stock from grade-marked offcuts or identified clean film/profiles, with paid work and losses. Both extrusion drawers must fit. Parts feed existing cables, valves, casings and plastic building blocks. PTFE and fluorochemical supply remain a separate future line.']))
     overviews.insert(2,('coastal_metals','Coastal magnesium, titanium and molded parts','jugcraft:magnesium_electrolysis_cell',[
         'Coastal Seawater Intake -> Brine Concentrator -> Mineral Conditioning Station -> Chloride Drying Oven -> Magnesium Electrolysis Cell. Intake water must be at sea level in a beach/ocean area beside an ocean, not just beneath a coastal machine. Lye and hydrochloric acid come from the existing starter factory.',
         'Raw Titanium + coke + chlorine -> Titanium Chlorination Vessel -> existing Chemical Distillation Station -> Titanium Reduction Retort with magnesium -> existing Arc Furnace. Re-electrolyze the returned dry salt to recover magnesium and chlorine with paid power. Treat spent mineral wash in the Conditioner.',
@@ -87,6 +91,8 @@ def write_content(write,assets,data,lang):
     acquire={"chemical_infuser":"Chemical Infuser", "chemical_oxidizer":"Chemical Oxidizer", "coal_gasifier":"Coal Gasifier", "gas_cleaning_rack":"Gas Cleaning and Separation Rack", "hydrochloric_acid_bucket":"Hydrochloric Acid"}
     import anaerobic
     import biorefinery
+    import polymers
+    acquire.update({name:info["display"] for name,info in polymers.FORMS.items()})
     import coastal_metals
     acquire.update({name:info["display"] for name,info in coastal_metals.FORMS.items()})
     acquire.update({name:info['display'] for name,info in biorefinery.FORMS.items()})

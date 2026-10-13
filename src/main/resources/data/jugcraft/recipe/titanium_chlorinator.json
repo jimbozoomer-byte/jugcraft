@@ -13,13 +13,13 @@
     "WKW"
   ],
   "key": {
-    "W": "jugcraft:copper_cable",
-    "T": "jugcraft:steel_tank",
+    "B": "minecraft:bricks",
+    "C": "jugcraft:basic_circuit",
     "K": "jugcraft:machine_casing",
     "M": "jugcraft:electric_motor",
     "P": "#c:plates/steel",
-    "B": "minecraft:bricks",
-    "C": "jugcraft:basic_circuit"
+    "T": "jugcraft:steel_tank",
+    "W": "jugcraft:copper_cable"
   },
   "result": {
     "id": "jugcraft:titanium_chlorinator",
