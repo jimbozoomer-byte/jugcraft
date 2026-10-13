@@ -111,7 +111,11 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftDrones.register();
 		io.github.jimbozoomer.jugcraft.tower.JugcraftTower.register();
 		io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints.register();
+		io.github.jimbozoomer.jugcraft.placement.StructureReach.register();
+		// A tank a kit placed comes down whole when any block of it is broken, giving the kit back.
+		io.github.jimbozoomer.jugcraft.nuclear.TankKitBreaking.register();
 		io.github.jimbozoomer.jugcraft.powerline.JugcraftPowerLines.register();
+		io.github.jimbozoomer.jugcraft.nuclear.JugcraftNuclear.register();
 		io.github.jimbozoomer.jugcraft.energy.CreativeEnergyCellBlock.register();
 		io.github.jimbozoomer.jugcraft.drone.CreativeSupplyCrateBlock.register();
 		PixelHollows.register();

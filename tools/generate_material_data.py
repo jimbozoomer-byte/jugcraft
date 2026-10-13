@@ -15,6 +15,7 @@ import model_writer
 import agriculture_data
 from party import party_lang
 import drones
+import structure_items
 import town_assets
 import material_icons
 
@@ -244,14 +245,21 @@ def assets():
     tower.write_assets(write, rid, ASSETS, lang)
     import power_lines
     power_lines.write_assets(write, rid, ASSETS, lang)
-
+    import nuclear
+    nuclear.write_assets(write, rid, ASSETS, lang)
     import wall_runs
     wall_runs.write_assets(write, rid, ASSETS, lang)
     import blueprints
     blueprints.write_assets(write, rid, ASSETS, lang)
     blueprints.write_all()
+    import nuclear_plants
+    nuclear_plants.write_blueprints()
+    import tank_kits
+    tank_kits.write()
     import drone_sounds
     lang.update(drone_sounds.LANG)
+    import diesel_sounds
+    lang.update(diesel_sounds.LANG)
     import guide_books
     guide_books.write_assets(write, rid, ASSETS, DATA, lang)
     seasons_assets(lang)
@@ -319,13 +327,15 @@ def drone_assets(lang):
         write(ASSETS / "models" / "block" / f"{block}.json", model)
         write(ASSETS / "blockstates" / f"{block}.json", {"variants": {"": {"model": rid(f"block/{block}")}}})
         write(ASSETS / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{block}")}})
-    items = dict(drones.DRONE_PARTS)
-    items.update({tier["id"]: tier["display"] for tier in drones.DRONE_TIERS.values()})
-    for item, display in items.items():
+    for item, display in drones.DRONE_PARTS.items():
         lang[f"item.{MOD}.{item}"] = display
         write(ASSETS / "models" / "item" / f"{item}.json",
               {"parent": "minecraft:item/generated", "textures": {"layer0": rid(f"item/{item}")}})
         write(ASSETS / "items" / f"{item}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{item}")}})
+    # A drone's item shows the drone itself, in miniature (tools/structure_items.py).
+    for tier, info in drones.DRONE_TIERS.items():
+        lang[f"item.{MOD}.{info['id']}"] = info["display"]
+        structure_items.drone_item(write, rid, ASSETS, info["id"], tier)
     lang.update(drones.DRONE_LANG)
 
 
@@ -468,6 +478,12 @@ def drone_recipes(out):
     for result, (pattern, key, count) in power_lines.CRAFTING.items():
         features = [MACHINE_FEATURE] + sorted(power_lines.recipe_features(result, feature_of))
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count, "building")
+        recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
+        write(out / f"{result}.json", recipe)
+    import nuclear
+    for result, (pattern, key, count) in nuclear.CRAFTING.items():
+        features = [MACHINE_FEATURE] + sorted(nuclear.recipe_features(result, feature_of))
+        recipe = shaped(MACHINE_FEATURE, pattern, key, result, count, "equipment" if result != "shielding_concrete" else "building")
         recipe["fabric:load_conditions"] = [c for f in features for c in condition(f)]
         write(out / f"{result}.json", recipe)
     for result, (pattern, key, count) in drones.DRONE_CRAFTING.items():
@@ -823,7 +839,8 @@ RECIPE_TYPES = {"crusher": "crushing", "arc_furnace": "arc_smelting", "alloy_sme
                 "coke_oven": "coking", "steel_foundry": "steelmaking",
                 "tree_farm": "tree_growing",
                 "hydroponic_bay": "hydroponics",
-                "rocket_workshop": "rocket_assembly"}
+                "rocket_workshop": "rocket_assembly",
+                "gas_centrifuge_cascade": "enrichment", "fuel_fabricator": "fuel_fabrication"}
 
 
 def machine_recipe_files(out):
@@ -1027,10 +1044,14 @@ def pixel_hollows_assets(lang):
     for event, subtitle in ph.SUBTITLES.items():
         lang[f"subtitles.{MOD}.{event}"] = subtitle
     import choir_sounds
+    import diesel_sounds
     import drone_sounds
+    import nuclear
     import concordance
     import guns
-    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS, **choir_sounds.SOUNDS, **concordance.sounds(), **guns.SOUNDS})
+    # The diesel generators' start, run and stop, and the Geiger counter's clicks (made in game, GeigerSound.java).
+    write(ASSETS / "sounds.json", {**drone_sounds.SOUNDS, **ph.SOUNDS, **choir_sounds.SOUNDS, **diesel_sounds.SOUNDS,
+                                   **nuclear.sound_events(), **concordance.sounds(), **guns.SOUNDS})
 
 
 def petro_assets(lang):
@@ -1136,9 +1157,11 @@ def loot_tables():
     import power_lines
     power_lines.write_loot(write, rid, out, self_drop)
     power_lines.write_data(write, DATA)
-
+    import nuclear
+    nuclear.write_loot(write, rid, out, self_drop)
     import wall_runs
     wall_runs.write_loot(write, rid, out, self_drop)
+    nuclear.write_data(write, DATA)
     import blueprints
     blueprints.write_loot(write, rid, out, self_drop)
     # The 2-tall charging station drops once, from its lower half.
@@ -1512,6 +1535,10 @@ def tags():
     import tank_display
     for block in tank_display.BLOCKS:
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import nuclear
+    nuclear.write_tags(tags, rid)
+    import wall_runs
+    wall_runs.write_tags(tags, rid)
     # Biomes whose grass and leaves change colour with the seasons (client/SeasonColors).
     import seasons
     for biome in seasons.BIOMES:
