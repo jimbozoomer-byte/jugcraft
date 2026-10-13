@@ -244,6 +244,9 @@ def assets():
     tower.write_assets(write, rid, ASSETS, lang)
     import power_lines
     power_lines.write_assets(write, rid, ASSETS, lang)
+
+    import wall_runs
+    wall_runs.write_assets(write, rid, ASSETS, lang)
     import blueprints
     blueprints.write_assets(write, rid, ASSETS, lang)
     blueprints.write_all()
@@ -1129,6 +1132,9 @@ def loot_tables():
     import power_lines
     power_lines.write_loot(write, rid, out, self_drop)
     power_lines.write_data(write, DATA)
+
+    import wall_runs
+    wall_runs.write_loot(write, rid, out, self_drop)
     import blueprints
     blueprints.write_loot(write, rid, out, self_drop)
     # The 2-tall charging station drops once, from its lower half.
@@ -1359,6 +1365,8 @@ def storage_tags(tags, path, block_id, tool):
 
 def tags():
     tags = Tags()
+    import wall_runs
+    wall_runs.write_tags(tags, rid)
     import petro
     for crop in petro.FERMENTABLE:
         tags.add("item", f"{MOD}:fermentable", crop)
