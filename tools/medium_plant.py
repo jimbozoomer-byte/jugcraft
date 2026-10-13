@@ -697,6 +697,9 @@ def containment(s, ox, oz):
     # Refuelling machine rails on the cavity's side walls.
     for z in range(cv - cav - 4, cv + cav + 5):
         for x in (cv - cav - 1, cv + cav + 1):
+            # The rails extend beyond the cavity wall; carry those ends on steel beams too.
+            if b.g[x, floor_y, z] == 0:
+                b.g[x, floor_y, z] = LINER
             b.g[x, floor_y + 1, z] = RAIL_NS
     # The polar crane's ring girder (a concrete corbel round the liner), lights under it.
     gy = 40
@@ -709,10 +712,15 @@ def containment(s, ox, oz):
     # Ladders up the outside of the crane wall in the annulus, west and east, to the operating floor.
     for x, face in ((int(c - crane_r) - 2, "west"), (int(c + crane_r) + 1, "east")):
         for y in range(1, floor_y + 1):
+            # The rounded wall steps away here. A continuous pilaster supports every ladder rung.
+            dx, dz = P.DIRS[face]
+            if b.g[x - dx, y, cv + 3 - dz] == 0:
+                b.g[x - dx, y, cv + 3 - dz] = CONCRETE
             b.g[x, y, cv + 3] = LADDER[face]
     # Personnel airlock (west): a steel box through the wall with a steel door at each end.
     b.box(0, 1, cv - 2, 4, 4, cv + 2, LINER)
     b.clear(1, 1, cv - 1, 3, 3, cv + 1)
+    b.p(0, 0, cv, LINER)  # The outer door is beyond the circular foundation; give it a sill.
     b.door(0, 1, cv, "east", double=False)
     b.door(4, 1, cv, "east", double=False)
     # Equipment hatch (south): a big steel plug in a concrete collar, warning lights.

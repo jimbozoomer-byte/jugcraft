@@ -45,7 +45,7 @@ import net.minecraft.world.level.block.Rotation;
  */
 public class NuclearPlantGameTests {
 	/** Block counts the blueprints must have (the same as tools/nuclear_plants.py writes; checked again there). */
-	private static final String[][] PLANTS = {{"nuclear_small_modular", "118096"}, {"nuclear_medium_pwr", "341636"}, {"nuclear_large_epr", "383209"}};
+	private static final String[][] PLANTS = {{"nuclear_small_modular", "118096"}, {"nuclear_medium_pwr", "341680"}, {"nuclear_large_epr", "383209"}};
 
 	@GameTest(maxTicks = 20)
 	public void plantBlueprintsLoadWhole(GameTestHelper helper) {
@@ -197,6 +197,7 @@ public class NuclearPlantGameTests {
 		}
 		String build = wrong + " blocks differ from the blueprint after the build" + (wrong == 0 ? "" : ":" + missing);
 		io.github.jimbozoomer.jugcraft.Jugcraft.LOGGER.info("{}: {}", plant, build);
+		helper.assertTrue(wrong == 0, plant + ": " + build);
 		java.util.List<BlockPos> cores = new java.util.ArrayList<>();
 		for (BlockPos vessel : built.vessels()) {
 			if (level.getBlockEntity(vessel) instanceof EquipmentBlockEntity v) {

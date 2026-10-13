@@ -37,6 +37,9 @@ attribution are preserved. Conflict resolution and additional fixes use OpenAI C
 - Check custom equipment and power-line footprints before placement/upgrading, and reject spectator/adventure,
   out-of-bounds, unloaded, protected-town or spawn-protected changes. Check both endpoints before wiring changes;
   wall-run packets/direct removal and reactor console packets enforce permissions too.
+- Support the medium plant's annulus ladders, extended crane rails and outer airlock door. These previously broke
+  when Minecraft updated their shapes. The plant runtime test now requires every non-equipment blueprint block to
+  remain after placement. Scope station-battery circuit tests to station chargers, separate from diesel starters.
 
 ## Verification
 
