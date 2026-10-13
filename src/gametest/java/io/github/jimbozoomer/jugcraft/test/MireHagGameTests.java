@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.lair.hag.PoisonBrewEntity;
 import io.github.jimbozoomer.jugcraft.lair.hag.RootKnotEntity;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -591,8 +592,8 @@ public class MireHagGameTests {
 	}
 
 	/**
-	 * The Likeness Exchange: she trades places with a Likeness. The Snuff: as its wind-up ends the lamp burning nearest
-	 * her goes out.
+	 * The Likeness Exchange: she trades places with a Likeness, whichever she picks. The Snuff: as its wind-up ends the
+	 * lamp burning nearest her goes out.
 	 */
 	@GameTest(structure = FEN, padding = 8, maxTicks = 200)
 	public void theLikenessExchangeAndTheSnuff(GameTestHelper helper) {
@@ -607,12 +608,15 @@ public class MireHagGameTests {
 		helper.runAfterDelay(LOADING_TICKS, () -> {
 			foe.setGameMode(GameType.SURVIVAL);
 			foe.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 400, 4));
-			HagLikenessEntity likeness = likeness(level, hag);
-			boolean found = likeness != null;
+			List<HagLikenessEntity> walking = hag.likenesses().stream().map(level::getEntity).filter(HagLikenessEntity.class::isInstance)
+					.map(HagLikenessEntity.class::cast).toList();
+			boolean found = !walking.isEmpty();
 			Vec3 hers = hag.position();
-			Vec3 its = found ? likeness.position() : Vec3.ZERO;
+			List<Vec3> theirs = walking.stream().map(HagLikenessEntity::position).toList();
 			boolean moved = found && hag.exchange(level);
-			boolean traded = found && hag.position().distanceTo(its) < 0.01 && likeness.position().distanceTo(hers) < 0.01;
+			// She trades with one of them, whichever she picks: it now stands where she stood, and she where it stood.
+			boolean traded = IntStream.range(0, walking.size()).anyMatch(i -> walking.get(i).position().distanceTo(hers) < 0.01
+					&& hag.position().distanceTo(theirs.get(i)) < 0.01);
 			middle(hag);
 			BlockPos nearest = hag.nearestLitLamp(level, hag.position());
 			hag.begin(level, MireHagEntity.Attack.SNUFF, foe);
