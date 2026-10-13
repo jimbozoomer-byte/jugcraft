@@ -1,6 +1,6 @@
 # Anaerobic Digester: biogas from organic waste (factory package 2)
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 Stacked on the [Bulk Chemical Reactor](industrial-bulk-chemical-reactor.md) and the branches below it, down to the [Chemical Infuser](industrial-chemical-infuser.md), whose nickel bed upgrades the biogas.
 Proposal issue: none. TODO item: "Design the substantial first bulk Anaerobic Digester … using the selected 60/40 methane/CO2 game mixture, usable digestate … and optional hydrogen upgrading into separated methane."
 - **From the owner's plan:**
@@ -120,7 +120,10 @@ Client game test: `AnaerobicDigesterClientGameTests` takes four views (front lef
 
 ### Results
 
-Not yet run in CI.
+- **The first run, [38425068211](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38425068211), failed only in `AnaerobicDigesterClientGameTests`.** Its full-tank check found the Digester still processing: the test's top-up kept a full stack of waste in the slot, so cancelling had no room to return a batch's waste. The build, the data checks and every server game test passed.
+- The test now empties the slot and the water tank before cancelling (commit 57e3a77f).
+- **Run [38432374427](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38432374427) (commit 57e3a77f): green.** Everything compiled; every server game test passed, including the Digester's tests and the Infuser's biogas upgrading; the build without optional integrations and all five client shards passed.
+- The client screenshots have not yet been looked at by a person.
 
 No survival playtest, two-client test or performance measurement has been done.
 
