@@ -286,30 +286,34 @@ public class MireHagGameTests {
 		foe.setGameMode(GameType.CREATIVE);
 		foe.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 400, 4, false, false));
 		hag.wake(level);
-		helper.runAfterDelay(MireHagEntity.WAKE_TICKS + 10, () -> {
-			boolean formed = hag.likenesses().size() == MireHagEntity.LIKENESSES && hag.foe(level) == null;
+		int down = MireHagEntity.WAKE_TICKS + 10;
+		boolean[] formed = {false};
+		boolean[] lit = {false};
+		helper.runAfterDelay(down, () -> {
+			formed[0] = hag.likenesses().size() == MireHagEntity.LIKENESSES && hag.foe(level) == null;
 			foe.setGameMode(GameType.SURVIVAL);
-			boolean[] lit = {false};
-			for (int tick = 1; tick <= SWING_TICKS; tick++) {
-				helper.runAfterDelay(tick, () -> {
-					for (UUID id : hag.likenesses()) {
-						if (level.getEntity(id) instanceof HagLikenessEntity likeness && hag.inLampLight(level, likeness.position())) {
-							lit[0] = true;
-						}
+		});
+		// Every tick of the walk is looked at. The looks are all set now, as the test begins: the server runs a test's
+		// timed checks while going through its list of them, and a check that adds many more to that list breaks it.
+		for (int tick = down + 1; tick <= down + SWING_TICKS; tick++) {
+			helper.runAfterDelay(tick, () -> {
+				for (UUID id : hag.likenesses()) {
+					if (level.getEntity(id) instanceof HagLikenessEntity likeness && hag.inLampLight(level, likeness.position())) {
+						lit[0] = true;
 					}
-				});
-			}
-			helper.runAfterDelay(SWING_TICKS + 1, () -> {
-				ending(level, hag, () -> {
-					helper.assertTrue(formed, "Her Likenesses did not form round her before she had a foe");
-					helper.assertTrue(hag.foe(level) == foe, "She did not take the player in the marsh for her foe");
-					helper.assertTrue(!lit[0], "A Likeness walked into a lamp's light");
-					helper.assertTrue(hag.likenesses().size() == MireHagEntity.LIKENESSES && hag.returns().isEmpty(), "A Likeness faded on its way: "
-							+ hag.likenesses().size() + " walk with her and " + hag.returns().size() + " will form again");
-					foe.discard();
-				});
-				helper.succeed();
+				}
 			});
+		}
+		helper.runAfterDelay(down + SWING_TICKS + 1, () -> {
+			ending(level, hag, () -> {
+				helper.assertTrue(formed[0], "Her Likenesses did not form round her before she had a foe");
+				helper.assertTrue(hag.foe(level) == foe, "She did not take the player in the marsh for her foe");
+				helper.assertTrue(!lit[0], "A Likeness walked into a lamp's light");
+				helper.assertTrue(hag.likenesses().size() == MireHagEntity.LIKENESSES && hag.returns().isEmpty(), "A Likeness faded on its way: "
+						+ hag.likenesses().size() + " walk with her and " + hag.returns().size() + " will form again");
+				foe.discard();
+			});
+			helper.succeed();
 		});
 	}
 
