@@ -34,6 +34,22 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **The Hag Stone** (a flint, string, two mud, two gold and a fermented spider eye) opens it: at night, standing in shallow water or on mud in any swamp, the Floodplain or the Muskeg, look through it. A lantern burns far off, the water stills and mist rises from it, which others can follow through for a minute. Refused, it says why and is kept. The Hag herself and her loot are part 2. Record: [lantern-fen.md](docs/features/lantern-fen.md).
 - **The data audit now finds a tag named inside a biome tag** (the stone's lands name `#c:is_swamp`); it looked for it among the wrong folder.
 
+### Added: Guns, slice 12C (the lone guns)
+- **Three guns** from the owner's models and animations: the **Tuppence Pistol**, a copper pistol held in one hand, the tube under its barrel loaded a round at a time; the **Goshawk Revolver**, a heavy iron revolver held in one hand, its cylinder swung out to load a round at a time; and the **Lament Rifle**, a sculk-grown bolt-action rifle of five rifle rounds, the hardest-hitting and furthest-reaching of the rifles. The two hand guns pair with any other one-handed gun.
+- The Tuppence Pistol is made from copper, iron and a lever; the Goshawk Revolver from iron and a lever; the Lament Rifle, as the sculk guns, from steel, a lever, echo shards and sculk. The Tuppence Pistol takes the stocks, scopes and Laser Sight; the Lament Rifle the grips and bayonets too; the Goshawk Revolver none.
+- The owner's Whizzbanger waits for the model its animations were made for.
+- Record: [guns.md, slice 12C](docs/features/guns.md#slice-12c-the-lone-guns).
+
+### Added: Guns, slice 12B (the copper guns)
+- **Three copper guns** from the owner's copper models and animations, early guns of copper and iron as the Rust Midge is: the **Penny Pistol**, held in one hand (so it pairs with another one-handed gun), fed from a long magazine at its left side; the **Conductor Carbine**, a slide-action carbine of eight rifle rounds, its slide worked after every shot; and the **Magpie SMG**, an automatic of thirty-two light rounds from a long magazine at its left side.
+- Each is made from copper ingots, an iron ingot and a lever; the Penny Pistol's recipe fits the inventory's own grid. The Penny Pistol takes the barrel attachments and the stocks; the other two the grips, bayonets, scopes and Laser Sight too, and the Conductor Carbine the magazines.
+- Record: [guns.md, slice 12B](docs/features/guns.md#slice-12b-the-copper-guns).
+
+### Added: Guns, slice 12A (the End guns)
+- **Three End guns** from the owner's purpur models and animations, each fed from a shulker box with the shulker peering out of it, whose bullets make what they hit float for a second, as a shulker's do (the game's own Levitation; each hit starts it again): the **Chitin SMG**, an automatic of twenty-four light rounds; the **Hermit Rifle**, an automatic of twenty rifle rounds, its muzzle in a curled shell; and the **Borer**, a machine gun of forty rifle rounds carried at the hip, charged with a crank.
+- Each is made from steel, a lever, a shulker shell (two for the Borer) and a purpur block. The Chitin SMG takes the scopes and Laser Sight, the Hermit Rifle the stocks too; the Borer takes none.
+- Record: [guns.md, slice 12A](docs/features/guns.md#slice-12a-the-end-guns).
+
 ### Added: The Cinder Tyrant (boss 4, part 2)
 - **The Cinder Tyrant,** the Cinder Kiln's boss: a salamander lord the size of a cart, armoured in obsidian plates with magma glowing in their seams. He waits sunk in the crucible, only his crest over the slag, and wakes when a player steps down onto the bowl's floor or strikes him: 440 health scaled for the party, armour 10, never hurt by fire. Left alone, he sinks back, healed, and the kiln resets.
 - **His rule, the heat is his:** hot, he takes half of every blow. Turn a sluice and bait his Body Slam into its flooded trough, and the steam quenches him for 8 seconds: his seams go dark, blows do a quarter more and he slows.

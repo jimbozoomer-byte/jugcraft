@@ -1480,6 +1480,15 @@ def check_guns():
     shots_java = (JAVA_ROOT / "guns" / "GunShots.java").read_text(encoding="utf-8")
     if f"BURN_SECONDS = {guns.BURN_SECONDS};" not in shots_java:
         err(f"GunShots.BURN_SECONDS differs from tools/guns.py: expected {guns.BURN_SECONDS}")
+    # Slice 12A: the End guns, whose bullets make what they hurt float, and for how long.
+    levitating = ", ".join(f'"{gun}"' for gun in guns.LEVITATING)
+    if f"LEVITATING = Set.of({levitating});" not in java:
+        err(f"JugcraftGuns.LEVITATING differs from tools/guns.py: expected Set.of({levitating})")
+    for gun in guns.LEVITATING:
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
+            err(f"tools/guns.py LEVITATING names {gun}, which is not a gun that fires bullets")
+    if f"LIFT_TICKS = {guns.LIFT_TICKS};" not in shots_java:
+        err(f"GunShots.LIFT_TICKS differs from tools/guns.py: expected {guns.LIFT_TICKS}")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:
