@@ -627,10 +627,12 @@ def check_tags():
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
             known |= set(re.findall(r'Registry\.register\(BuiltInRegistries\.ENTITY_TYPE,\s*id\("([a-z_]+)"\)', scary))
+        # A worldgen tag's registry is two folders deep (worldgen/biome): a tag it names lives beside it there.
+        tag_registry = "/".join(path.relative_to(DATA).parts[2:4]) if registry == "worldgen" else registry
         for value in (load(path) or {}).get("values", []):
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
-                if not tag_exists(registry, value[1:]):
+                if not tag_exists(tag_registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
             elif registry == "damage_type":
                 ns, name = split(value)
@@ -8360,25 +8362,31 @@ def check_model_uvs():
 
 def check_lairs():
     """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
-    tools/cinder_kiln.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
-    docs/features/cinder-kiln.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
-    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
-    there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts and snow heights and the
-    Cinder Kiln's slag, troughs and sluices are the tables', every server option has its default, every message the Java
-    sends has its words, and the Glacier Hall and the Cinder Kiln are laid out as their records say (check_glacier_hall,
-    check_cinder_kiln)."""
+    tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, docs/features/hollow-acre.md,
+    docs/features/spindle-loft.md, docs/features/glacier-hall.md, docs/features/cinder-kiln.md,
+    docs/features/lantern-fen.md, docs/features/crypt-archive.md): the Java's numbers are the tables' and the layouts',
+    every lair has its dimension, dimension type, biome (no spawns), template and words for coming in, the rituals'
+    blocks, items, recipes and tags are there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's
+    icicle parts and snow heights, the Cinder Kiln's slag, troughs and sluices, the Lantern Fen's lamps and the Archive of
+    Last Names' names, stones, seals, lectern and phylactery are the tables', every server option has its default, every
+    message the Java sends has its words, and the Glacier Hall, the Cinder Kiln, the Lantern Fen and the Archive of Last
+    Names are laid out as their records say (check_glacier_hall, check_cinder_kiln, check_lantern_fen,
+    check_crypt_archive)."""
     import cinder_kiln as ck
+    import crypt_archive as ca
     import glacier_hall as gh
     import hollow_acre as ha
     import lair_data as ld
     import lairs as la
+    import lantern_fen as lf
     import spindle_loft as sl
     folder = JAVA_ROOT / "lair"
     lair = (folder / "Lair.java").read_text(encoding="utf-8")
     # Each lair's line in Lair.java, from its layout: size, arrival and its facing, centre, bounds, floor and moon.
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
                                        ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
-                                       ("cinder_kiln", ck, ck.CENTRE, None)):
+                                       ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
+                                       ("crypt_archive", ca, ca.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8411,7 +8419,8 @@ def check_lairs():
     for block in la.LAIR_BLOCKS:
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
-    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", la.GATE["entity"]):
+    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
+                 la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8460,6 +8469,59 @@ def check_lairs():
     for land in la.SEAL_LANDS:
         if not (DATA / MOD / "worldgen" / "biome" / f"{land.split(':')[1]}.json").is_file():
             err(f"tools/lairs.py SEAL_LANDS names {land}, which is no biome of Jugcraft's")
+    # The Lantern Fen's: the Hag Stone's rest and reach, its ground and lands, and the lamps' light.
+    stone = (folder / "HagStoneRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(stone, name, la.STONE[key]):
+            err(f"HagStoneRite.{name} is not tools/lairs.py STONE {key} ({la.STONE[key]})")
+    stone_ground = (load(DATA / MOD / "tags" / "block" / "hag_stone_ground.json") or {}).get("values", [])
+    if sorted(stone_ground) != sorted(la.STONE_GROUND):
+        err(f"#jugcraft:hag_stone_ground is not tools/lairs.py STONE_GROUND: {stone_ground}")
+    stone_lands = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "hag_stone_lands.json") or {}).get("values", [])
+    if sorted(stone_lands) != sorted(la.STONE_LANDS):
+        err(f"#jugcraft:hag_stone_lands is not tools/lairs.py STONE_LANDS: {stone_lands}")
+    for land in la.STONE_LANDS:
+        ns, path = split(land.lstrip("#"))
+        found = tag_exists("worldgen/biome", land[1:]) if land.startswith("#") else \
+            ns == "minecraft" or (DATA / ns / "worldgen" / "biome" / f"{path}.json").is_file()
+        if not found:
+            err(f"tools/lairs.py STONE_LANDS names {land}, which is no biome or biome tag")
+    if f'fixture("fen_lamp", FenLampBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -{la.FEN_LAMP["light"]},' not in registry:
+        err(f"JugcraftLairs does not register the fen lamp burning at tools/lairs.py FEN_LAMP light {la.FEN_LAMP['light']}")
+    # The Archive of Last Names': the writ's rest and reach and the tombs it is served on; the names and their runes, the
+    # stones' glows and light, the lectern's rest, the phylactery's light, and the fixtures' registrations.
+    writ = (folder / "ExhumationRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(writ, name, la.WRIT[key]):
+            err(f"ExhumationRite.{name} is not tools/lairs.py WRIT {key} ({la.WRIT[key]})")
+    tombs = (load(DATA / MOD / "tags" / "block" / "writ_tombs.json") or {}).get("values", [])
+    if sorted(tombs) != sorted(la.WRIT_TOMBS):
+        err(f"#jugcraft:writ_tombs is not tools/lairs.py WRIT_TOMBS: {tombs}")
+    for tomb in la.WRIT_TOMBS:
+        if not (ASSETS / "blockstates" / f"{tomb.split(':')[1]}.json").is_file():
+            err(f"tools/lairs.py WRIT_TOMBS names {tomb}, which is no block of Jugcraft's")
+    stone_java = (folder / "NameStoneBlock.java").read_text(encoding="utf-8")
+    runes = re.search(r"enum Rune implements StringRepresentable \{\s*([^;]+);", stone_java)
+    found = re.findall(r'([A-Z_]+)\("([a-z_]+)"\)', runes.group(1)) if runes else []
+    if [(rune.lower(), title) for rune, title in found] != [(rune, title) for title, rune in la.NAMES.items()]:
+        err(f"NameStoneBlock.Rune is not tools/lairs.py NAMES {la.NAMES} in order: {found}")
+    glows = re.search(r"enum Glow implements StringRepresentable \{\s*([A-Z_, ]+);", stone_java)
+    if not glows or tuple(g.strip().lower() for g in glows.group(1).split(",")) != la.NAME_GLOWS:
+        err(f"NameStoneBlock.Glow is not tools/lairs.py NAME_GLOWS {la.NAME_GLOWS}")
+    for cls, name, value in (("NameStoneBlock", "LIGHT", la.NAME_STONE["light"]), ("PhylacteryBlock", "LIGHT", la.PHYLACTERY["light"]),
+                             ("ArchiveLecternBlock", "REST", la.LECTERN["cooldown"])):
+        if not java_number((folder / f"{cls}.java").read_text(encoding="utf-8"), name, value):
+            err(f"{cls}.{name} is not tools/lairs.py's {value}")
+    for line in ('fixture("name_stone", p -> new NameStoneBlock(p.lightLevel(NameStoneBlock::light))',
+                 'fixture("phylactery", p -> new PhylacteryBlock(p.lightLevel(PhylacteryBlock::light))',
+                 'fixture("grave_seal", GraveSealBlock::new', 'fixture("archive_lectern", ArchiveLecternBlock::new'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in ("sexton", "crowned", "scribe"):
+        if f"lair.{MOD}.crypt_archive.name.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Crypt Lich's name {name}")
+    if "ExhumationRite.register();" not in registry or "output.accept(EXHUMATION_WRIT);" not in registry:
+        err("JugcraftLairs does not register the Writ of Exhumation's rite or put the writ in the creative tab")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8509,6 +8571,8 @@ def check_lairs():
             err(f"No words for coming into the lair {name} (message.{MOD}.lair.enter.{name})")
     check_glacier_hall(gh)
     check_cinder_kiln(ck)
+    check_lantern_fen(lf)
+    check_crypt_archive(ca)
 
 
 def check_glacier_hall(gh):
@@ -8776,6 +8840,312 @@ def java_number(source, name, value):
     if isinstance(value, int) and not isinstance(value, bool):
         return re.search(rf"\bint {name} = {value};", source) is not None
     return re.search(rf"\b(?:float|double) {name} = {float(value)}F?;", source) is not None
+
+
+def check_lantern_fen(lf):
+    """The Lantern Fen as tools/lantern_fen.py builds it is the fen its record describes (docs/features/lantern-fen.md):
+    the arrival stands on the jetty's planks with room overhead, and the Grey Mist hangs between the willows; a walk along
+    the boardwalks and banks from the arrival, never stepping more than half a block nor into the water, reaches every
+    lamp's platform and the porch where the Hag waits; the water is one block deep on mud wherever the layout says, and
+    held in on every side, so none of it can flow; each lamp burns on its willow post; the porch has room for her, and
+    her cauldron stands on it; light flooded from the hidden lights, the lamps, the lanterns and the cauldron, as the game
+    floods it, is at least MARSH_LIGHT on every open cell of the marsh; and nothing in it changes by itself once placed
+    (the templates are placed without updates: no leaves, which would decay, no vines, which spread, no grass under a
+    whole block, which would turn to dirt, and nothing that burns or flows)."""
+    from collections import deque
+    import agriculture as agt
+    import decor15
+    import lairs as la
+    blocks = lf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    # What anyone can be in: nothing, or a block with no collision.
+    passable = {None, "minecraft:light", "jugcraft:lair_exit", "minecraft:short_grass", "minecraft:fern",
+                "jugcraft:ghost_fern", "jugcraft:withered_grass", "jugcraft:deadly_nightshade", "jugcraft:cattail",
+                "jugcraft:shroud_moss", "jugcraft:creeping_ivy", "minecraft:dead_bush", "minecraft:hanging_roots"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = lf.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "jugcraft:willow_planks" or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The Lantern Fen's arrival at {feet} does not stand on the jetty's planks with room overhead")
+    for pos in lf.exit_mist():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist between the Lantern Fen's willows at {pos}")
+
+    # Where anyone can stand out of the water, column by column: on a whole block, or on either half of a stair.
+    ground = {"jugcraft:willow_planks", "jugcraft:dead_planks", "minecraft:grass_block", "minecraft:moss_block",
+              "minecraft:podzol", "minecraft:packed_mud"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if not (free((x, y + 1, z)) and free((x, y + 2, z))):
+            continue
+        if state[0] in ground:
+            stands.setdefault((x, z), []).append(y + 1.0)
+        elif state[0] == "minecraft:mud":
+            stands.setdefault((x, z), []).append(y + 14 / 16)
+        elif state[0] == "jugcraft:willow_stairs":
+            stands.setdefault((x, z), []).extend((y + 0.5, y + 1.0))
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    wx, wy, wz, _ = lf.WAIT
+    wait = (int(wx), int(wy), int(wz))
+    if (wait[0], wait[2], float(wy)) not in seen:
+        err("No walk from the Lantern Fen's arrival to the porch where the Hag waits, along the boardwalks and the stair "
+            "without a step of more than half a block")
+    if name((wait[0], wait[1] - 1, wait[2])) != "jugcraft:dead_planks" \
+            or not all(free((wait[0], wait[1] + dy, wait[2])) for dy in range(3)):
+        err(f"The Hag has no room to wait on the Lantern Fen's porch at {wait}")
+    if name(lf.CAULDRON) != "jugcraft:bubbling_cauldron":
+        err(f"The Hag's cauldron is not on the Lantern Fen's porch at {lf.CAULDRON}")
+    for x, y, z in lf.lamp_blocks():
+        if name((x, y, z)) != "jugcraft:fen_lamp" or props((x, y, z)).get("lit") != "true":
+            err(f"No lit fen lamp at {(x, y, z)}")
+        if any(name((x, post, z)) != "jugcraft:willow_fence" for post in range(lf.STAND, y)):
+            err(f"The fen lamp at {(x, y, z)} does not stand on its willow post")
+        if not any(abs(nx - x) <= lf.PLATFORM and abs(nz - z) <= lf.PLATFORM and nh == float(lf.STAND)
+                   for nx, nz, nh in seen):
+            err(f"No walk from the Lantern Fen's arrival reaches the platform of the lamp at {(x, y, z)}")
+
+    # The water: one block deep on mud wherever the layout puts it (but where a stump, a stilt, a stair's support or the
+    # punt's sunk stern stands in it), and held in on every side and below.
+    holds = {"minecraft:water", "minecraft:seagrass", "minecraft:mud", "minecraft:packed_mud", "minecraft:dirt",
+             "minecraft:rooted_dirt", "minecraft:clay", "minecraft:grass_block", "minecraft:moss_block",
+             "minecraft:podzol", "jugcraft:willow_planks", "jugcraft:dead_planks", "jugcraft:willow_log",
+             "jugcraft:stripped_willow_log", "jugcraft:dead_log", "jugcraft:dead_slab"}
+    for x in range(lf.SIZE[0]):
+        for z in range(lf.SIZE[2]):
+            if not lf.is_water(x, z):
+                continue
+            if name((x, lf.WATER, z)) not in ("minecraft:water", "minecraft:seagrass", "jugcraft:dead_log",
+                                              "jugcraft:stripped_willow_log", "jugcraft:willow_planks", "jugcraft:dead_slab") \
+                    or name((x, lf.MUD, z)) not in ("minecraft:mud", "minecraft:packed_mud") \
+                    or name((x, lf.STAND, z)) == "minecraft:water":
+                err(f"The Lantern Fen's water is not one block deep on mud at {(x, z)}")
+                break
+    for (x, y, z), state in blocks.items():
+        if state[0] in ("minecraft:water", "minecraft:seagrass"):
+            leak = [n for n in ((x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1), (x, y - 1, z))
+                    if name(n) not in holds]
+            if leak:
+                err(f"The Lantern Fen's water at {(x, y, z)} would flow into {leak[0]} ({name(leak[0])})")
+                break
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"jugcraft:fen_lamp": la.FEN_LAMP["light"], "jugcraft:witchs_lantern": decor15.WITCHS_LANTERN["light"],
+            "jugcraft:bubbling_cauldron": agt.CAULDRON["light"]}
+    through = passable | {"minecraft:water", "minecraft:seagrass", "minecraft:lily_pad", "jugcraft:duckweed",
+                          "jugcraft:willow_fence", "jugcraft:dead_fence", "minecraft:skeleton_skull",
+                          "minecraft:moss_carpet", "jugcraft:fen_lamp", "jugcraft:witchs_lantern", "jugcraft:bramble"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if state[0] == "jugcraft:fen_lamp" and dict(state[1]).get("lit") != "true":
+            level = 0
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and -1 <= n[1] <= lf.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    marsh = sorted((light.get((x, lf.STAND, z), 0), (x, lf.STAND, z)) for x in range(lf.SIZE[0]) for z in range(lf.SIZE[2])
+                   if lf.in_marsh(x, z) and lf.on_island(x, z) and name((x, lf.STAND, z)) in through)
+    if not marsh or marsh[0][0] < lf.MARSH_LIGHT:
+        dark = [cell for level, cell in marsh if level < lf.MARSH_LIGHT]
+        err(f"{len(dark)} open cells of the Lantern Fen's marsh have less block light than MARSH_LIGHT {lf.MARSH_LIGHT}, "
+            f"the darkest {marsh[0] if marsh else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "LanternFenClientGameTests.java"
+    if not client.is_file() or not java_number(client.read_text(encoding="utf-8"), "MARSH_LIGHT", lf.MARSH_LIGHT):
+        err(f"LanternFenClientGameTests does not read the marsh's light against MARSH_LIGHT {lf.MARSH_LIGHT}")
+
+    # Nothing that changes by itself once placed.
+    covers = {"jugcraft:willow_planks", "jugcraft:dead_planks", "jugcraft:willow_log", "jugcraft:stripped_willow_log",
+              "jugcraft:dead_log", "minecraft:mud", "minecraft:packed_mud", "minecraft:dirt", "minecraft:moss_block"}
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire",
+                                                        "minecraft:magma_block"):
+            err(f"The Lantern Fen has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+        if state[0] == "minecraft:grass_block" and name((x, y + 1, z)) in covers:
+            err(f"The Lantern Fen's grass at {(x, y, z)} is under {name((x, y + 1, z))} and would turn to dirt")
+            break
+
+
+def check_crypt_archive(ca):
+    """The Archive of Last Names as tools/crypt_archive.py builds it is the archive its record describes
+    (docs/features/crypt-archive.md), and where the Java looks for its parts (CryptArchive.java) is where the layout puts
+    them: the arrival stands on the landing with room overhead, and the Grey Mist fills the stair's way back up; a walk
+    from the arrival, never stepping more than half a block, goes down the stair to every open cell of the hall's floor,
+    up the throne's apse, and within reach of each name's grave seal and of the Lectern of Last Names; the four lanes are
+    open and paved; each ledger stone lies in the floor with room over it; the pillars stand; each alcove's sarcophagus,
+    whole seal and dark name-stone carry its name's rune and face the hall, against their wall; the throne, the lectern and
+    the whole phylactery stand where they should; light flooded from the hidden lights, the soul lanterns and the
+    phylactery, as the game floods it, is at least HALL_LIGHT on every open cell of the hall's floor; and nothing in it
+    changes by itself once placed."""
+    from collections import deque
+    import lairs as la
+    blocks = ca.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CryptArchive.java").read_text(encoding="utf-8"))
+    for jname, value in (("STAND", ca.STAND), ("APSE_STAND", ca.APSE_STAND), ("LANDING_STAND", ca.LANDING_STAND),
+                         ("HALL_WEST", ca.HALL["x"][0]), ("HALL_EAST", ca.HALL["x"][1]), ("HALL_NORTH", ca.HALL["z"][0]),
+                         ("HALL_SOUTH", ca.HALL["z"][1])):
+        if not java_number(java, jname, value):
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's {value}")
+    for jname, pos in (("LECTERN", ca.LECTERN), ("PHYLACTERY", ca.PHYLACTERY), ("THRONE", ca.THRONE)):
+        if "{} = new BlockPos({}, {}, {});".format(jname, *pos) not in java:
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's {pos}")
+    order = list(la.NAMES)
+    for jname, cells in (("SEALS", ca.seal_cells()), ("STONES", ca.stone_cells())):
+        expected = "{} = {{{}}};".format(jname, ", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in order))
+        if expected not in java:
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's, in the order of tools/lairs.py NAMES: expected {expected}")
+
+    passable = {None, "minecraft:light", "minecraft:cobweb"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = ca.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "minecraft:deepslate_tiles" or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The archive's arrival at {feet} does not stand on the landing with room overhead")
+    for pos in ca.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the archive's way back up at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block, on a slab, or on either half of a stair.
+    whole = {"minecraft:deepslate_tiles", "minecraft:cracked_deepslate_tiles", "minecraft:polished_deepslate",
+             "minecraft:bone_block", "minecraft:deepslate_bricks", "jugcraft:chiseled_crypt_stone", "jugcraft:crypt_stone"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if not (free((x, y + 1, z)) and free((x, y + 2, z))):
+            continue
+        if state[0] in whole:
+            stands.setdefault((x, z), []).append(y + 1.0)
+        elif state[0] == "minecraft:polished_blackstone_slab":
+            stands.setdefault((x, z), []).append(y + 0.5)
+        elif state[0] == "minecraft:deepslate_brick_stairs":
+            stands.setdefault((x, z), []).extend((y + 0.5, y + 1.0))
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    floor = {(x, z) for x, z, h in seen if h == float(ca.STAND)}
+    stranded = [(x, z) for (x, z), heights in stands.items() if ca.in_hall(x, z) and float(ca.STAND) in heights
+                and (x, z) not in floor]
+    if stranded:
+        err(f"{len(stranded)} cells of the archive's hall floor cannot be walked to from the arrival, e.g. {stranded[0]}")
+
+    def within(target, reach):
+        tx, ty, tz = (c + 0.5 for c in target)
+        return any(((x + 0.5 - tx) ** 2 + (h + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach for x, z, h in seen)
+
+    for rune_name, pos in ca.seal_cells().items():
+        if not within(pos, 4.0):
+            err(f"No walk from the archive's arrival comes within reach of the {rune_name}'s grave seal at {pos}")
+    if not within(ca.LECTERN, 3.5):
+        err(f"No walk from the archive's arrival comes within reach of the Lectern of Last Names at {ca.LECTERN}")
+    if not any(h == float(ca.APSE_STAND) for x, z, h in seen if ca.in_alcove("crowned", x, z)):
+        err("No walk from the archive's arrival climbs into the throne's apse")
+
+    # The lanes, open and paved; the ledger stones in the floor with room over them; the pillars standing.
+    for lane in ca.LANES:
+        for x, z in sorted(ca.lane_cells(lane)):
+            if name((x, ca.PAVE, z)) not in ("minecraft:polished_deepslate", "minecraft:bone_block") \
+                    or not all(free((x, y, z)) for y in range(ca.STAND, ca.STAND + 3)):
+                err(f"The archive's {lane} lane is not open and paved at {(x, z)}")
+                break
+    for x, z in sorted(ca.grave_cells()):
+        if name((x, ca.PAVE, z)) != "jugcraft:chiseled_crypt_stone" or not free((x, ca.STAND, z)) \
+                or not free((x, ca.STAND + 1, z)):
+            err(f"The archive's ledger stone at {(x, z)} is not in the floor with room over it")
+    for x, z in sorted(ca.pillar_cells()):
+        if any(free((x, y, z)) for y in range(ca.STAND, ca.STAND + 3)):
+            err(f"The archive's pillar at {(x, z)} does not stand from the floor")
+            break
+
+    # The fixtures.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    seals, stones = ca.seal_cells(), ca.stone_cells()
+    for rune_name, info in ca.ALCOVES.items():
+        rune, face = la.NAMES[rune_name], info["face"]
+        if info["rune"] != rune:
+            err(f"tools/crypt_archive.py gives the {rune_name} the rune {info['rune']}, not tools/lairs.py's {rune}")
+        for pos, block, extra, word in ((seals[rune_name], "jugcraft:grave_seal", ("broken", "false"), "whole"),
+                                        (stones[rune_name], "jugcraft:name_stone", ("glow", "dark"), "dark")):
+            state = props(pos)
+            if name(pos) != block or state.get("rune") != rune or state.get("facing") != face or state.get(extra[0]) != extra[1]:
+                err(f"No {word} {block} with the rune {rune} facing {face} at {pos}")
+            dx, dz = steps[face]
+            if free((pos[0] - dx, pos[1], pos[2] - dz)):
+                err(f"The {block} at {pos} hangs on no wall")
+        for part in ("head", "foot"):
+            px, pz = info[part]
+            state = props((px, info["stand"], pz))
+            if name((px, info["stand"], pz)) != "jugcraft:deepslate_sarcophagus" or state.get("part") != part \
+                    or state.get("facing") != info["facing"] or state.get("open") != "false":
+                err(f"The {rune_name}'s sarcophagus has no shut {part} facing {info['facing']} at {(px, info['stand'], pz)}")
+    tx, ty, tz = ca.THRONE
+    if props(ca.THRONE).get("half") != "lower" or props((tx, ty + 1, tz)).get("half") != "upper" \
+            or name(ca.THRONE) != "jugcraft:bone_throne":
+        err(f"No bone throne in the archive's apse at {ca.THRONE}")
+    if name(ca.LECTERN) != "jugcraft:archive_lectern" or props(ca.LECTERN).get("facing") != "south":
+        err(f"No Lectern of Last Names facing the stair at {ca.LECTERN}")
+    if name(ca.PHYLACTERY) != "jugcraft:phylactery" or props(ca.PHYLACTERY).get("cracked") != "false" \
+            or name(ca.PLINTH) != "jugcraft:chiseled_crypt_stone":
+        err(f"No whole phylactery on its plinth at {ca.PHYLACTERY}")
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"minecraft:soul_lantern": 10, "jugcraft:phylactery": la.PHYLACTERY["light"]}
+    through = passable | {"minecraft:soul_lantern", "minecraft:iron_chain", "jugcraft:candle_skull",
+                          "jugcraft:skeleton_hand_sconce", "jugcraft:bone_pile", "jugcraft:phylactery", "jugcraft:archive_lectern",
+                          "jugcraft:name_stone", "jugcraft:grave_seal", "jugcraft:lair_exit"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and 0 <= n[1] < ca.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    hall = sorted((light.get((x, ca.STAND, z), 0), (x, ca.STAND, z)) for x, z in floor if ca.in_hall(x, z))
+    if not hall or hall[0][0] < ca.HALL_LIGHT:
+        dark = [cell for level, cell in hall if level < ca.HALL_LIGHT]
+        err(f"{len(dark)} open cells of the archive's hall have less block light than HALL_LIGHT {ca.HALL_LIGHT}, "
+            f"the darkest {hall[0] if hall else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CryptArchiveClientGameTests.java"
+    if not client.is_file() or not java_number(client.read_text(encoding="utf-8"), "HALL_LIGHT", ca.HALL_LIGHT):
+        err(f"CryptArchiveClientGameTests does not read the hall's light against HALL_LIGHT {ca.HALL_LIGHT}")
+
+    # Nothing that changes by itself once placed.
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                                                        "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
+            err(f"The archive has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
 
 
 def check_vesperine():
@@ -9645,6 +10015,329 @@ def check_cinder_tyrant():
                             ("TeleportTransition", "crosses dimensions")):
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
+
+def check_mire_hag():
+    """The Mire Hag (tools/mire_hag.py, docs/features/mire-hag.md): every number the Java uses is the table's; her
+    attacks are the table's, and her rule can be played (the marsh's middle lies beyond every lamp's light and the little
+    way her Likenesses keep from it, so they have somewhere to walk; every step a Likeness takes passes keepDark, so none
+    walks into a lamp's light of its own accord; her Likenesses' places round her foe never meet behind it; the Root Knot
+    gives players time to cut it down; her roots never hold anyone longer than her Root Lanes take to come round again;
+    her brew reaches its farthest mark well within its life, and her pools poison again before the last poisoning wears
+    off); where her fight looks for the Lantern Fen's parts (LanternFen.java) is where tools/lantern_fen.py builds them:
+    she waits on the porch with room over her, comes down into open water, the Grey Mist she leaves opens in water with
+    air over it, the Root Knot crawls the ring on its boards (or through a drowned stump), and each lamp is the fen lamp
+    on its post; her brews leave from where her model's left hand is as she throws; her Likenesses are she to look at
+    (her model, her clips and her sheet, her size and her name), but cast no shadow while she does; whoever her roots
+    hold has no speed left and no jump, until a tick of the server lets them go; every entity is registered, named and
+    drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the
+    sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no
+    bone is animated by both of her controllers; her loot table is the table's and her trophies are Arms VII's; her
+    recipes (none of which makes Hagmoss), tags and advancement are there; the Hag's Eye is held in the offhand and
+    looked at on the server; every message she sends has its words; and nothing of hers loads a chunk or leaves its
+    dimension."""
+    import math
+    import arms_variants
+    import lantern_fen as lf
+    import mire_hag as mh
+    import mire_hag_models as hm
+    folder = JAVA_ROOT / "lair" / "hag"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/hag: no Java")
+        return
+    for cls, table in (("MireHagEntity", mh.MIRE_HAG), ("HagLikenessEntity", mh.LIKENESS), ("RootKnotEntity", mh.ROOT_KNOT),
+                       ("PoisonBrewEntity", mh.BREW), ("HagRootsEntity", {"SINK": mh.SINK}), ("HagsEye", mh.EYE)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/mire_hag.py's {value}")
+    boss = sources.get("MireHagEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, lure, drowned) in mh.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(lure).lower()}, {str(drowned).lower()})")
+        if expected not in boss:
+            err(f"MireHagEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"MireHagEntity does not scale as every lair boss does ({call})")
+    h = mh.MIRE_HAG
+    if not 0.0 < h["LAST_AT"] < h["DARK_AT"] < 1.0:
+        err("tools/mire_hag.py: the Last Light (LAST_AT) must come after Lights Out (DARK_AT)")
+    if not 0.0 < h["LAST_COOLDOWN"] < 1.0:
+        err("tools/mire_hag.py: the Last Light must make her cooldowns shorter (0 < LAST_COOLDOWN < 1)")
+    if not 0 < h["LIKENESSES"] <= h["DARK_LIKENESSES"]:
+        err("tools/mire_hag.py: more Likenesses walk with her after Lights Out than before, and some before")
+    if h["LIKENESS_SPREAD"] * ((h["DARK_LIKENESSES"] + 1) // 2) >= 180.0:
+        err("tools/mire_hag.py: her Likenesses' places round her foe (LIKENESS_SPREAD apart, either side) would meet behind it")
+    centre = lf.CENTRE
+    for x, z in lf.LAMPS:
+        if math.hypot(x + 0.5 - centre[0], z + 0.5 - centre[1]) <= h["LAMP_REACH"] + mh.LIKENESS["SHY"]:
+            err(f"The lamp at ({x}, {z}) lights the marsh's middle (LAMP_REACH, and the Likenesses' SHY): her Likenesses "
+                "would have nowhere to walk")
+    if not 0.0 < mh.LIKENESS["SHY"] < 1.0:
+        err("tools/mire_hag.py LIKENESS SHY: a Likeness keeps a little way (more than nothing, less than a block) from a "
+            "lamp's light")
+    likeness = sources.get("HagLikenessEntity", "")
+    walk = likeness.split("protected void customServerAiStep(", 1)[-1].split("\n\t}\n", 1)[0]
+    if ("step = keepDark(level, found, step);" not in walk
+            or walk.find("step = keepDark(") > walk.find("setDeltaMovement(step.x")
+            or "then <= MireHagEntity.LAMP_REACH + SHY;" not in likeness):
+        err("HagLikenessEntity: a Likeness's every step must pass keepDark before it is taken, so it never walks into a "
+            "lamp's light of its own accord")
+    if (mh.ROOT_KNOT["START"] - mh.ROOT_KNOT["REACH"]) / mh.ROOT_KNOT["SPEED"] < 100:
+        err("tools/mire_hag.py: the Root Knot must give players five seconds at least to cut it down")
+    if h["ROOT_HOLD"] >= mh.ATTACKS["ROOT_LANES"][3]:
+        err("tools/mire_hag.py: her roots must let go before her Root Lanes can come round again (ROOT_HOLD)")
+    if h["POISON_TICKS"] <= h["POOL_EVERY"]:
+        err("tools/mire_hag.py: her pools must poison again before the last poisoning wears off (POISON_TICKS > POOL_EVERY)")
+    if mh.ATTACKS["POISON_BREW"][5] / mh.BREW["SPEED"] >= mh.BREW["LIFE"]:
+        err("tools/mire_hag.py: a brew must reach her farthest mark within its LIFE")
+    if hm.HAND_Z != -16 * mh.BREW["HAND_AHEAD"] or hm.HAND_Y != 16 * mh.BREW["HAND_UP"]:
+        err("tools/mire_hag.py BREW HAND_AHEAD and HAND_UP must be where tools/mire_hag_models.py's left hand is as she "
+            f"throws: {-hm.HAND_Z / 16} and {hm.HAND_Y / 16}")
+    # Where her fight looks for the Lantern Fen's parts is where tools/lantern_fen.py builds them.
+    fen = re.sub(r"\s+", " ", sources.get("LanternFen", ""))
+    wx, wy, wz, _ = lf.WAIT
+    for name, value in (("CENTRE_X", float(centre[0])), ("CENTRE_Z", float(centre[1])), ("MARSH_RADIUS", lf.MARSH_RADIUS),
+                        ("MUD", lf.MUD), ("WATER", lf.WATER), ("STAND", lf.STAND), ("RING_INNER", lf.RING[0]),
+                        ("RING_OUTER", lf.RING[1]), ("WAIT_X", float(wx)), ("WAIT_Y", float(wy)), ("WAIT_Z", float(wz)),
+                        ("WOKE_X", float(lf.WOKE[0])), ("WOKE_Z", float(lf.WOKE[1])), ("EXIT_WEST", lf.MIDDLE_EXIT["x"][0]),
+                        ("EXIT_EAST", lf.MIDDLE_EXIT["x"][1]), ("EXIT_Z", lf.MIDDLE_EXIT["z"])):
+        if not java_number(fen, name, value):
+            err(f"LanternFen.{name} is not {value} (tools/lantern_fen.py)")
+    if "MUD_TOP = 14.0 / 16.0;" not in fen:
+        err("LanternFen.MUD_TOP must be mud's height, 14/16 of a block")
+    lamps = ", ".join(f"new BlockPos({x}, {y}, {z})" for x, y, z in lf.lamp_blocks())
+    if f"LAMPS = List.of({lamps});" not in fen:
+        err(f"LanternFen.LAMPS are not tools/lantern_fen.py's lamps: {lamps}")
+    blocks = lf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light")
+    cell = (math.floor(wx), int(wy), math.floor(wz))
+    if name((cell[0], cell[1] - 1, cell[2])) != "jugcraft:dead_planks" or not all(
+            free((cell[0], cell[1] + dy, cell[2])) for dy in range(3)):
+        err(f"Where the Mire Hag waits, {cell}, is not on the porch's planks with room for her over them")
+    wokex, wokez = (math.floor(v) for v in lf.WOKE)
+    if math.hypot(lf.WOKE[0] - centre[0], lf.WOKE[1] - centre[1]) > lf.MARSH_RADIUS - 1.0 or name((wokex, lf.MUD, wokez)) != "minecraft:mud" \
+            or name((wokex, lf.WATER, wokez)) != "minecraft:water" or not all(free((wokex, lf.STAND + dy, wokez)) for dy in range(2)):
+        err(f"Where the Mire Hag comes down, ({wokex}, {wokez}), is not open water on mud in the marsh, with air over it")
+    for x in lf.MIDDLE_EXIT["x"]:
+        z = lf.MIDDLE_EXIT["z"]
+        if name((x, lf.WATER, z)) != "minecraft:water" or not free((x, lf.STAND, z)) or name((x, lf.MUD, z)) != "minecraft:mud":
+            err(f"The Grey Mist she leaves at ({x}, {z}) must open in the marsh's water on mud, with air over it")
+    ring = (lf.RING[0] + lf.RING[1]) / 2.0
+    if "RING = (LanternFen.RING_INNER + LanternFen.RING_OUTER) / 2.0;" not in sources.get("RootKnotEntity", ""):
+        err("RootKnotEntity must crawl the ring's middle, between LanternFen.RING_INNER and RING_OUTER")
+    stumps = {(x, z) for x, z, _ in lf.STUMPS}
+    for degrees in range(360):
+        angle = math.radians(degrees)
+        x, z = math.floor(centre[0] + math.cos(angle) * ring), math.floor(centre[1] + math.sin(angle) * ring)
+        if name((x, lf.DECK, z)) != "jugcraft:willow_planks" and (x, z) not in stumps:
+            err(f"The Root Knot's way round the ring crosses ({x}, {z}), which is no boardwalk ({name((x, lf.DECK, z))})")
+            break
+    for x, y, z in lf.lamp_blocks():
+        if name((x, y, z)) != "jugcraft:fen_lamp":
+            err(f"No fen lamp at {(x, y, z)}")
+    # Her Likenesses are she to look at: her model under their name, her clips, her sheet and glowmask; her size and name.
+    gecko = ASSETS / "geckolib"
+    hag_geo = load(gecko / "models" / "entity" / "mire_hag.geo.json") or {}
+    likeness_geo = load(gecko / "models" / "entity" / "hag_likeness.geo.json") or {}
+    strip = lambda geo: json.dumps([{**g, "description": {**g.get("description", {}), "identifier": None}}
+                                    for g in geo.get("minecraft:geometry", [])], sort_keys=True)
+    if mh.GECKO.get("hag_likeness") != "mire_hag" or strip(hag_geo) != strip(likeness_geo):
+        err("hag_likeness.geo.json must be the Mire Hag's model under the Likeness's name")
+    if (load(gecko / "animations" / "entity" / "mire_hag.animation.json")
+            != load(gecko / "animations" / "entity" / "hag_likeness.animation.json")):
+        err("hag_likeness.animation.json must be the Mire Hag's clips")
+    for suffix in ("", "_glowmask"):
+        sheets = [ASSETS / "textures" / "entity" / f"{who}{suffix}.png" for who in ("mire_hag", "hag_likeness")]
+        if all(sheet.is_file() for sheet in sheets) and sheets[0].read_bytes() != sheets[1].read_bytes():
+            with Image.open(sheets[0]) as a, Image.open(sheets[1]) as b:
+                if a.convert("RGBA").tobytes() != b.convert("RGBA").tobytes():
+                    err(f"textures/entity/hag_likeness{suffix}.png must be the Mire Hag's")
+    registry = sources.get("JugcraftHag", "")
+    sizes = {who: re.search(rf'entity\("{who}",.*?\.sized\(([0-9.F, ]+)\)\.eyeHeight\(([0-9.F]+)\)', registry, re.S)
+             for who in ("mire_hag", "hag_likeness")}
+    if None in sizes.values() or sizes["mire_hag"].groups() != sizes["hag_likeness"].groups():
+        err("JugcraftHag: the Likeness must be the Mire Hag's size")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.{MOD}.hag_likeness") != lang.get(f"entity.{MOD}.mire_hag"):
+        err("The Likeness must go by the Mire Hag's name")
+    client = (CLIENT_JAVA_ROOT / "MireHagClient.java").read_text(encoding="utf-8")
+    def drawn(entity):
+        start = client.find(f"register(JugcraftHag.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if "shadowRadius = 0.0F;" not in drawn("hag_likeness") or "shadowRadius = SHADOW;" not in drawn("mire_hag") \
+            or not re.search(r"float SHADOW = 0\.[1-9][0-9]*F;", client):
+        err("MireHagClient: the Mire Hag casts a shadow (SHADOW) and her Likenesses none")
+    likeness = sources.get("HagLikenessEntity", "")
+    for needed, why in (("MireHagEntity.BODY[action.ordinal()]", "plays her clips"), ("MireHagEntity.FLAME[", "plays her lantern"),
+                        ("found.burst(level, this)", "bursts when struck"), ("found.took(player,", "counts who struck it"),
+                        ("MireHagEntity.wade(this,", "wades as she does")):
+        if needed not in likeness:
+            err(f"HagLikenessEntity must be she to look at: it {why} ({needed})")
+    # Held fast: no speed left (Slowness takes 15% a level) and no jump, given back by the server's tick.
+    roots = sources.get("HagRootsEntity", "")
+    held = re.search(r"int HELD_AMPLIFIER = (\d+);", roots)
+    if held is None or (int(held.group(1)) + 1) * 0.15 < 1.0:
+        err("HagRootsEntity.HELD_AMPLIFIER must take all of a player's speed ((amplifier + 1) x 15% >= 100%)")
+    for needed in ("Attributes.JUMP_STRENGTH", "addTransientModifier(", "ServerTickEvents.END_SERVER_TICK.register(HagRootsEntity::release)",
+                   "ServerLifecycleEvents.SERVER_STOPPED"):
+        if needed not in roots:
+            err(f"HagRootsEntity must hold players fast with a transient jump modifier the server's tick takes off ({needed})")
+    if "HagRootsEntity.register();" not in registry:
+        err("JugcraftHag must register HagRootsEntity's release")
+    loot_java = sources.get("MireHagLoot", "")
+    if f'ADVANCEMENT = "{mh.ADVANCEMENT["key"]}";' not in loot_java:
+        err("MireHagLoot's advancement differs from tools/mire_hag.py")
+    for entity in mh.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftHag does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != mh.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {mh.ENTITIES[entity]!r}")
+        if f"JugcraftHag.{entity.upper()}," not in client:
+            err(f"MireHagClient draws no {entity}")
+    for item in mh.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftHag does not register {item}")
+    if "Lairs.onPlaced(Lair.LANTERN_FEN, MireHagEntity::summon)" not in registry:
+        err("JugcraftHag must seat the Mire Hag on the porch of every Lantern Fen as it is placed")
+    if "FenLampBlock.onLitByHand(JugcraftHag::lampLit)" not in registry or "hag.lampLit(level, lamp, player)" not in registry:
+        err("JugcraftHag must tell the Mire Hag when a player lights one of her lamps again")
+    lamp_block = (JAVA_ROOT / "lair" / "FenLampBlock.java").read_text(encoding="utf-8")
+    if "level instanceof ServerLevel server && light(level, pos)" not in lamp_block:
+        err("FenLampBlock must tell its listeners on the server only, and only when the lamp was out")
+    # The GeckoLib bodies.
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    # Her body's clips are named from a prefix (MireHagEntity's BODY table).
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("mire_hag", set()).add(f"animation.mire_hag.{clip}")
+    for entity, body in mh.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in hm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        # A body with a glow layer has a glowmask; one without has none (it would be a texture nothing draws).
+        glows = entity in mh.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"MireHagClient: the {entity}'s glow layer must match tools/mire_hag.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * hm.TEXTURE_SCALE, height * hm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * hm.TEXTURE_SCALE}x{height * hm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # Her controllers own their bones: the body's clips never key her lantern's flame, nor the lantern's a body bone.
+    owned = {bone: controller for controller, bones in hm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in hm.ANIMATIONS["mire_hag"]()["animations"].items():
+        controller = "lantern" if clip_name.split(".")[-1].startswith("lantern_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"mire_hag: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for cls in ("MireHagEntity", "HagLikenessEntity"):
+        for controller in ("body", *hm.CONTROLLERS):
+            if f'new AnimationController<{cls}>("{controller}"' not in sources.get(cls, ""):
+                err(f"{cls} has no {controller} controller (tools/mire_hag_models.py CONTROLLERS)")
+    # Her loot, and her trophies: Arms VII's, as her bosses/mire_hag table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "mire_hag.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/mire_hag.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"hagmoss": mh.HAGMOSS, **{item: mh.TROPHY_CHANCE for item in mh.TROPHIES}, **mh.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/mire_hag.json gives {found_loot}, not tools/mire_hag.py's {expected}")
+    if tuple(arms_variants.trophies("mire_hag")) != tuple(mh.TROPHIES):
+        err(f"tools/mire_hag.py TROPHIES {mh.TROPHIES} are not Arms VII's: {arms_variants.trophies('mire_hag')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "mire_hag.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in mh.TROPHIES]:
+        err(f"loot_table/bosses/mire_hag.json holds {held_items}, not her trophies {mh.TROPHIES}")
+    for table_id in ("entities/mire_hag", "bosses/mire_hag"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"MireHagLoot must roll loot_table/{table_id}.json")
+    for trophy in mh.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftHag must find the {trophy} (Arms VII registers it)")
+    for key, recipe in mh.RECIPES.items():
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Hagmoss comes only from her: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:hagmoss":
+            err(f"recipe/{path.name} makes Hagmoss, which only the Mire Hag gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in mh.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{mh.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{mh.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in mh.MESSAGES:
+        if f'"message.jugcraft.mire_hag.{key}"' not in sent:
+            err(f"tools/mire_hag.py MESSAGES has {key}, which the Java never sends")
+    # The Hag's Eye sees what hides: held in the offhand, looked at on the server's tick.
+    eye = sources.get("HagsEye", "")
+    if "getOffhandItem().is(JugcraftHag.HAGS_EYE)" not in eye or "ServerTickEvents.END_SERVER_TICK" not in eye \
+            or "HagsEye.register();" not in registry:
+        err("HagsEye must look at each player's offhand on the server's tick")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
 
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
@@ -13283,6 +13976,7 @@ def main():
     check_tatterlace()
     check_yeti()
     check_cinder_tyrant()
+    check_mire_hag()
     check_material_sets()
     check_art()
     check_pixel_hollows()
