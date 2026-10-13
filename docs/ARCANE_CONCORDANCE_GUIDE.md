@@ -27,7 +27,7 @@ and this guide is a bug.
    says what a spell does and costs, or exactly why it cannot work. **Inscribe** writes it on the wand, and it joins the
    spell bar.
 
-Lost on the way? Press **I**, or the scroll button beside the recipe book in your inventory, for the **Jugcraft
+Lost on the way? Press **B**, or the scroll button beside the recipe book in your inventory, for the **Jugcraft
 Encyclopedia**: its Discover page shows each of these steps, which are done, and which comes next, with the recipes
 your server actually has.
 

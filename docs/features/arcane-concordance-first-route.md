@@ -174,8 +174,8 @@ full route by keys from a fresh world to a lair win (unit 5's A-08 test); a pers
 world without reading source (A-04's acceptance is a human judgement); readability at GUI scales; the narrator heard;
 two clients.
 
-Unverified, and where the tests will settle it: vanilla 26.3's I is free except for F3+I (Copy Recreate Command, a
-debug combination that does not also press I); the recipe-book button being the inventory's only image button, and the
+Unverified, and where the tests will settle it: vanilla 26.3's B is free (its Ctrl+B narrator shortcut is not a key
+mapping, and acts only while the narrator is available); the recipe-book button being the inventory's only image button, and the
 creative tab's free space right of the inventory grid (below the slots Trinkets puts at its top right: a review found the
 first place, right of the armour slots, on Spell Engine's spell-book slot); `BookGuiManager.openEntry` in Modonomicon
 2.16.0 (read in 2.15.0's source); a placeable specimen being placed when aimed at a block.

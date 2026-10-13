@@ -35,7 +35,7 @@ import net.minecraft.world.phys.HitResult;
  * Spell Composer (whose Back returns here), the Concordance Journal or another page. Nothing here decides anything.
  */
 public final class EncyclopediaClient {
-	/** The proposed default key (A-D7): I, which vanilla and the locked pack's mods leave free. */
+	/** The proposed default key (A-D7): B, which vanilla and the locked pack's mods leave free (Iris has I). */
 	public static final int DEFAULT_KEY = InputConstants.KEY_B;
 	/** The server's Inspect page (concordance.encyclopedia.InspectPage.PAGE). */
 	private static final String INSPECT = "inspect";
