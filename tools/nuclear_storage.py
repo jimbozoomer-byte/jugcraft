@@ -11,6 +11,7 @@ Everything is a real 3D model in model pixels (16 a block), front to the south f
 Round parts are 16-sided: eight boxes turned 22.5 degrees apart (their ends are the sides), with one flat quad on top
 whose texture is cut to the same 16-sided outline, so no two faces ever lie in the same plane (no z-fighting).
 """
+from asset_fonts import font_path
 import math
 
 import numpy as np
@@ -27,7 +28,7 @@ SIDES = 16
 
 def font(size, bold=True, condensed=False):
     name = "DejaVuSans" + ("Condensed" if condensed else "") + ("-Bold" if bold else "") + ".ttf"
-    return ImageFont.truetype(FONT_DIR + name, size)
+    return ImageFont.truetype(font_path(name), size)
 
 
 def trefoil(d, cx, cy, r, fg=INK, bg=YELLOW, ring=False):

@@ -4,6 +4,7 @@ radiation damage type. Fuel: the enriched uranium cylinder, fuel assemblies and 
 and Fuel Fabricator are machines: tools/machines.py, models here). The reactor unit: the working equipment (placed
 whole from one item, drawn in 3D by client/NuclearRenderer.java from the material sheet made here), the three nuclear
 pipes and the link card. Names, models, loot, recipes, tags; tools/check_mod_data.py checks the Java matches."""
+from asset_fonts import font_path
 import math
 import os
 import random
@@ -720,7 +721,7 @@ def geiger_dial():
     # The scale arc and ticks: a long tick each decade, short ones at 2 and 5.
     a0, a1 = math.degrees(ang(0)), math.degrees(ang(1))
     d.arc([cx - R, cy - R, cx + R, cy + R], a0, a1, fill=(20, 20, 22, 255), width=3 * f)
-    font_n = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf", 15 * f)
+    font_n = ImageFont.truetype(font_path("DejaVuSansCondensed-Bold.ttf"), 15 * f)
     labels = {-3: "1", -2: "10", -1: "100", 0: "1", 1: "10", 2: "100", 3: "1", 4: "10"}
     for dec in range(DIAL_LOW, DIAL_HIGH + 1):
         for m, long_ in ((1, True), (2, False), (5, False)):
@@ -734,18 +735,18 @@ def geiger_dial():
             x, y = pt(dial_fraction(dec), R + 17 * f)
             d.text((x, y), labels[dec], font=font_n, fill=(20, 20, 22, 255), anchor="mm")
     # Unit names under each third of the scale, and the zone words.
-    font_u = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf", 13 * f)
+    font_u = ImageFont.truetype(font_path("DejaVuSansCondensed-Bold.ttf"), 13 * f)
     for lo, hi, unit in ((-4, -1, "\u00b5Sv/h"), (-1, 2, "mSv/h"), (2, 5, "Sv/h")):
         x, y = pt(dial_fraction((lo + hi) / 2 + 0.5), R - 44 * f)
         d.text((x, y), unit, font=font_u, fill=(60, 60, 64, 255), anchor="mm")
-    font_z = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf", 12 * f)
+    font_z = ImageFont.truetype(font_path("DejaVuSansCondensed-Bold.ttf"), 12 * f)
     for frac, word, col in ((dial_fraction(DIAL_SAFE) / 2, "SAFE", (40, 120, 52)),
                             ((dial_fraction(DIAL_SAFE) + dial_fraction(DIAL_LETHAL)) / 2, "CAUTION", (150, 104, 10)),
                             ((dial_fraction(DIAL_LETHAL) + 1) / 2, "LETHAL", (176, 30, 24))):
         x, y = pt(frac, R - 74 * f)
         d.text((x, y), word, font=font_z, fill=col + (255,), anchor="mm")
     # Maker's line and a little trefoil at the bottom.
-    font_s = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed.ttf", 10 * f)
+    font_s = ImageFont.truetype(font_path("DejaVuSansCondensed.ttf"), 10 * f)
     d.text((W * f // 2, (H - 18) * f), "DOSE RATE", font=font_s, fill=(70, 70, 74, 255), anchor="mm")
     return big.resize((256, 256), Image.LANCZOS)
 
@@ -790,6 +791,9 @@ def draw_item_textures():
     out.update(plant_interior.draw_item_textures())
     out["lead_door"] = nuclear_storage.door_item_icon()
     out.update(storage_tank.draw_item_textures())
+    # Flat inventory sprites use the native 16px source drawings. Detailed worn and block sheets stay separate.
+    from nuclear_item_icons import icons
+    out.update(icons())
     return out
 
 
@@ -992,7 +996,7 @@ def draw_scram_button():
         d.ellipse([c - 16 * f, c - 16 * f, c + 16 * f, c + 16 * f], fill=(230, 60, 46, 255))
         d.ellipse([c - 11 * f, c - 13 * f, c - 1 * f, c - 5 * f], fill=(255, 150, 140, 255))
         from PIL import ImageFont
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 9 * f)
+        font = ImageFont.truetype(font_path("DejaVuSans-Bold.ttf"), 9 * f)
         d.text((c, c), "SCRAM", font=font, fill=(255, 255, 255, 255), anchor="mm")
     return _supersample(draw, size=48, factor=8)
 
@@ -1285,7 +1289,7 @@ def _water_tex(seed):
 
 def _font(size, bold=True):
     from PIL import ImageFont
-    return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/" + ("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"), size)
+    return ImageFont.truetype(font_path("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"), size)
 
 
 def _rocker_cover():

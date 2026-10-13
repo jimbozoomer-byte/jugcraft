@@ -38,7 +38,7 @@ public record ConsoleActionPayload(BlockPos console, int action, int value) impl
 		ServerPlayNetworking.registerGlobalReceiver(TYPE, (payload, context) -> {
 			ServerPlayer player = context.player();
 			BlockPos pos = payload.console();
-			if (!player.level().isLoaded(pos) || player.distanceToSqr(Vec3.atCenterOf(pos)) > REACH_SQR
+			if (player.isSpectator() || !io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(player.level(), pos, player) || !player.level().isLoaded(pos) || player.distanceToSqr(Vec3.atCenterOf(pos)) > REACH_SQR
 					|| !(player.level().getBlockEntity(pos) instanceof EquipmentBlockEntity console)
 					|| console.kind() != EquipmentKind.CONTROL_CONSOLE && console.kind() != EquipmentKind.REMOTE_SHUTDOWN_PANEL) {
 				return;

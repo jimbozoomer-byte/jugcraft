@@ -55,6 +55,12 @@ public final class EquipmentPlacement {
 
 	/** As above, the anchor its labelled version {@code variant} (EquipmentAnchorBlock.VARIANT; a blueprint's). */
 	public static boolean place(ServerLevel level, BlockPos anchor, EquipmentKind kind, Direction facing, @Nullable Player player, int variant) {
+		if (player != null) {
+			if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, anchor, player)) return false;
+			for (BlockPos offset : kind.frames(facing)) {
+				if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, anchor.offset(offset), player)) return false;
+			}
+		}
 		if (!fits(level, anchor, kind, facing)) {
 			if (player != null) {
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.nuclear.no_room", kind.wide, kind.deep, kind.tall));

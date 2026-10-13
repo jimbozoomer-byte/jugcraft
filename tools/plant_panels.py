@@ -18,6 +18,7 @@ block line; what stands proud of the door (meters, relay cases, the annunciator,
 real box whose front shows the same drawing. Models are in model pixels for the piece facing north: x across to the
 user's right, y up from the floor (0..32), its front the south face (z 15).
 """
+from asset_fonts import font_path
 import math
 import random
 
@@ -37,16 +38,16 @@ FONT_DIR = "/usr/share/fonts/truetype/dejavu/"
 
 
 def font(size, bold=False):
-    return ImageFont.truetype(FONT_DIR + ("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"), round(size * K))
+    return ImageFont.truetype(font_path(("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf")), round(size * K))
 
 
 def cfont(size, bold=False):
-    return ImageFont.truetype(FONT_DIR + ("DejaVuSansCondensed-Bold.ttf" if bold else "DejaVuSansCondensed.ttf"), round(size * K))
+    return ImageFont.truetype(font_path(("DejaVuSansCondensed-Bold.ttf" if bold else "DejaVuSansCondensed.ttf")), round(size * K))
 
 
 def rfont(size, bold=False):
     """The condensed font at a size in the image's own pixels (for textures drawn outside the 16 px a pixel kit)."""
-    return ImageFont.truetype(FONT_DIR + ("DejaVuSansCondensed-Bold.ttf" if bold else "DejaVuSansCondensed.ttf"), round(size))
+    return ImageFont.truetype(font_path(("DejaVuSansCondensed-Bold.ttf" if bold else "DejaVuSansCondensed.ttf")), round(size))
 
 
 class _Draw(ImageDraw.ImageDraw):

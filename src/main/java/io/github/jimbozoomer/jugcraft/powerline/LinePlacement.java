@@ -64,6 +64,7 @@ public final class LinePlacement {
 	private static int groundBelow(Level level, BlockPos foot) {
 		for (int dy = MAX_SLOPE; dy >= -MAX_SLOPE; dy--) {
 			BlockPos p = foot.offset(0, dy, 0);
+			if (!level.isLoaded(p)) return Integer.MIN_VALUE;
 			BlockState state = level.getBlockState(p);
 			if (!state.canBeReplaced() && !state.getCollisionShape(level, p).isEmpty() && level.getBlockState(p.above()).canBeReplaced()) {
 				return p.getY();
@@ -121,6 +122,12 @@ public final class LinePlacement {
 		if (anchor == null) {
 			tell(player, "message.jugcraft.power_line.too_steep");
 			return null;
+		}
+		if (player != null) {
+			if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, anchor, player)) return null;
+			for (BlockPos offset : kind.frames()) {
+				if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, anchor.offset(offset), player)) return null;
+			}
 		}
 		if (!fits(level, anchor, kind, null)) {
 			tell(player, "message.jugcraft.power_line.no_room");
@@ -219,6 +226,7 @@ public final class LinePlacement {
 	}
 
 	private static void join(ServerLevel level, BlockPos a, BlockPos b, @Nullable Player player) {
+		if (player != null && (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, a, player) || !io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, b, player))) return;
 		if (level.getBlockEntity(a) instanceof LineAnchorBlockEntity ea && level.getBlockEntity(b) instanceof LineAnchorBlockEntity eb) {
 			ea.connect(b);
 			eb.connect(a);
@@ -228,6 +236,7 @@ public final class LinePlacement {
 	}
 
 	private static void cut(ServerLevel level, BlockPos a, BlockPos b, @Nullable Player player) {
+		if (player != null && (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, a, player) || !io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, b, player))) return;
 		if (level.getBlockEntity(a) instanceof LineAnchorBlockEntity ea) {
 			ea.disconnect(b);
 		}
@@ -286,6 +295,10 @@ public final class LinePlacement {
 		LineKind from = entity.kind();
 		if (from.isBox() || from.family != to.family || to.tier <= from.tier) {
 			return InteractionResult.PASS;
+		}
+		if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, anchor, player)) return InteractionResult.FAIL;
+		for (BlockPos offset : to.frames()) {
+			if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, anchor.offset(offset), player)) return InteractionResult.FAIL;
 		}
 		if (!fits(level, anchor, to, anchor)) {
 			tell(player, "message.jugcraft.power_line.no_room");

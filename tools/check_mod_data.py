@@ -456,6 +456,10 @@ def check_recipes(registered):
         kind = recipe["type"]
         if kind == "minecraft:crafting_shaped":
             symbols = "".join(recipe["pattern"])
+            used = set(symbols) - {" "}
+            if used != set(recipe["key"]):
+                err(f"{name}: pattern symbols {sorted(used)} differ from recipe keys {sorted(recipe['key'])}")
+                continue
             inputs = [recipe["key"][ch] for ch in symbols if ch != " "]
         elif kind == "minecraft:crafting_shapeless":
             inputs = recipe["ingredients"]

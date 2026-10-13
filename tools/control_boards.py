@@ -25,6 +25,7 @@ Each board has three lists: still (lit like the room), lit (full bright: lamps, 
 deeper in the board, BLINK_DEPTH, and the second lit in front of it while it flashes). core: how many of the still
 operations the far-away version draws (the board's body).
 """
+from asset_fonts import font_path
 import json
 import math
 import random
@@ -1681,14 +1682,14 @@ def _plate(d, x0, y0, w, h, legend, colour, alpha=255):
 # bold condensed letters (round 26, 8e; Justin: "Make sure all the text is clearly legible ... that applies to
 # everything": the 3 x 5 pixel font at 64 px was too coarse to read).
 LETTERED = 128
-_LETTER_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf"
+_LETTER_FONT = "DejaVuSansCondensed-Bold.ttf"
 
 
 def _fit_text(d, x0, y0, w, h, legend, ink, size):
     """The legend centred in a box, in the largest bold letters up to size that fit its width."""
     from PIL import ImageFont
     while True:
-        f = ImageFont.truetype(_LETTER_FONT, size)
+        f = ImageFont.truetype(font_path(_LETTER_FONT), size)
         if d.textlength(legend, font=f) <= w - 4 or size <= 7:
             break
         size -= 1

@@ -106,7 +106,7 @@ public final class WallRuns {
 			Level level = player.level();
 			BlockPos pos = payload.pos();
 			ItemStack held = player.getItemInHand(payload.mainHand() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
-			if (player.isSpectator() || !level.isLoaded(pos) || player.distanceToSqr(Vec3.atCenterOf(pos)) > 8 * 8
+			if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, pos, player) || !level.isLoaded(pos) || player.distanceToSqr(Vec3.atCenterOf(pos)) > 8 * 8
 					|| !(level.getBlockState(pos).getBlock() instanceof WallRun) || !canPull(held)
 					|| !player.mayUseItemAt(pos, Direction.UP, held)) {
 				return;
@@ -154,7 +154,7 @@ public final class WallRuns {
 		}
 		BlockPos pos = hit.getBlockPos();
 		BlockState there = level.getBlockState(pos);
-		if (!player.mayUseItemAt(pos, hit.getDirection(), stack)) {
+		if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, pos, player) || !player.mayUseItemAt(pos, hit.getDirection(), stack)) {
 			return InteractionResult.PASS;
 		}
 		// A pipe or cable into a made block.
@@ -202,6 +202,7 @@ public final class WallRuns {
 
 	/** The wrench: the pipe comes out, the wall stays. */
 	public static void pullOut(Level level, BlockPos pos, Player player) {
+		if (!io.github.jimbozoomer.jugcraft.placement.StructurePermissions.mayChange(level, pos, player)) return;
 		BlockState state = level.getBlockState(pos);
 		if (!(state.getBlock() instanceof WallRun run) || !(level.getBlockEntity(pos) instanceof WallRunBlockEntity entity)) {
 			return;

@@ -887,8 +887,8 @@ DESK = {"P": "#c:plates/steel", "G": "minecraft:black_stained_glass_pane", "C": 
 CRAFTING = {
     TC_KEY: (["GCG", "WPW", "P P"], DESK, 1),
     CC_KEY: (["GCG", "WXW", "P P"], dict(DESK, X="minecraft:note_block"), 1),
-    NRC_KEY: (["GCG", "QQQ", "P P"], dict(DESK, Q="minecraft:glass_pane"), 1),
-    VW_KEY: (["GGG", "GCG", " P "], DESK, 1),
+    NRC_KEY: (["GCG", "QQQ", "P P"], dict({k: v for k, v in DESK.items() if k != "W"}, Q="minecraft:glass_pane"), 1),
+    VW_KEY: (["GGG", "GCG", " P "], {k: v for k, v in DESK.items() if k != "W"}, 1),
     CB_KEY: (["LLL", "PCP"], {"L": "minecraft:redstone_lamp", "P": "#c:plates/steel", "C": "jugcraft:basic_circuit"}, 1),
     SB_KEY: (["QQQ", "QIQ"], {"Q": "minecraft:quartz_slab", "I": "minecraft:ink_sac"}, 1),
     AM_KEY: (["PGP", "CXC", "PRP"], {"P": "#c:plates/steel", "G": "minecraft:glass_pane", "C": "jugcraft:basic_circuit",

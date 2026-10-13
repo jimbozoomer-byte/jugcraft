@@ -184,6 +184,7 @@ public class EquipmentBlockEntity extends BlockEntity {
 
 	/** The owner, a creative-mode player, or (in Party mode) anyone in the owner's party. */
 	public boolean mayUse(Player player) {
+		if (player.isSpectator()) return false;
 		if (owner == null || owner.equals(player.getUUID()) || player.getAbilities().instabuild) {
 			return true;
 		}
