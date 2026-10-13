@@ -31,6 +31,7 @@ public final class JugcraftMaterials {
 	public static MetalFamily SOLDER;
 	public static MetalFamily STEEL;
 
+	public static MineralFamily FLUORITE;
 	public static MineralFamily SALT;
 	public static MineralFamily PHOSPHATE;
 	public static MineralFamily LEPIDOLITE;
@@ -72,6 +73,7 @@ public final class JugcraftMaterials {
 		SOLDER = MetalFamily.builder("solder").build();
 		STEEL = MetalFamily.builder("steel").build();
 
+		FLUORITE = MineralFamily.register("fluorite");
 		SALT = MineralFamily.register("salt");
 		PHOSPHATE = MineralFamily.register("phosphate");
 		LEPIDOLITE = MineralFamily.register("lepidolite");
@@ -97,7 +99,7 @@ public final class JugcraftMaterials {
 
 	private static void registerCreativeTabs() {
 		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, THALLITE, BRONZE, ALUMINUM, BRASS, INVAR, SOLDER, STEEL};
-		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE};
+		MineralFamily[] minerals = {FLUORITE, SALT, PHOSPHATE, LEPIDOLITE, MONAZITE};
 
 		List<ItemLike> natural = new ArrayList<>();
 		List<ItemLike> ingredients = new ArrayList<>();

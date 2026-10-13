@@ -315,6 +315,34 @@
         {
           "in": [
             [
+              "jugcraft:fluorite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fluorite",
+            3
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_fluorite_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fluorite",
+            3
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "jugcraft:salt_ore",
               1
             ]
@@ -7757,7 +7785,7 @@
           "results": [],
           "ticks": 400,
           "tool": "",
-          "energy_per_tick": 32
+          "energy_per_tick": 29
         },
         {
           "items": [],
@@ -7780,7 +7808,7 @@
           "results": [],
           "ticks": 300,
           "tool": "",
-          "energy_per_tick": 24
+          "energy_per_tick": 22
         }
       ]
     },
@@ -8233,6 +8261,78 @@
           "ticks": 120,
           "tool": "",
           "energy_per_tick": 16
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fluorite",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fluorite_concentrate",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:calcium_sulfate",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:gypsum_binder",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_powder",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lubricant",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_paste_charge",
+              4
+            ]
+          ],
+          "ticks": 120,
+          "tool": "",
+          "energy_per_tick": 32
         }
       ]
     },
@@ -8485,6 +8585,63 @@
           "ticks": 120,
           "tool": "jugcraft:panel_mold",
           "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_powder",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_seal_blank",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:gasket_mold",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_powder",
+              2
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_fitting_blank",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:fitting_mold",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_powder",
+              3
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_liner_blank",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:panel_mold",
+          "energy_per_tick": 48
         }
       ]
     },
@@ -8661,6 +8818,25 @@
           "ticks": 160,
           "tool": "",
           "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:tetrafluoroethylene",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_powder",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:ptfe_process_insert",
+          "energy_per_tick": 80
         }
       ]
     },
@@ -8805,6 +8981,29 @@
           "ticks": 160,
           "tool": "jugcraft:sheet_extrusion_die",
           "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_paste_charge",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_liner_blank",
+              1
+            ],
+            [
+              "jugcraft:ptfe_offcut",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:sheet_extrusion_die",
+          "energy_per_tick": 64
         }
       ]
     },
@@ -8925,6 +9124,301 @@
           "ticks": 120,
           "tool": "",
           "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_offcut",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_powder",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:acid_concentrator",
+      "type": "acid_concentrator",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:concentrated_sulfuric_acid",
+              750
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:chemical_dissolution_chamber",
+      "type": "chemical_dissolution_chamber",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:fluorite_concentrate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:concentrated_sulfuric_acid",
+              750
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:hydrogen_fluoride",
+              500
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:calcium_sulfate",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:fluorocarbon_reactor",
+      "type": "fluorocarbon_reactor",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:methane",
+              500
+            ],
+            [
+              "jugcraft:chlorine",
+              1500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:chloroform",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              1500
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:chloroform",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_fluoride",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:chlorodifluoromethane",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:fluoromonomer_cracker",
+      "type": "fluoromonomer_cracker",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:chlorodifluoromethane",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:tetrafluoroethylene",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 96
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:ptfe_sintering_oven",
+      "type": "ptfe_sintering_oven",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_seal_blank",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_seal",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_fitting_blank",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_fitting",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_liner_blank",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_liner",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:lined_fluorochemical_reactor",
+      "type": "lined_fluorochemical_reactor",
+      "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:methane",
+              500
+            ],
+            [
+              "jugcraft:chlorine",
+              1500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:chloroform",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              1500
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 58
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:chloroform",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_fluoride",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:chlorodifluoromethane",
+              500
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 72
         }
       ]
     }

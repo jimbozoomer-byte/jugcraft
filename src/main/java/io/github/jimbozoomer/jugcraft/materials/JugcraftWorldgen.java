@@ -42,6 +42,7 @@ public final class JugcraftWorldgen {
 		// rich pockets lie in Lush Caves and the Glowcap Grotto; with the biomes switch off, the grotto is never placed and
 		// Lush Caves still carry them.
 		String[][] biomeOres = {
+				{"fluorite", "machines"}, {"fluorite_rich", "machines"},
 				{"thallite_rich", "thallite"},
 		};
 		for (String[] ore : biomeOres) {

@@ -740,6 +740,7 @@
             "Uranium: Y -64 to -16, needs a iron pickaxe.",
             "Titanium: Y -64 to -8, needs a iron pickaxe.",
             "Thallite: Y -32 to 48, needs a stone pickaxe. Richer in Lush Caves and the Glowcap Grotto.",
+            "Fluorite: Y -48 to 72.",
             "Rock Salt: Y 0 to 64.",
             "Phosphorite: Y -16 to 48.",
             "Lepidolite: Y -48 to 32.",
@@ -4807,6 +4808,147 @@
               "minecraft:bricks"
             ],
             "result": "jugcraft:polymer_reclaimer",
+            "count": 1
+          }
+        },
+        {
+          "title": "Acid Concentrator",
+          "icon": "jugcraft:acid_concentrator",
+          "text": [
+            "Separate 1000 mB ordinary sulfuric acid into 750 mB concentrate and 250 mB recovered water. Both outlets must fit. Reuse the existing starter acid factory; this is paid concentration, not a second free acid source.",
+            "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_tank",
+              "minecraft:bricks",
+              "jugcraft:steel_tank",
+              "jugcraft:copper_cable",
+              "jugcraft:basic_circuit",
+              "jugcraft:copper_cable",
+              "minecraft:bricks",
+              "jugcraft:electric_motor",
+              "minecraft:bricks"
+            ],
+            "result": "jugcraft:acid_concentrator",
+            "count": 1
+          }
+        },
+        {
+          "title": "Chemical Dissolution Chamber",
+          "icon": "jugcraft:chemical_dissolution_chamber",
+          "text": [
+            "Mine fluorite in snowy regions, including occasional exposed high mountain veins. The Mineral Conditioning Station washes one fluorite with 250 mB water into concentrate. Concentrate plus 750 mB concentrated sulfuric acid yields 500 mB hydrogen fluoride gas and one calcium sulfate. The washed-out water is consumed; these are game units, not chemical instructions.",
+            "Optional residue recovery: two calcium sulfate + 250 mB water in the Conditioner yields one Prepared Gypsum Binder, paying 160 ticks at 48 JE/t with a material loss. One binder + two sand + gravel crafts two white concrete powder as game construction filler. The chamber is ceramic-lined starter equipment and needs no PTFE. Retain the gas in tanks or cylinders; this machine has no gas vent.",
+            "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:bricks",
+              "jugcraft:steel_tank",
+              "minecraft:bricks",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:basic_circuit",
+              "jugcraft:machine_casing"
+            ],
+            "result": "jugcraft:chemical_dissolution_chamber",
+            "count": 1
+          }
+        },
+        {
+          "title": "Fluorocarbon Reactor",
+          "icon": "jugcraft:fluorocarbon_reactor",
+          "text": [
+            "500 mB methane + 1500 mB chlorine -> 500 mB chloroform + 1500 mB hydrogen chloride. Then 500 mB chloroform + 1000 mB hydrogen fluoride -> 500 mB chlorodifluoromethane + 1000 mB hydrogen chloride. Empty incompatible feeds/products before changing jobs; reserve room for every output.",
+            "Recovered hydrogen chloride goes to the existing Chemical Reactor absorption recipe. Methane can come from the biogas chain; chlorine comes from electrolysis or the magnesium line. No elemental fluorine is required for this route.",
+            "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "minecraft:bricks",
+              "jugcraft:copper_cable",
+              "jugcraft:basic_circuit",
+              "jugcraft:electric_motor",
+              "minecraft:bricks",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_tank"
+            ],
+            "result": "jugcraft:fluorocarbon_reactor",
+            "count": 1
+          }
+        },
+        {
+          "title": "Fluoromonomer Cracker",
+          "icon": "jugcraft:fluoromonomer_cracker",
+          "text": [
+            "1000 mB chlorodifluoromethane -> 500 mB tetrafluoroethylene (TFE) + 500 mB hydrogen chloride. Work and heat are paid by JE. Feed 1000 mB TFE to the Polymerization Kettle with its reusable PTFE Process Insert to make four PTFE powder.",
+            "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:bricks",
+              "jugcraft:steel_plate",
+              "minecraft:bricks",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_gear",
+              "jugcraft:copper_cable",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_tank"
+            ],
+            "result": "jugcraft:fluoromonomer_cracker",
+            "count": 1
+          }
+        },
+        {
+          "title": "PTFE Sintering Oven",
+          "icon": "jugcraft:ptfe_sintering_oven",
+          "text": [
+            "PTFE is shaped before sintering. Use the Molding Press gasket, fitting or panel mold with 1, 2 or 3 powder respectively to make one unsintered seal, fitting or liner. The oven finishes each blank for 240 ticks at 80 JE/t.",
+            "Alternative liner route: mix four powder with 250 mB lubricant in the Mineral Conditioner, yielding four paste charges. The Extruder sheet die consumes four charges for one liner blank plus one clean unsintered offcut. Four offcuts return one powder in the Reclaimer, paying energy and losing material. Finished PTFE parts are not melt-recycled or substituted for generic plastic.",
+            "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
+          ],
+          "craft": {
+            "grid": [
+              "minecraft:bricks",
+              "jugcraft:steel_gear",
+              "minecraft:bricks",
+              "jugcraft:copper_cable",
+              "jugcraft:basic_circuit",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:machine_casing",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:ptfe_sintering_oven",
+            "count": 1
+          }
+        },
+        {
+          "title": "Lined Fluorochemical Reactor",
+          "icon": "jugcraft:lined_fluorochemical_reactor",
+          "text": [
+            "Build with one finished PTFE seal, fitting and liner, two titanium ingots, two motors, a basic circuit and machine casing. This upgrade runs the same two fluorocarbon recipes in two independent lanes with 8000 mB tanks and 90% energy per lane, rounded up each tick. The starter reactor can produce every input to this upgrade.",
+            "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:ptfe_seal",
+              "jugcraft:ptfe_fitting",
+              "jugcraft:ptfe_liner",
+              "jugcraft:titanium_ingot",
+              "jugcraft:basic_circuit",
+              "jugcraft:titanium_ingot",
+              "jugcraft:electric_motor",
+              "jugcraft:machine_casing",
+              "jugcraft:electric_motor"
+            ],
+            "result": "jugcraft:lined_fluorochemical_reactor",
             "count": 1
           }
         }

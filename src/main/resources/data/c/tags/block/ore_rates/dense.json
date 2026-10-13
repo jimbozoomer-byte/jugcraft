@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:fluorite_ore",
+    "jugcraft:deepslate_fluorite_ore",
     "jugcraft:salt_ore",
     "jugcraft:deepslate_salt_ore",
     "jugcraft:phosphate_ore",

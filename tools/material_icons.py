@@ -92,12 +92,14 @@ ORE_RAMPS = {
     "phosphate": ramp("1e4a44 2e6e66 48968c 74bcae aadcce"),   # apatite: sea green
     "lepidolite": ramp("5a3c6a 966eaa ba92cc d4b6e2 f4e4fa"),  # lilac mica
     "monazite": ramp("5a3010 965a28 ba7838 d49c52 f6d696"),    # honey-brown
+    "fluorite": ramp("28494b 48777a 72a5a6 a5d0cd e0f2eb"),
     "thallite": ramp("4a5a2e 6e8048 98a86a c0cc8e e4ecb8"),    # the owner's sheet: sage green, the mineral as dug
 }
 
 # The three overlay layouts, taken in turn down ORE_RAMPS, so neighbouring ores do not look alike.
 LAYOUTS = ("ore_a", "ore_b", "ore_c")
 LAYOUT = {ore: LAYOUTS[index % len(LAYOUTS)] for index, ore in enumerate(ORE_RAMPS)}
+LAYOUT["thallite"] = "ore_a"
 
 # Our own host rock (host_stone, host_deepslate), dark to light: previews and the fallback only.
 ROCK = {"stone": {"r": hx("6a7076"), "s": hx("7c8288"), "t": hx("8c9298"), "u": hx("9ea3a8")},

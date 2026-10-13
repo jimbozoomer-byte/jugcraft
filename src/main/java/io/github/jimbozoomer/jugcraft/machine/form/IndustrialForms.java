@@ -613,6 +613,124 @@ public final class IndustrialForms {
 			.build();
 	public static FormMachineBlock POLYMER_RECLAIMER;
 
+	public static final MachineForm ACID_CONCENTRATOR_FORM = MachineForm.builder(Jugcraft.id("acid_concentrator"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###")
+			.layer("###", "###", "###")
+			.layer("###", "###", "###")
+			.layer("###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("dilute_acid")
+			.outputTank("concentrated_acid")
+			.outputTank("condensate")
+			.items(0, 0)
+			.capability("jugcraft:acid_concentration")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_0", FormPort.Kind.FLUID_IN, 0, 0, 2, 1, FormSide.BACK)
+			.port("product_0", FormPort.Kind.FLUID_OUT, 0, 0, 2, 0, FormSide.BACK)
+			.port("product_1", FormPort.Kind.FLUID_OUT, 1, 1, 2, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock ACID_CONCENTRATOR;
+
+	public static final MachineForm CHEMICAL_DISSOLUTION_CHAMBER_FORM = MachineForm.builder(Jugcraft.id("chemical_dissolution_chamber"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("dissolution_acid")
+			.outputTank("fluoride_gas")
+			.items(1, 1)
+			.capability("jugcraft:fluoride_dissolution")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_0", FormPort.Kind.FLUID_IN, 0, 0, 3, 1, FormSide.BACK)
+			.port("product_0", FormPort.Kind.FLUID_OUT, 0, 0, 3, 0, FormSide.BACK)
+			.port("solid_in_0", FormPort.Kind.ITEM_IN, 0, 2, 0, 1, FormSide.FRONT)
+			.port("solid_out_0", FormPort.Kind.ITEM_OUT, 0, 2, 3, 1, FormSide.BACK)
+			.build();
+	public static FormMachineBlock CHEMICAL_DISSOLUTION_CHAMBER;
+
+	public static final MachineForm FLUOROCARBON_REACTOR_FORM = MachineForm.builder(Jugcraft.id("fluorocarbon_reactor"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("carbon_feed")
+			.inputTank("halogen_reagent")
+			.outputTank("fluorocarbon_product")
+			.outputTank("acid_gas_recovery")
+			.items(0, 0)
+			.capability("jugcraft:fluorocarbon_synthesis")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_0", FormPort.Kind.FLUID_IN, 0, 0, 3, 1, FormSide.BACK)
+			.port("feed_1", FormPort.Kind.FLUID_IN, 1, 1, 3, 1, FormSide.BACK)
+			.port("product_0", FormPort.Kind.FLUID_OUT, 0, 0, 3, 0, FormSide.BACK)
+			.port("product_1", FormPort.Kind.FLUID_OUT, 1, 1, 3, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock FLUOROCARBON_REACTOR;
+
+	public static final MachineForm FLUOROMONOMER_CRACKER_FORM = MachineForm.builder(Jugcraft.id("fluoromonomer_cracker"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("fluorocarbon_feed")
+			.outputTank("fluoromonomer")
+			.outputTank("acid_gas_recovery")
+			.items(0, 0)
+			.capability("jugcraft:fluoromonomer_cracking")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_0", FormPort.Kind.FLUID_IN, 0, 0, 3, 1, FormSide.BACK)
+			.port("product_0", FormPort.Kind.FLUID_OUT, 0, 0, 3, 0, FormSide.BACK)
+			.port("product_1", FormPort.Kind.FLUID_OUT, 1, 1, 3, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock FLUOROMONOMER_CRACKER;
+
+	public static final MachineForm PTFE_SINTERING_OVEN_FORM = MachineForm.builder(Jugcraft.id("ptfe_sintering_oven"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.layer("###", "###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.items(1, 1)
+			.capability("jugcraft:ptfe_sintering")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("solid_in_0", FormPort.Kind.ITEM_IN, 0, 2, 0, 1, FormSide.FRONT)
+			.port("solid_out_0", FormPort.Kind.ITEM_OUT, 0, 2, 3, 1, FormSide.BACK)
+			.build();
+	public static FormMachineBlock PTFE_SINTERING_OVEN;
+
+	public static final MachineForm LINED_FLUOROCHEMICAL_REACTOR_FORM = MachineForm.builder(Jugcraft.id("lined_fluorochemical_reactor"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.layer("###", "###", "###", "###", "###")
+			.profile(OperatingProfile.EXPANDED)
+			.inputTank("carbon_feed")
+			.inputTank("halogen_reagent")
+			.outputTank("fluorocarbon_product")
+			.outputTank("acid_gas_recovery")
+			.items(0, 0)
+			.capability("jugcraft:fluorocarbon_synthesis")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_0", FormPort.Kind.FLUID_IN, 0, 0, 4, 1, FormSide.BACK)
+			.port("feed_1", FormPort.Kind.FLUID_IN, 1, 1, 4, 1, FormSide.BACK)
+			.port("product_0", FormPort.Kind.FLUID_OUT, 0, 0, 4, 0, FormSide.BACK)
+			.port("product_1", FormPort.Kind.FLUID_OUT, 1, 1, 4, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock LINED_FLUOROCHEMICAL_REACTOR;
+
 	private IndustrialForms() {
 	}
 
@@ -646,7 +764,13 @@ public final class IndustrialForms {
 		POLYMERIZATION_KETTLE = block("polymerization_kettle", POLYMERIZATION_KETTLE_FORM);
 		POLYMER_EXTRUDER = block("polymer_extruder", POLYMER_EXTRUDER_FORM);
 		POLYMER_RECLAIMER = block("polymer_reclaimer", POLYMER_RECLAIMER_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, COAL_GASIFIER, GAS_CLEANING_RACK, ANAEROBIC_DIGESTER, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, BIO_GENERATOR, MASHING_STATION, INDUSTRIAL_FERMENTER, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER);
+		ACID_CONCENTRATOR = block("acid_concentrator", ACID_CONCENTRATOR_FORM);
+		CHEMICAL_DISSOLUTION_CHAMBER = block("chemical_dissolution_chamber", CHEMICAL_DISSOLUTION_CHAMBER_FORM);
+		FLUOROCARBON_REACTOR = block("fluorocarbon_reactor", FLUOROCARBON_REACTOR_FORM);
+		FLUOROMONOMER_CRACKER = block("fluoromonomer_cracker", FLUOROMONOMER_CRACKER_FORM);
+		PTFE_SINTERING_OVEN = block("ptfe_sintering_oven", PTFE_SINTERING_OVEN_FORM);
+		LINED_FLUOROCHEMICAL_REACTOR = block("lined_fluorochemical_reactor", LINED_FLUOROCHEMICAL_REACTOR_FORM);
+		List<FormMachineBlock> blocks = List.of(ACID_CONCENTRATOR, CHEMICAL_DISSOLUTION_CHAMBER, FLUOROCARBON_REACTOR, FLUOROMONOMER_CRACKER, PTFE_SINTERING_OVEN, LINED_FLUOROCHEMICAL_REACTOR, ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, COAL_GASIFIER, GAS_CLEANING_RACK, ANAEROBIC_DIGESTER, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, BIO_GENERATOR, MASHING_STATION, INDUSTRIAL_FERMENTER, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

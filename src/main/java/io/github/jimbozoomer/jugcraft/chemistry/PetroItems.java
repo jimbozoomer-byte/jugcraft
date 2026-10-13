@@ -88,7 +88,22 @@ public final class PetroItems {
 	private PetroItems() {
 	}
 
+	public static Item FLUORITE_CONCENTRATE;
+	public static Item CALCIUM_SULFATE;
+	public static Item PTFE_POWDER;
+	public static Item PTFE_PROCESS_INSERT;
+	public static Item PTFE_PASTE_CHARGE;
+	public static Item PTFE_SEAL_BLANK;
+	public static Item PTFE_FITTING_BLANK;
+	public static Item PTFE_LINER_BLANK;
+	public static Item PTFE_SEAL;
+	public static Item PTFE_FITTING;
+	public static Item PTFE_LINER;
+	public static Item PTFE_OFFCUT;
+	public static Item GYPSUM_BINDER;
+
 	public static void register() {
+
 		CRACKING_CATALYST = JugcraftRegistry.item("cracking_catalyst");
 		ASPHALT_BINDER = JugcraftRegistry.item("asphalt_binder");
 		PLASTIC_PELLETS = JugcraftRegistry.item("plastic_pellets");
@@ -151,7 +166,35 @@ public final class PetroItems {
 		PVC_OFFCUT = JugcraftRegistry.item("pvc_offcut");
 		RUBBER_OFFCUT = JugcraftRegistry.item("rubber_offcut");
 
+		FLUORITE_CONCENTRATE = JugcraftRegistry.item("fluorite_concentrate");
+		CALCIUM_SULFATE = JugcraftRegistry.item("calcium_sulfate");
+		PTFE_POWDER = JugcraftRegistry.item("ptfe_powder");
+		PTFE_PROCESS_INSERT = JugcraftRegistry.item("ptfe_process_insert");
+		PTFE_PASTE_CHARGE = JugcraftRegistry.item("ptfe_paste_charge");
+		PTFE_SEAL_BLANK = JugcraftRegistry.item("ptfe_seal_blank");
+		PTFE_FITTING_BLANK = JugcraftRegistry.item("ptfe_fitting_blank");
+		PTFE_LINER_BLANK = JugcraftRegistry.item("ptfe_liner_blank");
+		PTFE_SEAL = JugcraftRegistry.item("ptfe_seal");
+		PTFE_FITTING = JugcraftRegistry.item("ptfe_fitting");
+		PTFE_LINER = JugcraftRegistry.item("ptfe_liner");
+		PTFE_OFFCUT = JugcraftRegistry.item("ptfe_offcut");
+		GYPSUM_BINDER = JugcraftRegistry.item("gypsum_binder");
+
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
+			output.accept(FLUORITE_CONCENTRATE);
+			output.accept(CALCIUM_SULFATE);
+			output.accept(PTFE_POWDER);
+			output.accept(PTFE_PROCESS_INSERT);
+			output.accept(PTFE_PASTE_CHARGE);
+			output.accept(PTFE_SEAL_BLANK);
+			output.accept(PTFE_FITTING_BLANK);
+			output.accept(PTFE_LINER_BLANK);
+			output.accept(PTFE_SEAL);
+			output.accept(PTFE_FITTING);
+			output.accept(PTFE_LINER);
+			output.accept(PTFE_OFFCUT);
+			output.accept(GYPSUM_BINDER);
+
 			output.accept(HDPE_PELLETS);
 			output.accept(LDPE_PELLETS);
 			output.accept(LDPE_FILM);

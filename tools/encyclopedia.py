@@ -73,11 +73,15 @@ def build():
     overviews.insert(2,('polymer_factory','From oil or crops to useful polymer parts','jugcraft:polymer_extruder',[
         'Monomer Preparation Unit: refinery gas or renewable bioethanol -> ethylene. Add chlorine for dichloride; crack it into vinyl chloride and recovered hydrogen chloride for existing acid absorption.',
         'Polymerization Kettle selects HDPE and LDPE with reusable inserts. Existing PVC and rubber supplies also work. The Molding Press keeps six molds; HDPE joins compatible rigid stock. The Extruder uses five reusable dies for sheets, film, profiles, hoses and insulation.',
-        'Clean Polymer Reclaimer returns only matching stock from grade-marked offcuts or identified clean film/profiles, with paid work and losses. Both extrusion drawers must fit. Parts feed existing cables, valves, casings and plastic building blocks. PTFE and fluorochemical supply remain a separate future line.']))
+        'Clean Polymer Reclaimer returns only matching stock from grade-marked offcuts or identified clean film/profiles, with paid work and losses. Both extrusion drawers must fit. Parts feed existing cables, valves, casings and plastic building blocks. For PTFE, follow the fluorochemistry guide: separate specialist powder, shaping and sintering.']))
     overviews.insert(2,('coastal_metals','Coastal magnesium, titanium and molded parts','jugcraft:magnesium_electrolysis_cell',[
         'Coastal Seawater Intake -> Brine Concentrator -> Mineral Conditioning Station -> Chloride Drying Oven -> Magnesium Electrolysis Cell. Intake water must be at sea level in a beach/ocean area beside an ocean, not just beneath a coastal machine. Lye and hydrochloric acid come from the existing starter factory.',
         'Raw Titanium + coke + chlorine -> Titanium Chlorination Vessel -> existing Chemical Distillation Station -> Titanium Reduction Retort with magnesium -> existing Arc Furnace. Re-electrolyze the returned dry salt to recover magnesium and chlorine with paid power. Treat spent mineral wash in the Conditioner.',
         'The Polymer Molding Press uses six earlier-steel reusable molds. Rigid pellets/PVC supply housings and panels, PVC supplies fittings, and rubber supplies insulation/gaskets/hoses. Molded products have additional construction recipes; old routes remain useful. Search each machine for exact recipes and locations.']))
+    overviews.insert(2,('fluorochemistry','Snowy fluorite to finished PTFE','jugcraft:ptfe_sintering_oven',[
+        'Fluorite veins occur only in snowy biomes, with deeper deposits and occasional high mountain exposures. Wash fluorite in the Mineral Conditioner. Concentrate starter sulfuric acid in the Acid Concentrator, then use the Chemical Dissolution Chamber to make hydrogen fluoride and calcium sulfate.',
+        'Methane + chlorine -> chloroform in the Fluorocarbon Reactor. Chloroform + hydrogen fluoride -> chlorodifluoromethane. The Fluoromonomer Cracker makes TFE. Recover hydrogen chloride for existing acid absorption; every product outlet must have space.',
+        'Use the PTFE insert in the Polymerization Kettle to turn TFE into powder. Press gasket/fitting/panel blanks, then sinter them. Alternatively prepare PTFE paste in the Conditioner and extrude liner blanks with a sheet die. Finished seals, fittings and liners build the larger two-lane Lined Fluorochemical Reactor. Only clean unsintered offcuts can be reclaimed.']))
     for key,title,icon,text in reversed(overviews):
         entries.insert(0,dict(id='guide/'+key,group='Home',chapter='Start here',gate='',page=dict(title=title,icon=icon,text=text)))
     return dict(version=1,entries=entries)
@@ -91,6 +95,8 @@ def write_content(write,assets,data,lang):
     acquire={"chemical_infuser":"Chemical Infuser", "chemical_oxidizer":"Chemical Oxidizer", "coal_gasifier":"Coal Gasifier", "gas_cleaning_rack":"Gas Cleaning and Separation Rack", "hydrochloric_acid_bucket":"Hydrochloric Acid"}
     import anaerobic
     import biorefinery
+    import fluorochemistry
+    acquire.update({name:info["display"] for name,info in fluorochemistry.FORMS.items()})
     import polymers
     acquire.update({name:info["display"] for name,info in polymers.FORMS.items()})
     import coastal_metals

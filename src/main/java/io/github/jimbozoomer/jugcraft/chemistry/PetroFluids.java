@@ -188,7 +188,14 @@ public final class PetroFluids {
 		return 0;
 	}
 
+	public static Entry CONCENTRATED_SULFURIC_ACID;
+	public static Entry CHLOROFORM;
+	public static Gas HYDROGEN_FLUORIDE;
+	public static Gas CHLORODIFLUOROMETHANE;
+	public static Gas TETRAFLUOROETHYLENE;
+
 	public static void register() {
+
 		CRUDE_OIL = fluid("crude_oil", 20, 2, 2, 0xFF1E1711, MapColor.COLOR_BLACK);
 		NAPHTHA = fluid("naphtha", 5, 4, 1, 0xFFBEAA64, MapColor.COLOR_YELLOW);
 		DIESEL = fluid("diesel", 8, 3, 1, 0xFFAA6E19, MapColor.COLOR_ORANGE);
@@ -248,6 +255,12 @@ public final class PetroFluids {
 
 		ETHYLENE_DICHLORIDE = fluid("ethylene_dichloride", 8, 3, 1, 0xFF6E8562, MapColor.COLOR_LIGHT_GRAY);
 		ETHYLENE = gas("ethylene", 0xFF648787);
+
+		CONCENTRATED_SULFURIC_ACID = fluid("concentrated_sulfuric_acid", 8, 3, 1, 0xFF756E33, MapColor.COLOR_LIGHT_GRAY);
+		CHLOROFORM = fluid("chloroform", 8, 3, 1, 0xFF567769, MapColor.COLOR_LIGHT_GRAY);
+		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
+		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
+		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

@@ -55,7 +55,7 @@ Five unchanged owner-library 16 x 16 textures are copied from `art/owner-library
 
 ## Scope and validation
 
-This is the complete ordinary molding/extrusion route described above. The separate fluorite/HF/fluorocarbon/PTFE chain, PTFE advanced-machine consumers, additional polymer grades and larger bulk plants remain future chemistry work, rather than placeholder recipes that manufacture PTFE directly from acid.
+This checkpoint completed the ordinary molding/extrusion route described above. The subsequent local [fluorochemistry checkpoint](fluorochemistry-playtest.md) adds the fluorite/HF/fluorocarbon/PTFE chain and advanced-machine consumers. Additional polymer grades and larger bulk plants remain future work.
 
 - Full Gradle build: **all 1,415 required server tests passed**, including five new polymer tests. All twenty new processing receipts pay their exact energy and retain tooling; port tests cover every orientation. Tests also exercise wrong dies, blocked offcut storage, save/reload, HDPE/LDPE separation, original-press compatibility, same-grade recovery and real construction recipes.
 - Native client test renders the four new machines and updated press, checks working/stopped drives, opens their real menus and prepares connected battery/cable samples. Thirty-five screenshots cover idle/working views, menus and connections. The preserved yard starts with HDPE molding and LDPE film extrusion stocked for the owner.

@@ -181,7 +181,8 @@
 			"io.github.jimbozoomer.jugcraft.test.CinderKilnGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantGameTests",
 			"io.github.jimbozoomer.jugcraft.test.StarterChemistryGameTests",
-			"io.github.jimbozoomer.jugcraft.test.PolymerGameTests"
+			"io.github.jimbozoomer.jugcraft.test.PolymerGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FluorochemistryGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.CoastalMetalsClientGameTests",
@@ -326,7 +327,8 @@
 			"io.github.jimbozoomer.jugcraft.test.CinderKilnClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.StarterChemistryClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.PolymerClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.PolymerClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.FluorochemistryClientGameTests"
 		]
 	},
 	"depends": {

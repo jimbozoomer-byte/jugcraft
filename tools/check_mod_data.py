@@ -2977,7 +2977,7 @@ def check_industrial_forms():
                     for lit in ("false", "true") for part in range(parts)}
         if set(state.get("variants", {})) != expected:
             err(f"{form}: its blockstate must cover exactly 4 facings x 2 lights x {parts} parts")
-        if bool(industrial_forms.FORM_RECIPES.get(form)) != (f"{MOD}:{form}" in viewed):
+        if bool(industrial_forms.recipes_for_form(form)) != (f"{MOD}:{form}" in viewed):
             err(f"{form}: a JEI category in recipe_view.json exactly when it runs recipes")
         if info.get("fuels"):
             kinds = [port[1] for port in info["ports"]]
@@ -2995,7 +2995,7 @@ def check_industrial_forms():
                     err(f"{form}: {fluid} burns for {per_mb} JE/mB, at least the {cost:.1f} JE/mB its cheapest making costs: a power loop")
         tanks = info["input_tanks"] + info["output_tanks"]
         fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
-        for recipe in industrial_forms.FORM_RECIPES.get(form, []):
+        for recipe in industrial_forms.recipes_for_form(form):
             label = f"{form} recipe {recipe['name']}"
             if recipe["capability"] not in info["capabilities"]:
                 err(f"{label}: needs {recipe['capability']}, which the form does not offer")

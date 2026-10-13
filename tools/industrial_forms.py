@@ -466,6 +466,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     biorefinery.write_extras(write, assets, data, lang, condition)
     coastal_metals.write_extras(write, assets, data, lang, condition)
     polymers.write_extras(write, assets, data, lang, condition)
+    fluorochemistry.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -494,6 +495,18 @@ def form_recipe_files(condition):
             yield kind, recipe["name"], data
 
 
+def recipes_for_form(form):
+    """Resolve shared family/capability receipts without writing duplicate recipe IDs."""
+    info=FORMS[form]
+    return [recipe for owner,recipes in FORM_RECIPES.items() if FORMS[owner]['family']==info['family']
+            for recipe in recipes if recipe['capability'] in info['capabilities']]
+
+
+def form_energy(form, power):
+    percent={'ENTRY':100,'EXPANDED':90,'BULK':80}[FORMS[form]['profile']]
+    return max(1,(power*percent+99)//100) if power else 0
+
+
 def recipe_view():
     """The forms' JEI categories (tools/recipe_view.py): one per form that runs recipes, its recipes and the form as the
     station. A generator form runs none (its fuels are in the Engineer's Handbook, like every generator's)."""
@@ -502,8 +515,8 @@ def recipe_view():
                           "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
                           "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],
                           "results": [[item, count] for item, count in recipe.get("results", [])],
-                          "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "energy_per_tick": recipe.get("energy_per_tick", 0)} for recipe in FORM_RECIPES[form]]}
-            for form in FORMS if FORM_RECIPES.get(form)]
+                          "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "energy_per_tick": form_energy(form,recipe.get("energy_per_tick", 0))} for recipe in recipes_for_form(form)]}
+            for form in FORMS if recipes_for_form(form)]
 
 
 # Package 2's four further entry forms. Keep each physical machine in the common controller/renderer pipeline.
@@ -543,7 +556,7 @@ ITEM_EXTRAS.update(biorefinery_models.ITEM_EXTRAS)
 import coastal_metals
 import coastal_metals_models
 FORMS.update(coastal_metals.FORMS)
-FORM_RECIPES.update(coastal_metals.RECIPES)
+FORM_RECIPES.update({name:list(recipes) for name,recipes in coastal_metals.RECIPES.items()})
 for name, recipes in coastal_metals.EXTRA_RECIPES.items(): FORM_RECIPES[name].extend(recipes)
 HANDBOOK.update(coastal_metals.HANDBOOK)
 TANK_NAMES.update(coastal_metals.TANK_NAMES)
@@ -556,9 +569,21 @@ HANDBOOK['biogas_cleaner'].append('Also cleans wet fermentation CO2: 250 mB gas 
 import polymers
 import polymer_models
 FORMS.update(polymers.FORMS)
-FORM_RECIPES.update(polymers.RECIPES)
+FORM_RECIPES.update({name:list(recipes) for name,recipes in polymers.RECIPES.items()})
 HANDBOOK.update(polymers.HANDBOOK)
 TANK_NAMES.update(polymers.TANK_NAMES)
 MODELS.update(polymer_models.MODELS)
 ROTORS.update(polymer_models.ROTORS)
 ITEM_EXTRAS.update(polymer_models.ITEM_EXTRAS)
+
+import fluorochemistry
+import fluorochemistry_models
+FORMS.update(fluorochemistry.FORMS)
+FORM_RECIPES.update(fluorochemistry.RECIPES)
+for machine, recipes in fluorochemistry.EXTRA_RECIPES.items():
+    FORM_RECIPES[machine].extend(recipes)
+HANDBOOK.update(fluorochemistry.HANDBOOK)
+TANK_NAMES.update(fluorochemistry.TANK_NAMES)
+MODELS.update(fluorochemistry_models.MODELS)
+ROTORS.update(fluorochemistry_models.ROTORS)
+ITEM_EXTRAS.update(fluorochemistry_models.ITEM_EXTRAS)

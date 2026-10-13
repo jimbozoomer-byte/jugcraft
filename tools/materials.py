@@ -60,7 +60,13 @@ METALS = {
 }
 
 # Non-metal ores: <name>_ore, deepslate_<name>_ore, item <name>, storage block <name>_block.
+FLUORITE_BIOMES = ["minecraft:" + name for name in
+                  ("snowy_plains", "snowy_taiga", "grove", "snowy_slopes", "frozen_peaks",
+                   "jagged_peaks", "ice_spikes", "snowy_beach")]
 MINERALS = {
+    "fluorite": {"display": "Fluorite", "ore_display": "Fluorite", "feature": "machines", "drops": [1, 2],
+                 "tool": "iron", "gen": {"size": 18, "count": 4, "min_y": -48, "max_y": 72, "biomes": FLUORITE_BIOMES},
+                 "rich_gen": {"size": 7, "count": 1, "min_y": 64, "max_y": 192, "biomes": FLUORITE_BIOMES}},
     "salt": {"display": "Salt", "ore_display": "Rock Salt", "feature": "salt", "drops": [2, 4], "tool": "stone",
              "gen": {"size": 12, "count": 4, "min_y": 0, "max_y": 64}},
     "phosphate": {"display": "Phosphate", "ore_display": "Phosphorite", "feature": "phosphate", "drops": [1, 3],
