@@ -480,6 +480,11 @@ FORM_RECIPES = {
         # Hydrogen chloride: hydrogen burnt in chlorine, equal gas amounts making twice as much
         # (docs/features/industrial-starter-gas-and-acid-factory.md). The plan's budget, 9,600 JE a batch, at the
         # synthesis family's 128 JE/t: 75 ticks.
+        # Direct chlorination (the plan's detailed PVC route): refinery ethylene and chlorine join into ethylene dichloride,
+        # the liquid at 2 mB a reaction amount. 60 ticks at 128 JE/t.
+        {"name": "infuser_ethylene_dichloride", "capability": GAS_COMBINATION,
+         "fluids": [(f"{MOD}:refinery_gas", 250), (f"{MOD}:chlorine", 250)],
+         "fluid_results": [(f"{MOD}:ethylene_dichloride", 500, 0)], "ticks": 60, "features": ["salt", "machines"]},
         {"name": "infuser_hydrogen_chloride", "capability": GAS_COMBINATION,
          "fluids": [(f"{MOD}:hydrogen", 250), (f"{MOD}:chlorine", 250)],
          "fluid_results": [(f"{MOD}:hydrogen_chloride", 500, 0)], "ticks": 75, "features": ["salt"]},

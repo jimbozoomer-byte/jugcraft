@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -232,6 +233,36 @@ public class ChemicalInfuserGameTests {
 		});
 	}
 
+	/**
+	 * The detailed PVC route's direct chlorination: 250 mB of refinery gas (its ethylene) and 250 mB of chlorine join, with
+	 * no bed, into 500 mB of ethylene dichloride (the liquid at 2 mB a reaction amount), 60 ticks at 128 JE/t. The
+	 * existing PVC chain's other steps are in place: the Catalytic Cracker cracks the dichloride into vinyl chloride and
+	 * hydrogen chloride, and the Synthesis Converter reuses that hydrogen chloride with ethylene and oxygen.
+	 */
+	@GameTest(maxTicks = 200)
+	public void ethyleneAndChlorineJoinIntoEthyleneDichloride(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		insert(helper, port(helper, machine, "hydrogen_in"), PetroFluids.REFINERY_GAS.fluid(), 250);
+		insert(helper, port(helper, machine, "reactant_in"), PetroFluids.CHLORINE.fluid(), 250);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null
+					&& amount(machine.tanks().output(PRODUCT), PetroFluids.ETHYLENE_DICHLORIDE.source()) == 500, "500 mB of ethylene dichloride");
+			helper.assertTrue(used(machine, supplied) == 60 * DRAW, "Paid " + used(machine, supplied) + " JE");
+			MinecraftServer server = helper.getLevel().getServer();
+			boolean cracks = FluidRecipes.recipes(server, MachineKind.CATALYTIC_CRACKER).stream().anyMatch(recipe ->
+					recipe.fluids().size() == 1 && recipe.fluids().get(0).fluid() == PetroFluids.ETHYLENE_DICHLORIDE.source()
+							&& recipe.fluids().get(0).amount() == 500
+							&& recipe.fluidResults().stream().anyMatch(r -> r.fluid() == PetroFluids.VINYL_CHLORIDE.fluid() && r.amount() == 250)
+							&& recipe.fluidResults().stream().anyMatch(r -> r.fluid() == PetroFluids.HYDROGEN_CHLORIDE.fluid() && r.amount() == 250));
+			helper.assertTrue(cracks, "The Catalytic Cracker cracks 500 mB of dichloride into 250 mB of vinyl chloride and 250 mB of hydrogen chloride");
+			boolean reuses = FluidRecipes.recipes(server, MachineKind.SYNTHESIS_CONVERTER).stream().anyMatch(recipe ->
+					recipe.fluids().stream().anyMatch(f -> f.fluid() == PetroFluids.HYDROGEN_CHLORIDE.fluid() && f.amount() == 500)
+							&& recipe.fluidResults().stream().anyMatch(r -> r.fluid() == PetroFluids.ETHYLENE_DICHLORIDE.source() && r.amount() == 500));
+			helper.assertTrue(reuses, "The Synthesis Converter reuses 500 mB of hydrogen chloride into 500 mB of dichloride");
+		});
+	}
+
 	/** Without a bed, methane's gases wait and the screen names the bed socket; nothing is taken or spent. */
 	@GameTest(maxTicks = 60)
 	public void methanationWaitsForItsBed(GameTestHelper helper) {
@@ -314,16 +345,18 @@ public class ChemicalInfuserGameTests {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
 		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
-		helper.assertTrue(own.size() == 5 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_biogas_upgrading"))
+		helper.assertTrue(own.size() == 6 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_biogas_upgrading"))
 				&& own.get(0).recipe().time() == METHANATION_TICKS && own.get(0).recipe().tool().isPresent()
 				&& own.get(1).id().equals(Jugcraft.id("gas_synthesis/infuser_carbon_dioxide_methanation"))
 				&& own.get(1).recipe().time() == METHANATION_TICKS && own.get(1).recipe().tool().isPresent()
 				&& own.get(2).id().equals(Jugcraft.id("gas_synthesis/infuser_carbon_monoxide_methanation"))
 				&& own.get(2).recipe().time() == 150 && own.get(2).recipe().tool().isPresent()
-				&& own.get(3).id().equals(Jugcraft.id("gas_synthesis/infuser_hydrogen_chloride")) && own.get(3).recipe().time() == TICKS
+				&& own.get(3).id().equals(Jugcraft.id("gas_synthesis/infuser_ethylene_dichloride")) && own.get(3).recipe().time() == 60
 				&& own.get(3).recipe().tool().isEmpty()
-				&& own.get(4).id().equals(Jugcraft.id("gas_synthesis/infuser_sulfur_trioxide")) && own.get(4).recipe().time() == 100
-				&& own.get(4).recipe().tool().isPresent(), "Its five recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
+				&& own.get(4).id().equals(Jugcraft.id("gas_synthesis/infuser_hydrogen_chloride")) && own.get(4).recipe().time() == TICKS
+				&& own.get(4).recipe().tool().isEmpty()
+				&& own.get(5).id().equals(Jugcraft.id("gas_synthesis/infuser_sulfur_trioxide")) && own.get(5).recipe().time() == 100
+				&& own.get(5).recipe().tool().isPresent(), "Its six recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
 		long converter = FluidRecipes.recipes(level.getServer(), MachineKind.SYNTHESIS_CONVERTER).stream()
 				.filter(recipe -> recipe.fluidResults().stream().anyMatch(result -> result.fluid() == PetroFluids.HYDROGEN_CHLORIDE.fluid()))
 				.count();

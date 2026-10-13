@@ -82,6 +82,10 @@ FLUIDS = {
     "hydrochloric_acid": {"display": "Hydrochloric Acid", "feature": "machines",
                           "colors": [(150, 164, 120), (184, 196, 150), (210, 220, 180), (236, 242, 218)],
                           "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # The named PVC intermediate: refinery ethylene chlorinated into ethylene dichloride, an oily pale yellow-green.
+    "ethylene_dichloride": {"display": "Ethylene Dichloride", "feature": "machines",
+                            "colors": [(140, 150, 96), (176, 186, 128), (204, 212, 160), (232, 238, 200)],
+                            "tick_delay": 5, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -329,6 +333,11 @@ FLUID_RECIPES = {
         {"name": "naphtha", "items": [("jugcraft:cracking_catalyst", 1)], "fluids": [("jugcraft:naphtha", 1000)],
          "fluid_results": [("jugcraft:gasoline", 900, 3), ("jugcraft:refinery_gas", 100, 2)], "source": 0,
          "ticks": 120, "features": ["crude_oil"]},
+        # Ethylene dichloride cracked by heat alone (no catalyst used up) into vinyl chloride, giving back its hydrogen
+        # chloride for oxychlorination: C2H4Cl2 -> C2H3Cl + HCl (the plan's detailed PVC route).
+        {"name": "ethylene_dichloride", "fluids": [("jugcraft:ethylene_dichloride", 500)],
+         "fluid_results": [("jugcraft:vinyl_chloride", 250, 0), ("jugcraft:hydrogen_chloride", 250, 1)], "source": 0,
+         "ticks": 80, "features": ["salt", "machines"]},
     ],
     # Refinery gas polymerizes into plastic: a bucket of gas gives four pellets.
     "polymerization_reactor": [
@@ -470,6 +479,12 @@ FLUID_RECIPES = {
         {"name": "ammonia", "fluids": [("jugcraft:hydrogen", 300), ("jugcraft:nitrogen", 100)],
          "fluid_results": [("jugcraft:ammonia", 200)], "ticks": 40, "features": ["salt", "machines"]},
         # Vinyl chloride (batch 15): chlorine added to refinery gas (its ethylene), at heat over a catalyst.
+        # Oxychlorination (the plan's detailed PVC route, HCl reused): refinery ethylene, the hydrogen chloride the
+        # cracker gives back and oxygen make ethylene dichloride, C2H4 + 2 HCl + 1/2 O2 -> C2H4Cl2 + H2O. The liquid at
+        # 2 mB a reaction amount; the water is not kept.
+        {"name": "ethylene_dichloride", "fluids": [("jugcraft:refinery_gas", 250), ("jugcraft:hydrogen_chloride", 500),
+                                                   ("jugcraft:oxygen", 125)],
+         "fluid_results": [("jugcraft:ethylene_dichloride", 500)], "ticks": 60, "features": ["salt", "machines"]},
         {"name": "vinyl_chloride", "fluids": [("jugcraft:refinery_gas", 250), ("jugcraft:chlorine", 250)],
          "fluid_results": [("jugcraft:vinyl_chloride", 250)], "ticks": 40, "features": ["crude_oil", "salt"]},
         # Ostwald: ammonia burnt over platinum gauze in oxygen, the gases absorbed in water.

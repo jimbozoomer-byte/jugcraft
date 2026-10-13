@@ -129,6 +129,7 @@ public final class PetroFluids {
 	/** Ammonia burnt in oxygen and absorbed in water (the Ostwald process). */
 	public static Entry NITRIC_ACID;
 	public static Entry HYDROCHLORIC_ACID;
+	public static Entry ETHYLENE_DICHLORIDE;
 	/** Vanadium leached into sulfuric acid (batch 17): the flow battery's electrolyte. */
 	public static Entry VANADIUM_ELECTROLYTE;
 	/** Crops fermented in the chemical reactor (batch 26): fuel for the gas turbine and the advanced engine. */
@@ -213,6 +214,7 @@ public final class PetroFluids {
 		KEROSENE = fluid("kerosene", 5, 4, 1, 0xFFE0E0C4, MapColor.SAND);
 		LIQUID_OXYGEN = fluid("liquid_oxygen", 3, 4, 1, 0xFFA0C8EC, MapColor.COLOR_LIGHT_BLUE);
 		HYDROCHLORIC_ACID = fluid("hydrochloric_acid", 5, 4, 1, 0xFFD2DCB4, MapColor.COLOR_LIGHT_GREEN);
+		ETHYLENE_DICHLORIDE = fluid("ethylene_dichloride", 5, 4, 1, 0xFFCCD4A0, MapColor.COLOR_YELLOW);
 		HYDROGEN_CHLORIDE = gas("hydrogen_chloride", 0xFFD4DCDA);
 		SULFUR_DIOXIDE = gas("sulfur_dioxide", 0xFFDAD6B8);
 		CARBON_DIOXIDE = gas("carbon_dioxide", 0xFFC4CAD4);

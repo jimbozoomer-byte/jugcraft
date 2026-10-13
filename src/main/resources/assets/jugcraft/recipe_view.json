@@ -5586,6 +5586,27 @@
           "ticks": 120
         },
         {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ethylene_dichloride",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:vinyl_chloride",
+              250
+            ],
+            [
+              "jugcraft:hydrogen_chloride",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 80
+        },
+        {
           "items": [
             [
               "jugcraft:cracking_catalyst",
@@ -6974,6 +6995,31 @@
               250
             ],
             [
+              "jugcraft:hydrogen_chloride",
+              500
+            ],
+            [
+              "jugcraft:oxygen",
+              125
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethylene_dichloride",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 60
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:refinery_gas",
+              250
+            ],
+            [
               "jugcraft:chlorine",
               250
             ]
@@ -7263,6 +7309,27 @@
       "block": "jugcraft:chemical_infuser",
       "type": "chemical_infuser",
       "recipes": [
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:refinery_gas",
+              250
+            ],
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethylene_dichloride",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 60
+        },
         {
           "items": [],
           "fluids": [
