@@ -1,6 +1,6 @@
 # Industrial Fermenter: bioethanol with collected carbon dioxide (factory package 2)
 
-Status: implemented on the contributor's fork, pending CI and review. Stacked on [methane power](industrial-methane-power.md), which is stacked on the [Chemical Infuser](industrial-chemical-infuser.md) and the [Chemical Oxidizer](industrial-chemical-oxidizer.md).
+Status: implemented (CI green on the contributor's fork; pending review). Stacked on [methane power](industrial-methane-power.md), which is stacked on the [Chemical Infuser](industrial-chemical-infuser.md) and the [Chemical Oxidizer](industrial-chemical-oxidizer.md).
 Proposal issue: none. The TODO list's "Develop the earlier milling/mashing -> fermentation -> distillation Bio-Generator fuel route, adding … brewery CO2 collection" (the fermentation and CO2 collection step) and "Full CO2 capture storage defaults to continued production/excess venting". The size, model and venting follow the art brief's Industrial Fermenter ([models and textures](industrial-machine-models-and-textures.md#industrial-fermenter)); the bill and the carbon dioxide amount are this change's choices, described below for review.
 Owner: jimbozoomer-byte
 Target milestone and tier: steel era, the bio line of the starter gas and acid factory
@@ -97,7 +97,9 @@ Client game test: `IndustrialFermenterClientGameTests` takes four views (front l
 
 ### Results
 
-Not yet run in CI.
+- **Run [38338780045](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38338780045) on the contributor's fork (commit 6dc83b1a): green.** It compiled; the data checks passed; every server game test passed, the five `IndustrialFermenterGameTests` among them; the build without optional integrations passed; and all five client shards passed, `IndustrialFermenterClientGameTests` included.
+- The first run (38335877059) failed to compile: the tests read bioethanol with `fluid()` instead of the liquid's `source()`. The fix is commit 6dc83b1a.
+- The client screenshots have not yet been looked at by a person.
 
 No survival playtest, two-client test or performance measurement has been done.
 
