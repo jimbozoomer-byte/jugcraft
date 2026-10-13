@@ -59,11 +59,13 @@ import org.jspecify.annotations.Nullable;
  * where it stands for this player (done, next, can be done now, later, or not available on this server) and how much it
  * matters (required, recommended, or optional after a boss); a step the player can act on lists its ways: the server's
  * own recipes as crafting grids, sales in the town if one stands, and codex entries the player has opened. The numbers
- * (how dark, how many, how long, what a spell costs) are read from the loaded rules, so a data pack that changes them
- * changes the page. The journal's research and stage reports end it.
+ * (how dark, how many, what a spell costs) are read from the loaded rules, so a data pack that changes them changes the
+ * page; a bench study's length is the bench's own. The journal's research and stage reports end it.
  * <p>
  * Nothing is named before it is met: words, invocations and spells appear only on steps that need First Light
- * understood, and a lair only once the player has carried its token or met its keeper (A-D9). It only reads.
+ * understood (Kindle is named as the cast that completes its step only then), a lair only once the player has carried
+ * its token or met its keeper, and the stage report counts a route through research the player has not met without
+ * naming it (A-D9). It only reads.
  * <p>
  * The step ids, their order and the recipes each names are pinned by tools/check_mod_data.py (check_encyclopedia) to
  * tools/encyclopedia.py's FIRST_ROUTE, which writes the route table in docs/features/arcane-concordance-first-route.md.
@@ -73,6 +75,10 @@ public final class FirstLightRoute {
 	public static final String FIRST_LIGHT = "jugcraft:first_light";
 	/** Cast Kindle with an instrument (awarded when the first cast settles). */
 	public static final Identifier FIRST_KINDLE = Jugcraft.id("concordance_first_kindle");
+	/** The invocation whose cast completes the cast step. */
+	public static final String KINDLE = "jugcraft:kindle";
+	/** Spell Engine's spell keys: the use key, then the hotbar keys 2 to 9. */
+	private static final int SPELL_KEYS = 9;
 	public static final String LIGHT_EXAMPLE = "touch struck light";
 	/** The route's support spell (A-D13): it wards the friend touched, which a lair fight credits. */
 	public static final String WARD_EXAMPLE = "touch struck ward";
@@ -108,7 +114,7 @@ public final class FirstLightRoute {
 		out.heading(Component.translatable("encyclopedia.jugcraft.discover.research"));
 		Journal.research(player, out.report());
 		out.heading(Component.translatable("encyclopedia.jugcraft.discover.stage"));
-		StageProgress.describe(player, out::fact);
+		StageProgress.describe(player, out::fact, id -> knowledge.state(id) != ResearchState.NONE);
 		out.link(Component.translatable("encyclopedia.jugcraft.link.journal", Component.keybind("key.jugcraft.concordance_journal")), Link.journal());
 	}
 
@@ -166,13 +172,24 @@ public final class FirstLightRoute {
 		Component wand = JugcraftConcordance.INITIATE_WAND.getDefaultInstance().getHoverName();
 		if (route(out, "wand", states, EdgeKind.REQUIRED, Component.translatable("encyclopedia.jugcraft.route.wand", wand), null,
 				List.of(JugcraftConcordance.INITIATE_WAND))) {
-			out.recipe(EdgeKind.REQUIRED, wandRecipe, Component.translatable("encyclopedia.jugcraft.route.make", wand));
+			out.recipe(EdgeKind.REQUIRED, Jugcraft.id("initiate_wand"), Component.translatable("encyclopedia.jugcraft.route.make", wand));
 			out.codex("foundations/initiate_wand", null, null);
 		}
 
-		if (route(out, "cast", states, EdgeKind.REQUIRED, Component.translatable("encyclopedia.jugcraft.route.cast"), null, List.of())) {
+		// Kindle is named only once First Light is understood (it is learned then); before, the step is any invocation.
+		boolean kindle = understood && knowledge.invocations().containsKey(KINDLE);
+		Component castText = kindle ? Component.translatable("encyclopedia.jugcraft.route.cast.kindle", Component.translatable(Invocations.nameKey(KINDLE)))
+				: Component.translatable("encyclopedia.jugcraft.route.cast");
+		if (route(out, "cast", states, EdgeKind.REQUIRED, castText, null, List.of())) {
 			out.fact(Component.translatable("encyclopedia.jugcraft.route.cast.how", Component.keybind("key.use"),
 					Component.keybind("key.hotbar.2"), Component.keybind("key.hotbar.3")));
+			// The spell bar offers the invocations in the order they are known (ConcordanceSpells.containers): the use key
+			// casts the first, and the hotbar keys 2 to 9 the next ones.
+			int index = new ArrayList<>(knowledge.invocations().keySet()).indexOf(KINDLE);
+			if (kindle && index < SPELL_KEYS) {
+				out.fact(Component.translatable("encyclopedia.jugcraft.route.cast.goal", Component.translatable(Invocations.nameKey(KINDLE)),
+						Component.keybind(index == 0 ? "key.use" : "key.hotbar." + (index + 1))));
+			}
 			invocations(out, knowledge);
 			out.codex("invocations/kindle", "jugcraft:first_light", ResearchState.UNDERSTOOD);
 		}
@@ -188,8 +205,11 @@ public final class FirstLightRoute {
 
 		if (route(out, "support", states, EdgeKind.RECOMMENDED, Component.translatable("encyclopedia.jugcraft.route.support"), null, List.of())) {
 			out.fact(Component.translatable("encyclopedia.jugcraft.route.support.example", WARD_EXAMPLE), cost(player, held, WARD_EXAMPLE), List.of());
-			out.fact(Component.translatable("encyclopedia.jugcraft.route.support.credit", number(Encounter.WARDING),
-					SELF_WORD + " struck " + WARD_WORD));
+			if (lairs) {
+				// Only where lairs open: the boss's reward is what a ward for a friend earns.
+				out.fact(Component.translatable("encyclopedia.jugcraft.route.support.credit", number(Encounter.WARDING),
+						SELF_WORD + " struck " + WARD_WORD));
+			}
 		}
 
 		if (route(out, "equip", states, EdgeKind.RECOMMENDED, Component.translatable("encyclopedia.jugcraft.route.equip"), null, List.of())) {
@@ -197,14 +217,21 @@ public final class FirstLightRoute {
 		}
 
 		if (lairs && route(out, "lair", states, EdgeKind.OPTIONAL_BOSS, Component.translatable("encyclopedia.jugcraft.route.lair"), null, List.of())) {
-			List<Component> known = LairDossiers.discovered(player);
-			if (known.isEmpty()) {
-				out.fact(Component.translatable("encyclopedia.jugcraft.route.lair.unknown"));
-			} else {
-				for (Component lair : known) {
-					out.fact(Component.translatable("encyclopedia.jugcraft.route.lair.known", lair));
+			boolean found = false;
+			for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
+				LairDossiers.Discovery discovery = LairDossiers.discovery(player, boss);
+				if (discovery == LairDossiers.Discovery.UNKNOWN) {
+					continue;
 				}
+				// Expeditions shows a lair's rite once its token is carried, and its keeper only once she is met.
+				out.fact(Component.translatable(discovery == LairDossiers.Discovery.RITE ? "encyclopedia.jugcraft.route.lair.known_rite"
+						: "encyclopedia.jugcraft.route.lair.known", LairDossiers.name(boss.lair)));
+				found = true;
+			}
+			if (found) {
 				out.link(Component.translatable("encyclopedia.jugcraft.link.page.expedition"), Link.page(LairDossiers.PAGE));
+			} else {
+				out.fact(Component.translatable("encyclopedia.jugcraft.route.lair.unknown"));
 			}
 		}
 	}
@@ -249,14 +276,22 @@ public final class FirstLightRoute {
 		return state == StepState.NEXT || state == StepState.OPEN || state == StepState.BLOCKED;
 	}
 
-	/** The ways to understanding, from the loaded rules: each alternative, with how far the player has come. */
+	/**
+	 * The ways to understanding, from the loaded rules: each alternative, with how far the player has come. Any one of
+	 * them is enough, so none is called required when there are several.
+	 */
 	private static void understanding(PageWriter out, @Nullable List<EvidenceRule> rules, Knowledge knowledge) {
 		Map<String, Long> evidence = knowledge.progress(FIRST_LIGHT).evidence();
-		for (EvidenceRule rule : rules == null ? List.<EvidenceRule>of() : rules) {
+		List<EvidenceRule> ways = rules == null ? List.of() : rules;
+		EdgeKind sole = ways.size() == 1 ? EdgeKind.REQUIRED : EdgeKind.RECOMMENDED;
+		if (ways.size() > 1) {
+			out.fact(Component.translatable("encyclopedia.jugcraft.route.understand.any"));
+		}
+		for (EvidenceRule rule : ways) {
 			int have = Math.min(rule.progress(evidence, ConcordanceProgress.TAG_LOOKUP), rule.distinct());
 			Component exact = Component.translatable("journal.jugcraft.rule." + rule.kind().id, have, rule.distinct());
 			switch (rule.kind()) {
-				case EXAMINE -> out.edge(EdgeKind.REQUIRED, Component.translatable("encyclopedia.jugcraft.route.understand.examine", rule.distinct(),
+				case EXAMINE -> out.edge(sole, Component.translatable("encyclopedia.jugcraft.route.understand.examine", rule.distinct(),
 						rule.maxLight() == null ? Examination.DARK_LIGHT : rule.maxLight()), exact, List.of());
 				case STUDY -> {
 					Item station = item(rule.station());
@@ -274,7 +309,7 @@ public final class FirstLightRoute {
 							List.of(JugcraftConcordance.RESEARCH_NOTES_ITEM));
 					out.codex("foundations/research_notes", null, null);
 				}
-				default -> out.edge(EdgeKind.REQUIRED, Component.translatable("encyclopedia.jugcraft.route.understand.other"), exact, List.of());
+				default -> out.edge(sole, Component.translatable("encyclopedia.jugcraft.route.understand.other"), exact, List.of());
 			}
 		}
 	}
@@ -402,17 +437,34 @@ public final class FirstLightRoute {
 		return out;
 	}
 
-	/** Whether an inscription is a support spell: it has the ward and is not turned on its caster. */
+	/**
+	 * Whether an inscription is a support spell: some part of it wards (the word with or without modifiers, such as
+	 * {@code ward+prolong}, at any level of a {@code then} chain) and its first delivery is not {@code here}, which
+	 * turns the spell on its caster (a later level's {@code here} takes the first level's target).
+	 */
 	static boolean supports(Inscription inscription) {
-		List<String> words = List.of(inscription.text().toLowerCase(Locale.ROOT).trim().split("\\s+"));
-		return words.contains(WARD_WORD) && !words.contains(SELF_WORD);
+		boolean first = true;
+		boolean self = false;
+		boolean ward = false;
+		for (String token : inscription.text().toLowerCase(Locale.ROOT).trim().split("\\s+")) {
+			String word = token.split("\\+", 2)[0];
+			if (word.equals("then")) {
+				first = false;
+			} else if (word.equals(WARD_WORD)) {
+				ward = true;
+			} else if (first && word.equals(SELF_WORD)) {
+				self = true;
+			}
+		}
+		return ward && !self;
 	}
 
-	/** Whether the player carries or wears a piece of the first loadout. */
+	/** Whether the player carries or wears a piece of the first loadout: a Kindled Lantern, a fire-set piece, a fire focus or the Fire Bangle. */
 	private static boolean equipped(ServerPlayer player) {
 		Set<Item> loadout = new LinkedHashSet<>(EmberGear.ARMOR.values());
 		loadout.add(JugcraftConcordance.KINDLED_LANTERN);
 		loadout.add(EmberGear.LESSER_FIRE_FOCUS);
+		loadout.add(EmberGear.FIRE_FOCUS);
 		loadout.add(EmberGear.FIRE_BANGLE);
 		return carries(player, stack -> loadout.contains(stack.getItem())) || Wayfaring.worn(player, stack -> loadout.contains(stack.getItem())) != null;
 	}

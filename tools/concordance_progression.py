@@ -771,6 +771,7 @@ MESSAGES = {
     "stage.next": "To become %s, any one of:",
     "stage.route": "  %s: %s",
     "stage.route_met": "  %s: met",
+    "stage.routes_unmet": "  and %s more, through research you have not met yet",
     "stage.last": "There is no stage beyond this one",
     "stage.need.research": "%s %s",
     "stage.need.mastered": "%s entries mastered (you have %s)",

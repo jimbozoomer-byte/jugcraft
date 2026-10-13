@@ -415,7 +415,8 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 
 	/**
 	 * The phase, then "complete" or every fault, line by line to {@code out}, from the cached report (no scan beyond
-	 * {@link #report}): what chat, the command, Jade and the encyclopedia's Inspect page all show.
+	 * {@link #report}): what chat, the command and the encyclopedia's Inspect page show (Jade reads the same report, but
+	 * shows its phase and first three faults its own way).
 	 */
 	public void status(ServerLevel level, Consumer<Component> out) {
 		out.accept(Component.translatable("message.jugcraft.concordance.circle.status",

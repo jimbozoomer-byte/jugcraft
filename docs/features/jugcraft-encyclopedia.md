@@ -98,18 +98,22 @@ No reward economy, repeatable material farm or new currency is approved by this 
   encyclopedia from inside; and a scroll button with the owner's sprite in the survival inventory, right of the
   recipe-book button, and on the creative Survival Inventory tab (A-D8). The button closes the inventory as Esc would,
   and Back reopens it. Neither needs an item.
-- **Return:** Esc, the key and Done go back to the game; opened from the inventory, Back opens a fresh inventory.
+- **Return:** opened from the game, Esc, the key and Done return to the game; opened from the inventory, Esc, the key
+  and Back open a fresh inventory.
 - **Pages:** Discover (the First Light route, then the journal's research and stage reports), Spellcraft, Expeditions
   (lair dossiers), Inspect (a Circle Anchor or Ley Pylon looked at) and Keys. A page with nothing to show is left out.
 - **The route's honesty:** steps and ways are labelled in words and shapes as well as colour; required, recommended,
   trade and after-a-boss ways are kept apart; every recipe shown is the server's own, and one the server lacks is never
   advertised.
-- **Discovery (proposed, A-D9):** nothing is named before it is met; a lair shows once its token is carried, its keeper
-  once met or beaten.
+- **Discovery (proposed, A-D9):** the route's own research, First Light, is named from the start; other research, and
+  words, invocations and spells, only once met (the stage report counts a route through unmet research without naming
+  it); a lair shows once its token is carried, its keeper once met or beaten. An item's own description is shown as its
+  tooltip gives it.
 - **The Concordance Journal (J) stays** a separate screen; Discover reuses its research and stage reports and links to it.
-- **Not in this slice:** the technology route, the pan/zoom route canvas, search, history and bookmarks, a remembered
-  last page across sessions, quests and their rewards, the old handbook's place. The ten reference images informed the
-  layout only; nothing of theirs is used.
+- **Back navigation** is in this slice (Backspace, through the last 16 pages turned to).
+- **Not in this slice:** the technology route, the pan/zoom route canvas, search, forward history and bookmarks, a last
+  page remembered across sessions, quests and their rewards, the old handbook's place. The ten reference images informed
+  the layout only; nothing of theirs is used.
 
 ## Existing source and compatibility
 
@@ -152,4 +156,6 @@ The planning contribution of 6 October added documentation, TODO navigation and 
 
 Default key and inventory-button placement (proposed in the first slice: A-D7 and A-D8); visual style and screen layout; graph/entry data schema; spoiler/discovery behavior (proposed for the magic route: A-D9); quest objective and reward policies; individual/shared progress; old-handbook behavior; exact content coverage for each implementation slice. These details remain open without reopening the explicit owner requirements.
 
-AI-assisted planning documentation: OpenAI Codex, GPT-6 family. No gameplay feature implementation is included.
+AI-assisted planning documentation (6 October 2026): OpenAI Codex, GPT-6 family; that contribution included no gameplay
+implementation. The first slice (Concordance Chunk A): AI-assisted implementation with Claude Code; the model is named in
+the commit trailers.

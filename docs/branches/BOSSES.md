@@ -20,7 +20,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **Vesperine, the Last Reaper** | The Hollow Acre: the Last Rites at a Jugcraft headstone at night (four lit candles, a Mourning Wreath and the Death Knell) | [hollow-acre.md](../features/hollow-acre.md), [vesperine.md](../features/vesperine.md) | #284 and #288, through #277 |
 | **Madame Tatterlace** | The Spindle Loft: a Cursed Spindle used on a Spinning Wheel at night | [spindle-loft.md](../features/spindle-loft.md), [tatterlace.md](../features/tatterlace.md) | #292 and #294, through #277 |
 
-Both are the Witching Season's ([features/witching-season.md](../features/witching-season.md)), on the shared lair framework (`lair/`), and roll their loot for each player who took part. Their trophies, the Vesper Scythe and the Needle Rapier, are Arms VII's, in `bosses/vesperine` and `bosses/tatterlace` as the others' are.
+Both are the Witching Season's ([features/witching-season.md](../features/witching-season.md)), on the shared lair framework (`lair/`), and roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them.
 
 ## The first eight (trophies built)
 

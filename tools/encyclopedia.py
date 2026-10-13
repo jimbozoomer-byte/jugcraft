@@ -46,9 +46,9 @@ EDGES = {
 }
 
 # The First Light route (FirstLightRoute.java), in order. Each step: how much it matters, when it is done, what it waits
-# for, the recipes it names (edge, recipe id), the town sales it names (shop id, item id: each must be on sale there),
-# the codex entries it links (entry, research or None, state or None: the entry's own unlock) and the game tests that
-# exercise it.
+# for, the recipes it shows as grids (edge, recipe id), the recipes it only names, as a set's icons shown when each
+# exists ("named"), the town sales it names (shop id, item id: each must be on sale there), the codex entries it links
+# (entry, research or None, state or None: the entry's own unlock) and the game tests that exercise it.
 FIRST_ROUTE = [
     {"id": "find", "edge": "required", "done": "First Light encountered, or a luminous specimen carried", "after": [],
      "recipes": [], "trades": [("curios", "minecraft:glow_ink_sac")],
@@ -72,31 +72,33 @@ FIRST_ROUTE = [
     {"id": "compose", "edge": "required", "done": "a spell inscribed on a carried instrument", "after": ["understand", "wand"],
      "recipes": [], "trades": [], "codex": [("composition/composing", "jugcraft:first_light", "UNDERSTOOD")],
      "tests": ["theRouteFollowsTheResearch", "spellcraftShowsWhatIsHeld"]},
-    {"id": "support", "edge": "recommended", "done": "an inscription with ward and without here", "after": ["compose"],
+    {"id": "support", "edge": "recommended", "done": "an inscription that wards someone other than its caster (ward, with "
+     "or without modifiers, not delivered here)", "after": ["compose"],
      "recipes": [], "trades": [], "codex": [], "tests": ["theRouteFollowsTheResearch", "aWardForAFriendIsComposedAndCast"]},
-    {"id": "equip", "edge": "recommended", "done": "a piece of the first loadout carried or worn", "after": ["understand"],
-     "recipes": [("recommended", "jugcraft:pyromancers_hat"), ("recommended", "jugcraft:pyromancers_robes"),
-                 ("recommended", "jugcraft:pyromancers_leggings"), ("recommended", "jugcraft:pyromancers_boots"),
-                 ("recommended", "jugcraft:pyromaniacs_hood"), ("recommended", "jugcraft:pyromaniacs_tunic"),
-                 ("recommended", "jugcraft:pyromaniacs_pants"), ("recommended", "jugcraft:pyromaniacs_shoes"),
-                 ("recommended", "jugcraft:lesser_fire_focus"), ("recommended", "jugcraft:fire_bangle")],
+    {"id": "equip", "edge": "recommended", "done": "a Kindled Lantern, a fire-set piece, a fire focus or the Fire Bangle "
+     "carried or worn", "after": ["understand"],
+     "recipes": [("recommended", "jugcraft:lesser_fire_focus"), ("recommended", "jugcraft:fire_bangle")],
+     "named": [("recommended", "jugcraft:pyromancers_hat"), ("recommended", "jugcraft:pyromancers_robes"),
+               ("recommended", "jugcraft:pyromancers_leggings"), ("recommended", "jugcraft:pyromancers_boots"),
+               ("recommended", "jugcraft:pyromaniacs_hood"), ("recommended", "jugcraft:pyromaniacs_tunic"),
+               ("recommended", "jugcraft:pyromaniacs_pants"), ("recommended", "jugcraft:pyromaniacs_shoes")],
      "trades": [("general", "minecraft:lantern")], "codex": [], "tests": ["theFirstLoadoutIsMadeInSurvival"]},
     {"id": "lair", "edge": "optional_boss", "done": "The Last Harvest or Unravelled", "after": ["compose"],
      "recipes": [], "trades": [], "codex": [], "tests": ["aBossIsHiddenUntilDiscovered"]},
 ]
 
-# The lair dossiers (LairDossiers.java): each lair's tokens, the recipes its rite needs, the town sales that help, and
-# the recipes a win opens (cheaper with her loot).
+# The lair dossiers (LairDossiers.java): each lair's tokens, the recipes its rite needs, the town sales that help, the
+# cheaper recipes for a token her loot opens ("after_win") and the pieces made of her loot ("made_from").
 DOSSIERS = {
     "vesperine": {"lair": "hollow_acre", "advancement": "the_last_harvest", "trophy": "vesper_scythe",
                   "tokens": ["death_knell", "mourning_wreath"],
                   "rite": ["death_knell", "mourning_wreath", "gothic_headstone_from_stonecutting"],
                   "trades": [("florist", "minecraft:lily_of_the_valley"), ("curios", "minecraft:candle")],
-                  "after_win": ["mourning_wreath_from_shade", "reaper_hood"],
+                  "after_win": ["mourning_wreath_from_shade"], "made_from": ["reaper_hood"],
                   "loot": ["reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull"]},
     "tatterlace": {"lair": "spindle_loft", "advancement": "unravelled", "trophy": "needle_rapier",
                    "tokens": ["cursed_spindle"], "rite": ["cursed_spindle", "spinning_wheel"], "trades": [],
-                   "after_win": ["cursed_spindle_from_silk"],
+                   "after_win": ["cursed_spindle_from_silk"], "made_from": [],
                    "loot": ["gossamer_silk", "needle_rapier", "golden_thimble", "tatterlace_headdress"]},
 }
 
@@ -114,7 +116,8 @@ KEY_HELP = {
 
 # The inventory button's sprite, copied byte for byte from the owner's library (A-D8): runtime path under
 # assets/jugcraft -> path under art/owner-library/originals/Magic. It came in a set with waystone sprites, which are not
-# used.
+# used; that set's language file credits "Icons by JoeCreates (CC-BY-SA 3.0)" (waystones.iconCredits), a notice kept
+# with the asset in docs/features/arcane-concordance-first-route.md.
 OWNER_FILES = {
     "textures/gui/sprites/encyclopedia/inventory_button.png": "textures/gui/sprites/inventory/inventory_button.png",
 }
@@ -147,13 +150,16 @@ ROUTE = {
     "dark.where": "A cave, or the open air at night, away from torches and lanterns",
     "understand": "Understand %s",
     "understand.examine": "Examine %s different glowing things in the dark (light %s or less)",
-    "understand.study": "Study one at a %s: it takes %s seconds and uses the specimen up. A study made before you "
-                        "have examined one in the dark counts once you do",
+    "understand.any": "Any one of these ways is enough",
+    "understand.study": "Study one at a %s: it takes %s seconds and uses the specimen up. Once you have examined one in "
+                        "the dark, one study is enough on its own; a study made before that counts once you have",
     "understand.notes": "Read Research Notes written by a player who understands it",
     "understand.other": "Another way this server's data gives (your journal names it)",
     "make": "Recipe: %s",
     "wand": "Make a wand (%s) and hold it in your main hand",
     "cast": "Cast an invocation",
+    "cast.kindle": "Cast %s",
+    "cast.goal": "Casting %s completes this step: with the invocations you know, %s casts it",
     "cast.how": "With the wand in your main hand, %s casts the first invocation on your spell bar, and %s, %s and on "
                 "cast the ones after it; while it is in your hand those keys cast instead of changing slot, so scroll "
                 "to change slot",
@@ -165,7 +171,8 @@ ROUTE = {
     "support": "Inscribe a ward for a friend",
     "support.example": "For example: %s, which wards the friend you touch",
     "support.credit": "In a lair, a ward you put on another player earns your share of the boss's reward once it has "
-                      "soaked %s of her blows; cast it after she wakes. %s wards only you, and earns nothing",
+                      "soaked %s health from the blows of her side; cast it after she wakes. %s wards only you, and "
+                      "earns nothing",
     "equip": "Equip yourself for casting",
     "equip.lantern": "%s: made at a %s from %s and %s, once you understand %s",
     "equip.pyromancers": _set_line("pyromancers"),
@@ -175,6 +182,7 @@ ROUTE = {
     "lair": "Face a lair's keeper with friends",
     "lair.unknown": "Lairs open by rites, and a rite needs a token you make: carry one and its rite shows under Expeditions",
     "lair.known": "%s: its rite and its keeper are under Expeditions",
+    "lair.known_rite": "%s: its rite is under Expeditions",
 }
 
 SPELLCRAFT = {
@@ -217,13 +225,20 @@ DOSSIER = {
     "any_night": "The rite works on any night",
     "in_season": "The rite works now, in the Halloween season",
     "party": "A lair holds %s players; its gate stays open %s seconds for friends to follow",
-    "credit": "A share of her reward goes to everyone who strikes her or what fights for her, heals a friend her blows "
-              "hurt by %s or more, or wards a friend against %s or more of her blows, within %s blocks of her arena",
+    "hollow_acre.credit": "A share of her reward goes to everyone who strikes her, her skulls Dirge and Requiem or a "
+                          "Soul of the Harvest (not her Grave Thralls), gives friends back %s or more of the health her "
+                          "side's blows took, wards a friend against %s or more health of those blows, or relights one of "
+                          "her wards in her Harvest, within %s blocks of her arena",
+    "spindle_loft.credit": "A share of her reward goes to everyone who strikes her, her Egg Sacs or her Spiderlings, "
+                           "gives friends back %s or more of the health her side's blows took, wards a friend against %s "
+                           "or more health of those blows, or cuts a friend free of her Binding Thread, within %s blocks "
+                           "of her arena",
     "credit.wards": "Cast a ward after she wakes: one cast before is not counted. Those who fall are paid when they are "
                     "back on their feet, and those who leave the game when they come back",
     "won": "You have beaten her: %s",
     "first_win": "A first win always brings the %s",
     "after_win": "Cheaper with her loot: %s",
+    "made_from": "Made from her loot: %s",
     "hollow_acre.leave": "The Grey Mist in the lych gate takes you home at any time, in or out of a fight",
     "spindle_loft.leave": "The Grey Mist in the needle's eye beside the arrival takes you home at any time, in or out of "
                           "a fight",
@@ -248,6 +263,7 @@ GENERAL = {
     "row.edge": "%s: %s",
     "state.none": "Step",
     "edge.none": "Note",
+    "edge.optional_boss.step": "Optional: a boss fight",
     "link.codex": "Codex: %s",
     "link.composer": "Open the Spell Composer",
     "link.journal": "Open the Concordance Journal (%s)",
@@ -331,10 +347,15 @@ def _short(ingredient):
 
 def route_table():
     """The record's route table: one row per step, from FIRST_ROUTE and the recipe files on disk."""
-    lines = ["| Step | Matters | Done when | After | Recipes (ingredients on disk) | Trade | Codex | Tests |",
+    lines = ["| Step | Matters | Done when | After | Recipes shown (ingredients on disk) | Trade | Codex | Tests |",
              "|---|---|---|---|---|---|---|---|"]
     for step in FIRST_ROUTE:
-        recipes = "<br>".join(f"{edge}: `{recipe}` ({recipe_inputs(recipe)})" for edge, recipe in step["recipes"]) or "-"
+        recipes = "<br>".join(f"{edge}: `{recipe}` ({recipe_inputs(recipe)})" for edge, recipe in step["recipes"])
+        named = step.get("named", [])
+        if named:
+            recipes += ("<br>" if recipes else "") + "the sets, named when each of these exists: " + ", ".join(
+                f"`{recipe}`" for _edge, recipe in named)
+        recipes = recipes or "-"
         trades = "<br>".join(f"{shop}: `{item}`" for shop, item in step["trades"]) or "-"
         codex = "<br>".join(f"`{entry}`" + (f" ({research.split(':')[1]} {state.lower()})" if research else "")
                             for entry, research, state in step["codex"]) or "-"

@@ -59,7 +59,8 @@ import net.minecraft.world.level.block.Blocks;
  * inventory again. In creative it shows on the Survival Inventory tab only ({@code jugcraft_encyclopedia_creative_button}).</li>
  * <li><b>The route.</b> Examined in the dark, the dark step is done ({@code jugcraft_encyclopedia_discover_route}); with
  * First Light understood and a wand in hand, Spellcraft shows them ({@code jugcraft_encyclopedia_spellcraft}), and its
- * link opens the Spell Composer, whose Esc comes back.</li>
+ * link opens the Spell Composer, whose Esc comes back. Then a Kindled Lantern and an Adept's Wand are each held, for
+ * ticket A-07's runtime view ({@code jugcraft_first_loadout_kindled_lantern}, {@code jugcraft_first_loadout_adept_wand}).</li>
  * <li><b>Inspection.</b> Opened looking at a Circle Anchor, the Inspect page is the anchor's own report
  * ({@code jugcraft_encyclopedia_inspect}).</li>
  * <li><b>Expeditions and keys</b> ({@code jugcraft_encyclopedia_expedition}, {@code jugcraft_encyclopedia_keys}), and the
@@ -254,6 +255,17 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.waitForScreen(EncyclopediaScreen.class);
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
+
+		// Ticket A-07's runtime view of two first-loadout pieces only a working or a ritual makes: each in hand, as the
+		// first loadout's record cites them. The wand goes back in hand after.
+		for (String held : List.of("kindled_lantern", "adept_wand")) {
+			server.runOnServer(minecraft -> first(minecraft).setItemInHand(InteractionHand.MAIN_HAND,
+					new ItemStack(held.equals("kindled_lantern") ? JugcraftConcordance.KINDLED_LANTERN : JugcraftConcordance.ADEPT_WAND)));
+			context.waitTicks(10);
+			context.takeScreenshot("jugcraft_first_loadout_" + held);
+		}
+		server.runOnServer(minecraft -> first(minecraft).setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND)));
+		context.waitTicks(5);
 	}
 
 	private static void inspection(ClientGameTestContext context, TestDedicatedServerContext server) {
@@ -394,7 +406,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		return context.computeOnClient(client -> EncyclopediaClient.navigator().pages().stream().filter(page -> page.id().equals("discover"))
 				.flatMap(page -> page.rows().stream())
 				.filter(row -> row.kindOf() == EncyclopediaPayload.Kind.STEP && row.text().getContents() instanceof TranslatableContents key
-						&& key.getKey().equals("encyclopedia.jugcraft.route." + id))
+						&& (key.getKey().equals("encyclopedia.jugcraft.route." + id) || key.getKey().startsWith("encyclopedia.jugcraft.route." + id + ".")))
 				.map(EncyclopediaPayload.Row::stateOf).findFirst().orElse(null));
 	}
 

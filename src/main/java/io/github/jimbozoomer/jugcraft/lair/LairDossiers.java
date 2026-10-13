@@ -23,8 +23,9 @@ import org.jspecify.annotations.Nullable;
  * The encyclopedia's Expeditions page (Concordance Chunk A, A-04): a dossier for each lair the player has found, and
  * nothing for one they have not (A-D9). A lair is found by carrying its token (its rite is then shown: what to make,
  * where and when); its keeper by meeting her (being in her lair, being owed her reward) or beating her, when the
- * dossier adds how support earns a share of her reward, what she gives (the acquisition text JEI shows, "with the
- * default data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper rite recipes her loot opens, how to
+ * dossier adds how support earns a share of her reward (what counts in her lair: her own creatures, healing, wards and
+ * her objective), what she gives (the acquisition text JEI shows, "with the default data":
+ * {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token and the pieces her loot makes, how to
  * leave, and, in a fight, the player's own part in it.
  * <p>
  * Discovery is read, not saved: the inventory, {@link Lairs#VISIT}, {@link LairRewards#OWED} and the first-win
@@ -44,11 +45,11 @@ public final class LairDossiers {
 		VESPERINE(Lair.HOLLOW_ACRE, VesperineLoot.BOSS, VesperineLoot.ADVANCEMENT, "vesper_scythe",
 				List.of("death_knell", "mourning_wreath"), List.of("death_knell", "mourning_wreath", "gothic_headstone_from_stonecutting"),
 				List.of("reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull"),
-				List.of("mourning_wreath_from_shade", "reaper_hood")),
+				List.of("mourning_wreath_from_shade"), List.of("reaper_hood")),
 		TATTERLACE(Lair.SPINDLE_LOFT, TatterlaceLoot.BOSS, TatterlaceLoot.ADVANCEMENT, "needle_rapier",
 				List.of("cursed_spindle"), List.of("cursed_spindle", "spinning_wheel"),
 				List.of("gossamer_silk", "needle_rapier", "golden_thimble", "tatterlace_headdress"),
-				List.of("cursed_spindle_from_silk"));
+				List.of("cursed_spindle_from_silk"), List.of());
 
 		public final Lair lair;
 		/** Her id in {@link LairRewards} ("vesperine"), and her entity's. */
@@ -62,11 +63,13 @@ public final class LairDossiers {
 		public final List<String> rite;
 		/** What her table gives, each with its acquisition text ({@code jei.jugcraft.acquire.<item>}, tools/acquisition.py). */
 		public final List<String> loot;
-		/** Recipes that use her loot (a cheaper token, a piece made of it): optional, after a win. */
+		/** Cheaper recipes for a token that her loot opens: optional, after a win. */
 		public final List<String> afterWin;
+		/** Recipes for a piece made of her loot, which has no other recipe: optional, after a win. */
+		public final List<String> madeFrom;
 
 		Boss(Lair lair, String boss, String advancement, String trophy, List<String> tokens, List<String> rite, List<String> loot,
-				List<String> afterWin) {
+				List<String> afterWin, List<String> madeFrom) {
 			this.lair = lair;
 			this.boss = boss;
 			this.advancement = advancement;
@@ -75,6 +78,7 @@ public final class LairDossiers {
 			this.rite = rite;
 			this.loot = loot;
 			this.afterWin = afterWin;
+			this.madeFrom = madeFrom;
 		}
 	}
 
@@ -102,22 +106,6 @@ public final class LairDossiers {
 			}
 		}
 		return Discovery.UNKNOWN;
-	}
-
-	/** Whether {@code player} has found any lair. */
-	public static boolean anyDiscovered(ServerPlayer player) {
-		return !discovered(player).isEmpty();
-	}
-
-	/** The names of the lairs {@code player} has found, in order. */
-	public static List<Component> discovered(ServerPlayer player) {
-		List<Component> out = new ArrayList<>();
-		for (Boss boss : Boss.values()) {
-			if (discovery(player, boss) != Discovery.UNKNOWN) {
-				out.add(name(boss.lair));
-			}
-		}
-		return out;
 	}
 
 	public static void write(ServerPlayer player, EncyclopediaRequestPayload request, PageWriter out) {
@@ -169,8 +157,8 @@ public final class LairDossiers {
 	/** The keeper, once met: how support earns a share, her first win and loot, the recipes it opens, leaving, and the fight. */
 	private static void keeper(ServerPlayer player, PageWriter out, Boss boss, Discovery discovery) {
 		out.heading(Component.translatable("entity.jugcraft." + boss.boss));
-		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit", number(Encounter.HEALING), number(Encounter.WARDING),
-				(int) Encounter.REACH));
+		out.fact(Component.translatable("encyclopedia.jugcraft.dossier." + boss.lair.id + ".credit", number(Encounter.HEALING),
+				number(Encounter.WARDING), (int) Encounter.REACH));
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit.wards"));
 		Item trophy = item(boss.trophy);
 		if (discovery == Discovery.DEFEATED) {
@@ -188,6 +176,11 @@ public final class LairDossiers {
 		for (String recipe : boss.afterWin) {
 			Item made = result(recipe);
 			out.recipe(EdgeKind.OPTIONAL_BOSS, Jugcraft.id(recipe), Component.translatable("encyclopedia.jugcraft.dossier.after_win",
+					made == null ? Component.literal(recipe) : made.getDefaultInstance().getHoverName()));
+		}
+		for (String recipe : boss.madeFrom) {
+			Item made = result(recipe);
+			out.recipe(EdgeKind.OPTIONAL_BOSS, Jugcraft.id(recipe), Component.translatable("encyclopedia.jugcraft.dossier.made_from",
 					made == null ? Component.literal(recipe) : made.getDefaultInstance().getHoverName()));
 		}
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier." + boss.lair.id + ".leave"));
@@ -238,7 +231,8 @@ public final class LairDossiers {
 		return item == Items.AIR ? null : item;
 	}
 
-	private static Component name(Lair lair) {
+	/** A lair's name. */
+	public static Component name(Lair lair) {
 		return Component.translatable("lair.jugcraft." + lair.id);
 	}
 

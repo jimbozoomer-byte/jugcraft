@@ -585,7 +585,7 @@ COMPOSE_RATE_TICKS = 20  # the most often a player may check, inscribe or tune a
 COMPOSE_EXAMPLES = {
     "touch struck light": "Light where you touch",
     "here struck ward": "Ward yourself",
-    "touch struck ward": "Ward the friend you touch: in a lair fight it earns your share",
+    "touch struck ward": "Ward the friend you touch: soaking 4 health in a lair fight earns your share",
     "ray struck sear then here creatures dazzle": "Sear what you aim at, then dazzle what stands round it",
 }
 

@@ -96,6 +96,10 @@ public class EncyclopediaScreen extends Screen {
 		Navigator navigator = EncyclopediaClient.navigator();
 		boolean waiting = EncyclopediaClient.available() && !navigator.received();
 		int bodyTop = waiting ? TOP : tabs(navigator);
+		if (body != null) {
+			// Laid out again (an answer, a resize, back from the Spell Composer): keep the place the player scrolled to.
+			scroll = body.scrollAmount();
+		}
 		body = addRenderableWidget(new ComposerScroll(minecraft, left, bodyTop, contentWidth + SCROLLBAR, Math.max(ROW, footerY - 4 - bodyTop), this::focused));
 		int y = 0;
 		if (!EncyclopediaClient.available()) {
@@ -220,7 +224,10 @@ public class EncyclopediaScreen extends Screen {
 	/** A row's words: a step's state and weight, or a way's weight, before its text. Nothing relies on the colour. */
 	private static MutableComponent words(EncyclopediaPayload.Row row) {
 		return switch (row.kindOf()) {
-			case STEP -> Component.translatable("encyclopedia.jugcraft.row.step", state(row.stateOf()), edge(row.edgeOf()), row.text());
+			case STEP -> Component.translatable("encyclopedia.jugcraft.row.step", state(row.stateOf()),
+					row.edgeOf() == EncyclopediaPayload.EdgeKind.OPTIONAL_BOSS
+							? Component.translatable("encyclopedia.jugcraft.edge.optional_boss.step").withStyle(ChatFormatting.LIGHT_PURPLE)
+							: edge(row.edgeOf()), row.text());
 			case EDGE -> Component.translatable("encyclopedia.jugcraft.row.edge", edge(row.edgeOf()), row.text());
 			default -> row.text().copy();
 		};
@@ -319,7 +326,6 @@ public class EncyclopediaScreen extends Screen {
 		if (dirty) {
 			// Laid out again once a tick at most, after whatever changed (an answer, a page, the exact figures).
 			dirty = false;
-			scroll = body == null ? 0 : body.scrollAmount();
 			rebuildWidgets();
 		}
 	}
@@ -343,9 +349,10 @@ public class EncyclopediaScreen extends Screen {
 			body.setScrollAmount(body.scrollAmount() - body.getHeight() + ROW);
 		} else if (key == InputConstants.KEY_PAGEDOWN && body != null) {
 			body.setScrollAmount(body.scrollAmount() + body.getHeight() - ROW);
-		} else if (key == InputConstants.KEY_R) {
+		} else if (event.shortcutKey() == InputConstants.KEYCODE_R) {
+			// The letters as the keyboard's layout names them, as vanilla's own shortcuts are.
 			EncyclopediaClient.request();
-		} else if (key == InputConstants.KEY_X) {
+		} else if (event.shortcutKey() == InputConstants.KEYCODE_X) {
 			toggleExact();
 		} else {
 			return super.keyPressed(event);

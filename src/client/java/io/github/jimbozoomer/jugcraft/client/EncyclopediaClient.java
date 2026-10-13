@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.client.compat.CodexLinks;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceCommand;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaRequestPayload;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.Navigator;
@@ -16,6 +17,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -167,9 +169,14 @@ public final class EncyclopediaClient {
 		changed();
 	}
 
-	/** The block the player is looking at, if any. */
+	/**
+	 * The block the player is looking at, if any, as far as the server reads a circle (the crosshair's own target stops at
+	 * the player's reach); the server checks the distance again.
+	 */
 	private static Optional<BlockPos> looked(Minecraft client) {
-		return client.hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK ? Optional.of(hit.getBlockPos()) : Optional.empty();
+		Entity camera = client.getCameraEntity();
+		HitResult hit = camera == null ? null : camera.pick(ConcordanceCommand.CIRCLE_READ_RANGE, 1.0F, false);
+		return hit instanceof BlockHitResult block && block.getType() == HitResult.Type.BLOCK ? Optional.of(block.getBlockPos()) : Optional.empty();
 	}
 
 	private static void reset() {

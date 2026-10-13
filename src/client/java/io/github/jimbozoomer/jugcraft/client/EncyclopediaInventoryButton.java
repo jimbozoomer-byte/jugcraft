@@ -24,7 +24,8 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Added through Fabric's screen events, with no mixin: the recipe-book button (vanilla's only image button there) is
  * the anchor, read each frame, since the screen's own position is not public. Without it the button sits where the
- * anchor would.
+ * anchor would. A screen's entry is dropped when the screen is removed: the anchor's action holds its screen, which
+ * holds the player and the level, so a kept entry would keep them all.
  */
 public final class EncyclopediaInventoryButton {
 	public static final Identifier ICON = Jugcraft.id("encyclopedia/inventory_button");
@@ -36,11 +37,15 @@ public final class EncyclopediaInventoryButton {
 	static final int SURVIVAL_HEIGHT = 166;
 	static final int SURVIVAL_X = 104 + 20 + GAP;
 	static final int SURVIVAL_Y = 61;
-	/** The creative inventory's panel, and a free place on its Survival Inventory tab, right of the armour slots. */
+	/**
+	 * The creative inventory's panel, and a free place on its Survival Inventory tab: right of the inventory grid, below
+	 * the slots Trinkets puts at (146, 20) and the frame it draws round them when they open (to y 42), and above the
+	 * destroy slot (173, 112).
+	 */
 	static final int CREATIVE_WIDTH = 195;
 	static final int CREATIVE_HEIGHT = 136;
-	static final int CREATIVE_X = 154;
-	static final int CREATIVE_Y = 20;
+	static final int CREATIVE_X = 171;
+	static final int CREATIVE_Y = 44;
 	private static final Map<Screen, Placed> PLACED = new WeakHashMap<>();
 
 	/** The button on one screen, and the recipe-book button it stands beside (null in the creative inventory). */
@@ -77,6 +82,8 @@ public final class EncyclopediaInventoryButton {
 		place(screen, placed);
 		Screens.getWidgets(screen).add(button);
 		PLACED.put(screen, placed);
+		// The anchor's action holds the screen, so the entry would keep the screen, its player and their level alive.
+		ScreenEvents.remove(screen).register(PLACED::remove);
 		// The recipe book moves its button (and the panel) when it opens or closes: follow it every frame.
 		ScreenEvents.beforeExtract(screen).register((shown, graphics, mouseX, mouseY, delta) -> place(shown, placed));
 	}

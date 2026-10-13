@@ -42,9 +42,11 @@ a useful loadout, enter an existing lair and qualify for reward through support 
   `cinder_tyrant`, re-runs `python3 tools/generate_material_data.py` and commits the regenerated handbook (the boss
   moves to the trophy page's "met" list; CI's generated-files step fails otherwise). Both bosses' loot gives a trophy
   on a player's first kill, so that page's words hold.
-- The plan's status text that had gone stale (feature records' "on branch" lines, WHAT_EXISTS, BOSSES.md, the
-  delivery record) was corrected in unit 4, after the merge state was checked again on 11 October. The CHANGELOG's
-  stale headings are reconciled in a docs-only pull request of their own (A-D14).
+- The plan's status text that had gone stale (feature records' "on branch" lines, WHAT_EXISTS, the delivery record)
+  was corrected in unit 4, after the merge state was checked again on 11 October. BOSSES.md gained the support rule and
+  a "Built so far" table; its status line (still "nothing built yet") is left for the open boss pull requests (#300,
+  #304, #313), which each rewrite it. The CHANGELOG's other stale headings are reconciled in a docs-only pull request of
+  their own (A-D14); this chunk renames only Arms IV's, whose merged heading (#170) it had removed as a duplicate.
 
 ## Interfaces changed
 
@@ -101,9 +103,10 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | A-D6 | 11 October 2026 | Only the Concordance's healing and wards are credited (vanilla healing names no healer; crediting it would need a mixin) | Proposed | Unit 3 |
 | A-D7 | 11 October 2026 | The encyclopedia's key defaults to I (vanilla binds I only as F3+I, a debug combination that does not press it alone; no pinned mod binds it); a client test compares it with every loaded default | Proposed | Unit 4 |
 | A-D8 | 11 October 2026 | The inventory button is the owner's 16×16 scroll sprite, right of the recipe-book button, and on the creative Survival Inventory tab only; it closes the inventory, and Back reopens it | Proposed | Unit 4 |
-| A-D9 | 11 October 2026 | Discovery: research, invocations and words named only once met; a lair and its rite once its token is carried; its keeper once met or beaten; no saved "entered" state | Proposed | Unit 4 |
+| A-D9 | 11 October 2026 | Discovery: the route's own research (First Light) named from the start; other research, invocations and words only once met (the stage report counts a route through unmet research without naming it; an item's description is shown as its tooltip gives it); a lair and its rite once its token is carried; its keeper once met or beaten; no saved "entered" state | Proposed | Unit 4 |
 | A-D10 | 11 October 2026 | The first loadout is what survival already makes; the Wayfarer and the other owner armour tiers stay creative-only | Proposed | Unit 4 |
 | A-D11 | 11 October 2026 | Trade ways come only from the town's existing shops, for offers on sale today; no shop changes | Proposed | Unit 4 |
 | A-D12 | 11 October 2026 | Codex links open an unlocked entry without the codex being carried | Proposed | Unit 4 |
 | A-D13 | 11 October 2026 | The route's support spell is `touch struck ward`, added to the codex examples | Proposed | Unit 4 |
 | A-D14 | 11 October 2026 | The CHANGELOG's reconciliation (stale "Unmerged" headings, the entries #277 dropped) goes in its own docs-only pull request | Proposed | Unit 4 |
+| A-D15 | 11 October 2026 | JEI's acquisition pages and the encyclopedia's lair dossiers state exact drop chances and the first-win guarantee, "with the default data" (the alternative: name the boss and say "sometimes") | Proposed | Unit 4 |

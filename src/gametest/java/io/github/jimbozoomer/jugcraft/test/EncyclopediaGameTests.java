@@ -42,6 +42,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.KeybindContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -115,14 +116,14 @@ public class EncyclopediaGameTests {
 		return out;
 	}
 
-	/** The route's step rows, by step id (the step's text key is encyclopedia.jugcraft.route.<id>). */
+	/** The route's step rows, by step id (the step's text key is encyclopedia.jugcraft.route.<id>, or a variant of it, such as cast.kindle). */
 	private static Map<String, EncyclopediaPayload.Row> steps(EncyclopediaPayload payload) {
 		EncyclopediaPayload.Page discover = page(payload, "discover");
 		if (discover == null) {
 			return Map.of();
 		}
 		return discover.rows().stream().filter(row -> row.kindOf() == EncyclopediaPayload.Kind.STEP)
-				.collect(Collectors.toMap(row -> key(row.text()).substring("encyclopedia.jugcraft.route.".length()), row -> row,
+				.collect(Collectors.toMap(row -> key(row.text()).substring("encyclopedia.jugcraft.route.".length()).split("\\.")[0], row -> row,
 						(a, b) -> a, java.util.LinkedHashMap::new));
 	}
 
@@ -206,6 +207,11 @@ public class EncyclopediaGameTests {
 		helper.assertTrue(state(wand, "wand") == EncyclopediaPayload.StepState.DONE && state(wand, "cast") == EncyclopediaPayload.StepState.NEXT
 				&& state(wand, "compose") == EncyclopediaPayload.StepState.OPEN, "with a wand, cast next and compose now");
 		helper.assertTrue(keys(wand).contains(Invocations.nameKey("jugcraft:kindle")), "once understood, the invocations are named");
+		// The spell bar offers Dawn Aegis, Kindle and Revelation in that order: the use key casts Dawn Aegis, 2 Kindle.
+		helper.assertValueEqual(key(steps(wand).get("cast").text()), "encyclopedia.jugcraft.route.cast.kindle", "once understood, the cast step names Kindle");
+		EncyclopediaPayload.Row goal = rows(wand).stream().filter(row -> key(row.text()).equals("encyclopedia.jugcraft.route.cast.goal")).findFirst().orElseThrow();
+		helper.assertTrue(args(goal.text())[1] instanceof Component bound && bound.getContents() instanceof KeybindContents keybind
+				&& keybind.getName().equals("key.hotbar.2"), "Kindle is cast with the second spell key: " + List.of(args(goal.text())));
 
 		ConcordanceProgress.award(player, Jugcraft.id("concordance_first_kindle"));
 		helper.assertValueEqual(state(build(player), "cast"), EncyclopediaPayload.StepState.DONE, "Let There Be is the cast step");
@@ -223,6 +229,10 @@ public class EncyclopediaGameTests {
 		RateGate.forget(player.getUUID());
 		Composing.compose(player, "here struck ward", true, Composing.Held.of(player));
 		helper.assertValueEqual(state(build(player), "support"), EncyclopediaPayload.StepState.NEXT, "a ward on oneself is not support");
+		RateGate.forget(player.getUUID());
+		Composing.Result prolonged = Composing.compose(player, "touch struck ward+prolong", true, Composing.Held.of(player));
+		helper.assertTrue(prolonged.outcome() == Composing.Outcome.INSCRIBED && state(build(player), "support") == EncyclopediaPayload.StepState.DONE,
+				"a ward with a modifier is support too: " + prolonged.outcome());
 		helper.succeed();
 	}
 
@@ -366,7 +376,7 @@ public class EncyclopediaGameTests {
 					"her silk's cheaper spindle is shown");
 			helper.assertTrue(rows(met).stream().anyMatch(row -> row.edgeOf() == EncyclopediaPayload.EdgeKind.OPTIONAL_BOSS
 					&& row.grid().map(grid -> grid.recipe().equals(Jugcraft.id("cursed_spindle_from_silk"))).orElse(false)), "as optional, after a boss");
-			EncyclopediaPayload.Row credit = rows(met).stream().filter(row -> key(row.text()).equals("encyclopedia.jugcraft.dossier.credit"))
+			EncyclopediaPayload.Row credit = rows(met).stream().filter(row -> key(row.text()).equals("encyclopedia.jugcraft.dossier.spindle_loft.credit"))
 					.findFirst().orElseThrow();
 			Object[] numbers = args(credit.text());
 			helper.assertTrue(numbers[0].equals(String.valueOf((int) Encounter.HEALING)) && numbers[1].equals(String.valueOf((int) Encounter.WARDING))
@@ -376,6 +386,9 @@ public class EncyclopediaGameTests {
 		}
 		TrickOrTreat.award(player, "the_last_harvest");
 		helper.assertValueEqual(LairDossiers.discovery(player, LairDossiers.Boss.VESPERINE), LairDossiers.Discovery.DEFEATED, "a win is remembered");
+		helper.assertTrue(rows(build(player)).stream().anyMatch(row -> key(row.text()).equals("encyclopedia.jugcraft.dossier.made_from")
+				&& row.grid().map(grid -> grid.recipe().equals(Jugcraft.id("reaper_hood"))).orElse(false)),
+				"the Reaper's Hood is made from her loot, not cheaper with it");
 		helper.succeed();
 	}
 
@@ -456,6 +469,9 @@ public class EncyclopediaGameTests {
 		}
 		helper.runAfterDelay(Encyclopedia.REQUEST_TICKS + 2, () -> {
 			helper.assertFalse(Encyclopedia.waiting(player), "the waiting request is answered at its tick");
+			// Answered, not dropped: answering records the time, so the gate is shut again two ticks later.
+			helper.assertFalse(RateGate.allow(player, Encyclopedia.RATE_ACTION, Encyclopedia.REQUEST_TICKS),
+					"the waiting request was answered at its tick, not dropped");
 			helper.succeed();
 		});
 	}

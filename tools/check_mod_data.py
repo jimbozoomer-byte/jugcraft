@@ -13660,16 +13660,36 @@ def check_encyclopedia(root, lang):
     loot_items = set()
     for boss in ("vesperine", "tatterlace"):
         loot_items |= set(re.findall(r'"name": "(jugcraft:[a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
+    # Each step's own source: from its route(out, "<id>" call to the next one's (the last to the end of steps()), with
+    # the helper it calls (understanding for understand, equipment for equip).
+    marks = [(found.start(), found.group(1)) for found in re.finditer(r'route\(out, "([a-z_]+)"', route)]
+    steps_end = route.find("private static Map<String, StepState> states(")
+    def method(name):
+        found = re.search(rf"private static void {name}\(.*?\n\t\}}\n", route, re.S)
+        return found.group(0) if found else ""
+    helpers = {"understand": method("understanding"), "equip": method("equipment")}
+    bodies = {sid: route[start:(marks[i + 1][0] if i + 1 < len(marks) else steps_end)] + helpers.get(sid, "")
+              for i, (start, sid) in enumerate(marks)}
     for step in en.FIRST_ROUTE:
+        body = bodies.get(step["id"], "")
+        for edge, recipe in step.get("named", []):
+            path = recipe.split(":", 1)[1]
+            if not (DATA / MOD / "recipe" / f"{path}.json").is_file():
+                err(f"tools/encyclopedia.py: step {step['id']} names recipe {recipe}, which does not exist")
+            if f'"{path}"' not in helpers.get(step["id"], ""):
+                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must name {recipe}'s set when it exists")
         for edge, recipe in step["recipes"]:
             path = recipe.split(":", 1)[1]
             file = DATA / MOD / "recipe" / f"{path}.json"
             if not file.is_file():
                 err(f"tools/encyclopedia.py: step {step['id']} names recipe {recipe}, which does not exist")
                 continue
-            if f'"{path}"' not in route and recipe not in stations:
-                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must show recipe {recipe} (or the "
-                    "rules' study station must be it)")
+            # A grid, with its edge, written in the step's own source (the bench: the rules' study station).
+            shown = (f"out.recipe(EdgeKind.{edge.upper()}, recipe," in body if recipe in stations
+                     else f'out.recipe(EdgeKind.{edge.upper()}, Jugcraft.id("{path}")' in body)
+            if not shown:
+                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must show recipe {recipe} as a "
+                    f"{edge} grid (out.recipe), or the rules' study station must be it")
             if edge == "required":
                 for ingredient in re.findall(r'"(jugcraft:[a-z_]+)"', file.read_text(encoding="utf-8")):
                     if ingredient in loot_items:
@@ -13687,11 +13707,11 @@ def check_encyclopedia(root, lang):
 
     # The dossiers: each boss's tokens, rite, loot and after-win recipes are the tool's, exist, and her loot table is hers.
     for boss, dossier in en.DOSSIERS.items():
-        for field in ("tokens", "rite", "loot", "after_win"):
+        for field in ("tokens", "rite", "loot", "after_win", "made_from"):
             for name in dossier[field]:
                 if f'"{name}"' not in dossiers:
                     err(f"lair/LairDossiers.java: {boss}'s {field} must name {name} (DOSSIERS in tools/encyclopedia.py)")
-        for recipe in dossier["rite"] + dossier["after_win"]:
+        for recipe in dossier["rite"] + dossier["after_win"] + dossier["made_from"]:
             if not (DATA / MOD / "recipe" / f"{recipe}.json").is_file():
                 err(f"tools/encyclopedia.py: {boss} names recipe {recipe}, which does not exist")
         table = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
@@ -13701,6 +13721,7 @@ def check_encyclopedia(root, lang):
             if f"jei.{MOD}.acquire.{name}" not in lang:
                 err(f"encyclopedia: missing lang jei.{MOD}.acquire.{name} (the dossier shows each loot's acquisition text)")
         for key in (f"lair.{MOD}.{dossier['lair']}", f"encyclopedia.{MOD}.dossier.{dossier['lair']}.leave",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.credit",
                     f"encyclopedia.{MOD}.dossier.{dossier['lair']}.rite", f"advancements.{MOD}.{dossier['advancement']}.title",
                     f"entity.{MOD}.{boss}"):
             if key not in lang:

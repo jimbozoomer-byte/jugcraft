@@ -26,19 +26,21 @@ that has something to show this player:
 
 - **Discover**: the First Light route below, then the journal's research and stage reports, and a button to the
   Concordance Journal (J). Every step says, in words beside a mark of its own shape and colour, where it stands (Done,
-  Next, Can do now, Later, Not available here) and how much it matters (Required, Recommended, Optional: after a boss).
+  Next, Can do now, Later, Not available here) and how much it matters (Required, Recommended, Optional: a boss fight).
   A step the player can act on lists its ways: Required, Recommended, Trade (bought or shared), Optional (after a boss).
   A recipe is shown as its crafting grid, read from the server's own recipe; a recipe the route needs but this server
-  lacks says so instead, and one it merely recommends is left out. The numbers (how dark, how many, how long a study
-  takes, what a spell costs) are read from the loaded rules and the compiler, so a data pack that changes them changes
-  the page.
+  lacks says so instead, and one it merely recommends is left out. The numbers (how dark, how many, what a spell costs)
+  are read from the loaded rules and the compiler, so a data pack that changes them changes the page; a bench study
+  takes the bench's own 5 seconds. Where a step has several ways, the page says any one of them is enough.
 - **Spellcraft** (once First Light is begun, or an instrument carried): the instrument in hand and its limits, Focus,
   what is inscribed and its cost, the invocations known with what each costs this player, the words learned for
   composing (and how many are still to learn), and the way into the Spell Composer, whose Back returns here.
 - **Expeditions**: a dossier for each lair the player has found (below).
-- **Inspect**: opened while looking at a Circle Anchor or a Ley Pylon within 16 blocks. For an anchor, its own report
-  (the same lines chat, `/jugcraft concordance circle` and Jade show, from the anchor's cached report) and the rituals
-  the player knows there; for a pylon, its charge, how it fills and whose rituals it lends to.
+- **Inspect**: opened with its key while looking at a Circle Anchor or a Ley Pylon within 16 blocks (the client looks
+  that far itself, past the crosshair's reach; the server checks the distance again). For an anchor, its own report
+  (the same lines chat and `/jugcraft concordance circle` show, from the anchor's cached report; Jade shows its phase
+  and first three faults its own way) and the rituals the player knows there; for a pylon, its charge, how it fills and
+  whose rituals it lends to.
 - **Keys**: every Jugcraft key with its binding now, what it does, and any other key bound the same; the vanilla keys the
   route uses; and where to change them.
 
@@ -46,12 +48,14 @@ that has something to show this player:
 
 ### The route
 
-Steps in order, with what each waits for, the recipes it shows (with the ingredients the recipe files register), the
-sales it names when a town stands (each one a shop really sells), the codex entries it links, and the game tests that
-exercise it. Written by `tools/encyclopedia.py` (`python3 tools/encyclopedia.py`) and checked against the Java.
+Steps in order, with what each waits for, the recipes it shows as grids (with the ingredients the recipe files
+register) and those it only checks are present before naming a set, the sales it names when a town stands (each one a
+shop really sells), the codex entries it links, and the game tests that exercise it. Written by `tools/encyclopedia.py`
+(`python3 tools/encyclopedia.py`) and checked against the Java (`check_encyclopedia`: each grid with its weight inside
+its own step).
 
 <!-- first-route:start -->
-| Step | Matters | Done when | After | Recipes (ingredients on disk) | Trade | Codex | Tests |
+| Step | Matters | Done when | After | Recipes shown (ingredients on disk) | Trade | Codex | Tests |
 |---|---|---|---|---|---|---|---|
 | find | Required | First Light encountered, or a luminous specimen carried | - | - | curios: `minecraft:glow_ink_sac` | `radiance/first_light` | `aNewcomerSeesOnlyTheFirstSteps`, `theRouteNamesOnlyRealSales` |
 | examine | Required | First Light encountered | find | - | - | - | `theRouteFollowsTheResearch`, `examiningBySneakUse` |
@@ -60,29 +64,37 @@ exercise it. Written by `tools/encyclopedia.py` (`python3 tools/encyclopedia.py`
 | wand | Required | an instrument carried | - | required: `jugcraft:initiate_wand` (1 #concordance/luminous matter, 1 stick, 1 copper ingot) | - | `foundations/initiate_wand` | `everyRecipeShownIsOnTheServer`, `anAbsentRecipeIsNeverAdvertised` |
 | cast | Required | the advancement Let There Be (Kindle cast) | understand, wand | - | - | `invocations/kindle` (first_light understood) | `theRouteFollowsTheResearch`, `kindleCastsThroughSpellEngine` |
 | compose | Required | a spell inscribed on a carried instrument | understand, wand | - | - | `composition/composing` (first_light understood) | `theRouteFollowsTheResearch`, `spellcraftShowsWhatIsHeld` |
-| support | Recommended | an inscription with ward and without here | compose | - | - | - | `theRouteFollowsTheResearch`, `aWardForAFriendIsComposedAndCast` |
-| equip | Recommended | a piece of the first loadout carried or worn | understand | recommended: `jugcraft:pyromancers_hat` (4 #wool, 1 gold ingot)<br>recommended: `jugcraft:pyromancers_robes` (7 #wool, 1 gold ingot)<br>recommended: `jugcraft:pyromancers_leggings` (6 #wool, 1 gold ingot)<br>recommended: `jugcraft:pyromancers_boots` (2 #wool, 2 gold ingot)<br>recommended: `jugcraft:pyromaniacs_hood` (5 #wool)<br>recommended: `jugcraft:pyromaniacs_tunic` (8 #wool)<br>recommended: `jugcraft:pyromaniacs_pants` (7 #wool)<br>recommended: `jugcraft:pyromaniacs_shoes` (4 #wool)<br>recommended: `jugcraft:lesser_fire_focus` (2 string, 2 gold ingot, 2 #coals, 1 amethyst shard)<br>recommended: `jugcraft:fire_bangle` (4 gold ingot, 1 #coals, 1 amethyst shard) | general: `minecraft:lantern` | - | `theFirstLoadoutIsMadeInSurvival` |
+| support | Recommended | an inscription that wards someone other than its caster (ward, with or without modifiers, not delivered here) | compose | - | - | - | `theRouteFollowsTheResearch`, `aWardForAFriendIsComposedAndCast` |
+| equip | Recommended | a Kindled Lantern, a fire-set piece, a fire focus or the Fire Bangle carried or worn | understand | recommended: `jugcraft:lesser_fire_focus` (2 string, 2 gold ingot, 2 #coals, 1 amethyst shard)<br>recommended: `jugcraft:fire_bangle` (4 gold ingot, 1 #coals, 1 amethyst shard)<br>the sets, named when each of these exists: `jugcraft:pyromancers_hat`, `jugcraft:pyromancers_robes`, `jugcraft:pyromancers_leggings`, `jugcraft:pyromancers_boots`, `jugcraft:pyromaniacs_hood`, `jugcraft:pyromaniacs_tunic`, `jugcraft:pyromaniacs_pants`, `jugcraft:pyromaniacs_shoes` | general: `minecraft:lantern` | - | `theFirstLoadoutIsMadeInSurvival` |
 | lair | Optional: after a boss | The Last Harvest or Unravelled | compose | - | - | - | `aBossIsHiddenUntilDiscovered` |
 <!-- first-route:end -->
 
 How a step is placed: done when the player's own state says so; otherwise waiting (Later) until the steps it waits for
 are done; otherwise Not available here when this server has no way to it (the wand without its recipe); otherwise the
 first required step that can be taken is Next (when no required step can be, the first recommended one) and the rest
-Can do now. A step after a boss is never Next. The study at a bench is recommended, not an alternative to the dark: a
-study made first is kept and completes understanding once one specimen has been examined in the dark (states are reached
-in order).
+Can do now. A boss fight is never Next. Understanding has three ways, any one of them enough, so none is called
+required: three different specimens examined in the dark, one study at a Lampwright's Bench, or Research Notes. The
+bench is not a way round the first examination in the dark (the dark step comes first, as states are reached in order),
+but after it one study replaces the other two examinations; a study made earlier is kept and counts then. The cast step
+is done by casting Kindle: once First Light is understood it is called "Cast Kindle" and says which key casts it (the
+spell bar offers the invocations in the order they are known, Dawn Aegis first, so Kindle is usually on 2).
 
 What the player makes along the way, where everything the route touches comes from, and what stays creative-only:
 [the first loadout's record](concordance-first-loadout.md).
 
 ### Nothing before it is met (proposed, A-D9)
 
-- Words, invocations and spells are named only on steps that need First Light understood.
+- The route's own research, First Light, is named from the start; other research, and words, invocations and spells,
+  are named only on steps that need First Light understood. The stage report counts a route through research the player
+  has not met ("and 1 more, through research you have not met yet") without naming it. An item's own description is
+  shown as its tooltip gives it.
 - A lair, and its rite, show once its token is carried (a Death Knell or a Mourning Wreath for the Hollow Acre, a
   Cursed Spindle for the Spindle Loft); its keeper once met (inside her lair, or owed her reward) or beaten.
 - A boss's dossier then adds how support earns a share of her reward ([lair encounter credit](lair-encounter-credit.md)),
-  what she gives (the acquisition text JEI shows, "with the default data"), the cheaper rite recipes her loot opens,
-  how to leave, and, inside her lair, the player's own part in the current fight.
+  what she gives (the acquisition text JEI shows, "with the default data", exact chances included: A-D15), the cheaper
+  token her loot opens and the pieces made of it, how to leave, and, inside her lair, the player's own part in the
+  current fight. What counts towards a share is named for each lair: her own creatures (not Vesperine's Grave Thralls),
+  healing and warding friends, and her objective.
 
 ## Connections
 
@@ -112,7 +124,8 @@ None: no recipe, item, trade, reward or saved state is added. A recipe a data pa
   it. Building a page reads the rules, the player's own records and inventory, the server's recipes and at most one
   block entity near the player; it writes nothing (`check_encyclopedia` forbids the writes).
 - Bounds: 6 pages, 96 rows a page (the last says there is more), 12 grids a page, 9 icons a row, 4 alternatives a slot.
-- Persistence: none. The page being read is remembered in memory only and forgotten on leaving a world (T11).
+- Persistence: none. The page being read is remembered in memory only and forgotten on leaving a world; resuming
+  where one left off is a proposed convenience, so nothing is saved.
 - Disable behaviour: with the Concordance off, its pages are left out and a notice says so; with the lairs off, no
   dossier; a server without Jugcraft's pages shows only the Keys page and a notice.
 - New network payloads: `jugcraft:encyclopedia_request` (client to server) and `jugcraft:encyclopedia` (server to client).
@@ -124,8 +137,12 @@ No new dependency. Modonomicon (required, pinned) is called once, on the client,
 (`client/compat/CodexLinks`); a failure says so and is logged once. The screens are vanilla widgets (no GuiLib view in
 this slice). The inventory button is added through Fabric's screen events, with no mixin.
 
-The button's sprite is the owner's, copied byte for byte by `tools/owner_art.py` (it came in a set with waystone sprites,
-which are not used):
+The button's sprite is the owner's, copied byte for byte by `tools/owner_art.py`. It came in a set with waystone
+sprites, which are not used; that set's language file carries the credit "Icons by JoeCreates (CC-BY-SA 3.0)"
+(`originals/Magic/lang/en_us.json`, `waystones.iconCredits`), which is kept here with the asset as the library's guide
+asks (art/owner-library/MAGIC_ASSETS.md: retain supplied credits). Whether this scroll is one of the credited icons is
+not known here; the owner's 9 October declaration says the library was remade from its bases
+([PROVENANCE.md](../../art/owner-library/PROVENANCE.md)).
 
 | Runtime file | Library source | SHA-256 |
 |---|---|---|
@@ -138,18 +155,30 @@ which are not used):
 - Game tests added (not yet run): `EncyclopediaGameTests` (a newcomer sees only the first steps; the route follows the
   research; every recipe shown is on the server; an absent recipe is never advertised; switched-off features have no
   pages; Spellcraft shows what is held; a boss is hidden until discovered; the route names only real sales; the pages
-  survive the trip; requests are gated and the Inspect page reads only a near, loaded block; the page model keeps its
-  place) and `ConcordanceComposeGameTests.aWardForAFriendIsComposedAndCast`.
+  survive the trip; requests are gated, answered at their tick and the Inspect page reads only a near, loaded block;
+  the page model keeps its place), `ConcordanceComposeGameTests.aWardForAFriendIsComposedAndCast`, and the client test
+  `EncyclopediaClientGameTests` (one client on a dedicated server, log prefix `[encyclopedia-check]`): no other loaded
+  non-debug key shares the default; the key opens on Discover, the key or Esc closes, and typing i in chat does not
+  open it; the inventory button stands right of the recipe-book button over no slot or widget and follows it when the
+  recipe book opens, a real click puts the 2×2 grid's things back and opens the encyclopedia, and Back reopens the
+  inventory; in creative it shows on the Survival Inventory tab only, over no slot; with the examination recorded on the
+  server the dark step is done, understood with a wand in hand the cast step is next, and Spellcraft's composer link
+  opens the Spell Composer, whose Esc comes back; looking at a Circle Anchor the Inspect page is its own report; the
+  Expeditions and Keys pages; GUI scale 4 and a 640×360 window. Screenshots `jugcraft_encyclopedia_discover_new`,
+  `_inventory_button`, `_recipe_book`, `_discover_route`, `_spellcraft`, `_inspect`, `_expedition`, `_keys`,
+  `_creative_button`, `_scale4` and `_small`, and, for the first loadout's A-07 view, `jugcraft_first_loadout_kindled_lantern`
+  and `jugcraft_first_loadout_adept_wand` (each held in hand).
 
-Not yet run: any compilation or game test (this branch has not been through CI); the client screen, the key, the
-inventory button and its placement (the client tests are unit 5's); a person following the route from a fresh world
-without reading source (A-04's acceptance is a human judgement); readability at GUI scales; the narrator heard; two
-clients.
+Not yet run: any compilation or game test (this branch has not been through CI), the client test above included; the
+full route by keys from a fresh world to a lair win (unit 5's A-08 test); a person following the route from a fresh
+world without reading source (A-04's acceptance is a human judgement); readability at GUI scales; the narrator heard;
+two clients.
 
 Unverified, and where the tests will settle it: vanilla 26.3's I is free except for F3+I (Copy Recreate Command, a
 debug combination that does not also press I); the recipe-book button being the inventory's only image button, and the
-creative tab's free space right of the armour slots; `BookGuiManager.openEntry` in Modonomicon 2.16.0 (read in 2.15.0's
-source); a placeable specimen being placed when aimed at a block.
+creative tab's free space right of the inventory grid (below the slots Trinkets puts at its top right: a review found the
+first place, right of the armour slots, on Spell Engine's spell-book slot); `BookGuiManager.openEntry` in Modonomicon
+2.16.0 (read in 2.15.0's source); a placeable specimen being placed when aimed at a block.
 
 ## World and event applicability
 
@@ -160,13 +189,18 @@ setting. Boss containment, loot and dimension travel are unchanged; the dossier 
 
 Owner decisions, recorded as proposed in [the chunk's contract](concordance-chunk-a.md): the default key (A-D7), the
 button and its place (A-D8), the discovery rule (A-D9), trade edges only from existing shops (A-D11), codex links without
-the codex (A-D12) and the route's support spell (A-D13).
+the codex (A-D12), the route's support spell (A-D13) and exact drop chances "with the default data" (A-D15). Also for the
+owner: a fresh player following only the encyclopedia is not told which token opens a lair (the lair step says a token
+is made, not which), while JEI names every item and its recipe; naming the tokens there, or pointing to the recipe book,
+belongs to A-D9.
 
 Known limits:
 
 - Discovery is read, not saved: a player who entered a lair, left, and used up their token (a Cursed Spindle) reads as
   not having found it until they carry one again or win.
 - The Inspect page is read when the encyclopedia opens; refreshing keeps the block it was opened on.
-- The route's equip step is done by carrying or wearing any piece of the first loadout.
-- Later (outside Chunk A): the GuiLib route canvas, search, history and bookmarks, a remembered last page, the
-  technology route, quests, other schools' chapters, invocation cooldowns, bench and machine inspection.
+- The route's equip step is done by carrying or wearing a Kindled Lantern, a fire-set piece, a fire focus or the Fire
+  Bangle (the wand and the bench are steps of their own).
+- Back navigation is in this slice (Backspace, through the last 16 pages turned to).
+- Later (outside Chunk A): the GuiLib route canvas, search, forward history and bookmarks, a last page remembered across
+  sessions, the technology route, quests, other schools' chapters, invocation cooldowns, bench and machine inspection.
