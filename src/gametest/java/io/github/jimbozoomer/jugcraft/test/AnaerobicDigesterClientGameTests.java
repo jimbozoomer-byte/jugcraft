@@ -91,6 +91,9 @@ public class AnaerobicDigesterClientGameTests implements FabricClientGameTest {
 			// A full biogas tank: the waste waits, and the terminal says why.
 			server.runOnServer(minecraft -> {
 				FormMachineBlockEntity machine = machine(minecraft.overworld(), reactor);
+				// Room for every running batch's waste and water to go back, so all four lanes cancel.
+				machine.container().setItem(0, ItemStack.EMPTY);
+				machine.tanks().input(0).drain(machine.tanks().input(0).millibuckets());
 				machine.cancel();
 				machine.tanks().output(0).drain(machine.tanks().output(0).millibuckets());
 				machine.tanks().output(0).fill(PetroFluids.BIOGAS.fluid(), machine.form().profile().bufferMb());
