@@ -1,6 +1,6 @@
 # The Lantern Fen
 
-Status: implemented in source; CI is still to run, and its client test's pictures will follow. Part 1 of boss 5, the Mire Hag, in the [bosses plan](../branches/BOSSES.md#the-mire-hag-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Lantern Fen, a fifth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Hag Stone that opens it. The Mire Hag and her loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 5, the Mire Hag, in the [bosses plan](../branches/BOSSES.md#the-mire-hag-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Lantern Fen, a fifth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Hag Stone that opens it. The Mire Hag and her loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 13 October 2026 the owner chose the recommendation at the Cinder Tyrant's checkpoint ("Go with recommendations"): the Mire Hag next, built the same two-part way, her bog lair and summoning first.
 Owner: @jimbozoomer-byte
 
@@ -107,9 +107,24 @@ Nothing is renamed.
 
 ## Verification
 
-Pictures: to come from the client game test in CI.
+![Night over the test world's pool where the stone was looked through: green motes of marsh-light over a puff of mist on the dark water](../images/ingame_hag_stone_mist.jpg)
+![The view from the jetty: the willow boardwalk running north between reeds and cattails to the Hag's hut, dead willows on the banks, the punt moored on the left](../images/ingame_lantern_fen_arrival.jpg)
+![From the south-west lamp's platform: the fen lamp burning on its post, the ring's planks, the dark water of the marsh and the hut beyond](../images/ingame_lantern_fen_marsh.jpg)
+![The south-east lamp burning on its post at the end of the ring's planks, mist over the water round it](../images/ingame_lantern_fen_lamp.jpg)
+![The same lamp put out, its panes dark](../images/ingame_lantern_fen_lamp_out.jpg)
+![The Hag's hut on stilts from the spur: its plank walls and pale corner posts, lanterns under the eaves, the cauldron on the porch, skulls on posts at its corners and the stair down to the boardwalk](../images/ingame_lantern_fen_hut.jpg)
+![The fen from high over the jetty: the ring of boardwalk round the marsh, the spur north to the hut and the jetty south, dead willows on the banks round the rim](../images/ingame_lantern_fen_above.jpg)
+![Dead willows on the west banks hung with shroud moss, reeds and cattails at the water's edge](../images/ingame_lantern_fen_willows.jpg)
+![Behind the jetty's end, the Grey Mist hanging between two dead willows whose crowns have grown together](../images/ingame_lantern_fen_exit.jpg)
 
-CI: to run.
+*The client game test's pictures (CI, commit `bdaab72`): the mist where the stone was looked through, then in the fen the view from the jetty, the marsh from the south-west lamp's platform, the south-east lamp burning and put out, the hut and its porch, the fen from above, the willows on the banks and the Grey Mist behind the jetty. The test client renders at 480x270.*
+
+CI (13 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `42f8af0` | Build, data audit, game tests, client game tests | **One failure.** `mod` passed all 1384 required server game tests, the fen's five among them, and `optional integrations absent` and `repository` passed. The fen's client test stopped at its first refusals: the test world is superflat, its player standing at y -60, and the test's pool lies a block lower, so the bog it laid round the pool reached down to y -65, below the world's floor. The server refused the fill ("That position is out of this world!"), the land stayed plains, and the stone, looked through at night on stone, said "not a wetland" rather than "not wet" |
+| `bdaab72` | The same, the bog laid from the plains' floor (the world's), the land checked before the test goes on, and every refusal printing what the stone said and what was in hand | **All pass:** all 1384 required game tests, and the client test classes `tools/select_client_tests.py` picked, `LanternFenClientGameTests` among them: the stone passed end to end, and the game's own light on the marsh was at least 8 on all 1,499 of its open cells (the darkest at 8). The pictures above are from this commit |
 
 Run locally (13 October 2026):
 
@@ -139,6 +154,7 @@ What the building found:
 - Lair templates are placed without block updates. Leaves keep the state they are written with, and would rot away and follow the seasons; vines would spread; grass under a trunk would turn to dirt. The fen has none of them now, and the audit keeps it so.
 - The audit's first walk refused every column over the water, the porch's among them; it now judges a column by where one can stand in it, and nobody stands in the water's own cells.
 - The hut's moss carpets covered one of its four shelves; they now keep off whatever is already there.
+- CI's first run found the client test's own fault: it laid its bog a block below the superflat test world (above, `42f8af0`). The stone was right to refuse there; the test now lays the bog where the world has room and checks that it took.
 
 The game tests (`LanternFenGameTests`) show what a game-test server can:
 1. the fen's dimension type and biome load from their files;
