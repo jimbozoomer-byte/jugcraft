@@ -150,8 +150,8 @@ public class ConcordanceJourneyClientGameTests implements FabricClientGameTest {
 	 * <ul>
 	 * <li>with the wand in hand it plays on, laid over the player by Player Animation Library;</li>
 	 * <li>2 takes the rifle part way through: by the next tick the clip has stopped, nothing is laid over the player (so
-	 * nothing keeps the hands and the gun out of the first-person view) and nothing starts it again (screenshot
-	 * {@code jugcraft_concordance_cast_pose_gun});</li>
+	 * nothing replaces the first-person hands and gun with the gun drawn at the clip's posed hand) and nothing starts it
+	 * again (screenshot {@code jugcraft_concordance_cast_pose_gun});</li>
 	 * <li>a release that arrives with the rifle already in hand is stopped the same way, seen from the front
 	 * ({@code jugcraft_concordance_cast_pose_gun_third_person}), and so is one cut short by 3 taking the longsword
 	 * ({@code jugcraft_concordance_cast_pose_arm_third_person});</li>
@@ -267,7 +267,8 @@ public class ConcordanceJourneyClientGameTests implements FabricClientGameTest {
 
 	/**
 	 * Whether Player Animation Library lays anything over this client's player: what it needs to override the arms in
-	 * third person and to take the hands and the held item out of the first-person view.
+	 * third person and, in first person, to replace the hands and the held item with the held item drawn on the posed
+	 * model.
 	 */
 	private static boolean animated(ClientGameTestContext context) {
 		return context.computeOnClient(client -> PlayerAnimationAccess.getPlayerAnimManager(client.player).isActive());

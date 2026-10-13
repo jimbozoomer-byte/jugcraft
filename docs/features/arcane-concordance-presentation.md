@@ -163,8 +163,11 @@ in the main hand now owns the player's arms, and no cast's pose plays over it.
   - the five ticks over which Spell Engine fades out a cast that ended.
 - Player Animation Library lays its clips over the player model after `GunPose` and ArmsMotion have posed it, so a
   playing clip took the arms of a player holding a gun or an arm. In first person, by Spell Engine's default, the
-  library hides the hands and the held item as the game draws them and draws the posed body instead, so the gun, its
-  reload or the arm's stroke went out of view. A reload can begin during a gun's draw, inside that window.
+  library stops the game drawing the first-person hands and held item. It draws the player's own model instead, with
+  everything but the held items hidden (the library's default first-person configuration, which Spell Engine keeps). So
+  the gun or arm was drawn where the cast's pose held the unseen hand, while the first-person arms that hold the gun and
+  work its reload, its aim, or the arm's stroke went out of view. A reload can begin during a gun's draw, inside that
+  window.
 - The circle's and the Vigil's gestures gave way to Jugcraft arms, but not to guns.
 
 **The rule.** `client/CastPoses` runs at the end of each client tick, for every player the client sees: its own, in
@@ -174,7 +177,11 @@ either view, and every other player.
   The main hand is the player's own, left or right; riding, crouching and the camera's view change nothing.
 - The circle's and the Vigil's gestures are left off a player whose arms are owned, or who holds an arm in the off
   hand. The circle's is held off by `CircleClient`'s own tick. The Vigil's is skipped when it would start, and
-  `CastPoses` stops one already playing when a gun or an arm is taken in hand.
+  `CastPoses` stops one already playing when a gun or an arm is taken in hand. The server sends the Vigil's gesture at
+  the end of the tick of the offering (`Vigil.gesture`), after the player's own tick has sent other clients any change
+  of what they hold. Otherwise a player who took the chalice from a gun and offered in one tick (keeping the use button
+  held after aiming does this) would reach every other client still holding the gun, and the gesture would be skipped
+  there.
 - A stopped clip ends at once rather than fading, so the gun's or the arm's pose shows from the next frame.
 - Jugcraft's arms are no spell casters and Jugcraft gives no gun a spell, so only leftovers are stopped. A spell another
   mod lets a player cast with a gun or an arm in hand would still be cast, without its gesture.
@@ -188,9 +195,12 @@ either view, and every other player.
 - A release that reaches a client while a gun or an arm is already in hand plays until the end of the next client tick
   (at most 50 ms), on the body in third person. In first person it depends on the tick before. If a Spell Engine clip
   was playing then (as after a quick switch from the wand, while the cast was fading out), the library's first-person
-  hand-off is still complete, so until that tick ends the view may show the posed body without the hands and without the
-  held gun or arm. Otherwise the hands are only lowered for a moment. This is read from Player Animation Library's
-  source (its first-person item and pass checks, and the transition it advances in the entity tick), not seen in a game.
+  hand-off is still complete, so until that tick ends the view may show the held gun or arm where the cast's pose holds
+  the unseen hand, with no hands or arms, in place of the first-person view of it. Otherwise the hands are only lowered
+  for a moment. This is read from Player Animation Library's source, not seen in a game: its first-person item and pass
+  checks and the transition it advances in the entity tick; its model mixin hides the head, body and legs in that pass
+  and shows the arms only as the configuration says; the default configuration shows the items, not the arms; Spell
+  Engine sets a mode but no configuration.
 - An arm in the off hand does not stop a cast's clips: a wand in the main hand still casts with its gesture, and
   ArmsMotion poses only the main hand.
 - Spell Engine's third layer, its evasion clip, is left alone.

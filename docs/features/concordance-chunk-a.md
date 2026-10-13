@@ -35,7 +35,13 @@ a useful loadout, enter an existing lair and qualify for reward through support 
   [#303](https://github.com/jimbozoomer-byte/jugcraft/pull/303) and carried by #315.
 - Open pull requests touching this chunk's seams: #300 (Glacier Hall) and #313 (Cinder Kiln) edit the lair registry
   files; #304 (Yeti King) adds a third boss with the same damage-only reward pattern. Unit 3 keeps the existing
-  `took`, `participants` and `reward` signatures so those still compile.
+  `took`, `participants` and `reward` signatures so those still compile. Unit 4's `check_arms_variants` rule requires a
+  boss with its own `loot_table/entities/<boss>.json` to name its lair in `tools/arms_variants.py` `BOSSES`; #304
+  (Yeti King, on #300) and #317 (Cinder Tyrant, on #313) each add that table without one. Whichever of this chunk and
+  each of them merges second sets `"lair": "glacier_hall"` on `yeti_king` or `"lair": "cinder_kiln"` on
+  `cinder_tyrant`, re-runs `python3 tools/generate_material_data.py` and commits the regenerated handbook (the boss
+  moves to the trophy page's "met" list; CI's generated-files step fails otherwise). Both bosses' loot gives a trophy
+  on a player's first kill, so that page's words hold.
 - The plan's status text that had gone stale (feature records' "on branch" lines, WHAT_EXISTS, BOSSES.md, the
   delivery record) was corrected in unit 4, after the merge state was checked again on 11 October. The CHANGELOG's
   stale headings are reconciled in a docs-only pull request of their own (A-D14).

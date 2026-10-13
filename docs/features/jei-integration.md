@@ -29,6 +29,7 @@ Crafting-table recipes show in JEI's own crafting page when JEI's recipe sync re
 ## Verification
 - `tools/check_mod_data.py` passes.
 - CI compiled the plugin against the JEI API up to the merged main; Concordance Chunk A's `addAcquisitionInfo` is not compiled yet (no build here can; CI will).
+- `check_acquisition` (`tools/check_mod_data.py`) ties the information pages to `tools/acquisition.py` and the data on disk. It reads data only, so a drop coded in Java is not seen ([concordance-first-loadout.md](concordance-first-loadout.md), Known limits).
 - Not run: a client with JEI installed. Nothing is play-tested.
 
 ## Rollout and open questions

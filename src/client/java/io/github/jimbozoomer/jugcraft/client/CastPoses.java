@@ -22,9 +22,11 @@ import net.spell_engine.client.animation.SpellAnimationStack;
  * (GunShots) and ArmsMotion ends a weapon art. What can outlast the change is the cast's presentation: Spell Engine's
  * release clip (12 to 14 ticks, sent by the server once the cast took effect, so it can arrive after a quick switch)
  * and the five ticks over which it fades out a cast it ended. Player Animation Library lays those over the player model
- * after GunPose and ArmsMotion have posed it, and in first person, by Spell Engine's default, hides the hands and the
- * held item as the game draws them and draws the posed body instead, so the gun, its reload or the arm's stroke would
- * go out of view.
+ * after GunPose and ArmsMotion have posed it. In first person, by Spell Engine's default, it stops the game drawing the
+ * first-person hands and held item and draws the player's own model instead, with everything but the held items hidden
+ * (its default first-person configuration, which Spell Engine keeps): the gun or arm would be drawn where the clip
+ * holds the unseen hand, and the first-person arms that hold the gun and work its reload, its aim, or the arm's stroke
+ * would go out of view.
  * <p>
  * So at the end of each client tick, for every player this client sees (its own, in either view, and others):
  * <ul>
@@ -39,9 +41,9 @@ import net.spell_engine.client.animation.SpellAnimationStack;
  * A clip stopped here ends at once rather than fading, so the gun's or the arm's pose takes over in the next frame. A
  * release that reaches this client while a gun or an arm is already in hand is stopped by the end of the next client
  * tick, at most 50 ms later; until then it shows on the body in third person. In first person, if a Spell Engine clip
- * was playing the tick before (as after a quick switch from the wand), the view may show the posed body without the
- * hands and the held gun or arm until that tick ends; otherwise the hands are lowered for a moment. (Read in Player
- * Animation Library's source, not seen in a game.)
+ * was playing the tick before (as after a quick switch from the wand), until that tick ends the view may show the held
+ * gun or arm where the clip holds the unseen hand, with no hands or arms; otherwise the hands are lowered for a moment.
+ * (Read in Player Animation Library's source, not seen in a game.)
  */
 public final class CastPoses {
 	/** Clips and gestures stopped so far (for the client game tests). */

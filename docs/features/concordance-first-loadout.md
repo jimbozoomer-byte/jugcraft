@@ -206,7 +206,10 @@ Ran here (11 October 2026):
   `jugcraft:adept_wand` in `tags/item/equivalence/excluded.json`.
 - `python3 tools/check_mod_data.py`: **passes** ("PASS: 2149 material IDs, data files and recipe audit"), with the new
   `check_acquisition` (each page, the loadout and the creative-only tiers against the files on disk, as its docstring
-  lists) and the new equivalence rule (every instrument excluded). `check_arms_variants` is unchanged.
+  lists) and the new equivalence rule (every instrument excluded). Nothing in `check_arms_variants` is relaxed (a
+  trophy or a set's arm still has no recipe of its own); the unit adds one rule to it, for the handbook's trophy page: a
+  `tools/arms_variants.py` `BOSSES` entry names a lair (a `tools/lairs.py` `LAIRS` key) exactly when
+  `loot_table/entities/<boss>.json` exists ([arms-vii.md](arms-vii.md)).
 - The new audit was also run with deliberate faults, one at a time and in memory only: a generator chance moved, the
   scythe's pool removed, the shade count changed, an item with no page added to her table, a creative-only tier given a
   recipe, a loadout piece without its recipe or with the wrong working, the first-kill line or the table key removed

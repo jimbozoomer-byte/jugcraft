@@ -31,7 +31,8 @@ MATRIX = {
     "fabric-api": (
         "Attachments for every player record, and each wearer's worn trinkets choice, sent to everyone who sees them; item "
         "components; the rules' reload listener; menus; commands; networking (the journal and its request, signs, the "
-        "Vigil's gesture, the worn trinkets choice); key mappings; the Focus HUD line; block-entity load and unload "
+        "Vigil's gesture, the worn trinkets choice, the Spell Composer's request, state and result, the encyclopedia's "
+        "request and pages); key mappings; the Focus HUD line; block-entity load and unload "
         "(the circle index); the block-break and attack questions asked for the person behind a change, with a "
         "FakePlayer standing in for an absent owner when a server allows it; the Transfer API for the crucible's water "
         "and every courier pickup and delivery",
@@ -128,10 +129,14 @@ MATRIX = {
         "Server tests run without Jade in CI's optional-absent job; its overlay has not been seen in a client"),
     "jei": (
         "Recipe categories for the Lampwright's Bench, the Circle Anchor and the Resonant Ring; alchemy ingredients' "
-        "properties as information (never outcomes)",
+        "properties as information (never outcomes); since Concordance Chunk A, an information page each on where the "
+        "Adept's Wand and Vesperine's and Madame Tatterlace's loot come from (tools/acquisition.py), with the default "
+        "data's chances and offerings",
         "no JEI pages; the codex's recipe pages remain",
         [],
-        "Its pages have not been seen in a client"),
+        "Its pages have not been seen in a client; the information pages are written from the default data, so a "
+        "server data pack that changes a recipe, a boss's loot table or the Adept's Attunement is not shown; Chunk A's "
+        "information pages are not compiled yet"),
     "modmenu": (
         "Opens the Concordance settings screen from the mod list",
         "the Concordance settings key (unbound by default, in Controls) opens the same screen",

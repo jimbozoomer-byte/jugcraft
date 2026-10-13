@@ -9731,7 +9731,8 @@ def check_acquisition(registered):
         if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{method}\(\)\)\);", loot_java) \
                 or "first victory over her always brings it" not in pages.get(first, ""):
             err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
-    # Nothing else gives them, and what a page says is never crafted or traded is not.
+    # Nothing else gives them (no other loot table, shop, villager trade, commission or project), and what a page says is
+    # never crafted is not.
     for key, text in pages.items():
         ref = f"{MOD}:{key}"
         for path in dropped.get(ref, []):
@@ -9741,8 +9742,10 @@ def check_acquisition(registered):
         makers = [path for path in made.get(ref, []) if path not in own]
         if text.startswith("Not crafted") and makers:
             err(f"{makers[0].relative_to(DATA)} makes {key}, whose JEI page says it is not crafted")
-        if "or traded" in text and given.get(ref):
-            err(f"{given[ref][0]} gives {key}, whose JEI page says it is not traded")
+        if given.get(ref):
+            why = ("whose JEI page says it is not traded" if "or traded" in text
+                   else "which its JEI page (tools/acquisition.py) does not name")
+            err(f"{given[ref][0]} gives {key}, {why}")
     for item, (recipe, ingredient, count, name) in aq.CRAFTED.items():
         path = DATA / MOD / "recipe" / f"{recipe}.json"
         body = (load(path) or {}) if path.is_file() else {}
@@ -9782,8 +9785,11 @@ def check_acquisition(registered):
         if item not in registered:
             err(f"acquisition: the first loadout's {item} is not registered")
         if how == "recipe":
-            if DATA / MOD / "recipe" / f"{item}.json" not in made.get(f"{MOD}:{item}", []):
-                err(f"acquisition: no recipe/{item}.json makes the first loadout's {item}")
+            # The recipe's own result, not just a mention anywhere in the file (made counts every id object).
+            recipe = DATA / MOD / "recipe" / f"{item}.json"
+            result = ((load(recipe) or {}) if recipe.is_file() else {}).get("result")
+            if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
+                err(f"acquisition: recipe/{item}.json does not make the first loadout's {item} (its own result)")
         else:
             working = DATA / MOD / "concordance" / "working" / f"{how.split(':', 1)[1]}.json"
             if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
@@ -13257,7 +13263,8 @@ def check_crimson(co, root, lang, registered, research):
     surge and blade numbers); every rite gives no more Vitae than the health it takes and can be made from full health;
     an hour of offering is bounded whatever heals the giver, and a surge never turns Vitae into more Focus; health is
     taken in exactly one place; mastery comes from the blade's growth; every word has its text; the icons are their maps;
-    the offering gesture exists and skips players whose arms a gun or ArmsMotion poses (check_cast_poses)."""
+    the offering gesture exists and skips players whose arms a gun or ArmsMotion poses (check_cast_poses), and the
+    server sends it at the end of the tick, after the player's own tick has sent what they now hold."""
     cr = co.crimson
     def java(name, base=root):
         path = base / name
@@ -13340,6 +13347,12 @@ def check_crimson(co, root, lang, registered, research):
         err("VigilClient: the offering gesture needs its clip in assets/jugcraft/player_animations")
     if "CastPoses.gesturesYield(player)" not in client:
         err("VigilClient: the offering gesture must skip players whose arms a gun or ArmsMotion poses (CastPoses.gesturesYield)")
+    server = java("Vigil.java", vigil)
+    queued = re.search(r"private static void gesture\(ServerPlayer player\) \{(.*?)\n\t\}", server, re.S)
+    if "ServerTickEvents.END_SERVER_TICK.register(Vigil::sendGestures);" not in server or not queued \
+            or "ServerPlayNetworking.send" in queued.group(1):
+        err("Vigil: the offering gesture must be sent at the end of the server tick (Vigil.sendGestures), after the "
+            "player's own tick has sent what they hold, or other clients judge it by what they held before")
     import item_icons
     for icon in ("crimson_chalice", "thornheart_blade"):
         texture = ASSETS / "textures" / "item" / f"{icon}.png"
@@ -14039,7 +14052,8 @@ def check_persistence(root):
 def check_journey():
     """Roadmap step 31: tools/concordance_journey.py's three routes each reach the Architect stage for one player alone
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
-    data's; every game test the routes name exists; and the record's routes are the tool's."""
+    data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
+    other research; every game test the routes name exists; and the record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():
