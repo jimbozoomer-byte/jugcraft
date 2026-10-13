@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
@@ -17,11 +19,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -30,8 +35,9 @@ import net.minecraft.world.phys.Vec3;
  * fight did and nothing healed otherwise since; a ward counts only what it soaked of the fight's blows; overhealing,
  * healing yourself, a friend's blow, a fall and a ward that soaks nothing count for nothing; a tamed creature's blow
  * is its owner's; a fight left forgets who took part; one who left the game and came back is paid like anyone else;
- * and a reward kept for a player is paid once, whether it waited with them or in the world while they were away. The bosses' own deeds and falls are in {@link VesperineGameTests}
- * and {@link TatterlaceGameTests}.
+ * and a reward kept for a player is paid once, whether it waited with them or in the world while they were away, and
+ * survives a save either way. The bosses' own deeds and falls are in {@link VesperineGameTests} and
+ * {@link TatterlaceGameTests}.
  */
 public class LairEncounterGameTests {
 	/**
@@ -304,6 +310,48 @@ public class LairEncounterGameTests {
 				&& fallen.getInventory().countItem(JugcraftVesperine.REAPER_SHADE) >= 3 && !fallen.hasAttached(LairRewards.OWED),
 				"A reward kept with a player is handed over once they are alive");
 		helper.assertTrue(!LairRewards.handOver(fallen), "and only once");
+		helper.succeed();
+	}
+
+	/**
+	 * What is kept survives a save (A-08's last step). A reward kept with a player is saved with them and kept through
+	 * death: written out and loaded into the same player joining again, it is owed once. The world's record, written and
+	 * read back, keeps it for the same player. Both read their saves from before versions.
+	 */
+	@GameTest(maxTicks = 20)
+	public void keptRewardsSurviveASave(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer fallen = player(helper, 1, 1);
+		Vec3 origin = Vec3.atCenterOf(helper.absolutePos(new BlockPos(2, 2, 2)));
+		LairRewards.Due due = new LairRewards.Due(VesperineLoot.BOSS, UUID.randomUUID(), origin, 50);
+		helper.assertTrue(LairRewards.OWED.isPersistent() && LairRewards.OWED.copyOnDeath(),
+				"What a player is owed is saved with them and kept through death");
+		LairRewards.owe(fallen, due);
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		fallen.saveWithoutId(out);
+		// The same player joining again: a new player loaded from that save, as the player list loads one on joining.
+		ServerPlayer again = new ServerPlayer(level.getServer(), level, fallen.getGameProfile(), fallen.clientInformation());
+		again.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
+		// Making it bound the player's advancements to it; they go back to the player in the level.
+		level.getServer().getPlayerList().getPlayerAdvancements(fallen);
+		LairRewards.Owed owed = again.getAttached(LairRewards.OWED);
+		helper.assertTrue(owed != null && owed.due().equals(List.of(due)), "Saved and loaded, the player is owed it once: " + owed);
+		JsonElement owedSaved = LairRewards.Owed.CODEC.encodeStart(JsonOps.INSTANCE, owed).getOrThrow();
+		helper.assertTrue(LairRewards.Owed.CODEC.parse(JsonOps.INSTANCE, owedSaved.getAsJsonObject().get("data")).getOrThrow().equals(owed),
+				"What a player is owed reads its save from before versions");
+
+		UUID away = UUID.randomUUID();
+		LairRewards.Data data = LairRewards.Data.of(level.getServer());
+		data.owe(away, due);
+		try {
+			JsonElement saved = LairRewards.Data.CODEC.encodeStart(JsonOps.INSTANCE, data).getOrThrow();
+			helper.assertTrue(LairRewards.Data.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow().kept(away).equals(List.of(due)),
+					"The world's record, written and read back, keeps it for the player away");
+			helper.assertTrue(LairRewards.Data.CODEC.parse(JsonOps.INSTANCE, saved.getAsJsonObject().get("data")).getOrThrow()
+					.kept(away).equals(List.of(due)), "The world's record reads its save from before versions");
+		} finally {
+			data.take(away);
+		}
 		helper.succeed();
 	}
 }

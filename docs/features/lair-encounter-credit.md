@@ -138,7 +138,9 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
 - `python3 tools/check_mod_data.py` and `python3 scripts/check_repository.py` pass locally.
 - Game tests added (not yet run): `LairEncounterGameTests` (healing counts only the fight's hurt; what rest healed
   earns nothing; a ward is credited for what it soaks; a tamed creature's blow is its owner's; a left fight pays no
-  one; one who came back is paid like anyone else; a kept reward is paid once), `VesperineGameTests`
+  one; one who came back is paid like anyone else; a kept reward is paid once; kept rewards survive a save: a player saved
+  owing one and loaded again as the same player joining is owed it once, the world's record reads back the same, and
+  both read their saves from before versions), `VesperineGameTests`
   `supportSharesHerHarvestOnce` and `aWardRelitInHerHarvestCounts`, and `TatterlaceGameTests.cuttingAFriendFreeCounts`.
   They use mock players: a death or a departure is stood in for by marking the player (`Encounter.excuse`,
   `Encounter.left`), and a reward kept for one is handed over by calling the join and hand-over code directly; no test
