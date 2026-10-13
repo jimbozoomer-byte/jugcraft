@@ -1,7 +1,7 @@
 # Copper entry for aluminum, and the self-output gate check
 
 Status: implemented on the contributor's fork, pending CI and review.
-Based on [factory payoffs](industrial-factory-payoffs.md) and the branches below it.
+Stacked on the [ruthenium bed](industrial-ruthenium-bed.md) and the branches below it.
 
 Proposal issue: none. TODO item: "Use earlier copper conductors in entry aluminum-processing equipment, with aluminum improvements later; verify construction and reagent producers without self-output gates."
 
