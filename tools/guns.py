@@ -589,6 +589,33 @@ GUNS = {
         "damage": 2.5, "pellets": 1, "interval": 4, "auto": True, "capacity": 32,
         "reload": 53, "spread": (3.5, 1.5), "range": 40, "ammo": "light_round",
     },
+    # Slice 12C: one of the owner's last two copper guns, their one iron gun and their one echo-shard gun. A pistol held
+    # in one hand, the tube under its barrel loaded a round at a time; a heavy revolver held in one hand, its cylinder
+    # swung out to load a round at a time; and a bolt-action rifle of the deep dark.
+    "tuppence_pistol": {
+        "display": "Tuppence Pistol",
+        "source": "umax_pistol",
+        "tooltip": "A copper pistol held in one hand, the tube under its barrel loaded a round at a time. Fires light "
+                   "rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 6, "auto": False, "capacity": 8,
+        "reload": (8, 12, 5), "spread": (2.5, 1.0), "range": 56, "ammo": "light_round",
+    },
+    "goshawk_revolver": {
+        "display": "Goshawk Revolver",
+        "source": "ultra_knight_hawk",
+        "tooltip": "A heavy iron revolver held in one hand, its cylinder swung out to load a round at a time. Fires "
+                   "rifle rounds.",
+        "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 6,
+        "reload": (10, 20, 14), "spread": (2.0, 0.6), "range": 64, "ammo": "rifle_round",
+    },
+    "lament_rifle": {
+        "display": "Lament Rifle",
+        "source": "forlorn_hope",
+        "tooltip": "A sculk-grown bolt-action rifle, its bolt worked after every shot: one heavy, true shot at long range "
+                   "from a magazine of five. Fires rifle rounds.",
+        "damage": 16.0, "pellets": 1, "interval": 19, "auto": False, "capacity": 5,
+        "reload": 53, "spread": (2.0, 0.05), "range": 160, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -771,6 +798,14 @@ RECIPES = {
     "conductor_carbine": (["CCC", "ILI"], {"C": "minecraft:copper_ingot", "L": "minecraft:lever",
                                            "I": "minecraft:iron_ingot"}),
     "magpie_smg": (["CCC", " LI"], {"C": "minecraft:copper_ingot", "L": "minecraft:lever", "I": "minecraft:iron_ingot"}),
+    # Slice 12C: the Tuppence Pistol as the other copper guns; the Goshawk Revolver all iron and a lever, the library's
+    # one iron gun.
+    "tuppence_pistol": (["CCC", "CLI"], {"C": "minecraft:copper_ingot", "L": "minecraft:lever",
+                                         "I": "minecraft:iron_ingot"}),
+    "goshawk_revolver": (["III", " LI", "  I"], {"I": "minecraft:iron_ingot", "L": "minecraft:lever"}),
+    # The Lament Rifle as the sculk guns (slice 10D): steel and a lever, echo shards and sculk from the deep dark.
+    "lament_rifle": (["SSS", "ELE", " K "], {"S": "#c:ingots/steel", "E": "minecraft:echo_shard", "L": "minecraft:lever",
+                                             "K": "minecraft:sculk"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1886,6 +1921,60 @@ BUILDS = {
         "sight": (8.0, 6.9, 15.18),
         "eye_relief": 2.0,
     },
+    # Slice 12C. The UMAX Pistol is held in one hand: its idle hides the left arm, which comes in through the reload to
+    # put each round in. Its bolt is the receiver block at the back, driven back with each shot; its lever the loop under
+    # it (a flat plane, main#3), swung down in the inspection. Its sight is the owner's ring at the back over the post at
+    # the front.
+    "tuppence_pistol": {
+        "bones": [
+            ("gun_body", None, ["main-#0,1,3,20", "stan_grip", "sights"], (8.0, 2.5, 15.3)),
+            ("bolt", "gun_body", ["main#0,1,20"], (8.0, 4.75, 13.7)),
+            ("lever", "gun_body", ["main#3"], (8.0, 3.3, 10.6)),
+            ("magazine", "gun_body", [], (8.0, 2.75, 9.0)),
+            ("shell", "gun_body", ["@shell"], (8.0, 2.4, 11.0)),
+        ],
+        "hands": {"right": (8.0, 2.5, 15.3), "left": (7.3, 1.8, 12.0)},
+        "hand_pose": {"left": ("reload_loop", "0.2917")},
+        "arms": {"right": (0.1913, -0.4619, 0.866), "left": (0.6294, -0.483, 0.6088)},
+        "muzzle": (8.0, 5.03, 4.7),
+        "sight": (8.0, 6.3, 13.64),
+        "eye_relief": 1.0,
+    },
+    # The Ultra Knight Hawk is held in one hand, as the Sapper Revolver: its idle hides the left arm, which comes in to
+    # load each round. Its drum swings out to the left about the crane under it; its hammer is the flat plane at the back.
+    # Its sight is the notch at the back over the post at the front.
+    "goshawk_revolver": {
+        "bones": [
+            ("gun_body", None, ["main"], (8.0, 1.6, 14.6)),
+            ("magazine", "gun_body", ["drum"], (6.9, 2.4, 10.4)),
+            ("hammer", "gun_body", ["hammer"], (8.0, 3.6, 14.0)),
+            ("bolt", "gun_body", [], (8.0, 4.3, 12.0)),
+            ("seal", "gun_body", [], (8.0, 3.73, 10.4)),
+            ("shell", "gun_body", [], (8.0, 3.73, 10.4)),
+        ],
+        "hands": {"right": (8.0, 1.6, 14.6), "left": (5.6, 3.2, 13.2)},
+        "hand_pose": {"left": ("reload_loop", "0.4583")},
+        "arms": {"right": (-0.6871, -0.3967, 0.6088), "left": (0.733, -0.3036, 0.6088)},
+        "muzzle": (8.0, 4.3, -1.77),
+        "sight": (8.0, 6.0, 13.1),
+    },
+    # The Forlorn Hope is a bolt-action rifle: its bolt is the handle on the right of the receiver, drawn back after each
+    # shot. Its magazine under the barrel swings down about its front to reload; the empty one its reload throws out
+    # (empty_mag) and its seal hold nothing. Its sight is the owner's ring at the back over the post on the receiver.
+    "lament_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#23,24,25,57,58", "sights"], (8.0, 2.4, 17.8)),
+            ("bolt", "gun_body", ["main#23,24,25"], (9.2, 5.5, 15.4)),
+            ("mag", "gun_body", ["main#57,58"], (8.0, 3.02, 6.275)),
+            ("empty_mag", "gun_body", [], (8.0, 3.02, 6.275)),
+            ("seal", "gun_body", [], (8.0, 4.5, 11.0)),
+        ],
+        "hands": {"right": (8.0, 2.4, 17.8), "left": (8.0, 1.6, 8.5)},
+        "arms": {"right": (-0.2762, -0.2762, 0.9206), "left": (0.717, -0.4911, 0.4947)},
+        "muzzle": (8.0, 4.92, -7.87),
+        "sight": (8.0, 6.5, 16.5),
+        "eye_relief": 6.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -1958,6 +2047,10 @@ PROPS = {
     # the open trapdoor, and shrinks to nothing there.
     "bastion_rifle": {"shell": {"kind": "cartridge", "from": (8.207, 5.542, 13.778), "size": (1.0, 1.0, 3.0),
                                 "texture_at": (120, 120)}},
+    # Slice 12C: the UMAX Pistol's round rests behind the mouth of the tube under its barrel, where the loop's last carry
+    # (0.3333 s) brings it, and shrinks to nothing there.
+    "tuppence_pistol": {"shell": {"kind": "cartridge", "from": (7.5, 1.9, 11.0), "size": (1.0, 1.0, 3.0),
+                                  "texture_at": (120, 120)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -2384,6 +2477,8 @@ ZOOM = {
     "chitin_smg": 0.88, "hermit_rifle": 0.85, "borer": 0.95,
     # The copper guns (slice 12B): a pistol, a carbine and a submachine gun.
     "penny_pistol": 0.9, "conductor_carbine": 0.82, "magpie_smg": 0.88,
+    # Slice 12C: a pistol, a revolver and a bolt-action rifle.
+    "tuppence_pistol": 0.9, "goshawk_revolver": 0.9, "lament_rifle": 0.7,
 }
 
 
@@ -2576,6 +2671,10 @@ SHOT_SOUNDS = {
     "penny_pistol": "item/scrapper/fire.ogg",
     "conductor_carbine": "item/cowboy/fire.ogg",
     "magpie_smg": "item/rusty_gnat/fire.ogg",
+    # Slice 12C: the Sapper Revolver's, the Bulldog Pistol's and the Picket Rifle's.
+    "tuppence_pistol": "item/brass_pistol/fire.ogg",
+    "goshawk_revolver": "item/heavier_rifle/fire.ogg",
+    "lament_rifle": "item/scorched_sniper/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3104,7 +3203,9 @@ FRAMED = {"scguns:item/rocket_rifle",
           "scguns:item/sculk_resonator_animated", "scguns:item/sculk_resonator_tendril", "scguns:item/echoes_2_animated",
           # Slice 11A: the Cinder Repeater's glowing stone, three frames (the Pyroclastic Flow's); slice 11B's Goldbristle
           # Carbine's too.
-          "scguns:item/pyroclastic_flow_animated"}
+          "scguns:item/pyroclastic_flow_animated",
+          # Slice 12C: the Forlorn Hope's whole texture, seven frames.
+          "scguns:item/forlorn_hope"}
 
 
 def texture_size(texture):

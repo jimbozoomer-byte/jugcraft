@@ -1058,6 +1058,33 @@
       }
     ]
   },
+  "guns.tuppence_pistol.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_pistol_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.goshawk_revolver.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavier_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.lament_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/scorched_sniper_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

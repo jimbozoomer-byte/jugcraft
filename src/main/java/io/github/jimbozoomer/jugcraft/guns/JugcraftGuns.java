@@ -155,6 +155,9 @@ public final class JugcraftGuns {
 		SPECS.put("penny_pistol", new GunSpec(4.0F, 1, 6, false, 10, 56, 0, 0, 0, 3.0F, 1.0F, 48, "light_round"));
 		SPECS.put("conductor_carbine", new GunSpec(8.0F, 1, 15, false, 8, 49, 0, 0, 0, 2.0F, 0.3F, 96, "rifle_round"));
 		SPECS.put("magpie_smg", new GunSpec(2.5F, 1, 4, true, 32, 53, 0, 0, 0, 3.5F, 1.5F, 40, "light_round"));
+		SPECS.put("tuppence_pistol", new GunSpec(5.0F, 1, 6, false, 8, 0, 8, 12, 5, 2.5F, 1.0F, 56, "light_round"));
+		SPECS.put("goshawk_revolver", new GunSpec(9.0F, 1, 10, false, 6, 0, 10, 20, 14, 2.0F, 0.6F, 64, "rifle_round"));
+		SPECS.put("lament_rifle", new GunSpec(16.0F, 1, 19, false, 5, 53, 0, 0, 0, 2.0F, 0.05F, 160, "rifle_round"));
 	}
 
 	/**
@@ -197,7 +200,7 @@ public final class JugcraftGuns {
 	 * Slice 10G, two guns at once: the guns held in one hand (tools/guns.py one_handed()), of which a player may hold one
 	 * in each hand and fire both ({@link GunItem#dual}).
 	 */
-	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol");
+	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver");
 	/** Slice 10G: how much further each of two guns strays from the hip than one held alone (tools/guns.py DUAL_SPREAD). */
 	public static final float DUAL_SPREAD = 1.5F;
 	/**
@@ -371,6 +374,11 @@ public final class JugcraftGuns {
 		ACCEPTS.put("magpie_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
 				"weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
 				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("tuppence_pistol", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("lament_rifle", List.of("light_stock", "weighted_stock", "wooden_stock", "light_grip", "vertical_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
 	}
 
 	/** The rounds. */

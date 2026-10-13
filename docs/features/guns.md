@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A) and the copper guns (slice 12B)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B) and the lone guns (slice 12C)
 
 Status:
 - **Slices 1 to 11B are in `main`:** the last of them, 10A to 11B, with #320 on 11 October 2026. The lines below say where each was built.
@@ -32,6 +32,7 @@ Status:
 - **Slice 11B** (the rest of the Nether guns: the Ashfall Pistol, Goldbristle Carbine and Crackling; [below](#slice-11b-the-rest-of-the-nether-guns)): implemented on `claude/guns-nether-2`, stacked on slice 11A, awaiting review.
 - **Slice 12A** (the End guns: the Chitin SMG, Hermit Rifle and Borer; [below](#slice-12a-the-end-guns)): implemented on `claude/guns-12a`, off `main`, awaiting review.
 - **Slice 12B** (the copper guns: the Penny Pistol, Conductor Carbine and Magpie SMG; [below](#slice-12b-the-copper-guns)): implemented on `claude/guns-12b`, stacked on slice 12A, awaiting review.
+- **Slice 12C** (the lone guns: the Tuppence Pistol, Goshawk Revolver and Lament Rifle; [below](#slice-12c-the-lone-guns)): implemented on `claude/guns-12c`, stacked on slice 12B, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -49,6 +50,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the next round: on 10 October 2026, with those built, they asked "Ok lets continue and do the next thing we need to". No choice was offered this time: the next of their unbuilt guns were taken up, a set at a time, each its own pull request, starting with three of the six they made in the piglins' crimson, blackstone and gold. The Nether guns are slice 11A, and the other three slice 11B.
 - the round after: on 13 October 2026, with the Nether guns in `main`, they asked "Ok lets continue and do the next thing". The next of their unbuilt guns were taken up as before: the three they made in the shulkers' purpur, each fed from a shulker box, are slice 12A.
 - and again: on 13 October 2026, with slice 12A up for review, they asked again "Ok lets continue and do the next thing". Three of the five guns they made in copper are slice 12B.
+- and once more: on 13 October 2026, with slice 12B up for review, they asked again "Ok lets continue and do the next thing". Slice 12C takes up one of the two copper guns left and the two guns of their library that stand alone in their materials, the one of iron and the one of echo shards. The last copper gun, the Whizzbanger, waits for the model its animations were made for ([below](#the-whizzbanger-waits)).
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1895,6 +1897,86 @@ The reload times and the Conductor Carbine's rate are the owner's animations': i
 - **The Conductor Carbine and the Magpie SMG throw no cases:** their animations cue none.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 12C: the lone guns
+The next of the owner's guns, taken up after slice 12B in the same round (on 13 October 2026 the owner asked again "Ok lets continue and do the next thing"): the UMAX Pistol, one of the two copper guns slice 12B left; the Ultra Knight Hawk, the one gun of their library made of iron; and the Forlorn Hope, the one made of echo shards. The other copper gun, the Whizzbanger, waits ([below](#the-whizzbanger-waits)).
+
+| | Tuppence Pistol | Goshawk Revolver | Lament Rifle |
+|---|---|---|---|
+| The owner's gun | UMAX Pistol | Ultra Knight Hawk | Forlorn Hope |
+| What it is | a copper pistol: a barrel over a fat tube, a receiver block at the back that slides with each shot, a lever loop under it, a ring sight over a front post | a long white revolver: a heavy barrel, a cylinder that swings out to the left, a hammer at the back | a sculk-grown rifle: a long barrel hung with sculk, a glowing echo-shard window in the receiver, a bolt handle on the right, a magazine under the barrel and a raked grip |
+| Held | in one hand: it pairs with another (slice 10G) | in one hand: it pairs with another | in both hands |
+| Fires | one shot each pull | one shot each pull | one shot each pull, the bolt worked after each |
+| Damage | 5 | 9 | 16 |
+| Rate | 3.3 a second (every 6 ticks) | 2 a second (every 10 ticks) | about 1 a second (every 19 ticks) |
+| Holds | 8 | 6 | 5 |
+| Reload | a round at a time: 0.4 s to start, 0.6 s a round, 0.25 s to finish (5.45 s from empty) | a round at a time: 0.5 s, 1 s a round, 0.7 s (7.2 s from empty) | 2.65 s: the magazine |
+| Spread, hip / aimed | 2.5° / 1° | 2° / 0.6° | 2° / 0.05° |
+| Range | 56 blocks | 64 | 160 |
+| The view aimed | narrowed to 0.9 | 0.9 | 0.7 |
+| Round | Light Round | Rifle Round | Rifle Round |
+| Takes | the three stocks, the scopes and the Laser Sight | nothing (the owner made it no parts) | the three stocks, the Light and Vertical Grips, the four bayonets, the scopes and the Laser Sight |
+
+The reload times and the Lament Rifle's rate are the owner's animations': its bolt is worked in full between shots.
+
+**Crafting** (a crafting table; the guns switch, as every gun):
+- **Tuppence Pistol:** three copper ingots over a copper ingot, a lever and an iron ingot, as the other copper guns take copper, iron and a lever.
+- **Goshawk Revolver:** iron and a lever only: three iron ingots over a lever and an iron ingot, and one more iron ingot under that.
+- **Lament Rifle:** as the sculk guns (slice 10D): three steel ingots over a lever between two echo shards, over a block of sculk.
+
+**How they fire:** as the other bullet guns: each bullet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. The Tuppence Pistol and the Goshawk Revolver load a round at a time, and a shot cuts the loading short, as the other round-at-a-time guns do; the Lament Rifle's magazine loads at the end of its reload. Nothing else follows a hit.
+
+**What you see:** the owner's animations.
+- **Tuppence Pistol:** held out in the right hand; each shot kicks it and drives the receiver block back, throwing a case. To reload, the gun is rolled and the left hand brings each round up from below into the gate under the back of the tube; as the reload ends the block is worked, throwing a case. In the inspection the lever under it swings down and back.
+- **Goshawk Revolver:** held out in the right hand; each shot kicks it up hard and flicks the hammer. To reload, the gun is rolled and the cylinder swung out to the left; the left hand comes in for each round, a case falling with each; then the cylinder is flicked shut.
+- **Lament Rifle:** each shot kicks it back; then the gun cants and the bolt is drawn back and pushed home. To reload, the gun is turned; the magazine under the barrel swings down about its front, a new one goes in and is slapped home; then the bolt is worked.
+- **Spent rounds:** the Tuppence Pistol throws a case with each shot and one as its reload ends; the Goshawk Revolver one for each round it loads; the Lament Rifle's animations cue none.
+- **Sounds:** the Sapper Revolver's shot (the Tuppence Pistol), the Bulldog Pistol's (the Goshawk Revolver) and the Picket Rifle's (the Lament Rifle). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source (slice 11A), so none was added.
+
+**How the models were built:**
+- **Tuppence Pistol:**
+  - **One hand:** its idle hides the left arm, so it is among the one-handed guns (`JugcraftGuns.ONE_HANDED`, slice 10G); the left hand's place is given for the reload's push of a round into the gate (0.2917 s, `"hand_pose"`).
+  - **Bolt:** the receiver block at the back and the knob behind it (the main part's 1st, 2nd and 21st elements).
+  - **Lever:** the loop under the receiver, a flat plane (the main part's 4th element), turned about its front.
+  - **Round:** a Light Round the reload carries in (`PROPS`), resting behind the mouth of the tube, where the loop's last carry brings it; it shrinks to nothing there. The `magazine` bone its shots scale holds nothing.
+  - **Sights:** the owner's ring at the back (its sights part) over the post at the front.
+  - **Aiming:** held 1 px further out (`"eye_relief"`): the receiver block's travel brought it to 0.8 px from the eye.
+- **Goshawk Revolver:**
+  - **One hand:** its idle hides the left arm, so it pairs too; the left hand's place is given at the back of the swung-out cylinder, for the loop's push of a round (0.4583 s).
+  - **Cylinder:** the owner's drum part on the `magazine` bone, turned about the crane under its left side, so it swings out to the left; the `bolt`, `seal` and `shell` bones its animations move hold nothing.
+  - **Hammer:** the owner's hammer part, a flat plane at the back, turned about its foot.
+  - **Sights:** the notch at the back over the post at the front.
+  - **Aiming:** at the hip's depth: its hammer stays 1.7 px from the eye.
+- **Lament Rifle:**
+  - **Bolt:** the owner's bolt group, the handle on the right of the receiver.
+  - **Magazine:** the owner's mag group under the barrel, turned about its front; the `empty_mag` bone the reload throws out holds nothing, nor does the `seal`.
+  - **Texture:** the owner's is seven frames, one above another, its echo-shard window glowing from frame to frame; the gun draws on the first (`FRAMED`, as the sculk guns do).
+  - **Sights:** the owner's ring at the back of the receiver over the post on its front.
+  - **Aiming:** held 6 px further out: as the bolt is worked the gun cants, and the back of its grip came 4 px past the eye.
+- **The arms:** chosen in first-person previews to cover as little of the screen as they can, still running back toward the shoulder: both of the two hand guns', the Goshawk Revolver's right arm chosen over the flick that shuts its cylinder and its inspection as well. The Lament Rifle's keep the usual directions: its right arm stays behind the gun, and a search could better its left only by a few per cent.
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload, draw and inspection; the block, the lever, the round, the cylinder, the bolt and the magazine through their animations; each with the attachments it takes; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Light Round and the Rifle Round; nothing new.
+- **Parts:** copper, iron and a lever (the Tuppence Pistol); iron and a lever (the Goshawk Revolver); steel, a lever, echo shards and sculk (the Lament Rifle).
+- **Their place:** the Tuppence Pistol among the first guns, with the copper guns; the Goshawk Revolver once iron is smelted, needing no brass, unlike the other revolvers; the Lament Rifle with the sculk guns, past steel and the deep dark.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a load and its reload.
+- **Tuppence Pistol:** 5 a shot, 17 a second while it fires; about 5.3 a second, below the Penny Pistol's (7), above the Sapper Revolver's (4.4). It can be topped up a round at a time.
+- **Goshawk Revolver:** 9 a shot, 18 a second while it fires; about 5.6 a second, above the other revolvers' (the Sapper's 4.4, the Marshal's 2.8) and the Bulldog Pistol's (4.9).
+- **Lament Rifle:** 16 a shot, twice the Picket Rifle's; about 12.4 a second, as the Kestrel Rifle's (12.2), below the Picket's (13.9). It reaches further than any (160 blocks) and is the steadiest aimed (0.05°).
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:tuppence_pistol`, `goshawk_revolver` and `lament_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Lament Rifle throws no cases, nor an empty magazine:** its animations cue no cases, and the owner made no part for the magazine its reload throws out.
+- **The Lament Rifle's window does not glow from frame to frame:** the gun draws on the first of the seven.
+- **The Goshawk Revolver takes nothing:** the owner made no parts for it.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
+### The Whizzbanger waits
+The owner's other copper gun is a hand cannon fired by striking a pin with a hammer held in the left hand; after each shot the left hand puts the hammer away, tips the spent shell out and loads the next. Its animations move the hammer and the cannon's body about pivots of the model the owner's mod animated, which is not in the library: built from the item model, the hammer comes nowhere near the pin it strikes. A fit of the hammer's pivot to land its face on the pin at the shot found none that also held the hammer sensibly at rest. With the owner's animated model (its `.geo.json` or Blockbench project), it can follow as its own slice.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -3131,6 +3213,48 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | magpie_smg | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | magpie_smg | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | magpie_smg | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| tuppence_pistol | `Guns/models/item/umax_pistol.json` | `9b9c754f3cf31fdd` |
+| tuppence_pistol | `Guns/item/umax_pistol.png` | `d8e0c22865b815e1` |
+| tuppence_pistol | `Guns/item/umax_pistol.animation.json` | `15f4b095663a3308` |
+| tuppence_pistol | `Guns/models/special/umax_pistol/main.json` | `122aca6c82019740` |
+| tuppence_pistol | `Guns/models/special/umax_pistol/stan_grip.json` | `5e0d57e2614fc281` |
+| tuppence_pistol | `Guns/models/special/umax_pistol/light_stock.json` | `baa4ed15ee654792` |
+| tuppence_pistol | `Guns/models/special/umax_pistol/heavy_stock.json` | `174aa819a0e63619` |
+| tuppence_pistol | `Guns/models/special/umax_pistol/wooden_stock.json` | `0bc4ab27612e8975` |
+| tuppence_pistol | `Guns/models/special/umax_pistol/sights.json` | `c96c4dce7d304682` |
+| tuppence_pistol | `Guns/sounds/item/brass_pistol/fire.ogg` | `4fca376e2ece67b2` |
+| tuppence_pistol | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| tuppence_pistol | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| tuppence_pistol | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| tuppence_pistol | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| tuppence_pistol | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| goshawk_revolver | `Guns/models/item/ultra_knight_hawk.json` | `93458ed13b5680ca` |
+| goshawk_revolver | `Guns/item/ultra_knight_hawk.png` | `b6cab422c02babfc` |
+| goshawk_revolver | `Guns/item/ultra_knight_hawk.animation.json` | `c371c22506a0c358` |
+| goshawk_revolver | `Guns/models/special/ultra_knight_hawk/main.json` | `9c9aad7e25c381a5` |
+| goshawk_revolver | `Guns/models/special/ultra_knight_hawk/drum.json` | `a81080ecf6dc7bc1` |
+| goshawk_revolver | `Guns/models/special/ultra_knight_hawk/hammer.json` | `58774cfb703f962c` |
+| goshawk_revolver | `Guns/sounds/item/heavier_rifle/fire.ogg` | `4e17f5a1b2891ee7` |
+| lament_rifle | `Guns/models/item/forlorn_hope.json` | `4920c31eb3990723` |
+| lament_rifle | `Guns/item/forlorn_hope.png` | `6a8de09c3a97ead9` |
+| lament_rifle | `Guns/item/forlorn_hope.animation.json` | `3d17e3c23fa8c9c0` |
+| lament_rifle | `Guns/models/special/forlorn_hope/main.json` | `d924d7d8f6cae1c4` |
+| lament_rifle | `Guns/models/special/forlorn_hope/light_stock.json` | `155015336966502e` |
+| lament_rifle | `Guns/models/special/forlorn_hope/heavy_stock.json` | `59ff86b904ed88a2` |
+| lament_rifle | `Guns/models/special/forlorn_hope/wooden_stock.json` | `600df85a131f0a4e` |
+| lament_rifle | `Guns/models/special/forlorn_hope/light_grip.json` | `2cbd3296de0c8d96` |
+| lament_rifle | `Guns/models/special/forlorn_hope/vert_grip.json` | `a69d15791a05afd5` |
+| lament_rifle | `Guns/models/special/forlorn_hope/iron_bayonet.json` | `74ad1a806ce9d247` |
+| lament_rifle | `Guns/models/special/forlorn_hope/anthralite_bayonet.json` | `1be3a36ebd5efa8e` |
+| lament_rifle | `Guns/models/special/forlorn_hope/diamond_bayonet.json` | `53b9c58bfc89cb0b` |
+| lament_rifle | `Guns/models/special/forlorn_hope/netherite_bayonet.json` | `f0178f1629a90903` |
+| lament_rifle | `Guns/models/special/forlorn_hope/sights.json` | `51ace3a81d2dd533` |
+| lament_rifle | `Guns/sounds/item/scorched_sniper/fire.ogg` | `624b2460a3e39921` |
+| lament_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| lament_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| lament_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| lament_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| lament_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -3924,13 +4048,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Inspection:** each turned toward the eye to be looked over.
     - **Attachments:** each barrel part at the muzzle and each stock behind the grip. The Laser Sight stands on the receiver aimed as it does on the Riveter SMG, the Garrison, Squall and Hermit Rifles and the Chitin SMG in the same run.
     - **Third person:** each raised toward the camera, the Penny Pistol in one hand, each flashing as it fires.
+- **Slice 12C, run locally (13 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2198 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, looks and eye relief against tools/guns.py).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 12C game tests (to run in CI):**
+  - `MixedGunsGameTests`:
+    - `mixedGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires plain bullets, one a pull. The Tuppence Pistol is a pistol of eight light rounds and the Goshawk Revolver a revolver of six rifle rounds, each held in one hand and loaded a round at a time, and the two in the two hands are two guns at once; the Lament Rifle a rifle of five rifle rounds, loaded a magazine at a time, hitting harder and reaching further than the Goshawk Revolver. The Tuppence Pistol takes the stocks, the scopes and the Laser Sight; the Lament Rifle those, the grips and the bayonets; the Goshawk Revolver nothing.
+    - `mixedGunsFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: the two hand guns with one round in after their first round's time.
+    - `tuppenceAndGoshawkFireFromBothHands`: a Tuppence Pistol in the main hand and a Goshawk Revolver in the other each fire and land their shots, each spending a round of its own.
+  - `GunsGameTests` counts 63 guns; `DualGunsGameTests` the seventeen held in one hand.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -3939,5 +4075,6 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
 - **Not yet:**
   - the jam the Gnat's sound suggests;
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
+  - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets.
 - **Balance:** the numbers are starting points for the owner to set.

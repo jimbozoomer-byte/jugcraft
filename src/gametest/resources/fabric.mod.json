@@ -151,6 +151,7 @@
 			"io.github.jimbozoomer.jugcraft.test.NetherGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.EndGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.CopperGunsGameTests",
+			"io.github.jimbozoomer.jugcraft.test.MixedGunsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ThalliteGearGameTests",

@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: Guns, slice 12C (the lone guns)
+- **Three guns** from the owner's models and animations: the **Tuppence Pistol**, a copper pistol held in one hand, the tube under its barrel loaded a round at a time; the **Goshawk Revolver**, a heavy iron revolver held in one hand, its cylinder swung out to load a round at a time; and the **Lament Rifle**, a sculk-grown bolt-action rifle of five rifle rounds, the hardest-hitting and furthest-reaching of the rifles. The two hand guns pair with any other one-handed gun.
+- The Tuppence Pistol is made from copper, iron and a lever; the Goshawk Revolver from iron and a lever; the Lament Rifle, as the sculk guns, from steel, a lever, echo shards and sculk. The Tuppence Pistol takes the stocks, scopes and Laser Sight; the Lament Rifle the grips and bayonets too; the Goshawk Revolver none.
+- The owner's Whizzbanger waits for the model its animations were made for.
+- Record: [guns.md, slice 12C](docs/features/guns.md#slice-12c-the-lone-guns).
+
 ### Added: Guns, slice 12B (the copper guns)
 - **Three copper guns** from the owner's copper models and animations, early guns of copper and iron as the Rust Midge is: the **Penny Pistol**, held in one hand (so it pairs with another one-handed gun), fed from a long magazine at its left side; the **Conductor Carbine**, a slide-action carbine of eight rifle rounds, its slide worked after every shot; and the **Magpie SMG**, an automatic of thirty-two light rounds from a long magazine at its left side.
 - Each is made from copper ingots, an iron ingot and a lever; the Penny Pistol's recipe fits the inventory's own grid. The Penny Pistol takes the barrel attachments and the stocks; the other two the grips, bayonets, scopes and Laser Sight too, and the Conductor Carbine the magazines.
