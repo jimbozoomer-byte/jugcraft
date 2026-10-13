@@ -201,7 +201,8 @@
 			"io.github.jimbozoomer.jugcraft.test.StructureReachGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MbsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DieselGeneratorGameTests",
-			"io.github.jimbozoomer.jugcraft.test.StorageGameTests"
+			"io.github.jimbozoomer.jugcraft.test.StorageGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CryptLichGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.FluoriteClientGameTests",
@@ -353,7 +354,6 @@
 			"io.github.jimbozoomer.jugcraft.test.CryptArchiveClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MireHagClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceComposerClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.EncyclopediaClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.PowerLineClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ChemicalInfuserClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ChemicalOxidizerClientGameTests",
@@ -365,7 +365,8 @@
 			"io.github.jimbozoomer.jugcraft.test.BioGeneratorClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.MbsPreviewClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.NuclearClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.EncyclopediaRoutesClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.EncyclopediaRoutesClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.CryptLichClientGameTests"
 		]
 	},
 	"depends": {

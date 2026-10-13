@@ -1,6 +1,6 @@
 # The Archive of Last Names
 
-Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 6, the Crypt Lich, in the [bosses plan](../branches/BOSSES.md#the-crypt-lich-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Archive of Last Names, a sixth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Writ of Exhumation that opens it. The Crypt Lich and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 6, the Crypt Lich, in the [bosses plan](../branches/BOSSES.md#the-crypt-lich-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Archive of Last Names, a sixth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Writ of Exhumation that opens it. The Crypt Lich and his loot are part 2, in their own pull request ([crypt-lich.md](crypt-lich.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 13 October 2026 the owner chose the recommendations at the Mire Hag's checkpoint ("go with recommendations"): the Crypt Lich next, built the same two-part way, his crypt lair and summoning first.
 Owner: @jimbozoomer-byte
 
@@ -186,7 +186,7 @@ The Archive of Last Names is its own dimension, so nothing here changes the Over
 
 The shared framework's defaults hold: four players and eight instances, Grave Goods on death.
 
-Part 2, the Crypt Lich, adds:
+Part 2, the Crypt Lich ([crypt-lich.md](crypt-lich.md)), adds:
 - the fight in the hall: his ward, the soul chains from the seals to his phylactery, the lit name whose seal breaks, and the dead a wrong seal raises;
 - his attacks: the Grave Sweep, the Bone Lanes down the lanes to his names' alcoves, the Soul Bolt struck back, Raise the Dead, the Soul Drain broken by the pillars, and the Grave Pull's dark way out;
 - the Erasure, his names scraped from their stones and read back at the lectern;

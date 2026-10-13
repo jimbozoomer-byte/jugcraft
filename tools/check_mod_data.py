@@ -10704,6 +10704,310 @@ def check_acquisition(registered):
                     "(tools/acquisition.py) and the record's creative-only table")
 
 
+def check_crypt_lich():
+    """The Crypt Lich (tools/crypt_lich.py, docs/features/crypt-lich.md): every number the Java uses is the table's; his
+    attacks are the table's, and his rule can be played (the Erasure comes before the Last Name; his exposure outlasts
+    its stagger; the chains reforge a seal at a time within the reforging; a scraped name burns back by itself; he never
+    raises more dead at once than the cap; his Grave Pull's bones reach less far than its ring, so its dark part is a way
+    out; his bolt reaches its farthest foe within its life, and leaves from his model's left hand); where his fight looks
+    for the archive's parts (CryptArchive.java) is where tools/crypt_archive.py builds them: he waits at the throne, comes
+    down to open floor on the north lane, his dead rise on open floor over the ledger stones and at each sarcophagus's
+    foot, the lanes he calls are the three alcoves' (never the lectern's), the Grey Mist he leaves opens on the dais where
+    the phylactery stood, and every cell of the hall's floor lies within his leash; his chains turn every blow aside, a
+    seal is answered only by the fight it belongs to, and the lectern's reading reaches him; every entity is registered,
+    named and drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions
+    inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut
+    out; no bone is animated by two of his controllers; his loot table is the table's and his trophies are Arms VII's; his
+    recipes (none of which makes Grave Dust), tags and advancement are there; the Emptied Phylactery is held in the
+    offhand and looked at on the server; every message he sends has its words; and nothing of his loads a chunk or leaves
+    its dimension."""
+    import math
+    import arms_variants
+    import crypt_archive as ca
+    import crypt_lich as cl
+    import crypt_lich_models as lm
+    import lairs
+    folder = JAVA_ROOT / "lair" / "lich"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/lich: no Java")
+        return
+    for cls, table in (("CryptLichEntity", cl.CRYPT_LICH), ("RestlessDeadEntity", cl.RESTLESS_DEAD), ("SoulBoltEntity", cl.BOLT),
+                       ("LichBonesEntity", {"SINK": cl.SINK})):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/crypt_lich.py's {value}")
+    boss = sources.get("CryptLichEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, warded, unwritten) in cl.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(warded).lower()}, {str(unwritten).lower()})")
+        if expected not in boss:
+            err(f"CryptLichEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"CryptLichEntity does not scale as every lair boss does ({call})")
+    c = cl.CRYPT_LICH
+    names = list(lairs.NAMES)
+    if not 0.0 < c["LAST_AT"] < c["ERASE_AT"] < 1.0:
+        err("tools/crypt_lich.py: the Last Name (LAST_AT) must come after the Erasure (ERASE_AT)")
+    if not 0.0 < c["LAST_COOLDOWN"] < 1.0:
+        err("tools/crypt_lich.py: the Last Name must make his cooldowns shorter (0 < LAST_COOLDOWN < 1)")
+    if not 0 < c["STAGGER_TICKS"] < c["EXPOSED_TICKS"]:
+        err("tools/crypt_lich.py: his exposure must outlast the stagger it begins with (STAGGER_TICKS < EXPOSED_TICKS)")
+    if (len(names) - 1) * c["REFORGE_STEP"] >= c["REFORGE_TICKS"]:
+        err("tools/crypt_lich.py: every seal must mend within the reforging ((names - 1) x REFORGE_STEP < REFORGE_TICKS)")
+    if c["SCRAPED_TICKS"] <= 0 or c["SCRAPED_TICKS"] >= c["ABANDON_TICKS"] * 10:
+        err("tools/crypt_lich.py: a scraped name must burn back by itself, in good time (0 < SCRAPED_TICKS)")
+    if not 0 < c["RAISED"] <= c["DEAD_CAP"]:
+        err("tools/crypt_lich.py: Raise the Dead raises no more than his cap of dead (RAISED <= DEAD_CAP)")
+    if not c["PULL_REACH"] < c["PULL_RADIUS"] or not 0.0 < c["PULL_DARK"] < 180.0:
+        err("tools/crypt_lich.py: the Grave Pull's bones must reach less far than its ring, and its dark part be a part")
+    if cl.ATTACKS["SOUL_BOLT"][5] / cl.BOLT["SPEED"] >= cl.BOLT["LIFE"]:
+        err("tools/crypt_lich.py: a Soul Bolt must reach his farthest foe within its LIFE")
+    if cl.ATTACKS["GRAVE_PULL"][1] != c["PULL_BURST"]:
+        err("tools/crypt_lich.py: the Grave Pull's bones burst as its active ticks end (PULL_BURST)")
+    if cl.ATTACKS["SOUL_DRAIN"][1] % c["DRAIN_EVERY"] != 0:
+        err("tools/crypt_lich.py: the Soul Drain's active ticks must be whole draughts (DRAIN_EVERY)")
+    if lm.HAND_Z != -16 * cl.BOLT["HAND_AHEAD"] or lm.HAND_Y != 16 * cl.BOLT["HAND_UP"]:
+        err("tools/crypt_lich.py BOLT HAND_AHEAD and HAND_UP must be where tools/crypt_lich_models.py's left hand is as he "
+            f"looses it: {-lm.HAND_Z / 16} and {lm.HAND_Y / 16}")
+    # Where his fight looks for the archive's parts is where tools/crypt_archive.py builds them.
+    archive = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CryptArchive.java").read_text(encoding="utf-8"))
+    wx, wy, wz, _ = ca.WAIT
+    for name, value in (("CENTRE_X", float(ca.CENTRE[0])), ("CENTRE_Z", float(ca.CENTRE[1])), ("WAIT_X", float(wx)),
+                        ("WAIT_Y", float(wy)), ("WAIT_Z", float(wz)), ("WOKE_X", float(cl.WOKE[0])), ("WOKE_Z", float(cl.WOKE[1])),
+                        ("EXIT_WEST", ca.DAIS_EXIT["x"][0]), ("EXIT_EAST", ca.DAIS_EXIT["x"][1]), ("EXIT_Z", ca.DAIS_EXIT["z"])):
+        if not java_number(archive, name, value):
+            err(f"CryptArchive.{name} is not {value} (tools/crypt_archive.py, tools/crypt_lich.py)")
+    lane_of = {name: lane for lane, name in cl.LANE_NAMES.items()}
+    if sorted(cl.LANE_NAMES.values()) != sorted(names) or "south" in cl.LANE_NAMES:
+        err("tools/crypt_lich.py LANE_NAMES: he calls each name's lane, and never the lectern's (south)")
+    rects = []
+    for name in names:
+        cells = ca.lane_cells(lane_of.get(name, "south"))
+        xs, zs = [x for x, _ in cells], [z for _, z in cells]
+        rects.append(f"{{{min(xs)}, {max(xs)}, {min(zs)}, {max(zs)}}}")
+    if f"LANES = {{{', '.join(rects)}}};" not in archive:
+        err(f"CryptArchive.LANES are not tools/crypt_archive.py's lanes to the alcoves, in NAMES order: {{{', '.join(rects)}}}")
+    graves = ", ".join(f"{{{x}, {z}}}" for x, z in ca.FLOOR_GRAVES)
+    if f"GRAVES = {{{graves}}};" not in archive:
+        err(f"CryptArchive.GRAVES are not tools/crypt_archive.py's FLOOR_GRAVES: {{{graves}}}")
+    dead = ", ".join(f"{{{float(x)}, {float(z)}}}" for x, z in (cl.SARCOPHAGUS_DEAD[name] for name in names))
+    if f"SARCOPHAGUS_DEAD = {{{dead}}};" not in archive:
+        err(f"CryptArchive.SARCOPHAGUS_DEAD are not tools/crypt_lich.py's, in NAMES order: {{{dead}}}")
+    if "for (int y = STAND + 1; y <= STAND + 2; y++)" not in archive:
+        err("CryptArchive.exitCells: the Grey Mist on the dais is two high, from over the dais (STAND + 1)")
+    blocks = ca.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light", "minecraft:cave_air", "minecraft:air")
+    solid = lambda pos: name(pos) is not None and not free(pos)
+    throne = (math.floor(wx), int(wy), math.floor(wz))
+    if throne != tuple(ca.THRONE):
+        err(f"Where the Crypt Lich waits, {throne}, is not his throne {ca.THRONE}")
+    wokex, wokez = (math.floor(v) for v in cl.WOKE)
+    if not ca.HALL["x"][0] <= wokex <= ca.HALL["x"][1] or not ca.HALL["z"][0] <= wokez <= ca.HALL["z"][1] \
+            or (wokex, wokez) not in ca.lane_cells("north") or not solid((wokex, ca.PAVE, wokez)) \
+            or not all(free((wokex, ca.STAND + dy, wokez)) for dy in range(3)):
+        err(f"Where the Crypt Lich comes down, ({wokex}, {wokez}), is not open floor on the north lane, three high")
+    for x, z in ca.FLOOR_GRAVES:
+        for dz in (0, 1):
+            if not solid((x, ca.PAVE, z + dz)) or not all(free((x, ca.STAND + dy, z + dz)) for dy in range(2)):
+                err(f"His dead cannot rise from the ledger stone at ({x}, {z + dz}): no floor, or no room over it")
+    for nm, (dx, dz) in cl.SARCOPHAGUS_DEAD.items():
+        info = ca.ALCOVES.get(nm, {})
+        cell = (math.floor(dx), info.get("stand", ca.STAND), math.floor(dz))
+        foot = info.get("foot", (0, 0))
+        if not ca.in_alcove(nm, cell[0], cell[2]) or not solid((cell[0], cell[1] - 1, cell[2])) \
+                or not all(free((cell[0], cell[1] + dy, cell[2])) for dy in range(2)) \
+                or max(abs(cell[0] - foot[0]), abs(cell[2] - foot[1])) > 2:
+            err(f"The {nm}'s dead cannot climb out at {cell}: not open floor in the alcove by the sarcophagus's foot")
+    plinth = tuple(ca.PLINTH)
+    for x in range(ca.DAIS_EXIT["x"][0], ca.DAIS_EXIT["x"][1] + 1):
+        for y in (ca.STAND + 1, ca.STAND + 2):
+            pos = (x, y, ca.DAIS_EXIT["z"])
+            if not free(pos) and pos != tuple(ca.PHYLACTERY):
+                err(f"The Grey Mist he leaves on the dais would replace {name(pos)} at {pos}")
+    if tuple(ca.PHYLACTERY) not in [(x, ca.STAND + 1, ca.DAIS_EXIT["z"]) for x in range(ca.DAIS_EXIT["x"][0], ca.DAIS_EXIT["x"][1] + 1)] \
+            or plinth != (ca.PHYLACTERY[0], ca.PHYLACTERY[1] - 1, ca.PHYLACTERY[2]):
+        err("The Grey Mist he leaves must rise where the phylactery stood, on its plinth")
+    for x in range(ca.HALL["x"][0], ca.HALL["x"][1] + 1):
+        for z in range(ca.HALL["z"][0], ca.HALL["z"][1] + 1):
+            if free((x, ca.STAND, z)) and math.hypot(x + 0.5 - ca.CENTRE[0], z + 0.5 - ca.CENTRE[1]) > c["LEASH"]:
+                err(f"The hall's floor at ({x}, {z}) lies beyond his leash")
+    # His rule: warded, every blow is turned aside; a seal is answered only by its own fight; the lectern reaches him.
+    if not re.search(r"if \(warded\(\)\) \{\s*turnAside\(level, source\);\s*return false;", boss):
+        err("CryptLichEntity.hurtServer must turn every blow aside while his chains hold")
+    if "if (!seal(rune).equals(pos)) {" not in boss:
+        err("CryptLichEntity.sealUsed must answer only his own archive's seals")
+    registry = sources.get("JugcraftLich", "")
+    for needed, why in (("Lairs.onPlaced(Lair.CRYPT_ARCHIVE, CryptLichEntity::summon)", "seat him on the throne of every archive"),
+                        ("GraveSealBlock.onUsed(JugcraftLich::sealUsed)", "answer the grave seals"),
+                        ("ArchiveLecternBlock.onRead(JugcraftLich::read)", "hear the lectern read"),
+                        ("lich.lecternRead(level, player, restored)", "tell him who read which names back"),
+                        ("EmptiedPhylactery.register();", "look at the Emptied Phylactery")):
+        if needed not in registry:
+            err(f"JugcraftLich must {why} ({needed})")
+    dead_java = sources.get("RestlessDeadEntity", "")
+    if "master.took(player, amount)" not in dead_java or "crumble(level)" not in dead_java:
+        err("RestlessDeadEntity: whoever hurts one takes part, and it crumbles when he is gone")
+    bolt = sources.get("SoulBoltEntity", "")
+    if "reflect(level, player);" not in bolt or "lich.boltReturned(level, this," not in bolt or "public boolean isPickable()" not in bolt:
+        err("SoulBoltEntity must be struck back by a blow or an arrow and turn on the Lich")
+    if not re.search(r"if \(warded\(\)\) \{\s*stagger\(BOLT_STAGGER\);", boss):
+        err("CryptLichEntity.boltReturned must stagger him while warded")
+    phylactery = sources.get("EmptiedPhylactery", "")
+    if "getOffhandItem().is(JugcraftLich.EMPTIED_PHYLACTERY)" not in phylactery or "ServerTickEvents.END_SERVER_TICK" not in phylactery \
+            or "source.is(DamageTypes.WITHER)" not in phylactery:
+        err("EmptiedPhylactery must look at each player's offhand on the server's tick, and turn the Wither's harm aside")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    client = (CLIENT_JAVA_ROOT / "CryptLichClient.java").read_text(encoding="utf-8")
+    if "CryptLichClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register CryptLichClient")
+    if "lair.lich.JugcraftLich.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftLich")
+    def drawn(entity):
+        start = client.find(f"register(JugcraftLich.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("CryptLichLoot", "")
+    if f'ADVANCEMENT = "{cl.ADVANCEMENT["key"]}";' not in loot_java:
+        err("CryptLichLoot's advancement differs from tools/crypt_lich.py")
+    for entity in cl.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftLich does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != cl.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {cl.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"CryptLichClient draws no {entity}")
+    for item in cl.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftLich does not register {item}")
+    # The GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("crypt_lich", set()).add(f"animation.crypt_lich.{clip}")
+    for entity, body in cl.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in lm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in cl.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"CryptLichClient: the {entity}'s glow layer must match tools/crypt_lich.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * lm.TEXTURE_SCALE, height * lm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * lm.TEXTURE_SCALE}x{height * lm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key his crown's fire or the skull in his hand.
+    owned = {bone: controller for controller, bones in lm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in lm.ANIMATIONS["crypt_lich"]()["animations"].items():
+        short = clip_name.split(".")[-1]
+        controller = "crown" if short.startswith("crown_") else "hand" if short.startswith("hand_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"crypt_lich: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *lm.CONTROLLERS):
+        if f'new AnimationController<CryptLichEntity>("{controller}"' not in boss:
+            err(f"CryptLichEntity has no {controller} controller (tools/crypt_lich_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/crypt_lich table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "crypt_lich.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/crypt_lich.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"grave_dust": cl.GRAVE_DUST, **{item: cl.TROPHY_CHANCE for item in cl.TROPHIES}, **cl.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/crypt_lich.json gives {found_loot}, not tools/crypt_lich.py's {expected}")
+    if tuple(arms_variants.trophies("crypt_lich")) != tuple(cl.TROPHIES):
+        err(f"tools/crypt_lich.py TROPHIES {cl.TROPHIES} are not Arms VII's: {arms_variants.trophies('crypt_lich')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "crypt_lich.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in cl.TROPHIES]:
+        err(f"loot_table/bosses/crypt_lich.json holds {held_items}, not his trophies {cl.TROPHIES}")
+    for table_id in ("entities/crypt_lich", "bosses/crypt_lich"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"CryptLichLoot must roll loot_table/{table_id}.json")
+    for trophy in cl.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftLich must find the {trophy} (Arms VII registers it)")
+    for key in cl.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Grave Dust comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:grave_dust":
+            err(f"recipe/{path.name} makes Grave Dust, which only the Crypt Lich gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in cl.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{cl.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{cl.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in cl.MESSAGES:
+        if f'"message.jugcraft.crypt_lich.{key}"' not in sent:
+            err(f"tools/crypt_lich.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -14462,6 +14766,7 @@ def main():
     check_mire_hag()
 
     check_acquisition(registered)
+    check_crypt_lich()
     check_material_sets()
     check_art()
     check_pixel_hollows()

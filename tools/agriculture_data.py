@@ -59,6 +59,7 @@ import tatterlace_data
 import yeti_king_data
 import cinder_tyrant_data
 import mire_hag_data
+import crypt_lich_data
 import vesperine_data
 import decor18_data
 import decor19_data
@@ -301,6 +302,7 @@ def assets(root, write, lang):
     yeti_king_data.assets(root, write, lang)
     cinder_tyrant_data.assets(root, write, lang)
     mire_hag_data.assets(root, write, lang)
+    crypt_lich_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
     kitchen_data.assets(root, write, lang)
@@ -458,6 +460,7 @@ def loot(data, write):
     yeti_king_data.loot(out, write)
     cinder_tyrant_data.loot(out, write)
     mire_hag_data.loot(out, write)
+    crypt_lich_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -542,6 +545,7 @@ def recipes(out, write):
     yeti_king_data.recipes(out, write, conditions)
     cinder_tyrant_data.recipes(out, write, conditions)
     mire_hag_data.recipes(out, write, conditions)
+    crypt_lich_data.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
 
 
@@ -585,6 +589,7 @@ def tags(tags):
     yeti_king_data.tags(tags)
     cinder_tyrant_data.tags(tags)
     mire_hag_data.tags(tags)
+    crypt_lich_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)
@@ -643,6 +648,7 @@ def advancements(data, write):
     yeti_king_data.advancements(data, write)
     cinder_tyrant_data.advancements(data, write)
     mire_hag_data.advancements(data, write)
+    crypt_lich_data.advancements(data, write)
 
 
 def worldgen(data, write):
