@@ -1929,7 +1929,7 @@ The reload times and the Lament Rifle's rate are the owner's animations': its bo
 - **Tuppence Pistol:** held out in the right hand; each shot kicks it and drives the receiver block back, throwing a case. To reload, the gun is rolled and the left hand brings each round up from below into the gate under the back of the tube; as the reload ends the block is worked, throwing a case. In the inspection the lever under it swings down and back.
 - **Goshawk Revolver:** held out in the right hand; each shot kicks it up hard and flicks the hammer. To reload, the gun is rolled and the cylinder swung out to the left; the left hand comes in for each round, a case falling with each; then the cylinder is flicked shut.
 - **Lament Rifle:** each shot kicks it back; then the gun cants and the bolt is drawn back and pushed home. To reload, the gun is turned; the magazine under the barrel swings down about its front, a new one goes in and is slapped home; then the bolt is worked.
-- **Spent rounds:** the Tuppence Pistol throws a case with each shot and one as its reload ends; the Goshawk Revolver one for each round it loads; the Lament Rifle's animations cue none.
+- **Spent rounds:** the Tuppence Pistol's animations cue a case with each shot and one as its reload ends; the Goshawk Revolver's one each time its loading loop runs; the Lament Rifle's none. (How many the client shows depends on how far each animation plays: in CI, 1 and 3 over a shot and a one-round reload.)
 - **Sounds:** the Sapper Revolver's shot (the Tuppence Pistol), the Bulldog Pistol's (the Goshawk Revolver) and the Picket Rifle's (the Lament Rifle). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source (slice 11A), so none was added.
 
 **How the models were built:**
@@ -4054,12 +4054,27 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2198 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, looks and eye relief against tools/guns.py).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 12C game tests (to run in CI):**
+- **Slice 12C game tests (all passed in CI, below):**
   - `MixedGunsGameTests`:
     - `mixedGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires plain bullets, one a pull. The Tuppence Pistol is a pistol of eight light rounds and the Goshawk Revolver a revolver of six rifle rounds, each held in one hand and loaded a round at a time, and the two in the two hands are two guns at once; the Lament Rifle a rifle of five rifle rounds, loaded a magazine at a time, hitting harder and reaching further than the Goshawk Revolver. The Tuppence Pistol takes the stocks, the scopes and the Laser Sight; the Lament Rifle those, the grips and the bayonets; the Goshawk Revolver nothing.
     - `mixedGunsFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: the two hand guns with one round in after their first round's time.
     - `tuppenceAndGoshawkFireFromBothHands`: a Tuppence Pistol in the main hand and a Goshawk Revolver in the other each fire and land their shots, each spending a round of its own.
   - `GunsGameTests` counts 63 guns; `DualGunsGameTests` the seventeen held in one hand.
+- **Slice 12C in CI** ([run 38468187979](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38468187979), on 53c96a3fd): every check passed.
+  - **Server game tests:** 1388 in each job, the `mod` job's and the one without the optional integrations. All passed, `MixedGunsGameTests` among them.
+  - **Client game tests:** the changed files chose `GunsClientGameTests` alone, and it passed. In it each new gun, in its turn:
+    - held and aimed, its arms drawn at full size and then half, the view narrowed to 0.9 (Tuppence Pistol), 0.9 (Goshawk Revolver) and 0.7 (Lament Rifle);
+    - fired at the husk, each spending one round, with 10 frames of flash: the Tuppence Pistol took it from 354.88 to 349.88 (5), the Goshawk Revolver 9 and the Lament Rifle 16;
+    - reloaded from the inventory, 31 rounds left each time; over its shot and reload the Tuppence Pistol threw 1 casing and the Goshawk Revolver 3, the Lament Rifle none, as its animations cue none;
+    - with each set of attachments it takes, held and aimed: each with each stock, the stock left out aimed (in 52 or 53 frames, none held); the Lament Rifle with the grips and a bayonet; both with the Laser Sight.
+  - **Between the shots:** the husk lost nothing between the Magpie SMG's shot and the Tuppence Pistol's, or between the three guns'.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar: the Tuppence Pistol's barrel over its tube; the Goshawk Revolver's long white barrel; the Lament Rifle's barrel hung with sculk, its echo-shard window glowing.
+    - **Aimed:** each raised to the middle of the view, the husk's head over it. As the Penny Pistol's did in slice 12B's run, the two hand guns' backs rise over the crosshair (the first-person previews draw them lower).
+    - **Fired:** the Tuppence Pistol's receiver block, driven back, fills the middle of the view for a moment; the Goshawk Revolver kicks up.
+    - **Reloading and inspection:** the Tuppence Pistol rolled; the Goshawk Revolver rolled, the left hand in; the Lament Rifle turned up; each turned toward the eye to be looked over.
+    - **Attachments:** each stock behind the grip; the Laser Sight stands on the receiver aimed as it does on the other guns in the same run.
+    - **Third person:** the two hand guns held out in one hand and the rifle across the body, each flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
