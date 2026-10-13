@@ -31,7 +31,7 @@ identified accurately. This record is the index to that evidence, and it says wh
 |---|---|
 | A local build | Not made: this environment has no Minecraft jars, so `./gradlew build` runs only in CI |
 | A branch | `claude/concordance-steps-26-32` (steps 26 to 32, [#250](https://github.com/jimbozoomer-byte/jugcraft/pull/250)), stacked on `claude/awesome-davinci-iwv3b9` (steps 1 to 25, [#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244)); both merged |
-| CI | Every push builds the mod and runs the server game tests twice (with and without the optional integrations), runs the client game tests in four shards (a pull request runs only the client test classes it needs) and assembles Jugcraft Complete |
+| CI | Every push builds the mod and runs the server game tests twice (with and without the optional integrations), runs the client game tests in five shards (a pull request runs only the client test classes it needs) and assembles Jugcraft Complete |
 | Merged main | Yes. [#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244) and [#250](https://github.com/jimbozoomer-byte/jugcraft/pull/250) were merged into `integration/oct8-finished-prs` on 8 October 2026, which reached `main` through [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) (`b533201f8`) the same day |
 | An import-tested pack | No: no `.mrpack` has been imported into a launcher |
 | A published release | No: publishing is the owner's step |

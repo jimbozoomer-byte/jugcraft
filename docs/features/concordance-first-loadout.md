@@ -266,5 +266,7 @@ Known limits and findings:
   Nether's; the progression audits may count it as an Overworld relic specimen. It predates this chunk and is not
   changed here; Relic Lore stays reachable in the Overworld through a Nautilus Shell and a Totem of Undying.
 - The pages are static text in English (`en_us.json`), like the rest of the mod's words.
+- The pages cover the Witching Season's two bosses. The Yeti King's and the Cinder Tyrant's loot (on main since #320)
+  has no information page yet; their records state its chances.
 - Reverting: drop `tools/acquisition.py`'s rows and words, the plugin's `addAcquisitionInfo` and the audit; nothing in
   a world depends on them.

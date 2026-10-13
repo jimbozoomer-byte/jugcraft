@@ -24,7 +24,7 @@ The [framework foundation](features/framework-foundation.md) provides pinned ani
 | Fluid unit | **mB** in Jugcraft numbers. Fabric counts droplets: `FluidNetworks.DROPLETS_PER_MB` = 81 |
 | Metal accounting | nugget units: nugget 1, ingot/raw/ore/dust/washed ore/plate 9, wire 3, gear 36, block 81 |
 | Authority | All logic runs on the server; screens only show synced `ContainerData` |
-| Registered IDs | 2149 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
+| Registered IDs | 2189 items/blocks under `jugcraft:` (the checker counts them), plus the entities `pumpkin_barge`, `pumpkin_racer`, `will_o_wisp`, `flying_pumpkin`, `throw_marker`, `headless_horseman`, `flaming_pumpkin`, `bowling_pumpkin`, `toilet_paper_roll`, `haunted_hayride`, `crow`, `spooky_rocket`, `sky_lantern`, `restless_spirit`, `hay_golem`, `flying_broomstick`, `werewolf`, `squirrel`, `pumpkling`, `toss_ring`, `ferris_wheel`, `pinata`, `hot_air_balloon` and `pibal`, plus the `jugcraft:pixel_hollows` biome and the `jugcraft:retro_trader` villager profession |
 
 ## Build, generate, check
 
@@ -284,9 +284,9 @@ Record: [walled-town.md](features/walled-town.md).
 
 ### The Arcane Concordance (`concordance/`, `tools/concordance.py`)
 
-Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wayfaring parts 1 and 1b (through #277);
-Wayfaring part 1c and Concordance Chunk A (the Spell Composer, lair encounter credit and the Jugcraft Encyclopedia's first
-slice) are not yet merged. Contract
+Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wayfaring parts 1 and 1b (through #277),
+Wayfaring part 1c (#315, through #320); Concordance Chunk A (the Spell Composer, lair encounter credit and the Jugcraft
+Encyclopedia's first slice) is not yet merged. Contract
 and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),

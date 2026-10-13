@@ -27,26 +27,28 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 ## Baseline (A-00)
 
 - Base: `c3b4fcbdf` (main `240d73e1c` with Wayfaring part 1c merged in, as in
-  [#315](https://github.com/jimbozoomer-byte/jugcraft/pull/315)). The working tree was clean.
+  [#315](https://github.com/jimbozoomer-byte/jugcraft/pull/315)). The working tree was clean. Rebased on 13 October 2026
+  onto main `b73f51c8a`: [#320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) had brought in #315, the guns,
+  the industrial machines and the Glacier Hall, Yeti King, Cinder Kiln and Cinder Tyrant, and
+  [#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321) followed.
 - Framework lock unchanged since [#239](https://github.com/jimbozoomer-byte/jugcraft/pull/239) (verified 5 October, 18
   dependencies); no pin changes in this chunk.
 - Baseline checks at the base: `scripts/check_repository.py` and `tools/check_mod_data.py` passed. CI at the base
   failed one known flaky game test (`ArmsVIIIGameTests.javelinStrikesAndComesDown`), fixed by
   [#303](https://github.com/jimbozoomer-byte/jugcraft/pull/303) and carried by #315.
-- Open pull requests touching this chunk's seams: #300 (Glacier Hall) and #313 (Cinder Kiln) edit the lair registry
-  files; #304 (Yeti King) adds a third boss with the same damage-only reward pattern. Unit 3 keeps the existing
-  `took`, `participants` and `reward` signatures so those still compile. Unit 4's `check_arms_variants` rule requires a
-  boss with its own `loot_table/entities/<boss>.json` to name its lair in `tools/arms_variants.py` `BOSSES`; #304
-  (Yeti King, on #300) and #317 (Cinder Tyrant, on #313) each add that table without one. Whichever of this chunk and
-  each of them merges second sets `"lair": "glacier_hall"` on `yeti_king` or `"lair": "cinder_kiln"` on
-  `cinder_tyrant`, re-runs `python3 tools/generate_material_data.py` and commits the regenerated handbook (the boss
-  moves to the trophy page's "met" list; CI's generated-files step fails otherwise). Both bosses' loot gives a trophy
-  on a player's first kill, so that page's words hold.
+- The boss pull requests that touched this chunk's seams, #300 and #304 (the Glacier Hall and the Yeti King) and #313
+  and #317 (the Cinder Kiln and the Cinder Tyrant), reached main through #320 before this chunk did. Unit 3 kept the
+  `took`, `participants` and `reward` signatures, so they compile beside it; their bosses keep their own damage-only
+  reward (each counts who hurt him and pays them), without unit 3's support credit or its rewards kept for the fallen
+  and the away (see Deferrals). Unit 4's `check_arms_variants` rule needs a boss with its own
+  `loot_table/entities/<boss>.json` to name its lair, so the rebase sets `"lair": "glacier_hall"` on `yeti_king` and
+  `"lair": "cinder_kiln"` on `cinder_tyrant` and regenerates the handbook: both move to the trophy page's "met" list,
+  and both bosses' loot gives a trophy on a player's first kill, so its words hold.
 - The plan's status text that had gone stale (feature records' "on branch" lines, WHAT_EXISTS, the delivery record)
-  was corrected in unit 4, after the merge state was checked again on 11 October. BOSSES.md gained the support rule and
-  a "Built so far" table; its status line (still "nothing built yet") is left for the open boss pull requests (#300,
-  #304, #313), which each rewrite it. The CHANGELOG's other stale headings are reconciled in a docs-only pull request of
-  their own (A-D14); this chunk renames only Arms IV's, whose merged heading (#170) it had removed as a duplicate.
+  was corrected in unit 4, after the merge state was checked again on 11 October, and again for #320 at the rebase.
+  BOSSES.md gained the support rule and a "Built so far" table, which lists all four built bosses since the rebase, and
+  its status line says so. #320 renamed the CHANGELOG's merged entries itself, so A-D14's separate docs pull request is
+  no longer needed.
 
 ## Interfaces changed
 
@@ -90,6 +92,10 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 - The `compose` command's tab suggestions still list every word in the rules, learned or not; the screen offers only
   learned words. Changing the command is an owner choice (see Decisions).
 - Problems do not carry the position of the word they concern; the screen marks every word a problem names.
+- The Yeti King and the Cinder Tyrant, which reached main after this chunk began, are not yet part of it: they credit
+  damage alone (no support credit, no rewards kept for the fallen or the away), the encyclopedia has no dossier for the
+  Glacier Hall or the Cinder Kiln, and JEI has no acquisition pages for their loot. Bringing them in is the natural
+  next step (a decision for the owner at the checkpoint).
 
 ## Decisions
 
@@ -108,5 +114,5 @@ a useful loadout, enter an existing lair and qualify for reward through support 
 | A-D11 | 11 October 2026 | Trade ways come only from the town's existing shops, for offers on sale today; no shop changes | Proposed | Unit 4 |
 | A-D12 | 11 October 2026 | Codex links open an unlocked entry without the codex being carried | Proposed | Unit 4 |
 | A-D13 | 11 October 2026 | The route's support spell is `touch struck ward`, added to the codex examples | Proposed | Unit 4 |
-| A-D14 | 11 October 2026 | The CHANGELOG's reconciliation (stale "Unmerged" headings, the entries #277 dropped) goes in its own docs-only pull request | Proposed | Unit 4 |
+| A-D14 | 11 October 2026 | The CHANGELOG's reconciliation (stale "Unmerged" headings, the entries #277 dropped) goes in its own docs-only pull request | Superseded: #320 renamed the merged entries (13 October) | Unit 4 |
 | A-D15 | 11 October 2026 | JEI's acquisition pages and the encyclopedia's lair dossiers state exact drop chances and the first-win guarantee, "with the default data" (the alternative: name the boss and say "sometimes") | Proposed | Unit 4 |

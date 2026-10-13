@@ -163,7 +163,7 @@ chance (and one owed from before the event and handed over during it comes with 
   mixin. Recorded as a known limit.
 - A second ward on a player replaces the first's record, so the newer caster is credited for what is soaked.
 - The thresholds and the experience share are proposals for the owner (see the chunk's decisions).
-- Bosses built on the same pattern in open pull requests (the Yeti King,
-  [#304](https://github.com/jimbozoomer-byte/jugcraft/pull/304), and the Cinder Tyrant,
-  [#317](https://github.com/jimbozoomer-byte/jugcraft/pull/317)) keep working with damage only until they adopt
-  `Encounter`.
+- The Yeti King ([#304](https://github.com/jimbozoomer-byte/jugcraft/pull/304)) and the Cinder Tyrant
+  ([#317](https://github.com/jimbozoomer-byte/jugcraft/pull/317)), on main through #320 since 12 October, keep their own
+  damage-only reward until they adopt `Encounter` and `LairRewards`: support does not earn their reward, and one who
+  died or left in the fight is not paid later. Proposed as the next step at the chunk's checkpoint.

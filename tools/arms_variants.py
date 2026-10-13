@@ -62,9 +62,9 @@ STYLES = {
 }
 BOSSES = {
     # Fought in the Glacier Hall (docs/features/yeti-king.md); his loot drops one of his two.
-    "yeti_king": {"display": "the Yeti King"},
+    "yeti_king": {"display": "the Yeti King", "lair": "glacier_hall"},
     # Fought in the Cinder Kiln (docs/features/cinder-tyrant.md); his loot drops one of his two.
-    "cinder_tyrant": {"display": "the Cinder Tyrant"},
+    "cinder_tyrant": {"display": "the Cinder Tyrant", "lair": "cinder_kiln"},
     "mire_hag": {"display": "the Mire Hag"},
     "crypt_lich": {"display": "the Crypt Lich"},
     "iron_dreadnought": {"display": "the Iron Dreadnought"},

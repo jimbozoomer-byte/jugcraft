@@ -198,6 +198,8 @@ Known limits:
 
 - Discovery is read, not saved: a player who entered a lair, left, and used up their token (a Cursed Spindle) reads as
   not having found it until they carry one again or win.
+- The dossiers cover the Witching Season's two lairs. The Glacier Hall and the Cinder Kiln, on main since #320, have
+  none yet, and the lair step's token check names only the Death Knell and the Cursed Spindle.
 - The Inspect page is read when the encyclopedia opens; refreshing keeps the block it was opened on.
 - The route's equip step is done by carrying or wearing a Kindled Lantern, a fire-set piece, a fire focus or the Fire
   Bangle (the wand and the bench are steps of their own).
