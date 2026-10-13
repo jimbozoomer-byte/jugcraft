@@ -135,11 +135,11 @@ def write_extras(write, assets, data, lang, condition):
     for name in ITEMS:
         if name.endswith("bed"):
             coating = "dp_chrome" if name.startswith("nickel") else "sp_copper"
-            elements = [box((2, 3, 3), (14, 6, 13), "ceramic_insulator"), box((1, 3, 2), (15, 4, 14), "dp_gunmetal")]
+            elements = [box((2, 3, 3), (14, 6, 13), "el_white"), box((1, 3, 2), (15, 4, 14), "dp_gunmetal")]
             for x in (4, 7, 10):
                 elements.append(box((x, 6, 4), (x+2, 7, 12), coating))
         elif name == "oxidizer_burner":
-            elements = [box((2, 2, 2), (14, 14, 14), "ceramic_insulator"), box((4, 4, 1.5), (12, 11, 2), "dp_gunmetal"), box((5, 5, 1.25), (11, 9, 1.5), "dr_amber")]
+            elements = [box((2, 2, 2), (14, 14, 14), "el_white"), box((4, 4, 1.5), (12, 11, 2), "dp_gunmetal"), box((5, 5, 1.25), (11, 9, 1.5), "dr_amber")]
         else:
             coating = "sp_copper" if name == "vanadium_oxide" else "dp_gunmetal"
             elements = [box((3, 2, 3), (13, 5, 13), coating), box((5, 5, 5), (11, 7, 11), coating)]

@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "ceramic_insulator": "jugcraft:block/ceramic_insulator",
     "copper_busbar": "jugcraft:block/copper_busbar",
     "dp_chrome": "jugcraft:block/dp_chrome",
     "dp_exhaust": "jugcraft:block/dp_exhaust",
@@ -19,6 +18,7 @@
     "dw_ribbed_steel": "jugcraft:block/dw_ribbed_steel",
     "el_lamp": "jugcraft:block/el_lamp",
     "el_ribbed": "jugcraft:block/el_ribbed",
+    "el_white": "jugcraft:block/el_white",
     "hydrogen_still": "jugcraft:block/hydrogen_still",
     "power_port": "jugcraft:block/power_port",
     "sp_copper": "jugcraft:block/sp_copper",
@@ -9422,7 +9422,7 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9431,7 +9431,7 @@
           ]
         },
         "south": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9440,7 +9440,7 @@
           ]
         },
         "east": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9449,7 +9449,7 @@
           ]
         },
         "west": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9458,7 +9458,7 @@
           ]
         },
         "up": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9467,7 +9467,7 @@
           ]
         },
         "down": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9558,7 +9558,7 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9567,7 +9567,7 @@
           ]
         },
         "south": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9576,7 +9576,7 @@
           ]
         },
         "east": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9585,7 +9585,7 @@
           ]
         },
         "west": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9594,7 +9594,7 @@
           ]
         },
         "up": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9603,7 +9603,7 @@
           ]
         },
         "down": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9694,7 +9694,7 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9703,7 +9703,7 @@
           ]
         },
         "south": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9712,7 +9712,7 @@
           ]
         },
         "east": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9721,7 +9721,7 @@
           ]
         },
         "west": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9730,7 +9730,7 @@
           ]
         },
         "up": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -9739,7 +9739,7 @@
           ]
         },
         "down": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,

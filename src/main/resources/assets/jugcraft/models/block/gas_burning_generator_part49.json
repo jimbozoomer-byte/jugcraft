@@ -1,7 +1,6 @@
 {
   "ambientocclusion": false,
   "textures": {
-    "ceramic_insulator": "jugcraft:block/ceramic_insulator",
     "copper_busbar": "jugcraft:block/copper_busbar",
     "dp_chrome": "jugcraft:block/dp_chrome",
     "dp_exhaust": "jugcraft:block/dp_exhaust",
@@ -19,6 +18,7 @@
     "dw_ribbed_steel": "jugcraft:block/dw_ribbed_steel",
     "el_lamp": "jugcraft:block/el_lamp",
     "el_ribbed": "jugcraft:block/el_ribbed",
+    "el_white": "jugcraft:block/el_white",
     "hydrogen_still": "jugcraft:block/hydrogen_still",
     "power_port": "jugcraft:block/power_port",
     "sp_copper": "jugcraft:block/sp_copper",
@@ -93,22 +93,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "south": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "east": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "west": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "up": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "down": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         }
       }
     },
@@ -157,22 +157,22 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "south": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "east": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "west": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "up": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "down": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         }
       }
     },

@@ -1,7 +1,6 @@
 {
   "ambientocclusion": false,
   "textures": {
-    "ceramic_insulator": "jugcraft:block/ceramic_insulator",
     "dp_chrome": "jugcraft:block/dp_chrome",
     "dp_gauge": "jugcraft:block/dp_gauge",
     "dp_gunmetal": "jugcraft:block/dp_gunmetal",
@@ -9,6 +8,7 @@
     "dp_rubber": "jugcraft:block/dp_rubber",
     "dr_amber": "jugcraft:block/dr_amber",
     "dw_ribbed_steel": "jugcraft:block/dw_ribbed_steel",
+    "el_white": "jugcraft:block/el_white",
     "power_port": "jugcraft:block/power_port",
     "particle": "jugcraft:block/dp_olive"
   },
@@ -101,10 +101,10 @@
       ],
       "faces": {
         "east": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "down": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         }
       }
     },
@@ -121,13 +121,13 @@
       ],
       "faces": {
         "east": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "up": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         },
         "down": {
-          "texture": "#ceramic_insulator"
+          "texture": "#el_white"
         }
       }
     },

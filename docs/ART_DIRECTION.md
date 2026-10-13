@@ -1,5 +1,7 @@
 # Art direction
 
+**13 October machine-surface correction:** do not use the glossy `ceramic_insulator` sprite as a machine material. Its smooth shading becomes blurry white/black bands over vessels and housings. Industrial forms and their component items now reuse the existing 16×16 `el_white` enamel panel texture, including the shared `CERAMIC` material in `starter_chemistry_models.py`. Preserve the actual modeled collars, piping and moving parts; detail belongs in their geometry, not simulated glossy stripes. See the [local fluorochemistry record](features/fluorochemistry-playtest.md).
+
 **11 October owner correction:** the reported rapiers, Moonblades and Soulreaver now follow vanilla's simple pixel silhouettes; Nodachi/Bogfang orientation and vehicle motion are corrected. Custom logs use recoloured vanilla texture references. See [scope, sources and validation](features/vehicle-and-vanilla-polish.md); this owner request supersedes older ornate/high-resolution requirements for those items.
 
 Jugcraft's look changes with its tiers, the way real technology did: the early game is brass-and-steam, the later tiers move towards dieselpunk, and electrical power gear and the high-tech tiers to come are graphite and glowing light. Production art uses the generators in `tools/` and suitable assets from the [shared owner library](../art/owner-library/README.md).

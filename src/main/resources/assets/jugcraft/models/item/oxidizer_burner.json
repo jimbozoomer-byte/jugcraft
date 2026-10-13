@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "ceramic_insulator": "jugcraft:block/ceramic_insulator",
     "dp_gunmetal": "jugcraft:block/dp_gunmetal",
     "dr_amber": "jugcraft:block/dr_amber",
+    "el_white": "jugcraft:block/el_white",
     "particle": "jugcraft:block/dp_olive"
   },
   "elements": [
@@ -20,7 +20,7 @@
       ],
       "faces": {
         "north": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -29,7 +29,7 @@
           ]
         },
         "south": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -38,7 +38,7 @@
           ]
         },
         "east": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -47,7 +47,7 @@
           ]
         },
         "west": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -56,7 +56,7 @@
           ]
         },
         "up": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,
@@ -65,7 +65,7 @@
           ]
         },
         "down": {
-          "texture": "#ceramic_insulator",
+          "texture": "#el_white",
           "uv": [
             0,
             0,

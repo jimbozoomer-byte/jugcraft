@@ -8,7 +8,9 @@ from steampunk_models import box, cyl, dial
 from dieselpunk_models import GUNMETAL as STEEL, OLIVE, CHROME, RUBBER, HAZARD, GAUGE, GRILLE
 import machine_rotors as rotors
 
-CERAMIC = "ceramic_insulator"
+# White 16px enamel panels; the glossy 64px insulator sprite produces blurred
+# black/white bands when tiled over vessels. Keep this shared by every process line.
+CERAMIC = "el_white"
 COPPER = "sp_copper"
 LIGHT = "dr_amber"
 RIBS = "dw_ribbed_steel"
