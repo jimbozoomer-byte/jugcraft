@@ -2,7 +2,7 @@
 
 ## October 13 integration
 
-The [October 13 integration record](features/oct13-community-integration.md) tracks the 30 current source PRs,
+The [October 13 integration record](features/oct13-community-integration.md) tracks the 31 source PRs,
 their exact heads, integration corrections and verification. It includes community chemistry, Peepo automation,
 guns, bosses/lairs, Concordance/encyclopedia, mineral deposits, power lines/wall runs and nuclear power.
 Check the integration PR's merge state before treating these as shipped on main. The owner's separate local machine

@@ -66,7 +66,7 @@ BOSSES = {
     # Fought in the Cinder Kiln (docs/features/cinder-tyrant.md); his loot drops one of his two.
     "cinder_tyrant": {"display": "the Cinder Tyrant", "lair": "cinder_kiln"},
     "mire_hag": {"display": "the Mire Hag", "lair": "lantern_fen"},
-    "crypt_lich": {"display": "the Crypt Lich"},
+    "crypt_lich": {"display": "the Crypt Lich", "lair": "crypt_archive"},
     "iron_dreadnought": {"display": "the Iron Dreadnought"},
     "werewolf_alpha": {"display": "the Alpha Werewolf"},
     "storm_roc": {"display": "the Storm Roc"},

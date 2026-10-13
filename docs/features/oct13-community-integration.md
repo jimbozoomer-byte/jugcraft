@@ -1,6 +1,6 @@
 # October 13 community PR integration
 
-This branch combines the 30 open PRs captured on October 13 against main `b73f51c8`.
+This branch combines the 31 source PRs captured on October 13 against main `b73f51c8`.
 The integration PR's GitHub merge state determines whether the batch is on main. Source histories and original
 attribution are preserved. Conflict resolution and additional fixes use OpenAI Codex (GPT-6), authorized by the owner.
 
@@ -12,7 +12,7 @@ attribution are preserved. Conflict resolution and additional fixes use OpenAI C
   useful gasification residue and ammonium nitrate (#324, #326–327, #329, #333–335, #339–342, #345–346).
 - Exact gas-tank handling tests and the formed-machine power-label correction (#325, #328).
 - Brighter Cinder Kiln/Tyrant presentation; Lantern Fen, Mire Hag and rewards; the Archive of Last Names and
-  Writ of Exhumation (#330–331, #336, #350). The Crypt Lich encounter itself remains future part 2.
+  Writ of Exhumation and the Crypt Lich encounter with seals, phylactery, minions and rewards (#330–331, #336, #350, #353).
 - Nine more guns: End, copper and lone-gun sets (#332, #338, #344).
 - Concordance Chunk A: spell composition UI, encounter support credit, first-loadout routes and the live
   encyclopedia; community technology/magic guide cards are available inside that shared encyclopedia (#322, #337).
@@ -48,13 +48,17 @@ attribution are preserved. Conflict resolution and additional fixes use OpenAI C
   Normal player placement still rejects unloaded/protected cells. Nuclear frame naming uses the pinned Jade
   version's common `blockOperations().pick` API instead of a removed reflective client method.
 
+- Update the Peepo machine-registration test for the combined 38 supported processor kinds, and register the Crypt
+  Lich's implemented lair in the shared trophy acquisition guide. Rename the cafeteria plate base texture so Iris
+  does not mistake its `_s` suffix for a specular map.
+
 ## Verification
 
 Final results are recorded in [integration PR #352](https://github.com/jimbozoomer-byte/jugcraft/pull/352); do not treat
 the source PRs' individual CI as the result for this integration. The combined build at `c3a7538b` passed all 1,564
 server game tests locally. The later client registration, geometry and plant-support fixes require a fresh CI run.
 Repository structure/link checks, all 14 Python packaging/selection tests and 11 world-designer tests passed. The client
-planner includes all 161 registered client test classes, distributed across five jobs (about 23 minutes estimated
+planner includes all registered client test classes, distributed across five jobs (about 23 minutes estimated
 per job). Full server, optional-absent, data, and client results will be recorded in that PR before merge.
 
 Human two-client play, nuclear plant load profiling, survival balance and owner visual acceptance are not claimed.
@@ -100,4 +104,5 @@ before replacing the owner's test profile. The Howitzer-Walker remains planned i
 | [#348](https://github.com/jimbozoomer-byte/jugcraft/pull/348) | `64ab5ef9748823cb2d097d4b117acb46c1357462` | Pipes and cables inside made walls |
 | [#349](https://github.com/jimbozoomer-byte/jugcraft/pull/349) | `d05685d11e3338751aa618ab62037b99999644b2` | Nuclear power: reactor, pre-made plants, storage tanks, MBS placement |
 | [#350](https://github.com/jimbozoomer-byte/jugcraft/pull/350) | `86456ab5cad5346c4184907b8cd4d7d2015df3ca` | Add the Archive of Last Names and the Writ of Exhumation (the Crypt Lich, part 1) |
-| [#351](https://github.com/jimbozoomer-byte/jugcraft/pull/351) | `b09481a0f0437d8df1746f4bb62dec779171e61a` | Add rocky-upland spodumene deposits with stone outcrops |
+| [#351](https://github.com/jimbozoomer-byte/jugcraft/pull/351) | `b7f0ec1005c47648776f26fd4e6d3d87917a294c` | Add rocky-upland spodumene deposits with stone outcrops |
+| [#353](https://github.com/jimbozoomer-byte/jugcraft/pull/353) | `7ed1804a97b1ec0f824649467a2ff97861754359` | Add the Crypt Lich, his ward and phylactery, his dead and his loot (part 2) |

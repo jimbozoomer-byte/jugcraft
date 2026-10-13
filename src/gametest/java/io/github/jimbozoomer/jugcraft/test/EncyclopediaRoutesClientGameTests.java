@@ -18,8 +18,8 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 
 /** Both guide routes open from the shared encyclopedia and preserve handbook/back navigation. */
 public class EncyclopediaRoutesClientGameTests implements FabricClientGameTest {
-	/** GLFW's Escape key code. */
-	private static final int ESCAPE = 256;
+	/** Use the pinned game's input codes (26.3 uses SDL, not GLFW). */
+	private static final int ESCAPE = InputConstants.KEY_ESCAPE;
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
