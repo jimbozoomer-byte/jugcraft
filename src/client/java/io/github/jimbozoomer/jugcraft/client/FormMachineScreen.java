@@ -192,12 +192,19 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		}
 	}
 
-	/** The stored power against the store's size, in whole thousands when tenths would not fit beside the label. */
+	/**
+	 * The stored power against the store's size, in whole thousands when tenths would not fit beside the label, and the
+	 * stored power alone when even that would not (a store of 100,000 JE or more, holding 10,000 or more); the bar and
+	 * its tooltip still give the size.
+	 */
 	private void powerRow(GuiGraphicsExtractor graphics, int y) {
 		String label = Component.translatable("container.jugcraft.terminal.power").getString();
 		String energy = compact(menu.energy()) + "/" + compact(menu.capacity());
 		if (!fits(label, energy)) {
 			energy = thousands(menu.energy()) + "/" + thousands(menu.capacity());
+		}
+		if (!fits(label, energy)) {
+			energy = thousands(menu.energy());
 		}
 		row(graphics, y, label, energy);
 	}
