@@ -137,8 +137,8 @@ public class ConcordanceBaselineGameTests {
 		helper.assertTrue(rules.problems().isEmpty(), "The rules load clean: " + rules.problems());
 		Baselines.Report report = Baselines.report(source(helper.getLevel()));
 		Jugcraft.LOGGER.info("Arcane Concordance baselines (roadmap step 11), from this server's rules and spells:\n{}", report.table());
-		helper.assertTrue(report.outcomes().size() == 7 + rules.invocations().size() + 1 && report.encounters().size() == 5,
-				"Seven kits, one character per invocation and the utility kit without its shield, in five encounters: " + report.outcomes().size());
+		helper.assertTrue(report.outcomes().size() == 8 + rules.invocations().size() + 1 && report.encounters().size() == 5,
+				"Eight kits, one character per invocation and the utility kit without its shield, in five encounters: " + report.outcomes().size());
 		helper.assertTrue(report.accepted(), "The step 11 acceptance checks hold: " + report.failures());
 		helper.succeed();
 	}

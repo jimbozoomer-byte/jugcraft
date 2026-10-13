@@ -1,5 +1,7 @@
 # Natural textures: fitting the vanilla world
 
+**11 October owner correction:** custom logs now use vanilla bark/end-grain with Jugcraft colours, supplied by runtime texture references rather than bundled Minecraft images. See [the visual correction record](features/vehicle-and-vanilla-polish.md). This supersedes conflicting log-art guidance below; existing leaves and planks are unchanged.
+
 How Jugcraft's woods, leaves and other natural textures are drawn so they sit in the vanilla world as if they belonged
 there. Follow it for every new wood, tree, leaf, sapling, plant, stone, soil or ore texture.
 
@@ -146,6 +148,8 @@ The trees the biomes still need, with their proposed shapes and colours, are pla
    - preview its textures at 1× and 8×, tiled, and as blocks beside vanilla's;
    - add the tree to `WoodClientGameTests` so CI grows it and shoots it in game, beside the others;
    - compare it with the owner's painting.
+
+A tree whose logs are no wood set (no planks: the [cinnamon tree's](features/vegetables-herbs-and-spices.md)) puts its logs in `LOGS` in `tools/wood_style.py` instead: the stripped side's colour and the bark, drawn as every wood's log, end and stripped log are.
 
 ## Checklist
 - [ ] 16×16, drawn by code from a fixed seed; nothing copied or recoloured from Mojang.

@@ -25,7 +25,8 @@ import org.joml.Quaternionf;
  * ("muzzle_&lt;attachment&gt;"), full bright. The barrel points along the bone's -z: the frame faces back down it (what
  * the shooter sees, a star) and two crossed copies stretch forward along it (what anyone beside them sees). Each shot
  * picks its frame and its turn about the barrel from its time; the flash shows full, then swells and fades.
- * {@link GunRenderer} decides when there is one ({@link GunRenderer#FLASH}); a silencer hides it.
+ * {@link GunRenderer} decides when there is one ({@link GunRenderer#FLASH}); a silencer hides it. An energy weapon's
+ * discharge (slice 8D) is the same frames tinted ({@link GunLooks#FLASH_TINTS}).
  */
 final class GunFlashLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.RenderData, GeoRenderState> {
 	private static final RenderType[] FRAMES = new RenderType[4];
@@ -67,7 +68,7 @@ final class GunFlashLayer extends GeoRenderLayer<GunItem, GeoItemRenderer.Render
 		float half = flash.size() / 32.0F * swell;
 		float length = half * 3.0F;
 		int alpha = (int) (255.0F * Math.clamp(GunEffects.FLASH_TICKS - flash.age(), 0.0F, 1.0F));
-		int color = alpha << 24 | 0xFFFFFF;
+		int color = alpha << 24 | flash.tint() & 0xFFFFFF;
 		GunEffects.flashDrawn();
 		tasks.submitCustomGeometry(poseStack, FRAMES[Math.floorMod(flash.shot(), FRAMES.length)], (pose, buffer) -> {
 			// Facing back down the barrel, a little in front of the muzzle.

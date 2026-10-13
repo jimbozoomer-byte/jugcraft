@@ -1,7 +1,8 @@
 """The 3D armor sets' 16x16 inventory icons: the bronze and steel armor's, the knight armor (tools/knight_armor.py)
-drawn small, and Bloodthorn Armor's, Reforged White Diamond's, Hades Armor's, Sunset Gem's and Pharaoh's
-(tools/bloodthorn_armor.py, tools/white_diamond_armor.py, tools/hades_armor.py, tools/sunset_gem_armor.py and
-tools/pharaoh_armor.py, below), in the owner's style for item icons (vanilla's own size, a one-pixel outline in each
+drawn small, and Bloodthorn Armor's, Reforged White Diamond's, Hades Armor's, Sunset Gem's, Pharaoh's, and the Dread
+Knight's, Valkyrie's, Wayfarer's and Spartan's (tools/bloodthorn_armor.py, tools/white_diamond_armor.py,
+tools/hades_armor.py, tools/sunset_gem_armor.py, tools/pharaoh_armor.py and the four after it, below), in the owner's
+style for item icons (vanilla's own size, a one-pixel outline in each
 part's darkest tone, never pure black, light from the top left, a few flat tones, chunky parts that read at a glance).
 
 Each piece is one hand-drawn map, tools/armor_icons/<piece>.txt: 16 lines of 16 symbols, which the owner can edit
@@ -129,6 +130,106 @@ Their symbols:
                     "leather_darkest", the near-black of the bands, which is the teal's own outline
     T t s n         the tan: "under_light", "under_mid", "under_dark", "under_darkest"
     R r             the red gems: "gold_light", "gold_dark" (the palette's names for them, see armor_paint.PHARAOH)
+The four designs the owner sent on 7 October 2026 (docs/features/four-armor-designs.md) have maps of their own, drawn
+after the owner's sheet and screenshots; each part is outlined in its own darkest tone, "O" or one named below. A tone
+written "~<tone>" in OWN is that tone taken down to OUTLINE_LUMA, as "O" is, for a part whose own darkest tone is too
+light to outline it.
+Dread Knight (tools/dread_knight_armor.py, armor_paint.DREAD_KNIGHT): the crowned great helm with its slits and nasal
+bar; the banded pauldrons with their spikes over the mottled muscle plate and black belt; the black strip skirt riveted
+grey over the cuisses; the banded greaves.
+    H L M D S V     the steel, light grey to near-black: "light", "mid_light", "mid", "dark", "seam", "void"
+    P               the pink sheen on the lit greys: "gold_light"
+    U u x X         the near-black under-layer: "under_light", "under_mid", "under_dark", and "under_darkest", the eye
+                    slits and the black parts' own outline
+Valkyrie (tools/valkyrie_armor.py, armor_paint.VALKYRIE): the wreath and its two wings; the red-wrapped shoulders over
+the white cuirass; the studded strip skirt with its white linen; the gold-banded greaves with their small wings.
+    W C B G M V     the white plate: "light", "mid_light", "mid", "dark" (blue-grey), "seam" (mauve), "void"
+    Y y o g         the gold: "gold_light", "gold_mid", "gold_dark", and "~gold_dark", its outline
+    R r q Q K       the red cloth: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    T t n N         the brown leather: "under_light", "under_mid", "under_dark", and "under_darkest", its outline
+    F f v           the feathers' tints: "feather_pink", "feather_lilac", "feather_violet" (outlined "O")
+Wayfarer (tools/wayfarer_armor.py, armor_paint.WAYFARER): the hood and its teal rim; the cloak with its clasp over the
+dark tunic; the studded kilt; the boots and their winged ankles.
+    H L M D S V     the cloak's blues, light teal to the darkest navy: "light" to "void" ("O" is its void)
+    Y y             the clasp's silver: "gold_light", "gold_dark"
+    B b m d k       the brown leather: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    U u x X         the hood's inside: "under_light", "under_mid", "under_dark", "under_darkest"
+    W I F s g       the wings: "feather_white", "feather_ice", "feather_pink", "feather_steel", and "~feather_steel",
+                    their outline
+Spartan (tools/spartan_armor.py, armor_paint.SPARTAN): the crested helm with its T; the red cloth and the scrolled
+pauldron over the gold cuirass; the studded pteruges; the gold greaves over brown soles.
+    H L M D S V     the gold, pale to bronze brown: "light" to "void" ("O" is its void taken down)
+    Y A a           the plume's lit tips and oranges: "plume_yellow", "gold_light", "gold_dark"
+    R r q Q K       the plume's and the cloth's reds: "leather_light" to "leather_dark", and "leather_darkest", their
+                    outline
+    T t n N         the brown leather: "under_light", "under_mid", "under_dark", and "under_darkest", its outline
+The designs the owner sent on 8 October 2026 (docs/features/armor-designs-8-october.md) likewise:
+Berserker (tools/berserker_armor.py, armor_paint.BERSERKER): the horned cap with its red crest and toothed jaw frame;
+the stepped red pauldrons over the keyed white breastplate; the thigh guards banded white and red; the grey boots with
+red soles.
+    H L M D S V     the white plate, white to dark grey: "light" to "void" ("O" is its void taken down)
+    G g             the brightest whites: "gold_light", "gold_dark"
+    R r q Q K       the reds: "leather_light" to "leather_dark", and "leather_darkest", their outline
+    U u x X         the dark greys of the mail: "under_light" to "under_dark", and "under_darkest", their outline
+Paladin and Templar (tools/crusader_armor.py, armor_paint.PALADIN and armor_paint.TEMPLAR): the great helm, the
+Paladin's with its white H and purple sprig, the Templar's with its gable and crest; the spiralled pauldrons over the
+shield and its cross; the spiralled tassets over the cloth; the banded greaves. One set of symbols for both:
+    H L M D S V     the plate: white to slate on the Paladin, pale to near-black slate on the Templar
+    G g             "gold_light", "gold_dark": the Paladin's blue gems; the Templar's near-whites
+    C c q Q K       the cloth, purple or dark red: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    U u x X         the dark mail and belt: "under_light" to "under_dark", and "under_darkest", their outline
+Sentinel (tools/sentinel_armor.py, armor_paint.SENTINEL): the gold bucket helm with its keyhole and the loop on its
+crown; the great pauldron's bent plate, banded as the owner drew it, and the flat plates over the black coat, the
+gorget and its pale strip, and the baldric; the black skirt with its gold plate on the left and dark one on the right; the gold boots.
+    H L M D S V     the gold, cream to brown: "light" to "void" ("O" is its void taken down)
+    G g             the palest cream and the deep brown: "gold_light", "gold_dark"
+    C c q Q K       the browns: "leather_light" to "leather_dark", and "leather_darkest", their outline
+    U u x X         the black cloth: "under_light" to "under_dark", and "under_darkest", its outline
+Frost Knight (tools/frost_knight_armor.py, armor_paint.FROST_KNIGHT): the crown of ice over the white great helm, the
+mane of frost round it and its face, the dark eye slit turning up at its ends and crossed by the ridge over the
+grille; the frost on the right shoulder hanging down the arm, the navy pauldron on the left with its white curl and
+rim, and the navy strap over the white cuirass; the white legs in stacked lames under the navy belt and its ice gem,
+the knee bands; the white boots, a tuft of frost at each ankle.
+    H L M D S V     the frosted white, white to slate ("O" is its void taken down)
+    G g             the ice's palest and bright cyans: "gold_light", "gold_dark"
+    C c q Q K       the navy: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    U u x X         the eye slit's and the vents' near-black: "under_light" to "under_dark", and "under_darkest",
+                    its outline
+    A I E F J j     the crown's ice: "ice_light", "ice", "ice_mid", "ice_dark", "ice_deep", and "~ice_deep", its
+                    outline
+Wight King (tools/wight_king_armor.py, armor_paint.WIGHT_KING): the antlers and the crown of icicles over the slate
+helm and its black skull's face; the jagged right shoulder, the layered left one, the collar's cyan gem and the
+crossed straps; the banded legs under the dark belt and its cyan buckle; the banded boots.
+    H L M D S V     the slate, pale to deep ("O" is its void taken down)
+    G g             the gems' cyans: "gold_light", "gold_dark"
+    C c q Q K       the dark slate of the straps and belt: "leather_light" to "leather_dark", and "leather_darkest",
+                    their outline
+    U u x X         the face's black: "under_light" to "under_dark", and "under_darkest", its outline
+    A I E F J j     the icicles' and antlers' ice: "ice_light" to "ice_deep", and "~ice_deep", its outline
+Reaper (tools/reaper_armor.py, armor_paint.REAPER): the hood, its arched opening and the three bars in its black void;
+the robe with its white clasp and the strap stepping down to its pouch, the grey plates and white V on its right
+shoulder and the white cage on its left; the skirt of strips; the dark wrapped boots with grey wraps and a white band.
+    H L M D S V     the bone-white of the plates, white to grey ("O" is its void taken down)
+    G g             the pouch's reddish browns: "gold_light", "gold_dark"
+    C c q Q K       the robe's browns: "leather_light" to "leather_dark", and "leather_darkest", its outline (and
+                    the hood's)
+    U u x X         the void's black: "under_light" to "under_dark", and "under_darkest", its outline
+    a b e f         the hood's browns: "hood_light", "hood", "hood_mid", "hood_dark"
+Banana (tools/banana_armor.py, armor_paint.BANANA): the tall yellow box with the hole for the face and the brown stem
+on top; the yellow tube round the body, its ridges and speckles; the tube round the legs; its foot round the shins with
+the brown end sticking out on the right.
+    H L M D S V     the yellow, lit to shade ("O" is its void taken down)
+    G g             the brown speckles: "gold_light", "gold_dark"
+    C c q Q K       the stem's and the end's browns: "leather_light" to "leather_dark", and "leather_darkest", their
+                    outline
+    U u x X         inside the hole: "under_light" to "under_dark", and "under_darkest"
+Scarab (tools/scarab_armor.py, armor_paint.SCARAB), the owner's own four icons: the nemes striped gold and lapis with
+its lappets either side of the dark face; the cuirass with its striped shoulders and lapis bands; the kilt banded down
+the legs; the banded boots, their toes turned out.
+    H L M D S V     the gold, pale to brown ("O" is its void taken down)
+    G g             its brightest and its deepest: "gold_light", "gold_dark"
+    C c q Q K       the lapis: "leather_light" to "leather_dark", and "leather_darkest", its outline
+    U u x X         the shadow under the headcloth: "under_light" to "under_dark", and "under_darkest", its outline
 """
 import os
 
@@ -173,7 +274,74 @@ OWN = {"bloodthorn": (armor_paint.BLOODTHORN, {"H": "light", "L": "mid_light", "
                                          "a": "leather_mid_light", "d": "leather_mid", "e": "leather_dark",
                                          "k": "leather_darkest", "T": "under_light", "t": "under_mid",
                                          "s": "under_dark", "n": "under_darkest", "R": "gold_light",
-                                         "r": "gold_dark"})}
+                                         "r": "gold_dark"}),
+       "dread_knight": (armor_paint.DREAD_KNIGHT, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                                   "V": "void", "P": "gold_light", "U": "under_light", "u": "under_mid",
+                                                   "x": "under_dark", "X": "under_darkest"}),
+       "valkyrie": (armor_paint.VALKYRIE, {"W": "light", "C": "mid_light", "B": "mid", "G": "dark", "M": "seam",
+                                           "V": "void", "Y": "gold_light", "y": "gold_mid", "o": "gold_dark",
+                                           "g": "~gold_dark", "R": "leather_light", "r": "leather_mid_light",
+                                           "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
+                                           "T": "under_light", "t": "under_mid", "n": "under_dark", "N": "under_darkest",
+                                           "F": "feather_pink", "f": "feather_lilac", "v": "feather_violet"}),
+       "wayfarer": (armor_paint.WAYFARER, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                           "V": "void", "Y": "gold_light", "y": "gold_dark", "B": "leather_light",
+                                           "b": "leather_mid_light", "m": "leather_mid", "d": "leather_dark",
+                                           "k": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                           "x": "under_dark", "X": "under_darkest", "W": "feather_white",
+                                           "I": "feather_ice", "F": "feather_pink", "s": "feather_steel",
+                                           "g": "~feather_steel"}),
+       "spartan": (armor_paint.SPARTAN, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                         "V": "void", "Y": "plume_yellow", "A": "gold_light", "a": "gold_dark",
+                                         "R": "leather_light", "r": "leather_mid_light", "q": "leather_mid",
+                                         "Q": "leather_dark", "K": "leather_darkest", "T": "under_light",
+                                         "t": "under_mid", "n": "under_dark", "N": "under_darkest"}),
+       "berserker": (armor_paint.BERSERKER, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                             "V": "void", "G": "gold_light", "g": "gold_dark", "R": "leather_light",
+                                             "r": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                             "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                             "x": "under_dark", "X": "under_darkest"}),
+       "paladin": (armor_paint.PALADIN, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                         "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                         "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                         "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                         "x": "under_dark", "X": "under_darkest"}),
+       "templar": (armor_paint.TEMPLAR, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                         "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                         "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                         "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                         "x": "under_dark", "X": "under_darkest"}),
+       "sentinel": (armor_paint.SENTINEL, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                           "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                           "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                           "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                           "x": "under_dark", "X": "under_darkest"}),
+       "frost_knight": (armor_paint.FROST_KNIGHT, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark",
+                                                   "S": "seam", "V": "void", "G": "gold_light", "g": "gold_dark",
+                                                   "C": "leather_light", "c": "leather_mid_light", "q": "leather_mid",
+                                                   "Q": "leather_dark", "K": "leather_darkest", "U": "under_light",
+                                                   "u": "under_mid", "x": "under_dark", "X": "under_darkest",
+                                                   "A": "ice_light", "I": "ice", "E": "ice_mid", "F": "ice_dark",
+                                                   "J": "ice_deep", "j": "~ice_deep"}),
+       "wight_king": (armor_paint.WIGHT_KING, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam",
+                                               "V": "void", "G": "gold_light", "g": "gold_dark", "C": "leather_light",
+                                               "c": "leather_mid_light", "q": "leather_mid", "Q": "leather_dark",
+                                               "K": "leather_darkest", "U": "under_light", "u": "under_mid",
+                                               "x": "under_dark", "X": "under_darkest", "A": "ice_light", "I": "ice",
+                                               "E": "ice_mid", "F": "ice_dark", "J": "ice_deep", "j": "~ice_deep"}),
+       "reaper": (armor_paint.REAPER, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                       "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
+                                       "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
+                                       "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest",
+                                       "a": "hood_light", "b": "hood", "e": "hood_mid", "f": "hood_dark"}),
+       "banana": (armor_paint.BANANA, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                       "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
+                                       "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
+                                       "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest"}),
+       "scarab": (armor_paint.SCARAB, {"H": "light", "L": "mid_light", "M": "mid", "D": "dark", "S": "seam", "V": "void",
+                                       "G": "gold_light", "g": "gold_dark", "C": "leather_light", "c": "leather_mid_light",
+                                       "q": "leather_mid", "Q": "leather_dark", "K": "leather_darkest",
+                                       "U": "under_light", "u": "under_mid", "x": "under_dark", "X": "under_darkest"})}
 
 
 def luma(colour):
@@ -197,9 +365,11 @@ def palette(metal):
 
 
 def own_palette(name):
-    """Symbol -> RGBA for a set with maps of its own (OWN)."""
+    """Symbol -> RGBA for a set with maps of its own (OWN). A tone named "~<tone>" is that tone taken down to
+    OUTLINE_LUMA, as "O" is: the outline of a part whose own darkest tone is too light for one (a gold, a feather)."""
     tones, symbols = OWN[name]
-    colours = {symbol: tones[tone] for symbol, tone in symbols.items()}
+    colours = {symbol: deepen(tones[tone[1:]]) if tone.startswith("~") else tones[tone]
+               for symbol, tone in symbols.items()}
     colours["O"] = deepen(tones["void"])
     return {symbol: tuple(colour) + (255,) for symbol, colour in colours.items()}
 

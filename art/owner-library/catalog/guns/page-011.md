@@ -6,6 +6,24 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 
 | File | Type | Image size | Metadata / texture |
 |---|---|---|---|
+| [Guns/models/special/echoes_2/tact_grip.json](../../originals/Blocks/Guns/models/special/echoes_2/tact_grip.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/anthralite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/diamond_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/hammer.json](../../originals/Blocks/Guns/models/special/fencer_carabine/hammer.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/iron_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/iron_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/light_grip.json](../../originals/Blocks/Guns/models/special/fencer_carabine/light_grip.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/main.json](../../originals/Blocks/Guns/models/special/fencer_carabine/main.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_carabine/netherite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_carabine/tact_grip.json](../../originals/Blocks/Guns/models/special/fencer_carabine/tact_grip.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/anthralite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/diamond_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/hammer.json](../../originals/Blocks/Guns/models/special/fencer_thumper/hammer.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/iron_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/iron_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/light_grip.json](../../originals/Blocks/Guns/models/special/fencer_thumper/light_grip.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/main.json](../../originals/Blocks/Guns/models/special/fencer_thumper/main.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/fencer_thumper/netherite_bayonet.json) | model JSON | — | — |
+| [Guns/models/special/fencer_thumper/vert_grip.json](../../originals/Blocks/Guns/models/special/fencer_thumper/vert_grip.json) | model JSON | — | — |
+| [Guns/models/special/flame.json](../../originals/Blocks/Guns/models/special/flame.json) | model JSON | — | — |
 | [Guns/models/special/flayed_god/head.json](../../originals/Blocks/Guns/models/special/flayed_god/head.json) | model JSON | — | — |
 | [Guns/models/special/flayed_god/main.json](../../originals/Blocks/Guns/models/special/flayed_god/main.json) | model JSON | — | — |
 | [Guns/models/special/flintlock_pistol/hammer.json](../../originals/Blocks/Guns/models/special/flintlock_pistol/hammer.json) | model JSON | — | — |
@@ -238,21 +256,3 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/models/special/iron_spear/tact_grip.json](../../originals/Blocks/Guns/models/special/iron_spear/tact_grip.json) | model JSON | — | — |
 | [Guns/models/special/iron_spear/wooden_stock.json](../../originals/Blocks/Guns/models/special/iron_spear/wooden_stock.json) | model JSON | — | — |
 | [Guns/models/special/jackhammer/advanced_silencer.json](../../originals/Blocks/Guns/models/special/jackhammer/advanced_silencer.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/anthralite_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/anthralite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/bolt.json](../../originals/Blocks/Guns/models/special/jackhammer/bolt.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/diamond_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/diamond_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/ext_barrel.json](../../originals/Blocks/Guns/models/special/jackhammer/ext_barrel.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/ext_mag.json](../../originals/Blocks/Guns/models/special/jackhammer/ext_mag.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/heavy_stock.json](../../originals/Blocks/Guns/models/special/jackhammer/heavy_stock.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/iron_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/iron_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/light_grip.json](../../originals/Blocks/Guns/models/special/jackhammer/light_grip.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/light_stock.json](../../originals/Blocks/Guns/models/special/jackhammer/light_stock.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/main.json](../../originals/Blocks/Guns/models/special/jackhammer/main.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/muzzle_brake.json](../../originals/Blocks/Guns/models/special/jackhammer/muzzle_brake.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/netherite_bayonet.json](../../originals/Blocks/Guns/models/special/jackhammer/netherite_bayonet.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/silencer.json](../../originals/Blocks/Guns/models/special/jackhammer/silencer.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/speed_mag.json](../../originals/Blocks/Guns/models/special/jackhammer/speed_mag.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/stan_barrel.json](../../originals/Blocks/Guns/models/special/jackhammer/stan_barrel.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/stan_grip.json](../../originals/Blocks/Guns/models/special/jackhammer/stan_grip.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/stan_mag.json](../../originals/Blocks/Guns/models/special/jackhammer/stan_mag.json) | model JSON | — | — |
-| [Guns/models/special/jackhammer/tact_grip.json](../../originals/Blocks/Guns/models/special/jackhammer/tact_grip.json) | model JSON | — | — |

@@ -253,7 +253,7 @@ INVOCATION_MAX_TUNINGS = 3  # Java: RulesParser.MAX_TUNINGS
 INVOCATION_SCALING_MAX = 2.0  # Java: RulesParser.MAX_SCALING (damage per point of Spell Power)
 # The vanilla particles invocations show on release (Spell Engine skips an unknown id, so a typo would show nothing).
 INVOCATION_PARTICLES = ("minecraft:end_rod", "minecraft:wax_on", "minecraft:glow", "minecraft:electric_spark",
-                        "minecraft:cloud")
+                        "minecraft:cloud", "minecraft:flame", "minecraft:small_flame", "minecraft:lava")
 INVOCATION_ROLES = {
     "damage": "Damage", "defense": "Defense", "movement": "Movement", "support": "Support",
     "investigation": "Investigation", "utility": "Utility",
@@ -458,11 +458,22 @@ BLOCKS.update(spire.BLOCKS)
 rituals.STRUCTURES.update(spire.STRUCTURES)
 rituals.RITUALS.update(spire.RITUALS)
 rituals.RESEARCH["circle_lore"]["unlocks"]["understood"]["rituals"].append(spire.rid("spire_kindling"))
+# Ember (tools/concordance_ember.py): Hearthbinding, the Hearthbinders' research, and their invocations (their
+# authored words join COMPONENTS below).
+import concordance_ember as ember  # noqa: E402
+RESEARCH.update(ember.RESEARCH)
+ITEMS.update(ember.ITEMS)
+BLOCKS.update(ember.BLOCKS)
+INVOCATIONS.update(ember.INVOCATIONS)
+# Wayfaring (tools/concordance_trinkets.py): the owner's belt, boots and charms, worn once Relic Lore is understood.
+import concordance_trinkets as trinkets  # noqa: E402
+ITEMS.update(trinkets.ITEMS)
+BLOCKS.update(trinkets.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
                  artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
-                 hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG]
+                 hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -554,6 +565,7 @@ COMPONENTS = {
              "operation": {"effect": "restoration", "intent": "helpful", "principle": "radiance", "magnitude": 4},
              "name": "Mend", "text": "Lanternward's healing light."},
 }
+COMPONENTS.update(ember.COMPONENTS)
 COMPONENT_DATA_KEYS = ("slot", "requires", "authored", "capacity", "focus", "delivery", "selection", "operation",
                        "modifier", "termination")
 for _component in COMPONENTS.values():
@@ -654,7 +666,8 @@ def form_numbers(text):
                 elif m["aspect"] == "duration":
                     duration += op.get("duration", 0) * m["amount"] // 100
             out["operations"].append({"name": names[0], "effect": op["effect"], "magnitude": magnitude,
-                                      "duration": duration, "scaling": op.get("scaling", 0)})
+                                      "duration": duration, "scaling": op.get("scaling", 0),
+                                      "school": op.get("school"), "status": op.get("status")})
     return out
 
 
@@ -675,12 +688,22 @@ def persistence(numbers):
     return max([op["duration"] for op in numbers["operations"]] + [0])
 
 
+# Statuses invocations give, in the codex's words.
+STATUS_NAMES = dict(ember.STATUS_NAMES)
+
+
+def school_name(school):
+    """A Spell Power school in the codex's words ("arcane", "fire"); plain magic when it names none."""
+    return school.split(":")[1] if school else "magic"
+
+
 def operation_summary(op):
     """One operation's effect in the codex's words."""
     effect = op["effect"]
     if effect == "damage":
-        scaled = f" (+{op['scaling']} per point of arcane Spell Power)" if op["scaling"] else ""
-        return f"{op['magnitude']} arcane damage{scaled}"
+        school = school_name(op.get("school"))
+        scaled = f" (+{op['scaling']} per point of {school} Spell Power)" if op["scaling"] else ""
+        return f"{op['magnitude']} {school} damage{scaled}"
     if effect == "restoration":
         return f"restores {op['magnitude']} health"
     if effect == "protection":
@@ -691,6 +714,10 @@ def operation_summary(op):
         return f"glowing for {seconds(op['duration'])} seconds"
     if effect == "illumination":
         return f"light for {seconds(op['duration'])} seconds"
+    if effect == "status":
+        return f"{STATUS_NAMES.get(op['status'], op['status'])} for {seconds(op['duration'])} seconds"
+    if effect == "alteration":
+        return "kindles a hearth" if op.get("school") == ember.COMPONENTS["kindling"]["operation"]["school"] else "puts out fire"
     return effect
 
 
@@ -700,7 +727,7 @@ def invocation_codex():
     entries = {
         ("invocations", "overview"): {
             "name": "Invocations", "x": 0, "y": 0, "icon": f"{MOD}:initiate_wand", "condition": "understood",
-            "description": "Spells the Lampwrights wrote down",
+            "description": "Spells the traditions wrote down",
             "pages": [
                 ("text", "Invocations",
                  "An invocation is a spell someone wrote before you, in the same words you compose with and under "
@@ -715,9 +742,14 @@ def invocation_codex():
             ],
         },
     }
-    positions = {"understood": [(2, 0), (2, 2), (0, 2)], "mastered": [(4, 0), (4, 2), (4, 4)]}
+    # First Light's invocations, then Hearthbinding's in a row below them.
+    positions = {("first_light", "understood"): [(2, 0), (2, 2), (0, 2)],
+                 ("first_light", "mastered"): [(4, 0), (4, 2), (4, 4)],
+                 ("hearthbinding", "understood"): [(0, 6), (2, 6), (4, 6)], ("hearthbinding", "mastered"): [(6, 6)]}
     for key, info in INVOCATIONS.items():
-        x, y = positions[info["stage"]].pop(0)
+        research = info["research"].split(":")[1]
+        teacher = RESEARCH[research]["name"]
+        x, y = positions[(research, info["stage"])].pop(0)
         forms = invocation_forms(key)
         text, cost, numbers = forms[None]
         reach = f"Reach {numbers['range']} blocks. " if numbers["range"] else ""
@@ -726,7 +758,7 @@ def invocation_codex():
         effects = "; ".join(operation_summary(op) for op in numbers["operations"])
         cast = f"cast {info['cast']:g} seconds" if info["cast"] else "instant"
         stats = (f"**{INVOCATION_ROLES[info['role']]}.** {reach}{effects[0].upper() + effects[1:]}.\\\n\\\n"
-                 f"{info['focus']} Focus ({info['mastered_focus']} once First Light is mastered), {cast}, cooldown "
+                 f"{info['focus']} Focus ({info['mastered_focus']} once {teacher} is mastered), {cast}, cooldown "
                  f"{info['cooldown']:g} seconds.")
         tunings = []
         for tuning in info["tunings"]:
@@ -742,10 +774,10 @@ def invocation_codex():
             else:
                 what = "; ".join(operation_summary(op) for op in t_numbers["operations"])
             tunings.append(f"- **{COMPONENTS[tuning]['name']}**: {what} (+{extra} Focus)")
-        learned = ("Learned when First Light is understood." if info["stage"] == "understood"
-                   else "Learned when First Light is mastered.")
+        learned = f"Learned when {teacher} is {info['stage']}."
+        condition = info["stage"] if research == "first_light" else (research, info["stage"])
         entries[("invocations", key)] = {
-            "name": info["name"], "x": x, "y": y, "icon": info["icon"], "condition": info["stage"],
+            "name": info["name"], "x": x, "y": y, "icon": info["icon"], "condition": condition,
             "description": f"{INVOCATION_ROLES[info['role']]}: {info['description']}",
             "pages": [
                 ("text", info["name"], f"{info['description']}\\\n\\\n{stats} {learned}"),
@@ -973,6 +1005,8 @@ def codex():
         **conclave.codex(),
         **progression.codex(),
         **spire.codex(),
+        **ember.codex(),
+        **trinkets.codex(),
         **journal.codex(),
         **signs.codex(),
     }
@@ -1072,7 +1106,7 @@ CATEGORIES = {
     "composition": {"name": "Composition", "icon": "minecraft:writable_book", "sort": 2,
                     "description": "Writing spells of your own"},
     "invocations": {"name": "Invocations", "icon": f"{MOD}:initiate_wand", "sort": 3,
-                    "description": "Spells the Lampwrights wrote down, and how to answer them"},
+                    "description": "Spells the traditions wrote down, and how to answer them"},
     **rituals.CATEGORY,
     **alchemy.CATEGORY,
     **ecology.CATEGORY,
@@ -1085,6 +1119,7 @@ CATEGORIES = {
     **hexes.CATEGORY,
     **conclave.CATEGORY,
     **spire.CATEGORY,
+    **ember.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1133,7 +1168,7 @@ def spell_json(key):
                   "batch": {"count": 12.0, "shape": "SPHERE", "anchor": "ENTITY", "vertical_origin": 0.6,
                             "min_speed": 0.05, "max_speed": 0.15}}]
     return {
-        "school": "spell_power:arcane",
+        "school": PRINCIPLES[info["principle"]]["school"] or "spell_power:arcane",
         "range": float(invocation_range(info)),
         "tier": 1,
         "group": "concordance",
@@ -1424,11 +1459,15 @@ SOUND_EVENTS = {
 SOUND_EVENTS.update(rituals.SOUND_EVENTS)
 SOUND_EVENTS.update(alchemy.SOUND_EVENTS)
 SOUND_EVENTS.update(signs.SOUND_EVENTS)
+SOUND_EVENTS.update(ember.SOUND_EVENTS)
 
 
 def sounds():
+    """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
+    (tools/concordance_ember.py SOUND_FILES), one picked at random."""
     return {event: {"subtitle": f"subtitles.{MOD}.{event}",
-                    "sounds": [{"name": f"{MOD}:concordance/{event.split('.', 1)[1]}", "attenuation_distance": 16}]}
+                    "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
+                               for name in ember.SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
             for event in SOUND_EVENTS}
 
 
@@ -1498,6 +1537,7 @@ MESSAGES = {
     **relics.MESSAGES,
     **equivalence.MESSAGES,
     **hexes.MESSAGES,
+    **ember.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
@@ -1647,9 +1687,10 @@ def lang_entries(lang):
     lang[f"container.{MOD}.lampwright_bench"] = BLOCKS["lampwright_bench"]["name"]
     for key, info in INVOCATIONS.items():
         lang[f"spell.{MOD}.{key}.name"] = info["name"]
+        teacher = RESEARCH[info["research"].split(":")[1]]["name"]
         lang[f"spell.{MOD}.{key}.description"] = (f"{INVOCATION_ROLES[info['role']]}. {info['description']} "
-                                                  f"Costs {info['focus']} Focus ({info['mastered_focus']} once First "
-                                                  f"Light is mastered).")
+                                                  f"Costs {info['focus']} Focus ({info['mastered_focus']} once {teacher} "
+                                                  f"is mastered).")
         lang[f"message.{MOD}.concordance.fizzle.{key}"] = info["fizzle"]
     for key, name in INVOCATION_ROLES.items():
         lang[f"role.{MOD}.{key}"] = name
@@ -1733,6 +1774,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     conclave.write_all(write, assets, data, lang, condition, self_drop)
     progression.write_all(write, data, lang)
     spire.write_all(write, assets, data, lang, condition, self_drop)
+    ember.write_all(write, assets, data, lang, condition, self_drop)
+    trinkets.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
     signs.lang_entries(lang)
     # Items.
@@ -1876,6 +1919,8 @@ def write_data(write, res):
     relics.write_data(write, data)
     equivalence.write_data(write, data)
     hexes.write_data(write, data)
+    ember.write_data(write, data)
+    trinkets.write_data(write, data)
     conclave.write_data(write, data)
     progression.write_data(write, data)
     spire.write_data(write, data)
@@ -1904,6 +1949,8 @@ def tags(tags):
     hexes.tags(tags)
     conclave.tags(tags)
     spire.tags(tags)
+    ember.tags(tags)
+    trinkets.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     for item in LUMINOUS_MATTER:

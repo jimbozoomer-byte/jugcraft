@@ -66,6 +66,8 @@ PRACTICES = {
     "assay": ("balancewrights", "assay", ["assayers_scale"], []),
     "cultivation": ("greenwardens", "verdant_husbandry", ["verdant_bed"], ["days"]),
     "dream": ("dreamwalkers", "dreamwalking", ["oneiric_censer"], ["night"]),
+    # Kindling hearths with Hearthspark (the graph asks for the invocation and a hearth: see graph()).
+    "hearthkeeping": ("hearthbinders", "hearthbinding", [], []),
     "living_growth": ("crimson_vigil", "crimson_rites", ["thornheart_blade"], ["creatures", "days"]),
     "observation": ("starwatchers", "celestial_attunement", ["observatory"], ["night", "open_sky"]),
     "relic_pulse": ("runesmiths", "relic_lore", ["wardlight", "hearthstone", "stormglass", "owlsight_circlet"], []),
@@ -209,7 +211,19 @@ VANILLA_SOURCES = {
     "minecraft:amethyst_block": ("craftable", "amethyst shards", "", ""),
     "minecraft:flowering_azalea": ("renewable", "bone meal on a moss block grows them", "", ""),
     "minecraft:blaze_powder": ("renewable", "blazes, which keep spawning in nether fortresses", "", "nether"),
+    # Specimens: Hearthbinding's (tools/concordance_ember.py), and the hearths it kindles.
+    "minecraft:coal": ("gathered", "coal ore, plentiful near the surface", "charcoal, from any log, serves instead", ""),
+    "minecraft:charcoal": ("craftable", "any log smelted", "", ""),
+    "minecraft:torch": ("craftable", "a stick and coal or charcoal", "", ""),
+    "minecraft:campfire": ("craftable", "sticks, logs and coal or charcoal", "", ""),
+    "minecraft:magma_block": ("gathered", "the ocean floor and the Nether", "four magma cream make one", ""),
+    "minecraft:blaze_rod": ("renewable", "blazes, which keep spawning in nether fortresses", "", "nether"),
+    "minecraft:magma_cream": ("renewable", "magma cubes; or blaze powder and a slime ball", "", "nether"),
+    "minecraft:fire_charge": ("craftable", "blaze powder, coal and gunpowder", "", "nether"),
     "minecraft:prismarine_shard": ("renewable", "guardians, which keep spawning around ocean monuments", "", ""),
+    # Wayfaring's belt, boots and charms (tools/concordance_trinkets.py).
+    "minecraft:leather": ("renewable", "cows, horses and llamas; rabbit hide", "", ""),
+    "minecraft:golden_apple": ("craftable", "an apple and gold ingots", "", ""),
 }
 
 # Jugcraft things the world grows rather than a recipe makes, by the same rules as VANILLA_SOURCES.
@@ -474,6 +488,10 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
             if key == "ritual":
                 # A ritual is the practice; each ritual already needs its circle (anchor included) and offerings.
                 alternatives = [[f"ritual:{rid(ritual)}"] for ritual in rituals]
+            elif key == "hearthkeeping":
+                # Hearthspark kindles the hearths: campfires and candles, both made from what the world renews.
+                spark = f"invocation:{rid('hearthspark')}"
+                alternatives = [[spark, items.item("minecraft:campfire")], [spark, items.tag("minecraft:candles", "item")]]
             for encounter in encounters:
                 nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
                 needs.append(f"encounter:{encounter}")

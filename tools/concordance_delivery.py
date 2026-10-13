@@ -29,23 +29,26 @@ SOURCES = [ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java", ROO
 # Tests name a game test method, or a client game test class (whose single test is its runTest).
 MATRIX = {
     "fabric-api": (
-        "Attachments for every player record; item components; the rules' reload listener; menus; commands; networking "
-        "(the journal and its request, signs, the Vigil's gesture); key mappings; the Focus HUD line; block-entity load and unload "
+        "Attachments for every player record, and each wearer's worn trinkets choice, sent to everyone who sees them; item "
+        "components; the rules' reload listener; menus; commands; networking (the journal and its request, signs, the "
+        "Vigil's gesture, the worn trinkets choice); key mappings; the Focus HUD line; block-entity load and unload "
         "(the circle index); the block-break and attack questions asked for the person behind a change, with a "
         "FakePlayer standing in for an absent owner when a server allows it; the Transfer API for the crucible's water "
         "and every courier pickup and delivery",
         "required",
         ["theJournalSurvivesTheTrip", "aSignReachesTheClientUnchanged", "aRequestIsFetchedAndDelivered",
-         "lightGoesOnlyWhereItsCasterCouldBuild", "theCircleIndexLooksOnlyInReach"],
+         "lightGoesOnlyWhereItsCasterCouldBuild", "theCircleIndexLooksOnlyInReach", "eachWearerChoosesWhetherTheirTrinketsShow"],
         "No pipe carries Concordance essences; a real protection mod has not been tried (a stand-in listener answers "
         "the two questions in the tests)"),
     "geckolib": (
         "Animated blocks and creatures driven by the status the server sends: Circle Anchor, Alembic Crucible (with "
         "its liquid at its volume), Verdant Heart, Mulch Maw, Gleaner, Orrery Observatory, Reliquary Shrine, Spire "
-        "Heart, Oneiric Censer; Hearthling, Gathering Shade, Clockwork Porter and dream wisps",
+        "Heart, Oneiric Censer; Hearthling, Gathering Shade, Clockwork Porter and dream wisps; the two fire sets "
+        "worn as the owner's armour model, each in its own texture (Jugcraft's first GeckoLib armour)",
         "required",
-        ["ConcordancePresentationClientGameTests", "aPorterShowsOnceWhatItLacks"],
-        "Seen only in CI's small screenshot previews; frame cost of a large installation not measured"),
+        ["ConcordancePresentationClientGameTests", "aPorterShowsOnceWhatItLacks", "ConcordanceEmberGearClientGameTests"],
+        "Seen only in CI's small screenshot previews; frame cost of a large installation not measured; the sets' glint "
+        "is a Jugcraft layer, and vanilla trims are not drawn on them"),
     "player-animation-library": (
         "Original cast and release gestures for the invocations; the circle participants' channelling gesture; the "
         "Vigil's offering gesture, sent by the server when an offering is made",
@@ -87,22 +90,33 @@ MATRIX = {
         "the use key is Spell Engine's order"),
     "spell-power": (
         "Schools name each Principle's damage type, so resistances apply once; the Lance scales with arcane Spell "
-        "Power; Resonant Rings can carry arcane Spell Power",
+        "Power, Cinderbolt and Hearthflare with fire; Resonant Rings can carry arcane Spell Power, the Ember foci and "
+        "the two fire sets fire; Spell Power's attribute enchantments are refused on the sets",
         "required",
-        ["lanceStrikesAndScalesWithSpellPower", "everyStatisticIsARealAttribute"],
-        "Only the Lance scales with Spell Power"),
+        ["lanceStrikesAndScalesWithSpellPower", "everyStatisticIsARealAttribute", "cinderboltBurnsAndGrowsWithFireSpellPower",
+         "theRegaliaRaisesTheFireToItsCeiling", "spellPowerEnchantmentsAreRefusedOnTheSet"],
+        "Concordance damage adds Spell Power's points only, not its critical hits"),
     "trinkets-updated": (
-        "Resonant Rings in the ring slot and the Hearthstone in the necklace slot, both given by data; a ring's "
-        "modifiers through Trinkets' callback; relics read from the slots on the server",
+        "Resonant Rings in the ring slot and the Hearthstone in the necklace slot, both given by data; the owner's "
+        "Spell Focus and Bracelet slots, ported from their Curios data, for the Ember foci and the Fire Bangle; a ring's "
+        "and a focus's modifiers through Trinkets' callback; relics and the bangle read from the slots on the server; "
+        "Wayfaring's Belt, Charm and Feet slots, with named callback modifiers, a slot-count attribute and Relic Lore's "
+        "canEquip; the Leather Belt and Amphibian Boot drawn on the wearer by Trinkets' data-driven renderer (a render "
+        "definition and block models from the owner's worn sheets), through Jugcraft's own render element, which hides "
+        "them under armour and on a wearer who has chosen to hide them",
         "required",
-        ["relicsAreFoundInTrinketSlots", "gemsRunesAndBondsKeepTheirRules"],
-        "Cosmetic slots count as worn for show only"),
+        ["relicsAreFoundInTrinketSlots", "gemsRunesAndBondsKeepTheirRules", "theFociGiveFireSpellPowerThroughTrinkets",
+         "theBangleLeavesAHearthbindersBlowSmouldering", "ConcordanceEmberGearClientGameTests",
+         "theTrinketsAreMadeAndWornAsDesigned", "ConcordanceWayfaringClientGameTests"],
+        "Cosmetic slots count as worn for show only; of the worn things only the belt and boot are drawn on the body, "
+        "in third person only, and seen so far only in CI's client screenshots"),
     "cloth-config": (
-        "The Concordance settings screen: the Focus line, reduced motion, exact values, the simple journal and "
-        "visual intensity",
+        "The Concordance settings screen: the Focus line, reduced motion, exact values, the simple journal, visual "
+        "intensity and whether your worn trinkets are shown",
         "required",
         [],
-        "No test opens the screen; the settings it writes are read by client code only"),
+        "No test opens the screen; the settings it writes are read by client code only, but for the worn trinkets "
+        "choice, which the client sends to the server"),
     "jade": (
         "Readouts from server snapshots: bench study, lantern Radiance, sconce charge, circle phase and faults, pylon "
         "charge, crucible state, beds and crops, living devices, observatory, workers, courier posts, shrines",

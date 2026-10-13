@@ -37,7 +37,8 @@ Tide and Hollow, and some carry a contaminant:
 
 **Preparations are explicit transformations.** As it comes (`raw`), an ingredient goes in undissolved: all of it waits
 to be stirred out. **Ground** in a Mortar and Pestle (`ground`: hold the mortar, the ingredient in the other hand) it
-keeps 90% of its properties, and 60% of that dissolves the moment it goes in.
+keeps 90% of its properties, and 60% of that dissolves the moment it goes in. The kitchen uses the same mortar: a Dried
+Chili in the other hand grinds into two Paprika ([vegetables-herbs-and-spices.md](vegetables-herbs-and-spices.md)).
 
 **The crucible.** Place it over a heat source. Its temperature moves one degree a tick towards the source's: nothing
 20, magma 60, soul campfire 100, campfire 120, soul fire 150, fire 175, lava 220 (a campfire only while lit). Four

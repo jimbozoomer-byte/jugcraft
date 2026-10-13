@@ -30,6 +30,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  * is in it. It reads one block (the one below it) a tick and looks the recipe up when a food is put in or finished.
  */
 public class SkilletBlockEntity extends BlockEntity {
+	public final local.peepo.KitchenCompanionPort companionKitchen = new local.peepo.KitchenCompanionPort(this);
 	public static final int CAPACITY = 16;
 	public static final int SPEED = 3;
 	private static final RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> RECIPES =
@@ -42,6 +43,20 @@ public class SkilletBlockEntity extends BlockEntity {
 	private ItemStack fried = ItemStack.EMPTY;
 	private int progress;
 	private int time;
+	public int companionRoom(ItemStack stack,ItemStack result){
+		if(!raw.isEmpty() && !ItemStack.isSameItemSameComponents(raw,stack) || !fried.isEmpty() && !ItemStack.isSameItemSameComponents(fried,result))return 0;
+		return Math.max(0,Math.min(CAPACITY-raw.getCount(),result.getMaxStackSize()/Math.max(1,result.getCount())-raw.getCount()-fried.getCount()/Math.max(1,result.getCount())));
+	}
+	public int companionInsert(ItemStack stack,int maximum){
+		if(!(level instanceof ServerLevel server))return 0;var r=recipe(server,stack).orElse(null);if(r==null)return 0;
+		var result=r.value().assemble(new SingleRecipeInput(stack));int count=Math.min(maximum,companionRoom(stack,result));if(count<=0)return 0;
+		if(raw.isEmpty()){raw=stack.copyWithCount(count);progress=0;}else raw.grow(count);
+		time=Math.max(1,r.value().cookingTime()/SPEED);return count;
+	}
+	private record CompanionSnapshot(ItemStack raw,ItemStack fried,int progress,int time){}
+	public Object companionSnapshot(){return new CompanionSnapshot(raw.copy(),fried.copy(),progress,time);}
+	public void companionRestore(Object value){var s=(CompanionSnapshot)value;raw=s.raw.copy();fried=s.fried.copy();progress=s.progress;time=s.time;}
+
 
 	public SkilletBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.SKILLET_ENTITY, pos, state);
@@ -145,6 +160,7 @@ public class SkilletBlockEntity extends BlockEntity {
 
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		companionKitchen.drop();
 		if (level != null) {
 			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), fried);
 			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), raw);
@@ -156,6 +172,7 @@ public class SkilletBlockEntity extends BlockEntity {
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
+		companionKitchen.load(input);
 		raw = input.read("raw", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
 		fried = input.read("fried", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
 		progress = input.getIntOr("progress", 0);
@@ -165,6 +182,7 @@ public class SkilletBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		companionKitchen.save(output);
 		output.store("raw", ItemStack.OPTIONAL_CODEC, raw);
 		output.store("fried", ItemStack.OPTIONAL_CODEC, fried);
 		output.putInt("progress", progress);

@@ -139,6 +139,4 @@ def tags(tags):
     for knife in KNIVES:
         tags.add("item", KNIFE_TAG, rid(knife))
         tags.add("item", "c:tools/knife", rid(knife))
-        tags.add("item", "minecraft:enchantable/melee_weapon", rid(knife))
-        tags.add("item", "minecraft:enchantable/durability", rid(knife))
-
+        # Vanilla enchantment tags are composed with all equipment in gear.write_all.

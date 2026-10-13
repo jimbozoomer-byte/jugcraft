@@ -18,7 +18,10 @@ import net.minecraft.world.level.storage.ValueOutput;
  * What lies on a Cutting Board: one item, kept and sent to clients for the board to show; breaking the board drops it.
  */
 public class CuttingBoardBlockEntity extends BlockEntity {
+	public final local.peepo.KitchenCompanionPort companionKitchen = new local.peepo.KitchenCompanionPort(this);
 	private ItemStack item = ItemStack.EMPTY;
+	/** Only called inside a companion transfer, including rollback. */
+	public void companionPut(ItemStack stack){item=stack.copyWithCount(stack.isEmpty()?0:1);}
 
 	public CuttingBoardBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.CUTTING_BOARD_ENTITY, pos, state);
@@ -57,6 +60,7 @@ public class CuttingBoardBlockEntity extends BlockEntity {
 
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		companionKitchen.drop();
 		if (level != null) {
 			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), item);
 			item = ItemStack.EMPTY;
@@ -66,12 +70,14 @@ public class CuttingBoardBlockEntity extends BlockEntity {
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
+		companionKitchen.load(input);
 		item = input.read("item", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
 	}
 
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		companionKitchen.save(output);
 		output.store("item", ItemStack.OPTIONAL_CODEC, item);
 	}
 

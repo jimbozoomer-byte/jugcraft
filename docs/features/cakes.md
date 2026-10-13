@@ -106,5 +106,5 @@ Not done: play in a real client and a two-client dedicated-server session.
 Food and decoration, for any time of year; the birthday cake's candles are part of its model and do not light.
 
 ## Rollout and open questions
-- The owner's milkshakes and pies and tarts (their other pages) come after the new fruit crops they asked for first. The [fruit crops](fruit-crops.md) brought coffee, and the Coffee Cake now takes Coffee Beans where it took Mulling Spices.
+- The owner's milkshakes and pies and tarts (their other pages) come after the new fruit crops they asked for first. The [fruit crops](fruit-crops.md) brought coffee, and the Coffee Cake now takes Coffee Beans where it took Mulling Spices. The [pies and tarts](pies-and-tarts.md) are built, set down by the same block at their own height, and so are the [milkshakes](milkshakes.md).
 - Cakes do not sit on the feasts' platters or the Pantry Shelf; they stand on a table as a block.

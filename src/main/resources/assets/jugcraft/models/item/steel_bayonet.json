@@ -2,6 +2,7 @@
   "credit": "Made with Blockbench",
   "parent": "item/handheld",
   "textures": {
-    "layer0": "jugcraft:item/guns/attachments/steel_bayonet"
+    "layer0": "jugcraft:item/guns/attachments/steel_bayonet",
+    "particle": "jugcraft:item/guns/attachments/steel_bayonet"
   }
 }

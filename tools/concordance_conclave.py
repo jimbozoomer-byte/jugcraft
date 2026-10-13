@@ -2,10 +2,10 @@
 
 The Starbound Conclave is the fellowship of the Concordance's traditions, which are its factions: every research entry
 already belongs to one (Lampwrights, Greenwardens, Alembists, Starwatchers, Circlewrights, Spiritbinders, Crimson Vigil,
-Runesmiths, Balancewrights, Hexweavers, Dreamwalkers). It replaces nothing: parties stay Jugcraft's parties, the town
-stays the town, Jugs stay the only coin. A player who understands First Light swears its oath at a Conclave Lectern (or
-with /jugcraft concordance conclave join) and earns RENOWN, which is standing and never a currency, from four kinds of
-contribution, each bounded (Java: conclave/Conclave.java):
+Runesmiths, Balancewrights, Hexweavers, Dreamwalkers, Hearthbinders). It replaces nothing: parties stay Jugcraft's
+parties, the town stays the town, Jugs stay the only coin. A player who understands First Light swears its oath at a
+Conclave Lectern (or with /jugcraft concordance conclave join) and earns RENOWN, which is standing and never a currency,
+from four kinds of contribution, each bounded (Java: conclave/Conclave.java):
 
 - research: each state a research entry reaches, once (1, 2, 5 and 10);
 - commissions: the Conclave's posted tasks, each once a week, worth less each time and nothing after its third;
@@ -59,7 +59,7 @@ MAX_PROJECT_RENOWN = 100
 TRADITIONS = {"lampwrights": "Lampwrights", "greenwardens": "Greenwardens", "alembists": "Alembists",
               "starwatchers": "Starwatchers", "circlewrights": "Circlewrights", "spiritbinders": "Spiritbinders",
               "crimson_vigil": "Crimson Vigil", "runesmiths": "Runesmiths", "balancewrights": "Balancewrights",
-              "hexweavers": "Hexweavers", "dreamwalkers": "Dreamwalkers"}
+              "hexweavers": "Hexweavers", "dreamwalkers": "Dreamwalkers", "hearthbinders": "Hearthbinders"}
 
 # The practices commissions and projects may ask for (each a Java ACTIVITY), and how they read.
 ACTIVITIES = {"jugcraft:observation": "an observation of the sky", "jugcraft:ritual": "a ritual completed",

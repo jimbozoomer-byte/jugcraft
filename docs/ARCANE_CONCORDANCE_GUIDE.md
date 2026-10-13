@@ -51,6 +51,7 @@ and this guide is a bug.
 | Circle Lore | Circlewrights | Examine something made to hold a shape or a bearing | Understand circles: study a circle specimen at a Lampwright's Bench | Complete rituals in 3 different chunks |
 | Crimson Rites | Crimson Vigil | Examine a living thing that bleeds or stings | Understand Crimson Rites: study a crimson specimen at a Lampwright's Bench | Grow a Thornheart Blade to its second stage |
 | Dreamwalking | Dreamwalkers | Examine something from the edge of dreams | Understand Dreamwalking: study a dreamlike thing at a Lampwright's Bench | Come back from three dreams |
+| Hearthbinding | Hearthbinders | Examine something that holds fire | Understand Hearthbinding: study something that holds fire at a Lampwright's Bench | Kindle 3 different kinds of hearth with Hearthspark |
 | Relic Lore | Runesmiths | Examine something that has outlived its maker | Understand Relic Lore: study something old at a Lampwright's Bench | Have relics serve you in three different ways |
 | Runesmithing | Runesmiths | Examine something a smith works with | Understand Runesmithing: study smithing stock at a Lampwright's Bench | Enhance a ring in three different ways |
 | Sympathy | Hexweavers | Examine something that carries a creature's likeness | Understand Sympathy: study a likeness at a Lampwright's Bench | Cast three different curses |

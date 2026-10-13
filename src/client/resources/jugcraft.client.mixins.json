@@ -11,6 +11,7 @@
     "ClientLevelSeasonMixin",
     "DiagonalParticlesMixin",
     "GunFovMixin",
+    "GunMouseMixin",
     "JeiRegistryBootstrapMixin"
   ],
   "injectors": {

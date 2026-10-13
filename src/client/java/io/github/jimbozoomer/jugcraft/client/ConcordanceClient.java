@@ -44,7 +44,9 @@ import net.minecraft.world.level.Level;
 
 /**
  * The Arcane Concordance on the client: the Lampwright's Bench screen, the Focus line shown while an instrument is in
- * the main hand, specimen and lantern tooltips, the settings key and the journal ({@link JournalClient}). Everything here reads state the server sent
+ * the main hand, specimen and lantern tooltips, the settings key, the journal ({@link JournalClient}), the two fire
+ * sets as worn ({@link EmberClient}) and the render element Wayfaring's belt and boots are drawn through
+ * ({@link WayfaringClient}). Everything here reads state the server sent
  * (the player's own Focus attachment, item components, menu data); nothing here decides an outcome.
  */
 final class ConcordanceClient {
@@ -65,6 +67,8 @@ final class ConcordanceClient {
 		WorkerClient.register();
 		JournalClient.register();
 		SignClient.register();
+		EmberClient.register();
+		WayfaringClient.register();
 		openSettings = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.jugcraft.concordance_config",
 				InputConstants.UNKNOWN.getValue(), PartyClient.CATEGORY));
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {

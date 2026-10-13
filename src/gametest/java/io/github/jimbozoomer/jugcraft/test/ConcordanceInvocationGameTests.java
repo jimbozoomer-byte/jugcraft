@@ -118,14 +118,16 @@ public class ConcordanceInvocationGameTests {
 	}
 
 	/**
-	 * Six invocations load, one per role, each a composition that fits the wand with every tuning; none does what
-	 * another does; each costs at least its composition; its spell is a Concordance spell whose one impact is
-	 * jugcraft:invocation. Research teaches three at understood and all six at mastered, at the mastered costs.
+	 * First Light's six invocations load, one per role, and every invocation (Ember's too) is a composition that fits the
+	 * wand with every tuning; none does what another does; each costs at least its composition; its spell is a
+	 * Concordance spell whose one impact is jugcraft:invocation. First Light teaches three at understood and all six at
+	 * mastered, at the mastered costs.
 	 */
 	@GameTest(maxTicks = 20)
 	public void sixInvocationsOneForEachRole(GameTestHelper helper) {
 		ConcordanceRules rules = ConcordanceData.rules();
-		helper.assertTrue(rules.problems().isEmpty() && rules.invocations().size() == 6, "Six invocations load cleanly: "
+		long firstLight = rules.invocations().values().stream().filter(invocation -> invocation.research().equals(FIRST_LIGHT)).count();
+		helper.assertTrue(rules.problems().isEmpty() && firstLight == 6, "First Light's six invocations load cleanly: "
 				+ rules.invocations().keySet() + " " + rules.problems());
 		Set<Definitions.Role> roles = EnumSet.noneOf(Definitions.Role.class);
 		Set<String> signatures = new HashSet<>();

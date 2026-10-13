@@ -33,6 +33,14 @@
     "#c:seeds/strawberry",
     "#c:seeds/blueberry",
     "#c:seeds/coffee",
+    "#c:seeds/lettuce",
+    "#c:seeds/spinach",
+    "#c:seeds/peas",
+    "#c:seeds/cucumber",
+    "#c:seeds/eggplant",
+    "#c:seeds/zucchini",
+    "#c:seeds/mustard",
+    "#c:seeds/saffron",
     "jugcraft:acorn"
   ]
 }

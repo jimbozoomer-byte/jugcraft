@@ -85,6 +85,11 @@ public class KitchenStoveBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	protected InteractionResult useWithoutItem(BlockState state,Level level,BlockPos pos,Player player,BlockHitResult hit){
+		if(!level.isClientSide() && level.getBlockEntity(pos) instanceof KitchenStoveBlockEntity stove && stove.companionKitchen.handOver(player))return InteractionResult.SUCCESS;
+		return InteractionResult.PASS;
+	}
+	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
 		if (stack.is(ItemTags.SHOVELS) && state.getValue(LIT)) {
