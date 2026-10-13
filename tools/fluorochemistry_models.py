@@ -1,41 +1,41 @@
 """Bolted, supported chemistry vessels; every service pipe reaches a process body."""
 from fluorochemistry import FORMS
 from coastal_metals_models import base
-from starter_chemistry_models import drawer,coupling,STEEL,OLIVE,CHROME,CERAMIC,LIGHT
+from starter_chemistry_models import drawer,coupling,STEEL,OLIVE,CHROME,SILVER,LIGHT
 from steampunk_models import box,cyl
 from biorefinery_models import pipe_run
 
 def concentrator():
  m=base(3)+[box((-27,3,12),(11,12,43),STEEL)]
- m+=cyl('y',-11,27,14,12,54,CERAMIC)
+ m+=cyl('y',-11,27,14,12,54,SILVER)
  for y in (13,35,50):m+=cyl('y',-11,27,14.5,y,y+2,STEEL)
  m+=[box((1,12,20),(9,48,36),OLIVE),box((-15,54,23),(-7,60,31),STEEL)]
  for y in (22,34,44):pipe_run(m,[(-1,y,27),(5,y,27)])
  return m
 def dissolution():
  m=base(4)+[box((-28,3,12),(12,12,57),STEEL)]
- m+=cyl('z',-8,26,15,16,55,CERAMIC)
+ m+=cyl('z',-8,26,15,16,55,SILVER)
  for z in (16,34,52):m+=cyl('z',-8,26,15.5,z,z+2,STEEL)
  m += [box((-27,12,18),(-18,38,31),OLIVE),box((-15,38,24),(-1,44,39),OLIVE)]
  return m
 def reactor(depth=4,expanded=False):
  top=68 if expanded else 53
  m=base(depth)+[box((-27,3,13),(11,12,depth*16-6),STEEL)]
- m+=cyl('y',-8,32,16,12,top,CERAMIC)
+ m+=cyl('y',-8,32,16,12,top,SILVER)
  for y in (13,35,top-4):m+=cyl('y',-8,32,16.5,y,y+2,STEEL)
  m+=[box((-13,top,27),(-3,top+7,37),OLIVE),box((-22,12,47),(6,30,depth*16-6),OLIVE)]
  if expanded:
-  for y in (18,32,46,60):m.append(box((-25,y,23),(-23,y+2,41),CERAMIC))
-  m.append(box((-22,30,52),(6,45,70),CERAMIC))
+  for y in (18,32,46,60):m.append(box((-25,y,23),(-23,y+2,41),SILVER))
+  m.append(box((-22,30,52),(6,45,70),SILVER))
  return m
 def cracker():
- m=base(4)+[box((-28,3,12),(12,12,57),STEEL),box((-26,12,16),(10,40,52),CERAMIC)]
+ m=base(4)+[box((-28,3,12),(12,12,57),STEEL),box((-26,12,16),(10,40,52),SILVER)]
  for z in (16,28,40,50):m.append(box((-27,13,z),(11,41,z+2),STEEL))
  m.append(box((-21,16,13),(5,35,16),OLIVE))
  m.append(box((-18,20,12.8),(2,23,13),LIGHT))
  return m
 def oven():
- m=base(4)+[box((-28,3,12),(12,9,58),STEEL),box((-27,9,13),(11,39,56),CERAMIC)]
+ m=base(4)+[box((-28,3,12),(12,9,58),STEEL),box((-27,9,13),(11,39,56),SILVER)]
  for z in (14,53):m.append(box((-28,10,z),(12,40,z+2),STEEL))
  m.append(box((-18,16,11), (5,34,13),OLIVE))
  m.append(box((-15,21,10.8),(2,24,11),LIGHT))

@@ -26,8 +26,8 @@ AQUEOUS_ELECTROLYSIS = f"{MOD}:aqueous_electrolysis"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
-# Match the process-machine ceramic surfaces instead of the blurred insulator sprite.
-INSULATOR, BUSBAR, COPPER = "el_white", "copper_busbar", "sp_copper"
+# Match the silver-grey process-machine fittings, without glossy insulator stripes.
+INSULATOR, BUSBAR, COPPER = "dw_steel_plate", "copper_busbar", "sp_copper"
 # Amber level strips that light while it works (steampunk_models.GLOW).
 STRIP = "dr_amber"
 # The Gas Burning Generator's materials (the art brief): graphite ribs, olive combustion covers, a pale heat shield,

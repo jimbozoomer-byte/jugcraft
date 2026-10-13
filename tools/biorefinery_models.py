@@ -1,12 +1,12 @@
 """Native industrial models built from the existing restrained steel/ceramic material kit."""
-from starter_chemistry_models import skid,flange,cabinet,drawer,coupling,fan,STEEL,OLIVE,CHROME,CERAMIC,RIBS,RUBBER,GAUGE,LIGHT
+from starter_chemistry_models import skid,flange,cabinet,drawer,coupling,fan,STEEL,OLIVE,CHROME,SILVER,RIBS,RUBBER,GAUGE,LIGHT
 from steampunk_models import box,cyl,dial
 from biorefinery import FORMS
 
 def kettle():
  m=skid(3,3)
  for x in (-20,4):m.append(box((x,3,15),(x+4,12,39),STEEL))
- m+=cyl('y',-6,28,15,10,35,CERAMIC)
+ m+=cyl('y',-6,28,15,10,35,SILVER)
  for y in (11,32):m+=cyl('y',-6,28,15.5,y,y+2,STEEL)
  m+=cyl('y',-6,28,13,35,38,OLIVE)
  m+=[box((-28,20,3),(-15,34,15),OLIVE),box((-30,34,2),(-13,36,16),CHROME),box((-26,36,5),(-17,44,13),STEEL)]
@@ -26,7 +26,7 @@ def fermenter():
  for x in (-21,1):
   for z in (18,34):m.append(box((x,3,z),(x+4,24,z+4),STEEL))
  for rad,y in ((7,8),(11,12),(15,16)):m+=cyl('y',-8,28,rad,y,y+4,CHROME)
- m+=cyl('y',-8,28,17,20,51,CERAMIC)
+ m+=cyl('y',-8,28,17,20,51,SILVER)
  for y in (20,35,49):m+=cyl('y',-8,28,17.4,y,y+1.5,STEEL)
  for rad,y in ((16,51),(12,54),(7,57)):m+=cyl('y',-8,28,rad,y,y+3,OLIVE)
  m+=cyl('y',-8,28,3,60,63,STEEL)
@@ -43,7 +43,7 @@ def fermenter():
 def distiller():
  m=skid(4,4)
  # Offset column leaves the condenser and low reboiler visible from the aisle.
- m+=cyl('y',-29,40,13,5,83,CERAMIC)
+ m+=cyl('y',-29,40,13,5,83,SILVER)
  for y in (7,22,39,56,73,82):m+=cyl('y',-29,40,13.5,y,y+2,CHROME)
  m+=cyl('y',-29,40,10,84,89,STEEL)
  m+=cyl('y',-3, 40,6,24,77,OLIVE)
@@ -71,7 +71,7 @@ def distiller():
 def bauxite():
  m=skid(3,4)
  for z in (15, 44):m.append(box((-26,3,z),(6,12,z+7),STEEL))
- m+=cyl('z',-9,27,16,14, 54,CERAMIC)
+ m+=cyl('z',-9,27,16,14, 54,SILVER)
  for z in (14,32,52):m+=cyl('z',-9,27,16.5,z,z+2,STEEL)
  m+=cyl('z',-9,27,13,10,14,CHROME)
  m+=cyl('z',-9,27,10,9,10,OLIVE)
@@ -93,7 +93,7 @@ def press():
  for x in (-23,4):
   m+=cyl('z',x,34,1.7,8,56,CHROME)
  for z in range(17,49,4):
-  m+=[box((-23,17,z),(7,37,z+2),CHROME),box((-20,19,z-.2),(4,35,z),CERAMIC)]
+  m+=[box((-23,17,z),(7,37,z+2),CHROME),box((-20,19,z-.2),(4,35,z),SILVER)]
  m+=cyl('z',-8,28,4,1,2,STEEL)
  m+=cyl('z',-8,28,4,6,8,STEEL)
  m+=drawer(-26,-13,5,12,44, 60)
@@ -105,7 +105,7 @@ def press():
 def calciner():
  m=skid(3,4)
  for z in (13,45):m.append(box((-25,3,z),(5,14,z+8),STEEL))
- m+=cyl('z',-9,26,16,12,55,CERAMIC)
+ m+=cyl('z',-9,26,16,12,55,SILVER)
  for z in (12,29,51):m+=cyl('z',-9,26,16.5,z,z+2,STEEL)
  m+=cyl('z',-9,26,12,9,12,STEEL)
  m+=cyl('z',-9,26,9,8,9,OLIVE)
@@ -118,9 +118,9 @@ def calciner():
 
 def cell():
  m=skid(3,3)
- m+=[box((-29,5,12),(13,25, 44),CERAMIC),box((-26,25,14),(10,28,42),STEEL)]
+ m+=[box((-29,5,12),(13,25, 44),SILVER),box((-26,25,14),(10,28,42),STEEL)]
  for x in (-27,8):
-  m.append(box((x,26,15),(x+3,53,43),CERAMIC))
+  m.append(box((x,26,15),(x+3,53,43),SILVER))
   m.append(box((x-1,53,14),(x+4,56,44),'sp_copper'))
  for z in (19,29,39):
   m.append(box((-26,51,z),(10,54,z+3),'copper_busbar'))

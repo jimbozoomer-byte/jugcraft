@@ -9,7 +9,7 @@
     "dr_amber": "jugcraft:block/dr_amber",
     "dr_fan": "jugcraft:block/dr_fan",
     "dw_ribbed_steel": "jugcraft:block/dw_ribbed_steel",
-    "el_white": "jugcraft:block/el_white",
+    "dw_steel_plate": "jugcraft:block/dw_steel_plate",
     "power_port": "jugcraft:block/power_port",
     "sp_copper": "jugcraft:block/sp_copper",
     "particle": "jugcraft:block/dp_olive"
@@ -126,16 +126,16 @@
       ],
       "faces": {
         "north": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "south": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "west": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "up": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         }
       }
     },
@@ -152,13 +152,13 @@
       ],
       "faces": {
         "north": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "west": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "up": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         }
       }
     },
@@ -175,16 +175,16 @@
       ],
       "faces": {
         "north": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "south": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "west": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "up": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         }
       }
     },
@@ -201,13 +201,13 @@
       ],
       "faces": {
         "south": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "west": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "up": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         }
       }
     },

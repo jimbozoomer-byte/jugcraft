@@ -1,5 +1,5 @@
 """Supported, connected native machinery using the existing industrial material kit."""
-from starter_chemistry_models import skid,cabinet,drawer,coupling,fan,STEEL,OLIVE,CHROME,CERAMIC,RIBS,RUBBER,LIGHT
+from starter_chemistry_models import skid,cabinet,drawer,coupling,fan,STEEL,OLIVE,CHROME,SILVER,RIBS,RUBBER,LIGHT
 from steampunk_models import box,cyl
 from coastal_metals import FORMS
 from biorefinery_models import pipe_run
@@ -10,7 +10,7 @@ def base(depth):
 def vessel(depth,height=35):
  m=base(depth)
  m += [box((-27,3,13),(11,12,19),STEEL),box((-27,3,depth*16-18),(11,12,depth*16-12),STEEL)]
- m+=cyl('z',-8,26,16,14,depth*16-8,CERAMIC)
+ m+=cyl('z',-8,26,16,14,depth*16-8,SILVER)
  for z in (14,depth*16-11):m+=cyl('z',-8,26,16.5,z,z+2,CHROME)
  m+=cyl('z',-8,26,13,11,14,OLIVE)
  m.append(box((-12,40,22),(-4,43,30),STEEL))
@@ -30,7 +30,7 @@ def intake():
 
 def concentrator():
  m=base(3)
- m+=[box((-27,3,12),(11,7,41),STEEL),box((-25,7,13),(9,25,40),CERAMIC)]
+ m+=[box((-27,3,12),(11,7,41),STEEL),box((-25,7,13),(9,25,40),SILVER)]
  m+=cyl('y',-10,27,10,25,42,OLIVE)
  for y in (26,39):m+=cyl('y',-10,27,10.5,y,y+2,CHROME)
  m+=cyl('z',-8,17,3,9,14,STEEL)
@@ -43,7 +43,7 @@ def conditioner():
  m=base(3)
  m.append(box((-28,3,14),(12,12,41),STEEL))
  for x in (-18,2):
-  m+=cyl('y',x,27,10,12,36,CERAMIC)
+  m+=cyl('y',x,27,10,12,36,SILVER)
   for y in (12,33):m+=cyl('y',x,27,10.5,y,y+2,CHROME)
  m.append(box((-27,36,21),(10,39,33),OLIVE))
  m+=cyl('z',-8,22,3,9,17,STEEL)
@@ -52,7 +52,7 @@ def conditioner():
 
 def dryer():
  m=base(3)
- m+=[box((-28,3,10),(12,8,42),STEEL),box((-27,8,11),(11,36,41),CERAMIC),box((-23,12,9),(7,32,12),OLIVE)]
+ m+=[box((-28,3,10),(12,8,42),STEEL),box((-27,8,11),(11,36,41),SILVER),box((-23,12,9),(7,32,12),OLIVE)]
  m.append(box((-18,16,8.8),(2,19,9),LIGHT))
  for y in (14,24,33):m.append(box((-27,y,12),(11,y+2,40),STEEL))
  m+=cyl('z',-8,26,2,7,11,STEEL)
@@ -60,7 +60,7 @@ def dryer():
 
 def magnesium():
  m=base(3)
- m+=[box((-28,3,12),(12,8,41),STEEL),box((-27,8,13),(11,33,40),CERAMIC)]
+ m+=[box((-28,3,12),(12,8,41),STEEL),box((-27,8,13),(11,33,40),SILVER)]
  for x in (-23,2):
   m.append(box((x,31,18),(x+5,42,36),STEEL))
   m.append(box((x-1,42,17),(x+6,44,37),'sp_copper'))
@@ -71,7 +71,7 @@ def magnesium():
 def chlorinator():
  m=base(4)
  m+=[box((-27,3,16),(11,9,54),STEEL),box((-25,9,18),(9,15,52),OLIVE)]
- m+=cyl('y',-8,35,17,15,55,CERAMIC)
+ m+=cyl('y',-8,35,17,15,55,SILVER)
  for y in (16,34,52):m+=cyl('y',-8,35,17.5,y,y+2,STEEL)
  m+=cyl('y',-8,35,13,55,60,OLIVE)
  m+=cyl('z',-8,26,3,9,19,STEEL)

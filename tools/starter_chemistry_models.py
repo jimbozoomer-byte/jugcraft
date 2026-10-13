@@ -8,8 +8,9 @@ from steampunk_models import box, cyl, dial
 from dieselpunk_models import GUNMETAL as STEEL, OLIVE, CHROME, RUBBER, HAZARD, GAUGE, GRILLE
 import machine_rotors as rotors
 
-# White 16px enamel panels; the glossy 64px insulator sprite produces blurred
-# black/white bands when tiled over vessels. Keep this shared by every process line.
+# Muted 16px silver-grey steel for vessel cladding, shared by every process line.
+# Keep pale ceramic/polymer item materials separate from the metal machine shells.
+SILVER = "dw_steel_plate"
 CERAMIC = "el_white"
 COPPER = "sp_copper"
 LIGHT = "dr_amber"
@@ -69,7 +70,7 @@ def chemical_infuser():
     m = skid(2,3)
     # Vertical reaction vessel, insulated waist and banded shoulders.
     m += cyl("y", 0, 25, 10, 10, 39, STEEL)
-    m += cyl("y", 0, 25, 10.5, 16, 33, CERAMIC)
+    m += cyl("y", 0, 25, 10.5, 16, 33, SILVER)
     for y in (10,15,33,38):
         m += cyl("y", 0,25,11, y,y+1.5,CHROME)
     m += cyl("y", 0,25,8, 39,43,OLIVE)
@@ -104,7 +105,7 @@ def chemical_oxidizer():
     m = skid(2,2)
     m += drawer(-11,11,5,12,3,27)
     m += cyl("y",0,17,10,12,30,STEEL)
-    m += cyl("y",0,17,10.5,15,26,CERAMIC)
+    m += cyl("y",0,17,10.5,15,26,SILVER)
     for y in (12,27):
         m += cyl("y",0,17,11,y,y+2,CHROME)
     # Closed rear charging hopper with a dark recessed throat, broad rim, and guarded drive.
@@ -146,7 +147,7 @@ def coal_gasifier():
     m += cyl("y",-23,36,21,12,14,CHROME)
     m += drawer(-37,-9,15,25,12,24)
     # Tall refractory column; structural bands interrupt the ceramic shell instead of noisy wear.
-    m += cyl("y",-23,36,15,27,80,CERAMIC)
+    m += cyl("y",-23,36,15,27,80,SILVER)
     for y in (27,43,59,75):
         m += cyl("y",-23,36,15.5,y,y+2.5,STEEL)
         for x in (-38,-10):

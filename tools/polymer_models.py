@@ -1,7 +1,7 @@
 """Supported process bodies, continuous feed paths and visible guarded drives."""
 from polymers import FORMS
 from coastal_metals_models import base,vessel
-from starter_chemistry_models import drawer,coupling,STEEL,OLIVE,CHROME,CERAMIC,RUBBER
+from starter_chemistry_models import drawer,coupling,STEEL,OLIVE,CHROME,SILVER,RUBBER
 from steampunk_models import box,cyl
 from biorefinery_models import pipe_run
 
@@ -13,7 +13,7 @@ def monomer():
 def kettle():
  m=base(3)
  m += [box((-27,3,12),(11,12,42),STEEL)]
- m+=cyl('y',-8,27,17,12,53,CERAMIC)
+ m+=cyl('y',-8,27,17,12,53,SILVER)
  for y in (13,34,50):m+=cyl('y',-8,27,17.5,y,y+2,STEEL)
  m.append(box((-14,53,20),(-2,60,34),OLIVE))
  m+=cyl('z',-8,26,3,7,14,STEEL)
@@ -24,13 +24,13 @@ def extruder():
  # Heated screw barrel is bolted to two saddles; the hopper reaches its feed throat.
  for z in (15,32):m.append(box((-18,10,z),(2,18,z+5),OLIVE))
  m+=cyl('z',-8,24,9,13,43,OLIVE)
- for z in (16,26,36):m+=cyl('z',-8,24,9.5,z,z+2,CERAMIC)
+ for z in (16,26,36):m+=cyl('z',-8,24,9.5,z,z+2,SILVER)
  m.append(box((-16,30,17),(0,42,30),OLIVE))
  m.append(box((-25,22,20),(-14,28,26),STEEL)) # feed hatch joins the screw housing
  m+=cyl('z',-8,24,3,7,14,STEEL)
  # Die head seats in the cooling bed; pull rollers have bearings on both sides.
  m+=cyl('z',-8,24,6,43,48,STEEL)
- m.append(box((-20,10,44),(4,19,70),CERAMIC))
+ m.append(box((-20,10,44),(4,19,70),SILVER))
  for z in (51,62):
   for x in (-23,3):m.append(box((x,10,z-3),(x+4,29,z+3),OLIVE))
   m+=cyl('x',24,z,3,-19,3,RUBBER)

@@ -13,7 +13,7 @@
     "dp_olive_stencil": "jugcraft:block/dp_olive_stencil",
     "dp_rubber": "jugcraft:block/dp_rubber",
     "dr_amber": "jugcraft:block/dr_amber",
-    "el_white": "jugcraft:block/el_white",
+    "dw_steel_plate": "jugcraft:block/dw_steel_plate",
     "hydrogen_still": "jugcraft:block/hydrogen_still",
     "lye_still": "jugcraft:block/lye_still",
     "oxygen_still": "jugcraft:block/oxygen_still",
@@ -462,19 +462,19 @@
       ],
       "faces": {
         "north": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "south": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "east": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "west": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "down": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         }
       }
     },
@@ -491,19 +491,19 @@
       ],
       "faces": {
         "north": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "south": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "east": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "west": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         },
         "down": {
-          "texture": "#el_white"
+          "texture": "#dw_steel_plate"
         }
       }
     },

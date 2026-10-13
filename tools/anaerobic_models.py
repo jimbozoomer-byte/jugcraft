@@ -1,5 +1,5 @@
 """Sealed farm-industry equipment, in the shared native block/rotor model pipeline."""
-from starter_chemistry_models import skid,flange,cabinet,drawer,coupling,fan,STEEL,OLIVE,CHROME,CERAMIC,RIBS,RUBBER,GAUGE,LIGHT
+from starter_chemistry_models import skid,flange,cabinet,drawer,coupling,fan,STEEL,OLIVE,CHROME,SILVER,RIBS,RUBBER,GAUGE,LIGHT
 from steampunk_models import box,cyl,dial
 import math
 
@@ -13,7 +13,7 @@ def digester():
     for x in (-65,-10):
         for z in (18,73):
             m += [box((x,3,z),(x+8,14,z+8),STEEL),box((x-1,3,z-1),(x+9,5,z+9),CHROME)]
-    m += cyl('y',-33,50,34,12,68,CERAMIC)
+    m += cyl('y',-33,50,34,12,68,SILVER)
     for y in (12,30,49,66):m += cyl('y',-33,50,35,y,y+2,STEEL)
     for radius,y in ((33,68),(29,72),(24,76),(17,80),(9,84)):
         m += cyl('y',-33,50,radius,y,y+4,OLIVE)
@@ -57,7 +57,7 @@ def digester():
 def cleaner():
     m=skid(2,3)
     for x in (-8,8):
-        m += cyl('y',x,27,6,6,38,OLIVE if x<0 else CERAMIC)
+        m += cyl('y',x,27,6,6,38,OLIVE if x<0 else SILVER)
         for y in (7,19,34):m+=cyl('y',x,27,6.5,y,y+1.5,STEEL)
         m+=cyl('y',x,27,5,38,42,STEEL)
     m+=flange('z',-8,40,27,47.5,2)
