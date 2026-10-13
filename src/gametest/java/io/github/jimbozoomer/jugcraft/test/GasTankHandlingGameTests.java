@@ -83,14 +83,17 @@ public class GasTankHandlingGameTests {
 			helper.assertTrue(items.size() == 1, "Breaking the tank dropped " + items.size() + " tank stacks");
 			ItemEntity drop = items.get(0);
 			// Each touch is measured by what it adds, so the test holds whether or not the two mock players share an
-			// identity: the first takes the tank, the second finds nothing left to take.
+			// identity. The first takes the tank and the drop leaves the world; the game only touches entities still in
+			// it, and vanilla restores a discarded drop's count, so the second player is checked against the world.
 			int before = count(first);
 			drop.playerTouch(first);
 			int taken = count(first) - before;
-			helper.assertTrue(taken == 1 && (drop.isRemoved() || drop.getItem().isEmpty()),
-					"The first touch took " + taken + " tanks, leaving " + drop.getItem());
+			helper.assertTrue(taken == 1 && drop.isRemoved(), "The first touch took " + taken + " tanks, leaving " + drop.getItem());
 			int beforeSecond = count(second);
-			drop.playerTouch(second);
+			for (ItemEntity left : helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(tank)).inflate(3),
+					item -> item.isAlive() && item.getItem().is(JugcraftFluids.FLUID_TANK.asItem()))) {
+				left.playerTouch(second);
+			}
 			helper.assertTrue(count(second) == beforeSecond, "The second touch took another tank from an empty drop");
 			ServerPlayer holder = first;
 			StoredFluid stored = null;
