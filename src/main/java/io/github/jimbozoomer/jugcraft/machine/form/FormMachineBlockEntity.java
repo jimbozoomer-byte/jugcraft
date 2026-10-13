@@ -589,7 +589,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				return MachineStatus.fluid(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_OTHER_FLUID, inputs + out, reserved, 0);
 			}
 			int need = fluidNeeds.merge(out, result.amount(), Integer::sum);
-			if (tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
+			if (!form.vents(out) && tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + out);
 			}
 		}
@@ -686,7 +686,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		for (WorkLane.FluidPart part : lane.fluidResults()) {
 			FluidTank tank = tanks.output(part.tank());
 			int total = fluidOut.merge(part.tank(), part.mb(), Integer::sum);
-			if (!tank.variant.isBlank() && !tank.variant.equals(part.fluid()) || tank.millibuckets() + total > tank.capacityMb()) {
+			if (!tank.variant.isBlank() && !tank.variant.equals(part.fluid())
+					|| !form.vents(part.tank()) && tank.millibuckets() + total > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + part.tank());
 			}
 		}
@@ -702,7 +703,9 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			if (tank.variant.isBlank()) {
 				tank.variant = part.fluid();
 			}
-			tank.amount += (long) part.mb() * FluidNetworks.DROPLETS_PER_MB;
+			// A vented tank keeps what fits; the rest is released.
+			tank.amount = Math.min(tank.amount + (long) part.mb() * FluidNetworks.DROPLETS_PER_MB,
+					form.vents(part.tank()) ? (long) tank.capacityMb() * FluidNetworks.DROPLETS_PER_MB : Long.MAX_VALUE);
 		}
 		for (WorkLane.ItemPart part : lane.itemResults()) {
 			ItemStack held = items.get(part.slot());

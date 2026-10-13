@@ -22,7 +22,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * The industrial machine forms the game registers, from the owner's factory plan (docs/features/
  * industrial-machine-foundation.md): package 2's Electrolytic Separator (docs/features/industrial-electrolytic-separator.md),
  * Gas Burning Generator (docs/features/industrial-gas-burning-generator.md), Chemical Infuser
- * (docs/features/industrial-chemical-infuser.md) and Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md).
+ * (docs/features/industrial-chemical-infuser.md), Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md) and
+ * Industrial Fermenter (docs/features/industrial-fermenter.md).
  * Each form is also described in
  * tools/industrial_forms.py for its art, recipes and data; tools/check_mod_data.py keeps the two the same. Every form
  * shares the one controller block entity type, {@code jugcraft:machine_form}, so a saved machine keeps its type when
@@ -35,6 +36,8 @@ public final class IndustrialForms {
 	public static final String GAS_COMBINATION = "jugcraft:gas_combination";
 	/** Burning a solid feed in a metered oxidant gas, such as sulfur in oxygen. */
 	public static final String SOLID_OXIDATION = "jugcraft:solid_oxidation";
+	/** Fermenting crops into alcohol in a closed, stirred, heated vessel, its carbon dioxide collected. */
+	public static final String CONTROLLED_FERMENTATION = "jugcraft:controlled_fermentation";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
 	/** What the Infuser's bed socket holds: the nickel catalyst bed. */
@@ -142,10 +145,40 @@ public final class IndustrialForms {
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 1, 0, FormSide.LEFT)
 			.build();
 
+	/**
+	 * The Industrial Fermenter: a controlled fermentation form of the chemical reactor family (the Chemical Reactor's
+	 * energy figures), three wide, three deep and four tall, every position a block: a tall stepped vessel on four legs,
+	 * the controller (its instrument box) front left on the ground. Crops go in at the hatch on the crown and water low at
+	 * the back left; the alcohol leaves at the broth outlet low at the front and the carbon dioxide at the upper flange at
+	 * the back. The carbon dioxide tank vents what it cannot hold, so fermentation never waits on it (the owner's choice).
+	 */
+	public static final MachineForm INDUSTRIAL_FERMENTER_FORM = MachineForm.builder(Jugcraft.id("industrial_fermenter"),
+					MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###")
+			.layer("###", "###", "###")
+			.layer("###", "###", "###")
+			.layer("###", "###", "###")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("water")
+			.outputTank("product")
+			.outputTank("co2")
+			.vent("co2")
+			.items(1, 0)
+			.capability(CONTROLLED_FERMENTATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 1, 3, FormSide.TOP)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 2, 1, FormSide.BACK)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("co2_out", FormPort.Kind.FLUID_OUT, 1, 1, 2, 3, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 2, 2, 0, FormSide.BACK)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock CHEMICAL_OXIDIZER;
+	public static FormMachineBlock INDUSTRIAL_FERMENTER;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	private IndustrialForms() {
@@ -156,7 +189,9 @@ public final class IndustrialForms {
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
 		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER);
+		INDUSTRIAL_FERMENTER = block("industrial_fermenter", INDUSTRIAL_FERMENTER_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER,
+				INDUSTRIAL_FERMENTER);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

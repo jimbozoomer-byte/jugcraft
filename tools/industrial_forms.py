@@ -1,7 +1,8 @@
 """Industrial machine forms the game registers (docs/features/industrial-machine-foundation.md): the starter factory's
 Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), Gas Burning Generator
 (docs/features/industrial-gas-burning-generator.md), Chemical Infuser (docs/features/industrial-chemical-infuser.md) and
-Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md), package 2 of the owner's factory plan.
+Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md) and Industrial Fermenter
+(docs/features/industrial-fermenter.md), of the owner's factory plan.
 
 Each form is described here for its art, recipes and data, and in IndustrialForms.java for the game;
 tools/check_mod_data.py checks that the two agree. Layers are given bottom first, each as rows from the front to the
@@ -28,6 +29,8 @@ AQUEOUS_ELECTROLYSIS = f"{MOD}:aqueous_electrolysis"
 GAS_COMBINATION = f"{MOD}:gas_combination"
 # Burning a solid feed in a metered oxidant gas (sulfur in oxygen): what the Oxidizer offers its family's recipes.
 SOLID_OXIDATION = f"{MOD}:solid_oxidation"
+# Fermenting crops in a closed, stirred, heated vessel: what the Fermenter offers its family's recipes.
+CONTROLLED_FERMENTATION = f"{MOD}:controlled_fermentation"
 # Joining a carbon oxide and hydrogen into methane over the nickel bed, and the item tag the Infuser's bed socket holds.
 NICKEL_METHANATION = f"{MOD}:nickel_methanation"
 METHANATION_BEDS = "methanation_beds"
@@ -174,6 +177,37 @@ FORMS = {
                                            "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "industrial_fermenter": {
+        "display": "Industrial Fermenter",
+        # The chemical reactor family (the Chemical Reactor's energy figures, 96 JE/t), like the reactor's own fermentation.
+        "family": "chemical_reactor",
+        "layers": [["C##", "###", "###"], ["###", "###", "###"], ["###", "###", "###"], ["###", "###", "###"]],
+        "profile": "ENTRY",
+        "tank_mb": 2_000,
+        # Crops in the hatch slot and water; the alcohol and the carbon dioxide, which vents what it cannot hold
+        # (MachineForm.vents: the owner's selected excess-vent default, so fermentation never waits on the gas).
+        "input_tanks": ["water"],
+        "output_tanks": ["product", "co2"],
+        "vents": ["co2"],
+        "item_inputs": 1,
+        "capabilities": [CONTROLLED_FERMENTATION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "ITEM_IN", 0, 0, 1, 3, "TOP"),
+            ("water_in", "FLUID_IN", 0, 0, 2, 1, "BACK"),
+            ("product_out", "FLUID_OUT", 0, 1, 0, 0, "FRONT"),
+            ("co2_out", "FLUID_OUT", 1, 1, 2, 3, "BACK"),
+            ("power", "ENERGY_IN", 0, 2, 2, 0, "BACK"),
+        ],
+        # The plan's bill is 8 steel plates, a Steel Tank, a motor, 2 glass, a basic circuit and a casing: 14 items, more
+        # than a crafting grid holds. This takes 4 plates, the Steel Tank, glass, the motor, the circuit and the casing,
+        # 12 plates in all (open for review).
+        "recipe": (["PGP", "PTP", "MCK"], {"P": "#c:plates/steel", "G": "minecraft:glass", "T": f"{MOD}:steel_tank",
+                                           "M": f"{MOD}:electric_motor", "C": f"{MOD}:basic_circuit",
+                                           "K": f"{MOD}:machine_casing"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -212,6 +246,17 @@ HANDBOOK = {
         "in ten seconds. The bed is never used up. Its screen says what it is waiting for, and upgrade cards fit its "
         "terminal.",
     ],
+    "industrial_fermenter": [
+        "Three wide, three deep and four tall: a tall stirred vessel on four legs, built from steel plates, a Steel Tank, "
+        "glass, an electric motor, a basic circuit and a Machine Casing. Every block it fills must be free when it is "
+        "placed.",
+        "Drop eight crops (wheat, sugar cane, potatoes, carrots, beetroot, berries, melon or apples) into the hatch on its "
+        "crown and pipe water into the inlet low at the back left. With a bucket of water they ferment into 250 mB of "
+        "bioethanol at the broth outlet low at the front, and 250 mB of carbon dioxide at the flange high at the back, in "
+        "five seconds at 96 JE/t.",
+        "The carbon dioxide feeds the Chemical Infuser's methane. Collecting it is optional: when its tank is full the "
+        "rest is vented and fermentation goes on.",
+    ],
     "chemical_oxidizer": [
         "Two wide, two deep and three tall: a lined reaction throat fed by a hopper and a feed screw at the back, with a "
         "gas column and collector hood on top, built from steel plates, a furnace, an electric motor, glass, a basic "
@@ -235,6 +280,7 @@ TANK_NAMES = {
     "product": "Product gas tank",
     "water": "Water tank",
     "oxidant": "Oxidant tank",
+    "co2": "Carbon dioxide tank",
 }
 
 # Recipes only forms run: each names the capability a form must offer. Fluid results go to output tanks by their
@@ -265,6 +311,14 @@ FORM_RECIPES = {
          "tool": f"{MOD}:nickel_catalyst_bed",
          "fluids": [(f"{MOD}:hydrogen", 400), (f"{MOD}:carbon_dioxide", 100)],
          "fluid_results": [(f"{MOD}:methane", 100, 0), ("minecraft:water", 400, 1)], "ticks": 200, "features": ["machines"]},
+    ],
+    "industrial_fermenter": [
+        # The Chemical Reactor's fermentation (eight fermentable crops and a bucket of water, 250 mB of bioethanol, 100 ticks)
+        # with its carbon dioxide collected: one reaction amount of gas for each of alcohol, 250 mB. Vented when not taken.
+        {"name": "fermenter_bioethanol", "capability": CONTROLLED_FERMENTATION, "items": [("#jugcraft:fermentable", 8)],
+         "fluids": [("minecraft:water", 1000)],
+         "fluid_results": [(f"{MOD}:bioethanol", 250, 0), (f"{MOD}:carbon_dioxide", 250, 1)], "ticks": 100,
+         "features": ["machines"]},
     ],
     "chemical_oxidizer": [
         # Sulfur oxidation (docs/features/industrial-starter-gas-and-acid-factory.md): a dust counts as 250 reaction
@@ -746,6 +800,108 @@ def chemical_oxidizer_still():
     return cyl("z", cx, cy, 0.75, 22.5, 30.5, CHROME) + cyl("z", cx, cy, 3, 24, 29.5, COPPER)
 
 
+# The Fermenter's agitator drive pulley on top of the vessel, turning about y: its centre (x, y, z).
+FERMENTER_DRIVE = (-8, 62.75, 24)
+# The Fermenter's materials (the art brief): dull stainless steel for the vessel, a cream insulated jacket.
+STAINLESS, JACKET = "dw_steel_plate", "sp_ceramic"
+
+
+def industrial_fermenter():
+    """Three wide, three deep and four tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a
+    tall stepped vessel of dull stainless steel on four stout legs, a sloping bottom cone leading to the low broth
+    outlet at the front, its pipe banded in bioethanol with a red-wheeled valve. The front carries the short cream
+    insulated jacket between charcoal bands, the narrow amber level strip (which lights while it works) and the ringed
+    manway on the upper body; at the front left, under the vessel, the instrument box (the controller) with its gauge
+    and the green batch lamp. A shallow domed crown carries the enclosed agitator drive, its pulley (drawn turning by
+    MachineRotors) on a gearbox driven by the motor lying towards the back. The feed hatch rises through the crown's
+    shoulder at the top on the left; the closed carbon dioxide outlet leaves the upper body at the back to its flange,
+    the water inlet enters lower down on the left, and the compact heat-services box at the back right, with copper
+    risers into the jacket, carries the power socket. Each port is at the middle of its block's face."""
+    cx, cz = -8, 24
+    m = []
+    # Four stout legs on feet under a support ring, and the sloping bottom cone.
+    for lx in (cx - 14, cx + 14):
+        for lz in (cz - 14, cz + 14):
+            m.append(box((lx - 2.5, 0, lz - 2.5), (lx + 2.5, 1, lz + 2.5), GUNMETAL))
+            m.append(box((lx - 1.5, 1, lz - 1.5), (lx + 1.5, 14, lz + 1.5), GUNMETAL))
+    m += cyl("y", cx, cz, 10, 6, 10, GUNMETAL)
+    m += cyl("y", cx, cz, 15, 10, 14, GUNMETAL)
+    # The vessel: the lower body with its support ring, the cream jacket between charcoal bands, the shoulder ring, the
+    # stepped upper body with a charcoal band, and the shallow domed crown.
+    m += cyl("y", cx, cz, 19, 14, 40, STAINLESS, GUNMETAL)
+    m += cyl("y", cx, cz, 19.75, 14, 15.5, GUNMETAL)
+    m += cyl("y", cx, cz, 19.5, 18, 32, JACKET)
+    for y in (17, 32):
+        m += cyl("y", cx, cz, 19.75, y, y + 1, GUNMETAL)
+    m += cyl("y", cx, cz, 19.25, 39, 41, GUNMETAL)
+    m += cyl("y", cx, cz, 17, 41, 56, STAINLESS, GUNMETAL)
+    m += cyl("y", cx, cz, 17.5, 47, 48.5, GUNMETAL)
+    m += cyl("y", cx, cz, 14, 56, 58, STAINLESS)
+    m += cyl("y", cx, cz, 11, 58, 60, STAINLESS)
+    # The narrow level strip on the jacket's front, in a charcoal frame, and the ringed manway on the upper body.
+    m.append(box((cx - 1.75, 18.5, 3.75), (cx + 1.75, 31.5, 4.5), GUNMETAL))
+    m.append(box((cx - 1, 19.5, 3.5), (cx + 1, 30.5, 3.75), STRIP))
+    m += cyl("z", cx, 48, 5.5, 6.25, 7, GUNMETAL, FLANGE)
+    m.append(dial("north", (cx, 48, 5.5), 6, texture=PORTHOLE, body=CHROME))
+    # The instrument box (the controller) at the front left under the vessel: the amber gauge and the green batch lamp.
+    m.append(box((4, 0, 1), (15.5, 13.5, 7), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (11.5, 9.5, 0.75), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (7, 9.5, 0.75), 2, texture=MINT, body=GUNMETAL))
+    # The low broth outlet from the cone to its flange at the front: a charcoal pipe banded in bioethanol, a valve with
+    # a red handwheel.
+    m += cyl("z", cx, 8, 2.25, 0.75, 22, RUBBER)
+    m += cyl("z", cx, 8, 2.6, 3, 4, "bioethanol_still")
+    m.append(box((cx - 3, 5, 0), (cx + 3, 11, 0.75), {"*": CHROME, "north": f"{FLANGE}!"}))
+    m.append(box((cx - 1.5, 10, 7), (cx + 1.5, 11.5, 9), GUNMETAL))
+    m += cyl("y", cx, 8, 0.5, 11.5, 12.5, CHROME)
+    m += cyl("y", cx, 8, 2, 12.5, 13.25, HANDWHEEL)
+    # The enclosed agitator drive on the crown: a gearbox under the pulley and the motor lying towards the back,
+    # charcoal ribbed with its fan cover.
+    m.append(box((cx - 4, 59, cz - 4), (cx + 4, 62, cz + 4), GUNMETAL))
+    m += cyl("z", cx, 60.5, 2.25, cz + 4, cz + 13, OLIVE, GUNMETAL)
+    for z in (cz + 6, cz + 9):
+        m += cyl("z", cx, 60.5, 2.6, z, z + 1, GUNMETAL)
+    m += cyl("z", cx, 60.5, 2.5, cz + 13, cz + 14, GUNMETAL, GRILLE)
+    # The feed hatch rising through the crown's shoulder at the top on the left, its hazard-banded rim round the mouth.
+    m += cyl("y", 8, cz, 3, 50, 62.5, GUNMETAL)
+    m.append(box((3.5, 62.5, cz - 4.5), (12.5, 63.5, cz + 4.5), HAZARD))
+    m.append(box((5, 63.5, cz - 3), (11, 64, cz + 3), {"*": CHROME, "up": MOUTH}))
+    # The closed carbon dioxide outlet from the upper body to its flange high at the back.
+    m += cyl("z", cx, 56, 2.25, 38, 47.25, RUBBER)
+    m += cyl("z", cx, 56, 2.6, 44, 45, "carbon_dioxide_still")
+    m.append(box((cx - 3, 53, 47.25), (cx + 3, 59, 48), {"*": CHROME, "south": f"{FLANGE}!"}))
+    # The water inlet into the lower body at the back on the left.
+    m += cyl("z", 8, 24, 1.75, 32, 47.25, RUBBER)
+    m += cyl("z", 8, 24, 2.1, 44, 45, "sp_water")
+    m.append(box((5, 21, 47.25), (11, 27, 48), {"*": CHROME, "south": f"{FLANGE}!"}))
+    # The compact heat-services box at the back right: the power socket, a hazard band and copper risers into the
+    # jacket.
+    m.append(box((-31, 1.5, 41), (-17, 15, 47.25), GUNMETAL))
+    m.append(box((-31.25, 15, 40.75), (-16.75, 16, 47.5), HAZARD))
+    m.append(box((-27, 5, 47.25), (-21, 11, 48), {"*": CHROME, "south": "power_port!"}))
+    for x in (-27, -21):
+        m += cyl("y", x, 44, 1, 16, 22.5, COPPER)
+        m += cyl("z", x, 22, 1, 38, 45, COPPER)
+    return m
+
+
+def industrial_fermenter_rotor():
+    """The Fermenter's agitator drive pulley on its gearbox (client/MachineRotors draws it): a spoked pulley and a
+    drive key across it, so its slow turn reads from the floor."""
+    import machine_rotors as rotors
+    cx, y, cz = FERMENTER_DRIVE
+    quads = rotors.disc("y", y - 0.75, y + 0.5, cx, cz, 3.25, COPPER, "dr_pulley")
+    quads += rotors.prism("y", y + 0.5, y + 1, [(cx - 3, cz - 0.5), (cx + 3, cz - 0.5), (cx + 3, cz + 0.5), (cx - 3, cz + 0.5)],
+                          CHROME, CHROME)
+    return quads
+
+
+def industrial_fermenter_still():
+    """The pulley standing still, for the item model only."""
+    cx, y, cz = FERMENTER_DRIVE
+    return cyl("y", cx, cz, 3.25, y - 0.75, y + 0.5, COPPER, "dr_pulley")
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -763,13 +919,19 @@ ROTORS = {
         "block": "chemical_oxidizer", "axis": "z", "center": list(OXIDIZER_SCREW), "property": "lit", "speed": 9,
         "ease": 20, "always": True, "quads": chemical_oxidizer_rotor(),
     },
+    # The Fermenter's agitator drive, turning slowly while a batch works.
+    "industrial_fermenter_drive": {
+        "block": "industrial_fermenter", "axis": "y", "center": list(FERMENTER_DRIVE), "property": "lit", "speed": 4,
+        "ease": 30, "always": True, "quads": industrial_fermenter_rotor(),
+    },
 }
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
-          "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer()}
+          "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer(),
+          "industrial_fermenter": industrial_fermenter()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
-               "chemical_oxidizer": chemical_oxidizer_still()}
+               "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still()}
 PARTICLE = "dp_olive"
 
 
@@ -795,6 +957,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
         glow = {name: f"{MOD}:block/{FORM_GLOW[name]}" for name in model_writer.texture_names(elements) if name in FORM_GLOW}
         offsets = footprint(info["layers"])
         for index, part in enumerate(model_writer.split_model(form, elements, offsets)):
+            # A block wholly inside a vessel keeps none of its faces; Minecraft refuses a faceless element.
+            part = [element for element in part if element["faces"]]
             out.model(f"{form}_part{index}", {"ambientocclusion": False, "textures": textures, "elements": part})
             out.model(f"{form}_part{index}_on", {"parent": f"{MOD}:block/{form}_part{index}", "textures": glow})
         variants = {}

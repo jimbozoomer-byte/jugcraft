@@ -7360,6 +7360,38 @@
           "ticks": 100
         }
       ]
+    },
+    {
+      "block": "jugcraft:industrial_fermenter",
+      "type": "industrial_fermenter",
+      "recipes": [
+        {
+          "items": [
+            [
+              "#jugcraft:fermentable",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:bioethanol",
+              250
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100
+        }
+      ]
     }
   ],
   "concordance": {

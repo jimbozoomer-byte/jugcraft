@@ -980,6 +980,7 @@ def build():
             form_page("electrolytic_separator"),
             machine_page("chemical_reactor"),
             form_page("chemical_oxidizer"),
+            form_page("industrial_fermenter"),
             machine_page("fuel_cell"),
             form_page("gas_burning_generator"),
             machine_page("electroplating_bath"),

@@ -3874,6 +3874,30 @@
           }
         },
         {
+          "title": "Industrial Fermenter",
+          "icon": "jugcraft:industrial_fermenter",
+          "text": [
+            "Three wide, three deep and four tall: a tall stirred vessel on four legs, built from steel plates, a Steel Tank, glass, an electric motor, a basic circuit and a Machine Casing. Every block it fills must be free when it is placed.",
+            "Drop eight crops (wheat, sugar cane, potatoes, carrots, beetroot, berries, melon or apples) into the hatch on its crown and pipe water into the inlet low at the back left. With a bucket of water they ferment into 250 mB of bioethanol at the broth outlet low at the front, and 250 mB of carbon dioxide at the flange high at the back, in five seconds at 96 JE/t.",
+            "The carbon dioxide feeds the Chemical Infuser's methane. Collecting it is optional: when its tank is full the rest is vented and fermentation goes on."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "minecraft:glass",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:basic_circuit",
+              "jugcraft:machine_casing"
+            ],
+            "result": "jugcraft:industrial_fermenter",
+            "count": 1
+          }
+        },
+        {
           "title": "Fuel Cell",
           "icon": "jugcraft:fuel_cell",
           "text": [
