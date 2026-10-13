@@ -3903,12 +3903,27 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2195 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, looks and eye relief against tools/guns.py).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 12B game tests (to run in CI):**
+- **Slice 12B game tests (all passed in CI, below):**
   - `CopperGunsGameTests`:
     - `copperGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires plain bullets, one a shot, loaded a magazine at a time. The Penny Pistol is a pistol held in one hand, of ten light rounds, and two of them are two guns at once; the Conductor Carbine a carbine of eight rifle rounds, one a pull; the Magpie SMG an automatic of thirty-two light rounds. The Penny Pistol takes the barrels' attachments and the stocks only; the other two those, the grips, the bayonets, the scopes and the Laser Sight, and the Conductor Carbine the magazines too.
     - `copperGunsFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three.
     - `pennyPistolsFireFromBothHands`: a Penny Pistol in each hand fires from each and lands both shots, each spending a round of its own.
   - `GunsGameTests` counts 60 guns; `DualGunsGameTests` the fifteen held in one hand; `TacticalAttachmentsGameTests` the twenty-three that take the Tactical Grip.
+- **Slice 12B in CI** ([run 38457083489](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38457083489), on 3f4ac9b4e): every check passed.
+  - **Server game tests:** 1385 in each job, the `mod` job's and the one without the optional integrations. All passed, `CopperGunsGameTests` among them.
+  - **Client game tests:** the changed files chose `GunsClientGameTests` alone, and it passed. In it each new gun, in its turn:
+    - held and aimed, its arms drawn at full size and then half, the view narrowed to 0.9 (Penny Pistol), 0.82 (Conductor Carbine) and 0.88 (Magpie SMG);
+    - fired at the husk, each spending one round, with 7, 6 and 6 frames of flash: the Penny Pistol took it from 344.77 to 340.77 (4), the Conductor Carbine 8 and the Magpie SMG 2.5;
+    - reloaded from the inventory, 31 rounds left each time; the Penny Pistol threw 3 casings, the other two none, as their animations cue none;
+    - with each set of attachments it takes, held and aimed: each with each stock, the stock left out aimed (in 34 to 36 frames, none held); the Conductor Carbine's extended magazine holding 12; the long guns with the Tactical Grip and the Laser Sight.
+  - **Between the shots:** the husk lost nothing between the Borer's shot and the Penny Pistol's, or between the copper guns'.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar. The Penny Pistol's hand wraps most of it (see the known limits), its long magazine standing out to the left; the Conductor Carbine shows its slide and front post; the Magpie SMG its long magazine along the left of the view.
+    - **Aimed:** each raised to the middle of the view, the husk's head over it. The Penny Pistol's and the Magpie SMG's magazines stand out to the left.
+    - **Reloading:** the Penny Pistol's magazine drawn out of its side; the Conductor Carbine lowered, the left hand below it; the Magpie SMG tipped, its magazine out and the left hand over it at the left of the view.
+    - **Inspection:** each turned toward the eye to be looked over.
+    - **Attachments:** each barrel part at the muzzle and each stock behind the grip. The Laser Sight stands on the receiver aimed as it does on the Riveter SMG, the Garrison, Squall and Hermit Rifles and the Chitin SMG in the same run.
+    - **Third person:** each raised toward the camera, the Penny Pistol in one hand, each flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
