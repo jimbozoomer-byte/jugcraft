@@ -3903,7 +3903,8 @@
           "text": [
             "Four wide, four deep and four tall: the Chemical Reactor enlarged into a jacketed vessel with a stirring drive on its lid, built from a Chemical Reactor, a Steel Tank, a steel fluid pipe, an electric motor, a basic circuit and steel plates. Every block it fills must be free when it is placed. It runs two batches at once, from 8,000 mB tanks, at 90% of the reactor's draw.",
             "Pipe water into the inlet on its left side and hydrogen chloride from the Chemical Infuser into the short absorption inlet on its lid: 500 mB of the gas dissolves in a bucket of water into a bucket of hydrochloric acid in five seconds, which leaves at the outlet low at the front.",
-            "Hydrochloric acid leaches ore like sulfuric acid: drop an ore into the hatch on its lid, pipe 250 mB of the acid into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace."
+            "Hydrochloric acid leaches ore like sulfuric acid: drop an ore into the hatch on its lid, pipe 250 mB of the acid into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace.",
+            "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and high-explosive rockets in place of guncotton."
           ],
           "craft": {
             "grid": [

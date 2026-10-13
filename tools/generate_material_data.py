@@ -1244,6 +1244,10 @@ def recipes():
             ("grenade", shaped(MACHINE_FEATURE, [" N ", "PGP", " P "],
                                {"N": "minecraft:iron_nugget", "P": "#c:plates/steel", "G": rid("guncotton")},
                                "grenade", 4, "equipment")),
+            # Ammonium nitrate (the Bulk Chemical Reactor's) packs a grenade in place of guncotton.
+            ("grenade_from_ammonium_nitrate", shaped(MACHINE_FEATURE, [" N ", "PGP", " P "],
+                                                     {"N": "minecraft:iron_nugget", "P": "#c:plates/steel",
+                                                      "G": rid("ammonium_nitrate")}, "grenade", 4, "equipment")),
             ("grenade_launcher", shaped(MACHINE_FEATURE, ["PPG", "RCS"],
                                         {"P": "#c:plates/steel", "G": "#c:gears/steel", "R": rid("rubber"),
                                          "C": rid("basic_circuit"), "S": "#c:ingots/steel"},

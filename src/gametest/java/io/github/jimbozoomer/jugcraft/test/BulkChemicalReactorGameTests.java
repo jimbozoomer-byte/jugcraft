@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidTank;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
@@ -209,6 +210,33 @@ public class BulkChemicalReactorGameTests {
 			Optional<RecipeHolder<CraftingRecipe>> built = crafting.getRecipeFor(bed, helper.getLevel());
 			helper.assertTrue(built.isPresent() && built.get().value().assemble(bed).is(item("vanadium_contact_bed")),
 					"The oxide on two bricks makes the contact bed");
+		});
+	}
+
+	/**
+	 * Ammonium nitrate: 250 mB of nitric acid and 125 mB of ammonia give four ammonium nitrate at the chute, 100 ticks at
+	 * 87 JE. It is a three-dose fertilizer, and it packs a grenade in place of guncotton.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 300)
+	public void nitricAcidAndAmmoniaGiveAmmoniumNitrate(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		insert(helper, port(helper, machine, "liquid_in"), PetroFluids.NITRIC_ACID.source(), 250);
+		insert(helper, port(helper, machine, "gas_in"), PetroFluids.AMMONIA.fluid(), 125);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0
+					&& machine.tanks().input(1).millibuckets() == 0, "The acid and the ammonia used");
+			helper.assertTrue(used(machine, supplied) == TICKS * DRAW, "Paid " + used(machine, supplied) + " JE");
+			helper.assertTrue(extractItems(helper, itemPort(helper, machine, "items_out"), item("ammonium_nitrate")) == 4,
+					"Four ammonium nitrate leave at the chute");
+			helper.assertTrue(item("ammonium_nitrate") instanceof FertilizerItem, "Ammonium nitrate is a fertilizer");
+			RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+			ItemStack plate = stack("steel_plate");
+			CraftingInput grenade = CraftingInput.of(3, 3, List.of(ItemStack.EMPTY, new ItemStack(Items.IRON_NUGGET), ItemStack.EMPTY,
+					plate, stack("ammonium_nitrate"), plate, ItemStack.EMPTY, plate, ItemStack.EMPTY));
+			ItemStack made = crafting.getRecipeFor(grenade, helper.getLevel()).map(holder -> holder.value().assemble(grenade))
+					.orElse(ItemStack.EMPTY);
+			helper.assertTrue(made.is(item("grenade")) && made.getCount() == 4, "Ammonium nitrate packs 4 grenades, not " + made);
 		});
 	}
 

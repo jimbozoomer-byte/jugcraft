@@ -205,6 +205,37 @@ def gasification_residue():
     return img
 
 
+def ammonium_nitrate():
+    """Ammonium nitrate: a heap of small round white prills, lit from the top left and outlined in their own darkest
+    tone (docs/ITEM_ICONS.md)."""
+    white = [(118, 124, 134), (184, 190, 200), (222, 226, 232), (248, 250, 252)]
+    rows = [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        ".......oo.......",
+        "......oHMo......",
+        ".....oHMoHo.....",
+        "....oHMoHMmo....",
+        "...oHMoHMmoHo...",
+        "..oHMoHMmoHMmo..",
+        ".oHMmoMmoHMmmmo.",
+        ".oMmmoMmmoMmmmo.",
+        ".oooooooooooooo.",
+        "................",
+    ]
+    tones = {"o": white[0], "m": white[1], "M": white[2], "H": white[3]}
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def vanadium_contact_bed():
     """Vanadium contact bed: the nickel bed's fired-brick tray, heaped with orange-ochre vanadium oxide pellets. Drawn
     flat in the item icon manner (docs/ITEM_ICONS.md): each part outlined in its own darkest tone, lit from the top
@@ -573,6 +604,7 @@ def draw_all(save, save_animation):
     save(vanadium_pentoxide(), "item", "vanadium_pentoxide")
     save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
     save(gasification_residue(), "item", "gasification_residue")
+    save(ammonium_nitrate(), "item", "ammonium_nitrate")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")

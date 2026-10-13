@@ -5401,6 +5401,28 @@
               2
             ],
             [
+              "jugcraft:ammonium_nitrate",
+              2
+            ],
+            [
+              "jugcraft:rocket_casing",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:he_rocket",
+            4
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:solid_propellant",
+              2
+            ],
+            [
               "jugcraft:guncotton",
               2
             ],
@@ -7598,6 +7620,27 @@
             ]
           ],
           "ticks": 200
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:nitric_acid",
+              250
+            ],
+            [
+              "jugcraft:ammonia",
+              125
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ammonium_nitrate",
+              4
+            ]
+          ],
+          "ticks": 100
         },
         {
           "items": [

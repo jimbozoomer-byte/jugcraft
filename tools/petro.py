@@ -196,6 +196,9 @@ ITEMS = {
     "vanadium_contact_bed": "Vanadium Contact Bed",
     # The Coal Gasifier's ash: one mixed residue (tools/industrial_forms.py), bound into concrete or asphalt.
     "gasification_residue": "Gasification Residue",
+    # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
+    # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
+    "ammonium_nitrate": "Ammonium Nitrate",
 }
 
 

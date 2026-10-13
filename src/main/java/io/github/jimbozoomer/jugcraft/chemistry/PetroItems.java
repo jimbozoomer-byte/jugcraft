@@ -46,6 +46,9 @@ public final class PetroItems {
 	public static Item NICKEL_CATALYST_BED;
 	public static Item VANADIUM_PENTOXIDE;
 	public static Item GASIFICATION_RESIDUE;
+	public static Item AMMONIUM_NITRATE;
+	/** Bone meal doses ammonium nitrate gives each crop. */
+	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
 
 	private PetroItems() {
@@ -76,6 +79,9 @@ public final class PetroItems {
 		VANADIUM_PENTOXIDE = JugcraftRegistry.item("vanadium_pentoxide");
 		VANADIUM_CONTACT_BED = JugcraftRegistry.item("vanadium_contact_bed", properties -> new Item(properties.stacksTo(1)));
 		GASIFICATION_RESIDUE = JugcraftRegistry.item("gasification_residue");
+		// A nitrogen fertilizer: superphosphate's 5x5 area, three doses a crop instead of two.
+		AMMONIUM_NITRATE = JugcraftRegistry.item("ammonium_nitrate",
+				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(CRACKING_CATALYST);
@@ -95,6 +101,7 @@ public final class PetroItems {
 			output.accept(NICKEL_CATALYST_BED);
 			output.accept(VANADIUM_PENTOXIDE);
 			output.accept(GASIFICATION_RESIDUE);
+			output.accept(AMMONIUM_NITRATE);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

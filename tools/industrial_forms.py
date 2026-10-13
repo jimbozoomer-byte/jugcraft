@@ -54,6 +54,8 @@ CATALYST_BEDS = "catalyst_beds"
 # washed iron ore with lye (the Bulk Chemical Reactor).
 CONTACT_CONVERSION = f"{MOD}:contact_conversion"
 VANADIUM_RECOVERY = f"{MOD}:vanadium_recovery"
+# Neutralizing nitric acid with ammonia into solid ammonium nitrate (the Bulk Chemical Reactor).
+NITRATE_NEUTRALIZATION = f"{MOD}:nitrate_neutralization"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
@@ -248,7 +250,7 @@ FORMS = {
         "output_tanks": ["product"],
         "item_inputs": 1,
         "item_outputs": 1,
-        "capabilities": [ACID_ABSORPTION, CHLORIDE_LEACHING, VANADIUM_RECOVERY],
+        "capabilities": [ACID_ABSORPTION, CHLORIDE_LEACHING, VANADIUM_RECOVERY, NITRATE_NEUTRALIZATION],
         "upgrades": True,
         "warmup": 40,
         "ports": [
@@ -447,6 +449,9 @@ HANDBOOK["bulk_chemical_reactor"] = [
     "in five seconds, which leaves at the outlet low at the front.",
     "Hydrochloric acid leaches ore like sulfuric acid: drop an ore into the hatch on its lid, pipe 250 mB of the acid "
     "into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace.",
+    "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of "
+    "ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and "
+    "high-explosive rockets in place of guncotton.",
 ]
 
 HANDBOOK["anaerobic_digester"] = [
@@ -595,6 +600,12 @@ FORM_RECIPES = {
         {"name": "bulk_vanadium_pentoxide", "capability": VANADIUM_RECOVERY, "items": [(f"{MOD}:washed_iron_ore", 4)],
          "fluids": [(f"{MOD}:lye", 500)], "results": [(f"{MOD}:vanadium_pentoxide", 1)], "ticks": 200,
          "features": ["salt", "machines"]},
+        # Ammonium nitrate (this change's proposal): HNO3 + NH3 -> NH4NO3, 250 mB of nitric acid (125 reaction amounts at
+        # the liquid's 2 mB) neutralized by 125 mB of ammonia gas, crystallized into four ammonium nitrate. 100 ticks at
+        # 96 JE/t.
+        {"name": "bulk_ammonium_nitrate", "capability": NITRATE_NEUTRALIZATION,
+         "fluids": [(f"{MOD}:nitric_acid", 250), (f"{MOD}:ammonia", 125)],
+         "results": [(f"{MOD}:ammonium_nitrate", 4)], "ticks": 100, "features": ["salt", "machines"]},
     ],
     "coal_gasifier": [
         # Steam gasification (this change's proposal for the pending carbon ledger): a coal or coke counts as 250 reaction
