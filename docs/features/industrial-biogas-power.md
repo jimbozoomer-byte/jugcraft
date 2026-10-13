@@ -1,6 +1,6 @@
 # Biogas power: the Bio Generator burns the Digester's biogas (factory package 2)
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 This branch joins two stacks:
 - the [Bio Generator](industrial-bio-generator.md) branch (`claude/bio-generator`);
 - the [Anaerobic Digester](industrial-anaerobic-digester.md) stack, up to the [PVC route](industrial-pvc-hcl-recovery.md).
@@ -61,7 +61,9 @@ For CI, server game tests:
 
 ### Results
 
-Not yet run in CI.
+- **Run [38442417215](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38442417215) on the contributor's fork (commit 46a1b307): green.** Everything compiled; the data checks passed; every server game test passed, `BioGeneratorGameTests.biogasBurnsAt64JEATick` among them; the build without optional integrations and all five client shards passed. Later commits on the branch change only documentation.
+
+No survival playtest, two-client test or performance measurement has been done.
 
 ## Rollout and open questions
 
