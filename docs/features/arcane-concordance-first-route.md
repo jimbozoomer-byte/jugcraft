@@ -158,7 +158,7 @@ not known here; the owner's 9 October declaration says the library was remade fr
   survive the trip; requests are gated, answered at their tick and the Inspect page reads only a near, loaded block;
   the page model keeps its place), `ConcordanceComposeGameTests.aWardForAFriendIsComposedAndCast`, and the client test
   `EncyclopediaClientGameTests` (one client on a dedicated server, log prefix `[encyclopedia-check]`): no other loaded
-  non-debug key shares the default; the key opens on Discover, the key or Esc closes, and typing i in chat does not
+  non-debug key shares the default; the key opens on Discover, the key or Esc closes, and typing b in chat does not
   open it; the inventory button stands right of the recipe-book button over no slot or widget and follows it when the
   recipe book opens, a real click puts the 2×2 grid's things back and opens the encyclopedia, and Back reopens the
   inventory; in creative it shows on the Survival Inventory tab only, over no slot; with the examination recorded on the
