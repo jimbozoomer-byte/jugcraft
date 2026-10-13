@@ -1,6 +1,6 @@
 # Vent or hold: the stop-instead setting for vented byproduct tanks
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 Stacked on [biogas power](industrial-biogas-power.md) and the branches below it, down to the [Industrial Fermenter](industrial-fermenter.md), which added vented tanks.
 
 Proposal issue: none. TODO item: "Full CO2 capture storage defaults to continued production/excess venting, with optional stop-instead". The owner's plan ([chemistry and fuels plan](industrial-chemistry-and-fuels-plan.md), decision 8) settled the default and asked for an optional stop-instead setting, leaving the control's details to design. The control below is this change's choice, for review.
@@ -56,7 +56,8 @@ For CI, server game test `IndustrialFermenterGameTests.holdingTheGasStopsInstead
 
 ### Results
 
-Not yet run in CI.
+- **Run [38452018763](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38452018763) on the contributor's fork (commit a7969d1d): green.** Everything compiled; the data checks passed; every server game test passed, `holdingTheGasStopsInsteadOfVenting` among them; the build without optional integrations and all five client shards passed, `IndustrialFermenterClientGameTests` included.
+- The client screenshots have not yet been looked at by a person.
 
 No survival playtest, two-client test or performance measurement has been done.
 
