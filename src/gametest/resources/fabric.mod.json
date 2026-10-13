@@ -15,6 +15,7 @@
 			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorGameTests",
 			"io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorGameTests",
+			"io.github.jimbozoomer.jugcraft.test.GasTankHandlingGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
 			"io.github.jimbozoomer.jugcraft.test.LairGameTests",
 			"io.github.jimbozoomer.jugcraft.test.ConcordanceGameTests",
