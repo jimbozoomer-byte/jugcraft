@@ -981,6 +981,7 @@ def build():
             machine_page("chemical_reactor"),
             form_page("chemical_oxidizer"),
             form_page("industrial_fermenter"),
+            form_page("bulk_chemical_reactor"),
             machine_page("fuel_cell"),
             form_page("gas_burning_generator"),
             machine_page("electroplating_bath"),

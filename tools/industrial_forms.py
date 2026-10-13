@@ -1,8 +1,9 @@
 """Industrial machine forms the game registers (docs/features/industrial-machine-foundation.md): the starter factory's
 Electrolytic Separator (docs/features/industrial-electrolytic-separator.md), Gas Burning Generator
 (docs/features/industrial-gas-burning-generator.md), Chemical Infuser (docs/features/industrial-chemical-infuser.md) and
-Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md) and Industrial Fermenter
-(docs/features/industrial-fermenter.md), of the owner's factory plan.
+Chemical Oxidizer (docs/features/industrial-chemical-oxidizer.md), Industrial Fermenter
+(docs/features/industrial-fermenter.md) and Bulk Chemical Reactor (docs/features/industrial-bulk-chemical-reactor.md), of
+the owner's factory plan.
 
 Each form is described here for its art, recipes and data, and in IndustrialForms.java for the game;
 tools/check_mod_data.py checks that the two agree. Layers are given bottom first, each as rows from the front to the
@@ -31,6 +32,10 @@ GAS_COMBINATION = f"{MOD}:gas_combination"
 SOLID_OXIDATION = f"{MOD}:solid_oxidation"
 # Fermenting crops in a closed, stirred, heated vessel: what the Fermenter offers its family's recipes.
 CONTROLLED_FERMENTATION = f"{MOD}:controlled_fermentation"
+# Dissolving a gas in a liquid (hydrogen chloride in water) and leaching ores in the acid that makes: what the Bulk
+# Chemical Reactor offers its family's recipes.
+ACID_ABSORPTION = f"{MOD}:acid_absorption"
+CHLORIDE_LEACHING = f"{MOD}:chloride_leaching"
 # Joining a carbon oxide and hydrogen into methane over the nickel bed, and the item tag the Infuser's bed socket holds.
 NICKEL_METHANATION = f"{MOD}:nickel_methanation"
 METHANATION_BEDS = "methanation_beds"
@@ -208,6 +213,38 @@ FORMS = {
                                            "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "bulk_chemical_reactor": {
+        "display": "Bulk Chemical Reactor",
+        # The chemical reactor family (96 JE/t), in the expanded profile: two batches side by side, 8,000 mB tanks and
+        # 90% of the draw a batch.
+        "family": "chemical_reactor",
+        "layers": [["C###", "####", "####", "####"]] + [["####", "####", "####", "####"]] * 3,
+        "profile": "EXPANDED",
+        "tank_mb": 8_000,
+        # The liquid (water or acid) at the side, the gas at the short absorption inlet in the crown; ores in the hatch
+        # and washed ores out at the front.
+        "input_tanks": ["liquid", "gas"],
+        "output_tanks": ["product"],
+        "item_inputs": 1,
+        "item_outputs": 1,
+        "capabilities": [ACID_ABSORPTION, CHLORIDE_LEACHING],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "ITEM_IN", 0, 1, 1, 3, "TOP"),
+            ("liquid_in", "FLUID_IN", 0, 0, 2, 0, "LEFT"),
+            ("gas_in", "FLUID_IN", 1, 2, 2, 3, "TOP"),
+            ("product_out", "FLUID_OUT", 0, 2, 0, 0, "FRONT"),
+            ("items_out", "ITEM_OUT", "FormPort.ALL", 1, 0, 0, "FRONT"),
+            ("power", "ENERGY_IN", 0, 3, 3, 0, "RIGHT"),
+        ],
+        # The enlarged Chemical Reactor (no bill in the plan; this change's choice, open for review): the reactor itself,
+        # a Steel Tank, a steel fluid pipe, an electric motor, a basic circuit and 4 steel plates.
+        "recipe": (["PIP", "MRC", "PTP"], {"P": "#c:plates/steel", "I": f"{MOD}:steel_fluid_pipe",
+                                           "M": f"{MOD}:electric_motor", "R": f"{MOD}:chemical_reactor",
+                                           "C": f"{MOD}:basic_circuit", "T": f"{MOD}:steel_tank"}),
+        "features": ["machines"],
+    },
 }
 
 # Each form's Engineer's Handbook page (tools/handbook.py form_page), after its family's machine.
@@ -269,6 +306,18 @@ HANDBOOK = {
     ],
 }
 
+HANDBOOK["bulk_chemical_reactor"] = [
+    "Four wide, four deep and four tall: the Chemical Reactor enlarged into a jacketed vessel with a stirring drive on "
+    "its lid, built from a Chemical Reactor, a Steel Tank, a steel fluid pipe, an electric motor, a basic circuit and "
+    "steel plates. Every block it fills must be free when it is placed. It runs two batches at once, from 8,000 mB "
+    "tanks, at 90% of the reactor's draw.",
+    "Pipe water into the inlet on its left side and hydrogen chloride from the Chemical Infuser into the short "
+    "absorption inlet on its lid: 500 mB of the gas dissolves in a bucket of water into a bucket of hydrochloric acid "
+    "in five seconds, which leaves at the outlet low at the front.",
+    "Hydrochloric acid leaches ore like sulfuric acid: drop an ore into the hatch on its lid, pipe 250 mB of the acid "
+    "into the side inlet, and four washed ores come out of the chute at the front, ready for the furnace.",
+]
+
 # Tank labels on the screen and in its reasons (MachineStatus.tankLabel), by role.
 TANK_NAMES = {
     "fuel": "Fuel tank",
@@ -281,6 +330,8 @@ TANK_NAMES = {
     "water": "Water tank",
     "oxidant": "Oxidant tank",
     "co2": "Carbon dioxide tank",
+    "liquid": "Liquid tank",
+    "gas": "Gas tank",
 }
 
 # Recipes only forms run: each names the capability a form must offer. Fluid results go to output tanks by their
@@ -320,6 +371,14 @@ FORM_RECIPES = {
          "fluid_results": [(f"{MOD}:bioethanol", 250, 0), (f"{MOD}:carbon_dioxide", 250, 1)], "ticks": 100,
          "features": ["machines"]},
     ],
+    "bulk_chemical_reactor": [
+        # Hydrogen chloride absorbed in water (docs/features/industrial-starter-gas-and-acid-factory.md, aqueous HCl
+        # preparation): 500 mB of the gas and a bucket of water make a bucket of ordinary hydrochloric acid, 100 ticks at
+        # the reactor family's 96 JE/t, the plan's 9,600 JE.
+        {"name": "bulk_hydrochloric_acid", "capability": ACID_ABSORPTION,
+         "fluids": [("minecraft:water", 1000), (f"{MOD}:hydrogen_chloride", 500)],
+         "fluid_results": [(f"{MOD}:hydrochloric_acid", 1000, 0)], "ticks": 100, "features": ["salt"]},
+    ],
     "chemical_oxidizer": [
         # Sulfur oxidation (docs/features/industrial-starter-gas-and-acid-factory.md): a dust counts as 250 reaction
         # amounts of sulfur, burning with as much oxygen into as much sulfur dioxide. 100 ticks at the reactor family's
@@ -334,6 +393,21 @@ FORM_RECIPES = {
          "features": ["machines"]},
     ],
 }
+
+
+def _chloride_leaching():
+    """Each ore dissolved in 250 mB of hydrochloric acid gives four washed ores, as sulfuric acid does in the Chemical
+    Reactor (tools/petro.py _leaching): a second, sulfur-free route to the best ore yield, never a better one."""
+    from machines import ORE_LEACHING_MULTIPLIER, _metal_features
+    from materials import WASHED_ORES, ore_ids
+    return [{"name": f"bulk_chloride_{ore.split(':')[1]}", "capability": CHLORIDE_LEACHING, "items": [(ore, 1)],
+             "fluids": [(f"{MOD}:hydrochloric_acid", 250)],
+             "results": [(f"{MOD}:washed_{metal}_ore", ORE_LEACHING_MULTIPLIER)], "ticks": 160,
+             "ore_bonus": ORE_LEACHING_MULTIPLIER, "features": ["salt"] + _metal_features(metal)}
+            for metal in WASHED_ORES for ore in ore_ids(metal)]
+
+
+FORM_RECIPES["bulk_chemical_reactor"] += _chloride_leaching()
 
 
 def blocks():
@@ -902,6 +976,99 @@ def industrial_fermenter_still():
     return cyl("y", cx, cz, 3.25, y - 0.75, y + 0.5, COPPER, "dr_pulley")
 
 
+# The Bulk Chemical Reactor's stirring drive on its lid, turning about y: its centre (x, y, z).
+BULK_REACTOR_DRIVE = (-16, 59.25, 34)
+
+
+def bulk_chemical_reactor():
+    """Four wide, four deep and four tall (the art brief, docs/features/industrial-machine-models-and-textures.md): the
+    Chemical Reactor's jacketed vessel enlarged on a hazard-edged plinth, steel plate with olive bands and a cream lining
+    edge under its lid. The front carries the deep bolted access plate with the restrained activity window and its amber
+    strip; below it the lower product manifold (the acid outlet with its red-wheeled valve, banded in hydrochloric acid)
+    and the washed-ore chute under a hazard hood; at the front left the control panel (the controller) with its gauge,
+    amber lamp and green batch lamp. The lid carries the stirring drive (its pulley drawn turning by MachineRotors) on a
+    gearbox driven by a motor lying towards the back, the ore hatch beside it and the short closed absorption inlet,
+    banded in hydrogen chloride. The water inlet enters the left side; an acid sight glass stands beside it; the power
+    socket sits on a junction box at the back right. Each port is at the middle of its block's face."""
+    cx, cz = -16, 34
+    m = [box((-47, 0, 1), (15, 3, 63), {"*": GUNMETAL, "north": HAZARD, "south": HAZARD})]
+    # The vessel on its skirt: the lead-grey body with olive bands, the cream lining edge, the lid and its crown.
+    m += cyl("y", cx, cz, 23, 3, 5, GUNMETAL)
+    m += cyl("y", cx, cz, 22, 5, 44, STAINLESS, CHROME)
+    for y in (11, 24, 37):
+        m += cyl("y", cx, cz, 22.5, y, y + 2, OLIVE)
+    m += cyl("y", cx, cz, 22.75, 43, 45, CERAMIC)
+    m += cyl("y", cx, cz, 20, 45, 49, STAINLESS, CHROME)
+    m += cyl("y", cx, cz, 13, 49, 51, GUNMETAL)
+    # The deep bolted access plate with the activity window and the amber strip under it.
+    m.append(box((cx - 9, 15, 10.5), (cx + 9, 35, 12.25), {"*": GUNMETAL, "north": STENCIL}))
+    m.append(dial("north", (cx, 27, 9.75), 8, texture=PORTHOLE, body=CHROME))
+    m.append(box((cx - 5, 18, 10), (cx + 5, 19, 10.5), STRIP))
+    for x in (cx - 7.5, cx + 7.5):
+        for y in (16.5, 33.5):
+            m.append(box((x - 0.5, y - 0.5, 10), (x + 0.5, y + 0.5, 10.5), CHROME))
+    # The control panel (the controller) at the front left: the gauge, the amber running lamp and the green batch lamp.
+    m.append(box((3, 3, 1), (15.5, 16, 8), {"*": OLIVE, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (12, 11.5, 0.75), 3.5, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (6.5, 11.5, 0.75), 2.5, texture=LAMP, body=GUNMETAL))
+    m.append(dial("north", (6.5, 6, 0.75), 2, texture=MINT, body=GUNMETAL))
+    # The lower product manifold: the acid outlet from the vessel's foot to its flange, banded in hydrochloric acid, with a
+    # valve and a red handwheel.
+    m += cyl("z", -24, 8, 2.25, 0.75, 16, RUBBER)
+    m += cyl("z", -24, 8, 2.6, 3, 4, "hydrochloric_acid_still")
+    m.append(box((-27, 5, 0), (-21, 11, 0.75), {"*": CHROME, "north": f"{FLANGE}!"}))
+    m.append(box((-25.5, 10, 6), (-22.5, 11.5, 8), GUNMETAL))
+    m += cyl("y", -24, 7, 0.5, 11.5, 12.5, CHROME)
+    m += cyl("y", -24, 7, 2, 12.5, 13.25, HANDWHEEL)
+    # The washed-ore chute from the vessel to the front, under a hazard hood.
+    m.append(box((-11, 4, 1), (-5, 11, 13), GUNMETAL))
+    m.append(box((-12, 4, 0), (-4, 11, 1), {"*": GUNMETAL, "north": MOUTH}))
+    m.append(box((-12.5, 11, 0), (-3.5, 12, 6), HAZARD))
+    # The stirring drive on the lid: a gearbox under the pulley and the motor lying towards the back.
+    m.append(box((cx - 5, 51, cz - 5), (cx + 5, 58, cz + 5), GUNMETAL))
+    m += cyl("z", cx, 54.5, 2.75, cz + 5, cz + 15, OLIVE, GUNMETAL)
+    for z in (cz + 7, cz + 11):
+        m += cyl("z", cx, 54.5, 3.1, z, z + 1, GUNMETAL)
+    m += cyl("z", cx, 54.5, 3, cz + 15, cz + 16, GUNMETAL, GRILLE)
+    # The ore hatch on the lid, its hazard-banded rim round the mouth.
+    m += cyl("y", -8, 24, 3, 47, 62.5, GUNMETAL)
+    m.append(box((-12.5, 62.5, 19.5), (-3.5, 63.5, 28.5), HAZARD))
+    m.append(box((-11, 63.5, 21), (-5, 64, 27), {"*": CHROME, "up": MOUTH}))
+    # The short closed absorption inlet on the lid, banded in hydrogen chloride, to its flange on top.
+    m += cyl("y", -24, 40, 2.5, 47, 63.25, RUBBER)
+    m += cyl("y", -24, 40, 2.85, 57, 58, "hydrogen_chloride_still")
+    m.append(box((-27, 63.25, 37), (-21, 64, 43), {"*": CHROME, "up": f"{FLANGE}!"}))
+    # The water inlet into the left side, banded in water, and the acid sight glass beside it.
+    m += cyl("x", 8, 40, 2, 4, 15.25, RUBBER)
+    m += cyl("x", 8, 40, 2.4, 11, 12, "sp_water")
+    m.append(box((15.25, 5, 37), (16, 11, 43), {"*": CHROME, "east": f"{FLANGE}!"}))
+    m.append(box((5.5, 8, 28.5), (7, 40, 33.5), GUNMETAL))
+    m.append(box((7, 10, 29.5), (7.5, 38, 32.5), {"*": CHROME, "east": "hydrochloric_acid_still"}))
+    # The junction box at the back right: its power socket, a hazard band and a conduit into the vessel.
+    m.append(box((-47, 3, 50), (-38, 15, 62), GUNMETAL))
+    m.append(box((-47.25, 15, 49.75), (-37.75, 16, 62.25), HAZARD))
+    m.append(box((-47.75, 5, 53), (-47, 11, 59), {"*": CHROME, "west": "power_port!"}))
+    m += cyl("x", 10, 51, 1.25, -38, -34, RUBBER)
+    return m
+
+
+def bulk_chemical_reactor_rotor():
+    """The Bulk Chemical Reactor's stirring drive pulley on its gearbox (client/MachineRotors draws it): a spoked pulley
+    and a drive key across it."""
+    import machine_rotors as rotors
+    cx, y, cz = BULK_REACTOR_DRIVE
+    quads = rotors.disc("y", y - 1.25, y + 0.75, cx, cz, 3.75, COPPER, "dr_pulley")
+    quads += rotors.prism("y", y + 0.75, y + 1.25, [(cx - 3.5, cz - 0.5), (cx + 3.5, cz - 0.5), (cx + 3.5, cz + 0.5),
+                                                     (cx - 3.5, cz + 0.5)], CHROME, CHROME)
+    return quads
+
+
+def bulk_chemical_reactor_still():
+    """The pulley standing still, for the item model only."""
+    cx, y, cz = BULK_REACTOR_DRIVE
+    return cyl("y", cx, cz, 3.75, y - 1.25, y + 0.75, COPPER, "dr_pulley")
+
+
 # Turning parts (tools/machine_rotors.py writes them for client/MachineRotors): on the train's axis, spinning up over
 # two seconds when the machine starts and running down as long when it stops, standing still while idle.
 ROTORS = {
@@ -924,14 +1091,20 @@ ROTORS = {
         "block": "industrial_fermenter", "axis": "y", "center": list(FERMENTER_DRIVE), "property": "lit", "speed": 4,
         "ease": 30, "always": True, "quads": industrial_fermenter_rotor(),
     },
+    # The Bulk Chemical Reactor's stirring drive, turning while a batch works.
+    "bulk_chemical_reactor_drive": {
+        "block": "bulk_chemical_reactor", "axis": "y", "center": list(BULK_REACTOR_DRIVE), "property": "lit", "speed": 6,
+        "ease": 30, "always": True, "quads": bulk_chemical_reactor_rotor(),
+    },
 }
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
           "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer(),
-          "industrial_fermenter": industrial_fermenter()}
+          "industrial_fermenter": industrial_fermenter(), "bulk_chemical_reactor": bulk_chemical_reactor()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
-               "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still()}
+               "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
+               "bulk_chemical_reactor": bulk_chemical_reactor_still()}
 PARTICLE = "dp_olive"
 
 

@@ -78,6 +78,10 @@ FLUIDS = {
     "liquid_oxygen": {"display": "Liquid Oxygen", "feature": "machines",
                       "colors": [(70, 120, 180), (110, 160, 214), (160, 200, 236), (214, 234, 250)],
                       "tick_delay": 3, "slope": 4, "drop_off": 1},
+    # Factory package 2: hydrogen chloride absorbed in water (the Bulk Chemical Reactor), a faint greenish yellow.
+    "hydrochloric_acid": {"display": "Hydrochloric Acid", "feature": "machines",
+                          "colors": [(150, 164, 120), (184, 196, 150), (210, 220, 180), (236, 242, 218)],
+                          "tick_delay": 5, "slope": 4, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).

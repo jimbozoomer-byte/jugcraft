@@ -57,7 +57,7 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
 - [x] Package 2, third slice: the Chemical Infuser, the shared gas-reaction form, with its sliced model and turning fan from the art brief, the plan's starter bill, its water drain and hydrogen chloride from hydrogen and chlorine at the plan's 9,600 JE a batch. See [Chemical Infuser](features/industrial-chemical-infuser.md).
 - [x] Package 2, methane power: carbon dioxide from coal in the Oxidizer, CO2 methanation over the Nickel Catalyst Bed in the Infuser with its water drain, and methane as the Gas Burning Generator's second fuel at 256 JE/t. See [methane power](features/industrial-methane-power.md).
 - [ ] Package 2, the rest of the starter gas and acid factory:
-  - hydrogen chloride absorption into aqueous acid, and its consumers;
+  - hydrogen chloride absorption into aqueous acid, and its consumers (the [Bulk Chemical Reactor](features/industrial-bulk-chemical-reactor.md) now makes hydrochloric acid and leaches ores with it; later consumers remain);
   - contact conversion and absorption, for the sulfuric acid chain (the [Chemical Oxidizer](features/industrial-chemical-oxidizer.md) now makes its sulfur dioxide);
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.
