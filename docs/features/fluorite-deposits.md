@@ -1,6 +1,6 @@
 # Snow-country fluorite deposits
 
-Status: implemented on `codex/fluorite-deposits`, 13 October 2026. Public [PR #343](https://github.com/jimbozoomer-byte/jugcraft/pull/343). The owner accepted the first inspection world, then requested stone around and beneath the surface ore. The revised outcrops passed the rendered generation/persistence suite before starting spodumene. Original implementation commit: `5bc2af7af84824456ed61864c7f3a62597ce3b65`.
+Status: implemented on `codex/fluorite-deposits`, 13 October 2026. Public [PR #343](https://github.com/jimbozoomer-byte/jugcraft/pull/343). The owner accepted the first inspection world, then requested stone around and beneath the surface ore. The revised outcrops passed the rendered generation/persistence suite before starting spodumene. The owner accepted the revised stone outcrops in the combined mineral inspection world on 13 October 2026. Original implementation commit: `5bc2af7af84824456ed61864c7f3a62597ce3b65`.
 
 ## Approved player result
 

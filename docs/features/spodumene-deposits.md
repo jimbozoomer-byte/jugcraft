@@ -1,6 +1,6 @@
 # Rocky-upland spodumene deposits
 
-Status: implemented for owner inspection, 13 October 2026, public branch `speedygroyper:codex/spodumene-deposits` and draft [PR #351](https://github.com/jimbozoomer-byte/jugcraft/pull/351). Depends on the fluorite stone-outcrop update in [PR #343](https://github.com/jimbozoomer-byte/jugcraft/pull/343), commit `6256dd86`, which was tested and pushed first. The branch and draft PR announced the scope before implementation. OpenAI Codex (GPT-6) is the actual implementation tool, explicitly authorized by the owner.
+Status: implemented and visually accepted by the owner, 13 October 2026, public branch `speedygroyper:codex/spodumene-deposits` and [PR #351](https://github.com/jimbozoomer-byte/jugcraft/pull/351). Depends on the fluorite stone-outcrop update in [PR #343](https://github.com/jimbozoomer-byte/jugcraft/pull/343), commit `6256dd86`, which was tested and pushed first. The branch and draft PR announced the scope before implementation. OpenAI Codex (GPT-6) is the actual implementation tool, explicitly authorized by the owner.
 
 ## Approved scope
 
@@ -62,7 +62,7 @@ Fabric's content-presence snapshot also retained five names belonging to test-on
 - Fluorite surface view: `/tp @s 180 97 32`; mineral near `173 92 23`.
 - Untouched fluorite pocket: `/gamemode spectator`, then `/tp @s 154 -2 123`.
 
-Owner visual acceptance, launcher UI import, a two-independent-client dedicated-server session and representative server load remain untested. No merge or server deployment is included.
+The owner accepted the combined inspection world's spodumene deposits and revised stone outcrops for both minerals on 13 October 2026. Launcher UI import, a two-independent-client dedicated-server session and representative server load remain untested. No merge or server deployment is included.
 
 ## Art and provenance
 
