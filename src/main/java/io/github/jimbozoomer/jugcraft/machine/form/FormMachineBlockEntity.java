@@ -541,6 +541,11 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		MachineStatus first = null;
 		for (FluidRecipes.Entry entry : runs) {
 			FluidRecipe recipe = entry.recipe();
+			// Shared process families must not ignore another job's leftover liquid.
+			// Leave original single-capability machinery and already escrowed batches unchanged.
+			if (form.capabilities().size() > 1 && !consistent(recipe, inputs)) {
+				continue;
+			}
 			if (!recipe.itemsMatch(inputs) || !recipe.fluidsMatch(tanks)) {
 				continue;
 			}
@@ -835,7 +840,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				}
 			}
 		}
-		return MachineStatus.of(MachineLifecycle.WAITING_INPUT, MachineStatus.Reason.NONE);
+		return MachineStatus.of(MachineLifecycle.WAITING_INPUT,
+				best == null && form.capabilities().size() > 1 ? MachineStatus.Reason.MIXED_INPUTS : MachineStatus.Reason.NONE);
 	}
 
 	/** Whether everything in the input slots and tanks belongs where {@code recipe} would use it. */

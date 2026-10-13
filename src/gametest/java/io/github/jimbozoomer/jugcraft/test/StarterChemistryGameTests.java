@@ -90,7 +90,7 @@ public class StarterChemistryGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 11, "All eleven gas recipes including biogas upgrading exercised, found " + checked);
+        h.assertTrue(checked == 13, "Gas processes including all shared scrubber feeds exercised, found " + checked);
         h.succeed();
     }
 

@@ -85,7 +85,7 @@ public class CoastalMetalsGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 20, "All coastal, molding and fluorochemical extension recipes exercised, found " + checked);
+        h.assertTrue(checked == 21, "Coastal, molding and shared concentrator recipes exercised, found " + checked);
         h.succeed();
     }
 

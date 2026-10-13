@@ -143,7 +143,7 @@ PIPE_PATHS={
  'chemical_distillation_station':{('FLUID_IN',0):[(-24,24,50)],('FLUID_OUT',0):[(8,24,40),(2,24,40)],('FLUID_OUT',1):[(-24,8,43)]},
  'bauxite_digester':{('FLUID_IN',0):[(8,24,49),(4,24,49)],('FLUID_IN',1):[(-8,24,53)],('FLUID_OUT',0):[(-24,8,44),(-9,8,44),(-9,14,44)]},
  'aluminate_filter_press':{('FLUID_IN',0):[(-8,24,54)],('FLUID_OUT',0):[(8,8,44),(2,8,44),(2,13,44)],('FLUID_OUT',1):[(-8,8,44),(-8,13,44)]},
- 'alumina_calciner':{('FLUID_OUT',0):[(8,24,51),(4,24,51)]},
+ 'alumina_calciner':{('FLUID_IN',0):[(-8,8,53),(-8,14,53)],('FLUID_OUT',0):[(8,24,51),(4,24,51)]},
  'aluminum_reduction_cell':{('FLUID_OUT',0):[(8,24,42)]},
 }
 def pipe_run(parts,points):

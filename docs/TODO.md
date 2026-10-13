@@ -1,5 +1,18 @@
 # Jugcraft TODO list
 
+## MUST: consolidated machine recipe interface
+
+Owner requirement, 13 October 2026, for the Concentrator, Gas Scrubber, Filter Press and Industrial Oven, then other multi-recipe machinery. See [consolidation and compatibility](features/machine-consolidation-playtest.md). These unchecked items are mandatory follow-up work; the first consolidation build still chooses recipes from supplied inputs.
+
+- [ ] **MUST provide a searchable recipe/product picker** so players can choose what to make before inserting materials; show supported recipes and any unmet upgrade requirements.
+- [ ] **MUST preview exact inputs, retained catalysts/tools, outputs, byproducts, time and power**, including which tank/hatch receives each output.
+- [ ] **MUST implement a persistent, server-authoritative recipe lock for automation.** A locked machine may only start the selected recipe; it must not silently switch when other inputs arrive. Save/reload and multiplayer must preserve this selection.
+- [ ] **MUST explain why work cannot start**: missing ingredients, incompatible leftovers, missing upgrade, full/wrong output, power or pause. Never delete tank contents or consumed batch inputs when changing selection.
+- [ ] **MUST preserve running batches when selection changes** and apply a new selection only to subsequent work; validate permissions, recipe eligibility and all client requests on the server.
+- [ ] **MUST test selection, lock, automation, blocked outputs, reload and multiplayer**, plus readable layouts for every consolidated machine. Existing input-driven automation remains a deliberate selectable automatic mode.
+
+Local consolidation checkpoint: four recommended machines share the former nine specialists' processes. Old block IDs and construction recipes remain supported. This is local playtest work, not merged to main.
+
 Local October 13 checkpoint: [fluorochemistry and PTFE](features/fluorochemistry-playtest.md) adds snowy fluorite, concentrated acid, HF, named fluorocarbon intermediates, PTFE powder/shaping/sintering, useful seals/fittings/liners and a larger two-lane reactor. It extends the [ordinary polymer factory](features/polymer-factory-playtest.md). Local playtest only, not merged.
 
 

@@ -7752,6 +7752,60 @@
           "ticks": 100,
           "tool": "",
           "energy_per_tick": 48
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:raw_biogas",
+              1000
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:clean_biogas",
+              1000
+            ],
+            [
+              "jugcraft:digestate",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 24
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:fermentation_exhaust",
+              250
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 24
         }
       ]
     },
@@ -8055,6 +8109,30 @@
           "items": [],
           "fluids": [
             [
+              "jugcraft:digestate",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              750
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:digestate_fiber",
+              1
+            ]
+          ],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 16
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
               "jugcraft:aluminate_slurry",
               1000
             ]
@@ -8112,6 +8190,87 @@
           "ticks": 200,
           "tool": "",
           "energy_per_tick": 64
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:magnesium_chloride_solution",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:dry_magnesium_chloride",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_seal_blank",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_seal",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_fitting_blank",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_fitting",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ptfe_liner_blank",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ptfe_liner",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 80
         }
       ]
     },
@@ -8175,6 +8334,29 @@
           "ticks": 200,
           "tool": "",
           "energy_per_tick": 32
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:concentrated_sulfuric_acid",
+              750
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 64
         }
       ]
     },

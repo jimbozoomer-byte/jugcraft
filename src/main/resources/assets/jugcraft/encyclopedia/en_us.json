@@ -5395,9 +5395,11 @@
       "group": "Technology",
       "chapter": "Chemistry",
       "page": {
-        "title": "Gas Cleaning and Separation Rack",
+        "title": "Gas Scrubber",
         "icon": "jugcraft:gas_cleaning_rack",
         "text": [
+          "One Gas Scrubber cleans synthesis gas, raw biogas and wet fermentation CO2. Feed gas and wash water into their labeled inputs. Outlet 1 collects CO/clean biogas/CO2; outlet 2 collects hydrogen/wash digestate/water respectively. Capture solid synthesis-gas residue in the drawer.",
+          "Inputs currently select the recipe automatically. Drain incompatible input AND output fluids and remove other feed items before changing jobs. Empty outputs for sustained automation. You can use one machine for different jobs or dedicate identical copies to separate factory lines. Recipe selection, preview and locking are mandatory planned UI work, not implemented by this consolidation.",
           "Three wide, five deep and four tall. A stepped wash tower, collection pot, separator, closed pipe loops and service bridge share one machine. Dirty gas enters high at the rear; wash water enters low on the left. The two front upper outlets give carbon monoxide on the left, hydrogen on the right. Residue leaves the low front drawer.",
           "500 mB dirty synthesis gas + 125 mB wash water gives 250 mB carbon monoxide, 250 mB hydrogen and one wet mixed residue in 100 ticks at 48 JE/t. Both gases and the residue must fit before work starts. There are no disposable filters.",
           "Stabilize one residue with clay and two gravel into two cobblestone road-fill blocks. That consumes the residue once; it gives no second fuel or recovered metals. Existing gas cylinders, tanks and pipes carry every new gas. Feed the cleaned hydrogen and carbon monoxide to an Infuser; methane drives the Gas Burning Generator at 256 JE/t, 448 JE/mB."
@@ -5458,6 +5460,7 @@
         "title": "Biogas Cleaner",
         "icon": "jugcraft:biogas_cleaner",
         "text": [
+          "Optional specialist model: existing machines, recipes, inventories and production remain supported. For a new factory, build the Gas Scrubber, which also runs this machine's processes. This specialist stays craftable for existing layouts but is omitted from the main creative machinery list.",
           "Two wide, three deep and three tall. The sealed wash tower and demister clean biogas without splitting its 60/40 composition. Raw gas enters upper rear right; wash water enters lower rear left. Cleaned gas leaves upper front right; dirty wash leaves lower front right. Power enters front left.",
           "1000 mB raw biogas + 250 mB water -> 1000 mB cleaned biogas + 250 mB wash digestate, 100 ticks at 24 JE/t. Route that wash to the Digestate Separator with the digester residue. No disposable filter is needed. Full product tanks stop processing without wasting inputs.",
           "Also cleans wet fermentation CO2: 250 mB gas + 250 mB wash water -> 250 mB usable CO2 + 250 mB recovered water, 100 ticks at 24 JE/t. Drain both previous products before switching between biogas and fermentation gas. No new disposable filter or separate gas-cleaning machine is needed."
@@ -5488,6 +5491,7 @@
         "title": "Digestate Separator",
         "icon": "jugcraft:digestate_separator",
         "text": [
+          "Optional specialist model: existing machines, recipes, inventories and production remain supported. For a new factory, build the Filter Press, which also runs this machine's processes. This specialist stays craftable for existing layouts but is omitted from the main creative machinery list.",
           "Two wide, three deep and three tall. A closed screw press with guarded drive and collection drawer. Feed digestate at the rear left; recovered water leaves the rear right; fiber leaves the lower front right drawer. Power enters the front left.",
           "1000 mB digestate -> 750 mB reusable water + one Digestate Fiber in 100 ticks at 16 JE/t. Eight fibers craft one existing Fertilizer, usable in the farming and hydroponics systems. Fertilizer and recovered water are never accepted as biomass feed, and water alone cannot produce fuel."
         ],
@@ -5662,9 +5666,11 @@
       "group": "Technology",
       "chapter": "Chemistry",
       "page": {
-        "title": "Aluminate Recovery Press",
+        "title": "Filter Press",
         "icon": "jugcraft:aluminate_filter_press",
         "text": [
+          "One Filter Press handles aluminate slurry and digestate. Aluminate produces aluminum hydroxide, bauxite residue, lye at outlet 1 and water at outlet 2. Digestate produces fiber and water at outlet 1; its second liquid/solid outlets remain unused.",
+          "Inputs currently select the recipe automatically. Drain incompatible input AND output fluids and remove other feed items before changing jobs. Empty outputs for sustained automation. You can use one machine for different jobs or dedicate identical copies to separate factory lines. Recipe selection, preview and locking are mandatory planned UI work, not implemented by this consolidation.",
           "Three wide, four deep and three tall. 1000 mB slurry -> two Aluminum Hydroxide, one Bauxite Residue, 200 mB recovered lye and 500 mB water, 160 ticks at 32 JE/t. Return lye to digestion, adding 50 mB makeup per bauxite. Both liquid and both solid outputs must have room.",
           "One residue + one clay ball + two gravel craft two cobblestone as stabilized game filler. Raw bauxite residue is not fertilizer or digester feed. The press uses visible filter plates, clamping rods, a collection trough and separate output drawers.",
           "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: slurry midway up in the middle, recovered lye low left and water low middle. Two solid output hatches sit on the right. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
@@ -5692,9 +5698,11 @@
       "group": "Technology",
       "chapter": "Chemistry",
       "page": {
-        "title": "Alumina Calciner",
+        "title": "Industrial Oven",
         "icon": "jugcraft:alumina_calciner",
         "text": [
+          "One Industrial Oven calcines aluminum hydroxide, dries magnesium chloride solution and sinters PTFE blanks. A new lower-rear solution inlet feeds drying; the old solid hatches and condensate outlet stay in place. Solid recipes require the solution tank to be empty. All recipes retain their original costs and products.",
+          "Inputs currently select the recipe automatically. Drain incompatible input AND output fluids and remove other feed items before changing jobs. Empty outputs for sustained automation. You can use one machine for different jobs or dedicate identical copies to separate factory lines. Recipe selection, preview and locking are mandatory planned UI work, not implemented by this consolidation.",
           "Three wide, four deep and three tall. Two hydroxide -> two existing Alumina + 250 mB recovered water, 200 ticks at 64 JE/t. Reuse this water with the press water. Enclosed ceramic kiln, guarded drive, insulated service hood and front charge door; all heating is paid electricity. Alumina keeps its existing catalyst and metal consumers.",
           "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: recovered water midway up at the left, alumina in the right hatch. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills."
         ],
@@ -5781,9 +5789,11 @@
       "group": "Technology",
       "chapter": "Chemistry",
       "page": {
-        "title": "Brine Concentrator",
+        "title": "Concentrator",
         "icon": "jugcraft:brine_concentrator",
         "text": [
+          "One Concentrator handles coastal seawater and ordinary sulfuric acid. It replaces the need to build a separate Acid Concentrator. Product leaves outlet 1; recovered water leaves outlet 2. Each process keeps its original ingredients, yields, time and power.",
+          "Inputs currently select the recipe automatically. Drain incompatible input AND output fluids and remove other feed items before changing jobs. Empty outputs for sustained automation. You can use one machine for different jobs or dedicate identical copies to separate factory lines. Recipe selection, preview and locking are mandatory planned UI work, not implemented by this consolidation.",
           "1000 mB distinct coastal seawater -> 250 mB magnesium-bearing brine + 750 mB recovered water. 200 ticks at 32 JE/t. The short evaporator column, supported condenser and collection sump share one skid. Ordinary water and sodium-chloride brine are rejected.",
           "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
         ],
@@ -5843,6 +5853,7 @@
         "title": "Chloride Drying Oven",
         "icon": "jugcraft:chloride_dryer",
         "text": [
+          "Optional specialist model: existing machines, recipes, inventories and production remain supported. For a new factory, build the Industrial Oven, which also runs this machine's processes. This specialist stays craftable for existing layouts but is omitted from the main creative machinery list.",
           "500 mB prepared magnesium chloride solution -> one Dry Magnesium Chloride and 500 mB recovered condensate. 160 ticks at 48 JE/t includes paid conditioning/drying. Feed the dry item to the magnesium cell, never aqueous solution.",
           "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions."
         ],
@@ -6112,6 +6123,7 @@
         "title": "Acid Concentrator",
         "icon": "jugcraft:acid_concentrator",
         "text": [
+          "Optional specialist model: existing machines, recipes, inventories and production remain supported. For a new factory, build the Concentrator, which also runs this machine's processes. This specialist stays craftable for existing layouts but is omitted from the main creative machinery list.",
           "Separate 1000 mB ordinary sulfuric acid into 750 mB concentrate and 250 mB recovered water. Both outlets must fit. Reuse the existing starter acid factory; this is paid concentration, not a second free acid source.",
           "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
         ],
@@ -6230,6 +6242,7 @@
         "title": "PTFE Sintering Oven",
         "icon": "jugcraft:ptfe_sintering_oven",
         "text": [
+          "Optional specialist model: existing machines, recipes, inventories and production remain supported. For a new factory, build the Industrial Oven, which also runs this machine's processes. This specialist stays craftable for existing layouts but is omitted from the main creative machinery list.",
           "PTFE is shaped before sintering. Use the Molding Press gasket, fitting or panel mold with 1, 2 or 3 powder respectively to make one unsintered seal, fitting or liner. The oven finishes each blank for 240 ticks at 80 JE/t.",
           "Alternative liner route: mix four powder with 250 mB lubricant in the Mineral Conditioner, yielding four paste charges. The Extruder sheet die consumes four charges for one liner blank plus one clean unsintered offcut. Four offcuts return one powder in the Reclaimer, paying energy and losing material. Finished PTFE parts are not melt-recycled or substituted for generic plastic.",
           "Shared factory controls: Pause, Cancel, progress, energy, tanks and upgrades. Power at lower front-left; solid feed front-right and product rear-right; fluid feeds rear-middle and products rear-bottom. Processing is server-authoritative; no fluid is silently vented. Consult JEI for exact quantities and the encyclopedia for the connected route."
@@ -6278,6 +6291,21 @@
           "result": "jugcraft:lined_fluorochemical_reactor",
           "count": 1
         }
+      },
+      "gate": ""
+    },
+    {
+      "id": "tech/9/57",
+      "group": "Technology",
+      "chapter": "Chemistry",
+      "page": {
+        "title": "Four shared process machines",
+        "icon": "jugcraft:brine_concentrator",
+        "text": [
+          "Build a Concentrator for seawater or acid; a Gas Scrubber for synthesis gas, biogas or fermentation gas; a Filter Press for aluminate or digestate; and an Industrial Oven for drying, calcination or PTFE sintering. Each handles multiple resources without a separate named machine for every output.",
+          "The five older specialist designs stay craftable and continue working in existing factories. The four recommended machines also keep their original saved block IDs, inventories and ports. The Oven gains one connected solution inlet on its lower rear face.",
+          "Inputs currently choose the job. Drain incompatible fluids from inputs AND outputs before switching. Clear other feed items, retain enough output space, and consult JEI for exact receipts. Recipe selection and a persistent automation lock are required future interface work."
+        ]
       },
       "gate": ""
     },
@@ -8933,7 +8961,7 @@
         "title": "Rack Clean Synthesis Gas",
         "icon": "jugcraft:gas_cleaning_rack",
         "text": [
-          "Machine: Gas Cleaning Rack",
+          "Machine: Gas Scrubber",
           "Inputs: 500 mB Dirty Synthesis Gas, 125 mB Water",
           "Outputs: 1 x Mixed Gas Residue, 250 mB Carbon Monoxide, 250 mB Hydrogen",
           "Work: 100 ticks (5 seconds).",
@@ -8987,7 +9015,7 @@
         "title": "Clean Biogas",
         "icon": "jugcraft:biogas_cleaner",
         "text": [
-          "Machine: Biogas Cleaner",
+          "Machine: Gas Scrubber",
           "Inputs: 1000 mB Raw Biogas, 250 mB Water",
           "Outputs: 1000 mB Clean Biogas, 250 mB Digestate",
           "Work: 100 ticks (5 seconds).",
@@ -9005,7 +9033,7 @@
         "title": "Clean Fermentation Co2",
         "icon": "jugcraft:biogas_cleaner",
         "text": [
-          "Machine: Biogas Cleaner",
+          "Machine: Gas Scrubber",
           "Inputs: 250 mB Fermentation Exhaust, 250 mB Water",
           "Outputs: 250 mB Carbon Dioxide, 250 mB Water",
           "Work: 100 ticks (5 seconds).",
@@ -9023,7 +9051,7 @@
         "title": "Separate Digestate",
         "icon": "jugcraft:digestate_separator",
         "text": [
-          "Machine: Digestate Separator",
+          "Machine: Filter Press",
           "Inputs: 1000 mB Digestate",
           "Outputs: 1 x Digestate Fiber, 750 mB Water",
           "Work: 100 ticks (5 seconds).",
@@ -9131,7 +9159,7 @@
         "title": "Recover Aluminate",
         "icon": "jugcraft:aluminate_filter_press",
         "text": [
-          "Machine: Aluminate Filter Press",
+          "Machine: Filter Press",
           "Inputs: 1000 mB Aluminate Slurry",
           "Outputs: 2 x Aluminum Hydroxide, 1 x Bauxite Residue, 200 mB Lye, 500 mB Water",
           "Work: 160 ticks (8 seconds).",
@@ -9149,7 +9177,7 @@
         "title": "Calcine Hydroxide",
         "icon": "jugcraft:alumina_calciner",
         "text": [
-          "Machine: Alumina Calciner",
+          "Machine: Industrial Oven",
           "Inputs: 2 x Aluminum Hydroxide",
           "Outputs: 2 x Alumina, 250 mB Water",
           "Work: 200 ticks (10 seconds).",
@@ -9185,7 +9213,7 @@
         "title": "Concentrate Coastal Seawater",
         "icon": "jugcraft:brine_concentrator",
         "text": [
-          "Machine: Brine Concentrator",
+          "Machine: Concentrator",
           "Inputs: 1000 mB Seawater",
           "Outputs: 250 mB Magnesium Brine, 750 mB Water",
           "Work: 200 ticks (10 seconds).",
@@ -9311,7 +9339,7 @@
         "title": "Dry Magnesium Chloride",
         "icon": "jugcraft:chloride_dryer",
         "text": [
-          "Machine: Chloride Dryer",
+          "Machine: Industrial Oven",
           "Inputs: 500 mB Magnesium Chloride Solution",
           "Outputs: 1 x Dry Magnesium Chloride, 500 mB Water",
           "Work: 160 ticks (8 seconds).",
@@ -9978,7 +10006,7 @@
         "title": "Concentrate Sulfuric Acid",
         "icon": "jugcraft:acid_concentrator",
         "text": [
-          "Machine: Acid Concentrator",
+          "Machine: Concentrator",
           "Inputs: 1000 mB Sulfuric Acid",
           "Outputs: 750 mB Concentrated Sulfuric Acid, 250 mB Water",
           "Work: 240 ticks (12 seconds).",
@@ -10068,7 +10096,7 @@
         "title": "Sinter Ptfe Seal",
         "icon": "jugcraft:ptfe_sintering_oven",
         "text": [
-          "Machine: Ptfe Sintering Oven",
+          "Machine: Industrial Oven",
           "Inputs: 1 x Ptfe Seal Blank",
           "Outputs: 1 x Ptfe Seal",
           "Work: 240 ticks (12 seconds).",
@@ -10086,7 +10114,7 @@
         "title": "Sinter Ptfe Fitting",
         "icon": "jugcraft:ptfe_sintering_oven",
         "text": [
-          "Machine: Ptfe Sintering Oven",
+          "Machine: Industrial Oven",
           "Inputs: 1 x Ptfe Fitting Blank",
           "Outputs: 1 x Ptfe Fitting",
           "Work: 240 ticks (12 seconds).",
@@ -10104,7 +10132,7 @@
         "title": "Sinter Ptfe Liner",
         "icon": "jugcraft:ptfe_sintering_oven",
         "text": [
-          "Machine: Ptfe Sintering Oven",
+          "Machine: Industrial Oven",
           "Inputs: 1 x Ptfe Liner Blank",
           "Outputs: 1 x Ptfe Liner",
           "Work: 240 ticks (12 seconds).",
@@ -13588,8 +13616,8 @@
     },
     {
       "id": "jugcraft:encyclopedia_brine_concentrator",
-      "title": "Brine Concentrator",
-      "description": "Obtain Brine Concentrator by crafting, trade or collection.",
+      "title": "Concentrator",
+      "description": "Obtain Concentrator by crafting, trade or collection.",
       "icon": "jugcraft:brine_concentrator",
       "group": "Technology"
     },
@@ -13665,15 +13693,15 @@
     },
     {
       "id": "jugcraft:encyclopedia_aluminate_filter_press",
-      "title": "Aluminate Recovery Press",
-      "description": "Obtain Aluminate Recovery Press by crafting, trade or collection.",
+      "title": "Filter Press",
+      "description": "Obtain Filter Press by crafting, trade or collection.",
       "icon": "jugcraft:aluminate_filter_press",
       "group": "Technology"
     },
     {
       "id": "jugcraft:encyclopedia_alumina_calciner",
-      "title": "Alumina Calciner",
-      "description": "Obtain Alumina Calciner by crafting, trade or collection.",
+      "title": "Industrial Oven",
+      "description": "Obtain Industrial Oven by crafting, trade or collection.",
       "icon": "jugcraft:alumina_calciner",
       "group": "Technology"
     },

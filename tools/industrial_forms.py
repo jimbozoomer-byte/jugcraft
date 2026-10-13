@@ -460,6 +460,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
             "fabric:load_conditions": [c for f in info["features"] for c in condition(f)],
             "type": "minecraft:crafting_shaped", "category": "misc", "pattern": pattern, "key": key,
             "result": {"id": f"{MOD}:{form}", "count": 1}})
+    machine_consolidation.write_labels(lang, FORMS)
     import starter_chemistry
     starter_chemistry.write_extras(write, assets, data, lang, condition)
     import anaerobic
@@ -588,3 +589,7 @@ TANK_NAMES.update(fluorochemistry.TANK_NAMES)
 MODELS.update(fluorochemistry_models.MODELS)
 ROTORS.update(fluorochemistry_models.ROTORS)
 ITEM_EXTRAS.update(fluorochemistry_models.ITEM_EXTRAS)
+
+# Owner-requested consolidation: retain IDs/recipes and extend shared capabilities.
+import machine_consolidation
+machine_consolidation.apply(FORMS, HANDBOOK)

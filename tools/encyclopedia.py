@@ -24,7 +24,10 @@ def build():
             parts += [f"{amount} mB {name(fluid)}"+(' (retained; not consumed)' if i in recipe.get('retained_inputs',[]) else '') for i,(fluid,amount) in enumerate(recipe.get('fluids',[]))]
             outputs=[f"{count} x {name(item)}" for item,count in recipe.get('results',[])]
             outputs += [f"{row[1]} mB {name(row[0])}" for row in recipe.get('fluid_results',[])]
-            lines=['Machine: '+name(machine),'Inputs: '+(', '.join(parts) or 'None'),'Outputs: '+(', '.join(outputs) or 'None'),f"Work: {recipe['ticks']} ticks ({recipe['ticks']/20:g} seconds)."]
+            from machine_consolidation import LEGACY, PRIMARY
+            recommended = LEGACY.get(machine, machine)
+            display = PRIMARY[recommended][0] if recommended in PRIMARY else name(machine)
+            lines=['Machine: '+display,'Inputs: '+(', '.join(parts) or 'None'),'Outputs: '+(', '.join(outputs) or 'None'),f"Work: {recipe['ticks']} ticks ({recipe['ticks']/20:g} seconds)."]
             if recipe.get('tool'):lines.append('Reusable tool: '+name(recipe['tool']))
             if recipe.get('energy_per_tick'):lines.append(f"Power: {recipe['energy_per_tick']} JE/t before upgrades.")
             lines.append('Recipe conditions: '+', '.join(recipe.get('features',[]))+'. Installed-build reference; server datapacks may differ.')

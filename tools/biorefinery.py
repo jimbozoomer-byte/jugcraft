@@ -91,3 +91,7 @@ def write_extras(write,assets,data,lang,condition):
         write(assets/'items'/f'{name}.json',dict(model=dict(type='minecraft:model',model=f'jugcraft:item/{name}')))
     lang.update({'container.jugcraft.form.vent_on':'Vent excess','container.jugcraft.form.vent_off':'Keep gas','container.jugcraft.form.vent_hint':'Next batch: collect gas that fits, vent only excess. Keep gas stops for full storage. Running batches keep their setting.'})
     write(data/'recipe/stabilized_bauxite_residue.json',dict(type='minecraft:crafting_shapeless',category='misc',**{'fabric:load_conditions':condition('machines')},ingredients=['jugcraft:bauxite_residue','minecraft:clay_ball','minecraft:gravel','minecraft:gravel'],result=dict(id='minecraft:cobblestone',count=2)))
+
+# Append a solution inlet without changing existing save roles, slots or port coordinates.
+FORMS["alumina_calciner"]["input_tanks"] = ["oven_solution"]
+FORMS["alumina_calciner"]["ports"].append(("solution_in", "FLUID_IN", 0, 1, 3, 0, "BACK"))
