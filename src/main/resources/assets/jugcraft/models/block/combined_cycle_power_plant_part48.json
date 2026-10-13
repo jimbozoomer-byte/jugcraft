@@ -29,43 +29,23 @@
   "elements": [
     {
       "from": [
-        2.0,
         0,
-        0
+        1.0,
+        3.0
       ],
       "to": [
-        16,
+        14.0,
         16,
         16
       ],
       "faces": {
-        "west": {
-          "texture": "#dw_ribbed_steel"
-        }
-      }
-    },
-    {
-      "from": [
-        1.0,
-        0,
-        0.0
-      ],
-      "to": [
-        2.0,
-        16,
-        2.0
-      ],
-      "faces": {
         "north": {
-          "texture": "#dp_gunmetal"
-        },
-        "south": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_grille"
         },
         "east": {
-          "texture": "#dp_gunmetal"
+          "texture": "#dp_grille"
         },
-        "west": {
+        "down": {
           "texture": "#dp_gunmetal"
         }
       }

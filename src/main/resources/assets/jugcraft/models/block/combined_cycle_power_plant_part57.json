@@ -31,7 +31,7 @@
       "from": [
         2.0,
         1.0,
-        3.0
+        0
       ],
       "to": [
         16,
@@ -39,14 +39,37 @@
         16
       ],
       "faces": {
-        "north": {
-          "texture": "#dp_grille"
-        },
         "west": {
           "texture": "#dp_grille"
         },
         "down": {
           "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        4.0,
+        0,
+        0
+      ],
+      "to": [
+        12.0,
+        1.0,
+        8.0
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dp_chrome"
+        },
+        "east": {
+          "texture": "#dp_chrome"
+        },
+        "west": {
+          "texture": "#dp_chrome"
+        },
+        "up": {
+          "texture": "#dp_chrome"
         }
       }
     }

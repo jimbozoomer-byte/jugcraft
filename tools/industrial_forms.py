@@ -393,9 +393,9 @@ FORMS = {
         "family": "gas_turbine",
         # The skid, generator, gas turbine and boiler fill the two lower layers; the filter house stands over the generator
         # end and the heat-recovery boiler rises at the right, its steam drum and stack on top.
-        "layers": [["C######", "#######", "#######", "#######"], ["#######", "#######", "#######", "#######"],
-                   ["##..###", "##..###", "##..###", "##..###"], ["##..###", "##..###", "##..###", "##..###"],
-                   ["....###", "....###", "....###", "....###"]],
+        "layers": [["C#####", "######", "######", "######"], ["######", "######", "######", "######"],
+                   ["##..##", "##..##", "##..##", "##..##"], ["##..##", "##..##", "##..##", "##..##"],
+                   ["....##", "....##", "....##", "....##"]],
         "profile": "ENTRY",
         "tank_mb": 2_000,
         "input_tanks": ["fuel"],
@@ -533,7 +533,7 @@ HANDBOOK["gas_cleanup_rack"] = [
 ]
 
 HANDBOOK["combined_cycle_power_plant"] = [
-    "Seven wide, four deep and five tall: the factory's power station. A gas turbine on a long skid draws air through "
+    "Six wide, four deep and five tall: the factory's power station. A gas turbine on a long skid draws air through "
     "the filter house over its generator, and its hot exhaust raises steam in the tall heat-recovery boiler on the right "
     "for a second turbine on the same shaft. It is built from a Gas Turbine, a Heat Recovery Unit, two Steel Tanks, an "
     "advanced circuit, a Machine Casing and steel plates. Every block it fills must be free when it is placed.",
@@ -1796,7 +1796,7 @@ def bio_generator_still():
 
 
 def combined_cycle_power_plant():
-    """Seven wide, four deep and five tall: the factory's power station. On a long gunmetal skid, from the left: the olive
+    """Six wide, four deep and five tall (the largest form): the factory's power station. On a long gunmetal skid, from the left: the olive
     generator with its terminal box (the power socket, mint lamps and copper terminals) under the gridded air-filter
     house, the controller cabinet at the front left; the guarded shaft coupling (drawn turning by MachineRotors); the gas
     turbine, a ringed compressor stepping out to the copper-banded combustor and the heat-shielded turbine; the exhaust
@@ -1804,8 +1804,8 @@ def combined_cycle_power_plant():
     across the top and the hazard-banded stack at the back right. Behind the train the small steam turbine takes its steam
     from the boiler, and the fuel skid at the back carries the inlet flange, banded in methane."""
     cy, cz = PLANT_AXIS
-    m = [box((-96, 0, 0), (16, 4, 64), GUNMETAL)]
-    m.append(box((-96, 3, 0.5), (16, 4, 1.5), HAZARD))
+    m = [box((-80, 0, 0), (16, 4, 64), GUNMETAL)]
+    m.append(box((-80, 3, 0.5), (16, 4, 1.5), HAZARD))
     # The generator under the filter house: olive, ribbed, on gunmetal saddles.
     for x in (3, 8):
         m.append(box((x - 1.5, 4, cz - 10), (x + 1.5, 10, cz + 10), GUNMETAL))
@@ -1832,41 +1832,40 @@ def combined_cycle_power_plant():
     m.append(box((-15, 62, 2), (15, 63.5, 62), CHROME))
     m.append(box((-12, 28, 24), (-4, 33, 40), CHROME))
     # The gas turbine: the ringed compressor, the copper-banded combustor and the heat-shielded turbine section.
-    m += cyl("x", cy, cz, 8, -20, -2, CHROME, GUNMETAL)
-    for x in (-6, -11, -16):
+    m += cyl("x", cy, cz, 8, -14, -2, CHROME, GUNMETAL)
+    for x in (-6, -10):
         m += cyl("x", cy, cz, 8.75, x, x + 1, GUNMETAL)
-    m += cyl("x", cy, cz, 11, -32, -20, GUNMETAL, GUNMETAL)
-    for x in (-29, -25, -21):
+    m += cyl("x", cy, cz, 11, -24, -14, GUNMETAL, GUNMETAL)
+    for x in (-22, -18):
         m += cyl("x", cy, cz, 11.75, x, x + 1.5, COPPER)
-    m += cyl("x", cy, cz, 10, -46, -32, SHIELD, GUNMETAL)
-    for x in (-44, -38):
-        m += cyl("x", cy, cz, 10.75, x, x + 1.5, GUNMETAL)
-    for x in (-40, -26, -10):
+    m += cyl("x", cy, cz, 10, -36, -24, SHIELD, GUNMETAL)
+    m += cyl("x", cy, cz, 10.75, -31, -29.5, GUNMETAL)
+    for x in (-32, -20, -8):
         m.append(box((x - 2, 4, cz - 9), (x + 2, 10, cz + 9), GUNMETAL))
     # The exhaust diffuser widening into the boiler.
-    m.append(box((-52, 7, 18), (-46, 31, 46), GUNMETAL))
+    m.append(box((-48, 7, 18), (-36, 31, 46), GUNMETAL))
     # The heat-recovery steam generator: a tall ribbed casing with buttresses, a cream band and an inspection door.
-    m.append(box((-94, 4, 4), (-52, 62, 60), {"*": RIBBED, "up": GUNMETAL}))
-    for x in (-91, -80, -69, -58):
+    m.append(box((-78, 4, 4), (-48, 62, 60), {"*": RIBBED, "up": GUNMETAL}))
+    for x in (-76, -64, -52):
         m.append(box((x, 4, 3), (x + 2, 62, 4), GUNMETAL))
         m.append(box((x, 4, 60), (x + 2, 62, 61), GUNMETAL))
     for z in (4, 32):
-        m.append(box((-95, 4, z), (-94, 62, z + 2), GUNMETAL))
-    m.append(box((-94.5, 54, 3.5), (-51.5, 57, 60.5), CERAMIC))
-    m.append(box((-80, 8, 3.25), (-66, 30, 4), {"*": GUNMETAL, "north": PORTHOLE}))
+        m.append(box((-79, 4, z), (-78, 62, z + 2), GUNMETAL))
+    m.append(box((-78.5, 54, 3.5), (-48, 57, 60.5), CERAMIC))
+    m.append(box((-71, 8, 3.25), (-57, 30, 4), {"*": GUNMETAL, "north": PORTHOLE}))
     # The white steam drum across the top, on saddles, capped in chrome.
-    for z in (14, 44):
-        m.append(box((-78, 62, z - 2), (-66, 66, z + 2), GUNMETAL))
-    m += cyl("z", -72, 70, 6, 6, 58, TANK_BODY, CHROME)
-    for z in (10, 54):
-        m += cyl("z", -72, 70, 6.5, z, z + 1, CHROME)
+    for z in (14, 36):
+        m.append(box((-70, 62, z - 2), (-58, 66, z + 2), GUNMETAL))
+    m += cyl("z", -64, 70, 6, 6, 44, TANK_BODY, CHROME)
+    for z in (10, 39):
+        m += cyl("z", -64, 70, 6.5, z, z + 1, CHROME)
     # The stack at the back right, banded in hazard stripes near its lip.
-    m += cyl("y", -86, 50, 7, 62, 80, EXHAUST, "dr_soot")
-    m += cyl("y", -86, 50, 7.5, 74, 76, HAZARD)
+    m += cyl("y", -72, 52, 6, 62, 80, EXHAUST, "dr_soot")
+    m += cyl("y", -72, 52, 6.5, 74, 76, HAZARD)
     # The small steam turbine behind the generator end, and its steam main from the boiler.
     m += cyl("x", 16, 54, 7, -16, -2, OLIVE, CHROME)
     m += cyl("x", 16, 54, 7.75, -10, -8.5, GUNMETAL)
-    m += cyl("x", 27, 54, 2, -52, -16, COPPER)
+    m += cyl("x", 27, 54, 2, -48, -16, COPPER)
     m.append(box((-18, 23, 52), (-14, 29, 56), COPPER))
     # The fuel skid at the back: the inlet flange (the port), banded in methane, and the fuel line to the combustor.
     m.append(box((-30, 4, 50), (-18, 14, 63.25), {"*": OLIVE, "up": STENCIL}))

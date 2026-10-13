@@ -26,5 +26,104 @@
     "tk_body": "jugcraft:block/tk_body",
     "particle": "jugcraft:block/dp_olive"
   },
-  "elements": []
+  "elements": [
+    {
+      "from": [
+        2.0,
+        0,
+        4.0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "west": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        4.0,
+        0,
+        3.0
+      ],
+      "to": [
+        6.0,
+        16,
+        4.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_gunmetal"
+        },
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "west": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        0,
+        4.0
+      ],
+      "to": [
+        2.0,
+        16,
+        6.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_gunmetal"
+        },
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "west": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        9.0,
+        0,
+        3.25
+      ],
+      "to": [
+        16,
+        14.0,
+        4.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_porthole_steel"
+        },
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "west": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    }
+  ]
 }

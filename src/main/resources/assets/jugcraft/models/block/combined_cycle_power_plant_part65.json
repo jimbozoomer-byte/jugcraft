@@ -31,16 +31,48 @@
       "from": [
         2.0,
         0,
-        0
+        3.0
       ],
       "to": [
         16,
-        16,
+        14.0,
         16
       ],
       "faces": {
+        "north": {
+          "texture": "#dp_grille"
+        },
         "west": {
-          "texture": "#dw_ribbed_steel"
+          "texture": "#dp_grille"
+        },
+        "up": {
+          "texture": "#dp_olive_stencil"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        14.0,
+        2.0
+      ],
+      "to": [
+        16,
+        15.5,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_chrome"
+        },
+        "west": {
+          "texture": "#dp_chrome"
+        },
+        "up": {
+          "texture": "#dp_chrome"
+        },
+        "down": {
+          "texture": "#dp_chrome"
         }
       }
     }

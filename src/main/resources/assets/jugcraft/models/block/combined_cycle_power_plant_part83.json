@@ -29,44 +29,116 @@
   "elements": [
     {
       "from": [
-        0,
-        0,
+        10.0,
+        3.25,
         0
       ],
       "to": [
-        12.0,
-        14.0,
+        16,
+        8.75,
         16
       ],
       "faces": {
-        "east": {
-          "texture": "#dw_ribbed_steel"
+        "west": {
+          "texture": "#tk_body"
         },
         "up": {
-          "texture": "#dp_gunmetal"
+          "texture": "#tk_body"
+        },
+        "down": {
+          "texture": "#tk_body"
         }
       }
     },
     {
       "from": [
-        0,
-        6.0,
+        10.75,
+        8.75,
         0
       ],
       "to": [
-        12.5,
-        9.0,
+        16,
+        10.75,
         16
       ],
       "faces": {
-        "east": {
-          "texture": "#sp_ceramic"
+        "west": {
+          "texture": "#tk_body"
         },
         "up": {
-          "texture": "#sp_ceramic"
+          "texture": "#tk_body"
         },
         "down": {
-          "texture": "#sp_ceramic"
+          "texture": "#tk_body"
+        }
+      }
+    },
+    {
+      "from": [
+        10.75,
+        1.25,
+        0
+      ],
+      "to": [
+        16,
+        3.25,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#tk_body"
+        },
+        "up": {
+          "texture": "#tk_body"
+        },
+        "down": {
+          "texture": "#tk_body"
+        }
+      }
+    },
+    {
+      "from": [
+        12.5,
+        10.75,
+        0
+      ],
+      "to": [
+        16,
+        12.0,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#tk_body"
+        },
+        "up": {
+          "texture": "#tk_body"
+        },
+        "down": {
+          "texture": "#tk_body"
+        }
+      }
+    },
+    {
+      "from": [
+        12.5,
+        0.0,
+        0
+      ],
+      "to": [
+        16,
+        1.25,
+        16
+      ],
+      "faces": {
+        "west": {
+          "texture": "#tk_body"
+        },
+        "up": {
+          "texture": "#tk_body"
+        },
+        "down": {
+          "texture": "#tk_body"
         }
       }
     }

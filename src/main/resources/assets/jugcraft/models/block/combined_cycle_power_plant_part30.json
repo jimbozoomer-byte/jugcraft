@@ -26,5 +26,258 @@
     "tk_body": "jugcraft:block/tk_body",
     "particle": "jugcraft:block/dp_olive"
   },
-  "elements": []
+  "elements": [
+    {
+      "from": [
+        1.0,
+        0,
+        11.0
+      ],
+      "to": [
+        11.0,
+        15.0,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_olive"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "west": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_olive"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        0,
+        7.25
+      ],
+      "to": [
+        11.0,
+        13.75,
+        11.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_olive"
+        },
+        "south": {
+          "texture": "#dp_olive"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "west": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_olive"
+        }
+      }
+    },
+    {
+      "from": [
+        1.0,
+        0,
+        5.0
+      ],
+      "to": [
+        11.0,
+        10.5,
+        7.25
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_olive"
+        },
+        "south": {
+          "texture": "#dp_olive"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "west": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_olive"
+        }
+      }
+    },
+    {
+      "from": [
+        3.0,
+        0,
+        10.75
+      ],
+      "to": [
+        4.5,
+        15.75,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "east": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "west": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "up": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        3.0,
+        0,
+        6.5
+      ],
+      "to": [
+        4.5,
+        14.5,
+        10.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "south": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "east": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "west": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "up": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        3.0,
+        0,
+        4.25
+      ],
+      "to": [
+        4.5,
+        11.0,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "south": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "east": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "west": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "up": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        7.0,
+        0,
+        10.75
+      ],
+      "to": [
+        8.5,
+        15.75,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "east": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "west": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "up": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        7.0,
+        0,
+        6.5
+      ],
+      "to": [
+        8.5,
+        14.5,
+        10.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "south": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "east": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "west": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "up": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    },
+    {
+      "from": [
+        7.0,
+        0,
+        4.25
+      ],
+      "to": [
+        8.5,
+        11.0,
+        6.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "south": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "east": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "west": {
+          "texture": "#dw_ribbed_steel"
+        },
+        "up": {
+          "texture": "#dw_ribbed_steel"
+        }
+      }
+    }
+  ]
 }

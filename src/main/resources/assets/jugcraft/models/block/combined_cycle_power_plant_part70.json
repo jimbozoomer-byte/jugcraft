@@ -29,44 +29,56 @@
   "elements": [
     {
       "from": [
-        2.0,
+        0,
         0,
         0
       ],
       "to": [
-        16,
-        16,
+        16.0,
+        14.0,
         16
       ],
       "faces": {
-        "west": {
+        "east": {
           "texture": "#dw_ribbed_steel"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
         }
       }
     },
     {
       "from": [
-        1.0,
         0,
-        0.0
+        6.0,
+        0
       ],
       "to": [
-        2.0,
-        16,
-        2.0
+        16.1,
+        9.0,
+        16
       ],
       "faces": {
-        "north": {
-          "texture": "#dp_gunmetal"
-        },
-        "south": {
-          "texture": "#dp_gunmetal"
-        },
         "east": {
-          "texture": "#dp_gunmetal"
+          "texture": "#sp_ceramic"
         },
-        "west": {
-          "texture": "#dp_gunmetal"
+        "up": {
+          "texture": "#sp_ceramic",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
+        },
+        "down": {
+          "texture": "#sp_ceramic",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         }
       }
     }
