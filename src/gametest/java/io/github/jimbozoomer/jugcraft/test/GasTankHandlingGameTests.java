@@ -82,12 +82,17 @@ public class GasTankHandlingGameTests {
 					item -> item.getItem().is(JugcraftFluids.FLUID_TANK.asItem()));
 			helper.assertTrue(items.size() == 1, "Breaking the tank dropped " + items.size() + " tank stacks");
 			ItemEntity drop = items.get(0);
+			// Each touch is measured by what it adds, so the test holds whether or not the two mock players share an
+			// identity: the first takes the tank, the second finds nothing left to take.
+			int before = count(first);
 			drop.playerTouch(first);
+			int taken = count(first) - before;
+			helper.assertTrue(taken == 1 && (drop.isRemoved() || drop.getItem().isEmpty()),
+					"The first touch took " + taken + " tanks, leaving " + drop.getItem());
+			int beforeSecond = count(second);
 			drop.playerTouch(second);
-			int firstTanks = count(first);
-			int secondTanks = count(second);
-			helper.assertTrue(firstTanks + secondTanks == 1, "The players hold " + firstTanks + " and " + secondTanks + " tanks, not one between them");
-			ServerPlayer holder = firstTanks == 1 ? first : second;
+			helper.assertTrue(count(second) == beforeSecond, "The second touch took another tank from an empty drop");
+			ServerPlayer holder = first;
 			StoredFluid stored = null;
 			for (int slot = 0; slot < holder.getInventory().getContainerSize(); slot++) {
 				ItemStack stack = holder.getInventory().getItem(slot);
@@ -97,7 +102,6 @@ public class GasTankHandlingGameTests {
 			}
 			helper.assertTrue(stored != null && stored.variant().isOf(PetroFluids.HYDROGEN.fluid()) && stored.amount() == ODD,
 					"The picked-up tank carries " + stored + ", not " + ODD + " droplets of hydrogen");
-			helper.assertTrue(drop.isRemoved() || drop.getItem().isEmpty(), "The drop is still in the world after being picked up");
 			helper.succeed();
 		});
 	}
