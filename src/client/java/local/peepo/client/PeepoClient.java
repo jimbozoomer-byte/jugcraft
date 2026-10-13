@@ -16,6 +16,9 @@ public final class PeepoClient implements ClientModInitializer {
             if(context.player().containerMenu instanceof local.peepo.CompanionMenu menu && menu.containerId==payload.menu()){menu.populationRow=payload.row();menu.populationAnchor=payload.anchor();menu.populationTypes=payload.types();}
         });
         AssignmentPreview.initialize();
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(local.peepo.CompanionDetailsPayload.TYPE,(payload,context)->{
+            if(context.player().containerMenu instanceof local.peepo.CompanionMenu menu && menu.containerId==payload.menu())menu.receiveDetails(payload.rows());
+        });
         TransportCrateRenderer.initialize();
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler,client)->TransportCratePreview.clear());
         net.minecraft.client.gui.screens.MenuScreens.register(local.peepo.TransportCrateMenu.TYPE,TransportCrateScreen::new);

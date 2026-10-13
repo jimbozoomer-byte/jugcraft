@@ -184,6 +184,7 @@
 			"local.peepo.PeepoKitchenAnimationClientTests",
 			"local.peepo.PeepoSuppliesClientTests",
 			"local.peepo.PeepoDeliveryClientTests",
+			"local.peepo.PeepoCookingBatchClientTests",
 			"local.peepo.PeepoWorkSessionClientTests",
 			"local.peepo.PeepoHarvestClientTests",
 			"local.peepo.PeepoPopulationClientTests",

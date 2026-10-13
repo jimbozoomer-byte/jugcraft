@@ -56,6 +56,29 @@ public final class CompanionTransport extends Goal {
         return 2+Math.max(0,stacks-1)+Math.max(0,(items+31)/32-1);
     }
     public CompanionStatus activity(){return active?status:CompanionStatus.IDLE;}
+    private record Detail(CompanionAssignments.Target target,String text,long until){}
+    private final Map<BlockPos,Detail> jobDetails=new HashMap<>();
+    /** Only facts already discovered by real transport work; the menu never probes storage. */
+    private void rememberDetail(String text){
+        if(porter || workstation==null)return;
+        if(jobDetails.size()>=4 && !jobDetails.containsKey(workstation.at().pos()))jobDetails.clear();
+        jobDetails.put(workstation.at().pos(),new Detail(workstation,text,npc.level().getGameTime()+200));
+    }
+    public String jobDetail(CompanionAssignments.Target target){
+        if(target.equals(workstation) && !porter && !manifest.isEmpty()){
+            String item=manifest.getCount()+" "+manifest.getHoverName().getString();
+            String endpoint=storeName();
+            if(status==CompanionStatus.FULL)return endpoint+" cannot accept "+item+"; cargo retained.";
+            if(status==CompanionStatus.BLOCKED)return "Cannot reach "+(destination()==store?endpoint:"the workstation")+"; cargo retained.";
+            return (returning?"Returning ":supply?"Supplying ":"Delivering ")+item+(pending.isEmpty()?"":" + "+pending.size()+" more stack(s)")+(supply && !returning?" from ":" to ")+endpoint+".";
+        }
+        var detail=jobDetails.get(target.at().pos());
+        return detail!=null && detail.target.equals(target) && npc.level().getGameTime()<detail.until?detail.text:"";
+    }
+    private String storeName(){
+        for(int i=0;i<4;i++)for(boolean output:new boolean[]{false,true})if(store!=null && store.equals(npc.assignments.get(CompanionAssignments.containerSlot(output,i))))return (output?"Output ":"Supply ")+(i+1);
+        return "the linked container";
+    }
     public CompanionStatus porterStatus(){return !npc.assignments.supplies.anyRoutes()?CompanionStatus.PORTER_SETUP:porterState;}
     public CompanionStatus containerStatus(int row){
         if(npc.orders.porter() && row>=CompanionAssignments.SUPPLY)return porterStatus();
@@ -131,6 +154,7 @@ public final class CompanionTransport extends Goal {
     private void beginHandoff(){
         // Stay here while choosing the next bounded step: return to work, restock,
         // collect another output, or continue a porter route. Never wander between legs.
+        if(workstation!=null)jobDetails.remove(workstation.at().pos());
         forget();handoffUntil=npc.level().getGameTime()+40;active=true;
         status=CompanionStatus.WAITING;npc.getNavigation().stop();
     }
@@ -216,7 +240,7 @@ public final class CompanionTransport extends Goal {
                 if(sourceCounts!=null)max=Math.min(max,Math.max(0,sourceCounts.getOrDefault(stack.getItem(),0)-limits.leave));
                 if(destinationCounts!=null)max=Math.min(max,Math.max(0,limits.keep-destinationCounts.getOrDefault(stack.getItem(),0)));
             }
-            if(supply)max=Math.min(max,port.needed(stack));
+            if(supply)max=Math.min(max,port.pickupNeeded(stack));
             if(max<=0)continue;
             try(var scope=io.github.jimbozoomer.jugcraft.machine.MachineItemAutomation.companionTransfer();var tx=Transaction.openOuter()){
                 int take=(int)view.extract(variant,max,tx);
@@ -262,6 +286,14 @@ public final class CompanionTransport extends Goal {
         for(int i=1;i<5;i++){
             var work=npc.assignments.get(i);if(work==null || blocked.containsKey(work.at().pos()))continue;
             if(npc.deferJobTransport(work.at().pos()))continue;
+            // Let a stocked pot finish everything it can hold before taking its meals away.
+            // This also applies after reload, before the routine has reclaimed its rim position.
+            if(work.present(npc.level()) && npc.level().getBlockEntity(work.at().pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity pot
+                    && pot.cookingStatus()==CompanionStatus.READY){
+                var job=CompanionJobs.resolve(npc,work.at().pos());
+                if(job!=null && npc.orders.station(job) && job.worthStarting(npc))return false;
+                continue;
+            }
             // A supplied processor/plot should start working before we plan another haul.
             // This also lets a higher-priority productive job interrupt a delivery chain.
             if(continuing && work.present(npc.level())){
@@ -286,6 +318,8 @@ public final class CompanionTransport extends Goal {
     @Override public void stop(){handoffUntil=0;active=false;clearPiePose();npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
     private CompanionAssignments.Target destination(){return manifest.isEmpty()?(supply?store:workstation):supply && !returning?workstation:store;}
     private void fail(CompanionStatus why){
+        if(why==CompanionStatus.BLOCKED)rememberDetail("Last attempt: cannot reach "+(destination()==store?storeName():"the workstation")+". Clear a safe path and standing space.");
+        if(why==CompanionStatus.FULL)rememberDetail("Last attempt: "+storeName()+" could not accept the delivery; clear room or link another Output.");
         clearPiePose();
         if(porter)porterState=why;
         status=why;active=false;nextSearch=npc.level().getGameTime()+200;
@@ -459,7 +493,7 @@ public final class CompanionTransport extends Goal {
         var source=porter?CompanionStorage.find(npc,workstation):supply?CompanionStorage.find(npc,store):port.outputs();
         var destination=supply?port.inputs():CompanionStorage.find(npc,store);
         var slots=new ArrayList<Integer>();for(int i=0;i<8;i++)if(npc.belongings.getItem(i).isEmpty())slots.add(i);
-        var batch=CompanionDeliveryPlan.create(source,destination,slots.size(),supply?port::needed:null,porter?npc.assignments.supplies.route(route):null);
+        var batch=supply?port.supplyBatch(source,slots.size()):CompanionDeliveryPlan.create(source,destination,slots.size(),null,porter?npc.assignments.supplies.route(route):null);
         if(batch.isEmpty()){fail(slots.isEmpty()?CompanionStatus.FULL:porter?CompanionStatus.FULL:CompanionStatus.NO_INPUT);return;}
         try(var scope=io.github.jimbozoomer.jugcraft.machine.MachineItemAutomation.companionTransfer();var tx=Transaction.openOuter()){
             for(int i=0;i<batch.size();i++){

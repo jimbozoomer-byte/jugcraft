@@ -79,7 +79,7 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             head.xRot=.04F;
         }
         if(s.work!=local.peepo.WorkAnimation.NONE && !s.eating && !s.sleeping && !s.sitting && !s.wheelRunning){
-            if(s.work==local.peepo.WorkAnimation.STIR)CompanionWorkPose.stir(s,leftArm,rightArm,head,leftLeg,rightLeg);
+            if(s.work==local.peepo.WorkAnimation.STIR)CompanionWorkPose.stir(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else if(s.work==local.peepo.WorkAnimation.SPINNING)CompanionWorkPose.spinning(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else if(s.work==local.peepo.WorkAnimation.CRANK)CompanionWorkPose.crank(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);
             else if(s.work.isPie())CompanionWorkPose.pie(s,leftArm,rightArm,head,leftLeg,rightLeg,workTorso);

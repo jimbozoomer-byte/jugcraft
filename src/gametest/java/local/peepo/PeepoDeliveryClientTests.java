@@ -200,8 +200,8 @@ public final class PeepoDeliveryClientTests implements FabricClientGameTest {
             s.runOnServer(v->{for(var stack:ingredients)check(count(source,stack.getItem())>=stack.getCount() && count(pot[0],stack.getItem())==0,"Supply Off returns every ingredient");});
         }else {
             s.waitFor(v->!npc.transport.hasPendingDelivery(),1200);
-            s.runOnServer(v->{for(var stack:ingredients)check(count(pot[0],stack.getItem())>=stack.getCount(),"still-needed ingredients delivered after one becomes unnecessary");
-                check(count(source,ingredients.getFirst().getItem())>=ingredients.getFirst().getCount(),"unneeded ingredient returned to original chest");
+            s.runOnServer(v->{for(var stack:ingredients)check(count(pot[0],stack.getItem())>=stack.getCount(),"bulk ingredients delivered despite a concurrent compatible top-up");
+                check(count(pot[0],ingredients.getFirst().getItem())>=ingredients.getFirst().getCount()*2,"bulk pot retains compatible ingredients added during the trip for later recipes");
             });
         }
     }

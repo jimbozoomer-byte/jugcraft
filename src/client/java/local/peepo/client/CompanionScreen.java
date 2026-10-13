@@ -107,7 +107,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             b.setMessage(Component.literal((i==0?"Repair farmland: ":"Fertilizing: ")+(npc!=null && npc.assignments.gardenMaintenance(detailRow,i==0?CompanionAssignments.REPAIR:CompanionAssignments.FERTILIZE)?i==0?"On":"Auto":"Off")));}
         if(!naming && getFocused()==nameBox)setFocused(null);
     }
-    public CompanionScreen(CompanionMenu menu,Inventory inventory,Component title){super(menu,inventory,title,CompanionMenu.WIDTH,312);}
+    public CompanionScreen(CompanionMenu menu,Inventory inventory,Component title){super(menu,inventory,title,CompanionMenu.WIDTH,CompanionMenu.HEIGHT);}
     private Button button(String text,int x,int y,int width,int height,int id){
         return addRenderableWidget(Button.builder(Component.literal(text),b->{if(minecraft!=null && minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,id);}).bounds(leftPos+x,topPos+y,width,height).build());
     }
@@ -133,7 +133,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
     }
     private void tip(Button b,String text){b.setTooltip(Tooltip.create(Component.literal(text)));}
     @Override protected void init(){
-        super.init();inventoryLabelX=80;inventoryLabelY=218;
+        super.init();inventoryLabelX=80;inventoryLabelY=218+CompanionMenu.STATUS_SPACE;
         tab=addRenderableWidget(Button.builder(Component.literal("Routine >"),b->{panel=panel==1?0:1;updateButtons();}).bounds(leftPos+imageWidth-84,topPos+6,76,16).build());
         supplyTab=addRenderableWidget(Button.builder(Component.literal("Supplies"),b->{panel=panel==2?0:2;updateButtons();}).bounds(leftPos+imageWidth-166,topPos+6,78,16).build());
         initSupplies();initDetails();
@@ -260,6 +260,11 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         updateButtons();
         extractBackground(g,mouseX,mouseY,delta);super.extractRenderState(g,mouseX,mouseY,delta);extractTooltip(g,mouseX,mouseY);
         supplyTooltip(g,mouseX,mouseY);
+        if(panel==0 && menu.filterRow()<0 && npc()!=null)for(int i=1;i<=4;i++){
+            int sy=topPos+CompanionMenu.assignmentY(i)+17;
+            if(mouseX>=leftPos+101 && mouseX<leftPos+imageWidth-12 && mouseY>=sy && mouseY<sy+10)
+                g.setTooltipForNextFrame(font,Component.literal(menu.jobDetail(i,npc().assignments.view().get(i))),mouseX,mouseY);
+        }
         int row=assignmentRow(mouseY-topPos);var npc=npc();
         if(panel==0 && menu.filterRow()<0 && npc!=null && mouseX>=leftPos+(row>0 && row<5?118:100) && mouseX<leftPos+(row>0 && row<5?253:imageWidth-20) && mouseY>=topPos+78 && row>=0 && row<CompanionAssignments.COUNT){
             var target=npc.assignments.view().get(row);
@@ -382,6 +387,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         if(panel==0 && menu.filterRow()<0)for(int i=0;i<6;i++){
             int rowY=y+CompanionMenu.assignmentY(i);
             g.fill(x+99,rowY,x+(i==0 || i>=5?imageWidth-20:252),rowY+14,0xFFDADADA);
+            if(i>0 && i<5)g.fill(x+99,rowY+16,x+imageWidth-10,rowY+27,0xFFD1D1D1);
             if(i>=CompanionAssignments.SUPPLY)g.fill(x+99,rowY,x+101,rowY+14,i==CompanionAssignments.SUPPLY?CompanionAssignments.SUPPLY_COLOR:CompanionAssignments.OUTPUT_COLOR);
         }
     }
@@ -393,6 +399,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         g.text(font,playerInventoryTitle,inventoryLabelX,inventoryLabelY,0xFF404040,false);
         var status=CompanionStatus.from(menu.value(11));
         g.text(font,fit(status.label,84),8,140,color(status),false);
+        g.text(font,"Paused while",8,156,0xFF555555,false);
+        g.text(font,"editing",8,167,0xFF555555,false);
         if(menu.filterRow()>=4){
             g.text(font,"Porter route "+(menu.filterRow()-3)+" filter",105,82,0xFF404040,false);
             g.text(font,"Leave: minimum source stock per item",105,179,0xFF404040,false);
@@ -468,6 +476,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             String prefix=i==0?"Home":i==5?"Lunch":i==6?"Supply":i==7?"Output":"Work "+i;
             String label=target==null?prefix+": Not assigned":(i>0 && i<5?"":prefix+": ")+npc.assignments.label(i)+" "+target.at().pos().toShortString();
             g.text(font,fit(label,i==0 || i>=5?imageWidth-125:130),i>0 && i<5?119:101,CompanionMenu.assignmentY(i)+3,color(rowStatus),false);
+            if(i>0 && i<5)g.text(font,fit(menu.jobDetail(i,target),imageWidth-115),101,CompanionMenu.assignmentY(i)+18,color(rowStatus),false);
         }
 
     }

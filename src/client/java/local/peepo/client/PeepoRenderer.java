@@ -132,10 +132,11 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         }
         if(state.work==WorkAnimation.STIR){
             var target=entity.workTarget();
-            // The server plants the companion on the rim; only the hands/spoon animate.
+            // The server plants the feet on the rim; body sway and spoon motion stay client-side.
             if(!entity.level().hasChunkAt(target) || !(entity.level().getBlockState(target).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlock))state.work=WorkAnimation.NONE;
             else{
                 state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;state.shadowRadius=0;
+                state.toolPose.stir(state.workPhase);
             }
         }
         if(state.work.hasTool()){

@@ -66,6 +66,8 @@ Open **Supplies** to access these three views:
 
 Containers keep their numbers when another is removed. A container can have only one role for a given companion. The face clicked when assigning a container matters for sided inventories. A chest can serve one companion's Output and another's Supply to form a production line.
 
+Each job has a status line beneath its controls. Hover it for the full explanation, including linked Supply/Output numbers, missing tools, Hand lock, energy recovery and blocked approaches. Selected cooking-pot and ordinary-machine recipes can show quantities still missing at the station; these do not imply the linked chests are empty. Delivery messages show real carried items and their source/destination. The companion stays paused while you edit. See [job status details](features/companion-job-details.md).
+
 Attach a sign to a chest/container to give it a readable name in **Supplies**. Nonempty sign lines are joined into its display name, including a sign on either half of a double chest. The sign takes priority over a custom container name; removing or blanking it restores the container name. Labels refresh about once a second while the companion menu is open, without changing the actual assignment.
 
 Tools travel in real cargo. When an automatic tool swap completes, the previous hand item moves into cargo. Leave room for fetching a replacement; an accessible Tools supply can replace a broken tool. Locking Hand is useful when you want to keep a torch or a particular tool assigned.
@@ -116,7 +118,7 @@ Filters are available for Cooking Pots, supported standard processors, Hearth Ov
 | Coal Generator / Steam Generator / Large Steam Engine | Supply the machine's accepted solid fuels. Boilers can also receive water buckets; Output returns empty buckets. Pipes/source-water operation still works. No production boost. |
 | Auto-Crafter | Seed the real 3×3 grid with one item in each required slot. Supply replenishes that pattern; Output collects products and container remainders. Normal energy/redstone rules apply. |
 | Electroplating Bath | Supply a compatible damageable item and nickel, silver or gold ingots; pipe in sulfuric acid. Output takes the actual plated/repaired item, preserving its other components. |
-| Cooking Pot | Provide heat and the recipe's ingredients/containers. One helper stirs from the rim and gives **+50% cooking speed**; Supply and Output handle the supported recipe items and results. |
+| Cooking Pot | Provide heat and the recipe's ingredients/containers. Peepo brings balanced bulk ingredient loads, then stirs at **+50% cooking speed** until ingredients run out or the pot's result slots fill, before collecting and delivering the finished batch. Supply and Output use the existing links and controls. |
 | Cutting Board | Provide a knife and valid cutting inputs. Peepo stands at the board and makes a two-handed chop. The knife loses durability; all recipe results are retained for Output. |
 | Skillet | Heat it from below. Supply brings compatible raw food and Output collects fried food. Cooking continues without a resident helper; no speed bonus is added. |
 | Kitchen Stove | Light it and keep its top clear for its own cooking. Supply brings cookable food and Output collects cooked food. A pot/skillet on top uses the stove as heat instead; assign that upper station for its workflow. |

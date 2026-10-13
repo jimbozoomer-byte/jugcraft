@@ -24,10 +24,13 @@ final class CompanionRoutine extends Goal {
         && npc.preferences.canWork() && npc.orders.station(station) && station.availableTo(npc)
         && CompanionJobs.permitted(npc,station.stationPosition());}
     boolean atJob(BlockPos pos){return station instanceof CompanionJob && station.stationPosition().equals(pos);}
-    /** Let a productive session finish before ordinary same/lower-priority hauling, at most 20 seconds. */
+    /** Ordinary sessions last 20 seconds; a stocked pot finishes cooking before ordinary hauling. */
     boolean deferTransport(BlockPos pos){
-        if(!active || !(station instanceof CompanionJob) || npc.level().getGameTime()>=sessionUntil
+        if(!active || !(station instanceof CompanionJob job)
             || !npc.preferences.canWork() || !npc.orders.station(station))return false;
+        if(station instanceof CookingPotJob && job.planningStatus(npc)==CompanionStatus.READY)
+            return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
+        if(npc.level().getGameTime()>=sessionUntil)return false;
         if(state!=CompanionStatus.WORKING && state!=CompanionStatus.TRAVELLING && state!=CompanionStatus.IDLE && state!=CompanionStatus.WAITING)return false;
         int free=0;for(int i=0;i<8;i++)if(npc.belongings.getItem(i).isEmpty())free++;
         if(free<=1)return false;

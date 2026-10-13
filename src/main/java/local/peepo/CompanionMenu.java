@@ -13,6 +13,7 @@ import net.minecraft.world.flag.FeatureFlags;
 public final class CompanionMenu extends AbstractContainerMenu {
     public static final int DATA_COUNT=79, RECIPE_START=46, FILTER_START=50;
     public static final int WIDTH=480, RECIPE_X=416, SEED_X=396;
+    public static final int JOB_ROW_HEIGHT=28, STATUS_SPACE=40, HEIGHT=312+STATUS_SPACE;
     public static MenuType<CompanionMenu> TYPE;
     private final PeepoEntity npc;
     private final ContainerData data;
@@ -28,12 +29,21 @@ public final class CompanionMenu extends AbstractContainerMenu {
     public int populationRow=-1;
     public net.minecraft.core.BlockPos populationAnchor=net.minecraft.core.BlockPos.ZERO;
     public boolean showRecipes=true;
-    public static int assignmentY(int row){return row==0?78:row>=5?168+(row-5)*18:94+(row-1)*18;}
+    private long nextDetailsRefresh;
+    private java.util.List<CompanionDetailsPayload.Row> jobDetails=java.util.List.of();
+    public void receiveDetails(java.util.List<CompanionDetailsPayload.Row> rows){if(npc==null && rows.size()==4)jobDetails=java.util.List.copyOf(rows);}
+    public String jobDetail(int row,CompanionAssignments.Target target){
+        if(row<1 || row>4 || jobDetails.size()!=4)return "Checking job...";
+        var detail=jobDetails.get(row-1);
+        return detail.target().equals(CompanionDetailsPayload.key(target))?detail.text():"Checking job...";
+    }
+    public static int assignmentY(int row){return row==0?78:row>=5?168+STATUS_SPACE+(row-5)*18:94+(row-1)*JOB_ROW_HEIGHT;}
     public static int assignmentData(int row){return row<6?12+row:29+row-6;}
     public static void initialize(){TYPE=Registry.register(BuiltInRegistries.MENU,PeepoMod.id("companion_commands"),new MenuType<>(CompanionMenu::new,FeatureFlags.VANILLA_SET));
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(CompanionEditPayload.TYPE,CompanionEditPayload.CODEC);
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.serverboundPlay().register(PopulationEditPayload.TYPE,PopulationEditPayload.CODEC);
         net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(PopulationTypesPayload.TYPE,PopulationTypesPayload.CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.clientboundPlay().register(CompanionDetailsPayload.TYPE,CompanionDetailsPayload.CODEC);
         net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(PopulationEditPayload.TYPE,(payload,context)->{if(context.player().containerMenu instanceof CompanionMenu menu)menu.editPopulation(context.player(),payload);});
         net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(CompanionEditPayload.TYPE,(payload,context)->{if(context.player().containerMenu instanceof CompanionMenu menu && menu.containerId==payload.menu())menu.editDetails(context.player(),payload);});
     }
@@ -99,8 +109,8 @@ public final class CompanionMenu extends AbstractContainerMenu {
             public int getMaxStackSize(){return 1;}
         });
         addSlot(new Slot(contents,9,70,54){public int getMaxStackSize(){return 1;}});
-        for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,col+row*9+9,80+col*18,230+row*18));
-        for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,80+col*18,288));
+        for(int row=0;row<3;row++)for(int col=0;col<9;col++)addSlot(new Slot(inventory,col+row*9+9,80+col*18,230+STATUS_SPACE+row*18));
+        for(int col=0;col<9;col++)addSlot(new Slot(inventory,col,80+col*18,288+STATUS_SPACE));
         for(int row=0;row<4;row++){
             final int at=row;
             addSlot(new Slot(recipeIcons,row,SEED_X,assignmentY(row+1)){
@@ -171,6 +181,19 @@ public final class CompanionMenu extends AbstractContainerMenu {
         if(npc!=null && stillValid(playerInventory.player))npc.assignments.refreshLabels();
         if(npc!=null && npc.level().getGameTime()>=nextRecipeRefresh)refreshRecipes();
         super.broadcastChanges();
+        if(npc!=null && playerInventory.player.containerMenu==this && stillValid(playerInventory.player) && npc.level().getGameTime()>=nextDetailsRefresh){
+            nextDetailsRefresh=npc.level().getGameTime()+20;
+            var details=new java.util.ArrayList<CompanionDetailsPayload.Row>(4);
+            for(int row=1;row<=4;row++){
+                String text=CompanionJobDetails.describe(npc,row,CompanionStatus.from(npc.report.row(row))).replaceAll("[\\p{Cntrl}\\u00a7]"," ");
+                if(text.length()>512)text=text.substring(0,509)+"...";
+                details.add(new CompanionDetailsPayload.Row(CompanionDetailsPayload.key(npc.assignments.get(row)),text));
+            }
+            if(!details.equals(jobDetails)){
+                jobDetails=java.util.List.copyOf(details);
+                net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send((net.minecraft.server.level.ServerPlayer)playerInventory.player,new CompanionDetailsPayload(containerId,jobDetails));
+            }
+        }
     }
     public int filterRow(){return npc==null?value(40):filterRow;}
     @Override public void clicked(int slot,int button,ContainerInput type,Player player){
