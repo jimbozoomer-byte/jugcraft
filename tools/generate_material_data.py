@@ -194,6 +194,9 @@ def assets():
     concordance.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     concordance.advancements(DATA, write, lang)
     lang.update(concordance.write_data(write, RES))
+    # JEI's pages on where the things only a ritual or a lair boss gives come from (rows in recipe_view.json).
+    import acquisition
+    acquisition.lang_entries(lang)
     import control_electronics
     control_electronics.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import rocketry
@@ -233,6 +236,9 @@ def assets():
     import advancements
     lang.update(advancements.generate(MOD)[1])
     party_lang(lang)
+    # The Jugcraft Encyclopedia's words (tools/encyclopedia.py, Concordance Chunk A, A-04).
+    import encyclopedia
+    encyclopedia.lang_entries(lang)
     drone_assets(lang)
     import tower
     tower.write_assets(write, rid, ASSETS, lang)

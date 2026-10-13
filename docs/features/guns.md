@@ -2054,6 +2054,11 @@ The owner's other copper gun is a hand cannon fired by striking a pin with a ham
   - GeckoLib owns everything a gun does: the gun's parts and, in first person, the arms that hold it.
   - In third person (slice 6), `GunPose` raises the arms through the same two hooks that pose ArmsMotion's: `ArmsRenderStateMixin` and `ArmsHumanoidModelMixin`.
   - The off hand plays no part: guns fire from the main hand only.
+- **Casting (Concordance Chunk A, ticket A-07, 11 October 2026):** a gun in the main hand owns the player's arms, so no cast's pose plays over the gun or its reload.
+  - A cast and a reload cannot begin together: a cast needs a wand in the main hand, and a reload stops when the gun leaves it.
+  - What could outlast a switch from the wand was Spell Engine's release clip (up to 14 ticks) or its fade of an ended cast. Player Animation Library lays those over the arms after `GunPose`, and in first person (Spell Engine's default) hides the gun as the game draws it while they play.
+  - `client/CastPoses` stops those clips, and the Vigil's offering gesture, on any player holding a gun. It runs at the end of each client tick, in first and third person, for every player the client sees. No mixin. `CircleClient` keeps the circle's gesture off such a player itself, by asking `CastPoses.gesturesYield`.
+  - [The Concordance presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07) has the details and the test (`ConcordanceJourneyClientGameTests.aCastGivesWayToAGunOrAnArm`, not yet run).
 - **Particles:** the casings are registered as the Fog Machine's fog is (`FabricParticleTypes.simple()`, a provider on the client), and so is the Laser Sight's dot (slice 9E), which shows whatever the particle setting (`simple(true)`).
 
 ## How the owner's models became GeckoLib models

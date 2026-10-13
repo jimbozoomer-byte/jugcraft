@@ -16,7 +16,7 @@ This is future gameplay, as recorded in the [roadmap](ROADMAP.md#owner-requested
 Owner-requested 6 October 2026. Independent feature brief: [Jugcraft Encyclopedia](features/jugcraft-encyclopedia.md). All ten supplied screenshots are included in the [reference gallery](#reference-gallery) below and archived in the [reference folder](images/jugcraft-encyclopedia/README.md).
 
 - [ ] **Build the full Jugcraft Encyclopedia UI**, covering technology, magic, detailed pathways and integrated quests.
-- [ ] Add an inventory entry button and a configurable keybind. Both open the same Encyclopedia without crafting, carrying or using an Encyclopedia item.
+- [x] Add an inventory entry button and a configurable keybind. Both open the same Encyclopedia without crafting, carrying or using an Encyclopedia item. (Concordance Chunk A's first slice; its client test passed in CI run 38435014953; not yet merged; [record](features/arcane-concordance-first-route.md).)
 - [ ] Provide a home view explaining the overall machinery/technology route and the overall magic route.
 - [ ] Add chapter/specialty navigation and in-depth pages for each pathway within both routes, including useful products, entry requirements, process steps and optional branches.
 - [ ] Explain the essential technology path and the substantial pre-electric workshop's sideways possibilities. Show steel and electricity as parallel capabilities under the owner's planning direction.

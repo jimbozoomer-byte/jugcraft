@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; three bosses are built and a fourth is being built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; five bosses are built; the Crypt Lich’s lair is built, with his encounter still planned.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 ## Rules every boss follows
 
@@ -8,10 +8,21 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 - **An arena with edges:** a lair, or a summoning that builds one. The boss does not wander out of it, and it resets when everyone leaves.
 - **Readable attacks:** every big attack is telegraphed (a wind-up, a sound, a shadow on the ground) and can be dodged or blocked.
 - **Recovery:** dying in the fight is not the end; gear can be fetched back, and the boss heals and resets rather than keeping its gains.
-- **Multiplayer:** its health scales with the players in the arena; every player who fought gets a roll of its loot table, not just the last hit.
+- **Multiplayer:** its health scales with the players in the arena; every player who took part gets a roll of its loot table, not just the last hit. A blow to it, or to a creature that counts for it, is taking part; at Vesperine and Madame Tatterlace, since Concordance Chunk A, so is support: healing or warding another player against the fight, or one of its objectives ([lair encounter credit](../features/lair-encounter-credit.md)).
 - **No griefing:** a summoned boss cannot be called inside a town's protection or another player's claim, and its attacks do not break player builds.
 - **No farming loop:** a long respawn timer per lair (or a costly summoning item), so a trophy stays a trophy.
 - **Optional:** no core progression needs a boss. Its trophies are side-grades with a boon, and each boss also drops something useful to non-fighters (a crafting material, a decoration, a trophy head).
+
+## Built so far
+
+| Boss | Lair, and how it is opened | Records | In `main` |
+|---|---|---|---|
+| **Vesperine, the Last Reaper** | The Hollow Acre: the Last Rites at a Jugcraft headstone at night (four lit candles, a Mourning Wreath and the Death Knell) | [hollow-acre.md](../features/hollow-acre.md), [vesperine.md](../features/vesperine.md) | #284 and #288, through #277 |
+| **Madame Tatterlace** | The Spindle Loft: a Cursed Spindle used on a Spinning Wheel at night | [spindle-loft.md](../features/spindle-loft.md), [tatterlace.md](../features/tatterlace.md) | #292 and #294, through #277 |
+| **The Yeti King** | The Glacier Hall: the Frost Horn | [glacier-hall.md](../features/glacier-hall.md), [yeti-king.md](../features/yeti-king.md) | #300 and #304, through #320 |
+| **The Cinder Tyrant** | The Cinder Kiln: the Kiln Seal | [cinder-kiln.md](../features/cinder-kiln.md), [cinder-tyrant.md](../features/cinder-tyrant.md) | #313 and #317, through #320 |
+
+The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all four are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win; they still credit damage alone, without Concordance Chunk A's support credit ([lair-encounter-credit.md](../features/lair-encounter-credit.md)).
 
 ## The first eight (trophies built)
 

@@ -147,6 +147,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		PartyClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();
+		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).
+		EncyclopediaClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);

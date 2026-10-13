@@ -540,11 +540,31 @@ def arms_pages():
 
 
 def variant_pages():
-    """Arms VII (batch 56): the styles' patterns, the bosses' trophies and the armor sets' arms."""
+    """Arms VII (batch 56): the styles' patterns, the bosses' trophies and the armor sets' arms. A boss that is built
+    names its lair (tools/arms_variants.py BOSSES), so the trophy page lists it among the foes met, the rest among those
+    yet to be met."""
     import arms_variants as av
+    import lairs
     rows, key = av.STYLES["gilded"]["pattern_recipe"]
     grid = [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
     styles = ", ".join(info["display"].lower() for info in av.STYLES.values())
+
+    def trophies(boss, info):
+        # "Vesperine, the Last Reaper, in the Hollow Acre: Vesper Scythe."
+        name = info["display"][0].upper() + info["display"][1:]
+        if "lair" in info:
+            lair = lairs.LAIRS[info["lair"]]["display"]
+            name += ", in " + ("the " + lair[4:] if lair.startswith("The ") else lair)
+        return f"{name}: " + " and ".join(av.BY_ID[trophy][3] for trophy in av.trophies(boss)) + "."
+    met = [trophies(boss, info) for boss, info in av.BOSSES.items() if "lair" in info]
+    unmet = [trophies(boss, info) for boss, info in av.BOSSES.items() if "lair" not in info]
+    trophy_text = ["Great foes carry arms of their own, with a boon."]
+    if met:
+        trophy_text += ["These are met in their lairs. Anyone who takes part in one's fall may win its trophy, and "
+                        "always does the first time:"] + met
+    if unmet:
+        trophy_text += ["These are yet to be met in the world, and will each carry two:"] + unmet
+    trophy_text += ["Trophies last twice as long as steel, and fight as their kinds do."]
     return [
         {"title": "Arms: Styles", "icon": f"{MOD}:gilded_longsword", "text": [
             f"Four styles restyle a steel arm at a smithing table: {styles}. Put the style's pattern, the steel arm and "
@@ -556,12 +576,7 @@ def variant_pages():
             f"for {av.MARK_TICKS // 20} seconds, seen through walls.",
             "Each fights as its kind does: the same swing, reach, trait and art."],
          "craft": {"grid": grid, "result": f"{MOD}:gilders_pattern", "count": 1}},
-        {"title": "Arms: Trophies", "icon": f"{MOD}:glacier_maul", "text": [
-            "Great foes yet to be met in the world will each carry two arms of their own, with a boon:",
-            ] + [f"{info['display'][0].upper()}{info['display'][1:]}: "
-                 + " and ".join(av.BY_ID[name][3] for name in av.trophies(boss)) + "."
-                 for boss, info in av.BOSSES.items()] + [
-            "Trophies last twice as long as steel, and fight as their kinds do."]},
+        {"title": "Arms: Trophies", "icon": f"{MOD}:glacier_maul", "text": trophy_text},
     ] + set_pages()
 
 

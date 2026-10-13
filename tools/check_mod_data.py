@@ -2107,7 +2107,8 @@ def check_arms_variants():
     each boss's trophy loot table, and that an armor set's arm has neither a recipe nor any loot table yet (how a set is
     won is the owner's to decide); the boons' and lines' tooltips, a boss's line naming its boss and a set's its set;
     that every boon is bounded; that no variant deals as much a second as a netherite sword, whatever its boon adds;
-    and the armor sets' shields (SET_SHIELDS), each of a set and blocking as a kit shield, with no recipe or drop yet."""
+    and the armor sets' shields (SET_SHIELDS), each of a set and blocking as a kit shield, with no recipe or drop yet; and
+    that a boss names its lair (a tools/lairs.py LAIRS key) exactly when it is built (its own entity loot table)."""
     import arms_variants as av
     java = (JAVA_ROOT / "weapons" / "ArmVariants.java").read_text(encoding="utf-8")
     found = [(name, kind, line, None if boon == "null" else boon.split(".")[1].lower())
@@ -2125,6 +2126,16 @@ def check_arms_variants():
         err(f"ArmVariants.SETS differs from tools/arms_variants.py {list(av.SETS)}")
     if len(set(av.LINES)) != len(av.STYLES) + len(av.BOSSES) + len(av.SETS):
         err("tools/arms_variants.py: a line is in more than one of STYLES, BOSSES and SETS")
+    # A boss that is built (it has its own loot table, loot_table/entities/<boss>.json) names its lair, and only a built
+    # boss does: the handbook's trophy page lists a boss among the foes met by that key.
+    import lairs
+    for boss, info in av.BOSSES.items():
+        built = (DATA / MOD / "loot_table" / "entities" / f"{boss}.json").is_file()
+        if built != ("lair" in info):
+            err(f"tools/arms_variants.py BOSSES[{boss!r}] must name its lair exactly when loot_table/entities/{boss}.json "
+                f"exists (the boss is built): {'it has the table but no lair' if built else 'it names a lair but has no table'}")
+        if "lair" in info and info["lair"] not in lairs.LAIRS:
+            err(f"tools/arms_variants.py BOSSES[{boss!r}] names the lair {info['lair']!r}, which tools/lairs.py LAIRS does not have")
     if re.findall(r'"([a-z_]+)"', re.search(r"PATTERN_NAMES = List\.of\(([^)]*)\)", java, re.S).group(1)) != av.patterns():
         err(f"ArmVariants.PATTERN_NAMES differs from tools/arms_variants.py {av.patterns()}")
     ints = {"FROST_TICKS": av.FROST[0], "FROST_AMPLIFIER": av.FROST[1], "EMBER_SECONDS": av.EMBER_SECONDS,
@@ -10347,6 +10358,182 @@ def check_mire_hag():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def check_acquisition(registered):
+    """Concordance Chunk A, unit 4 (tools/acquisition.py, docs/features/concordance-first-loadout.md): JEI's pages on
+    where the things only a ritual or a lair boss gives come from are the generator's, and each is tied to the files on
+    disk. Each page is shown for a registered item, has its words and says it describes the default data. The loot table
+    a boss's loot class rolls gives each of her things at the chance or count its page states, and every Jugcraft item
+    in it has a page; the Halloween extra and the first victory's trophy are still the loot class's. Nothing else gives
+    them: no other loot table (but the thing's own block and its arms-variants trophy table, which nothing rolls), shop,
+    villager trade, commission or project; and nothing makes a thing whose page says it is not crafted (a recipe's
+    result, results or byproducts, a bench working, a ritual other than the page's own, the Assayer's Scale's
+    catalogue), while the hood's page names its own recipe. The Adept's Attunement makes the Adept's Wand from what its
+    page lists. The JEI plugin shows the rows. Every piece of the first loadout is made by a recipe or a bench working on
+    disk, and the server test that loads those recipes names each; none of those sources gives the owner's armour tiers
+    the record keeps creative-only. Only data is read: what Java alone gives (a creature's drops coded in its class) is
+    not seen. (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
+    import acquisition as aq
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    pages = aq.pages()
+    if (load(ASSETS / "recipe_view.json") or {}).get("acquisition_info") != aq.rows():
+        err("recipe_view.json acquisition_info is not tools/acquisition.py's rows(): run tools/generate_material_data.py")
+    for key, text in pages.items():
+        if key not in registered:
+            err(f"acquisition: the JEI page for {MOD}:{key} names no registered item")
+        if lang.get(f"{aq.PREFIX}.{key}") != text:
+            err(f"lang {aq.PREFIX}.{key} is not tools/acquisition.py's page: run tools/generate_material_data.py")
+        if aq.DEFAULT not in text.lower():
+            err(f"acquisition: the JEI page for {key} must say it describes the default data ({aq.DEFAULT!r})")
+    plugin_path = CLIENT_JAVA_ROOT / "compat" / "JugcraftJeiPlugin.java"
+    plugin = plugin_path.read_text(encoding="utf-8") if plugin_path.is_file() else ""
+    if '"acquisition_info"' not in plugin or f'"{aq.PREFIX}." + ' not in plugin:
+        err("JugcraftJeiPlugin must show recipe_view.json's acquisition_info rows as information pages")
+    # What gives things, on disk: every item a recipe makes (each {"id": ...} object in a recipe file: its result, its
+    # results and its byproducts' results; no input here uses one), a bench working's result, a ritual's
+    # transformation, what the Assayer's Scale can form (its catalogue); every Jugcraft item a loot table names; and what
+    # the town's shops sell, villager trades give, the Conclave's commissions pay and its projects reward. What Java alone
+    # gives (a creature's drops coded in its class, such as creatures/scary/ScaryDrops) is not seen here.
+    made, dropped, given = {}, {}, {}
+    def outputs(value):
+        if isinstance(value, dict):
+            found = [value["id"]] if isinstance(value.get("id"), str) else []
+            return found + [ref for child in value.values() for ref in outputs(child)]
+        return [ref for child in value for ref in outputs(child)] if isinstance(value, list) else []
+    for path in sorted(DATA.glob("*/recipe/**/*.json")):
+        body = load(path) or {}
+        refs = set(outputs(body)) | ({body["result"]} if isinstance(body.get("result"), str) else set())
+        for ref in refs:
+            made.setdefault(ref, []).append(path)
+    for folder, result in (("working", lambda body: body.get("result")),
+                           ("ritual", lambda body: ((body.get("result") or {}).get("transform") or {}).get("into")),
+                           ("material", lambda body: body.get("item") if body.get("form", True) else None)):
+        for path in sorted(DATA.glob(f"*/concordance/{folder}/*.json")):
+            ref = result(load(path) or {})
+            if isinstance(ref, str):
+                made.setdefault(ref, []).append(path)
+    for path in sorted(DATA.glob("*/loot_table/**/*.json")):
+        for ref in set(re.findall(rf'"({MOD}:[a-z0-9_/]+)"', path.read_text(encoding="utf-8"))):
+            dropped.setdefault(ref, []).append(path)
+    for shop, info in ((load(DATA / MOD / "town" / "shops.json") or {}).get("shops") or {}).items():
+        for offer in info.get("sells", []):
+            given.setdefault(offer.get("item"), []).append(f"the town's {info.get('name', shop)}")
+    for path in sorted(DATA.glob("*/villager_trade/**/*.json")):
+        given.setdefault(((load(path) or {}).get("gives") or {}).get("id"), []).append(str(path.relative_to(DATA)))
+    for folder in ("commission", "project"):
+        for path in sorted((DATA / MOD / "concordance" / folder).glob("*.json")):
+            given.setdefault((load(path) or {}).get("reward"), []).append(str(path.relative_to(DATA)))
+    # Each boss: her loot class rolls the table her pages describe, and it gives what they say.
+    tables_for = {key: set() for key in pages}
+    for boss, info in aq.BOSSES.items():
+        loot_path = JAVA_ROOT / "lair" / boss / f"{boss.capitalize()}Loot.java"
+        loot_java = loot_path.read_text(encoding="utf-8") if loot_path.is_file() else ""
+        if f'Jugcraft.id("{info["table"]}")' not in loot_java:
+            err(f"lair/{boss}/{loot_path.name} does not roll loot_table/{info['table']}.json, which its JEI pages describe")
+        rolled = {}
+        for pool in (load(DATA / MOD / "loot_table" / f"{info['table']}.json") or {}).get("pools", []):
+            chance = pool.get("condition", {}).get("chance")
+            for entry in pool.get("entries", []):
+                namespace, item = split(entry.get("name", ":"))
+                count = entry.get("modifier", {}).get("count", {})
+                if namespace == MOD:
+                    rolled[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+        for item in rolled:
+            if item not in pages:
+                err(f"loot_table/{info['table']}.json gives {item}, which has no JEI page (tools/acquisition.py)")
+                continue
+            tables_for[item] |= {DATA / MOD / "loot_table" / f"{info['table']}.json",
+                                 DATA / MOD / "loot_table" / "bosses" / f"{boss}.json",
+                                 DATA / MOD / "loot_table" / "blocks" / f"{item}.json"}
+        item = info["count"][0]
+        count = rolled.get(item)
+        if not isinstance(count, tuple) or f"holds {count[0]} to {count[1]}" not in pages.get(item, ""):
+            err(f"acquisition: {item}'s JEI page does not say each share holds what loot_table/{info['table']}.json gives")
+        for thing in info["chances"]:
+            chance = rolled.get(thing)
+            if not isinstance(chance, (int, float)) or f"a {aq.pct(chance)} chance of it" not in pages.get(thing, ""):
+                err(f"acquisition: {thing}'s JEI page does not give loot_table/{info['table']}.json's chance ({chance})")
+        thing = info["event"][0]
+        event = re.search(r"\bEVENT_[A-Z]+_CHANCE = ([0-9.]+)F;", loot_java)
+        if not event or f"another {aq.pct(float(event.group(1)))} chance" not in pages.get(thing, ""):
+            err(f"acquisition: {thing}'s JEI page does not give {loot_path.name}'s Halloween chance")
+        first = info["first"]
+        method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
+        if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{method}\(\)\)\);", loot_java) \
+                or "first victory over her always brings it" not in pages.get(first, ""):
+            err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
+    # Nothing else gives them (no other loot table, shop, villager trade, commission or project), and what a page says is
+    # never crafted is not.
+    for key, text in pages.items():
+        ref = f"{MOD}:{key}"
+        for path in dropped.get(ref, []):
+            if path not in tables_for[key]:
+                err(f"{path.relative_to(DATA)} gives {key}, which its JEI page (tools/acquisition.py) does not name")
+        own = {DATA / MOD / "concordance" / "ritual" / f"{aq.RITUALS[key]}.json"} if key in aq.RITUALS else set()
+        makers = [path for path in made.get(ref, []) if path not in own]
+        if text.startswith("Not crafted") and makers:
+            err(f"{makers[0].relative_to(DATA)} makes {key}, whose JEI page says it is not crafted")
+        if given.get(ref):
+            why = ("whose JEI page says it is not traded" if "or traded" in text
+                   else "which its JEI page (tools/acquisition.py) does not name")
+            err(f"{given[ref][0]} gives {key}, {why}")
+    for item, (recipe, ingredient, count, name) in aq.CRAFTED.items():
+        path = DATA / MOD / "recipe" / f"{recipe}.json"
+        body = (load(path) or {}) if path.is_file() else {}
+        symbols = [symbol for symbol, ref in body.get("key", {}).items() if ref == f"{MOD}:{ingredient}"]
+        uses = sum(row.count(symbol) for row in body.get("pattern", []) for symbol in symbols)
+        if (body.get("result") or {}).get("id") != f"{MOD}:{item}" or uses != count \
+                or not pages.get(item, "").startswith(f"Crafted from {count} {name}."):
+            err(f"acquisition: {item}'s JEI page must name recipe/{recipe}.json ({count} {name})")
+    # The Adept's Wand: the ritual on disk makes it from what its page offers, for the Focus, steps and research it states.
+    for item, ritual in aq.RITUALS.items():
+        path = DATA / MOD / "concordance" / "ritual" / f"{ritual}.json"
+        body = (load(path) or {}) if path.is_file() else {}
+        text = pages.get(item, "")
+        if ((body.get("result") or {}).get("transform") or {}).get("into") != f"{MOD}:{item}":
+            err(f"concordance/ritual/{ritual}.json does not make {item}, as its JEI page says")
+        research = aq.rituals.RESEARCH.get(split(body.get("research", ":"))[1], {}).get("name")
+        said = [f"{body.get('focus')} Focus", f"{body.get('steps')} steps", f"{research} {body.get('stage')}"]
+        for offering in body.get("offerings", []):
+            try:
+                said.append(f"{offering['count']} {aq.rituals._item_name(offering['item'])}")
+            except KeyError:
+                said.append(str(offering.get("item")))
+        for words in said:
+            if words not in text:
+                err(f"acquisition: {item}'s JEI page does not say {words!r}, as concordance/ritual/{ritual}.json does")
+    # The first loadout is made in survival as it is: by the recipe of its own name, or by a bench working; and the
+    # server test that loads those recipes names every one.
+    tests_path = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordanceGameTests.java"
+    tests = tests_path.read_text(encoding="utf-8") if tests_path.is_file() else ""
+    named = re.search(r"FIRST_LOADOUT_RECIPES = List\.of\(([^)]*)\)", tests)
+    recipes = {item for item, how in {**aq.LOADOUT, **aq.OPTIONAL}.items() if how == "recipe"}
+    if "public void theFirstLoadoutIsMadeInSurvival(" not in tests or not named \
+            or set(re.findall(r'"([a-z_]+)"', named.group(1))) != recipes:
+        err("ConcordanceGameTests.theFirstLoadoutIsMadeInSurvival must load the recipe of every first-loadout piece "
+            f"(FIRST_LOADOUT_RECIPES: {sorted(recipes)})")
+    for item, how in {**aq.LOADOUT, **aq.OPTIONAL}.items():
+        if item not in registered:
+            err(f"acquisition: the first loadout's {item} is not registered")
+        if how == "recipe":
+            # The recipe's own result, not just a mention anywhere in the file (made counts every id object).
+            recipe = DATA / MOD / "recipe" / f"{item}.json"
+            result = ((load(recipe) or {}) if recipe.is_file() else {}).get("result")
+            if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
+                err(f"acquisition: recipe/{item}.json does not make the first loadout's {item} (its own result)")
+        else:
+            working = DATA / MOD / "concordance" / "working" / f"{how.split(':', 1)[1]}.json"
+            if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
+                err(f"acquisition: concordance/working/{working.name} does not make the first loadout's {item}")
+    # The owner's armour tiers the record keeps creative-only: nothing gives them.
+    for tier in aq.CREATIVE_ONLY:
+        for piece in gear.ARMOR:
+            ref = f"{MOD}:{tier}_{piece}"
+            sources = [str(path.relative_to(DATA)) for path in made.get(ref, []) + dropped.get(ref, [])] + given.get(ref, [])
+            if sources:
+                err(f"{sources[0]} gives {tier}_{piece}, which docs/features/concordance-first-loadout.md keeps "
+                    "creative-only: once the owner settles how a tier is won, take it out of CREATIVE_ONLY "
+                    "(tools/acquisition.py) and the record's creative-only table")
+
 
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
@@ -10995,7 +11182,10 @@ def check_concordance(registered):
     check_progression(co, root, lang, registered, research)
     check_spire(co, root, lang, registered, research)
     check_journal(co, root, lang)
+    check_composer(co, root, lang)
+    check_encyclopedia(root, lang)
     check_signs(co, root, lang)
+    check_cast_poses()
     check_authority(root, lang)
     check_economy(root)
     check_persistence(root)
@@ -11013,7 +11203,7 @@ def check_composition(co, root, lang, registered, research):
         path = root / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
     for name, values in (("compose/Grammar.java", co.COMPOSE_LIMITS), ("effect/EffectSpec.java", co.EFFECT_LIMITS),
-                         ("ConcordanceCommand.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
+                         ("Composing.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
         text = java(name)
         for const, value in values.items():
             if not re.search(rf"\bint {const} = {value};", text):
@@ -13114,6 +13304,10 @@ def check_equivalence(co, root, lang, registered, research):
     tag = load(DATA / MOD / "tags" / "item" / "equivalence" / "excluded.json") or {}
     if sorted(tag.get("values", [])) != sorted(eq.EXCLUDED):
         err("tags/item/equivalence/excluded.json differs from EXCLUDED")
+    # Every instrument is beyond the scale, as the record says of wands: it carries what is inscribed and tuned on it.
+    for instrument in co.INSTRUMENTS:
+        if f"{MOD}:{instrument}" not in excluded:
+            err(f"equivalence: the instrument {MOD}:{instrument} must be in EXCLUDED (tools/concordance_equivalence.py)")
     for thing in eq.EXCLUDED:
         if thing.startswith(f"{MOD}:") and split(thing)[1] not in registered:
             err(f"equivalence: the excluded {thing} is not registered")
@@ -13799,7 +13993,8 @@ def check_crimson(co, root, lang, registered, research):
     surge and blade numbers); every rite gives no more Vitae than the health it takes and can be made from full health;
     an hour of offering is bounded whatever heals the giver, and a surge never turns Vitae into more Focus; health is
     taken in exactly one place; mastery comes from the blade's growth; every word has its text; the icons are their maps;
-    the offering gesture exists and skips players whose arms ArmsMotion poses."""
+    the offering gesture exists and skips players whose arms a gun or ArmsMotion poses (check_cast_poses), and the
+    server sends it at the end of the tick, after the player's own tick has sent what they now hold."""
     cr = co.crimson
     def java(name, base=root):
         path = base / name
@@ -13880,8 +14075,14 @@ def check_crimson(co, root, lang, registered, research):
     gesture = re.search(r'GESTURE = Jugcraft\.id\("([a-z_]+)"\)', client)
     if not gesture or not (ASSETS / "player_animations" / f"{gesture.group(1)}.json").is_file():
         err("VigilClient: the offering gesture needs its clip in assets/jugcraft/player_animations")
-    if "instanceof ArmItem" not in client:
-        err("VigilClient: the offering gesture must skip players whose arms ArmsMotion poses (ArmItem)")
+    if "CastPoses.gesturesYield(player)" not in client:
+        err("VigilClient: the offering gesture must skip players whose arms a gun or ArmsMotion poses (CastPoses.gesturesYield)")
+    server = java("Vigil.java", vigil)
+    queued = re.search(r"private static void gesture\(ServerPlayer player\) \{(.*?)\n\t\}", server, re.S)
+    if "ServerTickEvents.END_SERVER_TICK.register(Vigil::sendGestures);" not in server or not queued \
+            or "ServerPlayNetworking.send" in queued.group(1):
+        err("Vigil: the offering gesture must be sent at the end of the server tick (Vigil.sendGestures), after the "
+            "player's own tick has sent what they hold, or other clients judge it by what they held before")
     import item_icons
     for icon in ("crimson_chalice", "thornheart_blade"):
         texture = ASSETS / "textures" / "item" / f"{icon}.png"
@@ -13986,6 +14187,8 @@ def main():
     check_yeti()
     check_cinder_tyrant()
     check_mire_hag()
+
+    check_acquisition(registered)
     check_material_sets()
     check_art()
     check_pixel_hollows()
@@ -14050,6 +14253,323 @@ def check_journal(co, root, lang):
         err("journal/JournalRequestPayload.java: a request carries nothing (the server decides what a player sees)")
 
 
+def check_composer(co, root, lang):
+    """Chunk A (A-01 to A-03): the composer screen and the compose command are one service. Composing asks its questions
+    in the command's order (the Concordance on, an instrument in hand, still the one a screen showed, the shared rate,
+    then the compiler) and is the only writer of a composed inscription; the composer's server side answers through it,
+    writes nothing itself, bounds its request and rate-limits opening; the GuiLib workspace is reached only when GuiLib
+    is installed and its stylesheet ships; and every word the screens use has its text."""
+    cm = co.composer
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    composing = text(root / "Composing.java")
+    compose = composing[composing.find("public static Result compose("):]
+    order = ["JugcraftConfig.isFeatureEnabled(", "ComposedSpells.instrument(player)", "shown.holds(player)",
+             "RateGate.allow(player, RATE_ACTION, COMPOSE_RATE_TICKS)", "ComposedSpells.compile(", ".set(JugcraftConcordance.INSCRIPTION"]
+    places = [compose.find(needle) for needle in order]
+    if not compose or -1 in places or places != sorted(places):
+        err("concordance/Composing.java: compose asks feature, instrument, the screen's view, the shared rate, then compiles, "
+            "and only then writes")
+    for path in sorted(root.rglob("*.java")):
+        relative = path.relative_to(root).as_posix()
+        if relative != "Composing.java" and "new Inscription(" in text(path):
+            err(f"concordance/{relative}: only Composing makes a composed inscription (a ritual may copy one whole)")
+    command = text(root / "ConcordanceCommand.java")
+    for needle in ("Composing.compose(player, text, inscribe, null)", "Composing.show(player)", "Composing.clear(player)"):
+        if needle not in command:
+            err(f"concordance/ConcordanceCommand.java: the compose commands are adapters of Composing ({needle})")
+    composer = text(root / "composer" / "Composer.java")
+    for needle in ("Composing.compose(player, request.text(), false, null)", "Composing.compose(player, request.text(), true, session.held)",
+                   "Composing.clear(player, session.held)", "RateGate.allow(player, OPEN_ACTION, OPEN_TICKS)",
+                   "ServerPlayNetworking.canSend(player, payload.type())"):
+        if needle not in composer:
+            err(f"concordance/composer/Composer.java: answers through Composing, rate-limits opening, sends only to a game "
+                f"that can receive it ({needle})")
+    for path in sorted((root / "composer").glob("*.java")):
+        if "INSCRIPTION" in text(path) or "Compiler.compile(" in text(path):
+            err(f"concordance/composer/{path.name}: the composer writes and compiles nothing itself (Composing does)")
+    request = text(root / "composer" / "ComposerRequestPayload.java")
+    if "MAX_TEXT = 4 * Grammar.MAX_TEXT;" not in request or "ByteBufCodecs.stringUtf8(MAX_TEXT)" not in request:
+        err("concordance/composer/ComposerRequestPayload.java: the request's text decodes to a bounded length")
+    if "composer.Composer.register();" not in text(root / "JugcraftConcordance.java"):
+        err("concordance/JugcraftConcordance.java: registers the composer's server side")
+    client = text(CLIENT_JAVA_ROOT / "ComposerClient.java")
+    screens = client + text(CLIENT_JAVA_ROOT / "ComposerScreen.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
+    workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ComposerWorkspace.kt"
+    workspace = text(workspace_path)
+    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*ComposerWorkspace\.open\(parent\)', client):
+        err("ComposerClient.java: the composer's GuiLib workspace opens only when GuiLib is installed")
+    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
+        if path.name != "ComposerClient.java" and "ComposerWorkspace" in text(path):
+            err(f"{path.name}: only ComposerClient reaches the composer's GuiLib workspace (behind its isModLoaded check)")
+    if '"jugcraft:ui/composer.css"' not in workspace or not (ASSETS / "ui" / "composer.css").is_file():
+        err("composer: the GuiLib workspace's stylesheet assets/jugcraft/ui/composer.css must exist and be the one it opens")
+    # GuiLib's inputs clip (overflow: hidden), so a flex column may squeeze one to its padding: CI's screenshot of the
+    # workspace showed the spell box a sliver. The box keeps its height and the scrolling body takes what is left.
+    stylesheet = (ASSETS / "ui" / "composer.css").read_text(encoding="utf-8") if (ASSETS / "ui" / "composer.css").is_file() else ""
+    spell_rule = re.search(r"^\.spell\s*\{([^}]*)\}", stylesheet, re.M)
+    body_rule = re.search(r"^\.body\s*\{([^}]*)\}", stylesheet, re.M)
+    if not spell_rule or not re.search(r"(^|;|\s)flex-shrink:\s*0\s*;", spell_rule.group(1)):
+        err("composer.css: the spell box (.spell) must not shrink (flex-shrink: 0)")
+    if not body_rule or not re.search(r"(^|;|\s)flex:\s*1\s*;", body_rule.group(1)) or "min-height: 0" not in body_rule.group(1):
+        err("composer.css: the scrolling body (.body) takes the space left (flex: 1; min-height: 0)")
+    for source, name in ((screens, "the composer's screens"), (workspace, "ComposerWorkspace.kt")):
+        for key in re.findall(r'"((?:screen|key|compose|message)\.jugcraft\.[a-z_.]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    slots = re.findall(r"^\t([A-Z]+)[,;]", text(root / "compose" / "Slot.java"), re.M)
+    if [slot.lower() for slot in slots] != list(cm.SLOTS):
+        err(f"compose/Slot.java: SLOTS in tools/concordance_composer.py must name every slot, in order ({slots})")
+    for slot in cm.SLOTS:
+        if f"screen.{MOD}.composer.slot.{slot}" not in lang:
+            err(f"composer: missing lang screen.{MOD}.composer.slot.{slot}")
+
+
+def check_encyclopedia(root, lang):
+    """Chunk A (A-04): the Jugcraft Encyclopedia. Its pages, the route's states and weights, the First Light route's
+    steps (their order, weights and what each waits for), the recipes, sales and codex entries the route and the lair
+    dossiers name, and the Keys page's keys are tools/encyclopedia.py's; every recipe named exists, every sale is one a
+    shop sells, no required step needs a boss's loot, and every codex link is gated as its entry is; the pages only read;
+    the request is rate-limited, carries no text and is answered only to a game that can receive it; the key works only
+    from the game, the inventory's button closes the inventory first and needs no mixin; every word has its text; and
+    the record's route table is the tool's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import encyclopedia as en
+    import concordance_journey as jr
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    guide = JAVA_ROOT / "guide" / "encyclopedia"
+    pages_java = JAVA_ROOT / "concordance" / "encyclopedia"
+    service = text(guide / "Encyclopedia.java")
+    payload = text(guide / "EncyclopediaPayload.java")
+    route = text(pages_java / "FirstLightRoute.java")
+    dossiers = text(JAVA_ROOT / "lair" / "LairDossiers.java")
+    builders = {"concordance/encyclopedia/FirstLightRoute.java": route,
+                "concordance/encyclopedia/SpellcraftPage.java": text(pages_java / "SpellcraftPage.java"),
+                "concordance/encyclopedia/InspectPage.java": text(pages_java / "InspectPage.java"),
+                "lair/LairDossiers.java": dossiers}
+    for path in sorted(guide.glob("*.java")):
+        builders[f"guide/encyclopedia/{path.name}"] = text(path)
+    client_files = {name: text(CLIENT_JAVA_ROOT / name) for name in (
+        "EncyclopediaClient.java", "EncyclopediaScreen.java", "EncyclopediaWidgets.java", "EncyclopediaKeys.java",
+        "EncyclopediaInventoryButton.java")}
+    client_files["compat/CodexLinks.java"] = text(CLIENT_JAVA_ROOT / "compat" / "CodexLinks.java")
+
+    # The pages, in order, each with its title; each builder's PAGE is its id.
+    pages = re.findall(r'page\("([a-z_]+)", ', service)
+    if pages != en.SERVER_PAGES or [p for p in en.PAGES if p not in en.SERVER_PAGES] != ["keys"]:
+        err(f"guide/encyclopedia/Encyclopedia.java: pages {pages} differ from SERVER_PAGES in tools/encyclopedia.py")
+    for page, source in (("discover", route), ("spellcraft", builders["concordance/encyclopedia/SpellcraftPage.java"]),
+                         ("expedition", dossiers), ("inspect", builders["concordance/encyclopedia/InspectPage.java"]),
+                         ("keys", client_files["EncyclopediaKeys.java"])):
+        if f'PAGE = "{page}";' not in source:
+            err(f"encyclopedia: the {page} page's builder must name itself PAGE = \"{page}\"")
+    for page in en.PAGES:
+        if f"encyclopedia.{MOD}.page.{page}" not in lang:
+            err(f"encyclopedia: missing lang encyclopedia.{MOD}.page.{page}")
+    if "Encyclopedia.register();" not in text(JAVA_ROOT / "guide" / "JugcraftGuide.java"):
+        err("guide/JugcraftGuide.java: registers the encyclopedia's server side")
+    if "EncyclopediaClient.register();" not in text(CLIENT_JAVA_ROOT / "JugcraftClient.java"):
+        err("client/JugcraftClient.java: registers the encyclopedia's client side")
+
+    # The states and weights a row may carry.
+    for enum, table, name in (("StepState", en.STATES, "STATES"), ("EdgeKind", en.EDGES, "EDGES")):
+        body = re.search(rf"public enum {enum} \{{(.*?)public String id\(\)", payload, re.S)
+        found = [c.lower() for c in re.findall(r"^\t\t([A-Z_]+)[,;]?\s*$", body.group(1), re.M)] if body else []
+        if found[:1] != ["none"] or found[1:] != list(table):
+            err(f"guide/encyclopedia/EncyclopediaPayload.java: {enum} {found} must be NONE then {name} in tools/encyclopedia.py")
+        kind = "state" if enum == "StepState" else "edge"
+        for key in ["none", *table]:
+            if f"encyclopedia.{MOD}.{kind}.{key}" not in lang:
+                err(f"encyclopedia: missing lang encyclopedia.{MOD}.{kind}.{key}")
+
+    # The First Light route: its steps in order, each step's weight and what it waits for.
+    steps = re.findall(r'route\(out, "([a-z_]+)"', route)
+    if steps != [step["id"] for step in en.FIRST_ROUTE]:
+        err(f"concordance/encyclopedia/FirstLightRoute.java: steps {steps} differ from FIRST_ROUTE in tools/encyclopedia.py")
+    declared = {}
+    for sid, edge, body in re.findall(r'route\.add\(new Step\("([a-z_]+)", EdgeKind\.([A-Z_]+),(.*?)\)\);', route, re.S):
+        lists = re.findall(r"List\.of\(([^()]*)\)", body)
+        declared[sid] = (edge.lower(), re.findall(r'"([a-z_]+)"', lists[-1]) if lists else None)
+    for step in en.FIRST_ROUTE:
+        if declared.get(step["id"]) != (step["edge"], step["after"]):
+            err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} is {declared.get(step['id'])}, "
+                f"not ({step['edge']}, {step['after']}) as FIRST_ROUTE says")
+    research = load(DATA / MOD / "concordance" / "research" / "first_light.json") or {}
+    stations = {rule.get("station") for rule in research.get("states", {}).get("understood", {}).get("any", [])
+                if rule.get("type") == "study"}
+    loot_items = set()
+    for boss in ("vesperine", "tatterlace"):
+        loot_items |= set(re.findall(r'"name": "(jugcraft:[a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
+    # Each step's own source: from its route(out, "<id>" call to the next one's (the last to the end of steps()), with
+    # the helper it calls (understanding for understand, equipment for equip).
+    marks = [(found.start(), found.group(1)) for found in re.finditer(r'route\(out, "([a-z_]+)"', route)]
+    steps_end = route.find("private static Map<String, StepState> states(")
+    def method(name):
+        found = re.search(rf"private static void {name}\(.*?\n\t\}}\n", route, re.S)
+        return found.group(0) if found else ""
+    helpers = {"understand": method("understanding"), "equip": method("equipment")}
+    bodies = {sid: route[start:(marks[i + 1][0] if i + 1 < len(marks) else steps_end)] + helpers.get(sid, "")
+              for i, (start, sid) in enumerate(marks)}
+    for step in en.FIRST_ROUTE:
+        body = bodies.get(step["id"], "")
+        for edge, recipe in step.get("named", []):
+            path = recipe.split(":", 1)[1]
+            if not (DATA / MOD / "recipe" / f"{path}.json").is_file():
+                err(f"tools/encyclopedia.py: step {step['id']} names recipe {recipe}, which does not exist")
+            if f'"{path}"' not in helpers.get(step["id"], ""):
+                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must name {recipe}'s set when it exists")
+        for edge, recipe in step["recipes"]:
+            path = recipe.split(":", 1)[1]
+            file = DATA / MOD / "recipe" / f"{path}.json"
+            if not file.is_file():
+                err(f"tools/encyclopedia.py: step {step['id']} names recipe {recipe}, which does not exist")
+                continue
+            # A grid, with its edge, written in the step's own source (the bench: the rules' study station).
+            shown = (f"out.recipe(EdgeKind.{edge.upper()}, recipe," in body if recipe in stations
+                     else f'out.recipe(EdgeKind.{edge.upper()}, Jugcraft.id("{path}")' in body)
+            if not shown:
+                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must show recipe {recipe} as a "
+                    f"{edge} grid (out.recipe), or the rules' study station must be it")
+            if edge == "required":
+                for ingredient in re.findall(r'"(jugcraft:[a-z_]+)"', file.read_text(encoding="utf-8")):
+                    if ingredient in loot_items:
+                        err(f"tools/encyclopedia.py: required recipe {recipe} needs {ingredient}, a boss's loot")
+
+    # Sales the route and the dossiers name: each on sale in its shop (never only bought there).
+    shops = (load(DATA / MOD / "town" / "shops.json") or {}).get("shops", {})
+    trades = [(step["id"], shop, item) for step in en.FIRST_ROUTE for shop, item in step["trades"]]
+    trades += [(boss, shop, item) for boss, dossier in en.DOSSIERS.items() for shop, item in dossier["trades"]]
+    for owner, shop, item in trades:
+        if item not in [offer.get("item") for offer in shops.get(shop, {}).get("sells", [])]:
+            err(f"tools/encyclopedia.py: {owner} names {item} on sale at the {shop} shop, which does not sell it")
+    if "out.sales(" not in route or "out.sales(" not in dossiers:
+        err("encyclopedia: the route's and the dossiers' sales come from PageWriter.sales (a town that stands, today's offers)")
+
+    # The dossiers: each boss's tokens, rite, loot and after-win recipes are the tool's, exist, and her loot table is hers.
+    for boss, dossier in en.DOSSIERS.items():
+        for field in ("tokens", "rite", "loot", "after_win", "made_from"):
+            for name in dossier[field]:
+                if f'"{name}"' not in dossiers:
+                    err(f"lair/LairDossiers.java: {boss}'s {field} must name {name} (DOSSIERS in tools/encyclopedia.py)")
+        for recipe in dossier["rite"] + dossier["after_win"] + dossier["made_from"]:
+            if not (DATA / MOD / "recipe" / f"{recipe}.json").is_file():
+                err(f"tools/encyclopedia.py: {boss} names recipe {recipe}, which does not exist")
+        table = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
+        if table != set(dossier["loot"]):
+            err(f"tools/encyclopedia.py: {boss}'s loot {sorted(dossier['loot'])} is not her table's {sorted(table)}")
+        for name in dossier["loot"]:
+            if f"jei.{MOD}.acquire.{name}" not in lang:
+                err(f"encyclopedia: missing lang jei.{MOD}.acquire.{name} (the dossier shows each loot's acquisition text)")
+        for key in (f"lair.{MOD}.{dossier['lair']}", f"encyclopedia.{MOD}.dossier.{dossier['lair']}.leave",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.credit",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.rite", f"advancements.{MOD}.{dossier['advancement']}.title",
+                    f"entity.{MOD}.{boss}"):
+            if key not in lang:
+                err(f"encyclopedia: missing lang {key}")
+
+    # Codex links: each names an entry of the Arcane Concordance whose own unlock is the one given.
+    entries = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "entries"
+    linked = set()
+    for source_name, source in builders.items():
+        for entry, research_id, state in re.findall(
+                r'codex\("([a-z_]+/[a-z_]+)", (?:null|"(jugcraft:[a-z_]+)"), (?:null|ResearchState\.([A-Z]+))\)', source):
+            linked.add((entry, research_id or None, state or None))
+            data = load(entries / f"{entry}.json")
+            if data is None:
+                err(f"{source_name}: codex link {entry} names no entry of the Arcane Concordance")
+                continue
+            condition = data.get("condition") or {"type": "modonomicon:none"}
+            if research_id:
+                want = f"{MOD}:concordance/{research_id.split(':', 1)[1]}_{state.lower()}"
+                if condition.get("type") != "modonomicon:research_node_unlocked" or condition.get("node_id") != want:
+                    err(f"{source_name}: codex link {entry} is offered at {research_id} {state.lower()}, but the entry unlocks at {condition}")
+            elif condition.get("type") != "modonomicon:none":
+                err(f"{source_name}: codex link {entry} is offered to everyone, but the entry unlocks at {condition}")
+            if f"book.{MOD}.arcane_concordance.{entry.replace('/', '.')}.name" not in lang:
+                err(f"{source_name}: codex link {entry} has no name in lang")
+        if source.count("out.codex(") != len(re.findall(r'out\.codex\("[a-z_]+/[a-z_]+", (?:null|"jugcraft:[a-z_]+"), (?:null|ResearchState\.[A-Z]+)\)', source)):
+            err(f"{source_name}: every codex link names its entry, research and state as literals (so this audit can read them)")
+    route_codex = {(entry, research_id, state) for step in en.FIRST_ROUTE for entry, research_id, state in step["codex"]}
+    found_route = {link for link in re.findall(r'codex\("([a-z_]+/[a-z_]+)", (?:null|"(jugcraft:[a-z_]+)"), (?:null|ResearchState\.([A-Z]+))\)', route)}
+    found_route = {(entry, research_id or None, state or None) for entry, research_id, state in found_route}
+    if found_route != route_codex:
+        err(f"concordance/encyclopedia/FirstLightRoute.java: codex links {sorted(found_route, key=str)} differ from FIRST_ROUTE's")
+
+    # The pages only read.
+    forbidden = re.compile(r"setAttached\(|removeAttached\(|\.award\(|ConcordanceProgress\.(record|grant|setFocus|award|spendFocus)\(|"
+                           r"Composing\.(compose|clear)\(|\.set\(JugcraftConcordance\.INSCRIPTION|StructureValidator\.check\(|"
+                           r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(")
+    for name, source in builders.items():
+        if forbidden.search(source):
+            err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
+
+    # The request: rate-limited, answered only to a game that can receive it, carrying no text.
+    for needle in ("RateGate.allow(player, RATE_ACTION, REQUEST_TICKS)", "ServerPlayNetworking.canSend(player, EncyclopediaPayload.TYPE)"):
+        if needle not in service:
+            err(f"guide/encyclopedia/Encyclopedia.java: requests are rate-limited and answered only to a game that can receive them ({needle})")
+    request = text(guide / "EncyclopediaRequestPayload.java")
+    if not request or re.search(r"stringUtf8|STRING_UTF8|ByteBufCodecs\.list", request):
+        err("guide/encyclopedia/EncyclopediaRequestPayload.java: a request names no page and carries no text")
+    if "player.distanceToSqr(Vec3.atCenterOf(pos)) > reach * reach" not in builders["concordance/encyclopedia/InspectPage.java"] \
+            or "level.isLoaded(pos)" not in builders["concordance/encyclopedia/InspectPage.java"]:
+        err("concordance/encyclopedia/InspectPage.java: the looked-at block is checked on the server: loaded and within reach")
+
+    # The keys: every Jugcraft key has its name and its help on the Keys page.
+    keys = set()
+    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
+        keys.update(re.findall(r'new KeyMapping\("key\.jugcraft\.([a-z_]+)"', text(path)))
+    if keys != set(en.KEY_HELP):
+        err(f"tools/encyclopedia.py: KEY_HELP {sorted(en.KEY_HELP)} must name every Jugcraft key {sorted(keys)}")
+    for key in keys:
+        for wanted in (f"key.{MOD}.{key}", f"encyclopedia.{MOD}.key.{key}"):
+            if wanted not in lang:
+                err(f"encyclopedia: missing lang {wanted}")
+
+    # The ways in: the key only from the game; the inventory's button closes the inventory first, without a mixin.
+    client = client_files["EncyclopediaClient.java"]
+    loop = client[client.find("while (open.consumeClick())"):]
+    if "client.gui.screen() == null" not in loop[:400]:
+        err("client/EncyclopediaClient.java: the key opens the encyclopedia only from the game (no screen open)")
+    from_inventory = client[client.find("public static void openFromInventory("):]
+    if not from_inventory or from_inventory.find("closeContainer()") < 0 or from_inventory.find("closeContainer()") > from_inventory.find("open(client"):
+        err("client/EncyclopediaClient.java: the inventory's button closes the inventory (closeContainer) before opening")
+    if "ScreenEvents.AFTER_INIT" not in client_files["EncyclopediaInventoryButton.java"]:
+        err("client/EncyclopediaInventoryButton.java: the button is added through Fabric's screen events")
+    mixins = load(ROOT / "src" / "client" / "resources" / "jugcraft.client.mixins.json") or {}
+    for mixin in mixins.get("client", []) + mixins.get("mixins", []):
+        source = text(ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client" / f"{mixin}.java")
+        if re.search(r"@Mixin\([^)]*(InventoryScreen|AbstractContainerScreen|CreativeModeInventoryScreen|RecipeBook)", source):
+            err(f"mixin/client/{mixin}.java: the encyclopedia's button needs no mixin on the inventory screens")
+    if 'Jugcraft.id("encyclopedia/inventory_button")' not in client_files["EncyclopediaInventoryButton.java"] \
+            or "textures/gui/sprites/encyclopedia/inventory_button.png" not in en.OWNER_FILES:
+        err("client/EncyclopediaInventoryButton.java: the button's sprite is the owner's, imported by tools/owner_art.py")
+    for name, source in client_files.items():
+        if "JournalWorkspace" in source or "ComposerWorkspace" in source:
+            err(f"client/{name}: the encyclopedia opens the journal and the composer through their clients")
+
+    # Every word has its text.
+    for name, source in [*builders.items(), *client_files.items()]:
+        for key in re.findall(r'"((?:encyclopedia|jei|screen|key|compose|journal|message)\.jugcraft\.[a-z_.]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    for set_name in ("pyromancers", "pyromaniacs"):
+        if f"encyclopedia.{MOD}.route.equip.{set_name}" not in lang:
+            err(f"encyclopedia: missing lang encyclopedia.{MOD}.route.equip.{set_name}")
+
+    # The record's route table, and the tests it names.
+    tests = jr.game_tests()
+    for step in en.FIRST_ROUTE:
+        for test in step["tests"]:
+            if test not in tests:
+                err(f"tools/encyclopedia.py: step {step['id']} names game test {test}, which does not exist")
+    path = ROOT / "docs" / "features" / "arcane-concordance-first-route.md"
+    record = text(path)
+    block = re.search(r"<!-- first-route:start -->\n(.*?)\n<!-- first-route:end -->", record, re.S)
+    if not block or block.group(1).strip() != "\n".join(en.route_table()).strip():
+        err("docs/features/arcane-concordance-first-route.md: its route table is not tools/encyclopedia.py's (run it and paste)")
+
+
 def check_signs(co, root, lang):
     """Roadmap step 27: the signs, the visual intensities and the server's limits are tools/concordance_signs.py's, in
     its order; the warnings' sounds are registered, drawn and subtitled; every server-side Concordance particle goes
@@ -14103,6 +14623,44 @@ def check_signs(co, root, lang):
     for key in list(sg.CLIENT) + [f"screen.{MOD}.concordance.config.intensity.{name}" for name in sg.INTENSITY]:
         if key not in lang:
             err(f"sign: missing lang {key}")
+
+
+def check_cast_poses():
+    """Concordance Chunk A, ticket A-07: one owner for a player's arms. A gun or an arm in the main hand owns them
+    (client/CastPoses.armsOwned); at the end of every client tick, for every player the client sees, CastPoses stops
+    Spell Engine's casting and release clips on such a player, and the Vigil's gesture where the gestures yield (owned
+    arms, or an arm in the off hand); ConcordanceClient registers it; and the circle's gesture asks the same before it
+    plays (the Vigil's is checked with the Vigil, in check_crimson)."""
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    poses = text(CLIENT_JAVA_ROOT / "CastPoses.java")
+    if not poses:
+        err("client/CastPoses.java is missing: a cast's pose would play over a gun or an arm")
+        return
+
+    def body(signature):
+        found = re.search(re.escape(signature) + r" \{(.*?)\n\t\}", poses, re.S)
+        return found.group(1) if found else ""
+    owned = body("public static boolean armsOwned(Player player)")
+    if not all(part in owned for part in ("getMainHandItem()", "instanceof GunItem", "instanceof ArmItem")):
+        err("CastPoses.armsOwned: a gun (GunPose) or an arm (ArmsMotion) in the main hand owns the arms")
+    yields = body("static boolean gesturesYield(Player player)")
+    if "armsOwned(player)" not in yields or "getOffhandItem().getItem() instanceof ArmItem" not in yields:
+        err("CastPoses.gesturesYield: the gestures give way to owned arms and to an arm in the off hand")
+    tick = body("private static void tick(Minecraft client)")
+    for call in ("level.players()", "stop(player, SpellAnimationStack.CASTING_ID);", "stop(player, SpellAnimationStack.RELEASE_ID);",
+                 "stop(player, VigilClient.LAYER);"):
+        if call not in tick:
+            err(f"CastPoses.tick: missing {call} (every player this client sees gives a cast's pose up to a gun or an arm)")
+    stop = body("private static void stop(Player player, Identifier layer)")
+    if "controller.stopTriggeredAnimation();" not in stop or "controller.stop();" not in stop:
+        err("CastPoses.stop: clear the triggered clip, so it does not start again, and stop the layer at once")
+    if "ClientTickEvents.END_CLIENT_TICK.register(CastPoses::tick);" not in poses:
+        err("CastPoses must run at the end of every client tick")
+    if "CastPoses.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("ConcordanceClient.register() must call CastPoses.register()")
+    if "!CastPoses.gesturesYield(player)" not in text(CLIENT_JAVA_ROOT / "CircleClient.java"):
+        err("CircleClient: the circle's gesture must give way where CastPoses.gesturesYield says (a gun or an arm in hand)")
 
 
 # Where Fabric's permission events are asked as questions rather than raised by vanilla: the Concordance's Authority,
@@ -14256,7 +14814,8 @@ def check_persistence(root):
 def check_journey():
     """Roadmap step 31: tools/concordance_journey.py's three routes each reach the Architect stage for one player alone
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
-    data's; every game test the routes name exists; and the record's routes are the tool's."""
+    data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
+    other research; every game test the routes name exists; and the record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():
