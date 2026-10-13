@@ -1,6 +1,6 @@
 # The Archive of Last Names
 
-Status: implemented in source; to be run in CI. Part 1 of boss 6, the Crypt Lich, in the [bosses plan](../branches/BOSSES.md#the-crypt-lich-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Archive of Last Names, a sixth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Writ of Exhumation that opens it. The Crypt Lich and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 6, the Crypt Lich, in the [bosses plan](../branches/BOSSES.md#the-crypt-lich-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Archive of Last Names, a sixth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Writ of Exhumation that opens it. The Crypt Lich and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 13 October 2026 the owner chose the recommendations at the Mire Hag's checkpoint ("go with recommendations"): the Crypt Lich next, built the same two-part way, his crypt lair and summoning first.
 Owner: @jimbozoomer-byte
 
@@ -108,7 +108,26 @@ Nothing is renamed.
 
 ## Verification
 
-CI: to be run.
+![A stone-brick crypt under a roof: the deepslate sarcophagus with its lid aside, grey mist and pale bone-coloured motes rising from it](../images/ingame_exhumation_writ_mist.jpg)
+![From the landing, the stair going down between deepslate walls to the hall's floor, sconces and candles in skulls on the walls either side, and beyond, the south lane's line of bone running to the dais](../images/ingame_crypt_archive_arrival.jpg)
+![The hall from the stair's foot: the south lane's line of bone running north to the dais, the pillars standing either side, soul lanterns hanging from the vault, and the throne's apse far off at the north end](../images/ingame_crypt_archive_hall.jpg)
+![The dais: a round step of blackstone, the phylactery in gold on its plinth in the middle, two lanes running from it, the hall's walls of bookshelves and ossuary niches behind](../images/ingame_crypt_archive_phylactery.jpg)
+![The Sexton's alcove: the name-stone with its spade on the back wall over a red grave seal, the deepslate sarcophagus below them, candles in skulls and piles of bones on the floor](../images/ingame_crypt_archive_sexton.jpg)
+![The same alcove with the name-stone lit: its rune burning blue over the red seal](../images/ingame_crypt_archive_name_lit.jpg)
+![A name-stone scraped blank on the north alcove's back wall, the red seal under it and the sarcophagus below](../images/ingame_crypt_archive_name_erased.jpg)
+![The throne's apse at the end of the north lane: two steps up to the bone throne between sconces, bookshelves and ossuary walls either side](../images/ingame_crypt_archive_throne.jpg)
+![The Lectern of Last Names from the stair behind it: its book open, candles in skulls on the stair's walls either side, the south lane running on to the dais and the hall beyond](../images/ingame_crypt_archive_lectern.jpg)
+![The hall from the throne's apse: the north lane running down over the dais toward the stair, the pillars either side, soul lanterns on their chains](../images/ingame_crypt_archive_from_throne.jpg)
+![At the top of the stair, behind the landing, the Grey Mist filling the doorway in the wall](../images/ingame_crypt_archive_exit.jpg)
+
+*The client game test's pictures (CI, commit `a3165b9`): the open tomb in the crypt, then in the archive the stair from the landing, the hall from the stair's foot, the dais and the phylactery, the Sexton's alcove, a name lit and a name scraped, the throne's apse, the lectern, the hall from the throne and the Grey Mist behind the landing. The test client renders at 480x270.*
+
+CI (13 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `69c5d40` | Build, data audit, game tests, client game tests | **Two failures.** The game compiled, and `repository` and every client shard passed, `CryptArchiveClientGameTests` among them. `mod` failed two of the archive's game tests: each laid its roof and asked the writ on the same tick, before the game had worked out the sky light under it, and was told "open sky" (below). `optional integrations absent` failed before it built anything: Gradle could not resolve its own plugins' dependencies (kotlin-gradle-plugin, gson, asm) from the plugin portal; `mod` resolved them on the same commit |
+| `a3165b9` | The same, the two tests waiting for the light, and two pictures re-aimed | **All pass:** all 1406 required game tests, the archive's five among them, `optional integrations absent`, and the client test classes `tools/select_client_tests.py` picked, `CryptArchiveClientGameTests` among them: the writ passed end to end, and the game's own light on the hall's floor was at least 7 on all 1,597 of its open cells (the darkest at 7). The pictures above are from this commit |
 
 Run locally (13 October 2026):
 
@@ -121,7 +140,7 @@ Run locally (13 October 2026):
 | `python3 tools/generate_material_data.py` and `tools/generate_textures.py`, then `git status` | Write this part's data and textures only (the PNGs they re-encoded with identical pixels were put back) |
 | `javac` on the new and changed Java and the two test classes, for syntax only | No syntax errors |
 | `python3 -m unittest discover -s scripts/tests` | Pass, 14 tests |
-| `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); to be run by CI |
+| `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); run by CI (above) |
 
 `check_crypt_archive` checks the archive as `tools/crypt_archive.py` builds it, and `CryptArchive.java` against it:
 - `CryptArchive.java`'s stand heights, the hall's bounds, the lectern, the phylactery, the throne, and each name's seal and name-stone in the order of `tools/lairs.py` NAMES, are the layout's;
