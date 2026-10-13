@@ -1,6 +1,6 @@
 # The Cinder Tyrant
 
-Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 4 in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Cinder Kiln, his Cinderlings and his spat and fallen things, and his loot. It is built on part 1, the kiln and the Kiln Seal that opens it ([cinder-kiln.md](cinder-kiln.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 4 in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Cinder Kiln, his Cinderlings and his spat and fallen things, and his loot. It is built on part 1, the kiln and the Kiln Seal that opens it ([cinder-kiln.md](cinder-kiln.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. On 13 October 2026 his seams were widened and brightened, at the owner's choice ([Changes after review](#changes-after-review)); the CI for that is pending.
 Proposal issue: none. On 10 October 2026 the owner asked for "the next boss same way" as the Yeti King, and for the order he was made in to be saved as the plan for every boss (the playbook); the Cinder Tyrant is the next of the first eight in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -13,7 +13,7 @@ Primary specialty and supported player role: adventuring. His loot also serves t
 
 The Cinder Tyrant lies sunk in the crucible of every Cinder Kiln, placed with the kiln, only the crest down his spine showing over the slag. He is a salamander lord the size of a cart, seven and a half blocks from his jaws to the end of his tail (2.6 blocks wide, 2.2 high):
 - a long, low body of dark basalt scales on four sprawled legs;
-- plates of obsidian along his back and flanks, with magma glowing in the seams between them;
+- plates of obsidian along his back and flanks, with magma welling in the seams between them and rimming their feet, bright enough to read across the kiln;
 - a crest of obsidian spikes down his spine, the tallest behind his head;
 - a broad flat head with small burning eyes and a wide jaw, his throat glowing when he spits or breathes;
 - a tail ending in a club of basalt, ringed with spikes.
@@ -140,6 +140,16 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 - **His voice is a ghast's moan,** pitched low; struck, he clanks as an iron golem does; he dies with the wither's cry, and roars as the warden.
 - **He is a monster:** on Peaceful he is gone, as every monster is, and the Cinder Kiln stands empty.
 - **Animations by GeckoLib,** as the other lair bosses' are: GeckoLib 5.5.7 is already pinned.
+
+## Changes after review
+
+- **His seams read across the kiln (13 October 2026).** At his checkpoint his dark plates could blend into the basalt in play, and hot and quenched looked alike: his seams were a model pixel wide, flush between his plates. The owner chose the recommendation ("Go with recommendations"), with the kiln lit brighter beside it ([cinder-kiln.md](cinder-kiln.md#changes-after-review)). Now, all in the heat controller's bones, so all of it goes dark when he is quenched:
+  - the magma wells a pixel over the three joints between his back plates, two pixels wide, in two halves either side of the spine's seam (and over the joint between his tail's plates);
+  - a rim of magma runs along the foot of his plates where they meet his hide, on each side;
+  - a line of magma runs over and under each flank plate (one under it before), and along each side of his tail's base;
+  - the seams are painted brighter: only their outermost painted pixel is the deep orange, the rest the bright and pale tones.
+  - The Molten Heart's white-hot cores grew to wrap the wider seams, so no face of one lies on a face of the other.
+  - His fight, his numbers and his loot are unchanged; so are his other parts, his Cinderlings, gobs and cinders.
 
 ## Connections
 
