@@ -1,6 +1,6 @@
 # The Cinder Tyrant
 
-Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 4 in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Cinder Kiln, his Cinderlings and his spat and fallen things, and his loot. It is built on part 1, the kiln and the Kiln Seal that opens it ([cinder-kiln.md](cinder-kiln.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. On 13 October 2026 his seams were widened and brightened, at the owner's choice ([Changes after review](#changes-after-review)); the CI for that is pending.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 4 in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Cinder Kiln, his Cinderlings and his spat and fallen things, and his loot. It is built on part 1, the kiln and the Kiln Seal that opens it ([cinder-kiln.md](cinder-kiln.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. On 13 October 2026 his seams were widened and brightened, at the owner's choice ([Changes after review](#changes-after-review)); CI passes on that too, and the pictures below are from it.
 Proposal issue: none. On 10 October 2026 the owner asked for "the next boss same way" as the Yeti King, and for the order he was made in to be saved as the plan for every boss (the playbook); the Cinder Tyrant is the next of the first eight in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -211,14 +211,15 @@ No Mojang texture is read, traced or copied.
 ![The Molten Heart: seen from above his back, his cores glowing in his seams, fire burning on the floor all round](../images/ingame_cinder_tyrant_molten_heart.jpg)
 ![After his fall: Grey Mist standing in the bowl's middle, the crucible beyond it under the forge mouth](../images/ingame_cinder_tyrant_defeated.jpg)
 
-*The client game test's pictures (CI, commit `cc43a8e`): sunk and waking; the Kiln's Tail Sweep, Ember Spit, Body Slam, Kiln Breath and Mantle Shed; quenched in the south sluice's trough; the Eruption on the forge's lip, the surge and the west sluice choked; the Cinder Rain and the Lava Wave; the Molten Heart; and after his fall. Each attack is frozen mid-move. The test client renders at 480x270, and the kiln is dark: some of these are hard to read at that size.*
+*The client game test's pictures (CI, commit `cd8169f`, with his wider seams and the kiln's brighter light): sunk and waking; the Kiln's Tail Sweep, Ember Spit, Body Slam, Kiln Breath and Mantle Shed; quenched in the south sluice's trough; the Eruption on the forge's lip, the surge and the west sluice choked; the Cinder Rain and the Lava Wave; the Molten Heart; and after his fall. Each attack is frozen mid-move. The test client renders at 480x270. Hot, his seams now show as bright bars across his back and flanks; quenched, they are dark.*
 
-CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+CI (10 and 13 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 
 | Commit | What ran | Result |
 | --- | --- | --- |
 | `738fd70` | Build | **The game tests failed to compile:** his heat test set `Entity.invulnerableTime`, which is private in 26.3, to strike him twice in one tick. The main and client code built. Nothing else ran |
-| `cc43a8e` | Build, data audit, every server game test with and without the optional integrations, and every client test class (his arena is a new structure file, which the selection counts as shared) | The test now waits out his hurt cooldown between blows. **All pass:** all 1313 required game tests (his fourteen among them), `optional integrations absent`, and every client test class in five jobs of 15 to 28 minutes, `CinderTyrantClientGameTests` (his whole fight) among them. The pictures above are from this commit |
+| `cc43a8e` | Build, data audit, every server game test with and without the optional integrations, and every client test class (his arena is a new structure file, which the selection counts as shared) | The test now waits out his hurt cooldown between blows. **All pass:** all 1313 required game tests (his fourteen among them), `optional integrations absent`, and every client test class in five jobs of 15 to 28 minutes, `CinderTyrantClientGameTests` (his whole fight) among them |
+| `cd8169f` (his wider seams, the kiln's brighter light) | Build, data audit, every server game test with and without the optional integrations, and the client test classes the change picks: the kiln's, his and Arms VII's | **All pass:** all 1379 required game tests (main has grown since), his fourteen among them, `optional integrations absent`, and the three client test classes, his whole fight among them. The pictures above are from this commit |
 
 Run locally (10 October 2026):
 

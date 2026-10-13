@@ -1,6 +1,6 @@
 # The Cinder Kiln, and the Kiln Seal
 
-Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request ([cinder-tyrant.md](cinder-tyrant.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. On 13 October 2026 its bowl was lit brighter, at the owner's choice ([Changes after review](#changes-after-review)); the CI for that is pending.
+Status: implemented in source; CI passes (below), and its client test's pictures are in the record. Part 1 of boss 4, the Cinder Tyrant, in the [bosses plan](../branches/BOSSES.md#the-cinder-tyrant-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Cinder Kiln, a fourth lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the summoning that opens it. The Cinder Tyrant and his loot are part 2, in their own pull request ([cinder-tyrant.md](cinder-tyrant.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. On 13 October 2026 its bowl was lit brighter, at the owner's choice ([Changes after review](#changes-after-review)); CI passes on that too, and the pictures below are from it.
 Proposal issue: none. On 10 October 2026 the owner asked to "do the next boss same way" as the Yeti King; the Cinder Tyrant is the next of the first eight in the bosses brainstorm, and the planning pack's "Kiln Beneath the Mountain" ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md)).
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the other lairs are. The seal takes what a player has once they reach the Nether: obsidian, blaze powder, gold and a magma block.
@@ -65,6 +65,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
   - The old lattice hung three blocks over the floor, eight apart, at level 11. Flooded as the game floods light, it left the bowl's floor at 0 to 11, two thirds of it at 4 or under.
   - The new one hangs two blocks over the floor at level 15, eight apart, every other row shifted half a spacing along and the rows four apart, so no cell of the floor is more than four blocks walked from a light. Every cell of the bowl's floor now has 8 to 13, three in four of them 10 or more, and most of the ring round the bowl is as bright. It is 95 light blocks where there were 63.
   - The dome's lattice and the single lights are as they were. Nothing else in the kiln changed, and nobody can see, touch or stand on a light block.
+  - In the test's pictures the kiln looks only a little lighter: the slag and the glowing basalt already lit much of what the camera sees. The gain is in the dark corners: in the game, CI read every cell of the bowl's floor at block light 8 or more, where the darkest was 0.
 
 ## Connections
 
@@ -127,14 +128,15 @@ Nothing is renamed.
 ![The arch beside the arrival ledge, filled with Grey Mist](../images/ingame_cinder_kiln_exit.jpg)
 ![A second Kiln Seal pressed into a magma block in the Nether: its vent among the netherrack](../images/ingame_kiln_seal_vent_nether.jpg)
 
-*The client game test's pictures (CI, commit `042b98d`): the vent where the seal was pressed, then in the kiln the view from the ledge, the bowl from the stair's foot, the crucible, the slag over the lip, the west sluice's flooded trough, a shelf, the dome and the Grey Mist's arch; last, the vent a second seal opened in the Nether. The test client renders at 480x270.*
+*The client game test's pictures (CI, commit `cd8169f`, with the brighter light): the vent where the seal was pressed, then in the kiln the view from the ledge, the bowl from the stair's foot, the crucible, the slag over the lip, the west sluice's flooded trough, a shelf, the dome and the Grey Mist's arch; last, the vent a second seal opened in the Nether. The test client renders at 480x270.*
 
-CI (10 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+CI (10 and 13 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 
 | Commit | What ran | Result |
 | --- | --- | --- |
 | `8a7a4d4` | Build, data audit, game tests, client game tests | **Two failures.** `mod` passed all 1299 required server game tests, the kiln's six among them, and `optional integrations absent` passed. `repository` failed its check on how the client tests are shared out: with the kiln's client test class, the estimate for the busiest of the four client jobs came to 25 minutes 10 seconds, over the 25 it allows. The client test stopped at the seal's press: it judged the press by comparing the item's result with the game's one plain success value, and the result was something else |
-| `042b98d` | The same, the client tests now shared between five jobs ([TESTING.md](../TESTING.md)), and the press judged by whether it took effect (the checks after it still look for the open kiln, the used seal and the vent) | **All pass:** all 1299 required game tests, and every client test class (a workflow change runs them all) in five jobs of 12 to 28 minutes, `CinderKilnClientGameTests` among them. The pictures above are from this commit |
+| `042b98d` | The same, the client tests now shared between five jobs ([TESTING.md](../TESTING.md)), and the press judged by whether it took effect (the checks after it still look for the open kiln, the used seal and the vent) | **All pass:** all 1299 required game tests, and every client test class (a workflow change runs them all) in five jobs of 12 to 28 minutes, `CinderKilnClientGameTests` among them. |
+| `cd8169f` (the brighter light) | Build, data audit, every server game test with and without the optional integrations, and the client test classes the change picks: the kiln's, the Tyrant's and Arms VII's | **All pass:** all 1379 required game tests (main has grown since), `optional integrations absent`, and the three client test classes. In the game the client test read the block light on all 1,312 cells of the bowl's floor: the darkest is 8, as the audit has it. The pictures above are from this commit |
 
 Run locally:
 
