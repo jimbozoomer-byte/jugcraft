@@ -20,11 +20,14 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
@@ -159,6 +162,11 @@ public class CryptLichGameTests {
 			}
 		}
 		return out;
+	}
+
+	/** The Wither effect's own harm, as it lands on whoever it has taken hold of. */
+	private static DamageSource withering(ServerLevel level) {
+		return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DamageTypes.WITHER));
 	}
 
 	/** Everywhere his fight reaches, with room round it. */
@@ -859,7 +867,7 @@ public class CryptLichGameTests {
 			boolean bare = !EmptiedPhylactery.holds(holder);
 			holder.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(JugcraftLich.EMPTIED_PHYLACTERY));
 			boolean held = EmptiedPhylactery.holds(holder);
-			boolean spared = !holder.hurtServer(level, level.damageSources().wither(), 2.0F) && holder.getHealth() == holder.getMaxHealth();
+			boolean spared = !holder.hurtServer(level, withering(level), 2.0F) && holder.getHealth() == holder.getMaxHealth();
 			holder.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 0));
 			helper.runAfterDelay(3, () -> {
 				boolean cleansed = !holder.hasEffect(MobEffects.WITHER);
@@ -867,7 +875,7 @@ public class CryptLichGameTests {
 				holder.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
 				helper.runAfterDelay(HURT_COOLDOWN, () -> {
 					float before = holder.getHealth();
-					boolean withered = holder.hurtServer(level, level.damageSources().wither(), 2.0F) && holder.getHealth() < before;
+					boolean withered = holder.hurtServer(level, withering(level), 2.0F) && holder.getHealth() < before;
 					helper.assertTrue(bare, "With nothing in the offhand, the phylactery is held");
 					helper.assertTrue(held, "In the offhand, the phylactery is not held");
 					helper.assertTrue(spared, "Held, the phylactery did not keep Wither's harm off");

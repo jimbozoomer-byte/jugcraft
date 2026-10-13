@@ -200,7 +200,7 @@ The game tests (`CryptLichGameTests`) show what a game-test server can, with a L
 
 The client test (`CryptLichClientGameTests`) runs his whole fight in a real Archive of Last Names, with the one player in survival under Resistance: he waits on his throne; standing on the hall's floor wakes him and he comes down, his chains burning and a name lit; his chains at rest; the Warded King's four attacks, two dead risen from the floor graves, and a dark name's seal raising one from its sarcophagus; the three seals broken in their order, the phylactery cracked and he exposed; the Erasure, a name scraped; the Unwritten's Soul Drain and Grave Pull; the scraped name's seal holding until the player reads it back at the lectern, then breaking; the Last Name; and his fall: the player's Grave Dust, trophy and Nameless, his dead and bolts gone, Grey Mist on the dais; then a fresh instance in his slot with no Grey Mist, the phylactery whole, every seal whole and him on his throne again. Thirteen pictures along the way.
 
-**New game APIs:** `BossEvent.setName` (his bar names the lit name; vanilla since 1.9) and `DamageTypes.WITHER` (the Emptied Phylactery; a sibling of the `HOT_FLOOR` and `FALL` types already used), and in the tests `DamageSources.wither()`. The build compiles them against the pinned game.
+**New game APIs:** `BossEvent.setName` (his bar names the lit name; vanilla since 1.9) and `DamageTypes.WITHER` (the Emptied Phylactery; a sibling of the `HOT_FLOOR` and `FALL` types already used). The build compiles them against the pinned game.
 
 ## Rollout and open questions
 

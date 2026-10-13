@@ -587,7 +587,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 		setCrown(Crown.LIT);
 		bossBar.setVisible(true);
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.WITHER_SKELETON_AMBIENT, SoundSource.HOSTILE, 3.0F, 0.5F);
-		level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE, SoundSource.HOSTILE, 3.0F, 0.6F);
+		level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 3.0F, 0.6F);
 		for (Rune rune : Rune.values()) {
 			laneFire(level, rune, ParticleTypes.SOUL_FIRE_FLAME, 2);
 		}
@@ -669,7 +669,7 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 			NameStoneBlock.setGlow(level, stone(next), Glow.LIT);
 		}
 		bossBar.setName(Component.translatable("message.jugcraft.crypt_lich.answers", next.display()));
-		level.playSound(null, stone(next), SoundEvents.SOUL_ESCAPE, SoundSource.HOSTILE, 2.0F, 0.8F);
+		level.playSound(null, stone(next), SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 2.0F, 0.8F);
 	}
 
 	/** His ward ticks on: the chains drawn while they hold, a scraped name burning back, the exposure running out, the reforging. */
@@ -1025,11 +1025,11 @@ public class CryptLichEntity extends Monster implements GeoEntity {
 			}
 			case SOUL_BOLT -> {
 				setAction(Action.BOLT_WINDUP);
-				level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE, SoundSource.HOSTILE, 1.5F, 1.2F);
+				level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 1.5F, 1.2F);
 			}
 			case RAISE_DEAD -> {
 				setAction(Action.RAISE_WINDUP);
-				level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE, SoundSource.HOSTILE, 2.5F, 0.5F);
+				level.playSound(null, getX(), getY(), getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 2.5F, 0.5F);
 			}
 			case SOUL_DRAIN -> {
 				setAction(Action.DRAIN_WINDUP);
