@@ -1,6 +1,6 @@
 # Coal gasification: the Coal Gasifier, gas cleanup and CO methanation (factory package 2)
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented (CI green on the contributor's fork; pending review).
 Stacked on the [Anaerobic Digester](industrial-anaerobic-digester.md) and the branches below it, down to the [Chemical Infuser](industrial-chemical-infuser.md).
 Proposal issue: none. TODO items:
 - "the Coal Gasifier with Gas Cleanup and Separation" (package 2);
@@ -125,7 +125,9 @@ Client game tests: `CoalGasifierClientGameTests` and `GasCleanupRackClientGameTe
 
 ### Results
 
-Not yet run in CI.
+- **Run [38432379438](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38432379438) on the contributor's fork (commit 709bde6e): green.** Everything compiled; every server game test passed, including the seven `CoalGasificationGameTests` and the Infuser's CO methanation; the build without optional integrations and all five client shards passed, both new client test classes among them.
+- An earlier run on 6ea5a039 was cancelled before it finished, because it lacked the Digester's client-test fix.
+- The client screenshots have not yet been looked at by a person.
 
 No survival playtest, two-client test or performance measurement has been done.
 
