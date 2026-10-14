@@ -46,7 +46,7 @@ Owner: Narvisius
 ## How it works
 - **Format:** format 1 `*.jugbp.json` files. Each holds:
   - `name`;
-  - `palette`: one character → a block state;
+  - `palette`: one character → a block state, or an "any material" slot: a block tag such as `"#minecraft:planks"`;
   - `layers`: bottom first, each a list of text rows, with `.` or space meaning nothing;
   - optional `anchor`: where the stake stands, in front of the build;
   - optional `size`: the build's full size (empty edges count).
@@ -68,6 +68,10 @@ Owner: Narvisius
   - A stake syncs only its blueprint id, rotation, owner and mode.
   - Pasted text goes to the server in 8,000-character parts.
 - **Block checks:** a block counts when it is the same block as the one wanted. Stairs and other directional blocks are turned with the blueprint.
+- **"Any material" slots:** a palette entry naming a block tag (`"#minecraft:planks"`, `"#minecraft:wool"`) lets any block of that tag count there.
+  - The tag must exist and hold blocks, and none of them may be forbidden.
+  - The tag's first block is the one shown: in the hologram, the turning preview and the bill of materials.
+  - A drone's job for such a cell names the tag. The depot brings any block of it from the packager and sets it the way the drawn block is set: oak stairs drawn facing east become spruce stairs facing east (`BuildJobs.like`). With the endless test supply it brings the first block.
 - **The table block:** `BlueprintTableBlock` has `facing` and `part` (`main`/`side`). The side half goes to the player's right; each half removes itself when its partner is gone, and only the main half drops the item (loot `match_block` on `part=main`). Models are generated per half by `tools/blueprints.py` (`table_elements`), with the board tilted 22.5 degrees and its drawing split across the two halves; the item model shows both halves.
 - **The turning preview:** `TurntableRaster` (plain Java) fills each block face that shows, shaded by direction and tinted by the block's map colour, then inks the outline and depth steps in white. `BlueprintTurntable` runs it on a worker thread about twelve times a second into a `DynamicTexture` the screen draws.
 - **Drone jobs:** the stake is a `BuildJobs.Source`, the interface the Drone Depot already uses.
@@ -102,14 +106,14 @@ Owner: Narvisius
   - a stake offers only its floor layer first, and nothing to a stranger's depot;
   - a finished foundation pops the stake and returns the blueprint.
 - **Server game test (`BlueprintGameTests.aComparatorReadsTheBuildsProgress`):** a real comparator beside a foundation stake reads what the ground already holds, then 1 + 14 × placed / total once about half the rest is set. Added on the contributor's fork; pending CI.
-- **Server game tests:** import checks (a valid paste is saved; unknown block, forbidden block, missing palette key, bad JSON and wrong format are each refused with the right message).
+- **Server game test (`BlueprintGameTests.anyMaterialSlotsTakeAnyBlockOfTheirTag`):** an imported bench with a `#minecraft:planks` slot: birch and spruce planks set by hand count, a stone block does not, the drone job for it names the tag and dark oak planks complete it; stairs of another wood keep the drawn facing and half. Added on the contributor's fork; pending CI.
+- **Server game tests:** import checks (a valid paste is saved; unknown block, forbidden block, unknown block tag, a tag holding forbidden blocks (`#minecraft:portals`), missing palette key, bad JSON and wrong format are each refused with the right message).
 - **Client game test (`BlueprintClientGameTests`):** preview and placement from 20 blocks away, hologram, stake screen, table tabs and IMPORT (a pasted blueprint arrives in the client library and the import list), Item Index, chair, Creative Energy Cell.
 
 ## Not yet done (from #23)
-- "Any material" slots and tags.
 - The design kit and in-JAR AI guide.
 
-Comparator output, listed here before, is built (see above).
+Comparator output and "any material" slots, listed here before, are built (see above).
 
 ## World height
 
