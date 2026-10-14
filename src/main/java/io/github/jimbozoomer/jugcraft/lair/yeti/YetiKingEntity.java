@@ -7,6 +7,8 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rimebind;
+import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
@@ -79,6 +81,9 @@ import org.jspecify.annotations.Nullable;
  * lair/LairRewards; left alone he climbs back to his throne, healed, and the snow drifts back. Bound to a lair instance
  * he vanishes with it; one with no instance (a test's) keeps to the hall laid out from the origin he was given. He walks
  * on his own snow: he does not slide on his ice, freeze, fall, float or stick in webs.
+ * Since Concordance Chunk B unit 5 (B-09) only a Brace lessens his push, and a Brace one player put on another that
+ * meets it is that caster's deed in his fight; Rimebind's slow does not hold his steps, so a binding instead holds his
+ * next wind-up {@value #RIMEBOUND_WINDUP} ticks longer, once a thaw.
  */
 public class YetiKingEntity extends Monster implements GeoEntity {
 	// ---------------------------------------------------------------- numbers (tools/yeti_king.py)
@@ -128,6 +133,11 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 	public static final int KIN = 2;
 	public static final int MAX_WHELPS = 4;
 	public static final int EXPERIENCE = 300;
+	/**
+	 * Rimebind on him (Concordance Chunk B, B-09, B-P21, B-P54): how many ticks longer one wind-up of his holds, frost-locked,
+	 * for a binding that took; once a thaw. Untuned: a starting value until people play it (04:194).
+	 */
+	public static final int RIMEBOUND_WINDUP = 4;
 	/** How long a leap onto or off his dais takes, and how high a leap rises over the straight line. */
 	private static final int LEAP_TICKS = 16;
 	private static final double LEAP_RISE = 4.0;
@@ -261,6 +271,10 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 	 * ends in is their deed ({@link #baited}). Null for anyone else, such as a late arrival he turned on.
 	 */
 	private @Nullable UUID baiter;
+	/** Rimebind (B-09): his Thaw's ticks at his last tick; a Thaw that grew is a binding that took. Not saved. */
+	private int thawLeft;
+	/** Rimebind (B-09): ticks a wind-up of his still holds for a binding that took (none, or RIMEBOUND_WINDUP). Not saved. */
+	private int rimeHold;
 	private final List<Vec3> icicles = new ArrayList<>();
 	private final List<Vec3> spikes = new ArrayList<>();
 	/** Set when he is loaded from a save: the snow drifts back over what he had bared (saved with him) on his first tick. */
@@ -358,6 +372,11 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 		return stunned;
 	}
 
+	/** Ticks a wind-up of his still holds for Rimebind (B-09): RIMEBOUND_WINDUP after a binding takes, none once shown. */
+	public int rimeHold() {
+		return rimeHold;
+	}
+
 	public Action action() {
 		int id = entityData.get(ACTION);
 		return id >= 0 && id < Action.values().length ? Action.values()[id] : Action.IDLE;
@@ -421,6 +440,7 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 		bossBar.setProgress(getHealth() / getMaxHealth());
 		prune(level);
 		driftDue(level);
+		rimebound(level);
 		for (int i = 0; i < cooldowns.length; i++) {
 			if (cooldowns[i] > 0) {
 				cooldowns[i]--;
@@ -583,6 +603,16 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 			return;
 		}
 		if (attack != null) {
+			// Rimebind (B-09): a binding that took holds this wind-up, frost-locked, before its last two ticks (where a
+			// charge fixes its line and a breath, slam or spike line turns to its strike); else it waits for the next.
+			if (rimeHold > 0 && attackTicks < attack.windup - 2) {
+				rimeHold--;
+				setDeltaMovement(0.0, floorY() - getY(), 0.0);
+				if (rimeHold % 2 == 0) {
+					level.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 2.4, getZ(), 6, 0.7, 0.9, 0.7, 0.01);
+				}
+				return;
+			}
 			attackTicks++;
 			perform(level, target);
 			return;
@@ -840,10 +870,36 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 		return hit;
 	}
 
-	/** Pushes {@code player} along {@code way} (flat) by {@code strength}, and up by {@code up}, and tells their client. */
-	static void push(ServerPlayer player, Vec3 way, double strength, double up) {
-		player.push(way.x * strength, up, way.z * strength);
+	/**
+	 * Pushes {@code player} along {@code way} (flat) by {@code strength}, and up by {@code up}, and tells their client: every
+	 * push of his, his blows', his slam's, his charge's and his spikes' (B-09, B-P20). Only a Brace takes any of it off
+	 * ({@link Brace#spend}: spent by the first push it meets, it braces the rest of that tick, so a blow and its push are
+	 * halved once); knockback resistance from anything else (netherite, Rooted, the Ice Breaker) changes nothing of it. A
+	 * blow's own small knockback, and his boulders' and icicles', are the game's, which knockback resistance lessens as
+	 * ever. A Brace another player put on them is that player's deed ({@link #braced}).
+	 */
+	void push(ServerPlayer player, Vec3 way, double strength, double up) {
+		double share = Brace.spend(player);
+		if (share < 1.0) {
+			braced(player);
+		}
+		player.push(way.x * strength * share, up * share, way.z * strength * share);
 		player.connection.send(new ClientboundSetEntityMotionPacket(player));
+	}
+
+	/**
+	 * A Brace took some of his push off {@code player} (B-09, B-P22, B-P55): if another player put it on them, that caster's
+	 * deed in his fight, one for each push it meets (keyed by the braced player and the tick, so two pushes in one tick are
+	 * one deed); the caster needs no part before it, as a ward's soak needs none, but must be in his fight and able to fight
+	 * him. A Brace one put on oneself, the Water Bangle's (nobody's cast) and one carried through a relog (its caster is not
+	 * saved, Brace.BRACER) credit no one, as healing oneself earns nothing.
+	 */
+	private void braced(ServerPlayer player) {
+		UUID id = Brace.caster(player);
+		ServerPlayer caster = id == null || id.equals(player.getUUID()) ? null : player.level().getServer().getPlayerList().getPlayer(id);
+		if (caster != null && LairBosses.eligible(caster) && encounter.contains(caster)) {
+			encounter.deed(caster, "brace " + player.getUUID() + " " + player.level().getGameTime());
+		}
 	}
 
 	/** Where his slam comes down: where the foe stood, kept within his leash. */
@@ -1107,6 +1163,25 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 1.5F, 0.5F);
 		level.playSound(null, getX(), getY(), getZ(), SoundType.GLASS.getBreakSound(), SoundSource.HOSTILE, 2.0F, 0.6F);
 		tell(level, "message.jugcraft.yeti_king.stunned");
+	}
+
+	/**
+	 * Rimebind on him (Concordance Chunk B, B-09, B-P21, B-P54; 04:188): his steps are his own, so its slow does not hold
+	 * him; a binding shows as a wind-up held RIMEBOUND_WINDUP ticks longer, frost-locked. A Rimebound that takes starts its
+	 * Thaw (Rimebind.bound), which only counts down, so a Thaw longer than at his last tick is a binding that took, through
+	 * the effect boundary, which bears his resistance once (bound 30 ticks, thawing 70) and refuses another binding while
+	 * he thaws: once a thaw. The hold waits for his next wind-up however long he reels or roars; a binding before it is
+	 * shown sets it again and never adds. Waiting on his throne a binding holds nothing; left alone he forgets it (reset).
+	 */
+	private void rimebound(ServerLevel level) {
+		MobEffectInstance thaw = Rimebind.RIME_THAW == null ? null : getEffect(Rimebind.RIME_THAW);
+		int left = thaw == null ? 0 : thaw.getDuration();
+		if (left > thawLeft && phase != Phase.WAITING) {
+			rimeHold = RIMEBOUND_WINDUP;
+			level.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 2.0, getZ(), 24, 0.9, 1.2, 0.9, 0.02);
+			level.playSound(null, getX(), getY(), getZ(), SoundType.GLASS.getPlaceSound(), SoundSource.HOSTILE, 1.5F, 0.5F);
+		}
+		thawLeft = left;
 	}
 
 	/**
@@ -1390,6 +1465,7 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 		stunned = 0;
 		foe = null;
 		baiter = null;
+		rimeHold = 0;
 		encounter.abandon();
 		Arrays.fill(cooldowns, 0);
 		setHealth(getMaxHealth());

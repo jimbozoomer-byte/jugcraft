@@ -267,8 +267,9 @@ DOSSIER = {
                            "of her arena",
     "glacier_hall.credit": "A share of his reward goes to everyone who strikes him or his Yeti Whelps, gives friends back "
                            "%s or more of the health his side's blows took from them (freezing is not a blow), wards a "
-                           "friend against %s or more health of those blows, or, having already taken part, baits his "
-                           "charge into an ice column, within %s blocks of his lake",
+                           "friend against %s or more health of those blows, braces a friend who then takes one of his "
+                           "throws, or, having already taken part, baits his charge into an ice column, within %s blocks "
+                           "of his lake",
     "cinder_kiln.credit": "A share of his reward goes to everyone who strikes him or his Cinderlings, gives friends back "
                           "%s or more of the health his side took from them (blows, gobs, cinders and flame; not burning "
                           "afterwards, nor slag), or wards a friend against %s or more health of those, within %s blocks "

@@ -60,10 +60,10 @@ RESEARCH = {"stratawrighting": {
 
 # ----------------------------------------------------------------------------------------------- B-06 Brace
 # Braced (Java: strata/Brace): +BRACE_RESISTANCE knockback resistance for BRACE_TICKS, exclusive; spent by the first push
-# it meets (a blow that knocks back, a harmful Concordance push, or a push that asks for it: B-09's Yeti, the Leaf
-# Blower's stream) and gone at the end of that server tick (at the start of the next, if spent between ticks). Helpful
-# pushes (one's own Flashstep) neither spend it nor feel it (B-P12). Accepted exception: vanilla's knockback that comes
-# without a damaging blow is braced but does not spend it (B-P30).
+# it meets (a blow that knocks back, a harmful Concordance push, or a push that asks for it: the Yeti King's every push
+# (B-09), the Leaf Blower's stream) and gone at the end of that server tick (at the start of the next, if spent between
+# ticks). Helpful pushes (one's own Flashstep) neither spend it nor feel it (B-P12). Accepted exception: vanilla's
+# knockback that comes without a damaging blow is braced but does not spend it (B-P30).
 BRACED = rid("braced")
 BRACE_TICKS = 100
 BRACE_RESISTANCE = 0.5
@@ -140,7 +140,11 @@ def codex():
                        "anyone's harmful push (a Leaf Blower's stream too), moves you half as far and spends it. A shove "
                        "that does you no harm may be halved without spending it. A second Brace while one holds does "
                        "nothing. Your own Flashstep ignores it. It lessens no harm, and nothing holds you against a "
-                       "lair's mist, a portal or a teleport. Not the war fork's Brace, which strikes a charging foe harder.")]},
+                       "lair's mist, a portal or a teleport. Not the war fork's Brace, which strikes a charging foe harder."),
+                      ("text", "Against the Yeti King", "Nothing else lessens the Yeti King's throws (his boulders and "
+                       "icicles knock you back as anything does): not armour's knockback resistance, not Earthbound "
+                       "Thallite. Braced, the next of his blows, slams, charges or spikes throws you half as far. A Brace "
+                       "you put on a friend that takes one of his throws is your part in his fight.")]},
     }
 
 

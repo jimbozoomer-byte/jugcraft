@@ -24,9 +24,9 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A spike of ice bursting up from the Yeti King's lake in his Glacial Spikes: as it bursts, every player within
- * {@value #WIDTH} block of it takes {@value YetiKingEntity#SPIKE_DAMAGE} damage and is thrown up. It rises over
- * {@value #RISE_TICKS} ticks, stands {@value #HOLD_TICKS} more, and is gone. It cannot be harmed and is never saved, and it
- * goes at once when its king is gone or no longer counts it his ({@link YetiKingEntity#owning}).
+ * {@value #WIDTH} block of it takes {@value YetiKingEntity#SPIKE_DAMAGE} damage and is thrown up (half as high braced,
+ * B-09). It rises over {@value #RISE_TICKS} ticks, stands {@value #HOLD_TICKS} more, and is gone. It cannot be harmed and is
+ * never saved, and it goes at once when its king is gone or no longer counts it his ({@link YetiKingEntity#owning}).
  */
 public class GlacialSpikeEntity extends Entity implements GeoEntity {
 	public static final int RISE_TICKS = 4;
@@ -66,7 +66,7 @@ public class GlacialSpikeEntity extends Entity implements GeoEntity {
 			if (dx * dx + dz * dz <= reach * reach && Math.abs(player.getY() - getY()) < 2.0
 					&& player.hurtServer(level, damageSources().mobAttack(king), YetiKingEntity.damage(YetiKingEntity.SPIKE_DAMAGE))) {
 				hit++;
-				YetiKingEntity.push(player, Vec3.ZERO, 0.0, YetiKingEntity.SPIKE_LIFT);
+				king.push(player, Vec3.ZERO, 0.0, YetiKingEntity.SPIKE_LIFT);
 			}
 		}
 		return hit;

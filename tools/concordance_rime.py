@@ -253,7 +253,10 @@ def codex():
                        "Rimekeepers cast. The Yeti King and the Cinder Tyrant are bound half as long; the Ender Dragon, the "
                        "Wither, the Warden and the Elder Guardian shrug it off. Milk clears it. It reaches only what you "
                        "could strike by hand, and another player only where the server allows it and they are not in your "
-                       "party.")]},
+                       "party."),
+                      ("text", "Against the Yeti King", "The Yeti King moves by his own steps, so the slow does not "
+                       "hold him. Bound, he holds his next wind-up a moment longer, frost-locked, before it strikes: once "
+                       "each time he thaws.")]},
         ("winter", "preserving"): {
             "name": "Preserve", "x": 4, "y": 0, "icon": rid("crucible"), "condition": (research, "understood"),
             "description": "Holding a crucible's heat",

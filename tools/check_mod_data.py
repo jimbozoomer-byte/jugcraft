@@ -9739,7 +9739,8 @@ def check_yeti():
     TEXTURE_SCALE times the size the model declares and cut out; no bone is animated by both of his controllers; his loot
     table is the table's and his trophies are Arms VII's; his recipes, tags and advancement are there; every message he
     sends has its words; his fight's credit and reward go through lair/Encounter and lair/LairRewards (Concordance Chunk
-    B); and nothing of his loads a chunk or leaves its dimension."""
+    B); nothing of his loads a chunk or leaves its dimension; and (B-09) only a Brace lessens his push, a friend's Brace
+    is its caster's deed, and Rimebind holds a wind-up once a thaw."""
     import arms_variants
     import glacier_hall as gh
     import yeti_king as yk
@@ -9940,6 +9941,31 @@ def check_yeti():
                     f"({getattr(needle, 'pattern', needle)})")
     if "damageBy" in boss or "YetiKingLoot.reward(" in boss:
         err("YetiKingEntity.java pays his loot the old way (a damage map, YetiKingLoot.reward)")
+    # B-09 (Concordance Chunk B, unit 5): the school counters.
+    push = _java_body(boss, "\tvoid push(ServerPlayer player, Vec3 way, double strength, double up) {")
+    if ("double share = Brace.spend(player);" not in push
+            or "player.push(way.x * strength * share, up * share, way.z * strength * share);" not in push
+            or re.search(r"KNOCKBACK_RESISTANCE|getAttributeValue|resistanceWithout", push)):
+        err("YetiKingEntity.push: only a Brace takes his push off, its share on all three parts (B-09, B-P20)")
+    for cls, text in sources.items():
+        direct = len(re.findall(r"\bplayer\.push\(", text))
+        if direct != (1 if cls == "YetiKingEntity" else 0):
+            err(f"{cls}.java: every push of his goes through YetiKingEntity.push ({direct} direct)")
+    if "king.push(player, Vec3.ZERO, 0.0, YetiKingEntity.SPIKE_LIFT)" not in sources.get("GlacialSpikeEntity", ""):
+        err("GlacialSpikeEntity: the spike's lift goes through YetiKingEntity.push")
+    braced = _java_body(boss, "\tprivate void braced(ServerPlayer player) {")
+    for needle in ("Brace.caster(player)", "id.equals(player.getUUID())", "LairBosses.eligible(caster) && encounter.contains(caster)",
+                   'encounter.deed(caster, "brace " + player.getUUID() + " " + player.level().getGameTime())'):
+        if needle not in braced:
+            err(f"YetiKingEntity.braced: the Brace caster's deed, never one's own, keyed by the braced and the tick ({needle})")
+    if not 0 < yk.YETI_KING.get("RIMEBOUND_WINDUP", 0) < min(a[0] for a in yk.ATTACKS.values()) - 2:
+        err("tools/yeti_king.py RIMEBOUND_WINDUP: a few ticks, within his shortest wind-up's room (B-P21)")
+    rimed = _java_body(boss, "\tprivate void rimebound(ServerLevel level) {")
+    if ("getEffect(Rimebind.RIME_THAW)" not in rimed or "rimeHold = RIMEBOUND_WINDUP;" not in rimed
+            or "phase != Phase.WAITING" not in rimed or "rimeHold +=" in boss
+            or "rimeHold > 0 && attackTicks < attack.windup - 2" not in boss
+            or "rimeHold = 0;" not in _java_body(boss, "\tpublic void reset(ServerLevel level) {")):
+        err("YetiKingEntity: Rimebind holds one wind-up RIMEBOUND_WINDUP ticks once a thaw, set never added (B-P21, B-P54)")
     for key in yk.RECIPES:
         if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
             err(f"recipe/{key}.json is missing")

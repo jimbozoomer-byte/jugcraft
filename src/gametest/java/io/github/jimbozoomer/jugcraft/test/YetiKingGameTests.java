@@ -1,9 +1,11 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.authlib.GameProfile;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
 import io.github.jimbozoomer.jugcraft.agriculture.Knitwear;
 import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceSpells;
@@ -15,8 +17,11 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
+import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rimebind;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
@@ -98,7 +103,9 @@ import net.spell_engine.internals.target.SpellTarget;
  * dais, the ramp and a den wall, at his leash and when it grazes a column's foot (a run clear of the foot goes on), and
  * its fury chain; solo melee, a solo caster and a party of two solving the column loop; his lake as laid after a slam
  * and his reset, after his death and loaded again; his ice and kin gone on reset, death and unload; wool and leather
- * against his frost; and End-gun Levitation lifting neither him nor his kin.
+ * against his frost; and End-gun Levitation lifting neither him nor his kin. Since B-09 (unit 5): only a Brace lessens his
+ * push, once a tick, and a friend's Brace is its caster's deed (not one's own, the bangle's or a forgotten caster's);
+ * Rimebind holds one wind-up RIMEBOUND_WINDUP ticks longer once a thaw, and does not slow his steps.
  *
  * <p>He fights any player within 38 blocks of his lake's centre; the arena keeps every other test's players farther off
  * than that. Each test sends him away before it ends, with his whelps, and lets the snow drift back.
@@ -375,6 +382,70 @@ public class YetiKingGameTests {
 	private static void chargeAt(ServerLevel level, YetiKingEntity king, BlockPos origin, ServerPlayer foe) {
 		king.teleportTo(origin.getX() + 26.5, king.floorY(), origin.getZ() + 33.0);
 		king.begin(level, YetiKingEntity.Attack.AVALANCHE_CHARGE, foe);
+	}
+
+	// ---------------------------------------------------------------- Concordance Chunk B, unit 5 (B-09): the counters
+
+	/** East of his lake's centre, past its edge (GlacierHall.LAKE_RADIUS 20.5): players here never wake him. */
+	private static final double OFF_LAKE = 26.0;
+
+	/** A survival player {@code dx}, {@code dz} from where he stands off the lake. */
+	private static ServerPlayer offLake(GameTestHelper helper, YetiKingEntity king, double dx, double dz) {
+		return player(helper, king, OFF_LAKE + dx, dz);
+	}
+
+	/** He lands his Ground Slam off the lake (a waiting king is put back on his throne each tick, so each slam puts him there first). */
+	private static int slam(ServerLevel level, YetiKingEntity king) {
+		Vec3 centre = king.centre();
+		king.teleportTo(centre.x + OFF_LAKE, king.floorY(), centre.z);
+		return king.slamLands(level);
+	}
+
+	/** How {@code player}'s motion changed since {@code before}: across the ground, and up. */
+	private static double[] moved(ServerPlayer player, Vec3 before) {
+		Vec3 change = player.getDeltaMovement().subtract(before);
+		return new double[] {Math.hypot(change.x, change.z), change.y};
+	}
+
+	private static boolean near(double a, double b) {
+		return Math.abs(a - b) < 1.0E-9;
+	}
+
+	/** Puts {@code player} back at {@code at}, still: a mock player keeps the motion a push gave it, so the next is measured from rest. */
+	private static void back(ServerPlayer player, Vec3 at) {
+		player.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
+		player.setDeltaMovement(Vec3.ZERO);
+	}
+
+	/** Knockback resistance 1 from elsewhere (as netherite or Rooted might give): it must change nothing of his push. */
+	private static void steadfast(ServerPlayer player) {
+		player.getAttribute(Attributes.KNOCKBACK_RESISTANCE).addTransientModifier(
+				new AttributeModifier(Jugcraft.id("test_steadfast"), 1.0, AttributeModifier.Operation.ADD_VALUE));
+	}
+
+	/** The first effect of an invocation's composed form on the Initiate's Wand: what its cast applies. */
+	private static EffectSpec invoked(String id) {
+		return ConcordanceData.rules().authored(id, "jugcraft:initiate_wand").plan().root().steps().getFirst().effect();
+	}
+
+	/** {@code spec} on {@code target} as {@code caster}'s own new cast through the effect boundary (the test places them). */
+	private static ConcordanceEffects.Result cast(ServerPlayer caster, EffectSpec spec, LivingEntity target) {
+		Cause cause = Cause.of(caster.getUUID(), Cause.Origin.INVOCATION, "test:yeti_counter", ConcordanceEffects.nextSerial());
+		return ConcordanceEffects.apply(new ConcordanceEffects.Context(caster.level(), cause, caster,
+				new Ledger(new Ledger.Limits(16, 256, 0)), "0/0/0", caster.position()), spec, target);
+	}
+
+	/** One telegraph of his: his own tick count as a wind-up began, and as its strike came (-1 until then). */
+	private static final class Telegraph {
+		long begun = -1;
+		long struck = -1;
+	}
+
+	/** Begins his Maul Swipe at {@code foe} and notes the tick it began. */
+	private static void swipeAt(ServerLevel level, YetiKingEntity king, ServerPlayer foe, Telegraph telegraph) {
+		king.begin(level, YetiKingEntity.Attack.MAUL_SWIPE, foe);
+		telegraph.begun = king.tickCount;
+		telegraph.struck = -1;
 	}
 
 	/**
@@ -1985,6 +2056,316 @@ public class YetiKingGameTests {
 						helper.succeed();
 					});
 				});
+			});
+		});
+	}
+
+	/**
+	 * Concordance Chunk B (B-09, B-P20, B-P30): only a Brace lessens his push. His slam's 1.4 across and 0.4 up is the same
+	 * on a player with knockback resistance 1 from elsewhere, and half on a braced one, whoever put the Brace on (a friend,
+	 * they themselves, the Water Bangle); a second push that tick is braced too; the next tick the Brace is gone.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 20)
+	public void aBracedPlayerIsPushedHalfAsFarOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer bare = offLake(helper, king, 4.5, 0.0);
+		ServerPlayer friend = offLake(helper, king, -4.5, 0.0);
+		ServerPlayer own = offLake(helper, king, 0.0, 4.5);
+		ServerPlayer wearer = offLake(helper, king, 0.0, -4.5);
+		ServerPlayer caster = offLake(helper, king, 0.0, 12.0);
+		List<ServerPlayer> pushed = List.of(bare, friend, own, wearer);
+		List<ServerPlayer> braces = List.of(friend, own, wearer);
+		Map<ServerPlayer, Vec3> stand = new HashMap<>();
+		pushed.forEach(player -> stand.put(player, player.position()));
+		steadfast(bare);
+		steadfast(friend);
+		EffectSpec brace = invoked("jugcraft:brace");
+		boolean braced = cast(caster, brace, friend).applied() && cast(own, brace, own).applied() && RimeGear.brace(wearer).applied();
+		double resisting = bare.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+		Map<ServerPlayer, double[]> first = new HashMap<>();
+		Map<ServerPlayer, double[]> second = new HashMap<>();
+		Map<ServerPlayer, Vec3> before = new HashMap<>();
+		pushed.forEach(player -> before.put(player, player.getDeltaMovement()));
+		slam(level, king);
+		pushed.forEach(player -> {
+			first.put(player, moved(player, before.get(player)));
+			before.put(player, player.getDeltaMovement());
+		});
+		slam(level, king);
+		pushed.forEach(player -> second.put(player, moved(player, before.get(player))));
+		boolean heldOn = braces.stream().allMatch(player -> player.hasEffect(Brace.BRACED));
+		double half = 1.0 - Brace.RESISTANCE;
+		helper.runAfterDelay(1, () -> {
+			ending(level, king, () -> {
+				try {
+					helper.assertTrue(braced, "A friend's, one's own and the Water Bangle's Brace did not all take");
+					helper.assertTrue(near(resisting, 1.0), "The bare player does not have knockback resistance 1: " + resisting);
+					for (Map<ServerPlayer, double[]> push : List.of(first, second)) {
+						helper.assertTrue(near(push.get(bare)[0], YetiKingEntity.SLAM_KNOCKBACK) && near(push.get(bare)[1], 0.4),
+								"Knockback resistance from elsewhere lessened his push: " + Arrays.toString(push.get(bare)));
+						for (ServerPlayer player : braces) {
+							helper.assertTrue(near(push.get(player)[0], YetiKingEntity.SLAM_KNOCKBACK * half) && near(push.get(player)[1], 0.4 * half),
+									"A braced player was not pushed half as far, both pushes of the tick: " + Arrays.toString(push.get(player)));
+						}
+					}
+					helper.assertTrue(heldOn, "A spent Brace did not brace the rest of its tick");
+					helper.assertTrue(braces.stream().noneMatch(player -> player.hasEffect(Brace.BRACED)), "A spent Brace outlasted its tick");
+					pushed.forEach(player -> back(player, stand.get(player)));
+					slam(level, king);
+					for (ServerPlayer player : pushed) {
+						double[] whole = moved(player, Vec3.ZERO);
+						helper.assertTrue(near(whole[0], YetiKingEntity.SLAM_KNOCKBACK) && near(whole[1], 0.4),
+								"With its Brace gone, a player was not pushed the whole way: " + Arrays.toString(whole));
+					}
+				} finally {
+					List.of(bare, friend, own, wearer, caster).forEach(ServerPlayer::discard);
+				}
+			});
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Concordance Chunk B (B-09, B-P12, B-P30): a blow of his and the push it brings are braced once, not twice. His swipe
+	 * pushes a bare player 1 across and 0.3 up and a braced one 0.5 and 0.15, not a quarter; a glacial spike lifts a bare
+	 * player 0.8 and a braced one 0.4. Both have knockback resistance 1 from elsewhere, so the blow's own knockback moves
+	 * neither and only his push is measured.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 140)
+	public void hisBlowAndSpikeAreBracedOnceNotTwice(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer bare = offLake(helper, king, 1.5, 2.5);
+		ServerPlayer braced = offLake(helper, king, -1.5, 2.5);
+		ServerPlayer caster = offLake(helper, king, 0.0, 12.0);
+		List<ServerPlayer> all = List.of(bare, braced, caster);
+		all.forEach(player -> player.setGameMode(GameType.CREATIVE));   // their loading waited out, as hisSwipeStrikesInFrontNotBehind
+		EffectSpec brace = invoked("jugcraft:brace");
+		double half = 1.0 - Brace.RESISTANCE;
+		helper.runAfterDelay(LOADING_TICKS, () -> {
+			all.forEach(player -> player.setGameMode(GameType.SURVIVAL));
+			steadfast(bare);
+			steadfast(braced);
+			boolean first = cast(caster, brace, braced).applied();
+			Vec3 centre = king.centre();
+			king.teleportTo(centre.x + OFF_LAKE, king.floorY(), centre.z);
+			king.setYRot(0.0F);   // facing south, towards both
+			Vec3 bareBefore = bare.getDeltaMovement();
+			Vec3 bracedBefore = braced.getDeltaMovement();
+			int hit = king.swipe(level);
+			double[] bareSwipe = moved(bare, bareBefore);
+			double[] bracedSwipe = moved(braced, bracedBefore);
+			helper.runAfterDelay(20, () -> {
+				for (ServerPlayer player : List.of(bare, braced)) {
+					player.setHealth(player.getMaxHealth());
+					player.damageCooldownTime = 0;
+				}
+				boolean second = cast(caster, brace, braced).applied();
+				Vec3 bareLift = bare.getDeltaMovement();
+				GlacialSpikeEntity.burst(level, king, bare.position());
+				double[] bareSpike = moved(bare, bareLift);
+				Vec3 bracedLift = braced.getDeltaMovement();
+				GlacialSpikeEntity.burst(level, king, braced.position());
+				double[] bracedSpike = moved(braced, bracedLift);
+				ending(level, king, () -> {
+					try {
+						helper.assertTrue(first && second, "Brace did not take on the braced player");
+						helper.assertTrue(hit == 2, "His swipe struck " + hit + " players, not 2");
+						helper.assertTrue(near(bareSwipe[0], YetiKingEntity.SWIPE_KNOCKBACK) && near(bareSwipe[1], 0.3),
+								"The bare player's push changed: " + Arrays.toString(bareSwipe));
+						helper.assertTrue(near(bracedSwipe[0], YetiKingEntity.SWIPE_KNOCKBACK * half) && near(bracedSwipe[1], 0.3 * half),
+								"A blow and its push were not braced once (half, not a quarter): " + Arrays.toString(bracedSwipe));
+						helper.assertTrue(near(bareSpike[0], 0.0) && near(bareSpike[1], YetiKingEntity.SPIKE_LIFT),
+								"A spike did not lift the bare player " + YetiKingEntity.SPIKE_LIFT + ": " + Arrays.toString(bareSpike));
+						helper.assertTrue(near(bracedSpike[0], 0.0) && near(bracedSpike[1], YetiKingEntity.SPIKE_LIFT * half),
+								"A spike did not lift the braced player half as high: " + Arrays.toString(bracedSpike));
+					} finally {
+						all.forEach(ServerPlayer::discard);
+					}
+				});
+				helper.succeed();
+			});
+		});
+	}
+
+	/**
+	 * Concordance Chunk B (B-09, B-P22, B-P55): a Brace one player put on another that meets his push is the caster's deed,
+	 * one for each push it meets (two in one tick are one), with no part needed before; a Brace on oneself, the Water
+	 * Bangle's and one whose caster was forgotten (as a relog forgets it) credit no one, and being braced earns nothing.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 20)
+	public void aBraceOnAFriendIsTheCastersDeed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer friend = offLake(helper, king, -4.5, 0.0);
+		ServerPlayer own = offLake(helper, king, 4.5, 0.0);
+		ServerPlayer relogged = offLake(helper, king, 0.0, 4.5);
+		ServerPlayer wearer = offLake(helper, king, 0.0, -4.5);
+		ServerPlayer caster = offLake(helper, king, 0.0, 12.0);
+		Vec3 friendStands = friend.position();
+		Encounter fight = king.encounter();
+		fight.begin();
+		EffectSpec brace = invoked("jugcraft:brace");
+		boolean braced = cast(caster, brace, friend).applied() && cast(caster, brace, relogged).applied()
+				&& cast(own, brace, own).applied() && RimeGear.brace(wearer).applied();
+		relogged.removeAttached(Brace.BRACER);   // what a relog leaves: the Brace kept, its caster forgotten (not a real relog)
+		boolean casters = caster.getUUID().equals(Brace.caster(friend)) && own.getUUID().equals(Brace.caster(own))
+				&& Brace.caster(wearer) == null && Brace.caster(relogged) == null && !Brace.BRACER.isPersistent();
+		boolean noPart = fight.share(caster) == null;
+		long a = level.getGameTime();
+		slam(level, king);
+		slam(level, king);
+		int deedsA = deeds(fight, caster);
+		boolean qualifiedA = fight.qualified().contains(caster.getUUID());
+		boolean keyedA = !fight.deed(caster, "brace " + friend.getUUID() + " " + a);
+		boolean noBracedPart = List.of(friend, own, wearer, relogged).stream().allMatch(player -> fight.share(player) == null);
+		helper.runAfterDelay(1, () -> {
+			ending(level, king, () -> {
+				try {
+					helper.assertTrue(braced && casters, "The Braces and their casters are not as set (the caster unsaved)");
+					helper.assertTrue(noPart, "The caster had a part before any push");
+					helper.assertTrue(deedsA == 1 && qualifiedA, "Two pushes in a tick on a friend's Brace were not one deed that qualifies: " + deedsA);
+					helper.assertTrue(keyedA, "The Brace deed is not keyed by the braced player and the tick");
+					helper.assertTrue(noBracedPart, "One's own, the bangle's or a forgotten caster's Brace, or being braced, earned a part");
+					helper.assertTrue(!friend.hasEffect(Brace.BRACED) && cast(caster, brace, friend).applied(), "The friend could not be braced again");
+					back(friend, friendStands);
+					long b = level.getGameTime();
+					slam(level, king);
+					helper.assertTrue(deeds(fight, caster) == 2 && !fight.deed(caster, "brace " + friend.getUUID() + " " + b),
+							"A Brace meeting a push the next tick was not a second deed: " + deeds(fight, caster));
+					slam(level, king);
+					helper.assertTrue(deeds(fight, caster) == 2, "A second push in that tick was another deed");
+					helper.assertTrue(fight.share(own) == null, "A Brace on oneself earned a part");
+				} finally {
+					fight.end();
+					List.of(friend, own, relogged, wearer, caster).forEach(ServerPlayer::discard);
+				}
+			});
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Concordance Chunk B (B-09, B-P21, B-P54): a binding that takes holds his wind-up RIMEBOUND_WINDUP ticks longer, once a
+	 * thaw: bound, his Maul Swipe strikes 16 ticks after it begins, not 12; while he thaws no one binds him and his next
+	 * swipe strikes on time; bound again while he reels, the hold waits out his stun and holds the next wind-up.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 220)
+	public void aRimeboundKingWindsUpLongerOnceAThaw(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer foe = foeAt(helper, origin, 39.5, 5.0, 60.0, GameType.SURVIVAL);   // his target, far beyond his swipe
+		ServerPlayer caster = foeAt(helper, origin, 70.0, 5.0, 36.5, GameType.CREATIVE);
+		EffectSpec grip = invoked("jugcraft:rimebind");
+		int windup = YetiKingEntity.Attack.MAUL_SWIPE.windup;
+		Telegraph bound = new Telegraph();
+		Telegraph own = new Telegraph();
+		Telegraph reeled = new Telegraph();
+		helper.onEachTick(() -> {
+			for (Telegraph telegraph : List.of(bound, own, reeled)) {
+				if (telegraph.begun >= 0 && telegraph.struck < 0 && king.action() == YetiKingEntity.Action.SWIPE) {
+					telegraph.struck = king.tickCount;
+				}
+			}
+		});
+		hunting(helper, king, () -> {
+			boolean took = cast(caster, grip, king).applied();
+			MobEffectInstance rimed = king.getEffect(Rimebind.RIMEBOUND);
+			MobEffectInstance thaw = king.getEffect(Rimebind.RIME_THAW);
+			boolean halved = took && rimed != null && rimed.getDuration() == 30 && thaw != null && thaw.getDuration() == 70;
+			swipeAt(level, king, foe, bound);
+			helper.runAfterDelay(30, () -> {
+				boolean shown = king.rimeHold() == 0 && king.attack() == null;
+				ConcordanceEffects.Result thawing = cast(caster, grip, king);
+				swipeAt(level, king, foe, own);
+				helper.runAfterDelay(26, () -> {
+					king.stun(level);
+					helper.runAfterDelay(24, () -> {
+						boolean thawed = !king.hasEffect(Rimebind.RIME_THAW);
+						boolean again = cast(caster, grip, king).applied();
+						boolean reeling = king.stunnedTicks() > 0;
+						helper.runAfterDelay(40, () -> {
+							boolean waited = king.rimeHold() == YetiKingEntity.RIMEBOUND_WINDUP && king.stunnedTicks() == 0 && king.attack() == null;
+							swipeAt(level, king, foe, reeled);
+							helper.runAfterDelay(20, () -> {
+								ending(level, king, () -> {
+									try {
+										helper.assertTrue(halved, "Bound, he was not held 30 ticks with a thaw of 70");
+										helper.assertTrue(bound.struck - bound.begun == windup + YetiKingEntity.RIMEBOUND_WINDUP,
+												"Bound, his swipe struck " + (bound.struck - bound.begun) + " ticks after it began, not " + (windup + YetiKingEntity.RIMEBOUND_WINDUP));
+										helper.assertTrue(shown, "The hold outlasted the wind-up it held");
+										helper.assertTrue(thawing == ConcordanceEffects.Result.IMMUNE, "While he thaws Rimebind took him: " + thawing);
+										helper.assertTrue(own.struck - own.begun == windup, "Thawing, his swipe was held: " + (own.struck - own.begun));
+										helper.assertTrue(thawed && again && reeling, "Thawed and reeling, he was not bound again");
+										helper.assertTrue(waited, "The hold did not wait out his stun for his next wind-up");
+										helper.assertTrue(reeled.struck - reeled.begun == windup + YetiKingEntity.RIMEBOUND_WINDUP,
+												"After his stun his swipe was not held: " + (reeled.struck - reeled.begun));
+										helper.assertTrue(king.rimeHold() == 0, "Shown, the hold is not gone");
+									} finally {
+										foe.discard();
+										caster.discard();
+									}
+								});
+								helper.succeed();
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+
+	/**
+	 * Concordance Chunk B (B-09; settles yeti-king.md:143): Rimebind's slow does not hold his steps. Bound as his charge's
+	 * run begins, his speed attribute a fifth down, seven steps on he is where an unbound run puts him (eight steps of
+	 * CHARGE_SPEED from 45.0); and that binding, past his wind-up, waits for his next one (B-P54).
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 120)
+	public void aRimeboundChargeKeepsItsPace(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer foe = foeAt(helper, origin, 75.0, 5.0, 36.5, GameType.SURVIVAL);
+		ServerPlayer caster = foeAt(helper, origin, 45.0, 5.0, 60.0, GameType.CREATIVE);
+		EffectSpec grip = invoked("jugcraft:rimebind");
+		boolean[] bound = {false, false, false};   // cast, took, still bound when seen
+		double[] seen = {Double.NaN, Double.NaN, -1.0};   // his x in the template, his speed, his hold
+		helper.onEachTick(() -> {
+			if (king.attack() != CHARGE) {
+				return;
+			}
+			if (king.attackTicks() == CHARGE.windup && !bound[0]) {
+				bound[0] = true;
+				bound[1] = cast(caster, grip, king).applied();
+			} else if (king.attackTicks() == CHARGE.windup + 7 && Double.isNaN(seen[0])) {
+				seen[0] = king.getX() - origin.getX();
+				seen[1] = king.getAttributeValue(Attributes.MOVEMENT_SPEED);
+				seen[2] = king.rimeHold();
+				bound[2] = king.hasEffect(Rimebind.RIMEBOUND);
+			}
+		});
+		hunting(helper, king, () -> {
+			charge(level, king, 45.0, 36.5, foe);
+			helper.runAfterDelay(40, () -> {
+				ending(level, king, () -> {
+					try {
+						helper.assertTrue(bound[1] && bound[2], "Rimebind did not take as his run began, or he was not bound seven steps on");
+						helper.assertTrue(Math.abs(seen[1] - king.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) * (1.0 - Rimebind.SLOW)) < EPS,
+								"Bound, his speed attribute was not a fifth down: " + seen[1]);
+						helper.assertTrue(Math.abs(seen[0] - (45.0 + 8 * YetiKingEntity.CHARGE_SPEED)) < EPS,
+								"Bound, his charge did not keep its pace: at " + seen[0] + ", not " + (45.0 + 8 * YetiKingEntity.CHARGE_SPEED));
+						helper.assertTrue(seen[2] == YetiKingEntity.RIMEBOUND_WINDUP, "A binding past his wind-up did not wait for his next: " + seen[2]);
+					} finally {
+						foe.discard();
+						caster.discard();
+					}
+				});
+				helper.succeed();
 			});
 		});
 	}
