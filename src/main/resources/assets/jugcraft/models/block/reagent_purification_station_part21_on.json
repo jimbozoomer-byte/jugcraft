@@ -1,0 +1,8 @@
+{
+  "parent": "jugcraft:block/reagent_purification_station_part21",
+  "textures": {
+    "dp_lamp": "jugcraft:block/dp_lamp_on",
+    "dr_amber": "jugcraft:block/dr_amber_on",
+    "el_screen_cyan": "jugcraft:block/el_screen_cyan_on"
+  }
+}

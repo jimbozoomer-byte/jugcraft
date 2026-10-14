@@ -116,6 +116,9 @@ public final class PetroFluids {
 	public static Gas HYDROGEN;
 	/** Sulfur burnt and absorbed in water: the acid for fertilizer and leaching. */
 	public static Entry SULFURIC_ACID;
+	/** The Reagent Purification Station's grades: concentrated (water boiled off) and electronic-grade (purified). */
+	public static Entry CONCENTRATED_SULFURIC_ACID;
+	public static Entry ELECTRONIC_GRADE_SULFURIC_ACID;
 	/** Nitrogen chemistry (batch 12): air separated into nitrogen and oxygen; ammonia from them and hydrogen. */
 	public static Gas NITROGEN;
 	public static Gas OXYGEN;
@@ -223,6 +226,8 @@ public final class PetroFluids {
 		RAW_SYNGAS = gas("raw_syngas", 0xFF9A9286);
 		CARBON_MONOXIDE = gas("carbon_monoxide", 0xFFC2BED2);
 		SULFUR_TRIOXIDE = gas("sulfur_trioxide", 0xFFE2DCBC);
+		CONCENTRATED_SULFURIC_ACID = fluid("concentrated_sulfuric_acid", 12, 3, 1, 0xFF96702A, MapColor.COLOR_ORANGE);
+		ELECTRONIC_GRADE_SULFURIC_ACID = fluid("electronic_grade_sulfuric_acid", 10, 3, 1, 0xFFE2ECF0, MapColor.SNOW);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

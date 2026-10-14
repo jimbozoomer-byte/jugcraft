@@ -3854,6 +3854,31 @@
           }
         },
         {
+          "title": "Reagent Purification Station",
+          "icon": "jugcraft:reagent_purification_station",
+          "text": [
+            "Four wide, four deep and four tall: two purification columns and a conditioning chamber on an ivory wet-services bed, built from a Chemical Reactor, two Steel Tanks, steel fluid pipe, steel plates and a basic circuit. Every block it fills must be free when it is placed; the corners above the cabinet stay open.",
+            "Pipe sulfuric acid into the high inlet at the back: a bucket becomes 500 mB of concentrated sulfuric acid in 10 seconds, and the boiled-off 500 mB of water leaves low on its right side.",
+            "Concentrated acid with a quarter-bucket of water in the low inlet at the back becomes 900 mB of electronic-grade sulfuric acid in 15 seconds, the water used up conditioning it. A lithography station makes six microchips from a wafer with 50 mB of it, half again as many as with ordinary acid.",
+            "The product leaves at the spout on the front hatch; power comes in at the junction box on its left side. Upgrade cards fit its terminal."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_tank",
+              "jugcraft:chemical_reactor",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:reagent_purification_station",
+            "count": 1
+          }
+        },
+        {
           "title": "Chemical Reactor",
           "icon": "jugcraft:chemical_reactor",
           "text": [

@@ -86,6 +86,14 @@ FLUIDS = {
     "ethylene_dichloride": {"display": "Ethylene Dichloride", "feature": "machines",
                             "colors": [(140, 150, 96), (176, 186, 128), (204, 212, 160), (232, 238, 200)],
                             "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # The Reagent Purification Station's grades (docs/features/industrial-reagent-purification.md): concentrated acid,
+    # half the water boiled off, a dark oily amber that runs slowly; electronic-grade acid, purified from it, clear.
+    "concentrated_sulfuric_acid": {"display": "Concentrated Sulfuric Acid", "feature": "sulfur",
+                                   "colors": [(110, 80, 20), (150, 112, 36), (184, 146, 60), (220, 190, 110)],
+                                   "tick_delay": 12, "slope": 3, "drop_off": 1},
+    "electronic_grade_sulfuric_acid": {"display": "Electronic-Grade Sulfuric Acid", "feature": "sulfur",
+                                       "colors": [(176, 196, 204), (204, 220, 226), (226, 236, 240), (246, 250, 252)],
+                                       "tick_delay": 10, "slope": 3, "drop_off": 1},
 }
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
@@ -480,6 +488,11 @@ FLUID_RECIPES = {
         {"name": "microchip_nitric", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
          "fluids": [("jugcraft:nitric_acid", 50)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
          "features": ["silicon", "machines"]},
+        # Electronic-grade acid (the Reagent Purification Station) leaves no residue on the die: half again as many
+        # chips from a wafer, for 50 mB. For review.
+        {"name": "microchip_electronic_grade", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
+         "fluids": [("jugcraft:electronic_grade_sulfuric_acid", 50)], "results": [("jugcraft:microchip", 6)], "ticks": 200,
+         "features": ["silicon", "sulfur", "machines"]},
     ],
     # Nitrogen chemistry (batch 12). Fluid volumes shrink: 400 mB of gas in gives 200 of ammonia, so no recipe
     # makes fluid from nothing.

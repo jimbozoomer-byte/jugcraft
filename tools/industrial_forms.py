@@ -58,6 +58,8 @@ VANADIUM_RECOVERY = f"{MOD}:vanadium_recovery"
 NITRATE_NEUTRALIZATION = f"{MOD}:nitrate_neutralization"
 # Recovering the ruthenium bed's metal from washed nickel ore (the Bulk Chemical Reactor).
 PRECIOUS_METAL_RECOVERY = f"{MOD}:precious_metal_recovery"
+# Concentrating and purifying demanding reagents (the Reagent Purification Station).
+REAGENT_PURIFICATION = f"{MOD}:reagent_purification"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
@@ -86,6 +88,11 @@ BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 192, 96), (f"{MOD}:biogas", 268, 64
 # What the Combined Cycle Power Plant burns, the factory's big power station: methane at a quarter more than the gas
 # generator's 448 JE/mB (its exhaust raises steam for a second turbine) and 2,048 JE/t, four times the gas turbine; the
 # Coal Gasifier's raw syngas whole at 256 JE/mB and the same rate; hydrogen at the Fuel Cell's 128 JE/mB at 1,024 JE/t.
+# The Reagent Purification Station's cells, as its model fills them (form_layers on reagent_purification_station()).
+REAGENT_STATION_LAYERS = [["C###", "####", "####", "####"],
+                          ["####", "..##", "####", "####"],
+                          ["..#.", "..##", "####", "####"],
+                          ["....", "..##", "..##", "..##"]]
 # The Bulk Electrolytic Separator's cells, as its model fills them (form_layers on bulk_electrolytic_separator()).
 BULK_SEPARATOR_LAYERS = [["C###", "####", "####", "####"],
                          [".###", "####", "####", ".##."],
@@ -177,6 +184,33 @@ FORMS = {
         "recipe": (["TST", "PWP", "PCP"], {"T": f"{MOD}:steel_tank", "S": f"{MOD}:electrolytic_separator",
                                            "P": "#c:plates/steel", "W": f"{MOD}:copper_cable", "C": f"{MOD}:basic_circuit"}),
         "features": ["machines"],
+    },
+    "reagent_purification_station": {
+        "display": "Reagent Purification Station",
+        # The plan's shared purification station (4x4x4 in the art brief), in the chemical reactor family (96 JE/t): it
+        # concentrates sulfuric acid and purifies the concentrate into electronic-grade acid, the water for that
+        # conditioning taken inside the recipe.
+        "family": "chemical_reactor",
+        "layers": REAGENT_STATION_LAYERS,
+        "profile": "ENTRY",
+        "tank_mb": 2_000,
+        "input_tanks": ["feed", "water"],
+        "output_tanks": ["product", "water_out"],
+        "capabilities": [REAGENT_PURIFICATION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "FLUID_IN", 0, 2, 3, 1, "BACK"),
+            ("water_in", "FLUID_IN", 1, 1, 3, 0, "BACK"),
+            ("product_out", "FLUID_OUT", 0, 1, 0, 1, "FRONT"),
+            ("water_out", "FLUID_OUT", 1, 3, 1, 0, "RIGHT"),
+            ("power", "ENERGY_IN", 0, 0, 2, 0, "LEFT"),
+        ],
+        # This change's bill (open for review): a Chemical Reactor fitted out with two Steel Tanks, steel fluid pipe,
+        # steel plates and a basic circuit.
+        "recipe": (["PIP", "TRT", "PCP"], {"P": "#c:plates/steel", "I": f"{MOD}:steel_fluid_pipe", "T": f"{MOD}:steel_tank",
+                                           "R": f"{MOD}:chemical_reactor", "C": f"{MOD}:basic_circuit"}),
+        "features": ["machines", "sulfur"],
     },
     "gas_burning_generator": {
         "display": "Gas Burning Generator",
@@ -760,6 +794,19 @@ HANDBOOK["bio_generator"] = [
         "the same inlet: 268 JE a millibucket at 64 JE/t, a bucket lasting about 210 seconds.",
     ]
 
+HANDBOOK["reagent_purification_station"] = [
+    "Four wide, four deep and four tall: two purification columns and a conditioning chamber on an ivory wet-services "
+    "bed, built from a Chemical Reactor, two Steel Tanks, steel fluid pipe, steel plates and a basic circuit. Every "
+    "block it fills must be free when it is placed; the corners above the cabinet stay open.",
+    "Pipe sulfuric acid into the high inlet at the back: a bucket becomes 500 mB of concentrated sulfuric acid in 10 "
+    "seconds, and the boiled-off 500 mB of water leaves low on its right side.",
+    "Concentrated acid with a quarter-bucket of water in the low inlet at the back becomes 900 mB of electronic-grade "
+    "sulfuric acid in 15 seconds, the water used up conditioning it. A lithography station makes six microchips from a "
+    "wafer with 50 mB of it, half again as many as with ordinary acid.",
+    "The product leaves at the spout on the front hatch; power comes in at the junction box on its left side. Upgrade "
+    "cards fit its terminal.",
+]
+
 HANDBOOK["bulk_electrolytic_separator"] = [
     "Four wide, four deep and six tall: the Electrolytic Separator's cell housing and collection towers twice as large, "
     "built from an Electrolytic Separator, two Steel Tanks, steel plates, copper cable and a basic circuit. Every block "
@@ -844,6 +891,20 @@ FORM_TANK_NAMES = {
 # third value. The quantities and times are the owner's selected starter baseline
 # (docs/features/industrial-starter-gas-and-acid-factory.md, eighth batch, question 9).
 FORM_RECIPES = {
+    "reagent_purification_station": [
+        # Concentration: half the water boiled off ordinary acid, which comes back out as water. 200 ticks at 96 JE/t,
+        # 19,200 JE a bucket. For review.
+        {"name": "purification_concentrated_sulfuric_acid", "capability": REAGENT_PURIFICATION,
+         "fluids": [(f"{MOD}:sulfuric_acid", 1000)],
+         "fluid_results": [(f"{MOD}:concentrated_sulfuric_acid", 500, 0), ("minecraft:water", 500, 1)],
+         "ticks": 200, "features": ["machines", "sulfur"]},
+        # Electronic grade: the concentrate purified, with a quarter-bucket of water conditioned and used up inside the
+        # recipe; a tenth is lost to the residue drain. 300 ticks, 28,800 JE. For review.
+        {"name": "purification_electronic_grade_sulfuric_acid", "capability": REAGENT_PURIFICATION,
+         "fluids": [(f"{MOD}:concentrated_sulfuric_acid", 1000), ("minecraft:water", 250)],
+         "fluid_results": [(f"{MOD}:electronic_grade_sulfuric_acid", 900, 0)],
+         "ticks": 300, "features": ["machines", "sulfur"]},
+    ],
     "electrolytic_separator": [
         # Ordinary brine: chlorine at the anode, hydrogen at the cathode, lye left behind. 400 ticks at 256 JE/t,
         # 102,400 JE, the same as the Electrolytic Cell's own brine recipe.
@@ -1636,6 +1697,87 @@ def bulk_electrolytic_separator():
     keeps its size at the front left. Each port's pieces sit at the middle of a block face."""
     return _doubled(electrolytic_separator(), lambda e: e[0][0] >= 5.2 and e[1][2] <= 7.1 and e[1][1] <= 15.1,
                     BULK_SEPARATOR_PORT_SHIFTS)
+
+
+# The Reagent Purification Station's materials (the art brief): cool ivory enamel, graphite frames, muted steel
+# vessels and a cyan inspection panel on the conditioning chamber.
+IVORY, VESSEL = "el_white", "dw_steel_plate"
+
+
+def reagent_purification_station():
+    """Four wide, four deep and four tall (the art brief, docs/features/industrial-machine-models-and-textures.md): a
+    broad, low ivory wet-services bed with graphite rims carries two unequal muted-steel purification columns, each with
+    its collars, bolted lid and mounting shoes, the taller at the back right giving the machine its profile, and a
+    compact ivory conditioning chamber at the front right with a cyan inspection panel. At the front: the deep
+    clean-product hatch with the product spout, the tall inset level strip and the quiet instrument cabinet (the
+    controller) at the front left. Service couplings join the columns; at the back the short capped return loops, the
+    low residue drain and the feed and water inlets; the condensed water leaves low on the right side and power comes in
+    at the junction box on the left. Each port is at the middle of its block's face."""
+    m = [box((-48, 0, 0), (16, 3, 64), GUNMETAL)]
+    # The wet-services bed and its graphite rim.
+    m.append(box((-46, 3, 2), (14, 9, 62), {"*": IVORY, "up": GUNMETAL}))
+    m.append(box((-46.5, 9, 1.5), (14.5, 10, 62.5), GUNMETAL))
+    # The two purification columns: (x, z, radius, top), each on four mounting shoes, collared, lidded and capped.
+    for cx, cz, r, top in ((-30, 40, 10, 56), (-4, 44, 7, 38)):
+        for dx, dz in ((-1, -1), (-1, 1), (1, -1), (1, 1)):
+            sx, sz = cx + dx * (r - 2), cz + dz * (r - 2)
+            m.append(box((sx - 2, 10, sz - 2), (sx + 2, 13, sz + 2), GUNMETAL))
+        m += cyl("y", cx, cz, r, 10, top, VESSEL)
+        for y in (13, (13 + top) / 2 - 1, top - 3):
+            m += cyl("y", cx, cz, r + 0.5, y, y + 2, GUNMETAL)
+        m += cyl("y", cx, cz, r - 1, top, top + 2, GUNMETAL)
+        for dx, dz in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            bx, bz = cx + dx * (r - 2.5), cz + dz * (r - 2.5)
+            m.append(box((bx - 0.75, top + 2, bz - 0.75), (bx + 0.75, top + 2.75, bz + 0.75), CHROME))
+        m += cyl("y", cx, cz, 2.5, top + 2, top + 4, CHROME)
+    # The conditioning chamber at the front right, framed in graphite, with the cyan inspection panel.
+    m.append(box((-44, 10, 6), (-24, 28, 24), {"*": IVORY, "up": GUNMETAL}))
+    for x0, z0 in ((-44.5, 5.5), (-25.5, 5.5), (-44.5, 22.5), (-25.5, 22.5)):
+        m.append(box((x0, 10, z0), (x0 + 2, 28.5, z0 + 2), GUNMETAL))
+    m.append(box((-38, 15, 5.25), (-30, 23, 6), {"*": GUNMETAL, "north": "el_screen_cyan"}))
+    m.append(box((-36, 20, 24), (-32, 24, 31), RUBBER))
+    # The service couplings between the columns, and from the short column down to the chamber.
+    m.append(box((-20, 28, 38), (-12, 34, 46), GUNMETAL))
+    for x in (-19, -14):
+        m.append(box((x, 27.5, 37.5), (x + 1.5, 34.5, 46.5), CHROME))
+    m.append(box((-12, 30, 40), (-10, 32, 44), RUBBER))
+    m.append(box((-22, 30, 40), (-20, 32, 44), RUBBER))
+    # The deep clean-product hatch at the front, its door and the product spout (the product outlet).
+    m.append(box((-15, 10, 1), (-1, 31, 8), GUNMETAL))
+    m.append(box((-13.5, 11.5, 0.5), (-2.5, 29.5, 1), {"*": IVORY, "north": STENCIL}))
+    m.append(box((-11, 21, 0.25), (-5, 27, 0.5), {"*": CHROME, "north": f"{FLANGE}!"}))
+    m.append(box((-3.5, 15, 0.25), (-2.75, 19, 0.5), CHROME))
+    # The tall inset level strip, which lights while it works.
+    m.append(box((-22, 10, 2.5), (-16.5, 42, 5), GUNMETAL))
+    m.append(box((-20.5, 12, 2), (-18, 40, 2.5), STRIP))
+    # The instrument cabinet (the controller) at the front left: a gauge and the amber running lamp.
+    m.append(box((2, 10, 2), (14, 26, 10), {"*": IVORY, "north": GUNMETAL, "up": STENCIL}))
+    m.append(dial("north", (8, 21, 1.25), 4, texture=GAUGE, body=CHROME))
+    m.append(dial("north", (8, 13, 1.25), 3, texture=LAMP, body=GUNMETAL))
+    # The capped return loops at the back of each column.
+    for x, z_back, low, high in ((-30, 50, 16, 34), (-1, 51, 14, 28)):
+        m.append(box((x - 2, low, z_back), (x + 2, low + 3, 61), RUBBER))
+        m.append(box((x - 2, low, 58), (x + 2, high, 61), RUBBER))
+        m.append(box((x - 2, high - 3, z_back), (x + 2, high, 61), RUBBER))
+        m.append(box((x - 2.5, high, 57.5), (x + 2.5, high + 1, 61.5), CHROME))
+    # The low residue drain at the back, under a grille.
+    m.append(box((-20, 3, 57), (-13, 9, 63), GUNMETAL))
+    m.append(box((-19, 9, 58), (-14, 9.5, 62), GRILLE))
+    # The feed inlet at the back, high, banded in acid colour, into the tall column; the water inlet low beside it.
+    m.append(box((-26, 22, 49), (-22, 26, 63.25), RUBBER))
+    m.append(box((-26.5, 21.5, 58), (-21.5, 26.5, 59.5), "sulfuric_acid_still"))
+    m.append(box((-27, 21, 63.25), (-21, 27, 64), {"*": CHROME, "south": f"{FLANGE}!"}))
+    m.append(box((-10, 6, 50), (-6, 10, 63.25), RUBBER))
+    m.append(box((-11, 5, 63.25), (-5, 11, 64), {"*": CHROME, "south": f"{FLANGE}!"}))
+    # The condensed water's outlet low on the right side, under the chamber.
+    m.append(box((-47.25, 4, 22), (-44, 8, 26), RUBBER))
+    m.append(box((-48, 3, 21), (-47.25, 9, 27), {"*": CHROME, "west": f"{FLANGE}!"}))
+    # The junction box on the left, its hazard band and the power socket.
+    m.append(box((10, 10, 34), (15, 20, 46), GUNMETAL))
+    m.append(box((9.75, 20, 33.75), (15.25, 21, 46.25), HAZARD))
+    m.append(box((15, 5, 37), (15.75, 11, 43), {"*": CHROME, "east": "power_port!"}))
+    m.append(box((10, 3, 37), (15, 10, 43), GUNMETAL))
+    return m
 
 
 # The Fermenter's agitator drive pulley on top of the vessel, turning about y: its centre (x, y, z).
@@ -2674,6 +2816,7 @@ ROTORS = {
 }
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "bulk_electrolytic_separator": bulk_electrolytic_separator(),
+          "reagent_purification_station": reagent_purification_station(),
           "gas_burning_generator": gas_burning_generator(),
           "chemical_infuser": chemical_infuser(), "bulk_chemical_infuser": bulk_chemical_infuser(),
           "chemical_oxidizer": chemical_oxidizer(), "bulk_chemical_oxidizer": bulk_chemical_oxidizer(),

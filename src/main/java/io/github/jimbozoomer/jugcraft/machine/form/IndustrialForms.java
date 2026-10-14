@@ -59,6 +59,8 @@ public final class IndustrialForms {
 	public static final String NITRATE_NEUTRALIZATION = "jugcraft:nitrate_neutralization";
 	/** Recovering ruthenium from washed nickel ore with hydrochloric acid and chlorine. */
 	public static final String PRECIOUS_METAL_RECOVERY = "jugcraft:precious_metal_recovery";
+	/** Concentrating and purifying demanding reagents (the Reagent Purification Station). */
+	public static final String REAGENT_PURIFICATION = "jugcraft:reagent_purification";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
 	/** What the Infuser's bed socket holds: the nickel catalyst bed and the vanadium contact bed. */
@@ -384,6 +386,33 @@ public final class IndustrialForms {
 			.build();
 
 	/**
+	 * The Reagent Purification Station: the plan's shared purification station, 4x4x4, in the chemical reactor family.
+	 * It concentrates sulfuric acid (the boiled-off water leaving at its own outlet) and purifies the concentrate into
+	 * electronic-grade acid, the conditioning water used up inside that recipe. The controller is its instrument
+	 * cabinet at the front left; the corners above the cabinet stay open.
+	 */
+	public static final MachineForm REAGENT_PURIFICATION_STATION_FORM = MachineForm.builder(Jugcraft.id("reagent_purification_station"),
+					MachineKind.CHEMICAL_REACTOR)
+			.layer("C###", "####", "####", "####")
+			.layer("####", "..##", "####", "####")
+			.layer("..#.", "..##", "####", "####")
+			.layer("....", "..##", "..##", "..##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("feed")
+			.inputTank("water")
+			.outputTank("product")
+			.outputTank("water_out")
+			.capability(REAGENT_PURIFICATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.FLUID_IN, 0, 2, 3, 1, FormSide.BACK)
+			.port("water_in", FormPort.Kind.FLUID_IN, 1, 1, 3, 0, FormSide.BACK)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 1, 0, 1, FormSide.FRONT)
+			.port("water_out", FormPort.Kind.FLUID_OUT, 1, 3, 1, 0, FormSide.RIGHT)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 2, 0, FormSide.LEFT)
+			.build();
+
+	/**
 	 * The Bulk Chemical Oxidizer: the art brief's 4x4x6 variant of the Chemical Oxidizer, the same throat, hood and
 	 * hopper twice as large, in the chemical reactor family with the Oxidizer's tanks, feed slot and capability, so it
 	 * burns the same feeds, in the bulk profile: four batches side by side from 16,000 mB tanks at 80% of the draw a batch.
@@ -507,6 +536,7 @@ public final class IndustrialForms {
 
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock BULK_ELECTROLYTIC_SEPARATOR;
+	public static FormMachineBlock REAGENT_PURIFICATION_STATION;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock BULK_CHEMICAL_INFUSER;
@@ -530,6 +560,7 @@ public final class IndustrialForms {
 	public static void register() {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
 		BULK_ELECTROLYTIC_SEPARATOR = block("bulk_electrolytic_separator", BULK_ELECTROLYTIC_SEPARATOR_FORM);
+		REAGENT_PURIFICATION_STATION = block("reagent_purification_station", REAGENT_PURIFICATION_STATION_FORM);
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
 		BULK_CHEMICAL_INFUSER = block("bulk_chemical_infuser", BULK_CHEMICAL_INFUSER_FORM);
@@ -548,7 +579,7 @@ public final class IndustrialForms {
 		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, BULK_ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR,
 				CHEMICAL_INFUSER, BULK_CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, BULK_CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_FERMENTER,
 				BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, LARGE_BIO_GENERATOR,
-				LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
+				LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT, REAGENT_PURIFICATION_STATION);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}
