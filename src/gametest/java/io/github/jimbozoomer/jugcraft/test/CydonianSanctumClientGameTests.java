@@ -240,8 +240,10 @@ public class CydonianSanctumClientGameTests implements FabricClientGameTest {
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
 			float lost = (damageTaken(player) - taken.get()) / 10.0F;
-			// A full drop of DROP blocks costs DROP - 3 hearts' halves; Mars takes half, less the jump's cushion.
-			check(lost > 0.0F && lost <= (DROP - 3) * CydonianSanctum.FALL_DAMAGE + 0.01F, "The drop did not hurt half as much: lost " + lost);
+			// A full drop of DROP blocks costs DROP - 3 hearts' halves (at least DROP - 4 with the jump's cushion); Mars takes
+			// half, rounded up at most.
+			check(lost > 0.0F && lost <= Math.ceil((DROP - 3) * CydonianSanctum.FALL_DAMAGE) + 0.01F, "The drop did not hurt half as much: lost "
+					+ lost);
 			player.setHealth(20.0F);
 		});
 

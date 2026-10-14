@@ -221,9 +221,15 @@ public final class CydonianSanctum {
 		return out;
 	}
 
-	/** The cell of the door's figure {@code figure}, from an instance's origin. */
+	/**
+	 * The cell of the door's figure {@code figure}, from an instance's origin. {@link #FIGURE_X} holds the carved figures
+	 * only, in {@link StarDoorBlock.Figure}'s order after {@code PLAIN}; a plain block has no cell of its own.
+	 */
 	public static BlockPos figure(BlockPos origin, StarDoorBlock.Figure figure) {
-		return origin.offset(FIGURE_X[figure.ordinal()], DOOR_FIGURE_Y, DOOR_Z);
+		if (figure == StarDoorBlock.Figure.PLAIN) {
+			throw new IllegalArgumentException("A plain block of the Star Door has no figure's cell");
+		}
+		return origin.offset(FIGURE_X[figure.ordinal() - 1], DOOR_FIGURE_Y, DOOR_Z);
 	}
 
 	/**

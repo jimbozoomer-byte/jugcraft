@@ -56,6 +56,11 @@ public class CydonianSanctumGameTests {
 	private static final Lair SANCTUM = Lair.CYDONIAN_SANCTUM;
 	private static final BlockPos ALTAR = new BlockPos(2, 2, 2);
 	private static final BlockPos STAND = new BlockPos(4, 2, 2);
+	/**
+	 * A new player cannot be hurt until its client has loaded the world, or for 60 ticks; a mock player has no client, so
+	 * a test that hurts one waits this long first.
+	 */
+	private static final int LOADING_TICKS = 80;
 
 	private static ServerPlayer player(GameTestHelper helper, BlockPos standAt) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
@@ -232,7 +237,7 @@ public class CydonianSanctumGameTests {
 	 * is spared), and throws them south, back towards the gate chamber. Off Mars the thin air is not given, and a player
 	 * keeps their own fall damage.
 	 */
-	@GameTest
+	@GameTest(maxTicks = LOADING_TICKS + 40)
 	public void theDustVentsKeepTheirRhythmAndStrike(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		int lines = CydonianSanctum.VENT_LINES.length;
@@ -252,17 +257,20 @@ public class CydonianSanctumGameTests {
 			}
 		}
 		ServerPlayer player = player(helper, STAND);
-		player.setHealth(20.0F);
-		double z = player.getDeltaMovement().z;
-		helper.assertTrue(CydonianSanctum.puff(level, player), "A puff did not strike the player");
-		helper.assertTrue(Math.abs(player.getHealth() - (20.0F - CydonianSanctum.VENT_DAMAGE)) < 0.01F, "A puff did not deal "
-				+ CydonianSanctum.VENT_DAMAGE + ": health " + player.getHealth());
-		helper.assertTrue(player.getDeltaMovement().z > z, "A puff did not throw the player south");
-		helper.assertTrue(!CydonianSanctum.puff(level, player), "A second blow of the same puff struck");
-		CydonianSanctum.air(player);
-		helper.assertTrue(!CydonianSanctum.inSanctum(player) && !player.hasEffect(MobEffects.JUMP_BOOST),
-				"Off Mars the player was given the thin air's jump");
-		helper.assertTrue(player.getAttributeValue(Attributes.FALL_DAMAGE_MULTIPLIER) == 1.0, "Off Mars the player's falls were softened");
-		helper.succeed();
+		helper.runAfterDelay(LOADING_TICKS, () -> {
+			player.setHealth(20.0F);
+			double z = player.getDeltaMovement().z;
+			helper.assertTrue(CydonianSanctum.puff(level, player), "A puff did not strike the player");
+			helper.assertTrue(Math.abs(player.getHealth() - (20.0F - CydonianSanctum.VENT_DAMAGE)) < 0.01F, "A puff did not deal "
+					+ CydonianSanctum.VENT_DAMAGE + ": health " + player.getHealth());
+			helper.assertTrue(player.getDeltaMovement().z > z, "A puff did not throw the player south");
+			helper.assertTrue(!CydonianSanctum.puff(level, player), "A second blow of the same puff struck");
+			CydonianSanctum.air(player);
+			helper.assertTrue(!CydonianSanctum.inSanctum(player) && !player.hasEffect(MobEffects.JUMP_BOOST),
+					"Off Mars the player was given the thin air's jump");
+			helper.assertTrue(player.getAttributeValue(Attributes.FALL_DAMAGE_MULTIPLIER) == 1.0, "Off Mars the player's falls were softened");
+			player.discard();
+			helper.succeed();
+		});
 	}
 }

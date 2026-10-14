@@ -9034,6 +9034,8 @@ def check_cydonian_sanctum(cs):
     expected = "FIGURE_X = {{{}}};".format(", ".join(str(x) for x in cs.DOOR_FIGURES.values()))
     if expected not in java:
         err(f"CydonianSanctum.FIGURE_X is not tools/cydonian_sanctum.py DOOR_FIGURES' columns: expected {expected}")
+    if "FIGURE_X[figure.ordinal() - 1]" not in java:
+        err("CydonianSanctum.figure must index FIGURE_X by the figure's place after PLAIN (FIGURE_X[figure.ordinal() - 1])")
     expected = "DIALS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*d["pos"]) for d in cs.DIALS))
     if expected not in java:
         err(f"CydonianSanctum.DIALS is not tools/cydonian_sanctum.py DIALS: expected {expected}")
