@@ -23,7 +23,8 @@ EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below h
 # The lair-only blocks: unbreakable fixtures, in the wither_immune and dragon_immune tags, with no item and no drops.
 # The Hollow Acre's, the exit (every lair's), the Spindle Loft's (docs/features/spindle-loft.md), the Glacier Hall's
 # (docs/features/glacier-hall.md), the Cinder Kiln's (docs/features/cinder-kiln.md), the Lantern Fen's
-# (docs/features/lantern-fen.md), then the Archive of Last Names' (docs/features/crypt-archive.md).
+# (docs/features/lantern-fen.md), the Archive of Last Names' (docs/features/crypt-archive.md), then the Foundry
+# Trench's (docs/features/foundry-trench.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -59,6 +60,10 @@ LAIR_BLOCKS = {
     "grave_seal": "Grave Seal",
     "archive_lectern": "Lectern of Last Names",
     "phylactery": "Phylactery",
+    "pylon_lattice": "Pylon Lattice",
+    "pylon_crown": "Pylon Crown",
+    "discharge_breaker": "Breaker",
+    "ground_terminal": "Ground Terminal",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
@@ -82,8 +87,9 @@ SLUICE = {"flood_ticks": 200, "refill_ticks": 400, "gate_blocks": 40, "trough_bl
 SLUICE_PARTS = ("frame", "panel", "wheel")
 SLUICE_FLOWS = ("ready", "open", "filling", "choked")   # choked: by the Cinder Tyrant's slag
 # Fixtures a player in a lair may use (everything else is refused): the exits, the braziers Vesperine's fight lights, the
-# Cinder Kiln's sluice gates, the Lantern Fen's lamps, and the Archive of Last Names' grave seals and lectern.
-FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp", "grave_seal", "archive_lectern")
+# Cinder Kiln's sluice gates, the Lantern Fen's lamps, the Archive of Last Names' grave seals and lectern, and the
+# Foundry Trench's breakers.
+FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp", "grave_seal", "archive_lectern", "discharge_breaker")
 
 # The Last Rites (the Hollow Acre's ritual): a grave in the Overworld at night, lit candles round it, a Mourning Wreath
 # laid on it and the Death Knell rung beside it.
@@ -162,6 +168,27 @@ NAME_STONE = {"light": 9}
 PHYLACTERY = {"light": 10}
 LECTERN = {"cooldown": 20}     # ticks between readings of the lectern by one player
 
+# Sealed Orders (the Foundry Trench's ritual): used on a Field Telephone in the Overworld that stands in a trench: under
+# the open sky, with at least `trench_blocks` trench-works blocks (#jugcraft:trench_works) within `trench_range` blocks of
+# it (a cube). Any hour, all year. The bell rings and a whistle shrills down the line, the gate for lairs.gate_seconds;
+# whoever goes in wakes in the trench's dugout. Then the line goes dead.
+ORDERS = {
+    "cooldown": 40,            # ticks between uses of one set of orders, answered or not
+    "line_range": 3,           # how near another open line into the trench must not be (blocks)
+    "trench_range": 3,         # how far round the telephone the trench is looked for (blocks, a cube)
+    "trench_blocks": 4,        # trench-works blocks needed round it
+    "bell_ticks": 40,          # ticks between rings of an open line's bell
+}
+TRENCH_WORKS = ["jugcraft:sandbags", "jugcraft:sandbags_slab", "jugcraft:sandbags_stairs", "jugcraft:timber_revetment",
+                "jugcraft:timber_revetment_slab", "jugcraft:timber_revetment_stairs", "jugcraft:duckboard"]
+# The trench's fixtures. Three pylons, each with its breaker; a pylon is dark or live (its crown burning, its breaker's
+# lamp lit, the one the Dreadnought's charge will strike), and its terminal live while it earths a discharge. A breaker
+# is open or thrown, and fouled while a plate jams it. Light: a live crown, a live breaker's lamp, a live terminal.
+PYLON_NAMES = ("west", "east", "south")
+PYLON_CROWN = {"light": 12}
+BREAKER = {"light": 10, "rest": 10}   # its lamp's light when live; the least ticks between one player's uses
+TERMINAL = {"light": 8}
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
@@ -170,6 +197,7 @@ ITEMS = {
     "kiln_seal": "Kiln Seal",
     "hag_stone": "Hag Stone",
     "exhumation_writ": "Writ of Exhumation",
+    "sealed_orders": "Sealed Orders",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -200,6 +228,10 @@ RECIPES = {
     # sac. Used up by its serving.
     "exhumation_writ": {"pattern": ["PPP", "BEB", " I "], "key": {
         "P": "minecraft:paper", "B": "minecraft:bone", "E": "jugcraft:ectoplasm", "I": "minecraft:ink_sac"}},
+    # Orders: three sheets of paper over a steel plate and a coil of copper wire, sealed with a honeycomb's wax. Used up by
+    # the call.
+    "sealed_orders": {"pattern": ["PPP", "SHW"], "key": {
+        "P": "minecraft:paper", "S": "jugcraft:steel_plate", "H": "minecraft:honeycomb", "W": "jugcraft:copper_wire"}},
 }
 
 # Each lair's dimension: a void with its own biome; fixed time, no weather, no beds or respawn anchors. Its sky, fog and
@@ -259,12 +291,21 @@ LAIRS = {
         "ambient_light": 0.18,
         "motes": ("minecraft:white_ash", 0.004),
     },
+    "foundry_trench": {
+        "display": "The Foundry Trench",
+        "enter": "A whistle shrills down the line, and you come to in %s",
+        "sky": "#3a2a20", "fog": "#6a5442", "water_fog": "#2a2a24", "water": "#4a4a3c",
+        "ambient_light_color": "#6a5038", "sky_light_color": "#8a6644",
+        "music": "minecraft:music.nether.basalt_deltas",
+        "ambient_light": 0.25,
+        "motes": ("minecraft:ash", 0.008),
+    },
 }
 
 
 def blocks():
     """Every block the lairs register: the lair-only blocks and the Mourning Wreath (the Cursed Spindle, the Frost Horn, the
-    Kiln Seal, the Hag Stone and the Writ of Exhumation are items)."""
+    Kiln Seal, the Hag Stone, the Writ of Exhumation and Sealed Orders are items)."""
     return list(LAIR_BLOCKS) + ["mourning_wreath"]
 
 

@@ -1,10 +1,10 @@
 """JSON resources for the lairs (tools/lairs.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md,
 docs/features/glacier-hall.md, docs/features/cinder-kiln.md, docs/features/lantern-fen.md,
-docs/features/crypt-archive.md): the lair-only blocks, the Last Rites' Mourning Wreath and Death Knell, the Cursed
-Spindle, the Frost Horn, the Kiln Seal, the Hag Stone, the Writ of Exhumation, the Mist Gate's name, the lairs'
-messages, and each lair's dimension (its dimension type, level stem and biome) and structure template
-(tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py,
-tools/crypt_archive.py).
+docs/features/crypt-archive.md, docs/features/foundry-trench.md): the lair-only blocks, the Last Rites' Mourning Wreath
+and Death Knell, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Hag Stone, the Writ of Exhumation, Sealed Orders,
+the Mist Gate's name, the lairs' messages, and each lair's dimension (its dimension type, level stem and biome) and
+structure template (tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py, tools/cinder_kiln.py,
+tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
@@ -13,17 +13,19 @@ flat generator with no layers, and the biome vanilla's void with no spawns.
 from decor_data import MOD, HORIZONTAL, rid, self_drop
 import cinder_kiln
 import crypt_archive
+import foundry_trench
 import glacier_hall
 import hollow_acre
 import lantern_fen
 import spindle_loft
 from lairs import (FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS, MOURNING_FLOWERS,
                    NAME_GLOWS, NAMES, RECIPES, RITE_CANDLES, SEAL_GROUND, SEAL_LANDS, SLUICE_FLOWS, SLUICE_PARTS,
-                   STONE_GROUND, STONE_LANDS, THREAD_COLOURS, WRIT_TOMBS)
+                   PYLON_NAMES, STONE_GROUND, STONE_LANDS, THREAD_COLOURS, TRENCH_WORKS, WRIT_TOMBS)
 
 # Each lair's template, by the lair's id.
 TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft, "glacier_hall": glacier_hall,
-             "cinder_kiln": cinder_kiln, "lantern_fen": lantern_fen, "crypt_archive": crypt_archive}
+             "cinder_kiln": cinder_kiln, "lantern_fen": lantern_fen, "crypt_archive": crypt_archive,
+             "foundry_trench": foundry_trench}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -406,6 +408,115 @@ def crypt_archive_assets(models, states, write):
                                                     "cracked=true": {"model": rid("block/phylactery_cracked")}}})
 
 
+def pylon_lattice():
+    """A pylon's lattice, a block of its height: four steel corner posts, and between them on each side a plane of X
+    bracing, drawn on both its faces so the far side's bracing shows through the near side's (the gaps are cut out)."""
+    posts = [cube([x, 0, z], [x + 2, 16, z + 2], ALL, "#post") for x in (0, 14) for z in (0, 14)]
+    planes = [
+        {"from": [2, 0, 0.5], "to": [14, 16, 0.5], "faces": {
+            "north": {"uv": [2, 0, 14, 16], "texture": "#side"}, "south": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+        {"from": [2, 0, 15.5], "to": [14, 16, 15.5], "faces": {
+            "north": {"uv": [2, 0, 14, 16], "texture": "#side"}, "south": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+        {"from": [0.5, 0, 2], "to": [0.5, 16, 14], "faces": {
+            "east": {"uv": [2, 0, 14, 16], "texture": "#side"}, "west": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+        {"from": [15.5, 0, 2], "to": [15.5, 16, 14], "faces": {
+            "east": {"uv": [2, 0, 14, 16], "texture": "#side"}, "west": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+    ]
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/pylon_lattice_post"), "post": rid("block/pylon_lattice_post"),
+                         "side": rid("block/pylon_lattice_side")},
+            "elements": posts + planes}
+
+
+def pylon_crown(live):
+    """A pylon's tesla crown: a ribbed insulator stack, a square ring of copper round it and a copper ball on top. Live, the
+    ring and the ball burn violet (full light, unshaded)."""
+    metal = "#live" if live else "#copper"
+    ring = [cube([2, 8, 2], [14, 11, 5], ALL, metal, shade=not live), cube([2, 8, 11], [14, 11, 14], ALL, metal, shade=not live),
+            cube([2, 8, 5], [5, 11, 11], ALL, metal, shade=not live), cube([11, 8, 5], [14, 11, 11], ALL, metal, shade=not live)]
+    ball = cube([6, 11, 6], [10, 15, 10], ALL, metal, shade=not live)
+    if live:
+        for part in ring + [ball]:
+            part["light_emission"] = 15
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/pylon_crown_copper"), "insulator": rid("block/pylon_crown_insulator"),
+                         "copper": rid("block/pylon_crown_copper"), "live": rid("block/pylon_crown_live")},
+            "elements": [cube([6, 0, 6], [10, 8, 10], ALL, "#insulator")] + ring + [ball]}
+
+
+def discharge_breaker(thrown, live, fouled):
+    """A breaker, drawn facing north (its user stands to the north): a steel cabinet against the cell's south side, its
+    switch panel facing north, an amber lamp in a cage on top; on the panel a knife switch, its copper blade on a hinge at
+    the panel's foot with a bakelite handle. Open, the blade leans out 45 degrees; thrown, it stands in its jaws against
+    the panel. Live, the lamp burns (full light, unshaded); fouled, a bent plate of armour is jammed across the blade."""
+    cabinet = cube([2, 0, 7], [14, 13, 16], ALL, "#cabinet", uvs={"north": [2, 3, 14, 16]})
+    cabinet["faces"]["north"]["texture"] = "#panel"
+    lamp = cube([6, 13, 9], [10, 16, 13], ALL, "#lamp_lit" if live else "#lamp", shade=not live)
+    if live:
+        lamp["light_emission"] = 15
+    swing = {"origin": [8, 3, 6], "axis": "x", "angle": 0 if thrown else -45}
+    blade = cube([7, 3, 5.5], [9, 12, 6.5], ALL, "#blade")
+    handle = cube([6.5, 12, 5], [9.5, 14, 7], ALL, "#handle")
+    blade["rotation"] = dict(swing)
+    handle["rotation"] = dict(swing)
+    hinge = cube([6, 2, 5], [10, 4, 7], ALL, "#handle")
+    elements = [cabinet, lamp, hinge, blade, handle]
+    if fouled:
+        plate = cube([3, 6, 3.5], [13, 9, 4.5], ALL, "#plate")
+        plate["rotation"] = {"origin": [8, 7.5, 4], "axis": "z", "angle": 22.5}
+        elements.append(plate)
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/breaker_cabinet"), "cabinet": rid("block/breaker_cabinet"),
+                         "panel": rid("block/breaker_panel"), "lamp": rid("block/breaker_lamp"),
+                         "lamp_lit": rid("block/breaker_lamp_lit"), "blade": rid("block/breaker_blade"),
+                         "handle": rid("block/breaker_handle"), "plate": rid("block/breaker_plate")},
+            "elements": elements}
+
+
+def ground_terminal(live):
+    """A ground terminal: a block of the pit's floor whose top is a riveted copper plate. Live, the plate burns violet
+    with the discharge it is earthing (full light, unshaded)."""
+    top = "#live" if live else "#top"
+    element = cube([0, 0, 0], [16, 16, 16], ALL, "#side", shade=not live)
+    element["faces"]["up"]["texture"] = top
+    element["faces"]["down"]["texture"] = "#bottom"
+    for face, side in (("north", "north"), ("south", "south"), ("east", "east"), ("west", "west"), ("down", "down")):
+        element["faces"][face]["cullface"] = side
+    if live:
+        element["light_emission"] = 15
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/ground_terminal_side"), "side": rid("block/ground_terminal_side"),
+                         "bottom": rid("block/ground_terminal_side"), "top": rid("block/ground_terminal_top"),
+                         "live": rid("block/ground_terminal_live")},
+            "elements": [element]}
+
+
+def foundry_trench_assets(models, states, write):
+    """The Foundry Trench's lair-only blocks (tools/foundry_trench.py): the pylons' lattice and crowns, the breakers and
+    the ground terminals."""
+    write(models / "pylon_lattice.json", pylon_lattice())
+    write(states / "pylon_lattice.json", {"variants": {"": {"model": rid("block/pylon_lattice")}}})
+    write(models / "pylon_crown.json", pylon_crown(False))
+    write(models / "pylon_crown_live.json", pylon_crown(True))
+    write(states / "pylon_crown.json", {"variants": {"live=false": {"model": rid("block/pylon_crown")},
+                                                     "live=true": {"model": rid("block/pylon_crown_live")}}})
+    variants = {}
+    for thrown in (False, True):
+        for live in (False, True):
+            for fouled in (False, True):
+                name = "discharge_breaker" + ("_thrown" if thrown else "") + ("_live" if live else "") + (
+                    "_fouled" if fouled else "")
+                write(models / f"{name}.json", discharge_breaker(thrown, live, fouled))
+                for facing in HORIZONTAL:
+                    key = f"facing={facing},fouled={str(fouled).lower()},live={str(live).lower()},thrown={str(thrown).lower()}"
+                    variants[key] = turned(name, facing)
+    write(states / "discharge_breaker.json", {"variants": variants})
+    write(models / "ground_terminal.json", ground_terminal(False))
+    write(models / "ground_terminal_live.json", ground_terminal(True))
+    write(states / "ground_terminal.json", {"variants": {"live=false": {"model": rid("block/ground_terminal")},
+                                                         "live=true": {"model": rid("block/ground_terminal_live")}}})
+
+
 def assets(root, write, lang):
     models, states, items = root / "models" / "block", root / "blockstates", root / "items"
 
@@ -433,6 +544,7 @@ def assets(root, write, lang):
     cinder_kiln_assets(models, states, write, simple)
     lantern_fen_assets(models, states, write)
     crypt_archive_assets(models, states, write)
+    foundry_trench_assets(models, states, write)
     for name, display in LAIR_BLOCKS.items():
         lang[f"block.{MOD}.{name}"] = display
 
@@ -451,6 +563,7 @@ def assets(root, write, lang):
     lang[f"item.{MOD}.kiln_seal"] = ITEMS["kiln_seal"]
     lang[f"item.{MOD}.hag_stone"] = ITEMS["hag_stone"]
     lang[f"item.{MOD}.exhumation_writ"] = ITEMS["exhumation_writ"]
+    lang[f"item.{MOD}.sealed_orders"] = ITEMS["sealed_orders"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
     lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
@@ -461,8 +574,12 @@ def assets(root, write, lang):
                                         "burns far off, and the mist takes you to the Lantern Fen")
     lang[f"tooltip.{MOD}.exhumation_writ"] = ("Served on a stone sarcophagus in a crypt, under a roof: the lid grinds aside on a "
                                               "stair down to the Archive of Last Names")
+    lang[f"tooltip.{MOD}.sealed_orders"] = ("Used on a Field Telephone that stands in a trench, under the open sky: the line "
+                                            "crackles, and a whistle calls you to the Foundry Trench")
     for name, rune in NAMES.items():
         lang[f"lair.{MOD}.crypt_archive.name.{name}"] = f"the {name.capitalize()}"
+    for name in PYLON_NAMES:
+        lang[f"lair.{MOD}.foundry_trench.pylon.{name}"] = f"the {name} pylon"
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
@@ -506,6 +623,13 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.writ.misting": "This tomb already stands open: use its mist to follow",
         f"message.{MOD}.lair.writ.opened": "The lid grinds aside, and a stair goes down into blue fire and mist",
         f"message.{MOD}.lair.writ.not_tomb": "Serve the writ on a stone sarcophagus",
+        f"message.{MOD}.lair.orders.not_phone": "Use the orders on a Field Telephone that stands in a trench",
+        f"message.{MOD}.lair.orders.not_overworld": "No line runs to the front from here",
+        f"message.{MOD}.lair.orders.roofed": "The line is dead under a roof: use the telephone in an open trench",
+        f"message.{MOD}.lair.orders.no_trench": "The telephone must stand in a trench: sandbags, revetments or duckboards round it",
+        f"message.{MOD}.lair.orders.ringing": "This line is already open: use the telephone to follow",
+        f"message.{MOD}.lair.orders.opened": "The bell rings, a whistle shrills down the line, and you go over the top",
+        f"message.{MOD}.lair.breaker.dead": "No current: the pylon is dark",
         f"message.{MOD}.lair.seal.cold": "The seal is cold: no chain binds it now",
         f"message.{MOD}.lair.lectern.read": "The Archive of Last Names: %s, %s and %s",
         f"message.{MOD}.lair.lectern.restored": "You read the name back: %s is cut into its stone again",
@@ -566,6 +690,8 @@ def tags(tags):
         tags.add("worldgen/biome", f"{MOD}:hag_stone_lands", biome)
     for block in WRIT_TOMBS:
         tags.add("block", f"{MOD}:writ_tombs", block)
+    for block in TRENCH_WORKS:
+        tags.add("block", f"{MOD}:trench_works", block)
     # Blighted soil is earth: plants stand on it.
     tags.add("block", "minecraft:dirt", rid("blighted_soil"))
     tags.add("block", "minecraft:mineable/hoe", rid("mourning_wreath"))
