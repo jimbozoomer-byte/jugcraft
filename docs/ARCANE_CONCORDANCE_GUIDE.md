@@ -66,7 +66,7 @@ your server actually has.
 | Dreamwalking | Dreamwalkers | Examine something from the edge of dreams | Understand Dreamwalking: study a dreamlike thing at a Lampwright's Bench | Come back from three dreams |
 | Hearthbinding | Hearthbinders | Examine something that holds fire | Understand Hearthbinding: study something that holds fire at a Lampwright's Bench | Kindle 3 different kinds of hearth with Hearthspark |
 | Relic Lore | Runesmiths | Examine something that has outlived its maker | Understand Relic Lore: study something old at a Lampwright's Bench | Have relics serve you in three different ways |
-| Rimekeeping | Rimekeepers | Examine snow or ice | Understand Rimekeeping: study snow or ice at a Lampwright's Bench, arrive in the Glacier Hall, or bottle a brew that carries Rime | Do three kinds of cold work: Preserve a crucible holding a mixture while it is cold, and one while it is warm or hotter, and Rimebind a hostile creature (slowing a hostile creature with a Frost boon arm can stand for one) |
+| Rimekeeping | Rimekeepers | Examine snow or ice | Understand Rimekeeping: study snow or ice at a Lampwright's Bench, arrive in the Glacier Hall, or bottle a brew that carries Rime | Do three kinds of cold work: Preserve a crucible holding a mixture while it is cold, and one while it is warm or hotter, and Rimebind a hostile creature (slowing a hostile creature with a Frost boon arm, or drawing the Yeti King's charge into an ice column, can stand for one) |
 | Runesmithing | Runesmiths | Examine something a smith works with | Understand Runesmithing: study smithing stock at a Lampwright's Bench | Enhance a ring in three different ways |
 | Stratawrighting | Stratawrights | Examine ordinary stone or raw Thallite | Understand Stratawrighting: study stone at a Lampwright's Bench | Anchor three ways: Brace someone on soil, Brace someone on bare stone, sand or gravel, and have a Brace you cast hold against a blow (bracing a party member, a ritual completed or a blow taken in Earthbound Thallite can stand for one) |
 | Sympathy | Hexweavers | Examine something that carries a creature's likeness | Understand Sympathy: study a likeness at a Lampwright's Bench | Cast three different curses |
@@ -114,6 +114,10 @@ Each route, step by step: [the journey record](features/arcane-concordance-journ
   off while it lasts: three snowballs in a part give about 49 seconds, a stronger brew up to two minutes. His **Yeti
   Mitten**, held in the offhand, keeps it off for good. The Rimekeeper's water sets stop the freezing harm, as leather
   does, but not his frost's slow.
+- **Against the Yeti King,** a Brace halves the next of his throws (nothing else lessens them), and a Brace you put on a
+  friend that takes one earns your share; Rimebind does not slow him but holds his next wind-up a moment, once each time
+  he thaws; a Rimekeeper who draws his charge into an ice column does cold work (the same kind as a Frost boon arm's
+  slow).
 
 ## When something goes wrong
 

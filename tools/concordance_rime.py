@@ -6,7 +6,7 @@ Concordance Chunk B, unit 3.
   Bench, by the winter survey (arriving in the Glacier Hall, or a Rime brew bottled by hand at an Alembic Crucible; gated
   by First Light only, so either route advances understanding, 02:136) or by notes; mastered by RIMEWORK_MASTERY kinds of
   cold work, each counted once (02:153). Preserve's work needs a crucible filled by hand, so the Alembic Arts too: no
-  route to Rimekeeping's mastery skips the bench (or someone's notes).
+  route to Rimekeeping's mastery skips the bench (or someone's notes), as the electives share one kind (B-P56).
 - B-06, Rimebind (defense): Rimebound, a fifth off a creature's movement speed for 3 s, then a hidden thaw of 2 s in which
   no one's Rimebind takes it (02:78).
 - B-07, Preserve (utility): an alteration in Rime's school holds an Alembic Crucible's heat in its band for 60 s (02:77).
@@ -15,6 +15,8 @@ Concordance Chunk B, unit 3.
 - B-10, the travel kit (unit 4, tools/concordance_rime_kit.py): a focus of water worn lengthens Preserve's hold
   (LESSER_FOCUS_HOLD_TICKS, FOCUS_HOLD_TICKS).
 - B-10, the links (unit 4): a Frost boon arm's slow is elective cold work (B-P26, B-P53; the boon itself unchanged).
+- B-09 (unit 5): the Yeti King's charge broken on an ice column is elective cold work for the player its column deed
+  names (Rime.column), the same kind as a Frost boon arm's slow: one key between them (B-P56).
 
 Java: concordance/rime (Rime, RimeSurvey, Rimebind, Frostward); tools/check_mod_data.py check_rime and (B-08)
 check_winter_brine hold it to these tables.
@@ -48,18 +50,23 @@ SURVEY_KEYS = {"glacier_hall": "arrive in the Glacier Hall",
 # (CrucibleBlockEntity.use), so both Preserve keys need them; the progression graph's rimework route asks for them too
 # (tools/concordance_progression.py). A key whose need is words (elective()) is an elective: it can stand for one kind,
 # and mastery never needs one (check_rime counts the others).
-# Unit 5 (B-09) adds the elective "column" (the Yeti King's charge broken on a column) with its recorder.
+# Unit 5 (B-09) added the Yeti King's charge broken on a column (Rime.column) to the elective, which it shares with the
+# Frost boon's slow (B-P56): one key, so the electives stand for at most one kind and every mastery keeps a Preserve key.
 ALEMBIC_ARTS = rid("alembic_arts")
 RIMEWORK = rid("rimework")
 RIMEWORK_KEYS = {
     "preserve:cold": (ALEMBIC_ARTS, "Preserve a crucible holding a mixture in the cold band"),
     "preserve:heated": (ALEMBIC_ARTS, "Preserve a crucible holding a mixture in the warm, hot or searing band"),
     "restraint": (None, "Rimebind a hostile creature"),
-    # Unit 4 (B-P26, B-P52, B-P53): a Frost boon arm's slow that takes on a hostile creature (weapons/ArmItem.boon ->
-    # Rime.frostBoon). The boon is Arms VII's own (tools/arms_variants.py FROST), unchanged (B-P10, B-P28);
-    # check_winter_links holds the trophies named here to tools/arms_variants.py.
-    "frost_boon": ("a Frost boon arm", "slow a hostile creature with a Frost boon arm, such as the Yeti King's Glacier "
-                                       "Maul or Rimeclaw"),
+    # The elective, one kind however it is done (B-P56; Java: Rime.KEY_ELECTIVE). Unit 4 (B-P26, B-P52, B-P53): a Frost
+    # boon arm's slow that takes on a hostile creature (weapons/ArmItem.boon -> Rime.frostBoon). The boon is Arms VII's
+    # own (tools/arms_variants.py FROST), unchanged (B-P10, B-P28); check_winter_links holds the trophies named here to
+    # tools/arms_variants.py. Unit 5 (B-09, B-P16; 02:137): the Yeti King's charge broken on an ice column, for the
+    # player its column deed names (lair/yeti/YetiKingEntity.baited -> Rime.column).
+    "elective": ("a Frost boon arm, or a part in the Yeti King's fight",
+                 "slow a hostile creature with a Frost boon arm (such as the Yeti King's Glacier Maul or Rimeclaw), or "
+                 "draw the Yeti King's charge into an ice column, having already taken part in his fight (the two "
+                 "count as one kind)"),
 }
 RIMEWORK_MASTERY = 3
 
@@ -94,7 +101,8 @@ RESEARCH = {"rimekeeping": {
                        "Glacier Hall, or bottle a brew that carries Rime", "goal", "minecraft:packed_ice"),
         "mastered": ("Rimekeeper", "Do three kinds of cold work: Preserve a crucible holding a mixture while it is cold, "
                      "and one while it is warm or hotter, and Rimebind a hostile creature (slowing a hostile creature "
-                     "with a Frost boon arm can stand for one)", "challenge", "minecraft:blue_ice"),
+                     "with a Frost boon arm, or drawing the Yeti King's charge into an ice column, can stand for one)",
+                     "challenge", "minecraft:blue_ice"),
     },
     "locked": {"encountered": "Examine snow or ice first",
                "observed": "Examine snow or ice, and something that holds fire, first",
@@ -256,7 +264,8 @@ def codex():
                        "party."),
                       ("text", "Against the Yeti King", "The Yeti King moves by his own steps, so the slow does not "
                        "hold him. Bound, he holds his next wind-up a moment longer, frost-locked, before it strikes: once "
-                       "each time he thaws.")]},
+                       "each time he thaws. Drawing his charge into an ice column is cold work too, once you understand "
+                       "Rimekeeping: the same kind as a Frost boon arm's slow.")]},
         ("winter", "preserving"): {
             "name": "Preserve", "x": 4, "y": 0, "icon": rid("crucible"), "condition": (research, "understood"),
             "description": "Holding a crucible's heat",

@@ -7,6 +7,7 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rimebind;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
@@ -83,7 +84,8 @@ import org.jspecify.annotations.Nullable;
  * on his own snow: he does not slide on his ice, freeze, fall, float or stick in webs.
  * Since Concordance Chunk B unit 5 (B-09) only a Brace lessens his push, and a Brace one player put on another that
  * meets it is that caster's deed in his fight; Rimebind's slow does not hold his steps, so a binding instead holds his
- * next wind-up {@value #RIMEBOUND_WINDUP} ticks longer, once a thaw.
+ * next wind-up {@value #RIMEBOUND_WINDUP} ticks longer, once a thaw; and his charge broken on a column is Rimekeeping's
+ * elective cold work for its baiter.
  */
 public class YetiKingEntity extends Monster implements GeoEntity {
 	// ---------------------------------------------------------------- numbers (tools/yeti_king.py)
@@ -1140,13 +1142,15 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 	/**
 	 * His charge ended in an ice column: a deed of his fight (Concordance Chunk B) for whom it was aimed at, if they had
 	 * taken part as he set off and are still in his fight. Keyed by the player, so each baiter earns it once a fight and
-	 * several may each earn theirs. A stun called directly ({@link #stun}) credits no one.
+	 * several may each earn theirs. It is also Rimekeeping's elective cold work for them (Rime's column, B-09; the kind a
+	 * Frost boon arm's slow is too, B-P56). A stun called directly ({@link #stun}) credits no one.
 	 */
 	private void baited(ServerLevel level) {
 		ServerPlayer player = baiter == null ? null : level.getServer().getPlayerList().getPlayer(baiter);
 		baiter = null;
 		if (player != null && LairBosses.eligible(player) && encounter.contains(player)) {
 			encounter.deed(player, "column " + player.getUUID());
+			Rime.column(player);   // B-09 (02:137): Rimekeeping's elective cold work for the one the deed names
 		}
 	}
 

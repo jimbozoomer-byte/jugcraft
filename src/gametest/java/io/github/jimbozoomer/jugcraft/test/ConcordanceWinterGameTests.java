@@ -104,8 +104,8 @@ public class ConcordanceWinterGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
 	private static final String WAND = "jugcraft:initiate_wand";
-	/** The Frost boon's practice: Rimekeeping's elective cold work (B-P26). */
-	private static final String FROST_BOON = "practice:" + Rime.ACTIVITY + ":" + Rime.KEY_FROST_BOON;
+	/** The Frost boon's practice: Rimekeeping's elective cold work (B-P26), one kind with the Yeti King's column (B-P56). */
+	private static final String ELECTIVE = "practice:" + Rime.ACTIVITY + ":" + Rime.KEY_ELECTIVE;
 	/**
 	 * From (1, 2, 1) facing south, the eye (1.62 up) looks down to a point 0.4 above the foot of the block two south, just
 	 * inside its north face: Preserve's touch meets a crucible standing at (1, 2, 3) (as ConcordanceRimeStrataGameTests).
@@ -634,10 +634,11 @@ public class ConcordanceWinterGameTests {
 	 * B-P26, B-P52, B-P53: a Frost boon arm's slow that takes on a hostile creature at normal tolerance is Rimekeeping's
 	 * elective cold work for whoever understands Rimekeeping, whichever Frost arm struck (the Yeti King's Glacier Maul and
 	 * Rimeclaw, and the creative-only Frost Knight Greatsword: the boon counts, not the line). It is counted once, kept
-	 * through a save, and stands for one kind: with two Preserves it masters Rimekeeping. The slow is the boon's own on
-	 * whatever it lands: a novice learns nothing from it, a pig or a resistant ravager is no restraint, another boon is no
-	 * cold work, a killing blow restrains nothing, and with the Concordance switched off the arm still slows but nobody
-	 * learns from it.
+	 * through a save, and stands for one kind (the elective, which the Yeti King's column shares, B-P56, as
+	 * YetiKingGameTests.aColumnIsElectiveRimeworkForItsBaiterOnce shows): with two Preserves it masters Rimekeeping. The
+	 * slow is the boon's own on whatever it lands: a novice learns nothing from it, a pig or a resistant ravager is no
+	 * restraint, another boon is no cold work, a killing blow restrains nothing, and with the Concordance switched off the
+	 * arm still slows but nobody learns from it.
 	 */
 	@GameTest(structure = ARENA, maxTicks = 20)
 	public void aFrostBoonSlowIsElectiveRimePractice(GameTestHelper helper) {
@@ -649,19 +650,19 @@ public class ConcordanceWinterGameTests {
 			Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(1 + 3 * i, 2, 3));
 			strike(keeper, zombie);
 			frostSlowed(helper, zombie, frost.get(i) + " on a zombie");
-			helper.assertTrue(rimework(keeper).equals(List.of(FROST_BOON)),
+			helper.assertTrue(rimework(keeper).equals(List.of(ELECTIVE)),
 					frost.get(i) + ": a Rimekeeper's Frost boon slow on a zombie is cold work: " + rimework(keeper));
 		}
 		ServerPlayer keeper = wielder(helper, "glacier_maul", new BlockPos(13, 2, 1), ResearchState.UNDERSTOOD);
 		strike(keeper, helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(13, 2, 3)));
-		helper.assertTrue(rimework(keeper).equals(List.of(FROST_BOON)), "Exactly the Frost boon's kind: " + rimework(keeper));
+		helper.assertTrue(rimework(keeper).equals(List.of(ELECTIVE)), "Exactly the elective kind: " + rimework(keeper));
 		// Saved before mastery (once mastered, knowledge keeps only evidence that still advances an entry).
 		Knowledge knowledge = ConcordanceProgress.knowledge(keeper);
 		Knowledge loaded = ConcordanceCodecs.KNOWLEDGE.parse(JsonOps.INSTANCE,
 				ConcordanceCodecs.KNOWLEDGE.encodeStart(JsonOps.INSTANCE, knowledge).getOrThrow()).getOrThrow();
-		helper.assertTrue(loaded.equals(knowledge) && loaded.progress(Rime.RESEARCH).evidence().containsKey(FROST_BOON),
-				"The Frost boon's kind survives a save");
-		helper.assertTrue(!Rime.practise(keeper, Rime.KEY_FROST_BOON), "It counts once");
+		helper.assertTrue(loaded.equals(knowledge) && loaded.progress(Rime.RESEARCH).evidence().containsKey(ELECTIVE),
+				"The elective kind survives a save");
+		helper.assertTrue(!Rime.practise(keeper, Rime.KEY_ELECTIVE), "It counts once");
 		helper.assertTrue(Rime.practise(keeper, Rime.KEY_PRESERVE_COLD)
 				&& ConcordanceProgress.knowledge(keeper).state(Rime.RESEARCH) == ResearchState.UNDERSTOOD, "Two kinds are not three");
 		helper.assertTrue(Rime.practise(keeper, Rime.KEY_PRESERVE_HEATED)

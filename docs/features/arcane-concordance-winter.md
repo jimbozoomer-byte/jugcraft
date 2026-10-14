@@ -464,12 +464,14 @@ Implemented with Claude Code (Claude Opus 5.5).
 
 - `tools/concordance_rime.py`: `RIMEWORK_KEYS["frost_boon"]` needs "a Frost boon arm" (words, not a research id), which
   makes it an elective (`elective()`); the mastery's three kinds are the others, and `check_progression`'s `rimework`
-  route skips electives.
+  route skips electives. Since unit 5 the key is `elective` (`Rime.KEY_ELECTIVE`), which the Yeti King's column records
+  too, so the two stand for one kind and every mastery still needs a Preserve (B-P56; `check_rime`).
 - `weapons/ArmItem.boon`, the FROST case: the boon's own `addEffect` is kept, and only when it took does it call
   `Rime.frostBoon(attacker, target)`.
 - `Rime.frostBoon`: with the Concordance switched on, for a server player wielder and a living target
   `Rimebind.restrains` (a hostile creature at normal tolerance, the predicate Rimebind's restraint now shares, B-P34),
-  it records `practice:jugcraft:rimework:frost_boon`. It only records: no effect, push or attribute.
+  it records `practice:jugcraft:rimework:frost_boon` (`practice:jugcraft:rimework:elective` since unit 5, B-P56). It
+  only records: no effect, push or attribute.
 - Thallite: unit 3's `AFTER_DAMAGE` listener in `Strata` records `rooted`, reading Thallite's own ground tags
   (`ThalliteGear.LIVING_GROUND`, `EARTHEN_GROUND`). Nothing is added to them (B-P28).
 
@@ -494,7 +496,9 @@ Implemented with Claude Code (Claude Opus 5.5).
 ### Save effects
 
 - One more evidence key, `practice:jugcraft:rimework:frost_boon`, in the existing knowledge record; no schema or codec
-  change. An older build keeps it as a distinct rimework key, so a Rimekeeper mastered through it stays mastered.
+  change. An older build keeps it as a distinct rimework key, so a Rimekeeper mastered through it stays mastered. Unit 5
+  renamed it `practice:jugcraft:rimework:elective` before any release (B-P56); a world saved by this unit's unmerged
+  build keeps a `frost_boon` key as a kind of its own, not migrated.
 - The trophies, Thallite and their tags are unchanged, so nothing else saves differently.
 
 ### Known limits and the owner's question
@@ -669,9 +673,10 @@ hall is untouched.
   `winterguards_leggings`, `winterguards_boots`; equipment assets `jugcraft:nereids`, `jugcraft:aquamancers`,
   `jugcraft:winterguards`; GeckoLib model `jugcraft:armor/winterguards`; tags `jugcraft:repairs_nereids_gear`,
   `jugcraft:repairs_aquamancers_gear`, `jugcraft:repairs_winterguards_gear`; the evidence key
-  `practice:jugcraft:rimework:frost_boon`; the non-saved attachment `jugcraft:water_bangle_braced`; codex entries
-  `alembic/winter_brine` and `winter/travel_kit`. Additions to `#minecraft:freeze_immune_wearables`, the four vanilla
-  armour slot tags, the Trinkets tags `chest/spell_focus` and `hand/bracelet`, and `#jugcraft:equivalence/excluded`.
+  `practice:jugcraft:rimework:frost_boon` (`elective` since unit 5, B-P56); the non-saved attachment
+  `jugcraft:water_bangle_braced`; codex entries `alembic/winter_brine` and `winter/travel_kit`. Additions to
+  `#minecraft:freeze_immune_wearables`, the four vanilla armour slot tags, the Trinkets tags `chest/spell_focus` and
+  `hand/bracelet`, and `#jugcraft:equivalence/excluded`.
 - **Changed for everyone:** the Rime property gives Frostward, not Resistance; warmer stirs thaw Rime in amethyst and
   gloamcap brews too.
 - **Save compatibility:** additive; no migration. Rime bottles made before keep Resistance; formulas replay.

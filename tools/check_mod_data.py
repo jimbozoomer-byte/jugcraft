@@ -9740,7 +9740,7 @@ def check_yeti():
     table is the table's and his trophies are Arms VII's; his recipes, tags and advancement are there; every message he
     sends has its words; his fight's credit and reward go through lair/Encounter and lair/LairRewards (Concordance Chunk
     B); nothing of his loads a chunk or leaves its dimension; and (B-09) only a Brace lessens his push, a friend's Brace
-    is its caster's deed, and Rimebind holds a wind-up once a thaw."""
+    is its caster's deed, Rimebind holds a wind-up once a thaw, and a column's baiter does Rimekeeping's elective."""
     import arms_variants
     import glacier_hall as gh
     import yeti_king as yk
@@ -9966,6 +9966,8 @@ def check_yeti():
             or "rimeHold > 0 && attackTicks < attack.windup - 2" not in boss
             or "rimeHold = 0;" not in _java_body(boss, "\tpublic void reset(ServerLevel level) {")):
         err("YetiKingEntity: Rimebind holds one wind-up RIMEBOUND_WINDUP ticks once a thaw, set never added (B-P21, B-P54)")
+    if "Rime.column(player);" not in _java_body(boss, "\tprivate void baited(ServerLevel level) {"):
+        err("YetiKingEntity.baited: the column is Rimekeeping's elective cold work for the deed's player (B-09, B-P56)")
     for key in yk.RECIPES:
         if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
             err(f"recipe/{key}.json is missing")
@@ -12628,7 +12630,8 @@ def check_rime(co, root, lang, research):
     gates and keys; Rimekeeping begins with snow or ice, is observed against something that holds fire, is understood at
     the bench or by the First-Light-gated winter survey (the Glacier Hall, or a Rime brew bottled by hand) and is mastered
     by kinds of cold work that need nothing past research one player reaches alone (the Alembic Arts, to fill the
-    crucible Preserve counts). B-06: Rimebind's Rimebound is an exclusive harmful status with its
+    crucible Preserve counts), and its electives share one key, so no mastery skips a Preserve (B-P56). B-06:
+    Rimebind's Rimebound is an exclusive harmful status with its
     hidden thaw, guarded and hooked into the effect boundary, never lengthened or deepened by a tuning, and the benchmark
     models its slow and thaw with the generator's numbers (B-P32). B-07: Preserve is
     the one alteration in Rime's school; the boundary dispatches it before the dousing (which removes only fire) where it
@@ -12670,6 +12673,13 @@ def check_rime(co, root, lang, research):
     own = [key for key, (needs, _text) in rm.RIMEWORK_KEYS.items() if needs is None or split(needs)[1] in research]
     if not 1 <= rm.RIMEWORK_MASTERY <= len(own):
         err(f"Rimekeeping: mastery must be reachable by its own cold work alone ({len(own)} kinds)")
+    # B-P56: the electives (a Frost boon arm's slow, the Yeti King's column) share one key, so together they stand for at
+    # most one kind, and the kinds that need no Alembic Arts fall short of mastery: every mastery holds a Preserve key.
+    electives = [key for key, (needs, _text) in rm.RIMEWORK_KEYS.items() if rm.elective(needs)]
+    benchless = [key for key, (needs, _text) in rm.RIMEWORK_KEYS.items() if needs != rm.ALEMBIC_ARTS]
+    if len(electives) > 1 or len(benchless) >= rm.RIMEWORK_MASTERY:
+        err(f"Rimekeeping: the electives share one key ({electives}), and the cold work that needs no Alembic Arts "
+            f"({benchless}) falls short of mastery, so no route to it skips the bench (B-P56)")
     if "crucible.parts() > 0" in _java_body(rime, "public static boolean preserve(") \
             and "!Alchemy.knows(player)" in _java_body(crucible, "public InteractionResult use("):
         for key, (needs, _text) in rm.RIMEWORK_KEYS.items():
@@ -13872,26 +13882,27 @@ def check_rime_kit(co, root, lang):
 def check_winter_links(co, root):
     """Concordance Chunk B unit 4: B-10's links, with no stat changes (B-P26, B-P28, B-P10). A Frost boon arm's slow is
     Rimekeeping's elective cold work and Rooted holding is Stratawrighting's, each recorded in one place, and neither
-    changes a number. The FROST case still puts on exactly ArmVariants' FROST_TICKS and FROST_AMPLIFIER (which
-    check_arms_variants holds to tools/arms_variants.py FROST) and only reads whether it took; Rime.frostBoon only
-    records; the Concordance only reads Thallite's gear and ground (tools/gear.py, held by check_thallite_gear); and
-    earthen_ground keeps living ground and gains nothing cold. Everything is compared with a generator table, never a
-    copy of a number. The generator tables' diff shows that no number changed across the unit
-    (docs/features/arcane-concordance-winter.md)."""
+    changes a number; and (unit 5, B-09) the Yeti King's charge broken on a column is that same elective, one key
+    between them (B-P56), recorded only where its deed is earned, by one caller, and only recorded. The FROST case still
+    puts on exactly ArmVariants' FROST_TICKS and FROST_AMPLIFIER (which check_arms_variants holds to
+    tools/arms_variants.py FROST) and only reads whether it took; Rime.frostBoon only records; the Concordance only
+    reads Thallite's gear and ground (tools/gear.py, held by check_thallite_gear); and earthen_ground keeps living
+    ground and gains nothing cold. Everything is compared with a generator table, never a copy of a number. The
+    generator tables' diff shows that no number changed across the unit (docs/features/arcane-concordance-winter.md)."""
     av, rm, st = arms_variants, co.rime, co.strata
 
     def source(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
-    if not rm.elective(rm.RIMEWORK_KEYS.get("frost_boon", (None, ""))[0]):
-        err("tools/concordance_rime.py: frost_boon is an elective of Rimekeeping's cold work, naming what it needs (B-P26)")
+    if not rm.elective(rm.RIMEWORK_KEYS.get("elective", (None, ""))[0]):
+        err("tools/concordance_rime.py: elective is Rimekeeping's elective cold work, naming what it needs (B-P26, B-P56)")
     if st.ANCHORING_KEYS.get("rooted", (None,))[0] is None:
         err("tools/concordance_strata.py: rooted is an elective of Stratawrighting's anchoring (B-P26)")
-    if "rooted" in rm.RIMEWORK_KEYS or "frost_boon" in st.ANCHORING_KEYS:
+    if "rooted" in rm.RIMEWORK_KEYS or "elective" in st.ANCHORING_KEYS:
         err("A Frost boon slow is Rime practice and Rooted holding Strata practice, never both")
     trophies = [display for _name, _kind, line, boon, display in av.VARIANTS
                 if boon == "frost" and line in av.BOSSES and "lair" in av.BOSSES[line]]
-    if not trophies or any(display not in rm.RIMEWORK_KEYS.get("frost_boon", (None, ""))[1] for display in trophies):
-        err(f"tools/concordance_rime.py frost_boon: name the Frost trophies tools/arms_variants.py drops ({trophies})")
+    if not trophies or any(display not in rm.RIMEWORK_KEYS.get("elective", (None, ""))[1] for display in trophies):
+        err(f"tools/concordance_rime.py elective: name the Frost trophies tools/arms_variants.py drops ({trophies})")
     arm = source(JAVA_ROOT / "weapons" / "ArmItem.java")
     at = arm.find("case FROST -> {")
     frost = arm[at:arm.find("\n\t\t\t}", at)] if at >= 0 else ""
@@ -13904,8 +13915,8 @@ def check_winter_links(co, root):
         if needle in frost:
             err(f"ArmItem.boon FROST: the Frost boon keeps its own slow, outside Rimebind's thaw (B-P10): {needle}")
     body = _java_body(source(root / "rime" / "Rime.java"), "public static boolean frostBoon(")
-    if "Rimebind.restrains(target)" not in body or "practise(person, KEY_FROST_BOON)" not in body:
-        err("Rime.frostBoon: restraint's targets (Rimebind.restrains) and the frost_boon key, for its wielder")
+    if "Rimebind.restrains(target)" not in body or "practise(person, KEY_ELECTIVE)" not in body:
+        err("Rime.frostBoon: restraint's targets (Rimebind.restrains) and the elective key, for its wielder (B-P56)")
     for needle in ("JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)", "target.isAlive()"):
         if needle not in body:
             err(f"Rime.frostBoon: nothing while the Concordance is switched off (arms work whatever the switch), and a "
@@ -13935,6 +13946,20 @@ def check_winter_links(co, root):
     cold = [v for v in gear.EARTHEN_GROUND + gear.LIVING_GROUND if re.search(r"snow|ice|frost|glare|drift", v)]
     if cold:
         err(f"tools/gear.py: nothing cold is natural ground for Rooted or Regrowth (B-P28): {cold}")
+    # Unit 5 (B-09, B-P16, B-P56; 02:137): the Yeti King's charge broken on a column is the same elective, recorded in one
+    # place, by one caller, and only recorded.
+    if "Yeti King's charge" not in rm.RIMEWORK_KEYS.get("elective", (None, ""))[1] \
+            or "Yeti King's charge" not in rm.RESEARCH["rimekeeping"]["advancements"]["mastered"][1]:
+        err("tools/concordance_rime.py: the elective's words and the Rimekeeper advancement name the column (B-09)")
+    column = _java_body(source(root / "rime" / "Rime.java"), "public static boolean column(")
+    if "practise(baiter, KEY_ELECTIVE)" not in column or "JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)" not in column:
+        err("Rime.column: the elective key for the column deed's player, only while the Concordance is on (B-P56)")
+    for needle in ("addEffect", "MobEffectInstance", "removeEffect", "hurt", "push(", "deed(", "Attributes."):
+        if needle in column:
+            err(f"Rime.column only records practice ({needle})")
+    found = [p.name for p in sorted(JAVA_ROOT.rglob("*.java")) if "Rime.column(" in source(p)]
+    if found != ["YetiKingEntity.java"]:
+        err(f"Rime.column is called only where the column deed is earned (lair/yeti/YetiKingEntity.java), not {found}")
 
 
 def check_geckolib(name, java_text, uvs, sizes, kind="block"):

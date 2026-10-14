@@ -694,9 +694,11 @@ creature's saved effects on meeting the unknown id (the record's downgrade guida
   (`ConcordanceEffects.java:223-228`), so without this deed a Brace caster could never qualify.
 - **Rimebind transforms, and is never silently dropped** (B-P21; 04:188): once per thaw window, a rimebound Yeti's next
   wind-up is a few ticks longer. The number is set by test and called untuned until people play it (04:194).
-- **The column elective** (02:137; B-P16): a Yeti charge broken on a column becomes Rimekeeping evidence, the key
-  `column` in `jugcraft:rimework` (an elective: the mastery keeps needing its own three kinds), with its recorder and
-  its codex line, added here rather than in unit 3 because it needs B-01's deed and lair code.
+- **The column elective** (02:137; B-P16): a Yeti charge broken on a column becomes Rimekeeping evidence in
+  `jugcraft:rimework`, an elective, with its recorder and its codex line, added here rather than in unit 3 because it
+  needs B-01's deed and lair code. This ticket first named the key `column`; as built (unit 5, B-P56) it records the
+  key `elective` that a Frost boon arm's slow records too, so the two electives stand for one kind between them and
+  every mastery still needs a Preserve, so the Alembic Arts.
 - **Not here:** Rime's "preserved snow" footing (authored anchors only, 04:101; the trampled routes already do this job);
   Ember and Tempest counters.
 
@@ -746,12 +748,12 @@ B-P50). Sources are under `art/owner-library/originals/Magic/assets/ars_jymbaume
   recorder. `earthen_ground` and every Thallite number are unchanged (B-P28; `check_winter_links`, and the record's
   diff).
 - **Trophies** (09:106): a slow from a Frost boon arm that takes on a hostile creature at normal tolerance
-  (`Rimebind.restrains`, restraint's targets, B-P34) counts as Rime practice, the elective key `frost_boon` in
-  `jugcraft:rimework` (`ArmItem.boon` → `Rime.frostBoon`), recorded only for a wielder who understands Rimekeeping (the
-  practice's gate; this ticket first said "encountered": understood, an elective, B-P53). The mastery keeps needing
-  three kinds, of which the elective can be one. Any Frost boon arm counts, the creative-only Frost Knight Greatsword
-  included (B-P52). The boon itself is unchanged (`weapons/ArmVariants.java:123-125`; B-P10), and their JEI pages came
-  with B-02.
+  (`Rimebind.restrains`, restraint's targets, B-P34) counts as Rime practice, the elective key in `jugcraft:rimework`
+  (`ArmItem.boon` → `Rime.frostBoon`; built as `frost_boon`, renamed `elective` in unit 5 when the Yeti's column came to
+  share it, B-P56), recorded only for a wielder who understands Rimekeeping (the practice's gate; this ticket first said
+  "encountered": understood, an elective, B-P53). The mastery keeps needing three kinds, of which the elective can be
+  one. Any Frost boon arm counts, the creative-only Frost Knight Greatsword included (B-P52). The boon itself is
+  unchanged (`weapons/ArmVariants.java:123-125`; B-P10), and their JEI pages came with B-02.
 - **Creative-only sets stay so:** the Frost Knight and Wight King (`tools/acquisition.py`; B-P27).
 
 **Tests:** in `ConcordanceWinterGameTests`, `theTravelKitIsMadeAndWornAsDesigned`,
@@ -768,8 +770,9 @@ screenshots). The Strata link's tests are unit 3's (`thalliteIsAStrataSpecimen`,
 38549876709 (not merged).
 
 **Save effects:** fifteen new item ids and their equipment assets, stable once released; the non-saved attachment
-`jugcraft:water_bangle_braced`; one more evidence key, `practice:jugcraft:rimework:frost_boon`; the crucible's hold up
-to 2400 ticks from a focus, within its own cut.
+`jugcraft:water_bangle_braced`; one more evidence key, `practice:jugcraft:rimework:frost_boon`, renamed
+`practice:jugcraft:rimework:elective` in unit 5 before any release (B-P56); the crucible's hold up to 2400 ticks from a
+focus, within its own cut.
 
 **Review boundary (unit 4, with B-08):** alchemy, items, gear and tests. In lair code, only `chill()` checking Frostward
 and the dossier's read-only fact; in `weapons`, only the FROST case's call to `Rime.frostBoon`.
@@ -809,8 +812,8 @@ and the dossier's read-only fact; in `weapons`, only the FROST case's call to `R
 - **Registries (stable once released):** mob effects `jugcraft:rimebound`, `rime_thaw`, `braced` and `frostward`, and
   the attribute modifiers `jugcraft:rimebound` and `jugcraft:braced`; components `rimegrip`, `bracing` and `rimehold`;
   invocations and spells `rimebind`, `brace` and `preserve`; research `rimekeeping` and `stratawrighting`, with their
-  practices (`winter_survey`, `rimework`, `anchoring`) and advancements, and the elective key `frost_boon`; fifteen kit
-  items, their equipment assets (`jugcraft:nereids`, `aquamancers`, `winterguards`), the GeckoLib model
+  practices (`winter_survey`, `rimework`, `anchoring`) and advancements, and the elective key `elective` (B-P56);
+  fifteen kit items, their equipment assets (`jugcraft:nereids`, `aquamancers`, `winterguards`), the GeckoLib model
   `jugcraft:armor/winterguards` and three repair tags; tags `concordance/preservable`, `rime_specimens` and
   `strata_specimens`; additions to `assay_specimens` (which nests `strata_specimens`), `concordance/resistant`,
   `minecraft:freeze_immune_wearables`, the four vanilla armour slot tags, `equivalence/excluded` and the trinket slot
@@ -826,13 +829,14 @@ and the dossier's read-only fact; in `weapons`, only the FROST case's call to `R
   knockback. Unit 3's interfaces for later units: `Brace.spend`, `Brace.caster`, `Rimebind.RIME_THAW` and
   `Rime.MAX_HOLD_TICKS`. Unit 4's: `Frostward.STATUS`, `Frostward.FROSTWARD` and `Frostward.warded`;
   `RimeGear.holdTicks` (which `Rime.preserve` asks), `RimeGear.bangle` and `RimeGear.brace`; `Rimebind.restrains`
-  (restraint's targets, shared with `Rime.frostBoon`); `Rime.frostBoon` and `Rime.KEY_FROST_BOON`;
+  (restraint's targets, shared with `Rime.frostBoon`); `Rime.frostBoon` and its key, `Rime.KEY_ELECTIVE` since unit 5
+  (B-P56; unit 4's `KEY_FROST_BOON`), which unit 5's `Rime.column` records too;
   `LairDossiers.prepare`; `concordance_ember.SLOT_ITEMS` (one writer for both slices' slot tags); `EmberArmorItem`
   and `EmberClient`'s renderer, now also the water sets'. Unit 2's: `YetiKingEntity.owning` (his whelps and things last
   only while he counts them his), and he and his whelps refuse Levitation (`canBeAffected`). Practice hooks:
   Fabric's level change (`glacier_hall`; no lair code, and no `Encounter.onDeed`), `CrucibleBlockEntity.bottle`
   (`crucible`), `Rituals.listen` (`foundation`) and `AFTER_DAMAGE` (`rooted`, `held`) in unit 3; `ArmItem`'s Frost boon
-  (`frost_boon`) in unit 4; the Yeti's column (`column`) in unit 5.
+  in unit 4 and the Yeti's column (`YetiKingEntity.baited`) in unit 5, one key between them (`elective`, B-P56).
 - **Tools:** `acquisition.py`, `check_acquisition`, `encyclopedia.py`, the `concordance.py` merge points,
   `concordance_alchemy.py`, `concordance_equivalence.py`, `concordance_progression.py`, `concordance_conclave.py`,
   `owner_art.py`; new `concordance_rime.py`, `concordance_strata.py` and their checks. Unit 4: `concordance_ember.py`
@@ -1118,7 +1122,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P23 | 14 October 2026 | The kit's sets: freeze-immune; no Spell Power or knockback resistance; protection no greater than the Pyromaniac's (light), leather's (medium) and iron's (heavy), toughness 0 | Proposed (built as proposed in unit 4, with the numbers of B-P47) | B-10 |
 | B-P24 | 14 October 2026 | The water foci are the preservation focus: Preserve holds 90 s (lesser) or 120 s | Proposed (built as proposed in unit 4; B-P50) | B-10 |
 | B-P25 | 14 October 2026 | The Water Bangle is the short Brace accessory, a Brace every 30 s with Rimekeeping understood. The alternative is the owner's own text: a chill on each blow, like the Fire Bangle | Proposed (built as proposed in unit 4; B-P49) | B-10 |
-| B-P26 | 14 October 2026 | A Frost boon slow counts as Rime practice, and Rooted holding as Strata practice; no numbers change | Proposed (built as proposed: `rooted` in unit 3, `frost_boon` in unit 4) | B-05, B-10 |
+| B-P26 | 14 October 2026 | A Frost boon slow counts as Rime practice, and Rooted holding as Strata practice; no numbers change | Proposed (built as proposed: `rooted` in unit 3, `frost_boon` in unit 4, its key `elective` since B-P56) | B-05, B-10 |
 | B-P27 | 14 October 2026 | The Frost Knight and Wight King sets stay creative-only (continuing A-D10) | Proposed (kept in unit 4) | B-10 |
 | B-P28 | 14 October 2026 | Nothing is added to `earthen_ground`; no Thallite or trophy number changes | Proposed (built as proposed in unit 4; `check_winter_links` and the record's diff) | B-10 |
 | B-P29 | 14 October 2026 | Winter Brine's dossier fact is text and icons, with no recipe grid | Proposed (built as proposed in unit 4; B-P45) | B-02, B-08 |
@@ -1144,9 +1148,11 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P50 | 14 October 2026 | The foci hold 1800 and 2400 ticks, beyond the Initiate's Wand's 1200 (the hold is the crucible's state, cut at 2400); one Spell Focus slot holds a fire or a water focus, never both | Proposed | B-10 |
 | B-P51 | 14 October 2026 | The kit reuses Ember's slots, `EmberArmorItem`, renderer and medium model; Ember's writer writes both slices' slot tags (`SLOT_ITEMS`) | Proposed | B-10 |
 | B-P52 | 14 October 2026 | Any Frost boon arm counts (the boon, not the line), the creative-only Frost Knight Greatsword included; no survival route is added (B-P27) | Proposed | B-10 |
-| B-P53 | 14 October 2026 | `frost_boon` is an elective of `jugcraft:rimework` on restraint's targets (B-P34), gated by Rimekeeping understood (B-10 first said "encountered"); Rimekeeping can then be mastered without casting Rimebind | Proposed | B-10 |
+| B-P53 | 14 October 2026 | `frost_boon` is an elective of `jugcraft:rimework` on restraint's targets (B-P34), gated by Rimekeeping understood (B-10 first said "encountered"); Rimekeeping can then be mastered without casting Rimebind | Proposed (refined by B-P56: the key is `elective`, shared with the Yeti King's column) | B-10 |
+| B-P56 | 14 October 2026 | Rimekeeping's electives share one key, `elective` (Java `Rime.KEY_ELECTIVE`; unit 4's `frost_boon`, renamed before any release): a Frost boon arm's slow (B-P53), and the Yeti King's charge broken on an ice column, recorded for the player its column deed names whenever the deed's conditions hold (`YetiKingEntity.baited` → `Rime.column`), gated by Rimekeeping understood (the practice's gate, as B-P53; 02:137 says only "elective field evidence") and the Concordance switch. Together they stand for at most one kind: after either the other adds nothing, and with Rimebind's restraint they make two, so every mastery needs a Preserve, so the Alembic Arts, and the bench (or someone's notes) stays mandatory, as unit 3's review asked, and the progression graph's `rimework` route still asks for the Alembic Arts. The alternative, for the owner: each elective its own kind, which lets restraint and the two electives master Rimekeeping without Preserve or the Alembic Arts. A world saved by unit 4's unmerged build keeps a `frost_boon` key as a kind of its own (not migrated) | Proposed (built in unit 5; `check_rime`, `check_winter_links` and `YetiKingGameTests.aColumnIsElectiveRimeworkForItsBaiterOnce`, not yet run) | B-05, B-09, B-10 |
 
-Unit 2's are B-P37 and B-P38; B-P39 is kept free; unit 4's are B-P40 to B-P53.
+Unit 2's are B-P37 and B-P38; B-P39 is kept free; unit 4's are B-P40 to B-P53; unit 5's B-P56 came with its column
+elective, and its other rows, from B-P54, come with its records.
 
 ## How this contract was checked
 

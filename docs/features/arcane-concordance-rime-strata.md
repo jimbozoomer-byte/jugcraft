@@ -113,7 +113,7 @@ Each key is a piece of evidence, saved as `practice:<activity>:<key>` and counte
 | `jugcraft:rimework` (Rimekeeping understood) | `preserve:cold` | a Preserve that holds a crucible holding a mixture, in the cold band | the Alembic Arts understood, to put water in a crucible by hand (`CrucibleBlockEntity.use`); a crucible with water or a brew in it |
 | | `preserve:heated` | the same, in the warm, hot or searing band | the same, over a heat source (a magma block keeps it warm, a campfire hot) |
 | | `restraint` | a Rimebound that takes on a hostile creature (`Enemy`) at normal tolerance | a monster within 16 blocks |
-| | `frost_boon` (elective; unit 4) | a Frost boon arm's slow that takes on a hostile creature at normal tolerance (`weapons/ArmItem.boon` → `Rime.frostBoon`, on `Rimebind.restrains`, restraint's targets) | a Frost boon arm: the Glacier Maul or Rimeclaw (the Yeti King's trophies) or the creative-only Frost Knight Greatsword |
+| | `elective` (elective; unit 4 as `frost_boon`, shared since unit 5, B-P56) | a Frost boon arm's slow that takes on a hostile creature at normal tolerance (`weapons/ArmItem.boon` → `Rime.frostBoon`, on `Rimebind.restrains`, restraint's targets); or, since unit 5, the Yeti King's charge broken on an ice column, for the player its column deed names (`YetiKingEntity.baited` → `Rime.column`). One key: after either, the other adds nothing | a Frost boon arm: the Glacier Maul or Rimeclaw (the Yeti King's trophies) or the creative-only Frost Knight Greatsword; or a part in his fight already (B-P3) |
 | `jugcraft:anchoring` (Stratawrighting understood) | `ground:living` | a Brace that takes on someone standing on living ground | nothing: oneself on grass counts |
 | | `ground:earthen` | the same on other natural ground (stone, sand, gravel) | nothing |
 | | `held` | a Brace the caster put on is spent by a push | a blow or a harmful push to meet it |
@@ -121,14 +121,15 @@ Each key is a piece of evidence, saved as `practice:<activity>:<key>` and counte
 | | `foundation` (elective) | a ritual completed at a Circle Anchor, for every player present | Circle Lore and a circle |
 | | `rooted` (elective) | struck by a creature, not wholly blocked, in Earthbound Thallite on natural ground | Earthbound Thallite armour (the thallite switch) |
 
-Rimekeeping's mastery needs three kinds of cold work: its own three keys, of which unit 4's elective `frost_boon` can
-stand for one ([the winter record](arcane-concordance-winter.md)); both Preserve keys need the Alembic Arts: a crucible's mixture
-changes only by hand, which needs them, or by a formula an alembist set, while pipes fill only its water tank and
-hoppers only the buffer a formula draws on. `check_rime` holds the keys to that, and `check_progression` holds the
-progression graph's `rimework` route to the same research. Stratawrighting's needs three of its six, and its own three
-need nothing past the research and a blow to brace against, so neither Thallite nor another player is ever required
-(`check_strata` holds both rules). A Rime key can be stored while Rimekeeping is still unmet, when fire is examined
-first; the journal does not show an unmet entry.
+Rimekeeping's mastery needs three kinds of cold work: its own three keys, of which the elective can stand for one (a
+Frost boon arm's slow, [the winter record](arcane-concordance-winter.md), or since unit 5 the Yeti King's column: one
+key between them, so with Rimebind's restraint they make two kinds and a Preserve is always needed, B-P56); both
+Preserve keys need the Alembic Arts: a crucible's mixture changes only by hand, which needs them, or by a formula an
+alembist set, while pipes fill only its water tank and hoppers only the buffer a formula draws on. `check_rime` holds
+the keys to that, and `check_progression` holds the progression graph's `rimework` route to the same research.
+Stratawrighting's needs three of its six, and its own three need nothing past the research and a blow to brace against,
+so neither Thallite nor another player is ever required (`check_strata` holds both rules). A Rime key can be stored
+while Rimekeeping is still unmet, when fire is examined first; the journal does not show an unmet entry.
 
 ### When a Brace is spent
 
@@ -468,7 +469,7 @@ protected towns and build permission.
   Jugcraft should set a default that keeps a full bar on screen, or leave it to each player's Spell Engine settings.
 - For unit 4, answered there ([the winter record](arcane-concordance-winter.md)): B-P24's 120 s hold from a focus worn
   with the Initiate's Wand exceeds that wand's duration limit (1200 ticks), and unit 4 records why a worn focus may
-  (B-P50: the hold is the crucible's state, cut at 2400); its key `frost_boon` is an elective (B-P53), and it adds no
-  brew key.
+  (B-P50: the hold is the crucible's state, cut at 2400); its key `frost_boon` is an elective (B-P53; since unit 5 the
+  key is `elective`, which the Yeti King's column shares, B-P56), and it adds no brew key.
 - Later: the Yeti column elective (B-09); Strata's civic project and boss opening; words a player can compose for Rime
   and Strata (B-P6); Tempest.

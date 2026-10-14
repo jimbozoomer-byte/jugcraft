@@ -470,6 +470,7 @@ merged): the effect `jugcraft:frostward` (the Rime property's status, which was 
 `winterguards_helmet`, `winterguards_chestplate`, `winterguards_leggings` and `winterguards_boots`; equipment assets
 `jugcraft:nereids`, `jugcraft:aquamancers` and `jugcraft:winterguards`; the GeckoLib model `jugcraft:armor/winterguards`;
 repair tags `jugcraft:repairs_nereids_gear`, `jugcraft:repairs_aquamancers_gear` and `jugcraft:repairs_winterguards_gear`;
-the evidence key `practice:jugcraft:rimework:frost_boon`; the non-saved attachment `jugcraft:water_bangle_braced`; codex
-entries `alembic/winter_brine` and `winter/travel_kit`. The kit joins `minecraft:freeze_immune_wearables`, the vanilla
-armour slot tags, the Trinkets tags `chest/spell_focus` and `hand/bracelet`, and `jugcraft:equivalence/excluded`.
+the evidence key `practice:jugcraft:rimework:elective` (unit 4's `frost_boon`, which the Yeti King's column shares
+since unit 5, B-P56); the non-saved attachment `jugcraft:water_bangle_braced`; codex entries `alembic/winter_brine` and
+`winter/travel_kit`. The kit joins `minecraft:freeze_immune_wearables`, the vanilla armour slot tags, the Trinkets tags
+`chest/spell_focus` and `hand/bracelet`, and `jugcraft:equivalence/excluded`.

@@ -1,10 +1,12 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
 import io.github.jimbozoomer.jugcraft.agriculture.Knitwear;
 import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceCodecs;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -17,11 +19,14 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rimebind;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.guns.GunShots;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
@@ -105,7 +110,8 @@ import net.spell_engine.internals.target.SpellTarget;
  * and his reset, after his death and loaded again; his ice and kin gone on reset, death and unload; wool and leather
  * against his frost; and End-gun Levitation lifting neither him nor his kin. Since B-09 (unit 5): only a Brace lessens his
  * push, once a tick, and a friend's Brace is its caster's deed (not one's own, the bangle's or a forgotten caster's);
- * Rimebind holds one wind-up RIMEBOUND_WINDUP ticks longer once a thaw, and does not slow his steps.
+ * Rimebind holds one wind-up RIMEBOUND_WINDUP ticks longer once a thaw, and does not slow his steps; a column is
+ * Rimekeeping's elective cold work for its baiter, the one kind it shares with a Frost boon arm's slow (B-P56).
  *
  * <p>He fights any player within 38 blocks of his lake's centre; the arena keeps every other test's players farther off
  * than that. Each test sends him away before it ends, with his whelps, and lets the snow drift back.
@@ -2366,6 +2372,103 @@ public class YetiKingGameTests {
 					}
 				});
 				helper.succeed();
+			});
+		});
+	}
+
+	// ---------------------------------------------------------------- unit 5 (B-09, B-P56): the column's cold work
+
+	/** Rimekeeping's elective kind of cold work as knowledge keeps it: the column's, and a Frost boon arm's slow's (B-P56). */
+	private static final String ELECTIVE = "practice:" + Rime.ACTIVITY + ":" + Rime.KEY_ELECTIVE;
+
+	/** {@code player}'s Rimekeeping cold work (its evidence keys), as ConcordanceWinterGameTests reads it. */
+	private static List<String> rimework(ServerPlayer player) {
+		return ConcordanceProgress.knowledge(player).progress(Rime.RESEARCH).evidence().keySet().stream()
+				.filter(key -> key.startsWith("practice:" + Rime.ACTIVITY + ":")).toList();
+	}
+
+	/**
+	 * Concordance Chunk B (B-09, B-P16, B-P56; 02:137): his charge broken on an ice column is Rimekeeping's elective cold
+	 * work for the player its column deed names, if they understand Rimekeeping: counted once, kept through a save, standing
+	 * for one kind. It is the kind a Frost boon arm's slow is too, so after either the other adds nothing, and with
+	 * Rimebind's restraint it is two kinds, not three: every mastery still needs a Preserve. One who has only encountered
+	 * Rimekeeping earns the deed and learns nothing; with the Concordance off nobody learns from it.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 240)
+	public void aColumnIsElectiveRimeworkForItsBaiterOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 24, 10, 29, 14);
+		ServerPlayer keeper = northOfTheColumn(helper, king, origin, 26.5);
+		ServerPlayer novice = northOfTheColumn(helper, king, origin, 25.5);
+		ConcordanceProgress.grant(keeper, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(keeper, Rime.RESEARCH, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(novice, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(novice, Rime.RESEARCH, ResearchState.ENCOUNTERED);
+		int run = YetiKingEntity.Attack.AVALANCHE_CHARGE.windup + 12;
+		Encounter fight = king.encounter();
+		king.wake(level);
+		helper.runAfterDelay(YetiKingEntity.WAKE_TICKS + 2, () -> {
+			fight.warded(keeper, novice, 2.0F, 600);   // each a part short of qualifying, as twoBaitersEachEarnTheirDeed
+			fight.warded(novice, keeper, 2.0F, 600);
+			chargeAt(level, king, origin, keeper);
+			helper.runAfterDelay(run, () -> {
+				boolean firstStunned = king.stunnedTicks() > 0;
+				List<String> learned = rimework(keeper);
+				int keeperDeeds = deeds(fight, keeper);
+				boolean oneKind = ConcordanceProgress.knowledge(keeper).state(Rime.RESEARCH) == ResearchState.UNDERSTOOD;
+				helper.runAfterDelay(YetiKingEntity.STUN_TICKS + 4, () -> {
+					chargeAt(level, king, origin, novice);
+					helper.runAfterDelay(run, () -> {
+						ending(level, king, () -> {
+							boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+							// A hostile creature at normal tolerance for a Frost boon arm's slow to take on (Rime.frostBoon).
+							LivingEntity zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(28, 1, 13));
+							try {
+								helper.assertTrue(firstStunned && king.stunnedTicks() > 0, "A charge did not end in the column");
+								helper.assertTrue(learned.equals(List.of(ELECTIVE)) && keeperDeeds == 1,
+										"The keeper's column was not one deed and the elective kind: " + learned + ", " + keeperDeeds);
+								helper.assertTrue(oneKind, "One kind mastered Rimekeeping");
+								helper.assertTrue(deeds(fight, novice) == 1 && rimework(novice).isEmpty(),
+										"One who only encountered Rimekeeping: deed " + deeds(fight, novice) + ", learned " + rimework(novice));
+								helper.assertTrue(!Rime.column(keeper) && rimework(keeper).equals(List.of(ELECTIVE)), "The column counted twice");
+								helper.assertTrue(!Rime.frostBoon(keeper, zombie) && rimework(keeper).equals(List.of(ELECTIVE)),
+										"After the column a Frost boon arm's slow added a kind: " + rimework(keeper));
+								Knowledge knowledge = ConcordanceProgress.knowledge(keeper);
+								Knowledge loaded = ConcordanceCodecs.KNOWLEDGE.parse(JsonOps.INSTANCE,
+										ConcordanceCodecs.KNOWLEDGE.encodeStart(JsonOps.INSTANCE, knowledge).getOrThrow()).getOrThrow();
+								helper.assertTrue(loaded.equals(knowledge) && loaded.progress(Rime.RESEARCH).evidence().containsKey(ELECTIVE),
+										"The elective kind does not survive a save");
+								ConcordanceProgress.grant(novice, Rime.RESEARCH, ResearchState.UNDERSTOOD);
+								JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+								boolean offTaught = Rime.column(novice);
+								JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+								helper.assertTrue(!offTaught && rimework(novice).isEmpty(), "With the Concordance off the column taught something");
+								// B-P56: once a Frost boon arm's slow has recorded the elective, the column adds nothing; with
+								// Rimebind's restraint that is two kinds, and without a Preserve Rimekeeping is not mastered.
+								helper.assertTrue(Rime.frostBoon(novice, zombie) && rimework(novice).equals(List.of(ELECTIVE)),
+										"A Frost boon arm's slow was not the elective kind: " + rimework(novice));
+								helper.assertTrue(!Rime.column(novice) && rimework(novice).equals(List.of(ELECTIVE)),
+										"After a Frost boon arm's slow the column added a kind: " + rimework(novice));
+								helper.assertTrue(Rime.practise(novice, Rime.KEY_RESTRAINT)
+										&& ConcordanceProgress.knowledge(novice).state(Rime.RESEARCH) == ResearchState.UNDERSTOOD,
+										"Rimebind and the elective mastered Rimekeeping without a Preserve (B-P56)");
+								helper.assertTrue(Rime.practise(keeper, Rime.KEY_PRESERVE_COLD)
+										&& ConcordanceProgress.knowledge(keeper).state(Rime.RESEARCH) == ResearchState.UNDERSTOOD, "Two kinds are not three");
+								helper.assertTrue(Rime.practise(keeper, Rime.KEY_PRESERVE_HEATED)
+										&& ConcordanceProgress.knowledge(keeper).state(Rime.RESEARCH) == ResearchState.MASTERED,
+										"The column did not stand for one kind");
+							} finally {
+								JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+								zombie.discard();
+								keeper.discard();
+								novice.discard();
+							}
+						});
+						helper.succeed();
+					});
+				});
 			});
 		});
 	}
