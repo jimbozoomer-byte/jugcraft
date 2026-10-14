@@ -356,6 +356,27 @@ public final class IndustrialForms {
 			.build();
 
 	/**
+	 * The Large Gas Burning Generator: the art brief's 5x6x5 variant of the Gas Burning Generator, the same
+	 * engine-generator train drawn larger, in the gas turbine's family. It burns hydrogen and methane four times as fast,
+	 * methane an eighth better, from an 8,000 mB tank. Gas comes in low on the right side, the second block back; power
+	 * leaves at the back of the terminal cabinet.
+	 */
+	public static final MachineForm LARGE_GAS_BURNING_GENERATOR_FORM = MachineForm.builder(Jugcraft.id("large_gas_burning_generator"),
+					MachineKind.GAS_TURBINE)
+			.layer("C####", "#####", "#####", "#####", "#####", "#####")
+			.layer(".###.", ".####", ".###.", "#####", "#####", "#####")
+			.layer(".###.", ".###.", ".###.", "#####", "#####", "#####")
+			.layer(".###.", ".###.", ".###.", ".###.", ".###.", ".####")
+			.layer(".....", ".....", ".....", ".....", ".....", "..###")
+			.profile(OperatingProfile.EXPANDED)
+			.inputTank("fuel")
+			.fuel(Jugcraft.id("hydrogen"), FluidFuels.HYDROGEN, FluidFuels.LARGE_GAS_BURNING_HYDROGEN)
+			.fuel(Jugcraft.id("methane"), FluidFuels.LARGE_GAS_METHANE, FluidFuels.LARGE_GAS_BURNING_METHANE)
+			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 4, 1, 0, FormSide.RIGHT)
+			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 3, 5, 1, FormSide.BACK)
+			.build();
+
+	/**
 	 * The Large Bio Generator: the art brief's 5x6x5 variant of the Bio Generator, the same engine-generator drawn larger,
 	 * in the diesel generator's family. It burns bioethanol and biogas a quarter better and four times as fast, from an
 	 * 8,000 mB tank. Fuel comes in low on the right side and power leaves low on the left, both behind the middle.
@@ -410,6 +431,7 @@ public final class IndustrialForms {
 	public static FormMachineBlock GAS_CLEANUP_RACK;
 	public static FormMachineBlock BIO_GENERATOR;
 	public static FormMachineBlock LARGE_BIO_GENERATOR;
+	public static FormMachineBlock LARGE_GAS_BURNING_GENERATOR;
 	public static FormMachineBlock COMBINED_CYCLE_PLANT;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
@@ -429,10 +451,11 @@ public final class IndustrialForms {
 		GAS_CLEANUP_RACK = block("gas_cleanup_rack", GAS_CLEANUP_RACK_FORM);
 		BIO_GENERATOR = block("bio_generator", BIO_GENERATOR_FORM);
 		LARGE_BIO_GENERATOR = block("large_bio_generator", LARGE_BIO_GENERATOR_FORM);
+		LARGE_GAS_BURNING_GENERATOR = block("large_gas_burning_generator", LARGE_GAS_BURNING_GENERATOR_FORM);
 		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
 		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER,
 				INDUSTRIAL_FERMENTER, BULK_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR,
-				LARGE_BIO_GENERATOR, COMBINED_CYCLE_PLANT);
+				LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

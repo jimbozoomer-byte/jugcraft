@@ -4072,6 +4072,30 @@
           }
         },
         {
+          "title": "Large Gas Burning Generator",
+          "icon": "jugcraft:large_gas_burning_generator",
+          "text": [
+            "Five wide, six deep and five tall: the Gas Burning Generator's engine-generator train enlarged on its skid, built from a Gas Burning Generator, two Steel Tanks, steel plates, a steel gear and a basic circuit. Every block it fills must be free when it is placed.",
+            "It burns the same gases four times as fast: hydrogen at 128 JE a millibucket and 512 JE/t, methane an eighth better at 504 JE a millibucket and 1,024 JE/t. Pipe either into the capped inlet low on its right side, near the front; the power leaves at the socket on the back of the terminal cabinet.",
+            "Its 8,000 mB tank holds four buckets. It makes only as much as its store has room for, and its intake fan and coupling turn while it runs. The Combined Cycle Power Plant still gets more from methane."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_tank",
+              "jugcraft:gas_burning_generator",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_gear",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:large_gas_burning_generator",
+            "count": 1
+          }
+        },
+        {
           "title": "Bio Generator",
           "icon": "jugcraft:bio_generator",
           "text": [

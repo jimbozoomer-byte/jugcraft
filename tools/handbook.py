@@ -988,6 +988,7 @@ def build():
             form_page("gas_cleanup_rack"),
             machine_page("fuel_cell"),
             form_page("gas_burning_generator"),
+            form_page("large_gas_burning_generator"),
             form_page("bio_generator"),
             form_page("large_bio_generator"),
             form_page("combined_cycle_power_plant"),

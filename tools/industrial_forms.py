@@ -86,6 +86,16 @@ BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 192, 96), (f"{MOD}:biogas", 268, 64
 # What the Combined Cycle Power Plant burns, the factory's big power station: methane at a quarter more than the gas
 # generator's 448 JE/mB (its exhaust raises steam for a second turbine) and 2,048 JE/t, four times the gas turbine; the
 # Coal Gasifier's raw syngas whole at 256 JE/mB and the same rate; hydrogen at the Fuel Cell's 128 JE/mB at 1,024 JE/t.
+# What the Large Gas Burning Generator burns, four times as fast as the Gas Burning Generator: hydrogen at the same
+# 128 JE/mB (more would beat electrolysis's cost), methane an eighth better at 504 JE/mB, between the Gas Burning
+# Generator's 448 and the Combined Cycle Power Plant's 560. For review.
+LARGE_GAS_GENERATOR_FUELS = [(f"{MOD}:hydrogen", 128, 512), (f"{MOD}:methane", 504, 1024)]
+# The large generator's cells, as its model fills them (form_layers on large_gas_burning_generator()).
+LARGE_GAS_GENERATOR_LAYERS = [["C####", "#####", "#####", "#####", "#####", "#####"],
+                              [".###.", ".####", ".###.", "#####", "#####", "#####"],
+                              [".###.", ".###.", ".###.", "#####", "#####", "#####"],
+                              [".###.", ".###.", ".###.", ".###.", ".###.", ".####"],
+                              [".....", ".....", ".....", ".....", ".....", "..###"]]
 # What the Large Bio Generator burns: the same fuels a quarter better (a bigger, hotter engine with an exhaust heat
 # exchanger), four times as fast. For review.
 LARGE_BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 240, 384), (f"{MOD}:biogas", 335, 256)]
@@ -419,6 +429,29 @@ FORMS = {
                                            "T": f"{MOD}:steel_tank", "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "large_gas_burning_generator": {
+        "display": "Large Gas Burning Generator",
+        # The art brief's 5x6x5 larger variant, in the same gas turbine family (a 120,000 JE store, 2,048 JE/t out).
+        "family": "gas_turbine",
+        "layers": LARGE_GAS_GENERATOR_LAYERS,
+        "profile": "EXPANDED",
+        "tank_mb": 8_000,
+        "input_tanks": ["fuel"],
+        "output_tanks": [],
+        "capabilities": [],
+        "fuels": LARGE_GAS_GENERATOR_FUELS,
+        "upgrades": False,
+        "warmup": 0,
+        "ports": [
+            ("fuel_in", "FLUID_IN", 0, 4, 1, 0, "RIGHT"),
+            ("power_out", "ENERGY_OUT", 0, 3, 5, 1, "BACK"),
+        ],
+        # This change's bill (open for review): a Gas Burning Generator enlarged with two Steel Tanks, steel plates, a
+        # steel gear and a basic circuit.
+        "recipe": (["TBT", "PGP", "PCP"], {"T": f"{MOD}:steel_tank", "B": f"{MOD}:gas_burning_generator", "P": "#c:plates/steel",
+                                           "G": f"{MOD}:steel_gear", "C": f"{MOD}:basic_circuit"}),
+        "features": ["machines"],
+    },
     "large_bio_generator": {
         "display": "Large Bio Generator",
         # The art brief's 5x6x5 larger variant of the Bio Generator, in the same diesel generator family (a 60,000 JE store,
@@ -622,6 +655,17 @@ HANDBOOK["bio_generator"] = [
         "It makes only as much as its store has room for. It also burns biogas from the Anaerobic Digester, piped into "
         "the same inlet: 268 JE a millibucket at 64 JE/t, a bucket lasting about 210 seconds.",
     ]
+
+HANDBOOK["large_gas_burning_generator"] = [
+    "Five wide, six deep and five tall: the Gas Burning Generator's engine-generator train enlarged on its skid, built "
+    "from a Gas Burning Generator, two Steel Tanks, steel plates, a steel gear and a basic circuit. Every block it fills "
+    "must be free when it is placed.",
+    "It burns the same gases four times as fast: hydrogen at 128 JE a millibucket and 512 JE/t, methane an eighth better "
+    "at 504 JE a millibucket and 1,024 JE/t. Pipe either into the capped inlet low on its right side, near the front; "
+    "the power leaves at the socket on the back of the terminal cabinet.",
+    "Its 8,000 mB tank holds four buckets. It makes only as much as its store has room for, and its intake fan and "
+    "coupling turn while it runs. The Combined Cycle Power Plant still gets more from methane.",
+]
 
 HANDBOOK["large_bio_generator"] = [
     "Five wide, six deep and five tall: the Bio Generator's engine-generator enlarged on its skid, built from a Bio "
@@ -1985,9 +2029,14 @@ def _large_bio(point):
 
 
 def _large_bio_element(element):
+    return _scaled_element(element, _large_bio)
+
+
+def _scaled_element(element, place):
+    """An element of a smaller form moved and stretched by `place` into its larger variant (none are turned)."""
     frm, to, texture = element[:3]
-    assert len(element) == 3, "the Bio Generator has no turned elements"
-    a, b = _large_bio(frm), _large_bio(to)
+    assert len(element) == 3, "a scaled form has no turned elements"
+    a, b = place(frm), place(to)
     frm, to = [q(min(a[i], b[i])) for i in range(3)], [q(max(a[i], b[i])) for i in range(3)]
     faces = texture if isinstance(texture, dict) else {"*": texture}
     if any(str(name).endswith("!") for name in faces.values()):
@@ -2065,6 +2114,83 @@ def large_bio_generator_fan():
 def large_bio_generator_still():
     """The turning parts standing still, for the item model only."""
     return [_large_bio_element(e) for e in bio_generator_still()]
+
+
+# The Large Gas Burning Generator is the Gas Burning Generator drawn larger: four blocks wide and tall become five,
+# five deep become six.
+LARGE_GAS_SCALE = (5 / 4, 5 / 4, 6 / 5)
+GAS_AXIS = (-16, 26)
+
+
+def _large_gas(point):
+    """A Gas Burning Generator point where the large one has it: scaled from the controller block's left edge (x 16),
+    the ground and the front."""
+    sx, sy, sz = LARGE_GAS_SCALE
+    return (16 + (point[0] - 16) * sx, point[1] * sy, point[2] * sz)
+
+
+def _gas_panel(element):
+    """The ignition box (the controller), its gauges, amber lamp and conduit: kept at their own size in the controller
+    block, as only the master block lights its lamp."""
+    frm, to = element[0], element[1]
+    return frm[0] >= -8.6 and to[2] <= 12.1 and to[1] <= 15.6
+
+
+def large_gas_burning_generator():
+    """Five wide, six deep and five tall (the art brief's larger variant, "the same engine-generator train"): the Gas
+    Burning Generator itself, drawn larger: the skid, the round intake and its fan, the ribbed olive combustion section
+    under its arched heat shield, the guarded coupling, the large ribbed generator housing, the terminal cabinet at the
+    rear right with the power socket, the exhaust run along the left, the capped gas inlet on the right. The ignition box
+    (the controller) keeps its size at the front left. The gas inlet stays at the second block back on the right side and
+    the socket on the cabinet's back."""
+    m = [_scaled_element(e, _large_gas) for e in gas_burning_generator() if not _gas_panel(e)]
+    m += [e for e in gas_burning_generator() if _gas_panel(e)]
+    return m
+
+
+def large_gas_burning_generator_rotor():
+    """The large intake fan and coupling (client/MachineRotors)."""
+    import machine_rotors as rotors
+    cu, cv, _ = _large_gas((GAS_AXIS[0], GAS_AXIS[1], 0))
+    k, kz = LARGE_GAS_SCALE[0], LARGE_GAS_SCALE[2]
+    quads = rotors.disc("z", 3.25 * kz, 5.75 * kz, cu, cv, 2.5 * k, CHROME, CHROME)
+    for blade in range(6):
+        angle = math.radians(60 * blade + 15)
+        c, s = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cu + k * (r * c - w * s), cv + k * (r * s + w * c))
+        quads += rotors.prism("z", 4 * kz, 5 * kz, [at(2.25, -1.25), at(10.25, -2), at(10.25, 2), at(2.25, 1.25)], GUNMETAL, GUNMETAL)
+    quads += rotors.disc("z", 38 * kz, 50 * kz, cu, cv, 2.5 * k, CHROME, CHROME)
+    for z0, z1, bolts in ((42.5, 44, (42, 42.5)), (44.5, 46, (46, 46.5))):
+        quads += rotors.disc("z", z0 * kz, z1 * kz, cu, cv, 7 * k, CHROME, "dr_flange")
+        for bolt in range(4):
+            angle = math.radians(90 * bolt + 45)
+            quads += rotors.disc("z", bolts[0] * kz, bolts[1] * kz, cu + 5 * k * math.cos(angle), cv + 5 * k * math.sin(angle),
+                                 0.75 * k, GUNMETAL, GUNMETAL, sides=6)
+    return quads
+
+
+def large_gas_burning_generator_still():
+    """The turning parts standing still, for the item model only."""
+    return [_scaled_element(e, _large_gas) for e in gas_burning_generator_still()]
+
+
+def form_layers(model, width, depth, height, controller=(0, 0, 0)):
+    """The form's cells from where its model reaches: '#' where any element enters a block, '.' where none does, 'C' at
+    the controller (column 0, row 0, layer 0). Columns run from the controller's block (x 0..16) towards -x."""
+    filled = set()
+    for element in model:
+        frm, to = element[0], element[1]
+        for column in range(width):
+            x0 = -16 * column
+            for row in range(depth):
+                for layer in range(height):
+                    if (frm[0] < x0 + 16 and to[0] > x0 and frm[2] < 16 * row + 16 and to[2] > 16 * row
+                            and frm[1] < 16 * layer + 16 and to[1] > 16 * layer):
+                        filled.add((column, row, layer))
+    return [["".join("C" if (c, r, l) == controller else "#" if (c, r, l) in filled else "." for c in range(width))
+             for r in range(depth)] for l in range(height)]
 
 
 def combined_cycle_power_plant():
@@ -2217,6 +2343,10 @@ ROTORS = {
         "block": "bio_generator", "axis": "z", "center": [BIO_AXIS[0], BIO_AXIS[1], 29.5], "property": "lit", "speed": 12,
         "ease": 40, "always": True, "quads": bio_generator_coupling(),
     },
+    "large_gas_burning_generator": {
+        "block": "large_gas_burning_generator", "axis": "z", "center": [*_large_gas((GAS_AXIS[0], GAS_AXIS[1], 0))],
+        "property": "lit", "speed": 14, "ease": 40, "always": True, "quads": large_gas_burning_generator_rotor(),
+    },
     "large_bio_generator_coupling": {
         "block": "large_bio_generator", "axis": "z",
         "center": [*_large_bio((BIO_AXIS[0], BIO_AXIS[1], 29.5))], "property": "lit", "speed": 10,
@@ -2238,7 +2368,8 @@ MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_gener
           "bulk_chemical_reactor": bulk_chemical_reactor(),
           "anaerobic_digester": anaerobic_digester(), "coal_gasifier": coal_gasifier(),
           "gas_cleanup_rack": gas_cleanup_rack(), "bio_generator": bio_generator(),
-          "large_bio_generator": large_bio_generator(), "combined_cycle_power_plant": combined_cycle_power_plant()}
+          "large_bio_generator": large_bio_generator(), "large_gas_burning_generator": large_gas_burning_generator(),
+          "combined_cycle_power_plant": combined_cycle_power_plant()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
@@ -2246,6 +2377,7 @@ ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical
                "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still(),
                "coal_gasifier": coal_gasifier_still(), "gas_cleanup_rack": gas_cleanup_rack_still(),
                "bio_generator": bio_generator_still(), "large_bio_generator": large_bio_generator_still(),
+               "large_gas_burning_generator": large_gas_burning_generator_still(),
                "combined_cycle_power_plant": combined_cycle_power_plant_still()}
 PARTICLE = "dp_olive"
 

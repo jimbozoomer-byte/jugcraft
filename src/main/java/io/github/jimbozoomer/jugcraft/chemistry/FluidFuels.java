@@ -47,6 +47,14 @@ public final class FluidFuels {
 	public static final int BIOGAS = 268;
 	public static final int BIO_GENERATOR_BIOGAS = 64;
 	/**
+	 * The Large Gas Burning Generator (docs/features/industrial-large-gas-burning-generator.md), the Gas Burning
+	 * Generator's 5x6x5 variant: four times as fast, hydrogen at the same {@link #HYDROGEN} (more would beat electrolysis's
+	 * cost) and methane an eighth better, between the Gas Burning Generator and the Combined Cycle Power Plant.
+	 */
+	public static final int LARGE_GAS_BURNING_HYDROGEN = 512;
+	public static final int LARGE_GAS_METHANE = 504;
+	public static final int LARGE_GAS_BURNING_METHANE = 1_024;
+	/**
 	 * The Large Bio Generator (docs/features/industrial-large-bio-generator.md), the Bio Generator's 5x6x5 variant: a
 	 * bigger, hotter engine whose exhaust warms its fuel, so it gets a quarter more from each fuel than the Bio Generator,
 	 * and burns them four times as fast. Bioethanol at 240 JE/mB (still below the advanced engine's 256), biogas at 335.
