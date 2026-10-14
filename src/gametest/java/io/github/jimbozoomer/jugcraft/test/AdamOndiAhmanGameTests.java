@@ -62,8 +62,11 @@ public class AdamOndiAhmanGameTests {
 		Holder<Biome> valley = access.lookupOrThrow(Registries.BIOME).getOrThrow(AdamOndiAhman.BIOME);
 		helper.assertTrue(valley.is(BiomeTags.IS_OVERWORLD), "Adam-ondi-Ahman is not an Overworld biome");
 		Holder<Structure> knoll = access.lookupOrThrow(Registries.STRUCTURE).getOrThrow(AdamOndiAhman.KNOLL);
-		helper.assertTrue(knoll.value().biomes().size() == 1 && knoll.value().biomes().contains(valley),
-				"The knoll may stand outside the valley: " + knoll.value().biomes());
+		// Its placement chooses where it stands (the valleys' sites); its own biome check takes any Overworld biome.
+		helper.assertTrue(knoll.value().biomes().contains(valley)
+				&& knoll.value().biomes().contains(access.lookupOrThrow(Registries.BIOME).getOrThrow(net.minecraft.world.level.biome.Biomes.PLAINS)),
+				"The knoll's biome check is not the Overworld's: " + knoll.value().biomes());
+		helper.assertTrue(knoll.is(AdamOndiAhman.KNOLLS), "The knoll is not in #jugcraft:altar_knolls");
 		StructureSet set = access.lookupOrThrow(Registries.STRUCTURE_SET)
 				.getOrThrow(ResourceKey.create(Registries.STRUCTURE_SET, Jugcraft.id("altar_knolls"))).value();
 		helper.assertTrue(set.placement() instanceof AdamOndiAhmanPlacement, "The knolls are not placed at the valleys' sites: " + set.placement());
@@ -133,8 +136,9 @@ public class AdamOndiAhmanGameTests {
 	}
 
 	/**
-	 * The rare valleys' sites: about the configured share of cells has one; each is a chunk's corner, the same every time
-	 * for a seed and different for another seed, and its whole valley (its wavering edge too) stays inside its own cell.
+	 * The rare valleys' sites: about the configured share of cells has them; each of a cell's tries is a chunk's corner,
+	 * the same every time for a seed (and different for another seed), and its whole valley (its wavering edge too) stays
+	 * inside its own cell.
 	 */
 	@GameTest
 	public void rareValleySitesKeepToTheirCells(GameTestHelper helper) {
@@ -149,25 +153,28 @@ public class AdamOndiAhmanGameTests {
 		for (int cx = -30; cx < 30; cx++) {
 			for (int cz = -30; cz < 30; cz++) {
 				total++;
-				AdamOndiAhman.Site site = AdamOndiAhman.candidate(print, cx, cz, cells, share);
-				if (!Objects.equals(site, AdamOndiAhman.candidate(print, cx, cz, cells, share))) {
-					throw helper.assertionException("Cell " + cx + " " + cz + " has a different site each time");
-				}
-				if (!Objects.equals(site, AdamOndiAhman.candidate(other, cx, cz, cells, share))) {
+				AdamOndiAhman.Site first = AdamOndiAhman.candidate(print, cx, cz, cells, share, 0);
+				if (!Objects.equals(first, AdamOndiAhman.candidate(other, cx, cz, cells, share, 0))) {
 					differ++;
 				}
-				if (site == null) {
+				if (first == null) {
 					continue;
 				}
 				with++;
-				helper.assertTrue(Math.floorMod(site.x(), 16) == 0 && Math.floorMod(site.z(), 16) == 0, "Site " + site + " is not a chunk's corner");
-				for (int[] edge : new int[][] {{-reach, 0}, {reach, 0}, {0, -reach}, {0, reach}}) {
-					helper.assertTrue(Math.floorDiv(site.x() + edge[0], cells) == cx && Math.floorDiv(site.z() + edge[1], cells) == cz,
-							"The valley round " + site + " reaches out of its cell " + cx + " " + cz);
+				for (int attempt = 0; attempt < AdamOndiAhman.TRIES; attempt++) {
+					AdamOndiAhman.Site site = AdamOndiAhman.candidate(print, cx, cz, cells, share, attempt);
+					if (site == null || !site.equals(AdamOndiAhman.candidate(print, cx, cz, cells, share, attempt))) {
+						throw helper.assertionException("Cell " + cx + " " + cz + " has no try " + attempt + ", or a different one each time");
+					}
+					helper.assertTrue(Math.floorMod(site.x(), 16) == 0 && Math.floorMod(site.z(), 16) == 0, "Site " + site + " is not a chunk's corner");
+					for (int[] edge : new int[][] {{-reach, 0}, {reach, 0}, {0, -reach}, {0, reach}}) {
+						helper.assertTrue(Math.floorDiv(site.x() + edge[0], cells) == cx && Math.floorDiv(site.z() + edge[1], cells) == cz,
+								"The valley round " + site + " reaches out of its cell " + cx + " " + cz);
+					}
+					helper.assertTrue(AdamOndiAhman.inValley(site, site.x(), site.z())
+							&& AdamOndiAhman.inValley(site, site.x() + AdamOndiAhman.RADIUS - AdamOndiAhman.WOBBLE, site.z())
+							&& !AdamOndiAhman.inValley(site, site.x(), site.z() + reach + 1), "The valley round " + site + " is not where its radius says");
 				}
-				helper.assertTrue(AdamOndiAhman.inValley(site, site.x(), site.z())
-						&& AdamOndiAhman.inValley(site, site.x() + AdamOndiAhman.RADIUS - AdamOndiAhman.WOBBLE, site.z())
-						&& !AdamOndiAhman.inValley(site, site.x(), site.z() + reach + 1), "The valley round " + site + " is not where its radius says");
 			}
 		}
 		double fraction = with / (double) total;

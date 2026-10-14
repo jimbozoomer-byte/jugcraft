@@ -537,7 +537,7 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
-OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE, "altar_knoll"} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES},
                  "spell": set(concordance.INVOCATIONS) | {"composed"}}
 
@@ -2843,7 +2843,8 @@ def check_adam_ondi_ahman():
                      f"HUMIDITY_MIN = {suitable['humidity'][0]}F;", f"HUMIDITY_MAX = {suitable['humidity'][1]}F;",
                      f"PEAKS_VALLEYS = {suitable['peaks_valleys']}F;", f"REACH = {aa.REACH};", f"GROUND_MIN = {aa.GROUND['min']};",
                      f"GROUND_MAX = {aa.GROUND['max']};", f"MAX_SLOPE = {aa.GROUND['slope']};", f"DEPTH = {aa.DEPTH}F;",
-                     f"KNOLL_GROUND = {aa.KNOLL_GROUND};"):
+                     f"KNOLL_GROUND = {aa.KNOLL_GROUND};", f"TRIES = {aa.TRIES};",
+                     f'Jugcraft.id("{aa.KNOLLS_TAG.split(":")[1]}")'):
         if expected not in java:
             err(f"AdamOndiAhman.java has no {expected} (tools/adam_ondi_ahman.py)")
     if aa.INSET != aa.RADIUS + aa.WOBBLE + 64 or aa.MIN_SPACING <= 2 * aa.INSET:
@@ -2876,11 +2877,9 @@ def check_adam_ondi_ahman():
     info = bm.BIOMES.get(aa.BIOME, {})
     if info.get("placement") != "site" or info.get("display") != aa.DISPLAY:
         err(f"tools/biomes.py: {aa.BIOME} must be placed round its sites (\"placement\": \"site\")")
-    if aa.STRUCTURE_TAG not in bm.biome_tags(aa.BIOME):
-        err(f"The {aa.BIOME} biome is not in {aa.STRUCTURE_TAG}, so its knoll cannot stand there")
-    tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_structure" / f"{aa.STRUCTURE}.json") or {}
-    if tag.get("values") != [f"{MOD}:{aa.BIOME}"]:
-        err(f"{aa.STRUCTURE_TAG} should hold the valley alone: {tag.get('values')}")
+    tag = load(DATA / MOD / "tags" / "worldgen" / "structure" / f"{aa.KNOLLS_TAG.split(':')[1]}.json") or {}
+    if tag.get("values") != [f"{MOD}:{aa.STRUCTURE}"]:
+        err(f"{aa.KNOLLS_TAG} should hold the knoll alone: {tag.get('values')}")
     folder = DATA / MOD / "worldgen"
     for path, wanted in ((folder / "structure" / f"{aa.STRUCTURE}.json", aad.structure()),
                          (folder / "structure_set" / f"{aa.STRUCTURE_SET}.json", aad.structure_set()),

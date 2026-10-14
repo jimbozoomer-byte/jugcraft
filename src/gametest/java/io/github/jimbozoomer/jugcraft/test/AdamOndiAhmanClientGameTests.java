@@ -92,7 +92,28 @@ public class AdamOndiAhmanClientGameTests implements FabricClientGameTest {
 				altar = server.computeOnServer(minecraft -> findAltar(minecraft.overworld(), site));
 			}
 			if (altar == null) {
-				throw new AssertionError("No Ancient Altar within " + KNOLL_REACH + " blocks of the valley's site at " + site.x() + " " + site.z());
+				// What the site holds instead: whether its chunk is a knoll's, the biome its chunks were made with, any piece
+				// of a knoll near it, and the ground; and a picture of it from above.
+				String found = server.computeOnServer(minecraft -> {
+					ServerLevel level = minecraft.overworld();
+					StringBuilder out = new StringBuilder("site chunk is a knoll's: " + AdamOndiAhman.isSiteChunk(site.x() >> 4, site.z() >> 4));
+					for (int dx = -24; dx <= 24; dx += 24) {
+						for (int dz = -24; dz <= 24; dz += 24) {
+							int x = site.x() + dx;
+							int z = site.z() + dz;
+							BlockPos ground = new BlockPos(x, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1, z);
+							out.append("; ").append(x).append(' ').append(z).append(": ")
+									.append(level.getBiome(ground).unwrapKey().map(key -> key.identifier().getPath()).orElse("?")).append(", ")
+									.append(level.getBlockState(ground).getBlock().getDescriptionId()).append(" at y ").append(ground.getY())
+									.append(level.structureManager().getStructureWithPieceAt(ground, AdamOndiAhman.KNOLLS).isValid() ? ", in a knoll" : "");
+						}
+					}
+					return out.toString();
+				});
+				LOGGER.info("Adam-ondi-Ahman, seed {}: no altar; {}", SEED, found);
+				context.takeScreenshot("jugcraft_adam_ondi_ahman_site");
+				throw new AssertionError("No Ancient Altar within " + KNOLL_REACH + " blocks of the valley's site at " + site.x() + " " + site.z()
+						+ " (" + found + ")");
 			}
 			BlockPos top = altar;
 			String biome = server.computeOnServer(minecraft -> minecraft.overworld().getBiome(top).unwrapKey().map(key -> key.identifier().toString())

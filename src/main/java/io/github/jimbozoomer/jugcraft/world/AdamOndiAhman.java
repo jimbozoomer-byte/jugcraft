@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -45,8 +46,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Where: one valley near the start of every new world ({@link #START_MIN} to {@link #START_MAX} blocks from it,
  * chosen once on the world's first start, after Alpine Spawn and the town, and saved in {@link AdamOndiAhmanState}),
- * and elsewhere one candidate in {@code adam_ondi_ahman.chance} of the cells {@code adam_ondi_ahman.spacing} blocks
- * square, inset {@link #INSET} blocks from its edges, which is a valley if its land is suitable ({@link #suitable}).
+ * and elsewhere one in {@code adam_ondi_ahman.chance} of the cells {@code adam_ondi_ahman.spacing} blocks square, at
+ * the first of {@link #TRIES} places (inset {@link #INSET} blocks from its edges) whose land is suitable ({@link #suitable}).
  * Both are read from the land's noise (the climate and the generator's heights), so choosing generates nothing, and a
  * seed always makes the same rare valleys.
  *
@@ -55,7 +56,7 @@ import org.jspecify.annotations.Nullable;
  * beaches and anything below the surface ({@link #DEPTH}); the biome is listed in vanilla's Overworld table where no
  * climate reaches it ({@link #addToOverworld}), so world generation knows its features. The knoll is the structure
  * {@code jugcraft:altar_knoll}, a vanilla jigsaw structure of one template, placed in exactly the site chunks by
- * {@link AdamOndiAhmanPlacement}. Terrain does not depend on biomes; the knoll blends itself into the land.
+ * {@link AdamOndiAhmanPlacement} (its own biome check takes any Overworld biome: the placement is what chooses). Terrain does not depend on biomes; the knoll blends itself into the land.
  *
  * <p>The state is the loaded Overworld's (seed, noise, generator and start valley), set as it loads, before any chunk
  * generates, and cleared as it unloads. {@code adam_ondi_ahman.enabled=false} stops new valleys and knolls; the biome,
@@ -75,6 +76,10 @@ public final class AdamOndiAhman {
 	public static final int WOBBLE = 32;
 	/** How far inside its cell a rare valley's site is, so the valley never reaches into the next cell. */
 	public static final int INSET = RADIUS + WOBBLE + 64;
+	/** How many places a rare valley's cell tries, in turn, for land that suits; the first that does is its site. */
+	public static final int TRIES = 6;
+	/** The knolls (a structure tag), for finding one by its pieces. */
+	public static final TagKey<Structure> KNOLLS = TagKey.create(Registries.STRUCTURE, Jugcraft.id("altar_knolls"));
 	/** The valley near the start: rings this far from the start, {@link #START_STEP} apart, every {@link #START_ANGLE} degrees. */
 	public static final int START_MIN = 800;
 	public static final int START_MAX = 1600;
@@ -367,19 +372,41 @@ public final class AdamOndiAhman {
 	}
 
 	/**
-	 * The rare valley's candidate site in the cell (cellX, cellZ) of cells {@code cells} blocks square, for a seed's
-	 * {@link #fingerprint}; null in the cells (all but {@code share} / 65536 of them) that have none. A candidate is a
-	 * chunk's corner, at least {@link #INSET} blocks inside its cell. Whether its land suits is another matter.
+	 * A rare valley's candidate site in the cell (cellX, cellZ) of cells {@code cells} blocks square, for a seed's
+	 * {@link #fingerprint}: its try {@code attempt} (0 to {@link #TRIES} - 1); null in the cells (all but
+	 * {@code share} / 65536 of them) that have none. A candidate is a chunk's corner, at least {@link #INSET} blocks
+	 * inside its cell. Whether its land suits is another matter ({@link #cellSite}).
 	 */
-	public static @Nullable Site candidate(long print, int cellX, int cellZ, int cells, int share) {
-		long hash = mix(print ^ mix(cellX * 0xC2B2AE3D27D4EB4FL ^ cellZ * 0x9E3779B97F4A7C15L ^ 0x56414C4CL));
-		if (((hash >>> 32) & 0xFFFF) >= share) {
+	public static @Nullable Site candidate(long print, int cellX, int cellZ, int cells, int share, int attempt) {
+		long cell = mix(print ^ mix(cellX * 0xC2B2AE3D27D4EB4FL ^ cellZ * 0x9E3779B97F4A7C15L ^ 0x56414C4CL));
+		if (((cell >>> 32) & 0xFFFF) >= share) {
 			return null;
 		}
+		long hash = attempt == 0 ? cell : mix(cell ^ attempt * 0xD6E8FEB86659FD93L);
 		int span = cells - 2 * INSET;
 		int x = cellX * cells + INSET + (int) ((hash & 0xFFFF) * span >>> 16);
 		int z = cellZ * cells + INSET + (int) (((hash >>> 16) & 0xFFFF) * span >>> 16);
 		return new Site(Math.floorDiv(x, 16) * 16, Math.floorDiv(z, 16) * 16, hash);
+	}
+
+	/**
+	 * A cell's rare valley in the loaded Overworld: the first of its tries whose land suits, unless it would touch the
+	 * valley near the start; null if there is none, or before the land can be judged.
+	 */
+	private static @Nullable Site cellSite(World loaded, int cellX, int cellZ) {
+		if (loaded.sampler == null) {
+			return null;
+		}
+		for (int attempt = 0; attempt < TRIES; attempt++) {
+			Site site = candidate(loaded.print, cellX, cellZ, loaded.spacing, loaded.share, attempt);
+			if (site == null) {
+				return null;
+			}
+			if (suitableCached(loaded, site)) {
+				return near(loaded.start, site) ? null : site;
+			}
+		}
+		return null;
 	}
 
 	/** Whether (x, z) lies in the valley round a site: within {@link #RADIUS}, give or take its wavering edge. */
@@ -406,11 +433,19 @@ public final class AdamOndiAhman {
 		if (start != null && inValley(start, x, z)) {
 			return start;
 		}
-		Site site = candidate(loaded.print, Math.floorDiv(x, loaded.spacing), Math.floorDiv(z, loaded.spacing), loaded.spacing, loaded.share);
-		if (site == null || !inValley(site, x, z) || near(start, site) || !suitableCached(loaded, site)) {
-			return null;
+		int cellX = Math.floorDiv(x, loaded.spacing);
+		int cellZ = Math.floorDiv(z, loaded.spacing);
+		// Most places are far from every try of their cell: no land need be judged for them.
+		boolean close = false;
+		for (int attempt = 0; attempt < TRIES && !close; attempt++) {
+			Site candidate = candidate(loaded.print, cellX, cellZ, loaded.spacing, loaded.share, attempt);
+			if (candidate == null) {
+				return null;
+			}
+			close = Math.abs(x - candidate.x()) <= RADIUS + WOBBLE && Math.abs(z - candidate.z()) <= RADIUS + WOBBLE;
 		}
-		return site;
+		Site site = close ? cellSite(loaded, cellX, cellZ) : null;
+		return site != null && inValley(site, x, z) ? site : null;
 	}
 
 	/** Whether a rare valley would touch the valley near the start, which then takes its place. */
@@ -461,8 +496,18 @@ public final class AdamOndiAhman {
 		}
 		int x = chunkX << 4;
 		int z = chunkZ << 4;
-		Site site = candidate(loaded.print, Math.floorDiv(x, loaded.spacing), Math.floorDiv(z, loaded.spacing), loaded.spacing, loaded.share);
-		return site != null && site.x() >> 4 == chunkX && site.z() >> 4 == chunkZ && !near(start, site) && suitableCached(loaded, site);
+		int cellX = Math.floorDiv(x, loaded.spacing);
+		int cellZ = Math.floorDiv(z, loaded.spacing);
+		boolean tried = false;
+		for (int attempt = 0; attempt < TRIES && !tried; attempt++) {
+			Site candidate = candidate(loaded.print, cellX, cellZ, loaded.spacing, loaded.share, attempt);
+			if (candidate == null) {
+				return false;
+			}
+			tried = candidate.x() >> 4 == chunkX && candidate.z() >> 4 == chunkZ;
+		}
+		Site site = tried ? cellSite(loaded, cellX, cellZ) : null;
+		return site != null && site.x() >> 4 == chunkX && site.z() >> 4 == chunkZ;
 	}
 
 	/** The loaded Overworld's valley near the start; null if it has none (or no Overworld is loaded). */
@@ -483,8 +528,8 @@ public final class AdamOndiAhman {
 		}
 		for (int cx = Math.floorDiv(x - radius, loaded.spacing); cx <= Math.floorDiv(x + radius, loaded.spacing); cx++) {
 			for (int cz = Math.floorDiv(z - radius, loaded.spacing); cz <= Math.floorDiv(z + radius, loaded.spacing); cz++) {
-				Site site = candidate(loaded.print, cx, cz, loaded.spacing, loaded.share);
-				if (site != null && Math.hypot(site.x() - x, site.z() - z) <= radius && !near(loaded.start, site) && suitableCached(loaded, site)) {
+				Site site = cellSite(loaded, cx, cz);
+				if (site != null && Math.hypot(site.x() - x, site.z() - z) <= radius) {
 					out.add(site);
 				}
 			}

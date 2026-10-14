@@ -1566,7 +1566,7 @@ BIOMES = {
             "minecraft:creeper", "minecraft:slime", "minecraft:enderman", "minecraft:witch")},
         "untags": ["minecraft:has_structure/village_plains", "minecraft:has_structure/pillager_outpost",
                    "minecraft:has_structure/ruined_portal_standard"],
-        "tags": ["c:is_plains", "jugcraft:has_structure/altar_knoll"],
+        "tags": ["c:is_plains"],
     },
 }
 

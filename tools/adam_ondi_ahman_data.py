@@ -29,12 +29,14 @@ def loot(out, write):
 def tags(tags):
     for tag in ("minecraft:wither_immune", "minecraft:dragon_immune", "minecraft:features_cannot_replace"):
         tags.add("block", tag, rid(aa.ALTAR))
+    tags.add("worldgen/structure", aa.KNOLLS_TAG, rid(aa.STRUCTURE))
 
 
 def structure():
     """The knoll: vanilla's jigsaw structure of the one template, started under the land's surface at its middle and
-    blended into the land round it (beard_thin), in the valley only."""
-    return {"type": "minecraft:jigsaw", "biomes": f"#{aa.STRUCTURE_TAG}", "max_distance_from_center": 64,
+    blended into the land round it (beard_thin). Its placement (the valleys' sites) chooses where; its own biome check
+    takes any Overworld biome, so it never hangs on the valley's biome answer."""
+    return {"type": "minecraft:jigsaw", "biomes": "#minecraft:is_overworld", "max_distance_from_center": 64,
             "project_start_to_heightmap": "WORLD_SURFACE_WG", "size": 1, "spawn_overrides": {},
             "start_height": {"absolute": aa.START_HEIGHT}, "start_pool": rid(aa.POOL), "step": "surface_structures",
             "terrain_adaptation": "beard_thin", "use_expansion_hack": False}

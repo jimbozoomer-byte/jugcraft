@@ -6,12 +6,13 @@ stone older than the rest, carved with a red star; in part 1 it is dormant.
 Where the valleys are (world/AdamOndiAhman, which reads these numbers; tools/check_mod_data.py holds them together):
 - one near the start of every new world, START["min"] to START["max"] blocks from the world's start, chosen once on the
   world's first start, after Alpine Spawn and the town, and saved;
-- elsewhere, one candidate in CHANCE of the cells SPACING blocks square (the seed decides which), inset INSET blocks
-  from the cell's edges, which becomes a valley if its land is suitable (SUITABLE).
+- elsewhere, one in CHANCE of the cells SPACING blocks square (the seed decides which), at the first of TRIES places
+  in the cell (inset INSET blocks from its edges) whose land is suitable (SUITABLE).
 A valley is the land within RADIUS (give or take WOBBLE) blocks of its knoll; rivers, oceans and beaches there keep
 their own biomes (except on the knoll's own ground, KNOLL_GROUND), and so does everything below the surface (DEPTH).
 Terrain does not depend on biomes: the knoll itself is the structure template written here, placed with vanilla's
-jigsaw structure and blended into the land.
+jigsaw structure and blended into the land. Its placement alone chooses where it stands, so the structure's own biome
+check takes any Overworld biome.
 
 This module lays the knoll out (the template, a list of named parts) and states the constants Java reads.
 """
@@ -24,7 +25,8 @@ DISPLAY = "Adam-ondi-Ahman"
 FEATURE = "adam_ondi_ahman"
 STRUCTURE = "altar_knoll"
 STRUCTURE_SET = "altar_knolls"
-STRUCTURE_TAG = "jugcraft:has_structure/altar_knoll"
+# The knolls, a structure tag (for finding one by its pieces).
+KNOLLS_TAG = "jugcraft:altar_knolls"
 PLACEMENT = "adam_ondi_ahman"
 POOL = "adam_ondi_ahman/altar_knoll"
 TEMPLATE = "adam_ondi_ahman/altar_knoll"
@@ -43,6 +45,8 @@ CHANCE = 0.5
 RADIUS = 176
 WOBBLE = 32
 INSET = RADIUS + WOBBLE + 64
+# A cell tries up to TRIES places in turn; the first whose land suits is its valley.
+TRIES = 6
 # The valley near the start: START["min"] to START["max"] blocks from the world's start, tried in rings START["step"]
 # apart and every START["angle"] degrees round each, nearest first; never within ORIGIN_CLEARANCE blocks of the origin
 # (where vanilla's own spawn search may already have generated chunks). Setting adam_ondi_ahman.start (on or off).

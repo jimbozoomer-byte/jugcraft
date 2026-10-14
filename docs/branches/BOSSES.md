@@ -510,8 +510,8 @@ The real Adam-ondi-Ahman stands on the bluffs above the Grand River in northern 
 
 **Where it is:**
 - **Near the start:** one valley in every new world, 800 to 1,600 blocks from the world's start, on suitable land (below). It is chosen once, on the world's first start, after Alpine Spawn and the town have settled, and saved. Only the land's noise is read to choose it, so no chunk is generated to do so.
-- **Elsewhere, rare:** the Overworld is divided into cells 3,072 blocks square. In half of them (chosen by the seed) one place, inset from the cell's edges, is a candidate, and it becomes a valley if its land is suitable. The cell size (`adam_ondi_ahman.spacing`) and the share (`adam_ondi_ahman.chance`) are settings.
-- **Suitable land:** inland and dry; temperate (not frozen, not desert-hot); neither the peaks nor a river's bed; and gentle, so the knoll does not sit on a cliff. A candidate that fails is skipped; a cell's candidate is never moved.
+- **Elsewhere, rare:** the Overworld is divided into cells 3,072 blocks square. Half of them (chosen by the seed) try up to six places, inset from the cell's edges, and the first whose land is suitable becomes a valley. The cell size (`adam_ondi_ahman.spacing`) and the share (`adam_ondi_ahman.chance`) are settings.
+- **Suitable land:** inland and dry; temperate (not frozen, not desert-hot); neither the peaks nor a river's bed; and gentle, so the knoll does not sit on a cliff. A place that fails is skipped, and the cell tries its next.
 - `/locate biome jugcraft:adam_ondi_ahman` finds the nearest valley.
 
 ### The way to Mars: the Altar Keystone (part 2)
