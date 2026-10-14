@@ -2,12 +2,14 @@
 
 Status: contract written. Units 1 to 4 are implemented on branch `claude/chunk-b-winter-stone`, based on main
 `feb6d04fb` ([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk A); not merged; unit 5
-is Not started. Units 1 and 3 pass their tests in CI: run 38514144531 on `579ab5f6f` (unit 1) and run 38519234934 on
-`06dc5ea5f` (units 1 and 3) succeeded in every job (see the Validation plan). The first run, 38509414542, failed only the
-two four-player tests, which expected more health than the game's 1024 cap allows; the tests now expect the cap. Unit
-2's first run (38534127130 on `0e7de6bf1`) failed the charge test its review had predicted and found the King's ice
-left over after an unload; both are fixed (`215a1c1e0`, `1266c905a`), and its records follow its next run. Unit 4's
-tests have not run yet ([unit 3's record](arcane-concordance-rime-strata.md), [unit 4's](arcane-concordance-winter.md)).
+is Not started. Units 1 to 3 pass their tests in CI: run 38514144531 on `579ab5f6f` (unit 1), run 38519234934 on
+`06dc5ea5f` (units 1 and 3) and run 38543250503 on `1266c905a` (units 1 to 3) succeeded in every job (see the Validation
+plan). The first run, 38509414542, failed only the two four-player tests, which expected more health than the game's
+1024 cap allows; the tests now expect the cap. Unit 2's first run (38534127130 on `0e7de6bf1`) failed the charge test its
+review had predicted and found the King's ice left over after an unload; both are fixed (`215a1c1e0`, `1266c905a`).
+Unit 4's tests have not run yet. Records: unit 2's [yeti-king.md](yeti-king.md#verification) and
+[glacier-hall.md](glacier-hall.md#verification), [unit 3's](arcane-concordance-rime-strata.md) and
+[unit 4's](arcane-concordance-winter.md).
 The contract was written at `d4c07bf56`, the head of Chunk A
 ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337)), when main was
 `b73f51c8a` ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
@@ -32,7 +34,7 @@ The plan's outcome is to practise Rime and Strata in ordinary play, use existing
 reach a Rime/Strata workshop and fight the Yeti in his accepted hall (09:27, 09:86). Corrected for what is already built
 (see the status delta), a survival player can:
 
-- reach the Glacier Hall in an ordinary world, and in a designed world once B-03 confirms it;
+- reach the Glacier Hall in an ordinary world and in a designed world (B-03);
 - share the Yeti King's reward, or the Cinder Tyrant's, by damage, healing, warding or, against the Yeti King, an
   objective; keep it if they fall or leave the game in the fight; and be paid exactly once, a killing blow included;
 - read both keepers' dossiers and JEI's pages for their loot;
@@ -55,7 +57,7 @@ starts.
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
 | 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | Implemented, not merged; CI passed (runs 38514144531 and 38519234934): B-01 and B-02 committed for the Yeti King and the Cinder Tyrant, each keeper in his own commits (B-D1) |
-| 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Implemented (`98c550f16` to `1266c905a`); CI run 38534127130 found two defects, fixed; records after the next run |
+| 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | [glacier-hall.md](glacier-hall.md), [yeti-king.md](yeti-king.md) | Implemented, not merged; CI passed (run 38543250503, every job): B-03's tests (`98c550f16`), B-04's (`dca611f85`), the review's fixes (`0e7de6bf1`) and three fixes to the fight (`1dec9f9ef`, `215a1c1e0`, `1266c905a`). The first run, 38534127130, found the two faults the last two fix |
 | 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible, with Jade's hold. The crafted upgrade (09:94) is unit 4's water foci (B-P14). One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | [arcane-concordance-rime-strata.md](arcane-concordance-rime-strata.md) | Implemented, not merged; CI passed (run 38519234934) |
 | 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | [arcane-concordance-winter.md](arcane-concordance-winter.md); `arcane-concordance-alchemy.md` | Implemented; not yet compiled or run in CI: B-08 (`158717e6c`), the kit (`4be454f83`), the links (`eb6099144`), the Glacier Hall's preparation fact (`7e1efb5f9`, on unit 1's dossiers) and the records |
 | 5 | B-09, B-11 | Brace and Rimebind as optional counters in the Yeti fight; combined fixes, evidence and the owner checkpoint | `yeti-king.md`; this page | Not started |
@@ -83,10 +85,10 @@ starts.
 | Preserve, Rimebind and Brace (02:77-79) | Absent: ten invocations, none of them Rime or Strata | `concordance/invocation/` (aegis, cinderbolt, flashstep, hearthflare, hearthguard, hearthspark, kindle, lance, lanternward, revelation) |
 | Strata research (taken as missing) | Strata already has two entries: `assay` (Balancewrights; examines `#jugcraft:assay_specimens`) and `runesmithing` (Runesmiths). Rime has none. The Rimekeepers' and Stratawrights' rows give only their roadmap step | `concordance/research/assay.json`, `runesmithing.json`; `concordance/practice/assay.json`; `docs/ARCANE_CONCORDANCE.md:121,123` (the Hearthbinders' row 120 says "implemented") |
 | "Use existing Thallite" (09:86; 01:38) | Ore and gear (slices 1 and 2) are merged and tested; slices 3 to 5 (arms; arrow and horse armour; the Focus, Earthen Steps and Bulwark) are not built. The record's status lines are stale. No Concordance data mentions Thallite | `docs/features/thallite.md:5-8,136-141,194`; `ThalliteGearGameTests.java:60-222`; no match for "thallite" under `concordance/` data |
-| "A boss drop offers a distinctive variant, not the first and only cold protection" (04:141) | The Yeti Mitten is the only full counter to his frost: `chill()` checks the Mitten and not `canFreeze()`. Jugcraft adds only knitwear to `freeze_immune_wearables`. **Inference, untested:** knitwear stops freeze damage through vanilla's gate but not his frost slowdown (vanilla's freeze damage needs `canFreeze()`, which one listed piece turns off; the frost slowdown does not ask it). *Since unit 4:* Frostward (Winter Brine) is the timed counter beside the Mitten, and the inference is tested for the kit by `YetiKingGameTests.aKitWearerIsSlowedButNotHurtByHisFrost` and the client test, once they run | `YetiKingEntity.java:960-967` (the Mitten at `:961`); `lair/yeti/YetiMitten.java:23-35`; `data/minecraft/tags/item/freeze_immune_wearables.json`; mc263src `LivingEntity.java:534-543` (slowdown), `:2938` (damage), `:3756-3760` (`canFreeze`) |
+| "A boss drop offers a distinctive variant, not the first and only cold protection" (04:141) | The Yeti Mitten is the only full counter to his frost: `chill()` checks the Mitten and not `canFreeze()`. Jugcraft adds only knitwear to `freeze_immune_wearables`. **Shown by `YetiKingGameTests.woolAndLeatherStopTheFreezeButNotHisFrost`** (unit 2; passed in run 38543250503): a knitted sweater or a leather tunic stops the freeze's damage through vanilla's gate, but not his frost, its slowdown or its thaw, which are the same as on bare skin; only the Mitten stops both (vanilla's freeze damage needs `canFreeze()`, which one listed piece turns off; the frost and its slowdown do not ask it). *Since unit 4:* Frostward (Winter Brine) is the timed counter beside the Mitten, and the same is tested for the kit by `YetiKingGameTests.aKitWearerIsSlowedButNotHurtByHisFrost` and the client test, once they run | `YetiKingEntity.java:960-967` (the Mitten at `:961`); `lair/yeti/YetiMitten.java:23-35`; `data/minecraft/tags/item/freeze_immune_wearables.json`; mc263src `LivingEntity.java:534-543` (slowdown), `:2938` (damage), `:3756-3760` (`canFreeze`) |
 | Winter Brine: "Too much heat consumes the temporary cold property" (03:36) | Heat never consumes Rime: a searing stir damages only Radiance and Verdance. An unheated crucible sits at 20, inside the cold band, and nothing cools one below that. The Rime property gives Resistance. *Resolved by B-08 (unit 4):* every stir above the cold band keeps only part of the dissolved Rime, and Rime gives Frostward | `concordance/alchemy/Mixture.java:26,82-85`; `Band.java:12-15`; `Heat.java:12-20`; `tools/concordance_alchemy.py:95-103,121-122` |
-| A late-joining client receives phase and elapsed state (08:127) | Determinable: a player who comes into view joins the boss bar, and his action and fury are synced; the elapsed time is not | `YetiKingEntity.java:194-195,1457-1460` |
-| Designed-world access (09:90; 07:13) | Undetermined. Nothing in `world/design/` mentions a lair or the Glacier Hall (searched). The designer's client test builds a NORMAL world, swaps the Overworld's generator and runs the export; it never creates a world from an exported preset | `WorldDesignerClientGameTests.java:33-61,64,89`; `docs/WORLD_DESIGNER.md:55` |
+| A late-joining client receives phase and elapsed state (08:127) | Shown for one client leaving and returning (unit 2, `YetiKingClientGameTests`, passed in run 38543250503): back in his sight, his bar shows again and his fury reaches the client. The elapsed time stays unsynced. A second client joining mid-fight is not run | `YetiKingEntity.java:194-195,1457-1460` |
+| Designed-world access (09:90; 07:13) | Determined (unit 2): a world created with the designer's generator in place of the Overworld's has every lair's dimension; the Frost Horn opens a Glacier Hall there and the Kiln Seal a Cinder Kiln, in the created world and again after reopening it (`WorldDesignerClientGameTests`, passed in run 38543250503). The exported preset names only the three vanilla dimensions and writes no dimension files (`model.test.cjs`), and the game adds data-pack dimensions to any new or reopened world. Nothing in `world/design/` mentions a lair. A world made from an actual exported ZIP is not loaded (B-03, the deliberate deviation) | `WorldDesignerClientGameTests.java:33-61,64,89` at `d4c07bf56`; mc263src `CreateWorldScreen.java:249`, `WorldOpenFlows.java:165-166`; `docs/WORLD_DESIGNER.md:55` |
 | Open PRs #299, #300 and #301 (09:11) | 34 open (#322 to #355) at 00:30 UTC on 14 October 2026; #354 and #355 opened after midnight that day | the table below |
 
 ### Two payout defects (both bosses)
@@ -330,10 +332,41 @@ whichever merges.
   `LairClientGameTests` (`:253`, which already calls `Lairs.reset()`) to the Glacier Hall instead of writing a second
   restart test. With B-01, a Due kept before the restart is paid after it (07:155). This is not "persistent lairs" (04:9).
 
+**As built (unit 2: `98c550f16`, with `0e7de6bf1`'s wait before the designed world's horn; not merged).** Tests only;
+no product code changed and no defect was found. All passed in CI run 38543250503 on `1266c905a` (see the Validation
+plan); the server tests are required and registered, so each passed as one of the 1658.
+- **Designed world:** `WorldDesignerClientGameTests` creates its world through the create-world screen with the
+  designer's generator in place of the Overworld's, the shape of a designed world. There, and again after reopening it,
+  every lair's dimension exists, the Frost Horn blown on placed snow opens a Glacier Hall and takes the player in, the
+  Kiln Seal pressed into the Nether's magma opens a Cinder Kiln, and closing each sends the player back to where they
+  stood. `tools/world-designer/model.test.cjs` adds that the exported preset names only the three vanilla dimensions and
+  writes no dimension files, so the lairs come from the installed mod as in any world (the game adds data-pack
+  dimensions at creation and at load: mc263src `CreateWorldScreen.java:249`, `WorldOpenFlows.java:165-166`). No fix was
+  needed in the export.
+- **Deliberate deviation:** no world is made from an actual exported ZIP. The exporter is JavaScript, and adding a
+  user's data pack while creating a world is private to the game and opens the experimental-settings screen (the unit's
+  review). The Node test and the designed-shape world cover it; a world from an exported ZIP stays a check by hand
+  (07:150).
+- **Horn rules:** `GlacierHallGameTests.everyRefusalKeepsTheHorn` (by day, with the lairs switched off, and through the
+  item off the snow, which still rests it; nothing opens, moves or frosts) and
+  `theHornIsAnsweredOnAnyOfItsGroundAndOnPeaceful` (at night on every block of `#jugcraft:frost_horn_ground`, and on
+  Peaceful, where the hall opens empty: B-P37). `GlacierHallClientGameTests` adds a horn blown in the hall (refused and
+  kept); straying sideways past the hall's bounds, under Resistance IV and a Brace, for the mist's whole toll, as falling
+  does; the arch's Grey Mist used as a click uses it; forty ticks in the whirl, which take nobody in; by day through the
+  item and the world's clock; every instance taken; a whirl into a full party, which takes nobody in and frosts nobody;
+  and the whirl used as a click uses it, back into the same hall.
+- **Restart:** `LairClientGameTests` step 7b: a Glacier Hall closed by `Lairs.reset()` (a restart simulated, as step 7's)
+  with its King asleep; he goes with it, the player inside is sent home, and a `yeti_king` reward kept from before is
+  not paid in the closed hall but at home, once. A new step 9 is a real restart: the world is saved with the player
+  inside a Glacier Hall and a reward kept in the world's record, and opened again. The game's own server stops and
+  starts (Fabric's `SERVER_STOPPED` and `SERVER_STARTED`, which clear the instances, `Lairs.java:88-89`), and on the
+  real join the player is home first and then paid once. No disconnect or leave event is checked, and there is no second
+  client.
+
 **Reuses:** `Lairs`, `LairVisit`, `MistGateEntity`, `GlacierHallGameTests`, `GlacierHallClientGameTests`,
 `LairClientGameTests`, `WorldDesignerClientGameTests`.
 
-**Save effects:** none expected.
+**Save effects:** none.
 
 **Review boundary:** tests, and fixes only where a test fails. The hall's structure, blocks and recipe stay (04:118;
 09:90).
@@ -355,10 +388,49 @@ whichever merges.
   unsynced (Deferrals).
 - **Levitation:** if #332 or #352 merges first, End-gun Levitation does not lift the king or his whelps.
 
+**As built (unit 2: `dca611f85`, `0e7de6bf1`, and three fixes; not merged).** Seventeen new server tests in
+`YetiKingGameTests` and four new steps in `YetiKingClientGameTests`, all passed in CI run 38543250503 on `1266c905a`.
+Every server test is required and registered, so each passed as one of the 1658. The first run, 38534127130 on
+`0e7de6bf1`, failed one server test and the client test's away-and-back step (the Validation plan); each failure was a
+fault in the fight, fixed:
+- **Fixes:** a glancing charge that met a column's flared foot slid round it unstunned; now a step that would bring his
+  body against the foot stuns him as a straight run does (`215a1c1e0`, D1; B-P38). His blocks of ice, icicles, spikes
+  and whelps left in chunks that stopped without unloading came back with a player who returned mid-fight; now each lasts
+  only while he counts it his (`YetiKingEntity.owning`), and his count is not saved (`1266c905a`). End-gun Levitation
+  lifted his whelps, and him as he died; neither he nor they take any Levitation now (`1dec9f9ef`; #352 carried #332's
+  float).
+- **Edge determinism** (in the test arena of air the hall's size; the tests at the dais, the ramp, the dens and a
+  column's foot place the hall's own template over it): `aGrazingChargeStunsHimOnlyWithinAColumnsReach` (passing 5.6
+  from a column's centre he runs his full line, the same both runs; 4.8 from it he stops stunned),
+  `aChargeThatMeetsAColumnSouthOfItStunsHim` (D1), `aChargeThatClearsAColumnsFootRunsOnUnstunned`,
+  `inTheHallHisChargeStopsAtTheDaisTheRampAndTheDensWall` (he never climbs and is never inside a block),
+  `aChargeEndsAtHisLeashTheSameEveryRun`, `inHisFuryAMissedChargeIsFollowedByExactlyOneMore` and
+  `inHisFuryABaitLeadsTheChainedChargeIntoAColumn` (a stun never chains).
+- **Solo melee, solo caster and a party:** `soloMeleeBaitsAChargeIntoAColumnAndStrikesHimReeling` (a third more before
+  armour, `Benchmark.afterArmour`), `soloCasterBaitsAChargeIntoAColumnAndLancesHimReeling` (the Lance, cast through
+  Spell Engine, bypasses armour) and `aPartyOfTwoSolvesTheColumnLoop` (the bait side-steps, the charge tramples the
+  caster on its line once, both are credited). Test players, not people.
+- **Footing and cleanup:** `leftAloneAfterHisSlamHisLakeIsAsItWas`, `leftAloneHisIceIsGoneAtOnce`,
+  `whenHeFallsHisSnowDriftsBackAndHisKinAndIceAreGone` (his slams bare only drift snow, beside trampled routes; on a
+  reset and as he falls the lake is exactly as laid, and his kin and ice are gone),
+  `loadedAgainMidFightHeDriftsHisSnowBackAndBringsNoKin` (an emulated unload: only he is written; loaded, he hunts on
+  and the snow drifts back) and `loadedAgainHeCountsNoKinOrIceFromBefore` (his kin and ice from before, in chunks that
+  stayed, are gone on their next tick). The client test adds the real thing: his lake snapshot as placed, each slam
+  changing only drift snow to glare ice, and away and back mid-fight (the player leaves, the hall's chunks unload with
+  him in his fury, and coming back the player finds him loaded again, still furious, his bar shown again, the snow
+  drifted back and none of his kin or ice); as he falls the whole lake is as placed.
+- **Frost:** `woolAndLeatherStopTheFreezeButNotHisFrost` (the status delta).
+- **Levitation:** `endGunLevitationLiftsNeitherHimNorHisKin` (the spell refused by him, his whelps and him as an End
+  gun's shot fells him; none rises).
+- **Late joiners:** one client leaving and returning, above. A second client, a dedicated server and a real disconnect
+  are not run.
+
 **Acceptance:** 09:108-110. "Solo melee, solo caster and a mixed party" is automated: one or more test players in a
 server game test, the caster's spell cast through Spell Engine. A party of people and two clients stay not run (09:20).
 
-**Save effects:** none. A fix that changes his saved data needs a versioned read.
+**Save effects:** none. A fix that changes his saved data needs a versioned read. As built, none of the three fixes
+changes what Jugcraft saves with him (his instance, slot, origin, phase, fury and bared cells); his count of his whelps
+and things was never saved.
 
 **Review boundary:** the Yeti and the hall. No tuning change without a failing test.
 
@@ -749,7 +821,8 @@ and the dossier's read-only fact; in `weapons`, only the FROST case's call to `R
   `RimeGear.holdTicks` (which `Rime.preserve` asks), `RimeGear.bangle` and `RimeGear.brace`; `Rimebind.restrains`
   (restraint's targets, shared with `Rime.frostBoon`); `Rime.frostBoon` and `Rime.KEY_FROST_BOON`;
   `LairDossiers.prepare`; `concordance_ember.SLOT_ITEMS` (one writer for both slices' slot tags); `EmberArmorItem`
-  and `EmberClient`'s renderer, now also the water sets'. Practice hooks:
+  and `EmberClient`'s renderer, now also the water sets'. Unit 2's: `YetiKingEntity.owning` (his whelps and things last
+  only while he counts them his), and he and his whelps refuse Levitation (`canBeAffected`). Practice hooks:
   Fabric's level change (`glacier_hall`; no lair code, and no `Encounter.onDeed`), `CrucibleBlockEntity.bottle`
   (`crucible`), `Rituals.listen` (`foundation`) and `AFTER_DAMAGE` (`rooted`, `held`) in unit 3; `ArmItem`'s Frost boon
   (`frost_boon`) in unit 4; the Yeti's column (`column`) in unit 5.
@@ -785,8 +858,11 @@ B-05 cannot start on its own.
   would delete them. Tested.
 - **Brace stacking:** with netherite, Rooted, the Ice Breaker and a shield, one hit may reach full knockback resistance.
   Proposed as tolerable for one hit in five seconds (B-P11); the Yeti ignores all but Brace (B-P20, Proposed).
-- **Edge determinism** is untested, and `tools/glacier_hall.py` is unread.
-- **Designed worlds** may lack the lair dimensions (undetermined).
+- **The charge at the hall's edges** is held by server tests at fixed places in the hall's template (unit 2). A change to
+  the columns, dais, ramp or dens in `tools/glacier_hall.py` moves what they test, so their places must follow it.
+- **Designed worlds** are tested as a world made with the designer's generator, not one made from an exported ZIP
+  (B-03's deliberate deviation); a ZIP world stays a check by hand. A dimension another mod adds only through its own
+  world preset is not inherited (`docs/WORLD_DESIGNER.md`).
 - **Downgrade:** an older build drops kept Yeti or Tyrant rewards (`LairRewards.java:184-189`).
 - **Names:** "Focus" is both the resource and the foci; "Brace" is also a war fork trait and the shield's brace.
   Tooltips keep them apart.
@@ -817,6 +893,11 @@ B-05 cannot start on its own.
   Spell Engine's spell bar starts at a fixed place left of the screen's bottom centre, so a bar of 5 or more spells runs
   off the left edge of CI's 427-pixel-wide GUI, and 8 or more at 1920×1080 (players can move it in Spell Engine's HUD
   settings; [record](arcane-concordance-rime-strata.md#rollout-and-open-questions)).
+- **Unit 2, as built** ([record](yeti-king.md#rollout-and-open-questions)): on Peaceful the horn is used up and the hall
+  opens empty (B-P37); any step that would bring him within 5.2 blocks of a column's centre stuns him, so a charge begun
+  that near one can end on its first step though its line passes the column, and a glancing run that would meet a
+  column's foot now stuns him too (B-P38); a player who leaves mid-fight and comes back meets none of his kin or ice from
+  before; a client back in his sight gets his bar and fury, not the fight's elapsed time.
 - **Unit 4, as built** ([record](arcane-concordance-winter.md#rollout-and-open-questions)): "needs the cold band" holds
   per recipe (four snowballs stirred warm twice, or five stirred hot once, still reach Frostward; two ground snowballs
   unstirred do at any heat); Frostward also clears the Frost Horn's arrival chill and a snow werewolf's frostbite chill;
@@ -850,7 +931,7 @@ B-05 cannot start on its own.
 | Unit | Server game tests | Client game tests | Checks | Save tests |
 |---|---|---|---|---|
 | 1 | `YetiKingGameTests`, `CinderTyrantGameTests`, `LairEncounterGameTests`, `EncyclopediaGameTests`; passed (runs 38514144531 and 38519234934) | `YetiKingClientGameTests` and `CinderTyrantClientGameTests` unchanged; `EncyclopediaClientGameTests` if the page layout changes (the test is unchanged); each passed by its shard | `check_acquisition`, `check_encyclopedia`, with mutations | A kept Yeti and Tyrant Due across a save; passed |
-| 2 | `GlacierHallGameTests`, `YetiKingGameTests` | `WorldDesignerClientGameTests` (an exported preset); `LairClientGameTests` step 7 (the hall); `GlacierHallClientGameTests` | `check_glacier_hall`, `check_yeti` | None needed |
+| 2 | `GlacierHallGameTests` (+2), `YetiKingGameTests` (+17); passed (run 38543250503) | `WorldDesignerClientGameTests` (a world with the designer's generator, created and reopened; not an exported ZIP, B-03's deviation); `LairClientGameTests` steps 7b and 9 (the hall at a simulated and a real restart); `GlacierHallClientGameTests`; `YetiKingClientGameTests` (his lake as placed, away and back); each passed by its shard | `node --test tools/world-designer/model.test.cjs` (+1, in the `mod` job); `check_glacier_hall`, `check_yeti` | A kept `yeti_king` Due across a real save and reopen (step 9); his reload, emulated (`loadedAgainMidFightHeDriftsHisSnowBackAndBringsNoKin`, `loadedAgainHeCountsNoKinOrIceFromBefore`) and real (the client test); all passed |
 | 3 | `ConcordanceRimeStrataGameTests`, `ConcordanceEffectGameTests`, `ConcordanceProgressionGameTests`, `ConcordanceInvocationGameTests`, `ThalliteGameTests`, `ConcordancePersistenceGameTests`; passed (run 38519234934) | `ConcordanceRimeStrataClientGameTests` (icons, spell bar, HUD and inventory screenshots); `GlacierHallClientGameTests` (the field study; a braced player at the edge, the mist and the whirl); each passed by its shard, but toasts hid the status icons | `check_rime`, `check_strata`, `check_rime_strata_assets` (mutation-tested), `check_invocations`, `check_progression`, `check_conclave`, `check_delivery`, `owner_art.py --check` | The research record (`rimeAndStrataResearchSurviveASave`); saved effects (`rimeAndBraceSurviveASave`); the crucible's field (`ConcordancePersistenceGameTests`); all passed |
 | 4 | `ConcordanceAlchemyGameTests` (+4), `ConcordanceWinterGameTests` (new, 10), `YetiKingGameTests` (+2), `EncyclopediaGameTests` (+1), `ConcordancePersistenceGameTests` (+1, and the focus's hold), `ConcordanceGameTests` (`FIRST_LOADOUT_RECIPES`) | `ConcordanceWinterClientGameTests` (new: Frostward's HUD; the sets worn in four views, close up and on the player; his frost on the real player; the slots; the icons) | `check_alchemy`, `check_winter_brine`, `check_rime_kit`, `check_winter_links`, `check_ember_regalia`, `check_acquisition`, `check_progression`, `check_delivery`, `concordance_journey.py`, `check_icon_maps.py`, `owner_art.py --check` (the unit's rules mutation-tested: 60 faults, each reported) | A Rime bottle from before the change (`oldRimeBottlesStillGiveResistance`); a formula from before; Frostward on a saved creature; the kit's fifteen items and the bangle's unsaved count (`theTravelKitSurvivesASave`); a focus's hold; the `frost_boon` key before mastery |
 | 5 | `YetiKingGameTests` (counters) | `YetiKingClientGameTests` (a charge into a column) | Every check; the CI candidate | Re-run of all of the above |
@@ -858,7 +939,7 @@ B-05 cannot start on its own.
 Every unit also runs `tools/check_mod_data.py`, `scripts/check_repository.py` and the build with its server game tests,
 and the build without the optional integrations where it touches an optional boundary.
 
-**Results so far** (units 1 and 3, not merged; each run by workflow_dispatch of the Build workflow, with every client
+**Results so far** (units 1 to 3, not merged; each run by workflow_dispatch of the Build workflow, with every client
 test class):
 - Run 38509414542, unit 1 before its last fix: everything passed but `YetiKingGameTests.fourPlayersAreEachPaidOnce` and
   `CinderTyrantGameTests.fourPlayersAreEachPaidOnce`, which expected a party-scaled health above the game's
@@ -876,14 +957,42 @@ test class):
   `CinderTyrantClientGameTests`, `LairClientGameTests` and `ConcordanceRimeStrataClientGameTests` in 2;
   `GlacierHallClientGameTests` and `YetiKingClientGameTests` in 3. The baselines tables went to
   [the baselines record](arcane-concordance-baselines.md).
-- The server logs' warnings that name the lairs are expected on a game-test server, which has no lair dimensions:
-  "[lairs] No dimension jugcraft:glacier_hall: the lair cannot open" twice, and the same for `cinder_kiln` (and other
-  lairs). No WARN or ERROR line names Rime, Strata, Brace, Rimebind, Yeti, `LairRewards` or `Encounter`.
-- Screenshots (480×270 previews in the job logs): unit 3's status shots were hidden by advancement toasts, and the test
-  now clears them (not yet run); its spell bar runs off the screen's left edge (Risks); the Glacier Hall's shots are in
-  [its record](glacier-hall.md#verification); the Expeditions shot shows only the top of the page, so no shot shows the
-  Glacier Hall's or the Cinder Kiln's dossier (the server tests check their content); the encyclopedia home shot shows a
-  Chunk A defect, on unit 5's list (B-11).
+- In run 38519234934 the server logs' warnings that name the lairs are expected on a game-test server, which has no
+  lair dimensions: "[lairs] No dimension jugcraft:glacier_hall: the lair cannot open" twice, and the same for
+  `cinder_kiln` (and other lairs). No WARN or ERROR line names Rime, Strata, Brace, Rimebind, Yeti, `LairRewards` or
+  `Encounter`.
+- Run 38519234934's screenshots (480×270 previews in the job logs): unit 3's status shots were hidden by advancement
+  toasts, and the test now clears them (not yet run); its spell bar runs off the screen's left edge (Risks); the Glacier
+  Hall's shots are in [its record](glacier-hall.md#verification); the Expeditions shot shows only the top of the page,
+  so no shot shows the Glacier Hall's or the Cinder Kiln's dossier (the server tests check their content); the
+  encyclopedia home shot shows a Chunk A defect, on unit 5's list (B-11).
+- Run 38534127130 on `0e7de6bf1` (units 1 to 3, unit 2 before its last two fixes): `mod` and
+  `optional integrations absent` each ran 1657 game tests; 1656 passed and 1 required test failed in both,
+  `YetiKingGameTests.aChargeThatMeetsAColumnSouthOfItStunsHim`: "Passing the north-west column on its south side his
+  body met its foot at (24.0000, 28.3012) in the template, CHARGE, stunned 0 and he slid on unstunned, to (29.7340,
+  32.3164) in the template, CHARGE, stunned 0 on tick 87". The review's model had predicted (29.734, 32.3164);
+  `215a1c1e0` (D1) fixed it. Client shards 0 to 3 succeeded. Shard 4 failed in `YetiKingClientGameTests`' away-and-back
+  step, "java.lang.AssertionError: His ice came back with him", three ticks after he was loaded again; `1266c905a` fixed
+  it, with the server test `loadedAgainHeCountsNoKinOrIceFromBefore`. Earlier in that shard
+  `WorldDesignerClientGameTests` and `GlacierHallClientGameTests` passed by their log lines ("[designer-check] Authored
+  heights, custom biome paint, spawn, city and generator survived save/reopen"; "the Frost Horn passed end to end").
+  The fury screenshot showed glacial spikes still standing.
+- Run 38543250503 on `1266c905a` (units 1 to 3): all 9 jobs succeeded. `mod`: "All 1658 required tests passed" in
+  4.354 min ("BUILD SUCCESSFUL in 6m 29s"); `optional integrations absent`: the same in 3.903 min (6m 17s). Unit 2's 19
+  new server tests are registered and required, so each passed as one of the 1658. `choose client tests` chose all 163
+  classes in five shards, and each succeeded: `LairClientGameTests` in shard 0 (its log has "[lairs] client game test:
+  the framework passed end to end", after which step 9 runs); `CinderTyrantClientGameTests` and
+  `ConcordanceRimeStrataClientGameTests` in 1; `CinderKilnClientGameTests` in 2; `WorldDesignerClientGameTests`,
+  `GlacierHallClientGameTests` and `YetiKingClientGameTests` in 4, whose log has "[designer-check] Authored heights,
+  custom biome paint, spawn, city and generator survived save/reopen" (after the reopened world's lair check), "[lairs]
+  client game test: the Frost Horn passed end to end" and "[yeti] client game test: his fight passed end to end". The
+  `mod` job also ran `node --test tools/world-designer/model.test.cjs` before the build.
+- Unit 2's screenshots in run 38543250503 (shard 4): the client test takes none between the away-and-back step and his
+  fall. `jugcraft_yeti_king_defeated` (in run 38534127130 the test stopped before it) shows the lake's rippled drift
+  snow, the patch of glare ice in its middle with a faint grey column of mist over it, the dais and throne under the
+  tusks beyond, a column on either side and icicles hanging from the vault; no King, whelp or spike is in view.
+  `jugcraft_yeti_king_fury` shows him facing the camera with blue fire on his crown, and pale shards of ice standing
+  between his feet, which look like the glacial spikes of the pose before, as in run 38534127130.
 
 **Evidence rules** (10:5-22):
 - Each command is reported on its own as run and passed, run and failed, or not run. CI on a commit counts for that
@@ -891,8 +1000,9 @@ test class):
 - A server game test with several test players is not a party of people. One client on a dedicated server is not two
   clients. A disconnect marked in a test is not a real one.
 - A screenshot shows presentation, not balance. Nothing is called "balanced" without a human playtest.
-- Inferences in this page (knitwear against the Yeti; Rimebind doing nothing to him) stay inferences until a test runs
-  (`aKitWearerIsSlowedButNotHurtByHisFrost` covers the first for the kit, once it runs).
+- Inferences in this page (Rimebind doing nothing to him) stay inferences until a test runs. Knitwear against the Yeti
+  is no longer one: `woolAndLeatherStopTheFreezeButNotHisFrost` shows it (run 38543250503), and
+  `aKitWearerIsSlowedButNotHurtByHisFrost` shows the same for the kit once it runs.
 
 ## Deferrals
 
@@ -920,8 +1030,9 @@ test class):
 
 ## Where to resume
 
-Units 1 to 4 are implemented on branch `claude/chunk-b-winter-stone`, not merged. Units 1 and 3 pass their
-tests in CI (run 38519234934 on `06dc5ea5f`, every job; see the Validation plan). Unit 1, in four commits and two fixes: B-01, the Yeti
+Units 1 to 4 are implemented on branch `claude/chunk-b-winter-stone`, not merged. Units 1 to 3 pass their
+tests in CI (run 38543250503 on `1266c905a`, every job; units 1 and 3 also in run 38519234934 on `06dc5ea5f`; see the
+Validation plan). Unit 1, in four commits and two fixes: B-01, the Yeti
 King on `Encounter` and `LairRewards` with both payout defects fixed and the column deed, then the Cinder Tyrant the
 same way, with no deed (B-P4); B-02, the Glacier Hall's dossier and the Yeti King's JEI pages, with the lair step done
 by any keeper's first win and the generalised `check_acquisition` and `check_encyclopedia`, then the Cinder Kiln's
@@ -929,13 +1040,15 @@ dossier and the Cinder Tyrant's JEI pages (B-D1), which fill the Expeditions pag
 [its record](arcane-concordance-rime-strata.md#verification); after its CI, its status shots clear the advancement
 toasts (shown in run 38534127130). Unit 2 (B-03, B-04): tests for the Glacier Hall's access, refusals, exit and restart
 and for the Yeti fight, with three fixes to the fight (End-gun Levitation lifts neither him nor his whelps; a charge
-into a column's foot stuns him; his ice and whelps last only while he counts them his); its records follow its next
-CI run. Unit 4 (B-08 and B-10), in four commits and its records:
+into a column's foot stuns him; his ice and whelps last only while he counts them his; the last two found by its first
+CI run, 38534127130); records in [yeti-king.md](yeti-king.md#verification) and
+[glacier-hall.md](glacier-hall.md#verification). Its owner questions are B-P37 (Peaceful) and B-P38 (the column's
+reach). Unit 4 (B-08 and B-10), in four commits and its records:
 Winter Brine and Frostward; the Rime travel kit; the Frost-boon practice with Thallite and the trophies unchanged; the
 Glacier Hall's preparation fact, on unit 1's dossiers ([its record](arcane-concordance-winter.md#checks-run-for-the-unit)).
 Next: CI on the head with all four units, each job's result recorded here and in the unit records; then unit 5 (B-09,
-B-11), with its combined fixes and the owner's checkpoint. Open for the owner: B-P2, B-P3, B-P4, B-P5, B-P36 and
-B-P40 to B-P53; from CI, whether to lower the four-player health scale under the 1024 cap, and the spell bar's place.
+B-11), with its combined fixes and the owner's checkpoint. Open for the owner: B-P2, B-P3, B-P4, B-P5, B-P36 to B-P38
+and B-P40 to B-P53; from CI, whether to lower the four-player health scale under the 1024 cap, and the spell bar's place.
 #352 has merged, so the base is main; refresh the open pull requests first.
 
 ## Decisions
@@ -985,6 +1098,8 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P34 | 14 October 2026 | Rimebind's targets follow the shared boundary (monsters; creatures the caster could strike by hand; players only under PvP and outside the party), and only a hostile creature at normal tolerance counts as restraint | Proposed | B-05, B-06 |
 | B-P35 | 14 October 2026 | Preserve's hold is a fixed Java constant (60 s, not scaled by Spell Power), restarts on a recast and never adds, runs on the world clock, and is capped at 2400 ticks so B-P24 fits | Proposed | B-07, B-10 |
 | B-P36 | 14 October 2026 | The Glacier Hall's dossier names the Seasonal Stall's snow blocks (8 for 3 Jugs, under its winter and December themes) as a sale that helps with the horn, shown only where a town stands and while it is on sale | Proposed | B-02 |
+| B-P37 | 14 October 2026 | On Peaceful the Frost Horn is still answered at night on snow: it is used up and opens the hall empty, because the Yeti King is a monster and Peaceful removes him (`FrostHornRite.check`; `yeti-king.md`). Pinned by `GlacierHallGameTests.theHornIsAnsweredOnAnyOfItsGroundAndOnPeaceful`. The alternative, for the owner: refuse the horn on Peaceful and keep it, which would need a new refusal and its words, the same in the other rites, and the test reversed | Proposed (unit 2; nothing changed) | B-03 |
+| B-P38 | 14 October 2026 | A charge stuns him at a column when a step would bring him within 5.2 blocks of its centre, so a charge begun that near one can end on its first step though its line passes the column; and (D1, built in `215a1c1e0`) when a step within a block more would put his body against the column's flared foot, so a glancing run stuns him instead of sliding round it. The alternative, for the owner: only a step that brings him nearer the column stuns him | Proposed (unit 2; the 5.2 rule unchanged, D1 built) | B-04 |
 | B-P40 | 14 October 2026 | Frostward clears frost in its own effect tick, on any creature a salve reaches and from any source; never Slowness, never sinking | Proposed | B-08 |
 | B-P41 | 14 October 2026 | The heat rule acts on stirs only: ground Rime keeps its ready share until stirred, and additions record no band (the formula format is unchanged) | Proposed | B-08 |
 | B-P42 | 14 October 2026 | Every Rime brew (snowball, amethyst, gloamcap) gives Frostward; no brew gives Resistance any more; bottles already made keep it | Proposed | B-08 |
@@ -1000,7 +1115,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P52 | 14 October 2026 | Any Frost boon arm counts (the boon, not the line), the creative-only Frost Knight Greatsword included; no survival route is added (B-P27) | Proposed | B-10 |
 | B-P53 | 14 October 2026 | `frost_boon` is an elective of `jugcraft:rimework` on restraint's targets (B-P34), gated by Rimekeeping understood (B-10 first said "encountered"); Rimekeeping can then be mastered without casting Rimebind | Proposed | B-10 |
 
-B-P37 to B-P39 are kept free (for unit 2's decisions at integration); unit 4's are B-P40 to B-P53.
+Unit 2's are B-P37 and B-P38; B-P39 is kept free; unit 4's are B-P40 to B-P53.
 
 ## How this contract was checked
 
@@ -1034,7 +1149,10 @@ B-P37 to B-P39 are kept free (for unit 2's decisions at integration); unit 4's a
 - Read for unit 4 (14 October 2026), from the 26.3 sources fetched for it (not the local mirror):
   `PowderSnowBlock.canEntityWalkOnPowderSnow` (leather boots or an entity-type tag only: no boots tag) and
   `InsideBlockEffectType.FREEZE` (frost only while `canFreeze()`); B-P46 follows from them.
-- Undetermined until something runs or is read: lair dimensions in a world made from an exported preset; charge
-  behaviour at the dais and walls; the Yeti under Levitation;
-  whether a game-test player can be killed so that a real death event fires; the state of the pull requests after
-  00:30 UTC on 14 October.
+- Read for unit 2's records (14 October 2026): run 38543250503's job logs by the GitHub API (`mod` and
+  `optional integrations absent`, their last 5000 lines, which hold the game tests' summary; `choose client tests`;
+  client shards 0 and 4, their last 5000 lines, with the screenshots, viewed as 480×270 previews); run 38534127130's
+  results as noted at the time.
+- Undetermined until something runs or is read: whether a game-test player can be killed so that a real death event
+  fires; the state of the pull requests after 00:30 UTC on 14 October. Unit 2 settled the lair dimensions in a designed
+  world, the charge at the dais and walls, and the Yeti under Levitation (B-03 and B-04, as built).

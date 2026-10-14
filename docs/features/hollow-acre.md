@@ -151,10 +151,16 @@ The client game test (`LairClientGameTests`, CI job `client`) runs the framework
 4. dying there gathers the drops (3 diamonds, 7 experience) as Grave Goods and ends the visit; respawned outside, the player gets them all back;
 5. the gate takes the player back in; leaving puts them back exactly where they stood, facing the same way, able to build;
 6. a full party lets nobody else in;
-7. an instance empty for 30 seconds closes, and its gate with it; after a restart, a player found in a closed instance is sent home;
+7. an instance empty for 30 seconds closes, and its gate with it; after a restart, a player found in a closed instance is sent home; (since Concordance Chunk B, unit 2) for a Glacier Hall, its King goes with it, and a reward kept from before is paid at home, not in the closed hall;
 8. no more instances open than `lairs.instances` allows, and a closed one's slot is free again.
 
 Then it takes the six pictures above.
+
+Last (since Concordance Chunk B, unit 2):
+
+9. a real restart: the world is saved with the player inside a Glacier Hall and a Yeti King reward kept for them in the world's record, and opened again. The game's own server stops and starts, which clears the instances, and on the real join the player is back at their return point, able to build, and is then paid once.
+
+Step 7's restart is simulated (`Lairs.reset()`, as the server's start and stop do); step 9's is real, so "a server restart closes every instance, and anyone who logs in inside a closed instance goes back to their return point" is now shown. Step 2 of `GlacierHallClientGameTests` shows the edges' toll whole under Resistance IV and a Brace ([glacier-hall.md](glacier-hall.md#verification)). Both pass in CI (run 38543250503, by workflow_dispatch; not merged), each by its shard's success: `LairClientGameTests` in shard 0, `GlacierHallClientGameTests` in shard 4. No disconnect or leave event is checked.
 
 Not run: the two-client dedicated-server playtest the plan asks for, and play by hand.
 

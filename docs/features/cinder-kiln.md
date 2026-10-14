@@ -185,6 +185,8 @@ Then it takes ten pictures: the vent on the magma, and in the kiln the view from
 
 Concordance Chunk B, unit 1 (B-02) adds `CinderKilnGameTests.theSealIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the seal still takes on magma in a volcanic land. It passes in CI (runs 38509414542, 38514144531 and 38519234934, by workflow_dispatch; not merged). In run 38519234934 `CinderKilnClientGameTests`, unchanged by Chunk B, passed with every other client class (shard 1).
 
+Concordance Chunk B, unit 2 (not merged): the Kiln Seal pressed into the Nether's magma opens a Cinder Kiln in a world made with the World Designer's generator, as created and again after reopening it, and closing it sends the player back (`WorldDesignerClientGameTests`, [world-designer.md](world-designer.md)). It passed in CI run 38543250503 by its shard's success (shard 4), where `CinderKilnClientGameTests`, unchanged, passed too (shard 2).
+
 Not run: the two-client dedicated-server playtest, and play by hand.
 
 ## World and event applicability

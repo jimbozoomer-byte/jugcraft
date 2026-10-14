@@ -1,6 +1,6 @@
 # The Yeti King
 
-Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. Since Concordance Chunk B (unit 1) his reward is the lairs' shared one ([lair-encounter-credit.md](lair-encounter-credit.md)); that change's game tests have not run yet.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. Since Concordance Chunk B (unit 1) his reward is the lairs' shared one ([lair-encounter-credit.md](lair-encounter-credit.md)), and unit 2 held his fight to the chunk's completion evidence, with three fixes; both pass in CI (run 38543250503, by workflow_dispatch; not merged). Unit 4's change to his frost has not run yet.
 Proposal issue: none. On 10 October 2026 the owner asked for the next boss "exact same way you did the spider but adjusted for that character", and chose a new boss built from start to finish; the Yeti King is the owner's own example in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -158,7 +158,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 ## Multiplayer and persistence
 
 - **Server authority:** the server decides everything: waking, targets, every attack's hits, the bared snow and its drifting back, the phases, his kin, the frost and the mitten's warmth, the loot and the advancement. Clients only draw what his synced state says (his action and whether he is furious) and play the matching animations.
-- **What is saved:** he is saved with his instance's chunks. His phase, his fury and the cells of his lake he has bared are saved, and a passing moment (waking, his roar) resumes as the phase it leads to. When he is loaded, the snow drifts back over what he had bared. His whelps, blocks of ice, icicles and spikes are never saved, and each lasts only while he counts it his (`YetiKingEntity.owning`); his count is not saved either, so loaded again after an unload mid-fight he counts none from before, and any left in chunks that stopped without unloading are gone on their next tick instead of falling, flying or serving on. Instances close on a restart (part 1), and he goes with his.
+- **What is saved:** he is saved with his instance's chunks. His phase, his fury and the cells of his lake he has bared are saved, and a passing moment (waking, his roar) resumes as the phase it leads to. When he is loaded, the snow drifts back over what he had bared. His whelps, blocks of ice, icicles and spikes are never saved, and each lasts only while he counts it his (`YetiKingEntity.owning`); his count is not saved either, so loaded again after an unload mid-fight he counts none from before, and any left in chunks that stopped without unloading are gone on their next tick instead of falling, flying or serving on. Instances close on a restart (part 1), and he goes with his. Since Concordance Chunk B, unit 2, this is shown by `loadedAgainMidFightHeDriftsHisSnowBackAndBringsNoKin` and `loadedAgainHeCountsNoKinOrIceFromBefore` (an unload emulated on a game-test server), by the client test's away and back (a real unload), and for a restart by `LairClientGameTests` steps 7b and 9 ([hollow-acre.md](hollow-acre.md#verification)).
 - **The snow:** a bared patch is set back to drift snow cell by cell, and only where it is still glare ice.
 - **Chunks:** nothing is force-loaded. His arena stays loaded while players stand in the hall.
 - **The mitten** is looked at once a tick for each player; nothing about it is stored.
@@ -230,14 +230,15 @@ The game tests (`YetiKingGameTests`) show what a game-test server can, with a ki
 9. his loot is each participant's own: two who struck him each get Yeti Fur and, on a first kill, one trophy, and both earn Abominable; a bystander who never struck him gets nothing.
 
 The client game test (`YetiKingClientGameTests`, CI job `client`) runs his fight in a real Glacier Hall, with its one player in survival under Resistance:
-1. an instance opens with him waiting on his throne;
+1. an instance opens with him waiting on his throne, and (since Concordance Chunk B, unit 2) his lake is noted as the hall placed it: drift snow, trampled snow and glare ice;
 2. stepping onto the lake wakes him, and he comes down onto it to hunt;
-3. the Hunt's five attacks, his slam leaving bare glare ice where he came down;
+3. the Hunt's five attacks, his slam leaving bare glare ice where he came down and (unit 2) changing nothing of his lake but drift snow to glare ice;
 4. at half health the King's Roar from his dais, with two whelps out of the dens, then down again for the Blizzard;
 5. the Blizzard's icicles and spikes;
 6. below a fifth, the Fury of the Peaks;
-7. when he falls (with a patch of his lake bare and his kin about), the player has Yeti Fur, one trophy (a first kill) and Abominable, the snow has drifted back, his kin are gone, and Grey Mist stands in the lake's middle;
-8. a fresh instance opened in his slot has none of the old instance's Grey Mist.
+7. (unit 2) away and back mid-fight: his fury's slam beside a column's trampled ring bares a wider ring, only of drift snow, and his kin come out; the player leaves, and the hall's chunks unload with him in them; coming back, the player finds him loaded again, still in his fury, his bar shown again and his fury synced to the client, the snow drifted back, and none of his kin or ice;
+8. when he falls (with a patch of his lake bare and his kin about), the player has Yeti Fur, one trophy (a first kill) and Abominable, the snow has drifted back, his kin are gone, Grey Mist stands in the lake's middle, and (unit 2) his whole lake is as the hall placed it;
+9. a fresh instance opened in his slot has none of the old instance's Grey Mist.
 
 Along the way it takes a picture of each part of the fight (above).
 
@@ -257,9 +258,28 @@ Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these 
 
 Run 38519234934 also ran every client test class; `YetiKingClientGameTests`, unchanged by Chunk B, passed by its shard's success (shard 3).
 
+Concordance Chunk B, unit 2 (B-04; [the chunk's contract](concordance-chunk-b.md)), held his fight to the chunk's completion evidence with these game tests, and fixed three faults in it (the CHANGELOG has each). Not merged. They pass in CI run 38543250503 on `1266c905a`, by workflow_dispatch: all 1658 required game tests passed with and without the optional integrations (the logs name no test, but each of these is registered and required), and `YetiKingClientGameTests` passed by its shard's success (shard 4). The first run, 38534127130 on `0e7de6bf1`, failed `aChargeThatMeetsAColumnSouthOfItStunsHim` in both server jobs (he met the column's foot and slid on unstunned, to (29.7340, 32.3164) in the template) and the client test's away-and-back step ("His ice came back with him"); `215a1c1e0` and `1266c905a` fixed them.
+- `aGrazingChargeStunsHimOnlyWithinAColumnsReach`: passing 5.6 from a column's centre he runs his full line, and again to the very same spot; passing 4.8 from it he stops 5.32 short, stunned.
+- `inTheHallHisChargeStopsAtTheDaisTheRampAndTheDensWall`: in the hall's own template he never climbs: north he stops against the dais's lowest step, south against the ramp's first half step, and at the west den's corner he slides along the wall until his leash ends the run; never inside a block.
+- `aChargeThatMeetsAColumnSouthOfItStunsHim`: a glancing charge past a column's south side that meets its foot stuns him, rather than sliding him round it; `aChargeThatClearsAColumnsFootRunsOnUnstunned`: past its east side, within a block of its reach but clear of its foot, he runs on unstunned.
+- `aChargeEndsAtHisLeashTheSameEveryRun`: out to his leash he stops 28.8 from the centre; from it, outward, on his first step; from it, inward, he runs his full line; never past it.
+- `inHisFuryAMissedChargeIsFollowedByExactlyOneMore`; `inHisFuryABaitLeadsTheChainedChargeIntoAColumn`: a bait who moves during the chained wind-up leads the second charge into a column, and a stun never chains.
+- `soloMeleeBaitsAChargeIntoAColumnAndStrikesHimReeling`: baited from beyond a column he crashes into it, and a blow while he reels takes a third more before armour than the same blow after.
+- `soloCasterBaitsAChargeIntoAColumnAndLancesHimReeling`: the bait is the caster, who steps clear and lances him reeling, cast through Spell Engine, for a third more; the Lance is credited.
+- `aPartyOfTwoSolvesTheColumnLoop`: the bait side-steps 3 blocks during the wind-up, and the charge runs on into the column, trampling the caster on its line once; the bait strikes him reeling, the caster lances him, and both are credited. Two test players, not two people.
+- `leftAloneAfterHisSlamHisLakeIsAsItWas`: his slam bares only drift snow round where his foe stood, beside a trampled route; left alone, his reset drifts it all back, his kin flee and the lake is exactly as laid.
+- `leftAloneHisIceIsGoneAtOnce`: left alone, his standing spikes, a block of ice in the air and his falling icicles are all gone at once.
+- `whenHeFallsHisSnowDriftsBackAndHisKinAndIceAreGone`: his fury's wider ring and a second overlapping slam bare only drift snow; as he falls the lake comes back exactly, and his kin and spikes are gone.
+- `loadedAgainMidFightHeDriftsHisSnowBackAndBringsNoKin`: an unload emulated (each entity offered to `save()`, then removed as a chunk's unloading removes it): only he is written; loaded, he is the king he was, hunting, and on his first tick the snow he had bared drifts back; none of his kin or ice comes back.
+- `loadedAgainHeCountsNoKinOrIceFromBefore`: loaded again while his whelps and ice stay where they were, in chunks that did not unload, he counts none of them his, and each is gone on its next tick.
+- `woolAndLeatherStopTheFreezeButNotHisFrost`: a knitted sweater and a leather tunic stop the freeze's damage, but not his frost, its slowness or its thaw, which are as on bare skin; only the Yeti Mitten stops both.
+- `endGunLevitationLiftsNeitherHimNorHisKin`: End-gun Levitation is refused by him, by his whelps, and by him as an End gun's shot fells him; none of them rises.
+
+The client test's new steps are in its list above (1, 3, 7 and 8). Of its pictures in run 38543250503 (480×270 previews), the one after his fall shows the lake's rippled drift snow, the glare ice in its middle with a faint grey column of mist over it, and the dais and throne beyond, with no King, whelp or spike in view; the Fury's picture still shows pale shards of ice between his feet, which look like the spikes of the pose before. The pictures above were not replaced.
+
 Concordance Chunk B, unit 4 (B-08 and B-10), changed only his `chill` (it now passes by a player under Frostward, as by one holding the Mitten) and added these game tests, which have not run yet: `YetiKingGameTests.aFrostwardDrinkerIsNotChilledByTheYeti` (his blizzard and breath frost leave a Winter Brine drinker unfrozen, and land again once Frostward is gone) and `aKitWearerIsSlowedButNotHurtByHisFrost` (in a piece of the Rime travel kit his frost still lands, freezes and slows, but the freezing deals no damage); `ConcordanceWinterClientGameTests` runs his frost on a real player in Winterguard's set; the Glacier Hall's dossier names Winter Brine and the Mitten (`EncyclopediaGameTests.theGlacierHallsRiteNamesWinterBrine`). Record: [arcane-concordance-winter.md](arcane-concordance-winter.md).
 
-Not run: the two-client dedicated-server playtest, and play by hand. No test yet times his attacks against real players, measures how long a fight lasts, or tries sliding on his glare ice, his charge or his blocks of ice on a moving player.
+Not run: the two-client dedicated-server playtest, and play by hand; a second client joining mid-fight (the client test has one client leave and come back); a dedicated server; a real disconnect. No test yet times his attacks against real players, measures how long a fight lasts, or tries sliding on his glare ice, his charge or his blocks of ice on a moving player.
 
 ## World and event applicability
 
@@ -269,7 +289,8 @@ He is confined to the Glacier Hall, his own dimension; nothing of his reaches th
 
 Known limits:
 - untested by hand and with two clients, so his numbers are the plan's and may need tuning once he is played;
-- on Peaceful there is no fight;
+- on Peaceful there is no fight, though the horn is used up and the hall opens (proposed, B-P37);
+- a step of his charge that would bring him within 5.2 blocks of a column's centre stuns him, so a charge begun that near one can end on its first step though its line passes the column (proposed, B-P38);
 - with four or more players his health stops at the game's cap of 1024, not the 1050 his scale asks (the attribute's
   top; found by Chunk B's four-player test in CI);
 - Yeti Fur has two uses so far.

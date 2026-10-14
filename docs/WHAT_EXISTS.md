@@ -288,8 +288,9 @@ Record: [walled-town.md](features/walled-town.md).
 Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wayfaring parts 1 and 1b (through #277),
 Wayfaring part 1c (#315, through #320); Concordance Chunk A (the Spell Composer, lair encounter credit and the Jugcraft
 Encyclopedia's first slice) through #352. Concordance Chunk B's unit 1 (the Yeti King and the Cinder Tyrant on the
-encounter credit, their dossiers and JEI pages), unit 3 (Rime and Strata) and unit 4 (Winter Brine, Frostward and the
-Rime travel kit) are not merged; units 1 and 3 pass their tests in CI (run 38519234934). Contract and
+encounter credit, their dossiers and JEI pages), unit 2 (tests for the Glacier Hall's access and the Yeti King's fight,
+with three fixes to the fight), unit 3 (Rime and Strata) and unit 4 (Winter Brine, Frostward and the Rime travel kit)
+are not merged; units 1 to 3 pass their tests in CI (run 38543250503). Contract and
 vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),

@@ -180,10 +180,16 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   - *party:* four mock players, not four people.
   As in Chunk A, there is no real disconnect and no second client. `LairClientGameTests`, the lairs' own client test,
   passed in run 38519234934 (shard 2).
+- Concordance Chunk B, unit 2, not merged: `LairClientGameTests` keeps a `yeti_king` reward across a restart. In step
+  7b a Glacier Hall is closed by `Lairs.reset()` (a restart simulated) with the player inside: the reward kept from
+  before is not paid in the closed hall, and is paid once at home. In step 9 the world is saved with the player inside a
+  Glacier Hall and the reward kept in the world's record, and opened again: the game's own server stops and starts, and
+  on the real join the player is sent home first and then paid once. It passed in CI run 38543250503 by its shard's
+  success (shard 0). No disconnect or leave event is checked.
 
 Not run: a real fight with a healer in a lair; a real death in a fight (the Yeti King's test above makes one real
-`ServerPlayer.die` on a test player, without a real blow); a real disconnect, rejoin or respawn; two clients; a crash
-between saves.
+`ServerPlayer.die` on a test player, without a real blow); a real disconnect or respawn; a rejoin other than the one
+after a whole world's save and reopen (unit 2); two clients; a crash between saves.
 
 ## World and event applicability
 
