@@ -251,6 +251,11 @@ RESEARCH = {
 # "counter" is how an opponent or the world answers it, for the codex.
 INVOCATION_MAX_TUNINGS = 3  # Java: RulesParser.MAX_TUNINGS
 INVOCATION_SCALING_MAX = 2.0  # Java: RulesParser.MAX_SCALING (damage per point of Spell Power)
+# Spell Engine's spell bar keys, spell_hotbar_1 to 9: SpellHotbar.update gives a key to the first nine options only and
+# skips the rest (Spell Engine 1.10.9). ConcordanceSpells offers learned invocations sorted by id and an inscribed spell
+# last, so past nine the last ones have no key until the owner chooses an order, a cap or a loadout (#250);
+# check_invocations holds the invocations record to say so while there are more.
+SPELL_BAR_KEYS = 9
 # The vanilla particles invocations show on release (Spell Engine skips an unknown id, so a typo would show nothing).
 INVOCATION_PARTICLES = ("minecraft:end_rod", "minecraft:wax_on", "minecraft:glow", "minecraft:electric_spark",
                         "minecraft:cloud", "minecraft:flame", "minecraft:small_flame", "minecraft:lava",

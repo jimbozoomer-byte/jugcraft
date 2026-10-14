@@ -312,8 +312,9 @@ public class ConcordanceRimeStrataGameTests {
 	}
 
 	/**
-	 * Every route understands Rimekeeping: the bench; arriving in the Glacier Hall (not the Nether), which needs First Light
-	 * and may come before anything else, kept until snow and fire catch up; and a bottled dose that carries Rime.
+	 * Every route understands Rimekeeping: the bench; arriving in the Glacier Hall (not the Nether, and nothing while the
+	 * Concordance is switched off), which needs First Light and may come before anything else, kept until snow and fire
+	 * catch up; and a bottled dose that carries Rime.
 	 */
 	@GameTest(maxTicks = 20)
 	public void eitherRouteUnderstandsRimekeeping(GameTestHelper helper) {
@@ -327,6 +328,18 @@ public class ConcordanceRimeStrataGameTests {
 		learn(traveller, Rime.RESEARCH, ResearchState.OBSERVED);
 		helper.assertTrue(!RimeSurvey.arrived(traveller, Level.NETHER) && state(traveller, Rime.RESEARCH) == ResearchState.OBSERVED,
 				"The Nether is no winter survey");
+		// The Concordance off (the lairs still open): arriving records nothing. Switched back at once; the server runs other tests.
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		boolean switchedOff;
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			switchedOff = RimeSurvey.arrived(traveller, hall);
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		helper.assertTrue(!switchedOff && state(traveller, Rime.RESEARCH) == ResearchState.OBSERVED
+				&& practised(traveller, Rime.RESEARCH, RimeSurvey.ACTIVITY).isEmpty(),
+				"With the Concordance off the hall teaches nothing: " + evidence(traveller, Rime.RESEARCH));
 		helper.assertTrue(RimeSurvey.arrived(traveller, hall) && state(traveller, Rime.RESEARCH) == ResearchState.UNDERSTOOD,
 				"Arriving in the Glacier Hall understands it: " + state(traveller, Rime.RESEARCH));
 
@@ -542,7 +555,7 @@ public class ConcordanceRimeStrataGameTests {
 	/**
 	 * The electives: bracing another player on grass is an ally braced and living ground for the caster, and nothing for
 	 * the one braced; a ritual completed is a foundation for each taking part; and a creature's blow taken on stone in
-	 * Earthbound Thallite is Rooted holding. Without it, the same blow is nothing.
+	 * Earthbound Thallite is Rooted holding. Without it, or with the Concordance switched off, the same blow is nothing.
 	 */
 	@GameTest(maxTicks = 120)
 	public void anAllyARitualAndRootedThalliteAreElective(GameTestHelper helper) {
@@ -568,6 +581,18 @@ public class ConcordanceRimeStrataGameTests {
 		rooted.setItemSlot(EquipmentSlot.FEET, new ItemStack(item("jugcraft:earthbound_thallite_boots")));
 		helper.runAfterDelay(LOADING_TICKS, () -> {
 			Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(5, 2, 6));
+			// The Concordance off: the armour is worn, but a blow records nothing. Switched back at once.
+			boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+			try {
+				rooted.setOnGround(true);
+				rooted.damageCooldownTime = 0;
+				rooted.hurtServer(level, level.damageSources().mobAttack(zombie), 1.0F);
+			} finally {
+				JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+			}
+			helper.assertTrue(practised(rooted, Strata.RESEARCH, Strata.ACTIVITY).isEmpty(),
+					"With the Concordance off a blow taken is nothing: " + practised(rooted, Strata.RESEARCH, Strata.ACTIVITY));
 			for (ServerPlayer struck : List.of(rooted, bare)) {
 				struck.setOnGround(true);
 				struck.damageCooldownTime = 0;

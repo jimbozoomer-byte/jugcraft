@@ -5,7 +5,8 @@ Concordance Chunk B, unit 3.
   Hearthbinding's own specimens; either may come first, rules/ResearchEngine.java:21-22); understood at a Lampwright's
   Bench, by the winter survey (arriving in the Glacier Hall, or a Rime brew bottled by hand at an Alembic Crucible; gated
   by First Light only, so either route advances understanding, 02:136) or by notes; mastered by RIMEWORK_MASTERY kinds of
-  cold work, each counted once (02:153).
+  cold work, each counted once (02:153). Preserve's work needs a crucible filled by hand, so the Alembic Arts too: no
+  route to Rimekeeping's mastery skips the bench (or someone's notes).
 - B-06, Rimebind (defense): Rimebound, a fifth off a creature's movement speed for 3 s, then a hidden thaw of 2 s in which
   no one's Rimebind takes it (02:78).
 - B-07, Preserve (utility): an alteration in Rime's school holds an Alembic Crucible's heat in its band for 60 s (02:77).
@@ -35,12 +36,16 @@ SURVEY = rid("winter_survey")
 SURVEY_KEYS = {"glacier_hall": "arrive in the Glacier Hall",
                "crucible": "bottle a brew that carries Rime at an Alembic Crucible"}
 # Rimekeeping's mastery (Java: rime/Rime.ACTIVITY), gated by Rimekeeping understood.
-# key -> (what else it needs past Rimekeeping, its invocations and a crucible: None for nothing; words).
+# key -> (what else it needs past Rimekeeping, its invocations and a crucible: None for nothing, or a research one player
+# reaches alone, needed understood; words). Preserve counts only a crucible holding a mixture (Rime.preserve), and only
+# someone who understands the Alembic Arts puts water or anything else in one by hand (CrucibleBlockEntity.use), so both
+# Preserve keys need them; the progression graph's rimework route asks for them too (tools/concordance_progression.py).
 # Unit 5 (B-09) adds the elective "column" (the Yeti King's charge broken on a column) with its recorder.
+ALEMBIC_ARTS = rid("alembic_arts")
 RIMEWORK = rid("rimework")
 RIMEWORK_KEYS = {
-    "preserve:cold": (None, "Preserve a crucible holding a mixture in the cold band"),
-    "preserve:heated": (None, "Preserve a crucible holding a mixture in the warm, hot or searing band"),
+    "preserve:cold": (ALEMBIC_ARTS, "Preserve a crucible holding a mixture in the cold band"),
+    "preserve:heated": (ALEMBIC_ARTS, "Preserve a crucible holding a mixture in the warm, hot or searing band"),
     "restraint": (None, "Rimebind a hostile creature"),
 }
 RIMEWORK_MASTERY = 3
@@ -172,7 +177,7 @@ def _band_floors():
 def codex():
     research = "rimekeeping"
     specimens = "\\\n".join(f"- {name}" for name in RIME_SPECIMENS.values())
-    work = "; ".join(text for needs, text in RIMEWORK_KEYS.values() if needs is None)
+    work = "; ".join(text for _needs, text in RIMEWORK_KEYS.values())
     return {
         ("winter", "rimekeeping"): {
             "name": "Rimekeeping", "x": 0, "y": 0, "icon": "minecraft:packed_ice", "condition": None,
@@ -190,8 +195,9 @@ def codex():
                 ("crafting_recipe", "Frost Horn", "Blown at night on snow or ice in the Overworld, it takes you down into "
                  "the Glacier Hall. Arriving there is a study of cold in itself.", rid("frost_horn")),
                 ("text", "Understood", f"You can now cast **Rimebind** and **Preserve** with any Concordance instrument. "
-                 f"To **master** Rimekeeping, do {RIMEWORK_MASTERY} kinds of cold work: {work}. A magma block keeps a "
-                 "crucible warm and a campfire makes it hot.", (research, "understood")),
+                 f"To **master** Rimekeeping, do {RIMEWORK_MASTERY} kinds of cold work: {work}. Only someone who "
+                 "understands the **Alembic Arts** can put water in a crucible by hand. A magma block keeps a crucible "
+                 "warm and a campfire makes it hot.", (research, "understood")),
                 ("text", "Mastered", "Rimebind and Preserve cost a point less Focus.", (research, "mastered")),
             ]},
         ("winter", "rimebound"): {

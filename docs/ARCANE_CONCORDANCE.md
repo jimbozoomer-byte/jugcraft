@@ -16,8 +16,8 @@ seen by everyone) is on `claude/awesome-davinci-iwv3b9`. Where to start:
   and what remains;
 - players start with [the guide](ARCANE_CONCORDANCE_GUIDE.md).
 
-Concordance Chunk A, not yet merged, builds on these: the Spell Composer (composing without commands), lair encounter
-credit (support shares a lair boss's reward) and the encyclopedia's first route
+Concordance Chunk A (on `main` through #352) builds on these: the Spell Composer (composing without commands), lair
+encounter credit (support shares a lair boss's reward) and the encyclopedia's first route
 ([its contract](features/concordance-chunk-a.md)).
 Concordance Chunk B, unit 3, not yet merged, adds Rime and Strata: Rimekeeping and Stratawrighting, and the
 invocations Rimebind, Brace and Preserve ([its record](features/arcane-concordance-rime-strata.md);

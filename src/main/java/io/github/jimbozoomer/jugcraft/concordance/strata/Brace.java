@@ -31,8 +31,9 @@ import org.jspecify.annotations.Nullable;
  * Brace's Braced status (tools/concordance_strata.py): +{@value #RESISTANCE} knockback resistance a level, exclusive, for
  * 5 s. Not the war fork's BRACE trait nor a tower shield's brace (weapons/JugcraftArms). It is spent by the first push it
  * meets: a blow vanilla knocks back (full damage, not #minecraft:no_knockback, not wholly stopped by a shield), a harmful
- * Concordance push, or a scripted push that asks ({@link #spend}; the Yeti King's, B-09). Spent, it still braces for the
- * rest of that server tick and goes when the tick ends, so a whole blow is braced whatever order its parts come in. Helpful
+ * Concordance push, or a scripted push that asks ({@link #spend}; the Yeti King's, B-09, and the Leaf Blower's stream).
+ * Spent, it still braces for the rest of that server tick and goes when the tick ends, so a whole blow is braced whatever
+ * order its parts come in; spent between ticks (a push from a cast's packet), it goes when the next tick starts. Helpful
  * pushes (one's own Flashstep) neither feel nor spend it ({@link #resistanceWithout}). Teleports, portals and a lair's
  * mist ignore it. Who put it on is kept beside it, not saved ({@link #BRACER}).
  */
@@ -67,6 +68,9 @@ public final class Brace {
 				spend(entity);
 			}
 		});
+		// Packets run between ticks, after END_SERVER_TICK (mc263src MinecraftServer.java:836-837): a Brace a cast's push
+		// spent there goes before the next tick's blows, not at that tick's end.
+		ServerTickEvents.START_SERVER_TICK.register(server -> settle());
 		ServerTickEvents.END_SERVER_TICK.register(server -> settle());
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SPENT.clear());
 	}

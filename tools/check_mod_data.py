@@ -12035,7 +12035,8 @@ def check_invocations(co, root, lang, research):
     each of its tunings; it costs at least what its composition would (mastery taking off at most a quarter) and its
     cooldown is at least the composition's; its declared work and persistence cover every form; no two do the same
     thing; the six roles are covered; authored words are used only by invocations and every one is used; and each has
-    its spell, handler, gestures, sounds, particles, icon, codex entry and texts."""
+    its spell, handler, gestures, sounds, particles, icon, codex entry and texts. While the invocations and an inscribed
+    spell outnumber Spell Engine's spell keys, the record says so."""
     def java(name):
         path = root / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -12052,6 +12053,15 @@ def check_invocations(co, root, lang, research):
         err("concordance/rules/RulesParser.java: MAX_SCALING differs from INVOCATION_SCALING_MAX")
     if len(co.INVOCATIONS) > 16:
         err("invocations: more than an instrument's Tunings.MAX can tune")
+    # Spell Engine keys only the first SPELL_BAR_KEYS spells on the bar: every invocation and an inscribed spell after
+    # them may be more, and then the record must say how many and that the rest have no key (the #250 question).
+    record = ROOT / "docs" / "features" / "arcane-concordance-invocations.md"
+    words = " ".join((record.read_text(encoding="utf-8") if record.exists() else "").split())
+    claim = (f"{len(co.INVOCATIONS)} invocations and an inscribed spell, but Spell Engine's spell bar gives keys to its "
+             f"first {co.SPELL_BAR_KEYS} only")
+    if len(co.INVOCATIONS) + 1 > co.SPELL_BAR_KEYS and claim not in words:
+        err(f"docs/features/arcane-concordance-invocations.md: a player can hold {len(co.INVOCATIONS)} invocations and an "
+            f"inscribed spell, more than Spell Engine's {co.SPELL_BAR_KEYS} spell keys; the record must say \"{claim}\"")
     if 'registerCustomImpact(Jugcraft.id("invocation")' not in java("Invocations.java"):
         err("concordance/Invocations.java: must register the CUSTOM impact jugcraft:invocation")
     if set(info["role"] for info in co.INVOCATIONS.values()) != set(co.INVOCATION_ROLES):
@@ -12584,7 +12594,8 @@ def check_rime(co, root, lang, research):
     """Rime (Concordance Chunk B, unit 3; tools/concordance_rime.py). B-05: the Java mirrors Rimekeeping's activities,
     gates and keys; Rimekeeping begins with snow or ice, is observed against something that holds fire, is understood at
     the bench or by the First-Light-gated winter survey (the Glacier Hall, or a Rime brew bottled by hand) and is mastered
-    by kinds of cold work that need nothing else. B-06: Rimebind's Rimebound is an exclusive harmful status with its
+    by kinds of cold work that need nothing past research one player reaches alone (the Alembic Arts, to fill the
+    crucible Preserve counts). B-06: Rimebind's Rimebound is an exclusive harmful status with its
     hidden thaw, guarded and hooked into the effect boundary, never lengthened or deepened by a tuning, and the benchmark
     models its slow and thaw with the generator's numbers (B-P32). B-07: Preserve is
     the one alteration in Rime's school; the boundary dispatches it before the dousing (which removes only fire) where it
@@ -12619,9 +12630,18 @@ def check_rime(co, root, lang, research):
         err("Rimekeeping must be understood by its survey too (the Glacier Hall or a Rime brew, 02:136)")
     if rules("rimekeeping", "mastered") != [{"type": "practice", "activity": rm.RIMEWORK, "distinct": rm.RIMEWORK_MASTERY}]:
         err(f"Rimekeeping is mastered by its cold work, {rm.RIMEWORK_MASTERY} kinds")
-    own = [key for key, (needs, _text) in rm.RIMEWORK_KEYS.items() if needs is None]
+    # Each kind of cold work needs nothing past Rimekeeping, its invocations and a crucible but research one player
+    # reaches alone. Preserve counts only a crucible holding a mixture, which only an alembist fills by hand, so both
+    # Preserve keys need the Alembic Arts (check_progression holds the graph's rimework route to the same research).
+    own = [key for key, (needs, _text) in rm.RIMEWORK_KEYS.items() if needs is None or split(needs)[1] in research]
     if not 1 <= rm.RIMEWORK_MASTERY <= len(own):
         err(f"Rimekeeping: mastery must be reachable by its own cold work alone ({len(own)} kinds)")
+    if "crucible.parts() > 0" in _java_body(rime, "public static boolean preserve(") \
+            and "!Alchemy.knows(player)" in _java_body(crucible, "public InteractionResult use("):
+        for key, (needs, _text) in rm.RIMEWORK_KEYS.items():
+            if key.startswith("preserve:") and needs != rm.ALEMBIC_ARTS:
+                err(f"Rimekeeping key {key}: Preserve counts a crucible holding a mixture, which only someone who "
+                    f"understands the Alembic Arts fills by hand; it needs {rm.ALEMBIC_ARTS}")
     if research.get("rimekeeping", {}).get("unlocks") != {"understood": {"invocations": [f"{MOD}:rimebind", f"{MOD}:preserve"]}}:
         err("rimekeeping: understood teaches Rimebind and Preserve")
     # B-06: Rimebind.
@@ -12689,9 +12709,16 @@ def check_rime(co, root, lang, research):
             or "Rime.MAX_HOLD_TICKS" not in _java_body(crucible, "private int holding("):
         err("CrucibleBlockEntity.java: the hold is the optional field held_until, read as 0 when absent, cut to "
             "Rime.MAX_HOLD_TICKS")
-    if 'snapshot.putInt("held"' not in source(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java") \
-            or '"tooltip.jugcraft.concordance.jade.held"' not in source(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java"):
-        err("Jade: the crucible's snapshot carries Preserve's hold and the client shows it")
+    # The crucible's own snapshot and the client's crucible branch (from its band to its volume), not the whole files:
+    # the maw's snapshot puts a "held" too.
+    provider = _java_body(source(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"),
+                          "public static CompoundTag snapshot(CrucibleBlockEntity")
+    client = source(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java")
+    band = client.find('data.getStringOr("band", "")')
+    branch = client[band:client.find("tooltip.jugcraft.concordance.jade.volume", band)] if band >= 0 else ""
+    if 'snapshot.putInt("held"' not in provider or 'data.getIntOr("held"' not in branch \
+            or '"tooltip.jugcraft.concordance.jade.held"' not in branch:
+        err("Jade: the crucible's snapshot carries Preserve's hold and the client's crucible branch shows it")
     # B-P8: of the lair keepers (six since the Mire Hag and the Crypt Lich), only the Yeti King and the Cinder Tyrant
     # bear harmful control as resistant, and none is immune.
     keepers = {f"{MOD}:{keeper}" for keeper in ("yeti_king", "cinder_tyrant", "vesperine", "tatterlace", "mire_hag", "crypt_lich")}
@@ -12708,8 +12735,9 @@ def check_strata(co, root, lang, research):
     """Strata (Concordance Chunk B, unit 3; tools/concordance_strata.py). B-05: the Java mirrors Stratawrighting's
     activity, gate and keys; it reads stone inside Assay's raw matter, needs no Thallite and takes no bridging block; raw
     Thallite is never weighed; it is mastered by ways of anchoring that need nothing else. B-06: Brace's Braced is an
-    exclusive helpful status on the party, spent by a knockback blow or a harmful push and gone at the end of the tick;
-    helpful pushes neither feel nor spend it; who put it on is never saved; no tuning lengthens or deepens it; the
+    exclusive helpful status on the party, spent by a knockback blow or a harmful push (the Leaf Blower's stream among
+    them) and gone at the end of the tick, or at the start of the next when spent between ticks; helpful pushes neither
+    feel nor spend it; who put it on is never saved; no tuning lengthens or deepens it; the
     benchmark measures it with the generator's numbers (B-P32); and it is told apart from the war fork's Brace."""
     st, eq = co.strata, co.equivalence
 
@@ -12751,7 +12779,8 @@ def check_strata(co, root, lang, research):
     # B-06: Brace.
     for needle in (f'String STATUS = "{st.BRACED}";', f"double RESISTANCE = {st.BRACE_RESISTANCE};",
                    f'Jugcraft.id("{split(st.BRACED)[1]}")', f"0x{st.BRACED_COLOUR:06X}", "AFTER_DAMAGE",
-                   "DamageTypeTags.NO_KNOCKBACK", "hurtDuration", "END_SERVER_TICK", 'buildAndRegister(Jugcraft.id("brace_caster"))'):
+                   "DamageTypeTags.NO_KNOCKBACK", "hurtDuration", "START_SERVER_TICK", "END_SERVER_TICK",
+                   'buildAndRegister(Jugcraft.id("brace_caster"))'):
         if needle not in brace:
             err(f"concordance/strata/Brace.java: missing or different from tools/concordance_strata.py: {needle}")
     for line in brace.splitlines():
@@ -12760,6 +12789,11 @@ def check_strata(co, root, lang, research):
     for needle in ("Brace.resistanceWithout(", "Brace.spend(", "Brace.braced(", "effect.intent() == Intent.HARMFUL"):
         if needle not in effects:
             err(f"ConcordanceEffects.java: Brace wiring missing: {needle}")
+    # The Leaf Blower's stream is a push: a Brace meets it and is spent before knockback resistance is read.
+    blower = _java_body(source(JAVA_ROOT / "agriculture" / "LeafBlowerItem.java"), "public static void blow(")
+    spend, resist = blower.find("Brace.spend(living)"), blower.find("Attributes.KNOCKBACK_RESISTANCE")
+    if spend < 0 or resist < 0 or spend > resist:
+        err("agriculture/LeafBlowerItem.java: its stream must spend a Brace (Brace.spend) before it reads knockback resistance")
     bench = source(root / "balance" / "Benchmark.java")
     for needle in (f'String BRACED = "{st.BRACED}";', f"double BRACE_RESISTANCE = {st.BRACE_RESISTANCE};"):
         if needle not in bench:
@@ -14672,6 +14706,12 @@ def check_progression(co, root, lang, registered, research):
         err("docs/features/arcane-concordance-progression.md: its table of mandatory steps differs from the graph's:\n" + expected)
     nodes = pg.graph(research, invocations, rituals, at_hand)
     alone = pg.reachable(nodes, research)
+    # Rimekeeping's cold work (check_rime): every route to its practice asks for the research its keys need.
+    rimework = nodes.get(f"practice:{MOD}:rimework", {}).get("any", [])
+    for needs in sorted({needs for needs, _text in co.rime.RIMEWORK_KEYS.values() if needs}):
+        if not rimework or any(pg.research_node(needs, "understood") not in group for group in rimework):
+            err(f"progression: the rimework practice's route must ask for {needs} understood, which its cold work needs "
+                "(tools/concordance_rime.py RIMEWORK_KEYS)")
     def state_of(node_id):
         # A codex fact's id (jugcraft:concordance/<research>_<state>) as the graph's research node.
         path = node_id.split(":", 1)[1].removeprefix("concordance/")

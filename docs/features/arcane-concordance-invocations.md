@@ -35,6 +35,14 @@ a 20% slow for 3 s, then a 2 s thaw), Brace (support: half the knockback of the 
 Preserve (utility: an Alembic Crucible keeps its heat band for 60 s). That makes 13 of the 16 an instrument's tunings
 can hold (`Tunings.MAX`, which `check_mod_data` holds the invocations to), each signature still unique.
 
+**The spell bar's keys run out.** A player can hold 13 invocations and an inscribed spell, but Spell Engine's spell bar
+gives keys to its first 9 only (`SpellHotbar.update` skips the rest). The bar lists a player's invocations sorted by id,
+then the inscribed spell, so whatever comes after the ninth gets no key and is not on the bar. Which ones drop depends
+on what was learned: with First Light mastered and Hearthbinding and Rimekeeping understood, Revelation and Rimebind;
+Stratawrighting's Brace, second by id, pushes Preserve off too, and Hearthflare on top of that (Hearthbinding mastered)
+Lanternward. An inscribed spell, always last, is the first to go. The order, a cap or a loadout is the owner's open
+question from #250; `check_mod_data` keeps this paragraph to the count.
+
 **An instrument grants nothing by itself.** The spell bar offers only the invocations your research has taught; a
 second or better instrument does not add any. An instrument decides what an invocation may become: each invocation is
 compiled for each instrument, and one that does not fit an instrument cannot be cast with it.

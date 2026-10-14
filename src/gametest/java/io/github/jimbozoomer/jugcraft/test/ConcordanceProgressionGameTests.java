@@ -1,10 +1,18 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.conclave.Standing;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionGraph;
 import io.github.jimbozoomer.jugcraft.concordance.progression.Route;
@@ -24,9 +32,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 
 /**
  * Roadmap step 24, the progression graph (docs/features/arcane-concordance-progression.md), on a real server: the graph
@@ -34,7 +54,8 @@ import net.minecraft.world.level.GameType;
  * needing a later stage, two routes through each middle stage); a fresh player climbs from nothing to Architect, the
  * first stages by ordinary evidence through the research engine; a stage once reached is kept; and each route says what
  * it still needs. Since Concordance Chunk B, unit 3: winter and stone ask only for First Light, one examination of stone
- * serves Assay and Stratawrighting, and a Rimekeeper can reach Adept by the Glacier Hall with no bench.
+ * serves Assay and Stratawrighting, and a Rimekeeper understands Rimekeeping in the Glacier Hall with no bench, though
+ * its mastery, which wants a crucible filled by hand, asks for the Alembic Arts.
  */
 public class ConcordanceProgressionGameTests {
 	private static ServerPlayer fresh(GameTestHelper helper) {
@@ -65,6 +86,32 @@ public class ConcordanceProgressionGameTests {
 	private static Route route(String stage, String id) {
 		return definition(stage).routes().stream().filter(route -> route.id().equals(id)).findFirst()
 				.orElseThrow(() -> new IllegalStateException("no route " + stage + "/" + id));
+	}
+
+	/** The first effect of an invocation's composed form on the Initiate's Wand: what its cast applies. */
+	private static EffectSpec authored(String id) {
+		return ConcordanceData.rules().authored(id, "jugcraft:initiate_wand").plan().root().steps().getFirst().effect();
+	}
+
+	private static ConcordanceEffects.Context context(ServerLevel level, ServerPlayer actor) {
+		Cause cause = Cause.of(actor.getUUID(), Cause.Origin.INVOCATION, "test:progression", ConcordanceEffects.nextSerial());
+		return new ConcordanceEffects.Context(level, cause, actor, new Ledger(new Ledger.Limits(16, 256, 0)), "0/0/0", actor.position());
+	}
+
+	private static ConcordanceEffects.Result apply(ServerLevel level, ServerPlayer actor, EffectSpec spec, BlockPos at) {
+		return ConcordanceEffects.apply(context(level, actor), spec, at);
+	}
+
+	private static ConcordanceEffects.Result apply(ServerLevel level, ServerPlayer actor, EffectSpec spec, LivingEntity target) {
+		return ConcordanceEffects.apply(context(level, actor), spec, target);
+	}
+
+	/** A bottle of water poured into {@code crucible} by hand. */
+	private static InteractionResult fill(CrucibleBlockEntity crucible, ServerPlayer player) {
+		RateGate.forget(player.getUUID());
+		ItemStack water = PotionContents.createItemStack(Items.POTION, Potions.WATER);
+		player.setItemInHand(InteractionHand.MAIN_HAND, water);
+		return crucible.use(player, player.level(), water, InteractionHand.MAIN_HAND);
 	}
 
 	/**
@@ -236,28 +283,60 @@ public class ConcordanceProgressionGameTests {
 	}
 
 	/**
-	 * Concordance Chunk B, unit 3: an Adept without a bench. With First Light mastered, snow and fire observe Rimekeeping,
-	 * arriving in the Glacier Hall understands it and three kinds of cold work master it: two entries mastered make an
-	 * Adept, and nothing on the way was studied at a bench.
+	 * Concordance Chunk B, unit 3: a Rimekeeper on the way to Adept. With First Light mastered, snow and fire observe
+	 * Rimekeeping and arriving in the Glacier Hall understands it, with no study of it. Its mastery still asks for the
+	 * bench: Preserve counts only a crucible holding a mixture, and a crucible takes water by hand only from someone who
+	 * understands the Alembic Arts, studied at a Lampwright's Bench (or read in someone's notes). Then a cold crucible and
+	 * a heated one preserved through the effect boundary and a zombie bound master Rimekeeping, and two entries mastered
+	 * make an Adept.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aRimekeeperReachesAdeptByTheGlacierHall(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		for (int x = 0; x <= 7; x++) {
+			for (int z = 0; z <= 7; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+			}
+		}
 		ServerPlayer player = fresh(helper);
+		BlockPos standAt = helper.absolutePos(new BlockPos(1, 2, 1));
+		player.snapTo(standAt.getX() + 0.5, standAt.getY(), standAt.getZ() + 0.5, 0.0F, 0.0F);
 		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.MASTERED);
 		ConcordanceProgress.record(player, new Evidence.Examined("minecraft:snowball", 15));
 		ConcordanceProgress.record(player, new Evidence.Examined("minecraft:coal", 15));
 		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Rime.RESEARCH), ResearchState.OBSERVED, "snow and fire observe Rimekeeping");
 		helper.assertTrue(RimeSurvey.arrived(player, Lair.GLACIER_HALL.dimension), "arriving in the Glacier Hall is the field study");
 		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Rime.RESEARCH), ResearchState.UNDERSTOOD, "which understands it");
-		for (String work : List.of(Rime.KEY_PRESERVE_COLD, Rime.KEY_PRESERVE_HEATED, Rime.KEY_RESTRAINT)) {
-			helper.assertTrue(Rime.practise(player, work), "cold work: " + work);
+		helper.assertTrue(ConcordanceProgress.knowledge(player).progress(Rime.RESEARCH).evidence().keySet().stream().noneMatch(key -> key.startsWith("study:")),
+				"with no study of Rimekeeping");
+
+		BlockPos at = new BlockPos(1, 2, 3);
+		helper.setBlock(at, JugcraftConcordance.CRUCIBLE);
+		CrucibleBlockEntity crucible = (CrucibleBlockEntity) level.getBlockEntity(helper.absolutePos(at));
+		helper.assertTrue(fill(crucible, player) == InteractionResult.FAIL && crucible.parts() == 0,
+				"without the Alembic Arts no water goes into a crucible by hand");
+		EffectSpec preserve = authored("jugcraft:preserve");
+		helper.assertTrue(apply(level, player, preserve, helper.absolutePos(at)).applied()
+				&& !ConcordanceProgress.knowledge(player).progress(Rime.RESEARCH).evidence().keySet().stream().anyMatch(key -> key.startsWith("practice:" + Rime.ACTIVITY)),
+				"an empty crucible is held, but that is no cold work");
+
+		for (String specimen : List.of("minecraft:sugar", "minecraft:sweet_berries", "minecraft:dried_kelp")) {
+			ConcordanceProgress.record(player, new Evidence.Examined(specimen, 15));
 		}
-		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Rime.RESEARCH), ResearchState.MASTERED, "three kinds master it");
+		ConcordanceProgress.record(player, new Evidence.Studied("minecraft:sugar", "jugcraft:lampwright_bench"));
+		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Alchemy.RESEARCH), ResearchState.UNDERSTOOD,
+				"the Alembic Arts are understood at the bench");
+		helper.assertTrue(fill(crucible, player) == InteractionResult.SUCCESS && crucible.parts() == 1 && crucible.band() == Band.COLD,
+				"an alembist puts water in it: " + crucible.parts() + " parts at " + crucible.temperature());
+		helper.assertTrue(apply(level, player, preserve, helper.absolutePos(at)).applied(), "a cold crucible preserved");
+		crucible.setTemperature(60);
+		helper.assertTrue(apply(level, player, preserve, helper.absolutePos(at)).applied(), "a warm one preserved");
+		Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(3, 2, 6));
+		helper.assertTrue(apply(level, player, authored("jugcraft:rimebind"), zombie).applied(), "a zombie bound");
+		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Rime.RESEARCH), ResearchState.MASTERED,
+				"three kinds of cold work master it: " + ConcordanceProgress.knowledge(player).progress(Rime.RESEARCH).evidence().keySet());
 		StageProgress.refresh(player);
 		helper.assertValueEqual(stage(player), "adept", "two entries mastered make an Adept");
-		List<String> studied = ConcordanceProgress.knowledge(player).entries().values().stream()
-				.flatMap(progress -> progress.evidence().keySet().stream()).filter(key -> key.startsWith("study:")).toList();
-		helper.assertTrue(studied.isEmpty(), "no bench on the way: " + studied);
 		helper.succeed();
 	}
 }

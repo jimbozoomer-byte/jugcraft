@@ -1,9 +1,10 @@
 # Concordance Chunk B: winter and stone (contract and handoff)
 
 Status: contract written. Unit 1 (B-01 and B-02, the Yeti King and the Cinder Tyrant) and unit 3 (B-05 to B-07) are
-implemented on main `feb6d04fb` ([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk
-A). Unit 1's tests ran in CI once (run 38509414542: all but the two four-player tests, which expected more health
-than the game's 1024 cap allows; the tests now expect the cap); unit 3's have not run yet
+implemented on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb`
+([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk A); not merged. Unit 1's tests
+ran in CI once (run 38509414542: all but the two four-player tests, which expected more health than the game's 1024
+cap allows; the tests now expect the cap); unit 3's have not run yet
 ([its record](arcane-concordance-rime-strata.md)). Every other unit is Not started. The contract was written at
 `d4c07bf56`, the head of Chunk A ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337)), when main was
 `b73f51c8a` ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
@@ -382,8 +383,10 @@ and the next step named in the journal and the codex.
   bridge with them (`check_strata`). Nor is the Thallite ingot.
 - Strata can be completed with the `thallite` feature off: the four vanilla stones suffice.
 
-**Progression:** the Glacier Hall route makes an Adept possible without a bench (02:136), so the mandatory table moves
-the bench and planks to Architect.
+**Progression** (revised by the unit review): the Glacier Hall route understands Rimekeeping without a study (02:136),
+but Rimekeeping's mastery needs the Alembic Arts (Preserve counts a crucible holding a mixture, and only an alembist
+fills one by hand), which are understood at the bench or from notes. The graph's `rimework` route asks for them, so the
+bench stays mandatory at Adept; there is no bench-free Adept.
 
 **Not in this ticket:** Strata's civic-project or structural-boss-opening step (02:144); the Yeti column elective
 (02:137), with B-09. See Deferrals.
@@ -437,7 +440,8 @@ them.
 
 **Brace** (B-P11, B-P12, B-P30): `jugcraft:braced` for 100 ticks, +0.5 knockback resistance (the modifier
 `jugcraft:braced`), exclusive. It is spent by the first push it meets, braces the rest of that server tick and goes at
-its end (`ServerTickEvents.END_SERVER_TICK`). Vanilla's knockback respects knockback resistance (mc263src
+its end (`ServerTickEvents.END_SERVER_TICK`); spent between ticks, by a push in a cast's packet, it goes when the next
+tick starts (`START_SERVER_TICK`). Vanilla's knockback respects knockback resistance (mc263src
 `LivingEntity.java:1543-1544`).
 - **A blow vanilla knocks back** spends it (`ServerLivingEntityEvents.AFTER_DAMAGE`: full damage this tick, not
   `#minecraft:no_knockback`, not wholly stopped by a shield). Vanilla's knockback inside `hurtServer` and the extra
@@ -449,6 +453,10 @@ its end (`ServerTickEvents.END_SERVER_TICK`). Vanilla's knockback respects knock
 - **A scripted push** asks through `Brace.spend(target)`, which spends it and returns the share to let through, 1 − 0.5
   a level, and is safe to call more than once a blow. B-09's Yeti calls it inside his `push`, before or after
   `hurtServer`: the order no longer matters.
+- **The Leaf Blower's stream** (`agriculture/LeafBlowerItem.java`), which reaches another player only under PvP, spends
+  it with `Brace.spend` before it reads knockback resistance.
+- **Accepted exception** (B-P30): vanilla's knockback that comes without a damaging blow (the review names a mace
+  smash's bystanders) reads the Brace's resistance but does not spend it.
 - Teleports are not pushes: `Lairs.edges`, the Grey Mist, portals and the whirl move the braced as anyone.
 - Who put it on is kept in a non-saved attachment, `jugcraft:brace_caster` (`Brace.caster`, for B-09's deed). The
   caster's practice: the target's ground (`ground:living`, `ground:earthen`), an ally braced, and `held` when it is
@@ -490,9 +498,11 @@ scaled to 32) are checkpoint alternatives: shielding reads as "reduces damage", 
 - `ConcordanceRimeStrataClientGameTests`: the icons in the client's resources; spell bar, HUD and inventory screenshots.
 
 **Save effects:** new mob-effect, attribute-modifier, component, invocation and spell ids, stable once released. The
-three effects save in `active_effects`; whether their modifiers come back on load is settled by
-`rimeAndBraceSurviveASave`. `brace_caster` is not saved. An older build can drop all of a creature's effects on meeting
-an unknown one (the record's downgrade guidance).
+three effects save in `active_effects`, which vanilla puts back without re-adding their modifiers; those come back from
+the saved `attributes` (mc263src `LivingEntity.java:780-786`; `rimeAndBraceSurviveASave` checks it). `brace_caster` is
+not saved. An older build can drop all of a creature's effects on meeting an unknown one and keep their modifiers (a
+fifth off speed, +0.5 knockback resistance) until `/attribute ... modifier remove` takes them off (the record's
+downgrade guidance).
 
 ### B-07. Preserve (plan B2, part 3)
 
@@ -730,11 +740,14 @@ B-05 cannot start on its own.
   after Chunk B, four bosses are on the encounter credit and two are not.
 - **Overlap with Chunk C's preservation wash** (09:124): Winter Brine stays a frost counter.
 - **Unit 3, as built** ([record](arcane-concordance-rime-strata.md#rollout-and-open-questions)): sneak-use in the air
-  now examines snow, ice and four stones, so a sneaking player cannot throw a snowball; a bench-free Adept is possible
-  through the Glacier Hall, whose Frost Horn recipe sits under the `agriculture` switch; milk clears the Thaw with
-  Rimebound; recasting Preserve each minute holds one crucible indefinitely; an older build can drop a creature's
-  effects on meeting an unknown one. B-P24's 120 s hold from a focus worn with the Initiate's Wand exceeds that wand's
-  1200-tick duration limit: unit 4 caps it or records why.
+  now examines snow, ice and four stones, so a sneaking player cannot throw a snowball; the Glacier Hall, whose Frost
+  Horn recipe sits under the `agriculture` switch, understands Rimekeeping without a bench, but its mastery needs the
+  Alembic Arts, so the bench stays mandatory at Adept; milk clears the Thaw with Rimebound; recasting Preserve each
+  minute holds one crucible indefinitely; an older build can drop a creature's effects on meeting an unknown one and
+  keep their modifiers until `/attribute` removes them; Spell Engine keys only nine spells, so a player with more than
+  nine invocations loses the last ones from the bar (the #250 order question); vanilla's knockback without a damaging
+  blow is braced without spending the Brace. B-P24's 120 s hold from a focus worn with the Initiate's Wand exceeds that
+  wand's 1200-tick duration limit: unit 4 caps it or records why.
 
 ## Explicit don'ts
 
@@ -799,7 +812,7 @@ and the build without the optional integrations where it touches an optional bou
 
 ## Where to resume
 
-Units 1 and 3 are implemented. Unit 1, in four commits and a fix: B-01, the Yeti King on `Encounter` and `LairRewards`
+Units 1 and 3 are implemented on branch `claude/chunk-b-winter-stone`, not merged. Unit 1, in four commits and a fix: B-01, the Yeti King on `Encounter` and `LairRewards`
 with both payout defects fixed and the column deed, then the Cinder Tyrant the same way, with no deed (B-P4); B-02,
 the Glacier Hall's dossier and the Yeti King's JEI pages, with the lair step done by any keeper's first win and the
 generalised `check_acquisition` and `check_encyclopedia`, then the Cinder Kiln's dossier and the Cinder Tyrant's JEI
@@ -829,9 +842,9 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P6 | 14 October 2026 | Authored invocations only (13 of 16); no words a player composes for Rime or Strata | Proposed | B-06, B-07 |
 | B-P7 | 14 October 2026 | Brace's consenting ally is the party (`here allies`) | Proposed | B-06 |
 | B-P8 | 14 October 2026 | Only the Yeti King and the Cinder Tyrant join `#jugcraft:concordance/resistant`; Vesperine and Madame Tatterlace do not | Proposed | B-06 |
-| B-P9 | 14 October 2026 | Rimebind: `rimebound`, 20% slower for 60 ticks; a hidden `rime_thaw` for 100 ticks refuses a recast | Proposed | B-06 |
+| B-P9 | 14 October 2026; revised 14 October 2026 (unit 3) | Rimebind: `rimebound`, 20% slower for 60 ticks; a hidden `rime_thaw` refuses a recast for the binding's own time plus 40 ticks: 100 normally, 70 on a resistant creature (bound 30) | Proposed | B-06 |
 | B-P10 | 14 October 2026 | The thaw grace covers Rimebind only; the trophies' Frost boon (accepted), `dazzle`, DAZE and the Ice Breaker wave keep their own slows. The alternative, for the owner: one grace for every Concordance and trophy slow | Proposed | B-06, B-10 |
-| B-P11 | 14 October 2026 | Brace: +0.5 knockback resistance for 100 ticks, one hit, not stacking | Proposed | B-06 |
+| B-P11 | 14 October 2026; revised 14 October 2026 (unit 3) | Brace: +0.5 knockback resistance for 100 ticks, not stacking, spent by the first push it meets and bracing the rest of that tick (B-P30) rather than one hit | Proposed | B-06 |
 | B-P12 | 14 October 2026; revised 14 October 2026 (unit 3) | Brace's order: a Brace is spent by the first push it meets (a blow vanilla knocks back, a harmful Concordance push, or a scripted push through `Brace.spend`, as the Yeti's in B-09) and braces the rest of that tick (B-P30), so the Yeti may call `Brace.spend` before or after his blow's `hurtServer`; a helpful push (one's own Flashstep) neither uses it nor is shortened by it | Proposed | B-06, B-09 |
 | B-P13 | 14 October 2026 | Preserve: `touch struck`, the crucible only, holding its temperature band for 60 s | Proposed | B-07 |
 | B-P14 | 14 October 2026 | No Thallite Focus in Chunk B (it stays in Thallite slice 5); the crafted upgrade (09:94) is the water foci | Proposed | B-07, B-10 |
@@ -850,7 +863,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P27 | 14 October 2026 | The Frost Knight and Wight King sets stay creative-only (continuing A-D10) | Proposed | B-10 |
 | B-P28 | 14 October 2026 | Nothing is added to `earthen_ground`; no Thallite or trophy number changes | Proposed | B-10 |
 | B-P29 | 14 October 2026 | Winter Brine's dossier fact is text and icons, with no recipe grid | Proposed | B-02, B-08 |
-| B-P30 | 14 October 2026 | A spent Brace braces the rest of that server tick and goes at its end, so the extra knockback of sprints, weapons and mob attacks after `hurtServer` is braced too; two blows in one tick are both braced | Proposed | B-06, B-09 |
+| B-P30 | 14 October 2026; revised 14 October 2026 (unit 3 review) | A spent Brace braces the rest of that server tick and goes at its end, so the extra knockback of sprints, weapons and mob attacks after `hurtServer` is braced too; two blows in one tick are both braced. Spent between ticks (a push in a cast's packet), it goes when the next tick starts. The Leaf Blower's stream spends it. Accepted exception: vanilla's knockback without a damaging blow (a mace smash's bystanders) is braced but does not spend it | Proposed | B-06, B-09 |
 | B-P31 | 14 October 2026 | The owner's icons and sounds byte for byte at their own sizes: Rimebind `freeze.png`, Preserve `extend_time.png`, Brace and Braced `gravity.png` (the owner's own pair), Rimebound `freezing.png`, the Thaw `soaked.png`; Brace's release `gaia_1` to `gaia_4`; the other cues drawn. It replaces the earlier `shield`, `shielding` and `frozen`, scaled to 32 | Proposed | B-06, B-07 |
 | B-P32 | 14 October 2026 | The benchmark models Rimebound and its thaw, starts no cast that would change nothing, casts a harmful defense at any foe in reach, and measures knockback taken (never moved), with two acceptance checks | Proposed | B-06 |
 | B-P33 | 14 October 2026 | Roles: Rimebind defense, Brace support, Preserve utility | Proposed | B-06, B-07 |

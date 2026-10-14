@@ -213,10 +213,12 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 			// A Brace stops no mist: its toll comes off health, which is no blow, so it is not spent either.
 			player.addEffect(new MobEffectInstance(Brace.BRACED, 100, 0));
 			check(Lairs.edges(player, instance) && player.position().distanceTo(arrival) < 0.5
-					&& player.getHealth() == 20.0F - Lairs.EDGE_DAMAGE && player.hasEffect(Brace.BRACED),
-					"Falling out of the hall, braced, did not end on the ledge, or spent the Brace");
+					&& player.getHealth() == 20.0F - Lairs.EDGE_DAMAGE, "Falling out of the hall, braced, did not end on the ledge");
 			player.setHealth(20.0F);
 		});
+		// A spent Brace stays until its tick is over (B-P30): whether the toll spent it shows a tick later.
+		context.waitTicks(1);
+		server.runOnServer(minecraft -> check(player(minecraft).hasEffect(Brace.BRACED), "The mist's toll spent the Brace"));
 
 		// 3. Out, a second horn refused at the open whirl, and back in through the whirl.
 		server.runOnServer(minecraft -> {
@@ -240,9 +242,10 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 			whirl.use(player, InteractionHand.MAIN_HAND);
 			check(player.level() == minecraft.getLevel(HALL.dimension) && Lairs.instance(player.getAttached(Lairs.VISIT)) == first.get()
 					&& player.getTicksFrozen() > 60, "The whirl did not take the braced player back into the same hall, frosted");
-			check(player.hasEffect(Brace.BRACED), "The whirl spent the Brace");
 		});
-		context.waitTicks(40);
+		context.waitTicks(1);
+		server.runOnServer(minecraft -> check(player(minecraft).hasEffect(Brace.BRACED), "The whirl spent the Brace"));
+		context.waitTicks(39);
 
 		// 4. Closed, the player goes home and the whirl is gone.
 		server.runOnServer(minecraft -> {

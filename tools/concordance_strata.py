@@ -60,8 +60,10 @@ RESEARCH = {"stratawrighting": {
 
 # ----------------------------------------------------------------------------------------------- B-06 Brace
 # Braced (Java: strata/Brace): +BRACE_RESISTANCE knockback resistance for BRACE_TICKS, exclusive; spent by the first push
-# it meets (a blow that knocks back, a harmful Concordance push, or a scripted push that asks for it, B-09) and gone at the
-# end of that server tick. Helpful pushes (one's own Flashstep) neither spend it nor feel it (B-P12).
+# it meets (a blow that knocks back, a harmful Concordance push, or a push that asks for it: B-09's Yeti, the Leaf
+# Blower's stream) and gone at the end of that server tick (at the start of the next, if spent between ticks). Helpful
+# pushes (one's own Flashstep) neither spend it nor feel it (B-P12). Accepted exception: vanilla's knockback that comes
+# without a damaging blow is braced but does not spend it (B-P30).
 BRACED = rid("braced")
 BRACE_TICKS = 100
 BRACE_RESISTANCE = 0.5
@@ -135,8 +137,9 @@ def codex():
             "condition": (research, "understood"), "description": "Standing like stone",
             "pages": [("text", "Braced",
                        "Brace braces you and the members of your party within 4 blocks for 5 seconds: the next blow, or "
-                       "anyone's harmful push, moves you half as far. That blow spends it; a second Brace while one holds "
-                       "does nothing. Your own Flashstep ignores it. It lessens no harm, and nothing holds you against a "
+                       "anyone's harmful push (a Leaf Blower's stream too), moves you half as far and spends it. A shove "
+                       "that does you no harm may be halved without spending it. A second Brace while one holds does "
+                       "nothing. Your own Flashstep ignores it. It lessens no harm, and nothing holds you against a "
                        "lair's mist, a portal or a teleport. Not the war fork's Brace, which strikes a charging foe harder.")]},
     }
 

@@ -1,10 +1,12 @@
 package io.github.jimbozoomer.jugcraft.concordance.rime;
 
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Vector;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
 import net.minecraft.resources.ResourceKey;
@@ -40,8 +42,10 @@ public final class RimeSurvey {
 		return dose.get(Axis.RIME) > 0 && survey(player, KEY_CRUCIBLE);
 	}
 
+	/** The survey, for someone who understands First Light; nothing while the Concordance is switched off (lairs are not). */
 	private static boolean survey(ServerPlayer player, String key) {
-		return ConcordanceProgress.knowledge(player).state(RESEARCH).atLeast(ResearchState.UNDERSTOOD)
+		return JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)
+				&& ConcordanceProgress.knowledge(player).state(RESEARCH).atLeast(ResearchState.UNDERSTOOD)
 				&& ConcordanceProgress.record(player, new Evidence.Practiced(ACTIVITY, key)).recorded();
 	}
 }

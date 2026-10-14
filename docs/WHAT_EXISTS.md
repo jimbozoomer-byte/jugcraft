@@ -287,9 +287,9 @@ Record: [walled-town.md](features/walled-town.md).
 
 Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wayfaring parts 1 and 1b (through #277),
 Wayfaring part 1c (#315, through #320); Concordance Chunk A (the Spell Composer, lair encounter credit and the Jugcraft
-Encyclopedia's first slice) is not yet merged, nor are Concordance Chunk B's unit 1 (the Yeti King and the
-Cinder Tyrant on the encounter credit, their dossiers and JEI pages) and unit 3 (Rime and Strata). Contract
-and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
+Encyclopedia's first slice) through #352. Concordance Chunk B's unit 1 (the Yeti King and the Cinder Tyrant on the
+encounter credit, their dossiers and JEI pages) and unit 3 (Rime and Strata) are not merged. Contract and
+vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
 [arcane-concordance-composition.md](features/arcane-concordance-composition.md),

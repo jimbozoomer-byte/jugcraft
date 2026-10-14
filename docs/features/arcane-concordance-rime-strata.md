@@ -1,8 +1,9 @@
 # Arcane Concordance: Rime and Strata (Rimekeeping, Stratawrighting; Rimebind, Brace and Preserve)
 
 Status: implemented for Concordance Chunk B, unit 3 (tickets B-05, B-06 and B-07 of
-[the contract](concordance-chunk-b.md)), on main `feb6d04fb` (#352) with the contract on top. Not merged. **Nothing has
-been compiled or run in a game yet**; see Verification for what has run.
+[the contract](concordance-chunk-b.md)), on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb` (#352)
+with the contract and unit 1 beneath it; not merged. **No Minecraft build has been compiled or run yet** (only the balance package, in a scratch javac
+harness); see Verification for what has run.
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B2).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code (Claude Opus 5.5); the model is named in the
@@ -30,7 +31,8 @@ utility (Preserve).
   examined, and counts once it is.
 - Understood, Rimekeeping teaches **Rimebind** and **Preserve**. **Mastery** is three kinds of cold work, each counted
   once: Preserve a crucible holding a mixture while it is cold, Preserve one while it is warm or hotter, and Rimebind a
-  hostile creature. Mastered, both cost a point less Focus.
+  hostile creature. Only someone who understands the **Alembic Arts** puts water in a crucible by hand, so mastery needs
+  them too. Mastered, both cost a point less Focus.
 - **Stratawrighting** is the other new entry. Once First Light is understood, sneak and use **granite, diorite,
   andesite, tuff or raw Thallite** to examine it. The same examination also begins the Balancewrights' **Assay** (these
   are raw matter too). Three different ones observe it; studying one at the bench, or reading notes, understands it.
@@ -106,7 +108,7 @@ Each key is a piece of evidence, saved as `practice:<activity>:<key>` and counte
 |---|---|---|---|
 | `jugcraft:winter_survey` (First Light understood) | `glacier_hall` | arriving in the Glacier Hall's dimension | a Frost Horn blown at night on snow, or a friend's whirl |
 | | `crucible` | bottling by hand a dose whose Rime is above 0 | the Alembic Arts understood (to work the crucible by hand) |
-| `jugcraft:rimework` (Rimekeeping understood) | `preserve:cold` | a Preserve that holds a crucible holding a mixture, in the cold band | a crucible with water or a brew in it |
+| `jugcraft:rimework` (Rimekeeping understood) | `preserve:cold` | a Preserve that holds a crucible holding a mixture, in the cold band | the Alembic Arts understood, to put water in a crucible by hand (`CrucibleBlockEntity.use`); a crucible with water or a brew in it |
 | | `preserve:heated` | the same, in the warm, hot or searing band | the same, over a heat source (a magma block keeps it warm, a campfire hot) |
 | | `restraint` | a Rimebound that takes on a hostile creature (`Enemy`) at normal tolerance | a monster within 16 blocks |
 | `jugcraft:anchoring` (Stratawrighting understood) | `ground:living` | a Brace that takes on someone standing on living ground | nothing: oneself on grass counts |
@@ -116,21 +118,27 @@ Each key is a piece of evidence, saved as `practice:<activity>:<key>` and counte
 | | `foundation` (elective) | a ritual completed at a Circle Anchor, for every player present | Circle Lore and a circle |
 | | `rooted` (elective) | struck by a creature, not wholly blocked, in Earthbound Thallite on natural ground | Earthbound Thallite armour (the thallite switch) |
 
-Rimekeeping's mastery needs all three of its keys. Stratawrighting's needs three of its six, and its own three need
-nothing past the research and a blow to brace against, so neither Thallite nor another player is ever required
+Rimekeeping's mastery needs all three of its keys, and both Preserve keys need the Alembic Arts: a crucible's mixture
+changes only by hand, which needs them, or by a formula an alembist set, while pipes fill only its water tank and
+hoppers only the buffer a formula draws on. `check_rime` holds the keys to that, and `check_progression` holds the
+progression graph's `rimework` route to the same research. Stratawrighting's needs three of its six, and its own three
+need nothing past the research and a blow to brace against, so neither Thallite nor another player is ever required
 (`check_strata` holds both rules). A Rime key can be stored while Rimekeeping is still unmet, when fire is examined
 first; the journal does not show an unmet entry.
 
 ### When a Brace is spent
 
 A Brace is spent by the first push it meets and stays in force until that server tick ends (B-P30), so a whole blow is
-braced whatever order its parts come in.
+braced whatever order its parts come in. A push from a cast arrives in its packet, between ticks: a Brace spent there
+goes when the next tick starts, so it braces no blow of that tick.
 
 | What meets the Brace | Braced? | Spends it? |
 |---|---|---|
 | A blow vanilla knocks back (it took full damage this tick, is not `#minecraft:no_knockback`, and was not wholly stopped by a shield) | yes, with the extra knockback of a sprint, a Knockback enchantment or a mob's attack that follows in the same tick | yes, at the end of the tick |
 | Another blow in the same tick | yes | already spent |
 | A harmful Concordance push | yes | yes |
+| The Leaf Blower's stream (another player only under PvP) | yes, the first tick's push | yes |
+| Vanilla knockback that comes without a damaging blow (the review names a mace smash's bystanders) | yes | no: an accepted exception (B-P30) |
 | A helpful push: one's own Flashstep, a friend's helpful push | no: read without the Brace | no |
 | A scripted push that asks through `Brace.spend` (the Yeti King's, B-09) | returns the share to let through, 1 − 0.5 a level | yes |
 | A teleport, a portal, the Grey Mist, the hall's edge toll, a whirl | not a push: the Brace changes nothing | no |
@@ -172,9 +180,12 @@ until B-09 gives it a visible effect. This is an inference until a test runs.
   understood by the winter survey rather than a compare-two-brews step (revised B-P16); a Brace lasts out the tick it is
   spent in (B-P30); the owner's icons are used at their own sizes (B-P31); Jade's hold moved here from B-08; there is no
   Thallite Focus and no crafted upgrade in this unit (B-P14: the water foci in unit 4).
-- **A bench-free Adept is possible** through the Glacier Hall: arriving understands Rimekeeping without a study, so the
-  Lampwright's Bench first becomes unavoidable at Architect ([the mandatory table](arcane-concordance-progression.md)).
-  This is deliberate (02:136: either route advances core understanding).
+- **No bench-free Adept.** Arriving in the Glacier Hall understands Rimekeeping without a study (02:136: either route
+  advances core understanding), but its mastery needs the Alembic Arts, which are understood at the bench or from
+  notes, so the Lampwright's Bench stays unavoidable at Adept
+  ([the mandatory table](arcane-concordance-progression.md)). The unit first claimed a bench-free Adept because the
+  progression graph's `rimework` route left the Alembic Arts out; the unit review found it. The route and the keys now
+  ask for them, and `aRimekeeperReachesAdeptByTheGlacierHall` fills a real crucible.
 
 ## Connections
 
@@ -191,13 +202,14 @@ until B-09 gives it a visible effect. This is an inference until a test runs.
 - Magic connection: two more traditions for the Conclave; one examination serves Assay and Stratawrighting; Circle
   Lore's rituals and Earthbound Thallite are Strata electives; Hearthbinding's specimens observe Rimekeeping.
 - Reachable entry path: First Light understood → a snowball and coal → the bench (or the hall, or a bottled Rime brew) →
-  Preserve a cold crucible and a warm one and Rimebind a zombie. Granite, diorite and andesite → the bench → Brace on
-  grass and on stone and take a zombie's blow braced. Nothing needs the Nether or the End, and Strata completes with the
-  thallite switch off (`check_mod_data` runs the progression graph both ways; `strataNeedsNoThallite`).
+  the Alembic Arts understood (the bench or notes), to fill a crucible by hand → Preserve a cold crucible and a warm one
+  and Rimebind a zombie. Granite, diorite and andesite → the bench → Brace on grass and on stone and take a zombie's
+  blow braced. Nothing needs the Nether or the End, and Strata completes with the thallite switch off (`check_mod_data`
+  runs the progression graph both ways; `strataNeedsNoThallite`).
 - Solo, trade and cooperative routes: entirely solo; Research Notes can be shared; bracing a party member is one
   elective.
-- Specialty use without other branches: needs only First Light; Preserve's mastery keys want a crucible with water in
-  it.
+- Specialty use without other branches: understanding needs only First Light; mastery also needs the Alembic Arts, as
+  Preserve's keys want a crucible with water in it, filled by hand.
 
 ## Balance
 
@@ -232,16 +244,20 @@ until B-09 gives it a visible effect. This is an inference until a test runs.
 - Persistence:
   - **Knowledge:** the new research ids and keys sit inside the existing versioned record; the schema and codec are
     unchanged.
-  - **Effects:** Rimebound, the Thaw and Braced save with the creature in vanilla's `active_effects`, with their
-    attribute modifiers, so the grace survives a logout. Whether vanilla re-adds an effect's modifiers on load is
-    settled by `rimeAndBraceSurviveASave`, not yet run; if they are missing, they must be re-added on entity load.
+  - **Effects:** Rimebound, the Thaw and Braced save with the creature in vanilla's `active_effects`, so the grace
+    survives a logout. Their attribute modifiers are not re-added when the effects load: vanilla restores the saved
+    `attributes` first, then puts `active_effects` back without `onEffectAdded` (mc263src `LivingEntity.java:780-786`),
+    so the modifiers come back only because they were saved among the attributes. That they are saved there is assumed
+    from 1.20.5 to 1.21 (`AttributeInstance`'s packing is not in the mirror) and checked by `rimeAndBraceSurviveASave`,
+    not yet run.
   - **Not saved:** `jugcraft:brace_caster` (a Brace carried through a relog keeps its time and credits no one) and the
     set of Braces spent this tick (at most one tick long).
   - **The crucible's `held_until`** (game time) is written only while held, read with a default of 0, and the crucible
     still stamps version 1. A hold runs on the world clock: a crucible unloaded while held finds its minute over when it
     loads. A forged hold far in the future is cut to 2400 ticks on its next tick.
-- Disable behaviour: with `concordance.enabled=false`, examining and casting are refused like every Concordance action;
-  the effects, the attachment and the tags stay registered.
+- Disable behaviour: with `concordance.enabled=false`, examining and casting are refused like every Concordance action,
+  and the passive hooks record nothing: arriving in the Glacier Hall (the lairs are not switched off with it) and a blow
+  taken in Earthbound Thallite. The effects, the attachment and the tags stay registered.
 - Two blows landing in one tick are both braced; a save made inside the tick a Brace is spent can keep it.
 
 ## Dependencies and assets
@@ -292,7 +308,8 @@ ice or cold casting recording was found in the owner's sound families.
 
 ## Verification
 
-Run for this unit, on 14 October 2026 (no Minecraft jar is available where it was written, so nothing was compiled):
+Run for this unit, on 14 October 2026 (no Minecraft jar is available where it was written, so no Minecraft build was
+compiled or run):
 
 - `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py` and `python3 scripts/check_repository.py`
   pass on each of the unit's commits.
@@ -303,13 +320,17 @@ Run for this unit, on 14 October 2026 (no Minecraft jar is available where it wa
   set to 1 or a Prolong tuning; Preserve dispatched after the dousing, missing from `accepts`, a hold of 1300 ticks, a
   chest made preservable, `Rime.preserve` called from elsewhere, an inventory touched in `hold`; `brace_caster` made
   persistent; the harmful-only test removed from the push; Vesperine or the Mire Hag made resistant; the Thaw or the
-  bottling hook missing; Jade's key renamed; Brace's counter without the war fork; the Guard dropped; Rimekeepers
-  missing from the Conclave; the Glacier Hall alternative removed from the graph (the "later stage" problem returns);
-  two sources for one owner file; one pixel of an owner icon changed; and each of the benchmark's five mirrored
-  constants.
+  bottling hook missing; Jade's lang key renamed; Brace's counter without the war fork; the Guard dropped;
+  Rimekeepers missing from the Conclave; the Glacier Hall alternative removed from the graph (the "later stage" problem
+  returned, at that commit); two sources for one owner file; one pixel of an owner icon changed; and each of the
+  benchmark's five mirrored constants.
 - The progression graph (`check_progression`) reaches every stage alone, without the Nether or the End, and the
   mandatory table and journey routes it writes were regenerated.
 - The benchmark, by a scratch javac harness (see Balance); not the game test.
+- **After the unit review** (same day): the three checks pass again. The review's new audit rules were mutation-tested
+  on an export: the Alembic Arts dropped from the graph's `rimework` route, a Preserve key needing nothing, the Leaf
+  Blower spending no Brace, no settling at a tick's start, the crucible's snapshot or the client's crucible branch
+  without the hold, and the spell bar paragraph changed. Each of the seven was reported, and the clean export passes.
 
 Game tests added (none run yet; CI's `mod`, `optional integrations absent` and client jobs are their first run):
 
@@ -361,14 +382,25 @@ protected towns and build permission.
   `.strata_gather`, `.brace`; codex categories `winter`, `stone`.
 - Save compatibility: additive; no migration. **Downgrade:** an older build keeps the unknown research entries and
   relearns no spells from them, and ignores `held_until` (the crucible is simply not held). An older build reads a
-  creature's `active_effects` as one list, so an unknown effect id there can drop all of that creature's effects: back
-  up a world before moving it to an older build.
+  creature's `active_effects` as one list, so an unknown effect id there can drop all of that creature's effects. Their
+  attribute modifiers, restored from the saved `attributes`, then stay with no effect to take them off, and milk cannot
+  clear them: a creature that was rimebound keeps a fifth off its speed, and one that was braced +0.5 knockback
+  resistance, for good. Remove them by command:
+  `/attribute <target> minecraft:movement_speed modifier remove jugcraft:rimebound` and
+  `/attribute <target> minecraft:knockback_resistance modifier remove jugcraft:braced` (and likewise any other dropped
+  effect's modifier). Back up a world before moving it to an older build.
 - Sneak-use in the air now examines snow, ice, granite, diorite, andesite, tuff and raw Thallite: a sneaking player
   cannot throw a snowball. One bench study of granite can understand Assay and Stratawrighting at once; Assay becomes
   easier to begin, and its mastery is unchanged.
 - Milk clears the Thaw with Rimebound, so a drinker can be bound again at once.
-- The spell bar sorts invocations by id, so a player who learns these gets them among First Light's and Ember's (the
-  open spell-order question from #250).
+- **The spell bar's nine keys** (the open spell-order question from #250): Spell Engine's spell bar gives keys to its
+  first 9 spells only and leaves the rest off it (`SpellHotbar.update`), and Jugcraft offers a player's invocations
+  sorted by id, then an inscribed spell. Thirteen invocations exist, so a player who learns more than nine loses the
+  last ones: with First Light mastered and Hearthbinding and Rimekeeping understood, Revelation and Rimebind get no key;
+  Brace (Stratawrighting) pushes Preserve off too, and Hearthflare on top of that (Hearthbinding mastered) Lanternward;
+  an inscribed spell is always last. A later fix orders or caps the container (`ConcordanceSpells.containers`) or
+  offers a loadout, once the owner chooses; until then `check_invocations` holds
+  [the invocations record](arcane-concordance-invocations.md) to the count.
 - For the owner's checkpoint: a Brace lasting out its tick (B-P30); the icon choices (B-P31) and the soaked icon's
   folder label; the knockback measure (B-P32); Rimebind's targets following the shared boundary (B-P34); "Stonebrace" as
   a display name instead of "Brace", to keep it apart from the war fork's trait.

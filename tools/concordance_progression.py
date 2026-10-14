@@ -240,7 +240,7 @@ VANILLA_SOURCES = {
     "minecraft:granite": ("gathered", "stone veins everywhere underground", "another kind of stone serves instead", ""),
     "minecraft:diorite": ("gathered", "stone veins everywhere underground", "another kind of stone serves instead", ""),
     "minecraft:andesite": ("gathered", "stone veins everywhere underground", "another kind of stone serves instead", ""),
-    "minecraft:tuff": ("gathered", "stone veins below Y 16", "another kind of stone serves instead", ""),
+    "minecraft:tuff": ("gathered", "stone veins below Y 0", "another kind of stone serves instead", ""),
 }
 
 # Jugcraft things the world grows rather than a recipe makes, by the same rules as VANILLA_SOURCES.
@@ -523,7 +523,10 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
                 alternatives = [[items.item(rid("frost_horn")), "encounter:night"],
                                 [items.item(rid("crucible")), research_node(rid("alembic_arts"), "understood")]]
             elif key == "rimework":
-                alternatives = [[f"invocation:{rid('preserve')}", f"invocation:{rid('rimebind')}", items.item(rid("crucible"))]]
+                # Preserve counts only a crucible holding a mixture, and only an alembist fills one by hand
+                # (tools/concordance_rime.py RIMEWORK_KEYS; check_rime holds the two together).
+                alternatives = [[f"invocation:{rid('preserve')}", f"invocation:{rid('rimebind')}", items.item(rid("crucible")),
+                                 research_node(rid("alembic_arts"), "understood")]]
             elif key == "anchoring":
                 alternatives = [[f"invocation:{rid('brace')}"]]
             for encounter in encounters:

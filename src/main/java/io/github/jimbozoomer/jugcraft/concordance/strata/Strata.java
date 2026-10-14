@@ -1,9 +1,11 @@
 package io.github.jimbozoomer.jugcraft.concordance.strata;
 
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.gear.ThalliteGear;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,8 +74,14 @@ public final class Strata {
 		practise(caster, KEY_HELD);
 	}
 
-	/** An Earthbound wearer struck by a creature on natural ground: Rooted holding (02:141; B-P26). */
+	/**
+	 * An Earthbound wearer struck by a creature on natural ground: Rooted holding (02:141; B-P26). Nothing while the
+	 * Concordance is switched off: armour is worn whatever the switch.
+	 */
 	private static void struck(LivingEntity entity, DamageSource source, float base, float taken, boolean blocked) {
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			return;
+		}
 		if (entity instanceof ServerPlayer player && !blocked && source.getEntity() != null && ThalliteGear.earthbound(player) > 0
 				&& ground(ThalliteGear.footing(player)) != null) {
 			practise(player, KEY_ROOTED);
