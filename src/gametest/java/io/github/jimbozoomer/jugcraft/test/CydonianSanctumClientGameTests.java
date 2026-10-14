@@ -17,6 +17,7 @@ import io.github.jimbozoomer.jugcraft.world.AdamOndiAhman;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -28,6 +29,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -104,6 +106,7 @@ public class CydonianSanctumClientGameTests implements FabricClientGameTest {
 		context.waitTicks(5);
 		AtomicReference<LairInstance> first = new AtomicReference<>();
 		AtomicReference<Vec3> stood = new AtomicReference<>();
+		AtomicInteger taken = new AtomicInteger();
 		BlockHitResult atAltar = new BlockHitResult(Vec3.atCenterOf(altar), Direction.UP, altar, false);
 
 		// 1. By day the keystone is refused and kept.
@@ -189,13 +192,16 @@ public class CydonianSanctumClientGameTests implements FabricClientGameTest {
 			check(LairRules.useBlock(player, lair, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(vent), Direction.UP, vent, false))
 					== InteractionResult.FAIL, "A dust vent can be used");
 			player.setHealth(20.0F);
+			taken.set(damageTaken(player));
 			player.teleportTo(vent.getX() + 0.5, vent.getY() + 1.0, vent.getZ() + 0.5);
 		});
-		context.waitTicks(CydonianSanctum.VENT_PERIOD + 10);
+		// Two of the vents' periods, so a puff comes after the short shelter a player has on arriving in a dimension. The
+		// damage is counted rather than read off the health, which peaceful mends a point a second.
+		context.waitTicks(CydonianSanctum.VENT_PERIOD * 2 + 10);
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
-			check(player.getHealth() <= 20.0F - CydonianSanctum.VENT_DAMAGE + 0.01F, "Standing on a dust vent, the player was never struck: "
-					+ player.getHealth());
+			float struck = (damageTaken(player) - taken.get()) / 10.0F;
+			check(struck >= CydonianSanctum.VENT_DAMAGE - 0.01F, "Standing on a dust vent, the player was never struck: " + struck + " damage taken");
 			player.setHealth(20.0F);
 		});
 
@@ -226,13 +232,14 @@ public class CydonianSanctumClientGameTests implements FabricClientGameTest {
 			ServerPlayer player = player(minecraft);
 			BlockPos o = first.get().origin();
 			player.setHealth(20.0F);
+			taken.set(damageTaken(player));
 			player.teleportTo(o.getX() + CydonianSanctum.CENTRE_X, o.getY() + CydonianSanctum.STAND + DROP, o.getZ() + CydonianSanctum.CENTRE_Z - 6.0);
 			player.setDeltaMovement(Vec3.ZERO);
 		});
 		context.waitTicks(60);
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
-			float lost = 20.0F - player.getHealth();
+			float lost = (damageTaken(player) - taken.get()) / 10.0F;
 			// A full drop of DROP blocks costs DROP - 3 hearts' halves; Mars takes half, less the jump's cushion.
 			check(lost > 0.0F && lost <= (DROP - 3) * CydonianSanctum.FALL_DAMAGE + 0.01F, "The drop did not hurt half as much: lost " + lost);
 			player.setHealth(20.0F);
@@ -374,6 +381,11 @@ public class CydonianSanctumClientGameTests implements FabricClientGameTest {
 
 	private static ServerPlayer player(MinecraftServer minecraft) {
 		return minecraft.getPlayerList().getPlayers().get(0);
+	}
+
+	/** All the damage {@code player} has taken, in tenths of a point (the game's own count). */
+	private static int damageTaken(ServerPlayer player) {
+		return player.getStats().getValue(Stats.CUSTOM.get(Stats.DAMAGE_TAKEN));
 	}
 
 	private static void check(boolean condition, String message) {
