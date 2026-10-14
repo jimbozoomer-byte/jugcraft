@@ -1148,6 +1148,33 @@
       }
     ]
   },
+  "guns.fencepost_carbine.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/iron_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.waystation_shotgun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_shotgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.highball_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/new_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

@@ -161,6 +161,9 @@ public final class JugcraftGuns {
 		SPECS.put("tabby_revolver", new GunSpec(6.0F, 1, 8, false, 6, 0, 9, 12, 13, 2.5F, 0.8F, 56, "light_round"));
 		SPECS.put("lookout_rifle", new GunSpec(7.0F, 1, 13, false, 8, 0, 13, 9, 17, 2.0F, 0.2F, 112, "rifle_round"));
 		SPECS.put("ammonite_carbine", new GunSpec(5.0F, 1, 8, false, 16, 60, 0, 0, 0, 2.5F, 0.4F, 88, "rifle_round"));
+		SPECS.put("fencepost_carbine", new GunSpec(10.0F, 1, 18, false, 7, 0, 15, 20, 27, 2.0F, 0.3F, 104, "rifle_round"));
+		SPECS.put("waystation_shotgun", new GunSpec(3.0F, 8, 17, false, 8, 0, 9, 13, 18, 6.5F, 4.5F, 28, "buckshot_shell"));
+		SPECS.put("highball_rifle", new GunSpec(15.0F, 1, 13, false, 1, 33, 0, 0, 0, 2.0F, 0.1F, 128, "rifle_round"));
 	}
 
 	/**
@@ -387,6 +390,13 @@ public final class JugcraftGuns {
 				"steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope", "reflex_sight",
 				"tactical_grip", "laser_sight"));
 		ACCEPTS.put("ammonite_carbine", List.of("light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("fencepost_carbine", List.of("light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet", "tactical_grip"));
+		ACCEPTS.put("waystation_shotgun", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
+		ACCEPTS.put("highball_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */

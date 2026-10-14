@@ -643,6 +643,33 @@ GUNS = {
         "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 16,
         "reload": 60, "spread": (2.5, 0.4), "range": 88, "ammo": "rifle_round",
     },
+    # Slice 13B, more of the frontier guns: the owner's Fencer Carabine, Callwell Terminal and Saketini. A lever-action
+    # carbine loaded a round at a time through a lid in its stock; a lever-action shotgun loaded a shell at a time; and a
+    # single-shot rifle whose barrel swings aside to be loaded.
+    "fencepost_carbine": {
+        "display": "Fencepost Carbine",
+        "source": "fencer_carabine",
+        "tooltip": "A lever-action carbine loaded a round at a time through a lid in its stock, its hammer cocked by the "
+                   "lever. Fires rifle rounds.",
+        "damage": 10.0, "pellets": 1, "interval": 18, "auto": False, "capacity": 7,
+        "reload": (15, 20, 27), "spread": (2.0, 0.3), "range": 104, "ammo": "rifle_round",
+    },
+    "waystation_shotgun": {
+        "display": "Waystation Shotgun",
+        "source": "callwell_terminal",
+        "tooltip": "A lever-action shotgun with a drum under its action, loaded a shell at a time. Eight pellets a shot. "
+                   "Fires buckshot shells.",
+        "damage": 3.0, "pellets": 8, "interval": 17, "auto": False, "capacity": 8,
+        "reload": (9, 13, 18), "spread": (6.5, 4.5), "range": 28, "ammo": "buckshot_shell",
+    },
+    "highball_rifle": {
+        "display": "Highball Rifle",
+        "source": "saketini",
+        "tooltip": "A single-shot rifle whose barrel swings aside to take each round: one heavy, true shot, quickly "
+                   "reloaded. Fires rifle rounds.",
+        "damage": 15.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 1,
+        "reload": 33, "spread": (2.0, 0.1), "range": 128, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -841,6 +868,13 @@ RECIPES = {
                                        "P": "#minecraft:planks"}),
     "ammonite_carbine": (["CCC", "ILP"], {"C": "minecraft:copper_ingot", "I": "minecraft:iron_ingot",
                                           "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    # Slice 13B: the Fencepost Carbine and the Waystation Shotgun iron and brass, as the lever guns, the shotgun with an
+    # iron ingot more for its drum; the Highball Rifle steel, a marksman's rifle.
+    "fencepost_carbine": (["IIB", "LPP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                           "P": "#minecraft:planks"}),
+    "waystation_shotgun": (["IIB", "ILP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                            "P": "#minecraft:planks"}),
+    "highball_rifle": (["SSS", " LP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2063,6 +2097,60 @@ BUILDS = {
         "sight": (7.96, 5.55, 11.84),
         "eye_relief": 3.0,
     },
+    # Slice 13B. The Fencer Carabine loads through a lid on top of its stock (the main part's elements the owner put in
+    # their lid group, the 20th and 21st), turned up and over about its front; its hammer is the owner's hammer part on
+    # the right of the lock, its lever loop the main part's 24th element, turned about its front. Its bolt and flash
+    # bones hold nothing. Its sight is the notch on the receiver over the post at the muzzle.
+    "fencepost_carbine": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.4, 16.4)),
+            ("gun_body", "gun_body2", ["main-#19,20,21,22,23"], (8.0, 1.4, 16.4)),
+            ("lid", "gun_body", ["main#19,20"], (8.0, 2.66, 18.83)),
+            ("hammer", "gun_body", ["hammer"], (9.0, 3.1, 14.3)),
+            ("lever", "gun_body", ["main#23"], (8.0, 1.0, 14.6)),
+            ("bolt", "gun_body", [], (8.0, 4.5, 13.0)),
+            ("flash", "gun_body", [], (9.0, 3.6, 14.0)),
+        ],
+        "hands": {"right": (8.0, 1.4, 16.4), "left": (8.0, 1.6, 8.5)},
+        "arms": {"right": (0.433, -0.25, 0.866), "left": (0.8001, -0.3314, 0.5)},
+        "muzzle": (8.0, 4.25, -0.74),
+        "sight": (8.0, 5.3, 11.58),
+        "eye_relief": 6.0,
+    },
+    # The Callwell Terminal is a lever-action shotgun with a drum under its action and no shoulder stock. Its lever loop
+    # is the main part's element the owner named "lever"; the shell its loading loop carries in is the one they named
+    # "shell", resting inside the fore-end (the renderer shows it only while the loop moves it). Its sight is the notch
+    # on the receiver over the post at the muzzle.
+    "waystation_shotgun": {
+        "bones": [
+            ("gun_body", None, ["main-@lever", "stan_barrel"], (8.0, 2.0, 14.6)),
+            ("lever", "gun_body", ["main@lever"], (8.0, 1.8, 10.4)),
+            ("shell", "gun_body", ["main#26"], (8.0, 2.58, 5.88)),
+        ],
+        "hands": {"right": (8.0, 2.0, 14.6), "left": (8.0, 1.4, 4.5)},
+        "arms": {"right": (0.1913, -0.4619, 0.866), "left": (0.75, -0.433, 0.5)},
+        "muzzle": (8.0, 4.3, -4.97),
+        "sight": (8.0, 5.08, 11.8),
+        "eye_relief": 1.0,
+    },
+    # The Saketini is loaded a round at a time with its barrel (the owner's standard barrel part) swung aside about a
+    # hinge under the left of the breech; its hammer is the owner's hammer part on the right of the lock, its lever loop
+    # the main part's 13th element. Its bolt bone holds nothing. Its sight is the owner's notch over the post at the
+    # muzzle.
+    "highball_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-#12", "sights"], (8.0, 1.4, 16.4)),
+            ("barrel", "gun_body", ["stan_barrel"], (7.4, 3.5, 12.5)),
+            ("hammer", "gun_body", ["hammer"], (9.0, 3.0, 13.3)),
+            ("lever", "gun_body", ["main#12"], (8.0, 1.9, 11.8)),
+            ("bolt", "gun_body", [], (8.0, 4.5, 13.0)),
+        ],
+        "hands": {"right": (8.0, 1.4, 16.4), "left": (8.0, 2.4, 7.5)},
+        "arms": {"right": (-0.1576, -0.588, 0.7934), "left": (0.6533, -0.2706, 0.7071)},
+        "muzzle": (8.0, 4.29, -1.97),
+        "sight": (8.0, 5.25, 12.25),
+        "eye_relief": 3.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2569,6 +2657,8 @@ ZOOM = {
     "tuppence_pistol": 0.9, "goshawk_revolver": 0.9, "lament_rifle": 0.7,
     # Slice 13A: a revolver, a lever rifle made to take a scope and a carbine.
     "tabby_revolver": 0.9, "lookout_rifle": 0.8, "ammonite_carbine": 0.85,
+    # Slice 13B: a carbine, a shotgun and a marksman's single-shot rifle.
+    "fencepost_carbine": 0.82, "waystation_shotgun": 0.9, "highball_rifle": 0.75,
 }
 
 
@@ -2769,6 +2859,10 @@ SHOT_SOUNDS = {
     "tabby_revolver": "item/brass_revolver/fire.ogg",
     "lookout_rifle": "item/heavy_rifle/fire.ogg",
     "ammonite_carbine": "item/old_rifle/fire.ogg",
+    # Slice 13B: the Kestrel Rifle's, the Coach Gun's (the Callwell's) and the Thresher's.
+    "fencepost_carbine": "item/iron_rifle/fire.ogg",
+    "waystation_shotgun": "item/brass_shotgun/fire.ogg",
+    "highball_rifle": "item/new_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
