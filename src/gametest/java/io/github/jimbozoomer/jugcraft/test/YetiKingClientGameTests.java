@@ -5,13 +5,17 @@ import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.yeti.FallingIcicleEntity;
+import io.github.jimbozoomer.jugcraft.lair.yeti.GlacialSpikeEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.GlacierHall;
+import io.github.jimbozoomer.jugcraft.lair.yeti.HurledBoulderEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiWhelpEntity;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -24,6 +28,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -35,7 +41,10 @@ import net.minecraft.world.phys.Vec3;
  * and his kin out of the dens; the Blizzard's icicles and spikes; the Fury of the Peaks, his crown ablaze; and when he
  * falls the player has their loot and Abominable, the snow has drifted back over his lake and Grey Mist stands in its
  * middle, and a fresh instance in his slot no longer has it. Along the way, pictures of each part of the fight, the world
- * frozen for each so the pose holds. CI job {@code client}.
+ * frozen for each so the pose holds. Since Concordance Chunk B (B-04): his lake as the hall was placed, and every slam
+ * changing only drift snow to glare ice; leaving mid-fight, the hall unloads with him in his fury, and coming back the
+ * player finds him loaded again, still furious, his bar shown again, the snow drifted back and none of his kin or ice;
+ * and when he falls the whole lake is as it was placed. CI job {@code client}.
  */
 public class YetiKingClientGameTests implements FabricClientGameTest {
 	private static final Lair HALL = Lair.GLACIER_HALL;
@@ -77,6 +86,18 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 				check(king.position().distanceTo(king.throne()) < 0.1, "He is not on his throne but at " + king.position());
 			});
 			shot(context, singleplayer, hall, centre, 1.0, 1.0, throneZ + 13.5, 0.0, throneUp + 1.5, throneZ, false, "jugcraft_yeti_king_throne");
+			// His lake as the hall was placed (the camera is over it, so all of it is loaded): drift snow, trampled snow and the
+			// glare ice the wind has bared.
+			AtomicReference<Map<BlockPos, BlockState>> placed = new AtomicReference<>();
+			server.runOnServer(minecraft -> {
+				ServerLevel level = lair(minecraft);
+				Map<BlockPos, BlockState> cells = lake(level);
+				check(cells.keySet().stream().allMatch(level::isLoaded), "Not all of his lake is loaded");
+				for (Block block : List.of(JugcraftLairs.DRIFT_SNOW, JugcraftLairs.TRAMPLED_SNOW, JugcraftLairs.GLARE_ICE)) {
+					check(cells.values().stream().anyMatch(state -> state.is(block)), "His lake as placed has no " + block);
+				}
+				placed.set(cells);
+			});
 
 			// Stepping onto the lake wakes him: the player, in survival on the lake before his dais, and he rises roaring;
 			// caught as he roars.
@@ -114,6 +135,12 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 			context.waitTicks(YetiKingEntity.Attack.GROUND_SLAM.active);
 			server.runCommand("tick freeze");
 			server.runOnServer(minecraft -> check(king(minecraft).baredPatches() >= 1, "His slam bared no snow"));
+			server.runOnServer(minecraft -> {
+				ServerLevel level = lair(minecraft);
+				List<BlockPos> bared = changed(level, placed.get());
+				check(!bared.isEmpty() && bared.stream().allMatch(cell -> placed.get().get(cell).is(JugcraftLairs.DRIFT_SNOW)
+						&& level.getBlockState(cell).is(JugcraftLairs.GLARE_ICE)), "His slam changed his lake other than drift snow to glare ice: " + bared);
+			});
 			shot(context, singleplayer, hall, centre, 0.0, 9.0, 17.0, 0.5, 0.0, 5.0, true, "jugcraft_yeti_king_slam_ice");
 			pose(context, server, centre, (king, level, player) -> king.begin(level, YetiKingEntity.Attack.FROST_BREATH, player),
 					YetiKingEntity.Attack.FROST_BREATH.windup + 8);
@@ -191,6 +218,57 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 					"jugcraft_yeti_king_fury");
 			server.runCommand("tick unfreeze");
 
+			// Away and back mid-fight: his fury's slam by a column's trampled ring; the player leaves, the hall unloads with him
+			// in it; coming back the player finds him loaded again (the real unload, beside the emulated one in YetiKingGameTests).
+			AtomicReference<YetiKingEntity> away = new AtomicReference<>();
+			AtomicReference<LairInstance> slot0 = new AtomicReference<>();
+			context.waitFor(client -> client.gui.hud.getBossOverlay().shouldDarkenScreen(), 40);   // his bar darkens the sky
+			server.runOnServer(minecraft -> {
+				ServerLevel level = lair(minecraft);
+				YetiKingEntity king = king(minecraft);
+				Map<BlockPos, BlockState> lake = placed.get();
+				Vec3 slam = new Vec3(o.getX() + 31.5, king.floorY(), o.getZ() + 28.5);   // 7.07 from the north-west column
+				king.teleportTo(slam.x, slam.y, slam.z);
+				king.slamLands(level);
+				List<BlockPos> bared = changed(level, lake);
+				long route = lake.entrySet().stream().filter(cell -> cell.getValue().is(JugcraftLairs.TRAMPLED_SNOW)
+						&& Math.hypot(cell.getKey().getX() + 0.5 - slam.x, cell.getKey().getZ() + 0.5 - slam.z) <= YetiKingEntity.FURY_RING).count();
+				check(king.ring() == YetiKingEntity.FURY_RING && route > 0, "No trampled snow lay inside his fury's ring: " + route);
+				check(bared.stream().anyMatch(cell -> Math.hypot(cell.getX() + 0.5 - slam.x, cell.getZ() + 0.5 - slam.z) > YetiKingEntity.RING),
+						"His fury's slam bared no wider a ring");
+				check(bared.stream().allMatch(cell -> lake.get(cell).is(JugcraftLairs.DRIFT_SNOW) && level.getBlockState(cell).is(JugcraftLairs.GLARE_ICE)),
+						"His fury's slam changed his lake other than drift snow to glare ice");
+				king.callKin(level, YetiKingEntity.KIN);
+				check(!level.getEntitiesOfClass(YetiWhelpEntity.class, slot()).isEmpty(), "No kin out of the dens");
+				away.set(king);
+				slot0.set(Lairs.instance(HALL, 0));
+				check(slot0.get() != null && Lairs.leave(player(minecraft)), "The player could not leave");
+			});
+			context.waitFor(client -> !client.gui.hud.getBossOverlay().shouldDarkenScreen(), 100);   // out of his sight, off his bar
+			// Well inside the 30 seconds an empty instance stays open (Lairs.EMPTY_SECONDS).
+			server.waitFor(minecraft -> away.get().getRemovalReason() == Entity.RemovalReason.UNLOADED_TO_CHUNK, 400);
+			server.runOnServer(minecraft -> {
+				check(Lairs.instance(HALL, 0) == slot0.get(), "His instance closed while the player was away");
+				ServerPlayer player = player(minecraft);
+				check(Lairs.enter(player, slot0.get()), "The player could not come back in");
+				player.teleportTo(centre.x + 0.5, centre.y, centre.z + 5.0);   // onto the lake before him: his chunks load and tick
+			});
+			server.waitFor(minecraft -> lair(minecraft).getEntity(away.get().getUUID()) instanceof YetiKingEntity back && back != away.get()
+					&& back.tickCount > 2, 200);
+			server.runOnServer(minecraft -> {
+				ServerLevel level = lair(minecraft);
+				YetiKingEntity back = (YetiKingEntity) level.getEntity(away.get().getUUID());
+				List<BlockPos> left = changed(level, placed.get());
+				check(back.phase() == YetiKingEntity.Phase.FURY && back.furious(), "Loaded again he is not in his fury but " + back.phase());
+				check(back.baredPatches() == 0 && left.isEmpty(), "Loaded again, the snow did not drift back at " + left);
+				check(back.whelps().isEmpty() && level.getEntitiesOfClass(YetiWhelpEntity.class, slot()).isEmpty(), "His kin came back with him");
+				check(level.getEntitiesOfClass(HurledBoulderEntity.class, slot()).isEmpty() && level.getEntitiesOfClass(FallingIcicleEntity.class, slot()).isEmpty()
+						&& level.getEntitiesOfClass(GlacialSpikeEntity.class, slot()).isEmpty(), "His ice came back with him");
+			});
+			context.waitFor(client -> client.gui.hud.getBossOverlay().shouldDarkenScreen(), 100);   // in his sight again, his bar shown
+			context.waitFor(client -> client.level != null
+					&& client.level.getEntitiesOfClass(YetiKingEntity.class, slot()).stream().anyMatch(YetiKingEntity::furious), 100);   // his crown synced
+
 			// He falls, with a patch of his lake bare: the player's loot and advancement, the snow drifted back, his kin gone
 			// with him, and Grey Mist in the lake's middle.
 			AtomicReference<List<BlockPos>> bare = new AtomicReference<>();
@@ -220,6 +298,8 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 				}
 				check(level.getEntitiesOfClass(YetiKingEntity.class, slot()).stream().noneMatch(YetiKingEntity::isAlive), "He is still there");
 				check(level.getEntitiesOfClass(YetiWhelpEntity.class, slot()).isEmpty(), "His kin outlived him");
+				List<BlockPos> left = changed(level, placed.get());
+				check(left.isEmpty(), "As he fell his lake did not come back as the hall was placed, at " + left);
 			});
 			shot(context, singleplayer, hall, centre, 0.0, 0.5, 6.0, -0.5, 1.5, 0.0, false, "jugcraft_yeti_king_defeated");
 			// A fresh instance in his slot is placed anew: the Grey Mist he left is gone with the old one.
@@ -301,6 +381,26 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 	private static AABB slot() {
 		BlockPos o = HALL.origin(0);
 		return new AABB(o.getX() - 8, o.getY() - 16, o.getZ() - 8, o.getX() + HALL.width + 8, o.getY() + HALL.height + 8, o.getZ() + HALL.length + 8);
+	}
+
+	/** The lake's layer within its radius, in the first slot's hall, as it is now. */
+	private static Map<BlockPos, BlockState> lake(ServerLevel level) {
+		BlockPos o = HALL.origin(0);
+		Map<BlockPos, BlockState> cells = new HashMap<>();
+		int r = (int) Math.ceil(GlacierHall.LAKE_RADIUS);
+		for (int x = (int) GlacierHall.LAKE_X - r; x <= (int) GlacierHall.LAKE_X + r; x++) {
+			for (int z = (int) GlacierHall.LAKE_Z - r; z <= (int) GlacierHall.LAKE_Z + r; z++) {
+				if (GlacierHall.fromCentre(x + 0.5, z + 0.5) <= GlacierHall.LAKE_RADIUS) {
+					BlockPos cell = o.offset(x, GlacierHall.LAKE, z);
+					cells.put(cell, level.getBlockState(cell));
+				}
+			}
+		}
+		return cells;
+	}
+
+	private static List<BlockPos> changed(ServerLevel level, Map<BlockPos, BlockState> lake) {
+		return lake.entrySet().stream().filter(cell -> !level.getBlockState(cell.getKey()).equals(cell.getValue())).map(Map.Entry::getKey).toList();
 	}
 
 	/** He, alive, in the first slot's hall. */

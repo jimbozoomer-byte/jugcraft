@@ -1,43 +1,85 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.authlib.GameProfile;
+import io.github.jimbozoomer.jugcraft.agriculture.Knitting;
+import io.github.jimbozoomer.jugcraft.agriculture.Knitwear;
 import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceSpells;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.balance.Benchmark;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
+import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
+import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.guns.GunShots;
+import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
+import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairRewards;
+import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.yeti.FallingIcicleEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.GlacialSpikeEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.GlacierHall;
+import io.github.jimbozoomer.jugcraft.lair.yeti.HurledBoulderEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiWhelpEntity;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.spell_engine.api.spell.registry.SpellRegistry;
+import net.spell_engine.internals.SpellExecution;
+import net.spell_engine.internals.casting.SpellCast;
+import net.spell_engine.internals.casting.SpellCaster;
+import net.spell_engine.internals.container.SpellContainerSource;
+import net.spell_engine.internals.target.SpellTarget;
 
 /**
  * The Yeti King (docs/features/yeti-king.md), as far as a game-test server can show him: one put down on his own (with no
@@ -52,7 +94,11 @@ import net.minecraft.world.phys.Vec3;
  * his fight's credit is the lairs' shared one: support and the absent share his loot once, a killing blow alone is paid,
  * a tamed creature's blow is its owner's, a charge baited into a column is each baiter's deed but no idle late
  * arrival's, four players are each paid once, and a fight loaded awake keeps a fresh record. Since B-02 his loot is what
- * his JEI pages say.
+ * his JEI pages say. Since B-04, his fight held to the completion evidence: the charge's column reach, its stops at the
+ * dais, the ramp and a den wall, at his leash and when it grazes a column's foot, and its fury chain; solo melee, a solo
+ * caster and a party of two solving the column loop; his lake as laid after a slam and his reset, after his death and
+ * loaded again; his ice and kin gone on reset, death and unload; wool and leather against his frost; and End-gun
+ * Levitation lifting neither him nor his kin.
  *
  * <p>He fights any player within 38 blocks of his lake's centre; the arena keeps every other test's players farther off
  * than that. Each test sends him away before it ends, with his whelps, and lets the snow drift back.
@@ -116,6 +162,187 @@ public class YetiKingGameTests {
 			king.driftAll(level);
 			king.discard();
 		}
+	}
+
+	private static final YetiKingEntity.Attack CHARGE = YetiKingEntity.Attack.AVALANCHE_CHARGE;
+	/** From this tick of a charge its run is over (its full line, his leash or a wall) and he is recovering. */
+	private static final int RUN = CHARGE.windup + CHARGE.active;
+	private static final double EPS = 1.0E-3;
+	/** Nothing of the hall but a column stands this near a column's centre at his height (tools/glacier_hall.py). */
+	private static final double NEAR_COLUMN = 7.0;
+	/** How far each way from his lake's centre a test's lake is laid: past his fury's ring. */
+	private static final int LAID = 12;
+	/** Vanilla's frost slowness (mc263src LivingEntity.java:203,534-544). */
+	private static final Identifier FROST_SLOW = Identifier.withDefaultNamespace("powder_snow");
+
+	/** A mock player of {@code mode} at template (x, y, z) of the hall laid out from {@code origin} (y 5 stands on the lake). */
+	private static ServerPlayer foeAt(GameTestHelper helper, BlockPos origin, double x, double y, double z, GameType mode) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(mode);
+		player.snapTo(origin.getX() + x, origin.getY() + y, origin.getZ() + z, 0.0F, 0.0F);
+		return player;
+	}
+
+	/** Puts him at template (x, z) on his lake and begins his Avalanche Charge at {@code foe} (its wind-up first). */
+	private static void charge(ServerLevel level, YetiKingEntity king, double x, double z, ServerPlayer foe) {
+		BlockPos o = king.origin();
+		king.teleportTo(o.getX() + x, king.floorY(), o.getZ() + z);
+		king.begin(level, CHARGE, foe);
+	}
+
+	private static boolean isAt(YetiKingEntity king, double x, double z) {
+		BlockPos o = king.origin();
+		return Math.abs(king.getX() - o.getX() - x) < EPS && Math.abs(king.getZ() - o.getZ() - z) < EPS && Math.abs(king.getY() - king.floorY()) < EPS;
+	}
+
+	private static String where(YetiKingEntity king) {
+		BlockPos o = king.origin();
+		return String.format(Locale.ROOT, "(%.4f, %.4f) in the template, %s, stunned %d", king.getX() - o.getX(), king.getZ() - o.getZ(),
+				king.action(), king.stunnedTicks());
+	}
+
+	private static double fromColumn(YetiKingEntity king) {
+		BlockPos o = king.origin();
+		return GlacierHall.columnDistance(king.getX() - o.getX(), king.getZ() - o.getZ());
+	}
+
+	private static double fromCentre(YetiKingEntity king) {
+		Vec3 centre = king.centre();
+		return Math.hypot(king.getX() - centre.x, king.getZ() - centre.z);
+	}
+
+	/** His charge has run and he is recovering from it, not stunned. */
+	private static boolean ran(YetiKingEntity king) {
+		return king.attack() == CHARGE && king.attackTicks() >= RUN && king.stunnedTicks() == 0;
+	}
+
+	/** Wakes him and, once he is down on his lake hunting, runs {@code then}. */
+	private static void hunting(GameTestHelper helper, YetiKingEntity king, Runnable then) {
+		king.wake(helper.getLevel());
+		helper.runAfterDelay(YetiKingEntity.WAKE_TICKS + 2, then);
+	}
+
+	/**
+	 * The Glacier Hall itself over this arena, placed as Lairs.place places it; returns what stood in the four rows under
+	 * the arena that its underside overwrites, for clearHall to put back.
+	 */
+	private static Map<BlockPos, BlockState> placeHall(GameTestHelper helper, BlockPos origin) {
+		ServerLevel level = helper.getLevel();
+		StructureTemplate template = Lairs.template(level, Lair.GLACIER_HALL);
+		helper.assertTrue(template != null, "No Glacier Hall template");
+		Map<BlockPos, BlockState> below = new HashMap<>();
+		for (BlockPos at : BlockPos.betweenClosed(origin, origin.offset(Lair.GLACIER_HALL.width - 1, GlacierHall.LAKE - 1, Lair.GLACIER_HALL.length - 1))) {
+			below.put(at.immutable(), level.getBlockState(at));
+		}
+		template.placeInWorld(level, origin, origin, new StructurePlaceSettings().setKnownShape(true), level.getRandom(), Block.UPDATE_CLIENTS);
+		return below;
+	}
+
+	/** Takes the hall away again: air from the lake's layer to the vault (most of it above the 8-high arena), the rows below put back. */
+	private static void clearHall(ServerLevel level, BlockPos origin, Map<BlockPos, BlockState> below) {
+		Lair hall = Lair.GLACIER_HALL;
+		for (BlockPos at : BlockPos.betweenClosed(origin.offset(0, GlacierHall.LAKE, 0), origin.offset(hall.width - 1, hall.height - 1, hall.length - 1))) {
+			if (!level.getBlockState(at).isAir()) {
+				level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+		}
+		below.forEach((at, state) -> level.setBlock(at, state, Block.UPDATE_CLIENTS));
+	}
+
+	/** A caster who has mastered First Light, the Initiate's Wand in hand (as ConcordanceBaselineGameTests' master). */
+	private static void master(ServerPlayer player) {
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND));
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.MASTERED);
+		SpellContainerSource.setDirty(player, ConcordanceSpells.SOURCE);
+		SpellContainerSource.setDirty(player, "main_hand");
+		SpellContainerSource.update(player);
+	}
+
+	/** {@code caster} steps to template (x, z) on the lake, faces him and casts the Lance of Dawn through Spell Engine. */
+	private static void lance(ServerPlayer caster, YetiKingEntity king, double x, double z) {
+		BlockPos o = king.origin();
+		double px = o.getX() + x;
+		double pz = o.getZ() + z;
+		float yaw = (float) (Math.toDegrees(Math.atan2(king.getZ() - pz, king.getX() - px)) - 90.0);
+		caster.snapTo(px, king.floorY(), pz, yaw, 0.0F);
+		caster.setYHeadRot(yaw);
+		caster.setYBodyRot(yaw);
+		((SpellCaster.Player) caster).getCooldownManager().reset(null);
+		RateGate.forget(caster.getUUID());
+		ServerLevel level = caster.level();
+		SpellExecution.performSpell(level, caster, SpellRegistry.from(level).get(Identifier.parse("jugcraft:lance")).orElseThrow(),
+				SpellTarget.SearchResult.empty(), SpellCast.Action.RELEASE, 1.0F);
+	}
+
+	/** A lake round his lake's centre as the hall's is: drift snow, a trampled route three wide east-west, a 2x2 patch of glare ice. */
+	private static Map<BlockPos, BlockState> lake(ServerLevel level, YetiKingEntity king) {
+		BlockPos middle = BlockPos.containing(king.centre()).below();
+		for (int dx = -LAID; dx <= LAID; dx++) {
+			for (int dz = -LAID; dz <= LAID; dz++) {
+				Block block = Math.abs(dz) <= 1 ? JugcraftLairs.TRAMPLED_SNOW
+						: dx >= 3 && dx <= 4 && dz >= 3 && dz <= 4 ? JugcraftLairs.GLARE_ICE : JugcraftLairs.DRIFT_SNOW;
+				level.setBlockAndUpdate(middle.offset(dx, 0, dz), block.defaultBlockState());
+			}
+		}
+		Map<BlockPos, BlockState> laid = new HashMap<>();   // read back once all are placed
+		for (int dx = -LAID; dx <= LAID; dx++) {
+			for (int dz = -LAID; dz <= LAID; dz++) {
+				BlockPos cell = middle.offset(dx, 0, dz);
+				laid.put(cell, level.getBlockState(cell));
+			}
+		}
+		return laid;
+	}
+
+	private static List<BlockPos> changed(ServerLevel level, Map<BlockPos, BlockState> laid) {
+		return laid.entrySet().stream().filter(cell -> !level.getBlockState(cell.getKey()).equals(cell.getValue())).map(Map.Entry::getKey).toList();
+	}
+
+	/** Every changed cell was drift snow as laid and is glare ice now. */
+	private static boolean onlyDriftBared(ServerLevel level, Map<BlockPos, BlockState> laid) {
+		return changed(level, laid).stream().allMatch(cell -> laid.get(cell).is(JugcraftLairs.DRIFT_SNOW) && level.getBlockState(cell).is(JugcraftLairs.GLARE_ICE));
+	}
+
+	private static long trampledWithin(Map<BlockPos, BlockState> laid, Vec3 at, double radius) {
+		return laid.entrySet().stream().filter(cell -> cell.getValue().is(JugcraftLairs.TRAMPLED_SNOW)
+				&& Math.hypot(cell.getKey().getX() + 0.5 - at.x, cell.getKey().getZ() + 0.5 - at.z) <= radius).count();
+	}
+
+	/** This test's arena, with room below (whelps step off the den floors) and above (icicles, boulders). */
+	private static AABB arena(BlockPos origin) {
+		return new AABB(origin.getX(), origin.getY() - 8, origin.getZ(), origin.getX() + 80, origin.getY() + 32, origin.getZ() + 88);
+	}
+
+	/** Stone under both dens' floors, for his kin to come out onto. */
+	private static void dens(ServerLevel level, BlockPos origin) {
+		floor(level, origin, 3, 34, 8, 39);
+		floor(level, origin, 71, 34, 76, 39);
+	}
+
+	/** A survival player his blows cannot end a test early for (Resistance V, as TatterlaceGameTests does). */
+	private static ServerPlayer shielded(GameTestHelper helper, YetiKingEntity king, double dx, double dz) {
+		ServerPlayer player = player(helper, king, dx, dz);
+		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 1200, 4));
+		return player;
+	}
+
+	/** A survival player standing on stone at {@code at} in the arena. */
+	private static ServerPlayer onStone(GameTestHelper helper, BlockPos at) {
+		helper.setBlock(at.below(), Blocks.STONE.defaultBlockState());
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		BlockPos feet = helper.absolutePos(at);
+		player.snapTo(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, 0.0F, 0.0F);
+		return player;
+	}
+
+	private static String firstFew(List<BlockPos> cells) {
+		return cells.subList(0, Math.min(5, cells.size())).toString();
+	}
+
+	/** End-gun Levitation as GunShots gives it to what a bullet hurt: the game's own, at its first level, from the shooter. */
+	private static boolean levitate(LivingEntity target, ServerPlayer shooter) {
+		return target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, GunShots.LIFT_TICKS, 0), shooter);
 	}
 
 	/** {@code healer} mends {@code patient} 4 through the Concordance's effect boundary, as the Mend word does. */
@@ -262,6 +489,8 @@ public class YetiKingGameTests {
 				helper.assertTrue(cells.stream().allMatch(cell -> level.getBlockState(cell).is(JugcraftLairs.DRIFT_SNOW)),
 						"The snow did not drift back over the bare ice");
 				helper.assertTrue(king.baredPatches() == 0, "A patch is still bare");
+				helper.assertTrue(IntStream.rangeClosed(-9, 9).allMatch(x -> level.getBlockState(middle.offset(x, 0, 0)).is(JugcraftLairs.TRAMPLED_SNOW)),
+						"The snow drifting back covered the trampled snow");
 			});
 			helper.succeed();
 		});
@@ -839,5 +1068,761 @@ public class YetiKingGameTests {
 		helper.assertTrue(within(mitten, 0.25), mitten + " Yeti Mittens, not about 25%");
 		helper.assertTrue(within(crown, 0.2), crown + " Crowns, not about 20%");
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- B-04: the charge and the column loop
+
+	/**
+	 * The column's reach, both sides of it, every time: passing 5.6 from the north-west column's centre he runs his full
+	 * line, and again to the very same spot; passing 4.8 from it he stops 5.32 short, stunned (a step that would bring
+	 * him within 5.2 of a column's centre stuns him).
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 220)
+	public void aGrazingChargeStunsHimOnlyWithinAColumnsReach(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer foe = foeAt(helper, origin, 20.9, 5.0, 12.0, GameType.SURVIVAL);
+		hunting(helper, king, () -> {
+			charge(level, king, 20.9, 32.8, foe);
+			helper.runAfterDelay(45, () -> {
+				boolean passed = ran(king) && isAt(king, 20.9, 16.0);
+				String firstEnd = where(king);
+				Vec3 end = king.position();
+				charge(level, king, 20.9, 32.8, foe);
+				helper.runAfterDelay(45, () -> {
+					boolean again = ran(king) && king.position().equals(end);
+					String secondEnd = where(king);
+					foe.snapTo(origin.getX() + 21.7, origin.getY() + 5.0, origin.getZ() + 12.0, 0.0F, 0.0F);
+					charge(level, king, 21.7, 32.8, foe);
+					helper.runAfterDelay(31, () -> {
+						try {
+							ending(level, king, () -> {
+								helper.assertTrue(passed, "Passing 5.6 from the column he did not run his full line to (20.9, 16.0): " + firstEnd);
+								helper.assertTrue(again, "The same charge again did not end where the first did, " + end + ": " + secondEnd);
+								helper.assertTrue(king.stunnedTicks() > 0 && king.action() == YetiKingEntity.Action.STUNNED && king.attack() == null
+										&& isAt(king, 21.7, 25.8) && fromColumn(king) > GlacierHall.COLUMN_RADIUS + GlacierHall.COLUMN_FOOT,
+										"Passing 4.8 from the column he was not stunned at (21.7, 25.8): " + where(king));
+							});
+						} finally {
+							foe.discard();
+						}
+						helper.succeed();
+					});
+				});
+			});
+		});
+	}
+
+	/**
+	 * In the hall itself he never climbs (no gravity, so never on the ground, and only what is on the ground steps up):
+	 * north at the dais he stops against its lowest step, south at the ramp against its first half step, and at the west
+	 * den's corner he slides along the wall until his leash ends the run; never inside a block.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 260)
+	public void inTheHallHisChargeStopsAtTheDaisTheRampAndTheDensWall(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		Map<BlockPos, BlockState> below = placeHall(helper, origin);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer onDais = foeAt(helper, origin, 39.5, 7.0, 12.5, GameType.SURVIVAL);
+		ServerPlayer onRamp = foeAt(helper, origin, 39.5, 11.0, 70.0, GameType.SURVIVAL);
+		ServerPlayer byDen = foeAt(helper, origin, 12.5, 5.0, 30.5, GameType.SURVIVAL);
+		hunting(helper, king, () -> {
+			charge(level, king, 39.5, 30.0, onDais);
+			helper.runAfterDelay(45, () -> {
+				boolean dais = ran(king) && isAt(king, 39.5, 17.0) && level.noCollision(king);
+				String daisEnd = where(king);
+				charge(level, king, 39.5, 44.0, onRamp);
+				helper.runAfterDelay(45, () -> {
+					boolean ramp = ran(king) && isAt(king, 39.5, 58.0) && level.noCollision(king);
+					String rampEnd = where(king);
+					charge(level, king, 24.0, 33.0, byDen);
+					helper.runAfterDelay(45, () -> {
+						try {
+							ending(level, king, () -> {
+								helper.assertTrue(dais, "Charging north at the dais he did not stop against its lowest step at (39.5, 17.0): " + daisEnd);
+								helper.assertTrue(ramp, "Charging south at the ramp he did not stop against its half step at (39.5, 58.0): " + rampEnd);
+								helper.assertTrue(ran(king) && isAt(king, 12.0, 29.7286) && level.noCollision(king) && fromCentre(king) <= YetiKingEntity.LEASH - 1.0,
+										"At the west den's corner he did not slide along the wall to his leash at (12.0, 29.7286): " + where(king));
+							});
+						} finally {
+							clearHall(level, origin, below);
+							onDais.discard();
+							onRamp.discard();
+							byDen.discard();
+						}
+						helper.succeed();
+					});
+				});
+			});
+		});
+	}
+
+	/** A glancing charge past the north-west column on its south side: if his body meets its foot he is stunned, not slid round it. */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 160)
+	public void aChargeThatMeetsAColumnSouthOfItStunsHim(GameTestHelper helper) {
+		grazing(helper, 16.09, 22.68, 32.47, 34.15, "south");
+	}
+
+	/** The same past its east side (whichever order the game resolves the two axes in, one of these two lines touches). */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 160)
+	public void aChargeThatMeetsAColumnEastOfItStunsHim(GameTestHelper helper) {
+		grazing(helper, 36.33, 27.0, 23.47, 11.68, "east");
+	}
+
+	/** In the placed hall, his charge from template (x, z) at a foe at (foeX, foeZ), passing the north-west column on its {@code side}. */
+	private static void grazing(GameTestHelper helper, double x, double z, double foeX, double foeZ, String side) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		Map<BlockPos, BlockState> below = placeHall(helper, origin);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer foe = foeAt(helper, origin, foeX, 5.0, foeZ, GameType.SURVIVAL);
+		AtomicReference<String> met = new AtomicReference<>();
+		helper.onEachTick(() -> {
+			if (met.get() == null && king.attack() == CHARGE && king.horizontalCollision && fromColumn(king) < NEAR_COLUMN) {
+				met.set(where(king));
+			}
+		});
+		hunting(helper, king, () -> {
+			charge(level, king, x, z, foe);
+			helper.runAfterDelay(45, () -> {
+				try {
+					ending(level, king, () -> {
+						helper.assertTrue(met.get() == null || king.stunnedTicks() > 0, "Passing the north-west column on its " + side
+								+ " side his body met its foot at " + met.get() + " and he slid on unstunned, to " + where(king));
+						helper.assertTrue(level.noCollision(king), "He ended inside the column: " + where(king));
+						helper.assertTrue(king.stunnedTicks() > 0 ? fromColumn(king) > GlacierHall.COLUMN_RADIUS + GlacierHall.COLUMN_FOOT
+								: ran(king) && fromColumn(king) > NEAR_COLUMN, "Neither stunned short of the column nor run clear of it: " + where(king));
+					});
+				} finally {
+					clearHall(level, origin, below);
+					foe.discard();
+				}
+				helper.succeed();
+			});
+		});
+	}
+
+	/**
+	 * His leash ends a charge the same way each run: out to it he stops 28.8 from the centre; from it, outward, on his first
+	 * step (and the attack ends with its recovery); from it, inward, he runs his full line; a charge never carries him past
+	 * it (so his bound back to the lake never has to).
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 240)
+	public void aChargeEndsAtHisLeashTheSameEveryRun(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer foe = foeAt(helper, origin, 75.0, 5.0, 36.5, GameType.SURVIVAL);
+		double[] farthest = {0.0};
+		helper.onEachTick(() -> farthest[0] = Math.max(farthest[0], fromCentre(king)));
+		hunting(helper, king, () -> {
+			charge(level, king, 55.0, 36.5, foe);
+			helper.runAfterDelay(42, () -> {
+				boolean out = ran(king) && isAt(king, 68.3, 36.5) && fromCentre(king) <= YetiKingEntity.LEASH - 1.0;
+				String outEnd = where(king);
+				charge(level, king, 69.0, 36.5, foe);
+				helper.runAfterDelay(22, () -> {
+					boolean stopped = ran(king) && isAt(king, 69.0, 36.5);
+					String stoppedAt = where(king);
+					helper.runAfterDelay(10, () -> {
+						boolean over = king.attack() == null;
+						foe.snapTo(origin.getX() + 45.0, origin.getY() + 5.0, origin.getZ() + 36.5, 0.0F, 0.0F);
+						charge(level, king, 69.0, 36.5, foe);
+						helper.runAfterDelay(45, () -> {
+							try {
+								ending(level, king, () -> {
+									helper.assertTrue(out, "Charging out he did not stop at his leash, (68.3, 36.5): " + outEnd);
+									helper.assertTrue(stopped, "Charging outward from his leash he did not stop on his first step: " + stoppedAt);
+									helper.assertTrue(over, "A charge stopped on its first step did not end with its recovery");
+									helper.assertTrue(ran(king) && isAt(king, 52.2, 36.5), "Charging inward from his leash he did not run his full line to (52.2, 36.5): "
+											+ where(king));
+									helper.assertTrue(farthest[0] <= YetiKingEntity.LEASH + 1.0E-6, "A charge carried him " + farthest[0] + " from the centre");
+								});
+							} finally {
+								foe.discard();
+							}
+							helper.succeed();
+						});
+					});
+				});
+			});
+		});
+	}
+
+	/** In his fury a missed charge is followed at once by exactly one more, then his recovery. */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 180)
+	public void inHisFuryAMissedChargeIsFollowedByExactlyOneMore(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer foe = foeAt(helper, origin, 71.0, 5.0, 36.5, GameType.SURVIVAL);
+		hunting(helper, king, () -> {
+			king.startFury(level);
+			charge(level, king, 45.0, 36.5, foe);
+			helper.runAfterDelay(30, () -> {
+				boolean running = king.attack() == CHARGE && king.action() == YetiKingEntity.Action.CHARGE;
+				String runningAt = where(king);
+				helper.runAfterDelay(18, () -> {
+					boolean chained = king.attack() == CHARGE && king.attackTicks() >= 1 && king.attackTicks() < CHARGE.windup
+							&& king.action() == YetiKingEntity.Action.CHARGE_WINDUP && isAt(king, 61.8, 36.5);
+					String chainedAt = where(king) + ", tick " + king.attackTicks();
+					helper.runAfterDelay(22, () -> {
+						boolean second = ran(king) && isAt(king, 68.1, 36.5);
+						String secondEnd = where(king);
+						helper.runAfterDelay(12, () -> {
+							try {
+								ending(level, king, () -> {
+									helper.assertTrue(running, "His first charge was not running at its 30th tick: " + runningAt);
+									helper.assertTrue(chained, "Having run his full line to (61.8, 36.5) he did not wind up again at once: " + chainedAt);
+									helper.assertTrue(second, "The second charge did not end at his leash, (68.1, 36.5): " + secondEnd);
+									helper.assertTrue(king.attack() == null && king.action() == YetiKingEntity.Action.IDLE, "A third charge followed: " + where(king));
+								});
+							} finally {
+								foe.discard();
+							}
+							helper.succeed();
+						});
+					});
+				});
+			});
+		});
+	}
+
+	/** In his fury a bait who moves during the chained wind-up leads the second charge into a column; a stun never chains. */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 220)
+	public void inHisFuryABaitLeadsTheChainedChargeIntoAColumn(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer bait = foeAt(helper, origin, 39.5, 5.0, 56.0, GameType.SURVIVAL);
+		hunting(helper, king, () -> {
+			king.startFury(level);
+			charge(level, king, 39.5, 36.5, bait);
+			helper.runAfterDelay(48, () -> {
+				boolean chained = king.attack() == CHARGE && king.action() == YetiKingEntity.Action.CHARGE_WINDUP && isAt(king, 39.5, 53.3);
+				String chainedAt = where(king);
+				bait.snapTo(origin.getX() + 60.0, origin.getY() + 5.0, origin.getZ() + 44.5, 0.0F, 0.0F);
+				helper.runAfterDelay(26, () -> {
+					boolean stunned = king.stunnedTicks() > 0 && king.action() == YetiKingEntity.Action.STUNNED && king.attack() == null
+							&& isAt(king, 47.2188, 49.9865);
+					String stunnedAt = where(king) + ", " + fromColumn(king) + " from a column";
+					helper.runAfterDelay(46, () -> {
+						try {
+							ending(level, king, () -> {
+								helper.assertTrue(chained, "The chained wind-up did not start at (39.5, 53.3): " + chainedAt);
+								helper.assertTrue(stunned, "The chained charge was not stunned at (47.2188, 49.9865), 5.30 from the south-east column: " + stunnedAt);
+								helper.assertTrue(king.stunnedTicks() > 0 && king.attack() == null, "A stun chained into another charge: " + where(king));
+							});
+						} finally {
+							bait.discard();
+						}
+						helper.succeed();
+					});
+				});
+			});
+		});
+	}
+
+	/**
+	 * Solo melee: baited from beyond a column, he crashes into it, and a blow while he reels takes a third more before armour
+	 * than the same blow after (his armour 10 applies to a player's blow: Benchmark.afterArmour).
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 200)
+	public void soloMeleeBaitsAChargeIntoAColumnAndStrikesHimReeling(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer bait = foeAt(helper, origin, 26.5, 5.0, 16.5, GameType.SURVIVAL);
+		hunting(helper, king, () -> {
+			charge(level, king, 26.5, 33.0, bait);
+			helper.runAfterDelay(28, () -> {
+				boolean reeling = king.stunnedTicks() > 0 && isAt(king, 26.5, 28.8);
+				String reelingAt = where(king);
+				bait.snapTo(origin.getX() + 24.5, origin.getY() + 5.0, origin.getZ() + 28.8, -90.0F, 0.0F);
+				float before = king.getHealth();
+				king.hurtServer(level, level.damageSources().playerAttack(bait), 6.0F);
+				float stunnedBlow = before - king.getHealth();
+				helper.runAfterDelay(62, () -> {
+					try {
+						ending(level, king, () -> {
+							int armour = king.getArmorValue();
+							int toughness = (int) king.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
+							boolean recovered = king.stunnedTicks() == 0 && king.action() != YetiKingEntity.Action.STUNNED;
+							float healthy = king.getHealth();
+							king.hurtServer(level, level.damageSources().playerAttack(bait), 6.0F);
+							float plainBlow = healthy - king.getHealth();
+							double stunnedExpected = Benchmark.afterArmour(6.0 * YetiKingEntity.STUN_TAKEN, armour, toughness);
+							double plainExpected = Benchmark.afterArmour(6.0, armour, toughness);
+							helper.assertTrue(reeling, "Baited from beyond the column he was not stunned at (26.5, 28.8): " + reelingAt);
+							helper.assertTrue(Math.abs(stunnedBlow - stunnedExpected) < 0.01, "Reeling, a blow of 6 took " + stunnedBlow + ", not " + stunnedExpected);
+							helper.assertTrue(recovered, "His stun did not end: " + where(king));
+							helper.assertTrue(Math.abs(plainBlow - plainExpected) < 0.01 && stunnedBlow > plainBlow,
+									"Recovered, a blow of 6 took " + plainBlow + ", not " + plainExpected);
+							Encounter.Share share = king.encounter().share(bait);
+							helper.assertTrue(share != null && share.damage() > 0.0F && king.participants(level).contains(bait), "The bait's blows were not credited");
+						});
+					} finally {
+						bait.discard();
+					}
+					helper.succeed();
+				});
+			});
+		});
+	}
+
+	/** Solo caster: the bait is the caster, who steps clear and lances him reeling for a third more (the Lance bypasses armour). */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 160)
+	public void soloCasterBaitsAChargeIntoAColumnAndLancesHimReeling(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer caster = foeAt(helper, origin, 26.5, 5.0, 16.5, GameType.SURVIVAL);
+		master(caster);
+		hunting(helper, king, () -> {
+			charge(level, king, 26.5, 33.0, caster);
+			helper.runAfterDelay(28, () -> {
+				try {
+					ending(level, king, () -> {
+						helper.assertTrue(king.stunnedTicks() > 0 && isAt(king, 26.5, 28.8), "Baited from beyond the column he was not stunned: " + where(king));
+						float before = king.getHealth();
+						lance(caster, king, 34.5, 28.8);
+						float lanced = before - king.getHealth();
+						helper.assertTrue(Math.abs(lanced - 5.0 * YetiKingEntity.STUN_TAKEN) < 0.01, "Reeling, the Lance took " + lanced);
+						helper.assertTrue(ConcordanceProgress.currentFocus(caster) == FocusPool.MAX - 4, "The Lance's Focus: " + ConcordanceProgress.currentFocus(caster));
+						Encounter.Share share = king.encounter().share(caster);
+						helper.assertTrue(share != null && share.damage() > 0.0F, "The Lance was not credited to its caster");
+					});
+				} finally {
+					caster.discard();
+				}
+				helper.succeed();
+			});
+		});
+	}
+
+	/**
+	 * A party of two: the bait side-steps 3 blocks during the wind-up, the charge runs on into the column, trampling the caster
+	 * standing on its line once; the bait strikes him reeling, then the caster lances him; both are credited.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 300)
+	public void aPartyOfTwoSolvesTheColumnLoop(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		ServerPlayer bait = foeAt(helper, origin, 29.5, 5.0, 16.5, GameType.CREATIVE);
+		ServerPlayer caster = foeAt(helper, origin, 26.5, 5.0, 31.0, GameType.CREATIVE);
+		master(caster);
+		helper.runAfterDelay(LOADING_TICKS, () -> {   // only a loaded player can be hurt
+			bait.setGameMode(GameType.SURVIVAL);
+			caster.setGameMode(GameType.SURVIVAL);
+			hunting(helper, king, () -> {
+				charge(level, king, 26.5, 33.0, bait);
+				helper.runAfterDelay(5, () -> bait.snapTo(origin.getX() + 26.5, origin.getY() + 5.0, origin.getZ() + 16.5, 0.0F, 0.0F));
+				helper.runAfterDelay(28, () -> {
+					boolean reeling = king.stunnedTicks() > 0 && isAt(king, 26.5, 28.8);
+					String reelingAt = where(king);
+					float trampled = caster.getHealth();
+					boolean baitWhole = bait.getHealth() == bait.getMaxHealth();
+					bait.snapTo(origin.getX() + 24.5, origin.getY() + 5.0, origin.getZ() + 28.8, -90.0F, 0.0F);
+					float before = king.getHealth();
+					king.hurtServer(level, level.damageSources().playerAttack(bait), 6.0F);
+					float struck = before - king.getHealth();
+					helper.runAfterDelay(12, () -> {
+						try {
+							ending(level, king, () -> {
+								float healthy = king.getHealth();
+								lance(caster, king, 34.5, 28.8);
+								float lanced = healthy - king.getHealth();
+								double expected = Benchmark.afterArmour(6.0 * YetiKingEntity.STUN_TAKEN, king.getArmorValue(),
+										(int) king.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+								helper.assertTrue(reeling, "The side-stepping bait did not lead him into the column: " + reelingAt);
+								helper.assertTrue(trampled < caster.getMaxHealth() && baitWhole, "The caster on his line was not trampled, or the bait was");
+								helper.assertTrue(Math.abs(struck - expected) < 0.01, "Reeling, the bait's blow of 6 took " + struck + ", not " + expected);
+								helper.assertTrue(Math.abs(lanced - 5.0 * YetiKingEntity.STUN_TAKEN) < 0.01 && caster.getHealth() == trampled,
+										"Reeling, the Lance took " + lanced + "; or the caster was struck again");
+								Encounter.Share baitShare = king.encounter().share(bait);
+								Encounter.Share casterShare = king.encounter().share(caster);
+								helper.assertTrue(baitShare != null && baitShare.damage() > 0.0F && casterShare != null && casterShare.damage() > 0.0F
+										&& king.participants(level).containsAll(List.of(bait, caster)), "The party was not both credited");
+							});
+						} finally {
+							bait.discard();
+							caster.discard();
+						}
+						helper.succeed();
+					});
+				});
+			});
+		});
+	}
+
+	// ---------------------------------------------------------------- B-04: safe footing, cleanup and frost
+
+	/**
+	 * His Hunt slam bares only drift snow round where his foe stood, beside the trampled route; left alone, his reset drifts it
+	 * all back (before its own timer would), his kin flee, and the lake is exactly as laid.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 320)
+	public void leftAloneAfterHisSlamHisLakeIsAsItWas(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		Map<BlockPos, BlockState> laid = lake(level, king);
+		dens(level, origin);
+		ServerPlayer foe = shielded(helper, king, 0.5, 6.0);
+		YetiKingEntity.Attack slam = YetiKingEntity.Attack.GROUND_SLAM;
+		hunting(helper, king, () -> {
+			YetiKingEntity.Phase hunted = king.phase();
+			Vec3 centre = king.centre();
+			king.teleportTo(centre.x, king.floorY(), centre.z);
+			king.callKin(level, YetiKingEntity.KIN);
+			List<UUID> kin = king.whelps();
+			Vec3 stood = foe.position();
+			king.begin(level, slam, foe);
+			helper.runAfterDelay(slam.windup + slam.active + 2, () -> {
+				Vec3 landed = king.position();
+				int bared = changed(level, laid).size();
+				boolean onlyDrift = onlyDriftBared(level, laid);
+				long route = trampledWithin(laid, landed, YetiKingEntity.RING);
+				int patches = king.baredPatches();
+				foe.setGameMode(GameType.CREATIVE);   // no longer one he may fight: he is left alone
+				helper.runAfterDelay(YetiKingEntity.ABANDON_TICKS + 10, () -> {
+					try {
+						ending(level, king, () -> {
+							List<BlockPos> left = changed(level, laid);
+							helper.assertTrue(hunted == YetiKingEntity.Phase.HUNT, "He was not hunting: " + hunted);
+							helper.assertTrue(Math.hypot(landed.x - stood.x, landed.z - stood.z) < 0.5, "He did not come down where his foe stood: " + landed);
+							helper.assertTrue(patches == 1 && bared > 0, "His slam bared " + bared + " cells in " + patches + " patches");
+							helper.assertTrue(route > 0, "No trampled snow lay in his ring");
+							helper.assertTrue(onlyDrift, "His slam bared more than drift snow");
+							helper.assertTrue(king.phase() == YetiKingEntity.Phase.WAITING, "Left alone he is not back on his throne: " + king.phase());
+							helper.assertTrue(king.baredPatches() == 0 && left.isEmpty(), "Left alone, his lake is not as laid at " + firstFew(left));
+							for (UUID id : kin) {
+								helper.assertTrue(!(level.getEntity(id) instanceof YetiWhelpEntity whelp) || whelp.isRemoved(), "A whelp outlived his reset");
+							}
+						});
+					} finally {
+						foe.discard();
+					}
+					helper.succeed();
+				});
+			});
+		});
+	}
+
+	/** Left alone, his standing spikes, a block of ice in the air and falling icicles are all gone at once. */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 180)
+	public void leftAloneHisIceIsGoneAtOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 37, 42, 42, 47);   // the near one, 8 south of the centre
+		floor(level, origin, 37, 14, 42, 19);   // the far one, 20 north
+		ServerPlayer near = shielded(helper, king, 0.5, 8.0);
+		ServerPlayer far = shielded(helper, king, 0.5, -20.0);
+		YetiKingEntity.Attack spikes = YetiKingEntity.Attack.GLACIAL_SPIKES;
+		YetiKingEntity.Attack boulder = YetiKingEntity.Attack.BOULDER_THROW;
+		YetiKingEntity.Attack icicles = YetiKingEntity.Attack.ICICLE_FALL;
+		hunting(helper, king, () -> {
+			Vec3 centre = king.centre();
+			king.teleportTo(centre.x, king.floorY(), centre.z);
+			king.begin(level, spikes, near);
+			helper.runAfterDelay(spikes.windup + 1, () -> {
+				king.begin(level, boulder, far);   // the spikes raised still stand (a spike lives 24 ticks)
+				helper.runAfterDelay(boulder.windup + 1, () -> {   // the block is some 22 ticks in the air to the far one
+					List<GlacialSpikeEntity> standing = level.getEntitiesOfClass(GlacialSpikeEntity.class, arena(origin));
+					List<HurledBoulderEntity> flying = level.getEntitiesOfClass(HurledBoulderEntity.class, arena(origin));
+					king.reset(level);
+					boolean spikesGone = standing.stream().allMatch(Entity::isRemoved);
+					boolean boulderGone = flying.stream().allMatch(Entity::isRemoved);
+					king.wake(level);   // the same tick, before his own check for intruders could
+					helper.runAfterDelay(YetiKingEntity.WAKE_TICKS + 2, () -> {
+						king.teleportTo(centre.x, king.floorY(), centre.z);
+						king.begin(level, icicles, near);
+						helper.runAfterDelay(icicles.windup + 3, () -> {   // one or two icicles falling (a 14-tick fall)
+							List<FallingIcicleEntity> falling = level.getEntitiesOfClass(FallingIcicleEntity.class, arena(origin));
+							king.reset(level);
+							try {
+								ending(level, king, () -> {
+									helper.assertTrue(!standing.isEmpty() && !flying.isEmpty() && !falling.isEmpty(),
+											standing.size() + " spikes, " + flying.size() + " blocks of ice, " + falling.size() + " icicles as he was left alone");
+									helper.assertTrue(spikesGone, "A glacial spike outlived his reset");
+									helper.assertTrue(boulderGone, "A block of ice in the air outlived his reset");
+									helper.assertTrue(falling.stream().allMatch(Entity::isRemoved), "A falling icicle outlived his reset");
+									helper.assertTrue(king.phase() == YetiKingEntity.Phase.WAITING, "He is not back on his throne: " + king.phase());
+								});
+							} finally {
+								near.discard();
+								far.discard();
+							}
+							helper.succeed();
+						});
+					});
+				});
+			});
+		});
+	}
+
+	/** His fury's wider ring and a second overlapping slam bare only drift snow; as he falls the lake comes back exactly, his kin and spikes gone. */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 120)
+	public void whenHeFallsHisSnowDriftsBackAndHisKinAndIceAreGone(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		Map<BlockPos, BlockState> laid = lake(level, king);
+		dens(level, origin);
+		ServerPlayer foe = shielded(helper, king, 0.5, 6.0);
+		YetiKingEntity.Attack spikes = YetiKingEntity.Attack.GLACIAL_SPIKES;
+		hunting(helper, king, () -> {
+			Vec3 centre = king.centre();
+			king.teleportTo(centre.x, king.floorY(), centre.z);
+			king.startFury(level);
+			double ring = king.ring();
+			king.slamLands(level);
+			boolean wider = changed(level, laid).stream().anyMatch(cell -> Math.hypot(cell.getX() + 0.5 - centre.x, cell.getZ() + 0.5 - centre.z) > YetiKingEntity.RING);
+			long route = trampledWithin(laid, centre, YetiKingEntity.FURY_RING);
+			king.teleportTo(centre.x + 6.0, king.floorY(), centre.z);
+			king.slamLands(level);   // a second slam over half the first
+			int patches = king.baredPatches();
+			boolean onlyDrift = onlyDriftBared(level, laid);
+			king.teleportTo(centre.x, king.floorY(), centre.z);
+			king.callKin(level, YetiKingEntity.KIN);
+			List<UUID> kin = king.whelps();
+			king.begin(level, spikes, foe);   // spikes have no owner of their own: only his dismissal takes them
+			helper.runAfterDelay(spikes.windup + 3, () -> {
+				List<GlacialSpikeEntity> standing = level.getEntitiesOfClass(GlacialSpikeEntity.class, arena(origin));
+				king.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);   // as YetiKingClientGameTests fells him
+				List<BlockPos> left = changed(level, laid);
+				int patchesLeft = king.baredPatches();
+				boolean spikesGone = standing.stream().allMatch(Entity::isRemoved);
+				boolean kinGone = kin.stream().allMatch(id -> !(level.getEntity(id) instanceof YetiWhelpEntity whelp) || whelp.isRemoved());
+				helper.runAfterDelay(25, () -> {
+					try {
+						ending(level, king, () -> {
+							helper.assertTrue(ring == YetiKingEntity.FURY_RING && wider, "In his fury his slam bared no wider a ring");
+							helper.assertTrue(route > 0, "No trampled snow lay in his fury's ring");
+							helper.assertTrue(patches == 2 && onlyDrift, patches + " patches, or more than drift snow bared");
+							helper.assertTrue(!standing.isEmpty() && spikesGone, standing.size() + " spikes stood; one outlived him");
+							helper.assertTrue(kin.size() == YetiKingEntity.KIN && kinGone, "His kin outlived him");
+							helper.assertTrue(!king.isAlive(), "He did not fall");
+							helper.assertTrue(patchesLeft == 0 && left.isEmpty(), "As he fell his lake is not as laid at " + firstFew(left));
+						});
+					} finally {
+						foe.discard();
+					}
+					helper.succeed();
+				});
+			});
+		});
+	}
+
+	/**
+	 * Loaded again mid-fight (an emulated unload: each entity offered to save(), then removed as a chunk's unloading removes
+	 * it): only he is written; loaded, he is the king he was, hunting, and on his first tick the snow he had bared drifts
+	 * back; none of his kin or ice comes back. The real unload is in YetiKingClientGameTests.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 100)
+	public void loadedAgainMidFightHeDriftsHisSnowBackAndBringsNoKin(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		Map<BlockPos, BlockState> laid = lake(level, king);
+		dens(level, origin);
+		ServerPlayer foe = shielded(helper, king, 0.5, 6.0);
+		hunting(helper, king, () -> {
+			Vec3 centre = king.centre();
+			king.teleportTo(centre.x, king.floorY(), centre.z);
+			king.slamLands(level);
+			king.callKin(level, YetiKingEntity.KIN);
+			king.begin(level, YetiKingEntity.Attack.BOULDER_THROW, foe);   // some 8 ticks of flight
+			helper.runAfterDelay(YetiKingEntity.Attack.BOULDER_THROW.windup + 1, () -> {
+				List<Entity> inside = level.getEntitiesOfClass(Entity.class, arena(origin), entity -> !(entity instanceof Player));
+				Map<Entity, CompoundTag> written = new HashMap<>();
+				for (Entity entity : inside) {
+					TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+					if (entity.save(out)) {
+						written.put(entity, out.buildResult());
+					}
+				}
+				long whelps = inside.stream().filter(YetiWhelpEntity.class::isInstance).count();
+				long boulders = inside.stream().filter(HurledBoulderEntity.class::isInstance).count();
+				float health = king.getHealth();
+				inside.forEach(entity -> entity.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK));
+				CompoundTag his = written.get(king);
+				YetiKingEntity loaded = new YetiKingEntity(JugcraftYeti.YETI_KING, level);
+				boolean added = false;
+				if (his != null) {
+					loaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), his));
+					added = level.addFreshEntity(loaded);
+				}
+				boolean entered = added;
+				int patchesLoaded = loaded.baredPatches();   // before his first tick
+				boolean bareAsLoaded = !changed(level, laid).isEmpty();
+				helper.runAfterDelay(3, () -> {
+					try {
+						ending(level, loaded, () -> {
+							List<BlockPos> left = changed(level, laid);
+							helper.assertTrue(his != null, "He was not written with his hall's chunks");
+							helper.assertTrue(written.size() == 1, "Written with him: " + written.keySet());
+							helper.assertTrue(whelps == YetiKingEntity.KIN && boulders == 1, whelps + " whelps and " + boulders + " blocks of ice as it unloaded");
+							helper.assertTrue(entered, "The level refused him loaded again (his UUID still known after the unload)");
+							helper.assertTrue(loaded.getUUID().equals(king.getUUID()) && loaded.getHealth() == health, "Loaded, he is not the king he was");
+							helper.assertTrue(patchesLoaded == 1 && bareAsLoaded, "What he had bared did not come back with him");
+							helper.assertTrue(loaded.phase() == YetiKingEntity.Phase.HUNT, "Loaded, he is not hunting but " + loaded.phase());
+							helper.assertTrue(loaded.baredPatches() == 0 && left.isEmpty(), "Loaded, the snow did not drift back at " + firstFew(left));
+							helper.assertTrue(loaded.whelps().isEmpty() && level.getEntitiesOfClass(YetiWhelpEntity.class, arena(origin)).isEmpty()
+									&& level.getEntitiesOfClass(HurledBoulderEntity.class, arena(origin)).isEmpty(), "His kin or his ice came back with him");
+						});
+					} finally {
+						foe.discard();
+					}
+					helper.succeed();
+				});
+			});
+		});
+	}
+
+	/**
+	 * Against his frost: wool (knitwear) and leather stop the freeze's damage (vanilla's canFreeze) but not his frost (chill
+	 * ignores worn gear) nor its slowness, which they share with bare skin and thaw alike; only the Yeti Mitten stops both.
+	 */
+	@GameTest(maxTicks = 120)
+	public void woolAndLeatherStopTheFreezeButNotHisFrost(GameTestHelper helper) {
+		ServerPlayer bare = onStone(helper, new BlockPos(1, 2, 1));
+		ServerPlayer leather = onStone(helper, new BlockPos(3, 2, 1));
+		ServerPlayer wool = onStone(helper, new BlockPos(5, 2, 1));
+		ServerPlayer mitten = onStone(helper, new BlockPos(1, 2, 4));
+		leather.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.LEATHER_CHESTPLATE));
+		wool.setItemSlot(EquipmentSlot.CHEST, Knitting.garment(Knitwear.SWEATER, Knitting.UNDYED));
+		mitten.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(JugcraftYeti.YETI_MITTEN));
+		List<ServerPlayer> all = List.of(bare, leather, wool, mitten);
+		boolean[] canFreeze = {bare.canFreeze(), leather.canFreeze(), wool.canFreeze(), mitten.canFreeze()};
+		for (ServerPlayer player : all) {
+			YetiKingEntity.chill(player, YetiKingEntity.BLIZZARD_FROST, false);
+		}
+		int[] blizzard = all.stream().mapToInt(ServerPlayer::getTicksFrozen).toArray();
+		helper.runAfterDelay(LOADING_TICKS, () -> {   // only a loaded player can be hurt
+			try {
+				for (ServerPlayer player : all) {
+					YetiKingEntity.chill(player, player.getTicksRequiredToFreeze() * 2, true);   // his breath, stacked to its cap
+				}
+				boolean through = bare.isFullyFrozen() && leather.isFullyFrozen() && wool.isFullyFrozen() && !mitten.isFreezing();
+				float[] health = new float[all.size()];
+				for (int i = 0; i < all.size(); i++) {
+					ServerPlayer player = all.get(i);
+					health[i] = player.getHealth();
+					player.tickCount += Math.floorMod(-player.tickCount, 40);   // onto vanilla's freeze beat
+					player.aiStep();                                            // mock players do not tick by themselves
+				}
+				AttributeModifier[] slow = all.stream().map(player -> player.getAttribute(Attributes.MOVEMENT_SPEED).getModifier(FROST_SLOW))
+						.toArray(AttributeModifier[]::new);
+				helper.assertTrue(blizzard[0] == YetiKingEntity.BLIZZARD_FROST && blizzard[1] == YetiKingEntity.BLIZZARD_FROST
+						&& blizzard[2] == YetiKingEntity.BLIZZARD_FROST && blizzard[3] == 0, "His frost: " + Arrays.toString(blizzard));
+				helper.assertTrue(canFreeze[0] && !canFreeze[1] && !canFreeze[2] && canFreeze[3], "Freeze-immune: " + Arrays.toString(canFreeze));
+				helper.assertTrue(through, "His breath did not freeze bare skin, leather and wool through");
+				helper.assertTrue(health[0] - bare.getHealth() == 1.0F, "Frozen through, bare skin took " + (health[0] - bare.getHealth()));
+				helper.assertTrue(leather.getHealth() == health[1] && wool.getHealth() == health[2] && mitten.getHealth() == health[3],
+						"Leather, wool or the mitten's wearer was harmed by the freeze");
+				helper.assertTrue(slow[0] != null && slow[1] != null && slow[2] != null && slow[0].amount() < 0.0
+						&& slow[1].amount() == slow[0].amount() && slow[2].amount() == slow[0].amount(), "Not slowed alike: " + Arrays.toString(slow));
+				helper.assertTrue(slow[3] == null, "The mitten's wearer was slowed");
+				helper.assertTrue(leather.getTicksFrozen() == bare.getTicksFrozen() && wool.getTicksFrozen() == bare.getTicksFrozen(), "Leather or wool thawed faster");
+			} finally {
+				all.forEach(ServerPlayer::discard);
+			}
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * End-gun Levitation (GunShots gives the game's own, {@value GunShots#LIFT_TICKS} ticks at its first level, from the
+	 * shooter, to whatever a bullet hurts) lifts neither him nor his kin: hunting he stays on his lake and his whelps on
+	 * their dens' floors for the whole spell and after it, and the End gun's shot that fells him floats him no higher as he
+	 * dies. The whelps are given the spell alone, as GunShots gives it after a hit: a bullet's knockback (he has none) is
+	 * any blow's, not the spell's. The shooter is in creative, so neither he nor his kin go for anyone; and his whelps are
+	 * held where they came out (no speed: the spell's upward push does not depend on it), so a whelp strolling off its
+	 * den's one-block floor and jumping back cannot pass for a rise.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 160)
+	public void endGunLevitationLiftsNeitherHimNorHisKin(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		dens(level, origin);
+		ServerPlayer shooter = player(helper, king, 0.5, 6.0);
+		shooter.setGameMode(GameType.CREATIVE);   // no one he or his kin may fight
+		DamageSource bullet = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(JugcraftGuns.BULLET),
+				shooter, shooter);
+		// Him (0) and his whelps, from when the spell is given: where each stood, and how far above it each has been since.
+		LivingEntity[] watched = new LivingEntity[1 + YetiKingEntity.KIN];
+		double[] stood = new double[watched.length];
+		double[] rose = new double[watched.length];
+		boolean[] dying = {false};
+		double[] roseDying = {0.0};
+		helper.onEachTick(() -> {
+			for (int i = 0; i < watched.length; i++) {
+				if (watched[i] != null && !watched[i].isRemoved()) {
+					rose[i] = Math.max(rose[i], watched[i].getY() - stood[i]);
+				}
+			}
+			if (dying[0] && !king.isRemoved()) {
+				roseDying[0] = Math.max(roseDying[0], king.getY() - king.floorY());
+			}
+		});
+		hunting(helper, king, () -> {
+			YetiKingEntity.Phase hunted = king.phase();
+			int called = king.callKin(level, YetiKingEntity.KIN);
+			for (UUID id : king.whelps()) {
+				if (level.getEntity(id) instanceof YetiWhelpEntity whelp) {
+					whelp.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
+				}
+			}
+			helper.runAfterDelay(5, () -> {   // his whelps stand on the dens' floors
+				boolean[] took = new boolean[watched.length];
+				watched[0] = king;
+				stood[0] = king.floorY();
+				took[0] = levitate(king, shooter);
+				List<UUID> kin = king.whelps();
+				for (int i = 0; i < kin.size() && i + 1 < watched.length; i++) {
+					if (level.getEntity(kin.get(i)) instanceof YetiWhelpEntity whelp) {
+						watched[i + 1] = whelp;
+						stood[i + 1] = whelp.getY();
+						took[i + 1] = levitate(whelp, shooter);
+					}
+				}
+				helper.runAfterDelay(GunShots.LIFT_TICKS + 10, () -> {
+					watched[0] = null;
+					YetiKingEntity.Phase spelled = king.phase();
+					// The End gun's shot that fells him, as GunShots lands it: the bullet, then the spell if it hurt.
+					boolean felled = king.hurtServer(level, bullet, king.getMaxHealth() * 4.0F);
+					if (felled) {
+						levitate(king, shooter);
+					}
+					dying[0] = true;
+					helper.runAfterDelay(25, () -> {
+						try {
+							ending(level, king, () -> {
+								helper.assertTrue(hunted == YetiKingEntity.Phase.HUNT && spelled == YetiKingEntity.Phase.HUNT,
+										"He was not hunting throughout: " + hunted + ", then " + spelled);
+								helper.assertTrue(called == YetiKingEntity.KIN && watched[1] != null && watched[2] != null, called + " whelps came out of the dens");
+								helper.assertTrue(rose[0] <= 1.0E-6, "Hunting under Levitation he rose " + rose[0] + " off his lake (the spell "
+										+ (took[0] ? "took" : "was refused") + ")");
+								for (int i = 1; i < watched.length; i++) {
+									helper.assertTrue(rose[i] <= 1.0E-3, "Under Levitation a whelp rose " + rose[i] + " off its den's floor (the spell "
+											+ (took[i] ? "took" : "was refused") + ")");
+								}
+								helper.assertTrue(felled && !king.isAlive(), "The End gun's shot did not fell him");
+								helper.assertTrue(roseDying[0] <= 1.0E-6, "Felled by an End gun, he rose " + roseDying[0] + " off his lake as he died");
+							});
+						} finally {
+							shooter.discard();
+						}
+						helper.succeed();
+					});
+				});
+			});
+		});
 	}
 }
