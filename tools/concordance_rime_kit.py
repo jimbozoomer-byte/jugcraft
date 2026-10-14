@@ -111,7 +111,7 @@ ITEMS = {
     "water_bangle": {"name": "Water Bangle",
                      "tooltip": f"Worn in a Bracelet slot: once you understand Rimekeeping, whenever you have gone "
                                 f"{BANGLE_RECHARGE_TICKS // 20} seconds without a Brace it braces you for {BANGLE_BRACE_TICKS // 20} "
-                                "(the next push moves you half as far). A second bangle adds nothing."},
+                                "seconds (the next push moves you half as far). A second bangle adds nothing."},
     "nereids_hood": {"name": "Nereid's Hood"}, "nereids_tunic": {"name": "Nereid's Tunic"},
     "nereids_pants": {"name": "Nereid's Pants"}, "nereids_shoes": {"name": "Nereid's Shoes"},
     "aquamancers_hat": {"name": "Aquamancer's Hat"}, "aquamancers_robes": {"name": "Aquamancer's Robes"},

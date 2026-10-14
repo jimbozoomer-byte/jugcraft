@@ -27,6 +27,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Strata;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.gear.ThalliteGear;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.weapons.ArmVariants;
@@ -84,9 +85,10 @@ import net.spell_engine.internals.target.SpellTarget;
 /**
  * Concordance Chunk B, unit 4 (docs/features/arcane-concordance-winter.md), as far as a game-test server shows it.
  * <ul>
- * <li>B-08, Winter Brine's Frostward: a creature under it gathers no frost in powder snow, frost it had before is gone at
- * its next tick, and the status keeps its time through a save. (The brew itself is in {@link ConcordanceAlchemyGameTests},
- * and the Yeti King's chill passing a Frostward drinker by in {@link YetiKingGameTests}.)</li>
+ * <li>B-08, Winter Brine's Frostward: a creature under it in powder snow holds at most one tick of frost, never frozen
+ * through, frost it had before is gone at its next tick, and the status keeps its time through a save. (The brew itself
+ * is in {@link ConcordanceAlchemyGameTests}, and the Yeti King's chill passing a Frostward drinker by in
+ * {@link YetiKingGameTests}.)</li>
  * <li>B-10, the Rimekeeper's travel kit (the owner's water sets, foci and bangle; owner decision B-D2): the fifteen items
  * are made and worn as designed, within their bounds; every piece keeps powder snow from freezing its wearer, and none
  * walks on it; a focus of water worn, and only worn, lengthens Preserve's hold, through the effect boundary and through
@@ -485,7 +487,8 @@ public class ConcordanceWinterGameTests {
 	 * does nothing. Then the first look only starts the count; 600 ticks with no Brace brace the wearer for Brace's own 100
 	 * ticks (knockback resistance up by Brace's, Focus untouched); while braced the count starts again; spent, the next
 	 * Brace comes 600 ticks after the last. A Brace from anywhere else starts the count too. A second bangle adds nothing,
-	 * and a bangle taken off, or only held, does nothing.
+	 * and a bangle taken off, or only held, does nothing; put back on, it starts the count again, however long ago the last
+	 * Brace was.
 	 */
 	@GameTest(maxTicks = 20)
 	public void theWaterBangleBracesARimekeeperEveryThirtySeconds(GameTestHelper helper) {
@@ -532,6 +535,13 @@ public class ConcordanceWinterGameTests {
 		wearer.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(RimeGear.WATER_BANGLE));
 		helper.assertTrue(!RimeGear.wearsBangle(wearer) && RimeGear.bangle(wearer, t2 + 4L * r) == null && !wearer.hasEffect(Brace.BRACED),
 				"Taken off, or only held, the bangle does nothing");
+		wearer.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		bracelets.setItem(0, new ItemStack(RimeGear.WATER_BANGLE));
+		long t3 = t2 + 4L * r + 1;
+		helper.assertTrue(RimeGear.bangle(wearer, t3) == null && !wearer.hasEffect(Brace.BRACED),
+				"Put back on, the first look only starts the count again: taking it off forgot the last Brace");
+		ConcordanceEffects.Result back = RimeGear.bangle(wearer, t3 + r);
+		helper.assertTrue(back != null && back.applied() && wearer.hasEffect(Brace.BRACED), "and thirty seconds later it braces: " + back);
 		helper.succeed();
 	}
 
@@ -625,8 +635,9 @@ public class ConcordanceWinterGameTests {
 	 * elective cold work for whoever understands Rimekeeping, whichever Frost arm struck (the Yeti King's Glacier Maul and
 	 * Rimeclaw, and the creative-only Frost Knight Greatsword: the boon counts, not the line). It is counted once, kept
 	 * through a save, and stands for one kind: with two Preserves it masters Rimekeeping. The slow is the boon's own on
-	 * whatever it lands: a novice learns nothing from it, a pig or a resistant ravager is no restraint, and another boon is
-	 * no cold work.
+	 * whatever it lands: a novice learns nothing from it, a pig or a resistant ravager is no restraint, another boon is no
+	 * cold work, a killing blow restrains nothing, and with the Concordance switched off the arm still slows but nobody
+	 * learns from it.
 	 */
 	@GameTest(structure = ARENA, maxTicks = 20)
 	public void aFrostBoonSlowIsElectiveRimePractice(GameTestHelper helper) {
@@ -675,6 +686,25 @@ public class ConcordanceWinterGameTests {
 		ServerPlayer venom = wielder(helper, "hagthorn", new BlockPos(13, 2, 6), ResearchState.UNDERSTOOD);
 		strike(venom, helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(13, 2, 8)));
 		helper.assertTrue(rimework(venom).isEmpty(), "The Venom boon is no frost: " + rimework(venom));
+		// A killing blow: nothing is left to restrain.
+		ServerPlayer finisher = wielder(helper, "rimeclaw", new BlockPos(5, 2, 11), ResearchState.UNDERSTOOD);
+		Mob slain = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(5, 2, 13));
+		slain.setHealth(0.0F);
+		strike(finisher, slain);
+		helper.assertTrue(rimework(finisher).isEmpty(), "A killing blow restrains nothing: " + rimework(finisher));
+		// The Concordance off: arms work whatever the switch, so the boon still slows, and nobody learns from it. Switched
+		// back at once; the server runs other tests.
+		ServerPlayer off = wielder(helper, "glacier_maul", new BlockPos(1, 2, 11), ResearchState.UNDERSTOOD);
+		Mob chilled = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(1, 2, 13));
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			strike(off, chilled);
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		frostSlowed(helper, chilled, "With the Concordance off, the Glacier Maul");
+		helper.assertTrue(rimework(off).isEmpty(), "With the Concordance off a Frost boon slow teaches nothing: " + rimework(off));
 		helper.succeed();
 	}
 

@@ -184,12 +184,19 @@ public final class RimeGear {
 
 	/**
 	 * One look at {@code player} at {@code now} (server ticks). Only a living Rimekeeper wearing the bangle where it works
-	 * is looked at. Braced by any Brace, they have had one now. The first look only starts the count (putting it on,
-	 * logging in or coming back from death gives no Brace at once). After {@value #BANGLE_RECHARGE_TICKS} ticks with none,
-	 * they are braced. Returns the boundary's answer when it braced, or null when it did not try.
+	 * is looked at; anyone else's count is forgotten, so a bangle taken off and put back on starts again. Braced by any
+	 * Brace, they have had one now. The first look only starts the count (putting it on, logging in or coming back from
+	 * death gives no Brace at once). After {@value #BANGLE_RECHARGE_TICKS} ticks with none, they are braced. Returns the
+	 * boundary's answer when it braced, or null when it did not try.
 	 */
 	public static ConcordanceEffects.@Nullable Result bangle(ServerPlayer player, long now) {
-		if (!player.isAlive() || player.isSpectator() || !wearsBangle(player) || !Rime.understands(player)) {
+		if (!player.isAlive() || player.isSpectator()) {
+			return null;
+		}
+		if (!wearsBangle(player) || !Rime.understands(player)) {
+			if (player.hasAttached(BANGLE_LAST)) {
+				player.removeAttached(BANGLE_LAST);
+			}
 			return null;
 		}
 		Long last = player.getAttached(BANGLE_LAST);

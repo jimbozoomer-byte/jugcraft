@@ -49,7 +49,7 @@ utility (Preserve).
 |---|---|---|---|---|---|---|---|---|
 | Rimebind | defense | the first creature on a 16-block ray moves a fifth slower for 3 s (**Rimebound**), then **thaws** for 2 s, in which no one's Rimebind takes it | 4 (3) | 0.5 s | 2 s | Rimekeeping understood | Extend | slows, never roots; at most 3 s bound in every 5, however many cast; milk clears it; the Yeti King and the Cinder Tyrant are bound half as long; the Ender Dragon, Wither, Warden and Elder Guardian shrug it off |
 | Brace | support | you and your party within 4 blocks are **Braced** for 5 s: the next blow or harmful push moves each of you half as far | 3 (2) | 0.4 s | 8 s | Stratawrighting understood | Widen | one blow spends it; never stacks; lessens no harm; one's own Flashstep and a friend's helpful push ignore it; a teleport, a portal or a lair's mist moves the braced as anyone |
-| Preserve | utility | the Alembic Crucible you touch (4 blocks) keeps its heat band (cold, warm, hot or searing) for 60 s (90 s or 120 s with a focus of water worn, unit 4), whatever burns or goes out beneath it | 3 (2) | 0.6 s | 3 s | Rimekeeping understood | none | only a crucible you could change by hand; a second cast starts the minute again, never adds; nothing else is held: no chest, barrel, machine, food or item |
+| Preserve | utility | the Alembic Crucible you touch (4 blocks) keeps its heat band (cold, warm, hot or searing) for 60 s (90 s or 120 s with a focus of water worn, unit 4), whatever burns or goes out beneath it | 3 (2) | 0.6 s | 3 s | Rimekeeping understood | none | only a crucible you could change by hand; a second cast starts the hold again, never adds; nothing else is held: no chest, barrel, machine, food or item |
 
 - **Rimebound** is a new status with the owner's frost icon; **Thawing** is hidden (no icon on the HUD, no particles),
   though the inventory lists it, as it lists every effect. **Braced** shows the owner's weight glyph. Brace is not the
@@ -89,7 +89,7 @@ utility (Preserve).
     attachment, `jugcraft:brace_caster`. See the spending table below.
   - **Preserve** sets the crucible's `held_until` (game time). While held, the crucible's heat still moves a degree a
     tick toward its source, but `Band.keep` clamps it inside the band it was in; when the time passes the hold is
-    forgotten. A recast restarts the minute. The crucible accepts holds of up to `Rime.MAX_HOLD_TICKS` (2400, the
+    forgotten. A recast restarts the hold. The crucible accepts holds of up to `Rime.MAX_HOLD_TICKS` (2400, the
     boundary's longest time) and cuts anything further ahead, so unit 4's water foci (B-P24) fit unchanged.
   - **The crucible** tells `RimeSurvey.bottled` of every dose bottled by hand; one that carries Rime is the workshop
     study. Its empty-hand reading and its Jade snapshot carry the seconds held.

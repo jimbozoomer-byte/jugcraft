@@ -70,7 +70,8 @@ def elective(needs):
     return needs is not None and ":" not in needs
 
 
-_ELECTIVE = "; ".join(text for needs, text in RIMEWORK_KEYS.values() if elective(needs))
+_ELECTIVES = [text for needs, text in RIMEWORK_KEYS.values() if elective(needs)]
+_ELECTIVE = "; ".join(_ELECTIVES)
 _UNDERSTOOD = {"research": RESEARCH_ID, "state": "understood"}
 
 RESEARCH = {"rimekeeping": {
@@ -131,8 +132,9 @@ PRESERVE_WORD = "rimehold"
 
 # ---------------------------------------------------------------------------------------------- B-08 Frostward
 # Winter Brine's status (Java: rime/Frostward; tools/concordance_alchemy.py PROPERTIES["rime"] gives it). While it lasts a
-# creature gathers no frost: its own effect tick clears what it has (the Yeti Mitten's check, done by the creature under
-# it), and the Yeti King's chill does not take (YetiKingEntity.chill). Timed; the Mitten stays the lasting answer (B-D3).
+# creature is never frozen through: its own effect tick clears what it has (the Yeti Mitten's check, done by the creature
+# under it; powder snow adds one tick of frost after it), and the Yeti King's chill does not take (YetiKingEntity.chill).
+# Timed; the Mitten stays the lasting answer (B-D3).
 FROSTWARD_COLOUR = 0x73DAD8  # the ice of the owner's icon (frozen.png)
 
 COMPONENTS = {
@@ -174,7 +176,7 @@ INVOCATIONS = {
                        "warm, hot or searing), whatever burns beneath it.",
         "counter": "It holds one crucible you could change by hand, for a minute (two at most, with a Focus of Water worn): "
                    "the heat still moves inside its band, "
-                   "a second cast only starts the minute again, and it keeps nothing else (no chest, machine, food or "
+                   "a second cast only starts the hold again, and it keeps nothing else (no chest, machine, food or "
                    "item).",
         "fizzle": "Nothing to preserve: Preserve holds an Alembic Crucible within %s blocks",
     },
@@ -236,7 +238,8 @@ def codex():
                  "the Glacier Hall. Arriving there is a study of cold in itself.", rid("frost_horn")),
                 ("text", "Understood", f"You can now cast **Rimebind** and **Preserve** with any Concordance instrument. "
                  f"To **master** Rimekeeping, do {RIMEWORK_MASTERY} kinds of cold work: {work}."
-                 + (f" Any of these can stand for one: {_ELECTIVE}." if _ELECTIVE else "")
+                 + (f" Any of these can stand for one: {_ELECTIVE}." if len(_ELECTIVES) > 1
+                    else f" This can stand for one of them: {_ELECTIVE}." if _ELECTIVES else "")
                  + " Only someone who understands the **Alembic Arts** can put water in a crucible by hand. A magma block "
                  "keeps a crucible warm and a campfire makes it hot.", (research, "understood")),
                 ("text", "Mastered", "Rimebind and Preserve cost a point less Focus.", (research, "mastered")),
@@ -260,7 +263,7 @@ def codex():
                  "whatever burns or goes out beneath it. The heat still moves inside the band, a degree a tick."),
                 ("text", "What it will not hold", "Only a crucible you could change by hand: claims, protected towns and "
                  "spawn protection refuse it. Never a chest, barrel, machine, food or item. A second cast starts the "
-                 "minute again; it never adds to it. Jade, and the crucible's reading when you use it empty-handed, show "
+                 "hold again; it never adds to it. Jade, and the crucible's reading when you use it empty-handed, show "
                  "the seconds left."),
             ]},
     }

@@ -13474,17 +13474,48 @@ def check_alchemy(co, root, lang, registered, research):
 NOT_RECIPES = {"loot_table", "advancement", "tags", "worldgen", "modonomicon", "concordance", "dimension", "dimension_type", "structure"}
 
 
+def _item_tags():
+    """Every item tag the repository's data declares (data/*/tags/item), by id, with its listed values as written."""
+    found = {}
+    for path in DATA.glob("*/tags/item/**/*.json"):
+        namespace = path.relative_to(DATA).parts[0]
+        name = path.relative_to(DATA / namespace / "tags" / "item").with_suffix("").as_posix()
+        values = (load(path) or {}).get("values", [])
+        found.setdefault(f"{namespace}:{name}", []).extend(v.get("id", "") if isinstance(v, dict) else v for v in values)
+    return found
+
+
 def _made_from(start):
     """Every item Jugcraft's recipe-like data makes, step by step, from the items in start: a file that names one of them
-    (and does not make it) adds what it makes (B-08's must-fail loop: Yeti Fur must reach no Rime ingredient). Vanilla's
-    recipes are not in the repository; none makes snow, amethyst or a mushroom from wool or a horn."""
-    ids = re.compile(r'"((?:minecraft|jugcraft):[a-z0-9_/]+)"')
+    (and does not make it) adds what it makes (B-08's must-fail loop: Yeti Fur must reach no Rime ingredient). An input
+    tag (#ns:path) stands for its members in the repository's own tag files; a villager trade's `wants` makes its
+    `gives`; and the Assayer's Scale (data/jugcraft/concordance/material) makes every material it forms from any it
+    dissolves. Vanilla's recipes and tags are not in the repository; no vanilla recipe makes a snowball, an amethyst
+    shard, a mushroom or glow lichen from anything (gloamcap's inputs), and a town's coin shops are money, not this."""
+    ids = re.compile(r'"(#?[a-z0-9_.-]+:[a-z0-9_/.-]+)"')
+    tags = _item_tags()
+
+    def members(tag, seen):
+        found = set()
+        for value in tags.get(tag, []):
+            if value.startswith("#"):
+                if value[1:] not in seen:
+                    found |= members(value[1:], seen | {value[1:]})
+            else:
+                found.add(value)
+        return found
+
+    def named(text):
+        found = set()
+        for name in ids.findall(text):
+            found |= members(name[1:], {name[1:]}) if name.startswith("#") else {name}
+        return found
 
     def results(node):
         found = set()
         if isinstance(node, dict):
             for key, value in node.items():
-                found |= set(ids.findall(json.dumps(value))) if key in ("result", "results", "output", "outputs") else results(value)
+                found |= named(json.dumps(value)) if key in ("result", "results", "output", "outputs", "gives") else results(value)
         elif isinstance(node, list):
             for value in node:
                 found |= results(value)
@@ -13496,7 +13527,9 @@ def _made_from(start):
         data = load(path)
         made = results(data) if data is not None else set()
         if made:
-            recipes.append((set(ids.findall(path.read_text(encoding="utf-8"))) - made, made))
+            recipes.append((named(path.read_text(encoding="utf-8")) - made, made))
+    scale = [load(path) or {} for path in sorted((DATA / MOD / "concordance" / "material").glob("*.json"))]
+    recipes.append(({m.get("item") for m in scale if m.get("dissolve")}, {m.get("item") for m in scale if m.get("form")}))
     reached, grown = set(start), True
     while grown:
         grown = False
@@ -13550,8 +13583,10 @@ def check_winter_brine(co, root, lang):
     if "YetiMitten.warm(player)" not in chill or "Frostward.warded(player)" not in chill:
         err("lair/yeti/YetiKingEntity.chill: his frost passes by the Mitten and Frostward (B-08)")
     ingredients = {info["item"] for info in al.INGREDIENTS.values()}
-    if _made_from({f"{MOD}:yeti_fur"}) & ingredients:
-        err("Yeti Fur reaches an alchemical ingredient: Frostward must be no cheaper for it (06:146-158)")
+    rimed = {info["item"] for info in al.INGREDIENTS.values() if info["properties"].get("rime", 0) > 0}
+    if _made_from({f"{MOD}:yeti_fur"}) & rimed:
+        err("Yeti Fur reaches a Rime-bearing ingredient (snowball, amethyst shard, gloamcap): Frostward must be no "
+            "cheaper for it (06:146-158)")
     for thing in (f"{MOD}:draught", f"{MOD}:salve"):
         if thing in ingredients or thing in eq.MATERIALS:
             err(f"{thing} is neither an ingredient nor weighed: brews do not feed brews or the Scale")
@@ -13688,6 +13723,14 @@ def check_rime_kit(co, root, lang):
     for needle in ("!access.cosmetic() && access.canApplyEffects()", "Rime.MAX_HOLD_TICKS", "WATER_FOCUS", "LESSER_WATER_FOCUS"):
         if needle not in holding:
             err(f"RimeGear.holdTicks: only a focus worn where it works, within the cap ({needle})")
+    wearing = _java_body(gear_java, "public static boolean wearsBangle(")
+    for needle in ("!access.cosmetic() && access.canApplyEffects()", "WATER_BANGLE"):
+        if needle not in wearing:
+            err(f"RimeGear.wearsBangle: only a bangle worn where it works, never one in a cosmetic slot ({needle})")
+    looking = _java_body(gear_java, "public static ConcordanceEffects.@Nullable Result bangle(")
+    if "removeAttached(BANGLE_LAST)" not in looking:
+        err("RimeGear.bangle: a bangle taken off (or a wearer who no longer qualifies) forgets its count, so putting it "
+            "back on gives no Brace at once")
     for needle in ('Cause.of(null, Cause.Origin.ITEM, "jugcraft:water_bangle"', "new ConcordanceEffects.Context(level, cause, null,",
                    "ConcordanceEffects.apply(context, BANGLE_BRACE, player)", "Brace.STATUS", "Intent.HELPFUL",
                    "Stacking.EXCLUSIVE", "Rime.understands(player)", "wearsBangle(player)", "END_SERVER_TICK",
@@ -13837,6 +13880,10 @@ def check_winter_links(co, root):
     body = _java_body(source(root / "rime" / "Rime.java"), "public static boolean frostBoon(")
     if "Rimebind.restrains(target)" not in body or "practise(person, KEY_FROST_BOON)" not in body:
         err("Rime.frostBoon: restraint's targets (Rimebind.restrains) and the frost_boon key, for its wielder")
+    for needle in ("JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)", "target.isAlive()"):
+        if needle not in body:
+            err(f"Rime.frostBoon: nothing while the Concordance is switched off (arms work whatever the switch), and a "
+                f"killing blow restrains nothing ({needle})")
     for needle in ("addEffect", "MobEffectInstance", "removeEffect", "hurt", "push(", "knockback", "Attributes.", "setDuration"):
         if needle in body:
             err(f"Rime.frostBoon only records practice; it changes nothing ({needle})")

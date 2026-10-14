@@ -11,13 +11,14 @@ import net.minecraft.world.entity.LivingEntity;
 
 /**
  * Frostward ({@code jugcraft:frostward}; Concordance Chunk B, B-08): the status a Rime brew gives (Winter Brine,
- * tools/concordance_alchemy.py PROPERTIES["rime"]). While it lasts the creature gathers no frost: its own effect tick
- * clears whatever frost it has (the Yeti Mitten's check, lair/yeti/YetiMitten.java, done by each creature under the
+ * tools/concordance_alchemy.py PROPERTIES["rime"]). While it lasts the creature is never frozen through: its own effect
+ * tick clears whatever frost it has (the Yeti Mitten's check, lair/yeti/YetiMitten.java, done by each creature under the
  * status, so the work is one look at each such creature a tick), and the Yeti King's chill does not take
- * ({@code YetiKingEntity.chill}). Powder snow, the Frost Horn's arrival and a snow werewolf's frostbite leave no frost;
- * their other effects (the werewolf's Slowness, sinking in powder snow) are untouched. Timed as Ember's Fire Resistance
- * brew is (B-P19); milk ends it; the Mitten, held, stays the lasting answer (04:141). Registered whatever the Concordance
- * switch, so a saved Frostward keeps its id.
+ * ({@code YetiKingEntity.chill}). Powder snow, the Frost Horn's arrival and a snow werewolf's frostbite leave no frost
+ * past the creature's next tick (in powder snow, which adds a tick of frost after the effect tick, at most one tick of
+ * frost); their other effects (the werewolf's Slowness, sinking in powder snow) are untouched. Timed as Ember's Fire
+ * Resistance brew is (B-P19); milk ends it; the Mitten, held, stays the lasting answer (04:141). Registered whatever the
+ * Concordance switch, so a saved Frostward keeps its id.
  */
 public final class Frostward {
 	/** Its id: the Rime property's status (data/jugcraft/concordance/property/rime.json). */

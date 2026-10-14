@@ -55,10 +55,12 @@ public record Outcome(List<Effect> effects, List<Text> reasons) {
 
 	/**
 	 * The items whose ingredients carry {@code axis}, in the order they first went in; for Rime, then the stirs above the
-	 * cold band that thawed some of it (B-08).
+	 * cold band that thawed some of it (B-08): only a stir after something carrying Rime went in, since a stir thaws only
+	 * Rime already in the mixture (Mixture.apply).
 	 */
 	private static List<Text.Ref> sources(Axis axis, AlchemyCatalog catalog, List<Operation> history) {
 		Set<String> items = new LinkedHashSet<>();
+		boolean rimeIn = false;
 		boolean thawed = false;
 		for (Operation operation : history) {
 			if (operation instanceof Operation.Add add) {
@@ -66,7 +68,10 @@ public record Outcome(List<Effect> effects, List<Text> reasons) {
 				if (ingredient != null && ingredient.properties().get(axis) > 0) {
 					items.add(add.item());
 				}
-			} else if (axis == Axis.RIME && operation instanceof Operation.Stir stir && Mixture.rimeKeep(stir.band()) < 1000L) {
+				if (ingredient != null && ingredient.properties().get(Axis.RIME) > 0) {
+					rimeIn = true;
+				}
+			} else if (axis == Axis.RIME && rimeIn && operation instanceof Operation.Stir stir && Mixture.rimeKeep(stir.band()) < 1000L) {
 				thawed = true;
 			}
 		}

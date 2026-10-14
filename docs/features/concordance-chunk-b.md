@@ -1029,8 +1029,8 @@ B-P37 to B-P39 are kept free (for unit 2's decisions at integration); unit 4's a
 - Taken from the survey reports or the plan's review without re-reading, and marked *(survey)*: #322's conflicts with
   #337; #336's lamp listener; #330's audit; #332's Levitation; #344's contents; the Thallite leaching pull requests; the
   merge points in `tools/concordance.py`; the Conclave check; the context of `pewatermagic.ogg`; the heavy model's
-  unchecked fit; whether each listed recipe draws one grid (the Expeditions count); what an examination records; the
-  sluice's turner; the Winter Crown pattern.
+  unchecked fit (since measured by unit 4: 71%, head 91%); whether each listed recipe draws one grid (the Expeditions
+  count); what an examination records; the sluice's turner; the Winter Crown pattern.
 - Read for unit 4 (14 October 2026), from the 26.3 sources fetched for it (not the local mirror):
   `PowderSnowBlock.canEntityWalkOnPowderSnow` (leather boots or an entity-type tag only: no boots tag) and
   `InsideBlockEffectType.FREEZE` (frost only while `canFreeze()`); B-P46 follows from them.

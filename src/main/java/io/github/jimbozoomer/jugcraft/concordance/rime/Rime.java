@@ -3,11 +3,13 @@ package io.github.jimbozoomer.jugcraft.concordance.rime;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
@@ -72,12 +74,14 @@ public final class Rime {
 
 	/**
 	 * A Frost boon arm's slow took on {@code target} (weapons/ArmItem.boon; B-P26): restraint by a cold arm, Rimekeeping's
-	 * elective cold work, for a wielder who understands Rimekeeping, on the creatures Rimebind's restraint counts
-	 * ({@link Rimebind#restrains}). It only records: the slow is the boon's own, with its own refresh and no thaw (B-P10),
-	 * and nothing here changes it (B-P28). Returns whether it taught anything new.
+	 * elective cold work, for a wielder who understands Rimekeeping, on the living creatures Rimebind's restraint counts
+	 * ({@link Rimebind#restrains}; a killing blow restrains nothing). It only records: the slow is the boon's own, with its
+	 * own refresh and no thaw (B-P10), and nothing here changes it (B-P28). Nothing while the Concordance is switched off:
+	 * arms work whatever the switch. Returns whether it taught anything new.
 	 */
 	public static boolean frostBoon(LivingEntity wielder, LivingEntity target) {
-		return wielder instanceof ServerPlayer person && Rimebind.restrains(target) && practise(person, KEY_FROST_BOON);
+		return JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) && wielder instanceof ServerPlayer person
+				&& target.isAlive() && Rimebind.restrains(target) && practise(person, KEY_FROST_BOON);
 	}
 
 	/** The cold work a Preserve on a crucible in {@code band} is: cold, or heated (warm, hot or searing). */

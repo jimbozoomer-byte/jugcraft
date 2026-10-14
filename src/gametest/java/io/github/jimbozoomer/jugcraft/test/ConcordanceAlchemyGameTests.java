@@ -430,8 +430,8 @@ public class ConcordanceAlchemyGameTests {
 	 * dissolved. On paper, three snowballs as they come in one part of water, stirred three times, keep what
 	 * tools/concordance_alchemy.py winter_brine says at each band (check_mod_data holds the two to each other): cold, a
 	 * draught of Frostward I for 48.75 s; warm, too weak, naming the stirs that thawed it; searing, only the fouling's
-	 * Nausea. By hand, one crucible over stone and one over a magma block: the cold one's draught drunk gives Frostward
-	 * and no Resistance; the warm one's does nothing.
+	 * Nausea. A warm stir before any snowball went in thaws nothing and is not named. By hand, one crucible over stone and
+	 * one over a magma block: the cold one's draught drunk gives Frostward and no Resistance; the warm one's does nothing.
 	 */
 	@GameTest(maxTicks = 60)
 	public void winterBrineNeedsTheColdBand(GameTestHelper helper) {
@@ -451,6 +451,17 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(warm.effects().isEmpty() && warm.reasons().stream().anyMatch(reason -> reason.key().equals("alchemy.too_weak")
 				&& reason.args().stream().anyMatch(arg -> arg.toString().contains("thawed"))),
 				"Stirred warm: too weak, and the warm stirs named as what thawed it: " + warm.reasons());
+		List<Operation> stirredFirst = new ArrayList<>(List.of(new Operation.Water(1), new Operation.Stir(Band.WARM)));
+		for (int i = 0; i < 3; i++) {
+			stirredFirst.add(new Operation.Add(SNOW, "jugcraft:raw"));
+		}
+		for (int i = 0; i < 3; i++) {
+			stirredFirst.add(new Operation.Stir(Band.COLD));
+		}
+		Outcome early = bottled(((Mixture.Applied) new Formula(stirredFirst).replay(catalog)).mixture());
+		helper.assertTrue(early.key().equals("jugcraft:frostward@0") && early.reasons().stream()
+						.noneMatch(reason -> reason.args().stream().anyMatch(arg -> arg.toString().contains("thawed"))),
+				"A warm stir before any Rime went in thaws nothing and is not named: " + early.reasons());
 		Outcome searing = bottled(threeSnowballs(1, Band.SEARING));
 		helper.assertTrue(searing.key().equals("minecraft:nausea@0"), "Stirred searing: no Rime left, only the fouling: " + searing.key());
 

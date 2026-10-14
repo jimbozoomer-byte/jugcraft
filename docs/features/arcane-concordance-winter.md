@@ -63,7 +63,8 @@ with no number changed (B-10). Their decisions are B-P40 to B-P53, all Proposed
 - **The heat rule** (`concordance/alchemy/Mixture`): after each stir, the dissolved Rime is scaled by `rimeKeep(band)`
   (`RIME_KEEP_WARM`, `RIME_KEEP_HOT`, `RIME_KEEP_SEARING`), beside the searing rule. It acts on stirs only: an addition
   records no band, so the formula format is unchanged and a ground ingredient's ready share stays until a stir (B-P41).
-  `Outcome` adds the reason `alchemy.thawed` to a Rime reason when a warmer stir thawed some of it.
+  `Outcome` adds the reason `alchemy.thawed` to a Rime reason when a warmer stir came after something carrying Rime
+  went in (a stir before that thawed nothing and is not named).
 - **Frostward** (`concordance/rime/Frostward`): a helpful `MobEffect` that clears `ticksFrozen` in its own effect tick,
   every tick, on whatever creature carries it (the Mitten's check, done by the creature under it; B-P40). Effects tick
   in `baseTick` before blocks act in `aiStep` (mc263src `LivingEntity`), so powder snow adds at most one tick before the
@@ -109,9 +110,12 @@ with no number changed (B-10). Their decisions are B-P40 to B-P53, all Proposed
 - **"Needs the cold band" holds per recipe, not absolutely:** four raw snowballs stirred warm twice still reach
   Frostward (0.936 a part), and five stirred hot once (0.825); searing never does. Two ground snowballs bottled with no stir make Frostward at any heat,
   because their ready share is dissolved as they go in and no stir has thawed it (B-P41).
-- **No economy loop** (06:146-158): Yeti Fur reaches no alchemical ingredient (no recipe makes snow, amethyst or
-  gloamcap from it), so the boss makes Frostward no cheaper; a draught or a salve is neither an ingredient nor weighed
-  at the Assayer's Scale; diluting makes more bottles but not more Frostward (two parts of the same brew carry 0.406 a
+- **No economy loop** (06:146-158): Yeti Fur reaches no Rime-bearing ingredient (snowball, amethyst shard, gloamcap).
+  Its wool goes on through the Assayer's Scale to sugar and bone meal, which are ingredients but carry no Rime; no
+  recipe, villager trade or Scale form makes snow, amethyst or gloamcap from it, so the boss makes Frostward no cheaper
+  (a town's coin shops, where the General Store buys wool and the Seasonal Stall sells snow blocks in winter, are money,
+  as for any item, and stay outside this check); a draught or a salve is neither an ingredient nor weighed at the
+  Assayer's Scale; diluting makes more bottles but not more Frostward (two parts of the same brew carry 0.406 a
   part, below the threshold); two draughts drunk one after the other keep the longer time, never the sum.
 - It costs no Focus: brewing never has.
 
@@ -155,8 +159,9 @@ Game tests added; **none has run yet** (CI's `mod`, `optional integrations absen
 - `ConcordanceAlchemyGameTests` (+4): `winterBrineNeedsTheColdBand` (on paper, the Rime each band keeps of three
   snowballs, 813, 685, 211 and 0, the generator's own numbers, which the audit reads from the test; by hand, a cold and
   a warm crucible stirred three times, the cold draught drunk: Frostward for 975 ticks and no Resistance; the warm
-  one does nothing; searing gives Nausea), `oldRimeBottlesStillGiveResistance` (a save test: a Rime draught as saved
-  before, Resistance for 487 ticks, read, re-encoded and drunk), `aRimeFormulaWrittenBeforeBrewsFrostward` (an old
+  one does nothing; searing gives Nausea; a warm stir before any snowball is not named as thawing),
+  `oldRimeBottlesStillGiveResistance` (a save test: a Rime draught as saved before, Resistance for 487 ticks, read,
+  re-encoded and drunk), `aRimeFormulaWrittenBeforeBrewsFrostward` (an old
   formula's text set on a crucible fed by tank and buffer), `frostwardIsNeverCheaperThanItsSnow` (the must-fail loops
   above).
 - `ConcordanceWinterGameTests.frostwardClearsFrostAndKeepsItsTime`: two pigs in powder snow, one warded, and a frozen
@@ -188,7 +193,8 @@ The owner's water art, under the owner's names (B-D2), made at a crafting table 
 - **Water Bangle**, worn in a Bracelet slot: once you understand Rimekeeping, whenever you have gone **30 seconds
   without a Brace** it braces you for 5 seconds (Brace's own Braced: the next blow or harmful push moves you half as
   far). It is not your cast, so it teaches Stratawrighting nothing and earns no one a deed; a second bangle adds
-  nothing. Putting it on, logging in or coming back from death starts the count, with no Brace at once.
+  nothing. Putting it on (or back on: taking it off forgets the count), logging in or coming back from death starts
+  the count, with no Brace at once.
 - **Three water sets,** each worn as the owner's GeckoLib model in its own sheet:
   - **Nereid's** Hood, Tunic, Pants and Shoes (light): the Pyromaniac's equal;
   - **Aquamancer's** Hat, Robes, Leggings and Boots (medium): leather's protection, longer-lasting;
@@ -243,7 +249,8 @@ The owner's water art, under the owner's names (B-D2), made at a crafting table 
   - a focus or bangle in the hand or a cosmetic slot gives nothing;
   - with the Concordance switched off, the recipes do not load and the bangle and foci do nothing (Preserve is
     refused); the items stay registered and freeze-proof, as Ember's stay registered;
-  - the bangle's first look only starts its count; already braced (by anyone), the count starts again;
+  - the bangle's first look only starts its count; already braced (by anyone), the count starts again; taken off,
+    its count is forgotten;
   - a dead or spectating player is not looked at.
 - Solo and trade: entirely solo; the items are ordinary stacks.
 - Specialty use without other branches: the sets need nothing; the foci and bangle need First Light and Rimekeeping.
@@ -293,7 +300,8 @@ was an inference in the contract; `aKitWearerIsSlowedButNotHurtByHisFrost` and t
 - Server authority: the hold is read from the wearer's Trinkets slots on the server when Preserve lands; the bangle is
   looked at on the server's tick and goes through the shared effect boundary; freezing is vanilla's, on the server. No
   packet or client claim is added.
-- Cost: the bangle loop looks at each player once a second and at their Trinkets slots only while they wear one.
+- Cost: the bangle loop looks at every player's Trinkets slots once a second, whether or not they wear a bangle, and
+  at their research only while they wear one.
 
 | What | Effect | Test |
 |---|---|---|
@@ -389,8 +397,8 @@ Game tests added; **none has run yet**:
   boots only, B-P46), `theWaterFociLengthenPreservesHold` (1200, 1800, 2400; the hand and a Focus of Fire give
   nothing; a recast never adds; and through Spell Engine, the real cast), `theWaterBangleBracesARimekeeperEveryThirtySeconds`
   (before Rimekeeping nothing; the count, the Brace at 600 ticks, the restart after any Brace, a second bangle, taken
-  off or held), `theWaterBanglesBraceIsNobodysCast` (no caster, no anchoring practice, spent as a Brace),
-  `spellPowerEnchantmentsAreRefusedOnTheWaterSets`.
+  off or held, put back on: the count starts again), `theWaterBanglesBraceIsNobodysCast` (no caster, no anchoring
+  practice, spent as a Brace), `spellPowerEnchantmentsAreRefusedOnTheWaterSets`.
 - `YetiKingGameTests.aKitWearerIsSlowedButNotHurtByHisFrost`: in Nereid's Hood his frost lands and freezes through;
   pigs held fully frozen for 90 ticks, the dressed one at full health and the bare one hurt, both slowed.
 - `ConcordancePersistenceGameTests`: new `theTravelKitSurvivesASave` (each of the fifteen, damaged and enchanted or
@@ -440,8 +448,8 @@ Implemented with Claude Code (Claude Opus 5.5).
 - **The boon itself is unchanged:** Slowness II for 3 seconds, renewed by each hit, outside Rimebind's thaw. Its
   numbers, tooltip and the trophies' drop are as they were.
 - What does not count: a slow on a pig or another creature that is not hostile, on a resistant creature (a ravager, the
-  Yeti King, the Cinder Tyrant), or by someone who does not understand Rimekeeping; another boon; the Ice Breaker's
-  slow.
+  Yeti King, the Cinder Tyrant), or by someone who does not understand Rimekeeping; a killing blow; another boon; the
+  Ice Breaker's slow; any slow while the Concordance is switched off (the boon still slows).
 - **Thallite** links through unit 3: raw Thallite is a Stratawrighting specimen, and a blow taken in Earthbound Thallite
   on natural ground is its `rooted` elective. Unit 4 adds no recorder and changes nothing there.
 - The Rimekeeper advancement, the codex's Understood page and the player guide's table name the elective.
@@ -453,9 +461,9 @@ Implemented with Claude Code (Claude Opus 5.5).
   route skips electives.
 - `weapons/ArmItem.boon`, the FROST case: the boon's own `addEffect` is kept, and only when it took does it call
   `Rime.frostBoon(attacker, target)`.
-- `Rime.frostBoon`: for a server player wielder and a target `Rimebind.restrains` (a hostile creature at normal
-  tolerance, the predicate Rimebind's restraint now shares, B-P34), it records `practice:jugcraft:rimework:frost_boon`.
-  It only records: no effect, push or attribute.
+- `Rime.frostBoon`: with the Concordance switched on, for a server player wielder and a living target
+  `Rimebind.restrains` (a hostile creature at normal tolerance, the predicate Rimebind's restraint now shares, B-P34),
+  it records `practice:jugcraft:rimework:frost_boon`. It only records: no effect, push or attribute.
 - Thallite: unit 3's `AFTER_DAMAGE` listener in `Strata` records `rooted`, reading Thallite's own ground tags
   (`ThalliteGear.LIVING_GROUND`, `EARTHEN_GROUND`). Nothing is added to them (B-P28).
 
@@ -497,7 +505,8 @@ Implemented with Claude Code (Claude Opus 5.5).
 Game tests added (`ConcordanceWinterGameTests`); **none has run yet**:
 - `aFrostBoonSlowIsElectiveRimePractice`: each Frost arm counts once for a Rimekeeper striking a zombie, with the
   boon's own slow; the key survives a knowledge round trip before mastery; with two kinds of Preserve it masters
-  Rimekeeping; a novice, a pig, a resistant ravager and the Venom boon count nothing.
+  Rimekeeping; a novice, a pig, a resistant ravager, the Venom boon and a killing blow count nothing; with the
+  Concordance switched off the boon still slows and nothing is learned.
 - `aFrostBoonStaysOutsideTheThaw`: the boon's slow starts no thaw and is not refused by one; a hit renews it to its
   full time and leaves Rimebound and the thaw as they were.
 - `thalliteStaysOutOfTheCold`: snow, powder snow, ice, packed and blue ice and the hall's drift snow, trampled snow and
@@ -515,15 +524,15 @@ Implemented with Claude Code (Claude Opus 5.5).
 Run on 14 October 2026 where the unit was written. No Minecraft jar is available there, so no Minecraft build was
 compiled or run.
 
-| Check | A `f45b2c6c3` | B `68dd29dbc` | C `b262ba8c4` | E `ca1d4848c` | Records (this commit) |
-|---|---|---|---|---|---|
-| `python3 tools/owner_art.py --check` | passed | passed | passed | passed | passed |
-| `python3 -B tools/check_mod_data.py` | passed | passed | passed | passed | passed |
-| `python3 scripts/check_repository.py` | passed | passed | passed | passed | passed |
-| `python3 tools/concordance_journey.py --check` | passed | passed | passed | passed | passed |
-| `python3 tools/check_icon_maps.py` | passed | passed | passed | passed | passed |
-| `./gradlew build` (compilation and the server game tests) | not run | not run | not run | not run | not run |
-| `./gradlew runClientGameTest` | not run | not run | not run | not run | not run |
+| Check | A `f45b2c6c3` | B `68dd29dbc` | C `b262ba8c4` | E `ca1d4848c` | Records `cad1ac5e6` | Review fixes |
+|---|---|---|---|---|---|---|
+| `python3 tools/owner_art.py --check` | passed | passed | passed | passed | passed | passed |
+| `python3 -B tools/check_mod_data.py` | passed | passed | passed | passed | passed | passed |
+| `python3 scripts/check_repository.py` | passed | passed | passed | passed | passed | passed |
+| `python3 tools/concordance_journey.py --check` | passed | passed | passed | passed | passed | passed |
+| `python3 tools/check_icon_maps.py` | passed | passed | passed | passed | passed | passed |
+| `./gradlew build` (compilation and the server game tests) | not run | not run | not run | not run | not run | not run |
+| `./gradlew runClientGameTest` | not run | not run | not run | not run | not run | not run |
 
 For this record the gate was run on an export of each commit (`git archive`, outside the repository) and on the
 working tree of this commit. `check_mod_data` counts 2558 material ids at commit A and 2573 from commit B (the fifteen
@@ -561,6 +570,19 @@ time, and every injected fault below was reported (60 in all):
   literal; the codex link at understood; its research as a constant; either of the two lang lines missing; an
   attachment written from `prepare`.
 
+**Review fixes** (the unit review, 14 October 2026; the gate in the last column, on the working tree). Faults injected on
+a copy outside the repository, each restored after its run, were all reported (10 of 10): `Rime.frostBoon` without the
+switch, and without its living target; `RimeGear.wearsBangle` without its cosmetic check; `RimeGear.bangle` keeping its
+count when the bangle is taken off; and Yeti Fur reaching a Rime-bearing ingredient by a Scale form of snowballs, a
+recipe taking it through a tag, the same through a tag inside a tag, a villager trading wool for amethyst, the plain
+`yeti_fur → snowball` recipe, and a recipe making gloamcap from sugar. The audit as it was before the fixes reported
+only the plain recipe of those six routes. Forty of section 9.5's faults for the three new audits were re-run against
+the fixed audits, all reported: 38 as first written; the name "Nereids Hood", which in the table alone is left to CI's
+generated-file check, once it reaches the language file as the generator writes it; and Winterguard's sheet swapped
+for the medium one, by `owner_art.py --check` (in the table) and by the fit (on the runtime sheet).
+Not re-run here, as the fixes do not touch their audits: the faults caught by `check_ember_regalia`,
+`check_acquisition`, `check_rime`'s key mirror, `owner_art.py --check` alone and `concordance_journey.py`.
+
 Not run: `./gradlew build`, any server or client game test, a client by hand (the icons, the worn sets, the codex and
 JEI pages, the dossier), the Trinkets screen's slots (no client test opens it), a person looking at the screenshots,
 two clients on a dedicated server, and play by hand.
@@ -597,7 +619,8 @@ hall is untouched.
   [unit 3's downgrade guidance](arcane-concordance-rime-strata.md#rollout-and-open-questions) for the modifiers that
   can stay behind); it drops the fifteen items, as any unknown id. Back up a world before moving it to an older build.
 - **Disable behaviour:** with `concordance.enabled=false` the kit's recipes do not load, crucibles refuse work, and the
-  bangle, the foci and Frostward brewing do nothing; Frostward, the items and the attachment stay registered, and the
+  bangle, the foci, Frostward brewing and the Frost boon's practice do nothing (the boon still slows: arms work whatever
+  the switch); Frostward, the items and the attachment stay registered, and the
   pieces stay freeze-proof (the tag is not switched, as with Ember).
 - **Known limits:**
   - the draught is named "Draught" and its tooltip reads "Frostward I (48.75 s)"; "Winter Brine" appears in JEI, the

@@ -260,8 +260,10 @@ def _seconds(ticks):
 
 
 def _rime_keeps():
-    return ", ".join(f"{band} {RIME_KEEP[band] // 10}%" if RIME_KEEP[band] else f"{band} none"
-                     for band in BANDS if band != "cold")
+    """What a stir in each band above cold keeps of the dissolved Rime, as "warm keeps 60%, hot 30%, searing none"."""
+    kept = [f"{band} {RIME_KEEP[band] // 10}%" if RIME_KEEP[band] else f"{band} none" for band in BANDS if band != "cold"]
+    kept[0] = kept[0].replace(" ", " keeps ", 1)
+    return ", ".join(kept)
 
 
 def _milli(units):
@@ -422,7 +424,7 @@ def codex():
             "pages": [
                 ("text", "Winter Brine",
                  f"Rime brews Frostward, and Rime is cold's own: every stir above the cold band thaws part of the Rime "
-                 f"already dissolved ({_rime_keeps()} of it stays). So stir it with nothing burning beneath the crucible. "
+                 f"already dissolved ({_rime_keeps()}). So stir it with nothing burning beneath the crucible. "
                  + _winter_brine_example()),
                 ("text", "Frostward",
                  f"While Frostward lasts you gather no frost: powder snow, the Frost Horn's chill and the Yeti King's breath "
