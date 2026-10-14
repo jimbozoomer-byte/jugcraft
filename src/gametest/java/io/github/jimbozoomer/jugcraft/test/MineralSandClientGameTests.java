@@ -64,9 +64,13 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
                     // Decoration has since added trees. Survey the sediment surface beneath their canopy,
                     // not the water/tree height or the buried ore's three-dimensional biome.
                     if (ground == Integer.MIN_VALUE) ground = terrainSurface(level, x, z);
-                    var surfaceBiome = level.getBiome(new BlockPos(x, ground, z));
-                    check(surfaceBiome.is(feature(level, family).surfaceBiomes()),
-                            "Wrong surface biome " + surfaceBiome.unwrapKey() + " at " + x + " " + ground + " " + z + " over " + cursor);
+                    var configured = feature(level, family);
+                    // Later pond/soil/tree decoration can move the apparent surface at a 3D biome edge.
+                    // Its generation-time surface must occur within the lens's maximum burial envelope.
+                    boolean eligibleSurface = false;
+                    for (int sy = y + 1; sy <= y + configured.maxCover() + configured.maxThickness() + 1; sy++)
+                        eligibleSurface |= level.getBiome(new BlockPos(x, sy, z)).is(configured.surfaceBiomes());
+                    check(eligibleSurface, "No eligible generation surface above " + cursor + "; current ground " + ground);
                     var above = level.getBlockState(cursor.above());
                     if (above.isAir() || above.canBeReplaced() && above.getFluidState().isEmpty()) exposed.add(cursor.immutable());
                 }
@@ -90,7 +94,7 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
     }
     private static void natural(ClientGameTestContext context, String seed, boolean export) {
         List<Sample> samples = new ArrayList<>(); List<BlockPos> depleted = new ArrayList<>(), cameras = new ArrayList<>(); Path source; TestWorldSave save;
-        String[] targets = {"dune_beach", "outback", "lake_district", "gravel_beach"};
+        String[] targets = {"dune_beach", "outback", "lake_district", "highland"};
         try (TestSingleplayerContext world = context.worldBuilder().adjustSettings(c -> {
             normal(c, seed); c.setName(export ? "Mineral Sands Field Trip" : "Mineral Sands Sampling");
         }).create()) {
@@ -106,12 +110,16 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
                     // A small coastal strip need not contain a successful rare attempt. Survey additional
                     // eligible regions without changing production rates or manually placing a deposit.
                     for (int region = 1; found.exposed.isEmpty() && region <= 10; region++) {
-                        var next = server.overworld().findClosestBiome3d(b -> b.is(feature(server.overworld(), family).surfaceBiomes()),
-                                center.offset(region * 2048, 0, region * -2048), 8192, 32, 64);
+                        var next = server.overworld().findClosestBiome3d(b -> family == 3
+                                        ? b.is(Jugcraft.id("highland")) || b.is(Jugcraft.id("shield"))
+                                        : family == 2 ? b.is(Jugcraft.id("basin")) || b.is(Jugcraft.id("lake_district"))
+                                        : b.is(feature(server.overworld(), family).surfaceBiomes()),
+                                center.offset(region * 2048, 0, region * -2048), 16384, 32, 64);
                         if (next != null) found = sample(server.overworld(), next.getFirst(), 14, family, seed + " region " + region);
                     }
                     check(!found.reserve.isEmpty() && !found.exposed.isEmpty(), "No visible natural " + targets[family] + " deposit on " + seed);
-                    return found;
+                    // Include the whole bed when its first visible block lay at a regional survey boundary.
+                    return sample(server.overworld(), found.exposed.get(found.exposed.size() / 2), 4, family, seed + " complete inspection bed");
                 });
                 samples.add(result);
                 if (export) {
@@ -158,6 +166,13 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
     private static BlockPos camera(ClientGameTestContext context, TestSingleplayerContext world, BlockPos view, String name) {
         BlockPos camera = world.getServer().computeOnServer(s -> {
             var level = s.overworld(); var player = s.getPlayerList().getPlayers().getFirst();
+            // Inspection-only foliage window. Preserve the natural ground and every mineral block.
+            int leaves = 0;
+            for (BlockPos p : BlockPos.betweenClosed(view.offset(-6, 1, -6), view.offset(6, 14, 6)))
+                if (level.getBlockState(p).is(net.minecraft.tags.BlockTags.LEAVES)) {
+                    level.setBlock(p, Blocks.AIR.defaultBlockState(), 2); leaves++;
+                }
+            Jugcraft.LOGGER.info("[mineral-sands] {} inspection foliage window: {} leaves cleared; terrain and reserve preserved", name, leaves);
             for (int[] offset : new int[][]{{8, 9, 12}, {4, 4, 4}, {-4, 4, -4}, {2, 2, 2}, {-2, 2, -2}, {0, 2, 0}}) {
                 var pos = view.offset(offset[0], offset[1], offset[2]);
                 if (!level.getBlockState(pos).isAir() || !level.getBlockState(pos.above()).isAir()) continue;
@@ -168,12 +183,14 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
             }
             return view.above(2);
         });
+        world.getServer().runCommand("gamemode spectator @a");
         world.getServer().runCommand("tp @a " + xyz(camera));
         world.getServer().runOnServer(s -> { var p = s.getPlayerList().getPlayers().getFirst(); p.getAbilities().flying = true; p.onUpdateAbilities(); });
         context.waitTicks(60); world.getConnection().waitForChunksRender(); context.getInput().lookAt(view); context.waitTicks(10);
         context.runOnClient(c -> { if (!c.gui.hud.isHidden()) c.gui.hud.toggle(); }); context.waitTicks(2);
         context.takeScreenshot("mineral-sands-" + name);
         context.runOnClient(c -> { if (c.gui.hud.isHidden()) c.gui.hud.toggle(); });
+        world.getServer().runCommand("gamemode creative @a");
         return camera;
     }
     private static void designed(ClientGameTestContext context) {
@@ -261,7 +278,7 @@ public class MineralSandClientGameTests implements FabricClientGameTest {
         Jugcraft.LOGGER.info("[mineral-sands] Disabled decoration; all four block and inventory families survived reopening");
     }
     private static void writeTour(String seed, List<Sample> samples, List<BlockPos> removed, List<BlockPos> cameras) {
-        var text = new StringBuilder("Mineral Sands Field Trip\nSeed: " + seed + "\nAll deposits generated at production rates in a normal world. One block per family was extracted for the persistence test; the four units are in your inventory. Other reserves are untouched.\nUse /gamemode spectator to inspect the shallow buried lenses; /gamemode creative to return.\n\n");
+        var text = new StringBuilder("Mineral Sands Field Trip\nSeed: " + seed + "\nAll deposits generated at production rates in a normal world. One block per family was extracted for the persistence test; the four units are in your inventory. Other reserves and ground are untouched. Small leaf windows were cleared around the tour targets for visibility; these are inspection preparation, not a worldgen clearing.\nUse /gamemode spectator before the tour teleports to fly freely and inspect the shallow buried lenses; /gamemode creative to return.\n\n");
         for (int i = 0; i < 4; i++) {
             var sample = samples.get(i); var view = sample.exposed.get(sample.exposed.size() / 2);
             text.append(MineralSandGameTests.names().get(i)).append(": /tp @s ").append(xyz(cameras.get(i))).append('\n');

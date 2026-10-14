@@ -43,7 +43,7 @@ Exact visuals, default key, quests/rewards and release order remain to design. T
 
 Related owner planning records: [industrial agriculture, PR #208](https://github.com/jimbozoomer-byte/jugcraft/pull/208), [mineral sands/refining, PR #209](https://github.com/jimbozoomer-byte/jugcraft/pull/209), and [waste/recycling/pollution, PR #210](https://github.com/jimbozoomer-byte/jugcraft/pull/210). These are planning work, not claims that those proposed systems are implemented.
 
-- Regional mineral-sand world generation and finite reserves are being implemented in [draft PR #354](https://github.com/jimbozoomer-byte/jugcraft/pull/354), public branch `speedygroyper:codex/regional-mineral-sands`. See the [deposit implementation record](features/regional-mineral-sands.md). Dedicated extraction and chemical separation/refining remain separate work.
+- Regional mineral-sand world generation and finite reserves are implemented for owner inspection in [draft PR #354](https://github.com/jimbozoomer-byte/jugcraft/pull/354), public branch `speedygroyper:codex/regional-mineral-sands`; not yet merged. See the [deposit implementation record](features/regional-mineral-sands.md). Dedicated extraction and chemical separation/refining remain separate work.
 
 ## Industrial machine models textures and dimensions
 
