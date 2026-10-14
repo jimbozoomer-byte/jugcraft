@@ -9,6 +9,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
 
+### Fixed: the Highwayman's recipe
+- **The Highwayman now takes a second brass ingot,** under the first. Its grid was the Garrison Rifle's mirrored, and a crafting table matches a shaped grid either way round, so only one of the two guns could be made from it.
+- Record: [guns.md, slice 9D's crafting](docs/features/guns.md#slice-9d-the-pump-shotguns).
+
 ### Added: The Howitzer Walker, playable
 - Owner accepted the updated local playtest on October 13: aim without holding fire, no close-ground aim freeze, and hide the pilot model/equipment while mounted. Implementation and correction record: [Howitzer Walker](docs/features/howitzer-walker.md).
 - **The owner's Howitzer Walker is in the game:** a tall, two-legged artillery walker in riveted olive plate with a big howitzer in an open cradle, made from a Diesel Walker beside the Armoured Walker (`SDS / PWP / R R`: two steel blocks, a dispenser, steel plates, the Diesel Walker and pistons). It walks, turns, climbs and refuels as the other walkers do.
