@@ -8607,18 +8607,20 @@ def check_model_uvs():
 
 def check_lairs():
     """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
-    tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, docs/features/hollow-acre.md,
-    docs/features/spindle-loft.md, docs/features/glacier-hall.md, docs/features/cinder-kiln.md,
-    docs/features/lantern-fen.md, docs/features/crypt-archive.md): the Java's numbers are the tables' and the layouts',
-    every lair has its dimension, dimension type, biome (no spawns), template and words for coming in, the rituals'
-    blocks, items, recipes and tags are there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's
-    icicle parts and snow heights, the Cinder Kiln's slag, troughs and sluices, the Lantern Fen's lamps and the Archive of
-    Last Names' names, stones, seals, lectern and phylactery are the tables', every server option has its default, every
-    message the Java sends has its words, and the Glacier Hall, the Cinder Kiln, the Lantern Fen and the Archive of Last
-    Names are laid out as their records say (check_glacier_hall, check_cinder_kiln, check_lantern_fen,
-    check_crypt_archive)."""
+    tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py,
+    docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
+    docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md,
+    docs/features/foundry-trench.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
+    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
+    there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts and snow heights, the
+    Cinder Kiln's slag, troughs and sluices, the Lantern Fen's lamps, the Archive of Last Names' names, stones, seals,
+    lectern and phylactery and the Foundry Trench's pylons, crowns, breakers and terminals are the tables', every server
+    option has its default, every message the Java sends has its words, and the Glacier Hall, the Cinder Kiln, the Lantern
+    Fen, the Archive of Last Names and the Foundry Trench are laid out as their records say (check_glacier_hall,
+    check_cinder_kiln, check_lantern_fen, check_crypt_archive, check_foundry_trench)."""
     import cinder_kiln as ck
     import crypt_archive as ca
+    import foundry_trench as ft
     import glacier_hall as gh
     import hollow_acre as ha
     import lair_data as ld
@@ -8631,7 +8633,7 @@ def check_lairs():
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
                                        ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
                                        ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
-                                       ("crypt_archive", ca, ca.CENTRE, None)):
+                                       ("crypt_archive", ca, ca.CENTRE, None), ("foundry_trench", ft, ft.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8665,7 +8667,7 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 la.GATE["entity"]):
+                 "sealed_orders", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8767,6 +8769,33 @@ def check_lairs():
             err(f"No words for the Crypt Lich's name {name}")
     if "ExhumationRite.register();" not in registry or "output.accept(EXHUMATION_WRIT);" not in registry:
         err("JugcraftLairs does not register the Writ of Exhumation's rite or put the writ in the creative tab")
+    # The Foundry Trench's: the orders' rest, reach and trench, the bell, the trench works, the fixtures' light and rest and
+    # their registrations, and the pylons' names.
+    orders = (folder / "OrdersRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("LINE_RANGE", "line_range"), ("TRENCH_RANGE", "trench_range"),
+                      ("TRENCH_BLOCKS", "trench_blocks"), ("BELL_TICKS", "bell_ticks")):
+        if not java_number(orders, name, la.ORDERS[key]):
+            err(f"OrdersRite.{name} is not tools/lairs.py ORDERS {key} ({la.ORDERS[key]})")
+    works = (load(DATA / MOD / "tags" / "block" / "trench_works.json") or {}).get("values", [])
+    if sorted(works) != sorted(la.TRENCH_WORKS):
+        err(f"#jugcraft:trench_works is not tools/lairs.py TRENCH_WORKS: {works}")
+    for block in la.TRENCH_WORKS:
+        if not (ASSETS / "blockstates" / f"{block.split(':')[1]}.json").is_file():
+            err(f"tools/lairs.py TRENCH_WORKS names {block}, which is no block of Jugcraft's")
+    for cls, name, value in (("PylonCrownBlock", "LIGHT", la.PYLON_CROWN["light"]), ("DischargeBreakerBlock", "LIGHT", la.BREAKER["light"]),
+                             ("DischargeBreakerBlock", "REST", la.BREAKER["rest"]), ("GroundTerminalBlock", "LIGHT", la.TERMINAL["light"])):
+        if not java_number((folder / f"{cls}.java").read_text(encoding="utf-8"), name, value):
+            err(f"{cls}.{name} is not tools/lairs.py's {value}")
+    for line in ('fixture("pylon_lattice", Block::new', 'fixture("pylon_crown", p -> new PylonCrownBlock(p.lightLevel(PylonCrownBlock::light))',
+                 'fixture("discharge_breaker", p -> new DischargeBreakerBlock(p.lightLevel(DischargeBreakerBlock::light))',
+                 'fixture("ground_terminal", p -> new GroundTerminalBlock(p.lightLevel(GroundTerminalBlock::light))'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in la.PYLON_NAMES:
+        if f"lair.{MOD}.foundry_trench.pylon.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Foundry Trench's {name} pylon")
+    if "OrdersRite.register();" not in registry or "output.accept(SEALED_ORDERS);" not in registry:
+        err("JugcraftLairs does not register Sealed Orders' rite or put the orders in the creative tab")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8818,6 +8847,7 @@ def check_lairs():
     check_cinder_kiln(ck)
     check_lantern_fen(lf)
     check_crypt_archive(ca)
+    check_foundry_trench(ft)
 
 
 def check_glacier_hall(gh):
@@ -9392,6 +9422,189 @@ def check_crypt_archive(ca):
             err(f"The archive has {state[0]} at {(x, y, z)}, which would change once placed")
             break
 
+
+def check_foundry_trench(ft):
+    """The Foundry Trench as tools/foundry_trench.py builds it is the trench its record describes
+    (docs/features/foundry-trench.md), and where the Java looks for its parts (FoundryTrench.java) is where the layout puts
+    them: the arrival stands on the dugout's duckboards with room overhead, and the Grey Mist fills its back doorway; a
+    walk from the arrival, never stepping more than half a block, goes up the dugout's steps, along the fire trench, down
+    the ramp and to every open cell of the pit's floor, and within reach of each pylon's breaker; each pylon stands on its
+    footing, its lattice up to a dark crown, its breaker open and dark facing the pit against the footing, its terminal
+    dark in the floor before it; the lanes are open and paved; the cover stands; each service gantry has its catwalk,
+    railing and a ladder up at either end; the dugout's telephone stands on its table; light flooded from the hidden
+    lights, the lamps and the searchlights, as the game floods it, is at least PIT_LIGHT on every open cell of the pit's
+    floor; and nothing in it changes by itself once placed."""
+    from collections import deque
+    import lairs as la
+    blocks = ft.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "FoundryTrench.java").read_text(encoding="utf-8"))
+    for jname, value in (("PAVE", ft.PAVE), ("STAND", ft.STAND), ("GROUND", ft.GROUND), ("TRENCH_STAND", ft.TRENCH_STAND),
+                         ("DUGOUT_STAND", ft.DUGOUT_STAND), ("PIT_WEST", ft.PIT["x"][0]), ("PIT_EAST", ft.PIT["x"][1]),
+                         ("PIT_NORTH", ft.PIT["z"][0]), ("PIT_SOUTH", ft.PIT["z"][1]), ("CENTRE_X", ft.CENTRE[0]),
+                         ("CENTRE_Z", ft.CENTRE[1]), ("WAIT_X", ft.WAIT[0]), ("WAIT_Y", float(ft.WAIT[1])), ("WAIT_Z", ft.WAIT[2]),
+                         ("EXIT_WEST", ft.GANTRY_EXIT["x"][0]), ("EXIT_EAST", ft.GANTRY_EXIT["x"][1]),
+                         ("EXIT_Z", ft.GANTRY_EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"FoundryTrench.{jname} is not tools/foundry_trench.py's {value}")
+    if "TELEPHONE = new BlockPos({}, {}, {});".format(*ft.TELEPHONE) not in java:
+        err(f"FoundryTrench.TELEPHONE is not tools/foundry_trench.py's {ft.TELEPHONE}")
+    for jname, cells in (("BREAKERS", ft.breaker_cells()), ("CROWNS", ft.crown_cells()), ("TERMINALS", ft.terminal_cells())):
+        expected = "{} = {{{}}};".format(jname, ", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in la.PYLON_NAMES))
+        if expected not in java:
+            err(f"FoundryTrench.{jname} is not tools/foundry_trench.py's, in the order of tools/lairs.py PYLON_NAMES: "
+                f"expected {expected}")
+    lanes = []
+    for pylon in la.PYLON_NAMES:
+        axis, fixed, lo, hi = ft.LANES[pylon]
+        lanes.append((lo, hi, fixed - 1, fixed + 1) if axis == "x" else (fixed - 1, fixed + 1, lo, hi))
+    if "LANES = {{{}}};".format(", ".join("{{{}, {}, {}, {}}}".format(*lane) for lane in lanes)) not in java:
+        err(f"FoundryTrench.LANES is not tools/foundry_trench.py's lanes {lanes}, in the order of tools/lairs.py PYLON_NAMES")
+    pylons = re.search(r"enum Pylon \{\s*([A-Z_, ]+);", java)
+    if not pylons or tuple(p.strip().lower() for p in pylons.group(1).split(",")) != la.PYLON_NAMES:
+        err(f"FoundryTrench.Pylon is not tools/lairs.py PYLON_NAMES {la.PYLON_NAMES}")
+    if tuple(ft.PYLONS) != la.PYLON_NAMES:
+        err(f"tools/foundry_trench.py's PYLONS {tuple(ft.PYLONS)} are not tools/lairs.py PYLON_NAMES {la.PYLON_NAMES}")
+
+    passable = {None, "minecraft:light", "minecraft:rail", "jugcraft:barbed_wire", "jugcraft:lair_exit"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = ft.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name(feet) != "jugcraft:duckboard" or abs(ay - (ft.DUGOUT_STAND + ft.DUCK)) > 1e-9 \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not free((feet[0], feet[1] + 2, feet[2])):
+        err(f"The trench's arrival at {ft.ARRIVAL[:3]} does not stand on the dugout's duckboards with room overhead")
+    for pos in ft.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the dugout's back doorway at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block, on mud, on duckboards, on a top slab or on either half of
+    # a stair.
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:gravel", "minecraft:gray_concrete",
+             "minecraft:light_gray_concrete", "minecraft:black_concrete", "jugcraft:bastion_concrete", "jugcraft:hazard_plating",
+             "jugcraft:riveted_black_plate", "jugcraft:steel_armor_plate", "jugcraft:sandbags", "jugcraft:timber_revetment",
+             "jugcraft:ground_terminal", "jugcraft:corrugated_iron", "minecraft:bricks"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        heights = {"minecraft:mud": (y + 0.875,), "jugcraft:duckboard": (y + ft.DUCK,), "jugcraft:rust_grating_slab": (y + 1.0,),
+                   "jugcraft:sandbags_stairs": (y + 0.5, y + 1.0)}.get(state[0], (y + 1.0,) if state[0] in whole else ())
+        if heights and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).extend(heights)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    pit_floor = {(x, z) for x, z, h in seen if h == float(ft.STAND) and ft.in_pit(x, z)}
+    stranded = [(x, z) for (x, z), heights in stands.items() if ft.in_pit(x, z) and float(ft.STAND) in heights
+                and (x, z) not in pit_floor]
+    if stranded:
+        err(f"{len(stranded)} cells of the trench's pit floor cannot be walked to from the arrival, e.g. {stranded[0]}")
+    if not any(ft.in_trench(x, z) and abs(h - (ft.TRENCH_STAND + ft.DUCK)) < 1e-9 for x, z, h in seen):
+        err("No walk from the trench's arrival comes up into the fire trench")
+
+    def within(target, reach):
+        tx, ty, tz = (c + 0.5 for c in target)
+        return any(((x + 0.5 - tx) ** 2 + (h + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach for x, z, h in seen)
+
+    # The pylons: footing, lattice, dark crown, open dark breaker facing the pit against the footing, dark terminal.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    breakers, crowns, terminals = ft.breaker_cells(), ft.crown_cells(), ft.terminal_cells()
+    for pylon, info in ft.PYLONS.items():
+        px, pz = info["at"]
+        if any(name((cx, ft.STAND, cz)) != "jugcraft:bastion_concrete" for cx, cz in ft.footing_cells(pylon)):
+            err(f"The {pylon} pylon has no concrete footing round {info['at']}")
+        if any(name((px, y, pz)) != "jugcraft:pylon_lattice" for y in range(ft.STAND + 1, ft.STAND + 1 + ft.LATTICE)):
+            err(f"The {pylon} pylon's lattice does not stand from its footing to its crown")
+        if name(crowns[pylon]) != "jugcraft:pylon_crown" or props(crowns[pylon]).get("live") != "false":
+            err(f"No dark crown on the {pylon} pylon at {crowns[pylon]}")
+        state = props(breakers[pylon])
+        if name(breakers[pylon]) != "jugcraft:discharge_breaker" or state.get("facing") != info["face"] \
+                or (state.get("thrown"), state.get("live"), state.get("fouled")) != ("false", "false", "false"):
+            err(f"No open, dark, clear breaker facing {info['face']} at the {pylon} pylon's foot {breakers[pylon]}")
+        dx, dz = steps[info["face"]]
+        bx, by, bz = breakers[pylon]
+        if (bx - dx, bz - dz) not in ft.footing_cells(pylon):
+            err(f"The {pylon} pylon's breaker at {breakers[pylon]} does not stand against its footing")
+        if (bx + dx, bz + dz) != info["terminal"]:
+            err(f"The {pylon} pylon's terminal {info['terminal']} is not before its breaker")
+        if name(terminals[pylon]) != "jugcraft:ground_terminal" or props(terminals[pylon]).get("live") != "false":
+            err(f"No dark ground terminal in the floor at {terminals[pylon]}")
+        if not within(breakers[pylon], 4.0):
+            err(f"No walk from the trench's arrival comes within reach of the {pylon} pylon's breaker at {breakers[pylon]}")
+    for pylon in ft.LANES:
+        for x, z in sorted(ft.lane_cells(pylon)):
+            if name((x, ft.PAVE, z)) not in ("minecraft:light_gray_concrete", "jugcraft:hazard_plating", "jugcraft:ground_terminal") \
+                    or not all(free((x, y, z)) for y in range(ft.STAND, ft.STAND + 3)):
+                err(f"The trench's lane to the {pylon} pylon is not open and paved at {(x, z)}")
+                break
+    # The cover: no hole in its top, and its edge standing whole from the floor (its inside is hollowed, out of sight).
+    cover = ft.cover_cells()
+    for x, z in sorted(cover):
+        edge = any(n not in cover for n in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)))
+        top = ft.STAND + (ft.WRECK["height"] if (x, z) in ft.wreck_cells() else ft.BASTION_HEIGHT) - 1
+        if free((x, top, z)) and free((x, top + 1, z)) or edge and any(free((x, y, z)) for y in range(ft.STAND, top + 1)):
+            err(f"The trench's cover at {(x, z)} does not stand whole from the floor to its top")
+            break
+    for side, info in ft.CATWALKS.items():
+        for z in range(ft.CATWALK_Z[0], ft.CATWALK_Z[1] + 1):
+            if any(name((x, ft.CATWALK_Y, z)) != "jugcraft:rust_grating_slab" for x in range(info["x"][0], info["x"][1] + 1)) \
+                    or name((info["rail"], ft.CATWALK_Y + 1, z)) != "jugcraft:railing":
+                err(f"The {side} service gantry has no catwalk and railing at z {z}")
+                break
+        # Each ladder against the wall, from the floor to the catwalk; its foot walked to, its top beside the catwalk.
+        front = 1 if info["face"] == "east" else -1
+        for z in ft.LADDER_Z:
+            beside = z + 1 if z < ft.CATWALK_Z[0] else z - 1
+            if any(name((info["ladder"], y, z)) != "jugcraft:steel_ladder" for y in range(ft.STAND, ft.CATWALK_Y + 1)) \
+                    or (info["ladder"] + front, z) not in pit_floor \
+                    or name((info["ladder"], ft.CATWALK_Y, beside)) != "jugcraft:rust_grating_slab":
+                err(f"No ladder up from the pit's floor to the {side} service gantry at z {z}")
+    if name(ft.TELEPHONE) != "jugcraft:field_telephone" or name((ft.TELEPHONE[0], ft.TELEPHONE[1] - 1, ft.TELEPHONE[2])) \
+            != "jugcraft:map_table":
+        err(f"No telephone on the dugout's map table at {ft.TELEPHONE}")
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"jugcraft:searchlight": 15, "jugcraft:bunker_lamp": 14, "minecraft:campfire": 15, "jugcraft:lair_exit": 6}
+    through = passable | {"minecraft:iron_chain", "jugcraft:railing", "jugcraft:steel_ladder", "jugcraft:pylon_lattice",
+                          "jugcraft:pylon_crown", "jugcraft:discharge_breaker", "jugcraft:searchlight", "jugcraft:bunker_lamp",
+                          "jugcraft:field_telephone", "jugcraft:map_table", "jugcraft:bunker_bunk", "jugcraft:trench_periscope",
+                          "jugcraft:blast_door", "jugcraft:duckboard"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and 0 <= n[1] < ft.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    pit = sorted((light.get((x, ft.STAND, z), 0), (x, ft.STAND, z)) for x, z in pit_floor)
+    if not pit or pit[0][0] < ft.PIT_LIGHT:
+        dark = [cell for level, cell in pit if level < ft.PIT_LIGHT]
+        err(f"{len(dark)} open cells of the trench's pit have less block light than PIT_LIGHT {ft.PIT_LIGHT}, "
+            f"the darkest {pit[0] if pit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "FoundryTrenchClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "PIT_LIGHT", ft.PIT_LIGHT) or not java_number(source, "PIT_CELLS", len(pit_floor)):
+        err(f"FoundryTrenchClientGameTests does not read the pit's light against PIT_LIGHT {ft.PIT_LIGHT} on its "
+            f"{len(pit_floor)} open cells (PIT_CELLS)")
+
+    # Nothing that changes by itself once placed (the stacks' signal fires burn on for good, in no weather).
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                                                        "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
+            err(f"The trench has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
 
 def check_vesperine():
     """Vesperine, the Last Reaper (tools/vesperine.py, docs/features/vesperine.md): every number the Java uses is the

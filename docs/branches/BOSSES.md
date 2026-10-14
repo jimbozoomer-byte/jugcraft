@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; six bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; six bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is being built. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 ## Rules every boss follows
 
@@ -21,8 +21,11 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **Madame Tatterlace** | The Spindle Loft: a Cursed Spindle used on a Spinning Wheel at night | [spindle-loft.md](../features/spindle-loft.md), [tatterlace.md](../features/tatterlace.md) | #292 and #294, through #277 |
 | **The Yeti King** | The Glacier Hall: the Frost Horn | [glacier-hall.md](../features/glacier-hall.md), [yeti-king.md](../features/yeti-king.md) | #300 and #304, through #320 |
 | **The Cinder Tyrant** | The Cinder Kiln: the Kiln Seal | [cinder-kiln.md](../features/cinder-kiln.md), [cinder-tyrant.md](../features/cinder-tyrant.md) | #313 and #317, through #320 |
+| **The Mire Hag** | The Lantern Fen: the Hag Stone | [lantern-fen.md](../features/lantern-fen.md), [mire-hag.md](../features/mire-hag.md) | #331 and #336, through #352 |
+| **The Crypt Lich** | The Archive of Last Names: the Writ of Exhumation | [crypt-archive.md](../features/crypt-archive.md), [crypt-lich.md](../features/crypt-lich.md) | #350 and #353, through #352 |
+| **The Iron Dreadnought** (being built) | The Foundry Trench: Sealed Orders | [foundry-trench.md](../features/foundry-trench.md) (part 1; part 2 is the Dreadnought and his loot) | Not yet |
 
-The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all four are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win; they still credit damage alone, without Concordance Chunk A's support credit ([lair-encounter-credit.md](../features/lair-encounter-credit.md)).
+The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all six, and the Iron Dreadnought's trench, are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win; they still credit damage alone, without Concordance Chunk A's support credit ([lair-encounter-credit.md](../features/lair-encounter-credit.md)).
 
 ## The first eight (trophies built)
 
@@ -484,6 +487,125 @@ He follows the rules every boss follows (above):
 - every opening costs a Writ of Exhumation.
 
 Nothing a tier needs comes only from him.
+
+## The Iron Dreadnought: the plan (being built)
+
+The fifth of the first eight, built by [the boss playbook](BOSS_PLAYBOOK.md) as the bosses before him were: first his lair and the summoning that opens it, then the Dreadnought himself and his loot, each its own pull request with tests and pictures. On 14 October 2026 the owner chose him as the next boss ("go with recommendations" on the Crypt Lich's checkpoint). He is the first boss of the dieselpunk tiers. The planning pack asked that he wait until the industrial materials and the guns were settled; the October 13 integration (#352) brought the chemistry, the fuels and nine guns into `main`, and his summoning and loot use only what is there.
+
+The design joins two sources:
+- this page's own idea for him: a walking war machine bigger than the landship, with steam vents and tesla coils, which charges in straight lines, arcs its coils between players who stand close, and whose weak vents glow before they open;
+- the planning pack's "Foundry Trench" ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md)): a ruined industrial test pit with three grounded pylons, two service gantries and permanent cover; an announced coil charge picks a pylon, and players throw a fixture to route the discharge into the ground, which overloads his armour and opens his vents for six seconds; a piston punch, a rivet fan, a telegraphed mortar and a straight charge; and at half health a terminal fouled by a part of him, which a short interaction clears, always leaving at least two good routes.
+
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the trench and the orders: [features/foundry-trench.md](../features/foundry-trench.md).
+
+*A walking fortress of riveted gunmetal, five blocks wide and six tall, on two piston legs. Olive-drab plates worn bright at the edges, yellow-and-black hazard stripes on its ram, two ribbed tesla coils on its shoulders, a battery of rivet guns under steel shutters, a mortar in its back and a searchlight for an eye.* He was built in the foundry behind the lines to break them, and never sent; the test pit he was proved in became his ground, and he keeps it still, waiting in his assembly gantry for orders.
+
+### The Foundry Trench
+
+A ruined test pit sunk behind the front line, under a sky of drifting smoke:
+- **The arrival:** a timber-shored **dugout** two steps down off the fire trench, under a corrugated iron roof: bunks, a lamp, a map table and the telephone the orders came by. In its back doorway, Grey Mist: the way home. The dugout and the fire trench are safe.
+- **The fire trench:** along the west half of the pit's south rim: sandbags on its parapet over the pit, timber revetments, duckboards and a periscope. From its west end a ramp of sandbag steps goes down into the pit's south-west corner. Barbed wire runs round the rest of the rim.
+- **The pit, the arena:** 47 blocks by 41 of blast-scorched test-bed concrete, eight blocks below the rim. Three concrete **bastions** stand in three of its quarters, and in the fourth the burnt-out hull of a landship on a rail spur: **permanent cover**, which stops his rivets and stuns him if he charges into it.
+- **The three pylons:** grounded discharge towers of steel lattice at the pit's west, east and south, each with a tesla crown at its top. At the foot of each a **breaker** (a knife switch on a steel cabinet) faces the pit, and before it a copper **ground terminal** is set in the floor. A lane of bare concrete with a hazard stripe down its middle runs from the pit's centre to each, and nothing stands on them.
+- **The two service gantries:** steel catwalks along the west and east walls, five blocks up, with ladders at both ends: a way round him, and a view of the pylons.
+- **The assembly gantry:** at the pit's north end, a steel cradle with a crane over it, where he stands dormant. He waits there.
+- **Round it:** the pit walls are reinforced concrete with blast doors and searchlights on the rim; smoke stacks lean over the far side.
+
+The lair-only blocks are fixtures like the other lairs': unbreakable, no items, no drops. Only the three breakers can be used, by any player in the trench.
+
+### The summoning: Sealed Orders
+
+1. Craft **Sealed Orders**: three paper over a steel plate and copper wire, sealed with a honeycomb.
+2. Use them on a **Field Telephone** that stands in a trench: under the open sky, with at least four trench-works blocks (sandbags, timber revetment, duckboards, and their slabs and stairs) within three blocks of it. Any hour, all year.
+3. The bell rings, a whistle shrills down the line, and you go over the top: you wake in the Foundry Trench's dugout. The orders are used up.
+4. For 60 seconds the line stays open and the telephone's bell keeps ringing; anyone who uses the telephone follows. Nobody is taken in by standing near it. Then the line goes dead.
+5. Under a roof, with no trench round the telephone, outside the Overworld, or on a telephone whose line is already open, the orders only say why, and nothing is used up.
+
+He is not a Witching Season boss. There is no generated front line: the trench is any a player digs and lines with trench works.
+
+### The fight
+
+The Iron Dreadnought has 440 health, scaled for the party: half as much again for each player after the first, at most two and a half times. He has armour 12. Poison, Wither, drowning, falls and knockback never harm him.
+
+He stands dormant in his gantry, his searchlight dark. He wakes when a player who can fight him steps off the ramp onto the pit's floor, or strikes him: his boilers fire and his stacks smoke (2.5 s, unhurt meanwhile), his eye lights, and he steps down from the gantry. He keeps to his pit: more than 34 blocks from its centre, he walks back.
+
+**His rule: the discharge.** His plating is thick: while his vents are shut, every blow does a quarter of its damage.
+- Every 20 seconds he **charges his coils**: he plants his legs and his coils whine, and one pylon's crown crackles with violet light, its lamp burns amber, and the bar over the screen names it ("Discharge to the west pylon"). He picks the pylon nearest the player he is fighting. The charge takes 3 seconds.
+- **Throw that pylon's breaker** before it ends (use it), and the bolt is drawn into the pylon and earthed through its terminal, and the surge comes back into him: he **overloads**. His vents blow open, glowing orange, and for 6 seconds every blow does full damage; he staggers for the first 1.5. Then the vents clang shut.
+- **Leave it,** and the discharge runs out along that pylon's lane: 8 damage to every player within 3 blocks of the lane, and his plating holds.
+- A breaker whose pylon is dark only sparks. Every breaker springs open again after the discharge.
+
+**Phase 1, "The Advance"** (full to half health):
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Piston Punch | His arm draws back on its piston with a hiss of steam (0.8 s) | A blow 4 blocks across his front: 9 damage, and thrown back hard. Step aside |
+| Rivet Fan | The shutters on his shoulder battery snap open (0.9 s) | Five hot rivets in a fan at his foe: 4 damage each. Cover stops them |
+| Trench Charge | He lowers his ram, his stacks belch black smoke and the dust kicks up ahead of him (1.2 s) | He charges straight ahead up to 24 blocks: 10 damage, and thrown aside. Run into cover or a pylon's footing, and he is stunned for 2 seconds with a vent knocked open: full damage meanwhile |
+| Coil Arc | His coils crackle and a thread of violet light reaches for his foe (1.0 s) | 5 damage to his foe, then the arc jumps to the nearest other player within 4 blocks, and on, up to three jumps, 5 damage each. Spread out |
+
+**At half health, "The Torn Plate":**
+- he grinds to a halt for 2 seconds, unhurt, and tears a plate from his hull;
+- he hurls it at a pylon, and its breaker is **fouled**: jammed with the plate, it will not throw until somebody clears it (using it three times knocks the plate loose). Each time his vents shut, he fouls another;
+- from now on his charge lights **two** pylons, and either breaker routes it. At least two of the three are always clear;
+- then the fight changes.
+
+**Phase 2, "The Overcharge"** (half to a fifth): he keeps every attack, and adds:
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Mortar | He drops to one knee and the hatch on his back swings open; red smoke marks the ground at his foe's feet (1.5 s) | A shell lands on the mark: 10 damage within 3 blocks. Move off the mark |
+| Blowdown | His stacks shriek and steam hisses from round his feet (1.0 s) | A burst of scalding steam 4 blocks round him: 6 damage, and slowed for 2 s. Back off |
+| Sparkers | A hatch in his belly drops open (1.2 s) | Two **Sparkers**, little coil crawlers, scuttle at the nearest players and discharge against them (4 damage) unless they are struck first (6 health); at most four at a time |
+
+**Below a fifth, "Red Line":** his boilers redline, his vents jam open for good, and every blow does full damage to the end. Every cooldown, and his pause between attacks, is a third shorter, and he charges his coils every 12 seconds.
+
+**Left alone** for 10 seconds, he walks back to his gantry, healed. His Sparkers burn out, the fouled breakers are cleared, the pylons go dark, and who hurt him is forgotten.
+
+### His loot (per participant)
+
+A participant is a player who hurt him or his Sparkers, threw a breaker that routed a discharge, or cleared a fouled one, and is within 64 blocks of the pit's centre when he falls.
+
+| Loot | Chance |
+| --- | --- |
+| **Salvaged Coil**, copper wound from his tesla coils | 3 to 6, always |
+| **A trophy:** the Dynamo Halberd or the Piston Hammer (his `bosses/iron_dreadnought` table, one of the two) | 15%; certain on a player's first kill |
+| **The Grounding Strap** | 25% |
+| **The Dreadnought Visor** | 20% |
+| 300 experience, shared out | always |
+| The advancement **Grounded** | always |
+
+- **Salvaged Coil:** cheaper Sealed Orders, his part of what calls him up; and for those who never fight him, copper wire for the workshop (settled in part 2, with no loop that gains).
+- **The Grounding Strap:** a braided copper strap and clamp. Held in the offhand, it halves the harm done to you by lightning and electric arcs.
+- **The Dreadnought Visor:** a costume worn on the head, his riveted visor with the searchlight in it.
+- **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Shock boon; until now they were in the creative tab only.
+- When he falls, he sags in his tracks with a long hiss of steam, his eye goes dark, and Grey Mist opens in the gantry he came from, the way home.
+
+### The shared lair contract
+
+The planning pack's chapter 04 asks each lair to answer these:
+- **Arrival, staging, waking and return:** the dugout and the fire trench are safe. He wakes when a player steps off the ramp onto the pit's floor or strikes him. Grey Mist fills the dugout's steps back up, and opens in his gantry when he falls.
+- **Fixtures:** the three breakers, which any player in the trench may use, and the Grey Mist. Nothing else can be used, built or broken.
+- **The floor:** the trench owns it. Only the fixtures change (a pylon lit, a breaker thrown or fouled), and all of them are put back when he resets; each instance is placed fresh. His rivets, shells, steam and Sparkers are his, not blocks, and break nothing.
+- **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
+- **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
+- **Clean-up:** his Sparkers, rivets, shells and charges are his, capped, and gone with him.
+- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **An ordinary player** can do everything: a breaker is thrown and cleared by using it, the live pylon is shown by its crackling crown, its amber lamp and the words over the screen, cover is there for anyone, and every attack is read before it lands. Alone, a player can reach the lit pylon in the charge's 3 seconds, since he picks the pylon nearest them.
+
+Of the planning pack's magic links (a Tempest spell priming a terminal, Strata bracing against a piston, Clockheart helpers working a breaker, Tide cooling a vent), none is in the game yet: they wait for spells of those schools. None of them will be needed.
+
+### Rules kept
+
+He follows the rules every boss follows (above):
+- his trench is his arena, and resets when everyone leaves;
+- every big attack is read before it lands, and he is never plated for good: every routed discharge opens him, and so does a charge into cover;
+- dying there keeps everything as Grave Goods;
+- his health scales with the party, and every participant rolls his loot;
+- nothing in his trench can be built or broken, and the only blocks that change are his own pylons and breakers, which are put back;
+- every opening costs Sealed Orders.
+
+Nothing a tier needs comes only from him: first electricity, steel, actuators and the chemistry are all made without him.
 
 ## More bosses to consider (no trophies yet)
 
