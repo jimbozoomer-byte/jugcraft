@@ -8,7 +8,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -68,7 +68,7 @@ public class ChimaGameTests {
 	public void aWildOneHuntsCows(GameTestHelper helper) {
 		pen(helper);
 		Chima chima = helper.spawn(ChimaMod.CHIMA, new BlockPos(2, 2, 2));
-		Cow cow = helper.spawn(EntityType.COW, new BlockPos(5, 2, 5));
+		Cow cow = helper.spawn(EntityTypes.COW, new BlockPos(5, 2, 5));
 		helper.succeedWhen(() -> {
 			helper.assertTrue(!cow.isAlive(), "The cow is still up: " + cow.getHealth() + " health, the cub after " + chima.getTarget());
 			helper.assertTrue(chima.rest() > 0, "Having made its kill, it rests");
@@ -146,7 +146,7 @@ public class ChimaGameTests {
 		pen(helper);
 		ServerPlayer owner = player(helper, new BlockPos(1, 2, 6));
 		Chima chima = helper.spawn(ChimaMod.CHIMA, new BlockPos(2, 2, 2));
-		Cow cow = helper.spawn(EntityType.COW, new BlockPos(5, 2, 5));
+		Cow cow = helper.spawn(EntityTypes.COW, new BlockPos(5, 2, 5));
 		tame(owner, chima);
 		chima.setSitting(false);
 		chima.setHealth(8.0F);
