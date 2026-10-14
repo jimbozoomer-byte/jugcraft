@@ -2014,7 +2014,7 @@ The reload times and the rates are the owner's animations': the Lookout Rifle's 
 - **Lookout Rifle:** each shot kicks it; then the gun cants and the lever is swung down and back, throwing a case. To reload, the gun is rolled and the left hand pushes each round into the gate; as the reload ends the lever is worked again.
 - **Ammonite Carbine:** each shot kicks it and drives the cocking piece back, throwing a case. To reload, the gun is tipped; the curved magazine is pulled down and away, a new one swung up into place and slapped home; then the lever is swung down, drawing the cocking piece back, and pushed home.
 - **Spent rounds:** the Tabby Revolver's animations cue a case each time its loading loop runs; the Lookout Rifle's one with each shot and one as its reload ends; the Ammonite Carbine's one with each shot.
-- **Sounds:** the Marshal Revolver's shot (the Tabby Revolver), the Longhorn Rifle's (the Lookout Rifle) and the Ranger Rifle's (the Ammonite Carbine). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source or tool (slices 11A and 12C), so none was added.
+- **Sounds:** the Marshal Revolver's shot (the Tabby Revolver), the Longhorn Rifle's (the Lookout Rifle) and the Ranger Rifle's (the Ammonite Carbine). The Lookout Rifle's animation cues the magazine going in as each round goes in; it plays the shell-in sound there, as the Longhorn and Drover Rifles do (`GUN_SOUND_ALIASES`). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source or tool (slices 11A and 12C), so none was added.
 
 **How the models were built:**
 - **Tabby Revolver:**
@@ -2090,7 +2090,7 @@ The reload times and the rates are the owner's animations'.
 - **Waystation Shotgun:** each shot kicks it, throwing a case; then the gun cants and the lever is swung down and back. To reload, the gun is rolled and the left hand carries each shell up to the back of the drum; as the reload ends a case is thrown and the lever worked.
 - **Highball Rifle:** each shot kicks it and drops the hammer, and the right hand cocks it again. To reload, the gun is turned and the barrel swung aside, throwing a case; a round goes in and the barrel is swung home.
 - **Spent rounds:** the Fencepost Carbine's and the Waystation Shotgun's animations cue a case with each shot, and the shotgun's one more as its reload ends; the Highball Rifle's one each reload.
-- **Sounds:** the Kestrel Rifle's shot (the Fencepost Carbine), the Coach Gun's (the Waystation Shotgun; the owner's Callwell, of which the Terminal is a kind) and the Thresher's (the Highball Rifle). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source or tool (slices 11A and 12C), so none was added.
+- **Sounds:** the Kestrel Rifle's shot (the Fencepost Carbine), the Coach Gun's (the Waystation Shotgun; the owner's Callwell, of which the Terminal is a kind) and the Thresher's (the Highball Rifle). The Fencepost Carbine's and the Waystation Shotgun's animations cue the magazine going in as each round or shell goes in; each plays the shell-in sound there, as the other lever guns do (`GUN_SOUND_ALIASES`). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source or tool (slices 11A and 12C), so none was added.
 
 **How the models were built:**
 - **Fencepost Carbine:**
@@ -4363,6 +4363,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Reloading and inspection:** the Tabby Revolver rolled, the left hand in; the Lookout Rifle rolled, the left hand over it; the Ammonite Carbine tipped; each turned toward the eye to be looked over, the Ammonite Carbine filling the right of the view.
     - **Attachments:** each barrel part at the Tabby Revolver's muzzle; each stock behind the grip; the Laser Sight stands on the receiver aimed as it does on the Longhorn and Drover Rifles in the same run. The bayonet is hidden behind the left hand.
     - **Third person:** the Tabby Revolver held out in one hand and the long guns raised, each flashing as it fires.
+- **The Lookout Rifle's loading sound, run locally (14 October 2026):** it had played the magazine-in sound for each round, where the other lever rifles play the shell-in sound; it now plays theirs. `python3 tools/guns.py` PASS, `python3 tools/check_mod_data.py` PASS, `python3 scripts/check_repository.py` PASS; Java syntax parse only.
 - **Slice 13B, run locally (14 October 2026):**
   - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged.
   - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
@@ -4389,6 +4390,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Server game tests:** 1588 in the `mod` job, all passed; the job without the optional integrations passed too.
   - **Client game tests:** all five shards passed, `GunsClientGameTests` among them.
   - **The Fencepost Carbine's reload screenshot:** the gun rolled with its lid open, the right arm out of the view.
+- **The Fencepost Carbine's and the Waystation Shotgun's loading sound, run locally (14 October 2026):** each had played the magazine-in sound for each round or shell, where the other lever guns play the shell-in sound; each now plays theirs. `python3 tools/guns.py` PASS, `python3 tools/check_mod_data.py` PASS, `python3 scripts/check_repository.py` PASS; Java syntax parse only.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
