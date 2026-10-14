@@ -1,6 +1,6 @@
 # The Foundry Trench
 
-Status: implemented in source; CI has not run on it yet (below), and its client test's pictures will come from that run. Part 1 of boss 7, the Iron Dreadnought, in the [bosses plan](../branches/BOSSES.md#the-iron-dreadnought-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Foundry Trench, a seventh lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Sealed Orders that open it. The Iron Dreadnought and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and the pictures are from its client test. Part 1 of boss 7, the Iron Dreadnought, in the [bosses plan](../branches/BOSSES.md#the-iron-dreadnought-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Foundry Trench, a seventh lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Sealed Orders that open it. The Iron Dreadnought and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 14 October 2026 the owner chose the recommendations at the Crypt Lich's checkpoint ("go with recommendations"): the Iron Dreadnought next, built the same two-part way, his trench lair and summoning first.
 Owner: @jimbozoomer-byte
 
@@ -113,18 +113,33 @@ Nothing is renamed.
 
 ## Verification
 
-The client game test's pictures will be added from CI's run.
+![The test's trench in the Overworld: a ring of sandbags round a Field Telephone on the stone, duckboards below it, sparks and smoke rising off the telephone while the line stays open](../images/ingame_sealed_orders_line.jpg)
+![From the arrival on the dugout's duckboards: the sandbag steps going up north to the fire trench between earth walls, under the dugout's beams and corrugated iron](../images/ingame_foundry_trench_arrival.jpg)
+![The dugout: duckboards underfoot, timber shoring on its earth walls, the corrugated iron roof, a bunker lamp, bunks, and the map table with its telephone](../images/ingame_foundry_trench_dugout.jpg)
+![The fire trench running west: the sandbag parapet over timber revetments on one side, the trench's back wall on the other, duckboards between, the periscope at the far end](../images/ingame_foundry_trench_fire_trench.jpg)
+![The pit from over the south rim: the scorched test bed below, the hazard-striped lanes, the bastions and the landship's hull, the yellow-railed catwalks along the walls, the pylons' crowns, and the assembly gantry at the far end](../images/ingame_foundry_trench_pit.jpg)
+![The pit from the foot of the ramp: a bastion ahead, the west pylon's lattice to the left, the gantry far off beyond the blast-scorched test bed](../images/ingame_foundry_trench_from_ramp.jpg)
+![The west pylon: its lattice rising from the concrete footing to the crown, its breaker at the foot, and before it the copper terminal and the lane's hazard stripe running out toward the camera](../images/ingame_foundry_trench_west_pylon.jpg)
+![The south pylon live: its crown burning violet, its breaker's lamp lit and its terminal sparking violet at the end of the lane](../images/ingame_foundry_trench_south_live.jpg)
+![The east breaker thrown and fouled, smoke rising off it, its pylon's lattice above and the copper terminal and lane before it](../images/ingame_foundry_trench_breaker_fouled.jpg)
+![The assembly gantry in the north wall: two girder columns and the crane beam across its mouth, chains hanging from it, the cradle's frame against the back wall](../images/ingame_foundry_trench_gantry.jpg)
+![The pit from the west service gantry: the yellow railing and the grating underfoot, the west pylon beside it, and the bastions and the landship's hull across the floor](../images/ingame_foundry_trench_catwalk.jpg)
+![The Grey Mist filling the dugout's back doorway between the timber shoring, under the corrugated iron](../images/ingame_foundry_trench_exit.jpg)
 
-CI (GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+*The client game test's pictures (CI, commit `e1a74e7`): the open line over the telephone, then in the trench the dugout from the arrival, the dugout and its telephone, the fire trench, the pit from over the south rim and from the foot of the ramp, the west pylon, the south pylon live, the east breaker thrown and fouled, the assembly gantry, the pit from the west service gantry, and the Grey Mist in the dugout's back doorway. The test client renders at 480x270.*
 
-Not run yet.
+CI (14 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `e1a74e7` | Build, data audit, game tests, client game tests | **All pass:** all 1596 required game tests, the trench's five among them; `repository`; `optional integrations absent`; and the client test classes `tools/select_client_tests.py` picked for this change (six of 163: the lairs' and `FoundryTrenchClientGameTests`). The orders passed end to end, and the game's own light on the pit's floor was at least 7 on all 1,804 of its open cells (the darkest at 7). The pictures above are from this commit |
 
 Run locally (14 October 2026):
 
 | Check | Result |
 | --- | --- |
 | `python3 scripts/check_repository.py` | Pass |
-| `python3 tools/check_mod_data.py`: now also checks `Lair.FOUNDRY_TRENCH` against `tools/foundry_trench.py` (size, arrival, centre, bounds, floor, no moon); the orders' rest, reach, trench and bell, and the trench works' tag, against `tools/lairs.py`; the crowns', breakers' and terminals' light and the breakers' rest; the four fixtures' registrations and the pylons' names; and the trench itself (`check_foundry_trench`, below) | Pass, 2563 IDs |
+| `python3 tools/check_mod_data.py`: now also checks `Lair.FOUNDRY_TRENCH` against `tools/foundry_trench.py` (size, arrival, centre, bounds, floor, no moon); the orders' rest, reach, trench and bell, and the trench works' tag, against `tools/lairs.py`; the crowns', breakers' and terminals' light and the breakers' rest; the four fixtures' registrations and the pylons' names; and the trench itself (`check_foundry_trench`, below) | Pass, 2564 IDs (on `main` at `1ce4e33`) |
 | Deliberate breaks of the trench and its Java, one at a time (below) | 48 of 48 failed it |
 | `python3 tools/check_icon_maps.py tools/item_icons/sealed_orders.txt` | Pass |
 | `python3 tools/generate_material_data.py` and `tools/generate_textures.py`, then `git status` | Write this part's data and textures only (the PNGs they re-encoded, with identical pixels or for other features, were put back) |
