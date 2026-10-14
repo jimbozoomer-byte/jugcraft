@@ -10,13 +10,18 @@ import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionGraph;
 import io.github.jimbozoomer.jugcraft.concordance.progression.Route;
 import io.github.jimbozoomer.jugcraft.concordance.progression.StageDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.progression.Stages;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
+import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
 import io.github.jimbozoomer.jugcraft.concordance.starbound.Starbound;
+import io.github.jimbozoomer.jugcraft.lair.Lair;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -28,7 +33,8 @@ import net.minecraft.world.level.GameType;
  * the server builds from its own rules is whole (every stage reachable by one player alone, nothing circular, nothing
  * needing a later stage, two routes through each middle stage); a fresh player climbs from nothing to Architect, the
  * first stages by ordinary evidence through the research engine; a stage once reached is kept; and each route says what
- * it still needs.
+ * it still needs. Since Concordance Chunk B, unit 3: winter and stone ask only for First Light, one examination of stone
+ * serves Assay and Stratawrighting, and a Rimekeeper can reach Adept by the Glacier Hall with no bench.
  */
 public class ConcordanceProgressionGameTests {
 	private static ServerPlayer fresh(GameTestHelper helper) {
@@ -76,7 +82,11 @@ public class ConcordanceProgressionGameTests {
 				List.of("initiate", "practitioner", "adept", "master", "architect"), "the five stages, in order");
 		for (String node : List.of("research:jugcraft:first_light@encountered", "research:jugcraft:dreamwalking@mastered",
 				"invocation:jugcraft:kindle", "ritual:jugcraft:adept_attunement", "ritual:jugcraft:lumen_vigil", "practice:jugcraft:ritual",
-				"rank:starbound", ProgressionGraph.PROJECT, ProgressionGraph.NOTES)) {
+				"rank:starbound", ProgressionGraph.PROJECT, ProgressionGraph.NOTES,
+				// Concordance Chunk B, unit 3: winter and stone.
+				"research:jugcraft:rimekeeping@mastered", "research:jugcraft:stratawrighting@mastered", "practice:jugcraft:winter_survey",
+				"practice:jugcraft:rimework", "practice:jugcraft:anchoring", "invocation:jugcraft:rimebind", "invocation:jugcraft:preserve",
+				"invocation:jugcraft:brace")) {
 			helper.assertTrue(graph.nodes().containsKey(node), "the graph lacks " + node);
 		}
 		Set<String> alone = graph.reachable(true);
@@ -177,6 +187,77 @@ public class ConcordanceProgressionGameTests {
 		StageProgress.milestone(player, "jugcraft:test_milestone");
 		helper.assertValueEqual(player.getAttached(StageProgress.MILESTONES), List.of("jugcraft:test_milestone"), "one milestone, once");
 		helper.assertTrue(StageProgress.situation(player).milestones().contains("jugcraft:test_milestone"), "the stage rules see it");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B, unit 3: winter and stone ask only for First Light. The winter survey needs First Light
+	 * understood and nothing else; Rimekeeping's and Stratawrighting's practices need their own entry understood;
+	 * Stratawrighting begins after First Light alone; and one player alone can master both.
+	 */
+	@GameTest(maxTicks = 20)
+	public void winterAndStoneAskOnlyForFirstLight(GameTestHelper helper) {
+		ProgressionGraph graph = ConcordanceData.rules().progression().graph();
+		helper.assertTrue(graph != null, "the rules built no progression graph");
+		String firstLight = ProgressionGraph.research("jugcraft:first_light", ResearchState.UNDERSTOOD);
+		Map<String, List<String>> needs = Map.of(
+				"practice:jugcraft:winter_survey", List.of(firstLight),
+				"practice:jugcraft:rimework", List.of(ProgressionGraph.research("jugcraft:rimekeeping", ResearchState.UNDERSTOOD)),
+				"practice:jugcraft:anchoring", List.of(ProgressionGraph.research("jugcraft:stratawrighting", ResearchState.UNDERSTOOD)),
+				ProgressionGraph.research("jugcraft:stratawrighting", ResearchState.ENCOUNTERED), List.of(firstLight));
+		for (Map.Entry<String, List<String>> need : needs.entrySet()) {
+			ProgressionGraph.Node node = graph.nodes().get(need.getKey());
+			helper.assertTrue(node != null && node.all().equals(need.getValue()), need.getKey() + " needs only " + need.getValue() + ": "
+					+ (node == null ? "no node" : node.all()));
+		}
+		Set<String> alone = graph.reachable(true);
+		for (String research : List.of("jugcraft:rimekeeping", "jugcraft:stratawrighting")) {
+			helper.assertTrue(alone.contains(ProgressionGraph.research(research, ResearchState.MASTERED)), "one player alone masters " + research);
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B, unit 3: one examination of granite begins both Assay and Stratawrighting, and nothing else;
+	 * raw iron then observes Assay, which counts it, while Stratawrighting, which does not, is still only begun.
+	 */
+	@GameTest(maxTicks = 20)
+	public void oneExaminationServesAssayAndStratawrighting(GameTestHelper helper) {
+		ServerPlayer player = fresh(helper);
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ResearchEngine.Result granite = ConcordanceProgress.record(player, new Evidence.Examined("minecraft:granite", 15));
+		Set<String> begun = granite.transitions().stream().map(ResearchEngine.Transition::research).collect(Collectors.toSet());
+		helper.assertValueEqual(begun, Set.of("jugcraft:assay", "jugcraft:stratawrighting"), "granite begins Assay and Stratawrighting");
+		ConcordanceProgress.record(player, new Evidence.Examined("minecraft:raw_iron", 15));
+		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state("jugcraft:assay"), ResearchState.OBSERVED, "raw iron observes Assay");
+		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state("jugcraft:stratawrighting"), ResearchState.ENCOUNTERED,
+				"and leaves Stratawrighting begun");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B, unit 3: an Adept without a bench. With First Light mastered, snow and fire observe Rimekeeping,
+	 * arriving in the Glacier Hall understands it and three kinds of cold work master it: two entries mastered make an
+	 * Adept, and nothing on the way was studied at a bench.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRimekeeperReachesAdeptByTheGlacierHall(GameTestHelper helper) {
+		ServerPlayer player = fresh(helper);
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.MASTERED);
+		ConcordanceProgress.record(player, new Evidence.Examined("minecraft:snowball", 15));
+		ConcordanceProgress.record(player, new Evidence.Examined("minecraft:coal", 15));
+		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Rime.RESEARCH), ResearchState.OBSERVED, "snow and fire observe Rimekeeping");
+		helper.assertTrue(RimeSurvey.arrived(player, Lair.GLACIER_HALL.dimension), "arriving in the Glacier Hall is the field study");
+		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Rime.RESEARCH), ResearchState.UNDERSTOOD, "which understands it");
+		for (String work : List.of(Rime.KEY_PRESERVE_COLD, Rime.KEY_PRESERVE_HEATED, Rime.KEY_RESTRAINT)) {
+			helper.assertTrue(Rime.practise(player, work), "cold work: " + work);
+		}
+		helper.assertValueEqual(ConcordanceProgress.knowledge(player).state(Rime.RESEARCH), ResearchState.MASTERED, "three kinds master it");
+		StageProgress.refresh(player);
+		helper.assertValueEqual(stage(player), "adept", "two entries mastered make an Adept");
+		List<String> studied = ConcordanceProgress.knowledge(player).entries().values().stream()
+				.flatMap(progress -> progress.evidence().keySet().stream()).filter(key -> key.startsWith("study:")).toList();
+		helper.assertTrue(studied.isEmpty(), "no bench on the way: " + studied);
 		helper.succeed();
 	}
 }

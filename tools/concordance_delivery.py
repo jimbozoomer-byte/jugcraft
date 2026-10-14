@@ -123,9 +123,10 @@ MATRIX = {
         "choice, which the client sends to the server"),
     "jade": (
         "Readouts from server snapshots: bench study, lantern Radiance, sconce charge, circle phase and faults, pylon "
-        "charge, crucible state, beds and crops, living devices, observatory, workers, courier posts, shrines",
+        "charge, crucible state and Preserve's hold, beds and crops, living devices, observatory, workers, courier posts, "
+        "shrines",
         "nothing shown on looking; the same facts come from the journal, the commands and each device's own messages",
-        ["benchStudyUnderstandsFirstLight"],
+        ["benchStudyUnderstandsFirstLight", "preserveHoldsOneBandAndExpires"],
         "Server tests run without Jade in CI's optional-absent job; its overlay has not been seen in a client"),
     "jei": (
         "Recipe categories for the Lampwright's Bench, the Circle Anchor and the Resonant Ring; alchemy ingredients' "

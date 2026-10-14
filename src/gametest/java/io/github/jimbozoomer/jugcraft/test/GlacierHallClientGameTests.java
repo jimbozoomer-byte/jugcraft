@@ -1,6 +1,10 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
+import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.lair.FrostHornRite;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
@@ -25,6 +29,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -130,6 +135,9 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 	 * and kept, and using the whirl takes them back into the same hall, frosted again;</li>
 	 * <li>when the instance closes the player goes home and the whirl is gone.</li>
 	 * </ol>
+	 * Concordance Chunk B, unit 3: the player understands First Light before the horn, and arriving is Rimekeeping's field
+	 * study (the only proof that Fabric's level change fires on a lair's teleport); and a Brace (Strata) never stops the
+	 * mist's toll, the Grey Mist or the whirl from moving its player, and the toll and the whirl do not spend it.
 	 */
 	private static void endToEnd(ClientGameTestContext context, TestServerContext server, BlockPos spot) {
 		server.runCommand("gamemode survival @a");
@@ -145,6 +153,8 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 			stood.set(player.position());
 			check(overworld.getBlockState(spot.below()).is(Blocks.SNOW_BLOCK), "The player does not stand on snow");
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftLairs.FROST_HORN));
+			// Concordance Chunk B, unit 3: with First Light understood, arriving in the hall is Rimekeeping's field study.
+			ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
 			// use() asks the world whether it is night: the command above set midnight.
 			check(JugcraftLairs.FROST_HORN.use(overworld, player, InteractionHand.MAIN_HAND) == InteractionResult.SUCCESS,
 					"Blowing the horn did not succeed");
@@ -175,6 +185,9 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 			check(player.getTicksFrozen() > 60 && !player.isFullyFrozen(), "The player landed without frost, or frozen through: "
 					+ player.getTicksFrozen());
 			check(!player.getAbilities().mayBuild, "In a lair a player cannot build");
+			String survey = "practice:" + RimeSurvey.ACTIVITY + ":" + RimeSurvey.KEY_GLACIER_HALL;
+			check(ConcordanceProgress.knowledge(player).progress("jugcraft:rimekeeping").evidence().containsKey(survey),
+					"Arriving in the hall was not Rimekeeping's field study: " + ConcordanceProgress.knowledge(player).progress("jugcraft:rimekeeping"));
 			MistGateEntity whirl = FrostHornRite.whirl(overworld, spot);
 			check(whirl != null && whirl.instance() == instance && whirl.lair() == HALL, "No whirl in the snow where the horn was blown");
 		});
@@ -197,16 +210,20 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 			Vec3 arrival = instance.arrival();
 			player.teleportTo(o.getX() + 39.5, o.getY() + HALL.floor - 2.0, o.getZ() + 36.5);
 			player.setHealth(20.0F);
+			// A Brace stops no mist: its toll comes off health, which is no blow, so it is not spent either.
+			player.addEffect(new MobEffectInstance(Brace.BRACED, 100, 0));
 			check(Lairs.edges(player, instance) && player.position().distanceTo(arrival) < 0.5
-					&& player.getHealth() == 20.0F - Lairs.EDGE_DAMAGE, "Falling out of the hall did not end on the ledge");
+					&& player.getHealth() == 20.0F - Lairs.EDGE_DAMAGE && player.hasEffect(Brace.BRACED),
+					"Falling out of the hall, braced, did not end on the ledge, or spent the Brace");
 			player.setHealth(20.0F);
 		});
 
 		// 3. Out, a second horn refused at the open whirl, and back in through the whirl.
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
+			player.addEffect(new MobEffectInstance(Brace.BRACED, 100, 0));
 			check(Lairs.leave(player) && player.level() == minecraft.overworld() && player.position().distanceTo(stood.get()) < 1.0E-6,
-					"The player did not come back to where they stood: " + player.position());
+					"The braced player did not come back to where they stood: " + player.position());
 		});
 		context.waitTicks(40);
 		server.runOnServer(minecraft -> {
@@ -219,9 +236,11 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 			player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 			MistGateEntity whirl = FrostHornRite.whirl(overworld, spot);
 			check(whirl != null, "The whirl closed early");
+			player.addEffect(new MobEffectInstance(Brace.BRACED, 100, 0));
 			whirl.use(player, InteractionHand.MAIN_HAND);
 			check(player.level() == minecraft.getLevel(HALL.dimension) && Lairs.instance(player.getAttached(Lairs.VISIT)) == first.get()
-					&& player.getTicksFrozen() > 60, "The whirl did not take the player back into the same hall, frosted");
+					&& player.getTicksFrozen() > 60, "The whirl did not take the braced player back into the same hall, frosted");
+			check(player.hasEffect(Brace.BRACED), "The whirl spent the Brace");
 		});
 		context.waitTicks(40);
 
@@ -231,6 +250,7 @@ public class GlacierHallClientGameTests implements FabricClientGameTest {
 			ServerLevel overworld = minecraft.overworld();
 			Lairs.close(minecraft, first.get());
 			check(player.level() == overworld, "Closing the hall did not send the player home");
+			player.removeEffect(Brace.BRACED);
 			check(FrostHornRite.whirl(overworld, spot) == null
 					&& overworld.getEntitiesOfClass(MistGateEntity.class, new AABB(spot).inflate(3)).isEmpty(), "The whirl outlived its hall");
 			player.setTicksFrozen(0);
