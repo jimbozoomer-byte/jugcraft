@@ -670,6 +670,31 @@ GUNS = {
         "damage": 15.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 1,
         "reload": 33, "spread": (2.0, 0.1), "range": 128, "ammo": "rifle_round",
     },
+    # Slice 13C: three more of the owner's guns on plain stone: a punt gun, a flintlock repeater and a heavier Winnie.
+    "flatboat_gun": {
+        "display": "Flatboat Gun",
+        "source": "big_bore",
+        "tooltip": "A punt gun, its long barrel loaded through a chamber that swings out to the side: one great blast of "
+                   "sixteen pellets, then a long reload. Fires buckshot shells.",
+        "damage": 3.0, "pellets": 16, "interval": 13, "auto": False, "capacity": 1,
+        "reload": 72, "spread": (8.0, 6.0), "range": 36, "ammo": "buckshot_shell",
+    },
+    "windlass_musket": {
+        "display": "Windlass Musket",
+        "source": "repeating_musket",
+        "tooltip": "A flintlock repeater fed from a magazine across its breech, its drum turned between shots. Seven "
+                   "shots, then the magazine is changed. Fires paper cartridges.",
+        "damage": 6.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 7,
+        "reload": 69, "spread": (3.0, 1.0), "range": 56, "ammo": "paper_cartridge",
+    },
+    "millstone_rifle": {
+        "display": "Millstone Rifle",
+        "source": "winnie_millend",
+        "tooltip": "A heavy lever-action rifle, slower to work than the Drover Rifle and harder hitting, loaded a round "
+                   "at a time. Fires rifle rounds.",
+        "damage": 8.5, "pellets": 1, "interval": 15, "auto": False, "capacity": 8,
+        "reload": (8, 13, 17), "spread": (2.0, 0.25), "range": 108, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -875,6 +900,14 @@ RECIPES = {
     "waystation_shotgun": (["BII", "ILP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
                                             "P": "#minecraft:planks"}),
     "highball_rifle": (["SSS", " LP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    # Slice 13C: the Flatboat Gun's breech is an iron block behind its barrel; the Windlass Musket a flintlock with a
+    # brass drum and its crank; the Millstone Rifle a lever rifle stiffened with steel.
+    "flatboat_gun": (["KII", "BLP"], {"K": "minecraft:iron_block", "I": "minecraft:iron_ingot", "B": "#c:ingots/brass",
+                                      "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    "windlass_musket": (["IIB", "FLP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "F": "minecraft:flint",
+                                         "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    "millstone_rifle": (["SIB", " LP"], {"S": "#c:ingots/steel", "I": "minecraft:iron_ingot", "B": "#c:ingots/brass",
+                                         "L": "minecraft:lever", "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2153,6 +2186,58 @@ BUILDS = {
         "sight": (8.0, 5.25, 12.25),
         "eye_relief": 3.0,
     },
+    # Slice 13C. The Big Bore's chamber is the block behind its barrel (the main part's 3rd and 5th to 9th elements and
+    # the handle on its right, the 4th), which its reload swings out to the left about a hinge along its lower left
+    # edge; the shell (PROPS) is carried into it from the left. Its hammer is the owner's hammer part. Its sight is the
+    # owner's peep ring on the chamber's top.
+    "flatboat_gun": {
+        "bones": [
+            ("gun_body", None, ["main-#2,3,4,5,6,7,8", "sights"], (8.0, 1.9, 16.4)),
+            ("chamber", "gun_body", ["main#2,3,4,5,6,7,8"], (7.25, 3.37, 13.5)),
+            ("shell", "gun_body", ["@shell"], (8.0, 4.78, 13.5)),
+            ("Hammer", "gun_body", ["hammer"], (9.0, 4.62, 13.28)),
+            ("no_sights", "gun_body", [], (8.0, 6.4, 10.8)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 1.85, 8.0)},
+        "arms": {"right": (-0.4087, -0.6214, 0.6684), "left": (0.7686, -0.3229, 0.5523)},
+        "muzzle": (8.0, 4.78, -16.0),
+        "sight": (8.0, 6.82, 12.25),
+        "eye_relief": 6.0,
+    },
+    # The Repeating Musket is a flintlock repeater: its crank is the drum across its breech (the main part's 25th and
+    # 27th to 35th elements), turned about the axis of the magazine that runs through it; its bolt the block behind the
+    # drum with the plate and knob on top (the 6th, 8th and 9th). Its priming flash had no part (PROPS); its glow bone
+    # holds nothing. Its sight is the notch between the two posts on the drum.
+    "windlass_musket": {
+        "bones": [
+            ("gun_body", None, ["main-#5,7,8,24,26,27,28,29,30,31,32,33,34"], (8.0, 1.9, 16.4)),
+            ("crank", "gun_body", ["main#24,26,27,28,29,30,31,32,33,34"], (8.0, 4.08, 10.29)),
+            ("magazine", "gun_body", ["magazine"], (3.6, 4.08, 10.29)),
+            ("bolt", "gun_body", ["main#5,7,8"], (8.0, 4.5, 12.3)),
+            ("hammer", "gun_body", ["hammer"], (8.96, 3.5, 14.9)),
+            ("flash", "gun_body", ["@flash"], (9.2, 3.9, 13.3)),
+            ("glow", "gun_body", [], (9.2, 3.9, 13.3)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 1.6, 8.0)},
+        "arms": {"right": (-0.113, -0.5523, 0.826), "left": (0.733, -0.3036, 0.6088)},
+        "muzzle": (8.0, 4.03, 3.62),
+        "sight": (8.0, 5.7, 10.71),
+        "eye_relief": 3.0,
+    },
+    # The Winnie Millend is the Winnie made heavier: its lever is the main part's element the owner named "lever",
+    # turned about its front; its bolt bone holds nothing. Its sight is the owner's peep ring at the back.
+    "millstone_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-@lever", "stan_barrel", "sights", "hammer"], (8.0, 1.9, 16.4)),
+            ("lever", "gun_body", ["main@lever"], (8.0, 2.2, 12.9)),
+            ("bolt", "gun_body", [], (8.0, 4.0, 14.5)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 2.3, 7.0)},
+        "arms": {"right": (0.1913, -0.4619, 0.866), "left": (0.8001, -0.3314, 0.5)},
+        "muzzle": (8.0, 4.08, -1.45),
+        "sight": (8.0, 5.0, 14.05),
+        "eye_relief": 5.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2229,6 +2314,12 @@ PROPS = {
     # (0.3333 s) brings it, and shrinks to nothing there.
     "tuppence_pistol": {"shell": {"kind": "cartridge", "from": (7.5, 1.9, 11.0), "size": (1.0, 1.0, 3.0),
                                   "texture_at": (120, 120)}},
+    # Slice 13C: the Big Bore's shell, a great buckshot hull, rests in its chamber, where the reload's last carry brings
+    # it, and shrinks to nothing there; the Repeating Musket's priming flash at its pan, beside the hammer.
+    "flatboat_gun": {"shell": {"kind": "buckshot", "from": (7.4, 4.18, 12.2), "size": (1.2, 1.2, 2.6),
+                               "texture_at": (120, 120)}},
+    "windlass_musket": {"flash": {"kind": "flash", "from": (8.7, 3.4, 12.8), "size": (1.0, 1.0, 1.0),
+                                  "texture_at": (56, 56)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -2311,7 +2402,9 @@ ATTACHMENTS = {
         "tooltip": "A short grip under the fore-end: steadier from the hip.",
     },
     "vertical_grip": {
-        "display": "Vertical Grip", "slot": "grip", "parts": ["vertical_grip", "vert_grip", "grip_vertical"],
+        # Slice 13C: the Repeating Musket's is named "grip_vert".
+        "display": "Vertical Grip", "slot": "grip",
+        "parts": ["vertical_grip", "vert_grip", "grip_vertical", "grip_vert"],
         "replaces": False, "effects": {"kick": 0.65}, "model": "vertical_grip", "texture": "grips",
         "tooltip": "A grip to pull the gun down by: less kick.",
     },
@@ -2661,6 +2754,7 @@ ZOOM = {
     "tabby_revolver": 0.9, "lookout_rifle": 0.8, "ammonite_carbine": 0.85,
     # Slice 13B: a carbine, a shotgun and a marksman's single-shot rifle.
     "fencepost_carbine": 0.82, "waystation_shotgun": 0.9, "highball_rifle": 0.75,
+    "flatboat_gun": 0.9, "windlass_musket": 0.85, "millstone_rifle": 0.78,
 }
 
 
@@ -2766,7 +2860,10 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # Of the Nether guns (slice 11A), the Tusker pushes a shell in at a time, the Bastion Rifle a round;
                    # (slice 11B) the Crackling a shell.
                    "tusker": {"reload_mag_in": "shell_in"}, "bastion_rifle": {"reload_mag_in": "shell_in"},
-                   "crackling": {"reload_mag_in": "shell_in"}}
+                   "crackling": {"reload_mag_in": "shell_in"},
+                   # Slice 13C: the Big Bore pushes its shell into the chamber; the Winnie Millend a round at a time, as
+                   # the Winnie (the Drover Rifle) does.
+                   "flatboat_gun": {"reload_mag_in": "shell_in"}, "millstone_rifle": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -2865,6 +2962,10 @@ SHOT_SOUNDS = {
     "fencepost_carbine": "item/iron_rifle/fire.ogg",
     "waystation_shotgun": "item/brass_shotgun/fire.ogg",
     "highball_rifle": "item/new_rifle/fire.ogg",
+    # Slice 13C: the Culverin's cannon for the punt gun, the Line Musket's black powder, the Bastion Rifle's heavy shot.
+    "flatboat_gun": "item/cannon/fire.ogg",
+    "windlass_musket": "item/blackpowder/fire.ogg",
+    "millstone_rifle": "item/heavier_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3264,8 +3365,13 @@ def texture_file(texture):
     return None
 
 
+# The guns whose own texture is not named after their source: the Big Bore draws on the owner's punt_gun texture
+# (slice 13C).
+OWN_TEXTURES = {"flatboat_gun": "punt_gun"}
+
+
 def own_texture(gun):
-    return f"scguns:item/{GUNS[gun]['source']}"
+    return f"scguns:item/{OWN_TEXTURES.get(gun, GUNS[gun]['source'])}"
 
 
 def gun_textures(gun):
@@ -4312,7 +4418,8 @@ def provenance():
     rows = []
     for gun, spec in GUNS.items():
         src = spec["source"]
-        paths = [f"models/item/{src}.json", f"item/{src}.png", f"item/{src}.animation.json"]
+        paths = [f"models/item/{src}.json", str(texture_file(own_texture(gun)).relative_to(LIBRARY)),
+                 f"item/{src}.animation.json"]
         for _, _, parts, _ in effective_bones(gun):
             paths += [f"models/special/{src}/{part_file(p)}.json" for p in parts if not p.startswith(("@", "%"))]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")

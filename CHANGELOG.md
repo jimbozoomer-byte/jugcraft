@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: Guns, slice 13C (a punt gun, a repeater and a heavier rifle)
+- **Three guns** from the owner's models and animations: the **Flatboat Gun**, a punt gun whose chamber swings out to take one shell, one blast of sixteen pellets and a long reload; the **Windlass Musket**, a flintlock repeater of seven paper cartridges, its drum turned between shots and its magazine changed whole; and the **Millstone Rifle**, a heavy lever-action rifle of eight rifle rounds loaded a round at a time, slower than the Drover Rifle and harder hitting.
+- The Flatboat Gun is made from a block of iron, iron, brass, a lever and a plank; the Windlass Musket from iron, brass, a flint, a lever and a plank; the Millstone Rifle from steel, iron, brass, a lever and a plank. The Flatboat Gun takes the scopes and the Laser Sight; the Windlass Musket the Light and Vertical Grips and the bayonets; the Millstone Rifle what the Drover Rifle takes.
+- Record: [guns.md, slice 13C](docs/features/guns.md#slice-13c-a-punt-gun-a-repeater-and-a-heavier-rifle).
+
 ### Added: Guns, slice 13B (more frontier guns)
 - **Three guns** from the owner's models and animations: the **Fencepost Carbine**, a lever-action carbine of seven rifle rounds loaded a round at a time through a lid in its stock; the **Waystation Shotgun**, a lever-action shotgun of eight shells with a drum under its action, loaded a shell at a time; and the **Highball Rifle**, a single-shot rifle whose barrel swings aside to be loaded, one heavy, true shot at long range.
 - The Fencepost Carbine and the Waystation Shotgun are made from iron, brass, a lever and planks, as the lever guns; the Highball Rifle from steel, a lever and a plank. Each takes the grips and the bayonets; the shotgun and the rifle the barrel attachments too, and the rifle the scopes and the Laser Sight.

@@ -61,7 +61,7 @@ public class GunsGameTests {
 			helper.assertTrue(JugcraftGuns.ammo(spec) != null, name + " fires " + spec.ammo() + ", which is not registered");
 			helper.assertTrue(new ItemStack(JugcraftGuns.GUNS.get(name)).getMaxStackSize() == 1, name + " stacks");
 		});
-		helper.assertTrue(JugcraftGuns.GUNS.size() == 69 && JugcraftGuns.ROUNDS.size() == 4, "Not sixty-nine guns and four rounds");
+		helper.assertTrue(JugcraftGuns.GUNS.size() == 72 && JugcraftGuns.ROUNDS.size() == 4, "Not seventy-two guns and four rounds");
 		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
 				&& JugcraftGuns.ATTACHMENTS.size() == 20, "Not twenty attachments, each with its item");
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
