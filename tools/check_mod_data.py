@@ -12585,7 +12585,8 @@ def check_rime(co, root, lang, research):
     gates and keys; Rimekeeping begins with snow or ice, is observed against something that holds fire, is understood at
     the bench or by the First-Light-gated winter survey (the Glacier Hall, or a Rime brew bottled by hand) and is mastered
     by kinds of cold work that need nothing else. B-06: Rimebind's Rimebound is an exclusive harmful status with its
-    hidden thaw, guarded and hooked into the effect boundary, never lengthened or deepened by a tuning. B-07: Preserve is
+    hidden thaw, guarded and hooked into the effect boundary, never lengthened or deepened by a tuning, and the benchmark
+    models its slow and thaw with the generator's numbers (B-P32). B-07: Preserve is
     the one alteration in Rime's school; the boundary dispatches it before the dousing (which removes only fire) where it
     acts and where it chooses blocks, and is its only caller; holding touches no inventory; only the crucible is held,
     for no longer than the Initiate's Wand sustains, saved as an optional field and shown by Jade. B-P8: of the lair
@@ -12632,6 +12633,11 @@ def check_rime(co, root, lang, research):
             err(f"concordance/rime/Rimebind.java: missing or different from tools/concordance_rime.py: {needle}")
     if "Rimebind.bound(" not in effects:
         err("ConcordanceEffects.java: a Rimebound that takes must start the Thaw (Rimebind.bound)")
+    bench = source(root / "balance" / "Benchmark.java")
+    for needle in (f'String RIMEBOUND = "{rm.RIMEBOUND}";', f"double RIMEBOUND_SLOW = {rm.RIMEBOUND_SLOW};",
+                   f"int RIME_GRACE = {rm.RIME_GRACE_TICKS};"):
+        if needle not in bench:
+            err(f"concordance/balance/Benchmark.java: missing or different from tools/concordance_rime.py: {needle}")
     op = rm.COMPONENTS["rimegrip"]["operation"]
     if (op.get("effect"), op.get("intent"), op.get("status"), op.get("stacking"), op.get("duration")) != \
             ("status", "harmful", rm.RIMEBOUND, "exclusive", rm.RIMEBOUND_TICKS):
@@ -12703,8 +12709,8 @@ def check_strata(co, root, lang, research):
     activity, gate and keys; it reads stone inside Assay's raw matter, needs no Thallite and takes no bridging block; raw
     Thallite is never weighed; it is mastered by ways of anchoring that need nothing else. B-06: Brace's Braced is an
     exclusive helpful status on the party, spent by a knockback blow or a harmful push and gone at the end of the tick;
-    helpful pushes neither feel nor spend it; who put it on is never saved; no tuning lengthens or deepens it; and it is
-    told apart from the war fork's Brace."""
+    helpful pushes neither feel nor spend it; who put it on is never saved; no tuning lengthens or deepens it; the
+    benchmark measures it with the generator's numbers (B-P32); and it is told apart from the war fork's Brace."""
     st, eq = co.strata, co.equivalence
 
     def source(path):
@@ -12754,6 +12760,10 @@ def check_strata(co, root, lang, research):
     for needle in ("Brace.resistanceWithout(", "Brace.spend(", "Brace.braced(", "effect.intent() == Intent.HARMFUL"):
         if needle not in effects:
             err(f"ConcordanceEffects.java: Brace wiring missing: {needle}")
+    bench = source(root / "balance" / "Benchmark.java")
+    for needle in (f'String BRACED = "{st.BRACED}";', f"double BRACE_RESISTANCE = {st.BRACE_RESISTANCE};"):
+        if needle not in bench:
+            err(f"concordance/balance/Benchmark.java: missing or different from tools/concordance_strata.py: {needle}")
     op = st.COMPONENTS["bracing"]["operation"]
     info = st.INVOCATIONS["brace"]
     if (op.get("effect"), op.get("intent"), op.get("status"), op.get("stacking"), op.get("duration")) != \
