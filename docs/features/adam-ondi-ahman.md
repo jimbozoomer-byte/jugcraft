@@ -93,7 +93,7 @@ Results are recorded under "Results" below after CI runs.
   - `AdamOndiAhmanClientGameTests` (client shard 0 of 5): passed. In the world of seed `jugcraft` the knoll was built at the start valley's site, the Ancient Altar stood on it in the valley's biome, and using it left it as it was.
   - Client shards 0, 1, 2 and 4: passed. Shard 3: see the PR.
   - On the earlier head 2903fa5 the same client test logged the start valley at 688 -512, 1,108 blocks from the start at 304 528, and 2 rare valleys within 12,000 blocks of the start, the nearest 6,007 blocks away, each with the biome at its site. It found no altar there, because 26.3 never placed the knoll as a jigsaw structure. That is why `AltarKnolls` builds it now.
-  - The overview picture of the valley fell to the ground on f663f5117 (its camera's chunk was not loaded, so no barrier was placed under it); the test now loads the chunk first.
+  - The overview picture of the valley fell to the ground on f663f5117 (its camera's chunk was not loaded, so no barrier was placed under it). b0746a5da loaded the chunk first. That run built the knoll again ("built the knoll at 688 -512"), but the test failed: the first camera's barrier now stood at y 149 over the site, which is the altar's own column, and the altar search read that column's top as the barrier. The search now looks under the test's barrier. The camera also flies, so it stays put before the client has the chunks it is moved to.
 
 *In-game screenshots from CI's client game test (`AdamOndiAhmanClientGameTests`, software rendering, small previews), seed `jugcraft`, f663f5117.*
 

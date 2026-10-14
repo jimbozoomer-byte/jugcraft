@@ -171,8 +171,15 @@ public class AdamOndiAhmanClientGameTests implements FabricClientGameTest {
 				if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
 					return null;
 				}
-				// The top block of its column, or near it (leaves may hang over it).
+				// The top block of its column, or near it (leaves may hang over it), under the barrier the camera stands on if
+				// that is over this column (the first camera stands over the site, which is the altar's column).
 				int surface = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+				if (level.getBlockState(new BlockPos(x, surface - 1, z)).is(Blocks.BARRIER)) {
+					surface--;
+					while (surface > level.getMinY() && level.getBlockState(new BlockPos(x, surface - 1, z)).isAir()) {
+						surface--;
+					}
+				}
 				for (int y = surface - 1; y >= surface - 8; y--) {
 					BlockPos at = new BlockPos(x, y, z);
 					if (level.getBlockState(at).is(AdamOndiAhman.ANCIENT_ALTAR)) {
@@ -202,11 +209,15 @@ public class AdamOndiAhmanClientGameTests implements FabricClientGameTest {
 	}
 
 	/**
-	 * Puts the player at `at` looking along `yaw`, `pitch`, on a barrier if in the air (never over a block of the world). The
-	 * chunk is loaded first: a command cannot test a block in an unloaded chunk, and without the barrier the camera falls.
+	 * Puts the player at `at` looking along `yaw`, `pitch`, flying (set on the server, which tells the client), so the
+	 * camera stays put even before the client has the chunks it is moved to; and on a barrier if in the air (never over a
+	 * block of the world), the chunk loaded first so that there is a block to test.
 	 */
 	private static void fly(ClientGameTestContext context, TestServerContext server, BlockPos at, int yaw, int pitch) {
 		server.runOnServer(minecraft -> {
+			ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
+			player.getAbilities().flying = true;
+			player.onUpdateAbilities();
 			ServerLevel level = minecraft.overworld();
 			level.getChunk(at.getX() >> 4, at.getZ() >> 4);
 			if (level.getBlockState(at.below()).isAir()) {
