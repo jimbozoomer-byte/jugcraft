@@ -8,6 +8,21 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Machine screens in five looks by tech level
+- **Every machine screen takes the look of its tech level**, after the owner's five references:
+  - workshop brass and orange for the first machines;
+  - industrial steel and green for steel, oil and the industrial forms;
+  - an electric blue device for the power gear;
+  - a lab blueprint for chemistry;
+  - an advanced cyan hologram for electronics and nuclear fuel.
+- **Simpler to read:**
+  - a status lamp by the title;
+  - one word for what the machine is doing, and the fix when it is stuck ("Connect a cable or a generator.", "Take the results from OUT, or turn on Eject.");
+  - progress with the time left;
+  - a help box saying what the machine is for.
+- **Controls are icon buttons with tooltips.** The six face buttons move behind one Sides button, which shows the faces with a colour key. Empty slots show IN and OUT labels and hint icons, and say what goes in them when hovered. The decorative keyboard is gone.
+- Industrial forms share the layout: pause, cancel and vent icons, and their tool sockets in the help box. Slot positions, menus and saves are unchanged. Record: [machine-screens.md](docs/features/machine-screens.md).
+
 ### Unmerged: Formed-machine screens keep the POWER label on large stores
 - The terminal's power line dropped its "POWER" label once the stored and total power were too wide to fit beside it. The Gas Burning Generator's 120,000 JE store hit this whenever it held 10,000 JE or more. The line now shows the stored power alone in that case ("POWER 120k"); the bar and its tooltip still give the store's size.
 - The foundation, Separator and generator records now say they are merged, and the generator's record gives its CI results. Record: [industrial-gas-burning-generator.md](docs/features/industrial-gas-burning-generator.md).

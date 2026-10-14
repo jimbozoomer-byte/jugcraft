@@ -651,12 +651,17 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.getInput().pressKey(options -> options.keyUse);
 			context.waitForScreen(MachineScreen.class);
 			context.takeScreenshot("jugcraft_machine_screen");
+			// Its sides view: the faces in the status pane, the key in the help box.
+			context.runOnClient(client -> ((MachineScreen) client.screen).showSides(true));
+			context.waitTicks(2);
+			context.takeScreenshot("jugcraft_machine_screen_sides");
 			context.setScreen(() -> null);
 
-			// One screen in each of the other two themes (batch 22): the electric battery box and the lab's circuit
-			// assembler; and the distillation tower, whose screen holds the most outputs (five tanks and a slot, batch
-			// 24).
-			for (MachineKind kind : List.of(MachineKind.BATTERY_BOX, MachineKind.CIRCUIT_ASSEMBLER, MachineKind.DISTILLATION_TOWER)) {
+			// One screen in each of the other looks (docs/features/machine-screens.md): the electric battery box, the
+			// advanced circuit assembler, the lab's chemical reactor and the industrial distillation tower, whose screen
+			// holds the most outputs (five tanks and a slot, batch 24). The crusher above is the workshop look.
+			for (MachineKind kind : List.of(MachineKind.BATTERY_BOX, MachineKind.CIRCUIT_ASSEMBLER, MachineKind.CHEMICAL_REACTOR,
+					MachineKind.DISTILLATION_TOWER)) {
 				BlockPos machine = kind.isLarge() ? new BlockPos(x + largeOffset(kind), y, z - 5)
 						: new BlockPos(x - 7 + singleIndex(kind), y, z - 5);
 				server.runCommand("tp @p %d %d %d 180 30".formatted(machine.getX(), y, z - 3));
