@@ -1,6 +1,6 @@
 # Factory payoffs: the power station, bigger machines that pay, clearer tanks and the big milestones
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on [ammonium nitrate](industrial-ammonium-nitrate.md) and the branches below it.
 
 Proposal issue: none. This change comes from the contributor's review of the factory chain for fun. Mastery, progression, purpose, milestones and strategic diversity were strong. Three things were weak:
@@ -150,7 +150,8 @@ Client game test: `CombinedCyclePowerPlantClientGameTests` takes five views (fro
 ### Results
 
 - **The first run, [38466660997](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38466660997) (commit 719fba66), failed at startup.** The form foundation refuses machines wider than 6 blocks, and the Plant was drawn 7 wide. It is now 6×4×5, and `tools/check_mod_data.py` checks the 2–6 rule so this is caught locally.
-- The fixed branch has not yet run in CI.
+- **The second run, [38471422864](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38471422864) (commit 38427fa5), failed one client test.** The Plant's 120,000 JE store fills in under three seconds at 2,048 JE/t, so after the picture test's 60-tick wait it stood idle with a full store. The test now empties the store before checking that it works.
+- **The third run, [38494562417](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38494562417) (commit 94b0e85b), passed:** the build, the data checks, every server game test with and without optional integrations, and all five client test shards.
 
 No survival playtest, two-client test or performance measurement has been done. The fun of these numbers needs a real playthrough to confirm.
 
