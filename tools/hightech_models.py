@@ -73,6 +73,9 @@ def network_terminal():
     return m
 
 
-MODELS = {"lithography_station": lithography_station()}
+import nuclear as _nuclear  # noqa: E402
+MODELS = {"lithography_station": lithography_station(),
+          "gas_centrifuge_cascade": _nuclear.gas_centrifuge_cascade_model(), "fuel_fabricator": _nuclear.fuel_fabricator_model()}
 # Blocks outside the machine framework (generate_material_data: ELECTRONICS_BLOCKS).
-BLOCKS = {"network_terminal": network_terminal()}
+from machine_connections import with_sockets, exterior_ports
+BLOCKS = {"network_terminal": with_sockets(network_terminal(), exterior_ports())}
