@@ -30,6 +30,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -709,6 +711,11 @@ public class YetiKingGameTests {
 		});
 	}
 
+	/** The game caps a creature's health at its max_health attribute's top (1024 in 26.3): a party's scale stops there. */
+	private static double capped(double health) {
+		return Attributes.MAX_HEALTH.value() instanceof RangedAttribute ranged ? Math.min(health, ranged.getMaxValue()) : health;
+	}
+
 	/**
 	 * Concordance Chunk B and the party cap: woken by four players his health is two and a half times his own, and when
 	 * he falls each of the four is paid once, a first kill's trophy and a quarter of the experience; his fall reported
@@ -725,8 +732,8 @@ public class YetiKingGameTests {
 		king.wake(level);
 		ending(level, king, () -> {
 			try {
-				helper.assertTrue(Math.abs(king.getMaxHealth() - YetiKingEntity.HEALTH * YetiKingEntity.partyScale(4)) < 0.01,
-						"Woken by four, his health is not " + YetiKingEntity.partyScale(4) + " times his own: " + king.getMaxHealth());
+				helper.assertTrue(Math.abs(king.getMaxHealth() - capped(YetiKingEntity.HEALTH * YetiKingEntity.partyScale(4))) < 0.01,
+						"Woken by four, his health is not " + YetiKingEntity.partyScale(4) + " times his own, at most the game's cap: " + king.getMaxHealth());
 				int[] before = new int[party.size()];
 				for (int i = 0; i < party.size(); i++) {
 					king.took(party.get(i), 5.0F);

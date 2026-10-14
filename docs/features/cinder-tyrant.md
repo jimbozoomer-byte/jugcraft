@@ -248,7 +248,8 @@ Run locally (10 October 2026):
 
 The game tests (`CinderTyrantGameTests`) show what a game-test server can, with a Tyrant put down on his own (no lair) over a kiln laid out from the corner of an arena the kiln's width and length; each test lays the floor, troughs and gates it needs:
 1. sunk in his crucible, he takes no harm; a player's blow wakes him at full health, and he crawls out onto the floor south of the crucible, to fight;
-2. his health scales 1, 1.5 and 2.5 times for one, two and four or more players; in the Molten Heart his cooldowns are a third shorter and his breath wider;
+2. his health scales 1, 1.5 and 2.5 times for one, two and four or more players (at four, 1100 is held to the game's
+   own cap on a creature's health, 1024, a known limit found by Chunk B's four-player test in CI); in the Molten Heart his cooldowns are a third shorter and his breath wider;
 3. hot, a blow does him half its damage and fire none; quenched, a quarter more, and he crawls at half his pace; 8 seconds later his seams flare back, and a second after that he is hot again;
 4. his Tail Sweep strikes a player behind him and one beside him and sets them burning, and spares the one before his head;
 5. his Body Slam strikes a player within 3 blocks and only throws back one 4 blocks off; landing in a flooded trough quenches him; he counts as in it with its edge a fifth of a block from his feet, and not with its edge two fifths off, nor over dry trough stone;

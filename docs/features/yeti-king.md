@@ -219,7 +219,8 @@ The first audit run found the west den's mouth holding a pelt, a carpet; the che
 
 The game tests (`YetiKingGameTests`) show what a game-test server can, with a king put down on his own (no lair) over a hall laid out from the corner of a hall-sized arena:
 1. waiting on his throne, he takes no harm; a player's blow wakes him at full health, and he leaps down onto his lake below the dais, to hunt;
-2. his health scales 1, 1.5 and 2.5 times for one, two and four or more players; in his fury his cooldowns are a third shorter and his slam's ring wider;
+2. his health scales 1, 1.5 and 2.5 times for one, two and four or more players (at four, 1050 is held to the game's
+   own cap on a creature's health, 1024); in his fury his cooldowns are a third shorter and his slam's ring wider;
 3. Maul Swipe strikes a player in front of him and spares one behind him;
 4. his slam bares the drift snow within its ring to glare ice, never the trampled snow nor the snow beyond, and 12 seconds later the snow has drifted back;
 5. an Avalanche Charge at a foe beyond an ice column stops short of it with him stunned, and stunned he takes a third more damage;
@@ -265,6 +266,8 @@ He is confined to the Glacier Hall, his own dimension; nothing of his reaches th
 Known limits:
 - untested by hand and with two clients, so his numbers are the plan's and may need tuning once he is played;
 - on Peaceful there is no fight;
+- with four or more players his health stops at the game's cap of 1024, not the 1050 his scale asks (the attribute's
+  top; found by Chunk B's four-player test in CI);
 - Yeti Fur has two uses so far.
 
 With him, the first of the bosses Arms VII's trophies wait for is built.
