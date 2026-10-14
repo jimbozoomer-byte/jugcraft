@@ -134,6 +134,8 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 	/** How near his path a player must be for his charge to strike them, and how near a column's foot stuns him. */
 	private static final double CHARGE_REACH = 1.6;
 	private static final double COLUMN_REACH = GlacierHall.COLUMN_RADIUS + GlacierHall.COLUMN_FOOT + 1.2;
+	/** How far past COLUMN_REACH his body can still meet a column's foot (his corners reach past his sides). */
+	private static final double COLUMN_BODY = 1.0;
 	/** The most frost he leaves on anyone: a little past freezing them through, so the freeze bites for a moment. */
 	private static final int FROST_CAP = 200;
 
@@ -982,8 +984,8 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 	/**
 	 * Avalanche Charge, {@code t} ticks into it: on all fours pawing the snow through the wind-up; then a straight run of up
 	 * to {@value #CHARGE_SPEED} blocks a tick, {@value #CHARGE_DAMAGE} damage and a heavy knockback to each player he passes.
-	 * Into an ice column he stuns himself for {@value #STUN_TICKS} ticks; in the Fury of the Peaks a charge that does not
-	 * stun him is followed at once by another.
+	 * Into an ice column (a step that would bring him near its centre, or his body against its flared foot) he stuns himself
+	 * for {@value #STUN_TICKS} ticks; in the Fury of the Peaks a charge that does not stun him is followed at once by another.
 	 */
 	private void charge(ServerLevel level, Player target, int t) {
 		Attack run = Attack.AVALANCHE_CHARGE;
@@ -1013,8 +1015,9 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 			}
 			return;
 		}
-		Vec3 next = position().add(charge.scale(CHARGE_SPEED));
-		if (GlacierHall.columnDistance(next.x - origin.getX(), next.z - origin.getZ()) <= COLUMN_REACH) {
+		Vec3 step = charge.scale(CHARGE_SPEED);
+		Vec3 next = position().add(step);
+		if (intoColumn(level, next, step)) {
 			baited(level);
 			stun(level);
 			return;
@@ -1058,6 +1061,23 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 			setAction(Action.CHARGE_WINDUP);
 			face(target);
 		}
+	}
+
+	/**
+	 * Whether this step of his charge runs him into an ice column: it would bring him within COLUMN_REACH of one's centre, or,
+	 * within COLUMN_BODY more, the game's own collision would stop his body against its flared foot (a glancing run would
+	 * otherwise slide him round it unstunned). No other block of the hall stands that near a column at his height.
+	 */
+	private boolean intoColumn(ServerLevel level, Vec3 next, Vec3 step) {
+		double near = GlacierHall.columnDistance(next.x - origin.getX(), next.z - origin.getZ());
+		if (near <= COLUMN_REACH) {
+			return true;
+		}
+		if (near > COLUMN_REACH + COLUMN_BODY) {
+			return false;
+		}
+		Vec3 free = Entity.collideBoundingBox(this, step, getBoundingBox(), level, List.of());
+		return Math.abs(free.x - step.x) > 1.0E-5 || Math.abs(free.z - step.z) > 1.0E-5;
 	}
 
 	/**
