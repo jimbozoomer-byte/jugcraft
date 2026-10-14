@@ -665,7 +665,7 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.waitForScreen(MachineScreen.class);
 			context.takeScreenshot("jugcraft_machine_screen");
 			// Its sides view: the faces in the status pane, the key in the help box.
-			context.runOnClient(client -> ((MachineScreen) client.screen).showSides(true));
+			context.runOnClient(client -> ((MachineScreen) client.gui.screen()).showSides(true));
 			context.waitTicks(2);
 			context.takeScreenshot("jugcraft_machine_screen_sides");
 			context.setScreen(() -> null);
