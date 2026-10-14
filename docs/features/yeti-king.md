@@ -22,7 +22,7 @@ Waiting, he takes no harm. He wakes when a player who can fight him (anyone not 
 - he roars on his throne for a second and leaps down onto the lake below his dais in another, and nothing can hurt him meanwhile;
 - his health is set for the party: 420, half as much again for each player after the first within 38 blocks of the lake's centre, at most two and a half times (1050 for four or more).
 
-He has armour 10 and cannot be knocked back. He takes no fall damage, never freezes and no web or powder snow holds him; he walks his own snow and ice without sliding. He cannot ride, be leashed or be pushed. On the lake he lopes at a quarter-block a tick on his legs and knuckles and stops two and a half blocks short of his foe. If he is ever more than 30 blocks from the lake's centre, or fallen below it, he bounds back to its middle.
+He has armour 10 and cannot be knocked back. He takes no fall damage, never freezes and no web or powder snow holds him; he walks his own snow and ice without sliding. No Levitation (an End gun's bullet, a shulker's or a potion) takes on him or his whelps, so neither floats off the lake, nor he as he dies (Concordance Chunk B, B-04). He cannot ride, be leashed or be pushed. On the lake he lopes at a quarter-block a tick on his legs and knuckles and stops two and a half blocks short of his foe. If he is ever more than 30 blocks from the lake's centre, or fallen below it, he bounds back to its middle.
 
 ### His rule: the snow is his
 

@@ -40,6 +40,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -76,7 +78,7 @@ import org.jspecify.annotations.Nullable;
  * healing, a ward, or his charge baited into an ice column) gets their own loot ({@link YetiKingLoot}), paid once through
  * lair/LairRewards; left alone he climbs back to his throne, healed, and the snow drifts back. Bound to a lair instance
  * he vanishes with it; one with no instance (a test's) keeps to the hall laid out from the origin he was given. He walks
- * on his own snow: he does not slide on his ice, freeze, fall or stick in webs.
+ * on his own snow: he does not slide on his ice, freeze, fall, float or stick in webs.
  */
 public class YetiKingEntity extends Monster implements GeoEntity {
 	// ---------------------------------------------------------------- numbers (tools/yeti_king.py)
@@ -1461,6 +1463,15 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 	@Override
 	public boolean canFreeze() {
 		return false;
+	}
+
+	/**
+	 * No Levitation takes on him (an End gun's bullet, a shulker's, a potion): his steps keep him on his lake, but dying he
+	 * no longer takes them, and the spell would float him up.
+	 */
+	@Override
+	public boolean canBeAffected(MobEffectInstance effect) {
+		return !effect.is(MobEffects.LEVITATION) && super.canBeAffected(effect);
 	}
 
 	@Override
