@@ -2,7 +2,7 @@
 
 ## Howitzer-Walker (owner request, 13 October 2026)
 
-- [ ] **Add the Howitzer-Walker using the owner's existing model and animations in GitHub.** Locate and record their exact source paths before implementation; preserve the supplied design and clips. Import through the shared walker/vehicle systems, with grounded walking/turning, firing/recoil, idle and entry/exit behavior; add crafting, fuel/ammunition, controls, collision, sound, server-authoritative damage and multiplayer synchronization. Test the actual model/animations locally before main. This is future gameplay work, distinct from the already registered Self-Propelled Howitzer. The specific Howitzer-Walker source is not identified in this local checkout yet.
+- [x] **Howitzer-Walker implemented and owner playtested.** Main includes its model/animation integration, crafting, fuel/ammunition, movement, aiming, shelling, jump/stomp and server-authoritative controls. PR #356 adds continuous mouse aiming and hides the pilot model while driving. See [Howitzer-Walker](features/howitzer-walker.md). Two-player manual verification remains open.
 
 ## MUST: consolidated machine recipe interface
 
