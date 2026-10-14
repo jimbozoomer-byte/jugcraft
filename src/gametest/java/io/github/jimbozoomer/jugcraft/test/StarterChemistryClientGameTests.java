@@ -260,14 +260,25 @@ public class StarterChemistryClientGameTests implements FabricClientGameTest {
         ((SimpleEnergyStorage)m.energy()).setAmount(m.energy().getCapacity());
         for(int i=0;i<m.form().tanks().outputTanks().size();i++) m.tanks().output(i).drain(m.tanks().output(i).millibuckets());
         if(m.form().itemOutputs()>0) m.container().setItem(m.form().firstOutputSlot(),ItemStack.EMPTY);
-        switch(index) {
-            case 0 -> { m.container().setItem(0,new ItemStack(Items.COAL,16)); topUp(m.tanks().input(0),Fluids.WATER); }
-            case 1 -> { topUp(m.tanks().input(0),PetroFluids.DIRTY_SYNTHESIS_GAS.fluid()); topUp(m.tanks().input(1),Fluids.WATER); }
-            case 2 -> { m.container().setItem(m.form().firstSocketSlot(),new ItemStack(PetroItems.NICKEL_CATALYST_BED)); topUp(m.tanks().input(0),PetroFluids.CARBON_MONOXIDE.fluid()); topUp(m.tanks().input(1),PetroFluids.HYDROGEN.fluid()); }
-            case 3 -> { m.container().setItem(0,new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(io.github.jimbozoomer.jugcraft.Jugcraft.id("sulfur_dust")),16)); topUp(m.tanks().input(0),PetroFluids.OXYGEN.fluid()); }
-            case 4 -> { ((SimpleEnergyStorage)m.energy()).setAmount(0); topUp(m.tanks().input(0),PetroFluids.METHANE.fluid()); }
+        if(m.form().generator()) {
+            ((SimpleEnergyStorage)m.energy()).setAmount(0);
+            topUp(m.tanks().input(0),PetroFluids.METHANE.fluid());
+            return;
         }
+        // Exercise the expansion, while deriving inlet order from the retained main form's recipes.
+        String preferred=List.of("expanded_gasifier_coal", "rack_clean_synthesis_gas",
+                "infuser_co_methanation", "expanded_oxidizer_sulfur_dioxide").get(index);
+        var entry=m.recipes(level.getServer()).stream()
+                .filter(e -> e.id().getPath().endsWith("/"+preferred)).findFirst().orElseThrow();
+        m.selectRecipe(entry.id());
+        var recipe=entry.recipe();
+        recipe.tool().ifPresent(tool -> m.container().setItem(m.form().firstSocketSlot(),
+                new ItemStack(tool.items().findFirst().orElseThrow())));
+        for(int i=0;i<recipe.items().size();i++)
+            m.container().setItem(i,new ItemStack(recipe.items().get(i).ingredient().items().findFirst().orElseThrow(),64));
+        for(int i=0;i<recipe.fluids().size();i++) topUp(m.tanks().input(i),recipe.fluids().get(i).fluid());
     }
+
     private static void topUp(io.github.jimbozoomer.jugcraft.chemistry.FluidTank tank,net.minecraft.world.level.material.Fluid fluid) {
         int needed=Math.min(2000,tank.capacityMb())-tank.millibuckets();
         if(needed<0 || !tank.fits(fluid,Math.max(0,needed))) throw new AssertionError("Invalid showroom tank contents");

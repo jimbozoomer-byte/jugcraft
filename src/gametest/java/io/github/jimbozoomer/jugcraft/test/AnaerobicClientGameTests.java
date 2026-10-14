@@ -155,15 +155,16 @@ public class AnaerobicClientGameTests implements FabricClientGameTest {
         for(int i=0;i<m.form().tanks().outputTanks().size();i++) m.tanks().output(i).drain(m.tanks().output(i).millibuckets());
         if(m.form().itemOutputs()>0) m.container().setItem(m.form().firstOutputSlot(),ItemStack.EMPTY);
         switch(index) {
-            case 0 -> {m.container().setItem(0,new ItemStack(Items.WHEAT,64));topUp(m.tanks().input(0),Fluids.WATER);}
+            case 0 -> {m.selectRecipe(m.recipes(level.getServer()).stream().filter(e -> e.id().getPath().endsWith("/digest_farm_material")).findFirst().orElseThrow().id());m.container().setItem(0,new ItemStack(Items.WHEAT,64));topUp(m.tanks().input(0),Fluids.WATER);}
             case 1 -> {topUp(m.tanks().input(0),PetroFluids.RAW_BIOGAS.fluid());topUp(m.tanks().input(1),Fluids.WATER);}
             case 2 -> topUp(m.tanks().input(0),PetroFluids.DIGESTATE.source());
             case 3 -> {((SimpleEnergyStorage)m.energy()).setAmount(0);topUp(m.tanks().input(0),PetroFluids.CLEAN_BIOGAS.fluid());}
         }
     }
     private static void topUp(io.github.jimbozoomer.jugcraft.chemistry.FluidTank tank,net.minecraft.world.level.material.Fluid fluid) {
-        int needed=Math.min(2000,tank.capacityMb())-tank.millibuckets();
-        if(needed<0 || !tank.fits(fluid,Math.max(0,needed))) throw new AssertionError("Invalid showroom tank contents");
+        // Cancelling four bulk lanes may return more than the minimum showroom refill.
+        int needed=Math.max(0,Math.min(2000,tank.capacityMb())-tank.millibuckets());
+        if(!tank.fits(fluid,needed)) throw new AssertionError("Invalid showroom tank contents");
         if(needed>0) tank.fill(fluid,needed);
     }
     private static void shoot(ClientGameTestContext c,TestSingleplayerContext w,double x,int y,double z,double tx,double ty,double tz,String name) {

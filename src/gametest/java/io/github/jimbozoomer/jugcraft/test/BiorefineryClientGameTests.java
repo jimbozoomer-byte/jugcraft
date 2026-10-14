@@ -153,7 +153,10 @@ public class BiorefineryClientGameTests implements FabricClientGameTest {
         ((SimpleEnergyStorage)m.energy()).setAmount(m.energy().getCapacity());
         for(int i=0;i<m.form().tanks().outputTanks().size();i++) m.tanks().output(i).drain(m.tanks().output(i).millibuckets());
         for(int i=0;i<m.form().itemOutputs();i++) m.container().setItem(m.form().firstOutputSlot()+i,ItemStack.EMPTY);
-        var recipe=m.recipes(level.getServer()).getFirst().recipe();
+        var recipes=m.recipes(level.getServer());
+        var entry=index==1?recipes.stream().filter(e -> e.id().getPath().endsWith("/ferment_crop_mash")).findFirst().orElseThrow():recipes.getFirst();
+        m.selectRecipe(entry.id());
+        var recipe=entry.recipe();
         for(int i=0;i<recipe.items().size();i++) m.container().setItem(i,new ItemStack(recipe.items().get(i).ingredient().items().findFirst().orElseThrow(),64));
         for(int i=0;i<recipe.fluids().size();i++) topUp(m.tanks().input(i),recipe.fluids().get(i).fluid());
     }
