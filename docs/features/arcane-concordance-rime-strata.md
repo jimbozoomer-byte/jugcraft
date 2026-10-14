@@ -4,7 +4,9 @@ Status: implemented for Concordance Chunk B, unit 3 (tickets B-05, B-06 and B-07
 [the contract](concordance-chunk-b.md)), on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb` (#352)
 with the contract and unit 1 beneath it; not merged. CI run 38519234934 on `06dc5ea5f` built it and passed every job:
 its server game tests among the 1639 required, with and without the optional integrations, and its client game tests.
-Not played by hand or with two clients; see Verification for what has run.
+They passed again, with the status shots' fix, in runs 38543250503 (units 1 to 3) and 38549876709 (units 1 to 4); the
+fixed shots show the status icons (runs 38534127130 and 38549876709). Not played by hand or with two clients; see
+Verification for what has run.
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B2).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -318,10 +320,10 @@ Also taken from the owner's files, as data rather than copies: Brace's release l
 
 No scaling (B-P31): Spell Engine draws a spell icon into 16×16 from the whole texture (upstream, Spell Engine 1.10.9),
 and vanilla draws status icons at 18×18, stretching the 16×16 ones as it already does for `giant.png` and `shrunk.png`.
-How they look in game is barely seen yet: in CI's 480×270 previews the spell bar shows its slots 2 to 6, and
-advancement toasts hid the status icons (Verification). Alternatives offered at the checkpoint: `shield.png` and
-`shielding.png` for Brace (but shielding reads as "reduces damage", which Brace never does), `frozen.png` (the owner's
-"cannot heal") and `delay.png` for Preserve.
+How they look in game is seen only in CI's 480×270 previews: the spell bar shows its slots 2 to 6, and since the toasts
+are cleared the HUD shows Rimebound's and Braced's icons and the inventory all three (Verification). Alternatives
+offered at the checkpoint: `shield.png` and `shielding.png` for Brace (but shielding reads as "reduces damage", which
+Brace never does), `frozen.png` (the owner's "cannot heal") and `delay.png` for Preserve.
 
 Drawn by code, in the Concordance's D, A and E like Ember's (`tools/concordance_sounds.py`): `rime_gather` (Rimebind's
 and Preserve's cast: high wind under glassy voices), `rimebind` (a crystalline crack and falling glassy tone),
@@ -394,12 +396,26 @@ The screenshots of run 38519234934 (480×270 previews in the job log, shard 2):
 - `jugcraft_rime_strata_status_hud` and `jugcraft_rime_strata_status_inventory`: five advancement toasts (Cold Against
   Warmth, Rimekeeping, Strata, Read the Stone, Against the Dark) cover the top right, where the HUD draws effect icons
   and the inventory lists effects (JEI had moved its list aside). Neither shot shows Rimebound, Thawing or Braced,
-  although the test's check that the client had all three passed, so "Thawing listed" is not shown yet. The test now
-  clears the toasts before each shot (the commit after `06dc5ea5f`; not yet run).
+  although the test's check that the client had all three passed, so "Thawing listed" was not shown. The test now
+  clears the toasts before each shot (`7d6d0b0d3`, the commit after `06dc5ea5f`).
 
-Not run: any client by hand (the icons, sounds, codex pages, particles), two clients on a dedicated server (Brace on a
-party member, Rimebind between players under PvP), and play by hand. `./gradlew build` and
-`./gradlew runClientGameTest` ran only in CI.
+The screenshots of run 38549876709 (`b012875ab`, units 1 to 4; 480×270 previews in shard 3's log), with the fix:
+- `jugcraft_rime_strata_spell_bar`: as before, slots 2 to 6 at the bottom left and the first cut off by the screen's
+  left edge, a sliver of its icon showing; the chat says the player reached First Light, Rimekeeping and
+  Stratawrighting. No toast is in view.
+- `jugcraft_rime_strata_status_hud`: no toasts; at the top right two status icons, Braced's (the cream slab with teal
+  corners) above Rimebound's (the blue icy hand), as `braced.png` and `rimebound.png`. Thawing draws none, as its
+  status hides its icon. A few grey-brown squares hang in the sky, probably Braced's particles (its colour).
+- `jugcraft_rime_strata_status_inventory`: the inventory with JEI's list to its right; between them three icons,
+  Braced, Rimebound and Thawing (the blue drop, `rime_thaw.png`), without names, as the inventory draws its effects as
+  icons alone where the space is narrow. So "Thawing listed" is shown as its icon. The inventory and JEI's list do not
+  overlap.
+
+Run 38534127130's shard 1 (`0e7de6bf1`) showed the same three shots.
+
+Not run: any client by hand (the icons, sounds, codex pages, particles), a person looking at the screenshots (the
+descriptions above are of the previews), two clients on a dedicated server (Brace on a party member, Rimebind between
+players under PvP), and play by hand. `./gradlew build` and `./gradlew runClientGameTest` ran only in CI.
 
 ## World and event applicability
 
@@ -440,12 +456,12 @@ protected towns and build permission.
   an inscribed spell is always last. A later fix orders or caps the container (`ConcordanceSpells.containers`) or
   offers a loadout, once the owner chooses; until then `check_invocations` holds
   [the invocations record](arcane-concordance-invocations.md) to the count.
-- **The spell bar's place** (a known limit, seen in CI's previews of run 38519234934): Spell Engine centres its bar on a
-  point left of the screen's bottom centre (`HudConfig.defaultHotBar`: `Origin.BOTTOM`, offset (-170, -11)), 20 GUI
-  pixels a slot, so its left edge is at width/2 - 170 - 10 × spells. CI's window is 427 GUI pixels wide, so a bar of 5
-  or more spells runs off the left edge (the shot's first slot is cut off). At 480 (1920×1080 at the automatic GUI
-  scale) a bar of 7 reaches the edge exactly and 8 or more run off it. Thirteen invocations exist, and the bar keys up
-  to 9. A player can move the bar in Spell Engine's HUD settings; Jugcraft changes no configuration.
+- **The spell bar's place** (a known limit, seen in CI's previews of runs 38519234934 and 38549876709): Spell Engine
+  centres its bar on a point left of the screen's bottom centre (`HudConfig.defaultHotBar`: `Origin.BOTTOM`, offset
+  (-170, -11)), 20 GUI pixels a slot, so its left edge is at width/2 - 170 - 10 × spells. CI's window is 427 GUI pixels
+  wide, so a bar of 5 or more spells runs off the left edge (the shot's first slot is cut off). At 480 (1920×1080 at the
+  automatic GUI scale) a bar of 7 reaches the edge exactly and 8 or more run off it. Thirteen invocations exist, and the
+  bar keys up to 9. A player can move the bar in Spell Engine's HUD settings; Jugcraft changes no configuration.
 - For the owner's checkpoint: a Brace lasting out its tick (B-P30); the icon choices (B-P31) and the soaked icon's
   folder label; the knockback measure (B-P32); Rimebind's targets following the shared boundary (B-P34); "Stonebrace" as
   a display name instead of "Brace", to keep it apart from the war fork's trait; and the spell bar's place: whether

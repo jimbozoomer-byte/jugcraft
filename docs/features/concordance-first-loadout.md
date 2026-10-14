@@ -231,7 +231,8 @@ not yet merged), `OPTIONAL` also holds Rime's travel kit (the two water foci, th
 the three water sets), made by recipe as the Focus of Fire is; they are Rime's, not part of First Light's loadout, and
 have no JEI information page (JEI shows their recipes). `tools/concordance_journey.py` holds each of the fifteen to the
 same rule as the loadout (one player, the Overworld, before the Adept stage), and
-`ConcordanceGameTests.FIRST_LOADOUT_RECIPES` asks the server for their recipes too (not yet run).
+`ConcordanceGameTests.FIRST_LOADOUT_RECIPES` asks the server for their recipes too (`theFirstLoadoutIsMadeInSurvival`
+passed in CI run 38549876709; not merged).
 
 **Limits, said plainly.**
 - The pages are written from the data the mod ships. A server whose data pack changes a boss's loot table or the

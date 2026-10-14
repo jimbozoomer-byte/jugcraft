@@ -162,7 +162,7 @@ The restart: `LairClientGameTests` closes a Glacier Hall with its King asleep (a
 
 Concordance Chunk B, unit 3 ([Rime and Strata](arcane-concordance-rime-strata.md); not merged) adds to `GlacierHallClientGameTests`: with First Light understood, arriving in the hall is Rimekeeping's field study; and a braced player is still moved by the mist's toll, the Grey Mist and the whirl, and neither the toll nor the whirl spends the Brace. In run 38519234934 the class passed with every other client class (shard 3). Its pictures there (480×270 previews) show the ledge, the lake, the throne, the vault, a column, a den and the Grey Mist's arch as described above; the whirl's (`jugcraft_frost_horn_whirl`) is barely visible, a faint dark smudge of particles at night.
 
-Concordance Chunk B, unit 4 ([Winter Brine and the travel kit](arcane-concordance-winter.md); not merged) adds `EncyclopediaGameTests.theGlacierHallsRiteNamesWinterBrine` for the preparation fact; nothing in the hall changed. It has not run yet either.
+Concordance Chunk B, unit 4 ([Winter Brine and the travel kit](arcane-concordance-winter.md); not merged) adds `EncyclopediaGameTests.theGlacierHallsRiteNamesWinterBrine` for the preparation fact; nothing in the hall changed. It passes in CI (run 38549876709, by workflow_dispatch; not merged), where the hall's own tests and `GlacierHallClientGameTests` (shard 2) passed again.
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 

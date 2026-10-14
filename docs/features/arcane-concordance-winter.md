@@ -2,8 +2,10 @@
 
 Status: implemented for Concordance Chunk B, unit 4 (tickets B-08 and B-10 of [the contract](concordance-chunk-b.md)),
 on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb` (#352) with the contract, unit 1 and
-[unit 3](arcane-concordance-rime-strata.md) beneath it; not merged. **No Minecraft build has been compiled or run yet**;
-see each part's Verification and [Checks run for the unit](#checks-run-for-the-unit).
+[unit 3](arcane-concordance-rime-strata.md) beneath it; not merged. CI run 38549876709 on `b012875ab` (units 1 to 4)
+built it and passed every job: its server game tests among the 1676 required, with and without the optional
+integrations, and its client game test. Not played by hand or with two clients; see each part's Verification and
+[Checks run for the unit](#checks-run-for-the-unit).
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B") and the same day answered
 B-D2 ("Use your water sets as Rime") and B-D3 ("A timed brew"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B4).
@@ -154,7 +156,8 @@ alternative offered at the checkpoint is `ars_jimbaux/textures/mob_effect/shield
 
 ### Verification
 
-Game tests added; **none has run yet** (CI's `mod`, `optional integrations absent` and client jobs are their first run):
+Game tests added; all passed in CI run 38549876709, their first run (see
+[Checks run for the unit](#checks-run-for-the-unit)):
 
 - `ConcordanceAlchemyGameTests` (+4): `winterBrineNeedsTheColdBand` (on paper, the Rime each band keeps of three
   snowballs, 813, 685, 211 and 0, the generator's own numbers, which the audit reads from the test; by hand, a cold and
@@ -172,7 +175,8 @@ Game tests added; **none has run yet** (CI's `mod`, `optional integrations absen
   data, its four icons, the codex link only once the Alembic Arts are observed, and the Mitten alone with the
   Concordance switched off.
 - `ConcordanceWinterClientGameTests`: Frostward's icon in the client's resources, and the screenshot
-  `jugcraft_winter_frostward_hud` (presentation, not evidence).
+  `jugcraft_winter_frostward_hud` (presentation, not evidence; it shows the icon on the HUD, described under
+  [Checks run for the unit](#checks-run-for-the-unit)).
 
 Audits: `check_alchemy` mirrors `RIME_KEEP_*` and accepts a status only if Jugcraft registers it; the new
 `check_winter_brine` holds the property, the timing, the heat rule in Java and Python, the test's literal, Frostward's
@@ -293,7 +297,8 @@ fire resistant:
 
 The kit adds only what leather already gives (B-P23: no permanent boss immunity). The answers to his frost stay
 Frostward (timed and brewed) and the Mitten (lasting, his prize). That a kit wearer is slowed but not hurt by his frost
-was an inference in the contract; `aKitWearerIsSlowedButNotHurtByHisFrost` and the client test test it once they run.
+was an inference in the contract; `aKitWearerIsSlowedButNotHurtByHisFrost` and the client test (a hundred ticks of his
+frost on the real player in Winterguard's) show it, both passed in CI run 38549876709.
 
 ### Multiplayer and persistence
 
@@ -388,7 +393,7 @@ B-P49, recorded and not built.
 
 ### Verification
 
-Game tests added; **none has run yet**:
+Game tests added; all passed in CI run 38549876709 (see [Checks run for the unit](#checks-run-for-the-unit)):
 
 - `ConcordanceWinterGameTests`: `theTravelKitIsMadeAndWornAsDesigned` (the fifteen items, their kinds, slots and tags;
   each piece's set, model, slot, equipment asset, protection against its bound, toughness and knockback 0, no other
@@ -412,7 +417,8 @@ Game tests added; **none has run yet**:
   (`jugcraft_rime_kit_*`); the player in Winterguard's, standing and sneaking, front and back; a hundred ticks of his
   frost on the real, ticking player, in Winterguard's (still slowed, no health lost) and without it (hurt); the real
   Trinkets slots (a Focus of Water's 2400-tick hold, and the bangle bracing the player through the server's own tick);
-  the fifteen icons in frames. Nothing judges the pictures.
+  the fifteen icons in frames. Nothing judges the pictures; they are described under
+  [Checks run for the unit](#checks-run-for-the-unit).
 
 Audits: the new `check_rime_kit` (the Java's numbers and ids against the tables; protection within its bounds, no
 Spell Power, toughness or knockback; the foci only from a slot that applies effects, within the cap; the bangle's
@@ -483,7 +489,7 @@ Implemented with Claude Code (Claude Opus 5.5).
     its Thallite tables (the ground lists and the gear's numbers) are unchanged.
   - `git diff -U0` of `weapons/ArmItem.java` shows only the `Rime` import, the Javadoc sentence and the FROST case.
   - CI's "Check generated JSON is up to date" keeps the generated tags and lang equal to the unchanged generators; it
-    has not run on this unit yet.
+    passed in run 38549876709's `mod` job on `b012875ab`.
 
 ### Save effects
 
@@ -502,7 +508,7 @@ Implemented with Claude Code (Claude Opus 5.5).
 
 ### Verification
 
-Game tests added (`ConcordanceWinterGameTests`); **none has run yet**:
+Game tests added (`ConcordanceWinterGameTests`); all passed in CI run 38549876709:
 - `aFrostBoonSlowIsElectiveRimePractice`: each Frost arm counts once for a Rimekeeper striking a zombie, with the
   boon's own slow; the key survives a knowledge round trip before mastery; with two kinds of Preserve it masters
   Rimekeeping; a novice, a pig, a resistant ravager, the Venom boon and a killing blow count nothing; with the
@@ -512,8 +518,9 @@ Game tests added (`ConcordanceWinterGameTests`); **none has run yet**:
 - `thalliteStaysOutOfTheCold`: snow, powder snow, ice, packed and blue ice and the hall's drift snow, trampled snow and
   glare ice are not Thallite's natural ground, and Strata reads no ground from them.
 
-Unchanged and expected to stay green: `ArmsVIIGameTests.effectBoonsTakeOnTheFoe`, `ArmsVIIClientGameTests`,
-`ThalliteGearGameTests`, and unit 3's `anAllyARitualAndRootedThalliteAreElective` and `thalliteIsAStrataSpecimen`.
+Unchanged, and passed again in run 38549876709: `ArmsVIIGameTests.effectBoonsTakeOnTheFoe`, `ThalliteGearGameTests`,
+and unit 3's `anAllyARitualAndRootedThalliteAreElective` and `thalliteIsAStrataSpecimen` (among the 1676 required);
+`ArmsVIIClientGameTests` by its shard (0).
 
 Audit: the new `check_winter_links`.
 
@@ -521,18 +528,19 @@ Implemented with Claude Code (Claude Opus 5.5).
 
 ## Checks run for the unit
 
-Run on 14 October 2026 where the unit was written. No Minecraft jar is available there, so no Minecraft build was
-compiled or run.
+The first six columns were run on 14 October 2026 where the unit was written. No Minecraft jar is available there, so
+no Minecraft build was compiled or run there. The last column is CI's run 38549876709 on `b012875ab` (units 1 to 4,
+the unit's head; below).
 
-| Check | A `158717e6c` | B `4be454f83` | C `eb6099144` | E `7e1efb5f9` | Records `7605c420b` | Review fixes |
-|---|---|---|---|---|---|---|
-| `python3 tools/owner_art.py --check` | passed | passed | passed | passed | passed | passed |
-| `python3 -B tools/check_mod_data.py` | passed | passed | passed | passed | passed | passed |
-| `python3 scripts/check_repository.py` | passed | passed | passed | passed | passed | passed |
-| `python3 tools/concordance_journey.py --check` | passed | passed | passed | passed | passed | passed |
-| `python3 tools/check_icon_maps.py` | passed | passed | passed | passed | passed | passed |
-| `./gradlew build` (compilation and the server game tests) | not run | not run | not run | not run | not run | not run |
-| `./gradlew runClientGameTest` | not run | not run | not run | not run | not run | not run |
+| Check | A `158717e6c` | B `4be454f83` | C `eb6099144` | E `7e1efb5f9` | Records `7605c420b` | Review fixes | CI `b012875ab` |
+|---|---|---|---|---|---|---|---|
+| `python3 tools/owner_art.py --check` | passed | passed | passed | passed | passed | passed | not run alone; `check_mod_data` reads its errors, passed |
+| `python3 -B tools/check_mod_data.py` | passed | passed | passed | passed | passed | passed | passed (`mod`, "Check material data") |
+| `python3 scripts/check_repository.py` | passed | passed | passed | passed | passed | passed | not run (not in the Build workflow) |
+| `python3 tools/concordance_journey.py --check` | passed | passed | passed | passed | passed | passed | not run alone; `check_mod_data` reads its problems, passed |
+| `python3 tools/check_icon_maps.py` | passed | passed | passed | passed | passed | passed | not run alone; `check_mod_data` reads its errors and self-test, passed |
+| `./gradlew build` (compilation and the server game tests) | not run | not run | not run | not run | not run | not run | passed (`mod`, and `optional integrations absent`): all 1676 required |
+| `./gradlew runClientGameTest` | not run | not run | not run | not run | not run | not run | passed: every client test class (164), five shards |
 
 For this record the gate was run on an export of each commit (`git archive`, outside the repository) and on the
 working tree of this commit. `check_mod_data` counts 2558 material ids at commit A and 2573 from commit B (the fifteen
@@ -570,28 +578,81 @@ time, and every injected fault below was reported (60 in all):
   literal; the codex link at understood; its research as a constant; either of the two lang lines missing; an
   attachment written from `prepare`.
 
-**Review fixes** (the unit review, 14 October 2026; the gate in the last column, on the working tree). Faults injected on
-a copy outside the repository, each restored after its run, were all reported (10 of 10): `Rime.frostBoon` without the
-switch, and without its living target; `RimeGear.wearsBangle` without its cosmetic check; `RimeGear.bangle` keeping its
-count when the bangle is taken off; and Yeti Fur reaching a Rime-bearing ingredient by a Scale form of snowballs, a
-recipe taking it through a tag, the same through a tag inside a tag, a villager trading wool for amethyst, the plain
-`yeti_fur → snowball` recipe, and a recipe making gloamcap from sugar. The audit as it was before the fixes reported
-only the plain recipe of those six routes. Forty of section 9.5's faults for the three new audits were re-run against
-the fixed audits, all reported: 38 as first written; the name "Nereids Hood", which in the table alone is left to CI's
-generated-file check, once it reaches the language file as the generator writes it; and Winterguard's sheet swapped
-for the medium one, by `owner_art.py --check` (in the table) and by the fit (on the runtime sheet).
+**Review fixes** (the unit review, 14 October 2026; the gate in the Review fixes column, on the working tree). Faults
+injected on a copy outside the repository, each restored after its run, were all reported (10 of 10): `Rime.frostBoon`
+without the switch, and without its living target; `RimeGear.wearsBangle` without its cosmetic check; `RimeGear.bangle`
+keeping its count when the bangle is taken off; and Yeti Fur reaching a Rime-bearing ingredient by a Scale form of
+snowballs, a recipe taking it through a tag, the same through a tag inside a tag, a villager trading wool for amethyst,
+the plain `yeti_fur → snowball` recipe, and a recipe making gloamcap from sugar. The audit as it was before the fixes
+reported only the plain recipe of those six routes. Forty of section 9.5's faults for the three new audits were re-run
+against the fixed audits, all reported: 38 as first written; the name "Nereids Hood", which in the table alone is left
+to CI's generated-file check, once it reaches the language file as the generator writes it; and Winterguard's sheet
+swapped for the medium one, by `owner_art.py --check` (in the table) and by the fit (on the runtime sheet).
 Not re-run here, as the fixes do not touch their audits: the faults caught by `check_ember_regalia`,
 `check_acquisition`, `check_rime`'s key mirror, `owner_art.py --check` alone and `concordance_journey.py`.
 
-Not run: `./gradlew build`, any server or client game test, a client by hand (the icons, the worn sets, the codex and
-JEI pages, the dossier), the Trinkets screen's slots (no client test opens it), a person looking at the screenshots,
-two clients on a dedicated server, and play by hand.
+**CI, run 38549876709** (workflow_dispatch on `b012875ab`, units 1 to 4; not merged): all nine jobs succeeded, the
+unit's first CI run. `mod` passed "Check generated JSON is up to date" and "Check material data", then logged "All 1676
+required tests passed" ("1676 GAME TESTS COMPLETE IN 4.293 min"; "BUILD SUCCESSFUL in 6m 24s");
+`optional integrations absent` logged the same in 4.319 min ("BUILD SUCCESSFUL in 7m 6s"). The server log names no
+test that passed, but each of the unit's 18 new server game tests (`ConcordanceAlchemyGameTests` 4,
+`ConcordanceWinterGameTests` 10, `YetiKingGameTests` 2, `EncyclopediaGameTests` 1, `ConcordancePersistenceGameTests` 1)
+is a `@GameTest` in a class the gametest `fabric.mod.json` registers, and no test sets `required = false`, so each
+passed as one of the 1676; so did the two changed ones (`theCrucibleKeepsPreservesHoldThroughASave`,
+`theFirstLoadoutIsMadeInSurvival`). Unit 2's run 38543250503 counted 1658 on `1266c905a`, the commit beneath the unit,
+which adds 18 `@GameTest`s and removes none. `choose client tests` chose every client test class (164, this one
+included) in five shards, and each shard succeeded; a failing class stops the client with its error and fails its
+shard, so `ConcordanceWinterClientGameTests` passed in shard 4, every check in it held: the owner's icon, the GeckoLib
+renderers, models and sheets, the row dressed as the shots need, the sneak, his frost taking no health in Winterguard's
+while slowing the player and taking some bare, a Focus of Water's 2400-tick hold and the bangle's Brace. Both server
+logs re-run three tests by design ("Starting re-run of tests": the lair's last rites, Arms VIII's javelin and
+Tatterlace's brood, which ask for several successes). Their only WARN lines are the game-test server's usual ones (a
+test record saved by a newer version, a spire entry kept as written, and "[lairs] No dimension …: the lair cannot open"
+for five lairs, the Glacier Hall among them); no WARN or ERROR line names Frostward, Winter, Brine, Rime, `RimeGear`,
+the bangle, a focus, Winterguard, Aquamancer, Nereid or the alchemy. Read through the GitHub API: the last 5000 lines
+of each server log (of 6322 and 6091; they hold the game tests and their summary), `choose client tests`, and shard 4's
+last 5000 lines (of 19785: the screenshots, but not the class's own log lines).
 
-Not confirmed until CI compiles and runs the unit (read from the decompiled 26.3 sources or the 26.3 files fetched for
-the unit, not yet used by a compiled Jugcraft build): `MobEffectCategory.BENEFICIAL` (otherwise only in unit 3's
-`Brace`, also uncompiled); `EntityTypes.RAVAGER` in a test; `PowderSnowBlock.canEntityWalkOnPowderSnow`; the game rule
-id `minecraft:natural_health_regeneration` in the client test. `AttachmentType.isPersistent()` is already asserted by
-earlier tests (`FacePaintGameTests`, `LairEncounterGameTests`).
+The screenshots (480×270 previews in shard 4's log; for people to look at, not evidence):
+- `jugcraft_winter_frostward_hud`: the player in survival on a flat grass field at noon, full health and hunger; at the
+  top right one status icon, Frostward's (a pale cyan heart in a frosted ring, as `frostward.png`). A chat line ("You
+  got the Creative Quick Start book…") and the book in hand are the test world's.
+- The row by day (`jugcraft_rime_kit_front`, `_three_quarter`, `_side`, `_back`), left to right from the front: the
+  iron control; Nereid's and Aquamancer's, alike as expected (a wide-brimmed dark teal hat with yellow trim and a red
+  tassel; a teal coat with yellow shoulder stripes and Greek-key marks over a pale blue front; dark blue legs and
+  boots); Winterguard's (the same coat and legs, as its sheet's top half is the medium sheet, under a white helm with a
+  dark visor); Winterguard's with Protection IV, whose glint cannot be told apart at this size (in the back view it
+  looks slightly bluer than the plain one); Winterguard's on the zombie, its green face under the open helm and its
+  raised arms in the teal sleeves, the shoulder plates on; and the small stand, bare wood with nothing drawn on it. The
+  row turns as the test sets it in each view.
+- The close-ups (`jugcraft_rime_kit_close_*`): the three sets fill the frame from each side; the stands' wooden neck
+  and hands show under the hats and at the cuffs; the brims and tassels, the shoulder marks and the backs' teal-to-blue
+  fade are drawn. Nothing is magenta, missing or cut off.
+- `jugcraft_rime_kit_player`, `_player_sneaking` and `_player_sneaking_back`: the player in third person in
+  Winterguard's, the white helm above the face, the coat with a large yellow Greek-key mark on the left shoulder, the
+  book in hand; sneaking, the body bends and the coat follows it; from behind, the helm's white back and the coat.
+- `jugcraft_rime_kit_frost_hud`: vanilla's frost at the screen's edges, the ten hearts drawn frozen and all full, and
+  the armour bar at 15 points (seven and a half icons, Winterguard's 2/6/5/2).
+- `jugcraft_rime_kit_bangle_brace`: five advancement toasts (Cold Against Warmth, Rimekeeping, Against the Dark, First
+  Frost, A Glow of Its Own), raised by the research the test grants, cover the top right, where the HUD draws status
+  icons, so Braced's icon is not seen (the server's check that the bangle braced the player passed). A large purple
+  pixel shape stands in the middle of the view, probably a particle close to the camera; its source is not identified.
+  No shot shows the foci or the bangle in their slots: the test fills the slots on the server and checks them there.
+- `jugcraft_rime_kit_icons`: fifteen item frames on a wooden wall, the lesser focus, the focus, the bangle and Nereid's
+  four above, Aquamancer's and Winterguard's eight below; each icon whole in its frame and, at this size, like its
+  owner's file.
+
+Not run: a client by hand (the icons, the worn sets, the codex and JEI pages, the dossier), the Trinkets screen's slots
+(no client test opens it), a person looking at the screenshots (the descriptions above are of the previews, written
+for this record), the full-size screenshots (in the run's `client-screenshots-4` artifact, not downloaded), two clients
+on a dedicated server, and play by hand.
+
+Confirmed by CI's compilation and passing tests (they had been read from the decompiled 26.3 sources or the 26.3 files
+fetched for the unit): `MobEffectCategory.BENEFICIAL`, `EntityTypes.RAVAGER` in a test and
+`PowderSnowBlock.canEntityWalkOnPowderSnow`. Not confirmed: the game rule id `minecraft:natural_health_regeneration` in
+the client test (Fabric's `runCommand` does not fail on a rejected command, and the part of shard 4's log holding the
+class's run was not read). `AttachmentType.isPersistent()` is already asserted by earlier tests (`FacePaintGameTests`,
+`LairEncounterGameTests`).
 
 ## World and event applicability
 
@@ -633,7 +694,10 @@ hall is untouched.
   - the bangle does nothing against the Yeti King's own push until B-09 (unit 5) makes it call `Brace.spend`;
   - the kit shares `EmberArmorItem`, `EmberClient` and Ember's slot writer, so renaming them touches the kit;
   - one more GeckoLib armour model, and about 200 more client-test ticks plus the shots
-    (`ConcordanceWinterClientGameTests` has an estimated weight of 120 in `tools/select_client_tests.py`).
+    (`ConcordanceWinterClientGameTests` has an estimated weight of 120 in `tools/select_client_tests.py`);
+  - the client test's bangle shot is covered by the advancement toasts its research grant raises (run 38549876709), so
+    it does not show Braced; clearing the toasts before that shot, as unit 3's test does, is on unit 5's list of
+    combined fixes ([the contract](concordance-chunk-b.md#b-11-evidence-and-the-owner-checkpoint)).
 - **Deferred:** the owner's light model (no light-layout water sheet for it); the Caster Tome of Water (a tome casting
   one invocation needs a new instrument gate); the foci and bangle drawn on the body; the owner's on-hit bangle (B-P49's
   alternative); powder-snow walking boots (B-P46's alternative); a Rimekeeping elective for bottling Winter Brine

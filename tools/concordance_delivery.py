@@ -50,9 +50,9 @@ MATRIX = {
         "required",
         ["ConcordancePresentationClientGameTests", "aPorterShowsOnceWhatItLacks", "ConcordanceEmberGearClientGameTests",
          "ConcordanceWinterClientGameTests"],
-        "Seen only in CI's small screenshot previews, and the water sets not yet seen at all (unit 4's client test, "
-        "which draws them, added but not yet run); frame cost of a large installation not measured; the sets' glint "
-        "is a Jugcraft layer, and vanilla trims are not drawn on them"),
+        "Seen only in CI's small screenshot previews, the water sets since unit 4's client test passed in CI (run "
+        "38549876709, Chunk B, not merged); frame cost of a large installation not measured; the sets' glint is a "
+        "Jugcraft layer, and vanilla trims are not drawn on them"),
     "player-animation-library": (
         "Original cast and release gestures for the invocations; the circle participants' channelling gesture; the "
         "Vigil's offering gesture, sent by the server when an offering is made; none of them plays over a gun or an "
@@ -104,8 +104,8 @@ MATRIX = {
         ["lanceStrikesAndScalesWithSpellPower", "everyStatisticIsARealAttribute", "cinderboltBurnsAndGrowsWithFireSpellPower",
          "theRegaliaRaisesTheFireToItsCeiling", "spellPowerEnchantmentsAreRefusedOnTheSet",
          "spellPowerEnchantmentsAreRefusedOnTheWaterSets"],
-        "Concordance damage adds Spell Power's points only, not its critical hits; unit 4's water-set test added but "
-        "not yet run"),
+        "Concordance damage adds Spell Power's points only, not its critical hits; unit 4's water-set test passed in "
+        "CI (run 38549876709, Chunk B, not merged)"),
     "trinkets-updated": (
         "Resonant Rings in the ring slot and the Hearthstone in the necklace slot, both given by data; the owner's "
         "Spell Focus and Bracelet slots, ported from their Curios data, for the Ember foci, the Fire Bangle, the water "
@@ -121,8 +121,8 @@ MATRIX = {
          "theTrinketsAreMadeAndWornAsDesigned", "ConcordanceWayfaringClientGameTests", "theWaterFociLengthenPreservesHold",
          "theWaterBangleBracesARimekeeperEveryThirtySeconds"],
         "Cosmetic slots count as worn for show only; of the worn things only the belt and boot are drawn on the body, "
-        "in third person only, and seen so far only in CI's client screenshots; unit 4's foci and bangle tests added "
-        "but not yet run"),
+        "in third person only, and seen so far only in CI's client screenshots; unit 4's foci and bangle tests passed "
+        "in CI (run 38549876709, Chunk B, not merged), but no shot shows them in their slots"),
     "cloth-config": (
         "The Concordance settings screen: the Focus line, reduced motion, exact values, the simple journal, visual "
         "intensity and whether your worn trinkets are shown",

@@ -255,12 +255,13 @@ game), a two-client dedicated server, and a fluid pipe network filling the tank 
 the Transfer API, the interface pipes use).
 
 **Concordance Chunk B, unit 4** ([the winter record](arcane-concordance-winter.md); not yet merged) added four game
-tests to `ConcordanceAlchemyGameTests`, which have not run yet: `winterBrineNeedsTheColdBand` (the Rime each band keeps,
-the generator's numbers; a cold and a warm crucible by hand; Frostward for 975 ticks), `oldRimeBottlesStillGiveResistance`
-(a save test), `aRimeFormulaWrittenBeforeBrewsFrostward` and `frostwardIsNeverCheaperThanItsSnow` (economy loops that
-must fail). The existing alchemy tests are unchanged: none of them brews Rime. `check_alchemy` now mirrors
-`RIME_KEEP_*` and accepts a property's status only if vanilla or Jugcraft registers it; the new `check_winter_brine`
-holds the rest. `check_mod_data` passes; no build ran.
+tests to `ConcordanceAlchemyGameTests`: `winterBrineNeedsTheColdBand` (the Rime each band keeps, the generator's
+numbers; a cold and a warm crucible by hand; Frostward for 975 ticks), `oldRimeBottlesStillGiveResistance` (a save
+test), `aRimeFormulaWrittenBeforeBrewsFrostward` and `frostwardIsNeverCheaperThanItsSnow` (economy loops that must
+fail). They passed in CI (run 38549876709 on `b012875ab`, by workflow_dispatch; not merged), among its 1676 required
+server tests. The existing alchemy tests are unchanged, and passed there too: none of them brews Rime.
+`check_alchemy` now mirrors `RIME_KEEP_*` and accepts a property's status only if vanilla or Jugcraft registers it; the
+new `check_winter_brine` holds the rest. `check_mod_data` passes, locally and in that run's `mod` job.
 
 ## World and event applicability
 
