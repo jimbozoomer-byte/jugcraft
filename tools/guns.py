@@ -2674,7 +2674,9 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # Of the Nether guns (slice 11A), the Tusker pushes a shell in at a time, the Bastion Rifle a round;
                    # (slice 11B) the Crackling a shell.
                    "tusker": {"reload_mag_in": "shell_in"}, "bastion_rifle": {"reload_mag_in": "shell_in"},
-                   "crackling": {"reload_mag_in": "shell_in"}}
+                   "crackling": {"reload_mag_in": "shell_in"},
+                   # The Lookout Rifle (slice 13A) pushes a round in at a time, as the Drover Rifle does.
+                   "lookout_rifle": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
