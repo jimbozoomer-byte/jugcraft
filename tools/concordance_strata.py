@@ -141,10 +141,11 @@ def codex():
                        "that does you no harm may be halved without spending it. A second Brace while one holds does "
                        "nothing. Your own Flashstep ignores it. It lessens no harm, and nothing holds you against a "
                        "lair's mist, a portal or a teleport. Not the war fork's Brace, which strikes a charging foe harder."),
-                      ("text", "Against the Yeti King", "Nothing else lessens the Yeti King's throws (his boulders and "
-                       "icicles knock you back as anything does): not armour's knockback resistance, not Earthbound "
-                       "Thallite. Braced, the next of his blows, slams, charges or spikes throws you half as far. A Brace "
-                       "you put on a friend that takes one of his throws is your part in his fight.")]},
+                      ("text", "Against the Yeti King", "No knockback resistance lessens the Yeti King's throws: not "
+                       "armour's, not Earthbound Thallite's (his boulders and icicles knock you back as anything does, "
+                       "and a shield that wholly blocks a swipe or spike stops its throw). Braced, the next of his "
+                       "blows, slams, charges or spikes throws you half as far. A Brace you put on a friend that takes "
+                       "one of his throws is your part in his fight.")]},
     }
 
 

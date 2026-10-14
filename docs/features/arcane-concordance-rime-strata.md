@@ -165,9 +165,10 @@ push on them, not Rimebind's alone:
 | Concordance pushes | already nothing (knockback resistance 1.0) | already nothing |
 
 The Yeti moves by fixed steps, not by his movement-speed attribute, so Rimebind's slow alone does nothing to his charge.
-Since unit 5 (B-09) a binding that takes holds his next wind-up 4 ticks longer instead, once each Thaw (B-P54), and
-only a Brace lessens his push; `aRimeboundChargeKeepsItsPace` tests that his charge keeps its pace when bound, once it
-runs ([the Yeti King's record](yeti-king.md#optional-counters-concordance-chunk-b-b-09)).
+Since unit 5 (B-09) a binding that takes holds his wind-up (the one under way unless it is about to strike, else his
+next) 4 ticks longer instead, once each Thaw (B-P54), and only a Brace lessens his push; `aRimeboundChargeKeepsItsPace`
+tests that his charge keeps its pace when bound, once it runs
+([the Yeti King's record](yeti-king.md#optional-counters-concordance-chunk-b-b-09)).
 
 ## Changes from the plan
 

@@ -710,7 +710,8 @@ creature's saved effects on meeting the unknown id (the record's downgrade guida
 self-braced player does not; a rimebound Yeti telegraphs longer; with no counters the B-04 suite is unchanged.
 
 **As built (unit 5):** `25be6e227` (the counters) and `9cb934ec7` (the column), with the records; not merged, and none
-of its tests has run yet (the CI candidate follows). It refines B-P16, B-P20, B-P21 and B-P22 by B-P54 to B-P57.
+of its tests has run yet (the CI candidate follows). It refines B-P16, B-P21 and B-P22 by B-P54 to B-P56, and builds
+B-P20 and B-P57.
 - **Brace:** `YetiKingEntity.push` is now an instance method, every push of his through it: his swipe's, his slam's,
   his charge's and the spike's lift (`GlacialSpikeEntity` calls `king.push`). It multiplies the push by
   `Brace.spend(player)`, which spends the Brace and returns 0.5 while one holds and 1.0 without, so an unbraced push is
@@ -1261,7 +1262,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P17 | 14 October 2026 | Winter Brine needs no salt: a snowball carries the Rime, and salt has its own feature switch (`config/JugcraftConfig.java:24`) | Proposed (built as proposed in unit 4) | B-08 |
 | B-P18 | 14 October 2026 | A stir above the cold band keeps part of the dissolved Rime: warm 600, hot 300, searing 0 per thousand (starting values) | Proposed (built as proposed in unit 4; per stir, B-P41) | B-08 |
 | B-P19 | 14 October 2026 | Frostward lasts as Ember's Fire Resistance brew does: 1200 ticks a unit, at most 2400 | Proposed (built as proposed in unit 4) | B-08 |
-| B-P20 | 14 October 2026 | The Yeti's knockback respects only Brace, not all knockback resistance: the plan's former B-D3, not asked of the owner. Its source is 04:186's "bracable knockback" (the plan cited 04:184) | Proposed (built as proposed in unit 5) | B-09 |
+| B-P20 | 14 October 2026 | The Yeti's knockback respects only Brace, not all knockback resistance: the plan's former B-D3, not asked of the owner. Its source is 04:186's "bracable knockback" (the plan cited 04:184) | Proposed (built in unit 5 for every scripted push of his; a blow's own vanilla knockback and his boulders' and icicles' still read knockback resistance: B-09 as built) | B-09 |
 | B-P21 | 14 October 2026 | Rimebind on the Yeti: once per thaw window, his next wind-up is a few ticks longer (set by test) | Proposed (built in unit 5 as B-P54) | B-09 |
 | B-P22 | 14 October 2026 | The Brace caster earns a deed, one per occurrence, when a Brace they put on another player absorbs a Yeti push | Proposed (built in unit 5 as B-P55) | B-09 |
 | B-P23 | 14 October 2026 | The kit's sets: freeze-immune; no Spell Power or knockback resistance; protection no greater than the Pyromaniac's (light), leather's (medium) and iron's (heavy), toughness 0 | Proposed (built as proposed in unit 4, with the numbers of B-P47) | B-10 |

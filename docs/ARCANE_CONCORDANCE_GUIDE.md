@@ -104,20 +104,21 @@ Each route, step by step: [the journey record](features/arcane-concordance-journ
 - Your spells, devices and workers change only what you could change by hand: claims, towns, spawn protection and the
   PvP rules apply to them. While you are away (offline or in another dimension) they wait, unless the server lets them
   carry on in your name.
-- At a lair boss (Vesperine and Madame Tatterlace), helping counts as much as hitting. Once the boss is awake, any of
-  these earns your share of the loot: a ward you put on a friend (`touch struck ward`) soaking two hearts of the fight's
-  blows; mending two hearts of the hurt the fight did a friend (Lanternward); relighting one of Vesperine's wards in her
-  Harvest; cutting a friend free of Madame Tatterlace's thread. A ward on yourself does not count. Die or lose your
-  connection mid-fight, and your share waits until you are back.
+- At a lair boss (Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant), helping counts as much as hitting.
+  Once the boss is awake, any of these earns your share of the loot: a ward you put on a friend (`touch struck ward`)
+  soaking two hearts of the fight's blows; mending two hearts of the hurt the fight did a friend (Lanternward);
+  relighting one of Vesperine's wards in her Harvest; cutting a friend free of Madame Tatterlace's thread. A ward on
+  yourself does not count. Die or lose your connection mid-fight, and your share waits until you are back.
 - **Before the Yeti King's hall,** ready your party for his frost. A draught of **Winter Brine** each (snowballs in
   water at an Alembic Crucible with nothing burning beneath it, stirred cold) gives **Frostward**, which keeps his frost
   off while it lasts: three snowballs in a part give about 49 seconds, a stronger brew up to two minutes. His **Yeti
   Mitten**, held in the offhand, keeps it off for good. The Rimekeeper's water sets stop the freezing harm, as leather
   does, but not his frost's slow.
-- **Against the Yeti King,** a Brace halves the next of his throws (nothing else lessens them), and a Brace you put on a
-  friend that takes one earns your share; Rimebind does not slow him but holds his next wind-up a moment, once each time
-  he thaws; a Rimekeeper who draws his charge into an ice column does cold work (the same kind as a Frost boon arm's
-  slow).
+- **Against the Yeti King,** a Brace halves the next of his throws (no knockback resistance lessens them; his boulders
+  and icicles knock you back as anything does, and a shield that wholly blocks a swipe or spike stops its throw), and a
+  Brace you put on a friend that takes one earns your share; Rimebind does not slow him but holds his wind-up (the one
+  under way unless it is about to strike, else his next) a moment, once each time he thaws; a Rimekeeper who draws his
+  charge into an ice column does cold work (the same kind as a Frost boon arm's slow).
 
 ## When something goes wrong
 

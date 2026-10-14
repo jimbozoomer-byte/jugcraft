@@ -174,11 +174,12 @@ acceptance remain future work.
 
 Concordance Chunk B, unit 5 (B-11, B-P58; [the contract](concordance-chunk-b.md); not merged): the guides' home shows
 each route card whole. In run 38519234934 (CI's 427×240 GUI) the Magic card's link was cut to "Open Magic: the Arcane
-Concorda…" and both cards' overviews stopped mid-line, and 1920×1080 at the automatic GUI scale was cut too. Now each
-card is as tall as its whole overview and its whole "Open" link, the link wraps to the card, and the cards scroll (the
-wheel, a scroll bar in the panel's right margin, or Tab, which shows the card it reaches from its top) in the shared
-`ComposerScroll` when they are taller than the room below the introduction; windows where they fitted look as before
-(`d22a55830`). `check_encyclopedia_routes` requires the wrapped link, no scissor in the card and the scrolling body.
+Concorda…" and both cards' overviews stopped mid-line, and by the layout's arithmetic (not seen) 1920×1080 at the
+automatic GUI scale stops the overviews too. Now each card is as tall as its whole overview and its whole "Open" link,
+the link wraps to the card, and the cards scroll (the wheel, a scroll bar in the panel's right margin, or Tab, which
+shows the card it reaches from its top) in the shared `ComposerScroll` when they are taller than the room below the
+introduction; windows where they fitted look as before (`d22a55830`). `check_encyclopedia_routes` requires the wrapped
+link, no scissor in the card and the scrolling body.
 `EncyclopediaRoutesClientGameTests` checks every card's lines against its height, its whole title and link, and its foot
 within the body's reach, on opening, after Tab, scrolled to the end and at GUI scale 1, with the shots
 `jugcraft_encyclopedia_home`, `jugcraft_encyclopedia_home_end` and `jugcraft_encyclopedia_home_scale1`; it has not yet

@@ -263,9 +263,11 @@ def codex():
                        "could strike by hand, and another player only where the server allows it and they are not in your "
                        "party."),
                       ("text", "Against the Yeti King", "The Yeti King moves by his own steps, so the slow does not "
-                       "hold him. Bound, he holds his next wind-up a moment longer, frost-locked, before it strikes: once "
-                       "each time he thaws. Drawing his charge into an ice column is cold work too, once you understand "
-                       "Rimekeeping: the same kind as a Frost boon arm's slow.")]},
+                       "hold him. Bound, he holds his wind-up (the one under way unless it is about to strike, else his "
+                       "next) a moment longer, frost-locked, before it strikes: once each time he thaws. Drawing his "
+                       "charge into an ice column, as the player it was aimed at, having already taken part in his "
+                       "fight, is cold work too, once you understand Rimekeeping: the same kind as a Frost boon arm's "
+                       "slow.")]},
         ("winter", "preserving"): {
             "name": "Preserve", "x": 4, "y": 0, "icon": rid("crucible"), "condition": (research, "understood"),
             "description": "Holding a crucible's heat",
