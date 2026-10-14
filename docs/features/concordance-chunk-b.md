@@ -1,6 +1,7 @@
 # Concordance Chunk B: winter and stone (contract and handoff)
 
-Status: contract written; nothing built. Every unit is Not started. The base is `d4c07bf56`, the head of Chunk A
+Status: contract written; unit 1 in progress (the Yeti King's B-01 committed, its tests not yet run in CI); the other
+units Not started. The base is `d4c07bf56`, the head of Chunk A
 ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337), not merged); main is `b73f51c8a`
 ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
 Proposal: the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
@@ -25,8 +26,8 @@ reach a Rime/Strata workshop and fight the Yeti in his accepted hall (09:27, 09:
 (see the status delta), a survival player can:
 
 - reach the Glacier Hall in an ordinary world, and in a designed world once B-03 confirms it;
-- share the Yeti King's reward, or the Cinder Tyrant's, by damage, healing, warding or an objective; keep it if they fall
-  or leave the game in the fight; and be paid exactly once, a killing blow included;
+- share the Yeti King's reward, or the Cinder Tyrant's, by damage, healing, warding or, against the Yeti King, an
+  objective; keep it if they fall or leave the game in the fight; and be paid exactly once, a killing blow included;
 - read both keepers' dossiers and JEI's pages for their loot;
 - learn Rime and Strata through typed evidence, and cast Rimebind, Brace and Preserve;
 - brew Winter Brine at the Alembic Crucible, the winter workshop: a timed Frostward that the Yeti's frost respects, while
@@ -46,7 +47,7 @@ starts.
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | Not started |
+| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | In progress: the Yeti King's B-01 committed (CI pending); the Cinder Tyrant's B-01 and B-02 to come |
 | 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Not started |
 | 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible. One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | new `arcane-concordance-rime-strata.md` | Not started |
 | 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | new `arcane-concordance-winter.md`; `arcane-concordance-alchemy.md` | Not started |
@@ -120,7 +121,8 @@ B-01 fixes both, for both bosses (B-D1).
 
 **What the player sees.** A player who only heals or wards others against the Yeti qualifies for his reward. One who
 fell, or left the game, in the fight is paid later. A killing blow alone qualifies. A tamed creature's blow credits its
-owner. A player who baits his charge into a column qualifies by that deed. Every reward is paid once.
+owner. A player who already has a part in his fight and baits his charge into a column qualifies by that deed. Every
+reward is paid once.
 
 **Changes** (the pattern is Vesperine's: `VesperineEntity.java:236,1271-1296`; `JugcraftVesperine.java:58`;
 `VesperineLoot.java:42,66,78,83`):
@@ -137,13 +139,23 @@ owner. A player who baits his charge into a column qualifies by that deed. Every
   entity overload, which `YetiKingGameTests.java:371` calls; `table` takes the origin instead of `king.position()`
   (`:72-77`); `reward(...)` delegates.
 - `JugcraftYeti.register` (`:42`): `LairRewards.payer(YetiKingLoot.BOSS, YetiKingLoot::pay)`.
-- **The column deed** (B-P3). When a charge ends in a column stun (`YetiKingEntity.java:1001-1003`), the foe it was locked
-  on earns `encounter.deed(player, "column " + their uuid)`:
+- **The column deed** (B-P3, revised 14 October 2026). On the last tick of the charge's wind-up, where its line is fixed
+  (`YetiKingEntity.java:983-990`), he notes whom it is aimed at, but only if that player already has a part in his
+  fight: a share (`Encounter.share(player) != null`, `Encounter.java:350-353`), which any blow, credited healing or a
+  ward cast on another player in the fight creates, even short of qualifying (`:274-279`, `:316-322`, `:326-330`). When
+  the charge ends in a column stun (`YetiKingEntity.java:1001-1003`), that player, if still eligible and in his fight,
+  earns `encounter.deed(player, "column " + their uuid)`:
   - one key per player, so two baiters each earn theirs; a constant key would credit only the first, because a fight
     keeps one set of deed keys (`Encounter.java:282-288`);
-  - only if that foe moved at least 2 blocks during the charge's wind-up. `target()` falls back to the nearest eligible
-    player (`YetiKingEntity.java:604-623`), and one deed qualifies (`Encounter.java:101-103`), so without this an idle
-    late arrival could be charged into a column and paid (04:170; 10:58).
+  - being struck by his fight is not a part: the hurt map (`Encounter.java:72,292-296`) is not read. `target()` falls
+    back to the nearest eligible player (`YetiKingEntity.java:604-623`), and one deed qualifies
+    (`Encounter.java:101-103`), so an idle late arrival he turns on earns nothing by where the charge ends (04:170;
+    10:58), and one trampled by a Fury charge cannot earn the chained one that follows (`YetiKingEntity.java:1037-1044`);
+  - a stun called any other way (`stun()`, `:1047`) credits no one.
+
+  The earlier rule, "only a foe who moved 2 blocks or more during the wind-up", was dropped: a late arrival who walks in
+  during a wind-up would pass it, and it needs each player's position tracked every tick. A pure dodger with no blow,
+  healing or ward earns nothing from the deed; it mostly helps support players short of the threshold.
 - **The Tyrant, in a separate commit** (B-D1): the same changes at
   `CinderTyrantEntity.java:270,565,1533-1547,1570,1602-1618,1686-1688`, `CinderlingEntity.java:137-140`,
   `CinderTyrantLoot.java` (`BOSS = "cinder_tyrant"`; `pay`; `roll` by origin beside the entity overload; `:74` uses
@@ -153,19 +165,32 @@ owner. A player who baits his charge into a column qualifies by that deed. Every
 of `jugcraft:lair_rewards`.
 
 **Tests (server):**
-- `YetiKingGameTests`, modelled on `VesperineGameTests.supportSharesHerHarvestOnce` (`:342`): a healer qualifies; a fallen
-  striker is kept and paid on respawn; a player who left the game in the fight is paid on joining; a bystander and a
-  wanderer are not paid; a second `die()` pays nobody.
+- `YetiKingGameTests.supportSharesHisLootOnce`, modelled on `VesperineGameTests.supportSharesHerHarvestOnce` (`:342`): a
+  healer qualifies; a fallen striker is kept and paid on respawn; a player who left the game in the fight is paid on
+  joining; a bystander and a wanderer are not paid; the experience is shared among those paid; a second `die()` pays
+  nobody.
 - `aKillingBlowAloneIsPaid`; `aPetsBlowIsItsOwners` (on him and on a whelp).
-- `aBaiterBehindAColumnQualifies`, `twoBaitersEachEarnTheirDeed`, and `anIdleLateArrivalEarnsNothing`: a player who
-  arrives and stands still, and is charged into a column, gets no deed and no reward.
-- Four players and the party cap (04:194): his health scales, and four shares are paid once each.
-- The record states how each lifecycle event is produced. A death is real where the test can kill its player (then
-  `AFTER_DEATH` reaches `Encounter.java:148` and `Lairs.java:93-95`); otherwise it is marked with `encounter.excuse`.
-  Leaving the game is marked with `encounter.left`, as Chunk A's tests mark it (`concordance-chunk-a.md:134-135`);
-  unless a test can disconnect a player, the real `LEAVE` path (`Encounter.java:156-162`) stays not run.
-- `LairEncounterGameTests`: a kept `yeti_king` Due survives a save and is paid by the Yeti's payer (the pattern of
-  `keptRewardsSurviveASave`, `:322`).
+- `twoBaitersEachEarnTheirDeed`: two players, each with a part short of qualifying, charged into the column in turn,
+  earn one deed each and qualify by it; the key is `column <player>`, once a fight. `anIdleLateArrivalEarnsNothing`: a
+  player his fight has struck but who has no part, charged into a column, gets no deed and no reward.
+- `fourPlayersAreEachPaidOnce`, the party cap (04:194): his health scales, and four shares are paid once each.
+- `aFightLoadedAwakeIsRecordedAfresh`: a real entity save and load (`saveWithoutId`/`load`); loaded awake he holds no
+  one's part and begins a fresh record.
+- The records state how each lifecycle event is produced:
+  - *death:* the Yeti's support test performs one real `ServerPlayer.die` on a mock player, so Fabric's `AFTER_DEATH`
+    (fabric-api 0.161.0 `ServerPlayerMixin.java:76-79`) reaches `Encounter.java:148-153` and `Lairs.java:93-97`; the
+    blow that would kill is not real. The Tyrant's marks death with `encounter.excuse`, as Chunk A's tests do: the death
+    path is shared code, so proving it once is enough;
+  - *leaving:* marked with `encounter.left`, as Chunk A's tests mark it (`concordance-chunk-a.md:134-135`), on a Fabric
+    `FakePlayer` the player list never held (it has a connection, so `LairRewards.welcome` can run); the real `LEAVE`
+    path (`Encounter.java:156-162`) stays not run;
+  - *respawn and join:* `LairRewards.handOver` and `welcome` are called directly (their events are at
+    `LairRewards.java:105-106`);
+  - *save:* in-process entity and attachment round trips, not a restart;
+  - *party:* four mock players, not four people;
+  - unchanged from Chunk A: no real disconnect and no two clients.
+- `LairEncounterGameTests.aKeptYetiKingRewardIsSavedAndPaid`: a kept `yeti_king` Due survives a save and is paid by the
+  Yeti's payer (the pattern of `keptRewardsSurviveASave`, `:322`).
 - `CinderTyrantGameTests`: the same for the Tyrant, without the column cases.
 - Unchanged and still passing: `YetiKingGameTests.hisLootIsEachParticipantsOwn` (`:356`), the Tyrant's test of the same
   name (`CinderTyrantGameTests.java:629`), and the kill in `YetiKingClientGameTests` (`took` then `genericKill`,
@@ -680,8 +705,9 @@ and the build without the optional integrations where it touches an optional bou
 
 ## Where to resume
 
-Nothing is built. Start with B-01: the Yeti King on `Encounter` and `LairRewards` with both payout defects fixed, then
-the Cinder Tyrant's commit. Refresh the open pull requests first: #352 decides the rebase.
+B-01's Yeti King commit is in: the Yeti King on `Encounter` and `LairRewards` with both payout defects fixed and the
+column deed; its game tests have not run yet. Next, the Cinder Tyrant's B-01 commit, then B-02. Refresh the open pull
+requests first: #352 decides the rebase.
 
 ## Decisions
 
@@ -696,7 +722,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-D3 | 13 October 2026 | "A timed brew (Recommended)": Winter Brine from the Alembic Crucible gives a timed Frostward status that the Yeti King's frost respects; the Yeti Mitten stays the permanent prize | Accepted (owner) | B-08 |
 | B-P1 | 14 October 2026 | The trophy stays one of the two at random (`BOSSES.md:106-112`); 04:135's "choice" is stale | Proposed | B-02 |
 | B-P2 | 14 October 2026 | Shared dossier and JEI wording becomes pronoun-neutral | Proposed | B-02 |
-| B-P3 | 14 October 2026 | The column deed: key `column <player>`, one per baiter per fight, only for a foe who moved 2 blocks or more during that charge's wind-up | Proposed | B-01 |
+| B-P3 | 14 October 2026 | The column deed: key `column <player>`, one per baiter per fight, for the player the charge was aimed at as he set off, only if they already had a part (a share) then; being struck by his fight is not a part | Proposed (revised 14 October 2026 from "moved 2 blocks or more during the wind-up", which a late arrival walking in would pass) | B-01 |
 | B-P4 | 14 October 2026 | No Cinder Tyrant objective deed in Chunk B | Proposed | B-01 |
 | B-P5 | 14 October 2026 | Harm with no attacking creature (slag, fire ticks, freezing) stays outside the fight's hurt (`Encounter.java:132-134`) | Proposed | B-01 |
 | B-P6 | 14 October 2026 | Authored invocations only (13 of 16); no words a player composes for Rime or Strata | Proposed | B-06, B-07 |

@@ -1,6 +1,6 @@
 # The Yeti King
 
-Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. Since Concordance Chunk B (unit 1) his reward is the lairs' shared one ([lair-encounter-credit.md](lair-encounter-credit.md)); that change's game tests have not run yet.
 Proposal issue: none. On 10 October 2026 the owner asked for the next boss "exact same way you did the spider but adjusted for that character", and chose a new boss built from start to finish; the Yeti King is the owner's own example in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -38,7 +38,7 @@ Every attack has a wind-up you can read, a strike and a recovery. He waits at le
 | Boulder Throw | He digs both fists into the snow and heaves a block of ice up over his head (0.8 s) | He hurls it in an arc at where his foe stood; it shatters where it lands, or on the first player it strikes: 10 damage within 2.5 blocks |
 | Ground Slam | He crouches low, fists high, while a ring of frost spreads round his foe (0.8 s) | He leaps onto where his foe stood (0.8 s in the air): 14 damage within 3 blocks, a knockback within 6, and the drift snow blasted bare within 7 (his rule) |
 | Frost Breath | He swells his chest, head thrown back, frost at his jaws (1 s) | A cone of freezing breath before him, 60° and 6 blocks, for 1.5 s: 2 damage every quarter-second and the frost. It stacks past freezing you through, so standing in it lets the cold bite |
-| Avalanche Charge | He drops to all fours and paws the snow (0.8 s) | He charges in a straight line at 0.7 blocks a tick for up to 1.2 s (about 16 blocks): 12 damage and a heavy knockback to each player he passes, once each. **Into an ice column he crashes, reels for 3 s and takes a third more damage meanwhile** ("The Yeti King crashes into the ice and reels"). The charge also ends at his leash |
+| Avalanche Charge | He drops to all fours and paws the snow (0.8 s) | He charges in a straight line at 0.7 blocks a tick for up to 1.2 s (about 16 blocks): 12 damage and a heavy knockback to each player he passes, once each. **Into an ice column he crashes, reels for 3 s and takes a third more damage meanwhile** ("The Yeti King crashes into the ice and reels"). The charge also ends at his leash. A charge that ends in a column is a deed of his fight for the player it was aimed at, if they had already taken part (a blow, healing or a ward) as he set off |
 
 ### The King's Roar (at half health)
 
@@ -58,7 +58,7 @@ He keeps his Maul Swipe, Boulder Throw, Ground Slam and Avalanche Charge, stops 
 | Glacial Spikes | He raises a fist high while cracks race across the ice towards his foe (0.8 s) | He drives it into the ice: a spike bursts up each tick along the line, 12 blocks: 10 damage and thrown up. Each stands a second, then crumbles |
 | Kin Call | He beats his chest and calls (1 s) | Two Yeti Whelps climb out of the dens; at most four at a time |
 
-**Yeti Whelps:** round white cubs with big glacier eyes and a tuft of blue frost, 16 health, their blows 3 damage, quick. They go for the nearest player, never freeze, drop nothing, give no experience and are never saved. They flee into the snow when he falls, resets or is gone. Whoever hurts one has taken part in his fight.
+**Yeti Whelps:** round white cubs with big glacier eyes and a tuft of blue frost, 16 health, their blows 3 damage, quick. They go for the nearest player, never freeze, drop nothing, give no experience and are never saved. They flee into the snow when he falls, resets or is gone. Whoever hurts one, or whose tamed creature does, has taken part in his fight.
 
 ### The Fury of the Peaks (below a fifth)
 
@@ -69,17 +69,25 @@ He keeps his Maul Swipe, Boulder Throw, Ground Slam and Avalanche Charge, stops 
 When he falls:
 - his whelps flee into the snow, and his blocks of ice, icicles and spikes are gone;
 - the snow drifts back over everything he bared, at once;
-- each participant gets their loot (below) and Abominable;
+- each player who qualified in his fight is paid their loot (below) and Abominable, once however often his fall is reported;
 - "The Yeti King falls, and the glacier is still", and a gate of **Grey Mist** two blocks wide and two high opens in the middle of the lake. It takes players home, as the arch beside the ledge does;
 - the instance is ended, and it closes once everyone has left. The mist stays until then; the next instance in that slot clears it as he takes his throne again.
 
 ### Left alone
 
-If no player he can fight is within 38 blocks of the lake's centre for 10 seconds: "The Yeti King climbs back onto his throne". The snow drifts back, he heals fully, his crown is calm again, his whelps flee and his things are gone. Who hurt him is forgotten, so a fresh fight starts from nothing.
+If no player he can fight is within 38 blocks of the lake's centre for 10 seconds: "The Yeti King climbs back onto his throne". The snow drifts back, he heals fully, his crown is calm again, his whelps flee and his things are gone. Who took part is forgotten, so a fresh fight starts from nothing.
 
 ### His loot
 
-Each participant rolls their own loot. A participant is a player who hurt him or his whelps and is within 64 blocks of the lake's centre when he falls. The loot goes straight into their inventory, and what does not fit lands at their feet. "His frozen hoard is yours".
+Each player who qualified in his fight is paid their own loot, once. Since Concordance Chunk B a player qualifies as at every lair boss on the shared credit ([lair-encounter-credit.md](lair-encounter-credit.md)), by any one of these:
+- a blow to him or a whelp, their own or their tamed creature's, however small; the blow that fells him counts, even if it is the striker's only one;
+- giving other players back 4 or more of the health his side's blows took from them, with the Concordance;
+- a Concordance ward on another player that soaks 4 or more of those blows;
+- baiting his Avalanche Charge into an ice column: the player it was aimed at as he set off earns this deed if they had already taken part (a blow, healing or a ward, even short of qualifying), once for each player a fight. Being struck by his fight is not taking part.
+
+Freezing is no blow: the freeze damage his frost and the blizzard bring on has no attacker, so healing what it took earns nothing (his Frost Breath's own blows count).
+
+Who is paid: everyone who qualified and is alive within 64 blocks of the lake's centre when he falls, at once; one who died in his fight, once they are back on their feet, wherever they are; one who left the game in it and is still away when he falls, when they next join. Each fall pays each player once, and each share is rolled when it is handed over. The loot goes straight into their inventory, and what does not fit lands at their feet. "His frozen hoard is yours".
 
 | Loot | Chance |
 | --- | --- |
@@ -87,7 +95,7 @@ Each participant rolls their own loot. A participant is a player who hurt him or
 | **A trophy:** the Glacier Maul or the Rimeclaw, Arms VII's (one of the two) | 15%; one is certain on a player's first kill (whoever has not yet earned Abominable) |
 | **Yeti Mitten** | 25% |
 | **The Yeti King's Crown** | 20% |
-| 300 experience, shared out among the participants | always |
+| 300 experience, shared out among everyone paid, now or later | always |
 | The advancement **Abominable** (a challenge in the Adventure tab) | always |
 
 He is no Witching Season boss: the Halloween event adds nothing to his loot.
@@ -138,7 +146,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 
 - **Every fight costs a summoning:** a fresh Frost Horn, as part 1 set it.
 - **No gain loop:** fur makes a horn that still needs a goat horn, gold, snow and a whole fight, and fur shears into two wool, while wool makes no fur. Nothing he drops turns into more of itself. Nothing he drops sells to a Jugcraft shop for Jugs.
-- **No leeching:** only participants get loot. A bystander who never struck him or a whelp gets nothing, and loot is rolled per participant, so nobody takes another's.
+- **No leeching:** only those who qualified get loot. A bystander who never struck him or a whelp gets nothing, and so does one who heals or wards only themselves, or a late arrival with no part in his fight whom his charge was turned on. Loot is rolled per player, so nobody takes another's.
 - **First kill once:** the trophy's first-kill guarantee is stored with the advancement, so it comes once per player.
 - **Abandoning resets him:** leaving him alone for 10 seconds heals him and forgets everyone's part. He cannot be worn down between visits.
 - **No automation:** he wakes only for a player, bares his lake only in a fight, and his loot goes only to players. His whelps drop nothing and give no experience.
@@ -152,6 +160,9 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 - **Chunks:** nothing is force-loaded. His arena stays loaded while players stand in the hall.
 - **The mitten** is looked at once a tick for each player; nothing about it is stored.
 - **No griefing:** he cannot leave his lair, his attacks strike only players who can fight him, and the only blocks he changes are his own lake's snow, which drifts back.
+- **His fight's record** (who took part and how, `lair/Encounter`) is in memory only and not saved with him. Loaded awake, he begins a fresh one, so after his chunk is reloaded mid-fight only what is done from then on counts.
+- **What he owes waits:** a share kept for a player who died or left the game in his fight is held in `jugcraft:lair_rewards` (with the player, or in the world's record while they are away) under the name `yeti_king`, which is saved and so must not change. An older build has no payer for that name, and drops a kept Yeti King reward unpaid when it would hand it over.
+- **Freezing earns nothing (proposed, B-P5):** freeze damage has no attacking creature, so it is not his fight's hurt, and healing it earns no share.
 - **Still to do:** the two-client dedicated-server playtest.
 
 ## Dependencies and assets
@@ -225,6 +236,16 @@ The client game test (`YetiKingClientGameTests`, CI job `client`) runs his fight
 8. a fresh instance opened in his slot has none of the old instance's Grey Mist.
 
 Along the way it takes a picture of each part of the fight (above).
+
+Concordance Chunk B, unit 1 (B-01), put his reward on the shared credit and added these game tests. **None has run yet:** there is no Minecraft here, and CI runs them.
+- `YetiKingGameTests.supportSharesHisLootOnce`: a healer who mended 4 of what his fight did is paid; a striker who died in his fight (a real death of a test player) is kept their share and handed it back on their feet; one who left the game (marked, on a stand-in player the server never listed) has it kept in the world and handed over on joining; the experience is shared among the three paid; one who walked away, a bystander and the one he only hurt get nothing; and his fall reported again pays no one twice.
+- `aKillingBlowAloneIsPaid`; `aPetsBlowIsItsOwners` (a tamed wolf's bite on him and on a whelp).
+- `twoBaitersEachEarnTheirDeed`: two players with a part short of qualifying, each charged into the column in turn, earn one deed each and qualify by it; `anIdleLateArrivalEarnsNothing`: one struck by his fight but with no part, charged into the column, earns no deed and no loot.
+- `fourPlayersAreEachPaidOnce`: woken by four, his health is two and a half times his own, and each of the four is paid once, a quarter of the experience each.
+- `aFightLoadedAwakeIsRecordedAfresh`: saved awake and loaded again, he holds no one's part and begins a fresh record.
+- `LairEncounterGameTests.aKeptYetiKingRewardIsSavedAndPaid`: a reward kept under `yeti_king` survives a save and is paid once by his payer.
+
+`python3 tools/check_mod_data.py` (whose `check_yeti` now also holds his credit and reward to `Encounter` and `LairRewards`: the record begun, abandoned and claimed, the striker's credit on him and his whelps, the payment and payer under `yeti_king`, and the column deed's key) and `python3 scripts/check_repository.py` pass locally at this commit. Five deliberate changes, each made in a scratch copy, each failed `check_yeti`: the claim guard dropped, the whelp crediting `source.getEntity()`, the payer dropped, the old `YetiKingLoot.reward` payment restored, and a constant column key.
 
 Not run: the two-client dedicated-server playtest, and play by hand. No test yet times his attacks against real players, measures how long a fight lasts, or tries sliding on his glare ice, his charge or his blocks of ice on a moving player.
 

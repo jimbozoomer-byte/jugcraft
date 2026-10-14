@@ -1,12 +1,14 @@
 # Lair encounter credit: support earns a boss's reward
 
 Status: implemented for Concordance Chunk A (unit 3: tickets A-05 and A-06); its tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on
-`aa4d06c4e`). See Verification for what has run.
+`aa4d06c4e`). Extended to the Yeti King in Concordance Chunk B, unit 1 (ticket B-01; [the chunk's contract](concordance-chunk-b.md)),
+whose tests have not run yet. See Verification for what has run.
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: the Witching Season lairs ([Vesperine](vesperine.md) and [Madame Tatterlace](tatterlace.md),
-reached with Discovery-tier things), with the Concordance's support spells: **Ward** (a composable word at First
+reached with Discovery-tier things) and, since Concordance Chunk B, the Glacier Hall's [Yeti King](yeti-king.md), with
+the Concordance's support spells: **Ward** (a composable word at First
 Light understood) and **Lanternward** (an invocation at First Light mastered, which mends and wards a party).
 Primary specialty and supported player role: adventuring, for the party's healer, warder and helper as well as its
 fighters.
@@ -14,16 +16,16 @@ fighters.
 ## Player experience
 
 Before this, only a player who struck a boss, or a creature that counts for it (Vesperine's skulls and harvest souls;
-Madame Tatterlace's egg sacs and spiderlings), shared its reward. A healer who kept the party standing,
+Madame Tatterlace's egg sacs and spiderlings; the Yeti King's whelps), shared its reward. A healer who kept the party standing,
 or a player who relit the wards, got nothing unless they also landed a token blow. Now a player qualifies for a lair
 boss's reward by any one of these, within the fight:
 
 | Way to qualify | What counts | Threshold |
 |---|---|---|
-| **Damage** | Any blow to the boss, Vesperine's skulls or a harvest soul, or Madame Tatterlace's egg sacs or spiderlings, as before (not Vesperine's Grave Thralls); a tamed creature's blow counts for its owner | Any |
+| **Damage** | Any blow to the boss, Vesperine's skulls or a harvest soul, Madame Tatterlace's egg sacs or spiderlings, or the Yeti King's whelps, as before (not Vesperine's Grave Thralls); a tamed creature's blow counts for its owner | Any |
 | **Healing** | Health the Concordance gives back to *another* player, counting only hurt creatures did to them in the fight (not a player's or a tamed creature's blow) that they still lack | 4 (two hearts) |
 | **Warding** | Damage from the fight's creatures soaked by a Concordance ward put on *another* player, up to what the ward gave | 4 (two hearts) |
-| **An objective** | Vesperine: relighting one of her wards during Death's Harvest. Madame Tatterlace: cutting another player free of her Binding Thread | One, each counted once a fight |
+| **An objective** | Vesperine: relighting one of her wards during Death's Harvest. Madame Tatterlace: cutting another player free of her Binding Thread. The Yeti King: his Avalanche Charge aimed at you ending in an ice column, if you had already taken part (a blow, healing or a ward) as he set off | One, each counted once a fight (the column once for each player) |
 
 One **Mend** (4 health) of a friend her blows hurt, or one **Ward** (absorbs 4) that soaks one of her blows, is
 enough. Past the threshold, more adds nothing: a share of the loot is a share.
@@ -31,7 +33,8 @@ enough. Past the threshold, more adds nothing: a share of the loot is a share.
 **What counts for nothing.** Healing yourself; healing a player already whole (overhealing); healing hurt the fight
 did not do (a fall, another player's blow) or hurt that rest, food or a potion has healed since; a ward on yourself; a
 ward no blow reaches; striking an already snapped thread; relighting a ward outside her Harvest, or relighting it again;
-a blow to one of Vesperine's Grave Thralls; a pet's blow for anyone but its owner.
+a blow to one of Vesperine's Grave Thralls; a pet's blow for anyone but its owner; the Yeti King's charge into a column
+aimed at one who had no part yet, even if his fight had struck them; healing what freezing took (it has no attacker).
 
 **Who is paid, and when.** When the boss falls, each qualified player is paid once:
 
@@ -67,7 +70,12 @@ before.
 - *Objectives.* Lighting a lair brazier now calls `Lairs.relit` (only on its unlit-to-lit turn, so clicking a lit one
   does nothing). Vesperine counts it as a deed if her Harvest is on, the player is in her fight and the brazier is one
   of her wards; the key is the fight and the ward, and her Harvest comes once a fight. Her Binding Thread, struck by a
-  player other than the one it holds, counts a deed for the striker, keyed by the thread.
+  player other than the one it holds, counts a deed for the striker, keyed by the thread. The Yeti King's Avalanche
+  Charge, on the last tick of its wind-up (where its line is fixed), notes whom it is aimed at if they already have a
+  part in his fight (a share: a blow, healing that counted or a ward on another player, even short of qualifying; being
+  struck by his fight is not a part). If the charge ends in an ice column and that player is still in his fight, they
+  earn a deed keyed `column <player>`, so each baiter earns one a fight and several may each earn theirs; his stun any
+  other way credits no one.
 - *Who is in the fight.* A player in the boss's level within 64 blocks of the arena's centre, alive or not, while the
   fight is on. A player who dies there is excused (paid wherever they are, as above); one who leaves the game there is
   marked away (on the server thread, as they leave), which counts only if they are still away when the boss falls.
@@ -96,8 +104,8 @@ boss's loot by hand.
 
 ## Connections
 
-- Existing input producer: the lairs' fights (the Last Rites and the Cursed Spindle); the Concordance's Ward and
-  Lanternward.
+- Existing input producer: the lairs' fights (the Last Rites, the Cursed Spindle and, since Chunk B, the Frost Horn);
+  the Concordance's Ward and Lanternward.
 - Existing output consumer: the bosses' loot, experience and advancements, unchanged.
 - Technology connection: none required.
 - Magic connection: the Concordance's support spells now earn a boss's reward, so a First Light caster has a party
@@ -143,11 +151,25 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   both read their saves from before versions), `VesperineGameTests`
   `supportSharesHerHarvestOnce` and `aWardRelitInHerHarvestCounts`, and `TatterlaceGameTests.cuttingAFriendFreeCounts`.
   They use mock players: a death or a departure is stood in for by marking the player (`Encounter.excuse`,
-  `Encounter.left`), and a reward kept for one is handed over by calling the join and hand-over code directly; no test
-  kills, disconnects, rejoins or respawns a player. The existing loot tests still use the bosses' `took`,
-  `participants` and `reward`, which keep their signatures.
+  `Encounter.left`), and a reward kept for one is handed over by calling the join and hand-over code directly; none of
+  Chunk A's tests kills, disconnects, rejoins or respawns a player. The existing loot tests still use the bosses'
+  `took`, `participants` and `reward`, which keep their signatures.
+- Concordance Chunk B, unit 1 (the Yeti King), **not run yet** (CI runs them): `YetiKingGameTests`
+  `supportSharesHisLootOnce`, `aKillingBlowAloneIsPaid`, `aPetsBlowIsItsOwners` (on him and on a whelp),
+  `twoBaitersEachEarnTheirDeed`, `anIdleLateArrivalEarnsNothing`, `fourPlayersAreEachPaidOnce` and
+  `aFightLoadedAwakeIsRecordedAfresh`, and `LairEncounterGameTests.aKeptYetiKingRewardIsSavedAndPaid`. How each
+  lifecycle event is produced:
+  - *death:* one real `ServerPlayer.die` on a mock player, so Fabric's `AFTER_DEATH` reaches `Encounter`'s listener and
+    `Lairs.died`; the blow that would kill is not real (its health is set to nothing first);
+  - *leaving:* marked with `Encounter.left` on a Fabric `FakePlayer` the server's player list never held; the real
+    leave path is not run;
+  - *respawn and join:* `LairRewards.handOver` and `LairRewards.welcome`, which those events call, are called directly;
+  - *save:* in-process round trips of the boss entity and of the player's attachment, not a server restart;
+  - *party:* four mock players, not four people.
+  As in Chunk A, there is no real disconnect and no second client.
 
-Not run: a real fight with a healer in a lair; a real death, disconnect, rejoin or respawn; two clients; a crash between saves.
+Not run: a real fight with a healer in a lair; a real death (until the Yeti King's test above runs); a real disconnect,
+rejoin or respawn; two clients; a crash between saves.
 
 ## World and event applicability
 
@@ -164,7 +186,9 @@ chance (and one owed from before the event and handed over during it comes with 
   mixin. Recorded as a known limit.
 - A second ward on a player replaces the first's record, so the newer caster is credited for what is soaked.
 - The thresholds and the experience share are proposals for the owner (see the chunk's decisions).
-- The Yeti King ([#304](https://github.com/jimbozoomer-byte/jugcraft/pull/304)) and the Cinder Tyrant
-  ([#317](https://github.com/jimbozoomer-byte/jugcraft/pull/317)), on main through #320 since 12 October, keep their own
-  damage-only reward until they adopt `Encounter` and `LairRewards`: support does not earn their reward, and one who
-  died or left in the fight is not paid later. Proposed as the next step at the chunk's checkpoint.
+- The Yeti King ([#304](https://github.com/jimbozoomer-byte/jugcraft/pull/304)) has adopted `Encounter` and
+  `LairRewards` (Concordance Chunk B, unit 1). The Cinder Tyrant
+  ([#317](https://github.com/jimbozoomer-byte/jugcraft/pull/317)) follows in the unit's next commit; until then he keeps
+  his own damage-only reward: support does not earn it, and one who died or left in his fight is not paid later.
+- Harm with no attacking creature, such as freezing, is not the fight's hurt, so healing it earns nothing (proposed,
+  B-P5 in [the Chunk B contract](concordance-chunk-b.md)).

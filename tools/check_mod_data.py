@@ -9726,7 +9726,8 @@ def check_yeti():
     the sheet without overlapping, its sheet (and its glowmask if it is drawn with a glow layer, and none if not)
     TEXTURE_SCALE times the size the model declares and cut out; no bone is animated by both of his controllers; his loot
     table is the table's and his trophies are Arms VII's; his recipes, tags and advancement are there; every message he
-    sends has its words; and nothing of his loads a chunk or leaves its dimension."""
+    sends has its words; his fight's credit and reward go through lair/Encounter and lair/LairRewards (Concordance Chunk
+    B); and nothing of his loads a chunk or leaves its dimension."""
     import arms_variants
     import glacier_hall as gh
     import yeti_king as yk
@@ -9908,6 +9909,22 @@ def check_yeti():
     for table_id in ("entities/yeti_king", "bosses/yeti_king"):
         if f'Jugcraft.id("{table_id}")' not in loot_java:
             err(f"YetiKingLoot must roll loot_table/{table_id}.json")
+    # His fight's credit and reward (Concordance Chunk B, B-01): lair/Encounter's record, begun as he wakes and after a
+    # load; the killing blow and a tamed creature's blow are their striker's; his fall is claimed once and paid through
+    # lair/LairRewards under his name; a charge baited into a column is the baiter's deed, keyed by the player.
+    for cls, text, needles in (
+            ("YetiKingEntity", boss, ("new Encounter(this, this::centre)", "encounter.begin();", "encounter.abandon();",
+                                      "if (!encounter.claim()) {", "Encounter.striker(source) instanceof ServerPlayer player",
+                                      "LairRewards.pay(level, YetiKingLoot.BOSS, encounter, position(), centre(), EXPERIENCE)",
+                                      'encounter.deed(player, "column " + player.getUUID())')),
+            ("YetiWhelpEntity", sources.get("YetiWhelpEntity", ""), ("Encounter.striker(source) instanceof ServerPlayer player",)),
+            ("YetiKingLoot", loot_java, ('BOSS = "yeti_king";',)),
+            ("JugcraftYeti", registry, ("LairRewards.payer(YetiKingLoot.BOSS, YetiKingLoot::pay)",))):
+        for needle in needles:
+            if needle not in text:
+                err(f"{cls}.java: his fight's credit and reward go through lair/Encounter and lair/LairRewards ({needle})")
+    if "damageBy" in boss or "YetiKingLoot.reward(" in boss:
+        err("YetiKingEntity.java pays his loot the old way (a damage map, YetiKingLoot.reward)")
     for key in yk.RECIPES:
         if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
             err(f"recipe/{key}.json is missing")

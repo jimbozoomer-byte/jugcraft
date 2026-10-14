@@ -1,6 +1,15 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.authlib.GameProfile;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
+import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.yeti.FallingIcicleEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.GlacialSpikeEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.GlacierHall;
@@ -11,15 +20,20 @@ import io.github.jimbozoomer.jugcraft.lair.yeti.YetiWhelpEntity;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -31,7 +45,10 @@ import net.minecraft.world.phys.Vec3;
  * back; an Avalanche Charge into an ice column stuns him, and stunned he takes a third more damage; his kin come out of
  * the dens, never more than four at once, and flee when he is left alone; his frost, and the Yeti Mitten against it; a
  * glacial spike throws a player up and an icicle shatters on its mark; and his loot is each participant's own. His fight
- * in the Glacier Hall itself runs in a real world, in {@link YetiKingClientGameTests}.
+ * in the Glacier Hall itself runs in a real world, in {@link YetiKingClientGameTests}. Since Concordance Chunk B (B-01)
+ * his fight's credit is the lairs' shared one: support and the absent share his loot once, a killing blow alone is paid,
+ * a tamed creature's blow is its owner's, a charge baited into a column is each baiter's deed but no idle late
+ * arrival's, four players are each paid once, and a fight loaded awake keeps a fresh record.
  *
  * <p>He fights any player within 38 blocks of his lake's centre; the arena keeps every other test's players farther off
  * than that. Each test sends him away before it ends, with his whelps, and lets the snow drift back.
@@ -86,6 +103,38 @@ public class YetiKingGameTests {
 			king.driftAll(level);
 			king.discard();
 		}
+	}
+
+	/** {@code healer} mends {@code patient} 4 through the Concordance's effect boundary, as the Mend word does. */
+	private static void mend(ServerLevel level, ServerPlayer healer, ServerPlayer patient) {
+		Cause cause = Cause.of(healer.getUUID(), Cause.Origin.SPELL, "test:mend", ConcordanceEffects.nextSerial());
+		ConcordanceEffects.apply(new ConcordanceEffects.Context(level, cause, healer, new Ledger(new Ledger.Limits(16, 256, 0)), "mend",
+				healer.position()), EffectSpec.of(EffectKind.RESTORATION, Intent.HELPFUL, 4, 0), patient);
+	}
+
+	/** How many of his trophies {@code player} holds. */
+	private static int trophies(ServerPlayer player) {
+		return player.getInventory().countItem(JugcraftYeti.glacierMaul()) + player.getInventory().countItem(JugcraftYeti.rimeclaw());
+	}
+
+	/** {@code player}'s deeds in {@code fight} (none without a part). */
+	private static int deeds(Encounter fight, ServerPlayer player) {
+		Encounter.Share share = fight.share(player);
+		return share == null ? 0 : share.deeds();
+	}
+
+	/** A survival player north of the north-west column (26.5, 23.5), {@code x} across the hall (floor 24..29, 10..14). */
+	private static ServerPlayer northOfTheColumn(GameTestHelper helper, YetiKingEntity king, BlockPos origin, double x) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		player.snapTo(origin.getX() + x, king.floorY(), origin.getZ() + 12.0, 0.0F, 0.0F);
+		return player;
+	}
+
+	/** Puts him 9.5 blocks south of the north-west column and sets him charging at {@code foe}, beyond it (as a charge test does). */
+	private static void chargeAt(ServerLevel level, YetiKingEntity king, BlockPos origin, ServerPlayer foe) {
+		king.teleportTo(origin.getX() + 26.5, king.floorY(), origin.getZ() + 33.0);
+		king.begin(level, YetiKingEntity.Attack.AVALANCHE_CHARGE, foe);
 	}
 
 	/**
@@ -386,5 +435,350 @@ public class YetiKingGameTests {
 			}
 		});
 		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B: support shares his loot. A healer who mended 4 of what his fight did is paid; a striker who
+	 * died in it is kept their share and handed it on their feet; one who left the game in it has it kept in the world
+	 * and handed over on joining; one who walked away alive, a bystander and the one he only hurt are not paid; the
+	 * experience is shared among those paid, now or later; and his fall reported again pays no one twice.
+	 */
+	@GameTest(structure = HALL, padding = 8)
+	public void supportSharesHisLootOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 34, 34, 45, 41);
+		ServerPlayer fighter = player(helper, king, 0.5, 3.0);
+		ServerPlayer healer = player(helper, king, 2.5, 3.0);
+		ServerPlayer bystander = player(helper, king, -1.5, 3.0);
+		ServerPlayer wanderer = player(helper, king, 4.5, 3.0);
+		ServerPlayer fallen = player(helper, king, -3.5, 3.0);
+		// Away from the game: a player the server's list never held, as one who has left is not held.
+		FakePlayer away = FakePlayer.get(level, new GameProfile(UUID.randomUUID(), "yeti_away"));
+		Encounter fight = king.encounter();
+		fight.begin();
+		UUID receipt = fight.fight();
+		LairRewards.Data data = LairRewards.Data.of(level.getServer());
+		ending(level, king, () -> {
+			try {
+				// His fight hurt the fighter 6 (as his blow would have been measured); the healer mends 4 of it.
+				fighter.setHealth(fighter.getMaxHealth() - 6.0F);
+				fight.hurt(fighter, 6.0F);
+				mend(level, healer, fighter);
+				king.took(wanderer, 2.0F);
+				king.took(fallen, 2.0F);
+				king.took(away, 2.0F);
+				// A real death: Fabric's AFTER_DEATH reaches Encounter's listener (the killing blow itself is not real).
+				fallen.setHealth(0.0F);
+				fallen.die(level.damageSources().genericKill());
+				// Leaving is marked as Fabric's LEAVE would mark it: a test player cannot disconnect.
+				fight.left(away.getUUID());
+				wanderer.snapTo(wanderer.getX() + 100.0, wanderer.getY(), wanderer.getZ(), 0.0F, 0.0F);
+				helper.assertTrue(fight.excused(fallen.getUUID()), "Dying in his fight did not excuse the fallen striker");
+				List<UUID> qualified = fight.qualified();
+				helper.assertTrue(qualified.containsAll(List.of(healer.getUUID(), wanderer.getUUID(), fallen.getUUID(), away.getUUID()))
+						&& !qualified.contains(fighter.getUUID()) && !qualified.contains(bystander.getUUID()),
+						"The healer and the three strikers should qualify, the one he only hurt and the bystander not: " + qualified);
+				int experience = healer.totalExperience;
+				king.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+				int fur = healer.getInventory().countItem(JugcraftYeti.YETI_FUR);
+				int share = YetiKingEntity.EXPERIENCE / 3;
+				helper.assertTrue(fur >= 4 && trophies(healer) == 1, "The healer was not paid, first-kill trophy and all: " + fur + " Yeti Fur");
+				helper.assertTrue(healer.totalExperience - experience == share,
+						"300 was not shared among the three paid: " + (healer.totalExperience - experience));
+				LairRewards.Owed owed = fallen.getAttached(LairRewards.OWED);
+				helper.assertTrue(owed != null && owed.due().size() == 1 && owed.due().getFirst().boss().equals(YetiKingLoot.BOSS)
+						&& owed.due().getFirst().fight().equals(receipt) && fallen.getInventory().countItem(JugcraftYeti.YETI_FUR) == 0,
+						"The fallen striker's share was not kept for them: " + owed);
+				List<LairRewards.Due> kept = data.kept(away.getUUID());
+				helper.assertTrue(kept.size() == 1 && kept.getFirst().boss().equals(YetiKingLoot.BOSS) && kept.getFirst().fight().equals(receipt)
+						&& kept.getFirst().experience() == share, "The share of one who left the game was not kept in the world: " + kept);
+				for (ServerPlayer unpaid : List.of(wanderer, bystander, fighter)) {
+					helper.assertTrue(unpaid.getInventory().countItem(JugcraftYeti.YETI_FUR) == 0,
+							"Paid: the one who walked away, the bystander or the one he only hurt");
+				}
+				// Back on their feet far off (AFTER_RESPAWN calls handOver); joining (JOIN calls welcome).
+				fallen.snapTo(fallen.getX() - 100.0, fallen.getY(), fallen.getZ(), 0.0F, 0.0F);
+				fallen.setHealth(fallen.getMaxHealth());
+				helper.assertTrue(LairRewards.handOver(fallen) && fallen.getInventory().countItem(JugcraftYeti.YETI_FUR) >= 4
+						&& !fallen.hasAttached(LairRewards.OWED), "Back on their feet, the fallen striker was not handed their share by his payer");
+				LairRewards.welcome(away);
+				helper.assertTrue(away.getInventory().countItem(JugcraftYeti.YETI_FUR) >= 4 && data.kept(away.getUUID()).isEmpty(),
+						"Joining again, the one who left was not handed their share, or the world still keeps it");
+				int fallenFur = fallen.getInventory().countItem(JugcraftYeti.YETI_FUR);
+				king.die(level.damageSources().genericKill());
+				helper.assertTrue(healer.getInventory().countItem(JugcraftYeti.YETI_FUR) == fur && trophies(healer) == 1
+						&& fallen.getInventory().countItem(JugcraftYeti.YETI_FUR) == fallenFur && !fallen.hasAttached(LairRewards.OWED)
+						&& data.kept(away.getUUID()).isEmpty(), "His fall reported again paid someone twice");
+			} finally {
+				data.take(away.getUUID());
+				List.of(fighter, healer, bystander, wanderer, fallen).forEach(ServerPlayer::discard);
+			}
+		});
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B: a player whose only part in his fight is the blow that fells him has taken part before his
+	 * fall is paid, and is paid: Yeti Fur, a first kill's trophy and Abominable.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 120)
+	public void aKillingBlowAloneIsPaid(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 34, 34, 45, 41);
+		king.wake(level);
+		helper.runAfterDelay(YetiKingEntity.WAKE_TICKS + 2, () -> {
+			ServerPlayer striker = player(helper, king, 0.5, 3.0);
+			Encounter fight = king.encounter();
+			ending(level, king, () -> {
+				try {
+					helper.assertTrue(king.phase() == YetiKingEntity.Phase.HUNT && fight.underway() && fight.share(striker) == null,
+							"He was not hunting in a fight under way, or the striker already had a part: " + king.phase());
+					boolean felled = king.hurtServer(level, level.damageSources().playerAttack(striker), king.getMaxHealth() * 4.0F);
+					Encounter.Share share = fight.share(striker);
+					helper.assertTrue(felled && king.isDeadOrDying() && share != null && share.qualifies(),
+							"The blow that felled him was not the striker's part in his fight");
+					helper.assertTrue(striker.getInventory().countItem(JugcraftYeti.YETI_FUR) >= 4 && trophies(striker) == 1,
+							"The striker whose only blow felled him was not paid");
+					helper.assertFalse(YetiKingLoot.firstKill(striker), "Abominable is not the striker's");
+				} finally {
+					striker.discard();
+				}
+			});
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Concordance Chunk B: a tamed wolf's bite on him, or on one of his whelps, is its owner's part in his fight, and
+	 * each owner is paid when he falls.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 120)
+	public void aPetsBlowIsItsOwners(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 34, 34, 45, 41);
+		king.wake(level);
+		helper.runAfterDelay(YetiKingEntity.WAKE_TICKS + 2, () -> {
+			ServerPlayer kingOwner = player(helper, king, 0.5, 3.0);
+			ServerPlayer whelpOwner = player(helper, king, 2.5, 3.0);
+			var kingWolf = helper.spawnWithNoFreeWill(EntityTypes.WOLF, new BlockPos(38, 1, 40));
+			var whelpWolf = helper.spawnWithNoFreeWill(EntityTypes.WOLF, new BlockPos(41, 1, 40));
+			kingWolf.tame(kingOwner);
+			whelpWolf.tame(whelpOwner);
+			Encounter fight = king.encounter();
+			ending(level, king, () -> {
+				try {
+					helper.assertTrue(king.callKin(level, 1) == 1, "No whelp came out of a den");
+					YetiWhelpEntity whelp = (YetiWhelpEntity) level.getEntity(king.whelps().getFirst());
+					boolean bitten = whelp.hurtServer(level, level.damageSources().mobAttack(whelpWolf), 2.0F);
+					Encounter.Share whelpShare = fight.share(whelpOwner);
+					helper.assertTrue(bitten && whelpShare != null && whelpShare.damage() == 2.0F && whelpShare.qualifies(),
+							"A wolf's bite on his whelp was not its owner's part");
+					boolean bitHim = king.hurtServer(level, level.damageSources().mobAttack(kingWolf), 4.0F);
+					Encounter.Share kingShare = fight.share(kingOwner);
+					helper.assertTrue(bitHim && kingShare != null && kingShare.damage() == 4.0F && kingShare.qualifies(),
+							"A wolf's bite on him was not its owner's part");
+					king.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+					helper.assertTrue(kingOwner.getInventory().countItem(JugcraftYeti.YETI_FUR) >= 4
+							&& whelpOwner.getInventory().countItem(JugcraftYeti.YETI_FUR) >= 4, "A wolf's owner was not paid");
+				} finally {
+					kingWolf.discard();
+					whelpWolf.discard();
+					kingOwner.discard();
+					whelpOwner.discard();
+				}
+			});
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Concordance Chunk B: his charge aimed at a player who already has a part in his fight (here a ward on a friend,
+	 * short of qualifying) and ending in an ice column is that player's deed, once a fight; a second baiter earns their
+	 * own on his next charge, and both qualify by it alone.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 240)
+	public void twoBaitersEachEarnTheirDeed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 24, 10, 29, 14);
+		ServerPlayer first = northOfTheColumn(helper, king, origin, 26.5);
+		ServerPlayer second = northOfTheColumn(helper, king, origin, 25.5);
+		int run = YetiKingEntity.Attack.AVALANCHE_CHARGE.windup + 12;
+		Encounter fight = king.encounter();
+		king.wake(level);
+		helper.runAfterDelay(YetiKingEntity.WAKE_TICKS + 2, () -> {
+			// Each wards the other: a part in his fight, short of qualifying.
+			fight.warded(first, second, 2.0F, 600);
+			fight.warded(second, first, 2.0F, 600);
+			Encounter.Share firstPart = fight.share(first);
+			Encounter.Share secondPart = fight.share(second);
+			boolean shortOfQualifying = firstPart != null && !firstPart.qualifies() && secondPart != null && !secondPart.qualifies();
+			chargeAt(level, king, origin, first);
+			helper.runAfterDelay(run, () -> {
+				boolean firstStunned = king.stunnedTicks() > 0;
+				int firstDeeds = deeds(fight, first);
+				int secondThen = deeds(fight, second);
+				// Once he has reeled, and before his own pause between attacks is up, he charges the other.
+				helper.runAfterDelay(YetiKingEntity.STUN_TICKS + 4, () -> {
+					chargeAt(level, king, origin, second);
+					helper.runAfterDelay(run, () -> {
+						ending(level, king, () -> {
+							try {
+								helper.assertTrue(shortOfQualifying, "A ward on a friend did not give each a part short of qualifying");
+								helper.assertTrue(firstStunned && king.stunnedTicks() > 0, "A charge did not end in the column");
+								helper.assertTrue(firstDeeds == 1 && secondThen == 0,
+										"The first charge was not the first baiter's deed alone: " + firstDeeds + " and " + secondThen);
+								helper.assertTrue(deeds(fight, first) == 1 && deeds(fight, second) == 1,
+										"Each baiter did not earn their own deed: " + deeds(fight, first) + " and " + deeds(fight, second));
+								helper.assertTrue(fight.share(first).damage() == 0.0F && fight.share(second).damage() == 0.0F,
+										"A baiter struck him");
+								helper.assertTrue(fight.qualified().containsAll(List.of(first.getUUID(), second.getUUID())),
+										"The deed alone did not qualify each baiter");
+								helper.assertFalse(fight.deed(first, "column " + first.getUUID()), "A baiter's deed counted twice in one fight");
+							} finally {
+								first.discard();
+								second.discard();
+							}
+						});
+						helper.succeed();
+					});
+				});
+			});
+		});
+	}
+
+	/**
+	 * Concordance Chunk B: a late arrival with no part in his fight, though his fight has struck them, whom he charges into
+	 * a column (as when he turns on the nearest player) earns no deed and no reward, and no one else gets the deed.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 160)
+	public void anIdleLateArrivalEarnsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 24, 10, 29, 14);
+		floor(level, origin, 34, 34, 45, 41);
+		ServerPlayer fighter = player(helper, king, 0.5, 3.0);
+		fighter.setGameMode(GameType.CREATIVE);  // he pays them no heed
+		int run = YetiKingEntity.Attack.AVALANCHE_CHARGE.windup + 12;
+		Encounter fight = king.encounter();
+		king.wake(level);
+		helper.runAfterDelay(YetiKingEntity.WAKE_TICKS + 2, () -> {
+			king.took(fighter, 5.0F);
+			ServerPlayer late = northOfTheColumn(helper, king, origin, 26.5);
+			fight.hurt(late, 4.0F);  // struck by his fight, but no part in it
+			boolean idle = fight.share(late) == null;
+			chargeAt(level, king, origin, late);
+			helper.runAfterDelay(run, () -> {
+				ending(level, king, () -> {
+					try {
+						helper.assertTrue(idle, "The late arrival already had a part in his fight");
+						helper.assertTrue(king.stunnedTicks() > 0 && king.action() == YetiKingEntity.Action.STUNNED,
+								"His charge at the late arrival did not end in the column: " + king.action());
+						helper.assertTrue(fight.share(late) == null && !fight.qualified().contains(late.getUUID()),
+								"A late arrival with no part earned a deed by where his charge ended");
+						helper.assertTrue(deeds(fight, fighter) == 0, "The deed went to someone else");
+						king.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+						helper.assertTrue(late.getInventory().countItem(JugcraftYeti.YETI_FUR) == 0, "The idle late arrival was paid");
+						helper.assertTrue(fighter.getInventory().countItem(JugcraftYeti.YETI_FUR) >= 4, "The one who struck him was not paid");
+					} finally {
+						fighter.discard();
+						late.discard();
+					}
+				});
+				helper.succeed();
+			});
+		});
+	}
+
+	/**
+	 * Concordance Chunk B and the party cap: woken by four players his health is two and a half times his own, and when
+	 * he falls each of the four is paid once, a first kill's trophy and a quarter of the experience; his fall reported
+	 * again pays no one twice.
+	 */
+	@GameTest(structure = HALL, padding = 8)
+	public void fourPlayersAreEachPaidOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 34, 34, 45, 41);
+		List<ServerPlayer> party = List.of(player(helper, king, -3.5, 3.0), player(helper, king, -1.5, 3.0), player(helper, king, 0.5, 3.0),
+				player(helper, king, 2.5, 3.0));
+		king.wake(level);
+		ending(level, king, () -> {
+			try {
+				helper.assertTrue(Math.abs(king.getMaxHealth() - YetiKingEntity.HEALTH * YetiKingEntity.partyScale(4)) < 0.01,
+						"Woken by four, his health is not " + YetiKingEntity.partyScale(4) + " times his own: " + king.getMaxHealth());
+				int[] before = new int[party.size()];
+				for (int i = 0; i < party.size(); i++) {
+					king.took(party.get(i), 5.0F);
+					before[i] = party.get(i).totalExperience;
+				}
+				king.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+				int[] gained = new int[party.size()];
+				for (int i = 0; i < party.size(); i++) {
+					ServerPlayer player = party.get(i);
+					gained[i] = player.totalExperience - before[i];
+					helper.assertTrue(player.getInventory().countItem(JugcraftYeti.YETI_FUR) >= 4 && trophies(player) == 1
+							&& gained[i] == YetiKingEntity.EXPERIENCE / 4, "A player of the four was not paid once: " + gained[i] + " experience");
+				}
+				king.die(level.damageSources().genericKill());
+				for (int i = 0; i < party.size(); i++) {
+					ServerPlayer player = party.get(i);
+					helper.assertTrue(trophies(player) == 1 && player.totalExperience - before[i] == gained[i], "His fall reported again paid someone twice");
+				}
+			} finally {
+				party.forEach(ServerPlayer::discard);
+			}
+		});
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B: his fight's record is not saved. Saved awake and loaded again, he holds no one's part, and on
+	 * his first ticks he begins a fresh record, so who takes part from then on is counted.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 40)
+	public void aFightLoadedAwakeIsRecordedAfresh(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		floor(level, origin, 34, 34, 45, 41);
+		ServerPlayer striker = player(helper, king, 0.5, 3.0);
+		striker.setGameMode(GameType.CREATIVE);  // he pays them no heed
+		king.wake(level);
+		king.took(striker, 4.0F);
+		boolean before = king.encounter().qualified().contains(striker.getUUID());
+		// Saved awake and loaded again, as his chunk unloading and loading would.
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		king.saveWithoutId(out);
+		king.discard();
+		YetiKingEntity loaded = new YetiKingEntity(JugcraftYeti.YETI_KING, level);
+		loaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
+		loaded.setUUID(UUID.randomUUID());
+		level.addFreshEntity(loaded);
+		boolean unsaved = loaded.encounter().share(striker) == null && !loaded.encounter().underway();
+		helper.runAfterDelay(3, () -> {
+			ending(level, loaded, () -> {
+				try {
+					helper.assertTrue(before && unsaved, "His record was saved with him, or the striker never had a part");
+					helper.assertTrue(loaded.phase() == YetiKingEntity.Phase.HUNT, "Loaded waking, he does not hunt: " + loaded.phase());
+					helper.assertTrue(loaded.encounter().underway() && loaded.encounter().share(striker) == null,
+							"Loaded awake, he did not begin a fresh record");
+					loaded.took(striker, 2.0F);
+					helper.assertTrue(loaded.encounter().qualified().contains(striker.getUUID()), "A blow after loading was not counted");
+				} finally {
+					striker.discard();
+				}
+			});
+			helper.succeed();
+		});
 	}
 }
