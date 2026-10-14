@@ -13,10 +13,13 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ComparatorBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.ComparatorBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -219,6 +222,50 @@ public class BlueprintGameTests {
 					e -> e.getItem().is(net.minecraft.world.item.Items.DIAMOND)).isEmpty(), "the chest's contents were dropped, not lost");
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * A comparator beside a stake reads how much of the build is in place, 1 + 14 x placed / total like a container's
+	 * fill (0 with nothing placed): first what the ground already holds, then with about half the rest set.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 200, skyAccess = true)
+	public void aComparatorReadsTheBuildsProgress(GameTestHelper helper) {
+		if (TestFocus.skip("blueprints")) {
+			helper.succeed();
+			return;
+		}
+		BlockPos stakePos = helper.absolutePos(new BlockPos(22, 1, 40));
+		helper.getLevel().setBlockAndUpdate(stakePos, JugcraftBlueprints.STAKE.defaultBlockState());
+		SurveyStakeBlockEntity stake = (SurveyStakeBlockEntity) helper.getLevel().getBlockEntity(stakePos);
+		stake.setup("drone_tower_foundation", Rotation.NONE, UUID.randomUUID());
+		Map<BlockPos, BlockState> wanted = stake.wanted();
+		Direction side = Direction.Plane.HORIZONTAL.stream().filter(d -> !wanted.containsKey(stakePos.relative(d))).findFirst().orElseThrow();
+		BlockPos comparator = stakePos.relative(side);
+		helper.getLevel().setBlockAndUpdate(comparator, Blocks.COMPARATOR.defaultBlockState().setValue(ComparatorBlock.FACING, side.getOpposite()));
+		int total = wanted.size();
+		int[] expected = {-1};
+		helper.runAfterDelay(45, () -> {
+			// Whatever of the foundation the arena already holds counts too.
+			List<Map.Entry<BlockPos, BlockState>> open = wanted.entrySet().stream()
+					.filter(entry -> !SurveyStakeBlockEntity.matches(helper.getLevel().getBlockState(entry.getKey()), entry.getValue())).toList();
+			int already = total - open.size();
+			int before = already == 0 ? 0 : 1 + 14 * already / total;
+			helper.assertTrue(stake.signal() == before && output(helper, comparator) == before,
+					"With " + already + " of " + total + " in place the stake gives " + stake.signal() + " and the comparator reads "
+							+ output(helper, comparator) + ", not " + before);
+			int half = open.size() / 2;
+			open.stream().limit(half).forEach(entry -> helper.getLevel().setBlockAndUpdate(entry.getKey(), entry.getValue()));
+			expected[0] = 1 + 14 * (already + half) / total;
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(expected[0] >= 0, "Not built yet");
+			helper.assertTrue(stake.signal() == expected[0], "The stake gives " + stake.signal() + ", not " + expected[0]);
+			helper.assertTrue(output(helper, comparator) == expected[0], "The comparator reads " + output(helper, comparator) + ", not " + expected[0]);
+		});
+	}
+
+	private static int output(GameTestHelper helper, BlockPos comparator) {
+		return helper.getLevel().getBlockEntity(comparator) instanceof ComparatorBlockEntity entity ? entity.getOutputSignal() : -1;
 	}
 
 	@GameTest(structure = ARENA, maxTicks = 200, skyAccess = true)

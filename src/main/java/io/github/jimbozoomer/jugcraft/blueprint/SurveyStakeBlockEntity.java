@@ -47,6 +47,11 @@ public class SurveyStakeBlockEntity extends BlockEntity {
 	private int cursor;
 	/** Large builds: ticks between full checks of which blocks are in place. */
 	private static final int VERIFY_INTERVAL = 600;
+	/**
+	 * What a comparator reads: 0 before any block is in place, then 1 to 15 as the build fills, like a container. Set
+	 * at each check of the build, so a comparator costs nothing extra; not saved (the first check after loading sets it).
+	 */
+	private int signal;
 
 	public SurveyStakeBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftBlueprints.STAKE_ENTITY, pos, state);
@@ -239,14 +244,17 @@ public class SurveyStakeBlockEntity extends BlockEntity {
 				return;
 			}
 			boolean all = true;
+			int placed = 0;
 			BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
 			for (int i = 0; i < site.size(); i++) {
 				at.set(site.pos(i));
 				boolean in = server.isLoaded(at) && site.matches(server.getBlockState(at), i);
 				site.done.set(i, in);
 				all &= in;
+				placed += in ? 1 : 0;
 			}
 			cursor = 0;
+			signal(placed, site.size());
 			if (all) {
 				complete(server);
 			}
@@ -255,13 +263,33 @@ public class SurveyStakeBlockEntity extends BlockEntity {
 		if (Math.floorMod(phase, CHECK_INTERVAL) != 0) {
 			return;
 		}
+		// Every block is looked at (at most MAX_BLOCKS, once per CHECK_INTERVAL), so the comparator signal counts them all.
+		int placed = 0;
 		for (int i = 0; i < site.size(); i++) {
 			BlockPos p = site.blockPos(i);
-			if (!server.isLoaded(p) || !site.matches(server.getBlockState(p), i)) {
-				return;
+			if (server.isLoaded(p) && site.matches(server.getBlockState(p), i)) {
+				placed++;
 			}
 		}
-		complete(server);
+		signal(placed, site.size());
+		if (placed == site.size()) {
+			complete(server);
+		}
+	}
+
+	/** The comparator signal (see {@link #signal}). */
+	public int signal() {
+		return signal;
+	}
+
+	private void signal(int placed, int total) {
+		int next = placed <= 0 || total <= 0 ? 0 : 1 + (int) (14L * Math.min(placed, total) / total);
+		if (next != signal) {
+			signal = next;
+			if (level != null) {
+				level.updateNeighbourForOutputSignal(getBlockPos(), getBlockState().getBlock());
+			}
+		}
 	}
 
 	private void complete(ServerLevel server) {

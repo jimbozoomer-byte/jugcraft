@@ -40,6 +40,7 @@ Owner: Narvisius
   - **PERSONAL/PARTY**, **ROTATE** and **REMOVE** buttons for the player who placed it (or the party leader). REMOVE takes the stake down without giving the blueprint back.
 
   Sneak-right-click also switches Personal/Party.
+- **Comparator output:** a comparator beside the stake reads how much of the build is in place, like a container's fill: 0 before any block, then 1 to 15 as it fills. It changes at the stake's regular checks (every 2 seconds; every 30 seconds for the largest built-in blueprints), so a lamp or a door can show when a drone build is half or nearly done.
 - **A blueprint is used up when it is placed:** when every block is in place the stake pops off and nothing drops, and breaking the stake drops nothing either. Print another at the table (it is free).
 
 ## How it works
@@ -84,6 +85,11 @@ Owner: Narvisius
 - **Nuclear equipment in a blueprint** (an equipment anchor block with its facing): drones deliver the equipment's
   item and the stake places it whole, clearing any ground in its body first. The blueprint leaves the body empty.
 
+- **Comparator:** `SurveyStakeBlockEntity` counts the placed blocks at each check and keeps the signal, which `SurveyStakeBlock` reports.
+  - A small build (at most 8,192 blocks) is counted in full every 40 ticks. Before, the check stopped at the first missing block.
+  - A large built-in build is counted at its 600-tick full check, which already looked at every block.
+  - The signal is not saved: the first check after loading sets it.
+
 ## Testing aids (operators only: cheats on, or op level 2)
 - `/nuclear build <blueprint> [fuelled]`: builds any blueprint at once where you stand, facing the way you face
   (equipment placed whole, pipes joined, consoles linked to the nearest reactor).
@@ -95,13 +101,15 @@ Owner: Narvisius
   - built-in blueprints load (225-block foundation with one core; the church; rotation keeps every block);
   - a stake offers only its floor layer first, and nothing to a stranger's depot;
   - a finished foundation pops the stake and returns the blueprint.
+- **Server game test (`BlueprintGameTests.aComparatorReadsTheBuildsProgress`):** a real comparator beside a foundation stake reads what the ground already holds, then 1 + 14 × placed / total once about half the rest is set. Added on the contributor's fork; pending CI.
 - **Server game tests:** import checks (a valid paste is saved; unknown block, forbidden block, missing palette key, bad JSON and wrong format are each refused with the right message).
 - **Client game test (`BlueprintClientGameTests`):** preview and placement from 20 blocks away, hologram, stake screen, table tabs and IMPORT (a pasted blueprint arrives in the client library and the import list), Item Index, chair, Creative Energy Cell.
 
 ## Not yet done (from #23)
 - "Any material" slots and tags.
-- Comparator output.
 - The design kit and in-JAR AI guide.
+
+Comparator output, listed here before, is built (see above).
 
 ## World height
 
