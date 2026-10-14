@@ -2861,6 +2861,10 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # (slice 11B) the Crackling a shell.
                    "tusker": {"reload_mag_in": "shell_in"}, "bastion_rifle": {"reload_mag_in": "shell_in"},
                    "crackling": {"reload_mag_in": "shell_in"},
+                   # The Lookout Rifle (slice 13A) pushes a round in at a time, as the Drover Rifle does.
+                   "lookout_rifle": {"reload_mag_in": "shell_in"},
+                   # The Fencepost Carbine and the Waystation Shotgun (slice 13B) push a round or a shell in at a time.
+                   "fencepost_carbine": {"reload_mag_in": "shell_in"}, "waystation_shotgun": {"reload_mag_in": "shell_in"},
                    # Slice 13C: the Big Bore pushes its shell into the chamber; the Winnie Millend a round at a time, as
                    # the Winnie (the Drover Rifle) does.
                    "flatboat_gun": {"reload_mag_in": "shell_in"}, "millstone_rifle": {"reload_mag_in": "shell_in"}}
