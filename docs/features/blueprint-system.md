@@ -101,7 +101,7 @@ Owner: Narvisius
   - built-in blueprints load (225-block foundation with one core; the church; rotation keeps every block);
   - a stake offers only its floor layer first, and nothing to a stranger's depot;
   - a finished foundation pops the stake and returns the blueprint.
-- **Server game test (`BlueprintGameTests.aComparatorReadsTheBuildsProgress`):** a real comparator beside a foundation stake reads what the ground already holds, then 1 + 14 × placed / total once about half the rest is set. Added on the contributor's fork; pending CI.
+- **Server game test (`BlueprintGameTests.aComparatorReadsTheBuildsProgress`):** a real comparator beside a foundation stake reads what the ground already holds, then 1 + 14 × placed / total once about half the rest is set. Added on the contributor's fork; passed in run [38631690814](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38631690814) (commit 97d092bf), with every other server and client test (its first attempt's client shard 2 failed in `FlailClientGameTests`, which this change does not touch, and passed on the one re-run).
 - **Server game tests:** import checks (a valid paste is saved; unknown block, forbidden block, missing palette key, bad JSON and wrong format are each refused with the right message).
 - **Client game test (`BlueprintClientGameTests`):** preview and placement from 20 blocks away, hologram, stake screen, table tabs and IMPORT (a pasted blueprint arrives in the client library and the import list), Item Index, chair, Creative Energy Cell.
 
