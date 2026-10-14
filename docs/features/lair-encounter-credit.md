@@ -3,8 +3,8 @@
 Status: implemented for Concordance Chunk A (unit 3: tickets A-05 and A-06); its tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on
 `aa4d06c4e`). Extended to the Yeti King and the Cinder Tyrant in Concordance Chunk B, unit 1 (ticket B-01; [the chunk's
 contract](concordance-chunk-b.md)), not merged; its tests pass in CI (runs 38514144531 and 38519234934). Unit 5 (B-09)
-adds the Yeti King's second objective, a Brace put on another player that meets his push; its test has not yet run in
-CI. See Verification for what has run.
+adds the Yeti King's second objective, a Brace put on another player that meets his push; its test passes in CI (run
+38591108210). See Verification for what has run.
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -195,7 +195,7 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   Glacier Hall and the reward kept in the world's record, and opened again: the game's own server stops and starts, and
   on the real join the player is sent home first and then paid once. It passed in CI run 38543250503 by its shard's
   success (shard 0). No disconnect or leave event is checked.
-- Concordance Chunk B, unit 5 (B-09), not merged, not yet run in CI: `YetiKingGameTests.aBraceOnAFriendIsTheCastersDeed`
+- Concordance Chunk B, unit 5 (B-09), not merged, passed in CI (run 38591108210): `YetiKingGameTests.aBraceOnAFriendIsTheCastersDeed`
   (a Brace one test player put on another that meets his push is the caster's deed, one for each push it meets, two in
   one tick one; a Brace on oneself, the Water Bangle's and one whose caster was forgotten credit no one, and being
   braced earns nothing), and `check_yeti` holds `braced` to the caster, never the braced player, and to the key.

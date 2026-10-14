@@ -182,6 +182,9 @@ introduction; windows where they fitted look as before (`d22a55830`). `check_enc
 link, no scissor in the card and the scrolling body.
 `EncyclopediaRoutesClientGameTests` checks every card's lines against its height, its whole title and link, and its foot
 within the body's reach, on opening, after Tab, scrolled to the end and at GUI scale 1, with the shots
-`jugcraft_encyclopedia_home`, `jugcraft_encyclopedia_home_end` and `jugcraft_encyclopedia_home_scale1`; it has not yet
-run in CI. At CI's size the first of them still shows text cut at the scrolling body's edge: that is the scrolling. The
+`jugcraft_encyclopedia_home`, `jugcraft_encyclopedia_home_end` and `jugcraft_encyclopedia_home_scale1`; it passed in CI
+(run 38591108210 on `25644502a`, shard 1). At CI's size the first of them still shows text cut at the scrolling body's
+edge beside a scroll bar: that is the scrolling. In that run's previews `_home_end` shows each card's last paragraph and
+its link whole, "Open Magic: the Arcane Concordance ›" wrapped onto two lines, and `_home_scale1` both cards whole with
+each link on one line and no scroll bar to be seen. The
 stacked layout (a GUI narrower than 384) is not exercised. AI-assisted implementation with Claude Code (Claude Opus 5.5).

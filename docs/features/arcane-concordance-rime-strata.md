@@ -7,7 +7,8 @@ its server game tests among the 1639 required, with and without the optional int
 They passed again, with the status shots' fix, in runs 38543250503 (units 1 to 3) and 38549876709 (units 1 to 4); the
 fixed shots show the status icons (runs 38534127130 and 38549876709). Unit 5 (B-09) gives Brace and Rimebind their
 part in the Yeti King's fight, makes his column Rimekeeping's elective cold work and adds a spell-bar shot at GUI scale
-1; its tests have not yet run in CI. Not played by hand or with two clients; see Verification for what has run.
+1; its tests pass in CI (run 38591108210, units 1 to 5). Not played by hand or with two clients; see Verification for
+what has run.
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B2).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -167,7 +168,7 @@ push on them, not Rimebind's alone:
 The Yeti moves by fixed steps, not by his movement-speed attribute, so Rimebind's slow alone does nothing to his charge.
 Since unit 5 (B-09) a binding that takes holds his wind-up (the one under way unless it is about to strike, else his
 next) 4 ticks longer instead, once each Thaw (B-P54), and only a Brace lessens his push; `aRimeboundChargeKeepsItsPace`
-tests that his charge keeps its pace when bound, once it runs
+shows that his charge keeps its pace when bound (passed in CI, run 38591108210)
 ([the Yeti King's record](yeti-king.md#optional-counters-concordance-chunk-b-b-09)).
 
 ## Changes from the plan
@@ -419,9 +420,11 @@ The screenshots of run 38549876709 (`b012875ab`, units 1 to 4; 480×270 previews
 
 Run 38534127130's shard 1 (`0e7de6bf1`) showed the same three shots.
 
-Unit 5 (B-09, B-11; not yet run in CI): `ConcordanceRimeStrataClientGameTests` takes the spell bar again at GUI scale 1,
-where all six slots should fit, and logs its width (`jugcraft_rime_strata_spell_bar_scale1`; the bar's place is
-B-P60). The Braced and Rimebound codex entries each gain an "Against the Yeti King" page, and the Rimekeeping entry's
+Unit 5 (B-09, B-11; passed in CI, run 38591108210 on `25644502a`, shard 3): `ConcordanceRimeStrataClientGameTests`
+takes the spell bar again at GUI scale 1 and logs its width (`jugcraft_rime_strata_spell_bar_scale1`; the bar's place
+is B-P60). In that run's previews the default-scale bar still has its first slot cut by the screen's left edge; at GUI
+scale 1 all six slots stand whole left of the hotbar, each with its key number above it. `_status_hud` shows Braced's
+icon above Rimebound's at the top right, as before. The Braced and Rimebound codex entries each gain an "Against the Yeti King" page, and the Rimekeeping entry's
 Understood page names the column. `YetiKingGameTests` tests the counters and the column's cold work
 ([the Yeti King's record](yeti-king.md#verification)).
 

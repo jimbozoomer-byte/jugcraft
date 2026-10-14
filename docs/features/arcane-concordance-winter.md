@@ -6,7 +6,7 @@ on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb` (#352) with t
 built it and passed every job: its server game tests among the 1676 required, with and without the optional
 integrations, and its client game test. Unit 5 renamed the Frost boon's key to the elective the Yeti King's column
 shares (B-P56), made the bangle's Brace count against his push, and gave the client test its slots shot and its toasts
-cleared; those changes have not yet run in CI. Not played by hand or with two clients; see each part's Verification and
+cleared; those changes pass in CI too (run 38591108210 on `25644502a`). Not played by hand or with two clients; see each part's Verification and
 [Checks run for the unit](#checks-run-for-the-unit).
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B") and the same day answered
 B-D2 ("Use your water sets as Rime") and B-D3 ("A timed brew"), from
@@ -654,14 +654,17 @@ The screenshots (480×270 previews in shard 4's log; for people to look at, not 
   presentation, not a missing texture or a render defect; others see it round the wearer's body. Since unit 5 the test
   clears the toasts before this shot. No shot shows the foci or the bangle in their slots: the test fills the slots on
   the server and checks them there. Since unit 5 it also opens the survival inventory, where Trinkets shows its slot
-  groups, for `jugcraft_rime_kit_slots` (not yet run in CI; Trinkets may draw one slot of a group until it is hovered,
-  so the shot may not show both, and the server's checks remain the proof).
+  groups, for `jugcraft_rime_kit_slots` (Trinkets may draw one slot of a group until it is hovered, so the shot may not
+  show both, and the server's checks remain the proof). In run 38591108210 (attempt 2, shard 4) the bangle's shot has
+  no toasts: Braced's icon stands alone at the top right, and no purple shape is in view; the slots shot shows the
+  survival inventory with the armour slots empty (the test took the armour off before) and, beside the paper doll, a
+  column of four slots with grey outline icons and no item in any, so it shows neither the focus nor the bangle.
 - `jugcraft_rime_kit_icons`: fifteen item frames on a wooden wall, the lesser focus, the focus, the bangle and Nereid's
   four above, Aquamancer's and Winterguard's eight below; each icon whole in its frame and, at this size, like its
   owner's file.
 
 Not run: a client by hand (the icons, the worn sets, the codex and JEI pages, the dossier), the Trinkets screen's slots
-(no client test opened it in this run; unit 5's slots shot has not yet run in CI), a person looking at the screenshots
+(no client test opened it in this run; unit 5's slots shot, run 38591108210, shows no item in it), a person looking at the screenshots
 (the descriptions above are of the previews, written for this record), the full-size screenshots (in the run's
 `client-screenshots-4` artifact, not downloaded), two clients on a dedicated server, and play by hand.
 
@@ -711,13 +714,13 @@ hall is untouched.
     water, as the owner chose (B-D2); trims are kept on the item but not drawn, as with Ember; the foci and bangle are
     not drawn on the body; `frozen.png`'s meaning in the owner's set differs from Frostward's;
   - the bangle did nothing against the Yeti King's own push until B-09; since unit 5 his push calls `Brace.spend`, so
-    its Brace halves one of his pushes and credits no one (not yet run in CI);
+    its Brace halves one of his pushes and credits no one (passed in CI, run 38591108210);
   - the kit shares `EmberArmorItem`, `EmberClient` and Ember's slot writer, so renaming them touches the kit;
   - one more GeckoLib armour model, and about 200 more client-test ticks plus the shots
     (`ConcordanceWinterClientGameTests` has an estimated weight of 120 in `tools/select_client_tests.py`);
   - the client test's bangle shot is covered by the advancement toasts its research grant raises (run 38549876709), so
-    it does not show Braced; unit 5 clears the toasts before that shot, as unit 3's test does (`fc9b404dd`; not yet
-    run; [the contract](concordance-chunk-b.md#b-11-evidence-and-the-owner-checkpoint)).
+    it does not show Braced; unit 5 clears the toasts before that shot, as unit 3's test does (`fc9b404dd`; run
+    38591108210 shows Braced; [the contract](concordance-chunk-b.md#b-11-evidence-and-the-owner-checkpoint)).
 - **Deferred:** the owner's light model (no light-layout water sheet for it); the Caster Tome of Water (a tome casting
   one invocation needs a new instrument gate); the foci and bangle drawn on the body; the owner's on-hit bangle (B-P49's
   alternative); powder-snow walking boots (B-P46's alternative); a Rimekeeping elective for bottling Winter Brine

@@ -289,10 +289,10 @@ Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wa
 Wayfaring part 1c (#315, through #320); Concordance Chunk A (the Spell Composer, lair encounter credit and the Jugcraft
 Encyclopedia's first slice) through #352. Concordance Chunk B's unit 1 (the Yeti King and the Cinder Tyrant on the
 encounter credit, their dossiers and JEI pages), unit 2 (tests for the Glacier Hall's access and the Yeti King's fight,
-with three fixes to the fight), unit 3 (Rime and Strata) and unit 4 (Winter Brine, Frostward and the Rime travel kit)
-are not merged; all four pass their tests in CI (run 38549876709). Unit 5 (Brace and Rimebind against the Yeti King,
-his column as Rimekeeping's elective, and the encyclopedia home's route cards shown whole) is not merged and has not run
-in CI yet. Contract and
+with three fixes to the fight), unit 3 (Rime and Strata), unit 4 (Winter Brine, Frostward and the Rime travel kit) and
+unit 5 (Brace and Rimebind against the Yeti King, his column as Rimekeeping's elective, and the encyclopedia home's
+route cards shown whole) are not merged; all five pass their tests in CI (run 38591108210 on `25644502a`; units 1 to 4
+also in run 38549876709) and wait for the owner's checkpoint. Contract and
 vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),

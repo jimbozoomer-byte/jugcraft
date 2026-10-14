@@ -192,7 +192,8 @@ name no test); the first run, 38509414542, failed only the two four-player boss 
 unchanged and showed only the top of the Expeditions page: in run 38519234934 (shard 0, where it passed) the
 `_expedition` shot shows the Hollow Acre's dossier, so no shot showed the Glacier Hall's or the Cinder Kiln's; the
 server tests check their content. Since unit 5 (B-11) it scrolls Expeditions to each and pictures them
-(`jugcraft_encyclopedia_expedition_glacier_hall`, `_cinder_kiln`, their toasts cleared; not yet run in CI). That run's
+(`jugcraft_encyclopedia_expedition_glacier_hall`, `_cinder_kiln`, their toasts cleared); the test passed in run
+38591108210 (shard 3), whose readable log part did not reach those two previews. That run's
 home shot shows the Magic card's link cut to "Open Magic: the Arcane Concorda…" and the body's last line clipped above
 it. It was first recorded as a Chunk A defect, but the home is #322's guide directory (`EncyclopediaRoutesScreen`), on
 main through #352; unit 5 fixed it (`d22a55830`; [the encyclopedia record](jugcraft-encyclopedia.md), and B-11 in
