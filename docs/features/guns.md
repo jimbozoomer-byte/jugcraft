@@ -2113,7 +2113,10 @@ The reload times and the rates are the owner's animations'.
   - **Empty bone:** the `bolt` bone its draw names holds nothing.
   - **Sights:** the owner's notch over the post at the muzzle; the scopes stand on the receiver in its place.
   - **Aiming:** held 3 px further out: the back of its stock came 1.2 px past the eye.
-- **The arms:** chosen in first-person previews to cover as little of the screen as they can, still running back toward the shoulder, through each gun's hold, shot, reload and inspection. The Fencepost Carbine's right arm was the one that mattered most: its hand goes back to the lid on the stock for each round, and the usual direction brought the arm across most of the screen.
+- **The arms:** chosen in first-person previews to cover as little of the screen as they can, still running back toward the shoulder, through each gun's hold, shot, reload and inspection.
+  - **The Fencepost Carbine's right arm** mattered most: its hand carries each round back to the lid on the stock, within a few pixels of the eye. There the game leaves an arm out while any of it is within a tenth of a block of the eye, and draws it again as it leaves.
+  - **First choice:** in CI ([run 38500777704](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38500777704)), the reload screenshot showed it across the right half of the view, just outside that reach. Checked against the game's own rule at every hundredth of a second, it covered a fifth to two fifths of the view for about a tenth of a second twice in every round's loading.
+  - **Now:** it runs down and in from the hand. It is left out for most of each round's loading, and covers at most a sixth of the view when drawn. Its hold, shot and inspection look as before.
 - **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload, draw and inspection; the lid, the hammers, the levers, the shell and the swinging barrel through their animations; each with the attachments it takes; and the nearest point of each gun to the eye through its aimed shot.
 
 **Connections:**
@@ -2132,6 +2135,7 @@ The reload times and the rates are the owner's animations'.
 **Known limits:**
 - **The Fencepost Carbine's `flash` bone shows nothing:** its shot scales that bone up and away, a flash at the lock the owner's mod drew; here the muzzle flash every gun shows stands for it.
 - **The Highball Rifle's barrel swings aside about a hinge chosen here:** the owner's model gave no pivot for it.
+- **The Fencepost Carbine's right arm at the end of a reload:** as the lever is worked, it passes close to the eye. For about three hundredths of a second it covers much of the view, as it did with the first choice of arm.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
 ### The Fencer Thumper waits
@@ -4365,11 +4369,22 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2564 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, looks and eye relief against tools/guns.py).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 13B game tests (not yet run; CI runs them):**
+- **Slice 13B game tests (all passed in CI, below):**
   - `FrontierGunsIIGameTests`:
     - `frontierGunsIIAreRegistered`: each is registered with its numbers, its recipe loads, it fires plain bullets one pull a shot, held in both hands, and it takes the grips and the bayonets. The Fencepost Carbine is a carbine of seven rifle rounds and the Waystation Shotgun a shotgun of eight shells, eight pellets a shot, each loaded a round at a time; the Highball Rifle a single-shot rifle, hitting hardest and reaching furthest of the three, the shotgun least. The barrel attachments fit the shotgun and the rifle, not the carbine; the scopes and the Laser Sight the rifle alone.
     - `frontierGunsIIFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: the carbine and the shotgun with one round in after their first round's time, the rifle with none halfway through its reload.
   - `GunsGameTests` counts 69 guns; `TacticalAttachmentsGameTests` the twenty-seven that take the Tactical Grip.
+- **Slice 13B in CI** ([run 38500777704](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38500777704), on d1f20f7fe): every check passed.
+  - **Server game tests:** 1588 in each job, the `mod` job's and the one without the optional integrations. All passed, `FrontierGunsIIGameTests` among them.
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` ran alone in its shard, taking each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments. Its checks passed for each: the arms' sizes, the narrowed view, the hit and the round spent, the reload, and the casings its animations cue. The job's text log was too large to read here, so its numbers are not quoted.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar.
+    - **Aimed and fired:** each raised to the middle of the view. The Fencepost Carbine's and the Highball Rifle's sights meet the crosshair on the husk's chest. The Waystation Shotgun's sights meet it at the husk's head, with the right hand over its legs.
+    - **Reloading:** the Waystation Shotgun and the Highball Rifle rolled, each hand at its work. The Fencepost Carbine's right arm covered the right half of the view, with the gun out of sight behind it. It was chosen again after this run ([above](#slice-13b-more-frontier-guns)).
+    - **Inspection:** each turned toward the eye to be looked over.
+    - **Attachments:** each barrel part at the muzzle of the Waystation Shotgun and the Highball Rifle; the grips under the fore-end; the Laser Sight on the Highball Rifle as on the Longhorn, Kestrel, Lookout and Lament Rifles in the same run.
+    - **Third person:** each raised, flashing as it fires.
+- **The Fencepost Carbine's right arm chosen again, run locally (14 October 2026):** `python3 tools/guns.py` PASS, `python3 tools/check_mod_data.py` PASS, `python3 scripts/check_repository.py` PASS. Its first-person previews were drawn with the game's near-eye rule at every hundredth of a second of the reload. Its CI run is recorded in the pull request.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability

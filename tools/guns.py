@@ -2100,7 +2100,9 @@ BUILDS = {
     # Slice 13B. The Fencer Carabine loads through a lid on top of its stock (the main part's elements the owner put in
     # their lid group, the 20th and 21st), turned up and over about its front; its hammer is the owner's hammer part on
     # the right of the lock, its lever loop the main part's 24th element, turned about its front. Its bolt and flash
-    # bones hold nothing. Its sight is the notch on the receiver over the post at the muzzle.
+    # bones hold nothing. Its sight is the notch on the receiver over the post at the muzzle. Its right hand carries each
+    # round back to the lid, within a few pixels of the eye: its arm runs down and in from there, so that between the
+    # frames it is left out it does not sweep across the view (a CI screenshot of 14 October 2026).
     "fencepost_carbine": {
         "bones": [
             ("gun_body2", None, [], (8.0, 1.4, 16.4)),
@@ -2112,7 +2114,7 @@ BUILDS = {
             ("flash", "gun_body", [], (9.0, 3.6, 14.0)),
         ],
         "hands": {"right": (8.0, 1.4, 16.4), "left": (8.0, 1.6, 8.5)},
-        "arms": {"right": (0.433, -0.25, 0.866), "left": (0.8001, -0.3314, 0.5)},
+        "arms": {"right": (-0.2097, -0.3961, 0.8939), "left": (0.8001, -0.3314, 0.5)},
         "muzzle": (8.0, 4.25, -0.74),
         "sight": (8.0, 5.3, 11.58),
         "eye_relief": 6.0,
