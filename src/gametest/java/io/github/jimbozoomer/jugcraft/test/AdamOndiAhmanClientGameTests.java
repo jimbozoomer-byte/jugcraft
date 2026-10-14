@@ -94,7 +94,7 @@ public class AdamOndiAhmanClientGameTests implements FabricClientGameTest {
 			if (altar == null) {
 				// What the site holds instead: whether its chunk is a knoll's, the biome its chunks were made with, any piece
 				// of a knoll near it, and the ground; and a picture of it from above.
-				String found = server.computeOnServer(minecraft -> {
+				String held = server.computeOnServer(minecraft -> {
 					ServerLevel level = minecraft.overworld();
 					StringBuilder out = new StringBuilder("site chunk is a knoll's: " + AdamOndiAhman.isSiteChunk(site.x() >> 4, site.z() >> 4));
 					for (int dx = -24; dx <= 24; dx += 24) {
@@ -110,10 +110,10 @@ public class AdamOndiAhmanClientGameTests implements FabricClientGameTest {
 					}
 					return out.toString();
 				});
-				LOGGER.info("Adam-ondi-Ahman, seed {}: no altar; {}", SEED, found);
+				LOGGER.info("Adam-ondi-Ahman, seed {}: no altar; {}", SEED, held);
 				context.takeScreenshot("jugcraft_adam_ondi_ahman_site");
 				throw new AssertionError("No Ancient Altar within " + KNOLL_REACH + " blocks of the valley's site at " + site.x() + " " + site.z()
-						+ " (" + found + ")");
+						+ " (" + held + ")");
 			}
 			BlockPos top = altar;
 			String biome = server.computeOnServer(minecraft -> minecraft.overworld().getBiome(top).unwrapKey().map(key -> key.identifier().toString())
