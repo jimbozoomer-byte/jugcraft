@@ -287,8 +287,8 @@ Record: [walled-town.md](features/walled-town.md).
 
 Magic: the Concordance's 32 roadmap steps (on `main` through #263), Ember and Wayfaring parts 1 and 1b (through #277),
 Wayfaring part 1c (#315, through #320); Concordance Chunk A (the Spell Composer, lair encounter credit and the Jugcraft
-Encyclopedia's first slice) is not yet merged, nor is Concordance Chunk B unit 1 (so far the Yeti King on the encounter
-credit). Contract
+Encyclopedia's first slice) is not yet merged, nor is Concordance Chunk B unit 1 (so far the Yeti King and the Cinder
+Tyrant on the encounter credit). Contract
 and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),
@@ -358,14 +358,14 @@ and vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among t
 
 ### Lairs and their bosses (`lair/`, `tools/lairs.py`, `tools/lair_data.py`)
 
-The Witching Season's pocket-dimension lairs, and the Glacier Hall, under the `agriculture` switch ([hollow-acre.md](features/hollow-acre.md), [spindle-loft.md](features/spindle-loft.md), [vesperine.md](features/vesperine.md), [tatterlace.md](features/tatterlace.md), [glacier-hall.md](features/glacier-hall.md), [yeti-king.md](features/yeti-king.md)).
+The Witching Season's pocket-dimension lairs, the Glacier Hall and the Cinder Kiln, under the `agriculture` switch ([hollow-acre.md](features/hollow-acre.md), [spindle-loft.md](features/spindle-loft.md), [vesperine.md](features/vesperine.md), [tatterlace.md](features/tatterlace.md), [glacier-hall.md](features/glacier-hall.md), [yeti-king.md](features/yeti-king.md), [cinder-kiln.md](features/cinder-kiln.md), [cinder-tyrant.md](features/cinder-tyrant.md)).
 
 | ID / part | Class / data | What |
 | --- | --- | --- |
-| framework | `lair/Lair` (`HOLLOW_ACRE`, `SPINDLE_LOFT`, `GLACIER_HALL`), `Lairs`, `LairInstance`, `LairVisit`, `LairRules`, `GraveGoods`, `MistGateEntity`, `LairCommands` (`/jugcraft lair leave`; operators `list`, `close`) | an instance per ritual, placed fresh; nothing built or broken there; Grey Mist home; Grave Goods keep what a player falls with; `lairs.instances`, `lairs.party_size`, `lairs.gate_seconds`, `lairs.off_season` |
-| rituals | `LastRites` (the `death_knell` and the `mourning_wreath`), `SpindleRite` (the `cursed_spindle`), `FrostHornRite` (the `frost_horn`) | open the Hollow Acre, the Spindle Loft and the Glacier Hall, at night |
-| bosses | `lair/vesperine/` (`VesperineEntity`, `VesperineLoot`), `lair/tatterlace/` (`TatterlaceEntity`, `TatterlaceLoot`), `lair/yeti/` (`YetiKingEntity`, `YetiKingLoot`), `LairBosses` (`lairs.boss_health`, `lairs.boss_damage`) | GeckoLib bodies; loot rolled for each participant; `lairs.event_loot` |
-| encounter credit (Concordance Chunks A and B) | `lair/Encounter` (one fight's record: blows, healing, warding and deeds, at most 32 players, in memory only), `LairRewards` (paid once; the attachment and world record `jugcraft:lair_rewards`, rewards kept under each boss's saved name: `vesperine`, `tatterlace` and, since Chunk B, `yeti_king`), `ConcordanceEffects.observe`, `Lairs.onRelit` | support and objectives qualify for a reward as blows do, at Vesperine, Madame Tatterlace and the Yeti King; the fallen and the away are paid once they are back ([record](features/lair-encounter-credit.md)) |
+| framework | `lair/Lair` (`HOLLOW_ACRE`, `SPINDLE_LOFT`, `GLACIER_HALL`, `CINDER_KILN`), `Lairs`, `LairInstance`, `LairVisit`, `LairRules`, `GraveGoods`, `MistGateEntity`, `LairCommands` (`/jugcraft lair leave`; operators `list`, `close`) | an instance per ritual, placed fresh; nothing built or broken there; Grey Mist home; Grave Goods keep what a player falls with; `lairs.instances`, `lairs.party_size`, `lairs.gate_seconds`, `lairs.off_season` |
+| rituals | `LastRites` (the `death_knell` and the `mourning_wreath`), `SpindleRite` (the `cursed_spindle`), `FrostHornRite` (the `frost_horn`), `KilnSealRite` (the `kiln_seal`) | open the Hollow Acre, the Spindle Loft and the Glacier Hall, at night, and the Cinder Kiln at any hour |
+| bosses | `lair/vesperine/` (`VesperineEntity`, `VesperineLoot`), `lair/tatterlace/` (`TatterlaceEntity`, `TatterlaceLoot`), `lair/yeti/` (`YetiKingEntity`, `YetiKingLoot`), `lair/tyrant/` (`CinderTyrantEntity`, `CinderTyrantLoot`), `LairBosses` (`lairs.boss_health`, `lairs.boss_damage`) | GeckoLib bodies; loot rolled for each participant; `lairs.event_loot` |
+| encounter credit (Concordance Chunks A and B) | `lair/Encounter` (one fight's record: blows, healing, warding and deeds, at most 32 players, in memory only), `LairRewards` (paid once; the attachment and world record `jugcraft:lair_rewards`, rewards kept under each boss's saved name: `vesperine`, `tatterlace` and, since Chunk B, `yeti_king` and `cinder_tyrant`), `ConcordanceEffects.observe`, `Lairs.onRelit` | support and objectives qualify for a reward as blows do, at Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant (no objective of his own); the fallen and the away are paid once they are back ([record](features/lair-encounter-credit.md)) |
 
 ## Shared systems and how to plug in
 

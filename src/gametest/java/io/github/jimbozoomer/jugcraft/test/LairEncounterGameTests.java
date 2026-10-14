@@ -10,6 +10,8 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.LairRewards;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.JugcraftVesperine;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
@@ -40,7 +42,8 @@ import net.minecraft.world.phys.Vec3;
  * is its owner's; a fight left forgets who took part; one who left the game and came back is paid like anyone else;
  * and a reward kept for a player is paid once, whether it waited with them or in the world while they were away, and
  * survives a save either way, and is paid by its boss's payer. The bosses' own deeds and falls are in
- * {@link VesperineGameTests} and {@link TatterlaceGameTests}, and since Concordance Chunk B {@link YetiKingGameTests}.
+ * {@link VesperineGameTests} and {@link TatterlaceGameTests}, and since Concordance Chunk B {@link YetiKingGameTests} and
+ * {@link CinderTyrantGameTests}.
  */
 public class LairEncounterGameTests {
 	/**
@@ -387,5 +390,11 @@ public class LairEncounterGameTests {
 	@GameTest(maxTicks = 20)
 	public void aKeptYetiKingRewardIsSavedAndPaid(GameTestHelper helper) {
 		keptRewardIsSavedAndPaid(helper, YetiKingLoot.BOSS, JugcraftYeti.YETI_FUR, 4);
+	}
+
+	/** Concordance Chunk B: a kept Cinder Tyrant reward survives a save and is paid by his payer. */
+	@GameTest(maxTicks = 20)
+	public void aKeptCinderTyrantRewardIsSavedAndPaid(GameTestHelper helper) {
+		keptRewardIsSavedAndPaid(helper, CinderTyrantLoot.BOSS, JugcraftTyrant.TYRANT_SCALE, 3);
 	}
 }

@@ -8,7 +8,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 - **An arena with edges:** a lair, or a summoning that builds one. The boss does not wander out of it, and it resets when everyone leaves.
 - **Readable attacks:** every big attack is telegraphed (a wind-up, a sound, a shadow on the ground) and can be dodged or blocked.
 - **Recovery:** dying in the fight is not the end; gear can be fetched back, and the boss heals and resets rather than keeping its gains.
-- **Multiplayer:** its health scales with the players in the arena; every player who took part gets a roll of its loot table, not just the last hit. A blow to it, or to a creature that counts for it, is taking part; at Vesperine and Madame Tatterlace since Concordance Chunk A, and the Yeti King since Chunk B, so is support: healing or warding another player against the fight, or one of its objectives ([lair encounter credit](../features/lair-encounter-credit.md)).
+- **Multiplayer:** its health scales with the players in the arena; every player who took part gets a roll of its loot table, not just the last hit. A blow to it, or to a creature that counts for it, is taking part; at Vesperine and Madame Tatterlace since Concordance Chunk A, and the Yeti King and the Cinder Tyrant since Chunk B, so is support: healing or warding another player against the fight, or one of its objectives ([lair encounter credit](../features/lair-encounter-credit.md)).
 - **No griefing:** a summoned boss cannot be called inside a town's protection or another player's claim, and its attacks do not break player builds.
 - **No farming loop:** a long respawn timer per lair (or a costly summoning item), so a trophy stays a trophy.
 - **Optional:** no core progression needs a boss. Its trophies are side-grades with a boon, and each boss also drops something useful to non-fighters (a crafting material, a decoration, a trophy head).
@@ -22,7 +22,7 @@ From [CONTENT_BRANCHES.md](../CONTENT_BRANCHES.md) ("Caves, dungeons and bosses"
 | **The Yeti King** | The Glacier Hall: the Frost Horn | [glacier-hall.md](../features/glacier-hall.md), [yeti-king.md](../features/yeti-king.md) | #300 and #304, through #320 |
 | **The Cinder Tyrant** | The Cinder Kiln: the Kiln Seal | [cinder-kiln.md](../features/cinder-kiln.md), [cinder-tyrant.md](../features/cinder-tyrant.md) | #313 and #317, through #320 |
 
-The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all four are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win. The Yeti King has been on Concordance Chunk A's support credit since Chunk B ([lair-encounter-credit.md](../features/lair-encounter-credit.md)); the Cinder Tyrant still credits damage alone.
+The first two are the Witching Season's ([features/witching-season.md](../features/witching-season.md)); all four are on the shared lair framework (`lair/`). Vesperine and Madame Tatterlace roll their own loot table, `loot_table/entities/<boss>.json`, for each player who took part: their trophies, the Vesper Scythe and the Needle Rapier (Arms VII's), come at 15% a share and always on a player's first win. The Arms VII trophy tables `bosses/vesperine` and `bosses/tatterlace` are written by `tools/arms_variants.py` as the others' are, but nothing rolls them. The Yeti King and the Cinder Tyrant roll theirs the same way, a trophy always on a player's first win. Both have been on Concordance Chunk A's support credit since Chunk B ([lair-encounter-credit.md](../features/lair-encounter-credit.md)).
 
 ## The first eight (trophies built)
 
@@ -195,17 +195,17 @@ The slag never cools. The shelves and the dry troughs are firm footing.
 
 In this phase the sluices take turns: one at a time is choked with slag and will not turn. It is shown by the slag glowing in its gate, and the choke moves every 20 seconds, so one or two always work. Every 30 seconds the channel surges again, announced as before.
 
-**Cinderlings:** small salamanders of glowing slag. They have 14 health and bite for 3 damage, setting you burning for 2 s. They are quick and immune to fire, but in a flooded trough they gutter out. They go for the nearest player, drop nothing, and crumble to ash when he falls, resets or is gone. Whoever hurts one has taken part in his fight.
+**Cinderlings:** small salamanders of glowing slag. They have 14 health and bite for 3 damage, setting you burning for 2 s. They are quick and immune to fire, but in a flooded trough they gutter out. They go for the nearest player, drop nothing, and crumble to ash when he falls, resets or is gone. Whoever hurts one, or whose tamed creature does, has taken part in his fight.
 
 **Below a fifth, "The Molten Heart":** his cracks blaze white. Every cooldown, and his pause between attacks, is a third shorter. His Ember Spit throws five, and his Kiln Breath sweeps 90°. Quenching him still works as before.
 
-**Left alone** for 10 seconds, he sinks back into the crucible, healed. The troughs drain, the sluices reset, his Cinderlings crumble, and who hurt him is forgotten.
+**Left alone** for 10 seconds, he sinks back into the crucible, healed. The troughs drain, the sluices reset, his Cinderlings crumble, and who took part is forgotten.
 
 **Fire Resistance**, from a potion or the Ember invocation Hearthguard, stops his fire: the breath, the slag, the wave, the fire patches and burning. It never stops his blows: the Tail Sweep, the Body Slam, the gobs' and cinders' impact, and the Cinderlings' bites. It helps the prepared without emptying the fight. Hearthguard is the planning pack's Ember link; its Tide, Rime and Strata links wait for those schools.
 
 ### His loot (per participant)
 
-A participant is a player who hurt him or his Cinderlings and is within 64 blocks of the bowl's centre when he falls.
+A participant is a player who qualified in his fight: by a blow to him or a Cinderling (their own or their tamed creature's, the felling blow included), or by healing or warding other players against 4 of his side's blows with the Concordance (since Concordance Chunk B, [lair-encounter-credit.md](../features/lair-encounter-credit.md); his slag's heat and burning are no one's blows, and he names no objective of his own). One alive within 64 blocks of the bowl's centre when he falls is paid at once; one who died in the fight once back on their feet; one who left the game in it on joining again. Each fall pays each player once.
 
 | Loot | Chance |
 | --- | --- |
@@ -213,7 +213,7 @@ A participant is a player who hurt him or his Cinderlings and is within 64 block
 | **A trophy:** the Cinderbrand or the Magmaw (his `bosses/cinder_tyrant` table, one of the two) | 15%; certain on a player's first kill |
 | **Salamander Charm** | 25% |
 | **The Tyrant's Crest** | 20% |
-| 300 experience, shared out | always |
+| 300 experience, shared out among everyone paid | always |
 | The advancement **Tempered** | always |
 
 - **Tyrant Scale:** two magma cream, for Fire Resistance; or a cheaper Kiln Seal, his part of what summons him again.
@@ -237,7 +237,7 @@ The planning pack's chapter 04 asks each lair to answer these:
 - **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
 - **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
 - **Clean-up:** his gobs, cinders, waves, fire patches and Cinderlings are his, capped, and gone with him.
-- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's share is paid once and rolled when it is handed over: at once, or kept for one who died or left the game in the fight.
 - **An ordinary player** can do everything: the sluices are turned by hand, the bait is standing in a trough, and a hot Tyrant still takes half damage from any weapon.
 
 ### Rules kept

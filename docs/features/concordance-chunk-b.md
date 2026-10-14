@@ -1,7 +1,7 @@
 # Concordance Chunk B: winter and stone (contract and handoff)
 
-Status: contract written; unit 1 in progress (the Yeti King's B-01 committed, its tests not yet run in CI); the other
-units Not started. The base is `d4c07bf56`, the head of Chunk A
+Status: contract written; unit 1 in progress (B-01 committed for the Yeti King and the Cinder Tyrant, its tests not yet
+run in CI); the other units Not started. The base is `d4c07bf56`, the head of Chunk A
 ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337), not merged); main is `b73f51c8a`
 ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
 Proposal: the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
@@ -47,7 +47,7 @@ starts.
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | In progress: the Yeti King's B-01 committed (CI pending); the Cinder Tyrant's B-01 and B-02 to come |
+| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | In progress: B-01 committed for the Yeti King and the Cinder Tyrant (CI pending); B-02 to come |
 | 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Not started |
 | 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible. One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | new `arcane-concordance-rime-strata.md` | Not started |
 | 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | new `arcane-concordance-winter.md`; `arcane-concordance-alchemy.md` | Not started |
@@ -156,10 +156,22 @@ reward is paid once.
   The earlier rule, "only a foe who moved 2 blocks or more during the wind-up", was dropped: a late arrival who walks in
   during a wind-up would pass it, and it needs each player's position tracked every tick. A pure dodger with no blow,
   healing or ward earns nothing from the deed; it mostly helps support players short of the threshold.
-- **The Tyrant, in a separate commit** (B-D1): the same changes at
-  `CinderTyrantEntity.java:270,565,1533-1547,1570,1602-1618,1686-1688`, `CinderlingEntity.java:137-140`,
+- **The Tyrant, in a separate commit** (B-D1, done): the same changes at
+  `CinderTyrantEntity.java:270,492-497,577,1533-1547,1570,1602-1618,1686-1688`, `CinderlingEntity.java:137-140`,
   `CinderTyrantLoot.java` (`BOSS = "cinder_tyrant"`; `pay`; `roll` by origin beside the entity overload; `:74` uses
-  `tyrant.position()`) and `JugcraftTyrant.java:41`. No deed (B-P4).
+  `tyrant.position()`) and `JugcraftTyrant.java:41`. His fight begins again after a load once he has landed: a load
+  turns waking into the Kiln and erupting into the Eruption (`CinderTyrantEntity.java:1807-1811`). Waking on a blow
+  still needs a player (`:1677`), so a pet's bite does not wake him.
+  - No deed (B-P4): nothing records who turned a sluice. `SluiceGateBlock` is a plain block with no block entity
+    (`SluiceGateBlock.java:46`); turning it writes only its flow and its trough's flood (`:243-259`), and the quench
+    reads only the flood (`CinderTyrantEntity.java:1050-1062`).
+  - Of his harm, his blows and his own fire are the fight's hurt (the source's entity is he or a Cinderling: the sweep
+    and slam, `mobAttack`; the breath, wave and fire patches, his flame `DamageSource`, `:474-476`; the gobs and
+    cinders, `mobProjectile` with him as owner, whose entity is the owner in vanilla's build, not asserted by a test; a
+    Cinderling's bite, vanilla's `mobAttack`, likewise). The slag's heat (`hotFloor()`, `MoltenSlagBlock.java:56`) and
+    burning (`onFire()`) have no entity, so healing them earns nothing (B-P5). Giving them him as their cause was
+    rejected: the slag would scale with difficulty, knock players away from him, turn their pets on him and count the
+    crucible's permanent slag, and burning would need a mixin.
 
 **Reuses, unchanged:** `Encounter` and `LairRewards`; the effect observer at `lair/Lairs.java:82-83`; the saved formats
 of `jugcraft:lair_rewards`.
@@ -191,7 +203,16 @@ of `jugcraft:lair_rewards`.
   - unchanged from Chunk A: no real disconnect and no two clients.
 - `LairEncounterGameTests.aKeptYetiKingRewardIsSavedAndPaid`: a kept `yeti_king` Due survives a save and is paid by the
   Yeti's payer (the pattern of `keptRewardsSurviveASave`, `:322`).
-- `CinderTyrantGameTests`: the same for the Tyrant, without the column cases.
+- `CinderTyrantGameTests`, the same for the Tyrant without the column cases: `supportSharesHisHoardOnce` (a healer of
+  his Tail Sweep qualifies; one still down as he falls is kept and paid on their feet; one who left is kept in the
+  world; a bystander, a wanderer and the one he only hurt are not paid; a second `die()` pays nobody),
+  `aKillingBlowAloneIsPaid`, `aPetsBlowIsItsOwners` (on a Cinderling, and the felling bite on him; a wild wolf's bite
+  is no one's), `healingHisSlagAndBurningEarnsNothing` (B-P5: mending slag and burning earns nothing, mending his
+  Kiln Breath qualifies), `fourPlayersAreEachPaidOnce` and `aFightLoadedAwakeIsRecordedAfresh` (loaded waking, he
+  lands in the Kiln). `Encounter.REACH` (64) is wider than his arena's spacing from other tests (at least 43.5 blocks
+  from his centre), so exact counts and experience shares are asserted only for a fight begun and ended in one
+  synchronous block. `LairEncounterGameTests.aKeptCinderTyrantRewardIsSavedAndPaid`: a kept `cinder_tyrant` Due
+  survives a save and is paid by his payer.
 - Unchanged and still passing: `YetiKingGameTests.hisLootIsEachParticipantsOwn` (`:356`), the Tyrant's test of the same
   name (`CinderTyrantGameTests.java:629`), and the kill in `YetiKingClientGameTests` (`took` then `genericKill`,
   `:204-205`).
@@ -692,7 +713,11 @@ and the build without the optional integrations where it touches an optional bou
 
 - Ember and Tempest counters in the Yeti fight; Rime footing at authored anchors (04:101).
 - Words a player can compose for Rime and Strata, and "Winter's Courtesy" as a composed example (02:94).
-- A Cinder Tyrant objective deed; the sluice records no turner *(survey)*.
+- A Cinder Tyrant objective deed; the sluice records no turner (B-P4, confirmed in B-01). One would need the turner
+  noted as the wheel turns (a transient hook like `Lairs.onRelit`), a key for each turn, and credit only for a player
+  already in his fight.
+- Slag, burning and freezing as a fight's hurt (B-P5): if the owner wants them to count, an opt-in hazard rule in
+  `Encounter`, narrowed to the Tyrant's surge cells and to burning soon after one of his blows, as its own ticket.
 - Thallite slices 3 to 5: arms, the arrow and horse armour, the Thallite Focus, Earthen Steps and Bulwark.
 - The owner's earth sets (Nymph's, Geomancer's, Wealdguard's) as Strata gear.
 - Strata's ritual foundation and civic-project steps (02:143-144); the "warm surface" half of Rime's first step (02:132).
@@ -705,9 +730,9 @@ and the build without the optional integrations where it touches an optional bou
 
 ## Where to resume
 
-B-01's Yeti King commit is in: the Yeti King on `Encounter` and `LairRewards` with both payout defects fixed and the
-column deed; its game tests have not run yet. Next, the Cinder Tyrant's B-01 commit, then B-02. Refresh the open pull
-requests first: #352 decides the rebase.
+B-01 is in, in two commits: the Yeti King on `Encounter` and `LairRewards` with both payout defects fixed and the
+column deed, then the Cinder Tyrant the same way, with no deed (B-P4); their game tests have not run yet. Next, B-02.
+Refresh the open pull requests first: #352 decides the rebase.
 
 ## Decisions
 
@@ -723,8 +748,8 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P1 | 14 October 2026 | The trophy stays one of the two at random (`BOSSES.md:106-112`); 04:135's "choice" is stale | Proposed | B-02 |
 | B-P2 | 14 October 2026 | Shared dossier and JEI wording becomes pronoun-neutral | Proposed | B-02 |
 | B-P3 | 14 October 2026 | The column deed: key `column <player>`, one per baiter per fight, for the player the charge was aimed at as he set off, only if they already had a part (a share) then; being struck by his fight is not a part | Proposed (revised 14 October 2026 from "moved 2 blocks or more during the wind-up", which a late arrival walking in would pass) | B-01 |
-| B-P4 | 14 October 2026 | No Cinder Tyrant objective deed in Chunk B | Proposed | B-01 |
-| B-P5 | 14 October 2026 | Harm with no attacking creature (slag, fire ticks, freezing) stays outside the fight's hurt (`Encounter.java:132-134`) | Proposed | B-01 |
+| B-P4 | 14 October 2026 | No Cinder Tyrant objective deed in Chunk B: nothing records who turned a sluice (`SluiceGateBlock.java:46,243-259`; `CinderTyrantEntity.java:1050-1062`) | Proposed | B-01 |
+| B-P5 | 14 October 2026 | Harm with no attacking creature (slag, fire ticks, freezing) stays outside the fight's hurt (`Encounter.java:132-134`). Applied to both bosses in B-01, with no change to `Encounter`; pinned for the Tyrant by `CinderTyrantGameTests.healingHisSlagAndBurningEarnsNothing` | Proposed | B-01 |
 | B-P6 | 14 October 2026 | Authored invocations only (13 of 16); no words a player composes for Rime or Strata | Proposed | B-06, B-07 |
 | B-P7 | 14 October 2026 | Brace's consenting ally is the party (`here allies`) | Proposed | B-06 |
 | B-P8 | 14 October 2026 | Only the Yeti King and the Cinder Tyrant join `#jugcraft:concordance/resistant`; Vesperine and Madame Tatterlace do not | Proposed | B-06 |

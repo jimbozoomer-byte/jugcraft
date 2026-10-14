@@ -23,12 +23,12 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One fight with a lair boss (Concordance Chunk A, A-05; the Yeti King's since Chunk B): who took part and how, kept by
- * the boss while it lives. A player qualifies for the boss's reward by any one of these:
+ * One fight with a lair boss (Concordance Chunk A, A-05; the Yeti King's and the Cinder Tyrant's since Chunk B): who
+ * took part and how, kept by the boss while it lives. A player qualifies for the boss's reward by any one of these:
  * <ul>
  * <li><b>damage</b>: any blow to the boss or a creature that counts for it (Vesperine's skulls and harvest souls, Madame
- * Tatterlace's egg sacs and spiderlings, the Yeti King's whelps; not Vesperine's Grave Thralls), as before Chunk A, or
- * by a creature they tamed;</li>
+ * Tatterlace's egg sacs and spiderlings, the Yeti King's whelps, the Cinder Tyrant's Cinderlings; not Vesperine's Grave
+ * Thralls), as before Chunk A, or by a creature they tamed;</li>
  * <li><b>healing</b>: at least {@value #HEALING} health given back to other players the fight had hurt, counting no
  * more than the hurt not yet healed;</li>
  * <li><b>warding</b>: at least {@value #WARDING} of the fight's damage soaked by a ward they put on another player;</li>

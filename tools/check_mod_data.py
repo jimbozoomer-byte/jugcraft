@@ -9956,8 +9956,9 @@ def check_cinder_tyrant():
     each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet
     without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is
     animated by both of his controllers; his loot table is the table's and his trophies are Arms VII's; his recipes,
-    tags and advancement are there; every message he sends has its words; and nothing of his loads a chunk or leaves
-    its dimension."""
+    tags and advancement are there; every message he sends has its words; his fight's credit and reward go through
+    lair/Encounter and lair/LairRewards (Concordance Chunk B); and nothing of his loads a chunk or leaves its
+    dimension."""
     import math
     import arms_variants
     import cinder_kiln as ck
@@ -10212,6 +10213,21 @@ def check_cinder_tyrant():
     slag = (JAVA_ROOT / "lair" / "MoltenSlagBlock.java").read_text(encoding="utf-8")
     if "SalamanderCharm.warded(living)" not in slag:
         err("MoltenSlagBlock must spare whoever holds a Salamander Charm")
+    # His fight's credit and reward (Concordance Chunk B, B-01): lair/Encounter's record, begun as he wakes and after a
+    # load and abandoned when he is left alone; the killing blow and a tamed creature's blow, on him or a Cinderling, are
+    # their striker's; his fall is claimed once and paid through lair/LairRewards under his name, which is saved.
+    for cls, text, needles in (
+            ("CinderTyrantEntity", boss, ("new Encounter(this, this::centre)", "encounter.begin();", "encounter.abandon();",
+                                          "if (!encounter.claim()) {", "Encounter.striker(source) instanceof ServerPlayer player",
+                                          "LairRewards.pay(level, CinderTyrantLoot.BOSS, encounter, position(), centre(), EXPERIENCE)")),
+            ("CinderlingEntity", sources.get("CinderlingEntity", ""), ("Encounter.striker(source) instanceof ServerPlayer player",)),
+            ("CinderTyrantLoot", loot_java, ('BOSS = "cinder_tyrant";',)),
+            ("JugcraftTyrant", registry, ("LairRewards.payer(CinderTyrantLoot.BOSS, CinderTyrantLoot::pay)",))):
+        for needle in needles:
+            if needle not in text:
+                err(f"{cls}.java: his fight's credit and reward go through lair/Encounter and lair/LairRewards ({needle})")
+    if "damageBy" in boss or "CinderTyrantLoot.reward(" in boss:
+        err("CinderTyrantEntity.java pays his loot the old way (a damage map, CinderTyrantLoot.reward)")
     for cls, text in sources.items():
         for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
             if key not in lang:
