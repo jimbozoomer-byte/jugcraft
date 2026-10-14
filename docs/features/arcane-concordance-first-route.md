@@ -66,7 +66,7 @@ its own step).
 | compose | Required | a spell inscribed on a carried instrument | understand, wand | - | - | `composition/composing` (first_light understood) | `theRouteFollowsTheResearch`, `spellcraftShowsWhatIsHeld` |
 | support | Recommended | an inscription that wards someone other than its caster (ward, with or without modifiers, not delivered here) | compose | - | - | - | `theRouteFollowsTheResearch`, `aWardForAFriendIsComposedAndCast` |
 | equip | Recommended | a Kindled Lantern, a fire-set piece, a fire focus or the Fire Bangle carried or worn | understand | recommended: `jugcraft:lesser_fire_focus` (2 string, 2 gold ingot, 2 #coals, 1 amethyst shard)<br>recommended: `jugcraft:fire_bangle` (4 gold ingot, 1 #coals, 1 amethyst shard)<br>the sets, named when each of these exists: `jugcraft:pyromancers_hat`, `jugcraft:pyromancers_robes`, `jugcraft:pyromancers_leggings`, `jugcraft:pyromancers_boots`, `jugcraft:pyromaniacs_hood`, `jugcraft:pyromaniacs_tunic`, `jugcraft:pyromaniacs_pants`, `jugcraft:pyromaniacs_shoes` | general: `minecraft:lantern` | - | `theFirstLoadoutIsMadeInSurvival` |
-| lair | Optional: after a boss | The Last Harvest or Unravelled | compose | - | - | - | `aBossIsHiddenUntilDiscovered` |
+| lair | Optional: after a boss | a first win over any lair's keeper: The Last Harvest, Unravelled or Abominable | compose | - | - | - | `aBossIsHiddenUntilDiscovered`, `aWinOverAnyKeeperIsTheLairStep` |
 <!-- first-route:end -->
 
 How a step is placed: done when the player's own state says so; otherwise waiting (Later) until the steps it waits for
@@ -89,12 +89,18 @@ What the player makes along the way, where everything the route touches comes fr
   has not met ("and 1 more, through research you have not met yet") without naming it. An item's own description is
   shown as its tooltip gives it.
 - A lair, and its rite, show once its token is carried (a Death Knell or a Mourning Wreath for the Hollow Acre, a
-  Cursed Spindle for the Spindle Loft); its keeper once met (inside her lair, or owed her reward) or beaten.
-- A boss's dossier then adds how support earns a share of her reward ([lair encounter credit](lair-encounter-credit.md)),
-  what she gives (the acquisition text JEI shows, "with the default data", exact chances included: A-D15), the cheaper
-  token her loot opens and the pieces made of it, how to leave, and, inside her lair, the player's own part in the
-  current fight. What counts towards a share is named for each lair: her own creatures (not Vesperine's Grave Thralls),
-  healing and warding friends, and her objective.
+  Cursed Spindle for the Spindle Loft, and since Concordance Chunk B a Frost Horn for the Glacier Hall); its keeper once
+  met (inside the lair, or owed the keeper's reward) or beaten. The rite says when it works: the Witching Season's two
+  (the Last Rites and the spindle) wait for the Halloween event unless the server's `lairs.off_season` lets them work
+  on any night, while the horn works all year.
+- A keeper's dossier then adds how support earns a share of the reward
+  ([lair encounter credit](lair-encounter-credit.md)), the trophy a first win always brings (one, or for the Yeti King
+  one of his two at random), what the keeper gives (the acquisition text JEI shows, "with the default data", exact
+  chances included: A-D15), the cheaper token the loot opens and the pieces made of it, how to leave, and, inside the
+  lair, the player's own part in the current fight. What counts towards a share is named for each lair: the keeper's
+  own creatures (not Vesperine's Grave Thralls), healing and warding friends (never what freezing took: it is no
+  blow), and the lair's objective (for the Yeti King, baiting his charge into an ice column, by one already in his
+  fight). The words shared by every dossier name no keeper's sex (B-P2).
 
 ## Connections
 
@@ -124,6 +130,9 @@ None: no recipe, item, trade, reward or saved state is added. A recipe a data pa
   it. Building a page reads the rules, the player's own records and inventory, the server's recipes and at most one
   block entity near the player; it writes nothing (`check_encyclopedia` forbids the writes).
 - Bounds: 6 pages, 96 rows a page (the last says there is more), 12 grids a page, 9 icons a row, 4 alternatives a slot.
+  With every lair found and its keeper beaten, the Expeditions page draws 10 grids of the 12 (since Concordance Chunk B,
+  B-02) in 54 rows, 61 at most (a town's three sales, a kept share for each keeper and one fight line);
+  `check_encyclopedia` refuses a dossier table that would draw more grids than `PageWriter.MAX_GRIDS`.
 - Persistence: none. The page being read is remembered in memory only and forgotten on leaving a world; resuming
   where one left off is a proposed convenience, so nothing is saved.
 - Disable behaviour: with the Concordance off, its pages are left out and a notice says so; with the lairs off, no

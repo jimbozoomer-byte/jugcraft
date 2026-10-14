@@ -1,7 +1,7 @@
 # Concordance Chunk B: winter and stone (contract and handoff)
 
-Status: contract written; unit 1 in progress (B-01 committed for the Yeti King and the Cinder Tyrant, its tests not yet
-run in CI); the other units Not started. The base is `d4c07bf56`, the head of Chunk A
+Status: contract written; unit 1 in progress (B-01 committed for the Yeti King and the Cinder Tyrant, and B-02 for the
+Glacier Hall's dossier and the Yeti King's JEI pages; their tests not yet run in CI); the other units Not started. The base is `d4c07bf56`, the head of Chunk A
 ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337), not merged); main is `b73f51c8a`
 ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
 Proposal: the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
@@ -47,7 +47,7 @@ starts.
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | In progress: B-01 committed for the Yeti King and the Cinder Tyrant (CI pending); B-02 to come |
+| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | In progress: B-01 committed for the Yeti King and the Cinder Tyrant (CI pending); B-02 committed for the Glacier Hall and the Yeti King (CI pending); the Cinder Kiln's dossier and the Tyrant's pages to come |
 | 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Not started |
 | 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible. One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | new `arcane-concordance-rime-strata.md` | Not started |
 | 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | new `arcane-concordance-winter.md`; `arcane-concordance-alchemy.md` | Not started |
@@ -250,7 +250,7 @@ exactly-once rewards (04:20); no reward for a late arrival who did nothing (04:1
 | `lair/LairDossiers.java:58-59,163-169` | The trophy becomes one of a pair |
 | `lair/LairDossiers.java:134-139` | The exhaustive `rite()` switch gains both cases and their lang keys |
 | `lair/LairDossiers.java:151-153` | The season fact assumes the Halloween gate; an "all year" variant for rites that ignore it |
-| `concordance/encyclopedia/FirstLightRoute.java:92-93` | `abominable` and `tempered` join `FIRST_WINS` |
+| `concordance/encyclopedia/FirstLightRoute.java:92-93,126-127,142` | `FIRST_WINS` removed: the lair step is done by `LairDossiers.anyBeaten` (every keeper's first-win advancement) and shown when `LairDossiers.canOpen` (any token's recipe) |
 | `tools/encyclopedia.py` (dossiers; shared credit and route strings) | New entries; pronoun-neutral shared strings (B-P2) |
 | `tools/acquisition.py:41-50,96-117` | `event` optional; a trophy pair as one pool ("a 15% chance of one of the two"), not 15% each; new rows |
 | `tools/check_mod_data.py:9697-9733` (`check_acquisition`) | An explicit boss-to-loot-class map (today the path is built from the boss name, `:9698`, which finds no `lair/yeti_king/Yeti_kingLoot.java`); the Halloween chance optional (`:9725-9728`); a first-kill rule that accepts the `TROPHIES` table shape (`:9729-9733`); bosses without pages (the Mire Hag, the Crypt Lich) allowed |
@@ -269,7 +269,26 @@ exactly-once rewards (04:20); no reward for a late arrival who did nothing (04:1
   (`guide/encyclopedia/PageWriter.java:54`).
   Past it a grid keeps only its text, and rows past the page's maximum are dropped (`:48-49,129,256`). The test warns
   the next keeper; B-08's preparation fact is text and icons, with no grid (B-P29).
+  Exact counts, every keeper found and beaten, with no town, kept share or visit: 71 rows (Vesperine 20, Madame
+  Tatterlace 17, the Yeti 17, the Tyrant 17) and 12 grids; at worst about 79 rows (a town's three sales, a kept share
+  for each keeper, one fight line) against the 95 shown before the "more" row (`EncyclopediaPayload.Page.MAX_ROWS` 96).
+  The test asserts the grids exactly and that nothing is dropped, not a row count, which B-P29's fact would move.
+  `check_encyclopedia` counts the grids statically and refuses a table past `MAX_GRIDS`. A fifth keeper needs
+  `MAX_GRIDS` and `MAX_ROWS` raised as a recorded bound change, not a page per lair (`MAX_PAGES` is 6,
+  `EncyclopediaPayload.java:27`, with four taken). After the Glacier Hall's commit, before the Kiln's: 54 rows and 10
+  grids.
 - `check_mod_data.py` mutation checks, as in Chunk A.
+
+**As built (the Glacier Hall's commit; not run until CI):** `EncyclopediaGameTests.theGlacierHallsDossier`,
+`eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and `theExpeditionsPageHoldsEveryKeeper`;
+`GlacierHallGameTests.theHornIsNoHalloweenRite`; `YetiKingGameTests.hisLootIsWhatHisPagesSay` (400 shares, each count
+within five standard deviations of its page's chance; never both trophies). Run here: `check_mod_data.py`,
+`check_repository.py` and `concordance_journey.py` pass; on a scratch copy, 30 faults against `check_acquisition` and
+8 against `check_encyclopedia` (the Yeti's trophies in the tool, his mitten moved into another keeper's entry, his
+rite made a Halloween one, the grid bound lowered to 9, his rite recipe needing his fur, a missing lang key, his snow
+sale dropped from the entry, the Hollow Acre's season words dropped) were each reported, and #336's Mire Hag table with
+no pages was not. Adding `white_wool_from_yeti_fur` to his `made_from` passes at this commit (11 grids of 12); with the
+Kiln's two it would be 13, which the audit refuses.
 
 **Acceptance:** B4's encyclopedia guidance (09:106); closes Chunk A's deferral (`concordance-chunk-a.md:157-160`).
 
@@ -621,7 +640,8 @@ the Yeti and is still slowed (`YetiKingGameTests`); the foci lengthen Preserve's
   practices and advancements; fifteen kit items; tags `concordance/preservable` and `rime_specimens`; additions to
   `assay_specimens`, `concordance/resistant`, `minecraft:freeze_immune_wearables` and the trinket slot tags.
 - **Shared code:** `YetiKingLoot` and `CinderTyrantLoot` gain `BOSS`, `pay` and `roll` by origin (the entity overloads
-  kept); `LairDossiers.Boss` gains a trophy pair and an all-year rite; `FirstLightRoute.FIRST_WINS` gains two wins;
+  kept); `LairDossiers.Boss` gains `trophies` (one, or a pair), `offSeason` (null for a rite that works all year) and `sales`, and
+  `LairDossiers` gains `beaten`, `anyBeaten` and `canOpen`; `FirstLightRoute.FIRST_WINS` is removed (B-02 as built);
   `ConcordanceEffects` gains Rime's alteration and `accepts` case and the helpful-push exemption; a new Guard; `Mixture`
   gains the Rime heat rule; `CrucibleBlockEntity` gains the hold and records Rime brew practice; `YetiKingEntity` gains
   the Frostward check, the taking of Brace and the Rimebind wind-up; `Benchmark` learns `rimebound`. New practice hooks:
@@ -664,6 +684,11 @@ B-05 cannot start on its own.
 - **The Water Bangle's role** (a Brace) differs from the owner's tooltip text in the library (a chill on each blow); see
   B-P25.
 - **The Expeditions page** reaches its grid limit with four keepers; a fifth needs a layout change.
+- **The rite words name the default tags** (`#jugcraft:frost_horn_ground`, `#jugcraft:kiln_seal_lands`): a data pack
+  that changes them is not reflected in the dossier, as with the items' tooltips.
+- **A used-up token hides its lair again:** discovery is read, not saved (A-D9), so a player who went in and used up
+  their Frost Horn reads as not having found the Glacier Hall until they carry one again or win; the same as the
+  Witching Season's lairs, now for every lair.
 - **Two bosses stay on the old path:** the Mire Hag and the Crypt Lich keep damage-only rewards in their pull requests;
   after Chunk B, four bosses are on the encounter credit and two are not.
 - **Overlap with Chunk C's preservation wash** (09:124): Winter Brine stays a frost counter.
@@ -731,7 +756,10 @@ and the build without the optional integrations where it touches an optional bou
 ## Where to resume
 
 B-01 is in, in two commits: the Yeti King on `Encounter` and `LairRewards` with both payout defects fixed and the
-column deed, then the Cinder Tyrant the same way, with no deed (B-P4); their game tests have not run yet. Next, B-02.
+column deed, then the Cinder Tyrant the same way, with no deed (B-P4); their game tests have not run yet. B-02's first
+commit is in: the Glacier Hall's dossier, the Yeti King's JEI pages, the lair step done by any keeper's first win, and
+the generalised `check_acquisition` and `check_encyclopedia`; its tests have not run yet. Next, B-02's second commit:
+the Cinder Kiln's dossier and the Cinder Tyrant's JEI pages (B-D1).
 Refresh the open pull requests first: #352 decides the rebase.
 
 ## Decisions
@@ -746,7 +774,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-D2 | 13 October 2026 | "Use your water sets as Rime (Recommended)": the owner's water sets in the library (Winterguard's, Aquamancer's, Nereid's, with the water focus, lesser water focus and water bangle) become Rime's winter gear, the plan's "Rime travel kit" (02:168: preservation focus, snow-safe boots, a short Brace accessory; resist environmental freezing without permanent boss immunity), made in survival like Ember's regalia; names and art stay the owner's; no stat inflation | Accepted (owner) | B-10 |
 | B-D3 | 13 October 2026 | "A timed brew (Recommended)": Winter Brine from the Alembic Crucible gives a timed Frostward status that the Yeti King's frost respects; the Yeti Mitten stays the permanent prize | Accepted (owner) | B-08 |
 | B-P1 | 14 October 2026 | The trophy stays one of the two at random (`BOSSES.md:106-112`); 04:135's "choice" is stale | Proposed | B-02 |
-| B-P2 | 14 October 2026 | Shared dossier and JEI wording becomes pronoun-neutral | Proposed | B-02 |
+| B-P2 | 14 October 2026 | The dossier wording every lair shares (`won`, `after_win`, `made_from`, `owed`, `credit.wards`, the route's `support.credit`) becomes neutral ("the keeper"); JEI's pages are each one boss's, so they keep that boss's pronoun (her, his) and the ten existing pages stay as they were | Proposed (refined 14 October 2026 in B-02) | B-02 |
 | B-P3 | 14 October 2026 | The column deed: key `column <player>`, one per baiter per fight, for the player the charge was aimed at as he set off, only if they already had a part (a share) then; being struck by his fight is not a part | Proposed (revised 14 October 2026 from "moved 2 blocks or more during the wind-up", which a late arrival walking in would pass) | B-01 |
 | B-P4 | 14 October 2026 | No Cinder Tyrant objective deed in Chunk B: nothing records who turned a sluice (`SluiceGateBlock.java:46,243-259`; `CinderTyrantEntity.java:1050-1062`) | Proposed | B-01 |
 | B-P5 | 14 October 2026 | Harm with no attacking creature (slag, fire ticks, freezing) stays outside the fight's hurt (`Encounter.java:132-134`). Applied to both bosses in B-01, with no change to `Encounter`; pinned for the Tyrant by `CinderTyrantGameTests.healingHisSlagAndBurningEarnsNothing` | Proposed | B-01 |
@@ -774,6 +802,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P27 | 14 October 2026 | The Frost Knight and Wight King sets stay creative-only (continuing A-D10) | Proposed | B-10 |
 | B-P28 | 14 October 2026 | Nothing is added to `earthen_ground`; no Thallite or trophy number changes | Proposed | B-10 |
 | B-P29 | 14 October 2026 | Winter Brine's dossier fact is text and icons, with no recipe grid | Proposed | B-02, B-08 |
+| B-P30 | 14 October 2026 | The Glacier Hall's dossier names the Seasonal Stall's snow blocks (8 for 3 Jugs, under its winter and December themes) as a sale that helps with the horn, shown only where a town stands and while it is on sale | Proposed | B-02 |
 
 ## How this contract was checked
 

@@ -1,11 +1,13 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.lair.FrostHornRite;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
+import io.github.jimbozoomer.jugcraft.lair.SpindleRite;
 import io.github.jimbozoomer.jugcraft.lair.TrampledSnowBlock;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,8 +40,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The Glacier Hall and the Frost Horn (docs/features/glacier-hall.md), as far as a game-test server can show them. Its
  * world is built from the flat preset alone, so it has no lair dimension: the hall's own files load (dimension type,
- * biome and template), the horn's checks hold, a horn that can open no instance is not used up, and the hall's snow and
- * ice are what its fight needs (slick glare ice, the trampled snow's half steps). Everything that needs the hall itself
+ * biome and template), the horn's checks hold and keep no season, a horn that can open no instance is not used up, and
+ * the hall's snow and ice are what its fight needs (slick glare ice, the trampled snow's half steps). Everything that needs the hall itself
  * (falling in through the snow, the whirl, following, the arch's Grey Mist, the instance closing) runs in a real world, in
  * {@link GlacierHallClientGameTests}.
  */
@@ -129,6 +131,34 @@ public class GlacierHallGameTests {
 		helper.setBlock(STAND, Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, 2));
 		helper.assertTrue(FrostHornRite.check(level, at, true) == null, "The horn is not answered standing in a snow layer");
 		helper.assertTrue(FrostHornRite.whirl(level, at) == null, "A whirl opened where nobody blew");
+		helper.succeed();
+	}
+
+	/**
+	 * The horn keeps no season (Concordance Chunk B, B-02, as the Glacier Hall's dossier says): the Halloween event over
+	 * and lairs.off_season off, the spindle waits for the season but the horn is answered at night on snow.
+	 */
+	@GameTest
+	public void theHornIsNoHalloweenRite(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = helper.absolutePos(STAND);
+		helper.setBlock(STAND.below(), Blocks.SNOW_BLOCK.defaultBlockState());
+		HalloweenSeason.Mode mode = HalloweenSeason.mode();
+		String offSeason = JugcraftConfig.textOption("lairs.off_season");
+		FrostHornRite.Missing horn;
+		SpindleRite.Missing spindle;
+		// Switched back at once: the server runs other tests.
+		try {
+			HalloweenSeason.setMode(HalloweenSeason.Mode.OFF);
+			JugcraftConfig.setTextOption("lairs.off_season", "off");
+			horn = FrostHornRite.check(level, at, true);
+			spindle = SpindleRite.check(level, at, true);
+		} finally {
+			HalloweenSeason.setMode(mode);
+			JugcraftConfig.setTextOption("lairs.off_season", offSeason);
+		}
+		helper.assertTrue(spindle == SpindleRite.Missing.OFF_SEASON, "Out of season the spindle should wait (the settings took): " + spindle);
+		helper.assertTrue(horn == null, "Out of season the horn was refused: " + horn);
 		helper.succeed();
 	}
 

@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.authlib.GameProfile;
+import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
@@ -48,7 +49,8 @@ import net.minecraft.world.phys.Vec3;
  * in the Glacier Hall itself runs in a real world, in {@link YetiKingClientGameTests}. Since Concordance Chunk B (B-01)
  * his fight's credit is the lairs' shared one: support and the absent share his loot once, a killing blow alone is paid,
  * a tamed creature's blow is its owner's, a charge baited into a column is each baiter's deed but no idle late
- * arrival's, four players are each paid once, and a fight loaded awake keeps a fresh record.
+ * arrival's, four players are each paid once, and a fight loaded awake keeps a fresh record. Since B-02 his loot is what
+ * his JEI pages say.
  *
  * <p>He fights any player within 38 blocks of his lake's centre; the arena keeps every other test's players farther off
  * than that. Each test sends him away before it ends, with his whelps, and lets the snow drift back.
@@ -61,6 +63,15 @@ public class YetiKingGameTests {
 	 * a test that hurts one waits this long first.
 	 */
 	private static final int LOADING_TICKS = 80;
+	/** How many shares a page test rolls: each count then lies far inside five standard deviations of its chance's mean. */
+	private static final int SHARES = 400;
+
+	/** Whether {@code count} of {@value #SHARES} shares lies within five standard deviations of {@code chance}'s mean. */
+	private static boolean within(int count, double chance) {
+		double mean = SHARES * chance;
+		double deviation = 5.0 * Math.sqrt(SHARES * chance * (1.0 - chance));
+		return count >= mean - deviation && count <= mean + deviation;
+	}
 
 	/** The origin of a hall laid out from the arena's corner, its lake's surface a block over the arena's floor. */
 	private static BlockPos origin(GameTestHelper helper) {
@@ -780,5 +791,46 @@ public class YetiKingGameTests {
 			});
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * His JEI pages (tools/acquisition.py; Concordance Chunk B, B-02) say what the server rolls, with the default data: each
+	 * share holds 4 to 8 Yeti Fur and has a 15% chance of one of his two trophies (7.5% each, never both), a 25% chance of
+	 * the Yeti Mitten and a 20% chance of his Crown. A player who has already won Abominable (so no first-kill trophy)
+	 * rolls {@value #SHARES} shares: none holds both trophies, and each count lies within five standard deviations of its
+	 * chance (a pool's chance ignored, or his trophies split into two pools, falls outside). check_acquisition holds the
+	 * same table to the pages' words; the first kill's trophy is hisLootIsEachParticipantsOwn's.
+	 */
+	@GameTest(maxTicks = 20)
+	public void hisLootIsWhatHisPagesSay(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer veteran = helper.makeMockServerPlayerInLevel();
+		TrickOrTreat.award(veteran, YetiKingLoot.ADVANCEMENT);
+		helper.assertFalse(YetiKingLoot.firstKill(veteran), "A player who has won Abominable rolls no first-kill trophy");
+		Vec3 origin = helper.absoluteVec(new Vec3(1.5, 2.0, 1.5));
+		int maul = 0;
+		int rimeclaw = 0;
+		int mitten = 0;
+		int crown = 0;
+		try {
+			for (int share = 0; share < SHARES; share++) {
+				List<ItemStack> loot = YetiKingLoot.roll(level, origin, veteran);
+				int fur = loot.stream().filter(stack -> stack.is(JugcraftYeti.YETI_FUR)).mapToInt(ItemStack::getCount).sum();
+				helper.assertTrue(fur >= 4 && fur <= 8, fur + " Yeti Fur in a share, not 4 to 8");
+				long trophies = loot.stream().filter(YetiKingLoot::trophy).count();
+				helper.assertTrue(trophies <= 1, "A share held " + trophies + " trophies: his two share one pool");
+				maul += (int) loot.stream().filter(stack -> stack.is(JugcraftYeti.glacierMaul())).count();
+				rimeclaw += (int) loot.stream().filter(stack -> stack.is(JugcraftYeti.rimeclaw())).count();
+				mitten += (int) loot.stream().filter(stack -> stack.is(JugcraftYeti.YETI_MITTEN)).count();
+				crown += (int) loot.stream().filter(stack -> stack.is(JugcraftYeti.YETI_KING_CROWN)).count();
+			}
+		} finally {
+			veteran.discard();
+		}
+		helper.assertTrue(within(maul + rimeclaw, 0.15), (maul + rimeclaw) + " trophies in " + SHARES + " shares, not about 15%");
+		helper.assertTrue(within(maul, 0.075) && within(rimeclaw, 0.075), maul + " Glacier Mauls and " + rimeclaw + " Rimeclaws, not about 7.5% each");
+		helper.assertTrue(within(mitten, 0.25), mitten + " Yeti Mittens, not about 25%");
+		helper.assertTrue(within(crown, 0.2), crown + " Crowns, not about 20%");
+		helper.succeed();
 	}
 }

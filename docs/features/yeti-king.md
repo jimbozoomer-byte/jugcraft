@@ -100,6 +100,8 @@ Who is paid: everyone who qualified and is alive within 64 blocks of the lake's 
 
 He is no Witching Season boss: the Halloween event adds nothing to his loot.
 
+With JEI installed, each of these has an information page with these numbers, "with the default data" (since Concordance Chunk B, B-02: [concordance-first-loadout.md](concordance-first-loadout.md)); `check_acquisition` holds the pages to this table and to `YetiKingLoot`.
+
 **What they are for:**
 - **Yeti Fur:**
   - **A cheaper Frost Horn:** a goat horn, a gold ingot, two snow blocks and Yeti Fur, shapeless. The fur takes the two leather's place and one gold ingot's. This is the plan's "part of what summons him again".
@@ -141,6 +143,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 - **Technology and magic:** none required. He is fought with whatever players bring, and nothing in a tier needs his loot.
 - **Trade and solo routes:** a solo player can do everything. His health is lowest for one player, and the first kill always brings a trophy. His loot can be traded like any item.
 - **Reachable entry path:** the horn takes Discovery-tier things (part 1), and nothing he drops is needed to reach him.
+- **The encyclopedia and JEI (since Concordance Chunk B, B-02):** carrying a Frost Horn shows the Glacier Hall's dossier under Expeditions (its rite, the horn's recipe, that it works all year, and the party it holds); meeting or beating him adds how support earns a share (his whelps, healing, wards and the column), the two trophies of which a first win brings one, his loot with JEI's words, the cheaper horn and the way home. JEI has an information page for each of his five things. A first win over him completes the First Light route's lair step ([arcane-concordance-first-route.md](arcane-concordance-first-route.md)).
 
 ## Balance and automation
 
@@ -244,6 +247,10 @@ Concordance Chunk B, unit 1 (B-01), put his reward on the shared credit and adde
 - `fourPlayersAreEachPaidOnce`: woken by four, his health is two and a half times his own, and each of the four is paid once, a quarter of the experience each.
 - `aFightLoadedAwakeIsRecordedAfresh`: saved awake and loaded again, he holds no one's part and begins a fresh record.
 - `LairEncounterGameTests.aKeptYetiKingRewardIsSavedAndPaid`: a reward kept under `yeti_king` survives a save and is paid once by his payer.
+
+Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these game tests, which have not run yet either:
+- `YetiKingGameTests.hisLootIsWhatHisPagesSay`: a player who has already won Abominable rolls 400 shares; each holds 4 to 8 Yeti Fur and never both trophies, and the counts of the maul, the Rimeclaw, the mitten and the crown each lie within five standard deviations of 7.5%, 7.5%, 25% and 20%.
+- `EncyclopediaGameTests.theGlacierHallsDossier`, `eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and `theExpeditionsPageHoldsEveryKeeper`; `GlacierHallGameTests.theHornIsNoHalloweenRite`.
 
 `python3 tools/check_mod_data.py` (whose `check_yeti` now also holds his credit and reward to `Encounter` and `LairRewards`: the record begun, abandoned and claimed, the striker's credit on him and his whelps, the payment and payer under `yeti_king`, and the column deed's key) and `python3 scripts/check_repository.py` pass locally at this commit. Five deliberate changes, each made in a scratch copy, each failed `check_yeti`: the claim guard dropped, the whelp crediting `source.getEntity()`, the payer dropped, the old `YetiKingLoot.reward` payment restored, and a constant column key.
 

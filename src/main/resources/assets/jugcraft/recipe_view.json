@@ -8600,6 +8600,10 @@
       "key": "dirge_skull"
     },
     {
+      "item": "jugcraft:glacier_maul",
+      "key": "glacier_maul"
+    },
+    {
       "item": "jugcraft:golden_thimble",
       "key": "golden_thimble"
     },
@@ -8624,12 +8628,28 @@
       "key": "requiem_skull"
     },
     {
+      "item": "jugcraft:rimeclaw",
+      "key": "rimeclaw"
+    },
+    {
       "item": "jugcraft:tatterlace_headdress",
       "key": "tatterlace_headdress"
     },
     {
       "item": "jugcraft:vesper_scythe",
       "key": "vesper_scythe"
+    },
+    {
+      "item": "jugcraft:yeti_fur",
+      "key": "yeti_fur"
+    },
+    {
+      "item": "jugcraft:yeti_king_crown",
+      "key": "yeti_king_crown"
+    },
+    {
+      "item": "jugcraft:yeti_mitten",
+      "key": "yeti_mitten"
     }
   ]
 }

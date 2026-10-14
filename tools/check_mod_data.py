@@ -10561,19 +10561,25 @@ def check_mire_hag():
                 err(f"{cls}.java {why} ({banned})")
 
 def check_acquisition(registered):
-    """Concordance Chunk A, unit 4 (tools/acquisition.py, docs/features/concordance-first-loadout.md): JEI's pages on
-    where the things only a ritual or a lair boss gives come from are the generator's, and each is tied to the files on
-    disk. Each page is shown for a registered item, has its words and says it describes the default data. The loot table
-    a boss's loot class rolls gives each of her things at the chance or count its page states, and every Jugcraft item
-    in it has a page; the Halloween extra and the first victory's trophy are still the loot class's. Nothing else gives
-    them: no other loot table (but the thing's own block and its arms-variants trophy table, which nothing rolls), shop,
-    villager trade, commission or project; and nothing makes a thing whose page says it is not crafted (a recipe's
-    result, results or byproducts, a bench working, a ritual other than the page's own, the Assayer's Scale's
-    catalogue), while the hood's page names its own recipe. The Adept's Attunement makes the Adept's Wand from what its
-    page lists. The JEI plugin shows the rows. Every piece of the first loadout is made by a recipe or a bench working on
-    disk, and the server test that loads those recipes names each; none of those sources gives the owner's armour tiers
-    the record keeps creative-only. Only data is read: what Java alone gives (a creature's drops coded in its class) is
-    not seen. (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
+    """Concordance Chunk A, unit 4, and Chunk B, unit 1 (tools/acquisition.py, docs/features/concordance-first-loadout.md):
+    JEI's pages on where the things only a ritual or a lair boss gives come from are the generator's, and each is tied to
+    the files on disk. Each page is shown for a registered item, has its words and says it describes the default data.
+    For each boss the generator lists (and no other: a boss with a loot table and no pages is not asked for any), the
+    loot class its row names rolls the table its pages describe, which gives each of its things at the count or chance
+    its page states (a single thing from a pool of its own; a pair of trophies from one pool they share, each as likely),
+    and every Jugcraft item in it has a page. The first victory's trophy is still the loot class's: one added in code,
+    or, for a pair, the boss's own trophy table (one pool that always gives one of the two) rolled when the share brought
+    neither. A Halloween extra is the loot class's where a page states one, and there is none where none does. The boss
+    is paid through LairRewards from its fight's Encounter, as every page's last sentence says, and that sentence names
+    an objective exactly when the boss's package credits a deed. Nothing else gives them: no other loot table (but the
+    thing's own block and its boss's arms-variants trophy table), shop, villager trade, commission or project; and
+    nothing makes a thing whose page says it is not crafted (a recipe's result, results or byproducts, a bench working,
+    a ritual other than the page's own, the Assayer's Scale's catalogue), while the hood's page names its own recipe. The
+    Adept's Attunement makes the Adept's Wand from what its page lists. The JEI plugin shows the rows. Every piece of the
+    first loadout is made by a recipe or a bench working on disk, and the server test that loads those recipes names
+    each; none of those sources gives the owner's armour tiers the record keeps creative-only. Only data is read, and
+    the loot classes' few lines named above: what Java alone gives (a creature's drops coded in its class) is not seen.
+    (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
     import acquisition as aq
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     pages = aq.pages()
@@ -10624,14 +10630,25 @@ def check_acquisition(registered):
     for folder in ("commission", "project"):
         for path in sorted((DATA / MOD / "concordance" / folder).glob("*.json")):
             given.setdefault((load(path) or {}).get("reward"), []).append(str(path.relative_to(DATA)))
-    # Each boss: her loot class rolls the table her pages describe, and it gives what they say.
+    # Each boss tools/acquisition.py lists (and only those: a boss with a loot table and no pages, such as the Mire Hag
+    # of #336, paid the old way, is not asked for any): the loot class its row names (an explicit path, as the Yeti
+    # King's is lair/yeti/YetiKingLoot.java) rolls the table its pages describe, and that table gives what they say.
     tables_for = {key: set() for key in pages}
     for boss, info in aq.BOSSES.items():
-        loot_path = JAVA_ROOT / "lair" / boss / f"{boss.capitalize()}Loot.java"
+        his, him = info["pronouns"]
+        loot_path = JAVA_ROOT / info.get("loot_class", f"lair/{boss}/?")
         loot_java = loot_path.read_text(encoding="utf-8") if loot_path.is_file() else ""
+        cls = loot_path.stem
+        where = f"lair/{loot_path.parent.name}/{loot_path.name}"
+        if not loot_java:
+            err(f"acquisition: {boss}'s loot class {info.get('loot_class')} (tools/acquisition.py BOSSES) is not on disk")
         if f'Jugcraft.id("{info["table"]}")' not in loot_java:
-            err(f"lair/{boss}/{loot_path.name} does not roll loot_table/{info['table']}.json, which its JEI pages describe")
-        rolled = {}
+            err(f"{where} does not roll loot_table/{info['table']}.json, which its JEI pages describe")
+        if ("first" in info) == ("trophies" in info):
+            err(f"tools/acquisition.py BOSSES: {boss} needs one trophy (\"first\") or a pair (\"trophies\"), not both or neither")
+        # The table, pool by pool: what each Jugcraft item's pool rolls (its chance, or the count of a sure pool), and
+        # the pool itself.
+        rolled, pool_of = {}, {}
         for pool in (load(DATA / MOD / "loot_table" / f"{info['table']}.json") or {}).get("pools", []):
             chance = pool.get("condition", {}).get("chance")
             for entry in pool.get("entries", []):
@@ -10639,6 +10656,14 @@ def check_acquisition(registered):
                 count = entry.get("modifier", {}).get("count", {})
                 if namespace == MOD:
                     rolled[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+                    pool_of[item] = pool
+        def alone(pool, items):
+            """The pool rolls once, under nothing but its chance, and holds exactly these items, each as likely."""
+            entries = pool.get("entries", [])
+            return (pool.get("rolls") == 1 and not set(pool) - {"condition", "entries", "rolls"}
+                    and sorted(split(entry.get("name", ":"))[1] for entry in entries) == sorted(items)
+                    and len({json.dumps({k: v for k, v in entry.items() if k not in ("name", "modifier")}, sort_keys=True)
+                             for entry in entries}) == 1)
         for item in rolled:
             if item not in pages:
                 err(f"loot_table/{info['table']}.json gives {item}, which has no JEI page (tools/acquisition.py)")
@@ -10652,17 +10677,69 @@ def check_acquisition(registered):
             err(f"acquisition: {item}'s JEI page does not say each share holds what loot_table/{info['table']}.json gives")
         for thing in info["chances"]:
             chance = rolled.get(thing)
-            if not isinstance(chance, (int, float)) or f"a {aq.pct(chance)} chance of it" not in pages.get(thing, ""):
-                err(f"acquisition: {thing}'s JEI page does not give loot_table/{info['table']}.json's chance ({chance})")
-        thing = info["event"][0]
+            if not isinstance(chance, (int, float)) or f"a {aq.pct(chance)} chance of it" not in pages.get(thing, "") \
+                    or not alone(pool_of.get(thing, {}), [thing]):
+                err(f"acquisition: {thing}'s JEI page does not give loot_table/{info['table']}.json's chance ({chance}), "
+                    "one roll of a pool of its own")
+        # The Halloween extra: only where a row states it, and then at the loot class's chance.
         event = re.search(r"\bEVENT_[A-Z]+_CHANCE = ([0-9.]+)F;", loot_java)
-        if not event or f"another {aq.pct(float(event.group(1)))} chance" not in pages.get(thing, ""):
-            err(f"acquisition: {thing}'s JEI page does not give {loot_path.name}'s Halloween chance")
-        first = info["first"]
-        method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
-        if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{method}\(\)\)\);", loot_java) \
-                or "first victory over her always brings it" not in pages.get(first, ""):
-            err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
+        if "event" in info:
+            thing = info["event"][0]
+            if not event or f"another {aq.pct(float(event.group(1)))} chance" not in pages.get(thing, ""):
+                err(f"acquisition: {thing}'s JEI page does not give {loot_path.name}'s Halloween chance")
+        elif event or "eventBonus()" in loot_java:
+            err(f"acquisition: {loot_path.name} adds a Halloween extra, which {boss}'s JEI pages do not state "
+                "(tools/acquisition.py BOSSES has no \"event\" for it)")
+        if "first" in info:
+            # One trophy: the table's chance, and a first kill adds it when the roll did not.
+            first = info["first"]
+            method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
+            if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{method}\(\)\)\);", loot_java) \
+                    or f"first victory over {him} always brings it" not in pages.get(first, ""):
+                err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
+        elif "trophies" in info:
+            # A pair: one pool of the table holds both, each as likely, at the chance the pages state (never one pool
+            # each, which would be more than that chance of a trophy); a first kill that rolled neither rolls the
+            # boss's trophy table, one pool that always gives one of the two, each as likely.
+            pair, chance = info["trophies"]
+            if len(pair) != 2 or pool_of.get(pair[0]) is not pool_of.get(pair[-1]) or rolled.get(pair[0]) != chance \
+                    or not alone(pool_of.get(pair[0], {}), pair):
+                err(f"acquisition: loot_table/{info['table']}.json must roll {his} trophies {list(pair)} in one pool of "
+                    f"their own, once, at {chance}, each as likely, as their JEI pages say")
+            for thing in pair:
+                if aq.pair_roll(info) not in pages.get(thing, "") \
+                        or f"first victory over {him} always brings one of the two" not in pages.get(thing, ""):
+                    err(f"acquisition: {thing}'s JEI page does not say {aq.pair_roll(info)!r} and that a first victory "
+                        "brings one of the two")
+            trophies = load(DATA / MOD / "loot_table" / "bosses" / f"{boss}.json") or {}
+            if len(trophies.get("pools", [])) != 1 or set(trophies) - {"type", "random_sequence", "pools"} \
+                    or "condition" in trophies["pools"][0] or not alone(trophies["pools"][0], pair):
+                err(f"acquisition: loot_table/bosses/{boss}.json must be one pool that always gives one of {list(pair)}, "
+                    "each as likely, as their JEI pages say a first victory does")
+            held = re.search(r"public static boolean trophy\(ItemStack stack\) \{\s*return ([^;]*);", loot_java)
+            accessors = ["".join(word.capitalize() if i else word for i, word in enumerate(item.split("_"))) for item in pair]
+            if not re.search(rf'\bTROPHIES = ResourceKey\.create\(Registries\.LOOT_TABLE,\s*Jugcraft\.id\("bosses/{boss}"\)\);',
+                             loot_java) \
+                    or not re.search(rf"if \(firstKill\(player\) && loot\.stream\(\)\.noneMatch\({cls}::trophy\)\)\s*\{{\s*"
+                                     r"loot\.addAll\(table\(level, TROPHIES, \w+, player\)\);", loot_java) \
+                    or not held or held.group(1).count("stack.is(") != len(pair) \
+                    or any(not re.search(rf"\w+\.{name}\(\)", held.group(1)) for name in accessors):
+                err(f"acquisition: {loot_path.name} must still roll loot_table/bosses/{boss}.json on a player's first kill "
+                    f"when no trophy came ({cls}.trophy naming {list(pair)}), as their JEI pages say")
+        # Who is paid: the pages' last sentence is true of this boss. Its rewards go through lair/LairRewards from its
+        # fight's Encounter (paid once each, kept for the fallen and the away; healing and wards are credited for every
+        # fight by Lairs' observer), and they name an objective exactly when the boss's own package credits a deed.
+        package = "\n".join(path.read_text(encoding="utf-8") for path in sorted(loot_path.parent.glob("*.java")))
+        if f'BOSS = "{boss}";' not in loot_java or f"LairRewards.payer({cls}.BOSS, {cls}::pay)" not in package \
+                or not re.search(rf"LairRewards\.pay\(\w+, {cls}\.BOSS, encounter,", package):
+            err(f"acquisition: {boss}'s JEI pages say a share goes to whoever earns it by a blow, healing or a ward, but "
+                f"{cls} is not paid through LairRewards (BOSS = \"{boss}\", LairRewards.payer and LairRewards.pay from "
+                "its Encounter)")
+        deeds = bool(re.search(r"\.deed\(", package))
+        if deeds != info.get("objective"):
+            err(f"acquisition: {boss}'s JEI pages {'do not name' if deeds else 'name'} an objective, but lair/"
+                f"{loot_path.parent.name} {'credits a deed' if deeds else 'credits none'} (Encounter.deed): set "
+                "\"objective\" in tools/acquisition.py BOSSES")
     # Nothing else gives them (no other loot table, shop, villager trade, commission or project), and what a page says is
     # never crafted is not.
     for key, text in pages.items():
@@ -14940,10 +15017,12 @@ def check_encyclopedia(root, lang):
     """Chunk A (A-04): the Jugcraft Encyclopedia. Its pages, the route's states and weights, the First Light route's
     steps (their order, weights and what each waits for), the recipes, sales and codex entries the route and the lair
     dossiers name, and the Keys page's keys are tools/encyclopedia.py's; every recipe named exists, every sale is one a
-    shop sells, no required step needs a boss's loot, and every codex link is gated as its entry is; the pages only read;
-    the request is rate-limited, carries no text and is answered only to a game that can receive it; the key works only
-    from the game, the inventory's button closes the inventory first and needs no mixin; every word has its text; and
-    the record's route table is the tool's."""
+    shop sells, no required step needs a boss's loot, and every codex link is gated as its entry is; each dossier's Boss
+    entry names its own tokens, rite, trophies, loot, recipes and sales; its season words are its rite class's; and
+    every keeper found and beaten draws no more than PageWriter.MAX_GRIDS grids; the pages only read; the request is
+    rate-limited, carries no text and is answered only to a game that can receive it; the key works only from the game,
+    the inventory's button closes the inventory first and needs no mixin; every word has its text; and the record's
+    route table is the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import encyclopedia as en
     import concordance_journey as jr
@@ -15010,7 +15089,7 @@ def check_encyclopedia(root, lang):
     stations = {rule.get("station") for rule in research.get("states", {}).get("understood", {}).get("any", [])
                 if rule.get("type") == "study"}
     loot_items = set()
-    for boss in ("vesperine", "tatterlace"):
+    for boss in en.DOSSIERS:
         loot_items |= set(re.findall(r'"name": "(jugcraft:[a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
     # Each step's own source: from its route(out, "<id>" call to the next one's (the last to the end of steps()), with
     # the helper it calls (understanding for understand, equipment for equip).
@@ -15057,27 +15136,73 @@ def check_encyclopedia(root, lang):
     if "out.sales(" not in route or "out.sales(" not in dossiers:
         err("encyclopedia: the route's and the dossiers' sales come from PageWriter.sales (a town that stands, today's offers)")
 
-    # The dossiers: each boss's tokens, rite, loot and after-win recipes are the tool's, exist, and her loot table is hers.
+    # The dossiers: each keeper's own Boss entry names the tool's tokens, rite, trophies, loot, recipes and sales; each
+    # exists; the loot and trophy tables are the keeper's; the season fact is the rite class's own; the first rite recipe
+    # makes a token and no rite recipe needs a boss's loot; and, every keeper found and beaten, every recipe draws a grid
+    # within PageWriter.MAX_GRIDS.
+    enum = re.search(r"public enum Boss \{(.*?)\n\t\tpublic final Lair lair;", dossiers, re.S)
+    entries = {}
+    for chunk in re.split(r"\n(?=\t\t[A-Z_]+\(Lair\.)", enum.group(1) if enum else ""):
+        head = re.match(r"\t\t[A-Z_]+\(Lair\.([A-Z_]+),", chunk)
+        if head:
+            entries[head.group(1).lower()] = chunk
+    if sorted(entries) != sorted(dossier["lair"] for dossier in en.DOSSIERS.values()):
+        err(f"lair/LairDossiers.java: Boss's lairs {sorted(entries)} are not those of DOSSIERS in tools/encyclopedia.py")
+    drawn = ("minecraft:crafting_shaped", "minecraft:crafting_shapeless", "minecraft:stonecutting")
+    grids = 0
     for boss, dossier in en.DOSSIERS.items():
-        for field in ("tokens", "rite", "loot", "after_win", "made_from"):
+        entry = entries.get(dossier["lair"], "")
+        for field in ("tokens", "rite", "trophies", "loot", "after_win", "made_from"):
             for name in dossier[field]:
-                if f'"{name}"' not in dossiers:
-                    err(f"lair/LairDossiers.java: {boss}'s {field} must name {name} (DOSSIERS in tools/encyclopedia.py)")
+                if f'"{name}"' not in entry:
+                    err(f"lair/LairDossiers.java: {boss}'s Boss entry must name {name} ({field} in DOSSIERS, tools/encyclopedia.py)")
+        sold = {"Items." + item.split(":", 1)[1].upper() for _shop, item in dossier["trades"]}
+        named = set(re.findall(r"Items\.[A-Z_]+", entry))
+        if named != sold:
+            err(f"lair/LairDossiers.java: {boss}'s sales {sorted(named)} are not DOSSIERS' trades {sorted(sold)}")
         for recipe in dossier["rite"] + dossier["after_win"] + dossier["made_from"]:
-            if not (DATA / MOD / "recipe" / f"{recipe}.json").is_file():
+            file = DATA / MOD / "recipe" / f"{recipe}.json"
+            if not file.is_file():
                 err(f"tools/encyclopedia.py: {boss} names recipe {recipe}, which does not exist")
+                continue
+            kind = (load(file) or {}).get("type")
+            if kind not in drawn:
+                err(f"tools/encyclopedia.py: {boss}'s recipe {recipe} is {kind}, for which PageWriter draws no grid")
+            grids += 1
+            if recipe in dossier["rite"]:
+                for ingredient in re.findall(r'"(jugcraft:[a-z_]+)"', file.read_text(encoding="utf-8")):
+                    if ingredient in loot_items:
+                        err(f"tools/encyclopedia.py: {boss}'s rite recipe {recipe} needs {ingredient}, a boss's loot")
+        if not dossier["rite"] or dossier["rite"][0] not in dossier["tokens"]:
+            err(f"tools/encyclopedia.py: {boss}'s first rite recipe must make one of its tokens (LairDossiers.canOpen reads it)")
         table = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
         if table != set(dossier["loot"]):
-            err(f"tools/encyclopedia.py: {boss}'s loot {sorted(dossier['loot'])} is not her table's {sorted(table)}")
+            err(f"tools/encyclopedia.py: {boss}'s loot {sorted(dossier['loot'])} is not the table's {sorted(table)}")
+        trophies = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "bosses" / f"{boss}.json")))
+        if not 1 <= len(dossier["trophies"]) <= 2 or set(dossier["trophies"]) != trophies or not trophies <= table:
+            err(f"tools/encyclopedia.py: {boss}'s trophies {dossier['trophies']} must be the one or two of "
+                f"loot_table/bosses/{boss}.json ({sorted(trophies)}), each in the loot table")
+        season = dossier["off_season"]
+        rite_java = text(JAVA_ROOT / "lair" / f"{dossier['rite_class']}.java")
+        waits = "Lairs.offSeason()" in rite_java
+        if not rite_java or waits != (season is not None):
+            err(f"lair/{dossier['rite_class']}.java: {boss}'s dossier says the rite {'waits for' if season else 'ignores'} "
+                f"the Halloween season, but its check {'does' if waits else 'does not'} read lairs.off_season")
+        if season is None and not re.search(r",\s*null,", entry) or season is not None and f'"{season}"' not in entry:
+            err(f"lair/LairDossiers.java: {boss}'s Boss entry must give {season or 'null (works all year)'} as its off-season words")
         for name in dossier["loot"]:
             if f"jei.{MOD}.acquire.{name}" not in lang:
                 err(f"encyclopedia: missing lang jei.{MOD}.acquire.{name} (the dossier shows each loot's acquisition text)")
         for key in (f"lair.{MOD}.{dossier['lair']}", f"encyclopedia.{MOD}.dossier.{dossier['lair']}.leave",
                     f"encyclopedia.{MOD}.dossier.{dossier['lair']}.credit",
                     f"encyclopedia.{MOD}.dossier.{dossier['lair']}.rite", f"advancements.{MOD}.{dossier['advancement']}.title",
-                    f"entity.{MOD}.{boss}"):
+                    f"entity.{MOD}.{boss}", *([season] if season else [])):
             if key not in lang:
                 err(f"encyclopedia: missing lang {key}")
+    limit = re.search(r"\bMAX_GRIDS = (\d+);", text(guide / "PageWriter.java"))
+    if not limit or grids > int(limit.group(1)):
+        err(f"lair/LairDossiers.java: every keeper found and beaten, the Expeditions page would draw {grids} recipe grids, "
+            f"past PageWriter.MAX_GRIDS ({limit.group(1) if limit else 'not found'}): change the page's layout before adding a keeper")
 
     # Codex links: each names an entry of the Arcane Concordance whose own unlock is the one given.
     entries = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "entries"
