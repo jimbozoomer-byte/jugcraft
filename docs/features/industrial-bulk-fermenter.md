@@ -36,7 +36,7 @@ What differs is capacity:
 - **Same recipe.** It ferments exactly like the Industrial Fermenter: eight crops and a bucket of water give **375 mB of bioethanol and 250 mB of carbon dioxide**.
 - **Four batches at once**, from 16,000 mB tanks, at **80% of the draw a batch**: 77 JE/t instead of 96.
 - **Venting and holding.** The carbon dioxide tank vents what is not collected, and the screen's vent/hold switch works as on the smaller machine.
-- **Guides.** Its Engineer's Handbook page describes it.
+- **Guides.** Its Engineer's Handbook page describes it (listed in the handbook with the [Large Bio Generator](industrial-large-bio-generator.md) change).
 
 ## Connections
 

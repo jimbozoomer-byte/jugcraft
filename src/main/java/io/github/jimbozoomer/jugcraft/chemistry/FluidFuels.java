@@ -47,6 +47,15 @@ public final class FluidFuels {
 	public static final int BIOGAS = 268;
 	public static final int BIO_GENERATOR_BIOGAS = 64;
 	/**
+	 * The Large Bio Generator (docs/features/industrial-large-bio-generator.md), the Bio Generator's 5x6x5 variant: a
+	 * bigger, hotter engine whose exhaust warms its fuel, so it gets a quarter more from each fuel than the Bio Generator,
+	 * and burns them four times as fast. Bioethanol at 240 JE/mB (still below the advanced engine's 256), biogas at 335.
+	 */
+	public static final int LARGE_BIOETHANOL = 240;
+	public static final int LARGE_BIO_GENERATOR_BIOETHANOL = 384;
+	public static final int LARGE_BIOGAS = 335;
+	public static final int LARGE_BIO_GENERATOR_BIOGAS = 256;
+	/**
 	 * The Combined Cycle Power Plant, the factory's big power station: a gas turbine whose exhaust raises steam for a
 	 * second turbine, so methane gives a quarter more than the gas generator's 448 JE/mB, 560, and it runs at 2,048 JE/t,
 	 * four times the gas turbine. It burns the Coal Gasifier's raw syngas whole, 256 JE/mB at the same rate, and hydrogen at

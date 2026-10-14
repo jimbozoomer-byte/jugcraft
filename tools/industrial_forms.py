@@ -86,6 +86,9 @@ BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 192, 96), (f"{MOD}:biogas", 268, 64
 # What the Combined Cycle Power Plant burns, the factory's big power station: methane at a quarter more than the gas
 # generator's 448 JE/mB (its exhaust raises steam for a second turbine) and 2,048 JE/t, four times the gas turbine; the
 # Coal Gasifier's raw syngas whole at 256 JE/mB and the same rate; hydrogen at the Fuel Cell's 128 JE/mB at 1,024 JE/t.
+# What the Large Bio Generator burns: the same fuels a quarter better (a bigger, hotter engine with an exhaust heat
+# exchanger), four times as fast. For review.
+LARGE_BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 240, 384), (f"{MOD}:biogas", 335, 256)]
 COMBINED_CYCLE_FUELS = [(f"{MOD}:methane", 560, 2048), (f"{MOD}:raw_syngas", 256, 2048), (f"{MOD}:hydrogen", 128, 1024)]
 # Where its shaft runs: along x, at this height and depth (pixels).
 PLANT_AXIS = (20, 32)
@@ -416,6 +419,30 @@ FORMS = {
                                            "T": f"{MOD}:steel_tank", "K": f"{MOD}:machine_casing"}),
         "features": ["machines"],
     },
+    "large_bio_generator": {
+        "display": "Large Bio Generator",
+        # The art brief's 5x6x5 larger variant of the Bio Generator, in the same diesel generator family (a 60,000 JE store,
+        # 1,024 JE/t out); its fuel list burns bioethanol and biogas a quarter better at four times the rate.
+        "family": "diesel_generator",
+        "layers": [["C####"] + ["#####"] * 5] + [["#####"] * 6] * 4,
+        "profile": "EXPANDED",
+        "tank_mb": 8_000,
+        "input_tanks": ["fuel"],
+        "output_tanks": [],
+        "capabilities": [],
+        "fuels": LARGE_BIO_GENERATOR_FUELS,
+        "upgrades": False,
+        "warmup": 0,
+        "ports": [
+            ("fuel_in", "FLUID_IN", 0, 4, 3, 0, "RIGHT"),
+            ("power_out", "ENERGY_OUT", 0, 0, 3, 0, "LEFT"),
+        ],
+        # This change's bill (open for review): a Bio Generator enlarged with two Steel Tanks, steel plates, a steel gear
+        # and a basic circuit.
+        "recipe": (["TBT", "PGP", "PCP"], {"T": f"{MOD}:steel_tank", "B": f"{MOD}:bio_generator", "P": "#c:plates/steel",
+                                           "G": f"{MOD}:steel_gear", "C": f"{MOD}:basic_circuit"}),
+        "features": ["machines"],
+    },
     "combined_cycle_power_plant": {
         "display": "Combined Cycle Power Plant",
         # The gas turbine's family (a 120,000 JE store, 2,048 JE/t out); the form's fuel list says what it burns.
@@ -595,6 +622,17 @@ HANDBOOK["bio_generator"] = [
         "It makes only as much as its store has room for. It also burns biogas from the Anaerobic Digester, piped into "
         "the same inlet: 268 JE a millibucket at 64 JE/t, a bucket lasting about 210 seconds.",
     ]
+
+HANDBOOK["large_bio_generator"] = [
+    "Five wide, six deep and five tall: the Bio Generator's engine-generator enlarged on its skid, built from a Bio "
+    "Generator, two Steel Tanks, steel plates, a steel gear and a basic circuit. Every block it fills must be free when "
+    "it is placed.",
+    "It burns the same fuels a quarter better and four times as fast: bioethanol at 240 JE a millibucket and 384 JE/t, "
+    "biogas at 335 JE a millibucket and 256 JE/t. Pipe either into the liquid inlet low on its right side, behind the "
+    "middle; the power leaves at the socket on the terminal box low on its left side.",
+    "Its 8,000 mB tank holds four buckets. It makes only as much as its store has room for, and its coupling and "
+    "radiator fan turn while it runs.",
+]
 
 # Tank labels on the screen and in its reasons (MachineStatus.tankLabel), by role.
 TANK_NAMES = {
@@ -1935,6 +1973,100 @@ def bio_generator_still():
             + cyl("z", cu, 25, 7.5, BIO_FAN_Z - 0.5, BIO_FAN_Z + 0.5, GUNMETAL, "dr_fan"))
 
 
+# The Large Bio Generator is the Bio Generator drawn larger: three blocks wide and tall become five, four deep become six.
+LARGE_BIO_SCALE = (5 / 3, 5 / 3, 1.5)
+
+
+def _large_bio(point):
+    """A Bio Generator point where the Large Bio Generator has it: scaled from the controller block's left edge (x 16),
+    the ground and the front."""
+    sx, sy, sz = LARGE_BIO_SCALE
+    return (16 + (point[0] - 16) * sx, point[1] * sy, point[2] * sz)
+
+
+def _large_bio_element(element):
+    frm, to, texture = element[:3]
+    assert len(element) == 3, "the Bio Generator has no turned elements"
+    a, b = _large_bio(frm), _large_bio(to)
+    frm, to = [q(min(a[i], b[i])) for i in range(3)], [q(max(a[i], b[i])) for i in range(3)]
+    faces = texture if isinstance(texture, dict) else {"*": texture}
+    if any(str(name).endswith("!") for name in faces.values()):
+        # A stretched texture (a dial) must stay inside one block: slide it back into the block its middle is in.
+        for axis in range(3):
+            middle = (frm[axis] + to[axis]) / 2
+            low = math.floor(middle / 16) * 16
+            shift = max(0.0, low - frm[axis]) - max(0.0, to[axis] - (low + 16))
+            frm[axis], to[axis] = frm[axis] + shift, to[axis] + shift
+    return box(frm, to, texture)
+
+
+def _bio_panel(element):
+    """The Bio Generator's instrument panel (the controller) and its hood, gauges and lamp: kept at their own size in
+    the controller block, as only the master block lights its lamp."""
+    frm, to = element[0], element[1]
+    return frm[0] >= 3.4 and to[2] <= 9.6 and to[1] <= 17.5
+
+
+def _bio_port_mark(element):
+    """The Bio Generator's fuel flange, the bioethanol band on it and the power socket: drawn again at the large one's
+    ports."""
+    frm, texture = element[0], element[2]
+    faces = texture if isinstance(texture, dict) else {"*": texture}
+    names = set(faces.values())
+    return (f"{FLANGE_FACE}!" in names or "power_port!" in names
+            or ("bioethanol_still" in names and frm[0] <= -30))
+
+
+def large_bio_generator():
+    """Five wide, six deep and five tall (the art brief's larger variant): the Bio Generator itself, drawn larger, so the
+    family is plain at a glance: the skid, the ringed olive combustion body with its round inspection cover and heat
+    shields, the guarded coupling, the ribbed generator housing, the radiator and its fan, the fuel box on the right and
+    the terminal box on the left, the exhaust folded back over the top. The instrument panel (the controller) keeps its
+    size at the front left. The fuel flange (banded in bioethanol) and the power socket sit at the middle of their
+    ports' blocks, behind the middle of each side."""
+    m = [_large_bio_element(e) for e in bio_generator() if not _bio_panel(e) and not _bio_port_mark(e)]
+    m += [e for e in bio_generator() if _bio_panel(e)]
+    # The fuel flange on the fuel box's right side and the bioethanol band behind it (port: column 4, row 3, layer 0).
+    m.append(box((-63, 7, 51.5), (-62.25, 16, 60.5), {"*": CHROME, "west": f"{FLANGE_FACE}!"}))
+    m += cyl("x", 11.5, 56, 2.5, -62.25, -60.5, "bioethanol_still")
+    # The power socket on the terminal box's left side (port: column 0, row 3, layer 0).
+    m.append(box((14.25, 7, 53), (15, 13, 59), {"*": CHROME, "east": "power_port!"}))
+    return m
+
+
+def large_bio_generator_coupling():
+    """The large coupling shaft and flanges (client/MachineRotors)."""
+    import machine_rotors as rotors
+    cu, cv, _ = _large_bio((BIO_AXIS[0], BIO_AXIS[1], 0))
+    z0, z1 = (z * LARGE_BIO_SCALE[2] for z in BIO_COUPLING_Z)
+    k = LARGE_BIO_SCALE[0]
+    quads = rotors.disc("z", z0 - 1.5, z1 + 1.5, cu, cv, 1.75 * k, CHROME, CHROME)
+    quads += rotors.disc("z", z0 + 0.75, z0 + 3, cu, cv, 4.5 * k, CHROME, "dr_flange")
+    quads += rotors.disc("z", z1 - 3, z1 - 0.75, cu, cv, 4.5 * k, CHROME, "dr_flange")
+    return quads
+
+
+def large_bio_generator_fan():
+    """The large radiator fan behind its guard (client/MachineRotors): a hub and six blades."""
+    import machine_rotors as rotors
+    cu, cv, z = _large_bio((BIO_AXIS[0], 25, BIO_FAN_Z))
+    k = LARGE_BIO_SCALE[0]
+    quads = rotors.disc("z", z - 1.75, z + 1.75, cu, cv, 1.5 * k, CHROME, CHROME)
+    for blade in range(6):
+        angle = math.radians(60 * blade + 10)
+        c, s_ = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cu + k * (r * c - w * s_), cv + k * (r * s_ + w * c))
+        quads += rotors.prism("z", z - 0.75, z + 0.75, [at(2, -0.75), at(7.5, -1.75), at(7.5, 1.75), at(2, 0.75)], GUNMETAL, GUNMETAL)
+    return quads
+
+
+def large_bio_generator_still():
+    """The turning parts standing still, for the item model only."""
+    return [_large_bio_element(e) for e in bio_generator_still()]
+
+
 def combined_cycle_power_plant():
     """Six wide, four deep and five tall (the largest form): the factory's power station. On a long gunmetal skid, from the left: the olive
     generator with its terminal box (the power socket, mint lamps and copper terminals) under the gridded air-filter
@@ -2085,6 +2217,15 @@ ROTORS = {
         "block": "bio_generator", "axis": "z", "center": [BIO_AXIS[0], BIO_AXIS[1], 29.5], "property": "lit", "speed": 12,
         "ease": 40, "always": True, "quads": bio_generator_coupling(),
     },
+    "large_bio_generator_coupling": {
+        "block": "large_bio_generator", "axis": "z",
+        "center": [*_large_bio((BIO_AXIS[0], BIO_AXIS[1], 29.5))], "property": "lit", "speed": 10,
+        "ease": 40, "always": True, "quads": large_bio_generator_coupling(),
+    },
+    "large_bio_generator_fan": {
+        "block": "large_bio_generator", "axis": "z", "center": [*_large_bio((BIO_AXIS[0], 25, BIO_FAN_Z))],
+        "property": "lit", "speed": 15, "ease": 40, "always": True, "quads": large_bio_generator_fan(),
+    },
     "bio_generator_fan": {
         "block": "bio_generator", "axis": "z", "center": [BIO_AXIS[0], 25, BIO_FAN_Z], "property": "lit", "speed": 18,
         "ease": 40, "always": True, "quads": bio_generator_fan(),
@@ -2097,14 +2238,15 @@ MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_gener
           "bulk_chemical_reactor": bulk_chemical_reactor(),
           "anaerobic_digester": anaerobic_digester(), "coal_gasifier": coal_gasifier(),
           "gas_cleanup_rack": gas_cleanup_rack(), "bio_generator": bio_generator(),
-          "combined_cycle_power_plant": combined_cycle_power_plant()}
+          "large_bio_generator": large_bio_generator(), "combined_cycle_power_plant": combined_cycle_power_plant()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
                "bulk_fermenter": bulk_fermenter_still(),
                "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still(),
                "coal_gasifier": coal_gasifier_still(), "gas_cleanup_rack": gas_cleanup_rack_still(),
-               "bio_generator": bio_generator_still(), "combined_cycle_power_plant": combined_cycle_power_plant_still()}
+               "bio_generator": bio_generator_still(), "large_bio_generator": large_bio_generator_still(),
+               "combined_cycle_power_plant": combined_cycle_power_plant_still()}
 PARTICLE = "dp_olive"
 
 
