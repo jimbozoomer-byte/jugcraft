@@ -8770,6 +8770,7 @@ def check_lairs():
     check_crypt_archive)."""
     import cinder_kiln as ck
     import crypt_archive as ca
+    import cydonian_sanctum as cs
     import glacier_hall as gh
     import hollow_acre as ha
     import lair_data as ld
@@ -8782,7 +8783,7 @@ def check_lairs():
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
                                        ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
                                        ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
-                                       ("crypt_archive", ca, ca.CENTRE, None)):
+                                       ("crypt_archive", ca, ca.CENTRE, None), ("cydonian_sanctum", cs, cs.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8816,7 +8817,7 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 la.GATE["entity"]):
+                 "altar_keystone", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8918,6 +8919,36 @@ def check_lairs():
             err(f"No words for the Crypt Lich's name {name}")
     if "ExhumationRite.register();" not in registry or "output.accept(EXHUMATION_WRIT);" not in registry:
         err("JugcraftLairs does not register the Writ of Exhumation's rite or put the writ in the creative tab")
+    # The Cydonian Sanctum's: the keystone's rest, reach and kindling, the altars it kindles (as part 1's knoll stacks
+    # them), its recipes, and the fixtures' registrations.
+    keystone = (folder / "AltarKeystoneRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range"), ("KINDLE_TICKS", "kindle_ticks"),
+                      ("REACH_BLOCKS", "reach_blocks")):
+        if not java_number(keystone, name, la.KEYSTONE[key]):
+            err(f"AltarKeystoneRite.{name} is not tools/lairs.py KEYSTONE {key} ({la.KEYSTONE[key]})")
+    altars = "ALTARS = {{{}}};".format(", ".join("{{{}, {}}}".format(*a) for a in la.KEYSTONE_ALTARS))
+    if altars not in keystone:
+        err(f"AltarKeystoneRite.ALTARS is not tools/lairs.py KEYSTONE_ALTARS: expected {altars}")
+    import adam_ondi_ahman as aa
+    stacked = tuple((len(aa.TIERS) - k, aa.TIERS[k][0]) for k in range(len(aa.TIERS)))
+    if tuple(la.KEYSTONE_ALTARS) != stacked or aa.ALTAR_POS[1] != aa.CROWN_Y + len(aa.TIERS) + 1:
+        err(f"tools/lairs.py KEYSTONE_ALTARS {la.KEYSTONE_ALTARS} are not the altars tools/adam_ondi_ahman.py stacks under the "
+            f"Ancient Altar {stacked}")
+    flat = re.sub(r"\s+", " ", registry)
+    for line in ('fixture("red_mist", LairExitBlock::new', 'fixture("star_dial", StarDialBlock::new',
+                 'fixture("star_door", p -> new StarDoorBlock(p.lightLevel(StarDoorBlock::light))', 'fixture("star_stone", Block::new',
+                 'fixture("dust_vent", Block::new', "AltarKeystoneRite.register();", "CydonianSanctum.register();",
+                 "output.accept(ALTAR_KEYSTONE);"):
+        if line not in flat:
+            err(f"JugcraftLairs does not have {line}")
+    for name, recipe in la.RECIPES.items():
+        data = load(DATA / MOD / "recipe" / f"{name}.json") or {}
+        if data.get("result", {}).get("id") != f"{MOD}:{recipe.get('result', name)}":
+            err(f"The recipe {name} does not make {recipe.get('result', name)}")
+        features = [c.get("feature") for c in data.get("fabric:load_conditions", [])]
+        for feature in (la.FEATURE, *recipe.get("features", [])):
+            if feature not in features:
+                err(f"The recipe {name} does not load only with the {feature} feature")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8969,6 +9000,182 @@ def check_lairs():
     check_cinder_kiln(ck)
     check_lantern_fen(lf)
     check_crypt_archive(ca)
+    check_cydonian_sanctum(cs)
+
+
+def check_cydonian_sanctum(cs):
+    """The Cydonian Sanctum as tools/cydonian_sanctum.py builds it is the Sanctum its record describes
+    (docs/features/cydonian-sanctum.md), and where the Java looks for its parts (CydonianSanctum.java, StarDialBlock.java,
+    StarDoorBlock.java) is where the layout puts them: the arrival stands on the gate chamber's floor with room overhead,
+    the Red Mist fills the arch behind it, the Star Door fills the gallery's north end with its three constellations in
+    its middle row, each star dial stands in the gallery's wall facing into it, and the dust vents lie across its floor in
+    their lines; a walk from the arrival, never climbing more than a block, reaches the door, the front of each dial, and
+    (the door open) the crater's floor, its plinth and every standing stone; the crater's floor is open over its sand and
+    each standing stone stands whole with a star stone in the middle of each face; the moons hang over the north rim;
+    light flooded from the hidden lights, as the game floods it, is at least GALLERY_LIGHT_LEAST on every open cell of the
+    gallery's floor; sand always lies on something; and nothing in it changes by itself once placed."""
+    from collections import deque
+    blocks = cs.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    folder = JAVA_ROOT / "lair"
+    java = re.sub(r"\s+", " ", (folder / "CydonianSanctum.java").read_text(encoding="utf-8"))
+    gx, gz = cs.GALLERY["x"], cs.GALLERY["z"]
+    lines = sorted(cs.VENT_LINES)
+    for jname, value in (("PAVE", cs.PAVE), ("STAND", cs.STAND), ("CENTRE_X", cs.CENTRE[0]), ("CENTRE_Z", cs.CENTRE[1]),
+                         ("CRATER", cs.CRATER), ("DOOR_Z", cs.DOOR_Z), ("DOOR_WEST", gx[0]), ("DOOR_EAST", gx[1]),
+                         ("DOOR_HEIGHT", cs.GALLERY_HEIGHT), ("DOOR_FIGURE_Y", cs.DOOR_FIGURE_Y), ("VENT_WEST", gx[0]),
+                         ("VENT_EAST", gx[1]), ("VENT_PERIOD", cs.VENT["period"]), ("VENT_HISS", cs.VENT["hiss"]),
+                         ("VENT_PUFF", cs.VENT["puff"]), ("VENT_DAMAGE", cs.VENT["damage"]), ("VENT_PUSH", cs.VENT["push"]),
+                         ("VENT_LIFT", cs.VENT["lift"]), ("EXIT_WEST", cs.EXIT["x"][0]), ("EXIT_EAST", cs.EXIT["x"][1]),
+                         ("EXIT_Z", cs.EXIT["z"]), ("JUMP_AMPLIFIER", cs.AIR["jump_amplifier"]), ("FALL_DAMAGE", cs.AIR["fall_damage"])):
+        if not java_number(java, jname, value):
+            err(f"CydonianSanctum.{jname} is not tools/cydonian_sanctum.py's {value}")
+    expected = "FIGURE_X = {{{}}};".format(", ".join(str(x) for x in cs.DOOR_FIGURES.values()))
+    if expected not in java:
+        err(f"CydonianSanctum.FIGURE_X is not tools/cydonian_sanctum.py DOOR_FIGURES' columns: expected {expected}")
+    if "FIGURE_X[figure.ordinal() - 1]" not in java:
+        err("CydonianSanctum.figure must index FIGURE_X by the figure's place after PLAIN (FIGURE_X[figure.ordinal() - 1])")
+    expected = "DIALS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*d["pos"]) for d in cs.DIALS))
+    if expected not in java:
+        err(f"CydonianSanctum.DIALS is not tools/cydonian_sanctum.py DIALS: expected {expected}")
+    for jname, values in (("VENT_LINES", lines), ("VENT_PHASES", [cs.VENT_LINES[z] for z in lines])):
+        expected = "{} = {{{}}};".format(jname, ", ".join(str(v) for v in values))
+        if expected not in java:
+            err(f"CydonianSanctum.{jname} is not tools/cydonian_sanctum.py VENT_LINES: expected {expected}")
+    door_java = (folder / "StarDoorBlock.java").read_text(encoding="utf-8")
+    for jname, value in (("LIGHT", cs.DOOR_LIGHT), ("FIRST_ROW_TICKS", cs.DOOR_FIRST_ROW_TICKS), ("ROW_TICKS", cs.DOOR_ROW_TICKS)):
+        if not java_number(door_java, jname, value):
+            err(f"StarDoorBlock.{jname} is not tools/cydonian_sanctum.py's {value}")
+    figures = re.search(r"enum Figure implements StringRepresentable \{\s*([A-Z_, ]+);", door_java)
+    if not figures or [f.strip().lower() for f in figures.group(1).split(",")] != ["plain", *cs.DOOR_FIGURES]:
+        err(f"StarDoorBlock.Figure is not plain and tools/cydonian_sanctum.py DOOR_FIGURES {list(cs.DOOR_FIGURES)}")
+    stars = re.search(r"enum Stars implements StringRepresentable \{\s*([A-Z_, ]+);",
+                      (folder / "StarDialBlock.java").read_text(encoding="utf-8"))
+    if not stars or tuple(s.strip().lower() for s in stars.group(1).split(",")) != cs.CONSTELLATIONS:
+        err(f"StarDialBlock.Stars is not tools/cydonian_sanctum.py CONSTELLATIONS {cs.CONSTELLATIONS}")
+    if not set(cs.DOOR_FIGURES) <= set(cs.CONSTELLATIONS) or any(d["stars"] in cs.DOOR_FIGURES for d in cs.DIALS):
+        err("Every door figure must be a constellation a dial shows, and no dial may start on one")
+
+    passable = {None, "minecraft:light"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = cs.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) not in ("minecraft:cut_red_sandstone", "minecraft:smooth_red_sandstone") \
+            or not free(feet) or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The Sanctum's arrival at {feet} does not stand on the gate chamber's floor with room overhead")
+    for pos in cs.exit_cells():
+        if name(pos) != "jugcraft:red_mist":
+            err(f"No Red Mist in the gate chamber's arch at {pos}")
+    figure_at = {pos: figure for figure, pos in cs.figure_cells().items()}
+    for pos in cs.door_cells():
+        if name(pos) != "jugcraft:star_door" or props(pos).get("figure") != figure_at.get(pos, "plain") \
+                or props(pos).get("lit") != "false" or props(pos).get("opening") != "false":
+            err(f"The Star Door at {pos} is not a dark {figure_at.get(pos, 'plain')} block of it")
+    steps = {"east": (1, 0), "west": (-1, 0), "north": (0, -1), "south": (0, 1)}
+    fronts = []
+    for dial in cs.DIALS:
+        pos = tuple(dial["pos"])
+        dx, dz = steps[dial["facing"]]
+        front = (pos[0] + dx, cs.STAND, pos[2] + dz)
+        fronts.append(front)
+        if name(pos) != "jugcraft:star_dial" or props(pos).get("stars") != dial["stars"] or props(pos).get("facing") != dial["facing"] \
+                or not (gx[0] <= front[0] <= gx[1] and gz[0] <= front[2] <= gz[1]):
+            err(f"The star dial at {pos} does not stand in the gallery's wall facing into it, showing {dial['stars']}")
+    for pos in cs.vent_cells():
+        if name(pos) != "jugcraft:dust_vent" or not free((pos[0], pos[1] + 1, pos[2])) or not free((pos[0], pos[1] + 2, pos[2])):
+            err(f"No dust vent in the gallery's floor with room over it at {pos}")
+
+    # The walk, the door taken as open: from the arrival, a block up or down to three at a time, onto anything solid.
+    opened = lambda pos: free(pos) or name(pos) == "jugcraft:star_door"
+    solid = lambda pos: pos in blocks and name(pos) not in ("minecraft:light", "jugcraft:red_mist", "jugcraft:star_door")
+    standable = lambda x, y, z: solid((x, y - 1, z)) and opened((x, y, z)) and opened((x, y + 1, z))
+    seen, queue = {feet}, deque([feet])
+    while queue:
+        x, y, z = queue.popleft()
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dy in (1, 0, -1, -2, -3):
+                n = (x + dx, y + dy, z + dz)
+                if 0 <= n[0] < cs.SIZE[0] and 0 <= n[2] < cs.SIZE[2] and n not in seen and standable(*n) \
+                        and (dy <= 0 or opened((x, y + 2, z))):
+                    seen.add(n)
+                    queue.append(n)
+                    break
+    targets = {"the door": (36, cs.STAND, cs.DOOR_Z + 1), "the crater's middle": (int(cs.CENTRE[0]), cs.STAND, int(cs.CENTRE[1])),
+               "the plinth": (int(cs.WAIT[0]), int(cs.WAIT[1]), int(cs.WAIT[2]))}
+    for i, front in enumerate(fronts):
+        targets[f"star dial {i}"] = front
+    for i, (sx, sz) in enumerate(cs.STONES):
+        targets[f"standing stone {i}"] = (sx + cs.STONE_SIZE // 2 + 1, cs.STAND, sz)
+    for what, target in targets.items():
+        if target not in seen:
+            err(f"A walk from the Sanctum's arrival does not reach {what} at {target}")
+
+    # The crater's floor: sand (or a pit's rock) with room over it, but where the standing stones stand.
+    for x in range(cs.SIZE[0]):
+        for z in range(cs.SIZE[2]):
+            if not cs.in_crater(x, z) or cs.in_stone(x, z):
+                continue
+            top = cs.PAVE - (1 if cs.in_pit(x, z) else 0)
+            if not solid((x, top, z)) or not free((x, top + 1, z)) or not free((x, top + 2, z)):
+                err(f"The crater's floor is not open over solid ground at {(x, z)}")
+                break
+    for stone in cs.STONES:
+        cx, cz = stone
+        half = cs.STONE_SIZE // 2
+        for x, z in cs.stone_cells(stone):
+            for y in range(cs.STAND, cs.STAND + cs.STONE_HEIGHT):
+                face_middle = (x == cx) != (z == cz)
+                # Its core, closed in on every side, is left out of the template (nobody sees it); its faces and top are whole.
+                surface = abs(x - cx) == half or abs(z - cz) == half or y == cs.STAND + cs.STONE_HEIGHT - 1
+                wanted = "jugcraft:star_stone" if y == cs.STAND + cs.STONE_STAR and face_middle else None
+                if surface and not solid((x, y, z)) or wanted and name((x, y, z)) != wanted:
+                    err(f"The standing stone at {stone} is not whole, with a star stone in the middle of each face, at {(x, y, z)}")
+    north = cs.CENTRE[1] - cs.CRATER
+    for moon in (cs.PHOBOS, cs.DEIMOS):
+        cells = cs.moon_cells(moon)
+        # Its middle, closed in on every side, is left out of the template.
+        if not any(name(c) for c in cells) or any(name(c) not in ("minecraft:tuff", "minecraft:packed_mud", None) for c in cells) \
+                or moon[0][2] >= north \
+                or moon[0][1] < cs.STAND + 30:
+            err(f"The moon at {moon[0]} does not hang high over the north rim")
+
+    # The light down the gallery, flooded as the game floods block light.
+    through = passable | {"jugcraft:red_mist"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        if state[0] == "minecraft:light":
+            light[pos] = int(dict(state[1])["level"])
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and 0 <= n[1] < cs.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    gallery = sorted((light.get((x, cs.STAND, z), 0), (x, cs.STAND, z)) for x in range(gx[0], gx[1] + 1)
+                     for z in range(gz[0], gz[1] + 1))
+    if not gallery or gallery[0][0] < cs.GALLERY_LIGHT_LEAST:
+        dark = [cell for level, cell in gallery if level < cs.GALLERY_LIGHT_LEAST]
+        err(f"{len(dark)} open cells of the Dust Gallery have less block light than GALLERY_LIGHT_LEAST "
+            f"{cs.GALLERY_LIGHT_LEAST}, the darkest {gallery[0] if gallery else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CydonianSanctumClientGameTests.java"
+    text = client.read_text(encoding="utf-8") if client.is_file() else ""
+    for jname, value in (("GALLERY_LIGHT", cs.GALLERY_LIGHT_LEAST), ("GALLERY_WEST", gx[0]), ("GALLERY_EAST", gx[1]),
+                         ("GALLERY_NORTH", gz[0]), ("GALLERY_SOUTH", gz[1])):
+        if not java_number(text, jname, value):
+            err(f"CydonianSanctumClientGameTests.{jname} is not tools/cydonian_sanctum.py's {value}")
+
+    # Sand lies on something, and nothing changes by itself once placed.
+    for (x, y, z), state in blocks.items():
+        if state[0] == "minecraft:red_sand" and not solid((x, y - 1, z)):
+            err(f"The Sanctum's sand at {(x, y, z)} lies on nothing, and would fall")
+            break
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                                                        "minecraft:grass_block", "minecraft:magma_block"):
+            err(f"The Sanctum has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
 
 
 def check_glacier_hall(gh):

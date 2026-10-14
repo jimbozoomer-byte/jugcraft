@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.lair;
 
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -30,9 +31,16 @@ import org.jspecify.annotations.Nullable;
  * looked through, mist rising from the water with a marsh-light bobbing in it, which closes round followers and takes them
  * to the Lantern Fen ({@link HagStoneRite#follow}); and over a sarcophagus the Writ of Exhumation opened, grey mist and
  * cold blue fire welling up out of the dark under its lid, souls rising in it, down which followers go to the Archive of
- * Last Names ({@link ExhumationRite#follow}).
+ * Last Names ({@link ExhumationRite#follow}); and over the Ancient Altar the keystone was set into, red mist round a column
+ * of red light rising into the sky, through which followers step onto Mars, into the Cydonian Sanctum
+ * ({@link AltarKeystoneRite#follow}).
  */
 public class MistGateEntity extends Entity {
+	/** The red mist's dust and its column of light (the Cydonian Sanctum's gate). */
+	private static final DustParticleOptions RED_MIST = new DustParticleOptions(0xC0402A, 1.6F);
+	private static final DustParticleOptions RED_LIGHT = new DustParticleOptions(0xFF5A2A, 2.4F);
+	/** How high the red light's column rises over the altar (blocks). */
+	private static final int COLUMN = 24;
 	private @Nullable Lair lair;
 	private int slot;
 	private @Nullable UUID instance;
@@ -79,8 +87,11 @@ public class MistGateEntity extends Entity {
 		boolean vent = lair == Lair.CINDER_KILN;
 		boolean fen = lair == Lair.LANTERN_FEN;
 		boolean tomb = lair == Lair.CRYPT_ARCHIVE;
+		boolean mars = lair == Lair.CYDONIAN_SANCTUM;
 		if (instance() == null || level.getGameTime() >= until) {
-			if (vent) {
+			if (mars) {
+				level.sendParticles(RED_MIST, getX(), getY() + 1.0, getZ(), 40, 0.6, 0.8, 0.6, 0.02);
+			} else if (vent) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.6, getZ(), 24, 0.4, 0.6, 0.4, 0.03);
 			} else {
 				level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1.2, getZ(), 24, 0.4, 0.8, 0.4, 0.02);
@@ -106,6 +117,15 @@ public class MistGateEntity extends Entity {
 			double angle = tickCount * 0.08;
 			level.sendParticles(ParticleTypes.GLOW, getX() + Math.cos(angle) * 0.4, getY() + 1.3 + Math.sin(tickCount * 0.15) * 0.25,
 					getZ() + Math.sin(angle) * 0.4, 1, 0.0, 0.0, 0.0, 0.0);
+		} else if (mars) {
+			// The red mist over the altar, and a column of red light rising out of it into the sky.
+			if (tickCount % 2 == 0) {
+				level.sendParticles(RED_MIST, getX(), getY() + 0.8, getZ(), 3, 0.45, 0.6, 0.45, 0.0);
+				level.sendParticles(RED_LIGHT, getX(), getY() + 2.0 + level.getRandom().nextDouble() * COLUMN, getZ(), 2, 0.12, 1.0, 0.12, 0.0);
+			}
+			if (tickCount % 5 == 0) {
+				level.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1.5, getZ(), 1, 0.1, 0.2, 0.1, 0.06);
+			}
 		} else if (tomb) {
 			// The open tomb: grey mist and cold blue fire welling up out of it, and now and then a soul rising.
 			if (tickCount % 2 == 0) {
@@ -137,6 +157,8 @@ public class MistGateEntity extends Entity {
 				level.playSound(null, blockPosition(), SoundEvents.FIRE_AMBIENT, SoundSource.AMBIENT, 1.0F, 0.5F);
 			} else if (fen) {
 				level.playSound(null, blockPosition(), SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.AMBIENT, 0.6F, 0.5F);
+			} else if (mars) {
+				level.playSound(null, blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.AMBIENT, 0.5F, 0.5F);
 			} else {
 				level.playSound(null, blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.AMBIENT, 0.6F, 0.6F);
 			}
@@ -161,6 +183,8 @@ public class MistGateEntity extends Entity {
 			HagStoneRite.follow(server, open);
 		} else if (open.lair == Lair.CRYPT_ARCHIVE) {
 			ExhumationRite.follow(server, open);
+		} else if (open.lair == Lair.CYDONIAN_SANCTUM) {
+			AltarKeystoneRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}
