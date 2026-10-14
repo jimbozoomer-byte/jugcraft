@@ -4857,7 +4857,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' grids matches another.
-- **Slice 14A game tests (not run yet; CI runs them):**
+- **Slice 14A game tests (all passed in CI, below):**
   - `BrassSidearmsGameTests`:
     - `brassSidearmsAreRegistered`: each is registered with its numbers, its recipe loads, and it is one pull a shot, firing bullets. The Holler Pistol fires rifle rounds, ten a magazine, held in both hands, harder than any other pistol, and takes every attachment the owner made for it and every sight but the Long Scope; the Minuet Pistol fires light rounds, ten a magazine, held in one hand, and aimed strays less than any other gun held in one hand, and takes the barrel attachments, the Extended Magazine and the four sights; the Half-Crown Revolver fires rifle rounds, six loaded one at a time, held in one hand and a carbine with a stock, and takes what the Parley Revolver takes.
     - `oneHandedSidearmsPairUntilStocked`: two Minuet Pistols are two guns at once and the other hand's fires; a bare Half-Crown Revolver pairs with a Minuet Pistol; with a Weighted Stock on it, it is a carbine, the two are not two guns at once, the other hand's does not fire, and the stock steadies its aim; without it again, it is one-handed.
@@ -4867,6 +4867,17 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 - **Slice 14A's first CI run** ([run 38651258803](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38651258803), on 5e60bf941), in the job without the optional integrations, failed two server tests:
   - `TacticalAttachmentsGameTests.tacticalAttachmentsFitTheirGuns`: "The holler_pistol takes the Tactical Grip". Its list of the guns the grip fits did not name the Holler Pistol, which the owner made a tactical grip for; it does now.
   - `FluoriteGameTests.prospectAndDrill`: "Prospector missed fluorite", the chance failure https://github.com/jimbozoomer-byte/jugcraft/pull/376 fixes (its survey read only the drill's chunk). That fix is carried here too, line for line, for the fluorite and spodumene tests.
+- **Slice 14A in CI** ([run 38652346741](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38652346741), on f4cd9232e, with both fixes): every check passed, on its first run.
+  - **Server game tests:** 1657 in the `mod` job, all passed, `BrassSidearmsGameTests` and `TacticalAttachmentsGameTests` among them.
+  - **The job without the optional integrations** and **the repository check:** passed.
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` took each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments, and its checks passed for each.
+  - **Screenshots** (from the last 2,500 lines of the guns shard's log; the whole log was too large to read here):
+    - **Held:** each at the lower right pointing at the husk, the Minuet Pistol and the Half-Crown Revolver in the right hand alone.
+    - **Aimed:** each raised to the middle of the view, its sight on the crosshair at the husk.
+    - **Reloading:** the Holler Pistol is turned up and its left arm comes across the lower left as it draws the magazine, the owner's animation's reach; the Minuet Pistol is rolled over at the lower right; the Half-Crown Revolver's barrel is tipped down, raising the cylinder.
+    - **Inspection:** each turned to be looked over at the right.
+    - **Attachments:** the stocks, scopes and Laser Sight sit on each gun where they should; with a stock fitted, the Half-Crown Revolver's left hand comes up under its barrel.
+    - **Third person:** each raised and flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
