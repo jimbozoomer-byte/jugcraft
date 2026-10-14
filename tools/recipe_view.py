@@ -10,7 +10,8 @@ Input refs may be tags ("#c:ingots/tin"); the plugin shows every item in the tag
 
 Fluid machines (tools/petro.py) are listed under "fluid_machines": {"block", "type", "recipes": [
   {"items": [[ref, count]], "fluids": [[fluid, mB]], "fluid_results": [[fluid, mB]], "results": [[id, count]],
-   "ticks": n}]}.
+   "ticks": n}]}; an industrial form's entry also lists "stations", the larger forms that run the same recipes
+   (tools/industrial_forms.py also_runs), shown as further stations.
 """
 from machines import MACHINES, machine_recipes
 

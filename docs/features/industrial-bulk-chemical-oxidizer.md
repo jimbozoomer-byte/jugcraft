@@ -64,7 +64,7 @@ It burns **everything the Oxidizer does**, four batches at once from 16,000 mB t
 
 - **The bill:** a Chemical Oxidizer, two Steel Tanks, four steel plates, an electric motor and a basic circuit (`TOT / PMP / PCP`).
 - **Its cells follow its model:** 90 blocks in the 4×4×6 envelope, the open spaces beside the hopper kept free.
-- **JEI.** Its recipes are listed under the Oxidizer's category. JEI does not yet show the Bulk Oxidizer as a second station for them.
+- **JEI.** Its recipes are listed under the Oxidizer's category, with the Bulk Oxidizer shown as a second station (added by the JEI stations change stacked above).
 
 ## Multiplayer and persistence
 

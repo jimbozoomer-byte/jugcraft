@@ -61,7 +61,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 	public record FluidAmount(Fluid fluid, int mb) {
 	}
 
-	private record FluidMachine(Item block, IRecipeType<FluidViewRecipe> type, List<FluidViewRecipe> recipes) {
+	/** A fluid machine's category: its block, any larger forms that run the same recipes, and the recipes. */
+	private record FluidMachine(Item block, List<Item> stations, IRecipeType<FluidViewRecipe> type, List<FluidViewRecipe> recipes) {
 	}
 
 	/** A Lampwright's Bench working (tools/concordance.py recipe_view): the work and a specimen in, the lantern out. */
@@ -139,6 +140,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		}
 		for (FluidMachine machine : fluidMachines) {
 			registration.addCraftingStation(machine.type(), machine.block());
+			for (Item station : machine.stations()) {
+				registration.addCraftingStation(machine.type(), station);
+			}
 		}
 		if (bench != null) {
 			registration.addCraftingStation(bench.type(), bench.block());
@@ -202,7 +206,13 @@ public class JugcraftJeiPlugin implements IModPlugin {
 					recipes.add(new FluidViewRecipe(items, fluids(recipe.getAsJsonArray("fluids")),
 							fluids(recipe.getAsJsonArray("fluid_results")), results, recipe.get("ticks").getAsInt()));
 				}
-				result.add(new FluidMachine(block, type, recipes));
+				List<Item> stations = new ArrayList<>();
+				if (machine.has("stations")) {
+					for (JsonElement station : machine.getAsJsonArray("stations")) {
+						stations.add(item(station.getAsString()));
+					}
+				}
+				result.add(new FluidMachine(block, stations, type, recipes));
 			}
 		} catch (Exception e) {
 			Jugcraft.LOGGER.warn("Could not read Jugcraft's fluid recipe list for JEI", e);

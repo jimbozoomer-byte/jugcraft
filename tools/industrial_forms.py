@@ -2726,10 +2726,20 @@ def form_recipe_files(condition):
             yield kind, recipe["name"], data
 
 
+def also_runs(form):
+    """The larger forms that run `form`'s recipes without a list of their own: the same family, and every capability its
+    recipes ask for (the Bulk Fermenter for the Industrial Fermenter, say). JEI shows them as further stations."""
+    needed = {recipe["capability"] for recipe in FORM_RECIPES.get(form, [])}
+    family = FORMS[form]["family"]
+    return [other for other, info in FORMS.items() if other != form and not FORM_RECIPES.get(other)
+            and info["family"] == family and needed and needed <= set(info["capabilities"])]
+
+
 def recipe_view():
     """The forms' JEI categories (tools/recipe_view.py): one per form that runs recipes, its recipes and the form as the
-    station. A generator form runs none (its fuels are in the Engineer's Handbook, like every generator's)."""
-    return [{"block": f"{MOD}:{form}", "type": form,
+    station, with any larger form that runs the same recipes as a further station. A generator form runs none (its
+    fuels are in the Engineer's Handbook, like every generator's)."""
+    return [{"block": f"{MOD}:{form}", "type": form, "stations": [f"{MOD}:{other}" for other in also_runs(form)],
              "recipes": [{"items": [[ref, count] for ref, count in recipe.get("items", [])],
                           "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
                           "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],

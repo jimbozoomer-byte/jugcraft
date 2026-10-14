@@ -7278,6 +7278,7 @@
     {
       "block": "jugcraft:electrolytic_separator",
       "type": "electrolytic_separator",
+      "stations": [],
       "recipes": [
         {
           "items": [],
@@ -7330,6 +7331,9 @@
     {
       "block": "jugcraft:chemical_infuser",
       "type": "chemical_infuser",
+      "stations": [
+        "jugcraft:bulk_chemical_infuser"
+      ],
       "recipes": [
         {
           "items": [],
@@ -7549,6 +7553,9 @@
     {
       "block": "jugcraft:chemical_oxidizer",
       "type": "chemical_oxidizer",
+      "stations": [
+        "jugcraft:bulk_chemical_oxidizer"
+      ],
       "recipes": [
         {
           "items": [
@@ -7599,6 +7606,9 @@
     {
       "block": "jugcraft:industrial_fermenter",
       "type": "industrial_fermenter",
+      "stations": [
+        "jugcraft:bulk_fermenter"
+      ],
       "recipes": [
         {
           "items": [
@@ -7631,6 +7641,7 @@
     {
       "block": "jugcraft:bulk_chemical_reactor",
       "type": "bulk_chemical_reactor",
+      "stations": [],
       "recipes": [
         {
           "items": [],
@@ -8232,6 +8243,7 @@
     {
       "block": "jugcraft:anaerobic_digester",
       "type": "anaerobic_digester",
+      "stations": [],
       "recipes": [
         {
           "items": [
@@ -8265,6 +8277,7 @@
     {
       "block": "jugcraft:coal_gasifier",
       "type": "coal_gasifier",
+      "stations": [],
       "recipes": [
         {
           "items": [
@@ -8347,6 +8360,7 @@
     {
       "block": "jugcraft:gas_cleanup_rack",
       "type": "gas_cleanup_rack",
+      "stations": [],
       "recipes": [
         {
           "items": [],
