@@ -75,6 +75,7 @@ import bunkerworks
 import fire_control
 import raiders
 import armoured_walker
+import howitzer_walker
 import gear
 import arms
 import arms_variants
@@ -394,7 +395,7 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
             or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks():
         return {}
     if path in arms.items():
@@ -648,7 +649,7 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
                                                     + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         if registry == "entity_type":
@@ -890,6 +891,60 @@ def check_armoured_walker():
             err(f"armoured_walker_quads.json lacks {part}: run tools/generate_material_data.py")
 
 
+def check_howitzer_walker():
+    """walker/HowitzerWalker.java and client/HowitzerWalkerRenderer.java against tools/howitzer_walker.py: the gun, leap,
+    stomp, toughness, size and joints, the curves' constants the renderer draws the walk, shot and jump clips with, the
+    exported parts, and the shells it fires (artillery.py's Heavy Shell)."""
+    java_path = JAVA_ROOT / "walker" / "HowitzerWalker.java"
+    java = java_path.read_text(encoding="utf-8") if java_path.is_file() else ""
+    hw = howitzer_walker
+    floats = ("LAY_RATE", "MIN_ELEVATION", "MAX_ELEVATION", "REST_ELEVATION", "WIDTH", "HEIGHT")
+    for const in ("GUN_COOLDOWN", "LAY_RATE", "MIN_ELEVATION", "MAX_ELEVATION", "REST_ELEVATION", "AIM_REACH", "LEAP",
+                  "CROUCH_TICKS", "STOMP_HOP", "SLAM", "STOMP_DAMAGE", "STOMP_RADIUS", "STOMP_KNOCKBACK", "STOMP_COOLDOWN",
+                  "HEALTH", "WIDTH", "HEIGHT"):
+        value = getattr(hw, const)
+        literal = f"{value}F" if const in floats else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"HowitzerWalker.{const} differs from tools/howitzer_walker.py ({literal})")
+
+    def vec(pixels):
+        return "new Vec3(" + ", ".join(f"{v / 16:g}" for v in pixels) + ")"
+    flat = java.replace(".0,", ",").replace(".0)", ")")
+    if f"TRUNNION = {vec(hw.TRUNNION)};" not in flat:
+        err(f"HowitzerWalker.TRUNNION differs from tools/howitzer_walker.py ({vec(hw.TRUNNION)})")
+    if f"HATCH = {vec(hw.HATCH)};" not in flat:
+        err(f"HowitzerWalker.HATCH differs from tools/howitzer_walker.py ({vec(hw.HATCH)})")
+    barrel = hw.BARREL_END[2] / 16
+    if f" BARREL = {barrel:g};" not in java:
+        err(f"HowitzerWalker.BARREL differs from tools/howitzer_walker.py's barrel ({barrel:g} blocks)")
+    if abs(hw.REST_ELEVATION + hw.ELEVATION) > 1e-9:
+        err("tools/howitzer_walker.py: REST_ELEVATION is the model's ELEVATION, up positive")
+    renderer_path = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                     / "HowitzerWalkerRenderer.java")
+    text = renderer_path.read_text(encoding="utf-8") if renderer_path.is_file() else ""
+
+    def joint(values):
+        return "{" + ", ".join(f"{v:g}F" if v != int(v) else str(int(v)) for v in values) + "}"
+    for name, values in (("HIPS[left]", hw.HIPS["left"]), ("HIPS[right]", hw.HIPS["right"]), ("TRUNNION", hw.TRUNNION),
+                         ("KNEE", hw.KNEE), ("BARREL_END", hw.BARREL_END)):
+        if joint(values) not in text:
+            err(f"HowitzerWalkerRenderer lacks the joint {name} {joint(values)} from tools/howitzer_walker.py")
+    for const in ("STRIDE_RATE", "LEG_SWING", "KNEE_BEND", "BOB", "SQUASH", "ROLL", "PITCH", "GUN_WOBBLE", "RECOIL_STROKE",
+                  "RECOIL_TICKS", "KICK", "SQUAT", "FLASH_TICKS", "PUFF_TICKS"):
+        value = float(getattr(hw, const))
+        if f" {const} = {value:g}F;" not in text.replace(".0F;", "F;"):
+            err(f"HowitzerWalkerRenderer.{const} differs from tools/howitzer_walker.py ({value:g})")
+    leap = JAVA_ROOT / "walker" / "WalkerLeap.java"
+    if f" END = {hw.JUMP_TICKS}.0F;" not in (leap.read_text(encoding="utf-8") if leap.is_file() else ""):
+        err(f"WalkerLeap.END differs from tools/howitzer_walker.py's JUMP_TICKS ({hw.JUMP_TICKS})")
+    if "JugcraftArtillery.HEAVY_SPEED" not in java or "JugcraftArtillery.HEAVY_SHELL" not in java:
+        err("HowitzerWalker should fire the big guns' Heavy Shell at its speed (artillery.py)")
+    quads = load(ASSETS / "howitzer_walker_quads.json") or {}
+    for part in hw.parts():
+        if not quads.get(f"howitzer_walker_{part}"):
+            err(f"howitzer_walker_quads.json lacks howitzer_walker_{part}: run tools/generate_material_data.py")
+
+
 def check_artillery():
     """artillery/JugcraftArtillery.java against tools/artillery.py: the shells, guns, balloon and range finder, and the
     renderers' pivots and the howitzer's track."""
@@ -1057,7 +1112,7 @@ def check_gun_art():
     import gun_poses
     import item_icons
     kinds = sorted(set(artillery.ITEMS) | set(tower_guns.items()) | set(landship.ITEMS) | set(mech.ITEMS)
-                   | set(zeppelin.ITEMS))
+                   | set(zeppelin.ITEMS) | set(howitzer_walker.ITEMS))
     for kind in kinds:
         if not item_icons.has(kind):
             err(f"tools/item_icons/{kind}.txt is missing: every war machine's icon is a 16x16 map (docs/ITEM_ICONS.md)")
@@ -1075,7 +1130,8 @@ def check_gun_art():
             saved = img.convert("RGBA")
         if saved.size != drawn.size or saved.tobytes() != drawn.tobytes():
             err(f"textures/item/{kind}.png differs from its map in tools/item_icons/: run tools/generate_textures.py")
-    files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json")
+    files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json",
+             "howitzer_walker_quads.json")
     quads = {name: load(ASSETS / name) or {} for name in files}
     opacity = {}
 
@@ -3022,7 +3078,9 @@ def cheapest_electrolysis(fluid, _seen=None):
         # MachineUpgrades.Effect.use with four efficiency cards, the most that count.
         cheapest = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
         for recipe in recipes:
-            offer(recipe, cheapest)
+            base_use = recipe.get("energy_per_tick", 0) or use
+            discounted = max(1, round(base_use * 0.8 ** 4)) if info["upgrades"] else base_use
+            offer(recipe, industrial_forms.form_energy(form, discounted))
     return min(costs) if costs else None
 
 
@@ -3068,6 +3126,17 @@ def check_industrial_forms():
             described = info.get(key, []) if key == "fuels" else info[key]
             if [tuple(item) for item in described] != [tuple(item) for item in built] if key == "fuels" else described != built:
                 err(f"{form}: {key} is {built} in IndustrialForms.java but {described} in tools/industrial_forms.py")
+        vents = re.findall(r'\.gasVentOutput\((\d+), Jugcraft\.id\("(\w+)"\)\)', body)
+        actual_vent = (int(vents[0][0]), f"{MOD}:{vents[0][1]}") if len(vents) == 1 else None
+        if len(vents) > 1 or actual_vent != info.get("gas_vent"):
+            err(f"{form}: Java gas overflow must match its declared output and exact gas")
+        if actual_vent is not None:
+            output, gas = actual_vent
+            if not 0 <= output < len(info["output_tanks"]) or gas not in {f"{MOD}:{g}" for g in petro.GASES}:
+                err(f"{form}: overflow must target a real output and registered gas, never a liquid")
+            for row in industrial_forms.FORM_RECIPES.get(form, []):
+                if any(petro.result_tank(i, r) == output and r[0] != gas for i, r in enumerate(row.get("fluid_results", []))):
+                    err(f"{form}: declared gas overflow disagrees with a recipe product")
         if profiles.get(info["profile"]) != info["tank_mb"]:
             err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
         parts = len(industrial_forms.footprint(info["layers"]))
@@ -3076,7 +3145,7 @@ def check_industrial_forms():
                     for lit in ("false", "true") for part in range(parts)}
         if set(state.get("variants", {})) != expected:
             err(f"{form}: its blockstate must cover exactly 4 facings x 2 lights x {parts} parts")
-        if bool(industrial_forms.FORM_RECIPES.get(form)) != (f"{MOD}:{form}" in viewed):
+        if bool(industrial_forms.recipes_for_form(form)) != (f"{MOD}:{form}" in viewed):
             err(f"{form}: a JEI category in recipe_view.json exactly when it runs recipes")
         if info.get("fuels"):
             kinds = [port[1] for port in info["ports"]]
@@ -3094,7 +3163,7 @@ def check_industrial_forms():
                     err(f"{form}: {fluid} burns for {per_mb} JE/mB, at least the {cost:.1f} JE/mB its cheapest making costs: a power loop")
         tanks = info["input_tanks"] + info["output_tanks"]
         fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
-        for recipe in industrial_forms.FORM_RECIPES.get(form, []):
+        for recipe in industrial_forms.recipes_for_form(form):
             label = f"{form} recipe {recipe['name']}"
             if recipe["capability"] not in info["capabilities"]:
                 err(f"{label}: needs {recipe['capability']}, which the form does not offer")
@@ -3110,12 +3179,36 @@ def check_industrial_forms():
             targets = [petro.result_tank(i, r) for i, r in enumerate(recipe.get("fluid_results", []))]
             if len(set(targets)) != len(targets) or any(t >= len(info["output_tanks"]) for t in targets):
                 err(f"{label}: its results need distinct output tanks the form has")
-            if sum(r[1] for r in recipe.get("fluid_results", [])) > sum(mb for _, mb in recipe.get("fluids", [])):
+            source = recipe.get("source", 0)
+            if source < 0 or (source and not recipe.get("items")):
+                err(f"{label}: fluid released from items needs a consumed solid feed")
+            if sum(r[1] for r in recipe.get("fluid_results", [])) > sum(mb for _, mb in recipe.get("fluids", [])) + source:
                 err(f"{label}: makes more fluid than it takes")
             if recipe["ticks"] <= 0:
                 err(f"{label}: takes no time")
         if len(tanks) != len(set(tanks)):
             err(f"{form}: two tanks share a role")
+    # Methanation pays for its hydrogen as well as its processing. Treat CO/CO2 as free here for a conservative
+    # bound; gasification instead pays a finite carbon item. Speed never reduces total energy per batch.
+    hydrogen_cost = cheapest_electrolysis("jugcraft:hydrogen")
+    methane_value = dict((f, v) for f, v, _ in industrial_forms.GAS_GENERATOR_FUELS).get("jugcraft:methane")
+    if methane_value is not None:
+        import math
+        for recipe in industrial_forms.FORM_RECIPES.get("chemical_infuser", []):
+            made = sum(r[1] for r in recipe.get("fluid_results", []) if r[0] == "jugcraft:methane")
+            if not made:
+                continue
+            hydrogen = sum(mb for fluid, mb in recipe["fluids"] if fluid == "jugcraft:hydrogen")
+            # Upgrading consumes already-burnable mixed gas, including its original methane.
+            # Count its actual Bio-Generator opportunity cost, not a free feed or a second fuel award.
+            bio_values = {f: v for f, v, _ in industrial_forms.FORMS.get("bio_generator", {}).get("fuels", [])}
+            feed_energy = sum(mb * bio_values.get(fluid, 0) for fluid, mb in recipe["fluids"])
+            for speed in range(5):
+                for efficiency in range(5):
+                    ticks = math.ceil(recipe["ticks"] / (1 + .5 * speed))
+                    draw = max(1, math.floor(industrial_forms.form_energy("chemical_infuser", recipe.get("energy_per_tick", 0)) * (1 + .5 * speed) * (1 + .25 * speed) * .8**efficiency + .5))
+                    if hydrogen_cost is None or hydrogen * hydrogen_cost + ticks * draw + feed_energy <= made * methane_value:
+                        err(f"{recipe['name']}: methanation can profit from electrolytic hydrogen")
     # The Separator's construction: the owner's selected 20 steel plates, counting the Steel Tanks' own.
     pattern, key = industrial_forms.FORMS["electrolytic_separator"]["recipe"]
     tank = load(DATA / MOD / "recipe" / "steel_tank.json") or {}
@@ -6181,7 +6274,7 @@ def check_ferris_wheel(java, number, lang):
 
 
 def check_pinata(java, number, lang):
-    """Fall addition 28: the piñatas match tools/pinata.py (slots, drop, a charged swing, the stick's hits, each kind's
+    """Fall addition 28: the piﾃｱatas match tools/pinata.py (slots, drop, a charged swing, the stick's hits, each kind's
     hits and item); the items, entity and Blindfold are registered and drawn from the quads; the Blindfold's view and
     worn band exist; their words, recipes and advancements exist."""
     pn = pinata.PINATA
@@ -6205,7 +6298,7 @@ def check_pinata(java, number, lang):
             err(f"JugcraftAgriculture.java must call {call}")
     client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
     if "JugcraftAgriculture.PINATA, PinataRenderer::new" not in (client_dir / "JugcraftClient.java").read_text(encoding="utf-8"):
-        err("JugcraftClient.java must draw the piñatas")
+        err("JugcraftClient.java must draw the piﾃｱatas")
     if '"pinata_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
         err("DecorQuads must read pinata_quads.json")
     quads = load(ASSETS / "pinata_quads.json") or {}
@@ -6218,16 +6311,16 @@ def check_pinata(java, number, lang):
                 break
     for item, display in pinata.displays().items():
         if lang.get(f"item.{MOD}.{item}") != display:
-            err(f"The piñata party has no words for item.{MOD}.{item}")
+            err(f"The piﾃｱata party has no words for item.{MOD}.{item}")
     for key in ("full", "no_room", "filled"):
         if f"message.{MOD}.pinata.{key}" not in lang:
-            err(f"The piñata party has no words for message.{MOD}.pinata.{key}")
+            err(f"The piﾃｱata party has no words for message.{MOD}.pinata.{key}")
     for path in [DATA / MOD / "advancement" / f"{a}.json" for a in pinata.ADVANCEMENTS] + [
             DATA / MOD / "recipe" / f"{r['id']}.json" for r in pinata.SHAPED + pinata.SHAPELESS] + [
             ASSETS / "textures" / "misc" / "blindfold.png", ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "blindfold.png",
             ASSETS / "equipment" / "blindfold.json"] + [ASSETS / "items" / f"{i}.json" for i in pinata.items()]:
         if not path.exists():
-            err(f"The piñata party needs {path.relative_to(ROOT)}")
+            err(f"The piﾃｱata party needs {path.relative_to(ROOT)}")
 
 
 def check_hot_air_balloon(java, number, lang):
@@ -8095,7 +8188,7 @@ def check_pies(java, main):
 
 
 def check_spirit_board(java, main):
-    """The Spirit Board: the Java matches SPIRIT_BOARD in tools/agriculture.py (the séance's ranges, hands, letter times,
+    """The Spirit Board: the Java matches SPIRIT_BOARD in tools/agriculture.py (the sﾃｩance's ranges, hands, letter times,
     rest, watch range and a spirit's reward; the names; the wishes, in order); its words, YES, NO and GOODBYE sit on the
     face where tools/spirit_board_textures.py draws them; the block is registered; its model, textures (the face at its
     size), words, tags, recipe, loot and advancements exist."""
@@ -15620,7 +15713,7 @@ def main():
                   | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
                   | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     check_assets(sorted(registered))
@@ -15661,6 +15754,7 @@ def main():
     check_zeppelin()
     check_walker()
     check_armoured_walker()
+    check_howitzer_walker()
     check_landship()
     check_artillery()
     check_tower_guns()
