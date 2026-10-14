@@ -190,9 +190,9 @@ The Foundry Trench is its own dimension, so nothing here changes the Overworld. 
 
 The shared framework's defaults hold: four players and eight instances, Grave Goods on death.
 
-Part 2, the Iron Dreadnought, adds:
+Part 2, the Iron Dreadnought ([iron-dreadnought.md](iron-dreadnought.md)), adds:
 - the fight in the pit: his plating, the discharge he charges every 20 seconds into the pylon nearest his foe, the breaker thrown to route it and overload him, and the lane it runs down if it is not;
-- his attacks: the Piston Punch, the Rivet Fan stopped by cover, the Trench Charge that stuns him in cover or a pylon's footing, the Coil Arc, the Mortar, the Blowdown and the Sparkers;
+- his attacks: the Piston Punch, the Rivet Fan stopped by cover, the Trench Charge that stuns him when he runs into anything solid, the Coil Arc, the Mortar, the Blowdown and the Sparkers;
 - the Overcharge at half health, the plate he tears from his hull to foul a breaker, and Red Line below a fifth;
 - his loot: Salvaged Coil, the Dynamo Halberd and the Piston Hammer, the Grounding Strap, the Dreadnought Visor and the advancement Grounded;
 - Salvaged Coil in cheaper orders.
