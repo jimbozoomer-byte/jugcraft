@@ -4,9 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +130,8 @@ public final class AdamOndiAhman {
 	private static final class World {
 		final long print;
 		final BiomeSource source;
-		final Climate.@Nullable Sampler sampler;
+		/** The world's climate sampler, as the game hands it to the biome source (null until it first does). */
+		volatile Climate.@Nullable Sampler sampler;
 		final ChunkGenerator generator;
 		final LevelHeightAccessor heights;
 		final RandomState random;
@@ -149,7 +147,6 @@ public final class AdamOndiAhman {
 			this.generator = level.getChunkSource().getGenerator();
 			this.source = generator.getBiomeSource();
 			this.random = level.getChunkSource().randomState();
-			this.sampler = climateSampler(random);
 			this.heights = level;
 			this.spacing = spacing;
 			this.share = share;
@@ -240,6 +237,13 @@ public final class AdamOndiAhman {
 			return;
 		}
 		BlockPos start = level.getRespawnData().pos();
+		if (loaded.sampler == null) {
+			// The game hands its climate sampler to the biome source with each lookup; one search makes it do so.
+			level.findClosestBiome3d(biome -> false, start, 32, 32, 64);
+		}
+		if (loaded.sampler == null) {
+			Jugcraft.LOGGER.error("Adam-ondi-Ahman: the world's climate sampler was never handed to its biome source; no valley near the start");
+		}
 		Site site = findStart(level, loaded, start);
 		state.choose(site == null ? null : site.pos());
 		loaded.start = site;
@@ -326,29 +330,15 @@ public final class AdamOndiAhman {
 	private static final float QUANTIZED = 10000.0F;
 
 	/**
-	 * The climate sampler of a world's noise. RandomState holds it; it is found by its type (a public accessor, else a
-	 * field), so a renamed accessor cannot break this. Null (logged) if there is none: then no rare valley's land suits,
-	 * and no start valley is chosen.
+	 * Notes the climate sampler the game hands to a biome source as it makes a biome lookup
+	 * ({@code mixin/MultiNoiseBiomeSourceMixin}): the loaded Overworld's is kept, to judge the land with. 26.3's
+	 * RandomState holds no sampler of its own to read.
 	 */
-	static Climate.@Nullable Sampler climateSampler(RandomState random) {
-		try {
-			for (Method method : RandomState.class.getMethods()) {
-				if (method.getParameterCount() == 0 && method.getReturnType() == Climate.Sampler.class && !Modifier.isStatic(method.getModifiers())) {
-					return (Climate.Sampler) method.invoke(random);
-				}
-			}
-			for (Field field : RandomState.class.getDeclaredFields()) {
-				if (field.getType() == Climate.Sampler.class && !Modifier.isStatic(field.getModifiers())) {
-					field.setAccessible(true);
-					return (Climate.Sampler) field.get(random);
-				}
-			}
-		} catch (ReflectiveOperationException | RuntimeException e) {
-			Jugcraft.LOGGER.error("Adam-ondi-Ahman: could not read the world's climate sampler", e);
-			return null;
+	public static void noteSampler(BiomeSource source, Climate.Sampler sampler) {
+		World loaded = world;
+		if (loaded != null && loaded.sampler == null && source == loaded.source) {
+			loaded.sampler = sampler;
 		}
-		Jugcraft.LOGGER.error("Adam-ondi-Ahman: the world's noise has no climate sampler; no valley's land will suit");
-		return null;
 	}
 
 	/** Vanilla's peaks and valleys from weirdness: -1 in a river's valley, 1 on the peaks. */
@@ -360,6 +350,10 @@ public final class AdamOndiAhman {
 		long key = (long) site.x() << 32 ^ (site.z() & 0xFFFFFFFFL);
 		Boolean known = loaded.suitable.get(key);
 		if (known == null) {
+			if (loaded.sampler == null) {
+				// Not judged (nor remembered) before the game has handed over its climate sampler.
+				return false;
+			}
 			// Worked out from the noise alone, so two threads that race here reach the same answer.
 			known = suitable(loaded, site.x(), site.z());
 			loaded.suitable.put(key, known);

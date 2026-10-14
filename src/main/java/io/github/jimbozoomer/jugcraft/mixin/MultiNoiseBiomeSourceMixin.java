@@ -7,11 +7,14 @@ import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.world.AdamOndiAhman;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Jugcraft regions: in a Jugcraft region of an Overworld with the Jugcraft biomes, biome lookups answer from the
@@ -25,6 +28,18 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class MultiNoiseBiomeSourceMixin {
 	@Unique
 	private JugcraftRegions.Source jugcraft$regionState = new JugcraftRegions.Source();
+
+	/** Adam-ondi-Ahman judges the land with the climate sampler the game hands over here ({@link AdamOndiAhman#noteSampler}). */
+	@Inject(method = "createResolver", at = @At("HEAD"), remap = false)
+	private void jugcraft$noteSampler(Climate.Sampler sampler, CallbackInfoReturnable<BiomeResolver> cir) {
+		AdamOndiAhman.noteSampler((MultiNoiseBiomeSource) (Object) this, sampler);
+	}
+
+	@Inject(method = "createResolverForChunk", at = @At("HEAD"), remap = false)
+	private void jugcraft$noteSamplerForChunk(Climate.Sampler sampler, int x, int y, int z, int sizeX, int sizeY, int sizeZ,
+			CallbackInfoReturnable<BiomeResolver> cir) {
+		AdamOndiAhman.noteSampler((MultiNoiseBiomeSource) (Object) this, sampler);
+	}
 
 	@WrapOperation(method = "/^lambda\\$createResolver\\$.*/", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/world/level/biome/MultiNoiseBiomeSource;getNoiseBiome(Lnet/minecraft/world/level/biome/Climate$TargetPoint;)Lnet/minecraft/core/Holder;"),

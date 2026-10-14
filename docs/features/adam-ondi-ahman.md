@@ -57,7 +57,7 @@ Nothing to obtain but vanilla blocks from the knoll, and nothing to craft. The A
 - No new dependency. One new hook in each of two existing mixins: the biome lookup (`MultiNoiseBiomeSourceMixin`) and the Overworld's climate table (`OverworldBiomeBuilderMixin`).
 - The knoll is a structure template written by `tools/adam_ondi_ahman.py` from vanilla block IDs and the Ancient Altar. No Mojang structure file is copied.
 - The Ancient Altar's textures are drawn by code in `tools/adam_ondi_ahman_textures.py`: weathered grey stone, a carved band on its sides, and a ring and a red star on its face. No Mojang texture is read, traced or copied.
-- The land's climate is read with the world's own climate sampler. 26.3's `RandomState` has no `sampler()` (CI's first compile), so the sampler is found by its type, as the one accessor or field of that type; if there were none, no valley's land would suit, and that is logged.
+- The land's climate is read with the world's own climate sampler. 26.3's `RandomState` holds none (CI's first compile and run showed it), so `MultiNoiseBiomeSourceMixin` notes the one the game hands to the Overworld's biome source with each biome lookup (`createResolver`, `createResolverForChunk`). Until it has, no land is judged (and nothing is remembered); the start valley's choice makes one lookup first to be sure.
 - Java: `world/AdamOndiAhman` (placement, the start valley, the biome answer and the registrations), `world/AdamOndiAhmanPlacement` (the structure placement type `jugcraft:adam_ondi_ahman`), `world/AdamOndiAhmanState` (the saved start valley) and `world/AncientAltarBlock`.
 - Data:
   - the biome, from `tools/biomes.py` (`"placement": "site"`: placed round its sites, by no region rule);
