@@ -4685,13 +4685,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files. The GeckoLib calls the carbine idle and the cylinder cue use (`AnimationTest.getDataOrDefault`, `DataTickets.ANIMATABLE_INSTANCE_ID`) were read in GeckoLib 5.5.7's source.
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included. The Thumper's first grid was the Marshal Revolver's; with a brass ingot more under it, none of the three guns' matches another.
-- **Slice 13D game tests (not run yet; CI runs them):**
+- **Slice 13D game tests (all passed in CI, below):**
   - `FrontierGunsIVGameTests`:
     - `frontierGunsIVAreRegistered`: each is registered with its numbers, its recipe loads, and it is one pull a shot. The Fencepost Thumper lobs grenades, four loaded one at a time, held in both hands, and takes the grips and the bayonets; the Parley Revolver fires rifle rounds, six loaded one at a time, held in one hand and a carbine with a stock, and takes the barrel attachments and the stocks; the Lantern Musket fires a beam on Energy Cells, three charges a magazine, held in both hands, reaching further than every energy weapon but the Solenoid Rifle, and takes nothing.
     - `parleyRevolverIsACarbineWithAStock`: two bare Parley Revolvers are two guns at once and the other hand's fires; with a Wooden Stock on one, it is a carbine, the two are not two guns at once, the other hand's does not fire, and the stock steadies it; without it again, it is one-handed.
     - `fencepostThumperLoadsAGrenadeAtATime`: an empty Thumper with three Grenades holds one halfway through the second's time and all three when its reload ends, none left over; a shot then spends one and lobs a Grenade of the shooter's, which bursts on the pig seven blocks off and leaves the floor whole.
     - `lanternMusketDrivesThroughItsLine`: a shot takes its damage from both pigs in its line and stops at the wall, spending a charge; an empty one loads nothing before its reload's time and its three charges after, the cell keeping the rest.
   - `GunsGameTests` counts 75 guns; `DualGunsGameTests` the nineteen held in one hand; `LobberGrenadesGameTests` the three grenade guns, the Thumper among them.
+- **Slice 13D in CI** ([run 38634736533](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38634736533), on d00700826): every check passed after one re-run.
+  - **Server game tests:** 1653 in the `mod` job, all passed, `FrontierGunsIVGameTests` among them.
+  - **The job without the optional integrations failed once** on `SpodumeneGameTests.prospectAndDrill`, a test this slice does not touch, and passed on its one re-run. It reads only the drill's chunk, as the fluorite test does (slice 13C's record): in about one random placement in 64 both its ores fall across a chunk border from the drill ([the comment](https://github.com/jimbozoomer-byte/jugcraft/pull/373#issuecomment-6178187056)).
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` took each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments, and its checks passed for each.
+  - **Screenshots** (from the last 2,500 lines of the guns shard's log; the whole log was too large to read here):
+    - **Held:** each at the lower right pointing at the husk, the Parley Revolver small in the right hand alone.
+    - **Aimed:** each raised to the middle of the view, its sight on the crosshair at the husk.
+    - **Reloading:** the Thumper's and the Lantern Musket's left arm comes across the middle of the view as it loads, the owner's animations' reach; the Parley Revolver is rolled over, the right arm across the lower middle.
+    - **Inspection:** each turned to be looked over, the Parley Revolver raised to the upper right over the arm.
+    - **The carbine:** with each stock fitted (with a silencer, an extended barrel or a muzzle brake), the Parley Revolver's left hand comes up under its barrel; without a stock it does not.
+    - **Attachments:** the Thumper's grips and bayonet are hidden behind the left hand, as the Windlass Musket's are.
+    - **Third person:** each raised and flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
