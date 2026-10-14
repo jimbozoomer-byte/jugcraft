@@ -2,8 +2,8 @@
 
 Status: implemented for Concordance Chunk A (unit 4: the acquisition and JEI part of ticket A-07, and the acquisition
 half of A1); it compiled and its server tests passed in #337's CI on `d4c07bf56` (see Verification). Concordance Chunk
-B, unit 1 (B-02) adds the Yeti King's loot ([the chunk's contract](concordance-chunk-b.md)); its data checks pass
-locally and its server test has not run yet. A-07's other
+B, unit 1 (B-02) adds the Yeti King's and the Cinder Tyrant's loot ([the chunk's contract](concordance-chunk-b.md)); its
+data checks pass locally and its server tests have not run yet. A-07's other
 two asks are recorded elsewhere: the cast-pose rule in
 [the presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07), and the ritual
 and pylon inspection in [the encyclopedia's first slice](jugcraft-encyclopedia.md#first-slice-concordance-chunk-a-unit-4).
@@ -52,13 +52,18 @@ no recipe shows them:
 | Glacier Maul, Rimeclaw | 15% in each share of the Yeti King's reward of one of his two trophies, 7.5% each, never both; always one of the two on a player's first victory over him |
 | Yeti Mitten | 25% in each share of the Yeti King's reward |
 | The Yeti King's Crown | 20% in each share of the Yeti King's reward |
+| Tyrant Scale | The Cinder Tyrant, in the Cinder Kiln (a Kiln Seal pressed into a magma block in the Nether, the Volcano or the Cinder Barrens, at any hour): 3 to 6 in each share of his reward |
+| Cinderbrand, Magmaw | 15% in each share of the Cinder Tyrant's reward of one of his two trophies, 7.5% each, never both; always one of the two on a player's first victory over him |
+| Salamander Charm | 25% in each share of the Cinder Tyrant's reward |
+| The Tyrant's Crest | 20% in each share of the Cinder Tyrant's reward |
 
 Every boss page ends with who is paid, the rule of [lair encounter credit](lair-encounter-credit.md) (it names the kinds
 of part, not their thresholds, so it stays true if the owner moves those), per boss: "A share goes to each player who
 earns it in the fight by a blow, healing, a ward or an objective" for Vesperine, Madame Tatterlace and the Yeti King
-(his objective is the column, B-P3). `check_acquisition` holds the sentence to each boss's code: the boss is paid
-through `LairRewards` from its fight's `Encounter`, and "an objective" is named exactly when its package credits a deed.
-For example, the Vesper Scythe's page reads:
+(his objective is the column, B-P3), and "... by a blow, healing or a ward" for the Cinder Tyrant, who names no
+objective (B-P4). `check_acquisition` holds the sentence to each boss's code: the boss is paid through `LairRewards`
+from its fight's `Encounter`, and "an objective" is named exactly when its package credits a deed. For example, the
+Vesper Scythe's page reads:
 
 > Not crafted or traded. Vesperine, the Last Reaper, gives it in the Hollow Acre, which the Last Rites open at night.
 > With the default data, each share of her reward has a 15% chance of it, and a player's first victory over her always
@@ -70,6 +75,12 @@ and the Glacier Maul's (the Rimeclaw's is the same):
 > night. With the default data, each share of his reward has a 15% chance of one of his two trophies (7.5% each), and a
 > player's first victory over him always brings one of the two. A share goes to each player who earns it in the fight
 > by a blow, healing, a ward or an objective.
+
+and the Salamander Charm's:
+
+> Not crafted or traded. The Cinder Tyrant gives it in the Cinder Kiln, which a Kiln Seal pressed into a magma block in
+> the Nether, the Volcano or the Cinder Barrens opens at any hour. With the default data, each share of his reward has a
+> 25% chance of it. A share goes to each player who earns it in the fight by a blow, healing or a ward.
 
 ### The route (A1)
 
@@ -96,6 +107,7 @@ town sells an input), **optional** (a branch), **optional-boss** (from a lair bo
 | 11 | Vesperine's loot | the Hollow Acre: the Last Rites at night in the Overworld (a headstone, 4 lit candles within 4 blocks, a Mourning Wreath on or beside it, the Death Knell rung within 4 blocks; [hollow-acre.md](hollow-acre.md)) | `recipe/death_knell.json`: gold ingot, iron nugget, bone; `recipe/mourning_wreath.json`: 4 mourning flowers, 1 vine | optional-boss; trade-supported (the Curiosities stall sells 4 candles for 3 Jugs, the Florist 4 lilies of the valley for 2) |
 | 12 | Madame Tatterlace's loot | the Spindle Loft: a Cursed Spindle used on a Spinning Wheel at night in the Overworld ([spindle-loft.md](spindle-loft.md)) | `recipe/cursed_spindle.json`: 2 spider eyes, 3 string, 2 gold ingots, 1 amethyst shard, 1 stick; `recipe/spinning_wheel.json`: 3 planks, 3 sticks, 1 string | optional-boss |
 | 13 | The Yeti King's loot | the Glacier Hall: a Frost Horn blown at night in the Overworld standing on snow or ice ([glacier-hall.md](glacier-hall.md)) | `recipe/frost_horn.json`: 2 leather, 2 gold ingots, 2 snow blocks, 1 goat horn | optional-boss; trade-supported in winter (the Seasonal Stall sells 8 snow blocks for 3 Jugs under its winter and December themes) |
+| 14 | The Cinder Tyrant's loot | the Cinder Kiln: a Kiln Seal pressed into a magma block in the Nether, the Volcano or the Cinder Barrens, at any hour ([cinder-kiln.md](cinder-kiln.md)) | `recipe/kiln_seal.json`: 2 blaze powder (the Nether's), 4 obsidian, 1 magma block, 2 gold ingots | optional-boss |
 
 **The town is a seller of little on this route, and a buyer of much.** The walled town ([walled-town.md](walled-town.md))
 stands near the start of every new world and gives 20 Jugs on a first visit inside its wall. Its **General Store buys**
@@ -108,9 +120,10 @@ trades in the mod's data are the Halloween Peddler's and the Retro Trader's, nei
 
 **No circular unlock.** Steps 1 to 6 can be done with Overworld vanilla things alone, each needing only steps above it.
 No research, recipe or stage needs anything a boss gives: the bosses' materials make only the Reaper's Hood, string
-(`recipe/string_from_gossamer_silk.json`), white wool (`recipe/white_wool_from_yeti_fur.json`) and cheaper alternatives
-of the lairs' own entry items (`recipe/mourning_wreath_from_shade.json`, `recipe/cursed_spindle_from_silk.json`,
-`recipe/frost_horn_from_fur.json`), whose plain recipes stay. The lairs need no magic.
+(`recipe/string_from_gossamer_silk.json`), white wool (`recipe/white_wool_from_yeti_fur.json`), magma cream
+(`recipe/magma_cream_from_tyrant_scale.json`) and cheaper alternatives of the lairs' own entry items
+(`recipe/mourning_wreath_from_shade.json`, `recipe/cursed_spindle_from_silk.json`, `recipe/frost_horn_from_fur.json`,
+`recipe/kiln_seal_from_scales.json`), whose plain recipes stay. The lairs need no magic.
 
 ### Every item this chunk touches (A1)
 
@@ -133,6 +146,10 @@ of the lairs' own entry items (`recipe/mourning_wreath_from_shade.json`, `recipe
 | `yeti_mitten` | off-hand ward against freezing | loot only |
 | `yeti_king_crown` | head costume | loot only |
 | `yeti_fur` | material | loot only |
+| `cinderbrand`, `magmaw` | weapons (Arms VII trophies) | loot only, one of the Cinder Tyrant's two (and always one of them on a player's first victory) |
+| `salamander_charm` | off-hand charm against hot ground | loot only |
+| `tyrant_crest` | head costume | loot only |
+| `tyrant_scale` | material | loot only |
 | the 18 owner armour tiers' 72 pieces (`wayfarer_*` among them) | armour | creative-only |
 | `hades_scythe`, `sentinel_longsword`, `frost_knight_greatsword`, `wight_king_zweihander`, `reaper_scythe`, `sentinel_shield` | the armour sets' arms and shield | creative-only (`check_arms_variants` forbids their recipes and drops until the owner settles how a set is won) |
 | the 12 trophies of the 6 bosses not yet built (`hagthorn`, `bogfang` and the rest) | weapons | listed only in `loot_table/bosses/<boss>.json`, which nothing rolls: not had in survival yet |
@@ -202,8 +219,9 @@ trophies (costumes and a curio from the lairs; their art is Jugcraft's, see [ves
 **How it works.** `tools/acquisition.py` is a pure data module that writes each page from the generators' own tables:
 `tools/vesperine.py` (`CHANCES`, `SHADE`, `EVENT_HOOD_CHANCE`, `RECIPES`), `tools/tatterlace.py` (`CHANCES`, `SILK`,
 `EVENT_HEADDRESS_CHANCE`), `tools/yeti_king.py` (`FUR`, `TROPHIES`, `TROPHY_CHANCE`, `CHANCES`; since Chunk B),
-`tools/concordance_rituals.py` (`RITUALS`, `STRUCTURES`, `RESEARCH`) and `tools/lairs.py` (the lairs' names and
-tokens); no number is typed twice. `generate_material_data.py` writes the rows to
+`tools/cinder_tyrant.py` (`SCALES`, `TROPHIES`, `TROPHY_CHANCE`, `CHANCES`; since Chunk B),
+`tools/concordance_rituals.py` (`RITUALS`, `STRUCTURES`, `RESEARCH`), `tools/lairs.py` (the lairs' names and tokens,
+and the Kiln Seal's lands) and `tools/biomes.py` (those lands' names); no number is typed twice. `generate_material_data.py` writes the rows to
 `assets/jugcraft/recipe_view.json` (`"acquisition_info"`: an item and a key each) and the words to `en_us.json`
 (`jei.jugcraft.acquire.<key>`). `client/compat/JugcraftJeiPlugin.addAcquisitionInfo` reads the rows and adds a page for
 each registered item. The same module lists the loadout (`LOADOUT`, `OPTIONAL`) and the creative-only tiers
@@ -212,11 +230,12 @@ each registered item. The same module lists the loadout (`LOADOUT`, `OPTIONAL`) 
 **Limits, said plainly.**
 - The pages are written from the data the mod ships. A server whose data pack changes a boss's loot table or the
   Adept's Attunement is not reflected; every page says "with the default data" for that reason. The first-victory
-  trophy is code (`VesperineLoot`, `TatterlaceLoot`, `YetiKingLoot`), not data.
+  trophy is code (`VesperineLoot`, `TatterlaceLoot`, `YetiKingLoot`, `CinderTyrantLoot`), not data.
 - `loot_table/bosses/vesperine.json` and `tatterlace.json` (written by `tools/arms_variants.py`, as every boss's trophy
   table is) are rolled by nothing; the bosses' rewards are `loot_table/entities/<boss>.json`. A data pack that edits
-  those two `bosses/` tables changes nothing in game. The Yeti King's is rolled: `YetiKingLoot` rolls
-  `loot_table/bosses/yeti_king.json` on a player's first victory when their share brought neither of his trophies.
+  those two `bosses/` tables changes nothing in game. The Yeti King's and the Cinder Tyrant's are rolled:
+  `YetiKingLoot` and `CinderTyrantLoot` roll `loot_table/bosses/yeti_king.json` and `cinder_tyrant.json` on a player's
+  first victory when their share brought neither of the boss's trophies.
 - JEI's own crafting pages list Jugcraft's crafting recipes only when JEI's recipe sync reaches the client: its Fabric
   half synchronises the `minecraft:` recipe serializers through Fabric's recipe sync, so a single-player world (whose
   built-in server runs JEI) has them, but a dedicated server without JEI sends none and JEI falls back to vanilla's
@@ -283,6 +302,20 @@ Concordance Chunk B, unit 1 (B-02), the Yeti King's pages; ran here (14 October 
 - Not run: `YetiKingGameTests.hisLootIsWhatHisPagesSay` (400 shares against the pages' chances; CI runs it), and the
   pages in a client with JEI.
 
+Concordance Chunk B, unit 1 (B-02), the Cinder Tyrant's pages (B-D1); ran here (14 October 2026):
+- `python3 tools/generate_material_data.py`: the only generated changes are his five `jei.jugcraft.acquire.*` words and
+  the Cinder Kiln's three dossier words in `en_us.json`, and five more `acquisition_info` rows (20 in all) in
+  `recipe_view.json`; the fifteen existing pages are unchanged.
+- `python3 tools/check_mod_data.py`: **passes**; `check_acquisition` holds his row as it holds the Yeti King's, his
+  pages naming no objective because `lair/tyrant` credits no deed (B-P4).
+- Deliberate faults, one at a time on a scratch copy, each reported: his row naming an objective, a deed credited in
+  `lair/tyrant`, his trophies split into two pools, the Salamander Charm's chance moved in his table, and his payer
+  dropped (with eight against `check_encyclopedia`, in [the chunk's contract](concordance-chunk-b.md)).
+- `python3 scripts/check_repository.py` and `python3 tools/concordance_journey.py`: **pass**.
+- Not run: `CinderTyrantGameTests.hisLootIsWhatHisPagesSay` (400 shares: 3 to 6 Tyrant Scales each, never both
+  trophies, and the Cinderbrand, the Magmaw, the charm and the crest each within five standard deviations of 7.5%,
+  7.5%, 25% and 20%; CI runs it), and the pages in a client with JEI.
+
 ## World and event applicability
 
 The route is the Overworld's; nothing needs the Nether or the End (the Eye of Ender is only one of five relic
@@ -311,9 +344,8 @@ Known limits and findings:
   Nether's; the progression audits may count it as an Overworld relic specimen. It predates this chunk and is not
   changed here; Relic Lore stays reachable in the Overworld through a Nautilus Shell and a Totem of Undying.
 - The pages are static text in English (`en_us.json`), like the rest of the mod's words.
-- The pages cover the three bosses on `Encounter` that `tools/acquisition.py` lists: Vesperine, Madame Tatterlace and,
-  since Chunk B, the Yeti King. The Cinder Tyrant's loot has no information page yet (his record states its chances).
-  A boss with a table and no pages (the Mire Hag #336, the Crypt Lich #350/#353) is not held to pages until it gets a
-  row and `LairRewards`.
+- The pages cover the four bosses on `Encounter` that `tools/acquisition.py` lists: Vesperine, Madame Tatterlace and,
+  since Chunk B, the Yeti King and the Cinder Tyrant. A boss with a table and no pages (the Mire Hag #336, the Crypt
+  Lich #350/#353) is not held to pages until it gets a row and `LairRewards`.
 - Reverting: drop `tools/acquisition.py`'s rows and words, the plugin's `addAcquisitionInfo` and the audit; nothing in
   a world depends on them.

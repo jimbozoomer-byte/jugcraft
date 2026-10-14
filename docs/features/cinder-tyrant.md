@@ -116,6 +116,8 @@ Who is paid: everyone who qualified and is alive within 64 blocks of the bowl's 
 
 He is no Witching Season boss: the Halloween event adds nothing to his loot.
 
+With JEI installed, each of these has an information page with these numbers, "with the default data" (since Concordance Chunk B, B-02: [concordance-first-loadout.md](concordance-first-loadout.md)); `check_acquisition` holds the pages to this table and to `CinderTyrantLoot`, and their last sentence names a blow, healing or a ward, but no objective (B-P4).
+
 **What they are for:**
 - **Tyrant Scale:**
   - **Crushed:** one scale makes two magma cream, for Fire Resistance.
@@ -169,6 +171,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 - **Technology and magic:** none required. Fire Resistance helps against his fire, from a potion or the Ember school's Hearthguard (the planning pack's Ember link); its Tide, Rime and Strata links wait for those schools.
 - **Trade and solo routes:** a solo player can do everything. The sluices are turned by hand, the bait is standing in a trough, and a hot Tyrant still takes half damage from any weapon. His health is lowest for one player, and the first kill always brings a trophy. His loot can be traded like any item.
 - **Reachable entry path:** the seal takes what a player who has reached the Nether has (part 1), and nothing he drops is needed to reach him.
+- **The encyclopedia and JEI (since Concordance Chunk B, B-02):** carrying a Kiln Seal shows the Cinder Kiln's dossier under Expeditions (its rite, the seal's recipe, that it works all year, and the party it holds); meeting or beating him adds how support earns a share (his Cinderlings, healing and wards; not what burning or his slag took), the two trophies of which a first win brings one, his loot with JEI's words, the cheaper seal and the way home. JEI has an information page for each of his five things. A first win over him completes the First Light route's lair step ([arcane-concordance-first-route.md](arcane-concordance-first-route.md)).
 
 ## Balance and automation
 
@@ -278,6 +281,10 @@ Concordance Chunk B, unit 1 (B-01), put his reward on the shared credit and adde
 - `LairEncounterGameTests.aKeptCinderTyrantRewardIsSavedAndPaid`: a reward kept under `cinder_tyrant` survives a save and is paid once by his payer.
 
 `python3 tools/check_mod_data.py` (whose `check_cinder_tyrant` now also holds his credit and reward to `Encounter` and `LairRewards`: the record begun, abandoned and claimed, the striker's credit on him and his Cinderlings, and the payment and payer under `cinder_tyrant`) and `python3 scripts/check_repository.py` pass locally at this commit. Five deliberate changes, each made in a scratch copy, each failed `check_cinder_tyrant`: the payer dropped, `BOSS` renamed, the claim guard dropped, the old damage map restored, and the Cinderling crediting `source.getEntity()`.
+
+Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these game tests, which have not run yet either:
+- `CinderTyrantGameTests.hisLootIsWhatHisPagesSay`: a player who has already won Tempered rolls 400 shares; each holds 3 to 6 Tyrant Scales and never both trophies, and the counts of the Cinderbrand, the Magmaw, the Salamander Charm and the crest each lie within five standard deviations of 7.5%, 7.5%, 25% and 20%.
+- `EncyclopediaGameTests.theCinderKilnsDossier`, and his lair in `eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and `theExpeditionsPageHoldsEveryKeeper`; `CinderKilnGameTests.theSealIsNoHalloweenRite`.
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 

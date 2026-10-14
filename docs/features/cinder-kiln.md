@@ -78,6 +78,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
 - **Outputs:** the way into the Cinder Kiln, where the Cinder Tyrant will wait (part 2).
 - **Technology and magic:** none yet; the kiln is an adventuring destination. Part 2 brings Arms VII's two Cinder Tyrant trophies (the Cinderbrand and the Magmaw) into survival, and the plan's Ember link, Hearthguard's Fire Resistance, helps against the slag (as a potion does).
 - **Reachable entry path:** every input is reachable without the kiln, by a player who has reached the Nether: no circular unlock.
+- **The encyclopedia (since Concordance Chunk B, B-02):** carrying a Kiln Seal shows the kiln's dossier under Expeditions: the rite, the seal's recipe, that it works all year and the party it holds; the Cinder Tyrant's part follows once he is met ([cinder-tyrant.md](cinder-tyrant.md)). A first win over him completes the First Light route's lair step.
 
 ## Balance and automation
 
@@ -181,6 +182,8 @@ The client game test (`CinderKilnClientGameTests`, CI job `client`) runs the sea
 5. when the instance closes, the player goes home and the vent is gone.
 
 Then it takes ten pictures: the vent on the magma, and in the kiln the view from the ledge, the bowl from near the stair's foot, the crucible and channel under the forge mouth, the slag falling over the lip, the west sluice open over its flooded trough, a shelf, the dome and its vent, and the Grey Mist's arch. Since the brighter light it then reads the game's own block light on every cell of the bowl's floor, and fails under 8. Last, a seal pressed into a magma block in the Nether opens a second kiln, and the tenth picture is that vent.
+
+Concordance Chunk B, unit 1 (B-02) adds `CinderKilnGameTests.theSealIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the seal still takes on magma in a volcanic land. It has not run yet; CI runs it.
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 

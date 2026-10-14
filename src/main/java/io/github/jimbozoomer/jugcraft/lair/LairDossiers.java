@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload.Edg
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaRequestPayload;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.PageWriter;
 import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceLoot;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import java.util.ArrayList;
@@ -21,21 +22,21 @@ import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The encyclopedia's Expeditions page (Concordance Chunk A, A-04; the Glacier Hall since Chunk B, B-02): a dossier for
- * each lair the player has found, and nothing for one they have not (A-D9). A lair is found by carrying its token (its
- * rite is then shown: what to make, where and when, and whether it waits for the Halloween season); its keeper by
- * meeting them (being in the lair, being owed its reward) or beating them, when the dossier adds how support earns a
- * share of the reward (what counts in that lair: the keeper's own creatures, healing, wards and any objective), the
- * trophy a first win brings (one, or one of a pair at random), what the keeper gives (the acquisition text JEI shows,
- * "with the default data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token and the pieces
- * the loot makes, how to leave, and, in a fight, the player's own part in it.
+ * The encyclopedia's Expeditions page (Concordance Chunk A, A-04; the Glacier Hall and the Cinder Kiln since Chunk B,
+ * B-02): a dossier for each lair the player has found, and nothing for one they have not (A-D9). A lair is found by
+ * carrying its token (its rite is then shown: what to make, where and when, and whether it waits for the Halloween
+ * season); its keeper by meeting them (being in the lair, being owed its reward) or beating them, when the dossier adds
+ * how support earns a share of the reward (what counts in that lair: the keeper's own creatures, healing, wards and any
+ * objective), the trophy a first win brings (one, or one of a pair at random), what the keeper gives (the acquisition
+ * text JEI shows, "with the default data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token
+ * and the pieces the loot makes, how to leave, and, in a fight, the player's own part in it.
  * <p>
  * Discovery is read, not saved: the inventory, {@link Lairs#VISIT}, {@link LairRewards#OWED} and the first-win
- * advancements. So a player who went in, left, and used up their token (a Cursed Spindle, a Frost Horn) reads as not
- * having found the lair until they carry one again or win; recorded as a known limit. It only reads.
+ * advancements. So a player who went in, left, and used up their token (a Cursed Spindle, a Frost Horn, a Kiln Seal)
+ * reads as not having found the lair until they carry one again or win; recorded as a known limit. It only reads.
  * <p>
- * With every keeper found and beaten the page draws each recipe it names as a grid, within {@link PageWriter#MAX_GRIDS};
- * tools/check_mod_data.py (check_encyclopedia) refuses a table that would draw more.
+ * With every keeper found and beaten the page draws each recipe it names as a grid: twelve for the four keepers, which
+ * is {@link PageWriter#MAX_GRIDS}; tools/check_mod_data.py (check_encyclopedia) refuses a table that would draw more.
  */
 public final class LairDossiers {
 	public static final String PAGE = "expedition";
@@ -59,7 +60,10 @@ public final class LairDossiers {
 				List.of("gossamer_silk", "needle_rapier", "golden_thimble", "tatterlace_headdress"), List.of("cursed_spindle_from_silk"), List.of()),
 		YETI_KING(Lair.GLACIER_HALL, YetiKingLoot.BOSS, YetiKingLoot.ADVANCEMENT, List.of("glacier_maul", "rimeclaw"), null,
 				List.of("frost_horn"), List.of("frost_horn"), List.of(Items.SNOW_BLOCK),
-				List.of("yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown"), List.of("frost_horn_from_fur"), List.of());
+				List.of("yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown"), List.of("frost_horn_from_fur"), List.of()),
+		CINDER_TYRANT(Lair.CINDER_KILN, CinderTyrantLoot.BOSS, CinderTyrantLoot.ADVANCEMENT, List.of("cinderbrand", "magmaw"), null,
+				List.of("kiln_seal"), List.of("kiln_seal"), List.of(),
+				List.of("tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest"), List.of("kiln_seal_from_scales"), List.of());
 
 		public final Lair lair;
 		/** The keeper's id in {@link LairRewards} ("vesperine"), and its entity's. */
@@ -178,6 +182,7 @@ public final class LairDossiers {
 					LastRites.CANDLE_RANGE, LastRites.GRAVE_RANGE);
 			case TATTERLACE -> Component.translatable("encyclopedia.jugcraft.dossier.spindle_loft.rite");
 			case YETI_KING -> Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.rite");
+			case CINDER_TYRANT -> Component.translatable("encyclopedia.jugcraft.dossier.cinder_kiln.rite");
 		};
 		out.fact(rite, null, items(boss.tokens));
 		for (String recipe : boss.rite) {

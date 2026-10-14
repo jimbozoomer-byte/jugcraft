@@ -1,15 +1,16 @@
 """Where the things only a ritual or a lair boss gives come from, for JEI (Concordance Chunk A, unit 4:
-docs/features/concordance-first-loadout.md; the Yeti King since Chunk B, unit 1).
+docs/features/concordance-first-loadout.md; the Yeti King and the Cinder Tyrant since Chunk B, unit 1).
 
 JEI shows a crafting or machine recipe for most things. The Adept's Wand (made by a ritual) and what the lair bosses
-give (rolled from their loot tables when they fall: Vesperine, Madame Tatterlace and the Yeti King) have none, so each
-gets an information page instead, written here from the generators' own tables (tools/vesperine.py, tools/tatterlace.py,
-tools/yeti_king.py, tools/concordance_rituals.py and tools/lairs.py) so that its numbers are the data's.
+give (rolled from their loot tables when they fall: Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant)
+have none, so each gets an information page instead, written here from the generators' own tables (tools/vesperine.py,
+tools/tatterlace.py, tools/yeti_king.py, tools/cinder_tyrant.py, tools/concordance_rituals.py, tools/lairs.py and
+tools/biomes.py) so that its numbers are the data's.
 
 The pages are a client copy of the default data, as the rest of recipe_view.json is: a server whose data pack changes a
 boss's loot table or the Adept's Attunement is not reflected, so every page says "with the default data". A player's
-first victory bringing the boss's trophy is code (each boss's loot class: VesperineLoot, TatterlaceLoot, YetiKingLoot),
-not data; so is the Halloween event's extra, which only the Witching Season's two bosses have.
+first victory bringing the boss's trophy is code (each boss's loot class: VesperineLoot, TatterlaceLoot, YetiKingLoot,
+CinderTyrantLoot), not data; so is the Halloween event's extra, which only the Witching Season's two bosses have.
 
 Written by generate_material_data.py: the rows to assets/jugcraft/recipe_view.json "acquisition_info" (read by
 client/compat/JugcraftJeiPlugin, which adds each as an information page) and the words to the language file, as
@@ -20,6 +21,8 @@ the loadout and the creative-only tiers to the files on disk.
 
 Pure data: it imports only the generators' tables, which import nothing of the generator's.
 """
+import biomes
+import cinder_tyrant as ct
 import concordance_ember as ember
 import concordance_rituals as rituals
 import concordance_trinkets as trinkets
@@ -65,6 +68,14 @@ BOSSES = {
                   "opened": f"which a {lairs.ITEMS['frost_horn']} blown on snow or ice opens at night",
                   "loot_class": "lair/yeti/YetiKingLoot.java", "table": "entities/yeti_king", "objective": True,
                   "trophies": (yk.TROPHIES, yk.TROPHY_CHANCE), "count": ("yeti_fur", yk.FUR), "chances": yk.CHANCES},
+    "cinder_tyrant": {"name": ct.ENTITIES["cinder_tyrant"], "pronouns": ("his", "him"),
+                      "lair": lairs.LAIRS["cinder_kiln"]["display"],
+                      "opened": (f"which a {lairs.ITEMS['kiln_seal']} pressed into a magma block in the Nether, "
+                                 + " or ".join(f"the {biomes.BIOMES[land.split(':')[1]]['display']}"
+                                               for land in lairs.SEAL_LANDS) + " opens at any hour"),
+                      "loot_class": "lair/tyrant/CinderTyrantLoot.java", "table": "entities/cinder_tyrant",
+                      "objective": False, "trophies": (ct.TROPHIES, ct.TROPHY_CHANCE), "count": ("tyrant_scale", ct.SCALES),
+                      "chances": ct.CHANCES},
 }
 
 

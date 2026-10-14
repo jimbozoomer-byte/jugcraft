@@ -1,7 +1,7 @@
 # Concordance Chunk B: winter and stone (contract and handoff)
 
-Status: contract written; unit 1 in progress (B-01 committed for the Yeti King and the Cinder Tyrant, and B-02 for the
-Glacier Hall's dossier and the Yeti King's JEI pages; their tests not yet run in CI); the other units Not started. The base is `d4c07bf56`, the head of Chunk A
+Status: contract written; unit 1 implemented, CI pending (B-01 and B-02 committed for the Yeti King and the Cinder
+Tyrant; their tests not yet run in CI); the other units Not started. The base is `d4c07bf56`, the head of Chunk A
 ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337), not merged); main is `b73f51c8a`
 ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
 Proposal: the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
@@ -47,7 +47,7 @@ starts.
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | In progress: B-01 committed for the Yeti King and the Cinder Tyrant (CI pending); B-02 committed for the Glacier Hall and the Yeti King (CI pending); the Cinder Kiln's dossier and the Tyrant's pages to come |
+| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | Implemented, CI pending: B-01 and B-02 committed for the Yeti King and the Cinder Tyrant, each keeper in his own commits (B-D1) |
 | 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Not started |
 | 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible. One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | new `arcane-concordance-rime-strata.md` | Not started |
 | 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | new `arcane-concordance-winter.md`; `arcane-concordance-alchemy.md` | Not started |
@@ -289,6 +289,18 @@ rite made a Halloween one, the grid bound lowered to 9, his rite recipe needing 
 sale dropped from the entry, the Hollow Acre's season words dropped) were each reported, and #336's Mire Hag table with
 no pages was not. Adding `white_wool_from_yeti_fur` to his `made_from` passes at this commit (11 grids of 12); with the
 Kiln's two it would be 13, which the audit refuses.
+
+**As built (the Cinder Kiln's commit; not run until CI):** `EncyclopediaGameTests.theCinderKilnsDossier`, the Kiln Seal
+and the Cinder Kiln added to `eachRiteSaysWhenItWorks`; `CinderKilnGameTests.theSealIsNoHalloweenRite`;
+`CinderTyrantGameTests.hisLootIsWhatHisPagesSay` (400 shares, as the Yeti King's). `aWinOverAnyKeeperIsTheLairStep` and
+`theExpeditionsPageHoldsEveryKeeper` read `LairDossiers.Boss.values()`, so they now take in the Tyrant: four first wins,
+and 12 grids of 12 in 71 rows (79 at most). Run here: `check_mod_data.py`, `check_repository.py` and
+`concordance_journey.py` pass. On a scratch copy, 13 faults were each reported: 5 against `check_acquisition` (his row
+naming an objective; a deed credited in `lair/tyrant`; his trophies split into two pools; the Salamander Charm's chance
+moved; his payer dropped) and 8 against `check_encyclopedia` (one trophy in the tool; the Salamander Charm dropped from
+his Java entry; his rite made a Halloween one in the tool; `KilnSealRite` reading `Lairs.offSeason()`;
+`magma_cream_from_tyrant_scale` added to his `made_from`, 13 grids; his lair's leave words missing; his Java entry
+removed; a sale named in it).
 
 **Acceptance:** B4's encyclopedia guidance (09:106); closes Chunk A's deferral (`concordance-chunk-a.md:157-160`).
 
@@ -687,8 +699,8 @@ B-05 cannot start on its own.
 - **The rite words name the default tags** (`#jugcraft:frost_horn_ground`, `#jugcraft:kiln_seal_lands`): a data pack
   that changes them is not reflected in the dossier, as with the items' tooltips.
 - **A used-up token hides its lair again:** discovery is read, not saved (A-D9), so a player who went in and used up
-  their Frost Horn reads as not having found the Glacier Hall until they carry one again or win; the same as the
-  Witching Season's lairs, now for every lair.
+  their Frost Horn (or Kiln Seal) reads as not having found the Glacier Hall (or the Cinder Kiln) until they carry one
+  again or win; the same as the Witching Season's lairs, now for every lair.
 - **Two bosses stay on the old path:** the Mire Hag and the Crypt Lich keep damage-only rewards in their pull requests;
   after Chunk B, four bosses are on the encounter credit and two are not.
 - **Overlap with Chunk C's preservation wash** (09:124): Winter Brine stays a frost counter.
@@ -755,11 +767,14 @@ and the build without the optional integrations where it touches an optional bou
 
 ## Where to resume
 
-B-01 is in, in two commits: the Yeti King on `Encounter` and `LairRewards` with both payout defects fixed and the
-column deed, then the Cinder Tyrant the same way, with no deed (B-P4); their game tests have not run yet. B-02's first
-commit is in: the Glacier Hall's dossier, the Yeti King's JEI pages, the lair step done by any keeper's first win, and
-the generalised `check_acquisition` and `check_encyclopedia`; its tests have not run yet. Next, B-02's second commit:
-the Cinder Kiln's dossier and the Cinder Tyrant's JEI pages (B-D1).
+Unit 1 is implemented, in four commits. B-01: the Yeti King on `Encounter` and `LairRewards` with both payout defects
+fixed and the column deed, then the Cinder Tyrant the same way, with no deed (B-P4). B-02: the Glacier Hall's dossier
+and the Yeti King's JEI pages, with the lair step done by any keeper's first win and the generalised
+`check_acquisition` and `check_encyclopedia`; then the Cinder Kiln's dossier and the Cinder Tyrant's JEI pages (B-D1),
+which fill the Expeditions page's 12 grids. None of its game tests has run yet. Next: CI on the unit's head, each job's
+result recorded here and in the boss and loadout records (the evidence commit), and the owner's checkpoint on B-P2,
+B-P3, B-P4, B-P5 and B-P30; then unit 2 (B-03, B-04: the Glacier Hall's access and lifecycle, and the Yeti fight held
+to the completion evidence).
 Refresh the open pull requests first: #352 decides the rebase.
 
 ## Decisions

@@ -131,7 +131,7 @@ MATRIX = {
         "Recipe categories for the Lampwright's Bench, the Circle Anchor and the Resonant Ring; alchemy ingredients' "
         "properties as information (never outcomes); since Concordance Chunk A, an information page each on where the "
         "Adept's Wand and the lair bosses' loot come from (tools/acquisition.py: Vesperine's and Madame Tatterlace's, "
-        "and the Yeti King's since Chunk B), with the default data's chances and offerings",
+        "and the Yeti King's and the Cinder Tyrant's since Chunk B), with the default data's chances and offerings",
         "no JEI pages; the codex's recipe pages remain",
         [],
         "Its pages have not been seen in a client; the information pages are written from the default data, so a "

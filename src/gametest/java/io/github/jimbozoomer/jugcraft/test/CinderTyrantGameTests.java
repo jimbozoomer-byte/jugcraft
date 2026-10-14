@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.authlib.GameProfile;
+import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
@@ -60,7 +61,8 @@ import net.minecraft.world.phys.Vec3;
  * in the Cinder Kiln itself runs in a real world, in {@link CinderTyrantClientGameTests}. Since Concordance Chunk B
  * (B-01) his fight's credit is the lairs' shared one: support and the absent share his hoard once, a healer is credited
  * for mending his blows and his own fire but not his slag's heat or burning, a killing blow alone is paid, a tamed
- * creature's blow is its owner's, four players are each paid once, and a fight loaded awake keeps a fresh record.
+ * creature's blow is its owner's, four players are each paid once, and a fight loaded awake keeps a fresh record. Since
+ * B-02 his loot is what his JEI pages say.
  *
  * <p>He fights any player within 38 blocks of his bowl's centre; the arena keeps every other test's players farther off
  * than that. Each test sends him away before it ends, with his Cinderlings, and lets the slag ebb. His fight's record
@@ -79,6 +81,15 @@ public class CinderTyrantGameTests {
 	private static final int LOADING_TICKS = 80;
 	/** A creature hurt shrugs off a blow no harder than the last for 10 ticks after (vanilla's); a test waits this long between blows. */
 	private static final int HURT_COOLDOWN = 12;
+	/** How many shares a page test rolls: each count then lies far inside five standard deviations of its chance's mean. */
+	private static final int SHARES = 400;
+
+	/** Whether {@code count} of {@value #SHARES} shares lies within five standard deviations of {@code chance}'s mean. */
+	private static boolean within(int count, double chance) {
+		double mean = SHARES * chance;
+		double deviation = 5.0 * Math.sqrt(SHARES * chance * (1.0 - chance));
+		return count >= mean - deviation && count <= mean + deviation;
+	}
 
 	/** The origin of a kiln laid out from the arena's corner, a block under it: its crucible's floor on the arena's. */
 	private static BlockPos origin(GameTestHelper helper) {
@@ -1006,5 +1017,46 @@ public class CinderTyrantGameTests {
 			});
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * His JEI pages (tools/acquisition.py; Concordance Chunk B, B-02) say what the server rolls, with the default data: each
+	 * share holds 3 to 6 Tyrant Scales and has a 15% chance of one of his two trophies (7.5% each, never both), a 25%
+	 * chance of the Salamander Charm and a 20% chance of his Crest. A player who has already won Tempered (so no first-kill
+	 * trophy) rolls {@value #SHARES} shares: none holds both trophies, and each count lies within five standard deviations
+	 * of its chance (a pool's chance ignored, or his trophies split into two pools, falls outside). check_acquisition holds
+	 * the same table to the pages' words; the first kill's trophy is hisLootIsEachParticipantsOwn's.
+	 */
+	@GameTest(maxTicks = 20)
+	public void hisLootIsWhatHisPagesSay(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer veteran = helper.makeMockServerPlayerInLevel();
+		TrickOrTreat.award(veteran, CinderTyrantLoot.ADVANCEMENT);
+		helper.assertFalse(CinderTyrantLoot.firstKill(veteran), "A player who has won Tempered rolls no first-kill trophy");
+		Vec3 origin = helper.absoluteVec(new Vec3(1.5, 2.0, 1.5));
+		int cinderbrand = 0;
+		int magmaw = 0;
+		int charm = 0;
+		int crest = 0;
+		try {
+			for (int share = 0; share < SHARES; share++) {
+				List<ItemStack> loot = CinderTyrantLoot.roll(level, origin, veteran);
+				int scales = loot.stream().filter(stack -> stack.is(JugcraftTyrant.TYRANT_SCALE)).mapToInt(ItemStack::getCount).sum();
+				helper.assertTrue(scales >= 3 && scales <= 6, scales + " Tyrant Scales in a share, not 3 to 6");
+				long trophies = loot.stream().filter(CinderTyrantLoot::trophy).count();
+				helper.assertTrue(trophies <= 1, "A share held " + trophies + " trophies: his two share one pool");
+				cinderbrand += (int) loot.stream().filter(stack -> stack.is(JugcraftTyrant.cinderbrand())).count();
+				magmaw += (int) loot.stream().filter(stack -> stack.is(JugcraftTyrant.magmaw())).count();
+				charm += (int) loot.stream().filter(stack -> stack.is(JugcraftTyrant.SALAMANDER_CHARM)).count();
+				crest += (int) loot.stream().filter(stack -> stack.is(JugcraftTyrant.TYRANT_CREST)).count();
+			}
+		} finally {
+			veteran.discard();
+		}
+		helper.assertTrue(within(cinderbrand + magmaw, 0.15), (cinderbrand + magmaw) + " trophies in " + SHARES + " shares, not about 15%");
+		helper.assertTrue(within(cinderbrand, 0.075) && within(magmaw, 0.075), cinderbrand + " Cinderbrands and " + magmaw + " Magmaws, not about 7.5% each");
+		helper.assertTrue(within(charm, 0.25), charm + " Salamander Charms, not about 25%");
+		helper.assertTrue(within(crest, 0.2), crest + " Crests, not about 20%");
+		helper.succeed();
 	}
 }

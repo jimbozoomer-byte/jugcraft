@@ -27,6 +27,7 @@ import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.LairVisit;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.LastRites;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
 import io.github.jimbozoomer.jugcraft.town.Town;
@@ -488,7 +489,13 @@ public class EncyclopediaGameTests {
 		keeperDossier(helper, LairDossiers.Boss.YETI_KING, JugcraftLairs.FROST_HORN, List.of(JugcraftYeti.glacierMaul(), JugcraftYeti.rimeclaw()));
 	}
 
-	/** With the Halloween event over and lairs.off_season off, the Last Rites wait for the season; the horn works all year. */
+	/** Concordance Chunk B (B-02): the Cinder Kiln's dossier, from a Kiln Seal carried to a win over the Cinder Tyrant. */
+	@GameTest(maxTicks = 20)
+	public void theCinderKilnsDossier(GameTestHelper helper) {
+		keeperDossier(helper, LairDossiers.Boss.CINDER_TYRANT, JugcraftLairs.KILN_SEAL, List.of(JugcraftTyrant.cinderbrand(), JugcraftTyrant.magmaw()));
+	}
+
+	/** With the Halloween event over and lairs.off_season off, the Last Rites wait for the season; the horn and the seal work all year. */
 	@GameTest(maxTicks = 20)
 	public void eachRiteSaysWhenItWorks(GameTestHelper helper) {
 		if (!JugcraftConfig.isFeatureEnabled(JugcraftLairs.FEATURE)) {
@@ -496,7 +503,7 @@ public class EncyclopediaGameTests {
 			return;
 		}
 		ServerPlayer player = player(helper);
-		for (Item token : List.of(JugcraftLairs.DEATH_KNELL, JugcraftLairs.FROST_HORN)) {
+		for (Item token : List.of(JugcraftLairs.DEATH_KNELL, JugcraftLairs.FROST_HORN, JugcraftLairs.KILN_SEAL)) {
 			player.getInventory().add(new ItemStack(token));
 		}
 		HalloweenSeason.Mode mode = HalloweenSeason.mode();
@@ -512,7 +519,7 @@ public class EncyclopediaGameTests {
 			JugcraftConfig.setTextOption("lairs.off_season", offSeason);
 		}
 		helper.assertTrue(row(section(page, Lair.HOLLOW_ACRE), "message.jugcraft.lair.rite.off_season") != null, "out of season the Last Rites wait for it");
-		for (Lair lair : List.of(Lair.GLACIER_HALL)) {
+		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN)) {
 			List<EncyclopediaPayload.Row> rows = section(page, lair);
 			helper.assertTrue(row(rows, "encyclopedia.jugcraft.dossier.all_year") != null && row(rows, "message.jugcraft.lair.rite.off_season") == null,
 					lair.id + "'s rite works all year: " + rows.stream().map(row -> key(row.text())).toList());

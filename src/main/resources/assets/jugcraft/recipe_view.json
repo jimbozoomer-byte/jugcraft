@@ -8596,6 +8596,10 @@
       "key": "adept_wand"
     },
     {
+      "item": "jugcraft:cinderbrand",
+      "key": "cinderbrand"
+    },
+    {
       "item": "jugcraft:dirge_skull",
       "key": "dirge_skull"
     },
@@ -8610,6 +8614,10 @@
     {
       "item": "jugcraft:gossamer_silk",
       "key": "gossamer_silk"
+    },
+    {
+      "item": "jugcraft:magmaw",
+      "key": "magmaw"
     },
     {
       "item": "jugcraft:needle_rapier",
@@ -8632,8 +8640,20 @@
       "key": "rimeclaw"
     },
     {
+      "item": "jugcraft:salamander_charm",
+      "key": "salamander_charm"
+    },
+    {
       "item": "jugcraft:tatterlace_headdress",
       "key": "tatterlace_headdress"
+    },
+    {
+      "item": "jugcraft:tyrant_crest",
+      "key": "tyrant_crest"
+    },
+    {
+      "item": "jugcraft:tyrant_scale",
+      "key": "tyrant_scale"
     },
     {
       "item": "jugcraft:vesper_scythe",

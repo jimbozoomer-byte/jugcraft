@@ -84,8 +84,8 @@ FIRST_ROUTE = [
                ("recommended", "jugcraft:pyromaniacs_hood"), ("recommended", "jugcraft:pyromaniacs_tunic"),
                ("recommended", "jugcraft:pyromaniacs_pants"), ("recommended", "jugcraft:pyromaniacs_shoes")],
      "trades": [("general", "minecraft:lantern")], "codex": [], "tests": ["theFirstLoadoutIsMadeInSurvival"]},
-    {"id": "lair", "edge": "optional_boss", "done": "a first win over any lair's keeper: The Last Harvest, Unravelled or "
-     "Abominable", "after": ["compose"],
+    {"id": "lair", "edge": "optional_boss", "done": "a first win over any lair's keeper: The Last Harvest, Unravelled, "
+     "Abominable or Tempered", "after": ["compose"],
      "recipes": [], "trades": [], "codex": [], "tests": ["aBossIsHiddenUntilDiscovered", "aWinOverAnyKeeperIsTheLairStep"]},
 ]
 
@@ -112,6 +112,11 @@ DOSSIERS = {
                   "tokens": ["frost_horn"], "rite": ["frost_horn"], "trades": [("seasonal", "minecraft:snow_block")],
                   "after_win": ["frost_horn_from_fur"], "made_from": [],
                   "loot": ["yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown"]},
+    "cinder_tyrant": {"lair": "cinder_kiln", "advancement": "tempered", "trophies": ["cinderbrand", "magmaw"],
+                      "rite_class": "KilnSealRite", "off_season": None,
+                      "tokens": ["kiln_seal"], "rite": ["kiln_seal"], "trades": [],
+                      "after_win": ["kiln_seal_from_scales"], "made_from": [],
+                      "loot": ["tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest"]},
 }
 
 # What each Jugcraft key does, for the Keys page (key.jugcraft.<name>; every key the client registers).
@@ -237,6 +242,10 @@ DOSSIER = {
                          "powder snow, any ice, or Seasonal Snow where winter lays it. The snow splits into a whirl of "
                          "white mist and you fall through to the hall's ledge with frost on your skin; the horn is used "
                          "up only if the hall opens. While the whirl spins, friends follow by using it",
+    "cinder_kiln.rite": "At any hour, press the Kiln Seal into a magma block in the Nether, or in a volcanic land of the "
+                        "Overworld (the Volcano or the Cinder Barrens). The magma cracks open into a vent of sparks and "
+                        "smoke and you sink through the stone to the kiln's ledge; the seal is used up only if the kiln "
+                        "opens. While the vent smokes, friends follow by using it",
     "grave": "A grave: any headstone, such as a %s",
     "any_night": "The rite works on any night",
     "in_season": "The rite works now, in the Halloween season",
@@ -254,6 +263,10 @@ DOSSIER = {
                            "%s or more of the health his side's blows took from them (freezing is not a blow), wards a "
                            "friend against %s or more health of those blows, or, having already taken part, baits his "
                            "charge into an ice column, within %s blocks of his lake",
+    "cinder_kiln.credit": "A share of his reward goes to everyone who strikes him or his Cinderlings, gives friends back "
+                          "%s or more of the health his side took from them (blows, gobs, cinders and flame; not burning "
+                          "afterwards, nor slag), wards a friend against %s or more health of those, within %s blocks of "
+                          "his bowl",
     "credit.wards": "Cast a ward after the keeper wakes: one cast before is not counted. Those who fall are paid when "
                     "they are back on their feet, and those who leave the game when they come back",
     "won": "You have beaten this keeper: %s",
@@ -266,6 +279,8 @@ DOSSIER = {
                           "a fight",
     "glacier_hall.leave": "The Grey Mist in the arch of blue ice beside the arrival takes you home at any time, in or out "
                           "of a fight; when he falls, Grey Mist stands in the middle of the lake too",
+    "cinder_kiln.leave": "The Grey Mist in the arch of kiln brick behind the arrival takes you home at any time, in or "
+                         "out of a fight; when he falls, Grey Mist stands in the middle of the bowl too",
     "grave_goods": "Dying in a lair costs no belongings: they come back to you as Grave Goods",
     "owed": "A share of the keeper's spoils is kept for you",
     "share": "Damage %s, healing %s, warded %s, objectives %s",
