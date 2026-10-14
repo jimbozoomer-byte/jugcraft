@@ -695,6 +695,34 @@ GUNS = {
         "damage": 8.5, "pellets": 1, "interval": 15, "auto": False, "capacity": 8,
         "reload": (8, 13, 17), "spread": (2.0, 0.25), "range": 108, "ammo": "rifle_round",
     },
+    # Slice 13D: the owner's Fencer Thumper, Pax and Laser Musket. A revolving grenade launcher whose barrel tips down to
+    # load its cylinder a grenade at a time, its pump turning the cylinder after each shot; a revolver held in one hand
+    # that, with a stock fitted, is held in both as a carbine; and an energy musket on plain stone.
+    "fencepost_thumper": {
+        "display": "Fencepost Thumper",
+        "source": "fencer_thumper",
+        "tooltip": "A revolving grenade launcher, its barrel tipped down to load the cylinder a grenade at a time and its "
+                   "pump worked to turn it. Each shot lobs a grenade that goes off where it lands; it never breaks a "
+                   "block. Loads any grenade, the one in the other hand first.",
+        "damage": 16.0, "pellets": 1, "interval": 18, "auto": False, "capacity": 4,
+        "reload": (12, 22, 19), "spread": (3.0, 1.25), "range": 20, "ammo": "grenade", "shot": "grenade",
+    },
+    "parley_revolver": {
+        "display": "Parley Revolver",
+        "source": "pax",
+        "tooltip": "A heavy single-action revolver held in one hand, its cylinder swung out to load a round at a time. "
+                   "With a stock fitted it is held in both hands, as a carbine. Fires rifle rounds.",
+        "damage": 10.0, "pellets": 1, "interval": 16, "auto": False, "capacity": 6,
+        "reload": (10, 13, 14), "spread": (2.5, 0.6), "range": 72, "ammo": "rifle_round",
+    },
+    "lantern_musket": {
+        "display": "Lantern Musket",
+        "source": "laser_musket",
+        "tooltip": "A musket that fires light: its beam passes through every creature in its line. Three shots to a "
+                   "charge, then its core is changed. Runs on Energy Cells.",
+        "damage": 12.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 3,
+        "reload": 44, "spread": (2.0, 0.3), "range": 96, "ammo": "energy_cell", "shot": "beam", "charge": 900,
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -908,6 +936,15 @@ RECIPES = {
                                          "L": "minecraft:lever", "P": "#minecraft:planks"}),
     "millstone_rifle": (["SIB", " LP"], {"S": "#c:ingots/steel", "I": "minecraft:iron_ingot", "B": "#c:ingots/brass",
                                          "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    # Slice 13D: the Fencepost Thumper iron and brass, as the Fencepost Carbine, a brass ingot more under it for its
+    # cylinder (without it, the grid is the Marshal Revolver's); the Parley Revolver iron and brass on a steel frame; the
+    # Lantern Musket steel and an advanced circuit, as the energy weapons, and a lantern for its core.
+    "fencepost_thumper": (["IIB", "BLP", " B "], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass",
+                                                  "L": "minecraft:lever", "P": "#minecraft:planks"}),
+    "parley_revolver": (["SII", " LB"], {"S": "#c:ingots/steel", "I": "minecraft:iron_ingot", "L": "minecraft:lever",
+                                         "B": "#c:ingots/brass"}),
+    "lantern_musket": (["SSN", "PAB"], {"S": "#c:ingots/steel", "N": "minecraft:lantern", "P": "#minecraft:planks",
+                                        "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -935,7 +972,9 @@ RECIPE_SWITCHES.update({gun: ("machines",) for gun, spec in GUNS.items() if spec
 # block (client/guns/GunLooks.EYE_RELIEF). Aiming slides the sight onto the middle of the screen at the hip's depth; a
 # gun whose moving parts slide back along the line of sight as it fires can reach the eye there.
 # "mounts" (optional): the bone a slot's attachments ride, where it is not the bone holding the slot's standard part
-# (effective_bones()): the Trench Lobber's leaf sight flaps with each shot, and a scope in its place should not.
+# (effective_bones()): the Trench Lobber's leaf sight flaps with each shot, and a scope in its place should not. An
+# attachment named there rides its own bone, whatever its slot's: the Fencepost Thumper's grips ride its pump, which
+# slides, and its bayonets the barrel, which tips (slice 13D).
 BUILDS = {
     "rust_midge": {
         "bones": [
@@ -2238,6 +2277,71 @@ BUILDS = {
         "sight": (8.0, 5.0, 14.05),
         "eye_relief": 5.0,
     },
+    # Slice 13D. The Fencer Thumper's barrel (the main part's 5th to 14th elements, with the cylinder and the pump on it)
+    # tips down about the knuckle under the front of the cylinder (the 12th) to be loaded, raising the cylinder's back
+    # out of the frame. Its cylinder (the 15th to 18th) turns a chamber at each shot's "rotate_cylinder" cue, from code
+    # (GunEffects.cylinderTurn); its pump (the 19th to 22nd: the slide and the handle out to its left) is worked back and
+    # forward after each shot, and the left hand, which holds the handle, rides it on a "left_arm2" bone. Its hammer is
+    # the owner's hammer part (the main part's 30th element is the same plane). Its grips ride the pump and its bayonets
+    # the barrel ("mounts"). Its bolt, flash and lid bones hold nothing.
+    "fencepost_thumper": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.6, 16.4)),
+            ("gun_body", "gun_body2", ["main-#4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,29"], (8.0, 1.6, 16.4)),
+            ("barrel", "gun_body", ["main#4,5,6,7,8,9,10,11,12,13"], (7.96, 1.87, 8.84)),
+            ("cylinder_magazine", "barrel", ["main#14,15,16,17"], (7.93, 3.57, 10.79)),
+            ("pump", "barrel", ["main#18,19,20,21"], (6.71, 2.5, 4.11)),
+            ("hammer", "gun_body", ["hammer"], (7.92, 3.8, 15.3)),
+            ("left_arm2", "gun_body", [], (6.71, 2.5, 4.11)),
+            ("bolt", "gun_body", [], (8.0, 4.5, 13.5)),
+            ("flash", "gun_body", [], (8.0, 4.5, 13.5)),
+            ("lid", "gun_body", [], (8.0, 4.5, 13.5)),
+        ],
+        "mounts": {"grip": "barrel", "light_grip": "pump", "vertical_grip": "pump"},
+        "arm_parents": {"left": "left_arm2"},
+        "hands": {"right": (8.0, 1.6, 16.4), "left": (4.5, 2.5, 4.1)},
+        "arms": {"right": (0.113, -0.4392, 0.8912), "left": (0.4997, -0.1364, 0.8554)},
+        "muzzle": (7.84, 3.87, -1.27),
+        "sight": (8.0, 6.0, 13.0),
+        "eye_relief": 5.5,
+    },
+    # The Pax is held in one hand, as the Tabby Revolver: its idle hides the left arm, which comes in to load each round.
+    # With a stock fitted it is held in both, as a carbine, and plays the owner's carbine_ animations (GunAnimations;
+    # JugcraftGuns.CARBINES). Its cylinder (the owner's drum part) swings out to the left about the crane under it; its
+    # hammer is the flat plane at the back. Its bolt, seal and shell bones hold nothing; gun_body2, which holds every
+    # part, cants the gun in the carbine's aimed shot. Its sight is the notch at the back over the post at the front.
+    "parley_revolver": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 1.0, 13.9)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel"], (8.0, 1.0, 13.9)),
+            ("magazine", "gun_body", ["drum"], (6.9, 2.5, 11.12)),
+            ("hammer", "gun_body", ["hammer"], (8.0, 3.43, 13.73)),
+            ("bolt", "gun_body", [], (8.0, 4.5, 12.5)),
+            ("seal", "gun_body", [], (8.0, 4.5, 11.2)),
+            ("shell", "gun_body", [], (8.0, 4.5, 11.2)),
+        ],
+        "hands": {"right": (8.0, 1.0, 13.9), "left": (5.6, 2.8, 12.3)},
+        "hand_pose": {"left": ("reload_loop", "0.3333")},
+        "arms": {"right": (-0.5467, -0.2403, 0.8021), "left": (0.3536, -0.6124, 0.7071)},
+        "muzzle": (8.0, 4.3, 3.88),
+        "sight": (8.0, 5.5, 13.0),
+    },
+    # The Laser Musket is one part. Its core (the 22nd and 23rd elements: the glass tube at the breech and the glow
+    # inside it, on the owner's glass and three-frame glow textures) is drawn out to the right and down and a fresh one
+    # put in as it reloads, turning about its length. Its bolt bone, which only the draw names, holds nothing. Its sight
+    # is the notch on the breech's top over the post at the muzzle.
+    "lantern_musket": {
+        "bones": [
+            ("gun_body", None, ["main-#21,22"], (8.0, 2.0, 16.0)),
+            ("core", "gun_body", ["main#21,22"], (8.0, 3.89, 13.63)),
+            ("bolt", "gun_body", [], (8.0, 4.5, 13.0)),
+        ],
+        "hands": {"right": (8.0, 2.0, 16.0), "left": (8.0, 2.3, 7.0)},
+        "arms": {"right": (0.1256, -0.4392, 0.8896), "left": (0.553, -0.1067, 0.8263)},
+        "muzzle": (7.94, 3.91, -1.95),
+        "sight": (8.0, 5.35, 14.24),
+        "eye_relief": 3.5,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2666,13 +2770,15 @@ def effective_bones(gun):
     moves to a "std_<slot>" bone of its own. A slot on two bones (the Warden Pistol's magazine and the spare its reload
     brings in) gets a second set suffixed "_2". The renderer shows the fitted attachments' bones and hides the standard
     parts they replace (GunRenderer). A slot the gun's "mounts" names a bone for hangs its attachments there instead
-    (the Trench Lobber's scopes ride its body, not the leaf sight that flaps)."""
+    (the Trench Lobber's scopes ride its body, not the leaf sight that flaps), and an attachment it names a bone for
+    hangs there (slice 13D: the Fencepost Thumper's grips ride its pump)."""
     kinds = fits(gun)
     bones = BUILDS[gun]["bones"]
     anchors = {slot: [name for name, _, parts, _ in bones if set(parts) & set(standard)] or ["gun_body"]
                for slot, standard in SLOTS.items()}
-    mounts = {slot: [BUILDS[gun].get("mounts", {})[slot]] if slot in BUILDS[gun].get("mounts", {}) else anchors[slot]
-              for slot in SLOTS}
+    given = BUILDS[gun].get("mounts", {})
+    mounts = {slot: [given[slot]] if slot in given else anchors[slot] for slot in SLOTS}
+    homes = {kind: [given[kind]] if kind in given else mounts[ATTACHMENTS[kind]["slot"]] for kind in kinds}
     replaced = {ATTACHMENTS[kind]["slot"] for kind in kinds if ATTACHMENTS[kind]["replaces"]}
     out = []
     for name, parent, parts, pivot in bones:
@@ -2684,10 +2790,10 @@ def effective_bones(gun):
                 if own and slot in replaced:
                     parts = [p for p in parts if p not in standard]
                     children.append((f"std_{slot}{suffix}", name, own, pivot))
-            if name in mounts[slot]:
-                suffix = "" if mounts[slot].index(name) == 0 else f"_{mounts[slot].index(name) + 1}"
-                children += [(f"att_{kind}{suffix}", name, attachment_parts(gun, kind), pivot)
-                             for kind in kinds if ATTACHMENTS[kind]["slot"] == slot]
+            for kind in kinds:
+                if ATTACHMENTS[kind]["slot"] == slot and name in homes[kind]:
+                    suffix = "" if homes[kind].index(name) == 0 else f"_{homes[kind].index(name) + 1}"
+                    children.append((f"att_{kind}{suffix}", name, attachment_parts(gun, kind), pivot))
         out.append((name, parent, parts, pivot))
         out += children
     return out
@@ -2755,6 +2861,8 @@ ZOOM = {
     # Slice 13B: a carbine, a shotgun and a marksman's single-shot rifle.
     "fencepost_carbine": 0.82, "waystation_shotgun": 0.9, "highball_rifle": 0.75,
     "flatboat_gun": 0.9, "windlass_musket": 0.85, "millstone_rifle": 0.78,
+    # Slice 13D: a grenade launcher, a revolver and an energy musket.
+    "fencepost_thumper": 0.9, "parley_revolver": 0.9, "lantern_musket": 0.8,
 }
 
 
@@ -2785,6 +2893,10 @@ LASER_DOT = "red_dot_reticle"
 # the server's timing already covers, and show nothing. Slice 12B: a side magazine's tracking cues (the owner's mod
 # slid such a magazine along as its rounds were spent; here it stays where the animations put it).
 EJECT_CUE = "eject_casing"
+# Slice 13D: the Fencer Thumper's shot cues "rotate_cylinder" as its pump comes back, and GunAnimations turns the gun's
+# cylinder_magazine bone on by a chamber (a whole turn over the gun's capacity) there, eased over a few ticks
+# (client/guns/GunEffects.cylinderTurn).
+CYLINDER_CUE = "rotate_cylinder"
 QUIET_CUES = ("loaded", "end_reload", "loop_end", "reload_end", "stop_mag_tracking", "reset_mag_position",
               "resume_mag_tracking")
 # The muzzle flash: the owner's four flash frames, copied to textures/item/guns/flash/flash_<n>.png; each shot shows
@@ -2867,7 +2979,10 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    "fencepost_carbine": {"reload_mag_in": "shell_in"}, "waystation_shotgun": {"reload_mag_in": "shell_in"},
                    # Slice 13C: the Big Bore pushes its shell into the chamber; the Winnie Millend a round at a time, as
                    # the Winnie (the Drover Rifle) does.
-                   "flatboat_gun": {"reload_mag_in": "shell_in"}, "millstone_rifle": {"reload_mag_in": "shell_in"}}
+                   "flatboat_gun": {"reload_mag_in": "shell_in"}, "millstone_rifle": {"reload_mag_in": "shell_in"},
+                   # Slice 13D: the Fencer Thumper pushes a grenade into its cylinder at a time, as the Blooper (the
+                   # Bullfrog) does; the Laser Musket's core clanks home, as the Squall Rifle's canister does.
+                   "fencepost_thumper": {"reload_mag_in": "shell_in"}, "lantern_musket": {"metal": "clank"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -2970,6 +3085,10 @@ SHOT_SOUNDS = {
     "flatboat_gun": "item/cannon/fire.ogg",
     "windlass_musket": "item/blackpowder/fire.ogg",
     "millstone_rifle": "item/heavier_rifle/fire.ogg",
+    # Slice 13D: the Trench Lobber's grenade launcher, the Goshawk Revolver's heavy shot and the Linesman's laser.
+    "fencepost_thumper": "item/grenade_launcher/fire.ogg",
+    "parley_revolver": "item/heavier_rifle/fire.ogg",
+    "lantern_musket": "item/laser/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3102,6 +3221,14 @@ DUAL_SPREAD = 1.5
 def one_handed():
     """The guns a player may hold two of, one in each hand (slice 10G): those held in one hand."""
     return [gun for gun in GUNS if not two_handed(gun)]
+
+
+# Slice 13D: one-handed guns that, with a stock fitted, are held in both hands as carbines. Such a gun plays the owner's
+# carbine_ animations in place of its own (its draw, idle, shots, inspect and reload: client/guns/GunAnimations), its
+# holder's other arm comes up to it seen from outside (GunPose), and it is no longer one of two guns held at once
+# (JugcraftGuns.CARBINES, GunItem.carbine).
+CARBINES = ("parley_revolver",)
+CARBINE_ANIMATIONS = ("draw", "idle", "shoot", "aim_shoot", "inspect")
 
 
 # ------------------------------------------------------------------ the Nether guns' fire (slices 11A and 11B)
@@ -3506,7 +3633,9 @@ FRAMED = {"scguns:item/rocket_rifle",
           # Carbine's too.
           "scguns:item/pyroclastic_flow_animated",
           # Slice 12C: the Forlorn Hope's whole texture, seven frames.
-          "scguns:item/forlorn_hope"}
+          "scguns:item/forlorn_hope",
+          # Slice 13D: the Laser Musket's glowing core, three frames.
+          "scguns:item/animated_laser_musket"}
 
 
 def texture_size(texture):
@@ -4072,8 +4201,10 @@ def check():
                     problems.append(f"{gun}: animation {name} plays {event['effect']}, which has no sound")
             for event in (data.get("particle_effects") or {}).values():
                 # (the Scrapper's carbine reload names "end_reload " with a space after it)
-                if event["effect"].strip() != EJECT_CUE and event["effect"].strip() not in QUIET_CUES:
+                if event["effect"].strip() not in (EJECT_CUE, CYLINDER_CUE) and event["effect"].strip() not in QUIET_CUES:
                     problems.append(f"{gun}: animation {name} cues particle {event['effect']}, which nothing shows")
+                if event["effect"].strip() == CYLINDER_CUE and "cylinder_magazine" not in bones:
+                    problems.append(f"{gun}: animation {name} turns a cylinder, which the model lacks")
         for kind in fits(gun):
             if ATTACHMENTS[kind]["slot"] == "barrel" and f"muzzle_{kind}" not in bones.get(f"att_{kind}", {}).get("locators", {}):
                 problems.append(f"{gun}: the {kind} bone has no muzzle_{kind} locator for the flash")
@@ -4195,9 +4326,16 @@ def check():
                             "a tick (rocket_speed)")
     if not all(isinstance(n, int) and n >= 1 for n in OTHER_AMMO.values()):
         problems.append("OTHER_AMMO: each item loads a whole number of rounds, at least one")
+    for gun in CARBINES:
+        stocks = [kind for kind in fits(gun) if ATTACHMENTS[kind]["slot"] == "stock"]
+        names = animations(gun)["animations"]
+        reloads = ("reload_start", "reload_loop", "reload_stop") if isinstance(GUNS[gun]["reload"], tuple) else ("reload",)
+        missing = [f"carbine_{name}" for name in CARBINE_ANIMATIONS + reloads if f"carbine_{name}" not in names]
+        if gun not in one_handed() or not stocks or missing:
+            problems.append(f"{gun}: a carbine is one-handed, takes a stock and has carbine_ animations (lacks {missing})")
     for name, mounts in ((g, b.get("mounts", {})) for g, b in BUILDS.items()):
-        if not set(mounts) <= set(SLOTS) or not set(mounts.values()) <= {bone for bone, _, _, _ in BUILDS[name]["bones"]}:
-            problems.append(f"{name}: its mounts name a slot or a bone it lacks")
+        if not set(mounts) <= set(SLOTS) | set(fits(name)) or not set(mounts.values()) <= {bone for bone, _, _, _ in BUILDS[name]["bones"]}:
+            problems.append(f"{name}: its mounts name a slot, an attachment or a bone it lacks")
     for gun in GUNS:
         # The arms hang lower by the tilt in either hand (GunPose); a turn about another axis they could not take up.
         display = base_model(gun)["display"]

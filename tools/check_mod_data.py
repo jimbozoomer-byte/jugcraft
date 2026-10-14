@@ -1552,6 +1552,9 @@ def check_guns():
     one_handed = ", ".join(f'"{gun}"' for gun in guns.one_handed())
     if f"ONE_HANDED = Set.of({one_handed});" not in java:
         err(f"JugcraftGuns.ONE_HANDED differs from tools/guns.py one_handed(): expected Set.of({one_handed})")
+    carbines = ", ".join(f'"{gun}"' for gun in guns.CARBINES)
+    if f"CARBINES = Set.of({carbines});" not in java:
+        err(f"JugcraftGuns.CARBINES differs from tools/guns.py CARBINES: expected Set.of({carbines})")
     if f"DUAL_SPREAD = {guns.DUAL_SPREAD}F;" not in java:
         err(f"JugcraftGuns.DUAL_SPREAD differs from tools/guns.py: expected {guns.DUAL_SPREAD}F")
     # Slice 11A: the Nether guns, whose bullets set what they hurt alight, and for how long.
