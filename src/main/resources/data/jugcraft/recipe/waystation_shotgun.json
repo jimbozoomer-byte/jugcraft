@@ -8,7 +8,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "IIB",
+    "BII",
     "ILP"
   ],
   "key": {

@@ -872,7 +872,7 @@ RECIPES = {
     # iron ingot more for its drum; the Highball Rifle steel, a marksman's rifle.
     "fencepost_carbine": (["IIB", "LPP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
                                            "P": "#minecraft:planks"}),
-    "waystation_shotgun": (["IIB", "ILP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+    "waystation_shotgun": (["BII", "ILP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
                                             "P": "#minecraft:planks"}),
     "highball_rifle": (["SSS", " LP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "P": "#minecraft:planks"}),
 }

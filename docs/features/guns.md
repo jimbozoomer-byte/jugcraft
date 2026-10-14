@@ -2080,7 +2080,7 @@ The reload times and the rates are the owner's animations'.
 
 **Crafting** (a crafting table; the guns switch, as every gun):
 - **Fencepost Carbine:** two iron ingots and a brass ingot over a lever and two planks, as the lever guns.
-- **Waystation Shotgun:** two iron ingots and a brass ingot over an iron ingot (its drum), a lever and a plank.
+- **Waystation Shotgun:** a brass ingot and two iron ingots over an iron ingot (its drum), a lever and a plank. (First set as two iron ingots and a brass ingot over the same, which was the Mule's recipe; changed so the two do not clash.)
 - **Highball Rifle:** three steel ingots over a lever and a plank, a marksman's rifle of the steel tier.
 
 **How they fire:** as the other bullet guns, and the Waystation Shotgun as the other shotguns: each bullet or pellet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. The Fencepost Carbine and the Waystation Shotgun load a round at a time, and a shot cuts the loading short; the Highball Rifle's round goes in at the end of its reload. Nothing else follows a hit.
