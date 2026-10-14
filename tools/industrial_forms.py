@@ -198,6 +198,41 @@ FORMS = {
                                            "T": f"{MOD}:fluid_tank", "C": f"{MOD}:basic_circuit"}),
         "features": ["machines"],
     },
+    "bulk_chemical_infuser": {
+        "display": "Bulk Chemical Infuser",
+        # The art brief's 4x6x6 larger variant ("enlarges this exact chamber, its paired inlets and installed-bed
+        # compartment into a tall synthesis installation"): the Infuser's own family, tanks, bed socket and capabilities,
+        # so it runs the same recipes, in the bulk profile (four batches side by side from 16,000 mB tanks at 80% of the
+        # draw a batch).
+        "family": "synthesis_converter",
+        # Its cells as its model fills them (form_layers on bulk_chemical_infuser()): 110 blocks.
+        "layers": [["C###", "####", "####", "####", "####", "####"],
+                   ["####", "####", "####", "####", ".###", ".###"],
+                   ["####", "####", "####", "####", ".##.", ".##."],
+                   ["####", "####", "####", "####", ".##.", ".##."],
+                   ["####", "####", "####", "####", ".##.", ".##."],
+                   ["....", ".##.", ".##.", "....", "....", "...."]],
+        "profile": "BULK",
+        "tank_mb": 16_000,
+        "input_tanks": ["hydrogen", "reactant"],
+        "output_tanks": ["product", "water"],
+        "sockets": [("bed", CATALYST_BEDS)],
+        "capabilities": [GAS_COMBINATION, NICKEL_METHANATION, CONTACT_CONVERSION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("hydrogen_in", "FLUID_IN", 0, 0, 2, 2, "LEFT"),
+            ("reactant_in", "FLUID_IN", 1, 3, 2, 2, "RIGHT"),
+            ("product_out", "FLUID_OUT", 0, 2, 5, 2, "BACK"),
+            ("water_out", "FLUID_OUT", 1, 1, 5, 0, "BACK"),
+            ("power", "ENERGY_IN", 0, 3, 4, 0, "RIGHT"),
+        ],
+        # This change's bill (open for review): a Chemical Infuser enlarged with two Steel Tanks, steel plates, steel
+        # fluid pipe and a basic circuit.
+        "recipe": (["TIT", "PFP", "PCP"], {"T": f"{MOD}:steel_tank", "I": f"{MOD}:chemical_infuser", "P": "#c:plates/steel",
+                                           "F": f"{MOD}:steel_fluid_pipe", "C": f"{MOD}:basic_circuit"}),
+        "features": ["machines"],
+    },
     "chemical_oxidizer": {
         "display": "Chemical Oxidizer",
         # The chemical reactor family (the Chemical Reactor's energy figures: 96 JE/t, a 30,000 JE store); it runs only
@@ -656,6 +691,18 @@ HANDBOOK["bio_generator"] = [
         "the same inlet: 268 JE a millibucket at 64 JE/t, a bucket lasting about 210 seconds.",
     ]
 
+HANDBOOK["bulk_chemical_infuser"] = [
+    "Four wide, six deep and six tall: the Chemical Infuser's chamber, inlets, bed drawer and cooling jacket twice as "
+    "large, built from a Chemical Infuser, two Steel Tanks, steel plates, steel fluid pipe and a basic circuit. Every "
+    "block it fills must be free when it is placed.",
+    "It runs everything the Infuser does, hydrogen chloride, ethylene dichloride, methanation over a nickel bed and "
+    "contact conversion over a vanadium bed, but four batches at once from 16,000 mB tanks, at 80% of the draw a batch. "
+    "Its catalyst bed goes in the same socket on its screen and serves every batch.",
+    "Hydrogen (or oxygen for contact conversion) comes in on its left shoulder, the other gas on its right; the "
+    "product leaves high at the back and the water low at the back. Power comes in at the junction box low on its right "
+    "side, near the back. Upgrade cards fit its terminal.",
+]
+
 HANDBOOK["large_gas_burning_generator"] = [
     "Five wide, six deep and five tall: the Gas Burning Generator's engine-generator train enlarged on its skid, built "
     "from a Gas Burning Generator, two Steel Tanks, steel plates, a steel gear and a basic circuit. Every block it fills "
@@ -699,6 +746,7 @@ TANK_NAMES = {
 # Infuser's first inlet takes hydrogen for its hydrogen recipes but oxygen for contact conversion.
 FORM_TANK_NAMES = {
     "chemical_infuser": {"hydrogen": "Left inlet tank", "reactant": "Right inlet tank"},
+    "bulk_chemical_infuser": {"hydrogen": "Left inlet tank", "reactant": "Right inlet tank"},
 }
 
 # Recipes only forms run: each names the capability a form must offer. Fluid results go to output tanks by their
@@ -1242,6 +1290,80 @@ def chemical_infuser_still():
     """The fan standing still, for the item model only (the block models leave it to MachineRotors)."""
     cx, y, cz = INFUSER_FAN
     return cyl("y", cx, cz, 4.75, y - 0.5, y + 0.5, GUNMETAL, "dr_fan") + cyl("y", cx, cz, 1.25, y - 1.25, y + 1.25, CHROME)
+
+
+# The Bulk Chemical Infuser is the Infuser drawn twice as large every way. Each port's pieces then move half a block
+# from the seam the doubling puts them on to the middle of a block: (shift, test on the Infuser's own element centre).
+BULK_INFUSER_PORT_SHIFTS = [
+    # The hydrogen branch on the left shoulder and the reactant branch on the right: down and forward half a block.
+    ((0, -8, -8), lambda c: c[0] > 9.9 and abs(c[1] - 24) <= 7 and abs(c[2] - 24) <= 5),
+    ((0, -8, -8), lambda c: c[0] < -9.9 and abs(c[1] - 24) <= 7 and abs(c[2] - 24) <= 5),
+    # The product collar high at the back, towards the middle; the water drain low at the back, towards the jacket.
+    ((8, -8, 0), lambda c: c[2] > 40 and abs(c[0] + 8) <= 3.5 and abs(c[1] - 24) <= 3.5),
+    ((-8, -8, 0), lambda c: c[2] > 37 and abs(c[0] - 8) <= 3.5 and abs(c[1] - 8) <= 3.5),
+    # The junction box low on the right side at the back, with its socket, insulators and conduit: down and forward.
+    ((0, -8, -8), lambda c: c[0] < -5.5 and 33 <= c[2] <= 47 and c[1] < 19),
+]
+
+
+def _bulk_infuser(point):
+    return (16 + (point[0] - 16) * 2, point[1] * 2, point[2] * 2)
+
+
+def bulk_chemical_infuser():
+    """Four wide, six deep and six tall (the art brief's larger variant): the Chemical Infuser itself, twice as large: the
+    plinth, the stepped reaction chamber with its olive service plates, ceramic collar and crown, the catalyst-bed
+    drawer at the foot of the front with its handle and marker, the ringed inspection port and heat gauge, the amber
+    process band, the paired inlet branches on its shoulders with their valves, the closed loop into the ribbed cooling
+    jacket with its fan, the product collar and water drain at the back and the junction box with the power socket. The
+    control box (the controller) keeps its size at the front left. Each port's pieces sit at the middle of a block face,
+    clear of the seams the doubling would put them on."""
+    m = []
+    for element in chemical_infuser():
+        frm, to = element[0], element[1]
+        if frm[0] >= 8.4 and to[2] <= 4.1 and to[1] <= 14.1:
+            m.append(element)  # the control box, its gauge and lamp
+            continue
+        centre = [(frm[i] + to[i]) / 2 for i in range(3)]
+        shift = next((d for d, test in BULK_INFUSER_PORT_SHIFTS if test(centre)), (0, 0, 0))
+        scaled = _scaled_element(element, lambda p, d=shift: tuple(v + d[i] for i, v in enumerate(_bulk_infuser(p))))
+        frm2, to2 = list(scaled[0]), list(scaled[1])
+        # Nothing reaches below the plinth.
+        if frm2[1] < 4 and shift[1] < 0:
+            frm2[1] = 4.0
+        # A stretched face (a flange) doubled past a block's width is trimmed back to 14 pixels across, about its middle.
+        faces = scaled[2] if isinstance(scaled[2], dict) else {"*": scaled[2]}
+        if any(str(name).endswith("!") for name in faces.values()):
+            for axis in range(3):
+                if to2[axis] - frm2[axis] > 15:
+                    middle = (frm2[axis] + to2[axis]) / 2
+                    frm2[axis], to2[axis] = middle - 7, middle + 7
+        m.append(box(frm2, to2, scaled[2]))
+    return m
+
+
+# Its fan, doubled with the jacket it sits on.
+BULK_INFUSER_FAN = _bulk_infuser((0, 35.5, 40))
+
+
+def bulk_chemical_infuser_rotor():
+    """The bulk cooling fan, turning about y (client/MachineRotors)."""
+    import machine_rotors as rotors
+    cx, y, cz = BULK_INFUSER_FAN
+    quads = rotors.disc("y", y - 2.5, y + 2.5, cx, cz, 2.5, CHROME, CHROME)
+    for blade in range(5):
+        angle = math.radians(72 * blade)
+        c, s = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cx + 2 * (r * c - w * s), cz + 2 * (r * s + w * c))
+        quads += rotors.prism("y", y - 1, y + 1, [at(1.6, -0.55), at(4.75, -1.6), at(4.75, 1.6), at(1.6, 0.55)], GUNMETAL, GUNMETAL)
+    return quads
+
+
+def bulk_chemical_infuser_still():
+    """The fan standing still, for the item model only."""
+    return [_scaled_element(e, _bulk_infuser) for e in chemical_infuser_still()]
 
 
 # The Oxidizer's feed screw, under the hopper at the back, turning about z: its axis's centre (x, y, z).
@@ -2296,6 +2418,10 @@ ROTORS = {
         "ease": 40, "always": True, "quads": gas_burning_generator_rotor(),
     },
     # The Infuser's cooling fan, running while it works.
+    "bulk_chemical_infuser_fan": {
+        "block": "bulk_chemical_infuser", "axis": "y", "center": list(BULK_INFUSER_FAN), "property": "lit", "speed": 12,
+        "ease": 30, "always": True, "quads": bulk_chemical_infuser_rotor(),
+    },
     "chemical_infuser_fan": {
         "block": "chemical_infuser", "axis": "y", "center": list(INFUSER_FAN), "property": "lit", "speed": 18,
         "ease": 30, "always": True, "quads": chemical_infuser_rotor(),
@@ -2363,7 +2489,8 @@ ROTORS = {
 }
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
-          "chemical_infuser": chemical_infuser(), "chemical_oxidizer": chemical_oxidizer(),
+          "chemical_infuser": chemical_infuser(), "bulk_chemical_infuser": bulk_chemical_infuser(),
+          "chemical_oxidizer": chemical_oxidizer(),
           "industrial_fermenter": industrial_fermenter(), "bulk_fermenter": bulk_fermenter(),
           "bulk_chemical_reactor": bulk_chemical_reactor(),
           "anaerobic_digester": anaerobic_digester(), "coal_gasifier": coal_gasifier(),
@@ -2372,6 +2499,7 @@ MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_gener
           "combined_cycle_power_plant": combined_cycle_power_plant()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
+               "bulk_chemical_infuser": bulk_chemical_infuser_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
                "bulk_fermenter": bulk_fermenter_still(),
                "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still(),

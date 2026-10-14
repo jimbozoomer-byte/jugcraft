@@ -4319,6 +4319,30 @@
           }
         },
         {
+          "title": "Bulk Chemical Infuser",
+          "icon": "jugcraft:bulk_chemical_infuser",
+          "text": [
+            "Four wide, six deep and six tall: the Chemical Infuser's chamber, inlets, bed drawer and cooling jacket twice as large, built from a Chemical Infuser, two Steel Tanks, steel plates, steel fluid pipe and a basic circuit. Every block it fills must be free when it is placed.",
+            "It runs everything the Infuser does, hydrogen chloride, ethylene dichloride, methanation over a nickel bed and contact conversion over a vanadium bed, but four batches at once from 16,000 mB tanks, at 80% of the draw a batch. Its catalyst bed goes in the same socket on its screen and serves every batch.",
+            "Hydrogen (or oxygen for contact conversion) comes in on its left shoulder, the other gas on its right; the product leaves high at the back and the water low at the back. Power comes in at the junction box low on its right side, near the back. Upgrade cards fit its terminal."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_tank",
+              "jugcraft:chemical_infuser",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_fluid_pipe",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:bulk_chemical_infuser",
+            "count": 1
+          }
+        },
+        {
           "title": "Ammonia Chiller",
           "icon": "jugcraft:ammonia_chiller",
           "text": [

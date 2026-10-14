@@ -1025,6 +1025,7 @@ def build():
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
             form_page("chemical_infuser"),
+            form_page("bulk_chemical_infuser"),
             machine_page("ammonia_chiller"),
             machine_page("cryogenic_liquefier"),
             {"title": "Gas Cylinders", "icon": f"{MOD}:gas_cylinder", "text": [

@@ -356,6 +356,38 @@ public final class IndustrialForms {
 			.build();
 
 	/**
+	 * The Bulk Chemical Infuser: the art brief's 4x6x6 variant of the Chemical Infuser, the same chamber, paired inlets,
+	 * bed drawer and cooling jacket twice as large, in the synthesis family with the Infuser's tanks, bed socket and
+	 * capabilities, so it runs the same recipes, in the bulk profile: four batches side by side from 16,000 mB tanks at
+	 * 80% of the draw a batch.
+	 */
+	public static final MachineForm BULK_CHEMICAL_INFUSER_FORM = MachineForm.builder(Jugcraft.id("bulk_chemical_infuser"),
+					MachineKind.SYNTHESIS_CONVERTER)
+			.layer("C###", "####", "####", "####", "####", "####")
+			.layer("####", "####", "####", "####", ".###", ".###")
+			.layer("####", "####", "####", "####", ".##.", ".##.")
+			.layer("####", "####", "####", "####", ".##.", ".##.")
+			.layer("####", "####", "####", "####", ".##.", ".##.")
+			.layer("....", ".##.", ".##.", "....", "....", "....")
+			.profile(OperatingProfile.BULK)
+			.inputTank("hydrogen")
+			.inputTank("reactant")
+			.outputTank("product")
+			.outputTank("water")
+			.socket("bed", CATALYST_BEDS)
+			.capability(GAS_COMBINATION)
+			.capability(NICKEL_METHANATION)
+			.capability(CONTACT_CONVERSION)
+			.upgrades()
+			.warmup(40)
+			.port("hydrogen_in", FormPort.Kind.FLUID_IN, 0, 0, 2, 2, FormSide.LEFT)
+			.port("reactant_in", FormPort.Kind.FLUID_IN, 1, 3, 2, 2, FormSide.RIGHT)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 2, 5, 2, FormSide.BACK)
+			.port("water_out", FormPort.Kind.FLUID_OUT, 1, 1, 5, 0, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 3, 4, 0, FormSide.RIGHT)
+			.build();
+
+	/**
 	 * The Large Gas Burning Generator: the art brief's 5x6x5 variant of the Gas Burning Generator, the same
 	 * engine-generator train drawn larger, in the gas turbine's family. It burns hydrogen and methane four times as fast,
 	 * methane an eighth better, from an 8,000 mB tank. Gas comes in low on the right side, the second block back; power
@@ -422,6 +454,7 @@ public final class IndustrialForms {
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
+	public static FormMachineBlock BULK_CHEMICAL_INFUSER;
 	public static FormMachineBlock CHEMICAL_OXIDIZER;
 	public static FormMachineBlock INDUSTRIAL_FERMENTER;
 	public static FormMachineBlock BULK_FERMENTER;
@@ -442,6 +475,7 @@ public final class IndustrialForms {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
+		BULK_CHEMICAL_INFUSER = block("bulk_chemical_infuser", BULK_CHEMICAL_INFUSER_FORM);
 		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
 		INDUSTRIAL_FERMENTER = block("industrial_fermenter", INDUSTRIAL_FERMENTER_FORM);
 		BULK_FERMENTER = block("bulk_fermenter", BULK_FERMENTER_FORM);
@@ -453,9 +487,9 @@ public final class IndustrialForms {
 		LARGE_BIO_GENERATOR = block("large_bio_generator", LARGE_BIO_GENERATOR_FORM);
 		LARGE_GAS_BURNING_GENERATOR = block("large_gas_burning_generator", LARGE_GAS_BURNING_GENERATOR_FORM);
 		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER,
-				INDUSTRIAL_FERMENTER, BULK_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR,
-				LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, BULK_CHEMICAL_INFUSER,
+				CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER,
+				GAS_CLEANUP_RACK, BIO_GENERATOR, LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}
