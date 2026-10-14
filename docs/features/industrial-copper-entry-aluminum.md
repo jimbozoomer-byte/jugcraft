@@ -1,6 +1,6 @@
 # Copper entry for aluminum, and the self-output gate check
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on the [ruthenium bed](industrial-ruthenium-bed.md) and the branches below it.
 
 Proposal issue: none. TODO item: "Use earlier copper conductors in entry aluminum-processing equipment, with aluminum improvements later; verify construction and reagent producers without self-output gates."
@@ -72,7 +72,8 @@ For CI, server game test `ElectrolyticSeparatorGameTests.theAluminumCellIsWiredW
 
 ### Results
 
-Not yet run in CI.
+- An earlier run ([38471431369](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38471431369)) failed only on the Combined Cycle Power Plant's client test underneath, fixed in [factory payoffs](industrial-factory-payoffs.md).
+- **Run [38494568219](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38494568219) (commit e63f1475) passed:** the build, the data checks (the self-output gate audit included), every server game test (`theAluminumCellIsWiredWithCopper` included) with and without optional integrations, and all five client test shards.
 
 ## Rollout and open questions
 
