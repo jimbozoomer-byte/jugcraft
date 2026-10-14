@@ -640,7 +640,13 @@ The screenshots (480×270 previews in shard 4's log; for people to look at, not 
 - `jugcraft_rime_kit_bangle_brace`: five advancement toasts (Cold Against Warmth, Rimekeeping, Against the Dark, First
   Frost, A Glow of Its Own), raised by the research the test grants, cover the top right, where the HUD draws status
   icons, so Braced's icon is not seen (the server's check that the bangle braced the player passed). A large purple
-  pixel shape stands in the middle of the view, probably a particle close to the camera; its source is not identified.
+  pixel shape stands in the middle of the view. Identified in unit 5 from the test's code: it is the shared effect
+  boundary's mark for the Brace the bangle had just put on the player (`ConcordanceEffects.apply` shows `Sign.CHARM`,
+  which `SignClient` draws as vanilla `minecraft:witch` particles around 60% of the wearer's height). The shot was
+  taken in first person within 25 ticks of the bangle's once-a-second look bracing the player; those particles live 8
+  to 40 ticks and float upwards, so they rise through the camera from inside the player's own body. By the code it is
+  expected presentation, not a missing texture or a render defect; others see it round the wearer's body. Since unit
+  5 the test clears the toasts before this shot.
   No shot shows the foci or the bangle in their slots: the test fills the slots on the server and checks them there.
 - `jugcraft_rime_kit_icons`: fifteen item frames on a wooden wall, the lesser focus, the focus, the bangle and Nereid's
   four above, Aquamancer's and Winterguard's eight below; each icon whole in its frame and, at this size, like its

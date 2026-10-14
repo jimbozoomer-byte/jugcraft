@@ -28,11 +28,13 @@ import net.spell_engine.internals.container.SpellContainerSource;
 
 /**
  * Concordance Chunk B, unit 3 in a real client (docs/features/arcane-concordance-rime-strata.md): the owner's icons for
- * Rimebind, Brace and Preserve, and for Rimebound, Thawing and Braced, are in the client's resources; then three shots
+ * Rimebind, Brace and Preserve, and for Rimebound, Thawing and Braced, are in the client's resources; then four shots
  * for people to look at:
  * <ul>
  * <li>{@code jugcraft_rime_strata_spell_bar}: Rimekeeping and Stratawrighting understood and the Initiate's Wand in
  * hand, so Spell Engine's bar holds Rimebind, Brace and Preserve beside First Light's three;</li>
+ * <li>{@code jugcraft_rime_strata_spell_bar_scale1}: the same bar at GUI scale 1, where all six slots should fit (the
+ * width is logged; since Chunk B unit 5, B-11);</li>
  * <li>{@code jugcraft_rime_strata_status_hud}: the player Rimebound, Thawing (no icon) and Braced;</li>
  * <li>{@code jugcraft_rime_strata_status_inventory}: the same in the inventory's list, Thawing listed.</li>
  * </ul>
@@ -75,6 +77,24 @@ public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTes
 			singleplayer.getConnection().waitForChunksRender();
 			clearToasts(context);
 			context.takeScreenshot("jugcraft_rime_strata_spell_bar");
+			// The same bar at GUI scale 1, where it has room: Spell Engine centres it 170 GUI pixels left of the screen's
+			// middle, 20 a slot, so at CI's default scale (427 wide) a bar of 5 or more runs off the left edge (the record's
+			// Rollout: the spell bar's place).
+			int scale = context.computeOnClient(client -> client.options.guiScale().get());
+			context.runOnClient(client -> {
+				client.options.guiScale().set(1);
+				client.resizeGui();
+			});
+			context.waitTicks(10);
+			int width = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth());
+			Jugcraft.LOGGER.info("[rime strata client] the spell bar at GUI scale 1, {} GUI pixels wide", width);
+			clearToasts(context);
+			context.takeScreenshot("jugcraft_rime_strata_spell_bar_scale1");
+			context.runOnClient(client -> {
+				client.options.guiScale().set(scale);
+				client.resizeGui();
+			});
+			context.waitTicks(5);
 
 			// Rimebound, Thawing (hidden, as Rimebind leaves it) and Braced, on the HUD and in the inventory.
 			server.runOnServer(minecraft -> {

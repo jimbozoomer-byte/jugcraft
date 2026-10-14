@@ -29,6 +29,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.core.BlockPos;
@@ -66,7 +67,9 @@ import net.minecraft.world.phys.AABB;
  * them, but no freezing blow takes health; taken off, it does (natural regeneration held off meanwhile, then put
  * back).</li>
  * <li>The real Trinkets slots on the real player, Rimekeeping understood: a Focus of Water worn makes Preserve hold two
- * minutes, and the Water Bangle, its count set back thirty seconds, braces the player through the server's own tick.</li>
+ * minutes, and the Water Bangle, its count set back thirty seconds, braces the player through the server's own tick
+ * ({@code jugcraft_rime_kit_bangle_brace}, the research's toasts cleared first); then the survival inventory, where
+ * Trinkets shows its slots ({@code jugcraft_rime_kit_slots}; since Chunk B unit 5, B-11).</li>
  * <li>The fifteen icons in frames on a wall.</li>
  * </ul>
  * The shots are for people to look at; nothing here judges a picture. The HUD is hidden for the scenes, shown for the
@@ -238,7 +241,24 @@ public class ConcordanceWinterClientGameTests implements FabricClientGameTest {
 			boolean braced = server.computeOnServer(minecraft -> player(minecraft).hasEffect(Brace.BRACED));
 			Jugcraft.LOGGER.info("[winter client] the Water Bangle braced the player: {}", braced);
 			check(braced, "The Water Bangle did not brace a Rimekeeper who had gone thirty seconds without a Brace");
+			// The research granted raises advancement toasts over the top right, where the HUD draws Braced's icon: cleared
+			// first, as ConcordanceRimeStrataClientGameTests does. The purple pixel shapes that may stand mid-view are the
+			// shared effect boundary's mark for the Brace that just landed (ConcordanceEffects.apply shows Sign.CHARM, which
+			// SignClient draws as vanilla witch particles at 60% of the wearer's height): seen from inside the wearer's own
+			// body in first person, they rise through the camera for up to two seconds. Expected, not a missing texture.
+			clearToasts(context);
 			context.takeScreenshot("jugcraft_rime_kit_bangle_brace");
+			// The Focus of Water and the Water Bangle in their slots: the survival inventory, where Trinkets shows its slot
+			// groups (for a creative player vanilla opens the creative screen instead).
+			server.runCommand("gamemode survival @p");
+			context.waitFor(client -> !client.player.hasInfiniteMaterials(), 100);
+			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
+			context.waitTicks(10);
+			boolean inventoryShown = context.computeOnClient(client -> client.gui.screen() instanceof InventoryScreen);
+			context.takeScreenshot("jugcraft_rime_kit_slots");
+			context.setScreen(() -> null);
+			server.runCommand("gamemode creative @p");
+			check(inventoryShown, "The slots shot shows another screen than the survival inventory");
 			server.computeOnServer(ConcordanceWinterClientGameTests::takeOffKit);
 			server.runCommand("effect clear @p");
 			setHudHidden(context, true);
@@ -447,6 +467,12 @@ public class ConcordanceWinterClientGameTests implements FabricClientGameTest {
 		context.waitTicks(40);
 		singleplayer.getConnection().waitForChunksRender();
 		context.takeScreenshot(name);
+	}
+
+	/** Removes the shown and queued toasts (the research's advancements), then waits for a frame drawn without them. */
+	private static void clearToasts(ClientGameTestContext context) {
+		context.runOnClient(client -> client.gui.toastManager().clear());
+		context.waitTicks(5);
 	}
 
 	private static void setHudHidden(ClientGameTestContext context, boolean hidden) {

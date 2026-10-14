@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
@@ -44,7 +45,8 @@ import net.minecraft.world.phys.Vec3;
  * frozen for each so the pose holds. Since Concordance Chunk B (B-04): his lake as the hall was placed, and every slam
  * changing only drift snow to glare ice; leaving mid-fight, the hall unloads with him in his fury, and coming back the
  * player finds him loaded again, still furious, his bar shown again, the snow drifted back and none of his kin or ice;
- * and when he falls the whole lake is as it was placed. CI job {@code client}.
+ * and when he falls the whole lake is as it was placed. Since B-11: his Avalanche Charge baited into an ice column in
+ * the real hall, running and reeling, the column the player's deed. CI job {@code client}.
  */
 public class YetiKingClientGameTests implements FabricClientGameTest {
 	private static final Lair HALL = Lair.GLACIER_HALL;
@@ -148,6 +150,56 @@ public class YetiKingClientGameTests implements FabricClientGameTest {
 			pose(context, server, centre, (king, level, player) -> king.begin(level, YetiKingEntity.Attack.AVALANCHE_CHARGE, player),
 					YetiKingEntity.Attack.AVALANCHE_CHARGE.windup + 3);
 			shot(context, singleplayer, hall, centre, -7.0, 1.0, 5.0, 0.0, 1.5, 3.0, true, "jugcraft_yeti_king_charge");
+
+			// Concordance Chunk B (B-11): his Avalanche Charge baited into the north-west ice column (26.5, 23.5) in the real
+			// hall. The player, given a part in his fight, hovers on the shore's snow beyond the column as his wind-up ends, so
+			// the charge is aimed through it: he runs north along x 26.5 from z 40 and crashes at z 28.8, 5.3 short of the
+			// column's centre (the line of YetiKingGameTests.soloMeleeBaitsAChargeIntoAColumnAndStrikesHimReeling, from farther
+			// back). Pictures from the lake east of his line: running at the column, then reeling against it. The column is
+			// the player's deed (B-01), here for a real player.
+			Vec3 runFrom = new Vec3(o.getX() + 26.5, 0.0, o.getZ() + 40.0);
+			Vec3 bait = new Vec3(o.getX() + 26.5, centre.y, o.getZ() + 16.5);
+			server.runCommand("tick unfreeze");
+			server.runOnServer(minecraft -> {
+				ServerLevel level = lair(minecraft);
+				YetiKingEntity king = king(minecraft);
+				ServerPlayer player = player(minecraft);
+				player.teleportTo(bait.x, bait.y, bait.z);
+				king.teleportTo(runFrom.x, king.floorY(), runFrom.z);
+				king.took(player, 1.0F);
+				king.begin(level, YetiKingEntity.Attack.AVALANCHE_CHARGE, player);
+			});
+			server.waitFor(minecraft -> king(minecraft).action() == YetiKingEntity.Action.CHARGE, 40);
+			context.waitTicks(4);   // a few steps into his run, 16 short of the column
+			server.runCommand("tick freeze");
+			server.runOnServer(minecraft -> {
+				YetiKingEntity king = king(minecraft);
+				double along = king.getZ() - o.getZ();
+				check(king.attack() == YetiKingEntity.Attack.AVALANCHE_CHARGE && king.action() == YetiKingEntity.Action.CHARGE
+						&& king.stunnedTicks() == 0, "He is not running his charge: " + king.action() + ", stunned " + king.stunnedTicks());
+				check(Math.abs(king.getX() - runFrom.x) < 1.0E-3 && along > 28.8 + 1.0E-3 && along < 40.0,
+						"He is not running north along x 26.5 at the column: " + king.position());
+			});
+			shot(context, singleplayer, hall, centre, -1.0, 1.0, 3.5, -13.0, 2.0, -6.5, true, "jugcraft_yeti_king_charge_column");
+			server.runCommand("tick unfreeze");
+			server.waitFor(minecraft -> king(minecraft).stunnedTicks() > 0, 60);
+			context.waitFor(client -> client.level != null && client.level.getEntitiesOfClass(YetiKingEntity.class, slot()).stream()
+					.anyMatch(seen -> seen.action() == YetiKingEntity.Action.STUNNED), 20);
+			server.runCommand("tick freeze");
+			server.runOnServer(minecraft -> {
+				YetiKingEntity king = king(minecraft);
+				double along = king.getZ() - o.getZ();
+				check(king.stunnedTicks() > 0 && king.action() == YetiKingEntity.Action.STUNNED && king.attack() == null,
+						"Run into the column he is not reeling: " + king.action() + ", stunned " + king.stunnedTicks());
+				check(Math.abs(king.getX() - runFrom.x) < 1.0E-3 && Math.abs(along - 28.8) < 1.0E-3,
+						"He did not crash at (26.5, 28.8), 5.3 short of the north-west column: " + king.position());
+				Encounter.Share share = king.encounter().share(player(minecraft));
+				check(share != null && share.deeds() == 1,
+						"His charge into the column was not the player's deed: " + (share == null ? "no part" : share.deeds() + " deeds"));
+			});
+			shot(context, singleplayer, hall, centre, -7.5, 1.0, -6.0, -13.0, 2.0, -9.5, true, "jugcraft_yeti_king_reeling");
+			server.runCommand("tick unfreeze");
+			server.waitFor(minecraft -> king(minecraft).stunnedTicks() == 0, YetiKingEntity.STUN_TICKS + 20);   // out of his stun before the Roar's pose
 
 			// The King's Roar, at half his health: he bounds back onto his dais and roars, a blizzard howls and his kin come
 			// out of the dens.

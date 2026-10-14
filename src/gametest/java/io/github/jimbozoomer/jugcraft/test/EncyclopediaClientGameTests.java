@@ -13,6 +13,10 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
+import io.github.jimbozoomer.jugcraft.lair.Lair;
+import io.github.jimbozoomer.jugcraft.lair.LairDossiers;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
+import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +28,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerCon
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -64,7 +69,10 @@ import net.minecraft.world.level.block.Blocks;
  * <li><b>Inspection.</b> Opened looking at a Circle Anchor, the Inspect page is the anchor's own report
  * ({@code jugcraft_encyclopedia_inspect}).</li>
  * <li><b>Expeditions and keys</b> ({@code jugcraft_encyclopedia_expedition}, {@code jugcraft_encyclopedia_keys}), and the
- * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).</li>
+ * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
+ * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
+ * scrolled to the Glacier Hall's and the Cinder Kiln's dossiers ({@code jugcraft_encyclopedia_expedition_glacier_hall},
+ * {@code jugcraft_encyclopedia_expedition_cinder_kiln}).</li>
  * </ul>
  */
 public class EncyclopediaClientGameTests implements FabricClientGameTest {
@@ -324,6 +332,33 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.waitTicks(5);
 		context.takeScreenshot("jugcraft_encyclopedia_expedition");
 
+		// Concordance Chunk B (B-11): the Glacier Hall's and the Cinder Kiln's dossiers (their tokens carried, their keepers
+		// beaten), each scrolled to the top of the page's body.
+		server.runOnServer(minecraft -> {
+			ServerPlayer player = first(minecraft);
+			player.getInventory().add(new ItemStack(JugcraftLairs.FROST_HORN));
+			player.getInventory().add(new ItemStack(JugcraftLairs.KILN_SEAL));
+			TrickOrTreat.award(player, YetiKingLoot.ADVANCEMENT);
+			TrickOrTreat.award(player, CinderTyrantLoot.ADVANCEMENT);
+		});
+		context.waitTicks(10);
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		open(context);
+		context.runOnClient(client -> {
+			EncyclopediaClient.navigator().go("expedition");
+			EncyclopediaClient.changed();
+		});
+		context.waitTicks(5);
+		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN)) {
+			String placed = context.computeOnClient(client -> scrollTo(client, LairDossiers.name(lair)));
+			Jugcraft.LOGGER.info("[encyclopedia-check] the {} dossier on the Expeditions page: {}", lair.id, placed);
+			check(placed.startsWith("ok"), "The Expeditions page does not show the " + lair.id + " dossier: " + placed);
+			context.runOnClient(client -> client.gui.toastManager().clear());   // the two advancements' toasts
+			context.waitTicks(5);
+			context.takeScreenshot("jugcraft_encyclopedia_expedition_" + lair.id);
+		}
+
 		context.runOnClient(client -> {
 			EncyclopediaClient.navigator().go("keys");
 			EncyclopediaClient.changed();
@@ -345,6 +380,25 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.takeScreenshot("jugcraft_encyclopedia_keys");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
+	}
+
+	/** Scrolls the open encyclopedia's body so the row showing {@code heading} is at its top: "ok" and where it stands, or what is missing. */
+	private static String scrollTo(Minecraft client, Component heading) {
+		if (!(client.gui.screen() instanceof EncyclopediaScreen screen)) {
+			return "no encyclopedia open";
+		}
+		AbstractWidget row = screen.find(heading);
+		if (row == null) {
+			return "no row \"" + heading.getString() + "\"";
+		}
+		AbstractContainerWidget body = screen.children().stream().filter(AbstractContainerWidget.class::isInstance)
+				.map(AbstractContainerWidget.class::cast).filter(area -> area.children().contains(row)).findFirst().orElse(null);
+		if (body == null) {
+			return "no scrolling body holds \"" + heading.getString() + "\"";
+		}
+		body.setScrollAmount(body.scrollAmount() + row.getY() - body.getY());
+		boolean shown = row.getY() >= body.getY() && row.getY() < body.getY() + body.getHeight();
+		return (shown ? "ok" : "hidden") + " at " + (row.getY() - body.getY()) + " of " + body.getHeight() + ", scrolled " + body.scrollAmount();
 	}
 
 	private static void creative(ClientGameTestContext context, TestDedicatedServerContext server) {
