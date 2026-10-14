@@ -14,6 +14,7 @@ Concordance Chunk B, unit 3.
   and the Yeti King's chill does not take.
 - B-10, the travel kit (unit 4, tools/concordance_rime_kit.py): a focus of water worn lengthens Preserve's hold
   (LESSER_FOCUS_HOLD_TICKS, FOCUS_HOLD_TICKS).
+- B-10, the links (unit 4): a Frost boon arm's slow is elective cold work (B-P26, B-P53; the boon itself unchanged).
 
 Java: concordance/rime (Rime, RimeSurvey, Rimebind, Frostward); tools/check_mod_data.py check_rime and (B-08)
 check_winter_brine hold it to these tables.
@@ -41,10 +42,12 @@ SURVEY = rid("winter_survey")
 SURVEY_KEYS = {"glacier_hall": "arrive in the Glacier Hall",
                "crucible": "bottle a brew that carries Rime at an Alembic Crucible"}
 # Rimekeeping's mastery (Java: rime/Rime.ACTIVITY), gated by Rimekeeping understood.
-# key -> (what else it needs past Rimekeeping, its invocations and a crucible: None for nothing, or a research one player
-# reaches alone, needed understood; words). Preserve counts only a crucible holding a mixture (Rime.preserve), and only
-# someone who understands the Alembic Arts puts water or anything else in one by hand (CrucibleBlockEntity.use), so both
-# Preserve keys need them; the progression graph's rimework route asks for them too (tools/concordance_progression.py).
+# key -> (what else it needs past Rimekeeping, its invocations and a crucible: None for nothing, a research one player
+# reaches alone, needed understood, or, for an elective, words; words). Preserve counts only a crucible holding a mixture
+# (Rime.preserve), and only someone who understands the Alembic Arts puts water or anything else in one by hand
+# (CrucibleBlockEntity.use), so both Preserve keys need them; the progression graph's rimework route asks for them too
+# (tools/concordance_progression.py). A key whose need is words (elective()) is an elective: it can stand for one kind,
+# and mastery never needs one (check_rime counts the others).
 # Unit 5 (B-09) adds the elective "column" (the Yeti King's charge broken on a column) with its recorder.
 ALEMBIC_ARTS = rid("alembic_arts")
 RIMEWORK = rid("rimework")
@@ -52,8 +55,22 @@ RIMEWORK_KEYS = {
     "preserve:cold": (ALEMBIC_ARTS, "Preserve a crucible holding a mixture in the cold band"),
     "preserve:heated": (ALEMBIC_ARTS, "Preserve a crucible holding a mixture in the warm, hot or searing band"),
     "restraint": (None, "Rimebind a hostile creature"),
+    # Unit 4 (B-P26, B-P52, B-P53): a Frost boon arm's slow that takes on a hostile creature (weapons/ArmItem.boon ->
+    # Rime.frostBoon). The boon is Arms VII's own (tools/arms_variants.py FROST), unchanged (B-P10, B-P28);
+    # check_winter_links holds the trophies named here to tools/arms_variants.py.
+    "frost_boon": ("a Frost boon arm", "slow a hostile creature with a Frost boon arm, such as the Yeti King's Glacier "
+                                       "Maul or Rimeclaw"),
 }
 RIMEWORK_MASTERY = 3
+
+
+def elective(needs):
+    """Whether a kind of cold work needing `needs` is an elective: what it needs is words (a thing at hand, another
+    player), not a research id. It can stand for one kind; mastery never needs one."""
+    return needs is not None and ":" not in needs
+
+
+_ELECTIVE = "; ".join(text for needs, text in RIMEWORK_KEYS.values() if elective(needs))
 _UNDERSTOOD = {"research": RESEARCH_ID, "state": "understood"}
 
 RESEARCH = {"rimekeeping": {
@@ -75,7 +92,8 @@ RESEARCH = {"rimekeeping": {
         "understood": ("Rimekeeping", "Understand Rimekeeping: study snow or ice at a Lampwright's Bench, arrive in the "
                        "Glacier Hall, or bottle a brew that carries Rime", "goal", "minecraft:packed_ice"),
         "mastered": ("Rimekeeper", "Do three kinds of cold work: Preserve a crucible holding a mixture while it is cold, "
-                     "and one while it is warm or hotter, and Rimebind a hostile creature", "challenge", "minecraft:blue_ice"),
+                     "and one while it is warm or hotter, and Rimebind a hostile creature (slowing a hostile creature "
+                     "with a Frost boon arm can stand for one)", "challenge", "minecraft:blue_ice"),
     },
     "locked": {"encountered": "Examine snow or ice first",
                "observed": "Examine snow or ice, and something that holds fire, first",
@@ -199,7 +217,7 @@ def _band_floors():
 def codex():
     research = "rimekeeping"
     specimens = "\\\n".join(f"- {name}" for name in RIME_SPECIMENS.values())
-    work = "; ".join(text for _needs, text in RIMEWORK_KEYS.values())
+    work = "; ".join(text for needs, text in RIMEWORK_KEYS.values() if not elective(needs))
     return {
         ("winter", "rimekeeping"): {
             "name": "Rimekeeping", "x": 0, "y": 0, "icon": "minecraft:packed_ice", "condition": None,
@@ -217,9 +235,10 @@ def codex():
                 ("crafting_recipe", "Frost Horn", "Blown at night on snow or ice in the Overworld, it takes you down into "
                  "the Glacier Hall. Arriving there is a study of cold in itself.", rid("frost_horn")),
                 ("text", "Understood", f"You can now cast **Rimebind** and **Preserve** with any Concordance instrument. "
-                 f"To **master** Rimekeeping, do {RIMEWORK_MASTERY} kinds of cold work: {work}. Only someone who "
-                 "understands the **Alembic Arts** can put water in a crucible by hand. A magma block keeps a crucible "
-                 "warm and a campfire makes it hot.", (research, "understood")),
+                 f"To **master** Rimekeeping, do {RIMEWORK_MASTERY} kinds of cold work: {work}."
+                 + (f" Any of these can stand for one: {_ELECTIVE}." if _ELECTIVE else "")
+                 + " Only someone who understands the **Alembic Arts** can put water in a crucible by hand. A magma block "
+                 "keeps a crucible warm and a campfire makes it hot.", (research, "understood")),
                 ("text", "Mastered", "Rimebind and Preserve cost a point less Focus.", (research, "mastered")),
             ]},
         ("winter", "rimebound"): {

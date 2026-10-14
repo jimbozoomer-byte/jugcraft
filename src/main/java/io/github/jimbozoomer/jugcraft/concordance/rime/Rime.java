@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,7 +23,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Rime, the Rimekeepers' Principle: cold, stillness and preservation (docs/features/arcane-concordance-rime-strata.md,
- * tools/concordance_rime.py). Rimekeeping is mastered by kinds of cold work, each counted once ({@link #practise});
+ * tools/concordance_rime.py). Rimekeeping is mastered by kinds of cold work, each counted once ({@link #practise}), a
+ * Frost boon arm's slow among them as an elective ({@link #frostBoon});
  * Preserve, an alteration in Rime's school ({@link #SCHOOL}), holds an Alembic Crucible's heat in its band instead of
  * putting out fire ({@link #preserves}, {@link #preserve}): never an inventory, an item, food or a machine, and never a
  * block changed. Rimebind is {@link Rimebind}; the winter survey {@link RimeSurvey}. Frostward, Winter Brine's status
@@ -36,6 +38,8 @@ public final class Rime {
 	public static final String KEY_PRESERVE_COLD = "preserve:cold";
 	public static final String KEY_PRESERVE_HEATED = "preserve:heated";
 	public static final String KEY_RESTRAINT = "restraint";
+	/** Elective cold work (B-P26, B-P53): a hostile creature slowed by a Frost boon arm. */
+	public static final String KEY_FROST_BOON = "frost_boon";
 	/** Rime's Spell Power school: an alteration in it holds a crucible instead of putting out fire. */
 	public static final String SCHOOL = "spell_power:frost";
 	/** How long Preserve holds a band: 60 seconds (02:77; tools/concordance_rime.py PRESERVE_HOLD_TICKS). */
@@ -64,6 +68,16 @@ public final class Rime {
 	public static boolean practise(@Nullable ServerPlayer person, String key) {
 		return person != null && understands(person)
 				&& ConcordanceProgress.record(person, new Evidence.Practiced(ACTIVITY, key)).recorded();
+	}
+
+	/**
+	 * A Frost boon arm's slow took on {@code target} (weapons/ArmItem.boon; B-P26): restraint by a cold arm, Rimekeeping's
+	 * elective cold work, for a wielder who understands Rimekeeping, on the creatures Rimebind's restraint counts
+	 * ({@link Rimebind#restrains}). It only records: the slow is the boon's own, with its own refresh and no thaw (B-P10),
+	 * and nothing here changes it (B-P28). Returns whether it taught anything new.
+	 */
+	public static boolean frostBoon(LivingEntity wielder, LivingEntity target) {
+		return wielder instanceof ServerPlayer person && Rimebind.restrains(target) && practise(person, KEY_FROST_BOON);
 	}
 
 	/** The cold work a Preserve on a crucible in {@code band} is: cold, or heated (warm, hot or searing). */

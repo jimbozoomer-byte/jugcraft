@@ -11867,6 +11867,7 @@ def check_concordance(registered):
     check_strata(co, root, lang, research)
     check_rime_strata_assets(co, lang)
     check_rime_kit(co, root, lang)
+    check_winter_links(co, root)
     check_wayfaring(co, root, lang)
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
@@ -13789,6 +13790,70 @@ def check_rime_kit(co, root, lang):
         err("invocation preserve: its description names the foci's holds (B-P24)")
 
 
+def check_winter_links(co, root):
+    """Concordance Chunk B unit 4: B-10's links, with no stat changes (B-P26, B-P28, B-P10). A Frost boon arm's slow is
+    Rimekeeping's elective cold work and Rooted holding is Stratawrighting's, each recorded in one place, and neither
+    changes a number. The FROST case still puts on exactly ArmVariants' FROST_TICKS and FROST_AMPLIFIER (which
+    check_arms_variants holds to tools/arms_variants.py FROST) and only reads whether it took; Rime.frostBoon only
+    records; the Concordance only reads Thallite's gear and ground (tools/gear.py, held by check_thallite_gear); and
+    earthen_ground keeps living ground and gains nothing cold. Everything is compared with a generator table, never a
+    copy of a number. The generator tables' diff shows that no number changed across the unit
+    (docs/features/arcane-concordance-winter.md)."""
+    av, rm, st = arms_variants, co.rime, co.strata
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    if not rm.elective(rm.RIMEWORK_KEYS.get("frost_boon", (None, ""))[0]):
+        err("tools/concordance_rime.py: frost_boon is an elective of Rimekeeping's cold work, naming what it needs (B-P26)")
+    if st.ANCHORING_KEYS.get("rooted", (None,))[0] is None:
+        err("tools/concordance_strata.py: rooted is an elective of Stratawrighting's anchoring (B-P26)")
+    if "rooted" in rm.RIMEWORK_KEYS or "frost_boon" in st.ANCHORING_KEYS:
+        err("A Frost boon slow is Rime practice and Rooted holding Strata practice, never both")
+    trophies = [display for _name, _kind, line, boon, display in av.VARIANTS
+                if boon == "frost" and line in av.BOSSES and "lair" in av.BOSSES[line]]
+    if not trophies or any(display not in rm.RIMEWORK_KEYS.get("frost_boon", (None, ""))[1] for display in trophies):
+        err(f"tools/concordance_rime.py frost_boon: name the Frost trophies tools/arms_variants.py drops ({trophies})")
+    arm = source(JAVA_ROOT / "weapons" / "ArmItem.java")
+    at = arm.find("case FROST -> {")
+    frost = arm[at:arm.find("\n\t\t\t}", at)] if at >= 0 else ""
+    slow = "new MobEffectInstance(MobEffects.SLOWNESS, ArmVariants.FROST_TICKS, ArmVariants.FROST_AMPLIFIER)"
+    if (frost.count("new MobEffectInstance(") != 1 or f"boolean slowed = target.addEffect({slow}, attacker);" not in frost
+            or "if (slowed)" not in frost or "Rime.frostBoon(attacker, target);" not in frost):
+        err("ArmItem.boon FROST: exactly the boon's own Slowness (ArmVariants.FROST_TICKS, FROST_AMPLIFIER), and "
+            "Rime.frostBoon only when it took (B-P26, B-P28)")
+    for needle in ("RIME_THAW", "Rimebind", "removeEffect", "setDuration", "Attributes."):
+        if needle in frost:
+            err(f"ArmItem.boon FROST: the Frost boon keeps its own slow, outside Rimebind's thaw (B-P10): {needle}")
+    body = _java_body(source(root / "rime" / "Rime.java"), "public static boolean frostBoon(")
+    if "Rimebind.restrains(target)" not in body or "practise(person, KEY_FROST_BOON)" not in body:
+        err("Rime.frostBoon: restraint's targets (Rimebind.restrains) and the frost_boon key, for its wielder")
+    for needle in ("addEffect", "MobEffectInstance", "removeEffect", "hurt", "push(", "knockback", "Attributes.", "setDuration"):
+        if needle in body:
+            err(f"Rime.frostBoon only records practice; it changes nothing ({needle})")
+    callers, rooted = [], []
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        text = source(path)
+        if "Rime.frostBoon(" in text:
+            callers.append(path.name)
+        rooted += [path.name] * len(re.findall(r"practise\([^)]*KEY_ROOTED\)", text))
+        if path.name != "ThalliteGear.java" and 'Jugcraft.id("rooted")' in text:
+            err(f"{path.relative_to(JAVA_ROOT)}: Rooted's modifier is Thallite's alone (gear/ThalliteGear.ROOTED)")
+    if callers != ["ArmItem.java"]:
+        err(f"Rime.frostBoon is called only by the Frost boon (weapons/ArmItem.java), not {callers}")
+    if rooted != ["Strata.java"]:
+        err(f"Rooted holding is recorded once, by concordance/strata/Strata.java (found {rooted})")
+    reads = {"footing", "earthbound", "rooted", "regrows", "LIVING_GROUND", "EARTHEN_GROUND", "EARTHBOUND", "GEAR"}
+    for path in sorted(root.rglob("*.java")):
+        used = set(re.findall(r"ThalliteGear\.(?!java\b)([A-Za-z_]+)", source(path))) - reads
+        if used:
+            err(f"{path.relative_to(JAVA_ROOT)}: the Concordance only reads Thallite's gear and ground (B-P28): {sorted(used)}")
+    if f"#{MOD}:living_ground" not in gear.EARTHEN_GROUND:
+        err("tools/gear.py EARTHEN_GROUND holds #jugcraft:living_ground, so Strata's ground reading is Rooted's (B-P26)")
+    cold = [v for v in gear.EARTHEN_GROUND + gear.LIVING_GROUND if re.search(r"snow|ice|frost|glare|drift", v)]
+    if cold:
+        err(f"tools/gear.py: nothing cold is natural ground for Rooted or Regrowth (B-P28): {cold}")
+
+
 def check_geckolib(name, java_text, uvs, sizes, kind="block"):
     """A GeckoLib block's (or entity's) assets agree: every animation the Java names exists, every animated bone exists,
     and every cube's box-UV region lies inside the sheet without overlapping another's; the sheet is the size the model
@@ -15042,9 +15107,10 @@ def check_progression(co, root, lang, registered, research):
         err("docs/features/arcane-concordance-progression.md: its table of mandatory steps differs from the graph's:\n" + expected)
     nodes = pg.graph(research, invocations, rituals, at_hand)
     alone = pg.reachable(nodes, research)
-    # Rimekeeping's cold work (check_rime): every route to its practice asks for the research its keys need.
+    # Rimekeeping's cold work (check_rime): every route to its practice asks for the research its keys need (an
+    # elective, which needs something other than research and that mastery never needs, asks nothing of the route).
     rimework = nodes.get(f"practice:{MOD}:rimework", {}).get("any", [])
-    for needs in sorted({needs for needs, _text in co.rime.RIMEWORK_KEYS.values() if needs}):
+    for needs in sorted({needs for needs, _text in co.rime.RIMEWORK_KEYS.values() if needs and not co.rime.elective(needs)}):
         if not rimework or any(pg.research_node(needs, "understood") not in group for group in rimework):
             err(f"progression: the rimework practice's route must ask for {needs} understood, which its cold work needs "
                 "(tools/concordance_rime.py RIMEWORK_KEYS)")

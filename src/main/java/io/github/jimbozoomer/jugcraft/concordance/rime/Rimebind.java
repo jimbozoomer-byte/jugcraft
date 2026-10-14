@@ -55,6 +55,11 @@ public final class Rimebind {
 		return spec.kind() == EffectKind.STATUS && STATUS.equals(spec.status());
 	}
 
+	/** A hostile creature at normal tolerance: whose slowing is restraint, Rimekeeping's cold work (02:135; B-P34). */
+	public static boolean restrains(LivingEntity target) {
+		return target instanceof Enemy && ConcordanceEffects.tolerance(target) == Tolerance.NORMAL;
+	}
+
 	/**
 	 * After a status took (ConcordanceEffects): a Rimebound starts its Thaw; on a hostile creature at normal tolerance it is
 	 * restraint, Rimekeeping's cold work (02:135). Any other status is left alone.
@@ -66,7 +71,7 @@ public final class Rimebind {
 		MobEffectInstance binding = target.getEffect(RIMEBOUND);
 		int ticks = binding == null ? effect.duration() : binding.getDuration();
 		target.addEffect(new MobEffectInstance(RIME_THAW, ticks + GRACE_TICKS, 0, false, false, false));
-		if (target instanceof Enemy && ConcordanceEffects.tolerance(target) == Tolerance.NORMAL) {
+		if (restrains(target)) {
 			Rime.practise(person, Rime.KEY_RESTRAINT);
 		}
 	}

@@ -1,8 +1,10 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.serialization.JsonOps;
 import eu.pb4.trinkets.api.TrinketsApi;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceCodecs;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -19,10 +21,15 @@ import io.github.jimbozoomer.jugcraft.concordance.rime.Frostward;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeTrinketItem;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rimebind;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Strata;
+import io.github.jimbozoomer.jugcraft.gear.ThalliteGear;
+import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
+import io.github.jimbozoomer.jugcraft.weapons.ArmVariants;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,9 +51,11 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
@@ -61,6 +70,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PowderSnowBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.spell_engine.api.spell.Spell;
@@ -83,13 +93,17 @@ import net.spell_engine.internals.target.SpellTarget;
  * Spell Engine; the Water Bangle braces a Rimekeeper who has gone thirty seconds without a Brace, as nobody's cast; and
  * Spell Power's attribute enchantments are refused on the water sets. (A kit wearer under the Yeti King's frost is in
  * {@link YetiKingGameTests}; the kit's saves in {@link ConcordancePersistenceGameTests}.)</li>
+ * <li>B-10, the links, with no number changed: a Frost boon arm's slow on a hostile creature is Rimekeeping's elective
+ * cold work for a Rimekeeper, counted once, kept through a save and able to stand for one kind; the boon keeps its own
+ * slow outside Rimebind's thaw, both ways; and nothing cold is natural ground for Thallite or Strata.</li>
  * </ul>
- * B-10's Frost-boon practice joins this class with them.
  */
 public class ConcordanceWinterGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
 	private static final String WAND = "jugcraft:initiate_wand";
+	/** The Frost boon's practice: Rimekeeping's elective cold work (B-P26). */
+	private static final String FROST_BOON = "practice:" + Rime.ACTIVITY + ":" + Rime.KEY_FROST_BOON;
 	/**
 	 * From (1, 2, 1) facing south, the eye (1.62 up) looks down to a point 0.4 above the foot of the block two south, just
 	 * inside its north face: Preserve's touch meets a crucible standing at (1, 2, 3) (as ConcordanceRimeStrataGameTests).
@@ -561,6 +575,159 @@ public class ConcordanceWinterGameTests {
 				helper.assertTrue(piece.canBeEnchantedWith(protection, EnchantingContext.ACCEPTABLE), id + " refuses Protection");
 			}
 		}
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- B-10: the links (no number changed)
+
+	/** A survival player holding the Arms VII variant {@code arm}, First Light understood, Rimekeeping at {@code rime}. */
+	private static ServerPlayer wielder(GameTestHelper helper, String arm, BlockPos standAt, ResearchState rime) {
+		ServerPlayer player = player(helper, standAt, 0.0F);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ArmVariants.ITEMS.get(arm)));
+		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		if (rime != ResearchState.NONE) {
+			ConcordanceProgress.grant(player, Rime.RESEARCH, rime);
+		}
+		return player;
+	}
+
+	/** The arm in {@code player}'s hand strikes {@code foe}, as a landed blow calls it (as ArmsVIIGameTests strikes). */
+	private static void strike(ServerPlayer player, LivingEntity foe) {
+		ItemStack stack = player.getMainHandItem();
+		stack.getItem().hurtEnemy(stack, foe, player);
+	}
+
+	/** The Rimekeeping practice {@code player} holds (its cold work's evidence keys). */
+	private static List<String> rimework(ServerPlayer player) {
+		return ConcordanceProgress.knowledge(player).progress(Rime.RESEARCH).evidence().keySet().stream()
+				.filter(key -> key.startsWith("practice:" + Rime.ACTIVITY + ":")).toList();
+	}
+
+	/** Every Arms VII variant with the Frost boon, by id. */
+	private static List<String> frostArms() {
+		return ArmVariants.VARIANTS.stream().filter(v -> v.boon() == ArmVariants.Boon.FROST).map(ArmVariants.Variant::name).toList();
+	}
+
+	/** {@code foe} has the Frost boon's own slow, as Arms VII puts it on (ArmVariants, held to tools/arms_variants.py FROST). */
+	private static void frostSlowed(GameTestHelper helper, LivingEntity foe, String what) {
+		MobEffectInstance slow = foe.getEffect(MobEffects.SLOWNESS);
+		helper.assertTrue(slow != null && slow.getDuration() == ArmVariants.FROST_TICKS && slow.getAmplifier() == ArmVariants.FROST_AMPLIFIER,
+				what + ": the Frost boon's slow is " + slow);
+	}
+
+	/** Rimebind's frost on {@code target} through the effect boundary, as {@code actor}'s own new event. */
+	private static ConcordanceEffects.Result bind(GameTestHelper helper, ServerPlayer actor, LivingEntity target) {
+		return ConcordanceEffects.apply(context(helper, actor), invoked("jugcraft:rimebind"), target);
+	}
+
+	/**
+	 * B-P26, B-P52, B-P53: a Frost boon arm's slow that takes on a hostile creature at normal tolerance is Rimekeeping's
+	 * elective cold work for whoever understands Rimekeeping, whichever Frost arm struck (the Yeti King's Glacier Maul and
+	 * Rimeclaw, and the creative-only Frost Knight Greatsword: the boon counts, not the line). It is counted once, kept
+	 * through a save, and stands for one kind: with two Preserves it masters Rimekeeping. The slow is the boon's own on
+	 * whatever it lands: a novice learns nothing from it, a pig or a resistant ravager is no restraint, and another boon is
+	 * no cold work.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 20)
+	public void aFrostBoonSlowIsElectiveRimePractice(GameTestHelper helper) {
+		lay(helper, Blocks.STONE, 16);
+		List<String> frost = frostArms();
+		helper.assertTrue(frost.contains("glacier_maul") && frost.contains("rimeclaw"), "The Yeti King's trophies carry the Frost boon: " + frost);
+		for (int i = 0; i < frost.size(); i++) {
+			ServerPlayer keeper = wielder(helper, frost.get(i), new BlockPos(1 + 3 * i, 2, 1), ResearchState.UNDERSTOOD);
+			Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(1 + 3 * i, 2, 3));
+			strike(keeper, zombie);
+			frostSlowed(helper, zombie, frost.get(i) + " on a zombie");
+			helper.assertTrue(rimework(keeper).equals(List.of(FROST_BOON)),
+					frost.get(i) + ": a Rimekeeper's Frost boon slow on a zombie is cold work: " + rimework(keeper));
+		}
+		ServerPlayer keeper = wielder(helper, "glacier_maul", new BlockPos(13, 2, 1), ResearchState.UNDERSTOOD);
+		strike(keeper, helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(13, 2, 3)));
+		helper.assertTrue(rimework(keeper).equals(List.of(FROST_BOON)), "Exactly the Frost boon's kind: " + rimework(keeper));
+		// Saved before mastery (once mastered, knowledge keeps only evidence that still advances an entry).
+		Knowledge knowledge = ConcordanceProgress.knowledge(keeper);
+		Knowledge loaded = ConcordanceCodecs.KNOWLEDGE.parse(JsonOps.INSTANCE,
+				ConcordanceCodecs.KNOWLEDGE.encodeStart(JsonOps.INSTANCE, knowledge).getOrThrow()).getOrThrow();
+		helper.assertTrue(loaded.equals(knowledge) && loaded.progress(Rime.RESEARCH).evidence().containsKey(FROST_BOON),
+				"The Frost boon's kind survives a save");
+		helper.assertTrue(!Rime.practise(keeper, Rime.KEY_FROST_BOON), "It counts once");
+		helper.assertTrue(Rime.practise(keeper, Rime.KEY_PRESERVE_COLD)
+				&& ConcordanceProgress.knowledge(keeper).state(Rime.RESEARCH) == ResearchState.UNDERSTOOD, "Two kinds are not three");
+		helper.assertTrue(Rime.practise(keeper, Rime.KEY_PRESERVE_HEATED)
+				&& ConcordanceProgress.knowledge(keeper).state(Rime.RESEARCH) == ResearchState.MASTERED,
+				"The elective stands for one kind: Rimekeeping is mastered");
+		// Someone who does not understand Rimekeeping: the same slow, nothing learned.
+		ServerPlayer novice = wielder(helper, "rimeclaw", new BlockPos(1, 2, 6), ResearchState.NONE);
+		Mob struck = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(1, 2, 8));
+		strike(novice, struck);
+		frostSlowed(helper, struck, "A novice's Rimeclaw");
+		helper.assertTrue(rimework(novice).isEmpty(), "Only someone who understands Rimekeeping learns from it: " + rimework(novice));
+		// Restraint's targets only (B-P34); the boon slows whatever it strikes, as it always has (it is no Concordance effect).
+		ServerPlayer other = wielder(helper, "glacier_maul", new BlockPos(5, 2, 6), ResearchState.UNDERSTOOD);
+		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(5, 2, 8));
+		Mob ravager = helper.spawnWithNoFreeWill(EntityTypes.RAVAGER, new BlockPos(9, 2, 10));
+		strike(other, pig);
+		strike(other, ravager);
+		frostSlowed(helper, pig, "A pig");
+		frostSlowed(helper, ravager, "A resistant ravager");
+		helper.assertTrue(rimework(other).isEmpty(), "A pig, or a resistant creature, is no restraint: " + rimework(other));
+		// Another boon is no cold work.
+		ServerPlayer venom = wielder(helper, "hagthorn", new BlockPos(13, 2, 6), ResearchState.UNDERSTOOD);
+		strike(venom, helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(13, 2, 8)));
+		helper.assertTrue(rimework(venom).isEmpty(), "The Venom boon is no frost: " + rimework(venom));
+		helper.succeed();
+	}
+
+	/**
+	 * B-P10 (critique 4): the Frost boon keeps its own slow, outside Rimebind's thaw, both ways. Its slow starts no thaw,
+	 * so Rimebind still takes; the two slows are each their own and never root. While the creature thaws, a blow renews
+	 * the boon's slow to its full time and leaves Rimebound and the thaw as they were, and Rimebind is still refused.
+	 */
+	@GameTest(maxTicks = 60)
+	public void aFrostBoonStaysOutsideTheThaw(GameTestHelper helper) {
+		lay(helper, Blocks.STONE, 8);
+		ServerPlayer keeper = wielder(helper, "glacier_maul", new BlockPos(1, 2, 1), ResearchState.UNDERSTOOD);
+		Mob zombie = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new BlockPos(1, 2, 3));
+		double free = zombie.getAttributeValue(Attributes.MOVEMENT_SPEED);
+		strike(keeper, zombie);
+		frostSlowed(helper, zombie, "The first blow");
+		helper.assertTrue(!zombie.hasEffect(Rimebind.RIME_THAW) && !zombie.hasEffect(Rimebind.RIMEBOUND), "A Frost boon slow starts no thaw");
+		double slowed = zombie.getAttributeValue(Attributes.MOVEMENT_SPEED);
+		helper.assertTrue(bind(helper, keeper, zombie) == ConcordanceEffects.Result.APPLIED, "Vanilla Slowness is no thaw: Rimebind takes");
+		double both = zombie.getAttributeValue(Attributes.MOVEMENT_SPEED);
+		helper.assertTrue(0.0 < both && both < slowed && slowed < free, "Two slows, each its own, never a root: " + free + ", " + slowed + ", " + both);
+		helper.runAfterDelay(20, () -> {
+			MobEffectInstance slow = zombie.getEffect(MobEffects.SLOWNESS);
+			MobEffectInstance bound = zombie.getEffect(Rimebind.RIMEBOUND);
+			MobEffectInstance thaw = zombie.getEffect(Rimebind.RIME_THAW);
+			helper.assertTrue(slow != null && bound != null && thaw != null && slow.getDuration() < ArmVariants.FROST_TICKS,
+					"The boon's slow runs down while Rimebound and its thaw last: " + slow + ", " + bound + ", " + thaw);
+			int boundLeft = bound.getDuration();
+			int thawLeft = thaw.getDuration();
+			strike(keeper, zombie);
+			frostSlowed(helper, zombie, "A blow while it thaws renews the boon's own slow");
+			helper.assertTrue(zombie.getEffect(Rimebind.RIMEBOUND).getDuration() == boundLeft
+					&& zombie.getEffect(Rimebind.RIME_THAW).getDuration() == thawLeft, "The boon never lengthens Rimebound or its thaw");
+			helper.assertTrue(bind(helper, keeper, zombie) == ConcordanceEffects.Result.IMMUNE, "The thaw still refuses Rimebind");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * B-P28: nothing cold is natural ground, so Thallite's Rooted and Regrowth, and Strata's reading of the ground, do
+	 * nothing on snow, ice or the Glacier Hall's floors. The Concordance only reads Thallite's ground; none of it changed.
+	 */
+	@GameTest(maxTicks = 10)
+	public void thalliteStaysOutOfTheCold(GameTestHelper helper) {
+		List<String> natural = new ArrayList<>();
+		for (Block block : List.of(Blocks.SNOW_BLOCK, Blocks.SNOW, Blocks.POWDER_SNOW, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE,
+				JugcraftLairs.DRIFT_SNOW, JugcraftLairs.TRAMPLED_SNOW, JugcraftLairs.GLARE_ICE)) {
+			BlockState state = block.defaultBlockState();
+			if (state.is(ThalliteGear.EARTHEN_GROUND) || state.is(ThalliteGear.LIVING_GROUND) || Strata.ground(state) != null) {
+				natural.add(BuiltInRegistries.BLOCK.getKey(block).toString());
+			}
+		}
+		helper.assertTrue(natural.isEmpty(), "Cold blocks read as natural ground: " + natural);
 		helper.succeed();
 	}
 }
