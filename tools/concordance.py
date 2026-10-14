@@ -462,6 +462,8 @@ import concordance_journal as journal  # noqa: E402
 import concordance_composer as composer  # noqa: E402
 # Roadmap step 27 (tools/concordance_signs.py): signs of what really happened, the warnings' sounds and the codex page.
 import concordance_signs as signs  # noqa: E402
+# Concordance Chunk C, C-01 (tools/concordance_diagnostics.py): the shared diagnostic vocabulary's words.
+import concordance_diagnostics as diagnostics  # noqa: E402
 ITEMS.update(spire.ITEMS)
 BLOCKS.update(spire.BLOCKS)
 rituals.STRUCTURES.update(spire.STRUCTURES)
@@ -1835,6 +1837,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     journal.lang_entries(lang)
     composer.lang_entries(lang)
     signs.lang_entries(lang)
+    diagnostics.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})

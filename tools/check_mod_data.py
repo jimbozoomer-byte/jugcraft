@@ -12000,6 +12000,7 @@ def check_concordance(registered):
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
     check_winter_brine(co, root, lang)
+    check_diagnostics(co, root, lang)
     check_ecology(co, root, lang, registered, research)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
@@ -12308,7 +12309,8 @@ def check_baselines(root):
     concordance/sign/Presentation.java) are read only in animateTick, which runs on the client (check_signs checks the
     intensity's readers)."""
     for package in ("balance", "compose", "effect", "rules", "resource", "ritual", "alchemy", "ecology", "celestial", "crimson",
-                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression", "wonder"):
+                    "worker", "logistics", "artifice", "relic", "equivalence", "hex", "dream", "conclave", "progression", "wonder",
+                    "diagnostic"):
         for path in sorted((root / package).glob("*.java")):
             if re.search(r"^import net\.(minecraft|fabricmc|spell_engine|spell_power)", path.read_text(encoding="utf-8"), re.M):
                 err(f"concordance/{package}/{path.name}: must stay pure Java (no Minecraft or mod imports)")
@@ -13562,6 +13564,13 @@ def check_alchemy(co, root, lang, registered, research):
         for key in re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")):
             if f"compose.{MOD}.{key}" not in lang:
                 err(f"concordance/alchemy/{path.name}: missing lang compose.{MOD}.{key}")
+    # Concordance Chunk C, C-01: a step's words name its preparation; a written formula is set by a plain use.
+    for key in preparations:
+        if f"preparation.{MOD}.{key}" not in lang:
+            err(f"preparation {key}: missing lang preparation.{MOD}.{key} (a step's words: tools/concordance_alchemy.py PREPARATION_NAMES)")
+    if re.search(r"sneak[^.;(]*\bset", al.ITEMS["formula"]["tooltip"], re.I) \
+            or "isShiftKeyDown" in _java_body(java("CrucibleBlock.java"), "protected InteractionResult useItemOn("):
+        err("tools/concordance_alchemy.py: a written formula is set by a plain use (the formula's tooltip; useItemOn asks no sneak)")
     for band in al.BANDS:
         if f"compose.{MOD}.band.{band}" not in lang:
             err(f"alchemy: missing lang compose.{MOD}.band.{band}")
@@ -13742,6 +13751,73 @@ def check_winter_brine(co, root, lang):
     for key in (f"encyclopedia.{MOD}.dossier.glacier_hall.prepare", f"encyclopedia.{MOD}.dossier.glacier_hall.prepare.mitten"):
         if key not in lang:
             err(f"Winter Brine: missing lang {key}")
+
+
+def check_diagnostics(co, root, lang):
+    """Concordance Chunk C, C-01 (plan 03:9; C-P6, C-P22): the shared diagnostic codes and kinds are
+    tools/concordance_diagnostics.py's, in its order, each with its words; a diagnostic is worded by its code; the crucible
+    keeps a formula the rules refuse (no step clears it), shows a reason's sign once, asks Authority before any change and
+    has words for every message; the Peepo port maps from the crucible's own reason and asks nothing for an incompatible
+    formula; no client class reads the server-only rules; and a game test swaps the rules only through under(), which
+    restores them in a finally before its tick ends."""
+    dg = co.diagnostics
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    code_java = source(root / "diagnostic" / "Code.java")
+    found = re.findall(r'^\t([A-Z_]+)\("([a-z_]+)", Kind\.([A-Z]+)\)[,;]', code_java, re.M)
+    if [(cid, kind) for _, cid, kind in found] != [(key, kind.upper()) for key, (kind, _) in dg.CODES.items()]:
+        err("concordance/diagnostic/Code.java: the codes differ from tools/concordance_diagnostics.py CODES (ids, kinds, order)")
+    for name, cid, _ in found:
+        if name != cid.upper():
+            err(f"concordance/diagnostic/Code.java: {name} must be named after its id {cid}")
+    kinds = re.search(r"enum Kind \{\s*([A-Z_, ]+?)\s*\}", code_java)
+    if not kinds or [k.strip().lower() for k in kinds.group(1).split(",")] != list(dg.KINDS):
+        err("concordance/diagnostic/Code.java: Code.Kind must list KINDS of tools/concordance_diagnostics.py, in order")
+    for key in dg.CODES:
+        if f"compose.{MOD}.diagnostic.{key}" not in lang:
+            err(f"diagnostic: missing lang compose.{MOD}.diagnostic.{key}")
+    diagnostic = source(root / "diagnostic" / "Diagnostic.java")
+    if 'PREFIX = "diagnostic.";' not in diagnostic or "new Text(PREFIX + code.id, args)" not in diagnostic:
+        err("concordance/diagnostic/Diagnostic.text(): worded by compose.jugcraft.diagnostic.<id>")
+    crucible = source(root / "CrucibleBlockEntity.java")
+    automate = _java_body(crucible, "public @Nullable Diagnostic automate(ServerLevel level)")
+    if not automate or "program = null" in automate or "incompatibility()" not in automate:
+        err("CrucibleBlockEntity.automate: a formula the rules refuse is kept and named (C-01, C-P1), never program = null")
+    pause = _java_body(crucible, "private Diagnostic pause(")
+    if "waiting.code() != reason.code()" not in pause or "Sign.PERIL" not in pause or "case CONDITION ->" not in pause:
+        err("CrucibleBlockEntity.pause: a reason's sign shows once, when it begins; a fault as danger, a condition as none")
+    use = _java_body(crucible, "public InteractionResult use(ServerPlayer player")
+    empty = _java_body(crucible, "public void useEmpty(ServerPlayer player")
+    if not 0 <= use.find("Authority.mayChange(") < use.find("return formula(player, held);") \
+            or not 0 <= empty.find("Authority.mayChange(") < empty.find("program = null;"):
+        err("CrucibleBlockEntity: use and useEmpty ask Authority.mayChange before changing the crucible (C-01, C-P5)")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.[a-z_.]+)"', crucible))):
+        if key not in lang:
+            err(f"CrucibleBlockEntity.java: missing lang {key}")
+    companion = source(ROOT / "src" / "main" / "java" / "local" / "peepo" / "CrucibleCompanion.java")
+    status = re.search(r"public CompanionStatus status\(\)\{(.*?)\n    \}", companion, re.S)
+    if not status or "OUTPUT_SLOT" in status.group(1) or "crucible.waiting()" not in status.group(1):
+        err("local/peepo/CrucibleCompanion.status: maps from the crucible's own reason, never the output slot (C-01)")
+    needed = re.search(r"public int needed\(ItemStack stack\)\{(.*?)\n    \}", companion, re.S)
+    if not needed or "crucible.incompatibility()" not in needed.group(1):
+        err("local/peepo/CrucibleCompanion.needed: an incompatible formula asks for nothing (C-01)")
+    for path in sorted((ROOT / "src" / "client" / "java").rglob("*.java")):
+        text = source(path)
+        for needle in ("ConcordanceData.rules()", "Alchemy.catalog()", ".incompatibility()"):
+            if needle in text:
+                err(f"{path.relative_to(ROOT)}: the Concordance's rules are the server's (ConcordanceData.java:28); a client never reads them ({needle})")
+    for path in sorted((ROOT / "src" / "gametest" / "java").rglob("*.java")):
+        text = source(path)
+        helper = _java_body(text, "private static <T> T under(ConcordanceRules rules, Supplier<T> during)")
+        start = text.find(helper) if helper else -1
+        for swap in re.finditer(r"ConcordanceData\.replace\(([^;]*)\);", text):
+            if swap.group(1) == "ConcordanceData.rules()":
+                continue  # the same rules again: a reload that changes nothing
+            if not (0 <= start <= swap.start() < start + len(helper)) or "ConcordanceData.replace(rules);\n\t\ttry {" not in helper \
+                    or "} finally {\n\t\t\tConcordanceData.replace(was);" not in helper:
+                err(f"{path.relative_to(ROOT)}: the Concordance's rules are every test's: swap them only through under(), which "
+                    "puts them back in a finally before the tick ends")
 
 
 def _geo_faces(cube):
@@ -16360,6 +16436,8 @@ AUTHORITY_ROUTES = {
     "sympathy/ScryingGlassItem.java": ["Sympathy.allowed(player, target)", "Hexes.MAX_RANGE"],
     "CircleAnchorBlockEntity.java": ["Authority.present(level, disturber)"],
     "Alchemy.java": ["harmful(dose) ? Intent.HARMFUL"],
+    # Concordance Chunk C, C-01 (C-P5): working a crucible by hand, and clearing its formula.
+    "CrucibleBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)", "Authority.mayChange(player.level(), player, worldPosition)"],
 }
 
 

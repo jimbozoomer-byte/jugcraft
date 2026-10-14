@@ -19,6 +19,8 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Vector;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
@@ -39,6 +41,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -81,7 +84,10 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Formulas</b>: a blank formula records a fresh mixture that does something; a written one sets the crucible to
  * repeat it. Following a formula, every {@value #AUTOMATION_TICKS} ticks the crucible takes its next step when it can
  * (water from its tank, an ingredient from its {@value #BUFFER_SLOTS} buffer slots, a stir once the heat is right),
- * then bottles into its output while it has bottles or bowls. It never substitutes or guesses: it waits.</li>
+ * then bottles into its output while it has bottles or bowls. It never substitutes or guesses: it waits. It keeps why
+ * ({@link #waiting()}). A formula the rules can no longer follow stays set, says which step and why, and does nothing
+ * until they can again. Only someone who could change the block by hand changes a crucible (Concordance Chunk C,
+ * C-01).</li>
  * </ul>
  * Hoppers and pipes: ingredients and reagents into the buffer, bottles and bowls into the bottle slot, from above or the
  * sides; brews out from the sides or below (the heat source usually sits below); water into the tank. The mixture is
@@ -116,8 +122,14 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	private long lastStir = Long.MIN_VALUE / 2;
 	/** Preserve: game time until which the temperature stays in its band; 0 when not held. Saved only while held. */
 	private long heldUntil;
-	/** Whether its formula is waiting for something it lacks (so the shortage shows once, not every try). Not saved. */
-	private boolean waiting;
+	/** Why its formula waits now: what stopped its last pulse (Concordance Chunk C, C-01), or null. Not saved. Read through waiting(). */
+	private @Nullable Diagnostic waiting;
+	/** A saved formula this build can no longer read (C-01, C-P1): kept as written and saved back, never followed; "" if none. */
+	private String unreadable = "";
+	/** The rules revision (ConcordanceData.revision()) its formula was last replayed against; -1 to replay at the next look. Not saved. */
+	private int checkedRevision = -1;
+	/** Why the rules in force cannot follow its formula (as of checkedRevision), or null. Not saved. */
+	private @Nullable Diagnostic incompatible;
 	/** On a client: what the liquid looks like, as the server sent it (the spoon's reading, never the makeup). */
 	private Assay.Look shown = Assay.Look.PLAIN;
 
@@ -210,7 +222,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				sync(level);
 			}
 		}
-		if (program != null && level.getGameTime() % AUTOMATION_TICKS == 0 && JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+		if ((program != null || !unreadable.isEmpty()) && level.getGameTime() % AUTOMATION_TICKS == 0
+				&& JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
 			automate(level);
 		}
 	}
@@ -240,20 +253,32 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		return heat;
 	}
 
-	/** One step of the formula, if it can be taken now; or, the formula done, one bottle into the output. */
-	private void automate(ServerLevel level) {
+	/**
+	 * One pulse of its formula, every {@value #AUTOMATION_TICKS} ticks (or a test's, at a known moment): its next step if
+	 * it can be taken now or, the formula done, one bottle into the output. Returns why it waits (waiting()), or null when
+	 * it did something. A formula the rules in force cannot follow, or a saved one that no longer reads, keeps its step and
+	 * does nothing at all, no step and no bottle, until they can again (C-01, C-P1, C-P23).
+	 */
+	public @Nullable Diagnostic automate(ServerLevel level) {
+		Diagnostic refused = incompatibility();
+		if (refused != null) {
+			return pause(level, refused);
+		}
+		if (program == null) {
+			return null;
+		}
 		List<Operation> operations = program.operations();
 		if (step >= operations.size()) {
-			if (mixture.isEmpty()) {
-				step = 0;
-				setChanged();
-			} else {
-				bottleIntoOutput(level);
+			if (!mixture.isEmpty()) {
+				return bottleIntoOutput(level);
 			}
-			return;
+			step = 0;
+			waiting = null;
+			setChanged();
+			return null;
 		}
 		if (step == 0 && !mixture.isEmpty()) {
-			return; // a repeat starts from an empty crucible
+			return pause(level, Diagnostic.of(Code.NEEDS_EMPTYING)); // a repeat starts from an empty crucible
 		}
 		Operation operation = operations.get(step);
 		int slot = -1;
@@ -262,31 +287,27 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			case Operation.Water pour -> {
 				water = pour.parts() * FluidConstants.BOTTLE;
 				if (this.water.amount < water) {
-					want(level);
-					return;
+					return pause(level, Diagnostic.needsWater(pour.parts(), tankParts()));
 				}
 			}
 			case Operation.Add add -> {
 				slot = bufferSlotFor(add);
 				if (slot < 0) {
-					want(level);
-					return;
+					return pause(level, missing(add));
 				}
 			}
 			case Operation.Stir stir -> {
 				if (band() != stir.band()) {
-					return;
+					// Waiting for the heat shows no sign, as it never did; Preserve holding it in another band says so.
+					int held = held(ConcordanceProgress.now(level));
+					return pause(level, held > 0 ? Diagnostic.held(band().id, (held + 19) / 20) : Diagnostic.wrongHeat(stir.band().id, band().id));
 				}
 			}
 		}
 		Mixture.Step result = mixture.apply(operation, Alchemy.catalog());
 		if (!(result instanceof Mixture.Applied applied)) {
-			// The rules changed under it (a data pack): it stops rather than guess.
-			program = null;
-			step = 0;
-			setChanged();
-			sound(level, JugcraftConcordance.CIRCLE_BREAK_SOUND);
-			return;
+			// The replay passed, so the live mixture refused: the formula is kept and the step named, never cleared (C-P1).
+			return pause(level, program.incompatible(new Mixture.Refused(((Mixture.Refused) result).reason(), step)));
 		}
 		if (water > 0) {
 			this.water.amount -= water;
@@ -299,11 +320,12 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		}
 		mixture = applied.mixture();
 		step++;
-		waiting = false;
+		waiting = null;
 		setChanged();
 		sync(level);
 		sound(level, operation instanceof Operation.Stir ? JugcraftConcordance.CRUCIBLE_STIR_SOUND : JugcraftConcordance.CRUCIBLE_ADD_SOUND);
 		signStep(level, operation);
+		return null;
 	}
 
 	/** Roadmap step 27: a step taken shows as work; a searing stir, which damages the mixture, as danger. */
@@ -311,12 +333,43 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		Signs.show(level, worldPosition, operation instanceof Operation.Stir stir && stir.band() == Band.SEARING ? Sign.PERIL : Sign.WORK);
 	}
 
-	/** Its formula cannot go on for want of water, an ingredient, a container or room: shown once, when it starts waiting. */
-	private void want(ServerLevel level) {
-		if (!waiting) {
-			waiting = true;
-			Signs.show(level, worldPosition, Sign.WANT);
+	/**
+	 * Its formula cannot go on now, for {@code reason}: kept for Jade, the Inspect page, the status line and the Peepo
+	 * port, and shown once when the reason begins (C-P22): a shortage or a blockage as WANT, a fault as PERIL with the
+	 * breaking sound, a wait for heat or time as nothing.
+	 */
+	private Diagnostic pause(ServerLevel level, Diagnostic reason) {
+		if (waiting == null || waiting.code() != reason.code()) {
+			switch (reason.code().kind) {
+				case SHORTAGE, BLOCKED -> Signs.show(level, worldPosition, Sign.WANT);
+				case FAULT -> {
+					Signs.show(level, worldPosition, Sign.PERIL);
+					sound(level, JugcraftConcordance.CIRCLE_BREAK_SOUND);
+				}
+				case CONDITION -> {
+				}
+			}
 		}
+		waiting = reason;
+		return reason;
+	}
+
+	/** What an Add step lacks: the ingredient prepared otherwise, if the buffer holds it so; else the ingredient. */
+	private Diagnostic missing(Operation.Add add) {
+		Preparation plain = Alchemy.catalog().asItComes();
+		for (int i = 0; i < BUFFER_SLOTS; i++) {
+			ItemStack stack = items.get(i);
+			if (stack.isEmpty()) {
+				continue;
+			}
+			Reagent reagent = stack.get(JugcraftConcordance.REAGENT);
+			String item = reagent != null ? reagent.item() : ConcordanceProgress.itemId(stack);
+			String found = reagent != null ? reagent.preparation() : plain == null ? null : plain.id();
+			if (found != null && item.equals(add.item()) && !found.equals(add.preparation())) {
+				return Diagnostic.wrongPreparation(add.describe(), Operation.ingredient(item, found));
+			}
+		}
+		return Diagnostic.missingIngredient(1, add.describe());
 	}
 
 	/** The buffer slot holding what an Add step needs: the item itself as it comes, or a reagent of that preparation. */
@@ -342,20 +395,21 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			: plain != null && plain.id().equals(add.preparation()) && ConcordanceProgress.itemId(stack).equals(add.item());
 	}
 
-	private void bottleIntoOutput(ServerLevel level) {
+	private @Nullable Diagnostic bottleIntoOutput(ServerLevel level) {
 		ItemStack container = items.get(BOTTLE_SLOT);
 		Item form = formFor(container);
 		if (form == null) {
-			want(level);
-			return;
+			return pause(level, Diagnostic.of(Code.NEEDS_CONTAINER));
 		}
 		Mixture.Bottled bottled = mixture.bottle();
 		Outcome outcome = Outcome.of(bottled.dose(), bottled.contaminant(), Alchemy.catalog(), mixture.history());
 		ItemStack made = Alchemy.brew(form, outcome);
 		ItemStack output = items.get(OUTPUT_SLOT);
-		if (!output.isEmpty() && !(ItemStack.isSameItemSameComponents(output, made) && output.getCount() < output.getMaxStackSize())) {
-			want(level);
-			return;
+		if (!output.isEmpty() && !ItemStack.isSameItemSameComponents(output, made)) {
+			return pause(level, Diagnostic.of(Code.OUTPUT_DIFFERS)); // paused; nothing voided (plan 03:64)
+		}
+		if (!output.isEmpty() && output.getCount() >= output.getMaxStackSize()) {
+			return pause(level, Diagnostic.of(Code.INSUFFICIENT_CAPACITY));
 		}
 		container.shrink(1);
 		if (output.isEmpty()) {
@@ -367,11 +421,12 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (mixture.isEmpty()) {
 			step = 0;
 		}
-		waiting = false;
+		waiting = null;
 		setChanged();
 		sync(level);
 		sound(level, JugcraftConcordance.CRUCIBLE_BOTTLE_SOUND);
 		Signs.show(level, worldPosition, Sign.DONE);
+		return null;
 	}
 
 	private static @Nullable Item formFor(ItemStack container) {
@@ -412,6 +467,13 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		}
 		if (!Alchemy.knows(player)) {
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.unknown"));
+			return InteractionResult.FAIL;
+		}
+		// C-01 (C-P5, C-P24): only someone who could change the block by hand changes a crucible (water, adds, stirs,
+		// bottling, setting a formula). Reading stays open: the spoon and glass above, and recording its process on a blank.
+		boolean recording = formula && held.get(JugcraftConcordance.FORMULA) == null;
+		if (!recording && !Authority.mayChange(level, player, worldPosition)) {
+			player.sendOverlayMessage(ComposeText.show(Diagnostic.of(Code.MISSING_PERMISSION).text()));
 			return InteractionResult.FAIL;
 		}
 		if (formula) {
@@ -506,15 +568,32 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		String written = held.get(JugcraftConcordance.FORMULA);
 		if (written != null) {
 			Formula formula = Formula.parse(written);
-			if (formula == null || !(formula.replay(Alchemy.catalog()) instanceof Mixture.Applied)) {
+			if (formula == null) {
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_invalid"));
 				return InteractionResult.FAIL;
 			}
-			program = formula;
-			step = 0;
-			waiting = false;
-			setChanged();
-			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_set", formula.operations().size()));
+			AlchemyCatalog catalog = Alchemy.catalog();
+			if (formula.replay(catalog) instanceof Mixture.Refused refused) {
+				// Plan 03:54: which step the rules in force refuse, and why (C-01).
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_refused",
+						ComposeText.show(formula.incompatible(refused).text())));
+				return InteractionResult.FAIL;
+			}
+			follow(formula);
+			List<Text> risks = Assay.risks(formula, Mixture.EMPTY, catalog);
+			if (risks.isEmpty()) {
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_set", formula.operations().size()));
+			} else {
+				MutableComponent risk = Component.empty();
+				for (int i = 0; i < risks.size(); i++) {
+					if (i > 0) {
+						risk.append(" ");
+					}
+					risk.append(ComposeText.show(risks.get(i)));
+				}
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_set_risk",
+						formula.operations().size(), risk));
+			}
 			return InteractionResult.SUCCESS;
 		}
 		Formula formula = Formula.of(mixture);
@@ -530,26 +609,92 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		return InteractionResult.SUCCESS;
 	}
 
-	/** Empty-handed: the state of the pot; sneaking, stop repeating a formula. */
+	/**
+	 * Sets {@code formula} to repeat from its first step: the formula item's use after its checks, and tests and operators.
+	 * Nothing is checked here; the rules in force are checked at its next look, as after a load.
+	 */
+	public void follow(Formula formula) {
+		program = formula;
+		unreadable = "";
+		step = 0;
+		waiting = null;
+		incompatible = null;
+		checkedRevision = -1;
+		setChanged();
+	}
+
+	/** Empty-handed: the state of the pot and why its formula waits; sneaking, stop repeating a formula. */
 	public void useEmpty(ServerPlayer player, boolean sneaking) {
-		if (sneaking && program != null) {
-			// Only an alembist may stop a formula (roadmap step 28), as only one may set it.
+		if (sneaking && (program != null || !unreadable.isEmpty())) {
+			// Only an alembist may stop a formula (roadmap step 28), as only one may set it; since C-01 (C-P5), only one who
+			// could change the block by hand.
 			if (!Alchemy.knows(player)) {
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.unknown"));
 				return;
 			}
+			if (!Authority.mayChange(player.level(), player, worldPosition)) {
+				player.sendOverlayMessage(ComposeText.show(Diagnostic.of(Code.MISSING_PERMISSION).text()));
+				return;
+			}
 			program = null;
+			unreadable = "";
 			step = 0;
-			waiting = false;
+			waiting = null;
+			incompatible = null;
+			checkedRevision = -1;
 			setChanged();
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_cleared"));
 			return;
 		}
-		int held = held(ConcordanceProgress.now(player.level()));
+		player.sendOverlayMessage(statusLine(ConcordanceProgress.now(player.level())));
+	}
+
+	/** The empty-hand status line (one overlay, so nothing replaces it): band, heat, volume, Preserve's hold, then why it waits. */
+	public Component statusLine(long now) {
+		int held = held(now);
 		Component band = ComposeText.name(new Text.Ref("band", band().id));
-		player.sendOverlayMessage(held > 0
+		Component line = held > 0
 				? Component.translatable("message.jugcraft.concordance.crucible.status_held", band, temperature, mixture.parts(), (held + 19) / 20)
-				: Component.translatable("message.jugcraft.concordance.crucible.status", band, temperature, mixture.parts()));
+				: Component.translatable("message.jugcraft.concordance.crucible.status", band, temperature, mixture.parts());
+		Diagnostic reason = waiting();
+		return reason == null ? line : Component.translatable("message.jugcraft.concordance.crucible.status_waiting", line, ComposeText.show(reason.text()));
+	}
+
+	/**
+	 * Why its formula waits now (C-01), or null if it has none or is not waiting: unreadable, a step the rules in force
+	 * refuse, or what stopped its last pulse (never saved; up to {@value #AUTOMATION_TICKS} ticks old). Jade, the Inspect
+	 * page, the status line and the Peepo port read this one source. Server only.
+	 */
+	public @Nullable Diagnostic waiting() {
+		Diagnostic refused = incompatibility();
+		return refused != null ? refused : program == null ? null : waiting;
+	}
+
+	/**
+	 * Why its formula cannot be followed (C-01, C-P1): a saved one that no longer reads, or the first step the rules in
+	 * force refuse; null if it can or there is none. Replayed (at most Mixture.MAX_OPERATIONS operations) once per revision
+	 * of the rules (ConcordanceData.revision(): every load, reload and replace) and after a load; a cache, never saved.
+	 * Such a formula drives nothing: no step, no bottle, no Peepo demand (C-05's stand and C-06's filing read this too).
+	 * Server only.
+	 */
+	public @Nullable Diagnostic incompatibility() {
+		if (program == null) {
+			return unreadable.isEmpty() ? null : Diagnostic.of(Code.UNREADABLE);
+		}
+		int revision = ConcordanceData.revision();
+		if (checkedRevision != revision) {
+			checkedRevision = revision;
+			incompatible = program.incompatibility(Alchemy.catalog());
+			if (incompatible == null && waiting != null && waiting.code() == Code.INCOMPATIBLE) {
+				waiting = null; // the rules can follow it again: it carries on from its step
+			}
+		}
+		return incompatible;
+	}
+
+	/** A saved formula this build cannot read, kept as written (C-01); "" if none. */
+	public String unreadableProgram() {
+		return unreadable;
 	}
 
 	private void sound(ServerLevel level, SoundEvent sound) {
@@ -661,7 +806,13 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		shown = new Assay.Look(taste, input.getBooleanOr("murky", false));
 		String saved = input.getStringOr("program", "");
 		program = saved.isEmpty() ? null : Formula.parse(saved);
-		step = program == null ? 0 : Math.clamp(input.getIntOr("step", 0), 0, program.operations().size());
+		// A formula this build cannot read is kept as written, saved back and reported, never dropped (C-01, C-P1).
+		unreadable = program == null ? saved : "";
+		step = saved.isEmpty() ? 0 : Math.clamp(input.getIntOr("step", 0), 0, program != null ? program.operations().size() : Mixture.MAX_OPERATIONS);
+		// Never saved: worked out again, the formula replayed against the rules in force at its next look.
+		waiting = null;
+		incompatible = null;
+		checkedRevision = -1;
 		heldUntil = Math.max(0L, input.getLongOr(HELD_UNTIL, 0L));
 	}
 
@@ -685,8 +836,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			}
 			output.store("history", Codec.STRING.listOf(), history);
 		}
-		if (program != null) {
-			output.putString("program", program.text());
+		if (program != null || !unreadable.isEmpty()) {
+			output.putString("program", program != null ? program.text() : unreadable);
 			output.putInt("step", step);
 		}
 		if (heldUntil > 0L) {
@@ -717,6 +868,11 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	/** What a client knows: the volume (the server's mixture is never sent). */
 	public int parts() {
 		return mixture.parts();
+	}
+
+	/** Whole parts of water in the tank (a bottle each; water piped in part-way counts once a part is whole). */
+	public int tankParts() {
+		return (int) (water.amount / FluidConstants.BOTTLE);
 	}
 
 	// ---------------------------------------------------------------- GeckoLib (drawn on the client)

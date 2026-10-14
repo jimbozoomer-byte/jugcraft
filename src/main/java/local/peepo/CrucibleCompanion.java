@@ -5,7 +5,6 @@ import java.util.*;
 import io.github.jimbozoomer.jugcraft.concordance.*;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.*;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.item.*;
 import net.fabricmc.fabric.api.transfer.v1.storage.*;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.*;
@@ -47,7 +46,7 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
     }
     private int containers(){int parts=crucible.mixture().parts();for(var op:remaining())if(op instanceof Operation.Water water)parts+=water.parts();return Math.min(Mixture.MAX_PARTS,parts);}
     public int needed(ItemStack stack){
-        if(!enabled() || crucible.program()==null || stack.isEmpty())return 0;
+        if(!enabled() || crucible.program()==null || crucible.incompatibility()!=null || stack.isEmpty())return 0; // C-01: an incompatible formula asks for nothing
         if(stack.is(container())){
             var held=crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT);
             return held.isEmpty() || ItemStack.isSameItemSameComponents(held,stack)?Math.max(0,containers()-held.getCount()):0;
@@ -90,15 +89,22 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
     private final Storage<ItemVariant> output=new CombinedStorage<>(java.util.stream.IntStream.range(0,CrucibleBlockEntity.SLOTS).mapToObj(OutputSlot::new).toList());
     public Storage<ItemVariant> inputs(){return input;}
     public Storage<ItemVariant> outputs(){return output;}
+    /** One source (C-01): what blocks the crucible is its own reason (CrucibleBlockEntity.waiting()); after it, this port's lookahead. */
     public CompanionStatus status(){
         if(!enabled())return CompanionStatus.FORBIDDEN;
-        if(crucible.program()==null)return CompanionStatus.RECIPE_MISSING;
-        if(!crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT).isEmpty())return CompanionStatus.FULL;
-        var next=remaining();
-        if(!next.isEmpty()){
-            if(next.getFirst() instanceof Operation.Water water && crucible.water.amount<water.parts()*FluidConstants.BOTTLE)return CompanionStatus.NEEDS_WATER;
-            if(next.getFirst() instanceof Operation.Stir stir && crucible.band()!=stir.band())return CompanionStatus.WRONG_TEMPERATURE;
-        }
+        if(crucible.program()==null || crucible.incompatibility()!=null)return CompanionStatus.RECIPE_MISSING;
+        var reason=crucible.waiting();
+        if(reason!=null)return switch(reason.code()){
+            case NEEDS_WATER->CompanionStatus.NEEDS_WATER;
+            case MISSING_INGREDIENT,WRONG_PREPARATION->CompanionStatus.NO_INPUT;
+            case NEEDS_CONTAINER->CompanionStatus.NEEDS_BOTTLES;
+            case INSUFFICIENT_CAPACITY,OUTPUT_DIFFERS->CompanionStatus.FULL;
+            case WRONG_HEAT,HELD->CompanionStatus.WRONG_TEMPERATURE;
+            case NEEDS_EMPTYING->CompanionStatus.OCCUPIED;
+            case MISSING_PERMISSION->CompanionStatus.FORBIDDEN;
+            case INCOMPATIBLE,UNREADABLE->CompanionStatus.RECIPE_MISSING;
+            default->CompanionStatus.IDLE;
+        };
         if(shortage()!=null)return CompanionStatus.NO_INPUT;
         if(containers()>0 && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty())return CompanionStatus.NEEDS_BOTTLES;
         return CompanionStatus.IDLE;

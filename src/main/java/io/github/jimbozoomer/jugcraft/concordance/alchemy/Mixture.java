@@ -51,7 +51,11 @@ public record Mixture(int parts, Vector pending, Vector dissolved, long contamin
 	public record Applied(Mixture mixture) implements Step {
 	}
 
-	public record Refused(Text reason) implements Step {
+	/** Why an operation cannot be done (nothing changes); replaying a formula, also which of its steps (from 0), else -1. */
+	public record Refused(Text reason, int step) implements Step {
+		public Refused(Text reason) {
+			this(reason, -1);
+		}
 	}
 
 	public Step apply(Operation operation, AlchemyCatalog catalog) {

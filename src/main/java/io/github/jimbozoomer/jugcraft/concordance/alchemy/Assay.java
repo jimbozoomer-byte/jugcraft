@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance.alchemy;
 
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import java.util.ArrayList;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
@@ -73,6 +74,47 @@ public final class Assay {
 			out.add(Text.of("alchemy.assay.nothing"));
 		}
 		out.addAll(outcome.reasons());
+		return out;
+	}
+
+	/**
+	 * What is never hidden (plan 03:54; Concordance Chunk C, C-01, C-P3, C-P25): the harmful statuses a dose would carry
+	 * and the first searing stir, for anyone, whatever they know. Of {@code program}'s replay under these rules when there
+	 * is a formula (its searing step counted from 1), otherwise of {@code mixture} as it is; nothing for an empty crucible
+	 * with no formula. A formula these rules refuse has no outcome: only its searing step is named.
+	 */
+	public static List<Text> risks(@Nullable Formula program, Mixture mixture, AlchemyCatalog catalog) {
+		List<Text> out = new ArrayList<>();
+		List<Operation> operations;
+		Outcome outcome = null;
+		if (program != null) {
+			operations = program.operations();
+			if (program.replay(catalog) instanceof Mixture.Applied applied) {
+				outcome = applied.mixture().outcome(catalog);
+			}
+		} else if (!mixture.isEmpty()) {
+			operations = mixture.history();
+			outcome = mixture.outcome(catalog);
+		} else {
+			return out;
+		}
+		List<Text.Ref> harms = new ArrayList<>();
+		if (outcome != null) {
+			for (Outcome.Effect effect : outcome.effects()) {
+				if (effect.property().intent() == Intent.HARMFUL) {
+					harms.add(new Text.Ref("status", effect.property().status()));
+				}
+			}
+		}
+		if (!harms.isEmpty()) {
+			out.add(Text.of("alchemy.risk.harm", harms));
+		}
+		for (int i = 0; i < operations.size(); i++) {
+			if (operations.get(i) instanceof Operation.Stir stir && stir.band() == Band.SEARING) {
+				out.add(program != null ? Text.of("alchemy.risk.searing", i + 1) : Text.of("alchemy.risk.seared"));
+				break;
+			}
+		}
 		return out;
 	}
 }

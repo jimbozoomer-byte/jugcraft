@@ -114,6 +114,8 @@ PREPARATIONS = {
     # Ground in a mortar: a little lost as dust, but much of it dissolves the moment it goes in.
     "ground": {"tool": rid("mortar"), "scale": 0.9, "ready": 0.6},
 }
+# A preparation in a step's words (Java: Operation.ingredient; ComposeText names "preparation" refs preparation.<ns>.<path>).
+PREPARATION_NAMES = {"raw": "as it comes", "ground": "ground"}
 # Winter Brine's status (Concordance Chunk B, B-08, B-D3; Java: concordance/rime/Frostward.STATUS): no frost gathers while
 # it lasts and the Yeti King's chill does not take. tools/concordance_rime.py holds its colour, name and icon.
 FROSTWARD = rid("frostward")
@@ -151,8 +153,8 @@ ITEMS = {
                     "tooltip": "Use it on an Alembic Crucible to measure every property, pending and dissolved. In a "
                                "master's hands it also says what a dose would do, and why."},
     "formula": {"name": "Formula",
-                "tooltip": "Use a blank formula on a crucible to record its process; sneak to set a written one for "
-                           "the crucible to repeat."},
+                "tooltip": "Use a blank formula on a crucible to record its process; use a written one to set it for "
+                           "the crucible to repeat (sneak with an empty hand to clear it)."},
     "reagent": {"name": "Reagent", "tooltip": "A prepared ingredient for the crucible."},
     "draught": {"name": "Draught", "tooltip": "Drink it."},
     "salve": {"name": "Salve", "tooltip": "Use it on a creature to apply it (or on yourself, sneaking)."},
@@ -172,7 +174,9 @@ MESSAGES = {
     "alchemy.recorded": "Formula recorded: %s steps",
     "alchemy.formula_set": "The crucible will repeat this formula (%s steps)",
     "alchemy.formula_cleared": "The crucible no longer repeats a formula",
-    "alchemy.formula_invalid": "This formula cannot be followed here",
+    "alchemy.formula_invalid": "This formula can no longer be read",
+    "alchemy.formula_refused": "Not set: %s",
+    "alchemy.formula_set_risk": "The crucible will repeat this formula (%s steps). %s",
     "alchemy.automation_busy": "The crucible is following a formula",
     "alchemy.ground": "Ground a %s",
     "alchemy.cannot_grind": "Hold an alchemical ingredient in your other hand to grind it",
@@ -180,6 +184,7 @@ MESSAGES = {
     "alchemy.applied": "Applied the salve",
     "alchemy.no_effect": "It does nothing",
     "crucible.status": "Alembic Crucible: %s, %s degrees, %s parts",
+    "crucible.status_waiting": "%s. %s",
     "examine.substance": "You taste a pinch of the %s and note what it is made of",
 }
 
@@ -204,6 +209,14 @@ TEXT = {
     "alchemy.contaminant": "Contaminant",
     "alchemy.searing": "searing stirs",
     "alchemy.thawed": "stirs above the cold, which thaw Rime",
+    # Concordance Chunk C, C-01: a formula's step in the player's words (Operation.describe), and what is never hidden
+    # (Assay.risks).
+    "alchemy.op.water": "%s parts of water",
+    "alchemy.op.add": "%s, %s",
+    "alchemy.op.stir": "a %s stir",
+    "alchemy.risk.harm": "Danger: a dose would bring %s",
+    "alchemy.risk.searing": "Danger: step %s stirs it searing, which fouls it and spoils its Radiance and Verdance",
+    "alchemy.risk.seared": "Danger: it was stirred searing, which fouled it and spoiled its Radiance and Verdance",
 }
 # What JEI's page for an ingredient carrying Rime adds (Concordance Chunk B, B-08): a property fact, never an outcome.
 RIME_JEI = "; stirred cold, its Rime brews Frostward (Winter Brine)"
@@ -239,6 +252,8 @@ def lang_entries(lang):
             f"; contaminant {info['contaminant']:.2f}" if info.get("contaminant") else "") + (
             RIME_JEI if info["properties"].get("rime") else "")
     lang[f"jei.{MOD}.alchemy.mortar"] = "Grind an alchemical ingredient: it dissolves faster but loses a little."
+    for key, name in PREPARATION_NAMES.items():
+        lang[f"preparation.{MOD}.{key}"] = name
 
 
 # ------------------------------------------------------------------------------------------------- codex
@@ -414,7 +429,10 @@ def codex():
                  f"ingredients through a hopper (up to {BUFFER_SLOTS} kinds waiting), it follows the formula step "
                  f"by step, waiting for the heat each stir needs, and bottles into its output when it has bottles. "
                  f"A Pneumatic Extractor at its side takes the brews out, so the fire can stay beneath. "
-                 f"It never guesses: a missing ingredient or the wrong heat simply waits."),
+                 f"It never guesses: a missing ingredient or the wrong heat simply waits. The crucible says what it "
+                 f"waits for (use it with an empty hand). If the rules change so that a step can no longer be made, "
+                 f"the formula stays set, says which step and why, and carries on when they change back. Only someone "
+                 f"who could break the crucible by hand may work it, or set or clear its formula."),
             ],
         },
         # Concordance Chunk B, B-08 (B-P44): Winter Brine needs only the Alembic Arts, not Rimekeeping.
