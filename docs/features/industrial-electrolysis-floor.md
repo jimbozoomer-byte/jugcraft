@@ -1,6 +1,6 @@
 # Electrolysis energy floor
 
-Status: implemented on the contributor's fork (a data check, no gameplay change), pending CI and review.
+Status: implemented on the contributor's fork (a data check, no gameplay change); CI green; pending review.
 Stacked on the [Large Gas Burning Generator](industrial-large-gas-burning-generator.md) and the branches below it.
 
 Proposal issue: none. TODO item: "Enforce the electrolysis energy floor before any expanded or bulk Separator."
@@ -61,7 +61,7 @@ Locally:
 
 ### Results
 
-Not yet run in CI.
+**Run [38498552563](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38498552563) (commit 447f9797) passed:** the data checks with the new floor check, the build, every server game test with and without optional integrations, and all five client test shards.
 
 ## Rollout and open questions
 

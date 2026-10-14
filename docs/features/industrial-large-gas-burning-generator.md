@@ -1,6 +1,6 @@
 # Large Gas Burning Generator: the Gas Burning Generator's 5×6×5 variant
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on the [Large Bio Generator](industrial-large-bio-generator.md) and the branches below it.
 
 Proposal issue: none. TODO items:
@@ -117,7 +117,7 @@ There are no new dependencies.
 
 ### Results
 
-Not yet run in CI.
+**Run [38497894808](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38497894808) (commit ba67868a) passed:** the build, the data checks, every server game test (`LargeGasBurningGeneratorGameTests` included) with and without optional integrations, and all five client test shards (`LargeGasBurningGeneratorClientGameTests` included). The first attempt's client shard 3 failed in `PeepoDeliveryClientTests` (the companion's "meal" wait timed out), a test this change does not touch; that shard passed on its one re-run.
 
 **Not yet done:**
 - a survival playtest;
