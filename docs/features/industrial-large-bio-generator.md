@@ -1,6 +1,6 @@
 # Large Bio Generator: the Bio Generator's 5×6×5 variant
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on the [Bulk Fermenter](industrial-bulk-fermenter.md) and the branches below it.
 
 Proposal issue: none. TODO items:
@@ -109,7 +109,7 @@ There are no new dependencies.
 
 ### Results
 
-Not yet run in CI.
+**Run [38496961410](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38496961410) (commit 2fc145e0) passed:** the build, the data checks, every server game test (`LargeBioGeneratorGameTests` included) with and without optional integrations, and all five client test shards (`LargeBioGeneratorClientGameTests` included).
 
 **Not yet done:**
 - a survival playtest;
