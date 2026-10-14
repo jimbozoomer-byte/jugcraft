@@ -4200,12 +4200,27 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 tools/check_mod_data.py`: PASS (2201 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, looks and eye relief against tools/guns.py).
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
-- **Slice 13A game tests (not yet run; CI runs them):**
+- **Slice 13A game tests (all passed in CI, below):**
   - `FrontierGunsGameTests`:
     - `frontierGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires plain bullets, one a pull. The Tabby Revolver is a revolver of six light rounds, held in one hand and loaded a round at a time, and two of them are two guns at once; the Lookout Rifle a rifle of eight rifle rounds loaded a round at a time; the Ammonite Carbine a carbine of sixteen rifle rounds, loaded a magazine at a time; the Lookout Rifle reaches furthest and the Tabby Revolver least. The Tabby Revolver takes the barrel attachments only; the Lookout Rifle the stocks, the Light and Tactical Grips, the bayonets, the scopes and the Laser Sight; the Ammonite Carbine the stocks only.
     - `frontierGunsFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: the revolver and the lever rifle with one round in after their first round's time.
     - `tabbyRevolversFireFromBothHands`: a Tabby Revolver in each hand fires from each and lands both shots, each spending a round of its own.
   - `GunsGameTests` counts 66 guns; `DualGunsGameTests` the eighteen held in one hand; `TacticalAttachmentsGameTests` the twenty-four that take the Tactical Grip.
+- **Slice 13A in CI** ([run 38489671371](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38489671371), on bbe529f28): every check passed.
+  - **Server game tests:** 1391 in each job, the `mod` job's and the one without the optional integrations. All passed, `FrontierGunsGameTests` among them.
+  - **Client game tests:** the changed files chose eight classes over five shards, and all passed. `GunsClientGameTests` ran alone in its shard; in it each new gun, in its turn:
+    - held and aimed, its arms drawn at full size and then half, the view narrowed to 0.9 (Tabby Revolver), 0.8 (Lookout Rifle) and 0.85 (Ammonite Carbine);
+    - fired at the husk, each spending one round, with 6 frames of flash: the Tabby Revolver took it from 321.94 to 315.94 (6), the Lookout Rifle 7 and the Ammonite Carbine 5;
+    - reloaded from the inventory, 31 rounds left each time; over its shot and reload the Tabby Revolver threw 4 casings, the Lookout Rifle 3 and the Ammonite Carbine 1;
+    - with each set of attachments it takes, held and aimed: the Tabby Revolver with the Silencer, the Extended Barrel and the Muzzle Brake; the two long guns with each stock, the stock left out aimed (in 34 or 35 frames, none held); the Lookout Rifle with the Light Grip, a bayonet, and the Tactical Grip and the Laser Sight.
+  - **Between the shots:** the husk lost nothing between the Lament Rifle's shot and the Tabby Revolver's, or between the three guns'.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar: the Tabby Revolver's slotted barrel; the Lookout Rifle's barrel over its fore-end, the left hand at the front; the Ammonite Carbine's copper-banded barrels.
+    - **Aimed:** each raised to the middle of the view. The Lookout Rifle's and the Ammonite Carbine's sights meet the crosshair under the husk's head. As the other hand guns' did, the Tabby Revolver's cylinder rises over the crosshair and covers the husk's body.
+    - **Fired:** the Ammonite Carbine's cocking piece, driven back, covers the husk's body for a moment.
+    - **Reloading and inspection:** the Tabby Revolver rolled, the left hand in; the Lookout Rifle rolled, the left hand over it; the Ammonite Carbine tipped; each turned toward the eye to be looked over, the Ammonite Carbine filling the right of the view.
+    - **Attachments:** each barrel part at the Tabby Revolver's muzzle; each stock behind the grip; the Laser Sight stands on the receiver aimed as it does on the Longhorn and Drover Rifles in the same run. The bayonet is hidden behind the left hand.
+    - **Third person:** the Tabby Revolver held out in one hand and the long guns raised, each flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
