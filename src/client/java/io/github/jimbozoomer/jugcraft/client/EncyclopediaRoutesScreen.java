@@ -17,11 +17,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.FormattedCharSequence;
@@ -32,7 +34,8 @@ import org.jspecify.annotations.Nullable;
  * The Jugcraft Encyclopedia (docs/features/jugcraft-encyclopedia.md), first slice. It is not an item: the Encyclopedia
  * key (B unless remapped) and the book button on the inventory open its parent (EncyclopediaClient).
  *
- * <p>The home explains the two routes, machinery and magic, as cards; a card (clicked, or Tab then Enter) opens its
+ * <p>The home explains the two routes, machinery and magic, as cards, each shown whole (its overview and its link wrap to
+ * the card, and the cards scroll when the window is too small for them); a card (clicked, or Tab then Enter) opens its
  * route: an overview, the milestones in order and the chapters. A milestone or chapter opens the Engineer's Handbook at
  * its page (which closes back here), the Arcane Concordance codex at its category, or the Concordance Journal; the codex
  * and the journal show only what the server has unlocked. In a route, Up and Down pick a link and Enter opens it; the
@@ -62,6 +65,8 @@ public class EncyclopediaRoutesScreen extends Screen {
 	private static final int CARD_HEIGHT = 46;
 	private static final int CARD_GAP = 8;
 	private static final int ROW_HEIGHT = 22;
+	/** A route card's top, above its overview: its accent, icon and title. */
+	private static final int CARD_TOP = 28;
 
 	private static final int PANEL = 0xF01A1612;
 	private static final int EDGE = 0xFF6E5220;
@@ -114,6 +119,8 @@ public class EncyclopediaRoutesScreen extends Screen {
 	private final List<Line> lines = new ArrayList<>();
 	private final List<Hit> hits = new ArrayList<>();
 	private boolean codexLoaded;
+	/** The home's route cards, in a body that scrolls when they are taller than the room below the introduction. */
+	private @Nullable ComposerScroll cards;
 
 	/** The Encyclopedia's home, closing back to {@code parent} (the inventory) or, if null, to the game. */
 	public EncyclopediaRoutesScreen(@Nullable Screen parent) {
@@ -174,6 +181,7 @@ public class EncyclopediaRoutesScreen extends Screen {
 
 	@Override
 	protected void init() {
+		cards = null;
 		panelWidth = Math.max(Math.min(MIN_WIDTH, width - 8), Math.min(MAX_WIDTH, width - 24));
 		panelHeight = Math.max(Math.min(MIN_HEIGHT, height - 8), Math.min(MAX_HEIGHT, height - 24));
 		left = (width - panelWidth) / 2;
@@ -220,34 +228,86 @@ public class EncyclopediaRoutesScreen extends Screen {
 		return wrapped;
 	}
 
-	/** The route cards: side by side on a wide panel, stacked on a narrow one, below the introduction. */
+	/**
+	 * The route cards below the introduction: side by side on a wide panel, stacked on a narrow one. Each is as tall as its
+	 * whole overview and its whole link need, and at least its share of the room, so a large window looks as before; side by
+	 * side they are as tall as the tallest. When they are taller than the room they scroll (the wheel, the bar in the panel's
+	 * right margin, or Tab, which shows the card it reaches from its top).
+	 */
 	private void initHome() {
 		int count = routes.size();
 		if (count == 0) {
 			return;
 		}
 		int areaTop = top + HEADER + introLines().size() * font.lineHeight + intro.size() * 3 + 4;
-		int areaBottom = top + panelHeight - FOOTER - 2;
+		int area = Math.max(30, top + panelHeight - FOOTER - 2 - areaTop);
 		boolean side = panelWidth >= SIDE_BY_SIDE;
+		int cardWidth = side ? (textWidth() - (count - 1) * GAP) / count : textWidth();
+		int share = Math.max(30, side ? area : (area - (count - 1) * GAP) / count);
+		List<RouteCard> made = new ArrayList<>();
+		int tallest = 0;
 		for (int i = 0; i < count; i++) {
-			int x;
-			int y;
-			int cardWidth;
-			int cardHeight;
-			if (side) {
-				cardWidth = (textWidth() - (count - 1) * GAP) / count;
-				cardHeight = areaBottom - areaTop;
-				x = left + PAD + i * (cardWidth + GAP);
-				y = areaTop;
-			} else {
-				cardWidth = textWidth();
-				cardHeight = (areaBottom - areaTop - (count - 1) * GAP) / count;
-				x = left + PAD;
-				y = areaTop + i * (cardHeight + GAP);
-			}
 			int index = i;
-			addRenderableWidget(new RouteCard(x, y, cardWidth, Math.max(30, cardHeight), routes.get(i), button -> showRoute(index)));
+			RouteCard card = new RouteCard(left + PAD + (side ? i * (cardWidth + GAP) : 0), cardWidth, routes.get(i), font,
+					button -> showRoute(index));
+			card.setHeight(Math.max(share, card.needed()));
+			tallest = Math.max(tallest, card.getHeight());
+			made.add(card);
 		}
+		// The body reaches into the panel's right margin, so its scroll bar (6 wide, drawn only when the cards scroll) sits
+		// beside the cards and they keep their width.
+		cards = addRenderableWidget(new ComposerScroll(minecraft, left + PAD, areaTop, panelWidth - PAD - 1, area, this::focusedCard));
+		int y = 0;
+		for (RouteCard card : made) {
+			if (side) {
+				card.setHeight(tallest);
+			}
+			cards.add(card, side ? 0 : y);
+			y += card.getHeight() + GAP;
+		}
+		cards.arrange(0);
+	}
+
+	/**
+	 * The keyboard reached {@code control} in the cards' body, which scrolls a control taller than itself in by its foot; a
+	 * card reads from its top, so this shows that card's title and the start of its overview instead.
+	 */
+	private void focusedCard(@Nullable GuiEventListener control) {
+		if (cards != null && control instanceof RouteCard card && card.getHeight() > cards.getHeight()
+				&& minecraft.getLastInputType().isKeyboard()) {
+			cards.setScrollAmount(cards.scrollAmount() + card.getY() - cards.getY());
+		}
+	}
+
+	/** The home's route cards as laid out, for tests; empty while a route is shown. See {@link HomeCard}. */
+	public List<HomeCard> homeCards() {
+		List<HomeCard> out = new ArrayList<>();
+		if (route >= 0 || cards == null) {
+			return out;
+		}
+		int view = cards.getHeight();
+		int reach = cards.maxScrollAmount() + view;
+		int scrolled = (int) cards.scrollAmount();
+		for (GuiEventListener child : cards.children()) {
+			if (child instanceof RouteCard card) {
+				int shown = card.getY() - cards.getY();
+				int room = (card.getHeight() - CARD_TOP - 3 * card.overview.size() - 2) / font.lineHeight;
+				out.add(new HomeCard(card.route.title(), font.width(card.route.title()) <= card.getWidth() - 32, card.getWidth(),
+						card.getHeight(), card.lines(), room, List.copyOf(card.link), card.isFocused(), shown,
+						shown + scrolled + card.getHeight(), view, reach));
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * A home card as laid out: its route's title and whether the title shows whole; its width and height; the lines of text
+	 * below its top (its overview's and its link's) and the lines its height has room for; its link's lines as drawn; whether
+	 * it has the keyboard; its top as shown, from the top of the cards' body (negative when scrolled above it); its foot,
+	 * from the top of the cards' content; the body's visible height; and the furthest the body can show of its content.
+	 */
+	public record HomeCard(String title, boolean titleWhole, int width, int height, int lines, int room, List<String> link,
+			boolean focused, int top, int foot, int view, int reach) {
 	}
 
 	private void extractHome(GuiGraphicsExtractor graphics) {
@@ -262,21 +322,47 @@ public class EncyclopediaRoutesScreen extends Screen {
 	}
 
 	/**
-	 * A route on the home: a framed card in its accent with its icon, title and overview, cut to fit. A button, so Tab
-	 * reaches it, Enter opens it and the narrator reads "Open" and its title.
+	 * A route on the home: a framed card in its accent with its icon, its title, its whole overview and, at its foot, its
+	 * whole "Open" link, wrapped to the card's width (initHome makes it tall enough). A button, so Tab reaches it, Enter
+	 * opens it and the narrator reads "Open" and its title.
 	 */
 	private static final class RouteCard extends Button {
 		private final Route route;
+		private final Font font;
+		/** The overview, a list of lines for each paragraph, wrapped to the card's inner width. */
+		private final List<List<FormattedCharSequence>> overview = new ArrayList<>();
+		/** The link ("Open", the route's title and an arrow), wrapped to the card's inner width. */
+		private final List<String> link = new ArrayList<>();
 
-		RouteCard(int x, int y, int width, int height, Route route, OnPress onPress) {
-			super(x, y, width, height, Component.translatable("screen.jugcraft.routes.open_route", route.title()), onPress,
+		RouteCard(int x, int width, Route route, Font font, OnPress onPress) {
+			super(x, 0, width, 0, Component.translatable("screen.jugcraft.routes.open_route", route.title()), onPress,
 					Button.DEFAULT_NARRATION);
 			this.route = route;
+			this.font = font;
+			for (String paragraph : route.summary()) {
+				overview.add(font.split(Component.literal(paragraph), width - 12));
+			}
+			for (FormattedText line : font.splitIgnoringLanguage(getMessage().copy().append(" ›"), width - 12)) {
+				link.add(line.getString());
+			}
+		}
+
+		/** The lines of text below the card's top: its overview's and its link's. */
+		int lines() {
+			int lines = link.size();
+			for (List<FormattedCharSequence> paragraph : overview) {
+				lines += paragraph.size();
+			}
+			return lines;
+		}
+
+		/** The height that shows the whole card: its top, every line of its overview and its whole link. */
+		int needed() {
+			return CARD_TOP + lines() * font.lineHeight + overview.size() * 3 + 2;
 		}
 
 		@Override
 		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-			Font font = Minecraft.getInstance().font;
 			int x = getX();
 			int y = getY();
 			boolean lit = isHovered() || isFocused();
@@ -285,23 +371,21 @@ public class EncyclopediaRoutesScreen extends Screen {
 			graphics.fill(x + 1, y + 1, x + width - 1, y + 3, route.accent());
 			item(graphics, route.icon(), x + 6, y + 7);
 			graphics.text(font, fit(font, route.title(), width - 32), x + 26, y + 11, TITLE, false);
-			// The overview, as much as fits above the "Open" line.
-			int bottom = y + height - 14;
-			graphics.enableScissor(x + 1, y + 27, x + width - 1, bottom);
-			int ly = y + 28;
-			for (String paragraph : route.summary()) {
-				for (FormattedCharSequence line : font.split(Component.literal(paragraph), width - 12)) {
-					if (ly < bottom) {
-						graphics.text(font, line, x + 6, ly, DIM, false);
-					}
+			// The whole overview: initHome makes the card tall enough, so nothing is cut.
+			int ly = y + CARD_TOP;
+			for (List<FormattedCharSequence> paragraph : overview) {
+				for (FormattedCharSequence line : paragraph) {
+					graphics.text(font, line, x + 6, ly, DIM, false);
 					ly += font.lineHeight;
 				}
 				ly += 3;
 			}
-			graphics.disableScissor();
-			Component open = getMessage();
-			String label = fit(font, open.getString() + " ›", width - 12);
-			graphics.text(font, label, x + width - 6 - font.width(label), y + height - 11, lit ? TITLE : route.accent(), false);
+			// The whole link, each line right-aligned, the last at the card's foot (one line sits where it always did).
+			int linkY = y + height - 2 - link.size() * font.lineHeight;
+			for (String line : link) {
+				graphics.text(font, line, x + width - 6 - font.width(line), linkY, lit ? TITLE : route.accent(), false);
+				linkY += font.lineHeight;
+			}
 		}
 	}
 

@@ -3319,6 +3319,12 @@ def check_encyclopedia_routes(registered):
     keys |= {f"screen.jugcraft.routes.opens.{kind}" for kind in ("handbook", "codex", "journal")}
     for key in sorted(keys - set(lang)):
         err(f"encyclopedia: untranslated {key}")
+    # Concordance Chunk B, unit 5 (B-11, B-P58): a home card shows its whole overview and its whole link, wrapped to the
+    # card and scrolled when the window is too small; neither is cut to fit.
+    card = _java_body(java, "\tprivate static final class RouteCard extends Button {")
+    if ("splitIgnoringLanguage(" not in card or "enableScissor" in card or "fit(font, open" in card
+            or "new ComposerScroll(" not in java):
+        err("EncyclopediaRoutesScreen.RouteCard: its overview and link are drawn whole, in a scrolling body, never cut (B-11)")
 
 
 VANILLA_ADVANCEMENT_ROOTS = {"minecraft:story/root", "minecraft:nether/root", "minecraft:end/root", "minecraft:adventure/root",
