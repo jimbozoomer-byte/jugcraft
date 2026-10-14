@@ -203,7 +203,8 @@
 			"io.github.jimbozoomer.jugcraft.test.MbsGameTests",
 			"io.github.jimbozoomer.jugcraft.test.DieselGeneratorGameTests",
 			"io.github.jimbozoomer.jugcraft.test.StorageGameTests",
-			"io.github.jimbozoomer.jugcraft.test.CryptLichGameTests"
+			"io.github.jimbozoomer.jugcraft.test.CryptLichGameTests",
+			"io.github.jimbozoomer.jugcraft.test.IronDreadnoughtGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.jimbozoomer.jugcraft.test.FluoriteClientGameTests",
@@ -368,7 +369,8 @@
 			"io.github.jimbozoomer.jugcraft.test.MbsPreviewClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.NuclearClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.EncyclopediaRoutesClientGameTests",
-			"io.github.jimbozoomer.jugcraft.test.CryptLichClientGameTests"
+			"io.github.jimbozoomer.jugcraft.test.CryptLichClientGameTests",
+			"io.github.jimbozoomer.jugcraft.test.IronDreadnoughtClientGameTests"
 		]
 	},
 	"depends": {
