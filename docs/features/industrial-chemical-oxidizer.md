@@ -1,6 +1,6 @@
 # Chemical Oxidizer (factory package 2, sulfur oxidation)
 
-Status: implemented (pending CI and review). Built on the [shared machine foundation](industrial-machine-foundation.md), beside the [Electrolytic Separator](industrial-electrolytic-separator.md) and [Gas Burning Generator](industrial-gas-burning-generator.md).
+Status: implemented (CI green on the contributor's fork; pending review). Built on the [shared machine foundation](industrial-machine-foundation.md), beside the [Electrolytic Separator](industrial-electrolytic-separator.md) and [Gas Burning Generator](industrial-gas-burning-generator.md).
 Proposal issue: none. An unchecked item of package 2, "Starter steel chemistry", in the owner's [factory implementation plan (PR #302)](https://github.com/jimbozoomer-byte/jugcraft/pull/302) and the [TODO list](../TODO.md#industrial-machine-models-textures-and-dimensions). Its construction bill, the sulfur oxidation quantities and the 9,600 JE batch budget are the proposals in the [starter gas and acid factory](industrial-starter-gas-and-acid-factory.md); its look is the [art brief](industrial-machine-models-and-textures.md#chemical-oxidizer).
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era chemistry, the first step of the starter factory's contact acid chain
@@ -88,7 +88,14 @@ For CI:
 
 ### Results
 
-Pending: no Gradle build, game test or in-game look has run on this change yet.
+- **Run [38297565660](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38297565660) on the contributor's fork (commit 8de837c8): green after one re-run.**
+  - Everything compiled. "All 1384 required tests passed", the five new Oxidizer tests among them; the build without optional integrations passed too.
+  - Every client test class ran. On the first attempt one client job failed in `PeepoSuppliesClientTests` (a companion's meal timed out), which this change does not touch and which passed on the Infuser's run of every class. Re-running that job once passed.
+  - Screenshots, looked at in the job's previews:
+    - `jugcraft_chemical_oxidizer`, `_front`, `_back`: the whole machine on its plinth; the hopper on its legs with the hazard lip, the chute and screw trough, the column and ringed hood with its outlet collar, the bolted hatch in its cream ring, the drawer and the control panel all render, matching the offline drawing;
+    - `_night`: the same view at midnight, the machine working;
+    - `_screen`: "Processing", 71%, power 27k/30k, batches 1/1, with sulfur dust in the hopper slot and oxygen in its tank;
+    - `_product_full`: "Output blocked" over "Product gas tank is full".
 
 No survival playtest, two-client test or performance measurement has been done.
 

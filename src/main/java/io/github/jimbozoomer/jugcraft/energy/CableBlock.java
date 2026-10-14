@@ -68,6 +68,9 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 	@Override
 	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
 		EnergyNetworks.invalidate(level);
+		// Structures and commands place default states without getStateForPlacement. Resolve
+		// their arms as well, after neighbours and their block entities have been installed.
+		if (!level.isClientSide()) level.scheduleTick(pos, this, 1);
 	}
 
 	@Override
@@ -79,6 +82,13 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
 			Orientation orientation, boolean movedByPiston) {
 		EnergyNetworks.invalidate(level);
+		if (!level.isClientSide()) level.scheduleTick(pos, this, 1);
+	}
+
+	@Override
+	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		BlockState connected = connections(level, pos, state);
+		if (connected != state) level.setBlock(pos, connected, Block.UPDATE_ALL);
 	}
 
 	private static BlockState connections(BlockGetter level, BlockPos pos, BlockState state) {
@@ -95,7 +105,7 @@ public class CableBlock extends PipeBlock implements EnergyConnectable {
 	 * an energy storage on the touching face (Jugcraft machines or other mods' blocks).
 	 * World generation has no full level to query, so there only the marker interface counts.
 	 */
-	private static boolean connectsTo(BlockGetter level, BlockPos pos, Direction direction, BlockState neighbor) {
+	public static boolean connectsTo(BlockGetter level, BlockPos pos, Direction direction, BlockState neighbor) {
 		if (neighbor.getBlock() instanceof MachineBlock machine) {
 			// Only faces that really take power: a machine's power socket, never an unpowered machine.
 			return machine.acceptsPower(neighbor, direction.getOpposite());
