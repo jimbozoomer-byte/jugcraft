@@ -15,7 +15,11 @@ Builds on [typed resources](arcane-concordance-sharing.md) (Prima Materia is the
 ## Player experience
 
 Once First Light is understood, examining raw matter (raw iron, copper or gold, calcite, clay) begins **Assay**;
-studying it at a Lampwright's Bench (or reading notes) understands it.
+studying it at a Lampwright's Bench (or reading notes) understands it. Since Concordance Chunk B, unit 3, stone
+(granite, diorite, andesite, tuff) and raw Thallite are raw matter too: `#jugcraft:assay_specimens` holds
+Stratawrighting's `#jugcraft:strata_specimens`, so one examination begins both
+([Rime and Strata](arcane-concordance-rime-strata.md)). They are examined, never weighed: the Scale weighs only what the
+equivalence catalogue holds, and they are not in it.
 
 **The Assayer's Scale** (gold, copper and iron on a dark-oak plinth) works with what you hold:
 

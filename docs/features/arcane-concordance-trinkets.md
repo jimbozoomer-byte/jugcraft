@@ -30,7 +30,7 @@ effect are the owner's; the numbers are Jugcraft's.
 | **Angelheart Vial** | Charm | A blow that would kill you leaves you on 2 hearts with Regeneration II for 5 seconds. The vial is used up. |
 | **Phoenix Down** | Charm | A blow that would kill you leaves you at full health with Regeneration II and Fire Resistance for 10 seconds, and the down becomes an Angelic Feather where it was worn. Until then it is a feather as well (its fall and jump). |
 | **Amphibian Boot** | Feet | You swim faster (water movement +0.5, half of Depth Strider's most), and your air lasts about twice as long. |
-| **Ice Breaker** | Feet | +0.1 knockback resistance. A fall that hurts you sends a wave through the ground: the nearest hostile creatures (up to 12) within 3 blocks, a block more for each 4 points of harm (at most 6), take 2 damage, are thrown back and are slowed for 2 seconds (the Ender Dragon, Wither, Warden and Elder Guardian take the harm but are neither thrown nor slowed). |
+| **Ice Breaker** | Feet | +0.1 knockback resistance. A fall that hurts you sends a wave through the ground: the nearest hostile creatures (up to 12) within 3 blocks, a block more for each 4 points of harm (at most 6), take 2 damage, are thrown back and are slowed for 2 seconds (the Ender Dragon, Wither, Warden and Elder Guardian take the harm but are neither thrown nor slowed; since Concordance Chunk B, the Yeti King and the Cinder Tyrant, resistant, are slowed for 1 second, and the throw never moved them: they shrug off knockback). |
 
 - Two of a kind never add up: a second feather, boot or Ice Breaker adds nothing, and a feather and a Phoenix Down jump as
   one. A second vial waits its turn for the next death; a vial worn beside a Phoenix Down answers first.

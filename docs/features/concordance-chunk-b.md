@@ -1,9 +1,12 @@
 # Concordance Chunk B: winter and stone (contract and handoff)
 
-Status: contract written; unit 1 implemented, CI pending (B-01 and B-02 committed for the Yeti King and the Cinder
-Tyrant; their tests not yet run in CI); the other units Not started. The base is `d4c07bf56`, the head of Chunk A
-([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337), not merged); main is `b73f51c8a`
-([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
+Status: contract written. Unit 1 (B-01 and B-02, the Yeti King and the Cinder Tyrant) and unit 3 (B-05 to B-07) are
+implemented on main `feb6d04fb` ([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk
+A). Unit 1's tests ran in CI once (run 38509414542: all but the two four-player tests, which expected more health
+than the game's 1024 cap allows; the tests now expect the cap); unit 3's have not run yet
+([its record](arcane-concordance-rime-strata.md)). Every other unit is Not started. The contract was written at
+`d4c07bf56`, the head of Chunk A ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337)), when main was
+`b73f51c8a` ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
 Proposal: the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 4,
 B1 to B4), with [spellcraft](../plans/concordance-expansion-2026-10-10/02-magic-progression-and-spellcraft.md),
@@ -49,7 +52,7 @@ starts.
 |---|---|---|---|---|
 | 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | Implemented, CI pending: B-01 and B-02 committed for the Yeti King and the Cinder Tyrant, each keeper in his own commits (B-D1) |
 | 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Not started |
-| 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible. One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | new `arcane-concordance-rime-strata.md` | Not started |
+| 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible, with Jade's hold. The crafted upgrade (09:94) is unit 4's water foci (B-P14). One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | [arcane-concordance-rime-strata.md](arcane-concordance-rime-strata.md) | Implemented; not yet compiled or run in CI |
 | 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | new `arcane-concordance-winter.md`; `arcane-concordance-alchemy.md` | Not started |
 | 5 | B-09, B-11 | Brace and Rimebind as optional counters in the Yeti fight; combined fixes, evidence and the owner checkpoint | `yeti-king.md`; this page | Not started |
 
@@ -356,172 +359,181 @@ server game test, the caster's spell cast through Spell Engine. A party of peopl
 
 ### B-05. Rime and Strata research and evidence (plan B2, part 1)
 
-Ships with B-06 and B-07 as unit 3: a research entry may unlock only invocations that exist
-(`tools/check_mod_data.py:10321-10323`), and each invocation must be unlocked by its research (`:10688-10693`).
+Built with B-06 and B-07 as unit 3 ([record](arcane-concordance-rime-strata.md)): a research entry may unlock only
+invocations that exist, and each invocation must be unlocked by its research (`check_invocations`). B-05 to B-07 were
+rewritten on 14 October 2026 to what the unit built, on main `feb6d04fb`; the choices that changed are in the revised
+B-P12, B-P15 and B-P16, the new B-P30 to B-P35, and the record's "Changes from the plan".
 
 **What the player sees.** Two research entries with typed evidence, each piece counted once by its key (02:129, 02:153),
-and the next step named in the journal and the encyclopedia.
+and the next step named in the journal and the codex.
 
-| Research (proposed id) | Tradition, stage | Encountered | Observed | Understood (and what it unlocks) | Mastered |
+| Research | Tradition, stage | Encountered | Observed | Understood (and what it unlocks) | Mastered |
 |---|---|---|---|---|---|
-| `jugcraft:rimekeeping` (Rime) | Rimekeepers, practitioner; requires First Light understood | Examine an item in a new `#jugcraft:rime_specimens` (snowball, snow block, ice, packed ice) | Two distinct | Any of: study at the Lampwright's Bench; notes; compare a cold and a warm Rime brew (practice keys `brew_cold`, `brew_warm`; 02:134); study the Glacier Hall (practice key `glacier_hall`, recorded on entering through `FrostHornRite.follow`, `lair/FrostHornRite.java:133-136`, which the blower and the whirl both use, `:80` and `MistGateEntity.java:132`; 02:136). Unlocks Rimebind and Preserve | Varied practice with distinct keys: `preserve`, `rimebind <creature type>` (restraint within tolerance, 02:135), the brews, `glacier_hall`, `frost_boon` (B-10), and the elective `yeti_column`, given with the B-01 column deed (02:137) |
-| `jugcraft:stratawrighting` (Strata) | Stratawrights, practitioner; requires First Light understood | Examine an item in `#jugcraft:assay_specimens`, the tag the existing `assay` research reads (02:140) | Three distinct | Any of: study at the bench; notes; practice `rooted <ground>` (an Earthbound Thallite wearer struck while Rooted holds; 02:141). Unlocks Brace | Varied practice: `brace living` and `brace earthen` (a Brace that took a push on living or earthen ground; 02:142), `brace ally`, `rooted <ground>`; casts in distinct chunks |
+| `jugcraft:rimekeeping` (Rime) | Rimekeepers, practitioner; requires First Light understood | Examine an item in the new `#jugcraft:rime_specimens` (snowball, snow block, ice, packed ice, blue ice) | Examine something in `#jugcraft:ember_specimens`, something that holds fire (02:132's warm surface); either may come first | Any of: study snow or ice at the Lampwright's Bench; notes; the **winter survey** `jugcraft:winter_survey`, gated by First Light alone so either route advances understanding (02:136): `glacier_hall`, arriving in the Glacier Hall by any route (Fabric's `AFTER_PLAYER_CHANGE_LEVEL`; no lair code), or `crucible`, a dose carrying Rime bottled by hand (`CrucibleBlockEntity.bottle`). Unlocks Rimebind and Preserve | `jugcraft:rimework`, all three kinds: `preserve:cold` and `preserve:heated` (Preserve on a crucible holding a mixture, in the cold band or above it: 02:133-134's preserve and compare), `restraint` (a Rimebound taking on a hostile creature at normal tolerance, 02:135). The Yeti column elective (02:137) comes with B-09 |
+| `jugcraft:stratawrighting` (Strata) | Stratawrights, practitioner; requires First Light understood | Examine an item in the new `#jugcraft:strata_specimens` (granite, diorite, andesite, tuff, raw Thallite; 02:140) | Three distinct | Study at the bench; notes. Unlocks Brace | `jugcraft:anchoring`, three of: `ground:living` and `ground:earthen` (a Brace taking on someone standing on that ground, read with Thallite's ground tags; 02:141-142), `held` (a Brace the caster put on meets a push); and the electives `ally` (a party member braced), `foundation` (a ritual completed at a Circle Anchor, 02:143) and `rooted` (struck in Earthbound Thallite on natural ground, B-P26) |
 
-The thresholds are set, and tested, in the unit.
+**Reconciled with `assay`** (09:13; revised B-P15):
+- `#jugcraft:assay_specimens` holds `#jugcraft:strata_specimens`, so one examination serves Assay and Stratawrighting
+  (the research engine applies each piece of evidence against every entry's rules); a test confirms it. Assay becomes
+  easier to begin; its mastery is unchanged.
+- Nothing new reaches the Assayer's Scale, which weighs against the equivalence catalogue: stone and raw Thallite are
+  examined, never weighed.
+- Cobblestone, stone, cobbled deepslate and deepslate are never specimens: sneak-use in the air examines, and players
+  bridge with them (`check_strata`). Nor is the Thallite ingot.
+- Strata can be completed with the `thallite` feature off: the four vanilla stones suffice.
 
-**Reconciled with `assay`** (09:13): no Strata specimen tag and no second examination.
-- `#jugcraft:assay_specimens` gains raw Thallite, the Thallite ingot, stone and deepslate (its generator,
-  `tools/concordance_equivalence.py:194-199`).
-- The tag is read only as research evidence: examination, through `#jugcraft:concordance_specimens`, which includes it
-  (`concordance/Examination.java:55`), and study at the bench (`concordance/research/assay.json`).
-  `Assaying.SPECIMENS` (`concordance/assay/Assaying.java:88`) names it but nothing reads that constant, and the
-  Assayer's Scale weighs against the equivalence catalogue (`Assaying.java:71`, `:187`), so nothing new reaches the
-  Scale.
-- The research engine applies each piece of evidence against every entry's rules
-  (`concordance/ConcordanceProgress.java:99-101`), so one examination serves `assay` and `stratawrighting`; a test
-  confirms it. `assay` becomes easier to begin (stone counts); its mastery is unchanged.
-- Strata can be completed with the `thallite` feature off: stone and the existing five specimens suffice.
+**Progression:** the Glacier Hall route makes an Adept possible without a bench (02:136), so the mandatory table moves
+the bench and planks to Architect.
 
-**Not in this ticket:** Strata's steps 4 and 5 (a stable ritual foundation; a civic project or a structural boss opening,
-02:143-144) and the "warm surface" half of Rime's step 1 (an examination records only the item and the light
-*(survey)*). See Deferrals.
+**Not in this ticket:** Strata's civic-project or structural-boss-opening step (02:144); the Yeti column elective
+(02:137), with B-09. See Deferrals.
 
-**Files** (the template is Ember part 1, `9a0fab5a5`, 67 files):
-- New generators `tools/concordance_rime.py` and `tools/concordance_strata.py`, merged in `tools/concordance.py`
-  (research, components, invocations, status names, particles, codex positions and categories after Hearth's 16, sounds,
-  messages, tags *(survey: merge points)*).
-- `tools/concordance_progression.py`: `PRACTICES` rows, and `VANILLA_SOURCES` rows for snowball, snow block, ice, packed
-  ice, stone and deepslate. No step may need the Nether or the End.
-- `tools/concordance_conclave.py` `TRADITIONS`: Rimekeepers and Stratawrights (held equal to the research traditions
-  *(survey)*).
-- Java: new `concordance/rime/Rime.java` and `concordance/strata/Strata.java`, each with `ACTIVITY` and `RESEARCH`
-  constants, registered beside `Ember.register()` (`concordance/JugcraftConcordance.java:292`); their `Examination`
-  messages.
-- Generated and written docs: the guide block in `docs/ARCANE_CONCORDANCE_GUIDE.md` (made by
-  `tools/concordance_delivery.py:229-245`, held by `check_delivery`, `tools/check_mod_data.py:14111-14117`);
-  `docs/ARCANE_CONCORDANCE.md:121,123`; `docs/WHAT_EXISTS.md`; `CHANGELOG.md`.
-- Audits: `check_rime` and `check_strata`, called from `check_concordance` and mutation-tested.
+**Files:** new generators `tools/concordance_rime.py` and `tools/concordance_strata.py`, merged in
+`tools/concordance.py`; `tools/concordance_progression.py` (the three practices, the winter survey's two routes in
+`graph()`, sources for snow, ice, stone, goat horns, raw Thallite and Yeti Fur); `tools/concordance_conclave.py`
+(`TRADITIONS`); `tools/concordance_equivalence.py` (Assay's texts); Java `concordance/rime/Rime.java`, `RimeSurvey.java`
+and `concordance/strata/Strata.java`, registered beside `Ember.register()`; `Examination`'s messages; the guide block,
+the journey routes and the mandatory table, regenerated; `check_rime` and `check_strata`, mutation-tested.
 
-**Tests:** a new `ConcordanceRimeStrataGameTests` (its entrypoint in the gametest `fabric.mod.json`);
-`ConcordanceProgressionGameTests` (both routes, no Nether or End, `strataNeedsNoThallite`, one examination serving both
-Strata entries); `ThalliteGameTests.thalliteIsAStrataSpecimen` (09:112).
+**Tests:** `ConcordanceRimeStrataGameTests`; `ConcordanceProgressionGameTests` (the live graph, First Light alone gating
+winter and stone, one examination serving both entries, an Adept by the Glacier Hall);
+`ThalliteGameTests.thalliteIsAStrataSpecimen` (09:112); `GlacierHallClientGameTests` (arriving is the field study).
 
-**Save effects:** new research keys in the existing knowledge record and new advancements
-`concordance_<research>_<state>`, stable once released. The research record's round trip in `ConcordanceGameTests`
-carries the new ids.
+**Save effects:** new research ids, evidence keys `practice:jugcraft:{winter_survey,rimework,anchoring}:<key>` in the
+existing knowledge record, and advancements `concordance_<research>_<state>`, stable once released.
+`rimeAndStrataResearchSurviveASave` round-trips them; an older build keeps the unknown entries and relearns nothing from
+them.
 
 ### B-06. Rimebind and Brace (plan B2, part 2)
 
-**Budget.** Ten invocations against a cap of 16 (`tools/check_mod_data.py:10622-10623`; `concordance/Tunings.java:22`);
-signatures unique (`:10668-10671`); the six roles still covered (`:10626-10627`). After this unit, 13 of 16.
-- **Rimebind:** `ray struck` with a harmful status, `jugcraft:rimebound`; signature `ray/struck:status/harmful`, free.
-- **Brace:** `here allies` with a helpful status, `jugcraft:braced`; signature `here/allies:status/helpful`, free.
-  `allies` is the caster and their party only (`concordance/ComposedSpells.java:268-273`), so the party is the consent
-  (B-P7). A self-Brace written `here struck` would collide with Hearthguard.
-- Both are authored: no word a player composes is added, and the composer's locked count stays 10
-  (`ConcordanceComposeGameTests.java:480`) (B-P6).
+**Budget.** Ten invocations before and thirteen after, against a cap of 16 (an instrument's `Tunings.MAX`,
+`check_invocations`); signatures unique; the six roles still covered. Roles (B-P33): Rimebind **defense**
+(`Benchmark.choose` never casts a utility), Brace **support**.
+- **Rimebind:** `ray struck rimegrip`, signature `ray/struck:status/harmful`; work 2 (the ray 1, a status on one target
+  1); persists 100 (the binding and its thaw).
+- **Brace:** `here allies bracing`, signature `here/allies:status/helpful`. `allies` is the caster and their party only
+  (`concordance/ComposedSpells.java`), so the party is the consent (B-P7). Work 4; persists 100.
+- Both are authored: no word a player composes is added (B-P6).
 
-**Rimebind** (B-P9):
-- `rimebound` slows by 20% for 60 ticks through an attribute modifier on the effect (the pattern of
-  `agriculture/Hexes.java:61-69`).
-- **Grace:** a hidden `jugcraft:rime_thaw` for 100 ticks (3 s slowed, then 2 s of grace), and a `ConcordanceEffects`
-  Guard (the pattern of `concordance/sympathy/Sympathy.java:134`) that refuses Rimebind while it lasts. Nothing like it
-  exists: a lasting effect combines only by its stacking rule (`concordance/ConcordanceEffects.java:379-391`), and a
-  composed spell's cooldown ignores how long its status lasts (`concordance/compose/Compiler.java:151`). The grace covers
-  Rimebind's slow only (B-P10).
-- **Tolerance** (B-P8): harmful statuses and pushes fall under `Tolerance` (`concordance/effect/Tolerance.java:24-43`;
-  `ConcordanceEffects.java:187-191,344-349`). Only the Yeti King and the Cinder Tyrant join
-  `#jugcraft:concordance/resistant` (today the iron golem, ravager and piglin brute). That halves every harmful
-  Concordance status and push on them, not only Rimebind's: Smoulder, Dazzle, and the Ice Breaker wave's slow and push
-  (`concordance/trinket/Wayfaring.java:129-132`) among them. The Ember and trinket records say so, and
-  `ConcordanceEffectGameTests.friendlyFireToleranceAndTriggeredCause` (`:121`) covers it. Vesperine and Madame Tatterlace
-  are unchanged.
-- The Yeti moves by fixed steps, not by his movement-speed attribute (`move`, `YetiKingEntity.java:636-650`; the charge,
-  `:1011`), so a slow alone does nothing to him (an inference until tested); B-09 gives him a visible change instead of
-  a silent one (04:188).
+**Rimebind** (B-P9, B-P10, B-P34):
+- `jugcraft:rimebound` slows by 20% a level for 60 ticks through an attribute modifier on the effect,
+  `jugcraft:rimebound` (the pattern of `agriculture/Hexes.java`).
+- **Grace:** every Rimebound that takes starts a hidden `jugcraft:rime_thaw` for its own time plus 40 ticks
+  (`Rimebind.bound`, from the boundary's STATUS branch), and a `ConcordanceEffects` Guard (the pattern of
+  `concordance/sympathy/Sympathy.java`) refuses Rimebound while it lasts: IMMUNE, nothing spent, the cast fizzles at no
+  cost. At most 3 s bound in every 5, shared by every caster. The grace covers Rimebind's slow only (B-P10).
+- **Targets** (B-P34): the shared boundary's (monsters; creatures the caster could strike by hand; players only under
+  PvP and outside the party), not the plan's "hostile ordinary creature" only. Only a hostile creature (`Enemy`) at
+  normal tolerance counts as restraint.
+- **Tolerance** (B-P8): only the Yeti King and the Cinder Tyrant join `#jugcraft:concordance/resistant` (beside the iron
+  golem, ravager and piglin brute). That halves every harmful Concordance status and push on them, not only Rimebind's:
+  Rimebound lasts 30 ticks and its thaw 70; Smoulder on the Yeti (the Tyrant is immune to fire), Dazzle and the Ice
+  Breaker wave's slow (`concordance/trinket/Wayfaring.java`) are halved; pushes already did nothing (knockback
+  resistance 1.0). The Ember, trinket and keepers' records say so, and `onlyTheYetiAndTheTyrantResist` covers it.
+  Vesperine, Madame Tatterlace, the Mire Hag and the Crypt Lich are unchanged (`check_rime`).
+- The Yeti moves by fixed steps, not by his movement-speed attribute (`YetiKingEntity.move`; the charge), so a slow
+  alone does nothing to him (an inference until tested); B-09 gives him a visible change instead of a silent one
+  (04:188).
 
-**Brace** (B-P11, B-P12): `braced` for 100 ticks, +0.5 knockback resistance, EXCLUSIVE, one hit. Vanilla's knockback
-respects knockback resistance (mc263src `LivingEntity.java:1543-1544`). The order is fixed here because B-09 depends on
-it:
-- **Most blows** remove it after damage (`ServerLivingEntityEvents.AFTER_DAMAGE`, the pattern of
-  `concordance/ember/EmberGear.java:120`). Vanilla's default knockback runs inside `hurtServer`, before that event
-  (mc263src `LivingEntity.java:1209`), so it is reduced.
-- **The Yeti's blows** call `hurtServer` first and his own `push` afterwards: swipe `YetiKingEntity.java:817-819`, slam
-  `:883-886`, trample `:1027-1031`, spike `lair/yeti/GlacialSpikeEntity.java:60-63`. His `push` ignores knockback
-  resistance (`YetiKingEntity.java:829-832`; mc263src `Entity.java:1869`). So the Yeti takes the Brace **before** calling
-  `hurtServer` and reduces that blow's push himself (B-09); the removal after damage then finds none. Without this order
-  the Brace would be gone before his push.
-- **A harmful Concordance push** uses it up. **A helpful one** (Flashstep on oneself) neither uses it nor is shortened by
-  it: Concordance pushes scale by 1 − knockback resistance (`ConcordanceEffects.java:406-407`).
-- It cannot touch boundary returns, which are teleports (`Lairs.java:541-561`).
+**Brace** (B-P11, B-P12, B-P30): `jugcraft:braced` for 100 ticks, +0.5 knockback resistance (the modifier
+`jugcraft:braced`), exclusive. It is spent by the first push it meets, braces the rest of that server tick and goes at
+its end (`ServerTickEvents.END_SERVER_TICK`). Vanilla's knockback respects knockback resistance (mc263src
+`LivingEntity.java:1543-1544`).
+- **A blow vanilla knocks back** spends it (`ServerLivingEntityEvents.AFTER_DAMAGE`: full damage this tick, not
+  `#minecraft:no_knockback`, not wholly stopped by a shield). Vanilla's knockback inside `hurtServer` and the extra
+  knockback of sprints, the Knockback enchantment and mob attacks that follows it (mc263src `LivingEntity.java:1205`)
+  fall in the same tick, so the whole blow is braced (B-P30).
+- **A harmful Concordance push** reads the resistance with the Brace and spends it. **A helpful one** (one's own
+  Flashstep, a friend's helpful push) reads it without (`Brace.resistanceWithout`: the effect's own modifiers off for
+  the reading and back at once) and leaves it (B-P12).
+- **A scripted push** asks through `Brace.spend(target)`, which spends it and returns the share to let through, 1 − 0.5
+  a level, and is safe to call more than once a blow. B-09's Yeti calls it inside his `push`, before or after
+  `hurtServer`: the order no longer matters.
+- Teleports are not pushes: `Lairs.edges`, the Grey Mist, portals and the whirl move the braced as anyone.
+- Who put it on is kept in a non-saved attachment, `jugcraft:brace_caster` (`Brace.caster`, for B-09's deed). The
+  caster's practice: the target's ground (`ground:living`, `ground:earthen`), an ally braced, and `held` when it is
+  spent.
+- Its texts keep it apart from the war fork's BRACE trait and the tower shield's brace (`weapons/JugcraftArms.java`);
+  "Stonebrace" is offered at the checkpoint as a display name.
 
-**Costs** (hypotheses, 02:73): Rimebind 4 Focus (3 mastered), Brace 3 (2 mastered), on the scale of today's 3 to 7
-(`tools/concordance.py` `INVOCATIONS`), settled once when Spell Engine consumes the cast's cost
-(`concordance/ConcordanceSpells.java:42,74,185`).
+**Costs** (hypotheses, 02:73): Rimebind 4 Focus (3 mastered), 2 s cooldown; Brace 3 (2), 8 s; on the scale of today's 3
+to 7, settled once when Spell Engine consumes the cast's cost (`concordance/ConcordanceSpells.java`), however many it
+braces.
 
-**Benchmark.** An "Only X" kit is generated for every invocation (`concordance/balance/Baselines.java:154-158`), but
-`Benchmark` treats any harmful status as Slowness at 15% a level with no grace, and a helpful status as nothing
-(`concordance/balance/Benchmark.java:504-508,553-558`). Teach it `rimebound`'s 20% and the grace; record that Brace has no
-measure there.
+**Benchmark** (B-P32). `Benchmark` models Rimebound (a fifth of a foe's steps a level for the binding, then the thaw
+refusing Rimebind; every other harmful status keeps the 15% rule), starts no cast that would change nothing (a status
+already held by its stacking rule; Rimebind on a thawing foe), casts a defense with a harmful step at any foe in reach,
+and measures knockback taken without moving anyone (`Baselines`' "Knockback (blocks/min)" column). New acceptance
+checks: 5, Rimebind's control at most 7.8 foe-seconds a minute; 6, Brace takes knockback off beside the unkillable
+brute. The baselines record follows CI's log.
 
-**Assets.** Icons from the owner's library, copied into runtime with their provenance
-([MAGIC_ASSETS.md](../../art/owner-library/MAGIC_ASSETS.md)): Rimebind `ars_jimbaux/textures/item/freeze.png`, Brace
-`ars_jimbaux/textures/item/shield.png`, and the status icons `ars_jymbaumental/textures/mob_effect/frozen.png`
-(rimebound) and `ars_jimbaux/textures/mob_effect/shielding.png` (braced); the choices are proposals. The two glyphs and
-`shielding.png` are 16×16 and `frozen.png` 18×18, as Jugcraft's own status icons are 16×16 or 18×18 (`smoulder.png`).
-Spell icons are 32×32 at runtime (`textures/spell/aegis.png`), so the 16×16 glyphs are scaled by nearest neighbour, a
-technical change in the copy. Strata's casts use the owner's `ars_jimbaux/sounds/gaia_1.ogg` to `gaia_4.ogg`. No ice or
-water casting recording was found in the owner's sound families; the one water-named file,
-`originals/Magic/sounds/item/pewatermagic.ogg`, is loose and sits with `projecte:` models *(survey)*. So Rime's cues are
-synthesised, as Ember's were, or vanilla. Tooltips keep Brace apart from the war fork's BRACE trait and the shield's brace
-(`weapons/JugcraftArms.java:127,171-172,526`).
+**Assets** (B-P31). The owner's files byte for byte, at their own sizes: Rimebind
+`ars_jimbaux/textures/item/freeze.png`; Rimebound `ars_jimbaux/textures/mob_effect/freezing.png`; the Thaw
+`ars_nouveau/textures/mob_effect/soaked.png`; Brace and Braced `ars_jimbaux/textures/item/gravity.png` and
+`mob_effect/gravity.png` (the owner's own pair, byte-identical). Spell Engine draws a spell icon into 16×16 from the
+whole texture, so nothing is scaled. Brace's release is the owner's `gaia_1.ogg` to `gaia_4.ogg`; Rimebind's release and
+the gathering cues are synthesised, as Ember's were. The earlier proposals (`shield.png`, `shielding.png`, `frozen.png`,
+scaled to 32) are checkpoint alternatives: shielding reads as "reduces damage", which Brace never does, and frozen as
+"cannot heal".
 
 **Tests:**
-- `ConcordanceEffectGameTests` (09:112): the thaw Guard; Brace's one hit; the tolerance tag.
-- `repeatedSlowDoesNotPermanentlyImmobilize` (09:96), scoped to Rimebind: however many casters recast it on one target,
-  the target is slowed for at most 3 s in every 5 s over a minute. The other slows stay outside it (B-P10): the
-  trophies' Frost boon, refreshed by every hit (`weapons/ArmItem.java:240-250`), the `dazzle` word, the DAZE trait
-  (`weapons/JugcraftArms.java:144-146`) and the Ice Breaker wave.
-- `braceDoesNotCancelBoundaryEnforcement` (09:96), on the player's returns, not the Yeti's leash (which teleports him,
-  `YetiKingEntity.java:589-601`): a braced player past the bounds is returned by `Lairs.edges`; the Grey Mist sends them
-  home (`Lairs.java:368`); following through a whirl still enters.
-- `braceIsTakenBeforeTheBlow` (the order above); `braceDoesNotShortenFlashstep`.
-- `focusIsChargedOnce` (09:96), extending `ConcordanceInvocationGameTests`.
-- Saved effects: a relog or a save round trip keeps `rimebound`, `rime_thaw` and `braced` with their time left, so the
-  grace survives a logout.
+- `ConcordanceEffectGameTests` (09:112): `rimebindThawsBeforeItBindsAgain`; `onlyTheYetiAndTheTyrantResist`;
+  `braceHoldsTheWholeBlow`; `braceIsTakenBeforeTheBlow`; `harmfulPushesSpendTheBraceAndHelpfulOnesDoNot`;
+  `rimeAndBraceSurviveASave`.
+- `repeatedSlowDoesNotPermanentlyImmobilize` (09:96), scoped to Rimebind (B-P10): three casters recasting on one target
+  every tick for 15 s; no bound run longer than 3 s, no gap shorter than 2 s. The trophies' Frost boon, `dazzle`, DAZE
+  and the Ice Breaker wave stay outside it.
+- `braceDoesNotCancelBoundaryEnforcement` (09:96): the Grey Mist sends a braced player home and the Brace is untouched;
+  in `GlacierHallClientGameTests`, `Lairs.edges` returns a braced player past the bounds without spending it, and
+  leaving and following a whirl still move them.
+- `ConcordanceInvocationGameTests`: `focusIsChargedOnce` (09:96) and `braceDoesNotShortenFlashstep`.
+- `ConcordanceRimeStrataClientGameTests`: the icons in the client's resources; spell bar, HUD and inventory screenshots.
 
-**Save effects:** new mob-effect, invocation and spell ids, stable once released.
+**Save effects:** new mob-effect, attribute-modifier, component, invocation and spell ids, stable once released. The
+three effects save in `active_effects`; whether their modifiers come back on load is settled by
+`rimeAndBraceSurviveASave`. `brace_caster` is not saved. An older build can drop all of a creature's effects on meeting
+an unknown one (the record's downgrade guidance).
 
 ### B-07. Preserve (plan B2, part 3)
 
-- **Shape:** `touch struck` with a helpful alteration; signature `touch/struck:alteration/helpful`, free (Hearthspark holds
-  `ray/struck:alteration/helpful`). `touch struck` reaches a block (`concordance/compose/Component.java:31-32,56-57`).
-- **Dispatch:** on Rime's school, `spell_power:frost`, as Ember's alteration is on fire (`ConcordanceEffects.java:270-277`,
-  `accepts` at `:291-300`; `concordance/ember/Ember.java:47,61-63`). Preserve must be in both places: the default
-  alteration removes the block (`ConcordanceEffects.java:274`).
-- **Target** (B-P13): `#jugcraft:concordance/preservable`, holding only the Alembic Crucible. Preserve holds the
-  crucible's temperature band for 60 s; heat otherwise moves one degree a tick toward its source
-  (`concordance/CrucibleBlockEntity.java:177-191`; `concordance/alchemy/Heat.java:13`). That is Rime's reliable
-  workstation loop (02:54).
-- **Refused:** anything else returns `Result.NOTHING` and changes nothing (`ConcordanceEffects.java:246-247`): chests,
-  barrels, hoppers, machines and every other inventory (02:77; 06:96; 09:96). A crucible the caster may not change returns
-  `NOT_ALLOWED` (`:249-250`, through `Authority.mayChange`).
-- **No Thallite Focus here** (B-P14). With the Initiate's Wand's limits (`tools/concordance.py:381-384`) and no upgrade
-  (the Adept's Attunement takes only the Initiate's Wand, `concordance/ritual/adept_attunement.json`) it would add
-  nothing; the approved record pairs it with Earthen Steps and Bulwark in slice 5 (`thallite.md:136-141,194`). The
-  chunk's crafted upgrade from existing materials (09:94) is the travel kit's water foci (B-10). `thallite.md` records
+- **Shape:** `touch struck rimehold`, a helpful alteration; signature `touch/struck:alteration/helpful` (Hearthspark
+  holds `ray/struck:alteration/helpful`). `touch struck` reaches a block. Role **utility** (B-P33); 3 Focus (2
+  mastered), 0.6 s cast, 3 s cooldown, no tunings; work 4, persists 1200.
+- **Dispatch:** on Rime's school, `spell_power:frost`, as Ember's alteration is on fire: `Rime.preserve` in the
+  boundary's block path, before the default alteration (which removes fire, and only fire), and `Rime.preservable` in
+  `accepts`. `check_rime` holds the order and that only the boundary calls `Rime.preserve`.
+- **Target** (B-P13): `#jugcraft:concordance/preservable`, holding only the Alembic Crucible. Preserve holds its
+  temperature band for 60 s: the heat still moves a degree a tick toward its source, kept inside the band (`Band.keep`),
+  whatever burns or goes out beneath. That is Rime's reliable workstation loop (02:54).
+- **The hold** (B-P35): `Rime.HOLD_TICKS = 1200`, a Java constant (an alteration takes no duration, so Spell Power does
+  not scale it). A recast restarts it and never adds. It runs on the world clock (`held_until`, game time). The crucible
+  accepts holds up to `Rime.MAX_HOLD_TICKS` (2400, `EffectSpec.MAX_DURATION`) and cuts anything further ahead, so
+  B-P24's water foci need one line in `Rime.preserve`.
+- **Refused:** anything else returns `Result.NOTHING` and changes nothing: chests, barrels, hoppers, furnaces, machines
+  and every other inventory (02:77; 06:96; 09:96). A crucible the caster may not change returns `NOT_ALLOWED`
+  (`Authority.mayChange`: claims, protected towns, spawn protection, adventure mode, an absent caster).
+- **Practice:** a Preserve on a crucible holding a mixture is Rimekeeping's cold work, `preserve:cold` or
+  `preserve:heated` by its band.
+- **Guidance:** Jade's crucible lines and the crucible's empty-hand reading show the seconds held (moved here from
+  B-08).
+- **No Thallite Focus and no crafted upgrade here** (B-P14). With the Initiate's Wand's limits and no upgrade a Thallite
+  Focus would add nothing; the approved record pairs it with Earthen Steps and Bulwark in slice 5 (`thallite.md`). The
+  chunk's crafted upgrade from existing materials (09:94) is unit 4's water foci (B-10, B-P24). `thallite.md` records
   this.
 
-**Tests:** `preservationCannotWrapArbitraryInventories` (09:96); `preserveHoldsOneBandAndExpires`; in
-`ConcordanceEffectGameTests` (beside `blockOperationsActAsTheActor`, `:190`), `preserveNeverRemovesABlock` and
-`preserveIsRefusedUnderTownProtection`.
+**Tests:** `preservationCannotWrapArbitraryInventories` (09:96); `preserveHoldsOneBandAndExpires` (with Jade's seconds
+when Jade is loaded); `preserveCountsTheCrucibleBand`; `preserveIsChargedOnceAndCountsOnce`; in
+`ConcordanceEffectGameTests`, `preserveNeverRemovesABlock` and `preserveIsRefusedWhereItsCasterMayNotBuild` (renamed
+from `preserveIsRefusedUnderTownProtection`: it covers a neighbour's claim, an absent caster and adventure mode).
 
-**Save effects:** the crucible gains an optional saved `held_until` (game time), 0 when absent. It stamps version 1
-(`CrucibleBlockEntity.java:619`) and reads with defaults (`:587-614`). In `ConcordancePersistenceGameTests`
-(`everyRecordReadsItsSaveFromBeforeVersions`, `:109`; `blockEntitiesStampTheirVersion`, `:157`): a round trip keeps the
-hold, and a save without the field reads 0. #323 changes the same two methods.
+**Save effects:** the crucible's optional `held_until` (game time), written only while held and read with a default of
+0; it still stamps version 1. `ConcordancePersistenceGameTests.theCrucibleKeepsPreservesHoldThroughASave`: a round trip
+keeps the hold; a save without the field, or also without the version, reads 0 and keeps the temperature; an ended hold
+writes nothing; a forged hold far ahead is cut to 2400 ticks. #323's crucible change reached main with #352, and unit 3
+is built on it.
 
-**Review boundary (unit 3):** magic data, effects, the crucible's hold and tests; no lair code.
+**Review boundary (unit 3):** magic data, effects, the crucible's hold, Jade and tests; no lair code (the hall is heard
+through Fabric's level-change event).
 
 ### B-08. Winter Brine and Frostward at the Alembic Crucible (plan B4; B-D3)
 
@@ -544,9 +556,9 @@ The winter workshop is the existing Alembic Crucible: Rime's brew and Preserve's
 - **Bottles already made** keep the status they were bottled with (`concordance/Brew.java:19`); a written formula replays
   with the new effect. Knitwear is unchanged.
 
-**Guidance:** JEI's alchemy ingredient pages (snowball, amethyst, gloamcap) name Frostward; Jade's crucible lines add
-Preserve's hold time (the crucible's snapshot, `compat/jade/ConcordanceDataProvider.java:142-156`); the Glacier Hall
-dossier gains a preparation fact naming Winter Brine and the Mitten (text and icons, B-P29).
+**Guidance:** JEI's alchemy ingredient pages (snowball, amethyst, gloamcap) name Frostward; Jade's crucible lines
+already show Preserve's hold (moved into unit 3, B-07); the Glacier Hall dossier gains a preparation fact naming Winter
+Brine and the Mitten (text and icons, B-P29).
 
 **Tests:** `aFrostwardDrinkerIsNotChilledByTheYeti` (`YetiKingGameTests`); `winterBrineNeedsTheColdBand` (stirred cold it
 gives Frostward, stirred warm it loses it); `aRimeBottleFromBeforeStillGivesResistance`; must-fail economy loops
@@ -561,17 +573,22 @@ preparation has a non-boss route" (09:110).
 
 ### B-09. Optional school counters in the Yeti fight (plan B3; only after B-04 is green, 09:102)
 
-- **Brace** (B-P20, B-P12): before a blow's `hurtServer`, the Yeti takes `braced` from the player and halves that blow's
-  push, every push through `YetiKingEntity.push` (`:829-832`), the spike's lift included. Other knockback resistance stays
+- **Brace** (B-P20, B-P12, B-P30): `Brace.spend` inside `YetiKingEntity.push` (`:829-832`), before or after the blow's
+  `hurtServer` (a spent Brace braces the rest of that tick), halves that blow's push, every push through it, the spike's
+  lift included. Other knockback resistance stays
   ignored, so netherite, Rooted, shields and the Ice Breaker change nothing: this is the plan's "bracable knockback"
   (04:186).
 - **The Brace caster's deed** (B-P22; 02:187; 04:139, 04:156): when a Brace that one player put on another absorbs his
   push, the caster earns `encounter.deed(caster, "brace " + braced player + " " + game time)`, one key per occurrence.
-  The caster is kept with the effect and not saved, so a Brace carried through a relog keeps its time but credits no one.
+  The caster is `Brace.caster`, kept in the non-saved attachment `jugcraft:brace_caster` (unit 3), so a Brace carried
+  through a relog keeps its time but credits no one.
   A self-Brace earns nothing, as healing oneself does. Lair support credit sees only restoration and protection
   (`ConcordanceEffects.java:223-228`), so without this deed a Brace caster could never qualify.
 - **Rimebind transforms, and is never silently dropped** (B-P21; 04:188): once per thaw window, a rimebound Yeti's next
   wind-up is a few ticks longer. The number is set by test and called untuned until people play it (04:194).
+- **The column elective** (02:137; B-P16): a Yeti charge broken on a column becomes Rimekeeping evidence, the key
+  `column` in `jugcraft:rimework` (an elective: the mastery keeps needing its own three kinds), with its recorder and
+  its codex line, added here rather than in unit 3 because it needs B-01's deed and lair code.
 - **Not here:** Rime's "preserved snow" footing (authored anchors only, 04:101; the trampled routes already do this job);
   Ember and Tempest counters.
 
@@ -610,8 +627,9 @@ B-P25). Sources are under `art/owner-library/originals/Magic/assets/ars_jymbaume
   its model has not been checked *(survey)*.
 - **Thallite** (09:106) connects through Strata's examination and Rooted practice (B-05); `earthen_ground` and every
   Thallite number are unchanged (B-P28).
-- **Trophies** (09:106): a slow from the Glacier Maul's or Rimeclaw's Frost boon counts as Rime restraint practice
-  (`frost_boon`) for a wielder who has encountered Rimekeeping. The boon itself is unchanged
+- **Trophies** (09:106): a slow from the Glacier Maul's or Rimeclaw's Frost boon counts as Rime practice, an elective
+  key `frost_boon` in `jugcraft:rimework` (recorded only for a wielder who understands Rimekeeping, the practice's gate;
+  the mastery keeps needing its own three kinds). The boon itself is unchanged
   (`weapons/ArmVariants.java:123-125`; B-P10), and their JEI pages come with B-02.
 - **Creative-only sets stay so:** the Frost Knight and Wight King (`tools/acquisition.py:74-78`; B-P27).
 
@@ -646,22 +664,29 @@ the Yeti and is still slowed (`YetiKingGameTests`); the foci lengthen Preserve's
 ## Interfaces expected to change
 
 - **Saved data:** no new saved format. New boss ids `yeti_king` and `cinder_tyrant` inside `jugcraft:lair_rewards`; the
-  crucible's optional `held_until`; saved mob effects; new research keys; new item ids.
-- **Registries (stable once released):** mob effects `jugcraft:rimebound`, `rime_thaw`, `braced` and `frostward`;
+  crucible's optional `held_until`; saved mob effects and their attribute modifiers; new research keys; new item ids.
+  Not saved: the attachment `jugcraft:brace_caster`.
+- **Registries (stable once released):** mob effects `jugcraft:rimebound`, `rime_thaw`, `braced` and `frostward`, and
+  the attribute modifiers `jugcraft:rimebound` and `jugcraft:braced`; components `rimegrip`, `bracing` and `rimehold`;
   invocations and spells `rimebind`, `brace` and `preserve`; research `rimekeeping` and `stratawrighting`, with their
-  practices and advancements; fifteen kit items; tags `concordance/preservable` and `rime_specimens`; additions to
-  `assay_specimens`, `concordance/resistant`, `minecraft:freeze_immune_wearables` and the trinket slot tags.
+  practices (`winter_survey`, `rimework`, `anchoring`) and advancements; fifteen kit items; tags
+  `concordance/preservable`, `rime_specimens` and `strata_specimens`; additions to `assay_specimens` (which nests
+  `strata_specimens`), `concordance/resistant`, `minecraft:freeze_immune_wearables` and the trinket slot tags.
 - **Shared code:** `YetiKingLoot` and `CinderTyrantLoot` gain `BOSS`, `pay` and `roll` by origin (the entity overloads
   kept); `LairDossiers.Boss` gains `trophies` (one, or a pair), `offSeason` (null for a rite that works all year) and `sales`, and
   `LairDossiers` gains `beaten`, `anyBeaten` and `canOpen`; `FirstLightRoute.FIRST_WINS` is removed (B-02 as built);
-  `ConcordanceEffects` gains Rime's alteration and `accepts` case and the helpful-push exemption; a new Guard; `Mixture`
-  gains the Rime heat rule; `CrucibleBlockEntity` gains the hold and records Rime brew practice; `YetiKingEntity` gains
-  the Frostward check, the taking of Brace and the Rimebind wind-up; `Benchmark` learns `rimebound`. New practice hooks:
-  `FrostHornRite.follow` (`glacier_hall`), `ArmItem`'s Frost boon (`frost_boon`) and Thallite's Rooted (`rooted`).
+  `ConcordanceEffects` gains Rime's alteration and `accepts` case, the helpful-push exemption and, after a status takes,
+  Rimebind's thaw and Brace's caster; a new Guard; `Band.keep`; `Mixture` gains the Rime heat rule;
+  `CrucibleBlockEntity` gains the hold and records Rime brew practice; `YetiKingEntity` gains the Frostward check, the
+  taking of Brace and the Rimebind wind-up; `Benchmark` learns `rimebound`, its thaw and knockback. Unit 3's interfaces
+  for later units: `Brace.spend`, `Brace.caster`, `Rimebind.RIME_THAW` and `Rime.MAX_HOLD_TICKS`. Practice hooks:
+  Fabric's level change (`glacier_hall`; no lair code, and no `Encounter.onDeed`), `CrucibleBlockEntity.bottle`
+  (`crucible`), `Rituals.listen` (`foundation`) and `AFTER_DAMAGE` (`rooted`, `held`) in unit 3; `ArmItem`'s Frost boon
+  (`frost_boon`) in unit 4; the Yeti's column (`column`) in unit 5.
 - **Tools:** `acquisition.py`, `check_acquisition`, `encyclopedia.py`, the `concordance.py` merge points,
   `concordance_alchemy.py`, `concordance_equivalence.py`, `concordance_progression.py`, `concordance_conclave.py`,
   `owner_art.py`; new `concordance_rime.py`, `concordance_strata.py` and their checks.
-- **Network:** no new payload. Jade's crucible snapshot carries one more value.
+- **Network:** no new payload. Jade's crucible snapshot carries one more value (unit 3).
 
 ## Dependencies and order
 
@@ -704,6 +729,12 @@ B-05 cannot start on its own.
 - **Two bosses stay on the old path:** the Mire Hag and the Crypt Lich keep damage-only rewards in their pull requests;
   after Chunk B, four bosses are on the encounter credit and two are not.
 - **Overlap with Chunk C's preservation wash** (09:124): Winter Brine stays a frost counter.
+- **Unit 3, as built** ([record](arcane-concordance-rime-strata.md#rollout-and-open-questions)): sneak-use in the air
+  now examines snow, ice and four stones, so a sneaking player cannot throw a snowball; a bench-free Adept is possible
+  through the Glacier Hall, whose Frost Horn recipe sits under the `agriculture` switch; milk clears the Thaw with
+  Rimebound; recasting Preserve each minute holds one crucible indefinitely; an older build can drop a creature's
+  effects on meeting an unknown one. B-P24's 120 s hold from a focus worn with the Initiate's Wand exceeds that wand's
+  1200-tick duration limit: unit 4 caps it or records why.
 
 ## Explicit don'ts
 
@@ -731,7 +762,7 @@ B-05 cannot start on its own.
 |---|---|---|---|---|
 | 1 | `YetiKingGameTests`, `CinderTyrantGameTests`, `LairEncounterGameTests`, `EncyclopediaGameTests` | `YetiKingClientGameTests` and `CinderTyrantClientGameTests` unchanged; `EncyclopediaClientGameTests` if the page layout changes | `check_acquisition`, `check_encyclopedia`, with mutations | A kept Yeti and Tyrant Due across a save |
 | 2 | `GlacierHallGameTests`, `YetiKingGameTests` | `WorldDesignerClientGameTests` (an exported preset); `LairClientGameTests` step 7 (the hall); `GlacierHallClientGameTests` | `check_glacier_hall`, `check_yeti` | None needed |
-| 3 | `ConcordanceRimeStrataGameTests`, `ConcordanceEffectGameTests`, `ConcordanceProgressionGameTests`, `ConcordanceInvocationGameTests`, `ThalliteGameTests`, `ConcordanceGameTests` | A new Rime and Strata client test (icons, a cast) | `check_rime`, `check_strata`, `check_invocations`, `check_progression`, `check_delivery` | The research record; saved effects; the crucible's field (`ConcordancePersistenceGameTests`) |
+| 3 | `ConcordanceRimeStrataGameTests`, `ConcordanceEffectGameTests`, `ConcordanceProgressionGameTests`, `ConcordanceInvocationGameTests`, `ThalliteGameTests`, `ConcordancePersistenceGameTests` | `ConcordanceRimeStrataClientGameTests` (icons, spell bar, HUD and inventory screenshots); `GlacierHallClientGameTests` (the field study; a braced player at the edge, the mist and the whirl) | `check_rime`, `check_strata`, `check_rime_strata_assets` (mutation-tested), `check_invocations`, `check_progression`, `check_conclave`, `check_delivery`, `owner_art.py --check` | The research record (`rimeAndStrataResearchSurviveASave`); saved effects (`rimeAndBraceSurviveASave`); the crucible's field (`ConcordancePersistenceGameTests`) |
 | 4 | `ConcordanceAlchemyGameTests`, `YetiKingGameTests`, the kit's tests | The kit worn and slotted (screenshots) | `check_alchemy`, `check_rime_kit`, `check_acquisition` | A Rime bottle from before the change |
 | 5 | `YetiKingGameTests` (counters) | `YetiKingClientGameTests` (a charge into a column) | Every check; the CI candidate | Re-run of all of the above |
 
@@ -757,7 +788,8 @@ and the build without the optional integrations where it touches an optional bou
   `Encounter`, narrowed to the Tyrant's surge cells and to burning soon after one of his blows, as its own ticket.
 - Thallite slices 3 to 5: arms, the arrow and horse armour, the Thallite Focus, Earthen Steps and Bulwark.
 - The owner's earth sets (Nymph's, Geomancer's, Wealdguard's) as Strata gear.
-- Strata's ritual foundation and civic-project steps (02:143-144); the "warm surface" half of Rime's first step (02:132).
+- Strata's civic-project and structural-boss-opening step (02:144); the Yeti column elective of Rimekeeping (02:137),
+  with B-09.
 - Syncing the Yeti's elapsed fight time to late joiners (08:127).
 - One grace shared by every Concordance and trophy slow (an owner question, B-P10).
 - The Mire Hag and the Crypt Lich on the encounter credit (their own pull requests).
@@ -767,15 +799,16 @@ and the build without the optional integrations where it touches an optional bou
 
 ## Where to resume
 
-Unit 1 is implemented, in four commits. B-01: the Yeti King on `Encounter` and `LairRewards` with both payout defects
-fixed and the column deed, then the Cinder Tyrant the same way, with no deed (B-P4). B-02: the Glacier Hall's dossier
-and the Yeti King's JEI pages, with the lair step done by any keeper's first win and the generalised
-`check_acquisition` and `check_encyclopedia`; then the Cinder Kiln's dossier and the Cinder Tyrant's JEI pages (B-D1),
-which fill the Expeditions page's 12 grids. None of its game tests has run yet. Next: CI on the unit's head, each job's
-result recorded here and in the boss and loadout records (the evidence commit), and the owner's checkpoint on B-P2,
-B-P3, B-P4, B-P5 and B-P30; then unit 2 (B-03, B-04: the Glacier Hall's access and lifecycle, and the Yeti fight held
-to the completion evidence).
-Refresh the open pull requests first: #352 decides the rebase.
+Units 1 and 3 are implemented. Unit 1, in four commits and a fix: B-01, the Yeti King on `Encounter` and `LairRewards`
+with both payout defects fixed and the column deed, then the Cinder Tyrant the same way, with no deed (B-P4); B-02,
+the Glacier Hall's dossier and the Yeti King's JEI pages, with the lair step done by any keeper's first win and the
+generalised `check_acquisition` and `check_encyclopedia`, then the Cinder Kiln's dossier and the Cinder Tyrant's JEI
+pages (B-D1), which fill the Expeditions page's 12 grids. Unit 3 (B-05 to B-07): see
+[its record](arcane-concordance-rime-strata.md#verification). Next: CI on the head, each job's result recorded here
+and in the unit records (the evidence commits: actual results, screenshots, the baselines tables), and the owner's
+checkpoint on B-P2, B-P3, B-P4, B-P5 and B-P36; then unit 2 (B-03, B-04: the Glacier Hall's access and lifecycle, and
+the Yeti fight held to the completion evidence).
+#352 has merged, so the base is main; refresh the open pull requests first.
 
 ## Decisions
 
@@ -799,11 +832,11 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P9 | 14 October 2026 | Rimebind: `rimebound`, 20% slower for 60 ticks; a hidden `rime_thaw` for 100 ticks refuses a recast | Proposed | B-06 |
 | B-P10 | 14 October 2026 | The thaw grace covers Rimebind only; the trophies' Frost boon (accepted), `dazzle`, DAZE and the Ice Breaker wave keep their own slows. The alternative, for the owner: one grace for every Concordance and trophy slow | Proposed | B-06, B-10 |
 | B-P11 | 14 October 2026 | Brace: +0.5 knockback resistance for 100 ticks, one hit, not stacking | Proposed | B-06 |
-| B-P12 | 14 October 2026 | Brace's order: the Yeti takes it before his blow's `hurtServer`; other blows remove it after damage; a harmful Concordance push uses it; a helpful push neither uses it nor is shortened by it | Proposed | B-06, B-09 |
+| B-P12 | 14 October 2026; revised 14 October 2026 (unit 3) | Brace's order: a Brace is spent by the first push it meets (a blow vanilla knocks back, a harmful Concordance push, or a scripted push through `Brace.spend`, as the Yeti's in B-09) and braces the rest of that tick (B-P30), so the Yeti may call `Brace.spend` before or after his blow's `hurtServer`; a helpful push (one's own Flashstep) neither uses it nor is shortened by it | Proposed | B-06, B-09 |
 | B-P13 | 14 October 2026 | Preserve: `touch struck`, the crucible only, holding its temperature band for 60 s | Proposed | B-07 |
 | B-P14 | 14 October 2026 | No Thallite Focus in Chunk B (it stays in Thallite slice 5); the crafted upgrade (09:94) is the water foci | Proposed | B-07, B-10 |
-| B-P15 | 14 October 2026 | Stratawrighting reads `#jugcraft:assay_specimens`, which gains raw Thallite, the Thallite ingot, stone and deepslate; no Strata specimen tag | Proposed | B-05 |
-| B-P16 | 14 October 2026 | Rimekeeping understood by comparing a cold and a warm brew or by studying the Glacier Hall; mastered by varied practice, the column charge elective | Proposed | B-05 |
+| B-P15 | 14 October 2026; revised 14 October 2026 (unit 3) | Stratawrighting reads its own `#jugcraft:strata_specimens` (granite, diorite, andesite, tuff, raw Thallite), nested inside `#jugcraft:assay_specimens`, so one examination serves both entries. Cobblestone, stone, cobbled deepslate and deepslate are never specimens (sneak-use in the air would examine a bridging block), nor is the Thallite ingot | Proposed | B-05 |
+| B-P16 | 14 October 2026; revised 14 October 2026 (unit 3) | Rimekeeping understood by bench study, by the winter survey gated by First Light alone (arriving in the Glacier Hall, or bottling a Rime brew by hand), or by notes; mastered by three kinds of cold work (Preserve a crucible holding a mixture while cold, and while warm or hotter, and Rimebind a hostile creature), which stand for the plan's preserve and compare steps; the Yeti column charge joins as an elective with B-09 | Proposed | B-05, B-09 |
 | B-P17 | 14 October 2026 | Winter Brine needs no salt: a snowball carries the Rime, and salt has its own feature switch (`config/JugcraftConfig.java:24`) | Proposed | B-08 |
 | B-P18 | 14 October 2026 | A stir above the cold band keeps part of the dissolved Rime: warm 600, hot 300, searing 0 per thousand (starting values) | Proposed | B-08 |
 | B-P19 | 14 October 2026 | Frostward lasts as Ember's Fire Resistance brew does: 1200 ticks a unit, at most 2400 | Proposed | B-08 |
@@ -817,7 +850,13 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P27 | 14 October 2026 | The Frost Knight and Wight King sets stay creative-only (continuing A-D10) | Proposed | B-10 |
 | B-P28 | 14 October 2026 | Nothing is added to `earthen_ground`; no Thallite or trophy number changes | Proposed | B-10 |
 | B-P29 | 14 October 2026 | Winter Brine's dossier fact is text and icons, with no recipe grid | Proposed | B-02, B-08 |
-| B-P30 | 14 October 2026 | The Glacier Hall's dossier names the Seasonal Stall's snow blocks (8 for 3 Jugs, under its winter and December themes) as a sale that helps with the horn, shown only where a town stands and while it is on sale | Proposed | B-02 |
+| B-P30 | 14 October 2026 | A spent Brace braces the rest of that server tick and goes at its end, so the extra knockback of sprints, weapons and mob attacks after `hurtServer` is braced too; two blows in one tick are both braced | Proposed | B-06, B-09 |
+| B-P31 | 14 October 2026 | The owner's icons and sounds byte for byte at their own sizes: Rimebind `freeze.png`, Preserve `extend_time.png`, Brace and Braced `gravity.png` (the owner's own pair), Rimebound `freezing.png`, the Thaw `soaked.png`; Brace's release `gaia_1` to `gaia_4`; the other cues drawn. It replaces the earlier `shield`, `shielding` and `frozen`, scaled to 32 | Proposed | B-06, B-07 |
+| B-P32 | 14 October 2026 | The benchmark models Rimebound and its thaw, starts no cast that would change nothing, casts a harmful defense at any foe in reach, and measures knockback taken (never moved), with two acceptance checks | Proposed | B-06 |
+| B-P33 | 14 October 2026 | Roles: Rimebind defense, Brace support, Preserve utility | Proposed | B-06, B-07 |
+| B-P34 | 14 October 2026 | Rimebind's targets follow the shared boundary (monsters; creatures the caster could strike by hand; players only under PvP and outside the party), and only a hostile creature at normal tolerance counts as restraint | Proposed | B-05, B-06 |
+| B-P35 | 14 October 2026 | Preserve's hold is a fixed Java constant (60 s, not scaled by Spell Power), restarts on a recast and never adds, runs on the world clock, and is capped at 2400 ticks so B-P24 fits | Proposed | B-07, B-10 |
+| B-P36 | 14 October 2026 | The Glacier Hall's dossier names the Seasonal Stall's snow blocks (8 for 3 Jugs, under its winter and December themes) as a sale that helps with the horn, shown only where a town stands and while it is on sale | Proposed | B-02 |
 
 ## How this contract was checked
 

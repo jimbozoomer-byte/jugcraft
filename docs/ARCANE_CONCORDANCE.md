@@ -19,6 +19,9 @@ seen by everyone) is on `claude/awesome-davinci-iwv3b9`. Where to start:
 Concordance Chunk A, not yet merged, builds on these: the Spell Composer (composing without commands), lair encounter
 credit (support shares a lair boss's reward) and the encyclopedia's first route
 ([its contract](features/concordance-chunk-a.md)).
+Concordance Chunk B, unit 3, not yet merged, adds Rime and Strata: Rimekeeping and Stratawrighting, and the
+invocations Rimebind, Brace and Preserve ([its record](features/arcane-concordance-rime-strata.md);
+[the chunk's contract](features/concordance-chunk-b.md)).
 
 The names below (Principles, resources, stages, traditions) were new proposals at step 2: no earlier Jugcraft document
 defined a magic taxonomy.
@@ -118,9 +121,9 @@ Specialties a player can follow without mastering the rest ([CONTENT_BRANCHES.md
 |---|---|---|---|
 | Lampwrights | Radiance | illumination, lanterns and revelation | 5 (implemented) |
 | Hearthbinders | Ember | controlled heat for kilns, forges and cooking | 10; parts 1 and 2 implemented ([Ember](features/arcane-concordance-ember.md), [regalia](features/arcane-concordance-ember-regalia.md)) |
-| Rimekeepers | Rime | preservation, cooling and barriers | 10 |
+| Rimekeepers | Rime | preservation, cooling and barriers | 10; Concordance Chunk B unit 3 ([Rime and Strata](features/arcane-concordance-rime-strata.md)) |
 | Stormcallers | Tempest | charging, weather instruments and swift movement | 10 |
-| Stratawrights | Strata | soil care, shaping and mineral sensing | 10 |
+| Stratawrights | Strata | soil care, shaping and mineral sensing | 10; Concordance Chunk B unit 3 ([Rime and Strata](features/arcane-concordance-rime-strata.md)) |
 | Greenwardens | Verdance | habitats, cultivation and living devices | 14 |
 | Alembists | Tide, Ember, Verdance | experimental alchemy | 13 |
 | Circlewrights | Tether, Strata | ritual structures, anchors and containment | 12 |
@@ -443,3 +446,16 @@ payloads `jugcraft:concordance_composer_request`, `jugcraft:concordance_composer
 `jugcraft:concordance_composer_result`; key `key.jugcraft.concordance_composer`; the player attachment and the overworld
 record `jugcraft:lair_rewards`; the encyclopedia's payloads `jugcraft:encyclopedia_request` and `jugcraft:encyclopedia`
 and its key `key.jugcraft.encyclopedia`.
+
+Introduced by Concordance Chunk B, unit 3
+([Rime and Strata](features/arcane-concordance-rime-strata.md#rollout-and-open-questions); not yet merged): research
+`jugcraft:rimekeeping` and `jugcraft:stratawrighting`; practices `jugcraft:winter_survey`, `jugcraft:rimework` and
+`jugcraft:anchoring`, whose evidence keys are saved in the knowledge attachment; advancements
+`jugcraft:concordance_rimekeeping_*` and `jugcraft:concordance_stratawrighting_*` (encountered, observed, understood,
+mastered); item tags `jugcraft:rime_specimens` and `jugcraft:strata_specimens`; block tag
+`jugcraft:concordance/preservable`; effects `jugcraft:rimebound`, `jugcraft:rime_thaw` and `jugcraft:braced`, and the
+attribute modifiers `jugcraft:rimebound` and `jugcraft:braced`; components `jugcraft:rimegrip`, `jugcraft:bracing` and
+`jugcraft:rimehold`; invocations and spells `jugcraft:rimebind`, `jugcraft:brace` and `jugcraft:preserve`; the non-saved
+attachment `jugcraft:brace_caster`; the crucible's saved field `held_until`; sounds `jugcraft:concordance.rime_gather`,
+`.rimebind`, `.preserve`, `.strata_gather` and `.brace`; codex categories `winter` and `stone`. The Yeti King and the
+Cinder Tyrant join `jugcraft:concordance/resistant`.

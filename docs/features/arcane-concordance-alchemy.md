@@ -132,7 +132,9 @@ counts once.
 - Technology connection: water through the Fabric Transfer API (Jugcraft pipes or any mod's), hoppers for ingredients and
   bottles, the output for any extractor. A formula is canonical process data any automation can carry.
 - Magic connection: the six axes are the Principles' own names; the same research, notes and practice rules as the rest
-  of the Concordance; the shared effect boundary.
+  of the Concordance; the shared effect boundary. Since Concordance Chunk B, unit 3
+  ([Rime and Strata](arcane-concordance-rime-strata.md)): a brew that carries Rime, bottled by hand, is Rimekeeping's
+  workshop study, and Preserve holds a crucible's heat in its band for a minute while you stir.
 - Reachable entry path: First Light understood → the Alembic Arts by examining vanilla items → craft the crucible
   (four copper, a cauldron, three bricks) and tools from vanilla materials.
 - Solo, trade and cooperative routes: entirely solo; Research Notes and written formulas can be traded.
@@ -157,8 +159,9 @@ counts once.
 - Server authority: the crucible simulates on the server; clients receive the temperature and volume only (for the
   vessel's animation), never the makeup, which takes sampling. Hand operations are rate-limited and check research; a
   stir's band is the server's.
-- Persistence: the crucible saves its mixture exactly (to the thousandth), history, formula, step, tank and slots;
-  broken, its items drop (vanilla's container behaviour) and the mixture spills. Items carry `jugcraft:brew`,
+- Persistence: the crucible saves its mixture exactly (to the thousandth), history, formula, step, tank and slots, and
+  Preserve's hold, `held_until` (game time), only while held; broken, its items drop (vanilla's container behaviour) and
+  the mixture spills. Items carry `jugcraft:brew`,
   `jugcraft:reagent` and `jugcraft:formula`.
 - Disable behaviour: with `concordance.enabled=false`, crucibles refuse work and stop following formulas; everything stays
   registered.

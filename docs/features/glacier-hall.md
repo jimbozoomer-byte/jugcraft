@@ -58,7 +58,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
   - snow blocks, from snowballs;
   - snow or ice to stand on, in the cold biomes or under Jugcraft's winter snow (`seasons.snow`).
 - **Outputs:** the way into the Glacier Hall, where the Yeti King will wait (part 2).
-- **Technology and magic:** none; the hall is an adventuring destination. Its fight's loot (part 2) brings Arms VII's two Yeti King trophies into survival.
+- **Technology and magic:** the hall is an adventuring destination, and arriving in it is Rimekeeping's field study: with First Light understood, it can understand Rimekeeping without a bench (Concordance Chunk B, unit 3; [Rime and Strata](arcane-concordance-rime-strata.md)). Nothing in the hall changed for it. Its fight's loot (part 2) brings Arms VII's two Yeti King trophies into survival.
 - **Reachable entry path:** every input is reachable in the Discovery tier without the hall: no circular unlock.
 - **The encyclopedia (since Concordance Chunk B, B-02):** carrying a Frost Horn shows the hall's dossier under Expeditions: the rite, the horn's recipe, the Seasonal Stall's snow blocks where a town sells them that day, that it works all year and the party it holds; the Yeti King's part follows once he is met ([yeti-king.md](yeti-king.md)). A first win over him completes the First Light route's lair step.
 
