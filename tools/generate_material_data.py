@@ -1408,6 +1408,8 @@ def tags():
 
     for rock, info in ROCKS.items():
         tags.add("block", f"minecraft:mineable/{info['tool']}", rid(rock))
+    import mineral_sands
+    mineral_sands.tags(tags)
     # Veins placed only in some biomes (a "biomes" key on a metal's or mineral's worldgen entry): the biome tag that
     # JugcraftWorldgen places them in.
     for name, info in list(METALS.items()) + list(MINERALS.items()):
@@ -1555,7 +1557,11 @@ def worldgen():
             else:
                 ore_feature(placed, gen["size"], targets)
             placed_feature(placed, gen)
+    import mineral_sands
+    mineral_sands.worldgen(write, DATA / MOD)
     for rock, info in ROCKS.items():
+        if rock in mineral_sands.SANDS:
+            continue
         gen = info["gen"]
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},
                                          "state": rid(rock)}])

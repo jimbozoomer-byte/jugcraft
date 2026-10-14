@@ -54,6 +54,8 @@ def imports():
     out = []
     out.append(("block/transport_crate_wood", "biomes and tree blocks/origin_oak_planks"))
     out.append(("block/fluorite_block", "block_fluorite"))
+    from mineral_sands import SANDS
+    out.extend(("block/" + name, info["texture"]) for name, info in SANDS.items())
     for table in (kitchen.TEXTURES, feasts.TEXTURES, menu.TEXTURES, rice.TEXTURES, soil.TEXTURES, garden.TEXTURES):
         for target, source in table.items():
             out.append((target, f"{FOOD}/{source}"))

@@ -11,6 +11,7 @@
 			"io.github.jimbozoomer.jugcraft.test.TestForms"
 		],
 		"fabric-gametest": [
+			"io.github.jimbozoomer.jugcraft.test.MineralSandGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FluoriteGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SpodumeneGameTests",
 			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationGameTests",
@@ -178,6 +179,7 @@
 			"io.github.jimbozoomer.jugcraft.test.CinderTyrantGameTests"
 		],
 		"fabric-client-gametest": [
+			"io.github.jimbozoomer.jugcraft.test.MineralSandClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.FluoriteClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.SpodumeneClientGameTests",
 			"io.github.jimbozoomer.jugcraft.test.IndustrialFoundationClientGameTests",

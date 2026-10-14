@@ -2804,8 +2804,23 @@ def check_java():
     limited = sorted(placed for placed, gen in gens.items() if gen.get("biomes"))
     if sorted(java_list("biomeOres")) != limited:
         err(f"JugcraftWorldgen.biomeOres {sorted(java_list('biomeOres'))} != the veins with biomes in tools/materials.py {limited}")
-    if sorted(java_list("ores")) != sorted(set(gens) - set(limited)):
+    from mineral_sands import SANDS
+    if sorted(java_list("ores")) != sorted((set(gens) - set(limited)) | set(SANDS)):
         err(f"JugcraftWorldgen.ores {sorted(java_list('ores'))} != the Overworld-wide veins in tools/materials.py")
+    for name, info in SANDS.items():
+        feature = load(DATA / MOD / "worldgen" / "feature" / f"ore_{name}.json") or {}
+        expected = {"type": f"{MOD}:mineral_sand", "sand": f"{MOD}:{name}",
+                    "surface_biomes": f"{MOD}:has_surface_sand/{name}", "family": info["family"]}
+        for key in ("length", "width", "thickness", "cover"):
+            expected["min_" + key], expected["max_" + key] = info[key]
+        if feature != expected:
+            err(f"Mineral sand {name}: geometry differs from its approved configuration")
+        tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_surface_sand" / f"{name}.json") or {}
+        if tag.get("values") != info["biomes"]:
+            err(f"Mineral sand {name}: eligible surface regions differ")
+        placed = load(DATA / MOD / "worldgen" / "placed_feature" / f"ore_{name}.json") or {}
+        if placed.get("placement") != [{"type": "minecraft:rarity_filter", "chance": info["rarity"]}]:
+            err(f"Mineral sand {name}: rarity or bounded chunk anchor changed")
     if limited and 'Jugcraft.id("has_ore/" + ore[0])' not in worldgen:
         err("JugcraftWorldgen does not place biomeOres by their biome tag jugcraft:has_ore/<name>")
     for placed in limited:

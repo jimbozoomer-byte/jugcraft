@@ -781,6 +781,13 @@ def ores_page():
                      "The crusher gives two spodumene per ore; nine compact into a storage block. "
                      "Expanded lithium refining is planned separately; existing lepidolite processing remains available.")
         lines.append(line)
+    from mineral_sands import SANDS
+    for name, info in SANDS.items():
+        lines.append(f"{info['display']}: shallow beds in {biome_names(info['biomes'])}. "
+                     "Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. "
+                     "Each mineral-sand block is one finite feed unit; Fortune does not increase it. "
+                     "The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; "
+                     "the Deposit Drill and generic ore-doubling recipes do not process it.")
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
             "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}
 
