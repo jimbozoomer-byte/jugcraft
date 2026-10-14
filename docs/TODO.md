@@ -63,7 +63,7 @@ Owner-requested 10 October 2026. Independent art specification: [industrial mach
   - the Coal Gasifier with Gas Cleanup and Separation (implemented in [coal gasification](features/industrial-coal-gasification.md); its mixed residue and road/filler use are in [gasification residue](features/industrial-gasification-residue.md); numeric pollution remains);
   - portable handling.
 
-  Enforce the electrolysis energy floor before any expanded or bulk Separator.
+  Enforce the electrolysis energy floor before any expanded or bulk Separator. The data check now holds every expanded or bulk form to it ([electrolysis floor](features/industrial-electrolysis-floor.md)).
 - [ ] Inspect every completed form from all sides in-game, including idle/running states, module arrangements and lighting; verify bounds, placement and persistence. The current brief provides descriptions only.
 
 ## Industrial factory implementation planning

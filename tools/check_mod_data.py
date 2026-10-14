@@ -2891,7 +2891,7 @@ def machines_stats(family):
 
 def cheapest_electrolysis(fluid, _seen=None):
     """The least JE electricity alone spends per mB of `fluid`, with the most efficiency cards its machine takes (the
-    legacy fluid machines take none), counting the cheapest cost of the fluids it uses up as well (methane's hydrogen,
+    legacy fluid machines take none) and its form's profile saving (an expanded or bulk form pays 90% or 80% a lane), counting the cheapest cost of the fluids it uses up as well (methane's hydrogen,
     say; water is free), or None when electricity alone cannot make it. All of a recipe's cost counts against `fluid`, so
     a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too.
 
@@ -2925,11 +2925,16 @@ def cheapest_electrolysis(fluid, _seen=None):
         use = machines.STATS.get(machine, {}).get("use_per_tick", 0)
         for recipe in recipes:
             offer(recipe, use)
+    percents = {name: int(percent) for name, percent in re.findall(
+        r"(\w+)\(\d+, [\d_]+, (\d+)\)", (JAVA_ROOT / "machine" / "form" / "OperatingProfile.java").read_text(encoding="utf-8"))}
     for form, recipes in industrial_forms.FORM_RECIPES.items():
         info = industrial_forms.FORMS[form]
         use = machines.STATS[info["family"]]["use_per_tick"]
-        # MachineUpgrades.Effect.use with four efficiency cards, the most that count.
-        cheapest = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
+        # MachineUpgrades.Effect.use with four efficiency cards, the most that count; then the profile's share of that
+        # each lane pays (OperatingProfile.lanePerTick, rounded up), so an expanded or bulk electrolysis form's saving
+        # counts against the fuels it makes.
+        carded = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
+        cheapest = max(1, -(-carded * percents.get(info["profile"], 100) // 100))
         for recipe in recipes:
             offer(recipe, cheapest)
     return min(costs) if costs else None
@@ -3038,6 +3043,55 @@ def check_industrial_forms():
               + plates_per_tank * sum(row.count(ch) for row in pattern for ch, ref in key.items() if ref == f"{MOD}:steel_tank"))
     if plates != 20:
         err(f"The Electrolytic Separator costs {plates} steel plates, not the owner's selected 20")
+
+
+# The plan's electrolysis energy floor (docs/features/industrial-electrolytic-separator.md): an expanded or bulk form
+# that makes hydrogen from electricity alone spends at least this many JE a millibucket, cards and profile saving
+# included. The entry Separator, which has no profile saving, is not held to it.
+ELECTROLYSIS_FLOOR = 256
+
+
+def electrolysis_floor_breaches():
+    """Expanded or bulk forms whose recipes make hydrogen from electricity alone below ELECTROLYSIS_FLOOR: (form, recipe,
+    JE per mB). Inputs other than water count at their own cheapest electrolysis; recipes using items are not
+    electricity routes."""
+    import machines
+    percents = {name: int(percent) for name, percent in re.findall(
+        r"(\w+)\(\d+, [\d_]+, (\d+)\)", (JAVA_ROOT / "machine" / "form" / "OperatingProfile.java").read_text(encoding="utf-8"))}
+    hydrogen = f"{MOD}:hydrogen"
+    breaches = []
+    for form, recipes in industrial_forms.FORM_RECIPES.items():
+        info = industrial_forms.FORMS[form]
+        if info["profile"] == "ENTRY":
+            continue
+        use = machines.STATS[info["family"]]["use_per_tick"]
+        carded = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
+        per_tick = max(1, -(-carded * percents.get(info["profile"], 100) // 100))
+        for recipe in recipes:
+            if recipe.get("items"):
+                continue
+            made = sum(result[1] for result in recipe.get("fluid_results", []) if result[0] == hydrogen)
+            if not made:
+                continue
+            spent = 0.0
+            for source, mb in recipe.get("fluids", []):
+                if not source.startswith("minecraft:"):
+                    cost = cheapest_electrolysis(source, {hydrogen})
+                    spent = None if cost is None or spent is None else spent + cost * mb
+            if spent is None:
+                continue
+            per_mb = (recipe["ticks"] * per_tick + spent) / made
+            if per_mb < ELECTROLYSIS_FLOOR:
+                breaches.append((form, recipe["name"], per_mb))
+    return breaches
+
+
+def check_electrolysis_floor():
+    """No expanded or bulk form makes hydrogen from electricity alone for less than the plan's floor, so a larger
+    Separator can never undercut the entry one into a cheap hydrogen battery or a loop with a generator bonus."""
+    for form, recipe, per_mb in electrolysis_floor_breaches():
+        err(f"{form} recipe {recipe}: makes hydrogen from electricity for {per_mb:.1f} JE/mB with every card and its "
+            f"profile saving, below the {ELECTROLYSIS_FLOOR} JE/mB electrolysis floor")
 
 
 def check_self_output_gates():
@@ -13319,6 +13373,7 @@ def main():
     check_machine_recipe_files(registered)
     check_fluid_recipes(registered)
     check_industrial_forms()
+    check_electrolysis_floor()
     check_self_output_gates()
     check_tags()
     check_worldgen()
