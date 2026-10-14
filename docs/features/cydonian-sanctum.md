@@ -142,18 +142,22 @@ Results are recorded under "Results" below after CI runs.
     either switch off refuses it; it is not heard on a block that is no altar;
   - a dial turns through its six constellations; the door's figures burn and go dark as dials show them; all three open
     the door, which crumbles away;
-  - the vents' rhythm (a tell, then a puff; neighbours never together), a puff's damage once and its throw south; off
-    Mars, no thin air.
+  - the vents' rhythm (a tell, then a puff; neighbours never together), a puff's damage once and its throw south, on a
+    test player given the 80 ticks a new player cannot be hurt in; off Mars, no thin air.
 - Client game test (`CydonianSanctumClientGameTests`), in a real world with an Ancient Altar built on its three altars:
   - by day the keystone is refused and kept; at night, set by hand, it is spent and rested, the altars kindle, and an
     instance is placed with its Red Mist, door, dials and vents;
-  - after the kindling the player stands in the gate chamber, unable to build, and the red mist is over the altar;
-  - on Mars the player has Jump Boost I and half fall damage; a dial is a fixture, a vent is not; standing on a vent, a
-    puff strikes;
-  - the three dials turned by hand open the Star Door; a 12-block drop onto the crater costs at most half;
-  - the Red Mist takes the player back to exactly where they stood, and the thin air goes; a second keystone at the open
-    mist is refused and kept; the altar with an empty hand takes them back into the same instance; closing it sends them
-    home and the mist goes;
+  - after the kindling the player stands in the gate chamber, unable to build, and a red mist was opened into the
+    instance;
+  - on Mars the player has Jump Boost I and half fall damage; a dial is a fixture, a vent is not; standing on a vent for
+    two of its periods, a puff strikes (counted in the game's own damage-taken statistic, since peaceful mends a point a
+    second);
+  - the three dials turned by hand open the Star Door; a 12-block drop onto the crater costs at most half, rounded up
+    (the same drop costs 8 or more without the thin air);
+  - the Red Mist takes the player back to exactly where they stood, and the thin air goes; the red mist is still over the
+    altar (with nobody left beside it, its chunk was hidden while they were away); a second keystone at the open mist is
+    refused and kept; the altar with an empty hand takes them back into the same instance; closing it sends them home and
+    the mist goes;
   - pictures, and the block light on every open cell of the gallery's floor.
 - Not run: play by hand, a dedicated server, two clients, performance measurements.
 
@@ -162,13 +166,38 @@ Results are recorded under "Results" below after CI runs.
   - `python3 tools/generate_material_data.py` and `python3 tools/generate_textures.py` ran clean. The texture generator
     re-encoded 306 unrelated existing PNGs; those were reverted, and only the 20 new textures are kept.
   - `python3 tools/check_mod_data.py`: PASS (2,655 material IDs, data files and recipe audit).
-  - Breaking the Java on purpose, one change at a time, failed `check_lairs` 13 times out of 13: the Sanctum's bounds,
-    the vents' period and a line's phase, a dial's place, the thin air's falls, the door's figures, a lit figure's
-    light, the dials' order, the kindling's pace, the altars kindled, the Sanctum's registration, the dial's block and
-    the client test's light. Each file was restored afterwards.
+  - Breaking the Java on purpose, one change at a time, failed `check_lairs` 14 times out of 14: the Sanctum's bounds,
+    the vents' period and a line's phase, a dial's place, the thin air's falls, the door's figures and how they are
+    indexed, a lit figure's light, the dials' order, the kindling's pace, the altars kindled, the Sanctum's registration,
+    the dial's block and the client test's light. Each file was restored afterwards.
   - `python3 scripts/check_repository.py` and `python3 tools/check_icon_maps.py`: PASS.
   - `javac`, syntax only, on the new and changed Java: no parse errors (the game compiles only in CI).
-- CI: pending.
+- CI on a04d2f980 (Build run 38636795105): **every check passed.**
+  - `mod` (compile, data checks, every server game test with `CydonianSanctumGameTests`) and `optional integrations
+    absent` passed.
+  - `CydonianSanctumClientGameTests` passed from end to end (client shard 4: "the Altar Keystone and the Cydonian
+    Sanctum passed end to end"). The darkest open cell of the gallery's floor had block light 8. The other four shards
+    passed too.
+- What CI found on the way there:
+  - 6ecda427f did not compile: `Player.hurtMarked` is not in 26.3. The vents now send the throw to the player's client
+    as the other knockbacks in the mod do.
+  - **A real bug:** `CydonianSanctum.figure` indexed the three carved figures by the Figure enum's ordinal, which counts
+    the plain block first. Turning a dial to the Crown crashed, and the Hunter was looked for in the Swan's cell. Both
+    the server and client tests caught it; the figures are now found by their place after the plain block, and
+    `check_lairs` holds the Java to that.
+  - Three faults in the tests themselves:
+    - the client test looked for the red mist while nobody was by the altar (its chunk hidden); it now does so once the
+      player is home;
+    - it read the vent's blow off the player's health, which peaceful mends;
+    - the server test hurt a test player in the ticks a new player cannot be hurt.
+
+*In-game screenshots from CI's client game test (`CydonianSanctumClientGameTests`, software rendering, small previews),
+a04d2f980.*
+
+![The red mist over the Ancient Altar at night: a column of red light rising from the top of the three stacked altars](../images/ingame_altar_keystone_red_mist.jpg)
+![The Dust Gallery from its south end: sandstone walls carved with glyphs, a star dial set in the left wall, and lines of dust vents across the red sand floor, smoking](../images/ingame_cydonian_sanctum_gallery.jpg)
+![The Star Door: red brick with three carved figures on sunk panels; the Hunter and the Crown burn orange, the Swan between them is dark](../images/ingame_cydonian_sanctum_star_door_lit.jpg)
+![The crater: red sand under a butterscotch sky, two standing stones carved with the red star, small craters in the floor, the rim beyond and Phobos and Deimos overhead](../images/ingame_cydonian_sanctum_crater.jpg)
 
 ## World and event applicability
 - The rite works only in the Overworld, at the Ancient Altar (which generates only there). The Sanctum is its own
