@@ -9,12 +9,12 @@
   "capability": "jugcraft:starter_gas_infusing",
   "fluids": [
     {
-      "fluid": "jugcraft:sulfur_dioxide",
-      "amount": 250
-    },
-    {
       "fluid": "jugcraft:oxygen",
       "amount": 125
+    },
+    {
+      "fluid": "jugcraft:sulfur_dioxide",
+      "amount": 250
     }
   ],
   "fluid_results": [
@@ -26,5 +26,6 @@
   ],
   "tool": "jugcraft:vanadium_contact_bed",
   "energy_per_tick": 128,
+  "priority": -10,
   "time": 100
 }

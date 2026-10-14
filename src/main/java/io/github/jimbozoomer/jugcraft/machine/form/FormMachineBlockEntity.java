@@ -400,7 +400,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	}
 
 	/**
-	 * The recipes this form runs: its family's recipes whose capability it declares, in id order (so which of two
+	 * The recipes this form runs: its family's recipes whose capability it declares, in priority then id order (so which of two
 	 * complete recipes starts never depends on load order).
 	 */
 	public List<FluidRecipes.Entry> recipes(MinecraftServer server) {
@@ -412,7 +412,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 					runs.add(entry);
 				}
 			}
-			runs.sort(java.util.Comparator.comparing(entry -> entry.id().toString()));
+			runs.sort(java.util.Comparator.<FluidRecipes.Entry>comparingInt(entry -> entry.recipe().priority()).reversed()
+					.thenComparing(entry -> entry.id().toString()));
 			recipes = List.copyOf(runs);
 			recipeSource = all;
 		}

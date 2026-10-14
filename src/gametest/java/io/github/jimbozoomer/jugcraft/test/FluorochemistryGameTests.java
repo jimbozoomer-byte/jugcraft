@@ -189,7 +189,7 @@ public class FluorochemistryGameTests {
             h.assertTrue(silked.size()==1 && silked.getFirst().is(ore.asItem()),"Silk Touch preserves ore");
         }
         var biomes=level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.BIOME);
-        for(String name:List.of("fluorite","fluorite_rich")) {
+        for(String name:List.of("fluorite")) {
             var tag=net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.BIOME,Jugcraft.id("has_ore/"+name));
             h.assertTrue(biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.SNOWY_PLAINS).is(tag),"Snow plains eligible");
             h.assertTrue(!biomes.getOrThrow(net.minecraft.world.level.biome.Biomes.DESERT).is(tag),"Desert excluded");

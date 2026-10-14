@@ -1884,7 +1884,7 @@ def form_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
-            for field in ("tool", "energy_per_tick", "emissions"):
+            for field in ("tool", "energy_per_tick", "emissions", "priority"):
                 if field in recipe:
                     data[field] = recipe[field]
             data["time"] = recipe["ticks"]

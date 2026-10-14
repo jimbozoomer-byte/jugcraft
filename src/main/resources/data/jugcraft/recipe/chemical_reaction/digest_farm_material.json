@@ -32,5 +32,6 @@
     }
   ],
   "energy_per_tick": 32,
+  "priority": -10,
   "time": 400
 }

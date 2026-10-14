@@ -28,5 +28,6 @@
   ],
   "energy_per_tick": 64,
   "emissions": 4,
+  "priority": -10,
   "time": 200
 }

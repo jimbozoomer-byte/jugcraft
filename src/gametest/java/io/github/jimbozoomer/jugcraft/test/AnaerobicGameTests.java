@@ -53,9 +53,17 @@ public class AnaerobicGameTests {
                             && machine.energy().getAmount() == starting, "Missing catalyst blocks before spending inputs or power");
                     machine.container().setItem(slot, tool);
                 }
-                ticks(h, machine, recipe.time());
+                long supplied = 0;
+                for (int tick = 0; tick < recipe.time(); tick++) {
+                    long draw = machine.form().profile().lanePerTick(recipe.energyPerTick() > 0 ? recipe.energyPerTick() : machine.form().family().usePerTick);
+                    if (machine.energy().getAmount() < draw) {
+                        supplied += machine.energy().getCapacity() - machine.energy().getAmount();
+                        ((SimpleEnergyStorage)machine.energy()).setAmount(machine.energy().getCapacity());
+                    }
+                    ticks(h, machine, 1);
+                }
                 h.assertTrue(machine.lane(0) == null, entry.id() + " did not finish: " + machine.status());
-                h.assertTrue(starting - machine.energy().getAmount() == (long) recipe.time() * machine.form().profile().lanePerTick(recipe.energyPerTick() > 0 ? recipe.energyPerTick() : machine.form().family().usePerTick), entry.id() + " exact paid work");
+                h.assertTrue(starting + supplied - machine.energy().getAmount() == (long) recipe.time() * machine.form().profile().lanePerTick(recipe.energyPerTick() > 0 ? recipe.energyPerTick() : machine.form().family().usePerTick), entry.id() + " exact paid work");
                 for (int i = 0; i < recipe.fluidResults().size(); i++) {
                     var result = recipe.fluidResults().get(i);
                     var tank = machine.tanks().output(recipe.resultTank(i));

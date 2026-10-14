@@ -24,6 +24,9 @@ def apply(released, forms, recipes, handbook, models, rotors, extras):
         names = {row["name"] for row in old_recipes}
         added = deepcopy(recipes.get(name, []))
         for row in added:
+            row["priority"] = -10  # Published automatic routes remain first; locks can select either.
+            if name == "chemical_infuser":
+                row["fluids"].sort(key=lambda feed: 0 if feed[0] in ("jugcraft:hydrogen", "jugcraft:oxygen") else 1)
             if row["name"] in names:
                 row["name"] = "expanded_" + row["name"]
         if old_recipes or added:

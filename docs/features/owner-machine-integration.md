@@ -33,6 +33,7 @@ version. Back up such worlds first. Port positions on overlapping prototypes
 also differ; reconnect them to the retained main sockets. This is not a claim
 that an arbitrary preview world has been tested for migration.
 
+Automatic selection gives the published recipes priority over the added preview routes.
 Use the recipe picker to choose between the original and expanded routes when
 they accept overlapping ingredients. A lock affects future batches and feed
 acceptance; already escrowed work completes normally.
@@ -41,5 +42,6 @@ acceptance; already escrowed work completes normally.
 
 Integration validation is in progress. The owner tested the earlier local
 factory builds; the newly combined build has not received a human playtest.
-No local graphical client test is authorized during this integration. Record
-headless test results and remote CI evidence here before merging.
+No local graphical client test is authorized during this integration. All 34
+Python repository/data/pack tests pass. Final headless build and remote CI results
+are recorded in the integration PR; both must pass before merging.

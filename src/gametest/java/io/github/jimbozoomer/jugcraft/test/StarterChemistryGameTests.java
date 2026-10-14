@@ -114,7 +114,9 @@ public class StarterChemistryGameTests {
         m.tanks().output(1).fill(PetroFluids.LYE.source(), 1);
         m.toggleWaterDrain();
         ticks(h, m, 3);
-        h.assertTrue(m.lane(0) == null && m.tanks().output(1).millibuckets() == 1 && m.tanks().input(0).millibuckets() == 100,
+        h.assertTrue(m.lane(0) == null && m.tanks().output(1).millibuckets() == 1
+                && m.tanks().input(0).millibuckets() == recipe.fluids().get(0).amount()
+                && m.tanks().input(1).millibuckets() == recipe.fluids().get(1).amount(),
                 "Drain cannot discard lye or begin with wrong fluid");
         h.succeed();
     }
@@ -169,7 +171,7 @@ public class StarterChemistryGameTests {
         h.assertTrue(m.lane(0) == null && m.container().getItem(0).getCount() == 1 && m.tanks().input(0).millibuckets() == 1000,
                 "Untransformed carbon and water returned once");
         h.assertTrue(m.tanks().output(0).millibuckets() == 0 && m.processEmissions() == 0, "No unearned result");
-        h.assertTrue(m.energy().getAmount() == m.energy().getCapacity() - 90 * 64, "Spent heat is not refunded");
+        h.assertTrue(m.energy().getAmount() == m.energy().getCapacity() - 90 * 58, "Spent heat is not refunded");
         h.succeed();
     }
 

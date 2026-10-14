@@ -9,12 +9,12 @@
   "capability": "jugcraft:starter_gas_infusing",
   "fluids": [
     {
-      "fluid": "jugcraft:clean_biogas",
-      "amount": 1000
-    },
-    {
       "fluid": "jugcraft:hydrogen",
       "amount": 1600
+    },
+    {
+      "fluid": "jugcraft:clean_biogas",
+      "amount": 1000
     }
   ],
   "fluid_results": [
@@ -31,5 +31,6 @@
   ],
   "tool": "jugcraft:nickel_catalyst_bed",
   "energy_per_tick": 128,
+  "priority": -10,
   "time": 600
 }

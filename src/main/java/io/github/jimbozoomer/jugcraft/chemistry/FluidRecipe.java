@@ -87,6 +87,7 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	private final Optional<Ingredient> tool;
 	private final int energyPerTick;
 	private final int emissions;
+	private final int priority;
 
 	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
 			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time) {
@@ -107,6 +108,13 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
 			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time, int companionEffort, String capability,
 			Optional<Ingredient> tool, int energyPerTick, int emissions) {
+		this(machine, commonInfo, items, fluids, fluidResults, results, time, companionEffort, capability, tool, energyPerTick, emissions, 0);
+	}
+
+	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
+			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time, int companionEffort, String capability,
+			Optional<Ingredient> tool, int energyPerTick, int emissions, int priority) {
+		this.priority = Math.clamp(priority, -100, 100);
 		this.energyPerTick = Math.max(0, energyPerTick);
 		this.emissions = Math.max(0, emissions);
 		this.machine = machine;
@@ -145,6 +153,8 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	public int energyPerTick() { return energyPerTick; }
 	/** Abstract process units, recorded once on completion; no terrain damage or world pollution simulation. */
 	public int emissions() { return emissions; }
+	/** Higher priority wins automatic selection; explicit recipe locks bypass this ordering. */
+	public int priority() { return priority; }
 
 	public int time() {
 		return time;
@@ -254,13 +264,14 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	}
 
 	/** The fields added after the first fluid recipes, sent to clients together. */
-	private record Extras(int companionEffort, String capability, Optional<Ingredient> tool, int energyPerTick, int emissions) {
+	private record Extras(int companionEffort, String capability, Optional<Ingredient> tool, int energyPerTick, int emissions, int priority) {
 		static final StreamCodec<RegistryFriendlyByteBuf, Extras> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.VAR_INT, Extras::companionEffort,
 				ByteBufCodecs.STRING_UTF8, Extras::capability,
 				ByteBufCodecs.optional(Ingredient.CONTENTS_STREAM_CODEC), Extras::tool,
 				ByteBufCodecs.VAR_INT, Extras::energyPerTick,
 				ByteBufCodecs.VAR_INT, Extras::emissions,
+				ByteBufCodecs.VAR_INT, Extras::priority,
 				Extras::new);
 	}
 
@@ -276,9 +287,10 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				Codec.STRING.optionalFieldOf("capability", "").forGetter(FluidRecipe::capability),
 				Ingredient.CODEC.optionalFieldOf("tool").forGetter(FluidRecipe::tool),
 				Codec.intRange(0, 65_535).optionalFieldOf("energy_per_tick", 0).forGetter(FluidRecipe::energyPerTick),
-				Codec.intRange(0, 65_535).optionalFieldOf("emissions", 0).forGetter(FluidRecipe::emissions)
-		).apply(i, (info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions) ->
-				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions)));
+				Codec.intRange(0, 65_535).optionalFieldOf("emissions", 0).forGetter(FluidRecipe::emissions),
+				Codec.intRange(-100, 100).optionalFieldOf("priority", 0).forGetter(FluidRecipe::priority)
+		).apply(i, (info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions, priority) ->
+				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions, priority)));
 		StreamCodec<RegistryFriendlyByteBuf, FluidRecipe> stream = StreamCodec.composite(
 				Recipe.CommonInfo.STREAM_CODEC, recipe -> recipe.commonInfo,
 				ItemPart.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::items,
@@ -286,9 +298,9 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				FluidAmount.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::fluidResults,
 				ItemStackTemplate.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::results,
 				ByteBufCodecs.VAR_INT, FluidRecipe::time,
-				Extras.STREAM_CODEC, recipe -> new Extras(recipe.companionEffort, recipe.capability, recipe.tool, recipe.energyPerTick, recipe.emissions),
+				Extras.STREAM_CODEC, recipe -> new Extras(recipe.companionEffort, recipe.capability, recipe.tool, recipe.energyPerTick, recipe.emissions, recipe.priority),
 				(info, items, fluids, fluidResults, results, time, extras) -> new FluidRecipe(machine, info, items, fluids,
-						fluidResults, results, time, extras.companionEffort(), extras.capability(), extras.tool(), extras.energyPerTick(), extras.emissions()));
+						fluidResults, results, time, extras.companionEffort(), extras.capability(), extras.tool(), extras.energyPerTick(), extras.emissions(), extras.priority()));
 		return new RecipeSerializer<>(codec, stream);
 	}
 }

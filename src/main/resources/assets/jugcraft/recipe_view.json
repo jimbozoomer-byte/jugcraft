@@ -7731,12 +7731,12 @@
           "items": [],
           "fluids": [
             [
-              "jugcraft:carbon_monoxide",
-              100
-            ],
-            [
               "jugcraft:hydrogen",
               300
+            ],
+            [
+              "jugcraft:carbon_monoxide",
+              100
             ]
           ],
           "fluid_results": [
@@ -7758,12 +7758,12 @@
           "items": [],
           "fluids": [
             [
-              "jugcraft:carbon_dioxide",
-              100
-            ],
-            [
               "jugcraft:hydrogen",
               400
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              100
             ]
           ],
           "fluid_results": [
@@ -7785,12 +7785,12 @@
           "items": [],
           "fluids": [
             [
-              "jugcraft:sulfur_dioxide",
-              250
-            ],
-            [
               "jugcraft:oxygen",
               125
+            ],
+            [
+              "jugcraft:sulfur_dioxide",
+              250
             ]
           ],
           "fluid_results": [
@@ -7808,12 +7808,12 @@
           "items": [],
           "fluids": [
             [
-              "jugcraft:clean_biogas",
-              1000
-            ],
-            [
               "jugcraft:hydrogen",
               1600
+            ],
+            [
+              "jugcraft:clean_biogas",
+              1000
             ]
           ],
           "fluid_results": [
