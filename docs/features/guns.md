@@ -4863,7 +4863,10 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `oneHandedSidearmsPairUntilStocked`: two Minuet Pistols are two guns at once and the other hand's fires; a bare Half-Crown Revolver pairs with a Minuet Pistol; with a Weighted Stock on it, it is a carbine, the two are not two guns at once, the other hand's does not fire, and the stock steadies its aim; without it again, it is one-handed.
     - `halfCrownRevolverLoadsARoundAtATime`: an empty Half-Crown Revolver with three Rifle Rounds holds one halfway through the second's time and all three when its reload ends, none left over; a shot then spends one and takes its damage from the pig.
     - `hollerPistolChangesItsMagazine`: an empty Holler Pistol with fifteen Rifle Rounds loads nothing before its reload's time and ten after it, leaving five; a shot then takes its damage from the pig.
-  - `GunsGameTests` counts 78 guns; `DualGunsGameTests` the twenty-one held in one hand.
+  - `GunsGameTests` counts 78 guns; `DualGunsGameTests` the twenty-one held in one hand; `TacticalAttachmentsGameTests` the twenty-nine guns the Tactical Grip fits, the Holler Pistol among them.
+- **Slice 14A's first CI run** ([run 38651258803](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38651258803), on 5e60bf941), in the job without the optional integrations, failed two server tests:
+  - `TacticalAttachmentsGameTests.tacticalAttachmentsFitTheirGuns`: "The holler_pistol takes the Tactical Grip". Its list of the guns the grip fits did not name the Holler Pistol, which the owner made a tactical grip for; it does now.
+  - `FluoriteGameTests.prospectAndDrill`: "Prospector missed fluorite", the chance failure https://github.com/jimbozoomer-byte/jugcraft/pull/376 fixes (its survey read only the drill's chunk). That fix is carried here too, line for line, for the fluorite and spodumene tests.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
