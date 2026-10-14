@@ -86,6 +86,13 @@ BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 192, 96), (f"{MOD}:biogas", 268, 64
 # What the Combined Cycle Power Plant burns, the factory's big power station: methane at a quarter more than the gas
 # generator's 448 JE/mB (its exhaust raises steam for a second turbine) and 2,048 JE/t, four times the gas turbine; the
 # Coal Gasifier's raw syngas whole at 256 JE/mB and the same rate; hydrogen at the Fuel Cell's 128 JE/mB at 1,024 JE/t.
+# The Bulk Electrolytic Separator's cells, as its model fills them (form_layers on bulk_electrolytic_separator()).
+BULK_SEPARATOR_LAYERS = [["C###", "####", "####", "####"],
+                         [".###", "####", "####", ".##."],
+                         [".###", "####", "####", ".##."],
+                         [".###", "####", "####", ".##."],
+                         ["####", "####", "####", ".##."],
+                         [".##.", "####", "####", ".##."]]
 # The Bulk Chemical Oxidizer's cells, as its model fills them (form_layers on bulk_chemical_oxidizer()).
 BULK_OXIDIZER_LAYERS = [["C###", "####", "####", "####"],
                         ["####", "####", "####", "###."],
@@ -140,6 +147,35 @@ FORMS = {
         # with copper cable and a basic circuit where the Electrolytic Cell needs an advanced one.
         "recipe": (["PWP", "TCT", "PMP"], {"P": "#c:plates/steel", "W": f"{MOD}:copper_cable", "T": f"{MOD}:steel_tank",
                                            "C": f"{MOD}:basic_circuit", "M": f"{MOD}:machine_casing"}),
+        "features": ["machines"],
+    },
+    "bulk_electrolytic_separator": {
+        "display": "Bulk Electrolytic Separator",
+        # The art brief's 4x4x6 larger variant: the Separator's own family, tanks and capability, so it splits the same
+        # water and brine, in the bulk profile (four batches side by side from 16,000 mB tanks at 80% of the draw a batch).
+        "family": "electrolytic_cell",
+        "layers": BULK_SEPARATOR_LAYERS,
+        "profile": "BULK",
+        "tank_mb": 16_000,
+        "input_tanks": ["feed"],
+        "output_tanks": ["anode_gas", "hydrogen", "lye"],
+        "capabilities": [AQUEOUS_ELECTROLYSIS],
+        # No upgrade cards: with four efficiency cards its bulk saving would make hydrogen for 134.4 JE/mB, under the
+        # plan's 256 JE/mB electrolysis floor (docs/features/industrial-electrolysis-floor.md). Without them it makes
+        # it for 328 JE/mB, a fifth less than an uncarded Separator.
+        "upgrades": False,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "FLUID_IN", 0, 1, 3, 1, "BACK"),
+            ("anode_gas_out", "FLUID_OUT", 0, 3, 0, 4, "FRONT"),
+            ("hydrogen_out", "FLUID_OUT", 1, 0, 0, 4, "FRONT"),
+            ("lye_out", "FLUID_OUT", 2, 2, 0, 2, "FRONT"),
+            ("power", "ENERGY_IN", 0, 2, 0, 0, "FRONT"),
+        ],
+        # This change's bill (open for review): an Electrolytic Separator enlarged with two Steel Tanks, steel plates,
+        # copper cable and a basic circuit.
+        "recipe": (["TST", "PWP", "PCP"], {"T": f"{MOD}:steel_tank", "S": f"{MOD}:electrolytic_separator",
+                                           "P": "#c:plates/steel", "W": f"{MOD}:copper_cable", "C": f"{MOD}:basic_circuit"}),
         "features": ["machines"],
     },
     "gas_burning_generator": {
@@ -723,6 +759,17 @@ HANDBOOK["bio_generator"] = [
         "It makes only as much as its store has room for. It also burns biogas from the Anaerobic Digester, piped into "
         "the same inlet: 268 JE a millibucket at 64 JE/t, a bucket lasting about 210 seconds.",
     ]
+
+HANDBOOK["bulk_electrolytic_separator"] = [
+    "Four wide, four deep and six tall: the Electrolytic Separator's cell housing and collection towers twice as large, "
+    "built from an Electrolytic Separator, two Steel Tanks, steel plates, copper cable and a basic circuit. Every block "
+    "it fills must be free when it is placed.",
+    "It splits water and brine as the Separator does, but four batches at once from 16,000 mB tanks, at 80% of the "
+    "draw a batch: a bucket of water gives its 500 mB of hydrogen for a fifth less power than in an uncarded Separator.",
+    "It takes no upgrade cards: carded, it would make hydrogen cheaper than the factory allows. The feed comes in at "
+    "the back; hydrogen leaves high on the front left, oxygen or chlorine high on the front right, and lye from the "
+    "return below that. Power comes in at the junction box low on the front, under the lye return.",
+]
 
 HANDBOOK["bulk_chemical_oxidizer"] = [
     "Four wide, four deep and six tall: the Chemical Oxidizer's reaction throat, collector hood and feed hopper twice as "
@@ -1562,6 +1609,33 @@ def bulk_chemical_oxidizer_rotor():
 def bulk_chemical_oxidizer_still():
     """The feed screw standing still, for the item model only."""
     return _doubled(chemical_oxidizer_still(), lambda e: False, [((-8, 0, -8), lambda c: True)])
+
+
+# The Bulk Electrolytic Separator: each port's pieces moved half a block off the seams the doubling puts them on
+# (shift, test on the Separator's own element centre).
+BULK_SEPARATOR_PORT_SHIFTS = [
+    # The hydrogen outlet pipe, its bands and collar high on the left tower: outwards and down.
+    ((8, -8, 0), lambda c: 36.9 < c[1] < 43.1 and c[2] < 13 and abs(c[0] - 8) <= 2.1),
+    # The anode gas outlet on the right tower: outwards and down.
+    ((-8, -8, 0), lambda c: 36.9 < c[1] < 43.1 and c[2] < 13 and abs(c[0] + 8) <= 2.1),
+    # The junction box at the foot of the right tower, its socket, insulators and bus bar: inwards and down.
+    ((8, -8, 0), lambda c: -14.1 < c[0] < -4.9 and c[1] < 19 and c[2] < 8),
+    # The lye return above it: inwards and down, and flush with the front so its frame clears the door.
+    ((8, -8, -0.5), lambda c: -13.1 < c[0] < -4.4 and 19 < c[1] < 29 and c[2] < 8),
+    # The feed inlet low at the back: inwards and up.
+    ((-8, 8, 0), lambda c: 4.9 < c[0] < 11.1 and c[1] < 12 and c[2] > 23.9),
+]
+
+
+def bulk_electrolytic_separator():
+    """Four wide, four deep and six tall (the art brief's larger variant): the Electrolytic Separator itself, twice as
+    large: the plinth, the olive cell housing with its stepped door, gunmetal bands and the crown of electrode
+    feedthroughs; the white collection towers with their checker shoulders, domes and level strips; the banded outlet
+    pipes to their collars high on the front, hydrogen on the left and oxygen or chlorine on the right; the junction box
+    with the power socket and the lye return above it; the feed inlet low at the back. The control box (the controller)
+    keeps its size at the front left. Each port's pieces sit at the middle of a block face."""
+    return _doubled(electrolytic_separator(), lambda e: e[0][0] >= 5.2 and e[1][2] <= 7.1 and e[1][1] <= 15.1,
+                    BULK_SEPARATOR_PORT_SHIFTS)
 
 
 # The Fermenter's agitator drive pulley on top of the vessel, turning about y: its centre (x, y, z).
@@ -2599,7 +2673,8 @@ ROTORS = {
     },
 }
 
-MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
+MODELS = {"electrolytic_separator": electrolytic_separator(), "bulk_electrolytic_separator": bulk_electrolytic_separator(),
+          "gas_burning_generator": gas_burning_generator(),
           "chemical_infuser": chemical_infuser(), "bulk_chemical_infuser": bulk_chemical_infuser(),
           "chemical_oxidizer": chemical_oxidizer(), "bulk_chemical_oxidizer": bulk_chemical_oxidizer(),
           "industrial_fermenter": industrial_fermenter(), "bulk_fermenter": bulk_fermenter(),
@@ -2733,6 +2808,14 @@ def also_runs(form):
     family = FORMS[form]["family"]
     return [other for other, info in FORMS.items() if other != form and not FORM_RECIPES.get(other)
             and info["family"] == family and needed and needed <= set(info["capabilities"])]
+
+
+def recipes_run(form):
+    """Every recipe `form` runs: its own list, or, for a larger form without one, the lists of the forms it also runs
+    (also_runs), so audits of energy and loops count the larger forms' profile savings too."""
+    if FORM_RECIPES.get(form):
+        return FORM_RECIPES[form]
+    return [recipe for other in FORM_RECIPES if form in also_runs(other) for recipe in FORM_RECIPES[other]]
 
 
 def recipe_view():

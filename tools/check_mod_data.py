@@ -2927,8 +2927,10 @@ def cheapest_electrolysis(fluid, _seen=None):
             offer(recipe, use)
     percents = {name: int(percent) for name, percent in re.findall(
         r"(\w+)\(\d+, [\d_]+, (\d+)\)", (JAVA_ROOT / "machine" / "form" / "OperatingProfile.java").read_text(encoding="utf-8"))}
-    for form, recipes in industrial_forms.FORM_RECIPES.items():
-        info = industrial_forms.FORMS[form]
+    for form, info in industrial_forms.FORMS.items():
+        recipes = industrial_forms.recipes_run(form)
+        if not recipes:
+            continue
         use = machines.STATS[info["family"]]["use_per_tick"]
         # MachineUpgrades.Effect.use with four efficiency cards, the most that count; then the profile's share of that
         # each lane pays (OperatingProfile.lanePerTick, rounded up), so an expanded or bulk electrolysis form's saving
@@ -3012,7 +3014,7 @@ def check_industrial_forms():
                     err(f"{form}: {fluid} burns for {per_mb} JE/mB, at least the {cost:.1f} JE/mB its cheapest making costs: a power loop")
         tanks = info["input_tanks"] + info["output_tanks"]
         fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
-        for recipe in industrial_forms.FORM_RECIPES.get(form, []):
+        for recipe in industrial_forms.recipes_run(form):
             label = f"{form} recipe {recipe['name']}"
             if recipe["capability"] not in info["capabilities"]:
                 err(f"{label}: needs {recipe['capability']}, which the form does not offer")
@@ -3060,8 +3062,10 @@ def electrolysis_floor_breaches():
         r"(\w+)\(\d+, [\d_]+, (\d+)\)", (JAVA_ROOT / "machine" / "form" / "OperatingProfile.java").read_text(encoding="utf-8"))}
     hydrogen = f"{MOD}:hydrogen"
     breaches = []
-    for form, recipes in industrial_forms.FORM_RECIPES.items():
-        info = industrial_forms.FORMS[form]
+    for form, info in industrial_forms.FORMS.items():
+        recipes = industrial_forms.recipes_run(form)
+        if not recipes:
+            continue
         if info["profile"] == "ENTRY":
             continue
         use = machines.STATS[info["family"]]["use_per_tick"]

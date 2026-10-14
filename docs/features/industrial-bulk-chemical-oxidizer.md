@@ -115,4 +115,4 @@ Not yet run in CI.
 ## Rollout and open questions
 
 - The bill awaits the owner's review.
-- The brief's 4×4×6 Separator waits on the owner's decision about the [electrolysis floor](industrial-electrolysis-floor.md).
+- The brief's 4×4×6 Separator waited on the [electrolysis floor](industrial-electrolysis-floor.md); it is since built without upgrade cards: the [Bulk Electrolytic Separator](industrial-bulk-electrolytic-separator.md).

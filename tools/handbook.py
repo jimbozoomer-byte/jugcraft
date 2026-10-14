@@ -978,6 +978,7 @@ def build():
                 "chlorine, hydrogen and lye. Gases live only in tanks, pipes and gas cylinders."]},
             machine_page("electrolytic_cell"),
             form_page("electrolytic_separator"),
+            form_page("bulk_electrolytic_separator"),
             machine_page("chemical_reactor"),
             form_page("chemical_oxidizer"),
             form_page("bulk_chemical_oxidizer"),

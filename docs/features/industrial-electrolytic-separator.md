@@ -153,7 +153,7 @@ Not applicable: a placed machine, with no world generation, creatures, loot or s
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.
 - **Not done here**:
-  - the 4×4×6 bulk Separator;
+  - the 4×4×6 bulk Separator (since built: the [Bulk Electrolytic Separator](industrial-bulk-electrolytic-separator.md));
   - the electrolysis energy floor, needed before any larger form (since enforced by the data check: [electrolysis floor](industrial-electrolysis-floor.md));
   - a lye disposal route and its pollution record;
   - the peroxide recipe the art brief mentions;

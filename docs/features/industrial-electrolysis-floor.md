@@ -66,4 +66,4 @@ Locally:
 ## Rollout and open questions
 
 - **Owner decision:** whether the entry Separator should also be held to 256 JE/mB. This would mean weaker efficiency cards on it.
-- **Next step:** a 4×4×6 bulk Separator, the brief's larger variant, needs a recipe priced at or above the floor. Taking no efficiency cards would do it: its 800-tick water batch at 80% of 256 JE/t makes 500 mB of hydrogen for about 328 JE/mB. Allowing cards but capping them is another option.
+- **Next step:** a 4×4×6 bulk Separator, the brief's larger variant, needs a recipe priced at or above the floor. Taking no efficiency cards would do it: its 800-tick water batch at 80% of 256 JE/t makes 500 mB of hydrogen for about 328 JE/mB. Allowing cards but capping them is another option. Since built without cards: the [Bulk Electrolytic Separator](industrial-bulk-electrolytic-separator.md), which also extends both checks to larger forms that run a smaller form's recipes.

@@ -7278,7 +7278,9 @@
     {
       "block": "jugcraft:electrolytic_separator",
       "type": "electrolytic_separator",
-      "stations": [],
+      "stations": [
+        "jugcraft:bulk_electrolytic_separator"
+      ],
       "recipes": [
         {
           "items": [],

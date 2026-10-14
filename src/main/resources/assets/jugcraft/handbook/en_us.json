@@ -3830,6 +3830,30 @@
           }
         },
         {
+          "title": "Bulk Electrolytic Separator",
+          "icon": "jugcraft:bulk_electrolytic_separator",
+          "text": [
+            "Four wide, four deep and six tall: the Electrolytic Separator's cell housing and collection towers twice as large, built from an Electrolytic Separator, two Steel Tanks, steel plates, copper cable and a basic circuit. Every block it fills must be free when it is placed.",
+            "It splits water and brine as the Separator does, but four batches at once from 16,000 mB tanks, at 80% of the draw a batch: a bucket of water gives its 500 mB of hydrogen for a fifth less power than in an uncarded Separator.",
+            "It takes no upgrade cards: carded, it would make hydrogen cheaper than the factory allows. The feed comes in at the back; hydrogen leaves high on the front left, oxygen or chlorine high on the front right, and lye from the return below that. Power comes in at the junction box low on the front, under the lye return."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_tank",
+              "jugcraft:electrolytic_separator",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:bulk_electrolytic_separator",
+            "count": 1
+          }
+        },
+        {
           "title": "Chemical Reactor",
           "icon": "jugcraft:chemical_reactor",
           "text": [

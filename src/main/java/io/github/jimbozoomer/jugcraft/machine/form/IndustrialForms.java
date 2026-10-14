@@ -356,6 +356,34 @@ public final class IndustrialForms {
 			.build();
 
 	/**
+	 * The Bulk Electrolytic Separator: the art brief's 4x4x6 variant of the Electrolytic Separator, the same cell
+	 * housing and towers twice as large, in the Electrolytic Cell family with the Separator's tanks and capability, so
+	 * it splits the same water and brine, in the bulk profile: four batches side by side from 16,000 mB tanks at 80% of
+	 * the draw a batch. It takes no upgrade cards, which would put its hydrogen under the electrolysis floor.
+	 */
+	public static final MachineForm BULK_ELECTROLYTIC_SEPARATOR_FORM = MachineForm.builder(Jugcraft.id("bulk_electrolytic_separator"),
+					MachineKind.ELECTROLYTIC_CELL)
+			.layer("C###", "####", "####", "####")
+			.layer(".###", "####", "####", ".##.")
+			.layer(".###", "####", "####", ".##.")
+			.layer(".###", "####", "####", ".##.")
+			.layer("####", "####", "####", ".##.")
+			.layer(".##.", "####", "####", ".##.")
+			.profile(OperatingProfile.BULK)
+			.inputTank("feed")
+			.outputTank("anode_gas")
+			.outputTank("hydrogen")
+			.outputTank("lye")
+			.capability(AQUEOUS_ELECTROLYSIS)
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.FLUID_IN, 0, 1, 3, 1, FormSide.BACK)
+			.port("anode_gas_out", FormPort.Kind.FLUID_OUT, 0, 3, 0, 4, FormSide.FRONT)
+			.port("hydrogen_out", FormPort.Kind.FLUID_OUT, 1, 0, 0, 4, FormSide.FRONT)
+			.port("lye_out", FormPort.Kind.FLUID_OUT, 2, 2, 0, 2, FormSide.FRONT)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 2, 0, 0, FormSide.FRONT)
+			.build();
+
+	/**
 	 * The Bulk Chemical Oxidizer: the art brief's 4x4x6 variant of the Chemical Oxidizer, the same throat, hood and
 	 * hopper twice as large, in the chemical reactor family with the Oxidizer's tanks, feed slot and capability, so it
 	 * burns the same feeds, in the bulk profile: four batches side by side from 16,000 mB tanks at 80% of the draw a batch.
@@ -478,6 +506,7 @@ public final class IndustrialForms {
 			.build();
 
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
+	public static FormMachineBlock BULK_ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock BULK_CHEMICAL_INFUSER;
@@ -500,6 +529,7 @@ public final class IndustrialForms {
 
 	public static void register() {
 		ELECTROLYTIC_SEPARATOR = block("electrolytic_separator", ELECTROLYTIC_SEPARATOR_FORM);
+		BULK_ELECTROLYTIC_SEPARATOR = block("bulk_electrolytic_separator", BULK_ELECTROLYTIC_SEPARATOR_FORM);
 		GAS_BURNING_GENERATOR = block("gas_burning_generator", GAS_BURNING_GENERATOR_FORM);
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
 		BULK_CHEMICAL_INFUSER = block("bulk_chemical_infuser", BULK_CHEMICAL_INFUSER_FORM);
@@ -515,9 +545,10 @@ public final class IndustrialForms {
 		LARGE_BIO_GENERATOR = block("large_bio_generator", LARGE_BIO_GENERATOR_FORM);
 		LARGE_GAS_BURNING_GENERATOR = block("large_gas_burning_generator", LARGE_GAS_BURNING_GENERATOR_FORM);
 		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, BULK_CHEMICAL_INFUSER,
-				CHEMICAL_OXIDIZER, BULK_CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER,
-				COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, BULK_ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR,
+				CHEMICAL_INFUSER, BULK_CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, BULK_CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_FERMENTER,
+				BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, LARGE_BIO_GENERATOR,
+				LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}
