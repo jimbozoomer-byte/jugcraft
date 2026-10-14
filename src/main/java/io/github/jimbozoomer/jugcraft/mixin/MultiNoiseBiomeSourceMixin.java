@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
+import io.github.jimbozoomer.jugcraft.world.AdamOndiAhman;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
@@ -17,7 +18,8 @@ import org.spongepowered.asm.mixin.injection.At;
  * Jugcraft layout ({@link JugcraftRegions}); everywhere else vanilla answers. In 26.3 a multi-noise source answers
  * through resolvers ({@code createResolver} and {@code createResolverForChunk}) whose lambdas turn a place (quart x,
  * y, z) into a climate and look it up; this wraps that lookup, where the place is known. Every biome lookup of world
- * generation, structures, spawning and /locate goes through one of the two.
+ * generation, structures, spawning and /locate goes through one of the two. Round an Adam-ondi-Ahman valley's site
+ * the answer is then the valley's ({@link AdamOndiAhman#override}).
  */
 @Mixin(MultiNoiseBiomeSource.class)
 public abstract class MultiNoiseBiomeSourceMixin {
@@ -30,7 +32,7 @@ public abstract class MultiNoiseBiomeSourceMixin {
 	private Holder<Biome> jugcraft$regions(MultiNoiseBiomeSource source, Climate.TargetPoint target, Operation<Holder<Biome>> original,
 			@Local(argsOnly = true, ordinal = 0) int x, @Local(argsOnly = true, ordinal = 2) int z) {
 		Holder<Biome> biome = jugcraft$regionState.biome(source, x, z, target);
-		return biome != null ? biome : original.call(source, target);
+		return AdamOndiAhman.override(source, x, z, target, biome != null ? biome : original.call(source, target));
 	}
 
 	@WrapOperation(method = "/^lambda\\$createResolverForChunk\\$.*/", at = @At(value = "INVOKE",
@@ -39,6 +41,6 @@ public abstract class MultiNoiseBiomeSourceMixin {
 	private Holder<Biome> jugcraft$regionsForChunk(MultiNoiseBiomeSource source, Climate.TargetPoint target,
 			Operation<Holder<Biome>> original, @Local(argsOnly = true, ordinal = 3) int x, @Local(argsOnly = true, ordinal = 5) int z) {
 		Holder<Biome> biome = jugcraft$regionState.biome(source, x, z, target);
-		return biome != null ? biome : original.call(source, target);
+		return AdamOndiAhman.override(source, x, z, target, biome != null ? biome : original.call(source, target));
 	}
 }

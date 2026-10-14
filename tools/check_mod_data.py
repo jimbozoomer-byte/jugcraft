@@ -2715,6 +2715,10 @@ def check_biomes():
         if info.get("dimension") in ("nether", "end"):
             if f"{MOD}:{name}" in {rule["biome"] for rule in bm.RULES} or "surface" in info or info["seasons"]:
                 err(f"{name}: a {info['dimension']} biome has region rules, an Overworld surface or seasons")
+        elif info.get("placement") == "site":
+            # Placed round its sites by Java (world/AdamOndiAhman), never by a region rule.
+            if f"{MOD}:{name}" in {rule["biome"] for rule in bm.RULES}:
+                err(f"{name}: a biome placed round its sites also has region rules")
         elif f"{MOD}:{name}" not in {rule["biome"] for rule in bm.RULES}:
             err(f"No region rule places the {name} biome")
         if lang.get(f"biome.{MOD}.{name}") != info["display"]:
@@ -2812,6 +2816,122 @@ def check_wood_switches():
         if missing:
             err(f"{what} is placed by {sorted(missing)}, which the {wood} wood's switches {ag.WOOD_SWITCHES.get(wood)} "
                 f"lack (agriculture.WOOD_SWITCHES, TREES.md rule 4)")
+
+
+def check_adam_ondi_ahman():
+    """Adam-ondi-Ahman (docs/features/adam-ondi-ahman.md): Java's numbers match tools/adam_ondi_ahman.py; the knoll as its
+    template builds it has three altars stacked with nothing missing under an upper one, the Ancient Altar alone on the
+    top with room to stand beside it, a path up the south side a block at a time with headroom, and the old settlement and
+    the spring off the mound; the committed template, structure, structure set and pool are current and wired together;
+    the biome is placed round its sites and by no rule; and the hooks (biome lookups, the climate table, the mod's start)
+    are in place."""
+    import adam_ondi_ahman as aa
+    import adam_ondi_ahman_data as aad
+    import math
+    from lair_layout import template
+    from retro_game_shop import nbt_bytes
+    java = (WORLD_JAVA / "AdamOndiAhman.java").read_text(encoding="utf-8")
+    suitable = aa.SUITABLE
+    for expected in (f'FEATURE = "{aa.FEATURE}"', f'Jugcraft.id("{aa.BIOME}")', f'Jugcraft.id("{aa.STRUCTURE}")',
+                     f'Jugcraft.id("{aa.ALTAR}")', f'Jugcraft.id("{aa.PLACEMENT}"), AdamOndiAhmanPlacement.CODEC',
+                     f"SPACING = {aa.SPACING};", f"MIN_SPACING = {aa.MIN_SPACING};", f"MAX_SPACING = {aa.MAX_SPACING};",
+                     f"CHANCE = {aa.CHANCE};", f"RADIUS = {aa.RADIUS};", f"WOBBLE = {aa.WOBBLE};", "INSET = RADIUS + WOBBLE + 64;",
+                     f"START_MIN = {aa.START['min']};", f"START_MAX = {aa.START['max']};", f"START_STEP = {aa.START['step']};",
+                     f"START_ANGLE = {aa.START['angle']};", f"ORIGIN_CLEARANCE = {aa.ORIGIN_CLEARANCE};",
+                     f"CONTINENTALNESS = {suitable['continentalness']}F;", f"EROSION = {suitable['erosion']}F;",
+                     f"TEMPERATURE_MIN = {suitable['temperature'][0]}F;", f"TEMPERATURE_MAX = {suitable['temperature'][1]}F;",
+                     f"HUMIDITY_MIN = {suitable['humidity'][0]}F;", f"HUMIDITY_MAX = {suitable['humidity'][1]}F;",
+                     f"PEAKS_VALLEYS = {suitable['peaks_valleys']}F;", f"REACH = {aa.REACH};", f"GROUND_MIN = {aa.GROUND['min']};",
+                     f"GROUND_MAX = {aa.GROUND['max']};", f"MAX_SLOPE = {aa.GROUND['slope']};", f"DEPTH = {aa.DEPTH}F;",
+                     f"KNOLL_GROUND = {aa.KNOLL_GROUND};"):
+        if expected not in java:
+            err(f"AdamOndiAhman.java has no {expected} (tools/adam_ondi_ahman.py)")
+    if aa.INSET != aa.RADIUS + aa.WOBBLE + 64 or aa.MIN_SPACING <= 2 * aa.INSET:
+        err("tools/adam_ondi_ahman.py: a rare valley must sit INSET (RADIUS + WOBBLE + 64) inside a cell of at least MIN_SPACING")
+    if aa.KNOLL_GROUND < max(aa.SIZE[0], aa.SIZE[2]) or aa.KNOLL_GROUND >= aa.RADIUS - aa.WOBBLE:
+        err("tools/adam_ondi_ahman.py: KNOLL_GROUND must cover the knoll's template however it turns, inside the valley")
+    if aa.START["min"] <= aa.RADIUS + aa.WOBBLE or aa.START_HEIGHT != -(aa.GROUND_Y + 1):
+        err("tools/adam_ondi_ahman.py: the start valley must clear the start, and the template's ground lie on the land's surface")
+    config = CONFIG.read_text(encoding="utf-8")
+    for option, value in (("start", "on"), ("spacing", aa.SPACING), ("chance", aa.CHANCE)):
+        if f'"adam_ondi_ahman.{option}", "{value}"' not in config:
+            err(f"JugcraftConfig has no adam_ondi_ahman.{option} defaulting to {value}")
+    if aa.FEATURE not in FEATURES:
+        err(f"{aa.FEATURE} is not a feature switch")
+    mixin = (JAVA_ROOT / "mixin" / "MultiNoiseBiomeSourceMixin.java").read_text(encoding="utf-8")
+    if mixin.count("AdamOndiAhman.override(source, x, z, target, ") != 2:
+        err("MultiNoiseBiomeSourceMixin does not answer the valley in both resolvers (AdamOndiAhman.override)")
+    if "AdamOndiAhman.addToOverworld(" not in (JAVA_ROOT / "mixin" / "OverworldBiomeBuilderMixin.java").read_text(encoding="utf-8"):
+        err("OverworldBiomeBuilderMixin does not list the valley in the Overworld's table")
+    if "AdamOndiAhman.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft.java does not register Adam-ondi-Ahman")
+    if "AdamOndiAhman.isSiteChunk(x, z)" not in (WORLD_JAVA / "AdamOndiAhmanPlacement.java").read_text(encoding="utf-8"):
+        err("AdamOndiAhmanPlacement does not place the knolls at the valleys' sites")
+    altar_java = (WORLD_JAVA / "AncientAltarBlock.java").read_text(encoding="utf-8")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if f'"message.{MOD}.adam_ondi_ahman.dormant"' not in altar_java or lang.get(f"message.{MOD}.adam_ondi_ahman.dormant") != aa.DORMANT:
+        err("The Ancient Altar's dormant message is missing from AncientAltarBlock.java or the lang file")
+    if lang.get(f"block.{MOD}.{aa.ALTAR}") != aa.ALTAR_DISPLAY or lang.get(f"biome.{MOD}.{aa.BIOME}") != aa.DISPLAY:
+        err("Adam-ondi-Ahman's biome or the Ancient Altar has no name")
+    info = bm.BIOMES.get(aa.BIOME, {})
+    if info.get("placement") != "site" or info.get("display") != aa.DISPLAY:
+        err(f"tools/biomes.py: {aa.BIOME} must be placed round its sites (\"placement\": \"site\")")
+    if aa.STRUCTURE_TAG not in bm.biome_tags(aa.BIOME):
+        err(f"The {aa.BIOME} biome is not in {aa.STRUCTURE_TAG}, so its knoll cannot stand there")
+    tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_structure" / f"{aa.STRUCTURE}.json") or {}
+    if tag.get("values") != [f"{MOD}:{aa.BIOME}"]:
+        err(f"{aa.STRUCTURE_TAG} should hold the valley alone: {tag.get('values')}")
+    folder = DATA / MOD / "worldgen"
+    for path, wanted in ((folder / "structure" / f"{aa.STRUCTURE}.json", aad.structure()),
+                         (folder / "structure_set" / f"{aa.STRUCTURE_SET}.json", aad.structure_set()),
+                         (folder / "template_pool" / f"{aa.POOL}.json", aad.template_pool())):
+        if load(path) != wanted:
+            err(f"{path.relative_to(ROOT)} is out of date (run tools/generate_material_data.py)")
+    blocks = aa.blocks()
+    nbt = DATA / MOD / "structure" / f"{aa.TEMPLATE}.nbt"
+    if not nbt.is_file() or nbt.read_bytes() != nbt_bytes(template(blocks, aa.SIZE)):
+        err(f"{nbt.relative_to(ROOT)} is out of date (run tools/generate_material_data.py)")
+    # The knoll itself.
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    open_ = lambda pos: name(pos) in (None, "minecraft:air", "minecraft:short_grass", "minecraft:tall_grass")
+    if any(not all(0 <= pos[i] < aa.SIZE[i] for i in range(3)) for pos in blocks):
+        err("The knoll's template has blocks outside its size")
+    altars = [pos for pos, state in blocks.items() if state[0] == f"{MOD}:{aa.ALTAR}"]
+    if altars != [aa.ALTAR_POS]:
+        err(f"The knoll should hold one Ancient Altar, at {aa.ALTAR_POS}: {altars}")
+    cx, cz = aa.CENTRE
+    for i in range(1, len(aa.TIERS)):
+        half = aa.TIERS[i][0]
+        for x in range(cx - half, cx + half + 1):
+            for z in range(cz - half, cz + half + 1):
+                if open_((x, aa.CROWN_Y + i, z)) or open_((x, aa.CROWN_Y + i + 1, z)):
+                    err(f"The knoll's altar {i + 1} has a gap at {x} {z}, or nothing under it")
+    ax, ay, az = aa.ALTAR_POS
+    if open_((ax, ay - 1, az)) or not any(open_((ax + dx, ay, az + dz)) and open_((ax + dx, ay + 1, az + dz))
+                                          for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+        err("The Ancient Altar does not lie on the top altar with room to stand beside it")
+    tops = aa.heights()
+    path = [tops[(cx, z)] for z in range(cz + aa.MOUND["crown"], aa.SIZE[2])]
+    if any(abs(a - b) > 1 for a, b in zip(path, path[1:])):
+        err(f"The path up the knoll climbs more than a block at a time: {path}")
+    for z in range(cz + aa.MOUND["crown"] + 1, aa.SIZE[2]):
+        for x in range(cx - aa.PATH_HALF, cx + aa.PATH_HALF + 1):
+            top = tops[(x, z)]
+            if not open_((x, top + 1, z)) or not open_((x, top + 2, z)):
+                err(f"The path up the knoll has no headroom at {x} {z}")
+    footings = [(x, z) for x0, z0, x1, z1 in aa.CABINS for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)]
+    for (sx, sz), r in (aa.SPRING, aa.GATHERING):
+        footings += [(x, z) for x in range(sx - r - 1, sx + r + 2) for z in range(sz - r - 1, sz + r + 2) if math.hypot(x - sx, z - sz) <= r + 0.5]
+    if any(aa.mound_height(x, z) for x, z in footings):
+        err("Part of the old settlement or the spring sits on the knoll's mound")
+    for x in range(aa.SIZE[0]):
+        for z in range(aa.SIZE[2]):
+            if name((x, aa.GROUND_Y, z)) is None:
+                err(f"The knoll's template has no ground at {x} {z}")
+            for y in range(aa.SIZE[1] - 1):
+                if blocks.get((x, y, z)) == ("minecraft:tall_grass", (("half", "lower"),)) \
+                        and blocks.get((x, y + 1, z)) != ("minecraft:tall_grass", (("half", "upper"),)):
+                    err(f"Tall grass at {x} {y} {z} has no top")
 
 
 def check_alpine():
@@ -14824,6 +14944,7 @@ def main():
     check_plastic()
     check_seasons()
     check_alpine()
+    check_adam_ondi_ahman()
     check_biomes()
     check_wood_switches()
     check_machines(registered)

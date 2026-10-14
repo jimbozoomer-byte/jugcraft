@@ -1,0 +1,202 @@
+package io.github.jimbozoomer.jugcraft.test;
+
+import com.mojang.datafixers.util.Pair;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
+import io.github.jimbozoomer.jugcraft.world.AdamOndiAhman;
+import io.github.jimbozoomer.jugcraft.world.AdamOndiAhmanPlacement;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Adam-ondi-Ahman (docs/features/adam-ondi-ahman.md): the valley's biome, the knoll's structure, set, pool and template
+ * load and fit together; the biome is listed in the Overworld's table where no climate reaches it; the Ancient Altar
+ * cannot be broken and only says it is dormant; the rare valleys' sites keep to their cells, in about the share the
+ * settings give; and the climate a knoll needs. Where the valleys land in a real world is
+ * AdamOndiAhmanClientGameTests'.
+ */
+public class AdamOndiAhmanGameTests {
+	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-test");
+	private static final BlockPos STAND = new BlockPos(1, 2, 1);
+	/** tools/adam_ondi_ahman.py SIZE. */
+	private static final Vec3i SIZE = new Vec3i(48, 18, 48);
+
+	/** The biome, the knoll's structure, its set and its pool load; the knoll stands in the valley alone, placed at its sites. */
+	@GameTest
+	public void valleyAndKnollFilesLoad(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var access = level.registryAccess();
+		Holder<Biome> valley = access.lookupOrThrow(Registries.BIOME).getOrThrow(AdamOndiAhman.BIOME);
+		helper.assertTrue(valley.is(BiomeTags.IS_OVERWORLD), "Adam-ondi-Ahman is not an Overworld biome");
+		Holder<Structure> knoll = access.lookupOrThrow(Registries.STRUCTURE).getOrThrow(AdamOndiAhman.KNOLL);
+		helper.assertTrue(knoll.value().biomes().size() == 1 && knoll.value().biomes().contains(valley),
+				"The knoll may stand outside the valley: " + knoll.value().biomes());
+		StructureSet set = access.lookupOrThrow(Registries.STRUCTURE_SET)
+				.getOrThrow(ResourceKey.create(Registries.STRUCTURE_SET, Jugcraft.id("altar_knolls"))).value();
+		helper.assertTrue(set.placement() instanceof AdamOndiAhmanPlacement, "The knolls are not placed at the valleys' sites: " + set.placement());
+		helper.assertTrue(set.structures().size() == 1 && set.structures().get(0).structure().is(AdamOndiAhman.KNOLL),
+				"The knolls' set holds " + set.structures());
+		helper.assertTrue(access.lookupOrThrow(Registries.TEMPLATE_POOL).containsKey(Jugcraft.id("adam_ondi_ahman/altar_knoll")),
+				"No template pool jugcraft:adam_ondi_ahman/altar_knoll");
+		helper.succeed();
+	}
+
+	/** The valley is listed once in vanilla's Overworld table, where no climate reaches it: only its sites place it. */
+	@GameTest
+	public void valleyIsListedWhereNoClimateReaches(GameTestHelper helper) {
+		List<Pair<Climate.ParameterPoint, Holder<Biome>>> table = helper.getLevel().registryAccess()
+				.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST).getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD)
+				.value().parameters().values();
+		List<Pair<Climate.ParameterPoint, Holder<Biome>>> listed = table.stream().filter(entry -> entry.getSecond().is(AdamOndiAhman.BIOME)).toList();
+		helper.assertTrue(listed.size() == 1 && listed.get(0).getFirst().equals(JugcraftRegions.UNREACHABLE),
+				"Adam-ondi-Ahman is listed " + listed.size() + " times in the Overworld's table, not once where no climate reaches");
+		helper.succeed();
+	}
+
+	/** The knoll's template loads, at the size tools/adam_ondi_ahman.py gives it, with the Ancient Altar in it, in this game's data version. */
+	@GameTest
+	public void knollTemplateLoads(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Identifier path = Jugcraft.id("structure/adam_ondi_ahman/altar_knoll.nbt");
+		CompoundTag tag;
+		try (InputStream in = level.getServer().getResourceManager().getResourceOrThrow(path).open()) {
+			tag = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
+		} catch (IOException e) {
+			throw helper.assertionException("Could not read " + path + ": " + e);
+		}
+		StructureTemplate template = new StructureTemplate();
+		template.load(level.registryAccess().lookupOrThrow(Registries.BLOCK), tag);
+		helper.assertTrue(template.getSize().equals(SIZE), "The knoll's template is " + template.getSize() + ", not " + SIZE);
+		CompoundTag saved = template.save(new CompoundTag());
+		helper.assertTrue(tag.getIntOr("DataVersion", -1) == saved.getIntOr("DataVersion", -2), "The template's DataVersion is not the game's");
+		ListTag palette = saved.getListOrEmpty("palette");
+		List<String> names = new ArrayList<>();
+		for (int i = 0; i < palette.size(); i++) {
+			names.add(palette.getCompoundOrEmpty(i).getStringOr("id", "?"));
+		}
+		for (String wanted : List.of("jugcraft:ancient_altar", "minecraft:grass_block", "minecraft:mossy_cobblestone", "minecraft:stone_bricks",
+				"minecraft:chiseled_stone_bricks", "minecraft:oak_log", "minecraft:water")) {
+			helper.assertTrue(names.contains(wanted), "The knoll's template has no " + wanted + ": " + names);
+		}
+		helper.succeed();
+	}
+
+	/** The Ancient Altar cannot be broken or blown up and has no item; used, it only says it is dormant, and stays. */
+	@GameTest
+	public void ancientAltarIsDormantAndUnbreakable(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.setBlock(STAND, AdamOndiAhman.ANCIENT_ALTAR.defaultBlockState());
+		BlockPos at = helper.absolutePos(STAND);
+		BlockState state = level.getBlockState(at);
+		helper.assertTrue(state.getDestroySpeed(level, at) < 0.0F, "The Ancient Altar can be broken");
+		helper.assertTrue(AdamOndiAhman.ANCIENT_ALTAR.getExplosionResistance() >= 3600000.0F, "The Ancient Altar can be blown up");
+		helper.assertTrue(AdamOndiAhman.ANCIENT_ALTAR.asItem() == Items.AIR, "The Ancient Altar has an item");
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		InteractionResult result = state.useWithoutItem(level, player, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
+		helper.assertTrue(result.consumesAction(), "Using the Ancient Altar did nothing: " + result);
+		helper.assertTrue(level.getBlockState(at).is(AdamOndiAhman.ANCIENT_ALTAR), "Using the Ancient Altar changed it");
+		helper.succeed();
+	}
+
+	/**
+	 * The rare valleys' sites: about the configured share of cells has one; each is a chunk's corner, the same every time
+	 * for a seed and different for another seed, and its whole valley (its wavering edge too) stays inside its own cell.
+	 */
+	@GameTest
+	public void rareValleySitesKeepToTheirCells(GameTestHelper helper) {
+		int cells = AdamOndiAhman.SPACING;
+		int share = (int) Math.round(AdamOndiAhman.CHANCE * 65536);
+		long print = AdamOndiAhman.fingerprint(1838L);
+		long other = AdamOndiAhman.fingerprint(1839L);
+		int total = 0;
+		int with = 0;
+		int differ = 0;
+		int reach = AdamOndiAhman.RADIUS + AdamOndiAhman.WOBBLE;
+		for (int cx = -30; cx < 30; cx++) {
+			for (int cz = -30; cz < 30; cz++) {
+				total++;
+				AdamOndiAhman.Site site = AdamOndiAhman.candidate(print, cx, cz, cells, share);
+				if (!Objects.equals(site, AdamOndiAhman.candidate(print, cx, cz, cells, share))) {
+					throw helper.assertionException("Cell " + cx + " " + cz + " has a different site each time");
+				}
+				if (!Objects.equals(site, AdamOndiAhman.candidate(other, cx, cz, cells, share))) {
+					differ++;
+				}
+				if (site == null) {
+					continue;
+				}
+				with++;
+				helper.assertTrue(Math.floorMod(site.x(), 16) == 0 && Math.floorMod(site.z(), 16) == 0, "Site " + site + " is not a chunk's corner");
+				for (int[] edge : new int[][] {{-reach, 0}, {reach, 0}, {0, -reach}, {0, reach}}) {
+					helper.assertTrue(Math.floorDiv(site.x() + edge[0], cells) == cx && Math.floorDiv(site.z() + edge[1], cells) == cz,
+							"The valley round " + site + " reaches out of its cell " + cx + " " + cz);
+				}
+				helper.assertTrue(AdamOndiAhman.inValley(site, site.x(), site.z())
+						&& AdamOndiAhman.inValley(site, site.x() + AdamOndiAhman.RADIUS - AdamOndiAhman.WOBBLE, site.z())
+						&& !AdamOndiAhman.inValley(site, site.x(), site.z() + reach + 1), "The valley round " + site + " is not where its radius says");
+			}
+		}
+		double fraction = with / (double) total;
+		LOGGER.info("Adam-ondi-Ahman: {} of {} cells hold a candidate site ({}; setting {}); {} differ with the next seed", with, total,
+				String.format("%.3f", fraction), AdamOndiAhman.CHANCE, differ);
+		helper.assertTrue(Math.abs(fraction - AdamOndiAhman.CHANCE) < 0.05, "The share of cells with a site is " + fraction);
+		helper.assertTrue(differ > total / 4, "Another seed changes only " + differ + " of " + total + " cells");
+		helper.succeed();
+	}
+
+	/** A knoll needs a temperate inland climate: not the sea, the mountains, the desert, the frozen north, the jungle or a river's bed. */
+	@GameTest
+	public void climateSuitsAKnoll(GameTestHelper helper) {
+		helper.assertTrue(AdamOndiAhman.climateSuits(Climate.target(0.1F, 0.0F, 0.3F, 0.2F, 0.0F, 0.5F)), "Temperate inland land does not suit");
+		List<String> refused = new ArrayList<>();
+		for (Object[] land : new Object[][] {
+				{"the sea", Climate.target(0.1F, 0.0F, -0.5F, 0.2F, 0.0F, 0.5F)},
+				{"the mountains", Climate.target(0.1F, 0.0F, 0.3F, -0.8F, 0.0F, 0.5F)},
+				{"the desert", Climate.target(0.8F, -0.5F, 0.3F, 0.2F, 0.0F, 0.5F)},
+				{"the frozen north", Climate.target(-0.6F, 0.0F, 0.3F, 0.2F, 0.0F, 0.5F)},
+				{"the jungle", Climate.target(0.1F, 0.5F, 0.3F, 0.2F, 0.0F, 0.5F)},
+				{"a river's bed", Climate.target(0.1F, 0.0F, 0.3F, 0.2F, 0.0F, 0.0F)}}) {
+			if (AdamOndiAhman.climateSuits((Climate.TargetPoint) land[1])) {
+				refused.add((String) land[0]);
+			}
+		}
+		helper.assertTrue(refused.isEmpty(), "These suit a knoll: " + refused);
+		helper.assertTrue(Math.abs(AdamOndiAhman.peaksAndValleys(0.0F) + 1.0F) < 1.0E-5F && Math.abs(AdamOndiAhman.peaksAndValleys(2.0F / 3.0F) - 1.0F) < 1.0E-6F,
+				"Peaks and valleys are not vanilla's");
+		helper.succeed();
+	}
+}
