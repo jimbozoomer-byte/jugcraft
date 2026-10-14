@@ -11,8 +11,7 @@ cleared; those changes pass in CI too (run 38591108210 on `25644502a`). Not play
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B") and the same day answered
 B-D2 ("Use your water sets as Rime") and B-D3 ("A timed brew"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B4).
-Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code (Claude Opus 5.5); the model is named in the
-commit trailers.
+Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Practitioner stage (Jugcraft Discovery tier). Winter Brine needs only the Alembic Arts; the
 travel kit is crafted from Overworld things before the Adept stage, and its foci and bangle work for a Rimekeeper.
 Primary specialty and supported player role: the Alembists (the winter workshop) and the Rimekeepers (the travel kit);
@@ -185,7 +184,7 @@ Audits: `check_alchemy` mirrors `RIME_KEEP_*` and accepts a status only if Jugcr
 class and registration, the Yeti's chill, the economy loop, every word, the owner's icon and the dossier's fact (text
 and icons, reading `Frostward.STATUS`). See [Checks run for the unit](#checks-run-for-the-unit).
 
-Implemented with Claude Code (Claude Opus 5.5).
+Implemented with Claude Code; the model is named in the commit trailers.
 
 ## 2. The Rimekeeper's travel kit (B-10)
 
@@ -430,7 +429,7 @@ Brace through the boundary, nobody's cast, never saved; every item's owner model
 Overworld things and colliding with no other; slots and tags; the heavy model's bones and each sheet's fit; no mixin
 touching powder snow; the codex). `check_ember_regalia` reads `SLOT_ITEMS` and keeps Ember's own pieces in it.
 
-Implemented with Claude Code (Claude Opus 5.5).
+Implemented with Claude Code; the model is named in the commit trailers.
 
 ### Changes from the plan and the contract
 
@@ -534,7 +533,7 @@ and unit 3's `anAllyARitualAndRootedThalliteAreElective` and `thalliteIsAStrataS
 
 Audit: the new `check_winter_links`.
 
-Implemented with Claude Code (Claude Opus 5.5).
+Implemented with Claude Code; the model is named in the commit trailers.
 
 ## Checks run for the unit
 

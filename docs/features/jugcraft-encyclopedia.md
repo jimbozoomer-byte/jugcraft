@@ -187,4 +187,4 @@ within the body's reach, on opening, after Tab, scrolled to the end and at GUI s
 edge beside a scroll bar: that is the scrolling. In that run's previews `_home_end` shows each card's last paragraph and
 its link whole, "Open Magic: the Arcane Concordance ›" wrapped onto two lines, and `_home_scale1` both cards whole with
 each link on one line and no scroll bar to be seen. The
-stacked layout (a GUI narrower than 384) is not exercised. AI-assisted implementation with Claude Code (Claude Opus 5.5).
+stacked layout (a GUI narrower than 384) is not exercised. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
