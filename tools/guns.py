@@ -723,6 +723,34 @@ GUNS = {
         "damage": 12.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 3,
         "reload": 44, "spread": (2.0, 0.3), "range": 96, "ammo": "energy_cell", "shot": "beam", "charge": 900,
     },
+    # Slice 14A, the first of the owner's guns whose item models name treated brass as their base texture: the Howler,
+    # the M22 Waltz and the Osgood 50. A heavy pistol fed from a box magazine ahead of its trigger, its bolt worked after
+    # each shot; a light target pistol held in one hand; and a break-top revolver that, as the Parley Revolver, is held
+    # in both hands as a carbine with a stock fitted.
+    "holler_pistol": {
+        "display": "Holler Pistol",
+        "source": "howler",
+        "tooltip": "A heavy pistol held in both hands, fed from a box magazine ahead of its trigger and its bolt worked "
+                   "after each shot. Fires rifle rounds.",
+        "damage": 12.0, "pellets": 1, "interval": 22, "auto": False, "capacity": 10,
+        "reload": 58, "spread": (3.0, 0.6), "range": 80, "ammo": "rifle_round",
+    },
+    "minuet_pistol": {
+        "display": "Minuet Pistol",
+        "source": "m22_waltz",
+        "tooltip": "A light target pistol held in one hand, quick to fire and, aimed, the truest of them. Fires light "
+                   "rounds.",
+        "damage": 3.5, "pellets": 1, "interval": 5, "auto": False, "capacity": 10,
+        "reload": 48, "spread": (2.0, 0.25), "range": 64, "ammo": "light_round",
+    },
+    "half_crown_revolver": {
+        "display": "Half-Crown Revolver",
+        "source": "osgood_50",
+        "tooltip": "A break-top revolver held in one hand, its barrel tipped down to load the cylinder a round at a time. "
+                   "With a stock fitted it is held in both hands, as a carbine. Fires rifle rounds.",
+        "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 6,
+        "reload": (9, 13, 14), "spread": (2.5, 0.6), "range": 64, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -945,6 +973,13 @@ RECIPES = {
                                          "B": "#c:ingots/brass"}),
     "lantern_musket": (["SSN", "PAB"], {"S": "#c:ingots/steel", "N": "minecraft:lantern", "P": "#minecraft:planks",
                                         "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
+    # Slice 14A: steel and brass, as the library's other treated-brass guns, and a lever. The Holler Pistol's barrel is
+    # two steel ingots long; the Minuet Pistol is small; the Half-Crown Revolver takes a silver ingot for the coin it is
+    # named for.
+    "holler_pistol": (["SSB", " LB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
+    "minuet_pistol": (["SB", "LB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
+    "half_crown_revolver": (["SBV", " LB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "V": "#c:ingots/silver",
+                                             "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -955,7 +990,9 @@ RECIPE_SWITCHES.update({gun: ("machines",) for gun, spec in GUNS.items() if spec
 # How each gun is built from the owner's parts, in the owner's model space (Java item-model pixels: x east, y up,
 # z south; the muzzle points north, -z). Each bone: (name, parent, [parts], pivot). The pivots are where the
 # animations turn each part about: the gun body turns about the grip in the right hand, the moving parts about
-# their own centres (docs/features/guns.md has the survey of the animations that chose them).
+# their own centres (docs/features/guns.md has the survey of the animations that chose them). Slice 14A's guns' bodies
+# turn about the model's origin (8, 0, 8), under the middle of the gun: about the grip, the Holler Pistol's reload
+# swung the back of the gun into the view, and the Minuet Pistol's brought the back of its slide up into it.
 # "hands": where the right hand holds the grip and the left hand holds the gun in the idle pose. The arm bones are
 # children of gun_body, so the hands go where the gun goes; each one's pivot is the hand, placed so that the idle
 # animation's offset brings it to these points (arm_pivot()). A one-handed gun's idle hides the left arm; its
@@ -2342,6 +2379,64 @@ BUILDS = {
         "sight": (8.0, 5.35, 14.24),
         "eye_relief": 3.5,
     },
+    # Slice 14A. The Howler's magazine stands ahead of its trigger guard, and the left hand holds it from below. Its bolt
+    # is the owner's bolt part, the knobs out to either side, drawn back after each shot. Its magazine_2 and no_sights
+    # bones, which its reload and inspection only hide or tip, hold nothing. Its sight is the ring at the back.
+    "holler_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 0.0, 8.0)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel", "sights"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 4.92, 9.78)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 3.3, 10.4)),
+            ("magazine_2", "gun_body", [], (8.0, 3.3, 10.4)),
+            ("no_sights", "gun_body", [], (8.0, 5.9, 15.5)),
+        ],
+        "hands": {"right": (8.0, 1.9, 15.6), "left": (8.0, 0.4, 10.4)},
+        "arms": {"right": (0.0795, -0.6036, 0.7933), "left": (0.7663, -0.588, 0.2588)},
+        "muzzle": (8.0, 4.57, -5.3),
+        "sight": (8.0, 6.23, 15.49),
+        "eye_relief": 5.0,
+    },
+    # The M22 Waltz is held in one hand; its idle hides the left arm, which comes in to drive the magazine home. Its
+    # slide is the owner's "receiver" part (the animations call it the bolt). Its magazine is only the base plate under
+    # the grip, which the reload drops; magazine_2, which every other animation hides, holds nothing.
+    "minuet_pistol": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 0.0, 8.0)),
+            ("gun_body", "gun_body2", ["main", "stan_barrel", "sights"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", ["receiver"], (8.0, 5.4, 14.2)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 0.25, 15.8)),
+            ("magazine_2", "gun_body", [], (8.0, 0.25, 15.8)),
+        ],
+        "hands": {"right": (8.0, 1.3, 15.4), "left": (8.0, -0.6, 16.0)},
+        "hand_pose": {"left": ("reload", "1.6667")},
+        "arms": {"right": (0.1217, -0.4369, 0.8912), "left": (0.7663, -0.588, 0.2588)},
+        "muzzle": (8.0, 5.1, 7.2),
+        "sight": (8.0, 6.6, 14.11),
+        "eye_relief": 3.0,
+    },
+    # The Osgood 50 breaks open: its barrel (the stan_barrel part with the main part's 3rd to 5th and 10th to 14th
+    # elements: the lug under the barrel, the core of the cylinder, the top strap and both sights) tips down about the
+    # hinge at the bottom front of the frame, raising the cylinder (the owner's drum part, on it), which turns as each
+    # round goes in. As the Parley Revolver it is held in one hand, and in both with a stock fitted, as a carbine
+    # (CARBINES). Its hammer is the owner's hammer part; its bolt, seal and shell bones hold nothing. Its sight is the
+    # notch at the back of the top strap.
+    "half_crown_revolver": {
+        "bones": [
+            ("gun_body", None, ["main-#2,3,4,9,10,11,12,13"], (8.0, 0.0, 8.0)),
+            ("barrel", "gun_body", ["main#2,3,4,9,10,11,12,13", "stan_barrel"], (8.0, 2.1, 7.3)),
+            ("magazine", "barrel", ["drum"], (7.97, 4.12, 8.89)),
+            ("hammer", "gun_body", ["hammer"], (8.0, 4.6, 13.7)),
+            ("bolt", "gun_body", [], (8.0, 5.0, 12.0)),
+            ("seal", "gun_body", [], (8.0, 6.3, 12.0)),
+            ("shell", "gun_body", [], (8.0, 4.12, 10.5)),
+        ],
+        "hands": {"right": (8.0, 1.2, 15.6), "left": (6.6, 5.0, 7.4)},
+        "hand_pose": {"left": ("reload_loop", "0.2083")},
+        "arms": {"right": (0.25, -0.433, 0.866), "left": (0.9114, -0.3782, 0.1626)},
+        "muzzle": (8.0, 5.22, 2.5),
+        "sight": (8.0, 6.6, 12.7),
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2537,9 +2632,12 @@ ATTACHMENTS = {
     # The scopes, on the optic slot: they take the place of the gun's iron sights (the owner's "sights" part; their
     # "no_sights" part, a rail on the Riveter, shows with the scope). A scope steadies the aim and narrows the view;
     # the two magnifying ones are clumsy from the hip.
+    # "not_on" (slice 14A): the Holler Pistol's own texture is as big as the largest atlas, and beside it there is room
+    # for the pieces of only three of the four sights; it goes without the marksman's long scope.
     "long_scope": {
         "display": "Long Scope", "slot": "optic", "mount": True, "parts": [], "replaces": True,
         "effects": {"aim_spread": 0.5, "hip_spread": 1.25}, "model": "long_scope", "texture": "long_scope",
+        "not_on": ["holler_pistol"],
         "zoom": 0.3, "view": {"reticle": "long_scope_reticle2", "vignette": "scope_vignette"},
         "tooltip": "A long blackened-steel scope: a far closer view down the sights, clumsy from the hip.",
     },
@@ -2863,6 +2961,8 @@ ZOOM = {
     "flatboat_gun": 0.9, "windlass_musket": 0.85, "millstone_rifle": 0.78,
     # Slice 13D: a grenade launcher, a revolver and an energy musket.
     "fencepost_thumper": 0.9, "parley_revolver": 0.9, "lantern_musket": 0.8,
+    # Slice 14A: a heavy pistol, a target pistol and a revolver.
+    "holler_pistol": 0.88, "minuet_pistol": 0.9, "half_crown_revolver": 0.9,
 }
 
 
@@ -3089,6 +3189,11 @@ SHOT_SOUNDS = {
     "fencepost_thumper": "item/grenade_launcher/fire.ogg",
     "parley_revolver": "item/heavier_rifle/fire.ogg",
     "lantern_musket": "item/laser/fire.ogg",
+    # Slice 14A: the owner's brass pistol and brass revolver shots (the Sapper's and the Marshal's), and the Warden
+    # Pistol's lighter iron one for the target pistol.
+    "holler_pistol": "item/brass_pistol/fire.ogg",
+    "minuet_pistol": "item/iron_pistol/fire.ogg",
+    "half_crown_revolver": "item/brass_revolver/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3227,7 +3332,7 @@ def one_handed():
 # carbine_ animations in place of its own (its draw, idle, shots, inspect and reload: client/guns/GunAnimations), its
 # holder's other arm comes up to it seen from outside (GunPose), and it is no longer one of two guns held at once
 # (JugcraftGuns.CARBINES, GunItem.carbine).
-CARBINES = ("parley_revolver",)
+CARBINES = ("parley_revolver", "half_crown_revolver")
 CARBINE_ANIMATIONS = ("draw", "idle", "shoot", "aim_shoot", "inspect")
 
 

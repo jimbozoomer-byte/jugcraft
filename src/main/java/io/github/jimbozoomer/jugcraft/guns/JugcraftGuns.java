@@ -88,6 +88,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * chamber at each shot; the Parley Revolver, held in one hand ({@link #ONE_HANDED}) but in both, as a carbine, with a
  * stock fitted ({@link #CARBINES}); and the Lantern Musket, an energy weapon whose beam passes through every creature in
  * its line.</li>
+ * <li>Slice 14A, the first of the owner's treated-brass guns: the Holler Pistol, a heavy pistol fed from a magazine
+ * ahead of its trigger, its bolt worked after each shot; the Minuet Pistol, a light target pistol held in one hand
+ * ({@link #ONE_HANDED}); and the Half-Crown Revolver, a break-top revolver loaded a round at a time, held in one hand
+ * but in both, as a carbine, with a stock fitted ({@link #CARBINES}).</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -174,6 +178,9 @@ public final class JugcraftGuns {
 		SPECS.put("fencepost_thumper", new GunSpec(16.0F, 1, 18, false, 4, 0, 12, 22, 19, 3.0F, 1.25F, 20, "grenade"));
 		SPECS.put("parley_revolver", new GunSpec(10.0F, 1, 16, false, 6, 0, 10, 13, 14, 2.5F, 0.6F, 72, "rifle_round"));
 		SPECS.put("lantern_musket", new GunSpec(12.0F, 1, 9, false, 3, 44, 0, 0, 0, 2.0F, 0.3F, 96, "energy_cell"));
+		SPECS.put("holler_pistol", new GunSpec(12.0F, 1, 22, false, 10, 58, 0, 0, 0, 3.0F, 0.6F, 80, "rifle_round"));
+		SPECS.put("minuet_pistol", new GunSpec(3.5F, 1, 5, false, 10, 48, 0, 0, 0, 2.0F, 0.25F, 64, "light_round"));
+		SPECS.put("half_crown_revolver", new GunSpec(9.0F, 1, 9, false, 6, 0, 9, 13, 14, 2.5F, 0.6F, 64, "rifle_round"));
 	}
 
 	/**
@@ -216,13 +223,13 @@ public final class JugcraftGuns {
 	 * Slice 10G, two guns at once: the guns held in one hand (tools/guns.py one_handed()), of which a player may hold one
 	 * in each hand and fire both ({@link GunItem#dual}).
 	 */
-	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver");
+	public static final Set<String> ONE_HANDED = Set.of("warden_pistol", "haymaker", "duelling_pistol", "bulldog_pistol", "marshal_revolver", "sapper_revolver", "sentry_pistol", "beam_pistol", "rattler_pistol", "bronco_smg", "spikedriver", "caisson_pistol", "culverin", "ashfall_pistol", "penny_pistol", "tuppence_pistol", "goshawk_revolver", "tabby_revolver", "parley_revolver", "minuet_pistol", "half_crown_revolver");
 	/**
 	 * Slice 13D: one-handed guns that, with a stock fitted, are held in both hands as carbines (tools/guns.py CARBINES):
 	 * they play the owner's carbine_ animations in place of their own, and are no longer one of two guns held at once
-	 * ({@link GunItem#carbine}).
+	 * ({@link GunItem#carbine}). Slice 14A adds the Half-Crown Revolver.
 	 */
-	public static final Set<String> CARBINES = Set.of("parley_revolver");
+	public static final Set<String> CARBINES = Set.of("parley_revolver", "half_crown_revolver");
 	/** Slice 10G: how much further each of two guns strays from the hip than one held alone (tools/guns.py DUAL_SPREAD). */
 	public static final float DUAL_SPREAD = 1.5F;
 	/**
@@ -423,6 +430,14 @@ public final class JugcraftGuns {
 				"netherite_bayonet"));
 		ACCEPTS.put("parley_revolver", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
 				"weighted_stock", "wooden_stock"));
+		ACCEPTS.put("holler_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "medium_scope", "reflex_sight",
+				"tactical_grip", "laser_sight"));
+		ACCEPTS.put("minuet_pistol", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
+		ACCEPTS.put("half_crown_revolver", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"light_stock", "weighted_stock", "wooden_stock"));
 	}
 
 	/** The rounds. */
