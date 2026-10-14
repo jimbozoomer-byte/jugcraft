@@ -36,7 +36,9 @@ import net.spell_engine.internals.container.SpellContainerSource;
  * <li>{@code jugcraft_rime_strata_status_hud}: the player Rimebound, Thawing (no icon) and Braced;</li>
  * <li>{@code jugcraft_rime_strata_status_inventory}: the same in the inventory's list, Thawing listed.</li>
  * </ul>
- * Nothing here judges a picture. The HUD is shown for the shots and put back as it was. CI job {@code client}.
+ * Learning raises advancement toasts over the top right, where the HUD draws effect icons and the inventory lists
+ * effects, so they are cleared before each shot. Nothing here judges a picture. The HUD is shown for the shots and put
+ * back as it was. CI job {@code client}.
  */
 public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTest {
 	private static final List<String> SPELLS = List.of("rimebind", "brace", "preserve");
@@ -71,6 +73,7 @@ public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTes
 			server.runOnServer(ConcordanceRimeStrataClientGameTests::learn);
 			context.waitTicks(40);
 			singleplayer.getConnection().waitForChunksRender();
+			clearToasts(context);
 			context.takeScreenshot("jugcraft_rime_strata_spell_bar");
 
 			// Rimebound, Thawing (hidden, as Rimebind leaves it) and Braced, on the HUD and in the inventory.
@@ -84,9 +87,11 @@ public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTes
 			boolean shown = context.computeOnClient(client -> client.player.hasEffect(Rimebind.RIMEBOUND) && client.player.hasEffect(Rimebind.RIME_THAW)
 					&& client.player.hasEffect(Brace.BRACED));
 			check(shown, "The client was not told of Rimebound, Thawing and Braced");
+			clearToasts(context);
 			context.takeScreenshot("jugcraft_rime_strata_status_hud");
 			context.setScreen(() -> new InventoryScreen(Minecraft.getInstance().player));
 			context.waitTicks(10);
+			clearToasts(context);
 			context.takeScreenshot("jugcraft_rime_strata_status_inventory");
 			context.setScreen(() -> null);
 			server.runOnServer(minecraft -> player(minecraft).removeAllEffects());
@@ -124,6 +129,12 @@ public class ConcordanceRimeStrataClientGameTests implements FabricClientGameTes
 
 	private static ServerPlayer player(MinecraftServer minecraft) {
 		return minecraft.getPlayerList().getPlayers().get(0);
+	}
+
+	/** Removes the shown and queued toasts (learning's advancements), then waits for a frame drawn without them. */
+	private static void clearToasts(ClientGameTestContext context) {
+		context.runOnClient(client -> client.gui.toastManager().clear());
+		context.waitTicks(5);
 	}
 
 	private static void setHudHidden(ClientGameTestContext context, boolean hidden) {
