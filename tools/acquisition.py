@@ -15,7 +15,8 @@ CinderTyrantLoot), not data; so is the Halloween event's extra, which only the W
 Written by generate_material_data.py: the rows to assets/jugcraft/recipe_view.json "acquisition_info" (read by
 client/compat/JugcraftJeiPlugin, which adds each as an information page) and the words to the language file, as
 jei.jugcraft.acquire.<key>. The first magic loadout the record recommends is listed here too (LOADOUT), so the checker
-can confirm survival already makes every piece of it, and so are the owner's armour tiers that stay creative-only
+can confirm survival already makes every piece of it (with its optional branches: the Wayfaring trinkets and, since
+Chunk B, the Rime travel kit), and so are the owner's armour tiers that stay creative-only
 (CREATIVE_ONLY), so it can confirm nothing gives them yet. tools/check_mod_data.py (check_acquisition) ties each page,
 the loadout and the creative-only tiers to the files on disk.
 
@@ -24,6 +25,7 @@ Pure data: it imports only the generators' tables, which import nothing of the g
 import biomes
 import cinder_tyrant as ct
 import concordance_ember as ember
+import concordance_rime_kit as rime_kit
 import concordance_rituals as rituals
 import concordance_trinkets as trinkets
 import gear
@@ -96,10 +98,12 @@ RITUALS = {"adept_wand": "adept_attunement"}
 # The first magic loadout (the record's route): nothing new, only what survival already makes. Item -> how it is made:
 # "recipe" (the crafting recipe of its own name) or "working:<name>" (a Lampwright's Bench working). The Wayfaring
 # trinkets are an optional branch, made the same way but worn only once Relic Lore is understood; the Focus of Fire is
-# the lesser focus's later upgrade (two diamonds).
+# the lesser focus's later upgrade (two diamonds); and Rime's travel kit (tools/concordance_rime_kit.py; Concordance
+# Chunk B, B-10), its foci, bangle and three water sets, is another optional branch made the same way.
 LOADOUT = {"initiate_wand": "recipe", "lampwright_bench": "recipe", "kindled_lantern": "working:kindle_lantern",
            **{piece: "recipe" for piece in ember.ARMOR}, "lesser_fire_focus": "recipe", "fire_bangle": "recipe"}
-OPTIONAL = {**{item: "recipe" for item in trinkets.TRINKETS}, "fire_focus": "recipe"}
+OPTIONAL = {**{item: "recipe" for item in trinkets.TRINKETS}, "fire_focus": "recipe",
+            **{item: "recipe" for item in rime_kit.ITEMS}}  # Rime's travel kit (Chunk B, B-10), made the same way
 # The owner's armour tiers (tools/gear.py ARMOR_TIERS, the Wayfarer among them) that no recipe, drop, shop or trade gives:
 # all of them, as the owner asked when each was made (6 October 2026: "for now just make the armor we can figure that out
 # later"; the later designs likewise, as tools/gear.py records). The first loadout leaves that as it is. When the owner

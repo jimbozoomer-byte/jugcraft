@@ -24,7 +24,8 @@ Nothing here is generated into the game. tools/check_mod_data.py (check_journey)
   for, the wand's recipe and Kindle's cost; and it needs nothing past the Practitioner stage and nothing from the
   Nether or the End;
 - the first loadout (tools/acquisition.py LOADOUT, Concordance Chunk A) is made by one player in the Overworld, each
-  piece by its recipe or its bench working, with no research but First Light up to understood;
+  piece by its recipe or its bench working, with no research but First Light up to understood, and the Rime travel kit
+  (Chunk B, B-10; tools/concordance_rime_kit.py) likewise, every piece by its recipe;
 - every game test a step names exists;
 - the record's table is the one table() renders.
 
@@ -288,10 +289,11 @@ def problems():
     # Overworld, by its recipe or its bench working, with no research but First Light up to understood (the
     # Practitioner stage's own route; mastering two entries, or understanding five, would make them an Adept).
     import acquisition
+    import concordance_rime_kit as kit
     unmade = []
-    for item in acquisition.LOADOUT:
+    for item in [*acquisition.LOADOUT, *kit.ITEMS]:
         pg.item_node(nodes, at_hand, rid(item), unmade)
-    found.extend(f"journey: the first loadout: {problem}" for problem in unmade)
+    found.extend(f"journey: the first loadout or the Rime travel kit: {problem}" for problem in unmade)
     beyond = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
               if key != "first_light" or state == "mastered"}
     first = pg.reachable(nodes, research, cap="practitioner", dimensions={""}, without=beyond)
@@ -299,6 +301,11 @@ def problems():
         if f"item:{rid(item)}" not in first:
             found.append(f"journey: the first loadout's {item} needs more than First Light understood (research past the "
                          "Practitioner stage), another player, the Nether or the End")
+    # The Rime travel kit (Chunk B, B-10): every piece made the same way, before the Adept stage, in the Overworld.
+    for item in kit.ITEMS:
+        if f"item:{rid(item)}" not in first:
+            found.append(f"journey: the Rime travel kit's {item} needs more than First Light understood, another player, "
+                         "the Nether or the End")
     # Every game test named exists.
     tests = game_tests()
     named = list(FIRST_SUCCESS["tests"])

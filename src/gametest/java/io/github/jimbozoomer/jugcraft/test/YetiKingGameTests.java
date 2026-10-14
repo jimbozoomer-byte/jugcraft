@@ -644,6 +644,57 @@ public class YetiKingGameTests {
 	}
 
 	/**
+	 * The Rimekeeper's travel kit against his frost (Concordance Chunk B, B-10): his frost is his own, so a player in a kit
+	 * piece is still chilled by his blizzard and frozen through by his breath (B-P23: the kit is no boss immunity), but
+	 * cannot freeze, as a bare player can. What vanilla then does needs a ticking body: on a stone floor two pigs, one in
+	 * Winterguard's Helmet, are each frozen 400 ticks' worth once (melting two a tick keeps them frozen through for 130
+	 * ticks, standing in for his breath renewing it). After 90 ticks the dressed pig is unhurt and the bare one has taken
+	 * at least two of vanilla's freezing blows; both are slowed by the frost, as far as frost slows.
+	 */
+	@GameTest(maxTicks = 120)
+	public void aKitWearerIsSlowedButNotHurtByHisFrost(GameTestHelper helper) {
+		ServerPlayer kit = helper.makeMockServerPlayerInLevel();
+		ServerPlayer bare = helper.makeMockServerPlayerInLevel();
+		kit.setGameMode(GameType.SURVIVAL);
+		bare.setGameMode(GameType.SURVIVAL);
+		kit.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,
+				new ItemStack(io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear.ARMOR.get("nereids_hood")));
+		YetiKingEntity.chill(kit, YetiKingEntity.BLIZZARD_FROST, false);
+		helper.assertTrue(kit.getTicksFrozen() == YetiKingEntity.BLIZZARD_FROST, "His blizzard still chills a kit wearer: " + kit.getTicksFrozen());
+		YetiKingEntity.chill(kit, kit.getTicksRequiredToFreeze(), true);
+		helper.assertTrue(kit.isFullyFrozen(), "His breath still freezes a kit wearer through: " + kit.getTicksFrozen());
+		helper.assertTrue(!kit.canFreeze() && bare.canFreeze(), "A kit wearer cannot freeze; a bare player can");
+		for (int x = 0; x <= 4; x++) {
+			for (int z = 0; z <= 2; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), net.minecraft.world.level.block.Blocks.STONE);
+			}
+		}
+		net.minecraft.world.entity.Mob dressed = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(1, 2, 1));
+		net.minecraft.world.entity.Mob plain = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(3, 2, 1));
+		dressed.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,
+				new ItemStack(io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear.ARMOR.get("winterguards_helmet")));
+		dressed.setTicksFrozen(400);
+		plain.setTicksFrozen(400);
+		helper.runAfterDelay(90, () -> {
+			helper.assertTrue(dressed.isFullyFrozen() && plain.isFullyFrozen(), "Both pigs are still frozen through: "
+					+ dressed.getTicksFrozen() + ", " + plain.getTicksFrozen());
+			helper.assertTrue(dressed.getHealth() == dressed.getMaxHealth(), "Frozen through in the kit, no freezing blow: " + dressed.getHealth());
+			helper.assertTrue(plain.getHealth() <= plain.getMaxHealth() - 2.0F, "Frozen through bare, a blow every two seconds: " + plain.getHealth());
+			net.minecraft.resources.Identifier slow = net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow");
+			for (net.minecraft.world.entity.Mob pig : List.of(dressed, plain)) {
+				net.minecraft.world.entity.ai.attributes.AttributeModifier modifier = pig
+						.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).getModifier(slow);
+				helper.assertTrue(modifier != null && Math.abs(modifier.amount() + 0.05) < 1.0E-6, "The frost slows both: " + modifier);
+			}
+			kit.discard();
+			bare.discard();
+			dressed.discard();
+			plain.discard();
+			helper.succeed();
+		});
+	}
+
+	/**
 	 * A glacial spike bursting up under a player strikes them and throws them up; an icicle shaken from the vault falls
 	 * onto its mark and shatters, striking the player standing there.
 	 */

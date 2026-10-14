@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
  * Preserve, an alteration in Rime's school ({@link #SCHOOL}), holds an Alembic Crucible's heat in its band instead of
  * putting out fire ({@link #preserves}, {@link #preserve}): never an inventory, an item, food or a machine, and never a
  * block changed. Rimebind is {@link Rimebind}; the winter survey {@link RimeSurvey}. Frostward, Winter Brine's status
- * (Concordance Chunk B, B-08), is {@link Frostward}.
+ * (Concordance Chunk B, B-08), is {@link Frostward}; the Rimekeeper's travel kit (B-10) is {@link RimeGear}.
  */
 public final class Rime {
 	/** The practice Rimekeeping is mastered by (tools/concordance_rime.py RIMEWORK). */
@@ -53,6 +53,7 @@ public final class Rime {
 		Rimebind.register();
 		RimeSurvey.register();
 		Frostward.register();
+		RimeGear.register(); // Chunk B unit 4 (B-10): the travel kit
 	}
 
 	public static boolean understands(Player player) {
@@ -81,15 +82,16 @@ public final class Rime {
 	}
 
 	/**
-	 * Holds the crucible at {@code pos} in its band for {@link #HOLD_TICKS}. The effect boundary has already asked whether
-	 * the person behind it may change that block (only ConcordanceEffects calls this, tools/check_mod_data.py). A crucible
-	 * holding a mixture counts as cold work for {@code person}. Returns whether anything was held.
+	 * Holds the crucible at {@code pos} in its band for {@link #HOLD_TICKS}, or longer with a focus of water worn
+	 * ({@link RimeGear#holdTicks}, B-P24). The effect boundary has already asked whether the person behind it may change
+	 * that block (only ConcordanceEffects calls this, tools/check_mod_data.py). A crucible holding a mixture counts as cold
+	 * work for {@code person}. Returns whether anything was held.
 	 */
 	public static boolean preserve(ServerLevel level, @Nullable ServerPlayer person, BlockPos pos) {
 		if (!preservable(level, pos, level.getBlockState(pos)) || !(level.getBlockEntity(pos) instanceof CrucibleBlockEntity crucible)) {
 			return false;
 		}
-		crucible.hold(ConcordanceProgress.now(level), HOLD_TICKS);
+		crucible.hold(ConcordanceProgress.now(level), RimeGear.holdTicks(person));
 		level.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.6F, 1.6F);
 		if (crucible.parts() > 0) {
 			practise(person, preserveKey(crucible.band()));

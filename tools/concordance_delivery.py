@@ -45,9 +45,11 @@ MATRIX = {
         "Animated blocks and creatures driven by the status the server sends: Circle Anchor, Alembic Crucible (with "
         "its liquid at its volume), Verdant Heart, Mulch Maw, Gleaner, Orrery Observatory, Reliquary Shrine, Spire "
         "Heart, Oneiric Censer; Hearthling, Gathering Shade, Clockwork Porter and dream wisps; the two fire sets "
-        "worn as the owner's armour model, each in its own texture (Jugcraft's first GeckoLib armour)",
+        "and the three water sets worn as the owner's armour models, each in its own texture (Jugcraft's first GeckoLib "
+        "armour; Winterguard's on its own model)",
         "required",
-        ["ConcordancePresentationClientGameTests", "aPorterShowsOnceWhatItLacks", "ConcordanceEmberGearClientGameTests"],
+        ["ConcordancePresentationClientGameTests", "aPorterShowsOnceWhatItLacks", "ConcordanceEmberGearClientGameTests",
+         "ConcordanceWinterClientGameTests"],
         "Seen only in CI's small screenshot previews; frame cost of a large installation not measured; the sets' glint "
         "is a Jugcraft layer, and vanilla trims are not drawn on them"),
     "player-animation-library": (
@@ -95,15 +97,18 @@ MATRIX = {
     "spell-power": (
         "Schools name each Principle's damage type, so resistances apply once; the Lance scales with arcane Spell "
         "Power, Cinderbolt and Hearthflare with fire; Resonant Rings can carry arcane Spell Power, the Ember foci and "
-        "the two fire sets fire; Spell Power's attribute enchantments are refused on the sets",
+        "the two fire sets fire; Spell Power's attribute enchantments are refused on the sets; the water sets carry "
+        "none, and Spell Power's attribute enchantments are refused on them too",
         "required",
         ["lanceStrikesAndScalesWithSpellPower", "everyStatisticIsARealAttribute", "cinderboltBurnsAndGrowsWithFireSpellPower",
-         "theRegaliaRaisesTheFireToItsCeiling", "spellPowerEnchantmentsAreRefusedOnTheSet"],
+         "theRegaliaRaisesTheFireToItsCeiling", "spellPowerEnchantmentsAreRefusedOnTheSet",
+         "spellPowerEnchantmentsAreRefusedOnTheWaterSets"],
         "Concordance damage adds Spell Power's points only, not its critical hits"),
     "trinkets-updated": (
         "Resonant Rings in the ring slot and the Hearthstone in the necklace slot, both given by data; the owner's "
-        "Spell Focus and Bracelet slots, ported from their Curios data, for the Ember foci and the Fire Bangle; a ring's "
-        "and a focus's modifiers through Trinkets' callback; relics and the bangle read from the slots on the server; "
+        "Spell Focus and Bracelet slots, ported from their Curios data, for the Ember foci, the Fire Bangle, the water "
+        "foci and the Water Bangle; a ring's and a focus's modifiers through Trinkets' callback; relics and the bangle "
+        "read from the slots on the server; "
         "Wayfaring's Belt, Charm and Feet slots, with named callback modifiers, a slot-count attribute and Relic Lore's "
         "canEquip; the Leather Belt and Amphibian Boot drawn on the wearer by Trinkets' data-driven renderer (a render "
         "definition and block models from the owner's worn sheets), through Jugcraft's own render element, which hides "
@@ -111,7 +116,8 @@ MATRIX = {
         "required",
         ["relicsAreFoundInTrinketSlots", "gemsRunesAndBondsKeepTheirRules", "theFociGiveFireSpellPowerThroughTrinkets",
          "theBangleLeavesAHearthbindersBlowSmouldering", "ConcordanceEmberGearClientGameTests",
-         "theTrinketsAreMadeAndWornAsDesigned", "ConcordanceWayfaringClientGameTests"],
+         "theTrinketsAreMadeAndWornAsDesigned", "ConcordanceWayfaringClientGameTests", "theWaterFociLengthenPreservesHold",
+         "theWaterBangleBracesARimekeeperEveryThirtySeconds"],
         "Cosmetic slots count as worn for show only; of the worn things only the belt and boot are drawn on the body, "
         "in third person only, and seen so far only in CI's client screenshots"),
     "cloth-config": (

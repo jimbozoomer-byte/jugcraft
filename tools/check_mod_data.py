@@ -11866,6 +11866,7 @@ def check_concordance(registered):
     check_rime(co, root, lang, research)
     check_strata(co, root, lang, research)
     check_rime_strata_assets(co, lang)
+    check_rime_kit(co, root, lang)
     check_wayfaring(co, root, lang)
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
@@ -12490,6 +12491,10 @@ def check_ember_regalia(co, root, lang):
             err(f"{item}: its name must be the owner's ({owner_lang.get(f'item.ars_jymbaumental.{owner}')}) and it needs a tooltip")
     if set(em.OWNER_ITEMS) != set(em.ITEMS) or set(em.ITEMS) != set(em.TRINKETS) | set(em.ARMOR):
         err("tools/concordance_ember.py: ITEMS, OWNER_ITEMS, TRINKETS and ARMOR must name the same items")
+    # The slot tags have one writer, Ember's (SLOT_ITEMS): its own pieces, and what other slices put in them (Rime's travel
+    # kit, Concordance Chunk B unit 4, B-P51).
+    if not set(em.TRINKETS.items()) <= set(em.SLOT_ITEMS.items()):
+        err("tools/concordance_ember.py: SLOT_ITEMS must keep Ember's own pieces")
     excluded = set(co.equivalence.EXCLUDED)
     for item in em.ITEMS:
         if f"{MOD}:{item}" not in excluded:
@@ -12522,7 +12527,7 @@ def check_ember_regalia(co, root, lang):
         if f"textures/gui/sprites/container/slots/{info['icon']}.png" not in em.OWNER_FILES:
             err(f"slot {slot}: its icon is not the owner's (OWNER_FILES)")
         held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
-        if held != {f"{MOD}:{item}" for item, worn in em.TRINKETS.items() if worn == slot}:
+        if held != {f"{MOD}:{item}" for item, worn in em.SLOT_ITEMS.items() if worn == slot}:
             err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
         if f"trinkets.slot.{group}.{name}" not in lang:
             err(f"slot {slot}: missing lang trinkets.slot.{group}.{name}")
@@ -12601,7 +12606,8 @@ def check_rime(co, root, lang, research):
     models its slow and thaw with the generator's numbers (B-P32). B-07: Preserve is
     the one alteration in Rime's school; the boundary dispatches it before the dousing (which removes only fire) where it
     acts and where it chooses blocks, and is its only caller; holding touches no inventory; only the crucible is held,
-    for no longer than the Initiate's Wand sustains, saved as an optional field and shown by Jade. B-P8: of the lair
+    for no longer than the Initiate's Wand sustains (Preserve's own minute; the water foci, B-P50, hold up to
+    Rime.MAX_HOLD_TICKS, check_rime_kit), saved as an optional field and shown by Jade. B-P8: of the lair
     keepers, only the Yeti King and the Cinder Tyrant are resistant. Every word has its lang."""
     rm = co.rime
 
@@ -13555,6 +13561,232 @@ def check_winter_brine(co, root, lang):
             err(f"lang jei.{MOD}.alchemy.{key}: a Rime ingredient's page names Frostward")
     if "textures/mob_effect/frostward.png" not in rm.OWNER_FILES or not (ASSETS / "textures" / "mob_effect" / "frostward.png").is_file():
         err("Frostward's icon is the owner's (tools/concordance_rime.py OWNER_FILES), copied by tools/owner_art.py")
+
+
+def _geo_faces(cube):
+    """Each face of a GeckoLib cube on its sheet: (face, u, v, width, height), from per-face UVs or a box UV's net."""
+    uv = cube.get("uv")
+    if isinstance(uv, dict):
+        for face, value in uv.items():
+            (u, v), (du, dv) = value.get("uv", (0, 0)), value.get("uv_size", (0, 0))
+            yield face, u, v, du, dv
+    else:
+        w, h, d = cube.get("size", (0, 0, 0))
+        u, v = uv or (0, 0)
+        yield from (("east", u, v + d, d, h), ("north", u + d, v + d, w, h), ("west", u + d + w, v + d, d, h),
+                    ("south", u + 2 * d + w, v + d, w, h), ("up", u + d, v, w, d), ("down", u + d + w, v, w, d))
+
+
+def _sheet_fit(definition, sheet, skip):
+    """The opaque share of a sheet's pixels under a GeckoLib model's faces, overall and by bone (skipping `skip`)."""
+    import math
+    tw, th = definition["description"]["texture_width"], definition["description"]["texture_height"]
+    with Image.open(sheet) as image:
+        rgba = image.convert("RGBA")
+    width, height = rgba.size
+    px = rgba.load()
+    sx, sy = width / tw, height / th
+    opaque = total = 0
+    bones = {}
+    for bone in definition.get("bones", []):
+        if bone["name"] in skip:
+            continue
+        for cube in bone.get("cubes", []):
+            for _face, u, v, du, dv in _geo_faces(cube):
+                x0, x1 = sorted((u * sx, (u + du) * sx))
+                y0, y1 = sorted((v * sy, (v + dv) * sy))
+                o = t = 0
+                for x in range(math.floor(x0), max(math.floor(x0) + 1, math.ceil(x1))):
+                    for y in range(math.floor(y0), max(math.floor(y0) + 1, math.ceil(y1))):
+                        if 0 <= x < width and 0 <= y < height:
+                            t += 1
+                            o += px[x, y][3] > 0
+                opaque, total = opaque + o, total + t
+                counts = bones.setdefault(bone["name"], [0, 0])
+                counts[0], counts[1] = counts[0] + o, counts[1] + t
+    return (opaque / total if total else 0.0), {name: o / t for name, (o, t) in bones.items() if t}
+
+
+def check_rime_kit(co, root, lang):
+    """Concordance Chunk B unit 4, B-10 (tools/concordance_rime_kit.py, docs/features/arcane-concordance-winter.md): the
+    Java mirrors the kit's numbers and ids; protection stays within its bounds, with no Spell Power, toughness or knockback
+    (B-P23, B-P47); the foci lengthen Preserve only from a slot that applies effects, within MAX_HOLD_TICKS (B-P50); the
+    bangle's Brace is the boundary's, nobody's cast, unsaved (B-P49); every item is the owner's model, icon and name;
+    every recipe is Overworld things and collides with no other; every piece is freeze-immune and armour of its slot;
+    the heavy model has Ember's bones and each sheet fits its model; no mixin touches powder snow (B-P46)."""
+    kit, rm, st, em, pg = co.rime_kit, co.rime, co.strata, co.ember, co.progression
+    import acquisition as aq
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    gear_java, trinket_java, rime_java = (source(root / "rime" / name) for name in ("RimeGear.java", "RimeTrinketItem.java", "Rime.java"))
+    flat = re.sub(r"\s+", " ", gear_java)
+    # 1. Numbers.
+    numbers = {"LESSER_FOCUS_HOLD_TICKS": kit.LESSER_FOCUS_HOLD_TICKS, "FOCUS_HOLD_TICKS": kit.FOCUS_HOLD_TICKS,
+               "BANGLE_RECHARGE_TICKS": kit.BANGLE_RECHARGE_TICKS, "BANGLE_BRACE_TICKS": kit.BANGLE_BRACE_TICKS,
+               "BANGLE_CHECK_TICKS": kit.BANGLE_CHECK_TICKS,
+               **{f"{n.upper()}_DURABILITY": a["durability"] for n, a in kit.ARMOR_SETS.items()},
+               **{f"{n.upper()}_ENCHANTABILITY": a["enchantability"] for n, a in kit.ARMOR_SETS.items()}}
+    for name, value in numbers.items():
+        if not re.search(rf"\bint {name} = {value};", gear_java):
+            err(f"concordance/rime/RimeGear.java: {name} differs from tools/concordance_rime_kit.py ({value})")
+    if not (rm.PRESERVE_HOLD_TICKS < kit.LESSER_FOCUS_HOLD_TICKS < kit.FOCUS_HOLD_TICKS <= kit.MAX_HOLD_TICKS
+            == co.EFFECT_LIMITS["MAX_DURATION"]) or "MAX_HOLD_TICKS = EffectSpec.MAX_DURATION;" not in rime_java:
+        err("The water foci hold longer than Preserve's minute, within the crucible's cap (B-P24, B-P50)")
+    if not (kit.BANGLE_BRACE_TICKS == st.BRACE_TICKS < kit.BANGLE_RECHARGE_TICKS
+            and kit.BANGLE_RECHARGE_TICKS % kit.BANGLE_CHECK_TICKS == 0):
+        err("The Water Bangle's Brace is Brace's own, shorter than its recharge, checked on whole seconds (B-P49)")
+    # 2. Sets (B-P23, B-P47).
+    if "String MEDIUM_MODEL = EmberGear.ARMOR_MODEL;" not in gear_java or 'String HEAVY_MODEL = "winterguards";' not in gear_java:
+        err("concordance/rime/RimeGear.java: the medium sets wear Ember's model, the heavy its own")
+    if '0.0F, 0.0F, TagKey.create(Registries.ITEM, Jugcraft.id("repairs_" + set + "_gear"))' not in flat \
+            or "ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id(set))" not in flat:
+        err("concordance/rime/RimeGear.java: toughness and knockback resistance 0, repaired by repairs_<set>_gear, worn as "
+            "jugcraft:<set>")
+    for name, armour in kit.ARMOR_SETS.items():
+        d, bound = armour["defense"], armour["bound"]
+        if set(d) != {"helmet", "chestplate", "leggings", "boots"} or any(d[p] > bound[p] for p in d):
+            err(f"{name}: protection over its bound ({d} against {bound})")
+        call = (f'material("{name}", {name.upper()}_DURABILITY, {name.upper()}_ENCHANTABILITY, SoundEvents.{armour["sound"]}, '
+                f'{d["helmet"]}, {d["chestplate"]}, {d["leggings"]}, {d["boots"]})')
+        if call not in flat:
+            err(f"concordance/rime/RimeGear.java: {name}'s material differs: {call}")
+        if kit.repair_tag(name) != f"{MOD}:repairs_{name}_gear":
+            err(f"tools/concordance_rime_kit.py: {name}'s repair tag is named after the set")
+        model = "HEAVY_MODEL" if armour["model"] == "winterguards" else "MEDIUM_MODEL"
+        if armour["model"] not in ("winterguards", *em.ARMOR_MODELS):
+            err(f"{name}: worn on an unknown model {armour['model']}")
+        for item, piece in armour["pieces"].items():
+            if f'armor("{item}", "{name}", {name.upper()}_ARMOR, ArmorType.{piece.upper()}, {model});' not in flat:
+                err(f"concordance/rime/RimeGear.java: {item} is not registered as tools/concordance_rime_kit.py says")
+    if set(re.findall(r'item\("([a-z_]+)", RimeTrinketItem::new', gear_java)) != set(kit.TRINKETS) \
+            or set(re.findall(r'\barmor\("([a-z_]+)"', gear_java)) != set(kit.ARMOR):
+        err("concordance/rime/RimeGear.java: the foci, bangle and pieces differ from TRINKETS and ARMOR")
+    for needle in (".attributes(", "withModifierAdded", "spell_power", "Ember.SCHOOL", "KNOCKBACK_RESISTANCE",
+                   "ATTRIBUTE_MODIFIERS", "fireResistant", "addEffect(", "sendParticles"):
+        if needle in gear_java:
+            err(f"concordance/rime/RimeGear.java: the kit adds no stat, effect or show of its own ({needle})")
+    for needle in ("forEachTrinketModifier", "ATTRIBUTE_MODIFIERS"):
+        if needle in trinket_java:
+            err(f"concordance/rime/RimeTrinketItem.java: worn pieces give no attribute ({needle})")
+    # 3. Wiring.
+    if "RimeGear.register();" not in rime_java or "crucible.hold(ConcordanceProgress.now(level), RimeGear.holdTicks(person))" \
+            not in _java_body(rime_java, "public static boolean preserve("):
+        err("concordance/rime/Rime.java: the kit is registered and Preserve asks RimeGear.holdTicks")
+    holding = _java_body(gear_java, "public static int holdTicks(")
+    for needle in ("!access.cosmetic() && access.canApplyEffects()", "Rime.MAX_HOLD_TICKS", "WATER_FOCUS", "LESSER_WATER_FOCUS"):
+        if needle not in holding:
+            err(f"RimeGear.holdTicks: only a focus worn where it works, within the cap ({needle})")
+    for needle in ('Cause.of(null, Cause.Origin.ITEM, "jugcraft:water_bangle"', "new ConcordanceEffects.Context(level, cause, null,",
+                   "ConcordanceEffects.apply(context, BANGLE_BRACE, player)", "Brace.STATUS", "Intent.HELPFUL",
+                   "Stacking.EXCLUSIVE", "Rime.understands(player)", "wearsBangle(player)", "END_SERVER_TICK",
+                   "% BANGLE_CHECK_TICKS", "JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)",
+                   'buildAndRegister(Jugcraft.id("water_bangle_braced"))'):
+        if needle not in flat:
+            err(f"concordance/rime/RimeGear.java: the bangle's Brace wiring is missing ({needle})")
+    for line in gear_java.splitlines():
+        if "water_bangle_braced" in line and ".persistent(" in line:
+            err("RimeGear.BANGLE_LAST is never saved (a relog gives no free Brace)")
+    # 4. Items.
+    owner = kit.owner_lang()
+    if set(kit.ITEMS) != set(kit.OWNER_ITEMS) or set(kit.ITEMS) != set(kit.TRINKETS) | set(kit.ARMOR):
+        err("tools/concordance_rime_kit.py: ITEMS, OWNER_ITEMS and TRINKETS + ARMOR differ")
+    for item, owner_id in kit.OWNER_ITEMS.items():
+        if load(ASSETS / "items" / f"{item}.json") != {"model": {"type": "minecraft:model", "model": f"{MOD}:item/{item}"}} \
+                or load(ASSETS / "models" / "item" / f"{item}.json") != kit.owner_model(item) \
+                or f"textures/item/{item}.png" not in kit.OWNER_FILES:
+            err(f"{item}: the owner's model and icon")
+        if lang.get(f"item.{MOD}.{item}") != owner.get(f"item.ars_jymbaumental.{owner_id}") or f"tooltip.{MOD}.{item}" not in lang:
+            err(f"{item}: the owner's name ({owner.get(f'item.ars_jymbaumental.{owner_id}')}) and a tooltip")
+        if f"{MOD}:{item}" not in co.equivalence.EXCLUDED or aq.OPTIONAL.get(item) != "recipe":
+            err(f"{item}: kept off the Assayer's Scale and made in survival (tools/acquisition.py OPTIONAL)")
+    for item, piece in kit.ARMOR.items():
+        text = kit.ITEMS[item]["tooltip"]
+        if kit.FROST_LINE not in text or (piece == "boots") != (kit.BOOTS_LINE in text):
+            err(f"{item}: its tooltip says the Yeti's frost still slows (and, for boots, that they sink)")
+    # 5. Recipes: the kit's own items or Overworld things had without a boss, and no grid another recipe has.
+    grids = {}
+    for path in sorted(DATA.glob("*/recipe/*.json")):
+        data = load(path) or {}
+        if data.get("type") == "minecraft:crafting_shaped":
+            grid = tuple(tuple(json.dumps(data.get("key", {}).get(c)) for c in row) for row in data.get("pattern", []))
+            grids.setdefault(grid, []).append(path.stem)
+            grids.setdefault(tuple(tuple(reversed(row)) for row in grid), []).append(path.stem)
+    for item, recipe in kit.RECIPES.items():
+        data = load(DATA / MOD / "recipe" / f"{item}.json") or {}
+        if data.get("fabric:load_conditions") != [{"condition": f"{MOD}:feature_enabled", "feature": "concordance"}] \
+                or (data.get("result") or {}).get("id") != f"{MOD}:{item}" or data.get("key") != recipe["key"]:
+            err(f"recipe/{item}.json: switch-gated, making {item}, as tools/concordance_rime_kit.py writes it")
+        for ref in recipe["key"].values():
+            local = ref.startswith(f"{MOD}:") and split(ref)[1] in kit.ITEMS
+            vanilla = pg.VANILLA_SOURCES.get(ref)
+            if not (local or (vanilla and vanilla[3] == "" and vanilla[0] != "found")
+                    or ref.startswith("#") and ref[1:] in pg.VANILLA_TAGS):
+                err(f"recipe/{item}.json: {ref} is not an Overworld thing had without a boss (B-P48)")
+        grid = tuple(tuple(json.dumps(recipe["key"].get(c)) for c in row) for row in recipe["pattern"])
+        others = sorted({stem for stem in grids.get(grid, []) if stem != item})
+        if others:
+            err(f"recipe/{item}.json: the same grid as {others}")
+    if set(kit.RECIPES) != set(kit.ITEMS):
+        err("tools/concordance_rime_kit.py: every kit item has its recipe")
+    # 6. Slots and tags.
+    for slot in ("chest/spell_focus", "hand/bracelet"):
+        held = set((load(DATA / "trinkets" / "tags" / "item" / f"{slot}.json") or {}).get("values", []))
+        if not {f"{MOD}:{i}" for i, worn in kit.TRINKETS.items() if worn == slot} <= held:
+            err(f"data/trinkets/tags/item/{slot}.json must hold the kit's pieces for it")
+    frozen = set((load(DATA / "minecraft" / "tags" / "item" / "freeze_immune_wearables.json") or {}).get("values", []))
+    for item, piece in kit.ARMOR.items():
+        tag = load(DATA / "minecraft" / "tags" / "item" / f"{gear.ITEM_TAGS[piece]}.json") or {}
+        if f"{MOD}:{item}" not in frozen or f"{MOD}:{item}" not in tag.get("values", []):
+            err(f"{item}: freeze-immune and armour of its slot")
+    for name, armour in kit.ARMOR_SETS.items():
+        if (load(DATA / MOD / "tags" / "item" / f"repairs_{name}_gear.json") or {}).get("values") != armour["repair"]:
+            err(f"tags/item/repairs_{name}_gear.json must be {armour['repair']}")
+        if (ASSETS / "equipment" / f"{name}.json").exists():
+            err(f"assets/{MOD}/equipment/{name}.json: GeckoLib draws the set")
+    # 7. Models, sheets, fit.
+    for name, armour in kit.ARMOR_SETS.items():
+        if f"textures/armor/{name}.png" not in kit.OWNER_FILES:
+            err(f"the {name} set's worn sheet is not one of the owner's files")
+        geo = load(ASSETS / "geckolib" / "models" / "armor" / f"{armour['model']}.geo.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        sheet = ASSETS / "textures" / "armor" / f"{name}.png"
+        if not sheet.is_file() or geo.get("format_version") != "1.12.0":
+            err(f"{name}: sheet and 1.12.0 model present")
+            continue
+        size = (definition.get("description", {}).get("texture_width"), definition.get("description", {}).get("texture_height"))
+        with Image.open(sheet) as image:
+            if image.size != size:
+                err(f"{name}: sheet {image.size} differs from its model's {size}")
+                continue
+        bones = {bone.get("name") for bone in definition.get("bones", [])}
+        if not set(em.ARMOR_BONES + em.SLIM_BONES) <= bones:
+            err(f"{armour['model']}.geo.json: missing bones {sorted(set(em.ARMOR_BONES + em.SLIM_BONES) - bones)}")
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                for face, u, v, du, dv in _geo_faces(cube):
+                    if not (0 <= min(u, u + du) and max(u, u + du) <= size[0] and 0 <= min(v, v + dv) and max(v, v + dv) <= size[1]):
+                        err(f"{armour['model']}.geo.json: {bone.get('name')}'s {face} face maps outside its sheet")
+        overall, by_bone = _sheet_fit(definition, sheet, set(em.SLIM_BONES))
+        weak = {bone: round(share, 2) for bone, share in by_bone.items() if share < kit.MIN_BONE_FIT}
+        if overall < kit.MIN_FIT or weak:
+            err(f"{name}: its sheet does not fit {armour['model']} ({overall:.0%}; weak bones {weak})")
+    for model in kit.ARMOR_MODELS:
+        if f"geckolib/models/armor/{model}.geo.json" not in kit.OWNER_FILES:
+            err(f"{model}'s model is the owner's, imported by tools/owner_art.py")
+    # 8. B-P46: no mixin or code makes other boots walk on powder snow.
+    for path in [*(ROOT / "src" / "main" / "java").rglob("*.java"), *(ROOT / "src" / "client" / "java").rglob("*.java"),
+                 *(ROOT / "src" / "main" / "resources").glob("*.mixins.json"),
+                 *(ROOT / "src" / "client" / "resources").glob("*.mixins.json")]:
+        if re.search(r"PowderSnowBlock|canEntityWalkOnPowderSnow", source(path)):
+            err(f"{path.relative_to(ROOT)}: no mixin or code makes other boots walk on powder snow (B-P46)")
+    # 9. Codex and texts.
+    pages = next(iter(kit.codex().values()))["pages"]
+    if {page[3] for page in pages if page[0] == "crafting_recipe"} != {f"{MOD}:{item}" for item in kit.ITEMS}:
+        err("winter/travel_kit: a recipe page for each of the 15 items")
+    description = rm.INVOCATIONS["preserve"]["description"]
+    if f"{kit.LESSER_FOCUS_HOLD_TICKS // 20}" not in description or f"{kit.FOCUS_HOLD_TICKS // 20}" not in description:
+        err("invocation preserve: its description names the foci's holds (B-P24)")
 
 
 def check_geckolib(name, java_text, uvs, sizes, kind="block"):

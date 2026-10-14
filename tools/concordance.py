@@ -486,6 +486,11 @@ RESEARCH.update(rime.RESEARCH)
 RESEARCH.update(strata.RESEARCH)
 INVOCATIONS.update(rime.INVOCATIONS)
 INVOCATIONS.update(strata.INVOCATIONS)
+# Concordance Chunk B unit 4 (tools/concordance_rime_kit.py, B-10): Rime's travel kit, and its foci and bangle in Ember's
+# two slots, whose item tags Ember writes (one writer for each file).
+import concordance_rime_kit as rime_kit  # noqa: E402
+ITEMS.update(rime_kit.ITEMS)
+ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
@@ -742,7 +747,8 @@ def operation_summary(op):
         if op.get("school") == ember.COMPONENTS["kindling"]["operation"]["school"]:
             return "kindles a hearth"
         if op.get("school") == rime.COMPONENTS[rime.PRESERVE_WORD]["operation"]["school"]:
-            return f"holds an Alembic Crucible's heat in its band for {seconds(rime.PRESERVE_HOLD_TICKS)} seconds"
+            return (f"holds an Alembic Crucible's heat in its band for {seconds(rime.PRESERVE_HOLD_TICKS)} seconds (longer with "
+                    "a focus of water)")
         return "puts out fire"
     return effect
 
@@ -1035,6 +1041,7 @@ def codex():
         **spire.codex(),
         **ember.codex(),
         **rime.codex(),
+        **rime_kit.codex(),
         **strata.codex(),
         **trinkets.codex(),
         **journal.codex(),
@@ -1822,6 +1829,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     spire.write_all(write, assets, data, lang, condition, self_drop)
     ember.write_all(write, assets, data, lang, condition, self_drop)
     rime.write_all(write, assets, data, lang, condition, self_drop)
+    rime_kit.write_all(write, assets, data, lang, condition, self_drop)
     strata.write_all(write, assets, data, lang, condition, self_drop)
     trinkets.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
@@ -1996,6 +2004,7 @@ def tags(tags):
     relics.tags(tags)
     equivalence.tags(tags)
     rime.tags(tags)
+    rime_kit.tags(tags)
     strata.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)

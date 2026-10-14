@@ -12,6 +12,8 @@ Concordance Chunk B, unit 3.
 - B-07, Preserve (utility): an alteration in Rime's school holds an Alembic Crucible's heat in its band for 60 s (02:77).
 - B-08, Frostward (unit 4): Winter Brine's status (the Rime alchemy property gives it); no frost gathers while it lasts
   and the Yeti King's chill does not take.
+- B-10, the travel kit (unit 4, tools/concordance_rime_kit.py): a focus of water worn lengthens Preserve's hold
+  (LESSER_FOCUS_HOLD_TICKS, FOCUS_HOLD_TICKS).
 
 Java: concordance/rime (Rime, RimeSurvey, Rimebind, Frostward); tools/check_mod_data.py check_rime and (B-08)
 check_winter_brine hold it to these tables.
@@ -99,6 +101,13 @@ RIMEBIND_RANGE = 16  # the ray's
 # Not scaled by Spell Power (alterations take no duration, RulesParser.java:353-354). The crucible accepts holds up to the
 # boundary's longest time (Rime.MAX_HOLD_TICKS = EffectSpec.MAX_DURATION), so unit 4's water foci (B-P24) fit unchanged.
 PRESERVE_HOLD_TICKS = 1200
+# Unit 4 (B-10, B-P24, B-P50): Preserve's hold with a Lesser Focus of Water or a Focus of Water worn (Java: RimeGear.holdTicks).
+# Beyond the Initiate's Wand's 1200: the hold is the crucible's own state, not a composed effect's duration; the crucible
+# cuts any hold at Rime.MAX_HOLD_TICKS (EffectSpec.MAX_DURATION, 2400). tools/concordance_rime_kit.py names the foci.
+LESSER_FOCUS_HOLD_TICKS = 1800
+FOCUS_HOLD_TICKS = 2400
+_FOCI = (f"{PRESERVE_HOLD_TICKS // 20} seconds ({LESSER_FOCUS_HOLD_TICKS // 20} with a Lesser Focus of Water worn, "
+         f"{FOCUS_HOLD_TICKS // 20} with a Focus of Water)")
 PRESERVABLE = [rid("crucible")]  # Java: Rime.PRESERVABLE, #jugcraft:concordance/preservable
 PRESERVE_WORD = "rimehold"
 
@@ -119,7 +128,7 @@ COMPONENTS = {
                     "operation": {"effect": "alteration", "intent": "helpful", "principle": "rime",
                                   "school": "spell_power:frost"},
                     "name": "Rimehold",
-                    "text": "Preserve's stillness: an Alembic Crucible's heat stays in its band for 60 seconds."},
+                    "text": f"Preserve's stillness: an Alembic Crucible's heat stays in its band for {_FOCI}."},
 }
 
 INVOCATIONS = {
@@ -143,9 +152,10 @@ INVOCATIONS = {
         "cast": 0.6, "cooldown": 3.0,
         "animation": ("kindle_cast", "kindle_release"), "sounds": ("concordance.rime_gather", "concordance.preserve"),
         "particle": "minecraft:snowflake", "icon": rid("crucible"),
-        "description": f"Stills the Alembic Crucible you touch: for {PRESERVE_HOLD_TICKS // 20} seconds its heat stays in "
-                       "the band it is in (cold, warm, hot or searing), whatever burns beneath it.",
-        "counter": "It holds one crucible you could change by hand, for one minute: the heat still moves inside its band, "
+        "description": f"Stills the Alembic Crucible you touch: for {_FOCI} its heat stays in the band it is in (cold, "
+                       "warm, hot or searing), whatever burns beneath it.",
+        "counter": "It holds one crucible you could change by hand, for a minute (two at most, with a Focus of Water worn): "
+                   "the heat still moves inside its band, "
                    "a second cast only starts the minute again, and it keeps nothing else (no chest, machine, food or "
                    "item).",
         "fizzle": "Nothing to preserve: Preserve holds an Alembic Crucible within %s blocks",
@@ -227,7 +237,7 @@ def codex():
             "description": "Holding a crucible's heat",
             "pages": [
                 ("text", "Preserve", f"Preserve stills an **Alembic Crucible** you touch: for "
-                 f"{PRESERVE_HOLD_TICKS // 20} seconds its heat stays in the band it is in ({_band_floors()} degrees), "
+                 f"{_FOCI} its heat stays in the band it is in ({_band_floors()} degrees), "
                  "whatever burns or goes out beneath it. The heat still moves inside the band, a degree a tick."),
                 ("text", "What it will not hold", "Only a crucible you could change by hand: claims, protected towns and "
                  "spawn protection refuse it. Never a chest, barrel, machine, food or item. A second cast starts the "
