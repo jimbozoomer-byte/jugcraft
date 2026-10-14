@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: Guns, slice 14B (the brass carbines)
+- **Three guns** from the owner's models and animations, more of their treated-brass guns, each held in both hands: the **Holler Carbine**, the Holler Pistol made over with a long shrouded barrel, ten rifle rounds and a bolt its shot works, so it fires more than twice as fast; the **Minuet Carbine**, the Minuet Pistol made over with a long barrel, ten light rounds in a magazine ahead of its trigger and a lever under its barrel; and the **Grange Carbine**, a carbine of twelve rifle rounds fed from a box magazine.
+- Each is made from steel, brass and a lever. The Holler Carbine takes no attachment (the owner made none for it); the Minuet Carbine takes the stocks and the four sights; the Grange Carbine takes every attachment the owner made for it, the Tactical Grip among them.
+- The owner's Howler Conversion has no magazine part of its own, so the Holler Carbine shows its Howler's (`tools/guns.py` can now take a part from another of the owner's guns).
+- Record: [guns.md, slice 14B](docs/features/guns.md#slice-14b-the-brass-carbines).
+
 ### Added: Guns, slice 14A (the brass sidearms)
 - **Three guns** from the owner's models and animations, the first of their treated-brass guns: the **Holler Pistol**, a heavy pistol of ten rifle rounds held in both hands, fed from a magazine ahead of its trigger, its bolt worked after each shot; the **Minuet Pistol**, a light target pistol of ten light rounds held in one hand, the truest of the one-handed guns when aimed; and the **Half-Crown Revolver**, a break-top revolver of six rifle rounds loaded one at a time, held in one hand, which with a stock fitted is held in both as a carbine, as the Parley Revolver is.
 - Each is made from steel, brass and a lever, the Half-Crown Revolver with a silver ingot too. The Holler Pistol takes the barrel attachments, both magazines, the stocks, the grips, the bayonets and every sight but the Long Scope; the Minuet Pistol the barrel attachments, the Extended Magazine and the four sights; the Half-Crown Revolver the barrel attachments and the stocks.

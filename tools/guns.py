@@ -751,6 +751,33 @@ GUNS = {
         "damage": 9.0, "pellets": 1, "interval": 9, "auto": False, "capacity": 6,
         "reload": (9, 13, 14), "spread": (2.5, 0.6), "range": 64, "ammo": "rifle_round",
     },
+    # Slice 14B, the next three of the owner's treated-brass guns: the Howler Conversion and the Waltz Conversion, their
+    # Howler and M22 Waltz made over into carbines held in both hands, and the Grandle, a carbine fed from a box
+    # magazine, which takes every attachment the owner made for it.
+    "holler_carbine": {
+        "display": "Holler Carbine",
+        "source": "howler_conversion",
+        "tooltip": "The Holler Pistol made over into a carbine: a long shrouded barrel, and a bolt the shot works "
+                   "itself, so it fires quicker. Held in both hands. Fires rifle rounds.",
+        "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 10,
+        "reload": 58, "spread": (2.5, 0.4), "range": 96, "ammo": "rifle_round",
+    },
+    "minuet_carbine": {
+        "display": "Minuet Carbine",
+        "source": "waltz_conversion",
+        "tooltip": "The Minuet Pistol made over into a carbine: a long barrel, a magazine ahead of the trigger and a "
+                   "lever under the barrel. Held in both hands. Fires light rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 10,
+        "reload": 46, "spread": (2.0, 0.2), "range": 80, "ammo": "light_round",
+    },
+    "grange_carbine": {
+        "display": "Grange Carbine",
+        "source": "grandle",
+        "tooltip": "A brass-fitted carbine held in both hands, fed from a box magazine under its receiver. Fires rifle "
+                   "rounds.",
+        "damage": 7.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
+        "reload": 45, "spread": (2.5, 0.35), "range": 96, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -980,6 +1007,11 @@ RECIPES = {
     "minuet_pistol": (["SB", "LB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
     "half_crown_revolver": (["SBV", " LB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "V": "#c:ingots/silver",
                                              "L": "minecraft:lever"}),
+    # Slice 14B: steel, brass and a lever as well. The Holler and Grange Carbines' barrels are three steel ingots long;
+    # the Minuet Carbine's is two, as the pistol it is made from is small.
+    "holler_carbine": (["SSS", "BLB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
+    "minuet_carbine": (["SSB", "BL "], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
+    "grange_carbine": (["SSS", " LB", "  B"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2437,6 +2469,62 @@ BUILDS = {
         "muzzle": (8.0, 5.22, 2.5),
         "sight": (8.0, 6.6, 12.7),
     },
+    # Slice 14B. The Howler Conversion is the Howler with a long shroud over its barrel, and its animations are the
+    # Howler's but for a shorter shot that works the bolt itself. Its model has no magazine part, though its reload
+    # draws one out from below and puts it back, so its magazine bone holds its Howler's (part_source()), where the
+    # Howler's stands, under the same receiver. Its magazine_2 and no_sights bones hold nothing.
+    "holler_carbine": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.1, 12.3)),
+            ("magazine", "gun_body", ["howler/stan_mag"], (8.0, 3.3, 10.4)),
+            ("magazine_2", "gun_body", [], (8.0, 3.3, 10.4)),
+            ("no_sights", "gun_body", [], (8.0, 6.6, 16.3)),
+        ],
+        "hands": {"right": (8.0, 1.9, 15.6), "left": (8.0, 0.4, 10.4)},
+        "arms": {"right": (0.0795, -0.6036, 0.7933), "left": (0.7663, -0.588, 0.2588)},
+        "muzzle": (8.0, 4.57, -5.3),
+        "sight": (8.0, 6.97, 16.3),
+        "eye_relief": 5.5,
+    },
+    # The Waltz Conversion's main part holds it all: its slide (the 19th, 20th, 23rd, 26th and 27th elements, the
+    # animations' bolt), the lever under its barrel (the 34th to 39th, turned about the hinge at their back, as the
+    # owner's model turns them) and its magazine (the 40th to 42nd, the animations' core). Its magazine, magazine_2,
+    # seal and scriptures bones hold nothing: its model has no part for them (its shot only sways the last two).
+    "minuet_carbine": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 0.0, 8.0)),
+            ("gun_body", "gun_body2", ["main-#18,19,22,25,26,33,34,35,36,37,38,39,40,41", "sights"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", ["main#18,19,22,25,26"], (8.0, 5.3, 14.1)),
+            ("lever", "gun_body", ["main#33,34,35,36,37,38"], (8.0, 4.11, 11.8)),
+            ("core", "gun_body", ["main#39,40,41"], (8.0, 1.7, 10.3)),
+            ("magazine", "gun_body", [], (8.0, 1.7, 10.3)),
+            ("magazine_2", "gun_body", [], (8.0, 1.7, 10.3)),
+            ("seal", "gun_body", [], (8.0, 5.0, 8.0)),
+            ("scriptures", "gun_body", [], (8.0, 5.0, 8.0)),
+        ],
+        "hands": {"right": (8.0, 1.3, 15.4), "left": (8.0, -0.8, 10.3)},
+        "arms": {"right": (0.0048, -0.4917, 0.8707), "left": (0.0143, -0.4312, 0.9021)},
+        "muzzle": (8.0, 5.07, -2.9),
+        "sight": (8.0, 6.77, 14.27),
+        "eye_relief": 2.0,
+    },
+    # The Grandle has no pistol grip: the right hand holds the wrist of its stock, the left its handguard. Its bolt is
+    # the owner's bolt part, the handle on its right; its magazine is the owner's, and its magazine_2 bone holds nothing.
+    # Its sight is the ring at the back.
+    "grange_carbine": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.8, 11.7)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 0.7, 11.3)),
+            ("magazine_2", "gun_body", [], (8.0, 0.7, 11.3)),
+        ],
+        "hands": {"right": (8.0, 2.4, 16.0), "left": (8.0, 2.6, 7.4)},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.5988, -0.1774, 0.781)},
+        "muzzle": (8.0, 4.9, -0.32),
+        "sight": (8.0, 6.47, 15.15),
+        "eye_relief": 4.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2963,6 +3051,8 @@ ZOOM = {
     "fencepost_thumper": 0.9, "parley_revolver": 0.9, "lantern_musket": 0.8,
     # Slice 14A: a heavy pistol, a target pistol and a revolver.
     "holler_pistol": 0.88, "minuet_pistol": 0.9, "half_crown_revolver": 0.9,
+    # Slice 14B: three carbines.
+    "holler_carbine": 0.85, "minuet_carbine": 0.88, "grange_carbine": 0.85,
 }
 
 
@@ -3194,6 +3284,12 @@ SHOT_SOUNDS = {
     "holler_pistol": "item/brass_pistol/fire.ogg",
     "minuet_pistol": "item/iron_pistol/fire.ogg",
     "half_crown_revolver": "item/brass_revolver/fire.ogg",
+    # Slice 14B: the two conversions keep their pistols' shots; the Grange Carbine fires the old rifle shot (the Ranger
+    # Rifle's and the Ammonite Carbine's). The library's carabine, pistol and revolver shots carry tags naming other
+    # sources, so none of them is used.
+    "holler_carbine": "item/brass_pistol/fire.ogg",
+    "minuet_carbine": "item/iron_pistol/fire.ogg",
+    "grange_carbine": "item/old_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3557,9 +3653,10 @@ def load_part(gun, part):
     PART_SHIFTS entry if it has one. A scope's "%<kind>" is its item model mounted on the gun (optic_part())."""
     if part.startswith("%"):
         return optic_part(gun, part[1:])
-    data = json.loads((LIBRARY / "models" / "special" / GUNS[gun]["source"] / f"{part_file(part)}.json").read_text())
+    folder, name = part_source(gun, part)
+    data = json.loads((LIBRARY / "models" / "special" / folder / f"{name}.json").read_text())
     textures = data.get("textures", {})
-    shift = PART_SHIFTS.get((GUNS[gun]["source"], part_file(part)))
+    shift = PART_SHIFTS.get((folder, name))
     for element in data.get("elements", []):
         size = [t - f for f, t in zip(element["from"], element["to"])]
         for direction, face in list(element.get("faces", {}).items()):
@@ -3908,8 +4005,16 @@ def compose_atlas(gun):
 def part_file(part):
     """A bone's part entry names the owner's part file, optionally narrowed to some of its elements:
     "main@barrel" (the elements the owner named "barrel"), "main#8" (element 8), and "main-@barrel", "main-#8" (all
-    but those). Several numbers are comma-separated: "main#8,9"."""
+    but those). Several numbers are comma-separated: "main#8,9". "howler/stan_mag" is another of the owner's guns'
+    part (part_source())."""
     return part.split("@")[0].split("#")[0].removesuffix("-")
+
+
+def part_source(gun, part):
+    """The library folder and file name of a bone's part entry: the gun's own folder, or for "<gun>/<part>" that of
+    another of the owner's guns (slice 14B: the Howler Conversion has no magazine of its own, and takes its Howler's)."""
+    folder, _, name = part_file(part).rpartition("/")
+    return folder or GUNS[gun]["source"], name
 
 
 def part_elements(gun, part):
@@ -4669,7 +4774,8 @@ def provenance():
         paths = [f"models/item/{src}.json", str(texture_file(own_texture(gun)).relative_to(LIBRARY)),
                  f"item/{src}.animation.json"]
         for _, _, parts, _ in effective_bones(gun):
-            paths += [f"models/special/{src}/{part_file(p)}.json" for p in parts if not p.startswith(("@", "%"))]
+            paths += ["models/special/{}/{}.json".format(*part_source(gun, p)) for p in parts
+                      if not p.startswith(("@", "%"))]
         paths.append(f"sounds/{SHOT_SOUNDS[gun]}")
         # The shared textures its attachments draw on, merged into its atlas (slice 7).
         paths += [str(texture_file(t).relative_to(LIBRARY)) for t in atlas_layout(gun)[1] if t != own_texture(gun)]
