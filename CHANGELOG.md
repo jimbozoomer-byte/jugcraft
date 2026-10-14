@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: Guns, slice 13A (the frontier guns)
+- **Three guns** from the owner's models and animations: the **Tabby Revolver**, a gunmetal revolver held in one hand, its cylinder swung out to load a round at a time, tossed end over end as it is drawn; the **Lookout Rifle**, a lever-action rifle of eight rifle rounds loaded a round at a time, made to take a scope; and the **Ammonite Carbine**, a carbine of sixteen rifle rounds from a long curved magazine, its barrels caged in copper bands. The Tabby Revolver pairs with any other one-handed gun.
+- The Tabby Revolver is made from iron, brass, a lever and a plank; the Lookout Rifle from iron, brass, a lever and planks; the Ammonite Carbine from copper, iron, a lever and a plank. The Tabby Revolver takes the barrel attachments; the Lookout Rifle the stocks, grips, bayonets, scopes and Laser Sight; the Ammonite Carbine the stocks.
+- Record: [guns.md, slice 13A](docs/features/guns.md#slice-13a-the-frontier-guns).
+
 ### Added: Guns, slice 12C (the lone guns)
 - **Three guns** from the owner's models and animations: the **Tuppence Pistol**, a copper pistol held in one hand, the tube under its barrel loaded a round at a time; the **Goshawk Revolver**, a heavy iron revolver held in one hand, its cylinder swung out to load a round at a time; and the **Lament Rifle**, a sculk-grown bolt-action rifle of five rifle rounds, the hardest-hitting and furthest-reaching of the rifles. The two hand guns pair with any other one-handed gun.
 - The Tuppence Pistol is made from copper, iron and a lever; the Goshawk Revolver from iron and a lever; the Lament Rifle, as the sculk guns, from steel, a lever, echo shards and sculk. The Tuppence Pistol takes the stocks, scopes and Laser Sight; the Lament Rifle the grips and bayonets too; the Goshawk Revolver none.

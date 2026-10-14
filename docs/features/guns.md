@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B) and the lone guns (slice 12C)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C) and the frontier guns (slice 13A)
 
 Status:
 - **Slices 1 to 11B are in `main`:** the last of them, 10A to 11B, with #320 on 11 October 2026. The lines below say where each was built.
@@ -33,6 +33,7 @@ Status:
 - **Slice 12A** (the End guns: the Chitin SMG, Hermit Rifle and Borer; [below](#slice-12a-the-end-guns)): implemented on `claude/guns-12a`, off `main`, awaiting review.
 - **Slice 12B** (the copper guns: the Penny Pistol, Conductor Carbine and Magpie SMG; [below](#slice-12b-the-copper-guns)): implemented on `claude/guns-12b`, stacked on slice 12A, awaiting review.
 - **Slice 12C** (the lone guns: the Tuppence Pistol, Goshawk Revolver and Lament Rifle; [below](#slice-12c-the-lone-guns)): implemented on `claude/guns-12c`, stacked on slice 12B, awaiting review.
+- **Slice 13A** (the frontier guns: the Tabby Revolver, Lookout Rifle and Ammonite Carbine; [below](#slice-13a-the-frontier-guns)): implemented on `claude/guns-13a`, stacked on slice 12C, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -51,6 +52,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - the round after: on 13 October 2026, with the Nether guns in `main`, they asked "Ok lets continue and do the next thing". The next of their unbuilt guns were taken up as before: the three they made in the shulkers' purpur, each fed from a shulker box, are slice 12A.
 - and again: on 13 October 2026, with slice 12A up for review, they asked again "Ok lets continue and do the next thing". Three of the five guns they made in copper are slice 12B.
 - and once more: on 13 October 2026, with slice 12B up for review, they asked again "Ok lets continue and do the next thing". Slice 12C takes up one of the two copper guns left and the two guns of their library that stand alone in their materials, the one of iron and the one of echo shards. The last copper gun, the Whizzbanger, waits for the model its animations were made for ([below](#the-whizzbanger-waits)).
+- and after that: on 13 October 2026, with slice 12C up for review, they asked again "Ok lets continue and do the next thing". Slice 13A takes up three of the fourteen guns of their library whose item models name plain stone as their base texture: a revolver, a lever-action rifle and a carbine.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -1977,6 +1979,82 @@ The reload times and the Lament Rifle's rate are the owner's animations': its bo
 ### The Whizzbanger waits
 The owner's other copper gun is a hand cannon fired by striking a pin with a hammer held in the left hand; after each shot the left hand puts the hammer away, tips the spent shell out and loads the next. Its animations move the hammer and the cannon's body about pivots of the model the owner's mod animated, which is not in the library: built from the item model, the hammer comes nowhere near the pin it strikes. A fit of the hammer's pivot to land its face on the pin at the shot found none that also held the hammer sensibly at rest. With the owner's animated model (its `.geo.json` or Blockbench project), it can follow as its own slice.
 
+## Slice 13A: the frontier guns
+The next of the owner's guns, taken up after slice 12C in the same round (on 13 October 2026, with slice 12C up for review, the owner asked again "Ok lets continue and do the next thing"): three of the fourteen guns in their library whose item models name plain stone as their base texture, the Micina, the Red Raydar and the Spirulida. A revolver, a lever-action rifle and a lever-cycled carbine, they are named for the frontier.
+
+| | Tabby Revolver | Lookout Rifle | Ammonite Carbine |
+|---|---|---|---|
+| The owner's gun | Micina | Red Raydar | Spirulida |
+| What it is | a gunmetal revolver: a slotted top strap over the barrel, a cylinder that swings out to the left, a hammer at the back and a wooden grip | a lever-action rifle: a long barrel over a fore-end, a lever loop under the receiver and a raked stock | a carbine: a bundle of barrels caged in copper bands, a long curved magazine hooked under it, a lever loop under the grip and a cocking piece on top at the back |
+| Held | in one hand: it pairs with another (slice 10G) | in both hands | in both hands |
+| Fires | one shot each pull | one shot each pull, the lever worked after each | one shot each pull |
+| Damage | 6 | 7 | 5 |
+| Rate | 2.5 a second (every 8 ticks) | about 1.5 a second (every 13 ticks) | 2.5 a second (every 8 ticks) |
+| Holds | 6 | 8 | 16 |
+| Reload | a round at a time: 0.45 s to start, 0.6 s a round, 0.65 s to finish (4.7 s from empty) | a round at a time: 0.65 s, 0.45 s a round, 0.85 s (5.1 s from empty) | 3 s: the magazine |
+| Spread, hip / aimed | 2.5° / 0.8° | 2° / 0.2° | 2.5° / 0.4° |
+| Range | 56 blocks | 112 | 88 |
+| The view aimed | narrowed to 0.9 | 0.8 | 0.85 |
+| Round | Light Round | Rifle Round | Rifle Round |
+| Takes | the Silencer, the Baffled Silencer, the Muzzle Brake and the Extended Barrel | the three stocks, the Light and Tactical Grips, the four bayonets, the scopes and the Laser Sight | the three stocks |
+
+The reload times and the rates are the owner's animations': the Lookout Rifle's lever is worked in full between shots.
+
+**Crafting** (a crafting table; the guns switch, as every gun):
+- **Tabby Revolver:** iron and brass, as the other revolvers: an iron ingot, a brass ingot and an iron ingot over a lever and a plank.
+- **Lookout Rifle:** as the lever rifles: two iron ingots and a brass ingot over a lever between two planks, for its longer stock.
+- **Ammonite Carbine:** three copper ingots, for its copper bands, over an iron ingot, a lever and a plank.
+
+**How they fire:** as the other bullet guns: each bullet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. The Tabby Revolver and the Lookout Rifle load a round at a time, and a shot cuts the loading short, as the other round-at-a-time guns do; the Ammonite Carbine's magazine loads at the end of its reload. Nothing else follows a hit.
+
+**What you see:** the owner's animations.
+- **Tabby Revolver:** held out in the right hand. Drawn, it is tossed end over end and caught. Each shot kicks it and drops the hammer. To reload, the gun is rolled and the cylinder swung out to the left; the left hand comes in for each round, a case falling with each; then the cylinder is flicked shut.
+- **Lookout Rifle:** each shot kicks it; then the gun cants and the lever is swung down and back, throwing a case. To reload, the gun is rolled and the left hand pushes each round into the gate; as the reload ends the lever is worked again.
+- **Ammonite Carbine:** each shot kicks it and drives the cocking piece back, throwing a case. To reload, the gun is tipped; the curved magazine is pulled down and away, a new one swung up into place and slapped home; then the lever is swung down, drawing the cocking piece back, and pushed home.
+- **Spent rounds:** the Tabby Revolver's animations cue a case each time its loading loop runs; the Lookout Rifle's one with each shot and one as its reload ends; the Ammonite Carbine's one with each shot.
+- **Sounds:** the Marshal Revolver's shot (the Tabby Revolver), the Longhorn Rifle's (the Lookout Rifle) and the Ranger Rifle's (the Ammonite Carbine). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source or tool (slices 11A and 12C), so none was added.
+
+**How the models were built:**
+- **Tabby Revolver:**
+  - **One hand:** its idle hides the left arm, so it is among the one-handed guns (`JugcraftGuns.ONE_HANDED`, slice 10G); the left hand's place is given at the back of the swung-out cylinder, for the loop's push of a round (0.3016 s, `"hand_pose"`).
+  - **The toss:** the owner put every part of it on a second body bone (`gun_body_2`), which its draw alone turns, end over end, about the frame under the cylinder; the other animations move the outer `gun_body`, about the grip.
+  - **Cylinder:** the owner's drum part on the `magazine` bone, turned about the crane under its left side, so it swings out to the left, as the Goshawk Revolver's; the `bolt`, `seal` and `shell` bones its animations move hold nothing.
+  - **Hammer:** the owner's hammer part, a flat plane at the back, turned about its foot: it stands cocked and falls forward at each shot.
+  - **Barrel:** its standard barrel is the owner's part, so the barrel attachments fit it; the Baffled Silencer, the owner's part for it, stands 0.3 px clear of the barrel's end.
+  - **Sights:** the notch at the back of the frame over the post at the front.
+  - **Aiming:** at the hip's depth: its hammer stays 3.9 px from the eye.
+- **Lookout Rifle:**
+  - **Lever:** the loop under the receiver (the main part's element the owner named "lever"), turned about its front where it meets the receiver; the `bolt` and `shell` bones hold nothing (its reload keeps the round at scale 0).
+  - **Sights:** the owner's notch at the back of the receiver over the post at the muzzle; the scopes stand on the receiver in its place.
+  - **Aiming:** held 3.5 px further out (`"eye_relief"`): as the lever is worked the gun cants, and the back of its stock came 1.8 px past the eye.
+- **Ammonite Carbine:**
+  - **Magazine:** the curved magazine under it (the main part's elements the owner named "default_mag") on the `Magazine` bone, turned about where it meets the receiver.
+  - **Lever:** the loop under the grip (named "lever"), turned about its front.
+  - **Bolt:** the cocking piece on top at the back (the main part's 41st to 43rd elements), drawn back with each shot and by the lever.
+  - **Empty bone:** the `gun_body2` bone its reload slides forward as the lever is worked holds nothing.
+  - **Sights:** the owner's notch at the back of the receiver.
+  - **Aiming:** held 3 px further out: the back of its stock came 1.4 px past the eye.
+- **The arms:** chosen in first-person previews to cover as little of the screen as they can, still running back toward the shoulder: the Tabby Revolver's right arm for its hold, its shots, its loading and its inspection, its left for its loading; the two long guns' for their hold, their shots, their reloads and their inspections.
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload, draw and inspection; the hammer, the cylinder, the lever, the magazine and the cocking piece through their animations; each with the attachments it takes; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Light Round and the Rifle Round; nothing new.
+- **Parts:** iron, brass, a lever and a plank (the Tabby Revolver); iron, brass, a lever and planks (the Lookout Rifle); copper, iron, a lever and a plank (the Ammonite Carbine).
+- **Their place:** the Tabby Revolver and the Lookout Rifle with the other revolvers and the lever rifles, which take brass too; the Ammonite Carbine among the first guns, with the copper guns.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a load and its reload.
+- **Tabby Revolver:** 6 a shot, 15 a second while it fires; about 5.4 a second, as the Tuppence Pistol's (5.3), below the Goshawk Revolver's (5.6), above the Sapper Revolver's (4.4), which it matches in its reload and its attachments but outhits (6 to 4.5).
+- **Lookout Rifle:** 7 a shot, about 11 a second while it fires; about 5.8 a second, between the Drover Rifle's (5) and the Longhorn Rifle's (6.3). It holds two fewer than the Drover Rifle and hits a little harder, and reaches 112 blocks to the Drover's 100 and the Longhorn's 120.
+- **Ammonite Carbine:** 5 a shot, 12.5 a second while it fires; about 8.9 a second, as the Magpie SMG's (9), below the Patchwork Carbine's (11.8), which reaches further (96 blocks to 88) but holds ten to its sixteen.
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:tabby_revolver`, `lookout_rifle` and `ammonite_carbine`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Ammonite Carbine's `gun_body2` moves nothing:** its reload slides that bone forward as the lever is worked, but no part of the owner's model is named for it.
+- **The Baffled Silencer on the Tabby Revolver** stands 0.3 px clear of the barrel, as the owner's part has it.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -3255,6 +3333,47 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | lament_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | lament_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | lament_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| tabby_revolver | `Guns/models/item/micina.json` | `15a8d9614307f216` |
+| tabby_revolver | `Guns/item/micina.png` | `c6d71af39617c4f7` |
+| tabby_revolver | `Guns/item/micina.animation.json` | `932aa4c715d612d6` |
+| tabby_revolver | `Guns/models/special/micina/main.json` | `9b424faeaa1cd635` |
+| tabby_revolver | `Guns/models/special/micina/stan_barrel.json` | `a418c0135eff4acd` |
+| tabby_revolver | `Guns/models/special/micina/silencer.json` | `fbcad38b4e75586b` |
+| tabby_revolver | `Guns/models/special/micina/advanced_silencer.json` | `80689a482a56cc1f` |
+| tabby_revolver | `Guns/models/special/micina/muzzle_brake.json` | `2995268809fafc70` |
+| tabby_revolver | `Guns/models/special/micina/ext_barrel.json` | `dc67c7c3cc250be1` |
+| tabby_revolver | `Guns/models/special/micina/drum.json` | `0f0ff66dcb3434f5` |
+| tabby_revolver | `Guns/models/special/micina/hammer.json` | `828238e794952f3a` |
+| tabby_revolver | `Guns/sounds/item/brass_revolver/fire.ogg` | `9ede81f3520dfd5c` |
+| lookout_rifle | `Guns/models/item/red_raydar.json` | `d5043024891f5def` |
+| lookout_rifle | `Guns/item/red_raydar.png` | `f717867517542253` |
+| lookout_rifle | `Guns/item/red_raydar.animation.json` | `acea19226e70fa7c` |
+| lookout_rifle | `Guns/models/special/red_raydar/main.json` | `ec18a73c2cde2610` |
+| lookout_rifle | `Guns/models/special/red_raydar/light_stock.json` | `ffc72c01b2a0488b` |
+| lookout_rifle | `Guns/models/special/red_raydar/heavy_stock.json` | `acd98b0582c14627` |
+| lookout_rifle | `Guns/models/special/red_raydar/wooden_stock.json` | `66e3aa715589f318` |
+| lookout_rifle | `Guns/models/special/red_raydar/light_grip.json` | `61211a5101ac7f2f` |
+| lookout_rifle | `Guns/models/special/red_raydar/iron_bayonet.json` | `0983c6383dfd1bcb` |
+| lookout_rifle | `Guns/models/special/red_raydar/anthralite_bayonet.json` | `42c256791d7fc830` |
+| lookout_rifle | `Guns/models/special/red_raydar/diamond_bayonet.json` | `ad0cb4a036864c71` |
+| lookout_rifle | `Guns/models/special/red_raydar/netherite_bayonet.json` | `24cc60e07759e79e` |
+| lookout_rifle | `Guns/models/special/red_raydar/tact_grip.json` | `8a15ac84ca898daf` |
+| lookout_rifle | `Guns/models/special/red_raydar/sights.json` | `aa6035a4b8541d73` |
+| lookout_rifle | `Guns/sounds/item/heavy_rifle/fire.ogg` | `389a087108dc1565` |
+| lookout_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| lookout_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| lookout_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| lookout_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| lookout_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| ammonite_carbine | `Guns/models/item/spirulida.json` | `24dd5fda329a4c8f` |
+| ammonite_carbine | `Guns/item/spirulida.png` | `534455aeb4f99102` |
+| ammonite_carbine | `Guns/item/spirulida.animation.json` | `8807bbe25f371839` |
+| ammonite_carbine | `Guns/models/special/spirulida/main.json` | `02e70c50c0b3b8e2` |
+| ammonite_carbine | `Guns/models/special/spirulida/sights.json` | `2152ddc0b46a1aad` |
+| ammonite_carbine | `Guns/models/special/spirulida/light_stock.json` | `a8b80ed540c65d9b` |
+| ammonite_carbine | `Guns/models/special/spirulida/heavy_stock.json` | `2926ebb2256f5eb4` |
+| ammonite_carbine | `Guns/models/special/spirulida/wooden_stock.json` | `28ded3465978fe73` |
+| ammonite_carbine | `Guns/sounds/item/old_rifle/fire.ogg` | `d684ae9a09c9c12c` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -4075,13 +4194,25 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Reloading and inspection:** the Tuppence Pistol rolled; the Goshawk Revolver rolled, the left hand in; the Lament Rifle turned up; each turned toward the eye to be looked over.
     - **Attachments:** each stock behind the grip; the Laser Sight stands on the receiver aimed as it does on the other guns in the same run.
     - **Third person:** the two hand guns held out in one hand and the rifle across the body, each flashing as it fires.
+- **Slice 13A, run locally (14 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2201 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, looks and eye relief against tools/guns.py).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 13A game tests (not yet run; CI runs them):**
+  - `FrontierGunsGameTests`:
+    - `frontierGunsAreRegistered`: each is registered with its numbers, its recipe loads, and it fires plain bullets, one a pull. The Tabby Revolver is a revolver of six light rounds, held in one hand and loaded a round at a time, and two of them are two guns at once; the Lookout Rifle a rifle of eight rifle rounds loaded a round at a time; the Ammonite Carbine a carbine of sixteen rifle rounds, loaded a magazine at a time; the Lookout Rifle reaches furthest and the Tabby Revolver least. The Tabby Revolver takes the barrel attachments only; the Lookout Rifle the stocks, the Light and Tactical Grips, the bayonets, the scopes and the Laser Sight; the Ammonite Carbine the stocks only.
+    - `frontierGunsFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: the revolver and the lever rifle with one round in after their first round's time.
+    - `tabbyRevolversFireFromBothHands`: a Tabby Revolver in each hand fires from each and lands both shots, each spending a round of its own.
+  - `GunsGameTests` counts 66 guns; `DualGunsGameTests` the eighteen held in one hand; `TacticalAttachmentsGameTests` the twenty-four that take the Tactical Grip.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
