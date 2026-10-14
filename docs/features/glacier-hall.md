@@ -60,6 +60,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
 - **Outputs:** the way into the Glacier Hall, where the Yeti King will wait (part 2).
 - **Technology and magic:** none; the hall is an adventuring destination. Its fight's loot (part 2) brings Arms VII's two Yeti King trophies into survival.
 - **Reachable entry path:** every input is reachable in the Discovery tier without the hall: no circular unlock.
+- **The encyclopedia (since Concordance Chunk B, B-02):** carrying a Frost Horn shows the hall's dossier under Expeditions: the rite, the horn's recipe, the Seasonal Stall's snow blocks where a town sells them that day, that it works all year and the party it holds; the Yeti King's part follows once he is met ([yeti-king.md](yeti-king.md)). A first win over him completes the First Light route's lair step.
 
 ## Balance and automation
 
@@ -141,6 +142,8 @@ The client game test (`GlacierHallClientGameTests`, CI job `client`) runs the ho
 4. when the instance closes, the player goes home and the whirl is gone.
 
 Then it takes eight pictures: the whirl in the snow at midnight, and in the hall the view from the ledge, the lake from the ramp's foot, the throne, the vault, an ice column, a den and the Grey Mist's arch.
+
+Concordance Chunk B, unit 1 (B-02) adds `GlacierHallGameTests.theHornIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the horn is still answered at night on snow. It has not run yet; CI runs it.
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 

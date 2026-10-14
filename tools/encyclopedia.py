@@ -265,8 +265,8 @@ DOSSIER = {
                            "charge into an ice column, within %s blocks of his lake",
     "cinder_kiln.credit": "A share of his reward goes to everyone who strikes him or his Cinderlings, gives friends back "
                           "%s or more of the health his side took from them (blows, gobs, cinders and flame; not burning "
-                          "afterwards, nor slag), wards a friend against %s or more health of those, within %s blocks of "
-                          "his bowl",
+                          "afterwards, nor slag), or wards a friend against %s or more health of those, within %s blocks "
+                          "of his bowl",
     "credit.wards": "Cast a ward after the keeper wakes: one cast before is not counted. Those who fall are paid when "
                     "they are back on their feet, and those who leave the game when they come back",
     "won": "You have beaten this keeper: %s",
@@ -287,7 +287,7 @@ DOSSIER = {
     "share.qualifies": "This fight: your part already earns a share",
     "share.not_yet": "This fight: not yet enough for a share",
     "share.none": "This fight: you have no part in it yet",
-    "unknown_count": "%s more lairs are yet to be found",
+    "unknown_count": "Lairs yet to be found: %s",
 }
 
 GENERAL = {

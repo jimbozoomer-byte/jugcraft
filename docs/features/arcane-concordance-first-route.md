@@ -2,6 +2,8 @@
 
 Status: implemented for Concordance Chunk A (unit 4: ticket A-04, the encyclopedia entry and first route); its server
 and client tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on `aa4d06c4e`; see Verification).
+Concordance Chunk B, unit 1 extended it (B-02: the Glacier Hall's and the Cinder Kiln's dossiers); its new server tests
+have not run yet (see Verification).
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope, [the first-chunk tickets](../plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md) (A-04)
 the ask, and [the encyclopedia's own record](jugcraft-encyclopedia.md) the owner's requirements for the whole feature.
@@ -220,10 +222,10 @@ belongs to A-D9.
 
 Known limits:
 
-- Discovery is read, not saved: a player who entered a lair, left, and used up their token (a Cursed Spindle) reads as
-  not having found it until they carry one again or win.
-- The dossiers cover the Witching Season's two lairs. The Glacier Hall and the Cinder Kiln, on main since #320, have
-  none yet, and the lair step's token check names only the Death Knell and the Cursed Spindle.
+- Discovery is read, not saved: a player who entered a lair, left, and used up their token (a Cursed Spindle, a Frost
+  Horn or a Kiln Seal) reads as not having found it until they carry one again or win.
+- The dossiers cover all four lairs (the Glacier Hall and the Cinder Kiln since Chunk B, B-02); the lair step shows when
+  any token's recipe is on the server.
 - The Inspect page is read when the encyclopedia opens; refreshing keeps the block it was opened on.
 - The route's equip step is done by carrying or wearing a Kindled Lantern, a fire-set piece, a fire focus or the Fire
   Bangle (the wand and the bench are steps of their own).

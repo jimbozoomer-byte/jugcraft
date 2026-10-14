@@ -213,9 +213,9 @@ of `jugcraft:lair_rewards`.
   from his centre), so exact counts and experience shares are asserted only for a fight begun and ended in one
   synchronous block. `LairEncounterGameTests.aKeptCinderTyrantRewardIsSavedAndPaid`: a kept `cinder_tyrant` Due
   survives a save and is paid by his payer.
-- Unchanged and still passing: `YetiKingGameTests.hisLootIsEachParticipantsOwn` (`:356`), the Tyrant's test of the same
-  name (`CinderTyrantGameTests.java:629`), and the kill in `YetiKingClientGameTests` (`took` then `genericKill`,
-  `:204-205`).
+- Unchanged, and expected to pass; not re-run since B-01 (CI runs them): `YetiKingGameTests.hisLootIsEachParticipantsOwn`
+  (`:416`), the Tyrant's test of the same name (`CinderTyrantGameTests.java:673`), and the kill in
+  `YetiKingClientGameTests` (`took` then `genericKill`, `:204-205`).
 
 **Acceptance:** "Reward and return survive relevant lifecycle events" (09:110) for death, disconnect and a repeated fall;
 exactly-once rewards (04:20); no reward for a late arrival who did nothing (04:170).

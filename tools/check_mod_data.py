@@ -9717,6 +9717,14 @@ def check_tatterlace():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+# The Chunk B lair bosses' credit (Concordance Chunk B, B-01; check_yeti, check_cinder_tyrant), in lines each boss
+# writes once: a plain encounter.begin() or striker test also stands in his wake or his hurtServer, so these hold the
+# copy after a load and the one in die() (its striker taking part before the fall is paid) in place.
+ENCOUNTER_REBEGUN = re.compile(r"if \(phase != Phase\.WAITING && isAlive\(\) && !encounter\.underway\(\)\) \{\s*"
+                               r"encounter\.begin\(\);")
+KILLING_BLOW_TAKES_PART = re.compile(r"if \(Encounter\.striker\(source\) instanceof ServerPlayer player\) \{\s*"
+                                     r"took\(player, Float\.MIN_VALUE\);")
+
 def check_yeti():
     """The Yeti King (tools/yeti_king.py, docs/features/yeti-king.md): every number the Java uses is the table's; his
     attacks are the table's; where his fight looks for the Glacier Hall's parts (GlacierHall.java) is where
@@ -9913,16 +9921,19 @@ def check_yeti():
     # load; the killing blow and a tamed creature's blow are their striker's; his fall is claimed once and paid through
     # lair/LairRewards under his name; a charge baited into a column is the baiter's deed, keyed by the player.
     for cls, text, needles in (
-            ("YetiKingEntity", boss, ("new Encounter(this, this::centre)", "encounter.begin();", "encounter.abandon();",
-                                      "if (!encounter.claim()) {", "Encounter.striker(source) instanceof ServerPlayer player",
+            ("YetiKingEntity", boss, ("new Encounter(this, this::centre)", "encounter.begin();", ENCOUNTER_REBEGUN,
+                                      "encounter.abandon();", "if (!encounter.claim()) {",
+                                      "if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {",
+                                      KILLING_BLOW_TAKES_PART,
                                       "LairRewards.pay(level, YetiKingLoot.BOSS, encounter, position(), centre(), EXPERIENCE)",
                                       'encounter.deed(player, "column " + player.getUUID())')),
             ("YetiWhelpEntity", sources.get("YetiWhelpEntity", ""), ("Encounter.striker(source) instanceof ServerPlayer player",)),
             ("YetiKingLoot", loot_java, ('BOSS = "yeti_king";',)),
             ("JugcraftYeti", registry, ("LairRewards.payer(YetiKingLoot.BOSS, YetiKingLoot::pay)",))):
         for needle in needles:
-            if needle not in text:
-                err(f"{cls}.java: his fight's credit and reward go through lair/Encounter and lair/LairRewards ({needle})")
+            if not (needle.search(text) if isinstance(needle, re.Pattern) else needle in text):
+                err(f"{cls}.java: his fight's credit and reward go through lair/Encounter and lair/LairRewards "
+                    f"({getattr(needle, 'pattern', needle)})")
     if "damageBy" in boss or "YetiKingLoot.reward(" in boss:
         err("YetiKingEntity.java pays his loot the old way (a damage map, YetiKingLoot.reward)")
     for key in yk.RECIPES:
@@ -10217,15 +10228,18 @@ def check_cinder_tyrant():
     # load and abandoned when he is left alone; the killing blow and a tamed creature's blow, on him or a Cinderling, are
     # their striker's; his fall is claimed once and paid through lair/LairRewards under his name, which is saved.
     for cls, text, needles in (
-            ("CinderTyrantEntity", boss, ("new Encounter(this, this::centre)", "encounter.begin();", "encounter.abandon();",
-                                          "if (!encounter.claim()) {", "Encounter.striker(source) instanceof ServerPlayer player",
+            ("CinderTyrantEntity", boss, ("new Encounter(this, this::centre)", "encounter.begin();", ENCOUNTER_REBEGUN,
+                                          "encounter.abandon();", "if (!encounter.claim()) {",
+                                          "if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {",
+                                          KILLING_BLOW_TAKES_PART,
                                           "LairRewards.pay(level, CinderTyrantLoot.BOSS, encounter, position(), centre(), EXPERIENCE)")),
             ("CinderlingEntity", sources.get("CinderlingEntity", ""), ("Encounter.striker(source) instanceof ServerPlayer player",)),
             ("CinderTyrantLoot", loot_java, ('BOSS = "cinder_tyrant";',)),
             ("JugcraftTyrant", registry, ("LairRewards.payer(CinderTyrantLoot.BOSS, CinderTyrantLoot::pay)",))):
         for needle in needles:
-            if needle not in text:
-                err(f"{cls}.java: his fight's credit and reward go through lair/Encounter and lair/LairRewards ({needle})")
+            if not (needle.search(text) if isinstance(needle, re.Pattern) else needle in text):
+                err(f"{cls}.java: his fight's credit and reward go through lair/Encounter and lair/LairRewards "
+                    f"({getattr(needle, 'pattern', needle)})")
     if "damageBy" in boss or "CinderTyrantLoot.reward(" in boss:
         err("CinderTyrantEntity.java pays his loot the old way (a damage map, CinderTyrantLoot.reward)")
     for cls, text in sources.items():
@@ -10647,23 +10661,26 @@ def check_acquisition(registered):
         if ("first" in info) == ("trophies" in info):
             err(f"tools/acquisition.py BOSSES: {boss} needs one trophy (\"first\") or a pair (\"trophies\"), not both or neither")
         # The table, pool by pool: what each Jugcraft item's pool rolls (its chance, or the count of a sure pool), and
-        # the pool itself.
+        # the pool itself. Each item comes from one pool, which is the one its page states.
         rolled, pool_of = {}, {}
         for pool in (load(DATA / MOD / "loot_table" / f"{info['table']}.json") or {}).get("pools", []):
             chance = pool.get("condition", {}).get("chance")
             for entry in pool.get("entries", []):
                 namespace, item = split(entry.get("name", ":"))
                 count = entry.get("modifier", {}).get("count", {})
+                if namespace == MOD and item in pool_of:
+                    err(f"acquisition: loot_table/{info['table']}.json gives {item} from more than one pool (or "
+                        "entry), but its JEI page states one")
                 if namespace == MOD:
                     rolled[item] = chance if chance is not None else (count.get("min"), count.get("max"))
                     pool_of[item] = pool
         def alone(pool, items):
-            """The pool rolls once, under nothing but its chance, and holds exactly these items, each as likely."""
+            """The pool rolls once, under nothing but its chance, and holds exactly these items, each a plain entry (no
+            weight, count, condition or function of its own), so each as likely and one at a time."""
             entries = pool.get("entries", [])
             return (pool.get("rolls") == 1 and not set(pool) - {"condition", "entries", "rolls"}
                     and sorted(split(entry.get("name", ":"))[1] for entry in entries) == sorted(items)
-                    and len({json.dumps({k: v for k, v in entry.items() if k not in ("name", "modifier")}, sort_keys=True)
-                             for entry in entries}) == 1)
+                    and all(set(entry) <= {"type", "name"} for entry in entries))
         for item in rolled:
             if item not in pages:
                 err(f"loot_table/{info['table']}.json gives {item}, which has no JEI page (tools/acquisition.py)")
@@ -15136,10 +15153,11 @@ def check_encyclopedia(root, lang):
     if "out.sales(" not in route or "out.sales(" not in dossiers:
         err("encyclopedia: the route's and the dossiers' sales come from PageWriter.sales (a town that stands, today's offers)")
 
-    # The dossiers: each keeper's own Boss entry names the tool's tokens, rite, trophies, loot, recipes and sales; each
-    # exists; the loot and trophy tables are the keeper's; the season fact is the rite class's own; the first rite recipe
-    # makes a token and no rite recipe needs a boss's loot; and, every keeper found and beaten, every recipe draws a grid
-    # within PageWriter.MAX_GRIDS.
+    # The dossiers: each keeper's own Boss entry gives the tool's trophies, tokens, rite, loot and recipes, each list in
+    # its own place (Boss's List.of arguments, read by position: a name in another list does not count) and in the
+    # tool's order, and its sales; each recipe exists; the loot and trophy tables are the keeper's; the season fact is
+    # the rite class's own; the first rite recipe makes a token and no rite recipe the Java names needs a boss's loot;
+    # and, every keeper found and beaten, every recipe the Java names draws a grid within PageWriter.MAX_GRIDS.
     enum = re.search(r"public enum Boss \{(.*?)\n\t\tpublic final Lair lair;", dossiers, re.S)
     entries = {}
     for chunk in re.split(r"\n(?=\t\t[A-Z_]+\(Lair\.)", enum.group(1) if enum else ""):
@@ -15150,29 +15168,40 @@ def check_encyclopedia(root, lang):
         err(f"lair/LairDossiers.java: Boss's lairs {sorted(entries)} are not those of DOSSIERS in tools/encyclopedia.py")
     drawn = ("minecraft:crafting_shaped", "minecraft:crafting_shapeless", "minecraft:stonecutting")
     grids = 0
+    # Boss's List.of arguments, in the constructor's order.
+    fields = ("trophies", "tokens", "rite", "sales", "loot", "after_win", "made_from")
     for boss, dossier in en.DOSSIERS.items():
         entry = entries.get(dossier["lair"], "")
-        for field in ("tokens", "rite", "trophies", "loot", "after_win", "made_from"):
-            for name in dossier[field]:
-                if f'"{name}"' not in entry:
-                    err(f"lair/LairDossiers.java: {boss}'s Boss entry must name {name} ({field} in DOSSIERS, tools/encyclopedia.py)")
+        groups = re.findall(r"List\.of\(([^()]*)\)", entry)
+        parsed = len(groups) == len(fields)
+        if not parsed:
+            err(f"lair/LairDossiers.java: {boss}'s Boss entry must give its {len(fields)} lists "
+                f"({', '.join(fields)}) as List.of(...), in that order; found {len(groups)}")
+            groups = [""] * len(fields)
+        java = dict(zip(fields, groups))
+        named = {field: re.findall(r'"([a-z_]+)"', group) for field, group in java.items() if field != "sales"}
+        for field, names in named.items():
+            if parsed and names != list(dossier[field]):
+                err(f"lair/LairDossiers.java: {boss}'s Boss entry gives {field} {names}, not DOSSIERS' "
+                    f"{list(dossier[field])} (tools/encyclopedia.py), in that order")
         sold = {"Items." + item.split(":", 1)[1].upper() for _shop, item in dossier["trades"]}
-        named = set(re.findall(r"Items\.[A-Z_]+", entry))
-        if named != sold:
-            err(f"lair/LairDossiers.java: {boss}'s sales {sorted(named)} are not DOSSIERS' trades {sorted(sold)}")
-        for recipe in dossier["rite"] + dossier["after_win"] + dossier["made_from"]:
+        sales = set(re.findall(r"Items\.[A-Z_]+", java["sales"]))
+        if parsed and sales != sold:
+            err(f"lair/LairDossiers.java: {boss}'s sales {sorted(sales)} are not DOSSIERS' trades {sorted(sold)}")
+        # The page draws the Java's lists, so they are what is counted and checked.
+        for recipe in named["rite"] + named["after_win"] + named["made_from"]:
             file = DATA / MOD / "recipe" / f"{recipe}.json"
             if not file.is_file():
-                err(f"tools/encyclopedia.py: {boss} names recipe {recipe}, which does not exist")
+                err(f"lair/LairDossiers.java: {boss}'s Boss entry names recipe {recipe}, which does not exist")
                 continue
             kind = (load(file) or {}).get("type")
             if kind not in drawn:
-                err(f"tools/encyclopedia.py: {boss}'s recipe {recipe} is {kind}, for which PageWriter draws no grid")
+                err(f"lair/LairDossiers.java: {boss}'s recipe {recipe} is {kind}, for which PageWriter draws no grid")
             grids += 1
-            if recipe in dossier["rite"]:
+            if recipe in named["rite"]:
                 for ingredient in re.findall(r'"(jugcraft:[a-z_]+)"', file.read_text(encoding="utf-8")):
                     if ingredient in loot_items:
-                        err(f"tools/encyclopedia.py: {boss}'s rite recipe {recipe} needs {ingredient}, a boss's loot")
+                        err(f"lair/LairDossiers.java: {boss}'s rite recipe {recipe} needs {ingredient}, a boss's loot")
         if not dossier["rite"] or dossier["rite"][0] not in dossier["tokens"]:
             err(f"tools/encyclopedia.py: {boss}'s first rite recipe must make one of its tokens (LairDossiers.canOpen reads it)")
         table = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))

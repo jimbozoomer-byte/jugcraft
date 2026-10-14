@@ -31,7 +31,8 @@ tab, as the owner asked when each was made ([bloodthorn-armor.md](bloodthorn-arm
 does not claim that any of them became obtainable; how each is won is the owner's to decide (see Rollout).
 `check_acquisition` fails if a recipe (its result, results or byproducts), a bench working, a ritual, the Assayer's
 Scale, a loot table, a town shop, a villager trade, a commission or a project starts to give one before this record and
-`tools/acquisition.py` say so. It reads only data: a drop coded in Java is not seen (see Known limits).
+`tools/acquisition.py` say so. It reads data, and only the loot class's and the boss package's reward and deed lines;
+other drops coded in Java are not seen (see Known limits).
 
 **JEI says where ritual and boss things come from.** With JEI installed, each thing that only a ritual makes or only a
 lair boss gives now has an information page (JEI's "Information" tab, shown when you look up the item's recipes), since
@@ -337,9 +338,10 @@ Known limits and findings:
 - A-07's presentation rule (a cast pose never overriding a gun reload or an arms action, in first and third person
   and for other players) is a separate change of the same unit, recorded in
   [the presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07).
-- `check_acquisition` reads data only. Something a class gives in Java (a creature's drops coded in its class, such as
-  `creatures/scary/ScaryDrops`, which already drops steel armour) is not seen by it, so a Java drop of a "not crafted"
-  thing or of a creative-only tier would pass the data checks; review catches it.
+- `check_acquisition` reads data, and only the loot class's and the boss package's reward and deed lines; other drops
+  coded in Java are not seen (a creature's drops coded in its class, such as `creatures/scary/ScaryDrops`, which already
+  drops steel armour), so a Java drop of a "not crafted" thing or of a creative-only tier would pass the data checks;
+  review catches it.
 - `tools/concordance_progression.py` gives `minecraft:ender_eye` no dimension although its blaze powder is the
   Nether's; the progression audits may count it as an Overworld relic specimen. It predates this chunk and is not
   changed here; Relic Lore stays reachable in the Overworld through a Nautilus Shell and a Totem of Undying.
