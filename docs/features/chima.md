@@ -1,6 +1,6 @@
 # Chima, the lion cub
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Proposal issue: none; requested by the contributor (mmme123-spec) with their own drawings of Chima and its four looks.
 Owner: jimbozoomer-byte
 Target milestone and tier: none; an early-game wild animal and pet, reachable from the first day.
@@ -109,7 +109,7 @@ There are no new dependencies.
 
 **Client game test** (`ChimaClientGameTests`): screenshots of the five looks and a tame one sitting, seen from the front, from behind and up close.
 
-**Results:** the CI run that tests this branch is still to be recorded here.
+**Results:** fork CI run [38494479324](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38494479324) on 7a46abac passed: the build, the data checks, every server game test (these five included) with and without optional integrations, and all five client test shards (these screenshots included). The first run failed to compile one test (`EntityType.COW` is `EntityTypes.COW` in 26.3); that was fixed.
 
 **Not yet done:**
 - a two-client playtest;
