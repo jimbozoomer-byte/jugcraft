@@ -86,6 +86,13 @@ BIO_GENERATOR_FUELS = [(f"{MOD}:bioethanol", 192, 96), (f"{MOD}:biogas", 268, 64
 # What the Combined Cycle Power Plant burns, the factory's big power station: methane at a quarter more than the gas
 # generator's 448 JE/mB (its exhaust raises steam for a second turbine) and 2,048 JE/t, four times the gas turbine; the
 # Coal Gasifier's raw syngas whole at 256 JE/mB and the same rate; hydrogen at the Fuel Cell's 128 JE/mB at 1,024 JE/t.
+# The Bulk Chemical Oxidizer's cells, as its model fills them (form_layers on bulk_chemical_oxidizer()).
+BULK_OXIDIZER_LAYERS = [["C###", "####", "####", "####"],
+                        ["####", "####", "####", "###."],
+                        ["####", "####", "####", "#.#."],
+                        ["####", "####", "####", "###."],
+                        ["####", "####", "####", "###."],
+                        ["####", "####", "####", "###."]]
 # What the Large Gas Burning Generator burns, four times as fast as the Gas Burning Generator: hydrogen at the same
 # 128 JE/mB (more would beat electrolysis's cost), methane an eighth better at 504 JE/mB, between the Gas Burning
 # Generator's 448 and the Combined Cycle Power Plant's 560. For review.
@@ -259,6 +266,32 @@ FORMS = {
         "recipe": (["PFP", "MCG", "PKP"], {"P": "#c:plates/steel", "F": "minecraft:furnace", "M": f"{MOD}:electric_motor",
                                            "C": f"{MOD}:basic_circuit", "G": "minecraft:glass",
                                            "K": f"{MOD}:machine_casing"}),
+        "features": ["machines"],
+    },
+    "bulk_chemical_oxidizer": {
+        "display": "Bulk Chemical Oxidizer",
+        # The art brief's 4x4x6 larger variant: the Oxidizer's own family, tanks, feed slot and capability, so it burns the
+        # same feeds, in the bulk profile (four batches side by side from 16,000 mB tanks at 80% of the draw a batch).
+        "family": "chemical_reactor",
+        "layers": BULK_OXIDIZER_LAYERS,
+        "profile": "BULK",
+        "tank_mb": 16_000,
+        "input_tanks": ["oxidant"],
+        "output_tanks": ["product"],
+        "item_inputs": 1,
+        "capabilities": [SOLID_OXIDATION],
+        "upgrades": True,
+        "warmup": 40,
+        "ports": [
+            ("feed_in", "ITEM_IN", 0, 1, 2, 5, "TOP"),
+            ("oxidant_in", "FLUID_IN", 0, 3, 0, 0, "RIGHT"),
+            ("product_out", "FLUID_OUT", 0, 2, 0, 5, "TOP"),
+            ("power", "ENERGY_IN", 0, 0, 2, 0, "LEFT"),
+        ],
+        # This change's bill (open for review): a Chemical Oxidizer enlarged with two Steel Tanks, steel plates, an
+        # electric motor and a basic circuit.
+        "recipe": (["TOT", "PMP", "PCP"], {"T": f"{MOD}:steel_tank", "O": f"{MOD}:chemical_oxidizer", "P": "#c:plates/steel",
+                                           "M": f"{MOD}:electric_motor", "C": f"{MOD}:basic_circuit"}),
         "features": ["machines"],
     },
     "industrial_fermenter": {
@@ -690,6 +723,17 @@ HANDBOOK["bio_generator"] = [
         "It makes only as much as its store has room for. It also burns biogas from the Anaerobic Digester, piped into "
         "the same inlet: 268 JE a millibucket at 64 JE/t, a bucket lasting about 210 seconds.",
     ]
+
+HANDBOOK["bulk_chemical_oxidizer"] = [
+    "Four wide, four deep and six tall: the Chemical Oxidizer's reaction throat, collector hood and feed hopper twice as "
+    "large, built from a Chemical Oxidizer, two Steel Tanks, steel plates, an electric motor and a basic circuit. Every "
+    "block it fills must be free when it is placed.",
+    "It burns everything the Oxidizer does, sulfur into sulfur dioxide and coal into carbon dioxide, but four batches "
+    "at once from 16,000 mB tanks, at 80% of the draw a batch.",
+    "Feed goes in at the hopper's mouth on top at the back; oxygen comes in low on its right side, at the front; the gas "
+    "leaves at the collar on top at the front. Power comes in at the junction box low on its left side. Upgrade cards "
+    "fit its terminal.",
+]
 
 HANDBOOK["bulk_chemical_infuser"] = [
     "Four wide, six deep and six tall: the Chemical Infuser's chamber, inlets, bed drawer and cooling jacket twice as "
@@ -1306,8 +1350,44 @@ BULK_INFUSER_PORT_SHIFTS = [
 ]
 
 
-def _bulk_infuser(point):
+def _doubled(model, keep, shifts):
+    """A small form's model drawn twice as large every way about its controller block's left edge, for its bulk
+    variant. Elements `keep` accepts (the controller's own box, gauges and lamp) keep their size. Doubling puts the middle
+    of each port's block face on a seam, so each port's pieces move half a block by the first matching (shift, test on
+    the small element's centre) in `shifts`; nothing moved down goes below the plinth, and a stretched face (a flange)
+    doubled past a block's width is trimmed back to 14 pixels across about its middle."""
+    m = []
+    for element in model:
+        frm, to = element[0], element[1]
+        if keep(element):
+            m.append(element)
+            continue
+        centre = [(frm[i] + to[i]) / 2 for i in range(3)]
+        shift = next((d for d, test in shifts if test(centre)), (0, 0, 0))
+        scaled = _scaled_element(element, lambda p, d=shift: tuple(v + d[i] for i, v in enumerate(_doubled_point(p))))
+        frm2, to2 = list(scaled[0]), list(scaled[1])
+        if frm2[1] < 4 and shift[1] < 0:
+            frm2[1] = 4.0
+        faces = scaled[2] if isinstance(scaled[2], dict) else {"*": scaled[2]}
+        if any(str(name).endswith("!") for name in faces.values()):
+            for axis in range(3):
+                if to2[axis] - frm2[axis] > 15:
+                    middle = (frm2[axis] + to2[axis]) / 2
+                    frm2[axis], to2[axis] = middle - 7, middle + 7
+                # And kept inside the block its middle is in.
+                low = math.floor((frm2[axis] + to2[axis]) / 32) * 16
+                slide = max(0.0, low - frm2[axis]) - max(0.0, to2[axis] - (low + 16))
+                frm2[axis], to2[axis] = frm2[axis] + slide, to2[axis] + slide
+        m.append(box(frm2, to2, scaled[2]))
+    return m
+
+
+def _doubled_point(point):
     return (16 + (point[0] - 16) * 2, point[1] * 2, point[2] * 2)
+
+
+def _bulk_infuser(point):
+    return _doubled_point(point)
 
 
 def bulk_chemical_infuser():
@@ -1318,28 +1398,7 @@ def bulk_chemical_infuser():
     jacket with its fan, the product collar and water drain at the back and the junction box with the power socket. The
     control box (the controller) keeps its size at the front left. Each port's pieces sit at the middle of a block face,
     clear of the seams the doubling would put them on."""
-    m = []
-    for element in chemical_infuser():
-        frm, to = element[0], element[1]
-        if frm[0] >= 8.4 and to[2] <= 4.1 and to[1] <= 14.1:
-            m.append(element)  # the control box, its gauge and lamp
-            continue
-        centre = [(frm[i] + to[i]) / 2 for i in range(3)]
-        shift = next((d for d, test in BULK_INFUSER_PORT_SHIFTS if test(centre)), (0, 0, 0))
-        scaled = _scaled_element(element, lambda p, d=shift: tuple(v + d[i] for i, v in enumerate(_bulk_infuser(p))))
-        frm2, to2 = list(scaled[0]), list(scaled[1])
-        # Nothing reaches below the plinth.
-        if frm2[1] < 4 and shift[1] < 0:
-            frm2[1] = 4.0
-        # A stretched face (a flange) doubled past a block's width is trimmed back to 14 pixels across, about its middle.
-        faces = scaled[2] if isinstance(scaled[2], dict) else {"*": scaled[2]}
-        if any(str(name).endswith("!") for name in faces.values()):
-            for axis in range(3):
-                if to2[axis] - frm2[axis] > 15:
-                    middle = (frm2[axis] + to2[axis]) / 2
-                    frm2[axis], to2[axis] = middle - 7, middle + 7
-        m.append(box(frm2, to2, scaled[2]))
-    return m
+    return _doubled(chemical_infuser(), lambda e: e[0][0] >= 8.4 and e[1][2] <= 4.1 and e[1][1] <= 14.1, BULK_INFUSER_PORT_SHIFTS)
 
 
 # Its fan, doubled with the jacket it sits on.
@@ -1455,6 +1514,54 @@ def chemical_oxidizer_still():
     """The feed screw standing still, for the item model only."""
     cx, cy, cz = OXIDIZER_SCREW
     return cyl("z", cx, cy, 0.75, 22.5, 30.5, CHROME) + cyl("z", cx, cy, 3, 24, 29.5, COPPER)
+
+
+# The Bulk Chemical Oxidizer: each port's pieces moved half a block off the seams the doubling puts them on (shift,
+# test on the Oxidizer's own element centre).
+BULK_OXIDIZER_PORT_SHIFTS = [
+    # The hopper, chute, trough and feed screw at the back: left and forward, so the mouth is in one block's top.
+    ((-8, 0, -8), lambda c: 0 < c[0] < 15.6 and c[2] >= 16 and not (c[0] >= 11.9 and c[1] < 14.5)),
+    # The capped oxidant inlet low on the right: down and forward.
+    ((0, -8, -8), lambda c: c[0] < -11.9 and c[1] < 13 and c[2] < 13),
+    # The gas outlet's riser and collar on top: inwards over the hood, and forward.
+    ((8, 0, -8), lambda c: abs(c[0] + 8) <= 3.5 and abs(c[2] - 8) <= 3.5 and c[1] > 40),
+    # The junction box low on the left at the back, its socket and hazard band: down and forward.
+    ((0, -8, -8), lambda c: c[0] >= 11.9 and c[1] < 14.5 and c[2] > 16),
+]
+# Its feed screw, doubled and moved with the trough.
+BULK_OXIDIZER_SCREW = tuple(v + d for v, d in zip(_doubled_point(OXIDIZER_SCREW), (-8, 0, -8)))
+
+
+def bulk_chemical_oxidizer():
+    """Four wide, four deep and six tall (the art brief's larger variant): the Chemical Oxidizer itself, twice as large:
+    the plinth, the squat dark-steel reaction throat with its refractory ring, bolted hatch, glowing reaction slit and
+    residue drawer; the gas column and ringed collector hood with its outlet rising to a collar; the broad olive hopper
+    at the back with its hazard-striped lip, chute and guarded trough with the feed screw; the capped oxidant inlet low
+    on the right and the junction box with the power socket low on the left. The control panel (the controller) keeps its
+    size at the front left. Each port's pieces sit at the middle of a block face."""
+    return _doubled(chemical_oxidizer(), lambda e: e[0][0] >= 9 and e[1][2] <= 3.1 and e[1][1] <= 13.1, BULK_OXIDIZER_PORT_SHIFTS)
+
+
+def bulk_chemical_oxidizer_rotor():
+    """The bulk feed screw in its trough (client/MachineRotors)."""
+    import machine_rotors as rotors
+    cx, cy, cz = BULK_OXIDIZER_SCREW
+    z_lo = (22.5 * 2) - 8
+    quads = rotors.disc("z", z_lo, z_lo + 16, cx, cy, 1.5, CHROME, CHROME)
+    for flight in range(6):
+        z0 = z_lo + 1 + flight * 2.5
+        angle = math.radians(60 * flight)
+        c, s_ = math.cos(angle), math.sin(angle)
+
+        def at(r, w):
+            return (cx + 2 * (r * c - w * s_), cy + 2 * (r * s_ + w * c))
+        quads += rotors.prism("z", z0, z0 + 1.5, [at(0.9, -1.1), at(3.5, -1.4), at(3.5, 1.4), at(0.9, 1.1)], COPPER, COPPER)
+    return quads
+
+
+def bulk_chemical_oxidizer_still():
+    """The feed screw standing still, for the item model only."""
+    return _doubled(chemical_oxidizer_still(), lambda e: False, [((-8, 0, -8), lambda c: True)])
 
 
 # The Fermenter's agitator drive pulley on top of the vessel, turning about y: its centre (x, y, z).
@@ -2427,6 +2534,10 @@ ROTORS = {
         "ease": 30, "always": True, "quads": chemical_infuser_rotor(),
     },
     # The Oxidizer's feed screw, turning while it burns.
+    "bulk_chemical_oxidizer_screw": {
+        "block": "bulk_chemical_oxidizer", "axis": "z", "center": list(BULK_OXIDIZER_SCREW), "property": "lit", "speed": 6,
+        "ease": 20, "always": True, "quads": bulk_chemical_oxidizer_rotor(),
+    },
     "chemical_oxidizer_screw": {
         "block": "chemical_oxidizer", "axis": "z", "center": list(OXIDIZER_SCREW), "property": "lit", "speed": 9,
         "ease": 20, "always": True, "quads": chemical_oxidizer_rotor(),
@@ -2490,7 +2601,7 @@ ROTORS = {
 
 MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_generator": gas_burning_generator(),
           "chemical_infuser": chemical_infuser(), "bulk_chemical_infuser": bulk_chemical_infuser(),
-          "chemical_oxidizer": chemical_oxidizer(),
+          "chemical_oxidizer": chemical_oxidizer(), "bulk_chemical_oxidizer": bulk_chemical_oxidizer(),
           "industrial_fermenter": industrial_fermenter(), "bulk_fermenter": bulk_fermenter(),
           "bulk_chemical_reactor": bulk_chemical_reactor(),
           "anaerobic_digester": anaerobic_digester(), "coal_gasifier": coal_gasifier(),
@@ -2499,7 +2610,7 @@ MODELS = {"electrolytic_separator": electrolytic_separator(), "gas_burning_gener
           "combined_cycle_power_plant": combined_cycle_power_plant()}
 # Extra elements for a form's item model alone: its turning parts, standing still.
 ITEM_EXTRAS = {"gas_burning_generator": gas_burning_generator_still(), "chemical_infuser": chemical_infuser_still(),
-               "bulk_chemical_infuser": bulk_chemical_infuser_still(),
+               "bulk_chemical_infuser": bulk_chemical_infuser_still(), "bulk_chemical_oxidizer": bulk_chemical_oxidizer_still(),
                "chemical_oxidizer": chemical_oxidizer_still(), "industrial_fermenter": industrial_fermenter_still(),
                "bulk_fermenter": bulk_fermenter_still(),
                "bulk_chemical_reactor": bulk_chemical_reactor_still(), "anaerobic_digester": anaerobic_digester_still(),

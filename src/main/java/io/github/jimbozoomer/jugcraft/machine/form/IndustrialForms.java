@@ -356,6 +356,32 @@ public final class IndustrialForms {
 			.build();
 
 	/**
+	 * The Bulk Chemical Oxidizer: the art brief's 4x4x6 variant of the Chemical Oxidizer, the same throat, hood and
+	 * hopper twice as large, in the chemical reactor family with the Oxidizer's tanks, feed slot and capability, so it
+	 * burns the same feeds, in the bulk profile: four batches side by side from 16,000 mB tanks at 80% of the draw a batch.
+	 */
+	public static final MachineForm BULK_CHEMICAL_OXIDIZER_FORM = MachineForm.builder(Jugcraft.id("bulk_chemical_oxidizer"),
+					MachineKind.CHEMICAL_REACTOR)
+			.layer("C###", "####", "####", "####")
+			.layer("####", "####", "####", "###.")
+			.layer("####", "####", "####", "#.#.")
+			.layer("####", "####", "####", "###.")
+			.layer("####", "####", "####", "###.")
+			.layer("####", "####", "####", "###.")
+			.profile(OperatingProfile.BULK)
+			.inputTank("oxidant")
+			.outputTank("product")
+			.items(1, 0)
+			.capability(SOLID_OXIDATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 1, 2, 5, FormSide.TOP)
+			.port("oxidant_in", FormPort.Kind.FLUID_IN, 0, 3, 0, 0, FormSide.RIGHT)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 2, 0, 5, FormSide.TOP)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 2, 0, FormSide.LEFT)
+			.build();
+
+	/**
 	 * The Bulk Chemical Infuser: the art brief's 4x6x6 variant of the Chemical Infuser, the same chamber, paired inlets,
 	 * bed drawer and cooling jacket twice as large, in the synthesis family with the Infuser's tanks, bed socket and
 	 * capabilities, so it runs the same recipes, in the bulk profile: four batches side by side from 16,000 mB tanks at
@@ -456,6 +482,7 @@ public final class IndustrialForms {
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock BULK_CHEMICAL_INFUSER;
 	public static FormMachineBlock CHEMICAL_OXIDIZER;
+	public static FormMachineBlock BULK_CHEMICAL_OXIDIZER;
 	public static FormMachineBlock INDUSTRIAL_FERMENTER;
 	public static FormMachineBlock BULK_FERMENTER;
 	public static FormMachineBlock BULK_CHEMICAL_REACTOR;
@@ -477,6 +504,7 @@ public final class IndustrialForms {
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
 		BULK_CHEMICAL_INFUSER = block("bulk_chemical_infuser", BULK_CHEMICAL_INFUSER_FORM);
 		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
+		BULK_CHEMICAL_OXIDIZER = block("bulk_chemical_oxidizer", BULK_CHEMICAL_OXIDIZER_FORM);
 		INDUSTRIAL_FERMENTER = block("industrial_fermenter", INDUSTRIAL_FERMENTER_FORM);
 		BULK_FERMENTER = block("bulk_fermenter", BULK_FERMENTER_FORM);
 		BULK_CHEMICAL_REACTOR = block("bulk_chemical_reactor", BULK_CHEMICAL_REACTOR_FORM);
@@ -488,8 +516,8 @@ public final class IndustrialForms {
 		LARGE_GAS_BURNING_GENERATOR = block("large_gas_burning_generator", LARGE_GAS_BURNING_GENERATOR_FORM);
 		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
 		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, BULK_CHEMICAL_INFUSER,
-				CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER,
-				GAS_CLEANUP_RACK, BIO_GENERATOR, LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
+				CHEMICAL_OXIDIZER, BULK_CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER,
+				COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, COMBINED_CYCLE_PLANT);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.forEach(output::accept));
 	}

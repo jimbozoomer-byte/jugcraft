@@ -3877,6 +3877,30 @@
           }
         },
         {
+          "title": "Bulk Chemical Oxidizer",
+          "icon": "jugcraft:bulk_chemical_oxidizer",
+          "text": [
+            "Four wide, four deep and six tall: the Chemical Oxidizer's reaction throat, collector hood and feed hopper twice as large, built from a Chemical Oxidizer, two Steel Tanks, steel plates, an electric motor and a basic circuit. Every block it fills must be free when it is placed.",
+            "It burns everything the Oxidizer does, sulfur into sulfur dioxide and coal into carbon dioxide, but four batches at once from 16,000 mB tanks, at 80% of the draw a batch.",
+            "Feed goes in at the hopper's mouth on top at the back; oxygen comes in low on its right side, at the front; the gas leaves at the collar on top at the front. Power comes in at the junction box low on its left side. Upgrade cards fit its terminal."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_tank",
+              "jugcraft:chemical_oxidizer",
+              "jugcraft:steel_tank",
+              "jugcraft:steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:steel_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:basic_circuit",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:bulk_chemical_oxidizer",
+            "count": 1
+          }
+        },
+        {
           "title": "Industrial Fermenter",
           "icon": "jugcraft:industrial_fermenter",
           "text": [
