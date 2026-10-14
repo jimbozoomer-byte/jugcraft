@@ -1,6 +1,6 @@
 # The Iron Dreadnought
 
-Status: implemented in source; CI has not run on it yet (results and the client test's pictures go below once it has). This is part 2 of boss 7 in the [bosses plan](../branches/BOSSES.md#the-iron-dreadnought-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Foundry Trench, his plating and the discharge routed through the pylons, his Sparkers, rivets and mortar shells, and his loot. It is built on part 1, the trench and the Sealed Orders that open it ([foundry-trench.md](foundry-trench.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes (below), and the pictures are from its client test. This is part 2 of boss 7 in the [bosses plan](../branches/BOSSES.md#the-iron-dreadnought-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Foundry Trench, his plating and the discharge routed through the pylons, his Sparkers, rivets and mortar shells, and his loot. It is built on part 1, the trench and the Sealed Orders that open it ([foundry-trench.md](foundry-trench.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 14 October 2026 the owner answered the Crypt Lich's checkpoint with "go with recommendations", whose next chunk was the Iron Dreadnought, built the same two-part way: the Foundry Trench and its summoning, then the Dreadnought himself and his loot. He is the fifth of the first eight in [branches/BOSSES.md](../branches/BOSSES.md), and the first of the dieselpunk tiers.
 Owner: @jimbozoomer-byte
 
@@ -175,7 +175,29 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
-CI: not run yet on this branch. Its results, and the client test's pictures, go here once it has run.
+![He stands dormant in the assembly gantry, between its girder columns under the crane beam, his searchlight dark, the pit's hazard stripe at his feet](../images/ingame_iron_dreadnought_waiting.jpg)
+![Woken by a player on the pit's floor: his searchlight lit and smoke rising from his stacks as he steps down out of the gantry](../images/ingame_iron_dreadnought_wakes.jpg)
+![The Piston Punch landing: the burst of his fist before him, his ram's hazard stripes and the coils on his shoulders](../images/ingame_iron_dreadnought_punch.jpg)
+![The Rivet Fan: his battery's shutters open on his left pauldron as the rivets leave it, his stacks smoking](../images/ingame_iron_dreadnought_rivets.jpg)
+![The Trench Charge under way: dust kicking up round his feet as he runs down the pit](../images/ingame_iron_dreadnought_charge.jpg)
+![The Coil Arc: a thread of violet and white sparks from the coil on his shoulder to the player](../images/ingame_iron_dreadnought_arc.jpg)
+![His charge: planted in the pit with his coils crackling, the west pylon (the player's nearest) lit across the floor; from this far off its violet threads barely show](../images/ingame_iron_dreadnought_discharge.jpg)
+![Overloaded after the player threw the west breaker: his vents blown open, the furnaces behind them glowing orange](../images/ingame_iron_dreadnought_overload.jpg)
+![The Torn Plate: halted at half health, tearing a plate from his hull to hurl into a breaker](../images/ingame_iron_dreadnought_torn_plate.jpg)
+![The Mortar: the shell high over the pit and the ring of red smoke marking where it will land](../images/ingame_iron_dreadnought_mortar.jpg)
+![The Blowdown: scalding steam bursting round his feet, the nearest clouds right at the camera](../images/ingame_iron_dreadnought_blowdown.jpg)
+![His Sparkers: two little coil crawlers dropped from the hatch in his belly, at his feet](../images/ingame_iron_dreadnought_sparkers.jpg)
+![Red Line: his vents jammed open for good, flames and sparks round him](../images/ingame_iron_dreadnought_red_line.jpg)
+![His fall: he sags in his tracks, tinted red as he dies, his searchlight dark, with the stacks and the gantry behind him](../images/ingame_iron_dreadnought_defeated.jpg)
+
+*The client game test's pictures (CI, commit `a31bd68`): he waits, wakes, his four Advance attacks, his charge on the west pylon and his overload when it is routed, the Torn Plate, the Overcharge's Mortar, Blowdown and Sparkers, Red Line and his fall. The world is frozen for each, so a pose holds. 480 × 270, as CI's log carries them.*
+
+CI (14 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `4ce32d4` | Build, data audit, game tests | **Pass:** all 1615 required game tests, his 19 among them; `repository`; `optional integrations absent`. Its client shards were cancelled by the next push before they finished |
+| `a31bd68` (the above merged with the Foundry Trench at `c8f33f0`, which carries `main` after jimbozoomer-byte/jugcraft#358) | Build, data audit, game tests, client game tests | **All pass:** all 1666 required game tests, his 19 among them; `repository`; `optional integrations absent`; and every client test class (171; the change adds a shared test file, so `tools/select_client_tests.py` picks them all). His fight passed end to end in a real Foundry Trench. The pictures above are from this commit |
 
 Run locally (14 October 2026):
 
@@ -186,7 +208,7 @@ Run locally (14 October 2026):
 | `python3 tools/check_icon_maps.py` on the three new maps | Pass |
 | `python3 tools/generate_material_data.py` and `tools/generate_textures.py`, then `git status` | Write this part's data and textures only (the PNGs they re-encoded with identical pixels were reverted) |
 | `javac` on the new Java and tests, for syntax only | No errors |
-| `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); to be run by CI |
+| `./gradlew build`, game tests and client game tests | Not run locally (the Fabric Maven is out of reach here); run by CI: all pass (above) |
 
 The game tests (`IronDreadnoughtGameTests`) show what a game-test server can, with a Dreadnought put down on his own (no lair) over a trench laid out from near the corner of an arena the pit's size; each test lays the floor and fixtures it needs:
 1. he stands dormant in his gantry, his eye dark, and takes no harm; a player a block over the pit's floor does not wake him, nor does a creative player on it or their blow; a player who may fight him standing on the pit's floor does, at full health, his eye lit, unhurt while he wakes; he steps down onto the pit's floor where he wakes, his health one player's, every pylon dark and every breaker open;
