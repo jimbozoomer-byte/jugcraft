@@ -4,14 +4,14 @@ approved.
 
 - Hull: a long riveted olive box, its top front edge chamfered into a glacis and its top rear edge chamfered down to
   the engine deck; rivet rows along every edge; on the front a driver's hatch plate with a vision slit and a domed
-  periscope bulb; a louvred engine deck behind the turret ring with a rusty exhaust elbow bending back off its
-  right; a riveted leg bracket with a hinge pin on each side at the front and rear, a tow hook and a whip antenna.
+  periscope bulb; a louvred engine deck behind the turret ring; a battery pack on the left side between the leg brackets; a
+  riveted leg bracket with a hinge boss on each side at the front and rear, and a tow hook.
 - Turret: a riveted box with its front corners chamfered, a bustle at the back, two round roof hatches (one with a
-  lid dome and handle), four periscope blocks, a ribbed vent grille on the front left face, a lifting eye each side.
+  lid dome and handle), four periscope blocks, a ribbed vent grille on the front right face, a lifting eye each side, the whip antenna on the roof.
 - Gun: a mantlet block on the turret's front with the long barrel, a thick root and a muzzle collar, and the coaxial
   machine gun beside it, pivoting on the mantlet.
 - Legs: four, insect-jointed, each in four groups so it can be animated later: a yaw group at the hinge (front legs
-  splayed forward, rear legs back), a femur plate rising outward to a knee pin above the roof with a hydraulic hose
+  splayed forward, rear legs back), a femur plate rising outward to a knee pin kept below the barrel's sweep, with a hydraulic hose
   along its top, a long tibia plate dropping outward to an ankle pin, and a flat foot pad hinged level on the ground.
 
 Units are pixels, the walker facing +z with the ground at y = 0, about 50 wide across the hull and 100 across the
@@ -34,9 +34,9 @@ HULL = ((-20, 7, -20), (20, 25, 20))
 TURRET = (0, 26.5, 2)
 GUN = (0, 33, 14)
 # The legs: hinge pins on the hull's sides, the femur rising outward, the tibia dropping outward, the foot level.
-HIPS = {"front_left": (20, 20, 10), "front_right": (-20, 20, 10), "rear_left": (20, 20, -12), "rear_right": (-20, 20, -12)}
-FEMUR, TIBIA = 26, 37
-FEMUR_RISE, TIBIA_LEAN, SPLAY = 40, 25, 30   # degrees: the femur above level, the tibia outward from vertical, the yaw
+HIPS = {"front_left": (20, 17, 10), "front_right": (-20, 17, 10), "rear_left": (20, 17, -12), "rear_right": (-20, 17, -12)}
+FEMUR, TIBIA = 20, 24.5
+FEMUR_RISE, TIBIA_LEAN, SPLAY = 25, 25, 30   # the knee pins top out below the barrel (y 31.4)   # degrees: the femur above level, the tibia outward from vertical, the yaw
 
 
 def rot_z(v, a):
@@ -109,11 +109,17 @@ def hull():
     m.append(box((-15, y1, -19), (15, y1 + 1.6, -8), {"*": PLATE, "up": DARK}))
     for z in (-17.5, -15, -12.5, -10):
         m.append(box((-13, y1 + 1.6, z - 0.7), (13, y1 + 2.2, z + 0.7), GUNMETAL))
-    m += cyl("y", -14, -15, 2.1, y1 + 1.6, y1 + 7, RUST)
-    m.append(box((-16.4, y1 + 7, -17.4), (-11.6, y1 + 11.6, -12.6), RUST))
-    m += cyl("z", -14, y1 + 9.3, 2.1, -25, -17.4, RUST, BORE)
-    m.append(box((16.4, y1, -18.5), (17, y1 + 22, -17.9), GUNMETAL))
-    m += cyl("y", 16.7, -18.2, 1.3, y1, y1 + 1.6, DARK)
+    # The battery pack on the left side between the leg brackets: a cradle, two cells with their terminals, a
+    # strap over them and a cable up into the hull.
+    m.append(box((x0 - 3.8, 9, -5), (x0, 10.5, 4), DARK))
+    for za, zb in ((-4.5, -0.6), (0.6, 3.5)):
+        m.append(box((x0 - 3.4, 10.5, za), (x0 - 0.2, 18.5, zb), {"*": BORE, "up": DARK}))
+        m.append(box((x0 - 3.2, 18.5, za + 1), (x0 - 1.0, 19.3, zb - 1), GRILLE))
+        m += cyl("y", x0 - 2.6, (za + zb) / 2 - 0.9, 0.5, 19.3, 20.4, CHROME)
+        m += cyl("y", x0 - 1.4, (za + zb) / 2 + 0.9, 0.5, 19.3, 20.4, RUST)
+    m.append(box((x0 - 3.6, 13, -5.2), (x0 - 0.1, 14.4, 4.2), PLATE))
+    m.append(box((x0 - 2.4, 20.4, -4.2), (x0 - 1.6, 21.2, 4.4), DARK))
+    m.append(box((x0 - 2.4, 20.4, 4.4), (x0, 21.2, 5.2), DARK))
     # The turret ring, and a step round it.
     m += cyl("y", 0, 0, 14.5, y1, y1 + 1.5, GUNMETAL, DARK)
     # The leg brackets: a riveted plate standing off each side, front and rear, carrying the hinge pin.
@@ -145,6 +151,8 @@ def turret():
         m.append(box((x - 1.4, 11.5, 7), (x + 1.4, 14, 9.6), DARK))
         m.append(box((x - 1, 12.6, 9.6), (x + 1, 13.5, 10), BORE))
     m.append(box((-2, 11.5, -8), (2, 13, -6), DARK))
+    m += cyl("y", 11, -8, 1.3, 11.5, 13, DARK)
+    m.append(box((10.7, 13, -8.3), (11.3, 34, -7.7), GUNMETAL))
     # The vent grille on the front left face: a dark recess with raised ribs.
     m.append(box((6, 3, 12), (12.4, 9.5, 12.6), GRILLE))
     for y in (4, 5.6, 7.2, 8.8):
@@ -180,10 +188,10 @@ def femur():
     m.append(box((3.4, -5, -1.8), (9, 5, 1.8), LEG))
     m.append(box((9, -3.5, -1.4), (FEMUR + 2, 3.5, 1.4), LEG))
     m.append(box((4, -3, -2.2), (8, 3, -1.8), DARK))
-    m += rivets([(x, y, -1.6) for x in (11, 17, 23) for y in (-2.2, 2.2)], size=0.7)
-    m += rivets([(x, y, 1.6) for x in (11, 17, 23) for y in (-2.2, 2.2)], size=0.7)
-    m.append(box((3, 5, -0.5), (FEMUR - 1, 5.8, 0.5), DARK))
-    m.append(box((FEMUR - 1, 3.5, -0.5), (FEMUR - 0.2, 5.8, 0.5), DARK))
+    m += rivets([(x, y, -1.6) for x in (11, 15, 19) for y in (-2.2, 2.2)], size=0.7)
+    m += rivets([(x, y, 1.6) for x in (11, 15, 19) for y in (-2.2, 2.2)], size=0.7)
+    m.append(box((4, 3.5, -0.5), (FEMUR - 1, 4.3, 0.5), DARK))
+    m.append(box((FEMUR - 1, 3.2, -0.5), (FEMUR - 0.2, 4.3, 0.5), DARK))
     m += cyl("z", FEMUR, 0, 3.2, -2.4, 2.4, GUNMETAL, CHROME)
     return m
 
@@ -194,7 +202,7 @@ def tibia():
     m.append(box((-4.2, -7, -1.2), (4.2, 1.5, 1.2), LEG))
     m.append(box((-2.8, -TIBIA, -1.0), (2.8, -7, 1.0), LEG))
     m.append(box((-3.4, -TIBIA + 2, -1.1), (3.4, -TIBIA + 9, 1.1), DARK))
-    m += rivets([(0, y, -1.3) for y in (-12, -20, -28)] + [(0, y, 1.3) for y in (-12, -20, -28)], size=0.7)
+    m += rivets([(0, y, -1.3) for y in (-11, -16)] + [(0, y, 1.3) for y in (-11, -16)], size=0.7)
     m += cyl("z", 0, -TIBIA, 2.2, -2, 2, GUNMETAL, CHROME)
     return m
 
