@@ -56,7 +56,7 @@ MATRIX = {
         "arm in the main hand, on any player the client sees (CastPoses)",
         "required",
         ["aCastGivesWayToAGunOrAnArm"],
-        "No person has looked at the gestures; giving way has a test, added but not yet run, for Spell Engine's "
+        "No person has looked at the gestures; giving way has a test, passed in CI since Chunk A, for Spell Engine's "
         "release clip and the Vigil's gesture on the client's own player; it does not cover the fade of an ended "
         "cast, another player's view (a second client, not run) or the circle's gesture"),
     "modonomicon": (

@@ -7,8 +7,7 @@ its server game tests among the 1639 required, with and without the optional int
 Not played by hand or with two clients; see Verification for what has run.
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B2).
-Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code (Claude Opus 5.5); the model is named in the
-commit trailers.
+Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Practitioner stage (Jugcraft Workshops), once First Light is understood, beside Ember. Rime
 and Strata are the second and fourth of the four elemental Principles (Ember, Rime, Tempest, Strata) the Concordance
 named on 5 October.
