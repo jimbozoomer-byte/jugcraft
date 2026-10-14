@@ -1,12 +1,15 @@
 # Concordance Chunk B: winter and stone (contract and handoff)
 
-Status: contract written. Unit 1 (B-01 and B-02, the Yeti King and the Cinder Tyrant) and unit 3 (B-05 to B-07) are
-implemented on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb`
-([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk A); not merged. Their tests pass in
-CI: run 38514144531 on `579ab5f6f` (unit 1) and run 38519234934 on `06dc5ea5f` (units 1 and 3) succeeded in every job
-(see the Validation plan). The first run, 38509414542, failed only the two four-player tests, which expected more health
-than the game's 1024 cap allows; the tests now expect the cap. Every other unit is Not started. The contract was written
-at `d4c07bf56`, the head of Chunk A ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337)), when main was
+Status: contract written. Units 1 to 4 are implemented on branch `claude/chunk-b-winter-stone`, based on main
+`feb6d04fb` ([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk A); not merged; unit 5
+is Not started. Units 1 and 3 pass their tests in CI: run 38514144531 on `579ab5f6f` (unit 1) and run 38519234934 on
+`06dc5ea5f` (units 1 and 3) succeeded in every job (see the Validation plan). The first run, 38509414542, failed only the
+two four-player tests, which expected more health than the game's 1024 cap allows; the tests now expect the cap. Unit
+2's first run (38534127130 on `0e7de6bf1`) failed the charge test its review had predicted and found the King's ice
+left over after an unload; both are fixed (`215a1c1e0`, `1266c905a`), and its records follow its next run. Unit 4's
+tests have not run yet ([unit 3's record](arcane-concordance-rime-strata.md), [unit 4's](arcane-concordance-winter.md)).
+The contract was written at `d4c07bf56`, the head of Chunk A
+([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337)), when main was
 `b73f51c8a` ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
 Proposal: the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 4,
@@ -52,9 +55,9 @@ starts.
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
 | 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | Implemented, not merged; CI passed (runs 38514144531 and 38519234934): B-01 and B-02 committed for the Yeti King and the Cinder Tyrant, each keeper in his own commits (B-D1) |
-| 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Not started |
+| 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Implemented (`98c550f16` to `1266c905a`); CI run 38534127130 found two defects, fixed; records after the next run |
 | 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible, with Jade's hold. The crafted upgrade (09:94) is unit 4's water foci (B-P14). One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | [arcane-concordance-rime-strata.md](arcane-concordance-rime-strata.md) | Implemented, not merged; CI passed (run 38519234934) |
-| 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | new `arcane-concordance-winter.md`; `arcane-concordance-alchemy.md` | Not started |
+| 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | [arcane-concordance-winter.md](arcane-concordance-winter.md); `arcane-concordance-alchemy.md` | Implemented; not yet compiled or run in CI: B-08 (`f45b2c6c3`), the kit (`68dd29dbc`), the links (`b262ba8c4`), the Glacier Hall's preparation fact (`ca1d4848c`, on unit 1's dossiers) and the records |
 | 5 | B-09, B-11 | Brace and Rimebind as optional counters in the Yeti fight; combined fixes, evidence and the owner checkpoint | `yeti-king.md`; this page | Not started |
 
 ## Baseline (B-00)
@@ -80,8 +83,8 @@ starts.
 | Preserve, Rimebind and Brace (02:77-79) | Absent: ten invocations, none of them Rime or Strata | `concordance/invocation/` (aegis, cinderbolt, flashstep, hearthflare, hearthguard, hearthspark, kindle, lance, lanternward, revelation) |
 | Strata research (taken as missing) | Strata already has two entries: `assay` (Balancewrights; examines `#jugcraft:assay_specimens`) and `runesmithing` (Runesmiths). Rime has none. The Rimekeepers' and Stratawrights' rows give only their roadmap step | `concordance/research/assay.json`, `runesmithing.json`; `concordance/practice/assay.json`; `docs/ARCANE_CONCORDANCE.md:121,123` (the Hearthbinders' row 120 says "implemented") |
 | "Use existing Thallite" (09:86; 01:38) | Ore and gear (slices 1 and 2) are merged and tested; slices 3 to 5 (arms; arrow and horse armour; the Focus, Earthen Steps and Bulwark) are not built. The record's status lines are stale. No Concordance data mentions Thallite | `docs/features/thallite.md:5-8,136-141,194`; `ThalliteGearGameTests.java:60-222`; no match for "thallite" under `concordance/` data |
-| "A boss drop offers a distinctive variant, not the first and only cold protection" (04:141) | The Yeti Mitten is the only full counter to his frost: `chill()` checks the Mitten and not `canFreeze()`. Jugcraft adds only knitwear to `freeze_immune_wearables`. **Inference, untested:** knitwear stops freeze damage through vanilla's gate but not his frost slowdown (vanilla's freeze damage needs `canFreeze()`, which one listed piece turns off; the frost slowdown does not ask it) | `YetiKingEntity.java:960-967` (the Mitten at `:961`); `lair/yeti/YetiMitten.java:23-35`; `data/minecraft/tags/item/freeze_immune_wearables.json`; mc263src `LivingEntity.java:534-543` (slowdown), `:2938` (damage), `:3756-3760` (`canFreeze`) |
-| Winter Brine: "Too much heat consumes the temporary cold property" (03:36) | Heat never consumes Rime: a searing stir damages only Radiance and Verdance. An unheated crucible sits at 20, inside the cold band, and nothing cools one below that. The Rime property gives Resistance | `concordance/alchemy/Mixture.java:26,82-85`; `Band.java:12-15`; `Heat.java:12-20`; `tools/concordance_alchemy.py:95-103,121-122` |
+| "A boss drop offers a distinctive variant, not the first and only cold protection" (04:141) | The Yeti Mitten is the only full counter to his frost: `chill()` checks the Mitten and not `canFreeze()`. Jugcraft adds only knitwear to `freeze_immune_wearables`. **Inference, untested:** knitwear stops freeze damage through vanilla's gate but not his frost slowdown (vanilla's freeze damage needs `canFreeze()`, which one listed piece turns off; the frost slowdown does not ask it). *Since unit 4:* Frostward (Winter Brine) is the timed counter beside the Mitten, and the inference is tested for the kit by `YetiKingGameTests.aKitWearerIsSlowedButNotHurtByHisFrost` and the client test, once they run | `YetiKingEntity.java:960-967` (the Mitten at `:961`); `lair/yeti/YetiMitten.java:23-35`; `data/minecraft/tags/item/freeze_immune_wearables.json`; mc263src `LivingEntity.java:534-543` (slowdown), `:2938` (damage), `:3756-3760` (`canFreeze`) |
+| Winter Brine: "Too much heat consumes the temporary cold property" (03:36) | Heat never consumes Rime: a searing stir damages only Radiance and Verdance. An unheated crucible sits at 20, inside the cold band, and nothing cools one below that. The Rime property gives Resistance. *Resolved by B-08 (unit 4):* every stir above the cold band keeps only part of the dissolved Rime, and Rime gives Frostward | `concordance/alchemy/Mixture.java:26,82-85`; `Band.java:12-15`; `Heat.java:12-20`; `tools/concordance_alchemy.py:95-103,121-122` |
 | A late-joining client receives phase and elapsed state (08:127) | Determinable: a player who comes into view joins the boss bar, and his action and fury are synced; the elapsed time is not | `YetiKingEntity.java:194-195,1457-1460` |
 | Designed-world access (09:90; 07:13) | Undetermined. Nothing in `world/design/` mentions a lair or the Glacier Hall (searched). The designer's client test builds a NORMAL world, swaps the Overworld's generator and runs the export; it never creates a world from an exported preset | `WorldDesignerClientGameTests.java:33-61,64,89`; `docs/WORLD_DESIGNER.md:55` |
 | Open PRs #299, #300 and #301 (09:11) | 34 open (#322 to #355) at 00:30 UTC on 14 October 2026; #354 and #355 opened after midnight that day | the table below |
@@ -549,39 +552,58 @@ through Fabric's level-change event).
 
 ### B-08. Winter Brine and Frostward at the Alembic Crucible (plan B4; B-D3)
 
+Built as unit 4 with B-10 ([record](arcane-concordance-winter.md)), on main `feb6d04fb` with unit 1 and unit 3 beneath.
+This ticket was rewritten on 14 October 2026 to what the unit built; its new choices are B-P40 to B-P45.
+
 The winter workshop is the existing Alembic Crucible: Rime's brew and Preserve's hold are its loop.
 
-- **Frostward,** a new status `jugcraft:frostward`. While it lasts the Yeti's frost does not land (`YetiKingEntity.chill`,
-  `:960-967`, checks it beside the Mitten), and frost already gathered is cleared on a bounded check (the Mitten's
-  pattern, `YetiMitten.java:27-35`). It is timed (B-P19: 1200 ticks a unit, at most 2400, as Ember's Fire Resistance
-  brew, `tools/concordance_alchemy.py:119-120`). The Mitten, which works for as long as it is held, stays the permanent
-  prize (04:141).
-- **From the generator,** not hand-edited data: `PROPERTIES["rime"]` (`tools/concordance_alchemy.py:121-122`) gives
-  `jugcraft:frostward`, and the status names (`:249-251`) name it; `property/rime.json` is regenerated.
-- **The heat rule** ("Too much heat consumes the temporary cold property", 03:36; B-P18): a stir above the cold band keeps
-  only part of the dissolved Rime, beside the searing rule (`Mixture.java:26,82-85`). It is mirrored in
-  `tools/concordance_alchemy.py` (`:25-27`) and held by `check_alchemy`'s constant table (`tools/check_mod_data.py:11599`).
-  It also changes existing brews stirred warm, because amethyst and gloamcap carry Rime (`:96,103`);
-  `arcane-concordance-alchemy.md` says so.
-- **Winter Brine** names the cold-stirred Rime brew in JEI and the dossier. A snowball carries enough Rime on its own
-  (1.0 a part, against the 0.8 threshold, `:95,121-122`), so salt is not added (B-P17).
-- **Bottles already made** keep the status they were bottled with (`concordance/Brew.java:19`); a written formula replays
-  with the new effect. Knitwear is unchanged.
+- **Frostward,** a new status `jugcraft:frostward` (`concordance/rime/Frostward`, helpful, the owner's `frozen.png`,
+  B-P43). Its own effect tick clears frost every tick on whatever creature carries it (the Mitten's check, done by the
+  creature under it; B-P40), so powder snow, the Frost Horn's arrival chill and a snow werewolf's frostbite chill leave
+  none; never Slowness, never sinking. The Yeti's frost does not land (`YetiKingEntity.chill` checks
+  `Frostward.warded` beside the Mitten, in one hunk with a fully qualified name). It is timed (B-P19: 1200 ticks a
+  unit, at most 2400, as Ember's Fire Resistance brew). The Mitten, which works for as long as it is held, stays the
+  permanent prize (04:141).
+- **From the generator,** not hand-edited data: `PROPERTIES["rime"]` (`tools/concordance_alchemy.py`) gives
+  `jugcraft:frostward` (`FROSTWARD`), and `property/rime.json` is regenerated. Every Rime brew (snowball, amethyst,
+  gloamcap) gives Frostward; no brew gives Resistance any more (B-P42).
+- **The heat rule** ("Too much heat consumes the temporary cold property", 03:36; B-P18): after each stir the dissolved
+  Rime is scaled by `Mixture.rimeKeep(band)` (cold all, warm 600, hot 300, searing 0 per thousand, `RIME_KEEP_*`),
+  mirrored in `tools/concordance_alchemy.py` (`RIME_KEEP`, `simulate`, `winter_brine`) and held by `check_alchemy`'s
+  constant table and `check_winter_brine`. It acts on stirs only: an addition records no band (the formula format is
+  unchanged), so a ground ingredient keeps its ready share until stirred (B-P41). It also changes amethyst and
+  gloamcap brews stirred warm; `arcane-concordance-alchemy.md` says so. `Outcome` names the warmer stirs
+  (`alchemy.thawed`).
+- **Winter Brine** names the cold-stirred Rime brew in JEI (the snowball's, amethyst shard's and gloamcap's pages: a
+  property fact, B-P44), the codex (`alembic/winter_brine`, at the Alembic Arts observed) and the dossier. Three
+  snowballs in one part, stirred cold three times, hold 0.813 Rime a part: Frostward I for 975 ticks. It needs only the
+  Alembic Arts, not Rimekeeping (B-P44), and no salt (B-P17).
+- **Bottles already made** keep the status they were bottled with (`concordance/Brew`); a written formula replays with
+  the new rule and effect. Knitwear is unchanged.
 
-**Guidance:** JEI's alchemy ingredient pages (snowball, amethyst, gloamcap) name Frostward; Jade's crucible lines
-already show Preserve's hold (moved into unit 3, B-07); the Glacier Hall dossier gains a preparation fact naming Winter
-Brine and the Mitten (text and icons, B-P29).
+**Guidance:** JEI's alchemy ingredient pages name Frostward; Jade's crucible lines show Preserve's hold (done by unit 3,
+B-07); the Glacier Hall dossier's rite gains a preparation fact naming Winter Brine and the Mitten, text and icons with
+no grid, and a codex link at the Alembic Arts observed; with the Concordance off, or a data pack whose Rime no longer
+brews Frostward, the Mitten only (`LairDossiers.prepare`, B-P29, B-P45; made on unit 1's dossiers).
 
-**Tests:** `aFrostwardDrinkerIsNotChilledByTheYeti` (`YetiKingGameTests`); `winterBrineNeedsTheColdBand` (stirred cold it
-gives Frostward, stirred warm it loses it); `aRimeBottleFromBeforeStillGivesResistance`; must-fail economy loops
-(06:146-158): Yeti Fur makes Frostward no cheaper (fur already cheapens the horn: `recipe/frost_horn_from_fur.json`
-takes one gold and no leather where `frost_horn.json` takes two of each); the alchemy tests that expect
-Resistance from Rime, updated.
+**Tests:** `ConcordanceAlchemyGameTests.winterBrineNeedsTheColdBand` (stirred cold it gives Frostward, stirred warm it
+does nothing, searing gives Nausea; the kept Rime is the generator's), `oldRimeBottlesStillGiveResistance` (first
+named `aRimeBottleFromBeforeStillGivesResistance`), `aRimeFormulaWrittenBeforeBrewsFrostward` and
+`frostwardIsNeverCheaperThanItsSnow` (must-fail economy loops, 06:146-158: Yeti Fur reaches no Rime ingredient, though
+fur already cheapens the horn, `recipe/frost_horn_from_fur.json`; dilution and two draughts give no more Frostward);
+`ConcordanceWinterGameTests.frostwardClearsFrostAndKeepsItsTime`; `YetiKingGameTests.aFrostwardDrinkerIsNotChilledByTheYeti`;
+`EncyclopediaGameTests.theGlacierHallsRiteNamesWinterBrine`; `ConcordanceWinterClientGameTests` (the icon, a HUD
+screenshot). No existing alchemy test expected Resistance from Rime, so none changed. None has run yet.
 
 **Acceptance:** "one useful cold preparation route and a non-boss resistance option" (09:106); "Every required cold
 preparation has a non-boss route" (09:110).
 
-**Save effects:** a new effect id; the property change reaches only new bottles.
+**Save effects:** a new effect id, saved in `active_effects`; the property change reaches only new bottles; one more
+distinct Alembic practice outcome (`jugcraft:frostward@0`). An older build ignores Frostward draughts and may drop a
+creature's saved effects on meeting the unknown id (the record's downgrade guidance).
+
+**Review boundary (unit 4, with B-10):** alchemy, Frostward, the dossier's fact and tests. In lair code, only
+`chill()` checking Frostward and `LairDossiers.prepare`, which only reads.
 
 ### B-09. Optional school counters in the Yeti fight (plan B3; only after B-04 is green, 09:102)
 
@@ -609,50 +631,73 @@ self-braced player does not; a rimebound Yeti telegraphs longer; with no counter
 
 ### B-10. Winter gear: the Rime travel kit, Thallite and the trophies, without stat inflation (plan B4; B-D2)
 
+Built as unit 4 with B-08 ([record](arcane-concordance-winter.md)); rewritten on 14 October 2026 to what was built. Its
+new choices are B-P46 to B-P53.
+
 The owner's water sets become Rime's travel kit (02:168: a preservation focus, snow-safe boots and a short Brace
 accessory, resisting environmental freezing without permanent boss immunity), made in survival like
-[Ember's regalia](arcane-concordance-ember-regalia.md). Names and art are the owner's; the numbers are Proposed (B-P23 to
-B-P25). Sources are under `art/owner-library/originals/Magic/assets/ars_jymbaumental/`.
+[Ember's regalia](arcane-concordance-ember-regalia.md) (`tools/concordance_rime_kit.py`; `concordance/rime/RimeGear`,
+`RimeTrinketItem`). Names and art are the owner's; the numbers are Proposed (B-P23 to B-P25, as B-P47, B-P49 and
+B-P50). Sources are under `art/owner-library/originals/Magic/assets/ars_jymbaumental/`.
 
-| Pieces (the owner's names) | Source | Proposed ids | Role |
+| Pieces (the owner's names) | Source | Ids | As built |
 |---|---|---|---|
-| Nereid's Hood, Tunic, Pants and Shoes (light) | `textures/item/aqua_hood.png`, `aqua_tunic.png`, `aqua_pants.png`, `aqua_shoes.png`; `textures/armor/light_armor_water.png` | `nereids_*` | Protection no greater than the Pyromaniac's set (5 in all); worn on the imported medium model (`geckolib/models/armor/pyromancers.geo.json`) |
-| Aquamancer's Hat, Robes, Leggings and Boots (medium) | `aqua_hat.png`, `aqua_robes.png`, `aqua_leggings.png`, `aqua_boots.png`; `medium_armor_water.png` | `aquamancers_*` | Leather's protection (7); the same model |
-| Winterguard's Helmet, Chestplate, Leggings and Boots (heavy) | `aqua_helmet.png`, `aqua_chestplate.png`, `aqua_leggings_heavy.png`, `aqua_boots_heavy.png`; `heavy_armor_water.png`; `geo/heavy_armor_water.geo.json` | `winterguards_*` | No more than iron's protection (15), toughness 0; its own model, imported |
-| Lesser Focus of Water and Focus of Water | `lesser_water_focus.png`, `water_focus.png` | `lesser_water_focus`, `water_focus` | The preservation focus, in the Spell Focus slot: Preserve holds 90 s or 120 s instead of 60 s |
-| Water Bangle | `water_bangle.png` | `water_bangle` | The short Brace accessory, in a Bracelet slot: with Rimekeeping understood, a Brace for its wearer when they have had none for 30 s |
+| Nereid's Hood, Tunic, Pants and Shoes (light) | `textures/item/aqua_hood.png`, `aqua_tunic.png`, `aqua_pants.png`, `aqua_shoes.png`; `textures/armor/light_armor_water.png` | `nereids_*` | 1/2/1/1 (5, the Pyromaniac's), ×7 durability, enchantability 15, repaired with wool; wool and a snowball; worn on the imported medium model (`geckolib/models/armor/pyromancers.geo.json`) |
+| Aquamancer's Hat, Robes, Leggings and Boots (medium) | `aqua_hat.png`, `aqua_robes.png`, `aqua_leggings.png`, `aqua_boots.png`; `medium_armor_water.png` | `aquamancers_*` | 1/3/2/1 (7, leather's), ×10, 15, wool; wool and lapis lazuli; the same model |
+| Winterguard's Helmet, Chestplate, Leggings and Boots (heavy) | `aqua_helmet.png`, `aqua_chestplate.png`, `aqua_leggings_heavy.png`, `aqua_boots_heavy.png`; `heavy_armor_water.png`; `geo/heavy_armor_water.geo.json` | `winterguards_*` | 2/6/5/2 (15, iron's), ×15, 9, iron ingot; iron armour's iron and a snow block; its own model, imported as supplied (`jugcraft:armor/winterguards`) |
+| Lesser Focus of Water and Focus of Water | `lesser_water_focus.png`, `water_focus.png` | `lesser_water_focus`, `water_focus` | The preservation focus, in the Spell Focus slot: Preserve holds 90 s or 120 s instead of 60 s (`RimeGear.holdTicks`, B-P50). 2 string, 2 gold, 2 snowballs and an amethyst shard; the focus is the lesser one with 2 diamonds and 2 gold |
+| Water Bangle | `water_bangle.png` | `water_bangle` | The short Brace accessory, in a Bracelet slot: with Rimekeeping understood, Brace's own Braced (100 ticks) when its wearer has had none for 600 ticks, looked at once a second, as nobody's cast (B-P49). 4 gold, a snow block and an amethyst shard |
 
 - **Freezing:** every set piece joins `#minecraft:freeze_immune_wearables`, so powder snow and a full freeze deal no
-  damage. The Yeti's frost slowdown stays: only Frostward and the Mitten clear his frost, so there is no boss immunity.
-- **No stat inflation:** no Spell Power and no knockback resistance on any piece. Frost Spell Power would scale nothing,
-  because Rime's invocations deal no damage and Spell Power scales only damage (`concordance/compose/Plan.java:64-81`).
-- **Snow-safe boots:** if vanilla 26.3 lets boots other than leather walk on powder snow through a tag, the three boots
-  join it; if that is fixed to leather boots, the claim is dropped rather than added by a mixin. Undetermined: the
-  reference lacks `PowderSnowBlock`.
-- **Made in survival:** crafting-table recipes from Overworld materials (wool, string, dyes, snow, ice, gold, iron); no
-  boss item, and no Nether or End step; a `check_rime_kit` like `check_ember_regalia` (`tools/check_mod_data.py:10968`);
-  the items kept off the Assayer's Scale like Ember's; rows in `tools/acquisition.py`.
-- **Imports** go through `tools/owner_art.py`, with the originals untouched and the provenance recorded (paths,
-  checksums, changes); `ars_jymbaumental` references become `jugcraft:` in the copies; the library's language files are
-  not imported ([PROVENANCE.md](../../art/owner-library/PROVENANCE.md), its working rule at line 14 and its located
-  metadata). Whether the heavy texture fits
-  its model has not been checked *(survey)*.
-- **Thallite** (09:106) connects through Strata's examination and Rooted practice (B-05); `earthen_ground` and every
-  Thallite number are unchanged (B-P28).
-- **Trophies** (09:106): a slow from the Glacier Maul's or Rimeclaw's Frost boon counts as Rime practice, an elective
-  key `frost_boon` in `jugcraft:rimework` (recorded only for a wielder who understands Rimekeeping, the practice's gate;
-  the mastery keeps needing its own three kinds). The boon itself is unchanged
-  (`weapons/ArmVariants.java:123-125`; B-P10), and their JEI pages come with B-02.
-- **Creative-only sets stay so:** the Frost Knight and Wight King (`tools/acquisition.py:74-78`; B-P27).
+  damage and add no frost. The Yeti's frost slowdown stays: only Frostward and the Mitten clear his frost, so there is
+  no boss immunity.
+- **No stat inflation:** no Spell Power, toughness or knockback resistance on any piece, and not fire resistant.
+  Frost Spell Power would scale nothing, because Rime's invocations deal no damage and Spell Power scales only damage
+  (`concordance/compose/Plan.java:64-81`). Spell Power's attribute enchantments are refused on the sets, as on Ember's.
+- **Snow-safe boots** (B-P46): vanilla 26.3 fixes walking on powder snow to leather boots
+  (`PowderSnowBlock.canEntityWalkOnPowderSnow`, read from the 26.3 sources fetched for the unit) and has no boots tag,
+  so the claim is narrowed to freeze-proof and no mixin is added.
+- **Made in survival:** crafting-table recipes from Overworld things (wool, string, snowballs, snow blocks, lapis,
+  iron, gold, amethyst, diamonds); no boss item, and no Nether or End step (`check_rime_kit`, and
+  `concordance_journey.py` holds every piece to the first-loadout rule); kept off the Assayer's Scale like Ember's; in
+  `tools/acquisition.py` `OPTIONAL` (made by recipe), so `check_acquisition` and
+  `ConcordanceGameTests.FIRST_LOADOUT_RECIPES` cover them. No JEI `acquisition_info` pages: JEI shows their recipes.
+- **Shared with Ember** (B-P51): the Spell Focus and Bracelet slots, `EmberArmorItem`, `EmberClient`'s renderer and the
+  medium model; Ember's writer writes both slices' slot tags (`concordance_ember.SLOT_ITEMS`).
+- **Imports** go through `tools/owner_art.py` (19 byte copies), with the originals untouched and the provenance in the
+  record (paths, checksums, the owner's declaration); the item models are the owner's plain generated models with the
+  texture renamed; only the names are taken from the owner's language file. **The heavy texture fits its model:** 71% of
+  the model's faces fall on opaque pixels (the head 91%, the arms 58%), as the medium sets do on theirs.
+- **Thallite** (09:106) connects through Strata's examination and the `rooted` elective, both unit 3's; unit 4 adds no
+  recorder. `earthen_ground` and every Thallite number are unchanged (B-P28; `check_winter_links`, and the record's
+  diff).
+- **Trophies** (09:106): a slow from a Frost boon arm that takes on a hostile creature at normal tolerance
+  (`Rimebind.restrains`, restraint's targets, B-P34) counts as Rime practice, the elective key `frost_boon` in
+  `jugcraft:rimework` (`ArmItem.boon` → `Rime.frostBoon`), recorded only for a wielder who understands Rimekeeping (the
+  practice's gate; this ticket first said "encountered": understood, an elective, B-P53). The mastery keeps needing
+  three kinds, of which the elective can be one. Any Frost boon arm counts, the creative-only Frost Knight Greatsword
+  included (B-P52). The boon itself is unchanged (`weapons/ArmVariants.java:123-125`; B-P10), and their JEI pages came
+  with B-02.
+- **Creative-only sets stay so:** the Frost Knight and Wight King (`tools/acquisition.py`; B-P27).
 
-**Tests:** the kit is made in survival (`check_acquisition`, `check_rime_kit`); a kit wearer takes no freeze damage from
-the Yeti and is still slowed (`YetiKingGameTests`); the foci lengthen Preserve's hold; the bangle's Brace recharges;
-`ThalliteGameTests` for the Strata link. No test copies the Thallite numbers again:
-`ThalliteGearGameTests.thalliteGearMatchesItsNumbers` (`:60`) already holds them (10:63).
+**Tests:** in `ConcordanceWinterGameTests`, `theTravelKitIsMadeAndWornAsDesigned`,
+`everyPieceKeepsPowderSnowFromFreezingItsWearer`, `theWaterFociLengthenPreservesHold`,
+`theWaterBangleBracesARimekeeperEveryThirtySeconds`, `theWaterBanglesBraceIsNobodysCast`,
+`spellPowerEnchantmentsAreRefusedOnTheWaterSets`, `aFrostBoonSlowIsElectiveRimePractice`,
+`aFrostBoonStaysOutsideTheThaw` and `thalliteStaysOutOfTheCold`; `YetiKingGameTests.aKitWearerIsSlowedButNotHurtByHisFrost`
+(a kit wearer takes no freeze damage from his frost and is still slowed); `ConcordancePersistenceGameTests.theTravelKitSurvivesASave`
+and the focus's hold in `theCrucibleKeepsPreservesHoldThroughASave`; the kit in
+`ConcordanceGameTests.FIRST_LOADOUT_RECIPES`; `ConcordanceWinterClientGameTests` (the sets worn and slotted,
+screenshots). The Strata link's tests are unit 3's (`thalliteIsAStrataSpecimen`,
+`anAllyARitualAndRootedThalliteAreElective`). No test copies the Thallite numbers again:
+`ThalliteGearGameTests.thalliteGearMatchesItsNumbers` (`:60`) already holds them (10:63). None has run yet.
 
-**Save effects:** fifteen new item ids and their equipment assets, stable once released.
+**Save effects:** fifteen new item ids and their equipment assets, stable once released; the non-saved attachment
+`jugcraft:water_bangle_braced`; one more evidence key, `practice:jugcraft:rimework:frost_boon`; the crucible's hold up
+to 2400 ticks from a focus, within its own cut.
 
-**Review boundary (unit 4, with B-08):** alchemy, items, gear and tests. In lair code, only `chill()` checking Frostward.
+**Review boundary (unit 4, with B-08):** alchemy, items, gear and tests. In lair code, only `chill()` checking Frostward
+and the dossier's read-only fact; in `weapons`, only the FROST case's call to `Rime.frostBoon`.
 
 ### B-11. Evidence and the owner checkpoint
 
@@ -681,27 +726,39 @@ the Yeti and is still slowed (`YetiKingGameTests`); the foci lengthen Preserve's
 
 - **Saved data:** no new saved format. New boss ids `yeti_king` and `cinder_tyrant` inside `jugcraft:lair_rewards`; the
   crucible's optional `held_until`; saved mob effects and their attribute modifiers; new research keys; new item ids.
-  Not saved: the attachment `jugcraft:brace_caster`.
+  Not saved: the attachments `jugcraft:brace_caster` and `jugcraft:water_bangle_braced` (unit 4).
 - **Registries (stable once released):** mob effects `jugcraft:rimebound`, `rime_thaw`, `braced` and `frostward`, and
   the attribute modifiers `jugcraft:rimebound` and `jugcraft:braced`; components `rimegrip`, `bracing` and `rimehold`;
   invocations and spells `rimebind`, `brace` and `preserve`; research `rimekeeping` and `stratawrighting`, with their
-  practices (`winter_survey`, `rimework`, `anchoring`) and advancements; fifteen kit items; tags
-  `concordance/preservable`, `rime_specimens` and `strata_specimens`; additions to `assay_specimens` (which nests
-  `strata_specimens`), `concordance/resistant`, `minecraft:freeze_immune_wearables` and the trinket slot tags.
+  practices (`winter_survey`, `rimework`, `anchoring`) and advancements, and the elective key `frost_boon`; fifteen kit
+  items, their equipment assets (`jugcraft:nereids`, `aquamancers`, `winterguards`), the GeckoLib model
+  `jugcraft:armor/winterguards` and three repair tags; tags `concordance/preservable`, `rime_specimens` and
+  `strata_specimens`; additions to `assay_specimens` (which nests `strata_specimens`), `concordance/resistant`,
+  `minecraft:freeze_immune_wearables`, the four vanilla armour slot tags, `equivalence/excluded` and the trinket slot
+  tags `chest/spell_focus` and `hand/bracelet`.
 - **Shared code:** `YetiKingLoot` and `CinderTyrantLoot` gain `BOSS`, `pay` and `roll` by origin (the entity overloads
   kept); `LairDossiers.Boss` gains `trophies` (one, or a pair), `offSeason` (null for a rite that works all year) and `sales`, and
   `LairDossiers` gains `beaten`, `anyBeaten` and `canOpen`; `FirstLightRoute.FIRST_WINS` is removed (B-02 as built);
   `ConcordanceEffects` gains Rime's alteration and `accepts` case, the helpful-push exemption and, after a status takes,
-  Rimebind's thaw and Brace's caster; a new Guard; `Band.keep`; `Mixture` gains the Rime heat rule;
-  `CrucibleBlockEntity` gains the hold and records Rime brew practice; `YetiKingEntity` gains the Frostward check, the
-  taking of Brace and the Rimebind wind-up; `Benchmark` learns `rimebound`, its thaw and knockback. Unit 3's interfaces
-  for later units: `Brace.spend`, `Brace.caster`, `Rimebind.RIME_THAW` and `Rime.MAX_HOLD_TICKS`. Practice hooks:
+  Rimebind's thaw and Brace's caster; a new Guard; `Band.keep`; `Mixture` gains the Rime heat rule
+  (`Mixture.rimeKeep`, `RIME_KEEP_WARM`, `RIME_KEEP_HOT`, `RIME_KEEP_SEARING`) and `Outcome` the reason
+  `alchemy.thawed`; `CrucibleBlockEntity` gains the hold and records Rime brew practice; `YetiKingEntity` gains the
+  Frostward check (unit 4), the taking of Brace and the Rimebind wind-up; `Benchmark` learns `rimebound`, its thaw and
+  knockback. Unit 3's interfaces for later units: `Brace.spend`, `Brace.caster`, `Rimebind.RIME_THAW` and
+  `Rime.MAX_HOLD_TICKS`. Unit 4's: `Frostward.STATUS`, `Frostward.FROSTWARD` and `Frostward.warded`;
+  `RimeGear.holdTicks` (which `Rime.preserve` asks), `RimeGear.bangle` and `RimeGear.brace`; `Rimebind.restrains`
+  (restraint's targets, shared with `Rime.frostBoon`); `Rime.frostBoon` and `Rime.KEY_FROST_BOON`;
+  `LairDossiers.prepare`; `concordance_ember.SLOT_ITEMS` (one writer for both slices' slot tags); `EmberArmorItem`
+  and `EmberClient`'s renderer, now also the water sets'. Practice hooks:
   Fabric's level change (`glacier_hall`; no lair code, and no `Encounter.onDeed`), `CrucibleBlockEntity.bottle`
   (`crucible`), `Rituals.listen` (`foundation`) and `AFTER_DAMAGE` (`rooted`, `held`) in unit 3; `ArmItem`'s Frost boon
   (`frost_boon`) in unit 4; the Yeti's column (`column`) in unit 5.
 - **Tools:** `acquisition.py`, `check_acquisition`, `encyclopedia.py`, the `concordance.py` merge points,
   `concordance_alchemy.py`, `concordance_equivalence.py`, `concordance_progression.py`, `concordance_conclave.py`,
-  `owner_art.py`; new `concordance_rime.py`, `concordance_strata.py` and their checks.
+  `owner_art.py`; new `concordance_rime.py`, `concordance_strata.py` and their checks. Unit 4: `concordance_ember.py`
+  (`SLOT_ITEMS`), `gear.py` (the kit's armour tags), `concordance_journey.py`, `concordance_delivery.py`,
+  `select_client_tests.py`; new `concordance_rime_kit.py`, and the checks `check_winter_brine`, `check_rime_kit` and
+  `check_winter_links`.
 - **Network:** no new payload. Jade's crucible snapshot carries one more value (unit 3).
 
 ## Dependencies and order
@@ -733,7 +790,8 @@ B-05 cannot start on its own.
 - **Downgrade:** an older build drops kept Yeti or Tyrant rewards (`LairRewards.java:184-189`).
 - **Names:** "Focus" is both the resource and the foci; "Brace" is also a war fork trait and the shield's brace.
   Tooltips keep them apart.
-- **Size:** unit 4 adds fifteen items and a second armour model; the heavy model's fit is unchecked.
+- **Size:** unit 4 adds fifteen items and a second armour model. The heavy model's fit is measured: 71% of its faces on
+  opaque pixels, the head 91% (the record), held by `check_rime_kit`.
 - **The Water Bangle's role** (a Brace) differs from the owner's tooltip text in the library (a chill on each blow); see
   B-P25.
 - **The Expeditions page** reaches its grid limit with four keepers; a fifth needs a layout change.
@@ -753,12 +811,19 @@ B-05 cannot start on its own.
   keep their modifiers until `/attribute` removes them; Spell Engine keys only nine spells, so a player with more than
   nine invocations loses the last ones from the bar (the #250 order question); vanilla's knockback without a damaging
   blow is braced without spending the Brace. B-P24's 120 s hold from a focus worn with the Initiate's Wand exceeds that
-  wand's 1200-tick duration limit: unit 4 caps it or records why.
+  wand's 1200-tick duration limit: unit 4 records why (B-P50: the hold is the crucible's state, cut at 2400).
 - **Found in CI** (runs 38509414542 and 38519234934): four or more players scale the Yeti King's health to 1050 and the
   Cinder Tyrant's to 1100, but the game caps a creature's health at 1024, so both stop there (the scale is unchanged);
   Spell Engine's spell bar starts at a fixed place left of the screen's bottom centre, so a bar of 5 or more spells runs
   off the left edge of CI's 427-pixel-wide GUI, and 8 or more at 1920×1080 (players can move it in Spell Engine's HUD
   settings; [record](arcane-concordance-rime-strata.md#rollout-and-open-questions)).
+- **Unit 4, as built** ([record](arcane-concordance-winter.md#rollout-and-open-questions)): "needs the cold band" holds
+  per recipe (four snowballs stirred warm twice, or five stirred hot once, still reach Frostward; two ground snowballs
+  unstirred do at any heat); Frostward also clears the Frost Horn's arrival chill and a snow werewolf's frostbite chill;
+  a Frostward salve on an ally earns no lair support credit; a crucible following an old formula waits while its output
+  holds old Resistance draughts; the draught is named "Draught", and "Winter Brine" only in JEI, the codex and the
+  dossier; the bangle does nothing against the Yeti's own push until B-09; the kit shares Ember's classes and slot
+  writer; "snow-safe" boots are freeze-proof, not powder-snow walkers (B-P46).
 
 ## Explicit don'ts
 
@@ -787,7 +852,7 @@ B-05 cannot start on its own.
 | 1 | `YetiKingGameTests`, `CinderTyrantGameTests`, `LairEncounterGameTests`, `EncyclopediaGameTests`; passed (runs 38514144531 and 38519234934) | `YetiKingClientGameTests` and `CinderTyrantClientGameTests` unchanged; `EncyclopediaClientGameTests` if the page layout changes (the test is unchanged); each passed by its shard | `check_acquisition`, `check_encyclopedia`, with mutations | A kept Yeti and Tyrant Due across a save; passed |
 | 2 | `GlacierHallGameTests`, `YetiKingGameTests` | `WorldDesignerClientGameTests` (an exported preset); `LairClientGameTests` step 7 (the hall); `GlacierHallClientGameTests` | `check_glacier_hall`, `check_yeti` | None needed |
 | 3 | `ConcordanceRimeStrataGameTests`, `ConcordanceEffectGameTests`, `ConcordanceProgressionGameTests`, `ConcordanceInvocationGameTests`, `ThalliteGameTests`, `ConcordancePersistenceGameTests`; passed (run 38519234934) | `ConcordanceRimeStrataClientGameTests` (icons, spell bar, HUD and inventory screenshots); `GlacierHallClientGameTests` (the field study; a braced player at the edge, the mist and the whirl); each passed by its shard, but toasts hid the status icons | `check_rime`, `check_strata`, `check_rime_strata_assets` (mutation-tested), `check_invocations`, `check_progression`, `check_conclave`, `check_delivery`, `owner_art.py --check` | The research record (`rimeAndStrataResearchSurviveASave`); saved effects (`rimeAndBraceSurviveASave`); the crucible's field (`ConcordancePersistenceGameTests`); all passed |
-| 4 | `ConcordanceAlchemyGameTests`, `YetiKingGameTests`, the kit's tests | The kit worn and slotted (screenshots) | `check_alchemy`, `check_rime_kit`, `check_acquisition` | A Rime bottle from before the change |
+| 4 | `ConcordanceAlchemyGameTests` (+4), `ConcordanceWinterGameTests` (new, 10), `YetiKingGameTests` (+2), `EncyclopediaGameTests` (+1), `ConcordancePersistenceGameTests` (+1, and the focus's hold), `ConcordanceGameTests` (`FIRST_LOADOUT_RECIPES`) | `ConcordanceWinterClientGameTests` (new: Frostward's HUD; the sets worn in four views, close up and on the player; his frost on the real player; the slots; the icons) | `check_alchemy`, `check_winter_brine`, `check_rime_kit`, `check_winter_links`, `check_ember_regalia`, `check_acquisition`, `check_progression`, `check_delivery`, `concordance_journey.py`, `check_icon_maps.py`, `owner_art.py --check` (the unit's rules mutation-tested: 60 faults, each reported) | A Rime bottle from before the change (`oldRimeBottlesStillGiveResistance`); a formula from before; Frostward on a saved creature; the kit's fifteen items and the bangle's unsaved count (`theTravelKitSurvivesASave`); a focus's hold; the `frost_boon` key before mastery |
 | 5 | `YetiKingGameTests` (counters) | `YetiKingClientGameTests` (a charge into a column) | Every check; the CI candidate | Re-run of all of the above |
 
 Every unit also runs `tools/check_mod_data.py`, `scripts/check_repository.py` and the build with its server game tests,
@@ -826,7 +891,8 @@ test class):
 - A server game test with several test players is not a party of people. One client on a dedicated server is not two
   clients. A disconnect marked in a test is not a real one.
 - A screenshot shows presentation, not balance. Nothing is called "balanced" without a human playtest.
-- Inferences in this page (knitwear against the Yeti; Rimebind doing nothing to him) stay inferences until a test runs.
+- Inferences in this page (knitwear against the Yeti; Rimebind doing nothing to him) stay inferences until a test runs
+  (`aKitWearerIsSlowedButNotHurtByHisFrost` covers the first for the kit, once it runs).
 
 ## Deferrals
 
@@ -847,20 +913,29 @@ test class):
 - The Reagent Cabinet, Stillwater Keeping, and Root and Rivet (Chunk C: 06:119; 09:132).
 - The Ice Breaker's anti-slip from the owner's text, and the Winter Crown pattern's Fire Resistance attunement *(survey)*,
   left as they are.
+- From unit 4 ([record](arcane-concordance-winter.md#rollout-and-open-questions)): the owner's light armour model (no
+  light-layout water sheet for it); the Caster Tome of Water; the foci and bangle drawn on the body; the owner's on-hit
+  bangle (B-P49's alternative); boots that walk on powder snow (B-P46's alternative, a mixin); a Rimekeeping elective
+  for bottling Winter Brine (it would change `CrucibleBlockEntity`); naming the draught "Winter Brine".
 
 ## Where to resume
 
-Units 1 and 3 are implemented on branch `claude/chunk-b-winter-stone`, not merged, and their tests pass in CI (run
-38519234934 on `06dc5ea5f`, every job; see the Validation plan). Unit 1, in four commits and two fixes: B-01, the Yeti
+Units 1 to 4 are implemented on branch `claude/chunk-b-winter-stone`, not merged. Units 1 and 3 pass their
+tests in CI (run 38519234934 on `06dc5ea5f`, every job; see the Validation plan). Unit 1, in four commits and two fixes: B-01, the Yeti
 King on `Encounter` and `LairRewards` with both payout defects fixed and the column deed, then the Cinder Tyrant the
 same way, with no deed (B-P4); B-02, the Glacier Hall's dossier and the Yeti King's JEI pages, with the lair step done
 by any keeper's first win and the generalised `check_acquisition` and `check_encyclopedia`, then the Cinder Kiln's
 dossier and the Cinder Tyrant's JEI pages (B-D1), which fill the Expeditions page's 12 grids. Unit 3 (B-05 to B-07): see
 [its record](arcane-concordance-rime-strata.md#verification); after its CI, its status shots clear the advancement
-toasts (not yet run). Next: units 2 (B-03, B-04: the Glacier Hall's access and lifecycle, and the Yeti fight held to the
-completion evidence) and 4 (B-08, B-10: the winter workshop and gear), built in parallel; then unit 5 (B-09, B-11), with
-its combined fixes and the owner's checkpoint. Open for the owner: B-P2, B-P3, B-P4, B-P5 and B-P36; from CI, whether to
-lower the four-player health scale under the 1024 cap, and the spell bar's place.
+toasts (shown in run 38534127130). Unit 2 (B-03, B-04): tests for the Glacier Hall's access, refusals, exit and restart
+and for the Yeti fight, with three fixes to the fight (End-gun Levitation lifts neither him nor his whelps; a charge
+into a column's foot stuns him; his ice and whelps last only while he counts them his); its records follow its next
+CI run. Unit 4 (B-08 and B-10), in four commits and its records:
+Winter Brine and Frostward; the Rime travel kit; the Frost-boon practice with Thallite and the trophies unchanged; the
+Glacier Hall's preparation fact, on unit 1's dossiers ([its record](arcane-concordance-winter.md#checks-run-for-the-unit)).
+Next: CI on the head with all four units, each job's result recorded here and in the unit records; then unit 5 (B-09,
+B-11), with its combined fixes and the owner's checkpoint. Open for the owner: B-P2, B-P3, B-P4, B-P5, B-P36 and
+B-P40 to B-P53; from CI, whether to lower the four-player health scale under the 1024 cap, and the spell bar's place.
 #352 has merged, so the base is main; refresh the open pull requests first.
 
 ## Decisions
@@ -883,26 +958,26 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P7 | 14 October 2026 | Brace's consenting ally is the party (`here allies`) | Proposed | B-06 |
 | B-P8 | 14 October 2026 | Only the Yeti King and the Cinder Tyrant join `#jugcraft:concordance/resistant`; Vesperine and Madame Tatterlace do not | Proposed | B-06 |
 | B-P9 | 14 October 2026; revised 14 October 2026 (unit 3) | Rimebind: `rimebound`, 20% slower for 60 ticks; a hidden `rime_thaw` refuses a recast for the binding's own time plus 40 ticks: 100 normally, 70 on a resistant creature (bound 30) | Proposed | B-06 |
-| B-P10 | 14 October 2026 | The thaw grace covers Rimebind only; the trophies' Frost boon (accepted), `dazzle`, DAZE and the Ice Breaker wave keep their own slows. The alternative, for the owner: one grace for every Concordance and trophy slow | Proposed | B-06, B-10 |
+| B-P10 | 14 October 2026 | The thaw grace covers Rimebind only; the trophies' Frost boon (accepted), `dazzle`, DAZE and the Ice Breaker wave keep their own slows. The alternative, for the owner: one grace for every Concordance and trophy slow. Unit 4's `aFrostBoonStaysOutsideTheThaw` is the evidence for today's rule; the recommendation is to keep their own | Proposed | B-06, B-10 |
 | B-P11 | 14 October 2026; revised 14 October 2026 (unit 3) | Brace: +0.5 knockback resistance for 100 ticks, not stacking, spent by the first push it meets and bracing the rest of that tick (B-P30) rather than one hit | Proposed | B-06 |
 | B-P12 | 14 October 2026; revised 14 October 2026 (unit 3) | Brace's order: a Brace is spent by the first push it meets (a blow vanilla knocks back, a harmful Concordance push, or a scripted push through `Brace.spend`, as the Yeti's in B-09) and braces the rest of that tick (B-P30), so the Yeti may call `Brace.spend` before or after his blow's `hurtServer`; a helpful push (one's own Flashstep) neither uses it nor is shortened by it | Proposed | B-06, B-09 |
 | B-P13 | 14 October 2026 | Preserve: `touch struck`, the crucible only, holding its temperature band for 60 s | Proposed | B-07 |
 | B-P14 | 14 October 2026 | No Thallite Focus in Chunk B (it stays in Thallite slice 5); the crafted upgrade (09:94) is the water foci | Proposed | B-07, B-10 |
 | B-P15 | 14 October 2026; revised 14 October 2026 (unit 3) | Stratawrighting reads its own `#jugcraft:strata_specimens` (granite, diorite, andesite, tuff, raw Thallite), nested inside `#jugcraft:assay_specimens`, so one examination serves both entries. Cobblestone, stone, cobbled deepslate and deepslate are never specimens (sneak-use in the air would examine a bridging block), nor is the Thallite ingot | Proposed | B-05 |
 | B-P16 | 14 October 2026; revised 14 October 2026 (unit 3) | Rimekeeping understood by bench study, by the winter survey gated by First Light alone (arriving in the Glacier Hall, or bottling a Rime brew by hand), or by notes; mastered by three kinds of cold work (Preserve a crucible holding a mixture while cold, and while warm or hotter, and Rimebind a hostile creature), which stand for the plan's preserve and compare steps; the Yeti column charge joins as an elective with B-09 | Proposed | B-05, B-09 |
-| B-P17 | 14 October 2026 | Winter Brine needs no salt: a snowball carries the Rime, and salt has its own feature switch (`config/JugcraftConfig.java:24`) | Proposed | B-08 |
-| B-P18 | 14 October 2026 | A stir above the cold band keeps part of the dissolved Rime: warm 600, hot 300, searing 0 per thousand (starting values) | Proposed | B-08 |
-| B-P19 | 14 October 2026 | Frostward lasts as Ember's Fire Resistance brew does: 1200 ticks a unit, at most 2400 | Proposed | B-08 |
+| B-P17 | 14 October 2026 | Winter Brine needs no salt: a snowball carries the Rime, and salt has its own feature switch (`config/JugcraftConfig.java:24`) | Proposed (built as proposed in unit 4) | B-08 |
+| B-P18 | 14 October 2026 | A stir above the cold band keeps part of the dissolved Rime: warm 600, hot 300, searing 0 per thousand (starting values) | Proposed (built as proposed in unit 4; per stir, B-P41) | B-08 |
+| B-P19 | 14 October 2026 | Frostward lasts as Ember's Fire Resistance brew does: 1200 ticks a unit, at most 2400 | Proposed (built as proposed in unit 4) | B-08 |
 | B-P20 | 14 October 2026 | The Yeti's knockback respects only Brace, not all knockback resistance: the plan's former B-D3, not asked of the owner. Its source is 04:186's "bracable knockback" (the plan cited 04:184) | Proposed | B-09 |
 | B-P21 | 14 October 2026 | Rimebind on the Yeti: once per thaw window, his next wind-up is a few ticks longer (set by test) | Proposed | B-09 |
 | B-P22 | 14 October 2026 | The Brace caster earns a deed, one per occurrence, when a Brace they put on another player absorbs a Yeti push | Proposed | B-09 |
-| B-P23 | 14 October 2026 | The kit's sets: freeze-immune; no Spell Power or knockback resistance; protection no greater than the Pyromaniac's (light), leather's (medium) and iron's (heavy), toughness 0 | Proposed | B-10 |
-| B-P24 | 14 October 2026 | The water foci are the preservation focus: Preserve holds 90 s (lesser) or 120 s | Proposed | B-10 |
-| B-P25 | 14 October 2026 | The Water Bangle is the short Brace accessory, a Brace every 30 s with Rimekeeping understood. The alternative is the owner's own text: a chill on each blow, like the Fire Bangle | Proposed | B-10 |
-| B-P26 | 14 October 2026 | A Frost boon slow counts as Rime practice, and Rooted holding as Strata practice; no numbers change | Proposed | B-05, B-10 |
-| B-P27 | 14 October 2026 | The Frost Knight and Wight King sets stay creative-only (continuing A-D10) | Proposed | B-10 |
-| B-P28 | 14 October 2026 | Nothing is added to `earthen_ground`; no Thallite or trophy number changes | Proposed | B-10 |
-| B-P29 | 14 October 2026 | Winter Brine's dossier fact is text and icons, with no recipe grid | Proposed | B-02, B-08 |
+| B-P23 | 14 October 2026 | The kit's sets: freeze-immune; no Spell Power or knockback resistance; protection no greater than the Pyromaniac's (light), leather's (medium) and iron's (heavy), toughness 0 | Proposed (built as proposed in unit 4, with the numbers of B-P47) | B-10 |
+| B-P24 | 14 October 2026 | The water foci are the preservation focus: Preserve holds 90 s (lesser) or 120 s | Proposed (built as proposed in unit 4; B-P50) | B-10 |
+| B-P25 | 14 October 2026 | The Water Bangle is the short Brace accessory, a Brace every 30 s with Rimekeeping understood. The alternative is the owner's own text: a chill on each blow, like the Fire Bangle | Proposed (built as proposed in unit 4; B-P49) | B-10 |
+| B-P26 | 14 October 2026 | A Frost boon slow counts as Rime practice, and Rooted holding as Strata practice; no numbers change | Proposed (built as proposed: `rooted` in unit 3, `frost_boon` in unit 4) | B-05, B-10 |
+| B-P27 | 14 October 2026 | The Frost Knight and Wight King sets stay creative-only (continuing A-D10) | Proposed (kept in unit 4) | B-10 |
+| B-P28 | 14 October 2026 | Nothing is added to `earthen_ground`; no Thallite or trophy number changes | Proposed (built as proposed in unit 4; `check_winter_links` and the record's diff) | B-10 |
+| B-P29 | 14 October 2026 | Winter Brine's dossier fact is text and icons, with no recipe grid | Proposed (built as proposed in unit 4; B-P45) | B-02, B-08 |
 | B-P30 | 14 October 2026; revised 14 October 2026 (unit 3 review) | A spent Brace braces the rest of that server tick and goes at its end, so the extra knockback of sprints, weapons and mob attacks after `hurtServer` is braced too; two blows in one tick are both braced. Spent between ticks (a push in a cast's packet), it goes when the next tick starts. The Leaf Blower's stream spends it. Accepted exception: vanilla's knockback without a damaging blow (a mace smash's bystanders) is braced but does not spend it | Proposed | B-06, B-09 |
 | B-P31 | 14 October 2026 | The owner's icons and sounds byte for byte at their own sizes: Rimebind `freeze.png`, Preserve `extend_time.png`, Brace and Braced `gravity.png` (the owner's own pair), Rimebound `freezing.png`, the Thaw `soaked.png`; Brace's release `gaia_1` to `gaia_4`; the other cues drawn. It replaces the earlier `shield`, `shielding` and `frozen`, scaled to 32 | Proposed | B-06, B-07 |
 | B-P32 | 14 October 2026 | The benchmark models Rimebound and its thaw, starts no cast that would change nothing, casts a harmful defense at any foe in reach, and measures knockback taken (never moved), with two acceptance checks | Proposed | B-06 |
@@ -910,6 +985,22 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P34 | 14 October 2026 | Rimebind's targets follow the shared boundary (monsters; creatures the caster could strike by hand; players only under PvP and outside the party), and only a hostile creature at normal tolerance counts as restraint | Proposed | B-05, B-06 |
 | B-P35 | 14 October 2026 | Preserve's hold is a fixed Java constant (60 s, not scaled by Spell Power), restarts on a recast and never adds, runs on the world clock, and is capped at 2400 ticks so B-P24 fits | Proposed | B-07, B-10 |
 | B-P36 | 14 October 2026 | The Glacier Hall's dossier names the Seasonal Stall's snow blocks (8 for 3 Jugs, under its winter and December themes) as a sale that helps with the horn, shown only where a town stands and while it is on sale | Proposed | B-02 |
+| B-P40 | 14 October 2026 | Frostward clears frost in its own effect tick, on any creature a salve reaches and from any source; never Slowness, never sinking | Proposed | B-08 |
+| B-P41 | 14 October 2026 | The heat rule acts on stirs only: ground Rime keeps its ready share until stirred, and additions record no band (the formula format is unchanged) | Proposed | B-08 |
+| B-P42 | 14 October 2026 | Every Rime brew (snowball, amethyst, gloamcap) gives Frostward; no brew gives Resistance any more; bottles already made keep it | Proposed | B-08 |
+| B-P43 | 14 October 2026 | Frostward's icon is the owner's `frozen.png` (their "Frozen", used for its opposite); alternative `shielding.png` | Proposed | B-08 |
+| B-P44 | 14 October 2026 | Winter Brine needs only the Alembic Arts, not Rimekeeping; JEI's Rime ingredient pages name Frostward as a property fact | Proposed | B-08 |
+| B-P45 | 14 October 2026 | The Glacier Hall's preparation fact sits in the rite section (shown while a Frost Horn is carried), with a codex link at the Alembic Arts observed; Mitten-only when the Concordance is off or the data's Rime brews no Frostward. Built on unit 1's B-02 | Proposed | B-02, B-08 |
+| B-P46 | 14 October 2026 | "Snow-safe boots" means freeze-proof: vanilla 26.3 limits walking on powder snow to leather boots, and there is no mixin. Alternative: a mixin reading `#jugcraft:powder_snow_walkable_boots` | Proposed | B-10 |
+| B-P47 | 14 October 2026 | Set numbers: Nereid's 1/2/1/1, ×7, enchantability 15, wool; Aquamancer's 1/3/2/1, ×10, 15, wool; Winterguard's 2/6/5/2, ×15, 9, iron. Toughness and knockback resistance 0; no Spell Power; not fire resistant | Proposed | B-10 |
+| B-P48 | 14 October 2026 | Recipes are Ember's patterns with a cold accent (snowball, lapis, snow block); Winterguard's is iron armour's iron plus a snow block. Alternative: Aquamancer's in wool and gold | Proposed | B-10 |
+| B-P49 | 14 October 2026 | The bangle's Brace is Brace's own (100 ticks, exclusive), after 600 ticks with no Brace from any source, looked at once a second. The first look only starts the count; nobody's cast; a second bangle adds nothing; not saved; needs Rimekeeping understood and the Concordance on. Alternative (B-P25's): the owner's chill on each blow | Proposed | B-10 |
+| B-P50 | 14 October 2026 | The foci hold 1800 and 2400 ticks, beyond the Initiate's Wand's 1200 (the hold is the crucible's state, cut at 2400); one Spell Focus slot holds a fire or a water focus, never both | Proposed | B-10 |
+| B-P51 | 14 October 2026 | The kit reuses Ember's slots, `EmberArmorItem`, renderer and medium model; Ember's writer writes both slices' slot tags (`SLOT_ITEMS`) | Proposed | B-10 |
+| B-P52 | 14 October 2026 | Any Frost boon arm counts (the boon, not the line), the creative-only Frost Knight Greatsword included; no survival route is added (B-P27) | Proposed | B-10 |
+| B-P53 | 14 October 2026 | `frost_boon` is an elective of `jugcraft:rimework` on restraint's targets (B-P34), gated by Rimekeeping understood (B-10 first said "encountered"); Rimekeeping can then be mastered without casting Rimebind | Proposed | B-10 |
+
+B-P37 to B-P39 are kept free (for unit 2's decisions at integration); unit 4's are B-P40 to B-P53.
 
 ## How this contract was checked
 
@@ -940,7 +1031,10 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
   merge points in `tools/concordance.py`; the Conclave check; the context of `pewatermagic.ogg`; the heavy model's
   unchecked fit; whether each listed recipe draws one grid (the Expeditions count); what an examination records; the
   sluice's turner; the Winter Crown pattern.
+- Read for unit 4 (14 October 2026), from the 26.3 sources fetched for it (not the local mirror):
+  `PowderSnowBlock.canEntityWalkOnPowderSnow` (leather boots or an entity-type tag only: no boots tag) and
+  `InsideBlockEffectType.FREEZE` (frost only while `canFreeze()`); B-P46 follows from them.
 - Undetermined until something runs or is read: lair dimensions in a world made from an exported preset; charge
-  behaviour at the dais and walls; powder-snow walking for boots other than leather in 26.3; the Yeti under Levitation;
+  behaviour at the dais and walls; the Yeti under Levitation;
   whether a game-test player can be killed so that a real death event fires; the state of the pull requests after
   00:30 UTC on 14 October.

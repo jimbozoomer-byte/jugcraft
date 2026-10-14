@@ -49,7 +49,7 @@ utility (Preserve).
 |---|---|---|---|---|---|---|---|---|
 | Rimebind | defense | the first creature on a 16-block ray moves a fifth slower for 3 s (**Rimebound**), then **thaws** for 2 s, in which no one's Rimebind takes it | 4 (3) | 0.5 s | 2 s | Rimekeeping understood | Extend | slows, never roots; at most 3 s bound in every 5, however many cast; milk clears it; the Yeti King and the Cinder Tyrant are bound half as long; the Ender Dragon, Wither, Warden and Elder Guardian shrug it off |
 | Brace | support | you and your party within 4 blocks are **Braced** for 5 s: the next blow or harmful push moves each of you half as far | 3 (2) | 0.4 s | 8 s | Stratawrighting understood | Widen | one blow spends it; never stacks; lessens no harm; one's own Flashstep and a friend's helpful push ignore it; a teleport, a portal or a lair's mist moves the braced as anyone |
-| Preserve | utility | the Alembic Crucible you touch (4 blocks) keeps its heat band (cold, warm, hot or searing) for 60 s, whatever burns or goes out beneath it | 3 (2) | 0.6 s | 3 s | Rimekeeping understood | none | only a crucible you could change by hand; a second cast starts the minute again, never adds; nothing else is held: no chest, barrel, machine, food or item |
+| Preserve | utility | the Alembic Crucible you touch (4 blocks) keeps its heat band (cold, warm, hot or searing) for 60 s (90 s or 120 s with a focus of water worn, unit 4), whatever burns or goes out beneath it | 3 (2) | 0.6 s | 3 s | Rimekeeping understood | none | only a crucible you could change by hand; a second cast starts the minute again, never adds; nothing else is held: no chest, barrel, machine, food or item |
 
 - **Rimebound** is a new status with the owner's frost icon; **Thawing** is hidden (no icon on the HUD, no particles),
   though the inventory lists it, as it lists every effect. **Braced** shows the owner's weight glyph. Brace is not the
@@ -111,6 +111,7 @@ Each key is a piece of evidence, saved as `practice:<activity>:<key>` and counte
 | `jugcraft:rimework` (Rimekeeping understood) | `preserve:cold` | a Preserve that holds a crucible holding a mixture, in the cold band | the Alembic Arts understood, to put water in a crucible by hand (`CrucibleBlockEntity.use`); a crucible with water or a brew in it |
 | | `preserve:heated` | the same, in the warm, hot or searing band | the same, over a heat source (a magma block keeps it warm, a campfire hot) |
 | | `restraint` | a Rimebound that takes on a hostile creature (`Enemy`) at normal tolerance | a monster within 16 blocks |
+| | `frost_boon` (elective; unit 4) | a Frost boon arm's slow that takes on a hostile creature at normal tolerance (`weapons/ArmItem.boon` → `Rime.frostBoon`, on `Rimebind.restrains`, restraint's targets) | a Frost boon arm: the Glacier Maul or Rimeclaw (the Yeti King's trophies) or the creative-only Frost Knight Greatsword |
 | `jugcraft:anchoring` (Stratawrighting understood) | `ground:living` | a Brace that takes on someone standing on living ground | nothing: oneself on grass counts |
 | | `ground:earthen` | the same on other natural ground (stone, sand, gravel) | nothing |
 | | `held` | a Brace the caster put on is spent by a push | a blow or a harmful push to meet it |
@@ -118,7 +119,8 @@ Each key is a piece of evidence, saved as `practice:<activity>:<key>` and counte
 | | `foundation` (elective) | a ritual completed at a Circle Anchor, for every player present | Circle Lore and a circle |
 | | `rooted` (elective) | struck by a creature, not wholly blocked, in Earthbound Thallite on natural ground | Earthbound Thallite armour (the thallite switch) |
 
-Rimekeeping's mastery needs all three of its keys, and both Preserve keys need the Alembic Arts: a crucible's mixture
+Rimekeeping's mastery needs three kinds of cold work: its own three keys, of which unit 4's elective `frost_boon` can
+stand for one ([the winter record](arcane-concordance-winter.md)); both Preserve keys need the Alembic Arts: a crucible's mixture
 changes only by hand, which needs them, or by a formula an alembist set, while pipes fill only its water tank and
 hoppers only the buffer a formula draws on. `check_rime` holds the keys to that, and `check_progression` holds the
 progression graph's `rimework` route to the same research. Stratawrighting's needs three of its six, and its own three
@@ -195,8 +197,10 @@ until B-09 gives it a visible effect. This is an inference until a test runs.
   Crucible and the Alembic Arts; the Focus pool.
 - Output consumer: players and creatures through the shared effect boundary (control and protection); the Alembic
   Crucible (a band held while stirring, the loop unit 4's Winter Brine uses: a cold stir keeps its Rime, B-08); B-09's
-  Yeti counters (`Brace.spend`, `Brace.caster`, Rimebind's visible change); unit 4's travel kit (the water foci lengthen
-  Preserve's hold, B-P24; the Water Bangle's short Brace, B-P25).
+  Yeti counters (`Brace.spend`, `Brace.caster`, Rimebind's visible change); unit 4's travel kit
+  ([the winter record](arcane-concordance-winter.md)): a Lesser Focus of Water or a Focus of Water worn makes Preserve
+  hold 90 or 120 seconds (`RimeGear.holdTicks`, B-P24, B-P50), and the Water Bangle gives its wearer Brace's own Braced
+  after 30 seconds with none, as nobody's cast (B-P25, B-P49).
 - Technology connection: the crucible's automation is unchanged by a hold (hoppers still feed it, pipes still fill it);
   Jade shows the hold.
 - Magic connection: two more traditions for the Conclave; one examination serves Assay and Stratawrighting; Circle
@@ -446,8 +450,9 @@ protected towns and build permission.
   folder label; the knockback measure (B-P32); Rimebind's targets following the shared boundary (B-P34); "Stonebrace" as
   a display name instead of "Brace", to keep it apart from the war fork's trait; and the spell bar's place: whether
   Jugcraft should set a default that keeps a full bar on screen, or leave it to each player's Spell Engine settings.
-- For unit 4: B-P24's 120 s hold from a focus worn with the Initiate's Wand exceeds that wand's duration limit (1200
-  ticks); unit 4 should cap the hold at the casting instrument's or record why a worn focus may exceed it. Keys it adds
-  to Rimekeeping (`frost_boon`, brews) must be electives.
+- For unit 4, answered there ([the winter record](arcane-concordance-winter.md)): B-P24's 120 s hold from a focus worn
+  with the Initiate's Wand exceeds that wand's duration limit (1200 ticks), and unit 4 records why a worn focus may
+  (B-P50: the hold is the crucible's state, cut at 2400); its key `frost_boon` is an elective (B-P53), and it adds no
+  brew key.
 - Later: the Yeti column elective (B-09); Strata's civic project and boss opening; words a player can compose for Rime
   and Strata (B-P6); Tempest.

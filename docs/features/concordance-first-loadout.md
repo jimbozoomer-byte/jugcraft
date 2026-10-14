@@ -226,7 +226,12 @@ and the Kiln Seal's lands) and `tools/biomes.py` (those lands' names); no number
 `assets/jugcraft/recipe_view.json` (`"acquisition_info"`: an item and a key each) and the words to `en_us.json`
 (`jei.jugcraft.acquire.<key>`). `client/compat/JugcraftJeiPlugin.addAcquisitionInfo` reads the rows and adds a page for
 each registered item. The same module lists the loadout (`LOADOUT`, `OPTIONAL`) and the creative-only tiers
-(`CREATIVE_ONLY`) for the checker.
+(`CREATIVE_ONLY`) for the checker. Since Concordance Chunk B, unit 4 ([the winter record](arcane-concordance-winter.md);
+not yet merged), `OPTIONAL` also holds Rime's travel kit (the two water foci, the Water Bangle and the twelve pieces of
+the three water sets), made by recipe as the Focus of Fire is; they are Rime's, not part of First Light's loadout, and
+have no JEI information page (JEI shows their recipes). `tools/concordance_journey.py` holds each of the fifteen to the
+same rule as the loadout (one player, the Overworld, before the Adept stage), and
+`ConcordanceGameTests.FIRST_LOADOUT_RECIPES` asks the server for their recipes too (not yet run).
 
 **Limits, said plainly.**
 - The pages are written from the data the mod ships. A server whose data pack changes a boss's loot table or the

@@ -5,7 +5,7 @@ Proposal issue: none. On 10 October 2026 the owner asked for the next boss "exac
 Owner: @jimbozoomer-byte
 
 Target milestone and tier: Specialization tier (dungeon expeditions), as the lairs are. He is reached only through the Frost Horn, which takes Discovery-tier things. Nothing a tier needs comes only from him.
-Primary specialty and supported player role: adventuring. His loot also serves the summoning's makers (Yeti Fur in the next horn), cold-biome travellers (the Yeti Mitten) and costume wearers (trick-or-treating and the costume contest).
+Primary specialty and supported player role: adventuring. His loot also serves the summoning's makers (Yeti Fur in the next horn), cold-biome travellers (the Yeti Mitten; since Concordance Chunk B, unit 4, they also have Winter Brine and the Rime travel kit, [arcane-concordance-winter.md](arcane-concordance-winter.md)) and costume wearers (trick-or-treating and the costume contest).
 
 ## Player experience
 
@@ -106,7 +106,7 @@ With JEI installed, each of these has an information page with these numbers, "w
 - **Yeti Fur:**
   - **A cheaper Frost Horn:** a goat horn, a gold ingot, two snow blocks and Yeti Fur, shapeless. The fur takes the two leather's place and one gold ingot's. This is the plan's "part of what summons him again".
   - **Shorn:** one fur makes two white wool.
-- **Yeti Mitten:** held in the offhand, its wearer never freezes. Powder snow, his Frost Breath and his blizzard leave them warm: whatever frost they gather is gone each tick, and his frost never lands on them.
+- **Yeti Mitten:** held in the offhand, its wearer never freezes. Powder snow, his Frost Breath and his blizzard leave them warm: whatever frost they gather is gone each tick, and his frost never lands on them. It is the lasting answer: since Concordance Chunk B, unit 4, Winter Brine's Frostward does the same for as long as it lasts (at most 2 minutes a draught), and the water sets of the Rime travel kit stop only the freezing harm, not his frost or its slow ([arcane-concordance-winter.md](arcane-concordance-winter.md)).
 - **The Yeti King's Crown:** a costume worn on the head, his crown of blue ice in small: a band of ice and six points rising from it, the tallest at the front. It counts for trick-or-treating and the costume contest.
 - **The Glacier Maul and the Rimeclaw:** Arms VII's two Yeti King trophies, until now in the creative tab only. The maul fights as the steel maul does and the Rimeclaw as the steel katar; both are epic, last twice as long as steel, read "Trophy of the Yeti King", and carry his boon, **Frost:** a hit chills the foe, Slowness II for 3 seconds.
 
@@ -137,7 +137,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 - **Inputs:** the way in is part 1's Frost Horn, blown on snow at night, so goats' horns, gold, leather and snow feed every fight.
 - **Outputs:**
   - **Yeti Fur** feeds back into the summoning (the cheaper Frost Horn) and into wool;
-  - **the Yeti Mitten** is an offhand charm for powder snow and the cold biomes;
+  - **the Yeti Mitten** is an offhand charm for powder snow and the cold biomes, the permanent answer to his frost (Winter Brine's Frostward is the timed one, since Concordance Chunk B, unit 4);
   - **the Yeti King's Crown** is a costume for trick-or-treating and the costume contest (`#jugcraft:trick_or_treat_costumes` and `#jugcraft:costume_hats`);
   - **the Glacier Maul and the Rimeclaw** are Arms VII's boss trophies: the first of the eight bosses still to be made in Arms VII's list to drop his.
 - **Technology and magic:** none required. He is fought with whatever players bring, and nothing in a tier needs his loot. Since Concordance Chunk B, unit 3, he is resistant to Concordance control (`#jugcraft:concordance/resistant`): a harmful Concordance status (Rimebind's slow, Smoulder, Dazzle, the Ice Breaker's slow) lasts half as long on him, and Concordance pushes already did nothing (his knockback resistance is 1.0). He moves by fixed steps, so Rimebind's slow alone does nothing visible to his charge until B-09 gives it a visible effect ([Rime and Strata](arcane-concordance-rime-strata.md#tolerance-of-the-lair-keepers)). Arriving in his hall is Rimekeeping's field study.
@@ -256,6 +256,8 @@ Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these 
 `python3 tools/check_mod_data.py` (whose `check_yeti` now also holds his credit and reward to `Encounter` and `LairRewards`: the record begun, abandoned and claimed, the striker's credit on him and his whelps, the payment and payer under `yeti_king`, and the column deed's key) and `python3 scripts/check_repository.py` pass locally at this commit. Five deliberate changes, each made in a scratch copy, each failed `check_yeti`: the claim guard dropped, the whelp crediting `source.getEntity()`, the payer dropped, the old `YetiKingLoot.reward` payment restored, and a constant column key.
 
 Run 38519234934 also ran every client test class; `YetiKingClientGameTests`, unchanged by Chunk B, passed by its shard's success (shard 3).
+
+Concordance Chunk B, unit 4 (B-08 and B-10), changed only his `chill` (it now passes by a player under Frostward, as by one holding the Mitten) and added these game tests, which have not run yet: `YetiKingGameTests.aFrostwardDrinkerIsNotChilledByTheYeti` (his blizzard and breath frost leave a Winter Brine drinker unfrozen, and land again once Frostward is gone) and `aKitWearerIsSlowedButNotHurtByHisFrost` (in a piece of the Rime travel kit his frost still lands, freezes and slows, but the freezing deals no damage); `ConcordanceWinterClientGameTests` runs his frost on a real player in Winterguard's set; the Glacier Hall's dossier names Winter Brine and the Mitten (`EncyclopediaGameTests.theGlacierHallsRiteNamesWinterBrine`). Record: [arcane-concordance-winter.md](arcane-concordance-winter.md).
 
 Not run: the two-client dedicated-server playtest, and play by hand. No test yet times his attacks against real players, measures how long a fight lasts, or tries sliding on his glare ice, his charge or his blocks of ice on a moving player.
 

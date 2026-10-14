@@ -8,6 +8,15 @@ guns, bosses/lairs, Concordance/encyclopedia, mineral deposits, power lines/wall
 Check the integration PR's merge state before treating these as shipped on main. The owner's separate local machine
 consolidation and recipe-picker playtest remains outside this batch.
 
+## Not merged: Concordance Chunk B (winter and stone)
+
+On branch `claude/chunk-b-winter-stone`, not merged; its game tests have not all run in CI
+([the chunk's contract](features/concordance-chunk-b.md)).
+
+| Area | Implemented change | Record |
+| --- | --- | --- |
+| Winter magic | Rimekeeping and Stratawrighting; Rimebind, Brace and Preserve (unit 3). Winter Brine and its Frostward at the Alembic Crucible, the timed answer to the Yeti King's frost beside his Mitten; the Rimekeeper's travel kit from the owner's water sets (Nereid's, Aquamancer's, Winterguard's), water foci and Water Bangle; a Frost boon slow as Rimekeeping practice, with no Thallite or trophy number changed (unit 4) | [Rime and Strata](features/arcane-concordance-rime-strata.md), [winter workshop and travel kit](features/arcane-concordance-winter.md) |
+
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 

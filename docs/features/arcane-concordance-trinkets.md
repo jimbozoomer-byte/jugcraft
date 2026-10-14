@@ -13,7 +13,9 @@ Primary specialty and supported player role: anyone who travels, explores and fi
 
 Builds on [relics and shrines](arcane-concordance-relics.md) (Relic Lore and the Trinkets slots), the [shared effect
 boundary](arcane-concordance-composition.md) and [Ember part 2](arcane-concordance-ember-regalia.md) (the owner's art
-imported as supplied, slots ported to Trinkets). Contract and checklist: [ARCANE_CONCORDANCE.md](../ARCANE_CONCORDANCE.md).
+imported as supplied, slots ported to Trinkets). Ember's Spell Focus and Bracelet slots, not these, hold the fire foci
+and bangle and, since Concordance Chunk B, unit 4, the water foci and the Water Bangle
+([the winter record](arcane-concordance-winter.md); not yet merged). Contract and checklist: [ARCANE_CONCORDANCE.md](../ARCANE_CONCORDANCE.md).
 
 ## Player experience
 

@@ -136,8 +136,11 @@ Two bounded traits; neither adds damage, defense or speed.
 - **Magic connection:** the Earth school's metal, through the Arcane Concordance's Strata. Today (Concordance Chunk B,
   unit 3; [Rime and Strata](arcane-concordance-rime-strata.md)): raw thallite is a Stratawrighting specimen (the ingot
   is not), and taking a creature's blow in Earthbound armour on natural ground, where Rooted holds, counts as Strata
-  practice, an elective. Nothing here changed for it: no Thallite number, and nothing added to `earthen_ground`. The
-  rest waits for slice 5 (the Chunk B contract's B-P14):
+  practice, an elective. Nothing here changed for it: no Thallite number, and nothing added to `earthen_ground`.
+  Unit 4 holds that (B-P28; [the winter record](arcane-concordance-winter.md)): nothing joins `earthen_ground`, no
+  Thallite number changes in Chunk B (`check_winter_links`, and a diff of the tables against unit 3), and snow and ice
+  are not natural ground, so Rooted and Regrowth do nothing in the Glacier Hall. The rest waits for slice 5 (the Chunk B
+  contract's B-P14):
   - **The Thallite Focus:** Earth's starting instrument; 1 raw thallite, 2 ingots, 1 stick. The Concordance's Initiate's
     Wand is every school's first instrument, so a focus with its limits would add nothing; it earns its place as the
     instrument for earthwork.

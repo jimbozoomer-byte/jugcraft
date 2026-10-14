@@ -113,9 +113,9 @@ A participant is a player who qualified in his fight: by a blow to him or a whel
 | The advancement **Abominable** | always |
 
 - **Yeti Fur:** a cheaper Frost Horn (fur in place of the two leather and a gold ingot), his "part of what summons him again"; or two white wool.
-- **Yeti Mitten:** held in the offhand, you never freeze: powder snow, his Frost Breath and the blizzard leave you warm.
+- **Yeti Mitten:** held in the offhand, you never freeze: powder snow, his Frost Breath and the blizzard leave you warm. It stays the permanent prize; since Concordance Chunk B, Winter Brine (brewed at an Alembic Crucible) gives Frostward, the timed answer to his frost ([the winter record](../features/arcane-concordance-winter.md)).
 - **The Yeti King's Crown:** a costume worn on the head, his crown of blue ice in small.
-- **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Frost boon; until now they were in the creative tab only.
+- **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Frost boon; until now they were in the creative tab only. Since Concordance Chunk B, the boon's slow is also Rimekeeping practice (an elective), with no number changed.
 - When he falls, Grey Mist opens in the middle of the lake, the way home.
 
 ### Rules kept

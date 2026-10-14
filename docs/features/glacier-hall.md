@@ -60,7 +60,7 @@ Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-t
 - **Outputs:** the way into the Glacier Hall, where the Yeti King will wait (part 2).
 - **Technology and magic:** the hall is an adventuring destination, and arriving in it is Rimekeeping's field study: with First Light understood, it can understand Rimekeeping without a bench (Concordance Chunk B, unit 3; [Rime and Strata](arcane-concordance-rime-strata.md)). Nothing in the hall changed for it. Its fight's loot (part 2) brings Arms VII's two Yeti King trophies into survival.
 - **Reachable entry path:** every input is reachable in the Discovery tier without the hall: no circular unlock.
-- **The encyclopedia (since Concordance Chunk B, B-02):** carrying a Frost Horn shows the hall's dossier under Expeditions: the rite, the horn's recipe, the Seasonal Stall's snow blocks where a town sells them that day, that it works all year and the party it holds; the Yeti King's part follows once he is met ([yeti-king.md](yeti-king.md)). A first win over him completes the First Light route's lair step.
+- **The encyclopedia (since Concordance Chunk B, B-02):** carrying a Frost Horn shows the hall's dossier under Expeditions: the rite, the horn's recipe, the Seasonal Stall's snow blocks where a town sells them that day, that it works all year and the party it holds; the Yeti King's part follows once he is met ([yeti-king.md](yeti-king.md)). A first win over him completes the First Light route's lair step. Since unit 4 (B-08), the rite also names what readies a player for his frost: Winter Brine's Frostward (up to 120 seconds a draught, the data's) and the Yeti Mitten, as text and icons with no recipe grid (B-P29), with a link to the codex's Winter Brine once the Alembic Arts are observed; with the Concordance switched off, the Mitten only ([arcane-concordance-winter.md](arcane-concordance-winter.md)).
 
 ## Balance and automation
 
@@ -146,6 +146,8 @@ Then it takes eight pictures: the whirl in the snow at midnight, and in the hall
 Concordance Chunk B, unit 1 (B-02) adds `GlacierHallGameTests.theHornIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the horn is still answered at night on snow. It passes in CI (runs 38509414542, 38514144531 and 38519234934, by workflow_dispatch; not merged).
 
 Concordance Chunk B, unit 3 ([Rime and Strata](arcane-concordance-rime-strata.md); not merged) adds to `GlacierHallClientGameTests`: with First Light understood, arriving in the hall is Rimekeeping's field study; and a braced player is still moved by the mist's toll, the Grey Mist and the whirl, and neither the toll nor the whirl spends the Brace. In run 38519234934 the class passed with every other client class (shard 3). Its pictures there (480×270 previews) show the ledge, the lake, the throne, the vault, a column, a den and the Grey Mist's arch as described above; the whirl's (`jugcraft_frost_horn_whirl`) is barely visible, a faint dark smudge of particles at night.
+
+Concordance Chunk B, unit 4 ([Winter Brine and the travel kit](arcane-concordance-winter.md); not merged) adds `EncyclopediaGameTests.theGlacierHallsRiteNamesWinterBrine` for the preparation fact; nothing in the hall changed. It has not run yet either.
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 

@@ -109,6 +109,11 @@ Each route, step by step: [the journey record](features/arcane-concordance-journ
   blows; mending two hearts of the hurt the fight did a friend (Lanternward); relighting one of Vesperine's wards in her
   Harvest; cutting a friend free of Madame Tatterlace's thread. A ward on yourself does not count. Die or lose your
   connection mid-fight, and your share waits until you are back.
+- **Before the Yeti King's hall,** ready your party for his frost. A draught of **Winter Brine** each (snowballs in
+  water at an Alembic Crucible with nothing burning beneath it, stirred cold) gives **Frostward**, which keeps his frost
+  off while it lasts: three snowballs in a part give about 49 seconds, a stronger brew up to two minutes. His **Yeti
+  Mitten**, held in the offhand, keeps it off for good. The Rimekeeper's water sets stop the freezing harm, as leather
+  does, but not his frost's slow.
 
 ## When something goes wrong
 
@@ -116,6 +121,9 @@ Each route, step by step: [the journey record](features/arcane-concordance-journ
   missing ingredient, a missed upkeep. Flame and sparks with a sharp rising tone mean **danger**: failing containment,
   a searing stir, a damaged spire. Both have subtitles.
 - **Ask your journal** (J): it says what each research state and each stage route still needs, in words.
+- **A brew stirred too warm:** any heat above cold thaws Rime, so a Winter Brine stirred over a magma block or a fire
+  comes out too weak and does nothing. Stir it with nothing burning beneath; a master's Assay Glass names the warmer
+  stirs.
 - **Nothing is lost by accident.** A broken circle releases its offerings; a broken anchor, crucible, post or Spire
   Heart drops what it held; a cancelled request gives its items back; dying in a dream returns what you carried, once.
 

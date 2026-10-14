@@ -142,6 +142,10 @@ yet.
 - Concordance Chunk A ([first loadout](concordance-first-loadout.md)): the Adept's Wand had been left out of `EXCLUDED`,
   although the refusals above name wands (the scale refused a plain one as uncatalogued and an inscribed one as
   magical). It is excluded now, and `check_equivalence` requires every Concordance instrument to be.
+- Concordance Chunk B, unit 4 ([the winter record](arcane-concordance-winter.md); not yet merged): the Rimekeeper's
+  travel kit (the two water foci, the Water Bangle and the twelve pieces of the three water sets) joins `EXCLUDED`, as
+  Ember's regalia did; `check_rime_kit` requires each of the fifteen to be. Winter Brine's draughts and salves are
+  neither weighed nor ingredients (`check_winter_brine`).
 - The pure core compiles with JDK 21 and the rules load the generated catalogue (45 materials, 42 transmutations) with
   no problems. The step 21 harness passes **31 checks** against it: exact fractions add and round as asked; nuggets
   dissolve at 256/9 rounded down once on the whole batch, and splitting never earns more; forming costs five quarters
