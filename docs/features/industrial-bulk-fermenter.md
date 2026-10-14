@@ -1,6 +1,6 @@
 # Bulk Fermenter: the Industrial Fermenter's 5×5×6 variant
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on [copper entry](industrial-copper-entry-aluminum.md) and the branches below it, down to the [Industrial Fermenter](industrial-fermenter.md).
 
 Proposal issue: none. TODO items:
@@ -98,7 +98,8 @@ Client game test: `BulkFermenterClientGameTests` takes four views and two screen
 
 ### Results
 
-Not yet run in CI.
+- An earlier run ([38472612599](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38472612599)) failed only on the Combined Cycle Power Plant's client test underneath, fixed in [factory payoffs](industrial-factory-payoffs.md).
+- **Run [38494571370](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38494571370) (commit cc075f97) passed:** the build, the data checks, every server game test (`BulkFermenterGameTests` included) with and without optional integrations, and all five client test shards (`BulkFermenterClientGameTests` included).
 
 No survival playtest, two-client test or performance measurement has been done.
 
