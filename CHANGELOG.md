@@ -21,7 +21,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
   - progress with the time left;
   - a help box saying what the machine is for.
 - **Controls are icon buttons with tooltips**, along the top of the help box. The six face buttons move behind one Sides button, which shows the faces with a colour key. Batteries and solar panels show a big charge gauge with its percentage. Empty slots show IN and OUT labels and hint icons, and say what goes in them when hovered. The decorative keyboard is gone.
-- Industrial forms share the layout: pause, cancel and vent icons, and their tool sockets in the help box. Slot positions, menus and saves are unchanged. Record: [machine-screens.md](docs/features/machine-screens.md).
+- Industrial forms share the layout: pause, cancel, recipes and vent or drain icons, and their tool sockets in the help box. Slot positions, menus and saves are unchanged. Record: [machine-screens.md](docs/features/machine-screens.md).
 
 ### Added: The Howitzer Walker, playable
 - Owner accepted the updated local playtest on October 13: aim without holding fire, no close-ground aim freeze, and hide the pilot model/equipment while mounted. Implementation and correction record: [Howitzer Walker](docs/features/howitzer-walker.md).

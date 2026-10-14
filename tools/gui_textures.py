@@ -116,6 +116,34 @@ FORM_TAGLINES = {
     "coal_gasifier": "Turns coal and steam into raw syngas.",
     "gas_cleanup_rack": "Splits raw syngas into carbon monoxide and hydrogen.",
     "bio_generator": "Burns bioethanol or biogas into power.",
+    # The forms of the factory chains (#358), from their tanks and their records.
+    "gas_cleaning_rack": "Washes dirty gas with water into carbon monoxide and hydrogen.",
+    "biogas_cleaner": "Washes raw biogas clean with water.",
+    "digestate_separator": "Presses digestate, recovering its water.",
+    "mashing_station": "Cooks crops in hot water into a mash.",
+    "chemical_distillation_station": "Distils ethanol out of fermented broth.",
+    "bauxite_digester": "Dissolves bauxite in hot lye into aluminate slurry.",
+    "aluminate_filter_press": "Filters slurries, recovering lye and water.",
+    "alumina_calciner": "Bakes alumina, dries chlorides and sinters PTFE.",
+    "aluminum_reduction_cell": "Smelts alumina into aluminum with power.",
+    "coastal_seawater_intake": "Pumps seawater from the coast.",
+    "brine_concentrator": "Boils water out of seawater and dilute acid.",
+    "mineral_conditioner": "Prepares minerals with a reagent for the next step.",
+    "chloride_dryer": "Dries chloride solutions.",
+    "magnesium_electrolysis_cell": "Splits magnesium chloride into magnesium and chlorine.",
+    "titanium_chlorinator": "Chlorinates titanium with coke into crude chloride.",
+    "titanium_reduction_retort": "Reduces titanium chloride with magnesium into sponge.",
+    "polymer_molding_press": "Molds polymer into parts with reusable molds.",
+    "monomer_preparation_unit": "Prepares monomer for the kettle.",
+    "polymerization_kettle": "Polymerizes monomer into polymer.",
+    "polymer_extruder": "Extrudes polymer through reusable dies.",
+    "polymer_reclaimer": "Reclaims clean polymer scrap, at a cost.",
+    "acid_concentrator": "Boils dilute acid into concentrated acid.",
+    "chemical_dissolution_chamber": "Dissolves fluorite in acid into hydrogen fluoride.",
+    "fluorocarbon_reactor": "Joins a carbon feed and a halogen into fluorocarbons.",
+    "fluoromonomer_cracker": "Cracks fluorocarbons into fluoromonomer.",
+    "ptfe_sintering_oven": "Sinters shaped PTFE into finished parts.",
+    "lined_fluorochemical_reactor": "Makes fluorocarbons in an acid-proof lining.",
 }
 
 # What each machine is for, in a line the terminal shows.
@@ -385,7 +413,7 @@ def write_all(write, assets, lang, machines):
         "running": "RUNNING", "idle": "IDLE", "no_power": "NO POWER", "generating": "GENERATING",
         "charging": "CHARGING", "storing": "STORING", "holding": "HOLDING", "stopped": "STOPPED",
         "discharging": "DISCHARGING", "sides": "SIDES", "power": "POWER", "rate": "RATE", "fuel": "FUEL",
-        "output_full": "OUTPUT FULL", "time_left": "%s left",
+        "output_full": "OUTPUT FULL", "time_left": "%s left", "emitted": "EMITTED",
     }
     for key, text in words.items():
         lang[f"container.jugcraft.terminal.{key}"] = text

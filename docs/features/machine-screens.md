@@ -48,9 +48,9 @@ Primary specialty and supported player role: every player who uses a machine
 - Hovering the energy bar, the charge gauge or a tank still gives exact numbers.
 
 **Industrial forms** use the same layout:
-- the status pane gives the form's state and the one thing to fix, with progress, the time left, power, and batches when there are several;
-- icon buttons pause or resume it, cancel its batches, and choose whether excess byproduct is vented;
-- its tool sockets and upgrade slots sit in the help box. A form without them says there what it is for.
+- the status pane gives the form's state and the one thing to fix, with progress, the time left, power, and batches when there are several. The coal gasifier adds what it has emitted so far;
+- icon buttons pause or resume it, cancel its batches, open its **recipe page** (lit while a recipe is locked), and choose whether excess byproduct is vented, or excess water drained (a droplet; the forms that vent excess gas by the same switch show the vent icon);
+- its tool sockets and upgrade slots sit in the help box. A form without them says there what it is for. Every one of the 37 forms has a line.
 
 **Five looks by tech level.** The references set the mood and colours; everything is drawn fresh.
 
@@ -91,7 +91,7 @@ None. The screen shows only what the server already syncs: the machine's data, i
   - the looks' colours (`gui/machine_themes.json`);
   - the taglines for machines and forms;
   - the status words, hints and slot help, as lang keys.
-- `client/MachineSkin` draws the moving parts and the buttons: slots, the energy bar, the charge gauge, the arrow, the lamp, eleven 8×8 pixel icons, the icon buttons and the face buttons.
+- `client/MachineSkin` draws the moving parts and the buttons: slots, the energy bar, the charge gauge, the arrow, the lamp, thirteen 8×8 pixel icons, the icon buttons and the face buttons.
 - The companion wheel (`local/peepo/client/WheelScreen`) borrows the coal generator's background, so it takes the workshop look.
 
 ## Verification
@@ -143,7 +143,18 @@ After those fixes:
 - an overlay of the buttons, tool sockets, help text area and charge gauge showed each inside its box;
 - the local checks above were run again: `check_mod_data.py` **PASS**, `check_repository.py` **PASS**, the unit tests **OK**, a second generation changed nothing, and the Java syntax parse found 0 errors.
 
-CI on the fix: pending.
+Main then gained the factory chains (#358, 4d38e9712), which added a recipe page, a drain or vent switch and an emissions count to the old form screen, and 27 more forms. The merge carries them into this layout:
+- **Recipes** is an icon button. Its label stays "Recipes" (or "Locked recipe"), so the client tests that click it by name still find it.
+- The drain or vent switch is the row's last button; no form has both it and the excess-vent choice.
+- The emissions count is a status row, EMITTED.
+- The Gas Scrubber keeps its own title.
+- The 27 new forms got taglines, written from their tanks, capabilities and records. All but the Coastal Seawater Intake have upgrade slots, so the help box shows those instead.
+
+After the merge:
+- the generation, `check_mod_data.py` (**PASS**), `check_repository.py` (**PASS**) and the unit tests (**OK**, 34) were run again;
+- the Java syntax parse of the client and game-test sources found 0 errors.
+
+CI on the merge: pending.
 
 Not run:
 - a human trying every machine's screen;

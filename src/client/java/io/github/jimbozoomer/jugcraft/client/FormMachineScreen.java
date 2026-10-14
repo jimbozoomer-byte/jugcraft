@@ -38,8 +38,9 @@ import org.jspecify.annotations.Nullable;
  * per lane under the arrow when a profile runs several batches), and the status pane says the machine's state and the
  * one thing to fix, in the order the plan gives (process, inputs, tool, energy, reserved outputs and completion), then
  * progress with the time left, power and batches. Reserved room in an output tank shows as a pale band above its fluid.
- * Icon buttons pause or resume it, cancel its batches and choose whether excess byproduct is vented. The help box holds
- * the tool sockets and upgrade slots, or says what the machine is for when it has none.
+ * Icon buttons pause or resume it, cancel its batches, open its recipe page ({@link MachineRecipeScreen}) and choose
+ * whether excess byproduct is vented, or excess water drained. The help box holds the tool sockets and upgrade slots, or
+ * says what the machine is for when it has none.
  *
  * <p>A generator form shows its fuel tank, an arrow lit while it makes power and its store on the right, where a
  * processor's outputs would be; the status pane gives the power it made last tick. It has no batches, so no Cancel.
@@ -59,13 +60,40 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 	private final MachineScreenThemes.Theme theme;
 	private MachineSkin.IconButton pauseButton;
 	private MachineSkin.@Nullable IconButton ventButton;
+	/** Drain excess water (or vent excess gas) on a form with a drain output. */
+	private MachineSkin.@Nullable IconButton drainButton;
+	/** The recipe page, on processors; lit while a recipe is locked. */
+	private MachineSkin.@Nullable IconButton recipeButton;
+	private boolean recipePageOpen;
 	/** The first lane's progress a second ago (20 ticks of samples), for the time left. */
 	private final int[] progressHistory = new int[20];
 	private int samples;
 
 	public FormMachineScreen(FormMachineMenu menu, Inventory inventory, Component title) {
-		super(menu, inventory, title, 268, 166);
+		super(menu, inventory, menu.form().id().getPath().equals("gas_cleaning_rack")
+				? Component.translatable("container.jugcraft.form.cleaning_title") : title, 268, 166);
 		this.theme = MachineScreenThemes.forms();
+	}
+
+	/** Opens the recipe page; the menu stays open behind it until the page returns here. */
+	public void openRecipes() {
+		recipePageOpen = true;
+		minecraft.gui.setScreen(new MachineRecipeScreen(this, menu));
+	}
+
+	void returnFromRecipes() {
+		recipePageOpen = false;
+	}
+
+	@Override
+	public void removed() {
+		if (!recipePageOpen) {
+			super.removed();
+		}
+	}
+
+	private String overflowKey(String suffix) {
+		return "container.jugcraft.form." + (menu.form().ventGas() == null ? "drain_" : "vent_") + suffix;
 	}
 
 	@Override
@@ -82,10 +110,18 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 					0xFFC83228, Component.translatable("container.jugcraft.form.cancel"), button -> click(FormMachineBlockEntity.BUTTON_CANCEL)));
 			cancel.setTooltip(Tooltip.create(Component.translatable("container.jugcraft.form.cancel")));
 			x += BUTTON_STEP;
+			recipeButton = addRenderableWidget(new MachineSkin.IconButton(x, topPos + BUTTON_Y, theme, MachineSkin.Icon.RECIPES,
+					0xFF3C78C8, Component.translatable("container.jugcraft.form.recipes"), button -> openRecipes()));
+			x += BUTTON_STEP;
 		}
+		// No form both vents its excess and drains it, so the two share the last place in the row.
 		if (menu.form().ventsAny()) {
 			ventButton = addRenderableWidget(new MachineSkin.IconButton(x, topPos + BUTTON_Y, theme, MachineSkin.Icon.VENT, 0xFF32AA46,
 					Component.translatable("container.jugcraft.form.excess_vent"), button -> click(FormMachineBlockEntity.BUTTON_HOLD_VENTED)));
+		} else if (menu.form().waterDrainOutput() >= 0) {
+			drainButton = addRenderableWidget(new MachineSkin.IconButton(x, topPos + BUTTON_Y, theme,
+					menu.form().ventGas() == null ? MachineSkin.Icon.DRAIN : MachineSkin.Icon.VENT, 0xFF3060D0,
+					Component.translatable(overflowKey("on")), button -> click(FormMachineBlockEntity.BUTTON_DRAIN)));
 		}
 	}
 
@@ -111,6 +147,19 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 			ventButton.setLit(!holds);
 			ventButton.setTooltip(Tooltip.create(Component.translatable(holds ? "container.jugcraft.form.excess_hold" : "container.jugcraft.form.excess_vent")
 					.append(". ").append(Component.translatable("container.jugcraft.form.excess_tooltip"))));
+		}
+		if (drainButton != null) {
+			Component drain = Component.translatable(overflowKey(menu.data(FormMachineBlockEntity.DATA_DRAIN) != 0 ? "on" : "off"));
+			drainButton.setMessage(drain);
+			drainButton.setLit(menu.data(FormMachineBlockEntity.DATA_DRAIN) != 0);
+			drainButton.setTooltip(Tooltip.create(drain.copy().append(". ").append(Component.translatable(overflowKey("hint")))));
+		}
+		if (recipeButton != null) {
+			boolean locked = menu.selectedRecipe() != 0;
+			Component recipes = Component.translatable(locked ? "container.jugcraft.form.recipes_locked" : "container.jugcraft.form.recipes");
+			recipeButton.setMessage(recipes);
+			recipeButton.setLit(locked);
+			recipeButton.setTooltip(Tooltip.create(recipes.copy().append(". ").append(Component.translatable("container.jugcraft.form.recipes_hint"))));
 		}
 		extractBackground(graphics, mouseX, mouseY, delta);
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
@@ -212,8 +261,8 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		statusPane(graphics);
 		MachineForm form = menu.form();
 		if (form.sockets().isEmpty() && form.upgradeSlots() == 0) {
-			MachineSkin.wrap(graphics, font, Component.translatable("container.jugcraft.tagline." + form.id().getPath()), HELP_X, HELP_Y,
-					HELP_WIDTH, HELP_BOTTOM, theme.help());
+			MachineSkin.wrap(graphics, font, Component.translatableWithFallback("container.jugcraft.tagline." + form.id().getPath(), ""),
+					HELP_X, HELP_Y, HELP_WIDTH, HELP_BOTTOM, theme.help());
 		}
 	}
 
@@ -261,6 +310,12 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		}
 		if (menu.form().profile().lanes() > 1 && y + 9 <= STATUS_BOTTOM) {
 			row(graphics, y, Component.translatable("container.jugcraft.form.lanes").getString(), running + "/" + menu.form().profile().lanes());
+			y += 10;
+		}
+		if (menu.form().id().getPath().equals("coal_gasifier") && y + 9 <= STATUS_BOTTOM) {
+			// What the gasifier has let out so far, in mB.
+			long emitted = ((long) menu.data(FormMachineBlockEntity.DATA_EMISSIONS_HIGH) << 16) | menu.data(FormMachineBlockEntity.DATA_EMISSIONS_LOW);
+			row(graphics, y, Component.translatable("container.jugcraft.terminal.emitted").getString(), MachineSkin.compact(emitted));
 		}
 	}
 

@@ -420,7 +420,7 @@ Every `FenceBlock` and `IronBarsBlock` has the properties `north_east`, `south_e
 - **Machine screens (five looks by tech level, [record](features/machine-screens.md)):** `client/MachineScreen` and `client/FormMachineScreen` share one 268×166 layout:
   - the body: a title with a status lamp, the machine pane (slot positions unchanged; a big charge gauge on machines with nothing else in it) and a status pane (state, the fix, progress with time left, power);
   - the inventory tray;
-  - beside the tray, a help box as tall as it: icon buttons along its top (redstone, eject, sides; pause, cancel and vent on forms), then the tagline, the sides key, or a form's tool sockets.
+  - beside the tray, a help box as tall as it: icon buttons along its top (redstone, eject, sides; pause, cancel, recipes and vent or drain on forms), then the tagline, the sides key, or a form's tool sockets.
 
   The looks (workshop, industrial, electric, lab, advanced) and their colours come from `assets/jugcraft/gui/machine_themes.json` (`client/MachineScreenThemes`). That file, the backgrounds, taglines and hints are written by `tools/gui_textures.py`. `client/MachineSkin` draws slots, gauges, icons and buttons.
 - **Solar thermal (batch 21):** package `solar`: `SOLAR_TRACKER` (`SolarTrackerBlockEntity`, generator), `HELIOSTAT` (`HeliostatBlockEntity`, empty, for the renderer), `SOLAR_RECEIVER` (`SolarReceiverBlockEntity`: `countHeliostats`, water tank, `JE_PER_HELIOSTAT`, `MAX_HELIOSTATS`, `JE_PER_MB`). `SunTrackingBlock` keeps `turning` true so the client draws the top part; rotors in `kinetic_models.ROTORS` with `"mode": "sun"` tilt with the day time (`client/KineticRotors`). Their models are built with the kinetic blocks (`KINETIC_BLOCKS`).
