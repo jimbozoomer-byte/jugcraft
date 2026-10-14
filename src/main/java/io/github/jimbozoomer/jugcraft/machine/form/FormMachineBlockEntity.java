@@ -50,6 +50,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
@@ -73,7 +74,7 @@ import org.jspecify.annotations.Nullable;
  * <p>The block entity is deliberately not itself a container: its slots are reachable only through its screen and its
  * ports, so no generic container lookup can reach a tool socket or an output through a closed face.
  */
-public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuProvider<Identifier> {
+public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuProvider<FormRecipeCatalog>, local.peepo.ProcessorHost {
 	/**
 	 * Ticks between periodic structure checks, besides the check a part asks for when a neighbour changes; one check
 	 * examines at most {@link MachineForm#MAX_POSITIONS} positions.
@@ -111,12 +112,16 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	public static final int DATA_RESERVED = DATA_TANKS + 2 * FluidMachineSpec.MAX_TANKS;
 	/** 1 when the vented tanks hold their gas and stop the work instead of releasing it. */
 	public static final int DATA_HOLD_VENTED = DATA_RESERVED + FluidMachineSpec.MAX_TANKS;
-	public static final int DATA_COUNT = DATA_HOLD_VENTED + 1;
+	public static final int DATA_DRAIN = DATA_HOLD_VENTED + 1;
+	public static final int DATA_EMISSIONS_LOW = DATA_DRAIN + 1;
+	public static final int DATA_EMISSIONS_HIGH = DATA_EMISSIONS_LOW + 1;
+	public static final int DATA_COUNT = DATA_EMISSIONS_HIGH + 1;
 
 	/** Menu buttons. */
 	public static final int BUTTON_PAUSE = 0;
 	public static final int BUTTON_CANCEL = 1;
 	public static final int BUTTON_HOLD_VENTED = 2;
+	public static final int BUTTON_DRAIN = 3;
 
 	private final MachineForm form;
 	private final SimpleEnergyStorage energy;
@@ -131,6 +136,26 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	private boolean paused;
 	/** The player's stop-instead choice: vented tanks keep their excess and a full one stops the work. */
 	private boolean holdVented;
+	private @Nullable Identifier recipeLock;
+
+	public @Nullable Identifier recipeLock() { return recipeLock; }
+
+	/** Null restores automatic mode. Running escrowed batches are deliberately untouched. */
+	public boolean selectRecipe(@Nullable Identifier id) {
+		if (!(level instanceof ServerLevel server) || form.generator()) return false;
+		if (id != null && recipes(server.getServer()).stream().noneMatch(e -> e.id().equals(id))) return false;
+		recipeLock = id;
+		setChanged();
+		return true;
+	}
+
+	private List<FluidRecipes.Entry> allowedRecipes(MinecraftServer server) {
+		var all = recipes(server);
+		return recipeLock == null ? all : all.stream().filter(e -> e.id().equals(recipeLock)).toList();
+	}
+	private boolean drainWater = true;
+	private long drainedWater;
+	private long processEmissions;
 	private long nextCheck;
 	/** The game time of the last paid tick: a batch started long after it starts cold. Not saved. */
 	private long lastWorked = Long.MIN_VALUE / 2;
@@ -143,6 +168,14 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	/** JE a generator made on its last tick. Not saved. */
 	private int made;
 	private long lanePrice;
+	private final local.peepo.ProcessorJob[] companionJobs;
+	private final int[] assistQuarters;
+	private final WorkLane[] assistedLanes;
+	private long lastContributed = Long.MIN_VALUE / 2;
+	private long lastAssistanceTick = Long.MIN_VALUE / 2;
+	private boolean companionStructureLoaded;
+	private boolean companionPowerLimited;
+
 	/** The family's recipe list this machine filtered last, and the result (rebuilt after a reload). */
 	private @Nullable List<FluidRecipes.Entry> recipeSource;
 	private List<FluidRecipes.Entry> recipes = List.of();
@@ -164,7 +197,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			if (index >= DATA_TANKS && index < DATA_RESERVED) {
 				return index - DATA_TANKS < 2 * tanks.size() ? tanks.data(index - DATA_TANKS) : 0;
 			}
-			if (index >= DATA_RESERVED && index < DATA_COUNT) {
+			if (index >= DATA_RESERVED && index < DATA_HOLD_VENTED) {
 				int tank = index - DATA_RESERVED;
 				int inputs = form.tanks().inputTanks().size();
 				return tank >= inputs && tank < tanks.size() ? reservedMb(tank - inputs) : 0;
@@ -178,6 +211,9 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				case DATA_HOLD_VENTED -> holdVented ? 1 : 0;
 				case DATA_LANE_USE -> (int) Math.min(0xFFFF, form.generator() ? made : lanePrice);
 				case DATA_LOCKS -> locks();
+				case DATA_DRAIN -> drainWater ? 1 : 0;
+				case DATA_EMISSIONS_LOW -> (int) (processEmissions & 0xFFFF);
+				case DATA_EMISSIONS_HIGH -> (int) ((processEmissions >>> 16) & 0xFFFF);
 				default -> 0;
 			};
 		}
@@ -219,8 +255,106 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		};
 		this.items = slots.getItems();
 		this.tanks = new FluidTanks(form.tanks(), (tank, variant) -> form.generator() ? form.fuel(variant.getFluid()) != null
-				: level instanceof ServerLevel server && usesFluid(recipes(server.getServer()), tank, variant), this::setChanged);
+				: level instanceof ServerLevel server && usesFluid(allowedRecipes(server.getServer()), tank, variant), this::setChanged);
 		this.lanes = new WorkLane[form.profile().lanes()];
+		this.assistQuarters = new int[lanes.length];
+		this.assistedLanes = new WorkLane[lanes.length];
+		this.companionJobs = new local.peepo.ProcessorJob[form.companionAssistance() ? 2 : 0];
+		for (int i = 0; i < companionJobs.length; i++) companionJobs[i] = new local.peepo.ProcessorJob(this, i);
+	}
+
+	@Override public BlockEntity companionBlock() { return this; }
+	@Override public io.github.jimbozoomer.jugcraft.machine.MachineKind kind() { return form.family(); }
+	@Override public int companionHelperCount() { return companionJobs.length; }
+
+	/** Planning reads the controller's existing status; it never matches recipes or scans the structure. */
+	@Override public local.peepo.CompanionStatus companionStatus() {
+		if (!form.companionAssistance()) return local.peepo.CompanionStatus.UNSUPPORTED;
+		if (isRemoved()) return local.peepo.CompanionStatus.MISSING;
+		if (!companionStructureLoaded) return local.peepo.CompanionStatus.UNLOADED;
+		if (paused) return local.peepo.CompanionStatus.MACHINE_PAUSED;
+		if (structure != null) return local.peepo.CompanionStatus.MACHINE_UNFORMED;
+		return switch (status.state()) {
+			case UNFORMED -> local.peepo.CompanionStatus.MACHINE_UNFORMED;
+			case IDLE, WAITING_INPUT -> local.peepo.CompanionStatus.NO_INPUT;
+			case WAITING_TOOL -> local.peepo.CompanionStatus.MACHINE_TOOL;
+			case WAITING_ENERGY -> local.peepo.CompanionStatus.NO_POWER;
+			case OUTPUT_BLOCKED -> local.peepo.CompanionStatus.FULL;
+			case WARMING, PROCESSING -> companionPowerLimited ? local.peepo.CompanionStatus.NO_POWER : local.peepo.CompanionStatus.READY;
+		};
+	}
+
+	public local.peepo.@Nullable CompanionJob companionJob(local.peepo.PeepoEntity npc) {
+		for (var job : companionJobs) if (job.assignedTo(npc)) return job.prepare(npc);
+		local.peepo.ProcessorJob fallback = null;
+		for (var job : companionJobs) if (job.availableTo(npc)) {
+			job.prepare(npc);
+			if (job.workStatus(npc) == local.peepo.CompanionStatus.READY) return job;
+			fallback = job;
+		}
+		return fallback != null ? fallback : companionJobs.length == 0 ? null : companionJobs[0];
+	}
+
+	@Override public boolean helperPositionAvailable(int slot, net.minecraft.world.phys.Vec3 point) {
+		if (point == null) return false;
+		for (int i = 0; i < companionJobs.length; i++) if (i != slot) {
+			var reserved = companionJobs[i].reservedPosition();
+			if (reserved != null && reserved.distanceToSqr(point) < .64) return false;
+		}
+		return true;
+	}
+
+	@Override public void resetCompanionEffort() {
+		java.util.Arrays.fill(assistQuarters, 0);
+		java.util.Arrays.fill(assistedLanes, null);
+		lastContributed = Long.MIN_VALUE / 2;
+	}
+
+	/** A presence check only; the shared jobs validate ownership, position and reserve at contribution time. */
+	private boolean companionRequested(long now) {
+		for (var job : companionJobs) if (job.requestedAt(now)) return true;
+		return false;
+	}
+
+	/** Each active lane pays for its extra ticks. Each helper is debited once, proportional to assisted lanes. */
+	private void assist(long now, int eligible) {
+		if (lastAssistanceTick == now) return;
+		lastAssistanceTick = now;
+		if (eligible == 0 || !companionStructureLoaded || !companionRequested(now)) {
+			resetCompanionEffort();
+			return;
+		}
+		int count = Integer.bitCount(eligible);
+		// Reserve enough electrical headroom for all candidate lanes before spending companion reserve.
+		if (energy.getAmount() < lanePrice * count) {
+			companionPowerLimited = true;
+			resetCompanionEffort();
+			return;
+		}
+		if (now - lastContributed > 1) resetCompanionEffort();
+		int effort = io.github.jimbozoomer.jugcraft.machine.MachineCompanionEffort.perQuarter(form.family(), 0);
+		int quarters = 0;
+		for (var job : companionJobs) quarters += job.contribute(now, effort, count);
+		if (quarters == 0) { resetCompanionEffort(); return; }
+		lastContributed = now;
+		for (int i = 0; i < lanes.length; i++) {
+			if ((eligible & (1 << i)) == 0) { assistQuarters[i] = 0; assistedLanes[i] = null; continue; }
+			if (assistedLanes[i] != lanes[i]) { assistQuarters[i] = 0; assistedLanes[i] = lanes[i]; }
+			assistQuarters[i] += quarters;
+			if (assistQuarters[i] >= 4) {
+				assistQuarters[i] -= 4;
+				energy.setAmount(energy.getAmount() - lanePrice);
+				lanes[i].advance(1);
+				setChanged();
+			}
+		}
+	}
+
+	@Override public void setRemoved() {
+		for (var job : companionJobs) job.removed();
+		resetCompanionEffort();
+		local.peepo.CompanionReadiness.invalidate(this);
+		super.setRemoved();
 	}
 
 	public MachineForm form() {
@@ -244,6 +378,18 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		return status;
 	}
 
+	public boolean drainsWater() { return drainWater; }
+	public long drainedWater() { return drainedWater; }
+	public long processEmissions() { return processEmissions; }
+	/** Applies to newly started batches; a running batch keeps its saved reservation policy. */
+	public void toggleWaterDrain() {
+		if (form.waterDrainOutput() >= 0) { drainWater = !drainWater; setChanged(); }
+	}
+	private boolean mayDrain(int output, Fluid fluid, boolean enabled) {
+		return enabled && output == form.waterDrainOutput()
+				&& (form.ventGas() == null ? fluid == Fluids.WATER : form.ventGas().equals(net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluid)));
+	}
+
 	public boolean paused() {
 		return paused;
 	}
@@ -254,7 +400,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	}
 
 	/**
-	 * The recipes this form runs: its family's recipes whose capability it declares, in id order (so which of two
+	 * The recipes this form runs: its family's recipes whose capability it declares, in priority then id order (so which of two
 	 * complete recipes starts never depends on load order).
 	 */
 	public List<FluidRecipes.Entry> recipes(MinecraftServer server) {
@@ -266,7 +412,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 					runs.add(entry);
 				}
 			}
-			runs.sort(java.util.Comparator.comparing(entry -> entry.id().toString()));
+			runs.sort(java.util.Comparator.<FluidRecipes.Entry>comparingInt(entry -> entry.recipe().priority()).reversed()
+					.thenComparing(entry -> entry.id().toString()));
 			recipes = List.copyOf(runs);
 			recipeSource = all;
 		}
@@ -282,6 +429,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			nextCheck = now + CHECK_INTERVAL;
 		}
 		MachineStatus next;
+		companionPowerLimited = false;
 		made = 0;
 		if (structure != null) {
 			next = structure;
@@ -292,8 +440,19 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			if (now % PUSH_INTERVAL == 0) {
 				push(level, pos, state);
 			}
-			next = paused ? MachineStatus.PAUSED : work(level.getServer(), now);
+			if (paused) {
+				next = MachineStatus.PAUSED;
+			} else if (CoastalSeawaterIntake.matches(form)) {
+				if (now >= nextCoastalStroke) {
+					coastalStatus = CoastalSeawaterIntake.pump(this, level);
+					nextCoastalStroke = now + 20;
+				}
+				next = coastalStatus;
+			} else {
+				next = work(level.getServer(), now);
+			}
 		}
+		if (!next.state().working()) resetCompanionEffort();
 		if (!next.equals(status)) {
 			status = next;
 			setChanged();
@@ -328,8 +487,14 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		level.setBlock(pos, state.setValue(MachineBlock.LIT, lit), Block.UPDATE_ALL);
 	}
 
+	// Scheduling only; each stroke pays in full. Reload cannot duplicate unpaid output.
+	private long nextCoastalStroke = Long.MIN_VALUE;
+	private MachineStatus coastalStatus = MachineStatus.IDLE;
+
 	/** Checks the structure on the next tick (a part's neighbour changed). */
 	public void requestCheck() {
+		companionStructureLoaded = false;
+		resetCompanionEffort();
 		nextCheck = 0;
 	}
 
@@ -338,11 +503,13 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 * positions in unloaded chunks are taken as they were.
 	 */
 	public @Nullable MachineStatus checkStructure(ServerLevel level, BlockPos pos, BlockState state) {
+		companionStructureLoaded = true;
 		Direction facing = state.getValue(MachineBlock.FACING);
 		FormMachineBlock block = (FormMachineBlock) state.getBlock();
 		for (int part = 1; part < form.footprint().size(); part++) {
 			BlockPos at = form.footprint().partPos(pos, facing, part);
 			if (!level.isLoaded(at)) {
+				companionStructureLoaded = false;
 				continue;
 			}
 			BlockState there = level.getBlockState(at);
@@ -352,6 +519,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		}
 		for (int cell : form.clearanceCells()) {
 			BlockPos at = form.cellPos(pos, facing, cell);
+			if (!level.isLoaded(at)) companionStructureLoaded = false;
 			if (level.isLoaded(at) && !level.getBlockState(at).canBeReplaced()) {
 				return MachineStatus.at(MachineLifecycle.UNFORMED, MachineStatus.Reason.CLEARANCE_BLOCKED, cell);
 			}
@@ -361,7 +529,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 
 	/** Starts what batches it can, pays and advances the running ones, and says what the machine is doing. */
 	private MachineStatus work(MinecraftServer server, long now) {
-		List<FluidRecipes.Entry> runs = recipes(server);
+		List<FluidRecipes.Entry> runs = allowedRecipes(server);
 		MachineStatus blocked = null;
 		for (int lane = 0; lane < lanes.length; lane++) {
 			if (lanes[lane] == null) {
@@ -380,11 +548,15 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		WorkLane firstPaid = null;
 		boolean starved = false;
 		MachineStatus stuck = null;
+		int eligible = 0;
+		boolean requested = companionJobs.length > 0 && companionRequested(now);
 		for (int index = 0; index < lanes.length; index++) {
 			WorkLane lane = lanes[index];
 			if (lane == null) {
 				continue;
 			}
+			lanePrice = form.profile().lanePerTick(upgrades.use(lane.energyPerTick() > 0
+					? lane.energyPerTick() : form.family().usePerTick));
 			int required = upgrades.ticks(lane.duration());
 			if (lane.progress() < required) {
 				if (lane.tool() >= 0 && !form.sockets().get(lane.tool()).accepts(items.get(form.firstSocketSlot() + lane.tool()))) {
@@ -397,13 +569,19 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				}
 				energy.setAmount(energy.getAmount() - lanePrice);
 				lane.advance(1);
+				if (requested && lane.progress() < required && resultSpace(lane) == null) eligible |= 1 << index;
 				lastWorked = now;
 				if (firstPaid == null) {
 					firstPaid = lane;
 				}
 				setChanged();
 			}
-			if (lane.progress() >= required) {
+		}
+		if (companionJobs.length > 0) assist(now, eligible);
+		for (int index = 0; index < lanes.length; index++) {
+			WorkLane lane = lanes[index];
+			if (lane == null) continue;
+			if (lane.progress() >= upgrades.ticks(lane.duration())) {
 				MachineStatus failure = finish(lane);
 				if (failure == null) {
 					lanes[index] = null;
@@ -502,12 +680,20 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 */
 	private Start start(List<FluidRecipes.Entry> runs, long now) {
 		List<ItemStack> inputs = items.subList(0, form.itemInputs());
-		if (inputsEmpty()) {
+		if (recipeLock != null && runs.isEmpty()) {
+			return new Start(null, MachineStatus.of(MachineLifecycle.WAITING_INPUT, MachineStatus.Reason.RECIPE_UNAVAILABLE));
+		}
+		if (recipeLock == null && inputsEmpty()) {
 			return new Start(null, MachineStatus.IDLE);
 		}
 		MachineStatus first = null;
 		for (FluidRecipes.Entry entry : runs) {
 			FluidRecipe recipe = entry.recipe();
+			// Shared process families must not ignore another job's leftover liquid.
+			// Leave original single-capability machinery and already escrowed batches unchanged.
+			if ((recipeLock != null || form.capabilities().size() > 1) && !consistent(recipe, inputs)) {
+				continue;
+			}
 			if (!recipe.itemsMatch(inputs) || !recipe.fluidsMatch(tanks)) {
 				continue;
 			}
@@ -595,7 +781,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				return MachineStatus.fluid(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_OTHER_FLUID, inputs + out, reserved, 0);
 			}
 			int need = fluidNeeds.merge(out, result.amount(), Integer::sum);
-			if (!vents(out) && tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
+			if (!vents(out) && !mayDrain(out, result.fluid(), drainWater) && tank.millibuckets() + reservedMb(out) + need > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + out);
 			}
 		}
@@ -634,7 +820,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		for (WorkLane lane : lanes) {
 			if (lane != null) {
 				for (WorkLane.FluidPart part : lane.fluidResults()) {
-					if (part.tank() == out) {
+					if (part.tank() == out && !mayDrain(out, part.fluid().getFluid(), lane.drainWater())) {
 						total += part.mb();
 					}
 				}
@@ -682,18 +868,17 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			fluidResults.add(new WorkLane.FluidPart(recipe.resultTank(i), FluidVariant.of(result.fluid()), result.amount()));
 		}
 		boolean cold = now - lastWorked > Math.max(1, form.warmupTicks());
-		return new WorkLane(id, taken, drained, itemResults, fluidResults, recipe.time(), tool, cold, 0);
+		return new WorkLane(id, taken, drained, itemResults, fluidResults, recipe.time(), tool, cold, 0, recipe.energyPerTick(), drainWater, recipe.emissions());
 	}
 
-	/** Moves a finished batch's results out of the lane, all or nothing; null when done, else what blocks it. */
-	private @Nullable MachineStatus finish(WorkLane lane) {
+	/** Native output preflight, shared by completion and the paid assistance hook. */
+	private @Nullable MachineStatus resultSpace(WorkLane lane) {
 		int inputs = form.tanks().inputTanks().size();
 		Map<Integer, Integer> fluidOut = new HashMap<>();
 		for (WorkLane.FluidPart part : lane.fluidResults()) {
 			FluidTank tank = tanks.output(part.tank());
 			int total = fluidOut.merge(part.tank(), part.mb(), Integer::sum);
-			if (!tank.variant.isBlank() && !tank.variant.equals(part.fluid())
-					|| !vents(part.tank()) && tank.millibuckets() + total > tank.capacityMb()) {
+			if (!tank.variant.isBlank() && !tank.variant.equals(part.fluid()) || !vents(part.tank()) && !mayDrain(part.tank(), part.fluid().getFluid(), lane.drainWater()) && tank.millibuckets() + total > tank.capacityMb()) {
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_FULL, inputs + part.tank());
 			}
 		}
@@ -704,14 +889,27 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				return MachineStatus.at(MachineLifecycle.OUTPUT_BLOCKED, MachineStatus.Reason.OUTPUT_SLOT_FULL, part.slot());
 			}
 		}
+		return null;
+	}
+
+	/** Moves a finished batch's results out of the lane, all or nothing. */
+	private @Nullable MachineStatus finish(WorkLane lane) {
+		MachineStatus failure = resultSpace(lane);
+		if (failure != null) return failure;
 		for (WorkLane.FluidPart part : lane.fluidResults()) {
 			FluidTank tank = tanks.output(part.tank());
 			if (tank.variant.isBlank()) {
 				tank.variant = part.fluid();
 			}
-			// A vented tank keeps what fits; the rest is released.
-			tank.amount = Math.min(tank.amount + (long) part.mb() * FluidNetworks.DROPLETS_PER_MB,
-					vents(part.tank()) ? (long) tank.capacityMb() * FluidNetworks.DROPLETS_PER_MB : Long.MAX_VALUE);
+			int retained = vents(part.tank())
+					? Math.min(part.mb(), Math.max(0, tank.capacityMb() - tank.millibuckets()))
+					: mayDrain(part.tank(), part.fluid().getFluid(), lane.drainWater())
+					? Math.min(part.mb(), Math.max(0, tank.capacityMb() - tank.millibuckets() - reservedMb(part.tank()))) : part.mb();
+			drainedWater += Math.min(Long.MAX_VALUE - drainedWater, part.mb() - retained);
+			if (form.ventGas() != null || form.vents(part.tank())) {
+				processEmissions = Math.min(0xFFFF_FFFFL, processEmissions + part.mb() - retained);
+			}
+			tank.amount += (long) retained * FluidNetworks.DROPLETS_PER_MB;
 		}
 		for (WorkLane.ItemPart part : lane.itemResults()) {
 			ItemStack held = items.get(part.slot());
@@ -721,6 +919,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				held.grow(part.stack().getCount());
 			}
 		}
+		processEmissions = Math.min(0xFFFF_FFFFL, processEmissions + lane.emissions());
 		setChanged();
 		return null;
 	}
@@ -798,7 +997,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				}
 			}
 		}
-		return MachineStatus.of(MachineLifecycle.WAITING_INPUT, MachineStatus.Reason.NONE);
+		return MachineStatus.of(MachineLifecycle.WAITING_INPUT,
+				best == null && form.capabilities().size() > 1 ? MachineStatus.Reason.MIXED_INPUTS : MachineStatus.Reason.NONE);
 	}
 
 	/** Whether everything in the input slots and tanks belongs where {@code recipe} would use it. */
@@ -884,6 +1084,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	/** Pauses or resumes the machine (running batches keep their escrow and progress). */
 	public void togglePause() {
 		paused = !paused;
+		resetCompanionEffort();
+		local.peepo.CompanionReadiness.invalidate(this);
 		setChanged();
 	}
 
@@ -892,6 +1094,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 * (all of a batch's, or none of them). Energy already spent is not returned. Returns {lanes cancelled, lanes kept}.
 	 */
 	public int[] cancel() {
+		resetCompanionEffort();
 		int cancelled = 0;
 		int kept = 0;
 		for (int index = lanes.length - 1; index >= 0; index--) {
@@ -958,6 +1161,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	public boolean clickButton(ServerPlayer player, int button) {
 		if (button == BUTTON_PAUSE) {
 			togglePause();
+			return true;
+		}
+		if (button == BUTTON_DRAIN && form.waterDrainOutput() >= 0) {
+			toggleWaterDrain();
 			return true;
 		}
 		if (button == BUTTON_CANCEL) {
@@ -1068,7 +1275,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 */
 	public boolean canPlaceItem(int slot, ItemStack stack) {
 		if (slot < form.firstOutputSlot()) {
-			return !(level instanceof ServerLevel server) || usesItem(recipes(server.getServer()), slot, stack);
+			return !(level instanceof ServerLevel server) || usesItem(allowedRecipes(server.getServer()), slot, stack);
 		}
 		if (slot < form.firstSocketSlot()) {
 			return false;
@@ -1086,8 +1293,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 
 	/** The client builds the screen's layout from the form, found by its id. */
 	@Override
-	public Identifier getScreenOpeningData(ServerPlayer player) {
-		return form.id();
+	public FormRecipeCatalog getScreenOpeningData(ServerPlayer player) {
+		return new FormRecipeCatalog(form.id(), form.generator() ? List.of() : recipes(player.level().getServer()));
 	}
 
 	/** Breaking the machine drops its slots and every lane's untransformed inputs, once each. */
@@ -1114,11 +1321,32 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
+		resetCompanionEffort();
+		companionStructureLoaded = false;
+		nextCheck = 0;
 		items.clear();
 		ContainerHelper.loadAllItems(input, items);
+		// The separate owner preview omitted one solid slot on these shared IDs.
+		// Detect that layout by its old tank keys or an upgrade in the now-solid slot;
+		// shift only once, preserving main's existing inventories and saved work.
+		int previewUpgradeStart = switch (form.id().getPath()) {
+			case "coal_gasifier", "anaerobic_digester" -> 1;
+			case "industrial_fermenter" -> 0;
+			default -> -1;
+		};
+		if (previewUpgradeStart >= 0 && input.getIntOr("inventory_layout", 0) < 2
+				&& (form.roleAliases().keySet().stream().anyMatch(role -> input.child("tank_" + role).isPresent())
+				|| MachineUpgrades.isUpgrade(items.get(previewUpgradeStart)))) {
+			for (int slot = items.size() - 1; slot > previewUpgradeStart; slot--) items.set(slot, items.get(slot - 1));
+			items.set(previewUpgradeStart, ItemStack.EMPTY);
+		}
 		energy.setAmount(input.getLongOr("energy", 0L));
 		paused = input.getBooleanOr("paused", false);
 		holdVented = input.getBooleanOr("hold_vented", false);
+		recipeLock = input.read("recipe_lock", Identifier.CODEC).orElse(null);
+		drainWater = input.getBooleanOr("drain_water", true);
+		drainedWater = Math.max(0, input.getLongOr("drained_water", 0));
+		processEmissions = Math.clamp(input.getLongOr("process_emissions", 0), 0, 0xFFFF_FFFFL);
 		burn = Math.max(0, input.getLongOr("burn", 0L));
 		burnRate = Math.max(0, input.getIntOr("burn_rate", 0));
 		List<String> roles = form.tankRoles();
@@ -1146,10 +1374,15 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		ContainerHelper.saveAllItems(output, items);
+		output.putInt("inventory_layout", 2);
 		output.putInt("form_version", form.version());
 		output.putLong("energy", energy.getAmount());
 		output.putBoolean("paused", paused);
 		output.putBoolean("hold_vented", holdVented);
+		if (recipeLock != null) output.store("recipe_lock", Identifier.CODEC, recipeLock);
+		output.putBoolean("drain_water", drainWater);
+		output.putLong("drained_water", drainedWater);
+		output.putLong("process_emissions", processEmissions);
 		if (burn > 0) {
 			output.putLong("burn", burn);
 			output.putInt("burn_rate", burnRate);
