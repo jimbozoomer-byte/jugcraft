@@ -154,7 +154,16 @@ After the merge:
 - the generation, `check_mod_data.py` (**PASS**), `check_repository.py` (**PASS**) and the unit tests (**OK**, 34) were run again;
 - the Java syntax parse of the client and game-test sources found 0 errors.
 
-CI on the merge: pending.
+CI on the merge, 27a1c01fc ([run](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38512640407)), all **passed**:
+- `mod` and `optional integrations absent`;
+- the five client shards, which now include #358's form tests: StarterChemistry, Fluorochemistry, MachineConsolidation (which clicks Recipes, then Lock recipe, Automatic and Back to machine), Biorefinery, CoastalMetals, Anaerobic and Polymer;
+- `repository`.
+
+Its screenshots, checked by eye:
+- The help box fills the strip under the status pane on every look, and the buttons sit in its top.
+- The sides key shows all four entries inside the box.
+- The battery box shows its charge gauge and percentage.
+- On the Chemical Infuser, the drain droplet is lit as the fourth button. The coal gasifier shows EMITTED. The Recipes button sits on every processor form.
 
 Not run:
 - a human trying every machine's screen;
