@@ -10,6 +10,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -194,7 +195,9 @@ public final class CydonianSanctum {
 			return false;
 		}
 		player.push(0.0, VENT_LIFT, VENT_PUSH);
-		player.hurtMarked = true;
+		if (player instanceof ServerPlayer serverPlayer) {
+			serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
+		}
 		return true;
 	}
 
