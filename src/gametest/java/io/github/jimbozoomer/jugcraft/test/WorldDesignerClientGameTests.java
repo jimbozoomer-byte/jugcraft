@@ -153,6 +153,13 @@ public class WorldDesignerClientGameTests implements FabricClientGameTest {
                 home.set(player.position());
                 overworld.setBlockAndUpdate(snow, Blocks.SNOW_BLOCK.defaultBlockState());
                 player.teleportTo(overworld, snow.getX() + 0.5, snow.getY() + 1, snow.getZ() + 0.5, Set.of(), 180.0F, 0.0F, true);
+            });
+            // Placing the snow loads its chunk but only queues its entities' promotion to visible; ticks run it, so the whirl
+            // the horn adds there is found (as the Nether half waits before pressing the seal).
+            context.waitTicks(20);
+            server.runOnServer(minecraft -> {
+                ServerPlayer player = minecraft.getPlayerList().getPlayers().getFirst();
+                ServerLevel overworld = minecraft.overworld();
                 player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftLairs.FROST_HORN));
                 stood.set(player.position());
                 FrostHornRite.Call call = FrostHornRite.blow(overworld, player, player.getMainHandItem(), true);
