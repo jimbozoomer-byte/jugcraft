@@ -1,6 +1,6 @@
 # Ruthenium catalyst bed: faster methanation from nickel ore's ruthenium
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on [factory payoffs](industrial-factory-payoffs.md) and the branches below it, down to [methane power](industrial-methane-power.md).
 
 Proposal issue: none. TODO item: "optional later ruthenium improvement" of the methanation recipes.
@@ -98,7 +98,8 @@ For CI, server game tests:
 
 ### Results
 
-Not yet run in CI.
+- Earlier runs ([38468994620](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38468994620), [38471427250](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38471427250)) failed only on the Combined Cycle Power Plant underneath (its 7-block width, then its client test's full store), fixed in [factory payoffs](industrial-factory-payoffs.md).
+- **Run [38494565308](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38494565308) (commit 0f0b1d33) passed:** the build, the data checks, every server game test (this change's included) with and without optional integrations, and all five client test shards.
 
 No survival playtest, two-client test or performance measurement has been done.
 
