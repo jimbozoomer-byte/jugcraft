@@ -83,12 +83,13 @@ public class YetiWhelpEntity extends Monster implements GeoEntity {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!(level() instanceof ServerLevel level) || tickCount % 20 != 0) {
+		if (!(level() instanceof ServerLevel level)) {
 			return;
 		}
-		boolean serving = king != null && level.getEntity(king) instanceof YetiKingEntity found && found.isAlive()
-				&& found.phase() != YetiKingEntity.Phase.WAITING;
-		if (!serving) {
+		// Gone at once when its king is gone or no longer counts it his (loaded again after an unload); once a second
+		// when he is back on his throne.
+		YetiKingEntity found = YetiKingEntity.owning(level, king, getUUID());
+		if (found == null || tickCount % 20 == 0 && found.phase() == YetiKingEntity.Phase.WAITING) {
 			flee(level);
 		}
 	}

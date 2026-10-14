@@ -1703,6 +1703,52 @@ public class YetiKingGameTests {
 	}
 
 	/**
+	 * Loaded again while his whelps and his ice stay where they were, in chunks that did not unload (his chunk's unload
+	 * alone, emulated as in loadedAgainMidFightHeDriftsHisSnowBackAndBringsNoKin): he counts none of them his, so each is
+	 * gone on its next tick instead of serving him again. Before, an icicle or a block of ice found him again by his UUID
+	 * and fell or flew on, a spike stood out its time and a whelp served on; YetiKingClientGameTests found ice so after a
+	 * real unload.
+	 */
+	@GameTest(structure = HALL, padding = 8, maxTicks = 100)
+	public void loadedAgainHeCountsNoKinOrIceFromBefore(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		YetiKingEntity king = waiting(helper, origin);
+		dens(level, origin);
+		ServerPlayer foe = shielded(helper, king, 0.5, 6.0);
+		hunting(helper, king, () -> {
+			king.callKin(level, YetiKingEntity.KIN);
+			Vec3 centre = king.centre();
+			GlacialSpikeEntity spike = GlacialSpikeEntity.burst(level, king, new Vec3(centre.x + 6.0, king.floorY(), centre.z - 6.0));
+			FallingIcicleEntity icicle = FallingIcicleEntity.drop(level, king, new Vec3(centre.x - 6.0, king.floorY(), centre.z - 6.0));
+			HurledBoulderEntity boulder = HurledBoulderEntity.hurl(level, king, foe);   // some 8 ticks of flight
+			List<YetiWhelpEntity> kin = level.getEntitiesOfClass(YetiWhelpEntity.class, arena(origin));
+			TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+			boolean written = king.save(out);
+			king.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);   // his chunk alone; the rest stay loaded
+			YetiKingEntity loaded = new YetiKingEntity(JugcraftYeti.YETI_KING, level);
+			loaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
+			boolean added = written && level.addFreshEntity(loaded);
+			helper.runAfterDelay(2, () -> {
+				try {
+					ending(level, loaded, () -> {
+						helper.assertTrue(added, "He was not loaded again");
+						helper.assertTrue(kin.size() == YetiKingEntity.KIN, kin.size() + " whelps were out as he unloaded");
+						helper.assertTrue(kin.stream().allMatch(Entity::isRemoved) && loaded.whelps().isEmpty(),
+								"A whelp from before he unloaded served him again");
+						helper.assertTrue(spike.isRemoved() && icicle.isRemoved() && boulder.isRemoved(), "His ice from before he unloaded went on: spike "
+								+ !spike.isRemoved() + ", icicle " + !icicle.isRemoved() + ", block of ice " + !boulder.isRemoved());
+					});
+				} finally {
+					kin.forEach(Entity::discard);
+					foe.discard();
+				}
+				helper.succeed();
+			});
+		});
+	}
+
+	/**
 	 * Against his frost: wool (knitwear) and leather stop the freeze's damage (vanilla's canFreeze) but not his frost (chill
 	 * ignores worn gear) nor its slowness, which they share with bare skin and thaw alike; only the Yeti Mitten stops both.
 	 */

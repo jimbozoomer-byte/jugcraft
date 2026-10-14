@@ -58,7 +58,7 @@ He keeps his Maul Swipe, Boulder Throw, Ground Slam and Avalanche Charge, stops 
 | Glacial Spikes | He raises a fist high while cracks race across the ice towards his foe (0.8 s) | He drives it into the ice: a spike bursts up each tick along the line, 12 blocks: 10 damage and thrown up. Each stands a second, then crumbles |
 | Kin Call | He beats his chest and calls (1 s) | Two Yeti Whelps climb out of the dens; at most four at a time |
 
-**Yeti Whelps:** round white cubs with big glacier eyes and a tuft of blue frost, 16 health, their blows 3 damage, quick. They go for the nearest player, never freeze, drop nothing, give no experience and are never saved. They flee into the snow when he falls, resets or is gone. Whoever hurts one, or whose tamed creature does, has taken part in his fight.
+**Yeti Whelps:** round white cubs with big glacier eyes and a tuft of blue frost, 16 health, their blows 3 damage, quick. They go for the nearest player, never freeze, drop nothing, give no experience and are never saved. They flee into the snow when he falls, resets or is gone, or no longer counts them his (loaded again after an unload). Whoever hurts one, or whose tamed creature does, has taken part in his fight.
 
 ### The Fury of the Peaks (below a fifth)
 
@@ -158,7 +158,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 ## Multiplayer and persistence
 
 - **Server authority:** the server decides everything: waking, targets, every attack's hits, the bared snow and its drifting back, the phases, his kin, the frost and the mitten's warmth, the loot and the advancement. Clients only draw what his synced state says (his action and whether he is furious) and play the matching animations.
-- **What is saved:** he is saved with his instance's chunks. His phase, his fury and the cells of his lake he has bared are saved, and a passing moment (waking, his roar) resumes as the phase it leads to. When he is loaded, the snow drifts back over what he had bared. His whelps, blocks of ice, icicles and spikes are never saved. Instances close on a restart (part 1), and he goes with his.
+- **What is saved:** he is saved with his instance's chunks. His phase, his fury and the cells of his lake he has bared are saved, and a passing moment (waking, his roar) resumes as the phase it leads to. When he is loaded, the snow drifts back over what he had bared. His whelps, blocks of ice, icicles and spikes are never saved, and each lasts only while he counts it his (`YetiKingEntity.owning`); his count is not saved either, so loaded again after an unload mid-fight he counts none from before, and any left in chunks that stopped without unloading are gone on their next tick instead of falling, flying or serving on. Instances close on a restart (part 1), and he goes with his.
 - **The snow:** a bared patch is set back to drift snow cell by cell, and only where it is still glare ice.
 - **Chunks:** nothing is force-loaded. His arena stays loaded while players stand in the hall.
 - **The mitten** is looked at once a tick for each player; nothing about it is stored.

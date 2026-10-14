@@ -787,7 +787,7 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 					}
 				} else if (t == current.windup) {
 					setAction(Action.THROW);
-					things.add(HurledBoulderEntity.hurl(level, this, target).getUUID());
+					HurledBoulderEntity.hurl(level, this, target);
 				}
 			}
 			case GROUND_SLAM -> groundSlam(level, t);
@@ -1124,7 +1124,7 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 		}
 		for (int i = 0; i < icicles.size(); i++) {
 			if (t == i * fall.active / icicles.size()) {
-				things.add(FallingIcicleEntity.drop(level, this, icicles.get(i)).getUUID());
+				FallingIcicleEntity.drop(level, this, icicles.get(i));
 			}
 		}
 	}
@@ -1152,7 +1152,7 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 			return;
 		}
 		if (t < spikes.size()) {
-			things.add(GlacialSpikeEntity.burst(level, this, spikes.get(t)).getUUID());
+			GlacialSpikeEntity.burst(level, this, spikes.get(t));
 		}
 	}
 
@@ -1320,6 +1320,21 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 
 	public List<UUID> whelps() {
 		return List.copyOf(whelps);
+	}
+
+	/** Counts a block of ice, an icicle or a spike as his, gone with him: each one's own factory calls this as it is made. */
+	void keep(Entity thing) {
+		things.add(thing.getUUID());
+	}
+
+	/**
+	 * The living king {@code owner} names, if he counts {@code id} among his whelps and things; else null. None of them is
+	 * saved, nor is his count of them, so a king loaded again after an unload mid-fight counts none from before: a whelp or
+	 * a block of ice left in a chunk that stopped without unloading is gone on its next tick instead of serving him again.
+	 */
+	public static @Nullable YetiKingEntity owning(ServerLevel level, @Nullable UUID owner, UUID id) {
+		return owner != null && level.getEntity(owner) instanceof YetiKingEntity king && king.isAlive()
+				&& (king.whelps.contains(id) || king.things.contains(id)) ? king : null;
 	}
 
 	/** Forgets what is gone. */
