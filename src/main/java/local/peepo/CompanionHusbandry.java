@@ -21,8 +21,9 @@ import net.minecraft.world.phys.Vec3;
 /** Explicit species rules; planning is cached, population-changing actions re-count under the shared budget. */
 final class CompanionHusbandry {
     static final int CENSUS_LIMIT=256;
-    /** Vanilla's breed goal looks for a partner within 8 blocks: a fed pair must stand well inside that, or its food is wasted. */
-    static final double PARTNER_RANGE=6;
+    /** Vanilla's breed goal looks for a partner within 8 blocks. Both animals are held still until both are fed, so they look
+     *  from where they were fed: a pair farther apart would waste its food. */
+    static final double PARTNER_RANGE=8;
     final PeepoEntity npc;
     final CompanionAssignments.Target target;
     final Job breed=new Job(false),slaughter=new Job(true);
