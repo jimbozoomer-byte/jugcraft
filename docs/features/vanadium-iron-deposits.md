@@ -1,6 +1,6 @@
 # Regional vanadium-bearing iron deposits
 
-Status: implementation in progress, 14 October 2026. Public branch `speedygroyper:codex/vanadium-iron-deposits`. The owner approved this scope and requested tests and an inspection world. Actual implementation tool: OpenAI Codex (GPT-6).
+Status: implemented for owner inspection, 14 October 2026. Human visual acceptance is pending. Public branch `speedygroyper:codex/vanadium-iron-deposits`. The owner approved this scope and requested tests and an inspection world. Actual implementation tool: OpenAI Codex (GPT-6).
 
 ## Approved scope
 
@@ -21,9 +21,41 @@ This is an iron-tool mining and workshop processing route into the steel-era aci
 
 `vanadium.enabled=false` stops new ore decoration and new mined-feed processing after restart while retaining registered ore, raw stock and saved content. Existing concentrate extraction remains usable. The legacy recipe option is a server startup setting, not a per-player unlock.
 
-## Validation planned
+## Automated validation
 
-Verify ordinary/Silk Touch/Fortune drops, raw compaction, both ore forms and raw feed through the powered Crusher, water/energy-paid washing and catalyst crafting, exact biome policy, survey and drill depletion, blocked-output behavior, config fallback, and saved content. Sample at least two normal seeds and a Designed world, including the richer districts, excluded biomes, cave biomes, volcano outcrop exclusion and existing fluorite/spodumene behavior. Run applicable server/client, data, repository and packaging checks; export a naturally generated world with a matching build. Report measured yields and unperformed checks honestly. Human visual acceptance remains pending.
+- Full Gradle build: all **1,647 required server game tests passed**, including mining tier, fixed ordinary/Fortune drops, Silk Touch, reversible storage, exact biome tags, survey and finite drill extraction. Actual powered Crushers handled all three feeds at one concentrate each, paid 3,200 JE, retained feed while full/unpowered, resumed once after clearing output, and did not multiply yield with speed upgrades. The Ore Washer paid 500 mB water and 3,200 JE for one oxide; the oxide crafted the existing bed with two bricks. The bulk concentrate/lye route also passed its machine test.
+- `VanadiumIronClientGameTests`: passed with the complete integration set and again with `-PjugcraftOptionalIntegrations=false`. Two normal seeds, both Designed biome groups over Lush Caves, save/reopen persistence, and controlled outcrop fixtures were exercised. Volcano rejected even a forced outcrop attempt on otherwise suitable artificial ground while retaining its underground pocket. Air, water, roofs, obstructions and hollow foundations produced no outcrop; snow and gentle slopes retained stone-supported, exposed ore.
+- Existing `FluoriteClientGameTests` and `SpodumeneClientGameTests` completed their generation, outcrop and persistence checks. The first vanadium inspection search then stopped because a seven-chunk Shield patch naturally contained no pocket. The harness now searches up to eight distinct regions; production rarity and placement rules were not changed. The subsequent vanadium runs passed.
+- Disabled acquisition, with optional integrations and custom biome placement off: no vanadium decoration, compaction or mined-feed Crusher recipes; existing concentrate washing and both ordinary-iron fallback recipes remained available. Both saved ore forms and seven raw items survived reopening.
+- Explicit `vanadium.legacy_iron_recipes=true`: passed with optional integrations absent; both ordinary-iron shortcuts loaded while mined-feed processing and existing concentrate washing remained available.
+- Data audit: **2,652 material IDs**, data and recipes passed. Icon-map lint passed with 27 existing warnings; repository/link check passed. All **34 Python script tests** passed. The pack lock and all **18 dependency hashes** passed verification.
+
+Representative final client samples (bounded surveyed areas, not guaranteed deposit counts):
+
+| Terrain / seed | Surveyed chunks | Eligible center columns | Underground ore blocks | Surface ore blocks |
+| --- | ---: | ---: | ---: | ---: |
+| Designed Windswept Hills over Lush Caves | 144 | 144 | 944 | 0 |
+| Designed Shield over Lush Caves | 144 | 144 | 3,635 | 12 |
+| Designed Volcano over Lush Caves | 64 | 64 | 1,297 | 0 |
+| Designed Desert | 64 | 0 | 0 | 0 |
+| Normal `jugcraft-vanadium_iron-1`, selected Windswept region | 256 | 63 | 421 | 5 |
+| Normal `jugcraft-vanadium_iron-2` | 256 | 10 | 472 | 0 |
+
+The first normal world's selected region had two connected 186-block pockets plus smaller fragments; the second had 109-, 168- and 195-block pockets. Every sampled underground and surface ore block survived reopening. Generation can cross a sampled chunk boundary; these are measured blocks in the sampled area, not a promise about every deposit.
+
+## Inspection delivery
+
+The local `vanadium-preview-2026-10-14` delivery contains the matching Modrinth pack, standalone world ZIP, JAR, tour, validation notes, screenshots/logs and SHA-256 checksums. Builds and worlds stay out of Git. The artifact README records the source commit.
+
+All ore in **Vanadium Field Trip** generated naturally on normal seed `jugcraft-vanadium_iron-1`, at the production rates. The lit cutaway removes surrounding rock from one pocket while retaining its ore. Creative mode, commands, a fixed clear noon, an iron pickaxe and a prospector support inspection.
+
+- Surface outcrop view: `/tp @s 3988 102 -37`.
+- Lit underground cutaway: `/tp @s 3982 -4 -60`.
+- Untouched 186-block pocket: `/gamemode spectator`, then `/tp @s 3901 -36 32`.
+
+Only development datapack selections and five unused test-only entries in Fabric's content-presence snapshot were removed from the exported save. A scan of **8,223 saved region records** and all other save files found no actual test content; the cleanup preserved every other NBT value and world file. The cleaned export then loaded successfully through ordinary `runClient`, with the complete integration set and without the test mod; the player joined at the surface tour start. The client remains open for inspection.
+
+Human visual acceptance, launcher UI import, a two-independent-client dedicated-server session and representative server load remain untested. No merge or server deployment is included.
 
 ## Art provenance
 

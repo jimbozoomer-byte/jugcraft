@@ -483,6 +483,48 @@
         {
           "in": [
             [
+              "jugcraft:vanadium_iron",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:vanadium_iron_concentrate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:vanadium_iron_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:vanadium_iron_concentrate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_vanadium_iron_ore",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:vanadium_iron_concentrate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "minecraft:sulfur",
               1
             ]
@@ -8039,6 +8081,30 @@
           ],
           "results": [],
           "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:vanadium_iron_concentrate",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:vanadium_pentoxide",
+              1
+            ]
+          ],
+          "ticks": 200,
           "tool": "",
           "energy_per_tick": 87
         },

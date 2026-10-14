@@ -37,6 +37,7 @@ public final class JugcraftMaterials {
 	public static MineralFamily MONAZITE;
 	public static MineralFamily FLUORITE;
 	public static MineralFamily SPODUMENE;
+	public static MineralFamily VANADIUM_IRON;
 
 	public static Block BAUXITE;
 	public static Block OIL_SAND;
@@ -80,6 +81,7 @@ public final class JugcraftMaterials {
 		MONAZITE = MineralFamily.register("monazite");
 		FLUORITE = MineralFamily.register("fluorite");
 		SPODUMENE = MineralFamily.register("spodumene");
+		VANADIUM_IRON = MineralFamily.register("vanadium_iron");
 
 		BAUXITE = JugcraftRegistry.block("bauxite", Blocks.GRANITE);
 		OIL_SAND = JugcraftRegistry.block("oil_sand", Blocks.SAND);
@@ -101,7 +103,7 @@ public final class JugcraftMaterials {
 
 	private static void registerCreativeTabs() {
 		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, THALLITE, BRONZE, ALUMINUM, BRASS, INVAR, SOLDER, STEEL};
-		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE, FLUORITE, SPODUMENE};
+		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE, FLUORITE, SPODUMENE, VANADIUM_IRON};
 
 		List<ItemLike> natural = new ArrayList<>();
 		List<ItemLike> ingredients = new ArrayList<>();

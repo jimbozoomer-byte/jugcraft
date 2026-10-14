@@ -13,6 +13,7 @@
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.FluoriteGameTests",
       "io.github.jimbozoomer.jugcraft.test.SpodumeneGameTests",
+      "io.github.jimbozoomer.jugcraft.test.VanadiumIronGameTests",
       "io.github.jimbozoomer.jugcraft.test.IndustrialFoundationGameTests",
       "io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorGameTests",
       "io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorGameTests",
@@ -216,6 +217,7 @@
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.FluoriteClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.SpodumeneClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.VanadiumIronClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.IndustrialFoundationClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ElectrolyticSeparatorClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorClientGameTests",

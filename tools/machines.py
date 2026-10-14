@@ -665,6 +665,12 @@ def _crusher():
             recipes.append({"input": ore, "output": f"minecraft:raw_{vanilla}", "count": ORE_PROCESSING_MULTIPLIER,
                             "ticks": 160, "features": [FEATURE], "ore": True})
     for mineral, info in MINERALS.items():
+        if mineral == "vanadium_iron":
+            # A finite vanadium feed: neither intact ore nor upgrade cards multiply its yield.
+            for feed in (mineral, f"{mineral}_ore", f"deepslate_{mineral}_ore"):
+                recipes.append({"input": f"jugcraft:{feed}", "output": "jugcraft:vanadium_iron_concentrate",
+                                "count": 1, "ticks": 200, "features": [FEATURE, info["feature"]]})
+            continue
         for ore in (f"jugcraft:{mineral}_ore", f"jugcraft:deepslate_{mineral}_ore"):
             recipes.append({"input": ore, "output": f"jugcraft:{mineral}", "count": info["drops"][1] + 1,
                             "ticks": 160, "features": [FEATURE, info["feature"]], "ore": True})
