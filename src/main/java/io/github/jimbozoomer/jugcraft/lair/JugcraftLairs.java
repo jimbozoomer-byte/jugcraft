@@ -23,10 +23,10 @@ import net.minecraft.world.level.material.PushReaction;
 
 /**
  * The lairs' registrations (docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
- * docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md): the lair-only blocks
- * (unbreakable, no items, no drops), the Mourning Wreath and the Death Knell of the Last Rites, the Cursed Spindle, the
- * Frost Horn, the Kiln Seal, the Hag Stone, the Writ of Exhumation, the Mist Gate, and the lairs' events, rules, rituals
- * and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
+ * docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md,
+ * docs/features/cydonian-sanctum.md): the lair-only blocks (unbreakable, no items, no drops), the Mourning Wreath and the
+ * Death Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Hag Stone, the Writ of
+ * Exhumation, the Altar Keystone, the Mist Gate, and the lairs' events, rules, rituals and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
  * ({@value #FEATURE}) stops the rituals.
  */
 public final class JugcraftLairs {
@@ -67,6 +67,11 @@ public final class JugcraftLairs {
 	public static Block GRAVE_SEAL;
 	public static Block ARCHIVE_LECTERN;
 	public static Block PHYLACTERY;
+	public static Block RED_MIST;
+	public static Block STAR_STONE;
+	public static Block STAR_DIAL;
+	public static Block STAR_DOOR;
+	public static Block DUST_VENT;
 	public static Block MOURNING_WREATH;
 	public static Item MOURNING_WREATH_ITEM;
 	public static Item DEATH_KNELL;
@@ -75,6 +80,7 @@ public final class JugcraftLairs {
 	public static Item KILN_SEAL;
 	public static Item HAG_STONE;
 	public static Item EXHUMATION_WRIT;
+	public static Item ALTAR_KEYSTONE;
 	public static EntityType<MistGateEntity> MIST_GATE;
 
 	private JugcraftLairs() {
@@ -125,6 +131,14 @@ public final class JugcraftLairs {
 				Fit.SEE_THROUGH);
 		PHYLACTERY = fixture("phylactery", p -> new PhylacteryBlock(p.lightLevel(PhylacteryBlock::light)), MapColor.GOLD,
 				SoundType.BONE_BLOCK, 0, Fit.SEE_THROUGH);
+		// The Cydonian Sanctum's (docs/features/cydonian-sanctum.md): its way home, its carved stones, its dials and door
+		// (the door's figures burn as the dials match them), and its dust vents.
+		RED_MIST = fixture("red_mist", LairExitBlock::new, MapColor.COLOR_RED, SoundType.WOOL, 6, Fit.PASSABLE);
+		STAR_STONE = fixture("star_stone", Block::new, MapColor.TERRACOTTA_RED, SoundType.STONE, 0, Fit.SOLID);
+		STAR_DIAL = fixture("star_dial", StarDialBlock::new, MapColor.TERRACOTTA_RED, SoundType.STONE, 0, Fit.SOLID);
+		STAR_DOOR = fixture("star_door", p -> new StarDoorBlock(p.lightLevel(StarDoorBlock::light)), MapColor.TERRACOTTA_RED,
+				SoundType.STONE, 0, Fit.SOLID);
+		DUST_VENT = fixture("dust_vent", Block::new, MapColor.TERRACOTTA_RED, SoundType.STONE, 0, Fit.SOLID);
 
 		ResourceKey<Block> wreathKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("mourning_wreath"));
 		MOURNING_WREATH = Registry.register(BuiltInRegistries.BLOCK, wreathKey, new MourningWreathBlock(BlockBehaviour.Properties.of()
@@ -147,6 +161,9 @@ public final class JugcraftLairs {
 		ResourceKey<Item> writKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("exhumation_writ"));
 		EXHUMATION_WRIT = Registry.register(BuiltInRegistries.ITEM, writKey, new ExhumationWritItem(new Item.Properties().stacksTo(16)
 				.setId(writKey)));
+		ResourceKey<Item> keystoneKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("altar_keystone"));
+		ALTAR_KEYSTONE = Registry.register(BuiltInRegistries.ITEM, keystoneKey, new AltarKeystoneItem(new Item.Properties()
+				.stacksTo(16).setId(keystoneKey)));
 
 		ResourceKey<EntityType<?>> gateKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("mist_gate"));
 		MIST_GATE = Registry.register(BuiltInRegistries.ENTITY_TYPE, gateKey, EntityType.Builder.<MistGateEntity>of(MistGateEntity::new,
@@ -158,6 +175,8 @@ public final class JugcraftLairs {
 		LairRules.register();
 		SpindleRite.register();
 		ExhumationRite.register();
+		AltarKeystoneRite.register();
+		CydonianSanctum.register();
 		LairCommands.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(DEATH_KNELL);
@@ -166,6 +185,7 @@ public final class JugcraftLairs {
 			output.accept(KILN_SEAL);
 			output.accept(HAG_STONE);
 			output.accept(EXHUMATION_WRIT);
+			output.accept(ALTAR_KEYSTONE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(MOURNING_WREATH_ITEM));
 	}

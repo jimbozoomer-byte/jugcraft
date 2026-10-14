@@ -34,6 +34,11 @@
     "jugcraft:name_stone",
     "jugcraft:grave_seal",
     "jugcraft:archive_lectern",
-    "jugcraft:phylactery"
+    "jugcraft:phylactery",
+    "jugcraft:red_mist",
+    "jugcraft:star_stone",
+    "jugcraft:star_dial",
+    "jugcraft:star_door",
+    "jugcraft:dust_vent"
   ]
 }

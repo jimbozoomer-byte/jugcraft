@@ -59,6 +59,11 @@ LAIR_BLOCKS = {
     "grave_seal": "Grave Seal",
     "archive_lectern": "Lectern of Last Names",
     "phylactery": "Phylactery",
+    "red_mist": "Red Mist",
+    "star_stone": "Star Stone",
+    "star_dial": "Star Dial",
+    "star_door": "Star Door",
+    "dust_vent": "Dust Vent",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
@@ -82,8 +87,10 @@ SLUICE = {"flood_ticks": 200, "refill_ticks": 400, "gate_blocks": 40, "trough_bl
 SLUICE_PARTS = ("frame", "panel", "wheel")
 SLUICE_FLOWS = ("ready", "open", "filling", "choked")   # choked: by the Cinder Tyrant's slag
 # Fixtures a player in a lair may use (everything else is refused): the exits, the braziers Vesperine's fight lights, the
-# Cinder Kiln's sluice gates, the Lantern Fen's lamps, and the Archive of Last Names' grave seals and lectern.
-FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp", "grave_seal", "archive_lectern")
+# Cinder Kiln's sluice gates, the Lantern Fen's lamps, the Archive of Last Names' grave seals and lectern, and the Cydonian
+# Sanctum's Red Mist and star dials.
+FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp", "grave_seal", "archive_lectern", "red_mist",
+            "star_dial")
 
 # The Last Rites (the Hollow Acre's ritual): a grave in the Overworld at night, lit candles round it, a Mourning Wreath
 # laid on it and the Death Knell rung beside it.
@@ -162,6 +169,21 @@ NAME_STONE = {"light": 9}
 PHYLACTERY = {"light": 10}
 LECTERN = {"cooldown": 20}     # ticks between readings of the lectern by one player
 
+# The Altar Keystone (the Cydonian Sanctum's rite, docs/features/cydonian-sanctum.md): set into the Ancient Altar of
+# Adam-ondi-Ahman (tools/adam_ondi_ahman.py) at night, in the Overworld. The three altars under it kindle with red fire
+# one after another, kindle_ticks apart, and a column of red light rises; then the red mist opens over the altar, the gate
+# for lairs.gate_seconds, and whoever set the keystone steps through onto Mars, if still within reach_blocks of it. The
+# keystone crumbles to dust. Not a Witching Season ritual: it works all year, at night, whatever lairs.off_season says.
+KEYSTONE = {
+    "cooldown": 40,            # ticks between settings of one keystone, answered or not
+    "mist_range": 3,           # how near another open mist (or a kindling) into the Sanctum must not be (blocks)
+    "kindle_ticks": 20,        # between one altar kindling and the next (three altars, then the mist)
+    "reach_blocks": 8,         # how near the altar the one who set the keystone must still be to be taken through
+}
+# The altars under the Ancient Altar, as tools/adam_ondi_ahman.py stacks them: each one's top, blocks under the Ancient
+# Altar, and its half-width; the lowest first, the order they kindle in.
+KEYSTONE_ALTARS = ((3, 5), (2, 3), (1, 1))
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
@@ -170,9 +192,12 @@ ITEMS = {
     "kiln_seal": "Kiln Seal",
     "hag_stone": "Hag Stone",
     "exhumation_writ": "Writ of Exhumation",
+    "altar_keystone": "Altar Keystone",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
+# Each recipe is named for its file; it makes its "result" (the recipe's own name if none), and loads only when the
+# lairs' switch and its "features" are on.
 RECIPES = {
     # Four mourning flowers round a vine.
     "mourning_wreath": {"pattern": [" F ", "FVF", " F "], "key": {"F": "#jugcraft:mourning_flowers", "V": "minecraft:vine"}},
@@ -200,6 +225,19 @@ RECIPES = {
     # sac. Used up by its serving.
     "exhumation_writ": {"pattern": ["PPP", "BEB", " I "], "key": {
         "P": "minecraft:paper", "B": "minecraft:bone", "E": "jugcraft:ectoplasm", "I": "minecraft:ink_sac"}},
+    # The Altar Keystone, two ways, so neither specialty is forced through the other. The factories': a wedge of chiseled
+    # stone bound in titanium and tungsten, a red star of redstone set in it and an advanced circuit to wake it. Used up
+    # by its setting.
+    "altar_keystone": {"pattern": ["TWT", "RSR", " C "], "key": {
+        "T": "jugcraft:titanium_ingot", "W": "jugcraft:tungsten_ingot", "R": "minecraft:redstone",
+        "S": "minecraft:chiseled_stone_bricks", "C": "jugcraft:advanced_circuit"},
+        "features": ["adam_ondi_ahman", "titanium", "tungsten", "machines"]},
+    # The Concordance's: the same stone set with dreamglass brought back from dreams (the Dreamwalkers' work) round a red
+    # star, and the Starwatchers' astrolabe to read the sky by.
+    "altar_keystone_from_dreamglass": {"pattern": ["DAD", "RSR", " D "], "key": {
+        "D": "jugcraft:dreamglass", "A": "jugcraft:astrolabe", "R": "minecraft:redstone",
+        "S": "minecraft:chiseled_stone_bricks"},
+        "result": "altar_keystone", "features": ["adam_ondi_ahman", "concordance"]},
 }
 
 # Each lair's dimension: a void with its own biome; fixed time, no weather, no beds or respawn anchors. Its sky, fog and
@@ -258,6 +296,15 @@ LAIRS = {
         "music": "minecraft:music.nether.soul_sand_valley",
         "ambient_light": 0.18,
         "motes": ("minecraft:white_ash", 0.004),
+    },
+    "cydonian_sanctum": {
+        "display": "The Cydonian Sanctum",
+        "enter": "The red mist takes you, and you step out onto Mars, into %s",
+        "sky": "#c9945a", "fog": "#b07548", "water_fog": "#5a3a28", "water": "#7a5238",
+        "ambient_light_color": "#a8603a", "sky_light_color": "#d89a62",
+        "music": "minecraft:music.overworld.badlands",
+        "ambient_light": 0.3,
+        "motes": ("minecraft:crimson_spore", 0.004),
     },
 }
 

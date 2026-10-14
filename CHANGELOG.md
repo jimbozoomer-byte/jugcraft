@@ -8,6 +8,10 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: The Cydonian Sanctum and the Altar Keystone (part 2 of the owner's Mars boss)
+- **The Altar Keystone,** made in the factories (titanium, tungsten, an advanced circuit) or by the Concordance (dreamglass and an astrolabe). Set into the Ancient Altar at night, the three altars kindle with red fire, a column of red light rises, and the **red mist** opens onto Mars for 60 seconds.
+- **The Cydonian Sanctum,** a lair on Mars under a butterscotch sky with two moons: thin air (Jump Boost I, half fall damage), a gate chamber with the Red Mist home, the **Dust Gallery** with dust vents that puff on a rhythm and three **star dials** that light the **Star Door**'s constellations and grind it open, and the crater where the Cydonian Sentinel will wait (part 3). Record: [cydonian-sanctum.md](docs/features/cydonian-sanctum.md).
+
 ### Added: Adam-ondi-Ahman, the valley and its altar (part 1 of the owner's Mars boss)
 - **A quiet valley near the start of every new world,** 800 to 1,600 blocks away: rolling prairie grass, wildflowers and goldenrod, lone oaks and birches, grazing animals and few monsters, with four seasons. **Rare valleys** grow elsewhere (`adam_ondi_ahman.spacing`, `adam_ondi_ahman.chance`). Modelled on the real Adam-ondi-Ahman in northern Missouri.
 - **A knoll of three stacked stone altars** at each valley's heart, with a path up it, the log footings of two cabins, a fallen chimney, a spring and a ring of gathering stones at its foot. On the top lies the **Ancient Altar**, carved with a red star: unbreakable, and dormant until part 2's Altar Keystone wakes it.
