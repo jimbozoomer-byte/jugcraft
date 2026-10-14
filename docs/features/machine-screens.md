@@ -117,12 +117,27 @@ Local, without Gradle or a game:
 - `python -m unittest discover -s scripts/tests`: **OK**.
 - A tree-sitter syntax parse of the five changed Java files: 0 errors. This is not a compile.
 
-CI: pending.
+CI on 5c0a70c09 ([run 38506018399](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38506018399)), all **passed**:
+- `mod`: the generated-JSON and material checks, then `./gradlew build` with the server game tests;
+- `optional integrations absent`: the same build and server tests without the optional integrations;
+- the five client shards, chosen by `tools/select_client_tests.py`:
+  - `JugcraftClientGameTests`;
+  - `JugcraftServerClientGameTests`;
+  - the client tests of all ten industrial forms, plus `IndustrialFoundationClientGameTests`;
+- `repository`: passed in its own workflow run.
+
+The first CI run on the merge with main (5dabac78e) failed to compile: the new sides-view step read `client.screen`, which 26.x does not have. 5c0a70c09 reads `client.gui.screen()`, like the other client tests.
+
+The CI screenshots, checked by eye:
+- each of the five looks;
+- the crusher's sides view, with its colour key;
+- the form screens, including the waiting, output-blocked and idle generator states.
+
+In every one, the status text, warnings, power rows and help text sit inside their panes. At the CI window size, the recipe viewer's item panel sits beside the screen without overlapping it.
 
 Not run:
 - a human trying every machine's screen;
-- other GUI scales;
-- recipe viewers' (JEI/EMI) placement beside the screen.
+- other GUI scales and window sizes.
 
 ## World and event applicability
 
