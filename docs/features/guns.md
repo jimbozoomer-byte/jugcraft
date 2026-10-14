@@ -1,7 +1,7 @@
 # Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C) and the frontier guns (slice 13A)
 
 Status:
-- **Slices 1 to 11B are in `main`:** the last of them, 10A to 11B, with #320 on 11 October 2026. The lines below say where each was built.
+- **Slices 1 to 12C are in `main`:** 10A to 11B with #320 on 11 October 2026; 12A to 12C with #352 on 13 October 2026, which closed their own pull requests (#332, #338 and #344). The lines below say where each was built.
 - **Slice 1** (the Rust Midge, Patchwork Carbine and Thunderpipe): implemented on `claude/guns` (#248), awaiting review. It is stacked on `claude/owner-gun-models` (#247), which adds the owner's gun models to the owner asset library.
 - **Slice 2** (the iron set: the Warden Pistol, Riveter SMG and Haymaker; [below](#slice-2-the-iron-set)): implemented on `claude/guns-iron` (#252), stacked on slice 1, awaiting review.
 - **Slice 3** (the lever set: the Longhorn Rifle, Drover Rifle and Coach Gun; [below](#slice-3-the-lever-set)): implemented on `claude/guns-lever` (#253), stacked on slice 2, awaiting review.
@@ -33,7 +33,7 @@ Status:
 - **Slice 12A** (the End guns: the Chitin SMG, Hermit Rifle and Borer; [below](#slice-12a-the-end-guns)): implemented on `claude/guns-12a`, off `main`, awaiting review.
 - **Slice 12B** (the copper guns: the Penny Pistol, Conductor Carbine and Magpie SMG; [below](#slice-12b-the-copper-guns)): implemented on `claude/guns-12b`, stacked on slice 12A, awaiting review.
 - **Slice 12C** (the lone guns: the Tuppence Pistol, Goshawk Revolver and Lament Rifle; [below](#slice-12c-the-lone-guns)): implemented on `claude/guns-12c`, stacked on slice 12B, awaiting review.
-- **Slice 13A** (the frontier guns: the Tabby Revolver, Lookout Rifle and Ammonite Carbine; [below](#slice-13a-the-frontier-guns)): implemented on `claude/guns-13a`, stacked on slice 12C, awaiting review.
+- **Slice 13A** (the frontier guns: the Tabby Revolver, Lookout Rifle and Ammonite Carbine; [below](#slice-13a-the-frontier-guns)): implemented on `claude/guns-13a`, built on slice 12C and brought onto `main` once 12C was in it, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -2132,6 +2132,11 @@ The reload times and the rates are the owner's animations': the Lookout Rifle's 
   - GeckoLib owns everything a gun does: the gun's parts and, in first person, the arms that hold it.
   - In third person (slice 6), `GunPose` raises the arms through the same two hooks that pose ArmsMotion's: `ArmsRenderStateMixin` and `ArmsHumanoidModelMixin`.
   - The off hand plays no part: guns fire from the main hand only.
+- **Casting (Concordance Chunk A, ticket A-07, 11 October 2026):** a gun in the main hand owns the player's arms, so no cast's pose plays over the gun or its reload.
+  - A cast and a reload cannot begin together: a cast needs a wand in the main hand, and a reload stops when the gun leaves it.
+  - What could outlast a switch from the wand was Spell Engine's release clip (up to 14 ticks) or its fade of an ended cast. Player Animation Library lays those over the arms after `GunPose`, and in first person (Spell Engine's default) hides the gun as the game draws it while they play.
+  - `client/CastPoses` stops those clips, and the Vigil's offering gesture, on any player holding a gun. It runs at the end of each client tick, in first and third person, for every player the client sees. No mixin. `CircleClient` keeps the circle's gesture off such a player itself, by asking `CastPoses.gesturesYield`.
+  - [The Concordance presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07) has the details and the test (`ConcordanceJourneyClientGameTests.aCastGivesWayToAGunOrAnArm`, not yet run).
 - **Particles:** the casings are registered as the Fog Machine's fog is (`FabricParticleTypes.simple()`, a provider on the client), and so is the Laser Sight's dot (slice 9E), which shows whatever the particle setting (`simple(true)`).
 
 ## How the owner's models became GeckoLib models
