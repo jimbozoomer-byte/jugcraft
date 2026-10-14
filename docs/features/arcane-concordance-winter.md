@@ -4,7 +4,9 @@ Status: implemented for Concordance Chunk B, unit 4 (tickets B-08 and B-10 of [t
 on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb` (#352) with the contract, unit 1 and
 [unit 3](arcane-concordance-rime-strata.md) beneath it; not merged. CI run 38549876709 on `b012875ab` (units 1 to 4)
 built it and passed every job: its server game tests among the 1676 required, with and without the optional
-integrations, and its client game test. Not played by hand or with two clients; see each part's Verification and
+integrations, and its client game test. Unit 5 renamed the Frost boon's key to the elective the Yeti King's column
+shares (B-P56), made the bangle's Brace count against his push, and gave the client test its slots shot and its toasts
+cleared; those changes have not yet run in CI. Not played by hand or with two clients; see each part's Verification and
 [Checks run for the unit](#checks-run-for-the-unit).
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B") and the same day answered
 B-D2 ("Use your water sets as Rime") and B-D3 ("A timed brew"), from
@@ -17,7 +19,7 @@ Primary specialty and supported player role: the Alembists (the winter workshop)
 anyone who travels in the cold or fights the Yeti King.
 
 Three parts: Winter Brine and Frostward (B-08); the Rimekeeper's travel kit (B-10); Thallite and the trophies, linked
-with no number changed (B-10). Their decisions are B-P40 to B-P53, all Proposed
+with no number changed (B-10). Their decisions are B-P40 to B-P53, all Proposed, B-P53 refined by unit 5's B-P56
 ([the contract's decisions](concordance-chunk-b.md#decisions)).
 
 ## 1. Winter Brine and Frostward (B-08)
@@ -282,7 +284,9 @@ fire resistant:
   ingots.
 - **The bangle** gives at most 5 seconds of Brace in every 35 (30 with none, then 5), half the knockback of one blow or
   push, no Focus. Its recipe is 4 gold ingots, a snow block and an amethyst shard. Against the Yeti King's own push it
-  does nothing yet: his scripted push ignores knockback resistance until B-09 makes it ask `Brace.spend`.
+  did nothing in unit 4: his scripted push ignored knockback resistance. Since unit 5 (B-09) his every push asks
+  `Brace.spend`, so the bangle's Brace halves one of his pushes (`aBracedPlayerIsPushedHalfAsFarOnce`) and, being
+  nobody's cast, credits no one (`aBraceOnAFriendIsTheCastersDeed`); neither yet run in CI.
 - **No conversion loops:** no recipe makes a material, and nothing turns back into its inputs.
 
 ### The kit against the Yeti King's frost
@@ -448,9 +452,11 @@ Implemented with Claude Code (Claude Opus 5.5).
 
 - **A Frost boon slow is elective cold work.** A Rimekeeper (Rimekeeping understood) whose Frost boon arm slows a
   hostile creature at normal tolerance does one kind of cold work, counted once: it can stand for one of the three kinds
-  Rimekeeping's mastery asks for, so Rimekeeping can be mastered without casting Rimebind (B-P53). The arms are the Yeti
-  King's **Glacier Maul** and **Rimeclaw**, and the creative-only **Frost Knight Greatsword**: the boon counts, not the
-  line (B-P52), and no survival route is added for the greatsword (B-P27).
+  Rimekeeping's mastery asks for, so Rimekeeping can be mastered without casting Rimebind (B-P53). Since unit 5 it
+  shares that one kind with drawing the Yeti King's charge into an ice column, so after either the other adds nothing
+  and a Preserve is always needed (B-P56, refining B-P53). The arms are the Yeti King's **Glacier Maul** and
+  **Rimeclaw**, and the creative-only **Frost Knight Greatsword**: the boon counts, not the line (B-P52), and no
+  survival route is added for the greatsword (B-P27).
 - **The boon itself is unchanged:** Slowness II for 3 seconds, renewed by each hit, outside Rimebind's thaw. Its
   numbers, tooltip and the trophies' drop are as they were.
 - What does not count: a slow on a pig or another creature that is not hostile, on a resistant creature (a ravager, the
@@ -642,20 +648,22 @@ The screenshots (480×270 previews in shard 4's log; for people to look at, not 
   icons, so Braced's icon is not seen (the server's check that the bangle braced the player passed). A large purple
   pixel shape stands in the middle of the view. Identified in unit 5 from the test's code: it is the shared effect
   boundary's mark for the Brace the bangle had just put on the player (`ConcordanceEffects.apply` shows `Sign.CHARM`,
-  which `SignClient` draws as vanilla `minecraft:witch` particles around 60% of the wearer's height). The shot was
-  taken in first person within 25 ticks of the bangle's once-a-second look bracing the player; those particles live 8
-  to 40 ticks and float upwards, so they rise through the camera from inside the player's own body. By the code it is
-  expected presentation, not a missing texture or a render defect; others see it round the wearer's body. Since unit
-  5 the test clears the toasts before this shot.
-  No shot shows the foci or the bangle in their slots: the test fills the slots on the server and checks them there.
+  which `SignClient` draws as vanilla `minecraft:witch` particles around 60% of the wearer's height). The shot was taken
+  in first person within 25 ticks of the bangle's once-a-second look bracing the player; those particles live 8 to 40
+  ticks and float upwards, so they rise through the camera from inside the player's own body. By the code it is expected
+  presentation, not a missing texture or a render defect; others see it round the wearer's body. Since unit 5 the test
+  clears the toasts before this shot. No shot shows the foci or the bangle in their slots: the test fills the slots on
+  the server and checks them there. Since unit 5 it also opens the survival inventory, where Trinkets shows its slot
+  groups, for `jugcraft_rime_kit_slots` (not yet run in CI; Trinkets may draw one slot of a group until it is hovered,
+  so the shot may not show both, and the server's checks remain the proof).
 - `jugcraft_rime_kit_icons`: fifteen item frames on a wooden wall, the lesser focus, the focus, the bangle and Nereid's
   four above, Aquamancer's and Winterguard's eight below; each icon whole in its frame and, at this size, like its
   owner's file.
 
 Not run: a client by hand (the icons, the worn sets, the codex and JEI pages, the dossier), the Trinkets screen's slots
-(no client test opens it), a person looking at the screenshots (the descriptions above are of the previews, written
-for this record), the full-size screenshots (in the run's `client-screenshots-4` artifact, not downloaded), two clients
-on a dedicated server, and play by hand.
+(no client test opened it in this run; unit 5's slots shot has not yet run in CI), a person looking at the screenshots
+(the descriptions above are of the previews, written for this record), the full-size screenshots (in the run's
+`client-screenshots-4` artifact, not downloaded), two clients on a dedicated server, and play by hand.
 
 Confirmed by CI's compilation and passing tests (they had been read from the decompiled 26.3 sources or the 26.3 files
 fetched for the unit): `MobEffectCategory.BENEFICIAL`, `EntityTypes.RAVAGER` in a test and
@@ -702,17 +710,20 @@ hall is untouched.
   - Nereid's and Aquamancer's look alike when worn (the owner's sheets are the same bytes); the "aqua" art reads as
     water, as the owner chose (B-D2); trims are kept on the item but not drawn, as with Ember; the foci and bangle are
     not drawn on the body; `frozen.png`'s meaning in the owner's set differs from Frostward's;
-  - the bangle does nothing against the Yeti King's own push until B-09 (unit 5) makes it call `Brace.spend`;
+  - the bangle did nothing against the Yeti King's own push until B-09; since unit 5 his push calls `Brace.spend`, so
+    its Brace halves one of his pushes and credits no one (not yet run in CI);
   - the kit shares `EmberArmorItem`, `EmberClient` and Ember's slot writer, so renaming them touches the kit;
   - one more GeckoLib armour model, and about 200 more client-test ticks plus the shots
     (`ConcordanceWinterClientGameTests` has an estimated weight of 120 in `tools/select_client_tests.py`);
   - the client test's bangle shot is covered by the advancement toasts its research grant raises (run 38549876709), so
-    it does not show Braced; clearing the toasts before that shot, as unit 3's test does, is on unit 5's list of
-    combined fixes ([the contract](concordance-chunk-b.md#b-11-evidence-and-the-owner-checkpoint)).
+    it does not show Braced; unit 5 clears the toasts before that shot, as unit 3's test does (`fc9b404dd`; not yet
+    run; [the contract](concordance-chunk-b.md#b-11-evidence-and-the-owner-checkpoint)).
 - **Deferred:** the owner's light model (no light-layout water sheet for it); the Caster Tome of Water (a tome casting
   one invocation needs a new instrument gate); the foci and bangle drawn on the body; the owner's on-hit bangle (B-P49's
   alternative); powder-snow walking boots (B-P46's alternative); a Rimekeeping elective for bottling Winter Brine
-  (it would change `CrucibleBlockEntity`, a hot spot); the Yeti column elective (B-09).
+  (it would change `CrucibleBlockEntity`, a hot spot). The Yeti column elective came with B-09 in unit 5, as the same
+  key as the Frost boon's slow (B-P56).
 - **For the owner's checkpoint:** B-P40 to B-P53, among them the icon (B-P43), the set numbers and recipes (B-P47,
   B-P48: Aquamancer's in wool and gold instead of lapis), the bangle's role (B-P49), the boots (B-P46), any Frost boon
-  arm counting (B-P52), the elective's gate (B-P53), and B-P10's question above.
+  arm counting (B-P52), the elective's gate (B-P53, refined by B-P56: one key with the Yeti King's column), and
+  B-P10's question above.

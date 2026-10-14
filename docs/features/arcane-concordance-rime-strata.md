@@ -5,8 +5,9 @@ Status: implemented for Concordance Chunk B, unit 3 (tickets B-05, B-06 and B-07
 with the contract and unit 1 beneath it; not merged. CI run 38519234934 on `06dc5ea5f` built it and passed every job:
 its server game tests among the 1639 required, with and without the optional integrations, and its client game tests.
 They passed again, with the status shots' fix, in runs 38543250503 (units 1 to 3) and 38549876709 (units 1 to 4); the
-fixed shots show the status icons (runs 38534127130 and 38549876709). Not played by hand or with two clients; see
-Verification for what has run.
+fixed shots show the status icons (runs 38534127130 and 38549876709). Unit 5 (B-09) gives Brace and Rimebind their
+part in the Yeti King's fight, makes his column Rimekeeping's elective cold work and adds a spell-bar shot at GUI scale
+1; its tests have not yet run in CI. Not played by hand or with two clients; see Verification for what has run.
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B2).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -145,7 +146,7 @@ goes when the next tick starts, so it braces no blow of that tick.
 | The Leaf Blower's stream (another player only under PvP) | yes, the first tick's push | yes |
 | Vanilla knockback that comes without a damaging blow (the review names a mace smash's bystanders) | yes | no: an accepted exception (B-P30) |
 | A helpful push: one's own Flashstep, a friend's helpful push | no: read without the Brace | no |
-| A scripted push that asks through `Brace.spend` (the Yeti King's, B-09) | returns the share to let through, 1 − 0.5 a level | yes |
+| A scripted push that asks through `Brace.spend` (the Yeti King's every push, since unit 5, B-09) | returns the share to let through, 1 − 0.5 a level | yes |
 | A teleport, a portal, the Grey Mist, the hall's edge toll, a whirl | not a push: the Brace changes nothing | no |
 | Damage | never lessened | no |
 
@@ -163,16 +164,18 @@ push on them, not Rimebind's alone:
 | The Ice Breaker wave's Slowness | 40 → 20 ticks | 40 → 20 ticks |
 | Concordance pushes | already nothing (knockback resistance 1.0) | already nothing |
 
-The Yeti moves by fixed steps, not by his movement-speed attribute, so Rimebind alone does nothing visible to his charge
-until B-09 gives it a visible effect. This is an inference until a test runs.
+The Yeti moves by fixed steps, not by his movement-speed attribute, so Rimebind's slow alone does nothing to his charge.
+Since unit 5 (B-09) a binding that takes holds his next wind-up 4 ticks longer instead, once each Thaw (B-P54), and
+only a Brace lessens his push; `aRimeboundChargeKeepsItsPace` tests that his charge keeps its pace when bound, once it
+runs ([the Yeti King's record](yeti-king.md#optional-counters-concordance-chunk-b-b-09)).
 
 ## Changes from the plan
 
 - Rime's research steps (02:131-137): "a warm surface" is something that holds fire, examined; "preserve an allowed
   sample" and "compare warm and cold preparations" are Preserve on a cold and on a heated crucible; restraint is
   Rimebind on a hostile creature at normal tolerance; "finish a preservation workshop or study Glacier Hall" is the
-  winter survey (a Rime brew bottled by hand, or arriving in the hall). **Deferred:** the Yeti column charge as an
-  elective, with B-09, which already changes the Yeti.
+  winter survey (a Rime brew bottled by hand, or arriving in the hall). The Yeti column charge as an elective came
+  with B-09 in unit 5, sharing the Frost boon's key (B-P56).
 - Strata's (02:139-144): "assay existing Thallite and ordinary stone" is the shared examination; "use a brace or
   earth-bound tool on an allowed substrate" and "compare living and earthen ground" are the ground keys and Rooted
   Thallite; "a stable ritual foundation" is the `foundation` elective. **Deferred:** an ordinary civic project or a
@@ -200,7 +203,8 @@ until B-09 gives it a visible effect. This is an inference until a test runs.
   Crucible and the Alembic Arts; the Focus pool.
 - Output consumer: players and creatures through the shared effect boundary (control and protection); the Alembic
   Crucible (a band held while stirring, the loop unit 4's Winter Brine uses: a cold stir keeps its Rime, B-08); B-09's
-  Yeti counters (`Brace.spend`, `Brace.caster`, Rimebind's visible change); unit 4's travel kit
+  Yeti counters, built in unit 5 (`Brace.spend` on his every push, `Brace.caster` for the deed, Rimebind's held
+  wind-up, the column's elective); unit 4's travel kit
   ([the winter record](arcane-concordance-winter.md)): a Lesser Focus of Water or a Focus of Water worn makes Preserve
   hold 90 or 120 seconds (`RimeGear.holdTicks`, B-P24, B-P50), and the Water Bangle gives its wearer Brace's own Braced
   after 30 seconds with none, as nobody's cast (B-P25, B-P49).
@@ -414,6 +418,12 @@ The screenshots of run 38549876709 (`b012875ab`, units 1 to 4; 480×270 previews
 
 Run 38534127130's shard 1 (`0e7de6bf1`) showed the same three shots.
 
+Unit 5 (B-09, B-11; not yet run in CI): `ConcordanceRimeStrataClientGameTests` takes the spell bar again at GUI scale 1,
+where all six slots should fit, and logs its width (`jugcraft_rime_strata_spell_bar_scale1`; the bar's place is
+B-P60). The Braced and Rimebound codex entries each gain an "Against the Yeti King" page, and the Rimekeeping entry's
+Understood page names the column. `YetiKingGameTests` tests the counters and the column's cold work
+([the Yeti King's record](yeti-king.md#verification)).
+
 Not run: any client by hand (the icons, sounds, codex pages, particles), a person looking at the screenshots (the
 descriptions above are of the previews), two clients on a dedicated server (Brace on a party member, Rimebind between
 players under PvP), and play by hand. `./gradlew build` and `./gradlew runClientGameTest` ran only in CI.
@@ -462,14 +472,16 @@ protected towns and build permission.
   (-170, -11)), 20 GUI pixels a slot, so its left edge is at width/2 - 170 - 10 × spells. CI's window is 427 GUI pixels
   wide, so a bar of 5 or more spells runs off the left edge (the shot's first slot is cut off). At 480 (1920×1080 at the
   automatic GUI scale) a bar of 7 reaches the edge exactly and 8 or more run off it. Thirteen invocations exist, and the
-  bar keys up to 9. A player can move the bar in Spell Engine's HUD settings; Jugcraft changes no configuration.
+  bar keys up to 9. A player can move the bar in Spell Engine's HUD settings; Jugcraft changes no configuration. The
+  question is B-P60 ([the contract's decisions](concordance-chunk-b.md#decisions)).
 - For the owner's checkpoint: a Brace lasting out its tick (B-P30); the icon choices (B-P31) and the soaked icon's
   folder label; the knockback measure (B-P32); Rimebind's targets following the shared boundary (B-P34); "Stonebrace" as
-  a display name instead of "Brace", to keep it apart from the war fork's trait; and the spell bar's place: whether
-  Jugcraft should set a default that keeps a full bar on screen, or leave it to each player's Spell Engine settings.
+  a display name instead of "Brace", to keep it apart from the war fork's trait; and the spell bar's place (B-P60):
+  whether Jugcraft should set a default that keeps a full bar on screen, or leave it to each player's Spell Engine
+  settings.
 - For unit 4, answered there ([the winter record](arcane-concordance-winter.md)): B-P24's 120 s hold from a focus worn
   with the Initiate's Wand exceeds that wand's duration limit (1200 ticks), and unit 4 records why a worn focus may
   (B-P50: the hold is the crucible's state, cut at 2400); its key `frost_boon` is an elective (B-P53; since unit 5 the
   key is `elective`, which the Yeti King's column shares, B-P56), and it adds no brew key.
-- Later: the Yeti column elective (B-09); Strata's civic project and boss opening; words a player can compose for Rime
-  and Strata (B-P6); Tempest.
+- Later: Strata's civic project and boss opening; words a player can compose for Rime and Strata (B-P6); Tempest. (The
+  Yeti column elective came with B-09 in unit 5.)

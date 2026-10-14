@@ -101,7 +101,7 @@ The Yeti King: 420 health (scaled for the party: half as much again for each pla
 
 ### His loot (per participant)
 
-A participant is a player who qualified in his fight: by a blow to him or a whelp (their own or their tamed creature's, the felling blow included), by healing or warding other players against 4 of his side's blows with the Concordance, or, having already taken part, by baiting his charge into an ice column (since Concordance Chunk B, [lair-encounter-credit.md](../features/lair-encounter-credit.md)). One alive within 64 blocks of the lake's centre when he falls is paid at once; one who died in the fight once back on their feet; one who left the game in it on joining again. Each fall pays each player once.
+A participant is a player who qualified in his fight: by a blow to him or a whelp (their own or their tamed creature's, the felling blow included), by healing or warding other players against 4 of his side's blows with the Concordance; by baiting his charge into an ice column, having already taken part; or by bracing another player who then takes one of his throws, a Brace on oneself or the Water Bangle's counting for no one (since Concordance Chunk B, [lair-encounter-credit.md](../features/lair-encounter-credit.md); the Brace since its unit 5, B-09). One alive within 64 blocks of the lake's centre when he falls is paid at once; one who died in the fight once back on their feet; one who left the game in it on joining again. Each fall pays each player once.
 
 | Loot | Chance |
 | --- | --- |

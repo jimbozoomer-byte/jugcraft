@@ -1,6 +1,6 @@
 # The Yeti King
 
-Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. Since Concordance Chunk B (unit 1) his reward is the lairs' shared one ([lair-encounter-credit.md](lair-encounter-credit.md)), and unit 2 held his fight to the chunk's completion evidence, with three fixes; both pass in CI (run 38543250503, by workflow_dispatch; not merged). Unit 4's change to his frost passes too (run 38549876709, with units 1 to 3; not merged).
+Status: implemented in source. CI builds it, and its game tests and client game test pass (below). This is part 2 of boss 3 in the [bosses plan](../branches/BOSSES.md#the-yeti-king-the-plan-being-built): the boss of the Glacier Hall, his kin and his thrown and fallen things, and his loot. It is built on part 1, the hall and the Frost Horn that opens it ([glacier-hall.md](glacier-hall.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do. Since Concordance Chunk B (unit 1) his reward is the lairs' shared one ([lair-encounter-credit.md](lair-encounter-credit.md)), and unit 2 held his fight to the chunk's completion evidence, with three fixes; both pass in CI (run 38543250503, by workflow_dispatch; not merged). Unit 4's change to his frost passes too (run 38549876709, with units 1 to 3; not merged). Unit 5 gave Brace and Rimebind their part in his fight and made his column Rimekeeping practice ([below](#optional-counters-concordance-chunk-b-b-09)); its tests have not yet run in CI, and its CI candidate follows.
 Proposal issue: none. On 10 October 2026 the owner asked for the next boss "exact same way you did the spider but adjusted for that character", and chose a new boss built from start to finish; the Yeti King is the owner's own example in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -63,6 +63,28 @@ He keeps his Maul Swipe, Boulder Throw, Ground Slam and Avalanche Charge, stops 
 ### The Fury of the Peaks (below a fifth)
 
 "The Fury of the Peaks: his crown blazes, and his eyes burn blue". Blue fire wraps the points of his crown and rises from his eyes. Every cooldown, and his pause between attacks, is a third shorter; his Ground Slam bares a wider ring, 10 blocks; and a charge that does not stun him is followed at once by another.
+
+### Optional counters (Concordance Chunk B, B-09)
+
+Two of the Concordance's spells answer him, if a player chooses; neither is needed to win (none of his numbers changed,
+and without them his fight is as it was).
+- **Only a Brace lessens his throws.** Braced, the next of his blows, slams, charges or glacial spikes throws you half
+  as far; a Brace braces the rest of the tick it is spent in, so a blow and its own push are halved once, not twice.
+  Knockback resistance from anything else (netherite, Earthbound Thallite's Rooted, the Ice Breaker) still does not
+  lessen his throws; a blow's own small knockback and his boulders' and icicles' are the game's, as before, which such
+  resistance lessens. The Water Bangle's Brace counts as well.
+- **Bracing a friend is your part in his fight.** A Brace you put on another player that takes one of his throws is a
+  deed of his fight for you, as baiting his charge into a column is (no part needed before it, but you must be in his
+  fight and able to fight him). A Brace on yourself, the Water Bangle's and one whose caster a relog forgot earn no one
+  anything.
+- **Rimebind holds his next wind-up.** He moves by his own steps, so its slow does not hold him. A binding that takes
+  instead holds his next wind-up 4 ticks longer (a starting value, not yet tuned), frost-locked, with a puff of
+  snowflakes and the sound of glass: the wind-up under way if it is not about to strike, else the next. On him a
+  binding lasts 1.5 seconds and its thaw 3.5, in which no one binds him again, so the hold comes once each time he
+  thaws. Waiting on his throne a binding holds nothing, and left alone he forgets it.
+- **The column is cold work.** For a Rimekeeper (Rimekeeping understood), drawing his charge into an ice column as the
+  player it was aimed at (with a part in his fight already, as its deed asks) is Rimekeeping's elective kind of cold
+  work, the same kind as a Frost boon arm's slow: counted once ([Rime and Strata](arcane-concordance-rime-strata.md)).
 
 ### His fall
 
@@ -140,7 +162,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
   - **the Yeti Mitten** is an offhand charm for powder snow and the cold biomes, the permanent answer to his frost (Winter Brine's Frostward is the timed one, since Concordance Chunk B, unit 4);
   - **the Yeti King's Crown** is a costume for trick-or-treating and the costume contest (`#jugcraft:trick_or_treat_costumes` and `#jugcraft:costume_hats`);
   - **the Glacier Maul and the Rimeclaw** are Arms VII's boss trophies: the first of the eight bosses still to be made in Arms VII's list to drop his.
-- **Technology and magic:** none required. He is fought with whatever players bring, and nothing in a tier needs his loot. Since Concordance Chunk B, unit 3, he is resistant to Concordance control (`#jugcraft:concordance/resistant`): a harmful Concordance status (Rimebind's slow, Smoulder, Dazzle, the Ice Breaker's slow) lasts half as long on him, and Concordance pushes already did nothing (his knockback resistance is 1.0). He moves by fixed steps, so Rimebind's slow alone does nothing visible to his charge until B-09 gives it a visible effect ([Rime and Strata](arcane-concordance-rime-strata.md#tolerance-of-the-lair-keepers)). Arriving in his hall is Rimekeeping's field study.
+- **Technology and magic:** none required. He is fought with whatever players bring, and nothing in a tier needs his loot. Since Concordance Chunk B, unit 3, he is resistant to Concordance control (`#jugcraft:concordance/resistant`): a harmful Concordance status (Rimebind's slow, Smoulder, Dazzle, the Ice Breaker's slow) lasts half as long on him, and Concordance pushes already did nothing (his knockback resistance is 1.0). He moves by fixed steps, so Rimebind's slow does nothing to his charge; since unit 5 (B-09) a binding holds his next wind-up 4 ticks instead, and only a Brace lessens his push ([Optional counters](#optional-counters-concordance-chunk-b-b-09); [Rime and Strata](arcane-concordance-rime-strata.md#tolerance-of-the-lair-keepers)). `aRimeboundKingWindsUpLongerOnceAThaw` and `aRimeboundChargeKeepsItsPace` test both, once they run. Arriving in his hall is Rimekeeping's field study, and drawing his charge into a column is its elective cold work.
 - **Trade and solo routes:** a solo player can do everything. His health is lowest for one player, and the first kill always brings a trophy. His loot can be traded like any item.
 - **Reachable entry path:** the horn takes Discovery-tier things (part 1), and nothing he drops is needed to reach him.
 - **The encyclopedia and JEI (since Concordance Chunk B, B-02):** carrying a Frost Horn shows the Glacier Hall's dossier under Expeditions (its rite, the horn's recipe, that it works all year, and the party it holds); meeting or beating him adds how support earns a share (his whelps, healing, wards and the column), the two trophies of which a first win brings one, his loot with JEI's words, the cheaper horn and the way home. JEI has an information page for each of his five things. A first win over him completes the First Light route's lair step ([arcane-concordance-first-route.md](arcane-concordance-first-route.md)).
@@ -149,11 +171,11 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 
 - **Every fight costs a summoning:** a fresh Frost Horn, as part 1 set it.
 - **No gain loop:** fur makes a horn that still needs a goat horn, gold, snow and a whole fight, and fur shears into two wool, while wool makes no fur. Nothing he drops turns into more of itself. Nothing he drops sells to a Jugcraft shop for Jugs.
-- **No leeching:** only those who qualified get loot. A bystander who never struck him or a whelp gets nothing, and so does one who heals or wards only themselves, or a late arrival with no part in his fight whom his charge was turned on. Loot is rolled per player, so nobody takes another's.
+- **No leeching:** only those who qualified get loot. A bystander who never struck him or a whelp gets nothing, and so does one who heals or wards only themselves, braces only themselves (or wears the Water Bangle, whose Brace is nobody's cast), or a late arrival with no part in his fight whom his charge was turned on. Loot is rolled per player, so nobody takes another's. A Brace deed (since unit 5) is one for each braced player and tick, bounded by Brace's 8-second cooldown; past qualifying, more adds nothing.
 - **First kill once:** the trophy's first-kill guarantee is stored with the advancement, so it comes once per player.
 - **Abandoning resets him:** leaving him alone for 10 seconds heals him and forgets everyone's part. He cannot be worn down between visits.
 - **No automation:** he wakes only for a player, bares his lake only in a fight, and his loot goes only to players. His whelps drop nothing and give no experience.
-- **Units:** health and damage in half hearts, before `lairs.boss_health` and `lairs.boss_damage`. Times are in ticks, 20 a second; distances in blocks. Every number is in `tools/yeti_king.py`, and `tools/check_mod_data.py` holds the Java to it.
+- **Units:** health and damage in half hearts, before `lairs.boss_health` and `lairs.boss_damage`. Times are in ticks, 20 a second; distances in blocks. Every number is in `tools/yeti_king.py`, and `tools/check_mod_data.py` holds the Java to it. Since unit 5, `RIMEBOUND_WINDUP` = 4 ticks, how much longer a binding holds one wind-up: untuned, a starting value until people play him (04:194).
 
 ## Multiplayer and persistence
 
@@ -163,6 +185,7 @@ His settings are the ones every lair boss shares, in `config/jugcraft.properties
 - **Chunks:** nothing is force-loaded. His arena stays loaded while players stand in the hall.
 - **The mitten** is looked at once a tick for each player; nothing about it is stored.
 - **No griefing:** he cannot leave his lair, his attacks strike only players who can fight him, and the only blocks he changes are his own lake's snow, which drifts back.
+- **Rimebind's hold** (since unit 5): the ticks a wind-up still holds and his last Thaw reading (`rimeHold`, `thawLeft`) are not saved; a king loaded mid-Thaw sees that Thaw as a new binding and holds one wind-up more.
 - **His fight's record** (who took part and how, `lair/Encounter`) is in memory only and not saved with him. Loaded awake, he begins a fresh one, so after his chunk is reloaded mid-fight only what is done from then on counts.
 - **What he owes waits:** a share kept for a player who died or left the game in his fight is held in `jugcraft:lair_rewards` (with the player, or in the world's record while they are away) under the name `yeti_king`, which is saved and so must not change. An older build has no payer for that name, and drops a kept Yeti King reward unpaid when it would hand it over.
 - **Freezing earns nothing (proposed, B-P5):** freeze damage has no attacking creature, so it is not his fight's hurt, and healing it earns no share.
@@ -279,6 +302,16 @@ The client test's new steps are in its list above (1, 3, 7 and 8). Of its pictur
 
 Concordance Chunk B, unit 4 (B-08 and B-10), changed only his `chill` (it now passes by a player under Frostward, as by one holding the Mitten) and added these game tests, which passed in CI (run 38549876709 on `b012875ab`, by workflow_dispatch; not merged), among its 1676 required server tests: `YetiKingGameTests.aFrostwardDrinkerIsNotChilledByTheYeti` (his blizzard and breath frost leave a Winter Brine drinker unfrozen, and land again once Frostward is gone) and `aKitWearerIsSlowedButNotHurtByHisFrost` (in a piece of the Rime travel kit his frost still lands, freezes and slows, but the freezing deals no damage); `ConcordanceWinterClientGameTests` runs his frost on a real player in Winterguard's set (no health lost, still slowed; taken off, hurt), and passed by its shard (4); the Glacier Hall's dossier names Winter Brine and the Mitten (`EncyclopediaGameTests.theGlacierHallsRiteNamesWinterBrine`). Record: [arcane-concordance-winter.md](arcane-concordance-winter.md).
 
+Concordance Chunk B, unit 5 (B-09 and B-11; [the contract](concordance-chunk-b.md)), not merged, added these game tests; not yet run in CI (the CI candidate follows):
+- `aBracedPlayerIsPushedHalfAsFarOnce`: his slam's push (1.4 across, 0.4 up) is the same on a player with knockback resistance 1 from elsewhere and half on a braced one, whoever put the Brace on (a friend, they themselves, the Water Bangle); a second push that tick is braced too; the next tick the Brace is gone.
+- `hisBlowAndSpikeAreBracedOnceNotTwice`: his swipe pushes a braced player half as far as a bare one, not a quarter, and a glacial spike lifts them half as high.
+- `aBraceOnAFriendIsTheCastersDeed`: a Brace one player put on another that meets his push is the caster's deed, one for each push it meets (two in one tick are one), with no part needed before; one's own Brace, the bangle's and one whose caster was forgotten credit no one, and being braced earns nothing.
+- `aRimeboundKingWindsUpLongerOnceAThaw`: bound, his Maul Swipe strikes 16 ticks after it begins, not 12; while he thaws no one binds him and his next swipe strikes on time; bound again while he reels, the hold waits out his stun and holds his next wind-up.
+- `aRimeboundChargeKeepsItsPace`: bound as his charge's run begins, his speed attribute a fifth down, seven steps on he is where an unbound run puts him; the binding, past his wind-up, waits for his next one.
+- `aColumnIsElectiveRimeworkForItsBaiterOnce`: his charge broken on a column is Rimekeeping's elective cold work for its baiter if they understand Rimekeeping, once, kept through a save; nothing for one who has only encountered it, or with the Concordance off; the column adds nothing after a Frost boon slow, or the reverse; with Rimebind's restraint it does not master Rimekeeping without a Preserve.
+
+`check_yeti` now also holds his push to `Brace.spend` (and to nothing else), every push of his to `YetiKingEntity.push`, the Brace deed's caster and key, and the hold (set not added, before a wind-up's last two ticks, never while he waits, forgotten on a reset, its number against `tools/yeti_king.py`), and the column's practice in `baited`. The client test gains a step in the real hall: his Avalanche Charge baited into the north-west ice column, running (`jugcraft_yeti_king_charge_column`) and reeling at z 28.8 (`jugcraft_yeti_king_reeling`), the column checked as the real player's deed; not yet run in CI. With no counter, his pushes and wind-ups are as before, so the tests above (units 1 to 4) stand.
+
 Not run: the two-client dedicated-server playtest, and play by hand; a second client joining mid-fight (the client test has one client leave and come back); a dedicated server; a real disconnect. No test yet times his attacks against real players, measures how long a fight lasts, or tries sliding on his glare ice, his charge or his blocks of ice on a moving player.
 
 ## World and event applicability
@@ -292,7 +325,10 @@ Known limits:
 - on Peaceful there is no fight, though the horn is used up and the hall opens (proposed, B-P37);
 - a step of his charge that would bring him within 5.2 blocks of a column's centre stuns him, so a charge begun that near one can end on its first step though its line passes the column (proposed, B-P38);
 - with four or more players his health stops at the game's cap of 1024, not the 1050 his scale asks (the attribute's
-  top; found by Chunk B's four-player test in CI);
+  top; found by Chunk B's four-player test in CI); kept until four people have fought him (proposed, B-P59);
+- the counters' numbers are untried by people: Rimebind's 4-tick hold is untuned, and a Brace now halves his throws,
+  the Water Bangle's about every 35 seconds at no Focus cost (B-P54, B-P20); a binding mid-wind-up freezes his pose,
+  which GeckoLib is expected but not seen to hold;
 - Yeti Fur has two uses so far.
 
 With him, the first of the bosses Arms VII's trophies wait for is built.

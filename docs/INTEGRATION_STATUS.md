@@ -15,14 +15,16 @@ Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer
 
 On branch `claude/chunk-b-winter-stone`, not merged. Units 1 to 4 pass their tests in CI: run 38549876709 on
 `b012875ab` passed every job (all 1676 required server game tests, with and without the optional integrations, and
-every client test class). Unit 5 (the Yeti counters, the combined fixes and the owner's checkpoint) is not started.
-Not played by hand or with two clients ([the chunk's contract](features/concordance-chunk-b.md)).
+every client test class). Unit 5 (the Yeti counters, the combined fixes and the client evidence) is implemented and
+has not run in CI yet; its candidate run, its evidence and the owner's checkpoint follow. Not played by hand or with two
+clients ([the chunk's contract](features/concordance-chunk-b.md)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
 | Boss rewards and guidance | The Yeti King and the Cinder Tyrant on the lairs' shared encounter credit: support (healing, wards and, against the Yeti, baiting his charge into a column) earns a share, kept across death and disconnect and paid once; the Glacier Hall's and the Cinder Kiln's dossiers in the encyclopedia, and JEI pages for both keepers' loot (unit 1) | [encounter credit](features/lair-encounter-credit.md), [Yeti](features/yeti-king.md), [Tyrant](features/cinder-tyrant.md) |
 | The Glacier Hall and the Yeti fight | Tests for the hall's access in ordinary and designed worlds, refusals, exit and restart, and for his fight against the chunk's completion evidence; three fixes to the fight: End-gun Levitation lifts neither him nor his whelps, a charge into a column's foot stuns him, and his ice and whelps last only while he counts them his (unit 2) | [Glacier Hall](features/glacier-hall.md), [Yeti](features/yeti-king.md) |
 | Winter magic | Rimekeeping and Stratawrighting; Rimebind, Brace and Preserve (unit 3). Winter Brine and its Frostward at the Alembic Crucible, the timed answer to the Yeti King's frost beside his Mitten; the Rimekeeper's travel kit from the owner's water sets (Nereid's, Aquamancer's, Winterguard's), water foci and Water Bangle; a Frost boon slow as Rimekeeping practice, with no Thallite or trophy number changed (unit 4) | [Rime and Strata](features/arcane-concordance-rime-strata.md), [winter workshop and travel kit](features/arcane-concordance-winter.md) |
+| The Yeti counters and the combined fixes | Optional, neither needed to win: only a Brace now lessens the Yeti King's throws, halving the next; a Brace put on another player that takes one is its caster's share; Rimebind does not slow his steps but holds his next wind-up 4 ticks (untuned), once each thaw; drawing his charge into an ice column is Rimekeeping's elective cold work, one kind with the Frost boon's slow. The encyclopedia guides' home shows each route card whole and scrolls in a small window; the client tests picture the charge into a column, the spell bar at GUI scale 1, the foci and bangle slotted and both new dossiers (unit 5; not yet run in CI) | [Yeti](features/yeti-king.md), [encounter credit](features/lair-encounter-credit.md), [encyclopedia](features/jugcraft-encyclopedia.md), [the contract](features/concordance-chunk-b.md) |
 
 ## October 11 additions
 

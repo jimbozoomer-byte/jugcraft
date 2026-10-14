@@ -2,8 +2,9 @@
 
 Status: implemented for Concordance Chunk A (unit 3: tickets A-05 and A-06); its tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on
 `aa4d06c4e`). Extended to the Yeti King and the Cinder Tyrant in Concordance Chunk B, unit 1 (ticket B-01; [the chunk's
-contract](concordance-chunk-b.md)), not merged; its tests pass in CI (runs 38514144531 and 38519234934). See
-Verification for what has run.
+contract](concordance-chunk-b.md)), not merged; its tests pass in CI (runs 38514144531 and 38519234934). Unit 5 (B-09)
+adds the Yeti King's second objective, a Brace put on another player that meets his push; its test has not yet run in
+CI. See Verification for what has run.
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -26,17 +27,18 @@ boss's reward by any one of these, within the fight:
 | **Damage** | Any blow to the boss, Vesperine's skulls or a harvest soul, Madame Tatterlace's egg sacs or spiderlings, the Yeti King's whelps or the Cinder Tyrant's Cinderlings, as before (not Vesperine's Grave Thralls); a tamed creature's blow counts for its owner | Any |
 | **Healing** | Health the Concordance gives back to *another* player, counting only hurt creatures did to them in the fight (not a player's or a tamed creature's blow) that they still lack | 4 (two hearts) |
 | **Warding** | Damage from the fight's creatures soaked by a Concordance ward put on *another* player, up to what the ward gave | 4 (two hearts) |
-| **An objective** | Vesperine: relighting one of her wards during Death's Harvest. Madame Tatterlace: cutting another player free of her Binding Thread. The Yeti King: his Avalanche Charge aimed at you ending in an ice column, if you had already taken part (a blow, healing or a ward) as he set off. The Cinder Tyrant: none (proposed, B-P4) | One, each counted once a fight (the column once for each player) |
+| **An objective** | Vesperine: relighting one of her wards during Death's Harvest. Madame Tatterlace: cutting another player free of her Binding Thread. The Yeti King: his Avalanche Charge aimed at you ending in an ice column, if you had already taken part (a blow, healing or a ward) as he set off; and (since unit 5, B-09) a Brace you put on another player that takes one of his throws, with no part needed before, if you are in his fight and can fight him. The Cinder Tyrant: none (proposed, B-P4) | One, each counted once a fight (the column once for each player; a Brace once for each braced player and tick in which it meets his push) |
 
 One **Mend** (4 health) of a friend her blows hurt, or one **Ward** (absorbs 4) that soaks one of her blows, is
 enough. Past the threshold, more adds nothing: a share of the loot is a share.
 
-**What counts for nothing.** Healing yourself; healing a player already whole (overhealing); healing hurt the fight
-did not do (a fall, another player's blow) or hurt that rest, food or a potion has healed since; a ward on yourself; a
-ward no blow reaches; striking an already snapped thread; relighting a ward outside her Harvest, or relighting it again;
-a blow to one of Vesperine's Grave Thralls; a pet's blow for anyone but its owner; the Yeti King's charge into a column
-aimed at one who had no part yet, even if his fight had struck them; healing what freezing, or the Cinder Tyrant's
-slag's heat or burning, took (they have no attacker; his blows and his own fire count).
+**What counts for nothing.** Healing yourself; healing a player already whole (overhealing); healing hurt the fight did
+not do (a fall, another player's blow) or hurt that rest, food or a potion has healed since; a ward on yourself; a ward
+no blow reaches; striking an already snapped thread; relighting a ward outside her Harvest, or relighting it again; a
+blow to one of Vesperine's Grave Thralls; a pet's blow for anyone but its owner; the Yeti King's charge into a column
+aimed at one who had no part yet, even if his fight had struck them; a Brace on yourself, the Water Bangle's (nobody's
+cast), or one whose caster a relog forgot (who cast it is not saved), and being braced; healing what freezing, or the
+Cinder Tyrant's slag's heat or burning, took (they have no attacker; his blows and his own fire count).
 
 **Who is paid, and when.** When the boss falls, each qualified player is paid once:
 
@@ -77,7 +79,12 @@ before.
   part in his fight (a share: a blow, healing that counted or a ward on another player, even short of qualifying; being
   struck by his fight is not a part). If the charge ends in an ice column and that player is still in his fight, they
   earn a deed keyed `column <player>`, so each baiter earns one a fight and several may each earn theirs; his stun any
-  other way credits no one.
+  other way credits no one. Since unit 5 (B-09) every push of his goes through `YetiKingEntity.push`, which asks
+  `Brace.spend`: when a Brace takes some of it off a player, `braced` reads who cast that Brace (`Brace.caster`, kept in
+  the non-saved attachment `jugcraft:brace_caster`), and a caster who is not that player, is online, can fight him and
+  is in his fight earns a deed keyed `brace <braced player> <game time>`. Each key counts once a fight, so two pushes in
+  one tick are one deed and each Brace that meets his push is its own; no earlier part is needed, as a ward's soak needs
+  none. The dossier's share line shows the deed count, which Brace deeds raise; qualifying is a yes or no.
 - *Who is in the fight.* A player in the boss's level within 64 blocks of the arena's centre, alive or not, while the
   fight is on. A player who dies there is excused (paid wherever they are, as above); one who leaves the game there is
   marked away (on the server thread, as they leave), which counts only if they are still away when the boss falls.
@@ -123,7 +130,9 @@ boss's loot by hand.
 - Thresholds (proposed, for the owner): 4 healing or 4 warding, the size of one Mend or one Ward. Any damage still
   qualifies, as before.
 - No leeching: healing and wards count only the fight's own hurt and blows, on someone else, so two players cannot
-  farm credit off each other; a bystander who does nothing still gets nothing.
+  farm credit off each other; a bystander who does nothing still gets nothing. A Brace deed needs the Yeti King's own
+  push to meet a Brace on someone else, at most one key a braced player and tick, bounded by Brace's 8-second cooldown
+  and its Focus; one is enough, and more adds nothing.
 - Units: health in half hearts; times in ticks; distances in blocks.
 
 ## Multiplayer and persistence
@@ -186,6 +195,10 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   Glacier Hall and the reward kept in the world's record, and opened again: the game's own server stops and starts, and
   on the real join the player is sent home first and then paid once. It passed in CI run 38543250503 by its shard's
   success (shard 0). No disconnect or leave event is checked.
+- Concordance Chunk B, unit 5 (B-09), not merged, not yet run in CI: `YetiKingGameTests.aBraceOnAFriendIsTheCastersDeed`
+  (a Brace one test player put on another that meets his push is the caster's deed, one for each push it meets, two in
+  one tick one; a Brace on oneself, the Water Bangle's and one whose caster was forgotten credit no one, and being
+  braced earns nothing), and `check_yeti` holds `braced` to the caster, never the braced player, and to the key.
 
 Not run: a real fight with a healer in a lair; a real death in a fight (the Yeti King's test above makes one real
 `ServerPlayer.die` on a test player, without a real blow); a real disconnect or respawn; a rejoin other than the one
@@ -210,7 +223,10 @@ chance (and one owed from before the event and handed over during it comes with 
   ([#317](https://github.com/jimbozoomer-byte/jugcraft/pull/317)) have both adopted `Encounter` and `LairRewards`
   (Concordance Chunk B, unit 1). The Mire Hag ([#336](https://github.com/jimbozoomer-byte/jugcraft/pull/336)) and the
   Crypt Lich ([#350](https://github.com/jimbozoomer-byte/jugcraft/pull/350) and
-  [#353](https://github.com/jimbozoomer-byte/jugcraft/pull/353)) keep damage-only rewards in their own pull requests.
+  [#353](https://github.com/jimbozoomer-byte/jugcraft/pull/353)) are on main through
+  [#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352) with damage-only rewards (a private `damageBy`,
+  `lair/hag/MireHagEntity.java:249` and `lair/lich/CryptLichEntity.java:258`); this record first said "in their own pull
+  requests". Moving them onto `Encounter` is outside Chunk B.
 - Harm with no attacking creature, such as freezing, or the Cinder Tyrant's slag's heat and burning, is not the
   fight's hurt, so healing it earns nothing (proposed, B-P5 in [the Chunk B contract](concordance-chunk-b.md)). The
   Cinder Tyrant names no objective (proposed, B-P4): a turned sluice records no one who turned it.
