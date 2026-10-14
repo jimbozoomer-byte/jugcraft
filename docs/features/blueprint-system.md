@@ -22,6 +22,11 @@ Owner: Narvisius
     - Every blueprint you have imported, kept on your own computer in `.minecraft/jugcraft/imported_blueprints/`, so the list follows you to any server.
     - Select one to see it, import it again (IMPORT), print it when the server has it (PRINT), or remove it from your list (REMOVE).
     - **+ NEW IMPORT** shows a sheet of tracing paper to paste on, with PASTE, CLEAR and IMPORT stamps.
+    - **KIT** on that sheet writes the **design kit** to `.minecraft/jugcraft/blueprint_kit/`, for designing a blueprint by hand or with an AI:
+      - `ai_guide.md`: the format, limits, forbidden blocks, "any material" slots, which way the front faces, and tips;
+      - `blocks.txt`: every block this game allows, its mods' included, with each state property and its values;
+      - `tags.txt`: every block tag a slot may name, with how many blocks it holds;
+      - `example.jugbp.json`: a garden shed with a planks slot, ready to import.
 - **Item colour in the inventory** (`Blueprint.Kind`; the holograms are unchanged):
   - **blue:** a complete build, either an individual structure or a whole set;
   - **green:** a partial structure, one part of a set such as a single cooling tower;
@@ -94,6 +99,8 @@ Owner: Narvisius
   - A large built-in build is counted at its 600-tick full check, which already looked at every block.
   - The signal is not saved: the first check after loading sets it.
 
+- **The design kit:** `BlueprintKit` reads the guide and example from `assets/jugcraft/blueprint/` in the jar and makes the block and tag lists from the game's registry, so they match the mods installed. A tag is listed only when it holds an allowed block and nothing forbidden. `BlueprintKitExport` (client) writes them; nothing goes to the server.
+
 ## Testing aids (operators only: cheats on, or op level 2)
 - `/nuclear build <blueprint> [fuelled]`: builds any blueprint at once where you stand, facing the way you face
   (equipment placed whole, pipes joined, consoles linked to the nearest reactor).
@@ -107,13 +114,12 @@ Owner: Narvisius
   - a finished foundation pops the stake and returns the blueprint.
 - **Server game test (`BlueprintGameTests.aComparatorReadsTheBuildsProgress`):** a real comparator beside a foundation stake reads what the ground already holds, then 1 + 14 × placed / total once about half the rest is set. Added on the contributor's fork; pending CI.
 - **Server game test (`BlueprintGameTests.anyMaterialSlotsTakeAnyBlockOfTheirTag`):** an imported bench with a `#minecraft:planks` slot: birch and spruce planks set by hand count, a stone block does not, the drone job for it names the tag and dark oak planks complete it; stairs of another wood keep the drawn facing and half. Added on the contributor's fork; pending CI.
+- **Server game test (`BlueprintGameTests.theDesignKitDescribesWhatTheGameAllows`):** the guide in the jar shows the example, tag slots and limits; the example imports as a 5 × 4 × 4 shed with a planks slot; the block list holds stairs with their properties but no command block or air; the tag list holds planks but not the portals tag. Added on the contributor's fork; pending CI.
 - **Server game tests:** import checks (a valid paste is saved; unknown block, forbidden block, unknown block tag, a tag holding forbidden blocks (`#minecraft:portals`), missing palette key, bad JSON and wrong format are each refused with the right message).
 - **Client game test (`BlueprintClientGameTests`):** preview and placement from 20 blocks away, hologram, stake screen, table tabs and IMPORT (a pasted blueprint arrives in the client library and the import list), Item Index, chair, Creative Energy Cell.
 
 ## Not yet done (from #23)
-- The design kit and in-JAR AI guide.
-
-Comparator output and "any material" slots, listed here before, are built (see above).
+Nothing listed in #23 remains. Comparator output, "any material" slots and the design kit with its in-JAR AI guide, listed here before, are built (see above).
 
 ## World height
 

@@ -116,6 +116,11 @@ public final class Blueprint {
 	private record Slot(BlockState state, @Nullable TagKey<Block> anyOf) {
 	}
 
+	/** Whether {@code block} may appear in a blueprint (the forbidden ones never may, alone or inside a tag). */
+	public static boolean allowed(Block block) {
+		return !FORBIDDEN.contains(block) && !block.defaultBlockState().isAir();
+	}
+
 	/** A blueprint that does not pass the checks; the message says why in plain words. */
 	public static final class Invalid extends Exception {
 		public Invalid(String message) {

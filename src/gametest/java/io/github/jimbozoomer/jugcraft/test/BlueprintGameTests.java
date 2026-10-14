@@ -328,6 +328,36 @@ public class BlueprintGameTests {
 				"the bench of three woods is complete and the stake popped off"));
 	}
 
+	/**
+	 * The design kit: the AI guide in the jar shows the example and the tag slots; the example imports as a 5 x 4 x 4
+	 * shed with a planks slot; the block list holds stairs with their properties but no command block; the tag list
+	 * holds planks but not the portals tag, which holds forbidden blocks.
+	 */
+	@GameTest
+	public void theDesignKitDescribesWhatTheGameAllows(GameTestHelper helper) {
+		if (TestFocus.skip("blueprints")) {
+			helper.succeed();
+			return;
+		}
+		String guide = io.github.jimbozoomer.jugcraft.blueprint.BlueprintKit.resource(io.github.jimbozoomer.jugcraft.blueprint.BlueprintKit.GUIDE);
+		helper.assertTrue(guide.contains("Garden Shed") && guide.contains("#minecraft:planks") && guide.contains("8,192"),
+				"the guide shows the example, tag slots and limits");
+		try {
+			Blueprint shed = Blueprint.parse("import/kit_example",
+					io.github.jimbozoomer.jugcraft.blueprint.BlueprintKit.resource(io.github.jimbozoomer.jugcraft.blueprint.BlueprintKit.EXAMPLE), "imported");
+			helper.assertTrue(shed.sizeX == 5 && shed.sizeY == 4 && shed.sizeZ == 4 && BlockTags.PLANKS.equals(shed.anyOf(shed.size() - 1)),
+					"the example is a 5 x 4 x 4 shed roofed with any planks, got " + shed.sizeX + "x" + shed.sizeY + "x" + shed.sizeZ);
+		} catch (Blueprint.Invalid e) {
+			throw new AssertionError("the kit's example does not import: " + e.getMessage());
+		}
+		String blocks = io.github.jimbozoomer.jugcraft.blueprint.BlueprintKit.blocks();
+		helper.assertTrue(blocks.contains("\nminecraft:stone_bricks\n") && blocks.contains("\nminecraft:oak_stairs [") && blocks.contains("facing=")
+				&& !blocks.contains("minecraft:command_block") && !blocks.contains("\nminecraft:air"), "the block list holds what is allowed only");
+		String tags = io.github.jimbozoomer.jugcraft.blueprint.BlueprintKit.tags();
+		helper.assertTrue(tags.contains("\n#minecraft:planks (") && !tags.contains("#minecraft:portals"), "the tag list holds usable tags only");
+		helper.succeed();
+	}
+
 	@GameTest(structure = ARENA, maxTicks = 200, skyAccess = true)
 	public void finishedFoundationPopsOff(GameTestHelper helper) {
 		if (TestFocus.skip("blueprints")) {
