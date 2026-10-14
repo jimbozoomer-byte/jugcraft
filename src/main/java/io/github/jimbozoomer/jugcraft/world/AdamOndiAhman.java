@@ -4,6 +4,9 @@ import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +133,7 @@ public final class AdamOndiAhman {
 	private static final class World {
 		final long print;
 		final BiomeSource source;
-		final Climate.Sampler sampler;
+		final Climate.@Nullable Sampler sampler;
 		final ChunkGenerator generator;
 		final LevelHeightAccessor heights;
 		final RandomState random;
@@ -146,7 +149,7 @@ public final class AdamOndiAhman {
 			this.generator = level.getChunkSource().getGenerator();
 			this.source = generator.getBiomeSource();
 			this.random = level.getChunkSource().randomState();
-			this.sampler = random.sampler();
+			this.sampler = climateSampler(random);
 			this.heights = level;
 			this.spacing = spacing;
 			this.share = share;
@@ -282,7 +285,7 @@ public final class AdamOndiAhman {
 	 * middle, and within {@link #MAX_SLOPE} blocks from highest to lowest.
 	 */
 	private static boolean suitable(World loaded, int x, int z) {
-		if (!climateSuits(loaded.sampler.sample(x >> 2, 64 >> 2, z >> 2))) {
+		if (loaded.sampler == null || !climateSuits(loaded.sampler.sample(x >> 2, 64 >> 2, z >> 2))) {
 			return false;
 		}
 		int low = Integer.MAX_VALUE;
@@ -309,12 +312,43 @@ public final class AdamOndiAhman {
 
 	/** Whether a climate suits a knoll: inland, not the mountains, temperate, and not a river's bed. */
 	public static boolean climateSuits(Climate.TargetPoint target) {
-		if (target.continentalness() < Climate.quantizeCoord(CONTINENTALNESS) || target.erosion() < Climate.quantizeCoord(EROSION)
-				|| target.temperature() < Climate.quantizeCoord(TEMPERATURE_MIN) || target.temperature() >= Climate.quantizeCoord(TEMPERATURE_MAX)
-				|| target.humidity() < Climate.quantizeCoord(HUMIDITY_MIN) || target.humidity() >= Climate.quantizeCoord(HUMIDITY_MAX)) {
-			return false;
+		return climateSuits(target.temperature() / QUANTIZED, target.humidity() / QUANTIZED, target.continentalness() / QUANTIZED,
+				target.erosion() / QUANTIZED, target.weirdness() / QUANTIZED);
+	}
+
+	/** Whether a climate (vanilla's parameters, -1 to 1) suits a knoll: inland, not the mountains, temperate, and not a river's bed. */
+	public static boolean climateSuits(float temperature, float humidity, float continentalness, float erosion, float weirdness) {
+		return continentalness >= CONTINENTALNESS && erosion >= EROSION && temperature >= TEMPERATURE_MIN && temperature < TEMPERATURE_MAX
+				&& humidity >= HUMIDITY_MIN && humidity < HUMIDITY_MAX && peaksAndValleys(weirdness) >= PEAKS_VALLEYS;
+	}
+
+	/** Vanilla's quantization of climate parameters (Climate.quantizeCoord multiplies by it). */
+	private static final float QUANTIZED = 10000.0F;
+
+	/**
+	 * The climate sampler of a world's noise. RandomState holds it; it is found by its type (a public accessor, else a
+	 * field), so a renamed accessor cannot break this. Null (logged) if there is none: then no rare valley's land suits,
+	 * and no start valley is chosen.
+	 */
+	static Climate.@Nullable Sampler climateSampler(RandomState random) {
+		try {
+			for (Method method : RandomState.class.getMethods()) {
+				if (method.getParameterCount() == 0 && method.getReturnType() == Climate.Sampler.class && !Modifier.isStatic(method.getModifiers())) {
+					return (Climate.Sampler) method.invoke(random);
+				}
+			}
+			for (Field field : RandomState.class.getDeclaredFields()) {
+				if (field.getType() == Climate.Sampler.class && !Modifier.isStatic(field.getModifiers())) {
+					field.setAccessible(true);
+					return (Climate.Sampler) field.get(random);
+				}
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			Jugcraft.LOGGER.error("Adam-ondi-Ahman: could not read the world's climate sampler", e);
+			return null;
 		}
-		return peaksAndValleys(target.weirdness() / 10000.0F) >= PEAKS_VALLEYS;
+		Jugcraft.LOGGER.error("Adam-ondi-Ahman: the world's noise has no climate sampler; no valley's land will suit");
+		return null;
 	}
 
 	/** Vanilla's peaks and valleys from weirdness: -1 in a river's valley, 1 on the peaks. */

@@ -181,16 +181,18 @@ public class AdamOndiAhmanGameTests {
 	/** A knoll needs a temperate inland climate: not the sea, the mountains, the desert, the frozen north, the jungle or a river's bed. */
 	@GameTest
 	public void climateSuitsAKnoll(GameTestHelper helper) {
-		helper.assertTrue(AdamOndiAhman.climateSuits(Climate.target(0.1F, 0.0F, 0.3F, 0.2F, 0.0F, 0.5F)), "Temperate inland land does not suit");
+		helper.assertTrue(AdamOndiAhman.climateSuits(0.1F, 0.0F, 0.3F, 0.2F, 0.5F), "Temperate inland land does not suit");
 		List<String> refused = new ArrayList<>();
+		// temperature, humidity, continentalness, erosion, weirdness
 		for (Object[] land : new Object[][] {
-				{"the sea", Climate.target(0.1F, 0.0F, -0.5F, 0.2F, 0.0F, 0.5F)},
-				{"the mountains", Climate.target(0.1F, 0.0F, 0.3F, -0.8F, 0.0F, 0.5F)},
-				{"the desert", Climate.target(0.8F, -0.5F, 0.3F, 0.2F, 0.0F, 0.5F)},
-				{"the frozen north", Climate.target(-0.6F, 0.0F, 0.3F, 0.2F, 0.0F, 0.5F)},
-				{"the jungle", Climate.target(0.1F, 0.5F, 0.3F, 0.2F, 0.0F, 0.5F)},
-				{"a river's bed", Climate.target(0.1F, 0.0F, 0.3F, 0.2F, 0.0F, 0.0F)}}) {
-			if (AdamOndiAhman.climateSuits((Climate.TargetPoint) land[1])) {
+				{"the sea", new float[] {0.1F, 0.0F, -0.5F, 0.2F, 0.5F}},
+				{"the mountains", new float[] {0.1F, 0.0F, 0.3F, -0.8F, 0.5F}},
+				{"the desert", new float[] {0.8F, -0.5F, 0.3F, 0.2F, 0.5F}},
+				{"the frozen north", new float[] {-0.6F, 0.0F, 0.3F, 0.2F, 0.5F}},
+				{"the jungle", new float[] {0.1F, 0.5F, 0.3F, 0.2F, 0.5F}},
+				{"a river's bed", new float[] {0.1F, 0.0F, 0.3F, 0.2F, 0.0F}}}) {
+			float[] c = (float[]) land[1];
+			if (AdamOndiAhman.climateSuits(c[0], c[1], c[2], c[3], c[4])) {
 				refused.add((String) land[0]);
 			}
 		}
