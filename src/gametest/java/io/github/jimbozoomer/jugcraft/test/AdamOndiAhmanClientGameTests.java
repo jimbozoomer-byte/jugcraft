@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.phys.BlockHitResult;
@@ -200,10 +201,18 @@ public class AdamOndiAhmanClientGameTests implements FabricClientGameTest {
 		fly(context, server, new BlockPos(column.getX(), y, column.getZ()), yaw, pitch);
 	}
 
-	/** Puts the player at `at` looking along `yaw`, `pitch`, on a barrier if in the air (never over a block of the world). */
+	/**
+	 * Puts the player at `at` looking along `yaw`, `pitch`, on a barrier if in the air (never over a block of the world). The
+	 * chunk is loaded first: a command cannot test a block in an unloaded chunk, and without the barrier the camera falls.
+	 */
 	private static void fly(ClientGameTestContext context, TestServerContext server, BlockPos at, int yaw, int pitch) {
-		server.runCommand("execute if block %d %d %d minecraft:air run setblock %d %d %d minecraft:barrier".formatted(
-				at.getX(), at.getY() - 1, at.getZ(), at.getX(), at.getY() - 1, at.getZ()));
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			level.getChunk(at.getX() >> 4, at.getZ() >> 4);
+			if (level.getBlockState(at.below()).isAir()) {
+				level.setBlockAndUpdate(at.below(), Blocks.BARRIER.defaultBlockState());
+			}
+		});
 		server.runCommand(String.format(Locale.ROOT, "tp @p %d.5 %d %d.5 %d %d", at.getX(), at.getY(), at.getZ(), yaw, pitch));
 		context.waitTicks(40);
 	}
