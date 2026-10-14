@@ -60,10 +60,13 @@ public class CombinedCyclePowerPlantClientGameTests implements FabricClientGameT
 			server.runOnServer(minecraft -> build(minecraft.overworld(), generator));
 			context.waitTicks(60);
 			singleplayer.getConnection().waitForChunksRender();
+			// At 2,048 JE a tick its 120,000 JE store fills in under three seconds: empty it first, as a cable would.
+			feed(server, generator);
+			context.waitTicks(5);
 			boolean working = server.computeOnServer(minecraft -> machine(minecraft.overworld(), generator).status().state().working());
 			check(working, "The generator should be making power for its pictures");
 
-			// Its store fills in about a minute with nothing drawing it: emptied before each picture, as a cable would, and
+			// Its store fills in under three seconds with nothing drawing it: emptied before each picture, as a cable would, and
 			// its fuel topped up.
 			double cx = x;
 			double cz = z - 9.5;
