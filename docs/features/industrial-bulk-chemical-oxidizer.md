@@ -1,6 +1,6 @@
 # Bulk Chemical Oxidizer: the Chemical Oxidizer's 4×4×6 variant
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on the [Bulk Chemical Infuser](industrial-bulk-chemical-infuser.md) and the branches below it.
 
 Proposal issue: none. TODO items:
@@ -105,7 +105,7 @@ There are no new dependencies.
 
 ### Results
 
-Not yet run in CI.
+**Run [38500691578](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38500691578) (commit b2611732) passed:** the build, the data checks, every server game test (`BulkChemicalOxidizerGameTests` included) with and without optional integrations, and all five client test shards (`BulkChemicalOxidizerClientGameTests` included). The first attempt's client shard 3 failed in `PeepoDeliveryClientTests` (the companion's "meal" wait timed out), a test this change does not touch, as on the Large Gas Burning Generator's run; that shard passed on its one re-run.
 
 **Not yet done:**
 - a survival playtest;
