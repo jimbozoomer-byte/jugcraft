@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
+import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.ComposedSpells;
 import io.github.jimbozoomer.jugcraft.concordance.Composing;
@@ -68,7 +69,8 @@ import net.minecraft.world.phys.Vec3;
  * keeper until she is met; the route names only sales a town makes; the pages survive the trip to the client; requests
  * are rate-limited and the Inspect page reads only a near, loaded block; and the client's page model keeps its place.
  * Since Concordance Chunk B (B-02) the Glacier Hall has its dossier, each rite says whether it waits for the Halloween
- * season, a first win over any keeper is the route's lair step, and the Expeditions page holds every keeper whole.
+ * season, a first win over any keeper is the route's lair step, and the Expeditions page holds every keeper whole;
+ * and (B-08) the Glacier Hall's rite names Winter Brine and the Yeti Mitten.
  */
 public class EncyclopediaGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -487,6 +489,50 @@ public class EncyclopediaGameTests {
 	@GameTest(maxTicks = 20)
 	public void theGlacierHallsDossier(GameTestHelper helper) {
 		keeperDossier(helper, LairDossiers.Boss.YETI_KING, JugcraftLairs.FROST_HORN, List.of(JugcraftYeti.glacierMaul(), JugcraftYeti.rimeclaw()));
+	}
+
+	/**
+	 * Concordance Chunk B (B-08, B-P29): the Glacier Hall's rite names what readies a player for his frost, as text and
+	 * icons with no grid: Winter Brine's Frostward for the data's longest time, with a codex link once the Alembic Arts
+	 * are observed, and the Yeti Mitten. With the Concordance off, the Mitten alone.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theGlacierHallsRiteNamesWinterBrine(GameTestHelper helper) {
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftLairs.FEATURE) || !JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			helper.succeed();
+			return;
+		}
+		String prepare = "encyclopedia.jugcraft.dossier.glacier_hall.prepare";
+		String codex = "book.jugcraft.arcane_concordance.alembic.winter_brine.name";
+		ServerPlayer player = player(helper);
+		player.getInventory().add(new ItemStack(JugcraftLairs.FROST_HORN));
+		EncyclopediaPayload carried = build(player);
+		List<EncyclopediaPayload.Row> rite = section(page(carried, LairDossiers.PAGE), Lair.GLACIER_HALL);
+		EncyclopediaPayload.Row brine = row(rite, prepare);
+		helper.assertTrue(brine != null && brine.kindOf() == EncyclopediaPayload.Kind.FACT && brine.grid().isEmpty(),
+				"carrying a Frost Horn, the rite names Winter Brine as a fact with no grid: " + rite.stream().map(row -> key(row.text())).toList());
+		Object[] seconds = args(brine.text());
+		helper.assertTrue(seconds.length == 1 && seconds[0].equals(Alchemy.catalog().property("rime").maxTicks() / 20),
+				"Frostward's longest time is the data's: " + List.of(seconds));
+		helper.assertValueEqual(brine.icons(), List.of(Items.SNOWBALL, JugcraftConcordance.CRUCIBLE.asItem(), JugcraftConcordance.DRAUGHT,
+				JugcraftYeti.YETI_MITTEN), "snowballs, the crucible, a draught and the Mitten");
+		helper.assertFalse(keys(carried).contains(codex), "no codex link before the Alembic Arts are observed");
+
+		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Alchemy.RESEARCH, ResearchState.OBSERVED);
+		helper.assertTrue(keys(build(player)).contains(codex), "the Alembic Arts observed, the dossier links Winter Brine's codex entry");
+
+		// The Concordance off: the Mitten alone (switched back at once; the server runs other tests).
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		List<String> off;
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			off = section(page(build(player), LairDossiers.PAGE), Lair.GLACIER_HALL).stream().map(row -> key(row.text())).toList();
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		helper.assertTrue(off.contains(prepare + ".mitten") && !off.contains(prepare), "with the Concordance off, the Mitten alone: " + off);
+		helper.succeed();
 	}
 
 	/** Concordance Chunk B (B-02): the Cinder Kiln's dossier, from a Kiln Seal carried to a win over the Cinder Tyrant. */

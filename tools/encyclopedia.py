@@ -242,6 +242,12 @@ DOSSIER = {
                          "powder snow, any ice, or Seasonal Snow where winter lays it. The snow splits into a whirl of "
                          "white mist and you fall through to the hall's ledge with frost on your skin; the horn is used "
                          "up only if the hall opens. While the whirl spins, friends follow by using it",
+    # Concordance Chunk B (B-08, B-P29, B-P45): what readies a player for his frost, as text and icons, no recipe grid.
+    "glacier_hall.prepare": "Against his frost: Winter Brine, snowballs stirred cold in an Alembic Crucible, gives "
+                            "Frostward for up to %s seconds a draught; the Yeti Mitten from his loot keeps its holder "
+                            "warm for as long as it is held",
+    "glacier_hall.prepare.mitten": "Against his frost: the Yeti Mitten from his loot keeps its holder warm for as long as "
+                                   "it is held",
     "cinder_kiln.rite": "At any hour, press the Kiln Seal into a magma block in the Nether, or in a volcanic land of the "
                         "Overworld (the Volcano or the Cinder Barrens). The magma cracks open into a vent of sparks and "
                         "smoke and you sink through the stone to the kiln's ledge; the seal is used up only if the kiln "

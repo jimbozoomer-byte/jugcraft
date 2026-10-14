@@ -13511,7 +13511,8 @@ def check_winter_brine(co, root, lang):
     """Concordance Chunk B unit 4, B-08 (docs/features/arcane-concordance-winter.md): Rime brews Frostward, timed as the
     Fire Resistance brew; a stir above the cold band thaws Rime (Mixture mirrors RIME_KEEP); the generator's simulation is
     the game test's; Frostward is registered, clears frost, and the Yeti King's chill asks for it; Yeti Fur reaches no
-    Rime ingredient; every word and the owner's icon are present."""
+    Rime ingredient; the Glacier Hall's dossier names Winter Brine as text and icons, never a grid (B-P29); every word
+    and the owner's icon are present."""
     al, rm, eq = co.alchemy, co.rime, co.equivalence
 
     def source(path):
@@ -13562,6 +13563,15 @@ def check_winter_brine(co, root, lang):
             err(f"lang jei.{MOD}.alchemy.{key}: a Rime ingredient's page names Frostward")
     if "textures/mob_effect/frostward.png" not in rm.OWNER_FILES or not (ASSETS / "textures" / "mob_effect" / "frostward.png").is_file():
         err("Frostward's icon is the owner's (tools/concordance_rime.py OWNER_FILES), copied by tools/owner_art.py")
+    # The Glacier Hall's dossier names Winter Brine and the Mitten in its rite section, as text and icons and never a
+    # grid (B-P29, B-P45): the page's grids are spoken for (check_encyclopedia counts them).
+    dossiers = source(JAVA_ROOT / "lair" / "LairDossiers.java")
+    prepare = _java_body(dossiers, "private static void prepare(")
+    if "prepare(out, boss);" not in dossiers or "Frostward.STATUS" not in prepare or "out.recipe(" in prepare:
+        err("lair/LairDossiers.prepare: the Glacier Hall's preparation fact, text and icons only (B-P29)")
+    for key in (f"encyclopedia.{MOD}.dossier.glacier_hall.prepare", f"encyclopedia.{MOD}.dossier.glacier_hall.prepare.mitten"):
+        if key not in lang:
+            err(f"Winter Brine: missing lang {key}")
 
 
 def _geo_faces(cube):

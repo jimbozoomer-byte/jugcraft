@@ -2,6 +2,12 @@ package io.github.jimbozoomer.jugcraft.lair;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
+import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Frostward;
+import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload.EdgeKind;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaRequestPayload;
@@ -29,7 +35,8 @@ import org.jspecify.annotations.Nullable;
  * how support earns a share of the reward (what counts in that lair: the keeper's own creatures, healing, wards and any
  * objective), the trophy a first win brings (one, or one of a pair at random), what the keeper gives (the acquisition
  * text JEI shows, "with the default data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token
- * and the pieces the loot makes, how to leave, and, in a fight, the player's own part in it.
+ * and the pieces the loot makes, how to leave, and, in a fight, the player's own part in it. The Glacier Hall's rite
+ * also names what readies a player for his frost (Chunk B, B-08: Winter Brine and the Yeti Mitten).
  * <p>
  * Discovery is read, not saved: the inventory, {@link Lairs#VISIT}, {@link LairRewards#OWED} and the first-win
  * advancements. So a player who went in, left, and used up their token (a Cursed Spindle, a Frost Horn, a Kiln Seal)
@@ -200,6 +207,29 @@ public final class LairDossiers {
 				: HalloweenSeason.active() ? Component.translatable("encyclopedia.jugcraft.dossier.in_season")
 				: Component.translatable(boss.offSeason));
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.party", Lairs.partySize(), Lairs.gateTicks() / 20));
+		prepare(out, boss);
+	}
+
+	/**
+	 * What readies a player for the lair's hazard (Concordance Chunk B, B-08), as text and icons and never a recipe grid
+	 * (B-P29: with four keepers the page's grids are spoken for, {@link PageWriter#MAX_GRIDS}). For the Glacier Hall:
+	 * Winter Brine's Frostward, named only while the Concordance is on and the data's Rime brews it (its longest time the
+	 * data's), with a codex link once the Alembic Arts are observed; and the Yeti Mitten, his lasting answer. It only
+	 * reads.
+	 */
+	private static void prepare(PageWriter out, Boss boss) {
+		if (boss != Boss.YETI_KING) {
+			return;
+		}
+		Property rime = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) ? Alchemy.catalog().property(Axis.RIME.id) : null;
+		if (rime == null || !Frostward.STATUS.equals(rime.status())) {
+			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.prepare.mitten"), null, items(List.of("yeti_mitten")));
+			return;
+		}
+		List<Item> icons = new ArrayList<>(List.of(Items.SNOWBALL));
+		icons.addAll(items(List.of("crucible", "draught", "yeti_mitten")));
+		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.prepare", rime.maxTicks() / 20), null, icons);
+		out.codex("alembic/winter_brine", "jugcraft:alembic_arts", ResearchState.OBSERVED);
 	}
 
 	/** The keeper, once met: how support earns a share, the first win and the loot, the recipes it opens, leaving, and the fight. */
