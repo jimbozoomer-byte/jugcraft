@@ -26,17 +26,18 @@ from steampunk_models import box, cyl
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "art" / "kv_walker"
 
-PLATE, DARK, LEG, RUST, GUNMETAL, CHROME, BORE, GRILLE, LAMP = (
-    "kv_plate", "kv_plate_dark", "kv_leg", "kv_rust", "kv_gunmetal", "kv_chrome", "kv_bore", "kv_grille", "kv_lamp")
+PLATE, DARK, LEG, RUST, GUNMETAL, CHROME, BORE, GRILLE, LAMP, FLASH, FLASH_RIM, SMOKE = (
+    "kv_plate", "kv_plate_dark", "kv_leg", "kv_rust", "kv_gunmetal", "kv_chrome", "kv_bore", "kv_grille", "kv_lamp",
+    "kv_flash", "kv_flash_rim", "kv_smoke")
 
 # The hull's box, the turret ring, the gun's pivot on the mantlet.
 HULL = ((-20, 7, -20), (20, 25, 20))
 TURRET = (0, 26.5, 2)
 GUN = (0, 33, 14)
 # The legs: hinge pins on the hull's sides, the femur rising outward, the tibia dropping outward, the foot level.
-HIPS = {"front_left": (20, 17, 10), "front_right": (-20, 17, 10), "rear_left": (20, 17, -12), "rear_right": (-20, 17, -12)}
+HIPS = {"front_left": (20, 17, 20), "front_right": (-20, 17, 20), "rear_left": (20, 17, -20), "rear_right": (-20, 17, -20)}
 FEMUR, TIBIA = 20, 24.5
-FEMUR_RISE, TIBIA_LEAN, SPLAY = 25, 25, 30   # the knee pins top out below the barrel (y 31.4)   # degrees: the femur above level, the tibia outward from vertical, the yaw
+FEMUR_RISE, TIBIA_LEAN, SPLAY = 25, 25, 45   # the knee pins top out below the barrel (y 31.4)   # degrees: the femur above level, the tibia outward from vertical, the yaw
 
 
 def rot_z(v, a):
@@ -111,7 +112,7 @@ def hull():
         m.append(box((-13, y1 + 1.6, z - 0.7), (13, y1 + 2.2, z + 0.7), GUNMETAL))
     # The battery pack on the left side between the leg brackets: a cradle, two cells with their terminals, a
     # strap over them and a cable up into the hull.
-    m.append(box((x0 - 3.8, 9, -5), (x0, 10.5, 4), DARK))
+    m.append(box((x0 - 3.8, 9, -4.5), (x0, 10.5, 4.5), DARK))
     for za, zb in ((-4.5, -0.6), (0.6, 3.5)):
         m.append(box((x0 - 3.4, 10.5, za), (x0 - 0.2, 18.5, zb), {"*": BORE, "up": DARK}))
         m.append(box((x0 - 3.2, 18.5, za + 1), (x0 - 1.0, 19.3, zb - 1), GRILLE))
@@ -122,14 +123,16 @@ def hull():
     m.append(box((x0 - 2.4, 20.4, 4.4), (x0, 21.2, 5.2), DARK))
     # The turret ring, and a step round it.
     m += cyl("y", 0, 0, 14.5, y1, y1 + 1.5, GUNMETAL, DARK)
-    # The leg brackets: a riveted plate standing off each side, front and rear, carrying the hinge pin.
+    # The leg brackets: a riveted plate across each corner, facing the leg's diagonal, carrying the hinge boss.
     for name, (hx, hy, hz) in HIPS.items():
-        side = 1 if hx > 0 else -1
-        inner, outer = (x1, x1 + 1.2) if side > 0 else (x0 - 1.2, x0)
-        m.append(box((inner, hy - 6, hz - 5.5), (outer, hy + 4.5, hz + 5.5), {"*": DARK, "east" if side > 0 else "west": PLATE}))
-        m.append(box((inner, hy + 4.5, hz - 3.5), (outer, hy + 6.5, hz + 3.5), DARK))
-        m += rivets([(outer + 0.2 * side, hy + 3, hz - 4), (outer + 0.2 * side, hy + 3, hz + 4),
-                     (outer + 0.2 * side, hy - 5, hz - 4), (outer + 0.2 * side, hy - 5, hz + 4)], size=0.8)
+        yaw = leg_rests(name)["yaw"][1]
+        z0, z1 = (hz - 0.8, hz + 2.4) if hz > 0 else (hz - 2.4, hz + 0.8)
+        turn = ("y", -yaw, [hx, hy, hz])
+        m.append(box((hx - 5, hy - 6, z0), (hx + 5, hy + 4.5, z1), {"*": DARK, "south" if hz > 0 else "north": PLATE}, turn))
+        m.append(box((hx - 3.5, hy + 4.5, z0 + 0.3), (hx + 3.5, hy + 6.5, z1 - 0.3), DARK, turn))
+        face = z1 + 0.2 if hz > 0 else z0 - 0.2
+        m += [box((x - 0.4, y - 0.4, face - 0.4), (x + 0.4, y + 0.4, face + 0.4), GUNMETAL, turn)
+              for x in (hx - 4, hx + 4) for y in (hy - 5, hy + 3)]
     return m
 
 
@@ -180,11 +183,37 @@ def gun():
     return m
 
 
+MUZZLE = (0, 0, 40.5)
+
+
+def flash():
+    """A cartoon star burst at the muzzle (+z forward): two four-point stars and a tongue of flame, popped and spun
+    by the fire clip, scaled to nothing at rest."""
+    m = []
+    for w, h, tex, z0, z1 in ((8, 2, FLASH, 1, 3.4), (11, 1.3, FLASH_RIM, 0, 1), (6, 1.4, FLASH, 3.6, 5)):
+        for i, (angle, across) in enumerate(((0, False), (0, True), (45, False), (45, True))):
+            cut = 0.12 * i
+            lo, hi = (-h, -w) if across else (-w, -h)
+            m.append(box((lo, hi, z0 + cut), (-lo, -hi, z1 - cut), tex, ("z", angle, [0, 0, (z0 + z1) / 2])))
+    m += cyl("z", 0, 0, 2.6, 5, 10, FLASH)
+    m += cyl("z", 0, 0, 1.4, 10, 15, FLASH)
+    m += cyl("z", 0, 0, 0.7, 15, 19, FLASH_RIM)
+    return m
+
+
+def puff():
+    m = []
+    for cx, cy, cz, r in ((0, 0, 0, 4), (-3, 2.5, 3, 2.8), (3, -1.5, 5, 2.4)):
+        m += cyl("z", cx, cy, r, cz - r * 0.5, cz + r * 0.5, SMOKE)
+        m += cyl("y", cx, cz, r * 0.75, cy - r * 0.8, cy + r * 0.8, SMOKE)
+    return m
+
+
 def femur():
     """From the hinge pin, the left side's femur along +x: the hinge pin, a wide root plate, the long plate, rivets, the
     hose along its top and the knee pin at its end. Mirrored for the right."""
     m = []
-    m += cyl("x", 0, 0, 2.8, 3.4, 5.4, GUNMETAL, CHROME)
+    m += cyl("x", 0, 0, 2.8, 2.6, 4.6, GUNMETAL, CHROME)
     m.append(box((3.4, -5, -1.8), (9, 5, 1.8), LEG))
     m.append(box((9, -3.5, -1.4), (FEMUR + 2, 3.5, 1.4), LEG))
     m.append(box((4, -3, -2.2), (8, 3, -1.8), DARK))
@@ -246,6 +275,9 @@ def groups():
     out = [("hull", (0, 0, 0), None, hull()),
            ("turret", TURRET, None, [shifted(i, TURRET) for i in turret()], "hull"),
            ("gun", GUN, None, [shifted(i, GUN) for i in gun()], "turret")]
+    muzzle = [GUN[k] + MUZZLE[k] for k in range(3)]
+    out.append(("flash", muzzle, None, [shifted(i, muzzle) for i in flash()], "gun"))
+    out.append(("puff", muzzle, None, [shifted(i, muzzle) for i in puff()], "gun"))
     for name in HIPS:
         side = 1 if "left" in name else -1
         hip, knee, ankle = leg_joints(name)
@@ -290,9 +322,196 @@ def posed(pose=None):
     return out
 
 
+# ------------------------------------------------------------------ animation curves (ticks)
+
+def smooth(u):
+    u = max(0.0, min(1.0, u))
+    return u * u * (3 - 2 * u)
+
+
+def with_rest(pose):
+    out = {}
+    for g in groups():
+        base = tuple(g[2] or (0, 0, 0)) + (0, 0, 0)
+        delta = pose.get(g[0], (0, 0, 0, 0, 0, 0))
+        out[g[0]] = tuple(base[i] + delta[i] for i in range(6))
+    return out
+
+
+def leg_delta(name, yaw=0.0, rise=0.0, tuck=0.0, foot=0.0):
+    """Deltas for a leg's four groups: `yaw` sweeps the foot forward (positive) or back about the hinge, `rise`
+    lifts the femur, `tuck` folds the tibia in under the knee, `foot` tips the pad's toe up."""
+    side = 1 if "left" in name else -1
+    return {f"leg_{name}": (0, -side * yaw, 0, 0, 0, 0), f"femur_{name}": (0, 0, side * rise, 0, 0, 0),
+            f"tibia_{name}": (0, 0, -side * tuck, 0, 0, 0), f"foot_{name}": (0, 0, side * (tuck - rise + foot), 0, 0, 0)}
+
+
+def crouch_rise(depth):
+    """The femur's extra rise that lifts the ankle by `depth` pixels, so a hull dropped by that much keeps its feet
+    on the ground."""
+    return math.degrees(math.asin(min(1.0, math.sin(math.radians(FEMUR_RISE)) + depth / FEMUR))) - FEMUR_RISE
+
+
+PHASES = {"front_left": 0.0, "rear_right": 0.0, "front_right": math.pi, "rear_left": math.pi}
+FLASH_SCALE = (0, 0, 0)
+
+
+def gait(t, period, swing, direction=None, turn=0.0, lift=14.0, tuck=20.0):
+    """A trot: diagonal pairs alternate. A leg's foot sweeps back through its stance (the body moving forward, or
+    turning when `turn` is set) and swings forward lifted. `direction` is +1 forward, -1 back; `turn` +1 left."""
+    p = 2 * math.pi * t / period
+    pose = {}
+    for name, phase in PHASES.items():
+        q = p + phase
+        side = 1 if "left" in name else -1
+        up = max(0.0, -math.sin(q))
+        yaw = 0.0
+        if direction:
+            yaw = -direction * swing * math.cos(q)
+        if turn:
+            yaw += -turn * side * swing * math.cos(q)
+        pose.update(leg_delta(name, yaw=yaw, rise=lift * up, tuck=tuck * up, foot=8 * up))
+    return pose
+
+
+def idle_pose(t, period=60):
+    p = 2 * math.pi * t / period
+    pose = {"hull": (0.4 * math.sin(p), 0, 0.3 * math.sin(p + 1), 0, 0.5 * math.sin(p), 0),
+            "turret": (0, 7 * math.sin(p / 2), 0, 0, 0, 0), "gun": (-1.5 * math.sin(p / 2 + 0.7), 0, 0, 0, 0, 0),
+            "flash": (0, 0, 0, 0, 0, 0)}
+    for name in HIPS:
+        pose.update(leg_delta(name, rise=0.8 * math.sin(p + PHASES[name]), tuck=0.8 * math.sin(p + PHASES[name])))
+    return with_rest(pose), (1, 1, 1)
+
+
+def walk_pose(t, period=24):
+    p = 2 * math.pi * t / period
+    pose = gait(t, period, swing=16, direction=1)
+    pose["hull"] = (1.5 * math.sin(2 * p + 0.5), 0, 2 * math.sin(p), 0, 1.4 * (0.5 - 0.5 * math.cos(2 * p)), 0)
+    pose["turret"] = (0, -1.5 * math.sin(p), 0, 0, 0, 0)
+    pose["gun"] = (-1.2 * math.sin(2 * p - 0.6), 0, 0, 0, 0, 0)
+    return with_rest(pose), (1, 1, 1)
+
+
+def turn_pose(t, direction, period=32):
+    p = 2 * math.pi * t / period
+    pose = gait(t, period, swing=14, turn=direction, lift=12, tuck=16)
+    pose["hull"] = (0, 0, -2 * direction * math.sin(p) ** 2, 0, 1.0 * (0.5 - 0.5 * math.cos(2 * p)), 0)
+    pose["turret"] = (0, 3 * direction, 0, 0, 0, 0)
+    return with_rest(pose), (1, 1, 1)
+
+
+JUMP_TICKS = 40
+
+
+def jump_pose(t):
+    """A crouch, a spring off all four legs with the hull rising and the legs stretched then tucked under, a hang,
+    and a heavy landing that squats and settles."""
+    if t < 8:
+        u = smooth(t / 8)
+        depth, rise, stretch, tuck, pitch = 6 * u, 0, 0, 0, 2 * u
+    elif t < 12:
+        u = smooth((t - 8) / 4)
+        depth, rise, stretch, tuck, pitch = 6 * (1 - u), 10 * u, -14 * u, 0, 2 - 8 * u
+    elif t < 26:
+        u = (t - 12) / 14
+        fold = smooth(u * 2) * (1 - smooth((u - 0.6) / 0.4))
+        depth, rise, stretch, tuck, pitch = 0, 10 + 16 * math.sin(math.pi * u), -14 * (1 - fold) + 22 * fold, 30 * fold, -6 + 10 * u
+    elif t < 30:
+        u = smooth((t - 26) / 4)
+        depth, rise, stretch, tuck, pitch = 7 * u, 0, 22 * (1 - u), 30 * (1 - u), 4 - 1 * u
+    else:
+        u = (t - 30) / (JUMP_TICKS - 30)
+        w = math.exp(-u * 3) * math.cos(u * 6)
+        depth, rise, stretch, tuck, pitch = 7 * w * (1 - u), 0, 0, 0, 3 * w * (1 - u)
+    pose = {"hull": (pitch, 0, 0, 0, rise - depth, 0), "turret": (0, 0, 0, 0, 0, 0)}
+    extra = crouch_rise(depth)
+    for name in HIPS:
+        pose.update(leg_delta(name, rise=extra + stretch, tuck=tuck, foot=(0 if depth else 10 * (tuck > 0))))
+    squash = 0.05 * depth / 7
+    return with_rest(pose), (1 + squash, 1 - squash * 1.5, 1 + squash)
+
+
+def climb_pose(t, period=40):
+    """Climbing a step: the hull pitched nose-up and heaved forward, each front leg in turn reaching high and
+    forward then hauling back, the rear legs pushing low."""
+    p = 2 * math.pi * t / period
+    pose = {"hull": (-14 + 2 * math.sin(2 * p), 0, 3 * math.sin(p), 0, 2 * (0.5 - 0.5 * math.cos(2 * p)), 0),
+            "turret": (0, 0, 0, 0, 0, 0), "gun": (6, 0, 0, 0, 0, 0)}
+    for name, phase in PHASES.items():
+        q = p + phase
+        up = max(0.0, -math.sin(q))
+        if "front" in name:
+            pose.update(leg_delta(name, yaw=-14 * math.cos(q), rise=18 + 26 * up, tuck=10 + 30 * up, foot=16 * up))
+        else:
+            pose.update(leg_delta(name, yaw=-12 * math.cos(q), rise=-12 + 10 * up, tuck=-6 + 14 * up, foot=6 * up))
+    return with_rest(pose), (1, 1, 1)
+
+
+FIRE_TICKS = 24
+
+
+def fire_pose(t):
+    """The gun slams back and runs out with a wobble, the burst pops and spins at the muzzle, the smoke rolls out,
+    the hull rocks back and squats on its legs, and the turret shivers."""
+    if t < 3:
+        u = t / 3
+        recoil, kick, depth = -5 * u, -5 * u, 2.5 * u
+    elif t < 14:
+        u = (t - 3) / 11
+        w = math.exp(-u * 3) * math.cos(u * 7)
+        recoil, kick, depth = -5 * (1 - smooth(u)) - 1.5 * w, -5 * w, 2.5 * (1 - smooth(u)) + 0.8 * w
+    else:
+        recoil, kick, depth = 0, 0, 0
+    flash = (0, 0, 0) if t > 8 or t < 1 else tuple(v * (1.3 * math.sin(math.pi * (t - 1) / 7)) for v in (1, 1, 1))
+    puff = (0, 0, 0) if t < 2 or t > 22 else tuple(v for v in (1, 1, 1))
+    pu = max(0.0, min(1.0, (t - 2) / 20))
+    puff_s = (0.3 + 1.4 * pu) * (1 - smooth((pu - 0.6) / 0.4)) if 2 <= t <= 22 else 0
+    pose = {"hull": (kick, 0, 0, 0, -depth, 0), "turret": (0, 0.8 * kick, 0, 0, 0, 0), "gun": (kick * 0.6, 0, 0, 0, 0, recoil),
+            "flash": (0, 0, 60 * t, 0, 0, 0), "puff": (0, 0, 0, 0, 1.5 * pu * 4, 6 * pu + 2 * pu * pu)}
+    extra = crouch_rise(depth)
+    for name in HIPS:
+        pose.update(leg_delta(name, rise=extra))
+    return with_rest(pose), (1, 1, 1), {"flash": flash, "puff": (puff_s, puff_s, puff_s)}
+
+
+def animations():
+    import blockbench_export
+    rests = {g[0]: tuple(g[2] or (0, 0, 0)) for g in groups()}
+    names = list(rests)
+
+    def clip(name, length, frames, poses, loop):
+        tracks = {n: {"rotation": [], "position": [], "scale": []} for n in names}
+        for i in range(frames + 1):
+            time = round(length * i / frames, 4)
+            result = poses(i, frames)
+            pose, scale = result[0], result[1]
+            scales = result[2] if len(result) > 2 else {}
+            for n in names:
+                rx, ry, rz, dx, dy, dz = pose.get(n, rests[n] + (0, 0, 0))
+                rest = rests[n]
+                tracks[n]["rotation"].append((time, (rx - rest[0], ry - rest[1], rz - rest[2])))
+                tracks[n]["position"].append((time, (dx, dy, dz)))
+            tracks["hull"]["scale"].append((time, scale))
+            for n in ("flash", "puff"):
+                tracks[n]["scale"].append((time, scales.get(n, (0, 0, 0))))
+        tracks = {g: {c: k for c, k in ch.items() if any(v != (0, 0, 0) and v != (1, 1, 1) for _, v in k)
+                      or (g in ("flash", "puff") and c == "scale")} for g, ch in tracks.items()}
+        return blockbench_export.animation(name, length, tracks, loop=loop)
+
+    return [clip("idle", 3.0, 30, lambda i, n: idle_pose(60 * i / n), True),
+            clip("walk", 1.2, 24, lambda i, n: walk_pose(24 * i / n), True),
+            clip("turn_left", 1.6, 32, lambda i, n: turn_pose(32 * i / n, 1), True),
+            clip("turn_right", 1.6, 32, lambda i, n: turn_pose(32 * i / n, -1), True),
+            clip("jump", 2.0, 40, lambda i, n: jump_pose(JUMP_TICKS * i / n), False),
+            clip("climb", 2.0, 40, lambda i, n: climb_pose(40 * i / n), True),
+            clip("fire", 1.2, 24, lambda i, n: fire_pose(FIRE_TICKS * i / n), False)]
+
+
 def write_bbmodel(folder=ART):
     import blockbench_export
-    return blockbench_export.write(folder / "kv_walker.bbmodel", "kv_walker", groups(), draw=lambda name: TEXTURES[name]())
+    return blockbench_export.write(folder / "kv_walker.bbmodel", "kv_walker", groups(), draw=lambda name: TEXTURES[name](),
+                                   animations=animations())
 
 
 # ------------------------------------------------------------------ art (the clean style, tools/clean_metal.py)
@@ -351,7 +570,9 @@ def flat(colour, edge):
 TEXTURES = {PLATE: lambda: riveted(OLIVE), DARK: lambda: plain(DARK_OLIVE), LEG: lambda: worn(WORN, RUSTY),
             RUST: lambda: plain(RUSTY), GUNMETAL: lambda: plain(STEEL), CHROME: lambda: plain(BRIGHT),
             BORE: lambda: flat((18, 18, 20), (30, 30, 34)), GRILLE: lambda: grille(DARK_OLIVE),
-            LAMP: lambda: flat((228, 220, 160), (250, 246, 200))}
+            LAMP: lambda: flat((228, 220, 160), (250, 246, 200)),
+            FLASH: lambda: flat((255, 226, 90), (255, 244, 170)), FLASH_RIM: lambda: flat((240, 130, 40), (255, 170, 70)),
+            SMOKE: lambda: flat((214, 214, 210), (236, 236, 232))}
 
 
 def draw_all(save):
@@ -370,6 +591,26 @@ if __name__ == "__main__":
         import box_preview
         draw = lambda n: TEXTURES[n]()
         out = sys.argv[-1]
+        owners = [g[0] for g in groups() for _ in g[3]]
+
+        def view(pose=None, burst=False):
+            keep = [e for e, o in zip(posed(pose), owners) if burst or o not in ("flash", "puff")]
+            return keep
+
         for yaw, pitch, suffix in ((35, 14, "front_left"), (-35, 14, "front_right"), (90, 8, "side"), (-145, 14, "back_right"), (0, 50, "top")):
-            box_preview.render(posed(), scale=4, yaw=yaw, pitch=pitch, draw=draw).save(out.replace(".png", f"_{suffix}.png"))
+            box_preview.render(view(), scale=4, yaw=yaw, pitch=pitch, draw=draw).save(out.replace(".png", f"_{suffix}.png"))
+        from PIL import Image
+        rows = ([walk_pose(t)[0] for t in (0, 6, 12, 18)], [turn_pose(t, 1)[0] for t in (0, 8, 16, 24)],
+                [jump_pose(t)[0] for t in (7, 11, 19, 27)], [climb_pose(t)[0] for t in (0, 10, 20, 30)],
+                [fire_pose(t)[0] for t in (1, 3, 6, 12)])
+        frames = []
+        for r, row in enumerate(rows):
+            for pose in row:
+                frames.append(box_preview.render(view(pose, burst=(r == 4)), scale=2, yaw=-35, pitch=14, draw=draw))
+        w = max(f.width for f in frames)
+        h = max(f.height for f in frames)
+        sheet = Image.new("RGB", (4 * (w + 8), len(rows) * (h + 8)), (236, 238, 242))
+        for i, f in enumerate(frames):
+            sheet.paste(f, ((i % 4) * (w + 8) + (w - f.width) // 2, (i // 4) * (h + 8) + h - f.height))
+        sheet.save(out.replace(".png", "_frames.png"))
         print(out)
