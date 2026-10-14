@@ -22,7 +22,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -35,7 +34,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import org.jspecify.annotations.Nullable;
@@ -54,9 +52,9 @@ import org.jspecify.annotations.Nullable;
  * <p>How: a valley is a site (a chunk corner) and the land within about {@link #RADIUS} blocks of it. Biome lookups
  * there answer the valley ({@link #override}, from {@code mixin/MultiNoiseBiomeSourceMixin}), except rivers, oceans,
  * beaches and anything below the surface ({@link #DEPTH}); the biome is listed in vanilla's Overworld table where no
- * climate reaches it ({@link #addToOverworld}), so world generation knows its features. The knoll is the structure
- * {@code jugcraft:altar_knoll}, a vanilla jigsaw structure of one template, placed in exactly the site chunks by
- * {@link AdamOndiAhmanPlacement} (its own biome check takes any Overworld biome: the placement is what chooses). Terrain does not depend on biomes; the knoll blends itself into the land.
+ * climate reaches it ({@link #addToOverworld}), so world generation knows its features. The knoll at each site is built
+ * by {@link AltarKnolls} once its chunks are newly generated and loaded, as the town is. Terrain does not depend on
+ * biomes; the builder levels and blends the knoll's ground.
  *
  * <p>The state is the loaded Overworld's (seed, noise, generator and start valley), set as it loads, before any chunk
  * generates, and cleared as it unloads. {@code adam_ondi_ahman.enabled=false} stops new valleys and knolls; the biome,
@@ -65,7 +63,6 @@ import org.jspecify.annotations.Nullable;
 public final class AdamOndiAhman {
 	public static final String FEATURE = "adam_ondi_ahman";
 	public static final ResourceKey<Biome> BIOME = ResourceKey.create(Registries.BIOME, Jugcraft.id("adam_ondi_ahman"));
-	public static final ResourceKey<Structure> KNOLL = ResourceKey.create(Registries.STRUCTURE, Jugcraft.id("altar_knoll"));
 	/** Defaults of the rare valleys' settings, and their bounds. Keep in sync with tools/adam_ondi_ahman.py. */
 	public static final int SPACING = 3072;
 	public static final int MIN_SPACING = 1024;
@@ -78,8 +75,6 @@ public final class AdamOndiAhman {
 	public static final int INSET = RADIUS + WOBBLE + 64;
 	/** How many places a rare valley's cell tries, in turn, for land that suits; the first that does is its site. */
 	public static final int TRIES = 6;
-	/** The knolls (a structure tag), for finding one by its pieces. */
-	public static final TagKey<Structure> KNOLLS = TagKey.create(Registries.STRUCTURE, Jugcraft.id("altar_knolls"));
 	/** The valley near the start: rings this far from the start, {@link #START_STEP} apart, every {@link #START_ANGLE} degrees. */
 	public static final int START_MIN = 800;
 	public static final int START_MAX = 1600;
@@ -172,7 +167,7 @@ public final class AdamOndiAhman {
 		ANCIENT_ALTAR = Registry.register(BuiltInRegistries.BLOCK, altarKey, new AncientAltarBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.STONE).sound(SoundType.STONE).strength(-1.0F, 3600000.0F).pushReaction(PushReaction.IMMOVEABLE)
 				.setId(altarKey)));
-		Registry.register(BuiltInRegistries.STRUCTURE_PLACEMENT, Jugcraft.id("adam_ondi_ahman"), AdamOndiAhmanPlacement.CODEC);
+		AltarKnolls.register();
 		int cells = SPACING;
 		double fraction = CHANCE;
 		try {
@@ -484,30 +479,37 @@ public final class AdamOndiAhman {
 		return valley != null ? valley : biome;
 	}
 
-	/** Whether the chunk (chunkX, chunkZ) of the loaded Overworld holds a valley's site, where its knoll stands. */
-	public static boolean isSiteChunk(int chunkX, int chunkZ) {
+	/**
+	 * The valley's site whose knoll (with its blend ring, {@link AltarKnolls#footprint}) covers the chunk (chunkX, chunkZ)
+	 * of the loaded Overworld; null if none does.
+	 */
+	public static @Nullable Site knollAt(int chunkX, int chunkZ) {
 		World loaded = world;
 		if (loaded == null || !enabled()) {
-			return false;
+			return null;
 		}
 		Site start = loaded.start;
-		if (start != null && start.x() >> 4 == chunkX && start.z() >> 4 == chunkZ) {
-			return true;
+		if (start != null && covers(start, chunkX, chunkZ)) {
+			return start;
 		}
-		int x = chunkX << 4;
-		int z = chunkZ << 4;
-		int cellX = Math.floorDiv(x, loaded.spacing);
-		int cellZ = Math.floorDiv(z, loaded.spacing);
-		boolean tried = false;
-		for (int attempt = 0; attempt < TRIES && !tried; attempt++) {
+		int cellX = Math.floorDiv(chunkX << 4, loaded.spacing);
+		int cellZ = Math.floorDiv(chunkZ << 4, loaded.spacing);
+		boolean close = false;
+		for (int attempt = 0; attempt < TRIES && !close; attempt++) {
 			Site candidate = candidate(loaded.print, cellX, cellZ, loaded.spacing, loaded.share, attempt);
 			if (candidate == null) {
-				return false;
+				return null;
 			}
-			tried = candidate.x() >> 4 == chunkX && candidate.z() >> 4 == chunkZ;
+			close = covers(candidate, chunkX, chunkZ);
 		}
-		Site site = tried ? cellSite(loaded, cellX, cellZ) : null;
-		return site != null && site.x() >> 4 == chunkX && site.z() >> 4 == chunkZ;
+		Site site = close ? cellSite(loaded, cellX, cellZ) : null;
+		return site != null && covers(site, chunkX, chunkZ) ? site : null;
+	}
+
+	private static boolean covers(Site site, int chunkX, int chunkZ) {
+		int reach = AltarKnolls.HALF + AltarKnolls.BLEND;
+		return chunkX >= (site.x() - reach) >> 4 && chunkX <= (site.x() + reach) >> 4 && chunkZ >= (site.z() - reach) >> 4
+				&& chunkZ <= (site.z() + reach) >> 4;
 	}
 
 	/** The loaded Overworld's valley near the start; null if it has none (or no Overworld is loaded). */

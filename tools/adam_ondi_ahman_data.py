@@ -1,8 +1,6 @@
-"""Writes Adam-ondi-Ahman's data from tools/adam_ondi_ahman.py: the knoll's structure, structure set, template pool and
-template, the Ancient Altar's block assets, loot table and tags, and names. The valley's biome is tools/biomes.py's
+"""Writes Adam-ondi-Ahman's data from tools/adam_ondi_ahman.py: the knoll's template (world/AltarKnolls builds it), the
+Ancient Altar's block assets, loot table and tags, and names. The valley's biome is tools/biomes.py's
 (placed round its sites, "placement": "site"). Called by agriculture_data.py, as the lairs' data is."""
-import json
-
 import adam_ondi_ahman as aa
 
 MOD = "jugcraft"
@@ -29,35 +27,7 @@ def loot(out, write):
 def tags(tags):
     for tag in ("minecraft:wither_immune", "minecraft:dragon_immune", "minecraft:features_cannot_replace"):
         tags.add("block", tag, rid(aa.ALTAR))
-    tags.add("worldgen/structure", aa.KNOLLS_TAG, rid(aa.STRUCTURE))
-
-
-def structure():
-    """The knoll: vanilla's jigsaw structure of the one template, started under the land's surface at its middle and
-    blended into the land round it (beard_thin). Its placement (the valleys' sites) chooses where; its own biome check
-    takes any Overworld biome, so it never hangs on the valley's biome answer."""
-    return {"type": "minecraft:jigsaw", "biomes": "#minecraft:is_overworld", "max_distance_from_center": 64,
-            "project_start_to_heightmap": "WORLD_SURFACE_WG", "size": 1, "spawn_overrides": {},
-            "start_height": {"absolute": aa.START_HEIGHT}, "start_pool": rid(aa.POOL), "step": "surface_structures",
-            "terrain_adaptation": "beard_thin", "use_expansion_hack": False}
-
-
-def structure_set():
-    return {"placement": {"type": rid(aa.PLACEMENT)}, "structures": [{"structure": rid(aa.STRUCTURE), "weight": 1}]}
-
-
-def template_pool():
-    return {"fallback": "minecraft:empty", "elements": [{"weight": 1, "element": {
-        "element_type": "minecraft:single_pool_element", "location": rid(aa.TEMPLATE), "processors": "minecraft:empty",
-        "projection": "rigid"}}]}
 
 
 def worldgen(data, write):
-    folder = data / MOD / "worldgen"
-    write(folder / "structure" / f"{aa.STRUCTURE}.json", structure())
-    write(folder / "structure_set" / f"{aa.STRUCTURE_SET}.json", structure_set())
-    # Written as it is: the shared writer takes anything with "elements" for a block model.
-    pool = folder / "template_pool" / f"{aa.POOL}.json"
-    pool.parent.mkdir(parents=True, exist_ok=True)
-    pool.write_text(json.dumps(template_pool(), indent=2) + "\n", encoding="utf-8")
     aa.write(data / MOD / "structure" / f"{aa.TEMPLATE}.nbt")

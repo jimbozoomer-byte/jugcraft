@@ -10,9 +10,10 @@ Where the valleys are (world/AdamOndiAhman, which reads these numbers; tools/che
   in the cell (inset INSET blocks from its edges) whose land is suitable (SUITABLE).
 A valley is the land within RADIUS (give or take WOBBLE) blocks of its knoll; rivers, oceans and beaches there keep
 their own biomes (except on the knoll's own ground, KNOLL_GROUND), and so does everything below the surface (DEPTH).
-Terrain does not depend on biomes: the knoll itself is the structure template written here, placed with vanilla's
-jigsaw structure and blended into the land. Its placement alone chooses where it stands, so the structure's own biome
-check takes any Overworld biome.
+Terrain does not depend on biomes: the knoll itself is the structure template written here, which world/AltarKnolls
+builds at each site once every chunk under it (and its blend ring) is newly generated and loaded, as the town is
+built: it levels the ground over the knoll's pad (HALF blocks either way of the site) to the knoll's height, blends it
+back to the land's own over a ring BLEND blocks wide, and places the template, turned as the site's number says.
 
 This module lays the knoll out (the template, a list of named parts) and states the constants Java reads.
 """
@@ -23,12 +24,6 @@ from lair_layout import block, hash01, template, write as write_nbt
 BIOME = "adam_ondi_ahman"
 DISPLAY = "Adam-ondi-Ahman"
 FEATURE = "adam_ondi_ahman"
-STRUCTURE = "altar_knoll"
-STRUCTURE_SET = "altar_knolls"
-# The knolls, a structure tag (for finding one by its pieces).
-KNOLLS_TAG = "jugcraft:altar_knolls"
-PLACEMENT = "adam_ondi_ahman"
-POOL = "adam_ondi_ahman/altar_knoll"
 TEMPLATE = "adam_ondi_ahman/altar_knoll"
 ALTAR = "ancient_altar"
 ALTAR_DISPLAY = "Ancient Altar"
@@ -68,12 +63,16 @@ DEPTH = 0.2
 # the knoll's structure, which checks the biome at its template's middle, always finds it.
 KNOLL_GROUND = 64
 
-# The knoll's template: SIZE (x, y, z). Its layer 0 is subsoil and layer 1 the ground, so the structure starts
-# START_HEIGHT under the land's surface at its middle (vanilla's jigsaw structure projects its start to the surface).
+# The knoll's template: SIZE (x, y, z). Its layer 0 is subsoil and layer 1 the ground, which the builder sets on the
+# land's height at the site (the middle of nine samples over the pad, from the land's noise). It turns round CENTRE.
 SIZE = (48, 18, 48)
-START_HEIGHT = -2
 GROUND_Y = 1
 CENTRE = (23, 23)
+# The builder (world/AltarKnolls): the pad levelled for the knoll reaches HALF blocks either way of the site (the
+# template reaches CENTRE + 1 either way, however it is turned); the ground blends back to the land's own height over a
+# ring BLEND blocks wide round it; a hollow under it is filled at most FILL_DEPTH deep, and land over it cleared at most
+# CLEAR_HEIGHT high.
+BUILD = {"half": 25, "blend": 8, "fill_depth": 24, "clear_height": 32}
 # The knoll: a mound MOUND["radius"] blocks round, rising MOUND["peak"] blocks to a flat crown MOUND["crown"] round.
 MOUND = {"radius": 21, "peak": 8, "crown": 6}
 # The altars on its crown, stacked: (half-width, block weights); each one block over the last. The Ancient Altar lies

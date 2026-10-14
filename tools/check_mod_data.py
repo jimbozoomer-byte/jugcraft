@@ -537,7 +537,7 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
-OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE, "altar_knoll"} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
+OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES},
                  "spell": set(concordance.INVOCATIONS) | {"composed"}}
 
@@ -2826,14 +2826,12 @@ def check_adam_ondi_ahman():
     the biome is placed round its sites and by no rule; and the hooks (biome lookups, the climate table, the mod's start)
     are in place."""
     import adam_ondi_ahman as aa
-    import adam_ondi_ahman_data as aad
     import math
     from lair_layout import template
     from retro_game_shop import nbt_bytes
     java = (WORLD_JAVA / "AdamOndiAhman.java").read_text(encoding="utf-8")
     suitable = aa.SUITABLE
-    for expected in (f'FEATURE = "{aa.FEATURE}"', f'Jugcraft.id("{aa.BIOME}")', f'Jugcraft.id("{aa.STRUCTURE}")',
-                     f'Jugcraft.id("{aa.ALTAR}")', f'Jugcraft.id("{aa.PLACEMENT}"), AdamOndiAhmanPlacement.CODEC',
+    for expected in (f'FEATURE = "{aa.FEATURE}"', f'Jugcraft.id("{aa.BIOME}")', f'Jugcraft.id("{aa.ALTAR}")', "AltarKnolls.register();",
                      f"SPACING = {aa.SPACING};", f"MIN_SPACING = {aa.MIN_SPACING};", f"MAX_SPACING = {aa.MAX_SPACING};",
                      f"CHANCE = {aa.CHANCE};", f"RADIUS = {aa.RADIUS};", f"WOBBLE = {aa.WOBBLE};", "INSET = RADIUS + WOBBLE + 64;",
                      f"START_MIN = {aa.START['min']};", f"START_MAX = {aa.START['max']};", f"START_STEP = {aa.START['step']};",
@@ -2843,16 +2841,24 @@ def check_adam_ondi_ahman():
                      f"HUMIDITY_MIN = {suitable['humidity'][0]}F;", f"HUMIDITY_MAX = {suitable['humidity'][1]}F;",
                      f"PEAKS_VALLEYS = {suitable['peaks_valleys']}F;", f"REACH = {aa.REACH};", f"GROUND_MIN = {aa.GROUND['min']};",
                      f"GROUND_MAX = {aa.GROUND['max']};", f"MAX_SLOPE = {aa.GROUND['slope']};", f"DEPTH = {aa.DEPTH}F;",
-                     f"KNOLL_GROUND = {aa.KNOLL_GROUND};", f"TRIES = {aa.TRIES};",
-                     f'Jugcraft.id("{aa.KNOLLS_TAG.split(":")[1]}")'):
+                     f"KNOLL_GROUND = {aa.KNOLL_GROUND};", f"TRIES = {aa.TRIES};"):
         if expected not in java:
             err(f"AdamOndiAhman.java has no {expected} (tools/adam_ondi_ahman.py)")
     if aa.INSET != aa.RADIUS + aa.WOBBLE + 64 or aa.MIN_SPACING <= 2 * aa.INSET:
         err("tools/adam_ondi_ahman.py: a rare valley must sit INSET (RADIUS + WOBBLE + 64) inside a cell of at least MIN_SPACING")
     if aa.KNOLL_GROUND < max(aa.SIZE[0], aa.SIZE[2]) or aa.KNOLL_GROUND >= aa.RADIUS - aa.WOBBLE:
         err("tools/adam_ondi_ahman.py: KNOLL_GROUND must cover the knoll's template however it turns, inside the valley")
-    if aa.START["min"] <= aa.RADIUS + aa.WOBBLE or aa.START_HEIGHT != -(aa.GROUND_Y + 1):
-        err("tools/adam_ondi_ahman.py: the start valley must clear the start, and the template's ground lie on the land's surface")
+    if aa.START["min"] <= aa.RADIUS + aa.WOBBLE:
+        err("tools/adam_ondi_ahman.py: the start valley must clear the start")
+    builder = (WORLD_JAVA / "AltarKnolls.java").read_text(encoding="utf-8")
+    for expected in (f'Jugcraft.id("{aa.TEMPLATE}")', f"SIZE = {aa.SIZE[0]};", f"CENTRE = {aa.CENTRE[0]};", f"GROUND_Y = {aa.GROUND_Y};",
+                     f"HALF = {aa.BUILD['half']};", f"BLEND = {aa.BUILD['blend']};", f"FILL_DEPTH = {aa.BUILD['fill_depth']};",
+                     f"CLEAR_HEIGHT = {aa.BUILD['clear_height']};"):
+        if expected not in builder:
+            err(f"AltarKnolls.java has no {expected} (tools/adam_ondi_ahman.py)")
+    if (aa.SIZE[0] != aa.SIZE[2] or aa.CENTRE[0] != aa.CENTRE[1] or aa.BUILD["half"] < aa.CENTRE[0] + 1
+            or aa.BUILD["half"] < aa.SIZE[0] - aa.CENTRE[0] or aa.INSET <= aa.BUILD["half"] + aa.BUILD["blend"] + 16):
+        err("tools/adam_ondi_ahman.py: the knoll's pad must hold its template however it turns, and stay inside its cell")
     config = CONFIG.read_text(encoding="utf-8")
     for option, value in (("start", "on"), ("spacing", aa.SPACING), ("chance", aa.CHANCE)):
         if f'"adam_ondi_ahman.{option}", "{value}"' not in config:
@@ -2866,8 +2872,6 @@ def check_adam_ondi_ahman():
         err("OverworldBiomeBuilderMixin does not list the valley in the Overworld's table")
     if "AdamOndiAhman.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
         err("Jugcraft.java does not register Adam-ondi-Ahman")
-    if "AdamOndiAhman.isSiteChunk(x, z)" not in (WORLD_JAVA / "AdamOndiAhmanPlacement.java").read_text(encoding="utf-8"):
-        err("AdamOndiAhmanPlacement does not place the knolls at the valleys' sites")
     altar_java = (WORLD_JAVA / "AncientAltarBlock.java").read_text(encoding="utf-8")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     if f'"message.{MOD}.adam_ondi_ahman.dormant"' not in altar_java or lang.get(f"message.{MOD}.adam_ondi_ahman.dormant") != aa.DORMANT:
@@ -2877,15 +2881,6 @@ def check_adam_ondi_ahman():
     info = bm.BIOMES.get(aa.BIOME, {})
     if info.get("placement") != "site" or info.get("display") != aa.DISPLAY:
         err(f"tools/biomes.py: {aa.BIOME} must be placed round its sites (\"placement\": \"site\")")
-    tag = load(DATA / MOD / "tags" / "worldgen" / "structure" / f"{aa.KNOLLS_TAG.split(':')[1]}.json") or {}
-    if tag.get("values") != [f"{MOD}:{aa.STRUCTURE}"]:
-        err(f"{aa.KNOLLS_TAG} should hold the knoll alone: {tag.get('values')}")
-    folder = DATA / MOD / "worldgen"
-    for path, wanted in ((folder / "structure" / f"{aa.STRUCTURE}.json", aad.structure()),
-                         (folder / "structure_set" / f"{aa.STRUCTURE_SET}.json", aad.structure_set()),
-                         (folder / "template_pool" / f"{aa.POOL}.json", aad.template_pool())):
-        if load(path) != wanted:
-            err(f"{path.relative_to(ROOT)} is out of date (run tools/generate_material_data.py)")
     blocks = aa.blocks()
     nbt = DATA / MOD / "structure" / f"{aa.TEMPLATE}.nbt"
     if not nbt.is_file() or nbt.read_bytes() != nbt_bytes(template(blocks, aa.SIZE)):

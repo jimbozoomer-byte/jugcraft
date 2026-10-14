@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.world.AdamOndiAhman;
+import io.github.jimbozoomer.jugcraft.world.AdamOndiAhmanState;
+import io.github.jimbozoomer.jugcraft.world.AltarKnolls;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -15,6 +17,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
@@ -92,20 +95,28 @@ public class AdamOndiAhmanClientGameTests implements FabricClientGameTest {
 				altar = server.computeOnServer(minecraft -> findAltar(minecraft.overworld(), site));
 			}
 			if (altar == null) {
-				// What the site holds instead: whether its chunk is a knoll's, the biome its chunks were made with, any piece
-				// of a knoll near it, and the ground; and a picture of it from above.
+				// What the site holds instead: whether its knoll is built, how many of its chunks are new and loaded, and the
+				// ground; and a picture of it from above.
 				String held = server.computeOnServer(minecraft -> {
 					ServerLevel level = minecraft.overworld();
-					StringBuilder out = new StringBuilder("site chunk is a knoll's: " + AdamOndiAhman.isSiteChunk(site.x() >> 4, site.z() >> 4));
+					AdamOndiAhmanState state = AdamOndiAhmanState.get(level);
+					long key = AltarKnolls.key(site);
+					int fresh = 0;
+					int loaded = 0;
+					List<ChunkPos> chunks = AltarKnolls.footprint(site);
+					for (ChunkPos pos : chunks) {
+						fresh += state.isNew(key, pos.pack()) ? 1 : 0;
+						loaded += level.getChunkSource().getChunkNow(pos.x(), pos.z()) != null ? 1 : 0;
+					}
+					StringBuilder out = new StringBuilder("knoll built: " + state.built(key) + ", chunks new " + fresh + " and loaded " + loaded
+							+ " of " + chunks.size() + ", the knoll's height " + AltarKnolls.groundHeight(level, site));
 					for (int dx = -24; dx <= 24; dx += 24) {
 						for (int dz = -24; dz <= 24; dz += 24) {
 							int x = site.x() + dx;
 							int z = site.z() + dz;
 							BlockPos ground = new BlockPos(x, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1, z);
 							out.append("; ").append(x).append(' ').append(z).append(": ")
-									.append(level.getBiome(ground).unwrapKey().map(key -> key.identifier().getPath()).orElse("?")).append(", ")
-									.append(level.getBlockState(ground).getBlock().getDescriptionId()).append(" at y ").append(ground.getY())
-									.append(level.structureManager().getStructureWithPieceAt(ground, AdamOndiAhman.KNOLLS).isValid() ? ", in a knoll" : "");
+									.append(level.getBlockState(ground).getBlock().getDescriptionId()).append(" at y ").append(ground.getY());
 						}
 					}
 					return out.toString();

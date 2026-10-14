@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.world.AdamOndiAhman;
-import io.github.jimbozoomer.jugcraft.world.AdamOndiAhmanPlacement;
+import io.github.jimbozoomer.jugcraft.world.AltarKnolls;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,13 +28,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -42,8 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Adam-ondi-Ahman (docs/features/adam-ondi-ahman.md): the valley's biome, the knoll's structure, set, pool and template
- * load and fit together; the biome is listed in the Overworld's table where no climate reaches it; the Ancient Altar
+ * Adam-ondi-Ahman (docs/features/adam-ondi-ahman.md): the valley's biome and the knoll's template load, and the knoll's
+ * footprint holds it; the biome is listed in the Overworld's table where no climate reaches it; the Ancient Altar
  * cannot be broken and only says it is dormant; the rare valleys' sites keep to their cells, in about the share the
  * settings give; and the climate a knoll needs. Where the valleys land in a real world is
  * AdamOndiAhmanClientGameTests'.
@@ -54,26 +53,27 @@ public class AdamOndiAhmanGameTests {
 	/** tools/adam_ondi_ahman.py SIZE. */
 	private static final Vec3i SIZE = new Vec3i(48, 18, 48);
 
-	/** The biome, the knoll's structure, its set and its pool load; the knoll stands in the valley alone, placed at its sites. */
+	/** The biome loads and is an Overworld biome, with its own name. */
 	@GameTest
-	public void valleyAndKnollFilesLoad(GameTestHelper helper) {
-		ServerLevel level = helper.getLevel();
-		var access = level.registryAccess();
-		Holder<Biome> valley = access.lookupOrThrow(Registries.BIOME).getOrThrow(AdamOndiAhman.BIOME);
+	public void valleyBiomeLoads(GameTestHelper helper) {
+		Holder<Biome> valley = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(AdamOndiAhman.BIOME);
 		helper.assertTrue(valley.is(BiomeTags.IS_OVERWORLD), "Adam-ondi-Ahman is not an Overworld biome");
-		Holder<Structure> knoll = access.lookupOrThrow(Registries.STRUCTURE).getOrThrow(AdamOndiAhman.KNOLL);
-		// Its placement chooses where it stands (the valleys' sites); its own biome check takes any Overworld biome.
-		helper.assertTrue(knoll.value().biomes().contains(valley)
-				&& knoll.value().biomes().contains(access.lookupOrThrow(Registries.BIOME).getOrThrow(net.minecraft.world.level.biome.Biomes.PLAINS)),
-				"The knoll's biome check is not the Overworld's: " + knoll.value().biomes());
-		helper.assertTrue(knoll.is(AdamOndiAhman.KNOLLS), "The knoll is not in #jugcraft:altar_knolls");
-		StructureSet set = access.lookupOrThrow(Registries.STRUCTURE_SET)
-				.getOrThrow(ResourceKey.create(Registries.STRUCTURE_SET, Jugcraft.id("altar_knolls"))).value();
-		helper.assertTrue(set.placement() instanceof AdamOndiAhmanPlacement, "The knolls are not placed at the valleys' sites: " + set.placement());
-		helper.assertTrue(set.structures().size() == 1 && set.structures().get(0).structure().is(AdamOndiAhman.KNOLL),
-				"The knolls' set holds " + set.structures());
-		helper.assertTrue(access.lookupOrThrow(Registries.TEMPLATE_POOL).containsKey(Jugcraft.id("adam_ondi_ahman/altar_knoll")),
-				"No template pool jugcraft:adam_ondi_ahman/altar_knoll");
+		helper.succeed();
+	}
+
+	/**
+	 * A knoll's footprint (its pad and blend ring, 33 blocks either way) for a site at a chunk's corner is the 6 x 6 chunks
+	 * round it, and its pad holds its template however it turns.
+	 */
+	@GameTest
+	public void knollFootprintHoldsItsTemplate(GameTestHelper helper) {
+		AdamOndiAhman.Site site = AdamOndiAhman.Site.at(1600, -512, 7L);
+		List<ChunkPos> chunks = AltarKnolls.footprint(site);
+		helper.assertTrue(chunks.size() == 36 && chunks.contains(new ChunkPos(97, -35)) && chunks.contains(new ChunkPos(102, -30)),
+				"The knoll's footprint is " + chunks);
+		helper.assertTrue(AltarKnolls.HALF >= AltarKnolls.CENTRE + 1 && AltarKnolls.HALF >= AltarKnolls.SIZE - AltarKnolls.CENTRE,
+				"The knoll's pad does not hold its template turned");
+		helper.assertTrue(AltarKnolls.key(site) != AltarKnolls.key(AdamOndiAhman.Site.at(1600, -496, 7L)), "Two sites share a key");
 		helper.succeed();
 	}
 

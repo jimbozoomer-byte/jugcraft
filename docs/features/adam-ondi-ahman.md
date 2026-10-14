@@ -43,10 +43,10 @@ Nothing to obtain but vanilla blocks from the knoll, and nothing to craft. The A
   - on suitable land: inland, not the mountains, temperate, not a river's bed, dry at a 3 x 3 grid of samples 40 blocks apart, 65 to 110 high at its middle, and no more than 10 blocks from the highest sample to the lowest. Only the land's noise is read (as the town's choice reads it), so nothing is generated to choose.
   - Its site is saved in the Overworld (`data/jugcraft_adam_ondi_ahman.dat`), chosen or not, and read back as the Overworld loads, before any chunk generates. Moving the world spawn later does not move it.
 - **The rare valleys** come from the world seed: `adam_ondi_ahman.chance` of the cells `adam_ondi_ahman.spacing` blocks square try up to 6 places each, every one at least 272 blocks inside its cell so that its valley never reaches the next cell; the first whose land suits (as above) is the cell's valley. (CI's first real world found none within 12 km with one place a cell.) A rare valley that would touch the start valley gives way to it. The same seed always makes the same rare valleys.
-- **How the valley and its knoll agree.** A valley is the land within 176 blocks of its site, give or take 32 round its wavering edge. Biome lookups there answer Adam-ondi-Ahman, except rivers, oceans, beaches and everything below the surface. Within 64 blocks of the site, the knoll's own ground, the valley answers even over a river. The knoll is vanilla's jigsaw structure of one template, placed in exactly the site chunks. Its own biome check takes any Overworld biome, since the placement is what chooses; CI's second real world chose a valley but no knoll stood in it with the check set to the valley alone. The knolls are tagged `#jugcraft:altar_knolls`.
+- **How the valley and its knoll agree.** A valley is the land within 176 blocks of its site, give or take 32 round its wavering edge. Biome lookups there answer Adam-ondi-Ahman, except rivers, oceans, beaches and everything below the surface. Within 64 blocks of the site, the knoll's own ground, the valley answers even over a river. The knoll is built at its site by `world/AltarKnolls`, as the town is built: once every chunk under it and its blend ring (6 x 6 chunks) has been newly generated and is loaded, the ground is levelled to the knoll's height over its pad (25 blocks either way of the site), filling a hollow at most 24 deep and clearing land and trees at most 32 high, and blended back to the land's own height over an 8-block ring; then its template is placed, turned as the site's number says. The knoll's height is the middle of nine height samples over the pad, read from the land's noise. Which knolls are built, and which chunks under the others are new, is saved. A knoll is never built over a chunk the world had before. (It was first a vanilla jigsaw structure with a custom placement; CI's real worlds showed 26.3's generator never placed it, though the site chunk was chosen.)
 - **Finding one:** `/locate biome jugcraft:adam_ondi_ahman` finds a valley. `/locate structure` does not find the knolls, as for the World Designer's pinned structures: vanilla's search knows only its own placements.
 - **Settings** (config/jugcraft.properties):
-  - `adam_ondi_ahman.enabled=false` stops new valleys and knolls. The biome, the structure and the altar stay registered, so old chunks keep them.
+  - `adam_ondi_ahman.enabled=false` stops new valleys and knolls. The biome and the altar stay registered, so old chunks keep them.
   - `adam_ondi_ahman.start=off`: new worlds get no valley near their start.
   - `adam_ondi_ahman.spacing` (1,024 to 16,384 blocks; default 3,072) and `adam_ondi_ahman.chance` (0 to 1; default 0.5). Changing them on an existing world moves the rare valleys for new chunks only, which can leave a valley cut off at the old chunks' edge.
 - **Existing worlds.** Old chunks are never rewritten. A world made before this gets no start valley (its first start is long past), but its new chunks may hold rare ones.
@@ -55,24 +55,24 @@ Nothing to obtain but vanilla blocks from the knoll, and nothing to craft. The A
 
 ## Dependencies and assets
 - No new dependency. One new hook in each of two existing mixins: the biome lookup (`MultiNoiseBiomeSourceMixin`) and the Overworld's climate table (`OverworldBiomeBuilderMixin`).
-- The knoll is a structure template written by `tools/adam_ondi_ahman.py` from vanilla block IDs and the Ancient Altar. No Mojang structure file is copied.
+- The knoll is a structure template written by `tools/adam_ondi_ahman.py` from vanilla block IDs and the Ancient Altar, built into the world by `world/AltarKnolls`. No Mojang structure file is copied.
 - The Ancient Altar's textures are drawn by code in `tools/adam_ondi_ahman_textures.py`: weathered grey stone, a carved band on its sides, and a ring and a red star on its face. No Mojang texture is read, traced or copied.
 - The land's climate is read with the world's own climate sampler. 26.3's `RandomState` holds none (CI's first compile and run showed it), so `MultiNoiseBiomeSourceMixin` notes the one the game hands to the Overworld's biome source with each biome lookup (`createResolver`, `createResolverForChunk`). Until it has, no land is judged (and nothing is remembered); the start valley's choice makes one lookup first to be sure.
-- Java: `world/AdamOndiAhman` (placement, the start valley, the biome answer and the registrations), `world/AdamOndiAhmanPlacement` (the structure placement type `jugcraft:adam_ondi_ahman`), `world/AdamOndiAhmanState` (the saved start valley) and `world/AncientAltarBlock`.
+- Java: `world/AdamOndiAhman` (placement, the start valley, the biome answer and the registrations), `world/AltarKnolls` (builds the knolls), `world/AdamOndiAhmanState` (the saved start valley and the knolls' progress) and `world/AncientAltarBlock`.
 - Data:
   - the biome, from `tools/biomes.py` (`"placement": "site"`: placed round its sites, by no region rule);
-  - from `tools/adam_ondi_ahman_data.py`: the structure `jugcraft:altar_knoll`, its set `jugcraft:altar_knolls`, its pool and template, and the altar's block assets, empty loot table and tags (wither- and dragon-immune; `#minecraft:features_cannot_replace`).
+  - from `tools/adam_ondi_ahman_data.py`: the knoll's template, and the altar's block assets, empty loot table and tags (wither- and dragon-immune; `#minecraft:features_cannot_replace`).
 
 ## Verification
 Results are recorded under "Results" below after CI runs.
 - `python3 tools/check_mod_data.py`, `check_adam_ondi_ahman`:
   - Java's numbers, IDs, settings and hooks match `tools/adam_ondi_ahman.py`;
-  - the committed template, structure, set and pool are current;
-  - the biome is placed round its sites and by no rule, and `#jugcraft:altar_knolls` holds the knoll;
+  - the committed template is current, and the builder's numbers (pad, blend ring, fill and clearing) match, with the pad holding the template however it turns and the knoll inside its cell;
+  - the biome is placed round its sites and by no rule;
   - the knoll as built: one Ancient Altar, on the top altar, with room to stand beside it; no gap in an altar under the one above it; the path up the knoll climbs at most a block at a time, with headroom; the settlement and the spring off the mound; ground under every column; tall grass whole.
-  - Breaking the Java on purpose, one change at a time (a radius, a climate limit, the start rings, the placement's ID, either hook, the placement's rule, the altar's message, a setting's default), made the audit fail each time: 9 of 9.
+  - Breaking the Java on purpose, one change at a time (a radius, a climate limit, the start rings, the tries, the builder's registration, its blend ring and pad, either hook, the altar's message, a setting's default), made the audit fail each time: 11 of 11.
 - Server game tests (`AdamOndiAhmanGameTests`):
-  - the biome, structure, set and pool load, and the knoll stands in the valley alone, placed at its sites;
+  - the biome loads, and a knoll's footprint is the 6 x 6 chunks round its site;
   - the valley is listed once in the Overworld's table, where no climate reaches;
   - the template loads at 48 x 18 x 48 with the altar and its stones, in the game's data version;
   - the altar cannot be broken or blown up, has no item, and used, only says it is dormant;
@@ -96,5 +96,5 @@ Results are recorded under "Results" below after CI runs.
 
 ## Rollout and open questions
 - The start valley's distance and the rare valleys' rarity are first guesses. The client test logs how far the first world's start valley is and how many rare valleys lie within 12 km.
-- On steep land the knoll's ground is levelled by vanilla's terrain blending (as round a village); the slope limit keeps that gentle.
+- On steep land the builder's pad and blend ring show; the slope limit (10 blocks over the knoll's samples) keeps them gentle. In a world explored before this, a rare valley whose knoll would cover old chunks has no knoll.
 - Part 2 builds the Altar Keystone, its rite at the altar and the Cydonian Sanctum on Mars; part 3, the Cydonian Sentinel and its loot. The owner checks each part before the next.
