@@ -246,7 +246,10 @@ public class BlueprintGameTests {
 		Map<BlockPos, BlockState> wanted = stake.wanted();
 		Direction side = Direction.Plane.HORIZONTAL.stream().filter(d -> !wanted.containsKey(stakePos.relative(d))).findFirst().orElseThrow();
 		BlockPos comparator = stakePos.relative(side);
+		// A comparator needs solid ground under it.
+		helper.getLevel().setBlockAndUpdate(comparator.below(), Blocks.STONE.defaultBlockState());
 		helper.getLevel().setBlockAndUpdate(comparator, Blocks.COMPARATOR.defaultBlockState().setValue(ComparatorBlock.FACING, side.getOpposite()));
+		helper.assertTrue(helper.getLevel().getBlockState(comparator).is(Blocks.COMPARATOR), "The comparator did not stay beside the stake");
 		int total = wanted.size();
 		int[] expected = {-1};
 		helper.runAfterDelay(45, () -> {
