@@ -2,11 +2,11 @@
 
 Status: contract written. Unit 1 (B-01 and B-02, the Yeti King and the Cinder Tyrant) and unit 3 (B-05 to B-07) are
 implemented on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb`
-([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk A); not merged. Unit 1's tests
-ran in CI once (run 38509414542: all but the two four-player tests, which expected more health than the game's 1024
-cap allows; the tests now expect the cap); unit 3's have not run yet
-([its record](arcane-concordance-rime-strata.md)). Every other unit is Not started. The contract was written at
-`d4c07bf56`, the head of Chunk A ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337)), when main was
+([#352](https://github.com/jimbozoomer-byte/jugcraft/pull/352), which carries Chunk A); not merged. Their tests pass in
+CI: run 38514144531 on `579ab5f6f` (unit 1) and run 38519234934 on `06dc5ea5f` (units 1 and 3) succeeded in every job
+(see the Validation plan). The first run, 38509414542, failed only the two four-player tests, which expected more health
+than the game's 1024 cap allows; the tests now expect the cap. Every other unit is Not started. The contract was written
+at `d4c07bf56`, the head of Chunk A ([#337](https://github.com/jimbozoomer-byte/jugcraft/pull/337)), when main was
 `b73f51c8a` ([#321](https://github.com/jimbozoomer-byte/jugcraft/pull/321)).
 Proposal: the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 4,
@@ -51,9 +51,9 @@ starts.
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | Implemented, CI pending: B-01 and B-02 committed for the Yeti King and the Cinder Tyrant, each keeper in his own commits (B-D1) |
+| 1 | B-01, B-02 | The Yeti King on Chunk A's encounter credit, kept rewards and exactly-once payment; then the Cinder Tyrant in a separate commit (B-D1); both keepers' dossiers, route step and JEI pages | `lair-encounter-credit.md`, `yeti-king.md`, `cinder-tyrant.md` | Implemented, not merged; CI passed (runs 38514144531 and 38519234934): B-01 and B-02 committed for the Yeti King and the Cinder Tyrant, each keeper in his own commits (B-D1) |
 | 2 | B-03, B-04 | Glacier Hall access (ordinary and designed worlds) and lifecycle; the Yeti fight held to the completion evidence (charge and columns, footing, cleanup, frost) | `glacier-hall.md`, `yeti-king.md` | Not started |
-| 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible, with Jade's hold. The crafted upgrade (09:94) is unit 4's water foci (B-P14). One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | [arcane-concordance-rime-strata.md](arcane-concordance-rime-strata.md) | Implemented; not yet compiled or run in CI |
+| 3 | B-05, B-06, B-07 | Rime and Strata research and evidence; Rimebind and Brace; Preserve on the crucible, with Jade's hold. The crafted upgrade (09:94) is unit 4's water foci (B-P14). One unit, because research may unlock only invocations that exist and each invocation must be unlocked by its research (`tools/check_mod_data.py:10321-10323,10688-10693`) | [arcane-concordance-rime-strata.md](arcane-concordance-rime-strata.md) | Implemented, not merged; CI passed (run 38519234934) |
 | 4 | B-08, B-10 | The winter workshop and gear: Winter Brine and Frostward at the crucible (B-D3); the Rime travel kit from the owner's water sets (B-D2); Thallite and the trophies linked without stat changes | new `arcane-concordance-winter.md`; `arcane-concordance-alchemy.md` | Not started |
 | 5 | B-09, B-11 | Brace and Rimebind as optional counters in the Yeti fight; combined fixes, evidence and the owner checkpoint | `yeti-king.md`; this page | Not started |
 
@@ -217,9 +217,10 @@ of `jugcraft:lair_rewards`.
   from his centre), so exact counts and experience shares are asserted only for a fight begun and ended in one
   synchronous block. `LairEncounterGameTests.aKeptCinderTyrantRewardIsSavedAndPaid`: a kept `cinder_tyrant` Due
   survives a save and is paid by his payer.
-- Unchanged, and expected to pass; not re-run since B-01 (CI runs them): `YetiKingGameTests.hisLootIsEachParticipantsOwn`
-  (`:416`), the Tyrant's test of the same name (`CinderTyrantGameTests.java:673`), and the kill in
-  `YetiKingClientGameTests` (`took` then `genericKill`, `:204-205`).
+- Unchanged, and passed in CI with B-01 (runs 38509414542, 38514144531 and 38519234934):
+  `YetiKingGameTests.hisLootIsEachParticipantsOwn` (`:416`), the Tyrant's test of the same name
+  (`CinderTyrantGameTests.java:673`), and the kill in `YetiKingClientGameTests` (`took` then `genericKill`,
+  `:204-205`).
 
 **Acceptance:** "Reward and return survive relevant lifecycle events" (09:110) for death, disconnect and a repeated fall;
 exactly-once rewards (04:20); no reward for a late arrival who did nothing (04:170).
@@ -283,19 +284,19 @@ exactly-once rewards (04:20); no reward for a late arrival who did nothing (04:1
   grids.
 - `check_mod_data.py` mutation checks, as in Chunk A.
 
-**As built (the Glacier Hall's commit; not run until CI):** `EncyclopediaGameTests.theGlacierHallsDossier`,
-`eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and `theExpeditionsPageHoldsEveryKeeper`;
-`GlacierHallGameTests.theHornIsNoHalloweenRite`; `YetiKingGameTests.hisLootIsWhatHisPagesSay` (400 shares, each count
-within five standard deviations of its page's chance; never both trophies). Run here: `check_mod_data.py`,
-`check_repository.py` and `concordance_journey.py` pass; on a scratch copy, 30 faults against `check_acquisition` and
-8 against `check_encyclopedia` (the Yeti's trophies in the tool, his mitten moved into another keeper's entry, his
-rite made a Halloween one, the grid bound lowered to 9, his rite recipe needing his fur, a missing lang key, his snow
-sale dropped from the entry, the Hollow Acre's season words dropped) were each reported, and #336's Mire Hag table with
-no pages was not. Adding `white_wool_from_yeti_fur` to his `made_from` passes at this commit (11 grids of 12); with the
-Kiln's two it would be 13, which the audit refuses.
+**As built (the Glacier Hall's commit; passed in CI runs 38509414542, 38514144531 and 38519234934):**
+`EncyclopediaGameTests.theGlacierHallsDossier`, `eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and
+`theExpeditionsPageHoldsEveryKeeper`; `GlacierHallGameTests.theHornIsNoHalloweenRite`;
+`YetiKingGameTests.hisLootIsWhatHisPagesSay` (400 shares, each count within five standard deviations of its page's
+chance; never both trophies). Run here: `check_mod_data.py`, `check_repository.py` and `concordance_journey.py` pass; on
+a scratch copy, 30 faults against `check_acquisition` and 8 against `check_encyclopedia` (the Yeti's trophies in the
+tool, his mitten moved into another keeper's entry, his rite made a Halloween one, the grid bound lowered to 9, his rite
+recipe needing his fur, a missing lang key, his snow sale dropped from the entry, the Hollow Acre's season words
+dropped) were each reported, and #336's Mire Hag table with no pages was not. Adding `white_wool_from_yeti_fur` to his
+`made_from` passes at this commit (11 grids of 12); with the Kiln's two it would be 13, which the audit refuses.
 
-**As built (the Cinder Kiln's commit; not run until CI):** `EncyclopediaGameTests.theCinderKilnsDossier`, the Kiln Seal
-and the Cinder Kiln added to `eachRiteSaysWhenItWorks`; `CinderKilnGameTests.theSealIsNoHalloweenRite`;
+**As built (the Cinder Kiln's commit; passed in the same three runs):** `EncyclopediaGameTests.theCinderKilnsDossier`,
+the Kiln Seal and the Cinder Kiln added to `eachRiteSaysWhenItWorks`; `CinderKilnGameTests.theSealIsNoHalloweenRite`;
 `CinderTyrantGameTests.hisLootIsWhatHisPagesSay` (400 shares, as the Yeti King's). `aWinOverAnyKeeperIsTheLairStep` and
 `theExpeditionsPageHoldsEveryKeeper` read `LairDossiers.Boss.values()`, so they now take in the Tyrant: four first wins,
 and 12 grids of 12 in 71 rows (79 at most). Run here: `check_mod_data.py`, `check_repository.py` and
@@ -473,7 +474,8 @@ refusing Rimebind; every other harmful status keeps the 15% rule), starts no cas
 already held by its stacking rule; Rimebind on a thawing foe), casts a defense with a harmful step at any foe in reach,
 and measures knockback taken without moving anyone (`Baselines`' "Knockback (blocks/min)" column). New acceptance
 checks: 5, Rimebind's control at most 7.8 foe-seconds a minute; 6, Brace takes knockback off beside the unkillable
-brute. The baselines record follows CI's log.
+brute. The baselines record holds CI's tables (run 38519234934): Rimebind alone 6.6 foe-seconds a minute, Brace alone
+5.2 blocks of knockback.
 
 **Assets** (B-P31). The owner's files byte for byte, at their own sizes: Rimebind
 `ars_jimbaux/textures/item/freeze.png`; Rimebound `ars_jimbaux/textures/mob_effect/freezing.png`; the Thaw
@@ -664,6 +666,10 @@ the Yeti and is still slowed (`YetiKingGameTests`); the foci lengthen Preserve's
 - **Client evidence** (10:109-111): screenshots of the three spell icons and the status icons in the HUD; the three sets
   worn, front and back, and the foci and bangle in their slots; the Yeti charging into a column and reeling. New client
   test classes are added to `tools/select_client_tests.py` and the gametest `fabric.mod.json`.
+- **Combined fixes** (unit 5's list; each found in the units' CI and not fixed yet):
+  - The encyclopedia's home page (`jugcraft_encyclopedia_home`, run 38519234934, shard 0): the Magic card's link is cut
+    to "Open Magic: the Arcane Concorda…", and the body's last line is clipped above it (the Machinery card's body also
+    stops mid-line). A Chunk A defect.
 - **Not run, expected:** two clients in one fight; play by hand; timings against guns and mobility items; completion
   times (04:192-194).
 - **The checkpoint:** 300 to 500 words under the fixed headings (10:87-121), with 2 to 4 screenshots and a short
@@ -748,6 +754,11 @@ B-05 cannot start on its own.
   nine invocations loses the last ones from the bar (the #250 order question); vanilla's knockback without a damaging
   blow is braced without spending the Brace. B-P24's 120 s hold from a focus worn with the Initiate's Wand exceeds that
   wand's 1200-tick duration limit: unit 4 caps it or records why.
+- **Found in CI** (runs 38509414542 and 38519234934): four or more players scale the Yeti King's health to 1050 and the
+  Cinder Tyrant's to 1100, but the game caps a creature's health at 1024, so both stop there (the scale is unchanged);
+  Spell Engine's spell bar starts at a fixed place left of the screen's bottom centre, so a bar of 5 or more spells runs
+  off the left edge of CI's 427-pixel-wide GUI, and 8 or more at 1920×1080 (players can move it in Spell Engine's HUD
+  settings; [record](arcane-concordance-rime-strata.md#rollout-and-open-questions)).
 
 ## Explicit don'ts
 
@@ -773,14 +784,41 @@ B-05 cannot start on its own.
 
 | Unit | Server game tests | Client game tests | Checks | Save tests |
 |---|---|---|---|---|
-| 1 | `YetiKingGameTests`, `CinderTyrantGameTests`, `LairEncounterGameTests`, `EncyclopediaGameTests` | `YetiKingClientGameTests` and `CinderTyrantClientGameTests` unchanged; `EncyclopediaClientGameTests` if the page layout changes | `check_acquisition`, `check_encyclopedia`, with mutations | A kept Yeti and Tyrant Due across a save |
+| 1 | `YetiKingGameTests`, `CinderTyrantGameTests`, `LairEncounterGameTests`, `EncyclopediaGameTests`; passed (runs 38514144531 and 38519234934) | `YetiKingClientGameTests` and `CinderTyrantClientGameTests` unchanged; `EncyclopediaClientGameTests` if the page layout changes (the test is unchanged); each passed by its shard | `check_acquisition`, `check_encyclopedia`, with mutations | A kept Yeti and Tyrant Due across a save; passed |
 | 2 | `GlacierHallGameTests`, `YetiKingGameTests` | `WorldDesignerClientGameTests` (an exported preset); `LairClientGameTests` step 7 (the hall); `GlacierHallClientGameTests` | `check_glacier_hall`, `check_yeti` | None needed |
-| 3 | `ConcordanceRimeStrataGameTests`, `ConcordanceEffectGameTests`, `ConcordanceProgressionGameTests`, `ConcordanceInvocationGameTests`, `ThalliteGameTests`, `ConcordancePersistenceGameTests` | `ConcordanceRimeStrataClientGameTests` (icons, spell bar, HUD and inventory screenshots); `GlacierHallClientGameTests` (the field study; a braced player at the edge, the mist and the whirl) | `check_rime`, `check_strata`, `check_rime_strata_assets` (mutation-tested), `check_invocations`, `check_progression`, `check_conclave`, `check_delivery`, `owner_art.py --check` | The research record (`rimeAndStrataResearchSurviveASave`); saved effects (`rimeAndBraceSurviveASave`); the crucible's field (`ConcordancePersistenceGameTests`) |
+| 3 | `ConcordanceRimeStrataGameTests`, `ConcordanceEffectGameTests`, `ConcordanceProgressionGameTests`, `ConcordanceInvocationGameTests`, `ThalliteGameTests`, `ConcordancePersistenceGameTests`; passed (run 38519234934) | `ConcordanceRimeStrataClientGameTests` (icons, spell bar, HUD and inventory screenshots); `GlacierHallClientGameTests` (the field study; a braced player at the edge, the mist and the whirl); each passed by its shard, but toasts hid the status icons | `check_rime`, `check_strata`, `check_rime_strata_assets` (mutation-tested), `check_invocations`, `check_progression`, `check_conclave`, `check_delivery`, `owner_art.py --check` | The research record (`rimeAndStrataResearchSurviveASave`); saved effects (`rimeAndBraceSurviveASave`); the crucible's field (`ConcordancePersistenceGameTests`); all passed |
 | 4 | `ConcordanceAlchemyGameTests`, `YetiKingGameTests`, the kit's tests | The kit worn and slotted (screenshots) | `check_alchemy`, `check_rime_kit`, `check_acquisition` | A Rime bottle from before the change |
 | 5 | `YetiKingGameTests` (counters) | `YetiKingClientGameTests` (a charge into a column) | Every check; the CI candidate | Re-run of all of the above |
 
 Every unit also runs `tools/check_mod_data.py`, `scripts/check_repository.py` and the build with its server game tests,
 and the build without the optional integrations where it touches an optional boundary.
+
+**Results so far** (units 1 and 3, not merged; each run by workflow_dispatch of the Build workflow, with every client
+test class):
+- Run 38509414542, unit 1 before its last fix: everything passed but `YetiKingGameTests.fourPlayersAreEachPaidOnce` and
+  `CinderTyrantGameTests.fourPlayersAreEachPaidOnce`, which expected a party-scaled health above the game's
+  `max_health` cap of 1024 (the Yeti King 420 × 2.5 = 1050; the Tyrant 440 × 2.5 = 1100). `579ab5f6f` made the tests
+  expect the cap.
+- Run 38514144531 on `579ab5f6f` (unit 1): all 9 jobs succeeded: `mod`, `optional integrations absent`,
+  `choose client tests`, client shards 0 to 4, and `client`.
+- Run 38519234934 on `06dc5ea5f` (units 1 and 3): all 9 jobs succeeded. `mod`: "All 1639 required tests passed" in 3.994
+  min ("BUILD SUCCESSFUL in 6m 3s"); `optional integrations absent`: the same in 3.930 min. The server logs do not name
+  the tests that pass; every server test units 1 and 3 name is registered and required (none sets `required = false`),
+  so each passed as one of the 1639. `choose client tests` chose all 163 client test classes in five shards, and each
+  succeeded (0 in 21m35s, 1 in 39m20s, 2 in 22m46s, 3 in 53m33s, 4 in 23m51s). The client logs print no per-class
+  result, but a failing class stops the client with its error and fails its shard's `runClientGameTest`, so each class
+  passed by its shard: `EncyclopediaClientGameTests` in shard 0; `CinderKilnClientGameTests` in 1;
+  `CinderTyrantClientGameTests`, `LairClientGameTests` and `ConcordanceRimeStrataClientGameTests` in 2;
+  `GlacierHallClientGameTests` and `YetiKingClientGameTests` in 3. The baselines tables went to
+  [the baselines record](arcane-concordance-baselines.md).
+- The server logs' warnings that name the lairs are expected on a game-test server, which has no lair dimensions:
+  "[lairs] No dimension jugcraft:glacier_hall: the lair cannot open" twice, and the same for `cinder_kiln` (and other
+  lairs). No WARN or ERROR line names Rime, Strata, Brace, Rimebind, Yeti, `LairRewards` or `Encounter`.
+- Screenshots (480×270 previews in the job logs): unit 3's status shots were hidden by advancement toasts, and the test
+  now clears them (not yet run); its spell bar runs off the screen's left edge (Risks); the Glacier Hall's shots are in
+  [its record](glacier-hall.md#verification); the Expeditions shot shows only the top of the page, so no shot shows the
+  Glacier Hall's or the Cinder Kiln's dossier (the server tests check their content); the encyclopedia home shot shows a
+  Chunk A defect, on unit 5's list (B-11).
 
 **Evidence rules** (10:5-22):
 - Each command is reported on its own as run and passed, run and failed, or not run. CI on a commit counts for that
@@ -812,15 +850,17 @@ and the build without the optional integrations where it touches an optional bou
 
 ## Where to resume
 
-Units 1 and 3 are implemented on branch `claude/chunk-b-winter-stone`, not merged. Unit 1, in four commits and a fix: B-01, the Yeti King on `Encounter` and `LairRewards`
-with both payout defects fixed and the column deed, then the Cinder Tyrant the same way, with no deed (B-P4); B-02,
-the Glacier Hall's dossier and the Yeti King's JEI pages, with the lair step done by any keeper's first win and the
-generalised `check_acquisition` and `check_encyclopedia`, then the Cinder Kiln's dossier and the Cinder Tyrant's JEI
-pages (B-D1), which fill the Expeditions page's 12 grids. Unit 3 (B-05 to B-07): see
-[its record](arcane-concordance-rime-strata.md#verification). Next: CI on the head, each job's result recorded here
-and in the unit records (the evidence commits: actual results, screenshots, the baselines tables), and the owner's
-checkpoint on B-P2, B-P3, B-P4, B-P5 and B-P36; then unit 2 (B-03, B-04: the Glacier Hall's access and lifecycle, and
-the Yeti fight held to the completion evidence).
+Units 1 and 3 are implemented on branch `claude/chunk-b-winter-stone`, not merged, and their tests pass in CI (run
+38519234934 on `06dc5ea5f`, every job; see the Validation plan). Unit 1, in four commits and two fixes: B-01, the Yeti
+King on `Encounter` and `LairRewards` with both payout defects fixed and the column deed, then the Cinder Tyrant the
+same way, with no deed (B-P4); B-02, the Glacier Hall's dossier and the Yeti King's JEI pages, with the lair step done
+by any keeper's first win and the generalised `check_acquisition` and `check_encyclopedia`, then the Cinder Kiln's
+dossier and the Cinder Tyrant's JEI pages (B-D1), which fill the Expeditions page's 12 grids. Unit 3 (B-05 to B-07): see
+[its record](arcane-concordance-rime-strata.md#verification); after its CI, its status shots clear the advancement
+toasts (not yet run). Next: units 2 (B-03, B-04: the Glacier Hall's access and lifecycle, and the Yeti fight held to the
+completion evidence) and 4 (B-08, B-10: the winter workshop and gear), built in parallel; then unit 5 (B-09, B-11), with
+its combined fixes and the owner's checkpoint. Open for the owner: B-P2, B-P3, B-P4, B-P5 and B-P36; from CI, whether to
+lower the four-player health scale under the 1024 cap, and the spell bar's place.
 #352 has merged, so the base is main; refresh the open pull requests first.
 
 ## Decisions

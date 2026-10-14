@@ -2,8 +2,8 @@
 
 Status: implemented for Concordance Chunk A (unit 4: the acquisition and JEI part of ticket A-07, and the acquisition
 half of A1); it compiled and its server tests passed in #337's CI on `d4c07bf56` (see Verification). Concordance Chunk
-B, unit 1 (B-02) adds the Yeti King's and the Cinder Tyrant's loot ([the chunk's contract](concordance-chunk-b.md)); its
-data checks pass locally and its server tests have not run yet. A-07's other
+B, unit 1 (B-02) adds the Yeti King's and the Cinder Tyrant's loot ([the chunk's contract](concordance-chunk-b.md)), not
+merged; its data checks pass locally and its server tests pass in CI (runs 38514144531 and 38519234934). A-07's other
 two asks are recorded elsewhere: the cast-pose rule in
 [the presentation record](arcane-concordance-presentation.md#one-owner-for-the-arms-chunk-a-ticket-a-07), and the ritual
 and pylon inspection in [the encyclopedia's first slice](jugcraft-encyclopedia.md#first-slice-concordance-chunk-a-unit-4).
@@ -300,8 +300,9 @@ Concordance Chunk B, unit 1 (B-02), the Yeti King's pages; ran here (14 October 
   the older pages Vesperine's first-kill line, her scythe's pool holding the hood, Madame Tatterlace's thread deed and
   the hood's Halloween chance. Adding #336's Mire Hag table with no pages was not reported, as intended.
 - `python3 scripts/check_repository.py` and `python3 tools/concordance_journey.py`: **pass**.
-- Not run: `YetiKingGameTests.hisLootIsWhatHisPagesSay` (400 shares against the pages' chances; CI runs it), and the
-  pages in a client with JEI.
+- `YetiKingGameTests.hisLootIsWhatHisPagesSay` (400 shares against the pages' chances) **passes in CI** (runs
+  38509414542, 38514144531 and 38519234934, by workflow_dispatch; not merged).
+- Not run: the pages in a client with JEI.
 
 Concordance Chunk B, unit 1 (B-02), the Cinder Tyrant's pages (B-D1); ran here (14 October 2026):
 - `python3 tools/generate_material_data.py`: the only generated changes are his five `jei.jugcraft.acquire.*` words and
@@ -313,9 +314,10 @@ Concordance Chunk B, unit 1 (B-02), the Cinder Tyrant's pages (B-D1); ran here (
   `lair/tyrant`, his trophies split into two pools, the Salamander Charm's chance moved in his table, and his payer
   dropped (with eight against `check_encyclopedia`, in [the chunk's contract](concordance-chunk-b.md)).
 - `python3 scripts/check_repository.py` and `python3 tools/concordance_journey.py`: **pass**.
-- Not run: `CinderTyrantGameTests.hisLootIsWhatHisPagesSay` (400 shares: 3 to 6 Tyrant Scales each, never both
-  trophies, and the Cinderbrand, the Magmaw, the charm and the crest each within five standard deviations of 7.5%,
-  7.5%, 25% and 20%; CI runs it), and the pages in a client with JEI.
+- `CinderTyrantGameTests.hisLootIsWhatHisPagesSay` (400 shares: 3 to 6 Tyrant Scales each, never both trophies, and
+  the Cinderbrand, the Magmaw, the charm and the crest each within five standard deviations of 7.5%, 7.5%, 25% and
+  20%) **passes in CI** (the same three runs).
+- Not run: the pages in a client with JEI.
 
 ## World and event applicability
 

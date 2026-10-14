@@ -2,7 +2,8 @@
 
 Status: implemented for Concordance Chunk A (unit 3: tickets A-05 and A-06); its tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on
 `aa4d06c4e`). Extended to the Yeti King and the Cinder Tyrant in Concordance Chunk B, unit 1 (ticket B-01; [the chunk's
-contract](concordance-chunk-b.md)), whose tests have not run yet. See Verification for what has run.
+contract](concordance-chunk-b.md)), not merged; its tests pass in CI (runs 38514144531 and 38519234934). See
+Verification for what has run.
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -157,7 +158,10 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   `Encounter.left`), and a reward kept for one is handed over by calling the join and hand-over code directly; none of
   Chunk A's tests kills, disconnects, rejoins or respawns a player. The existing loot tests still use the bosses'
   `took`, `participants` and `reward`, which keep their signatures.
-- Concordance Chunk B, unit 1 (the Yeti King and the Cinder Tyrant), **not run yet** (CI runs them):
+- Concordance Chunk B, unit 1 (the Yeti King and the Cinder Tyrant), not merged; these **pass in CI** (runs
+  38514144531 on `579ab5f6f` and 38519234934 on `06dc5ea5f`, each with every job green; the server logs name no test,
+  but each of these is a required test, and every required test passed). In the first run, 38509414542, only the two
+  `fourPlayersAreEachPaidOnce` failed: they expected more health than the game's cap of 1024, and now expect the cap.
   `YetiKingGameTests` `supportSharesHisLootOnce`, `aKillingBlowAloneIsPaid`, `aPetsBlowIsItsOwners` (on him and on a
   whelp), `twoBaitersEachEarnTheirDeed`, `anIdleLateArrivalEarnsNothing`, `fourPlayersAreEachPaidOnce` and
   `aFightLoadedAwakeIsRecordedAfresh`; `CinderTyrantGameTests` `supportSharesHisHoardOnce`, `aKillingBlowAloneIsPaid`,
@@ -174,10 +178,12 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   - *respawn and join:* `LairRewards.handOver` and `LairRewards.welcome`, which those events call, are called directly;
   - *save:* in-process round trips of the boss entity and of the player's attachment, not a server restart;
   - *party:* four mock players, not four people.
-  As in Chunk A, there is no real disconnect and no second client.
+  As in Chunk A, there is no real disconnect and no second client. `LairClientGameTests`, the lairs' own client test,
+  passed in run 38519234934 (shard 2).
 
-Not run: a real fight with a healer in a lair; a real death (until the Yeti King's test above runs); a real disconnect,
-rejoin or respawn; two clients; a crash between saves.
+Not run: a real fight with a healer in a lair; a real death in a fight (the Yeti King's test above makes one real
+`ServerPlayer.die` on a test player, without a real blow); a real disconnect, rejoin or respawn; two clients; a crash
+between saves.
 
 ## World and event applicability
 

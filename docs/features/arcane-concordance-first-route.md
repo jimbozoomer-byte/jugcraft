@@ -2,8 +2,8 @@
 
 Status: implemented for Concordance Chunk A (unit 4: ticket A-04, the encyclopedia entry and first route); its server
 and client tests pass in CI (run [38435014953](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38435014953) on `aa4d06c4e`; see Verification).
-Concordance Chunk B, unit 1 extended it (B-02: the Glacier Hall's and the Cinder Kiln's dossiers); its new server tests
-have not run yet (see Verification).
+Concordance Chunk B, unit 1 extended it (B-02: the Glacier Hall's and the Cinder Kiln's dossiers), not merged; its new
+server tests pass in CI (runs 38509414542, 38514144531 and 38519234934; see Verification).
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope, [the first-chunk tickets](../plans/concordance-expansion-2026-10-10/12-detailed-first-chunk-tickets.md) (A-04)
 the ask, and [the encyclopedia's own record](jugcraft-encyclopedia.md) the owner's requirements for the whole feature.
@@ -182,14 +182,20 @@ not known here; the owner's 9 October declaration says the library was remade fr
   `_creative_button`, `_scale4` and `_small`, and, for the first loadout's A-07 view, `jugcraft_first_loadout_kindled_lantern`
   and `jugcraft_first_loadout_adept_wand` (each held in hand).
 
-Concordance Chunk B, unit 1 (B-02) adds the Glacier Hall's and the Cinder Kiln's dossiers and the lair step done by
-any keeper's first win, with these server game tests, which have not run yet (CI runs them):
-`EncyclopediaGameTests.theGlacierHallsDossier`, `theCinderKilnsDossier`, `eachRiteSaysWhenItWorks`,
-`aWinOverAnyKeeperIsTheLairStep` and `theExpeditionsPageHoldsEveryKeeper` (all four keepers beaten: the 12 grids drawn
-in order and no row dropped); `GlacierHallGameTests.theHornIsNoHalloweenRite` and
-`CinderKilnGameTests.theSealIsNoHalloweenRite`. The client test is unchanged and shows only the top of the Expeditions
-page. Run here: `check_mod_data.py` (with `check_encyclopedia` holding each dossier entry to the tool, its loot and
-trophy tables, its rite class's season and the grid bound) and `check_repository.py` pass.
+Concordance Chunk B, unit 1 (B-02) adds the Glacier Hall's and the Cinder Kiln's dossiers and the lair step done by any
+keeper's first win, with these server game tests, which pass in CI: runs 38514144531 and 38519234934 (by
+workflow_dispatch) passed every required test, these among them (the server logs name no test), and the first run,
+38509414542, failed only the two four-player boss tests: `EncyclopediaGameTests.theGlacierHallsDossier`,
+`theCinderKilnsDossier`, `eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and
+`theExpeditionsPageHoldsEveryKeeper` (all four keepers beaten: the 12 grids drawn in order and no row dropped);
+`GlacierHallGameTests.theHornIsNoHalloweenRite` and `CinderKilnGameTests.theSealIsNoHalloweenRite`. The client test is
+unchanged and shows only the top of the Expeditions page: in run 38519234934 (shard 0, where it passed) the
+`_expedition` shot shows the Hollow Acre's dossier, so no shot shows the Glacier Hall's or the Cinder Kiln's; the server
+tests check their content. That run's home shot shows the Magic card's link cut to "Open Magic: the Arcane Concorda…"
+and the body's last line clipped above it, a Chunk A defect on unit 5's list (B-11 in
+[the Chunk B contract](concordance-chunk-b.md)). Run here: `check_mod_data.py` (with `check_encyclopedia` holding each
+dossier entry to the tool, its loot and trophy tables, its rite class's season and the grid bound) and
+`check_repository.py` pass.
 
 CI's history: the first run (38424079157) found Iris 1.11.7's *Shader pack selection* on the default key, I, so the
 default became B (A-D7); the test now also logs every loaded default. A later run (38433352364) failed once on the

@@ -241,19 +241,21 @@ The client game test (`YetiKingClientGameTests`, CI job `client`) runs his fight
 
 Along the way it takes a picture of each part of the fight (above).
 
-Concordance Chunk B, unit 1 (B-01), put his reward on the shared credit and added these game tests. **None has run yet:** there is no Minecraft here, and CI runs them.
+Concordance Chunk B, unit 1 (B-01), put his reward on the shared credit and added these game tests. They pass in CI (runs 38514144531 and 38519234934, by workflow_dispatch; not merged); in the first run, 38509414542, only `fourPlayersAreEachPaidOnce` failed (below).
 - `YetiKingGameTests.supportSharesHisLootOnce`: a healer who mended 4 of what his fight did is paid; a striker who died in his fight (a real death of a test player) is kept their share and handed it back on their feet; one who left the game (marked, on a stand-in player the server never listed) has it kept in the world and handed over on joining; the experience is shared among the three paid; one who walked away, a bystander and the one he only hurt get nothing; and his fall reported again pays no one twice.
 - `aKillingBlowAloneIsPaid`; `aPetsBlowIsItsOwners` (a tamed wolf's bite on him and on a whelp).
 - `twoBaitersEachEarnTheirDeed`: two players with a part short of qualifying, each charged into the column in turn, earn one deed each and qualify by it; `anIdleLateArrivalEarnsNothing`: one struck by his fight but with no part, charged into the column, earns no deed and no loot.
-- `fourPlayersAreEachPaidOnce`: woken by four, his health is two and a half times his own, and each of the four is paid once, a quarter of the experience each.
+- `fourPlayersAreEachPaidOnce`: woken by four, his health is two and a half times his own, held to the game's cap of 1024 (1050 asked), and each of the four is paid once, a quarter of the experience each. In run 38509414542 it still expected 1050 and failed; since `579ab5f6f` it expects the cap.
 - `aFightLoadedAwakeIsRecordedAfresh`: saved awake and loaded again, he holds no one's part and begins a fresh record.
 - `LairEncounterGameTests.aKeptYetiKingRewardIsSavedAndPaid`: a reward kept under `yeti_king` survives a save and is paid once by his payer.
 
-Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these game tests, which have not run yet either:
+Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these game tests, which pass in the same runs (38509414542 included):
 - `YetiKingGameTests.hisLootIsWhatHisPagesSay`: a player who has already won Abominable rolls 400 shares; each holds 4 to 8 Yeti Fur and never both trophies, and the counts of the maul, the Rimeclaw, the mitten and the crown each lie within five standard deviations of 7.5%, 7.5%, 25% and 20%.
 - `EncyclopediaGameTests.theGlacierHallsDossier`, `eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and `theExpeditionsPageHoldsEveryKeeper`; `GlacierHallGameTests.theHornIsNoHalloweenRite`.
 
 `python3 tools/check_mod_data.py` (whose `check_yeti` now also holds his credit and reward to `Encounter` and `LairRewards`: the record begun, abandoned and claimed, the striker's credit on him and his whelps, the payment and payer under `yeti_king`, and the column deed's key) and `python3 scripts/check_repository.py` pass locally at this commit. Five deliberate changes, each made in a scratch copy, each failed `check_yeti`: the claim guard dropped, the whelp crediting `source.getEntity()`, the payer dropped, the old `YetiKingLoot.reward` payment restored, and a constant column key.
+
+Run 38519234934 also ran every client test class; `YetiKingClientGameTests`, unchanged by Chunk B, passed by its shard's success (shard 3).
 
 Not run: the two-client dedicated-server playtest, and play by hand. No test yet times his attacks against real players, measures how long a fight lasts, or tries sliding on his glare ice, his charge or his blocks of ice on a moving player.
 

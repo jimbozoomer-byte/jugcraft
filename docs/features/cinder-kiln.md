@@ -183,7 +183,7 @@ The client game test (`CinderKilnClientGameTests`, CI job `client`) runs the sea
 
 Then it takes ten pictures: the vent on the magma, and in the kiln the view from the ledge, the bowl from near the stair's foot, the crucible and channel under the forge mouth, the slag falling over the lip, the west sluice open over its flooded trough, a shelf, the dome and its vent, and the Grey Mist's arch. Since the brighter light it then reads the game's own block light on every cell of the bowl's floor, and fails under 8. Last, a seal pressed into a magma block in the Nether opens a second kiln, and the tenth picture is that vent.
 
-Concordance Chunk B, unit 1 (B-02) adds `CinderKilnGameTests.theSealIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the seal still takes on magma in a volcanic land. It has not run yet; CI runs it.
+Concordance Chunk B, unit 1 (B-02) adds `CinderKilnGameTests.theSealIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the seal still takes on magma in a volcanic land. It passes in CI (runs 38509414542, 38514144531 and 38519234934, by workflow_dispatch; not merged). In run 38519234934 `CinderKilnClientGameTests`, unchanged by Chunk B, passed with every other client class (shard 1).
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 

@@ -128,7 +128,7 @@ MATRIX = {
         "nothing shown on looking; the same facts come from the journal, the commands and each device's own messages",
         ["benchStudyUnderstandsFirstLight", "preserveHoldsOneBandAndExpires"],
         "Server tests run without Jade in CI's optional-absent job; its overlay has not been seen in a client; Preserve's "
-        "hold has a test, added but not yet run"),
+        "hold, as Jade reads it, passed its test in CI's mod job (run 38519234934, Chunk B unit 3, not merged)"),
     "jei": (
         "Recipe categories for the Lampwright's Bench, the Circle Anchor and the Resonant Ring; alchemy ingredients' "
         "properties as information (never outcomes); since Concordance Chunk A, an information page each on where the "

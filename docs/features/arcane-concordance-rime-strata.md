@@ -2,8 +2,9 @@
 
 Status: implemented for Concordance Chunk B, unit 3 (tickets B-05, B-06 and B-07 of
 [the contract](concordance-chunk-b.md)), on branch `claude/chunk-b-winter-stone`, based on main `feb6d04fb` (#352)
-with the contract and unit 1 beneath it; not merged. **No Minecraft build has been compiled or run yet** (only the balance package, in a scratch javac
-harness); see Verification for what has run.
+with the contract and unit 1 beneath it; not merged. CI run 38519234934 on `06dc5ea5f` built it and passed every job:
+its server game tests among the 1639 required, with and without the optional integrations, and its client game tests.
+Not played by hand or with two clients; see Verification for what has run.
 Proposal issue: none; the owner chose Chunk B on 13 October 2026 ("Ok lets begin Chunk B"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (B2).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code (Claude Opus 5.5); the model is named in the
@@ -231,8 +232,25 @@ until B-09 gives it a visible effect. This is an inference until a test runs.
   moving anyone. Two acceptance checks are added: Rimebind's control stays within a binding for each binding and thaw in
   a minute, plus one (7.8 foe-seconds), and Brace takes knockback off beside the unkillable brute. A scratch harness
   (javac 21 over this tree's generated data; not CI) read 6.6 for the first and 5.2 against 5.6 bare-handed for the
-  second, every earlier cell unchanged. [The baselines record](arcane-concordance-baselines.md) is updated from CI's
-  log, not yet.
+  second, every earlier cell unchanged. CI's game test (run 38519234934, `ConcordanceBaselineGameTests`) logged the
+  same, the acceptance checks held, and [the baselines record](arcane-concordance-baselines.md) now holds its tables.
+  The three new rows, from that log:
+
+| Character | Isolated target | Clustered group | Mobile opponent | Protected target | Objective defense |
+|---|---|---|---|---|---|
+| Only jugcraft:brace | lost 8.8 s | lost 5.2 s | lost 37.5 s | lost 7.6 s | lost 8.8 s |
+| Only jugcraft:preserve | lost 9.3 s | lost 8.4 s | won 40.4 s, 4 HP | lost 6.6 s | lost 8.8 s |
+| Only jugcraft:rimebind | lost 11.0 s | lost 7.8 s | lost 40.5 s | lost 9.1 s | lost 8.8 s |
+
+| Character | Sustained (dmg/s) | Burst (5 s) | Survival (s) | Movement (blocks/min) | Control (foe-s/min) | Efficiency (dmg/Focus) | Support (per ally/min) | Knockback (blocks/min) |
+|---|---|---|---|---|---|---|---|---|
+| Only jugcraft:brace | 1.88 | 9.4 | 6.9 | 0.0 | 0.0 | 0.00 | 0.0 | 5.2 |
+| Only jugcraft:preserve | 1.88 | 9.4 | 7.5 | 0.0 | 0.0 | 0.00 | 0.0 | 5.6 |
+| Only jugcraft:rimebind | 1.71 | 8.5 | 9.0 | 0.0 | 6.6 | 0.00 | 0.0 | 5.6 |
+
+Preserve, never cast in a fight, matches Kindle's and Revelation's rows. Rimebind alone gives the most control of any
+character (6.6 foe-seconds a minute) and wins no encounter; Brace alone wins none either, and its casts cost it
+survival time (6.9 s against Preserve's 7.5).
 
 ## Multiplayer and persistence
 
@@ -249,7 +267,7 @@ until B-09 gives it a visible effect. This is an inference until a test runs.
     `attributes` first, then puts `active_effects` back without `onEffectAdded` (mc263src `LivingEntity.java:780-786`),
     so the modifiers come back only because they were saved among the attributes. That they are saved there is assumed
     from 1.20.5 to 1.21 (`AttributeInstance`'s packing is not in the mirror) and checked by `rimeAndBraceSurviveASave`,
-    not yet run.
+    which passed in CI (run 38519234934): the modifiers came back.
   - **Not saved:** `jugcraft:brace_caster` (a Brace carried through a relog keeps its time and credits no one) and the
     set of Braces spent this tick (at most one tick long).
   - **The crucible's `held_until`** (game time) is written only while held, read with a default of 0, and the crucible
@@ -297,9 +315,10 @@ Also taken from the owner's files, as data rather than copies: Brace's release l
 
 No scaling (B-P31): Spell Engine draws a spell icon into 16×16 from the whole texture (upstream, Spell Engine 1.10.9),
 and vanilla draws status icons at 18×18, stretching the 16×16 ones as it already does for `giant.png` and `shrunk.png`.
-How they look in game has not been seen yet; `ConcordanceRimeStrataClientGameTests` takes the screenshots. Alternatives
-offered at the checkpoint: `shield.png` and `shielding.png` for Brace (but shielding reads as "reduces damage", which
-Brace never does), `frozen.png` (the owner's "cannot heal") and `delay.png` for Preserve.
+How they look in game is barely seen yet: in CI's 480×270 previews the spell bar shows its slots 2 to 6, and
+advancement toasts hid the status icons (Verification). Alternatives offered at the checkpoint: `shield.png` and
+`shielding.png` for Brace (but shielding reads as "reduces damage", which Brace never does), `frozen.png` (the owner's
+"cannot heal") and `delay.png` for Preserve.
 
 Drawn by code, in the Concordance's D, A and E like Ember's (`tools/concordance_sounds.py`): `rime_gather` (Rimebind's
 and Preserve's cast: high wind under glassy voices), `rimebind` (a crystalline crack and falling glassy tone),
@@ -308,8 +327,8 @@ ice or cold casting recording was found in the owner's sound families.
 
 ## Verification
 
-Run for this unit, on 14 October 2026 (no Minecraft jar is available where it was written, so no Minecraft build was
-compiled or run):
+Run for this unit where it was written, on 14 October 2026 (no Minecraft jar is available there, so no Minecraft build
+was compiled or run there):
 
 - `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py` and `python3 scripts/check_repository.py`
   pass on each of the unit's commits.
@@ -332,7 +351,15 @@ compiled or run):
   Blower spending no Brace, no settling at a tick's start, the crucible's snapshot or the client's crucible branch
   without the hold, and the spell bar paragraph changed. Each of the seven was reported, and the clean export passes.
 
-Game tests added (none run yet; CI's `mod`, `optional integrations absent` and client jobs are their first run):
+**CI, run 38519234934** (workflow_dispatch on `06dc5ea5f`, units 1 and 3; not merged): all nine jobs succeeded.
+`mod` logged "All 1639 required tests passed" in 3.994 min ("BUILD SUCCESSFUL in 6m 3s"), and
+`optional integrations absent` the same in 3.930 min. The server log names no test that passed, but every server game
+test below is registered and required, so each passed as one of the 1639. `choose client tests` chose every client
+test class (163) in five shards, and each shard succeeded; a failing class fails its shard, so
+`ConcordanceRimeStrataClientGameTests` passed in shard 2 and `GlacierHallClientGameTests` in shard 3. No WARN or ERROR
+line in the server logs names Rime, Strata, Brace or Rimebind.
+
+Game tests added (all passed in that run):
 
 - `ConcordanceRimeStrataGameTests` (15): `rimeAndStrataTeachTheirInvocations`,
   `snowAndFireObserveRimekeepingInEitherOrder`, `eitherRouteUnderstandsRimekeeping`,
@@ -358,9 +385,18 @@ Game tests added (none run yet; CI's `mod`, `optional integrations absent` and c
 - `ConcordanceRimeStrataClientGameTests` (new): the six icons are in the client's resources; screenshots of the spell
   bar, the status HUD and the inventory (Thawing listed), for people to look at. Nothing judges them.
 
-Not yet run: `./gradlew build`, `./gradlew runClientGameTest`, any client by hand (the icons, sounds, codex pages,
-particles), two clients on a dedicated server (Brace on a party member, Rimebind between players under PvP), and play by
-hand.
+The screenshots of run 38519234934 (480×270 previews in the job log, shard 2):
+- `jugcraft_rime_strata_spell_bar`: Spell Engine's spell bar at the bottom left, slots 2 to 6 visible; the first is cut
+  off by the screen's left edge (only a sliver of its icon). See the spell bar's place under Rollout.
+- `jugcraft_rime_strata_status_hud` and `jugcraft_rime_strata_status_inventory`: five advancement toasts (Cold Against
+  Warmth, Rimekeeping, Strata, Read the Stone, Against the Dark) cover the top right, where the HUD draws effect icons
+  and the inventory lists effects (JEI had moved its list aside). Neither shot shows Rimebound, Thawing or Braced,
+  although the test's check that the client had all three passed, so "Thawing listed" is not shown yet. The test now
+  clears the toasts before each shot (the commit after `06dc5ea5f`; not yet run).
+
+Not run: any client by hand (the icons, sounds, codex pages, particles), two clients on a dedicated server (Brace on a
+party member, Rimebind between players under PvP), and play by hand. `./gradlew build` and
+`./gradlew runClientGameTest` ran only in CI.
 
 ## World and event applicability
 
@@ -401,9 +437,16 @@ protected towns and build permission.
   an inscribed spell is always last. A later fix orders or caps the container (`ConcordanceSpells.containers`) or
   offers a loadout, once the owner chooses; until then `check_invocations` holds
   [the invocations record](arcane-concordance-invocations.md) to the count.
+- **The spell bar's place** (a known limit, seen in CI's previews of run 38519234934): Spell Engine centres its bar on a
+  point left of the screen's bottom centre (`HudConfig.defaultHotBar`: `Origin.BOTTOM`, offset (-170, -11)), 20 GUI
+  pixels a slot, so its left edge is at width/2 - 170 - 10 × spells. CI's window is 427 GUI pixels wide, so a bar of 5
+  or more spells runs off the left edge (the shot's first slot is cut off). At 480 (1920×1080 at the automatic GUI
+  scale) a bar of 7 reaches the edge exactly and 8 or more run off it. Thirteen invocations exist, and the bar keys up
+  to 9. A player can move the bar in Spell Engine's HUD settings; Jugcraft changes no configuration.
 - For the owner's checkpoint: a Brace lasting out its tick (B-P30); the icon choices (B-P31) and the soaked icon's
   folder label; the knockback measure (B-P32); Rimebind's targets following the shared boundary (B-P34); "Stonebrace" as
-  a display name instead of "Brace", to keep it apart from the war fork's trait.
+  a display name instead of "Brace", to keep it apart from the war fork's trait; and the spell bar's place: whether
+  Jugcraft should set a default that keeps a full bar on screen, or leave it to each player's Spell Engine settings.
 - For unit 4: B-P24's 120 s hold from a focus worn with the Initiate's Wand exceeds that wand's duration limit (1200
   ticks); unit 4 should cap the hold at the casting instrument's or record why a worn focus may exceed it. Keys it adds
   to Rimekeeping (`frost_boon`, brews) must be electives.

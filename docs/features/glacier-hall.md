@@ -143,7 +143,9 @@ The client game test (`GlacierHallClientGameTests`, CI job `client`) runs the ho
 
 Then it takes eight pictures: the whirl in the snow at midnight, and in the hall the view from the ledge, the lake from the ramp's foot, the throne, the vault, an ice column, a den and the Grey Mist's arch.
 
-Concordance Chunk B, unit 1 (B-02) adds `GlacierHallGameTests.theHornIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the horn is still answered at night on snow. It has not run yet; CI runs it.
+Concordance Chunk B, unit 1 (B-02) adds `GlacierHallGameTests.theHornIsNoHalloweenRite`, for the dossier's "works all year": with the Halloween event over and `lairs.off_season` off, the Cursed Spindle waits for the season but the horn is still answered at night on snow. It passes in CI (runs 38509414542, 38514144531 and 38519234934, by workflow_dispatch; not merged).
+
+Concordance Chunk B, unit 3 ([Rime and Strata](arcane-concordance-rime-strata.md); not merged) adds to `GlacierHallClientGameTests`: with First Light understood, arriving in the hall is Rimekeeping's field study; and a braced player is still moved by the mist's toll, the Grey Mist and the whirl, and neither the toll nor the whirl spends the Brace. In run 38519234934 the class passed with every other client class (shard 3). Its pictures there (480×270 previews) show the ledge, the lake, the throne, the vault, a column, a den and the Grey Mist's arch as described above; the whirl's (`jugcraft_frost_horn_whirl`) is barely visible, a faint dark smudge of particles at night.
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 

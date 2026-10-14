@@ -273,19 +273,21 @@ The client game test (`CinderTyrantClientGameTests`, CI job `client`) runs his f
 
 It takes fifteen pictures: sunk, waking, the five Kiln attacks, quenched, the Eruption, the surge, the choked sluice, the Cinder Rain, the Lava Wave, the Molten Heart and after his fall.
 
-Concordance Chunk B, unit 1 (B-01), put his reward on the shared credit and added these game tests. **None has run yet:** there is no Minecraft here, and CI runs them.
+Concordance Chunk B, unit 1 (B-01), put his reward on the shared credit and added these game tests. They pass in CI (runs 38514144531 and 38519234934, by workflow_dispatch; not merged); in the first run, 38509414542, only `fourPlayersAreEachPaidOnce` failed (below).
 - `CinderTyrantGameTests.supportSharesHisHoardOnce`: a healer who mended 4 of what his Tail Sweep did is paid; a striker still down as he falls (marked, as Chunk A's tests mark a death; the Yeti King's test makes a real one) is kept their share and handed it on their feet; one who left the game (marked, on a stand-in player the server never listed) has it kept in the world; one who walked away, a bystander and the one he only hurt get nothing; and his fall reported again pays no one twice.
 - `aKillingBlowAloneIsPaid`; `aPetsBlowIsItsOwners` (a tamed wolf's bite on a Cinderling and the felling bite on him; a wild wolf's bite credits no one).
 - `healingHisSlagAndBurningEarnsNothing`: mending what his slag and burning took earns nothing, and mending what his Kiln Breath did qualifies the healer.
-- `fourPlayersAreEachPaidOnce`: woken by four, his health is two and a half times his own, and each of the four is paid once, a quarter of the experience each.
+- `fourPlayersAreEachPaidOnce`: woken by four, his health is two and a half times his own, held to the game's cap of 1024 (1100 asked), and each of the four is paid once, a quarter of the experience each. In run 38509414542 it still expected 1100 and failed; since `579ab5f6f` it expects the cap.
 - `aFightLoadedAwakeIsRecordedAfresh`: saved while waking and loaded again, he lands to fight, holds no one's part and begins a fresh record.
 - `LairEncounterGameTests.aKeptCinderTyrantRewardIsSavedAndPaid`: a reward kept under `cinder_tyrant` survives a save and is paid once by his payer.
 
 `python3 tools/check_mod_data.py` (whose `check_cinder_tyrant` now also holds his credit and reward to `Encounter` and `LairRewards`: the record begun, abandoned and claimed, the striker's credit on him and his Cinderlings, and the payment and payer under `cinder_tyrant`) and `python3 scripts/check_repository.py` pass locally at this commit. Five deliberate changes, each made in a scratch copy, each failed `check_cinder_tyrant`: the payer dropped, `BOSS` renamed, the claim guard dropped, the old damage map restored, and the Cinderling crediting `source.getEntity()`.
 
-Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these game tests, which have not run yet either:
+Concordance Chunk B, unit 1 (B-02), added his dossier and JEI pages, with these game tests, which pass in the same runs (38509414542 included):
 - `CinderTyrantGameTests.hisLootIsWhatHisPagesSay`: a player who has already won Tempered rolls 400 shares; each holds 3 to 6 Tyrant Scales and never both trophies, and the counts of the Cinderbrand, the Magmaw, the Salamander Charm and the crest each lie within five standard deviations of 7.5%, 7.5%, 25% and 20%.
 - `EncyclopediaGameTests.theCinderKilnsDossier`, and his lair in `eachRiteSaysWhenItWorks`, `aWinOverAnyKeeperIsTheLairStep` and `theExpeditionsPageHoldsEveryKeeper`; `CinderKilnGameTests.theSealIsNoHalloweenRite`.
+
+Run 38519234934 also ran every client test class; `CinderTyrantClientGameTests`, unchanged by Chunk B, passed by its shard's success (shard 2).
 
 Not run: the two-client dedicated-server playtest, and play by hand.
 
