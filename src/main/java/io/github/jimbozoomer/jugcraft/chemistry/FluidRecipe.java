@@ -55,18 +55,23 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	 * A fluid and an amount in millibuckets. A fluid result may name the output {@code tank} it goes to (batch 24: a
 	 * machine with several jobs keeps each product in its own tank); -1, the default, means the result's position.
 	 */
-	public record FluidAmount(Fluid fluid, int amount, int tank) {
+	public record FluidAmount(Fluid fluid, int amount, int tank, boolean retained) {
 		static final Codec<FluidAmount> CODEC = RecordCodecBuilder.create(i -> i.group(
 				BuiltInRegistries.FLUID.byNameCodec().fieldOf("fluid").forGetter(FluidAmount::fluid),
 				ExtraCodecs.POSITIVE_INT.fieldOf("amount").forGetter(FluidAmount::amount),
-				Codec.INT.optionalFieldOf("tank", -1).forGetter(FluidAmount::tank)
+				Codec.INT.optionalFieldOf("tank", -1).forGetter(FluidAmount::tank),
+				Codec.BOOL.optionalFieldOf("retained", false).forGetter(FluidAmount::retained)
 		).apply(i, FluidAmount::new));
 		static final StreamCodec<RegistryFriendlyByteBuf, FluidAmount> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.registry(Registries.FLUID), FluidAmount::fluid, ByteBufCodecs.VAR_INT, FluidAmount::amount,
-				ByteBufCodecs.VAR_INT, FluidAmount::tank, FluidAmount::new);
+				ByteBufCodecs.VAR_INT, FluidAmount::tank, ByteBufCodecs.BOOL, FluidAmount::retained, FluidAmount::new);
+
+		public FluidAmount(Fluid fluid, int amount, int tank) {
+			this(fluid, amount, tank, false);
+		}
 
 		public FluidAmount(Fluid fluid, int amount) {
-			this(fluid, amount, -1);
+			this(fluid, amount, -1, false);
 		}
 	}
 
@@ -80,6 +85,8 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	private final int companionEffort;
 	private final String capability;
 	private final Optional<Ingredient> tool;
+	private final int energyPerTick;
+	private final int emissions;
 
 	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
 			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time) {
@@ -94,6 +101,14 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
 			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time, int companionEffort, String capability,
 			Optional<Ingredient> tool) {
+		this(machine, commonInfo, items, fluids, fluidResults, results, time, companionEffort, capability, tool, 0, 0);
+	}
+
+	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
+			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time, int companionEffort, String capability,
+			Optional<Ingredient> tool, int energyPerTick, int emissions) {
+		this.energyPerTick = Math.max(0, energyPerTick);
+		this.emissions = Math.max(0, emissions);
 		this.machine = machine;
 		this.commonInfo = commonInfo;
 		this.items = List.copyOf(items);
@@ -125,6 +140,11 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	public List<ItemStackTemplate> results() {
 		return results;
 	}
+
+	/** Zero preserves the family draw of old recipes. Forms snapshot a positive override with their batch. */
+	public int energyPerTick() { return energyPerTick; }
+	/** Abstract process units, recorded once on completion; no terrain damage or world pollution simulation. */
+	public int emissions() { return emissions; }
 
 	public int time() {
 		return time;
@@ -234,11 +254,13 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	}
 
 	/** The fields added after the first fluid recipes, sent to clients together. */
-	private record Extras(int companionEffort, String capability, Optional<Ingredient> tool) {
+	private record Extras(int companionEffort, String capability, Optional<Ingredient> tool, int energyPerTick, int emissions) {
 		static final StreamCodec<RegistryFriendlyByteBuf, Extras> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.VAR_INT, Extras::companionEffort,
 				ByteBufCodecs.STRING_UTF8, Extras::capability,
 				ByteBufCodecs.optional(Ingredient.CONTENTS_STREAM_CODEC), Extras::tool,
+				ByteBufCodecs.VAR_INT, Extras::energyPerTick,
+				ByteBufCodecs.VAR_INT, Extras::emissions,
 				Extras::new);
 	}
 
@@ -252,9 +274,11 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				ExtraCodecs.POSITIVE_INT.optionalFieldOf("time", 200).forGetter(FluidRecipe::time),
 				MachineCompanionEffort.CODEC.optionalFieldOf("companion_effort_per_quarter", 0).forGetter(FluidRecipe::companionEffort),
 				Codec.STRING.optionalFieldOf("capability", "").forGetter(FluidRecipe::capability),
-				Ingredient.CODEC.optionalFieldOf("tool").forGetter(FluidRecipe::tool)
-		).apply(i, (info, items, fluids, fluidResults, results, time, effort, capability, tool) ->
-				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort, capability, tool)));
+				Ingredient.CODEC.optionalFieldOf("tool").forGetter(FluidRecipe::tool),
+				Codec.intRange(0, 65_535).optionalFieldOf("energy_per_tick", 0).forGetter(FluidRecipe::energyPerTick),
+				Codec.intRange(0, 65_535).optionalFieldOf("emissions", 0).forGetter(FluidRecipe::emissions)
+		).apply(i, (info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions) ->
+				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions)));
 		StreamCodec<RegistryFriendlyByteBuf, FluidRecipe> stream = StreamCodec.composite(
 				Recipe.CommonInfo.STREAM_CODEC, recipe -> recipe.commonInfo,
 				ItemPart.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::items,
@@ -262,9 +286,9 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				FluidAmount.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::fluidResults,
 				ItemStackTemplate.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::results,
 				ByteBufCodecs.VAR_INT, FluidRecipe::time,
-				Extras.STREAM_CODEC, recipe -> new Extras(recipe.companionEffort, recipe.capability, recipe.tool),
+				Extras.STREAM_CODEC, recipe -> new Extras(recipe.companionEffort, recipe.capability, recipe.tool, recipe.energyPerTick, recipe.emissions),
 				(info, items, fluids, fluidResults, results, time, extras) -> new FluidRecipe(machine, info, items, fluids,
-						fluidResults, results, time, extras.companionEffort(), extras.capability(), extras.tool()));
+						fluidResults, results, time, extras.companionEffort(), extras.capability(), extras.tool(), extras.energyPerTick(), extras.emissions()));
 		return new RecipeSerializer<>(codec, stream);
 	}
 }
