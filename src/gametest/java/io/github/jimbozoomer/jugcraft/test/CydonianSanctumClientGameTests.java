@@ -159,16 +159,16 @@ public class CydonianSanctumClientGameTests implements FabricClientGameTest {
 		});
 		context.waitTicks(AltarKeystoneRite.KINDLE_TICKS * AltarKeystoneRite.ALTARS.length + 10);
 
-		// 3. The mist opened and took the player onto Mars, unable to build; the mist stays over the altar.
+		// 3. The mist opened and took the player onto Mars, unable to build. (With nobody left by the altar its chunk is
+		// hidden, and the mist with it, until someone comes near again: step 6 finds it there.)
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
 			ServerLevel overworld = minecraft.overworld();
 			ServerLevel lair = minecraft.getLevel(SANCTUM.dimension);
 			check(!AltarKeystoneRite.kindling(overworld, altar), "The altars are still kindling");
-			MistGateEntity mist = AltarKeystoneRite.mist(overworld, altar);
-			check(mist != null && mist.instance() == first.get() && mist.lair() == SANCTUM, "No red mist over the altar");
 			check(player.level() == lair && player.position().distanceTo(first.get().arrival()) < 0.5,
 					"The player did not step out in the gate chamber: " + player.level().dimension() + " " + player.position());
+			check(first.get().gateUntil() > overworld.getGameTime(), "No red mist was opened into the Sanctum: " + first.get().gateUntil());
 			check(!player.getAbilities().mayBuild, "In a lair a player cannot build");
 		});
 		context.waitTicks(25);
@@ -254,6 +254,8 @@ public class CydonianSanctumClientGameTests implements FabricClientGameTest {
 			ServerPlayer player = player(minecraft);
 			ServerLevel overworld = minecraft.overworld();
 			check(player.getAttributeValue(Attributes.FALL_DAMAGE_MULTIPLIER) == 1.0, "Home, the player's falls are still softened");
+			MistGateEntity mist = AltarKeystoneRite.mist(overworld, altar);
+			check(mist != null && mist.instance() == first.get() && mist.lair() == SANCTUM, "No red mist over the altar");
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftLairs.ALTAR_KEYSTONE));
 			check(AltarKeystoneRite.set(overworld, player, altar, player.getMainHandItem(), true).missing() == AltarKeystoneRite.Missing.MISTING
 					&& player.getMainHandItem().getCount() == 1, "A second keystone at the open mist was not refused, or was used up");
