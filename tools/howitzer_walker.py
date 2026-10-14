@@ -69,8 +69,8 @@ HEIGHT = 5.4
 HATCH = (-8, 60.8, -7)
 
 ITEMS = {"howitzer_walker": "Howitzer Walker"}
-TOOLTIPS = {"howitzer_walker": "A tall artillery walker with a howitzer. Walk with the movement keys; hold use to lay "
-                               "the gun on what you look at (or your Range Finder mark) and fire Heavy Shells; jump to "
+TOOLTIPS = {"howitzer_walker": "A tall artillery walker with a howitzer. Walk with the movement keys; look to aim "
+                               "(your Range Finder mark takes priority); hold use to fire Heavy Shells; jump to "
                                "spring up; press attack to stomp. Refuel with a diesel or kerosene bucket."}
 MESSAGES = {"on_mark": "Laying on your Range Finder mark",
             "out_of_range": "Out of the howitzer's range"}

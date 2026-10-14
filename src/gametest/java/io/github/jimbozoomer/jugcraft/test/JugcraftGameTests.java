@@ -840,6 +840,57 @@ public class JugcraftGameTests {
 		});
 	}
 
+	/** Mouse aim works before pressing the trigger and does not spend shells. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
+	public void howitzerWalkerAimsWithoutFiring(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		pilot.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		var walker = pilotedHowitzerWalker(helper, new Vec3(20.5, 1, 20.5), pilot);
+		pilot.getInventory().add(new ItemStack(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM, 2));
+		helper.onEachTick(() -> {
+			pilot.setYRot(-90);
+			pilot.setYHeadRot(-90);
+			pilot.setXRot(-45);
+			walker.steer(pilot, 0, 0, 0, 0, 0);
+		});
+		helper.runAfterDelay(35, () -> {
+			helper.assertTrue(Math.abs(net.minecraft.util.Mth.wrapDegrees(walker.getYRot() + 90)) < 1,
+					"Mouse aim must turn the hull without holding fire");
+			helper.assertTrue(Math.abs(walker.elevation() - 45) < 1, "The barrel must follow the pilot's upward look");
+			helper.assertTrue(pilot.getInventory().countItem(io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.HEAVY_SHELL_ITEM) == 2,
+					"Aiming must not fire or spend shells");
+			helper.assertTrue(!pilot.isInvisible(), "Hiding the cockpit model must not grant gameplay invisibility");
+			helper.succeed();
+		});
+	}
+
+	/** Looking at ground too close for a ballistic arc must not freeze the gun; it can then aim back up. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 100, skyAccess = true)
+	public void howitzerWalkerNearGroundDoesNotFreezeAim(GameTestHelper helper) {
+		raiderFloor(helper);
+		ServerPlayer pilot = helper.makeMockServerPlayerInLevel();
+		var walker = pilotedHowitzerWalker(helper, new Vec3(20.5, 1, 20.5), pilot);
+		boolean[] lookUp = {false};
+		helper.onEachTick(() -> {
+			pilot.setYRot(90);
+			pilot.setYHeadRot(90);
+			pilot.setXRot(lookUp[0] ? -30 : 85);
+			walker.steer(pilot, 0, 0, 0, 0, 0);
+		});
+		helper.runAfterDelay(35, () -> {
+			helper.assertTrue(Math.abs(net.minecraft.util.Mth.wrapDegrees(walker.getYRot() - 90)) < 1,
+					"A nearby target must not prevent turning; yaw was " + walker.getYRot());
+			helper.assertTrue(Math.abs(walker.elevation() + 15) < 1, "Close ground should lower the gun to its safe limit");
+			lookUp[0] = true;
+		});
+		helper.runAfterDelay(60, () -> {
+			// A loaded structure along the ray can require a ballistic arc rather than exactly the camera's pitch.
+			helper.assertTrue(walker.elevation() > 10, "Looking up must raise the gun away from its -15-degree limit; elevation was " + walker.elevation());
+			helper.succeed();
+		});
+	}
+
 	/**
 	 * Holding use lays the howitzer on the block the pilot looks at, off to its side: the walker turns to face it, and the
 	 * Heavy Shell it fires lands there and hurts the pig standing on it. One shell is used.

@@ -39,13 +39,13 @@ import org.jspecify.annotations.Nullable;
  * ({@value #MIN_ELEVATION} to {@value #MAX_ELEVATION} degrees, {@value #LAY_RATE} a tick) to the arc that lands a Heavy
  * Shell there ({@link Ballistics}). Once laid and reloaded it fires, every {@value #GUN_COOLDOWN} ticks, a shell from
  * the pilot's own (none in creative): a damage-only blast, as every gun's. Let go, and the barrel settles back to
- * {@value #REST_ELEVATION} degrees.</li>
+	 * {@value #REST_ELEVATION} degrees when unmanned; while piloted it keeps tracking without firing.</li>
  * <li><b>Jump:</b> it crouches for {@value #CROUCH_TICKS} ticks, then springs about three blocks up.</li>
  * <li><b>Attack: the stomp.</b> It crouches, hops and comes down hard (at once, if it is already in the air), and the
  * landing hurts and throws everything within {@value #STOMP_RADIUS} blocks: {@value #STOMP_DAMAGE} damage, counted as
  * the pilot's attack. It never breaks a block.</li>
  * </ul>
- * The pilot sits in the roof hatch, head out. The client draws its walk, shot and jump from the curves in
+	 * The pilot's model is hidden inside the cockpit. The client draws its walk, shot and jump from the curves in
  * tools/howitzer_walker.py, the same curves its Blockbench clips are sampled from.
  */
 public class HowitzerWalker extends DieselWalker {
@@ -81,9 +81,10 @@ public class HowitzerWalker extends DieselWalker {
 	private static final EntityDataAccessor<Integer> CROUCHED_AT = SynchedEntityData.defineId(HowitzerWalker.class, EntityDataSerializers.INT);
 
 	private int lastShot = -GUN_COOLDOWN;
-	/** Whether the pilot held use this tick, and last tick (a new press on a mark says so once). */
+	/** Whether the controls are active this tick, and whether the trigger was held last tick. */
 	private boolean laying;
 	private boolean wasLaying;
+	private boolean firing;
 	private boolean warnedRange;
 	private boolean warnedShells;
 	/** Server side: the tick a crouch began (-1 when not crouching), how fast it will leap, and whether it will stomp. */
@@ -157,33 +158,38 @@ public class HowitzerWalker extends DieselWalker {
 			airTicks = 0;
 		}
 		if (!laying) {
-			// Let go: the barrel settles back to rest, and the next press tells the pilot again what is wrong.
+			// Unmanned, out of fuel or timed-out controls: settle back to rest.
 			float elevation = elevation();
 			if (elevation != REST_ELEVATION) {
 				entityData.set(ELEVATION, elevation + Mth.clamp(REST_ELEVATION - elevation, -LAY_RATE, LAY_RATE));
 			}
+		}
+		if (!firing) {
 			warnedRange = false;
 			warnedShells = false;
 		}
-		wasLaying = laying;
+		wasLaying = firing;
+		firing = false;
 		laying = false;
 	}
 
 	/**
-	 * Holding use: turn the walker and elevate the barrel toward the target, and fire once laid and reloaded. Returns
+	 * Track the pilot's look independently of the trigger. Holding use fires once laid and reloaded. Returns
 	 * whether it turned (turning burns fuel, as the turn keys do).
 	 */
 	@Override
-	protected boolean useHeld(ServerLevel level, ServerPlayer pilot) {
+	protected boolean operateTool(ServerLevel level, ServerPlayer pilot, boolean use, boolean manualTurn) {
 		laying = true;
+		firing = use;
 		Vec3 pivot = pivot();
 		BlockPos mark = Spotting.own(level, pilot);
 		Vec3 target = mark != null ? Vec3.atCenterOf(mark).add(0, 0.5, 0) : lookedAt(level, pilot);
-		if (mark != null && !wasLaying) {
+		if (mark != null && use && !wasLaying) {
 			pilot.sendOverlayMessage(Component.translatable("message.jugcraft.howitzer_walker.on_mark"));
 		}
 		float wantedYaw;
 		float wantedPitch;
+		boolean reachable = true;
 		if (target == null) {
 			// Nothing in reach where the pilot looks (open sky): fire straight along the look.
 			wantedYaw = pilot.getYRot();
@@ -191,24 +197,32 @@ public class HowitzerWalker extends DieselWalker {
 		} else {
 			float[] aim = solve(target, pivot);
 			if (aim == null) {
-				if (!warnedRange) {
+				if (use && !warnedRange) {
 					pilot.sendOverlayMessage(Component.translatable(mark != null ? "message.jugcraft.artillery.out_of_range"
 							: "message.jugcraft.howitzer_walker.out_of_range"));
 					warnedRange = true;
 				}
-				return false;
+				// An unsolvable arc must not freeze the controls. Unmarked targets fall back to direct aim;
+				// an unreachable mark still turns the gun toward it, but must never consume ammunition.
+				reachable = mark == null;
+				Vec3 direction = target.subtract(pivot);
+				wantedYaw = mark == null ? pilot.getYRot() : (float) Math.toDegrees(Math.atan2(-direction.x, direction.z));
+				wantedPitch = Mth.clamp(mark == null ? -pilot.getXRot()
+						: (float) Math.toDegrees(Math.atan2(direction.y, direction.horizontalDistance())), MIN_ELEVATION, MAX_ELEVATION);
+			} else {
+				warnedRange = false;
+				wantedYaw = aim[0];
+				wantedPitch = aim[1];
 			}
-			warnedRange = false;
-			wantedYaw = aim[0];
-			wantedPitch = aim[1];
 		}
-		float turn = Mth.clamp(Mth.wrapDegrees(wantedYaw - getYRot()), -TURN, TURN);
+		// A/D retain priority for deliberate hull steering; release them to resume mouse steering.
+		float turn = manualTurn ? 0 : Mth.clamp(Mth.wrapDegrees(wantedYaw - getYRot()), -TURN, TURN);
 		setYRot(getYRot() + turn);
 		float elevation = elevation();
 		float elevated = elevation + Mth.clamp(wantedPitch - elevation, -LAY_RATE, LAY_RATE);
 		entityData.set(ELEVATION, elevated);
 		boolean laid = Math.abs(Mth.wrapDegrees(wantedYaw - getYRot())) < 1.0F && Math.abs(wantedPitch - elevated) < 1.0F;
-		if (laid && tickCount - lastShot >= GUN_COOLDOWN) {
+		if (use && reachable && laid && tickCount - lastShot >= GUN_COOLDOWN) {
 			fire(level, pilot);
 		}
 		return Math.abs(turn) > 0.05F;
@@ -232,7 +246,8 @@ public class HowitzerWalker extends DieselWalker {
 	 */
 	private @Nullable Vec3 lookedAt(ServerLevel level, ServerPlayer pilot) {
 		Vec3 from = pilot.getEyePosition();
-		Vec3 look = pilot.getViewVector(1.0F);
+		// Use the rotation vanilla receives from the mounted player's camera, not the animated head yaw.
+		Vec3 look = Vec3.directionFromRotation(pilot.getXRot(), pilot.getYRot());
 		for (int travelled = 0; travelled < AIM_REACH; travelled += 16) {
 			Vec3 to = from.add(look.scale(16));
 			if (!level.isLoaded(BlockPos.containing(to))) {

@@ -223,7 +223,8 @@ public class DieselWalker extends Entity {
 			passenger.resetFallDistance();
 		}
 
-		boolean drilled = listening && drill > 0 && fuelled && pilot instanceof ServerPlayer player && useHeld(level, player);
+		boolean drilled = listening && fuelled && pilot instanceof ServerPlayer player
+				&& operateTool(level, player, drill > 0, t != 0);
 		if (!drilled) {
 			stopDrilling(level);
 		}
@@ -265,6 +266,11 @@ public class DieselWalker extends Entity {
 	/** How fast it leaves the ground when it leaps, in blocks a tick. */
 	protected double leapSpeed() {
 		return JUMP;
+	}
+
+	/** Tools normally work only while use is held; artillery can track a target before the trigger is pressed. */
+	protected boolean operateTool(ServerLevel level, ServerPlayer pilot, boolean use, boolean manualTurn) {
+		return use && useHeld(level, pilot);
 	}
 
 	/**

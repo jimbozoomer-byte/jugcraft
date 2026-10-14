@@ -6736,7 +6736,7 @@
   "tooltip.jugcraft.hex.shrinking": "Makes the drinker half their size",
   "tooltip.jugcraft.hold_shift": "Hold %s for details",
   "tooltip.jugcraft.homing_rocket": "Rocket launcher ammunition: locks on to the hostile mob nearest your crosshair within 48 blocks and steers into it. A smaller blast.",
-  "tooltip.jugcraft.howitzer_walker": "A tall artillery walker with a howitzer. Walk with the movement keys; hold use to lay the gun on what you look at (or your Range Finder mark) and fire Heavy Shells; jump to spring up; press attack to stomp. Refuel with a diesel or kerosene bucket.",
+  "tooltip.jugcraft.howitzer_walker": "A tall artillery walker with a howitzer. Walk with the movement keys; look to aim (your Range Finder mark takes priority); hold use to fire Heavy Shells; jump to spring up; press attack to stomp. Refuel with a diesel or kerosene bucket.",
   "tooltip.jugcraft.ice_breaker": "Worn on your feet: a little knockback resistance, and a fall that hurts you sends a wave through the ground that harms, throws back and slows hostile creatures up to 6 blocks away.",
   "tooltip.jugcraft.illumination_flare": "A white burst that makes hostile mobs within 48 blocks glow for 30 seconds.",
   "tooltip.jugcraft.imperial_crest": "The arms of no real empire: a winged cog on a crimson shield. Faces you when placed.",

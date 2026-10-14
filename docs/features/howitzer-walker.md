@@ -24,13 +24,13 @@ A tall walker, about five and a half blocks high, in the owner's design:
 **Colours:** olive riveted plate with darker olive-grey recesses, brown-grey legs, gunmetal rails and barrel, chrome hubs, rods and lamp rings, amber lamps. No rust (the clean style).
 
 ### Piloting
-- **Place** it from its item (it needs room for its height), **use** it to climb into the roof hatch (head out), and **refuel** it with a diesel, premium diesel or kerosene bucket, exactly like the Diesel Walker.
+- **Place** it from its item (it needs room for its height), **use** it to climb into the enclosed cockpit (the pilot model and equipment are hidden only while mounted), and **refuel** it with a diesel, premium diesel or kerosene bucket, exactly like the Diesel Walker.
 - **Walk, turn and climb** one-block steps with the movement keys, burning 4 mB of fuel a second while it walks or turns, as the Diesel Walker does.
-- **Hold use: lay and fire the howitzer.**
+- **Move the mouse to aim; hold use to fire the howitzer.** The gun tracks before the trigger is pressed. A/D take priority for manual hull steering; release them to resume mouse steering.
   - **What it aims at:** the pilot's own Range Finder mark, if they have one (it says "Laying on your Range Finder mark"); else the block they look at, up to 128 blocks; else, looking at open sky, straight along their look.
   - **Laying:** the gun is fixed in the hull, so the whole walker turns to face the target (4 degrees a tick, burning fuel as turning does), and the barrel elevates on its trunnion, 3 degrees a tick, between 15 degrees down and 60 up, to the arc that lands the shell there. It picks the low arc, or the high one when the low cannot reach.
-  - **Firing:** once laid and reloaded it fires a **Heavy Shell** from the pilot's inventory (none in creative), then reloads for 4 seconds. Holding use keeps it laying and firing. It reaches about 115 blocks on level ground. A target too near or too far gets "Out of the howitzer's range" (for a mark, the big guns' own "The marked target is out of range"); no shells, "No Heavy Shell". Each is said once a press.
-  - **Let go,** and the barrel settles back to 25 degrees.
+  - **Firing:** once laid and reloaded it fires a **Heavy Shell** from the pilot's inventory (none in creative), then reloads for 4 seconds. Holding use fires; releasing use keeps tracking without spending ammunition. It reaches about 115 blocks on level ground. An unmarked target too near or too far falls back to direct aim and gets "Out of the howitzer's range" when firing (for a mark, the big guns' own "The marked target is out of range"); no shells, "No Heavy Shell". Each is said once a press.
+  - **Dismount, run out of fuel or stop sending controls,** and the barrel settles back to 25 degrees. An unreachable Range Finder mark allows aiming but blocks firing.
 - **Jump:** it crouches for 6 ticks, then springs about three blocks up, and lands with a squash and a thud.
 - **Attack: the stomp.** It crouches and hops (about a block and a half), or, already in the air, drives straight down; the landing hurts everything within 3.5 blocks of its feet for 14 damage, counted as the pilot's attack, and throws them outward. Once every 2 seconds.
 - **Toughness:** 80 damage to knock it down (the Diesel Walker 60, the Armoured Walker 90). It heals slowly. Knocked down, it drops its item.
@@ -65,7 +65,7 @@ The renderer draws the owner-reviewed clips from the same curves in `tools/howit
 
 ## Multiplayer and persistence
 - **Server-authoritative:** as with the other walkers, the client sends only the pilot's keys (`WalkerInputPayload`). The server clamps them, ignores anyone but the pilot and stops listening after 10 ticks of silence. The server aims, fires, consumes the shell, leaps and resolves the stomp.
-- **Aiming never loads a chunk:** the pilot's look is traced a chunk at a time and stops at the first chunk that is not loaded. The walk is bounded work: one 128-block trace and one firing solution a tick while use is held.
+- **Aiming never loads a chunk:** the pilot's look is traced a chunk at a time and stops at the first chunk that is not loaded. The walk is bounded work: one 128-block trace and one firing solution a tick while the pilot controls the fuelled walker. Vanilla passenger rotation packets supply the look direction; the server remains authoritative.
 - **Marks:** only the pilot's own Range Finder mark is used, never another player's, so a walker cannot be steered by someone else's mark. Marks are not saved, as for every gun.
 - **Synced for the animations:** the barrel's elevation and the ticks it last fired and crouched. Everything else (stride, the jump's air and landing) is worked out on each client from its movement, so there is no extra networking. A walker coming into view does not replay an old shot or crouch.
 - **Saving:** its fuel is saved, as the Diesel Walker's is. The barrel's elevation is not: it rests at 25 degrees after a reload.
@@ -115,3 +115,15 @@ Not applicable: it is crafted and placed by players only. No raider version yet.
 - The fuel reading every 2 seconds shares the action bar with the gun's messages, so a message can be replaced quickly.
 - It fires only for a pilot: it does not take orders from a Fire Control Table, and does not use other players' marks. Either could come later if the owner wants a walker battery.
 - Possible later: a raider version, other shells (smoke, flak), and a second seat for a spotter.
+
+
+## Owner playtest correction — 13 October 2026
+
+Implemented with OpenAI Codex (GPT-6), following the owner's hands-on feedback:
+
+- Aiming no longer requires holding fire. Nearby terrain without a valid ballistic arc no longer freezes hull rotation or barrel elevation. Marks still take priority and cannot waste ammunition when unreachable.
+- A/D retain priority while held; releasing them resumes mouse steering. Existing Diesel/Armoured Walker tools retain their use-only behavior through the default tool hook.
+- Client rendering omits the mounted Howitzer pilot, including armor, held equipment and name tag; first-person hands/items are omitted too. Dismount restores rendering automatically. No invisibility effect, saved flag, targeting immunity or server gameplay change is applied to the player.
+- Added server regressions for aiming without firing/spending shells and recovering from a too-close ground target.
+- Render injection signatures were checked against the pinned Minecraft 26.3 classes. The revised model hiding still requires the owner's manual visual check. No local graphical test or game control will be run for this revision at the owner's request.
+- Final local verification: `gradlew.bat build --offline --no-daemon -Pkotlin.compiler.execution.strategy=in-process` succeeded; **all 1,387 required server tests passed**, including both new aim regressions and the existing Howitzer firing, Range Finder, reload, walking, jump and stomp tests. Repository/link validation and the focused model/code audit passed. The first run exposed head-yaw versus camera-yaw aim inconsistency; the second exposed an overly exact test expectation for a ballistically adjusted barrel angle. Both were corrected before this passing run.

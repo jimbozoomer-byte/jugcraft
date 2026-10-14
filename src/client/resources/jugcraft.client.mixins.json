@@ -12,6 +12,8 @@
     "DiagonalParticlesMixin",
     "GunFovMixin",
     "GunMouseMixin",
+    "HowitzerPilotHandsMixin",
+    "HowitzerPilotRendererMixin",
     "JeiRegistryBootstrapMixin"
   ],
   "injectors": {
