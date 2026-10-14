@@ -4534,11 +4534,22 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' matches another.
-- **Slice 13C game tests (to run in CI):**
+- **Slice 13C game tests (all passed in CI, below):**
   - `FrontierGunsIIIGameTests`:
     - `frontierGunsIIIAreRegistered`: each is registered with its numbers, its recipe loads, and it fires plain bullets one pull a shot, held in both hands. The Flatboat Gun is a single shot of sixteen pellets of buckshot and takes the scopes and the Laser Sight only; the Windlass Musket a repeater of seven paper cartridges loaded a magazine at a time, taking the Light and Vertical Grips and the bayonets but no scope; the Millstone Rifle a rifle of eight rifle rounds loaded a round at a time, hitting harder and working slower than the Drover Rifle and taking what it takes. The rifle reaches furthest and the punt gun least.
     - `frontierGunsIIIFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: the punt gun and the musket with nothing in halfway through their reloads, the rifle with one round in after its first round's time.
   - `GunsGameTests` counts 72 guns; `TacticalAttachmentsGameTests` the twenty-eight that take the Tactical Grip.
+- **Slice 13C in CI** ([run 38511296312](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38511296312), on 43088608d): every check passed.
+  - **Server game tests:** 1598 in the `mod` job, all passed, `FrontierGunsIIIGameTests` among them; the job without the optional integrations passed too.
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` took each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments, and its checks passed for each. The job's text log was too large to read here, so its numbers are not quoted.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar; the Windlass Musket's magazine tube standing out to the left across the view's lower middle.
+    - **Aimed:** each raised to the middle of the view, its sight on the crosshair at the husk's chest.
+    - **Fired:** the Windlass Musket flashes at its pan, to the right of its drum, and smokes.
+    - **Reloading:** the Flatboat Gun tipped with its chamber out to the left; the Windlass Musket lowered, the left hand drawing the magazine away; the Millstone Rifle tipped, the left hand below it.
+    - **Inspection:** each turned toward the eye to be looked over, the Flatboat Gun and the Windlass Musket filling a side of the view.
+    - **Attachments:** the Laser Sight on top of the Flatboat Gun and the Millstone Rifle, as on the Highball Rifle; the Windlass Musket's grips and bayonet hidden behind the left hand, as the Lookout Rifle's bayonet is.
+    - **Third person:** the Flatboat Gun's long barrel held out and flashing as it fires; the Windlass Musket and the Millstone Rifle raised, smoking as they fire.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
