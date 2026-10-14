@@ -602,6 +602,48 @@ public class YetiKingGameTests {
 	}
 
 	/**
+	 * Winter Brine (Concordance Chunk B, B-08): a player who drank a draught of Frostward is not chilled by his blizzard or
+	 * his breath, and frost gathered before is gone at their next tick; once Frostward ends (milk, or its time) his frost
+	 * lands again. No mitten is held; the Mitten stays the lasting answer.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFrostwardDrinkerIsNotChilledByTheYeti(GameTestHelper helper) {
+		ServerPlayer bare = helper.makeMockServerPlayerInLevel();
+		ServerPlayer warded = helper.makeMockServerPlayerInLevel();
+		bare.setGameMode(GameType.SURVIVAL);
+		warded.setGameMode(GameType.SURVIVAL);
+		BlockPos at = helper.absolutePos(new BlockPos(1, 2, 1));
+		warded.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);
+		ItemStack brine = winterBrine();
+		brine.getItem().finishUsingItem(brine, helper.getLevel(), warded);
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.concordance.rime.Frostward.warded(warded)
+				&& !warded.getOffhandItem().is(JugcraftYeti.YETI_MITTEN), "The draught gave Frostward, and no mitten is held");
+		YetiKingEntity.chill(bare, YetiKingEntity.BLIZZARD_FROST, false);
+		YetiKingEntity.chill(warded, YetiKingEntity.BLIZZARD_FROST, false);
+		helper.assertTrue(warded.getTicksFrozen() == 0, "His blizzard chilled a Frostward drinker: " + warded.getTicksFrozen());
+		helper.assertTrue(bare.getTicksFrozen() == YetiKingEntity.BLIZZARD_FROST, "His blizzard did not chill a player without it");
+		YetiKingEntity.chill(warded, warded.getTicksRequiredToFreeze(), true);
+		helper.assertTrue(warded.getTicksFrozen() == 0 && !warded.isFullyFrozen(), "His breath's frost took on a Frostward drinker");
+		warded.setTicksFrozen(100);
+		warded.baseTick(); // a mock player has no client to tick it (JugcraftGameTests.scubaTankKeepsAirUnderWater)
+		helper.assertTrue(warded.getTicksFrozen() == 0, "Frost gathered before was not cleared at the next tick: " + warded.getTicksFrozen());
+		warded.removeEffect(io.github.jimbozoomer.jugcraft.concordance.rime.Frostward.FROSTWARD);
+		YetiKingEntity.chill(warded, YetiKingEntity.BLIZZARD_FROST, false);
+		helper.assertTrue(warded.getTicksFrozen() == YetiKingEntity.BLIZZARD_FROST, "Once Frostward ends, his frost lands again");
+		bare.discard();
+		warded.discard();
+		helper.succeed();
+	}
+
+	/** A draught of Winter Brine as the crucible bottles it: Frostward I for 975 ticks (three snowballs, stirred cold three times). */
+	private static ItemStack winterBrine() {
+		ItemStack draught = new ItemStack(io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.DRAUGHT);
+		draught.set(io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.BREW, new io.github.jimbozoomer.jugcraft.concordance.Brew(
+				List.of(new io.github.jimbozoomer.jugcraft.concordance.Brew.Dose("jugcraft:frostward", 0, 975, false)), "jugcraft:frostward@0"));
+		return draught;
+	}
+
+	/**
 	 * A glacial spike bursting up under a player strikes them and throws them up; an icicle shaken from the vault falls
 	 * onto its mark and shatters, striking the player standing there.
 	 */

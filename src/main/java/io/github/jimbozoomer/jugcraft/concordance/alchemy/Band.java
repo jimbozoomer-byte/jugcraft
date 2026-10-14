@@ -5,7 +5,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * How hot a mixture is, in four bands, and what a stir does at each: the share of the undissolved properties that
  * dissolves ({@code dissolve}, per thousand). Heat makes stirring work faster, but a searing stir also damages the
- * delicate properties ({@link Mixture#SEARING_KEEP}) and fouls the mixture ({@link Mixture#SEARING_CONTAMINANT}).
+ * delicate properties ({@link Mixture#SEARING_KEEP}) and fouls the mixture ({@link Mixture#SEARING_CONTAMINANT}), and
+ * any stir above cold thaws Rime ({@link Mixture#rimeKeep}).
  * Keep the numbers equal to tools/concordance_alchemy.py.
  */
 public enum Band {

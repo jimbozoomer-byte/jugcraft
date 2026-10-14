@@ -970,10 +970,11 @@ public class YetiKingEntity extends Monster implements GeoEntity {
 
 	/**
 	 * Frost on {@code player}: {@code ticks} more of the ticks that freeze them (to {@code stack} past freezing them through,
-	 * or else never past just short of it), unless they hold a Yeti Mitten in their offhand.
+	 * or else never past just short of it), unless they hold a Yeti Mitten in their offhand or are under Frostward (Winter
+	 * Brine, Concordance Chunk B, B-08): the Mitten for as long as it is held, Frostward for as long as it lasts.
 	 */
 	public static void chill(ServerPlayer player, int ticks, boolean stack) {
-		if (YetiMitten.warm(player)) {
+		if (YetiMitten.warm(player) || io.github.jimbozoomer.jugcraft.concordance.rime.Frostward.warded(player)) {
 			return;
 		}
 		int frozen = player.getTicksFrozen();

@@ -11870,6 +11870,7 @@ def check_concordance(registered):
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
     check_alchemy(co, root, lang, registered, research)
+    check_winter_brine(co, root, lang)
     check_ecology(co, root, lang, registered, research)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
@@ -13320,7 +13321,11 @@ def check_alchemy(co, root, lang, registered, research):
         return path.read_text(encoding="utf-8") if path.exists() else ""
     constants = {
         "alchemy/Mixture.java": {"MAX_PARTS": ("int", al.MAX_PARTS), "MAX_OPERATIONS": ("int", al.MAX_OPERATIONS),
-                                 "SEARING_KEEP": ("long", al.SEARING_KEEP), "SEARING_CONTAMINANT": ("long", al.SEARING_CONTAMINANT)},
+                                 "SEARING_KEEP": ("long", al.SEARING_KEEP), "SEARING_CONTAMINANT": ("long", al.SEARING_CONTAMINANT),
+                                 # Concordance Chunk B, B-08: what a stir above cold keeps of the dissolved Rime.
+                                 "RIME_KEEP_WARM": ("long", al.RIME_KEEP["warm"]),
+                                 "RIME_KEEP_HOT": ("long", al.RIME_KEEP["hot"]),
+                                 "RIME_KEEP_SEARING": ("long", al.RIME_KEEP["searing"])},
         "alchemy/Heat.java": {"AMBIENT": ("int", al.AMBIENT), "RATE": ("int", al.HEAT_RATE)},
         "alchemy/Assay.java": {"SPOON": ("int", al.SPOON), "GLASS": ("int", al.GLASS), "MASTERED": ("int", al.MASTERED)},
         "CrucibleBlockEntity.java": {"BUFFER_SLOTS": ("int", al.BUFFER_SLOTS), "STIR_TICKS": ("int", al.STIR_TICKS),
@@ -13382,13 +13387,19 @@ def check_alchemy(co, root, lang, registered, research):
         if not (1 <= entry.get("max_level", 0) <= 5 and 1 <= entry.get("max_ticks", 0) <= 2400
                 and 1 <= entry.get("ticks_per_unit", 0) <= 2400 and entry.get("threshold", 0) > 0 and entry.get("per_level", 0) > 0):
             err(f"property {key}: numbers outside the shared effect limits")
-        if not re.fullmatch(r"minecraft:[a-z_]+", entry.get("status", "")):
-            err(f"property {key}: status must be a vanilla effect id")
+        # A vanilla status, or (Concordance Chunk B, B-08: Rime's Frostward) one Jugcraft registers.
+        status = entry.get("status", "")
+        if not re.fullmatch(rf"(minecraft|{MOD}):[a-z_]+", status):
+            err(f"property {key}: status must be a vanilla or Jugcraft effect id")
+        elif status.startswith(f"{MOD}:") and not any(
+                f'registerForHolder(BuiltInRegistries.MOB_EFFECT, Jugcraft.id("{split(status)[1]}")' in path.read_text(encoding="utf-8")
+                for path in root.rglob("*.java")):
+            err(f"property {key}: {status} is not a status Jugcraft registers")
         if key == "contaminant" and entry.get("intent") != "harmful":
             err("property contaminant: must be harmful")
         # A brew never outlasts the vanilla potion of the same effect at the highest level it can reach (vanilla's
         # Potions: night vision, fire resistance and water breathing 3600 ticks; regeneration and poison 900, and at
-        # level II 450 and 432). Effects with no vanilla potion (resistance, nausea) keep the shared limit above.
+        # level II 450 and 432). Effects with no vanilla potion (nausea, Jugcraft's Frostward) keep the shared limit above.
         vanilla = {("minecraft:night_vision", 1): 3600, ("minecraft:fire_resistance", 1): 3600,
                    ("minecraft:water_breathing", 1): 3600, ("minecraft:regeneration", 1): 900,
                    ("minecraft:regeneration", 2): 450, ("minecraft:poison", 1): 900, ("minecraft:poison", 2): 432}
@@ -13451,6 +13462,99 @@ def check_alchemy(co, root, lang, registered, research):
         err("textures/block/crucible.png needs its animation metadata (GeckoLib animates the liquid's surface)")
     if "CRUCIBLE_ENTITY" not in java("CircleClient.java", CLIENT_JAVA_ROOT):
         err("the crucible must be drawn by GeckoLib on the client")
+
+
+NOT_RECIPES = {"loot_table", "advancement", "tags", "worldgen", "modonomicon", "concordance", "dimension", "dimension_type", "structure"}
+
+
+def _made_from(start):
+    """Every item Jugcraft's recipe-like data makes, step by step, from the items in start: a file that names one of them
+    (and does not make it) adds what it makes (B-08's must-fail loop: Yeti Fur must reach no Rime ingredient). Vanilla's
+    recipes are not in the repository; none makes snow, amethyst or a mushroom from wool or a horn."""
+    ids = re.compile(r'"((?:minecraft|jugcraft):[a-z0-9_/]+)"')
+
+    def results(node):
+        found = set()
+        if isinstance(node, dict):
+            for key, value in node.items():
+                found |= set(ids.findall(json.dumps(value))) if key in ("result", "results", "output", "outputs") else results(value)
+        elif isinstance(node, list):
+            for value in node:
+                found |= results(value)
+        return found
+    recipes = []
+    for path in (DATA / MOD).rglob("*.json"):
+        if path.relative_to(DATA / MOD).parts[0] in NOT_RECIPES:
+            continue
+        data = load(path)
+        made = results(data) if data is not None else set()
+        if made:
+            recipes.append((set(ids.findall(path.read_text(encoding="utf-8"))) - made, made))
+    reached, grown = set(start), True
+    while grown:
+        grown = False
+        for takes, made in recipes:
+            if takes & reached and not made <= reached:
+                reached |= made
+                grown = True
+    return reached - set(start)
+
+
+def check_winter_brine(co, root, lang):
+    """Concordance Chunk B unit 4, B-08 (docs/features/arcane-concordance-winter.md): Rime brews Frostward, timed as the
+    Fire Resistance brew; a stir above the cold band thaws Rime (Mixture mirrors RIME_KEEP); the generator's simulation is
+    the game test's; Frostward is registered, clears frost, and the Yeti King's chill asks for it; Yeti Fur reaches no
+    Rime ingredient; every word and the owner's icon are present."""
+    al, rm, eq = co.alchemy, co.rime, co.equivalence
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    rime = al.PROPERTIES.get("rime", {})
+    if rime.get("status") != al.FROSTWARD or rime.get("intent") != "helpful":
+        err("tools/concordance_alchemy.py: Rime brews Frostward, a helpful status (B-08, B-D3)")
+    if (rime.get("ticks_per_unit"), rime.get("max_ticks")) != (al.PROPERTIES["ember"]["ticks_per_unit"], al.PROPERTIES["ember"]["max_ticks"]):
+        err("tools/concordance_alchemy.py: Frostward is timed as Ember's Fire Resistance brew (B-P19)")
+    order = list(al.BANDS)
+    if set(al.RIME_KEEP) != set(order) or al.RIME_KEEP["cold"] != 1000 \
+            or any(al.RIME_KEEP[a] < al.RIME_KEEP[b] for a, b in zip(order, order[1:])):
+        err("tools/concordance_alchemy.py RIME_KEEP: every band, cold keeps it all, no hotter band keeps more (B-P18)")
+    mixture, outcome = source(root / "alchemy" / "Mixture.java"), source(root / "alchemy" / "Outcome.java")
+    for needle in ("case COLD -> 1000L;", "nowDissolved = nowDissolved.scale(rimeKeep(stir.band()), Axis.RIME);"):
+        if needle not in mixture:
+            err(f"concordance/alchemy/Mixture.java: the Rime heat rule is missing ({needle})")
+    if 'new Text.Ref("alchemy", "thawed")' not in outcome or f"compose.{MOD}.alchemy.thawed" not in lang:
+        err("concordance/alchemy/Outcome.java: a Rime reason names the stirs that thawed it, with its words")
+    threshold = round(rime.get("threshold", 0) * 1000)
+    kept = [al.winter_brine(band) for band in order]
+    if kept[0] < threshold or kept[1] >= threshold:
+        err(f"Winter Brine: three snowballs stirred cold reach Frostward and stirred warm fall short ({kept}, needs {threshold})")
+    tests = source(ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordanceAlchemyGameTests.java")
+    if f"long[] kept = {{{', '.join(map(str, kept))}}};" not in tests:
+        err(f"ConcordanceAlchemyGameTests.winterBrineNeedsTheColdBand: kept must be the generator's {kept}")
+    frost = source(root / "rime" / "Frostward.java")
+    for needle in (f'String STATUS = "{al.FROSTWARD}";', f'Jugcraft.id("{split(al.FROSTWARD)[1]}")', f"0x{rm.FROSTWARD_COLOUR:06X}",
+                   "MobEffectCategory.BENEFICIAL", "setTicksFrozen(0)", "shouldApplyEffectTickThisTick"):
+        if needle not in frost:
+            err(f"concordance/rime/Frostward.java: missing or different from the tables: {needle}")
+    if "Frostward.register();" not in source(root / "rime" / "Rime.java"):
+        err("concordance/rime/Rime.java: Frostward is registered with Rime, whatever the switch")
+    chill = _java_body(source(JAVA_ROOT / "lair" / "yeti" / "YetiKingEntity.java"), "public static void chill(")
+    if "YetiMitten.warm(player)" not in chill or "Frostward.warded(player)" not in chill:
+        err("lair/yeti/YetiKingEntity.chill: his frost passes by the Mitten and Frostward (B-08)")
+    ingredients = {info["item"] for info in al.INGREDIENTS.values()}
+    if _made_from({f"{MOD}:yeti_fur"}) & ingredients:
+        err("Yeti Fur reaches an alchemical ingredient: Frostward must be no cheaper for it (06:146-158)")
+    for thing in (f"{MOD}:draught", f"{MOD}:salve"):
+        if thing in ingredients or thing in eq.MATERIALS:
+            err(f"{thing} is neither an ingredient nor weighed: brews do not feed brews or the Scale")
+    for key in (f"effect.{MOD}.frostward", f"book.{MOD}.arcane_concordance.alembic.winter_brine.name"):
+        if key not in lang:
+            err(f"Winter Brine: missing lang {key}")
+    for key, info in al.INGREDIENTS.items():
+        if info["properties"].get("rime") and "Frostward" not in lang.get(f"jei.{MOD}.alchemy.{key}", ""):
+            err(f"lang jei.{MOD}.alchemy.{key}: a Rime ingredient's page names Frostward")
+    if "textures/mob_effect/frostward.png" not in rm.OWNER_FILES or not (ASSETS / "textures" / "mob_effect" / "frostward.png").is_file():
+        err("Frostward's icon is the owner's (tools/concordance_rime.py OWNER_FILES), copied by tools/owner_art.py")
 
 
 def check_geckolib(name, java_text, uvs, sizes, kind="block"):

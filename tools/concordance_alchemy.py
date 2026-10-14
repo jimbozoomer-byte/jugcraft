@@ -3,7 +3,8 @@
 The Alembists' practice. Ingredients carry amounts of six properties (a property vector); a preparation is an explicit
 transformation of that vector; a mixture in an Alembic Crucible tracks its volume (parts of water), the properties
 still pending and those dissolved, its contaminant, the temperature band and its whole history. Heat decides how much a
-stir dissolves (and searing heat damages delicate properties); bottling draws one part's dose. The rules are data
+stir dissolves (searing heat damages delicate properties, and any heat above cold thaws Rime: Concordance Chunk B, B-08);
+bottling draws one part's dose. The rules are data
 (data/jugcraft/concordance/ingredient, preparation and property, read by Java's concordance/alchemy); the simulation is
 whole milli-units with floor division, so the same process always gives the same result.
 
@@ -25,6 +26,10 @@ MAX_OPERATIONS = 32
 SEARING_KEEP = 850  # per thousand of dissolved Radiance and Verdance a searing stir keeps
 SEARING_CONTAMINANT = 500  # milli-units of contaminant a searing stir adds
 BANDS = {"cold": (None, 100), "warm": (40, 300), "hot": (90, 550), "searing": (160, 800)}  # (from, dissolve per 1000)
+# Rime is cold's own (plan 03:36, "too much heat consumes the temporary cold property"; Concordance Chunk B, B-08, B-P18):
+# per thousand of the Rime already dissolved that one stir at each band keeps (Java: Mixture.rimeKeep, RIME_KEEP_*).
+# Cold keeps it all; no hotter band may keep more than a cooler one (check_mod_data.py check_winter_brine).
+RIME_KEEP = {"cold": 1000, "warm": 600, "hot": 300, "searing": 0}
 AMBIENT = 20
 HEAT_RATE = 1  # degrees a tick
 HEAT_SOURCES = {"minecraft:magma_block": 60, "minecraft:soul_campfire": 100, "minecraft:campfire": 120,
@@ -109,6 +114,9 @@ PREPARATIONS = {
     # Ground in a mortar: a little lost as dust, but much of it dissolves the moment it goes in.
     "ground": {"tool": rid("mortar"), "scale": 0.9, "ready": 0.6},
 }
+# Winter Brine's status (Concordance Chunk B, B-08, B-D3; Java: concordance/rime/Frostward.STATUS): no frost gathers while
+# it lasts and the Yeti King's chill does not take. tools/concordance_rime.py holds its colour, name and icon.
+FROSTWARD = rid("frostward")
 # What a dose a part does: at the threshold, level I; a level more each per_level; ticks_per_unit for each unit.
 PROPERTIES = {
     "radiance": {"status": "minecraft:night_vision", "intent": "helpful", "threshold": 0.5, "per_level": 10.0,
@@ -118,8 +126,10 @@ PROPERTIES = {
                  "max_level": 2, "ticks_per_unit": 300, "max_ticks": 450},
     "ember": {"status": "minecraft:fire_resistance", "intent": "helpful", "threshold": 0.6, "per_level": 10.0,
               "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
-    "rime": {"status": "minecraft:resistance", "intent": "helpful", "threshold": 0.8, "per_level": 10.0,
-             "max_level": 1, "ticks_per_unit": 600, "max_ticks": 1200},
+    # B-08: Rime brews Frostward (no salt: a snowball carries 1.0, B-P17), timed as the Fire Resistance brew is (B-P19). A
+    # bottle keeps the status it was bottled with (concordance/Brew.Dose), so Rime brews made before still give Resistance.
+    "rime": {"status": FROSTWARD, "intent": "helpful", "threshold": 0.8, "per_level": 10.0,
+             "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
     "tide": {"status": "minecraft:water_breathing", "intent": "helpful", "threshold": 0.6, "per_level": 10.0,
              "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
     "hollow": {"status": "minecraft:poison", "intent": "harmful", "threshold": 0.4, "per_level": 1.0,
@@ -193,7 +203,10 @@ TEXT = {
     "band.cold": "Cold", "band.warm": "Warm", "band.hot": "Hot", "band.searing": "Searing",
     "alchemy.contaminant": "Contaminant",
     "alchemy.searing": "searing stirs",
+    "alchemy.thawed": "stirs above the cold, which thaw Rime",
 }
+# What JEI's page for an ingredient carrying Rime adds (Concordance Chunk B, B-08): a property fact, never an outcome.
+RIME_JEI = "; stirred cold, its Rime brews Frostward (Winter Brine)"
 
 TOOLTIPS = {
     "alchemy_specimen": "Alchemical ingredient: sneak and use to examine it",
@@ -223,7 +236,8 @@ def lang_entries(lang):
     for key, info in INGREDIENTS.items():
         lang[f"jei.{MOD}.alchemy.{key}"] = "Alchemy: " + ", ".join(
             f"{axis.title()} {value:.2f}" for axis, value in info["properties"].items()) + (
-            f"; contaminant {info['contaminant']:.2f}" if info.get("contaminant") else "")
+            f"; contaminant {info['contaminant']:.2f}" if info.get("contaminant") else "") + (
+            RIME_JEI if info["properties"].get("rime") else "")
     lang[f"jei.{MOD}.alchemy.mortar"] = "Grind an alchemical ingredient: it dissolves faster but loses a little."
 
 
@@ -245,9 +259,71 @@ def _seconds(ticks):
     return str(int(value)) if value == int(value) else f"{value:g}"
 
 
+def _rime_keeps():
+    return ", ".join(f"{band} {RIME_KEEP[band] // 10}%" if RIME_KEEP[band] else f"{band} none"
+                     for band in BANDS if band != "cold")
+
+
+def _milli(units):
+    return round(units * 1000)
+
+
+def simulate(operations):
+    """The process as Java's alchemy/Mixture does it, in milli-units with floor division: ("water", n), ("add", key, prep),
+    ("stir", band) -> (parts, pending, dissolved, contaminant), each by axis. For the codex's worked Winter Brine and
+    check_mod_data.py check_winter_brine, which hold it to ConcordanceAlchemyGameTests."""
+    parts, pending, dissolved, contaminant = 0, dict.fromkeys(AXES, 0), dict.fromkeys(AXES, 0), 0
+    for operation in operations:
+        if operation[0] == "water":
+            parts += operation[1]
+        elif operation[0] == "add":
+            ingredient, preparation = INGREDIENTS[operation[1]], PREPARATIONS[operation[2]]
+            for axis in AXES:
+                prepared = _milli(ingredient["properties"].get(axis, 0)) * _milli(preparation["scale"]) // 1000
+                ready = prepared * _milli(preparation["ready"]) // 1000
+                pending[axis] += prepared - ready
+                dissolved[axis] += ready
+            contaminant += _milli(ingredient.get("contaminant", 0)) + _milli(preparation.get("contaminant", 0))
+        else:
+            band = operation[1]
+            for axis in AXES:
+                moved = pending[axis] * BANDS[band][1] // 1000
+                pending[axis] -= moved
+                dissolved[axis] += moved
+            if band == "searing":
+                for axis in ("radiance", "verdance"):
+                    dissolved[axis] = dissolved[axis] * SEARING_KEEP // 1000
+                contaminant += SEARING_CONTAMINANT
+            dissolved["rime"] = dissolved["rime"] * RIME_KEEP[band] // 1000
+    return parts, pending, dissolved, contaminant
+
+
+# Winter Brine as the codex and ConcordanceAlchemyGameTests.winterBrineNeedsTheColdBand work it: three snowballs as they
+# come in one part of water, then WINTER_BRINE_STIRS stirs at one band.
+WINTER_BRINE = [("water", 1)] + [("add", "snowball", "raw")] * 3
+WINTER_BRINE_STIRS = 3
+
+
+def winter_brine(band):
+    """Rime a part (milli-units) of WINTER_BRINE stirred WINTER_BRINE_STIRS times at {band}."""
+    parts, _, dissolved, _ = simulate(WINTER_BRINE + [("stir", band)] * WINTER_BRINE_STIRS)
+    return dissolved["rime"] // parts
+
+
+def _winter_brine_example():
+    rime = PROPERTIES["rime"]
+    cold, warm = winter_brine("cold"), winter_brine("warm")
+    ticks = min(rime["max_ticks"], cold * rime["ticks_per_unit"] // 1000)
+    text = (f"Three snowballs as they come in one part of water, stirred cold three times, hold {_units(cold / 1000)} Rime a "
+            f"part: a draught of **Frostward** for {_seconds(ticks)} s.")
+    if warm < _milli(rime["threshold"]):
+        text += f" Stirred warm, the same three keep {_units(warm / 1000)}: too weak (it needs {_units(rime['threshold'])})."
+    return text
+
+
 def _property_table():
     names = {"minecraft:night_vision": "Night Vision", "minecraft:regeneration": "Regeneration",
-             "minecraft:fire_resistance": "Fire Resistance", "minecraft:resistance": "Resistance",
+             "minecraft:fire_resistance": "Fire Resistance", FROSTWARD: "Frostward",
              "minecraft:water_breathing": "Water Breathing", "minecraft:poison": "Poison", "minecraft:nausea": "Nausea"}
     return "\\\n".join(f"- {axis.title()}: {names[info['status']]} from {_units(info['threshold'])} a part, "
                        f"{_seconds(info['ticks_per_unit'])} s a unit (at most {_seconds(info['max_ticks'])} s)"
@@ -290,7 +366,9 @@ def codex():
                 ("text", "Stirring",
                  f"Ingredients do not dissolve by themselves. Each **stir** (a Stirring Rod or a stick) dissolves a "
                  f"share of what is still pending, more the hotter it is. But a **searing** stir keeps only "
-                 f"{SEARING_KEEP // 10}% of the dissolved Radiance and Verdance and fouls the mixture."),
+                 f"{SEARING_KEEP // 10}% of the dissolved Radiance and Verdance and fouls the mixture."
+                 f" Rime is cold's own: a stir above the cold band keeps only part of the Rime already dissolved "
+                 f"({_rime_keeps()})."),
                 ("text", "Bottling",
                  "A bottle takes one part's share of everything dissolved: that is its dose. The same process always "
                  "makes the same mixture, so a good one can be made again."),
@@ -337,6 +415,22 @@ def codex():
                  f"It never guesses: a missing ingredient or the wrong heat simply waits."),
             ],
         },
+        # Concordance Chunk B, B-08 (B-P44): Winter Brine needs only the Alembic Arts, not Rimekeeping.
+        ("alembic", "winter_brine"): {
+            "name": "Winter Brine", "x": 4, "y": 2, "icon": "minecraft:snowball", "condition": (art, "observed"),
+            "description": "Rime stirred cold: Frostward",
+            "pages": [
+                ("text", "Winter Brine",
+                 f"Rime brews Frostward, and Rime is cold's own: every stir above the cold band thaws part of the Rime "
+                 f"already dissolved ({_rime_keeps()} of it stays). So stir it with nothing burning beneath the crucible. "
+                 + _winter_brine_example()),
+                ("text", "Frostward",
+                 f"While Frostward lasts you gather no frost: powder snow, the Frost Horn's chill and the Yeti King's breath "
+                 f"and blizzard leave none on you, though his blows still land. It lasts "
+                 f"{_seconds(PROPERTIES['rime']['ticks_per_unit'])} s for each unit of Rime a part holds, at most "
+                 f"{_seconds(PROPERTIES['rime']['max_ticks'])} s, and milk ends it. The Yeti Mitten from his loot, held in "
+                 f"the other hand, keeps you warm for as long as you hold it."),
+            ]},
     }
 
 

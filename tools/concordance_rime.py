@@ -10,11 +10,14 @@ Concordance Chunk B, unit 3.
 - B-06, Rimebind (defense): Rimebound, a fifth off a creature's movement speed for 3 s, then a hidden thaw of 2 s in which
   no one's Rimebind takes it (02:78).
 - B-07, Preserve (utility): an alteration in Rime's school holds an Alembic Crucible's heat in its band for 60 s (02:77).
+- B-08, Frostward (unit 4): Winter Brine's status (the Rime alchemy property gives it); no frost gathers while it lasts
+  and the Yeti King's chill does not take.
 
-Java: concordance/rime (Rime, RimeSurvey, Rimebind); tools/check_mod_data.py check_rime holds it to these tables.
+Java: concordance/rime (Rime, RimeSurvey, Rimebind, Frostward); tools/check_mod_data.py check_rime and (B-08)
+check_winter_brine hold it to these tables.
 Imports only leaf tables, never tools/concordance.py (tools/owner_art.py imports this module directly).
 """
-from concordance_alchemy import BANDS
+from concordance_alchemy import BANDS, FROSTWARD
 from concordance_ember import EMBER_SPECIMEN_TAG
 
 MOD = "jugcraft"
@@ -99,6 +102,12 @@ PRESERVE_HOLD_TICKS = 1200
 PRESERVABLE = [rid("crucible")]  # Java: Rime.PRESERVABLE, #jugcraft:concordance/preservable
 PRESERVE_WORD = "rimehold"
 
+# ---------------------------------------------------------------------------------------------- B-08 Frostward
+# Winter Brine's status (Java: rime/Frostward; tools/concordance_alchemy.py PROPERTIES["rime"] gives it). While it lasts a
+# creature gathers no frost: its own effect tick clears what it has (the Yeti Mitten's check, done by the creature under
+# it), and the Yeti King's chill does not take (YetiKingEntity.chill). Timed; the Mitten stays the lasting answer (B-D3).
+FROSTWARD_COLOUR = 0x73DAD8  # the ice of the owner's icon (frozen.png)
+
 COMPONENTS = {
     "rimegrip": {"slot": "operation", "requires": _UNDERSTOOD, "authored": True, "capacity": 1, "focus": 2,
                  "operation": {"effect": "status", "intent": "harmful", "principle": "rime", "magnitude": 0,
@@ -160,6 +169,8 @@ OWNER_FILES = {
     "textures/spell/preserve.png": "assets/ars_jimbaux/textures/item/extend_time.png",
     "textures/mob_effect/rimebound.png": "assets/ars_jimbaux/textures/mob_effect/freezing.png",
     "textures/mob_effect/rime_thaw.png": "assets/ars_nouveau/textures/mob_effect/soaked.png",
+    # B-08 (unit 4, B-P43): the owner's "Frozen" icon, used for its opposite, the ward against frost.
+    "textures/mob_effect/frostward.png": "assets/ars_jymbaumental/textures/mob_effect/frozen.png",
 }
 
 
@@ -167,6 +178,7 @@ def lang_entries(lang):
     lang[f"tag.item.{MOD}.rime_specimens"] = "Snow and Ice"
     lang[f"effect.{MOD}.rimebound"] = "Rimebound"
     lang[f"effect.{MOD}.rime_thaw"] = "Thawing"
+    lang[f"effect.{FROSTWARD.replace(':', '.')}"] = "Frostward"  # B-08
 
 
 def _band_floors():

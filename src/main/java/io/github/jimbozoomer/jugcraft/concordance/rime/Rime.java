@@ -25,7 +25,8 @@ import org.jspecify.annotations.Nullable;
  * tools/concordance_rime.py). Rimekeeping is mastered by kinds of cold work, each counted once ({@link #practise});
  * Preserve, an alteration in Rime's school ({@link #SCHOOL}), holds an Alembic Crucible's heat in its band instead of
  * putting out fire ({@link #preserves}, {@link #preserve}): never an inventory, an item, food or a machine, and never a
- * block changed. Rimebind is {@link Rimebind}; the winter survey {@link RimeSurvey}.
+ * block changed. Rimebind is {@link Rimebind}; the winter survey {@link RimeSurvey}. Frostward, Winter Brine's status
+ * (Concordance Chunk B, B-08), is {@link Frostward}.
  */
 public final class Rime {
 	/** The practice Rimekeeping is mastered by (tools/concordance_rime.py RIMEWORK). */
@@ -51,6 +52,7 @@ public final class Rime {
 	public static void register() {
 		Rimebind.register();
 		RimeSurvey.register();
+		Frostward.register();
 	}
 
 	public static boolean understands(Player player) {
