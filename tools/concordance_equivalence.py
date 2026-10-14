@@ -299,12 +299,12 @@ RESEARCH = {
         },
         "unlocks": {},
         "advancements": {
-            "encountered": ("Raw Matter", "Examine an unworked ore or clay", "task", "minecraft:raw_iron"),
+            "encountered": ("Raw Matter", "Examine raw matter: an unworked ore, clay or stone", "task", "minecraft:raw_iron"),
             "observed": ("Comparisons", "Examine two different raw materials", "task", "minecraft:raw_copper"),
             "understood": ("Assay", "Understand Assay: study raw matter at a Lampwright's Bench", "goal", rid("assayers_scale")),
             "mastered": ("Balancewright", "Dissolve five different materials at an Assayer's Scale", "challenge", "minecraft:gold_ingot"),
         },
-        "locked": {"encountered": "Examine an unworked ore or clay first",
+        "locked": {"encountered": "Examine raw matter first",
                    "observed": "Examine two different raw materials first",
                    "understood": "Understand Assay first", "mastered": "Master Assay first"},
     },
@@ -352,7 +352,8 @@ def codex():
     pages = [
         ("text", "Assay",
          "Once you understand First Light, examine raw matter (**sneak and use**): raw iron, copper or gold, calcite or "
-         "clay. Study one at a Lampwright's Bench to understand Assay."),
+         "clay, or stone (granite, diorite, andesite, tuff) or raw Thallite; examining a thing never puts it on the scale. "
+         "Study one at a Lampwright's Bench to understand Assay."),
         ("crafting_recipe", "Assayer's Scale",
          "Use the scale with a material in your main hand to **weigh** it: its worth in grains of Prima Materia, what "
          "the stack would dissolve into, and what forming one costs. Use it again within ten seconds to **dissolve** "

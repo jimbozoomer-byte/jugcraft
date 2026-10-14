@@ -253,7 +253,8 @@ INVOCATION_MAX_TUNINGS = 3  # Java: RulesParser.MAX_TUNINGS
 INVOCATION_SCALING_MAX = 2.0  # Java: RulesParser.MAX_SCALING (damage per point of Spell Power)
 # The vanilla particles invocations show on release (Spell Engine skips an unknown id, so a typo would show nothing).
 INVOCATION_PARTICLES = ("minecraft:end_rod", "minecraft:wax_on", "minecraft:glow", "minecraft:electric_spark",
-                        "minecraft:cloud", "minecraft:flame", "minecraft:small_flame", "minecraft:lava")
+                        "minecraft:cloud", "minecraft:flame", "minecraft:small_flame", "minecraft:lava",
+                        "minecraft:snowflake", "minecraft:white_ash")
 INVOCATION_ROLES = {
     "damage": "Damage", "defense": "Defense", "movement": "Movement", "support": "Support",
     "investigation": "Investigation", "utility": "Utility",
@@ -361,7 +362,8 @@ EFFECT_KINDS = {
 }
 # Creatures that harmful control (pushes and statuses) does not move or slow, and those it reaches at half strength.
 EFFECT_IMMUNE = ["minecraft:ender_dragon", "minecraft:wither", "minecraft:warden", "minecraft:elder_guardian"]
-EFFECT_RESISTANT = ["minecraft:iron_golem", "minecraft:ravager", "minecraft:piglin_brute"]
+EFFECT_RESISTANT = ["minecraft:iron_golem", "minecraft:ravager", "minecraft:piglin_brute",
+                    f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant"]  # B-P8: only these two lair keepers
 # Blocks an interaction effect may use as a player would, and plants a harvesting effect may gather (besides ripe
 # crops, which are always gathered and replanted).
 # Vanilla tags are optional entries, so a renamed tag in a later version empties the entry instead of breaking the list.
@@ -471,11 +473,20 @@ INVOCATIONS.update(ember.INVOCATIONS)
 import concordance_trinkets as trinkets  # noqa: E402
 ITEMS.update(trinkets.ITEMS)
 BLOCKS.update(trinkets.BLOCKS)
+# Concordance Chunk B, unit 3 (tools/concordance_rime.py, tools/concordance_strata.py): Rimekeeping and Stratawrighting,
+# and their invocations, Rimebind, Preserve and Brace (their authored words join COMPONENTS below).
+import concordance_rime as rime  # noqa: E402
+import concordance_strata as strata  # noqa: E402
+RESEARCH.update(rime.RESEARCH)
+RESEARCH.update(strata.RESEARCH)
+INVOCATIONS.update(rime.INVOCATIONS)
+INVOCATIONS.update(strata.INVOCATIONS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
                  artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
-                 hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG]
+                 hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG,
+                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -568,6 +579,8 @@ COMPONENTS = {
              "name": "Mend", "text": "Lanternward's healing light."},
 }
 COMPONENTS.update(ember.COMPONENTS)
+COMPONENTS.update(rime.COMPONENTS)
+COMPONENTS.update(strata.COMPONENTS)
 COMPONENT_DATA_KEYS = ("slot", "requires", "authored", "capacity", "focus", "delivery", "selection", "operation",
                        "modifier", "termination")
 for _component in COMPONENTS.values():
@@ -693,7 +706,7 @@ def persistence(numbers):
 
 
 # Statuses invocations give, in the codex's words.
-STATUS_NAMES = dict(ember.STATUS_NAMES)
+STATUS_NAMES = {**ember.STATUS_NAMES, **rime.STATUS_NAMES, **strata.STATUS_NAMES}
 
 
 def school_name(school):
@@ -721,7 +734,11 @@ def operation_summary(op):
     if effect == "status":
         return f"{STATUS_NAMES.get(op['status'], op['status'])} for {seconds(op['duration'])} seconds"
     if effect == "alteration":
-        return "kindles a hearth" if op.get("school") == ember.COMPONENTS["kindling"]["operation"]["school"] else "puts out fire"
+        if op.get("school") == ember.COMPONENTS["kindling"]["operation"]["school"]:
+            return "kindles a hearth"
+        if op.get("school") == rime.COMPONENTS[rime.PRESERVE_WORD]["operation"]["school"]:
+            return f"holds an Alembic Crucible's heat in its band for {seconds(rime.PRESERVE_HOLD_TICKS)} seconds"
+        return "puts out fire"
     return effect
 
 
@@ -746,10 +763,11 @@ def invocation_codex():
             ],
         },
     }
-    # First Light's invocations, then Hearthbinding's in a row below them.
+    # First Light's invocations, then Hearthbinding's in a row below them, then Rimekeeping's and Stratawrighting's.
     positions = {("first_light", "understood"): [(2, 0), (2, 2), (0, 2)],
                  ("first_light", "mastered"): [(4, 0), (4, 2), (4, 4)],
-                 ("hearthbinding", "understood"): [(0, 6), (2, 6), (4, 6)], ("hearthbinding", "mastered"): [(6, 6)]}
+                 ("hearthbinding", "understood"): [(0, 6), (2, 6), (4, 6)], ("hearthbinding", "mastered"): [(6, 6)],
+                 ("rimekeeping", "understood"): [(0, 8), (2, 8)], ("stratawrighting", "understood"): [(0, 10)]}
     for key, info in INVOCATIONS.items():
         research = info["research"].split(":")[1]
         teacher = RESEARCH[research]["name"]
@@ -786,7 +804,8 @@ def invocation_codex():
             "pages": [
                 ("text", info["name"], f"{info['description']}\\\n\\\n{stats} {learned}"),
                 ("text", "Tuning and Counters",
-                 "Tunings:\\\n" + "\\\n".join(tunings) + f"\\\n\\\n**Counter.** {info['counter']}"),
+                 "Tunings:\\\n" + ("\\\n".join(tunings) or "- none: it always does the same")
+                 + f"\\\n\\\n**Counter.** {info['counter']}"),
             ],
         }
     return entries
@@ -1010,6 +1029,8 @@ def codex():
         **progression.codex(),
         **spire.codex(),
         **ember.codex(),
+        **rime.codex(),
+        **strata.codex(),
         **trinkets.codex(),
         **journal.codex(),
         **signs.codex(),
@@ -1129,6 +1150,8 @@ CATEGORIES = {
     **conclave.CATEGORY,
     **spire.CATEGORY,
     **ember.CATEGORY,
+    **rime.CATEGORY,
+    **strata.CATEGORY,
 }
 
 ENTRY_BACKGROUNDS = {None: "square_gray", "encountered": "square_gray", "observed": "square_gray",
@@ -1469,14 +1492,18 @@ SOUND_EVENTS.update(rituals.SOUND_EVENTS)
 SOUND_EVENTS.update(alchemy.SOUND_EVENTS)
 SOUND_EVENTS.update(signs.SOUND_EVENTS)
 SOUND_EVENTS.update(ember.SOUND_EVENTS)
+SOUND_EVENTS.update(rime.SOUND_EVENTS)
+SOUND_EVENTS.update(strata.SOUND_EVENTS)
+# Events that play the owner's recordings instead of a drawn cue: event -> sound files (copied by tools/owner_art.py).
+SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES}
 
 
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
-    (tools/concordance_ember.py SOUND_FILES), one picked at random."""
+    (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), one picked at random."""
     return {event: {"subtitle": f"subtitles.{MOD}.{event}",
                     "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
-                               for name in ember.SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
+                               for name in SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
             for event in SOUND_EVENTS}
 
 
@@ -1547,6 +1574,8 @@ MESSAGES = {
     **equivalence.MESSAGES,
     **hexes.MESSAGES,
     **ember.MESSAGES,
+    **rime.MESSAGES,
+    **strata.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
@@ -1592,6 +1621,7 @@ TOOLTIPS = {
     **hexes.TOOLTIPS,
     **conclave.TOOLTIPS,
     **spire.TOOLTIPS,
+    **rime.TOOLTIPS,
 }
 
 
@@ -1786,6 +1816,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     progression.write_all(write, data, lang)
     spire.write_all(write, assets, data, lang, condition, self_drop)
     ember.write_all(write, assets, data, lang, condition, self_drop)
+    rime.write_all(write, assets, data, lang, condition, self_drop)
+    strata.write_all(write, assets, data, lang, condition, self_drop)
     trinkets.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
     composer.lang_entries(lang)
@@ -1958,6 +1990,8 @@ def tags(tags):
     artifice.tags(tags)
     relics.tags(tags)
     equivalence.tags(tags)
+    rime.tags(tags)
+    strata.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)
     spire.tags(tags)

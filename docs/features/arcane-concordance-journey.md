@@ -74,9 +74,9 @@ raising the Lantern Spire instead.
 <!-- journey:start -->
 | Route | Research mastered | Also understood | Adept by | Master by | Practices | Spire |
 |---|---|---|---|---|---|---|
-| Cultivation | First Light, Verdant Husbandry, Alembic Arts, Binding Arts, Circle Lore | none | specialist | specialist | alchemy, cultivation, ritual, worker_service | Verdant Spire |
-| Exploration and combat | First Light, Celestial Attunement, Crimson Rites, Relic Lore, Sympathy | Circle Lore | generalist | specialist | living_growth, observation, relic_pulse, ritual, sympathy | Star Spire |
-| Crafting and infrastructure | First Light, Circle Lore, Runesmithing, Assay, Binding Arts | none | attuned | specialist | artifice, assay, ritual, worker_service | Lantern Spire |
+| Cultivation | First Light, Verdant Husbandry, Alembic Arts, Binding Arts, Circle Lore | none | specialist | specialist | alchemy, cultivation, ritual, winter_survey, worker_service | Verdant Spire |
+| Exploration and combat | First Light, Celestial Attunement, Crimson Rites, Relic Lore, Sympathy | Circle Lore | generalist | specialist | living_growth, observation, relic_pulse, ritual, sympathy, winter_survey | Star Spire |
+| Crafting and infrastructure | First Light, Circle Lore, Runesmithing, Assay, Binding Arts | none | attuned | specialist | artifice, assay, ritual, winter_survey, worker_service | Lantern Spire |
 
 ### Cultivation
 

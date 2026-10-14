@@ -19,6 +19,8 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Vector;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
+import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
@@ -83,8 +85,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * Hoppers and pipes: ingredients and reagents into the buffer, bottles and bowls into the bottle slot, from above or the
  * sides; brews out from the sides or below (the heat source usually sits below); water into the tank. The mixture is
- * saved with the crucible; broken, its slots drop and the mixture spills. Keep the numbers equal to
- * tools/concordance_alchemy.py.
+ * saved with the crucible; broken, its slots drop and the mixture spills. Preserve (Rime) may hold it in its band; the
+ * heat moves within the band. Keep the numbers equal to tools/concordance_alchemy.py.
  */
 public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, WorldlyContainer {
 	public static final int BUFFER_SLOTS = 5;
@@ -94,6 +96,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	public static final int STIR_TICKS = 10;
 	public static final int AUTOMATION_TICKS = 20;
 	public static final int WATER_PER_BUCKET = 3;
+	/** Preserve's hold: the game time it ends (optional; absent = not held). */
+	public static final String HELD_UNTIL = "held_until";
 	/** From above, only what goes in; from the sides, that and the output; from below, only the output. */
 	private static final int[] ABOVE = {0, 1, 2, 3, 4, BOTTLE_SLOT};
 	private static final int[] SIDES = {0, 1, 2, 3, 4, BOTTLE_SLOT, OUTPUT_SLOT};
@@ -110,6 +114,8 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	private int step;
 	public final local.peepo.CrucibleCompanion companion = new local.peepo.CrucibleCompanion(this);
 	private long lastStir = Long.MIN_VALUE / 2;
+	/** Preserve: game time until which the temperature stays in its band; 0 when not held. Saved only while held. */
+	private long heldUntil;
 	/** Whether its formula is waiting for something it lacks (so the shortage shows once, not every try). Not saved. */
 	private boolean waiting;
 	/** On a client: what the liquid looks like, as the server sent it (the spoon's reading, never the makeup). */
@@ -173,11 +179,29 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		setChanged();
 	}
 
+	public long heldUntil() {
+		return heldUntil;
+	}
+
+	/** Ticks Preserve still holds the band at {@code now} (0 when not held). */
+	public int held(long now) {
+		return heldUntil > now ? (int) Math.min(Rime.MAX_HOLD_TICKS, heldUntil - now) : 0;
+	}
+
+	/** Preserve: holds the band it is in now for {@code ticks} (at most Rime.MAX_HOLD_TICKS; a recast restarts it); 0 ends a hold. */
+	public void hold(long now, int ticks) {
+		heldUntil = ticks <= 0 ? 0L : now + Math.min(ticks, Rime.MAX_HOLD_TICKS);
+		setChanged();
+	}
+
 	// ---------------------------------------------------------------- heat and automation
 
 	void serverTick(ServerLevel level) {
 		int target = heatBelow(level);
 		int next = Heat.toward(temperature, target);
+		if (heldUntil != 0L) {
+			next = holding(level, next);
+		}
 		if (next != temperature) {
 			boolean newBand = Band.of(next) != Band.of(temperature);
 			temperature = next;
@@ -189,6 +213,21 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (program != null && level.getGameTime() % AUTOMATION_TICKS == 0 && JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
 			automate(level);
 		}
+	}
+
+	/** While held, the next temperature kept in its band; once over, forgotten. A hold further ahead than allowed is cut. */
+	private int holding(ServerLevel level, int next) {
+		long now = ConcordanceProgress.now(level);
+		if (now >= heldUntil) {
+			heldUntil = 0L;
+			setChanged();
+			return next;
+		}
+		if (heldUntil - now > Rime.MAX_HOLD_TICKS) {
+			heldUntil = now + Rime.MAX_HOLD_TICKS;
+			setChanged();
+		}
+		return band().keep(next);
 	}
 
 	/** The temperature the block beneath gives (a campfire only while lit). */
@@ -453,6 +492,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (!outcome.effects().isEmpty()) {
 			ConcordanceProgress.record(player, new Evidence.Practiced(Alchemy.ACTIVITY, outcome.key()));
 		}
+		RimeSurvey.bottled(player, bottled.dose()); // Rimekeeping's workshop study (Chunk B unit 3)
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.bottled", made.getHoverName()));
 		setChanged();
 		sync(level);
@@ -505,8 +545,11 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_cleared"));
 			return;
 		}
-		player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.crucible.status",
-				ComposeText.name(new Text.Ref("band", band().id)), temperature, mixture.parts()));
+		int held = held(ConcordanceProgress.now(player.level()));
+		Component band = ComposeText.name(new Text.Ref("band", band().id));
+		player.sendOverlayMessage(held > 0
+				? Component.translatable("message.jugcraft.concordance.crucible.status_held", band, temperature, mixture.parts(), (held + 19) / 20)
+				: Component.translatable("message.jugcraft.concordance.crucible.status", band, temperature, mixture.parts()));
 	}
 
 	private void sound(ServerLevel level, SoundEvent sound) {
@@ -619,6 +662,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		String saved = input.getStringOr("program", "");
 		program = saved.isEmpty() ? null : Formula.parse(saved);
 		step = program == null ? 0 : Math.clamp(input.getIntOr("step", 0), 0, program.operations().size());
+		heldUntil = Math.max(0L, input.getLongOr(HELD_UNTIL, 0L));
 	}
 
 	@Override
@@ -644,6 +688,9 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (program != null) {
 			output.putString("program", program.text());
 			output.putInt("step", step);
+		}
+		if (heldUntil > 0L) {
+			output.putLong(HELD_UNTIL, heldUntil);
 		}
 	}
 

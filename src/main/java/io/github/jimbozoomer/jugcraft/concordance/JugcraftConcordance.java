@@ -4,8 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.ember.Ember;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
+import io.github.jimbozoomer.jugcraft.concordance.strata.Strata;
 import io.github.jimbozoomer.jugcraft.concordance.trinket.Wayfaring;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import java.util.List;
@@ -68,6 +70,10 @@ public final class JugcraftConcordance {
 	public static final TagKey<Item> ALCHEMY_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("alchemy_specimens"));
 	/** Hearthbinding's specimens: fuels and things that hold fire (tools/concordance_ember.py). */
 	public static final TagKey<Item> EMBER_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("ember_specimens"));
+	/** Rimekeeping's specimens: snow and ice (tools/concordance_rime.py). */
+	public static final TagKey<Item> RIME_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("rime_specimens"));
+	/** Stratawrighting's specimens: stone and raw Thallite, also Assay's raw matter (tools/concordance_strata.py). */
+	public static final TagKey<Item> STRATA_SPECIMENS = TagKey.create(Registries.ITEM, Jugcraft.id("strata_specimens"));
 	/** What casts Concordance invocations from the main hand. */
 	public static final TagKey<Item> INSTRUMENTS = TagKey.create(Registries.ITEM, Jugcraft.id("concordance_instruments"));
 
@@ -174,10 +180,11 @@ public final class JugcraftConcordance {
 		STUDY_COMPLETE_SOUND = sound("concordance.study_complete");
 		LANTERN_IGNITE_SOUND = sound("concordance.lantern_ignite");
 		LANTERN_SNUFF_SOUND = sound("concordance.lantern_snuff");
-		// The invocations' release sounds, and Ember's cast sound (tools/concordance_ember.py): Spell Engine looks each up
-		// in the sound registry when a cast starts or is released.
+		// The invocations' release sounds, and Ember's, Rime's and Strata's cast sounds (tools/concordance_ember.py,
+		// concordance_rime.py, concordance_strata.py): Spell Engine looks each up in the sound registry when a cast starts or
+		// is released.
 		for (String release : List.of("aegis", "revelation", "lance", "flash", "lanternward", "ember_gather", "hearthspark",
-				"hearthguard", "cinderbolt", "hearthflare")) {
+				"hearthguard", "cinderbolt", "hearthflare", "rime_gather", "rimebind", "preserve", "strata_gather", "brace")) {
 			sound("concordance." + release);
 		}
 		CIRCLE_START_SOUND = sound("concordance.circle_start");
@@ -290,6 +297,10 @@ public final class JugcraftConcordance {
 
 		Examination.register();
 		Ember.register();
+		// Concordance Chunk B, unit 3: Rime's and Strata's statuses and practice (registered whatever the switch says, so a
+		// saved effect keeps its id).
+		Rime.register();
+		Strata.register();
 		Wayfaring.register();
 		RateGate.register();
 		ConcordanceSpells.register();

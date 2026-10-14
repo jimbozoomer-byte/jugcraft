@@ -58,7 +58,7 @@ your server actually has.
 |---|---|---|---|---|
 | First Light | Lampwrights | Examine a luminous specimen | Understand Radiance: study at a bench, or examine three specimens in the dark | Master First Light: Kindle light in 8 different chunks |
 | Alembic Arts | Alembists | Examine an alchemical ingredient | Understand alchemy: study an ingredient at a Lampwright's Bench | Bottle 3 different outcomes |
-| Assay | Balancewrights | Examine an unworked ore or clay | Understand Assay: study raw matter at a Lampwright's Bench | Dissolve five different materials at an Assayer's Scale |
+| Assay | Balancewrights | Examine raw matter: an unworked ore, clay or stone | Understand Assay: study raw matter at a Lampwright's Bench | Dissolve five different materials at an Assayer's Scale |
 | Binding Arts | Spiritbinders | Examine something that binds | Understand the Binding Arts: study something that binds at a Lampwright's Bench | Be served by a familiar, a spirit and a construct |
 | Celestial Attunement | Starwatchers | Examine an instrument of the sky | Understand Celestial Attunement: study an instrument of the sky at a Lampwright's Bench | Observe three different celestial patterns through an observatory |
 | Circle Lore | Circlewrights | Examine something made to hold a shape or a bearing | Understand circles: study a circle specimen at a Lampwright's Bench | Complete rituals in 3 different chunks |
@@ -66,7 +66,9 @@ your server actually has.
 | Dreamwalking | Dreamwalkers | Examine something from the edge of dreams | Understand Dreamwalking: study a dreamlike thing at a Lampwright's Bench | Come back from three dreams |
 | Hearthbinding | Hearthbinders | Examine something that holds fire | Understand Hearthbinding: study something that holds fire at a Lampwright's Bench | Kindle 3 different kinds of hearth with Hearthspark |
 | Relic Lore | Runesmiths | Examine something that has outlived its maker | Understand Relic Lore: study something old at a Lampwright's Bench | Have relics serve you in three different ways |
+| Rimekeeping | Rimekeepers | Examine snow or ice | Understand Rimekeeping: study snow or ice at a Lampwright's Bench, arrive in the Glacier Hall, or bottle a brew that carries Rime | Do three kinds of cold work: Preserve a crucible holding a mixture while it is cold, and one while it is warm or hotter, and Rimebind a hostile creature |
 | Runesmithing | Runesmiths | Examine something a smith works with | Understand Runesmithing: study smithing stock at a Lampwright's Bench | Enhance a ring in three different ways |
+| Stratawrighting | Stratawrights | Examine ordinary stone or raw Thallite | Understand Stratawrighting: study stone at a Lampwright's Bench | Anchor three ways: Brace someone on soil, Brace someone on bare stone, sand or gravel, and have a Brace you cast hold against a blow (bracing a party member, a ritual completed or a blow taken in Earthbound Thallite can stand for one) |
 | Sympathy | Hexweavers | Examine something that carries a creature's likeness | Understand Sympathy: study a likeness at a Lampwright's Bench | Cast three different curses |
 | Verdant Husbandry | Greenwardens | Examine a living specimen | Understand Verdant Husbandry: study a living specimen at a Lampwright's Bench | Grow and harvest all four of the Greenwardens' crops by hand |
 

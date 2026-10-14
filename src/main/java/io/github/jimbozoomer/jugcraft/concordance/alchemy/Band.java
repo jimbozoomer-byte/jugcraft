@@ -35,6 +35,13 @@ public enum Band {
 		return band;
 	}
 
+	/** {@code temperature} kept inside this band (Preserve's hold: the heat moves, but not out of the band). */
+	public int keep(int temperature) {
+		Band[] bands = values();
+		int top = ordinal() + 1 < bands.length ? bands[ordinal() + 1].from - 1 : Integer.MAX_VALUE;
+		return Math.clamp(temperature, from, top);
+	}
+
 	public static @Nullable Band fromId(String id) {
 		for (Band band : values()) {
 			if (band.id.equals(id)) {

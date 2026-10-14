@@ -491,6 +491,24 @@
             "type": "codex",
             "category": "jugcraft:hearth"
           }
+        },
+        {
+          "title": "Winter",
+          "icon": "minecraft:packed_ice",
+          "text": "The Rimekeepers' practice: cold kept and used",
+          "link": {
+            "type": "codex",
+            "category": "jugcraft:winter"
+          }
+        },
+        {
+          "title": "Stone",
+          "icon": "minecraft:tuff",
+          "text": "The Stratawrights' practice: stone read and leant on",
+          "link": {
+            "type": "codex",
+            "category": "jugcraft:stone"
+          }
         }
       ]
     }

@@ -154,5 +154,29 @@
   },
   {
     "id": "jugcraft:concordance/hearthbinding_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/rimekeeping_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/rimekeeping_observed"
+  },
+  {
+    "id": "jugcraft:concordance/rimekeeping_understood"
+  },
+  {
+    "id": "jugcraft:concordance/rimekeeping_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/stratawrighting_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/stratawrighting_observed"
+  },
+  {
+    "id": "jugcraft:concordance/stratawrighting_understood"
+  },
+  {
+    "id": "jugcraft:concordance/stratawrighting_mastered"
   }
 ]

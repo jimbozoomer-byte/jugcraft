@@ -5,7 +5,10 @@ textures, a GeckoLib model and sounds, each a byte-for-byte copy under a Jugcraf
 made LF), listed in tools/concordance_ember.py OWNER_FILES. The trinkets slice (tools/concordance_trinkets.py) adds its
 icons, their animation sidecars, two slot icons and (part 1b) the Leather Belt's and Amphibian Boot's worn sheets the
 same way: OWNER_FILES from the magic collection and OWNER_BLOCKS_FILES from the Blocks folder's Trinket Type Mod. The
-encyclopedia (tools/encyclopedia.py, Chunk A) adds its inventory button's scroll sprite.
+encyclopedia (tools/encyclopedia.py, Chunk A) adds its inventory button's scroll sprite. Concordance Chunk B, unit 3 adds
+Rime's and Strata's (tools/concordance_rime.py, tools/concordance_strata.py OWNER_FILES): the spell and status icons of
+Rimebind, Preserve and Brace, at their own sizes, and Brace's four earth recordings. Two tables may not import different
+files to one path.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -36,6 +39,8 @@ sys.path.insert(0, HERE)
 
 import arms_pixel  # noqa: E402
 import concordance_ember  # noqa: E402
+import concordance_rime  # noqa: E402
+import concordance_strata  # noqa: E402
 import concordance_trinkets  # noqa: E402
 import encyclopedia  # noqa: E402
 import feasts  # noqa: E402
@@ -64,8 +69,15 @@ def imports():
 
 
 def magic_imports():
-    """(runtime path under assets/jugcraft, library path under Magic/) for every copied magic-collection file."""
-    return sorted({**concordance_ember.OWNER_FILES, **concordance_trinkets.OWNER_FILES, **encyclopedia.OWNER_FILES}.items())
+    """(runtime path under assets/jugcraft, library path under Magic/) for every copied magic-collection file. Two slices
+    may not import different files to one path."""
+    merged = {}
+    for table in (concordance_ember.OWNER_FILES, concordance_trinkets.OWNER_FILES, encyclopedia.OWNER_FILES,
+                  concordance_rime.OWNER_FILES, concordance_strata.OWNER_FILES):
+        for target, source in table.items():
+            if merged.setdefault(target, source) != source:
+                raise SystemExit(f"tools/owner_art.py: two slices import different files to {target}")
+    return sorted(merged.items())
 
 
 def block_asset_imports():

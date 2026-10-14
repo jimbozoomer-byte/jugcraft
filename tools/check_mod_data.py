@@ -655,6 +655,10 @@ def check_tags():
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
             known |= set(re.findall(r'Registry\.register\(BuiltInRegistries\.ENTITY_TYPE,\s*id\("([a-z_]+)"\)', scary))
+            # The lair keepers and their summons (lair/<keeper>/Jugcraft<Keeper>.java entity(...)): Concordance Chunk B
+            # puts the Yeti King and the Cinder Tyrant in #jugcraft:concordance/resistant (B-P8).
+            for keeper in sorted((JAVA_ROOT / "lair").glob("*/Jugcraft*.java")):
+                known |= set(re.findall(r'\bentity\("([a-z_]+)",\s*EntityType\.Builder', keeper.read_text(encoding="utf-8")))
         # A worldgen tag's registry is two folders deep (worldgen/biome): a tag it names lives beside it there.
         tag_registry = "/".join(path.relative_to(DATA).parts[2:4]) if registry == "worldgen" else registry
         for value in (load(path) or {}).get("values", []):
@@ -11859,6 +11863,9 @@ def check_concordance(registered):
     check_composition(co, root, lang, registered, research)
     check_invocations(co, root, lang, research)
     check_ember(co, root, lang, research)
+    check_rime(co, root, lang, research)
+    check_strata(co, root, lang, research)
+    check_rime_strata_assets(co, lang)
     check_wayfaring(co, root, lang)
     check_baselines(root)
     check_rituals(co, root, lang, registered, research)
@@ -12563,6 +12570,249 @@ def check_ember_regalia(co, root, lang):
     if drawn & set(em.OWNER_FILES):
         err(f"tools/concordance_ember_art.py draws over imported owner files: {sorted(drawn & set(em.OWNER_FILES))}")
 
+
+
+def _java_body(text, start):
+    """The body of the member that starts with `start` in a Java source (to its first closing brace at one tab)."""
+    at = text.find(start)
+    rest = text[at:] if at >= 0 else ""
+    end = rest.find("\n\t}\n")
+    return rest[:end] if end >= 0 else rest
+
+
+def check_rime(co, root, lang, research):
+    """Rime (Concordance Chunk B, unit 3; tools/concordance_rime.py). B-05: the Java mirrors Rimekeeping's activities,
+    gates and keys; Rimekeeping begins with snow or ice, is observed against something that holds fire, is understood at
+    the bench or by the First-Light-gated winter survey (the Glacier Hall, or a Rime brew bottled by hand) and is mastered
+    by kinds of cold work that need nothing else. B-06: Rimebind's Rimebound is an exclusive harmful status with its
+    hidden thaw, guarded and hooked into the effect boundary, never lengthened or deepened by a tuning. B-07: Preserve is
+    the one alteration in Rime's school; the boundary dispatches it before the dousing (which removes only fire) where it
+    acts and where it chooses blocks, and is its only caller; holding touches no inventory; only the crucible is held,
+    for no longer than the Initiate's Wand sustains, saved as an optional field and shown by Jade. B-P8: of the lair
+    keepers, only the Yeti King and the Cinder Tyrant are resistant. Every word has its lang."""
+    rm = co.rime
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    rime, survey, rimebind = (source(root / "rime" / name) for name in ("Rime.java", "RimeSurvey.java", "Rimebind.java"))
+    effects, crucible = source(root / "ConcordanceEffects.java"), source(root / "CrucibleBlockEntity.java")
+    # B-05: the Java mirrors the generator's activities, gates and keys.
+    for text, name, activity, gate, keys in ((rime, "rime/Rime.java", rm.RIMEWORK, rm.RESEARCH_ID, rm.RIMEWORK_KEYS),
+                                             (survey, "rime/RimeSurvey.java", rm.SURVEY, f"{MOD}:first_light", rm.SURVEY_KEYS)):
+        if f'String ACTIVITY = "{activity}";' not in text or f'String RESEARCH = "{gate}";' not in text:
+            err(f"concordance/{name}: ACTIVITY or RESEARCH differs from tools/concordance_rime.py ({activity}, gate {gate})")
+        found = set(re.findall(r'String KEY_[A-Z_]+ = "([a-z_:]+)";', text))
+        if found != set(keys):
+            err(f"concordance/{name}: keys {sorted(found)} differ from the generator's {sorted(keys)}")
+    if "Lair.GLACIER_HALL.dimension" not in survey or "AFTER_PLAYER_CHANGE_LEVEL" not in survey:
+        err("concordance/rime/RimeSurvey.java: the Glacier Hall is studied by arriving in its level")
+    if "RimeSurvey.bottled(" not in crucible:
+        err("CrucibleBlockEntity.java: a brew bottled by hand must tell Rimekeeping's survey (RimeSurvey.bottled)")
+
+    def rules(key, state):
+        return research.get(key, {}).get("states", {}).get(state, {}).get("any", [])
+    if rules("rimekeeping", "encountered") != [{"type": "examine", "specimens": f"#{rm.RIME_SPECIMEN_TAG}"}] \
+            or rules("rimekeeping", "observed") != [{"type": "examine", "specimens": f"#{rm.WARM_TAG}"}]:
+        err("Rimekeeping begins with snow or ice and is observed against something that holds fire")
+    if {"type": "practice", "activity": rm.SURVEY} not in rules("rimekeeping", "understood"):
+        err("Rimekeeping must be understood by its survey too (the Glacier Hall or a Rime brew, 02:136)")
+    if rules("rimekeeping", "mastered") != [{"type": "practice", "activity": rm.RIMEWORK, "distinct": rm.RIMEWORK_MASTERY}]:
+        err(f"Rimekeeping is mastered by its cold work, {rm.RIMEWORK_MASTERY} kinds")
+    own = [key for key, (needs, _text) in rm.RIMEWORK_KEYS.items() if needs is None]
+    if not 1 <= rm.RIMEWORK_MASTERY <= len(own):
+        err(f"Rimekeeping: mastery must be reachable by its own cold work alone ({len(own)} kinds)")
+    if research.get("rimekeeping", {}).get("unlocks") != {"understood": {"invocations": [f"{MOD}:rimebind", f"{MOD}:preserve"]}}:
+        err("rimekeeping: understood teaches Rimebind and Preserve")
+    # B-06: Rimebind.
+    for needle in (f'String STATUS = "{rm.RIMEBOUND}";', f"double SLOW = {rm.RIMEBOUND_SLOW};",
+                   f"int GRACE_TICKS = {rm.RIME_GRACE_TICKS};", f'Jugcraft.id("{split(rm.RIMEBOUND)[1]}")',
+                   f'Jugcraft.id("{split(rm.RIME_THAW)[1]}")', f"0x{rm.RIMEBOUND_COLOUR:06X}", f"0x{rm.RIME_THAW_COLOUR:06X}",
+                   "ConcordanceEffects.guard(", "0, false, false, false)", "instanceof Enemy"):
+        if needle not in rimebind:
+            err(f"concordance/rime/Rimebind.java: missing or different from tools/concordance_rime.py: {needle}")
+    if "Rimebind.bound(" not in effects:
+        err("ConcordanceEffects.java: a Rimebound that takes must start the Thaw (Rimebind.bound)")
+    op = rm.COMPONENTS["rimegrip"]["operation"]
+    if (op.get("effect"), op.get("intent"), op.get("status"), op.get("stacking"), op.get("duration")) != \
+            ("status", "harmful", rm.RIMEBOUND, "exclusive", rm.RIMEBOUND_TICKS):
+        err("component rimegrip: an exclusive harmful Rimebound of RIMEBOUND_TICKS")
+    info = rm.INVOCATIONS["rimebind"]
+    if set(info["tunings"]) & {"prolong", "intensify"} or info["persists"] != rm.RIMEBOUND_TICKS + rm.RIME_GRACE_TICKS:
+        err("invocation rimebind: no tuning may lengthen or deepen the slow, and it declares the thaw's time")
+    # B-07: Preserve.
+    school = co.PRINCIPLES["rime"]["school"]
+    words = [key for key, c in co.COMPONENTS.items() if c.get("operation", {}).get("effect") == "alteration"
+             and c["operation"].get("school") == school]
+    op = co.COMPONENTS.get(rm.PRESERVE_WORD, {}).get("operation", {})
+    if words != [rm.PRESERVE_WORD] or op.get("intent") != "helpful" or op.get("principle") != "rime":
+        err(f"Preserve: {rm.PRESERVE_WORD} must be the one helpful alteration in Rime's school ({school}); found {words}")
+    if co.INVOCATIONS.get("preserve", {}).get("composition") != f"touch struck {rm.PRESERVE_WORD}":
+        err(f"invocation preserve: Preserve is touch struck {rm.PRESERVE_WORD}")
+    if not 0 < rm.PRESERVE_HOLD_TICKS <= co.INSTRUMENT_LIMITS["initiate_wand"]["duration"]:
+        err("Preserve: its hold is positive and no longer than the Initiate's Wand may sustain (02:77: 60 seconds)")
+    if co.INVOCATIONS.get("preserve", {}).get("persists") != rm.PRESERVE_HOLD_TICKS:
+        err("invocation preserve: it declares the hold it leaves (persists = PRESERVE_HOLD_TICKS)")
+    for needle in (f'String SCHOOL = "{school}";', f"int HOLD_TICKS = {rm.PRESERVE_HOLD_TICKS};",
+                   "MAX_HOLD_TICKS = EffectSpec.MAX_DURATION;", 'Jugcraft.id("concordance/preservable")',
+                   "instanceof CrucibleBlockEntity"):
+        if needle not in rime:
+            err(f"concordance/rime/Rime.java: differs from tools/concordance_rime.py ({needle})")
+    alteration = _java_body(_java_body(effects, "public static Result apply(Context context, EffectSpec spec, BlockPos pos)"),
+                            "case ALTERATION -> {")
+    dispatch, remove = alteration.find("Rime.preserves(spec)"), alteration.find("level.removeBlock(")
+    if dispatch < 0 or remove < 0 or dispatch > remove or "state.is(BlockTags.FIRE)" not in alteration[dispatch:remove]:
+        err("ConcordanceEffects.java: Preserve is dispatched before the default alteration, which removes only fire")
+    if "Rime.preserves(spec) ? Rime.preservable(level, pos, state)" not in _java_body(effects, "public static boolean accepts("):
+        err("ConcordanceEffects.accepts: Preserve chooses only what it can hold")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        text = source(path)
+        if path.name != "ConcordanceEffects.java" and "Rime.preserve(" in text:
+            err(f"{path.relative_to(JAVA_ROOT)}: only the effect boundary holds a crucible (it asks Authority first)")
+        if path.name not in ("Rime.java", "CrucibleBlockEntity.java") and "CrucibleBlockEntity" in text \
+                and re.search(r"\.hold\(", text):
+            err(f"{path.relative_to(JAVA_ROOT)}: only Preserve (concordance/rime/Rime.java) holds a crucible's heat")
+    holding = _java_body(rime, "public static boolean preserve(") + _java_body(rime, "public static boolean preservable(") \
+        + _java_body(crucible, "public void hold(")
+    for needle in ("ItemStack", "getItem(", "setItem(", "Container", "Storage"):
+        if needle in holding:
+            err(f"Preserve: holding a crucible never touches an inventory ({needle})")
+    tag = (load(DATA / MOD / "tags" / "block" / "concordance" / "preservable.json") or {}).get("values")
+    if tag != [f"{MOD}:crucible"] or rm.PRESERVABLE != [f"{MOD}:crucible"]:
+        err(f"tags/block/concordance/preservable.json: Preserve holds only the Alembic Crucible (found {tag})")
+    if 'HELD_UNTIL = "held_until"' not in crucible or "input.getLongOr(HELD_UNTIL, 0L)" not in crucible \
+            or "Rime.MAX_HOLD_TICKS" not in _java_body(crucible, "private int holding("):
+        err("CrucibleBlockEntity.java: the hold is the optional field held_until, read as 0 when absent, cut to "
+            "Rime.MAX_HOLD_TICKS")
+    if 'snapshot.putInt("held"' not in source(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java") \
+            or '"tooltip.jugcraft.concordance.jade.held"' not in source(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java"):
+        err("Jade: the crucible's snapshot carries Preserve's hold and the client shows it")
+    # B-P8: of the lair keepers (six since the Mire Hag and the Crypt Lich), only the Yeti King and the Cinder Tyrant
+    # bear harmful control as resistant, and none is immune.
+    keepers = {f"{MOD}:{keeper}" for keeper in ("yeti_king", "cinder_tyrant", "vesperine", "tatterlace", "mire_hag", "crypt_lich")}
+    if set(co.EFFECT_RESISTANT) & keepers != {f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant"} or set(co.EFFECT_IMMUNE) & keepers:
+        err("concordance tolerance: only the Yeti King and the Cinder Tyrant join #concordance/resistant (B-P8)")
+    for key in (f"message.{MOD}.concordance.examine.cold", f"message.{MOD}.concordance.crucible.status_held",
+                f"tooltip.{MOD}.concordance.jade.held", f"tag.item.{MOD}.rime_specimens", f"effect.{MOD}.rimebound",
+                f"effect.{MOD}.rime_thaw", f"compose.{MOD}.conclave.tradition.rimekeepers"):
+        if key not in lang:
+            err(f"Rime: missing lang {key}")
+
+
+def check_strata(co, root, lang, research):
+    """Strata (Concordance Chunk B, unit 3; tools/concordance_strata.py). B-05: the Java mirrors Stratawrighting's
+    activity, gate and keys; it reads stone inside Assay's raw matter, needs no Thallite and takes no bridging block; raw
+    Thallite is never weighed; it is mastered by ways of anchoring that need nothing else. B-06: Brace's Braced is an
+    exclusive helpful status on the party, spent by a knockback blow or a harmful push and gone at the end of the tick;
+    helpful pushes neither feel nor spend it; who put it on is never saved; no tuning lengthens or deepens it; and it is
+    told apart from the war fork's Brace."""
+    st, eq = co.strata, co.equivalence
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    strata, brace = source(root / "strata" / "Strata.java"), source(root / "strata" / "Brace.java")
+    effects = source(root / "ConcordanceEffects.java")
+    if f'String ACTIVITY = "{st.ANCHORING}";' not in strata or f'String RESEARCH = "{st.RESEARCH_ID}";' not in strata:
+        err(f"concordance/strata/Strata.java: ACTIVITY or RESEARCH differs from tools/concordance_strata.py "
+            f"({st.ANCHORING}, gate {st.RESEARCH_ID})")
+    found = set(re.findall(r'String KEY_[A-Z_]+ = "([a-z_:]+)";', strata))
+    if found != set(st.ANCHORING_KEYS):
+        err(f"concordance/strata/Strata.java: keys {sorted(found)} differ from the generator's {sorted(st.ANCHORING_KEYS)}")
+    if "Rituals.listen(" not in strata or "AFTER_DAMAGE" not in strata:
+        err("concordance/strata/Strata.java: a ritual completed and a blow taken in Earthbound Thallite are its electives")
+
+    def rules(key, state):
+        return research.get(key, {}).get("states", {}).get(state, {}).get("any", [])
+    tag = f"#{st.STRATA_SPECIMEN_TAG}"
+    if rules("stratawrighting", "encountered") != [{"type": "examine", "specimens": tag}] or \
+            rules("stratawrighting", "observed") != [{"type": "examine", "specimens": tag, "distinct": st.OBSERVED_DISTINCT}]:
+        err("Stratawrighting reads stone: its specimens, OBSERVED_DISTINCT kinds")
+    if tag not in (load(DATA / MOD / "tags" / "item" / "assay_specimens.json") or {}).get("values", []):
+        err("#jugcraft:assay_specimens must hold #jugcraft:strata_specimens: one examination of raw matter (09:13)")
+    if len([item for item in st.STRATA_SPECIMENS if item.startswith("minecraft:")]) < st.OBSERVED_DISTINCT:
+        err("Stratawrighting must be observable with vanilla stone alone (the thallite switch off)")
+    for path in sorted((DATA / MOD / "tags" / "item").glob("*specimens.json")):
+        for item in sorted(set((load(path) or {}).get("values", [])) & set(st.NOT_SPECIMENS)):
+            err(f"{path.name}: {item} is a bridging block; sneak-use in the air would examine it")
+    if f"{MOD}:raw_thallite" in eq.MATERIALS:
+        err("raw Thallite is examined, never weighed: it stays out of the equivalence catalogue")
+    if research.get("stratawrighting", {}).get("unlocks") != {"understood": {"invocations": [f"{MOD}:brace"]}}:
+        err("stratawrighting: understood teaches Brace")
+    if rules("stratawrighting", "mastered") != [{"type": "practice", "activity": st.ANCHORING, "distinct": st.ANCHORING_MASTERY}]:
+        err(f"Stratawrighting is mastered by its ways of anchoring, {st.ANCHORING_MASTERY} kinds")
+    own = [key for key, (needs, _text) in st.ANCHORING_KEYS.items() if needs is None]
+    if not 1 <= st.ANCHORING_MASTERY <= len(own):
+        err(f"Stratawrighting: mastery must be reachable by its own ways of anchoring alone ({len(own)} kinds)")
+    # B-06: Brace.
+    for needle in (f'String STATUS = "{st.BRACED}";', f"double RESISTANCE = {st.BRACE_RESISTANCE};",
+                   f'Jugcraft.id("{split(st.BRACED)[1]}")', f"0x{st.BRACED_COLOUR:06X}", "AFTER_DAMAGE",
+                   "DamageTypeTags.NO_KNOCKBACK", "hurtDuration", "END_SERVER_TICK", 'buildAndRegister(Jugcraft.id("brace_caster"))'):
+        if needle not in brace:
+            err(f"concordance/strata/Brace.java: missing or different from tools/concordance_strata.py: {needle}")
+    for line in brace.splitlines():
+        if "brace_caster" in line and ".persistent(" in line:
+            err("concordance/strata/Brace.java: who put a Brace on is not saved (no .persistent( on brace_caster)")
+    for needle in ("Brace.resistanceWithout(", "Brace.spend(", "Brace.braced(", "effect.intent() == Intent.HARMFUL"):
+        if needle not in effects:
+            err(f"ConcordanceEffects.java: Brace wiring missing: {needle}")
+    op = st.COMPONENTS["bracing"]["operation"]
+    info = st.INVOCATIONS["brace"]
+    if (op.get("effect"), op.get("intent"), op.get("status"), op.get("stacking"), op.get("duration")) != \
+            ("status", "helpful", st.BRACED, "exclusive", st.BRACE_TICKS) or not info["composition"].startswith("here allies "):
+        err("Brace: an exclusive helpful Braced of BRACE_TICKS, on the party (here allies)")
+    if set(info["tunings"]) & {"prolong", "intensify"}:
+        err("invocation brace: no tuning may lengthen or deepen it")
+    if "war fork" not in info["counter"]:
+        err("invocation brace: its counter must tell it apart from the war fork's Brace")
+    for key in (f"message.{MOD}.concordance.examine.weight", f"tag.item.{MOD}.strata_specimens", f"effect.{MOD}.braced",
+                f"compose.{MOD}.conclave.tradition.stratawrights"):
+        if key not in lang:
+            err(f"Strata: missing lang {key}")
+
+
+def check_rime_strata_assets(co, lang):
+    """Rime's and Strata's icons and sounds (Chunk B, unit 3; B-P31): each spell and status icon is the owner's file at its
+    own size (tools/owner_art.py holds the bytes), every status the inventory lists has its name; Brace's release plays
+    the owner's four earth recordings and no cue is drawn for it; every other Rime and Strata event has its drawn cue; and
+    every Jugcraft status a word names is a registered mob effect."""
+    rm, st = co.rime, co.strata
+    for slice_, spells, statuses in ((rm, ("rimebind", "preserve"), (rm.RIMEBOUND, rm.RIME_THAW)), (st, ("brace",), (st.BRACED,))):
+        for spell in spells:
+            if f"textures/spell/{spell}.png" not in slice_.OWNER_FILES:
+                err(f"spell {spell}: its icon is not one of the owner's files ({slice_.__name__}.OWNER_FILES)")
+        for status in statuses:
+            if f"textures/mob_effect/{split(status)[1]}.png" not in slice_.OWNER_FILES:
+                err(f"status {status}: its icon is not one of the owner's files ({slice_.__name__}.OWNER_FILES)")
+    for status in (rm.RIMEBOUND, rm.RIME_THAW, st.BRACED):
+        name = split(status)[1]
+        if f"effect.{MOD}.{name}" not in lang:
+            err(f"status {status}: missing lang effect.{MOD}.{name} (the inventory lists every effect)")
+    played = load(ASSETS / "sounds.json") or {}
+    sounds_py = (ROOT / "tools" / "concordance_sounds.py").read_text(encoding="utf-8")
+    cues = set(re.findall(r'^\s+"([a-z_]+)": \(', sounds_py, re.M))
+    for event, names in st.SOUND_FILES.items():
+        if [sound.get("name") for sound in played.get(event, {}).get("sounds", [])] != [f"{MOD}:{name}" for name in names]:
+            err(f"sounds.json: {event} must play the owner's {names}")
+        if event.split(".", 1)[1] in cues:
+            err(f"tools/concordance_sounds.py draws {event}, which plays the owner's recordings")
+        for name in names:
+            if not (ASSETS / "sounds" / f"{name}.ogg").exists():
+                err(f"sounds/{name}.ogg is missing: run tools/owner_art.py")
+    for event in list(rm.SOUND_EVENTS) + list(st.SOUND_EVENTS):
+        if event in co.SOUND_FILES:
+            continue
+        cue = event.split(".", 1)[1]
+        if cue not in cues or not (ASSETS / "sounds" / "concordance" / f"{cue}.ogg").exists():
+            err(f"{event}: no drawn cue or no sounds/concordance/{cue}.ogg (tools/concordance_sounds.py)")
+    if set(co.SOUND_FILES) != set(co.ember.SOUND_FILES) | set(st.SOUND_FILES):
+        err("tools/concordance.py SOUND_FILES must be Ember's and Strata's owner recordings")
+    effects = set()
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        effects |= set(re.findall(r'registerForHolder\(\s*BuiltInRegistries\.MOB_EFFECT,\s*Jugcraft\.id\("([a-z_]+)"\)',
+                                  path.read_text(encoding="utf-8")))
+    for key, info in co.COMPONENTS.items():
+        status = info.get("operation", {}).get("status")
+        if status and split(status)[0] == MOD and split(status)[1] not in effects:
+            err(f"component {key}: status {status} is not a registered mob effect")
 
 
 def check_wayfaring(co, root, lang):
