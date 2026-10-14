@@ -47,6 +47,9 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	private static final int BAR_Y = 17;
 	private static final int BAR_WIDTH = 12;
 	private static final int BAR_HEIGHT = 52;
+	/** The big charge gauge on a machine with nothing else in its pane, centred with its percentage under it. */
+	private static final int CHARGE_X = 25;
+	private static final int CHARGE_Y = 25;
 	/** The player's inventory and hotbar: the menu's last slots. */
 	private static final int PLAYER_SLOTS = 36;
 
@@ -166,13 +169,16 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		extractGaugeTooltip(graphics, mouseX, mouseY);
 	}
 
-	/** Exact numbers over the energy bar and the tanks, and what goes in an empty machine slot. */
+	/** Exact numbers over the energy bar (or charge gauge) and the tanks, and what goes in an empty machine slot. */
 	private void extractGaugeTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		int mx = mouseX - leftPos;
 		int my = mouseY - topPos;
 		MachineKind kind = menu.kind();
 		String line = null;
-		if (kind.usesPower() && mx >= BAR_X - 1 && mx <= BAR_X + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
+		boolean overEnergy = bare(kind)
+				? mx >= CHARGE_X - 1 && mx <= CHARGE_X + 127 && my >= CHARGE_Y - 1 && my <= CHARGE_Y + 26
+				: mx >= BAR_X - 1 && mx <= BAR_X + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT;
+		if (kind.usesPower() && overEnergy) {
 			line = String.format("%,d / %,d JE", menu.energy(), menu.capacity());
 		} else if (kind.tankCapacity() > 0 && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT
 				&& (kind.isProcessor() ? mx >= 29 && mx < 37 : mx >= 149 && mx < 163)) {
@@ -291,7 +297,9 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 				status.warning ? theme.warn() : status.active ? theme.ok() : theme.dim());
 
 		MachineKind kind = menu.kind();
-		if (kind.usesPower()) {
+		if (kind.usesPower() && bare(kind)) {
+			MachineSkin.charge(graphics, theme, x + CHARGE_X, y + CHARGE_Y, menu.energy(), menu.capacity());
+		} else if (kind.usesPower()) {
 			MachineSkin.energyBar(graphics, theme, x + BAR_X, y + BAR_Y, BAR_WIDTH, BAR_HEIGHT, menu.energy(), menu.capacity());
 		}
 		if (kind == MachineKind.COAL_GENERATOR) {
@@ -339,6 +347,12 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		}
 	}
 
+	/** Whether a machine has nothing in its pane but its energy (batteries, solar panels): no slots, tanks or fuel. */
+	private static boolean bare(MachineKind kind) {
+		return kind != MachineKind.COAL_GENERATOR && !kind.isBoiler() && kind != MachineKind.GEOTHERMAL_GENERATOR
+				&& !kind.isFluidProcessor() && !kind.isProcessor();
+	}
+
 	/** A machine slot's frame at (slotX, slotY), with a faint hint of what goes there while it is empty. */
 	private void slot(GuiGraphicsExtractor graphics, int slotX, int slotY, int containerSlot, MachineSkin.@Nullable Icon hint) {
 		MachineSkin.slot(graphics, theme, leftPos + slotX, topPos + slotY);
@@ -384,12 +398,16 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		graphics.text(font, title, titleLabelX, titleLabelY, theme.label(), false);
 		slotLabels(graphics);
+		if (menu.kind().usesPower() && bare(menu.kind())) {
+			String percent = menu.energy() * 100 / Math.max(1, menu.capacity()) + "%";
+			graphics.text(font, percent, CHARGE_X + 61 - font.width(percent) / 2, CHARGE_Y + 31, theme.text(), false);
+		}
 		if (sidesView) {
 			sides(graphics);
 		} else {
 			statusPane(graphics);
-			MachineSkin.wrap(graphics, font, Component.translatable("container.jugcraft.tagline." + menu.kind().id), HELP_X, HELP_Y,
-					HELP_WIDTH, HELP_BOTTOM, theme.help());
+			MachineSkin.wrap(graphics, font, Component.translatable("container.jugcraft.tagline." + menu.kind().id), HELP_X,
+					sidesButton != null ? HELP_Y : MachineSkin.HELP_TOP, HELP_WIDTH, HELP_BOTTOM, theme.help());
 		}
 	}
 
@@ -455,7 +473,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		y += 2;
 		for (int mode = 0; mode < MODE_KEYS.length && y + 9 <= HELP_BOTTOM; mode++) {
 			graphics.fill(HELP_X, y + 1, HELP_X + 6, y + 7, MODE_COLORS[mode]);
-			graphics.text(font, Component.translatable("container.jugcraft.mode." + MODE_KEYS[mode]), HELP_X + 9, y, theme.help(), false);
+			graphics.text(font, Component.translatable("container.jugcraft.sides.key." + MODE_KEYS[mode]), HELP_X + 9, y, theme.help(), false);
 			y += 9;
 		}
 	}

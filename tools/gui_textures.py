@@ -3,8 +3,8 @@
 Every machine screen is 268x166. Its top is the machine's body: a title strip with a status lamp, the machine pane
 (energy, slots, tanks and progress, where the menu puts them) and, on the right, the status pane (what it is doing,
 what to do about it, progress, time left and power). Under the body sit the player's inventory on its own tray and,
-on the right, the row of icon buttons and the help box (what the machine does; the faces' key while the sides are
-shown; a form's tool sockets and upgrade slots).
+on the right, the help box: the icon buttons along its top (on machines that have them), then what the machine does,
+the faces' key while the sides are shown, or a form's tool sockets and upgrade slots.
 
 The look follows the machine's tech level (the owner's references of 14 October 2026, used for mood, colour and layout
 only; everything here is drawn fresh):
@@ -29,7 +29,7 @@ BODY = (0, 0, WIDTH - 1, 77)
 MACHINE_PANE = (3, 11, 174, 76)
 STATUS_PANE = (179, 11, 264, 76)
 TRAY = (0, 79, BAY - 1, HEIGHT - 1)
-HELP_BOX = (178, 100, WIDTH - 2, HEIGHT - 2)
+HELP_BOX = (178, 79, WIDTH - 2, HEIGHT - 2)
 
 SKINS = {
     "workshop": {
@@ -414,4 +414,7 @@ def write_all(write, assets, lang, machines):
         lang[f"container.jugcraft.slot.{key}"] = text
     lang["container.jugcraft.button.sides"] = "Sides: choose what each face does"
     lang["container.jugcraft.button.status"] = "Back to the status"
-    lang["container.jugcraft.sides.help"] = "Click a face to change what it does."
+    lang["container.jugcraft.sides.help"] = "Click a face to change it."
+    # The faces' key in the help box: short enough for one line each.
+    for key, text in {"input": "in", "output": "out", "both": "in and out", "none": "closed"}.items():
+        lang[f"container.jugcraft.sides.key.{key}"] = text

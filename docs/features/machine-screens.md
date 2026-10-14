@@ -19,10 +19,10 @@ Primary specialty and supported player role: every player who uses a machine
 **One layout for every machine.** The screen is still 268 by 166.
 - **The machine's body:**
   - a title strip with a **status lamp**: green while it works, a dim lamp when it is idle, red when something is wrong;
-  - the **machine pane**, holding the energy bar, slots, tanks and progress arrow where they always were;
+  - the **machine pane**, holding the energy bar, slots, tanks and progress arrow where they always were. A machine with nothing else in it (a battery or solar panel) shows a **big charge gauge** with its percentage instead of the small energy bar;
   - the **status pane**.
 - **The inventory** sits on its own tray under the body.
-- **Beside the inventory:** a row of **icon buttons**, and a **help box** that says in plain words what the machine is for.
+- **Beside the inventory:** the **help box**, as tall as the tray. It says in plain words what the machine is for. On machines with controls, a row of **icon buttons** sits along its top.
 
 **The status pane says what is happening and what to do about it:**
 - One word: RUNNING, IDLE, NO POWER, OUTPUT FULL, GENERATING, CHARGING, DISCHARGING or STORING.
@@ -39,13 +39,13 @@ Primary specialty and supported player role: every player who uses a machine
 - Eject: a small lit dot when on.
 - Sides.
 
-**The side settings stay out of the way until wanted.** The Sides button turns the status pane into the machine's six faces: front in the middle, back to the right, top, bottom, left and right. Each face is coloured by what it does; click one to change it. The help box shows the colour key, and the button turns into a Back arrow.
+**The side settings stay out of the way until wanted.** The Sides button turns the status pane into the machine's six faces: front in the middle, back to the right, top, bottom, left and right. Each face is coloured by what it does; click one to change it. The help box shows the colour key (in, out, in and out, closed), and the button turns into a Back arrow.
 
 **Empty slots explain themselves:**
 - IN and OUT labels sit over a processor's slots where they fit.
 - Upgrade slots and fuel slots show a faint hint icon while empty.
 - Hovering an empty slot says what goes there ("Input: what the machine works on", "Upgrade: a speed or efficiency card").
-- Hovering the energy bar or a tank still gives exact numbers.
+- Hovering the energy bar, the charge gauge or a tank still gives exact numbers.
 
 **Industrial forms** use the same layout:
 - the status pane gives the form's state and the one thing to fix, with progress, the time left, power, and batches when there are several;
@@ -91,7 +91,7 @@ None. The screen shows only what the server already syncs: the machine's data, i
   - the looks' colours (`gui/machine_themes.json`);
   - the taglines for machines and forms;
   - the status words, hints and slot help, as lang keys.
-- `client/MachineSkin` draws the moving parts and the buttons: slots, the energy bar, the arrow, the lamp, eleven 8×8 pixel icons, the icon buttons and the face buttons.
+- `client/MachineSkin` draws the moving parts and the buttons: slots, the energy bar, the charge gauge, the arrow, the lamp, eleven 8×8 pixel icons, the icon buttons and the face buttons.
 - The companion wheel (`local/peepo/client/WheelScreen`) borrows the coal generator's background, so it takes the workshop look.
 
 ## Verification
@@ -111,7 +111,7 @@ The industrial forms' own client tests photograph their screens in the industria
 ### Results
 
 Local, without Gradle or a game:
-- `python tools/generate_material_data.py` regenerated `gui/machine_themes.json` (the five looks; 18 workshop, 23 industrial, 8 electric, 5 lab and 4 advanced machines; forms industrial) and added 29 lang strings (hints, slot help, form taglines, the Sides button).
+- `python tools/generate_material_data.py` regenerated `gui/machine_themes.json` (the five looks; 18 workshop, 23 industrial, 8 electric, 5 lab and 4 advanced machines; forms industrial) and added 33 lang strings (hints, slot help, form taglines, the Sides button).
 - `python tools/check_mod_data.py`: **PASS**, including the art check of every model.
 - `python scripts/check_repository.py`: **PASS**.
 - `python -m unittest discover -s scripts/tests`: **OK**.
@@ -133,7 +133,17 @@ The CI screenshots, checked by eye:
 - the crusher's sides view, with its colour key;
 - the form screens, including the waiting, output-blocked and idle generator states.
 
-In every one, the status text, warnings, power rows and help text sit inside their panes. At the CI window size, the recipe viewer's item panel sits beside the screen without overlapping it.
+In them, the status text, warnings, power rows and taglines sit inside their panes. At the CI window size, the recipe viewer's item panel sits beside the screen without overlapping it. The screenshots also showed three faults, which the next commit fixes:
+- In the sides view, the key's "input and output" ran past the help box's edge. The key now uses short words (in, out, in and out, closed), and the help line is shorter, so all four fit.
+- On machines without controls (generators, batteries, fluid machines), the world showed through the empty strip between the status pane and the help box. The help box now starts under the status pane, level with the tray, and the buttons sit inside its top.
+- The battery box's pane was empty but for the small energy bar. Batteries and solar panels now show the big charge gauge.
+
+After those fixes:
+- the five backgrounds were redrawn;
+- an overlay of the buttons, tool sockets, help text area and charge gauge showed each inside its box;
+- the local checks above were run again: `check_mod_data.py` **PASS**, `check_repository.py` **PASS**, the unit tests **OK**, a second generation changed nothing, and the Java syntax parse found 0 errors.
+
+CI on the fix: pending.
 
 Not run:
 - a human trying every machine's screen;

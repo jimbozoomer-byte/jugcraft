@@ -24,14 +24,15 @@ public final class MachineSkin {
 	public static final int STATUS_Y = 15;
 	public static final int STATUS_WIDTH = 78;
 	public static final int STATUS_BOTTOM = 74;
-	/** The row of icon buttons under the body. */
-	public static final int BUTTON_X = 180;
-	public static final int BUTTON_Y = 80;
+	/** The row of icon buttons along the top of the help box. */
+	public static final int BUTTON_X = 182;
+	public static final int BUTTON_Y = 82;
 	public static final int BUTTON_SIZE = 18;
 	public static final int BUTTON_STEP = 21;
-	/** The help box's text area. */
+	/** The help box's text area: under the buttons, or from the top of the box on a screen without them. */
 	public static final int HELP_X = 182;
 	public static final int HELP_Y = 104;
+	public static final int HELP_TOP = 83;
 	public static final int HELP_WIDTH = 81;
 	public static final int HELP_BOTTOM = 162;
 
@@ -105,6 +106,27 @@ public final class MachineSkin {
 		for (int segment = 0; segment * 4 < height; segment++) {
 			int bottom = top + height - segment * 4;
 			graphics.fill(left + 1, bottom - 3, left + width - 1, bottom, segment * 4 < filled ? theme.energy() : unlit);
+		}
+	}
+
+	/**
+	 * The big charge gauge filling an otherwise empty machine pane (batteries, solar panels): a battery lying on its
+	 * side, twenty cells lit from the left as it fills.
+	 */
+	public static void charge(GuiGraphicsExtractor graphics, MachineScreenThemes.Theme theme, int left, int top, long energy,
+			long capacity) {
+		int width = 122;
+		int height = 26;
+		graphics.fill(left - 1, top - 1, left + width + 1, top + height + 1, theme.slotDark());
+		graphics.fill(left, top, left + width, top + height, theme.slotFace());
+		graphics.fill(left + width + 1, top + 8, left + width + 5, top + height - 8, theme.slotDark());
+		graphics.fill(left + width + 1, top + 9, left + width + 4, top + height - 9, theme.slotLight());
+		int cells = 20;
+		int lit = capacity <= 0 || energy <= 0 ? 0 : (int) Math.max(1, Math.min(cells, energy * cells / capacity));
+		int unlit = (theme.energy() & 0x00FFFFFF) | 0x30000000;
+		for (int cell = 0; cell < cells; cell++) {
+			int x = left + 2 + cell * 6;
+			graphics.fill(x, top + 3, x + 5, top + height - 3, cell < lit ? theme.energy() : unlit);
 		}
 	}
 
