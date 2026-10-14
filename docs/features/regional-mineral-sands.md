@@ -1,8 +1,8 @@
 # Regional mineral-sand deposits
 
-Status: implemented for owner inspection, 13 October 2026; not merged or deployed. Public branch `speedygroyper:codex/regional-mineral-sands`, based on the tested fluorite/spodumene work in PRs [#343](https://github.com/jimbozoomer-byte/jugcraft/pull/343) and [#351](https://github.com/jimbozoomer-byte/jugcraft/pull/351). Actual tool: OpenAI Codex (GPT-6), explicitly authorized by the owner.
+Status: implemented and visually accepted by the owner after reviewing the inspection world; not merged or deployed. Implementation and local validation completed 13 October 2026. Public branch `speedygroyper:codex/regional-mineral-sands`, based on the tested fluorite/spodumene work in PRs [#343](https://github.com/jimbozoomer-byte/jugcraft/pull/343) and [#351](https://github.com/jimbozoomer-byte/jugcraft/pull/351). Actual tool: OpenAI Codex (GPT-6), explicitly authorized by the owner.
 
-The owner approved all four families in the [mineral-sands plan](mineral-sands-and-refining-plan.md), with shallow irregular sediment lenses, visible exposures, regional biome eligibility, terrain protection and finite reserves. Public coordination is in [draft PR #354](https://github.com/jimbozoomer-byte/jugcraft/pull/354).
+The owner approved all four families in the [mineral-sands plan](mineral-sands-and-refining-plan.md), with shallow irregular sediment lenses, visible exposures, regional biome eligibility, terrain protection and finite reserves, and accepted the completed preview with “Looks good.” Public coordination is in [PR #354](https://github.com/jimbozoomer-byte/jugcraft/pull/354).
 
 | Family | Length × width × thickness (blocks) | Buried top | Attempt frequency |
 | --- | --- | --- | --- |
