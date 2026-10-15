@@ -174,7 +174,7 @@ public class VerdantBedBlock extends BaseEntityBlock {
 			if (!bed.awake() && Garden.knows(server) && Garden.enabled()) {
 				Garden.tell(server, "garden.awakened", awaken(serverLevel, pos, server));
 			} else {
-				tend(serverLevel, pos, server, bed);
+				tendBy(serverLevel, pos, server, bed);
 				bed.report(serverLevel, server);
 			}
 		}
@@ -201,9 +201,11 @@ public class VerdantBedBlock extends BaseEntityBlock {
 
 	/**
 	 * Concordance Chunk C (C-08, C-P61): a Greenwarden's empty hand tends an awake, strained bed they may change (Authority),
-	 * easing one strain at most once every {@value Garden#TEND_TICKS} ticks a bed; anyone else's touch only reads it.
+	 * easing one strain at most once every {@value Garden#TEND_TICKS} ticks a bed; anyone else's touch only reads it. Reached
+	 * from the bed's own use and, since a crop covers its bed from above, from an empty hand on its growing crop
+	 * ({@link OrganismCropBlock}, the unit review), each after its rate gate; {@code pos} is the bed's.
 	 */
-	private static void tend(ServerLevel level, BlockPos pos, ServerPlayer player, VerdantBedBlockEntity bed) {
+	static void tendBy(ServerLevel level, BlockPos pos, ServerPlayer player, VerdantBedBlockEntity bed) {
 		if (!bed.awake() || !Garden.enabled() || !Garden.knows(player) || bed.strainNow() == 0
 				|| !Authority.mayChange(level, player, pos)) {
 			return;

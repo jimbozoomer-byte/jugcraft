@@ -774,7 +774,8 @@ public class ConcordanceGardenGameTests {
 	/**
 	 * C-07 (C-P55): a bed's verdict, sent to clients for its crop's tooltip, stays until the bed's next random tick and then
 	 * clears once nothing that notes it stands on it, synced and saved cleared; a Verdant Heart's note stays (the Heart notes
-	 * its bed too); a crop planted again notes it again.
+	 * its bed too); a crop planted again notes it again. A step of the same crop keeps the verdict; another plant set on the
+	 * bed forgets it at once (the unit review), so Jade never shows one plant's reasons on another.
 	 */
 	@GameTest(maxTicks = 80)
 	public void aVerdictClearsWhenThePlantGoes(GameTestHelper helper) {
@@ -806,6 +807,10 @@ public class ConcordanceGardenGameTests {
 			helper.assertTrue(!noted.isEmpty() && heartBed.growth().equals(noted), "A Verdant Heart's note stays: " + noted);
 			helper.setBlock(at.above(), Garden.SUNPETAL_CROP);
 			helper.assertTrue(grow(helper, at.above()) == OrganismCropBlock.Growth.STALLED && bed.growth().equals("stalled"), "Planted again, it is noted again");
+			crop(helper, at.above(), Garden.SUNPETAL_CROP, 2);
+			helper.assertTrue(bed.growth().equals("stalled"), "A step of the same crop keeps its verdict");
+			helper.setBlock(at.above(), Garden.DEWMOSS_CROP);
+			helper.assertTrue(bed.growth().isEmpty() && bed.reasons().isEmpty(), "Another plant set there forgets the last one's verdict at once");
 			helper.succeed();
 		});
 	}
@@ -1061,8 +1066,9 @@ public class ConcordanceGardenGameTests {
 	 * C-08 (C-P60, C-P61): strain eases by rest (one a bed random tick, only while no crop grows on it; a tick that counts a
 	 * harvest rests nothing; nothing switched off), by compost (bone meal on the bed and, a plain use, on its crop;
 	 * fertilizer's two doses; a Mulch Maw's nutrient, for the bed it feeds only; a full bed takes none) and by a
-	 * Greenwarden's empty hand, once every TEND_TICKS a bed. An item in hand is its own use and tends nothing; a novice's hand
-	 * only reads; a bed its tender may not change is neither tended nor fed by bone meal on its crop.
+	 * Greenwarden's empty hand, once every TEND_TICKS a bed, on the bed or on its growing crop (the unit review: a crop covers
+	 * its bed from above). An item in hand is its own use and tends nothing; a novice's hand only reads; a bed its tender may
+	 * not change is neither tended, on it or through its crop, nor fed by bone meal on its crop.
 	 */
 	@GameTest(maxTicks = 80)
 	public void restCompostAndTendingEaseStrain(GameTestHelper helper) {
@@ -1130,6 +1136,7 @@ public class ConcordanceGardenGameTests {
 			// Compost: bone meal on the bed; on its crop, by a plain use; fertilizer's two doses.
 			ServerPlayer greenwarden = gardener(helper, true);
 			crop(helper, compostAt.above(), Garden.SUNPETAL_CROP, 1); // growing, whatever random ticks made of it
+			compostBed.setNutrients(10); // nor what a random step took from it
 			compostBed.setStrain(3);
 			ItemStack meal = new ItemStack(Items.BONE_MEAL, 2);
 			handUse(helper, greenwarden, compostAt, meal, false);
@@ -1178,8 +1185,14 @@ public class ConcordanceGardenGameTests {
 			helper.assertTrue(tendBed.strain() == 2, "A novice's empty hand only reads it");
 			claimedBed.setStrain(2);
 			crop(helper, claimedAt.above(), Garden.SUNPETAL_CROP, 1);
+			// The fallow bed (its area read early) under a growing crop: tended through the crop, as on the bed.
+			crop(helper, fallowAt.above(), Garden.SUNPETAL_CROP, 1);
+			fallowBed.setStrain(2);
 			try (TestClaims claims = TestClaims.open()) {
 				claims.block(helper.absolutePos(claimedAt), new UUID(14L, 3L));
+				claims.block(helper.absolutePos(fallowAt), new UUID(14L, 3L));
+				handUse(helper, greenwarden, fallowAt.above(), ItemStack.EMPTY, false);
+				helper.assertTrue(fallowBed.strain() == 2, "A bed its tender may not change is not tended through its crop: " + fallowBed.strain());
 				handUse(helper, greenwarden, claimedAt, ItemStack.EMPTY, false);
 				helper.assertTrue(claimedBed.strain() == 2, "A bed its tender may not change is not tended: " + claimedBed.strain());
 				ItemStack refused = new ItemStack(Items.BONE_MEAL);
@@ -1187,6 +1200,9 @@ public class ConcordanceGardenGameTests {
 						&& claimedBed.nutrients() == 10 && refused.getCount() == 1,
 						"Bone meal on its crop asks as bone meal on the bed: refused, it feeds and eases nothing and is kept");
 			}
+			handUse(helper, greenwarden, fallowAt.above(), ItemStack.EMPTY, false);
+			helper.assertTrue(fallowBed.strain() == 1 && age(helper, fallowAt.above()) == 1,
+					"A Greenwarden's empty hand on a growing crop tends the bed beneath: " + fallowBed.strain());
 			helper.succeed();
 		});
 	}
@@ -1350,7 +1366,8 @@ public class ConcordanceGardenGameTests {
 	 * C-09 (C-P62, C-P65): a Greenwarden's plain use of a Dewmoss on a Sunpetal grafts Dewlit onto its bed, spends one Dewmoss
 	 * and leaves the crop as it was; clients are told the graft and its host (never the keeper), and Jade the graft. A second
 	 * use is refused and spends nothing (one graft a bed); a Dewmoss on a Gloamcap grafts nothing; switched off, nothing
-	 * grafts; and a graft the rules no longer know is replaced by the next.
+	 * grafts; and a graft the rules no longer know is replaced by the next. The graft forgets the ungrafted plant's verdict
+	 * (the unit review).
 	 */
 	@GameTest(maxTicks = 20)
 	public void aGraftTakesOnceAndConsumesItsDonor(GameTestHelper helper) {
@@ -1360,9 +1377,11 @@ public class ConcordanceGardenGameTests {
 		crop(helper, at.above(), Garden.SUNPETAL_CROP, 1);
 		ServerPlayer gardener = gardener(helper, true);
 		ItemStack donor = new ItemStack(Garden.DEWMOSS, 2);
+		bed.note(Verdict.Growth.STALLED.id, List.of()); // the ungrafted plant's last verdict
 		helper.assertTrue(handUse(helper, gardener, at.above(), donor, false).consumesAction(), "The graft consumes the use");
 		helper.assertTrue(DEWLIT.equals(bed.graft()) && donor.getCount() == 1 && age(helper, at.above()) == 1,
 				"Dewlit is grafted, one Dewmoss spent, the crop as it was: " + bed.graft() + ", " + donor.getCount());
+		helper.assertTrue(bed.growth().isEmpty(), "and the bed forgets the ungrafted plant's verdict: " + bed.growth());
 		CompoundTag sent = bed.getUpdateTag(level.registryAccess());
 		helper.assertTrue(sent.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals(DEWLIT) && sent.getStringOr(VerdantBedBlockEntity.GRAFT_HOST, "").equals(SUNPETAL)
 				&& !sent.contains("keeper"), "Clients are told the graft and its host, never the keeper: " + sent);

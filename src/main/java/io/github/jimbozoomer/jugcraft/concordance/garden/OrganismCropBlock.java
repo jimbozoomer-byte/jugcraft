@@ -56,7 +56,8 @@ import org.jspecify.annotations.Nullable;
  * Bone meal and fertilizer feed its bed rather than forcing a step, so they are a nutrient source like any other (and
  * compost: Concordance Chunk C, C-08, C-P61); used on a growing crop they are their own use, as on a sweet berry bush,
  * bone meal by the bed's own rule (rate-limited, for someone who may change the bed). Ripe, an empty hand harvests it (its
- * produce and chaff, and it falls back to its replanting step); otherwise an empty hand says how it grows.
+ * produce and chaff, and it falls back to its replanting step); otherwise an empty hand tends its bed as on the bed itself
+ * (C-08, C-P61) and says how it grows.
  * <p>
  * Concordance Chunk C (C-08, C-P58, C-P59): a growth attempt first counts a harvest its bed saw
  * ({@link VerdantBedBlockEntity#settle}); a step taken to ripe tells the bed; a mixed bed's bonus is in the step's chance
@@ -118,6 +119,19 @@ public class OrganismCropBlock extends CropBlock {
 	protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
 		BlockPos below = pos.below();
 		return mayPlaceOn(level.getBlockState(below), level, below);
+	}
+
+	/**
+	 * A crop newly set on a bed makes the bed forget the last plant's verdict, so Jade never shows another plant's reasons
+	 * until this one's first growth attempt notes its own (Concordance Chunk C, C-07, C-P55; the unit review). Only on the
+	 * server (mc263src LevelChunk.setBlockState); a harvest, a growth step or a bee changes this same block, so none forgets.
+	 */
+	@Override
+	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+		super.onPlace(state, level, pos, oldState, movedByPiston);
+		if (!oldState.is(this) && level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed) {
+			bed.forgetVerdict();
+		}
 	}
 
 	@Override
@@ -305,6 +319,8 @@ public class OrganismCropBlock extends CropBlock {
 			return InteractionResult.CONSUME;
 		}
 		bed.setGraft(graft.id());
+		// The niche changed: the last verdict spoke for the ungrafted plant (the unit review).
+		bed.forgetVerdict();
 		donor.consume(1, player);
 		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 5);
 		Garden.tell(player, "garden.grafted", getName(), ComposeText.name(new Text.Ref("graft", graft.id())));
@@ -332,6 +348,11 @@ public class OrganismCropBlock extends CropBlock {
 				ConcordanceProgress.record(server, new Evidence.Practiced(Garden.ACTIVITY, organismId()));
 			}
 			return InteractionResult.SUCCESS;
+		}
+		// Concordance Chunk C (C-08, C-P61; the unit review): a crop covers its bed from above, so a Greenwarden's empty hand
+		// on it tends the bed beneath by the bed's own rule (Authority at the bed), then reports.
+		if (player.getMainHandItem().isEmpty() && level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed) {
+			VerdantBedBlock.tendBy(serverLevel, pos.below(), server, bed);
 		}
 		report(serverLevel, pos, state, server);
 		return InteractionResult.SUCCESS;

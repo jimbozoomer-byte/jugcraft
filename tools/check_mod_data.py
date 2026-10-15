@@ -14776,19 +14776,30 @@ def check_ecology(co, root, lang, registered, research):
     if re.search(r"strain|compost\(", _java_body(java("garden/Garden.java"), "public static int nourish(")):
         err("Garden.nourish: a fixer's gift never eases strain (C-P61)")
     callers = {"compost": set(), "tend": set(), "setStrain": set()}
+    tenders = set()
     for path in sorted((ROOT / "src" / "main" / "java").rglob("*.java")):
         source = path.read_text(encoding="utf-8")
         for method in callers:
             if re.search(rf"\.{method}\(", source):
                 callers[method].add(path.name)
+        if re.search(r"\btendBy\(", source):
+            tenders.add(path.name)
     if callers["compost"] != {"MulchMawBlockEntity.java", "OrganismCropBlock.java", "VerdantBedBlock.java"}:
         err(f"garden: strain is eased by compost only at bone meal on a bed, bone meal or fertilizer on a crop and a Maw's nutrient, not {sorted(callers['compost'])}")
     if callers["tend"] != {"VerdantBedBlock.java"} or callers["setStrain"]:
         err(f"garden: only a Greenwarden's use tends a bed, and no game code sets a strain ({sorted(callers['tend'])}, {sorted(callers['setStrain'])})")
+    if tenders != {"OrganismCropBlock.java", "VerdantBedBlock.java"}:
+        err(f"garden: only the bed's use and its crop's tend a bed through VerdantBedBlock.tendBy, not {sorted(tenders)}")
+    # A crop covers its bed from above, so an empty hand on a growing crop tends the bed beneath by the bed's rule (the
+    # unit review): after the crop's rate gate, with an empty main hand, at the bed's position.
+    crop_use = _java_body(crop, "protected InteractionResult useWithoutItem(")
+    if not 0 <= crop_use.find("RateGate.allow(") < crop_use.find("VerdantBedBlock.tendBy(serverLevel, pos.below(), server, bed)") \
+            or "player.getMainHandItem().isEmpty() && level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed" not in crop_use:
+        err("OrganismCropBlock.useWithoutItem: an empty hand on a growing crop tends the bed beneath by the bed's rule, after the rate gate (C-P61)")
     block = java("garden/VerdantBedBlock.java")
     use = _java_body(block, "protected InteractionResult useWithoutItem(")
-    tending = _java_body(block, "private static void tend(")
-    if not 0 <= use.find("RateGate.allow(") < use.find("tend(serverLevel") \
+    tending = _java_body(block, "static void tendBy(")
+    if not 0 <= use.find("RateGate.allow(") < use.find("tendBy(serverLevel") \
             or not all(needle in tending for needle in ("Garden.knows(", "Garden.enabled()", "Authority.mayChange(level, player, pos)")) \
             or not 0 <= tending.find("Authority.mayChange(") < tending.find("bed.tend("):
         err("VerdantBedBlock: a Greenwarden's empty hand tends, after the rate gate, Garden.knows and Authority (C-P61)")
@@ -14890,6 +14901,14 @@ def check_ecology(co, root, lang, registered, research):
     tick = _java_body(bed_block, "protected void randomTick(")
     if "!(above.getBlock() instanceof OrganismCropBlock) && !above.is(Garden.VERDANT_HEART)" not in tick or "bed.forgetVerdict();" not in tick:
         err("VerdantBedBlock.randomTick: forgets a verdict once neither a crop nor a Verdant Heart stands on the bed (C-07, C-P55)")
+    # The unit review: another crop set on a bed, or a graft, forgets the last plant's verdict at once, so Jade never shows
+    # one plant's reasons (or the ungrafted niche's) on another; a step or a harvest of the same crop forgets nothing.
+    crop_block = java("OrganismCropBlock.java", garden)
+    placed = _java_body(crop_block, "protected void onPlace(")
+    if not re.search(r"if \(!oldState\.is\(this\) && level\.getBlockEntity\(pos\.below\(\)\) instanceof VerdantBedBlockEntity bed\) \{\s*"
+                     r"bed\.forgetVerdict\(\);", placed) \
+            or not re.search(r"bed\.setGraft\(graft\.id\(\)\);\s*(//[^\n]*\s*)?bed\.forgetVerdict\(\);", _java_body(crop_block, "private InteractionResult graftBed(")):
+        err("OrganismCropBlock: another crop set on a bed, or a graft, forgets the last plant's verdict at once (C-07, C-P55)")
     pour = _java_body(bed_block, "public static boolean pour(ServerLevel level, BlockPos pos, ServerPlayer player)")
     if not 0 <= pour.find('RateGate.allow(player, "garden", 4)') < pour.find("Authority.mayChange(level, player, pos)") < pour.find("level.setBlock("):
         err("VerdantBedBlock.pour: a canteen's sip wets a bed only for someone who may change it, rate-gated (C-07, C-P56)")

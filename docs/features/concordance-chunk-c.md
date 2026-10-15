@@ -8,8 +8,9 @@ Status: contract written; unit 1 (C-01 and C-02) built, in four commits on this 
 (`2263f851b`), and a fifth with the unit review's fixes (see the Fixes from the unit review under C-04). Every local
 check passes; none of their game code has been compiled against Minecraft and none of their game tests has run (no CI
 run yet; see the As built notes of C-01 to C-04). Unit 4 (C-07 to C-09) built on `23f28b90e` (unit 2's head, with its
-review fixes), beside unit 3 rather than on it, in three commits (`5ba973632`, `d32ac3a61`, `d6edee4f4`) and a fourth
-for its records; every local check passes, and none of its game code has been compiled against Minecraft or run (see the
+review fixes), beside unit 3 rather than on it, in three commits (`5ba973632`, `d32ac3a61`, `d6edee4f4`), a fourth
+for its records (`549a49d7e`) and a fifth with the unit review's fixes (see the Fixes from the unit review under C-09);
+every local check passes, and none of its game code has been compiled against Minecraft or run (see the
 As built notes of C-07 to C-09). Unit 3 (C-05, C-06) is being built from the same base, on its own commits, to be merged
 with unit 4; unit 5 not started. Chunk C is developed on branch `claude/chunk-c-living-workshop`, whose base `e079ad4a3`
 is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in; CI run 38617471274 on that base passed every job (see The
@@ -98,7 +99,7 @@ path before multiplying content variants"; MP:66).
 | 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records `807da7f5e`; review fixes `d593ae61d`): local checks pass; not compiled, no game test run, no CI run yet |
 | 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Built (`a0e73881c`, `2c98d6d68`; records `4df687cc7`; merged with unit 1's fixes `2263f851b`; review fixes in the next commit): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; not compiled against Minecraft, no game test run, no CI run yet |
 | 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Not started |
-| 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Built on `23f28b90e`, beside unit 3 (`5ba973632`, `d32ac3a61`, `d6edee4f4`; records in the next commit): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; audit mutations 83 of 83 reported; not compiled against Minecraft, no game test run, no CI run yet |
+| 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Built on `23f28b90e`, beside unit 3 (`5ba973632`, `d32ac3a61`, `d6edee4f4`; records `549a49d7e`; the unit review's fixes in the next commit): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; audit mutations 83 of 83 reported; not compiled against Minecraft, no game test run, no CI run yet |
 | 5 | C-10 | The measured small-workshop load, the end-to-end journey, client evidence, combined fixes, the checkpoint and the handoff | this page | Not started |
 
 The plan allows three to five units (09:3); this is five plus the baseline.
@@ -1117,9 +1118,10 @@ stays 1.
     (`Garden.catalog()`, `Garden.organism(`, `.organism()`, `.niche()`) and `AUTHORITY_ROUTES` for `VerdantBedBlock`.
 - **Departures from the ticket and the spec:**
   - the held-item rule (the spec's R2) is C-07's, not C-08's, so the canteen needs no pass of its own in `useItemOn`;
-  - from the spec's critique: the short and excess judgements name all four bounds (its correction 8); the three garden
-    tests and the Inspect test prefetch their samples at ticks 10, 20 and 30 (4); the client section holds random ticks
-    at 0 while it runs (5);
+  - from the spec's critique: the short and excess judgements name all four bounds (its correction 8);
+    `aBedSaysWhatItsPlantNeedsAndHowFar`, `aVerdictClearsWhenThePlantGoes` and the Inspect test prefetch their samples
+    at ticks 10, 20 and 30 (4; `aCanteenWatersABed` takes no sample); the client section holds random ticks at 0 while
+    it runs (5);
   - built on `23f28b90e` beside unit 3, not on unit 3's head as the spec planned: `AUTHORITY_ROUTES`' bed line follows
     the Gleaner's, with no crucible line of unit 3's here; the decisions are C-P54 to C-P57 (the spec's placeholders
     C-P80 to C-P83), after unit 3's C-P43 to C-P53.
@@ -1173,7 +1175,8 @@ stays 1.
   - eased by rest (one a bed random tick), by **explicit compost points only** (bone meal on the bed,
     `VerdantBedBlock.java:129`; bone meal or fertilizer on the crop, `OrganismCropBlock.java:271-276`; the Mulch Maw's
     mulch, `concordance/garden/MulchMawBlockEntity.java:95-96`) and by a Greenwarden's empty-hand tending
-    (`VerdantBedBlock.java:140-154`, at most once a 600 ticks a bed, `Authority`-checked). Not in `give`: nitrogen fixing
+    (`VerdantBedBlock.java:140-154`, at most once a 600 ticks a bed, `Authority`-checked; as built, on the bed or, since
+    the unit review, on its growing crop). Not in `give`: nitrogen fixing
     calls `give` through `Garden.nourish` on every Mendvetch step for its bed and four neighbours
     (`Garden.java:297-312, 340-352`; `OrganismCropBlock.java:175-177`), so easing there would keep those beds unstrained;
   - it never reads industrial pollution or main's process emissions.
@@ -1210,7 +1213,7 @@ stays 1 (`VerdantBedBlockEntity.java:227`). A persistence test reads an older be
   - the rules report a neighbour that is not another crop costing nutrients (`ConcordanceRules`), and such a name speeds
     nothing;
   - the bed: `strain`, `ripened`, `strainNow` (it only reads), `ripen`, `settle`, `rest`, `compost`, `tend`, `setStrain`
-    (operators and tests), `mixed`, `mixedLine`, `strainLine` and `notes`; the keys `STRAIN` and `RIPENED`, saved when
+    (tests only), `mixed`, `mixedLine`, `strainLine` and `notes`; the keys `STRAIN` and `RIPENED`, saved when
     set and always sent, never with the keeper; its reports add the mixed-bed and strain lines;
   - growth: `OrganismCropBlock.grow` counts a harvest the bed saw before the dormant check and tells the bed when a step
     reaches ripe; `speed` holds the mixed bed's bonus and the cost is untouched; `useItemOn` makes fertilizer on a
@@ -1351,7 +1354,11 @@ niche helper and tests.
     `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests,
     `scripts/tests` and `git diff --check`;
   - the spec's audit mutations with the critique's, each applied in place and restored: 32 of 32 reported (30 rows, two
-    of them in two variants), at the commit and again for these records;
+    of them in two variants), at the commit and again for these records, through a scratch harness of five audits
+    (`check_ecology`, `check_graft`, `check_encyclopedia`, `check_authority`, `check_diagnostics`) with the generated
+    files written by hand, not through the generator or the whole `check_mod_data`. Mutation 5 (Dewlit's nutrients
+    `[0, 0, 32, 32]`) in fact crashed the generator and `check_mod_data` (the codex's `graft_text` joined a full range's
+    `None`) until the unit review fixed `graft_text`;
   - a scratch harness outside Git passed 28 checks of the graft (the parser and its refusals, the catalogue's niche and
     lines, a graft whose crops are not loaded) on the compiled pure classes, at the commit and again for these records;
   - for these records, `python3 tools/select_client_tests.py --base 23f28b90e --head d6edee4f4` chose 12 of 171 client
@@ -1360,6 +1367,49 @@ niche helper and tests.
     `PeepoGardenExpansionClientTests`, `PeepoHarvestClientTests`, `PeepoIntegrationClientTests`,
     `PeepoSuppliesClientTests`, `SpodumeneClientGameTests` and `WorldDesignerClientGameTests`, noting that no client
     test shows the Jade client, the JEI plugin, `ComposeText`, `EcologyParser`, `Neighbours` or `recipe_view.json`;
+  - not run: the build, the game tests and CI.
+
+**Fixes from the unit review (unit 4, a fifth commit).** The review confirmed ten findings and rejected sixteen; all ten
+are fixed here. None of the changed Java has been compiled against Minecraft or run in a game.
+- **A graft with a full range crashed the generator** (C-09). `graft_text` joined `_range`'s `None` for a range such as
+  `[0, 0, 32, 32]`, so mutation 5 crashed `tools/generate_material_data.py` and `check_mod_data` (the codex is built
+  before `check_graft`). It now writes "nutrients any"; Dewlit's page is unchanged. The mutation record above says how
+  the mutations were really run.
+- **Jade could show another plant's verdict** (C-07, C-P55). A crop newly set on a bed (`OrganismCropBlock.onPlace`,
+  server only, not for a step or a harvest of the same crop) and a graft (`graftBed`) now forget the bed's last
+  verdict at once; before, a Dewmoss planted where a Sunpetal stalled showed the Sunpetal's reasons until its own first
+  growth attempt. `aVerdictClearsWhenThePlantGoes` and `aGraftTakesOnceAndConsumesItsDonor` assert it, and
+  `check_ecology` audits both calls.
+- **Tending could not be reached on a planted bed** (C-08, C-P61). A crop's shape covers its bed from above, so in a
+  field only edge beds could be tended. A Greenwarden's empty hand on a growing crop now tends the bed beneath through
+  the bed's own rule (`VerdantBedBlock.tendBy`, which asks `Authority` at the bed), after the crop's rate gate, then
+  reports. `restCompostAndTendingEaseStrain` tends through a crop and is refused through one on a claimed bed;
+  `check_ecology` holds the callers of `tendBy` to the bed and the crop. Not done (optional): a crop read again during
+  the cooldown still says "tended lately".
+- **A rare flake** (about 0.1% of runs): `restCompostAndTendingEaseStrain` now resets the compost bed's nutrients, which
+  a random step before tick 46 could lower, before its exact asserts.
+- **Records.** Bees reach these crops (confirmed by reading, under Risks; a gap since step 14, recorded in the ecology
+  record). The Jade staleness risk is "until the crop's next growth attempt". The ecology record's test count (step 14
+  added ten; "the ten garden tests"). The persistence record names the bed's new keys. The merge note (Where to resume)
+  names the conflicting files from a trial merge. `setStrain` is "tests only" (no game code calls it; also `setGraft`'s
+  Javadoc, which said "operators"). The departure note names the two garden tests that prefetch.
+- **Commands** for the fixes:
+  - run and passed: `python3 -B tools/generate_material_data.py` (changing nothing: Dewlit's page reads as before),
+    `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/owner_art.py --check`,
+    `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
+    `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
+    `git diff --check`;
+  - mutation 5 again, in place and restored, through the generator and the whole `check_mod_data`: the generator ran
+    (rewriting `dewlit.json` and the lang) and `check_mod_data` reported "below its host's cost" and "one range for the
+    better and one for the worse"; the old `graft_text` raises `TypeError` on the same data;
+  - the fixes' audit mutations, each applied in place and restored, through the five-audit harness: 11 of 11 reported
+    (`onPlace` forgetting nothing, forgetting on a step of the same crop, or missing; the graft not forgetting; the
+    crop's tending removed, with an item in hand, at the crop's own position or without the crop's rate gate; a third
+    caller of `tendBy`; `tendBy` without `Authority`; the crop calling the bed entity's `tend` itself);
+  - `python3 tools/select_client_tests.py` on the fixes as staged: against `549a49d7e` it chose
+    `EncyclopediaClientGameTests`, `PeepoActionClientTests`, `PeepoGardenExpansionClientTests`,
+    `PeepoHarvestClientTests` and `PeepoIntegrationClientTests` (noting that no client test shows
+    `VerdantBedBlockEntity`); against `23f28b90e` the same 12 classes as for the records above;
   - not run: the build, the game tests and CI.
 
 ### C-10. The measured workshop, the journey, the evidence and the checkpoint (unit 5)
@@ -1578,18 +1628,28 @@ after the first path (09:16).
 - **Unit 4, not yet seen in a game:**
   - behaviour changes, all Proposed and visible: an item held in the main hand never reports, wakes or tends a bed
     (C-P56); a Greenwarden holding a Dewmoss cannot harvest a ripe Sunpetal by a plain use, which grafts or is refused
-    (C-P62); bone meal on a growing crop feeds its bed rather than reporting (C-P61);
+    (C-P62); bone meal on a growing crop feeds its bed rather than reporting (C-P61); a Greenwarden's empty hand on a
+    growing crop tends its bed before reporting (C-P61, the unit review);
   - resting only while no crop grows (C-P60): a Gleaner-run Sunpetal bed with no compost settles at strain 3 (half
     pace), by the model's arithmetic, not measured; a crop stalled by strain lets its bed rest, so strain never stops a
     plant for good;
   - counting whatever took the crop also counts a crow raid, a Hay Golem and breaking a ripe crop to move it; a crop
-    placed ripe, or aged by bees, never strains (an under-count, which is safe); whether bees reach these crops in 26.3
-    is unconfirmed;
+    placed ripe, or aged by bees, never strains (an under-count, which is safe);
+  - bees do reach these crops in 26.3 (confirmed by reading, the unit review): the mirror's
+    `data/minecraft/tags/block/bee_growables.json` includes `#minecraft:crops`, its `Bee.java` steps any `CropBlock` by
+    `getStateForAge(age + 1)` and `setBlockAndUpdate`, and the generator puts the four crops in `#minecraft:crops`
+    (`crops.json`, from `tools/concordance_ecology.py`'s `tags()`). A gap since roadmap step 14: a bee's step skips `grow`,
+    so a stalled crop advances with no niche check, no nutrient cost and no drying; it never calls `ripen()`, so that
+    harvest never strains; and it never clears a graft. The owner may choose to move the crops to a
+    `jugcraft:organism_crops` tag that fertilizer and garden maintenance also accept;
   - bone meal used sneaking or from a dispenser, and fertilizer's area, still reach `performBonemeal` without asking who
     may change the bed, as on any vanilla crop, and each such dose that feeds a bed eases a strain;
   - when a bed was last tended is not saved, so a restart allows one early tending;
   - the Inspect page and Jade can differ: the page takes a fresh reading, while Jade shows growth's last note, stale
-    until the bed's next random tick (about 68 seconds on average);
+    until the crop's next growth attempt (about 68 seconds on average); since the unit review a crop newly set on the
+    bed, or a graft, forgets the last plant's note at once, so Jade never shows one plant's reasons on another. A ripe
+    crop makes no growth attempt, so one grafted, or set there ripe, shows no "As it grew" until it is harvested and
+    grows again;
   - one `RateGate` ("garden", 4 ticks) serves the canteen, bone meal, reports, tending and grafting;
   - the Habitat Gauge's disturbance mode shows the area only; its suitability mode includes the strain and the graft;
   - a Verdant Heart set on a recently harvested bed sees one strain in its verdict until the bed rests;
@@ -1608,8 +1668,9 @@ after the first path (09:16).
   - nothing of the unit has been compiled against Minecraft or run.
 - **Unverified:** the null-side Fabric item insert (inferred from a passing post test *(survey)*); vanilla's container
   drop when a crucible overrides `preRemoveSideEffects` (the mirror has no `BlockEntity`; the Spire drops explicitly);
-  whether Jade's accessor gives the viewing player; bees and `#minecraft:supports_crops` on these crops; Fabric's load
-  conditions on Concordance data; whether the client tests' dedicated server runs in the client's process.
+  whether Jade's accessor gives the viewing player; `#minecraft:supports_crops` on these crops (bees reach them: unit 4's
+  risks); Fabric's load conditions on Concordance data; whether the client tests' dedicated server runs in the client's
+  process.
 
 ## Explicit don'ts
 
@@ -1740,7 +1801,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P58 | 15 October 2026 | The mixed bed: a crop may declare `neighbours: {organisms, percent}` (1 to 50), naming other crops that cost nutrients, never itself; Dewmoss and Gloamcap name each other at 25 (a starting value). The kinds come from the sample's existing set, with no new read. The bonus is speed only; a fixer neither takes a bonus nor is named as a neighbour, and the rules report a bad neighbour | Proposed | C-08 |
 | C-P59 | 15 October 2026 | Harvest strain is counted and shown: a bed notes `ripened` when growth reaches the last age, and the next time it sees its crop below ripe or gone (a growth attempt, its random tick, compost or tending) it counts one, up to 3, whatever took the crop (a Hay Golem or a crow too). A crop placed ripe never strains. `Verdict.of` judges disturbance as the worse of the area alone and the area with the strain. Shown as the `ecology.strained.*` reasons, "Recently harvested: strain n of 3" (reports and Jade) and the Inspect page's disturbance row; a harvest not yet counted shows as counted (`strainNow`) | Proposed | C-08 |
 | C-P60 | 15 October 2026 | Rest: one strain rests away a bed random tick, only while no crop grows on the bed (fallow, ripe, or stalled or dormant by its last note); a random tick that counts a harvest rests nothing; with the switch off no strain changes. It refines C-P17's "one a bed random tick", from the model's arithmetic (a random tick about every 1,365 ticks, a Sunpetal's regrowth about 16,400), not a measurement | Proposed | C-08 |
-| C-P61 | 15 October 2026 | Compost and tending: each dose of bone meal on the bed, bone meal or fertilizer on its crop (now a plain use on a growing crop: fertilizer by its own area rule, bone meal by the bed's rate gate and who may change the bed, a refusal consuming the use) or a Mulch Maw's nutrient eases one strain; `give` and `nourish` never do. Tending: a Greenwarden's empty main hand on an awake, strained bed they may change (Authority) eases one, at most once every 600 ticks a bed; not saved, so a restart allows one early tending. Anyone else only reads the bed | Proposed | C-08 |
+| C-P61 | 15 October 2026 | Compost and tending: each dose of bone meal on the bed, bone meal or fertilizer on its crop (now a plain use on a growing crop: fertilizer by its own area rule, bone meal by the bed's rate gate and who may change the bed, a refusal consuming the use) or a Mulch Maw's nutrient eases one strain; `give` and `nourish` never do. Tending: a Greenwarden's empty main hand on an awake, strained bed they may change (Authority), or on its growing crop (the unit review: a crop covers its bed from above; `VerdantBedBlock.tendBy` asks at the bed), eases one, at most once every 600 ticks a bed; not saved, so a restart allows one early tending. Anyone else only reads the bed | Proposed | C-08 |
 | C-P62 | 15 October 2026 | The graft gesture: a plain main-hand use, by a Greenwarden with the Concordance on, of a graft's donor item on its host's crop, at any age. Rate-limited; refused for no bed, for Authority refused at the crop or the bed, or for a bed already carrying a graft the rules know. Every outcome consumes the action and never harvests, reports or plants; success spends one donor. Anyone else's donor is just an item | Proposed | C-09 |
 | C-P63 | 15 October 2026 | Graft data and checks: `concordance/graft/<id>.json` is `{schema, host, donor, niche}` only. The loader requires two different loaded crops, a grafted nutrient floor at least the host's cost and one graft a host and donor. `check_graft` holds the pilot's cap of one graft, exactly one range better and one worse (03:76), and no cost, yield or alchemy. A bed carries one graft | Proposed | C-09 |
 | C-P64 | 15 October 2026 | Clearing a graft: the first growth attempt of another organism's crop clears it (time, a sprinkler, a Spire's hastening), before the dormant check; reading never clears it. A graft the rules no longer know is kept, read by nothing, and replaced by the next graft. Breaking the bed loses it; a Verdant Heart or a device set on the bed does not clear it | Proposed | C-09 |
@@ -1751,13 +1812,17 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 Units 1 (C-01, C-02), 2 (C-03, C-04) and 4 (C-07 to C-09) are built and recorded, and none of their game code has been
 compiled against Minecraft or run. Unit 4 was built on `23f28b90e`, beside unit 3 (C-05, C-06), which is being built from
 the same base on its own commits. Next:
-1. merge units 3 and 4. They meet in this page (the status, the units table's rows 3 and 4, the interfaces' As built
-   paragraphs, the risks, the decisions after C-P42, where to resume and how it was checked: keep both, unit 3's first),
-   `docs/WHAT_EXISTS.md`, `docs/INTEGRATION_STATUS.md` and the CHANGELOG's Chunk C section (append both); in
-   `tools/check_mod_data.py` (`AUTHORITY_ROUTES`: unit 3's line after the crucible's, unit 4's two after the Gleaner's;
-   the client-read needles; separate functions and calls), the Jade client and provider, `EncyclopediaClientGameTests`
-   and `ConcordancePersistenceGameTests` (separate hunks; the persistence class has 8 tests here and 10 with unit 3's);
-   lang and `recipe_view.json` are regenerated by `python3 -B tools/generate_material_data.py`, never merged by hand;
+1. merge units 3 and 4. A trial merge (`git merge-tree`, which writes nothing; unit 3 at `2f13fed54`, the unit review)
+   conflicts in this page (the status, the units table's rows 3 and 4, the interfaces' As built paragraphs, the risks,
+   the decisions after C-P42, where to resume and how it was checked), `docs/WHAT_EXISTS.md`,
+   `docs/INTEGRATION_STATUS.md` and the CHANGELOG's Chunk C section, and also in
+   `arcane-concordance-authority.md` (one: each unit's paragraph), `arcane-concordance-persistence.md` (the block
+   entities' row, since the unit review: each unit's sentence), the `ConcordanceDataProvider` class Javadoc (one),
+   `EncyclopediaClientGameTests` (one) and `ConcordancePersistenceGameTests` (three: imports, the class Javadoc and each
+   unit's new test; the class has 8 tests here and 10 with unit 3's). Each is resolved by keeping both sides, unit 3's
+   first. `tools/check_mod_data.py` (`AUTHORITY_ROUTES`: unit 3's line after the crucible's, unit 4's two after the
+   Gleaner's; the client-read needles; separate functions and calls), the Jade client and lang merge cleanly; lang and
+   `recipe_view.json` are regenerated by `python3 -B tools/generate_material_data.py`, never merged by hand;
 2. refresh main and the open pull requests (#357 and #369 for the Peepo files; the hot shared files: lang,
    `check_mod_data.py`, `CHANGELOG.md`, `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and
    merge main again if it moved;

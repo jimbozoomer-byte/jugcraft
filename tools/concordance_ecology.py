@@ -393,7 +393,8 @@ def graft_text():
     """The codex's grafting page (C-09): the gesture, then each graft and the ranges it changes."""
     rows = []
     for info in GRAFTS.values():
-        changes = "; ".join(_range(factor, info["niche"][factor]) for factor in FACTORS if factor in info["niche"])
+        changes = "; ".join(_range(factor, info["niche"][factor]) or f"{factor} any"
+                            for factor in FACTORS if factor in info["niche"])
         rows.append(f"- **{info['name']}**: {ORGANISMS[info['donor']]['name']} in a {ORGANISMS[info['host']]['name']}: "
                     f"{changes}.")
     return ("Use the donor on its host's crop, ripe or growing (not sneaking): the donor is spent, and the bed beneath "

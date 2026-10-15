@@ -249,8 +249,9 @@ public class VerdantBedBlockEntity extends BlockEntity {
 
 	/**
 	 * Forgets the last verdict once nothing that notes it stands on the bed (Concordance Chunk C, C-07, C-P55: the bed's
-	 * random tick asks), so a crop's tooltip never speaks for a plant that is gone; sent to clients and saved. Only the
-	 * verdict: the nutrients and whether it is awake stay.
+	 * random tick asks), and at once when another crop is set on it or it is grafted (OrganismCropBlock: the unit review),
+	 * so a crop's tooltip never speaks for a plant that is gone or for its niche before a graft; sent to clients and saved.
+	 * Only the verdict: the nutrients and whether it is awake stay.
 	 */
 	public void forgetVerdict() {
 		if (!growth.isEmpty() || !reasons.isEmpty()) {
@@ -372,7 +373,7 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		return true;
 	}
 
-	/** Operators and tests: sets the strain (clamped) and forgets a ripening not yet counted. */
+	/** Tests only (no game code calls it): sets the strain (clamped) and forgets a ripening not yet counted. */
 	public void setStrain(int amount) {
 		strain = Math.clamp(amount, 0, Habitat.MAX_STRAIN);
 		ripened = false;
@@ -458,7 +459,7 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		return graftFor;
 	}
 
-	/** Grafts it (OrganismCropBlock's gesture; operators and tests), or clears it with "". */
+	/** Grafts it (OrganismCropBlock's gesture, and tests), or clears it with "". */
 	public void setGraft(String graft) {
 		if (!graft.equals(this.graft)) {
 			this.graft = graft;

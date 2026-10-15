@@ -63,7 +63,7 @@ counting; diversity counts the kinds of plant within 2 blocks at the plant's hei
 in the 5 by 5 round the plant, a block above and below, plus the strain recent harvests count against its limit. A bed
 with nothing on it gives its readings unjudged; a dormant bed says so and is not read; the page changes nothing. Jade
 on a ripe crop shows its bed's last verdict ("As it grew: ..."), and a bed forgets its verdict on its next random tick
-once neither a crop nor a Verdant Heart stands on it.
+once neither a crop nor a Verdant Heart stands on it, and at once when another crop is set on it or it is grafted.
 
 **A mixed bed** (C-08). A Dewmoss with a Gloamcap growing in the 5 by 5 round it at plant height, or a Gloamcap with a
 Dewmoss, steps 25% more often. Only the other kind counts, never copies. It is speed only: a step costs what it always
@@ -80,8 +80,8 @@ the Inspect page say "Mixed bed: +25%".
   up to 3; a Dewmoss does not care; a Gloamcap still needs its magic.
 - It eases by rest (one a bed random tick while no crop grows on the bed: fallow, ripe, or stalled or dormant), by
   compost (each dose of bone meal on the bed, bone meal or fertilizer on its growing crop, or a Mulch Maw's nutrient)
-  and by a Greenwarden's empty hand on a bed they may change, once every 30 seconds a bed. A Mendvetch's gift is not
-  compost.
+  and by a Greenwarden's empty hand on a bed they may change, or on its growing crop, once every 30 seconds a bed. A
+  Mendvetch's gift is not compost.
 - It never kills (a crop stalled by strain lets its bed rest, and grows again) and never reads industrial work or
   pollution. Reports and Jade say "Recently harvested: strain n of 3", a harvest not yet counted included.
 
@@ -273,20 +273,21 @@ and icons have not been shown to the owner yet.
   a sample reads exactly 100 positions and caps diversity and disturbance; the budget gives 16 a tick and renews;
   nourishment's tie rule and full beds; the Maw's holding limit; the Heart's four beat outcomes; the parser's refusals;
   and the reference-garden simulation above.
-- Game tests: `ConcordanceGardenGameTests`, twelve before Concordance Chunk C (this record said nine; roadmap step 28
-  added `theGleanerWaitsForItsKeeper` and step 29 `aHastenedStepPaysAndFixesNothing`): a Greenwarden wakes the beds (a
-  novice's bed is dormant and grows nothing; one touch wakes the three joined beds and not a fourth); a crop grows only
-  within its niche (lit by glowstone it grows a step, paying a nutrient and drying its bed; shut in stone it stalls, and
-  its bed records "too little light, needs 11"); an empty bed stops growth (bone meal feeds it; fertilizer feeds the bed
-  two doses and never forces a step); a fixer feeds the poorest bed; the Heart beats 1 nutrient into 2 Verdance among
-  three kinds of crop, pours 3 for 2 into a pylon, and stops on a starved bed; the Maw feeds the poorest bed and stops
-  eating when every bed is full; the Gauge reads moisture and judges an attuned crop; the Gleaner harvests a ripe
-  sunpetal for a Verdance from a shared Heart, and a stranger's Gleaner may not draw; twenty beds in one tick get at
-  most 16 samples and the rest are read later; a bed and a Heart keep what they hold through a save.
+- Game tests: `ConcordanceGardenGameTests`, twelve before Concordance Chunk C: step 14 added ten (this record said
+  nine), roadmap step 28 `theGleanerWaitsForItsKeeper` and step 29 `aHastenedStepPaysAndFixesNothing`. Step 14's: a
+  Greenwarden wakes the beds (a novice's bed is dormant and grows nothing; one touch wakes the three joined beds and not
+  a fourth); a crop grows only within its niche (lit by glowstone it grows a step, paying a nutrient and drying its bed;
+  shut in stone it stalls, and its bed records "too little light, needs 11"); an empty bed stops growth (bone meal feeds
+  it; fertilizer feeds the bed two doses and never forces a step); a fixer feeds the poorest bed; the Heart beats 1
+  nutrient into 2 Verdance among three kinds of crop, pours 3 for 2 into a pylon, and stops on a starved bed; the Maw
+  feeds the poorest bed and stops eating when every bed is full; the Gauge reads moisture and judges an attuned crop;
+  the Gleaner harvests a ripe sunpetal for a Verdance from a shared Heart, and a stranger's Gleaner may not draw; twenty
+  beds in one tick get at most 16 samples and the rest are read later; a bed and a Heart keep what they hold through a
+  save.
 - CI: the first pushes failed to compile (`yield` is a restricted name; 26.3 has no `PushReaction.BLOCK`/`DESTROY` and
   no four-argument `withinManhattan`), then the server failed to start (the crops copied wheat's properties, whose map
   colour reads wheat's own age); each was fixed. Build run 37605176553 (commit `038153ea`) passed: compilation, the
-  data checks, every required server game test (including the nine garden tests) with and without the optional
+  data checks, every required server game test (including the ten garden tests) with and without the optional
   integrations, and the three client test shards.
 
 **Concordance Chunk C, unit 4 (C-07 to C-09; commits `5ba973632`, `d32ac3a61` and `d6edee4f4`, records in the commit
@@ -359,3 +360,8 @@ No worldgen, creatures or seasons. The crops are not found in the world; they ar
 - Open: a GuiLib garden overview; SmartBrainLib pollinators if a mobile organism is wanted later; graft cuttings as
   items and a visible graft tint (deferred by Concordance Chunk C); whether the mixed bed, strain and Dewlit suit play
   (C-P58 to C-P65 are proposals, their numbers starting values).
+- A gap since step 14, found by reading in Concordance Chunk C's unit review: bees step these crops, since
+  `#minecraft:bee_growables` includes `#minecraft:crops` and a bee steps any `CropBlock` by its next age (mc263src
+  `Bee.java`). Such a step skips `grow`: no niche check (a stalled crop advances), no nutrient cost, no drying, no
+  strain on its harvest and no graft cleared. Whether to move the crops to a tag of their own, which fertilizer and
+  garden maintenance would also accept, is the owner's choice.
