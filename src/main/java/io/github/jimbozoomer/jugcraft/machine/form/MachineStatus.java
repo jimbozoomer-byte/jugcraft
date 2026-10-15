@@ -27,7 +27,9 @@ public record MachineStatus(MachineLifecycle state, Reason reason, int index, in
 		/** A generator's fuel tank is empty and it has nothing left in hand. */
 		NO_FUEL,
 		/** A generator's store is full: nothing is drawing its power. */
-		POWER_FULL;
+		POWER_FULL,
+		COASTAL_SOURCE,
+		MIXED_INPUTS, RECIPE_UNAVAILABLE;
 
 		public String translationKey() {
 			return "container.jugcraft.form.reason." + name().toLowerCase();
@@ -120,6 +122,12 @@ public record MachineStatus(MachineLifecycle state, Reason reason, int index, in
 			return Component.literal("?");
 		}
 		String role = form.tankRoles().get(tank);
+		if (switch (form.id().getPath()) {
+			case "brine_concentrator", "gas_cleaning_rack", "aluminate_filter_press", "alumina_calciner" -> true;
+			default -> false;
+		}) {
+			return Component.translatable("container.jugcraft.form.tank." + form.id().getPath() + "." + role);
+		}
 		String own = "container.jugcraft.form." + form.id().getPath() + ".tank." + role;
 		if (Language.getInstance().has(own)) {
 			return Component.translatable(own);

@@ -173,7 +173,7 @@ public class BulkFermenterGameTests {
 	}
 
 	/**
-	 * It runs the Industrial Fermenter's one recipe, vents its carbon dioxide like the smaller one, and is built from an
+	 * It runs the Industrial Fermenter's two recipes, vents its carbon dioxide like the smaller one, and is built from an
 	 * Industrial Fermenter, two Steel Tanks, steel plates, an electric motor and a basic circuit.
 	 */
 	@GameTest(structure = ARENA)
@@ -181,8 +181,9 @@ public class BulkFermenterGameTests {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 1), Direction.NORTH);
 		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
-		helper.assertTrue(own.size() == 1 && own.get(0).id().equals(Jugcraft.id("chemical_reaction/fermenter_bioethanol")),
-				"Its one recipe: " + own.stream().map(FluidRecipes.Entry::id).toList());
+		helper.assertTrue(own.size() == 2 && own.get(0).id().equals(Jugcraft.id("chemical_reaction/fermenter_bioethanol"))
+				&& own.get(1).id().equals(Jugcraft.id("chemical_reaction/ferment_crop_mash")),
+				"The Fermenter's two recipes, bioethanol first: " + own.stream().map(FluidRecipes.Entry::id).toList());
 		helper.assertTrue(machine.form().vents(1) && machine.form().profile().lanes() == 4, "Four lanes, and its gas vents");
 		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
 		ItemStack tank = stack("steel_tank");
