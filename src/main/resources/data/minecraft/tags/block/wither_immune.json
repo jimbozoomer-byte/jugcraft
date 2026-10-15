@@ -38,6 +38,8 @@
     "jugcraft:pylon_lattice",
     "jugcraft:pylon_crown",
     "jugcraft:discharge_breaker",
-    "jugcraft:ground_terminal"
+    "jugcraft:ground_terminal",
+    "jugcraft:moonwood_leaves",
+    "jugcraft:warden_bell"
   ]
 }

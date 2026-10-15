@@ -351,9 +351,10 @@ def item_units(ref):
         return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers", "mourning_flowers") \
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} \
+                or path in ("fermentable", "grave_flowers", "mourning_flowers", "werewolf_pelts") \
                 or ns == MOD and form == "concordance":
-            return {}  # ... and the Concordance's own item tags (luminous matter) hold no metal
+            return {}  # ... and the Concordance's own item tags (luminous matter) and the werewolves' pelts hold no metal
         if form not in UNITS or not metal:
             err(f"Recipe uses unsupported tag {ref}")
             return {}
@@ -8664,17 +8665,18 @@ def check_model_uvs():
 
 def check_lairs():
     """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
-    tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py,
+    tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py,
     docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
     docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md,
-    docs/features/foundry-trench.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
-    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
-    there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts and snow heights, the
-    Cinder Kiln's slag, troughs and sluices, the Lantern Fen's lamps, the Archive of Last Names' names, stones, seals,
-    lectern and phylactery and the Foundry Trench's pylons, crowns, breakers and terminals are the tables', every server
-    option has its default, every message the Java sends has its words, and the Glacier Hall, the Cinder Kiln, the Lantern
-    Fen, the Archive of Last Names and the Foundry Trench are laid out as their records say (check_glacier_hall,
-    check_cinder_kiln, check_lantern_fen, check_crypt_archive, check_foundry_trench)."""
+    docs/features/foundry-trench.md, docs/features/moonlit-ring.md): the Java's numbers are the tables' and the layouts',
+    every lair has its dimension, dimension type, biome (no spawns), template and words for coming in, the rituals' blocks,
+    items, recipes and tags are there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts
+    and snow heights, the Cinder Kiln's slag, troughs and sluices, the Lantern Fen's lamps, the Archive of Last Names'
+    names, stones, seals, lectern and phylactery, the Foundry Trench's pylons, crowns, breakers and terminals and the
+    Moonlit Ring's bells are the tables', every server option has its default, every message the Java sends has its
+    words, and the Glacier Hall, the Cinder Kiln, the Lantern Fen, the Archive of Last Names, the Foundry Trench and the
+    Moonlit Ring are laid out as their records say (check_glacier_hall, check_cinder_kiln, check_lantern_fen,
+    check_crypt_archive, check_foundry_trench, check_moonlit_ring)."""
     import cinder_kiln as ck
     import crypt_archive as ca
     import foundry_trench as ft
@@ -8683,6 +8685,7 @@ def check_lairs():
     import lair_data as ld
     import lairs as la
     import lantern_fen as lf
+    import moonlit_ring as mr
     import spindle_loft as sl
     folder = JAVA_ROOT / "lair"
     lair = (folder / "Lair.java").read_text(encoding="utf-8")
@@ -8690,7 +8693,8 @@ def check_lairs():
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
                                        ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
                                        ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
-                                       ("crypt_archive", ca, ca.CENTRE, None), ("foundry_trench", ft, ft.CENTRE, None)):
+                                       ("crypt_archive", ca, ca.CENTRE, None), ("foundry_trench", ft, ft.CENTRE, None),
+                                       ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS))):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8724,7 +8728,7 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 "sealed_orders", la.GATE["entity"]):
+                 "sealed_orders", "howling_totem", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8853,6 +8857,31 @@ def check_lairs():
             err(f"No words for the Foundry Trench's {name} pylon")
     if "OrdersRite.register();" not in registry or "output.accept(SEALED_ORDERS);" not in registry:
         err("JugcraftLairs does not register Sealed Orders' rite or put the orders in the creative tab")
+    # The Moonlit Ring's: the totem's rest and reach and the pelts it takes, the bells' swing, the fixtures' registrations,
+    # the bells' names, and the gate's follow into the ring.
+    totem = (folder / "HowlingTotemRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(totem, name, la.TOTEM[key]):
+            err(f"HowlingTotemRite.{name} is not tools/lairs.py TOTEM {key} ({la.TOTEM[key]})")
+    if not java_number((folder / "WardenBellBlock.java").read_text(encoding="utf-8"), "SWING_TICKS", la.WARDEN_BELL["swing_ticks"]):
+        err(f"WardenBellBlock.SWING_TICKS is not tools/lairs.py WARDEN_BELL swing_ticks ({la.WARDEN_BELL['swing_ticks']})")
+    if sorted(la.WEREWOLF_PELTS) != sorted(f"{MOD}:{pelt}" for pelt in ag.WEREWOLF_PELTS):
+        err(f"tools/lairs.py WEREWOLF_PELTS {la.WEREWOLF_PELTS} are not every werewolf kind's pelt {ag.WEREWOLF_PELTS}")
+    pelts = (load(DATA / MOD / "tags" / "item" / "werewolf_pelts.json") or {}).get("values", [])
+    if sorted(pelts) != sorted(la.WEREWOLF_PELTS):
+        err(f"#jugcraft:werewolf_pelts is not tools/lairs.py WEREWOLF_PELTS: {pelts}")
+    for line in ('fixture("moonwood_leaves", Block::new, MapColor.PLANT, SoundType.GRASS, 0, Fit.SEE_THROUGH)',
+                 'fixture("warden_bell", WardenBellBlock::new'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in la.BELL_NAMES:
+        if f"lair.{MOD}.moonlit_ring.bell.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Moonlit Ring's {name} bell")
+    if "output.accept(HOWLING_TOTEM);" not in registry:
+        err("JugcraftLairs does not put the Howling Totem in the creative tab")
+    gate = re.sub(r"\s+", " ", (folder / "MistGateEntity.java").read_text(encoding="utf-8"))
+    if "open.lair == Lair.MOONLIT_RING) { HowlingTotemRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Moonlit Ring by the totem's way (HowlingTotemRite.follow)")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8905,6 +8934,7 @@ def check_lairs():
     check_lantern_fen(lf)
     check_crypt_archive(ca)
     check_foundry_trench(ft)
+    check_moonlit_ring(mr)
 
 
 def check_glacier_hall(gh):
@@ -9662,6 +9692,167 @@ def check_foundry_trench(ft):
                                                         "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
             err(f"The trench has {state[0]} at {(x, y, z)}, which would change once placed")
             break
+
+def check_moonlit_ring(mr):
+    """The Moonlit Ring as tools/moonlit_ring.py builds it is the ring its record describes (docs/features/moonlit-ring.md),
+    and where the Java looks for its parts (MoonlitRing.java) is where the layout puts them: the arrival stands on the
+    camp's floor with room overhead, and the Grey Mist fills the end of the trail behind it; a walk from the arrival,
+    never stepping more than half a block, reaches every open cell of the clearing and of each bell clearing, and comes
+    within reach of each bell; each bell hangs at rest facing the ring under its frame (a post either side, a beam over it,
+    a ridge over that), with room to stand under it; the Howling Stone stands three high at the centre with room on its
+    top where the Alpha waits, and from his eyes there the moon is seen over the northern trees; light flooded from the
+    hidden lights, the lantern and the mist, as the game floods it, is at least RING_LIGHT on every open cell of the
+    clearing and the bell clearings; and nothing in it changes by itself once placed."""
+    import math
+    from collections import deque
+    import lairs as la
+    blocks = mr.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "MoonlitRing.java").read_text(encoding="utf-8"))
+    for jname, value in (("SOIL", mr.SOIL), ("STAND", mr.STAND), ("CENTRE_X", mr.CENTRE[0]), ("CENTRE_Z", mr.CENTRE[1]),
+                         ("RING", mr.RING), ("GLADE_AT", mr.GLADE_AT), ("GLADE_RADIUS", mr.GLADE_RADIUS),
+                         ("CAMP_WEST", mr.CAMP["x"][0]), ("CAMP_EAST", mr.CAMP["x"][1]), ("CAMP_NORTH", mr.CAMP["z"][0]),
+                         ("CAMP_SOUTH", mr.CAMP["z"][1]), ("WAIT_X", mr.WAIT[0]), ("WAIT_Y", float(mr.WAIT[1])),
+                         ("WAIT_Z", mr.WAIT[2]), ("EXIT_WEST", mr.EXIT["x"][0]), ("EXIT_EAST", mr.EXIT["x"][1]),
+                         ("EXIT_Z", mr.EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"MoonlitRing.{jname} is not tools/moonlit_ring.py's {value}")
+    if tuple(mr.BELLS) != la.BELL_NAMES:
+        err(f"tools/moonlit_ring.py's BELLS {tuple(mr.BELLS)} are not tools/lairs.py BELL_NAMES {la.BELL_NAMES}")
+    cells = mr.bell_cells()
+    expected = "BELLS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in la.BELL_NAMES))
+    if expected not in java:
+        err(f"MoonlitRing.BELLS is not tools/moonlit_ring.py's, in the order of tools/lairs.py BELL_NAMES: expected {expected}")
+    ways = ", ".join("{}({}, {})".format(n.upper(), *mr.BELLS[n]["way"]) for n in la.BELL_NAMES)
+    if f"enum Bell {{ {ways};" not in java:
+        err(f"MoonlitRing.Bell is not tools/lairs.py BELL_NAMES with tools/moonlit_ring.py's ways: expected {ways}")
+
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:fern", "jugcraft:lair_exit", "jugcraft:werewolf_rug"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = mr.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:rooted_dirt", "minecraft:moss_block",
+             "minecraft:stone", "minecraft:andesite", "minecraft:mossy_cobblestone"}
+    if name((feet[0], feet[1] - 1, feet[2])) not in whole or ay != float(mr.STAND) or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not mr.in_camp(feet[0], feet[2]):
+        err(f"The ring's arrival at {mr.ARRIVAL[:3]} does not stand on the camp's floor with room overhead")
+    for pos in mr.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist at the end of the trail behind the camp at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block or on trodden earth (a sixteenth lower).
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        height = y + 1.0 if state[0] in whole else y + 15 / 16 if state[0] == "minecraft:dirt_path" else None
+        if height is not None and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).append(height)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    walked = {(x, z) for x, z, h in seen if mr.SOIL < h <= mr.STAND}
+    open_cells = sorted((x, z) for x in range(mr.SIZE[0]) for z in range(mr.SIZE[2]) if (mr.in_ring(x, z) or mr.in_glade(x, z))
+                        and free((x, mr.STAND, z)) and free((x, mr.STAND + 1, z)))
+    stranded = [cell for cell in open_cells if cell not in walked]
+    if stranded:
+        err(f"{len(stranded)} open cells of the clearing and the bell clearings cannot be walked to from the arrival, "
+            f"e.g. {stranded[0]}")
+    for bell in la.BELL_NAMES:
+        gx, gz = mr.glade_middle(bell)
+        if not any(math.hypot(x + 0.5 - gx, z + 0.5 - gz) <= mr.GLADE_RADIUS for x, z in walked):
+            err(f"No walk from the ring's arrival comes into the {bell} bell's clearing")
+
+    def within(target, reach):
+        tx, ty, tz = (c + 0.5 for c in target)
+        return any(((x + 0.5 - tx) ** 2 + (h + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach for x, z, h in seen)
+
+    # The bells: at rest, facing the ring, under their frames, with room to stand under them.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    for bell, info in mr.BELLS.items():
+        x, y, z = cells[bell]
+        wx, wz = info["way"]
+        state = props((x, y, z))
+        if name((x, y, z)) != "jugcraft:warden_bell" or state.get("facing") != info["face"] or state.get("ringing") != "false":
+            err(f"No Warden Bell at rest facing {info['face']} at the {bell} clearing's {(x, y, z)}")
+        if steps[info["face"]] != (-wx, -wz):
+            err(f"The {bell} bell faces {info['face']}, not back toward the ring")
+        if not mr.in_glade(x, z):
+            err(f"The {bell} bell at {(x, y, z)} does not hang in its clearing")
+        for px, pz in mr.frame_posts(bell):
+            if any(name((px, py, pz)) != "minecraft:spruce_log" for py in range(mr.STAND, mr.BEAM_Y)):
+                err(f"The {bell} bell's frame has no post standing at {(px, pz)}")
+        if name((x, mr.BEAM_Y, z)) != "minecraft:spruce_log" or name((x, mr.ROOF_Y, z)) != "minecraft:spruce_slab":
+            err(f"The {bell} bell hangs from no beam under a ridge")
+        if y != mr.BEAM_Y - 1 or not free((x, mr.STAND, z)) or not free((x, mr.STAND + 1, z)):
+            err(f"The {bell} bell does not hang from its beam with room to stand under it")
+        if not within((x, y, z), 4.0):
+            err(f"No walk from the ring's arrival comes within reach of the {bell} bell at {(x, y, z)}")
+
+    # The Howling Stone, and the moon over the northern trees from where the Alpha waits (his eyes 3.2 over his feet).
+    wx_, wy_, wz_, _ = mr.WAIT
+    top = (int(wx_), int(wy_) - 1, int(wz_))
+    if mr.stone_height(mr.CX, mr.CZ) != 3 or wy_ != mr.STAND + 3 or name(top) not in whole \
+            or not free((top[0], top[1] + 1, top[2])) or not free((top[0], top[1] + 2, top[2])):
+        err(f"The Howling Stone does not stand three high at the centre with room on its top at {mr.WAIT[:3]}")
+    eye = (wx_, wy_ + 3.2, wz_)
+    moon = tuple(c + 0.5 for c in mr.MOON)
+    if mr.MOON[2] >= 0:
+        err(f"The moon at {mr.MOON} is not north of the ring")
+    steps_ = 400
+    for i in range(1, steps_):
+        t = i / steps_
+        p = tuple(eye[k] + (moon[k] - eye[k]) * t for k in range(3))
+        cell = tuple(int(c // 1) for c in p)
+        if 0 <= cell[0] < mr.SIZE[0] and 0 <= cell[1] < mr.SIZE[1] and 0 <= cell[2] < mr.SIZE[2] and not free(cell):
+            err(f"From the Howling Stone the moon is hidden by {name(cell)} at {cell}")
+            break
+
+    # The light, flooded as the game floods block light: a level less a block, through anything but whole opaque blocks
+    # (leaves, plants, the bells, the fences and the lantern let it through).
+    opaque = whole | {"minecraft:dirt_path", "minecraft:cobblestone", "minecraft:dark_oak_log", "minecraft:oak_log",
+                      "minecraft:spruce_log", "minecraft:stripped_spruce_log", "minecraft:brown_wool", "minecraft:spruce_planks",
+                      "minecraft:spruce_slab", "minecraft:spruce_stairs", "minecraft:cobblestone_slab"}
+    emit = {"minecraft:lantern": 15, "jugcraft:lair_exit": 6}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) not in opaque and level > light.get(n, 0) and 0 <= n[1] < mr.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    lit = sorted((light.get((x, mr.STAND, z), 0), (x, mr.STAND, z)) for x, z in open_cells)
+    if not lit or lit[0][0] < mr.RING_LIGHT:
+        dark = [cell for level, cell in lit if level < mr.RING_LIGHT]
+        err(f"{len(dark)} open cells of the clearing and the bell clearings have less block light than RING_LIGHT "
+            f"{mr.RING_LIGHT}, the darkest {lit[0] if lit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "MoonlitRingClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "RING_LIGHT", mr.RING_LIGHT) or not java_number(source, "RING_CELLS", len(open_cells)):
+        err(f"MoonlitRingClientGameTests does not read the light against RING_LIGHT {mr.RING_LIGHT} on the clearing's and the "
+            f"bell clearings' {len(open_cells)} open cells (RING_CELLS)")
+
+    # Nothing that changes by itself once placed: Moonwood Leaves never fall, and nothing in the ring is lit or grows.
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") and state[0] != "jugcraft:moonwood_leaves" \
+                or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water", "minecraft:grass_block",
+                                "minecraft:snow", "minecraft:soul_fire") \
+                or state[0] == "minecraft:campfire" and dict(state[1]).get("lit") != "false":
+            err(f"The ring has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+
 
 def check_vesperine():
     """Vesperine, the Last Reaper (tools/vesperine.py, docs/features/vesperine.md): every number the Java uses is the

@@ -1,6 +1,6 @@
 # Bosses branch (brainstorm)
 
-Status: **a brainstorm; seven bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
+Status: **a brainstorm; seven bosses are built.** On 10 October 2026 the owner chose to build a new boss "the same way" as Madame Tatterlace ([features/tatterlace.md](../features/tatterlace.md)); the Yeti King is first, to the plan below. The same day the owner asked for "the next boss same way" as him: the Cinder Tyrant, to his plan below. Both are built. On 13 October 2026 the owner chose the next: the Mire Hag, to her plan below, who is built too; and after her, the same day, the Crypt Lich, to his plan below, who is built too. On 14 October 2026 the owner chose the Iron Dreadnought, to his plan below, who is built too. The same day the owner chose the Alpha Werewolf, to his plan below. On 4 October 2026 the owner asked for variant weapons, many of them "drops from bosses ill make later", themed around those bosses ("example: Yeti King"), and to "brainstorm bosses we could make". This page is that brainstorm. The bosses' weapons already exist: Arms VII ([features/arms-vii.md](../features/arms-vii.md)) adds two trophies for each of the first eight bosses below, and their loot tables are ready (`data/jugcraft/loot_table/bosses/<boss>.json`, one of the two per roll). Building a boss is a separate, reviewed feature each time, in the order the Yeti King was built in: [BOSS_PLAYBOOK.md](BOSS_PLAYBOOK.md). Everything here is a proposal for the owner to pick from, change or drop.
 
 ## Rules every boss follows
 
@@ -606,6 +606,127 @@ He follows the rules every boss follows (above):
 - every opening costs Sealed Orders.
 
 Nothing a tier needs comes only from him: first electricity, steel, actuators and the chemistry are all made without him.
+
+## The Alpha Werewolf: the plan (being built)
+
+The sixth of the first eight, built by [the boss playbook](BOSS_PLAYBOOK.md) as the bosses before him were: first his lair and the summoning that opens it, then the Alpha himself, his pack and his loot, each its own pull request with tests and pictures. On 14 October 2026 the owner chose him as the next boss ("Ok lets do the alpha werewolf boss 8"), after the Iron Dreadnought's checkpoint.
+
+The design joins three sources:
+- this page's own idea for him: the pack leader of the werewolves already in the world, twice their size, who leaps between trees, howls to weaken players and call the pack, and flees to heal at dawn;
+- the planning pack's "Moonlit Pursuit" ([chapter 05](../plans/concordance-expansion-2026-10-10/05-new-boss-compendium.md)): a moonlit woodland ring with clear paths and three bell clearings; the pack marks a target before a hunt, and ringing the right bell breaks its coordination and opens a recovery window; a 0.7-second claw combination, a 1.2-second pounce shadow, a marked howl and at most three pack allies; at low health he changes his pursuit route rather than simply getting faster; his ground trails stay visible without particles; and the invitation must not be locked to the calendar;
+- the werewolves of the woods ([features/even-more-fall-additions.md](../features/even-more-fall-additions.md), fall addition 23): their hide that shrugs off half of every blow but silver's, their pelts, and wolfsbane, which wards them off.
+
+The numbers here are the plan's. Each part's feature record says what changed in building it. Part 1, the ring and the totem: [features/moonlit-ring.md](../features/moonlit-ring.md); part 2, the Alpha, his pack and his loot, will have `features/alpha-werewolf.md`.
+
+*A werewolf twice the height of a man, the werewolves' build made massive: a silver-grey mane over a hunched black-furred back, scarred muzzle, a torn ear, claws like sickles and eyes that burn moon-white.* He is the oldest of the werewolves, the one the others answer when they howl. His hunting ground is a ring of giant oaks under a moon that never sets, where the old wardens hung bells to warn of the pack, and nobody has rung them in a long while.
+
+### The Moonlit Ring
+
+A clearing in an old wood, under a huge full moon:
+- **The arrival:** the **Hunters' Camp**, a hollow at the ring's south edge under the trees: a lean-to of hides on spruce poles, a cold firepit ringed with stones, werewolf rugs on the ground and a stump with a lantern on it. Behind it the trail back through the trees fills with Grey Mist: the way home. The camp is safe.
+- **The ring, the arena:** a clearing about 44 blocks across of moonlit grass and moss, walled all round by the trunks of **giant oaks** standing too close to pass between. Their canopy closes overhead round the edge and opens in the middle onto the moon.
+- **Clear paths:** a path of trodden earth runs round the ring just inside the trees, and three spokes run from the centre to the bell clearings. Between them grow grass and low ferns, with a few fallen logs and boulders for low cover. Nothing blocks a run from the centre to any bell.
+- **The three bell clearings:** at the ring's west, north and east, each a small glade let into the tree wall. In each hangs a **Warden Bell**, an old silver alarm bell under a shingled frame on two posts, with a pull rope. Any player in the ring may ring them. A bell rung swings for 2 seconds, and cannot be rung again until it stops.
+- **The Howling Stone:** at the centre, a grey outcrop three blocks high with a flat, mossy top, where he crouches waiting, head raised to the moon.
+- **The moon:** a huge full moon, pale gold, low over the northern trees.
+
+The lair-only blocks are fixtures like the other lairs': unbreakable, no items, no drops. Only the three Warden Bells can be used. One more lair-only block, **raked turf** (moss torn by his claws), is the trail he leaves; it knits back by itself (part 2).
+
+### The summoning: the Howling Totem
+
+1. Craft a **Howling Totem**: a werewolf's pelt (any kind) wrapped round three bones and bound with two silver ingots.
+2. Use it standing on the woodland floor (earth a tree could grow on: grass, dirt, podzol or moss, under snow or not) **at night** (any night, not only a full moon, all year), **in werewolf country** (the Overworld's woods: biome tag `jugcraft:werewolf_haunts`), under the open sky (nothing over your head, not even leaves).
+3. The totem howls at the moon and something far off answers: you come to in the Moonlit Ring's camp. The totem is used up, and Grey Mist rises where it stood: for 60 seconds anyone can walk into the mist and follow. Nobody is taken in by standing near it.
+4. By day, under a roof, outside werewolf country or the Overworld, or within 6 blocks of growing wolfsbane ("the wolfsbane keeps them away"), the totem only says why, and nothing is used up; likewise if every ring is taken.
+
+Werewolf pelts come from the werewolves of full-moon nights and keep, so a player who has hunted one full moon can call him up on any night after.
+
+### The fight
+
+The Alpha Werewolf has 400 health, scaled for the party: half as much again for each player after the first, at most two and a half times. He has armour 8. Falls and knockback never harm or move him much: he is heavy.
+
+**His hide**, like his kind's: every blow but silver's (a weapon in `jugcraft:silver_weapons`, or a silver arrow) does half its damage. Silver does full damage. Silver is a help, never a need: the bells open him to every weapon.
+
+He crouches on the Howling Stone, head raised to the moon, eyes dark. He wakes when a player who can fight him steps off the camp onto the ring's turf, or strikes him: he rises and howls at the moon (2.5 s, unhurt meanwhile), his eyes blaze, and his pack, three **Packmates**, lope out of the trees. He keeps to the ring: more than 26 blocks from its centre, he is set back.
+
+**His rule: the Hunt.** Every 24 seconds he hunts:
+- **He marks his quarry:** he throws back his head in a short, rising howl (1.0 s), and the bar over the screen names the player he was fighting ("The pack hunts Steve").
+- **He goes to ground:** he bounds off into the trees and hides in one of the three bell clearings, never the one his quarry stands nearest. His claws tear the turf as he runs, so a **trail of raked turf** leads from where he was to where he hides, and his eyes glint out of that clearing's dark.
+- **His pack drives the quarry:** the Packmates close in on the quarry, snapping at their heels.
+- **The ambush lasts 10 seconds.** Then he springs: a long leap from the clearing at the quarry wherever they are. A shadow spreads where he will land, 1.2 seconds before: 14 damage within 2.5 blocks of it, and the quarry is knocked flat (Slowness for 1 s).
+- **Ring the Warden Bell in his clearing before he springs,** and he is **flushed**: startled into the open, he staggers out (1.5 s), his hide fails and every blow does full damage (silver half as much again) for 8 seconds, and his pack cowers among the trees for 4 seconds.
+- A bell in an empty clearing only tolls. Each bell can be rung once every 2 seconds.
+
+From anywhere in the ring, a sprinting player reaches any bell well inside the ambush's 10 seconds, alone or not; the audit will walk the ring to keep that true.
+
+**Phase 1, "The Chase"** (full to half health):
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Claw Rake | He rears up and spreads his claws (0.7 s) | Two rakes across his front, 3 blocks: 6 damage each. Step back or aside |
+| Pounce | He drops into a crouch and a shadow spreads where he will land (1.2 s) | He leaps up to 12 blocks onto the shadow: 9 damage within 2 blocks, and thrown down. Step off the shadow |
+| Rending Howl | His hackles rise and he fills his chest (1.0 s) | Weakness for 6 s on players within 10 blocks, and his pack runs faster for 6 s. Get out of earshot |
+| The Hunt | His short, rising howl (1.0 s) | Above |
+
+**At half health, "The Pack Gathers":** he leaps onto the Howling Stone and howls long at the moon (2 s, unhurt). His pack is called back up to three, and the fight changes.
+
+**Phase 2, "The Moon's Fury"** (half to a quarter): he keeps every attack, hunts every 20 seconds, and adds:
+
+| Attack | Read it by | What it does |
+| --- | --- | --- |
+| Tree Leap | He springs into the ring trees out of sight; the leaves shiver along his path (1.5 s), then a shadow spreads behind a player (1.2 s) | He drops from the trees onto the shadow: 10 damage within 2.5 blocks. Step off the shadow |
+| Hamstring Bite | He lunges low, jaws wide (0.9 s) | A bite on his foe: 8 damage and Slowness II for 2 s. Step back |
+
+**Below a quarter, "The Last Hunt":** he changes his route, not his speed. In every ambush, halfway through, he slips from his clearing through the trees to another, leaving a second trail; the bell to ring is the one in the clearing he is in when it rings. His tells stay as long as ever. He hunts every 16 seconds.
+
+**Left alone** for 10 seconds, he slinks back to his stone to lick his wounds, healed. His pack melts back into the trees, the raked turf knits, and who hurt him is forgotten.
+
+**His pack, the Packmates:** young werewolves of his blood, smaller than he is: 24 health, no hide (silver still does half as much again), a 4-damage bite, fast. At most three at a time; they harry the quarry in a hunt, and his foe otherwise. A sprig of wolfsbane in hand keeps them from biting its holder (they circle and growl), but not him. Killed, they stay dead until he gathers the pack again. They drop nothing and give no experience.
+
+### His loot (per participant)
+
+A participant is a player who hurt him or his pack, or rang the bell that flushed him, and is within 64 blocks of the ring's centre when he falls.
+
+| Loot | Chance |
+| --- | --- |
+| **Alpha Pelt**, his silver-grey pelt | 1, always |
+| **A trophy:** Moonfang or Howler (his `bosses/werewolf_alpha` table, one of the two) | 15%; certain on a player's first kill |
+| **The Packfinder Charm** | 25% |
+| **The Alpha's Hood** | 20% |
+| 300 experience, shared out | always |
+| The advancement **Hunter's Moon** | always |
+
+- **Alpha Pelt:** for those who never fight, four leather for the workshop (a werewolf's pelt gives two); and it counts as a werewolf's pelt, so it makes a Howling Totem, one for one, with no loop that gains.
+- **The Packfinder Charm:** the planning pack's tracking equipment. Held in the offhand, it marks every werewolf within 32 blocks with a glow (seen by everyone) every 2 seconds: the hunter becomes the hunted on full-moon nights.
+- **The Alpha's Hood:** a costume worn on the head, his silver-grey wolf's head.
+- **The trophies** are Arms VII's ([features/arms-vii.md](../features/arms-vii.md)), with their Howl boon; until now they were in the creative tab only.
+- When he falls, he slumps on the turf with a last long howl, his eyes going dark, and Grey Mist opens on the Howling Stone, the way home.
+
+### The shared lair contract
+
+The planning pack's chapter 04 asks each lair to answer these:
+- **Arrival, staging, waking and return:** the camp is safe. He wakes when a player steps off the camp onto the ring's turf or strikes him. Grey Mist fills the trail behind the camp, and opens on the Howling Stone when he falls.
+- **Fixtures:** the three Warden Bells, which any player in the ring may ring, and the Grey Mist. Nothing else can be used, built or broken.
+- **The floor:** the ring owns it. Only his trail changes it (raked turf, which knits back by itself, and all of it is put back when he resets); each instance is placed fresh.
+- **Who fights:** players who may fight a lair's boss (`LairBosses`), with party health as above.
+- **Reset:** when no eligible player is left, or he is left alone for 10 seconds.
+- **Clean-up:** his Packmates are his, capped at three, and gone with him.
+- **Death, disconnect and restart:** as every lair. Grave Goods keep what a player falls with, and instances close on a restart. Each participant's loot is rolled once when he falls.
+- **An ordinary player** can do everything: a bell is rung by using it, his hiding place is shown by his trail and his eyes, every attack is read before it lands, and the flush opens him to any weapon. Alone, the quarry can reach his bell in time, and silver and wolfsbane only make it easier.
+
+Of the planning pack's magic links (Echo reading the hunt's target, a Verdance refuge, Tether interrupting a pack signal), none is in the game yet: they wait for spells of those schools. None of them will be needed. The planning pack's offered story of being turned into a werewolf is not part of this fight: no blow of his changes a player.
+
+### Rules kept
+
+He follows the rules every boss follows (above):
+- his ring is his arena, and resets when everyone leaves;
+- every attack is read before it lands, and his hide is never his last word: every bell rung in time opens him to any weapon;
+- dying there keeps everything as Grave Goods;
+- his health scales with the party, and every participant rolls his loot;
+- nothing in his ring can be built or broken, and the only blocks that change are his own trail, which knits back;
+- every opening costs a Howling Totem, and a full moon is never required to make or use one.
+
+Nothing a tier needs comes only from him: silver, leather and the werewolves' own pelts all come without him.
 
 ## More bosses to consider (no trophies yet)
 
