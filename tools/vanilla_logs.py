@@ -22,6 +22,8 @@ LOGS = {
     "cedar": ("spruce", 0xC5B6A5, 0xBCAA92),
     "cinnamon": ("jungle", 0xE9B98D, 0xF7B881),
 }
+# Pine uses the owner's original local textures without tints (15 October correction).
+# Its ordinary wood models from festival_data.wood_assets must not be overridden here.
 
 
 def column(side, end, horizontal=False, bark_ends=False):

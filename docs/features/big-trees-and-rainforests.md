@@ -6,15 +6,17 @@ Owner: @jimbozoomer-byte
 Target milestone and tier: world generation and building (Discovery).
 Primary specialty and supported player role: exploration; building (redwood, eucalyptus and mahogany wood).
 
+Tree-generation update (15 October 2026): [batch 2](trees-batch-2.md) adds the approved warm and mountain shapes and adjusts existing tree picks without changing biome placement or per-chunk attempt budgets. Its feature record holds the current mixes, measurements and fresh validation; older evidence below remains historical.
+
 ## Player experience
 Eight forests, mostly in the **woodland** layout of Jugcraft regions. The two giant forests of the old-growth taigas also grow in the wild layout:
 
 | Biome | Layout: replaces | What grows |
 | --- | --- | --- |
 | **Rainforest** | woodland: the wettest jungles | tall mahoganies and giant ones, jungle trees and bushes over ferns, orange cosmos and puddles; only parrots |
-| **Eucalyptus Forest** | woodland: other jungles, savanna plateaus | tall eucalyptus with rainbow-streaked bark, oak scrub, melons and wildflowers; parrots among the farm animals |
+| **Eucalyptus Forest** | woodland: other jungles, savanna plateaus | ordinary, branching and rare giant eucalyptus with rainbow-streaked bark, oak scrub, melons and wildflowers; parrots among the farm animals |
 | **Tropics** | woodland: sparse jungles | bright green land of palms, small palms, flowering azaleas and jungle bushes; hibiscus, hydrangeas and bamboo; turquoise water; parrots; jungle temples |
-| **Subtropics** | woodland: savannas, warm plains | green, plains-like country with flowering azaleas, oaks, birches, small palms and vine-hung oaks; hydrangeas, sugar cane; villages |
+| **Subtropics** | woodland: savannas, warm plains | green, plains-like country with flowering azaleas, broad live oaks with shroud moss, birches, small palms and vine-hung oaks; hydrangeas, sugar cane; villages |
 | **Dense Forest** | woodland: dark forests | big spreading oaks packed close, dark oaks and a rare great oak among them, leaf litter and ferns; woodland mansions |
 | **Redwood Forest** | woodland and wild: old-growth pine taigas | giant redwoods two blocks wide and tall single ones, a few firs and mossy maples, on podzol broken by moss; ferns and tall ferns |
 | **Temperate Rainforest** | woodland and wild: old-growth spruce taigas | firs and redwoods, moss-hung bigleaf maples and willows, thick with ferns and berry bushes |

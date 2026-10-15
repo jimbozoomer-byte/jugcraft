@@ -415,7 +415,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # (docs/branches/TREES.md), the swamp cedar of its wetlands.
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
-             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar"}
+             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -423,7 +423,7 @@ WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen"
 WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "biomes"], "maple": ["biomes"],
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
-                 "mahogany": ["biomes"], "cedar": ["biomes"]}
+                 "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -468,11 +468,14 @@ TREES = {
     # tools/trees.py) that four saplings planted in a square grow (agriculture/GiantSaplingBlock).
     "redwood": {"leaves": "redwood_needles", "leaves_display": "Redwood Needles", "season": None, "base": "spruce",
                 "giant": "giant_redwood"},
-    "eucalyptus": {"leaves": "eucalyptus_leaves", "leaves_display": "Eucalyptus Leaves", "season": None, "base": "jungle"},
+    "eucalyptus": {"leaves": "eucalyptus_leaves", "leaves_display": "Eucalyptus Leaves", "season": None, "base": "jungle",
+                   "giant": "giant_eucalyptus"},
     "mahogany": {"leaves": "mahogany_leaves", "leaves_display": "Mahogany Leaves", "season": None, "base": "jungle",
                  "giant": "giant_mahogany"},
     # The tree roster's batch 1: the swamp cedar, an evergreen conifer of flat sprays of scale-leaves.
     "cedar": {"leaves": "cedar_leaves", "leaves_display": "Cedar Leaves", "season": None, "base": "spruce"},
+    "pine": {"leaves": "pine_needles", "leaves_display": "Pine Needles", "season": None, "base": "spruce",
+             "leaf_tint": 0x78A88A, "leaf_overlay": "pine_needles_overlay"},
 }
 SEASON_STATES = ["green", "gold", "bare"]
 JITTER = 7
