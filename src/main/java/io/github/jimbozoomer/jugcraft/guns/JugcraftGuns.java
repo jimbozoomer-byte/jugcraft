@@ -95,6 +95,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * <li>Slice 14B, the next three treated-brass guns, carbines held in both hands: the Holler Carbine, the Holler
  * Pistol made over with a long shrouded barrel and a bolt its shot works; the Minuet Carbine, the Minuet Pistol made
  * over with a long barrel and a magazine ahead of its trigger; and the Grange Carbine, fed from a box magazine.</li>
+ * <li>Slice 14C, three more treated-brass guns sharing one family of animations: the Sprocket Gun, an automatic rifle
+ * fed from a pan magazine on its top; the Navvy Shotgun, an automatic shotgun fed from a box magazine; and the
+ * Freeholder Rifle, a quick-firing rifle.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -187,6 +190,9 @@ public final class JugcraftGuns {
 		SPECS.put("holler_carbine", new GunSpec(9.0F, 1, 10, false, 10, 58, 0, 0, 0, 2.5F, 0.4F, 96, "rifle_round"));
 		SPECS.put("minuet_carbine", new GunSpec(5.0F, 1, 5, false, 10, 46, 0, 0, 0, 2.0F, 0.2F, 80, "light_round"));
 		SPECS.put("grange_carbine", new GunSpec(7.0F, 1, 7, false, 12, 45, 0, 0, 0, 2.5F, 0.35F, 96, "rifle_round"));
+		SPECS.put("sprocket_gun", new GunSpec(4.5F, 1, 4, true, 40, 63, 0, 0, 0, 4.0F, 1.5F, 80, "rifle_round"));
+		SPECS.put("navvy_shotgun", new GunSpec(2.5F, 6, 8, true, 8, 52, 0, 0, 0, 6.0F, 4.0F, 24, "buckshot_shell"));
+		SPECS.put("freeholder_rifle", new GunSpec(6.0F, 1, 5, false, 20, 53, 0, 0, 0, 2.5F, 0.3F, 104, "rifle_round"));
 	}
 
 	/**
@@ -450,6 +456,14 @@ public final class JugcraftGuns {
 				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
 				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
 				"reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("sprocket_gun", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel", "light_stock",
+				"weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
+				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("navvy_shotgun", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "tactical_grip"));
+		ACCEPTS.put("freeholder_rifle", List.of("extended_magazine", "speed_magazine", "medium_scope", "reflex_sight",
+				"laser_sight"));
 	}
 
 	/** The rounds. */

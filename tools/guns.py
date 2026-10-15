@@ -778,6 +778,33 @@ GUNS = {
         "damage": 7.0, "pellets": 1, "interval": 7, "auto": False, "capacity": 12,
         "reload": 45, "spread": (2.5, 0.35), "range": 96, "ammo": "rifle_round",
     },
+    # Slice 14C, three more of the owner's treated-brass guns, which share one family of animations: the Cogloader, a
+    # rifle fed from a pan magazine on its top, wound after each change; the Jackhammer, an automatic shotgun fed from a
+    # box magazine; and the Libertas, a quick-firing rifle with glowing coils along its barrel.
+    "sprocket_gun": {
+        "display": "Sprocket Gun",
+        "source": "cogloader",
+        "tooltip": "An automatic rifle fed from a pan magazine on its top, wound like a sprocket after each change. "
+                   "Fires rifle rounds.",
+        "damage": 4.5, "pellets": 1, "interval": 4, "auto": True, "capacity": 40,
+        "reload": 63, "spread": (4.0, 1.5), "range": 80, "ammo": "rifle_round",
+    },
+    "navvy_shotgun": {
+        "display": "Navvy Shotgun",
+        "source": "jackhammer",
+        "tooltip": "An automatic shotgun fed from a box magazine of eight shells: it fires as long as the trigger is "
+                   "held. Fires buckshot shells.",
+        "damage": 2.5, "pellets": 6, "interval": 8, "auto": True, "capacity": 8,
+        "reload": 52, "spread": (6.0, 4.0), "range": 24, "ammo": "buckshot_shell",
+    },
+    "freeholder_rifle": {
+        "display": "Freeholder Rifle",
+        "source": "libertas",
+        "tooltip": "A quick-firing rifle with glowing coils along its barrel, fed from a magazine of twenty. Fires "
+                   "rifle rounds.",
+        "damage": 6.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 20,
+        "reload": 53, "spread": (2.5, 0.3), "range": 104, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -1012,6 +1039,13 @@ RECIPES = {
     "holler_carbine": (["SSS", "BLB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
     "minuet_carbine": (["SSB", "BL "], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
     "grange_carbine": (["SSS", " LB", "  B"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
+    # Slice 14C: steel, brass and a lever again. The Sprocket Gun takes a hopper for the pan that feeds it; the Navvy
+    # Shotgun is short; the Freeholder Rifle takes an emerald for its green coils.
+    "sprocket_gun": (["SSS", "HLB", " B "], {"S": "#c:ingots/steel", "H": "minecraft:hopper", "L": "minecraft:lever",
+                                             "B": "#c:ingots/brass"}),
+    "navvy_shotgun": (["SBS", " LB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
+    "freeholder_rifle": (["SSE", "BLB"], {"S": "#c:ingots/steel", "E": "minecraft:emerald", "B": "#c:ingots/brass",
+                                          "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2525,6 +2559,60 @@ BUILDS = {
         "sight": (8.0, 6.47, 15.15),
         "eye_relief": 4.0,
     },
+    # Slice 14C. The Cogloader's pan magazine (the owner's magazine part) sits flat on its top. Its reload lifts the pan
+    # off to the left on the magazine bone and puts it back; then the cogloader_magazine bone, which holds the pan, winds
+    # it a full turn about its middle. As the Grandle, it has no pistol grip: the right hand holds the stock's wrist.
+    # Its bolt is the owner's bolt part, the handle on its left. Its magazine_2 and seal bones hold nothing. Its sight
+    # is the frame of posts at the back of the pan over the post at the muzzle.
+    "sprocket_gun": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "sights"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", ["bolt"], (6.2, 5.8, 10.6)),
+            ("magazine", "gun_body", [], (8.0, 7.44, 8.0)),
+            ("cogloader_magazine", "magazine", ["magazine"], (8.0, 7.44, 8.0)),
+            ("magazine_2", "gun_body", [], (8.0, 7.44, 8.0)),
+            ("seal", "gun_body", [], (8.0, 6.0, 8.0)),
+        ],
+        "hands": {"right": (8.0, 2.6, 16.0), "left": (8.0, 2.0, 6.5)},
+        "arms": {"right": (0.0, -0.6088, 0.7934), "left": (0.5624, -0.2329, 0.7934)},
+        "muzzle": (8.0, 5.0, -6.2),
+        "sight": (8.0, 8.15, 13.9),
+        "eye_relief": 3.5,
+    },
+    # The Jackhammer's bolt is the owner's bolt part, the handle across its top; its grip and magazine are the owner's.
+    # Its sights are in its main part (the ring at the back over the post at the front), so it takes no scope. Its
+    # magazine_2 and seal bones hold nothing.
+    "navvy_shotgun": {
+        "bones": [
+            ("gun_body", None, ["main", "stan_barrel", "stan_grip"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", ["bolt"], (8.0, 5.45, 11.7)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 1.0, 9.65)),
+            ("magazine_2", "gun_body", [], (8.0, 1.0, 9.65)),
+            ("seal", "gun_body", [], (8.0, 6.0, 8.0)),
+        ],
+        "hands": {"right": (8.0, 2.0, 15.6), "left": (8.0, 1.6, 5.0)},
+        "arms": {"right": (-0.3672, -0.7161, 0.5936), "left": (0.233, -0.3036, 0.9239)},
+        "muzzle": (8.0, 5.2, -0.85),
+        "sight": (8.0, 6.75, 14.14),
+        "eye_relief": 2.0,
+    },
+    # The Libertas is held through the loop of its trigger guard. It has no bolt part, and none of its main part's
+    # elements slides as a bolt (its top carries the sights; the pieces on its sides are flat), so its bolt bone, as its
+    # magazine_2 and seal bones, holds nothing. Its sight is the ring at the back over the post at the front of the top.
+    "freeholder_rifle": {
+        "bones": [
+            ("gun_body", None, ["main", "sights"], (8.0, 0.0, 8.0)),
+            ("bolt", "gun_body", [], (8.0, 6.45, 12.0)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 1.8, 9.2)),
+            ("magazine_2", "gun_body", [], (8.0, 1.8, 9.2)),
+            ("seal", "gun_body", [], (8.0, 6.0, 8.0)),
+        ],
+        "hands": {"right": (8.0, 2.2, 14.3), "left": (8.0, 1.6, 5.5)},
+        "arms": {"right": (-0.0337, -0.5622, 0.8263), "left": (0.2706, -0.2706, 0.9239)},
+        "muzzle": (8.0, 5.2, -1.1),
+        "sight": (8.0, 7.0, 13.39),
+        "eye_relief": 2.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2721,11 +2809,12 @@ ATTACHMENTS = {
     # "no_sights" part, a rail on the Riveter, shows with the scope). A scope steadies the aim and narrows the view;
     # the two magnifying ones are clumsy from the hip.
     # "not_on" (slice 14A): the Holler Pistol's own texture is as big as the largest atlas, and beside it there is room
-    # for the pieces of only three of the four sights; it goes without the marksman's long scope.
+    # for the pieces of only three of the four sights; it goes without the marksman's long scope. So does slice 14C's
+    # Freeholder Rifle, for the same reason.
     "long_scope": {
         "display": "Long Scope", "slot": "optic", "mount": True, "parts": [], "replaces": True,
         "effects": {"aim_spread": 0.5, "hip_spread": 1.25}, "model": "long_scope", "texture": "long_scope",
-        "not_on": ["holler_pistol"],
+        "not_on": ["holler_pistol", "freeholder_rifle"],
         "zoom": 0.3, "view": {"reticle": "long_scope_reticle2", "vignette": "scope_vignette"},
         "tooltip": "A long blackened-steel scope: a far closer view down the sights, clumsy from the hip.",
     },
@@ -3053,6 +3142,8 @@ ZOOM = {
     "holler_pistol": 0.88, "minuet_pistol": 0.9, "half_crown_revolver": 0.9,
     # Slice 14B: three carbines.
     "holler_carbine": 0.85, "minuet_carbine": 0.88, "grange_carbine": 0.85,
+    # Slice 14C: an automatic rifle, an automatic shotgun and a rifle.
+    "sprocket_gun": 0.85, "navvy_shotgun": 0.9, "freeholder_rifle": 0.8,
 }
 
 
@@ -3290,6 +3381,11 @@ SHOT_SOUNDS = {
     "holler_carbine": "item/brass_pistol/fire.ogg",
     "minuet_carbine": "item/iron_pistol/fire.ogg",
     "grange_carbine": "item/old_rifle/fire.ogg",
+    # Slice 14C: the scorched rifle shot (the Garrison Rifle's), the combat shotgun shot (the Breacher's) and the
+    # scorched sniper shot (the Picket Rifle's).
+    "sprocket_gun": "item/scorched_rifle/fire.ogg",
+    "navvy_shotgun": "item/combat_shotgun/fire.ogg",
+    "freeholder_rifle": "item/scorched_sniper/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
