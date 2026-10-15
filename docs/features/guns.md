@@ -5163,12 +5163,23 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' grids matches another. (This branch still carries the Highwayman's old grid, which matches the Garrison Rifle's mirrored; https://github.com/jimbozoomer-byte/jugcraft/pull/377 fixes that on `main`.)
-- **Slice 14B game tests (not run yet; CI runs them):**
+- **Slice 14B game tests (all passed in CI, below):**
   - `BrassCarbinesGameTests`:
     - `brassCarbinesAreRegistered`: each is registered with its numbers, its recipe loads, and it is one pull a shot, firing bullets from a magazine, held in both hands. Each conversion fires its pistol's rounds, as many a magazine, reaches further and strays less aimed; the Holler Carbine fires quicker than the Holler Pistol and hits less hard, and the Minuet Carbine hits harder than the Minuet Pistol. The Holler Carbine takes nothing; the Minuet Carbine takes the stocks and the four sights; the Grange Carbine fires rifle rounds, twelve a magazine, and takes all nineteen attachments the owner made for it.
     - `grangeCarbineChangesItsMagazine`: an empty Grange Carbine with twenty Rifle Rounds loads nothing before its reload's time and twelve after it, leaving eight; a shot then takes its damage from the pig.
     - `minuetCarbineLoadsLightRounds`: an empty Minuet Carbine with ten Light Rounds and ten Rifle Rounds loads the Light Rounds and leaves the Rifle Rounds; a shot then takes its damage from the pig.
   - `GunsGameTests` counts 81 guns; `TacticalAttachmentsGameTests` the thirty guns the Tactical Grip fits, the Grange Carbine among them.
+- **Slice 14B in CI** ([run 38657383418](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38657383418), on d0001d964): every check passed, on its first run.
+  - **Server game tests:** 1660 in the `mod` job, all passed, `BrassCarbinesGameTests` and `TacticalAttachmentsGameTests` among them.
+  - **The job without the optional integrations** and **the repository check:** passed.
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` took each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments, and its checks passed for each.
+  - **Screenshots** (from the last 2,500 lines of the guns shard's log; the whole log was too large to read here):
+    - **Held:** each at the lower right pointing at the husk, in both hands.
+    - **Aimed:** each raised to the middle of the view, its sight on the crosshair at the husk.
+    - **Reloading:** the Holler Carbine is turned up and its left arm comes across the lower left as it draws the magazine, the owner's animation's reach, as the Holler Pistol's; the Minuet and Grange Carbines are rolled over at the lower right.
+    - **Inspection:** each turned to be looked over at the right.
+    - **Attachments:** the Minuet Carbine's stocks and Laser Sight and the Grange Carbine's stocks and sights sit where they should. (The Holler Carbine takes none.)
+    - **Third person:** each raised and flashing as it fires.
 - **Slice 14C, run locally (15 October 2026):**
   - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged (the Long Scope's `"not_on"` now names the Freeholder Rifle too). Its first run stopped on the Freeholder Rifle: its own texture is a whole 128 px atlas, and the four sights' pieces did not fit beside it; without the Long Scope's they do. `--check` passed after the last run.
   - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
