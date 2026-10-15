@@ -74,7 +74,7 @@ There are no new dependencies. All art is drawn by this repository's scripts: no
 
 Fork CI run 38774406665 on `1ee5f7a6`: the mod build, generated-data and material checks, all server game tests (these three included), the server tests without optional integrations, and all five client shards passed. Client shard 3, which holds none of these tests, hit the 60-minute job limit on the first attempt and passed on its one re-run.
 
-The tool icons use the shared material-set maps for now. The contributor asked for vanilla-looking tools; that waits on hand-drawn base tools from them or the owner, which every metal's tools would then be recoloured from.
+**Tool shapes.** At the contributor's request, the shared sword, pickaxe, axe and hoe maps (`tools/material_icons/<tool>.txt`) are redrawn fresh in vanilla's layout (rule 9 of [ITEM_ICONS.md](../ITEM_ICONS.md): the crossguard sword, the arched pickaxe, the flat-backed axe and the hooked hoe; no Mojang texture opened or recoloured). They are the base for every metal's basic tools: bronze, steel, thallite and titanium. The shovel keeps its map; paxels are unchanged. The contributor approved these four shapes from a preview.
 
 **Not yet done:** a survival playtest and a two-client test.
 
