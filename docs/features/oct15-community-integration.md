@@ -1,6 +1,6 @@
 # October 15 community integration
 
-Status: prepared locally on `integrate/ready-prs-oct15`; publishing and combined CI are pending. Do not treat this batch as shipped until its integration PR is merged.
+Status: prepared locally on `integrate/ready-prs-oct15`; local validation passed; publishing and combined CI are pending. Do not treat this batch as shipped until its integration PR is merged.
 
 Owner request: merge all ready open PRs and repair blockers. Integration and fixes by OpenAI Codex (GPT-6). Base: `40381834a75312b8cb8a9b326d32c671f2f20a8e`, which includes the separately reviewed and merged PR #357. The seven uncommitted local technology packages are outside this batch.
 
@@ -50,9 +50,12 @@ The KV-1/W walker PR (#371) supplies models, textures and animation clips only. 
 - Locked dependency/platform check: passed (18 libraries).
 - World Designer Node tests: 11 passed. The initial sandbox attempt could not spawn a worker; the authorized retry passed.
 - Generated resources refreshed and audited: passed, 2,719 material IDs. Preserved 17 pixel-identical PNGs and the pre-existing Linux floating-point model output; language regeneration changes ordering only.
-- Python unit tests: passed (see local validation log for count).
+- Python unit tests: 43 passed.
 - Common, client and game-test compilation: passed. Full offline Gradle build: passed, all 1,734 required server game tests.
-- Optional-integrations-absent build and repaired Alpha Werewolf rendered client test: in progress. Combined GitHub CI is still pending.
+- Optional-integrations-absent offline build: passed, all 1,734 required server game tests.
+- Repaired Alpha Werewolf rendered client test: passed the full fight, loot and fresh-instance reset (`runClientGameTest -PclientTests=AlphaWerewolfClientGameTests`), on the runtime source of `ae1adb4fe`.
+- Combined GitHub CI, including the remaining rendered client classes, is still pending. No local CLI or SSH GitHub login was available to push the candidate.
+- All local Gradle commands used the repository pins, JDK 25.0.4.1, the existing dependency cache and `--offline --no-daemon`; the full builds and targeted client run used `-Pkotlin.compiler.execution.strategy=in-process` to avoid sandbox-restricted Kotlin daemon state.
 - No manual playtest, two-player dedicated-server session, or performance approval is claimed.
 
 ## Drafts excluded
