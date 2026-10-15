@@ -67,7 +67,7 @@ by 2), however many circles the world holds. An anchor that is unloaded and load
 | Conclave projects | world (`jugcraft:conclave`) | versioned, project by project | kept as written; a project no longer defined is set aside when its owner begins another |
 | Courier ledger | world (`jugcraft:courier_ledger`) | versioned, whole | read as written or not at all (its parts refer to one another) |
 | Knowledge, Focus, stage, milestones, standing, attunement, offerings, dream, dreams, curses, wards, Prima ledger | player or creature attachments | versioned | knowledge keeps unknown entries; an unknown stage is recomputed; an unknown curse lifts |
-| Block entities (pylon, sconce, crucible, anchor, heart, shrine, observatory, garden devices, bench, lectern, post, spirit anchor) | chunk | stamped `version`, every field defaulted | a ritual run that cannot be read is reset to idle; since Concordance Chunk C (C-01), a crucible's formula that cannot be read is kept as written under `program`, saved back and reported, never followed |
+| Block entities (pylon, sconce, crucible, anchor, heart, shrine, observatory, garden devices, bench, lectern, post, spirit anchor) | chunk | stamped `version`, every field defaulted | a ritual run that cannot be read is reset to idle; since Concordance Chunk C (C-01), a crucible's formula that cannot be read is kept as written under `program`, saved back and reported, never followed. Since Chunk C, unit 3 (not merged): the Crucible Stand saves `energy` and `setting` (an unknown setting reads as off); the crucible's optional `formula_owner` and `request` read with defaults, so an older crucible asks no courier until its formula is set again |
 | Workers (porter, shade, Hearthling) | chunk | stamped `version`, every field defaulted | a worker whose definition is gone says it is disabled |
 | Item components (Radiance, notes, inscription, tunings, brew, relic, artifice, reagent, link, route, and so on) | item stacks | unchanged | most fields optional. A changed shape gets a new component id, since an envelope would change every stack, command and recipe that names one |
 
@@ -82,7 +82,10 @@ Simulation pauses; nothing models what an unloaded place would have done:
 - a ritual whose circle is partly unloaded stops as unloaded;
 - a cursed creature that unloads leaves the curse index and returns when it loads;
 - a dream's wisps gather only where creatures are live;
-- a Preserve hold runs on the world clock: a crucible unloaded while held finds its minute over when it loads.
+- a Preserve hold runs on the world clock: a crucible unloaded while held finds its minute over when it loads;
+- a Crucible Stand and its crucible stop together; a courier carrying for an unloaded crucible waits with the cargo
+  aboard (`DESTINATION_UNLOADED`, its lease renewed), and the crucible's request counts against its setter's quota
+  until it is delivered or cancelled (Concordance Chunk C, C-06; not merged).
 
 No Concordance code forces, tickets or synchronously loads a chunk.
 

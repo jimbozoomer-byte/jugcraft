@@ -5,9 +5,11 @@ Status: contract written; unit 1 (C-01 and C-02) built, in four commits on this 
 (`d593ae61d`; see the Fixes from the unit review under C-02), and after it the Rime and Strata client tests' fix
 (`0b1039312`: one research learned a tick). Unit 2 (C-03 and C-04) built on `807da7f5e`, in two commits (`a0e73881c`,
 `2c98d6d68`) and a third for its records (`4df687cc7`), then merged with `d593ae61d` and `0b1039312` in a fourth
-(`2263f851b`), and a fifth with the unit review's fixes (see the Fixes from the unit review under C-04). Every local
-check passes; none of their game code has been compiled against Minecraft and none of their game tests has run (no CI
-run yet; see the As built notes of C-01 to C-04). Units 3 to 5 not started. Chunk C is developed on branch
+(`2263f851b`), and a fifth with the unit review's fixes (`23f28b90e`; see the Fixes from the unit review under C-04).
+Unit 3 (C-05 and C-06) built on `23f28b90e`, in three commits (`940f1f8a8`, `7b2dd6783`, `46f6e2a0e`) and a fourth for
+its records. Every local check passes; none of their game code has been compiled against Minecraft and none of their
+game tests has run (no CI run yet; see the As built notes of C-01 to C-06). Units 4 and 5 are not built on this branch
+yet. Chunk C is developed on branch
 `claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in;
 CI run 38617471274 on that base passed every job (see The merge and its CI run). Not merged; no pull request. Chunk B,
 beneath it, is not merged and has no pull request either.
@@ -94,7 +96,7 @@ path before multiplying content variants"; MP:66).
 |---|---|---|---|---|
 | 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records `807da7f5e`; review fixes `d593ae61d`): local checks pass; not compiled, no game test run, no CI run yet |
 | 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Built (`a0e73881c`, `2c98d6d68`; records `4df687cc7`; merged with unit 1's fixes `2263f851b`; review fixes in the next commit): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; not compiled against Minecraft, no game test run, no CI run yet |
-| 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Not started |
+| 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Built (`940f1f8a8`, `7b2dd6783`, `46f6e2a0e`; records in a fourth commit, "Concordance Chunk C, unit 3: records"): checks run and passed: `owner_art --check`, `check_mod_data`, `check_repository`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; its 53 audit mutations each reported; not compiled against Minecraft, no game test run, CI not run |
 | 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Not started |
 | 5 | C-10 | The measured small-workshop load, the end-to-end journey, client evidence, combined fixes, the checkpoint and the handoff | this page | Not started |
 
@@ -981,6 +983,65 @@ block entity). An older build drops the unknown block.
 
 **Review boundary:** one block, the heat hook, the economy row, its art and tests.
 
+**As built (unit 3: commits `940f1f8a8`, the art, and `7b2dd6783`; record [crucible-stand.md](crucible-stand.md)).**
+- **Built:**
+  - `CrucibleStandBlock` (`LIT`; a ticker on the server only; `useWithoutItem` for an empty hand, `useItemOn` passing
+    anything held to the item) and `CrucibleStandBlockEntity` (`energy`, a `SimpleEnergyStorage` of 640 JE taking at
+    most 64 a tick, extracting none, its `insert` closed with the switch off; `setting`; `given`; `plan`, `heat`,
+    `useEmpty`, `statusLine`; the record `Plan`), registered in `JugcraftConcordance` as `CRUCIBLE_STAND` and
+    `CRUCIBLE_STAND_ENTITY`, with `EnergyStorage.SIDED` null for `UP`;
+  - `Heat`: `STAND_WARM`, `STAND_HOT`, `STAND_SEARING` (65, 120, 175), `standTarget`, `waitsForHeat`, `standBand`, and a
+    third component of `Heat.Below`, the heat a stand paid for; `CrucibleBlockEntity.below` (the ticket's `heatBelow`,
+    renamed by unit 1) asks a stand beneath for `given()`: one block-entity read, no scan;
+  - the diagnostic code `no_crucible`, appended after unit 2's codes; "too little JE" is `unavailable_power` with three
+    lines (C-P49);
+  - Jade: `ConcordanceDataProvider.STAND` and `standSnapshot` (read-only; `energy`, `capacity`, `following`, `aim`,
+    `target`, `draw`, `reason`, `waits`, or `disabled`), the client's own `StandTooltip`;
+  - generated from `tools/concordance_alchemy.py`: `STAND_TARGETS`, `STAND_JE`, `STAND_CAPACITY`, `STAND_INTAKE`,
+    `STAND_SET_TICKS`, `STAND_PORTS`, the two models (sockets through `with_model_sockets`), the blockstate, item, loot,
+    recipe, lang, the mineable tag and the codex entry `alembic/crucible_stand`; `OWNER_BLOCKS_FILES` for the art,
+    copied by `tools/owner_art.py`, whose `block_asset_imports` now merges every slice's Blocks-folder table;
+  - `tools/concordance_economy.py`: the resource `crucible_heat`, the conversion `je_to_heat` and its anchors,
+    `STAND_JE` and the installation row (768,000 JE a day searing); the economy record's table pasted from the tool;
+  - unit 2's foundation: its tooltip and codex page now name the stand (`tools/concordance_rituals.py`);
+  - audits: `check_crucible_stand` (new), the stand's constants and recipe in `check_alchemy`, its route in
+    `AUTHORITY_ROUTES`, the heat sink in `check_economy`.
+- **Departures from the ticket,** each a proposal below or a review correction:
+  - no `EnergyConnectable` marker: a cable meets the stand only on a face that takes JE, never its seat (C-P44);
+  - it pays only while the crucible is no hotter than the band's target (C-P43); a `HELD` reason counts as a wait for
+    heat (`Heat.waitsForHeat`) and the hold itself is judged from the crucible's clock, so a hold that has ended never
+    idles the stand;
+  - the recipe also needs the `machines` and `thallite` switches (C-P47; the spec had `machines` only, and its review
+    added `thallite`, which Root and Rivet's plate needs);
+  - only an empty hand sets or reads it; anything held is used as itself, so a crucible is placed on it by a plain use
+    (`useItemOn`; the review's correction: the default use would have cycled the setting for any item held);
+  - the art is the owner's (C-P48): treated iron plates and block and the copper coil seen from its side, byte copies,
+    rather than a code-drawn coil, so `tools/concordance_alchemy_art.py` and `tools/generate_textures.py` are not
+    touched. The owner's end-on coil is not imported: in this model the coil's top lies under the deck and its bottom on
+    the cladding, so it would never show (the review's correction);
+  - Jade's stand snapshot names its band `aim`, since the crucible's client branch matches the first `band` key, and
+    its lines are their own enum;
+  - the cable check is `ConcordanceAlchemyGameTests.aCableMeetsTheStandWhereItTakesPower`, not a new
+    `MachineConnectionGameTests` case; the six cables are placed first, then the stand (the order does not matter:
+    a cable's placement schedules the tick that resolves its arms);
+  - in `theFullChainRunsFromAPumpAndACable` the spring stands on stone, so its water does not spread into neighbouring
+    tests (the review's correction).
+- **Tests (none run):**
+  - 8 new `ConcordanceAlchemyGameTests` (41 in all): `aStandFollowsTheFormulasBands`,
+    `anUnpoweredStandLetsTheCrucibleCool`, `aStandIdlesForAWaitingOrIncompatibleFormula`,
+    `aStandIsSetOnlyByThoseWhoMayChangeIt`, `theFullChainRunsFromAPumpAndACable`, `aCampfireCrucibleStillWorks`,
+    `aSwitchedOffConcordanceStandDrawsNothing`, `aCableMeetsTheStandWhereItTakesPower`; and
+    `anIncompatibleFormulaAsksForNothing` extended (no heat from a stand beneath);
+  - `ConcordanceEconomyGameTests.aStandTurnsElectricityIntoHeatOnly` (3 in all);
+  - `ConcordancePersistenceGameTests.theCrucibleStandKeepsItsEnergyAndSettingThroughASave`, and the stand in
+    `blockEntitiesStampTheirVersion`;
+  - the client test `EncyclopediaClientGameTests.crucibleStandWorkshop`, with shots
+    `jugcraft_concordance_crucible_stand_workshop` and `jugcraft_concordance_crucible_stand_jade` (when Jade is loaded).
+- **Commands** (for the records, on the whole unit): see C-06's. The spec's C-05 audit mutations, in place with every
+  file restored after each: its 22 in 33 variants and the review's two (the `useItemOn` override deleted, the
+  `thallite` condition dropped), 35 in all, each reported. Dropping `jade.stand_waits` from the generator's table alone
+  is reported only once the generator rewrites the lang.
+
 ### C-06. One shared job: keep this crucible's formula supplied (unit 3; C-D4)
 
 **What the player sees.** A crucible running a formula that waits for an ingredient asks the nearest Courier Post its
@@ -1044,6 +1105,72 @@ stays 1.
 
 **Review boundary:** crucible demand and filing, the shared post helper, the port edit and tests. No edit to
 `PeepoEntity`, `CompanionHusbandry` or the other files #357 and #369 change.
+
+**As built (unit 3: commit `46f6e2a0e`; records [arcane-concordance-logistics.md](arcane-concordance-logistics.md) and
+[companion-farm-stand-crucible.md](companion-farm-stand-crucible.md)).**
+- **Built:**
+  - the shared helper `Couriers.nearestPost(level, from, user, reach)` and `Couriers.FILING_REACH` (16), extracted from
+    `ConcordSpire` (whose copy is gone; `restock` calls the helper), the reach capped at `FILING_REACH`;
+  - in `CrucibleBlockEntity`: the record `Shortage`, `shortage()`, `courierRemainder`, `sample`, `backoffAfter`, the
+    private `supply`, `reconcile`, `turnBack` and `forgetRequest`; `automate` turns a refused formula's request back,
+    reconciles every pulse and asks on an ingredient wait; `follow(Formula, UUID)` beside `follow(Formula)` (no setter;
+    tests and operators); the formula item records its user as the setter; `useEmpty` turns the request back before it
+    clears; a `preRemoveSideEffects` override calls `CourierLedger.destinationGone` and then the container drop;
+    optional keys `formula_owner` and `request`, the stamp still 1; accessors `formulaOwner()` and `request()`;
+  - `Diagnostic.courierQuota(count, what, seconds)`, and `courier_quota`'s words with those parameters;
+  - the Peepo port (`CrucibleCompanion`): its private shortage deleted; `needed` is the crucible's shortage less
+    `courierRemainder`; `COURIER_QUOTA` reads `NO_INPUT`;
+  - `tools/concordance_logistics.py`: `FILING_REACH`, `CRUCIBLE_BACKOFF`, `CRUCIBLE_MAX_BACKOFF`; the notes `full` and
+    `destination_gone` reworded ("where it was going is full", "... was broken"); the Couriers entry's fourth page, "A
+    Crucible's Own Requests";
+  - audits: `check_crucible_supply` (new), `FILING_REACH` in `check_logistics`, `Authority.answering` in the crucible's
+    `AUTHORITY_ROUTES`.
+- **Departures from the ticket and the spec,** each a proposal below or a review correction:
+  - the Peepo port subtracts the remainder only while a courier holds the request: its claim's lease live and the
+    request not being taken back (C-P50, refining C-P13). Checking the lease, not only that a worker is named, keeps a
+    porter unloaded or killed with its claim from stalling the Peepo (the review's correction);
+  - every pulse reconciles the request (C-P51). As built it also forgets a request not bound for this crucible or not
+    its setter's, and one being taken back; it turns back one with nothing carried that no longer matches what is
+    lacked first, asks for more than is lacked, or whose post is gone or barred to its setter (the post's chunk loaded);
+  - filing needs the setter answering (`Authority.answering`: online, or the server's absent-owner option), so a party
+    member's crucibles cannot file for someone away and stall a shared post's queue, where a porter serves the oldest
+    request first (C-P53; the spec had filing without the setter online, and its review changed it);
+  - `turnBack` cancels as the request's own requester, the only one `Logistics.cancel` accepts;
+  - a crucible files the whole shortage; it is at most 32 (a formula's operations), inside the ledger's 256;
+  - the note `full` is reworded as well as `destination_gone` (the review's correction);
+  - neither `unloaded_target` nor `unavailable_worker` is raised: the porter's `Status` and the Peepo's
+    `CompanionStatus` already say so at their own edges, so their parameters stay unfixed (`Code`'s comments say so);
+  - `aCrucibleAsksOnceForItsExactShortage` saves and loads the ledger by its codec mid-delivery (the contract's
+    "codec round trip"; the review's correction);
+  - the Peepo unload check keeps the companion walking on its own the whole time, fenced in with barriers where its
+    chunk is forced, rather than frozen, so its own transport meets the unloaded crucible (the review's correction); and
+    the Peepo group is named `noOverSupplyWithAnOpenCourierRequest`, as the ticket's test list names it.
+- **Tests (none run):**
+  - 9 new `ConcordanceLogisticsGameTests` (14 in all): `aCrucibleAsksOnceForItsExactShortage`,
+    `aClearedOrReplacedFormulaCancelsItsRequest`, `aFullCourierQuotaWaitsAndBacksOff`,
+    `aBrokenCrucibleTurnsItsRequestBack`, `aCourierFillsACrucibleUntilItIsFull`, `aPostTheSetterMayNotUseIsNeverAsked`,
+    `anUnloadedCrucibleWaitsAndLosesNothing`, `aDiscardedPorterStrandsItsCargoOnce`, `anOfflineSetterPausesTheCourier`;
+    each audits `problems()` and counts every item, in containers and carried, after every step; every test post has
+    an owner;
+  - `ConcordancePersistenceGameTests.theCrucibleKeepsItsRequestThroughASave` (9 in all, with C-05's);
+  - `ConcordanceAlchemyGameTests.anIncompatibleFormulaAsksForNothing` extended (a refused formula turns its request
+    back and files no other; restored, it asks again; broken, the request goes);
+  - Peepo, client: `PeepoIntegrationClientTests` groups "crucible demand: the exact shortage, nothing for an
+    incompatible formula" and "crucible demand: noOverSupplyWithAnOpenCourierRequest"; `CompanionAutomationChecks`
+    groups "a full crucible leaves the companion's cargo with it" and "an unloaded crucible: the job says UNLOADED and
+    keeps its cargo";
+  - to re-run: `ConcordanceSpireGameTests.theHeartAsksACourierForItsUpkeep` (the extracted helper) and the five
+    existing logistics tests.
+- **Commands** for the unit, run for its records on the tree with all four commits, and passed:
+  `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+  `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
+  `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
+  `git diff --check`. The audit mutations, in place with every file restored after each, against `check_mod_data`'s
+  Concordance checks and `owner_art.errors()`: C-06's 15 from the spec and three more (`Authority.answering` dropped,
+  the lease check dropped, a turn-back cancelling as the formula's owner), each reported; with C-05's 35, all 53. The
+  tree was unchanged afterwards (`git status` clean). `python3 tools/select_client_tests.py --base 23f28b90e` chose
+  every client class (171), since `CompanionAutomationChecks` is a shared file. Not run: `./gradlew build` (with or
+  without the optional integrations), `./gradlew runClientGameTest` and CI.
 
 ### C-07. Habitat made visible (unit 4)
 
@@ -1273,6 +1400,29 @@ niche helper and tests.
   `tools/concordance_strata.py`; the `thallite` material in `tools/icon_materials.py`.
 - **No new saved key or payload:** the ending lives in memory; Jade's anchor snapshot carries more values.
 
+**As built in unit 3:**
+- **The stand (C-05):** `CrucibleStandBlock` (`LIT`, `useItemOn`, `useWithoutItem`) and `CrucibleStandBlockEntity`
+  (`energy`, `setting`, `given`, `plan`, `heat`, `useEmpty`, `statusLine`, `rate`, the record `Plan`; `JE_WARM`,
+  `JE_HOT`, `JE_SEARING`, `CAPACITY`, `INTAKE`, `SET_TICKS`); `JugcraftConcordance.CRUCIBLE_STAND` and
+  `CRUCIBLE_STAND_ENTITY`.
+- **Pure alchemy:** `Heat.STAND_WARM`, `STAND_HOT`, `STAND_SEARING`, `standTarget`, `waitsForHeat` and `standBand`;
+  `Heat.Below` gains a third component, `heat` (its two-argument constructor keeps the old behaviour).
+- **The crucible (C-05, C-06):** `below` asks a stand beneath; `Shortage`, `shortage`, `courierRemainder`, `sample`,
+  `backoffAfter`, `follow(Formula, UUID)`, `formulaOwner`, `request`, `preRemoveSideEffects`; the constants
+  `FORMULA_OWNER`, `REQUEST`, `POST_REACH`, `FILING_BACKOFF` and `MAX_FILING_BACKOFF`.
+- **Couriers:** `Couriers.nearestPost(ServerLevel, BlockPos, UUID, int)` and `FILING_REACH`; `ConcordSpire`'s own
+  `nearestPost` removed.
+- **Diagnostics:** `Code.NO_CRUCIBLE` (appended); `Diagnostic.courierQuota`; `courier_quota`'s parameters fixed.
+- **Peepo:** `CrucibleCompanion`'s private `shortage()` removed; `needed` and `status` read the crucible's.
+- **Jade:** `ConcordanceDataProvider.STAND` and `standSnapshot`; the client's `StandTooltip`.
+- **Tools:** `tools/concordance_alchemy.py` (`OWNER_BLOCKS_FILES`, `STAND_*`, `stand_model`), `tools/owner_art.py`
+  (`block_asset_imports` merges every slice's table), `tools/concordance_economy.py` (`crucible_heat`, `je_to_heat`,
+  `STAND_JE`), `tools/concordance_logistics.py` (`FILING_REACH`, `CRUCIBLE_BACKOFF`, `CRUCIBLE_MAX_BACKOFF`, two notes,
+  the fourth codex page), `tools/concordance_diagnostics.py`, `tools/concordance_rituals.py` (the foundation's words);
+  `check_crucible_stand` and `check_crucible_supply`.
+- **Saved data:** the stand's `energy` and `setting` (stamp 1); the crucible's optional `formula_owner` and `request`
+  (its stamp still 1). No new payload; Jade's stand snapshot is new.
+
 ## Dependencies and order
 
 1. C-00: done (the merge, its CI, this page).
@@ -1347,8 +1497,8 @@ after the first path (09:16).
   - the one interruption line is long and may be clipped on a narrow action bar; no test reads the action bar;
   - the ending is lost on a reload (C-P37), and `TAMPERED`'s line under-counts its last draw;
   - an operator's command reads any loaded circle, so it can mark one from afar; the marks are signs only;
-  - the foundation has no consumer until unit 3 (against 09:124's "no decorative recipes"), and its icon is a draft
-    whose roots may read as legs;
+  - the foundation had no consumer until unit 3 (against 09:124's "no decorative recipes"; since unit 3, the Crucible
+    Stand's recipe), and its icon is a draft whose roots may read as legs;
   - the codex's first `entry://` link was checked against Modonomicon's source by the design, never clicked; the audit
     stops a link to a missing entry, page id or page number, not a wrong link format;
   - widening `VANILLA_TAGS` with `c:ingots/thallite` also lets the "Overworld things" recipe rules accept thallite
@@ -1364,8 +1514,37 @@ after the first path (09:16).
   - with the `machines` or `thallite` switch off the plate's recipe is gone, and Root and Rivet's codex entry still has
     its recipe page. In Modonomicon 2.16.0's source `BookRecipePage` then logs "Recipe … not found" and shows a barrier
     in the recipe's place without blocking the book; not seen in a client.
-- **Unverified:** the null-side Fabric item insert (inferred from a passing post test *(survey)*); vanilla's container
-  drop when a crucible overrides `preRemoveSideEffects` (the mirror has no `BlockEntity`; the Spire drops explicitly);
+- **Unit 3, not yet seen in a game:**
+  - the stand and the crucible tick in no fixed order, so the crucible heats on the stand's last decision, at most a
+    tick late; the JE paid stays exactly the rate times the ticks paid, and the tests read its light in retried
+    assertions;
+  - the crucible's reason can be up to 20 ticks old, so after a refill a stand may idle up to 20 ticks more; a stand fed
+    below its rate flickers its light (a client update each change, nothing more);
+  - whether the coil drawn full-bright reads as lit in daylight, whether the owner's treated iron reads as the
+    silver-grey cladding, and whether a one-block stand suits "real-life-sized stations" are for the owner's review;
+  - with no `EnergyConnectable`, a worldgen structure could not pre-connect cables to a stand (none places one);
+  - with `machines` or `thallite` off, the stand's recipe does not load and its codex recipe page shows it missing
+    (Modonomicon's behaviour as read for unit 2, not seen);
+  - the model's `light_emission` key and automatic UVs follow the shipped charged Ley Pylon's model; 26.3's model
+    loader was not read for them;
+  - the courier ledger, its ids and `problems()` are world-wide, and an ownerless post serves anyone: every new test
+    post has an owner, test structures stand a few blocks apart, and each synchronous test body is assumed not to
+    interleave with another test's ticks;
+  - over-supply stays possible through stranded cargo taken up later (bounded; nothing is lost), and two WANT signs
+    show when a quota wait begins and when it ends;
+  - a request outlives an unloaded crucible and counts against its setter's 16 until delivered or cancelled; delivery
+    does not ask `Authority` at the crucible (C-P53);
+  - the Peepo unload check depends on vanilla's chunk tickets and unload delay (1,200 ticks allowed) and on the
+    companion's transport retrying while fenced in; the full-crucible check on the companion handing back unused
+    cargo; both read in the code, not run;
+  - the unit's hot shared files: lang, `check_mod_data.py`, `CHANGELOG.md`, `tools/owner_art.py` (#351, #354),
+    `docs/WHAT_EXISTS.md` (#366), `docs/INTEGRATION_STATUS.md` (#361 to #365); the open pull requests' file lists read
+    for C-06 include none of the three Peepo files it edits (`CrucibleCompanion`, `PeepoIntegrationClientTests`,
+    `CompanionAutomationChecks`).
+- **Unverified:** the null-side Fabric item insert (inferred from a passing post test *(survey)*; the C-06 design read
+  Fabric API 0.161.0's source: a `Container` falls back to its plain slots, each asking `canPlaceItem`; not re-read for
+  these notes); vanilla's container drop when a crucible overrides `preRemoveSideEffects` (confirmed for unit 3 in the
+  mirror's `HEAD`, `BlockEntity.java:262-270`: it drops a `Container`'s contents);
   whether Jade's accessor gives the viewing player; bees and `#minecraft:supports_crops` on these crops; Fabric's load
   conditions on Concordance data; whether the client tests' dedicated server runs in the client's process.
 
@@ -1460,8 +1639,8 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P9 | 14 October 2026 | The Kiln Draught is a draught carrying Fire Resistance and nothing harmful; its dossier fact is text and icons in the Cinder Kiln's rite section with a codex link at the Alembic Arts observed and the Salamander Charm as the lasting answer (the Charm alone when the Concordance is off or Ember no longer brews Fire Resistance); the Tyrant Scale → magma cream edge (C-D1's audit) is recorded as a reward route, not a loop: the draught makes no Kiln Seal or scale, and magma cream has vanilla sources. As built in unit 1, with C-P31 (his flame) and C-P32 (the Grave Dust route) | Proposed | C-02 |
 | C-P10 | 14 October 2026 | A run-level Ley shortfall warns and does not refuse; the start rule (one step's Ley) is unchanged; signs mark faults on the empty-hand, chat and refusal paths only. As built in unit 2: the warning names the step the run would break off at (since the unit review, "unless it is refilled meanwhile": a pylon on JE gains more a step than any rite draws); `check_rituals` holds the one-step start; how signs mark is C-P35 | Proposed | C-03 |
 | C-P11 | 14 October 2026 | Root and Rivet is taught by Circle Lore understood; offerings a Thallite plate, 4 copper ingots, 4 Mendvetch; 1 participant, 6 Focus, 4 steps of 2 Ley a pylon, any light, backlash 4 (starting values). As built in unit 2, with these numbers; the foundation it makes is C-P40 | Proposed | C-04 |
-| C-P12 | 14 October 2026 | The stand: targets warm 65, hot 120, searing 175 (starting values) at C-D3's rates; it follows the next stir's band only while the formula can proceed and idles otherwise; a Preserve hold wins; with no formula an empty-hand use by someone who may change it cycles its setting; crafted from the foundation, iron and copper; no wear | Proposed | C-05 |
-| C-P13 | 14 October 2026 | Crucible filing: the requester is the formula's setter; one open request; filed on entering the ingredient wait, with backoff after no post or `TOO_MANY` (200 ticks doubling to 1200, starting values); cancelled when the formula is cleared, replaced, set by another or incompatible; the Peepo port subtracts the open remainder | Proposed | C-06 |
+| C-P12 | 14 October 2026 | The stand: targets warm 65, hot 120, searing 175 (starting values) at C-D3's rates; it follows the next stir's band only while the formula can proceed and idles otherwise; a Preserve hold wins; with no formula an empty-hand use by someone who may change it cycles its setting; crafted from the foundation, iron and copper; no wear. As built in unit 3, with these targets and rates: it pays only for heat a stir can take (C-P43), on five faces (C-P44), from its own store (C-P45); the setting is C-P46 and the recipe C-P47 | Proposed | C-05 |
+| C-P13 | 14 October 2026 | Crucible filing: the requester is the formula's setter; one open request; filed on entering the ingredient wait, with backoff after no post or `TOO_MANY` (200 ticks doubling to 1200, starting values); cancelled when the formula is cleared, replaced, set by another or incompatible; the Peepo port subtracts the open remainder. As built in unit 3, with these values: filed on an ingredient wait while no request is open and no backoff runs (once a wait, as filing on entry would); also turned back when no longer what it lacks (C-P51); the remainder counted only while a courier holds the request (C-P50); the quota's words and the backoff's reset are C-P52, who files and when C-P53 | Proposed | C-06 |
 | C-P14 | 14 October 2026 | Light is shown as sky and lamps; niches are unchanged | Proposed | C-07 |
 | C-P15 | 14 October 2026 | The canteen waters Verdant Beds and the compost JEI page is wired, rather than deleting their claims | Proposed | C-07 |
 | C-P16 | 14 October 2026 | The mixed bed: Dewmoss and Gloamcap, +25% pace each way within the 5×5 (a starting value); no Mendvetch pairing, no fixer beneficiary; named "mixed bed" | Proposed | C-08 |
@@ -1491,11 +1670,22 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P40 | 14 October 2026 | The Rooted Thallite Foundation is a plain described item in the Ingredients tab. The Assayer's Scale never weighs it, nothing turns it back, and the economy models it as a sink of 32 Ley Charge and 6 Focus a run. Its icon is drawn fresh, because nothing in the owner's library fitted, and awaits the owner's review | Proposed | C-04, C-05 |
 | C-P41 | 14 October 2026 | A rite's offerings may need feature switches beside the Concordance's. The generator states them (`"switches"`) and `check_rituals` holds that statement to the recipes, one step down, an offering that is a tag through its members (since the unit review, a machine recipe's `{"ingredient", "count"}` entries followed too, and a condition with `"or"` alternatives counted as needing none of its switches alone). Concordance data carries no load condition. Any recipe that makes an offering counts as its way to make it | Proposed | C-04 |
 | C-P42 | 14 October 2026 | The codex's first `entry://` link (Stratawrighting's Understood page to Root and Rivet). Every codex link is audited to an entry on disk (since the unit review, its `@anchor` to a page id and its `#n` to a page of the entry), since a broken link stops Modonomicon opening the book (as read from its source by the C-04 design; not seen in a client) | Proposed | C-04 |
+| C-P43 | 15 October 2026 | A Crucible Stand pays its band's rate on a tick only when all of these hold: the Concordance is on; a crucible stands directly above; no Preserve hold; the crucible waits for nothing or for heat alone (`WRONG_HEAT`, or a `HELD` left by a hold now over: the hold itself is judged from the crucible's clock); there is a band; and the crucible is no hotter than the band's target. Otherwise it pays nothing, is dark, and the crucible cools by the usual rule. Refines C-P12's "only while the formula can proceed": coasting down to a cooler band costs nothing | Proposed | C-05 |
+| C-P44 | 15 October 2026 | JE goes in on five faces, never the seat (`EnergyStorage.SIDED` gives nothing for `UP`). The stand is not an `EnergyConnectable`, so a cable meets it only where it takes power (`CableBlock.connectsTo`). A departure from the ticket's "and `EnergyConnectable`": the marker matters only in worldgen, and no structure places a stand | Proposed | C-05 |
+| C-P45 | 15 October 2026 | It holds 640 JE, takes at most 64 JE a tick (the Ley Pylon's rate), never gives any back, and takes none with the Concordance switched off. The JE it holds is lost when it is broken | Proposed | C-05 |
+| C-P46 | 15 October 2026 | With no formula above, a plain empty-hand use by someone `Authority.mayChange` allows cycles off, warm, hot, searing, at most once every 10 ticks a player (`RateGate`). Sneaking only reads. While a formula is set, the formula decides and the setting is kept. As built, with the review's correction: only an empty hand sets or reads it; anything held is used as itself (a crucible placed on it) | Proposed | C-05 |
+| C-P47 | 15 October 2026 | Recipe `ICI / ICI / IFI`: 6 iron ingots, 2 copper ingots and the Rooted Thallite Foundation. It loads with the `concordance`, `machines` and `thallite` switches (the last two are what the foundation's plate needs, and `machines` is the JE) | Proposed | C-05 |
+| C-P48 | 15 October 2026 | The stand's art is the owner's, as byte copies through `tools/owner_art.py`: treated iron plates (cladding), the treated iron block (posts and deck) and the copper coil seen from its side (`coilside.png`); the end-on coil is not imported, since in this model it would never show. Jugcraft's `thallite_block` is the slab. Lit is the coil drawn full-bright (`light_emission`); no block light and no signs. Awaits the owner's visual review (09:144) | Proposed | C-05 |
+| C-P49 | 15 October 2026 | One new diagnostic code, `no_crucible` (blocked), appended after unit 2's `participants`. A stand short of a tick's JE is `unavailable_power` with three lines. Jade puts "Idle while its crucible waits:" before the crucible's own reason | Proposed | C-05 |
+| C-P50 | 15 October 2026 | Refines C-P13: the Peepo port subtracts the crucible's request's remainder (asked less delivered) only while a courier holds the request: its claim's lease live and the request not being taken back. A request nobody serves never stalls a Peepo | Proposed | C-06 |
+| C-P51 | 15 October 2026 | Each pulse reconciles the crucible's request. A closed one is forgotten (as built, also one not bound for it, not its setter's, or being taken back). One with nothing carried is turned back when its item is no longer what is lacked first, when it asks for more than is lacked, or when its post is gone or barred to its setter. Cargo already carried is always delivered | Proposed | C-06 |
+| C-P52 | 15 October 2026 | `courier_quota` takes (count, what, seconds), is blocked (one WANT sign when it begins) and reads `NO_INPUT` at the Peepo port. The backoff is 200 ticks doubling to 1,200, reset by a filing or a turn-back, never saved. Finding no post shows no courier words: a crucible without couriers is an ordinary crucible | Proposed | C-06 |
+| C-P53 | 15 October 2026 | Filing needs its setter answering (online, or the server's absent-owner option); a request already open when they leave waits at the porter, `OWNER_OFFLINE` (a known limit). The same player setting the same formula again keeps the request. A formula saved before C-06 has no setter and asks no courier until it is set again. Delivery does not ask `Authority` at the crucible (a known limit) | Proposed | C-06 |
 
 ## Where to resume
 
-Units 1 (C-01, C-02) and 2 (C-03, C-04) are built and recorded, and none of their game code has been compiled against
-Minecraft or run. Next:
+Units 1 (C-01, C-02), 2 (C-03, C-04) and 3 (C-05, C-06) are built and recorded, and none of their game code has been
+compiled against Minecraft or run. Next:
 1. refresh main and the open pull requests (#357 and #369 for the Peepo files; the hot shared files: lang,
    `check_mod_data.py`, `CHANGELOG.md`, `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and
    merge main again if it moved;
@@ -1506,13 +1696,19 @@ Minecraft or run. Next:
    `ConcordanceProgressionGameTests`, `ConcordanceGameTests` (`codexLoadsWithoutErrors`, with the new entry),
    `ConcordanceRimeStrataGameTests`, `ConcordanceSpireGameTests`, `ConcordanceEconomyGameTests`,
    `ConcordanceJourneyGameTests`, `ConcordancePersistenceGameTests`; on the client, `EncyclopediaClientGameTests` (three
-   new shots) and `EncyclopediaRoutesClientGameTests`. Record each result in the As built notes,
-   `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` and `arcane-concordance-rituals.md`;
-3. units 1 and 2's checkpoint evidence (the owner's look at the foundation's icon among it), then unit 3 (C-05, C-06):
-   the Crucible Stand's recipe consumes the foundation and needs a codex recipe page; `PRODUCERS` already routes the
-   foundation to the rite.
+   new shots) and `EncyclopediaRoutesClientGameTests`. Unit 3's: `ConcordanceAlchemyGameTests` (41),
+   `ConcordanceEconomyGameTests` (3), `ConcordanceLogisticsGameTests` (14), `ConcordancePersistenceGameTests` (9),
+   `ConcordanceSpireGameTests` (`theHeartAsksACourierForItsUpkeep`, the extracted helper),
+   `ConcordanceAuthorityGameTests`; both builds, since Jade code changed; on the client, `EncyclopediaClientGameTests`
+   (the workshop shots), `PeepoIntegrationClientTests`, `PeepoCompanionClientTests` (which runs
+   `CompanionAutomationChecks`; its weight in `tools/select_client_tests.py` may need measuring again) and every other
+   class, as `select_client_tests.py` chooses for this unit. Record each result in the As built notes,
+   `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md`, `arcane-concordance-rituals.md`,
+   `crucible-stand.md`, `arcane-concordance-logistics.md` and `arcane-concordance-economy.md`;
+3. units 1 to 3's checkpoint evidence (the owner's look at the foundation's icon and the stand's art among it), then
+   unit 4 (C-07 to C-09) and unit 5.
 
-The owner's choices are C-D0, C-D0b and C-D1 to C-D3; C-D4 and C-P1 to C-P42 are Proposed. Open for the owner's
+The owner's choices are C-D0, C-D0b and C-D1 to C-D3; C-D4 and C-P1 to C-P53 are Proposed. Open for the owner's
 checkpoint: the review route for Chunk B and Chunk C (above), and 09:144's three questions.
 
 ## How this contract was checked
@@ -1566,3 +1762,9 @@ checkpoint: the review route for Chunk B and Chunk C (above), and 09:144's three
   logs (the checks, the audit mutations and the client-test selection), re-read for the names, keys, counts, test names
   and lang given; the library candidates' hashes taken again from `art/owner-library` (read, nothing executed). Run for
   the records: the scratch harness (above, C-03's As built), and the checks in the rituals record's Verification.
+- Unit 3's notes (15 October 2026): written from the unit's three commits (`940f1f8a8`, `7b2dd6783`, `46f6e2a0e`) read
+  as diffs against `23f28b90e`, re-read for the names, keys, constants, test names and counts (`@GameTest` counted in
+  each class), lang and generated words given; the stand's provenance printed by
+  `python3 tools/owner_art.py --provenance alchemy`, and the rejected candidates' hashes and transparent texels taken
+  again from `art/owner-library` (read, nothing executed); the container drop read in the mirror's `HEAD`. Run for the
+  records: the checks and the 53 audit mutations in C-06's As built notes.

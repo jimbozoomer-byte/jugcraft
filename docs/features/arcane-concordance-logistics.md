@@ -2,7 +2,9 @@
 
 Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244), from branch
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
-8 October 2026); see Verification for what has run.
+8 October 2026); see Verification for what has run. Extended by Concordance Chunk C, unit 3 (C-06: an Alembic Crucible
+files its own requests, and a Peepo at its port brings only what no courier is bringing; [the chunk's
+contract](concordance-chunk-c.md)), not merged; none of its tests has run yet.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 18) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 10, Practitioner stage (Jugcraft Workshops). Roadmap step 18.
@@ -27,11 +29,26 @@ within 8 blocks of the post that holds the item, reserves what it will take ther
 and puts it in the post's nine slots, for you or a hopper below. Two couriers never reach for the same items: what one
 has reserved, another does not count. If the chest was emptied meanwhile it takes what is there and finds another.
 
-**When things go wrong.** A full post takes what fits; the rest stays in transit and the courier says the post is full.
+**When things go wrong.** A full post takes what fits; the rest stays in transit and the courier says where it was
+going is full.
 A courier broken, unloaded or lost in a restart leaves its cargo **stranded** at the post: another courier takes it up
 there, or you take it yourself (`/jugcraft concordance logistics recover <number>`). Cancel a request
 (`... cancel <number>`) and anything picked up is taken back to its chest first (or into the post if the chest has no
 room); a broken post does the same for every request bound for it. Nothing is ever dropped or deleted on the way.
+Since Concordance Chunk C (C-06), a request's notes name where it was going ("where it was going is full", "where it was
+going was broken"), since a crucible can fill or break as a post can.
+
+**Crucibles ask for themselves** (Concordance Chunk C, C-06; not merged, not run). An Alembic Crucible following a formula
+that waits for an ingredient files one request itself: as whoever set its formula (while they are here, or the server
+lets absent owners' devices act), at the nearest Courier Post within 16 blocks they may use, for exactly what its
+formula lacks first, a ground reagent as a ground reagent. A porter bound to that post fetches it from the chests round
+the post and carries it into the crucible's buffer; a full crucible keeps the rest aboard ("full") until there is room.
+A Peepo working the same crucible brings only what no courier holding that request is bringing, so one need is never
+brought twice. The crucible files no other request while one is open. Clearing or replacing its formula, setting it as
+another player, the rules refusing it, or breaking the crucible turns the request back (anything carried goes home).
+With its setter's sixteen requests already open it says so ("Needs 2 more: ...; the couriers take no more of its
+setter's requests now, so it asks again in 10 s") and waits. The codex's Couriers entry has a fourth page, "A
+Crucible's Own Requests".
 
 **Seeing it.** Use the post with an empty hand: how many requests are open and in transit, its free slots and its last
 eight steps (filed, claimed, reserved, picked up, delivered, stranded, taken up, taken back, cancelled, recovered, with
@@ -77,10 +94,33 @@ nothing about the cargo lives in the brain. A courier fuels at a pylon by its po
 and wear). Sources are plain containers (not furnace-like ones) whose chunks are loaded and that its keeper may open;
 nothing is loaded to fetch from.
 
+**Blocks that file their own requests** (since Concordance Chunk C, C-06). A Spire Heart's upkeep and an Alembic
+Crucible's formula both find their post with one shared helper, `Couriers.nearestPost(level, from, user, reach)`: the
+nearest post within `FILING_REACH` (16) blocks that the user may use, reading only the loaded 3×3 chunks round the block
+and loading none (the Spire's own copy is gone). The crucible (`CrucibleBlockEntity`):
+- **One demand.** `shortage()` is the earliest ingredient its formula's remaining steps need more of than its buffer
+  holds, and how many; nothing for a formula the rules refuse. The Peepo port (`CrucibleCompanion.needed`) asks for that
+  shortage less `courierRemainder`: what its request still brings (asked less delivered), counted only while a courier
+  holds the request (a live claim, its lease not run out) and it is not being taken back (C-P50). A request nobody
+  serves (no porter, its setter away, a porter unloaded with its claim) therefore never stalls a Peepo.
+- **Filing** (`supply`, on an ingredient wait): one request at a time, for the shortage's exact stack (`sample`), with
+  its setter as requester and the crucible as destination. After finding no post, or `TOO_MANY` (the setter's 16 or
+  the world's 1,024), it waits 200 ticks, doubling to 1,200, before trying again; a full quota is the reason it gives,
+  `courier_quota` (C-P52). The backoff resets on a filing or a turn-back and is never saved.
+- **Reconciling** every pulse (C-P51): a request the ledger has closed, one not bound here or not its setter's, or one
+  being taken back is forgotten. One with nothing carried is turned back when its item is no longer what the formula
+  lacks first, when it asks for more than is still lacked, or when its post is gone or barred to its setter (its chunk
+  loaded). Cargo already carried is always delivered.
+- **Turning back** cancels as the request's own requester (the ledger lets no one else) and forgets it. It happens when
+  the formula is cleared, replaced, set by another player or refused by the rules; the same player setting the same
+  formula again keeps the request (C-P53). Broken, the crucible calls `CourierLedger.destinationGone`, then drops its
+  slots as before.
+
 ## Connections
 
 - Input producer: any container round the post; Clockwork Porters (step 17) and their Ley Charge.
-- Output consumer: the post's slots, hoppers and pipes below it, the requester.
+- Output consumer: the post's slots, hoppers and pipes below it, the requester; since Chunk C (C-06), an Alembic
+  Crucible's buffer for its formula.
 - Technology connection: porters run on Ley Charge (from Radiance or electricity); posts feed hopper lines.
 - Magic connection: the Binding Arts (the porter, the key).
 - Reachable entry path: First Light → the Binding Arts understood → a Clockwork Porter, a Porter Key and a Courier Post
@@ -95,16 +135,27 @@ nothing is loaded to fetch from.
 - A request asks for 1 to 256 items; a player has at most 16 open requests and a world 1024. A courier moves at most
   what its body allows (step 17: 16 items, 2 Ley Charge and 1 wear a delivery).
 - A request with no source rests ten seconds before another try, so idle couriers do not churn.
+- A crucible (C-06) has at most one open request, filed only when it waits for an ingredient, for no more than its
+  formula lacks; after no post or a full quota it backs off 200 ticks, doubling to 1,200, so many crucibles cannot spend
+  a player's quota in a loop. Its requests count against its setter's 16 and the world's 1,024. A Peepo and a courier
+  never both bring one need while a courier holds the request; cargo stranded and taken up later can still over-supply,
+  bounded, and nothing is lost (the excess waits in the buffer for the next repeat).
 
 ## Multiplayer and persistence
 
 - Server authority: filing, claims, reservations, transfers, cancellation and recovery are the server's; the client
   only sees chat, Jade and the porter's synced status. Filing and reading a post are rate-limited.
 - Permissions: only the post's owner's party files requests and binds couriers; a courier takes only from containers
-  its keeper may open; only a request's requester cancels or recovers it.
+  its keeper may open; only a request's requester cancels or recovers it. A crucible (C-06) files only as its formula's
+  setter, at a post they may use, and only while `Authority.answering` finds them (C-P53); a request open when they
+  leave waits at the porter, `OWNER_OFFLINE`. Delivery into the crucible is the porter's existing code and does not ask
+  `Authority` at the crucible (a known limit).
 - Persistence: the ledger, samples and cargo in `jugcraft:courier_ledger` (world data); a courier's post and claim
   (`post`, `task`) on the porter; a key's post in its `jugcraft:courier_post` component; the post's slots and owner on
-  its block entity. The cargo is saved with the ledger, so a restart neither repeats nor loses a step.
+  its block entity. The cargo is saved with the ledger, so a restart neither repeats nor loses a step. Since Chunk C
+  (C-06), the crucible keeps its formula's setter (`formula_owner`) and its open request (`request`), each optional and
+  read with defaults; its stamp stays 1. A formula saved before C-06 has no setter and asks no courier until it is set
+  again. A request outlives an unloaded crucible and counts against its setter's 16 until it is delivered or cancelled.
 - PvP: nothing here harms anyone.
 - Disable behaviour: with `concordance.enabled=false` couriers stop (switched off) and nothing is filed; the ledger and
   everything in transit are kept.
@@ -115,7 +166,8 @@ No new dependency. Framework use:
 
 - **SmartBrainLib** (through step 17's workers): movement only; the ledger is not in the brain.
 - **Jade (optional)**: a post's open and in-transit counts and its latest step; couriers show their status.
-- **Modonomicon**: a **Couriers** entry in the Binding category.
+- **Modonomicon**: a **Couriers** entry in the Binding category; since Chunk C, a fourth page, "A Crucible's Own
+  Requests".
 - **GuiLib**: not used. The bounded request-history view is the post's chat summary (its last 8 of 32 steps), the
   `logistics` command and Jade; a GuiLib history screen is an open item (step 26).
 
@@ -158,6 +210,40 @@ and did not fit) or from Mojang's files. The art has not been shown to the owner
 Not yet run: any client (the post's look, Jade lines, codex page), a two-client dedicated server, real walking between
 chests, and a real restart of a server with couriers mid-delivery (the test saves and loads the ledger's codec).
 
+**Concordance Chunk C, unit 3: C-06** (commit `46f6e2a0e`; [the chunk's contract](concordance-chunk-c.md); not merged).
+**No new test has run:** none of its Java has been compiled; CI is its first compile and run.
+- `ConcordanceLogisticsGameTests` +9 (14 in all), one for each failure case of the plan (03:193) and the crucible's own
+  rules, each auditing `problems()` and counting every item in containers and carried after every step (the five
+  existing tests are unchanged): `aCrucibleAsksOnceForItsExactShortage` (two ground glowstone asked, the plain dust in
+  its buffer never standing in; the Peepo asks for none while a courier holds the request; a ledger saved and loaded
+  keeps the request, its exact reagent and its cargo), `aClearedOrReplacedFormulaCancelsItsRequest` (cleared,
+  replaced, set by another player, refused by the rules; the same formula set again by the same player keeps it),
+  `aFullCourierQuotaWaitsAndBacksOff`, `aBrokenCrucibleTurnsItsRequestBack`, `aCourierFillsACrucibleUntilItIsFull`,
+  `aPostTheSetterMayNotUseIsNeverAsked`, `anUnloadedCrucibleWaitsAndLosesNothing`, `aDiscardedPorterStrandsItsCargoOnce`
+  and `anOfflineSetterPausesTheCourier`. Every test post has an owner, since an ownerless post serves anyone and test
+  structures stand a few blocks apart.
+- `ConcordancePersistenceGameTests.theCrucibleKeepsItsRequestThroughASave` (the keys present, absent in an older save,
+  a request numbered 0 read as none, the stamp 1).
+- `ConcordanceAlchemyGameTests.anIncompatibleFormulaAsksForNothing`, extended: a refused formula turns its request back
+  and files no other.
+- Peepo, client (`PeepoIntegrationClientTests`): the exact shortage, and nothing for an incompatible formula, which
+  files no request either; `noOverSupplyWithAnOpenCourierRequest`. `CompanionAutomationChecks`: a full crucible leaves
+  the companion's cargo with it (it goes back once); an unloaded crucible: the companion walks on its own the whole time,
+  fenced in where its chunk is forced, its job reads `UNLOADED` through two of its transport's retries and its cargo is
+  kept; loaded again, the cargo is delivered once. `ConcordanceSpireGameTests.theHeartAsksACourierForItsUpkeep` covers
+  the shared nearest-post helper.
+- Audits in `tools/check_mod_data.py`: `check_crucible_supply` (new: one demand, the remainder rule, every turn-back,
+  filing and its backoff, the keys and stamp, the shared helper written once, the quota's parameters, no client
+  reading the demand or the ledger); `check_logistics` mirrors `Couriers.FILING_REACH`; `AUTHORITY_ROUTES` names
+  `Authority.answering` in the crucible.
+- Audit mutations, run for the records in place with every file restored after each, against `check_mod_data`'s
+  Concordance checks: the spec's 15 and three more (`Authority.answering` dropped from filing, the lease check dropped
+  from the remainder, a turn-back cancelling as the formula's owner rather than the request's requester): all 18
+  reported. Commit `46f6e2a0e`'s message reports the same 18.
+- The commands run for the unit's records are in [crucible-stand.md](crucible-stand.md#verification); all passed.
+- **Not run:** the build, the game tests, the client tests (`python3 tools/select_client_tests.py` chooses every client
+  class for this unit, as `CompanionAutomationChecks` is a shared file), CI, and two clients.
+
 ## World and event applicability
 
 Works in every dimension; a post fetches only from its own dimension's containers. No seasonal content.
@@ -169,8 +255,9 @@ New registrations only: block and item `jugcraft:courier_post`; data component `
 
 Open items:
 
-- A request is delivered to its post only; delivering to another container chosen by the requester needs a way to
-  mark it (a GuiLib screen or another key use).
+- A request a player files is delivered to its post only; delivering to another container chosen by the requester
+  needs a way to mark it (a GuiLib screen or another key use). A Spire Heart and, since Chunk C (C-06), an Alembic
+  Crucible file their own requests, delivered to themselves.
 - A GuiLib history screen (step 26); the chat summary shows the last 8 of the 32 steps kept.
 - Sources are found by nearness only; preferring or excluding particular chests needs a marking tool.
 - A crash between saving a chunk and saving the world's data could repeat or lose one step's transfer, as with

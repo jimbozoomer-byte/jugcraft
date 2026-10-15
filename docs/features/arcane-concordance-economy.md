@@ -47,6 +47,12 @@ bone meal, relic charge, a Crimson Surge) were in no loop check.
     node with no way out, so a later conversion out of it is weighed with it. `check_economy` holds the sink's figures
     to the ritual's data, and its offerings are worded from that data. The table's Root and Rivet row below is the same
     C-04 addition (not merged).
+  - **JE → a crucible's heat** (Concordance Chunk C, C-05; not merged, not run): a
+    [Crucible Stand](crucible-stand.md) pays 8, 16 or 32 JE a tick only on ticks it heats; heat goes nowhere else
+    (`je_to_heat`, at the cheapest band's 8 JE, an edge into a node with no way out). `check_economy` holds that heat
+    becomes nothing else and that the edge is modelled at the stand's cheapest rate, and anchors the rates and the
+    store's "never extracted" to `CrucibleStandBlockEntity`. The table's Crucible Stand row below (768,000 JE a day,
+    heating searing) is the same C-05 addition, pasted from the tool.
   - Every crop's regrow-and-compost loop is included, at its natural cost and when a spire hastens it.
 
 ## Bounded on purpose
@@ -115,6 +121,8 @@ The brief's combinations, and the tests that exercise them (new in this step mar
 | Remote storage with interrupted rituals | **new** `ConcordanceRitualGameTests.aPorterFuellingFromACircleStopsItCleanly`: a porter fuels itself from a channel's pylon mid-ritual; it took exactly what the pylons lost, the ritual stops for want of power with every offering kept, and neither its Focus nor the porter's Ley Charge comes back. `ConcordanceLogisticsGameTests.cancellingAndRecoveringGiveItemsBack`, `fullStorageRemovalAndRestartLoseNothing`, `aBrokenPostSendsItsCargoBack` |
 | Light burnt and relit | **new** `ConcordanceEconomyGameTests.aLanternPutOutHasSpentTheMeasureItBegan`, `aSconceTakenDownHasSpentTheMeasureItBegan` |
 | Automation of a formula | `ConcordanceAlchemyGameTests.machineryRunsAFormulaTwice` |
+| Electricity into a crucible's heat (Concordance Chunk C, C-05; not merged, not run) | `ConcordanceEconomyGameTests.aStandTurnsElectricityIntoHeatOnly`: set to each heat, a Crucible Stand pays exactly its rate on each tick it heats until its store runs short; off, under a crucible already hotter than it aims or with nothing to heat, nothing; no JE comes back out on any face, and no fluid or item. `check_economy`: no gaining cycle through `je_to_heat` |
+| Two carriers for one demand (Concordance Chunk C, C-06; not merged, not run) | `ConcordanceLogisticsGameTests`: `aCrucibleAsksOnceForItsExactShortage`, `aClearedOrReplacedFormulaCancelsItsRequest`, `aFullCourierQuotaWaitsAndBacksOff`, `aBrokenCrucibleTurnsItsRequestBack`, `aCourierFillsACrucibleUntilItIsFull`, `aPostTheSetterMayNotUseIsNeverAsked`, `anUnloadedCrucibleWaitsAndLosesNothing`, `aDiscardedPorterStrandsItsCargoOnce` and `anOfflineSetterPausesTheCourier`, each counting every item in containers and carried after every step; the Peepo client groups `noOverSupplyWithAnOpenCourierRequest` and "crucible demand" (`PeepoIntegrationClientTests`), a full crucible and an unloaded one (`CompanionAutomationChecks`). See [logistics](arcane-concordance-logistics.md) |
 
 The brief's library interactions:
 
@@ -169,6 +177,10 @@ No new dependency, art, sound or animation.
   which asserted that Focus stayed put although it returns with time. The other was a dream test whose wisps fell where
   creatures were not live. Build run 37680579216 on 9f50a1d: `mod` and `optional integrations absent` passed, with all
   1069 server tests. This step adds no client test.
+
+Concordance Chunk C, unit 3 (not merged): `ConcordanceEconomyGameTests` gains `aStandTurnsElectricityIntoHeatOnly`
+(3 in all), and `check_economy` the heat sink. The test has not run: it was written where no Minecraft jar is
+available. `check_mod_data` passes with the new row and checks.
 
 Not yet run:
 - a representative installation simulated over real world time in a running world (the tests advance their systems by

@@ -100,6 +100,8 @@ unless stated):
 | Curse pulses | the rules again at every pulse; skipped while the caster is away | unchanged |
 | Ritual backlash after a part is broken | as the player who broke it within the step (if here), so their PvP and parties apply | **GAP**: sourceless, whoever broke it |
 | Crucible: water, adds, stirs, bottling, setting or clearing a formula (since Concordance Chunk C, C-01) | `mayChange` as the player; every change also needs the Alembic Arts; recording onto a blank formula stays open (C-P24) | **GAP** until Chunk C: anyone with the Alembic Arts; stopping a formula, an alembist only (this step) |
+| Crucible: filing its own courier request (since Concordance Chunk C, C-06; not merged) | as its formula's setter, only while `answering` finds them (else nothing is filed), at a post they may use (`post.mayUse`); delivery into it is the courier's existing route, which does not ask the crucible's block (a known limit) | new |
+| Crucible Stand: setting its heat (since Concordance Chunk C, C-05; not merged) | `mayChange` as the player, then `RateGate` (10 ticks); reading it stays open | new |
 | Lampwright Bench buttons | one press every 4 ticks a player | **GAP**: unlimited |
 | `/jugcraft concordance courier request`, `cancel`, `recover` | one every 10 ticks a player (counts bounded by `Logistics.MAX_WANTED` as before) | **GAP**: unlimited |
 | Circle, sconce, garden, sky, relic, spire, vigil, artifice, compose, hex, journal requests | `RateGate`, as before | unchanged |
@@ -168,6 +170,12 @@ and setting or clearing a formula, and nothing in the crucible changes; the stra
 still work, and the owner still stirs, sets and clears. Outside the claim, in adventure mode, the stranger's water is refused too, and
 back in survival it goes in. `AUTHORITY_ROUTES` names the crucible's two calls. The test has not run yet: it was
 written where no Minecraft jar is available.
+
+Concordance Chunk C, unit 3 (not merged; none of it run): `ConcordanceAlchemyGameTests.aStandIsSetOnlyByThoseWhoMayChangeIt`
+(a stranger in the owner's claim and anyone in adventure mode change nothing; sneaking only reads; a second use within
+the rate gate is refused) and `ConcordanceLogisticsGameTests.anOfflineSetterPausesTheCourier` (a crucible whose setter
+is away files nothing unless the absent-owner option is on; a request filed for an absent setter waits,
+`OWNER_OFFLINE`). `AUTHORITY_ROUTES` names the stand's `mayChange` and the crucible's `answering`.
 
 Not yet run: a real protection mod (only the stand-in listener in the tests); a two-client server with one player
 trying the routes against another's claim; a server with the absent-owner option on in play.

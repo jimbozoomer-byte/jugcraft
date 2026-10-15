@@ -80,9 +80,9 @@ The **Adept's Wand** is the second instrument: a capacity of 12 (the Initiate's 
 
 **Root and Rivet** (Concordance Chunk C, C-04; the owner's choice C-D2, with C-P11's numbers as starting values) is the
 first workshop rite, at the same Practitioner stage and taught by the same Circle Lore understood. A Thallite plate,
-riveted with copper and bound with Mendvetch, becomes a **Rooted Thallite Foundation**: the base unit 3's Crucible Stand
-is to be built on (C-05). Until then nothing uses the foundation; nothing turns it back into a plate, Ley Charge or Focus,
-and the Assayer's Scale never weighs it. The plate comes from a Metal Press or, by hand, from two thallite ingots; every
+riveted with copper and bound with Mendvetch, becomes a **Rooted Thallite Foundation**: the base of the
+[Crucible Stand](crucible-stand.md) (C-05, unit 3; not merged, not run), its one consumer. Nothing turns the foundation
+back into a plate, Ley Charge or Focus, and the Assayer's Scale never weighs it. The plate comes from a Metal Press or, by hand, from two thallite ingots; every
 route to it needs the server's `machines` and `thallite` feature switches. With either off the rite stays known, but its
 plate cannot be made (its codex entry says so). Completing it lays a Stratawright's `foundation` for each participant
 present, as any completed ritual does. Its stages and what each pays, as its codex entry and the Inspect page state them:
@@ -204,7 +204,8 @@ kept, as notes are, and counts once it is.
   (C-04), Root and Rivet's: a Thallite plate (a Metal Press, or two thallite ingots by hand; the `machines` and
   `thallite` switches), copper ingots and Mendvetch (a Verdant Bed crop, or crafted).
 - Output consumer: the Adept's Wand (larger composed spells, step 8); party protection and creature detection. Since
-  Chunk C, the Rooted Thallite Foundation, which has no consumer until unit 3's Crucible Stand (C-05). Every completed
+  Chunk C, the Rooted Thallite Foundation, whose consumer is the [Crucible Stand](crucible-stand.md)'s recipe (C-05,
+  unit 3; the foundation's tooltip and codex page name it). Every completed
   ritual, Root and Rivet among them, is also Stratawrighting's `foundation` elective for each participant present
   ([Rime and Strata](arcane-concordance-rime-strata.md)); Root and Rivet's codex entry is linked from Stratawrighting's
   Understood page.

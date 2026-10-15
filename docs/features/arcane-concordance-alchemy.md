@@ -4,7 +4,8 @@ Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026); see Verification for what has run. Extended by Concordance Chunk C, unit 1 (C-01: the crucible says
 why it waits and keeps a formula honestly; C-02: the Stillroot Poultice and the Kiln Draught; [the chunk's
-contract](concordance-chunk-c.md)), not merged; none of its tests has run yet.
+contract](concordance-chunk-c.md)), and unit 3 (C-05: a [Crucible Stand](crucible-stand.md) heats a crucible with
+JE; C-06: a crucible asks the couriers for its formula's shortage), not merged; none of their tests has run yet.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 13) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 5, Practitioner stage (Jugcraft Discovery). Roadmap step 13.
@@ -61,6 +62,11 @@ bands decide what a **stir** (a Stirring Rod or a stick, at most one every half 
 | Warm | 40 | 30% | 60% | |
 | Hot | 90 | 55% | 30% | |
 | Searing | 160 | 80% | none | keeps only 85% of the dissolved Radiance and Verdance, and adds 0.50 contaminant |
+
+**A Crucible Stand beneath** (since Concordance Chunk C, C-05; not merged, not run) heats with JE: following a formula,
+for its next stir (warm 65, hot 120, searing 175, for 8, 16 or 32 JE a tick), only while the crucible waits for nothing
+or for heat alone; with no formula, to the stand's own setting. See [crucible-stand.md](crucible-stand.md). An Electric
+Pump piped into the tank fills it for the formula's water steps.
 
 **Rime is cold's own** (since Concordance Chunk B, unit 4, B-08; [the winter record](arcane-concordance-winter.md)):
 every stir above the cold band keeps only that share of the Rime already dissolved. A ground ingredient's ready share
@@ -153,6 +159,13 @@ Since Concordance Chunk C (C-01):
   names that mixture's harm, and that it was stirred searing, since a dose of it can still be bottled by hand. Harm is
   judged by the server (a harmful or unknown status) as well as by the property's data.
 - **Setting is a plain use;** the formula's tooltip said "sneak" until Chunk C.
+- **It asks the couriers for what it lacks** (since Concordance Chunk C, C-06; not merged, not run): waiting for an
+  ingredient, a crucible files one courier request, as whoever set its formula and while they are here (or the server
+  lets absent owners' devices act), at the nearest Courier Post within 16 blocks they may use, for exactly what its
+  formula lacks first (a ground reagent stays a ground reagent). A Peepo at its port brings only what no courier holding
+  that request is bringing. Clearing, replacing or losing the formula, setting it as another player, or breaking the
+  crucible turns the request back; with its setter's sixteen requests already open it says so and asks again later
+  (200 ticks, doubling to 1,200). See [logistics](arcane-concordance-logistics.md).
 - **Only someone who could break the crucible by hand** may pour, add, stir, bottle, or set or clear its formula
   (claims, protected towns, adventure mode and spawn protection refuse). Tasting, the glass and recording onto a blank
   formula stay open.
@@ -257,6 +270,9 @@ counts once.
 - Server authority: the crucible simulates on the server; clients receive the temperature and volume only (for the
   vessel's animation), never the makeup, which takes sampling. Hand operations are rate-limited and check research; a
   stir's band is the server's.
+- Since Chunk C, C-06: a crucible files courier requests only as its formula's setter, and only while
+  `Authority.answering` finds them (online, or the server's absent-owner option); a request already open when they
+  leave waits, `OWNER_OFFLINE`, at the porter.
 - Who may change a crucible (since Chunk C, C-01): every change by hand asks `Authority.mayChange` as the player (water,
   adds, stirs, bottling, setting or clearing a formula). Tasting, the glass and recording onto a blank formula stay
   open. The Inspect page's position is the client's claim: the server reads only a loaded crucible within the reader's
@@ -265,6 +281,10 @@ counts once.
   Preserve's hold, `held_until` (game time), only while held; broken, its items drop (vanilla's container behaviour) and
   the mixture spills. Items carry `jugcraft:brew`,
   `jugcraft:reagent` and `jugcraft:formula`.
+- Since Chunk C, C-06 (not merged): the crucible also saves who set its formula (`formula_owner`, a UUID) and its open
+  courier request (`request`, a number), each only when set, and reads both with defaults: a save from before reads as
+  nobody's formula with no request, and asks no courier until the formula is set again. The stamp stays 1. The filing
+  backoff is never saved. Broken, its request is turned back (its cargo goes home) and its slots drop once, as before.
 - Since Chunk C: a saved formula this build cannot read is kept as written under `program` and saved back. The waiting
   reason and the rules revision last checked are never saved; they are worked out again after a load. Product names
   reach new stacks only, so a named brew and an older unnamed one of the same outcome do not stack (an automated
@@ -434,6 +454,23 @@ compile and run.
 - **Not run:** `./gradlew build` with and without the optional integrations, `./gradlew runClientGameTest`, CI, any
   play by hand, and two clients.
 
+**Concordance Chunk C, unit 3** ([the chunk's contract](concordance-chunk-c.md); not merged). **No new test has run;**
+none of its Java has been compiled.
+- `ConcordanceAlchemyGameTests` +8 (41 in all), the Crucible Stand's: `aStandFollowsTheFormulasBands`,
+  `anUnpoweredStandLetsTheCrucibleCool`, `aStandIdlesForAWaitingOrIncompatibleFormula`,
+  `aStandIsSetOnlyByThoseWhoMayChangeIt`, `theFullChainRunsFromAPumpAndACable` (a pump and a pipe fill the tank, which
+  three water steps draw exactly), `aCampfireCrucibleStillWorks`, `aSwitchedOffConcordanceStandDrawsNothing` and
+  `aCableMeetsTheStandWhereItTakesPower` ([crucible-stand.md](crucible-stand.md)).
+- `anIncompatibleFormulaAsksForNothing` now also asserts that a stand beneath gives no heat (C-05), and that a formula
+  the rules refuse turns its courier request back and files no other, asks again once the rules are restored, and
+  loses the request when the crucible is broken (C-06).
+- C-06's tests are in `ConcordanceLogisticsGameTests` (nine new) and `ConcordancePersistenceGameTests`
+  (`theCrucibleKeepsItsRequestThroughASave`), and the Peepo side in `PeepoIntegrationClientTests` and
+  `CompanionAutomationChecks` ([logistics](arcane-concordance-logistics.md)).
+- Audits: `check_crucible_stand` and `check_crucible_supply` (new); `check_alchemy` mirrors the stand's targets and
+  rates. The checks run for the unit, and its audit mutations, are in the stand's and the logistics records.
+- **Not run:** the build, the game tests, the client tests and CI.
+
 ## World and event applicability
 
 No worldgen, creatures, loot or seasons.
@@ -460,5 +497,7 @@ No worldgen, creatures, loot or seasons.
   `preparation.jugcraft.*`, `compose.jugcraft.diagnostic.*`, `compose.jugcraft.alchemy.inspect.*`, `.risk.*`,
   `.op.*`, `.fouled`, `.assay.fouls`, and the products' item names (`item.jugcraft.salve.stillroot_poultice`,
   `item.jugcraft.draught.kiln_draught`, `item.jugcraft.draught.winter_brine`). No new saved key and no new item.
+- Since Concordance Chunk C, unit 3 (not merged): the Crucible Stand's ids ([crucible-stand.md](crucible-stand.md));
+  the crucible's optional saved keys `formula_owner` and `request` (C-06), read with defaults, the stamp still 1.
 - Open: more preparations (distilling, calcining) and ingredients arrive with later Principles; a GuiLib crucible
   screen. For now the encyclopedia's Inspect page stands in for a crucible screen (plan 08:55-59).
