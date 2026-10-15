@@ -5187,12 +5187,23 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' grids matches another.
-- **Slice 14C game tests (not run yet; CI runs them):**
+- **Slice 14C game tests (all passed in CI, below):**
   - `BrassQuickFirersGameTests`:
     - `brassQuickFirersAreRegistered`: each is registered with its numbers, its recipe loads, and it fires bullets from a magazine, held in both hands. The Sprocket Gun fires rifle rounds as long as the trigger is held, forty a pan, and takes all seventeen attachments the owner made for it, the four sights among them; the Navvy Shotgun fires six pellets a shell as long as the trigger is held, eight shells a magazine, the only automatic gun that fires shells, and takes its fifteen and no scope; the Freeholder Rifle fires rifle rounds a pull at a time, twenty a magazine, quicker than any other gun that fires rifle rounds a pull at a time, and takes both magazines and every sight but the Long Scope.
     - `sprocketGunChangesItsPan`: an empty Sprocket Gun with fifty Rifle Rounds loads nothing before its reload's time and forty after it, leaving ten; a shot then takes its damage from the pig.
     - `navvyShotgunChangesItsMagazine`: an empty Navvy Shotgun with twelve Buckshot Shells loads eight, leaving four; a shot then spends one, and at close range its pellets land together on the pig.
   - `GunsGameTests` counts 84 guns; `TacticalAttachmentsGameTests` the thirty-two guns the Tactical Grip fits, the Sprocket Gun and the Navvy Shotgun among them.
+- **Slice 14C in CI** ([run 38659879209](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38659879209), on e786153dd): every check passed, on its first run.
+  - **Server game tests:** 1663 in the `mod` job, all passed, `BrassQuickFirersGameTests` and `TacticalAttachmentsGameTests` among them.
+  - **The job without the optional integrations** and **the repository check:** passed.
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` took each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments, and its checks passed for each.
+  - **Screenshots** (from the last 2,500 lines of the guns shard's log; the whole log was too large to read here):
+    - **Held:** each at the lower right pointing at the husk, in both hands.
+    - **Aimed:** each raised to the middle of the view. The Sprocket Gun's pan lies level across the crosshair at the husk; the Navvy Shotgun's butt fills the lower middle, the husk's head between its two rear posts at the crosshair; the Freeholder Rifle's sight is on the crosshair at the husk.
+    - **Reloading:** the Sprocket Gun is tipped up at the lower middle, its top to the view; the Navvy Shotgun and the Freeholder Rifle are rolled over at the lower right.
+    - **Inspection:** each turned to be looked over at the right.
+    - **Attachments:** the Laser Sight sits on the Sprocket Gun's pan and on the Freeholder Rifle, and stands to the right of the crosshair aimed, as on the earlier guns; the Navvy Shotgun's bayonet sits under its muzzle; the Extended Magazine shows thirty rounds on the Freeholder Rifle and twelve shells on the Navvy Shotgun. At the hip the muzzle attachments point away from the view and the stocks are behind it, so they show little.
+    - **Third person:** each raised and flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
