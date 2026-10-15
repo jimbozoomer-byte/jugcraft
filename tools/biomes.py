@@ -1165,7 +1165,11 @@ BIOMES = {
         "effects": {"grass_color": "#4a5a3a", "foliage_color": "#3e4c32", "water_color": "#3a2850"},
         "attributes": {"minecraft:visual/sky_color": "#6a6478", "minecraft:visual/fog_color": "#4a4058",
                        "minecraft:visual/water_fog_color": "#1e1428"},
-        "trees": {"count": [2, 3], "default": "jugcraft:dead_tree_checked", "picks": [["minecraft:spruce_checked", 0.3]]},
+        "base_trees": "minecraft:dark_forest_vegetation",
+        "trees": {"count": [16, 17], "default": "jugcraft:huge_brown_mushroom_on_soil", "picks": [
+            ["minecraft:dark_oak_checked", .45], ["jugcraft:yew_checked", .20 / .55],
+            ["jugcraft:dead_tree_checked", .10 / .35], ["jugcraft:dead_snag_checked", .10 / .25],
+            ["jugcraft:huge_red_mushroom_on_soil", .08 / .15]]},
         "extras": ["ponds", "leaf_litter", "toadstools", "brown_toadstools", "flora_ghost_fern", "flora_large_ghost_fern",
                    "flora_ghost_pipe", "flora_deadly_nightshade", "flora_foxglove", "flora_wild_mandrake", "flora_creeping_ivy"],
         "tags": [],

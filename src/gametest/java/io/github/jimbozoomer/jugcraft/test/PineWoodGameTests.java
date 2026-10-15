@@ -93,7 +93,7 @@ public class PineWoodGameTests {
 		helper.succeed();
 	}
 
-	private static void craft(GameTestHelper helper, Item expected, int count, int width, int height, Item... grid) {
+	static void craft(GameTestHelper helper, Item expected, int count, int width, int height, Item... grid) {
 		List<ItemStack> stacks = new ArrayList<>();
 		for (Item ingredient : grid) {
 			stacks.add(ingredient == null ? ItemStack.EMPTY : new ItemStack(ingredient));

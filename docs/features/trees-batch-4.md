@@ -2,6 +2,8 @@
 
 Design note, 15 October 2026, before implementation. Owner-authorized remaining tree roster; actual tool: OpenAI Codex (GPT-6).
 
+**Not started.** After this note was published, the owner instructed us to finish batch 3 and not start the next batch. This document remains a proposal; implementation awaits renewed direction.
+
 ## Separate the tree from its timber
 
 `agriculture.TREES` will accept an optional `wood` key and a separate display name. Existing entries default to their own name, preserving their blocks, recipes and seasonal behavior. `trees.SHAPES.tree` will select foliage independently of its log wood. Its default remains the existing wood key. Explicit `log` support is reserved for later special stems; this batch needs only vanilla cherry and birch logs.

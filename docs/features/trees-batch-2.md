@@ -1,6 +1,6 @@
 # Trees batch 2: pine approval and warm/mountain tree generation
 
-Status: owner-authorized implementation, 15 October 2026. Public branch `speedygroyper:codex/tree-generation-batch-2`. **The owner approved the original pine textures on 15 October and authorized the remaining trees and biome changes, with tree/biome tests. Batch 2 is implemented and tested, awaiting owner inspection. The owner subsequently authorized the remaining tree roster after batch 2.** Actual tool: OpenAI Codex (GPT-6), directly requested by the owner.
+Status: owner-authorized implementation, 15 October 2026. Public branch `speedygroyper:codex/tree-generation-batch-2`. **The owner approved the original pine textures on 15 October and authorized the remaining trees and biome changes, with tree/biome tests. Batch 2 is implemented, tested and visually approved by the owner on 15 October: “Batch 2 looks good.” PR #386 is ready for review. The owner subsequently limited the remaining work to finishing batch 3.** Actual tool: OpenAI Codex (GPT-6), directly requested by the owner.
 
 ## First checkpoint: pine wood
 

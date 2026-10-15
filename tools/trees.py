@@ -13,6 +13,13 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "yew": {"wood": "yew", "sapling": True,
+            "trunk": {"type": "straight", "base_height": 4, "height_rand_a": 2},
+            "foliage": {"type": "blob", "radius": 3, "offset": 0, "height": 4}},
+    "ancient_yew": {"wood": "yew", "giant": True,
+                    "trunk": {"type": "dark_oak", "base_height": 6, "height_rand_a": 2, "height_rand_b": 1},
+                    "foliage": {"type": "dark_oak", "radius": 0, "offset": 0},
+                    "decorators": [{"type": "minecraft:alter_ground", "provider": "minecraft:podzol_beneath_tree"}]},
     # Tree roster batch 2. Dimensions are checked on generated trees, not inferred from trunk height alone.
     "cottonwood": {"wood": "aspen",
                    "trunk": {"type": "fancy", "base_height": 10, "height_rand_a": 6},

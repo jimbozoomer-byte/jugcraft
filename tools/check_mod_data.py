@@ -4911,6 +4911,10 @@ def check_festival(java, main):
     expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
     for tree, info in ag.TREES.items():
         expected_states[info["leaves"]] = {f"season={state}" for state in ag.SEASON_STATES} if info["season"] else {""}
+        if "fruit" in info:
+            expected_states[info["leaves"]] = {
+                f"fruit={fruit}" + (f",{season}" if season else "")
+                for season in expected_states[info["leaves"]] for fruit in range(3)}
     for block, variants in expected_states.items():
         if set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})) != variants:
             err(f"{block}: blockstate does not cover every stage")
