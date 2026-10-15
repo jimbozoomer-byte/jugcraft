@@ -34,6 +34,15 @@ AMBIENT = 20
 HEAT_RATE = 1  # degrees a tick
 HEAT_SOURCES = {"minecraft:magma_block": 60, "minecraft:soul_campfire": 100, "minecraft:campfire": 120,
                 "minecraft:soul_fire": 150, "minecraft:fire": 175, "minecraft:lava": 220}
+# Concordance Chunk C, C-05 (C-P48): the Crucible Stand's art, each a byte-for-byte copy of the owner's file (copied and
+# checked by tools/owner_art.py block_asset_imports): treated iron for its cladding and frame (posts and deck), and a
+# copper coil seen from its side (the coil's ends lie under the deck and on the cladding, so its end-on face is never
+# seen and is not imported). Searched first: art/owner-library/catalog/files.csv.
+OWNER_BLOCKS_FILES = {
+    "textures/block/crucible_stand_plates.png": "Guns/block/treated_iron_plates.png",
+    "textures/block/crucible_stand_frame.png": "Guns/block/treated_iron_block.png",
+    "textures/block/crucible_stand_coil.png": "Big Cannons and Mounted Guns/textures/block/coilside.png",
+}
 # The crucible (Java: CrucibleBlockEntity.java).
 BUFFER_SLOTS = 5  # ingredients waiting for automation
 STIR_TICKS = 10  # the most often a crucible can be stirred
