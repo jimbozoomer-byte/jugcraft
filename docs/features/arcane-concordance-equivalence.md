@@ -165,7 +165,7 @@ yet.
   magical, glinting, changed, uncatalogued and excluded stacks are refused and nothing moves either way); the ledger
   never passes its cap; every declared crafting and smelting conversion is the game's own recipe, output and count;
   and the catalogue is balanced, this server's live recipes included. A seventh since Concordance Chunk C,
-  `workshopProductsAreNeverWeighed` (not run yet): the three products, refused as magical, change nothing weighed or
+  `workshopProductsAreNeverWeighed` (passed in CI: run 38684732031, and again in run 38774859294): the three products, refused as magical, change nothing weighed or
   dissolved, and nothing is formed from one as a pattern; a bare draught or salve is not catalogued.
 - CI: the first run on this step (commit fdf36745) found three faults, fixed in 65d98e8b (26.3's component patch
   has no entry set, so a stack's changes are compared component by component), 65870d7d (an item's nature is judged

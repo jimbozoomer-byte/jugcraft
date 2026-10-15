@@ -4,7 +4,8 @@ Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026); see Verification for what has run. Concordance Chunk C's unit 4 (habitat inspection, the canteen on
 beds, the compost page, the mixed bed, harvest strain and the Dewlit graft) is built for
-`claude/chunk-c-living-workshop`, not merged, and its tests have not run ([contract](concordance-chunk-c.md)).
+`claude/chunk-c-living-workshop`, not merged; its tests passed in CI (run 38726242149, with unit 3, and again in run
+38774859294; [contract](concordance-chunk-c.md)).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 14) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 6, Practitioner stage (Jugcraft Workshops). Roadmap step 14.
@@ -72,7 +73,7 @@ the Inspect page say "Mixed bed: +25%".
 
 **Harvest strain** (C-08).
 - Every harvest a bed sees strains it by one, whatever took the ripe crop: an empty hand, a Gleaner, a sickle, a reap
-  (an arm weapon's or the harvesting spell's), the Crop Harvester, or breaking it (each in a game test, not yet run),
+  (an arm weapon's or the harvesting spell's), the Crop Harvester, or breaking it (each in a game test, passed in CI),
   and, counted the same way but not tested, a Peepo, a Hay Golem or a crow raid. A crop placed ripe never strains its
   bed.
 - Up to 3, counted only against a plant's disturbance limit, never as the magic it needs: a Sunpetal on a quiet bed
@@ -172,6 +173,8 @@ crops master Verdant Husbandry.
 - Solo, trade and cooperative routes: entirely solo; crops, beds and devices can be traded, and a non-Greenwarden can
   run a garden a Greenwarden woke; a party shares its Hearts with its Gleaners.
 - Specialty use without other branches: needs only First Light.
+- Unlocks: nothing new in Concordance Chunk C; the mixed bed, strain and the graft change how a garden grows, not what
+  can be made.
 - Since Concordance Chunk C (not merged): Dewmoss is an input of grafting (one spent a graft), whose output is the bed's
   trait, Dewlit; the Inspect page is a new reader of beds and crops; the canteen wets beds; compost (bone meal,
   fertilizer, the Maw's nutrient) also eases strain.
@@ -200,8 +203,10 @@ crops master Verdant Husbandry.
 - **Simulation budget**: crops cost only on random ticks; a sample is 100 reads, reused for 10 seconds, at most 16 a
   level a tick; devices pulse every 2 or 10 seconds, staggered; the Maw scans 147 positions a pulse (7 by 7, a block
   above and below), and the Gleaner 147 for ripe crops and, while short of Verdance, 729 for Verdant Hearts (9 by 9 by
-  9, `GleanerBlockEntity.draw`). This record said 147 for both until Concordance Chunk C, whose workshop load is to
-  measure the Heart search (C-10, C-P21). Since Chunk C a bed's random tick reads the block above it at most three
+  9, `GleanerBlockEntity.draw`). This record said 147 for both until Concordance Chunk C, which measured the Heart
+  search (C-10, C-P21, C-P68): a starved pulse took 333 µs in run 38774859294's `mod` job (the position list alone 304
+  µs), over the proposed 250 µs line, so a change is proposed and not applied (caching `Garden.nearest`'s offset
+  order, or a vertical reach of ±1); `HEART_REACH` stays 4 until the owner decides. Since Chunk C a bed's random tick reads the block above it at most three
   times more (C-07's forgetting, C-08's rest); a sample still reads 100 positions; a graft adds catalogue lookups and
   no block read. No device ticks work every tick, loads a chunk or reads outside its reach.
 
@@ -291,9 +296,10 @@ and icons have not been shown to the owner yet.
   integrations, and the three client test shards.
 
 **Concordance Chunk C, unit 4 (C-07 to C-09; commits `5ba973632`, `d32ac3a61` and `d6edee4f4`, records in the commit
-after them).** Written with no Minecraft jar, so none of its game code has been compiled against Minecraft, and none of
-the tests below has run: no CI run yet. Every one is **not run**.
-- `ConcordanceGardenGameTests`, 21 new (33 in all), not run:
+after them, and the unit review's fixes in `ce04da475`).** Written with no Minecraft jar; its first CI run was with
+unit 3, in the merge of units 3 and 4 (`1c7dc577c`): **every job of run 38726242149 passed**, the tests below among
+them (the client test by its shard; its shots not viewed). Every job passed again in runs 38731825181 and 38774859294.
+- `ConcordanceGardenGameTests`, 21 new (33 in all):
   - C-07: `aBedSaysWhatItsPlantNeedsAndHowFar`, `aVerdictClearsWhenThePlantGoes`, `aCanteenWatersABed`;
   - C-08: `aMixedBedGrowsFasterOnlyForAnotherKind`, `theBonusSpendsNoExtraNutrientAndMintsNone`,
     `everyHarvestPathStrainsTheBedOnce` (a hand, a Gleaner, a sneaking sickle, a reap, breaking and planting again),
@@ -305,16 +311,16 @@ the tests below has run: no CI run yet. Every one is **not run**.
     `aDonorOnARipeCropGraftsAndAnyOtherItemStillHarvests`, `anUnresearchedGardenerCannotGraft`,
     `aGraftIsRefusedWhereTheGardenerMayNotBuild`, `aGraftSurvivesEveryHarvestPathAndASave`,
     `everyNicheReaderSeesTheGraft`, `aGraftChangesOnlyTheNiche` and `anotherPlantClearsTheGraft`.
-- `EncyclopediaGameTests.theInspectPageReadsABedAndACrop` and `theInspectPageNamesAGraft` (23 in all), not run.
+- `EncyclopediaGameTests.theInspectPageReadsABedAndACrop` and `theInspectPageNamesAGraft` (23 in all).
 - `ConcordancePersistenceGameTests.anOlderBedLoadsWithoutItsNewKeys` (a bed saved before strain and grafts reads
-  unstrained, unripened and ungrafted, at version 1), not run.
-- `EncyclopediaClientGameTests.gardenInspection`, not run: random ticks held at 0 while a Sunpetal is grown ripe, the
+  unstrained, unripened and ungrafted, at version 1).
+- `EncyclopediaClientGameTests.gardenInspection`: random ticks held at 0 while a Sunpetal is grown ripe, the
   client told the bed's strain and graft, and the shots `jugcraft_concordance_ripe_crop_jade` (only when Jade is
   loaded) and `jugcraft_encyclopedia_inspect_bed`.
 - Unchanged, to run again because they harvest and regrow or use the canteen: `theGleanerHarvestsForVerdance`,
   `ConcordanceSpireGameTests.aVerdantFieldHastensOnlyWhatItsBedsPay`, `PeepoIntegrationClientTests` (its crop is
   placed ripe, so it strains nothing), `ConcordanceJourneyGameTests`, `ConcordanceWorkloadGameTests` and
-  `HalloweenGameTests`; not run.
+  `HalloweenGameTests`; each passed in run 38731825181, which ran every client class (171).
 - Run and passed for the unit's code commits: `python3 -B tools/generate_material_data.py`, a second run changing
   nothing. Run and passed for those commits and again for these records: `python3 -B tools/check_mod_data.py` (among it
   `check_ecology`'s C-07 and C-08 blocks, `check_graft`, `check_encyclopedia`'s garden reach block and read-only list,
@@ -326,7 +332,22 @@ the tests below has run: no CI run yet. Every one is **not run**.
   C-08's 28 and C-09's 32, every one reported.
 - The pure ecology classes compiled with JDK 21 against stubs, and two scratch harnesses outside Git passed against
   the generated data: 41 checks of the mixed bed and strain, 28 of the graft.
-- Not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest`, CI, any client.
+- In CI only: `./gradlew build` (with and without the optional integrations) and `./gradlew runClientGameTest`. Not run:
+  any client by hand.
+
+**Concordance Chunk C, unit 5 (C-10; [the contract](concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10)).**
+- `ConcordanceWorkloadGameTests.gleanersHeartSearch` times a Gleaner's pulse in every ordinary build. In run
+  38774859294's `mod` job it logged: "Concordance workload: Gleaner pulse starved 333 us (its Heart search, 729
+  positions, 729 of them loaded; the position list alone 304 us), fed 62 us (its crop search, 147 positions), each
+  after 1000 untimed pulses; C-P21's line 250 us: over; runner: 4 processors, amd64, Java VM 25.0.4.1+1-LTS". The test
+  passed (its bound is 5 ms a pulse).
+- The load card's garden (nine planted beds, the Heart's bed, a Mulch Maw and a Gleaner) worked while measured in run
+  38774859294: Gleaner harvests 2 (a Mendvetch and a Dewmoss), Heart searches that drew 0 of 150 pulses, the Maw ate
+  150, every item accounted for.
+- `ConcordanceWorkshopClientGameTests` shows nine Mendvetch beds with a Mulch Maw and a Gleaner in the workshop's one
+  view (random ticks held at 0); it passed in client shard 4 of run 38774859294, and its overview,
+  `jugcraft_concordance_workshop`, was viewed (the beds on the right, small at that distance).
+- The journey test lays crafted beds and seeds with a mixed bed and a Dewlit graft; it passed in run 38774859294.
 
 Not yet run: any client (the GeckoLib devices, the Fusion beds, the crop textures, the Jade lines and the codex pages
 in game), a two-client dedicated server, and a long unattended garden on a real server.

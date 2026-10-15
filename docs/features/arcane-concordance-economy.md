@@ -42,12 +42,12 @@ bone meal, relic charge, a Crimson Surge) were in no loop check.
   - Every conversion and every source driven by time is modelled, each figure tied to the Java or data it comes from,
     so the model cannot drift from the game.
   - No cycle of conversions comes back with as much as it started with.
-  - **Ritual sinks** (`RITUAL_SINKS`; Concordance Chunk C, C-04; not merged, not run): Root and Rivet takes 32 Ley
+  - **Ritual sinks** (`RITUAL_SINKS`; Concordance Chunk C, C-04; not merged; passed in CI): Root and Rivet takes 32 Ley
     Charge and 6 Focus a run for one Rooted Thallite Foundation, which nothing turns back; modelled as an edge into a
     node with no way out, so a later conversion out of it is weighed with it. `check_economy` holds the sink's figures
     to the ritual's data, and its offerings are worded from that data. The table's Root and Rivet row below is the same
     C-04 addition (not merged).
-  - **JE → a crucible's heat** (Concordance Chunk C, C-05; not merged, not run): a
+  - **JE → a crucible's heat** (Concordance Chunk C, C-05; not merged; passed in CI): a
     [Crucible Stand](crucible-stand.md) pays 8, 16 or 32 JE a tick only on ticks it heats; heat goes nowhere else
     (`je_to_heat`, at the cheapest band's 8 JE, an edge into a node with no way out). `check_economy` holds that heat
     becomes nothing else and that the edge is modelled at the stand's cheapest rate, and anchors the rates and the
@@ -121,8 +121,8 @@ The brief's combinations, and the tests that exercise them (new in this step mar
 | Remote storage with interrupted rituals | **new** `ConcordanceRitualGameTests.aPorterFuellingFromACircleStopsItCleanly`: a porter fuels itself from a channel's pylon mid-ritual; it took exactly what the pylons lost, the ritual stops for want of power with every offering kept, and neither its Focus nor the porter's Ley Charge comes back. `ConcordanceLogisticsGameTests.cancellingAndRecoveringGiveItemsBack`, `fullStorageRemovalAndRestartLoseNothing`, `aBrokenPostSendsItsCargoBack` |
 | Light burnt and relit | **new** `ConcordanceEconomyGameTests.aLanternPutOutHasSpentTheMeasureItBegan`, `aSconceTakenDownHasSpentTheMeasureItBegan` |
 | Automation of a formula | `ConcordanceAlchemyGameTests.machineryRunsAFormulaTwice` |
-| Electricity into a crucible's heat (Concordance Chunk C, C-05; not merged, not run) | `ConcordanceEconomyGameTests.aStandTurnsElectricityIntoHeatOnly`: set to each heat, a Crucible Stand pays exactly its rate on each tick it heats until its store runs short; off, under a crucible already hotter than it aims or with nothing to heat, nothing; no JE comes back out on any face, and no fluid or item. `check_economy`: no gaining cycle through `je_to_heat` |
-| Two carriers for one demand (Concordance Chunk C, C-06; not merged, not run) | `ConcordanceLogisticsGameTests`: `aCrucibleAsksOnceForItsExactShortage`, `aClearedOrReplacedFormulaCancelsItsRequest`, `aFullCourierQuotaWaitsAndBacksOff`, `aBrokenCrucibleTurnsItsRequestBack`, `aCourierFillsACrucibleUntilItIsFull`, `aPostTheSetterMayNotUseIsNeverAsked`, `anUnloadedCrucibleWaitsAndLosesNothing`, `aDiscardedPorterStrandsItsCargoOnce` and `anOfflineSetterPausesTheCourier`, each counting every item in containers and carried after every step; the Peepo client groups `noOverSupplyWithAnOpenCourierRequest` and "crucible demand" (`PeepoIntegrationClientTests`), a full crucible and an unloaded one (`CompanionAutomationChecks`). See [logistics](arcane-concordance-logistics.md) |
+| Electricity into a crucible's heat (Concordance Chunk C, C-05; not merged; passed in CI) | `ConcordanceEconomyGameTests.aStandTurnsElectricityIntoHeatOnly`: set to each heat, a Crucible Stand pays exactly its rate on each tick it heats until its store runs short; off, under a crucible already hotter than it aims or with nothing to heat, nothing; no JE comes back out on any face, and no fluid or item. `check_economy`: no gaining cycle through `je_to_heat` |
+| Two carriers for one demand (Concordance Chunk C, C-06; not merged; passed in CI) | `ConcordanceLogisticsGameTests`: `aCrucibleAsksOnceForItsExactShortage`, `aClearedOrReplacedFormulaCancelsItsRequest`, `aFullCourierQuotaWaitsAndBacksOff`, `aBrokenCrucibleTurnsItsRequestBack`, `aCourierFillsACrucibleUntilItIsFull`, `aPostTheSetterMayNotUseIsNeverAsked`, `anUnloadedCrucibleWaitsAndLosesNothing`, `aDiscardedPorterStrandsItsCargoOnce` and `anOfflineSetterPausesTheCourier`, each counting every item in containers and carried after every step; the Peepo client groups `noOverSupplyWithAnOpenCourierRequest` and "crucible demand" (`PeepoIntegrationClientTests`), a full crucible and an unloaded one (`CompanionAutomationChecks`). See [logistics](arcane-concordance-logistics.md) |
 
 The brief's library interactions:
 
@@ -179,8 +179,12 @@ No new dependency, art, sound or animation.
   1069 server tests. This step adds no client test.
 
 Concordance Chunk C, unit 3 (not merged): `ConcordanceEconomyGameTests` gains `aStandTurnsElectricityIntoHeatOnly`
-(3 in all), and `check_economy` the heat sink. The test has not run: it was written where no Minecraft jar is
-available. `check_mod_data` passes with the new row and checks.
+(3 in all), and `check_economy` the heat sink. It was written where no Minecraft jar is available; it passed in CI
+with unit 3's server tests (run 38720814268's `mod` job) and again in runs 38726242149, 38731825181 and 38774859294,
+every job passing in those three. `check_mod_data` passes with the new row and checks. Unit 2's Root and Rivet sink is
+held by `check_economy` and its ritual tests, which passed in run 38693262154. Concordance Chunk C, unit 5: the load
+card measures the workshop's server cost (C-10; in run 38774859294, +0.240 ms median and +0.550 ms p95 a tick, net, on
+CI's runner); it is a measurement, not an economy test.
 
 Not yet run:
 - a representative installation simulated over real world time in a running world (the tests advance their systems by

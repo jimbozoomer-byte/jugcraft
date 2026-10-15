@@ -10,16 +10,31 @@ Unit 3 (C-05 and C-06) built on `23f28b90e`, in three commits (`940f1f8a8`, `7b2
 records (`00e795594`) and a fifth with the unit review's fixes (`2f13fed54`; see Unit 3's review fixes, after C-06).
 Unit 4 (C-07 to C-09) built on `23f28b90e` too, beside unit 3 rather than on it, in three commits (`5ba973632`,
 `d32ac3a61`, `d6edee4f4`), a fourth for its records (`549a49d7e`) and a fifth with the unit review's fixes (`ce04da475`;
-see the Fixes from the unit review under C-09); the merge of units 3 and 4 joins them. Units 1 to 4 are built and
-recorded on this branch and every local check passes; unit 5 has not started. In CI, unit 1 (through `0b1039312`)
-passed every job in run 38684732031, after one re-run of shard 1, whose failure was main's `PeepoPopulationClientTests`
-cow-breeding flake (fixed by open PR #357); unit 2 (`23f28b90e`) passed every job in run 38693262154; unit 3
-(`2f13fed54`) is in run 38720814268, not finished; unit 4's game code has not been compiled against Minecraft and its
-game tests have not run, and the merge has had no CI run. The As built notes of C-01 to C-09 were written before these
-runs. Chunk C is developed on branch
-`claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in;
-CI run 38617471274 on that base passed every job (see The merge and its CI run). Not merged; no pull request. Chunk B,
-beneath it, is not merged and has no pull request either.
+see the Fixes from the unit review under C-09); the merge of units 3 and 4 (`1c7dc577c`) joins them, and a commit on it
+fixes unit 3's unloaded-crucible client check (`9098c06b1`). Unit 5 (C-10) built on `9098c06b1`, in four commits
+(`a86085b3c`, `bfb08770b`, `31bc7087d`, `6d54726fa`), a fifth with the unit review's fixes (`fd2b558c8`) and a sixth
+that makes the load card compile (`bb856f873`, the candidate); the commit after the candidate changes only records.
+Units 1 to 5 are built and recorded on this branch. In CI:
+- unit 1 (through `0b1039312`) passed every job in run 38684732031, after one re-run of client shard 1, whose failure
+  was main's `PeepoPopulationClientTests` cow-breeding flake (two cows wandered apart; open PR #357 fixes it in main's
+  Peepo code, which this branch does not edit);
+- unit 2 (`23f28b90e`) passed every job in run 38693262154 on its first attempt;
+- unit 3 (`2f13fed54`), run 38720814268: `mod` (every server game test), `optional integrations absent` and client
+  shards 1 to 4 passed; shard 0 failed on `CompanionAutomationChecks` "an unloaded crucible", a test defect fixed in
+  `9098c06b1` (see Combined fixes under Unit 5);
+- the merge of units 3 and 4 (`1c7dc577c`) passed every job in run 38726242149, unit 4's first CI run: its server and
+  client tests passed;
+- `9098c06b1` passed every job in run 38731825181, every client class (171) included; `PeepoCompanionClientTests`,
+  which holds the fixed check, passed in shard 0;
+- unit 5's `fd2b558c8` failed to compile in run 38773020842, fixed in `bb856f873`;
+- the candidate `bb856f873` (units 1 to 5) passed every job in run 38774859294, dispatched with `load_card`, after one
+  re-run of client shard 1 for main's cow-breeding flake again ([Unit 5: evidence and
+  handoff](#unit-5-evidence-and-handoff-c-10)).
+
+The As built notes of C-01 to C-09 were written before these runs. The owner's checkpoint is awaited. Chunk C is
+developed on branch `claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0` with main
+`4d38e9712` merged in; CI run 38617471274 on that base passed every job (see The merge and its CI run). Not merged; no
+pull request. Chunk B, beneath it, is not merged and has no pull request either.
 Proposal: the owner chose Chunk C on 14 October 2026 ("ok begin chunk c"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 5,
 C1 to C4), with [workshops, ecology and pacts](../plans/concordance-expansion-2026-10-10/03-workshops-ecology-and-pacts.md),
@@ -101,11 +116,11 @@ path before multiplying content variants"; MP:66).
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records `807da7f5e`; review fixes `d593ae61d`): local checks pass; every CI job passed in run 38684732031 (through `0b1039312`, after one re-run of shard 1 for main's `PeepoPopulationClientTests` cow-breeding flake) |
-| 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Built (`a0e73881c`, `2c98d6d68`; records `4df687cc7`; merged with unit 1's fixes `2263f851b`; review fixes `23f28b90e`): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; every CI job passed in run 38693262154 |
-| 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Built (`940f1f8a8`, `7b2dd6783`, `46f6e2a0e`; records `00e795594`; review fixes `2f13fed54`; joined with unit 4 in the merge of units 3 and 4): checks run and passed: `owner_art --check`, `check_mod_data`, `check_repository`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; its 53 audit mutations each reported, and the review fixes' 16 and five of the spec's re-run on the code they change; CI run 38720814268 on `2f13fed54` not finished |
-| 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Built on `23f28b90e`, beside unit 3 (`5ba973632`, `d32ac3a61`, `d6edee4f4`; records `549a49d7e`; review fixes `ce04da475`; joined with unit 3 in the merge of units 3 and 4): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; audit mutations 83 of 83 reported; not compiled against Minecraft, no game test run, no CI run yet |
-| 5 | C-10 | The measured small-workshop load, the end-to-end journey, client evidence, combined fixes, the checkpoint and the handoff | this page | Not started |
+| 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records `807da7f5e`; review fixes `d593ae61d`): local checks pass; every CI job passed in run 38684732031 (through `0b1039312`, after one re-run of client shard 1 for main's `PeepoPopulationClientTests` cow-breeding flake), and again with units 2 to 5 in the candidate's run 38774859294 |
+| 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Built (`a0e73881c`, `2c98d6d68`; records `4df687cc7`; merged with unit 1's fixes `2263f851b`; review fixes `23f28b90e`): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; every CI job passed in run 38693262154 on its first attempt, and again in run 38774859294 |
+| 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Built (`940f1f8a8`, `7b2dd6783`, `46f6e2a0e`; records `00e795594`; review fixes `2f13fed54`; joined with unit 4 in the merge of units 3 and 4): checks run and passed: `owner_art --check`, `check_mod_data`, `check_repository`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; its 53 audit mutations each reported, and the review fixes' 16 and five of the spec's re-run on the code they change; CI run 38720814268 on `2f13fed54`: `mod` (every server game test), `optional integrations absent` and client shards 1 to 4 passed, and shard 0 failed on `CompanionAutomationChecks` "an unloaded crucible", a test defect fixed in `9098c06b1`, which passed every job in run 38731825181 (every client class, 171; `PeepoCompanionClientTests`, which holds the fixed check, in shard 0); every job passed again in run 38774859294 |
+| 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Built on `23f28b90e`, beside unit 3 (`5ba973632`, `d32ac3a61`, `d6edee4f4`; records `549a49d7e`; review fixes `ce04da475`; joined with unit 3 in the merge of units 3 and 4): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; audit mutations 83 of 83 reported; first compiled and run in CI with the merge of units 3 and 4 (`1c7dc577c`), whose run 38726242149 passed every job, unit 4's server and client tests included; every job passed again in runs 38731825181 and 38774859294 |
+| 5 | C-10 | The measured small-workshop load, the end-to-end journey, client evidence, combined fixes, the checkpoint and the handoff | this page; `arcane-concordance-journey.md`, `arcane-concordance-delivery.md`, `docs/TESTING.md` | Built on `9098c06b1` (`a86085b3c`; `bfb08770b`, the Build workflow's `load_card` input, for the owner's review; `31bc7087d`; `6d54726fa`; review fixes `fd2b558c8`; the compile fix `bb856f873`, the candidate; records in the commit after it): run and passed for the records: `check_mod_data`, `check_repository`, `concordance_journey --check`, `git diff --check`; CI: `fd2b558c8` failed to compile in run 38773020842; the candidate passed every job in run 38774859294 (after one re-run of client shard 1 for main's cow-breeding flake), the load card's job included; evidence in [Unit 5](#unit-5-evidence-and-handoff-c-10); the owner's checkpoint is awaited |
 
 The plan allows three to five units (09:3); this is five plus the baseline.
 
@@ -433,7 +448,8 @@ outcome changes.
     were run with the unit review's fixes, on a scratch copy: commit 1's twelve (20 variants) and commit 2's seven,
     each reported, but for dropping `ground` from `PREPARATION_NAMES`, which is reported only once the generator has
     rewritten the lang (the stale key hides it from `check_mod_data` alone);
-  - not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest` and CI.
+  - not run when these notes were written: `./gradlew build` (with or without the optional integrations),
+    `./gradlew runClientGameTest` and CI (they have run since, on later heads: see the status at the top).
 
 ### C-02. The Stillroot Poultice and the Kiln Draught (unit 1; C-D1)
 
@@ -599,7 +615,7 @@ the Cinder Kiln's preparation fact, the checks and the records.
 - **Commands,** for each commit:
   - run and passed: as C-01's;
   - the audit mutations on a scratch copy, each reported: 30 for commit 3 and 22 for commit 4;
-  - not run: the build, the game tests and CI.
+  - not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 **Fixes from the unit review (unit 1, a sixth commit).** The review confirmed thirteen findings; each is fixed here, and
 none of the changed Java has run in a game.
@@ -633,7 +649,7 @@ none of the changed Java has run in a game.
 - **Commands:** as C-01's, run and passed; the fixes' twelve audit mutations on a scratch copy, each reported. The pure
   alchemy packages compiled with `javac` against a stub of jspecify's `@Nullable`, and a scratch harness replayed the
   new assertions' alchemy against the real data and agreed (the risk lines with a stand-in for the registry's harm
-  test). Not run: the build, the game tests and CI.
+  test). Not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 ### C-03. Ritual readiness, fault positions, spent and reserved (unit 2)
 
@@ -768,7 +784,8 @@ anchor (`jugcraft_concordance_anchor_gathering_jade`, when Jade is loaded).
     one more, running readiness without the light, is caught by no audit;
   - a scratch harness outside Git, re-run for the records at `2c98d6d68`: the pure Concordance packages compiled with
     JDK 21 and 37 checks of `Choice` and `Readiness` with the game tests' figures passed;
-  - not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest` and CI.
+  - not run when these notes were written: `./gradlew build` (with or without the optional integrations),
+    `./gradlew runClientGameTest` and CI (they have run since, on later heads: see the status at the top).
 
 ### C-04. Root and Rivet (unit 2; C-D2)
 
@@ -875,7 +892,7 @@ first release.
     tag offering: it failed only on the scratch rite's unrelated research, lang and progression errors, so the spec's
     loop misses a tag offering. A foundation-to-Ley conversion of 31 is, as the spec expects, not a gaining cycle;
   - `python3 tools/select_client_tests.py --base 807da7f5e` chose `EncyclopediaClientGameTests`;
-  - not run: the build, the game tests and CI.
+  - not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 **Fixes from the unit review (unit 2, a fifth commit, after the merge `2263f851b`).** The review confirmed seventeen
 findings. Sixteen are fixed here or in the merge; the seventeenth, a commit message, is left as written. None of the
@@ -907,7 +924,7 @@ changed Java has run in a game.
 - **The economy's ritual sink** words its offerings from `tools/concordance_rituals.py` (`offerings()`), as the JEI page
   does, so the economy table follows the rite; its row is re-pasted from the tool.
 - **Records.** C-04's mutation count above (23 caught, a control, mutation 13 a crash). Unit 2's insertions marked "not
-  merged, not run" in [arcane-concordance-rime-strata.md](arcane-concordance-rime-strata.md),
+  merged, not run" (since unit 5's records, "not merged" with the CI run that passed) in [arcane-concordance-rime-strata.md](arcane-concordance-rime-strata.md),
   [arcane-concordance-economy.md](arcane-concordance-economy.md), [thallite.md](thallite.md) and
   [jei-integration.md](jei-integration.md). Thallite's switch sentence (a plate made earlier can still be offered). The
   icon table's full path for `table_plate.png` and the rituals record's lang list ("among them"). Two more unconfirmed
@@ -934,7 +951,7 @@ changed Java has run in a game.
     its fixes) it chose `EncyclopediaClientGameTests`, and against the merge `2263f851b` (the fixes alone) the same.
     Against `807da7f5e` it now chose ten classes, because unit 1's review fixes and the Rime and Strata client tests are
     in that range too;
-  - not run: the build, the game tests and CI.
+  - not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 ### C-05. The Crucible Stand: JE heat for the next stir, piped water (unit 3; C-D3)
 
@@ -1191,12 +1208,13 @@ stays 1.
   Concordance checks and `owner_art.errors()`: C-06's 15 from the spec and three more (`Authority.answering` dropped,
   the lease check dropped, a turn-back cancelling as the formula's owner), each reported; with C-05's 35, all 53. The
   tree was unchanged afterwards (`git status` clean). `python3 tools/select_client_tests.py --base 23f28b90e` chose
-  every client class (171), since `CompanionAutomationChecks` is a shared file. Not run: `./gradlew build` (with or
-  without the optional integrations), `./gradlew runClientGameTest` and CI.
+  every client class (171), since `CompanionAutomationChecks` is a shared file. Not run when these notes were written: `./gradlew
+  build` (with or without the optional integrations), `./gradlew runClientGameTest` and CI (they have run since, on later heads: see the status at the top).
 
 ### Unit 3's review fixes (commit "Chunk C unit 3: fixes from the unit review")
 
-The unit review's confirmed findings, each applied; none of it compiled or run.
+The unit review's confirmed findings, each applied; none of it compiled or run when written (its CI is in the status at
+the top: run 38720814268, then runs 38726242149 and 38731825181).
 - **No request it has no room for** (C-06, C-P53): `supply` measures how much of the item fits through the lookup a
   porter delivers by (`ItemStorage.SIDED`, no side, `CourierLedger.room`) and files that much, or nothing (no backoff,
   so it asks at its next pulse once there is room). Before, a crucible whose five buffer slots held other things (a
@@ -1319,7 +1337,7 @@ The unit review's confirmed findings, each applied; none of it compiled or run.
     five of them in two variants). Mutation 8, the pour without Authority, is reported by the pour's own audit;
     `check_authority`, which the spec also expected to report it, does not, because the bed block's tending keeps the
     same call;
-  - not run: the build, the game tests and CI.
+  - not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 ### C-08. One mixed-bed rule, and harvest strain with recovery (unit 4)
 
@@ -1447,7 +1465,7 @@ stays 1 (`VerdantBedBlockEntity.java:227`). A persistence test reads an older be
   - the pure ecology classes compiled with `javac` (JDK 21) against stubs, and a scratch harness outside Git passed 41
     checks of the mixed bed, the parser's refusals and strain; for these records it was run again on the final tree, its
     catalogue built through C-09's three-argument constructor;
-  - not run: the build, the game tests and CI.
+  - not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 ### C-09. One stable graft trait (unit 4)
 
@@ -1546,10 +1564,11 @@ niche helper and tests.
     `PeepoGardenExpansionClientTests`, `PeepoHarvestClientTests`, `PeepoIntegrationClientTests`,
     `PeepoSuppliesClientTests`, `SpodumeneClientGameTests` and `WorldDesignerClientGameTests`, noting that no client
     test shows the Jade client, the JEI plugin, `ComposeText`, `EcologyParser`, `Neighbours` or `recipe_view.json`;
-  - not run: the build, the game tests and CI.
+  - not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 **Fixes from the unit review (unit 4, a fifth commit).** The review confirmed ten findings and rejected sixteen; all ten
-are fixed here. None of the changed Java has been compiled against Minecraft or run in a game.
+are fixed here. None of the changed Java had been compiled against Minecraft or run in a game when this was written;
+its first CI run, run 38726242149 on the merge of units 3 and 4, passed every job.
 - **A graft with a full range crashed the generator** (C-09). `graft_text` joined `_range`'s `None` for a range such as
   `[0, 0, 32, 32]`, so mutation 5 crashed `tools/generate_material_data.py` and `check_mod_data` (the codex is built
   before `check_graft`). It now writes "nutrients any"; Dewlit's page is unchanged. The mutation record above says how
@@ -1589,7 +1608,7 @@ are fixed here. None of the changed Java has been compiled against Minecraft or 
     `EncyclopediaClientGameTests`, `PeepoActionClientTests`, `PeepoGardenExpansionClientTests`,
     `PeepoHarvestClientTests` and `PeepoIntegrationClientTests` (noting that no client test shows
     `VerdantBedBlockEntity`); against `23f28b90e` the same 12 classes as for the records above;
-  - not run: the build, the game tests and CI.
+  - not run when these notes were written: the build, the game tests and CI (they have run since, on later heads: see the status at the top).
 
 ### C-10. The measured workshop, the journey, the evidence and the checkpoint (unit 5)
 
@@ -1605,8 +1624,10 @@ are fixed here. None of the changed Java has been compiled against Minecraft or 
     sign payloads), counted if a cheap counter proves feasible, otherwise stated as not measured;
   - **client frame time:** CI's client shards render in software (`.github/workflows/build.yml:109`), so frame times
     there describe that renderer only; a player's hardware stays not run unless someone runs it;
-  - **runner** (C-P20): a server game test of its own, opted in so ordinary runs are not lengthened (about 12,000 ticks
-    with warm-up is ten minutes or more); if a client class is used instead, it gets a `WEIGHTS` entry
+  - **runner** (C-P20): a server game test of its own, opted in so ordinary runs are not lengthened (the game test
+    server runs its ticks back to back, mc263src `GameTestServer.waitUntilNextTick`, so the card takes its ticks × their
+    mean time: measured, "1 GAME TESTS COMPLETE IN 10.16 s" in run 38774859294); if a client class is used instead, it
+    gets a `WEIGHTS` entry
     (`tools/select_client_tests.py:53`) to stay under the 60-minute job limit (`build.yml:102`);
   - **budget** (C-P19), agreed before merge.
 - **The journey:** `tools/concordance_journey.py` and `ConcordanceJourneyGameTests` gain the workshop route from a manual
@@ -1622,6 +1643,72 @@ are fixed here. None of the changed Java has been compiled against Minecraft or 
   family, whether the visual workshop fits the desired style). The review route (above) goes with it as a question, and
   the load budget is put at merge review (`docs/TESTING.md:41`), not as a fourth decision.
 - **The handoff** (10:133-146) on this page.
+
+**As built (unit 5):**
+- **The load card** (C-P66, C-P67): `ConcordanceWorkshopLoadGameTests.loadCard` (`a86085b3c`; compile fix
+  `bb856f873`). It measures only when Fabric's game test filter names exactly its id,
+  `jugcraft-test:concordance_workshop_load_game_tests_load_card`; in every other run, every ordinary build included, it
+  passes on its first tick and places nothing. Locally, the command in `docs/TESTING.md` (Java 25). In CI, a manual
+  Build run with `load_card` ticked runs it alone in the "workshop load card" job and repeats its lines as one notice
+  (`bfb08770b`, a workflow change for the owner's review).
+  - The workshop it measures: a Crucible Stand under an Alembic Crucible replaying the Stillroot Poultice, with water
+    from an Electric Pump through a bronze pipe; a Lesser Circle running Root and Rivet again and again, its pylons fed
+    by cable; a Peepo and a Clockwork Porter bringing Mendvetch; nine planted Verdant Beds, a Mulch Maw and a Gleaner.
+    A tenth bed, under the Verdant Heart the Gleaner draws its Verdance from, is an addition the workload needs. Power
+    comes from four Creative Energy Cells: test scaffolding, not a player's generators. The crucible's companion filter
+    is set to the salve, so its bowls count as its containers.
+  - It holds noon and the weather, turns mob and wandering-trader spawning off, force-loads its yard's chunks (the game
+    test server sets no simulation distance, so only forced chunks tick) and measures the same world twice, baseline
+    first: each span a warm-up (at least 2,000 and 1,500 ticks, then until the loaded chunk count holds 400 ticks),
+    then 6,000 ticks from the server's 100-tick ring, net of the test's own work (the simulated player's actions and
+    output extraction included). Before its assertions it logs the runner (every JVM argument included), the world,
+    the counts, memory, every item in, out, carried and stored, and what one test player is sent.
+  - Measured once, in run 38774859294 on `bb856f873`; the block is quoted under [Unit 5](#the-load-card-run-38774859294).
+    On that runner (AMD EPYC 7763, 2 physical and 4 logical CPUs, Java 25.0.4.1) the workshop added +0.240 ms to the
+    median tick and +0.550 ms to the p95, net, and retained heap rose +0 MiB beyond the baseline's change: within
+    C-P67's proposed budget, which the owner decides at merge review. While measured: poultices 21, Root and Rivet 37
+    (interrupted 0), the porter 44 Mendvetch in 22 requests and the Peepo 0, Gleaner harvests 2, the Maw ate 150;
+    problems none. The game test took 10.16 s.
+  - Not measured: client frame time on a player's hardware; two clients; a busy server; Jade's and the encyclopedia's
+    replies (they answer a client's request); compression and framing; any other hardware.
+- **C-P21's measurement** (C-P68): `ConcordanceWorkloadGameTests.gleanersHeartSearch` times a starved Gleaner pulse
+  (its whole 729-position Heart search) and a fed one (its 147-position crop search), each after 1,000 untimed pulses,
+  in every ordinary build. The `mod` job of run 38774859294 (job 116559763087) logged: "Concordance workload: Gleaner
+  pulse starved 333 us (its Heart search, 729 positions, 729 of them loaded; the position list alone 304 us), fed 62 us
+  (its crop search, 147 positions), each after 1000 untimed pulses; C-P21's line 250 us: over; runner: 4 processors,
+  amd64, Java VM 25.0.4.1+1-LTS". Over the line, so by C-P68 a change is proposed and not applied: the position list
+  alone took 304 of the 333 µs, which points at caching `Garden.nearest`'s fixed offset order; a vertical reach of ±1
+  (243 positions) is the other. `HEART_REACH` stays 4 until the owner decides. One run on one shared runner, beside
+  the other server tests.
+- **The journey** (C-P69): `WORKSHOP`, `workshop_walk`, `workshop_problems`, `_band`, `_switches` and `_workshop_wants`
+  in `tools/concordance_journey.py` (`--check` prints only the problems and exits 1 on one); `WORKSHOP`, `FACTORY`,
+  `CHUNK_C_ITEMS` and `recipe_file` in `tools/acquisition.py`; kelp, barrel, writable book and bowl in
+  `VANILLA_SOURCES`; `check_acquisition`'s workshop rows; `ConcordanceJourneyGameTests`' `WORKSHOP_RECIPES`,
+  `theWorkshopsRecipesLoad` and `theLivingWorkshopFromAManualStart`, in the existing `jugcraft-test:drone_depot`
+  structure (16×8×16 air), so the client-test selector sees no new shared file. Both tests passed in the `mod` job of
+  run 38774859294 ("All 1836 required tests passed"). The test places its factory parts with `setBlock`, as compact
+  one-block coal generators; a crafted generator builds the full multi-block. The route's table is in
+  [the journey record](arcane-concordance-journey.md#the-living-workshop).
+- **Client evidence** (C-P70): `ConcordanceWorkshopClientGameTests` (`6d54726fa`; review fixes `fd2b558c8`), registered
+  in the gametest `fabric.mod.json`, 200 s in `WEIGHTS` (an estimate) and held by `check_workshop_client_evidence`. One
+  client on the game's own dedicated server, at the ordinary GUI scale, random ticks held at 0:
+  - the whole workshop in one view;
+  - the stand lit and then dark (its crucible waiting for Mendvetch) from one place;
+  - the crucible's Inspect page naming its stand;
+  - Root and Rivet under way beside the workshop: its Inspect page at the ordinary scale and at GUI scale 4 (a 1920×1080
+    window, the applied scale checked), and, with Jade loaded, Jade's snapshot checked and its overlay shot;
+  - the rite completes (one foundation from exactly its offerings, 2 Ley Charge a step from each pylon, taken by its
+    participant) and the batch makes two poultices in its two bowls;
+  - 100 frames' render times logged: Mesa's software renderer in CI, never a player's hardware.
+
+  It ran in client shard 4 of run 38774859294, which passed. Which of its seven shots were viewed is under
+  [Unit 5](#client-evidence-run-38774859294); its frame-time line was not read for these records.
+  `EncyclopediaClientGameTests` is unchanged: its crucible (unit 1, with a GUI scale 4 shot), anchor (Chunk A and unit
+  2) and bed (unit 4) pages stand for C-10's three Inspect pages. Jade absent: the server tests, in the `optional
+  integrations absent` job, which passed; no client runs without Jade. GuiLib: not relevant (Chunk C adds no GuiLib
+  code; the Inspect page is the encyclopedia's own screen). JEI's pages: not seen.
+- **Combined fixes, the checkpoint and the handoff:** under [Unit 5](#unit-5-evidence-and-handoff-c-10). The
+  checkpoint is reported to the owner, not kept on this page.
 
 ## Interfaces expected to change
 
@@ -1736,6 +1823,27 @@ are fixed here. None of the changed Java has been compiled against Minecraft or 
 - **Saved and sent:** bed keys `strain`, `ripened` and `graft`, saved only when set, the stamp staying 1; the update tag
   always adds `strain` and `ripened`, and `graft` and `graft_host` while grafted. No new block, item or payload.
 
+**As built in unit 5:**
+- **No new id, saved key, payload, lang key or test structure:** the journey's server test reuses
+  `jugcraft-test:drone_depot`; the game's own code is unchanged.
+- **Server game tests:** `ConcordanceWorkshopLoadGameTests` (`loadCard`, its `ID` and window constants; registered in
+  the gametest `fabric.mod.json` after `ConcordanceWorkloadGameTests`); `ConcordanceWorkloadGameTests.gleanersHeartSearch`
+  and `HEART_SEARCH_LINE_US` (250); `ConcordanceJourneyGameTests`' `WORKSHOP_RECIPES`, `theWorkshopsRecipesLoad` and
+  `theLivingWorkshopFromAManualStart`.
+- **Client game test:** `ConcordanceWorkshopClientGameTests`, registered after `ConcordanceWayfaringClientGameTests`;
+  `WEIGHTS["ConcordanceWorkshopClientGameTests"]` = 200 in `tools/select_client_tests.py`.
+- **Tools:** in `tools/check_mod_data.py`, `check_load_card`, `check_workshop_client_evidence`, `WORKSHOP_CLIENT`,
+  `WORKSHOP_CLIENT_SHOTS`, `WORKSHOP_CLIENT_PIECES` and `_inside_block`; in `tools/acquisition.py`, `WORKSHOP`,
+  `FACTORY`, `CHUNK_C_ITEMS` and `recipe_file`, which `check_acquisition` ties to the files on disk; in
+  `tools/concordance_journey.py`, `WORKSHOP`, `workshop_walk`, `workshop_problems`, `_band`, `_switches` and
+  `_workshop_wants`, and `--check`'s exit status; `VANILLA_SOURCES` in `tools/concordance_progression.py` (kelp,
+  barrel, writable book, bowl); Jade's row of `tools/concordance_delivery.py`'s `MATRIX`, pasted into the delivery
+  record.
+- **Workflow (`bfb08770b`, for the owner's review):** the Build workflow's `workflow_dispatch` input `load_card`
+  (boolean, default false) and the job `load-card` ("workshop load card"), which runs only on a manual run with it
+  ticked. No existing job, trigger, gate or permission changes.
+- **Records:** `docs/TESTING.md` gives the card's command and points to C-P19 for its limits.
+
 ## Dependencies and order
 
 1. C-00: done (the merge, its CI, this page).
@@ -1786,8 +1894,9 @@ after the first path (09:16).
 - **Naming by effect** makes any Regeneration salve carrying nothing harmful a Stillroot Poultice, which earns credit
   (C-P29).
 - **Unit 1, not yet seen in a game:** the Expeditions page with the poultice's fact for all four keepers stays within
-  the 96 rows a page holds (about 77 by the spec review's count; `theExpeditionsPageHoldsEveryKeeper` checks it, not
-  run), and whether the client test's Jade shot shows Jade's overlay (`takeScreenshot` with the HUD).
+  the 96 rows a page holds (about 77 by the spec review's count; `theExpeditionsPageHoldsEveryKeeper` checks it, a
+  server test that passed in CI from run 38684732031 on), and whether the client test's Jade shot shows Jade's overlay
+  (`takeScreenshot` with the HUD; its shard passed, not viewed).
 - **Feature switches:** the foundation needs `machines` and `thallite` (C-04); with either off the powered route is out
   of reach and the campfire route stays. Whether Fabric applies load conditions to Concordance data is unverified.
 - **Strain** is a new soft cost on every harvest path, Peepo's and the Crop Harvester's included: visible, capped and
@@ -1801,7 +1910,27 @@ after the first path (09:16).
   other Concordance tests. Unit 1's tests swap the rules only through `under()`, which `check_diagnostics` enforces
   (C-P28).
 - **Load measurement** on CI is noisy and hardware-specific: numbers are recorded, and only an agreed, generous limit is
-  asserted.
+  asserted. As built in unit 5 (the load card, C-P66):
+  - the game test server runs its ticks back to back, not at a 20-tick server's rhythm, so per-tick work is comparable
+    and wall-clock behaviour (CPU boost, cache warmth, collections per second) is not;
+  - one run on one shared runner, baseline first, so JIT warmth favours the workshop's span; the drift line (+0.023 ms
+    in run 38774859294) reports this and does not remove it;
+  - an autosave lands about once a span (every 6,000 ticks) and shows in the maximum and the over-50 ms count (run
+    38774859294: the baseline's maximum 64.3 ms, its one tick over 50 ms; the workshop's 29.3 ms);
+  - the packet counter's own garbage adds to both spans' collection pressure; its encoding time is excluded, its effect
+    on collection is not;
+  - the test player is not a client: it does not move, the test acknowledges its chunk batches, payloads sent only to
+    a client that can take them never reach it (signs are counted from `observe`, an upper bound), and Jade's and the
+    encyclopedia's replies need a client and are not measured;
+  - the Peepo brought 0 Mendvetch while measured (the porter 44): whether it served the raised crucible at all in the
+    headless server, or lost every search to the porter, the card's lines do not say. The card asserts only that
+    Mendvetch was brought;
+  - the Gleaner's harvests while measured were 2 (a Mendvetch and a Dewmoss; no Sunpetal or Gloamcap), so the harvest
+    assertion counts harvests since the build, five crops having been planted ripe;
+  - forcing the yard's chunks changes what ticks: its 12 chunks, flat ground far below included, tick in both spans;
+  - `JAVA_TOOL_OPTIONS` reaches every Java program in that shell or CI step, Gradle's own included: harmless, but noisy;
+  - the porter's integrity of 64 allows about 64 trips, so a much longer span could wear it out; in run 38774859294 it
+    served 22 requests while measured.
 - **Unit 2, not yet seen in a game:**
   - the cached shape report can hold a refused start's charge and ownership faults for up to 100 ticks: the status lines
     and Jade show them while readiness reads the channels itself, so the two can disagree for that window;
@@ -1860,7 +1989,9 @@ after the first path (09:16).
     its formula;
   - the Peepo unload check depends on vanilla's chunk tickets and unload delay (1,200 ticks allowed) and on the
     companion's transport retrying while fenced in; the full-crucible check on the companion handing back unused
-    cargo; both read in the code, not run;
+    cargo; both read in the code when written. Both are `CompanionAutomationChecks`, run by `PeepoCompanionClientTests`:
+    the unloaded-crucible check failed in run 38720814268 (shard 0) on a test defect, fixed in `9098c06b1`, and both
+    passed in run 38731825181 (shard 0);
   - the unit's hot shared files: lang, `check_mod_data.py`, `CHANGELOG.md`, `tools/owner_art.py` (#351, #354),
     `docs/WHAT_EXISTS.md` (#366), `docs/INTEGRATION_STATUS.md` (#361 to #365); the open pull requests' file lists read
     for C-06 include none of the three Peepo files it edits (`CrucibleCompanion`, `PeepoIntegrationClientTests`,
@@ -1905,7 +2036,24 @@ after the first path (09:16).
     or the Crop Harvester; the tests accept both); the Crop Harvester's footprint against the test's glowstone; a
     gametest server's `Component.getString()` resolving mod lang; `lookAt`'s aim at the crop and the bed; light settled
     by ticks 44 to 46; every test of a batch starting on one tick; the two new codex pages' length;
-  - nothing of the unit has been compiled against Minecraft or run.
+  - nothing of the unit has been compiled against Minecraft or run (written before its CI: the merge's run 38726242149
+    passed every job, unit 4's tests included).
+- **Unit 5, not yet seen by a person:**
+  - the client view's framing is arithmetic for FOV 70 and a 16:9 window; in the viewed `jugcraft_concordance_workshop`
+    the whole workshop is in view but small at that distance;
+  - the client shots rely on about 200 ticks of formula and Root and Rivet's 160; the class passed in run 38774859294;
+  - one client only; no CI job runs a client without Jade;
+  - the client class's weight (200 s) is an estimate: run 38774859294's shard 4, which ran it, took 32 min 23 s in all;
+  - the Jade overlay on the anchor is not seen: no Jade box is visible in the 480×270 preview of
+    `jugcraft_concordance_anchor_root_and_rivet_jade`, while the test's Jade snapshot assertion passed;
+  - the stand's lit and dark pair answers C-P48's daylight question only as far as Mesa's software renderer shows it;
+    the lit shot was viewed (the copper coil lit), the dark one not;
+  - the journey test is end to end, so its first failure hides the rest; the porter works on its own time and the
+    900-tick budget relies on it; the courier ledger is shared with every test running at once and `problems()` is read
+    only at the end; it uses compact one-block generators where a player's are multi-block; the factory's own
+    reachability is left to the factory's graph;
+  - the workflow change makes a pull request that changes `build.yml` run every client class; GitHub took the
+    `load_card` input from this branch's file in run 38774859294; the notice's length limit is not known.
 - **Unverified:** the null-side Fabric item insert (inferred from a passing post test *(survey)*; the C-06 design read
   Fabric API 0.161.0's source: a `Container` falls back to its plain slots, each asking `canPlaceItem`; not re-read for
   these notes); vanilla's container drop when a crucible overrides `preRemoveSideEffects` (read in the mirror's `HEAD`,
@@ -1938,6 +2086,205 @@ after the first path (09:16).
     complete because tests compile (10:162; 09:20; 09:315).
 17. Do not restore or rewrite main's `CHANGELOG.md` here; this branch's merge resolution is the only change.
 
+## Unit 5: evidence and handoff (C-10)
+
+### Candidate and CI
+
+- Candidate: `bb856f873` on `claude/chunk-c-living-workshop` (units 1 to 5 on the base `e079ad4a3`; not merged, no
+  pull request). CI run [38774859294](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38774859294), a
+  workflow_dispatch of the Build workflow with `load_card` ticked, in two attempts; every job passed by the second.
+  The commit after the candidate changes only records.
+- Attempt 1: every job passed except client shard 1, which failed on main's `PeepoPopulationClientTests` cow-breeding
+  flake, the same that failed unit 1's run 38684732031 (open PR #357 fixes it in main's Peepo code, which this branch
+  does not edit).
+- Attempt 2 re-ran client shard 1 alone, and it passed, so every job passed.
+- The jobs, start to end:
+  - `mod`: "1836 GAME TESTS COMPLETE IN 5.493 min" and "All 1836 required tests passed"; the job took 18 min 38 s. No
+    game test is marked optional, so every server game test of units 1 to 5 passed, the journey's two new ones and
+    `gleanersHeartSearch` among them; the load card, not selected there, passed at once;
+  - `optional integrations absent`: passed, 7 min 9 s;
+  - client shards: 0 in 38 min 2 s, 1 in 34 min 6 s (attempt 2), 2 in 26 min 31 s, 3 in 44 min 43 s, 4 in 32 min 23 s.
+    `ConcordanceWorkshopClientGameTests` ran in shard 4. The longest, shard 3, stays inside its 60-minute limit;
+  - workshop load card: 2 min 16 s; "1 GAME TESTS COMPLETE IN 10.16 s" and "All 1 required tests passed".
+- Runs on the way (this branch has no pull request):
+  - 38684732031 (unit 1, through `0b1039312`): every job passed after one re-run of client shard 1, whose failure was
+    main's `PeepoPopulationClientTests` cow-breeding flake (two cows wandered apart);
+  - 38693262154 (unit 2, `23f28b90e`): every job passed on its first attempt;
+  - 38720814268 (unit 3, `2f13fed54`): `mod` (every server game test), `optional integrations absent` and client
+    shards 1 to 4 passed; shard 0 failed on `CompanionAutomationChecks` "an unloaded crucible" (below);
+  - 38726242149 (the merge of units 3 and 4, `1c7dc577c`): every job passed; unit 4's first CI run, its server and
+    client tests passed;
+  - 38731825181 (`9098c06b1`): every job passed, every client class (171) included; `PeepoCompanionClientTests`, which
+    holds the fixed check, passed in shard 0;
+  - 38773020842 (`fd2b558c8`, unit 5 before its compile fix): the game tests' compile failed: inside the load card's
+    `Stats` record, `median(sorted)` resolved to the record's own `median()` accessor. `bb856f873` renames the helper
+    `middle(long[])`.
+- Local, for the records commit: `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+  `python3 tools/concordance_journey.py --check` and `git diff --check`, each run and passed. `./gradlew build`,
+  `./gradlew runGameTest` and `./gradlew runClientGameTest` ran in CI only.
+
+### Combined fixes
+
+- `9098c06b1`, on the merge of units 3 and 4: unit 3's `CompanionAutomationChecks` "an unloaded crucible" failed in
+  shard 0 of run 38720814268. It was a test defect: the check lifted the forced chunks in the same tick it moved the
+  player back, so the companion was reloaded as a new copy and the check read the removed one; in the game the delivery
+  is one transaction. Only the check changed (`CompanionAutomationChecks.java`), and it passed in run 38731825181.
+- Unit 5's own: the unit review's fixes (`fd2b558c8`: the GUI scale 4 shot taken at scale 4 in a larger window, the
+  stand's dark shot waiting for its crucible's reason, the load card asserting only that Mendvetch was brought, and
+  tighter audits) and the compile fix (`bb856f873`). CI found no other fault in unit 5.
+
+### The demonstration (09:120, 09:136, 09:140)
+
+"Server" means a game-test server with test (mock) players; "client" means one real client on the game's own dedicated
+server, never two. Every server test named passed in run 38774859294's `mod` job, and in `optional integrations
+absent` with its Jade checks skipped; the client classes passed by their shards in run 38731825181 (every client
+class) and, for `ConcordanceWorkshopClientGameTests`, in shard 4 of run 38774859294. Each test starts from its own
+fresh structure; only the journey test walks one player through the whole workshop, and no person has played it.
+
+| Item | Evidence |
+|---|---|
+| Survival-reachable from a manual start (09:140) | Server: `ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart` (one survival mock player with vanilla materials, two Thallite ingots, two full Kindled Lanterns and a blank formula: Mendvetch crafted by the server's recipe matcher, the Kiln Draught over a campfire and the poultice over a magma block by hand, Root and Rivet from lantern-filled pylons, the stand fed by a coal generator and a pump, a porter bringing the formula's Mendvetch from a chest at its post, a mixed bed and a Dewlit graft; nothing lost or made twice) and `theWorkshopsRecipesLoad`. Checks: `concordance_journey.py --check`, `check_acquisition`'s workshop rows |
+| Powered convenience | Server: the stand's tests in `ConcordanceAlchemyGameTests`, `theFullChainRunsFromAPumpAndACable`. Client: `ConcordanceWorkshopClientGameTests` (the stand heating a formula's batch to two poultices, its water from the pump) |
+| Formula reload | `aChangedRuleKeepsTheFormulaAndSaysWhy`, `aRestoredRuleResumesTheFormula`, `aWrittenFormulaThatNoLongerReplaysSaysWhichStep`, `aSavedFormulaThatNoLongerReadsIsKeptAndReported` |
+| Output blockage | `aFullOutputPausesAndVoidsNothing`, `anOldUnnamedBrewInTheOutputPausesAndSaysSo`, `theCompanionAndTheCrucibleAgreeOnFull` |
+| Container returns | `aPoulticeReturnsItsBowlToAFullInventory` |
+| Interruption | `aDryPylonStopsRootAndRivetAndKeepsTheOfferings`, `theInterruptionReasonIsKept` |
+| Save and reload | `aRestartJustBeforeOutputBottlesOnce`, `rootAndRivetSavedMidRunLapses`, `theCrucibleStandKeepsItsEnergyAndSettingThroughASave`, `theCrucibleKeepsItsRequestThroughASave`, `anOlderBedLoadsWithoutItsNewKeys`, `strainSurvivesASave`, `aGraftSurvivesEveryHarvestPathAndASave` |
+| Full destination and unloaded target (09:136) | Server: `aCourierFillsACrucibleUntilItIsFull`, `anUnloadedCrucibleWaitsAndLosesNothing`, `aBrokenCrucibleTurnsItsRequestBack`. Client: `PeepoIntegrationClientTests` (crucible demand), `CompanionAutomationChecks` through `PeepoCompanionClientTests` (a full crucible; an unloaded one, "delivered once, none lost or doubled") |
+| No profit loop | `workshopProductsAreNeverWeighed`, `theFoundationIsNeverWeighed`, `productsNeverFeedTheCrucible`, `aStandTurnsElectricityIntoHeatOnly`, `theBonusSpendsNoExtraNutrientAndMintsNone`; `check_workshop_products`, `check_economy` |
+| Poultice credit | the eight tests unit 1 added to `LairEncounterGameTests` |
+| Garden | the 21 tests unit 4 added to `ConcordanceGardenGameTests` (33 in the class) |
+| Load (C-10) | `ConcordanceWorkshopLoadGameTests.loadCard` (below); `ConcordanceWorkloadGameTests.gleanersHeartSearch` (C-10's As built notes) |
+
+### The load card (run 38774859294)
+
+The "workshop load card" job's output, as the job logged it (job 116559763522, 2026-10-15 17:08:45 to 17:11:01 UTC, on
+`bb856f873`; one trailing space trimmed, after "0 total;"):
+
+```text
+===== Concordance Chunk C workshop load card (C-10) =====
+build: Jugcraft 0.1.0-alpha; Jade loaded
+runner: Minecraft Version: 26.3
+runner: Operating System: Linux (amd64) version 6.17.0-1022-azure
+runner: Java Version: 25.0.4.1, Eclipse Adoptium
+runner: Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+runner: Processor Vendor: AuthenticAMD
+runner: Processor Name: AMD EPYC 7763 64-Core Processor
+runner: Frequency (GHz): -0.00
+runner: Number of physical packages: 1
+runner: Number of physical CPUs: 2
+runner: Number of logical CPUs: 4
+runner: Memory: 465567744 bytes (444 MiB) / 889192448 bytes (848 MiB) up to 4192206848 bytes (3998 MiB)
+runner: JVM Flags: 0 total;
+runner: max heap 3998 MiB; collectors G1 Young Generation, G1 Concurrent GC, G1 Old Generation
+runner: JVM arguments: -Dfabric-api.gametest.filter=jugcraft-test:concordance_workshop_load_game_tests_load_card -Dfabric-api.gametest -Dfabric.dli.config=/home/runner/work/jugcraft/jugcraft/.gradle/loom-cache/launch.cfg -Dfabric.dli.env=server -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer --sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant
+world: game test server (flat world, ticks run back to back); noon and weather held, mobs and wandering traders off, random tick speed 3; player list view 0 and simulation 0 (the chunk map views at least 2); the yard's 12 chunks force-loaded (11 by the card); players 1 (a server-side test player, no client)
+spans: baseline from tick 2996, workshop from tick 10497; each 6000 ticks in 60 windows of 100 after warm-ups of 2000 and 1500 ticks (at least 2000 and 1500, then until the loaded chunk count held 400 ticks); tick times net of the test's own work, including the simulated player's actions and output extraction; power from Creative Energy Cells (test scaffolding, not a player's generators)
+tick ms, net of the test's own work | median p95 mean max over-50ms | 100-tick window means: median p95
+baseline 0.074 0.124 0.092 64.3 1 | 0.076 0.123
+workshop 0.314 0.674 0.370 29.3 0 | 0.350 0.521
+raw medians 0.078 and 0.330 ms; the test's own work 0.005 and 0.029 ms a tick
+delta: median +0.240 ms, p95 +0.550 ms; baseline drift (second half less first) +0.023 ms
+memory: retained after a full collection: baseline 375 -> 376 MiB, workshop 377 -> 377 MiB (+0 MiB beyond the baseline's change); heap in use +24.79 and +44.90 MiB per 1,000 ticks; collections 0 (0 ms) and 0 (0 ms)
+chunks loaded: baseline 961 -> 961, workshop 961 -> 961
+counts: Crucible Stand 1, Alembic Crucible 1, Electric Pump 1 (bronze pipe 1, spring 1), Creative Energy Cells 4, copper cables 11, Ley Pylons 5 (4 in the circle, 1 at the post), Circle Anchor 1, Warding Stones 8, Courier Post 1, hoppers 3, containers 5, Peepo 1, Clockwork Porter 1, Verdant Beds 10 (9 planted: Mendvetch 3, Sunpetal 2, Dewmoss 2, Gloamcap 2; the Verdant Heart's 1), Verdant Heart 1, Mulch Maw 1, Gleaner 1, water sources 3
+level at the end: players: 1, entities: 3,3,3,81,81,0,0 [jugcraft:clockwork_porter:1,peepo_companion:peepo:1,minecraft:player:1], block_entities: 19 [jugcraft:ley_pylon:5,jugcraft:creative_energy_cell:4,minecraft:hopper:3,jugcraft:gleaner:1,jugcraft:circle_anchor:1], block_ticks: 0, fluid_ticks: 0, chunk_source: Chunks[S] W: 961 E: 3,3,3,81,81,0,0
+active recipes: Alembic Crucible formula "water 1; add jugcraft:mendvetch jugcraft:raw; add jugcraft:mendvetch jugcraft:raw; stir warm; stir warm; stir warm; stir warm" (the Stillroot Poultice); rite jugcraft:root_and_rivet
+work while measured: poultices 21, Root and Rivet 37 (interrupted 0), Peepo brought 0 Mendvetch, porter 44 in 22 requests, Gleaner harvests 2 {mendvetch=1, sunpetal=0, dewmoss=1, gloamcap=0}, Heart searches that drew 0 (of 150 pulses), Maw ate 150, crucible waits {missing_ingredient=26, none=34}, stand lit at 29 of 60 window ends
+inventory: Mendvetch 384 = supplies 330 + Peepo 0 + carried 0 + porter 0 + buffer 1 + used 53; bowls 128 = left 102 + used 26; rite plates 47, copper 188, Mendvetch 188 = 46 foundations (4 copper, 4 Mendvetch each) + held [1 jugcraft:thallite_plate, 4 minecraft:copper_ingot, 4 jugcraft:mendvetch, 0 minecraft:air, 0 minecraft:air, 0 minecraft:air]; Maw ate 187 of 256 chaff; open requests 0; ground and ledger checked; problems none
+network to the one test player (uncompressed, unframed): baseline 310 packets 3.1 KiB (0.01 KiB/s), workshop 7773 packets 144.9 KiB (0.48 KiB/s); unsized 0 and 0; signs in reach 0 and 864 (58.8 KiB, an upper bound: the level's budget may drop some)
+network, workshop, by kind: block_entity_data jugcraft:circle_anchor 150/31.6 KiB, minecraft:system_chat 185/23.6 KiB, minecraft:move_entity_pos 1883/18.4 KiB, minecraft:set_entity_motion 1706/13.3 KiB, block_entity_data jugcraft:crucible 191/12.2 KiB, minecraft:move_entity_pos_rot 935/11.0 KiB, block_entity_data jugcraft:verdant_bed 89/9.9 KiB, minecraft:sound 245/7.7 KiB, minecraft:block_update 512/6.0 KiB, minecraft:rotate_head 1184/3.5 KiB, minecraft:set_entity_data 316/3.3 KiB, minecraft:set_time 300/2.9 KiB
+network not measured: Jade's and the encyclopedia's replies (they answer a client's request); compression and framing
+budget (C-P19 in C-P67's form, proposed; the owner decides at merge review): median +1.0 ms: within; p95 +2.5 ms: within; retained +4 MiB beyond the baseline's: within. Asserted here: +5.0, +12.5 ms, +64 MiB
+===== end =====
+```
+
+Read with C-P67's proposed budget (median +1.0 ms, p95 +2.5 ms, retained +4 MiB beyond the baseline's): within, on this
+runner, in this one run. The card names its runner and claims nothing for other hardware. The Peepo brought no
+Mendvetch while measured; the porter brought it all (Risks, Load measurement).
+
+### Client evidence (run 38774859294)
+
+What was viewed for these records: shots extracted from client shard 4's log of run 38774859294 at the log's 480×270
+preview size (the full-size images are the run's `client-screenshots-<shard>` artifacts, not downloaded). A screenshot
+shows presentation; the tests' checks are the evidence of behaviour.
+
+| Item | Shot (class) | Seen |
+|---|---|---|
+| The whole workshop at the ordinary scale | `jugcraft_concordance_workshop` (`ConcordanceWorkshopClientGameTests`) | Viewed: the whole workshop, small at that distance; the stand and crucible cluster on the left, the circle in the centre, the beds on the right |
+| The stand lit | `jugcraft_concordance_stand_lit` (same) | Viewed: the crucible on the stand, its copper coil lit, the pump and a Creative Energy Cell beside it |
+| The stand dark, its crucible waiting | `jugcraft_concordance_stand_dark` (same) | Not viewed; its shard passed |
+| The crucible's Inspect page on its stand | `jugcraft_encyclopedia_inspect_crucible_stand` (same) | Viewed. It reads: "Alembic Crucible at 7, -59, 11 / 62 degrees (Warm) / Crucible Stand beneath heats it towards 65 degrees / 2 of 6 parts / Its tank holds 3 of 3 parts of water / Formula: step 3 of 9: Mendvetch, as it comes / Waiting to go in: 3 Mendvetch / Bottles and bowls: 2 Bowl" |
+| Root and Rivet under way: spent apart from held, its stage table | `jugcraft_encyclopedia_inspect_root_and_rivet`, `_scale4` (same) | Not viewed; its shard passed |
+| Root and Rivet in Jade | `jugcraft_concordance_anchor_root_and_rivet_jade` (same) | Viewed: the circle with its anchor; no Jade box is visible at the 480×270 size. The test's Jade snapshot assertion passed |
+| The foundation's icon | `jugcraft_rooted_thallite_foundation` (`EncyclopediaClientGameTests`) | The icon was viewed: a green Thallite plate with copper rivets and roots beneath; the roots may read as legs. It awaits the owner's review |
+| The crucible's Inspect pages (unit 1) | `jugcraft_encyclopedia_inspect_crucible`, `_scale4`, `_inspect_poultice`, `jugcraft_concordance_crucible_jade` (`EncyclopediaClientGameTests`) | Not viewed; its shard passed |
+| The anchor's readiness (unit 2) | `jugcraft_encyclopedia_inspect_readiness`, `jugcraft_concordance_anchor_gathering_jade` (same) | Not viewed; its shard passed |
+| The stand's workshop (unit 3) | `jugcraft_concordance_crucible_stand_workshop`, `jugcraft_concordance_crucible_stand_jade` (same) | Not viewed; its shard passed |
+| A bed's Inspect page and Jade on a crop (unit 4) | `jugcraft_encyclopedia_inspect_bed`, `jugcraft_concordance_ripe_crop_jade` (same) | Not viewed; its shard passed |
+
+The frame-time line `ConcordanceWorkshopClientGameTests` logs (100 frames, Mesa's software renderer) was not read for
+these records.
+
+### Not run
+
+A person playing any of it, by hand, or looking at the shots not viewed above; two clients, and a dedicated multiplayer
+playtest; a client without the optional integrations; client frame times on a player's hardware; Jade's and the
+encyclopedia's reply traffic; JEI's pages in a client; `runServer`; the larger workload (H3, deferred).
+
+### Known defects and limits
+
+- The Gleaner's starved pulse is over C-P68's line: 333 µs against 250 µs in run 38774859294 (one run, one shared
+  runner). A change is proposed (caching `Garden.nearest`'s order, or a vertical reach of ±1), not applied.
+- In the load card the Peepo brought no Mendvetch while measured; why is not known from its lines.
+- Bees step these crops without strain, niche or graft clearing (unit 4's risks).
+- An offline setter's unclaimed request holds its post's queue (C-P53).
+- Jade's overlay has not been seen: the one Jade shot viewed shows no Jade box at the preview's size.
+- The codex pages' lengths have not been seen in a client.
+- Outside Chunk C: main's `PeepoPopulationClientTests` cow-breeding flake (open #357) failed client shard 1 in runs
+  38684732031 and 38774859294, each passing on its re-run.
+- The other as-built limits of units 1 to 5 are under Risks above.
+
+### Record fields (CLAUDE.md)
+
+Every row is at the Practitioner stage. The tests named passed in CI (above).
+
+| Feature | Input producer | Output consumer | Costs | Unlocks | Failure behaviour | Test evidence |
+|---|---|---|---|---|---|---|
+| Crucible diagnostics (C-01) | the crucible's state | the reader, Peepo's status, the stand | none; deeper glass reading needs research and the glass | nothing | a refused formula stays set and drives nothing; an unreadable one is kept as text | C-01's alchemy tests, `theInspectPageReadsACrucibleByResearch`, `EncyclopediaClientGameTests` |
+| Stillroot Poultice (C-02) | Mendvetch (a bed's harvest, or wheat seeds, bone meal and an amethyst shard for 2), water, a bowl | healing; a friend in a lair fight (credit) | 2 Mendvetch, a part of water, a bowl (returned), 4 warm stirs | nothing | a dirty batch heals less, predicted | the product tests and `LairEncounterGameTests`' credit tests |
+| Kiln Draught (C-02) | magma cream (a Tyrant Scale gives 2) or 2 sugar | the Kiln's slag, his flame | 1 cream or 2 sugar, a part, a bottle, 2 hot stirs | nothing | the wrong heat waits | `aKilnDraughtCarriesItsDrinkerAcrossTheSlag`, `theCinderKilnsRiteNamesTheKilnDraught` |
+| Readiness (C-03) | the circle | the reader, the start | none | nothing | warns for a run short; marks faults | C-03's tests in `ConcordanceRitualGameTests`, `theInspectPageShowsARitesReadinessAndPayments` |
+| Root and Rivet (C-04) | a Thallite plate (Metal Press or 2 Thallite ingots; `machines` and `thallite` switches), 4 copper, 4 Mendvetch; Ley from Radiance, Verdance or JE | the stand's recipe; a Strata foundation elective | 6 Focus; 32 Ley Charge (48 Radiance, 48 Verdance or 32,000 JE); 8 s | the stand | an interruption keeps the offerings, in one line; backlash 4 | C-04's tests in `ConcordanceRitualGameTests`, `theFoundationIsNeverWeighed` |
+| Crucible Stand (C-05) | the foundation, 6 iron, 2 copper; JE | the crucible's heat | 8, 16 or 32 JE a tick only for a stir; a 640 JE store | nothing | dark while the crucible waits on anything else; its JE lost when broken | the stand's alchemy tests, `aStandTurnsElectricityIntoHeatOnly`, the persistence test, `ConcordanceWorkshopClientGameTests` |
+| Two carriers (C-06) | the crucible's shortage | its buffer | a porter trip (2 Ley Charge, 1 integrity); 16 requests a setter | nothing | full keeps cargo aboard; unloaded waits; turned back when cleared | the 10 tests unit 3 added to `ConcordanceLogisticsGameTests`, the persistence test, the Peepo checks |
+| Habitat (C-07) | a bed's sample | the reader | a canteen sip | nothing | a dormant bed is not read; a gone plant's verdict is forgotten | `ConcordanceGardenGameTests`, `theInspectPageReadsABedAndACrop`, `gardenInspection` |
+| Mixed bed and strain (C-08) | Dewmoss with Gloamcap; harvests | pace; the disturbance fit | strain +1 a harvest, at most 3 | nothing | never kills, never reads industry | `ConcordanceGardenGameTests` |
+| Dewlit (C-09) | a Dewmoss on a Sunpetal crop | the Sunpetal's niche on that bed | 1 Dewmoss | nothing | refusals consume the use; another plant clears it | `ConcordanceGardenGameTests`, `theInspectPageNamesAGraft` |
+| The measured workshop (C-10) | the workshop of C-01 to C-09 | the owner's merge review (C-P67) | none in play | nothing | — | `loadCard`, `gleanersHeartSearch`, the journey's two tests, `ConcordanceWorkshopClientGameTests` |
+
+### The handoff (10:133-146)
+
+- **Base and final:** `e079ad4a3` → `bb856f873`, then this records commit. Tickets C-01 to C-10; the contracts changed
+  are under Interfaces expected to change and each ticket's As built notes.
+- **APIs reused:** `CompanionLogistics.Port` (`CrucibleCompanion`), `CourierLedger.file`, `Couriers.nearestPost`,
+  `EnergyStorage.SIDED`, Fabric Transfer fluid storage, `RitualMachine` (a Transform result), `Sampler` and
+  `SampleBudget`, `Authority` and `RateGate`, `Signs`, `ComposeText`, `InspectPage` and `PageWriter`, the Jade provider,
+  the JEI plugin, `owner_art.py`.
+- **Schemas, defaults and migration:** product and graft JSON; the organism's `neighbours` and a property's `fouling`
+  fields; optional saved keys, stamps still 1; older saves load (`anOlderBedLoadsWithoutItsNewKeys` and the persistence
+  tests); no migration.
+- **Generators and provenance:** `tools/concordance_alchemy.py`, `concordance_ecology.py`, `concordance_rituals.py`,
+  `concordance_economy.py`, `concordance_logistics.py`, `concordance_diagnostics.py`, `acquisition.py`,
+  `concordance_journey.py`. The stand's art through `owner_art.py --provenance alchemy`; the foundation's icon drawn
+  fresh.
+- **Commands and results:** the CI runs above; the local checks in each unit's row of the Units table; screenshots in
+  each run's `client-screenshots-<shard>` artifacts; the load card's lines in its job's log and notice.
+- **Decisions:** C-D0, C-D0b and C-D1 to C-D3 accepted by the owner; C-D4 and C-P1 to C-P70 Proposed; the checkpoint's
+  questions open.
+- **Next smallest complete outcome:** if the owner picks Gloam Ink, one formula from a mixed bed's Gloamcap with one
+  existing consumer (Research Notes); otherwise Chunk D's first unit.
+
 ## Deferrals
 
 - **Rimewash** (a Winter Brine salve holding a crucible's band): it would copy Preserve's Proposed hold (B-P13, B-P35;
@@ -1964,7 +2311,7 @@ after the first path (09:16).
 | 2 | `ConcordanceRitualGameTests`, `ConcordanceAssayGameTests`, `ConcordanceProgressionGameTests`, `EncyclopediaGameTests` | the anchor's Inspect page; Jade on an anchor | `check_rituals` and the Ley-capacity rule; the encyclopedia's forbidden list; `check_acquisition`; the build without optional integrations | a mid-run lapse |
 | 3 | `ConcordanceAlchemyGameTests`, `ConcordanceEconomyGameTests`, `ConcordanceLogisticsGameTests`, `ConcordancePersistenceGameTests`, the cable check | `PeepoIntegrationClientTests`, `CompanionAutomationChecks`; a workshop shot | `check_alchemy` (the stand's targets), `check_economy`, `owner_art.py --check` if art is imported; the build without optional integrations | the stand; the crucible's keys present and absent; the ledger's codec |
 | 4 | `ConcordanceGardenGameTests`, `EncyclopediaGameTests`, `ConcordancePersistenceGameTests`; re-run the Gleaner, Spire-field, Peepo regrowth and journey tests (the Crop Harvester's strain test runs only when `JUGCRAFT_TEST_FOCUS` is unset or names `machines`) | a bed's Inspect page; Jade on a crop | `check_ecology` (neighbours, strain, graft), the compost page; the build without optional integrations | an older bed; strain and graft through a save |
-| 5 | `ConcordanceJourneyGameTests`; the load runner | the evidence set; `python tools/select_client_tests.py --base origin/main` | every check | — |
+| 5 | `ConcordanceJourneyGameTests` (`theWorkshopsRecipesLoad`, `theLivingWorkshopFromAManualStart`), `ConcordanceWorkloadGameTests.gleanersHeartSearch` and, opted in, `ConcordanceWorkshopLoadGameTests.loadCard`: run 38774859294 on `bb856f873`, `mod` passed ("All 1836 required tests passed"; the card passing at once there), `optional integrations absent` passed, and the "workshop load card" job passed with the card measuring ("All 1 required tests passed") | `ConcordanceWorkshopClientGameTests` (new; shard 4 of run 38774859294, passed); every client shard of that run passed, shard 1 on its re-run | every check, `check_load_card` and `check_workshop_client_evidence` (new); for the records commit `check_mod_data`, `check_repository`, `concordance_journey --check` and `git diff --check`, run and passed | — |
 
 Every unit also runs `tools/check_mod_data.py`, `scripts/check_repository.py`, `scripts/tests` and the build with its
 server game tests, and its CI by workflow_dispatch of the Build workflow with every client test class, as Chunk B did.
@@ -2011,9 +2358,9 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P16 | 14 October 2026 | The mixed bed: Dewmoss and Gloamcap, +25% pace each way within the 5×5 (a starting value); no Mendvetch pairing, no fixer beneficiary; named "mixed bed". As built in unit 4: an organism's optional `neighbours`; Dewmoss and Gloamcap name each other at 25 (C-P58) | Proposed | C-08 |
 | C-P17 | 14 October 2026 | Harvest strain: +1 a seen harvest, at most 3; it only ever worsens the disturbance fit (alternative: plain disturbance, which would let a harvested Gloamcap bed grow with no magic block); eased by rest (one a bed random tick), explicit compost points (bone meal, fertilizer, the Maw's mulch) and a Greenwarden's tending (once a 600 ticks a bed), never by nitrogen fixing; never kills. As built in unit 4: counted and shown as C-P59 says; rest only while no crop grows on the bed (C-P60); compost includes bone meal and fertilizer used plainly on a growing crop, and tending asks Authority (C-P61) | Proposed | C-08 |
 | C-P18 | 14 October 2026 | One graft, Dewlit (Sunpetal host, Dewmoss donor): light `[9,11,15,15]`, moisture `[4,5,7,7]` (starting values); Verdant Husbandry understood; a plain use, not sneaking; bed-bound, cuttings deferred; produce, cost and alchemy unchanged. As built in unit 4, with C-P62 to C-P65 | Proposed | C-09 |
-| C-P19 | 14 October 2026 | The load budget, agreed before merge: the workshop adds at most 1.0 ms median and 2.5 ms p95 server tick, with a flat memory trend over 6,000 ticks, on the stated runner; recorded, not claimed for other hardware | Proposed | C-10 |
-| C-P20 | 14 October 2026 | The load runner: a server game test of its own, opted in so ordinary CI runs are unchanged; CI's software-rendered frame times recorded as that renderer's only | Proposed | C-10 |
-| C-P21 | 14 October 2026 | The Gleaner's Heart search (729 positions) is measured in C-10 and the record corrected; its radius changes only if the measurement says so. As built in unit 4: the ecology record now gives the Maw 147, the Gleaner 147 for crops and 729 for Hearts; the measurement stays in C-10 | Proposed | C-07, C-10 |
+| C-P19 | 14 October 2026 | The load budget, agreed before merge: the workshop adds at most 1.0 ms median and 2.5 ms p95 server tick, with a flat memory trend over 6,000 ticks, on the stated runner; recorded, not claimed for other hardware. As built in unit 5, in C-P67's form: reported by the load card, not asserted; measured once, in run 38774859294 on `bb856f873`: +0.240 ms median and +0.550 ms p95, net, and retained heap +0 MiB beyond the baseline's change, within it on that runner. The owner decides it at merge review | Proposed | C-10 |
+| C-P20 | 14 October 2026 | The load runner: a server game test of its own, opted in so ordinary CI runs are unchanged; CI's software-rendered frame times recorded as that renderer's only. As built in unit 5 as C-P66 (the card) and C-P70 (the client class, whose frame times are Mesa's) | Proposed | C-10 |
+| C-P21 | 14 October 2026 | The Gleaner's Heart search (729 positions) is measured in C-10 and the record corrected; its radius changes only if the measurement says so. As built in unit 4: the ecology record now gives the Maw 147, the Gleaner 147 for crops and 729 for Hearts; the measurement stays in C-10. As built in unit 5 as C-P68: measured in run 38774859294's `mod` job, a starved pulse took 333 µs against the 250 µs line (over; the position list alone 304 µs), so a change is proposed, not applied, and `HEART_REACH` stays 4 | Proposed | C-07, C-10 |
 | C-P22 | 14 October 2026 | Diagnostic ids use 03:9's own wording, then Chunk C's (`needs_water`, `needs_container`, `held`, `incompatible`, `courier_quota`, `output_differs`, `needs_emptying`, `unreadable`). Each code has a kind that sets the sign shown when it begins: a shortage or a blockage a WANT, a fault a PERIL with the breaking sound, a condition (heat, a hold) none. Codes no unit raises yet have words without parameters until their unit fixes both. The crucible's formerly silent wait before a repeat now shows a WANT sign once | Proposed | C-01, C-03, C-05, C-06 |
 | C-P23 | 14 October 2026 | A formula the rules refuse, or a saved one that no longer reads, drives nothing: no step and no automated bottle, even of a finished batch. Bottling by hand stays open; clearing stays a sneak-use by someone who may change the crucible | Proposed | C-01 |
 | C-P24 | 14 October 2026 | Recording a blank formula stays open to anyone with the Alembic Arts (it changes nothing in the crucible); every other change asks Authority (within C-P5) | Proposed | C-01 |
@@ -2058,44 +2405,25 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P63 | 15 October 2026 | Graft data and checks: `concordance/graft/<id>.json` is `{schema, host, donor, niche}` only. The loader requires two different loaded crops, a grafted nutrient floor at least the host's cost and one graft a host and donor. `check_graft` holds the pilot's cap of one graft, exactly one range better and one worse (03:76), and no cost, yield or alchemy. A bed carries one graft | Proposed | C-09 |
 | C-P64 | 15 October 2026 | Clearing a graft: the first growth attempt of another organism's crop clears it (time, a sprinkler, a Spire's hastening), before the dormant check; reading never clears it. A graft the rules no longer know is kept, read by nothing, and replaced by the next graft. Breaking the bed loses it; a Verdant Heart or a device set on the bed does not clear it | Proposed | C-09 |
 | C-P65 | 15 October 2026 | Graft network and save: clients are told `graft` and `graft_host` only while grafted, never the keeper. Jade names a graft on a crop only when the crop is its host, and on a bed only when the rules know it; the Inspect page does the same. The save writes `graft` only when set, never `graft_host`; the stamp stays 1 | Proposed | C-09 |
+| C-P66 | 15 October 2026 | The load runner as built, refining C-P20. `ConcordanceWorkshopLoadGameTests.loadCard` measures only when Fabric's filter (`fabric-api.gametest.filter`) names exactly its id; in every other run it passes on its first tick. Locally the filter goes through `JAVA_TOOL_OPTIONS` (`docs/TESTING.md`); in CI, through a manual Build run's `load_card` input, which runs the card alone in its own job (`bfb08770b`, a workflow change awaiting the owner). It force-loads its yard and holds noon and the weather, with mob and wandering-trader spawning off. It measures the baseline first, then the workshop: each span a warm-up (at least 2,000 and 1,500 ticks, then until the loaded chunks hold 400 ticks), then 6,000 ticks of the server's ring, net of the test's own work (the simulated player's actions and output extraction included). Power comes from Creative Energy Cells | Proposed | C-10 |
+| C-P67 | 15 October 2026 | The budget's form, refining C-P19 (for merge review, not a checkpoint decision). Tick time: at most +1.0 ms median and +2.5 ms p95 per tick, net. "Flat memory trend": the heap retained after a full collection grows by at most 4 MiB more than the baseline's over the measured 6,000 ticks. Network traffic is recorded with no budget. The test asserts only +5.0 ms, +12.5 ms and +64 MiB | Proposed | C-10 |
+| C-P68 | 15 October 2026 | C-P21's line. If a starved Gleaner pulse (its whole 729-position Heart search) takes at most 250 µs on the runner the "Gleaner pulse" line names (the `mod` job's, in CI), `HEART_REACH` stays 4. If it is over, a change is proposed and not applied: a vertical reach of ±1 (243 positions), or caching `Garden.nearest`'s fixed offset order. Timed by `ConcordanceWorkloadGameTests.gleanersHeartSearch` after 1,000 untimed pulses, in every ordinary build. Measured in run 38774859294: 333 µs, over (see C-10's As built notes) | Proposed | C-07, C-10 |
+| C-P69 | 15 October 2026 | The living workshop in the journey: not a stage route but five steps, one player alone in the Overworld with the research understood so far and nothing mastered. Nothing it needs is past the Practitioner stage, though its five understood entries make that player a generalist Adept (an open question in the journey record). The Kiln Draught is made by the sugar process over a campfire, the poultice over a magma block. The factory's deeper materials stay the factory's. `concordance_journey.py --check` exits 1 on a problem. The server test reuses `jugcraft-test:drone_depot` and adds no structure | Proposed | C-10 |
+| C-P70 | 15 October 2026 | Client evidence is a new class, `ConcordanceWorkshopClientGameTests`, rather than an extension of `EncyclopediaClientGameTests`. Its weight is 200 s, an estimate. Random ticks are held at 0. The GUI scale 4 shot is taken in a 1920×1080 window with the applied scale checked, since the test's own 854×480 window allows no scale above 2. The frame-time observation describes Mesa's software renderer only | Proposed | C-10 |
 
 ## Where to resume
 
-Units 1 (C-01, C-02), 2 (C-03, C-04), 3 (C-05, C-06) and 4 (C-07 to C-09) are built and recorded; units 3 and 4 were
-built side by side from `23f28b90e` and are joined by the merge of units 3 and 4. Units 1 and 2 have passed CI and unit
-3's run has not finished (the status at the top); unit 4's game code and the merge have not been compiled against
-Minecraft or run. Next:
-1. refresh main and the open pull requests (#357 and #369 for the Peepo files; the hot shared files: lang,
-   `check_mod_data.py`, `CHANGELOG.md`, `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and
-   merge main again if it moved;
-2. run CI on the pushed head by workflow_dispatch of the Build workflow, with every client test class. The Build runs
-   the server game tests twice, with Jade (the default) and with `-PjugcraftOptionalIntegrations=false`; the Jade checks
-   of `jadeIsToldTheTankAndWhyNeverTheMakeup`, of unit 2's anchor tests and of unit 4's bed tests run only in the first.
-   Unit 2's classes: `ConcordanceRitualGameTests` (29), `EncyclopediaGameTests` (21 then), `ConcordanceAssayGameTests`
-   (8), `ConcordanceProgressionGameTests`, `ConcordanceGameTests` (`codexLoadsWithoutErrors`, with the new entry),
-   `ConcordanceRimeStrataGameTests`, `ConcordanceSpireGameTests`, `ConcordanceEconomyGameTests`,
-   `ConcordanceJourneyGameTests`, `ConcordancePersistenceGameTests`; on the client, `EncyclopediaClientGameTests` (three
-   new shots) and `EncyclopediaRoutesClientGameTests`. Unit 3's (with its review fixes): `ConcordanceAlchemyGameTests`
-   (42), `ConcordanceEconomyGameTests` (3), `ConcordanceLogisticsGameTests` (15), `ConcordancePersistenceGameTests` (10
-   with unit 4's), `ConcordanceSpireGameTests` (`theHeartAsksACourierForItsUpkeep`, the extracted helper),
-   `ConcordanceAuthorityGameTests`; both builds, since Jade code changed; on the client, `EncyclopediaClientGameTests`
-   (the workshop shots), `PeepoIntegrationClientTests`, `PeepoCompanionClientTests` (which runs
-   `CompanionAutomationChecks`; its weight in `tools/select_client_tests.py` may need measuring again) and every other
-   class, as `select_client_tests.py` chooses. Unit 4's: `ConcordanceGardenGameTests` (33), `EncyclopediaGameTests`
-   (23), `ConcordancePersistenceGameTests`, `ConcordanceSpireGameTests`, `ConcordanceJourneyGameTests`,
-   `ConcordanceWorkloadGameTests`, `HalloweenGameTests` (the canteen) and `ConcordanceGameTests` (the organisms entry's
-   two new pages); on the client, `EncyclopediaClientGameTests` (`gardenInspection`, two shots) and
-   `PeepoIntegrationClientTests` (`livingHarvests`). Record each result in the As built notes,
-   `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md`, `arcane-concordance-rituals.md`,
-   `crucible-stand.md`, `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` and
-   `arcane-concordance-ecology.md`;
-3. the checkpoint evidence of units 1 to 4 (the owner's look at the foundation's icon and the stand's art among it),
-   then unit 5 (C-10): the load card (with a Maw, a Gleaner and nine beds, the Gleaner's Heart search measured, C-P21),
-   the journey, the client evidence (a bed's Inspect page and Jade on a crop among it), combined fixes, the checkpoint
-   and the handoff.
-
-The owner's choices are C-D0, C-D0b and C-D1 to C-D3; C-D4 and C-P1 to C-P65 are Proposed. Open for the owner's
-checkpoint: the review route for Chunk B and Chunk C (above), and 09:144's three questions.
+Units 1 to 5 (C-01 to C-10) are built and recorded, and the candidate `bb856f873` passed every CI job in run
+38774859294 (the status at the top; [Unit 5](#unit-5-evidence-and-handoff-c-10)). Nothing is merged and there is no
+pull request. The owner's checkpoint is awaited: 09:144's three questions (the balance of hands-on and automated work,
+the next product family, whether the workshop's look fits), with the review route for Chunk B and Chunk C as a question
+and the load budget (C-P19 in C-P67's form) and the Build workflow's `load_card` input (`bfb08770b`) at merge review.
+C-D0, C-D0b and C-D1 to C-D3 are the owner's; C-D4 and C-P1 to C-P70 are Proposed. Before more work:
+1. refresh main and the open pull requests (#357 for the Peepo flake and #369 for the Peepo files; the hot shared files:
+   lang, the gametest `fabric.mod.json`, `check_mod_data.py`, `CHANGELOG.md`, `docs/TESTING.md`, `WHAT_EXISTS.md` with
+   #366, `INTEGRATION_STATUS.md` with #361 to #365), and merge main again if it moved;
+2. after the owner's answers, the next smallest outcome: one Gloam Ink formula from a mixed bed's Gloamcap with Research
+   Notes as its consumer, if the owner picks it; otherwise Chunk D's first unit.
 
 ## How this contract was checked
 
@@ -2160,3 +2488,12 @@ checkpoint: the review route for Chunk B and Chunk C (above), and 09:144's three
   names and lang given. Run for these records on the final tree: the three audit-mutation suites (C-07's written again
   from the spec's table), the two pure harnesses, `git diff --check` on each code commit, `select_client_tests.py`, and
   the checks in the ecology record's Verification.
+- Unit 5's notes (15 October 2026): written from the unit's commits (`a86085b3c`, `bfb08770b`, `31bc7087d`,
+  `6d54726fa`, `fd2b558c8`, `bb856f873`) and their messages, the code re-read for the names, constants and test names
+  given, and the unit's specification and its review. The CI facts are those of run 38774859294 and the earlier runs
+  named in the status, as the session read them: the load card's block from its job's log; the `mod` job's "Gleaner pulse" line and
+  test count from that job's log, fetched for these records through the GitHub connector's job-log tool (the log host
+  itself is refused here, 403); the four shots viewed, from client shard 4's log. Every test name in the demonstration
+  was found in the test sources. Run for the records: `python3 -B tools/check_mod_data.py`,
+  `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check` and `git diff --check`, each
+  passed. Not run here: any build, game test, client or other check.

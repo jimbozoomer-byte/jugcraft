@@ -168,10 +168,10 @@ Concordance Chunk C, unit 1 (not merged): `ConcordanceAlchemyGameTests.onlyThose
 the owner's claim (`TestClaims`), a stranger who knows more alchemy is refused water, ingredients, a stir, bottling,
 and setting or clearing a formula, and nothing in the crucible changes; the stranger's spoon, glass and blank formula
 still work, and the owner still stirs, sets and clears. Outside the claim, in adventure mode, the stranger's water is refused too, and
-back in survival it goes in. `AUTHORITY_ROUTES` names the crucible's two calls. The test has not run yet: it was
-written where no Minecraft jar is available.
+back in survival it goes in. `AUTHORITY_ROUTES` names the crucible's two calls. The test was written where no
+Minecraft jar is available; it passed in CI (run 38684732031, and again in run 38774859294).
 
-Concordance Chunk C, unit 3 (not merged; none of it run): `ConcordanceAlchemyGameTests.aStandIsSetOnlyByThoseWhoMayChangeIt`
+Concordance Chunk C, unit 3 (not merged; both tests passed in CI, run 38720814268's `mod` job, and again in run 38774859294): `ConcordanceAlchemyGameTests.aStandIsSetOnlyByThoseWhoMayChangeIt`
 (a stranger in the owner's claim and anyone in adventure mode change nothing; sneaking only reads; a second use within
 the rate gate is refused) and `ConcordanceLogisticsGameTests.anOfflineSetterPausesTheCourier` (a crucible whose setter
 is away files nothing unless the absent-owner option is on; a request filed for an absent setter waits,
@@ -183,7 +183,8 @@ refused, the sip is kept and the player told `missing_permission`), a Greenwarde
 bed or, since the unit review, through its growing crop: both reach `VerdantBedBlock.tendBy`, which asks at the bed),
 and a graft, which asks at the crop and at its bed (`OrganismCropBlock.graftBed`; refused, the donor is kept). Bone meal
 on a growing crop asks what bone meal on its bed asks. `AUTHORITY_ROUTES` names the bed block's call and the crop block's
-two. The tests, not yet run: `ConcordanceGardenGameTests.aCanteenWatersABed`, `restCompostAndTendingEaseStrain` and
+two. The tests, which passed in CI (run 38726242149, and again in run 38774859294):
+`ConcordanceGardenGameTests.aCanteenWatersABed`, `restCompostAndTendingEaseStrain` and
 `aGraftIsRefusedWhereTheGardenerMayNotBuild`, each against a neighbour's claim (`TestClaims`).
 
 Not yet run: a real protection mod (only the stand-in listener in the tests); a two-client server with one player

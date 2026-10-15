@@ -46,7 +46,7 @@ utility (Preserve).
   (grass, dirt, mud, moss), Brace someone standing on bare stone, sand or gravel, and have a Brace you cast hold against
   a blow. Any of three electives can stand for one: bracing a party member, completing a ritual at a Circle Anchor
   (Circle Lore; Root and Rivet's codex entry is linked from Stratawrighting's Understood page: Concordance Chunk C,
-  C-04; not merged, not run), or taking a creature's blow in Earthbound Thallite armour on natural ground. Mastered,
+  C-04; not merged; its tests passed in CI, run 38693262154), or taking a creature's blow in Earthbound Thallite armour on natural ground. Mastered,
   Brace costs a point less.
 - The three invocations, cast with any Concordance instrument like First Light's and Ember's:
 

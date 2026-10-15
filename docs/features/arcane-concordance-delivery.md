@@ -66,6 +66,11 @@ server game test with the optional libraries removed. The client game tests run 
 | GuiLib | 0.12.4 | client | optional | The Concordance Journal's workspace (a tab for each section the server sends) and the Spell Composer's (the draft as a strip of words over the words the player has learned) | the plain journal and composer screens, with the same journal and the same draft | `ConcordanceJournalClientGameTests`, `ConcordanceComposerClientGameTests` | No ritual-schematic, crucible or observatory screen is built; the workspaces have no narration (the plain screens do); keyboard use not tried by a person |
 <!-- matrix:end -->
 
+Since the matrix's Jade row was written (Concordance Chunk C, unit 5): four of Chunk C's client shots were viewed from
+client shard 4's log of run 38774859294, among them `jugcraft_concordance_anchor_root_and_rivet_jade`, which shows the
+circle and its anchor but no Jade box at the log's 480×270 preview size; that test's Jade snapshot assertion passed.
+Jade's overlay is still not seen in a client ([Chunk C's evidence](concordance-chunk-c.md#client-evidence-run-38774859294)).
+
 ## What is complete, what is not, and what is assumed
 
 **Complete in code and tested on a server in CI** (steps 1 to 30). Each has a record with its tests:
@@ -167,7 +172,21 @@ The log rounds to whole microseconds, so the look-up shows as 0. A tick's whole 
 0.4 ms against a tick of 50 ms. The graph's own audit walks it seven times at every data load, about 1.5 ms; nothing
 walks it during play.
 
-Not measured: server tick time with a large installation, and client frame time.
+Since Concordance Chunk C (C-10, not merged), `gleanersHeartSearch` adds a Gleaner's pulse, timed after 1,000 untimed
+pulses. Measured in Build run 38774859294 on `bb856f873`, `mod` job only (the line names its runner: 4 processors,
+amd64, Java VM 25.0.4.1+1-LTS):
+
+| Work | `mod` job |
+|---|---|
+| A Gleaner's starved pulse: its whole Heart search, 729 positions (729 loaded) | 333 µs, over C-P68's proposed 250 µs line |
+| The position list alone (`Garden.nearest`, built and sorted each call) | 304 µs |
+| A fed pulse: its crop search, 147 positions, nothing ripe | 62 µs |
+
+The server's tick time with and without one small workshop is the load card's, recorded in
+[Chunk C's contract](concordance-chunk-c.md#the-load-card-run-38774859294). Not measured: server tick time with a large
+installation. Client frame time: `ConcordanceWorkshopClientGameTests` logs 100 frames' times under Mesa's software
+renderer in CI (its shard passed in run 38774859294; that line was not read for these records); a player's hardware is
+not measured.
 
 ## Connections
 

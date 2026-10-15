@@ -3,7 +3,8 @@
 Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244), from branch
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026); see Verification for what has run. Concordance Chunk C's unit 2 (ritual readiness, fault positions,
-spent and held; Root and Rivet) is on `claude/chunk-c-living-workshop`, not merged ([contract](concordance-chunk-c.md)).
+spent and held; Root and Rivet) is on `claude/chunk-c-living-workshop`, not merged ([contract](concordance-chunk-c.md));
+its tests passed in CI (run 38693262154, and again in run 38774859294).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 12) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 5, Practitioner stage (Jugcraft Discovery). Roadmap step 12.
@@ -81,7 +82,7 @@ The **Adept's Wand** is the second instrument: a capacity of 12 (the Initiate's 
 **Root and Rivet** (Concordance Chunk C, C-04; the owner's choice C-D2, with C-P11's numbers as starting values) is the
 first workshop rite, at the same Practitioner stage and taught by the same Circle Lore understood. A Thallite plate,
 riveted with copper and bound with Mendvetch, becomes a **Rooted Thallite Foundation**: the base of the
-[Crucible Stand](crucible-stand.md) (C-05, unit 3; not merged, not run), its one consumer. Nothing turns the foundation
+[Crucible Stand](crucible-stand.md) (C-05, unit 3; not merged), its one consumer. Nothing turns the foundation
 back into a plate, Ley Charge or Focus, and the Assayer's Scale never weighs it. The plate comes from a Metal Press or, by hand, from two thallite ingots; every
 route to it needs the server's `machines` and `thallite` feature switches. With either off the rite stays known, but its
 plate cannot be made (its codex entry says so). Completing it lays a Stratawright's `foundation` for each participant
@@ -331,10 +332,11 @@ participant disconnecting), and a real server restart mid-ritual (the lapse is t
 entity).
 
 **Concordance Chunk C, unit 2 (C-03 and C-04; commits `a0e73881c` and `2c98d6d68`, records `4df687cc7`, merged with unit
-1's review fixes in `2263f851b`, and the unit review's fixes in the commit after it).** Written with no Minecraft jar,
-so none of its game code has been compiled against Minecraft, and none of the tests below has run: no CI run yet. Every
-one is **not run**.
-- `ConcordanceRitualGameTests`, 11 new (29 in all), not run:
+1's review fixes in `2263f851b`, and the unit review's fixes in `23f28b90e`).** Written with no Minecraft jar; CI was
+its first compile and run. **Every test below passed in CI:** every job of run 38693262154 on `23f28b90e` passed on its
+first attempt, and every job passed again in run 38774859294 on `bb856f873` (the client shots: their shards passed;
+which were viewed is below).
+- `ConcordanceRitualGameTests`, 11 new (29 in all):
   - C-03: `anIdleCircleSaysEverythingARiteStillNeeds`, `aRefusedStartMarksEveryFault`,
     `aStatusReadingMarksFaultsButTheInspectPageDoesNot`, `spentAndReservedAreShownApart`, `theInterruptionReasonIsKept`
     (the ending kept in memory, never saved) and `unknownRitesStayUnnamed`;
@@ -342,13 +344,14 @@ one is **not run**.
     `rootAndRivetSavedMidRunLapses`, `theAttunementsOfferingsNeverChooseRootAndRivet` (combined offerings, the Kindling's
     11 items beating Root and Rivet's 9) and `rootAndRivetIsStrataFoundationWork` (a bystander who took no part lays no
     foundation).
-- `EncyclopediaGameTests.theInspectPageShowsARitesReadinessAndPayments` (21 in all), not run.
-- `ConcordanceAssayGameTests.theFoundationIsNeverWeighed` (8 in all), not run.
+- `EncyclopediaGameTests.theInspectPageShowsARitesReadinessAndPayments` (21 in all).
+- `ConcordanceAssayGameTests.theFoundationIsNeverWeighed` (8 in all).
 - `ConcordanceProgressionGameTests.theLiveGraphIsWhole`: the node `ritual:jugcraft:root_and_rivet`, reachable by one
-  player alone; not run.
-- Client shots in `EncyclopediaClientGameTests`, not run: `jugcraft_encyclopedia_inspect_readiness` (the Inspect page on
-  an anchor), `jugcraft_concordance_anchor_gathering_jade` (Jade on a gathering anchor, taken only when Jade is loaded)
-  and `jugcraft_rooted_thallite_foundation` (the foundation in hand).
+  player alone.
+- Client shots in `EncyclopediaClientGameTests`: `jugcraft_encyclopedia_inspect_readiness` (the Inspect page on an
+  anchor), `jugcraft_concordance_anchor_gathering_jade` (Jade on a gathering anchor, taken only when Jade is loaded) and
+  `jugcraft_rooted_thallite_foundation` (the foundation in hand). Their shard passed; the first two were not viewed.
+  The foundation's icon was viewed for unit 5's records: a green Thallite plate with copper rivets and roots beneath.
 - The Jade checks in these tests run only when Jade is loaded, so a build with `-PjugcraftOptionalIntegrations=false`
   alone does not run them. No test reads the action bar's one line: a mock player's overlay is not readable.
 - Run and passed locally for each of the unit's three commits: `python3 tools/check_mod_data.py`,
@@ -364,12 +367,22 @@ one is **not run**.
   `Choice` and `Readiness` with the game tests' figures (readiness lines and their order, warnings, spent and held, the
   stage tables of the attunement and the vigil); all passed. It is not a game test and it is not in Git.
 - The unit review's fixes ([the contract](concordance-chunk-c.md), Fixes from the unit review under C-04):
-  `spentAndReservedAreShownApart` also asserts that a pylon gone since the last step is a blocking line (not run); the
+  `spentAndReservedAreShownApart` also asserts that a pylon gone since the last step is a blocking line (passed in CI); the
   same local checks run and passed; the fixes' audit mutations were each reported, their negative cases and controls
   were not, and C-03's and C-04's suites gave the results above again; the scratch harness passed with three new
   checks.
-- Not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest`, CI, any client
-  by hand, and two clients.
+- In CI only: `./gradlew build` (with and without the optional integrations) and `./gradlew runClientGameTest`. Not
+  run: any client by hand, and two clients.
+
+**Concordance Chunk C, unit 5 (C-10; [the contract](concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10)).**
+`ConcordanceWorkshopClientGameTests` begins Root and Rivet beside a working crucible in one real client on a dedicated
+server: the anchor's Inspect page shows what the rite has spent apart from what it holds and its stage table, with no
+key or id (shots `jugcraft_encyclopedia_inspect_root_and_rivet` and `_scale4`, at GUI scale 4, not viewed), Jade's
+snapshot is checked (`jugcraft_concordance_anchor_root_and_rivet_jade`, viewed: the circle with its anchor, no Jade box
+visible at the 480×270 preview size), and the rite completes with one foundation from exactly its offerings, 2 Ley
+Charge a step from each pylon, taken by its participant. It passed in client shard 4 of run 38774859294. The load card
+runs Root and Rivet again and again while measured (37 completed, none interrupted, in run 38774859294), and the
+journey test performs it from lantern-filled pylons; both passed in that run.
 
 ## World and event applicability
 
@@ -416,5 +429,6 @@ its map. Nothing is taken from Mojang's files. The owner's library was searched 
 | `originals/Blocks/Weapon Smithing/slime/foliage/roots.png` (and the enderbark `roots` and `slimy_roots` block textures) | `b54c05377316` | block foliage and wood, not an item |
 | `originals/Blocks/Airships and Planes/item/hull_reinforcement.png` | `9749022e0cfb` | hull planking |
 
-The owner has not reviewed the icon (the roots may read as legs), and its look in game comes only from the client shot
-`jugcraft_rooted_thallite_foundation`, not yet run.
+The owner has not reviewed the icon (the roots may read as legs). Its look in game comes only from the client shot
+`jugcraft_rooted_thallite_foundation`, whose shard passed in CI; the icon was viewed for unit 5's records (a green
+Thallite plate with copper rivets and roots beneath; the roots may read as legs).

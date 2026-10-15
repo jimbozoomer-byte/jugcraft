@@ -218,8 +218,9 @@ Concordance Chunk C, unit 1 (C-01, C-02; not merged) adds `EncyclopediaGameTests
 glass carried; the preview only for a master; nothing beyond reach or in an unloaded chunk; reading changes nothing).
 It also adds `theCinderKilnsRiteNamesTheKilnDraught` and `theDossiersNameThePoulticesCredit`. The client test's new
 step `crucibleInspection` takes the shots `jugcraft_encyclopedia_inspect_crucible`, `_inspect_crucible_scale4` and
-`_inspect_poultice`, and `jugcraft_concordance_crucible_jade` when Jade is loaded. **None of them has run yet:** they
-were written where no Minecraft jar is available.
+`_inspect_poultice`, and `jugcraft_concordance_crucible_jade` when Jade is loaded. They were written where no
+Minecraft jar is available; they passed in CI (run 38684732031, and again in run 38774859294), the client test by its
+shard (its shots not viewed).
 
 Not run: the full route by keys from a fresh world to a lair win as one test (the chunk's handoff maps each A-08 step
 to the separate tests that cover it: [Unit 5](concordance-chunk-a.md#unit-5-evidence-and-handoff-a-08)); a person

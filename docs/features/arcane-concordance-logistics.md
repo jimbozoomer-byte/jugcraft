@@ -4,7 +4,8 @@ Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
 8 October 2026); see Verification for what has run. Extended by Concordance Chunk C, unit 3 (C-06: an Alembic Crucible
 files its own requests, and a Peepo at its port brings only what no courier is bringing; [the chunk's
-contract](concordance-chunk-c.md)), not merged; none of its tests has run yet.
+contract](concordance-chunk-c.md)), not merged; its tests passed in CI (runs 38731825181 and 38774859294; see
+Verification).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 18) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 10, Practitioner stage (Jugcraft Workshops). Roadmap step 18.
@@ -38,7 +39,7 @@ room); a broken post does the same for every request bound for it. Nothing is ev
 Since Concordance Chunk C (C-06), a request's notes name where it was going ("where it was going is full", "where it was
 going was broken"), since a crucible can fill or break as a post can.
 
-**Crucibles ask for themselves** (Concordance Chunk C, C-06; not merged, not run). An Alembic Crucible following a
+**Crucibles ask for themselves** (Concordance Chunk C, C-06; not merged). An Alembic Crucible following a
 formula that waits for an ingredient files one request itself: as whoever set its formula (while they are here, or the
 server lets absent owners' devices act), at the nearest Courier Post within 16 blocks they may use, for exactly what its
 formula lacks first, a ground reagent as a ground reagent, as much of it as fits in the crucible now (nothing while its
@@ -129,6 +130,8 @@ and loading none (the Spire's own copy is gone). The crucible (`CrucibleBlockEnt
 - Magic connection: the Binding Arts (the porter, the key).
 - Reachable entry path: First Light → the Binding Arts understood → a Clockwork Porter, a Porter Key and a Courier Post
   (vanilla materials).
+- Unlocks: nothing; a crucible's request (Concordance Chunk C, C-06; not merged) changes who carries, not what can be
+  made.
 - Solo, trade and cooperative routes: solo, or a party sharing a post (its owner's party may file and bind couriers).
 - Specialty use without other branches: needs only the Binding Arts.
 
@@ -220,7 +223,13 @@ Not yet run: any client (the post's look, Jade lines, codex page), a two-client 
 chests, and a real restart of a server with couriers mid-delivery (the test saves and loads the ledger's codec).
 
 **Concordance Chunk C, unit 3: C-06** (commit `46f6e2a0e`; [the chunk's contract](concordance-chunk-c.md); not merged).
-**No new test has run:** none of its Java has been compiled; CI is its first compile and run.
+**In CI** (its first compile and run): run 38720814268 on `2f13fed54` passed `mod` (every server game test, these
+among them), `optional integrations absent` and client shards 1 to 4; shard 0 failed on `CompanionAutomationChecks`
+"an unloaded crucible", a test defect: the check lifted the forced chunks in the same tick it moved the player back, so
+the companion was reloaded as a new copy and the check read the removed one; in the game the delivery is one
+transaction. `9098c06b1` fixes the check alone, and every job passed in run 38731825181 (every client class, 171;
+`PeepoCompanionClientTests`, which runs `CompanionAutomationChecks`, in shard 0), as in runs 38726242149 and
+38774859294.
 - `ConcordanceLogisticsGameTests` +9 (14 in all), one for each failure case of the plan (03:193) and the crucible's own
   rules, each auditing `problems()` and counting every item in containers and carried after every step (the five
   existing tests are unchanged): `aCrucibleAsksOnceForItsExactShortage` (two ground glowstone asked, the plain dust in
@@ -250,7 +259,7 @@ chests, and a real restart of a server with couriers mid-delivery (the test save
   from the remainder, a turn-back cancelling as the formula's owner rather than the request's requester): all 18
   reported. Commit `46f6e2a0e`'s message reports the same 18; its "never filled twice" claims too much (two bounded
   over-supply paths remain, above).
-- **The unit review's fixes** (commit "Chunk C unit 3: fixes from the unit review"; not run): a crucible files only for
+- **The unit review's fixes** (commit "Chunk C unit 3: fixes from the unit review", `2f13fed54`; in CI as above): a crucible files only for
   what fits (`aCrucibleWithNoRoomAsksForNothing`, new, so `ConcordanceLogisticsGameTests` has 15: five slots of spider
   eyes file nothing, one slot emptied files at once); `aCrucibleAsksOnceForItsExactShortage` now also lowers the
   shortage while a porter carries, and the request is kept and delivered (C-P51); `aFullCourierQuotaWaitsAndBacksOff`
@@ -258,8 +267,12 @@ chests, and a real restart of a server with couriers mid-delivery (the test save
   holds the room check, `reconcile`'s order (cargo carried is left to arrive; with nothing carried, another item or more
   than is lacked turns it back) and the step order of `shortage()`.
 - The commands run for the unit's records are in [crucible-stand.md](crucible-stand.md#verification); all passed.
-- **Not run:** the build, the game tests, the client tests (`python3 tools/select_client_tests.py` chooses every client
-  class for this unit, as `CompanionAutomationChecks` is a shared file), CI, and two clients.
+- In CI only: the build, the game tests and the client tests (`python3 tools/select_client_tests.py` chooses every
+  client class for this unit, as `CompanionAutomationChecks` is a shared file). **Not run:** two clients.
+- Concordance Chunk C, unit 5 (C-10): the load card runs a crucible supplied by a Clockwork Porter and a Peepo while
+  measured; in run 38774859294 the porter brought 44 Mendvetch in 22 requests and the Peepo none, with every item
+  accounted for, open requests 0 and the ledger checked ("problems none"). The journey test has a porter bring a
+  formula's Mendvetch from a chest at its post by itself. Both passed in that run.
 
 ## World and event applicability
 

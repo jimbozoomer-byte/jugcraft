@@ -5,8 +5,8 @@ Status: implemented for Concordance Chunk A (unit 3: tickets A-05 and A-06); its
 contract](concordance-chunk-b.md)), not merged; its tests pass in CI (runs 38514144531 and 38519234934). Unit 5 (B-09)
 adds the Yeti King's second objective, a Brace put on another player that meets his push; its test passes in CI (run
 38591108210). Extended in Concordance Chunk C, unit 1 (C-02, C-P8 and C-P30: a Stillroot Poultice put on a friend;
-[the chunk's contract](concordance-chunk-c.md)), not merged; its tests have not run yet. See Verification for what has
-run.
+[the chunk's contract](concordance-chunk-c.md)), not merged; its tests pass in CI (run 38684732031, and again in
+38774859294). See Verification for what has run.
 Proposal issue: none. The owner chose Chunk A on 10 October 2026; [the chunk's contract](concordance-chunk-a.md) holds
 the scope.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
@@ -233,8 +233,10 @@ None new. Two new messages (`message.jugcraft.lair.reward.kept` and `.returned`)
   (a Brace one test player put on another that meets his push is the caster's deed, one for each push it meets, two in
   one tick one; a Brace on oneself, the Water Bangle's and one whose caster was forgotten credit no one, and being
   braced earns nothing), and `check_yeti` holds `braced` to the caster, never the braced player, and to the key.
-- Concordance Chunk C, unit 1 (C-02), not merged. **These tests have not run:** they were written where no Minecraft jar
-  is available, and CI has not run them yet.
+- Concordance Chunk C, unit 1 (C-02), not merged. **Passed in CI:** every job of run 38684732031 (through `0b1039312`,
+  after one re-run of a client shard for main's Peepo cow-breeding flake), and again in run 38774859294 on
+  `bb856f873`, among its 1836 required server game tests. They were written where no Minecraft jar is available; CI
+  was their first run.
   - `LairEncounterGameTests` +8 (18 in all):
     - `aPoulticeOnAFriendIsCreditedForWhatItHeals`: credit as it comes, with food between heals, within the hurt;
     - `aPoulticeOnOneselfEarnsNothing`, by a use and by sneaking;

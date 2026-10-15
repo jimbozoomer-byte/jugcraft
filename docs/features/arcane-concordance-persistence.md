@@ -100,7 +100,7 @@ thing once.
 | A circle anchor | nothing while idle; a ritual checks its circle (at most 64 positions) every step (40 ticks) |
 | A block broken or a pylon changed | the anchors in the chunks within 8 blocks (at most 2 by 2 chunks) |
 | Garden beds and crops | an area sample of at most 100 positions; at most 16 samples a level a tick |
-| Verdant Heart, Gleaner, Mulch Maw, Habitat Gauge | one pulse every 200, 40, 40 and 40 ticks, staggered |
+| Verdant Heart, Gleaner, Mulch Maw, Habitat Gauge | one pulse every 200, 40, 40 and 40 ticks, staggered; a Gleaner short of Verdance searches 729 positions a pulse (measured since Concordance Chunk C: 333 µs a starved pulse in run 38774859294's `mod` job, [the ecology record](arcane-concordance-ecology.md)) |
 | Spire Heart | one look every 20 ticks; a field pulse every 100 ticks of at most its count (4 or 6) |
 | Reliquary Shrine, Observatory | one pulse every 20 and 100 ticks, staggered |
 | Workers | one decision every 20 ticks; a porter searches at most the loaded block entities within 8 blocks of its post |
@@ -110,9 +110,11 @@ thing once.
 | Signs | at most 48 a level a tick, plus 16 warnings |
 | Courier ledger | at most 1,024 open requests, 32 history events a post |
 
-The budget is stated in work, not in milliseconds. It has not been profiled under load. Four pieces of it (a block
-change's circle look-up, a spell compile, the graph's audit walk, a garden sample) are timed on a CI runner by
-`ConcordanceWorkloadGameTests`; the figures are in the [delivery record](arcane-concordance-delivery.md). A large
+The budget is stated in work, not in milliseconds. One small workshop is profiled by Concordance Chunk C's load card
+([C-10](concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10), not merged); a larger installation has not been.
+Five pieces of it (a block change's circle look-up, a spell compile, the graph's audit walk, a garden sample and, since
+Chunk C, a Gleaner's pulse) are timed on a CI runner by `ConcordanceWorkloadGameTests`; the figures are in the
+[delivery record](arcane-concordance-delivery.md). A large
 installation's frame cost (GeckoLib, particles, GUI, shaders) has not been measured on a client.
 
 ## Connections
@@ -157,7 +159,7 @@ No new dependency or asset.
 Not yet run:
 - a real world saved by an earlier build and opened with this one (none is kept: world saves are not committed);
 - a server restart;
-- profiling under load.
+- profiling a large installation under load (one small workshop is measured by Chunk C's load card, above).
 
 ## World and event applicability
 

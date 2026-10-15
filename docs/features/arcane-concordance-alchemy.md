@@ -5,7 +5,8 @@ Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull
 8 October 2026); see Verification for what has run. Extended by Concordance Chunk C, unit 1 (C-01: the crucible says
 why it waits and keeps a formula honestly; C-02: the Stillroot Poultice and the Kiln Draught; [the chunk's
 contract](concordance-chunk-c.md)), and unit 3 (C-05: a [Crucible Stand](crucible-stand.md) heats a crucible with
-JE; C-06: a crucible asks the couriers for its formula's shortage), not merged; none of their tests has run yet.
+JE; C-06: a crucible asks the couriers for its formula's shortage), not merged; their tests passed in CI, most
+recently with unit 5 in run 38774859294 on `bb856f873` (see Verification).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 13) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 5, Practitioner stage (Jugcraft Discovery). Roadmap step 13.
@@ -63,7 +64,7 @@ bands decide what a **stir** (a Stirring Rod or a stick, at most one every half 
 | Hot | 90 | 55% | 30% | |
 | Searing | 160 | 80% | none | keeps only 85% of the dissolved Radiance and Verdance, and adds 0.50 contaminant |
 
-**A Crucible Stand beneath** (since Concordance Chunk C, C-05; not merged, not run) heats with JE: following a formula,
+**A Crucible Stand beneath** (since Concordance Chunk C, C-05; not merged) heats with JE: following a formula,
 for its next stir (warm 65, hot 120, searing 175, for 8, 16 or 32 JE a tick), only while the crucible waits for nothing
 or for heat alone; with no formula, to the stand's own setting. See [crucible-stand.md](crucible-stand.md). An Electric
 Pump piped into the tank fills it for the formula's water steps.
@@ -159,7 +160,7 @@ Since Concordance Chunk C (C-01):
   names that mixture's harm, and that it was stirred searing, since a dose of it can still be bottled by hand. Harm is
   judged by the server (a harmful or unknown status) as well as by the property's data.
 - **Setting is a plain use;** the formula's tooltip said "sneak" until Chunk C.
-- **It asks the couriers for what it lacks** (since Concordance Chunk C, C-06; not merged, not run): waiting for an
+- **It asks the couriers for what it lacks** (since Concordance Chunk C, C-06; not merged): waiting for an
   ingredient, a crucible files one courier request, as whoever set its formula and while they are here (or the server
   lets absent owners' devices act), at the nearest Courier Post within 16 blocks they may use, for exactly what its
   formula lacks first (a ground reagent stays a ground reagent). A Peepo at its port brings only what no courier holding
@@ -237,6 +238,10 @@ counts once.
   workshop's brew, and the Yeti King's frost respects its Frostward.
 - Reachable entry path: First Light understood → the Alembic Arts by examining vanilla items → craft the crucible
   (four copper, a cauldron, three bricks) and tools from vanilla materials.
+- Since Concordance Chunk C (not merged): input producers also Mendvetch from Verdant Beds or crafted, a Crucible
+  Stand's JE, and a courier's or a Peepo's deliveries; output consumers also a poultice on another player in a lair
+  fight (encounter credit) and the Kiln Draught at the Cinder Kiln's slag. Unlocks: nothing; no product is an
+  ingredient, a recipe input or a research gate (`check_workshop_products`).
 - Solo, trade and cooperative routes: entirely solo; Research Notes and written formulas can be traded.
 - Specialty use without other branches: needs only First Light.
 
@@ -384,9 +389,10 @@ server tests. The existing alchemy tests are unchanged, and passed there too: no
 `check_alchemy` now mirrors `RIME_KEEP_*` and accepts a property's status only if vanilla or Jugcraft registers it; the
 new `check_winter_brine` holds the rest. `check_mod_data` passes, locally and in that run's `mod` job.
 
-**Concordance Chunk C, unit 1** ([the chunk's contract](concordance-chunk-c.md); not merged). **No new test has run.**
-They were written where no Minecraft jar is available, so none of this Java has been compiled; CI is their first
-compile and run.
+**Concordance Chunk C, unit 1** ([the chunk's contract](concordance-chunk-c.md); not merged). **Passed in CI:** every
+job of run 38684732031 (through `0b1039312`, after one re-run of a client shard for main's Peepo cow-breeding flake),
+and again in run 38774859294 on `bb856f873`. The tests were written where no Minecraft jar is available; CI was their
+first compile and run.
 - **New server game tests:**
   - `ConcordanceAlchemyGameTests` +20 (33 in all). C-01's 13:
     - `aChangedRuleKeepsTheFormulaAndSaysWhy`, `aRestoredRuleResumesTheFormula`,
@@ -421,7 +427,7 @@ compile and run.
   - `check_signs`: Jade's crucible snapshot and its client;
   - `check_encyclopedia`: the crucible page's reach and glass, and that it only reads;
   - the crucible in `AUTHORITY_ROUTES`, and `diagnostic` in the pure-package list.
-- **Fixes from the unit review** (a sixth commit; none of it run in a game):
+- **Fixes from the unit review** (a sixth commit, `d593ae61d`; in CI with the unit, run 38684732031):
   - every dose of a batch is the same share (`Mixture.bottle`, `Vector.times`, and the generator's `bottle`), so a
     poultice in two parts bottles 1.063 twice and an automated batch's doses stack. Before, the last dose took the
     remainder (1.063 then 1.064), the two salves differed, and an automated crucible paused on its own second dose
@@ -453,11 +459,13 @@ compile and run.
   The pure alchemy packages also compiled with `javac` against a stub of jspecify's `@Nullable`, and a scratch harness
   replayed the new assertions' alchemy against the real data: two doses of 1.063 for 318 ticks, the Kiln Draught's 765
   and 765, equal doses in 2 to 6 parts, and the risk lines (with a stand-in for the registry's harm test).
-- **Not run:** `./gradlew build` with and without the optional integrations, `./gradlew runClientGameTest`, CI, any
-  play by hand, and two clients.
+- **In CI only:** `./gradlew build` with and without the optional integrations and `./gradlew runClientGameTest`
+  (above). **Not run:** any play by hand, and two clients.
 
-**Concordance Chunk C, unit 3** ([the chunk's contract](concordance-chunk-c.md); not merged). **No new test has run;**
-none of its Java has been compiled.
+**Concordance Chunk C, unit 3** ([the chunk's contract](concordance-chunk-c.md); not merged). Its server tests passed
+in CI run 38720814268 (`mod` and `optional integrations absent`), where client shard 0 failed on a defect in the Peepo
+unloaded-crucible check, fixed in `9098c06b1`; every job then passed in runs 38726242149 (with unit 4),
+38731825181 and 38774859294.
 - `ConcordanceAlchemyGameTests` +8 (41 in all), the Crucible Stand's: `aStandFollowsTheFormulasBands`,
   `anUnpoweredStandLetsTheCrucibleCool`, `aStandIdlesForAWaitingOrIncompatibleFormula`,
   `aStandIsSetOnlyByThoseWhoMayChangeIt`, `theFullChainRunsFromAPumpAndACable` (a pump and a pipe fill the tank, which
@@ -471,7 +479,15 @@ none of its Java has been compiled.
   `CompanionAutomationChecks` ([logistics](arcane-concordance-logistics.md)).
 - Audits: `check_crucible_stand` and `check_crucible_supply` (new); `check_alchemy` mirrors the stand's targets and
   rates. The checks run for the unit, and its audit mutations, are in the stand's and the logistics records.
-- **Not run:** the build, the game tests, the client tests and CI.
+- **Not run:** play by hand and two clients.
+
+**Concordance Chunk C, unit 5** ([C-10](concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10); not merged).
+`ConcordanceWorkshopClientGameTests` shows, in one real client on a dedicated server, a crucible on a Crucible Stand
+following the Stillroot Poultice's formula with water from an Electric Pump, its Inspect page naming the stand, and the
+batch bottled as two poultices in two bowls; it passed in client shard 4 of run 38774859294. The viewed Inspect shot
+reads "Crucible Stand beneath heats it towards 65 degrees" and "Formula: step 3 of 9: Mendvetch, as it comes". The
+load card measures a crucible replaying the poultice on a stand (21 poultices while measured, every item accounted
+for) and the journey test brews both products by hand and the poultice powered; both passed in that run.
 
 ## World and event applicability
 

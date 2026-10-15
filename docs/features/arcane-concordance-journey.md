@@ -5,7 +5,7 @@ branch `claude/concordance-steps-26-32`, integrated by [#263](https://github.com
 8 October 2026). **The human playtest has not been run**; see Verification for what has. Concordance Chunk C (C-10)
 adds the living workshop (`WORKSHOP` in `tools/concordance_journey.py`;
 `ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart` and `theWorkshopsRecipesLoad`). Not merged; its two
-server game tests have not run yet.
+server game tests passed in CI (run 38774859294 on `bb856f873`).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.
@@ -245,16 +245,19 @@ existing test structure `jugcraft-test:drone_depot` (16×8×16 air); no structur
   was cancelled by step 32's push.
 
 - The living workshop (Concordance Chunk C, C-10):
-  - Server game tests added, not yet compiled or run: `ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart`
-    (up to 900 ticks; one survival mock player and a mock friend; the porter works by itself on the server's own time)
-    and `theWorkshopsRecipesLoad`.
+  - Server game tests: `ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart` (up to 900 ticks; one survival
+    mock player and a mock friend; the porter works by itself on the server's own time) and `theWorkshopsRecipesLoad`.
+    Both passed in CI, in run 38774859294's `mod` job ("All 1836 required tests passed") and in `optional
+    integrations absent`; CI was their first compile and run.
   - The test's given inputs: vanilla materials and coal, two Thallite ingots, two Kindled Lanterns kindled and infused
     full at a Lampwright's Bench (amethyst shards; covered by the first loadout) and a blank formula. Placed with
     `setBlock`: the hand crucibles, the circle's blocks, two compact one-block coal generators (a crafted generator
     builds the full multi-block), the cable, pump, pipe, hopper, chest and the post's pylon; `theWorkshopsRecipesLoad`
     loads their recipes.
   - Run locally: `python3 tools/concordance_journey.py --check` (now exits 1 on a problem) and `check_acquisition`'s
-    workshop rows; their results and the audit mutations are in the pull request.
+    workshop rows (inside `tools/check_mod_data.py`); both pass, and passed again for unit 5's records. Commit
+    `31bc7087d`'s message records 32 audit mutations run for them; Chunk C's evidence is in
+    [its contract](concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10).
 
 Not yet run:
 - the playtest of each route, in both setups;
