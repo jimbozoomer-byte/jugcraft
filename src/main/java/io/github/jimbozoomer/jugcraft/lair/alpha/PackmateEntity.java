@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -136,7 +137,7 @@ public class PackmateEntity extends Monster {
 	/** It bites {@code target}: {@value #DAMAGE}, times {@code lairs.boss_damage}. Returns whether it hurt them. */
 	public boolean bite(ServerLevel level, Player target) {
 		biteIn = BITE_COOLDOWN;
-		swing(InteractionHand.MAIN_HAND);
+		swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT);
 		level.playSound(null, getX(), getY(), getZ(), AlphaWerewolfEntity.sound("entity.wolf.growl", SoundEvents.ZOMBIE_AMBIENT),
 				SoundSource.HOSTILE, 1.0F, 1.2F);
 		return target.hurtServer(level, damageSources().mobAttack(this), LairBosses.damage(DAMAGE));
