@@ -16,7 +16,21 @@
       "slot_dark": "FF1E1208",
       "slot_face": "FF3C2412",
       "slot_light": "FFC48C4C",
-      "outlined": false
+      "outlined": false,
+      "shape": "workshop",
+      "casing": [
+        "FF4E2E14",
+        "FF8A5828",
+        "FFB0763A",
+        "FFCE9654",
+        "FFE8BA70"
+      ],
+      "outline": "FF281608",
+      "screen": "FF1A110A",
+      "grid": "FF2A1A0D",
+      "frame": "FFE27824",
+      "help_box": "FF3C2412",
+      "band": "FF301E0E"
     },
     "industrial": {
       "text": "FF60E66E",
@@ -34,7 +48,20 @@
       "slot_dark": "FF0A0B0C",
       "slot_face": "FF1A1C1D",
       "slot_light": "FF707477",
-      "outlined": false
+      "outlined": false,
+      "shape": "industrial",
+      "casing": [
+        "FF2E3032",
+        "FF585B5E",
+        "FF7C7F82",
+        "FFA0A3A6",
+        "FFC4C7C9"
+      ],
+      "outline": "FF18191A",
+      "screen": "FF101213",
+      "grid": "FF141716",
+      "frame": "FF707477",
+      "help_box": "FF101213"
     },
     "electric": {
       "text": "FFC8ECFF",
@@ -52,7 +79,20 @@
       "slot_dark": "FF0A1E5A",
       "slot_face": "FF123896",
       "slot_light": "FF3C82EC",
-      "outlined": false
+      "outlined": false,
+      "shape": "electric",
+      "casing": [
+        "FF0A1C4A",
+        "FF164AAA",
+        "FF2268D6",
+        "FF3E92F6",
+        "FF84C8FF"
+      ],
+      "outline": "FF060E28",
+      "screen": "FF0C1634",
+      "grid": "FF142452",
+      "frame": "FF46B2FF",
+      "help_box": "FF123896"
     },
     "lab": {
       "text": "FF78B0FF",
@@ -70,7 +110,20 @@
       "slot_dark": "FF3C7CDC",
       "slot_face": "FF0C101A",
       "slot_light": "FF3C7CDC",
-      "outlined": true
+      "outlined": true,
+      "shape": "lab",
+      "casing": [
+        "FF282A2E",
+        "FF5C6064",
+        "FF969A9E",
+        "FFB2B6BA",
+        "FFD6D9DC"
+      ],
+      "outline": "FF141517",
+      "screen": "FF0A0D14",
+      "grid": "FF131A27",
+      "frame": "FF3C7CDC",
+      "help_box": "FF0A0D14"
     },
     "advanced": {
       "text": "FF80F4F0",
@@ -88,7 +141,51 @@
       "slot_dark": "FF2AA8A8",
       "slot_face": "FF0A1A1C",
       "slot_light": "FF2AA8A8",
-      "outlined": true
+      "outlined": true,
+      "shape": "advanced",
+      "casing": [
+        "FF060E10",
+        "FF0A1619",
+        "FF0E1E22",
+        "FF142C30",
+        "FF285A5E"
+      ],
+      "outline": "FF040A0C",
+      "screen": "FF081416",
+      "grid": "FF0D1F21",
+      "frame": "FF38D6D6",
+      "help_box": "FF081416"
+    },
+    "drone": {
+      "text": "FFECE6E6",
+      "dim": "FFA8564A",
+      "warn": "FFFF6A5A",
+      "ok": "FF78DC8C",
+      "energy": "FFE05040",
+      "progress": "FFFF8A70",
+      "label": "FFE05040",
+      "help": "FFC8B4B0",
+      "button_face": "FF1E1416",
+      "button_edge": "FFE05040",
+      "button_light": "FFFF8A70",
+      "button_icon": "FFECE6E6",
+      "slot_dark": "FF96463C",
+      "slot_face": "FF141012",
+      "slot_light": "FF96463C",
+      "outlined": true,
+      "shape": "advanced",
+      "casing": [
+        "FF0A0809",
+        "FF141012",
+        "FF1C1618",
+        "FF281E20",
+        "FF602C28"
+      ],
+      "outline": "FF060404",
+      "screen": "FF1E1A1C",
+      "grid": "FF282021",
+      "frame": "FFE05040",
+      "help_box": "FF1E1A1C"
     }
   },
   "machines": {
@@ -151,5 +248,15 @@
     "diesel_engine": "industrial",
     "wind_turbine": "workshop"
   },
-  "forms": "industrial"
+  "forms": "industrial",
+  "screens": {
+    "prospector": "workshop",
+    "rocket_pad": "industrial",
+    "storage_tank": "industrial",
+    "logic_controller": "advanced",
+    "reactor_console": "advanced",
+    "remote_shutdown": "advanced",
+    "drone_terminal": "drone",
+    "drone_tower": "drone"
+  }
 }

@@ -175,7 +175,7 @@ Not applicable.
 
 ## Rollout and open questions
 
-- The other custom screens (storage tank, rocket pad, reactor console, logic controller and the rest) keep their own looks for now. They could take the look of their tech level next.
+- The other machine screens (prospector, rocket pad, storage tank, logic controller, reactor console, remote shutdown panel, drone depot terminal and drone tower) take their looks in [the other machine screens](other-machine-screens.md).
 - A machine's look can be changed by moving it between the sets in `tools/gui_textures.py`.
 
 ## History

@@ -21,17 +21,18 @@ import net.minecraft.network.chat.Component;
  * control is, the transfer switch that takes the reactor's controls from the control room (or hands them back), and
  * the reactor trip. What it shows is the panel's own copy of its reactor's state (synced with the panel, so it works
  * however far away the reactor is); every button is a {@link ConsoleActionPayload} the server checks. In the reactor
- * console's colours, laid out at 360 x 220 and scaled to fit.
+ * console's advanced look (docs/features/machine-screens.md), with a status lamp and chip by the title; laid out at
+ * 360 x 220 and scaled to fit.
  */
 public class RemoteShutdownScreen extends Screen {
 	static final int W = 360, H = 220;
-	static final int BG = ReactorConsoleScreen.BG, PANEL = ReactorConsoleScreen.PANEL, EDGE = ReactorConsoleScreen.EDGE,
-			ACCENT = ReactorConsoleScreen.ACCENT, TEXT = ReactorConsoleScreen.TEXT, DIM = ReactorConsoleScreen.DIM,
+	static final int EDGE = ReactorConsoleScreen.EDGE, TEXT = ReactorConsoleScreen.TEXT, DIM = ReactorConsoleScreen.DIM,
 			GREEN = ReactorConsoleScreen.GREEN, AMBER = ReactorConsoleScreen.AMBER, RED = ReactorConsoleScreen.RED;
 	/** Buttons, relative to the screen's corner: the transfer switch, the reactor trip, the owner's switch. */
 	static final int[] TRANSFER = {196, 92, 154, 28}, TRIP = {300, 140, 48, 48}, MODE = {196, 196, 96, 14};
 
 	private final BlockPos panel;
+	private final MachineScreenThemes.Theme theme = MachineScreenThemes.screen("remote_shutdown");
 	private float scale = 1;
 	private int left, top;
 
@@ -77,12 +78,11 @@ public class RemoteShutdownScreen extends Screen {
 
 	private void draw(GuiGraphicsExtractor g, int mx, int my) {
 		int x0 = left, y0 = top;
-		g.fill(x0, y0, x0 + W, y0 + H, BG);
-		g.fill(x0, y0 + 20, x0 + W, y0 + 21, ACCENT);
-		g.text(font, t("title"), x0 + 8, y0 + 6, ACCENT, false);
+		ScreenKit.body(g, theme, x0, y0, W, H);
 		EquipmentBlockEntity p = panelEntity();
 		if (p == null || p.linked == null) {
-			g.text(font, t("no_reactor", EquipmentBlockEntity.PANEL_RANGE), x0 + 8, y0 + 40, AMBER, false);
+			ScreenKit.title(g, font, theme, x0 + 4, y0 + 5, Component.literal(t("title")), AMBER, W - 16);
+			g.text(font, t("no_reactor", EquipmentBlockEntity.PANEL_RANGE), x0 + 12, y0 + 40, AMBER, false);
 			return;
 		}
 		ReactorCore core = p.core;
@@ -101,7 +101,8 @@ public class RemoteShutdownScreen extends Screen {
 			status = t("status.shut_down");
 			statusColour = DIM;
 		}
-		g.text(font, status, x0 + W - 8 - font.width(status), y0 + 6, statusColour, false);
+		ScreenKit.title(g, font, theme, x0 + 4, y0 + 5, Component.literal(t("title")), statusColour, W - font.width(status) - 32);
+		ScreenKit.chip(g, font, theme, x0 + W - 8, y0 + 4, status, statusColour);
 		reactor(g, p, core, x0 + 8, y0 + 28);
 		control(g, core, x0 + 188, y0 + 28, mx, my);
 		trip(g, core, x0 + 188, y0 + 132);
@@ -110,11 +111,7 @@ public class RemoteShutdownScreen extends Screen {
 	}
 
 	private void panel(GuiGraphicsExtractor g, int x, int y, int w, int h, String title) {
-		g.fill(x, y, x + w, y + h, PANEL);
-		g.outline(x, y, w, h, EDGE);
-		g.fill(x + w - 8, y, x + w, y + 1, ACCENT);
-		g.text(font, title, x + 6, y + 5, ACCENT, false);
-		g.fill(x + 6, y + 15, x + w - 6, y + 16, EDGE);
+		ScreenKit.pane(g, font, theme, x, y, w, h, title);
 	}
 
 	/** The reactor it found and its readings. */
