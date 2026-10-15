@@ -38,17 +38,18 @@ room); a broken post does the same for every request bound for it. Nothing is ev
 Since Concordance Chunk C (C-06), a request's notes name where it was going ("where it was going is full", "where it was
 going was broken"), since a crucible can fill or break as a post can.
 
-**Crucibles ask for themselves** (Concordance Chunk C, C-06; not merged, not run). An Alembic Crucible following a formula
-that waits for an ingredient files one request itself: as whoever set its formula (while they are here, or the server
-lets absent owners' devices act), at the nearest Courier Post within 16 blocks they may use, for exactly what its
-formula lacks first, a ground reagent as a ground reagent. A porter bound to that post fetches it from the chests round
-the post and carries it into the crucible's buffer; a full crucible keeps the rest aboard ("full") until there is room.
-A Peepo working the same crucible brings only what no courier holding that request is bringing, so one need is never
-brought twice. The crucible files no other request while one is open. Clearing or replacing its formula, setting it as
-another player, the rules refusing it, or breaking the crucible turns the request back (anything carried goes home).
-With its setter's sixteen requests already open it says so ("Needs 2 more: ...; the couriers take no more of its
-setter's requests now, so it asks again in 10 s") and waits. The codex's Couriers entry has a fourth page, "A
-Crucible's Own Requests".
+**Crucibles ask for themselves** (Concordance Chunk C, C-06; not merged, not run). An Alembic Crucible following a
+formula that waits for an ingredient files one request itself: as whoever set its formula (while they are here, or the
+server lets absent owners' devices act), at the nearest Courier Post within 16 blocks they may use, for exactly what its
+formula lacks first, a ground reagent as a ground reagent, as much of it as fits in the crucible now (nothing while its
+buffer is full of other things). A porter bound to that post fetches it from the chests round the post and carries it
+into the crucible's buffer; a crucible filled after it asked keeps the rest aboard ("full") until there is room. A Peepo
+working the same crucible brings only what no courier holding that request is bringing, so the two do not bring one need
+twice while a courier holds the request. The crucible files no other request while one is open. Clearing or replacing
+its formula, setting it as another player, the rules refusing it, or breaking the crucible turns the request back
+(anything carried goes home). With its setter's sixteen requests already open it says so ("Needs 2 more: ...; the
+couriers take no more of its setter's requests now, so it asks again in 10 s") and waits. The codex's Couriers entry has
+a fourth page, "A Crucible's Own Requests".
 
 **Seeing it.** Use the post with an empty hand: how many requests are open and in transit, its free slots and its last
 eight steps (filed, claimed, reserved, picked up, delivered, stranded, taken up, taken back, cancelled, recovered, with
@@ -104,9 +105,12 @@ and loading none (the Spire's own copy is gone). The crucible (`CrucibleBlockEnt
   holds the request (a live claim, its lease not run out) and it is not being taken back (C-P50). A request nobody
   serves (no porter, its setter away, a porter unloaded with its claim) therefore never stalls a Peepo.
 - **Filing** (`supply`, on an ingredient wait): one request at a time, for the shortage's exact stack (`sample`), with
-  its setter as requester and the crucible as destination. After finding no post, or `TOO_MANY` (the setter's 16 or
-  the world's 1,024), it waits 200 ticks, doubling to 1,200, before trying again; a full quota is the reason it gives,
-  `courier_quota` (C-P52). The backoff resets on a filing or a turn-back and is never saved.
+  its setter as requester and the crucible as destination, for as much of the shortage as fits in the crucible now,
+  measured as a porter delivers (`ItemStorage.SIDED`, no side, `CourierLedger.room`). With no room at all it files
+  nothing and tries again at its next pulse, with no backoff (the unit review: such a request left its porter on `FULL`
+  for good, holding the post's queue). After finding no post, or `TOO_MANY` (the setter's 16 or the world's 1,024), it
+  waits 200 ticks, doubling to 1,200, before trying again; a full quota is the reason it gives, `courier_quota` (C-P52).
+  The backoff resets on a filing or a turn-back and is never saved.
 - **Reconciling** every pulse (C-P51): a request the ledger has closed, one not bound here or not its setter's, or one
   being taken back is forgotten. One with nothing carried is turned back when its item is no longer what the formula
   lacks first, when it asks for more than is still lacked, or when its post is gone or barred to its setter (its chunk
@@ -136,10 +140,12 @@ and loading none (the Spire's own copy is gone). The crucible (`CrucibleBlockEnt
   what its body allows (step 17: 16 items, 2 Ley Charge and 1 wear a delivery).
 - A request with no source rests ten seconds before another try, so idle couriers do not churn.
 - A crucible (C-06) has at most one open request, filed only when it waits for an ingredient, for no more than its
-  formula lacks; after no post or a full quota it backs off 200 ticks, doubling to 1,200, so many crucibles cannot spend
-  a player's quota in a loop. Its requests count against its setter's 16 and the world's 1,024. A Peepo and a courier
-  never both bring one need while a courier holds the request; cargo stranded and taken up later can still over-supply,
-  bounded, and nothing is lost (the excess waits in the buffer for the next repeat).
+  formula lacks or more than fits in it; after no post or a full quota it backs off 200 ticks, doubling to 1,200, so
+  many crucibles cannot spend a player's quota in a loop. Its requests count against its setter's 16 and the world's
+  1,024. A Peepo and a courier never both bring one need while a courier holds the request. Two paths can still
+  over-supply, bounded, with nothing lost (the excess waits in the buffer for the next repeat): cargo stranded and taken
+  up later, and a request a Peepo fills before any courier has claimed it, which a porter then claims and picks up
+  before the crucible's next pulse (cargo carried is always delivered, C-P51).
 
 ## Multiplayer and persistence
 
@@ -147,9 +153,12 @@ and loading none (the Spire's own copy is gone). The crucible (`CrucibleBlockEnt
   only sees chat, Jade and the porter's synced status. Filing and reading a post are rate-limited.
 - Permissions: only the post's owner's party files requests and binds couriers; a courier takes only from containers
   its keeper may open; only a request's requester cancels or recovers it. A crucible (C-06) files only as its formula's
-  setter, at a post they may use, and only while `Authority.answering` finds them (C-P53); a request open when they
-  leave waits at the porter, `OWNER_OFFLINE`. Delivery into the crucible is the porter's existing code and does not ask
-  `Authority` at the crucible (a known limit).
+  setter, at a post they may use, and only while `Authority.answering` finds them (C-P53). That stops new filings only:
+  an unclaimed request open when its setter leaves holds the post's queue for every request behind it
+  (`OWNER_OFFLINE`), since a porter serves the oldest first, until they return or someone who may change the crucible
+  clears its formula. Delivery into the crucible is the porter's existing code and does not ask `Authority` at the
+  crucible (a known limit). Slots a hopper fills after the crucible filed leave the porter on `FULL`, holding the
+  post's queue in the same way, until there is room or the formula is cleared.
 - Persistence: the ledger, samples and cargo in `jugcraft:courier_ledger` (world data); a courier's post and claim
   (`post`, `task`) on the porter; a key's post in its `jugcraft:courier_post` component; the post's slots and owner on
   its block entity. The cargo is saved with the ledger, so a restart neither repeats nor loses a step. Since Chunk C
@@ -228,10 +237,10 @@ chests, and a real restart of a server with couriers mid-delivery (the test save
   and files no other.
 - Peepo, client (`PeepoIntegrationClientTests`): the exact shortage, and nothing for an incompatible formula, which
   files no request either; `noOverSupplyWithAnOpenCourierRequest`. `CompanionAutomationChecks`: a full crucible leaves
-  the companion's cargo with it (it goes back once); an unloaded crucible: the companion walks on its own the whole time,
-  fenced in where its chunk is forced, its job reads `UNLOADED` through two of its transport's retries and its cargo is
-  kept; loaded again, the cargo is delivered once. `ConcordanceSpireGameTests.theHeartAsksACourierForItsUpkeep` covers
-  the shared nearest-post helper.
+  the companion's cargo with it (it goes back once); an unloaded crucible: the companion walks on its own the whole
+  time, fenced in where its chunk is forced, its job reads `UNLOADED` after two of its transport's 200-tick retries and
+  its cargo is kept; loaded again, the cargo is delivered once.
+  `ConcordanceSpireGameTests.theHeartAsksACourierForItsUpkeep` covers the shared nearest-post helper.
 - Audits in `tools/check_mod_data.py`: `check_crucible_supply` (new: one demand, the remainder rule, every turn-back,
   filing and its backoff, the keys and stamp, the shared helper written once, the quota's parameters, no client
   reading the demand or the ledger); `check_logistics` mirrors `Couriers.FILING_REACH`; `AUTHORITY_ROUTES` names
@@ -239,7 +248,15 @@ chests, and a real restart of a server with couriers mid-delivery (the test save
 - Audit mutations, run for the records in place with every file restored after each, against `check_mod_data`'s
   Concordance checks: the spec's 15 and three more (`Authority.answering` dropped from filing, the lease check dropped
   from the remainder, a turn-back cancelling as the formula's owner rather than the request's requester): all 18
-  reported. Commit `46f6e2a0e`'s message reports the same 18.
+  reported. Commit `46f6e2a0e`'s message reports the same 18; its "never filled twice" claims too much (two bounded
+  over-supply paths remain, above).
+- **The unit review's fixes** (commit "Chunk C unit 3: fixes from the unit review"; not run): a crucible files only for
+  what fits (`aCrucibleWithNoRoomAsksForNothing`, new, so `ConcordanceLogisticsGameTests` has 15: five slots of spider
+  eyes file nothing, one slot emptied files at once); `aCrucibleAsksOnceForItsExactShortage` now also lowers the
+  shortage while a porter carries, and the request is kept and delivered (C-P51); `aFullCourierQuotaWaitsAndBacksOff`
+  breaks its crucible at the end, so it leaves no request open in the shared ledger. `check_crucible_supply` now also
+  holds the room check, `reconcile`'s order (cargo carried is left to arrive; with nothing carried, another item or more
+  than is lacked turns it back) and the step order of `shortage()`.
 - The commands run for the unit's records are in [crucible-stand.md](crucible-stand.md#verification); all passed.
 - **Not run:** the build, the game tests, the client tests (`python3 tools/select_client_tests.py` chooses every client
   class for this unit, as `CompanionAutomationChecks` is a shared file), CI, and two clients.

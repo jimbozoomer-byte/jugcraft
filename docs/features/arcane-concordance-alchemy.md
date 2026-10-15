@@ -271,8 +271,10 @@ counts once.
   vessel's animation), never the makeup, which takes sampling. Hand operations are rate-limited and check research; a
   stir's band is the server's.
 - Since Chunk C, C-06: a crucible files courier requests only as its formula's setter, and only while
-  `Authority.answering` finds them (online, or the server's absent-owner option); a request already open when they
-  leave waits, `OWNER_OFFLINE`, at the porter.
+  `Authority.answering` finds them (here, that is online, alive and in the crucible's dimension, or the server's
+  absent-owner option). That stops new filings only: an unclaimed request open when they leave holds the post's queue
+  for every request behind it (`OWNER_OFFLINE`) until they return or someone who may change the crucible clears its
+  formula.
 - Who may change a crucible (since Chunk C, C-01): every change by hand asks `Authority.mayChange` as the player (water,
   adds, stirs, bottling, setting or clearing a formula). Tasting, the glass and recording onto a blank formula stay
   open. The Inspect page's position is the client's claim: the server reads only a loaded crucible within the reader's

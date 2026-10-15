@@ -11,7 +11,8 @@ import org.jspecify.annotations.Nullable;
  * campfire only while lit), or {@link #AMBIENT} with none, by {@link #RATE} degrees a tick. Worked out on the server
  * each tick from the block below, so a fire put out or lit changes the process at once. A Crucible Stand (Concordance
  * Chunk C, C-05) heats towards {@link #standTarget} for the band its crucible needs ({@link #standBand}) on the ticks it
- * pays. Keep equal to tools/concordance_alchemy.py.
+ * pays; fed too little, it holds the crucible on some ticks it cannot pay (CrucibleStandBlockEntity.holds). Keep equal to
+ * tools/concordance_alchemy.py.
  */
 public final class Heat {
 	public static final int AMBIENT = 20;
@@ -36,8 +37,9 @@ public final class Heat {
 
 	/**
 	 * The block beneath a crucible (Concordance Chunk C, C-01): its id, whether it is out (an unlit campfire; a Crucible
-	 * Stand that paid nothing this tick, C-05) and its heat: SOURCES' for a block that heats by what it is, a stand's target
-	 * paid for (AMBIENT when it paid nothing), or null for a block that does not heat a crucible.
+	 * Stand that gave nothing on its last tick, C-05) and its heat: SOURCES' for a block that heats by what it is, what a
+	 * stand gave (the target it paid for, the crucible's own temperature on a tick it held it, AMBIENT when it gave
+	 * nothing), or null for a block that does not heat a crucible.
 	 */
 	public record Below(String block, boolean unlit, @Nullable Integer heat) {
 		/** A block that heats a crucible by what it is ({@link Heat#SOURCES}; null heat for one that does not). */

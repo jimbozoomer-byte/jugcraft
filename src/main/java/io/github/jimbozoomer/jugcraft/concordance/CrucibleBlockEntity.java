@@ -41,7 +41,9 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -289,15 +291,16 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 
 	/**
 	 * The block beneath, read now: what heats it (serverTick) and what the Inspect page names (C-01). A Crucible Stand
-	 * beneath (Concordance Chunk C, C-05) gives the target it paid for on its last tick, lit, or nothing, dark: one block
-	 * entity read, no scan.
+	 * beneath (Concordance Chunk C, C-05) gives what it gave on its last tick (the target it paid for, or the crucible's own
+	 * temperature on a tick it held it), or nothing, out: one block entity read, no scan. Since the unit review its light
+	 * only shows it: a trickle-fed stand stays lit through a few ticks it cannot pay.
 	 */
 	public Heat.Below below(ServerLevel level) {
 		BlockPos at = worldPosition.below();
 		BlockState below = level.getBlockState(at);
 		String block = BuiltInRegistries.BLOCK.getKey(below.getBlock()).toString();
 		if (below.is(JugcraftConcordance.CRUCIBLE_STAND) && level.getBlockEntity(at) instanceof CrucibleStandBlockEntity stand) {
-			return new Heat.Below(block, !below.getValue(BlockStateProperties.LIT), stand.given());
+			return new Heat.Below(block, stand.given() == Heat.AMBIENT, stand.given());
 		}
 		return new Heat.Below(block, below.hasProperty(BlockStateProperties.LIT) && !below.getValue(BlockStateProperties.LIT));
 	}
@@ -357,9 +360,10 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				if (band() != stir.band()) {
 					// Waiting for the heat shows no sign, as it never did. Preserve's hold is the reason only while it keeps the
 					// heat from the stir's band: unheld, the block beneath would move it that way (C-01). Over a magma block
-					// (warm at most) a hot stir waits for heat, held or not.
+					// (warm at most) a hot stir waits for heat, held or not. A Crucible Stand, which gives nothing during a hold,
+					// would aim unheld inside the stir's own band (Heat.standTarget; the unit review).
 					int held = held(ConcordanceProgress.now(level));
-					Band heading = Band.of(heatBelow(level));
+					Band heading = level.getBlockEntity(worldPosition.below()) instanceof CrucibleStandBlockEntity ? stir.band() : Band.of(heatBelow(level));
 					boolean kept = held > 0 && Integer.compare(heading.ordinal(), band().ordinal()) == Integer.compare(stir.band().ordinal(), band().ordinal());
 					return pause(level, kept ? Diagnostic.held(band().id, (held + 19) / 20) : Diagnostic.wrongHeat(stir.band().id, band().id));
 				}
@@ -539,11 +543,13 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 
 	/**
 	 * Waiting for an ingredient (C-06, C-P13): one request, its formula's setter's, at the nearest Courier Post within
-	 * POST_REACH blocks they may use, for the step's exact item and the whole shortage, delivered here. Nothing is asked
-	 * while a request is open, for a formula nobody is known to have set, while its setter does not answer (away, unless
-	 * the server lets absent owners' devices act: a request filed for nobody would stall a shared post, C-P53), or during a
-	 * backoff: after no post, or the couriers' quota full (Logistics.TOO_MANY: the setter's 16 or the world's 1,024), it
-	 * waits backoffAfter(...) ticks and, for the quota, says so. Returns the reason it waits.
+	 * POST_REACH blocks they may use, for the step's exact item and the whole shortage, as much of it as fits here now
+	 * (measured through the lookup a porter delivers by), delivered here. Nothing is asked while a request is open, for a
+	 * formula nobody is known to have set, while its setter does not answer (away, unless the server lets absent owners'
+	 * devices act: a request filed for nobody would stall a shared post, C-P53), while none of it would fit (its buffer
+	 * full of other things: a porter would wait at it, FULL, holding the post's queue; it asks again once there is room,
+	 * with no backoff), or during a backoff: after no post, or the couriers' quota full (Logistics.TOO_MANY: the setter's
+	 * 16 or the world's 1,024), it waits backoffAfter(...) ticks and, for the quota, says so. Returns the reason it waits.
 	 */
 	private Diagnostic supply(ServerLevel level, Diagnostic reason) {
 		Shortage shortage = shortage();
@@ -554,10 +560,15 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (now >= nextFiling) {
 			quotaFull = false;
 			ItemStack sample = sample(shortage.add());
-			CourierPostBlockEntity post = sample.isEmpty() ? null : Couriers.nearestPost(level, worldPosition, formulaOwner, POST_REACH);
+			Storage<ItemVariant> self = ItemStorage.SIDED.find(level, worldPosition, null);
+			long room = sample.isEmpty() || self == null ? 0L : CourierLedger.room(self, ItemVariant.of(sample), shortage.count());
+			if (room <= 0L) {
+				return reason; // the unit review: no request it has no room for
+			}
+			CourierPostBlockEntity post = Couriers.nearestPost(level, worldPosition, formulaOwner, POST_REACH);
 			if (post != null) {
 				Logistics.Filed filed = CourierLedger.of(level.getServer()).file(formulaOwner, Couriers.place(level, post.getBlockPos()),
-						Couriers.place(level, worldPosition), sample, shortage.count(), level.registryAccess(), now);
+						Couriers.place(level, worldPosition), sample, (int) room, level.registryAccess(), now);
 				if (filed.outcome() == Logistics.Outcome.DONE) {
 					request = filed.id();
 					backoff = 0;

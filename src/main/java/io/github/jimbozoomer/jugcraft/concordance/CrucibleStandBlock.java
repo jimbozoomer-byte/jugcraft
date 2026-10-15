@@ -25,9 +25,9 @@ import org.jspecify.annotations.Nullable;
  * The Crucible Stand (Concordance Chunk C, C-05): set an Alembic Crucible on it and run a cable to any face but its top;
  * it heats the crucible for its formula's next stir, or to its own setting. Empty-handed, a use sets its heat (no formula
  * above) or says how it stands (sneaking, or a formula decides); anything held is used as itself, so a crucible is set on
- * it and a cable beside it by a plain use. {@link #LIT} lights its coil on the ticks it pays. It carries no worldgen
- * connection marker: a cable meets it where it really takes power (CableBlock.connectsTo asks the face), never its seat
- * (C-P44). Everything else is {@link CrucibleStandBlockEntity}.
+ * it and a cable beside it by a plain use. {@link #LIT} lights its coil on the ticks it pays (fed too little, also through
+ * a few it cannot). It carries no worldgen connection marker: a cable meets it where it really takes power
+ * (CableBlock.connectsTo asks the face), never its seat (C-P44). Everything else is {@link CrucibleStandBlockEntity}.
  */
 public class CrucibleStandBlock extends BaseEntityBlock {
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;

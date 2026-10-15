@@ -1784,10 +1784,61 @@ public class ConcordanceAlchemyGameTests {
 	}
 
 	/**
+	 * C-05 (C-P43, the unit review): a stand fed 8 JE a tick, half the hot band's rate, still brings its crucible into the
+	 * hot band. A tick it cannot pay holds the crucible below the band instead of letting it cool, so each degree costs what
+	 * it costs at full power, and its light stays on through those ticks. Set to hot with no formula, its crucible reaches
+	 * the band; following a formula, the hot stirs are taken (it also holds the band's lowest degree, so a pulse finds the
+	 * crucible in the band) and the draught is made.
+	 */
+	@GameTest(maxTicks = 900)
+	public void aTrickleFedStandStillReachesItsBand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos set = new BlockPos(1, 2, 1);
+		BlockPos following = new BlockPos(4, 2, 4);
+		CrucibleStandBlockEntity setStand = onStand(helper, set);
+		CrucibleBlockEntity setCrucible = helper.getBlockEntity(set, CrucibleBlockEntity.class);
+		onStand(helper, following);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(following, CrucibleBlockEntity.class);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		for (int i = 0; i < 2; i++) {
+			RateGate.forget(player.getUUID());
+			setStand.useEmpty(player, false);
+		}
+		helper.assertTrue(setStand.setting() == Band.HOT, "Set to hot: " + setStand.setting());
+		helper.assertTrue(use(crucible, player, written(NIGHT_EYE)).consumesAction(), "The formula is set");
+		pour(crucible, FluidConstants.BOTTLE);
+		crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST));
+		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
+		helper.assertTrue(pulse(crucible, level, 2) == null && crucible.step() == 2, "Water and glowstone in: step " + crucible.step());
+		long half = CrucibleStandBlockEntity.JE_HOT / 2;
+		int[] hottest = {Heat.AMBIENT};
+		boolean[] wasLit = {false};
+		boolean[] darkAgain = {false};
+		helper.onEachTick(() -> {
+			offer(level, helper.absolutePos(set.below()), half);
+			offer(level, helper.absolutePos(following.below()), half);
+			hottest[0] = Math.max(hottest[0], setCrucible.temperature());
+			boolean on = lit(helper, set.below());
+			darkAgain[0] |= wasLit[0] && !on;
+			wasLit[0] |= on;
+		});
+		ItemStack expected = draught(NIGHT_EYE);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(hottest[0] >= Band.HOT.from, "Set to hot and fed half its rate, its crucible reaches the hot band: " + hottest[0]
+					+ " (now " + setCrucible.temperature() + ", " + setStand.energy.getAmount() + " JE)");
+			helper.assertTrue(wasLit[0] && !darkAgain[0], "Its light stays on through the ticks it cannot pay");
+			ItemStack made = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+			helper.assertTrue(made.getCount() == 1 && ItemStack.isSameItemSameComponents(made, expected),
+					"Following a formula on half the rate, the hot stirs are taken: " + made + " (step " + crucible.step() + ", "
+							+ crucible.temperature() + " degrees, " + crucible.waiting() + ")");
+		});
+	}
+
+	/**
 	 * C-05 (C-P12, C-P43): a stand pays only while its crucible can go on or waits only for heat. It idles, paying nothing
-	 * and dark, while the crucible waits for water, an ingredient or a bottle, while Preserve holds it, and while the rules
-	 * in force cannot follow the formula, each time giving the crucible's own reason; with nothing on it, nothing to heat.
-	 * Jade is told the same.
+	 * and dark, while the crucible waits for water, an ingredient or a bottle, while Preserve holds it (the crucible then
+	 * names the hold, as over a campfire), and while the rules in force cannot follow the formula, each time giving the
+	 * crucible's own reason; with nothing on it, nothing to heat. Jade is told the same.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aStandIdlesForAWaitingOrIncompatibleFormula(GameTestHelper helper) {
@@ -1826,6 +1877,9 @@ public class ConcordanceAlchemyGameTests {
 		Diagnostic held = Diagnostic.held(crucible.band().id, (crucible.held(now) + 19) / 20);
 		helper.assertTrue(!stand.heat(level) && held.equals(stand.plan(level).reason()) && stand.plan(level).band() == null
 				&& stand.energy.getAmount() == afterOne, "Held by Preserve, it gives nothing: " + stand.plan(level));
+		// The unit review: the crucible names the hold too, as over a campfire; unheld, the stand would aim inside the hot band.
+		Diagnostic heldPulse = crucible.automate(level);
+		helper.assertTrue(held.equals(heldPulse) && crucible.step() == 2, "Its pulse says the hold keeps it from the hot stir: " + heldPulse);
 		crucible.hold(now, 0);
 		record Refused(boolean paid, Diagnostic reason, long energy) {
 		}

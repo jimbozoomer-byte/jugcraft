@@ -95,8 +95,8 @@ path before multiplying content variants"; MP:66).
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
 | 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records `807da7f5e`; review fixes `d593ae61d`): local checks pass; not compiled, no game test run, no CI run yet |
-| 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Built (`a0e73881c`, `2c98d6d68`; records `4df687cc7`; merged with unit 1's fixes `2263f851b`; review fixes in the next commit): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; not compiled against Minecraft, no game test run, no CI run yet |
-| 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Built (`940f1f8a8`, `7b2dd6783`, `46f6e2a0e`; records in a fourth commit, "Concordance Chunk C, unit 3: records"): checks run and passed: `owner_art --check`, `check_mod_data`, `check_repository`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; its 53 audit mutations each reported; not compiled against Minecraft, no game test run, CI not run |
+| 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Built (`a0e73881c`, `2c98d6d68`; records `4df687cc7`; merged with unit 1's fixes `2263f851b`; review fixes `23f28b90e`): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; not compiled against Minecraft, no game test run, no CI run yet |
+| 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Built (`940f1f8a8`, `7b2dd6783`, `46f6e2a0e`; records `00e795594`; review fixes in "Chunk C unit 3: fixes from the unit review"): checks run and passed: `owner_art --check`, `check_mod_data`, `check_repository`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; its 53 audit mutations each reported, and the review fixes' 16 and five of the spec's re-run on the code they change; not compiled against Minecraft, no game test run, CI not run |
 | 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Not started |
 | 5 | C-10 | The measured small-workshop load, the end-to-end journey, client evidence, combined fixes, the checkpoint and the handoff | this page | Not started |
 
@@ -1076,12 +1076,12 @@ one waits with the cargo intact; cancelling returns it.
 
 | Case | What happens | Shown by |
 |---|---|---|
-| Destination fills | the rest stays aboard, noted "full"; delivered once there is room | new: `aCourierFillsACrucibleUntilItIsFull` |
+| Destination fills | the rest stays aboard, noted "full"; delivered once there is room. Since the unit review a crucible files only for what fits in it now, and nothing while none would, so no porter waits at a crucible it could never fill; slots a hopper fills after filing still leave the porter on `FULL`, holding the post's queue until there is room or the formula is cleared | new: `aCourierFillsACrucibleUntilItIsFull`; the unit review: `aCrucibleWithNoRoomAsksForNothing` |
 | Access removed | filing needs a post the setter may use (`CourierPostBlockEntity.mayUse`); a source its keeper may not open releases the claim, `BLOCKED_BY_ACCESS` (`ClockworkPorterEntity.java:424-427`) | new: `aPostTheSetterMayNotUseIsNeverAsked` |
 | Path fails | the porter gives up after a failed walk and releases the claim; the cargo stays with the request (`ClockworkPorterEntity.java:378-385`). Not 03:193's "three times": existing behaviour, unchanged | existing code; re-run `ConcordanceLogisticsGameTests` |
 | Target chunk unloads | `DESTINATION_UNLOADED`, no ledger step, the lease renewed (`ClockworkPorterEntity.java:389-392, 335`) | new: `anUnloadedCrucibleWaitsAndLosesNothing` |
 | Entity dies | a discarded porter strands its cargo, recovered exactly once | new: `aDiscardedPorterStrandsItsCargoOnce` |
-| Owner logs out | a request is served only while its requester is answering: `OWNER_OFFLINE` (`ClockworkPorterEntity.java:324-328`); a known limit | new: `anOfflineSetterPausesTheCourier` |
+| Owner logs out | a request is served only while its requester is answering: `OWNER_OFFLINE` (`ClockworkPorterEntity.java:324-328`); an unclaimed one then holds the post's queue for every request behind it; a known limit | new: `anOfflineSetterPausesTheCourier` |
 | Source broken | the claim is released, `source_gone` (`ClockworkPorterEntity.java:423-427`) | existing code |
 | Server restarts | the ledger's codec and the crucible's keys round-trip | new: the codec round trip; `ConcordancePersistenceGameTests` |
 
@@ -1132,11 +1132,15 @@ stays 1.
   - every pulse reconciles the request (C-P51). As built it also forgets a request not bound for this crucible or not
     its setter's, and one being taken back; it turns back one with nothing carried that no longer matches what is
     lacked first, asks for more than is lacked, or whose post is gone or barred to its setter (the post's chunk loaded);
-  - filing needs the setter answering (`Authority.answering`: online, or the server's absent-owner option), so a party
-    member's crucibles cannot file for someone away and stall a shared post's queue, where a porter serves the oldest
-    request first (C-P53; the spec had filing without the setter online, and its review changed it);
+  - filing needs the setter answering (`Authority.answering`: here, that is online, alive and in the crucible's
+    dimension, or the server's absent-owner option), so a party member's crucibles file no new request for someone
+    away, which would stall a shared post's queue, where a porter serves the oldest request first (C-P53; the spec had
+    filing without the setter online, and its review changed it). The rule stops new filings only: a request still
+    unclaimed when its setter leaves holds the queue (the unit review);
   - `turnBack` cancels as the request's own requester, the only one `Logistics.cancel` accepts;
-  - a crucible files the whole shortage; it is at most 32 (a formula's operations), inside the ledger's 256;
+  - a crucible files the whole shortage, or as much of it as fits in it now, measured as a porter delivers, and nothing
+    while none would (the unit review: a request it had no room for left a porter on `FULL` for good); it is at most 32
+    (a formula's operations), inside the ledger's 256;
   - the note `full` is reworded as well as `destination_gone` (the review's correction);
   - neither `unloaded_target` nor `unavailable_worker` is raised: the porter's `Status` and the Peepo's
     `CompanionStatus` already say so at their own edges, so their parameters stay unfixed (`Code`'s comments say so);
@@ -1171,6 +1175,51 @@ stays 1.
   tree was unchanged afterwards (`git status` clean). `python3 tools/select_client_tests.py --base 23f28b90e` chose
   every client class (171), since `CompanionAutomationChecks` is a shared file. Not run: `./gradlew build` (with or
   without the optional integrations), `./gradlew runClientGameTest` and CI.
+
+### Unit 3's review fixes (commit "Chunk C unit 3: fixes from the unit review")
+
+The unit review's confirmed findings, each applied; none of it compiled or run.
+- **No request it has no room for** (C-06, C-P53): `supply` measures how much of the item fits through the lookup a
+  porter delivers by (`ItemStorage.SIDED`, no side, `CourierLedger.room`) and files that much, or nothing (no backoff,
+  so it asks at its next pulse once there is room). Before, a crucible whose five buffer slots held other things (a
+  hopper-fed crucible after a formula change, or a formula of more than five distinct ingredients) filed anyway, and its
+  porter waited on `FULL`, holding the post's queue, until the formula was cleared. New test
+  `ConcordanceLogisticsGameTests.aCrucibleWithNoRoomAsksForNothing`.
+- **A trickle-fed stand reaches its band** (C-05, C-P43 amended): fed less than its rate (JE in within 20 ticks), a tick
+  it cannot pay holds the crucible where it is while the crucible is below the band and, following a formula, at the
+  band's lowest degree; inside the band such a tick still cools. Short of JE it goes dark only after 10 such ticks in a
+  row (no light change for any other reason is delayed). The plan carries the crucible's temperature (still one
+  block-entity read); the crucible reads a stand as out when it gave nothing, not by its light. New test
+  `ConcordanceAlchemyGameTests.aTrickleFedStandStillReachesItsBand` (42 in all): fed 8 JE a tick, a stand set to hot
+  brings its crucible into the band, keeping its light on, and one following a formula takes both hot stirs.
+- **A hold over a stand is named as the hold** (C-01): with a stand beneath, `automate` takes the stir's own band as
+  where the heat would go unheld, as the stand aims inside it, so a Preserve hold keeping the crucible from a hotter
+  stir is `held`, as over a campfire, not `wrong_heat` (both read `WRONG_TEMPERATURE` at the Peepo port).
+  `aStandIdlesForAWaitingOrIncompatibleFormula` asserts it.
+- **Tests and audits:** `aCrucibleAsksOnceForItsExactShortage` lowers the shortage by hand while a porter carries; the
+  request is kept and delivered, one glowstone left over (C-P51). `aFullCourierQuotaWaitsAndBacksOff` breaks its
+  crucible at the end, so it leaves no request open in the shared ledger. `check_crucible_supply` holds the room check,
+  `reconcile`'s order and `shortage()`'s step order; `check_crucible_stand` the trickle rule and how the crucible reads a
+  stand; `check_economy` that `STAND_JE` is `tools/concordance_alchemy.py`'s.
+- **Records:** C-P53 and the logistics, alchemy and authority records say the setter rule stops new filings only (an
+  unclaimed request of a setter who has left holds the post's queue); "online" reads "here (online, alive and in the
+  crucible's dimension)"; the two over-supply paths are named; the changelog's stand textures, the foundation's line and
+  this table's unit 2 row are corrected; the unverified container drop is "read, not seen".
+- **Departures from the review,** recorded: the edge hold for a stand following a formula is added, since without it a
+  stand fed exactly half its rate leaves the crucible alternating between the band's lowest degree and the one below,
+  and every 20-tick pulse can land on the lower one, so a stir could wait for good (with no formula the review's rule
+  stands, and holding a band costs C-D3's rates); the 10-tick dark delay applies only to ticks short of JE, so a stand
+  idling for any other reason still goes dark at once, as C-P43 and the tests say; commit `46f6e2a0e`'s message is not
+  rewritten (an earlier commit), and its "never filled twice" is corrected here and in the logistics record.
+- **Commands,** run on the tree with the fixes before it was committed, and passed: as C-06's (`select_client_tests.py`
+  is run on the commit, after it). Audit mutations, in place with every file restored after each (the tree compared
+  before and after), against `check_crucible_stand`, `check_crucible_supply` and `check_economy`: the fixes' 16 (no room
+  check, the whole shortage filed, the room measured from the top face or after the post scan, carried cargo turned
+  back, the more-than-lacked or item rule dropped, a `HashMap` shortage, `STAND_JE` drifting, a hold inside the band,
+  the edge hold without a formula or whatever the feed, dark at once, a hold above the target, the crucible reading the
+  light, a second payment) and five of the spec's re-run on the changed code (C-05's `Block.UPDATE_ALL`, a loop in
+  `plan`, the temperature comparison removed, `below()` without the stand; C-06's `request > 0L` dropped): all 21
+  reported.
 
 ### C-07. Habitat made visible (unit 4)
 
@@ -1518,8 +1567,13 @@ after the first path (09:16).
   - the stand and the crucible tick in no fixed order, so the crucible heats on the stand's last decision, at most a
     tick late; the JE paid stays exactly the rate times the ticks paid, and the tests read its light in retried
     assertions;
-  - the crucible's reason can be up to 20 ticks old, so after a refill a stand may idle up to 20 ticks more; a stand fed
-    below its rate flickers its light (a client update each change, nothing more);
+  - the crucible's reason can be up to 20 ticks old, so after a refill a stand may idle up to 20 ticks more;
+  - a stand fed less than its rate holds the crucible on the ticks it cannot pay while the crucible is below the band
+    (following a formula, also at the band's lowest degree), so it reaches the band for the same JE a degree, and its
+    light goes dark only after 10 such ticks in a row (C-P43 as amended by the unit review; before, a stand fed below
+    half its rate never reached the band, paid all it received and changed its light almost every tick). Inside the
+    band such a tick cools, so with no formula, fed at or below half its rate, it hovers at the band's lowest degree
+    and the one below it;
   - whether the coil drawn full-bright reads as lit in daylight, whether the owner's treated iron reads as the
     silver-grey cladding, and whether a one-block stand suits "real-life-sized stations" are for the owner's review;
   - with no `EnergyConnectable`, a worldgen structure could not pre-connect cables to a stand (none places one);
@@ -1530,10 +1584,16 @@ after the first path (09:16).
   - the courier ledger, its ids and `problems()` are world-wide, and an ownerless post serves anyone: every new test
     post has an owner, test structures stand a few blocks apart, and each synchronous test body is assumed not to
     interleave with another test's ticks;
-  - over-supply stays possible through stranded cargo taken up later (bounded; nothing is lost), and two WANT signs
-    show when a quota wait begins and when it ends;
+  - over-supply stays possible, bounded and with nothing lost, through stranded cargo taken up later, and through a
+    request a Peepo fills before any courier has claimed it, which a porter then claims and picks up before the
+    crucible's next pulse (cargo carried is always delivered, C-P51); two WANT signs show when a quota wait begins and
+    when it ends;
+  - a crucible files only for what fits, but slots a hopper fills after it filed leave the porter on `FULL`, holding
+    the post's queue until there is room or the formula is cleared;
   - a request outlives an unloaded crucible and counts against its setter's 16 until delivered or cancelled; delivery
-    does not ask `Authority` at the crucible (C-P53);
+    does not ask `Authority` at the crucible (C-P53); an unclaimed request open when its setter leaves holds the post's
+    queue for every request behind it (`OWNER_OFFLINE`) until they return or someone who may change the crucible clears
+    its formula;
   - the Peepo unload check depends on vanilla's chunk tickets and unload delay (1,200 ticks allowed) and on the
     companion's transport retrying while fenced in; the full-crucible check on the companion handing back unused
     cargo; both read in the code, not run;
@@ -1543,8 +1603,8 @@ after the first path (09:16).
     `CompanionAutomationChecks`).
 - **Unverified:** the null-side Fabric item insert (inferred from a passing post test *(survey)*; the C-06 design read
   Fabric API 0.161.0's source: a `Container` falls back to its plain slots, each asking `canPlaceItem`; not re-read for
-  these notes); vanilla's container drop when a crucible overrides `preRemoveSideEffects` (confirmed for unit 3 in the
-  mirror's `HEAD`, `BlockEntity.java:262-270`: it drops a `Container`'s contents);
+  these notes); vanilla's container drop when a crucible overrides `preRemoveSideEffects` (read in the mirror's `HEAD`,
+  `BlockEntity.java:262-270`, not seen in a game);
   whether Jade's accessor gives the viewing player; bees and `#minecraft:supports_crops` on these crops; Fabric's load
   conditions on Concordance data; whether the client tests' dedicated server runs in the client's process.
 
@@ -1670,7 +1730,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P40 | 14 October 2026 | The Rooted Thallite Foundation is a plain described item in the Ingredients tab. The Assayer's Scale never weighs it, nothing turns it back, and the economy models it as a sink of 32 Ley Charge and 6 Focus a run. Its icon is drawn fresh, because nothing in the owner's library fitted, and awaits the owner's review | Proposed | C-04, C-05 |
 | C-P41 | 14 October 2026 | A rite's offerings may need feature switches beside the Concordance's. The generator states them (`"switches"`) and `check_rituals` holds that statement to the recipes, one step down, an offering that is a tag through its members (since the unit review, a machine recipe's `{"ingredient", "count"}` entries followed too, and a condition with `"or"` alternatives counted as needing none of its switches alone). Concordance data carries no load condition. Any recipe that makes an offering counts as its way to make it | Proposed | C-04 |
 | C-P42 | 14 October 2026 | The codex's first `entry://` link (Stratawrighting's Understood page to Root and Rivet). Every codex link is audited to an entry on disk (since the unit review, its `@anchor` to a page id and its `#n` to a page of the entry), since a broken link stops Modonomicon opening the book (as read from its source by the C-04 design; not seen in a client) | Proposed | C-04 |
-| C-P43 | 15 October 2026 | A Crucible Stand pays its band's rate on a tick only when all of these hold: the Concordance is on; a crucible stands directly above; no Preserve hold; the crucible waits for nothing or for heat alone (`WRONG_HEAT`, or a `HELD` left by a hold now over: the hold itself is judged from the crucible's clock); there is a band; and the crucible is no hotter than the band's target. Otherwise it pays nothing, is dark, and the crucible cools by the usual rule. Refines C-P12's "only while the formula can proceed": coasting down to a cooler band costs nothing | Proposed | C-05 |
+| C-P43 | 15 October 2026 | A Crucible Stand pays its band's rate on a tick only when all of these hold: the Concordance is on; a crucible stands directly above; no Preserve hold; the crucible waits for nothing or for heat alone (`WRONG_HEAT`, or a `HELD` left by a hold now over: the hold itself is judged from the crucible's clock); there is a band; and the crucible is no hotter than the band's target. Otherwise it pays nothing, is dark, and the crucible cools by the usual rule. Refines C-P12's "only while the formula can proceed": coasting down to a cooler band costs nothing. Amended by the unit review: fed less than its rate (JE in within the last 20 ticks), a tick it cannot pay holds the crucible where it is while the crucible is below the band, and, following a formula, at the band's lowest degree, so a trickle reaches the band for the same JE a degree and a pulse finds the crucible in it; inside the band such a tick cools as before, so holding a band still costs C-D3's rates. Short of JE, it goes dark only after 10 such ticks in a row, and a crucible over it reads it as out exactly when it gave nothing | Proposed | C-05 |
 | C-P44 | 15 October 2026 | JE goes in on five faces, never the seat (`EnergyStorage.SIDED` gives nothing for `UP`). The stand is not an `EnergyConnectable`, so a cable meets it only where it takes power (`CableBlock.connectsTo`). A departure from the ticket's "and `EnergyConnectable`": the marker matters only in worldgen, and no structure places a stand | Proposed | C-05 |
 | C-P45 | 15 October 2026 | It holds 640 JE, takes at most 64 JE a tick (the Ley Pylon's rate), never gives any back, and takes none with the Concordance switched off. The JE it holds is lost when it is broken | Proposed | C-05 |
 | C-P46 | 15 October 2026 | With no formula above, a plain empty-hand use by someone `Authority.mayChange` allows cycles off, warm, hot, searing, at most once every 10 ticks a player (`RateGate`). Sneaking only reads. While a formula is set, the formula decides and the setting is kept. As built, with the review's correction: only an empty hand sets or reads it; anything held is used as itself (a crucible placed on it) | Proposed | C-05 |
@@ -1680,7 +1740,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P50 | 15 October 2026 | Refines C-P13: the Peepo port subtracts the crucible's request's remainder (asked less delivered) only while a courier holds the request: its claim's lease live and the request not being taken back. A request nobody serves never stalls a Peepo | Proposed | C-06 |
 | C-P51 | 15 October 2026 | Each pulse reconciles the crucible's request. A closed one is forgotten (as built, also one not bound for it, not its setter's, or being taken back). One with nothing carried is turned back when its item is no longer what is lacked first, when it asks for more than is lacked, or when its post is gone or barred to its setter. Cargo already carried is always delivered | Proposed | C-06 |
 | C-P52 | 15 October 2026 | `courier_quota` takes (count, what, seconds), is blocked (one WANT sign when it begins) and reads `NO_INPUT` at the Peepo port. The backoff is 200 ticks doubling to 1,200, reset by a filing or a turn-back, never saved. Finding no post shows no courier words: a crucible without couriers is an ordinary crucible | Proposed | C-06 |
-| C-P53 | 15 October 2026 | Filing needs its setter answering (online, or the server's absent-owner option); a request already open when they leave waits at the porter, `OWNER_OFFLINE` (a known limit). The same player setting the same formula again keeps the request. A formula saved before C-06 has no setter and asks no courier until it is set again. Delivery does not ask `Authority` at the crucible (a known limit) | Proposed | C-06 |
+| C-P53 | 15 October 2026 | Filing needs its setter answering (here, that is online, alive and in the crucible's dimension, or the server's absent-owner option). This stops new filings only: an unclaimed request open when its setter leaves holds the post's queue for every request behind it (`OWNER_OFFLINE`) until they return or someone who may change the crucible clears its formula (a known limit; turning such a request back is for the owner to decide). Since the unit review a crucible files only for what fits in it now, measured as a porter delivers, and nothing while none would, with no backoff. The same player setting the same formula again keeps the request. A formula saved before C-06 has no setter and asks no courier until it is set again. Delivery does not ask `Authority` at the crucible (a known limit) | Proposed | C-06 |
 
 ## Where to resume
 

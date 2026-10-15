@@ -31,7 +31,10 @@ import org.jspecify.annotations.Nullable;
  * nothing or for heat alone; with none, its own setting. It pays that band's rate ({@value #JE_WARM}, {@value #JE_HOT} or
  * {@value #JE_SEARING} JE a tick) only on a tick the crucible is no hotter than the band's target, and lights; the
  * crucible then heads for the target ({@link CrucibleBlockEntity#below}). Otherwise it pays nothing and goes dark, and the
- * crucible cools by the usual rule. Preserve's hold wins.</li>
+ * crucible cools by the usual rule. Preserve's hold wins. Fed less than its rate (JE came in within {@value #FED_TICKS}
+ * ticks), a tick it cannot pay holds the crucible where it is while the crucible is below the band (and, following a
+ * formula, at the band's lowest degree), so a trickle still brings it to the band for the same JE a degree; inside the
+ * band such a tick cools as before. Short of JE, it goes dark only after {@value #DARK_TICKS} such ticks in a row.</li>
  * <li><b>Setting</b>: with no formula above, a plain empty-hand use by someone who may change the block cycles off, warm,
  * hot, searing, at most once every {@value #SET_TICKS} ticks a player. There is no client slider; the server chooses.</li>
  * </ul>
@@ -45,6 +48,10 @@ public class CrucibleStandBlockEntity extends BlockEntity {
 	public static final long CAPACITY = 640;
 	public static final long INTAKE = 64;
 	public static final int SET_TICKS = 10;
+	/** C-P43 (the unit review): how recently JE must have come in for a tick it cannot pay to hold the crucible. */
+	public static final int FED_TICKS = 20;
+	/** C-P43 (the unit review): ticks in a row short of JE before it goes dark, so a trickle does not flicker its light. */
+	public static final int DARK_TICKS = 10;
 
 	/** Electricity waiting to be paid as heat. Never extracted; switched off, it takes nothing. */
 	public final SimpleEnergyStorage energy = new SimpleEnergyStorage(CAPACITY, INTAKE, 0, this::setChanged) {
@@ -55,16 +62,24 @@ public class CrucibleStandBlockEntity extends BlockEntity {
 	};
 	/** Its own heat when no formula decides it: COLD is off. Saved. */
 	private Band setting = Band.COLD;
-	/** The target it paid for on its last tick, or AMBIENT. Not saved: worked out again at its next tick. */
+	/**
+	 * The target it paid for on its last tick, the crucible's own temperature on a tick it held it, or AMBIENT. Not saved:
+	 * worked out again at its next tick.
+	 */
 	private int given = Heat.AMBIENT;
+	/** The JE in its store after its last tick, the game time JE last came in, and its ticks in a row short of JE. Not saved. */
+	private long left;
+	private long fedAt = Long.MIN_VALUE;
+	private int starvedTicks;
 
 	/**
 	 * What it does for the crucible on it now (C-05): the band it aims at (null: none); whether a formula decides it;
 	 * whether it heats (would pay on this tick); and, when it gives no heat for a reason, why: the crucible's own reason or
-	 * Preserve's hold ({@code waits}), nothing on it, or too little JE. Read only.
+	 * Preserve's hold ({@code waits}), nothing on it, or too little JE; and the crucible's temperature (AMBIENT with none),
+	 * read in the same block entity read. Read only.
 	 */
-	public record Plan(@Nullable Band band, boolean following, boolean heats, @Nullable Diagnostic reason, boolean waits) {
-		static final Plan DISABLED = new Plan(null, false, false, null, false);
+	public record Plan(@Nullable Band band, boolean following, boolean heats, @Nullable Diagnostic reason, boolean waits, int temperature) {
+		static final Plan DISABLED = new Plan(null, false, false, null, false, Heat.AMBIENT);
 	}
 
 	public CrucibleStandBlockEntity(BlockPos pos, BlockState state) {
@@ -75,7 +90,7 @@ public class CrucibleStandBlockEntity extends BlockEntity {
 		return setting;
 	}
 
-	/** The target it paid for on its last tick, AMBIENT if it paid nothing (what the crucible above heads for). */
+	/** What it gave on its last tick (what the crucible above heads for): its target paid for, the crucible's temperature held, or AMBIENT. */
 	public int given() {
 		return given;
 	}
@@ -96,48 +111,72 @@ public class CrucibleStandBlockEntity extends BlockEntity {
 			return Plan.DISABLED;
 		}
 		if (!(level.getBlockEntity(worldPosition.above()) instanceof CrucibleBlockEntity crucible)) {
-			return new Plan(setting == Band.COLD ? null : setting, false, false, Diagnostic.of(Code.NO_CRUCIBLE), false);
+			return new Plan(setting == Band.COLD ? null : setting, false, false, Diagnostic.of(Code.NO_CRUCIBLE), false, Heat.AMBIENT);
 		}
+		int temperature = crucible.temperature();
 		int held = crucible.held(ConcordanceProgress.now(level));
 		Diagnostic waiting = crucible.waiting();
 		boolean following = crucible.program() != null || !crucible.unreadableProgram().isEmpty();
 		Band band = Heat.standBand(crucible.program(), crucible.step(), waiting, held > 0, setting);
 		if (held > 0) {
-			return new Plan(band, following, false, Diagnostic.held(crucible.band().id, (held + 19) / 20), true);
+			return new Plan(band, following, false, Diagnostic.held(crucible.band().id, (held + 19) / 20), true, temperature);
 		}
 		if (!Heat.waitsForHeat(waiting)) {
-			return new Plan(band, following, false, waiting, true);
+			return new Plan(band, following, false, waiting, true, temperature);
 		}
 		if (band == null || crucible.temperature() > Heat.standTarget(band)) {
-			return new Plan(band, following, false, null, false);
+			return new Plan(band, following, false, null, false, temperature);
 		}
 		long rate = rate(band);
 		if (energy.getAmount() < rate) {
 			return new Plan(band, following, false, Diagnostic.of(Code.UNAVAILABLE_POWER, Text.of("alchemy.stand.it"),
-					Text.of("alchemy.stand.je", (int) energy.getAmount()), Text.of("alchemy.stand.je_tick", (int) rate)), false);
+					Text.of("alchemy.stand.je", (int) energy.getAmount()), Text.of("alchemy.stand.je_tick", (int) rate)), false, temperature);
 		}
-		return new Plan(band, following, true, null, false);
+		return new Plan(band, following, true, null, false, temperature);
 	}
 
 	/**
 	 * One tick of the stand (its ticker, or a test's at a known moment): pays its plan's rate from its own store if the
-	 * plan heats, and lights; otherwise pays nothing and goes dark. Returns whether it paid. Its light changes only how it
-	 * looks (clients, and the crucible above, read it): no neighbour, cable-shape or light update.
+	 * plan heats, and lights; otherwise pays nothing and goes dark (short of JE, only after DARK_TICKS such ticks in a row).
+	 * Short of JE but fed within FED_TICKS, it holds the crucible where it is while {@link #holds} says so (C-P43, the unit
+	 * review). Returns whether it paid. Its light changes only how it looks (clients read it): no neighbour, cable-shape or
+	 * light update.
 	 */
 	public boolean heat(ServerLevel level) {
 		Plan plan = plan(level);
+		long now = level.getGameTime();
+		if (energy.getAmount() > left) {
+			fedAt = now;
+		}
 		boolean paid = false;
 		if (plan.heats()) {
 			energy.setAmount(energy.getAmount() - rate(plan.band()));
 			setChanged();
 			paid = true;
 		}
-		given = paid ? Heat.standTarget(plan.band()) : Heat.AMBIENT;
+		boolean starving = !paid && plan.reason() != null && plan.reason().code() == Code.UNAVAILABLE_POWER;
+		starvedTicks = starving ? starvedTicks + 1 : 0;
+		given = paid ? Heat.standTarget(plan.band()) : starving && fedAt >= now - FED_TICKS && holds(plan) ? plan.temperature() : Heat.AMBIENT;
+		left = energy.getAmount();
 		BlockState state = getBlockState();
-		if (state.getValue(CrucibleStandBlock.LIT) != paid) {
-			level.setBlock(worldPosition, state.setValue(CrucibleStandBlock.LIT, paid), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+		boolean lit = paid || starving && starvedTicks < DARK_TICKS && state.getValue(CrucibleStandBlock.LIT);
+		if (state.getValue(CrucibleStandBlock.LIT) != lit) {
+			level.setBlock(worldPosition, state.setValue(CrucibleStandBlock.LIT, lit), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
 		}
 		return paid;
+	}
+
+	/**
+	 * On a tick it is short of JE but fed lately (C-P43, the unit review): whether it holds the crucible where it is. Below
+	 * the band, always, so a trickle brings it there degree by degree for the same JE a degree. Following a formula, also at
+	 * the band's lowest degree, so a pulse finds it in the band whatever the pattern of the ticks it pays (a stir waits at
+	 * most one pulse more). Otherwise, inside the band, it cools as before, and holding the band costs C-D3's rates.
+	 */
+	static boolean holds(Plan plan) {
+		Band band = plan.band();
+		int temperature = plan.temperature();
+		return band != null && temperature < Heat.standTarget(band)
+				&& (Band.of(temperature) != band || plan.following() && Band.of(temperature - Heat.RATE) != band);
 	}
 
 	/**
@@ -202,6 +241,7 @@ public class CrucibleStandBlockEntity extends BlockEntity {
 		Band saved = Band.fromId(input.getStringOr("setting", Band.COLD.id));
 		setting = saved == null ? Band.COLD : saved;
 		given = Heat.AMBIENT;
+		left = energy.getAmount();
 	}
 
 	@Override

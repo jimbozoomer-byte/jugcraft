@@ -14335,6 +14335,16 @@ def check_crucible_stand(co, root, lang):
         err("CrucibleStandBlockEntity.heat: its light changes how it looks only (no neighbour, cable or light update)")
     if plan.count("getBlockEntity(") != 1 or "worldPosition.above()" not in plan or re.search(r"\b(for|while) \(", plan + pay):
         err("CrucibleStandBlockEntity.plan: one block entity read, the crucible directly above; no scan")
+    # The unit review (C-P43): fed too little, a tick it cannot pay holds the crucible below the band (following a formula,
+    # also at its lowest degree), never inside it, and it goes dark only after DARK_TICKS such ticks.
+    hold = _java_body(stand, "static boolean holds(Plan plan)")
+    if "starving && fedAt >= now - FED_TICKS && holds(plan) ? plan.temperature() : Heat.AMBIENT" not in pay \
+            or "starving && starvedTicks < DARK_TICKS" not in pay or "temperature < Heat.standTarget(band)" not in hold \
+            or "(Band.of(temperature) != band || plan.following() && Band.of(temperature - Heat.RATE) != band)" not in hold:
+        err("CrucibleStandBlockEntity.heat: fed too little, it holds the crucible only below its band (or, following a formula, at "
+            "its lowest degree), and short of JE goes dark only after DARK_TICKS ticks (C-P43)")
+    if "new Heat.Below(block, stand.given() == Heat.AMBIENT, stand.given())" not in source(root / "CrucibleBlockEntity.java"):
+        err("CrucibleBlockEntity.below: a stand is out when it gave nothing, whatever its light shows (C-P43)")
     for needle in ("JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)", "Heat.standBand(", "Heat.waitsForHeat(waiting)",
                    "crucible.temperature() > Heat.standTarget(band)", "Code.UNAVAILABLE_POWER", "Code.NO_CRUCIBLE"):
         if needle not in plan:
@@ -14433,6 +14443,19 @@ def check_crucible_supply(co, root):
                    "backoffAfter(backoff)", "Diagnostic.courierQuota("):
         if needle not in supply:
             err(f"CrucibleBlockEntity.supply: one request, its setter's while they answer, at the shared nearest post, with its backoff ({needle})")
+    # The unit review: no request it has no room for (a porter would wait at it, FULL, holding its post's queue).
+    if not 0 <= supply.find("ItemStorage.SIDED.find(level, worldPosition, null)") < supply.find("if (room <= 0L) {") \
+            < supply.find("Couriers.nearestPost(") or "CourierLedger.room(self, ItemVariant.of(sample), shortage.count())" not in supply \
+            or "sample, (int) room, level.registryAccess()" not in supply:
+        err("CrucibleBlockEntity.supply: it measures its room as a porter delivers (ItemStorage.SIDED, no side) and asks only "
+            "for what fits, nothing when none would")
+    reconcile = _java_body(crucible, "private void reconcile(ServerLevel level)")
+    if not 0 <= reconcile.find("if (open.progress().carried() > 0) {") < reconcile.find("turnBack();") \
+            or "> shortage.count() || barred" not in reconcile or "!matchesIngredient(shortage.add(), item.toStack())" not in reconcile:
+        err("CrucibleBlockEntity.reconcile: cargo already carried is always delivered; with nothing carried, a request for another "
+            "item or more than is lacked is turned back (C-P51)")
+    if "new LinkedHashMap<>()" not in shortage:
+        err("CrucibleBlockEntity.shortage: the formula's needs in step order (a LinkedHashMap), so the first one short is asked for")
     back = _java_body(crucible, "private void turnBack()")
     if "ledger.cancel(request, open.ticket().requester()," not in back:
         err("CrucibleBlockEntity.turnBack: cancels as the request's requester, the only one the ledger lets cancel it")
@@ -17185,6 +17208,7 @@ def check_economy(root):
     Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it; since C-05, a crucible's heat
     is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate."""
     sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_alchemy as al
     import concordance_economy as ec
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -17217,6 +17241,8 @@ def check_economy(root):
         err("economy: a crucible's heat becomes nothing else (tools/concordance_economy.py)")
     if {key: amount for key, _, amount, _, _ in ec.CONVERSIONS}.get("je_to_heat") != min(ec.STAND_JE.values()):
         err("economy: je_to_heat is modelled at the stand's cheapest rate (STAND_JE)")
+    if ec.STAND_JE != al.STAND_JE:
+        err("economy: STAND_JE is not tools/concordance_alchemy.py's (CrucibleStandBlockEntity.JE_*)")
     heart = load(DATA / MOD / "concordance" / "organism" / "verdant_heart.json") or {}
     if (heart.get("cost"), max(heart.get("thriving", 0), heart.get("tolerating", 0))) != (1, 2):
         err("economy: the Verdant Heart's beat is modelled as 1 nutrient for at most 2 Verdance")

@@ -433,7 +433,8 @@ public class ConcordanceLogisticsGameTests {
 	 * its formula's setter, at the post, for exactly what it lacks (two ground glowstone; the plain glowstone in its buffer
 	 * is the wrong preparation and never stands in), and no other while that one is open. A porter brings them; while a
 	 * courier holds the request the Peepo port asks for none of it (C-P50); a restart keeps the request, its exact reagent
-	 * and its cargo; the formula goes on.
+	 * and its cargo; cargo already carried is delivered even after the shortage falls below it (C-P51: one put in by hand,
+	 * which the crucible takes, so one ground glowstone is left over); the formula goes on.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aCrucibleAsksOnceForItsExactShortage(GameTestHelper helper) {
@@ -485,13 +486,21 @@ public class ConcordanceLogisticsGameTests {
 		helper.assertTrue(restarted.ledger().get(id) != null && restarted.ledger().get(id).progress().carried() == 2
 				&& ItemVariant.of(ground(1)).equals(restarted.item(id)) && restarted.ledger().get(id).ticket().destination().equals(here)
 				&& restarted.problems().isEmpty(), "A restart keeps its request, its exact reagent and its cargo");
+		// C-P51 (the unit review): cargo already carried is always delivered, though the request now asks more than is lacked.
+		crucible.setItem(1, ground(1));
+		CrucibleBlockEntity.Shortage fell = crucible.shortage();
+		helper.assertTrue(fell != null && fell.count() == 1, "One put in by hand: it lacks one, not two: " + fell);
+		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 2 && crucible.request() == id
+				&& ledger.ledger().get(id).state() == RequestState.IN_TRANSIT && ledger.ledger().get(id).progress().carried() == 2,
+				"It takes the one put in and keeps the request its courier carries for");
+		conserved(helper, ledger, List.of(id), GROUND, 10, "carried, the shortage fallen (the one put in, used)", chest, crucible);
 		porter.think(level, NIGHT, now + 40);
 		helper.assertTrue(ledger.ledger().get(id) == null && matching(crucible, GROUND) == 2 && matching(crucible, PLAIN) == 3 && porter.task() == 0L,
 				"Delivered into its buffer and closed");
 		conserved(helper, ledger, List.of(id), GROUND, 10, "delivered", chest, crucible);
-		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 2 && crucible.request() == -1L, "It goes on, forgetting the closed request");
-		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 3 && bound(ledger, here) == 0
-				&& matching(crucible, GROUND) == 0 && matching(crucible, PLAIN) == 3, "and takes the second; the plain glowstone is untouched");
+		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 3 && crucible.request() == -1L && bound(ledger, here) == 0
+				&& matching(crucible, GROUND) == 1 && matching(crucible, PLAIN) == 3,
+				"It goes on, forgetting the closed request, and takes the second; one is left over and the plain glowstone is untouched");
 		helper.assertValueEqual(story(ledger, at, id), List.of("filed", "claimed", "reserved", "picked_up", "done"), "the post's history of it");
 		helper.succeed();
 	}
@@ -615,8 +624,9 @@ public class ConcordanceLogisticsGameTests {
 					&& ledger.ledger().openFor(setter.getUUID()) == Logistics.MAX_OPEN_PER_PLAYER
 					&& crucible.waiting() != null && crucible.waiting().code() == Code.MISSING_INGREDIENT,
 					"Its own pulse files once the backoff is over: request " + asked + ", " + open);
+			// Broken, the crucible turns its request back and forgets its formula, so it files nothing more (the unit review).
 			ledger.destinationGone(at, level.getGameTime());
-			ledger.destinationGone(here, level.getGameTime());
+			helper.setBlock(new BlockPos(3, 1, 2), Blocks.AIR);
 		});
 	}
 
@@ -703,6 +713,40 @@ public class ConcordanceLogisticsGameTests {
 		helper.assertValueEqual(events.stream().map(Event::kind).toList(), List.of("filed", "claimed", "reserved", "picked_up", "delivered", "done"),
 				"the post's history of it");
 		helper.assertTrue("full".equals(events.get(4).note()), "the part delivery is noted full: " + events.get(4));
+		helper.succeed();
+	}
+
+	/**
+	 * C-06, the unit review: a crucible whose buffer is full of other things files nothing, since a porter could only wait
+	 * at it, FULL, holding its post's queue; one slot emptied, its next pulse files at once (no backoff), for what fits.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aCrucibleWithNoRoomAsksForNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer setter = alembist(helper);
+		post(helper, setter, new BlockPos(2, 1, 2));
+		CrucibleBlockEntity crucible = crucible(helper, new BlockPos(3, 1, 2));
+		setFormula(helper, crucible, setter, TWO_GLOW);
+		pour(crucible, 2);
+		for (int slot = 0; slot < CrucibleBlockEntity.BUFFER_SLOTS; slot++) {
+			crucible.setItem(slot, new ItemStack(Items.SPIDER_EYE));
+		}
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		Place here = Couriers.place(level, crucible.getBlockPos());
+		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 1, "The water poured");
+		long next = ledger.ledger().nextId();
+		Diagnostic full = crucible.automate(level);
+		helper.assertTrue(full != null && full.code() == Code.MISSING_INGREDIENT && crucible.request() == -1L && ledger.ledger().nextId() == next
+				&& bound(ledger, here) == 0, "Five slots of spider eyes: it waits and files nothing: " + full);
+		crucible.setItem(0, ItemStack.EMPTY);
+		Diagnostic room = crucible.automate(level);
+		long id = crucible.request();
+		Request filed = ledger.ledger().get(id);
+		helper.assertTrue(room != null && room.code() == Code.MISSING_INGREDIENT && id > 0L && filed != null && filed.ticket().wanted() == 2
+				&& filed.ticket().requester().equals(setter.getUUID()) && filed.ticket().destination().equals(here) && bound(ledger, here) == 1,
+				"One slot emptied, its next pulse files at once: " + room + ", " + filed);
+		crucible.useEmpty(setter, true);
+		helper.assertTrue(ledger.ledger().get(id) == null && crucible.request() == -1L, "Cleared, it leaves no request in the shared ledger");
 		helper.succeed();
 	}
 
