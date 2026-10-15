@@ -6021,6 +6021,29 @@
         {
           "items": [
             [
+              "jugcraft:borax",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:boric_acid",
+              2
+            ]
+          ],
+          "ticks": 100,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "minecraft:rotten_flesh",
               2
             ]

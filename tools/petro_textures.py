@@ -205,6 +205,46 @@ def gasification_residue():
     return img
 
 
+def boric_acid():
+    """Boric acid: a heap of pearly white flakes with a faint warm cast, lit from the top left."""
+    import material_style as ms
+    img = ms.dust([(140, 136, 128), (192, 188, 178), (220, 218, 208), (240, 238, 230), (252, 252, 248)])
+    for x, y in ((7, 9), (10, 11), (5, 12)):
+        img.putpixel((x, y), (255, 255, 255, 255))
+    return img
+
+
+def control_rod_assembly():
+    """A control rod assembly: four dark boron rods hanging apart from a steel spider and hub, outlined in their darkest tones."""
+    steel = {"o": (52, 56, 62), "d": (110, 116, 124), "m": (160, 166, 174), "l": (210, 214, 220)}
+    rod = {"O": (28, 30, 34), "D": (58, 60, 66), "M": (86, 90, 98), "L": (120, 124, 132)}
+    rows = [
+        "......oooo......",
+        "......olmo......",
+        "..oooooldoooooo.",
+        ".ollllllmmmmmddo",
+        "..oOoooOoOoooOo.",
+        "..OL..OL.OL..OL.",
+        "..OL..OL.OL..OL.",
+        "..OL..OL.OL..OL.",
+        "..OM..OM.OM..OM.",
+        "..OM..OM.OM..OM.",
+        "..OM..OM.OM..OM.",
+        "..OD..OD.OD..OD.",
+        "..OD..OD.OD..OD.",
+        "..OO..OO.OO..OO.",
+        "................",
+        "................",
+    ]
+    tones = {**steel, **rod}
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def ammonium_nitrate():
     """Ammonium nitrate: a heap of small round white prills, lit from the top left and outlined in their own darkest
     tone (docs/ITEM_ICONS.md)."""
@@ -605,6 +645,8 @@ def draw_all(save, save_animation):
     save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
     save(gasification_residue(), "item", "gasification_residue")
     save(ammonium_nitrate(), "item", "ammonium_nitrate")
+    save(boric_acid(), "item", "boric_acid")
+    save(control_rod_assembly(), "item", "control_rod_assembly")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")
