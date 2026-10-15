@@ -169,6 +169,14 @@ still work, and the owner still stirs, sets and clears. Outside the claim, in ad
 back in survival it goes in. `AUTHORITY_ROUTES` names the crucible's two calls. The test has not run yet: it was
 written where no Minecraft jar is available.
 
+Concordance Chunk C, unit 4 (not merged): three more garden routes ask `mayChange` as the player, all within "garden
+blocks used by hand" above: a Gourd Canteen's sip on a Verdant Bed (`VerdantBedBlock.pour`, after its rate limit;
+refused, the sip is kept and the player told `missing_permission`), a Greenwarden's tending of a strained bed, and a
+graft, which asks at the crop and at its bed (`OrganismCropBlock.graftBed`; refused, the donor is kept). Bone meal on a
+growing crop asks what bone meal on its bed asks. `AUTHORITY_ROUTES` names the bed block's call and the crop block's
+two. The tests, not yet run: `ConcordanceGardenGameTests.aCanteenWatersABed`, `restCompostAndTendingEaseStrain` and
+`aGraftIsRefusedWhereTheGardenerMayNotBuild`, each against a neighbour's claim (`TestClaims`).
+
 Not yet run: a real protection mod (only the stand-in listener in the tests); a two-client server with one player
 trying the routes against another's claim; a server with the absent-owner option on in play.
 
