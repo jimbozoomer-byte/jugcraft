@@ -10722,7 +10722,10 @@ def check_acquisition(registered):
     a ritual other than the page's own, the Assayer's Scale's catalogue), while the hood's page names its own recipe. The
     Adept's Attunement makes the Adept's Wand from what its page lists. The JEI plugin shows the rows. Every piece of the
     first loadout is made by a recipe or a bench working on disk, and the server test that loads those recipes names
-    each; none of those sources gives the owner's armour tiers the record keeps creative-only. Only data is read, and
+    each; none of those sources gives the owner's armour tiers the record keeps creative-only. The living workshop's rows
+    (tools/acquisition.py WORKSHOP and FACTORY; Concordance Chunk C, C-10) are each registered and made as they say (a
+    recipe of their own result, a bench working, or a rite RITUALS pages), every item Chunk C registered is a WORKSHOP
+    row, and the journey's server test loads every recipe they name. Only data is read, and
     the loot classes' few lines named above: what Java alone gives (a creature's drops coded in its class) is not seen.
     (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
     import acquisition as aq
@@ -10951,6 +10954,41 @@ def check_acquisition(registered):
             working = DATA / MOD / "concordance" / "working" / f"{how.split(':', 1)[1]}.json"
             if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
                 err(f"acquisition: concordance/working/{working.name} does not make the first loadout's {item}")
+    # Concordance Chunk C (C-10): the living workshop's rows (tools/acquisition.py WORKSHOP and FACTORY). Each is registered
+    # and made as its row says: by a crafting recipe whose own result it is, a bench working that makes it, or a ritual
+    # RITUALS pages for it (whose transformation the check above holds to its page); every item Chunk C registered is a
+    # WORKSHOP row; and the journey's server test loads every recipe the rows name (WORKSHOP_RECIPES).
+    journey_path = tests_path.with_name("ConcordanceJourneyGameTests.java")
+    journey = journey_path.read_text(encoding="utf-8") if journey_path.is_file() else ""
+    listed = re.search(r"WORKSHOP_RECIPES = List\.of\(([^)]*)\)", journey)
+    rows = {**aq.WORKSHOP, **aq.FACTORY}
+    wanted = {aq.recipe_file(item, how) for item, how in rows.items()} - {None}
+    if "public void theWorkshopsRecipesLoad(" not in journey or not listed \
+            or set(re.findall(r'"([a-z_]+)"', listed.group(1))) != wanted:
+        err("ConcordanceJourneyGameTests.theWorkshopsRecipesLoad must load the recipe of every workshop row "
+            f"(WORKSHOP_RECIPES: {sorted(wanted)})")
+    for item in aq.CHUNK_C_ITEMS:
+        if item not in aq.WORKSHOP:
+            err(f"acquisition: {item}, registered by Concordance Chunk C, is no row of WORKSHOP (tools/acquisition.py)")
+    for item, how in rows.items():
+        if item not in registered:
+            err(f"acquisition: the workshop's {item} is not registered")
+        recipe = aq.recipe_file(item, how)
+        kind, _, name = how.partition(":")
+        if recipe is not None:
+            path = DATA / MOD / "recipe" / f"{recipe}.json"
+            result = ((load(path) or {}) if path.is_file() else {}).get("result")
+            if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
+                err(f"acquisition: recipe/{recipe}.json does not make the workshop's {item} (its own result)")
+        elif kind == "working":
+            working = DATA / MOD / "concordance" / "working" / f"{name}.json"
+            if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
+                err(f"acquisition: concordance/working/{name}.json does not make the workshop's {item}")
+        elif kind == "ritual":
+            if item in aq.FACTORY or aq.RITUALS.get(item) != name:
+                err(f"acquisition: the workshop's {item} is made by the ritual {name}: RITUALS must page it for {item}")
+        else:
+            err(f"acquisition: the workshop's {item} is made by {how!r}, not a recipe, a working or a ritual")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
     for tier in aq.CREATIVE_ONLY:
         for piece in gear.ARMOR:
@@ -17708,7 +17746,8 @@ def check_journey():
     """Roadmap step 31: tools/concordance_journey.py's three routes each reach the Architect stage for one player alone
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
     data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
-    other research; every game test the routes name exists; and the record's routes are the tool's."""
+    other research; the living workshop (Concordance Chunk C, C-10) holds from a manual start, step by step (WORKSHOP);
+    every game test the routes name exists; and the record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():

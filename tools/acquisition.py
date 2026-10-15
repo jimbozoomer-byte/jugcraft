@@ -18,8 +18,10 @@ client/compat/JugcraftJeiPlugin, which adds each as an information page) and the
 jei.jugcraft.acquire.<key>. The first magic loadout the record recommends is listed here too (LOADOUT), so the checker
 can confirm survival already makes every piece of it (with its optional branches: the Wayfaring trinkets and, since
 Chunk B, the Rime travel kit), and so are the owner's armour tiers that stay creative-only
-(CREATIVE_ONLY), so it can confirm nothing gives them yet. tools/check_mod_data.py (check_acquisition) ties each page,
-the loadout and the creative-only tiers to the files on disk.
+(CREATIVE_ONLY), so it can confirm nothing gives them yet, and, since Concordance Chunk C (C-10), the living workshop's
+things (WORKSHOP; the factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes
+each as its row says. tools/check_mod_data.py (check_acquisition) ties each page, the loadout, the workshop and the
+creative-only tiers to the files on disk.
 
 Pure data: it imports only the generators' tables, which import nothing of the generator's.
 """
@@ -111,6 +113,32 @@ OPTIONAL = {**{item: "recipe" for item in trinkets.TRINKETS}, "fire_focus": "rec
 # later"; the later designs likewise, as tools/gear.py records). The first loadout leaves that as it is. When the owner
 # settles how a tier is won, take it out of here and out of the record's creative-only table.
 CREATIVE_ONLY = list(gear.ARMOR_TIERS)
+# Concordance Chunk C (C-10): the living workshop's route (tools/concordance_journey.py WORKSHOP). WORKSHOP: every
+# Concordance thing it makes or places, each made in survival as it is: by the crafting recipe of its own name ("recipe"),
+# the recipe named ("recipe:<file>": the Thallite plate's is thallite_plate_by_hand), a Lampwright's Bench working
+# ("working:<name>") or a ritual RITUALS gives a JEI page ("ritual:<name>"). FACTORY: the factory's parts the powered
+# workshop takes (JE and piped water), each by its own recipe; their bronze, plates and gears are the factory's
+# (docs/features/machines-and-power.md), not followed by the Concordance's graph. CHUNK_C_ITEMS: every item Concordance
+# Chunk C registered (C-04's foundation, C-05's stand; the Stillroot Poultice and the Kiln Draught are brews, never items,
+# and a graft or a mixed bed is a bed's state), each a WORKSHOP row. check_acquisition ties all three to the files on disk
+# and to the server test that loads their recipes (ConcordanceJourneyGameTests.WORKSHOP_RECIPES).
+WORKSHOP = {"mendvetch": "recipe", "crucible": "recipe", "formula": "recipe", "lampwright_bench": "recipe",
+            "kindled_lantern": "working:kindle_lantern", "ley_pylon": "recipe", "circle_anchor": "recipe",
+            "warding_stone": "recipe", "thallite_plate": "recipe:thallite_plate_by_hand",
+            "rooted_thallite_foundation": "ritual:root_and_rivet", "crucible_stand": "recipe", "courier_post": "recipe",
+            "clockwork_porter": "recipe", "porter_key": "recipe", "verdant_bed": "recipe", "sunpetal": "recipe",
+            "dewmoss": "recipe", "gloamcap": "recipe"}
+FACTORY = {"coal_generator": "recipe", "copper_cable": "recipe", "machine_casing": "recipe", "metal_press": "recipe",
+           "electric_pump": "recipe", "bronze_fluid_pipe": "recipe"}
+CHUNK_C_ITEMS = ["rooted_thallite_foundation", "crucible_stand"]
+
+
+def recipe_file(item, how):
+    """The recipe file a WORKSHOP or FACTORY row is made by ("recipe": its own name; "recipe:<file>"), or None for a
+    bench working or a ritual."""
+    if how == "recipe":
+        return item
+    return how.split(":", 1)[1] if how.startswith("recipe:") else None
 
 
 def pct(chance):
