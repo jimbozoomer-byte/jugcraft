@@ -11590,6 +11590,10 @@ def check_cydonian_sentinel():
         err("CydonianSentinelEntity.hurtServer: its open plates double the core's harm, and a strong blow in the lance's wind-up staggers it")
     if not re.search(r"if \(phase == Phase\.WAKING \|\| phase == Phase\.CRACKING \|\| phase == Phase\.BURSTING\) \{\s*return false;", boss):
         err("CydonianSentinelEntity.hurtServer: it is unhurt while it wakes, cracks or bursts")
+    if not re.search(r"private void breakOff\(\) \{\s*if \(attack == Attack\.CORE_LANCE\) \{\s*shut\(\);", boss) \
+            or len(re.findall(r"breakOff\(\);", boss)) < 4:
+        err("CydonianSentinelEntity: an attack broken off (its foe gone, drawn back, its storm, another begun) must shut a "
+            "Core Lance's plates (breakOff)")
     if "case RED_STORM, BURSTING -> STORM_EVERY_STORM;" not in boss:
         err("CydonianSentinelEntity.stormEvery must use the table's STORM_EVERY_* for each phase")
     registry = sources.get("JugcraftSentinel", "")

@@ -288,7 +288,8 @@ No Mojang texture is read, traced or copied.
 
 CI on 051daf62d (Build run 38660094306): **every check passed.**
 - `mod` (compile, data checks, every server game test) and `optional integrations absent`: "All 1669 required tests
-  passed", among them the 14 of `CydonianSentinelGameTests` and the Rust test in `ArmsVIIGameTests`.
+  passed", among them the 14 of `CydonianSentinelGameTests` (a 15th came later, below) and the Rust test in
+  `ArmsVIIGameTests`.
 - `CydonianSentinelClientGameTests` passed from end to end (client shard 1: "its fight passed end to end"), with its 16
   pictures. The other client classes the change picked (the armour tiers, the knight armour and Arms VII's, which show
   the new trophies) passed on the other shards.
@@ -298,6 +299,13 @@ CI on 051daf62d (Build run 38660094306): **every check passed.**
     (The Sanctum's own sand lies on rock.) Every other server test had passed;
   - 9acef93ff did not compile: `Blocks` has no `RED_TERRACOTTA` by that name in 26.3. Red sandstone, already used for
     the tests' standing stones, took its place.
+  - on c068ec220 (the record only) the client test failed once: just after it woke it was found with its core open,
+    not lit. With the player in the fight, its first second's pause was over and it had begun a Core Lance at them.
+    The test now has the player stand out of the fight while it looks. That turned up **a real fault**: an attack
+    broken off before its end (its foe gone, drawn back to its crater, its storm called, another attack begun) left a
+    Core Lance's plates open, so its core took double harm with no armour until its next lance ended, and would have
+    left a core sunk after its Starfall on the floor. It now breaks off an attack as its end would (`breakOff`: the
+    plates shut and a sunk core rises), a game test shows it, and `check_mod_data.py` holds the Java to it.
 - Three of the client test's cameras were moved after the first run, so the Quake Line, the rising sentries and the Red
   Giant's core are in view.
 
@@ -327,7 +335,8 @@ red sandstone, which, unlike sand, stays put over empty air) and the standing st
    as taking part, and a bystander does not;
 3. charging its Core Lance its plates open, its armour gone; a light blow on the open core does double harm and does not
    stagger it; a blow of 6 in the wind-up does double harm and staggers it, the lance failing, its plates open; after the
-   stagger its plates shut and its armour is whole;
+   stagger its plates shut and its armour is whole; and a lance broken off by its storm, or by another attack begun,
+   shuts its plates, its armour whole (a test of its own);
 4. its rule: each of four players beside a standing stone is sheltered from the one wind the stone stands against, and
    from no other, and a player in the open from none; called from the west, it plants its arms; the storm blows after its
    tell, and its scouring hurts the player in the open and pushes them downwind, sparing the one in the stone's lee; after

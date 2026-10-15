@@ -94,14 +94,18 @@ public class CydonianSentinelClientGameTests implements FabricClientGameTest {
 					"Standing on the crater's floor did not wake it: " + sentinel(minecraft).phase()));
 			shot(context, singleplayer, dim, o, 41.5, CydonianSanctum.STAND + 1.0, 31.5, CydonianSanctum.WAIT_X, CydonianSanctum.WAIT_Y + 2.2,
 					CydonianSanctum.WAIT_Z, true, "jugcraft_cydonian_sentinel_wakes");
+			// The player stands out of the fight (in creative) while it steps down, so it has no foe to begin an attack on
+			// (a Core Lance would open its plates) when it is looked at; then back in for its attacks.
+			server.runCommand("gamemode creative @a");
 			server.runCommand("tick unfreeze");
 			context.waitTicks(CydonianSentinelEntity.WAKE_TICKS + 10);
 			server.runOnServer(minecraft -> {
 				CydonianSentinelEntity sentinel = sentinel(minecraft);
 				check(sentinel.phase() == CydonianSentinelEntity.Phase.SENTINEL, "It did not step down to fight: " + sentinel.phase());
 				check(sentinel.glow() == CydonianSentinelEntity.Glow.LIT && sentinel.form() == CydonianSentinelEntity.Form.SHELL,
-						"Stepped down, its core is not lit in its shell");
+						"Stepped down, its core is not lit in its shell: " + sentinel.glow() + ", " + sentinel.attack());
 			});
+			server.runCommand("gamemode survival @a");
 
 			// The Sentinel: each attack caught as it lands, it south of the crater's middle facing south, the player five
 			// blocks in front of it; the camera then stands where it shows the attack best, turned towards the point named.

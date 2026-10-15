@@ -296,6 +296,39 @@ public class CydonianSentinelGameTests {
 	}
 
 	/**
+	 * A Core Lance broken off before its end (its storm called, or another attack begun) shuts its plates, and its armour
+	 * counts again, as the lance's own end would: its core is open only while it charges and fires.
+	 */
+	@GameTest(structure = ARENA, padding = 8, maxTicks = 160)
+	public void aBrokenOffLanceShutsItsPlates(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		crater(level, origin);
+		CydonianSentinelEntity sentinel = waiting(helper, origin);
+		ServerPlayer foe = player(helper, origin, 36.5, 36.5);
+		foe.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 400, 4, false, false));
+		sentinel.wake(level);
+		helper.runAfterDelay(AWAKE, () -> {
+			ending(level, sentinel, () -> {
+				sentinel.begin(level, Attack.CORE_LANCE, foe);
+				helper.assertTrue(sentinel.platesOpen(), "Charging its Core Lance, its plates did not open");
+				sentinel.callStorm(level, Wind.NORTH);
+				helper.assertTrue(!sentinel.platesOpen() && sentinel.attack() == null
+						&& sentinel.getAttributeValue(Attributes.ARMOR) == CydonianSentinelEntity.ARMOR,
+						"Its storm called mid-lance, its plates stayed open or its armour gone");
+				sentinel.calm(level);
+				sentinel.begin(level, Attack.CORE_LANCE, foe);
+				sentinel.begin(level, Attack.HAMMERFALL, foe);
+				helper.assertTrue(!sentinel.platesOpen() && sentinel.attack() == Attack.HAMMERFALL
+						&& sentinel.getAttributeValue(Attributes.ARMOR) == CydonianSentinelEntity.ARMOR,
+						"Another attack begun mid-lance, its plates stayed open or its armour gone");
+				foe.discard();
+			});
+			helper.succeed();
+		});
+	}
+
+	/**
 	 * Its rule, the Red Storm. Rock within {@value CydonianSentinelEntity#LEE} blocks upwind shelters: a player beside a
 	 * standing stone is sheltered from the one wind the stone stands against, and from no other. Called from the west, it
 	 * plants its arms for {@value CydonianSentinelEntity#STORM_TELL} ticks; then the storm blows, and its scouring hurts a

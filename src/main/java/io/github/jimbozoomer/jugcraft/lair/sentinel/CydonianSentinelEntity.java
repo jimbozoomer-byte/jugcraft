@@ -762,7 +762,7 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 		wind = from;
 		storm = Storm.TELL;
 		stormTicks = 0;
-		attack = null;
+		breakOff();
 		if (form() == Form.SHELL) {
 			setAction(Action.PLANT);
 		}
@@ -873,8 +873,7 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 		}
 		Player target = target(level);
 		if (target == null) {
-			attack = null;
-			sunk = false;
+			breakOff();
 			setAction(staggerTicks > 0 ? Action.STAGGER : form() == Form.CORE ? Action.CORE_IDLE : Action.IDLE);
 			move(centre(), speed());
 			if (++abandoned >= ABANDON_TICKS) {
@@ -934,7 +933,7 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 			return;
 		}
 		level.sendParticles(RED_DUST, getX(), getY() + 1.0, getZ(), 20, 0.6, 0.8, 0.6, 0.02);
-		attack = null;
+		breakOff();
 		Vec3 back = woke();
 		teleportTo(back.x, back.y + (form() == Form.CORE ? CORE_HOVER : 0.0), back.z);
 		level.sendParticles(RED_DUST, getX(), getY() + 1.0, getZ(), 20, 0.6, 0.8, 0.6, 0.02);
@@ -1047,6 +1046,7 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 
 	/** Starts {@code next} on {@code target}: its wind-up begins. */
 	public void begin(ServerLevel level, Attack next, Player target) {
+		breakOff();
 		attack = next;
 		attackTicks = 0;
 		foe = target.getUUID();
@@ -1161,6 +1161,23 @@ public class CydonianSentinelEntity extends Monster implements GeoEntity {
 				setAction(form() == Form.CORE ? Action.CORE_IDLE : Action.IDLE);
 			}
 		}
+	}
+
+	/**
+	 * The attack under way is broken off before its end (its foe gone, drawn back to its crater, its storm called, or
+	 * another begun): a Core Lance's plates swing shut, and a core sunk after its Starfall rises again, as they would have
+	 * at the attack's end. A stagger keeps the plates open on purpose, and drops its attack itself.
+	 */
+	private void breakOff() {
+		if (attack == Attack.CORE_LANCE) {
+			shut();
+		}
+		if (sunk) {
+			sunk = false;
+			setGlow(phase == Phase.RED_GIANT ? Glow.GIANT : Glow.UNBOUND);
+		}
+		attack = null;
+		attackTicks = 0;
 	}
 
 	/** The way to {@code to}, flat and of length one (or its facing, if {@code to} is straight up). */
