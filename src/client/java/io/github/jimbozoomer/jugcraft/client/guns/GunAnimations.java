@@ -40,7 +40,8 @@ public final class GunAnimations {
 	 * Glowmouth is loaded a charge at a time, as the Stormlock Rifle is (slice 10B); the Mule pushes its shells in, as the
 	 * Coach Gun does (slice 10C), and the Reverb a shell at a time (slice 10D); of the Nether guns, the Tusker pushes a shell
 	 * in at a time and the Bastion Rifle a round (slice 11A), and the Crackling a shell (slice 11B); the Lookout Rifle
-	 * pushes a round in at a time, as the Drover Rifle does (slice 13A).
+	 * pushes a round in at a time, as the Drover Rifle does (slice 13A), and the Fencepost Carbine a round and the
+	 * Waystation Shotgun a shell (slice 13B).
 	 */
 	public static final Map<String, Map<String, String>> GUN_SOUND_ALIASES = Map.ofEntries(
 			Map.entry("thunderpipe", Map.of("reload_mag_in", "shell_in")),
@@ -63,7 +64,9 @@ public final class GunAnimations {
 			Map.entry("tusker", Map.of("reload_mag_in", "shell_in")),
 			Map.entry("bastion_rifle", Map.of("reload_mag_in", "shell_in")),
 			Map.entry("crackling", Map.of("reload_mag_in", "shell_in")),
-			Map.entry("lookout_rifle", Map.of("reload_mag_in", "shell_in")));
+			Map.entry("lookout_rifle", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("fencepost_carbine", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("waystation_shotgun", Map.of("reload_mag_in", "shell_in")));
 
 	private GunAnimations() {
 	}

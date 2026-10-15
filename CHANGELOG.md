@@ -41,6 +41,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **The Highwayman now takes a second brass ingot,** under the first. Its grid was the Garrison Rifle's mirrored, and a crafting table matches a shaped grid either way round, so only one of the two guns could be made from it.
 - Record: [guns.md, slice 9D's crafting](docs/features/guns.md#slice-9d-the-pump-shotguns).
 
+### Added: Guns, slice 13B (more frontier guns)
+- **Three guns** from the owner's models and animations: the **Fencepost Carbine**, a lever-action carbine of seven rifle rounds loaded a round at a time through a lid in its stock; the **Waystation Shotgun**, a lever-action shotgun of eight shells with a drum under its action, loaded a shell at a time; and the **Highball Rifle**, a single-shot rifle whose barrel swings aside to be loaded, one heavy, true shot at long range.
+- The Fencepost Carbine and the Waystation Shotgun are made from iron, brass, a lever and planks, as the lever guns; the Highball Rifle from steel, a lever and a plank. Each takes the grips and the bayonets; the shotgun and the rifle the barrel attachments too, and the rifle the scopes and the Laser Sight.
+- The owner's Fencer Thumper waits for its cylinder to turn with each shot.
+- Record: [guns.md, slice 13B](docs/features/guns.md#slice-13b-more-frontier-guns).
+
 ### Added: Guns, slice 13A (the frontier guns)
 - **Three guns** from the owner's models and animations: the **Tabby Revolver**, a gunmetal revolver held in one hand, its cylinder swung out to load a round at a time, tossed end over end as it is drawn; the **Lookout Rifle**, a lever-action rifle of eight rifle rounds loaded a round at a time, made to take a scope; and the **Ammonite Carbine**, a carbine of sixteen rifle rounds from a long curved magazine, its barrels caged in copper bands. The Tabby Revolver pairs with any other one-handed gun.
 - The Tabby Revolver is made from iron, brass, a lever and a plank; the Lookout Rifle from iron, brass, a lever and planks; the Ammonite Carbine from copper, iron, a lever and a plank. The Tabby Revolver takes the barrel attachments; the Lookout Rifle the stocks, grips, bayonets, scopes and Laser Sight; the Ammonite Carbine the stocks.

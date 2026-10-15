@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C) and the frontier guns (slice 13A)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C) and the frontier guns (slices 13A and 13B)
 
 Status:
 - **Slices 1 to 12C are in `main`:** 10A to 11B with #320 on 11 October 2026; 12A to 12C with #352 on 13 October 2026, which closed their own pull requests (#332, #338 and #344). The lines below say where each was built.
@@ -34,6 +34,7 @@ Status:
 - **Slice 12B** (the copper guns: the Penny Pistol, Conductor Carbine and Magpie SMG; [below](#slice-12b-the-copper-guns)): implemented on `claude/guns-12b`, stacked on slice 12A, awaiting review.
 - **Slice 12C** (the lone guns: the Tuppence Pistol, Goshawk Revolver and Lament Rifle; [below](#slice-12c-the-lone-guns)): implemented on `claude/guns-12c`, stacked on slice 12B, awaiting review.
 - **Slice 13A** (the frontier guns: the Tabby Revolver, Lookout Rifle and Ammonite Carbine; [below](#slice-13a-the-frontier-guns)): implemented on `claude/guns-13a`, built on slice 12C and brought onto `main` once 12C was in it, awaiting review.
+- **Slice 13B** (more frontier guns: the Fencepost Carbine, Waystation Shotgun and Highball Rifle; [below](#slice-13b-more-frontier-guns)): implemented on `claude/guns-13b`, stacked on slice 13A, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -53,6 +54,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - and again: on 13 October 2026, with slice 12A up for review, they asked again "Ok lets continue and do the next thing". Three of the five guns they made in copper are slice 12B.
 - and once more: on 13 October 2026, with slice 12B up for review, they asked again "Ok lets continue and do the next thing". Slice 12C takes up one of the two copper guns left and the two guns of their library that stand alone in their materials, the one of iron and the one of echo shards. The last copper gun, the Whizzbanger, waits for the model its animations were made for ([below](#the-whizzbanger-waits)).
 - and after that: on 13 October 2026, with slice 12C up for review, they asked again "Ok lets continue and do the next thing". Slice 13A takes up three of the fourteen guns of their library whose item models name plain stone as their base texture: a revolver, a lever-action rifle and a carbine.
+- and next: on 14 October 2026, with slice 13A up for review, they asked "Ok lets continue and do the next thing or what should we do?". The recommendation was to keep on with their guns; slice 13B takes up three more of the same fourteen: a lever-action carbine, a lever-action shotgun and a single-shot rifle.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -2055,6 +2057,90 @@ The reload times and the rates are the owner's animations': the Lookout Rifle's 
 - **The Baffled Silencer on the Tabby Revolver** stands 0.3 px clear of the barrel, as the owner's part has it.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 13B: more frontier guns
+The next of the owner's guns, taken up after slice 13A (on 14 October 2026, with slice 13A up for review, the owner asked "Ok lets continue and do the next thing or what should we do?"): three more of the guns whose item models name plain stone as their base texture, the Fencer Carabine, the Callwell Terminal and the Saketini. A lever-action carbine loaded through its stock, a lever-action shotgun and a single-shot rifle, they follow slice 13A's frontier guns. Their fourth, the Fencer Thumper, waits ([below](#the-fencer-thumper-waits)).
+
+| | Fencepost Carbine | Waystation Shotgun | Highball Rifle |
+|---|---|---|---|
+| The owner's gun | Fencer Carabine | Callwell Terminal | Saketini |
+| What it is | a lever-action carbine: a long barrel over a fore-end, a hammer on the right of the lock, a lever loop under it and a stock with a lid on top that opens to load the tube inside | a lever-action shotgun without a shoulder stock: a barrel over a long fore-end, a drum under the action and a lever loop behind it | a single-shot rifle: a long barrel that swings aside to be loaded, a hammer on the right of the lock, a lever loop under it and a raked stock |
+| Held | in both hands | in both hands | in both hands |
+| Fires | one shot each pull, the lever worked and the hammer cocked after each | eight pellets each pull, the lever worked after each | one shot, then a reload |
+| Damage | 10 | 3 a pellet | 15 |
+| Rate | about 1.1 a second (every 18 ticks) | about 1.2 a second (every 17 ticks) | one a load |
+| Holds | 7 | 8 | 1 |
+| Reload | a round at a time: 0.75 s to start, 1 s a round, 1.35 s to finish (9.1 s from empty) | a shell at a time: 0.45 s, 0.65 s a shell, 0.9 s (6.55 s from empty) | 1.65 s |
+| Spread, hip / aimed | 2° / 0.3° | 6.5° / 4.5° | 2° / 0.1° |
+| Range | 104 blocks | 28 | 128 |
+| The view aimed | narrowed to 0.82 | 0.9 | 0.75 |
+| Round | Rifle Round | Buckshot Shell | Rifle Round |
+| Takes | the Light and Tactical Grips and the four bayonets | those and the barrel attachments | those, the barrel attachments, the scopes and the Laser Sight |
+
+The reload times and the rates are the owner's animations'.
+
+**Crafting** (a crafting table; the guns switch, as every gun):
+- **Fencepost Carbine:** two iron ingots and a brass ingot over a lever and two planks, as the lever guns.
+- **Waystation Shotgun:** a brass ingot and two iron ingots over an iron ingot (its drum), a lever and a plank. (First set as two iron ingots and a brass ingot over the same, which was the Mule's recipe; changed so the two do not clash.)
+- **Highball Rifle:** three steel ingots over a lever and a plank, a marksman's rifle of the steel tier.
+
+**How they fire:** as the other bullet guns, and the Waystation Shotgun as the other shotguns: each bullet or pellet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. The Fencepost Carbine and the Waystation Shotgun load a round at a time, and a shot cuts the loading short; the Highball Rifle's round goes in at the end of its reload. Nothing else follows a hit.
+
+**What you see:** the owner's animations.
+- **Fencepost Carbine:** each shot kicks it, throwing a case, and drops the hammer; then the lever is swung down and back and the hammer cocked. To reload, the gun is rolled and the lid on the stock flipped open; the right hand brings each round back to it; then the lid is shut and the lever worked.
+- **Waystation Shotgun:** each shot kicks it, throwing a case; then the gun cants and the lever is swung down and back. To reload, the gun is rolled and the left hand carries each shell up to the back of the drum; as the reload ends a case is thrown and the lever worked.
+- **Highball Rifle:** each shot kicks it and drops the hammer, and the right hand cocks it again. To reload, the gun is turned and the barrel swung aside, throwing a case; a round goes in and the barrel is swung home.
+- **Spent rounds:** the Fencepost Carbine's and the Waystation Shotgun's animations cue a case with each shot, and the shotgun's one more as its reload ends; the Highball Rifle's one each reload.
+- **Sounds:** the Kestrel Rifle's shot (the Fencepost Carbine), the Coach Gun's (the Waystation Shotgun; the owner's Callwell, of which the Terminal is a kind) and the Thresher's (the Highball Rifle). The Fencepost Carbine's and the Waystation Shotgun's animations cue the magazine going in as each round or shell goes in; each plays the shell-in sound there, as the other lever guns do (`GUN_SOUND_ALIASES`). The library's shots not used yet are silenced takes, rocket, flamethrower and jetpack sounds and wind-ups, or carry tags naming another source or tool (slices 11A and 12C), so none was added.
+
+**How the models were built:**
+- **Fencepost Carbine:**
+  - **Lid:** the plate on top of the stock (the main part's elements the owner put in their lid group, the 20th and 21st), turned up and over about its front.
+  - **Hammer:** the owner's hammer part on the right of the lock, turned about its foot: it falls forward at the shot and is cocked again as the lever closes.
+  - **Lever:** the loop under the lock (the main part's 24th element), turned about its front.
+  - **Empty bones:** the `bolt` and `flash` bones its animations move hold nothing.
+  - **Sights:** the notch on the receiver over the post at the muzzle.
+  - **Aiming:** held 6 px further out (`"eye_relief"`), as the Lament Rifle: as the lever is worked the gun cants back toward the eye. Its long stock still reaches 1 px past the eye then, but 2 px or more below the line of sight, out of view.
+- **Waystation Shotgun:**
+  - **Lever:** the loop behind the drum (the main part's element the owner named "lever"), turned about its front.
+  - **Shell:** the shell the loading loop carries in is the owner's (the main part's element they named "shell"), resting inside the fore-end; the renderer shows it only while the loop moves it.
+  - **Barrel:** its standard barrel is the owner's part, so the barrel attachments fit it.
+  - **Sights:** the notch on the receiver over the post at the muzzle.
+  - **Aiming:** held 1 px further out: as it kicks, the back of its grip came 0.9 px from the eye.
+- **Highball Rifle:**
+  - **Barrel:** the owner's standard barrel part, swung aside about a hinge under the left of the breech.
+  - **Hammer:** the owner's hammer part on the right of the lock, turned about its foot.
+  - **Lever:** the loop under the lock (the main part's 13th element), turned about its front in the inspection.
+  - **Empty bone:** the `bolt` bone its draw names holds nothing.
+  - **Sights:** the owner's notch over the post at the muzzle; the scopes stand on the receiver in its place.
+  - **Aiming:** held 3 px further out: the back of its stock came 1.2 px past the eye.
+- **The arms:** chosen in first-person previews to cover as little of the screen as they can, still running back toward the shoulder, through each gun's hold, shot, reload and inspection.
+  - **The Fencepost Carbine's right arm** mattered most: its hand carries each round back to the lid on the stock, within a few pixels of the eye. There the game leaves an arm out while any of it is within a tenth of a block of the eye, and draws it again as it leaves.
+  - **First choice:** in CI ([run 38500777704](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38500777704)), the reload screenshot showed it across the right half of the view, just outside that reach. Checked against the game's own rule at every hundredth of a second, it covered a fifth to two fifths of the view for about a tenth of a second twice in every round's loading.
+  - **Now:** it runs down and in from the hand. It is left out for most of each round's loading, and covers at most a sixth of the view when drawn. Its hold, shot and inspection look as before. In CI ([run 38506772653](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38506772653)), the reload screenshot shows the gun rolled with its lid open and the arm out of the view.
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload, draw and inspection; the lid, the hammers, the levers, the shell and the swinging barrel through their animations; each with the attachments it takes; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Rifle Round and the Buckshot Shell; nothing new.
+- **Parts:** iron, brass, a lever and planks (the Fencepost Carbine and the Waystation Shotgun); steel, a lever and a plank (the Highball Rifle).
+- **Their place:** the Fencepost Carbine and the Waystation Shotgun with the other lever guns, which take brass too; the Highball Rifle with the marksman rifles, past steel.
+
+**Balance:** starting numbers, at point blank with every shot (and pellet) landing, over a load and its reload.
+- **Fencepost Carbine:** 10 a shot, the hardest of the lever rifles (the Longhorn Rifle's 8); about 4.8 a second, as the Drover Rifle's (5). It is the slowest of them to load, a round a second.
+- **Waystation Shotgun:** 24 a shot; about 15.4 a second, as the Throttle's (15.2), between the Highwayman's (13.7) and the Haymaker's (17). It holds eight, more than any shotgun loaded a shell at a time.
+- **Highball Rifle:** 15 a shot; about 9.1 a second, below the Skylark Rifle's (10), a single-shot rocket rifle, and the marksman rifles' (12 to 15), which hold eight or ten. It reaches as far as the furthest of them (128 blocks) and aims as steadily as the Picket Rifle (0.1°).
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:fencepost_carbine`, `waystation_shotgun` and `highball_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Fencepost Carbine's `flash` bone shows nothing:** its shot scales that bone up and away, a flash at the lock the owner's mod drew; here the muzzle flash every gun shows stands for it.
+- **The Highball Rifle's barrel swings aside about a hinge chosen here:** the owner's model gave no pivot for it.
+- **The Fencepost Carbine's right arm at the end of a reload:** as the lever is worked, it passes close to the eye. For about three hundredths of a second it covers much of the view, as it did with the first choice of arm.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
+### The Fencer Thumper waits
+The owner's other Fencer gun is a revolving gun whose cylinder turns with each shot. Its animations cue the turn ("rotate_cylinder") for the owner's mod to make in code, and nothing here turns a cylinder from a cue yet; built now, its cylinder would stand still. It can follow as its own slice, with that turn added.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -3379,6 +3465,57 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | ammonite_carbine | `Guns/models/special/spirulida/heavy_stock.json` | `2926ebb2256f5eb4` |
 | ammonite_carbine | `Guns/models/special/spirulida/wooden_stock.json` | `28ded3465978fe73` |
 | ammonite_carbine | `Guns/sounds/item/old_rifle/fire.ogg` | `d684ae9a09c9c12c` |
+| fencepost_carbine | `Guns/models/item/fencer_carabine.json` | `ffa260b1360b4b32` |
+| fencepost_carbine | `Guns/item/fencer_carabine.png` | `5c35a35f1e4ea61c` |
+| fencepost_carbine | `Guns/item/fencer_carabine.animation.json` | `042163727e5f741e` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/main.json` | `9ca1ed42452b5a47` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/light_grip.json` | `d9dc1a3bc6263bf6` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/iron_bayonet.json` | `9c6808e8d21117d9` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/anthralite_bayonet.json` | `119ecb9ebc26fea4` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/diamond_bayonet.json` | `4554b531058af7d8` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/netherite_bayonet.json` | `e0f1a82b403ac930` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/tact_grip.json` | `6081c7c952e7f207` |
+| fencepost_carbine | `Guns/models/special/fencer_carabine/hammer.json` | `b810d36b3242b1b0` |
+| fencepost_carbine | `Guns/sounds/item/iron_rifle/fire.ogg` | `e4a92914502ffd1c` |
+| waystation_shotgun | `Guns/models/item/callwell_terminal.json` | `fe8ac73f362dc54f` |
+| waystation_shotgun | `Guns/item/callwell_terminal.png` | `4183d551f83dffd0` |
+| waystation_shotgun | `Guns/item/callwell_terminal.animation.json` | `8ffa05490858e199` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/main.json` | `899a29c536b3fa71` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/stan_barrel.json` | `3de7ee67547b18f6` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/silencer.json` | `fb00d6e9a758c4ff` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/advanced_silencer.json` | `c11554dde63ea113` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/muzzle_brake.json` | `ad334c219da7ca55` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/ext_barrel.json` | `fef56cd59efd427d` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/light_grip.json` | `134e942f35933f9a` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/iron_bayonet.json` | `51ec0e6c2de55208` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/anthralite_bayonet.json` | `dca846b29a362d4f` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/diamond_bayonet.json` | `6b09f5894c24ca36` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/netherite_bayonet.json` | `a3b2f6855e7a8deb` |
+| waystation_shotgun | `Guns/models/special/callwell_terminal/tact_grip.json` | `990034371ab282e4` |
+| waystation_shotgun | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
+| highball_rifle | `Guns/models/item/saketini.json` | `d83b819c2c9a4036` |
+| highball_rifle | `Guns/item/saketini.png` | `048f70e9a97fe923` |
+| highball_rifle | `Guns/item/saketini.animation.json` | `47948b84854488de` |
+| highball_rifle | `Guns/models/special/saketini/main.json` | `2cccc9a95567c8e0` |
+| highball_rifle | `Guns/models/special/saketini/light_grip.json` | `33f72bf1821cfc71` |
+| highball_rifle | `Guns/models/special/saketini/iron_bayonet.json` | `2f99ea34b6301f65` |
+| highball_rifle | `Guns/models/special/saketini/anthralite_bayonet.json` | `450aa9780315e0d2` |
+| highball_rifle | `Guns/models/special/saketini/diamond_bayonet.json` | `b0f8eac636b6a649` |
+| highball_rifle | `Guns/models/special/saketini/netherite_bayonet.json` | `29b7f03f0b298cae` |
+| highball_rifle | `Guns/models/special/saketini/tact_grip.json` | `9672af6808382d42` |
+| highball_rifle | `Guns/models/special/saketini/sights.json` | `1dcb5b05a4e28785` |
+| highball_rifle | `Guns/models/special/saketini/stan_barrel.json` | `d06cd42bc3ddcec6` |
+| highball_rifle | `Guns/models/special/saketini/silencer.json` | `18824fdb27c492f4` |
+| highball_rifle | `Guns/models/special/saketini/advanced_silencer.json` | `952e8a8a20666ec3` |
+| highball_rifle | `Guns/models/special/saketini/muzzle_brake.json` | `a1fcf19059083d2c` |
+| highball_rifle | `Guns/models/special/saketini/ext_barrel.json` | `6612cf1ca4061713` |
+| highball_rifle | `Guns/models/special/saketini/hammer.json` | `8a0491f25aa8f35d` |
+| highball_rifle | `Guns/sounds/item/new_rifle/fire.ogg` | `267e176ad9bae07a` |
+| highball_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| highball_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| highball_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| highball_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| highball_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -4229,13 +4366,40 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Attachments:** each barrel part at the Tabby Revolver's muzzle; each stock behind the grip; the Laser Sight stands on the receiver aimed as it does on the Longhorn and Drover Rifles in the same run. The bayonet is hidden behind the left hand.
     - **Third person:** the Tabby Revolver held out in one hand and the long guns raised, each flashing as it fires.
 - **The Lookout Rifle's loading sound, run locally (14 October 2026):** it had played the magazine-in sound for each round, where the other lever rifles play the shell-in sound; it now plays theirs. `python3 tools/guns.py` PASS, `python3 tools/check_mod_data.py` PASS, `python3 scripts/check_repository.py` PASS; Java syntax parse only.
+- **Slice 13B, run locally (14 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2564 material IDs), with `check_guns` (the numbers, attachments, the one-handed guns, looks and eye relief against tools/guns.py).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+- **Slice 13B game tests (all passed in CI, below):**
+  - `FrontierGunsIIGameTests`:
+    - `frontierGunsIIAreRegistered`: each is registered with its numbers, its recipe loads, it fires plain bullets one pull a shot, held in both hands, and it takes the grips and the bayonets. The Fencepost Carbine is a carbine of seven rifle rounds and the Waystation Shotgun a shotgun of eight shells, eight pellets a shot, each loaded a round at a time; the Highball Rifle a single-shot rifle, hitting hardest and reaching furthest of the three, the shotgun least. The barrel attachments fit the shotgun and the rifle, not the carbine; the scopes and the Laser Sight the rifle alone.
+    - `frontierGunsIIFireAndLoad`: as `netherGunsFireAndLoad` (whose helpers it shares), for the three: the carbine and the shotgun with one round in after their first round's time, the rifle with none halfway through its reload.
+  - `GunsGameTests` counts 69 guns; `TacticalAttachmentsGameTests` the twenty-seven that take the Tactical Grip.
+- **Slice 13B in CI** ([run 38500777704](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38500777704), on d1f20f7fe): every check passed.
+  - **Server game tests:** 1588 in each job, the `mod` job's and the one without the optional integrations. All passed, `FrontierGunsIIGameTests` among them.
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` ran alone in its shard, taking each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments. Its checks passed for each: the arms' sizes, the narrowed view, the hit and the round spent, the reload, and the casings its animations cue. The job's text log was too large to read here, so its numbers are not quoted.
+  - **Screenshots:**
+    - **Held:** each at the lower right pointing at the husk, its name over the hotbar.
+    - **Aimed and fired:** each raised to the middle of the view. The Fencepost Carbine's and the Highball Rifle's sights meet the crosshair on the husk's chest. The Waystation Shotgun's sights meet it at the husk's head, with the right hand over its legs.
+    - **Reloading:** the Waystation Shotgun and the Highball Rifle rolled, each hand at its work. The Fencepost Carbine's right arm covered the right half of the view, with the gun out of sight behind it. It was chosen again after this run ([above](#slice-13b-more-frontier-guns)).
+    - **Inspection:** each turned toward the eye to be looked over.
+    - **Attachments:** each barrel part at the muzzle of the Waystation Shotgun and the Highball Rifle; the grips under the fore-end; the Laser Sight on the Highball Rifle as on the Longhorn, Kestrel, Lookout and Lament Rifles in the same run.
+    - **Third person:** each raised, flashing as it fires.
+- **The Fencepost Carbine's right arm chosen again, run locally (14 October 2026):** `python3 tools/guns.py` PASS, `python3 tools/check_mod_data.py` PASS, `python3 scripts/check_repository.py` PASS. Its first-person previews were drawn with the game's near-eye rule at every hundredth of a second of the reload.
+- **Slice 13B on 643c6fe3b in CI** ([run 38506772653](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38506772653); the new arm and the Waystation Shotgun's own recipe): every check passed.
+  - **Server game tests:** 1588 in the `mod` job, all passed; the job without the optional integrations passed too.
+  - **Client game tests:** all five shards passed, `GunsClientGameTests` among them.
+  - **The Fencepost Carbine's reload screenshot:** the gun rolled with its lid open, the right arm out of the view.
+- **The Fencepost Carbine's and the Waystation Shotgun's loading sound, run locally (14 October 2026):** each had played the magazine-in sound for each round or shell, where the other lever guns play the shell-in sound; each now plays theirs. `python3 tools/guns.py` PASS, `python3 tools/check_mod_data.py` PASS, `python3 scripts/check_repository.py` PASS; Java syntax parse only.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -4245,5 +4409,6 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the jam the Gnat's sound suggests;
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
+  - the Fencer Thumper, which waits for its cylinder to turn with each shot ([above](#the-fencer-thumper-waits));
   - the guns beyond these sets.
 - **Balance:** the numbers are starting points for the owner to set.
