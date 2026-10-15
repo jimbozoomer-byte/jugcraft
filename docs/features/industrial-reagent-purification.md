@@ -1,6 +1,6 @@
 # Reagent Purification Station: electronic-grade sulfuric acid
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 Stacked on the [Bulk Electrolytic Separator](industrial-bulk-electrolytic-separator.md) and the branches below it, on main's factory integration (#358).
 
 Main's integration added concentrated sulfuric acid and makes it in the Concentrator (`concentrate_sulfuric_acid`: a bucket of ordinary acid gives 750 mB and 250 mB of water). This station therefore no longer concentrates acid or registers its own concentrated acid: it takes main's concentrate and adds the electronic grade.
@@ -103,7 +103,7 @@ There are no new dependencies.
 
 ### Results
 
-Not yet run in CI.
+Fork CI run 38668067592 on `e13af882` (on main #358): the mod build, generated-data and material checks, server game tests (these five included), the server tests without optional integrations, and all five client shards passed.
 
 **Not yet done:**
 - a survival playtest;
