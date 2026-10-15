@@ -2,12 +2,17 @@ package io.github.jimbozoomer.jugcraft.concordance.garden;
 
 import io.github.jimbozoomer.jugcraft.agriculture.CropGrowth;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.Illumination;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
@@ -56,6 +61,10 @@ import org.jspecify.annotations.Nullable;
  * Concordance Chunk C (C-08, C-P58, C-P59): a growth attempt first counts a harvest its bed saw
  * ({@link VerdantBedBlockEntity#settle}); a step taken to ripe tells the bed; a mixed bed's bonus is in the step's chance
  * only ({@link #speed}), never in what it costs.
+ * <p>
+ * Concordance Chunk C (C-09, C-P62 to C-P65): a Greenwarden's plain use of a donor's item grafts its trait onto the bed
+ * (graftBed); its organism grows by the niche its bed gives it ({@link VerdantBedBlockEntity#niche}), and a crop of
+ * another organism growing there clears the graft.
  */
 public class OrganismCropBlock extends CropBlock {
 	public static final int MAX_AGE = Organism.STAGES;
@@ -157,6 +166,8 @@ public class OrganismCropBlock extends CropBlock {
 		if (!(level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed)) {
 			return Growth.NO_BED;
 		}
+		// Concordance Chunk C (C-09, C-P64): a crop of another organism growing here clears the bed's graft (reading never does).
+		bed.clearGraftUnlessFor(organismId());
 		// Concordance Chunk C (C-08, C-P59): growing below ripe, it is a harvest the bed saw it ripen for, whatever took it.
 		bed.settle();
 		if (!bed.awake()) {
@@ -168,7 +179,7 @@ public class OrganismCropBlock extends CropBlock {
 			bed.note("waiting", List.of());
 			return Growth.WAITING;
 		}
-		Verdict verdict = Verdict.of(definition.niche(), habitat);
+		Verdict verdict = Verdict.of(bed.niche(definition), habitat);
 		bed.note(verdict, habitat, definition);
 		if (verdict.growth() == Verdict.Growth.STALLED) {
 			return Growth.STALLED;
@@ -231,7 +242,10 @@ public class OrganismCropBlock extends CropBlock {
 	/**
 	 * Concordance Chunk C (C-08, C-P61): fertilizer on a growing crop is its own use (its own area rule, as on any crop), and
 	 * bone meal on one feeds the bed below as bone meal on the bed does (rate-limited, for someone who may change the bed),
-	 * which is compost; as on vanilla's sweet berry bush, a ripe crop still harvests. Anything else goes on as before.
+	 * which is compost; as on vanilla's sweet berry bush, a ripe crop still harvests. C-09 (C-P62): a Greenwarden's plain use
+	 * of a graft's donor on its host grafts the bed beneath (graftBed), at any age, and every outcome consumes the use
+	 * (a refusal neither harvests, reports nor plants; sneaking with an item never reaches a block, mc263src
+	 * ServerPlayerGameMode.useItemOn). Anything else, and anyone else's donor, goes on as before.
 	 */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
@@ -257,7 +271,44 @@ public class OrganismCropBlock extends CropBlock {
 			}
 			return InteractionResult.SUCCESS;
 		}
-		return super.useItemOn(stack, state, level, pos, player, hand, hit);
+		// Concordance Chunk C (C-09, C-P62): a Greenwarden's donor grafts; anyone else's is just an item.
+		if (stack.isEmpty() || !(player instanceof ServerPlayer server) || !(level instanceof ServerLevel serverLevel)
+				|| !Garden.enabled() || !Garden.knows(server)) {
+			return super.useItemOn(stack, state, level, pos, player, hand, hit);
+		}
+		Graft graft = Garden.catalog().graft(organismId(), ConcordanceProgress.itemId(stack));
+		if (graft == null) {
+			return super.useItemOn(stack, state, level, pos, player, hand, hit);
+		}
+		return graftBed(serverLevel, pos, server, stack, graft);
+	}
+
+	/**
+	 * Grafts {@code graft} onto the bed beneath for {@code player}, who holds its donor (C-P62): at most once every four ticks
+	 * (RateGate), only where they could change both this crop and its bed by hand (Authority), and only on a bed with no
+	 * graft the rules know (one trait a bed; one they no longer know is replaced). Spends one donor; changes nothing else.
+	 */
+	private InteractionResult graftBed(ServerLevel level, BlockPos pos, ServerPlayer player, ItemStack donor, Graft graft) {
+		if (!RateGate.allow(player, "garden", 4)) {
+			return InteractionResult.CONSUME;
+		}
+		if (!(level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed)) {
+			Garden.tell(player, "garden.no_bed");
+			return InteractionResult.CONSUME;
+		}
+		if (!Authority.mayChange(level, player, pos) || !Authority.mayChange(level, player, pos.below())) {
+			player.sendOverlayMessage(ComposeText.show(Diagnostic.of(Code.MISSING_PERMISSION).text()));
+			return InteractionResult.CONSUME;
+		}
+		if (!bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null) {
+			Garden.tell(player, "garden.graft_held", ComposeText.name(new Text.Ref("graft", bed.graft())));
+			return InteractionResult.CONSUME;
+		}
+		bed.setGraft(graft.id());
+		donor.consume(1, player);
+		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 5);
+		Garden.tell(player, "garden.grafted", getName(), ComposeText.name(new Text.Ref("graft", graft.id())));
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
@@ -303,14 +354,23 @@ public class OrganismCropBlock extends CropBlock {
 			player.sendSystemMessage(Garden.status("waiting"));
 			return;
 		}
-		Verdict verdict = Verdict.of(definition.niche(), habitat);
+		Niche niche = bed.niche(definition);
+		Verdict verdict = Verdict.of(niche, habitat);
 		bed.note(verdict, habitat, definition);
 		Component pace = isMaxAge(state) ? ComposeText.show(Text.of("ecology.mature"))
 				: ComposeText.show(Text.of("ecology.growth." + verdict.growth().id));
 		player.sendSystemMessage(Component.translatable("message.jugcraft.concordance.garden.crop", name, getAge(state), MAX_AGE, pace));
+		// Concordance Chunk C (C-09): its graft, when the bed carries one for it.
+		Graft graft = Garden.catalog().graft(bed.graft());
+		if (graft != null && graft.host().equals(organismId())) {
+			List<Text> grafted = Garden.catalog().graftLines(graft.id());
+			if (!grafted.isEmpty()) {
+				player.sendSystemMessage(ComposeText.show(grafted.getFirst()));
+			}
+		}
 		player.sendSystemMessage(ComposeText.show(Text.of("ecology.habitat", habitat.moisture(), habitat.light(), habitat.nutrients(),
 				habitat.diversity(), habitat.disturbance())));
-		for (Text line : verdict.reasons(definition.niche(), habitat)) {
+		for (Text line : verdict.reasons(niche, habitat)) {
 			player.sendSystemMessage(ComposeText.show(line));
 		}
 		// Concordance Chunk C (C-08): a mixed bed's bonus and the strain its harvests left.

@@ -68,6 +68,20 @@
       "title": "book.jugcraft.arcane_concordance.garden.organisms.p6.title",
       "text": "book.jugcraft.arcane_concordance.garden.organisms.p6.text",
       "show_title_separator": true
+    },
+    {
+      "type": "modonomicon:text",
+      "id": "p7",
+      "title": "book.jugcraft.arcane_concordance.garden.organisms.p7.title",
+      "text": "book.jugcraft.arcane_concordance.garden.organisms.p7.text",
+      "show_title_separator": true,
+      "condition": {
+        "type": "modonomicon:research_node_unlocked",
+        "node_id": "jugcraft:concordance/verdant_husbandry_understood",
+        "tooltip": {
+          "translate": "book.jugcraft.arcane_concordance.locked.verdant_husbandry.understood"
+        }
+      }
     }
   ]
 }

@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.CrucibleInspection;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
@@ -47,6 +48,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The encyclopedia's Inspect page (Concordance Chunk A, A-04 and A-07): shown when the encyclopedia is opened while
@@ -64,7 +66,9 @@ import net.minecraft.world.phys.Vec3;
  * attempt broke off; and the rite's stage and payment table with its backlash. A rite the reader has not learned is never
  * named. Since Concordance Chunk C (C-07) also a Verdant Bed, or a crop through the bed below it, within the reader's own
  * block reach: the bed's moisture and nutrients, the crop's step, the verdict and each factor against the plant's niche
- * with how far it reaches, the light as sky and lamps (HabitatInspection).
+ * with how far it reaches, the light as sky and lamps (HabitatInspection). Since C-09, a bed's page names the graft it
+ * carries and the ranges it changes, and a crop's page does when the crop is the graft's host; the factors are judged by
+ * the niche the bed gives (VerdantBedBlockEntity.niche).
  */
 public final class InspectPage {
 	public static final String PAGE = "inspect";
@@ -235,7 +239,7 @@ public final class InspectPage {
 			out.fact(ComposeText.show(HabitatInspection.unplanted()));
 			facts(out, HabitatInspection.unjudged(state));
 		} else {
-			Niche niche = organism.niche();
+			Niche niche = bed.niche(organism);
 			Verdict verdict = Verdict.of(niche, state.habitat());
 			if (plant.getBlock() instanceof OrganismCropBlock crop) {
 				out.fact(Component.translatable("message.jugcraft.concordance.garden.crop", crop.getName(), crop.getAge(plant), OrganismCropBlock.MAX_AGE,
@@ -250,6 +254,7 @@ public final class InspectPage {
 				out.fact(ComposeText.show(mixed));
 			}
 		}
+		grafted(out, bed, looked instanceof OrganismCropBlock crop ? crop.organismId() : null);
 		out.codex("garden/habitats", "jugcraft:verdant_husbandry", ResearchState.ENCOUNTERED);
 		out.codex("garden/organisms", "jugcraft:verdant_husbandry", ResearchState.OBSERVED);
 	}
@@ -323,5 +328,26 @@ public final class InspectPage {
 			icons.add(stack.getItem());
 		}
 		out.fact(Component.translatable(key, icons.isEmpty() ? Component.translatable("encyclopedia.jugcraft.inspect.crucible.none") : held), null, icons);
+	}
+
+	/**
+	 * Concordance Chunk C (C-09, C-P65): the graft a bed carries, when the rules know it, and on a crop's page only when the
+	 * crop ({@code crop}, its organism; null on the bed's page) is the graft's host, as Jade names it: its name with its host
+	 * and donor, then each range it changes against the host's own. The factor rows above already read the grafted niche
+	 * (VerdantBedBlockEntity.niche). Reads only.
+	 */
+	private static void grafted(PageWriter out, VerdantBedBlockEntity bed, @Nullable String crop) {
+		Graft held = Garden.catalog().graft(bed.graft());
+		if (held == null || crop != null && !held.host().equals(crop)) {
+			return;
+		}
+		List<Text> lines = Garden.catalog().graftLines(held.id());
+		if (lines.isEmpty()) {
+			return;
+		}
+		out.heading(ComposeText.show(lines.getFirst()));
+		for (Text line : lines.subList(1, lines.size())) {
+			out.fact(ComposeText.show(line));
+		}
 	}
 }

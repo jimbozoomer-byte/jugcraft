@@ -9,6 +9,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlock;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
@@ -252,7 +253,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 
 	/**
 	 * A Greenwarden crop: its step, and its bed's last verdict for it (ripe, as it grew: Concordance Chunk C, C-07, C-P55),
-	 * which the server sends with the bed (a crop has no block entity of its own to ask).
+	 * which the server sends with the bed (a crop has no block entity of its own to ask), its bed's strain (C-08), and (C-09)
+	 * its bed's graft when the crop is its host (the server sends the organism the graft is for).
 	 */
 	private enum CropTooltip implements IBlockComponentProvider {
 		INSTANCE;
@@ -280,6 +282,9 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				}
 				verdict(tooltip, growth, String.join("\n", bed.reasons()));
 				strain(tooltip, bed.strainNow());
+				if (!bed.graft().isEmpty() && bed.graftFor().equals(crop.organismId())) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.graft", ComposeText.name(new Text.Ref("graft", bed.graft()))));
+				}
 			}
 		}
 	}
@@ -411,6 +416,11 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					}
 					verdict(tooltip, data.getStringOr("growth", ""), data.getStringOr("reasons", ""));
 					strain(tooltip, data.getIntOr("strain", 0));
+					// Concordance Chunk C (C-09): the graft it carries, when the rules know it.
+					String graft = data.getStringOr("graft", "");
+					if (!graft.isEmpty()) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.graft", ComposeText.name(new Text.Ref("graft", graft))));
+					}
 				}
 				String device = data.getStringOr("device", "");
 				if (!device.isEmpty()) {

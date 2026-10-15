@@ -1,22 +1,28 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.google.gson.JsonParser;
 import io.github.jimbozoomer.jugcraft.agriculture.CropGrowth;
 import io.github.jimbozoomer.jugcraft.agriculture.GourdCanteenItem;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
+import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
+import io.github.jimbozoomer.jugcraft.concordance.assay.Assaying;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyParser;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Fit;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.SampleBudget;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Sampler;
@@ -39,6 +45,7 @@ import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -78,7 +85,9 @@ import net.minecraft.world.phys.Vec3;
  * nothing that notes it stands on it; an item held on a bed is its own use, and a canteen's sip wets a bed, by permission
  * and rate. Concordance Chunk C (C-08): a mixed bed speeds only another kind's company and mints nothing; every harvest path
  * strains a bed once, rest, compost and tending ease it and a fixer's gift does not, strain never supplies disturbance,
- * never kills, never reads a machine, and survives a save.
+ * never kills, never reads a machine, and survives a save. Concordance Chunk C (C-09): a Greenwarden grafts Dewlit onto a
+ * Sunpetal's bed, which every niche reader sees, every harvest path and a save keep, and another plant's growth clears; a
+ * graft changes the niche and nothing else.
  */
 public class ConcordanceGardenGameTests {
 	private static final UUID KEEPER = new UUID(14L, 1L);
@@ -1321,5 +1330,444 @@ public class ConcordanceGardenGameTests {
 			helper.assertTrue(!plain.contains(VerdantBedBlockEntity.STRAIN) && !plain.contains(VerdantBedBlockEntity.RIPENED), "An unstrained bed writes neither key");
 			helper.succeed();
 		});
+	}
+
+	// ---------------------------------------------------------------- grafting (Concordance Chunk C, C-09)
+
+	private static final String DEWLIT = "jugcraft:dewlit";
+	private static final String SUNPETAL = "jugcraft:sunpetal";
+
+	private static OrganismCropBlock sunpetal() {
+		return (OrganismCropBlock) Garden.SUNPETAL_CROP;
+	}
+
+	/** {@code bed} still carries Dewlit after {@code after}, and gives a Sunpetal Dewlit's niche. */
+	private static void kept(GameTestHelper helper, VerdantBedBlockEntity bed, Organism petal, Niche grafted, String after) {
+		helper.assertTrue(DEWLIT.equals(bed.graft()) && bed.niche(petal).equals(grafted), "After " + after + " the bed still carries Dewlit: " + bed.graft());
+	}
+
+	/**
+	 * C-09 (C-P62, C-P65): a Greenwarden's plain use of a Dewmoss on a Sunpetal grafts Dewlit onto its bed, spends one Dewmoss
+	 * and leaves the crop as it was; clients are told the graft and its host (never the keeper), and Jade the graft. A second
+	 * use is refused and spends nothing (one graft a bed); a Dewmoss on a Gloamcap grafts nothing; switched off, nothing
+	 * grafts; and a graft the rules no longer know is replaced by the next.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGraftTakesOnceAndConsumesItsDonor(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos at = new BlockPos(2, 1, 2);
+		VerdantBedBlockEntity bed = bed(helper, at, 10);
+		crop(helper, at.above(), Garden.SUNPETAL_CROP, 1);
+		ServerPlayer gardener = gardener(helper, true);
+		ItemStack donor = new ItemStack(Garden.DEWMOSS, 2);
+		helper.assertTrue(handUse(helper, gardener, at.above(), donor, false).consumesAction(), "The graft consumes the use");
+		helper.assertTrue(DEWLIT.equals(bed.graft()) && donor.getCount() == 1 && age(helper, at.above()) == 1,
+				"Dewlit is grafted, one Dewmoss spent, the crop as it was: " + bed.graft() + ", " + donor.getCount());
+		CompoundTag sent = bed.getUpdateTag(level.registryAccess());
+		helper.assertTrue(sent.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals(DEWLIT) && sent.getStringOr(VerdantBedBlockEntity.GRAFT_HOST, "").equals(SUNPETAL)
+				&& !sent.contains("keeper"), "Clients are told the graft and its host, never the keeper: " + sent);
+		VerdantBedBlockEntity client = reload(helper, bed, sent);
+		helper.assertTrue(DEWLIT.equals(client.graft()) && SUNPETAL.equals(client.graftFor()), "and read them as a client does");
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			helper.assertValueEqual(ConcordanceDataProvider.bedSnapshot(bed, level).getStringOr("graft", ""), DEWLIT, "Jade's graft");
+		}
+		helper.assertTrue(handUse(helper, gardener, at.above(), donor, false).consumesAction() && donor.getCount() == 1 && DEWLIT.equals(bed.graft())
+				&& age(helper, at.above()) == 1, "A second graft is refused and spends nothing: one graft a bed");
+		BlockPos capAt = new BlockPos(5, 1, 2);
+		VerdantBedBlockEntity capBed = bed(helper, capAt, 10);
+		crop(helper, capAt.above(), Garden.GLOAMCAP_CROP, 1);
+		handUse(helper, gardener, capAt.above(), donor, false);
+		helper.assertTrue(capBed.graft().isEmpty() && donor.getCount() == 1, "A Dewmoss on a Gloamcap grafts nothing");
+		BlockPos offAt = new BlockPos(5, 1, 5);
+		VerdantBedBlockEntity offBed = bed(helper, offAt, 10);
+		crop(helper, offAt.above(), Garden.SUNPETAL_CROP, 1);
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			handUse(helper, gardener, offAt.above(), donor, false);
+			helper.assertTrue(offBed.graft().isEmpty() && donor.getCount() == 1 && DEWLIT.equals(bed.graft()), "Switched off, nothing grafts");
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		bed.setGraft("jugcraft:gone");
+		helper.assertTrue(handUse(helper, gardener, at.above(), donor, false).consumesAction() && DEWLIT.equals(bed.graft()) && donor.isEmpty(),
+				"A graft the rules no longer know is replaced by the next: " + bed.graft());
+		helper.succeed();
+	}
+
+	/**
+	 * C-09 (C-P62): sneaking with a Dewmoss never reaches the crop (the server suppresses a block's use for a sneaking player
+	 * holding an item), so it neither grafts nor, a crop being no bed, plants anything; a plain use then grafts.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aSneakingUseNeitherGraftsNorPlaces(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 1, 2);
+		VerdantBedBlockEntity bed = bed(helper, at, 10);
+		crop(helper, at.above(), Garden.SUNPETAL_CROP, 1);
+		ServerPlayer gardener = gardener(helper, true);
+		ItemStack donor = new ItemStack(Garden.DEWMOSS);
+		handUse(helper, gardener, at.above(), donor, true);
+		helper.assertTrue(bed.graft().isEmpty() && donor.getCount() == 1 && helper.getBlockState(at.above(2)).isAir()
+				&& helper.getBlockState(at.above()).is(Garden.SUNPETAL_CROP) && age(helper, at.above()) == 1,
+				"Sneaking, the Dewmoss neither grafts nor plants: " + bed.graft() + ", " + helper.getBlockState(at.above(2)));
+		handUse(helper, gardener, at.above(), donor, false);
+		helper.assertTrue(DEWLIT.equals(bed.graft()) && donor.isEmpty(), "A plain use grafts it");
+		helper.succeed();
+	}
+
+	/**
+	 * C-09 (C-P62): a Dewmoss used on a ripe Sunpetal grafts it and harvests nothing; any other item (a stick) on a ripe crop
+	 * still harvests it as an empty hand does; and an empty hand harvests the grafted one, whose bed keeps its graft.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aDonorOnARipeCropGraftsAndAnyOtherItemStillHarvests(GameTestHelper helper) {
+		BlockPos a = new BlockPos(1, 1, 2);
+		BlockPos b = new BlockPos(5, 1, 2);
+		VerdantBedBlockEntity bedA = bed(helper, a, 10);
+		VerdantBedBlockEntity bedB = bed(helper, b, 10);
+		crop(helper, a.above(), Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		crop(helper, b.above(), Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		ServerPlayer gardener = gardener(helper, true);
+		handUse(helper, gardener, a.above(), new ItemStack(Garden.DEWMOSS), false);
+		helper.assertTrue(DEWLIT.equals(bedA.graft()) && age(helper, a.above()) == OrganismCropBlock.MAX_AGE,
+				"A Dewmoss on a ripe Sunpetal grafts its bed and leaves it ripe");
+		helper.assertItemEntityNotPresent(Garden.SUNPETAL, a.above(), 1.5);
+		ItemStack stick = new ItemStack(Items.STICK);
+		handUse(helper, gardener, b.above(), stick, false);
+		helper.assertTrue(bedB.graft().isEmpty() && age(helper, b.above()) == 1 && stick.getCount() == 1, "A stick harvests a ripe crop as an empty hand does");
+		helper.assertItemEntityPresent(Garden.SUNPETAL, b.above(), 1.5);
+		helper.assertItemEntityPresent(Garden.VERDANT_CHAFF, b.above(), 1.5);
+		handUse(helper, gardener, a.above(), ItemStack.EMPTY, false);
+		helper.assertTrue(age(helper, a.above()) == 1 && DEWLIT.equals(bedA.graft()), "An empty hand harvests the grafted crop, and its bed keeps the graft");
+		helper.assertItemEntityPresent(Garden.SUNPETAL, a.above(), 1.5);
+		helper.succeed();
+	}
+
+	/** C-09 (C-P62): to someone who has not understood Verdant Husbandry a Dewmoss is just an item: it grafts nothing. */
+	@GameTest(maxTicks = 20)
+	public void anUnresearchedGardenerCannotGraft(GameTestHelper helper) {
+		BlockPos ripeAt = new BlockPos(1, 1, 2);
+		BlockPos youngAt = new BlockPos(5, 1, 2);
+		VerdantBedBlockEntity ripeBed = bed(helper, ripeAt, 10);
+		VerdantBedBlockEntity youngBed = bed(helper, youngAt, 10);
+		crop(helper, ripeAt.above(), Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		crop(helper, youngAt.above(), Garden.SUNPETAL_CROP, 1);
+		ServerPlayer novice = gardener(helper, false);
+		helper.assertTrue(!Garden.knows(novice), "A novice has not understood Verdant Husbandry");
+		ItemStack donor = new ItemStack(Garden.DEWMOSS, 2);
+		handUse(helper, novice, youngAt.above(), donor, false);
+		helper.assertTrue(youngBed.graft().isEmpty() && donor.getCount() == 2 && age(helper, youngAt.above()) == 1,
+				"On a growing crop: no graft, nothing spent (the crop reports)");
+		handUse(helper, novice, ripeAt.above(), donor, false);
+		helper.assertTrue(ripeBed.graft().isEmpty() && donor.getCount() == 2 && age(helper, ripeAt.above()) == 1,
+				"On a ripe one: no graft, nothing spent, and it is harvested as an empty hand would");
+		helper.assertItemEntityPresent(Garden.SUNPETAL, ripeAt.above(), 1.5);
+		helper.succeed();
+	}
+
+	/**
+	 * C-09 (C-P62): a graft asks Authority at the crop and at its bed: a neighbour's claim on either refuses it, the use
+	 * consumed and nothing spent (so the Dewmoss is never planted instead); unclaimed, it grafts.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGraftIsRefusedWhereTheGardenerMayNotBuild(GameTestHelper helper) {
+		BlockPos a = new BlockPos(1, 1, 2);
+		BlockPos b = new BlockPos(5, 1, 2);
+		VerdantBedBlockEntity bedA = bed(helper, a, 10);
+		VerdantBedBlockEntity bedB = bed(helper, b, 10);
+		crop(helper, a.above(), Garden.SUNPETAL_CROP, 1);
+		crop(helper, b.above(), Garden.SUNPETAL_CROP, 1);
+		ServerPlayer gardener = gardener(helper, true);
+		ItemStack donor = new ItemStack(Garden.DEWMOSS, 2);
+		try (TestClaims claims = TestClaims.open()) {
+			UUID neighbour = new UUID(14L, 9L);
+			claims.block(helper.absolutePos(a), neighbour).block(helper.absolutePos(b.above()), neighbour);
+			helper.assertTrue(handUse(helper, gardener, a.above(), donor, false).consumesAction() && bedA.graft().isEmpty() && donor.getCount() == 2,
+					"A claimed bed refuses the graft: the use is consumed and nothing spent");
+			helper.assertTrue(handUse(helper, gardener, b.above(), donor, false).consumesAction() && bedB.graft().isEmpty() && donor.getCount() == 2,
+					"A claimed crop refuses it too");
+			helper.assertTrue(helper.getBlockState(a.above(2)).isAir() && helper.getBlockState(b.above(2)).isAir()
+					&& age(helper, a.above()) == 1 && age(helper, b.above()) == 1, "Nothing was planted, harvested or grown");
+		}
+		helper.assertTrue(handUse(helper, gardener, a.above(), donor, false).consumesAction() && DEWLIT.equals(bedA.graft()) && donor.getCount() == 1,
+				"Unclaimed, it grafts");
+		helper.succeed();
+	}
+
+	/**
+	 * C-09 (C-P64, C-P65): a graft lives on its bed, so every way a ripe Sunpetal is taken keeps it: an empty hand, a Gleaner,
+	 * a sickle's reap (and planting again where it left the bed bare), breaking it and planting again by a plain use, and a
+	 * Peepo's or a machine's reset; so do its host's growth and a save, which writes the graft and never its host. An
+	 * ungrafted bed writes no graft.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aGraftSurvivesEveryHarvestPathAndASave(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		Organism petal = organism(SUNPETAL);
+		Niche grafted = Garden.catalog().niche(petal, DEWLIT);
+		helper.assertTrue(!grafted.equals(petal.niche()), "Dewlit changes the Sunpetal's niche");
+		BlockPos byHand = new BlockPos(1, 2, 1);
+		BlockPos byGleaner = new BlockPos(3, 2, 3);
+		BlockPos bySickle = new BlockPos(6, 2, 1);
+		BlockPos byBreaking = new BlockPos(1, 2, 6);
+		BlockPos byReset = new BlockPos(6, 2, 6);
+		ServerPlayer gardener = gardener(helper, true);
+		ItemStack donor = new ItemStack(Garden.DEWMOSS, 5);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (BlockPos at : List.of(byHand, byGleaner, bySickle, byBreaking, byReset)) {
+			VerdantBedBlockEntity bed = bed(helper, at.below(), 10);
+			crop(helper, at, Garden.SUNPETAL_CROP, 1);
+			handUse(helper, gardener, at, donor, false);
+			helper.assertTrue(DEWLIT.equals(bed.graft()), "Grafted at " + at);
+			beds.add(bed);
+		}
+		helper.assertTrue(donor.isEmpty(), "Five grafts spent five Dewmoss");
+		VerdantBedBlockEntity handBed = beds.get(0), gleanerBed = beds.get(1), sickleBed = beds.get(2), breakingBed = beds.get(3);
+		VerdantBedBlockEntity resetBed = beds.get(4);
+		// An empty hand.
+		crop(helper, byHand, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		helper.assertTrue(handUse(helper, gardener, byHand, ItemStack.EMPTY, false).consumesAction() && age(helper, byHand) == petal.replant(),
+				"harvested by hand");
+		kept(helper, handBed, petal, grafted, "a hand's harvest");
+		// A Gleaner (reach 3: of these crops only its own is ripe), drawing on a Heart its keeper shares.
+		BlockPos heartAt = new BlockPos(4, 2, 6);
+		bed(helper, heartAt.below(), 10);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt);
+		heart.awaken(gardener.getUUID());
+		heart.setVerdance(5);
+		BlockPos gleanerAt = new BlockPos(4, 2, 4);
+		helper.setBlock(gleanerAt, Garden.GLEANER);
+		GleanerBlockEntity gleaner = entity(helper, gleanerAt);
+		gleaner.awaken(gardener.getUUID());
+		crop(helper, byGleaner, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		helper.assertValueEqual(gleaner.glean(level), "working", "the Gleaner harvests it");
+		helper.assertTrue(age(helper, byGleaner) == petal.replant(), "and it falls back to its replanting step");
+		kept(helper, gleanerBed, petal, grafted, "a Gleaner's harvest");
+		// A sickle's reap (sneaking: a plain use is the hand's harvest); it replants, or leaves the bed bare to plant again.
+		crop(helper, bySickle, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		helper.assertTrue(handUse(helper, gardener, bySickle, new ItemStack(JugcraftAgriculture.item("flint_sickle")), true).consumesAction(),
+				"a sneaking sickle reaps it");
+		BlockState cut = helper.getBlockState(bySickle);
+		helper.assertTrue(cut.isAir() || cut.is(Garden.SUNPETAL_CROP) && age(helper, bySickle) == 0, "reaped: " + cut);
+		kept(helper, sickleBed, petal, grafted, "a sickle's reap");
+		if (cut.isAir()) {
+			handUse(helper, gardener, bySickle.below(), new ItemStack(Garden.SUNPETAL), false);
+		}
+		helper.assertTrue(helper.getBlockState(bySickle).is(Garden.SUNPETAL_CROP), "a Sunpetal grows there again");
+		kept(helper, sickleBed, petal, grafted, "planting again after the sickle");
+		// Breaking it ripe, then planting again from its item without sneaking.
+		crop(helper, byBreaking, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		helper.assertTrue(level.destroyBlock(helper.absolutePos(byBreaking), true, gardener) && helper.getBlockState(byBreaking).isAir(), "broken");
+		kept(helper, breakingBed, petal, grafted, "breaking the crop");
+		helper.assertTrue(handUse(helper, gardener, byBreaking.below(), new ItemStack(Garden.SUNPETAL), false).consumesAction()
+				&& helper.getBlockState(byBreaking).is(Garden.SUNPETAL_CROP) && age(helper, byBreaking) == 0, "planted again, not sneaking");
+		kept(helper, breakingBed, petal, grafted, "planting again");
+		// A Peepo's reset (to its replanting step) and a machine's (to its first): plain block changes.
+		crop(helper, byReset, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		level.setBlock(helper.absolutePos(byReset), sunpetal().getStateForAge(petal.replant()), Block.UPDATE_CLIENTS);
+		kept(helper, resetBed, petal, grafted, "a Peepo's reset");
+		level.setBlock(helper.absolutePos(byReset), sunpetal().getStateForAge(0), Block.UPDATE_ALL);
+		kept(helper, resetBed, petal, grafted, "a machine's reset");
+		// Its host's growth (only another organism's clears it).
+		OrganismCropBlock.Growth growth = grow(helper, byHand);
+		helper.assertTrue(growth != OrganismCropBlock.Growth.NO_BED && growth != OrganismCropBlock.Growth.DISABLED
+				&& growth != OrganismCropBlock.Growth.DORMANT, "Its host's growth reaches the bed: " + growth);
+		kept(helper, handBed, petal, grafted, "its host's growth");
+		// A save.
+		CompoundTag saved = handBed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals(DEWLIT) && !saved.contains(VerdantBedBlockEntity.GRAFT_HOST),
+				"A save writes the graft, never its host: " + saved);
+		VerdantBedBlockEntity copy = reload(helper, handBed, saved);
+		kept(helper, copy, petal, grafted, "a save");
+		VerdantBedBlockEntity plain = bed(helper, new BlockPos(3, 1, 0), 10);
+		helper.assertTrue(!plain.saveWithoutMetadata(level.registryAccess()).contains(VerdantBedBlockEntity.GRAFT), "An ungrafted bed writes no graft");
+		helper.succeed();
+	}
+
+	/**
+	 * C-09 (C-P62 to C-P65): every reader of the niche a Sunpetal grows by on a Dewlit bed reads Dewlit's. At moisture 3, below
+	 * Dewlit's least but within the Sunpetal's own, the report and the note it writes say a grafted Sunpetal stalls for want of
+	 * moisture, its growth stalls, and a Habitat Gauge on a Dewlit bed reads 0; on plain beds the Sunpetal grows slowly and a
+	 * gauge reads 8. A gauge set on a grafted bed keeps the graft.
+	 */
+	@GameTest(maxTicks = 80)
+	public void everyNicheReaderSeesTheGraft(GameTestHelper helper) {
+		BlockPos cropAt = new BlockPos(2, 1, 2);
+		BlockPos gaugeAt = new BlockPos(3, 1, 2);
+		BlockPos plainCropAt = new BlockPos(2, 1, 5);
+		BlockPos plainGaugeAt = new BlockPos(3, 1, 5);
+		List<BlockPos> spots = List.of(cropAt, gaugeAt, plainCropAt, plainGaugeAt);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (BlockPos at : spots) {
+			beds.add(bed(helper, at, 10));
+		}
+		VerdantBedBlockEntity cropBed = beds.get(0), gaugeBed = beds.get(1), plainCropBed = beds.get(2), plainGaugeBed = beds.get(3);
+		// Light 14 at the crops and 13 at the gauges, both ideal for Dewlit and for the Sunpetal's own niche.
+		helper.setBlock(new BlockPos(2, 2, 3), Blocks.GLOWSTONE);
+		helper.setBlock(new BlockPos(2, 2, 4), Blocks.GLOWSTONE);
+		crop(helper, cropAt.above(), Garden.SUNPETAL_CROP, 1);
+		crop(helper, plainCropAt.above(), Garden.SUNPETAL_CROP, 1);
+		ServerPlayer gardener = gardener(helper, true);
+		handUse(helper, gardener, cropAt.above(), new ItemStack(Garden.DEWMOSS), false);
+		gaugeBed.setGraft(DEWLIT); // a gauge stands where a plant would, so its bed is grafted directly
+		for (BlockPos at : List.of(gaugeAt, plainGaugeAt)) {
+			helper.setBlock(at.above(), Garden.HABITAT_GAUGE);
+			HabitatGaugeBlockEntity gauge = entity(helper, at.above());
+			gauge.awaken(KEEPER);
+		}
+		helper.assertTrue(DEWLIT.equals(cropBed.graft()) && DEWLIT.equals(gaugeBed.graft()) && plainCropBed.graft().isEmpty()
+				&& plainGaugeBed.graft().isEmpty(), "Two beds carry Dewlit and two none; a gauge set on a grafted bed keeps it");
+		prefetch(helper, cropBed, gaugeBed, plainCropBed, plainGaugeBed);
+		helper.runAtTickTime(54, () -> {
+			ServerLevel level = level(helper);
+			Organism petal = organism(SUNPETAL);
+			Niche dewlit = Garden.catalog().niche(petal, DEWLIT);
+			helper.assertTrue(dewlit.range(Factor.LIGHT).equals(new Niche.Range(9, 11, 15, 15)) && dewlit.range(Factor.MOISTURE).equals(new Niche.Range(4, 5, 7, 7)),
+					"Dewlit: light from 9 (best 11), moisture from 4 (best 5)");
+			crop(helper, cropAt.above(), Garden.SUNPETAL_CROP, 1);
+			crop(helper, plainCropAt.above(), Garden.SUNPETAL_CROP, 1);
+			for (int i = 0; i < spots.size(); i++) {
+				BlockPos at = helper.absolutePos(spots.get(i));
+				level.setBlock(at, level.getBlockState(at).setValue(VerdantBedBlock.MOISTURE, 3), Block.UPDATE_CLIENTS);
+				beds.get(i).setNutrients(10);
+				beds.get(i).setStrain(0);
+			}
+			helper.assertTrue(cropBed.niche(petal).equals(dewlit) && gaugeBed.niche(petal).equals(dewlit) && plainCropBed.niche(petal).equals(petal.niche())
+					&& plainGaugeBed.niche(petal).equals(petal.niche()), "Each bed gives a Sunpetal its niche");
+			// The report, and the note it writes.
+			cropBed.note("waiting", List.of());
+			plainCropBed.note("waiting", List.of());
+			sunpetal().report(level, helper.absolutePos(cropAt.above()), helper.getBlockState(cropAt.above()), gardener);
+			sunpetal().report(level, helper.absolutePos(plainCropAt.above()), helper.getBlockState(plainCropAt.above()), gardener);
+			helper.assertTrue(cropBed.growth().equals("stalled") && cropBed.reasons().stream().anyMatch(reason -> reason.startsWith("ecology.short|moisture|3|4")),
+					"On Dewlit moisture 3 is too little: " + cropBed.growth() + " " + cropBed.reasons());
+			helper.assertTrue(plainCropBed.growth().equals("tolerating")
+					&& plainCropBed.reasons().stream().anyMatch(reason -> reason.startsWith("ecology.tolerable|moisture|3|4|7")),
+					"On its own it is only tolerable: " + plainCropBed.growth() + " " + plainCropBed.reasons());
+			// Growth.
+			helper.assertTrue(grow(helper, cropAt.above()) == OrganismCropBlock.Growth.STALLED && age(helper, cropAt.above()) == 1
+					&& cropBed.growth().equals("stalled") && DEWLIT.equals(cropBed.graft()), "Growth stalls on Dewlit, which its host's growth keeps");
+			helper.assertTrue(grow(helper, plainCropAt.above()) == OrganismCropBlock.Growth.GREW && plainCropBed.growth().equals("tolerating"),
+					"and goes on slowly on a plain bed");
+			// The gauges.
+			HabitatGaugeBlockEntity gauge = entity(helper, gaugeAt.above());
+			HabitatGaugeBlockEntity plainGauge = entity(helper, plainGaugeAt.above());
+			gauge.attune(level, SUNPETAL);
+			plainGauge.attune(level, SUNPETAL);
+			helper.assertTrue(gauge.signal() == 0 && plainGauge.signal() == HabitatGaugeBlockEntity.TOLERATING,
+					"A gauge reads its bed's niche: " + gauge.signal() + " on Dewlit, " + plainGauge.signal() + " on a plain bed");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-09 (C-P63): a graft changes the niche and nothing else. The parser refuses a graft naming anything but a host, a donor
+	 * and ranges, or changing nothing; the catalog gives Dewlit's two ranges to a Sunpetal only, and nothing for a graft it does
+	 * not know; and on a Dewlit bed a Sunpetal grows at the same cost, dries its bed the same and yields the same plain produce,
+	 * still an alchemical ingredient, as on a plain bed.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aGraftChangesOnlyTheNiche(GameTestHelper helper) {
+		EcologyParser parser = new EcologyParser();
+		helper.assertTrue(parser.graft("test:greedy", JsonParser.parseString("{\"schema\": 1, \"host\": \"jugcraft:sunpetal\", \"donor\": \"jugcraft:dewmoss\","
+				+ " \"niche\": {\"light\": [9, 11, 15, 15]}, \"produce\": 4}")) == null
+				&& parser.graft("test:idle", JsonParser.parseString("{\"schema\": 1, \"host\": \"jugcraft:sunpetal\", \"donor\": \"jugcraft:dewmoss\","
+				+ " \"niche\": {}}")) == null, "A graft with a yield, or one changing nothing, is refused");
+		helper.assertTrue(parser.problems().size() == 2 && parser.problems().get(0).startsWith("graft test:greedy: ")
+				&& parser.problems().get(1).startsWith("graft test:idle: "), "and each refusal is named: " + parser.problems());
+		EcologyCatalog catalog = Garden.catalog();
+		Organism petal = organism(SUNPETAL);
+		Organism moss = organism("jugcraft:dewmoss");
+		Graft dewlit = catalog.graft(DEWLIT);
+		helper.assertTrue(dewlit != null && dewlit.host().equals(SUNPETAL) && dewlit.donor().equals("jugcraft:dewmoss")
+				&& dewlit.overrides().keySet().equals(EnumSet.of(Factor.MOISTURE, Factor.LIGHT)), "Dewlit: a Dewmoss in a Sunpetal, two ranges: " + dewlit);
+		helper.assertTrue(catalog.graft(SUNPETAL, "jugcraft:dewmoss") == dewlit && catalog.graft(SUNPETAL, "jugcraft:gloamcap") == null,
+				"The gesture finds it by its host and its donor");
+		Niche grafted = catalog.niche(petal, DEWLIT);
+		for (Factor factor : Factor.values()) {
+			Niche.Range expected = factor == Factor.LIGHT ? new Niche.Range(9, 11, 15, 15)
+					: factor == Factor.MOISTURE ? new Niche.Range(4, 5, 7, 7) : petal.niche().range(factor);
+			helper.assertValueEqual(grafted.range(factor), expected, "Dewlit's " + factor.id);
+		}
+		helper.assertTrue(catalog.niche(moss, DEWLIT).equals(moss.niche()) && catalog.niche(petal, "jugcraft:no_such_graft").equals(petal.niche()),
+				"Another organism, or a graft the rules do not know, keeps its own niche");
+		List<BlockPos> spots = List.of(new BlockPos(2, 1, 2), new BlockPos(5, 1, 2));
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (BlockPos at : spots) {
+			beds.add(bed(helper, at, 10));
+			crop(helper, at.above(), Garden.SUNPETAL_CROP, 0);
+			helper.setBlock(at.above().north(), Blocks.GLOWSTONE);
+		}
+		beds.get(0).setGraft(DEWLIT);
+		prefetch(helper, beds.get(0), beds.get(1));
+		helper.runAtTickTime(55, () -> {
+			ServerLevel level = level(helper);
+			List<List<ItemStack>> yields = new ArrayList<>();
+			for (int i = 0; i < spots.size(); i++) {
+				BlockPos at = spots.get(i);
+				VerdantBedBlockEntity bed = beds.get(i);
+				crop(helper, at.above(), Garden.SUNPETAL_CROP, 0);
+				wet(helper, at);
+				bed.setNutrients(10);
+				bed.setStrain(0);
+				helper.assertTrue(grow(helper, at.above()) == OrganismCropBlock.Growth.GREW && bed.nutrients() == 10 - petal.cost()
+						&& bed.moisture() == VerdantBedBlock.WET - 1, "A step costs and dries the same at " + at + ": " + bed.reasons());
+				crop(helper, at.above(), Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+				yields.add(sunpetal().harvest(level, helper.absolutePos(at.above()), helper.getBlockState(at.above())));
+			}
+			List<ItemStack> onDewlit = yields.get(0);
+			List<ItemStack> alone = yields.get(1);
+			helper.assertTrue(onDewlit.size() == 2 && alone.size() == 2, "Both yield produce and chaff: " + onDewlit + " / " + alone);
+			for (int i = 0; i < 2; i++) {
+				ItemStack a = onDewlit.get(i);
+				ItemStack b = alone.get(i);
+				helper.assertTrue(ItemStack.isSameItemSameComponents(a, b) && a.getCount() == b.getCount() && Assaying.patched(a).isEmpty(),
+						"The same plain stack, grafted or not: " + a + " / " + b);
+			}
+			helper.assertTrue(onDewlit.get(0).is(Garden.SUNPETAL) && onDewlit.get(0).getCount() == petal.produce() && onDewlit.get(1).is(Garden.VERDANT_CHAFF),
+					"Sunpetals and chaff: " + onDewlit);
+			helper.assertTrue(Alchemy.catalog().ingredient(ConcordanceProgress.itemId(onDewlit.get(0))) != null, "still the crucible's Sunpetal");
+			helper.assertTrue(DEWLIT.equals(beds.get(0).graft()) && age(helper, spots.get(0).above()) == petal.replant(),
+					"The bed keeps its graft, the crop falls back to its replanting step");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-09 (C-P64): a graft lasts until a crop of another organism grows on its bed. A Dewmoss set there, reading it (a report,
+	 * Jade) and the Dewmoss's own niche leave it; the Dewmoss's first growth attempt clears it, and clients are told; a Sunpetal
+	 * planted again grows by its own niche. A graft the rules no longer know is kept, and read by nothing.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anotherPlantClearsTheGraft(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		BlockPos at = new BlockPos(2, 1, 2);
+		VerdantBedBlockEntity bed = bed(helper, at, 10);
+		crop(helper, at.above(), Garden.SUNPETAL_CROP, 1);
+		ServerPlayer gardener = gardener(helper, true);
+		handUse(helper, gardener, at.above(), new ItemStack(Garden.DEWMOSS), false);
+		helper.assertTrue(DEWLIT.equals(bed.graft()), "Grafted");
+		Organism petal = organism(SUNPETAL);
+		Organism moss = organism("jugcraft:dewmoss");
+		helper.assertTrue(level.destroyBlock(helper.absolutePos(at.above()), false, gardener), "The Sunpetal is broken");
+		helper.setBlock(at.above(), Garden.DEWMOSS_CROP);
+		helper.assertTrue(DEWLIT.equals(bed.graft()) && bed.niche(moss).equals(moss.niche()), "A Dewmoss set there keeps the graft and grows by its own niche");
+		BlockState mossState = helper.getBlockState(at.above());
+		((OrganismCropBlock) mossState.getBlock()).report(level, helper.absolutePos(at.above()), mossState, gardener);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			ConcordanceDataProvider.bedSnapshot(bed, level);
+		}
+		helper.assertTrue(DEWLIT.equals(bed.graft()), "Reading it clears nothing");
+		helper.assertTrue(grow(helper, at.above()) != OrganismCropBlock.Growth.NO_BED && bed.graft().isEmpty(), "The Dewmoss's growth clears it");
+		helper.assertTrue(!bed.getUpdateTag(level.registryAccess()).contains(VerdantBedBlockEntity.GRAFT), "and clients are told");
+		helper.setBlock(at.above(), Garden.SUNPETAL_CROP);
+		helper.assertTrue(bed.niche(petal).equals(petal.niche()), "A Sunpetal planted again grows by its own niche");
+		bed.setGraft("jugcraft:gone");
+		helper.setBlock(at.above(), Garden.DEWMOSS_CROP);
+		grow(helper, at.above());
+		helper.assertTrue(bed.graft().equals("jugcraft:gone") && bed.niche(petal).equals(petal.niche()) && Garden.catalog().graftLines(bed.graft()).isEmpty(),
+				"A graft the rules no longer know is kept by another plant's growth, and read by nothing");
+		helper.succeed();
 	}
 }

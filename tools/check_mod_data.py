@@ -12030,6 +12030,7 @@ def check_concordance(registered):
     check_workshop_products(co, root, lang)
     check_poultice_credit(co, lang)
     check_ecology(co, root, lang, registered, research)
+    check_graft(co, root, lang)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
@@ -14916,6 +14917,140 @@ def check_ecology(co, root, lang, registered, research):
             err(f"garden: missing lang {key}")
 
 
+def _graft_effect(values, base):
+    """+1 when a graft's range takes in all of its host's and more, -1 when less, 0 when the same or mixed."""
+    if values == base:
+        return 0
+    wider = values[0] <= base[0] and values[1] <= base[1] and values[2] >= base[2] and values[3] >= base[3]
+    narrower = values[0] >= base[0] and values[1] >= base[1] and values[2] <= base[2] and values[3] <= base[3]
+    return 1 if wider else -1 if narrower else 0
+
+
+def check_graft(co, root, lang):
+    """Concordance Chunk C, C-09 (C-P18, C-P62 to C-P65): one stable graft trait. The pilot holds one graft (plan 03:81),
+    joining two different crops, one range better and one worse (03:76), its data naming nothing but a host, a donor and
+    ranges, and the loader reading no more. Every reader of a bed's niche asks the bed (VerdantBedBlockEntity.niche), the
+    Verdant Heart alone reading its own. The gesture asks research, RateGate and Authority at crop and bed, and a refusal
+    consumes the use. Another organism's growth clears it and reading never does. The bed saves it only when it has one and
+    tells clients it with its host, never the keeper. Jade and the Inspect page name it on its host's crop only. Every word
+    has its lang."""
+    ec = co.ecology
+    garden = root / "garden"
+
+    def java(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+
+    files = {p.stem: load(p) or {} for p in (DATA / MOD / "concordance" / "graft").glob("*.json")}
+    if ec.GRAFT_CAP != 1 or len(ec.GRAFTS) != ec.GRAFT_CAP or set(files) != set(ec.GRAFTS):
+        err(f"grafts: the pilot holds exactly one graft (plan 03:81): GRAFTS {sorted(ec.GRAFTS)}, data {sorted(files)}")
+    for key, entry in sorted(files.items()):
+        if set(entry) != {"schema", "host", "donor", "niche"}:
+            err(f"graft {key}: names a host, a donor and ranges only, never a cost, yield or alchemy ({sorted(entry)})")
+        if key in ec.GRAFTS and entry != ec.graft_json(key):
+            err(f"graft {key}: differs from tools/concordance_ecology.py: run tools/generate_material_data.py")
+        host_ns, host_key = split(entry.get("host", ":"))
+        donor_ns, donor_key = split(entry.get("donor", ":"))
+        host, donor = ec.ORGANISMS.get(host_key, {}), ec.ORGANISMS.get(donor_key, {})
+        if host_ns != MOD or donor_ns != MOD or host.get("role") != "crop" or donor.get("role") != "crop" or host_key == donor_key:
+            err(f"graft {key}: joins two different crops the garden grows (host {entry.get('host')}, donor {entry.get('donor')})")
+            continue
+        effects = []
+        for factor, values in entry.get("niche", {}).items():
+            top = ec.FACTORS.get(factor)
+            if top is None or not isinstance(values, list) or len(values) != 4 or values != sorted(values) or values[0] < 0 \
+                    or values[3] > top:
+                err(f"graft {key}: niche.{factor} must be [least, ideal from, ideal to, most] within 0..{top}")
+                continue
+            effects.append(_graft_effect(values, host["niche"].get(factor, [0, 0, top, top])))
+            if factor == "nutrients" and values[0] < host.get("cost", 0):
+                err(f"graft {key}: its nutrient floor ({values[0]}) is below its host's cost")
+        if sorted(effects) != [-1, 1]:
+            err(f"graft {key}: changes one range for the better and one for the worse (plan 03:76), found {effects}")
+    # The loader reads the kind and nothing more.
+    parser = _java_body(java(root / "ecology" / "EcologyParser.java"), "public @Nullable Graft graft(String id, JsonElement json)")
+    if 'Json.only(object, "schema", "host", "donor", "niche");' not in parser:
+        err("EcologyParser.graft: a graft names a host, a donor and ranges, and nothing else (C-09)")
+    rules = java(root / "rules" / "ConcordanceRules.java")
+    if 'case "graft" ->' not in rules or "new EcologyCatalog(organisms, disturbances, grafts)" not in rules:
+        err("ConcordanceRules.build: reads concordance/graft and gives the grafts to the ecology catalog (C-09)")
+    # One niche helper for every reader.
+    bed = java(garden / "VerdantBedBlockEntity.java")
+    if "return Garden.catalog().niche(organism, graft);" not in _java_body(bed, "public Niche niche(Organism organism)"):
+        err("VerdantBedBlockEntity.niche: the one niche helper asks the catalog with the bed's graft (C-09)")
+    for path in sorted(garden.glob("*.java")) + [root / "encyclopedia" / "InspectPage.java"]:
+        if path.name == "VerdantHeartBlockEntity.java":
+            continue  # the Heart reads its own niche (C-09 leaves it untouched)
+        for match in re.finditer(r"\b\w+\.niche\(\)", java(path)):
+            err(f"concordance/{path.relative_to(root).as_posix()}: {match.group(0)}: a bed's niche is the bed's to give "
+                "(VerdantBedBlockEntity.niche), so its graft reaches every reader (C-09)")
+    crop = java(garden / "OrganismCropBlock.java")
+    grow = _java_body(crop, "private Growth grow(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, boolean certain, boolean hastened)")
+    report = _java_body(crop, "public void report(")
+    gauge = java(garden / "HabitatGaugeBlockEntity.java")
+    inspect = java(root / "encyclopedia" / "InspectPage.java")
+    inspect_garden = _java_body(inspect, "private static void garden(")
+    for where, text_, needle in (("OrganismCropBlock.grow", grow, "Verdict.of(bed.niche(definition), habitat)"),
+                                 ("OrganismCropBlock.report", report, "Niche niche = bed.niche(definition);"),
+                                 ("HabitatGaugeBlockEntity.read", gauge, "Verdict.of(bed.niche(organism), habitat)"),
+                                 ("VerdantBedBlockEntity.note", bed, "verdict.reasons(niche(organism), habitat)"),
+                                 ("InspectPage.garden", inspect_garden, "Niche niche = bed.niche(organism);")):
+        if needle not in text_:
+            err(f"{where}: reads the bed's niche ({needle}) (C-09)")
+    # The gesture.
+    use = _java_body(crop, "protected InteractionResult useItemOn(")
+    for needle in ("Garden.knows(server)", "Garden.catalog().graft(organismId(), ConcordanceProgress.itemId(stack))",
+                   "return super.useItemOn(stack, state, level, pos, player, hand, hit);"):
+        if needle not in use:
+            err(f"OrganismCropBlock.useItemOn: a Greenwarden's donor grafts; anything else goes on as before ({needle}) (C-09)")
+    act = _java_body(crop, "private InteractionResult graftBed(")
+    for needle in ('RateGate.allow(player, "garden", 4)', "Authority.mayChange(level, player, pos)",
+                   "Authority.mayChange(level, player, pos.below())", "!bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null",
+                   "donor.consume(1, player)"):
+        if needle not in act:
+            err(f"OrganismCropBlock.graftBed: rate, Authority at crop and bed, one graft the rules know a bed (one they no longer "
+                f"know is replaced), one donor spent ({needle}) (C-09)")
+    if "InteractionResult.FAIL" in act:
+        err("OrganismCropBlock.graftBed: a refused graft consumes the use (CONSUME), so the donor's own use never plants it (C-09)")
+    # Clearing, and only growth clears.
+    if "bed.clearGraftUnlessFor(organismId());" not in grow or grow.find("bed.clearGraftUnlessFor(") > grow.find("bed.awake()"):
+        err("OrganismCropBlock.grow: another organism's growth clears the bed's graft, before the dormant check (C-09)")
+    for path in sorted(root.rglob("*.java")):
+        if re.search(r"\.(setGraft|clearGraftUnlessFor)\(", java(path)) and path.name != "OrganismCropBlock.java":
+            err(f"concordance/{path.relative_to(root).as_posix()}: only the gesture grafts and only growth clears (C-09)")
+    if re.search(r"(setGraft|clearGraftUnlessFor)\(", report):
+        err("OrganismCropBlock.report: a report reads and clears nothing (C-09)")
+    # Saved and sent.
+    save = _java_body(bed, "protected void saveAdditional(ValueOutput output)")
+    if not re.search(r"if \(!graft\.isEmpty\(\)\) \{\s*output\.putString\(GRAFT, graft\);", save) or "GRAFT_HOST" in save:
+        err("VerdantBedBlockEntity.saveAdditional: saves the graft only when it carries one, never its host (C-09)")
+    if 'graft = input.getStringOr(GRAFT, "");' not in _java_body(bed, "protected void loadAdditional(ValueInput input)") \
+            or 'GRAFT = "graft";' not in bed or 'GRAFT_HOST = "graft_host";' not in bed:
+        err("VerdantBedBlockEntity.loadAdditional: an older bed reads as ungrafted (C-09)")
+    update = _java_body(bed, "public CompoundTag getUpdateTag(HolderLookup.Provider registries)")
+    if "tag.putString(GRAFT, graft);" not in update or "tag.putString(GRAFT_HOST," not in update or '"keeper"' in update:
+        err("VerdantBedBlockEntity.getUpdateTag: clients are told the graft and the organism it is for, never the keeper (C-09)")
+    # Shown.
+    snapshot = _java_body(java(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag bedSnapshot(")
+    if 'snapshot.putString("graft", bed.graft());' not in snapshot or re.search(r"(setGraft|clearGraftUnlessFor)\(", snapshot):
+        err("ConcordanceDataProvider.bedSnapshot: tells Jade the graft and changes nothing (C-09)")
+    named = _java_body(inspect, "private static void grafted(")
+    if "grafted(out, bed, " not in inspect_garden or "Garden.catalog().graftLines(held.id())" not in named \
+            or "!held.host().equals(crop)" not in named:
+        err("InspectPage: a bed's page names its graft, and a crop's page only when the crop is its host (C-09)")
+    client = java(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java")
+    crop_tooltip = client[client.find("private enum CropTooltip"):]
+    crop_tooltip = crop_tooltip[:crop_tooltip.find("\n\t}\n")]
+    if "bed.graftFor().equals(crop.organismId())" not in crop_tooltip or client.count('"tooltip.jugcraft.concordance.jade.graft"') != 2:
+        err("JugcraftJadeClient: names the graft on the bed, and on a crop only when it is the graft's host (C-09)")
+    if 'case "graft" -> "graft." + namespace + "." + path;' not in java(root / "ComposeText.java"):
+        err("ComposeText.name: a graft is named graft.<ns>.<path> (C-09)")
+    for key in [f"graft.{MOD}.{name}" for name in ec.GRAFTS] + [
+            f"tooltip.{MOD}.concordance.jade.graft", f"message.{MOD}.concordance.garden.grafted",
+            f"message.{MOD}.concordance.garden.graft_held", f"compose.{MOD}.ecology.graft", f"compose.{MOD}.ecology.graft.range"]:
+        if key not in lang:
+            err(f"graft: missing lang {key}")
+
+
 def check_celestial(co, root, lang, registered, research):
     """Roadmap step 15: the Java mirrors tools/concordance_celestial.py (the calendar, the limits, the observatory, the
     astrolabe and the pulse); every pattern keeps to its limits, gives an allowed effect, costs more to recall than to
@@ -16869,7 +17004,9 @@ def check_encyclopedia(root, lang):
                            # Concordance Chunk C, C-07: reading a bed or a crop notes, grows, feeds, takes and forgets nothing.
                            r"|\.note\(|forgetVerdict\(|forgetSample\(|\.take\(|\.give\(|\.grow\(|\.hasten\("
                            # Concordance Chunk C, C-08: nor counts, eases or sets a strain.
-                           r"|\.settle\(|\.compost\(|\.tend\(|setStrain\(|\.ripen\(")
+                           r"|\.settle\(|\.compost\(|\.tend\(|setStrain\(|\.ripen\("
+                           # Concordance Chunk C, C-09: nor grafts or clears a graft.
+                           r"|setGraft\(|clearGraftUnlessFor\(")
     for name, source in builders.items():
         if forbidden.search(source):
             err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
@@ -17086,6 +17223,8 @@ AUTHORITY_ROUTES = {
     "garden/GleanerBlockEntity.java": ["Authority.answering(level, keeper)", "Authority.mayChange(level, answering, pos)"],
     # Concordance Chunk C, C-07 (C-P56): a canteen's sip on a Verdant Bed; and (C-08, C-P61) a Greenwarden's tending.
     "garden/VerdantBedBlock.java": ["Authority.mayChange(level, player, pos)"],
+    # Concordance Chunk C, C-09 (C-P62): a graft asks at the crop and at the bed.
+    "garden/OrganismCropBlock.java": ["Authority.mayChange(level, player, pos)", "Authority.mayChange(level, player, pos.below())"],
     "spirits/ClockworkPorterEntity.java": ["Authority.answering(level, owner) == null", "Authority.mayChangeFor(level, owner, source)",
                                            "Authority.mayChangeFor(level, owner, target)",
                                            "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],

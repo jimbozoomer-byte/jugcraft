@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.LivingDeviceBlockEntity;
@@ -198,7 +199,8 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 
 	/**
 	 * A Verdant Bed: moisture, nutrients, whether it is awake, and its habitat (from its sample: the five factors); since
-	 * Concordance Chunk C also its harvest strain, a harvest not yet counted included (C-08, read and never counted here).
+	 * Concordance Chunk C also its harvest strain, a harvest not yet counted included (C-08, read and never counted here), and
+	 * the graft it carries when the rules know it (C-09).
 	 */
 	public static CompoundTag bedSnapshot(VerdantBedBlockEntity bed, ServerLevel level) {
 		CompoundTag snapshot = new CompoundTag();
@@ -215,6 +217,10 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		int strain = bed.strainNow();
 		if (strain > 0) {
 			snapshot.putInt("strain", strain);
+		}
+		// Concordance Chunk C (C-09): the graft it carries, when the rules know it (named on the client).
+		if (Garden.catalog().graft(bed.graft()) != null) {
+			snapshot.putString("graft", bed.graft());
 		}
 		return snapshot;
 	}

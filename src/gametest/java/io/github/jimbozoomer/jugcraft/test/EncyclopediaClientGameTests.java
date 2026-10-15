@@ -700,11 +700,14 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		server.runOnServer(minecraft -> {
 			if (minecraft.overworld().getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed) {
 				bed.setStrain(2); // Concordance Chunk C (C-08): so Jade and the page show "recently harvested"
+				bed.setGraft("jugcraft:dewlit"); // C-09: so Jade and the page name the graft
 			}
 		});
 		context.waitTicks(5);
 		int strain = context.computeOnClient(client -> client.level.getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed ? bed.strainNow() : -1);
 		check(strain == 2, "The client should be told the bed's strain (the update tag): " + strain);
+		String graft = context.computeOnClient(client -> client.level.getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed ? bed.graft() + "|" + bed.graftFor() : "");
+		check(graft.equals("jugcraft:dewlit|jugcraft:sunpetal"), "The client should be told the graft and its host: " + graft);
 		context.getInput().lookAt(plant);
 		context.waitTicks(20);
 		if (FabricLoader.getInstance().isModLoaded("jade")) {
@@ -728,11 +731,12 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			return found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.light"))
 					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.diversity"))
 					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.verdict"))
-					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.disturbance_strained"));
+					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.disturbance_strained"))
+					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.graft"));
 		});
 		Jugcraft.LOGGER.info("[encyclopedia-check] looking at a bed: page {}, rows {}", page, rows);
 		check(page.equals("inspect") && judged && rows.stream().noneMatch(row -> row.contains("jugcraft.") || row.contains("jugcraft:")),
-				"Looking at a bed, the Inspect page should judge each factor in words, the light as sky and lamps, and name its strain: " + rows);
+				"Looking at a bed, the Inspect page should judge each factor in words, the light as sky and lamps, and name its strain and graft: " + rows);
 		context.runOnClient(client -> client.gui.toastManager().clear());
 		context.waitTicks(5);
 		context.takeScreenshot("jugcraft_encyclopedia_inspect_bed");

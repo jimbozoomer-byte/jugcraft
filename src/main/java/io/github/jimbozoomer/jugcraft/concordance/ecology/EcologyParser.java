@@ -22,8 +22,10 @@ import org.jspecify.annotations.Nullable;
  * {"schema": 1, "role": "producer", "block": "jugcraft:verdant_heart", "cost": 1, "thriving": 2, "tolerating": 1,
  *  "niche": {...}}
  * {"schema": 1, "blocks": ["jugcraft:ley_pylon"], "value": 2}
+ * {"schema": 1, "host": "jugcraft:sunpetal", "donor": "jugcraft:dewmoss", "niche": {"light": [9, 11, 15, 15]}}
  * </pre>
- * A niche range is {@code [least, ideal from, ideal to, most]}; a factor left out is any value.
+ * A niche range is {@code [least, ideal from, ideal to, most]}; a factor left out is any value. The last line is a graft
+ * (Concordance Chunk C, C-09): a host, a donor and the ranges it puts in place of the host's.
  */
 public final class EcologyParser {
 	/** The most nutrients one step may cost or fix, and the most a harvest or a beat may yield. */
@@ -93,6 +95,26 @@ public final class EcologyParser {
 	}
 
 	/**
+	 * A graft (Concordance Chunk C, C-09, C-P63): a host, a donor and the ranges it puts in place of the host's, and nothing
+	 * else, so no file can give a graft a cost, a yield or an alchemical part. Whether host and donor are crops is the rules'.
+	 */
+	public @Nullable Graft graft(String id, JsonElement json) {
+		try {
+			JsonObject object = Json.object(json, "graft");
+			Json.only(object, "schema", "host", "donor", "niche");
+			Json.schema(object);
+			Map<Factor, Niche.Range> overrides = ranges(Json.object(Json.member(object, "niche"), "niche"));
+			if (overrides.isEmpty()) {
+				throw new Json.Invalid("\"niche\" changes nothing: a graft changes at least one range");
+			}
+			return new Graft(id, Json.id(object, "host"), Json.id(object, "donor"), overrides);
+		} catch (Json.Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
+			problems.add("graft " + id + ": " + problem.getMessage());
+			return null;
+		}
+	}
+
+	/**
 	 * A crop's mixed bed (Concordance Chunk C, C-08, C-P58): {"organisms": [ids], "percent": 1..Neighbours.MAX_PERCENT}. A
 	 * nitrogen fixer takes none (a faster fixer would fix faster), and a plant's own kind never counts.
 	 */
@@ -115,6 +137,11 @@ public final class EcologyParser {
 	}
 
 	private static Niche niche(JsonObject object) {
+		return new Niche(ranges(object));
+	}
+
+	/** A niche's ranges as written, factor by factor (a factor left out is not there); a graft's too (C-09). */
+	private static Map<Factor, Niche.Range> ranges(JsonObject object) {
 		Map<Factor, Niche.Range> ranges = new EnumMap<>(Factor.class);
 		for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
 			Factor factor = Factor.fromId(entry.getKey());
@@ -135,6 +162,6 @@ public final class EcologyParser {
 				throw new Json.Invalid("niche." + factor.id + ": " + wrong.getMessage());
 			}
 		}
-		return new Niche(ranges);
+		return ranges;
 	}
 }

@@ -3,8 +3,10 @@ package io.github.jimbozoomer.jugcraft.concordance.garden;
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Sampler;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
@@ -43,12 +45,19 @@ import org.jspecify.annotations.Nullable;
  * up to {@link Habitat#MAX_STRAIN} ({@link #settle}), whatever took the crop. It rests away one a random tick while no crop
  * grows on it, one a dose of compost, one a Greenwarden's tending; {@link #give} never eases it. Saved as optional keys
  * (stamp 1) and sent to clients.
+ * <p>
+ * Since Concordance Chunk C (C-09, C-P62 to C-P65) it may carry a graft for its host's crop, kept through every harvest and
+ * replanting until another organism grows here; clients are told it and the organism it is for. Every reader of the niche
+ * a plant grows by here asks {@link #niche}.
  */
 public class VerdantBedBlockEntity extends BlockEntity {
 	public static final int CAPACITY = Habitat.MAX_NUTRIENTS;
 	/** Saved and sent keys (Concordance Chunk C, C-08): in a save only when set; absent in older saves (read as 0 and false). */
 	public static final String STRAIN = "strain";
 	public static final String RIPENED = "ripened";
+	/** Saved and sent key (C-09, C-P65): the graft it carries, in a save only when it carries one; clients are also told its host. */
+	public static final String GRAFT = "graft";
+	public static final String GRAFT_HOST = "graft_host";
 
 	private int nutrients;
 	private boolean awake;
@@ -67,6 +76,10 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	private boolean ripened;
 	/** When a Greenwarden last tended it (game time); not saved. */
 	private long tendedAt = Long.MIN_VALUE;
+	/** The graft it carries for its host's crop (Concordance Chunk C, C-09), by id; "" for none. */
+	private String graft = "";
+	/** Clients only: the organism that graft is for, as the server sent it ("" for none). */
+	private String graftFor = "";
 
 	public VerdantBedBlockEntity(BlockPos pos, BlockState state) {
 		super(Garden.BED_ENTITY, pos, state);
@@ -206,7 +219,7 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	 */
 	public void note(Verdict verdict, Habitat habitat, Organism organism) {
 		List<String> encoded = new ArrayList<>();
-		for (Text line : verdict.reasons(organism.niche(), habitat)) {
+		for (Text line : verdict.reasons(niche(organism), habitat)) {
 			encoded.add(encode(line));
 		}
 		Text mixed = mixedLine(organism);
@@ -250,6 +263,11 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	public void report(ServerLevel level, ServerPlayer player) {
 		player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.jugcraft.concordance.garden.bed",
 				moisture(), nutrients, CAPACITY));
+		// Concordance Chunk C (C-09): the graft it carries, named.
+		List<Text> grafted = Garden.catalog().graftLines(graft);
+		if (!grafted.isEmpty()) {
+			player.sendSystemMessage(ComposeText.show(grafted.getFirst()));
+		}
 		if (!awake) {
 			player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.jugcraft.concordance.garden.dormant"));
 			return;
@@ -428,6 +446,47 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		return lines;
 	}
 
+	// ---------------------------------------------------------------- a graft (Concordance Chunk C, C-09, C-P62 to C-P65)
+
+	/** The graft it carries, by id ("" for none). */
+	public String graft() {
+		return graft;
+	}
+
+	/** On a client, the organism its graft is for, as the server sent it ("" for none): a crop names the graft only if it is that. */
+	public String graftFor() {
+		return graftFor;
+	}
+
+	/** Grafts it (OrganismCropBlock's gesture; operators and tests), or clears it with "". */
+	public void setGraft(String graft) {
+		if (!graft.equals(this.graft)) {
+			this.graft = graft;
+			setChanged();
+			sync();
+		}
+	}
+
+	/**
+	 * A crop of {@code organism} grows here (OrganismCropBlock.grow, C-P64): a graft the rules know for another organism is
+	 * cleared. One the rules no longer know is kept, read by nothing (the next graft replaces it). Reading never calls this.
+	 */
+	public void clearGraftUnlessFor(String organism) {
+		Graft held = graft.isEmpty() ? null : Garden.catalog().graft(graft);
+		if (held != null && !held.host().equals(organism)) {
+			setGraft("");
+		}
+	}
+
+	/**
+	 * The niche {@code organism} grows by on this bed: its graft's when it carries one for that organism, otherwise the
+	 * organism's own (EcologyCatalog.niche). Growth, both reports, the note, the Habitat Gauge and the Inspect page ask here;
+	 * the Verdant Heart reads its own.
+	 */
+	public Niche niche(Organism organism) {
+		return Garden.catalog().niche(organism, graft);
+	}
+
 	// ---------------------------------------------------------------- saving and clients
 
 	private void sync() {
@@ -448,6 +507,9 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		// Concordance Chunk C (C-08): optional; a bed saved before them reads unstrained and unripened (the stamp stays 1).
 		strain = Math.clamp(input.getIntOr(STRAIN, 0), 0, Habitat.MAX_STRAIN);
 		ripened = input.getBooleanOr(RIPENED, false);
+		// Concordance Chunk C (C-09): optional; a bed saved before grafts reads ungrafted. Only an update tag holds the host.
+		graft = input.getStringOr(GRAFT, "");
+		graftFor = input.getStringOr(GRAFT_HOST, "");
 	}
 
 	@Override
@@ -467,6 +529,9 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		if (ripened) {
 			output.putBoolean(RIPENED, true);
 		}
+		if (!graft.isEmpty()) {
+			output.putString(GRAFT, graft);
+		}
 	}
 
 	@Override
@@ -477,7 +542,7 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	/**
 	 * Clients get the nutrients, whether it is awake, the crop's last verdict (its reasons with a mixed bed's line), and
 	 * (C-08) its strain and whether its crop has ripened since (so a client shows a harvest not yet counted as the server
-	 * counts it); never the keeper.
+	 * counts it), and (C-09) its graft with the organism it is for, only while it carries one; never the keeper.
 	 */
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
@@ -488,6 +553,11 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		tag.putString("reasons", String.join("\n", reasons));
 		tag.putInt(STRAIN, strain);
 		tag.putBoolean(RIPENED, ripened);
+		if (!graft.isEmpty()) {
+			Graft held = Garden.catalog().graft(graft);
+			tag.putString(GRAFT, graft);
+			tag.putString(GRAFT_HOST, held == null ? "" : held.host());
+		}
 		return tag;
 	}
 }

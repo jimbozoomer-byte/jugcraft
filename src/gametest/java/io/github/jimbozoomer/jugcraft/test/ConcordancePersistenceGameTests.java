@@ -15,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
@@ -56,7 +57,7 @@ import net.minecraft.world.level.storage.TagValueInput;
  * older version forward step by step and reads what it can of a newer one; a record keeps an entry it cannot read
  * exactly as written; block entities stamp their version; the crucible keeps Preserve's hold through a save (Concordance
  * Chunk B, unit 3); the circle index looks only at the chunks in reach; and a Verdant Bed saved before harvest strain reads
- * unstrained (Concordance Chunk C, C-08).
+ * unstrained (Concordance Chunk C, C-08), and one saved before grafts ungrafted (C-09).
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -294,7 +295,8 @@ public class ConcordancePersistenceGameTests {
 
 	/**
 	 * Concordance Chunk C (C-08): a Verdant Bed saved before harvest strain, with or without its version, reads unstrained and
-	 * unripened and keeps the rest; a strain from a save beyond its cap is held to it; the bed's version stays 1.
+	 * unripened and keeps the rest; a strain from a save beyond its cap is held to it; the bed's version stays 1. (C-09) A
+	 * graft is saved, never its host, still at version 1; a bed saved before grafts reads ungrafted and saves no graft.
 	 */
 	@GameTest(maxTicks = 20)
 	public void anOlderBedLoadsWithoutItsNewKeys(GameTestHelper helper) {
@@ -324,6 +326,17 @@ public class ConcordancePersistenceGameTests {
 		helper.assertTrue(loadBed(level, bed, forged).strain() == Habitat.MAX_STRAIN, "A strain past its cap is held to it");
 		forged.putInt(VerdantBedBlockEntity.STRAIN, -4);
 		helper.assertTrue(loadBed(level, bed, forged).strain() == 0, "and one below none reads as none");
+		bed.setGraft("jugcraft:dewlit");
+		CompoundTag grafted = bed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(grafted.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals("jugcraft:dewlit") && !grafted.contains(VerdantBedBlockEntity.GRAFT_HOST)
+				&& grafted.getIntOr(Saved.VERSION, 0) == 1, "The graft is saved, never its host, still at version 1: " + grafted);
+		CompoundTag older = grafted.copy();
+		older.remove(VerdantBedBlockEntity.GRAFT);
+		Organism petal = Garden.catalog().organism("jugcraft:sunpetal");
+		VerdantBedBlockEntity read = loadBed(level, bed, older);
+		helper.assertTrue(petal != null && read.graft().isEmpty() && read.niche(petal).equals(petal.niche()) && read.nutrients() == 17,
+				"A bed from before grafts reads ungrafted");
+		helper.assertTrue(!read.saveWithoutMetadata(level.registryAccess()).contains(VerdantBedBlockEntity.GRAFT), "and saves no graft");
 		helper.succeed();
 	}
 
