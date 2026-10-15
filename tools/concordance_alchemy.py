@@ -217,6 +217,25 @@ TEXT = {
     "alchemy.risk.harm": "Danger: a dose would bring %s",
     "alchemy.risk.searing": "Danger: step %s stirs it searing, which fouls it and spoils its Radiance and Verdance",
     "alchemy.risk.seared": "Danger: it was stirred searing, which fouled it and spoiled its Radiance and Verdance",
+    # Concordance Chunk C, C-01: the encyclopedia's Inspect page on a crucible (alchemy/CrucibleInspection).
+    "alchemy.inspect.heat": "%s degrees (%s)",
+    "alchemy.inspect.heated": "%s beneath heats it towards %s degrees",
+    "alchemy.inspect.unlit": "%s beneath is not lit: it settles towards %s degrees",
+    "alchemy.inspect.unheated": "%s beneath does not heat a crucible: it settles towards %s degrees",
+    "alchemy.inspect.held": "Preserve holds it in the %s band for %s s more",
+    "alchemy.inspect.volume": "%s of %s parts",
+    "alchemy.inspect.tank": "Its tank holds %s of %s parts of water",
+    "alchemy.inspect.no_formula": "It follows no formula",
+    "alchemy.inspect.step": "Formula: step %s of %s: %s",
+    "alchemy.inspect.step.bottle": "Formula: all %s steps taken; it bottles what it made",
+    "alchemy.inspect.sample.spoon": "What a spoon finds",
+    "alchemy.inspect.sample.glass": "What your Assay Glass finds",
+    "alchemy.inspect.sample.mastered": "What your Assay Glass finds, and what a dose would do",
+    "alchemy.inspect.measures": "Measured with the glass",
+    "alchemy.inspect.thresholds": "Contaminant %s a part: murky from %s, Nausea from %s",
+    "alchemy.inspect.operations": "%s of %s steps taken since it was empty",
+    "alchemy.inspect.drawn": "%s doses drawn: its process can no longer be recorded",
+    "alchemy.inspect.preview": "The formula, repeated now",
 }
 # What JEI's page for an ingredient carrying Rime adds (Concordance Chunk B, B-08): a property fact, never an outcome.
 RIME_JEI = "; stirred cold, its Rime brews Frostward (Winter Brine)"
@@ -231,7 +250,9 @@ TOOLTIPS = {
     "jade.temperature": "%s degrees (%s)",
     "jade.volume": "%s / %s parts",
     "jade.step": "Formula: step %s of %s",
-    "jade.waiting": "Waiting for: %s",
+    # Concordance Chunk C, C-01 (C-P4): the next step is still shown to anyone, raw; why it waits is the crucible's reason.
+    "jade.waiting": "Next step: %s",
+    "jade.tank": "Water: %s / %s parts",
 }
 
 SOUND_EVENTS = {
@@ -413,7 +434,8 @@ def codex():
                 ("crafting_recipe", "Assay Glass",
                  "Measures every property, dissolved and pending, and the contaminant, a part at a time. Once you have "
                  "mastered the Alembic Arts it also says what a dose would do and why: which property, how strong "
-                 "against its threshold, and which ingredients put it there.", rid("assay_glass")),
+                 "against its threshold, and which ingredients put it there. Carried, it also lets the encyclopedia's "
+                 "Inspect page read the crucible you look at, at the same level.", rid("assay_glass")),
             ],
         },
         ("alembic", "formulas"): {

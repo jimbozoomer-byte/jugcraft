@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance.alchemy;
 
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Where a crucible's temperature heads: towards the heat of the block beneath it ({@link #SOURCES}, by block id; a
@@ -20,6 +21,20 @@ public final class Heat {
 			"minecraft:lava", 220);
 
 	private Heat() {
+	}
+
+	/** The block beneath a crucible (Concordance Chunk C, C-01): its id and whether it is a source that is out (an unlit campfire). */
+	public record Below(String block, boolean unlit) {
+		/** Its heat as a source ({@link Heat#SOURCES}), lit or not; null for a block that does not heat a crucible. */
+		public @Nullable Integer heat() {
+			return SOURCES.get(block);
+		}
+
+		/** Where it heats a crucible towards: its heat while lit, the air's otherwise. */
+		public int target() {
+			Integer heat = heat();
+			return heat == null || unlit ? AMBIENT : heat;
+		}
 	}
 
 	/** The temperature a tick later, moving towards {@code target}. */

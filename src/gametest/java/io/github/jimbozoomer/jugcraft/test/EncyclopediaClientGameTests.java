@@ -6,9 +6,14 @@ import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
 import io.github.jimbozoomer.jugcraft.client.EncyclopediaClient;
 import io.github.jimbozoomer.jugcraft.client.EncyclopediaInventoryButton;
 import io.github.jimbozoomer.jugcraft.client.EncyclopediaScreen;
+import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
@@ -26,6 +31,10 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractContainerWidget;
@@ -37,6 +46,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -50,6 +60,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
 
 /**
  * Concordance Chunk A (A-04) in a real client on a dedicated server, so every encyclopedia request and answer is encoded,
@@ -68,6 +79,11 @@ import net.minecraft.world.level.block.Blocks;
  * ticket A-07's runtime view ({@code jugcraft_first_loadout_kindled_lantern}, {@code jugcraft_first_loadout_adept_wand}).</li>
  * <li><b>Inspection.</b> Opened looking at a Circle Anchor, the Inspect page is the anchor's own report
  * ({@code jugcraft_encyclopedia_inspect}).</li>
+ * <li><b>A crucible</b> (Concordance Chunk C, C-01). Following the Kiln formula over a lit campfire, it waits for its
+ * magma cream: the reason the server encodes reads back on the client in words, with no key or id showing. Jade shows
+ * it when loaded ({@code jugcraft_concordance_crucible_jade}); the Inspect page, opened looking at it by a master
+ * carrying an Assay Glass, says it with the rest ({@code jugcraft_encyclopedia_inspect_crucible}, and at GUI scale 4
+ * {@code jugcraft_encyclopedia_inspect_crucible_scale4}).</li>
  * <li><b>Expeditions and keys</b> ({@code jugcraft_encyclopedia_expedition}, {@code jugcraft_encyclopedia_keys}), and the
  * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
  * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
@@ -77,6 +93,8 @@ import net.minecraft.world.level.block.Blocks;
  */
 public class EncyclopediaClientGameTests implements FabricClientGameTest {
 	private static final int WAIT = 200;
+	/** A Kiln Draught's formula: magma cream stirred hot twice. */
+	private static final String KILN_FORMULA = "water 1; add minecraft:magma_cream jugcraft:raw; stir hot; stir hot";
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -92,6 +110,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				theInventoryButton(context, server);
 				theRoute(context, server);
 				inspection(context, server);
+				crucibleInspection(context, server);
 				expeditionsAndKeys(context, server);
 				creative(context, server);
 				sizes(context);
@@ -313,6 +332,97 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
 		context.getInput().lookAt(0.0F, 30.0F);
+		context.waitTicks(5);
+	}
+
+	private static void crucibleInspection(ClientGameTestContext context, TestDedicatedServerContext server) {
+		BlockPos stand = context.computeOnClient(client -> client.player.blockPosition());
+		BlockPos fire = stand.offset(0, 0, 2);
+		BlockPos pot = fire.above();
+		boolean set = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			for (int dz = 1; dz <= 2; dz++) {
+				level.setBlockAndUpdate(stand.offset(0, 0, dz), Blocks.AIR.defaultBlockState());
+				level.setBlockAndUpdate(stand.offset(0, 1, dz), Blocks.AIR.defaultBlockState());
+			}
+			level.setBlockAndUpdate(fire, Blocks.CAMPFIRE.defaultBlockState());
+			level.setBlockAndUpdate(pot, JugcraftConcordance.CRUCIBLE.defaultBlockState());
+			ServerPlayer player = first(minecraft);
+			ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+			ConcordanceProgress.grant(player, Alchemy.RESEARCH, ResearchState.MASTERED);
+			player.getInventory().add(new ItemStack(JugcraftConcordance.ASSAY_GLASS));
+			if (!(level.getBlockEntity(pot) instanceof CrucibleBlockEntity crucible)) {
+				return false;
+			}
+			// Set as the formula item sets it, without its checks: no permission rule of this server can refuse it.
+			crucible.follow(Formula.parse(KILN_FORMULA));
+			try (Transaction transaction = Transaction.openOuter()) {
+				crucible.water.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BOTTLE * 2, transaction);
+				transaction.commit();
+			}
+			return crucible.program() != null;
+		});
+		check(set, "The crucible should follow the Kiln formula");
+		// Its first pulse pours a part; its second finds no magma cream in its buffer.
+		for (int wait = 0; wait < WAIT && !server.computeOnServer(minecraft -> minecraft.overworld().getBlockEntity(pot) instanceof CrucibleBlockEntity crucible
+				&& crucible.step() == 1 && crucible.waiting() != null); wait++) {
+			context.waitTick();
+		}
+		String encoded = server.computeOnServer(minecraft -> minecraft.overworld().getBlockEntity(pot) instanceof CrucibleBlockEntity crucible
+				&& crucible.waiting() != null ? crucible.waiting().encode() : "");
+		String worded = context.computeOnClient(client -> {
+			Diagnostic reason = Diagnostic.decode(encoded);
+			return reason == null ? "" : ComposeText.show(reason.text()).getString();
+		});
+		String cream = context.computeOnClient(client -> I18n.get("item.minecraft.magma_cream"));
+		Jugcraft.LOGGER.info("[encyclopedia-check] the crucible waits: sent {}, worded on the client \"{}\"", encoded, worded);
+		check(!worded.isEmpty() && worded.contains(cream) && !worded.contains("jugcraft.") && !worded.contains("jugcraft:"),
+				"The crucible's reason should read back in words naming the magma cream, with no key or id: \"" + worded + "\" from " + encoded);
+
+		context.getInput().lookAt(pot);
+		context.waitTicks(20);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			context.runOnClient(client -> client.gui.toastManager().clear());   // the research's toasts
+			context.waitTicks(5);
+			context.takeScreenshot("jugcraft_concordance_crucible_jade");
+		} else {
+			Jugcraft.LOGGER.info("[encyclopedia-check] Jade is not loaded: no shot of its crucible lines");
+		}
+
+		open(context);
+		String page = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).page());
+		List<String> rows = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			return current == null ? List.<String>of() : current.rows().stream().map(row -> row.text().getString()).toList();
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] looking at a crucible: page {}, rows {}", page, rows);
+		check(page.equals("inspect") && rows.stream().anyMatch(row -> row.contains(worded))
+				&& rows.stream().noneMatch(row -> row.contains("jugcraft.") || row.contains("jugcraft:")),
+				"Looking at a crucible, the Inspect page should give its reason, with no key or id: " + rows);
+		context.runOnClient(client -> client.gui.toastManager().clear());
+		context.waitTicks(5);
+		context.takeScreenshot("jugcraft_encyclopedia_inspect_crucible");
+		int scale = context.computeOnClient(client -> client.options.guiScale().get());
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+			client.gui.toastManager().clear();
+		});
+		context.waitTicks(10);
+		context.takeScreenshot("jugcraft_encyclopedia_inspect_crucible_scale4");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(scale);
+			client.resizeGui();
+		});
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.getInput().lookAt(0.0F, 30.0F);
+		// Taken away again (no bottle went in, so nothing drops), so the later shots are as they were.
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			level.setBlockAndUpdate(pot, Blocks.AIR.defaultBlockState());
+			level.setBlockAndUpdate(fire, Blocks.AIR.defaultBlockState());
+		});
 		context.waitTicks(5);
 	}
 

@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
@@ -51,6 +52,15 @@ public final class Alchemy {
 	/** Whether the player may work a crucible: the Alembic Arts understood. */
 	public static boolean knows(Player player) {
 		return state(player).atLeast(ResearchState.UNDERSTOOD);
+	}
+
+	/**
+	 * What an Assay Glass tells this player ({@link Assay}'s levels): a master's prediction, the glass's measures with the
+	 * Alembic Arts understood, otherwise a spoon's. The crucible's glass and the encyclopedia's Inspect page ask this (C-01).
+	 */
+	public static int glassLevel(Player player) {
+		ResearchState state = state(player);
+		return state.atLeast(ResearchState.MASTERED) ? Assay.MASTERED : state.atLeast(ResearchState.UNDERSTOOD) ? Assay.GLASS : Assay.SPOON;
 	}
 
 	/** A draught or salve ({@code form}) carrying an outcome's effects. */

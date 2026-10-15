@@ -229,6 +229,13 @@ INSPECT = {
     "pylon.fill_energy": "Fill it with Jugcraft Energy (%s JE a Ley Charge)",
     "pylon.lends": "It lends its charge to your rituals",
     "pylon.owned": "It is someone else's: it lends only to rituals they take part in",
+    # Concordance Chunk C, C-01: an Alembic Crucible's slots, and the hint that a glass reads more.
+    "crucible.buffer": "Waiting to go in: %s",
+    "crucible.bottles": "Bottles and bowls: %s",
+    "crucible.output": "Made: %s",
+    "crucible.none": "nothing",
+    "crucible.count": "%s %s",
+    "crucible.glass": "An Assay Glass, carried by someone who understands the Alembic Arts, reads its makeup here",
 }
 
 DOSSIER = {

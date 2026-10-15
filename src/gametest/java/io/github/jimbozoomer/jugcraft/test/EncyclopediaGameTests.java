@@ -5,13 +5,21 @@ import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ComposedSpells;
 import io.github.jimbozoomer.jugcraft.concordance.Composing;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.Invocations;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.encyclopedia.InspectPage;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
@@ -55,10 +63,15 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -70,7 +83,9 @@ import net.minecraft.world.phys.Vec3;
  * are rate-limited and the Inspect page reads only a near, loaded block; and the client's page model keeps its place.
  * Since Concordance Chunk B (B-02) the Glacier Hall has its dossier, each rite says whether it waits for the Halloween
  * season, a first win over any keeper is the route's lair step, and the Expeditions page holds every keeper whole;
- * and (B-08) the Glacier Hall's rite names Winter Brine and the Yeti Mitten.
+ * and (B-08) the Glacier Hall's rite names Winter Brine and the Yeti Mitten. Since Concordance Chunk C (C-01) the
+ * Inspect page reads an Alembic Crucible within the reader's own block reach, more with an Assay Glass carried and the
+ * Alembic Arts learned, showing no sign and changing nothing, and gives a waiting formula's own reason.
  */
 public class EncyclopediaGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -711,6 +726,190 @@ public class EncyclopediaGameTests {
 			helper.assertFalse(RateGate.allow(player, Encyclopedia.RATE_ACTION, Encyclopedia.REQUEST_TICKS),
 					"the waiting request was answered at its tick, not dropped");
 			helper.succeed();
+		});
+	}
+
+	// ---------------------------------------------------------------- an Alembic Crucible (Concordance Chunk C, C-01)
+
+	private static CrucibleBlockEntity crucible(GameTestHelper helper, BlockPos at, Block beneath) {
+		helper.setBlock(at.below(), beneath);
+		helper.setBlock(at, JugcraftConcordance.CRUCIBLE);
+		return (CrucibleBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(at));
+	}
+
+	/** Works a crucible by hand with {@code held}, as a use of it does. */
+	private static InteractionResult work(CrucibleBlockEntity crucible, ServerPlayer player, ItemStack held) {
+		RateGate.forget(player.getUUID());
+		player.setItemInHand(InteractionHand.MAIN_HAND, held);
+		return crucible.use(player, (ServerLevel) player.level(), held, InteractionHand.MAIN_HAND);
+	}
+
+	/** The Inspect page's rows for {@code player} looking at {@code pos} (absolute), or null when there is none. */
+	private static List<EncyclopediaPayload.Row> inspected(ServerPlayer player, BlockPos pos) {
+		EncyclopediaPayload.Page page = page(Encyclopedia.build(player, new EncyclopediaRequestPayload(5, Optional.of(pos)), PageWriter::of), InspectPage.PAGE);
+		return page == null ? null : page.rows();
+	}
+
+	/** The facts under the heading whose key is {@code heading}, as shown, up to the next heading. */
+	private static List<String> factsUnder(List<EncyclopediaPayload.Row> rows, String heading) {
+		List<String> out = new ArrayList<>();
+		boolean in = false;
+		for (EncyclopediaPayload.Row row : rows) {
+			if (row.kindOf() == EncyclopediaPayload.Kind.HEADING) {
+				in = key(row.text()).equals(heading);
+			} else if (in && row.kindOf() == EncyclopediaPayload.Kind.FACT) {
+				out.add(row.text().getString());
+			}
+		}
+		return out;
+	}
+
+	private static List<String> headingKeys(List<EncyclopediaPayload.Row> rows) {
+		return rows.stream().filter(row -> row.kindOf() == EncyclopediaPayload.Kind.HEADING).map(row -> key(row.text())).toList();
+	}
+
+	/** Every translation key in the rows' text and exact text. */
+	private static List<String> allKeys(List<EncyclopediaPayload.Row> rows) {
+		List<String> out = new ArrayList<>();
+		for (EncyclopediaPayload.Row row : rows) {
+			keys(row.text(), out);
+			row.exact().ifPresent(exact -> keys(exact, out));
+		}
+		return out;
+	}
+
+	/** The simulation's lines as the page shows them. */
+	private static List<String> worded(List<Text> lines) {
+		return lines.stream().map(line -> ComposeText.show(line).getString()).toList();
+	}
+
+	/** A row's arguments, or none if there is no such row. */
+	private static List<Object> argsOf(List<EncyclopediaPayload.Row> rows, String key) {
+		EncyclopediaPayload.Row row = row(rows, key);
+		return row == null ? List.of() : List.of(args(row.text()));
+	}
+
+	/**
+	 * C-01 (C-P3, C-P26): the Inspect page reads an Alembic Crucible within the reader's own block reach. Anyone sees its
+	 * heat and what heats it, volume, tank, formula, the risk line (a spider eye's Poison), its slots and a spoon's sample;
+	 * a carried Assay Glass adds the glass's measures once the Alembic Arts are understood and the formula's outcome under
+	 * the rules in force once they are mastered (a glass without the research, or the research without a glass, reads as a
+	 * spoon). Reading shows no sign and changes nothing. A crucible past the reader's reach (though within the anchor's 16
+	 * blocks), or not loaded, has no page; and a formula's own reason for waiting is on its page.
+	 */
+	@GameTest(maxTicks = 60)
+	public void theInspectPageReadsACrucibleByResearch(GameTestHelper helper) {
+		AlchemyCatalog catalog = Alchemy.catalog();
+		String inspect = "compose.jugcraft.alchemy.inspect.";
+		BlockPos atA = new BlockPos(1, 2, 4);
+		CrucibleBlockEntity a = crucible(helper, atA, Blocks.CAMPFIRE);
+		ServerPlayer alembist = player(helper);
+		ConcordanceProgress.grant(alembist, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(alembist, Alchemy.RESEARCH, ResearchState.UNDERSTOOD);
+		a.setTemperature(120);
+		work(a, alembist, PotionContents.createItemStack(Items.POTION, Potions.WATER));
+		work(a, alembist, new ItemStack(Items.SPIDER_EYE));
+		work(a, alembist, new ItemStack(Items.STICK));
+		helper.assertTrue(a.mixture().history().size() == 3 && a.mixture().outcome(catalog).key().startsWith("minecraft:poison"),
+				"A spider eye in water, stirred hot once, would poison: " + a.mixture());
+		a.setItem(0, new ItemStack(Items.SUGAR, 3));
+		BlockPos absA = helper.absolutePos(atA);
+		Mixture mixtureA = a.mixture();
+		int temperatureA = a.temperature();
+		ServerPlayer reader = player(helper);
+		SignWatch watch = new SignWatch(helper);
+
+		// Anyone: what is seen, the slots, a spoon's sample and the risk, never the makeup.
+		List<EncyclopediaPayload.Row> anyone = inspected(reader, absA);
+		helper.assertTrue(anyone != null, "Anyone within reach reads the crucible");
+		List<String> keys = allKeys(anyone);
+		for (String wanted : List.of(inspect + "heat", inspect + "heated", inspect + "volume", inspect + "tank", inspect + "no_formula",
+				"compose.jugcraft.alchemy.risk.harm", "block.minecraft.campfire", "encyclopedia.jugcraft.inspect.crucible.buffer",
+				"encyclopedia.jugcraft.inspect.crucible.glass", "effect.minecraft.poison")) {
+			helper.assertTrue(keys.contains(wanted), "Anyone is told " + wanted + ": " + keys);
+		}
+		helper.assertTrue(argsOf(anyone, inspect + "heated").size() == 2 && Integer.valueOf(120).equals(argsOf(anyone, inspect + "heated").get(1)),
+				"The campfire beneath heats it towards 120: " + argsOf(anyone, inspect + "heated"));
+		helper.assertValueEqual(factsUnder(anyone, inspect + "sample.spoon"), worded(Assay.read(mixtureA, temperatureA, Assay.SPOON, catalog)),
+				"a spoon's sample");
+		for (String hidden : List.of("compose.jugcraft.alchemy.assay.axis", "compose.jugcraft.alchemy.assay.contaminant", inspect + "thresholds",
+				inspect + "operations", "compose.jugcraft.alchemy.reason", "compose.jugcraft.alchemy.too_weak", inspect + "preview")) {
+			helper.assertTrue(!keys.contains(hidden), "Anyone is not told " + hidden);
+		}
+		helper.assertTrue(keys.stream().noneMatch(key -> key.startsWith("compose.jugcraft.diagnostic.")), "With no formula there is no reason: " + keys);
+
+		// A glass without the research, or the research without a glass, reads as a spoon.
+		reader.getInventory().add(new ItemStack(JugcraftConcordance.ASSAY_GLASS));
+		helper.assertTrue(headingKeys(inspected(reader, absA)).contains(inspect + "sample.spoon"), "A glass without the Alembic Arts reads as a spoon");
+		ConcordanceProgress.grant(reader, Alchemy.RESEARCH, ResearchState.UNDERSTOOD);
+		reader.getInventory().clearContent();
+		helper.assertTrue(headingKeys(inspected(reader, absA)).contains(inspect + "sample.spoon"), "The Alembic Arts without a glass read as a spoon");
+
+		// Understood, with a glass: the glass's measures.
+		reader.getInventory().add(new ItemStack(JugcraftConcordance.ASSAY_GLASS));
+		List<EncyclopediaPayload.Row> glass = inspected(reader, absA);
+		List<String> glassKeys = allKeys(glass);
+		helper.assertValueEqual(factsUnder(glass, inspect + "sample.glass"), worded(Assay.read(mixtureA, temperatureA, Assay.GLASS, catalog)),
+				"the glass's sample");
+		helper.assertValueEqual(argsOf(glass, inspect + "operations"), List.<Object>of(3, Mixture.MAX_OPERATIONS), "three steps taken");
+		helper.assertValueEqual(argsOf(glass, inspect + "thresholds"), List.<Object>of("0.30", "0.25", "0.50"),
+				"its contaminant against the murky and Nausea thresholds");
+		helper.assertTrue(!glassKeys.contains("compose.jugcraft.alchemy.reason") && !glassKeys.contains(inspect + "preview")
+				&& !glassKeys.contains("encyclopedia.jugcraft.inspect.crucible.glass"), "No outcome yet, and no word about a glass: " + glassKeys);
+
+		// Mastered, with a glass: what a dose would do; the glass put away, a spoon's reading again.
+		ConcordanceProgress.grant(reader, Alchemy.RESEARCH, ResearchState.MASTERED);
+		helper.assertValueEqual(factsUnder(inspected(reader, absA), inspect + "sample.mastered"),
+				worded(Assay.read(mixtureA, temperatureA, Assay.MASTERED, catalog)), "a master's sample");
+		reader.getInventory().clearContent();
+		helper.assertTrue(headingKeys(inspected(reader, absA)).contains(inspect + "sample.spoon"), "A master without a glass reads as a spoon");
+		watch.close();
+		helper.assertTrue(watch.all().isEmpty(), "Reading shows no sign: " + watch.all());
+		helper.assertTrue(a.mixture().equals(mixtureA) && a.temperature() == temperatureA && a.getItem(0).getCount() == 3,
+				"Reading changes nothing: " + a.mixture());
+
+		// A formula: its step in words, the tank, and the risk of its outcome and its searing stir, to anyone.
+		BlockPos atB = new BlockPos(3, 2, 4);
+		CrucibleBlockEntity b = crucible(helper, atB, Blocks.STONE);
+		ItemStack written = new ItemStack(JugcraftConcordance.FORMULA_ITEM);
+		written.set(JugcraftConcordance.FORMULA, "water 1; add minecraft:spider_eye jugcraft:raw; stir searing");
+		helper.assertTrue(work(b, alembist, written).consumesAction() && b.program() != null, "The formula is set");
+		BlockPos absB = helper.absolutePos(atB);
+		SignWatch second = new SignWatch(helper);
+		ServerPlayer novice = player(helper);
+		List<EncyclopediaPayload.Row> rows = inspected(novice, absB);
+		helper.assertTrue(rows != null, "Anyone within reach reads it");
+		List<String> novel = allKeys(rows);
+		helper.assertTrue(novel.contains(inspect + "unheated") && novel.contains("block.minecraft.stone"), "Stone beneath heats nothing: " + novel);
+		helper.assertValueEqual(argsOf(rows, inspect + "tank"), List.<Object>of(0, CrucibleBlockEntity.WATER_PER_BUCKET), "an empty tank");
+		List<Object> step = argsOf(rows, inspect + "step");
+		helper.assertTrue(step.size() == 3 && step.get(0).equals(1) && step.get(1).equals(3) && step.get(2) instanceof Component words
+				&& key(words).equals("compose.jugcraft.alchemy.op.water"), "Step 1 of 3, in words: " + step);
+		helper.assertValueEqual(argsOf(rows, "compose.jugcraft.alchemy.risk.searing"), List.<Object>of(3), "step 3 stirs it searing");
+		helper.assertTrue(novel.contains("effect.minecraft.poison") && novel.contains("effect.minecraft.nausea"),
+				"A dose would bring Poison and Nausea: " + novel);
+		helper.assertTrue(!headingKeys(rows).contains(inspect + "preview"), "No outcome without a glass and mastery");
+		reader.getInventory().add(new ItemStack(JugcraftConcordance.ASSAY_GLASS));
+		helper.assertValueEqual(factsUnder(inspected(reader, absB), inspect + "preview"),
+				worded(((Mixture.Applied) b.program().replay(catalog)).mixture().outcome(catalog).reasons()), "a master's preview of the formula");
+		second.close();
+		helper.assertTrue(second.all().isEmpty() && b.step() == 0, "Reading shows no sign and takes no step: " + second.all());
+
+		// Past the reader's own reach, though within the anchor's 16 blocks, or not loaded: no page.
+		BlockPos away = helper.absolutePos(new BlockPos(1, 2, -4));
+		reader.snapTo(away.getX() + 0.5, away.getY(), away.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertTrue(reader.distanceToSqr(Vec3.atCenterOf(absA)) <= 256 && !reader.isWithinBlockInteractionRange(absA, InspectPage.CRUCIBLE_REACH),
+				"The reader stands within the anchor's reach but past their own");
+		helper.assertTrue(inspected(reader, absA) == null, "A crucible past the reader's reach has no page");
+		helper.assertTrue(inspected(reader, absA.offset(100_000, 0, 0)) == null, "nor one not loaded");
+
+		// Its first pulse finds the tank empty: the page gives the crucible's own reason.
+		helper.succeedWhen(() -> {
+			Diagnostic reason = b.waiting();
+			helper.assertTrue(reason != null, "Waiting for the formula's first pulse");
+			List<EncyclopediaPayload.Row> now = inspected(novice, absB);
+			String said = ComposeText.show(reason.text()).getString();
+			helper.assertTrue(now != null && now.stream().anyMatch(row -> row.text().getString().equals(said)), "The page gives its reason: " + said);
 		});
 	}
 

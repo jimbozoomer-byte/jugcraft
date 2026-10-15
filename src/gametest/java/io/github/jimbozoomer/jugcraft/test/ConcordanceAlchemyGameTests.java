@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
+import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.Brew;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
@@ -41,6 +42,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -81,8 +83,8 @@ import net.minecraft.world.phys.AABB;
  * bottles made before keep their Resistance, a Rime formula written before brews Frostward, and nothing makes Frostward
  * cheaper than its snow. Since Concordance Chunk C (C-01), the crucible says why it waits: a formula the rules in force
  * refuse, or a saved one that no longer reads, is kept, names its step and drives nothing until the rules can follow it
- * again; a full output pauses and voids nothing; the Peepo port reads the crucible's own reason; and only someone who
- * could change the block by hand works it.
+ * again; a full output pauses and voids nothing; the Peepo port reads the crucible's own reason; only someone who
+ * could change the block by hand works it; and Jade is told the tank and that reason, encoded, never the makeup.
  */
 public class ConcordanceAlchemyGameTests {
 	private static final String GLOW = "minecraft:glowstone_dust";
@@ -1091,6 +1093,41 @@ public class ConcordanceAlchemyGameTests {
 		stranger.setGameMode(GameType.SURVIVAL);
 		helper.assertTrue(use(crucible, stranger, waterBottle()).consumesAction() && crucible.mixture().parts() == 2,
 				"Back in survival, outside the claim, the same player may pour");
+		helper.succeed();
+	}
+
+	/**
+	 * C-01 (C-P4): Jade is told the tank's whole parts and the crucible's own reason, encoded (its code and parameters, a
+	 * line inside it closed by "."), which reads back the same; anything malformed reads as nothing. Never the makeup:
+	 * the snapshot holds only the heat, hold, volume, tank, step and reason, and the update every client gets is still the
+	 * heat, the volume and the spoon's reading. (The snapshot is checked only where Jade is loaded.)
+	 */
+	@GameTest(maxTicks = 20)
+	public void jadeIsToldTheTankAndWhyNeverTheMakeup(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Diagnostic refused = glowstoneRefused();
+		helper.assertValueEqual(refused.encode(), "incompatible|#2|!alchemy.op.add|@item=minecraft:glowstone_dust|@preparation=jugcraft:raw|."
+				+ "|!alchemy.not_ingredient|@item=minecraft:glowstone_dust|.", "step 2 refused, encoded");
+		helper.assertTrue(refused.equals(Diagnostic.decode(refused.encode())), "and read back the same: " + Diagnostic.decode(refused.encode()));
+		for (String bad : List.of("", "no_such_code|#1", "needs_water|x", "needs_water|!alchemy.op.water|#1", "needs_water|.")) {
+			helper.assertTrue(Diagnostic.decode(bad) == null, "Malformed, it reads as nothing: '" + bad + "'");
+		}
+		CrucibleBlockEntity crucible = following(helper, new BlockPos(2, 2, 2), NIGHT_EYE, alembist(helper, ResearchState.UNDERSTOOD));
+		pour(crucible, FluidConstants.BOTTLE * 2);
+		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 1 && crucible.tankParts() == 1,
+				"The first pulse pours one part of the tank's two: step " + crucible.step() + ", tank " + crucible.tankParts());
+		Diagnostic waiting = crucible.automate(level);
+		Diagnostic missing = Diagnostic.missingIngredient(1, new Operation.Add(GLOW, "jugcraft:raw").describe());
+		helper.assertTrue(missing.equals(waiting) && missing.equals(crucible.waiting()), "It waits for its glowstone: " + waiting);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			CompoundTag shown = ConcordanceDataProvider.snapshot(crucible, level.getGameTime());
+			helper.assertTrue(Set.of("temperature", "band", "parts", "tank", "step", "steps", "next", "reason").containsAll(shown.keySet()),
+					"Jade is told no more than the heat, volume, tank, step and reason: " + shown.keySet());
+			helper.assertTrue(shown.getIntOr("tank", -1) == 1, "Jade is told the tank's one whole part: " + shown);
+			helper.assertTrue(waiting.encode().equals(shown.getStringOr("reason", "")), "and the crucible's own reason: " + shown);
+		}
+		Set<String> sent = crucible.getUpdateTag(level.registryAccess()).keySet();
+		helper.assertTrue(Set.of("temperature", "parts", "taste", "murky").equals(sent), "Every client is told only the heat, volume and look: " + sent);
 		helper.succeed();
 	}
 }

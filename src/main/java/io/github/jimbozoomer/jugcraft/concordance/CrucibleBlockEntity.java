@@ -24,7 +24,6 @@ import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
-import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
@@ -243,14 +242,16 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		return band().keep(next);
 	}
 
+	/** The block beneath, read now: what heats it (serverTick) and what the Inspect page names (C-01). */
+	public Heat.Below below(ServerLevel level) {
+		BlockState below = level.getBlockState(worldPosition.below());
+		return new Heat.Below(BuiltInRegistries.BLOCK.getKey(below.getBlock()).toString(),
+				below.hasProperty(BlockStateProperties.LIT) && !below.getValue(BlockStateProperties.LIT));
+	}
+
 	/** The temperature the block beneath gives (a campfire only while lit). */
 	private int heatBelow(ServerLevel level) {
-		BlockState below = level.getBlockState(worldPosition.below());
-		Integer heat = Heat.SOURCES.get(BuiltInRegistries.BLOCK.getKey(below.getBlock()).toString());
-		if (heat == null || below.hasProperty(BlockStateProperties.LIT) && !below.getValue(BlockStateProperties.LIT)) {
-			return Heat.AMBIENT;
-		}
-		return heat;
+		return below(level).target();
 	}
 
 	/**
@@ -450,9 +451,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			return InteractionResult.SUCCESS;
 		}
 		if (held.is(JugcraftConcordance.ASSAY_GLASS)) {
-			ResearchState state = Alchemy.state(player);
-			int level0 = state.atLeast(ResearchState.MASTERED) ? Assay.MASTERED : state.atLeast(ResearchState.UNDERSTOOD) ? Assay.GLASS : Assay.SPOON;
-			Alchemy.tell(player, Assay.read(mixture, temperature, level0, catalog));
+			Alchemy.tell(player, Assay.read(mixture, temperature, Alchemy.glassLevel(player), catalog));
 			return InteractionResult.SUCCESS;
 		}
 		boolean water = held.is(Items.WATER_BUCKET) || held.is(Items.POTION)

@@ -5,8 +5,11 @@ import io.github.jimbozoomer.jugcraft.compat.jade.JugcraftJadePlugin;
 import io.github.jimbozoomer.jugcraft.compat.jade.MachineDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlock;
+import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlock;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
@@ -356,6 +359,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.held", held));
 					}
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.volume", data.getIntOr("parts", 0), Mixture.MAX_PARTS));
+					// Concordance Chunk C (C-01): the tank, and why it waits as the crucible says it (worded here, worked out on the server).
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.tank", data.getIntOr("tank", 0), CrucibleBlockEntity.WATER_PER_BUCKET));
 					int steps = data.getIntOr("steps", 0);
 					if (steps > 0) {
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.step", Math.min(steps, data.getIntOr("step", 0) + 1), steps));
@@ -363,6 +368,10 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						if (!next.isEmpty()) {
 							tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.waiting", next));
 						}
+					}
+					Diagnostic reason = Diagnostic.decode(data.getStringOr("reason", ""));
+					if (reason != null) {
+						tooltip.add(ComposeText.show(reason.text()));
 					}
 				}
 				int capacity = data.getIntOr("capacity", -1);

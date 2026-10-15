@@ -16250,7 +16250,9 @@ def check_encyclopedia(root, lang):
     # The pages only read.
     forbidden = re.compile(r"setAttached\(|removeAttached\(|\.award\(|ConcordanceProgress\.(record|grant|setFocus|award|spendFocus)\(|"
                            r"Composing\.(compose|clear)\(|\.set\(JugcraftConcordance\.INSCRIPTION|StructureValidator\.check\(|"
-                           r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(")
+                           r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(|"
+                           # Concordance Chunk C, C-01: reading a crucible shows no sign, holds, heats, works or saves nothing.
+                           r"Signs\.(?:show|flow)\(|\.hold\(|setTemperature\(|useEmpty\(|setChanged\(|sendBlockUpdated\(|\.automate\(")
     for name, source in builders.items():
         if forbidden.search(source):
             err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
@@ -16265,6 +16267,14 @@ def check_encyclopedia(root, lang):
     if "player.distanceToSqr(Vec3.atCenterOf(pos)) > reach * reach" not in builders["concordance/encyclopedia/InspectPage.java"] \
             or "level.isLoaded(pos)" not in builders["concordance/encyclopedia/InspectPage.java"]:
         err("concordance/encyclopedia/InspectPage.java: the looked-at block is checked on the server: loaded and within reach")
+    # Concordance Chunk C, C-01 (C-P3, C-P26): a crucible within the reader's own block reach; its makeup only with a glass.
+    inspect = builders["concordance/encyclopedia/InspectPage.java"]
+    branch = _java_body(inspect, "private static void crucible(")
+    if "entity instanceof CrucibleBlockEntity crucible && player.isWithinBlockInteractionRange(pos, CRUCIBLE_REACH)" not in inspect \
+            or not re.search(r"\bdouble CRUCIBLE_REACH = 1\.0;", inspect):
+        err("concordance/encyclopedia/InspectPage.java: a crucible is read only within the reader's own block reach (C-P3, C-P26)")
+    if "stack.is(JugcraftConcordance.ASSAY_GLASS)" not in branch or "Alchemy.glassLevel(player)" not in branch or "CrucibleInspection.read(" not in branch:
+        err("concordance/encyclopedia/InspectPage.java: a crucible's makeup is read with an Assay Glass carried, at the glass's level, through CrucibleInspection")
 
     # The keys: every Jugcraft key has its name and its help on the Keys page.
     keys = set()
@@ -16326,7 +16336,8 @@ def check_signs(co, root, lang):
     its order; the warnings' sounds are registered, drawn and subtitled; every server-side Concordance particle goes
     through a sign (no sendParticles), so each client draws it as its settings allow; the display settings are read only
     by client code and blocks' animateTick (the server never decides from them); a crucible tells a client only its
-    heat, volume and the spoon's reading; and the setting's words exist."""
+    heat, volume and the spoon's reading, and Jade (Concordance Chunk C, C-01) its tank and own encoded reason, never its
+    makeup; and the setting's words exist."""
     sg = co.signs
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -16368,6 +16379,22 @@ def check_signs(co, root, lang):
     sent = set(re.findall(r'tag\.put\w+\("([a-z_]+)"', update.group(1))) if update else set()
     if sent != {"temperature", "parts", "taste", "murky"}:
         err(f"CrucibleBlockEntity.java: a client is told only the heat, the volume and the spoon's reading, not {sorted(sent)}")
+    # Concordance Chunk C, C-01 (C-P4): Jade's crucible snapshot adds the tank and the crucible's own reason (encoded),
+    # never the makeup; the client words what it was sent and works nothing out.
+    jade = _java_body(text(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag snapshot(CrucibleBlockEntity")
+    put = set(re.findall(r'snapshot\.put\w+\("([a-z_]+)"', jade))
+    if not jade or not put <= {"temperature", "band", "held", "parts", "tank", "step", "steps", "next", "reason"} \
+            or 'snapshot.putString("reason", reason.encode())' not in jade or "crucible.waiting()" not in jade:
+        err(f"ConcordanceDataProvider.java: Jade's crucible snapshot is the heat, hold, volume, tank, step and the crucible's own reason, not {sorted(put)}")
+    for needle in ("mixture()", "dissolved", "pending", "contaminant", "concentration", "history", "Assay.", "outcome(", "replay(", "catalog()", "rules()"):
+        if needle in jade:
+            err(f"ConcordanceDataProvider.java: Jade's crucible snapshot never reads the makeup ({needle})")
+    client = text(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java")
+    for needle in ("Alchemy.", "ConcordanceData.", ".replay(", "Outcome", "Assay.", "Mixture.Step", "Diagnostic.of("):
+        if needle in client:
+            err(f"JugcraftJadeClient.java: Jade's lines show what the server sent and work nothing out ({needle})")
+    if "Diagnostic.decode(" not in client or '"tooltip.jugcraft.concordance.jade.tank"' not in client or f"tooltip.{MOD}.concordance.jade.tank" not in lang:
+        err("JugcraftJadeClient.java: the crucible's lines show its tank and decode its reason")
     settings = text(CLIENT_JAVA_ROOT / "ConcordanceSettingsScreen.java")
     if '"screen.jugcraft.concordance.config.intensity." + value.id()' not in settings:
         err("ConcordanceSettingsScreen.java: each intensity is named by screen.jugcraft.concordance.config.intensity.<id>")

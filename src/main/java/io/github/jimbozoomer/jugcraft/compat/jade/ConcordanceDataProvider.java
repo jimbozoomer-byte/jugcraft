@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
@@ -34,8 +35,8 @@ import snownee.jade.api.IServerDataProvider;
  * The Concordance's blocks for Jade: the Lampwright's Bench (how far its study has come, whether notes wait for
  * someone, the Radiance in the lantern on it), the Lumen Sconce (its Radiance), the Circle Anchor (its ritual's phase
  * and progress and the circle's first faults), the Ley Pylon (its Ley Charge), the Alembic Crucible (its heat,
- * volume and formula step), the garden (roadmap step 14: a bed's moisture, nutrients and habitat; each living
- * device's status and store) and the Orrery Observatory (roadmap step 15: its resonance, status and visible patterns). Bounded snapshots of the one block looked at; they name no player, reveal no one's
+ * volume, tank, formula step and, since Concordance Chunk C (C-01), its own reason for waiting), the garden (roadmap
+ * step 14: a bed's moisture, nutrients and habitat; each living device's status and store) and the Orrery Observatory (roadmap step 15: its resonance, status and visible patterns). Bounded snapshots of the one block looked at; they name no player, reveal no one's
  * research and change nothing (a bed's habitat comes from its sample, taken again no more often than a plant would).
  */
 public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor> {
@@ -136,9 +137,9 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 	}
 
 	/**
-	 * The crucible: temperature and band, the seconds Preserve still holds the band (Chunk B unit 3), volume, and,
-	 * following a formula, its step and what it waits for (the next operation's text). Never the mixture's makeup: that
-	 * takes sampling.
+	 * The crucible: temperature and band, the seconds Preserve still holds the band (Chunk B unit 3), volume, the tank's
+	 * whole parts, and, following a formula, its step and next operation, and the crucible's own reason (Concordance Chunk
+	 * C, C-01: Diagnostic.encode, its code and parameters, worded on the client). Never the makeup: that takes sampling.
 	 */
 	public static CompoundTag snapshot(CrucibleBlockEntity crucible, long now) {
 		CompoundTag snapshot = new CompoundTag();
@@ -149,6 +150,7 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 			snapshot.putInt("held", (held + 19) / 20);
 		}
 		snapshot.putInt("parts", crucible.parts());
+		snapshot.putInt("tank", crucible.tankParts());
 		Formula program = crucible.program();
 		if (program != null) {
 			snapshot.putInt("step", crucible.step());
@@ -156,6 +158,10 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 			if (crucible.step() < program.operations().size()) {
 				snapshot.putString("next", program.operations().get(crucible.step()).text());
 			}
+		}
+		Diagnostic reason = crucible.waiting();
+		if (reason != null) {
+			snapshot.putString("reason", reason.encode());
 		}
 		return snapshot;
 	}
