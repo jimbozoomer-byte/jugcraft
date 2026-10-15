@@ -19,8 +19,9 @@ import org.jspecify.annotations.Nullable;
  * searing stir also keeps only {@value #SEARING_KEEP} per thousand of the dissolved Radiance and Verdance and adds
  * {@value #SEARING_CONTAMINANT} milli-units of contaminant, and any stir above the cold band thaws part of the dissolved
  * Rime ({@link #rimeKeep}: warm {@value #RIME_KEEP_WARM}, hot {@value #RIME_KEEP_HOT}, searing {@value #RIME_KEEP_SEARING}
- * per thousand kept; Concordance Chunk B, B-08, plan 03:36). Bottling draws one part's share of everything. All amounts
- * are whole milli-units with floor division, so identical operations always give identical mixtures and doses.
+ * per thousand kept; Concordance Chunk B, B-08, plan 03:36). Bottling draws one part's share of everything, the same
+ * for every dose of a batch ({@link #bottle}). All amounts are whole milli-units with floor division, so identical
+ * operations always give identical mixtures and doses.
  */
 public record Mixture(int parts, Vector pending, Vector dissolved, long contaminant, int drawn, List<Operation> history) {
 	public static final int MAX_PARTS = 6;
@@ -114,6 +115,11 @@ public record Mixture(int parts, Vector pending, Vector dissolved, long contamin
 	public record Bottled(Mixture rest, Vector dose, long contaminant) {
 	}
 
+	/**
+	 * One dose: a part's share, rounded down. Every dose of a batch is the same (Concordance Chunk C, C-02), so they stack:
+	 * what is left holds exactly that share for each part still in it, and what did not divide evenly (under one
+	 * milli-unit a part) is lost, never given to a later dose.
+	 */
 	public @Nullable Bottled bottle() {
 		if (parts == 0) {
 			return null;
@@ -121,7 +127,7 @@ public record Mixture(int parts, Vector pending, Vector dissolved, long contamin
 		Vector dose = dissolved.divide(parts);
 		long fouled = contaminant / parts;
 		Mixture rest = parts == 1 ? EMPTY
-				: new Mixture(parts - 1, pending.minus(pending.divide(parts)), dissolved.minus(dose), contaminant - fouled, drawn + 1, history);
+				: new Mixture(parts - 1, pending.minus(pending.divide(parts)), dose.times(parts - 1), fouled * (parts - 1), drawn + 1, history);
 		return new Bottled(rest, dose, fouled);
 	}
 

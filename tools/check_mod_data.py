@@ -14018,12 +14018,15 @@ def check_workshop_products(co, root, lang):
             if harmful or matching != [key]:
                 err(f"product {key}: process {name} must brew {prop.get('status')} alone among the {info['form']}s, with "
                     f"nothing harmful ({effects})")
-            # Dilution gains nothing: the same batch in more parts gives no more in all (health healed, or ticks).
+            # Dilution gains nothing: the same batch in more parts gives no more in all (health healed, or ticks); and
+            # every dose of one batch is the same, so an automated crucible's doses stack.
             whole = al.realised([effects], info["property"])
             for parts in range(2, al.MAX_PARTS + 1):
-                pieces = [al.outcome(*al.bottle([("water", parts)] + process[1:], drawn)) for drawn in range(parts)]
-                if al.realised(pieces, info["property"]) > whole:
+                doses = [al.bottle([("water", parts)] + process[1:], drawn) for drawn in range(parts)]
+                if al.realised([al.outcome(*dose) for dose in doses], info["property"]) > whole:
                     err(f"product {key}: process {name} in {parts} parts gives more in all than in one")
+                if any(dose != doses[0] for dose in doses):
+                    err(f"product {key}: process {name} in {parts} parts bottles unequal doses, which do not stack")
             for operation in process:
                 if operation[0] != "add":
                     continue
@@ -14061,11 +14064,21 @@ def check_workshop_products(co, root, lang):
     if at_brew < 0 or at_name < at_brew or "DataComponents.CUSTOM_NAME" in alchemy_java:
         err("Alchemy.brew: a product carries jugcraft:brew and is named after it with vanilla's item name, never a custom name")
     crucible = source(root / "CrucibleBlockEntity.java")
-    place = _java_body(crucible, "public boolean canPlaceItem(")
-    if "Alchemy.catalog().ingredient(ConcordanceProgress.itemId(stack)) != null" not in place or "formFor(stack) != null" not in place:
-        err("CrucibleBlockEntity.canPlaceItem: hoppers put in only ingredients, reagents and containers")
-    if "Alchemy.catalog().ingredient(item) == null" not in _java_body(source(root / "MortarItem.java"), "public InteractionResult use("):
-        err("MortarItem.use: the mortar grinds only ingredients")
+    # The whole of each condition, not a part of it: a widened one (`true ||`, `|| stack.has(BREW)`, `&& false`) fails.
+    place = " ".join(_java_body(crucible, "public boolean canPlaceItem(").split())
+    returns = re.findall(r"\breturn [^;]*;", place)
+    if "if (slot < BUFFER_SLOTS) { return stack.has(" not in place or returns != [
+            "return stack.has(JugcraftConcordance.REAGENT) || Alchemy.catalog().ingredient(ConcordanceProgress.itemId(stack)) != null;",
+            "return slot == BOTTLE_SLOT && formFor(stack) != null;"]:
+        err(f"CrucibleBlockEntity.canPlaceItem: hoppers put in only ingredients, reagents and containers ({returns})")
+    mortar = " ".join(_java_body(source(root / "MortarItem.java"), "public InteractionResult use(").split())
+    if "if (other.isEmpty() || other.has(JugcraftConcordance.REAGENT) || ground == null || Alchemy.catalog().ingredient(item) == null) {" not in mortar:
+        err("MortarItem.use: the mortar grinds only ingredients (the whole refusal condition)")
+    # Every dose of a batch is one share (tools/concordance_alchemy.py bottle mirrors it): what is left holds that share
+    # for each part, the remainder lost, never given to the last dose.
+    if "dose.times(parts - 1), fouled * (parts - 1)" not in _java_body(source(root / "alchemy" / "Mixture.java"), "public @Nullable Bottled bottle("):
+        err("alchemy/Mixture.bottle: every dose of a batch is the same share (the rest holds dose.times(parts - 1)), as "
+            "tools/concordance_alchemy.py bottle models it")
     # Containers net to zero: bottling takes one, using one gives it back.
     if _java_body(crucible, "private @Nullable Diagnostic bottleIntoOutput(").count("container.shrink(1);") != 1 \
             or _java_body(crucible, "private InteractionResult bottle(").count("held.shrink(1);") != 1:
@@ -14170,8 +14183,11 @@ def check_poultice_credit(co, lang):
             err(f"{path.relative_to(ROOT)}: no mixin for the poultice's credit (CLAUDE.md; C-02 reads Regeneration's own time)")
     keeper = _java_body(dossiers, "private static void keeper(")
     if '"encyclopedia.jugcraft.dossier.credit.poultice"' not in keeper or "if (poultices())" not in keeper \
-            or "brews(verdance, Encounter.POULTICE_STATUS)" not in _java_body(dossiers, "private static boolean poultices("):
-        err("lair/LairDossiers.java: each keeper's dossier names the poultice's credit while the Concordance's Verdance brews it")
+            or "brews(verdance, Encounter.POULTICE_STATUS)" not in _java_body(dossiers, "private static boolean poultices(") \
+            or "catalog.product(Product.Form.SALVE, List.of(Encounter.POULTICE_STATUS), false)" not in _java_body(dossiers, "private static boolean poultices(") \
+            or "Alchemy.STILLROOT_POULTICE.equals(salve.id())" not in _java_body(dossiers, "private static boolean poultices("):
+        err("lair/LairDossiers.java: each keeper's dossier names the poultice's credit while the Concordance's Verdance brews "
+            "it and a salve of that status alone is the Stillroot Poultice (Alchemy.product's match, which the credit needs)")
     if f"encyclopedia.{MOD}.dossier.credit.poultice" not in lang:
         err(f"encyclopedia: missing lang encyclopedia.{MOD}.dossier.credit.poultice (tools/encyclopedia.py DOSSIER)")
 
@@ -14215,6 +14231,11 @@ def check_diagnostics(co, root, lang):
     if not 0 <= use.find("Authority.mayChange(") < use.find("return formula(player, held);") \
             or not 0 <= empty.find("Authority.mayChange(") < empty.find("program = null;"):
         err("CrucibleBlockEntity: use and useEmpty ask Authority.mayChange before changing the crucible (C-01, C-P5)")
+    formula = _java_body(crucible, "private InteractionResult formula(")
+    if "Component refused = refusal(formula, catalog);" not in formula or "player.sendOverlayMessage(refused);" not in formula \
+            or "Assay.risks(formula, mixture, !mixture.isEmpty(), Alchemy::harmfulStatus, catalog)" not in formula:
+        err("CrucibleBlockEntity.formula: a refused formula is told through refusal() (what the game test asserts), and setting "
+            "one names its risk and that of a mixture already in it, harm judged by the server (C-01, plan 03:54)")
     for key in sorted(set(re.findall(r'"(message\.jugcraft\.[a-z_.]+)"', crucible))):
         if key not in lang:
             err(f"CrucibleBlockEntity.java: missing lang {key}")
@@ -16700,6 +16721,8 @@ def check_encyclopedia(root, lang):
         err("concordance/encyclopedia/InspectPage.java: a crucible is read only within the reader's own block reach (C-P3, C-P26)")
     if "stack.is(JugcraftConcordance.ASSAY_GLASS)" not in branch or "Alchemy.glassLevel(player)" not in branch or "CrucibleInspection.read(" not in branch:
         err("concordance/encyclopedia/InspectPage.java: a crucible's makeup is read with an Assay Glass carried, at the glass's level, through CrucibleInspection")
+    if "crucible.step() == 0 || crucible.incompatibility() != null" not in branch or "Alchemy::harmfulStatus" not in branch:
+        err("concordance/encyclopedia/InspectPage.java: the risk line names a mixture that is not its formula's batch, harm judged by the server (C-01)")
 
     # The keys: every Jugcraft key has its name and its help on the Keys page.
     keys = set()

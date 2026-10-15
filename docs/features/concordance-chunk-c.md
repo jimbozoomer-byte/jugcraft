@@ -1,10 +1,12 @@
 # Concordance Chunk C: the living workshop (contract and handoff)
 
-Status: contract written; unit 1 (C-01 and C-02) built, in four commits on this contract (`8d61fdb7b`) and a fifth
-for its records (`807da7f5e`); unit 2 (C-03 and C-04) built, in two commits (`a0e73881c`, `2c98d6d68`) and a third for
-its records. Every local check passes; none of their game code has been compiled against Minecraft and none of their
-game tests has run (no CI run yet; see the As built notes of C-01 to C-04). Units 3 to 5 not started. Chunk C is
-developed on branch
+Status: contract written; unit 1 (C-01 and C-02) built, in four commits on this contract (`8d61fdb7b`): `f4efbf82c`,
+`ff11cc062`, `2b53fbff0` and `e1d69574e`; a fifth for its records (`807da7f5e`), a sixth with the unit review's fixes
+(`d593ae61d`; see the Fixes from the unit review under C-02), and after it the Rime and Strata client tests' fix
+(`0b1039312`: one research learned a tick). Unit 2 (C-03 and C-04) built on `807da7f5e`, in two commits (`a0e73881c`,
+`2c98d6d68`) and a third for its records (`4df687cc7`), then merged with `d593ae61d` and `0b1039312`. Every local check
+passes; none of their game code has been compiled against Minecraft and none of their game tests has run (no CI run
+yet; see the As built notes of C-01 to C-04). Units 3 to 5 not started. Chunk C is developed on branch
 `claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in;
 CI run 38617471274 on that base passed every job (see The merge and its CI run). Not merged; no pull request. Chunk B,
 beneath it, is not merged and has no pull request either.
@@ -370,8 +372,9 @@ outcome changes.
     the sign it shows when it begins (C-P22). The wait before a repeat, silent before, now shows a WANT sign once
     (`needs_emptying`), and Peepo shows `OCCUPIED` for it;
   - an incompatible or unreadable formula bottles nothing automatically, not even a finished batch (C-P23);
-  - recording onto a blank formula stays open. Clearing also still needs the Alembic Arts (C-P24);
-  - the risk line names the harmful statuses and the first searing step (C-P25);
+  - recording onto a blank formula stays open. Every change, clearing included, still needs the Alembic Arts (C-P24);
+  - the risk line names the harmful statuses and the first searing step (C-P25), and, since the unit review, the harm
+    of a mixture that is not the formula's own batch;
   - the Inspect page reads a crucible within the reader's block reach plus the server's 1.0 use allowance. Every level
     above the spoon's needs an Assay Glass carried, a master's too (C-P26);
   - Jade's raw step now reads "Next step: ..." (C-P27);
@@ -387,7 +390,8 @@ outcome changes.
     incompatible, then that one pulse bottles once the rules are back (C-P23);
   - `crucibleInspection` checks that neither a key nor a `jugcraft:` id shows in the reason or the page's rows.
 - **Tests (none run):**
-  - 12 new `ConcordanceAlchemyGameTests`: 11 in commit 1, and `jadeIsToldTheTankAndWhyNeverTheMakeup` in commit 2;
+  - 13 new `ConcordanceAlchemyGameTests`: 11 in commit 1, `jadeIsToldTheTankAndWhyNeverTheMakeup` in commit 2, and
+    `aHoldIsTheReasonOnlyWhileItKeepsTheHeat` from the unit review;
   - `EncyclopediaGameTests.theInspectPageReadsACrucibleByResearch`;
   - the client test `EncyclopediaClientGameTests.crucibleInspection`, with shots
     `jugcraft_encyclopedia_inspect_crucible` and `_scale4`, and `jugcraft_concordance_crucible_jade` when Jade is
@@ -404,6 +408,10 @@ outcome changes.
   - run and passed: `python3 tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
     `python3 tools/owner_art.py --check`, `python3 tools/concordance_journey.py --check`,
     `python -m unittest discover -s scripts/tests` and `git diff --check`;
+  - the listed audit mutations (§1.7 and §2.3 of the unit's spec) were not run when commits 1 and 2 were made. They
+    were run with the unit review's fixes, on a scratch copy: commit 1's twelve (20 variants) and commit 2's seven,
+    each reported, but for dropping `ground` from `PREPARATION_NAMES`, which is reported only once the generator has
+    rewritten the lang (the stale key hides it from `check_mod_data` alone);
   - not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest` and CI.
 
 ### C-02. The Stillroot Poultice and the Kiln Draught (unit 1; C-D1)
@@ -474,8 +482,9 @@ outcome changes.
   - **containers net to zero:** a salve gives its bowl back, dropped at the user's feet if the inventory is full
     (`BrewItem.java:83`; mc263src `Inventory.java:273-283`); a draught gives its bottle back
     (`JugcraftConcordance.java:253-254`);
-  - **dilution gains nothing:** a poultice diluted to 2 parts gives doses of 1.063 and 1.064 a part, Regeneration I for
-    318 and 319 ticks (`Mixture.bottle` gives the remainder to the last dose) *(the model, re-run)*. At vanilla's
+  - **dilution gains nothing:** a poultice diluted to 2 parts gives two doses of 1.063 a part, Regeneration I for 318
+    ticks each (`Mixture.bottle` gives every dose of a batch the same share since the unit review; before, the last
+    dose took the remainder, 1.064 for 319 ticks) *(the model, re-run)*. At vanilla's
     interval (above) the two heal 6 + 6 = 12, against 18 for one Regeneration II dose of 450 ticks
     (`dilutionNeverHealsMore` measures it). The credit is bounded by the fight's hurt, not by how many doses exist;
   - **no stacking:** `Stacking.STRONGEST` (`Alchemy.java:79-81`; `effect/Stacking.java:11-15, 68-76`): a second poultice
@@ -559,7 +568,7 @@ the Cinder Kiln's preparation fact, the checks and the records.
   - the bowl test's user stands in the test's own space, and only bowls inside its bounds are counted;
   - the recipe edges read once.
 - **Tests (none run):**
-  - `ConcordanceAlchemyGameTests` +7 (32 in all);
+  - `ConcordanceAlchemyGameTests` +7 (32 in all; 33 with the unit review's);
   - `ConcordanceAssayGameTests.workshopProductsAreNeverWeighed` (7);
   - `LairEncounterGameTests` +8 (18);
   - `EncyclopediaGameTests` `theCinderKilnsRiteNamesTheKilnDraught` and `theDossiersNameThePoulticesCredit` (20 with
@@ -570,6 +579,40 @@ the Cinder Kiln's preparation fact, the checks and the records.
   - run and passed: as C-01's;
   - the audit mutations on a scratch copy, each reported: 30 for commit 3 and 22 for commit 4;
   - not run: the build, the game tests and CI.
+
+**Fixes from the unit review (unit 1, a sixth commit).** The review confirmed thirteen findings; each is fixed here, and
+none of the changed Java has run in a game.
+- **Equal doses** (C-02). `Mixture.bottle` gave each dose a part's share rounded down and left the remainder for the
+  last, so a two-part poultice bottled 1.063 then 1.064: two different salves, and an automated crucible paused on its
+  own second dose (`output_differs`). Now every dose of a batch is the same share (`Vector.times`); what does not divide
+  is lost, at most a thousandth a part an axis, so nothing is gained. The generator's `bottle` mirrors it,
+  `check_workshop_products` holds both, and `dilutionNeverHealsMore` expects 1.063 twice and runs the two-part batch as
+  a formula into one stack of two.
+- **The risk line hid a live batch** (C-01, 03:54). Set over a mixture already in the crucible, or under a formula the
+  rules refuse, the risk line judged only the formula's replay, though a dose of the mixture can still be bottled by
+  hand. `Assay.risks` now takes whether the mixture is the formula's own batch and names its harm and searing too;
+  the Inspect page passes it through `CrucibleInspection.State`, and `formula()` passes the mixture it is set over.
+- **Harm as the server judges it** (C-P29). The risk line asks `Alchemy.harmfulStatus` (a harmful or unknown status) as
+  well as the property's data.
+- **The refusal a formula item sends** is built by `CrucibleBlockEntity.refusal`, which
+  `aWrittenFormulaThatNoLongerReplaysSaysWhichStep` asserts against step 2's refusal.
+- **Preserve's hold** is the reason only while, unheld, the block beneath would move the heat towards the stir's band;
+  over a magma block a hot stir waits for heat, held or not (`aHoldIsTheReasonOnlyWhileItKeepsTheHeat`, new).
+- **The dossiers' poultice credit** is named only while a salve of Regeneration alone is the Stillroot Poultice, the
+  match `Alchemy.product` makes for the credit.
+- **Audits made exact:** `canPlaceItem`'s two returns and the mortar's whole refusal condition, so a widened condition
+  fails; `formula()`'s refusal and risk line; the Inspect page's risk-line inputs; the dossier's product match.
+- **Words:** the searing danger lines also say a searing stir thaws all Rime.
+- **Records:** the Peepo mappings each test asserts
+  ([companion-farm-stand-crucible.md](companion-farm-stand-crucible.md)), with the Peepo status now asserted at the
+  `NEEDS_WATER`, `NEEDS_BOTTLES`, `NO_INPUT`, `OCCUPIED` and `WRONG_TEMPERATURE` waits;
+  commits 1 and 2's mutations (C-01's Commands); every change needing the Alembic Arts
+  ([arcane-concordance-authority.md](arcane-concordance-authority.md)); `follow(Formula)` and the credit row's chunks in
+  `WHAT_EXISTS.md`; the client test's comment, and the Assay Glass put back after its crucible shots.
+- **Commands:** as C-01's, run and passed; the fixes' twelve audit mutations on a scratch copy, each reported. The pure
+  alchemy packages compiled with `javac` against a stub of jspecify's `@Nullable`, and a scratch harness replayed the
+  new assertions' alchemy against the real data and agreed (the risk lines with a stand-in for the registry's harm
+  test). Not run: the build, the game tests and CI.
 
 ### C-03. Ritual readiness, fault positions, spent and reserved (unit 2)
 
@@ -1359,7 +1402,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P22 | 14 October 2026 | Diagnostic ids use 03:9's own wording, then Chunk C's (`needs_water`, `needs_container`, `held`, `incompatible`, `courier_quota`, `output_differs`, `needs_emptying`, `unreadable`). Each code has a kind that sets the sign shown when it begins: a shortage or a blockage a WANT, a fault a PERIL with the breaking sound, a condition (heat, a hold) none. Codes no unit raises yet have words without parameters until their unit fixes both. The crucible's formerly silent wait before a repeat now shows a WANT sign once | Proposed | C-01, C-03, C-05, C-06 |
 | C-P23 | 14 October 2026 | A formula the rules refuse, or a saved one that no longer reads, drives nothing: no step and no automated bottle, even of a finished batch. Bottling by hand stays open; clearing stays a sneak-use by someone who may change the crucible | Proposed | C-01 |
 | C-P24 | 14 October 2026 | Recording a blank formula stays open to anyone with the Alembic Arts (it changes nothing in the crucible); every other change asks Authority (within C-P5) | Proposed | C-01 |
-| C-P25 | 14 October 2026 | The ungated risk line names the harmful statuses a dose would carry and the formula's first searing step, rather than "would harm" alone | Proposed | C-01 |
+| C-P25 | 14 October 2026 | The ungated risk line names the harmful statuses a dose would carry and the formula's first searing step, rather than "would harm" alone. Since the unit review, it also names the harm (and a searing stir) of a mixture that is not the formula's own batch (there before it was set, or under a formula the rules refuse), and a status is harmful when the server judges it so as well as when its property says | Proposed | C-01 |
 | C-P26 | 14 October 2026 | The Inspect page reads a crucible within the reader's block reach plus the server's 1.0 use allowance; every level beyond the spoon's needs an Assay Glass carried, a master's included, as the glass itself does | Proposed | C-01 |
 | C-P27 | 14 October 2026 | Jade carries the reason as `Diagnostic.encode()` text (code and parameters, at most 1024 characters, else the code alone) and the tank as whole parts. Jade's next step stays canonical text (C-P4) while the Inspect page words it | Proposed | C-01 |
 | C-P28 | 14 October 2026 | A test that stands for a reload swaps the rules only through a helper that restores them in a `finally` within the same tick, not in a batch of its own | Proposed | C-01, C-10 |

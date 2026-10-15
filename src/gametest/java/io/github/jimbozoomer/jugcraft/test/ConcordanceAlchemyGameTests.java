@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.Brew;
+import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
@@ -787,21 +788,26 @@ public class ConcordanceAlchemyGameTests {
 	}
 
 	/**
-	 * C-01 (plan 03:54): a written formula the rules in force cannot replay is not set, and says which step and why; one
-	 * that does not read is not set either. Setting one names what is never hidden: the harmful statuses a dose carries
-	 * and the first searing stir.
+	 * C-01 (plan 03:54): a written formula the rules in force cannot replay is not set, and the formula item's use says
+	 * which step and why (the message it sends, CrucibleBlockEntity.refusal); one that does not read is not set either.
+	 * Setting one names what is never hidden: the harmful statuses a dose carries and the first searing stir, judged by
+	 * the server as well as the property's own word; and, when the mixture in the crucible is not the formula's own
+	 * batch (there before it was set, or under a formula the rules refuse), that mixture's harm and searing too.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aWrittenFormulaThatNoLongerReplaysSaysWhichStep(GameTestHelper helper) {
 		BlockPos at = new BlockPos(2, 2, 2);
 		CrucibleBlockEntity crucible = crucible(helper, at, true);
 		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
-		record Tried(InteractionResult result, Diagnostic why) {
+		record Tried(InteractionResult result, Component told) {
 		}
 		Tried tried = under(ConcordanceRules.EMPTY, () -> new Tried(use(crucible, player, written(NIGHT_EYE)),
-				Formula.parse(NIGHT_EYE).incompatibility(Alchemy.catalog())));
-		helper.assertTrue(tried.result() == InteractionResult.FAIL && crucible.program() == null && glowstoneRefused().equals(tried.why()),
-				"Rules without glowstone refuse it at step 2: " + tried);
+				CrucibleBlockEntity.refusal(Formula.parse(NIGHT_EYE), Alchemy.catalog())));
+		helper.assertTrue(tried.result() == InteractionResult.FAIL && crucible.program() == null && tried.told() != null
+				&& tried.told().getContents() instanceof TranslatableContents told && told.getKey().equals("message.jugcraft.concordance.alchemy.formula_refused")
+				&& told.getArgs().length == 1 && ComposeText.show(glowstoneRefused().text()).equals(told.getArgs()[0]),
+				"Rules without glowstone refuse it, and the use says step 2 and why: " + tried);
+		helper.assertTrue(CrucibleBlockEntity.refusal(Formula.parse(NIGHT_EYE), Alchemy.catalog()) == null, "The rules in force replay it");
 		AlchemyCatalog catalog = Alchemy.catalog();
 		Diagnostic overflow = Formula.parse("water 4; water 3").incompatibility(catalog);
 		helper.assertTrue(Diagnostic.incompatible(2, new Operation.Water(3).describe(), Text.of("alchemy.overflowing", Mixture.MAX_PARTS)).equals(overflow),
@@ -810,14 +816,36 @@ public class ConcordanceAlchemyGameTests {
 				"and it is not set");
 		helper.assertTrue(Formula.parse("water 1; stir boiling") == null && use(crucible, player, written("water 1; stir boiling")) == InteractionResult.FAIL,
 				"A formula that does not read is not set");
-		List<Text> spider = Assay.risks(Formula.parse(SPIDER), Mixture.EMPTY, catalog);
-		helper.assertTrue(List.of(Text.of("alchemy.risk.harm", List.of(new Text.Ref("status", "minecraft:poison")))).equals(spider),
-				"A spider eye's dose brings Poison, and its fouling is under Nausea's threshold: " + spider);
-		List<Text> seared = Assay.risks(Formula.parse("water 2; stir searing"), Mixture.EMPTY, catalog);
+		List<Text> poison = List.of(Text.of("alchemy.risk.harm", List.of(new Text.Ref("status", "minecraft:poison"))));
+		List<Text> spider = Assay.risks(Formula.parse(SPIDER), Mixture.EMPTY, false, Alchemy::harmfulStatus, catalog);
+		helper.assertTrue(poison.equals(spider), "A spider eye's dose brings Poison, and its fouling is under Nausea's threshold: " + spider);
+		List<Text> seared = Assay.risks(Formula.parse("water 2; stir searing"), Mixture.EMPTY, false, Alchemy::harmfulStatus, catalog);
 		helper.assertTrue(List.of(Text.of("alchemy.risk.searing", 2)).equals(seared), "Step 2 stirs it searing: " + seared);
-		helper.assertTrue(Assay.risks(Formula.parse(NIGHT_EYE), Mixture.EMPTY, catalog).isEmpty(), "The worked example hides nothing");
+		helper.assertTrue(Assay.risks(Formula.parse(NIGHT_EYE), Mixture.EMPTY, false, Alchemy::harmfulStatus, catalog).isEmpty(), "The worked example hides nothing");
+		// The server judges harm too (C-P29): a status it holds harmful is named whatever the property says.
+		helper.assertTrue(Alchemy.harmfulStatus("minecraft:poison") && !Alchemy.harmfulStatus("minecraft:night_vision") && Alchemy.harmfulStatus("jugcraft:no_such_status"),
+				"Poison and an unknown status harm; Night Vision does not");
+		helper.assertTrue(List.of(Text.of("alchemy.risk.harm", List.of(new Text.Ref("status", "minecraft:night_vision"))))
+				.equals(Assay.risks(Formula.parse(NIGHT_EYE), Mixture.EMPTY, false, status -> true, catalog)), "A status the server holds harmful is named");
+		// A mixture that is not the formula's own batch: its harm is named too, as a dose of it can be bottled by hand.
+		Mixture spiderBatch = ((Mixture.Applied) Formula.parse(SPIDER + "; stir searing").replay(catalog)).mixture();
+		List<Text> over = Assay.risks(Formula.parse(NIGHT_EYE), spiderBatch, true, Alchemy::harmfulStatus, catalog);
+		helper.assertTrue(over.size() == 2 && over.get(0).key().equals("alchemy.risk.harm") && over.get(0).args().toString().contains("minecraft:poison")
+				&& over.get(1).equals(Text.of("alchemy.risk.seared")), "A clean formula over a searing spider-eye batch names its Poison and its searing: " + over);
+		helper.assertTrue(Assay.risks(Formula.parse(NIGHT_EYE), spiderBatch, false, Alchemy::harmfulStatus, catalog).isEmpty(),
+				"its own batch: the formula's risk alone");
+		List<Text> refused = Assay.risks(Formula.parse("water 4; water 3"), replay(Formula.parse(SPIDER).operations()), true, Alchemy::harmfulStatus, catalog);
+		helper.assertTrue(poison.equals(refused), "A finished Poison batch under a formula the rules refuse: " + refused);
 		helper.assertTrue(use(crucible, player, written(SPIDER)).consumesAction() && SPIDER.equals(crucible.program().text()),
 				"A formula with a risk is still set, by a plain use");
+		crucible.useEmpty(player, true);
+		use(crucible, player, waterBottle());
+		use(crucible, player, new ItemStack(Items.SPIDER_EYE));
+		helper.assertTrue(use(crucible, player, written(NIGHT_EYE)).consumesAction() && NIGHT_EYE.equals(crucible.program().text())
+				&& crucible.step() == 0 && !crucible.mixture().isEmpty(), "A clean formula is still set over a spider eye in water");
+		Diagnostic emptying = crucible.automate(helper.getLevel());
+		helper.assertTrue(Diagnostic.of(Code.NEEDS_EMPTYING).equals(emptying) && crucible.companion.status() == CompanionStatus.OCCUPIED,
+				"It waits for that mixture to be bottled, and the Peepo port says OCCUPIED: " + emptying + ", " + crucible.companion.status());
 		helper.succeed();
 	}
 
@@ -920,7 +948,8 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(pulse(crucible, level, 4) == null && crucible.step() == 4, "Made to its end: step " + crucible.step());
 		Mixture made = crucible.mixture();
 		Diagnostic noBottle = crucible.automate(level);
-		helper.assertTrue(Diagnostic.of(Code.NEEDS_CONTAINER).equals(noBottle), "It waits for a bottle: " + noBottle);
+		helper.assertTrue(Diagnostic.of(Code.NEEDS_CONTAINER).equals(noBottle) && crucible.companion.status() == CompanionStatus.NEEDS_BOTTLES,
+				"It waits for a bottle: " + noBottle + ", " + crucible.companion.status());
 		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
 		crucible.setItem(CrucibleBlockEntity.OUTPUT_SLOT, draught(NIGHT_EYE).copyWithCount(16));
 		Diagnostic full = crucible.automate(level);
@@ -992,7 +1021,8 @@ public class ConcordanceAlchemyGameTests {
 		Diagnostic lacking = Diagnostic.needsWater(2, 1);
 		Diagnostic first = crucible.automate(level);
 		Diagnostic second = crucible.automate(level);
-		helper.assertTrue(lacking.equals(first) && lacking.equals(second), "Two parts needed, one whole part held: " + first + " / " + second);
+		helper.assertTrue(lacking.equals(first) && lacking.equals(second) && crucible.companion.status() == CompanionStatus.NEEDS_WATER,
+				"Two parts needed, one whole part held: " + first + " / " + second + ", " + crucible.companion.status());
 		helper.assertTrue(crucible.water.amount == FluidConstants.BOTTLE * 3 / 2 && crucible.mixture().isEmpty() && crucible.step() == 0,
 				"Nothing is drawn: " + crucible.water.amount);
 		helper.assertValueEqual(signs.at(Sign.WANT, at), 1L, "the want shown once");
@@ -1049,6 +1079,38 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(Diagnostic.of(Code.OUTPUT_DIFFERS).equals(crucible.automate(level)) && crucible.companion.status() == CompanionStatus.FULL,
 				"Another brew in the output is FULL: " + crucible.companion.status());
 		helper.assertTrue(crucible.mixture().parts() == 1 && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).getCount() == 1, "Nothing more was bottled");
+		helper.succeed();
+	}
+
+	/**
+	 * C-01: a stir waits for its band, and Preserve's hold is named as the reason only while it is what keeps the heat
+	 * from that band. Over a campfire (heading hot) held warm, a hot stir waits on the hold; over a magma block (warm at
+	 * most), held or not, it waits for hot heat, which will not come from there. Either way the Peepo port says
+	 * WRONG_TEMPERATURE.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHoldIsTheReasonOnlyWhileItKeepsTheHeat(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		long now = ConcordanceProgress.now(level);
+		CrucibleBlockEntity campfire = pouredNightEye(helper, new BlockPos(1, 2, 2));
+		helper.assertTrue(campfire.automate(level) == null && campfire.step() == 2, "The glowstone goes in: step " + campfire.step());
+		campfire.setTemperature(60);
+		campfire.hold(now, 200);
+		Diagnostic held = campfire.automate(level);
+		helper.assertTrue(Diagnostic.held(Band.WARM.id, 10).equals(held) && campfire.step() == 2 && campfire.companion.status() == CompanionStatus.WRONG_TEMPERATURE,
+				"Over a campfire held warm, the hot stir waits on the hold: " + held + ", " + campfire.companion.status());
+		CrucibleBlockEntity magma = crucible(helper, new BlockPos(4, 2, 2), Blocks.MAGMA_BLOCK);
+		magma.setTemperature(60);
+		helper.assertTrue(use(magma, alembist(helper, ResearchState.UNDERSTOOD), written(NIGHT_EYE)).consumesAction(), "The formula is set over magma");
+		pour(magma, FluidConstants.BOTTLE);
+		magma.setItem(0, new ItemStack(Items.GLOWSTONE_DUST));
+		helper.assertTrue(pulse(magma, level, 2) == null && magma.step() == 2, "Water and glowstone: step " + magma.step());
+		Diagnostic unheld = magma.automate(level);
+		magma.hold(now, 200);
+		Diagnostic heldAnyway = magma.automate(level);
+		Diagnostic hot = Diagnostic.wrongHeat(Band.HOT.id, Band.WARM.id);
+		helper.assertTrue(hot.equals(unheld) && hot.equals(heldAnyway) && magma.step() == 2 && magma.companion.status() == CompanionStatus.WRONG_TEMPERATURE,
+				"Over magma the hot stir waits for hot heat, held or not: " + unheld + " / " + heldAnyway + ", " + magma.companion.status());
 		helper.succeed();
 	}
 
@@ -1126,7 +1188,8 @@ public class ConcordanceAlchemyGameTests {
 				"The first pulse pours one part of the tank's two: step " + crucible.step() + ", tank " + crucible.tankParts());
 		Diagnostic waiting = crucible.automate(level);
 		Diagnostic missing = Diagnostic.missingIngredient(1, new Operation.Add(GLOW, "jugcraft:raw").describe());
-		helper.assertTrue(missing.equals(waiting) && missing.equals(crucible.waiting()), "It waits for its glowstone: " + waiting);
+		helper.assertTrue(missing.equals(waiting) && missing.equals(crucible.waiting()) && crucible.companion.status() == CompanionStatus.NO_INPUT,
+				"It waits for its glowstone: " + waiting + ", " + crucible.companion.status());
 		if (FabricLoader.getInstance().isModLoaded("jade")) {
 			CompoundTag shown = ConcordanceDataProvider.snapshot(crucible, level.getGameTime());
 			helper.assertTrue(Set.of("temperature", "band", "parts", "tank", "step", "steps", "next", "reason").containsAll(shown.keySet()),
@@ -1460,10 +1523,11 @@ public class ConcordanceAlchemyGameTests {
 	}
 
 	/**
-	 * C-02 (C-P7): dilution never heals more. The poultice's batch in two parts of water bottles 1.063 and then 1.064
-	 * Verdance a part (the remainder goes to the last dose): Regeneration I for 318 and 319 ticks, against the one part's
-	 * Regeneration II for 450. Worked on players, the whole batch heals 18 and the two halves 6 and 6. The Kiln Draught's
-	 * magma cream in two parts lasts no longer in all than in one.
+	 * C-02 (C-P7): dilution never heals more. The poultice's batch in two parts of water bottles 1.063 Verdance a part
+	 * twice (every dose of a batch the same share; what does not divide evenly is lost): Regeneration I for 318 ticks
+	 * each, against the one part's Regeneration II for 450. Worked on players, the whole batch heals 18 and the two halves
+	 * 6 and 6. The Kiln Draught's magma cream in two parts lasts no longer in all than in one. Followed as a formula, the
+	 * two-part batch bottles two poultices that stack in its output.
 	 */
 	@GameTest(maxTicks = 20)
 	public void dilutionNeverHealsMore(GameTestHelper helper) {
@@ -1472,14 +1536,13 @@ public class ConcordanceAlchemyGameTests {
 		Mixture diluted = replay(poultice(2, 0));
 		Mixture.Bottled first = diluted.bottle();
 		Mixture.Bottled second = first.rest().bottle();
-		helper.assertTrue(first.dose().get(Axis.VERDANCE) == 1063 && second.dose().get(Axis.VERDANCE) == 1064,
-				"Two parts: 1.063 and then 1.064 Verdance a part: " + first.dose() + " / " + second.dose());
+		helper.assertTrue(first.dose().get(Axis.VERDANCE) == 1063 && second.dose().equals(first.dose()) && second.contaminant() == first.contaminant()
+				&& second.rest().isEmpty(), "Two parts: 1.063 Verdance a part, twice: " + first.dose() + " / " + second.dose());
 		Outcome weakFirst = Outcome.of(first.dose(), first.contaminant(), catalog, diluted.history());
 		Outcome weakSecond = Outcome.of(second.dose(), second.contaminant(), catalog, first.rest().history());
 		Outcome whole = bottled(replay(poultice(1, 0)));
 		helper.assertTrue(weakFirst.key().equals("minecraft:regeneration@0") && weakFirst.effects().get(0).ticks() == 318
-				&& weakSecond.key().equals("minecraft:regeneration@0") && weakSecond.effects().get(0).ticks() == 319,
-				"Each half is Regeneration I, for 318 and 319 ticks: " + weakFirst.effects() + " / " + weakSecond.effects());
+				&& weakSecond.equals(weakFirst), "Each half is Regeneration I for 318 ticks: " + weakFirst.effects() + " / " + weakSecond.effects());
 		helper.assertTrue(whole.key().equals("minecraft:regeneration@1") && whole.effects().get(0).ticks() == 450, "The whole is Regeneration II for 450: " + whole.effects());
 		ServerPlayer one = standing(helper, new BlockPos(1, 2, 1));
 		ServerPlayer two = standing(helper, new BlockPos(4, 2, 4));
@@ -1499,6 +1562,22 @@ public class ConcordanceAlchemyGameTests {
 		int halves = Outcome.of(creamFirst.dose(), creamFirst.contaminant(), catalog, creamTwice.history()).effects().get(0).ticks()
 				+ Outcome.of(creamSecond.dose(), creamSecond.contaminant(), catalog, creamFirst.rest().history()).effects().get(0).ticks();
 		helper.assertTrue(halves == 765 + 765 && halves <= 1531, "Two Kiln Draughts from one magma cream last no longer than one: " + halves);
+		// Followed as a formula over a magma block (warm), the two-part batch bottles two poultices that stack (C-01: no
+		// OUTPUT_DIFFERS pause between doses of one batch).
+		CrucibleBlockEntity automated = crucible(helper, new BlockPos(1, 2, 6), Blocks.MAGMA_BLOCK);
+		automated.setTemperature(60);
+		ServerPlayer maker = alembist(helper, ResearchState.UNDERSTOOD);
+		helper.assertTrue(use(automated, maker, written(new Formula(poultice(2, 0)).text())).consumesAction() && automated.program() != null,
+				"The two-part poultice's formula is set");
+		pour(automated, FluidConstants.BOTTLE * 2);
+		automated.setItem(0, new ItemStack(Garden.MENDVETCH, 2));
+		automated.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.BOWL, 2));
+		int steps = poultice(2, 0).size();
+		Diagnostic last = pulse(automated, level, steps + 2);
+		ItemStack output = automated.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+		helper.assertTrue(last == null && output.getCount() == 2 && ItemStack.isSameItemSameComponents(output, Alchemy.brew(JugcraftConcordance.SALVE, weakFirst))
+				&& automated.mixture().isEmpty() && automated.step() == 0 && automated.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty(),
+				"Both doses bottled, one stack of two like poultices: " + output + " (" + last + ", step " + automated.step() + ", " + automated.mixture() + ")");
 		helper.succeed();
 	}
 

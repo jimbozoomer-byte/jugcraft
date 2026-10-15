@@ -199,10 +199,13 @@ public final class InspectPage {
 				pos.getX(), pos.getY(), pos.getZ()));
 		int reading = FirstLightRoute.carries(player, stack -> stack.is(JugcraftConcordance.ASSAY_GLASS)) ? Alchemy.glassLevel(player) : Assay.SPOON;
 		Diagnostic reason = crucible.waiting();
+		// Its mixture is not its formula's own batch when it was there before the formula was set (step 0) or the rules
+		// refuse the formula: its own harm is then named too, since a dose of it can still be bottled by hand (Assay.risks).
+		boolean apart = !crucible.mixture().isEmpty() && (crucible.step() == 0 || crucible.incompatibility() != null);
 		CrucibleInspection.State state = new CrucibleInspection.State(crucible.temperature(), crucible.below(level),
 				crucible.held(ConcordanceProgress.now(level)), crucible.mixture(), crucible.tankParts(), CrucibleBlockEntity.WATER_PER_BUCKET,
-				crucible.program(), crucible.step(), reason == null ? null : reason.text());
-		List<CrucibleInspection.Section> sections = CrucibleInspection.read(state, reading, Alchemy.catalog());
+				crucible.program(), crucible.step(), reason == null ? null : reason.text(), apart);
+		List<CrucibleInspection.Section> sections = CrucibleInspection.read(state, reading, Alchemy::harmfulStatus, Alchemy.catalog());
 		lines(out, sections.getFirst());
 		slots(crucible, out);
 		if (reading < Assay.GLASS) {
