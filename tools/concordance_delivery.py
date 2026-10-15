@@ -140,8 +140,9 @@ MATRIX = {
          "EncyclopediaClientGameTests", "ConcordanceWorkshopClientGameTests"],
         "Server tests run without Jade in CI's optional-absent job; CI runs no client test without it; the client tests "
         "are written to photograph its overlay on a crucible, a stand, an anchor and a crop (Concordance Chunk C, not "
-        "merged), and no shot has been viewed where these records were written (CI's logs and screenshots were refused, "
-        "403); Preserve's hold, as Jade reads it, passed its test in CI's mod job (run 38519234934, Chunk B unit 3, not "
+        "merged; they pass in CI, run 38774859294); the one Jade shot viewed, the anchor's in that run, shows no Jade box "
+        "at the log's 480x270 preview size, though its snapshot assertion passed, so the overlay is still not seen in a "
+        "client; Preserve's hold, as Jade reads it, passed its test in CI's mod job (run 38519234934, Chunk B unit 3, not "
         "merged)"),
     "jei": (
         "Recipe categories for the Lampwright's Bench, the Circle Anchor and the Resonant Ring; alchemy ingredients' "
