@@ -237,8 +237,8 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 	}
 
 	/**
-	 * A Greenwarden crop: its step, and its bed's last verdict for it, which the server sends with the bed (a crop
-	 * has no block entity of its own to ask).
+	 * A Greenwarden crop: its step, and its bed's last verdict for it (ripe, as it grew: Concordance Chunk C, C-07, C-P55),
+	 * which the server sends with the bed (a crop has no block entity of its own to ask).
 	 */
 	private enum CropTooltip implements IBlockComponentProvider {
 		INSTANCE;
@@ -254,10 +254,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 			if (!(state.getBlock() instanceof OrganismCropBlock crop)) {
 				return;
 			}
+			boolean ripe = crop.isMaxAge(state);
 			tooltip.add(Component.translatable("message.jugcraft.concordance.garden.crop", crop.getName(), crop.getAge(state),
-					OrganismCropBlock.MAX_AGE, crop.isMaxAge(state) ? Component.translatable("compose.jugcraft.ecology.mature") : Component.empty()));
-			if (!crop.isMaxAge(state) && accessor.getLevel().getBlockEntity(accessor.getPosition().below()) instanceof VerdantBedBlockEntity bed) {
-				verdict(tooltip, bed.growth(), String.join("\n", bed.reasons()));
+					OrganismCropBlock.MAX_AGE, ripe ? Component.translatable("compose.jugcraft.ecology.mature") : Component.empty()));
+			if (accessor.getLevel().getBlockEntity(accessor.getPosition().below()) instanceof VerdantBedBlockEntity bed) {
+				String growth = bed.growth();
+				// Concordance Chunk C (C-07): ripe, it still shows its bed's last verdict, as it grew: what its regrowth will meet.
+				if (ripe && !growth.isEmpty() && !growth.equals("dormant") && !growth.equals("waiting")) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.as_it_grew", growthText(growth)));
+					growth = "";
+				}
+				verdict(tooltip, growth, String.join("\n", bed.reasons()));
 			}
 		}
 	}

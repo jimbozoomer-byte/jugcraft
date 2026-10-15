@@ -14,6 +14,9 @@ Fluid machines (tools/petro.py) are listed under "fluid_machines": {"block", "ty
 
 Things only a ritual or a lair boss gives (tools/acquisition.py) are listed under "acquisition_info": [{"item": id,
 "key": key}], each shown as an information page with the words of jei.jugcraft.acquire.<key>.
+
+The Mulch Maw's compost worths (tools/concordance_ecology.py compost_view) are listed under "garden_compost":
+[{"tag": tag, "quarters": n}]; each tag's items are shown as information pages, an item at its highest worth.
 """
 from machines import MACHINES, machine_recipes
 
@@ -59,4 +62,6 @@ def build():
     import acquisition
     return {"machines": machines, "fluid_machines": fluid_machines, "concordance": concordance.recipe_view(),
             "concordance_stations": concordance.recipe_stations(),
-            "alchemy_ingredients": concordance.alchemy.recipe_ingredients(), "acquisition_info": acquisition.rows()}
+            "alchemy_ingredients": concordance.alchemy.recipe_ingredients(), "acquisition_info": acquisition.rows(),
+            # Concordance Chunk C, C-07 (C-P57): what a Mulch Maw makes of each tag it eats, for JEI's information pages.
+            "garden_compost": concordance.ecology.compost_view()}

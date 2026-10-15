@@ -246,6 +246,22 @@ TEXT = {
     "ecology.status.waiting": "waiting for a reading",
     "ecology.status.keeper_away": "waiting for its keeper (it harvests only while they are here)",
     "ecology.gauge.suitability": "suitability",
+    # Concordance Chunk C, C-07 (Java: ecology/HabitatInspection.java): the encyclopedia's Inspect page on a bed or a
+    # crop: each factor with how far its reading reaches, light as its two sources (C-P14), judged against the plant's
+    # niche with all four of its bounds (least, ideal from, ideal to, most).
+    "ecology.inspect.moisture": "Moisture %s of %s, the bed's own (water within %s blocks, rain, a wet sprinkler or a canteen wets it)",
+    "ecology.inspect.light": "Light %s at the plant: sky %s, lamps %s (the greater counts, whatever the time of day)",
+    "ecology.inspect.nutrients": "Nutrients %s of %s, the bed's own",
+    "ecology.inspect.diversity": "Diversity %s: the kinds of plant within %s blocks at the plant's height, itself included",
+    "ecology.inspect.disturbance": "Disturbance %s: the working magic in the %s by %s round the plant, %s block above and below",
+    "ecology.inspect.judged": "%s: %s",
+    "ecology.inspect.any": "any will do",
+    "ecology.inspect.ideal": "ideal (best %s to %s; it lives with %s to %s)",
+    "ecology.inspect.tolerable": "only tolerable, so it grows at half pace (best %s to %s; it lives with %s to %s)",
+    "ecology.inspect.short": "too little: it stops below %s (best %s to %s; at most %s)",
+    "ecology.inspect.excess": "too much: it stops above %s (best %s to %s; at least %s)",
+    "ecology.inspect.verdict": "On this reading: %s",
+    "ecology.inspect.unplanted": "Nothing grows on it to judge these by",
 }
 for _factor in FACTORS:
     TEXT[f"factor.{_factor}"] = _factor.title()
@@ -261,6 +277,7 @@ TOOLTIPS = {
     "jade.gauge": "Reading %s: signal %s",
     "jade.maw": "%s quarters digested",
     "jade.dormant": "Dormant: a Greenwarden must wake it",
+    "jade.as_it_grew": "As it grew: %s",  # Concordance Chunk C, C-07: a ripe crop's last verdict
 }
 
 
@@ -354,8 +371,9 @@ def codex():
                  f"**fertilizer**. A broken bed loses what it held.\\\n\\\nDisturbance: {disturbance}."),
                 ("text", "How It Grows",
                  "A crop grows on random ticks (and a sprinkler's) at full pace while every factor is ideal, at half "
-                 "pace while some are only tolerable, and not at all while one is outside its range. Look at it "
-                 "(or use it with an empty hand) to see which."),
+                 "pace while some are only tolerable, and not at all while one is outside its range. Look at it, use "
+                 "it with an empty hand, or open the encyclopedia while looking at it or its bed (the Inspect page "
+                 "says how far each reading reaches) to see which."),
             ],
         },
         ("garden", "organisms"): {
@@ -552,8 +570,9 @@ def write_data(write, data):
 
 
 def compost_view():
-    """For JEI (client/compat/JugcraftJeiPlugin "garden"): the organisms' items and chaff, and what the Maw makes of
-    them. Public numbers; never a habitat."""
+    """For JEI (client/compat/JugcraftJeiPlugin addCompostInfo; recipe_view.json "garden_compost", Concordance Chunk C,
+    C-07): each Mulch Maw tag and its worth in quarters of a nutrient; an item in several tags is worth its highest, as
+    Garden.mulch reads it. Public numbers; never a habitat."""
     return [{"tag": f"{MOD}:mulch/{name}", "quarters": quarters} for name, (quarters, _values) in MULCH.items()]
 
 

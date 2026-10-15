@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Sampler;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
@@ -19,6 +20,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,7 +32,8 @@ import org.jspecify.annotations.Nullable;
  * What a Verdant Bed holds (roadmap step 14): its nutrients (0 to {@value #CAPACITY}), whether a Greenwarden has woken
  * it and who placed it, and its last sample of the area round the plant above it, reused for
  * {@value Sampler#FRESH_TICKS} ticks. Clients are sent the nutrients, whether it is awake and its crop's last verdict
- * (growth and the factors holding it back), so a crop's tooltip can say why; nothing a client sends changes it.
+ * (growth and the factors holding it back), so a crop's tooltip can say why; the verdict is forgotten on the bed's next
+ * random tick once nothing that notes it stands on it (Concordance Chunk C, C-07); nothing a client sends changes it.
  * <p>
  * Nutrients only change through {@link #take} (a step of growth, a Heart's beat), {@link #give} (bone meal, fertilizer,
  * a Maw, a fixer) and nothing else. A broken bed loses them.
@@ -165,6 +168,21 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		sampledAt = Long.MIN_VALUE;
 	}
 
+	/**
+	 * The reading the encyclopedia's Inspect page shows (Concordance Chunk C, C-07, C-P14, C-P54): the habitat growth would
+	 * read now (the cached sample, taken again only as a plant would take it) and the light at the plant as its two sources,
+	 * sky and lamps (the habitat's light is the greater). Null when there is no reading this tick. It only reads.
+	 */
+	public HabitatInspection.@Nullable State inspect(ServerLevel level) {
+		Habitat habitat = habitat(level);
+		if (habitat == null) {
+			return null;
+		}
+		BlockPos plant = worldPosition.above();
+		return new HabitatInspection.State(habitat, level.getBrightness(LightLayer.SKY, plant), level.getBrightness(LightLayer.BLOCK, plant),
+				Garden.WATER_REACH);
+	}
+
 	/** Records what the crop or device above makes of the habitat, for its tooltip; sends it only when it changes. */
 	public void note(Verdict verdict, Habitat habitat, Organism organism) {
 		List<String> encoded = new ArrayList<>();
@@ -184,6 +202,18 @@ public class VerdantBedBlockEntity extends BlockEntity {
 			this.growth = growth;
 			this.reasons = List.copyOf(reasons);
 			sync();
+		}
+	}
+
+	/**
+	 * Forgets the last verdict once nothing that notes it stands on the bed (Concordance Chunk C, C-07, C-P55: the bed's
+	 * random tick asks), so a crop's tooltip never speaks for a plant that is gone; sent to clients and saved. Only the
+	 * verdict: the nutrients and whether it is awake stay.
+	 */
+	public void forgetVerdict() {
+		if (!growth.isEmpty() || !reasons.isEmpty()) {
+			note("", List.of());
+			setChanged();
 		}
 	}
 

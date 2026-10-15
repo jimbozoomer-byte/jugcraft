@@ -1,13 +1,21 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.GourdCanteenItem;
+import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.SampleBudget;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Sampler;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
@@ -23,17 +31,23 @@ import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Roadmap step 14, ecological cultivation (docs/features/arcane-concordance-ecology.md), on a real server: a bed
@@ -44,7 +58,10 @@ import net.minecraft.world.level.storage.TagValueInput;
  * stops on a starved bed; the Mulch Maw turns plant matter into nutrients for the poorest bed and stops eating when
  * every bed is full; the Habitat Gauge gives the habitat as a signal; the Gleaner harvests a ripe crop for a Verdance
  * drawn from a Heart its keeper may use, and from no one else's; a level takes at most 16 area samples a tick; and
- * beds and devices keep what they hold through a save.
+ * beds and devices keep what they hold through a save. Since Concordance Chunk C (C-07): the reading the Inspect page
+ * shows judges each factor as growth does and names its reach, the light as sky and lamps; a bed forgets its verdict once
+ * nothing that notes it stands on it; an item held on a bed is its own use, and a canteen's sip wets a bed, by permission
+ * and rate.
  */
 public class ConcordanceGardenGameTests {
 	private static final UUID KEEPER = new UUID(14L, 1L);
@@ -86,6 +103,56 @@ public class ConcordanceGardenGameTests {
 	@SuppressWarnings("unchecked")
 	private static <T> T entity(GameTestHelper helper, BlockPos at) {
 		return (T) level(helper).getBlockEntity(helper.absolutePos(at));
+	}
+
+	/** The top face of the block at {@code at}, as a use from above hits it. */
+	private static BlockHitResult top(GameTestHelper helper, BlockPos at) {
+		BlockPos absolute = helper.absolutePos(at);
+		return new BlockHitResult(Vec3.atCenterOf(absolute).relative(Direction.UP, 0.5), Direction.UP, absolute, false);
+	}
+
+	/**
+	 * {@code player} uses {@code held}, put in the main hand, on the top of the block at {@code at} by the server's own path
+	 * (ServerPlayerGameMode.useItemOn), plainly or sneaking, its rate limit forgotten first.
+	 */
+	private static InteractionResult handUse(GameTestHelper helper, ServerPlayer player, BlockPos at, ItemStack held, boolean sneaking) {
+		RateGate.forget(player.getUUID());
+		player.setItemInHand(InteractionHand.MAIN_HAND, held);
+		player.setShiftKeyDown(sneaking);
+		try {
+			return player.gameMode.useItemOn(player, helper.getLevel(), player.getMainHandItem(), InteractionHand.MAIN_HAND, top(helper, at));
+		} finally {
+			player.setShiftKeyDown(false);
+		}
+	}
+
+	/** One random tick of the block at {@code at}, as the level gives it. */
+	private static void tickBed(GameTestHelper helper, BlockPos at) {
+		helper.getBlockState(at).randomTick(level(helper), helper.absolutePos(at), level(helper).getRandom());
+	}
+
+	/** A copy of {@code bed} read back from {@code saved}: a save, or an update tag as a client reads it. */
+	private static VerdantBedBlockEntity reload(GameTestHelper helper, VerdantBedBlockEntity bed, CompoundTag saved) {
+		VerdantBedBlockEntity copy = new VerdantBedBlockEntity(bed.getBlockPos(), bed.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level(helper).registryAccess(), saved));
+		return copy;
+	}
+
+	private static ItemStack canteen(int water) {
+		ItemStack stack = new ItemStack(JugcraftAgriculture.item("gourd_canteen"));
+		stack.set(JugcraftAgriculture.CANTEEN_WATER, water);
+		return stack;
+	}
+
+	/** Reads each bed's area early (ticks 10, 20, 30): a level takes only so many samples a tick, and any one serves 200. */
+	private static void prefetch(GameTestHelper helper, VerdantBedBlockEntity... beds) {
+		for (int tick : new int[] {10, 20, 30}) {
+			helper.runAtTickTime(tick, () -> {
+				for (VerdantBedBlockEntity bed : beds) {
+					bed.habitat(level(helper));
+				}
+			});
+		}
 	}
 
 	// ---------------------------------------------------------------- waking
@@ -488,6 +555,161 @@ public class ConcordanceGardenGameTests {
 		VerdantHeartBlockEntity heartCopy = new VerdantHeartBlockEntity(heart.getBlockPos(), heart.getBlockState());
 		heartCopy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), savedHeart));
 		helper.assertTrue(heartCopy.verdance() == 9 && heartCopy.awake(), "The Heart keeps its Verdance");
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- habitat made visible (Concordance Chunk C, C-07)
+
+	/**
+	 * C-07 (C-P14, C-P54): the reading the Inspect page shows. A sunpetal walled and roofed in stone and lit by one glowstone
+	 * reads its light from lamps alone, and its habitat's light is the greater of sky and lamps; a dewmoss 2 blocks away counts
+	 * for diversity and a gloamcap 3 away does not; a Ley Pylon in the 5 by 5 disturbs it by 2 and one 3 away does not. Each
+	 * factor is judged against the sunpetal's own range by the verdict growth reaches from the same reading and names how
+	 * far it reaches; reading takes, dries and notes nothing.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aBedSaysWhatItsPlantNeedsAndHowFar(GameTestHelper helper) {
+		BlockPos at = new BlockPos(3, 1, 3);
+		VerdantBedBlockEntity bed = bed(helper, at, 10);
+		helper.setBlock(at.above(), Garden.SUNPETAL_CROP);
+		shut(helper, at.above());
+		helper.setBlock(at.above().north(), Blocks.GLOWSTONE);
+		bed(helper, new BlockPos(5, 1, 3), 0);
+		helper.setBlock(new BlockPos(5, 2, 3), Garden.DEWMOSS_CROP);
+		bed(helper, new BlockPos(6, 1, 3), 0);
+		helper.setBlock(new BlockPos(6, 2, 3), Garden.GLOAMCAP_CROP);
+		helper.setBlock(new BlockPos(1, 2, 3), JugcraftConcordance.LEY_PYLON);
+		helper.setBlock(new BlockPos(0, 2, 3), JugcraftConcordance.LEY_PYLON);
+		// The area is built now and never changes: its sample is taken early, away from the other tests' sampling ticks.
+		prefetch(helper, bed);
+		helper.runAtTickTime(44, () -> {
+			ServerLevel level = level(helper);
+			helper.setBlock(at.above(), Garden.SUNPETAL_CROP); // a random tick may have grown it meanwhile
+			bed.setNutrients(10);
+			bed.note("waiting", List.of()); // so a reading that noted would be caught
+			BlockPos plant = helper.absolutePos(at.above());
+			int moisture = bed.moisture();
+			HabitatInspection.State state = bed.inspect(level);
+			helper.assertTrue(state != null, "The bed is read");
+			Habitat habitat = state.habitat();
+			helper.assertTrue(state.sky() <= 2 && state.lamps() >= 13 && state.sky() == level.getBrightness(LightLayer.SKY, plant)
+					&& state.lamps() == level.getBrightness(LightLayer.BLOCK, plant) && habitat.light() == Math.max(state.sky(), state.lamps()),
+					"Walled and roofed, its light is the glowstone's: sky " + state.sky() + ", lamps " + state.lamps() + ", light " + habitat.light());
+			helper.assertTrue(habitat.diversity() == 2 && habitat.disturbance() == 2,
+					"The dewmoss 2 away counts, the gloamcap 3 away not; the pylon in the 5 by 5 disturbs it by 2, the one 3 away not: " + habitat);
+			helper.assertTrue(bed.nutrients() == 10 && bed.moisture() == moisture && bed.growth().equals("waiting") && age(helper, at.above()) == 0,
+					"Reading takes, dries and notes nothing");
+			Organism sunpetal = Garden.catalog().organism("jugcraft:sunpetal");
+			Verdict verdict = Verdict.of(sunpetal.niche(), habitat);
+			List<Text> lines = HabitatInspection.judged(state, sunpetal.niche(), verdict);
+			helper.assertTrue(lines.size() == Factor.values().length, "A line for each factor");
+			for (Factor factor : Factor.values()) {
+				Text row = lines.get(factor.ordinal());
+				Text said = (Text) row.args().get(0);
+				Text judged = (Text) row.args().get(1);
+				helper.assertTrue(row.key().equals("ecology.inspect.judged") && said.key().equals("ecology.inspect." + factor.id)
+						&& said.args().get(0).equals(habitat.get(factor)) && judged.key().equals("ecology.inspect." + verdict.fit(factor).id),
+						factor.id + " is judged as growth judges it: " + row);
+			}
+			helper.assertValueEqual(((Text) lines.get(Factor.LIGHT.ordinal()).args().get(0)).args(),
+					List.<Object>of(habitat.light(), state.sky(), state.lamps()), "light as sky and lamps");
+			helper.assertValueEqual(((Text) lines.get(Factor.DIVERSITY.ordinal()).args().get(0)).args(), List.<Object>of(2, Sampler.RADIUS),
+					"diversity names its reach");
+			helper.assertValueEqual(((Text) lines.get(Factor.DISTURBANCE.ordinal()).args().get(0)).args(), List.<Object>of(2, 5, 5, Sampler.HEIGHT),
+					"disturbance names its reach");
+			helper.assertValueEqual(((Text) lines.get(Factor.MOISTURE.ordinal()).args().get(0)).args(), List.<Object>of(moisture, 7, Garden.WATER_REACH),
+					"moisture is the bed's own and names the water's reach");
+			Text diversity = (Text) lines.get(Factor.DIVERSITY.ordinal()).args().get(1);
+			helper.assertTrue(diversity.key().equals("ecology.inspect.tolerable") && diversity.args().equals(List.of(3, 8, 1, 8)),
+					"Two kinds are only tolerable, best 3 to 8: " + diversity);
+			Text light = (Text) lines.get(Factor.LIGHT.ordinal()).args().get(1);
+			helper.assertTrue(light.key().equals("ecology.inspect.ideal") && light.args().equals(List.of(13, 15, 11, 15)), "Lamps alone light it well: " + light);
+			Text said = HabitatInspection.verdict(verdict);
+			helper.assertTrue(verdict.growth() == Verdict.Growth.TOLERATING && said.key().equals("ecology.inspect.verdict")
+					&& ((Text) said.args().get(0)).key().equals("ecology.growth.tolerating"), "Tolerating, for its diversity: " + said);
+			helper.assertTrue(grow(helper, at.above()) != OrganismCropBlock.Growth.WAITING && bed.growth().equals(verdict.growth().id),
+					"Growth reaches the same verdict from the same reading: " + bed.growth());
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-07 (C-P55): a bed's verdict, sent to clients for its crop's tooltip, stays until the bed's next random tick and then
+	 * clears once nothing that notes it stands on it, synced and saved cleared; a Verdant Heart's note stays (the Heart notes
+	 * its bed too); a crop planted again notes it again.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aVerdictClearsWhenThePlantGoes(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 1, 2);
+		VerdantBedBlockEntity bed = bed(helper, at, 10);
+		helper.setBlock(at.above(), Garden.SUNPETAL_CROP);
+		shut(helper, at.above());
+		BlockPos heartAt = new BlockPos(6, 1, 6);
+		VerdantBedBlockEntity heartBed = bed(helper, heartAt, 10);
+		helper.setBlock(heartAt.above(), Garden.VERDANT_HEART);
+		VerdantHeartBlockEntity heart = entity(helper, heartAt.above());
+		heart.awaken(KEEPER);
+		prefetch(helper, bed, heartBed);
+		helper.runAtTickTime(45, () -> {
+			ServerLevel level = level(helper);
+			helper.assertTrue(grow(helper, at.above()) == OrganismCropBlock.Growth.STALLED && bed.growth().equals("stalled") && !bed.reasons().isEmpty(),
+					"The sunpetal in the dark stalls and its bed says why: " + bed.reasons());
+			helper.setBlock(at.above(), Blocks.AIR);
+			helper.assertTrue(bed.growth().equals("stalled"), "Until the bed's next random tick the verdict stays");
+			tickBed(helper, at);
+			helper.assertTrue(bed.growth().isEmpty() && bed.reasons().isEmpty(), "With nothing on it, its random tick forgets the verdict");
+			CompoundTag sent = bed.getUpdateTag(level.registryAccess());
+			helper.assertTrue(sent.getStringOr("growth", "?").isEmpty() && sent.getStringOr("reasons", "?").isEmpty(), "Clients are sent none: " + sent);
+			VerdantBedBlockEntity copy = reload(helper, bed, bed.saveWithoutMetadata(level.registryAccess()));
+			helper.assertTrue(copy.growth().isEmpty() && copy.reasons().isEmpty() && copy.nutrients() == bed.nutrients(), "and it is saved cleared");
+			heart.beat(level);
+			String noted = heartBed.growth();
+			tickBed(helper, heartAt);
+			helper.assertTrue(!noted.isEmpty() && heartBed.growth().equals(noted), "A Verdant Heart's note stays: " + noted);
+			helper.setBlock(at.above(), Garden.SUNPETAL_CROP);
+			helper.assertTrue(grow(helper, at.above()) == OrganismCropBlock.Growth.STALLED && bed.growth().equals("stalled"), "Planted again, it is noted again");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-07 (C-P15, C-P56): an item held on a Verdant Bed is its own use. A Gourd Canteen's sip wets a dry bed to 7, by a plain
+	 * use and a sneaking one alike; a wet bed takes no sip; two sips in one tick are rate-limited to one; a neighbour's claim
+	 * refuses it and spends nothing; and a seed in hand plants on the bed without sneaking.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aCanteenWatersABed(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 1, 2);
+		BlockPos second = new BlockPos(4, 1, 2);
+		helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, 0));
+		ServerPlayer gardener = helper.makeMockServerPlayerInLevel();
+		gardener.setGameMode(GameType.SURVIVAL);
+		ItemStack sips = canteen(3);
+		helper.assertTrue(handUse(helper, gardener, at, sips, false).consumesAction(), "A plain use pours: the bed passes a held item on");
+		helper.assertTrue(helper.getBlockState(at).getValue(VerdantBedBlock.MOISTURE) == VerdantBedBlock.WET && GourdCanteenItem.water(sips) == 2,
+				"A sip wets the dry bed to 7: " + helper.getBlockState(at));
+		handUse(helper, gardener, at, sips, false);
+		helper.assertTrue(GourdCanteenItem.water(sips) == 2, "A wet bed takes no sip");
+		helper.setBlock(at, helper.getBlockState(at).setValue(VerdantBedBlock.MOISTURE, 1));
+		handUse(helper, gardener, at, sips, true);
+		helper.assertTrue(helper.getBlockState(at).getValue(VerdantBedBlock.MOISTURE) == VerdantBedBlock.WET && GourdCanteenItem.water(sips) == 1,
+				"A sneaking use pours too");
+		ItemStack full = canteen(3);
+		helper.setBlock(at, helper.getBlockState(at).setValue(VerdantBedBlock.MOISTURE, 0));
+		helper.setBlock(second, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, 0));
+		handUse(helper, gardener, at, full, false);
+		gardener.gameMode.useItemOn(gardener, helper.getLevel(), full, InteractionHand.MAIN_HAND, top(helper, second));
+		helper.assertTrue(helper.getBlockState(second).getValue(VerdantBedBlock.MOISTURE) == 0 && GourdCanteenItem.water(full) == 2,
+				"A second sip in the same tick is refused and spends nothing");
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(second), new UUID(14L, 9L));
+			helper.assertTrue(!handUse(helper, gardener, second, full, false).consumesAction()
+					&& helper.getBlockState(second).getValue(VerdantBedBlock.MOISTURE) == 0 && GourdCanteenItem.water(full) == 2,
+					"A claimed bed refuses the sip and spends nothing");
+		}
+		ItemStack seed = new ItemStack(Garden.SUNPETAL, 2);
+		handUse(helper, gardener, at, seed, false);
+		helper.assertTrue(helper.getBlockState(at.above()).is(Garden.SUNPETAL_CROP) && seed.getCount() == 1, "A seed in hand plants on the bed, not sneaking");
 		helper.succeed();
 	}
 }

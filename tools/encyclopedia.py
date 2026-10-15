@@ -229,6 +229,9 @@ INSPECT = {
     "pylon.fill_energy": "Fill it with Jugcraft Energy (%s JE a Ley Charge)",
     "pylon.lends": "It lends its charge to your rituals",
     "pylon.owned": "It is someone else's: it lends only to rituals they take part in",
+    # Concordance Chunk C, C-07: a Verdant Bed or a crop: what the plant on it needs, against what it has.
+    "garden.habitat": "What %s needs, and what it has",
+    "garden.here": "The habitat here",
     # Concordance Chunk C, C-01: an Alembic Crucible's slots, and the hint that a glass reads more.
     "crucible.buffer": "Waiting to go in: %s",
     "crucible.bottles": "Bottles and bowls: %s",

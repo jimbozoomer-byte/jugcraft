@@ -18,6 +18,10 @@ import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
@@ -70,6 +74,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 
 /**
@@ -103,6 +108,10 @@ import net.minecraft.world.level.material.Fluids;
  * ({@code jugcraft_concordance_anchor_gathering_jade}).</li>
  * <li><b>Root and Rivet's foundation</b> (Concordance Chunk C, C-04): the Rooted Thallite Foundation held, in the hand and
  * the hotbar, so its icon is seen in game ({@code jugcraft_rooted_thallite_foundation}; ITEM_ICONS step 7).</li>
+ * <li><b>A garden</b> (Concordance Chunk C, C-07): a Sunpetal grown ripe in a lit Verdant Bed, with random ticks held
+ * still so only the test grows it; Jade on the ripe crop shows its bed's last verdict, as it grew
+ * ({@code jugcraft_concordance_ripe_crop_jade}); the Inspect page, opened looking at the bed, judges each factor in words,
+ * the light as sky and lamps ({@code jugcraft_encyclopedia_inspect_bed}).</li>
  * <li><b>Expeditions and keys</b> ({@code jugcraft_encyclopedia_expedition}, {@code jugcraft_encyclopedia_keys}), and the
  * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
  * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
@@ -135,6 +144,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				crucibleInspection(context, server);
 				anchorReadiness(context, server);
 				rootedFoundation(context, server);
+				gardenInspection(context, server);
 				expeditionsAndKeys(context, server);
 				creative(context, server);
 				sizes(context);
@@ -638,6 +648,93 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.waitTicks(10);
 		context.takeScreenshot("jugcraft_rooted_thallite_foundation");
 		server.runOnServer(minecraft -> first(minecraft).setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND)));
+		context.waitTicks(5);
+	}
+
+	/**
+	 * Concordance Chunk C, C-07 (C-P54, C-P55): a Sunpetal grown ripe in a lit Verdant Bed. The client holds its bed's last
+	 * verdict, which Jade shows on the ripe crop as it grew; the Inspect page, opened looking at the bed, judges each factor
+	 * in words, the light as sky and lamps. Random ticks are held still meanwhile, so only this test grows the crop.
+	 */
+	private static void gardenInspection(ClientGameTestContext context, TestDedicatedServerContext server) {
+		server.runCommand("gamerule minecraft:random_tick_speed 0");
+		BlockPos stand = context.computeOnClient(client -> client.player.blockPosition());
+		BlockPos bedAt = stand.offset(0, 0, 2);
+		BlockPos plant = bedAt.above();
+		BlockPos lamp = plant.east();
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			for (int dx = 0; dx <= 1; dx++) {
+				for (int dz = 1; dz <= 2; dz++) {
+					level.setBlockAndUpdate(stand.offset(dx, 0, dz), Blocks.AIR.defaultBlockState());
+					level.setBlockAndUpdate(stand.offset(dx, 1, dz), Blocks.AIR.defaultBlockState());
+				}
+			}
+			level.setBlockAndUpdate(bedAt, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+			level.setBlockAndUpdate(plant, Garden.SUNPETAL_CROP.defaultBlockState());
+			level.setBlockAndUpdate(lamp, Blocks.GLOWSTONE.defaultBlockState());
+			if (level.getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed) {
+				bed.awaken(first(minecraft).getUUID());
+				bed.setNutrients(10);
+			}
+		});
+		context.waitTicks(20); // the light engine
+		String grown = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			for (int step = 0; step < OrganismCropBlock.MAX_AGE; step++) {
+				BlockState state = level.getBlockState(plant);
+				if (!(state.getBlock() instanceof OrganismCropBlock crop) || crop.grow(level, plant, state, level.getRandom(), true) != OrganismCropBlock.Growth.GREW) {
+					return "";
+				}
+			}
+			return level.getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed ? bed.growth() : "";
+		});
+		check(!grown.isEmpty(), "The sunpetal should grow ripe in its lit bed, its bed noting its pace");
+		context.waitTicks(10);
+		String seen = context.computeOnClient(client -> client.level.getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed
+				&& client.level.getBlockState(plant).getBlock() instanceof OrganismCropBlock crop && crop.isMaxAge(client.level.getBlockState(plant)) ? bed.growth() : "");
+		Jugcraft.LOGGER.info("[encyclopedia-check] a ripe sunpetal: its bed noted {}, the client holds {}", grown, seen);
+		check(seen.equals(grown), "The client should hold the ripe crop's last verdict, which Jade now shows: " + seen + " vs " + grown);
+		context.getInput().lookAt(plant);
+		context.waitTicks(20);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			context.runOnClient(client -> client.gui.toastManager().clear());
+			context.waitTicks(5);
+			context.takeScreenshot("jugcraft_concordance_ripe_crop_jade");
+		} else {
+			Jugcraft.LOGGER.info("[encyclopedia-check] Jade is not loaded: no shot of a ripe crop's lines");
+		}
+		context.getInput().lookAt(bedAt);
+		context.waitTicks(5);
+		open(context);
+		String page = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).page());
+		List<String> rows = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			return current == null ? List.<String>of() : current.rows().stream().map(row -> row.text().getString()).toList();
+		});
+		boolean judged = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			List<EncyclopediaPayload.Row> found = current == null ? List.of() : current.rows();
+			return found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.light"))
+					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.diversity"))
+					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.verdict"));
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] looking at a bed: page {}, rows {}", page, rows);
+		check(page.equals("inspect") && judged && rows.stream().noneMatch(row -> row.contains("jugcraft.") || row.contains("jugcraft:")),
+				"Looking at a bed, the Inspect page should judge each factor in words, the light as sky and lamps: " + rows);
+		context.runOnClient(client -> client.gui.toastManager().clear());
+		context.waitTicks(5);
+		context.takeScreenshot("jugcraft_encyclopedia_inspect_bed");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.getInput().lookAt(0.0F, 30.0F);
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			level.setBlockAndUpdate(plant, Blocks.AIR.defaultBlockState());
+			level.setBlockAndUpdate(lamp, Blocks.AIR.defaultBlockState());
+			level.setBlockAndUpdate(bedAt, Blocks.AIR.defaultBlockState());
+		});
+		server.runCommand("gamerule minecraft:random_tick_speed 3");
 		context.waitTicks(5);
 	}
 

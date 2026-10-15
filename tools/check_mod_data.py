@@ -14258,7 +14258,9 @@ def check_diagnostics(co, root, lang):
         err("local/peepo/CrucibleCompanion.needed: an incompatible formula asks for nothing (C-01)")
     for path in sorted((ROOT / "src" / "client" / "java").rglob("*.java")):
         text = source(path)
-        for needle in ("ConcordanceData.rules()", "Alchemy.catalog()", ".incompatibility()"):
+        for needle in ("ConcordanceData.rules()", "Alchemy.catalog()", ".incompatibility()",
+                       # Concordance Chunk C, C-07: the garden's organisms are the server's rules too.
+                       "Garden.catalog()", "Garden.organism(", ".organism()", ".niche()"):
             if needle in text:
                 err(f"{path.relative_to(ROOT)}: the Concordance's rules are the server's (ConcordanceData.java:28); a client never reads them ({needle})")
     for path in sorted((ROOT / "src" / "gametest" / "java").rglob("*.java")):
@@ -14757,6 +14759,61 @@ def check_ecology(co, root, lang, registered, research):
         check_geckolib(name, java(f"{entity}.java", garden), uvs, sizes)
     if not re.search(r"HEART_ENTITY", java("CircleClient.java", CLIENT_JAVA_ROOT)):
         err("the garden's living devices must be drawn by GeckoLib on the client")
+    # Concordance Chunk C, C-07 (C-P14, C-P54 to C-P57): the habitat made visible. The Inspect page's lines are
+    # HabitatInspection's, judged by the verdict growth reaches, the light given as sky and lamps and each reach named from
+    # Sampler; the bed's reading only reads; a bed's random tick forgets a verdict once nothing that notes it stands on it,
+    # and saves that; an item held in the main hand is its own use on a bed; a canteen wets a bed through the bed's own rule
+    # (RateGate, then Authority) and spends a sip only when it does; Jade shows a ripe crop's last verdict; the compost page
+    # is the generator's and JEI shows it; every new word has its text. Each judgement names all four of the range's
+    # bounds (least, ideal from, ideal to, most), and each reach is its own line's argument.
+    inspection = java("ecology/HabitatInspection.java")
+    judged = _java_body(inspection, "public static List<Text> judged(")
+    line = _java_body(inspection, "static Text line(")
+    reaches = ('"ecology.inspect.moisture", value, Factor.MOISTURE.max, state.waterReach())',
+               '"ecology.inspect.light", value, state.sky(), state.lamps())',
+               '"ecology.inspect.diversity", value, Sampler.RADIUS)', "int square = 2 * Sampler.RADIUS + 1;",
+               '"ecology.inspect.disturbance", value, square, square, Sampler.HEIGHT)')
+    if "verdict.fit(factor)" not in judged or "Niche.Range.any(factor)" not in judged or not all(n in line for n in reaches) \
+            or any(judged.count(f"range.{bound}()") != 4 for bound in ("min", "idealMin", "idealMax", "max")):
+        err("concordance/ecology/HabitatInspection: each factor is judged by the verdict's own fit against all four bounds, its "
+            "reach named from Sampler, the light given as sky and lamps (C-07, C-P14)")
+    bed = java("VerdantBedBlockEntity.java", garden)
+    inspect = _java_body(bed, "public HabitatInspection.@Nullable State inspect(ServerLevel level)")
+    if "habitat(level)" not in inspect or "LightLayer.SKY" not in inspect or "LightLayer.BLOCK" not in inspect \
+            or any(n in inspect for n in ("note(", "sync(", "setChanged(", "take(", "give(", "setBlock(")):
+        err("VerdantBedBlockEntity.inspect: the habitat growth reads and the light's two sources, and it only reads (C-07)")
+    forget = _java_body(bed, "public void forgetVerdict()")
+    if 'note("", List.of());' not in forget or "setChanged();" not in forget or re.search(r"strain|ripened|graft|nutrients", forget):
+        err("VerdantBedBlockEntity.forgetVerdict: clears only the verdict, sends it and saves it (C-07, C-P55)")
+    bed_block = java("VerdantBedBlock.java", garden)
+    tick = _java_body(bed_block, "protected void randomTick(")
+    if "!(above.getBlock() instanceof OrganismCropBlock) && !above.is(Garden.VERDANT_HEART)" not in tick or "bed.forgetVerdict();" not in tick:
+        err("VerdantBedBlock.randomTick: forgets a verdict once neither a crop nor a Verdant Heart stands on the bed (C-07, C-P55)")
+    pour = _java_body(bed_block, "public static boolean pour(ServerLevel level, BlockPos pos, ServerPlayer player)")
+    if not 0 <= pour.find('RateGate.allow(player, "garden", 4)') < pour.find("Authority.mayChange(level, player, pos)") < pour.find("level.setBlock("):
+        err("VerdantBedBlock.pour: a canteen's sip wets a bed only for someone who may change it, rate-gated (C-07, C-P56)")
+    use = _java_body(bed_block, "protected InteractionResult useWithoutItem(")
+    if not re.search(r"if \(!player\.getMainHandItem\(\)\.isEmpty\(\)\) \{\s*return InteractionResult\.PASS;", use) \
+            or not 0 <= use.find("getMainHandItem().isEmpty()") < use.find("RateGate.allow("):
+        err("VerdantBedBlock.useWithoutItem: an item in the main hand is its own use (a seed plants, a canteen pours); only an "
+            "empty hand reports, wakes or tends (C-07, C-P56)")
+    canteen = java("GourdCanteenItem.java", JAVA_ROOT / "agriculture")
+    spend = canteen.find("stack.set(JugcraftAgriculture.CANTEEN_WATER, water(stack) - 1);")
+    if "VerdantBedBlock.pour(server, pos, gardener)" not in canteen or not 0 <= canteen.find("VerdantBedBlock.pour(") < spend:
+        err("GourdCanteenItem.useOn: a sip on a Verdant Bed goes through VerdantBedBlock.pour before it is spent (C-07, C-P56)")
+    client = java("JugcraftJadeClient.java", CLIENT_JAVA_ROOT / "compat")
+    crop_tip = client[client.find("private enum CropTooltip"):client.find("private enum MachineTooltip")]
+    if "!crop.isMaxAge(state) &&" in crop_tip or '"tooltip.jugcraft.concordance.jade.as_it_grew"' not in crop_tip:
+        err("JugcraftJadeClient CropTooltip: a ripe crop shows its bed's last verdict, as it grew (C-07, C-P55)")
+    if (load(ASSETS / "recipe_view.json") or {}).get("garden_compost") != ec.compost_view():
+        err("recipe_view.json garden_compost is not tools/concordance_ecology.py's compost_view(): run tools/generate_material_data.py")
+    jei = java("JugcraftJeiPlugin.java", CLIENT_JAVA_ROOT / "compat")
+    if '"garden_compost"' not in jei or '"jei.jugcraft.garden.compost"' not in jei or "addCompostInfo(registration);" not in jei:
+        err("JugcraftJeiPlugin: shows recipe_view.json's garden_compost as the Mulch Maw's information pages (C-07, C-P57)")
+    for key in (f"jei.{MOD}.garden.compost", f"tooltip.{MOD}.concordance.jade.as_it_grew",
+                f"encyclopedia.{MOD}.inspect.garden.habitat", f"encyclopedia.{MOD}.inspect.garden.here"):
+        if key not in lang:
+            err(f"garden: missing lang {key}")
 
 
 def check_celestial(co, root, lang, registered, research):
@@ -16708,7 +16765,9 @@ def check_encyclopedia(root, lang):
                            # Concordance Chunk C, C-01: reading a crucible shows no sign, holds, heats, works or saves nothing.
                            r"Signs\.(?:show|flow)\(|\.hold\(|setTemperature\(|useEmpty\(|setChanged\(|sendBlockUpdated\(|\.automate\("
                            # Concordance Chunk C, C-03: reading an anchor marks no part and never takes the chat reading's path.
-                           r"|markReadiness\(|markFaults\(|\.status\([a-z]+, [a-z]+\)")
+                           r"|markReadiness\(|markFaults\(|\.status\([a-z]+, [a-z]+\)"
+                           # Concordance Chunk C, C-07: reading a bed or a crop notes, grows, feeds, takes and forgets nothing.
+                           r"|\.note\(|forgetVerdict\(|forgetSample\(|\.take\(|\.give\(|\.grow\(|\.hasten\(")
     for name, source in builders.items():
         if forbidden.search(source):
             err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
@@ -16733,6 +16792,18 @@ def check_encyclopedia(root, lang):
         err("concordance/encyclopedia/InspectPage.java: a crucible's makeup is read with an Assay Glass carried, at the glass's level, through CrucibleInspection")
     if "crucible.step() == 0 || crucible.incompatibility() != null" not in branch or "Alchemy::harmfulStatus" not in branch:
         err("concordance/encyclopedia/InspectPage.java: the risk line names a mixture that is not its formula's batch, harm judged by the server (C-01)")
+    # Concordance Chunk C, C-07 (C-P14, C-P54): a Verdant Bed, or a crop through the bed below it, within the reader's own
+    # block reach; the reading is the bed's own and is judged by the plant's niche as growth judges it; a dormant bed is
+    # not read. (That the page writes nothing is the forbidden list above.)
+    garden_branch = _java_body(inspect, "private static void garden(")
+    if "entity instanceof VerdantBedBlockEntity bed && player.isWithinBlockInteractionRange(pos, GARDEN_REACH)" not in inspect \
+            or "getBlock() instanceof OrganismCropBlock crop" not in inspect \
+            or inspect.count("isWithinBlockInteractionRange(pos, GARDEN_REACH)") != 2 or not re.search(r"\bdouble GARDEN_REACH = 1\.0;", inspect):
+        err("concordance/encyclopedia/InspectPage.java: a bed or a crop is read only within the reader's own block reach (C-07)")
+    if "bed.awake() ? bed.inspect(level) : null" not in garden_branch or "Verdict.of(niche, state.habitat())" not in garden_branch \
+            or "HabitatInspection.judged(state, niche, verdict)" not in garden_branch:
+        err("concordance/encyclopedia/InspectPage.java garden: the bed's own reading, judged by the plant's niche as growth "
+            "judges it; a dormant bed is not read (C-07)")
 
     # The keys: every Jugcraft key has its name and its help on the Keys page.
     keys = set()
@@ -16911,6 +16982,8 @@ AUTHORITY_ROUTES = {
     "ConcordanceEffects.java": ["Authority.answering(level, behind(context))", "Authority.mayStrike(context.level(), context.actor(), behind(context), target)"],
     "Illumination.java": ["return Authority.mayChange(level, player, pos);"],
     "garden/GleanerBlockEntity.java": ["Authority.answering(level, keeper)", "Authority.mayChange(level, answering, pos)"],
+    # Concordance Chunk C, C-07 (C-P56): a canteen's sip on a Verdant Bed.
+    "garden/VerdantBedBlock.java": ["Authority.mayChange(level, player, pos)"],
     "spirits/ClockworkPorterEntity.java": ["Authority.answering(level, owner) == null", "Authority.mayChangeFor(level, owner, source)",
                                            "Authority.mayChangeFor(level, owner, target)",
                                            "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],
