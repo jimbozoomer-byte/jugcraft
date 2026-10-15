@@ -2,7 +2,9 @@
 
 Design note, 15 October 2026, before implementation. Owner-authorized remaining tree roster; actual tool: OpenAI Codex (GPT-6).
 
-**Not started.** After this note was published, the owner instructed us to finish batch 3 and not start the next batch. This document remains a proposal; implementation awaits renewed direction.
+**In progress, owner authorized 15 October 2026.** Public branch `codex/tree-generation-batch-4` builds on approved batch 3 (PR #388, which includes batch 2). Scope is snowpetal cherry, normal/tall shimmer birch and their four biome mixes. Later batches, including bald cypress and magnolia, are not started. Actual tool: OpenAI Codex (GPT-6).
+
+Approved refinements: Glimmer Grove explicitly uses 55% normal jacaranda, 15% big jacaranda, 20% normal shimmer birch and 10% red mushroom; its previous oak share was 18%. Shimmer saplings choose normal/tall shapes at 80%/20%. Existing biome placement counts remain unchanged. Validation and the inspection-world handoff are pending.
 
 ## Separate the tree from its timber
 
