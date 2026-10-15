@@ -75,6 +75,7 @@ public final class JugcraftLairs {
 	public static Block GROUND_TERMINAL;
 	public static Block MOONWOOD_LEAVES;
 	public static Block WARDEN_BELL;
+	public static Block RAKED_TURF;
 	public static Block MOURNING_WREATH;
 	public static Item MOURNING_WREATH_ITEM;
 	public static Item DEATH_KNELL;
@@ -147,6 +148,7 @@ public final class JugcraftLairs {
 		// The Moonlit Ring's (docs/features/moonlit-ring.md): the giant oaks' leaves, which never fall, and its bells.
 		MOONWOOD_LEAVES = fixture("moonwood_leaves", Block::new, MapColor.PLANT, SoundType.GRASS, 0, Fit.SEE_THROUGH);
 		WARDEN_BELL = fixture("warden_bell", WardenBellBlock::new, MapColor.METAL, SoundType.ANVIL, 0, Fit.SEE_THROUGH);
+		RAKED_TURF = fixture("raked_turf", RakedTurfBlock::new, MapColor.PLANT, SoundType.MOSS, 0, Fit.SOLID);
 
 		ResourceKey<Block> wreathKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("mourning_wreath"));
 		MOURNING_WREATH = Registry.register(BuiltInRegistries.BLOCK, wreathKey, new MourningWreathBlock(BlockBehaviour.Properties.of()

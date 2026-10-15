@@ -6,7 +6,8 @@ is read, traced or copied.
 - Moonwood Leaves: the giant oaks' foliage at night, dark blue-green, each cluster of leaves lit silver along its
   moonward (top left) edge, a few gaps between them cut out;
 - the Warden Bell: its silver (a soft highlight down the bell's moonward side, darker toward its lip), its yoke of old
-  dark wood banded with iron, its clapper of dark iron, and its pull rope of twisted hemp.
+  dark wood banded with iron, its clapper of dark iron, and its pull rope of twisted hemp;
+- raked turf (the Alpha's trail): the clearing's moss torn into furrows by his claws, the dark earth in them.
 
 The models' faces (tools/lair_data.py) take the textures at a texel a pixel.
 """
@@ -129,6 +130,46 @@ def bell_rope():
     return img
 
 
+MOSS = pal("2e4519", "3d5a22", "4d6f2a", "5f8433", "74983d")
+EARTH = pal("2a1c12", "3b2818", "513822", "684a2e")
+
+
+def raked_turf():
+    """Raked turf (the Alpha's trail): the clearing's moss torn by his claws, three furrows raked across it on a slant,
+    the dark earth showing in them, a lip of torn moss lit along each furrow's upper edge."""
+    img = new(MOSS[2])
+    for y in range(16):
+        for x in range(16):
+            # The moss in flat tufts, each lit at its top left.
+            tuft = (x // 4 + y // 4) % 2
+            img.putpixel((x, y), MOSS[3] if tuft and (x % 4, y % 4) in ((0, 0), (1, 0), (0, 1)) else MOSS[2 + tuft - 1 + 1]
+                         if tuft else MOSS[2])
+    for k in range(3):
+        for i in range(16):
+            x = i
+            y = (i // 2 + 2 + k * 5) % 16
+            for dy in (0, 1):
+                img.putpixel((x, (y + dy) % 16), EARTH[1 + dy])
+            img.putpixel((x, (y - 1) % 16), MOSS[4])
+            img.putpixel((x, (y + 2) % 16), MOSS[0])
+    return img
+
+
+def raked_turf_side():
+    """Raked turf's side: the torn moss along the top, ragged, over its dark earth."""
+    img = new(EARTH[1])
+    for x in range(16):
+        depth = 3 + (x * 7) % 3
+        for y in range(16):
+            if y < depth:
+                img.putpixel((x, y), MOSS[3] if y == 0 else MOSS[2])
+            elif (x * 5 + y * 3) % 11 == 0:
+                img.putpixel((x, y), EARTH[0])
+            elif (x + y * 7) % 13 == 0:
+                img.putpixel((x, y), EARTH[3])
+    return img
+
+
 def moonlit_ring_textures():
     return {
         ("block", "moonwood_leaves"): moonwood_leaves(),
@@ -136,6 +177,8 @@ def moonlit_ring_textures():
         ("block", "warden_bell_yoke"): bell_yoke(),
         ("block", "warden_bell_clapper"): bell_clapper(),
         ("block", "warden_bell_rope"): bell_rope(),
+        ("block", "raked_turf"): raked_turf(),
+        ("block", "raked_turf_side"): raked_turf_side(),
         ("item", "howling_totem"): item_icons.draw("howling_totem"),
     }
 

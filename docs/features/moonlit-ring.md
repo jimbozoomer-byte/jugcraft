@@ -162,7 +162,7 @@ The Moonlit Ring is its own dimension, so nothing here changes the Overworld. Th
 
 The shared framework's defaults hold: four players and eight instances, Grave Goods on death.
 
-Part 2, the Alpha Werewolf (to be recorded in `alpha-werewolf.md`), adds:
+Part 2, the Alpha Werewolf ([alpha-werewolf.md](alpha-werewolf.md)), adds:
 - the fight in the ring: his hide, which halves every blow but silver's; his waking howl and his three Packmates;
 - the Hunt every 24 seconds: the marked howl, his hiding in a bell clearing with a trail of raked turf to it, the ambush and the pounce, and the Warden Bell that flushes him out if it is rung in time;
 - his attacks: the Claw Rake, the Pounce and the Rending Howl; the Tree Leap and the Hamstring Bite of the Moon's Fury at half health; the Last Hunt's changed route below a quarter;
