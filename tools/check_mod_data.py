@@ -12002,6 +12002,7 @@ def check_concordance(registered):
     check_winter_brine(co, root, lang)
     check_diagnostics(co, root, lang)
     check_workshop_products(co, root, lang)
+    check_poultice_credit(co, lang)
     check_ecology(co, root, lang, registered, research)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
@@ -13799,7 +13800,8 @@ def check_winter_brine(co, root, lang):
 # Each product's consumer in the game's code: (path under src/main/java/io/github/jimbozoomer/jugcraft, text that must be
 # there). Concordance Chunk C, C-02 (09:124: "no decorative recipes with no consumer").
 PRODUCT_CONSUMERS = {
-    "stillroot_poultice": [("concordance/BrewItem.java", "applySalve(level, server, stack, target, target == player ? null : player);")],
+    "stillroot_poultice": [("concordance/BrewItem.java", "applySalve(level, server, stack, target, target == player ? null : player);"),
+                           ("lair/Encounter.java", "public static void mended(ServerPlayer helper, ServerPlayer patient)")],
     "kiln_draught": [("lair/MoltenSlagBlock.java", "living.hasEffect(MobEffects.FIRE_RESISTANCE)")],
     "winter_brine": [("lair/yeti/YetiKingEntity.java", "Frostward.warded(player)")],
 }
@@ -13943,6 +13945,73 @@ def check_workshop_products(co, root, lang):
     for key in (f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare", f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare.charm"):
         if key not in lang:
             err(f"Kiln Draught: missing lang {key}")
+
+
+def check_poultice_credit(co, lang):
+    """Concordance Chunk C, C-02 (C-P8; docs/features/lair-encounter-credit.md): a Stillroot Poultice another player put
+    on someone in a lair fight credits its helper with each heal its Regeneration gives, at most one health a heal and
+    within the fight's healing bounds; the heals are read from Regeneration's own time (vanilla's 50 >> amplifier, the
+    interval check_workshop_products holds tools/concordance_alchemy.py REGENERATION_INTERVAL to, measured by
+    LairEncounterGameTests.regenerationHealsOnItsVanillaInterval) at each tick's end, at each blow (before the fight's
+    hurt is settled) and at each Concordance heal, with no mixin; only a poultice put on another player starts a note,
+    which is never saved and is forgotten with the fight; the poultice is a salve of the status Verdance brews, and the
+    dossiers name its credit while it is brewed."""
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    al = co.alchemy
+    encounter = source(JAVA_ROOT / "lair" / "Encounter.java")
+    brew_item = source(JAVA_ROOT / "concordance" / "BrewItem.java")
+    lairs = source(JAVA_ROOT / "lair" / "Lairs.java")
+    dossiers = source(JAVA_ROOT / "lair" / "LairDossiers.java")
+    found = re.search(r'public static final String POULTICE_STATUS = "([a-z0-9_.:-]+)";', encounter)
+    status = found.group(1) if found else None
+    if status is None or al.PROPERTIES.get("verdance", {}).get("status") != status:
+        err("lair/Encounter.java POULTICE_STATUS: the status Verdance brews (tools/concordance_alchemy.py PROPERTIES), whose "
+            "heals a poultice's helper is credited for (C-02)")
+    poultice = al.PRODUCTS.get("stillroot_poultice", {})
+    if poultice.get("form") != "salve" or al.PROPERTIES.get(poultice.get("property"), {}).get("status") != status:
+        err("tools/concordance_alchemy.py PRODUCTS: the Stillroot Poultice is a salve carrying Encounter.POULTICE_STATUS")
+    salve = _java_body(brew_item, "private static void applySalve(")
+    for needle in ("actor instanceof ServerPlayer", "target instanceof ServerPlayer", "Alchemy.product(stack)",
+                   "Alchemy.STILLROOT_POULTICE.equals(product.id())", "int hadTicks =",
+                   "observer.mended((ServerPlayer) actor, (ServerPlayer) target)"):
+        if needle not in salve:
+            err(f"concordance/BrewItem.applySalve: only a poultice put on another player tells the lairs ({needle})")
+    if brew_item.count("observer.mended(") != 1:
+        err("concordance/BrewItem.java: only applySalve tells of a poultice, never a draught drunk or a salve on oneself")
+    if "BrewItem.observe(Encounter::mended);" not in lairs:
+        err("lair/Lairs.java: the lairs observe the poultice (BrewItem.observe(Encounter::mended))")
+    register = _java_body(encounter, "static void register(")
+    read = _java_body(encounter, "private void readMending(")
+    for needle, where, why in (
+            ("ServerTickEvents.END_SERVER_TICK.register(", register, "read at each tick's end"),
+            ("fight.readMending(player, before[0], player.getHealth());", register, "read at each blow"),
+            ("fight.readMending(player, player.getHealth() - amount, player.getHealth());",
+             _java_body(encounter, "public static void helped("), "read at each Concordance heal"),
+            ("50 >> amplifier", _java_body(encounter, "public static int regenerationHeals("), "counted by vanilla's interval"),
+            ("Math.min(rose, heals * REGENERATION_HEAL)", read, "at most one health a heal"),
+            ("creditHealing(mending.helper(), patient, health,", read, "credited within the fight's healing bounds"),
+            ("regeneration.getDuration() > mending.left()", read, "ended once the Regeneration is no longer the poultice's"),
+            ("helper == patient", _java_body(encounter, "public static void mended("), "never the patient's own")):
+        if needle not in where:
+            err(f"lair/Encounter.java: a poultice's heals are {why} ({needle})")
+    blow, settle = register.find("fight.readMending(player, before[0]"), register.find("fight.settle(player, before[0])")
+    if blow < 0 or settle < 0 or blow > settle:
+        err("lair/Encounter.java: a blow reads the poultice before it settles the fight's hurt (or the heal is taken twice)")
+    if "mends.clear();" not in _java_body(encounter, "private void forget("):
+        err("lair/Encounter.java: a forgotten fight forgets its poultices")
+    if "com.mojang.serialization" in encounter:
+        err("lair/Encounter.java: nothing about a fight in progress is saved, the poultice's note included")
+    folders = [JAVA_ROOT / "mixin", ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin"]
+    for path in sorted(p for folder in folders if folder.is_dir() for p in folder.rglob("*.java")):
+        if re.search(r'RegenerationMobEffect|MobEffectInstance|tickEffects|"heal', path.read_text(encoding="utf-8")):
+            err(f"{path.relative_to(ROOT)}: no mixin for the poultice's credit (CLAUDE.md; C-02 reads Regeneration's own time)")
+    keeper = _java_body(dossiers, "private static void keeper(")
+    if '"encyclopedia.jugcraft.dossier.credit.poultice"' not in keeper or "if (poultices())" not in keeper \
+            or "brews(verdance, Encounter.POULTICE_STATUS)" not in _java_body(dossiers, "private static boolean poultices("):
+        err("lair/LairDossiers.java: each keeper's dossier names the poultice's credit while the Concordance's Verdance brews it")
+    if f"encyclopedia.{MOD}.dossier.credit.poultice" not in lang:
+        err(f"encyclopedia: missing lang encyclopedia.{MOD}.dossier.credit.poultice (tools/encyclopedia.py DOSSIER)")
 
 
 def check_diagnostics(co, root, lang):

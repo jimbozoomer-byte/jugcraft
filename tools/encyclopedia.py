@@ -291,6 +291,10 @@ DOSSIER = {
                           "of his bowl",
     "credit.wards": "Cast a ward after the keeper wakes: one cast before is not counted. Those who fall are paid when "
                     "they are back on their feet, and those who leave the game when they come back",
+    # Concordance Chunk C (C-02, C-P8): after credit.wards, while the Concordance's Verdance brews Regeneration.
+    "credit.poultice": "A Stillroot Poultice you put on a friend in the fight counts as healing: each health its "
+                       "Regeneration then gives back of what the keeper's side took from them, while they stay in the "
+                       "fight. One on yourself earns nothing, and two on one friend heal, and earn, no faster than one",
     "won": "You have beaten this keeper: %s",
     "first_win": "A first win always brings the %s",
     "first_win.pair": "A first win always brings one of two trophies, at random: the %s or the %s",

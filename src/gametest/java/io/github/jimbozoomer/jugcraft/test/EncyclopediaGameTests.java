@@ -663,8 +663,9 @@ public class EncyclopediaGameTests {
 	}
 
 	/**
-	 * Every keeper found and beaten: each dossier is whole, every recipe named is drawn as a grid, in order, within
-	 * PageWriter.MAX_GRIDS, and no row is dropped. A keeper past the bound needs the page's layout changed first.
+	 * Every keeper found and beaten: each dossier is whole (with the Stillroot Poultice's credit while the Concordance is
+	 * on, Chunk C, C-02), every recipe named is drawn as a grid, in order, within PageWriter.MAX_GRIDS, and no row is
+	 * dropped. A keeper past the bound needs the page's layout changed first.
 	 */
 	@GameTest(maxTicks = 20)
 	public void theExpeditionsPageHoldsEveryKeeper(GameTestHelper helper) {
@@ -694,8 +695,45 @@ public class EncyclopediaGameTests {
 					"entity.jugcraft." + boss.boss, dossier + boss.lair.id + ".credit", dossier + "credit.wards", dossier + "won",
 					dossier + boss.lair.id + ".leave", dossier + "grave_goods"));
 			boss.loot.forEach(loot -> whole.add("jei.jugcraft.acquire." + loot));
+			if (JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+				whole.add(dossier + "credit.poultice");
+			}
 			helper.assertTrue(keys.containsAll(whole), boss + "'s dossier is whole: " + keys);
 		}
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk C (C-02, C-P8): a keeper's dossier says a Stillroot Poultice on a friend counts as healing, with a
+	 * salve's icon, right after the wards' rule. With the Concordance off it is not named, and the wards' rule stays.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theDossiersNameThePoulticesCredit(GameTestHelper helper) {
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftLairs.FEATURE) || !JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			helper.succeed();
+			return;
+		}
+		String dossier = "encyclopedia.jugcraft.dossier.";
+		ServerPlayer player = player(helper);
+		TrickOrTreat.award(player, LairDossiers.Boss.CINDER_TYRANT.advancement);
+		List<EncyclopediaPayload.Row> rows = section(page(build(player), LairDossiers.PAGE), Lair.CINDER_KILN);
+		List<String> keys = rows.stream().map(row -> key(row.text())).toList();
+		EncyclopediaPayload.Row poultice = row(rows, dossier + "credit.poultice");
+		helper.assertTrue(poultice != null && poultice.icons().equals(List.of(JugcraftConcordance.SALVE))
+				&& keys.indexOf(dossier + "credit.poultice") == keys.indexOf(dossier + "credit.wards") + 1,
+				"beaten, the keeper's dossier names the poultice's credit, with a salve, after the wards' rule: " + keys);
+
+		// The Concordance off: not named (switched back at once; the server runs other tests).
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		List<String> off;
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			off = section(page(build(player), LairDossiers.PAGE), Lair.CINDER_KILN).stream().map(row -> key(row.text())).toList();
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		helper.assertTrue(off.contains(dossier + "credit.wards") && !off.contains(dossier + "credit.poultice"),
+				"with the Concordance off, the wards' rule and no poultice: " + off);
 		helper.succeed();
 	}
 

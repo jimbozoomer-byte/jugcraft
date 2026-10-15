@@ -32,12 +32,13 @@ import org.jspecify.annotations.Nullable;
  * B-02): a dossier for each lair the player has found, and nothing for one they have not (A-D9). A lair is found by
  * carrying its token (its rite is then shown: what to make, where and when, and whether it waits for the Halloween
  * season); its keeper by meeting them (being in the lair, being owed its reward) or beating them, when the dossier adds
- * how support earns a share of the reward (what counts in that lair: the keeper's own creatures, healing, wards and any
- * objective), the trophy a first win brings (one, or one of a pair at random), what the keeper gives (the acquisition
- * text JEI shows, "with the default data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token
- * and the pieces the loot makes, how to leave, and, in a fight, the player's own part in it. The Glacier Hall's rite
- * also names what readies a player for his frost (Chunk B, B-08: Winter Brine and the Yeti Mitten), and the Cinder
- * Kiln's what readies a player for his slag and flame (Chunk C, C-02: the Kiln Draught and the Salamander Charm).
+ * how support earns a share of the reward (what counts in that lair: the keeper's own creatures, healing, a Stillroot
+ * Poultice on a friend while the Concordance brews it (Chunk C, C-02), wards and any objective), the trophy a first win
+ * brings (one, or one of a pair at random), what the keeper gives (the acquisition text JEI shows, "with the default
+ * data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token and the pieces the loot makes, how
+ * to leave, and, in a fight, the player's own part in it. The Glacier Hall's rite also names what readies a player for
+ * his frost (Chunk B, B-08: Winter Brine and the Yeti Mitten), and the Cinder Kiln's what readies a player for his slag
+ * and flame (Chunk C, C-02: the Kiln Draught and the Salamander Charm).
  * <p>
  * Discovery is read, not saved: the inventory, {@link Lairs#VISIT}, {@link LairRewards#OWED} and the first-win
  * advancements. So a player who went in, left, and used up their token (a Cursed Spindle, a Frost Horn, a Kiln Seal)
@@ -257,6 +258,10 @@ public final class LairDossiers {
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier." + boss.lair.id + ".credit", number(Encounter.HEALING),
 				number(Encounter.WARDING), (int) Encounter.REACH));
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit.wards"));
+		// Concordance Chunk C (C-02): a Stillroot Poultice on a friend is healing too, named while the Concordance brews it.
+		if (poultices()) {
+			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit.poultice"), null, items(List.of("salve")));
+		}
 		List<Item> trophies = items(boss.trophies);
 		if (discovery == Discovery.DEFEATED) {
 			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.won",
@@ -294,6 +299,15 @@ public final class LairDossiers {
 		if (visit != null && visit.lair().equals(boss.lair.id)) {
 			share(player, out);
 		}
+	}
+
+	/**
+	 * Whether a Stillroot Poultice can be brewed here (Concordance Chunk C, C-02): the Concordance is on and the data's
+	 * Verdance brews {@link Encounter#POULTICE_STATUS}, the status whose heals its helper is credited for. It only reads.
+	 */
+	private static boolean poultices() {
+		Property verdance = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) ? Alchemy.catalog().property(Axis.VERDANCE.id) : null;
+		return brews(verdance, Encounter.POULTICE_STATUS);
 	}
 
 	/** The player's part in the fight round them so far, and whether it is enough for a share. */
