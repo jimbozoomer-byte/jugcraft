@@ -1,6 +1,6 @@
 # Regional vanadium-bearing iron deposits
 
-Status: implemented for owner inspection, 14 October 2026. Human visual acceptance is pending. Public branch `speedygroyper:codex/vanadium-iron-deposits`. The owner approved this scope and requested tests and an inspection world. Actual implementation tool: OpenAI Codex (GPT-6).
+Status: implemented and visually accepted by the owner on 14 October 2026 after delivery of the inspection world. Public branch `speedygroyper:codex/vanadium-iron-deposits`, [PR #378](https://github.com/jimbozoomer-byte/jugcraft/pull/378). The owner approved this scope and requested tests and an inspection world. Actual implementation tool: OpenAI Codex (GPT-6).
 
 ## Approved scope
 
@@ -55,7 +55,7 @@ All ore in **Vanadium Field Trip** generated naturally on normal seed `jugcraft-
 
 Only development datapack selections and five unused test-only entries in Fabric's content-presence snapshot were removed from the exported save. A scan of **8,223 saved region records** and all other save files found no actual test content; the cleanup preserved every other NBT value and world file. The cleaned export then loaded successfully through ordinary `runClient`, with the complete integration set and without the test mod; the player joined at the surface tour start. The client remains open for inspection.
 
-Human visual acceptance, launcher UI import, a two-independent-client dedicated-server session and representative server load remain untested. No merge or server deployment is included.
+The owner accepted the delivered preview on 14 October 2026 with "Looks good". This acceptance covers the preview built from gameplay commit `7eab931e80ee1c874042a6e7dcbae7e9132f113c`; the acceptance update changes documentation only. Launcher UI import, a two-independent-client dedicated-server session and representative server load remain untested. No merge or server deployment is included.
 
 ## Art provenance
 
