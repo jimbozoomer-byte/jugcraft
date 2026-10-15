@@ -41,7 +41,8 @@ public final class GunAnimations {
 	 * Coach Gun does (slice 10C), and the Reverb a shell at a time (slice 10D); of the Nether guns, the Tusker pushes a shell
 	 * in at a time and the Bastion Rifle a round (slice 11A), and the Crackling a shell (slice 11B); the Lookout Rifle
 	 * pushes a round in at a time, as the Drover Rifle does (slice 13A), and the Fencepost Carbine a round and the
-	 * Waystation Shotgun a shell (slice 13B).
+	 * Waystation Shotgun a shell (slice 13B); the Flatboat Gun pushes its shell into the chamber, and the Millstone
+	 * Rifle a round at a time, as the Drover Rifle does (slice 13C).
 	 */
 	public static final Map<String, Map<String, String>> GUN_SOUND_ALIASES = Map.ofEntries(
 			Map.entry("thunderpipe", Map.of("reload_mag_in", "shell_in")),
@@ -66,7 +67,9 @@ public final class GunAnimations {
 			Map.entry("crackling", Map.of("reload_mag_in", "shell_in")),
 			Map.entry("lookout_rifle", Map.of("reload_mag_in", "shell_in")),
 			Map.entry("fencepost_carbine", Map.of("reload_mag_in", "shell_in")),
-			Map.entry("waystation_shotgun", Map.of("reload_mag_in", "shell_in")));
+			Map.entry("waystation_shotgun", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("flatboat_gun", Map.of("reload_mag_in", "shell_in")),
+			Map.entry("millstone_rifle", Map.of("reload_mag_in", "shell_in")));
 
 	private GunAnimations() {
 	}
