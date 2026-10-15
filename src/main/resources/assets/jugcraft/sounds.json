@@ -1121,6 +1121,33 @@
       }
     ]
   },
+  "guns.tabby_revolver.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/brass_revolver_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.lookout_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavy_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.ammonite_carbine.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/old_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [

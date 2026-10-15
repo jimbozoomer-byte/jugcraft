@@ -41,6 +41,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **The Highwayman now takes a second brass ingot,** under the first. Its grid was the Garrison Rifle's mirrored, and a crafting table matches a shaped grid either way round, so only one of the two guns could be made from it.
 - Record: [guns.md, slice 9D's crafting](docs/features/guns.md#slice-9d-the-pump-shotguns).
 
+### Added: Guns, slice 13A (the frontier guns)
+- **Three guns** from the owner's models and animations: the **Tabby Revolver**, a gunmetal revolver held in one hand, its cylinder swung out to load a round at a time, tossed end over end as it is drawn; the **Lookout Rifle**, a lever-action rifle of eight rifle rounds loaded a round at a time, made to take a scope; and the **Ammonite Carbine**, a carbine of sixteen rifle rounds from a long curved magazine, its barrels caged in copper bands. The Tabby Revolver pairs with any other one-handed gun.
+- The Tabby Revolver is made from iron, brass, a lever and a plank; the Lookout Rifle from iron, brass, a lever and planks; the Ammonite Carbine from copper, iron, a lever and a plank. The Tabby Revolver takes the barrel attachments; the Lookout Rifle the stocks, grips, bayonets, scopes and Laser Sight; the Ammonite Carbine the stocks.
+- Record: [guns.md, slice 13A](docs/features/guns.md#slice-13a-the-frontier-guns).
+
 ### Added: The Howitzer Walker, playable
 - Owner accepted the updated local playtest on October 13: aim without holding fire, no close-ground aim freeze, and hide the pilot model/equipment while mounted. Implementation and correction record: [Howitzer Walker](docs/features/howitzer-walker.md).
 - **The owner's Howitzer Walker is in the game:** a tall, two-legged artillery walker in riveted olive plate with a big howitzer in an open cradle, made from a Diesel Walker beside the Armoured Walker (`SDS / PWP / R R`: two steel blocks, a dispenser, steel plates, the Diesel Walker and pistons). It walks, turns, climbs and refuels as the other walkers do.

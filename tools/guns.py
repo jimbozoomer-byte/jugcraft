@@ -616,6 +616,33 @@ GUNS = {
         "damage": 16.0, "pellets": 1, "interval": 19, "auto": False, "capacity": 5,
         "reload": 53, "spread": (2.0, 0.05), "range": 160, "ammo": "rifle_round",
     },
+    # Slice 13A, the frontier guns: the owner's Micina, Red Raydar and Spirulida. A revolver held in one hand, its
+    # cylinder swung out to load a round at a time; a lever-action rifle loaded a round at a time through its gate; and a
+    # carbine fed from a long curved magazine under it.
+    "tabby_revolver": {
+        "display": "Tabby Revolver",
+        "source": "micina",
+        "tooltip": "A gunmetal revolver held in one hand, its cylinder swung out to load a round at a time. Fires light "
+                   "rounds.",
+        "damage": 6.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 6,
+        "reload": (9, 12, 13), "spread": (2.5, 0.8), "range": 56, "ammo": "light_round",
+    },
+    "lookout_rifle": {
+        "display": "Lookout Rifle",
+        "source": "red_raydar",
+        "tooltip": "A lever-action rifle loaded a round at a time through its gate, made to take a scope. Fires rifle "
+                   "rounds.",
+        "damage": 7.0, "pellets": 1, "interval": 13, "auto": False, "capacity": 8,
+        "reload": (13, 9, 17), "spread": (2.0, 0.2), "range": 112, "ammo": "rifle_round",
+    },
+    "ammonite_carbine": {
+        "display": "Ammonite Carbine",
+        "source": "spirulida",
+        "tooltip": "A carbine fed from a long curved magazine, its barrel caged in copper bands. One shot each pull. Fires "
+                   "rifle rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 16,
+        "reload": 60, "spread": (2.5, 0.4), "range": 88, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -807,6 +834,14 @@ RECIPES = {
     # The Lament Rifle as the sculk guns (slice 10D): steel and a lever, echo shards and sculk from the deep dark.
     "lament_rifle": (["SSS", "ELE", " K "], {"S": "#c:ingots/steel", "E": "minecraft:echo_shard", "L": "minecraft:lever",
                                              "K": "minecraft:sculk"}),
+    # Slice 13A: the Tabby Revolver iron and brass, as the other revolvers; the Lookout Rifle as the lever rifles, its
+    # stock two planks long; the Ammonite Carbine copper-banded over iron, with a wooden stock.
+    "tabby_revolver": (["IBI", " LP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                        "P": "#minecraft:planks"}),
+    "lookout_rifle": (["IIB", "PLP"], {"I": "minecraft:iron_ingot", "B": "#c:ingots/brass", "L": "minecraft:lever",
+                                       "P": "#minecraft:planks"}),
+    "ammonite_carbine": (["CCC", "ILP"], {"C": "minecraft:copper_ingot", "I": "minecraft:iron_ingot",
+                                          "L": "minecraft:lever", "P": "#minecraft:planks"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -1976,6 +2011,59 @@ BUILDS = {
         "sight": (8.0, 6.5, 16.5),
         "eye_relief": 6.0,
     },
+    # Slice 13A. The Micina is held in one hand, as the Goshawk Revolver: its idle hides the left arm, which comes in to
+    # load each round. Its draw tosses the gun end over end on gun_body_2, which holds every part; its cylinder swings
+    # out to the left about the crane under it; its hammer is the flat plane at the back. Its bolt, seal and shell bones
+    # hold nothing. Its sight is the notch at the back over the post at the front.
+    "tabby_revolver": {
+        "bones": [
+            ("gun_body", None, [], (8.0, 1.8, 14.6)),
+            ("gun_body_2", "gun_body", ["main", "stan_barrel"], (8.0, 2.6, 12.0)),
+            ("magazine", "gun_body_2", ["drum"], (6.9, 3.3, 12.0)),
+            ("hammer", "gun_body_2", ["hammer"], (8.0, 3.8, 14.3)),
+            ("bolt", "gun_body_2", [], (8.0, 4.5, 13.0)),
+            ("seal", "gun_body_2", [], (8.0, 4.5, 12.0)),
+            ("shell", "gun_body_2", [], (8.0, 4.5, 12.0)),
+        ],
+        "hands": {"right": (8.0, 1.8, 14.6), "left": (5.6, 3.6, 13.2)},
+        "hand_pose": {"left": ("reload_loop", "0.3016")},
+        "arms": {"right": (-0.7663, -0.2053, 0.6088), "left": (0.8536, -0.3536, 0.3827)},
+        "muzzle": (8.0, 3.82, 4.21),
+        "sight": (8.0, 5.9, 13.6),
+    },
+    # The Red Raydar is a lever rifle: its lever loop is the main part's element the owner named "lever", turned about its
+    # front where it meets the receiver. Its bolt and shell bones hold nothing (its reload keeps the round at scale 0).
+    "lookout_rifle": {
+        "bones": [
+            ("gun_body", None, ["main-@lever", "sights"], (8.0, 1.9, 16.4)),
+            ("lever", "gun_body", ["main@lever"], (7.9, 2.2, 13.0)),
+            ("bolt", "gun_body", [], (8.0, 4.4, 14.0)),
+            ("shell", "gun_body", [], (8.0, 3.6, 13.0)),
+        ],
+        "hands": {"right": (8.0, 1.9, 16.4), "left": (8.0, 3.0, 8.0)},
+        "arms": {"right": (0.0653, -0.4957, 0.866), "left": (0.7663, -0.2053, 0.6088)},
+        "muzzle": (7.9, 4.47, 0.03),
+        "sight": (7.9, 5.45, 13.2),
+        "eye_relief": 3.5,
+    },
+    # The Spirulida keeps its moving parts in its main part: the curved magazine (the elements the owner named
+    # "default_mag") on the Magazine bone, swung down about its front; the lever loop under the grip (named "lever"),
+    # turned about its front; and the cocking piece on top at the back (the 41st to 43rd elements) on the bolt bone,
+    # drawn back with each shot. The gun_body2 bone its reload moves holds nothing. Its sight is the owner's.
+    "ammonite_carbine": {
+        "bones": [
+            ("gun_body", None, ["main-#30,31,32,33,34,35,36,37,38,40,41,42", "sights"], (8.0, 1.5, 16.5)),
+            ("Magazine", "gun_body", ["main#30,31,32,33,34,35,36,38"], (8.0, 2.2, 10.8)),
+            ("lever", "gun_body", ["main#37"], (8.0, 1.6, 12.4)),
+            ("bolt", "gun_body", ["main#40,41,42"], (8.0, 4.4, 15.0)),
+            ("gun_body2", "gun_body", [], (8.0, 1.5, 16.5)),
+        ],
+        "hands": {"right": (8.0, 1.5, 16.5), "left": (8.0, 2.4, 5.0)},
+        "arms": {"right": (0.0795, -0.6036, 0.7934), "left": (0.5624, -0.233, 0.7934)},
+        "muzzle": (7.96, 3.77, -3.8),
+        "sight": (7.96, 5.55, 11.84),
+        "eye_relief": 3.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2480,6 +2568,8 @@ ZOOM = {
     "penny_pistol": 0.9, "conductor_carbine": 0.82, "magpie_smg": 0.88,
     # Slice 12C: a pistol, a revolver and a bolt-action rifle.
     "tuppence_pistol": 0.9, "goshawk_revolver": 0.9, "lament_rifle": 0.7,
+    # Slice 13A: a revolver, a lever rifle made to take a scope and a carbine.
+    "tabby_revolver": 0.9, "lookout_rifle": 0.8, "ammonite_carbine": 0.85,
 }
 
 
@@ -2585,7 +2675,9 @@ EVENT_OVERRIDES = {"thunderpipe": {"reload_mag_in": "shell_in"}, "haymaker": {"r
                    # Of the Nether guns (slice 11A), the Tusker pushes a shell in at a time, the Bastion Rifle a round;
                    # (slice 11B) the Crackling a shell.
                    "tusker": {"reload_mag_in": "shell_in"}, "bastion_rifle": {"reload_mag_in": "shell_in"},
-                   "crackling": {"reload_mag_in": "shell_in"}}
+                   "crackling": {"reload_mag_in": "shell_in"},
+                   # The Lookout Rifle (slice 13A) pushes a round in at a time, as the Drover Rifle does.
+                   "lookout_rifle": {"reload_mag_in": "shell_in"}}
 SHOT_SOUNDS = {
     "rust_midge": "item/rusty_gnat/fire.ogg",
     "patchwork_carbine": "item/makeshift_rifle/fire.ogg",
@@ -2676,6 +2768,10 @@ SHOT_SOUNDS = {
     "tuppence_pistol": "item/brass_pistol/fire.ogg",
     "goshawk_revolver": "item/heavier_rifle/fire.ogg",
     "lament_rifle": "item/scorched_sniper/fire.ogg",
+    # Slice 13A: the Marshal Revolver's, the Longhorn Rifle's and the Ranger Rifle's.
+    "tabby_revolver": "item/brass_revolver/fire.ogg",
+    "lookout_rifle": "item/heavy_rifle/fire.ogg",
+    "ammonite_carbine": "item/old_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
