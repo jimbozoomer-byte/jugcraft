@@ -32,9 +32,13 @@ import org.jspecify.annotations.Nullable;
  * cold blue fire welling up out of the dark under its lid, souls rising in it, down which followers go to the Archive of
  * Last Names ({@link ExhumationRite#follow}); and over a Field Telephone Sealed Orders were used on, the open line:
  * sparks crackling off it and a wisp of smoke, its bell ringing, down which followers go over the top into the Foundry
- * Trench ({@link OrdersRite#follow}).
+ * Trench ({@link OrdersRite#follow}); and where the Howling Totem howled, Grey Mist curling up out of the ground, pale
+ * ash drifting in it like moonlit motes and a howl answering far off now and then, which closes round followers and
+ * brings them to in the Moonlit Ring's camp ({@link HowlingTotemRite#follow}).
  */
 public class MistGateEntity extends Entity {
+	/** How often a howl answers from far off through the Howling Totem's mist (ticks). */
+	private static final int HOWL_TICKS = 120;
 	private @Nullable Lair lair;
 	private int slot;
 	private @Nullable UUID instance;
@@ -82,6 +86,7 @@ public class MistGateEntity extends Entity {
 		boolean fen = lair == Lair.LANTERN_FEN;
 		boolean tomb = lair == Lair.CRYPT_ARCHIVE;
 		boolean line = lair == Lair.FOUNDRY_TRENCH;
+		boolean howl = lair == Lair.MOONLIT_RING;
 		if (instance() == null || level.getGameTime() >= until) {
 			if (vent) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.6, getZ(), 24, 0.4, 0.6, 0.4, 0.03);
@@ -121,6 +126,14 @@ public class MistGateEntity extends Entity {
 			if (tickCount % 7 == 0) {
 				level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.3, getZ(), 1, 0.2, 0.1, 0.2, 0.02);
 			}
+		} else if (howl) {
+			// Grey mist curling up out of the ground, pale ash drifting in it.
+			if (tickCount % 2 == 0) {
+				level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.3, getZ(), 2, 0.45, 0.4, 0.45, 0.0);
+			}
+			if (tickCount % 4 == 0) {
+				level.sendParticles(ParticleTypes.WHITE_ASH, getX(), getY() + 1.2, getZ(), 3, 0.6, 0.8, 0.6, 0.0);
+			}
 		} else if (line) {
 			// The open line: sparks crackling off the telephone under it, a wisp of smoke going up.
 			if (tickCount % 3 == 0) {
@@ -144,7 +157,13 @@ public class MistGateEntity extends Entity {
 				level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 0.1, getZ(), 1, 0.45, 0.05, 0.45, 0.0);
 			}
 		}
-		if (line) {
+		if (howl) {
+			// Something far off answers, now and then.
+			if (tickCount % HOWL_TICKS == 0) {
+				level.playSound(null, blockPosition(), HowlingTotemRite.sound("entity.wolf.howl", SoundEvents.ZOMBIE_AMBIENT), SoundSource.AMBIENT,
+						0.6F, 0.5F);
+			}
+		} else if (line) {
 			if (tickCount % OrdersRite.BELL_TICKS == 0) {
 				level.playSound(null, blockPosition().below(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 0.8F, 1.8F);
 			}
@@ -181,6 +200,8 @@ public class MistGateEntity extends Entity {
 			ExhumationRite.follow(server, open);
 		} else if (open.lair == Lair.FOUNDRY_TRENCH) {
 			OrdersRite.follow(server, open);
+		} else if (open.lair == Lair.MOONLIT_RING) {
+			HowlingTotemRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}
