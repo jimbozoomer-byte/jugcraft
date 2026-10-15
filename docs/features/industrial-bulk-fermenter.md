@@ -64,7 +64,7 @@ What differs is capacity:
 ## Choices made here for review
 
 - **The bill:** an Industrial Fermenter, two Steel Tanks, four steel plates, an electric motor and a basic circuit (`TFT / PMP / PCP`).
-- **JEI.** The recipe is listed under the Industrial Fermenter's category, with the Bulk Fermenter shown as a second station (added with the [Bulk Chemical Oxidizer](industrial-bulk-chemical-oxidizer.md) stack's JEI change).
+- **JEI.** It has its own recipe page with the Fermenter's recipes; main's recipe view gives every form one.
 
 ## Multiplayer and persistence
 

@@ -165,7 +165,7 @@ public class BulkChemicalOxidizerGameTests {
 		FormMachineBlockEntity small = helper.getBlockEntity(new BlockPos(12, 1, 10), FormMachineBlockEntity.class);
 		List<?> own = machine.recipes(level.getServer()).stream().map(FluidRecipes.Entry::id).sorted().toList();
 		List<?> oxidizers = small.recipes(level.getServer()).stream().map(FluidRecipes.Entry::id).sorted().toList();
-		helper.assertTrue(own.size() == 2 && own.equals(oxidizers), "Its recipes " + own + " are the Oxidizer's " + oxidizers);
+		helper.assertTrue(!own.isEmpty() && own.equals(oxidizers), "Its recipes " + own + " are the Oxidizer's " + oxidizers);
 		helper.assertTrue(machine.form().profile().lanes() == 4 && machine.form().profile().energyPercent() == 80, "Four lanes at 80%");
 		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
 		ItemStack tank = stack("steel_tank");

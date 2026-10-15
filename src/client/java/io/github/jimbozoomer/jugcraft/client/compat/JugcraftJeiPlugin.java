@@ -33,6 +33,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import org.jspecify.annotations.Nullable;
 
@@ -55,14 +56,13 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 	/** A fluid machine's recipe (FLUID_RECIPES in tools/petro.py): items and fluids in, fluids and items out, in mB. */
 	public record FluidViewRecipe(List<List<ItemStack>> items, List<FluidAmount> fluids, List<FluidAmount> fluidResults,
-			List<ItemStack> results, int ticks) {
+			List<ItemStack> results, int ticks, List<ItemStack> tool, int energyPerTick, List<Integer> retainedInputs) {
 	}
 
 	public record FluidAmount(Fluid fluid, int mb) {
 	}
 
-	/** A fluid machine's category: its block, any larger forms that run the same recipes, and the recipes. */
-	private record FluidMachine(Item block, List<Item> stations, IRecipeType<FluidViewRecipe> type, List<FluidViewRecipe> recipes) {
+	private record FluidMachine(Item block, IRecipeType<FluidViewRecipe> type, List<FluidViewRecipe> recipes) {
 	}
 
 	/** A Lampwright's Bench working (tools/concordance.py recipe_view): the work and a specimen in, the lantern out. */
@@ -131,6 +131,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		addAlchemyInfo(registration);
 		// Roadmap step 19: rings are forged at the Artificer's Bench, their properties rolled once on the server.
 		registration.addIngredientInfo(item("jugcraft:resonant_ring"), Component.translatable("jei.jugcraft.artifice.ring"));
+		addAcquisitionInfo(registration);
 	}
 
 	@Override
@@ -140,9 +141,6 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		}
 		for (FluidMachine machine : fluidMachines) {
 			registration.addCraftingStation(machine.type(), machine.block());
-			for (Item station : machine.stations()) {
-				registration.addCraftingStation(machine.type(), station);
-			}
 		}
 		if (bench != null) {
 			registration.addCraftingStation(bench.type(), bench.block());
@@ -204,15 +202,12 @@ public class JugcraftJeiPlugin implements IModPlugin {
 						results.add(new ItemStack(item(pair.get(0).getAsString()), pair.get(1).getAsInt()));
 					}
 					recipes.add(new FluidViewRecipe(items, fluids(recipe.getAsJsonArray("fluids")),
-							fluids(recipe.getAsJsonArray("fluid_results")), results, recipe.get("ticks").getAsInt()));
+							fluids(recipe.getAsJsonArray("fluid_results")), results, recipe.get("ticks").getAsInt(),
+							recipe.has("tool") && !recipe.get("tool").getAsString().isEmpty() ? stacks(recipe.get("tool").getAsString(), 1) : List.of(),
+							recipe.has("energy_per_tick") ? recipe.get("energy_per_tick").getAsInt() : 0,
+                                recipe.has("retained_inputs") ? java.util.stream.StreamSupport.stream(recipe.getAsJsonArray("retained_inputs").spliterator(),false).map(JsonElement::getAsInt).toList() : List.of()));
 				}
-				List<Item> stations = new ArrayList<>();
-				if (machine.has("stations")) {
-					for (JsonElement station : machine.getAsJsonArray("stations")) {
-						stations.add(item(station.getAsString()));
-					}
-				}
-				result.add(new FluidMachine(block, stations, type, recipes));
+				result.add(new FluidMachine(block, type, recipes));
 			}
 		} catch (Exception e) {
 			Jugcraft.LOGGER.warn("Could not read Jugcraft's fluid recipe list for JEI", e);
@@ -312,6 +307,34 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			registration.addIngredientInfo(item("jugcraft:mortar"), Component.translatable("jei.jugcraft.alchemy.mortar"));
 		} catch (Exception e) {
 			Jugcraft.LOGGER.warn("Could not read the alchemy ingredients for JEI", e);
+		}
+	}
+
+	/**
+	 * Where the things only a ritual or a lair boss gives come from (recipe_view.json "acquisition_info",
+	 * tools/acquisition.py): an information page each, as no recipe shows them. The pages state the default data's
+	 * chances and offerings, and say so: a server's data pack that changes them is not seen here.
+	 */
+	private static void addAcquisitionInfo(IRecipeRegistration registration) {
+		Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(DATA);
+		if (resource.isEmpty()) {
+			return;
+		}
+		try (Reader reader = resource.get().openAsReader()) {
+			JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+			if (!root.has("acquisition_info")) {
+				return;
+			}
+			for (JsonElement element : root.getAsJsonArray("acquisition_info")) {
+				JsonObject row = element.getAsJsonObject();
+				Item item = item(row.get("item").getAsString());
+				if (item != Items.AIR) {
+					registration.addIngredientInfo(item,
+							Component.translatable("jei.jugcraft.acquire." + row.get("key").getAsString()));
+				}
+			}
+		} catch (Exception e) {
+			Jugcraft.LOGGER.warn("Could not read where ritual and lair rewards come from, for JEI", e);
 		}
 	}
 
@@ -516,7 +539,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 		@Override
 		public int getHeight() {
-			return 38;
+			return machine.recipes().stream().anyMatch(r -> !r.tool().isEmpty()) ? 58 : 38;
 		}
 
 		@Override
@@ -526,13 +549,17 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 		@Override
 		public void setRecipe(IRecipeLayoutBuilder builder, FluidViewRecipe recipe, IFocusGroup focuses) {
+			if (!recipe.tool().isEmpty()) {
+				builder.addSlot(mezz.jei.api.recipe.RecipeIngredientRole.CRAFTING_STATION, 0, 39).setStandardSlotBackground().addItemStacks(recipe.tool());
+			}
 			int x = 0;
 			for (List<ItemStack> input : recipe.items()) {
 				builder.addInputSlot(x, SLOT_Y).setStandardSlotBackground().addItemStacks(input);
 				x += 18;
 			}
-			for (FluidAmount fluid : recipe.fluids()) {
-				builder.addInputSlot(x, SLOT_Y).setStandardSlotBackground().add(fluid.fluid(), fluid.mb() * bucketVolume / 1000);
+			for (int i = 0; i < recipe.fluids().size(); i++) {
+                FluidAmount fluid = recipe.fluids().get(i);
+				builder.addSlot(recipe.retainedInputs().contains(i) ? mezz.jei.api.recipe.RecipeIngredientRole.CRAFTING_STATION : mezz.jei.api.recipe.RecipeIngredientRole.INPUT, x, SLOT_Y).setStandardSlotBackground().add(fluid.fluid(), fluid.mb() * bucketVolume / 1000);
 				x += 18;
 			}
 			x = 92;
@@ -554,7 +581,10 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		@Override
 		public void draw(FluidViewRecipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
 			var font = Minecraft.getInstance().font;
-			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0), 0, 28, TEXT, false);
+			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0)
+					+ (recipe.energyPerTick() > 0 ? " / " + recipe.energyPerTick() + " JE/t" : ""), 0, 28, TEXT, false);
+			if (!recipe.tool().isEmpty()) graphics.text(font, "Reusable catalyst", 22, 43, TEXT, false);
+            if (!recipe.retainedInputs().isEmpty()) graphics.text(font, "Acid charge retained (top)", 0, 43, TEXT, false);
 		}
 	}
 }

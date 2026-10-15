@@ -1,7 +1,7 @@
 # Bulk Electrolytic Separator: the Electrolytic Separator's 4×4×6 variant
 
 Status: implemented on the contributor's fork; CI green; pending review.
-Stacked on the JEI bulk-stations change, the [Bulk Chemical Oxidizer](industrial-bulk-chemical-oxidizer.md) and the branches below them.
+Stacked on the [Bulk Chemical Oxidizer](industrial-bulk-chemical-oxidizer.md) and the branches below them.
 
 Proposal issue: none. TODO items:
 - "Develop both installed upgrade chips/modules and larger advanced physical versions" of the Separator and its sibling roles;
@@ -46,7 +46,7 @@ As on the Separator, a full lye tank stops brine but not water.
 
 **No upgrade cards.** Its screen has no card slots. The handbook says why: carded, it would make hydrogen cheaper than the factory allows.
 
-**Guides.** Its Engineer's Handbook page describes it. JEI lists it as a second station for the Separator's recipes.
+**Guides.** Its Engineer's Handbook page describes it. JEI gives it its own recipe page with the Separator's recipes, as main's recipe view does for every form.
 
 ## Connections
 
@@ -78,7 +78,7 @@ As on the Separator, a full lye tank stops brine but not water.
 
 Before this change, the loop audit and the floor check in `tools/check_mod_data.py` read only each form's own recipe list. A larger form running its smaller form's recipes (the Bulk Fermenter, Infuser and Oxidizer, and now this Separator) has no list of its own, so both checks skipped it.
 
-They now read `recipes_run(form)` in `tools/industrial_forms.py`, which gives such a form the recipes it actually runs. The tank checks use it too. Nothing existing breaches either check; the audit's cheapest hydrogen is still 168 JE/mB.
+They now read main's `recipes_for_form(form)` in `tools/industrial_forms.py`, which gives such a form the recipes it actually runs: every recipe of its family whose capability it has. The tank checks use it too. Nothing existing breaches either check; the audit's cheapest hydrogen is still 168 JE/mB.
 
 ## Choices made here for review
 

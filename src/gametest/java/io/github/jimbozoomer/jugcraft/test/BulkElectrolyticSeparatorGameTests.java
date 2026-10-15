@@ -189,7 +189,7 @@ public class BulkElectrolyticSeparatorGameTests {
 		FormMachineBlockEntity small = helper.getBlockEntity(new BlockPos(12, 1, 10), FormMachineBlockEntity.class);
 		List<?> own = machine.recipes(level.getServer()).stream().map(FluidRecipes.Entry::id).sorted().toList();
 		List<?> separators = small.recipes(level.getServer()).stream().map(FluidRecipes.Entry::id).sorted().toList();
-		helper.assertTrue(own.size() == 2 && own.equals(separators), "Its recipes " + own + " are the Separator's " + separators);
+		helper.assertTrue(!own.isEmpty() && own.equals(separators), "Its recipes " + own + " are the Separator's " + separators);
 		helper.assertTrue(machine.form().profile().lanes() == 4 && machine.form().profile().energyPercent() == 80, "Four lanes at 80%");
 		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
 		ItemStack tank = stack("steel_tank");
