@@ -537,6 +537,8 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
+# Vanilla 26.3's damage types that Jugcraft's damage type tags name (the electric harm the Grounding Strap halves).
+VANILLA_DAMAGE_TYPES = {"minecraft:lightning_bolt"}
 OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES},
                  "spell": set(concordance.INVOCATIONS) | {"composed"}}
@@ -665,7 +667,7 @@ def check_tags():
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
             elif registry == "damage_type":
                 ns, name = split(value)
-                if not (DATA / ns / "damage_type" / f"{name}.json").is_file():
+                if value not in VANILLA_DAMAGE_TYPES and not (DATA / ns / "damage_type" / f"{name}.json").is_file():
                     err(f"{path.relative_to(ROOT)}: unknown damage type {value}")
             elif registry == "fluid":
                 if split(value)[1] not in petro.fluid_ids():
@@ -11332,6 +11334,349 @@ def check_crypt_lich():
                 err(f"{cls}.java {why} ({banned})")
 
 
+def check_iron_dreadnought():
+    """The Iron Dreadnought (tools/iron_dreadnought.py, docs/features/iron-dreadnought.md): every number the Java uses is
+    the table's; his attacks are the table's, and his rule can be played (the Torn Plate comes before Red Line; Red Line
+    makes him quicker; his plating lets some of a blow through; his overload outlasts its stagger; Red Line's charges come
+    sooner than the Advance's, and each charge ends before the next is due; he never drops more Sparkers than his cap; his
+    Trench Charge can run its whole range in its active ticks; a rivet reaches the farthest Rivet Fan target within its
+    life; his shell lands as its flight clip ends; his rivets, shells and arcs leave from where his model's battery, mortar
+    and coils are); where his fight looks for the trench's parts (FoundryTrench.java) is where tools/foundry_trench.py
+    builds them: he waits in the gantry with room for his body, steps down to open floor out of its mouth along a clear
+    way, every open cell of the pit's floor lies within his leash, a sprinting player anywhere on it can come within reach
+    of the breaker nearest them before his charge ends, and the Grey Mist he leaves opens in open cells of the gantry; his
+    plating takes three quarters of a blow while his vents are shut, a breaker is answered only by the fight it belongs to,
+    and the trench's breakers reach him; the Grounding Strap's hook is registered and its damage tag holds his arcs; every
+    entity is registered, named and drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet,
+    its box-UV regions inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model
+    declares and cut out; no bone is animated by two of his controllers; his loot table is the table's and his trophies
+    are Arms VII's; his recipes (none of which makes Salvaged Coil), tags and advancement are there; every message he
+    sends has its words; and nothing of his loads a chunk or leaves its dimension."""
+    import heapq
+    import math
+    import arms_variants
+    import foundry_trench as ft
+    import iron_dreadnought as dn
+    import iron_dreadnought_models as dm
+    folder = JAVA_ROOT / "lair" / "dreadnought"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/dreadnought: no Java")
+        return
+    for cls, table in (("IronDreadnoughtEntity", dn.IRON_DREADNOUGHT), ("IronDreadnoughtEntity", dn.COILS),
+                       ("SparkerEntity", dn.SPARKER), ("HotRivetEntity", dn.RIVET), ("MortarShellEntity", dn.SHELL),
+                       ("GroundingStrap", {"SHARE": dn.STRAP_SHARE})):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/iron_dreadnought.py's {value}")
+    boss = sources.get("IronDreadnoughtEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, advance, overcharge) in dn.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(advance).lower()}, {str(overcharge).lower()})")
+        if expected not in boss:
+            err(f"IronDreadnoughtEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"IronDreadnoughtEntity does not scale as every lair boss does ({call})")
+    d = dn.IRON_DREADNOUGHT
+    if not 0.0 < d["RED_AT"] < d["TORN_AT"] < 1.0:
+        err("tools/iron_dreadnought.py: Red Line (RED_AT) must come after the Torn Plate (TORN_AT)")
+    if not 0.0 < d["RED_COOLDOWN"] < 1.0:
+        err("tools/iron_dreadnought.py: Red Line must make his cooldowns shorter (0 < RED_COOLDOWN < 1)")
+    if not 0.0 < d["PLATED"] < 1.0:
+        err("tools/iron_dreadnought.py: his plating must let some of a blow through, and turn some (0 < PLATED < 1)")
+    if not 0 < d["OVERLOAD_STAGGER"] < d["OVERLOAD_TICKS"]:
+        err("tools/iron_dreadnought.py: his overload must outlast the stagger it begins with (OVERLOAD_STAGGER < OVERLOAD_TICKS)")
+    if not 0 < d["DISCHARGE_TICKS"] < d["RED_DISCHARGE_EVERY"] < d["DISCHARGE_EVERY"]:
+        err("tools/iron_dreadnought.py: each charge must end before the next is due, and Red Line's come sooner "
+            "(DISCHARGE_TICKS < RED_DISCHARGE_EVERY < DISCHARGE_EVERY)")
+    if not 0 < d["DROPPED"] <= d["SPARKER_CAP"] or d["CLEAR_USES"] < 1:
+        err("tools/iron_dreadnought.py: he drops no more Sparkers than his cap, and a fouled breaker can be cleared")
+    charge = dn.ATTACKS["TRENCH_CHARGE"]
+    if charge[1] * d["CHARGE_SPEED"] < d["CHARGE_RANGE"] or charge[5] > d["CHARGE_RANGE"]:
+        err("tools/iron_dreadnought.py: his Trench Charge must run its whole range within its active ticks, and he must "
+            "charge only foes within it")
+    if dn.ATTACKS["RIVET_FAN"][5] / dn.RIVET["SPEED"] >= dn.RIVET["LIFE"]:
+        err("tools/iron_dreadnought.py: a rivet must reach his farthest Rivet Fan target within its LIFE")
+    shell_clip = dm.mortar_shell_animations()["animations"]["animation.mortar_shell.flight"]["animation_length"]
+    if round(shell_clip * 20) != d["SHELL_FLIGHT"]:
+        err(f"tools/iron_dreadnought.py SHELL_FLIGHT must be the shell's flight clip ({shell_clip} s)")
+    tear_clip = dm.iron_dreadnought_animations()["animations"]["animation.iron_dreadnought.tear"]["animation_length"]
+    if round(tear_clip * 20) != d["TORN_TICKS"]:
+        err(f"tools/iron_dreadnought.py TORN_TICKS must be the Torn Plate's clip ({tear_clip} s)")
+    wake_clip = dm.iron_dreadnought_animations()["animations"]["animation.iron_dreadnought.wake"]["animation_length"]
+    if round(wake_clip * 20) != d["WAKE_TICKS"]:
+        err(f"tools/iron_dreadnought.py WAKE_TICKS must be his waking clip ({wake_clip} s)")
+    for value, model, what in ((dn.RIVET["BATTERY_AHEAD"], -dm.BATTERY_Z, "RIVET BATTERY_AHEAD"),
+                               (dn.RIVET["BATTERY_SIDE"], dm.BATTERY_X, "RIVET BATTERY_SIDE"),
+                               (dn.RIVET["BATTERY_UP"], dm.BATTERY_Y, "RIVET BATTERY_UP"),
+                               (dn.SHELL["MORTAR_UP"], dm.HATCH_Y, "SHELL MORTAR_UP"),
+                               (dn.SHELL["MORTAR_BACK"], dm.MORTAR_Z, "SHELL MORTAR_BACK"),
+                               (dn.COILS["COIL_SIDE"], dm.COIL_X, "COILS COIL_SIDE"),
+                               (dn.COILS["COIL_UP"], dm.COIL_TOP, "COILS COIL_UP")):
+        if abs(value * 16 - model) > 1.0E-6:
+            err(f"tools/iron_dreadnought.py {what} must be where tools/iron_dreadnought_models.py puts it: {model / 16}")
+    # Where his fight looks for the trench's parts is where tools/foundry_trench.py builds them.
+    trench = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "FoundryTrench.java").read_text(encoding="utf-8"))
+    for name, value in (("WOKE_X", float(dn.WOKE[0])), ("WOKE_Z", float(dn.WOKE[1])), ("GANTRY_WEST", ft.GANTRY["x"][0]),
+                        ("GANTRY_EAST", ft.GANTRY["x"][1]), ("GANTRY_NORTH", ft.GANTRY["z"][0]),
+                        ("GANTRY_SOUTH", ft.GANTRY["z"][1]), ("INTRUDER_UP", float(dn.INTRUDER_UP))):
+        if not java_number(trench, name, value):
+            err(f"FoundryTrench.{name} is not {value} (tools/foundry_trench.py, tools/iron_dreadnought.py)")
+    blocks = ft.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light", "minecraft:cave_air", "minecraft:air")
+    solid = lambda pos: name(pos) is not None and not free(pos)
+    width, height = 3.5, 5.5    # his box (JugcraftDreadnought: sized(3.5F, 5.5F))
+    registry = sources.get("JugcraftDreadnought", "")
+    if f"sized({width}F, {height}F)" not in registry:
+        err(f"JugcraftDreadnought: his box must be {width} by {height}, as the audit measures his room")
+    tall = math.ceil(height)
+
+    def room(x, z):
+        """Whether his box fits standing at (x, z) on the floor at STAND."""
+        for cx in range(math.floor(x - width / 2), math.floor(x + width / 2 - 1.0E-6) + 1):
+            for cz in range(math.floor(z - width / 2), math.floor(z + width / 2 - 1.0E-6) + 1):
+                if not solid((cx, ft.PAVE, cz)) or not all(free((cx, ft.STAND + dy, cz)) for dy in range(tall)):
+                    return False
+        return True
+    wx, wy, wz, _ = ft.WAIT
+    if wy != ft.STAND or not ft.in_gantry(math.floor(wx), math.floor(wz)) or not room(wx, wz):
+        err(f"Where the Iron Dreadnought waits, ({wx}, {wz}), is not open gantry floor with room for him")
+    if not room(*dn.WOKE) or not (ft.PIT["z"][0] <= math.floor(dn.WOKE[1]) <= ft.PIT["z"][1]):
+        err(f"Where the Iron Dreadnought steps down to, {dn.WOKE}, is not open pit floor with room for him")
+    steps = 40
+    for i in range(steps + 1):
+        x = wx + (dn.WOKE[0] - wx) * i / steps
+        z = wz + (dn.WOKE[1] - wz) * i / steps
+        if not room(x, z):
+            err(f"His way down out of the gantry is blocked at ({x:.2f}, {z:.2f})")
+            break
+    floor = [(x, z) for x in range(ft.PIT["x"][0], ft.PIT["x"][1] + 1) for z in range(ft.PIT["z"][0], ft.PIT["z"][1] + 1)
+             if solid((x, ft.PAVE, z)) and free((x, ft.STAND, z)) and free((x, ft.STAND + 1, z))]
+    cx, cz = ft.CENTRE
+    for x, z in floor:
+        if math.hypot(x + 0.5 - cx, z + 0.5 - cz) > d["LEASH"]:
+            err(f"The pit's floor at ({x}, {z}) lies beyond his leash")
+    # A sprinting player anywhere on the pit's floor can come within reach of the breaker nearest them before the charge
+    # ends: the walk is measured over open floor cells, never cutting a corner of cover.
+    cells = set(floor)
+    reach = {}
+    for info in ft.PYLONS.values():
+        bx, bz = info["breaker"]
+        dist = {c: 0.0 for c in cells if math.hypot(c[0] - bx, c[1] - bz) <= dn.REACH}
+        queue = [(0.0, c) for c in dist]
+        while queue:
+            dd, (x, z) = heapq.heappop(queue)
+            if dd > dist[(x, z)]:
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in cells or (dx and dz and ((x + dx, z) not in cells or (x, z + dz) not in cells)):
+                    continue
+                nd = dd + (math.sqrt(2.0) if dx and dz else 1.0)
+                if nd < dist.get(n, math.inf):
+                    dist[n] = nd
+                    heapq.heappush(queue, (nd, n))
+        for c in cells:
+            reach[c] = min(reach.get(c, math.inf), dist.get(c, math.inf))
+    farthest = max(reach.items(), key=lambda kv: kv[1]) if reach else ((0, 0), 0.0)
+    if farthest[1] / dn.SPRINT > d["DISCHARGE_TICKS"]:
+        err(f"From the pit's floor at {farthest[0]} a sprinting player cannot come within reach of a breaker before his "
+            f"charge ends ({farthest[1]:.1f} blocks; DISCHARGE_TICKS {d['DISCHARGE_TICKS']})")
+    for x in range(ft.GANTRY_EXIT["x"][0], ft.GANTRY_EXIT["x"][1] + 1):
+        for y in (ft.STAND, ft.STAND + 1):
+            if not free((x, y, ft.GANTRY_EXIT["z"])) or not ft.in_gantry(x, ft.GANTRY_EXIT["z"]):
+                err(f"The Grey Mist he leaves in the gantry would replace {name((x, y, ft.GANTRY_EXIT['z']))} at "
+                    f"{(x, y, ft.GANTRY_EXIT['z'])}")
+    # His rule: plated, three quarters of a blow is turned; a breaker is answered only by its own fight; the breakers reach
+    # him; the Grounding Strap's hook is registered and its tag holds his arcs.
+    if not re.search(r"if \(!ventsOpen\(\)\) \{\s*dealt = amount \* PLATED;", boss):
+        err("IronDreadnoughtEntity.hurtServer must let only PLATED of a blow through while his vents are shut")
+    if "Pylon pylon = FoundryTrench.breakerAt(origin, pos);" not in boss:
+        err("IronDreadnoughtEntity.breakerUsed must answer only his own trench's breakers")
+    if "return phase == Phase.RED_LINE ? RED_DISCHARGE_EVERY : DISCHARGE_EVERY;" not in boss \
+            or "return phase == Phase.ADVANCE ? 1 : 2;" not in boss:
+        err("IronDreadnoughtEntity: Red Line charges every RED_DISCHARGE_EVERY, and two pylons light from the Torn Plate on")
+    for needed, why in (("Lairs.onPlaced(Lair.FOUNDRY_TRENCH, IronDreadnoughtEntity::summon)", "stand him in the gantry of every trench"),
+                        ("DischargeBreakerBlock.onUsed(JugcraftDreadnought::breakerUsed)", "answer the breakers"),
+                        ("dreadnought.breakerUsed(level, pos, state, player)", "tell him who used which breaker")):
+        if needed not in registry:
+            err(f"JugcraftDreadnought must {why} ({needed})")
+    sparker = sources.get("SparkerEntity", "")
+    if "master.took(player, amount)" not in sparker or "burnOut(level)" not in sparker:
+        err("SparkerEntity: whoever hurts one takes part, and it burns out when he is gone")
+    for cls in ("IronDreadnoughtEntity", "SparkerEntity"):
+        if "GroundingStrap.arc(level," not in sources.get(cls, ""):
+            err(f"{cls}: his arcs must be electric harm (GroundingStrap.arc), which the Grounding Strap halves")
+    strap = sources.get("GroundingStrap", "")
+    if 'Jugcraft.id("electric")' not in strap or f'Jugcraft.id("{dn.ARC}")' not in strap \
+            or "getOffhandItem().is(JugcraftDreadnought.GROUNDING_STRAP)" not in strap:
+        err("GroundingStrap must halve #jugcraft:electric harm for whoever holds it in their offhand")
+    mixin = (JAVA_ROOT / "mixin" / "GroundingStrapMixin.java")
+    mixins = load(RES / "jugcraft.mixins.json") or {}
+    if not mixin.is_file() or "GroundingStrap.scale(" not in mixin.read_text(encoding="utf-8") \
+            or "GroundingStrapMixin" not in mixins.get("mixins", []):
+        err("The Grounding Strap's hook (mixin/GroundingStrapMixin.java) must be written and registered in jugcraft.mixins.json")
+    electric = load(DATA / MOD / "tags" / "damage_type" / "electric.json") or {}
+    if sorted(electric.get("values", [])) != sorted(dn.ELECTRIC):
+        err(f"tags/damage_type/electric.json must hold {dn.ELECTRIC}")
+    if not (DATA / MOD / "damage_type" / f"{dn.ARC}.json").is_file():
+        err(f"damage_type/{dn.ARC}.json is missing")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"death.attack.{MOD}.{dn.ARC}", f"death.attack.{MOD}.{dn.ARC}.player"):
+        if key not in lang:
+            err(f"{key} has no words in en_us.json")
+    client = (CLIENT_JAVA_ROOT / "IronDreadnoughtClient.java").read_text(encoding="utf-8")
+    if "IronDreadnoughtClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register IronDreadnoughtClient")
+    if "lair.dreadnought.JugcraftDreadnought.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftDreadnought")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftDreadnought.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("IronDreadnoughtLoot", "")
+    if f'ADVANCEMENT = "{dn.ADVANCEMENT["key"]}";' not in loot_java:
+        err("IronDreadnoughtLoot's advancement differs from tools/iron_dreadnought.py")
+    for entity in dn.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftDreadnought does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != dn.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {dn.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"IronDreadnoughtClient draws no {entity}")
+    for item in dn.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftDreadnought does not register {item}")
+    # The GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("iron_dreadnought", set()).add(f"animation.iron_dreadnought.{clip}")
+    for entity, body in dn.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in dm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        sheet_w = definition.get("description", {}).get("texture_width", 0)
+        sheet_h = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, dd = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + dd), v + dd + h_)
+                if region[2] > sheet_w or region[3] > sheet_h:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {sheet_w}x{sheet_h} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in dn.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"IronDreadnoughtClient: the {entity}'s glow layer must match tools/iron_dreadnought.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (sheet_w * dm.TEXTURE_SCALE, sheet_h * dm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {sheet_w * dm.TEXTURE_SCALE}x{sheet_h * dm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key his eye's shutter, his vents' flaps or his coils' arcs.
+    owned = {bone: controller for controller, bones in dm.CONTROLLERS.items() for bone in bones}
+    prefixes = {"eye": "eye_", "vents": "vents_", "coils": "coils_"}
+    for clip_name, clip in dm.ANIMATIONS["iron_dreadnought"]()["animations"].items():
+        short = clip_name.split(".")[-1]
+        controller = next((c for c, p in prefixes.items() if short.startswith(p)), "body")
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"iron_dreadnought: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *dm.CONTROLLERS):
+        if f'new AnimationController<IronDreadnoughtEntity>("{controller}"' not in boss:
+            err(f"IronDreadnoughtEntity has no {controller} controller (tools/iron_dreadnought_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/iron_dreadnought table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "iron_dreadnought.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/iron_dreadnought.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"salvaged_coil": dn.SALVAGED_COIL, **{item: dn.TROPHY_CHANCE for item in dn.TROPHIES}, **dn.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/iron_dreadnought.json gives {found_loot}, not tools/iron_dreadnought.py's {expected}")
+    if tuple(arms_variants.trophies("iron_dreadnought")) != tuple(dn.TROPHIES):
+        err(f"tools/iron_dreadnought.py TROPHIES {dn.TROPHIES} are not Arms VII's: {arms_variants.trophies('iron_dreadnought')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "iron_dreadnought.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in dn.TROPHIES]:
+        err(f"loot_table/bosses/iron_dreadnought.json holds {held_items}, not his trophies {dn.TROPHIES}")
+    for table_id in ("entities/iron_dreadnought", "bosses/iron_dreadnought"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"IronDreadnoughtLoot must roll loot_table/{table_id}.json")
+    for trophy in dn.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftDreadnought must find the {trophy} (Arms VII registers it)")
+    for key in dn.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Salvaged Coil comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:salvaged_coil":
+            err(f"recipe/{path.name} makes Salvaged Coil, which only the Iron Dreadnought gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in dn.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{dn.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{dn.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in dn.MESSAGES:
+        if f'"message.jugcraft.iron_dreadnought.{key}"' not in sent:
+            err(f"tools/iron_dreadnought.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -15092,6 +15437,7 @@ def main():
 
     check_acquisition(registered)
     check_crypt_lich()
+    check_iron_dreadnought()
     check_material_sets()
     check_art()
     check_pixel_hollows()

@@ -43,6 +43,16 @@ public final class FoundryTrench {
 	public static final double WAIT_X = 35.5;
 	public static final double WAIT_Y = 5.0;
 	public static final double WAIT_Z = 9.5;
+	/** Where he comes down to as he wakes, just out of the gantry's mouth on the pit's floor (tools/iron_dreadnought.py WOKE). */
+	public static final double WOKE_X = 35.5;
+	public static final double WOKE_Z = 18.5;
+	/** The assembly gantry's open cells, inclusive: west to east (x) and north to south (z). */
+	public static final int GANTRY_WEST = 26;
+	public static final int GANTRY_EAST = 44;
+	public static final int GANTRY_NORTH = 5;
+	public static final int GANTRY_SOUTH = 15;
+	/** How far over the pit's floor a player may stand and still be on it (the ramp's lowest step is a block up). */
+	public static final double INTRUDER_UP = 0.5;
 	/** Where the Grey Mist opens in the gantry when the Dreadnought falls: three columns, two high from the floor. */
 	public static final int EXIT_WEST = 34;
 	public static final int EXIT_EAST = 36;
@@ -72,6 +82,12 @@ public final class FoundryTrench {
 		public BlockPos terminal(BlockPos origin) {
 			return origin.offset(TERMINALS[ordinal()]);
 		}
+
+		/** How far (x, z) (in the template) is from the middle of this pylon's ground terminal. */
+		public double distance(double x, double z) {
+			BlockPos at = TERMINALS[ordinal()];
+			return Math.hypot(x - (at.getX() + 0.5), z - (at.getZ() + 0.5));
+		}
 	}
 
 	private FoundryTrench() {
@@ -85,6 +101,26 @@ public final class FoundryTrench {
 	/** Where the Dreadnought waits in his gantry. */
 	public static Vec3 waiting() {
 		return new Vec3(WAIT_X, WAIT_Y, WAIT_Z);
+	}
+
+	/** Where he comes down to as he wakes. */
+	public static Vec3 woke() {
+		return new Vec3(WOKE_X, STAND, WOKE_Z);
+	}
+
+	/** Whether (x, z) (in the template) is in the assembly gantry. */
+	public static boolean inGantry(double x, double z) {
+		return x >= GANTRY_WEST && x < GANTRY_EAST + 1 && z >= GANTRY_NORTH && z < GANTRY_SOUTH + 1;
+	}
+
+	/** Whether (x, z) (in the template) is in his arena: the pit or the gantry (the fire trench and the dugout are safe). */
+	public static boolean inArena(double x, double z) {
+		return inPit(x, z) || inGantry(x, z);
+	}
+
+	/** Whether (x, y, z) (in the template) stands on the pit's floor: in the pit, no higher than {@value #INTRUDER_UP} over it. */
+	public static boolean onPitFloor(double x, double y, double z) {
+		return inPit(x, z) && y >= STAND - 1 && y < STAND + INTRUDER_UP;
 	}
 
 	/** Whether (x, z) (in the template) is one of the pit's open cells. */
