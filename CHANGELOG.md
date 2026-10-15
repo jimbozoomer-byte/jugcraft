@@ -41,6 +41,12 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **The Highwayman now takes a second brass ingot,** under the first. Its grid was the Garrison Rifle's mirrored, and a crafting table matches a shaped grid either way round, so only one of the two guns could be made from it.
 - Record: [guns.md, slice 9D's crafting](docs/features/guns.md#slice-9d-the-pump-shotguns).
 
+### Added: Guns, slice 13D (a revolving launcher, a carbine revolver and a musket of light)
+- **Three guns** from the owner's models and animations: the **Fencepost Thumper**, a revolving grenade launcher of four grenades loaded one at a time, its barrel tipped down to load and its pump turning the cylinder after each shot; the **Parley Revolver**, a heavy single-action revolver of six rifle rounds held in one hand, which with a stock fitted is held in both as a carbine and plays the owner's carbine animations; and the **Lantern Musket**, an energy musket whose beam passes through every creature in its line, three shots to a core.
+- The Fencepost Thumper is made from iron, brass, a lever and a plank; the Parley Revolver from steel, iron, brass and a lever; the Lantern Musket from steel, a lantern, a plank, an advanced circuit and brass. The Thumper takes the Light and Vertical Grips and the bayonets; the Parley Revolver the barrel attachments and the stocks; the Lantern Musket nothing.
+- A carbine (the Parley Revolver with a stock) is not one of two guns held at once.
+- Record: [guns.md, slice 13D](docs/features/guns.md#slice-13d-a-revolving-launcher-a-carbine-revolver-and-a-musket-of-light).
+
 ### Added: Guns, slice 13C (a punt gun, a repeater and a heavier rifle)
 - **Three guns** from the owner's models and animations: the **Flatboat Gun**, a punt gun whose chamber swings out to take one shell, one blast of sixteen pellets and a long reload; the **Windlass Musket**, a flintlock repeater of seven paper cartridges, its drum turned between shots and its magazine changed whole; and the **Millstone Rifle**, a heavy lever-action rifle of eight rifle rounds loaded a round at a time, slower than the Drover Rifle and harder hitting.
 - The Flatboat Gun is made from a block of iron, iron, brass, a lever and a plank; the Windlass Musket from iron, brass, a flint, a lever and a plank; the Millstone Rifle from steel, iron, brass, a lever and a plank. The Flatboat Gun takes the scopes and the Laser Sight; the Windlass Musket the Light and Vertical Grips and the bayonets; the Millstone Rifle what the Drover Rifle takes.

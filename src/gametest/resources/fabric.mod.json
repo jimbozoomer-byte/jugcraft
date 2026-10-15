@@ -159,6 +159,7 @@
       "io.github.jimbozoomer.jugcraft.test.FrontierGunsGameTests",
       "io.github.jimbozoomer.jugcraft.test.FrontierGunsIIGameTests",
       "io.github.jimbozoomer.jugcraft.test.FrontierGunsIIIGameTests",
+      "io.github.jimbozoomer.jugcraft.test.FrontierGunsIVGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArmorSetsGameTests",
       "io.github.jimbozoomer.jugcraft.test.ThalliteGameTests",
       "io.github.jimbozoomer.jugcraft.test.ThalliteGearGameTests",
