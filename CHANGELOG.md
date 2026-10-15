@@ -41,6 +41,11 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **The Highwayman now takes a second brass ingot,** under the first. Its grid was the Garrison Rifle's mirrored, and a crafting table matches a shaped grid either way round, so only one of the two guns could be made from it.
 - Record: [guns.md, slice 9D's crafting](docs/features/guns.md#slice-9d-the-pump-shotguns).
 
+### Added: Guns, slice 14C (the brass quick-firers)
+- **Three guns** from the owner's models and animations, more of their treated-brass guns, each held in both hands: the **Sprocket Gun**, an automatic rifle of forty rifle rounds fed from a pan magazine on its top, which its reload lifts off, sets back and winds; the **Navvy Shotgun**, the first automatic shotgun, eight shells of six pellets in a box magazine; and the **Freeholder Rifle**, a rifle of twenty rifle rounds that fires a pull at a time quicker than any other.
+- Each is made from steel, brass and a lever, the Sprocket Gun with a hopper and the Freeholder Rifle with an emerald. The Sprocket Gun and the Navvy Shotgun take the barrel attachments, the stocks, the grips (the Tactical Grip among them) and the bayonets, the Navvy Shotgun its magazines too; the Sprocket Gun takes the four sights, the Freeholder Rifle its magazines and every sight but the Long Scope, and the Navvy Shotgun no scope.
+- Record: [guns.md, slice 14C](docs/features/guns.md#slice-14c-the-brass-quick-firers).
+
 ### Added: Guns, slice 14B (the brass carbines)
 - **Three guns** from the owner's models and animations, more of their treated-brass guns, each held in both hands: the **Holler Carbine**, the Holler Pistol made over with a long shrouded barrel, ten rifle rounds and a bolt its shot works, so it fires more than twice as fast; the **Minuet Carbine**, the Minuet Pistol made over with a long barrel, ten light rounds in a magazine ahead of its trigger and a lever under its barrel; and the **Grange Carbine**, a carbine of twelve rifle rounds fed from a box magazine.
 - Each is made from steel, brass and a lever. The Holler Carbine takes no attachment (the owner made none for it); the Minuet Carbine takes the stocks and the four sights; the Grange Carbine takes every attachment the owner made for it, the Tactical Grip among them.

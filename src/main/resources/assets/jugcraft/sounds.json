@@ -1283,6 +1283,33 @@
       }
     ]
   },
+  "guns.sprocket_gun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/scorched_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.navvy_shotgun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/combat_shotgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.freeholder_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/scorched_sniper_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "space_kook.laugh": {
     "subtitle": "subtitles.jugcraft.laugh",
     "sounds": [
