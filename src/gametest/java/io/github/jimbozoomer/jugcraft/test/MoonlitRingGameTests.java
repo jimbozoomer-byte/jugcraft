@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -122,10 +123,10 @@ public class MoonlitRingGameTests {
 	}
 
 	/**
-	 * The totem's checks, changing nothing: at night in werewolf country, under the open sky and on woodland floor (grass,
-	 * podzol, moss, under a moss carpet or a snow layer) it is answered; by day, out of the woods, under a roof (even of
-	 * leaves), on stone, or with wolfsbane growing within the werewolves' ward reach it is refused, and answered again once
-	 * the roof or the wolfsbane is gone. On a moss carpet a player's feet are taken in its cell. Werewolf country is the
+	 * The totem's checks, changing nothing: at night in werewolf country, under the open sky (a barrier, which cannot be
+	 * seen, roofs nothing) and on woodland floor (grass, podzol, moss, under a moss carpet or a snow layer) it is answered;
+	 * by day, out of the woods, under a roof (even of leaves), on stone, or with wolfsbane growing within the werewolves'
+	 * ward reach it is refused, and answered again once the roof or the wolfsbane is gone. On a moss carpet a player's feet are taken in its cell. Werewolf country is the
 	 * forests and taigas and the Grove, not the plains, the desert or a swamp. No mist rises where nobody used a totem.
 	 */
 	@GameTest
@@ -133,8 +134,13 @@ public class MoonlitRingGameTests {
 		ServerLevel level = helper.getLevel();
 		BlockPos feet = helper.absolutePos(STAND);
 		helper.setBlock(STAND.below(), Blocks.GRASS_BLOCK.defaultBlockState());
+		int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, feet.getX(), feet.getZ());
 		helper.assertTrue(HowlingTotemRite.check(level, feet, true, true) == null, "On grass under the open sky at night in the woods "
-				+ "the totem was refused: " + HowlingTotemRite.check(level, feet, true, true));
+				+ "the totem was refused: " + HowlingTotemRite.check(level, feet, true, true) + " (feet at y " + feet.getY()
+				+ ", the column's highest blocking block " + level.getBlockState(feet.atY(top - 1)) + " at y " + (top - 1) + ")");
+		// A barrier hides no moon: invisible, it roofs nothing.
+		helper.setBlock(STAND.above(3), Blocks.BARRIER.defaultBlockState());
+		helper.assertTrue(HowlingTotemRite.check(level, feet, true, true) == null, "Under a barrier the totem was refused");
 		helper.assertTrue(HowlingTotemRite.check(level, feet, false, true) == HowlingTotemRite.Missing.NOT_NIGHT, "By day the totem was not refused");
 		helper.assertTrue(HowlingTotemRite.check(level, feet, true, false) == HowlingTotemRite.Missing.NOT_WOODS,
 				"Out of the woods the totem was not refused");
