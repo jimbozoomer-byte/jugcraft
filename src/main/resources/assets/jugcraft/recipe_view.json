@@ -3148,6 +3148,26 @@
         {
           "in": [
             [
+              "#jugcraft:pine_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:pine_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "#minecraft:planks",
               1
             ]

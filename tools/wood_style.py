@@ -65,6 +65,9 @@ WOOD = {
     # off vanilla spruce (dE 9.6 to 10.0) and our cypress (8.2 to 10.6); docs/features/trees-batch-1.md. Appended last,
     # so every other wood keeps its seeds.
     "cedar": ("2:0", "725543"),
+    # Batch 2: the owner's first painting set, number 6, in a muted warm gray-tan.
+    # Append new woods to preserve the existing textures' deterministic seeds.
+    "pine": (6, "a49a84"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -105,6 +108,7 @@ BARK = {
     # (dE 14 from the wood; as painted 17; the painted bark beside the darkened wood would be 10, the least of any wood).
     # Stringy, as cedar bark peels in long fibrous strips. docs/features/trees-batch-1.md.
     "cedar": (pal("3e2b24", "463229", "4a352a", "573f32", "5d4437"), "stringy"),
+    "pine": (pal("2d2521", "43312a", "5f4433", "805a3d", "9c6c48"), "plated"),
 }
 EUCALYPTUS_STREAKS = pal("d07a2e", "9a4f9e", "4f7fb8", "c9a63a", "5ea06a")
 

@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "jugcraft:block/pine_wood",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 13223095
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 12170916
+      }
+    ]
+  }
+}

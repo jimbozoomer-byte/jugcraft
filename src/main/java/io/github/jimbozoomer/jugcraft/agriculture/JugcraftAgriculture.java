@@ -524,6 +524,8 @@ public final class JugcraftAgriculture {
 		registerTree("cedar", "cedar_leaves", CEDAR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.COLOR_BROWN);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
+		// Pine wood is available for the approval preview; trees and biome placement follow later.
+		registerWoodSet("pine", MapColor.COLOR_BROWN, MapColor.COLOR_LIGHT_GRAY);
 		registerWildPlants();
 
 		// Seeds, produce and food.

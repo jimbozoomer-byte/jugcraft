@@ -21,6 +21,7 @@ LOGS = {
     "mahogany": ("jungle", 0xB58378, 0xB56855),
     "cedar": ("spruce", 0xC5B6A5, 0xBCAA92),
     "cinnamon": ("jungle", 0xE9B98D, 0xF7B881),
+    "pine": ("oak", 0xC9C4B7, 0xB9B6A4),
 }
 
 
