@@ -259,6 +259,14 @@ DOSSIER = {
                         "Overworld (the Volcano or the Cinder Barrens). The magma cracks open into a vent of sparks and "
                         "smoke and you sink through the stone to the kiln's ledge; the seal is used up only if the kiln "
                         "opens. While the vent smokes, friends follow by using it",
+    # Concordance Chunk C (C-02, C-P9): what readies a player for his slag and flame, as text and icons, no recipe grid.
+    "cinder_kiln.prepare": "Against his slag and flame: the Kiln Draught, magma cream or sugar stirred in an Alembic "
+                           "Crucible, gives Fire Resistance for up to %s seconds a draught, and under it the slag does not "
+                           "burn and his flame does not take, though his blows, gobs and cinders still land; the Salamander "
+                           "Charm from his loot, held in the other hand, keeps hot ground from burning its holder for as "
+                           "long as it is held",
+    "cinder_kiln.prepare.charm": "Against his slag: the Salamander Charm from his loot, held in the other hand, keeps hot "
+                                 "ground from burning its holder for as long as it is held",
     "grave": "A grave: any headstone, such as a %s",
     "any_night": "The rite works on any night",
     "in_season": "The rite works now, in the Halloween season",

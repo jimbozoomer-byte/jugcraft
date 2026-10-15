@@ -83,7 +83,9 @@ import net.minecraft.world.level.material.Fluids;
  * magma cream: the reason the server encodes reads back on the client in words, with no key or id showing. Jade shows
  * it when loaded ({@code jugcraft_concordance_crucible_jade}); the Inspect page, opened looking at it by a master
  * carrying an Assay Glass, says it with the rest ({@code jugcraft_encyclopedia_inspect_crucible}, and at GUI scale 4
- * {@code jugcraft_encyclopedia_inspect_crucible_scale4}).</li>
+ * {@code jugcraft_encyclopedia_inspect_crucible_scale4}). Since C-02, set to a dirty Stillroot Poultice (bone meal
+ * stirred in with the Mendvetch), the formula's preview names what fouled its Verdance
+ * ({@code jugcraft_encyclopedia_inspect_poultice}).</li>
  * <li><b>Expeditions and keys</b> ({@code jugcraft_encyclopedia_expedition}, {@code jugcraft_encyclopedia_keys}), and the
  * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
  * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
@@ -95,6 +97,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 	private static final int WAIT = 200;
 	/** A Kiln Draught's formula: magma cream stirred hot twice. */
 	private static final String KILN_FORMULA = "water 1; add minecraft:magma_cream jugcraft:raw; stir hot; stir hot";
+	/** A dirty Stillroot Poultice's formula (C-02): bone meal stirred in with the Mendvetch fouls its Verdance. */
+	private static final String DIRTY_POULTICE = "water 1; add jugcraft:mendvetch jugcraft:raw; add jugcraft:mendvetch jugcraft:raw; "
+			+ "add minecraft:bone_meal jugcraft:raw; stir warm; stir warm; stir warm; stir warm";
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -416,6 +421,38 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		});
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
+
+		// C-02 (C-P7): set to a dirty Stillroot Poultice, the formula's preview names what fouled its Verdance.
+		boolean dirty = server.computeOnServer(minecraft -> {
+			if (!(minecraft.overworld().getBlockEntity(pot) instanceof CrucibleBlockEntity crucible)) {
+				return false;
+			}
+			crucible.follow(Formula.parse(DIRTY_POULTICE));
+			return crucible.program() != null;
+		});
+		check(dirty, "The crucible should follow the dirty poultice's formula");
+		open(context);
+		List<String> preview = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			List<String> found = new ArrayList<>();
+			boolean under = false;
+			for (EncyclopediaPayload.Row row : current == null ? List.<EncyclopediaPayload.Row>of() : current.rows()) {
+				if (row.kindOf() == EncyclopediaPayload.Kind.HEADING) {
+					under = holds(row.text(), "compose.jugcraft.alchemy.inspect.preview");
+				} else if (under && holds(row.text(), "compose.jugcraft.alchemy.fouled")) {
+					found.add(row.text().getString());
+				}
+			}
+			return found;
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] a dirty poultice's preview: fouled {}", preview);
+		check(!preview.isEmpty() && preview.stream().noneMatch(row -> row.contains("jugcraft.") || row.contains("jugcraft:")),
+				"The dirty poultice's preview should say what fouled its Verdance, in words: " + preview);
+		context.runOnClient(client -> client.gui.toastManager().clear());
+		context.waitTicks(5);
+		context.takeScreenshot("jugcraft_encyclopedia_inspect_poultice");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
 		context.getInput().lookAt(0.0F, 30.0F);
 		// Taken away again (no bottle went in, so nothing drops), so the later shots are as they were.
 		server.runOnServer(minecraft -> {
@@ -595,6 +632,21 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 
 	private static ServerPlayer first(MinecraftServer minecraft) {
 		return minecraft.getPlayerList().getPlayers().get(0);
+	}
+
+	/** Whether the translation key {@code key} is in {@code component}, its arguments or its siblings. */
+	private static boolean holds(Component component, String key) {
+		if (component.getContents() instanceof TranslatableContents translatable) {
+			if (translatable.getKey().equals(key)) {
+				return true;
+			}
+			for (Object arg : translatable.getArgs()) {
+				if (arg instanceof Component inner && holds(inner, key)) {
+					return true;
+				}
+			}
+		}
+		return component.getSiblings().stream().anyMatch(sibling -> holds(sibling, key));
 	}
 
 	private static void check(boolean condition, String message) {

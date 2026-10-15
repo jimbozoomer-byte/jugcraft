@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
  * <ol>
  * <li>a spoon: the temperature band, the volume, the strongest property and whether it is murky;</li>
  * <li>an assay glass: the temperature, every property dissolved and still pending, a part's share, and the
- * contaminant;</li>
+ * contaminant, with what it takes from a property it fouls (Concordance Chunk C, C-02);</li>
  * <li>an assay glass in the hands of someone who has mastered the Alembic Arts: what a dose bottled now would do, and
  * why ({@link Outcome#reasons()}).</li>
  * </ol>
@@ -65,7 +65,16 @@ public final class Assay {
 						Vector.units(pending.get(axis))));
 			}
 		}
-		out.add(Text.of("alchemy.assay.contaminant", Vector.units(mixture.contaminantConcentration())));
+		long contaminant = mixture.contaminantConcentration();
+		out.add(Text.of("alchemy.assay.contaminant", Vector.units(contaminant)));
+		// What the contaminant takes from a property that declares fouling (Concordance Chunk C, C-02, C-P7).
+		for (Axis axis : Axis.values()) {
+			Property property = catalog.property(axis.id);
+			long taken = property == null ? 0L : property.fouled(concentration.get(axis), contaminant);
+			if (taken > 0) {
+				out.add(Text.of("alchemy.assay.fouls", new Text.Ref("principle", axis.id), Vector.units(taken)));
+			}
+		}
 		if (level < MASTERED) {
 			return out;
 		}

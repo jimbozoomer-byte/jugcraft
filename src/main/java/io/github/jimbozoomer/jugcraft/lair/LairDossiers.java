@@ -36,7 +36,8 @@ import org.jspecify.annotations.Nullable;
  * objective), the trophy a first win brings (one, or one of a pair at random), what the keeper gives (the acquisition
  * text JEI shows, "with the default data": {@code jei.jugcraft.acquire.<item>}, tools/acquisition.py), the cheaper token
  * and the pieces the loot makes, how to leave, and, in a fight, the player's own part in it. The Glacier Hall's rite
- * also names what readies a player for his frost (Chunk B, B-08: Winter Brine and the Yeti Mitten).
+ * also names what readies a player for his frost (Chunk B, B-08: Winter Brine and the Yeti Mitten), and the Cinder
+ * Kiln's what readies a player for his slag and flame (Chunk C, C-02: the Kiln Draught and the Salamander Charm).
  * <p>
  * Discovery is read, not saved: the inventory, {@link Lairs#VISIT}, {@link LairRewards#OWED} and the first-win
  * advancements. So a player who went in, left, and used up their token (a Cursed Spindle, a Frost Horn, a Kiln Seal)
@@ -47,6 +48,8 @@ import org.jspecify.annotations.Nullable;
  */
 public final class LairDossiers {
 	public static final String PAGE = "expedition";
+	/** The status the Kiln Draught carries: the Cinder Kiln's preparation fact names it only while Ember brews this (C-P9). */
+	public static final String FIRE_RESISTANCE = "minecraft:fire_resistance";
 
 	/** How far a player has come with one lair. */
 	public enum Discovery {
@@ -211,25 +214,41 @@ public final class LairDossiers {
 	}
 
 	/**
-	 * What readies a player for the lair's hazard (Concordance Chunk B, B-08), as text and icons and never a recipe grid
-	 * (B-P29: with four keepers the page's grids are spoken for, {@link PageWriter#MAX_GRIDS}). For the Glacier Hall:
-	 * Winter Brine's Frostward, named only while the Concordance is on and the data's Rime brews it (its longest time the
-	 * data's), with a codex link once the Alembic Arts are observed; and the Yeti Mitten, his lasting answer. It only
-	 * reads.
+	 * What readies a player for the lair's hazard, as text and icons and never a recipe grid (B-P29: with four keepers the
+	 * page's grids are spoken for, {@link PageWriter#MAX_GRIDS}). A brew is named only while the Concordance is on and the
+	 * data's property brews its status (its longest time the data's), with a codex link once the Alembic Arts are
+	 * observed; the keeper's own lasting answer from his loot beside it, or alone. The Glacier Hall (Chunk B, B-08):
+	 * Winter Brine's Frostward and the Yeti Mitten. The Cinder Kiln (Chunk C, C-02, C-P9): the Kiln Draught's Fire
+	 * Resistance, which his slag and flame respect, and the Salamander Charm. It only reads.
 	 */
 	private static void prepare(PageWriter out, Boss boss) {
-		if (boss != Boss.YETI_KING) {
-			return;
+		boolean concordance = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		if (boss == Boss.YETI_KING) {
+			Property rime = concordance ? Alchemy.catalog().property(Axis.RIME.id) : null;
+			if (!brews(rime, Frostward.STATUS)) {
+				out.fact(Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.prepare.mitten"), null, items(List.of("yeti_mitten")));
+				return;
+			}
+			List<Item> icons = new ArrayList<>(List.of(Items.SNOWBALL));
+			icons.addAll(items(List.of("crucible", "draught", "yeti_mitten")));
+			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.prepare", rime.maxTicks() / 20), null, icons);
+			out.codex("alembic/winter_brine", "jugcraft:alembic_arts", ResearchState.OBSERVED);
+		} else if (boss == Boss.CINDER_TYRANT) {
+			Property ember = concordance ? Alchemy.catalog().property(Axis.EMBER.id) : null;
+			if (!brews(ember, FIRE_RESISTANCE)) {
+				out.fact(Component.translatable("encyclopedia.jugcraft.dossier.cinder_kiln.prepare.charm"), null, items(List.of("salamander_charm")));
+				return;
+			}
+			List<Item> icons = new ArrayList<>(List.of(Items.MAGMA_CREAM, Items.SUGAR));
+			icons.addAll(items(List.of("crucible", "draught", "salamander_charm")));
+			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.cinder_kiln.prepare", ember.maxTicks() / 20), null, icons);
+			out.codex("alembic/kiln_draught", "jugcraft:alembic_arts", ResearchState.OBSERVED);
 		}
-		Property rime = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) ? Alchemy.catalog().property(Axis.RIME.id) : null;
-		if (rime == null || !Frostward.STATUS.equals(rime.status())) {
-			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.prepare.mitten"), null, items(List.of("yeti_mitten")));
-			return;
-		}
-		List<Item> icons = new ArrayList<>(List.of(Items.SNOWBALL));
-		icons.addAll(items(List.of("crucible", "draught", "yeti_mitten")));
-		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.glacier_hall.prepare", rime.maxTicks() / 20), null, icons);
-		out.codex("alembic/winter_brine", "jugcraft:alembic_arts", ResearchState.OBSERVED);
+	}
+
+	/** Whether {@code property} (null: the Concordance off, or no such property in the data) brews {@code status}. */
+	public static boolean brews(@Nullable Property property, String status) {
+		return property != null && status.equals(property.status());
 	}
 
 	/** The keeper, once met: how support earns a share, the first win and the loot, the recipes it opens, leaving, and the fight. */

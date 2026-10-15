@@ -124,8 +124,10 @@ PROPERTIES = {
     "radiance": {"status": "minecraft:night_vision", "intent": "helpful", "threshold": 0.5, "per_level": 10.0,
                  "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
     # Regeneration and Poison reach level II, so they last no longer than vanilla's strong potions (450 and 432 ticks).
+    # Concordance Chunk C, C-02 (C-P7): each unit of contaminant a part takes this many units of Verdance a part before
+    # the dose is judged (Java: Property.fouled, in Outcome.of). A starting value.
     "verdance": {"status": "minecraft:regeneration", "intent": "helpful", "threshold": 0.6, "per_level": 1.5,
-                 "max_level": 2, "ticks_per_unit": 300, "max_ticks": 450},
+                 "max_level": 2, "ticks_per_unit": 300, "max_ticks": 450, "fouling": 4.0},
     "ember": {"status": "minecraft:fire_resistance", "intent": "helpful", "threshold": 0.6, "per_level": 10.0,
               "max_level": 1, "ticks_per_unit": 1200, "max_ticks": 2400},
     # B-08: Rime brews Frostward (no salt: a snowball carries 1.0, B-P17), timed as the Fire Resistance brew is (B-P19). A
@@ -236,9 +238,16 @@ TEXT = {
     "alchemy.inspect.operations": "%s of %s steps taken since it was empty",
     "alchemy.inspect.drawn": "%s doses drawn: its process can no longer be recorded",
     "alchemy.inspect.preview": "The formula, repeated now",
+    # Concordance Chunk C, C-02 (C-P7): what the contaminant takes from a property that declares fouling (Outcome.of, and
+    # the Assay Glass's line).
+    "alchemy.fouled": "%s fouled: %s a part lost to %s contaminant a part, from %s",
+    "alchemy.assay.fouls": "%s: the contaminant takes %s a part",
 }
 # What JEI's page for an ingredient carrying Rime adds (Concordance Chunk B, B-08): a property fact, never an outcome.
 RIME_JEI = "; stirred cold, its Rime brews Frostward (Winter Brine)"
+# What JEI's page for a workshop product's ingredient adds (Concordance Chunk C, C-02): the product its property brews.
+PRODUCT_JEI = "; its {axis} brews {status}: in a {container}, the {name}"
+CONTAINERS = {"draught": "bottle", "salve": "bowl"}
 
 TOOLTIPS = {
     "alchemy_specimen": "Alchemical ingredient: sneak and use to examine it",
@@ -271,7 +280,12 @@ def lang_entries(lang):
         lang[f"jei.{MOD}.alchemy.{key}"] = "Alchemy: " + ", ".join(
             f"{axis.title()} {value:.2f}" for axis, value in info["properties"].items()) + (
             f"; contaminant {info['contaminant']:.2f}" if info.get("contaminant") else "") + (
-            RIME_JEI if info["properties"].get("rime") else "")
+            RIME_JEI if info["properties"].get("rime") else "") + "".join(
+            PRODUCT_JEI.format(axis=product["property"].title(), status=STATUS_NAMES[PROPERTIES[product["property"]]["status"]],
+                               container=CONTAINERS[product["form"]], name=product["name"])
+            for product in PRODUCTS.values() if key in product["jei"])
+    for key, info in PRODUCTS.items():
+        lang[product_name_key(key, info)] = info["name"]
     lang[f"jei.{MOD}.alchemy.mortar"] = "Grind an alchemical ingredient: it dissolves faster but loses a little."
     for key, name in PREPARATION_NAMES.items():
         lang[f"preparation.{MOD}.{key}"] = name
@@ -359,11 +373,178 @@ def _winter_brine_example():
     return text
 
 
+# ------------------------------------------------------------------------------------------------- outcomes and products
+
+def fouled(axis, amount, contaminant):
+    """What is left of {amount} milli-units a part of {axis} once {contaminant} milli-units a part foul it: the
+    property's fouling, in units, for each unit of contaminant, never more than there is (Java: Property.fouled, taken
+    in Outcome.of before the level and duration; Concordance Chunk C, C-02, C-P7)."""
+    taken = contaminant * _milli(PROPERTIES[axis].get("fouling", 0)) // 1000
+    return max(0, amount - taken)
+
+
+def judge(key, amount):
+    """(status, amplifier, ticks) of a dose holding {amount} milli-units a part of property {key}, or None below its
+    threshold (Java: Property.level and ticks)."""
+    info = PROPERTIES[key]
+    threshold, per_level = _milli(info["threshold"]), _milli(info["per_level"])
+    if amount < threshold:
+        return None
+    level = min(info["max_level"], 1 + (amount - threshold) // per_level)
+    return info["status"], level - 1, min(info["max_ticks"], amount * info["ticks_per_unit"] // 1000)
+
+
+def bottle(operations, drawn=0):
+    """The dose (milli-units a part, by axis) and the contaminant a part of the bottle drawn after {drawn} others from the
+    mixture {operations} make (Java: Mixture.bottle)."""
+    parts, _, dissolved, contaminant = simulate(operations)
+    for _ in range(drawn):
+        dose = {axis: dissolved[axis] // parts for axis in AXES}
+        dissolved = {axis: dissolved[axis] - dose[axis] for axis in AXES}
+        contaminant -= contaminant // parts
+        parts -= 1
+    return {axis: dissolved[axis] // parts for axis in AXES}, contaminant // parts
+
+
+def outcome(dose, contaminant):
+    """What a dose does, as Java's alchemy/Outcome.of works it out: {axis, or "contaminant": (status, amplifier, ticks), or
+    None when too weak}, each axis judged after its fouling."""
+    out = {axis: judge(axis, fouled(axis, dose[axis], contaminant)) for axis in AXES if dose[axis]}
+    if contaminant:
+        out["contaminant"] = judge("contaminant", contaminant)
+    return out
+
+
+# Vanilla's Regeneration heals one health every 50 >> amplifier ticks (26.3's
+# RegenerationMobEffect.shouldApplyEffectTickThisTick, read from the decompiled sources;
+# LairEncounterGameTests.regenerationHealsOnItsVanillaInterval measures it).
+REGENERATION_INTERVAL = {0: 50, 1: 25}
+
+
+def realised(outcomes, axis):
+    """What the doses {outcomes} give in all through {axis}: health healed for Regeneration, ticks of effect otherwise."""
+    total = 0
+    for each in outcomes:
+        effect = each.get(axis)
+        if effect:
+            _, amplifier, ticks = effect
+            total += ticks // REGENERATION_INTERVAL[amplifier] if effect[0] == "minecraft:regeneration" else ticks
+    return total
+
+
+def stillroot_poultice(bone_meal=0, water=1):
+    """The Stillroot Poultice's process: two Mendvetch as they come in {water} parts of water, {bone_meal} bone meal
+    stirred in with them (a dirty batch), then four warm stirs."""
+    return ([("water", water)] + [("add", "mendvetch", "raw")] * 2 + [("add", "bone_meal", "raw")] * bone_meal
+            + [("stir", "warm")] * 4)
+
+
+STILLROOT_BONE_MEAL = 3  # the dirtiest batch the audit and ConcordanceAlchemyGameTests work
+
+
+def poultice_verdance():
+    """Verdance a part (milli-units, after fouling) of a poultice with 0 to STILLROOT_BONE_MEAL bone meal:
+    ConcordanceAlchemyGameTests.aStillrootPoulticeRepeatsAndADirtyBatchHealsLess's `long[] verdance` (check_alchemy)."""
+    out = []
+    for bone_meal in range(STILLROOT_BONE_MEAL + 1):
+        dose, contaminant = bottle(stillroot_poultice(bone_meal))
+        out.append(fouled("verdance", dose["verdance"], contaminant))
+    return out
+
+
+KILN_DRAUGHT = [("water", 1), ("add", "magma_cream", "raw")] + [("stir", "hot")] * 2
+KILN_DRAUGHT_SUGAR = [("water", 1)] + [("add", "sugar", "raw")] * 2 + [("stir", "hot")] * 2
+
+# Concordance Chunk C, C-02 (C-D1, C-P2): the workshop's products. A product is a brew the crucible already makes, named
+# on the stack (vanilla's item name) when it is of this form, carries the status its property brews and carries nothing
+# harmful (Java: alchemy/Product.java, AlchemyCatalog.product, Alchemy.brew); data concordance/product/<key>.json. Never
+# an item, an ingredient or a Scale material (check_mod_data.py check_workshop_products). "processes" are the worked
+# examples the codex shows and the audits replay, each from one part of water; "jei" the ingredients whose JEI page
+# names the product (Winter Brine's are named by RIME_JEI).
+PRODUCTS = {
+    "stillroot_poultice": {"name": "Stillroot Poultice", "form": "salve", "property": "verdance",
+                           "codex": "alembic/stillroot_poultice", "jei": ["mendvetch"],
+                           "processes": {"mendvetch": stillroot_poultice()}},
+    "kiln_draught": {"name": "Kiln Draught", "form": "draught", "property": "ember", "codex": "alembic/kiln_draught",
+                     "jei": ["magma_cream", "sugar"],
+                     "processes": {"magma_cream": KILN_DRAUGHT, "sugar": KILN_DRAUGHT_SUGAR}},
+    # Chunk B's brew, now named on its bottle too (Chunk B's known defect: it read "Draught").
+    "winter_brine": {"name": "Winter Brine", "form": "draught", "property": "rime", "codex": "alembic/winter_brine",
+                     "jei": [], "processes": {"snowball": WINTER_BRINE + [("stir", "cold")] * WINTER_BRINE_STIRS}},
+}
+# Boss drops that reach a product's ingredient by recipes alone (not through the Assayer's Scale, whose exchange is
+# priced): declared reward routes, not loops, since no brew makes anything (C-P9; check_workshop_products).
+PRODUCT_REWARD_ROUTES = {rid("tyrant_scale"): {"minecraft:magma_cream"},  # two magma cream a scale
+                         rid("grave_dust"): {rid("mendvetch")}}  # two bone meal a dust, and Mendvetch from bone meal
+ROMAN = ["I", "II", "III", "IV", "V"]
+
+
+def product_name_key(key, info):
+    """The translation key a product's stack is named with: item.jugcraft.<form>.<key>."""
+    return f"item.{MOD}.{info['form']}.{key}"
+
+
+def product_json(key, info):
+    """concordance/product/<key>.json (Java: rules/RulesParser.product)."""
+    return {"schema": 1, "form": info["form"], "status": PROPERTIES[info["property"]]["status"], "harmful": False,
+            "name": product_name_key(key, info), "codex": info["codex"]}
+
+
+def _exact(milli):
+    return f"{milli // 1000}.{milli % 1000:03d}"
+
+
+def _fouling_text():
+    fouling = [f"{axis.title()} (each unit of contaminant a part takes {_units(PROPERTIES[axis]['fouling'])} of it)"
+               for axis in AXES if PROPERTIES[axis].get("fouling")]
+    return " Contaminant also fouls " + ", ".join(fouling) + ", before the dose is judged." if fouling else ""
+
+
+def _poultice_example():
+    dose, contaminant = bottle(stillroot_poultice())
+    _, amplifier, ticks = outcome(dose, contaminant)["verdance"]
+    return (f"Two Mendvetch as they come in one part of water, stirred warm four times, hold {_exact(dose['verdance'])} "
+            f"Verdance a part: in a bowl, a **Stillroot Poultice** of Regeneration {ROMAN[amplifier]} for "
+            f"{_seconds(ticks)} s. Use it on a friend, or on yourself while sneaking, and the bowl comes back. Any salve "
+            f"that brings Regeneration and nothing harmful is a Stillroot Poultice.")
+
+
+def _clean_batch_example():
+    dose, contaminant = bottle(stillroot_poultice(1))
+    left = fouled("verdance", dose["verdance"], contaminant)
+    _, amplifier, _ = outcome(dose, contaminant)["verdance"]
+    two = outcome(*bottle(stillroot_poultice(2)))
+    poison = " Two bring Poison as well." if two.get("hollow") else ""
+    searing = SEARING_CONTAMINANT * _milli(PROPERTIES["verdance"]["fouling"]) // 1000
+    return (f"Contaminant fouls Verdance: each unit of it a part takes {_units(PROPERTIES['verdance']['fouling'])} units "
+            f"of Verdance a part before the dose is judged. One bone meal stirred in with the same Mendvetch brings "
+            f"{_exact(contaminant)} contaminant and leaves {_exact(left)} Verdance: only Regeneration "
+            f"{ROMAN[amplifier]}.{poison} A searing stir adds {_exact(SEARING_CONTAMINANT)} contaminant to the pot, "
+            f"which in one part takes {_exact(searing)}. The Assay Glass shows what the contaminant takes; a master's "
+            f"glass shows the weaker outcome and names what fouled it.")
+
+
+def _kiln_example():
+    cream, cream_contaminant = bottle(KILN_DRAUGHT)
+    sugar, _ = bottle(KILN_DRAUGHT_SUGAR)
+    split = outcome(*bottle([("water", 2)] + KILN_DRAUGHT[1:]))["ember"]
+    nausea = _milli(PROPERTIES["contaminant"]["threshold"])
+    return (f"One magma cream as it comes in one part of water, stirred hot twice, holds {_exact(cream['ember'])} Ember a "
+            f"part (and {_exact(cream_contaminant)} contaminant, under the {_exact(nausea)} that brings nausea): a "
+            f"**Kiln Draught** of Fire Resistance for {_seconds(outcome(cream, cream_contaminant)['ember'][2])} s. Two "
+            f"sugar stirred the same way hold {_exact(sugar['ember'])}: {_seconds(outcome(sugar, 0)['ember'][2])} s. In "
+            f"two parts of water the magma cream makes two draughts of {_seconds(split[2])} s each: more bottles, no more "
+            f"time.")
+
+
+# The statuses the properties brew, by name (the codex's property table and the products' JEI lines).
+STATUS_NAMES = {"minecraft:night_vision": "Night Vision", "minecraft:regeneration": "Regeneration",
+                "minecraft:fire_resistance": "Fire Resistance", FROSTWARD: "Frostward",
+                "minecraft:water_breathing": "Water Breathing", "minecraft:poison": "Poison", "minecraft:nausea": "Nausea"}
+
+
 def _property_table():
-    names = {"minecraft:night_vision": "Night Vision", "minecraft:regeneration": "Regeneration",
-             "minecraft:fire_resistance": "Fire Resistance", FROSTWARD: "Frostward",
-             "minecraft:water_breathing": "Water Breathing", "minecraft:poison": "Poison", "minecraft:nausea": "Nausea"}
-    return "\\\n".join(f"- {axis.title()}: {names[info['status']]} from {_units(info['threshold'])} a part, "
+    return "\\\n".join(f"- {axis.title()}: {STATUS_NAMES[info['status']]} from {_units(info['threshold'])} a part, "
                        f"{_seconds(info['ticks_per_unit'])} s a unit (at most {_seconds(info['max_ticks'])} s)"
                        for axis, info in PROPERTIES.items())
 
@@ -418,7 +599,8 @@ def codex():
             "pages": [
                 ("text", "Ingredients", _ingredient_table()),
                 ("text", "What a Dose Does", _property_table() + "\\\n\\\nA dose below a threshold does nothing for "
-                                                                 "that property; too much contaminant brings nausea."),
+                                                                 "that property; too much contaminant brings nausea."
+                 + _fouling_text()),
                 ("text", "Preparation",
                  "Used as it comes, an ingredient waits to be stirred out. **Ground** in a Mortar and Pestle it loses a "
                  "tenth, but most of it dissolves the moment it goes in."),
@@ -472,6 +654,26 @@ def codex():
                  f"{_seconds(PROPERTIES['rime']['ticks_per_unit'])} s for each unit of Rime a part holds, at most "
                  f"{_seconds(PROPERTIES['rime']['max_ticks'])} s, and milk ends it. The Yeti Mitten from his loot, held in "
                  f"the other hand, keeps you warm for as long as you hold it."),
+            ]},
+        # Concordance Chunk C, C-02 (C-D1, C-P2): the workshop's products, named on the stack by what they carry.
+        ("alembic", "stillroot_poultice"): {
+            "name": "Stillroot Poultice", "x": 0, "y": 4, "icon": rid("mendvetch"), "condition": (art, "observed"),
+            "description": "Mendvetch stirred clean: a healing salve",
+            "pages": [
+                ("text", "Stillroot Poultice", _poultice_example()),
+                ("text", "A Clean Batch", _clean_batch_example()),
+            ]},
+        ("alembic", "kiln_draught"): {
+            "name": "Kiln Draught", "x": 2, "y": 4, "icon": "minecraft:magma_cream", "condition": (art, "observed"),
+            "description": "Ember stirred hot: Fire Resistance",
+            "pages": [
+                ("text", "Kiln Draught", _kiln_example()),
+                ("text", "Against the Kiln",
+                 f"Under Fire Resistance the Cinder Kiln's slag does not burn and his flame does not take, though his "
+                 f"blows, gobs and cinders still land. It lasts {_seconds(PROPERTIES['ember']['ticks_per_unit'])} s a unit "
+                 f"of Ember a part, at most {_seconds(PROPERTIES['ember']['max_ticks'])} s. The Salamander Charm from his "
+                 f"loot, held in the other hand, keeps hot ground from burning you for as long as you hold it. A Tyrant "
+                 f"Scale makes two magma cream."),
             ]},
     }
 
@@ -610,6 +812,9 @@ def write_data(write, data):
         write(data / "concordance" / "preparation" / f"{key}.json", preparation_json(info))
     for key, info in PROPERTIES.items():
         write(data / "concordance" / "property" / f"{key}.json", property_json(info))
+    # Concordance Chunk C, C-02: the workshop's products (Java: rules/RulesParser.product).
+    for key, info in PRODUCTS.items():
+        write(data / "concordance" / "product" / f"{key}.json", product_json(key, info))
 
 
 def recipe_ingredients():

@@ -17,8 +17,10 @@ import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.encyclopedia.InspectPage;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
@@ -85,7 +87,8 @@ import net.minecraft.world.phys.Vec3;
  * season, a first win over any keeper is the route's lair step, and the Expeditions page holds every keeper whole;
  * and (B-08) the Glacier Hall's rite names Winter Brine and the Yeti Mitten. Since Concordance Chunk C (C-01) the
  * Inspect page reads an Alembic Crucible within the reader's own block reach, more with an Assay Glass carried and the
- * Alembic Arts learned, showing no sign and changing nothing, and gives a waiting formula's own reason.
+ * Alembic Arts learned, showing no sign and changing nothing, and gives a waiting formula's own reason; and (C-02) the
+ * Cinder Kiln's rite names the Kiln Draught and the Salamander Charm.
  */
 public class EncyclopediaGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -554,6 +557,57 @@ public class EncyclopediaGameTests {
 	@GameTest(maxTicks = 20)
 	public void theCinderKilnsDossier(GameTestHelper helper) {
 		keeperDossier(helper, LairDossiers.Boss.CINDER_TYRANT, JugcraftLairs.KILN_SEAL, List.of(JugcraftTyrant.cinderbrand(), JugcraftTyrant.magmaw()));
+	}
+
+	/**
+	 * Concordance Chunk C (C-02, C-P9): the Cinder Kiln's rite names what readies a player for his slag and flame, as text
+	 * and icons with no grid: the Kiln Draught's Fire Resistance for the data's longest time (magma cream or sugar, the
+	 * crucible, a draught) and the Salamander Charm, with a codex link once the Alembic Arts are observed. Named only while
+	 * the data's Ember brews Fire Resistance; with the Concordance off, the Charm alone.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theCinderKilnsRiteNamesTheKilnDraught(GameTestHelper helper) {
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftLairs.FEATURE) || !JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			helper.succeed();
+			return;
+		}
+		String prepare = "encyclopedia.jugcraft.dossier.cinder_kiln.prepare";
+		String codex = "book.jugcraft.arcane_concordance.alembic.kiln_draught.name";
+		ServerPlayer player = player(helper);
+		player.getInventory().add(new ItemStack(JugcraftLairs.KILN_SEAL));
+		EncyclopediaPayload carried = build(player);
+		List<EncyclopediaPayload.Row> rite = section(page(carried, LairDossiers.PAGE), Lair.CINDER_KILN);
+		EncyclopediaPayload.Row draught = row(rite, prepare);
+		helper.assertTrue(draught != null && draught.kindOf() == EncyclopediaPayload.Kind.FACT && draught.grid().isEmpty() && row(rite, prepare + ".charm") == null,
+				"carrying a Kiln Seal, the rite names the Kiln Draught as a fact with no grid: " + rite.stream().map(row -> key(row.text())).toList());
+		Object[] seconds = args(draught.text());
+		helper.assertTrue(seconds.length == 1 && seconds[0].equals(Alchemy.catalog().property("ember").maxTicks() / 20),
+				"Fire Resistance's longest time is the data's: " + List.of(seconds));
+		helper.assertValueEqual(draught.icons(), List.of(Items.MAGMA_CREAM, Items.SUGAR, JugcraftConcordance.CRUCIBLE.asItem(), JugcraftConcordance.DRAUGHT,
+				JugcraftTyrant.SALAMANDER_CHARM), "magma cream, sugar, the crucible, a draught and the Charm");
+		helper.assertFalse(keys(carried).contains(codex), "no codex link before the Alembic Arts are observed");
+
+		ConcordanceProgress.grant(player, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Alchemy.RESEARCH, ResearchState.OBSERVED);
+		helper.assertTrue(keys(build(player)).contains(codex), "the Alembic Arts observed, the dossier links the Kiln Draught's codex entry");
+
+		// Named only while the data's Ember brews Fire Resistance.
+		Property ember = Alchemy.catalog().property("ember");
+		helper.assertTrue(LairDossiers.brews(ember, LairDossiers.FIRE_RESISTANCE) && !LairDossiers.brews(null, LairDossiers.FIRE_RESISTANCE)
+				&& !LairDossiers.brews(new Property("ember", "minecraft:speed", Intent.HELPFUL, 600, 10000, 1, 1200, 2400, 0L), LairDossiers.FIRE_RESISTANCE),
+				"the Kiln Draught is named only while Ember brews Fire Resistance: " + ember);
+
+		// The Concordance off: the Charm alone (switched back at once; the server runs other tests).
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		List<String> off;
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			off = section(page(build(player), LairDossiers.PAGE), Lair.CINDER_KILN).stream().map(row -> key(row.text())).toList();
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		helper.assertTrue(off.contains(prepare + ".charm") && !off.contains(prepare), "with the Concordance off, the Charm alone: " + off);
+		helper.succeed();
 	}
 
 	/** With the Halloween event over and lairs.off_season off, the Last Rites wait for the season; the horn and the seal work all year. */

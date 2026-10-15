@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Ingredient;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Authored;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Catalog;
@@ -300,7 +301,8 @@ public final class ConcordanceRules {
 
 	/**
 	 * The files under {@code data/<ns>/concordance/}: kind (research, invocation, working, conversion, component,
-	 * instrument, structure, ritual, ingredient, preparation, property, organism, disturbance or pattern), id, content.
+	 * instrument, structure, ritual, ingredient, preparation, property, product, organism, disturbance or pattern), id,
+	 * content.
 	 */
 	public record Source(String kind, String id, JsonElement json) {
 	}
@@ -348,6 +350,7 @@ public final class ConcordanceRules {
 		Map<String, Ingredient> ingredients = new TreeMap<>();
 		Map<String, Preparation> preparations = new TreeMap<>();
 		Map<String, Property> properties = new TreeMap<>();
+		Map<String, Product> products = new TreeMap<>();
 		List<String> problems = new ArrayList<>();
 		for (Source source : sources) {
 			switch (source.kind()) {
@@ -420,6 +423,12 @@ public final class ConcordanceRules {
 					Property property = parser.property(source.id(), source.json());
 					if (property != null) {
 						properties.put(property.id(), property);
+					}
+				}
+				case "product" -> {
+					Product product = parser.product(source.id(), source.json());
+					if (product != null) {
+						products.put(product.id(), product);
 					}
 				}
 				case "organism" -> {
@@ -538,7 +547,7 @@ public final class ConcordanceRules {
 				}
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
-						+ "preparation, property, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
+						+ "preparation, property, product, organism, disturbance, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
 						+ "curse, commission, project, stage, practice, wonder or wonder_configuration)");
 			}
 		}
@@ -691,7 +700,7 @@ public final class ConcordanceRules {
 		if (!byItem.isEmpty() && plain != 1) {
 			problems.add("alchemy: exactly one preparation must have no tool (how an ingredient goes in as it comes); found " + plain);
 		}
-		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties);
+		AlchemyCatalog alchemy = new AlchemyCatalog(byItem, preparations, properties, products);
 		// Ecology: a block is one organism and an item plants one crop, or the garden could not tell which grows.
 		Map<String, String> organismBlocks = new HashMap<>();
 		Map<String, String> organismItems = new HashMap<>();

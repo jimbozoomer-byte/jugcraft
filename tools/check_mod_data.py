@@ -12001,6 +12001,7 @@ def check_concordance(registered):
     check_alchemy(co, root, lang, registered, research)
     check_winter_brine(co, root, lang)
     check_diagnostics(co, root, lang)
+    check_workshop_products(co, root, lang)
     check_ecology(co, root, lang, registered, research)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
@@ -13553,6 +13554,28 @@ def check_alchemy(co, root, lang, registered, research):
             err(f"property {key}: {status} has no vanilla potion at level {top}")
         elif bound is not None and entry.get("max_ticks", 0) > bound:
             err(f"property {key}: {entry.get('max_ticks')} ticks outlasts vanilla's level {top} {status} potion ({bound})")
+    # Concordance Chunk C, C-02 (C-P7): the yield rule, mirrored. A helpful axis may declare fouling; the contaminant
+    # takes its share before the level and duration are worked out (amount less what was taken, then judged), with a
+    # reason naming the foulers; a dirtier Stillroot Poultice holds less, and the game test says so in the same numbers.
+    for key, info in al.PROPERTIES.items():
+        fouling = info.get("fouling", 0)
+        if fouling and (key == "contaminant" or info.get("intent") != "helpful" or not 0 < fouling <= al.MAX_PROPERTY):
+            err(f"tools/concordance_alchemy.py PROPERTIES {key}: only a helpful axis may declare fouling, 0..{al.MAX_PROPERTY} (C-P7)")
+    if "long fouling" not in java("alchemy/Property.java") \
+            or "Math.min(amount, Math.multiplyExact(contaminant, fouling) / 1000L)" not in java("alchemy/Property.java"):
+        err("concordance/alchemy/Property.java: fouling takes its units for each unit of contaminant, never more than there is (C-P7)")
+    of = _java_body(java("alchemy/Outcome.java"), "public static Outcome of(")
+    at_foul, at_taken, at_judge = of.find("property.fouled(amount, contaminant)"), of.find("amount -= taken;"), of.find("judge(property, amount,")
+    if at_foul < 0 or not at_foul < at_taken < at_judge or 'Text.of("alchemy.fouled"' not in of:
+        err("concordance/alchemy/Outcome.of: a property's fouling is taken before its level and duration, with a reason naming the foulers (C-P7)")
+    if not re.search(r'only\(object, [^;]*"fouling"[^;]*\);', _java_body(java("rules/RulesParser.java"), "public @Nullable Property property(")):
+        err("concordance/rules/RulesParser.property: the allow-list takes a property's fouling")
+    series = al.poultice_verdance()
+    if any(a <= b for a, b in zip(series, series[1:])):
+        err(f"tools/concordance_alchemy.py: a dirtier Stillroot Poultice must hold less Verdance ({series})")
+    tests = java("ConcordanceAlchemyGameTests.java", ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test")
+    if f"long[] verdance = {{{', '.join(map(str, series))}}};" not in tests:
+        err(f"ConcordanceAlchemyGameTests.aStillrootPoulticeRepeatsAndADirtyBatchHealsLess: verdance must be the generator's {series}")
     for ref in al.ALCHEMY_SPECIMENS:
         if ref not in items:
             err(f"alchemy specimen {ref} is not an ingredient")
@@ -13629,13 +13652,42 @@ def _item_tags():
     return found
 
 
-def _made_from(start):
+_RECIPE_EDGES = []
+
+
+def _recipe_edges(scale=True):
+    """_made_from's edges: (what a file takes, what it makes) for each recipe-like file, read once a run (Concordance
+    Chunk C, C-02: check_workshop_products asks for every boss drop), and, with scale, the Assayer's Scale's."""
+    if not _RECIPE_EDGES:
+        _RECIPE_EDGES.append(_read_recipe_edges())
+    edges = _RECIPE_EDGES[0]
+    if scale:
+        materials = [load(path) or {} for path in sorted((DATA / MOD / "concordance" / "material").glob("*.json"))]
+        edges = edges + [(frozenset(m.get("item") for m in materials if m.get("dissolve")),
+                          frozenset(m.get("item") for m in materials if m.get("form")))]
+    return edges
+
+
+def _made_from(start, scale=True):
     """Every item Jugcraft's recipe-like data makes, step by step, from the items in start: a file that names one of them
     (and does not make it) adds what it makes (B-08's must-fail loop: Yeti Fur must reach no Rime ingredient). An input
     tag (#ns:path) stands for its members in the repository's own tag files; a villager trade's `wants` makes its
     `gives`; and the Assayer's Scale (data/jugcraft/concordance/material) makes every material it forms from any it
     dissolves. Vanilla's recipes and tags are not in the repository; no vanilla recipe makes a snowball, an amethyst
-    shard, a mushroom or glow lichen from anything (gloamcap's inputs), and a town's coin shops are money, not this."""
+    shard, a mushroom or glow lichen from anything (gloamcap's inputs), and a town's coin shops are money, not this.
+    check_workshop_products leaves the Scale out (scale=False): its exchange is priced (check_equivalence), so a drop that
+    reaches an ingredient only through it is no reward route."""
+    reached, grown = set(start), True
+    while grown:
+        grown = False
+        for takes, made in _recipe_edges(scale):
+            if takes & reached and not made <= reached:
+                reached |= made
+                grown = True
+    return reached - set(start)
+
+
+def _read_recipe_edges():
     ids = re.compile(r'"(#?[a-z0-9_.-]+:[a-z0-9_/.-]+)"')
     tags = _item_tags()
 
@@ -13671,17 +13723,8 @@ def _made_from(start):
         data = load(path)
         made = results(data) if data is not None else set()
         if made:
-            recipes.append((named(path.read_text(encoding="utf-8")) - made, made))
-    scale = [load(path) or {} for path in sorted((DATA / MOD / "concordance" / "material").glob("*.json"))]
-    recipes.append(({m.get("item") for m in scale if m.get("dissolve")}, {m.get("item") for m in scale if m.get("form")}))
-    reached, grown = set(start), True
-    while grown:
-        grown = False
-        for takes, made in recipes:
-            if takes & reached and not made <= reached:
-                reached |= made
-                grown = True
-    return reached - set(start)
+            recipes.append((frozenset(named(path.read_text(encoding="utf-8")) - made), frozenset(made)))
+    return recipes
 
 
 def check_winter_brine(co, root, lang):
@@ -13751,6 +13794,155 @@ def check_winter_brine(co, root, lang):
     for key in (f"encyclopedia.{MOD}.dossier.glacier_hall.prepare", f"encyclopedia.{MOD}.dossier.glacier_hall.prepare.mitten"):
         if key not in lang:
             err(f"Winter Brine: missing lang {key}")
+
+
+# Each product's consumer in the game's code: (path under src/main/java/io/github/jimbozoomer/jugcraft, text that must be
+# there). Concordance Chunk C, C-02 (09:124: "no decorative recipes with no consumer").
+PRODUCT_CONSUMERS = {
+    "stillroot_poultice": [("concordance/BrewItem.java", "applySalve(level, server, stack, target, target == player ? null : player);")],
+    "kiln_draught": [("lair/MoltenSlagBlock.java", "living.hasEffect(MobEffects.FIRE_RESISTANCE)")],
+    "winter_brine": [("lair/yeti/YetiKingEntity.java", "Frostward.warded(player)")],
+}
+
+
+def check_workshop_products(co, root, lang):
+    """Concordance Chunk C, C-02 (C-D1, C-P2, C-P7, C-P9; docs/features/arcane-concordance-alchemy.md): the workshop's
+    products are brews the crucible already makes, named by what they carry. The data is the generator's; each product's
+    worked processes brew its status, alone among the products of its form and with nothing harmful, from vanilla
+    things and recipes of vanilla things; each has a consumer in the game's code; none is an ingredient, a Scale
+    material or anything a recipe, trade or the Scale takes, and the crucible's hand, hopper and the mortar take only
+    ingredients; bottling takes one container and using one gives it back; diluting a product's process gives no more in
+    all; a second dose never adds a level; the only boss drops that reach a product's ingredient by recipes are the
+    declared reward routes; health stays out of the economy, so the Vitae bound holds whatever heals; each ingredient's
+    JEI page names its product; and the Cinder Kiln's dossier names the Kiln Draught as text and icons, never a grid."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import concordance_economy as ec
+    al, eq = co.alchemy, co.equivalence
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    data = {p.stem: load(p) or {} for p in (DATA / MOD / "concordance" / "product").glob("*.json")}
+    if set(data) != set(al.PRODUCTS):
+        err(f"concordance/product: {sorted(data)} differ from PRODUCTS (run tools/generate_material_data.py)")
+    forms = {f"{MOD}:{info['form']}" for info in al.PRODUCTS.values()}
+    inputs = set()
+    entries = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "entries"
+    for key, info in al.PRODUCTS.items():
+        if data.get(key) != al.product_json(key, info):
+            err(f"concordance/product/{key}.json differs from PRODUCTS (run tools/generate_material_data.py)")
+        prop = al.PROPERTIES.get(info["property"], {})
+        if info["form"] not in ("draught", "salve") or prop.get("intent") != "helpful":
+            err(f"product {key}: a draught or a salve of a helpful property")
+        if lang.get(al.product_name_key(key, info)) != info["name"]:
+            err(f"product {key}: lang {al.product_name_key(key, info)} must be {info['name']}")
+        if not (entries / f"{info['codex']}.json").is_file():
+            err(f"product {key}: codex entry {info['codex']} does not exist")
+        if not PRODUCT_CONSUMERS.get(key):
+            err(f"product {key}: no consumer (09:124: no decorative recipes)")
+        for path, needle in PRODUCT_CONSUMERS.get(key, []):
+            if needle not in source(JAVA_ROOT / path):
+                err(f"product {key}: its consumer is gone from {path} ({needle})")
+        for name, process in info["processes"].items():
+            if process[:1] != [("water", 1)]:
+                err(f"product {key}: process {name} starts with one part of water")
+                continue
+            effects = al.outcome(*al.bottle(process))
+            statuses = {effect[0] for effect in effects.values() if effect}
+            harmful = any(al.PROPERTIES[axis]["intent"] == "harmful" for axis, effect in effects.items() if effect)
+            matching = [other for other, each in al.PRODUCTS.items()
+                        if each["form"] == info["form"] and al.PROPERTIES[each["property"]]["status"] in statuses]
+            if harmful or matching != [key]:
+                err(f"product {key}: process {name} must brew {prop.get('status')} alone among the {info['form']}s, with "
+                    f"nothing harmful ({effects})")
+            # Dilution gains nothing: the same batch in more parts gives no more in all (health healed, or ticks).
+            whole = al.realised([effects], info["property"])
+            for parts in range(2, al.MAX_PARTS + 1):
+                pieces = [al.outcome(*al.bottle([("water", parts)] + process[1:], drawn)) for drawn in range(parts)]
+                if al.realised(pieces, info["property"]) > whole:
+                    err(f"product {key}: process {name} in {parts} parts gives more in all than in one")
+            for operation in process:
+                if operation[0] != "add":
+                    continue
+                item = al.INGREDIENTS[operation[1]]["item"]
+                inputs.add(item)
+                # Reachable from a manual start: vanilla, or a Jugcraft item crafted from vanilla things alone.
+                if split(item)[0] == MOD:
+                    recipe = load(DATA / MOD / "recipe" / f"{split(item)[1]}.json") or {}
+                    named = set(re.findall(r'"(#?[a-z0-9_.-]+:[a-z0-9_/.-]+)"', json.dumps(recipe.get("ingredients", recipe.get("key", {})))))
+                    if not named or any(not ref.startswith("minecraft:") for ref in named):
+                        err(f"product {key}: {item} is not crafted from vanilla things alone ({sorted(named)})")
+        for ingredient in info["jei"]:
+            if info["name"] not in lang.get(f"jei.{MOD}.alchemy.{ingredient}", ""):
+                err(f"lang jei.{MOD}.alchemy.{ingredient}: names no {info['name']}")
+    for item in sorted(inputs):
+        page = next((lang.get(f"jei.{MOD}.alchemy.{k}", "") for k, i in al.INGREDIENTS.items() if i["item"] == item), "")
+        if not any(info["name"] in page for info in al.PRODUCTS.values()):
+            err(f"lang: the JEI page of {item}, a product's ingredient, names no product")
+    # Not weighable, and brews never feed brews.
+    materials = {(load(p) or {}).get("item") for p in (DATA / MOD / "concordance" / "material").glob("*.json")}
+    ingredients = {info["item"] for info in al.INGREDIENTS.values()}
+    for thing in sorted(forms):
+        if thing in eq.MATERIALS or thing in materials or f'"{thing}"' in json.dumps(eq.TRANSMUTATIONS) or thing in ingredients:
+            err(f"{thing} is neither weighed nor an ingredient: products feed no Scale and no crucible")
+    fed = _made_from(forms)
+    if fed:
+        err(f"a brew feeds {sorted(fed)}: no recipe, trade or Scale material may take a draught or salve")
+    if not re.search(r'MAGIC_NAMESPACES = Set\.of\([^)]*"jugcraft"', source(root / "equivalence" / "Eligibility.java")):
+        err("equivalence/Eligibility.java: jugcraft components are magic, so a brew is never weighed")
+    alchemy_java = source(root / "Alchemy.java")
+    if f'STILLROOT_POULTICE = "{MOD}:stillroot_poultice";' not in alchemy_java or "stillroot_poultice" not in al.PRODUCTS:
+        err("Alchemy.STILLROOT_POULTICE names the generator's poultice")
+    brew = _java_body(alchemy_java, "public static ItemStack brew(")
+    at_brew, at_name = brew.find("stack.set(JugcraftConcordance.BREW"), brew.find("stack.set(DataComponents.ITEM_NAME")
+    if at_brew < 0 or at_name < at_brew or "DataComponents.CUSTOM_NAME" in alchemy_java:
+        err("Alchemy.brew: a product carries jugcraft:brew and is named after it with vanilla's item name, never a custom name")
+    crucible = source(root / "CrucibleBlockEntity.java")
+    place = _java_body(crucible, "public boolean canPlaceItem(")
+    if "Alchemy.catalog().ingredient(ConcordanceProgress.itemId(stack)) != null" not in place or "formFor(stack) != null" not in place:
+        err("CrucibleBlockEntity.canPlaceItem: hoppers put in only ingredients, reagents and containers")
+    if "Alchemy.catalog().ingredient(item) == null" not in _java_body(source(root / "MortarItem.java"), "public InteractionResult use("):
+        err("MortarItem.use: the mortar grinds only ingredients")
+    # Containers net to zero: bottling takes one, using one gives it back.
+    if _java_body(crucible, "private @Nullable Diagnostic bottleIntoOutput(").count("container.shrink(1);") != 1 \
+            or _java_body(crucible, "private InteractionResult bottle(").count("held.shrink(1);") != 1:
+        err("CrucibleBlockEntity: bottling takes exactly one bottle or bowl")
+    salve = _java_body(source(root / "BrewItem.java"), "private static void applySalve(")
+    if salve.count("stack.shrink(1);") != 1 or "placeItemBackInInventory(new ItemStack(Items.BOWL), Prediction.SERVER_ONLY);" not in salve:
+        err("BrewItem.applySalve: a salve used gives exactly its bowl back")
+    if not re.search(r'DRAUGHT = item\("draught".*?\.usingConvertsTo\(Items\.GLASS_BOTTLE\)', source(root / "JugcraftConcordance.java"), re.S):
+        err("JugcraftConcordance: a draught drunk gives its glass bottle back")
+    # The dilution audit's Regeneration interval is vanilla's: 50 >> amplifier ticks a heal.
+    if al.REGENERATION_INTERVAL != {a: 50 >> a for a in al.REGENERATION_INTERVAL} \
+            or set(al.REGENERATION_INTERVAL) != set(range(al.PROPERTIES["verdance"]["max_level"])):
+        err(f"tools/concordance_alchemy.py REGENERATION_INTERVAL: vanilla's 50 >> amplifier for each level Verdance reaches ({al.REGENERATION_INTERVAL})")
+    # No stacking: a second dose never adds a level.
+    if "Stacking.STRONGEST" not in _java_body(alchemy_java, "public static int apply("):
+        err("Alchemy.apply: brews stack as the strongest, never adding a level")
+    # Boss routes: recipes alone (the Scale's exchange is priced, check_equivalence).
+    bosses = sorted(p.stem for p in (DATA / MOD / "loot_table" / "bosses").glob("*.json"))
+    drops = set()
+    for boss in bosses:
+        for table in (DATA / MOD / "loot_table" / "bosses" / f"{boss}.json", DATA / MOD / "loot_table" / "entities" / f"{boss}.json"):
+            drops |= set(re.findall(r'"name": "([a-z0-9_]+:[a-z0-9_/]+)"', source(table)))
+    for drop in sorted(drops):
+        reached = _made_from({drop}, scale=False) & inputs
+        if reached != al.PRODUCT_REWARD_ROUTES.get(drop, set()):
+            err(f"{drop} (a boss's drop) reaches {sorted(reached)} of the products' ingredients; declared "
+                f"{sorted(al.PRODUCT_REWARD_ROUTES.get(drop, set()))} (tools/concordance_alchemy.py PRODUCT_REWARD_ROUTES)")
+    # Vitae: health is no modelled resource, so whatever heals a giver, check_crimson's hourly bound holds.
+    if "health" in ec.RESOURCES or set(al.PRODUCTS) & set(ec.RESOURCES):
+        err("economy: health and the products are no modelled resource; model their conversions before one feeds another")
+    # The Cinder Kiln's dossier (C-P9): text and icons, a codex link at the Alembic Arts observed, never a grid.
+    dossiers = source(JAVA_ROOT / "lair" / "LairDossiers.java")
+    prepare = _java_body(dossiers, "private static void prepare(")
+    if (f'String FIRE_RESISTANCE = "{al.PROPERTIES["ember"]["status"]}";' not in dossiers
+            or "brews(ember, FIRE_RESISTANCE)" not in prepare or "out.recipe(" in prepare
+            or 'out.codex("alembic/kiln_draught", "jugcraft:alembic_arts", ResearchState.OBSERVED);' not in prepare):
+        err("lair/LairDossiers.prepare: the Cinder Kiln's preparation fact names the Kiln Draught while Ember brews Fire "
+            "Resistance, as text and icons only (C-P9)")
+    for key in (f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare", f"encyclopedia.{MOD}.dossier.cinder_kiln.prepare.charm"):
+        if key not in lang:
+            err(f"Kiln Draught: missing lang {key}")
 
 
 def check_diagnostics(co, root, lang):

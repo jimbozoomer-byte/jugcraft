@@ -23,13 +23,16 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Operation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Frostward;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.lair.MoltenSlagBlock;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
@@ -45,6 +48,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -59,6 +63,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -84,7 +89,10 @@ import net.minecraft.world.phys.AABB;
  * cheaper than its snow. Since Concordance Chunk C (C-01), the crucible says why it waits: a formula the rules in force
  * refuse, or a saved one that no longer reads, is kept, names its step and drives nothing until the rules can follow it
  * again; a full output pauses and voids nothing; the Peepo port reads the crucible's own reason; only someone who
- * could change the block by hand works it; and Jade is told the tank and that reason, encoded, never the makeup.
+ * could change the block by hand works it; and Jade is told the tank and that reason, encoded, never the makeup. Since
+ * C-02, the workshop's products: contaminant fouls Verdance first, so a dirtier Stillroot Poultice heals less; the Kiln
+ * Draught carries its drinker across the Cinder Kiln's slag; a poultice gives back its bowl; products feed no crucible
+ * and never add up; dilution never heals more; and an old unnamed brew in the output pauses the crucible.
  */
 public class ConcordanceAlchemyGameTests {
 	private static final String GLOW = "minecraft:glowstone_dust";
@@ -1128,6 +1136,413 @@ public class ConcordanceAlchemyGameTests {
 		}
 		Set<String> sent = crucible.getUpdateTag(level.registryAccess()).keySet();
 		helper.assertTrue(Set.of("temperature", "parts", "taste", "murky").equals(sent), "Every client is told only the heat, volume and look: " + sent);
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- the workshop's products (Concordance Chunk C, C-02)
+
+	private static final String MENDVETCH = "jugcraft:mendvetch";
+	private static final String RAW = "jugcraft:raw";
+
+	/** A process replayed under the rules in force, from an empty crucible. */
+	private static Mixture replay(List<Operation> process) {
+		return ((Mixture.Applied) new Formula(process).replay(Alchemy.catalog())).mixture();
+	}
+
+	/**
+	 * The Stillroot Poultice's process (tools/concordance_alchemy.py stillroot_poultice): two Mendvetch as they come in
+	 * {@code water} parts, {@code boneMeal} bone meal stirred in with them (a dirty batch), then four warm stirs.
+	 */
+	private static List<Operation> poultice(int water, int boneMeal) {
+		List<Operation> process = new ArrayList<>(List.of(new Operation.Water(water)));
+		for (int i = 0; i < 2; i++) {
+			process.add(new Operation.Add(MENDVETCH, RAW));
+		}
+		for (int i = 0; i < boneMeal; i++) {
+			process.add(new Operation.Add("minecraft:bone_meal", RAW));
+		}
+		for (int i = 0; i < 4; i++) {
+			process.add(new Operation.Stir(Band.WARM));
+		}
+		return process;
+	}
+
+	/**
+	 * The Kiln Draught's process (tools/concordance_alchemy.py KILN_DRAUGHT and KILN_DRAUGHT_SUGAR): one magma cream, or
+	 * two sugar, as they come in {@code water} parts, stirred hot twice.
+	 */
+	private static List<Operation> kilnDraught(int water, boolean sugar) {
+		List<Operation> process = new ArrayList<>(List.of(new Operation.Water(water)));
+		for (int i = 0; i < (sugar ? 2 : 1); i++) {
+			process.add(new Operation.Add(sugar ? "minecraft:sugar" : "minecraft:magma_cream", RAW));
+		}
+		process.add(new Operation.Stir(Band.HOT));
+		process.add(new Operation.Stir(Band.HOT));
+		return process;
+	}
+
+	/** A salve of a process's first dose, bottled as the crucible bottles it. */
+	private static ItemStack salve(List<Operation> process) {
+		return Alchemy.brew(JugcraftConcordance.SALVE, bottled(replay(process)));
+	}
+
+	/** The translation key of the name a stack carries: vanilla's item name, its item's own or a product's. */
+	private static String nameKey(ItemStack stack) {
+		Component name = stack.get(DataComponents.ITEM_NAME);
+		return name != null && name.getContents() instanceof TranslatableContents contents ? contents.getKey() : "";
+	}
+
+	/** Stirs each crucible with a stick {@code times} times, a little apart, then runs {@code then}. */
+	private static void stirs(GameTestHelper helper, ServerPlayer player, List<CrucibleBlockEntity> crucibles, int times, Runnable then) {
+		for (CrucibleBlockEntity crucible : crucibles) {
+			helper.assertTrue(use(crucible, player, new ItemStack(Items.STICK)).consumesAction(), "A stir at " + crucible.getBlockPos());
+		}
+		if (times > 1) {
+			helper.runAfterDelay(NEXT_STIR, () -> stirs(helper, player, crucibles, times - 1, then));
+		} else {
+			then.run();
+		}
+	}
+
+	/** A mock player who knows no alchemy, standing in this test's own space at {@code at}, not at the world's spawn. */
+	private static ServerPlayer standing(GameTestHelper helper, BlockPos at) {
+		ServerPlayer player = alembist(helper, ResearchState.NONE);
+		BlockPos feet = helper.absolutePos(at);
+		player.snapTo(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, 0.0F, 0.0F);
+		return player;
+	}
+
+	/** The health {@code player} gains over {@code ticks} of its own ticking (a mock player has no client to tick it). */
+	private static float healed(ServerPlayer player, int ticks) {
+		float before = player.getHealth();
+		for (int i = 0; i < ticks; i++) {
+			player.baseTick();
+		}
+		return player.getHealth() - before;
+	}
+
+	/** Bowls lying in this test's own space. */
+	private static int droppedBowls(GameTestHelper helper) {
+		int bowls = 0;
+		for (ItemEntity item : helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds())) {
+			bowls += item.getItem().is(Items.BOWL) ? item.getItem().getCount() : 0;
+		}
+		return bowls;
+	}
+
+	/**
+	 * C-02 (C-D1, C-P2, C-P7): on paper, two Mendvetch stirred warm four times hold 2.127 Verdance a part, a Stillroot
+	 * Poultice of Regeneration II; each bone meal stirred in with them brings contaminant that fouls Verdance first
+	 * (4.00 for each unit), so a dirtier batch holds less (the generator's poultice_verdance, held to this array by
+	 * check_alchemy), with a reason naming the bone meal; the glass says what the contaminant takes. By hand and by a
+	 * formula over a magma block the same batches come out, named Stillroot Poultice by what they carry, and the
+	 * automated one is the same salve as the hand-made one. Over 100 ticks the clean poultice heals 4 and the dirty one 2
+	 * (vanilla's 50 >> amplifier interval).
+	 */
+	@GameTest(maxTicks = 400)
+	public void aStillrootPoulticeRepeatsAndADirtyBatchHealsLess(GameTestHelper helper) {
+		AlchemyCatalog catalog = Alchemy.catalog();
+		long[] verdance = {2127, 1935, 1743, 1551};
+		String[] keys = {"minecraft:regeneration@1", "minecraft:regeneration@0", "minecraft:poison@0+minecraft:regeneration@0",
+				"minecraft:nausea@0+minecraft:poison@0+minecraft:regeneration@0"};
+		for (int n = 0; n < verdance.length; n++) {
+			Mixture mixture = replay(poultice(1, n));
+			Outcome outcome = bottled(mixture);
+			Outcome.Effect regeneration = outcome.effects().stream().filter(effect -> effect.property().id().equals(Axis.VERDANCE.id)).findFirst().orElse(null);
+			helper.assertTrue(regeneration != null && regeneration.concentration() == verdance[n] && regeneration.ticks() == 450 && outcome.key().equals(keys[n]),
+					n + " bone meal: " + verdance[n] + " Verdance a part after fouling, " + keys[n] + ": " + outcome.effects() + ", " + outcome.key());
+			boolean fouled = outcome.reasons().stream().anyMatch(reason -> reason.key().equals("alchemy.fouled")
+					&& reason.args().toString().contains("minecraft:bone_meal"));
+			helper.assertTrue(fouled == (n > 0), n + " bone meal: a reason names the bone meal as what fouled it exactly when there is some: " + outcome.reasons());
+			helper.assertTrue(mixture.outcome(catalog).equals(outcome), "The preview is the bottled outcome: " + mixture.outcome(catalog));
+		}
+		List<Text> glass = Assay.read(replay(poultice(1, 1)), 60, Assay.GLASS, catalog);
+		helper.assertTrue(glass.contains(Text.of("alchemy.assay.fouls", new Text.Ref("principle", Axis.VERDANCE.id), "0.80")),
+				"The glass says the contaminant takes 0.80 Verdance a part: " + glass);
+
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		CrucibleBlockEntity clean = crucible(helper, new BlockPos(1, 2, 1), Blocks.MAGMA_BLOCK);
+		CrucibleBlockEntity dirty = crucible(helper, new BlockPos(4, 2, 1), Blocks.MAGMA_BLOCK);
+		CrucibleBlockEntity automated = crucible(helper, new BlockPos(1, 2, 4), Blocks.MAGMA_BLOCK);
+		for (CrucibleBlockEntity crucible : List.of(clean, dirty, automated)) {
+			crucible.setTemperature(60);
+		}
+		helper.assertTrue(use(automated, player, written(new Formula(poultice(1, 0)).text())).consumesAction() && automated.program() != null,
+				"The poultice's formula is set");
+		pour(automated, FluidConstants.BOTTLE);
+		automated.setItem(0, new ItemStack(Garden.MENDVETCH, 2));
+		automated.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.BOWL));
+		for (CrucibleBlockEntity crucible : List.of(clean, dirty)) {
+			use(crucible, player, waterBottle());
+			use(crucible, player, new ItemStack(Garden.MENDVETCH));
+			use(crucible, player, new ItemStack(Garden.MENDVETCH));
+		}
+		use(dirty, player, new ItemStack(Items.BONE_MEAL));
+		stirs(helper, player, List.of(clean, dirty), 4, () -> {
+			helper.assertTrue(clean.mixture().equals(replay(poultice(1, 0))) && dirty.mixture().equals(replay(poultice(1, 1))),
+					"By hand, the same batches as on paper: " + clean.mixture() + " / " + dirty.mixture());
+			helper.assertTrue(Assay.read(dirty.mixture(), dirty.temperature(), Assay.MASTERED, catalog).stream().anyMatch(line -> line.key().equals("alchemy.fouled")),
+					"A master's glass names what fouled the dirty batch");
+			use(clean, player, new ItemStack(Items.BOWL));
+			ItemStack strong = take(player, JugcraftConcordance.SALVE);
+			use(dirty, player, new ItemStack(Items.BOWL));
+			ItemStack weak = take(player, JugcraftConcordance.SALVE);
+			helper.assertValueEqual(strong.get(JugcraftConcordance.BREW), new Brew(List.of(new Brew.Dose("minecraft:regeneration", 1, 450, false)),
+					"minecraft:regeneration@1"), "the clean poultice: Regeneration II for 450 ticks");
+			helper.assertValueEqual(weak.get(JugcraftConcordance.BREW), new Brew(List.of(new Brew.Dose("minecraft:regeneration", 0, 450, false)),
+					"minecraft:regeneration@0"), "the dirty one: Regeneration I for 450 ticks");
+			for (ItemStack made : List.of(strong, weak)) {
+				Product product = Alchemy.product(made);
+				helper.assertTrue(product != null && product.id().equals(Alchemy.STILLROOT_POULTICE)
+						&& nameKey(made).equals("item.jugcraft.salve.stillroot_poultice"), "Each is named a Stillroot Poultice: " + product + ", " + nameKey(made));
+			}
+			ServerPlayer a = standing(helper, new BlockPos(6, 2, 6));
+			ServerPlayer b = standing(helper, new BlockPos(6, 2, 4));
+			a.setHealth(2.0F);
+			b.setHealth(2.0F);
+			Alchemy.apply(helper.getLevel(), strong.get(JugcraftConcordance.BREW), a, null);
+			Alchemy.apply(helper.getLevel(), weak.get(JugcraftConcordance.BREW), b, null);
+			float gainedA = healed(a, 100);
+			float gainedB = healed(b, 100);
+			helper.assertTrue(gainedA == 4.0F && gainedB == 2.0F,
+					"Over 100 ticks the clean poultice heals 4 and the dirty one 2 (one a 25 and a 50 ticks): " + gainedA + ", " + gainedB);
+			helper.succeedWhen(() -> {
+				ItemStack output = automated.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+				helper.assertTrue(output.getCount() == 1 && ItemStack.isSameItemSameComponents(output, strong),
+						"Waiting for the formula's poultice, the same as the hand-made one: " + output + " (step " + automated.step() + ", " + automated.waiting() + ")");
+				helper.assertTrue(automated.getItem(0).isEmpty() && automated.water.amount == 0 && automated.mixture().isEmpty()
+						&& automated.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty(), "It used exactly its Mendvetch, its water and its bowl");
+			});
+		});
+	}
+
+	/**
+	 * C-02 (C-D1, C-P9): one magma cream stirred hot twice holds 1.276 Ember a part (and 0.20 contaminant, under Nausea's
+	 * 0.50), a Kiln Draught of Fire Resistance for 1531 ticks; two sugar hold 1.435, 1722 ticks. Either is named the Kiln
+	 * Draught in a bottle, never in a bowl. Drunk, it hands back its bottle, and under it the Cinder Kiln's slag spares its
+	 * drinker; a pig carrying the same brew takes no burn while a bare one does.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aKilnDraughtCarriesItsDrinkerAcrossTheSlag(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Mixture cream = replay(kilnDraught(1, false));
+		Mixture sugar = replay(kilnDraught(1, true));
+		helper.assertTrue(cream.dissolved().get(Axis.EMBER) == 1276 && cream.contaminant() == 200 && sugar.dissolved().get(Axis.EMBER) == 1435,
+				"Magma cream holds 1.276 Ember with 0.200 contaminant, two sugar 1.435: " + cream + " / " + sugar);
+		Outcome fromCream = bottled(cream);
+		Outcome fromSugar = bottled(sugar);
+		helper.assertTrue(fromCream.key().equals("minecraft:fire_resistance@0") && fromCream.effects().size() == 1 && fromCream.effects().get(0).ticks() == 1531,
+				"Fire Resistance I for 1531 ticks: " + fromCream.effects());
+		helper.assertTrue(fromSugar.key().equals("minecraft:fire_resistance@0") && fromSugar.effects().size() == 1 && fromSugar.effects().get(0).ticks() == 1722,
+				"From sugar, 1722 ticks: " + fromSugar.effects());
+		ItemStack draught = Alchemy.brew(JugcraftConcordance.DRAUGHT, fromCream);
+		for (ItemStack made : List.of(draught, Alchemy.brew(JugcraftConcordance.DRAUGHT, fromSugar))) {
+			Product product = Alchemy.product(made);
+			helper.assertTrue(product != null && product.id().equals("jugcraft:kiln_draught") && nameKey(made).equals("item.jugcraft.draught.kiln_draught"),
+					"Bottled, it is named the Kiln Draught: " + product + ", " + nameKey(made));
+		}
+		helper.assertTrue(Alchemy.product(Alchemy.brew(JugcraftConcordance.SALVE, fromCream)) == null, "In a bowl it is no Kiln Draught: the form counts");
+		Brew brew = draught.get(JugcraftConcordance.BREW);
+		ServerPlayer drinker = alembist(helper, ResearchState.NONE);
+		ServerPlayer bare = alembist(helper, ResearchState.NONE);
+		ItemStack left = draught.finishUsingItem(level, drinker);
+		helper.assertTrue(left.is(Items.GLASS_BOTTLE) && left.getCount() == 1, "Drunk, it hands back its bottle: " + left);
+		MobEffectInstance resistance = drinker.getEffect(MobEffects.FIRE_RESISTANCE);
+		helper.assertTrue(resistance != null && resistance.getDuration() == 1531 && resistance.getAmplifier() == 0,
+				"Fire Resistance I for 1531 ticks on its drinker: " + resistance);
+		helper.assertTrue(!MoltenSlagBlock.harms(drinker) && MoltenSlagBlock.harms(bare), "The slag spares its drinker and not a bare player");
+		Mob covered = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(1, 2, 1));
+		Mob exposed = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(4, 2, 1));
+		Alchemy.apply(level, brew, covered, null);
+		float coveredHealth = covered.getHealth();
+		float exposedHealth = exposed.getHealth();
+		helper.assertTrue(!MoltenSlagBlock.burn(level, covered) && covered.getHealth() == coveredHealth && covered.getRemainingFireTicks() <= 0,
+				"Under the draught's Fire Resistance a pig takes no burn from the slag");
+		helper.assertTrue(MoltenSlagBlock.burn(level, exposed) && exposed.getHealth() < exposedHealth && exposed.getRemainingFireTicks() > 0,
+				"A bare pig is burned");
+		helper.succeed();
+	}
+
+	/**
+	 * C-02: a poultice used on a creature gives back its bowl; with no room for it the bowl drops at the user's feet, once;
+	 * the last poultice leaves its bowl in the hand it was used from.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aPoulticeReturnsItsBowlToAFullInventory(GameTestHelper helper) {
+		ServerPlayer user = standing(helper, new BlockPos(1, 2, 1));
+		for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
+			user.getInventory().setItem(slot, new ItemStack(Items.COBBLESTONE, 64));
+		}
+		user.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.COBBLESTONE, 64));
+		ItemStack poultices = salve(poultice(1, 0)).copyWithCount(2);
+		user.setItemInHand(InteractionHand.MAIN_HAND, poultices);
+		Mob first = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(4, 2, 1));
+		Mob second = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(4, 2, 4));
+		RateGate.forget(user.getUUID());
+		poultices.getItem().interactLivingEntity(poultices, user, first, InteractionHand.MAIN_HAND);
+		helper.assertTrue(first.hasEffect(MobEffects.REGENERATION) && user.getMainHandItem().getCount() == 1, "The first poultice takes on the pig");
+		helper.assertTrue(user.getInventory().countItem(Items.BOWL) == 0 && droppedBowls(helper) == 1,
+				"With no room, its bowl drops once: " + droppedBowls(helper) + " dropped");
+		RateGate.forget(user.getUUID());
+		ItemStack last = user.getMainHandItem();
+		last.getItem().interactLivingEntity(last, user, second, InteractionHand.MAIN_HAND);
+		helper.assertTrue(second.hasEffect(MobEffects.REGENERATION) && user.getMainHandItem().is(Items.BOWL) && user.getMainHandItem().getCount() == 1,
+				"The last poultice leaves its bowl in the hand: " + user.getMainHandItem());
+		helper.assertTrue(droppedBowls(helper) == 1, "and no other bowl drops: " + droppedBowls(helper));
+		helper.succeed();
+	}
+
+	/**
+	 * C-02 (05:117): brews feed no brew. The Stillroot Poultice, the Kiln Draught and Winter Brine are no ingredient: the
+	 * crucible takes none of them by hand or by hopper, and the mortar grinds none.
+	 */
+	@GameTest(maxTicks = 20)
+	public void productsNeverFeedTheCrucible(GameTestHelper helper) {
+		AlchemyCatalog catalog = Alchemy.catalog();
+		List<ItemStack> products = List.of(salve(poultice(1, 0)).copyWithCount(2),
+				Alchemy.brew(JugcraftConcordance.DRAUGHT, bottled(replay(kilnDraught(1, false)))).copyWithCount(2),
+				Alchemy.brew(JugcraftConcordance.DRAUGHT, bottled(threeSnowballs(1, Band.COLD))).copyWithCount(2));
+		List<String> ids = List.of(Alchemy.STILLROOT_POULTICE, "jugcraft:kiln_draught", "jugcraft:winter_brine");
+		CrucibleBlockEntity crucible = crucible(helper, new BlockPos(2, 2, 2), Blocks.STONE);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		use(crucible, player, waterBottle());
+		Mixture before = crucible.mixture();
+		for (int i = 0; i < products.size(); i++) {
+			ItemStack product = products.get(i);
+			Product named = Alchemy.product(product);
+			helper.assertTrue(named != null && named.id().equals(ids.get(i)), "It is " + ids.get(i) + ": " + named);
+			helper.assertTrue(catalog.ingredient(ConcordanceProgress.itemId(product)) == null, ids.get(i) + " is no ingredient");
+			helper.assertTrue(use(crucible, player, product) == InteractionResult.TRY_WITH_EMPTY_HAND && product.getCount() == 2
+					&& crucible.mixture().equals(before), "The crucible takes no " + ids.get(i) + " by hand: " + crucible.mixture());
+			for (int slot = 0; slot <= CrucibleBlockEntity.BOTTLE_SLOT; slot++) {
+				helper.assertTrue(!crucible.canPlaceItem(slot, product) && !crucible.canPlaceItemThroughFace(slot, product, Direction.UP),
+						"nor from a hopper into slot " + slot + ": " + ids.get(i));
+			}
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.MORTAR));
+			player.setItemInHand(InteractionHand.OFF_HAND, product);
+			RateGate.forget(player.getUUID());
+			helper.assertTrue(JugcraftConcordance.MORTAR.use(helper.getLevel(), player, InteractionHand.MAIN_HAND) == InteractionResult.FAIL
+					&& player.getOffhandItem().getCount() == 2 && take(player, JugcraftConcordance.REAGENT_ITEM).isEmpty(), "The mortar grinds no " + ids.get(i));
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * C-02 (C-P7): poultices never add up. Two strong ones at once leave Regeneration II for 450 ticks; a strong one
+	 * replaces a weak one; later, a weak one changes nothing and a strong one only renews the time (Stacking.STRONGEST).
+	 */
+	@GameTest(maxTicks = 200)
+	public void twoPoulticesDoNotAdd(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Brew strong = salve(poultice(1, 0)).get(JugcraftConcordance.BREW);
+		Brew weak = salve(poultice(1, 1)).get(JugcraftConcordance.BREW);
+		Mob twice = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(1, 2, 1));
+		Mob replaced = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(4, 2, 1));
+		Alchemy.apply(level, strong, twice, null);
+		Alchemy.apply(level, strong, twice, null);
+		MobEffectInstance both = twice.getEffect(MobEffects.REGENERATION);
+		helper.assertTrue(both != null && both.getAmplifier() == 1 && both.getDuration() == 450, "Two strong poultices at once: Regeneration II for 450, no more: " + both);
+		Alchemy.apply(level, weak, replaced, null);
+		Alchemy.apply(level, strong, replaced, null);
+		MobEffectInstance stronger = replaced.getEffect(MobEffects.REGENERATION);
+		helper.assertTrue(stronger != null && stronger.getAmplifier() == 1 && stronger.getDuration() == 450, "A strong one replaces a weak one: " + stronger);
+		helper.runAfterDelay(100, () -> {
+			int left = twice.getEffect(MobEffects.REGENERATION).getDuration();
+			helper.assertTrue(left < 450, "The time runs down: " + left);
+			Alchemy.apply(level, weak, twice, null);
+			MobEffectInstance kept = twice.getEffect(MobEffects.REGENERATION);
+			helper.assertTrue(kept.getAmplifier() == 1 && kept.getDuration() == left, "A weak one later changes nothing: " + kept);
+			Alchemy.apply(level, strong, twice, null);
+			MobEffectInstance renewed = twice.getEffect(MobEffects.REGENERATION);
+			helper.assertTrue(renewed.getAmplifier() == 1 && renewed.getDuration() == 450, "A strong one renews the time, at the same level: " + renewed);
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-02 (C-P7): dilution never heals more. The poultice's batch in two parts of water bottles 1.063 and then 1.064
+	 * Verdance a part (the remainder goes to the last dose): Regeneration I for 318 and 319 ticks, against the one part's
+	 * Regeneration II for 450. Worked on players, the whole batch heals 18 and the two halves 6 and 6. The Kiln Draught's
+	 * magma cream in two parts lasts no longer in all than in one.
+	 */
+	@GameTest(maxTicks = 20)
+	public void dilutionNeverHealsMore(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		AlchemyCatalog catalog = Alchemy.catalog();
+		Mixture diluted = replay(poultice(2, 0));
+		Mixture.Bottled first = diluted.bottle();
+		Mixture.Bottled second = first.rest().bottle();
+		helper.assertTrue(first.dose().get(Axis.VERDANCE) == 1063 && second.dose().get(Axis.VERDANCE) == 1064,
+				"Two parts: 1.063 and then 1.064 Verdance a part: " + first.dose() + " / " + second.dose());
+		Outcome weakFirst = Outcome.of(first.dose(), first.contaminant(), catalog, diluted.history());
+		Outcome weakSecond = Outcome.of(second.dose(), second.contaminant(), catalog, first.rest().history());
+		Outcome whole = bottled(replay(poultice(1, 0)));
+		helper.assertTrue(weakFirst.key().equals("minecraft:regeneration@0") && weakFirst.effects().get(0).ticks() == 318
+				&& weakSecond.key().equals("minecraft:regeneration@0") && weakSecond.effects().get(0).ticks() == 319,
+				"Each half is Regeneration I, for 318 and 319 ticks: " + weakFirst.effects() + " / " + weakSecond.effects());
+		helper.assertTrue(whole.key().equals("minecraft:regeneration@1") && whole.effects().get(0).ticks() == 450, "The whole is Regeneration II for 450: " + whole.effects());
+		ServerPlayer one = standing(helper, new BlockPos(1, 2, 1));
+		ServerPlayer two = standing(helper, new BlockPos(4, 2, 4));
+		one.setHealth(1.0F);
+		two.setHealth(1.0F);
+		Alchemy.apply(level, Alchemy.brew(JugcraftConcordance.SALVE, whole).get(JugcraftConcordance.BREW), one, null);
+		float all = healed(one, 460);
+		Alchemy.apply(level, Alchemy.brew(JugcraftConcordance.SALVE, weakFirst).get(JugcraftConcordance.BREW), two, null);
+		float split = healed(two, 330);
+		Alchemy.apply(level, Alchemy.brew(JugcraftConcordance.SALVE, weakSecond).get(JugcraftConcordance.BREW), two, null);
+		split += healed(two, 330);
+		helper.assertTrue(!one.hasEffect(MobEffects.REGENERATION) && !two.hasEffect(MobEffects.REGENERATION), "Every dose has run out");
+		helper.assertTrue(all == 18.0F && split == 12.0F, "The whole heals 18, the two halves 6 and 6: " + all + " against " + split);
+		Mixture creamTwice = replay(kilnDraught(2, false));
+		Mixture.Bottled creamFirst = creamTwice.bottle();
+		Mixture.Bottled creamSecond = creamFirst.rest().bottle();
+		int halves = Outcome.of(creamFirst.dose(), creamFirst.contaminant(), catalog, creamTwice.history()).effects().get(0).ticks()
+				+ Outcome.of(creamSecond.dose(), creamSecond.contaminant(), catalog, creamFirst.rest().history()).effects().get(0).ticks();
+		helper.assertTrue(halves == 765 + 765 && halves <= 1531, "Two Kiln Draughts from one magma cream last no longer than one: " + halves);
+		helper.succeed();
+	}
+
+	/**
+	 * C-02 (C-P2): a stack is a product by what it carries, never by its name. A poultice bottled before products were
+	 * named reads as the Stillroot Poultice yet keeps the salve's own name, so it is not the same stack as a fresh one; a
+	 * Night Vision salve wearing the poultice's name is none. An automated crucible whose output holds such an old salve
+	 * makes its batch, then pauses (another brew in the output, C-01), voiding and taking nothing; emptied, it bottles a
+	 * named poultice.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anOldUnnamedBrewInTheOutputPausesAndSaysSo(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		ItemStack old = ItemStack.CODEC.parse(ops, JsonParser.parseString("{\"id\":\"jugcraft:salve\",\"count\":1,\"components\":{\"jugcraft:brew\":"
+				+ "{\"effects\":[{\"status\":\"minecraft:regeneration\",\"amplifier\":1,\"ticks\":450}],\"outcome\":\"minecraft:regeneration@1\"}}}")).getOrThrow();
+		ItemStack fresh = salve(poultice(1, 0));
+		Product named = Alchemy.product(old);
+		helper.assertTrue(named != null && named.id().equals(Alchemy.STILLROOT_POULTICE), "By what it carries, the old salve is a Stillroot Poultice: " + named);
+		helper.assertTrue(nameKey(old).equals("item.jugcraft.salve") && !ItemStack.isSameItemSameComponents(old, fresh),
+				"but it keeps the salve's own name, so it is not the same stack as a fresh one: " + nameKey(old));
+		ItemStack night = salve(List.of(new Operation.Water(1), new Operation.Add(GLOW, RAW), new Operation.Stir(Band.HOT), new Operation.Stir(Band.HOT)));
+		night.set(DataComponents.ITEM_NAME, Component.translatable("item.jugcraft.salve.stillroot_poultice"));
+		helper.assertTrue(Alchemy.product(night) == null, "A Night Vision salve wearing the poultice's name is none");
+
+		CrucibleBlockEntity crucible = crucible(helper, new BlockPos(2, 2, 2), Blocks.MAGMA_BLOCK);
+		crucible.setTemperature(60);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		helper.assertTrue(use(crucible, player, written(new Formula(poultice(1, 0)).text())).consumesAction(), "The poultice's formula is set");
+		pour(crucible, FluidConstants.BOTTLE);
+		crucible.setItem(0, new ItemStack(Garden.MENDVETCH, 2));
+		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.BOWL));
+		crucible.setItem(CrucibleBlockEntity.OUTPUT_SLOT, old.copy());
+		helper.assertTrue(pulse(crucible, level, 7) == null && crucible.step() == 7, "Seven pulses make the batch: step " + crucible.step());
+		Diagnostic differs = crucible.automate(level);
+		ItemStack kept = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+		helper.assertTrue(Diagnostic.of(Code.OUTPUT_DIFFERS).equals(differs), "The old salve in its output is another brew: " + differs);
+		helper.assertTrue(kept.getCount() == 1 && nameKey(kept).equals("item.jugcraft.salve") && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).getCount() == 1
+				&& crucible.mixture().parts() == 1, "Nothing voided or taken: " + kept + ", " + crucible.mixture());
+		crucible.setItem(CrucibleBlockEntity.OUTPUT_SLOT, ItemStack.EMPTY);
+		helper.assertTrue(crucible.automate(level) == null, "Emptied, it bottles");
+		ItemStack out = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+		helper.assertTrue(out.getCount() == 1 && ItemStack.isSameItemSameComponents(out, fresh) && nameKey(out).equals("item.jugcraft.salve.stillroot_poultice")
+				&& crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty() && crucible.mixture().isEmpty(), "A named poultice, its bowl used: " + out);
 		helper.succeed();
 	}
 }

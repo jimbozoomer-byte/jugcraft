@@ -1,7 +1,12 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.assay.Assaying;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.CycleAudit;
@@ -41,7 +46,8 @@ import net.minecraft.world.level.GameType;
  * stack is weighed, then dissolved on a second use at its exact worth rounded down; forming costs more than dissolving
  * pays, so a round trip loses; only plain catalogued matter is weighed (named, filled, bound, enchanted, magical and
  * excluded things are refused with their reason, and nothing changes); the ledger never passes its cap; the declared
- * conversion graph is the game's own recipes; and the catalogue is balanced.
+ * conversion graph is the game's own recipes; and the catalogue is balanced. Since Concordance Chunk C (C-02), the
+ * workshop's products are never weighed.
  */
 public class ConcordanceAssayGameTests {
 	private static ServerPlayer assayer(GameTestHelper helper) {
@@ -204,6 +210,49 @@ public class ConcordanceAssayGameTests {
 		for (Material material : catalog.materials().values()) {
 			ItemStack plain = new ItemStack(item(material.item()));
 			helper.assertTrue(!plain.isEmpty() && Assaying.eligibility(plain).isEmpty(), material.item() + " is a real, plain, weighable item");
+		}
+		helper.succeed();
+	}
+
+	/** A brew of a formula's first dose in {@code form}, bottled as the crucible bottles it. */
+	private static ItemStack brewed(String formula, Item form) {
+		Mixture mixture = ((Mixture.Applied) Formula.parse(formula).replay(Alchemy.catalog())).mixture();
+		Mixture.Bottled bottled = mixture.bottle();
+		return Alchemy.brew(form, Outcome.of(bottled.dose(), bottled.contaminant(), Alchemy.catalog(), mixture.history()));
+	}
+
+	/**
+	 * Concordance Chunk C (C-02, C-P2): the workshop's products (the Stillroot Poultice, the Kiln Draught and Winter Brine)
+	 * carry a Jugcraft brew, so the scale refuses them as magical before their name is looked at: weighed and dissolved
+	 * they change nothing, and as a pattern nothing is formed from them. A bare draught or salve is not catalogued.
+	 */
+	@GameTest(maxTicks = 20)
+	public void workshopProductsAreNeverWeighed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = assayer(helper);
+		List<ItemStack> products = List.of(
+				brewed("water 1; add jugcraft:mendvetch jugcraft:raw; add jugcraft:mendvetch jugcraft:raw; stir warm; stir warm; stir warm; stir warm",
+						JugcraftConcordance.SALVE),
+				brewed("water 1; add minecraft:magma_cream jugcraft:raw; stir hot; stir hot", JugcraftConcordance.DRAUGHT),
+				brewed("water 1; add minecraft:snowball jugcraft:raw; add minecraft:snowball jugcraft:raw; add minecraft:snowball jugcraft:raw; "
+						+ "stir cold; stir cold; stir cold", JugcraftConcordance.DRAUGHT));
+		for (ItemStack product : products) {
+			helper.assertTrue(Alchemy.product(product) != null, "It is a workshop product: " + product);
+			String reason = Assaying.eligibility(product);
+			helper.assertTrue(reason.equals("magical"), product + " is refused as magical, not " + reason);
+			int count = product.getCount();
+			use(player, level, product, ItemStack.EMPTY);
+			Assaying.use(player, level, player.getMainHandItem(), player.getOffhandItem());
+			helper.assertTrue(player.getMainHandItem().getCount() == count && Assaying.balance(player) == 0, product + ": nothing dissolved");
+			Assaying.setBalance(player, 10_000L);
+			use(player, level, ItemStack.EMPTY, product.copy());
+			helper.assertTrue(Assaying.balance(player) == 10_000L, product + ": nothing is formed from it as a pattern");
+			Assaying.setBalance(player, 0L);
+		}
+		for (Item form : List.of(JugcraftConcordance.DRAUGHT, JugcraftConcordance.SALVE)) {
+			String id = BuiltInRegistries.ITEM.getKey(form).toString();
+			helper.assertTrue(Assaying.eligibility(new ItemStack(form)).equals("uncatalogued") && Assaying.catalog().material(id) == null,
+					"A bare " + id + " is not catalogued: " + Assaying.eligibility(new ItemStack(form)));
 		}
 		helper.succeed();
 	}

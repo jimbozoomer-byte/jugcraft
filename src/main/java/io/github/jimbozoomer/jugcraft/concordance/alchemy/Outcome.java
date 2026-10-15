@@ -10,7 +10,8 @@ import java.util.Set;
  * What a dose does, worked out from what it carries, with a reason for each effect a player can check against their
  * own process: which property, how much of it a part holds against the threshold, and which ingredients (or searing
  * stirs, or, for Rime, the warmer stirs that thawed it) put it there. Below a threshold the property is named as too
- * weak, so nothing is mysterious.
+ * weak, so nothing is mysterious. A property that declares fouling loses its share of the dose to the contaminant
+ * first, with a reason naming what fouled it (Concordance Chunk C, C-02, C-P7).
  */
 public record Outcome(List<Effect> effects, List<Text> reasons) {
 	public Outcome {
@@ -25,17 +26,29 @@ public record Outcome(List<Effect> effects, List<Text> reasons) {
 	public static Outcome of(Vector dose, long contaminant, AlchemyCatalog catalog, List<Operation> history) {
 		List<Effect> effects = new ArrayList<>();
 		List<Text> reasons = new ArrayList<>();
+		List<Text.Ref> fouledBy = null;
 		for (Axis axis : Axis.values()) {
 			Property property = catalog.property(axis.id);
 			long amount = dose.get(axis);
 			if (property == null || amount == 0) {
 				continue;
 			}
+			// The yield rule (Concordance Chunk C, C-02, C-P7): contaminant takes its share of a property that declares
+			// fouling before the level and duration are worked out, and the reason names what fouled it.
+			long taken = property.fouled(amount, contaminant);
+			if (taken > 0) {
+				if (fouledBy == null) {
+					fouledBy = foulers(catalog, history);
+				}
+				reasons.add(Text.of("alchemy.fouled", new Text.Ref("principle", axis.id), Vector.units(taken), Vector.units(contaminant), fouledBy));
+				amount -= taken;
+			}
 			judge(property, amount, new Text.Ref("principle", axis.id), sources(axis, catalog, history), effects, reasons);
 		}
 		Property fouling = catalog.property(Property.CONTAMINANT);
 		if (fouling != null && contaminant > 0) {
-			judge(fouling, contaminant, new Text.Ref("alchemy", Property.CONTAMINANT), foulers(catalog, history), effects, reasons);
+			judge(fouling, contaminant, new Text.Ref("alchemy", Property.CONTAMINANT), fouledBy != null ? fouledBy : foulers(catalog, history),
+					effects, reasons);
 		}
 		return new Outcome(effects, reasons);
 	}
