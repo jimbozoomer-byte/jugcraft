@@ -72,16 +72,19 @@ public class CydonianSentinelGameTests {
 		return CydonianSentinelEntity.summon(helper.getLevel(), origin, null);
 	}
 
-	/** The crater's floor: red sand in every cell whose middle is within its radius. */
+	/**
+	 * The crater's floor in every cell whose middle is within its radius: red rock, not the Sanctum's red sand, which
+	 * here would have nothing under it and fall.
+	 */
 	private static void crater(ServerLevel level, BlockPos origin) {
-		BlockState sand = Blocks.RED_SAND.defaultBlockState();
+		BlockState floor = Blocks.RED_TERRACOTTA.defaultBlockState();
 		int reach = (int) Math.ceil(CydonianSanctum.CRATER);
 		int cx = (int) Math.floor(CydonianSanctum.CENTRE_X);
 		int cz = (int) Math.floor(CydonianSanctum.CENTRE_Z);
 		for (int x = cx - reach; x <= cx + reach; x++) {
 			for (int z = cz - reach; z <= cz + reach; z++) {
 				if (Math.hypot(x + 0.5 - CydonianSanctum.CENTRE_X, z + 0.5 - CydonianSanctum.CENTRE_Z) <= CydonianSanctum.CRATER) {
-					level.setBlock(origin.offset(x, CydonianSanctum.PAVE, z), sand, Block.UPDATE_CLIENTS);
+					level.setBlock(origin.offset(x, CydonianSanctum.PAVE, z), floor, Block.UPDATE_CLIENTS);
 				}
 			}
 		}
@@ -191,7 +194,8 @@ public class CydonianSentinelGameTests {
 						helper.assertTrue(sentinel.phase() == CydonianSentinelEntity.Phase.SENTINEL, "It did not step down to fight: " + sentinel.phase());
 						// Down for up to 25 ticks by now, it has strided toward the crater's middle at most 3 blocks.
 						helper.assertTrue(Math.abs(sentinel.getY() - sentinel.floorY()) < 0.1 && Math.hypot(sentinel.getX() - woke.x, sentinel.getZ() - woke.z) < 6.0,
-								"It did not step down to the crater's floor where it wakes but to " + sentinel.position());
+								"It did not step down to the crater's floor where it wakes but to " + sentinel.position().subtract(Vec3.atLowerCornerOf(origin))
+										+ " in its Sanctum (the floor at y " + CydonianSanctum.STAND + ")");
 						helper.assertTrue(sentinel.glow() == CydonianSentinelEntity.Glow.LIT && sentinel.form() == CydonianSentinelEntity.Form.SHELL
 								&& !sentinel.platesOpen(), "Stepped down, its core is not lit in its shut shell: " + sentinel.glow());
 						player.discard();
