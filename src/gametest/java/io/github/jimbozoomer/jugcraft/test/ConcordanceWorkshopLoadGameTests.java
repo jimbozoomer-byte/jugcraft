@@ -364,7 +364,7 @@ public class ConcordanceWorkshopLoadGameTests {
 			Arrays.sort(windows);
 			double windowMedian = windows.length % 2 == 1 ? windows[windows.length / 2]
 					: (windows[windows.length / 2 - 1] + windows[windows.length / 2]) / 2.0;
-			return new Stats(ms(median(sorted)), ms(sorted[rank(sorted.length, 0.95)]), ms(sum / nanos.length),
+			return new Stats(ms(middle(sorted)), ms(sorted[rank(sorted.length, 0.95)]), ms(sum / nanos.length),
 					ms(sorted[sorted.length - 1]), over, ms(windowMedian), ms(windows[rank(windows.length, 0.95)]));
 		}
 	}
@@ -374,7 +374,8 @@ public class ConcordanceWorkshopLoadGameTests {
 		return Math.max(0, (int) Math.ceil(q * n) - 1);
 	}
 
-	static double median(long[] sorted) {
+	/** The middle of a sorted run (the mean of the two middle values when even); named apart from Stats' median(). */
+	static double middle(long[] sorted) {
 		int n = sorted.length;
 		return n % 2 == 1 ? sorted[n / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0;
 	}
@@ -382,7 +383,7 @@ public class ConcordanceWorkshopLoadGameTests {
 	static double half(long[] nanos, boolean second) {
 		long[] part = Arrays.copyOfRange(nanos, second ? nanos.length / 2 : 0, second ? nanos.length : nanos.length / 2);
 		Arrays.sort(part);
-		return ms(median(part));
+		return ms(middle(part));
 	}
 
 	static double ms(double nanos) {
