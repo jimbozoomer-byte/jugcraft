@@ -79,7 +79,7 @@ Meanwhile:
 
 ### Fire Resistance
 
-Fire Resistance, from a potion or the Ember invocation Hearthguard, stops his fire: the Kiln Breath, the Lava Wave, the fire patches, the slag and burning. It never stops his blows: the Tail Sweep, the Body Slam, the gobs' and cinders' impact and the Cinderlings' bites. It helps the prepared without emptying the fight.
+Fire Resistance, from a potion, the Ember invocation Hearthguard or (since Concordance Chunk C, C-02, not merged) the Alembic Crucible's Kiln Draught, stops his fire: the Kiln Breath, the Lava Wave, the fire patches, the slag and burning. It never stops his blows: the Tail Sweep, the Body Slam, the gobs' and cinders' impact and the Cinderlings' bites. It helps the prepared without emptying the fight.
 
 ### His fall
 

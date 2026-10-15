@@ -2,7 +2,9 @@
 
 Status: merged to main ([#244](https://github.com/jimbozoomer-byte/jugcraft/pull/244), from branch
 `claude/awesome-davinci-iwv3b9`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
-8 October 2026); see Verification for what has run.
+8 October 2026); see Verification for what has run. Extended by Concordance Chunk C, unit 1 (C-01: the crucible says
+why it waits and keeps a formula honestly; C-02: the Stillroot Poultice and the Kiln Draught; [the chunk's
+contract](concordance-chunk-c.md)), not merged; none of its tests has run yet.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 13) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 5, Practitioner stage (Jugcraft Discovery). Roadmap step 13.
@@ -36,6 +38,13 @@ Tide and Hollow, and some carry a contaminant:
 | Dried kelp | Tide 1.20 | |
 | Honeycomb | Tide 0.60, Verdance 0.40 | |
 | Spider eye | Hollow 1.20 | 0.30 |
+| Sunpetal | Radiance 1.00, Verdance 0.60 | |
+| Dewmoss | Tide 1.40, Verdance 0.30 | |
+| Gloamcap | Hollow 0.90, Rime 0.40 | 0.10 |
+| Mendvetch | Verdance 1.40 | |
+
+The last four are the garden's crops ([the ecology record](arcane-concordance-ecology.md)); this table lacked them until
+Concordance Chunk C.
 
 **Preparations are explicit transformations.** As it comes (`raw`), an ingredient goes in undissolved: all of it waits
 to be stirred out. **Ground** in a Mortar and Pestle (`ground`: hold the mortar, the ingredient in the other hand) it
@@ -73,11 +82,31 @@ Put in water first (a water bottle is one part, a water bucket three; at most si
 | Hollow | Poison | 0.40 | 1.00 | II | 10 s (21.6 s) |
 | Contaminant | Nausea | 0.50 | | I | 8 s (20 s) |
 
+**Contaminant fouls Verdance** (since Concordance Chunk C, C-02; C-P7, a starting value). Before a dose is judged, each
+unit of contaminant a part takes 4.00 units of Verdance a part, and the reason names what fouled it (the ingredients or
+searing stirs that brought the contaminant). No other property is fouled.
+
 Below its threshold a property does nothing, and the explanation says so. **Frostward** (since Chunk B, unit 4) is a
 Jugcraft status: while it lasts no frost gathers on its holder and the Yeti King's frost does not take; milk ends it.
 Three snowballs in one part of water, stirred cold three times, make **Winter Brine**: 0.813 Rime a part, Frostward I
 for 48.75 seconds. Stirred warm, the same keep 0.685 and do nothing. Before unit 4, Rime gave Resistance (30 s a unit,
 at most 60 s); a Rime draught bottled then still gives Resistance.
+
+**Products** (since Concordance Chunk C, C-02). A brew of the right form carrying a product's status and nothing harmful
+is named on its stack, with vanilla's item name (an anvil can still rename it; the name is never how it is known).
+Figures from the generator's model, not yet measured in a game:
+- **Stillroot Poultice**, a salve of Regeneration: two Mendvetch as they come in one part of water, stirred warm four
+  times, hold 2.127 Verdance a part: Regeneration II for 22.5 s. Stirred in with them, one, two and three bone meal
+  leave 1.935, 1.743 and 1.551 after fouling: Regeneration I, then Poison too, then Nausea too. A searing stir in place
+  of the last warm one leaves 0.215 (2.215 less 2.000): Nausea only. In two parts of water the batch makes doses of
+  1.063 and 1.064, Regeneration I for 318 and 319 ticks. Use it on a friend, or on yourself while sneaking; the bowl
+  comes back. A poultice another player puts on you in a lair fight earns them healing credit
+  ([lair-encounter-credit.md](lair-encounter-credit.md)).
+- **Kiln Draught**, a draught of Fire Resistance: one magma cream as it comes in one part of water, stirred hot twice,
+  holds 1.276 Ember a part (and 0.200 contaminant, under Nausea's 0.500): 76.55 s. Two sugar stirred the same way hold
+  1.435: 86.1 s. Under it the Cinder Kiln's slag does not burn and his flame does not take
+  ([cinder-kiln.md](cinder-kiln.md)).
+- **Winter Brine**, a draught of Frostward (Chunk B's), now named on its bottle too.
 
 **A worked example** (the one the game tests use). One water bottle, one glowstone dust as it comes (1.50 Radiance
 pending), the crucible over a campfire (hot). The first stir dissolves 55%: 0.825. The second dissolves 55% of the 0.675
@@ -89,10 +118,15 @@ would last longer; stirred over fire (searing), it would lose 15% of its Radianc
 
 - **Sampling Spoon** (anyone): the band, the volume, the strongest property and whether it is murky.
 - **Assay Glass** (the Alembic Arts understood): the temperature, every property dissolved and still pending, a part's
-  share and the contaminant. Without the research it reads like a spoon.
+  share and the contaminant, and (since Chunk C) what the contaminant takes from the Verdance a part. Without the
+  research it reads like a spoon.
 - **Assay Glass, mastered**: what a dose bottled now would do, and why: each effect with its property, how much a part
   holds against the threshold, and which ingredients (or searing stirs) put it there; for Rime, also "stirs above the
-  cold, which thaw Rime" when a warmer stir thawed some.
+  cold, which thaw Rime" when a warmer stir thawed some; and (since Chunk C) what fouled the Verdance and by how much.
+- **The encyclopedia's Inspect page** (since Chunk C, C-01): looking at a crucible within your block reach, it shows
+  to anyone its heat and the block heating it (or why that block does not), Preserve's hold, its volume and tank, the
+  formula's step in words, why it waits, the risk line and its slots. With an Assay Glass carried it adds what the glass
+  would tell you, at your level; without one it says that a glass reads more.
 
 **Formulas.** Use a blank formula on a crucible whose mixture is fresh (nothing bottled yet) and would do something: it
 writes down the whole process, for example `water 1; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot`.
@@ -101,6 +135,22 @@ ingredients (or reagents) through a hopper into its five buffer slots, the cruci
 once a second: it takes exactly the ingredient and preparation the step names, waits until its temperature is in the
 band the step names before stirring, then bottles into its output while it has bottles or bowls. It never guesses or
 substitutes; it waits. The same process gives the same result, so the repeat makes exactly the same draught.
+
+Since Concordance Chunk C (C-01):
+- **It says what it waits for:** used with an empty hand, its status line ends with the reason: water, an ingredient
+  (or the same one prepared otherwise), the heat, Preserve's hold, a bottle or bowl, an output that is full or holds
+  another brew, a batch to empty before a repeat. Jade and the Inspect page show the same reason. A shortage or a
+  blockage shows a want sign once when it begins; a formula it cannot follow shows danger with the breaking sound;
+  waiting for heat or a hold shows nothing.
+- **A formula is kept honestly:** a formula the rules in force can no longer make (after a reload or a data pack) stays
+  set at its step. It names the step and why, and does nothing, not even bottling a finished batch, until the rules can
+  follow it again; then it carries on. A saved formula this build cannot read is kept as written and reported. Setting a
+  written formula the rules refuse names the step and why, and setting one that would harm says so: the risk line names
+  the harmful statuses a dose would carry and the first searing stir.
+- **Setting is a plain use;** the formula's tooltip said "sneak" until Chunk C.
+- **Only someone who could break the crucible by hand** may pour, add, stir, bottle, or set or clear its formula
+  (claims, protected towns, adventure mode and spawn protection refuse). Tasting, the glass and recording onto a blank
+  formula stay open.
 
 ## How it works
 
@@ -133,6 +183,24 @@ any spell. A harmful salve on another player follows the same rule as a harmful 
 outcome (for example `minecraft:night_vision@0`): three distinct outcomes master the Alembic Arts; the same draught again
 counts once.
 
+**Since Concordance Chunk C, unit 1:**
+- *Diagnostics* (C-01). The pure package `concordance/diagnostic` holds the shared codes (`Code`: 03:9's eleven, then
+  Chunk C's eight, each with a kind) and `Diagnostic`, a code with at most four parameters, worded under
+  `compose.jugcraft.diagnostic.<id>` (table: `tools/concordance_diagnostics.py`).
+  - Each automation pulse (`automate`) returns why it waits, and the crucible keeps that reason (not saved).
+    `waiting()` gives the formula's incompatibility if it has one, otherwise that reason. The status line, Jade, the
+    Inspect page and the Peepo port all read `waiting()`.
+  - The kind of a new reason sets its sign.
+- *The honest reload* (C-01). `incompatibility()` replays the formula (at most 32 operations) once whenever
+  `ConcordanceData.revision()` differs from the one it last checked, and after a load. The refusal carries its step
+  (`Mixture.Refused.step`), and `Formula.incompatible` words it with the step's description (`Operation.describe`).
+  `follow(Formula)` sets a formula from its first step without the item's checks.
+- *Products* (C-02) are data, `data/<ns>/concordance/product/` (form, status, "nothing harmful", a name key and a codex
+  entry), read by `RulesParser.product` into `AlchemyCatalog`. `Alchemy.product` finds the one product a stack is, by
+  its form and what its brew carries, with harm judged by the server; a brew matching two stays unnamed.
+- *Fouling* (C-02): a property may declare `fouling`. In `Outcome.of` the fouling is taken, subtracted, then judged
+  (`Property.fouled`).
+
 ## Connections
 
 - Input producer: First Light (the Alembic Arts needs it understood); vanilla ingredients from farming, the Nether, the
@@ -161,11 +229,18 @@ counts once.
   Resistance I for at most a minute until unit 4.
   `tools/check_mod_data.py` enforces this. Brewing is cheaper than vanilla brewing (no blaze powder, nether wart or
   brewing stand), so it is held to vanilla's ceilings rather than allowed to exceed them.
-- Nothing alchemy makes is a resource another system consumes, so there is no conversion loop.
+- Since Concordance Chunk C (C-02), two things alchemy makes are consumed elsewhere, and neither feeds a conversion:
+  - the Stillroot Poultice heals a friend and, in a lair fight, earns its helper a support share bounded by the fight's
+    hurt (health is no modelled resource, so the Vigil's Vitae bound holds whatever heals);
+  - the Kiln Draught's Fire Resistance stops the Cinder Kiln's slag and the Cinder Tyrant's flame.
+  No brew is an ingredient, a Scale material or anything a recipe, trade or the Scale takes. A draught gives its bottle
+  back and a salve its bowl. Diluting a product gives no more in all: one poultice heals 18, the same batch in two parts
+  12. A second dose never adds a level. The Tyrant Scale (two magma cream) and Grave Dust (bone meal, for Mendvetch) are
+  declared reward routes. `check_workshop_products` holds all of this.
 - Searing heat trades quality for speed (85% of Radiance and Verdance kept and contaminant added), so the fastest fire
-  is not always the best. Any heat above cold thaws Rime (warm keeps 60%, hot 30%, searing none), so a Rime brew wants
-  the cold band, per recipe: four raw snowballs stirred warm twice still reach Frostward, and five stirred hot once;
-  searing never does.
+  is not always the best; since Chunk C its contaminant also fouls Verdance. Any heat above cold thaws Rime (warm keeps
+  60%, hot 30%, searing none), so a Rime brew wants the cold band, per recipe: four raw snowballs stirred warm twice
+  still reach Frostward, and five stirred hot once; searing never does.
 - Grinding loses a tenth for speed: a ground ingredient needs fewer stirs.
 - A crucible holds at most six parts: six doses per fill.
 
@@ -174,10 +249,19 @@ counts once.
 - Server authority: the crucible simulates on the server; clients receive the temperature and volume only (for the
   vessel's animation), never the makeup, which takes sampling. Hand operations are rate-limited and check research; a
   stir's band is the server's.
+- Who may change a crucible (since Chunk C, C-01): every change by hand asks `Authority.mayChange` as the player (water,
+  adds, stirs, bottling, setting or clearing a formula). Tasting, the glass and recording onto a blank formula stay
+  open. The Inspect page's position is the client's claim: the server reads only a loaded crucible within the reader's
+  block reach (plus its 1.0 use allowance).
 - Persistence: the crucible saves its mixture exactly (to the thousandth), history, formula, step, tank and slots, and
   Preserve's hold, `held_until` (game time), only while held; broken, its items drop (vanilla's container behaviour) and
   the mixture spills. Items carry `jugcraft:brew`,
   `jugcraft:reagent` and `jugcraft:formula`.
+- Since Chunk C: a saved formula this build cannot read is kept as written under `program` and saved back. The waiting
+  reason and the rules revision last checked are never saved; they are worked out again after a load. Product names
+  reach new stacks only, so a named brew and an older unnamed one of the same outcome do not stack (an automated
+  crucible pauses on one in its output and says so). Verdance brews that carry contaminant heal less from now on;
+  bottles already made keep what they carry.
 - Disable behaviour: with `concordance.enabled=false`, crucibles refuse work and stop following formulas; everything stays
   registered.
 
@@ -190,14 +274,20 @@ No new dependency. Framework use:
 - **Texture animation**: the liquid surface is a four-frame animated sheet (`crucible.png.mcmeta`), which GeckoLib uses
   for the geo model.
 - **Jade** (optional): temperature and band, volume, and when following a formula its step and the next operation it
-  waits for.
+  waits for ("Next step: ..." since Chunk C). Since Chunk C (C-01) also the tank in whole parts and the crucible's own
+  reason. The server sends the reason as its code and parameters (`Diagnostic.encode`), and the client words it. Never
+  the makeup: `check_signs` locks the snapshot's keys.
 - **JEI** (optional): each ingredient's properties and the mortar's preparation as ingredient information, and the tools'
   crafting recipes. JEI never shows outcomes: those are for the player to work out (or the mastered Assay Glass). Since
   Chunk B, unit 4, the Rime ingredients' pages (snowball, amethyst shard, gloamcap) add "stirred cold, its Rime brews
-  Frostward (Winter Brine)": a fact about the property, never a formula's outcome.
+  Frostward (Winter Brine)": a fact about the property, never a formula's outcome. Since Chunk C, the Mendvetch page
+  names the Stillroot Poultice, and the magma cream and sugar pages the Kiln Draught, the same way.
 - **Modonomicon**: a new **Alembic** codex category (the Alembic Arts, the crucible, properties, sampling and formulas),
   generated from the same tables as the data. Since Chunk B, unit 4, it has a **Winter Brine** entry (the Alembic Arts
-  observed), and the Stirring page names the Rime each warmer band keeps.
+  observed), and the Stirring page names the Rime each warmer band keeps. Since Chunk C: **Stillroot Poultice** and
+  **Kiln Draught** entries (the Alembic Arts observed). The Properties page names Verdance's fouling, and the Sampling
+  page the Inspect page. The Formulas page says the crucible says what it waits for, keeps a refused formula, and asks
+  who may change it.
 - **Fabric Transfer API**: the water tank (`FluidStorage.SIDED`).
 
 Sounds `jugcraft:concordance.crucible_add`, `.crucible_stir`, `.crucible_bottle` are synthesised by
@@ -213,7 +303,8 @@ Sounds `jugcraft:concordance.crucible_add`, `.crucible_stir`, `.crucible_bottle`
   at its highest level (setting Poison's cap back to 600 ticks fails the check). A new rule (found while testing this
   step): every sound a spell plays must be registered as a SoundEvent (see below).
 - `python3 scripts/check_repository.py` passes.
-- The pure core compiles with JDK 21. The step 13 harness passes **61 checks** against the generated data, including:
+- The pure core compiles with JDK 21. The step 13 harness passes **61 checks** against the generated data (that harness
+  is not in Git: `src/test` holds only `VanillaReferences.java`), including:
   the worked example to the thousandth; two independent replays of the same operations giving equal mixtures and doses;
   bands, searing loss and contaminant; ground preparation; bottling shares; thresholds, levels and duration caps; the
   formula's canonical text parsing back to the same operations; refusals (no water, overflow, unknown ingredient, too
@@ -263,6 +354,49 @@ server tests. The existing alchemy tests are unchanged, and passed there too: no
 `check_alchemy` now mirrors `RIME_KEEP_*` and accepts a property's status only if vanilla or Jugcraft registers it; the
 new `check_winter_brine` holds the rest. `check_mod_data` passes, locally and in that run's `mod` job.
 
+**Concordance Chunk C, unit 1** ([the chunk's contract](concordance-chunk-c.md); not merged). **No new test has run.**
+They were written where no Minecraft jar is available, so none of this Java has been compiled; CI is their first
+compile and run.
+- **New server game tests:**
+  - `ConcordanceAlchemyGameTests` +19 (32 in all). C-01's 12:
+    - `aChangedRuleKeepsTheFormulaAndSaysWhy`, `aRestoredRuleResumesTheFormula`,
+      `aWrittenFormulaThatNoLongerReplaysSaysWhichStep` and `aSavedFormulaThatNoLongerReadsIsKeptAndReported`;
+    - `anIncompatibleFormulaAsksForNothing`, which also shows that an incompatible formula bottles nothing;
+    - `aFullOutputPausesAndVoidsNothing`, `twoHoppersRaceForTheBuffer`, `partialWaterWaitsThenDrawsExactly`,
+      `aRestartJustBeforeOutputBottlesOnce` and `theCompanionAndTheCrucibleAgreeOnFull`;
+    - `onlyThoseWhoMayChangeACrucibleWorkIt` (a claim and adventure mode);
+    - `jadeIsToldTheTankAndWhyNeverTheMakeup`, whose Jade checks run only when Jade is loaded.
+  - C-02's 7: `aStillrootPoulticeRepeatsAndADirtyBatchHealsLess`, `aKilnDraughtCarriesItsDrinkerAcrossTheSlag`,
+    `aPoulticeReturnsItsBowlToAFullInventory`, `productsNeverFeedTheCrucible`, `twoPoulticesDoNotAdd`,
+    `dilutionNeverHealsMore` and `anOldUnnamedBrewInTheOutputPausesAndSaysSo`.
+  - `ConcordanceAssayGameTests.workshopProductsAreNeverWeighed`.
+  - `EncyclopediaGameTests.theInspectPageReadsACrucibleByResearch`.
+  - The credit and dossier tests are in [lair-encounter-credit.md](lair-encounter-credit.md) and
+    [cinder-kiln.md](cinder-kiln.md).
+  The rules are swapped only through the tests' `under()`, which restores them in a `finally` in the same callback.
+- **Client game test:** `EncyclopediaClientGameTests.crucibleInspection`. A crucible follows the Kiln Draught's formula
+  and waits for its magma cream. The test checks that the reason the server encodes reads back in words, with no key
+  or `jugcraft:` id showing, in the reason and in the Inspect page's rows. A dirty poultice's preview names what fouled
+  it. Shots: `jugcraft_encyclopedia_inspect_crucible`, `_scale4` and `_poultice`, and
+  `jugcraft_concordance_crucible_jade` when Jade is loaded.
+- **New and changed audits in `tools/check_mod_data.py`:**
+  - `check_diagnostics` (new): codes, kinds and words; the crucible keeps a refused formula, shows a sign once and asks
+    Authority first; the Peepo mapping; no client reads the rules; tests swap the rules only through `under()`;
+  - `check_workshop_products` (new): products are the generator's; each worked process brews its product alone, with
+    nothing harmful, from ingredients crafted from vanilla things; each has a consumer; none is an ingredient, a Scale
+    material or a recipe input; containers come back; dilution gives no more; brews stack as the strongest; only the
+    declared boss routes;
+  - `check_alchemy`: the fouling mirror and its order; preparation names; a written formula set by a plain use;
+  - `check_signs`: Jade's crucible snapshot and its client;
+  - `check_encyclopedia`: the crucible page's reach and glass, and that it only reads;
+  - the crucible in `AUTHORITY_ROUTES`, and `diagnostic` in the pure-package list.
+- **Run locally for each of the unit's commits, and passed:** `python3 tools/check_mod_data.py`,
+  `python3 scripts/check_repository.py`, `python3 tools/owner_art.py --check`,
+  `python3 tools/concordance_journey.py --check`, `python -m unittest discover -s scripts/tests` and `git diff --check`.
+  The audit mutations tried on a scratch copy were each reported (30 for the products' commit, 22 for the credit's).
+- **Not run:** `./gradlew build` with and without the optional integrations, `./gradlew runClientGameTest`, CI, any
+  play by hand, and two clients.
+
 ## World and event applicability
 
 No worldgen, creatures, loot or seasons.
@@ -272,7 +406,8 @@ No worldgen, creatures, loot or seasons.
 - New stable ids: block and item `jugcraft:crucible` and its block entity; items `jugcraft:mortar`,
   `jugcraft:stirring_rod`, `jugcraft:sampling_spoon`, `jugcraft:assay_glass`, `jugcraft:formula`, `jugcraft:reagent`,
   `jugcraft:draught`, `jugcraft:salve`; item components `jugcraft:reagent`, `jugcraft:brew`, `jugcraft:formula`; research
-  `jugcraft:alembic_arts`; preparations `jugcraft:raw`, `jugcraft:ground`; eleven ingredients and seven properties; item
+  `jugcraft:alembic_arts`; preparations `jugcraft:raw`, `jugcraft:ground`; eleven ingredients (fifteen since step 14
+  added the garden's four) and seven properties; item
   tag `jugcraft:alchemy_specimens`; the three sounds above.
 - `jugcraft:concordance_specimens` (added in step 12) now also includes `#jugcraft:alchemy_specimens`.
 - Save compatibility: additive. The formula text format (`water`, `add`, `stir`) is part of the saved data and must
@@ -282,5 +417,11 @@ No worldgen, creatures, loot or seasons.
   operations only and replay under the new rule (a warm, hot or searing Rime stir now brews weaker or nothing). A
   crucible whose output still holds old Resistance draughts waits for them to be taken, because a Frostward draught
   does not stack with them.
+- Since Concordance Chunk C, unit 1 (not merged): the products `jugcraft:stillroot_poultice`, `jugcraft:kiln_draught`
+  and `jugcraft:winter_brine` (data under `concordance/product/`, ids stable once released); a property's `fouling`
+  field; the diagnostic codes' ids (`Code`, stable: never renamed, reused or removed; new ones are appended); lang keys
+  `preparation.jugcraft.*`, `compose.jugcraft.diagnostic.*`, `compose.jugcraft.alchemy.inspect.*`, `.risk.*`,
+  `.op.*`, `.fouled`, `.assay.fouls`, and the products' item names (`item.jugcraft.salve.stillroot_poultice`,
+  `item.jugcraft.draught.kiln_draught`, `item.jugcraft.draught.winter_brine`). No new saved key and no new item.
 - Open: more preparations (distilling, calcining) and ingredients arrive with later Principles; a GuiLib crucible
-  screen.
+  screen. For now the encyclopedia's Inspect page stands in for a crucible screen (plan 08:55-59).

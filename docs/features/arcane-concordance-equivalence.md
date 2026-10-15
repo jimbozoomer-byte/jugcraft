@@ -146,6 +146,11 @@ yet.
   travel kit (the two water foci, the Water Bangle and the twelve pieces of the three water sets) joins `EXCLUDED`, as
   Ember's regalia did; `check_rime_kit` requires each of the fifteen to be. Winter Brine's draughts and salves are
   neither weighed nor ingredients (`check_winter_brine`).
+- Concordance Chunk C, unit 1 ([the alchemy record](arcane-concordance-alchemy.md); not merged): the workshop's
+  products (the Stillroot Poultice, the Kiln Draught and Winter Brine) are draughts and salves carrying `jugcraft:brew`,
+  so the Scale refuses them as magical before it looks at what they are. None is a Scale material or an ingredient, and
+  no recipe or trade takes a brew (`check_workshop_products`). The Tyrant Scale and Grave Dust reach the products'
+  ingredients by recipes alone, as declared reward routes; the Scale's priced exchange is not counted as a route.
 - The pure core compiles with JDK 21 and the rules load the generated catalogue (45 materials, 42 transmutations) with
   no problems. The step 21 harness passes **31 checks** against it: exact fractions add and round as asked; nuggets
   dissolve at 256/9 rounded down once on the whole batch, and splitting never earns more; forming costs five quarters
@@ -159,7 +164,9 @@ yet.
   pattern kept, dissolved again for 256; too few grains form nothing); only plain catalogued matter is weighed (named,
   magical, glinting, changed, uncatalogued and excluded stacks are refused and nothing moves either way); the ledger
   never passes its cap; every declared crafting and smelting conversion is the game's own recipe, output and count;
-  and the catalogue is balanced, this server's live recipes included.
+  and the catalogue is balanced, this server's live recipes included. A seventh since Concordance Chunk C,
+  `workshopProductsAreNeverWeighed` (not run yet): the three products, refused as magical, change nothing weighed or
+  dissolved, and nothing is formed from one as a pattern; a bare draught or salve is not catalogued.
 - CI: the first run on this step (commit fdf36745) found three faults, fixed in 65d98e8b (26.3's component patch
   has no entry set, so a stack's changes are compared component by component), 65870d7d (an item's nature is judged
   against a plain item's defaults, which already carry an empty enchantment list) and ca66a3e1 (a formed ingot may

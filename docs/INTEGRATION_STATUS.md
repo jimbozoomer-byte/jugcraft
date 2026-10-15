@@ -11,14 +11,27 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
+## Not merged: Concordance Chunk C (living workshop)
+
+Stacked on Chunk B, on branch `claude/chunk-c-living-workshop`; not merged, no pull request. Unit 1 (C-01, C-02) is
+built and recorded. Its local checks pass (`check_mod_data`, `check_repository`, `owner_art --check`,
+`concordance_journey --check`, `scripts/tests`). None of its Java has been compiled, and none of its game tests has run:
+no CI run yet. Units 2 to 5 have not started. Not played by hand or with two clients
+([the chunk's contract](features/concordance-chunk-c.md)).
+
+| Area | Implemented change | Record |
+| --- | --- | --- |
+| The crucible says what it is doing (unit 1, C-01) | An Alembic Crucible following a formula says why it waits: the empty-hand status line, Jade (with its tank) and the encyclopedia's new Inspect page for a crucible within reach (more with an Assay Glass carried). A formula the rules can no longer make stays set, names its step and why, and carries on when they change back; an unreadable saved one is kept. Only someone who could break it by hand may work it or set or clear its formula. Peepo's crucible status reads the same reason, and is FULL only when the output is full or holds another brew | [alchemy](features/arcane-concordance-alchemy.md), [authority](features/arcane-concordance-authority.md), [Peepo port](features/companion-farm-stand-crucible.md), [first route](features/arcane-concordance-first-route.md) |
+| Two workshop products (unit 1, C-02) | The Stillroot Poultice (Mendvetch stirred warm: a Regeneration II salve) and the Kiln Draught (magma cream or sugar stirred hot: Fire Resistance), named on the stack, as Winter Brine now is; contaminant fouls Verdance, so a dirty batch heals less, and the glass and the outcome say so. A poultice put on a friend in a lair fight earns its helper healing credit for each heal of its Regeneration; the Kiln Draught carries its drinker over the Cinder Kiln's slag, and the kiln's dossier names it | [alchemy](features/arcane-concordance-alchemy.md), [encounter credit](features/lair-encounter-credit.md), [Cinder Kiln](features/cinder-kiln.md), [the contract](features/concordance-chunk-c.md) |
+
 ## Not merged: Concordance Chunk B (winter and stone)
 
 On branch `claude/chunk-b-winter-stone`, not merged. Units 1 to 5 pass their tests in CI: run 38591108210 on
 `25644502a` passed every job on its second attempt (all 1682 required server game tests, with and without the optional
 integrations, and every client test class); its first attempt failed two tests outside Chunk B (a nuclear plant's
 radiation reading, a Peepo delivery client test), which passed when re-run. Units 1 to 4 also passed run 38549876709
-on `b012875ab`. The evidence is recorded and the owner's checkpoint is awaited; Chunk C has not started. Not played by
-hand or with two clients ([the chunk's contract](features/concordance-chunk-b.md),
+on `b012875ab`. The evidence is recorded and the owner's checkpoint is awaited; Chunk C, stacked on it, is under way
+(above). Not played by hand or with two clients ([the chunk's contract](features/concordance-chunk-b.md),
 [its evidence](features/concordance-chunk-b.md#unit-5-evidence-and-handoff-b-09-b-11)).
 
 | Area | Implemented change | Record |

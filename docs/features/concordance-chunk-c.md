@@ -1,9 +1,11 @@
 # Concordance Chunk C: the living workshop (contract and handoff)
 
-Status: contract written; nothing built. Chunk C is developed on branch `claude/chunk-c-living-workshop`, whose base
-`e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in; CI run 38617471274 on that base passed every
-job (see The merge and its CI run). Not merged; no pull request. Chunk B, beneath it, is not merged and has no pull
-request either.
+Status: contract written; unit 1 (C-01 and C-02) built, in four commits on this contract (`8d61fdb7b`) and a fifth
+for its records. Every local check passes; none of its Java has been compiled and none of its game tests has run (no
+CI run yet; see the As built notes of C-01 and C-02). Units 2 to 5 not started. Chunk C is developed on branch
+`claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in;
+CI run 38617471274 on that base passed every job (see The merge and its CI run). Not merged; no pull request. Chunk B,
+beneath it, is not merged and has no pull request either.
 Proposal: the owner chose Chunk C on 14 October 2026 ("ok begin chunk c"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 5,
 C1 to C4), with [workshops, ecology and pacts](../plans/concordance-expansion-2026-10-10/03-workshops-ecology-and-pacts.md),
@@ -85,7 +87,7 @@ path before multiplying content variants"; MP:66).
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Not started |
+| 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records in the next commit): local checks pass; not compiled, no game test run, no CI run yet |
 | 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Not started |
 | 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Not started |
 | 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Not started |
@@ -164,7 +166,7 @@ on `e079ad4a3`), read by REST on 14 October 2026: conclusion success on attempt 
 
 ### Defects and gaps found
 
-**Fixed in this chunk:**
+**Fixed in this chunk** (1 to 7 in unit 1; see C-01's As built notes):
 
 1. A formula refused under new rules vanishes with only a sound (`CrucibleBlockEntity.java:282-289`). C-01.
 2. Setting a written formula that no longer replays says only "formula invalid", without the step or the reason
@@ -205,6 +207,7 @@ Gloamcap and Mendvetch are missing); the rituals record says thirteen tests
 (`arcane-concordance-ecology.md:187`) where there are 12, and 147 positions (`:131`) where the Heart search is 729; the
 alchemy record's "Nothing alchemy makes is a resource another system consumes, so there is no conversion loop"
 (`arcane-concordance-alchemy.md:164`) stops being true with C-02; the pure harnesses those records cite are not in Git.
+Unit 1 corrected the alchemy record's table (15 rows) and its line 164, and says there that its harness is not in Git.
 
 **Not Chunk C's:** main's shortened `CHANGELOG.md` (above).
 
@@ -310,8 +313,10 @@ the encyclopedia payloads, Signs, `RateGate`.
 - `ConcordanceAlchemyGameTests` (13 today):
   - `aChangedRuleKeepsTheFormulaAndSaysWhy` and `aRestoredRuleResumesTheFormula`. They stand for a reload with
     `ConcordanceData.replace` (used so at `ConcordanceComposeGameTests.java:361`). That is global and static: a catalogue
-    missing an ingredient would reach every Concordance test running beside it, so the test restores the rules in a
-    `finally` and runs in a batch of its own (how 26.3's game-test framework isolates one is read before writing it);
+    missing an ingredient would reach every Concordance test running beside it, so the tests swap the rules only
+    through `under()`, which restores them in a `finally` within the same callback (C-P28; `check_diagnostics`);
+    vanilla batches by environment and dimension, 50 a batch (`mc263src` HEAD `GameTestBatchFactory.java:32-74`), which
+    is not relied on;
   - `aWrittenFormulaThatNoLongerReplaysSaysWhichStep`;
   - `aSavedFormulaThatNoLongerReadsIsKeptAndReported`;
   - `anIncompatibleFormulaAsksForNothing` (`companion.needed(...)` is 0; no filing; no heat demand);
@@ -336,6 +341,64 @@ waiting reason and the checked revision are not; an unreadable program's text is
 
 **Review boundary:** crucible diagnostics, the shared vocabulary, authority on crucible use, and their tests. No brew
 outcome changes.
+
+**As built (unit 1: commits `f4efbf82c` and `ff11cc062`).**
+- **Built:**
+  - the pure package `concordance/diagnostic`: `Code` holds 03:9's eleven codes in its order and words, then Chunk C's
+    eight, each with a kind; `Diagnostic` is a code with at most four parameters, worded under
+    `compose.jugcraft.diagnostic.<id>` and sent to a client as `encode()`d text. Its table is
+    `tools/concordance_diagnostics.py`;
+  - the crucible's reason, `CrucibleBlockEntity.waiting()`, read by the empty-hand status line, Jade, the Inspect page
+    and the Peepo port;
+  - the honest reload. `incompatibility()` replays the formula once per `ConcordanceData.revision()` and after a load. A
+    refused formula keeps its step, and an unreadable saved one is kept under `program`;
+  - `formula()` names the refused step and why (`message.jugcraft.concordance.alchemy.formula_refused`), and gives the
+    risk line (`Assay.risks`) when it sets one;
+  - Authority on every change;
+  - `CrucibleCompanion`'s status and demand, taken from the crucible's reason;
+  - the Inspect page's crucible branch (`InspectPage`, and the pure `alchemy/CrucibleInspection`), and Jade's tank and
+    reason;
+  - the tooltip and the codex's formulas page.
+- **Departures from the ticket,** each a proposal below:
+  - the code ids follow 03:9's own wording (`missing_ingredient`, `insufficient_capacity`, ...). Each code's kind sets
+    the sign it shows when it begins (C-P22). The wait before a repeat, silent before, now shows a WANT sign once
+    (`needs_emptying`), and Peepo shows `OCCUPIED` for it;
+  - an incompatible or unreadable formula bottles nothing automatically, not even a finished batch (C-P23);
+  - recording onto a blank formula stays open. Clearing also still needs the Alembic Arts (C-P24);
+  - the risk line names the harmful statuses and the first searing step (C-P25);
+  - the Inspect page reads a crucible within the reader's block reach plus the server's 1.0 use allowance. Every level
+    above the spoon's needs an Assay Glass carried, a master's too (C-P26);
+  - Jade's raw step now reads "Next step: ..." (C-P27);
+  - the reload tests swap the rules through `under()`, not in a batch of their own (C-P28);
+  - `follow(Formula)` sets a formula without the item's checks. The client test uses it, so spawn protection on its
+    server cannot refuse the formula;
+  - `onlyThoseWhoMayChangeACrucibleWorkIt` refuses a stranger inside a claim (`TestClaims`) and, outside it, in
+    adventure mode. No game test can make a town, so a protected town is not tested.
+- **From the spec review:**
+  - the stranger's stick is tried before any stir, so only the claim can refuse it;
+  - adventure mode is a second refusal;
+  - `anIncompatibleFormulaAsksForNothing` runs a formula to its end and shows that no bottle is used while it is
+    incompatible, then that one pulse bottles once the rules are back (C-P23);
+  - `crucibleInspection` checks that neither a key nor a `jugcraft:` id shows in the reason or the page's rows.
+- **Tests (none run):**
+  - 12 new `ConcordanceAlchemyGameTests`: 11 in commit 1, and `jadeIsToldTheTankAndWhyNeverTheMakeup` in commit 2;
+  - `EncyclopediaGameTests.theInspectPageReadsACrucibleByResearch`;
+  - the client test `EncyclopediaClientGameTests.crucibleInspection`, with shots
+    `jugcraft_encyclopedia_inspect_crucible` and `_scale4`, and `jugcraft_concordance_crucible_jade` when Jade is
+    loaded.
+  There is no Minecraft jar where they were written. The Jade test checks Jade's snapshot only when Jade is loaded, so a
+  build with `-PjugcraftOptionalIntegrations=false` alone does not run those checks.
+- **Audits:**
+  - `check_diagnostics` (new);
+  - `check_alchemy`: preparation names, and a written formula set by a plain use;
+  - `check_signs`: Jade's crucible snapshot and its client;
+  - `check_encyclopedia`: the crucible page's reach and glass, and that it only reads;
+  - the crucible in `AUTHORITY_ROUTES`, and `diagnostic` in the pure-package list.
+- **Commands,** for each commit:
+  - run and passed: `python3 tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+    `python3 tools/owner_art.py --check`, `python3 tools/concordance_journey.py --check`,
+    `python -m unittest discover -s scripts/tests` and `git diff --check`;
+  - not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest` and CI.
 
 ### C-02. The Stillroot Poultice and the Kiln Draught (unit 1; C-D1)
 
@@ -370,7 +433,9 @@ outcome changes.
   bone meal, with 0.2, 0.4 and 0.6 contaminant and 0.227, 0.455 and 0.683 Hollow a part. Today all three are
   Regeneration II (two add Poison, three also Nausea). Under the rule (arithmetic, not run): one bone meal leaves 1.935,
   Regeneration I; two 1.743, Regeneration I and Poison; three 1.551, Regeneration I, Poison and Nausea. A searing
-  stir's 500 milli-units of contaminant (`Mixture.java:28-29`) now also costs Verdance.
+  stir's 500 milli-units of contaminant (`Mixture.java:28-29`) now also costs Verdance: one in place of the poultice's
+  last warm stir leaves a one-part batch 2.215 less 2.000, 0.215 Verdance a part, under the threshold, so Nausea only
+  *(the model, re-run)*.
 - **Products as data** (C-P2): `concordance/product/*.json`, generated by `tools/concordance_alchemy.py`: an id, a form
   (salve or draught), the status it must carry, "nothing harmful", a name key and a codex link. `Alchemy.brew`
   (`Alchemy.java:56-66`) names a matching stack with vanilla's item name. A stack is a product by what it carries, never
@@ -379,8 +444,9 @@ outcome changes.
   another player applied takes (`actor` non-null, `:56`). `Encounter` keeps a transient mending note (helper, patient,
   until) and, on each tick vanilla's Regeneration would heal the patient, credits the health they gained that tick, at
   most 1, through `Encounter.healed` (`Encounter.java:308-325`), which already credits only the fight's hurt not yet
-  healed and nothing past full health. Regeneration's interval by level and remaining time is not in the local mirror;
-  it is read from the 26.3 sources before coding. No mixin (CLAUDE.md). Today brews earn nothing because the boundary's
+  healed and nothing past full health. Regeneration's interval was read from the 26.3 sources (`mc263src` HEAD:
+  `RegenerationMobEffect`, a heal every `50 >> amplifier` ticks; `MobEffectInstance.tickServer` passes the time left
+  before it counts down). No mixin (CLAUDE.md). Before this, brews earned nothing because the boundary's
   observer sees only RESTORATION and PROTECTION (`ConcordanceEffects.java:230-237`; `Lairs.java:82-83`).
 - **The Cinder Kiln's preparation fact** (C-P9): `LairDossiers.prepare` (`LairDossiers.java:220-233`, today the Glacier
   Hall only) gains the Cinder Kiln: text and icons, no recipe grid (the Expeditions page's grids are spoken for, Chunk
@@ -402,17 +468,19 @@ outcome changes.
   - **containers net to zero:** a salve gives its bowl back, dropped at the user's feet if the inventory is full
     (`BrewItem.java:83`; mc263src `Inventory.java:273-283`); a draught gives its bottle back
     (`JugcraftConcordance.java:253-254`);
-  - **dilution gains nothing:** a poultice diluted to 2 parts gives two doses of 1.063 a part, Regeneration I for 318
-    ticks each *(the model, re-run)*; that the two heal less in all than one Regeneration II dose for 450 ticks rests on
-    vanilla's Regeneration interval, read from the 26.3 sources before coding (it is not in the local mirror). The
-    credit is bounded by the fight's hurt, not by how many doses exist;
+  - **dilution gains nothing:** a poultice diluted to 2 parts gives doses of 1.063 and 1.064 a part, Regeneration I for
+    318 and 319 ticks (`Mixture.bottle` gives the remainder to the last dose) *(the model, re-run)*. At vanilla's
+    interval (above) the two heal 6 + 6 = 12, against 18 for one Regeneration II dose of 450 ticks
+    (`dilutionNeverHealsMore` measures it). The credit is bounded by the fight's hurt, not by how many doses exist;
   - **no stacking:** `Stacking.STRONGEST` (`Alchemy.java:79-81`; `effect/Stacking.java:11-15, 68-76`): a second poultice
     replaces a weaker one or, as strong and longer, extends it to its own time; otherwise nothing changes, and it never
     adds a level;
   - **the boss route:** a Tyrant Scale makes 2 magma cream (`recipe/magma_cream_from_tyrant_scale.json`, under
     `agriculture`), a boss-to-ingredient edge found through `_made_from` (`check_mod_data.py:13623`). Proposed as a
     reward route, not a loop (C-P9): the draught makes no Kiln Seal (`kiln_seal_from_scales`, `LairDossiers.java:71-73`)
-    and no scale, and magma cream has vanilla sources;
+    and no scale, and magma cream has vanilla sources. A second route: the Crypt Lich's Grave Dust makes 2 bone meal
+    (`recipe/bone_meal_from_grave_dust.json`), and bone meal goes into Mendvetch. Both are declared in
+    `PRODUCT_REWARD_ROUTES` and found by recipes alone, not through the Assayer's Scale (C-P32);
   - **Vitae:** health is not a modelled resource; the Vigil offering stays bounded by `HOURLY_VITAE_BOUND` = 60
     whatever heals the giver (`check_mod_data.py:15597, 15652-15653`).
 - **Records:** `arcane-concordance-alchemy.md:164` rewritten to name the consumers and these checks;
@@ -432,8 +500,11 @@ rite section, Preserve's hold.
 - `LairEncounterGameTests` (10 today): `aPoulticeOnAFriendIsCreditedForWhatItHeals` (no more than the fight's hurt and
   the poultice's own healing; qualifies at two hearts); `aPoulticeOnOneselfEarnsNothing`;
   `aPoulticeOnAnUnhurtFriendEarnsNothing`; `aSecondPoulticeAddsNoCredit`; `aPoulticeOutsideTheFightEarnsNothing`;
-  `onlyAPoulticeMends` (a Frostward salve earns nothing, as Chunk B recorded, its contract line 1024).
-- `EncyclopediaGameTests.theCinderKilnsRiteNamesTheKilnDraught` (and the Charm alone with the Concordance off).
+  `onlyAPoulticeMends` (a Frostward salve earns nothing, as Chunk B recorded, its contract line 1024);
+  `blowsAndSpellsBetweenItsHealsAreNotThePoultices`; `regenerationHealsOnItsVanillaInterval`.
+- `EncyclopediaGameTests.theCinderKilnsRiteNamesTheKilnDraught` (and the Charm alone with the Concordance off);
+  `theDossiersNameThePoulticesCredit`.
+- `ConcordanceAlchemyGameTests.jadeIsToldTheTankAndWhyNeverTheMakeup` (C-01's, in unit 1's second commit).
 
 **Tests (client):** Inspect shots of a fouled poultice's preview and of a crucible holding a Kiln Draught formula.
 
@@ -448,6 +519,51 @@ and vanilla's Fire Resistance potion remain.
 
 **Review boundary:** alchemy data and generator, product naming, one `Encounter` hook (the mending credit) in lair code,
 the Cinder Kiln's preparation fact, the checks and the records.
+
+**As built (unit 1: commits `2b53fbff0` and `e1d69574e`).**
+- **Built:**
+  - the yield rule: `Property.fouled`; in `Outcome.of` the fouling is taken, subtracted, then judged; Verdance declares
+    4.0;
+  - three products as data (`concordance/product/`, read by `RulesParser.product` into `AlchemyCatalog`):
+    `stillroot_poultice`, `kiln_draught` and `winter_brine`. `Alchemy.brew` names a stack that `Alchemy.product`
+    matches, with vanilla's item name;
+  - the Assay Glass line (what the contaminant takes) and the fouled reason;
+  - codex entries and the JEI facts;
+  - the Cinder Kiln's preparation fact;
+  - the poultice's credit: the `BrewItem.Observer`, registered by `Lairs`, calls `Encounter.mended`; the encounter reads
+    the note at three points (C-P30); `creditHealing` holds `healed`'s old body;
+  - the dossiers' poultice fact;
+  - `check_workshop_products` and `check_poultice_credit` (new), and `check_alchemy`'s fouling rules.
+- **Departures from the ticket:**
+  - no `Products` class: `Alchemy.product` and `AlchemyCatalog.product`, with `Alchemy.STILLROOT_POULTICE`;
+  - a product is any brew of its form that carries its status and nothing harmful, as the server judges harm (C-P29);
+  - credit is counted from Regeneration's own time left, read at each tick's end, each blow and each Concordance heal.
+    The ticket said "on each tick vanilla's Regeneration would heal" (C-P30);
+  - the Kiln Draught's dossier fact also names his flame (C-P31);
+  - Grave Dust is a second declared reward route (C-P32);
+  - `_made_from` takes `scale=False` and reads the recipe files once a run;
+  - `LairDossiers.poultices()` reuses `brews`, the helper the Kiln Draught's fact added;
+  - two credit tests (`aPoulticeOnOneselfEarnsNothing`, `blowsAndSpellsBetweenItsHealsAreNotThePoultices`) check that
+    none of their own players qualifies, rather than that nobody does: a fight in a neighbouring test within 64 blocks
+    shares their players' hurt and notes;
+  - the credit tests run their steps through a small timeline helper.
+- **From the spec review:**
+  - the order check (fouling taken, subtracted, then judged);
+  - `REGENERATION_INTERVAL` held to `50 >> amplifier`, in `check_workshop_products`;
+  - the bowl test's user stands in the test's own space, and only bowls inside its bounds are counted;
+  - the recipe edges read once.
+- **Tests (none run):**
+  - `ConcordanceAlchemyGameTests` +7 (32 in all);
+  - `ConcordanceAssayGameTests.workshopProductsAreNeverWeighed` (7);
+  - `LairEncounterGameTests` +8 (18);
+  - `EncyclopediaGameTests` `theCinderKilnsRiteNamesTheKilnDraught` and `theDossiersNameThePoulticesCredit` (20 with
+    C-01's);
+  - `crucibleInspection`'s poultice preview (shot `jugcraft_encyclopedia_inspect_poultice`).
+  Every number in their assertions is the model's or vanilla's arithmetic until they run.
+- **Commands,** for each commit:
+  - run and passed: as C-01's;
+  - the audit mutations on a scratch copy, each reported: 30 for commit 3 and 22 for commit 4;
+  - not run: the build, the game tests and CI.
 
 ### C-03. Ritual readiness, fault positions, spent and reserved (unit 2)
 
@@ -881,6 +997,26 @@ niche helper and tests.
 - **Network:** no new payload. Jade snapshots carry more values; the bed's update tag grows (C-08, C-09), a contract
   change between server and client of the same build.
 
+**As built in unit 1:**
+- **Diagnostics:** `Diagnostic` (`of`, the crucible's factories, `text`, `encode`, `decode`) and `Code` (with
+  `Code.Kind`).
+- **The crucible:** `CrucibleBlockEntity.automate` (now public, returning its reason), `waiting`, `incompatibility`,
+  `unreadableProgram`, `follow`, `statusLine`, `tankParts` and `below`.
+- **Pure alchemy:**
+  - `Formula.incompatibility` and `incompatible`; `Mixture.Refused` gains `step`; `Operation.describe` and
+    `Operation.ingredient`;
+  - `Assay.risks`, `CrucibleInspection` and `Heat.Below`;
+  - `Property.fouled` (and the `fouling` field), `Product`, and `AlchemyCatalog.product`.
+- **Shared Concordance code:** `Alchemy.glassLevel`, `product` and `STILLROOT_POULTICE`; `ComposeText` words a line
+  nested in a diagnostic; `BrewItem.Observer` and `observe`.
+- **Lairs:** `Encounter.mended`, `regenerationHeals`, `POULTICE_STATUS`, `REGENERATION_HEAL` and the private
+  `creditHealing`; `LairDossiers.brews`, `poultices` and `FIRE_RESISTANCE`.
+- **Encyclopedia and Jade:** `InspectPage.CRUCIBLE_REACH`; the Jade crucible snapshot's `tank` and `reason`.
+- **Tools:** `tools/concordance_diagnostics.py`; `tools/concordance_alchemy.py` (`fouled`, `PRODUCTS`,
+  `PRODUCT_REWARD_ROUTES`, `REGENERATION_INTERVAL`, `realised`); `check_diagnostics`, `check_workshop_products`,
+  `check_poultice_credit`.
+- **No new saved key:** an unreadable program reuses `program`. The crucible's update tag still has its four keys.
+
 ## Dependencies and order
 
 1. C-00: done (the merge, its CI, this page).
@@ -918,9 +1054,21 @@ after the first path (09:16).
   (mc263src `LivingEntity.java:1155`). Vanilla's Fire Resistance potion and the crucible's Ember brews already
   do this; the dossier fact will advertise it. The Salamander Charm stops only hot ground
   (`lair/tyrant/SalamanderCharm.java:7-12`). A balance question for the checkpoint.
-- **The poultice's credit** samples a patient's health on Regeneration's ticks: food healing on the same tick can be
-  credited, but never more than the poultice's own scheduled healing or the fight's hurt; a heal coinciding with a blow is
-  under-credited.
+- **The poultice's credit** (as built, C-P30): food, a vanilla potion or a beacon healing in the same tick as one of
+  the poultice's heals can be credited for that heal, at most one health and never past the fight's hurt; heals from
+  Concordance spells and blows are read out exactly. A poultice replaced by a stronger or longer Regeneration (a potion,
+  a beacon, milk) ends its note, so heals vanilla's hidden instance gives after are not credited (under-credit, which is
+  safe). A real client's patient (`doTick`, with `FoodData.tick`) is not run; the tests run the patient's tick by hand.
+- **The crucible's reason** comes from its last pulse, so it can be up to 20 ticks old in Jade, the status line and
+  Peepo (for example FULL just after the output is emptied). The incompatibility is rechecked lazily and is never stale.
+- **Authority is a behaviour change** (C-P5): adventure mode, spawn protection on a dedicated server with operators,
+  claims and protected towns now refuse crucible work. Recording stays open (C-P24).
+- **An incompatible formula** stops even a finished batch from bottling automatically (C-P23).
+- **Naming by effect** makes any Regeneration salve carrying nothing harmful a Stillroot Poultice, which earns credit
+  (C-P29).
+- **Unit 1, not yet seen in a game:** the Expeditions page with the poultice's fact for all four keepers stays within
+  the 96 rows a page holds (about 77 by the spec review's count; `theExpeditionsPageHoldsEveryKeeper` checks it, not
+  run), and whether the client test's Jade shot shows Jade's overlay (`takeScreenshot` with the HUD).
 - **Feature switches:** the foundation needs `machines` and `thallite` (C-04); with either off the powered route is out
   of reach and the campfire route stays. Whether Fabric applies load conditions to Concordance data is unverified.
 - **Strain** is a new soft cost on every harvest path, Peepo's and the Crop Harvester's included: visible, capped and
@@ -931,14 +1079,14 @@ after the first path (09:16).
   serves a crucible only while its formula's setter answers.
 - **Holds versus the stand:** a Preserve hold freezes the band, so a stand-driven formula waits; by design and documented.
 - **Test isolation:** `ConcordanceData.replace` is global; a reload test that forgets to restore the rules would fail
-  other Concordance tests.
+  other Concordance tests. Unit 1's tests swap the rules only through `under()`, which `check_diagnostics` enforces
+  (C-P28).
 - **Load measurement** on CI is noisy and hardware-specific: numbers are recorded, and only an agreed, generous limit is
   asserted.
 - **Unverified:** the null-side Fabric item insert (inferred from a passing post test *(survey)*); vanilla's container
   drop when a crucible overrides `preRemoveSideEffects` (the mirror has no `BlockEntity`; the Spire drops explicitly);
-  Regeneration's healing interval in 26.3 (the mirror has no effect classes); whether Jade's accessor gives the viewing
-  player; bees and `#minecraft:supports_crops` on these crops; Fabric's load conditions on Concordance data; whether the
-  client tests' dedicated server runs in the client's process.
+  whether Jade's accessor gives the viewing player; bees and `#minecraft:supports_crops` on these crops; Fabric's load
+  conditions on Concordance data; whether the client tests' dedicated server runs in the client's process.
 
 ## Explicit don'ts
 
@@ -1020,15 +1168,15 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-D2 | 14 October 2026 | "Root and Rivet (Recommended)": turns a Thallite plate into a Rooted Thallite Foundation, the base the Crucible Stand is built on; uses the existing ritual engine (Transform result) and pylon economics, with a declared stage and payment table | Accepted (owner) | C-03, C-04, C-05 |
 | C-D3 | 14 October 2026 | "Crucible Stand (Recommended)": under the Alembic Crucible, on the rooted foundation; turns JE into the heat the running formula's next stir needs (starting rates about 8, 16 and 32 JE/t for warm, hot and searing), while an Electric Pump pipes water into the crucible's tank; manual heat sources still work | Accepted (owner) | C-05, C-06, C-10 |
 | C-D4 | 14 October 2026 | Both carriers, one demand: the crucible's formula shortage, served by a Peepo through the existing `CrucibleCompanion` port and by a Clockwork Porter through a courier request the crucible files (09:136 names both `MachineCompanionPort` and `CourierLedger`). Not asked; the session's default | Proposed | C-06 |
-| C-P1 | 14 October 2026 | A formula's identity is its canonical text (the Peepo plan id hashes it); the rules' revision is `ConcordanceData.revision()`, process-local, so not 03:46's stable version (a recorded deviation); no new formula save key; an incompatibility is re-derived after a load or reload; an unreadable saved program is kept as text and reported | Proposed | C-01 |
-| C-P2 | 14 October 2026 | Products are generated data; a brew matching one is named on the stack with vanilla's item name, recognised by what it carries, never its name; Winter Brine is named the same way. Alternative: JEI and codex names only | Proposed | C-02 |
-| C-P3 | 14 October 2026 | A crucible's Inspect page: spoon level and an ungated risk line (a harmful outcome or a searing step) for anyone; glass level with the Alembic Arts understood and an Assay Glass carried; the outcome and replay preview for a master; within the player's block reach, not 16 blocks | Proposed | C-01 |
-| C-P4 | 14 October 2026 | Jade keeps showing a running formula's next operation to anyone, as today, beside JEI's "formulas are never shown" (an inconsistency noted, not changed) | Proposed | C-01 |
-| C-P5 | 14 October 2026 | Every state-changing crucible use (setting or clearing a formula, water, adds, stirs, bottling) asks `Authority.mayChange`; spoon, glass and empty-hand reading stay open | Proposed | C-01, C-06 |
-| C-P6 | 14 October 2026 | One shared diagnostic vocabulary in a pure `concordance/diagnostic` package for the crucible, the stand, ritual readiness and crucible filing; `CompanionStatus` and the porter's `Status` map from it at their edges | Proposed | C-01, C-03, C-05, C-06 |
-| C-P7 | 14 October 2026 | The yield rule: a property may declare `fouling`; Verdance alone does, 4.0 (each unit of contaminant a part takes 4 units of Verdance before level and duration), a starting value; a reason names the foulers | Proposed | C-02 |
-| C-P8 | 14 October 2026 | The poultice's credit: on each tick Regeneration heals, the health a patient gains, at most 1, credited through `Encounter.healed` to the player who applied the poultice, while it lasts; transient; only a poultice (a Frostward or any other salve earns nothing); no mixin | Proposed | C-02 |
-| C-P9 | 14 October 2026 | The Kiln Draught is a draught carrying Fire Resistance and nothing harmful; its dossier fact is text and icons in the Cinder Kiln's rite section with a codex link at the Alembic Arts observed and the Salamander Charm as the lasting answer (the Charm alone when the Concordance is off or Ember no longer brews Fire Resistance); the Tyrant Scale → magma cream edge (C-D1's audit) is recorded as a reward route, not a loop: the draught makes no Kiln Seal or scale, and magma cream has vanilla sources | Proposed | C-02 |
+| C-P1 | 14 October 2026 | A formula's identity is its canonical text (the Peepo plan id hashes it); the rules' revision is `ConcordanceData.revision()`, process-local, so not 03:46's stable version (a recorded deviation); no new formula save key; an incompatibility is re-derived after a load or reload; an unreadable saved program is kept as text and reported. As built in unit 1: `incompatibility()` replays the formula once per revision and after a load, and names the refused step; an unreadable program is kept under `program` (see C-P23) | Proposed | C-01 |
+| C-P2 | 14 October 2026 | Products are generated data; a brew matching one is named on the stack with vanilla's item name, recognised by what it carries, never its name; Winter Brine is named the same way. Alternative: JEI and codex names only. As built in unit 1, for the Stillroot Poultice, the Kiln Draught and Winter Brine; how a stack is matched is C-P29 | Proposed | C-02 |
+| C-P3 | 14 October 2026 | A crucible's Inspect page: spoon level and an ungated risk line (a harmful outcome or a searing step) for anyone; glass level with the Alembic Arts understood and an Assay Glass carried; the outcome and replay preview for a master; within the player's block reach, not 16 blocks. As built in unit 1, refined by C-P25 (the risk line's words) and C-P26 (the reach's allowance, and the glass carried at every level above the spoon's) | Proposed | C-01 |
+| C-P4 | 14 October 2026 | Jade keeps showing a running formula's next operation to anyone, as today, beside JEI's "formulas are never shown" (an inconsistency noted, not changed). As built in unit 1; the line reads "Next step: ..." (C-P27) | Proposed | C-01 |
+| C-P5 | 14 October 2026 | Every state-changing crucible use (setting or clearing a formula, water, adds, stirs, bottling) asks `Authority.mayChange`; spoon, glass and empty-hand reading stay open. As built in unit 1, with recording onto a blank formula left open (C-P24) | Proposed | C-01, C-06 |
+| C-P6 | 14 October 2026 | One shared diagnostic vocabulary in a pure `concordance/diagnostic` package for the crucible, the stand, ritual readiness and crucible filing; `CompanionStatus` and the porter's `Status` map from it at their edges. As built in unit 1 for the crucible: `Code` (19 codes in four kinds) and `Diagnostic`; `CrucibleCompanion.status` maps from it; the ids and kinds are C-P22 | Proposed | C-01, C-03, C-05, C-06 |
+| C-P7 | 14 October 2026 | The yield rule: a property may declare `fouling`; Verdance alone does, 4.0 (each unit of contaminant a part takes 4 units of Verdance before level and duration), a starting value; a reason names the foulers. As built in unit 1; `check_alchemy` holds the order (taken, subtracted, then judged) and the generator's mirror | Proposed | C-02 |
+| C-P8 | 14 October 2026 | The poultice's credit: on each tick Regeneration heals, the health a patient gains, at most 1, credited through `Encounter.healed` to the player who applied the poultice, while it lasts; transient; only a poultice (a Frostward or any other salve earns nothing); no mixin. As built in unit 1 as C-P30 refines it, credited through `creditHealing` (`healed`'s old body) | Proposed | C-02 |
+| C-P9 | 14 October 2026 | The Kiln Draught is a draught carrying Fire Resistance and nothing harmful; its dossier fact is text and icons in the Cinder Kiln's rite section with a codex link at the Alembic Arts observed and the Salamander Charm as the lasting answer (the Charm alone when the Concordance is off or Ember no longer brews Fire Resistance); the Tyrant Scale → magma cream edge (C-D1's audit) is recorded as a reward route, not a loop: the draught makes no Kiln Seal or scale, and magma cream has vanilla sources. As built in unit 1, with C-P31 (his flame) and C-P32 (the Grave Dust route) | Proposed | C-02 |
 | C-P10 | 14 October 2026 | A run-level Ley shortfall warns and does not refuse; the start rule (one step's Ley) is unchanged; signs mark faults on the empty-hand, chat and refusal paths only | Proposed | C-03 |
 | C-P11 | 14 October 2026 | Root and Rivet is taught by Circle Lore understood; offerings a Thallite plate, 4 copper ingots, 4 Mendvetch; 1 participant, 6 Focus, 4 steps of 2 Ley a pylon, any light, backlash 4 (starting values) | Proposed | C-04 |
 | C-P12 | 14 October 2026 | The stand: targets warm 65, hot 120, searing 175 (starting values) at C-D3's rates; it follows the next stir's band only while the formula can proceed and idles otherwise; a Preserve hold wins; with no formula an empty-hand use by someone who may change it cycles its setting; crafted from the foundation, iron and copper; no wear | Proposed | C-05 |
@@ -1041,13 +1189,33 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P19 | 14 October 2026 | The load budget, agreed before merge: the workshop adds at most 1.0 ms median and 2.5 ms p95 server tick, with a flat memory trend over 6,000 ticks, on the stated runner; recorded, not claimed for other hardware | Proposed | C-10 |
 | C-P20 | 14 October 2026 | The load runner: a server game test of its own, opted in so ordinary CI runs are unchanged; CI's software-rendered frame times recorded as that renderer's only | Proposed | C-10 |
 | C-P21 | 14 October 2026 | The Gleaner's Heart search (729 positions) is measured in C-10 and the record corrected; its radius changes only if the measurement says so | Proposed | C-07, C-10 |
+| C-P22 | 14 October 2026 | Diagnostic ids use 03:9's own wording, then Chunk C's (`needs_water`, `needs_container`, `held`, `incompatible`, `courier_quota`, `output_differs`, `needs_emptying`, `unreadable`). Each code has a kind that sets the sign shown when it begins: a shortage or a blockage a WANT, a fault a PERIL with the breaking sound, a condition (heat, a hold) none. Codes no unit raises yet have words without parameters until their unit fixes both. The crucible's formerly silent wait before a repeat now shows a WANT sign once | Proposed | C-01, C-03, C-05, C-06 |
+| C-P23 | 14 October 2026 | A formula the rules refuse, or a saved one that no longer reads, drives nothing: no step and no automated bottle, even of a finished batch. Bottling by hand stays open; clearing stays a sneak-use by someone who may change the crucible | Proposed | C-01 |
+| C-P24 | 14 October 2026 | Recording a blank formula stays open to anyone with the Alembic Arts (it changes nothing in the crucible); every other change asks Authority (within C-P5) | Proposed | C-01 |
+| C-P25 | 14 October 2026 | The ungated risk line names the harmful statuses a dose would carry and the formula's first searing step, rather than "would harm" alone | Proposed | C-01 |
+| C-P26 | 14 October 2026 | The Inspect page reads a crucible within the reader's block reach plus the server's 1.0 use allowance; every level beyond the spoon's needs an Assay Glass carried, a master's included, as the glass itself does | Proposed | C-01 |
+| C-P27 | 14 October 2026 | Jade carries the reason as `Diagnostic.encode()` text (code and parameters, at most 1024 characters, else the code alone) and the tank as whole parts. Jade's next step stays canonical text (C-P4) while the Inspect page words it | Proposed | C-01 |
+| C-P28 | 14 October 2026 | A test that stands for a reload swaps the rules only through a helper that restores them in a `finally` within the same tick, not in a batch of its own | Proposed | C-01, C-10 |
+| C-P29 | 14 October 2026 | A product is any brew of its form carrying its status and nothing harmful (judged by the server); a sweet-berry Regeneration salve is therefore a Stillroot Poultice; a brew matching two products stays unnamed | Proposed | C-02 |
+| C-P30 | 14 October 2026 | Poultice credit is read from Regeneration's own time left at each tick's end, each blow and each Concordance heal, at most one health a heal. One note per patient; a later poultice that takes replaces it; it ends when the Regeneration is no longer the poultice's or the patient leaves the fight. The helper is credited wherever they stand, as a ward's caster is | Proposed | C-02 |
+| C-P31 | 14 October 2026 | The Kiln Draught's dossier fact says it also turns the Tyrant's flame (breath, waves, patches), as Fire Resistance already does | Proposed | C-02 |
+| C-P32 | 14 October 2026 | Grave Dust → bone meal → Mendvetch is a second declared reward route; boss routes are audited by recipes alone, not through the Assayer's Scale | Proposed | C-02 |
 
 ## Where to resume
 
-The contract is written; nothing is built. Next: unit 1's C-01 on `claude/chunk-c-living-workshop` from `e079ad4a3`,
-after refreshing main and the open pull requests (#357 and #369 among them, for the Peepo files). The owner's choices
-are C-D0, C-D0b and C-D1 to C-D3; C-D4 and C-P1 to C-P21 are Proposed. Open for the owner's checkpoint: the review route
-for Chunk B and Chunk C (above), and 09:144's three questions.
+Unit 1 (C-01, C-02) is built and recorded, and nothing of it has been compiled or run. Next:
+1. refresh main and the open pull requests (#357 and #369 for the Peepo files; the hot shared files: lang,
+   `check_mod_data.py`, `CHANGELOG.md`, `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and
+   merge main again if it moved;
+2. run CI on the pushed head by workflow_dispatch of the Build workflow, with every client test class. The Build runs
+   the server game tests twice, with Jade (the default) and with `-PjugcraftOptionalIntegrations=false`; the Jade checks
+   of `jadeIsToldTheTankAndWhyNeverTheMakeup` run only in the first. Record each result in the As built notes,
+   `arcane-concordance-alchemy.md`, `lair-encounter-credit.md` and `cinder-kiln.md`;
+3. unit 1's checkpoint evidence, then unit 2 (C-03 appends its codes to `Code` and `tools/concordance_diagnostics.py`,
+   and fixes `incomplete_pattern`'s parameters).
+
+The owner's choices are C-D0, C-D0b and C-D1 to C-D3; C-D4 and C-P1 to C-P32 are Proposed. Open for the owner's
+checkpoint: the review route for Chunk B and Chunk C (above), and 09:144's three questions.
 
 ## How this contract was checked
 
@@ -1085,9 +1253,14 @@ for Chunk B and Chunk C (above), and 09:144's three questions.
   alchemy survey's section 9 obligations; the harvest-path table; loot-table harvests dropping unstamped produce; the
   null-side insert; #370's Concordance keystone.
 - Not determined: the cause of run 38617471274's first `mod` failure (the log host refused this page's requests; recorded
-  from the session's reading); Regeneration's healing interval in 26.3; whether Fabric applies load conditions to the
-  Concordance's loader; how 26.3's game-test framework isolates a batch; whether the client tests' dedicated server shares
-  the client's process.
+  from the session's reading); whether Fabric applies load conditions to the Concordance's loader; whether the client
+  tests' dedicated server shares the client's process. Answered for unit 1 (C-01's and C-02's As built notes):
+  Regeneration's healing interval in 26.3, read in `mc263src` HEAD; how a batch is isolated (vanilla batches by
+  environment and dimension; unit 1 does not rely on it).
 - Run for this page: the alchemy generator's model (`tools/concordance_alchemy.py` `simulate`, imported read-only from a
   scratch script) for the C-02 figures; `python3 scripts/check_repository.py` (passed) and `git diff --check` on the
   page. Not run: any build, game test, data generator or other check.
+- Unit 1's notes (15 October 2026): written from the unit's four commits, re-read for the names, keys, counts and test
+  names given; the figures re-run from the generator's model (`bottle`, `outcome`, `poultice_verdance`, `realised`,
+  imported read-only from a scratch script). The checks run for the records' commit are in the alchemy record's
+  Verification.

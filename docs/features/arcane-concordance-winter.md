@@ -25,10 +25,11 @@ with no number changed (B-10). Their decisions are B-P40 to B-P53, all Proposed,
 
 ### Player experience
 
-- **Winter Brine** is what the codex, JEI and the encyclopedia call a Rime brew stirred cold. An alembist (the Alembic
-  Arts understood) puts three snowballs in one part of water in an Alembic Crucible with nothing burning beneath it,
-  stirs three times and bottles a draught of **Frostward I for 48.75 seconds**. Amethyst shards and gloamcap carry Rime
-  too, so their brews can give Frostward as well (gloamcap's beside its Hollow's Poison).
+- **Winter Brine** is what the codex, JEI and the encyclopedia call a Rime brew stirred cold (and, since Concordance
+  Chunk C, its bottle: see Known limits). An alembist (the Alembic Arts understood) puts three snowballs in one part of
+  water in an Alembic Crucible with nothing burning beneath it, stirs three times and bottles a draught of **Frostward I
+  for 48.75 seconds**. Amethyst shards and gloamcap carry Rime too, so their brews can give Frostward as well
+  (gloamcap's beside its Hollow's Poison).
 - **Frostward** is a new helpful status, with the owner's frost icon. It lasts 60 seconds for each unit of Rime a part
   holds, at most 120 seconds, and milk ends it. While it lasts:
   - no frost gathers on its holder: powder snow, the Frost Horn's arrival chill and a snow werewolf's frostbite chill
@@ -706,7 +707,9 @@ hall is untouched.
   pieces stay freeze-proof (the tag is not switched, as with Ember).
 - **Known limits:**
   - the draught is named "Draught" and its tooltip reads "Frostward I (48.75 s)"; "Winter Brine" appears in JEI, the
-    codex and the dossier. Naming the item is an option at the checkpoint;
+    codex and the dossier. Naming the item is an option at the checkpoint. Since Concordance Chunk C (C-02, C-P2; not
+    merged), a draught of Frostward carrying nothing harmful is named Winter Brine on its bottle (vanilla's item name);
+    bottles made before keep "Draught" and do not stack with named ones;
   - Frostward reaches beyond the Yeti: it also clears the Frost Horn's arrival chill and a snow werewolf's frostbite
     chill (the werewolf's Slowness stays);
   - Nereid's and Aquamancer's look alike when worn (the owner's sheets are the same bytes); the "aqua" art reads as

@@ -45,8 +45,10 @@ Magic does nothing on your behalf that you could not do by hand:
 - Breaking someone's Warding Stone during their ritual is your doing: the backlash is yours, so it reaches them only
   where you could harm them, and you are credited.
 - A Spire Heart takes upkeep in through any face but gives nothing out through one, so no hopper or pipe drains it.
-- Only an alembist may stop a crucible's formula, as only one may set it. A forged brew that calls poison helpful is
-  judged by the poison.
+- Only an alembist may stop a crucible's formula, as only one may set it. Since Concordance Chunk C (C-01, C-P5; not
+  merged), only one who could change the crucible by hand may pour water into it, add to it, stir it, bottle from it, or
+  set or clear its formula. Tasting, the Assay Glass and recording its process onto a blank formula stay open (C-P24).
+  A forged brew that calls poison helpful is judged by the poison.
 
 ## How it works
 
@@ -97,7 +99,7 @@ unless stated):
 | Curse cast through a link; scrying a link | only by the link's maker; scrying also within 128 blocks and by the rules | **GAP**: anyone holding the taglock, at any distance |
 | Curse pulses | the rules again at every pulse; skipped while the caster is away | unchanged |
 | Ritual backlash after a part is broken | as the player who broke it within the step (if here), so their PvP and parties apply | **GAP**: sourceless, whoever broke it |
-| Crucible: stopping a formula | an alembist only | **GAP**: anyone |
+| Crucible: water, adds, stirs, bottling, setting or clearing a formula (since Concordance Chunk C, C-01) | `mayChange` as the player; clearing also needs the Alembic Arts; recording onto a blank formula stays open (C-P24) | **GAP** until Chunk C: anyone with the Alembic Arts; stopping a formula, an alembist only (this step) |
 | Lampwright Bench buttons | one press every 4 ticks a player | **GAP**: unlimited |
 | `/jugcraft concordance courier request`, `cancel`, `recover` | one every 10 ticks a player (counts bounded by `Logistics.MAX_WANTED` as before) | **GAP**: unlimited |
 | Circle, sconce, garden, sky, relic, spire, vigil, artifice, compose, hex, journal requests | `RateGate`, as before | unchanged |
@@ -159,6 +161,13 @@ that tag's source. No art, sound or animation; the four new messages are text.
 - CI: Build run [37676787998](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/37676787998) on 3bbd117:
   `mod` and `optional integrations absent` passed, "All 1064 required tests passed" in each (the eight new tests
   among them). This was the first compile of `Authority` and the new tests.
+
+Concordance Chunk C, unit 1 (not merged): `ConcordanceAlchemyGameTests.onlyThoseWhoMayChangeACrucibleWorkIt`. Inside
+the owner's claim (`TestClaims`), a stranger who knows more alchemy is refused water, ingredients, a stir, bottling,
+and setting or clearing a formula, and nothing in the crucible changes; the stranger's spoon, glass and blank formula
+still work, and the owner still stirs, sets and clears. Outside the claim, in adventure mode, the stranger's water is refused too, and
+back in survival it goes in. `AUTHORITY_ROUTES` names the crucible's two calls. The test has not run yet: it was
+written where no Minecraft jar is available.
 
 Not yet run: a real protection mod (only the stand-in listener in the tests); a two-client server with one player
 trying the routes against another's claim; a server with the absent-owner option on in play.

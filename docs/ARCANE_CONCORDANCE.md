@@ -58,7 +58,9 @@ they are, so removing and restoring a data pack loses nothing.
 
 **Pure core.** `concordance/rules/` holds the research engine, the parser, Focus and the knowledge model, and
 `concordance/resource/` the typed resource rules (containers, transfers, conversions, allocation, ledgers), with no
-Minecraft types, so they are deterministic and testable outside the game.
+Minecraft types, so they are deterministic and testable outside the game. Since Concordance Chunk C,
+`concordance/diagnostic/` holds the shared reasons a recipe, ritual, station or courier waits or refuses (`Code`,
+`Diagnostic`), pure in the same way. `tools/check_mod_data.py` holds every pure package to no Minecraft or mod import.
 
 **Budgets.** Nothing the Concordance adds runs per player per tick. Focus regenerates lazily from game time, lantern
 burn is lazy from game time, a Kindled light uses one scheduled tick per 80 ticks (a lantern's trail light one per 10),
