@@ -92,6 +92,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * ahead of its trigger, its bolt worked after each shot; the Minuet Pistol, a light target pistol held in one hand
  * ({@link #ONE_HANDED}); and the Half-Crown Revolver, a break-top revolver loaded a round at a time, held in one hand
  * but in both, as a carbine, with a stock fitted ({@link #CARBINES}).</li>
+ * <li>Slice 14B, the next three treated-brass guns, carbines held in both hands: the Holler Carbine, the Holler
+ * Pistol made over with a long shrouded barrel and a bolt its shot works; the Minuet Carbine, the Minuet Pistol made
+ * over with a long barrel and a magazine ahead of its trigger; and the Grange Carbine, fed from a box magazine.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -181,6 +184,9 @@ public final class JugcraftGuns {
 		SPECS.put("holler_pistol", new GunSpec(12.0F, 1, 22, false, 10, 58, 0, 0, 0, 3.0F, 0.6F, 80, "rifle_round"));
 		SPECS.put("minuet_pistol", new GunSpec(3.5F, 1, 5, false, 10, 48, 0, 0, 0, 2.0F, 0.25F, 64, "light_round"));
 		SPECS.put("half_crown_revolver", new GunSpec(9.0F, 1, 9, false, 6, 0, 9, 13, 14, 2.5F, 0.6F, 64, "rifle_round"));
+		SPECS.put("holler_carbine", new GunSpec(9.0F, 1, 10, false, 10, 58, 0, 0, 0, 2.5F, 0.4F, 96, "rifle_round"));
+		SPECS.put("minuet_carbine", new GunSpec(5.0F, 1, 5, false, 10, 46, 0, 0, 0, 2.0F, 0.2F, 80, "light_round"));
+		SPECS.put("grange_carbine", new GunSpec(7.0F, 1, 7, false, 12, 45, 0, 0, 0, 2.5F, 0.35F, 96, "rifle_round"));
 	}
 
 	/**
@@ -438,6 +444,12 @@ public final class JugcraftGuns {
 				"extended_magazine", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
 		ACCEPTS.put("half_crown_revolver", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"light_stock", "weighted_stock", "wooden_stock"));
+		ACCEPTS.put("minuet_carbine", List.of("light_stock", "weighted_stock", "wooden_stock", "long_scope", "medium_scope",
+				"reflex_sight", "laser_sight"));
+		ACCEPTS.put("grange_carbine", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */

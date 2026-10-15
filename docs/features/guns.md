@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C), the frontier guns (slices 13A to 13D) and the brass sidearms (slice 14A)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C), the frontier guns (slices 13A to 13D), the brass sidearms (slice 14A) and the brass carbines (slice 14B)
 
 Status:
 - **Slices 1 to 12C are in `main`:** 10A to 11B with #320 on 11 October 2026; 12A to 12C with #352 on 13 October 2026, which closed their own pull requests (#332, #338 and #344). The lines below say where each was built.
@@ -38,6 +38,7 @@ Status:
 - **Slice 13C** (a punt gun, a repeater and a heavier rifle: the Flatboat Gun, Windlass Musket and Millstone Rifle; [below](#slice-13c-a-punt-gun-a-repeater-and-a-heavier-rifle)): implemented on `claude/guns-13c`, stacked on slice 13B, awaiting review.
 - **Slice 13D** (a revolving launcher, a carbine revolver and a musket of light: the Fencepost Thumper, Parley Revolver and Lantern Musket; [below](#slice-13d-a-revolving-launcher-a-carbine-revolver-and-a-musket-of-light)): implemented on `claude/guns-13d`, stacked on slice 13C, awaiting review.
 - **Slice 14A** (the brass sidearms: the Holler Pistol, Minuet Pistol and Half-Crown Revolver; [below](#slice-14a-the-brass-sidearms)): implemented on `claude/guns-14a`, stacked on slice 13D, awaiting review.
+- **Slice 14B** (the brass carbines: the Holler Carbine, Minuet Carbine and Grange Carbine; [below](#slice-14b-the-brass-carbines)): implemented on `claude/guns-14b`, stacked on slice 14A, awaiting review.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -61,6 +62,7 @@ Proposal issue: none. The owner asked on 7 October 2026: "I want to start workin
 - and then: on 14 October 2026, with slice 13B up for review, they asked "What could we work on next?". Offered more of their guns and some follow-ups, they answered "continue" to the recommendation: slice 13C takes up three more of the same fourteen, a punt gun, a flintlock repeater and a heavier lever-action rifle.
 - and after that: on 14 October 2026, with slice 13C up for review, they asked "Ok what sohuld we work on next". Offered three more of their guns first among other work, they answered "Yeah lets do slice 13D then when thats done suggest 2 and 3 again": slice 13D takes up three more of the same fourteen, a revolving grenade launcher, a revolver that takes a stock and an energy musket.
 - and then: on 14 October 2026, with slice 13D up for review, they were offered again their treated-brass guns (option 2) or two small fixes (option 3), and answered "Lets do option 2 and then option 3". Slice 14A takes up the first three of the fourteen guns of their library whose item models name treated brass as their base texture: a heavy pistol, a target pistol and a break-top revolver.
+- and next: on 14 October 2026, with slice 14A up for review, they asked "Begin the next part always be offering to start the next part at the end begin 14B". Slice 14B takes up three more of the same fourteen: the two conversions of slice 14A's pistols into carbines, and a carbine fed from a box magazine.
 
 Owner: jimbozoomer-byte (models, textures, animations and sounds: the owner; implementation: Claude Opus 5.5).
 Target milestone and tier: early firearms, after the first copper and iron. These are the bottom rungs of a gun line the owner's library holds well over a hundred more of.
@@ -2404,6 +2406,84 @@ The reload times and the rates are the owner's animations'. The Holler Pistol ta
 - **A Half-Crown Revolver becomes a carbine from its next animation,** as the Parley Revolver does.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 14B: the brass carbines
+The next three of the owner's treated-brass guns, taken up after slice 14A (on 14 October 2026 the owner asked "Begin the next part always be offering to start the next part at the end begin 14B"): the Howler Conversion, the Waltz Conversion and the Grandle. The two conversions are slice 14A's Howler and M22 Waltz made over into carbines held in both hands; the Grandle is a carbine fed from a box magazine. They are the brass carbines.
+
+| | Holler Carbine | Minuet Carbine | Grange Carbine |
+|---|---|---|---|
+| The owner's gun | Howler Conversion | Waltz Conversion | Grandle |
+| What it is | the Howler with a long shroud over its barrel, its bolt worked by the shot itself | the M22 Waltz with a long barrel, a slide at the back of its top, a magazine ahead of its trigger and a lever under its barrel | a carbine with a wooden handguard, a stock's wrist and no pistol grip, a box magazine under its receiver and a bolt handle on its right; the owner made every attachment for it |
+| Held | in both hands, the left under the magazine | in both hands, the left under the magazine | in both hands, the right at the stock's wrist and the left on the handguard |
+| What it fires | Rifle Rounds | Light Rounds | Rifle Rounds |
+| Damage | 9 | 5 | 7 |
+| Rate | 2 a second (every 10 ticks) | 4 a second (every 5 ticks) | about 2.9 a second (every 7 ticks) |
+| Holds | 10 | 10 | 12 |
+| Reload | 2.9 s, the magazine | 2.3 s, the magazine | 2.25 s, the magazine |
+| Spread, hip / aimed | 2.5° / 0.4° | 2° / 0.2° | 2.5° / 0.35° |
+| Range | 96 blocks | 80 | 96 |
+| The view aimed | narrowed to 0.85 | 0.88 | 0.85 |
+| Takes | nothing: the owner made no attachment for it | the three stocks and the four sights | the barrel attachments, the Extended and Speed Magazines, the three stocks, the Light and Tactical Grips, the four bayonets and the four sights |
+
+The reload times are the owner's animations'.
+
+**Crafting** (a crafting table; the guns switch, as every gun): steel, brass and a lever, as slice 14A's.
+- **Holler Carbine:** three steel ingots over a brass ingot, a lever and a brass ingot: its barrel is three steel ingots long.
+- **Minuet Carbine:** two steel ingots and a brass ingot over a brass ingot and a lever: its barrel is two, as the pistol it is made from is small.
+- **Grange Carbine:** three steel ingots over a lever and a brass ingot, and a brass ingot under that.
+
+**The conversions and their pistols:** each fires its pistol's rounds, as many to a magazine, reaches further and strays less aimed. The Holler Carbine fires more than twice as fast as the Holler Pistol, as its shot works its bolt, and hits less hard; the Minuet Carbine hits harder than the Minuet Pistol. They are crafted as guns of their own, not made from their pistols, so a pistol's fitted attachments and rounds are never lost to a conversion.
+
+**What you see:** the owner's animations.
+- **Holler Carbine:** the Holler Pistol's, but for its shot: each kicks it and its bolt runs back and home, with no hand on it. To reload, it is turned up, the left hand draws the magazine out from below and puts it back in, and the right hand works the bolt.
+- **Minuet Carbine:** each shot kicks it and its slide comes back. To reload, it is tipped and rolled over, the lever under its barrel swings down, the magazine drops out and comes back up, the left hand slaps it home, and the lever swings back up.
+- **Grange Carbine:** each shot kicks it and its bolt comes back. To reload, it is rolled over and its bolt locked back, the magazine drops out and the left hand slaps it home, and the bolt is let go.
+- **Spent rounds:** each throws a case at each shot.
+- **Sounds:** the conversions keep their pistols' shots, the owner's brass pistol shot for the Holler Carbine and their iron pistol shot for the Minuet Carbine; the Grange Carbine fires their old rifle shot (the Ranger Rifle's and the Ammonite Carbine's). The library's carabine, pistol and revolver shots carry tags naming other sources, so none of them is used. Each animation's own cues play as they name: the magazine out and in, the slap, the bolt, the lever.
+
+**How the models were built:**
+- **Where the guns turn:** about the model's origin (owner point (8, 0, 8)), as slice 14A's guns, checked in first-person previews of each reload and inspection. The Holler Carbine's animations are the Holler Pistol's.
+- **Holler Carbine:**
+  - **Magazine:** the owner's Howler Conversion has no magazine part, though its reload draws one out from below and puts it back. Its magazine bone holds the Howler's own magazine part (`tools/guns.py` `part_source()`: a part entry `howler/stan_mag` names another of the owner's guns' parts). The two guns share the receiver it stands under, and it stands where it stands on the Howler, ahead of the trigger guard. Its pieces come from the Howler's texture, packed beside the Howler Conversion's own in its atlas.
+  - **Bolt:** the owner's bolt part, a knob out to either side.
+  - **Empty bones:** the `magazine_2` and `no_sights` bones (its reload hides the one and its inspection tips the other) hold nothing.
+  - **Sights:** the ring at the back over the post at the muzzle.
+  - **Aiming:** held 5.5 px further out (`"eye_relief"`): the back of its top rail came 1.7 px past the eye. Held there, it is 3.8 px away.
+- **Minuet Carbine:** its main part holds it all.
+  - **Slide:** the 19th, 20th, 23rd, 26th and 27th elements, the slide and the knob on its left side (the animations call it the bolt).
+  - **Lever:** the 34th to 39th elements, turned about the hinge at their back, where the owner's model turns them.
+  - **Magazine:** the 40th to 42nd elements (the animations' core).
+  - **Empty bones:** the `magazine`, `magazine_2`, `seal` and `scriptures` bones hold nothing: the model has no part for them. Its shot only sways the last two.
+  - **Sights:** the ring on the rail over the post at the front of the rail.
+  - **Aiming:** held 2 px further out: the back of its frame came within 1.6 px of the eye. Held there, it is 3.6 px away.
+- **Grange Carbine:**
+  - **Hold:** it has no pistol grip; the right hand holds the stock's wrist behind the trigger guard, and the left the handguard, where its reload draws it back to the magazine.
+  - **Bolt:** the owner's bolt part, the handle on its right.
+  - **Magazine:** the owner's; its `magazine_2` bone holds nothing.
+  - **Sights:** the ring at the back over the post at the front.
+  - **Aiming:** held 4 px further out: the back end of its stock came 0.3 px past the eye. Held there, it is 3.7 px away.
+- **The arms:** chosen in first-person previews, with the game's rule that leaves an arm out while any of it is within a tenth of a block of the eye, to cover as little of the screen as they can through each gun's hold, shot, reload and inspection. The Holler Carbine keeps the Holler Pistol's.
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload and inspection; the Holler Carbine's bolt and borrowed magazine, the Minuet Carbine's slide, lever and magazine, the Grange Carbine's bolt and magazine; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Light Round and the Rifle Round; nothing new.
+- **Parts:** steel, brass and a lever.
+- **Their place:** past steel, with the carbines: the conversions are the long guns of slice 14A's pistols, the Grange Carbine the brass carbine that takes every attachment.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a load and its reload.
+- **Holler Carbine:** 9 a shot; about 12.2 a second, as the Kestrel Rifle's (12.2), above the Holler Pistol's 9.4.
+- **Minuet Carbine:** 5 a shot; about 11.0 a second, the most of the guns that fire light rounds a pull at a time (the Sentry Pistol's 9.8). Aimed, it strays 0.2°, the least of the guns that fire light rounds.
+- **Grange Carbine:** 7 a shot; about 13.8 a second, as the Picket Rifle's (13.9), below the Goldbristle Carbine's (14.2).
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:holler_carbine`, `minuet_carbine` and `grange_carbine`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Holler Carbine's magazine is the Howler's:** its own model has none. If the owner makes one for it, it can take its place.
+- **The Holler Carbine takes no attachment:** the owner made none for it, not even a stand-in for the sights, so it takes no scope either.
+- **The Minuet Carbine's seal and scriptures:** its shot sways two bones the model has no part for; they hold nothing.
+- **Where each gun turns is chosen here:** the model's origin, from previews, not the owner's own pivots.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -3926,6 +4006,60 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | half_crown_revolver | `Guns/models/special/osgood_50/drum.json` | `7fa91cc59e74ce06` |
 | half_crown_revolver | `Guns/models/special/osgood_50/hammer.json` | `23c0224325ee8d98` |
 | half_crown_revolver | `Guns/sounds/item/brass_revolver/fire.ogg` | `9ede81f3520dfd5c` |
+| holler_carbine | `Guns/models/item/howler_conversion.json` | `cd9d9d76eee49fcb` |
+| holler_carbine | `Guns/item/howler_conversion.png` | `cf22317ac487ac39` |
+| holler_carbine | `Guns/item/howler_conversion.animation.json` | `a55726b4a2658208` |
+| holler_carbine | `Guns/models/special/howler_conversion/main.json` | `979db3903a20975b` |
+| holler_carbine | `Guns/models/special/howler_conversion/stan_barrel.json` | `682f66f9ca01841a` |
+| holler_carbine | `Guns/models/special/howler_conversion/sights.json` | `c14ca49cd2cd9da4` |
+| holler_carbine | `Guns/models/special/howler_conversion/bolt.json` | `cb86d0e7f4cf5aa0` |
+| holler_carbine | `Guns/models/special/howler/stan_mag.json` | `1f0c7cb0c4096001` |
+| holler_carbine | `Guns/sounds/item/brass_pistol/fire.ogg` | `4fca376e2ece67b2` |
+| holler_carbine | `Guns/item/howler.png` | `768f46a178640ddd` |
+| minuet_carbine | `Guns/models/item/waltz_conversion.json` | `b3b6d43c130a5481` |
+| minuet_carbine | `Guns/item/waltz_conversion.png` | `047cf85ab365e901` |
+| minuet_carbine | `Guns/item/waltz_conversion.animation.json` | `9370427b5d4420b5` |
+| minuet_carbine | `Guns/models/special/waltz_conversion/main.json` | `747d3230aa208b7e` |
+| minuet_carbine | `Guns/models/special/waltz_conversion/light_stock.json` | `7d954a24b072ab0e` |
+| minuet_carbine | `Guns/models/special/waltz_conversion/heavy_stock.json` | `23b3acadd76359e5` |
+| minuet_carbine | `Guns/models/special/waltz_conversion/wooden_stock.json` | `a1c8bc09f2a871ed` |
+| minuet_carbine | `Guns/models/special/waltz_conversion/sights.json` | `e1597adeeebb2ed5` |
+| minuet_carbine | `Guns/sounds/item/iron_pistol/fire.ogg` | `6a0fe18dfc3165d5` |
+| minuet_carbine | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| minuet_carbine | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| minuet_carbine | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| minuet_carbine | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| minuet_carbine | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| grange_carbine | `Guns/models/item/grandle.json` | `c66593ffde7a056b` |
+| grange_carbine | `Guns/item/grandle.png` | `b9aeedd07a230010` |
+| grange_carbine | `Guns/item/grandle.animation.json` | `00528c620dda2d26` |
+| grange_carbine | `Guns/models/special/grandle/main.json` | `cf2136ce6990a328` |
+| grange_carbine | `Guns/models/special/grandle/stan_barrel.json` | `0197a341bb4e61aa` |
+| grange_carbine | `Guns/models/special/grandle/silencer.json` | `4a95cd84a0158d4c` |
+| grange_carbine | `Guns/models/special/grandle/advanced_silencer.json` | `7695ef649b257e63` |
+| grange_carbine | `Guns/models/special/grandle/muzzle_brake.json` | `e03fa8ab8f457601` |
+| grange_carbine | `Guns/models/special/grandle/ext_barrel.json` | `b3ad11cd1d641fb3` |
+| grange_carbine | `Guns/models/special/grandle/light_stock.json` | `8939deb3d0665084` |
+| grange_carbine | `Guns/models/special/grandle/heavy_stock.json` | `5c7fb8025fe4efb8` |
+| grange_carbine | `Guns/models/special/grandle/wooden_stock.json` | `7e78c522585f8077` |
+| grange_carbine | `Guns/models/special/grandle/light_grip.json` | `880cbee82daa7f7c` |
+| grange_carbine | `Guns/models/special/grandle/iron_bayonet.json` | `8d0006f4abb52a25` |
+| grange_carbine | `Guns/models/special/grandle/anthralite_bayonet.json` | `2a72b79d513fc2e9` |
+| grange_carbine | `Guns/models/special/grandle/diamond_bayonet.json` | `b7f05a773b22c5c6` |
+| grange_carbine | `Guns/models/special/grandle/netherite_bayonet.json` | `922a28f199ccd827` |
+| grange_carbine | `Guns/models/special/grandle/tact_grip.json` | `79f3d8cde481ee9e` |
+| grange_carbine | `Guns/models/special/grandle/sights.json` | `b480903472926df1` |
+| grange_carbine | `Guns/models/special/grandle/no_sights.json` | `719909411988aac2` |
+| grange_carbine | `Guns/models/special/grandle/bolt.json` | `2c6065f5233cf70c` |
+| grange_carbine | `Guns/models/special/grandle/stan_mag.json` | `91e3b7b0836db229` |
+| grange_carbine | `Guns/models/special/grandle/ext_mag.json` | `de362dabe31e767a` |
+| grange_carbine | `Guns/models/special/grandle/speed_mag.json` | `039a498c5efb4704` |
+| grange_carbine | `Guns/sounds/item/old_rifle/fire.ogg` | `d684ae9a09c9c12c` |
+| grange_carbine | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| grange_carbine | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| grange_carbine | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| grange_carbine | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| grange_carbine | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -4880,13 +5014,37 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Inspection:** each turned to be looked over at the right.
     - **Attachments:** the stocks, scopes and Laser Sight sit on each gun where they should; with a stock fitted, the Half-Crown Revolver's left hand comes up under its barrel.
     - **Third person:** each raised and flashing as it fires.
+- **Slice 14B, run locally (14 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged. Its new `part_source()` reads a part entry `howler/stan_mag` from the Howler's folder; the Holler Carbine's atlas holds its own texture and the Howler magazine's pieces.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds.
+  - `python3 tools/check_mod_data.py`: PASS (2666 material IDs), with `check_guns`.
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' grids matches another. (This branch still carries the Highwayman's old grid, which matches the Garrison Rifle's mirrored; https://github.com/jimbozoomer-byte/jugcraft/pull/377 fixes that on `main`.)
+- **Slice 14B game tests (all passed in CI, below):**
+  - `BrassCarbinesGameTests`:
+    - `brassCarbinesAreRegistered`: each is registered with its numbers, its recipe loads, and it is one pull a shot, firing bullets from a magazine, held in both hands. Each conversion fires its pistol's rounds, as many a magazine, reaches further and strays less aimed; the Holler Carbine fires quicker than the Holler Pistol and hits less hard, and the Minuet Carbine hits harder than the Minuet Pistol. The Holler Carbine takes nothing; the Minuet Carbine takes the stocks and the four sights; the Grange Carbine fires rifle rounds, twelve a magazine, and takes all nineteen attachments the owner made for it.
+    - `grangeCarbineChangesItsMagazine`: an empty Grange Carbine with twenty Rifle Rounds loads nothing before its reload's time and twelve after it, leaving eight; a shot then takes its damage from the pig.
+    - `minuetCarbineLoadsLightRounds`: an empty Minuet Carbine with ten Light Rounds and ten Rifle Rounds loads the Light Rounds and leaves the Rifle Rounds; a shot then takes its damage from the pig.
+  - `GunsGameTests` counts 81 guns; `TacticalAttachmentsGameTests` the thirty guns the Tactical Grip fits, the Grange Carbine among them.
+- **Slice 14B in CI** ([run 38657383418](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38657383418), on d0001d964): every check passed, on its first run.
+  - **Server game tests:** 1660 in the `mod` job, all passed, `BrassCarbinesGameTests` and `TacticalAttachmentsGameTests` among them.
+  - **The job without the optional integrations** and **the repository check:** passed.
+  - **Client game tests:** all five shards passed. `GunsClientGameTests` took each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments, and its checks passed for each.
+  - **Screenshots** (from the last 2,500 lines of the guns shard's log; the whole log was too large to read here):
+    - **Held:** each at the lower right pointing at the husk, in both hands.
+    - **Aimed:** each raised to the middle of the view, its sight on the crosshair at the husk.
+    - **Reloading:** the Holler Carbine is turned up and its left arm comes across the lower left as it draws the magazine, the owner's animation's reach, as the Holler Pistol's; the Minuet and Grange Carbines are rolled over at the lower right.
+    - **Inspection:** each turned to be looked over at the right.
+    - **Attachments:** the Minuet Carbine's stocks and Laser Sight and the Grange Carbine's stocks and sights sit where they should. (The Holler Carbine takes none.)
+    - **Third person:** each raised and flashing as it fires.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
