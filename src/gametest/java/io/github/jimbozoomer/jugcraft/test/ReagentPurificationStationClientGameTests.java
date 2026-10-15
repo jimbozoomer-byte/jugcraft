@@ -19,10 +19,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 
 /**
  * Client game test for the Reagent Purification Station (docs/features/industrial-reagent-purification.md),
- * concentrating sulfuric acid with its level strip lit and its cyan inspection panel on: from the front left (the
+ * purifying concentrated sulfuric acid with its level strip lit and its cyan inspection panel on: from the front left (the
  * cabinet, the product hatch, the level strip and the conditioning chamber), straight on, from the back right (the
  * return loops, the residue drain and the inlets) and at night; then its screen while it works and once a full product
  * tank has stopped it. CI job {@code client}.
@@ -91,7 +92,7 @@ public class ReagentPurificationStationClientGameTests implements FabricClientGa
 				FormMachineBlockEntity machine = machine(minecraft.overworld(), station);
 				machine.cancel();
 				machine.tanks().output(0).drain(machine.tanks().output(0).millibuckets());
-				machine.tanks().output(0).fill(PetroFluids.CONCENTRATED_SULFURIC_ACID.source(), machine.form().profile().bufferMb());
+				machine.tanks().output(0).fill(PetroFluids.ELECTRONIC_GRADE_SULFURIC_ACID.source(), machine.form().profile().bufferMb());
 			});
 			context.waitTicks(10);
 			MachineLifecycle state = server.computeOnServer(minecraft -> machine(minecraft.overworld(), station).status().state());
@@ -101,7 +102,7 @@ public class ReagentPurificationStationClientGameTests implements FabricClientGa
 		}
 	}
 
-	/** The Reagent Purification Station, facing south, charged and concentrating sulfuric acid. */
+	/** The Reagent Purification Station, facing south, charged and purifying concentrated sulfuric acid. */
 	private static void build(ServerLevel level, BlockPos pos) {
 		BlockState state = IndustrialForms.REAGENT_PURIFICATION_STATION.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH);
 		level.setBlock(pos, state, Block.UPDATE_ALL);
@@ -119,10 +120,9 @@ public class ReagentPurificationStationClientGameTests implements FabricClientGa
 
 	private static void top(FormMachineBlockEntity machine) {
 		((SimpleEnergyStorage) machine.energy()).setAmount(machine.energy().getCapacity());
-		machine.tanks().input(0).fill(PetroFluids.SULFURIC_ACID.source(), Math.max(0, 1000 - machine.tanks().input(0).millibuckets()));
-		for (int tank = 0; tank < 2; tank++) {
-			machine.tanks().output(tank).drain(machine.tanks().output(tank).millibuckets());
-		}
+		machine.tanks().input(0).fill(PetroFluids.CONCENTRATED_SULFURIC_ACID.source(), Math.max(0, 1000 - machine.tanks().input(0).millibuckets()));
+		machine.tanks().input(1).fill(Fluids.WATER, Math.max(0, 250 - machine.tanks().input(1).millibuckets()));
+		machine.tanks().output(0).drain(machine.tanks().output(0).millibuckets());
 	}
 
 	private static FormMachineBlockEntity machine(ServerLevel level, BlockPos pos) {

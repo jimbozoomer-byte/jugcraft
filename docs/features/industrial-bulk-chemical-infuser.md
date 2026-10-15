@@ -78,7 +78,7 @@ One catalyst bed in its socket serves all four batches. Its tanks hold 16,000 mB
 
 - **The bill:** a Chemical Infuser, two Steel Tanks, four steel plates, steel fluid pipe and a basic circuit (`TIT / PFP / PCP`).
 - **Its cells follow its model:** 110 blocks in the 4×6×6 envelope, the open corners above and behind the chamber kept free.
-- **JEI.** Its recipes are listed under the Infuser's category, with the Bulk Infuser shown as a second station (added by the JEI stations change stacked above).
+- **JEI.** It has its own recipe page with the Infuser's recipes; main's recipe view gives every form one.
 
 ## Multiplayer and persistence
 

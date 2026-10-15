@@ -58,12 +58,13 @@ VANADIUM_RECOVERY = f"{MOD}:vanadium_recovery"
 NITRATE_NEUTRALIZATION = f"{MOD}:nitrate_neutralization"
 # Recovering the ruthenium bed's metal from washed nickel ore (the Bulk Chemical Reactor).
 PRECIOUS_METAL_RECOVERY = f"{MOD}:precious_metal_recovery"
-# Concentrating and purifying demanding reagents (the Reagent Purification Station).
+# Purifying demanding reagents (the Reagent Purification Station).
 REAGENT_PURIFICATION = f"{MOD}:reagent_purification"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
-INSULATOR, BUSBAR, COPPER = "ceramic_insulator", "copper_busbar", "sp_copper"
+# Match the silver-grey process-machine fittings, without glossy insulator stripes.
+INSULATOR, BUSBAR, COPPER = "dw_steel_plate", "copper_busbar", "sp_copper"
 # Amber level strips that light while it works (steampunk_models.GLOW).
 STRIP = "dr_amber"
 # The Gas Burning Generator's materials (the art brief): graphite ribs, olive combustion covers, a pale heat shield,
@@ -188,14 +189,14 @@ FORMS = {
     "reagent_purification_station": {
         "display": "Reagent Purification Station",
         # The plan's shared purification station (4x4x4 in the art brief), in the chemical reactor family (96 JE/t): it
-        # concentrates sulfuric acid and purifies the concentrate into electronic-grade acid, the water for that
+        # purifies the Concentrator's concentrated sulfuric acid into electronic-grade acid, the water for that
         # conditioning taken inside the recipe.
         "family": "chemical_reactor",
         "layers": REAGENT_STATION_LAYERS,
         "profile": "ENTRY",
         "tank_mb": 2_000,
         "input_tanks": ["feed", "water"],
-        "output_tanks": ["product", "water_out"],
+        "output_tanks": ["product"],
         "capabilities": [REAGENT_PURIFICATION],
         "upgrades": True,
         "warmup": 40,
@@ -203,7 +204,6 @@ FORMS = {
             ("feed_in", "FLUID_IN", 0, 2, 3, 1, "BACK"),
             ("water_in", "FLUID_IN", 1, 1, 3, 0, "BACK"),
             ("product_out", "FLUID_OUT", 0, 1, 0, 1, "FRONT"),
-            ("water_out", "FLUID_OUT", 1, 3, 1, 0, "RIGHT"),
             ("power", "ENERGY_IN", 0, 0, 2, 0, "LEFT"),
         ],
         # This change's bill (open for review): a Chemical Reactor fitted out with two Steel Tanks, steel fluid pipe,
@@ -294,7 +294,7 @@ FORMS = {
         "input_tanks": ["hydrogen", "reactant"],
         "output_tanks": ["product", "water"],
         "sockets": [("bed", CATALYST_BEDS)],
-        "capabilities": [GAS_COMBINATION, NICKEL_METHANATION, CONTACT_CONVERSION],
+        "capabilities": [GAS_COMBINATION, NICKEL_METHANATION, CONTACT_CONVERSION, f"{MOD}:starter_gas_infusing"],
         "upgrades": True,
         "warmup": 40,
         "ports": [
@@ -349,7 +349,7 @@ FORMS = {
         "input_tanks": ["oxidant"],
         "output_tanks": ["product"],
         "item_inputs": 1,
-        "capabilities": [SOLID_OXIDATION],
+        "capabilities": [SOLID_OXIDATION, f"{MOD}:starter_gas_oxidizing"],
         "upgrades": True,
         "warmup": 40,
         "ports": [
@@ -798,10 +798,8 @@ HANDBOOK["reagent_purification_station"] = [
     "Four wide, four deep and four tall: two purification columns and a conditioning chamber on an ivory wet-services "
     "bed, built from a Chemical Reactor, two Steel Tanks, steel fluid pipe, steel plates and a basic circuit. Every "
     "block it fills must be free when it is placed; the corners above the cabinet stay open.",
-    "Pipe sulfuric acid into the high inlet at the back: a bucket becomes 500 mB of concentrated sulfuric acid in 10 "
-    "seconds, and the boiled-off 500 mB of water leaves low on its right side.",
-    "Concentrated acid with a quarter-bucket of water in the low inlet at the back becomes 900 mB of electronic-grade "
-    "sulfuric acid in 15 seconds, the water used up conditioning it. A lithography station makes six microchips from a "
+    "Pipe concentrated sulfuric acid from a Concentrator into the high inlet at the back and water into the low one: a "
+    "bucket of the acid with a quarter-bucket of water becomes 900 mB of electronic-grade sulfuric acid in 15 seconds, the water used up conditioning it. A lithography station makes six microchips from a "
     "wafer with 50 mB of it, half again as many as with ordinary acid.",
     "The product leaves at the spout on the front hatch; power comes in at the junction box on its left side. Upgrade "
     "cards fit its terminal.",
@@ -892,12 +890,6 @@ FORM_TANK_NAMES = {
 # (docs/features/industrial-starter-gas-and-acid-factory.md, eighth batch, question 9).
 FORM_RECIPES = {
     "reagent_purification_station": [
-        # Concentration: half the water boiled off ordinary acid, which comes back out as water. 200 ticks at 96 JE/t,
-        # 19,200 JE a bucket. For review.
-        {"name": "purification_concentrated_sulfuric_acid", "capability": REAGENT_PURIFICATION,
-         "fluids": [(f"{MOD}:sulfuric_acid", 1000)],
-         "fluid_results": [(f"{MOD}:concentrated_sulfuric_acid", 500, 0), ("minecraft:water", 500, 1)],
-         "ticks": 200, "features": ["machines", "sulfur"]},
         # Electronic grade: the concentrate purified, with a quarter-bucket of water conditioned and used up inside the
         # recipe; a tenth is lost to the residue drain. 300 ticks, 28,800 JE. For review.
         {"name": "purification_electronic_grade_sulfuric_acid", "capability": REAGENT_PURIFICATION,
@@ -2888,7 +2880,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "key": {"B": "minecraft:brick", "N": "#c:ingots/nickel"}, "result": {"id": f"{MOD}:nickel_catalyst_bed", "count": 1}})
     for form, info in FORMS.items():
         lang[f"block.{MOD}.{form}"] = info["display"]
-        elements = MODELS[form]
+        from machine_connections import with_sockets, form_ports
+        elements = with_sockets(MODELS[form], form_ports(info))
         item_elements = elements + ITEM_EXTRAS.get(form, [])
         textures = {name: f"{MOD}:block/{name}" for name in model_writer.texture_names(item_elements)}
         textures["particle"] = f"{MOD}:block/{PARTICLE}"
@@ -2917,6 +2910,22 @@ def write_all(write, assets, data, lang, condition, self_drop):
             "fabric:load_conditions": [c for f in info["features"] for c in condition(f)],
             "type": "minecraft:crafting_shaped", "category": "misc", "pattern": pattern, "key": key,
             "result": {"id": f"{MOD}:{form}", "count": 1}})
+    for name, info in FORMS.items():
+        if "alternate_recipe" in info and info["alternate_recipe"] != info["recipe"]:
+            pattern, key = info["alternate_recipe"]
+            write(data / "recipe" / f"expanded_{name}.json", {
+                "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped",
+                "category": "misc", "pattern": pattern, "key": key,
+                "result": {"id": f"{MOD}:{name}", "count": 1}})
+    machine_consolidation.write_labels(lang, FORMS)
+    import starter_chemistry
+    starter_chemistry.write_extras(write, assets, data, lang, condition)
+    import anaerobic
+    anaerobic.write_extras(write, assets, data, lang, condition)
+    biorefinery.write_extras(write, assets, data, lang, condition)
+    coastal_metals.write_extras(write, assets, data, lang, condition)
+    polymers.write_extras(write, assets, data, lang, condition)
+    fluorochemistry.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -2938,37 +2947,118 @@ def form_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
-            if recipe.get("tool"):
-                data["tool"] = recipe["tool"]
+            for field in ("tool", "energy_per_tick", "emissions", "priority"):
+                if field in recipe:
+                    data[field] = recipe[field]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
 
 
-def also_runs(form):
-    """The larger forms that run `form`'s recipes without a list of their own: the same family, and every capability its
-    recipes ask for (the Bulk Fermenter for the Industrial Fermenter, say). JEI shows them as further stations."""
-    needed = {recipe["capability"] for recipe in FORM_RECIPES.get(form, [])}
-    family = FORMS[form]["family"]
-    return [other for other, info in FORMS.items() if other != form and not FORM_RECIPES.get(other)
-            and info["family"] == family and needed and needed <= set(info["capabilities"])]
+def recipes_for_form(form):
+    """Resolve shared family/capability receipts without writing duplicate recipe IDs."""
+    info=FORMS[form]
+    return [recipe for owner,recipes in FORM_RECIPES.items() if FORMS[owner]['family']==info['family']
+            for recipe in recipes if recipe['capability'] in info['capabilities']]
 
 
-def recipes_run(form):
-    """Every recipe `form` runs: its own list, or, for a larger form without one, the lists of the forms it also runs
-    (also_runs), so audits of energy and loops count the larger forms' profile savings too."""
-    if FORM_RECIPES.get(form):
-        return FORM_RECIPES[form]
-    return [recipe for other in FORM_RECIPES if form in also_runs(other) for recipe in FORM_RECIPES[other]]
+def form_energy(form, power):
+    import machines
+    power = power or machines.STATS[FORMS[form]['family']]['use_per_tick']
+    percent={'ENTRY':100,'EXPANDED':90,'BULK':80}[FORMS[form]['profile']]
+    return max(1,(power*percent+99)//100) if power else 0
 
 
 def recipe_view():
     """The forms' JEI categories (tools/recipe_view.py): one per form that runs recipes, its recipes and the form as the
-    station, with any larger form that runs the same recipes as a further station. A generator form runs none (its
-    fuels are in the Engineer's Handbook, like every generator's)."""
-    return [{"block": f"{MOD}:{form}", "type": form, "stations": [f"{MOD}:{other}" for other in also_runs(form)],
+    station. A generator form runs none (its fuels are in the Engineer's Handbook, like every generator's)."""
+    return [{"block": f"{MOD}:{form}", "type": form,
              "recipes": [{"items": [[ref, count] for ref, count in recipe.get("items", [])],
                           "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
                           "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],
                           "results": [[item, count] for item, count in recipe.get("results", [])],
-                          "ticks": recipe["ticks"]} for recipe in FORM_RECIPES[form]]}
-            for form in FORMS if FORM_RECIPES.get(form)]
+                          "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "energy_per_tick": form_energy(form,recipe.get("energy_per_tick", 0))} for recipe in recipes_for_form(form)]}
+            for form in FORMS if recipes_for_form(form)]
+
+
+# Preserve released forms while adding the owner-tested expansion below.
+from copy import deepcopy
+_RELEASED = {key: deepcopy(value) for key, value in dict(forms=FORMS, recipes=FORM_RECIPES,
+    handbook=HANDBOOK, models=MODELS, rotors=ROTORS, extras=ITEM_EXTRAS).items()}
+
+# Package 2's four further entry forms. Keep each physical machine in the common controller/renderer pipeline.
+import starter_chemistry
+import starter_chemistry_models
+FORMS.update(starter_chemistry.FORMS)
+FORM_RECIPES.update(starter_chemistry.RECIPES)
+HANDBOOK.update(starter_chemistry.HANDBOOK)
+TANK_NAMES.update(starter_chemistry.TANK_NAMES)
+MODELS.update(starter_chemistry_models.MODELS)
+ROTORS.update(starter_chemistry_models.ROTORS)
+ITEM_EXTRAS.update(starter_chemistry_models.ITEM_EXTRAS)
+HANDBOOK["gas_burning_generator"][-1] = "Methane from the Infuser now burns here too: 448 JE per mB, up to 256 JE/t. Fractional fuel credit is saved, so switching loads or restarting loses and duplicates no fuel. This generator has no upgrade slots."
+
+import anaerobic
+import anaerobic_models
+FORMS.update(anaerobic.FORMS)
+FORM_RECIPES.update(anaerobic.RECIPES)
+FORM_RECIPES["chemical_infuser"].append(anaerobic.UPGRADING)
+HANDBOOK.update(anaerobic.HANDBOOK)
+TANK_NAMES.update(anaerobic.TANK_NAMES)
+MODELS.update(anaerobic_models.MODELS)
+ROTORS.update(anaerobic_models.ROTORS)
+ITEM_EXTRAS.update(anaerobic_models.ITEM_EXTRAS)
+
+import biorefinery
+import biorefinery_models
+FORMS.update(biorefinery.FORMS)
+FORM_RECIPES.update(biorefinery.RECIPES)
+for name, recipes in biorefinery.EXTRA_RECIPES.items(): FORM_RECIPES[name].extend(recipes)
+HANDBOOK.update(biorefinery.HANDBOOK)
+TANK_NAMES.update(biorefinery.TANK_NAMES)
+MODELS.update(biorefinery_models.MODELS)
+ROTORS.update(biorefinery_models.ROTORS)
+ITEM_EXTRAS.update(biorefinery_models.ITEM_EXTRAS)
+
+import coastal_metals
+import coastal_metals_models
+FORMS.update(coastal_metals.FORMS)
+FORM_RECIPES.update({name:list(recipes) for name,recipes in coastal_metals.RECIPES.items()})
+for name, recipes in coastal_metals.EXTRA_RECIPES.items(): FORM_RECIPES[name].extend(recipes)
+HANDBOOK.update(coastal_metals.HANDBOOK)
+TANK_NAMES.update(coastal_metals.TANK_NAMES)
+MODELS.update(coastal_metals_models.MODELS)
+ROTORS.update(coastal_metals_models.ROTORS)
+ITEM_EXTRAS.update(coastal_metals_models.ITEM_EXTRAS)
+
+HANDBOOK['biogas_cleaner'].append('Also cleans wet fermentation CO2: 250 mB gas + 250 mB wash water -> 250 mB usable CO2 + 250 mB recovered water, 100 ticks at 24 JE/t. Drain both previous products before switching between biogas and fermentation gas. No new disposable filter or separate gas-cleaning machine is needed.')
+
+import polymers
+import polymer_models
+FORMS.update(polymers.FORMS)
+FORM_RECIPES.update({name:list(recipes) for name,recipes in polymers.RECIPES.items()})
+HANDBOOK.update(polymers.HANDBOOK)
+TANK_NAMES.update(polymers.TANK_NAMES)
+MODELS.update(polymer_models.MODELS)
+ROTORS.update(polymer_models.ROTORS)
+ITEM_EXTRAS.update(polymer_models.ITEM_EXTRAS)
+
+import fluorochemistry
+import fluorochemistry_models
+FORMS.update(fluorochemistry.FORMS)
+FORM_RECIPES.update(fluorochemistry.RECIPES)
+for machine, recipes in fluorochemistry.EXTRA_RECIPES.items():
+    FORM_RECIPES[machine].extend(recipes)
+HANDBOOK.update(fluorochemistry.HANDBOOK)
+TANK_NAMES.update(fluorochemistry.TANK_NAMES)
+MODELS.update(fluorochemistry_models.MODELS)
+ROTORS.update(fluorochemistry_models.ROTORS)
+ITEM_EXTRAS.update(fluorochemistry_models.ITEM_EXTRAS)
+
+# Owner-requested consolidation: retain IDs/recipes and extend shared capabilities.
+import machine_consolidation
+machine_consolidation.apply(FORMS, HANDBOOK)
+
+# Shared IDs keep main's footprint, slots, port positions and tank roles. The expansion
+# adds recipes and explicitly aliased tanks rather than replacing existing factories.
+import machine_expansion_compat
+machine_expansion_compat.apply(_RELEASED, FORMS, FORM_RECIPES, HANDBOOK, MODELS, ROTORS, ITEM_EXTRAS)

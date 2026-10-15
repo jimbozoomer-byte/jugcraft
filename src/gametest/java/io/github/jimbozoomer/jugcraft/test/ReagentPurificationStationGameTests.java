@@ -40,9 +40,8 @@ import net.minecraft.world.level.material.Fluids;
 
 /**
  * The Reagent Purification Station (docs/features/industrial-reagent-purification.md): it stands whole in every
- * orientation with pipes and cables reaching it only at its five ports; it concentrates sulfuric acid, giving the
- * boiled-off water back at its own outlet, and purifies the concentrate into electronic-grade acid with the
- * conditioning water used up; every part lights while it works; it is built from a Chemical Reactor and its bill; and
+ * orientation with pipes and cables reaching it only at its four ports; it purifies the Concentrator's concentrated
+ * sulfuric acid into electronic-grade acid with the conditioning water used up; every part lights while it works; it is built from a Chemical Reactor and its bill; and
  * a lithography station makes six microchips from a wafer with 50 mB of electronic-grade acid.
  */
 public class ReagentPurificationStationGameTests {
@@ -50,15 +49,13 @@ public class ReagentPurificationStationGameTests {
 	private static final int PARTS = 47;
 	/** The chemical reactor family's 96 JE/t, the entry profile's full draw. */
 	private static final long DRAW = 96;
-	private static final int CONCENTRATE_TICKS = 200;
 	private static final int PURIFY_TICKS = 300;
 	private static final int PRODUCT = 0;
-	private static final int WATER_OUT = 1;
 
 	/**
 	 * In every orientation it fills its 47 blocks and leaves its open positions free, and each block's faces answer
-	 * pipes and cables only where the form declares a port. The feed inlet takes sulfuric acid, not oxygen; the water
-	 * inlet takes water; nothing goes in at the two outlets.
+	 * pipes and cables only where the form declares a port. The feed inlet takes concentrated acid, not oxygen; the
+	 * water inlet takes water; nothing goes in at the outlet.
 	 */
 	@GameTest(structure = ARENA)
 	public void itStandsWholeAndOnlyItsPortsAnswer(GameTestHelper helper) {
@@ -95,12 +92,10 @@ public class ReagentPurificationStationGameTests {
 				Storage<FluidVariant> feed = port(helper, machine, "feed_in");
 				helper.assertTrue(feed.insert(FluidVariant.of(PetroFluids.OXYGEN.fluid()), FluidConstants.BUCKET, transaction) == 0,
 						facing + ": the feed inlet refuses oxygen");
-				for (String outlet : List.of("product_out", "water_out")) {
-					helper.assertTrue(port(helper, machine, outlet).insert(FluidVariant.of(PetroFluids.SULFURIC_ACID.source()), FluidConstants.BUCKET, transaction) == 0,
-							facing + ": nothing goes in at " + outlet);
-				}
-				helper.assertTrue(feed.insert(FluidVariant.of(PetroFluids.SULFURIC_ACID.source()), FluidConstants.BUCKET, transaction) == FluidConstants.BUCKET,
-						facing + ": the feed inlet takes sulfuric acid");
+				helper.assertTrue(port(helper, machine, "product_out").insert(FluidVariant.of(PetroFluids.CONCENTRATED_SULFURIC_ACID.source()),
+						FluidConstants.BUCKET, transaction) == 0, facing + ": nothing goes in at the outlet");
+				helper.assertTrue(feed.insert(FluidVariant.of(PetroFluids.CONCENTRATED_SULFURIC_ACID.source()), FluidConstants.BUCKET, transaction)
+						== FluidConstants.BUCKET, facing + ": the feed inlet takes concentrated acid");
 				helper.assertTrue(port(helper, machine, "water_in").insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET / 4, transaction) == FluidConstants.BUCKET / 4,
 						facing + ": the water inlet takes water");
 				transaction.abort();
@@ -110,42 +105,23 @@ public class ReagentPurificationStationGameTests {
 	}
 
 	/**
-	 * A bucket of sulfuric acid: 200 paid ticks at 96 JE, 19,200 JE, then 500 mB of concentrated acid at the product
-	 * spout and the 500 mB of water boiled off it at the water outlet.
-	 */
-	@GameTest(structure = ARENA, maxTicks = 300)
-	public void sulfuricAcidConcentrates(GameTestHelper helper) {
-		FormMachineBlockEntity machine = place(helper, new BlockPos(5, 1, 1), Direction.NORTH);
-		long[] supplied = supply(helper, machine);
-		insert(helper, port(helper, machine, "feed_in"), PetroFluids.SULFURIC_ACID.source(), 1000);
-		helper.succeedWhen(() -> {
-			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0, "Still concentrating");
-			helper.assertTrue(amount(machine.tanks().output(PRODUCT), PetroFluids.CONCENTRATED_SULFURIC_ACID.source()) == 500
-					&& amount(machine.tanks().output(WATER_OUT), Fluids.WATER) == 500, "500 mB of concentrate and 500 mB of water");
-			long used = used(machine, supplied);
-			helper.assertTrue(used == CONCENTRATE_TICKS * DRAW, "Paid " + used + " JE, not " + CONCENTRATE_TICKS * DRAW);
-			helper.assertTrue(extract(helper, port(helper, machine, "product_out"), PetroFluids.CONCENTRATED_SULFURIC_ACID.source()) == 500
-					&& extract(helper, port(helper, machine, "water_out"), Fluids.WATER) == 500, "Each leaves at its own outlet");
-		});
-	}
-
-	/**
 	 * A bucket of concentrated acid and a quarter-bucket of water: 300 paid ticks at 96 JE, 28,800 JE, then 900 mB of
-	 * electronic-grade acid; the water is used up conditioning it, and nothing comes out of the water outlet.
+	 * electronic-grade acid at the product spout; the water is used up conditioning it.
 	 */
 	@GameTest(structure = ARENA, maxTicks = 400)
 	public void theConcentrateIsPurifiedToElectronicGrade(GameTestHelper helper) {
 		FormMachineBlockEntity machine = place(helper, new BlockPos(5, 1, 1), Direction.NORTH);
 		long[] supplied = supply(helper, machine);
-		machine.tanks().input(0).fill(PetroFluids.CONCENTRATED_SULFURIC_ACID.source(), 1000);
+		insert(helper, port(helper, machine, "feed_in"), PetroFluids.CONCENTRATED_SULFURIC_ACID.source(), 1000);
 		insert(helper, port(helper, machine, "water_in"), Fluids.WATER, 250);
 		helper.succeedWhen(() -> {
 			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0, "Still purifying");
 			helper.assertTrue(amount(machine.tanks().output(PRODUCT), PetroFluids.ELECTRONIC_GRADE_SULFURIC_ACID.source()) == 900
-					&& machine.tanks().input(1).millibuckets() == 0 && machine.tanks().output(WATER_OUT).millibuckets() == 0,
-					"900 mB of electronic-grade acid, the water used up");
+					&& machine.tanks().input(1).millibuckets() == 0, "900 mB of electronic-grade acid, the water used up");
 			long used = used(machine, supplied);
 			helper.assertTrue(used == PURIFY_TICKS * DRAW, "Paid " + used + " JE, not " + PURIFY_TICKS * DRAW);
+			helper.assertTrue(extract(helper, port(helper, machine, "product_out"), PetroFluids.ELECTRONIC_GRADE_SULFURIC_ACID.source()) == 900,
+					"It leaves at the product spout");
 		});
 	}
 
@@ -154,7 +130,8 @@ public class ReagentPurificationStationGameTests {
 	public void everyPartLightsWhileItWorks(GameTestHelper helper) {
 		FormMachineBlockEntity machine = place(helper, new BlockPos(5, 1, 1), Direction.NORTH);
 		supply(helper, machine);
-		machine.tanks().input(0).fill(PetroFluids.SULFURIC_ACID.source(), 2000);
+		machine.tanks().input(0).fill(PetroFluids.CONCENTRATED_SULFURIC_ACID.source(), 2000);
+		machine.tanks().input(1).fill(Fluids.WATER, 500);
 		helper.runAfterDelay(10, () -> {
 			assertLit(helper, machine, true);
 			machine.togglePause();
@@ -166,7 +143,7 @@ public class ReagentPurificationStationGameTests {
 	}
 
 	/**
-	 * It runs its two purification recipes and nothing else, is built from a Chemical Reactor, two Steel Tanks, steel
+	 * It runs its purification recipe and nothing else, is built from a Chemical Reactor, two Steel Tanks, steel
 	 * fluid pipe, steel plates and a basic circuit, and its electronic-grade acid makes six microchips from a wafer in
 	 * the lithography station, where ordinary acid makes four.
 	 */
@@ -175,8 +152,7 @@ public class ReagentPurificationStationGameTests {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(5, 1, 1), Direction.NORTH);
 		List<?> own = machine.recipes(level.getServer()).stream().map(FluidRecipes.Entry::id).sorted().toList();
-		helper.assertTrue(own.equals(List.of(Jugcraft.id("chemical_reaction/purification_concentrated_sulfuric_acid"),
-				Jugcraft.id("chemical_reaction/purification_electronic_grade_sulfuric_acid"))), "Its recipes: " + own);
+		helper.assertTrue(own.equals(List.of(Jugcraft.id("chemical_reaction/purification_electronic_grade_sulfuric_acid"))), "Its recipes: " + own);
 		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
 		ItemStack plate = stack("steel_plate");
 		ItemStack tank = stack("steel_tank");

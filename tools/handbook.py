@@ -168,12 +168,12 @@ ABOUT = {
                          "and a bucket of water. It also splits plain water, slowly: a bucket gives 500 mB of hydrogen "
                          "(middle row) and 250 mB of oxygen (top row) every 40 seconds, an early fuel for the fuel cell.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid: the general chemistry vessel, with two "
-                        "item slots, a tank in and a tank out. Two sulfur dust and a bucket of water make a bucket of "
+                        "item slots, liquid and gas feeds, a retained acid charge and a product tank. Two sulfur dust and a bucket of water make a bucket of "
                         "sulfuric acid. It also mixes: two salt and a bucket of water make brine; two sand, a dried "
                         "kelp and a bucket of water make fracking fluid. An ore in 250 mB of sulfuric acid gives four washed "
                         "ores, the best ore route. Eight crops (wheat, sugar cane, potatoes, carrots, beetroot, "
                         "berries, melon or apples) in a bucket of water ferment into 250 mB of bioethanol. Its other "
-                        "reactions are on its recipe pages.",
+                        "reactions are on its recipe pages. Absorption: 500 mB water + 500 mB hydrogen chloride gas makes 1000 mB hydrochloric acid; 250 mB water + 250 mB sulfur trioxide makes 500 mB sulfuric acid. Both take 5 seconds at 96 JE/t. For sulfuric absorption, first use a sulfuric-acid bucket on the TOP: the dedicated 1000 mB charge is retained, including in the dropped reactor. Normal liquid/gas feeds and products connect at the sides. Other process liquids are not preserved when broken: drain them first. HCl leaches one raw copper into two washed copper in 8 seconds. These are game recipes, not real chemical procedures.",
     "air_separation_unit": "Two by two and six tall: a cold box and its distillation column. It needs no input: it "
                            "liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen "
                            "out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 "
@@ -540,11 +540,31 @@ def arms_pages():
 
 
 def variant_pages():
-    """Arms VII (batch 56): the styles' patterns, the bosses' trophies and the armor sets' arms."""
+    """Arms VII (batch 56): the styles' patterns, the bosses' trophies and the armor sets' arms. A boss that is built
+    names its lair (tools/arms_variants.py BOSSES), so the trophy page lists it among the foes met, the rest among those
+    yet to be met."""
     import arms_variants as av
+    import lairs
     rows, key = av.STYLES["gilded"]["pattern_recipe"]
     grid = [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
     styles = ", ".join(info["display"].lower() for info in av.STYLES.values())
+
+    def trophies(boss, info):
+        # "Vesperine, the Last Reaper, in the Hollow Acre: Vesper Scythe."
+        name = info["display"][0].upper() + info["display"][1:]
+        if "lair" in info:
+            lair = lairs.LAIRS[info["lair"]]["display"]
+            name += ", in " + ("the " + lair[4:] if lair.startswith("The ") else lair)
+        return f"{name}: " + " and ".join(av.BY_ID[trophy][3] for trophy in av.trophies(boss)) + "."
+    met = [trophies(boss, info) for boss, info in av.BOSSES.items() if "lair" in info]
+    unmet = [trophies(boss, info) for boss, info in av.BOSSES.items() if "lair" not in info]
+    trophy_text = ["Great foes carry arms of their own, with a boon."]
+    if met:
+        trophy_text += ["These are met in their lairs. Anyone who takes part in one's fall may win its trophy, and "
+                        "always does the first time:"] + met
+    if unmet:
+        trophy_text += ["These are yet to be met in the world, and will each carry two:"] + unmet
+    trophy_text += ["Trophies last twice as long as steel, and fight as their kinds do."]
     return [
         {"title": "Arms: Styles", "icon": f"{MOD}:gilded_longsword", "text": [
             f"Four styles restyle a steel arm at a smithing table: {styles}. Put the style's pattern, the steel arm and "
@@ -556,12 +576,7 @@ def variant_pages():
             f"for {av.MARK_TICKS // 20} seconds, seen through walls.",
             "Each fights as its kind does: the same swing, reach, trait and art."],
          "craft": {"grid": grid, "result": f"{MOD}:gilders_pattern", "count": 1}},
-        {"title": "Arms: Trophies", "icon": f"{MOD}:glacier_maul", "text": [
-            "Great foes yet to be met in the world will each carry two arms of their own, with a boon:",
-            ] + [f"{info['display'][0].upper()}{info['display'][1:]}: "
-                 + " and ".join(av.BY_ID[name][3] for name in av.trophies(boss)) + "."
-                 for boss, info in av.BOSSES.items()] + [
-            "Trophies last twice as long as steel, and fight as their kinds do."]},
+        {"title": "Arms: Trophies", "icon": f"{MOD}:glacier_maul", "text": trophy_text},
     ] + set_pages()
 
 
@@ -768,9 +783,21 @@ def ores_page():
             lines.append(line)
     for mineral, info in MINERALS.items():
         gen = info["gen"]
-        lines.append(f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}.")
+        line = f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}."
+        if mineral == "fluorite":
+            line += (f" Large pockets below permanently snowy inland biomes; needs an {info['tool']} pickaxe. "
+                     "Mineral faces in small stone outcrops can point to a pocket below. Seasonal snow, beaches, rivers and oceans do not qualify. "
+                     "The prospector and ore drill work here; nine fluorite make a decorative storage block. "
+                     "Fluorite chemistry is planned separately.")
+        elif mineral == "spodumene":
+            line += (" Large pockets below Shield, Highland, Basin, Windswept Hills, Windswept Gravelly Hills, "
+                     "Windswept Forest and Stony Peaks; most centers are near Y 24. Needs an iron pickaxe. "
+                     "Look for pale-green mineral faces in small stone outcrops, or use the prospector and ore drill. "
+                     "The crusher gives two spodumene per ore; nine compact into a storage block. "
+                     "Expanded lithium refining is planned separately; existing lepidolite processing remains available.")
+        lines.append(line)
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
-            "text": ["Jugcraft ores appear in the stone and deepslate of every Overworld biome:"] + lines}
+            "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}
 
 
 # The path through the mod, stage by stage (the "Progression" chapter). Each stage: title, icon, what it is for, a
@@ -1190,4 +1217,16 @@ def build():
                 "A comparator next to a generator or battery shows how full it is.",
                 "Next to a processing machine, it shows how full its slots are, like a chest."]}]},
     ]
+    # Keep every registered industrial form discoverable, including later chemistry/farm additions.
+    # Existing authored pages keep their positions; only missing station pages are appended.
+    import industrial_forms
+    covered = {page.get("icon") for chapter in chapters for page in chapter["pages"]}
+    chemistry = next(chapter for chapter in chapters if chapter["title"] == "Chemistry")
+    for form in industrial_forms.FORMS:
+        if f"{MOD}:{form}" not in covered:
+            chemistry["pages"].append(form_page(form))
+    chemistry["pages"].append({"title": "Four shared process machines", "icon": "jugcraft:brine_concentrator", "text": [
+        "Build a Concentrator for seawater or acid; a Gas Scrubber for synthesis gas, biogas or fermentation gas; a Filter Press for aluminate or digestate; and an Industrial Oven for drying, calcination or PTFE sintering. Each handles multiple resources without a separate named machine for every output.",
+        "The five older specialist designs stay craftable and continue working in existing factories. The four recommended machines also keep their original saved block IDs, inventories and ports. The Oven gains one connected solution inlet on its lower rear face.",
+        "Open Recipes to search and preview inputs, outputs and costs. Lock recipe chooses the only job new batches may start; Automatic restores input-driven selection. Saved locks also filter automated inputs. Drain incompatible input AND output fluids and clear other feed items when changing jobs; running batches finish unchanged."]})
     return {"chapters": chapters}
