@@ -32,7 +32,8 @@ public final class OreSurvey {
 			family("salt", "jugcraft:salt_ore"), family("phosphate", "jugcraft:phosphate_ore"),
 			family("lepidolite", "jugcraft:lepidolite_ore"), family("monazite", "jugcraft:monazite_ore"),
 			family("fluorite", "jugcraft:fluorite_ore"), family("spodumene", "jugcraft:spodumene_ore"),
-			sand("titanium_sand"), sand("zircon_sand"), sand("rare_earth_sand"), sand("garnet_sand"));
+			sand("titanium_sand"), sand("zircon_sand"), sand("rare_earth_sand"), sand("garnet_sand"),
+			family("vanadium_iron", "jugcraft:vanadium_iron_ore"));
 	/** Surveyed chunks in each direction from the player's chunk: 1 means 3x3. */
 	public static final int RADIUS = 1;
 	/** Only every STRIDE-th column in x and z is sampled. */

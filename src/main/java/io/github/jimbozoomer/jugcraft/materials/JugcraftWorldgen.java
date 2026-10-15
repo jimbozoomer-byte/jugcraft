@@ -41,6 +41,7 @@ public final class JugcraftWorldgen {
 				{"spodumene", "lithium"},
 				{"titanium_sand", "mineral_sands"}, {"zircon_sand", "mineral_sands"},
 				{"rare_earth_sand", "mineral_sands"}, {"garnet_sand", "mineral_sands"},
+				{"vanadium_iron", "vanadium"}, {"vanadium_iron_rich", "vanadium"},
 		};
 		for (String[] ore : ores) {
 			add(ore[0], ore[1], overworld);

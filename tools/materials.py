@@ -14,7 +14,7 @@ MOD = "jugcraft"
 
 # Feature switches (config/jugcraft.properties). Order is the config file order.
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
-            "salt", "phosphate", "lithium", "rare_earths", "fluorite", "mineral_sands", "sulfur", "silicon", "crude_oil", "machines", "deposits",
+            "salt", "phosphate", "lithium", "rare_earths", "fluorite", "mineral_sands", "vanadium", "sulfur", "silicon", "crude_oil", "machines", "deposits",
             "explosives", "agriculture", "parties", "drones",
             "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections", "raiders",
             "concordance", "guns"]
@@ -83,6 +83,15 @@ MINERALS = {
                   "outcrop_chance": 4, "surface_biomes": [
                       "jugcraft:shield", "jugcraft:highland", "jugcraft:basin", "minecraft:windswept_hills",
                       "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_peaks"]}},
+    "vanadium_iron": {"display": "Raw Vanadium-bearing Iron", "ore_display": "Vanadium-bearing Iron",
+                     "feature": "vanadium", "drops": [1, 1], "fortune": False, "tool": "iron",
+                     "gen": {"size": 40, "rarity": 24, "min_y": -48, "max_y": 32,
+                             "outcrop_chance": 3, "surface_biomes": [
+                                 "jugcraft:highland", "jugcraft:basin", "minecraft:windswept_hills",
+                                 "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_peaks"]},
+                     "rich_gen": {"size": 48, "rarity": 12, "min_y": -48, "max_y": 32,
+                                  "outcrop_chance": 3, "surface_biomes": ["jugcraft:shield", "jugcraft:volcano"],
+                                  "outcrop_surface_biomes": ["jugcraft:shield"]}},
 }
 
 # Surface rocks with their own blocks. copy: vanilla block whose properties are copied.
