@@ -959,7 +959,7 @@ Each fires Buckshot Shells (slice 1). The reload times are the owner's animation
 
 **Crafting** (a crafting table; the guns switch):
 - **Sledge:** three steel ingots over a steel ingot, a lever and planks: four steel for its heavy barrel and frame, the lever for its action and the planks for its fore-end.
-- **Highwayman:** three steel ingots over planks, a lever and a brass ingot (its long barrel's fittings).
+- **Highwayman:** three steel ingots over planks, a lever and a brass ingot, with a second brass ingot under the first (its long barrel's fittings). Until 14 October 2026 it had no second brass ingot, and its grid was the Garrison Rifle's mirrored: a crafting table matches a shaped recipe mirrored too, so the two could not both be made from it.
 - **Throttle:** two steel ingots and a copper ingot (its bulb) over planks, a lever and a brass ingot.
 
 **How they fire:** as the other shotguns: each pellet strays within the spread to the first creature or block in its path, and a creature takes the damage of every pellet that lands on it at once (`jugcraft:bullet`, which counts every shot). A shot cuts a reload short and fires what is loaded.
@@ -3651,6 +3651,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `pumpShotgunsAreRegistered`: the three are registered with their numbers, fire eight pellets a shot from Buckshot Shells a pull at a time and load a shell at a time; each recipe loads; the Sledge hits hardest, the Highwayman holds the most, reaches furthest and aims steadiest, the Throttle fires quickest; the Highwayman and the Throttle take the scopes, the Sledge none; the Throttle takes only the stocks and scopes, the others the barrel attachments, the light grip and the bayonets too.
     - `pumpShotgunsLandAndLoad`: side by side, each fires its one shell at a pig three blocks off, the pellets landing together and the shell spent; then each loads its full tube from the inventory, the first shell after its opening and one shell's time, every shell after its whole reload, and no more than the tube holds.
     - `highwaymanKeepsItsPelletsTogether`: aimed at pigs thirteen blocks off, standing a block up so that no pellet strays into the floor first, all eight of the Highwayman's pellets land (its 2.5° cone is narrower than the pig there), and fewer of the Sledge's (6°).
+    - `highwaymanAndGarrisonRifleCraftApart` (added 14 October 2026, with the Highwayman's second brass ingot): the Highwayman's grid gives the Highwayman and the Garrison Rifle's the Garrison Rifle; the Highwayman's old grid, the Garrison Rifle's mirrored, gives the Garrison Rifle.
   - "Every gun registered" now counts thirty-six guns.
   - `GunsClientGameTests` takes the three through every gun's steps; screenshots `jugcraft_guns_sledge_*`, `jugcraft_guns_highwayman_*` and `jugcraft_guns_throttle_*`.
 - **Slice 9D in CI** ([run 38036998697](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38036998697), on 631cc3a84): every check passed.

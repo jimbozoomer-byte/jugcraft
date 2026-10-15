@@ -736,10 +736,11 @@ RECIPES = {
     "caisson_pistol": (["LSS", " AB"], {"L": "minecraft:lightning_rod", "S": "#c:ingots/steel",
                                        "A": "jugcraft:advanced_circuit", "B": "#c:ingots/brass"}),
     # Slice 9D: steel, a lever and planks for the fore-end each; four steel ingots for the Sledge's heavy barrel and
-    # frame, brass for the Highwayman's long barrel's fittings, a copper ingot for the Throttle's bulb.
+    # frame, brass for the Highwayman's long barrel's fittings, a copper ingot for the Throttle's bulb. The Highwayman's
+    # second brass ingot, under the first, keeps its grid from being the Garrison Rifle's mirrored (14 October 2026).
     "sledge": (["SSS", "SLP"], {"S": "#c:ingots/steel", "L": "minecraft:lever", "P": "#minecraft:planks"}),
-    "highwayman": (["SSS", "PLB"], {"S": "#c:ingots/steel", "P": "#minecraft:planks", "L": "minecraft:lever",
-                                    "B": "#c:ingots/brass"}),
+    "highwayman": (["SSS", "PLB", "  B"], {"S": "#c:ingots/steel", "P": "#minecraft:planks", "L": "minecraft:lever",
+                                           "B": "#c:ingots/brass"}),
     "throttle": (["SSC", "PLB"], {"S": "#c:ingots/steel", "C": "minecraft:copper_ingot", "P": "#minecraft:planks",
                                   "L": "minecraft:lever", "B": "#c:ingots/brass"}),
     # Slice 10A: the rocket guns in steel plate, as the Rocket Launcher is, a tripwire hook for the trigger; copper for
