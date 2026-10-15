@@ -350,8 +350,9 @@ which were viewed is below).
   player alone.
 - Client shots in `EncyclopediaClientGameTests`: `jugcraft_encyclopedia_inspect_readiness` (the Inspect page on an
   anchor), `jugcraft_concordance_anchor_gathering_jade` (Jade on a gathering anchor, taken only when Jade is loaded) and
-  `jugcraft_rooted_thallite_foundation` (the foundation in hand). Their shard passed; the first two were not viewed.
-  The foundation's icon was viewed for unit 5's records: a green Thallite plate with copper rivets and roots beneath.
+  `jugcraft_rooted_thallite_foundation` (the foundation in hand). Their shard passed; none of the three was viewed.
+  The foundation's icon itself was viewed for unit 5's records: a green Thallite plate with copper rivets and roots
+  beneath.
 - The Jade checks in these tests run only when Jade is loaded, so a build with `-PjugcraftOptionalIntegrations=false`
   alone does not run them. No test reads the action bar's one line: a mock player's overlay is not readable.
 - Run and passed locally for each of the unit's three commits: `python3 tools/check_mod_data.py`,
@@ -430,5 +431,5 @@ its map. Nothing is taken from Mojang's files. The owner's library was searched 
 | `originals/Blocks/Airships and Planes/item/hull_reinforcement.png` | `9749022e0cfb` | hull planking |
 
 The owner has not reviewed the icon (the roots may read as legs). Its look in game comes only from the client shot
-`jugcraft_rooted_thallite_foundation`, whose shard passed in CI; the icon was viewed for unit 5's records (a green
-Thallite plate with copper rivets and roots beneath; the roots may read as legs).
+`jugcraft_rooted_thallite_foundation`, whose shard passed in CI, not viewed; the icon itself was viewed for unit 5's
+records (a green Thallite plate with copper rivets and roots beneath; the roots may read as legs).

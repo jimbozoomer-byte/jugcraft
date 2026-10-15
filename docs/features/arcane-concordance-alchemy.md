@@ -464,8 +464,8 @@ first compile and run.
 
 **Concordance Chunk C, unit 3** ([the chunk's contract](concordance-chunk-c.md); not merged). Its server tests passed
 in CI run 38720814268 (`mod` and `optional integrations absent`), where client shard 0 failed on a defect in the Peepo
-unloaded-crucible check, fixed in `9098c06b1`; every job then passed in runs 38726242149 (with unit 4),
-38731825181 and 38774859294.
+unloaded-crucible check, fixed in `9098c06b1`. Every job passed in run 38726242149 (the merge with unit 4, before the
+fix) and, with the fix, in runs 38731825181 and 38774859294.
 - `ConcordanceAlchemyGameTests` +8 (41 in all), the Crucible Stand's: `aStandFollowsTheFormulasBands`,
   `anUnpoweredStandLetsTheCrucibleCool`, `aStandIdlesForAWaitingOrIncompatibleFormula`,
   `aStandIsSetOnlyByThoseWhoMayChangeIt`, `theFullChainRunsFromAPumpAndACable` (a pump and a pipe fill the tank, which

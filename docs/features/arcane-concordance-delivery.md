@@ -178,7 +178,7 @@ amd64, Java VM 25.0.4.1+1-LTS):
 
 | Work | `mod` job |
 |---|---|
-| A Gleaner's starved pulse: its whole Heart search, 729 positions (729 loaded) | 333 µs, over C-P68's proposed 250 µs line |
+| A Gleaner's starved pulse: its whole Heart search, 729 positions (729 loaded) | 333 µs, over C-P21's 250 µs line (C-P68, proposed) |
 | The position list alone (`Garden.nearest`, built and sorted each call) | 304 µs |
 | A fed pulse: its crop search, 147 positions, nothing ripe | 62 µs |
 

@@ -1328,8 +1328,8 @@ shows a hold); whether the longer codex pages fit Modonomicon's pages (no audit 
 Every unit is implemented and its tests passed in CI (the candidate `25644502a`, run 38591108210). Nothing is merged.
 The owner's checkpoint is awaited: movement feel (being thrown, a Brace halving a throw, the 4-tick hold, the
 charge-and-column loop), difficulty (B-P59), the spell bar's place (B-P60) and the next school (Chunk C or Tempest).
-Every B-P decision remains Proposed; B-D0 to B-D3 are the owner's. Chunk C has not started. Before more work, refresh
-main and the open pull requests (#357 among them).
+Every B-P decision remains Proposed; B-D0 to B-D3 are the owner's. Chunk C had not started then (since built:
+[its contract](concordance-chunk-c.md)). Before more work, refresh main and the open pull requests (#357 among them).
 
 ## Deferrals
 
@@ -1384,7 +1384,7 @@ home's route cards shown whole (`d22a55830`); and the client evidence, with the 
 and not kept here, which asks about movement feel, difficulty (B-P59), the spell bar's place (B-P60) and the next
 school (Chunk C or Tempest). Open for the owner: B-P2 to B-P5; B-P10; B-P30 to B-P34 and "Stonebrace" as Brace's
 display name ([unit 3's record](arcane-concordance-rime-strata.md#rollout-and-open-questions)); B-P36 to B-P38; B-P40 to
-B-P60 (B-P39 is free). Chunk C has not started.
+B-P60 (B-P39 is free). Chunk C had not started then (since built: [its contract](concordance-chunk-c.md)).
 #352 has merged, so the base is main; refresh main and the open pull requests first (#357 among them).
 
 ## Decisions

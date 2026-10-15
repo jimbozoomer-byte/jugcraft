@@ -1893,7 +1893,7 @@ after the first path (09:16).
 - **An incompatible formula** stops even a finished batch from bottling automatically (C-P23).
 - **Naming by effect** makes any Regeneration salve carrying nothing harmful a Stillroot Poultice, which earns credit
   (C-P29).
-- **Unit 1, not yet seen in a game:** the Expeditions page with the poultice's fact for all four keepers stays within
+- **Unit 1, not yet seen by a person:** the Expeditions page with the poultice's fact for all four keepers stays within
   the 96 rows a page holds (about 77 by the spec review's count; `theExpeditionsPageHoldsEveryKeeper` checks it, a
   server test that passed in CI from run 38684732031 on), and whether the client test's Jade shot shows Jade's overlay
   (`takeScreenshot` with the HUD; its shard passed, not viewed).
@@ -1915,8 +1915,9 @@ after the first path (09:16).
     and wall-clock behaviour (CPU boost, cache warmth, collections per second) is not;
   - one run on one shared runner, baseline first, so JIT warmth favours the workshop's span; the drift line (+0.023 ms
     in run 38774859294) reports this and does not remove it;
-  - an autosave lands about once a span (every 6,000 ticks) and shows in the maximum and the over-50 ms count (run
-    38774859294: the baseline's maximum 64.3 ms, its one tick over 50 ms; the workshop's 29.3 ms);
+  - an autosave may land about once a span (every 6,000 ticks) and would show in the maximum and the over-50 ms count;
+    the card does not say what caused the baseline's 64.3 ms maximum (its one tick over 50 ms) or the workshop's 29.3 ms
+    (run 38774859294);
   - the packet counter's own garbage adds to both spans' collection pressure; its encoding time is excluded, its effect
     on collection is not;
   - the test player is not a client: it does not move, the test acknowledges its chunk batches, payloads sent only to
@@ -1931,7 +1932,7 @@ after the first path (09:16).
   - `JAVA_TOOL_OPTIONS` reaches every Java program in that shell or CI step, Gradle's own included: harmless, but noisy;
   - the porter's integrity of 64 allows about 64 trips, so a much longer span could wear it out; in run 38774859294 it
     served 22 requests while measured.
-- **Unit 2, not yet seen in a game:**
+- **Unit 2, not yet seen by a person:**
   - the cached shape report can hold a refused start's charge and ownership faults for up to 100 ticks: the status lines
     and Jade show them while readiness reads the channels itself, so the two can disagree for that window;
   - `report()` may send a block update when the linked channels change under the Inspect page or Jade, as it already
@@ -1956,7 +1957,7 @@ after the first path (09:16).
   - with the `machines` or `thallite` switch off the plate's recipe is gone, and Root and Rivet's codex entry still has
     its recipe page. In Modonomicon 2.16.0's source `BookRecipePage` then logs "Recipe … not found" and shows a barrier
     in the recipe's place without blocking the book; not seen in a client.
-- **Unit 3, not yet seen in a game:**
+- **Unit 3, not yet seen by a person:**
   - the stand and the crucible tick in no fixed order, so the crucible heats on the stand's last decision, at most a
     tick late; the JE paid stays exactly the rate times the ticks paid, and the tests read its light in retried
     assertions;
@@ -1996,7 +1997,7 @@ after the first path (09:16).
     `docs/WHAT_EXISTS.md` (#366), `docs/INTEGRATION_STATUS.md` (#361 to #365); the open pull requests' file lists read
     for C-06 include none of the three Peepo files it edits (`CrucibleCompanion`, `PeepoIntegrationClientTests`,
     `CompanionAutomationChecks`).
-- **Unit 4, not yet seen in a game:**
+- **Unit 4, not yet seen by a person:**
   - behaviour changes, all Proposed and visible: an item held in the main hand never reports, wakes or tends a bed
     (C-P56); a Greenwarden holding a Dewmoss cannot harvest a ripe Sunpetal by a plain use, which grafts or is refused
     (C-P62); bone meal on a growing crop feeds its bed rather than reporting (C-P61); a Greenwarden's empty hand on a
@@ -2036,8 +2037,8 @@ after the first path (09:16).
     or the Crop Harvester; the tests accept both); the Crop Harvester's footprint against the test's glowstone; a
     gametest server's `Component.getString()` resolving mod lang; `lookAt`'s aim at the crop and the bed; light settled
     by ticks 44 to 46; every test of a batch starting on one tick; the two new codex pages' length;
-  - nothing of the unit has been compiled against Minecraft or run (written before its CI: the merge's run 38726242149
-    passed every job, unit 4's tests included).
+  - nothing of the unit had been compiled against Minecraft or run when this was written (since then, the merge's run
+    38726242149 passed every job, unit 4's tests included).
 - **Unit 5, not yet seen by a person:**
   - the client view's framing is arithmetic for FOV 70 and a 16:9 window; in the viewed `jugcraft_concordance_workshop`
     the whole workshop is in view but small at that distance;
@@ -2217,7 +2218,7 @@ shows presentation; the tests' checks are the evidence of behaviour.
 | The crucible's Inspect page on its stand | `jugcraft_encyclopedia_inspect_crucible_stand` (same) | Viewed. It reads: "Alembic Crucible at 7, -59, 11 / 62 degrees (Warm) / Crucible Stand beneath heats it towards 65 degrees / 2 of 6 parts / Its tank holds 3 of 3 parts of water / Formula: step 3 of 9: Mendvetch, as it comes / Waiting to go in: 3 Mendvetch / Bottles and bowls: 2 Bowl" |
 | Root and Rivet under way: spent apart from held, its stage table | `jugcraft_encyclopedia_inspect_root_and_rivet`, `_scale4` (same) | Not viewed; its shard passed |
 | Root and Rivet in Jade | `jugcraft_concordance_anchor_root_and_rivet_jade` (same) | Viewed: the circle with its anchor; no Jade box is visible at the 480×270 size. The test's Jade snapshot assertion passed |
-| The foundation's icon | `jugcraft_rooted_thallite_foundation` (`EncyclopediaClientGameTests`) | The icon was viewed: a green Thallite plate with copper rivets and roots beneath; the roots may read as legs. It awaits the owner's review |
+| The foundation's icon | `jugcraft_rooted_thallite_foundation` (`EncyclopediaClientGameTests`) | Not viewed; its shard passed. The icon itself was viewed separately: a green Thallite plate with copper rivets and roots beneath; the roots may read as legs. It awaits the owner's review |
 | The crucible's Inspect pages (unit 1) | `jugcraft_encyclopedia_inspect_crucible`, `_scale4`, `_inspect_poultice`, `jugcraft_concordance_crucible_jade` (`EncyclopediaClientGameTests`) | Not viewed; its shard passed |
 | The anchor's readiness (unit 2) | `jugcraft_encyclopedia_inspect_readiness`, `jugcraft_concordance_anchor_gathering_jade` (same) | Not viewed; its shard passed |
 | The stand's workshop (unit 3) | `jugcraft_concordance_crucible_stand_workshop`, `jugcraft_concordance_crucible_stand_jade` (same) | Not viewed; its shard passed |
@@ -2234,8 +2235,8 @@ encyclopedia's reply traffic; JEI's pages in a client; `runServer`; the larger w
 
 ### Known defects and limits
 
-- The Gleaner's starved pulse is over C-P68's line: 333 µs against 250 µs in run 38774859294 (one run, one shared
-  runner). A change is proposed (caching `Garden.nearest`'s order, or a vertical reach of ±1), not applied.
+- The Gleaner's starved pulse is over C-P21's line (C-P68): 333 µs against 250 µs in run 38774859294 (one run, one
+  shared runner). A change is proposed (caching `Garden.nearest`'s order, or a vertical reach of ±1), not applied.
 - In the load card the Peepo brought no Mendvetch while measured; why is not known from its lines.
 - Bees step these crops without strain, niche or graft clearing (unit 4's risks).
 - An offline setter's unclaimed request holds its post's queue (C-P53).
