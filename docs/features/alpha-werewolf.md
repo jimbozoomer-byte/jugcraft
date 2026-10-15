@@ -1,6 +1,6 @@
 # The Alpha Werewolf
 
-Status: implemented in source; not yet run in CI (its results and the client test's pictures will be added here when they are). Part 2 of boss 8 in the [bosses plan](../branches/BOSSES.md#the-alpha-werewolf-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Moonlit Ring, his hide and the Hunt that the Warden Bells break, his Packmates, the raked turf of his trail, and his loot. It is built on part 1, the ring and the Howling Totem that opens it ([moonlit-ring.md](moonlit-ring.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source. The original branch passed server tests, but its client test failed at the first hunt; the October 15 integration repairs that timing assumption and is awaiting combined validation. Part 2 of boss 8 in the [bosses plan](../branches/BOSSES.md#the-alpha-werewolf-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the boss of the Moonlit Ring, his hide and the Hunt that the Warden Bells break, his Packmates, the raked turf of his trail, and his loot. It is built on part 1, the ring and the Howling Totem that opens it ([moonlit-ring.md](moonlit-ring.md)), and on the lair framework ([hollow-acre.md](hollow-acre.md)). It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 14 October 2026 the owner chose the Alpha Werewolf as the next boss ("Ok lets do the alpha werewolf boss 8"), built the same two-part way: the Moonlit Ring and its summoning, then the Alpha himself, his pack and his loot. He is the sixth of the first eight in [branches/BOSSES.md](../branches/BOSSES.md).
 Owner: @jimbozoomer-byte
 
@@ -203,7 +203,7 @@ Moonfang, the Howler and `bosses/werewolf_alpha` were already Arms VII's. Nothin
 
 ## Verification
 
-CI: not yet run. Its results, and the client test's pictures, will be added here.
+Original branch CI [run 38667558143](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38667558143): server jobs passed; the Alpha client test failed with `He did not mark the player: NONE`. The test resumed a pose frozen during Rending Howl, whose remaining recovery intentionally pauses the hunt timer. The [October 15 integration](oct15-community-integration.md) waits for the bounded server transition to `MARK` instead of assuming eight client ticks. The repair still needs its rendered client run; it does not change combat timing.
 
 Run locally (15 October 2026):
 

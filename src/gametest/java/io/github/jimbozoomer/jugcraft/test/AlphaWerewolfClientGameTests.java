@@ -126,8 +126,14 @@ public class AlphaWerewolfClientGameTests implements FabricClientGameTest {
 				alpha.teleportTo(at.x, at.y, at.z);
 				alpha.huntIn(1);
 			});
-			context.waitTicks(8);
-			server.runOnServer(minecraft -> check(alpha(minecraft).hunt() == Hunt.MARK, "He did not mark the player: " + alpha(minecraft).hunt()));
+			// Rending Howl was frozen during its active part. The hunt timer intentionally pauses until its
+			// recovery finishes; observe the actual server transition instead of assuming eight client ticks suffice.
+			boolean marked = false;
+			for (int wait = 0; wait < Attack.RENDING_HOWL.length() + 20 && !marked; wait++) {
+				context.waitTick();
+				marked = server.computeOnServer(minecraft -> alpha(minecraft).hunt() == Hunt.MARK);
+			}
+			check(marked, "He did not mark the player after finishing Rending Howl");
 			context.waitTicks(AlphaWerewolfEntity.MARK_TICKS + AlphaWerewolfEntity.RUN_TICKS + 4);
 			server.runCommand("tick freeze");
 			AtomicReference<Bell> glade = new AtomicReference<>();
