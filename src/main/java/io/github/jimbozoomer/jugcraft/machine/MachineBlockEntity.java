@@ -85,7 +85,7 @@ import org.jspecify.annotations.Nullable;
  * battery ({@link #energy}); what it does each tick depends on its {@link MachineKind}.
  * All logic runs on the server; clients only see synced {@link ContainerData}.
  */
-public class MachineBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, ExtendedMenuProvider<BlockPos>, KineticConsumer {
+public class MachineBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, ExtendedMenuProvider<BlockPos>, KineticConsumer, local.peepo.ProcessorHost {
 	public final MachineItemAutomation itemAutomation = new MachineItemAutomation(this);
 	public final MachineCompanionPort companionPort = new MachineCompanionPort(this);
 	// Container data is synced to clients as 16-bit values, so energy and capacity (which exceed
@@ -157,6 +157,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private boolean formed;
 	/** mB in the machine's tank: water for the steam generator and ore washer, lava for the geothermal generator. Saved as "water". */
 	private int tank;
+	int companionTankAmount(){return tank;}
 	/** Processors: which faces take input or give output, and whether results are pushed out. */
 	private final SideConfig sides;
 	/** Ore drill: the next block to check, counted from the top layer below the drill (see {@link OreDrilling}). */
@@ -294,6 +295,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 */
 	public @Nullable Storage<FluidVariant> fluidFor(@Nullable Direction side) {
 		if (tanks != null) {
+			if (kind == MachineKind.CHEMICAL_REACTOR) {
+				if (side == Direction.UP) return new net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage<>(List.of(tanks.input(2), tanks.input(0), tanks.input(1), tanks.output(0)));
+				return new net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage<>(List.of(tanks.input(0), tanks.input(1), tanks.output(0)));
+			}
 			return tanks.exposed();
 		}
 		return reservoir != null ? reservoir : inlet;
@@ -356,7 +361,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	@Override
 	protected void collectImplicitComponents(DataComponentMap.Builder components) {
 		super.collectImplicitComponents(components);
-		StoredFluid stored = reservoir == null ? null : StoredFluid.of(reservoir);
+		StoredFluid stored = reservoir != null ? StoredFluid.of(reservoir)
+				: kind == MachineKind.CHEMICAL_REACTOR ? StoredFluid.of(tanks.input(2)) : null;
 		if (stored != null) {
 			components.set(JugcraftFluids.STORED_FLUID, stored);
 		}
@@ -368,6 +374,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		StoredFluid stored = components.get(JugcraftFluids.STORED_FLUID);
 		if (stored != null && reservoir != null) {
 			stored.restore(reservoir);
+		}
+		if (stored != null && kind == MachineKind.CHEMICAL_REACTOR
+				&& stored.variant().isOf(PetroFluids.SULFURIC_ACID.source()) && stored.amount() > 0) {
+			stored.restore(tanks.input(2));
 		}
 	}
 
@@ -902,6 +912,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return companionJobs.length == 0 ? local.peepo.CompanionStatus.UNSUPPORTED : companionStatus;
 	}
 	public int companionHelperCount() { return companionJobs.length; }
+	public net.minecraft.world.level.block.entity.BlockEntity companionBlock() { return this; }
+	public boolean companionLocked() { return isLocked(); }
 
 	public local.peepo.@Nullable CompanionJob companionJob(local.peepo.PeepoEntity npc) {
 		for (var job : companionJobs) if (job.assignedTo(npc)) return job.prepare(npc);
@@ -994,7 +1006,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				items.get(slot).shrink(recipe.items().get(slot).count());
 			}
 			for (int i = 0; i < recipe.fluids().size(); i++) {
-				tanks.input(i).drain(recipe.fluids().get(i).amount());
+				if (!recipe.fluids().get(i).retained()) tanks.input(i).drain(recipe.fluids().get(i).amount());
 			}
 			for (int i = 0; i < recipe.fluidResults().size(); i++) {
 				tanks.output(recipe.resultTank(i)).fill(recipe.fluidResults().get(i).fluid(), recipe.fluidResults().get(i).amount());
@@ -1670,6 +1682,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		ItemStack result = recipe.get().value().assemble(input);
+		if (!companionPort.filter().allows(result)) return processorStopped(local.peepo.CompanionStatus.RECIPE_MISSING);
 		ItemStack remainder = ItemStack.EMPTY;
 		for (ItemStack left : recipe.get().value().getRemainingItems(input)) {
 			if (left.isEmpty()) {
@@ -1726,6 +1739,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		String metal = Electroplating.metalOf(items.get(1));
 		ItemStack result = metal == null || item.isEmpty() ? ItemStack.EMPTY
 				: Electroplating.plate(item, metal, level.registryAccess());
+		if (!companionPort.filter().allows(result)) return processorStopped(local.peepo.CompanionStatus.RECIPE_MISSING);
 		if (result.isEmpty() || tank < Electroplating.ACID_PER_PLATING || !items.get(kind.outputSlot()).isEmpty()) {
 			processorStatus(!items.get(kind.outputSlot()).isEmpty() ? local.peepo.CompanionStatus.FULL : local.peepo.CompanionStatus.NO_INPUT);
 			if (progress != 0) {
