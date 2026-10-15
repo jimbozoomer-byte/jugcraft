@@ -70,7 +70,7 @@ CI, [run 38657990009](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/
 - The drone tower's hint and legend were cut short with an ellipsis (also from before). They now wrap.
 - The workshop glass's band ran across the middle of the prospector's readings. It is now the rule under the heading.
 
-The re-run with these fixes: see the PR.
+CI, [run 38659890877](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38659890877) on 37b86deed with those fixes: green. The shots showed each fix working. They also showed one more fault from before the restyle: on the remote shutdown panel, "This panel (control room locked out)" ran past its pane. It now wraps above the transfer switch. The re-run with that fix: see the PR.
 
 Not run:
 - a human using each screen;

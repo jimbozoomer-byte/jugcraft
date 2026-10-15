@@ -157,9 +157,10 @@ public class RemoteShutdownScreen extends Screen {
 		panel(g, x, y, 164, 98, t("control"));
 		// The two lamps over the transfer switches: white while the control room has control, amber while this panel does.
 		lamp(g, x + 10, y + 24, !core.remote ? 0xFFF4F0DC : 0xFF5A5850);
-		g.text(font, t("at_mcr"), x + 24, y + 26, !core.remote ? TEXT : DIM, false);
+		g.text(font, ScreenKit.fit(font, t("at_mcr"), 134), x + 24, y + 26, !core.remote ? TEXT : DIM, false);
 		lamp(g, x + 10, y + 40, core.remote ? AMBER : 0xFF5A4420);
-		g.text(font, t("at_panel"), x + 24, y + 42, core.remote ? AMBER : DIM, false);
+		// Wrapped inside the pane, above the transfer switch.
+		MachineSkin.wrap(g, font, Component.literal(t("at_panel")), x + 24, y + 42, 134, top + TRANSFER[1] - 2, core.remote ? AMBER : DIM);
 		boolean hot = over(TRANSFER, mx, my);
 		int bx = left + TRANSFER[0], by = top + TRANSFER[1];
 		g.fill(bx, by, bx + TRANSFER[2], by + TRANSFER[3], hot ? 0xFF3A3210 : 0xFF282410);
