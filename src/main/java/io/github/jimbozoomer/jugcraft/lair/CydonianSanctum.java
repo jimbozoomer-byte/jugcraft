@@ -81,6 +81,26 @@ public final class CydonianSanctum {
 	public static final int EXIT_WEST = 35;
 	public static final int EXIT_EAST = 37;
 	public static final int EXIT_Z = 129;
+	/**
+	 * The Cydonian Sentinel's fight (lair/sentinel): where it waits on its plinth (WAIT_X, WAIT_Y, WAIT_Z) and where it
+	 * comes down to the crater's floor as it wakes (WOKE_X, WOKE_Z); the rim's wall (its radius from the middle, RIM_WALL);
+	 * the four standing stones (their middle cells, STONE_SIZE square and STONE_HEIGHT high); the small craters its
+	 * sentries rise from (their middle cells); and the Red Mist it leaves in the crater's middle when it falls (its
+	 * columns and row, three high from STAND). All in tools/cydonian_sanctum.py and tools/cydonian_sentinel.py.
+	 */
+	public static final double WAIT_X = 36.5;
+	public static final double WAIT_Y = 8.0;
+	public static final double WAIT_Z = 20.5;
+	public static final double WOKE_X = 36.5;
+	public static final double WOKE_Z = 28.5;
+	public static final double RIM_WALL = 25.0;
+	public static final int[][] STONES = {{44, 38}, {28, 38}, {28, 54}, {44, 54}};
+	public static final int STONE_SIZE = 3;
+	public static final int STONE_HEIGHT = 5;
+	public static final int[][] PITS = {{26, 46}, {46, 46}, {31, 31}, {41, 31}, {31, 61}, {41, 61}};
+	public static final int CRATER_MIST_WEST = 35;
+	public static final int CRATER_MIST_EAST = 37;
+	public static final int CRATER_MIST_Z = 46;
 	/** The thin air: Jump Boost's amplifier, and how much of a fall's damage is taken. */
 	public static final int JUMP_AMPLIFIER = 0;
 	public static final double FALL_DAMAGE = 0.5;
@@ -321,6 +341,36 @@ public final class CydonianSanctum {
 			}
 		}
 		return out;
+	}
+
+	/** The cells of the Red Mist the Sentinel leaves in the crater's middle when it falls, from an instance's origin. */
+	public static List<BlockPos> craterMistCells(BlockPos origin) {
+		List<BlockPos> out = new ArrayList<>();
+		for (int y = STAND; y < STAND + 3; y++) {
+			for (int x = CRATER_MIST_WEST; x <= CRATER_MIST_EAST; x++) {
+				out.add(origin.offset(x, y, CRATER_MIST_Z));
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * Whether a point is over the crater laid out from {@code origin}: within the rim's wall of its middle, and from a
+	 * small crater's floor to a few blocks over the floor.
+	 */
+	public static boolean inCrater(BlockPos origin, double x, double y, double z) {
+		double dx = x - origin.getX() - CENTRE_X;
+		double dz = z - origin.getZ() - CENTRE_Z;
+		double up = y - origin.getY() - STAND;
+		return dx * dx + dz * dz <= RIM_WALL * RIM_WALL && up >= -2.0 && up <= 6.0;
+	}
+
+	/** Whether a point is on the crater's floor itself (within its radius), as a foe stepping down onto it is. */
+	public static boolean onCraterFloor(BlockPos origin, double x, double y, double z) {
+		double dx = x - origin.getX() - CENTRE_X;
+		double dz = z - origin.getZ() - CENTRE_Z;
+		double up = y - origin.getY() - STAND;
+		return dx * dx + dz * dz <= CRATER * CRATER && up >= -2.0 && up <= 4.0;
 	}
 
 	/** The crater's middle, on its floor, from an instance's origin. */

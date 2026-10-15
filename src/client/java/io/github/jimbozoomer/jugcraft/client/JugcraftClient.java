@@ -80,6 +80,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		LanternFenClient.register();
 		MireHagClient.register();
 		CryptLichClient.register();
+		CydonianSentinelClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);

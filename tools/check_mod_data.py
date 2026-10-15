@@ -2243,10 +2243,12 @@ def check_arms_variants():
     ints = {"FROST_TICKS": av.FROST[0], "FROST_AMPLIFIER": av.FROST[1], "EMBER_SECONDS": av.EMBER_SECONDS,
             "VENOM_TICKS": av.VENOM[0], "VENOM_AMPLIFIER": av.VENOM[1], "WITHER_TICKS": av.WITHER[0],
             "WITHER_AMPLIFIER": av.WITHER[1], "HOWL_TICKS": av.HOWL[0], "HOWL_AMPLIFIER": av.HOWL[1],
-            "MARK_TICKS": av.MARK_TICKS, "GILDED_ENCHANTABILITY": av.GILDED_ENCHANTABILITY,
+            "MARK_TICKS": av.MARK_TICKS, "RUST_TICKS": av.RUST[0], "RUST_AMPLIFIER": av.RUST[1],
+            "GILDED_ENCHANTABILITY": av.GILDED_ENCHANTABILITY,
             "IRONCLAD_DURABILITY": av.IRONCLAD_DURABILITY, "TROPHY_DURABILITY": av.TROPHY_DURABILITY}
     floats = {"DRAIN_HEAL": av.DRAIN_HEAL, "SHOCK_SHARE": av.SHOCK_SHARE, "SHOCK_RANGE": av.SHOCK_RANGE,
-              "GALE_KNOCKBACK": av.GALE_KNOCKBACK, "GALE_LIFT": av.GALE_LIFT, "TIDE": av.TIDE, "GRAVEBANE": av.GRAVEBANE}
+              "GALE_KNOCKBACK": av.GALE_KNOCKBACK, "GALE_LIFT": av.GALE_LIFT, "TIDE": av.TIDE, "GRAVEBANE": av.GRAVEBANE,
+              "RUST_ARMOR": av.RUST_ARMOR}
     for name, value in ints.items():
         if f"{name} = {value};" not in java:
             err(f"ArmVariants.{name} differs from tools/arms_variants.py ({value})")
@@ -2254,11 +2256,17 @@ def check_arms_variants():
         if f"{name} = {float(value)}F;" not in java:
             err(f"ArmVariants.{name} differs from tools/arms_variants.py ({value})")
     # Bounded: no effect longer than 5 s or above amplifier 1; no share above half a blow.
-    for ticks, amplifier in (av.FROST, av.VENOM, av.WITHER, av.HOWL, (av.MARK_TICKS, 0), (av.EMBER_SECONDS * 20, 0)):
+    for ticks, amplifier in (av.FROST, av.VENOM, av.WITHER, av.HOWL, av.RUST, (av.MARK_TICKS, 0), (av.EMBER_SECONDS * 20, 0)):
         if ticks > 100 or amplifier > 1:
             err(f"tools/arms_variants.py: a boon lasts {ticks} ticks at amplifier {amplifier}, over 5 s or amplifier 1")
-    if av.SHOCK_SHARE > 0.5 or av.TIDE > 0.5 or av.GRAVEBANE > 0.5:
-        err("tools/arms_variants.py: SHOCK_SHARE, TIDE and GRAVEBANE must be at most half a blow")
+    if av.SHOCK_SHARE > 0.5 or av.TIDE > 0.5 or av.GRAVEBANE > 0.5 or not 0.0 < av.RUST_ARMOR <= 0.5:
+        err("tools/arms_variants.py: SHOCK_SHARE, TIDE, GRAVEBANE and RUST_ARMOR must be at most half a blow (or armor)")
+    # Rusted is the Rust boon's own effect: registered with its armor's share, its name and its icon.
+    if "Jugcraft.id(\"rusted\"), -RUST_ARMOR, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL" not in java:
+        err("ArmVariants must register Rusted, taking RUST_ARMOR of its holder's armor")
+    if not (ASSETS / "textures" / "mob_effect" / "rusted.png").is_file() \
+            or "effect.jugcraft.rusted" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+        err("Rusted needs its icon (textures/mob_effect/rusted.png) and its name (effect.jugcraft.rusted)")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for name, kind, line, boon, _display in av.VARIANTS:
         if kind not in arms.KINDS or kind in arms.CHARGING:
@@ -11422,6 +11430,344 @@ def check_crypt_lich():
                 err(f"{cls}.java {why} ({banned})")
 
 
+def check_cydonian_sentinel():
+    """The Cydonian Sentinel (tools/cydonian_sentinel.py, docs/features/cydonian-sentinel.md): every number the Java uses
+    is the table's; its attacks are the table's, and its fight can be played (the Shell Cracks before the Unbound Core
+    before the Red Giant; the Red Giant shortens its cooldowns; a storm's tell and its blowing fit between storms; its
+    sentries rise within their cap; its Hammerfall hurts within the ring it throws back; its lances burn in whole beats;
+    a meteor starts falling within the Starfall's wind-up; every shard reaches its farthest foe, or crosses the crater,
+    within its life); its lances leave from where tools/cydonian_sentinel_models.py puts its core; where its fight looks
+    for the Sanctum's parts (CydonianSanctum.java) is where tools/cydonian_sanctum.py builds them: it waits on the
+    plinth, comes down to open floor with room for it, its sentries rise from the small craters, the Red Mist it leaves
+    opens on open floor in the crater's middle, and every cell of the crater's floor lies within its leash; its rule is
+    fair: from every cell of the crater's floor a sheltered place (rock within LEE upwind) lies within SHELTER_REACH,
+    whichever way the storm blows; its plates open double the core's harm and a strong blow in the lance's wind-up
+    staggers it, and it is unhurt while it wakes, cracks or bursts; every entity is registered, named and drawn; each
+    GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet without
+    overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is animated
+    by two of its controllers; its loot table is the table's and its trophies are Arms VII's; its recipes (none of which
+    makes Cydonian Shards), tags, damage type and advancement are there; the Lowfall Core is held in the offhand and
+    looked at on the server; every message it sends has its words; and nothing of its loads a chunk or leaves its
+    dimension."""
+    import math
+    import arms_variants
+    import cydonian_sanctum as cs
+    import cydonian_sentinel as cn
+    import cydonian_sentinel_models as sm
+    folder = JAVA_ROOT / "lair" / "sentinel"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/sentinel: no Java")
+        return
+    lowfall = {"TICKS": cn.LOWFALL_TICKS, "REFRESH": cn.LOWFALL_REFRESH}
+    for cls, table in (("CydonianSentinelEntity", {**cn.SENTINEL, **cn.LANCE}), ("ShardSentryEntity", cn.SENTRY),
+                       ("RustShardEntity", cn.SHARD), ("QuakeSpikeEntity", {"SINK": cn.SINK}), ("LowfallCore", lowfall)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/cydonian_sentinel.py's {value}")
+    boss = sources.get("CydonianSentinelEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, sentinel, storm, core) in cn.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(sentinel).lower()}, {str(storm).lower()}, {str(core).lower()})")
+        if expected not in boss:
+            err(f"CydonianSentinelEntity.Attack: expected {expected}")
+    winds = ", ".join(f"{side.upper()}({dx}, {dz})" for side, (dx, dz) in cn.WINDS.items())
+    if f"{winds};" not in boss:
+        err(f"CydonianSentinelEntity.Wind: expected {winds} (tools/cydonian_sentinel.py WINDS)")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"CydonianSentinelEntity does not scale as every lair boss does ({call})")
+    s = cn.SENTINEL
+    a = {name: dict(zip(("windup", "active", "recovery", "cooldown", "near", "far"), row)) for name, row in cn.ATTACKS.items()}
+    if not 0.0 < s["GIANT_AT"] < s["UNBOUND_AT"] < s["CRACK_AT"] < 1.0:
+        err("tools/cydonian_sentinel.py: the Shell Cracks, then the Unbound Core, then the Red Giant (0 < GIANT_AT < UNBOUND_AT < CRACK_AT < 1)")
+    if not 0.0 < s["GIANT_COOLDOWN"] < 1.0:
+        err("tools/cydonian_sentinel.py: the Red Giant must make its cooldowns shorter (0 < GIANT_COOLDOWN < 1)")
+    for every in ("STORM_FIRST", "STORM_EVERY", "STORM_EVERY_STORM", "STORM_EVERY_UNBOUND", "STORM_EVERY_GIANT"):
+        if s[every] <= s["STORM_TELL"] + s["STORM_TICKS"]:
+            err(f"tools/cydonian_sentinel.py: a storm's tell and its blowing must fit between storms ({every})")
+    if not s["STORM_EVERY"] >= s["STORM_EVERY_STORM"] >= s["STORM_EVERY_UNBOUND"] >= s["STORM_EVERY_GIANT"]:
+        err("tools/cydonian_sentinel.py: its storms come no less often as the fight goes on")
+    if not 0 < s["STORM_SHARD_AT"] < s["STORM_TICKS"] or s["STORM_TICKS"] < s["STORM_HIT_EVERY"]:
+        err("tools/cydonian_sentinel.py: the storm's shards fly, and it strikes, while it blows")
+    if not 0 < s["SENTRIES_RISE"] <= s["SENTRY_CAP"]:
+        err("tools/cydonian_sentinel.py: no more sentries rise at once than its cap (SENTRIES_RISE <= SENTRY_CAP)")
+    if not s["HAMMER_REACH"] <= s["HAMMER_KNOCK"] or a["HAMMERFALL"]["far"] > s["HAMMER_AHEAD"] + s["HAMMER_REACH"]:
+        err("tools/cydonian_sentinel.py: the Hammerfall hurts within the ring it throws back, and reaches whoever it is used on")
+    for attack in ("CORE_LANCE", "SWEEPING_LANCE"):
+        if a[attack]["active"] % s["LANCE_EVERY"] != 0:
+            err(f"tools/cydonian_sentinel.py: the {attack}'s active ticks must be whole beats (LANCE_EVERY)")
+    if a["CORE_LANCE"]["far"] > s["LANCE_LENGTH"] or a["SWEEPING_LANCE"]["far"] > s["LANCE_LENGTH"]:
+        err("tools/cydonian_sentinel.py: its lances reach whoever they are used on (far <= LANCE_LENGTH)")
+    if a["QUAKE_LINE"]["far"] > s["QUAKE_LENGTH"] or s["QUAKE_STEP"] > 2 * s["QUAKE_WIDTH"] + 0.6:
+        err("tools/cydonian_sentinel.py: the Quake Line reaches whoever it is used on, and its spikes stand close enough to show it")
+    if not 0 < s["METEOR_FALL"] <= a["STARFALL"]["windup"]:
+        err("tools/cydonian_sentinel.py: a meteor starts falling within the Starfall's wind-up (METEOR_FALL)")
+    if not 0 < s["STAGGER_TICKS"] or not 0 < s["STAGGER_DAMAGE"] or a["CORE_LANCE"]["windup"] <= 0:
+        err("tools/cydonian_sentinel.py: the Core Lance's wind-up is the moment to stagger it")
+    for reach, speed, why in ((a["SHARD_VOLLEY"]["far"], "VOLLEY_SPEED", "the Shard Volley's farthest foe"),
+                              (2 * cs.CRATER, "STORM_SPEED", "across the crater"),
+                              (a["SHARD_BURST"]["far"], "BURST_SPEED", "the Shard Burst's farthest foe"),
+                              (cn.SENTRY["RANGE"], "SENTRY_SPEED", "a sentry's farthest foe")):
+        if reach / cn.SHARD[speed] >= cn.SHARD["LIFE"]:
+            err(f"tools/cydonian_sentinel.py: a shard at {speed} must reach {why} within its LIFE")
+    if cn.LOWFALL_REFRESH >= cn.LOWFALL_TICKS:
+        err("tools/cydonian_sentinel.py: the Lowfall Core's Slow Falling must be renewed before it lapses")
+    # Its lances leave from its model's core: in its chest, and unbound.
+    for name, value in (("CORE_UP", sm.CORE_Y / 16), ("CORE_AHEAD", -sm.CORE_FRONT / 16), ("UNBOUND_UP", sm.UNBOUND_CORE_Y / 16)):
+        if cn.LANCE[name] != value:
+            err(f"tools/cydonian_sentinel.py LANCE {name} must be where tools/cydonian_sentinel_models.py puts its core: {value}")
+    # Where its fight looks for the Sanctum's parts is where tools/cydonian_sanctum.py builds them.
+    sanctum = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CydonianSanctum.java").read_text(encoding="utf-8"))
+    wx, wy, wz, _ = cs.WAIT
+    for name, value in (("WAIT_X", float(wx)), ("WAIT_Y", float(wy)), ("WAIT_Z", float(wz)), ("WOKE_X", float(cn.WOKE[0])),
+                        ("WOKE_Z", float(cn.WOKE[1])), ("RIM_WALL", float(cs.RIM["wall"])), ("STONE_SIZE", cs.STONE_SIZE),
+                        ("STONE_HEIGHT", cs.STONE_HEIGHT), ("CRATER_MIST_WEST", cn.CRATER_MIST["x"][0]),
+                        ("CRATER_MIST_EAST", cn.CRATER_MIST["x"][1]), ("CRATER_MIST_Z", cn.CRATER_MIST["z"])):
+        if not java_number(sanctum, name, value):
+            err(f"CydonianSanctum.{name} is not {value} (tools/cydonian_sanctum.py, tools/cydonian_sentinel.py)")
+    for name, cells in (("STONES", cs.STONES), ("PITS", cs.PITS)):
+        listed = ", ".join(f"{{{x}, {z}}}" for x, z in cells)
+        if f"{name} = {{{listed}}};" not in sanctum:
+            err(f"CydonianSanctum.{name} are not tools/cydonian_sanctum.py's: {{{listed}}}")
+    if not re.search(r"craterMistCells\(BlockPos origin\) \{ List<BlockPos> out = new ArrayList<>\(\); "
+                     r"for \(int y = STAND; y < STAND \+ 3; y\+\+\)", sanctum):
+        err("CydonianSanctum.craterMistCells: the Red Mist it leaves is three high, from the floor (STAND)")
+    blocks = cs.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light", "minecraft:cave_air", "minecraft:air")
+    solid = lambda pos: not free(pos)
+    plinth = (math.floor(wx), int(wy), math.floor(wz))
+    if not cs.in_box(cs.PLINTH, plinth[0], plinth[2]) or not solid((plinth[0], plinth[1] - 1, plinth[2])) \
+            or not all(free((x, plinth[1] + dy, z)) for x in range(plinth[0] - 1, plinth[0] + 2)
+                       for z in range(plinth[2] - 1, plinth[2] + 2) for dy in range(4)):
+        err(f"Where the Cydonian Sentinel waits, {plinth}, is not on its plinth with room for it, four high")
+    wokex, wokez = (math.floor(v) for v in cn.WOKE)
+    if not cs.in_crater(wokex, wokez) or cs.in_pit(wokex, wokez) or any(cs.in_stone(x, z) for x in range(wokex - 1, wokex + 2)
+                                                                          for z in range(wokez - 1, wokez + 2)) \
+            or not all(solid((x, cs.PAVE, z)) and all(free((x, cs.STAND + dy, z)) for dy in range(4))
+                       for x in range(wokex - 1, wokex + 2) for z in range(wokez - 1, wokez + 2)):
+        err(f"Where the Cydonian Sentinel comes down, ({wokex}, {wokez}), is not open crater floor with room for it, four high")
+    for px, pz in cs.PITS:
+        if not cs.in_crater(px, pz) or not cs.in_pit(px, pz) or not solid((px, cs.PAVE - 1, pz)) \
+                or not all(free((px, cs.STAND + dy, pz)) for dy in range(4)):
+            err(f"A sentry cannot rise from the small crater at ({px}, {pz}): not a pit in the crater with room over it")
+    for x in range(cn.CRATER_MIST["x"][0], cn.CRATER_MIST["x"][1] + 1):
+        z = cn.CRATER_MIST["z"]
+        if not cs.in_crater(x, z) or not solid((x, cs.PAVE, z)) or not all(free((x, cs.STAND + dy, z)) for dy in range(3)):
+            err(f"The Red Mist it leaves at ({x}, {z}) would not stand on open crater floor")
+    floor = [(x, z) for x in range(cs.SIZE[0]) for z in range(cs.SIZE[2]) if cs.in_crater(x, z) and not cs.in_stone(x, z)]
+    for x, z in floor:
+        if cs.distance(x, z) > s["LEASH"]:
+            err(f"The crater's floor at ({x}, {z}) lies beyond its leash")
+    # Its rule is fair: whichever way the storm blows, a sheltered place is near. Sheltered, as the Java decides: rock
+    # stands within LEE upwind of the chest (a block over where they stand).
+    def stand(x, z):
+        y = cs.STAND
+        while solid((x, y, z)):
+            y += 1
+        while not solid((x, y - 1, z)):
+            y -= 1
+        return y
+
+    def sheltered(x, z, dx, dz):
+        y = stand(x, z) + 1
+        steps = int(s["LEE"] * 20)
+        return any(solid((math.floor(x + 0.5 - dx * i / 20), y, math.floor(z + 0.5 - dz * i / 20))) for i in range(steps + 1))
+
+    for side, (dx, dz) in cn.WINDS.items():
+        lee = [(x, z) for x, z in floor if sheltered(x, z, dx, dz)]
+        for x, z in floor:
+            if not lee or min(math.hypot(x - lx, z - lz) for lx, lz in lee) > s["SHELTER_REACH"]:
+                err(f"From ({x}, {z}) on the crater's floor no shelter from a storm from the {side} lies within SHELTER_REACH")
+                break
+    if not re.search(r"new ClipContext\(chest, upwind, ClipContext\.Block\.COLLIDER", boss) \
+            or "chest.subtract(from.blows().scale(LEE))" not in boss:
+        err("CydonianSentinelEntity.sheltered must look LEE blocks upwind for rock, as the audit does")
+    # Its weak point and its pauses.
+    if "dealt = amount * CORE_MULTIPLIER;" not in boss \
+            or "attack == Attack.CORE_LANCE && attackTicks < Attack.CORE_LANCE.windup && amount >= STAGGER_DAMAGE" not in boss:
+        err("CydonianSentinelEntity.hurtServer: its open plates double the core's harm, and a strong blow in the lance's wind-up staggers it")
+    if not re.search(r"if \(phase == Phase\.WAKING \|\| phase == Phase\.CRACKING \|\| phase == Phase\.BURSTING\) \{\s*return false;", boss):
+        err("CydonianSentinelEntity.hurtServer: it is unhurt while it wakes, cracks or bursts")
+    if "case RED_STORM, BURSTING -> STORM_EVERY_STORM;" not in boss:
+        err("CydonianSentinelEntity.stormEvery must use the table's STORM_EVERY_* for each phase")
+    registry = sources.get("JugcraftSentinel", "")
+    for needed, why in (("Lairs.onPlaced(Lair.CYDONIAN_SANCTUM, CydonianSentinelEntity::summon)", "set it on the plinth of every Sanctum"),
+                        ("LowfallCore.register();", "look at the Lowfall Core")):
+        if needed not in registry:
+            err(f"JugcraftSentinel must {why} ({needed})")
+    sentry = sources.get("ShardSentryEntity", "")
+    if "master.took(player, amount)" not in sentry or "crumble(level)" not in sentry:
+        err("ShardSentryEntity: whoever hurts one takes part, and it crumbles when the Sentinel is gone")
+    core = sources.get("LowfallCore", "")
+    if "getOffhandItem().is(JugcraftSentinel.LOWFALL_CORE)" not in core or "ServerTickEvents.END_SERVER_TICK" not in core \
+            or "player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, TICKS," not in core:
+        err("LowfallCore must look at each player's offhand on the server's tick, and keep them falling slowly")
+    damage = load(DATA / MOD / "damage_type" / "red_storm.json") or {}
+    if any(damage.get(key) != cn.DAMAGE_TYPE[key] for key in ("message_id", "exhaustion", "scaling")):
+        err(f"damage_type/red_storm.json is not tools/cydonian_sentinel.py's DAMAGE_TYPE: {damage}")
+    if 'Jugcraft.id("red_storm")' not in boss:
+        err("CydonianSentinelEntity's storm must deal jugcraft:red_storm")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"death.attack.{cn.DAMAGE_TYPE['message_id']}", f"death.attack.{cn.DAMAGE_TYPE['message_id']}.player"):
+        if key not in lang:
+            err(f"The Red Storm's death message {key} has no words")
+    for side in cn.WINDS:
+        if lang.get(f"message.{MOD}.cydonian_sentinel.wind.{side}") != cn.WIND_NAMES.get(side):
+            err(f"The storm's side {side} has no words (message.{MOD}.cydonian_sentinel.wind.{side})")
+    client = (CLIENT_JAVA_ROOT / "CydonianSentinelClient.java").read_text(encoding="utf-8")
+    if "CydonianSentinelClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register CydonianSentinelClient")
+    if "lair.sentinel.JugcraftSentinel.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftSentinel")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftSentinel.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("SentinelLoot", "")
+    if f'ADVANCEMENT = "{cn.ADVANCEMENT["key"]}";' not in loot_java:
+        err("SentinelLoot's advancement differs from tools/cydonian_sentinel.py")
+    for entity in cn.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftSentinel does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != cn.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {cn.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"CydonianSentinelClient draws no {entity}")
+    for item in cn.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftSentinel does not register {item}")
+    # The GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("cydonian_sentinel", set()).add(f"animation.cydonian_sentinel.{clip}")
+    for entity, body in cn.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in sm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, first in enumerate(regions):
+            for second in regions[i + 1:]:
+                if first[0] < second[2] and second[0] < first[2] and first[1] < second[3] and second[1] < first[3]:
+                    err(f"{entity}.geo.json: UV regions {first} and {second} overlap")
+        glows = entity in cn.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"CydonianSentinelClient: the {entity}'s glow layer must match tools/cydonian_sentinel.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * sm.TEXTURE_SCALE, height * sm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * sm.TEXTURE_SCALE}x{height * sm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # Its controllers own their bones: the body's clips never key its core's light, its plates or its form.
+    owned = {bone: controller for controller, bones in sm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in sm.ANIMATIONS["cydonian_sentinel"]()["animations"].items():
+        controller = sm.controller_of(clip_name)
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"cydonian_sentinel: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *sm.CONTROLLERS):
+        if f'new AnimationController<CydonianSentinelEntity>("{controller}"' not in boss:
+            err(f"CydonianSentinelEntity has no {controller} controller (tools/cydonian_sentinel_models.py CONTROLLERS)")
+    # Its loot, and its trophies: Arms VII's, as its bosses/cydonian_sentinel table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "cydonian_sentinel.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/cydonian_sentinel.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"cydonian_shard": cn.SHARDS, **{item: cn.TROPHY_CHANCE for item in cn.TROPHIES}, **cn.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/cydonian_sentinel.json gives {found_loot}, not tools/cydonian_sentinel.py's {expected}")
+    if tuple(arms_variants.trophies("cydonian_sentinel")) != tuple(cn.TROPHIES):
+        err(f"tools/cydonian_sentinel.py TROPHIES {cn.TROPHIES} are not Arms VII's: {arms_variants.trophies('cydonian_sentinel')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "cydonian_sentinel.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in cn.TROPHIES]:
+        err(f"loot_table/bosses/cydonian_sentinel.json holds {held_items}, not its trophies {cn.TROPHIES}")
+    for table_id in ("entities/cydonian_sentinel", "bosses/cydonian_sentinel"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"SentinelLoot must roll loot_table/{table_id}.json")
+    for trophy in cn.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftSentinel must find the {trophy} (Arms VII registers it)")
+    for key in cn.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    for key in cn.CRUSHING:
+        crushing = load(DATA / MOD / "recipe" / "crushing" / f"{key}.json") or {}
+        if crushing.get("result", {}).get("id") != cn.CRUSHING[key]["result"]:
+            err(f"recipe/crushing/{key}.json must crush it into {cn.CRUSHING[key]['result']}")
+    # Cydonian Shards come only from it: no recipe makes them, so nothing turns back into them.
+    for path in (DATA / MOD / "recipe").rglob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:cydonian_shard":
+            err(f"recipe/{path.relative_to(DATA / MOD / 'recipe')} makes Cydonian Shards, which only the Cydonian Sentinel gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in cn.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{cn.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{cn.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in cn.MESSAGES:
+        if f'"message.jugcraft.cydonian_sentinel.{key}"' not in sent:
+            err(f"tools/cydonian_sentinel.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -15183,6 +15529,7 @@ def main():
 
     check_acquisition(registered)
     check_crypt_lich()
+    check_cydonian_sentinel()
     check_material_sets()
     check_art()
     check_pixel_hollows()
