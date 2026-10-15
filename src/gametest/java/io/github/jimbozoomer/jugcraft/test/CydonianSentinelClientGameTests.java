@@ -116,7 +116,7 @@ public class CydonianSentinelClientGameTests implements FabricClientGameTest {
 				int spikes = lair(minecraft).getEntitiesOfClass(QuakeSpikeEntity.class, slot()).size();
 				check(spikes >= 5, "Only " + spikes + " spikes burst up along its Quake Line");
 			});
-			shotFrom(context, singleplayer, dim, at, -5.5, 3.0, 2.0, 0.0, 0.5, 6.0, "jugcraft_cydonian_sentinel_quake");
+			shotFrom(context, singleplayer, dim, at, -7.0, 5.0, -2.0, 0.0, 0.5, 6.0, "jugcraft_cydonian_sentinel_quake");
 			pose(context, server, at, (sentinel, level, player) -> sentinel.begin(level, Attack.CORE_LANCE, player), Attack.CORE_LANCE.windup - 4);
 			server.runOnServer(minecraft -> {
 				CydonianSentinelEntity sentinel = sentinel(minecraft);
@@ -148,7 +148,7 @@ public class CydonianSentinelClientGameTests implements FabricClientGameTest {
 				check(sentinel.sentries().size() == CydonianSentinelEntity.SENTRIES_RISE, sentinel.sentries().size() + " sentries rose, not "
 						+ CydonianSentinelEntity.SENTRIES_RISE);
 			});
-			shotFrom(context, singleplayer, dim, at, 0.0, 3.0, 15.0, 0.0, 2.5, 0.0, "jugcraft_cydonian_sentinel_cracks");
+			shotFrom(context, singleplayer, dim, at, 0.0, 7.0, 14.0, 0.0, 1.0, 2.0, "jugcraft_cydonian_sentinel_cracks");
 			server.runCommand("tick unfreeze");
 			context.waitTicks(CydonianSentinelEntity.CRACK_TICKS + 5);
 			server.runOnServer(minecraft -> check(sentinel(minecraft).phase() == CydonianSentinelEntity.Phase.RED_STORM,
@@ -196,7 +196,7 @@ public class CydonianSentinelClientGameTests implements FabricClientGameTest {
 				check(sentinel.phase() == CydonianSentinelEntity.Phase.RED_GIANT && sentinel.glow() == CydonianSentinelEntity.Glow.GIANT,
 						"The Red Giant did not come: " + sentinel.phase());
 			});
-			shotFrom(context, singleplayer, dim, at, 3.5, 1.0, 3.5, 0.0, 2.0, 0.0, "jugcraft_cydonian_sentinel_red_giant");
+			shotFrom(context, singleplayer, dim, at, 4.5, 1.5, 4.5, 0.0, 2.8, 0.0, "jugcraft_cydonian_sentinel_red_giant");
 
 			// It falls: the player's loot and advancement, its sentries and things gone with it, and the Red Mist in the
 			// crater's middle. Beside the mist, a stand wears the Sentinel's Visor and holds the Corelance.
