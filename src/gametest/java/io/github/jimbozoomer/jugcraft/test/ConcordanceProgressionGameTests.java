@@ -133,7 +133,9 @@ public class ConcordanceProgressionGameTests {
 				// Concordance Chunk B, unit 3: winter and stone.
 				"research:jugcraft:rimekeeping@mastered", "research:jugcraft:stratawrighting@mastered", "practice:jugcraft:winter_survey",
 				"practice:jugcraft:rimework", "practice:jugcraft:anchoring", "invocation:jugcraft:rimebind", "invocation:jugcraft:preserve",
-				"invocation:jugcraft:brace")) {
+				"invocation:jugcraft:brace",
+				// Concordance Chunk C, C-04: Root and Rivet.
+				"ritual:jugcraft:root_and_rivet")) {
 			helper.assertTrue(graph.nodes().containsKey(node), "the graph lacks " + node);
 		}
 		Set<String> alone = graph.reachable(true);
@@ -142,6 +144,7 @@ public class ConcordanceProgressionGameTests {
 			helper.assertTrue(alone.contains("stage:" + stage.id()), "one player alone cannot reach " + stage.id());
 		}
 		helper.assertTrue(together.containsAll(alone), "other players only add to what one can reach");
+		helper.assertTrue(alone.contains("ritual:jugcraft:root_and_rivet"), "one player alone can work Root and Rivet (Concordance Chunk C, C-04)");
 		helper.assertTrue(!alone.contains("ritual:jugcraft:lumen_vigil") && together.contains("ritual:jugcraft:lumen_vigil"),
 				"a ritual for two needs a second player");
 		helper.assertTrue(!alone.contains(ProgressionGraph.NOTES) && together.contains(ProgressionGraph.NOTES),

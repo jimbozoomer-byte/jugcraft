@@ -190,6 +190,7 @@ EXCLUDED = [
     rid("winterguards_boots"),
     rid("leather_belt"), rid("angelic_feather"), rid("kraken_shell"), rid("infernal_claws"), rid("angelheart_vial"),
     rid("phoenix_down"), rid("amphibian_boot"), rid("ice_breaker"),
+    rid("rooted_thallite_foundation"),  # Concordance Chunk C, C-04: Root and Rivet's, never weighed
     "minecraft:enchanted_book", "minecraft:totem_of_undying", "minecraft:nether_star", "minecraft:experience_bottle",
     "minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:written_book",
     "minecraft:filled_map", "minecraft:player_head", "minecraft:spawner", "minecraft:trial_spawner", "minecraft:heart_of_the_sea",

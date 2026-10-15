@@ -32,6 +32,7 @@ RESOURCES = {
     "je": "Jugcraft Energy (JE)",
     "relic_charge": "relic charge",
     "bone_meal": "bone meal",
+    "rooted_thallite_foundation": "Rooted Thallite Foundations (Root and Rivet's; nothing turns one back)",
 }
 
 # Every conversion: (id, from, amount, to, amount). The best case is used (a thriving Heart), so the audit is safe.
@@ -68,6 +69,8 @@ ANCHORS = {
                 ("KindledLanternItem.java", "charge(stack).kept(now, true)")],
     "gleaner": [("garden/GleanerBlockEntity.java", "GLEAN_TICKS = 40;"), ("garden/GleanerBlockEntity.java", "COST = 1;")],
     "spire": [("data:concordance/wonder/concord_spire.json", None)],
+    "root_and_rivet": [("data:concordance/ritual/root_and_rivet.json", None), ("ritual/RitualMachine.java", "STEP_TICKS = 40;"),
+                       ("rules/FocusPool.java", "REGEN_TICKS = 40;")],
 }
 
 # The figures the anchors must show (checked against the data files by check_economy).
@@ -82,6 +85,19 @@ LANTERN_BURN_TICKS = 400
 SCONCE_BURN_TICKS = 1200
 FOCUS_MAX = 20
 VITAE_AN_HOUR = 60     # check_crimson's bound on what an hour of offerings can give
+STEP_TICKS = 40         # a ritual's step (ritual/RitualMachine.STEP_TICKS)
+FOCUS_REGEN_TICKS = 40  # a player's Focus comes back one point this often (rules/FocusPool.REGEN_TICKS)
+
+# Rituals that make a thing nothing turns back into a resource, modelled from Concordance Chunk C on (C-04; plan 06:144;
+# the Adept's Attunement's wand is an instrument, excluded and never converted): what one completed run takes, the Ley
+# Charge of every channel and each participant's Focus, for the one thing it makes. Each is an edge into a node with no
+# way out, so it closes no cycle today; it is in the audit so that a later conversion out of that thing is weighed with
+# it. check_economy holds each to its ritual's data.
+RITUAL_SINKS = {
+    "root_and_rivet": {"rite": "Root and Rivet", "makes": "rooted_thallite_foundation", "name": "Rooted Thallite Foundations",
+                       "ley": 32, "focus": 6, "ticks": 160, "offerings": "a Thallite plate, 4 copper ingots and 4 Mendvetch",
+                       "consequence": "none; a foundation never becomes Ley Charge, Focus or a plate again"},
+}
 
 
 def load(path):
@@ -129,6 +145,9 @@ def edges():
     ratios = {}
     for _, source, amount, result, made in CONVERSIONS:
         ratios[source, result] = max(ratios.get((source, result), 0.0), made / amount)
+    for sink in RITUAL_SINKS.values():
+        for resource in ("ley", "focus"):
+            ratios[resource, sink["makes"]] = max(ratios.get((resource, sink["makes"]), 0.0), 1 / sink[resource])
     for _, back, spent in crop_loops():
         ratios["nutrient", "nutrient"] = max(ratios.get(("nutrient", "nutrient"), 0.0), back / spent)
     return ratios
@@ -190,6 +209,13 @@ def installations():
         ("Crimson Surge", f"{DAY // SURGE_COOLDOWN * 6} Vitae", f"{DAY // SURGE_COOLDOWN * 6} Focus",
          f"one every {SURGE_COOLDOWN} ticks", "health given (offering exhaustion)"),
     ]
+    for sink in RITUAL_SINKS.values():
+        runs = DAY // sink["ticks"]
+        rows.append((f"{sink['rite']}, worked again and again at one Lesser Circle",
+                     f"{runs * sink['ley']:,} Ley Charge, {runs * sink['focus']:,} Focus, and {sink['offerings']} a run",
+                     f"{runs} {sink['name']}", f"one run every {sink['ticks']} ticks; one player's Focus, back 1 every "
+                     f"{FOCUS_REGEN_TICKS} ticks, pays for {DAY // FOCUS_REGEN_TICKS // sink['focus']} runs",
+                     sink["consequence"]))
     for key, label in (("verdant_spire", "Verdant Spire"), ("star_spire", "Star Spire"), ("lantern_spire", "Lantern Spire")):
         entry = configurations[key]
         upkeep = entry["upkeep"]

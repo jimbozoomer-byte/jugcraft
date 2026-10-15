@@ -100,6 +100,8 @@ import net.minecraft.world.level.material.Fluids;
  * ({@code jugcraft_encyclopedia_inspect_readiness}); then, walled and roofed so it is dark at any hour (the player given
  * night vision, which changes only what the client draws, so the shot is not black), the Lumen Vigil gathering, in Jade
  * ({@code jugcraft_concordance_anchor_gathering_jade}).</li>
+ * <li><b>Root and Rivet's foundation</b> (Concordance Chunk C, C-04): the Rooted Thallite Foundation held, in the hand and
+ * the hotbar, so its icon is seen in game ({@code jugcraft_rooted_thallite_foundation}; ITEM_ICONS step 7).</li>
  * <li><b>Expeditions and keys</b> ({@code jugcraft_encyclopedia_expedition}, {@code jugcraft_encyclopedia_keys}), and the
  * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
  * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
@@ -131,6 +133,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				inspection(context, server);
 				crucibleInspection(context, server);
 				anchorReadiness(context, server);
+				rootedFoundation(context, server);
 				expeditionsAndKeys(context, server);
 				creative(context, server);
 				sizes(context);
@@ -616,6 +619,16 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		});
 		server.runCommand("time set noon");
 		context.getInput().lookAt(0.0F, 30.0F);
+		context.waitTicks(5);
+	}
+
+	/** Concordance Chunk C, C-04: the Rooted Thallite Foundation in the hand and the hotbar, its icon seen in game (ITEM_ICONS step 7). */
+	private static void rootedFoundation(ClientGameTestContext context, TestDedicatedServerContext server) {
+		server.runOnServer(minecraft -> first(minecraft).setItemInHand(InteractionHand.MAIN_HAND,
+				new ItemStack(JugcraftConcordance.ROOTED_THALLITE_FOUNDATION)));
+		context.waitTicks(10);
+		context.takeScreenshot("jugcraft_rooted_thallite_foundation");
+		server.runOnServer(minecraft -> first(minecraft).setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND)));
 		context.waitTicks(5);
 	}
 

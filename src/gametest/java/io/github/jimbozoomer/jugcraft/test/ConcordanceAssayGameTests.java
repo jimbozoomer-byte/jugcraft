@@ -47,7 +47,7 @@ import net.minecraft.world.level.GameType;
  * pays, so a round trip loses; only plain catalogued matter is weighed (named, filled, bound, enchanted, magical and
  * excluded things are refused with their reason, and nothing changes); the ledger never passes its cap; the declared
  * conversion graph is the game's own recipes; and the catalogue is balanced. Since Concordance Chunk C (C-02), the
- * workshop's products are never weighed.
+ * workshop's products are never weighed, and since C-04 neither is Root and Rivet's Rooted Thallite Foundation.
  */
 public class ConcordanceAssayGameTests {
 	private static ServerPlayer assayer(GameTestHelper helper) {
@@ -254,6 +254,25 @@ public class ConcordanceAssayGameTests {
 			helper.assertTrue(Assaying.eligibility(new ItemStack(form)).equals("uncatalogued") && Assaying.catalog().material(id) == null,
 					"A bare " + id + " is not catalogued: " + Assaying.eligibility(new ItemStack(form)));
 		}
+		helper.succeed();
+	}
+
+	/** Concordance Chunk C, C-04: the Rooted Thallite Foundation is excluded: never weighed, dissolved or formed. */
+	@GameTest(maxTicks = 20)
+	public void theFoundationIsNeverWeighed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer player = assayer(helper);
+		Item foundation = item("jugcraft:rooted_thallite_foundation");
+		ItemStack stack = new ItemStack(foundation, 2);
+		helper.assertTrue(foundation != Items.AIR && stack.is(Assaying.EXCLUDED) && Assaying.eligibility(stack).equals("excluded")
+				&& Assaying.catalog().material("jugcraft:rooted_thallite_foundation") == null, "excluded: " + Assaying.eligibility(stack));
+		use(player, level, stack, ItemStack.EMPTY);
+		Assaying.use(player, level, player.getMainHandItem(), player.getOffhandItem());
+		helper.assertTrue(player.getMainHandItem().getCount() == 2 && Assaying.balance(player) == 0, "nothing dissolved");
+		Assaying.setBalance(player, 10_000L);
+		use(player, level, ItemStack.EMPTY, new ItemStack(foundation));
+		helper.assertTrue(Assaying.balance(player) == 10_000L && player.getMainHandItem().isEmpty() && player.getOffhandItem().getCount() == 1,
+				"nothing is formed from it as a pattern");
 		helper.succeed();
 	}
 }

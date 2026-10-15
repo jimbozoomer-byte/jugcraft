@@ -10893,6 +10893,28 @@
             1
           ],
           "value": 5
+        },
+        {
+          "kind": "ritual",
+          "in": [
+            [
+              "jugcraft:thallite_plate",
+              1
+            ],
+            [
+              "minecraft:copper_ingot",
+              4
+            ],
+            [
+              "jugcraft:mendvetch",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:rooted_thallite_foundation",
+            1
+          ],
+          "value": 4
         }
       ]
     }
@@ -11007,6 +11029,10 @@
     {
       "item": "jugcraft:rimeclaw",
       "key": "rimeclaw"
+    },
+    {
+      "item": "jugcraft:rooted_thallite_foundation",
+      "key": "rooted_thallite_foundation"
     },
     {
       "item": "jugcraft:salamander_charm",

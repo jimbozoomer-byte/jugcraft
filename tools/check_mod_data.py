@@ -11723,7 +11723,7 @@ def check_concordance(registered):
     # Every Concordance item icon is its 16x16 map in tools/item_icons/, committed as drawn (docs/ITEM_ICONS.md).
     import item_icons
     for icon in ("initiate_wand", "adept_wand", "kindled_lantern", "kindled_lantern_lit", "research_notes",
-                 "research_notes_written", "arcane_concordance"):
+                 "research_notes_written", "arcane_concordance", "rooted_thallite_foundation"):
         texture = ASSETS / "textures" / "item" / f"{icon}.png"
         if not item_icons.has(icon) or not texture.is_file():
             err(f"concordance: {icon} needs its map tools/item_icons/{icon}.txt and its texture (tools/generate_textures.py)")
@@ -11731,6 +11731,12 @@ def check_concordance(registered):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
                 err(f"concordance: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+    # The foundation's thallite is the Thallite metal's own ramp (Concordance Chunk C, C-04): only its outline is darker.
+    import icon_materials
+    import material_icons
+    thallite = icon_materials.MATERIALS.get("thallite")
+    if thallite is None or (thallite.dark, thallite.mid, thallite.light, thallite.highlight) != material_icons.METAL_RAMPS["thallite"][1:]:
+        err("tools/icon_materials.py: thallite's dark, mid, light and highlight are the Thallite metal's (tools/material_icons.py METAL_RAMPS)")
     resource_java = (root / "resource" / "ResourceType.java").read_text(encoding="utf-8") \
         if (root / "resource" / "ResourceType.java").exists() else ""
     match = re.search(r"PRINCIPLES = Set\.of\(([^;]*)\);", resource_java)
@@ -11952,6 +11958,17 @@ def check_concordance(registered):
         for key in re.findall(r'"(book\.[a-z_.0-9]+|research_node\.[a-z_.0-9]+)"', text):
             if key not in lang:
                 err(f"codex {path.relative_to(book)}: missing lang {key}")
+    # A codex link (Modonomicon's entry://) names an entry of this book (Concordance Chunk C, C-04, C-P42). Modonomicon
+    # will not open a book with a broken link (allow_open_book_with_invalid_links defaults to false), so one stale link
+    # would close the whole codex.
+    for key, text in sorted(lang.items()):
+        if not key.startswith(f"book.{MOD}.{co.BOOK}."):
+            continue
+        for link in re.findall(r"\]\((entry://[^)\s]*)\)", text):
+            target = re.split(r"[#@]", link[len("entry://"):])[0]
+            owner, _, path = target.partition("/")
+            if owner != f"{MOD}:{co.BOOK}" or not (book / "entries" / f"{path}.json").is_file():
+                err(f"codex lang {key}: {link} names no entry of the codex ({MOD}:{co.BOOK}/<category>/<entry>)")
     # Opt-outs name real items; the Kindled mote has its block state and name; LambDynamicLights names a real item.
     for path in (DATA / MOD / "spell_assignments").glob("*.json"):
         if path.stem not in registered:
@@ -12337,8 +12354,13 @@ def check_rituals(co, root, lang, registered, research):
     ritual is unlocked by the research that teaches it); every interruption, fault, role and phase has its words; and
     the anchor's GeckoLib assets, the participants' gesture and the Fusion built-in pack are all there. Concordance Chunk
     C, C-03: a full pylon pays a whole run; a start and readiness choose through one function; what the Inspect page and
-    Jade read only reads; readings and refused starts mark the faulted parts; an interruption is told in one line."""
+    Jade read only reads; readings and refused starts mark the faulted parts; an interruption is told in one line. C-04:
+    any recipe whose result an offering is counts as its way to make it; what a ritual makes is excluded from the scale,
+    made by that ritual in the progression graph and given its JEI page; the feature switches a rite's offerings need
+    beside the Concordance's are the ones its generator states, and Concordance data carries no load condition; and
+    Stratawrighting's Understood page links Root and Rivet's codex entry."""
     ri = co.rituals
+    import acquisition as aq
     def java(name, base=root):
         path = base / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -12402,7 +12424,14 @@ def check_rituals(co, root, lang, registered, research):
             err(f"structure {key}: missing lang structure.{MOD}.{key}")
     # Rituals: references, limits, reachability and the research that unlocks them.
     rituals = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "ritual").glob("*.json")}
-    recipes = {path.stem for path in (DATA / MOD / "recipe").glob("*.json")}
+    # A way to make an offering is a recipe whose result it is, in any recipe folder (the Metal Press's pressing/ too), not
+    # a file of its name: the Thallite plate's hand recipe is thallite_plate_by_hand (Concordance Chunk C, C-04).
+    recipes = set()
+    for path in DATA.glob("*/recipe/**/*.json"):
+        made_by = (load(path) or {}).get("result")
+        made_by = made_by.get("id") if isinstance(made_by, dict) else made_by
+        if isinstance(made_by, str) and split(made_by)[0] == MOD:
+            recipes.add(split(made_by)[1])
     made = {split(r["result"]["transform"]["into"])[1] for r in rituals.values() if "transform" in r.get("result", {})}
     unlocked = {split(ref)[1] for entry in research.values() for block in entry.get("unlocks", {}).values()
                 for ref in block.get("rituals", [])}
@@ -12446,6 +12475,14 @@ def check_rituals(co, root, lang, registered, research):
                 err(f"ritual {key}: makes unknown item {into}")
             if not any(o.get("item") == result["transform"].get("from") and o.get("count") == 1 for o in offerings):
                 err(f"ritual {key}: transforms an item that is not offered once")
+            # What a ritual makes is beyond the scale, the progression graph's to make, and has its JEI page (the Adept's
+            # Wand since roadmap step 21 and Chunk A; Concordance Chunk C, C-04).
+            if into not in co.equivalence.EXCLUDED:
+                err(f"ritual {key}: {into} is never weighed: add it to tools/concordance_equivalence.py EXCLUDED")
+            if co.progression.PRODUCERS.get(into, ("",))[0] != f"ritual:{MOD}:{key}":
+                err(f"ritual {key}: tools/concordance_progression.py PRODUCERS must say this ritual makes {into}")
+            if aq.RITUALS.get(split(into)[1]) != key:
+                err(f"ritual {key}: tools/acquisition.py RITUALS must give {into} its JEI page, naming this ritual")
         elif not 0 < len(result.get("effects", [])) <= lim["MAX_GRANTS"]:
             err(f"ritual {key}: needs a transform or 1 to {lim['MAX_GRANTS']} effects")
         for grant in result.get("effects", []):
@@ -12456,6 +12493,61 @@ def check_rituals(co, root, lang, registered, research):
                 err(f"ritual {key}: effect {operation.get('effect')} does not act on creatures")
         if f"ritual.{MOD}.{key}" not in lang:
             err(f"ritual {key}: missing lang ritual.{MOD}.{key}")
+    # Concordance Chunk C, C-04 (C-P41): the feature switches a rite's offerings need beside the Concordance's are the ones
+    # tools/concordance_rituals.py states for it ("switches"): those every recipe making an offering asks for, with those
+    # every recipe making each thing it is made from asks for (one step down; a tag needs what all its members need, and a
+    # thing not Jugcraft's needs none), an offering that is itself a tag likewise. With one off the rite stays known but its
+    # offering cannot be made. Concordance data carries no load condition: whether Fabric applies one to the Concordance's
+    # loader is unverified.
+    makers = {}
+    for path in sorted(DATA.glob("*/recipe/**/*.json")):
+        body = load(path) or {}
+        result = body.get("result")
+        result = result.get("id") if isinstance(result, dict) else result
+        if not isinstance(result, str):
+            continue
+        switches = {c.get("feature") for c in body.get("fabric:load_conditions", [])
+                    if c.get("condition") == f"{MOD}:feature_enabled"} - {"concordance"}
+        refs = list(body.get("key", {}).values()) + list(body.get("ingredients", [])) + [body.get("ingredient")]
+        makers.setdefault(result, []).append((switches, refs))
+    def members(ref):
+        """What an ingredient stands for: an item, a #tag's values, or a list of either."""
+        if isinstance(ref, list):
+            return [m for each in ref for m in members(each)]
+        if isinstance(ref, dict):
+            return members(ref.get("id"))
+        if not isinstance(ref, str):
+            return []
+        if ref.startswith("#"):
+            ns, path = split(ref[1:])
+            tag = DATA / ns / "tags" / "item" / f"{path}.json"
+            return [m for value in ((load(tag) or {}).get("values", []) if tag.is_file() else []) for m in members(value)]
+        return [ref]
+    def needs(item, depth=1):
+        if split(item)[0] != MOD or not makers.get(item):
+            return set()
+        each = []
+        for switches, refs in makers[item]:
+            more = set(switches)
+            if depth > 0:
+                for ref in refs:
+                    things = members(ref)
+                    if things:
+                        more |= set.intersection(*(needs(thing, depth - 1) for thing in things))
+            each.append(more)
+        return set.intersection(*each)
+    def offering_needs(ref):
+        things = members(ref)
+        return set.intersection(*(needs(thing) for thing in things)) if things else set()
+    for key, entry in rituals.items():
+        needed = set().union(*(offering_needs(o.get("item", "")) for o in entry.get("offerings", [])))
+        stated = set(ri.RITUALS.get(key, {}).get("switches", []))
+        if needed != stated:
+            err(f"ritual {key}: its offerings are made only with the switches {sorted(needed)}, but tools/concordance_rituals.py "
+                f"states {sorted(stated)} (\"switches\")")
+    for path in sorted((DATA / MOD / "concordance").rglob("*.json")):
+        if "fabric:load_conditions" in path.read_text(encoding="utf-8"):
+            err(f"{path.relative_to(DATA)}: Concordance data carries no load conditions (a rite stays known whatever the switches)")
     # Ley Charge comes in only through a losing conversion, and nothing turns it back.
     conversion = load(DATA / MOD / "concordance" / "conversion" / "radiance_to_ley.json") or {}
     if conversion.get("from", {}).get("resource") != "essence/radiance" or conversion.get("to", {}).get("resource") != "ley_charge" \
@@ -12569,6 +12661,10 @@ def check_rituals(co, root, lang, registered, research):
     for key in ("offering", "participants", "spent", "reserved"):
         if f'"tooltip.{MOD}.concordance.jade.{key}"' not in client or f"tooltip.{MOD}.concordance.jade.{key}" not in lang:
             err(f"JugcraftJadeClient.java: the anchor's Jade lines use tooltip.{MOD}.concordance.jade.{key} (C-03)")
+    # Root and Rivet's codex entry is linked from Stratawrighting's Understood page (Concordance Chunk C, C-04): its
+    # completion is a Stratawright's foundation (strata/Strata.java's listener).
+    if f"(entry://{MOD}:{co.BOOK}/circles/root_and_rivet)" not in lang.get(f"book.{MOD}.{co.BOOK}.stone.stratawrighting.p2.text", ""):
+        err("codex: Stratawrighting's Understood page must link Root and Rivet's entry (tools/concordance_strata.py ROOT_AND_RIVET)")
 
 
 def check_ember(co, root, lang, research):
@@ -16845,7 +16941,8 @@ def check_economy(root):
     """Roadmap step 29: tools/concordance_economy.py models every Concordance conversion and every source that time alone
     drives. Its figures must be the game's (each anchor is in its Java or data file), the data conversions must all be
     in it, no cycle of conversions across the systems (every crop's regrow-and-compost loop included, grown by time and
-    hastened by a spire) may come back with as much as it started with, and the record's table must be the model's."""
+    hastened by a spire) may come back with as much as it started with, and the record's table must be the model's. Since
+    Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_economy as ec
     def text(path):
@@ -16862,6 +16959,18 @@ def check_economy(root):
     for key, entry in conversions.items():
         if modelled.get(key) != (entry.get("from", {}).get("amount"), entry.get("to", {}).get("amount")):
             err(f"economy: the conversion {key} is not modelled as it is in the data ({modelled.get(key)})")
+    # Concordance Chunk C, C-04: each ritual sink is its ritual's run: Ley Charge from every channel, every participant's
+    # Focus, its steps' time and the thing it makes.
+    structures = {path.stem: load(path) or {} for path in (DATA / MOD / "concordance" / "structure").glob("*.json")}
+    for key, sink in ec.RITUAL_SINKS.items():
+        ritual = load(DATA / MOD / "concordance" / "ritual" / f"{key}.json") or {}
+        parts = structures.get(split(ritual.get("structure", ":"))[1], {}).get("parts", [])
+        channels = sum(len(group.get("at", [])) for group in parts if group.get("role") == "channel")
+        made = ((ritual.get("result") or {}).get("transform") or {}).get("into")
+        if (sink["ley"], sink["focus"], sink["ticks"], f"{MOD}:{sink['makes']}") != (
+                ritual.get("steps", 0) * ritual.get("ley", 0) * channels, ritual.get("focus", 0) * ritual.get("participants", 0),
+                ritual.get("steps", 0) * ec.STEP_TICKS, made) or sink["makes"] not in ec.RESOURCES:
+            err(f"economy: the ritual sink {key} is not concordance/ritual/{key}.json's run (tools/concordance_economy.py RITUAL_SINKS)")
     heart = load(DATA / MOD / "concordance" / "organism" / "verdant_heart.json") or {}
     if (heart.get("cost"), max(heart.get("thriving", 0), heart.get("tolerating", 0))) != (1, 2):
         err("economy: the Verdant Heart's beat is modelled as 1 nutrient for at most 2 Verdance")

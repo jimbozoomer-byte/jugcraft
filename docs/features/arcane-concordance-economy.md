@@ -70,6 +70,7 @@ The table is rendered by `python3 tools/concordance_economy.py`, and `check_econ
 | Lumen Sconce | 20 Radiance | light 15 | a measure every 1200 ticks; a measure begun is spent | light |
 | Reliquary Shrine recharging | 2,400 Ley Charge | 9,600 relic charge | 8 charge a second | none; relic charge never becomes Ley Charge again |
 | Crimson Surge | 120 Vitae | 120 Focus | one every 1200 ticks | health given (offering exhaustion) |
+| Root and Rivet, worked again and again at one Lesser Circle | 4,800 Ley Charge, 900 Focus, and a Thallite plate, 4 copper ingots and 4 Mendvetch a run | 150 Rooted Thallite Foundations | one run every 160 ticks; one player's Focus, back 1 every 40 ticks, pays for 100 runs | none; a foundation never becomes Ley Charge, Focus or a plate again |
 | Verdant Spire, kept | 8 bone meal and 6 Ley Charge | 1,440 crop steps | 6 a pulse, a pulse every 100 ticks | Concordance crops pay their beds |
 | Star Spire, kept | 2 glow ink sacs and 8 Ley Charge | 240 Focus a player | 6 a pulse, a pulse every 100 ticks | hostile creatures revealed |
 | Lantern Spire, kept | 4 glowstone dust and 8 Ley Charge | 960 lights | 4 a pulse, a pulse every 100 ticks | no hostile spawns in its light |

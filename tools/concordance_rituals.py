@@ -69,7 +69,7 @@ RESEARCH = {
             # Mastery is practice: rituals carried through to the end in different places.
             "mastered": [{"type": "practice", "activity": rid("ritual"), "distinct": RITUAL_MASTERY}],
         },
-        "unlocks": {"understood": {"rituals": [rid("adept_attunement"), rid("lumen_vigil")]}},
+        "unlocks": {"understood": {"rituals": [rid("adept_attunement"), rid("lumen_vigil"), rid("root_and_rivet")]}},
         # Advancement titles and descriptions, and the icon of each state's advancement.
         "advancements": {
             "encountered": ("Holding a Bearing", "Examine something made to hold a shape or a bearing", "task",
@@ -141,6 +141,24 @@ RITUALS = {
         ]},
         "backlash": 2,
     },
+    # Concordance Chunk C, C-04 (C-D2; C-P11's starting values, Proposed): the first workshop rite. A Thallite plate,
+    # riveted with copper and bound with Mendvetch, becomes a Rooted Thallite Foundation, the base a Crucible Stand is
+    # built on (C-05). No offering is another rite's, so the most specific match never chooses it for another's.
+    # "switches": the feature switches its offerings are made under beside the Concordance's (the plate: by hand machines
+    # and thallite; pressed, machines, from a thallite ingot); check_rituals holds it to the recipes. The rite's own data
+    # carries no load condition (C-P41).
+    "root_and_rivet": {
+        "name": "Root and Rivet",
+        "summary": "Roots a Thallite plate: riveted with copper and bound with Mendvetch in a Lesser Circle, it becomes a "
+                   "Rooted Thallite Foundation, a base that holds still under living work.",
+        "structure": rid("lesser_circle"), "research": rid("circle_lore"), "stage": "understood",
+        "participants": 1, "focus": 6, "steps": 4, "ley": 2,
+        "offerings": [{"item": rid("thallite_plate"), "count": 1}, {"item": "minecraft:copper_ingot", "count": 4},
+                      {"item": rid("mendvetch"), "count": 4}],
+        "result": {"transform": {"from": rid("thallite_plate"), "into": rid("rooted_thallite_foundation")}},
+        "backlash": 4,
+        "switches": ["machines", "thallite"],
+    },
 }
 
 CONVERSIONS = {
@@ -155,6 +173,11 @@ ITEMS = {
     "adept_wand": {"name": "Adept's Wand",
                    "tooltip": "A second instrument, attuned in a circle: it holds larger spells than an Initiate's "
                               "Wand. Hold it in the main hand to cast."},
+    # Concordance Chunk C, C-04: Root and Rivet's result (no consumer until unit 3's Crucible Stand, C-05).
+    "rooted_thallite_foundation": {"name": "Rooted Thallite Foundation",
+                                   "tooltip": "A Thallite plate riveted with copper and bound with Mendvetch roots in a "
+                                              "Lesser Circle (Root and Rivet): a foundation that holds still under living "
+                                              "work."},
 }
 BLOCKS = {
     "circle_anchor": {"name": "Circle Anchor"},
@@ -306,13 +329,58 @@ def _item_name(ref):
     names = {"minecraft:amethyst_shard": "Amethyst Shard", "minecraft:gold_ingot": "Gold Ingot",
              "minecraft:glowstone_dust": "Glowstone Dust", "minecraft:glow_berries": "Glow Berries",
              "minecraft:ender_pearl": "Ender Pearl",
-             rid("initiate_wand"): "Initiate's Wand", rid("adept_wand"): "Adept's Wand"}
+             rid("initiate_wand"): "Initiate's Wand", rid("adept_wand"): "Adept's Wand",
+             "minecraft:copper_ingot": "Copper Ingot", rid("thallite_plate"): "Thallite Plate", rid("mendvetch"): "Mendvetch",
+             rid("rooted_thallite_foundation"): "Rooted Thallite Foundation"}
     return names[ref]
+
+
+def _channels(info):
+    return sum(len(p["at"]) for p in STRUCTURES[info["structure"].split(":")[1]]["parts"] if p["role"] == "channel")
+
+
+def _payment_text(key):
+    """A transforming rite's stage and payment table in words (plan 03:107; Concordance Chunk C, C-04): what each stage
+    pays, what is held and spent, and what an interruption keeps and loses, from RITUALS' numbers, as the anchor's
+    Inspect page states it (C-03, Readiness.stages)."""
+    info = RITUALS[key]
+    channels = _channels(info)
+    per_step = info["ley"] * channels
+    total = per_step * info["steps"]
+    offerings = ", ".join(f"{o['count']} {_item_name(o['item'])}" for o in info["offerings"])
+    made = _item_name(info["result"]["transform"]["into"])
+    each = " each" if info["participants"] > 1 else ""
+    return (f"**Offer** (the anchor idle): {offerings}. Sneak with an empty hand to take them back.\\\n"
+            f"**Begin** (an empty-hand use): {info['focus']} Focus{each} is paid, and the offerings are held from then on.\\\n"
+            f"**Each of its {info['steps']} steps** (every {_seconds(STEP_TICKS)} seconds, "
+            f"{_seconds(info['steps'] * STEP_TICKS)} in all): {info['ley']} Ley Charge from each of the {channels} pylons, "
+            f"{per_step} a step; after step k, {info['focus']} Focus and k times {per_step} Ley Charge are spent.\\\n"
+            f"**After the last step:** the offerings are used and the {made} made, at the same moment, once: "
+            f"{total} Ley Charge in all ({total * RADIANCE_PER_LEY_BATCH // LEY_PER_BATCH} Radiance or as much Verdance "
+            f"poured into the pylons, or {total * JE_PER_LEY:,} JE).\\\n"
+            f"**Complete:** the {made} waits in the anchor until a participant takes it.\\\n"
+            f"**Broken off:** the offerings stay in the anchor, free to take back; the Focus and Ley Charge spent are gone. "
+            f"If a Warding Stone is lost, each participant also takes {info['backlash']} backlash. If the anchor itself is "
+            f"broken, everything in it drops where it stood.")
+
+
+def _switches_text(key):
+    """What a rite needs beside the Concordance's switch (RITUALS[key]["switches"], held to the recipes by
+    check_rituals), in words; "" for none."""
+    info = RITUALS[key]
+    switches = info.get("switches", [])
+    if not switches:
+        return ""
+    named = " and ".join(f"**{name}**" for name in switches)
+    off = "it" if len(switches) == 1 else "either" if len(switches) == 2 else "any of them"
+    plural = "es" if len(switches) > 1 else ""
+    return (f"It is made only while the server's {named} feature switch{plural} {'are' if plural else 'is'} on; with "
+            f"{off} off, {info['name']} stays known, but what it takes cannot be made.")
 
 
 def _ritual_text(key):
     info = RITUALS[key]
-    channels = sum(len(p["at"]) for p in STRUCTURES[info["structure"].split(":")[1]]["parts"] if p["role"] == "channel")
+    channels = _channels(info)
     offerings = ", ".join(f"{o['count']} {_item_name(o['item'])}" for o in info["offerings"])
     people = "one practitioner" if info["participants"] == 1 else f"{info['participants']} practitioners"
     light = (f" It must be dark: light {info['conditions']['max_light']} or less above the anchor."
@@ -433,6 +501,24 @@ def codex(initiate):
                 ("text", "Its Effect",
                  "Each participant gains 8 points of absorption for 2 minutes, and up to 16 creatures within 16 "
                  "blocks glow for a minute. It needs two people, but nothing else in the Concordance needs it."),
+            ],
+        },
+        # Concordance Chunk C, C-04: the first workshop rite, its stage and payment table, and the plate it takes (the
+        # progression graph asks for a recipe page readable before a step needs the plate: check_progression).
+        ("circles", "root_and_rivet"): {
+            "name": "Root and Rivet", "x": 0, "y": 4, "icon": rid("rooted_thallite_foundation"),
+            "condition": (lore, "understood"), "description": "A Thallite plate, rooted",
+            "pages": [
+                ("text", "Root and Rivet", _ritual_text("root_and_rivet")),
+                ("text", "Stages and Payment", _payment_text("root_and_rivet")),
+                ("crafting_recipe", "Thallite Plate",
+                 "The plate it takes, by hand at a crafting table or from a Metal Press. " + _switches_text("root_and_rivet"),
+                 rid("thallite_plate_by_hand")),
+                ("text", "The Foundation",
+                 "A **Rooted Thallite Foundation** is a Thallite plate riveted with copper and bound with Mendvetch roots: "
+                 "a base that holds still under living work. Nothing turns it back into a plate, Ley Charge or Focus, and "
+                 "the Assayer's Scale will not weigh it.\\\n\\\nCompleting Root and Rivet counts towards "
+                 "**Stratawrighting**'s mastery, as any completed ritual does."),
             ],
         },
     }
@@ -564,6 +650,11 @@ def write_all(write, assets, data, lang, condition, self_drop, packs):
     write(assets / "models" / "item" / "adept_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/adept_wand")}})
     write(assets / "items" / "adept_wand.json", {"model": {"type": "minecraft:model", "model": rid("item/adept_wand")}})
+    # Concordance Chunk C, C-04: the Rooted Thallite Foundation, a flat icon (tools/item_icons/rooted_thallite_foundation.txt).
+    write(assets / "models" / "item" / "rooted_thallite_foundation.json",
+          {"parent": "minecraft:item/generated", "textures": {"layer0": rid("item/rooted_thallite_foundation")}})
+    write(assets / "items" / "rooted_thallite_foundation.json",
+          {"model": {"type": "minecraft:model", "model": rid("item/rooted_thallite_foundation")}})
     # The Ley Pylon: charged lights its crystal.
     textures = {"particle": rid("block/ley_pylon_stone"), "stone": rid("block/ley_pylon_stone"),
                 "copper": rid("block/ley_pylon_copper"), "crystal": rid("block/ley_pylon_crystal")}

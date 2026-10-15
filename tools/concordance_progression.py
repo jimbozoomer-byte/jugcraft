@@ -100,6 +100,7 @@ ENCOUNTERS = {
 # that makes them, and how.
 PRODUCERS = {
     rid("adept_wand"): (f"ritual:{rid('adept_attunement')}", "the Adept's Attunement ritual transforms an Initiate's Wand"),
+    rid("rooted_thallite_foundation"): (f"ritual:{rid('root_and_rivet')}", "the Root and Rivet ritual roots a Thallite plate"),
     rid("dreamglass"): (f"practice:{rid('dream')}", "dream wisps caught in a dream"),
 }
 
@@ -268,6 +269,7 @@ VANILLA_TAGS = {
     "c:ingots/iron": ("gathered", "iron ingots (minecraft:iron_ingot)"),
     "c:ingots/copper": ("gathered", "copper ingots (minecraft:copper_ingot)"),
     "c:ingots/gold": ("gathered", "gold ingots (minecraft:gold_ingot)"),
+    "c:ingots/thallite": ("gathered", "thallite ingots (jugcraft:thallite_ingot), smelted from raw thallite (the thallite switch)"),
 }
 
 RECIPE_TYPES = ("minecraft:crafting_shaped", "minecraft:crafting_shapeless", "minecraft:smelting", "minecraft:blasting",

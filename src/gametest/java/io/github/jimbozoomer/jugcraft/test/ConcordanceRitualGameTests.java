@@ -15,6 +15,8 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.encyclopedia.InspectPage;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.Choice;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
@@ -24,6 +26,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.strata.Strata;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
@@ -39,10 +42,12 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
@@ -72,7 +77,9 @@ import net.minecraft.world.phys.Vec3;
  * Concordance Chunk C, C-03: an idle circle says everything a rite still needs at once, a run-level shortfall only warns,
  * a refused start and a chat reading mark every faulted part (the Inspect page none), what a run has spent is shown apart
  * from what it holds, an interruption is told in one line kept for the Inspect page, and a rite the reader has not
- * learned is never named.
+ * learned is never named. Concordance Chunk C, C-04: Root and Rivet, a Thallite plate rooted into a foundation, completed
+ * once, stopped by a dry pylon, lapsed when saved mid-run, never chosen for the attunement's offerings, and a
+ * Stratawright's foundation laid.
  */
 public class ConcordanceRitualGameTests {
 	private static final String CIRCLE_LORE = "jugcraft:circle_lore";
@@ -1073,5 +1080,165 @@ public class ConcordanceRitualGameTests {
 				&& keys(mine).contains("compose.jugcraft.ritual.stage.backlash"), "The practitioner sees it named, with its table");
 		jadeNamesNoRite(helper, anchor);
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Root and Rivet (Concordance Chunk C, C-04)
+
+	private static final String ROOT_AND_RIVET = "jugcraft:root_and_rivet";
+
+	/** The Thallite plate (registered by the materials, so it has no Java constant). */
+	private static Item thallitePlate() {
+		return BuiltInRegistries.ITEM.getValue(Identifier.parse("jugcraft:thallite_plate"));
+	}
+
+	private static List<ItemStack> plus(List<ItemStack> base, ItemStack... more) {
+		List<ItemStack> out = new ArrayList<>(base);
+		out.addAll(List.of(more));
+		return out;
+	}
+
+	/** Offers Root and Rivet's offerings, with one Mendvetch more than it needs. */
+	private static void offerRootAndRivet(CircleAnchorBlockEntity anchor, ServerPlayer player) {
+		for (ItemStack stack : List.of(new ItemStack(thallitePlate()), new ItemStack(Items.COPPER_INGOT, 4), new ItemStack(Garden.MENDVETCH, 5))) {
+			anchor.offer(player, stack);
+		}
+	}
+
+	/** Every Root and Rivet offering is still in the anchor, unlocked, and nothing was made. */
+	private static void rootAndRivetKept(GameTestHelper helper, CircleAnchorBlockEntity anchor, RitualMachine.Interruption reason) {
+		List<ItemStack> held = anchor.offerings();
+		helper.assertTrue(anchor.phase() == RitualMachine.Phase.IDLE && anchor.run().last() == reason && !anchor.run().completed()
+				&& ROOT_AND_RIVET.equals(anchor.run().ritual()), "Root and Rivet broke off for " + reason + ": " + anchor.run());
+		helper.assertTrue(count(held, thallitePlate()) == 1 && count(held, Items.COPPER_INGOT) == 4 && count(held, Garden.MENDVETCH) == 5,
+				"Every offering is still in the anchor after " + reason + ": " + held);
+		helper.assertTrue(anchor.output().isEmpty(), "Nothing was made after " + reason);
+	}
+
+	/** Starts Root and Rivet and checks it channels with six Focus paid. */
+	private static ServerPlayer startRootAndRivet(GameTestHelper helper, CircleAnchorBlockEntity anchor) {
+		helper.assertTrue(thallitePlate() != Items.AIR, "The Thallite plate is registered");
+		ServerPlayer player = practitioner(helper, STAND);
+		offerRootAndRivet(anchor, player);
+		use(anchor, player, false);
+		helper.assertTrue(anchor.phase() == RitualMachine.Phase.CHANNELING && ROOT_AND_RIVET.equals(anchor.run().ritual()),
+				"Root and Rivet starts: " + anchor.run());
+		helper.assertTrue(ConcordanceProgress.currentFocus(player) == 20 - 6, "It took six Focus");
+		return player;
+	}
+
+	/** Four steps of 40 ticks: one foundation, its offerings consumed once, 2 Ley Charge a step from each pylon; the spare Mendvetch makes nothing. */
+	@GameTest(maxTicks = 300)
+	public void rootAndRivetAttunesOnePlateOnce(GameTestHelper helper) {
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		ServerPlayer player = startRootAndRivet(helper, anchor);
+		helper.runAfterDelay(RitualMachine.STEP_TICKS * 4L + 20, () -> {
+			helper.assertTrue(anchor.phase() == RitualMachine.Phase.COMPLETE && anchor.output().is(JugcraftConcordance.ROOTED_THALLITE_FOUNDATION)
+					&& anchor.output().getCount() == 1, "One Rooted Thallite Foundation: " + anchor.run() + " " + anchor.output());
+			List<ItemStack> left = anchor.offerings();
+			helper.assertTrue(count(left, thallitePlate()) == 0 && count(left, Items.COPPER_INGOT) == 0 && count(left, Garden.MENDVETCH) == 1,
+					"Exactly its offerings were consumed; the spare Mendvetch stays: " + left);
+			for (BlockPos at : pylons()) {
+				helper.assertValueEqual(pylon(helper, at).ley(), 64L - 2 * 4, "2 Ley Charge a step for four steps at " + at);
+			}
+			helper.assertValueEqual(anchor.spent(), new Readiness.Spent(6, 32, 4, 0, 0), "spent in all: 6 Focus, 32 Ley Charge");
+			use(anchor, player, false);
+			helper.assertTrue(anchor.output().isEmpty() && anchor.phase() == RitualMachine.Phase.IDLE && anchor.run().completed()
+					&& player.getInventory().countItem(JugcraftConcordance.ROOTED_THALLITE_FOUNDATION) == 1, "The participant took it");
+			int focus = ConcordanceProgress.currentFocus(player);
+			use(anchor, player, false); // one Mendvetch: the vigil is closest (4 lacking), so nothing starts
+			helper.assertTrue(anchor.phase() == RitualMachine.Phase.IDLE && ConcordanceProgress.currentFocus(player) == focus
+					&& count(anchor.offerings(), Garden.MENDVETCH) == 1 && anchor.output().isEmpty(), "Nothing more is made of what is left");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 200)
+	public void aDryPylonStopsRootAndRivetAndKeepsTheOfferings(GameTestHelper helper) {
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		startRootAndRivet(helper, anchor);
+		helper.runAfterDelay(AFTER_FIRST_STEP, () -> pylon(helper, first(StructurePattern.Role.CHANNEL)).setLey(helper.getLevel(), 0));
+		helper.runAfterDelay(AFTER_FIRST_STEP + RitualMachine.STEP_TICKS + 10, () -> {
+			rootAndRivetKept(helper, anchor, RitualMachine.Interruption.POWER);
+			helper.assertValueEqual(anchor.ending(), new Readiness.Ending(RitualMachine.Interruption.POWER, new Readiness.Spent(6, 8, 1, 3, 24)),
+					"one step drawn, then a dry pylon");
+			for (BlockPos at : pylons()) {
+				long ley = pylon(helper, at).ley();
+				helper.assertTrue(ley == 0 || ley == 62, "The failed step drew from no pylon: " + ley);
+			}
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 100)
+	public void rootAndRivetSavedMidRunLapses(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		startRootAndRivet(helper, anchor);
+		helper.runAfterDelay(AFTER_FIRST_STEP, () -> {
+			CompoundTag saved = anchor.saveWithoutMetadata(level.registryAccess());
+			anchor.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+			helper.runAfterDelay(2, () -> {
+				rootAndRivetKept(helper, anchor, RitualMachine.Interruption.LAPSED);
+				helper.assertValueEqual(anchor.ending(), new Readiness.Ending(RitualMachine.Interruption.LAPSED, new Readiness.Spent(6, 8, 1, 3, 24)),
+						"the loaded run lapses, its ending worked out after the load");
+				helper.succeed();
+			});
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theAttunementsOfferingsNeverChooseRootAndRivet(GameTestHelper helper) {
+		record Case(String name, List<ItemStack> offered, String chosen) {
+		}
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		ServerPlayer player = practitioner(helper, STAND);
+		Item plate = thallitePlate();
+		List<ItemStack> attunement = List.of(inscribedWand(), new ItemStack(Items.AMETHYST_SHARD, 4), new ItemStack(Items.GOLD_INGOT, 2),
+				new ItemStack(Items.GLOWSTONE_DUST, 4));
+		List<ItemStack> rootAndRivet = List.of(new ItemStack(plate), new ItemStack(Items.COPPER_INGOT, 4), new ItemStack(Garden.MENDVETCH, 4));
+		List<Case> cases = List.of(
+				new Case("the attunement's", attunement, "jugcraft:adept_attunement"),
+				new Case("the attunement's and copper", plus(attunement, new ItemStack(Items.COPPER_INGOT, 4)), "jugcraft:adept_attunement"),
+				new Case("the attunement's, a plate and Mendvetch (six slots)", plus(attunement, new ItemStack(plate), new ItemStack(Garden.MENDVETCH, 4)),
+						"jugcraft:adept_attunement"),
+				new Case("Root and Rivet's", rootAndRivet, ROOT_AND_RIVET),
+				new Case("Root and Rivet's and the vigil's (9 to 4)", plus(rootAndRivet, new ItemStack(Items.GLOW_BERRIES, 4)), ROOT_AND_RIVET),
+				new Case("Root and Rivet's and the Kindling's (11 to 9)", plus(rootAndRivet, new ItemStack(Items.GLOWSTONE_DUST, 8),
+						new ItemStack(Items.GOLD_INGOT, 2), new ItemStack(Items.ENDER_PEARL)), "jugcraft:spire_kindling"),
+				new Case("one Mendvetch short", List.of(new ItemStack(plate), new ItemStack(Items.COPPER_INGOT, 4), new ItemStack(Garden.MENDVETCH, 3)), ""));
+		for (Case each : cases) {
+			use(anchor, player, true); // the last case's offerings back
+			for (ItemStack stack : each.offered()) {
+				anchor.offer(player, stack.copy()); // offer() shrinks what it is given
+			}
+			Choice choice = anchor.choose(player);
+			helper.assertValueEqual(choice.chosen() == null ? "" : choice.chosen().id(), each.chosen(), each.name());
+		}
+		Choice wanting = anchor.choose(player);
+		helper.assertTrue(wanting.closest() != null && ROOT_AND_RIVET.equals(wanting.closest().id()) && wanting.missing().size() == 1
+				&& wanting.missing().getFirst().have() == 3, "Root and Rivet is closest, one Mendvetch short: " + wanting);
+		use(anchor, player, false);
+		helper.assertTrue(anchor.phase() == RitualMachine.Phase.IDLE && ConcordanceProgress.currentFocus(player) == 20
+				&& count(anchor.offerings(), Garden.MENDVETCH) == 3, "Short, nothing starts and nothing is taken");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 300)
+	public void rootAndRivetIsStrataFoundationWork(GameTestHelper helper) {
+		CircleAnchorBlockEntity anchor = build(helper, 64);
+		String foundation = "practice:" + Strata.ACTIVITY + ":" + Strata.KEY_FOUNDATION;
+		ServerPlayer bystander = practitioner(helper, STAND_2);
+		ConcordanceProgress.grant(bystander, Strata.RESEARCH, ResearchState.UNDERSTOOD);
+		ServerPlayer player = startRootAndRivet(helper, anchor);
+		ConcordanceProgress.grant(player, Strata.RESEARCH, ResearchState.UNDERSTOOD);
+		helper.assertFalse(ConcordanceProgress.knowledge(player).progress(Strata.RESEARCH).evidence().containsKey(foundation), "not before it completes");
+		helper.runAfterDelay(RitualMachine.STEP_TICKS * 4L + 20, () -> {
+			helper.assertTrue(anchor.phase() == RitualMachine.Phase.COMPLETE, "Complete: " + anchor.run());
+			helper.assertTrue(ConcordanceProgress.knowledge(player).progress(Strata.RESEARCH).evidence().containsKey(foundation),
+					"The participant laid a Stratawright's foundation");
+			helper.assertFalse(ConcordanceProgress.knowledge(bystander).progress(Strata.RESEARCH).evidence().containsKey(foundation),
+					"A bystander in the circle who took no part laid none");
+			helper.succeed();
+		});
 	}
 }

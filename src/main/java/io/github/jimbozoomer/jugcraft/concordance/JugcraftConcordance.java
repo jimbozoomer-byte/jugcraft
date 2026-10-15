@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.strata.Strata;
 import io.github.jimbozoomer.jugcraft.concordance.trinket.Wayfaring;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
 import java.util.List;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
@@ -107,6 +108,8 @@ public final class JugcraftConcordance {
 	public static Block LEY_PYLON;
 	public static Block WARDING_STONE;
 	public static Item ADEPT_WAND;
+	/** Concordance Chunk C, C-04: what Root and Rivet makes of a Thallite plate (the Crucible Stand's base, C-05). */
+	public static Item ROOTED_THALLITE_FOUNDATION;
 	public static BlockEntityType<CircleAnchorBlockEntity> ANCHOR_ENTITY;
 	public static BlockEntityType<LeyPylonBlockEntity> PYLON_ENTITY;
 	/** Roadmap step 13: alchemy. */
@@ -234,6 +237,8 @@ public final class JugcraftConcordance {
 				.strength(2.0F, 6.0F).sound(SoundType.STONE).requiresCorrectToolForDrops().pushReaction(PushReaction.IMMOVEABLE));
 		Item stone = item("warding_stone", properties -> new BlockItem(WARDING_STONE, properties), new Item.Properties().useBlockDescriptionPrefix());
 		ADEPT_WAND = item("adept_wand", InitiateWandItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+		// Concordance Chunk C, C-04: Root and Rivet's result (data/jugcraft/concordance/ritual/root_and_rivet.json).
+		ROOTED_THALLITE_FOUNDATION = item("rooted_thallite_foundation", DescribedItem::new, new Item.Properties());
 		ANCHOR_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("circle_anchor"),
 				FabricBlockEntityTypeBuilder.create(CircleAnchorBlockEntity::new, CIRCLE_ANCHOR).build());
 		PYLON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ley_pylon"),
@@ -331,6 +336,8 @@ public final class JugcraftConcordance {
 			output.accept(stone);
 			output.accept(crucible);
 		});
+		// Concordance Chunk C, C-04: Root and Rivet's foundation, an ingredient.
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(ROOTED_THALLITE_FOUNDATION));
 	}
 
 	private static SoundEvent sound(String id) {

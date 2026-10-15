@@ -1,11 +1,12 @@
 """Where the things only a ritual or a lair boss gives come from, for JEI (Concordance Chunk A, unit 4:
 docs/features/concordance-first-loadout.md; the Yeti King and the Cinder Tyrant since Chunk B, unit 1).
 
-JEI shows a crafting or machine recipe for most things. The Adept's Wand (made by a ritual) and what the lair bosses
-give (rolled from their loot tables when they fall: Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant)
-have none, so each gets an information page instead, written here from the generators' own tables (tools/vesperine.py,
-tools/tatterlace.py, tools/yeti_king.py, tools/cinder_tyrant.py, tools/concordance_rituals.py, tools/lairs.py and
-tools/biomes.py) so that its numbers are the data's.
+JEI shows a crafting or machine recipe for most things. The Adept's Wand and, since Concordance Chunk C, the Rooted
+Thallite Foundation (each made by a ritual) and what the lair bosses give (rolled from their loot tables when they fall:
+Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant) have none, so each gets an information page instead,
+written here from the generators' own tables (tools/vesperine.py, tools/tatterlace.py, tools/yeti_king.py,
+tools/cinder_tyrant.py, tools/concordance_rituals.py, tools/lairs.py and tools/biomes.py) so that its numbers are the
+data's.
 
 The pages are a client copy of the default data, as the rest of recipe_view.json is: a server whose data pack changes a
 boss's loot table or the Adept's Attunement is not reflected, so every page says "with the default data". A player's
@@ -92,8 +93,9 @@ def _crafted(key, recipes, names):
 
 # Loot a crafting recipe makes as well: item -> (recipe, ingredient, count, the ingredient's name).
 CRAFTED = {"reaper_hood": _crafted("reaper_hood", vs.RECIPES, vs.ITEMS)}
-# Things only a ritual makes: item -> the ritual (tools/concordance_rituals.py RITUALS).
-RITUALS = {"adept_wand": "adept_attunement"}
+# Things only a ritual makes: item -> the ritual (tools/concordance_rituals.py RITUALS). The Rooted Thallite Foundation
+# since Concordance Chunk C (C-04, Root and Rivet).
+RITUALS = {"adept_wand": "adept_attunement", "rooted_thallite_foundation": "root_and_rivet"}
 
 # The first magic loadout (the record's route): nothing new, only what survival already makes. Item -> how it is made:
 # "recipe" (the crafting recipe of its own name) or "working:<name>" (a Lampwright's Bench working). The Wayfaring
@@ -182,9 +184,14 @@ def _ritual_page(key):
     else:
         takes = f"{info['participants']} practitioners, {info['focus']} Focus each, and {info['steps']} steps"
     blocks = rituals.BLOCKS
-    return (f"Not crafted or traded. {DEFAULT.capitalize()}, the {info['name']} turns "
-            f"{_a(rituals._item_name(info['result']['transform']['from']))} into it, keeping what was inscribed and "
-            f"tuned on it. Work it at {_a(blocks['circle_anchor']['name'])} in {_a(structure['name'])} "
+    transform = info["result"]["transform"]
+    # Only an instrument carries an inscription and tunings over (CircleAnchorBlockEntity.commit copies both).
+    keeps = ", keeping what was inscribed and tuned on it" if transform["into"].split(":")[1] in rituals.INSTRUMENTS else ""
+    # A rite named for whose it is takes "the" (the Adept's Attunement); one named for what it does, none (Root and Rivet).
+    rite = f"the {info['name']}" if "'s " in info["name"] else info["name"]
+    return (f"Not crafted or traded. {DEFAULT.capitalize()}, {rite} turns "
+            f"{_a(rituals._item_name(transform['from']))} into it{keeps}. Work it at {_a(blocks['circle_anchor']['name'])} "
+            f"in {_a(structure['name'])} "
             f"({parts['channel']} {blocks['ley_pylon']['name']}s and {parts['boundary']} "
             f"{blocks['warding_stone']['name']}s round it) with {research} {info['stage']}: offer {offer}. It takes "
             f"{takes}, drawing {info['ley']} Ley Charge from each pylon a step "
