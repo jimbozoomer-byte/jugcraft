@@ -29,7 +29,7 @@ CODES = {
     "needs_container": ("shortage", "Needs a glass bottle or a bowl to bottle into"),
     "held": ("condition", "Preserve holds it %s for %s s more"),
     "incompatible": ("fault", "Step %s (%s) cannot be made under the rules now: %s"),
-    "courier_quota": ("blocked", "It has asked the couriers for as much as it may; it asks again later"),
+    "courier_quota": ("blocked", "Needs %s more: %s; the couriers take no more of its setter's requests now, so it asks again in %s s"),
     "output_differs": ("blocked", "Its output holds something else: take it out"),
     "needs_emptying": ("blocked", "A repeat starts from an empty crucible: bottle what is in it"),
     "unreadable": ("fault", "Its formula can no longer be read: set it again, or clear it (sneak with an empty hand)"),

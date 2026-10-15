@@ -12035,6 +12035,7 @@ def check_concordance(registered):
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
     check_logistics(co, root, lang, registered)
+    check_crucible_supply(co, root)
     check_artifice(co, root, lang, registered, research)
     check_relics(co, root, lang, registered, research)
     check_equivalence(co, root, lang, registered, research)
@@ -14391,6 +14392,91 @@ def check_crucible_stand(co, root, lang):
         err("codex: the Crucible Stand's entry (alembic/crucible_stand) is missing")
 
 
+def check_crucible_supply(co, root):
+    """Concordance Chunk C, C-06 (C-D4, C-P13, C-P50 to C-P53): one demand, two carriers. The crucible owns its shortage;
+    the Peepo port asks for it less what a courier holding the crucible's request brings (a live claim, not being taken
+    back); the crucible files one request, its setter's, while they answer, through the shared nearest-post helper (no
+    copy), backs off with tools/concordance_logistics.py's numbers and says COURIER_QUOTA; every way its formula ends turns
+    the request back (as its requester), as does breaking it, which still drops its slots; its two keys are optional and
+    its stamp stays 1; no client calls the demand or the ledger."""
+    lg = co.logistics
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    crucible = text(root / "CrucibleBlockEntity.java")
+    companion = text(ROOT / "src" / "main" / "java" / "local" / "peepo" / "CrucibleCompanion.java")
+    spire, couriers = text(root / "spire" / "ConcordSpire.java"), text(root / "courier" / "Couriers.java")
+    shortage = _java_body(crucible, "public @Nullable Shortage shortage()")
+    if not shortage or "incompatibility() != null" not in shortage:
+        err("CrucibleBlockEntity.shortage: the one demand, nothing for a formula it cannot follow (C-06)")
+    if "needs.merge(" in companion or re.search(r"\bshortage\(\)\s*\{", companion):
+        err("local/peepo/CrucibleCompanion: the shortage is the crucible's (CrucibleBlockEntity.shortage), never worked out again here")
+    needed = re.search(r"public int needed\(ItemStack stack\)\{(.*?)\n    \}", companion, re.S)
+    if not needed or "crucible.shortage()" not in needed.group(1) or "crucible.courierRemainder(missing.add())" not in needed.group(1):
+        err("local/peepo/CrucibleCompanion.needed: the crucible's shortage less its courier request's remainder (C-06, C-P50)")
+    status = re.search(r"public CompanionStatus status\(\)\{(.*?)\n    \}", companion, re.S)
+    if not status or "COURIER_QUOTA->CompanionStatus.NO_INPUT" not in status.group(1) or "crucible.shortage()" not in status.group(1):
+        err("local/peepo/CrucibleCompanion.status: a courier quota is still missing input (C-P52); the lookahead is the crucible's shortage")
+    remainder = _java_body(crucible, "public int courierRemainder(Operation.Add add)")
+    if not all(n in remainder for n in ("progress().returning()", "worker() == null", "progress().lease() < server.getGameTime()",
+                                        "open.ticket().wanted() - open.progress().delivered()")):
+        err("CrucibleBlockEntity.courierRemainder: only a request a courier holds (its lease live), not being taken back, is "
+            "subtracted: asked less delivered (C-P50)")
+    automate = _java_body(crucible, "public @Nullable Diagnostic automate(ServerLevel level)")
+    if not 0 <= automate.find("turnBack();") < automate.find("return pause(level, refused);"):
+        err("CrucibleBlockEntity.automate: a formula it cannot follow turns its courier request back (C-06)")
+    if "return pause(level, supply(level, missing(add)));" not in automate or "reconcile(level);" not in automate:
+        err("CrucibleBlockEntity.automate: an ingredient wait asks the couriers and each pulse reconciles its request (C-06, C-P51)")
+    supply = _java_body(crucible, "private Diagnostic supply(ServerLevel level, Diagnostic reason)")
+    for needle in ("formulaOwner == null || request > 0L", "Authority.answering(level, formulaOwner) == null", "now >= nextFiling",
+                   "Couriers.nearestPost(level, worldPosition, formulaOwner, POST_REACH)", "Logistics.Outcome.TOO_MANY",
+                   "backoffAfter(backoff)", "Diagnostic.courierQuota("):
+        if needle not in supply:
+            err(f"CrucibleBlockEntity.supply: one request, its setter's while they answer, at the shared nearest post, with its backoff ({needle})")
+    back = _java_body(crucible, "private void turnBack()")
+    if "ledger.cancel(request, open.ticket().requester()," not in back:
+        err("CrucibleBlockEntity.turnBack: cancels as the request's requester, the only one the ledger lets cancel it")
+    for const, value in (("FILING_BACKOFF", lg.CRUCIBLE_BACKOFF), ("MAX_FILING_BACKOFF", lg.CRUCIBLE_MAX_BACKOFF)):
+        if not re.search(rf"\bint {const} = {value};", crucible):
+            err(f"CrucibleBlockEntity.java: {const} differs from tools/concordance_logistics.py ({value})")
+    if "POST_REACH = Couriers.FILING_REACH;" not in crucible:
+        err("CrucibleBlockEntity.POST_REACH: the Spire's reach, Couriers.FILING_REACH")
+    follow = _java_body(crucible, "public void follow(Formula formula, @Nullable UUID setter)")
+    if not 0 <= follow.find("turnBack();") < follow.find("program = formula;") or "formulaOwner = setter;" not in follow:
+        err("CrucibleBlockEntity.follow: a formula replaced or set by another turns the request back, then records its setter")
+    if "follow(formula, player.getUUID());" not in _java_body(crucible, "private InteractionResult formula(ServerPlayer player, ItemStack held)"):
+        err("CrucibleBlockEntity.formula: the formula item records its user as the setter (C-06)")
+    empty = _java_body(crucible, "public void useEmpty(ServerPlayer player")
+    if not 0 <= empty.find("Authority.mayChange(") < empty.find("turnBack();") < empty.find("program = null;"):
+        err("CrucibleBlockEntity.useEmpty: clearing a formula turns its request back, after Authority (C-06)")
+    removal = _java_body(crucible, "public void preRemoveSideEffects(BlockPos pos, BlockState state)")
+    if not 0 <= removal.find(".destinationGone(") < removal.find("super.preRemoveSideEffects(pos, state);"):
+        err("CrucibleBlockEntity.preRemoveSideEffects: broken, its requests turn back and its slots still drop (C-06)")
+    saving = _java_body(crucible, "protected void saveAdditional(ValueOutput output)")
+    for needle in ('FORMULA_OWNER = "formula_owner"', 'REQUEST = "request"', "input.read(FORMULA_OWNER, UUIDUtil.CODEC).orElse(null)",
+                   "input.getLongOr(REQUEST, -1L)", "asked > 0L ? asked : -1L"):
+        if needle not in crucible:
+            err(f"CrucibleBlockEntity: the setter and request are optional keys read with defaults ({needle})")
+    if "Saved.stamp(output, 1);" not in saving or "if (request > 0L) {\n\t\t\toutput.putLong(REQUEST, request);" not in saving \
+            or "if (formulaOwner != null) {\n\t\t\toutput.store(FORMULA_OWNER, UUIDUtil.CODEC, formulaOwner);" not in saving:
+        err("CrucibleBlockEntity.saveAdditional: the setter and request are written only when set; the stamp stays 1 (C-06)")
+    if "private static @Nullable CourierPostBlockEntity nearestPost(" in spire \
+            or "Couriers.nearestPost(level, heart.getBlockPos(), state.keeper(), REACH)" not in spire:
+        err("spire/ConcordSpire.restock: uses the shared Couriers.nearestPost, no copy (C-06)")
+    if "public static @Nullable CourierPostBlockEntity nearestPost(ServerLevel level, BlockPos from, UUID user, int reach)" not in couriers:
+        err("courier/Couriers.nearestPost: the shared nearest-post helper (C-06)")
+    scans = sum(text(path).count("entity instanceof CourierPostBlockEntity post && distance <=") for path in root.rglob("*.java"))
+    if scans != 1:
+        err(f"concordance: the nearest-post scan is written once (Couriers.nearestPost); found {scans}")
+    if "of(Code.COURIER_QUOTA, count, what, seconds)" not in text(root / "diagnostic" / "Diagnostic.java"):
+        err("diagnostic/Diagnostic.courierQuota: (count, what, seconds)")
+    for path in sorted((ROOT / "src" / "client" / "java").rglob("*.java")):
+        source = text(path)
+        for needle in (".shortage()", ".courierRemainder(", "CourierLedger"):
+            if needle in source:
+                err(f"{path.relative_to(ROOT)}: the crucible's demand and the ledger are the server's ({needle})")
+
+
 def _geo_faces(cube):
     """Each face of a GeckoLib cube on its sheet: (face, u, v, width, height), from per-face UVs or a box UV's net."""
     uv = cube.get("uv")
@@ -15126,7 +15212,7 @@ def check_logistics(co, root, lang, registered):
         if f"long {const} = {value}L;" not in ledger:
             err(f"concordance/logistics/Logistics.java: {const} differs from tools/concordance_logistics.py ({value})")
     couriers = java("courier/Couriers.java")
-    for const, value in (("SOURCE_RADIUS", lg.SOURCE_RADIUS), ("SHOWN_HISTORY", lg.SHOWN_HISTORY)):
+    for const, value in (("SOURCE_RADIUS", lg.SOURCE_RADIUS), ("SHOWN_HISTORY", lg.SHOWN_HISTORY), ("FILING_REACH", lg.FILING_REACH)):
         if not re.search(rf"\bint {const} = {value};", couriers):
             err(f"concordance/courier/Couriers.java: {const} differs from tools/concordance_logistics.py ({value})")
     if not re.search(rf"\bint SLOTS = {lg.POST_SLOTS};", java("courier/CourierPostBlockEntity.java")):
@@ -17038,8 +17124,10 @@ AUTHORITY_ROUTES = {
     "sympathy/ScryingGlassItem.java": ["Sympathy.allowed(player, target)", "Hexes.MAX_RANGE"],
     "CircleAnchorBlockEntity.java": ["Authority.present(level, disturber)"],
     "Alchemy.java": ["harmful(dose) ? Intent.HARMFUL"],
-    # Concordance Chunk C, C-01 (C-P5): working a crucible by hand, and clearing its formula.
-    "CrucibleBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)", "Authority.mayChange(player.level(), player, worldPosition)"],
+    # Concordance Chunk C, C-01 (C-P5): working a crucible by hand, and clearing its formula; C-06 (C-P53): it files a
+    # courier request only while its formula's setter answers.
+    "CrucibleBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)", "Authority.mayChange(player.level(), player, worldPosition)",
+                                 "Authority.answering(level, formulaOwner) == null"],
     # Concordance Chunk C, C-05 (C-P46): setting a Crucible Stand's heat by hand.
     "CrucibleStandBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)"],
 }

@@ -19,8 +19,13 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Preparation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Vector;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Request;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
@@ -28,14 +33,20 @@ import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Signs;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.base.SingleFluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -44,6 +55,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -88,6 +100,11 @@ import org.jspecify.annotations.Nullable;
  * ({@link #waiting()}). A formula the rules can no longer follow stays set, says which step and why, and does nothing
  * until they can again. Only someone who could change the block by hand changes a crucible (Concordance Chunk C,
  * C-01).</li>
+ * <li><b>Supply</b> (Concordance Chunk C, C-06): its formula's {@link #shortage()} is the one demand a Peepo at its port
+ * and its own courier request serve. Waiting for an ingredient, it files one request as its formula's setter, while they
+ * answer (Authority.answering), at the nearest Courier Post within {@value #POST_REACH} blocks they may use, for exactly
+ * what it lacks; a Peepo brings only what no courier holding that request is bringing. Clearing, replacing or losing its
+ * formula, or breaking it, turns the request back.</li>
  * </ul>
  * Hoppers and pipes: ingredients and reagents into the buffer, bottles and bowls into the bottle slot, from above or the
  * sides; brews out from the sides or below (the heat source usually sits below); water into the tank. The mixture is
@@ -104,6 +121,15 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	public static final int WATER_PER_BUCKET = 3;
 	/** Preserve's hold: the game time it ends (optional; absent = not held). */
 	public static final String HELD_UNTIL = "held_until";
+	/** C-06: who set its formula (optional; absent = nobody known, so it asks no courier). */
+	public static final String FORMULA_OWNER = "formula_owner";
+	/** C-06: its open courier request's number (optional; absent = none). */
+	public static final String REQUEST = "request";
+	/** C-06: how far its Courier Post may be, as a Spire Heart's. */
+	public static final int POST_REACH = Couriers.FILING_REACH;
+	/** C-06 (C-P13): the wait after a filing found no post or the couriers' quota full (ticks), doubling to MAX_FILING_BACKOFF. Keep equal to tools/concordance_logistics.py. */
+	public static final int FILING_BACKOFF = 200;
+	public static final int MAX_FILING_BACKOFF = 1200;
 	/** From above, only what goes in; from the sides, that and the output; from below, only the output. */
 	private static final int[] ABOVE = {0, 1, 2, 3, 4, BOTTLE_SLOT};
 	private static final int[] SIDES = {0, 1, 2, 3, 4, BOTTLE_SLOT, OUTPUT_SLOT};
@@ -130,6 +156,14 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	private int checkedRevision = -1;
 	/** Why the rules in force cannot follow its formula (as of checkedRevision), or null. Not saved. */
 	private @Nullable Diagnostic incompatible;
+	/** Who set its formula (C-06): its courier requests are theirs; null when nobody is known. Saved as formula_owner. */
+	private @Nullable UUID formulaOwner;
+	/** Its open courier request (C-06), or -1. Saved as request. */
+	private long request = -1L;
+	/** C-06: no filing before this game time; the wait that set it; whether the couriers' quota was full. Not saved. */
+	private long nextFiling;
+	private int backoff;
+	private boolean quotaFull;
 	/** On a client: what the liquid looks like, as the server sent it (the spoon's reading, never the makeup). */
 	private Assay.Look shown = Assay.Look.PLAIN;
 
@@ -183,6 +217,16 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 
 	public int step() {
 		return step;
+	}
+
+	/** Who set its formula (C-06), or null. */
+	public @Nullable UUID formulaOwner() {
+		return formulaOwner;
+	}
+
+	/** Its open courier request's number (C-06), or -1. */
+	public long request() {
+		return request;
 	}
 
 	/** Tests and operators: sets the temperature at once (it then moves towards its source as usual). */
@@ -267,16 +311,19 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 	 * One pulse of its formula, every {@value #AUTOMATION_TICKS} ticks (or a test's, at a known moment): its next step if
 	 * it can be taken now or, the formula done, one bottle into the output. Returns why it waits (waiting()), or null when
 	 * it did something. A formula the rules in force cannot follow, or a saved one that no longer reads, keeps its step and
-	 * does nothing at all, no step and no bottle, until they can again (C-01, C-P1, C-P23).
+	 * does nothing at all, no step and no bottle, until they can again (C-01, C-P1, C-P23). Waiting for an ingredient, it
+	 * asks the couriers for exactly its shortage (C-06).
 	 */
 	public @Nullable Diagnostic automate(ServerLevel level) {
 		Diagnostic refused = incompatibility();
 		if (refused != null) {
+			turnBack(); // C-06: a formula it cannot follow asks the couriers for nothing
 			return pause(level, refused);
 		}
 		if (program == null) {
 			return null;
 		}
+		reconcile(level); // C-06: forget a closed request; turn back one it no longer needs as asked
 		List<Operation> operations = program.operations();
 		if (step >= operations.size()) {
 			if (!mixture.isEmpty()) {
@@ -303,7 +350,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			case Operation.Add add -> {
 				slot = bufferSlotFor(add);
 				if (slot < 0) {
-					return pause(level, missing(add));
+					return pause(level, supply(level, missing(add))); // C-06: and ask the couriers, once
 				}
 			}
 			case Operation.Stir stir -> {
@@ -407,6 +454,180 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		Reagent reagent = stack.get(JugcraftConcordance.REAGENT);
 		return reagent != null ? reagent.item().equals(add.item()) && reagent.preparation().equals(add.preparation())
 			: plain != null && plain.id().equals(add.preparation()) && ConcordanceProgress.itemId(stack).equals(add.item());
+	}
+
+	// ---------------------------------------------------------------- one demand, two carriers (Concordance Chunk C, C-06)
+
+	/** What its formula lacks first (C-06): an Add step's ingredient and how many more its buffer must hold. */
+	public record Shortage(Operation.Add add, int count) {
+	}
+
+	/**
+	 * The one demand a Peepo at its port and its own courier request both serve (C-06, moved from the Peepo port): the
+	 * earliest ingredient its remaining steps need more of than its buffer holds, and how many more; earliest first, so
+	 * later ingredients cannot fill all five slots ahead of it. Null when it lacks nothing, has no formula or cannot follow
+	 * the one it has (C-01). Server only (it reads the rules in force).
+	 */
+	public @Nullable Shortage shortage() {
+		if (program == null || incompatibility() != null) {
+			return null;
+		}
+		List<Operation> operations = program.operations();
+		Map<Operation.Add, Integer> needs = new LinkedHashMap<>();
+		for (Operation operation : operations.subList(Math.min(step, operations.size()), operations.size())) {
+			if (operation instanceof Operation.Add add) {
+				needs.merge(add, 1, Integer::sum);
+			}
+		}
+		for (Map.Entry<Operation.Add, Integer> need : needs.entrySet()) {
+			int held = 0;
+			for (int i = 0; i < BUFFER_SLOTS; i++) {
+				if (matchesIngredient(need.getKey(), items.get(i))) {
+					held += items.get(i).getCount();
+				}
+			}
+			if (held < need.getValue()) {
+				return new Shortage(need.getKey(), need.getValue() - held);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * How many of {@code add}'s ingredient its open courier request still brings (C-06, C-P50): asked for less delivered,
+	 * while a courier holds it (a live claim, reserving or carrying: its lease not run out) and it is not being taken back;
+	 * else 0. The Peepo port asks for the shortage less this, so the two carriers never bring one need twice and a request
+	 * nobody serves (no porter, its setter away, a porter unloaded with its claim) never stalls a Peepo.
+	 */
+	public int courierRemainder(Operation.Add add) {
+		if (request <= 0L || !(level instanceof ServerLevel server)) {
+			return 0;
+		}
+		CourierLedger ledger = CourierLedger.of(server.getServer());
+		Request open = ledger.ledger().get(request);
+		ItemVariant item = ledger.item(request);
+		if (open == null || item == null || open.progress().returning() || open.progress().worker() == null
+				|| open.progress().lease() < server.getGameTime() || !matchesIngredient(add, item.toStack())) {
+			return 0;
+		}
+		return Math.max(0, open.ticket().wanted() - open.progress().delivered());
+	}
+
+	/**
+	 * The exact stack an Add step takes (C-06): the item as it comes, or a reagent of it prepared so, as the mortar makes it;
+	 * empty for an item this game lacks.
+	 */
+	public static ItemStack sample(Operation.Add add) {
+		Identifier id = Identifier.tryParse(add.item());
+		Item item = id == null ? Items.AIR : BuiltInRegistries.ITEM.getValue(id);
+		if (item == Items.AIR) {
+			return ItemStack.EMPTY;
+		}
+		Preparation plain = Alchemy.catalog().asItComes();
+		if (plain != null && plain.id().equals(add.preparation())) {
+			return new ItemStack(item);
+		}
+		ItemStack reagent = new ItemStack(JugcraftConcordance.REAGENT_ITEM);
+		reagent.set(JugcraftConcordance.REAGENT, new Reagent(add.item(), add.preparation()));
+		return reagent;
+	}
+
+	/** The wait after a failed filing (C-P13): FILING_BACKOFF ticks, doubling to MAX_FILING_BACKOFF. */
+	public static int backoffAfter(int last) {
+		return last <= 0 ? FILING_BACKOFF : Math.min(MAX_FILING_BACKOFF, last * 2);
+	}
+
+	/**
+	 * Waiting for an ingredient (C-06, C-P13): one request, its formula's setter's, at the nearest Courier Post within
+	 * POST_REACH blocks they may use, for the step's exact item and the whole shortage, delivered here. Nothing is asked
+	 * while a request is open, for a formula nobody is known to have set, while its setter does not answer (away, unless
+	 * the server lets absent owners' devices act: a request filed for nobody would stall a shared post, C-P53), or during a
+	 * backoff: after no post, or the couriers' quota full (Logistics.TOO_MANY: the setter's 16 or the world's 1,024), it
+	 * waits backoffAfter(...) ticks and, for the quota, says so. Returns the reason it waits.
+	 */
+	private Diagnostic supply(ServerLevel level, Diagnostic reason) {
+		Shortage shortage = shortage();
+		if (formulaOwner == null || request > 0L || shortage == null || Authority.answering(level, formulaOwner) == null) {
+			return reason;
+		}
+		long now = level.getGameTime();
+		if (now >= nextFiling) {
+			quotaFull = false;
+			ItemStack sample = sample(shortage.add());
+			CourierPostBlockEntity post = sample.isEmpty() ? null : Couriers.nearestPost(level, worldPosition, formulaOwner, POST_REACH);
+			if (post != null) {
+				Logistics.Filed filed = CourierLedger.of(level.getServer()).file(formulaOwner, Couriers.place(level, post.getBlockPos()),
+						Couriers.place(level, worldPosition), sample, shortage.count(), level.registryAccess(), now);
+				if (filed.outcome() == Logistics.Outcome.DONE) {
+					request = filed.id();
+					backoff = 0;
+					nextFiling = 0L;
+					setChanged();
+					return reason;
+				}
+				quotaFull = filed.outcome() == Logistics.Outcome.TOO_MANY;
+			}
+			backoff = backoffAfter(backoff);
+			nextFiling = now + backoff;
+		}
+		return quotaFull ? Diagnostic.courierQuota(shortage.count(), shortage.add().describe(), (int) ((nextFiling - now + 19) / 20)) : reason;
+	}
+
+	/**
+	 * Its open request against what it lacks now (C-06, C-P51), each pulse: closed (delivered, cancelled, recovered) or
+	 * not this crucible's setter's, forgotten; being taken back, forgotten (the ledger finishes it); with nothing carried,
+	 * turned back when its item is not what it lacks first, it asks for more than it lacks, or its post is gone or barred
+	 * to its setter. Cargo already carried is left to arrive.
+	 */
+	private void reconcile(ServerLevel level) {
+		if (request <= 0L) {
+			return;
+		}
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		Request open = ledger.ledger().get(request);
+		if (open == null || !open.ticket().destination().equals(Couriers.place(level, worldPosition))
+				|| !open.ticket().requester().equals(formulaOwner) || open.progress().returning()) {
+			forgetRequest();
+			return;
+		}
+		if (open.progress().carried() > 0) {
+			return;
+		}
+		Shortage shortage = shortage();
+		ItemVariant item = ledger.item(request);
+		BlockPos post = Couriers.pos(open.ticket().post());
+		boolean barred = level.isLoaded(post) && !(level.getBlockEntity(post) instanceof CourierPostBlockEntity usable
+				&& usable.mayUse(open.ticket().requester()));
+		if (shortage == null || item == null || !matchesIngredient(shortage.add(), item.toStack())
+				|| open.ticket().wanted() - open.progress().delivered() > shortage.count() || barred) {
+			turnBack();
+		}
+	}
+
+	/**
+	 * Turns back its open request (C-06): closed at once with nothing carried, else its cargo goes back where it came from
+	 * (CourierLedger.cancel as its requester, which the ledger insists on; only a request bound here). Forgotten either
+	 * way, with the backoff and the quota's reason, so the next ingredient wait asks at once.
+	 */
+	private void turnBack() {
+		if (request > 0L && level instanceof ServerLevel server) {
+			CourierLedger ledger = CourierLedger.of(server.getServer());
+			Request open = ledger.ledger().get(request);
+			if (open != null && open.ticket().destination().equals(Couriers.place(server, worldPosition))) {
+				ledger.cancel(request, open.ticket().requester(), server.getGameTime());
+			}
+		}
+		forgetRequest();
+		backoff = 0;
+		nextFiling = 0L;
+		quotaFull = false;
+	}
+
+	private void forgetRequest() {
+		if (request > 0L) {
+			request = -1L;
+			setChanged();
+		}
 	}
 
 	private @Nullable Diagnostic bottleIntoOutput(ServerLevel level) {
@@ -590,7 +811,7 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				player.sendOverlayMessage(refused);
 				return InteractionResult.FAIL;
 			}
-			follow(formula);
+			follow(formula, player.getUUID());
 			// What is never hidden: the formula's own, and, set over a mixture already in it, that mixture's (C-01).
 			List<Text> risks = Assay.risks(formula, mixture, !mixture.isEmpty(), Alchemy::harmfulStatus, catalog);
 			if (risks.isEmpty()) {
@@ -630,12 +851,23 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		return why == null ? null : Component.translatable("message.jugcraft.concordance.alchemy.formula_refused", ComposeText.show(why.text()));
 	}
 
-	/**
-	 * Sets {@code formula} to repeat from its first step: the formula item's use after its checks, and tests and operators.
-	 * Nothing is checked here; the rules in force are checked at its next look, as after a load.
-	 */
+	/** Sets {@code formula} with nobody known as its setter (tests and operators; it asks no courier). Nothing is checked here. */
 	public void follow(Formula formula) {
+		follow(formula, null);
+	}
+
+	/**
+	 * Sets {@code formula} to repeat from its first step, set by {@code setter} (the formula item's use after its checks;
+	 * tests and operators): its courier requests are then theirs (C-06). An open request is turned back unless the same
+	 * player sets the same formula again (C-P53). Nothing is checked here; the rules in force are checked at its next look,
+	 * as after a load.
+	 */
+	public void follow(Formula formula, @Nullable UUID setter) {
+		if (program == null || !program.text().equals(formula.text()) || !Objects.equals(formulaOwner, setter)) {
+			turnBack();
+		}
 		program = formula;
+		formulaOwner = setter;
 		unreadable = "";
 		step = 0;
 		waiting = null;
@@ -657,7 +889,9 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				player.sendOverlayMessage(ComposeText.show(Diagnostic.of(Code.MISSING_PERMISSION).text()));
 				return;
 			}
+			turnBack(); // C-06: its courier request goes with it
 			program = null;
+			formulaOwner = null;
 			unreadable = "";
 			step = 0;
 			waiting = null;
@@ -793,6 +1027,18 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		items.clear();
 	}
 
+	/**
+	 * Broken (C-06): the courier requests bound for it are turned back (their cargo goes back where it came from) and, as
+	 * before, what its slots hold drops once (BlockEntity's own container drop); its mixture spills.
+	 */
+	@Override
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		if (level instanceof ServerLevel server) {
+			CourierLedger.of(server.getServer()).destinationGone(Couriers.place(server, pos), server.getGameTime());
+		}
+		super.preRemoveSideEffects(pos, state);
+	}
+
 	// ---------------------------------------------------------------- saving and clients
 
 	private void sync(ServerLevel level) {
@@ -835,6 +1081,13 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		incompatible = null;
 		checkedRevision = -1;
 		heldUntil = Math.max(0L, input.getLongOr(HELD_UNTIL, 0L));
+		// C-06: optional, read with defaults (a save from before reads as nobody's, asking nothing); the stamp stays 1.
+		formulaOwner = saved.isEmpty() ? null : input.read(FORMULA_OWNER, UUIDUtil.CODEC).orElse(null);
+		long asked = input.getLongOr(REQUEST, -1L);
+		request = asked > 0L ? asked : -1L;
+		nextFiling = 0L;
+		backoff = 0;
+		quotaFull = false;
 	}
 
 	@Override
@@ -860,6 +1113,12 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		if (program != null || !unreadable.isEmpty()) {
 			output.putString("program", program != null ? program.text() : unreadable);
 			output.putInt("step", step);
+		}
+		if (formulaOwner != null) {
+			output.store(FORMULA_OWNER, UUIDUtil.CODEC, formulaOwner);
+		}
+		if (request > 0L) {
+			output.putLong(REQUEST, request);
 		}
 		if (heldUntil > 0L) {
 			output.putLong(HELD_UNTIL, heldUntil);

@@ -27,6 +27,9 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Operation;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
@@ -989,6 +992,31 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(crucible.automate(level) == null && ItemStack.isSameItemSameComponents(crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT), draught(NIGHT_EYE))
 				&& crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT).getCount() == 1 && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty()
 				&& crucible.mixture().isEmpty(), "The rules restored, one pulse bottles it: " + crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT));
+		// C-06: its courier request goes the same way: a formula the rules cannot follow turns it back and files no other;
+		// restored, the next ingredient wait asks again; broken, the request goes with it.
+		BlockPos postAt = new BlockPos(4, 2, 2);
+		helper.setBlock(postAt, Couriers.COURIER_POST);
+		helper.getBlockEntity(postAt, CourierPostBlockEntity.class).setOwner(crucible.formulaOwner());
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		pour(crucible, FluidConstants.BOTTLE);
+		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 1, "The next repeat pours its water");
+		Diagnostic waits = crucible.automate(level);
+		long firstAsk = crucible.request();
+		helper.assertTrue(waits != null && waits.code() == Code.MISSING_INGREDIENT && firstAsk > 0L && ledger.ledger().get(firstAsk) != null,
+				"Waiting for its glowstone, it asks a courier: " + waits + ", request " + firstAsk);
+		long filed = ledger.ledger().nextId();
+		record Turned(Diagnostic first, Diagnostic second, long request, boolean open, long next) {
+		}
+		Turned turned = under(ConcordanceRules.EMPTY, () -> new Turned(crucible.automate(level), crucible.automate(level), crucible.request(),
+				ledger.ledger().get(firstAsk) != null, ledger.ledger().nextId()));
+		helper.assertTrue(turned.first().code() == Code.INCOMPATIBLE && turned.request() == -1L && !turned.open() && turned.next() == filed,
+				"A formula the rules refuse turns its request back and asks for nothing more: " + turned);
+		Diagnostic again = crucible.automate(level);
+		long reasked = crucible.request();
+		helper.assertTrue(again != null && again.code() == Code.MISSING_INGREDIENT && reasked > 0L && reasked != firstAsk,
+				"The rules restored, it asks again: " + again + ", request " + reasked);
+		helper.setBlock(at, Blocks.AIR);
+		helper.assertTrue(ledger.ledger().get(reasked) == null, "Broken, its request goes with it");
 		helper.succeed();
 	}
 

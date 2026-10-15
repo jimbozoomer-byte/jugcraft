@@ -13,7 +13,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.*;
 
-/** Supplies the native written formula. Heat, water, brewing and research remain native. */
+/** Supplies the native written formula. Heat, water, brewing and research remain native. What it lacks is the crucible's own demand (CrucibleBlockEntity.shortage, Concordance Chunk C, C-06), shared with the crucible's courier request: this port asks for it less what a courier holding that request still brings. */
 public final class CrucibleCompanion implements CompanionLogistics.Port {
     private final CrucibleBlockEntity crucible;
     public final CompanionRecipeFilter filter=new CompanionRecipeFilter();
@@ -34,16 +34,6 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
         return cachedPlan;
     }
     private List<Operation> remaining(){var formula=crucible.program();return formula==null?List.of():formula.operations().subList(crucible.step(),formula.operations().size());}
-    /** Earliest missing preparation first: later ingredients cannot occupy all five slots ahead of it. */
-    private Map.Entry<Operation.Add,Integer> shortage(){
-        var needs=new LinkedHashMap<Operation.Add,Integer>();
-        for(var op:remaining())if(op instanceof Operation.Add add)needs.merge(add,1,Integer::sum);
-        for(var entry:needs.entrySet()){
-            int held=0;for(int i=0;i<CrucibleBlockEntity.BUFFER_SLOTS;i++)if(CrucibleBlockEntity.matchesIngredient(entry.getKey(),crucible.getItem(i)))held+=crucible.getItem(i).getCount();
-            if(held<entry.getValue())return Map.entry(entry.getKey(),entry.getValue()-held);
-        }
-        return null;
-    }
     private int containers(){int parts=crucible.mixture().parts();for(var op:remaining())if(op instanceof Operation.Water water)parts+=water.parts();return Math.min(Mixture.MAX_PARTS,parts);}
     public int needed(ItemStack stack){
         if(!enabled() || crucible.program()==null || crucible.incompatibility()!=null || stack.isEmpty())return 0; // C-01: an incompatible formula asks for nothing
@@ -51,8 +41,9 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
             var held=crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT);
             return held.isEmpty() || ItemStack.isSameItemSameComponents(held,stack)?Math.max(0,containers()-held.getCount()):0;
         }
-        var missing=shortage();if(missing==null || !CrucibleBlockEntity.matchesIngredient(missing.getKey(),stack))return 0;
-        return missing.getValue();
+        // C-06: the crucible's one demand, less what a courier holding its request still brings.
+        var missing=crucible.shortage();if(missing==null || !CrucibleBlockEntity.matchesIngredient(missing.add(),stack))return 0;
+        return Math.max(0,missing.count()-crucible.courierRemainder(missing.add()));
     }
     private final Storage<ItemVariant> input=new InsertionOnlyStorage<>(){
         public long insert(ItemVariant item,long amount,TransactionContext tx){
@@ -96,7 +87,7 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
         var reason=crucible.waiting();
         if(reason!=null)return switch(reason.code()){
             case NEEDS_WATER->CompanionStatus.NEEDS_WATER;
-            case MISSING_INGREDIENT,WRONG_PREPARATION->CompanionStatus.NO_INPUT;
+            case MISSING_INGREDIENT,WRONG_PREPARATION,COURIER_QUOTA->CompanionStatus.NO_INPUT;
             case NEEDS_CONTAINER->CompanionStatus.NEEDS_BOTTLES;
             case INSUFFICIENT_CAPACITY,OUTPUT_DIFFERS->CompanionStatus.FULL;
             case WRONG_HEAT,HELD->CompanionStatus.WRONG_TEMPERATURE;
@@ -105,7 +96,7 @@ public final class CrucibleCompanion implements CompanionLogistics.Port {
             case INCOMPATIBLE,UNREADABLE->CompanionStatus.RECIPE_MISSING;
             default->CompanionStatus.IDLE;
         };
-        if(shortage()!=null)return CompanionStatus.NO_INPUT;
+        if(crucible.shortage()!=null)return CompanionStatus.NO_INPUT;
         if(containers()>0 && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty())return CompanionStatus.NEEDS_BOTTLES;
         return CompanionStatus.IDLE;
     }

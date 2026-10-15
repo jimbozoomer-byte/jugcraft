@@ -71,6 +71,11 @@ public record Diagnostic(Code code, List<Object> args) {
 		return of(Code.INCOMPATIBLE, step, operation, reason);
 	}
 
+	/** C-06: what it lacks, and in how many seconds it asks the couriers again, their quota for its setter being full. */
+	public static Diagnostic courierQuota(int count, Text what, int seconds) {
+		return of(Code.COURIER_QUOTA, count, what, seconds);
+	}
+
 	private static Text.Ref band(String id) {
 		return new Text.Ref("band", id);
 	}

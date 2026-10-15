@@ -16,8 +16,11 @@ import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
@@ -34,6 +37,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -51,6 +57,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 
 /**
@@ -58,8 +65,8 @@ import net.minecraft.world.level.storage.TagValueInput;
  * Concordance saves in a world reads its own saves from before versions began, is written with its version, brings an
  * older version forward step by step and reads what it can of a newer one; a record keeps an entry it cannot read
  * exactly as written; block entities stamp their version; the crucible keeps Preserve's hold through a save (Concordance
- * Chunk B, unit 3); the Crucible Stand keeps its JE and setting (Concordance Chunk C, C-05); and the circle index looks
- * only at the chunks in reach.
+ * Chunk B, unit 3); the Crucible Stand keeps its JE and setting (Concordance Chunk C, C-05); the crucible keeps its
+ * formula's setter and its courier request (C-06); and the circle index looks only at the chunks in reach.
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -334,6 +341,65 @@ public class ConcordancePersistenceGameTests {
 				"JE beyond its store is cut to it; an unknown setting is off");
 		forged.putLong("energy", -5L);
 		helper.assertTrue(loadStand(level, stand, forged).energy.getAmount() == 0, "Negative JE reads as none");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk C, C-06: a crucible saves its formula's setter and its open courier request, stamped 1, and reads
+	 * them back exactly. A save from before (stamped or not) reads as nobody's formula with no request, its formula and
+	 * step kept; a request numbered 0 reads as none; a crucible with no formula writes neither key; broken, its request
+	 * goes with it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theCrucibleKeepsItsRequestThroughASave(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		String twoGlow = "water 2; add minecraft:glowstone_dust jugcraft:raw; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot";
+		// The setter is here: a crucible files only while its setter answers (C-P53).
+		ServerPlayer setter = helper.makeMockServerPlayerInLevel();
+		UUID owner = setter.getUUID();
+		BlockPos postAt = new BlockPos(4, 2, 2);
+		helper.setBlock(postAt, Couriers.COURIER_POST);
+		helper.getBlockEntity(postAt, CourierPostBlockEntity.class).setOwner(owner);
+		BlockPos relative = new BlockPos(2, 2, 2);
+		helper.setBlock(relative.below(), Blocks.STONE);
+		helper.setBlock(relative, JugcraftConcordance.CRUCIBLE);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(relative, CrucibleBlockEntity.class);
+		crucible.follow(Formula.parse(twoGlow), owner);
+		try (Transaction transaction = Transaction.openOuter()) {
+			crucible.water.insert(FluidVariant.of(Fluids.WATER), 2 * FluidConstants.BOTTLE, transaction);
+			transaction.commit();
+		}
+		crucible.automate(level);
+		crucible.automate(level);
+		long id = crucible.request();
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		helper.assertTrue(id > 0L && ledger.ledger().get(id) != null && crucible.step() == 1, "It has asked a courier for its glowstone: request " + id);
+		CompoundTag saved = crucible.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getLongOr(CrucibleBlockEntity.REQUEST, -1L) == id
+				&& saved.contains(CrucibleBlockEntity.FORMULA_OWNER), "Saved: its setter and request, still at version 1: " + saved);
+		CrucibleBlockEntity read = load(level, crucible, saved);
+		helper.assertTrue(owner.equals(read.formulaOwner()) && read.request() == id && read.step() == 1, "and read back exactly");
+		CompoundTag before = saved.copy();
+		before.remove(CrucibleBlockEntity.FORMULA_OWNER);
+		before.remove(CrucibleBlockEntity.REQUEST);
+		CompoundTag unversioned = before.copy();
+		unversioned.remove(Saved.VERSION);
+		for (CompoundTag legacy : List.of(before, unversioned)) {
+			CrucibleBlockEntity older = load(level, crucible, legacy);
+			helper.assertTrue(older.formulaOwner() == null && older.request() == -1L && older.program() != null
+					&& twoGlow.equals(older.program().text()) && older.step() == 1,
+					"A save from before reads as nobody's formula with no request, the formula and its step kept");
+		}
+		CompoundTag forged = saved.copy();
+		forged.putLong(CrucibleBlockEntity.REQUEST, 0L);
+		helper.assertTrue(load(level, crucible, forged).request() == -1L, "A request numbered 0 reads as none");
+		BlockPos freshAt = new BlockPos(6, 2, 2);
+		helper.setBlock(freshAt, JugcraftConcordance.CRUCIBLE);
+		CompoundTag fresh = helper.getBlockEntity(freshAt, CrucibleBlockEntity.class).saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(!fresh.contains(CrucibleBlockEntity.FORMULA_OWNER) && !fresh.contains(CrucibleBlockEntity.REQUEST),
+				"A crucible with no formula writes neither key: " + fresh);
+		helper.setBlock(relative, Blocks.AIR);
+		helper.assertTrue(ledger.ledger().get(id) == null, "Broken, its request goes with it");
 		helper.succeed();
 	}
 
