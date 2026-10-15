@@ -65,6 +65,10 @@ WEIGHTS = {
     # Concordance Chunk B unit 4: about 25 shots at 2 s each and 200 ticks of the Yeti King's frost on the player, which
     # its length would put far lower (an estimate, not a measurement).
     "ConcordanceWinterClientGameTests": 120,
+    # Concordance Chunk C unit 5: a dedicated server's start, several hundred lockstep ticks of the workshop working (its
+    # poultice batch, Root and Rivet's four steps), 100 of them with their frame times sampled, and seven shots: about
+    # 190 s at the pace the Winter entry implies (an estimate, not a measurement).
+    "ConcordanceWorkshopClientGameTests": 200,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.

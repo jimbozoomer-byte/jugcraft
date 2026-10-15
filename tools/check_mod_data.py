@@ -12094,6 +12094,7 @@ def check_concordance(registered):
     check_delivery()
     check_game_test_entrypoints()
     check_load_card()
+    check_workshop_client_evidence()
 
 
 def check_composition(co, root, lang, registered, research):
@@ -12439,6 +12440,65 @@ def check_load_card():
     workload = (test_dir / "ConcordanceWorkloadGameTests.java").read_text(encoding="utf-8")
     if "public void gleanersHeartSearch(GameTestHelper helper)" not in workload or "GleanerBlockEntity.HEART_REACH" not in workload:
         err("ConcordanceWorkloadGameTests.java: the Gleaner's Heart search must be timed (C-P21)")
+
+
+WORKSHOP_CLIENT = "io.github.jimbozoomer.jugcraft.test.ConcordanceWorkshopClientGameTests"
+WORKSHOP_CLIENT_SHOTS = ("jugcraft_concordance_workshop", "jugcraft_concordance_stand_lit", "jugcraft_concordance_stand_dark",
+                         "jugcraft_encyclopedia_inspect_crucible_stand", "jugcraft_encyclopedia_inspect_root_and_rivet",
+                         "jugcraft_encyclopedia_inspect_root_and_rivet_scale4", "jugcraft_concordance_anchor_root_and_rivet_jade")
+WORKSHOP_CLIENT_PIECES = ("JugcraftConcordance.CRUCIBLE_STAND", "JugcraftConcordance.CRUCIBLE.", "JugcraftFluids.ELECTRIC_PUMP",
+                          "JugcraftConcordance.CIRCLE_ANCHOR", "JugcraftConcordance.LEY_PYLON", "Garden.VERDANT_BED",
+                          "Garden.MULCH_MAW", "Garden.GLEANER")
+
+
+def check_workshop_client_evidence():
+    """Concordance Chunk C, C-10: the living workshop's client evidence (plan 08:169-181). ConcordanceWorkshopClientGameTests
+    is listed by the test mod and weighed by tools/select_client_tests.py (an entry that is not a comment), so its shard
+    stays inside the client jobs' 60 minutes (.github/workflows/build.yml); it builds the whole workshop in one view,
+    takes the shots the contract names and records a client frame time (Mesa's, C-P70); and it uses Jade's provider only
+    inside an isModLoaded("jade") block, so it runs without Jade. Comments are ignored."""
+    name = "src/gametest/ConcordanceWorkshopClientGameTests.java"
+    path = (ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+            / "ConcordanceWorkshopClientGameTests.java")
+    if not path.exists():
+        err(f"{name}: missing (Concordance Chunk C, C-10)")
+        return
+    text = path.read_text(encoding="utf-8")
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if WORKSHOP_CLIENT not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"{name}: not a fabric-client-gametest entrypoint")
+    selector = (ROOT / "tools" / "select_client_tests.py").read_text(encoding="utf-8")
+    weights = re.search(r"^WEIGHTS = \{(.*?)^\}", selector, re.S | re.M)
+    entries = re.sub(r"#[^\n]*", "", weights.group(1)) if weights else ""
+    if not re.search(r'"ConcordanceWorkshopClientGameTests":\s*\d+,', entries):
+        err(f"{name}: needs a WEIGHTS entry in tools/select_client_tests.py")
+    # Comments blanked to spaces with their line breaks kept, so offsets and line numbers stay the source's.
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", lambda m: re.sub(r"[^\n]", " ", m.group(0)), text, flags=re.S)
+    for piece in WORKSHOP_CLIENT_PIECES:
+        if piece not in code:
+            err(f"{name}: the workshop in one view lacks {piece}")
+    for shot in WORKSHOP_CLIENT_SHOTS:
+        if f'takeScreenshot("{shot}")' not in code:
+            err(f"{name}: no shot {shot}")
+    if "getFrameTimeNs()" not in code:
+        err(f"{name}: records no client frame time (C-10)")
+    blank = re.sub(r'"(?:\\.|[^"\\\n])*"', lambda m: '"' + " " * (len(m.group(0)) - 2) + '"', code)
+    guard = 'if (FabricLoader.getInstance().isModLoaded("jade")) {'
+    opens = [m.end() for m in re.finditer(re.escape(guard), code)]
+    for use in re.finditer(r"\bConcordanceDataProvider\.", blank):
+        if not any(start <= use.start() and _inside_block(blank, start, use.start()) for start in opens):
+            err(f"{name}: Jade's provider is used outside an isModLoaded(\"jade\") block "
+                f"(line {code.count(chr(10), 0, use.start()) + 1})")
+
+
+def _inside_block(text, start, at):
+    """Whether `at` lies inside the block whose opening brace ends just before `start` (string contents blanked)."""
+    depth = 1
+    for ch in text[start:at]:
+        depth += (ch == "{") - (ch == "}")
+        if depth == 0:
+            return False
+    return True
 
 
 def check_baselines(root):
