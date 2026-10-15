@@ -50,7 +50,7 @@ There are no new dependencies. Both icons are drawn by `tools/petro_textures.py`
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38809622624](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38809622624) on commit `ca6458d1` passed: the mod job (compilation and every server game test, these two included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
