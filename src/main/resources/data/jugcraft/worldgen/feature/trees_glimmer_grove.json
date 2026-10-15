@@ -9,6 +9,10 @@
     {
       "chance": 0.2,
       "feature": "minecraft:oak_checked"
+    },
+    {
+      "chance": 0.20833333333333334,
+      "feature": "jugcraft:big_jacaranda_checked"
     }
   ]
 }

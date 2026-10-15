@@ -179,6 +179,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		io.github.jimbozoomer.jugcraft.gear.TraitTooltips.details = () -> Minecraft.getInstance().hasShiftDown();
 		SeasonColors.register();
 		WoodColors.register();
+		TreeLeafColors.register();
 		PartyClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();

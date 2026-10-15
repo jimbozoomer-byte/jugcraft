@@ -467,11 +467,14 @@ TREES = {
     # tools/trees.py) that four saplings planted in a square grow (agriculture/GiantSaplingBlock).
     "redwood": {"leaves": "redwood_needles", "leaves_display": "Redwood Needles", "season": None, "base": "spruce",
                 "giant": "giant_redwood"},
-    "eucalyptus": {"leaves": "eucalyptus_leaves", "leaves_display": "Eucalyptus Leaves", "season": None, "base": "jungle"},
+    "eucalyptus": {"leaves": "eucalyptus_leaves", "leaves_display": "Eucalyptus Leaves", "season": None, "base": "jungle",
+                   "giant": "giant_eucalyptus"},
     "mahogany": {"leaves": "mahogany_leaves", "leaves_display": "Mahogany Leaves", "season": None, "base": "jungle",
                  "giant": "giant_mahogany"},
     # The tree roster's batch 1: the swamp cedar, an evergreen conifer of flat sprays of scale-leaves.
     "cedar": {"leaves": "cedar_leaves", "leaves_display": "Cedar Leaves", "season": None, "base": "spruce"},
+    "pine": {"leaves": "pine_needles", "leaves_display": "Pine Needles", "season": None, "base": "spruce",
+             "leaf_tint": 0x78A88A, "leaf_overlay": "pine_needles_overlay"},
 }
 SEASON_STATES = ["green", "gold", "bare"]
 JITTER = 7

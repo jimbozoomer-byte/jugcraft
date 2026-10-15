@@ -170,10 +170,13 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower MAHOGANY_GROWER = grower("mahogany");
 	/** The tree roster's batch 1: the swamp cedar, on its own wood (tools/trees.py "cedar"). */
 	public static final TreeGrower CEDAR_GROWER = grower("cedar");
+	public static final TreeGrower PINE_GROWER = grower("pine");
 	/** Giant trees, which four saplings in a square grow ({@link GiantSaplingBlock}; agriculture.TREES "giant"). */
 	public static final TreeGrower GIANT_REDWOOD_GROWER = grower("giant_redwood");
 	public static final TreeGrower GIANT_MAHOGANY_GROWER = grower("giant_mahogany");
-	private static final Map<String, TreeGrower> GIANT_GROWERS = Map.of("redwood", GIANT_REDWOOD_GROWER, "mahogany", GIANT_MAHOGANY_GROWER);
+	public static final TreeGrower GIANT_EUCALYPTUS_GROWER = grower("giant_eucalyptus");
+	private static final Map<String, TreeGrower> GIANT_GROWERS = Map.of("redwood", GIANT_REDWOOD_GROWER,
+			"mahogany", GIANT_MAHOGANY_GROWER, "eucalyptus", GIANT_EUCALYPTUS_GROWER);
 	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
 	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
 	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
@@ -524,8 +527,8 @@ public final class JugcraftAgriculture {
 		registerTree("cedar", "cedar_leaves", CEDAR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.COLOR_BROWN);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
-		// Pine wood is available for the approval preview; trees and biome placement follow later.
-		registerWoodSet("pine", MapColor.COLOR_BROWN, MapColor.COLOR_LIGHT_GRAY);
+		registerTree("pine", "pine_needles", PINE_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.COLOR_BROWN, MapColor.COLOR_LIGHT_GRAY);
 		registerWildPlants();
 
 		// Seeds, produce and food.

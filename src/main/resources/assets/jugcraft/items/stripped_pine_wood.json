@@ -1,16 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:block/stripped_pine_wood",
-    "tints": [
-      {
-        "type": "minecraft:constant",
-        "value": 12170916
-      },
-      {
-        "type": "minecraft:constant",
-        "value": 12170916
-      }
-    ]
+    "model": "jugcraft:block/stripped_pine_wood"
   }
 }

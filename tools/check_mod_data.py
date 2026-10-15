@@ -2733,6 +2733,17 @@ def check_biomes():
             err(f"{name}: seasons {info['seasons']} but seasons.BIOMES says otherwise")
     features = DATA / MOD / "worldgen" / "feature"
     for shape, info in tr.SHAPES.items():
+        trunk = info["trunk"]
+        if trunk["type"] == "cherry":
+            # Native 26.3 CherryTrunkPlacer codec bounds, including two distinct branch starts.
+            for field, low, high in (("branch_count", 1, 3), ("branch_horizontal_length", 2, 16),
+                                     ("branch_start_offset_from_top", -16, 0), ("branch_end_offset_from_top", -16, 16)):
+                value = trunk.get(field)
+                bounds = value if isinstance(value, list) else [value, value]
+                if None in bounds or not low <= bounds[0] <= bounds[-1] <= high:
+                    err(f"{shape}: {field} is outside native cherry placer bounds {low}..{high}: {value}")
+                if field == "branch_start_offset_from_top" and (not isinstance(value, list) or bounds[-1] - bounds[0] < 1):
+                    err(f"{shape}: cherry branch starts need a uniform range with at least two values")
         vanilla = info["wood"] in ("minecraft:oak", "minecraft:birch", "minecraft:spruce", "minecraft:jungle", "minecraft:acacia",
                                    "minecraft:dark_oak", "minecraft:cherry", "minecraft:mangrove", "minecraft:pale_oak")
         if not vanilla and (info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES)):

@@ -22,6 +22,7 @@ def variants(looks):
 
 def assets(root, write):
     models = root / "models" / "block"
+    write(root / "tree_leaf_tints.json", {info["leaves"]: info["leaf_tint"] for info in TREES.values() if "leaf_tint" in info})
     for tree, info in TREES.items():
         young = sapling(tree)
         write(models / f"{young}.json", {"parent": "minecraft:block/cross", "textures": {"cross": rid(f"block/{young}")}})
@@ -40,7 +41,20 @@ def assets(root, write):
         else:
             state = {"variants": {f"season={season}": variants(looks[season]) for season in SEASON_STATES}}
         write(root / "blockstates" / f"{leaves}.json", state)
-        write(root / "items" / f"{leaves}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{leaves}")}})
+        item_model = {"type": "minecraft:model", "model": rid(f"block/{leaves}")}
+        if "leaf_tint" in info:
+            # Owner grayscale foliage keeps its original pixels. Only needles are tinted; brown twigs stay uncoloured.
+            faces = {side: {"texture": "#all", "cullface": side, "tintindex": 0}
+                     for side in ("down", "up", "north", "south", "west", "east")}
+            elements = [{"from": [0, 0, 0], "to": [16, 16, 16], "faces": faces}]
+            textures = {"all": rid(f"block/{leaves}"), "particle": rid(f"block/{leaves}")}
+            if "leaf_overlay" in info:
+                textures["overlay"] = rid(f"block/{info['leaf_overlay']}")
+                elements.append({"from": [-0.01, -0.01, -0.01], "to": [16.01, 16.01, 16.01], "faces": {
+                    side: {"texture": "#overlay", "cullface": side, "uv": [0, 0, 16, 16]} for side in faces}})
+            write(models / f"{leaves}.json", {"parent": "minecraft:block/block", "textures": textures, "elements": elements})
+            item_model["tints"] = [{"type": "minecraft:constant", "value": info["leaf_tint"]}]
+        write(root / "items" / f"{leaves}.json", {"model": item_model})
 
 
 def loot(out, write):

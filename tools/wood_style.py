@@ -65,8 +65,8 @@ WOOD = {
     # off vanilla spruce (dE 9.6 to 10.0) and our cypress (8.2 to 10.6); docs/features/trees-batch-1.md. Appended last,
     # so every other wood keeps its seeds.
     "cedar": ("2:0", "725543"),
-    # Batch 2: the owner's first painting set, number 6, in a muted warm gray-tan.
-    # Append new woods to preserve the existing textures' deterministic seeds.
+    # Initial batch-2 fallback; owner_art replaces pine with the owner's originals (15 October).
+    # Keep this slot so future woods retain their deterministic seeds.
     "pine": (6, "a49a84"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):

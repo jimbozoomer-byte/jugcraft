@@ -193,7 +193,7 @@ public class PineWoodClientGameTests implements FabricClientGameTest {
 		label(level, origin.offset(32, 1, -3), "PINE PAVILION", "Roof / deck", "Logs / framing", "Fence / gate");
 	}
 
-	private static void label(ServerLevel level, BlockPos pos, String... words) {
+	static void label(ServerLevel level, BlockPos pos, String... words) {
 		level.setBlock(pos.north(), Blocks.SMOOTH_STONE.defaultBlockState(), 3);
 		level.setBlock(pos, Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, Direction.SOUTH), 3);
 		check(level.getBlockEntity(pos) instanceof SignBlockEntity, "Missing gallery label at " + pos);
