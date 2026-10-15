@@ -15,6 +15,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import org.jspecify.annotations.Nullable;
@@ -138,10 +140,19 @@ public final class HowlingTotemRite {
 
 	/**
 	 * Whether someone with their feet in {@code feet} is under a roof: anything over their head that would stop a fall
-	 * (a roof, a floor, leaves). Their own cell (a snow layer, a carpet) does not count.
+	 * (a roof, a floor, leaves, water). Their own cell (a snow layer, a carpet) does not count, and nor does a barrier,
+	 * which cannot be seen and hides no moon. The column is looked up only as high as the highest such block.
 	 */
 	public static boolean roofed(Level level, BlockPos feet) {
-		return level.getHeight(Heightmap.Types.MOTION_BLOCKING, feet.getX(), feet.getZ()) > feet.getY() + 1;
+		int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, feet.getX(), feet.getZ());
+		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos(feet.getX(), feet.getY(), feet.getZ());
+		for (int y = feet.getY() + 1; y < top; y++) {
+			BlockState state = level.getBlockState(at.setY(y));
+			if (!state.is(Blocks.BARRIER) && (state.blocksMotion() || !state.getFluidState().isEmpty())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** An open mist into the Moonlit Ring within {@value #MIST_RANGE} blocks of {@code at}, or null. */

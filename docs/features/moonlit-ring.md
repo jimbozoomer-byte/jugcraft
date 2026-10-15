@@ -19,7 +19,7 @@ Primary specialty and supported player role: adventuring and hunting: the fighte
    - outside the Overworld: "Nothing here answers the totem's howl";
    - by day: "Nothing answers the totem by day";
    - out of the woods: "The totem's howl is answered only in werewolf country: the woods";
-   - with anything over your head that would stop a fall, leaves too: "Howl under the open sky, where the moon can hear";
+   - with anything over your head that would stop a fall, leaves too (a barrier, which cannot be seen, does not count): "Howl under the open sky, where the moon can hear";
    - off the woodland floor (on stone, sand, planks): "Stand on the woodland floor to plant the totem";
    - with wolfsbane growing or potted within six blocks (and three up or down), the werewolves' own ward reach: "The wolfsbane keeps them away";
    - within three blocks of a mist already risen into the ring: "The mist has already risen here: use it to follow";
@@ -133,11 +133,12 @@ What the building found:
 - The template leaves out blocks nobody can see, which left a pocket of air inside the Howling Stone. The game would have counted it as open, dark floor, so nothing over the floor of the clearing or a glade is left out.
 - The hidden lights at level 12 left the clearing's edge and the glades' sides at 5 and 6; at 15 the darkest open cell is 8.
 - The recipe audit counts the metal in every tag a recipe takes, and did not know the new pelts' tag; it is now among the tags that hold no metal.
+- CI's first run failed two game tests: on a game-test server every test stands under barriers, which the totem's check counted as a roof. A barrier cannot be seen and hides no moon, so the check now passes over barriers (the sky light the other rites read passes through them too), and the game test checks that a barrier roofs nothing.
 
 The game tests (`MoonlitRingGameTests`) show what a game-test server can:
 1. the ring's dimension type and biome load from their files;
 2. its template loads in the running game, at the size `Lair.MOONLIT_RING` gives, with the bells, the Moonwood Leaves, the oaks, the moss, the rugs and the Grey Mist, and the game's data version, and without anything that changes once placed;
-3. the totem's checks: on grass, podzol, moss, dirt and coarse dirt, under a moss carpet or in a snow layer it is answered; by day, out of the woods, under a roof of leaves or stone, on stone, or with wolfsbane near it is refused, and answered again once the roof or the wolfsbane is gone; on a moss carpet the feet are taken in its cell; the forests, the taigas and the Grove are werewolf country and the plains, the desert and the swamp are not; no mist has risen where nobody used a totem;
+3. the totem's checks: on grass, podzol, moss, dirt and coarse dirt, under a moss carpet or in a snow layer it is answered, and under a barrier; by day, out of the woods, under a roof of leaves or stone, on stone, or with wolfsbane near it is refused, and answered again once the roof or the wolfsbane is gone; on a moss carpet the feet are taken in its cell; the forests, the taigas and the Grove are werewolf country and the plains, the desert and the swamp are not; no mist has risen where nobody used a totem;
 4. the totem used when no instance can open: the ring is full, the totem is kept, nobody moves, no mist rises; by day it is refused and kept; used from the hand, it is rested and kept;
 5. the totem is crafted from each kind of pelt, three bones and two silver ingots;
 6. the bells: rung by a player's hand a bell swings for two seconds and cannot be rung again meanwhile, then rests and rings again; bells and Moonwood Leaves cannot be broken and have no item; the bells are lair fixtures and the leaves are not; the leaves are seen through and not walked through; each bell is found by its place in an instance, and each clearing round its bell.
