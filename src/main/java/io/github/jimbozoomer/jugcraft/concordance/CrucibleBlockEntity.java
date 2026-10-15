@@ -73,7 +73,8 @@ import org.jspecify.annotations.Nullable;
  * An Alembic Crucible (roadmap step 13): a {@link Mixture}, its temperature, and a formula to follow.
  * <ul>
  * <li><b>Heat</b> comes from the block beneath ({@link Heat#SOURCES}; a campfire only while lit) and moves one degree
- * a tick, worked out on the server every tick from what is there now.</li>
+ * a tick, worked out on the server every tick from what is there now; since Concordance Chunk C (C-05) a Crucible Stand
+ * beneath gives the heat it paid for that tick.</li>
  * <li><b>By hand</b> (the Alembic Arts understood): water (a bucket is {@value #WATER_PER_BUCKET} parts, a water bottle
  * one), ingredients as they come or prepared, a stir (Stirring Rod or stick, at most one every {@value #STIR_TICKS}
  * ticks) at the band it is in, and bottling (a glass bottle makes a draught, a bowl a salve). Bottling records the
@@ -242,11 +243,19 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		return band().keep(next);
 	}
 
-	/** The block beneath, read now: what heats it (serverTick) and what the Inspect page names (C-01). */
+	/**
+	 * The block beneath, read now: what heats it (serverTick) and what the Inspect page names (C-01). A Crucible Stand
+	 * beneath (Concordance Chunk C, C-05) gives the target it paid for on its last tick, lit, or nothing, dark: one block
+	 * entity read, no scan.
+	 */
 	public Heat.Below below(ServerLevel level) {
-		BlockState below = level.getBlockState(worldPosition.below());
-		return new Heat.Below(BuiltInRegistries.BLOCK.getKey(below.getBlock()).toString(),
-				below.hasProperty(BlockStateProperties.LIT) && !below.getValue(BlockStateProperties.LIT));
+		BlockPos at = worldPosition.below();
+		BlockState below = level.getBlockState(at);
+		String block = BuiltInRegistries.BLOCK.getKey(below.getBlock()).toString();
+		if (below.is(JugcraftConcordance.CRUCIBLE_STAND) && level.getBlockEntity(at) instanceof CrucibleStandBlockEntity stand) {
+			return new Heat.Below(block, !below.getValue(BlockStateProperties.LIT), stand.given());
+		}
+		return new Heat.Below(block, below.hasProperty(BlockStateProperties.LIT) && !below.getValue(BlockStateProperties.LIT));
 	}
 
 	/** The temperature the block beneath gives (a campfire only while lit). */

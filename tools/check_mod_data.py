@@ -12029,6 +12029,7 @@ def check_concordance(registered):
     check_diagnostics(co, root, lang)
     check_workshop_products(co, root, lang)
     check_poultice_credit(co, lang)
+    check_crucible_stand(co, root, lang)
     check_ecology(co, root, lang, registered, research)
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
@@ -13644,11 +13645,18 @@ def check_alchemy(co, root, lang, registered, research):
                                  "RIME_KEEP_WARM": ("long", al.RIME_KEEP["warm"]),
                                  "RIME_KEEP_HOT": ("long", al.RIME_KEEP["hot"]),
                                  "RIME_KEEP_SEARING": ("long", al.RIME_KEEP["searing"])},
-        "alchemy/Heat.java": {"AMBIENT": ("int", al.AMBIENT), "RATE": ("int", al.HEAT_RATE)},
+        "alchemy/Heat.java": {"AMBIENT": ("int", al.AMBIENT), "RATE": ("int", al.HEAT_RATE),
+                              # Concordance Chunk C, C-05: where a Crucible Stand heats a crucible for each band.
+                              "STAND_WARM": ("int", al.STAND_TARGETS["warm"]), "STAND_HOT": ("int", al.STAND_TARGETS["hot"]),
+                              "STAND_SEARING": ("int", al.STAND_TARGETS["searing"])},
         "alchemy/Assay.java": {"SPOON": ("int", al.SPOON), "GLASS": ("int", al.GLASS), "MASTERED": ("int", al.MASTERED)},
         "CrucibleBlockEntity.java": {"BUFFER_SLOTS": ("int", al.BUFFER_SLOTS), "STIR_TICKS": ("int", al.STIR_TICKS),
                                      "AUTOMATION_TICKS": ("int", al.AUTOMATION_TICKS),
                                      "WATER_PER_BUCKET": ("int", al.WATER_PER_BUCKET)},
+        # Concordance Chunk C, C-05: the Crucible Stand's rates, store, intake and how often one player may set it.
+        "CrucibleStandBlockEntity.java": {"JE_WARM": ("long", al.STAND_JE["warm"]), "JE_HOT": ("long", al.STAND_JE["hot"]),
+                                          "JE_SEARING": ("long", al.STAND_JE["searing"]), "CAPACITY": ("long", al.STAND_CAPACITY),
+                                          "INTAKE": ("long", al.STAND_INTAKE), "SET_TICKS": ("int", al.STAND_SET_TICKS)},
     }
     for name, values in constants.items():
         text = java(name)
@@ -13752,7 +13760,7 @@ def check_alchemy(co, root, lang, registered, research):
     for ref in al.ALCHEMY_SPECIMENS:
         if ref not in items:
             err(f"alchemy specimen {ref} is not an ingredient")
-    for item in ("crucible", "mortar", "stirring_rod", "sampling_spoon", "assay_glass", "formula"):
+    for item in ("crucible", "mortar", "stirring_rod", "sampling_spoon", "assay_glass", "formula", "crucible_stand"):
         if item not in recipes:
             err(f"alchemy: {item} has no recipe")
     # Every line the simulation can say has its words.
@@ -14272,6 +14280,115 @@ def check_diagnostics(co, root, lang):
                     or "} finally {\n\t\t\tConcordanceData.replace(was);" not in helper:
                 err(f"{path.relative_to(ROOT)}: the Concordance's rules are every test's: swap them only through under(), which "
                     "puts them back in a finally before the tick ends")
+
+
+def check_crucible_stand(co, root, lang):
+    """Concordance Chunk C, C-05 (C-D3, C-P12, C-P43 to C-P49): the Crucible Stand. Its targets lie inside their bands and
+    its rates rise with them; it is never a HEAT_SOURCES block; Heat.standBand lets a hold win first and a formula drive it
+    only while its crucible waits for nothing or for heat alone; it pays once, in heat(), from its own store, after one
+    block entity read and no scan; its light updates nothing else; its store is never drawn on and takes nothing with the
+    switch off; its seat takes no JE and it carries no worldgen connection marker; the crucible asks it for its heat; only
+    an empty hand sets it, and only someone who may change it, rate-gated; its art is the owner's, with sockets only where
+    JE goes in; and its words, recipe, codex entry and Jade lines exist."""
+    al = co.alchemy
+
+    def source(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    order = list(al.BANDS)
+    for band, target in al.STAND_TARGETS.items():
+        index = order.index(band) if band in order else 0
+        top = al.BANDS[order[index + 1]][0] if 0 < index < len(order) - 1 else None
+        if index <= 0 or not (al.BANDS[band][0] <= target and (top is None or target < top)):
+            err(f"tools/concordance_alchemy.py STAND_TARGETS: {band} {target} must lie inside its band, and cold is off")
+    rates = list(al.STAND_JE.values())
+    if list(al.STAND_TARGETS) != order[1:] or list(al.STAND_JE) != order[1:] or any(a >= b for a, b in zip(rates, rates[1:])):
+        err("tools/concordance_alchemy.py: STAND_TARGETS and STAND_JE name warm, hot and searing in order; a hotter band costs more")
+    if al.STAND_INTAKE < max(rates) or al.STAND_CAPACITY < al.STAND_INTAKE:
+        err("tools/concordance_alchemy.py: a stand takes at least a searing tick's JE a tick, and holds at least that")
+    if f"{MOD}:crucible_stand" in al.HEAT_SOURCES:
+        err("the Crucible Stand heats only when it pays, never as a HEAT_SOURCES block")
+    if set(al.STAND_PORTS) != {"north", "south", "west", "east", "down"} or len(al.STAND_PORTS) != 5:
+        err("tools/concordance_alchemy.py STAND_PORTS: a socket on each face that takes JE, none on its seat")
+    if al.OWNER_BLOCKS_FILES != {
+            "textures/block/crucible_stand_plates.png": "Guns/block/treated_iron_plates.png",
+            "textures/block/crucible_stand_frame.png": "Guns/block/treated_iron_block.png",
+            "textures/block/crucible_stand_coil.png": "Big Cannons and Mounted Guns/textures/block/coilside.png"}:
+        err("tools/concordance_alchemy.py OWNER_BLOCKS_FILES: the stand's art is the owner's treated iron and copper coil (C-P48)")
+    heat = source(root / "alchemy" / "Heat.java")
+    target = _java_body(heat, "public static int standTarget(Band band)")
+    if "case COLD -> AMBIENT;" not in target or any(f"case {b.upper()} -> STAND_{b.upper()};" not in target for b in order[1:]):
+        err("concordance/alchemy/Heat.standTarget: cold is off (AMBIENT); each other band aims at its STAND_ target")
+    waits = _java_body(heat, "public static boolean waitsForHeat(")
+    if not all(n in waits for n in ("waiting == null", "Code.WRONG_HEAT", "Code.HELD")):
+        err("concordance/alchemy/Heat.waitsForHeat: nothing, the wrong band or a hold are the only waits a stand heats through")
+    rule = _java_body(heat, "public static @Nullable Band standBand(")
+    if not 0 <= rule.find("if (held)") < rule.find("program == null") or "!waitsForHeat(waiting)" not in rule \
+            or "stir.band() == Band.COLD ? null" not in rule:
+        err("concordance/alchemy/Heat.standBand: a hold wins first; a formula drives it only while its crucible waits for heat; a cold stir is off")
+    stand = source(root / "CrucibleStandBlockEntity.java")
+    plan = _java_body(stand, "public Plan plan(ServerLevel level)")
+    pay = _java_body(stand, "public boolean heat(ServerLevel level)")
+    if "Plan plan = plan(level);" not in pay or "if (plan.heats())" not in pay or pay.count("energy.setAmount(") != 1:
+        err("CrucibleStandBlockEntity.heat: it pays once, from its own store, only when its plan heats")
+    if "Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE" not in pay:
+        err("CrucibleStandBlockEntity.heat: its light changes how it looks only (no neighbour, cable or light update)")
+    if plan.count("getBlockEntity(") != 1 or "worldPosition.above()" not in plan or re.search(r"\b(for|while) \(", plan + pay):
+        err("CrucibleStandBlockEntity.plan: one block entity read, the crucible directly above; no scan")
+    for needle in ("JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)", "Heat.standBand(", "Heat.waitsForHeat(waiting)",
+                   "crucible.temperature() > Heat.standTarget(band)", "Code.UNAVAILABLE_POWER", "Code.NO_CRUCIBLE"):
+        if needle not in plan:
+            err(f"CrucibleStandBlockEntity.plan: missing {needle} (C-05, C-P43)")
+    if "new SimpleEnergyStorage(CAPACITY, INTAKE, 0, this::setChanged)" not in stand \
+            or "return JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) ? super.insert(maxAmount, transaction) : 0L;" not in stand:
+        err("CrucibleStandBlockEntity.energy: never extracted, and it takes nothing with the Concordance switched off")
+    use = _java_body(stand, "public void useEmpty(ServerPlayer player, boolean sneaking)")
+    if "!plan.following()" not in use or not 0 <= use.find("Authority.mayChange(level, player, worldPosition)") \
+            < use.find('RateGate.allow(player, "crucible_stand", SET_TICKS)') < use.find("setting = next(setting);"):
+        err("CrucibleStandBlockEntity.useEmpty: with no formula, only someone who may change it sets it, rate-gated (C-P46)")
+    block = source(root / "CrucibleStandBlock.java")
+    if "stack.isEmpty() ? super.useItemOn(" not in _java_body(block, "protected InteractionResult useItemOn("):
+        err("CrucibleStandBlock.useItemOn: only an empty hand sets the stand; anything held is used as itself (C-P46)")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.[a-z_.]+)"', stand))):
+        if key not in lang:
+            err(f"CrucibleStandBlockEntity.java: missing lang {key}")
+    for key in sorted(set(re.findall(r'Text\.of\("([a-z_.]+)"', stand))):
+        if f"compose.{MOD}.{key}" not in lang:
+            err(f"CrucibleStandBlockEntity.java: missing lang compose.{MOD}.{key}")
+    if "EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> side == Direction.UP ? null : entity.energy, CRUCIBLE_STAND_ENTITY);" \
+            not in source(root / "JugcraftConcordance.java"):
+        err("JugcraftConcordance.java: the stand takes JE on every face but its seat")
+    if re.search(r"\bimplements\b[^{]*\bEnergyConnectable\b", block):
+        err("CrucibleStandBlock: no EnergyConnectable; a cable meets it only where it takes JE (CableBlock.connectsTo, C-P44)")
+    if "stand.given()" not in _java_body(source(root / "CrucibleBlockEntity.java"), "public Heat.Below below(ServerLevel level)"):
+        err("CrucibleBlockEntity.below: a Crucible Stand beneath gives the heat it paid for (C-05)")
+    for lit in ("", "_lit"):
+        model = load(ASSETS / "models" / "block" / f"crucible_stand{lit}.json") or {}
+        textures = model.get("textures", {})
+        if (textures.get("plates"), textures.get("frame"), textures.get("coil"), textures.get("foundation")) != (
+                f"{MOD}:block/crucible_stand_plates", f"{MOD}:block/crucible_stand_frame", f"{MOD}:block/crucible_stand_coil",
+                f"{MOD}:block/thallite_block"):
+            err(f"models/block/crucible_stand{lit}.json: the owner's treated iron and copper coil on Jugcraft's thallite")
+        glowing = any(e.get("light_emission") for e in model.get("elements", []))
+        if glowing != (lit == "_lit"):
+            err(f"models/block/crucible_stand{lit}.json: only the lit model's coil is drawn full-bright")
+    for key in ("stand_energy", "stand_setting", "stand_following", "stand_heat", "stand_off", "stand_draw", "stand_waits"):
+        if f"tooltip.{MOD}.concordance.jade.{key}" not in lang:
+            err(f"Jade: missing lang tooltip.{MOD}.concordance.jade.{key}")
+    if "ConcordanceDataProvider.STAND, CrucibleStandBlockEntity.class" not in source(JAVA_ROOT / "compat" / "jade" / "JugcraftJadePlugin.java") \
+            or "StandTooltip.INSTANCE, CrucibleStandBlock.class" not in source(CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java") \
+            or f"config.jade.plugin_{MOD}.crucible_stand" not in lang:
+        err("Jade: the Crucible Stand needs its provider, its lines and its config name")
+    snapshot = _java_body(source(JAVA_ROOT / "compat" / "jade" / "ConcordanceDataProvider.java"), "public static CompoundTag standSnapshot(")
+    if "stand.plan(level)" not in snapshot or 'putString("band"' in snapshot \
+            or any(n in snapshot for n in ("heat(", "useEmpty(", "setAmount(", "setBlock(")):
+        err("ConcordanceDataProvider.standSnapshot: reads the stand's plan (its band as \"aim\") and changes nothing")
+    recipe = load(DATA / MOD / "recipe" / "crucible_stand.json") or {}
+    conditions = {c.get("feature") for c in recipe.get("fabric:load_conditions", [])}
+    if set(recipe.get("key", {}).values()) != {"minecraft:iron_ingot", "minecraft:copper_ingot", f"{MOD}:rooted_thallite_foundation"} \
+            or conditions != {"concordance", "machines", "thallite"}:
+        err("recipe/crucible_stand.json: the foundation, iron and copper, with the concordance, machines and thallite switches (C-P47)")
+    if not (DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries" / "alembic" / "crucible_stand.json").is_file():
+        err("codex: the Crucible Stand's entry (alembic/crucible_stand) is missing")
 
 
 def _geo_faces(cube):
@@ -16923,6 +17040,8 @@ AUTHORITY_ROUTES = {
     "Alchemy.java": ["harmful(dose) ? Intent.HARMFUL"],
     # Concordance Chunk C, C-01 (C-P5): working a crucible by hand, and clearing its formula.
     "CrucibleBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)", "Authority.mayChange(player.level(), player, worldPosition)"],
+    # Concordance Chunk C, C-05 (C-P46): setting a Crucible Stand's heat by hand.
+    "CrucibleStandBlockEntity.java": ["Authority.mayChange(level, player, worldPosition)"],
 }
 
 
@@ -16975,7 +17094,8 @@ def check_economy(root):
     drives. Its figures must be the game's (each anchor is in its Java or data file), the data conversions must all be
     in it, no cycle of conversions across the systems (every crop's regrow-and-compost loop included, grown by time and
     hastened by a spire) may come back with as much as it started with, and the record's table must be the model's. Since
-    Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it."""
+    Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it; since C-05, a crucible's heat
+    is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_economy as ec
     def text(path):
@@ -17004,6 +17124,11 @@ def check_economy(root):
                 ritual.get("steps", 0) * ritual.get("ley", 0) * channels, ritual.get("focus", 0) * ritual.get("participants", 0),
                 ritual.get("steps", 0) * ec.STEP_TICKS, made) or sink["makes"] not in ec.RESOURCES:
             err(f"economy: the ritual sink {key} is not concordance/ritual/{key}.json's run (tools/concordance_economy.py RITUAL_SINKS)")
+    # Concordance Chunk C, C-05: a crucible's heat is a sink nothing converts back, modelled at the cheapest band's rate.
+    if any(source == "crucible_heat" for source, _ in ec.edges()):
+        err("economy: a crucible's heat becomes nothing else (tools/concordance_economy.py)")
+    if {key: amount for key, _, amount, _, _ in ec.CONVERSIONS}.get("je_to_heat") != min(ec.STAND_JE.values()):
+        err("economy: je_to_heat is modelled at the stand's cheapest rate (STAND_JE)")
     heart = load(DATA / MOD / "concordance" / "organism" / "verdant_heart.json") or {}
     if (heart.get("cost"), max(heart.get("thriving", 0), heart.get("tolerating", 0))) != (1, 2):
         err("economy: the Verdant Heart's beat is modelled as 1 nutrient for at most 2 Verdance")

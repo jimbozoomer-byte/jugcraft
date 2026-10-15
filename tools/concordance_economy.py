@@ -35,6 +35,7 @@ RESOURCES = {
     "relic_charge": "relic charge",
     "bone_meal": "bone meal",
     "rooted_thallite_foundation": "Rooted Thallite Foundations (Root and Rivet's; nothing turns one back)",
+    "crucible_heat": "a crucible's heat (a tick held at a Crucible Stand's target)",
 }
 
 # Every conversion: (id, from, amount, to, amount). The best case is used (a thriving Heart), so the audit is safe.
@@ -47,6 +48,9 @@ CONVERSIONS = [
     ("bone_meal_to_nutrients", "bone_meal", 1, "nutrient", 2),
     ("ley_to_relic_charge", "ley", 1, "relic_charge", 4),
     ("crimson_surge", "vitae", 6, "focus", 6),
+    # Concordance Chunk C, C-05: a Crucible Stand pays JE for a crucible's heat, modelled at its cheapest band (warm), so
+    # the audit is safe; heat goes nowhere else (an edge into a node with no way out).
+    ("je_to_heat", "je", 8, "crucible_heat", 1),
 ]
 
 # Where each figure lives: (path under concordance/ or data:path, text that must be there).
@@ -73,6 +77,9 @@ ANCHORS = {
     "spire": [("data:concordance/wonder/concord_spire.json", None)],
     "root_and_rivet": [("data:concordance/ritual/root_and_rivet.json", None), ("ritual/RitualMachine.java", "STEP_TICKS = 40;"),
                        ("rules/FocusPool.java", "REGEN_TICKS = 40;")],
+    "je_to_heat": [("CrucibleStandBlockEntity.java", "JE_WARM = 8;"), ("CrucibleStandBlockEntity.java", "JE_HOT = 16;"),
+                   ("CrucibleStandBlockEntity.java", "JE_SEARING = 32;"),
+                   ("CrucibleStandBlockEntity.java", "new SimpleEnergyStorage(CAPACITY, INTAKE, 0, this::setChanged)")],
 }
 
 # The figures the anchors must show (checked against the data files by check_economy).
@@ -87,6 +94,7 @@ LANTERN_BURN_TICKS = 400
 SCONCE_BURN_TICKS = 1200
 FOCUS_MAX = 20
 VITAE_AN_HOUR = 60     # check_crimson's bound on what an hour of offerings can give
+STAND_JE = {"warm": 8, "hot": 16, "searing": 32}  # a Crucible Stand's JE a tick (CrucibleStandBlockEntity.JE_*)
 STEP_TICKS = 40         # a ritual's step (ritual/RitualMachine.STEP_TICKS)
 FOCUS_REGEN_TICKS = 40  # a player's Focus comes back one point this often (rules/FocusPool.REGEN_TICKS)
 
@@ -206,6 +214,11 @@ def installations():
          f"one beat every {HEART_BEAT_TICKS} ticks", "the bed's nutrients fall; it stops on a starved bed"),
         ("Ley Pylon on Jugcraft Energy", f"{JE_RATE * DAY:,} JE", f"{JE_RATE * DAY // 1000:,} Ley Charge",
          f"{JE_RATE} JE a tick", "none; Ley Charge never becomes JE again"),
+        ("Crucible Stand on Jugcraft Energy, heating searing all day", f"{STAND_JE['searing'] * DAY:,} JE",
+         f"{DAY:,} ticks of one crucible's heat, no more",
+         f"{STAND_JE['searing']} JE a tick searing, {STAND_JE['hot']} hot, {STAND_JE['warm']} warm; nothing while its crucible "
+         "waits for anything but heat, is held, or is hotter than it aims",
+         "none; heat is never stored, carried or turned back into JE, Ley Charge or anything else"),
         ("Gleaner on Concordance crops", f"{DAY // GLEAN_TICKS} Verdance", f"{DAY // GLEAN_TICKS} harvests, of ripe crops only",
          f"one every {GLEAN_TICKS} ticks", "each crop falls back to step 1 and must regrow at its cost"),
         ("Kindled Lantern, lit", f"{DAY // LANTERN_BURN_TICKS} Radiance", "light at its carrier",

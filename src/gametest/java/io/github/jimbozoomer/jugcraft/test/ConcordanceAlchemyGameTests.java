@@ -11,6 +11,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.Reagent;
@@ -30,16 +31,25 @@ import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Frostward;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.energy.CreativeEnergyCellBlock;
+import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
+import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.lair.MoltenSlagBlock;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
+import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import local.peepo.CompanionStatus;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -73,11 +83,15 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HopperBlock;
+import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Roadmap step 13, experimental alchemy: a crucible takes its heat from the block beneath; the same process in two
@@ -93,7 +107,9 @@ import net.minecraft.world.phys.AABB;
  * could change the block by hand works it; and Jade is told the tank and that reason, encoded, never the makeup. Since
  * C-02, the workshop's products: contaminant fouls Verdance first, so a dirtier Stillroot Poultice heals less; the Kiln
  * Draught carries its drinker across the Cinder Kiln's slag; a poultice gives back its bowl; products feed no crucible
- * and never add up; dilution never heals more; and an old unnamed brew in the output pauses the crucible.
+ * and never add up; dilution never heals more; and an old unnamed brew in the output pauses the crucible. Since C-05, the
+ * Crucible Stand: JE heat for the next stir, idle for any other wait or a hold, set only by those who may change it, fed
+ * through a cable and a piped tank; a campfire crucible as before.
  */
 public class ConcordanceAlchemyGameTests {
 	private static final String GLOW = "minecraft:glowstone_dust";
@@ -266,6 +282,45 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(pulse(crucible, helper.getLevel(), 5) == null && crucible.step() == 5 && crucible.mixture().parts() == 2,
 				"Five pulses make both parts: step " + crucible.step() + ", " + crucible.mixture());
 		return crucible;
+	}
+
+	/** C-05: a mixed-band formula: one glowstone dust stirred warm, then hot. */
+	private static final String WARM_THEN_HOT = "water 1; add minecraft:glowstone_dust jugcraft:raw; stir warm; stir hot";
+
+	/** A crucible at {@code at} on a Crucible Stand beneath it; the stand. */
+	private static CrucibleStandBlockEntity onStand(GameTestHelper helper, BlockPos at) {
+		helper.setBlock(at.below(), JugcraftConcordance.CRUCIBLE_STAND);
+		helper.setBlock(at, JugcraftConcordance.CRUCIBLE);
+		return helper.getBlockEntity(at.below(), CrucibleStandBlockEntity.class);
+	}
+
+	private static boolean lit(GameTestHelper helper, BlockPos relative) {
+		return helper.getBlockState(relative).getValue(BlockStateProperties.LIT);
+	}
+
+	/** A stand that would heat but holds {@code held} JE, short of {@code rate} a tick. */
+	private static Diagnostic unpowered(int held, long rate) {
+		return Diagnostic.of(Code.UNAVAILABLE_POWER, Text.of("alchemy.stand.it"), Text.of("alchemy.stand.je", held), Text.of("alchemy.stand.je_tick", (int) rate));
+	}
+
+	/** Offers {@code amount} JE to a stand's west face as a cable would; what it took. */
+	private static long offer(ServerLevel level, BlockPos absolute, long amount) {
+		EnergyStorage storage = EnergyStorage.SIDED.find(level, absolute, Direction.WEST);
+		try (Transaction transaction = Transaction.openOuter()) {
+			long taken = storage == null ? 0L : storage.insert(amount, transaction);
+			transaction.commit();
+			return taken;
+		}
+	}
+
+	/** Each cable round {@code at} reaches it exactly where it takes JE: every face but its seat while it stands, none once gone. */
+	private static void armsMeet(GameTestHelper helper, BlockPos at, boolean standing) {
+		for (Direction side : Direction.values()) {
+			boolean takes = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(at), side) != null;
+			boolean arm = helper.getBlockState(at.relative(side)).getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side.getOpposite()));
+			helper.assertTrue(takes == (standing && side != Direction.UP) && arm == takes,
+					"The cable on its " + side + " face: arm " + arm + ", takes JE " + takes + " (stand " + (standing ? "placed" : "gone") + ")");
+		}
 	}
 
 	// ---------------------------------------------------------------- heat
@@ -904,17 +959,21 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(crucible.companion.needed(dust) == 1 && crucible.companion.needed(bottle) == 1 && crucible.incompatibility() == null,
 				"Followable, it asks for its glowstone and a bottle");
 		pour(crucible, FluidConstants.BOTTLE);
-		record Asked(int dust, int bottles, CompanionStatus status, Diagnostic hook, Diagnostic first, Diagnostic second, Diagnostic third) {
+		record Asked(int dust, int bottles, CompanionStatus status, Diagnostic hook, Diagnostic first, Diagnostic second, Diagnostic third, Band heat) {
 		}
 		Asked asked = under(ConcordanceRules.EMPTY, () -> new Asked(crucible.companion.needed(dust), crucible.companion.needed(bottle),
-				crucible.companion.status(), crucible.incompatibility(), crucible.automate(level), crucible.automate(level), crucible.automate(level)));
+				crucible.companion.status(), crucible.incompatibility(), crucible.automate(level), crucible.automate(level), crucible.automate(level),
+				Heat.standBand(crucible.program(), crucible.step(), crucible.waiting(), false, Band.SEARING)));
 		helper.assertTrue(asked.dust() == 0 && asked.bottles() == 0 && asked.status() == CompanionStatus.RECIPE_MISSING,
 				"It asks for nothing at once: " + asked);
+		helper.assertTrue(asked.heat() == null, "and a stand beneath would give it no heat: " + asked);
 		helper.assertTrue(asked.hook() != null && asked.hook().code() == Code.INCOMPATIBLE && asked.hook().equals(asked.first())
 				&& asked.hook().equals(asked.second()) && asked.hook().equals(asked.third()), "Every pulse says why: " + asked);
 		helper.assertTrue(crucible.water.amount == FluidConstants.BOTTLE && crucible.mixture().isEmpty() && crucible.step() == 0,
 				"Nothing is drawn: " + crucible.water.amount + " droplets, " + crucible.mixture());
 		helper.assertTrue(crucible.companion.needed(dust) == 1 && crucible.incompatibility() == null, "The rules restored, it asks again");
+		helper.assertTrue(Heat.standBand(crucible.program(), crucible.step(), crucible.waiting(), false, Band.SEARING) == Band.HOT,
+				"Restored, a stand would heat for its hot stir");
 		// C-P23: a batch made to its end is not bottled while the rules refuse its formula.
 		crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST));
 		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
@@ -1623,5 +1682,352 @@ public class ConcordanceAlchemyGameTests {
 		helper.assertTrue(out.getCount() == 1 && ItemStack.isSameItemSameComponents(out, fresh) && nameKey(out).equals("item.jugcraft.salve.stillroot_poultice")
 				&& crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty() && crucible.mixture().isEmpty(), "A named poultice, its bowl used: " + out);
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- the Crucible Stand (Concordance Chunk C, C-05)
+
+	/**
+	 * C-05 (C-D3): a mixed-band formula repeats unattended over a stand fed by a Creative Energy Cell. It heats for the next
+	 * stir (warm, then hot), lets the crucible cool to warm for the repeat, and gives no heat while the crucible bottles or
+	 * waits for water. Both repeats make the draught the formula makes on paper.
+	 */
+	@GameTest(maxTicks = 900)
+	public void aStandFollowsTheFormulasBands(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleStandBlockEntity stand = onStand(helper, at);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(at, CrucibleBlockEntity.class);
+		helper.setBlock(at.below().west(), CreativeEnergyCellBlock.BLOCK);
+		helper.assertTrue(use(crucible, alembist(helper, ResearchState.UNDERSTOOD), written(WARM_THEN_HOT)).consumesAction(), "The formula is set");
+		pour(crucible, FluidConstants.BOTTLE * 2);
+		crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST, 2));
+		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE, 2));
+		helper.assertTrue(crucible.temperature() == Heat.AMBIENT, "It starts at the air's heat");
+		ItemStack expected = draught(WARM_THEN_HOT);
+		int[] hottest = {Heat.AMBIENT};
+		helper.onEachTick(() -> hottest[0] = Math.max(hottest[0], crucible.temperature()));
+		helper.succeedWhen(() -> {
+			ItemStack made = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+			helper.assertTrue(made.getCount() == 2 && ItemStack.isSameItemSameComponents(made, expected), "Waiting for two draughts: " + made
+					+ " (step " + crucible.step() + ", " + crucible.temperature() + " degrees, " + crucible.waiting() + ")");
+			helper.assertTrue(crucible.getItem(0).isEmpty() && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty()
+					&& crucible.water.amount == 0 && crucible.mixture().isEmpty(), "It used exactly its glowstone, bottles and water");
+			helper.assertTrue(Diagnostic.needsWater(1, 0).equals(crucible.waiting()), "Then it waits for water: " + crucible.waiting());
+			helper.assertTrue(!lit(helper, at.below()) && stand.given() == Heat.AMBIENT, "and the stand gives it no heat");
+			helper.assertTrue(hottest[0] >= Band.HOT.from && hottest[0] <= Heat.STAND_HOT, "Heated into hot, never past its target: " + hottest[0]);
+		});
+	}
+
+	/**
+	 * C-05: with no JE, a stand gives no heat. The crucible cools by the usual rule and waits for its stir's band; the Peepo
+	 * port says WRONG_TEMPERATURE, as for any stir out of band (CrucibleCompanion maps WRONG_HEAT). The stand says what it
+	 * lacks. Given power, it heats and the formula goes on.
+	 */
+	@GameTest(maxTicks = 400)
+	public void anUnpoweredStandLetsTheCrucibleCool(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleStandBlockEntity stand = onStand(helper, at);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(at, CrucibleBlockEntity.class);
+		helper.assertTrue(use(crucible, alembist(helper, ResearchState.UNDERSTOOD), written(NIGHT_EYE)).consumesAction(), "The formula is set");
+		pour(crucible, FluidConstants.BOTTLE);
+		crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST));
+		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
+		helper.assertTrue(pulse(crucible, level, 2) == null && crucible.step() == 2, "Water and glowstone in: step " + crucible.step());
+		crucible.setTemperature(Band.HOT.from - 1);
+		helper.assertTrue(!stand.heat(level) && unpowered(0, CrucibleStandBlockEntity.JE_HOT).equals(stand.plan(level).reason()),
+				"With no JE it pays nothing and says so: " + stand.plan(level));
+		Heat.Below below = crucible.below(level);
+		helper.assertTrue(below.unlit() && below.heat() != null && below.target() == Heat.AMBIENT && !lit(helper, at.below()), "Dark, it heats nothing: " + below);
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(crucible.band() == Band.COLD && crucible.temperature() >= Heat.AMBIENT && crucible.step() == 2,
+					"Unpowered, it cooled into the cold band and stirred nothing: " + crucible.temperature() + ", step " + crucible.step());
+			Diagnostic waiting = crucible.waiting();
+			helper.assertTrue(waiting != null && waiting.code() == Code.WRONG_HEAT && crucible.companion.status() == CompanionStatus.WRONG_TEMPERATURE,
+					"It waits for the hot band; the Peepo port says the temperature is wrong: " + waiting + ", " + crucible.companion.status());
+			helper.assertTrue(stand.energy.getAmount() == 0 && !lit(helper, at.below()), "The stand still holds nothing and is dark");
+			helper.setBlock(at.below().west(), CreativeEnergyCellBlock.BLOCK);
+		});
+		ItemStack expected = draught(NIGHT_EYE);
+		helper.succeedWhen(() -> {
+			ItemStack made = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+			helper.assertTrue(made.getCount() == 1 && ItemStack.isSameItemSameComponents(made, expected),
+					"Powered, it heats for the stirs and the formula goes on: " + made + " (step " + crucible.step() + ", " + crucible.temperature() + ")");
+		});
+	}
+
+	/**
+	 * C-05 (C-P12, C-P43): a stand pays only while its crucible can go on or waits only for heat. It idles, paying nothing
+	 * and dark, while the crucible waits for water, an ingredient or a bottle, while Preserve holds it, and while the rules
+	 * in force cannot follow the formula, each time giving the crucible's own reason; with nothing on it, nothing to heat.
+	 * Jade is told the same.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aStandIdlesForAWaitingOrIncompatibleFormula(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleStandBlockEntity stand = onStand(helper, at);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(at, CrucibleBlockEntity.class);
+		helper.assertTrue(use(crucible, alembist(helper, ResearchState.UNDERSTOOD), written(NIGHT_EYE)).consumesAction(), "The formula is set");
+		long full = CrucibleStandBlockEntity.CAPACITY;
+		long afterOne = full - CrucibleStandBlockEntity.JE_HOT;
+		stand.energy.setAmount(full);
+		Diagnostic noWater = crucible.automate(level);
+		helper.assertTrue(Diagnostic.needsWater(1, 0).equals(noWater) && !stand.heat(level) && stand.energy.getAmount() == full
+				&& !lit(helper, at.below()) && noWater.equals(stand.plan(level).reason()) && stand.plan(level).waits()
+				&& crucible.below(level).target() == Heat.AMBIENT, "Waiting for water, it pays nothing and says why: " + stand.plan(level));
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			CompoundTag shown = ConcordanceDataProvider.standSnapshot(stand, level);
+			helper.assertTrue(Set.of("energy", "capacity", "following", "aim", "target", "draw", "reason", "waits", "disabled").containsAll(shown.keySet())
+					&& noWater.encode().equals(shown.getStringOr("reason", "")) && shown.getBooleanOr("waits", false)
+					&& shown.getBooleanOr("following", false) && shown.getLongOr("energy", -1L) == full && shown.getIntOr("draw", 0) == 0,
+					"Jade is told its JE, that the formula decides, and the crucible's reason: " + shown);
+		}
+		pour(crucible, FluidConstants.BOTTLE);
+		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 1, "The water poured");
+		helper.assertTrue(stand.heat(level) && stand.energy.getAmount() == afterOne && lit(helper, at.below())
+				&& crucible.below(level).target() == Heat.STAND_HOT && stand.plan(level).band() == Band.HOT,
+				"With nothing to wait for, it pays a hot tick ahead of the hot stirs: " + stand.plan(level));
+		Diagnostic noDust = crucible.automate(level);
+		helper.assertTrue(noDust != null && noDust.code() == Code.MISSING_INGREDIENT && !stand.heat(level) && stand.energy.getAmount() == afterOne
+				&& !lit(helper, at.below()) && crucible.below(level).target() == Heat.AMBIENT && noDust.equals(stand.plan(level).reason()),
+				"Waiting for its glowstone, it pays nothing: " + stand.plan(level));
+		crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST));
+		helper.assertTrue(crucible.automate(level) == null && crucible.step() == 2 && crucible.waiting() == null, "The glowstone went in");
+		long now = ConcordanceProgress.now(level);
+		crucible.hold(now, Rime.HOLD_TICKS);
+		Diagnostic held = Diagnostic.held(crucible.band().id, (crucible.held(now) + 19) / 20);
+		helper.assertTrue(!stand.heat(level) && held.equals(stand.plan(level).reason()) && stand.plan(level).band() == null
+				&& stand.energy.getAmount() == afterOne, "Held by Preserve, it gives nothing: " + stand.plan(level));
+		crucible.hold(now, 0);
+		record Refused(boolean paid, Diagnostic reason, long energy) {
+		}
+		Refused refused = under(ConcordanceRules.EMPTY, () -> new Refused(stand.heat(level), stand.plan(level).reason(), stand.energy.getAmount()));
+		helper.assertTrue(!refused.paid() && glowstoneRefused().equals(refused.reason()) && refused.energy() == afterOne,
+				"A formula the rules refuse drives no heat: " + refused);
+		helper.assertTrue(stand.heat(level), "The rules restored, it heats for the stir again");
+		crucible.setTemperature(Heat.STAND_HOT);
+		helper.assertTrue(pulse(crucible, level, 2) == null && crucible.step() == 4, "Both hot stirs taken");
+		Diagnostic noBottle = crucible.automate(level);
+		helper.assertTrue(Diagnostic.of(Code.NEEDS_CONTAINER).equals(noBottle) && !stand.heat(level) && noBottle.equals(stand.plan(level).reason()),
+				"Waiting for a bottle, it gives nothing: " + stand.plan(level));
+		helper.setBlock(at, Blocks.AIR);
+		helper.assertTrue(!stand.heat(level) && Diagnostic.of(Code.NO_CRUCIBLE).equals(stand.plan(level).reason()), "Nothing on it: nothing to heat");
+		helper.succeed();
+	}
+
+	/**
+	 * C-05 (C-P12, C-P46): with no formula, an empty-hand use cycles a stand off, warm, hot, searing and off, at most once
+	 * every SET_TICKS ticks a player. In someone else's claim, or in adventure mode, it changes nothing, and sneaking only
+	 * reads it. Following a formula, the formula decides. Holding something, a use is the item's own: a crucible is set on
+	 * the stand by a plain use, never a change of its heat.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aStandIsSetOnlyByThoseWhoMayChangeIt(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleStandBlockEntity stand = onStand(helper, at);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(at, CrucibleBlockEntity.class);
+		ServerPlayer owner = alembist(helper, ResearchState.UNDERSTOOD);
+		ServerPlayer stranger = alembist(helper, ResearchState.MASTERED);
+		helper.assertTrue(stand.setting() == Band.COLD, "A new stand is off");
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(at.below()), owner.getUUID());
+			List<Band> seen = new ArrayList<>();
+			for (int i = 0; i < 5; i++) {
+				RateGate.forget(owner.getUUID());
+				stand.useEmpty(owner, false);
+				seen.add(stand.setting());
+			}
+			helper.assertValueEqual(seen, List.of(Band.WARM, Band.HOT, Band.SEARING, Band.COLD, Band.WARM), "its owner cycles it");
+			stand.useEmpty(owner, false);
+			helper.assertTrue(stand.setting() == Band.WARM, "A second use in the same tick is refused (rate-gated)");
+			RateGate.forget(stranger.getUUID());
+			stand.useEmpty(stranger, false);
+			stand.useEmpty(stranger, true);
+			helper.assertTrue(stand.setting() == Band.WARM, "In the owner's claim a stranger changes nothing; reading changes nothing");
+			stand.energy.setAmount(CrucibleStandBlockEntity.CAPACITY);
+			helper.assertTrue(stand.heat(level) && crucible.below(level).target() == Heat.STAND_WARM
+					&& stand.energy.getAmount() == CrucibleStandBlockEntity.CAPACITY - CrucibleStandBlockEntity.JE_WARM,
+					"Set warm with no formula, it heats the crucible towards 65 for 8 JE a tick");
+			helper.assertTrue(use(crucible, owner, written(NIGHT_EYE)).consumesAction(), "The owner sets a formula");
+			RateGate.forget(owner.getUUID());
+			stand.useEmpty(owner, false);
+			helper.assertTrue(stand.setting() == Band.WARM && stand.plan(level).following() && stand.plan(level).band() == Band.HOT,
+					"Following a formula, a use changes nothing: its hot stir decides: " + stand.plan(level));
+			// C-P46: holding something, the stand's use is the item's own (here a crucible set on it), never a setting.
+			BlockPos standAt = helper.absolutePos(at.below());
+			ItemStack pot = new ItemStack(JugcraftConcordance.CRUCIBLE);
+			owner.setItemInHand(InteractionHand.MAIN_HAND, pot);
+			RateGate.forget(owner.getUUID());
+			Band kept = stand.setting();
+			helper.assertTrue(helper.getBlockState(at.below()).useItemOn(pot, level, owner, InteractionHand.MAIN_HAND,
+					new BlockHitResult(Vec3.atCenterOf(standAt), Direction.UP, standAt, false)) == InteractionResult.PASS && stand.setting() == kept,
+					"Holding something, a use is the item's own, never a setting");
+			owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		}
+		crucible.useEmpty(owner, true);
+		helper.assertTrue(crucible.program() == null, "The formula is cleared");
+		stranger.setGameMode(GameType.ADVENTURE);
+		RateGate.forget(stranger.getUUID());
+		stand.useEmpty(stranger, false);
+		helper.assertTrue(stand.setting() == Band.WARM, "In adventure mode, outside any claim, nothing changes");
+		stranger.setGameMode(GameType.SURVIVAL);
+		stand.useEmpty(stranger, false);
+		helper.assertTrue(stand.setting() == Band.HOT, "Back in survival, outside the claim, anyone may set it");
+		helper.succeed();
+	}
+
+	/**
+	 * C-05 (C-D3): the workshop as built. A Creative Energy Cell feeds the stand through a copper cable. An Electric Pump on
+	 * a spring pipes water through a bronze pipe into the crucible's tank. The pump is cut off once the tank holds its
+	 * bucket, and three water steps then draw exactly that bucket, a part each. Two draughts are made, and the stand idles
+	 * while the third repeat waits for glowstone.
+	 */
+	@GameTest(maxTicks = 900)
+	public void theFullChainRunsFromAPumpAndACable(GameTestHelper helper) {
+		BlockPos at = new BlockPos(3, 2, 3);
+		BlockPos cable = new BlockPos(2, 1, 3);
+		helper.setBlock(new BlockPos(1, 1, 3), CreativeEnergyCellBlock.BLOCK);
+		helper.setBlock(cable, JugcraftMachines.COPPER_CABLE);
+		// The cable resolves its arms a tick after anything is placed beside it (CableBlock.onPlace), so the order is free.
+		CrucibleStandBlockEntity stand = onStand(helper, at);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(at, CrucibleBlockEntity.class);
+		BlockPos spring = new BlockPos(5, 1, 3);
+		// A floor and four walls: the test's own floor is air, and loose water would run into the next test.
+		helper.setBlock(spring.below(), Blocks.STONE);
+		for (BlockPos wall : List.of(spring.west(), spring.east(), spring.north(), spring.south())) {
+			helper.setBlock(wall, Blocks.STONE);
+		}
+		helper.setBlock(spring, Blocks.WATER);
+		BlockPos pump = spring.above();
+		helper.setBlock(pump, JugcraftFluids.ELECTRIC_PUMP);
+		ElectricPumpBlockEntity pumping = helper.getBlockEntity(pump, ElectricPumpBlockEntity.class);
+		pumping.energy().setAmount(ElectricPumpBlockEntity.ENERGY_CAPACITY);
+		helper.setBlock(pump.west(), JugcraftFluids.BRONZE_FLUID_PIPE);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		ItemStack expected = draught(NIGHT_EYE);
+		AtomicBoolean filled = new AtomicBoolean();
+		helper.onEachTick(() -> {
+			if (filled.get() || crucible.water.amount != FluidConstants.BUCKET) {
+				return;
+			}
+			filled.set(true);
+			pumping.energy().setAmount(0); // from here the tank holds exactly the bucket it was piped
+			helper.assertTrue(helper.getBlockState(cable).getValue(PipeBlock.EAST) && stand.energy.getAmount() > 0,
+					"The cable meets the stand's side and feeds it: " + stand.energy.getAmount());
+			helper.assertTrue(use(crucible, player, written(NIGHT_EYE)).consumesAction(), "The formula is set");
+			crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST, 2));
+			crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE, 2));
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(filled.get(), "The pump fills the tank through the pipe: " + crucible.water.amount);
+			ItemStack made = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+			helper.assertTrue(made.getCount() == 2 && ItemStack.isSameItemSameComponents(made, expected),
+					"Waiting for two draughts: " + made + " (step " + crucible.step() + ", " + crucible.temperature() + ", " + crucible.waiting() + ")");
+			Diagnostic waiting = crucible.waiting();
+			helper.assertTrue(waiting != null && waiting.code() == Code.MISSING_INGREDIENT, "then waits for a third glowstone: " + waiting);
+			helper.assertTrue(crucible.water.amount == 0 && crucible.mixture().parts() == 1,
+					"Three water steps drew exactly the piped bucket, a part each: " + crucible.water.amount + ", " + crucible.mixture());
+			helper.assertTrue(crucible.getItem(0).isEmpty() && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty(), "and both glowstone and bottles");
+			helper.assertTrue(!lit(helper, at.below()), "The stand gives no heat while the crucible waits for glowstone");
+		});
+	}
+
+	/**
+	 * C-05: every Heat.SOURCES block heats as before (a campfire only while lit); stone and a stand's id are no source (a
+	 * stand heats only when it pays). Over a lit campfire, a crucible follows its formula to its draught.
+	 */
+	@GameTest(maxTicks = 400)
+	public void aCampfireCrucibleStillWorks(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		for (Map.Entry<String, Integer> source : Heat.SOURCES.entrySet()) {
+			Heat.Below below = new Heat.Below(source.getKey(), false);
+			helper.assertTrue(source.getValue().equals(below.heat()) && below.target() == source.getValue(), "Heat for " + source.getKey() + ": " + below);
+		}
+		helper.assertTrue(new Heat.Below("minecraft:stone", false).heat() == null && new Heat.Below("jugcraft:crucible_stand", false).heat() == null
+				&& new Heat.Below("minecraft:campfire", true).target() == Heat.AMBIENT, "Stone, a stand's id and an unlit campfire heat nothing by themselves");
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleBlockEntity crucible = crucible(helper, at, true);
+		helper.assertValueEqual(crucible.below(level), new Heat.Below("minecraft:campfire", false, 120), "a lit campfire beneath");
+		helper.assertTrue(use(crucible, alembist(helper, ResearchState.UNDERSTOOD), written(NIGHT_EYE)).consumesAction(), "The formula is set");
+		pour(crucible, FluidConstants.BOTTLE);
+		crucible.setItem(0, new ItemStack(Items.GLOWSTONE_DUST));
+		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
+		ItemStack expected = draught(NIGHT_EYE);
+		helper.succeedWhen(() -> {
+			ItemStack made = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+			helper.assertTrue(made.getCount() == 1 && ItemStack.isSameItemSameComponents(made, expected), "Over a campfire, one draught: " + made);
+			helper.assertTrue(crucible.temperature() == 120, "settled at the campfire's 120: " + crucible.temperature());
+		});
+	}
+
+	/**
+	 * C-05: with the Concordance off, a stand takes no JE from a cable, pays none, gives no heat, cannot be set and shows
+	 * Jade only that it is off, as the crucible stops. Switched back on (in the same tick: the server runs other tests), it
+	 * does all of these again.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aSwitchedOffConcordanceStandDrawsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = new BlockPos(2, 2, 2);
+		CrucibleStandBlockEntity stand = onStand(helper, at);
+		CrucibleBlockEntity crucible = helper.getBlockEntity(at, CrucibleBlockEntity.class);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		helper.assertTrue(use(crucible, player, written(NIGHT_EYE)).consumesAction(), "The formula is set");
+		stand.energy.setAmount(100);
+		helper.setBlock(new BlockPos(5, 1, 2), JugcraftConcordance.CRUCIBLE_STAND);
+		CrucibleStandBlockEntity lone = helper.getBlockEntity(new BlockPos(5, 1, 2), CrucibleStandBlockEntity.class);
+		BlockPos standAt = helper.absolutePos(at.below());
+		boolean jade = FabricLoader.getInstance().isModLoaded("jade");
+		record Off(boolean paid, long taken, long energy, int target, Band setting, boolean shownOff) {
+		}
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		Off off;
+		try {
+			boolean paid = stand.heat(level);
+			long taken = offer(level, standAt, 64);
+			RateGate.forget(player.getUUID());
+			lone.useEmpty(player, false);
+			boolean shownOff = !jade || ConcordanceDataProvider.standSnapshot(stand, level).getBooleanOr("disabled", false);
+			off = new Off(paid, taken, stand.energy.getAmount(), crucible.below(level).target(), lone.setting(), shownOff);
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
+		helper.assertValueEqual(off, new Off(false, 0L, 100L, Heat.AMBIENT, Band.COLD, true), "switched off, nothing is taken, paid, given or set");
+		helper.assertTrue(!lit(helper, at.below()), "and the stand is dark");
+		helper.assertTrue(stand.heat(level) && stand.energy.getAmount() == 100 - CrucibleStandBlockEntity.JE_HOT
+				&& crucible.below(level).target() == Heat.STAND_HOT, "Switched back on, it pays a hot tick: " + stand.energy.getAmount());
+		helper.assertValueEqual(offer(level, standAt, 64), 64L, "and takes JE from a cable again");
+		RateGate.forget(player.getUUID());
+		lone.useEmpty(player, false);
+		helper.assertTrue(lone.setting() == Band.WARM, "and can be set");
+		helper.succeed();
+	}
+
+	/**
+	 * C-05 (C-P44): a cable meets a stand on each face that takes JE (four sides and underneath), never its seat. Removed,
+	 * the arms retract; placed again, they reach it. The contract's cable check, beside MachineConnectionGameTests, which
+	 * covers only machines.
+	 */
+	@GameTest(maxTicks = 40)
+	public void aCableMeetsTheStandWhereItTakesPower(GameTestHelper helper) {
+		BlockPos at = new BlockPos(3, 2, 3);
+		for (Direction side : Direction.values()) {
+			helper.setBlock(at.relative(side), JugcraftMachines.COPPER_CABLE);
+		}
+		helper.setBlock(at, JugcraftConcordance.CRUCIBLE_STAND);
+		helper.runAfterDelay(3, () -> {
+			armsMeet(helper, at, true);
+			helper.setBlock(at, Blocks.AIR);
+			helper.runAfterDelay(3, () -> {
+				armsMeet(helper, at, false);
+				helper.setBlock(at, JugcraftConcordance.CRUCIBLE_STAND);
+				helper.runAfterDelay(3, () -> {
+					armsMeet(helper, at, true);
+					helper.succeed();
+				});
+			});
+		});
 	}
 }

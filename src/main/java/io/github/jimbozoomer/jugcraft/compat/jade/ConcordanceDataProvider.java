@@ -3,12 +3,14 @@ package io.github.jimbozoomer.jugcraft.compat.jade;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
@@ -24,6 +26,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
@@ -40,7 +43,7 @@ import snownee.jade.api.IServerDataProvider;
  * someone, the Radiance in the lantern on it), the Lumen Sconce (its Radiance), the Circle Anchor (its ritual's phase
  * and progress and the circle's first faults), the Ley Pylon (its Ley Charge), the Alembic Crucible (its heat,
  * volume, tank, formula step and, since Concordance Chunk C (C-01), its own reason for waiting), the garden (roadmap
- * step 14: a bed's moisture, nutrients and habitat; each living device's status and store) and the Orrery Observatory (roadmap step 15: its resonance, status and visible patterns). Bounded snapshots of the one block looked at; they name no player, reveal no one's
+ * step 14: a bed's moisture, nutrients and habitat; each living device's status and store), the Orrery Observatory (roadmap step 15: its resonance, status and visible patterns) and the Crucible Stand (Concordance Chunk C, C-05: its JE, heat and draw, and why it gives none). Bounded snapshots of the one block looked at; they name no player, reveal no one's
  * research and change nothing (a bed's habitat comes from its sample, taken again no more often than a plant would).
  */
 public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor> {
@@ -54,7 +57,8 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 	MAW("mulch_maw"),
 	GAUGE("habitat_gauge"),
 	GLEANER("gleaner"),
-	OBSERVATORY("observatory");
+	OBSERVATORY("observatory"),
+	STAND("crucible_stand");
 
 	/** The most patterns an observatory's tooltip names. */
 	public static final int SHOWN_PATTERNS = 3;
@@ -102,7 +106,40 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 			CompoundTag snapshot = new CompoundTag();
 			snapshot.putInt("ley", (int) pylon.ley());
 			data.put(dataKey, snapshot);
+		} else if (this == STAND && accessor.getBlockEntity() instanceof CrucibleStandBlockEntity stand
+				&& accessor.getLevel() instanceof ServerLevel level) {
+			data.put(dataKey, standSnapshot(stand, level));
 		}
+	}
+
+	/**
+	 * A Crucible Stand (Concordance Chunk C, C-05): its JE and store, whether a formula decides its heat, the band ("aim")
+	 * and target it aims at, the JE a tick it pays now, and, when it gives no heat for a reason, that reason
+	 * (Diagnostic.encode, worded on the client) and whether it is its crucible's. Read only: it never pays, lights, sets or
+	 * changes the crucible.
+	 */
+	public static CompoundTag standSnapshot(CrucibleStandBlockEntity stand, ServerLevel level) {
+		CompoundTag snapshot = new CompoundTag();
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			snapshot.putBoolean("disabled", true);
+			return snapshot;
+		}
+		CrucibleStandBlockEntity.Plan plan = stand.plan(level);
+		snapshot.putLong("energy", stand.energy.getAmount());
+		snapshot.putLong("capacity", CrucibleStandBlockEntity.CAPACITY);
+		snapshot.putBoolean("following", plan.following());
+		if (plan.band() != null) {
+			snapshot.putString("aim", plan.band().id);
+			snapshot.putInt("target", Heat.standTarget(plan.band()));
+		}
+		if (plan.heats()) {
+			snapshot.putInt("draw", (int) CrucibleStandBlockEntity.rate(plan.band()));
+		}
+		if (plan.reason() != null) {
+			snapshot.putString("reason", plan.reason().encode());
+			snapshot.putBoolean("waits", plan.waits());
+		}
+		return snapshot;
 	}
 
 	public static CompoundTag snapshot(LampwrightBenchBlockEntity bench, long now) {

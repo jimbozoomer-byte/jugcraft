@@ -43,6 +43,17 @@ OWNER_BLOCKS_FILES = {
     "textures/block/crucible_stand_frame.png": "Guns/block/treated_iron_block.png",
     "textures/block/crucible_stand_coil.png": "Big Cannons and Mounted Guns/textures/block/coilside.png",
 }
+# Concordance Chunk C, C-05 (C-D3, C-P12; starting values): where a Crucible Stand heats the crucible on it for a stir at
+# each band (cold is off: the crucible settles at AMBIENT), the JE a tick it pays while it heats, its store, what it takes
+# a tick from a cable, and how often one player may set it (Java: alchemy/Heat.STAND_*, CrucibleStandBlockEntity). Each
+# target lies inside its band; a hotter band costs more (check_crucible_stand). It is never a HEAT_SOURCES block.
+STAND_TARGETS = {"warm": 65, "hot": 120, "searing": 175}
+STAND_JE = {"warm": 8, "hot": 16, "searing": 32}
+STAND_CAPACITY = 640
+STAND_INTAKE = 64
+STAND_SET_TICKS = 10
+# Its power sockets: every face that takes JE, never its seat (tools/machine_connections.py with_model_sockets; C-P44).
+STAND_PORTS = ("north", "south", "west", "east", "down")
 # The crucible (Java: CrucibleBlockEntity.java).
 BUFFER_SLOTS = 5  # ingredients waiting for automation
 STIR_TICKS = 10  # the most often a crucible can be stirred
@@ -170,7 +181,7 @@ ITEMS = {
     "draught": {"name": "Draught", "tooltip": "Drink it."},
     "salve": {"name": "Salve", "tooltip": "Use it on a creature to apply it (or on yourself, sneaking)."},
 }
-BLOCKS = {"crucible": {"name": "Alembic Crucible"}}
+BLOCKS = {"crucible": {"name": "Alembic Crucible"}, "crucible_stand": {"name": "Crucible Stand"}}
 
 # ------------------------------------------------------------------------------------------------- text
 
@@ -196,6 +207,16 @@ MESSAGES = {
     "alchemy.no_effect": "It does nothing",
     "crucible.status": "Alembic Crucible: %s, %s degrees, %s parts",
     "crucible.status_waiting": "%s. %s",
+    # Concordance Chunk C, C-05: the Crucible Stand's empty-hand words.
+    "stand.status": "Crucible Stand: %s; %s of %s JE",
+    "stand.status_more": "%s. %s",
+    "stand.following": "following its crucible's formula, %s",
+    "stand.setting": "set to %s",
+    "stand.heat": "%s (%s degrees)",
+    "stand.off": "off",
+    "stand.heating": "Heating: %s JE a tick",
+    "stand.set": "Crucible Stand set to %s",
+    "stand.settling": "Let the stand settle a moment",
     "examine.substance": "You taste a pinch of the %s and note what it is made of",
 }
 
@@ -252,6 +273,10 @@ TEXT = {
     # the Assay Glass's line).
     "alchemy.fouled": "%s fouled: %s a part lost to %s contaminant a part, from %s",
     "alchemy.assay.fouls": "%s: the contaminant takes %s a part",
+    # Concordance Chunk C, C-05: the Crucible Stand in the shared vocabulary's unavailable_power ("%s holds %s; it needs %s").
+    "alchemy.stand.it": "The Crucible Stand",
+    "alchemy.stand.je": "%s JE",
+    "alchemy.stand.je_tick": "%s JE a tick",
 }
 # What JEI's page for an ingredient carrying Rime adds (Concordance Chunk B, B-08): a property fact, never an outcome.
 RIME_JEI = "; stirred cold, its Rime brews Frostward (Winter Brine)"
@@ -272,6 +297,14 @@ TOOLTIPS = {
     # Concordance Chunk C, C-01 (C-P4): the next step is still shown to anyone, raw; why it waits is the crucible's reason.
     "jade.waiting": "Next step: %s",
     "jade.tank": "Water: %s / %s parts",
+    # Concordance Chunk C, C-05: Jade on a Crucible Stand.
+    "jade.stand_energy": "Energy: %s / %s JE",
+    "jade.stand_setting": "Set to %s",
+    "jade.stand_following": "Following its crucible's formula: %s",
+    "jade.stand_heat": "%s, %s degrees",
+    "jade.stand_off": "off",
+    "jade.stand_draw": "Heating: %s JE a tick",
+    "jade.stand_waits": "Idle while its crucible waits:",
 }
 
 SOUND_EVENTS = {
@@ -286,6 +319,7 @@ def lang_entries(lang):
     for key, text in TEXT.items():
         lang[f"compose.{MOD}.{key}"] = text
     lang[f"config.jade.plugin_{MOD}.crucible"] = BLOCKS["crucible"]["name"]
+    lang[f"config.jade.plugin_{MOD}.crucible_stand"] = BLOCKS["crucible_stand"]["name"]
     for key, info in INGREDIENTS.items():
         lang[f"jei.{MOD}.alchemy.{key}"] = "Alchemy: " + ", ".join(
             f"{axis.title()} {value:.2f}" for axis, value in info["properties"].items()) + (
@@ -686,6 +720,27 @@ def codex():
                  f"loot, held in the other hand, keeps hot ground from burning you for as long as you hold it. A Tyrant "
                  f"Scale makes two magma cream."),
             ]},
+        # Concordance Chunk C, C-05: the Crucible Stand, on Root and Rivet's foundation.
+        ("alembic", "crucible_stand"): {
+            "name": "Crucible Stand", "x": 4, "y": 4, "icon": rid("crucible_stand"), "condition": (art, "understood"),
+            "description": "Electric heat for the next stir",
+            "pages": [
+                ("crafting_recipe", "Crucible Stand",
+                 "Set an Alembic Crucible on it and run a cable to a side or underneath. Its base is a Rooted Thallite "
+                 "Foundation, from the [Root and Rivet](entry://jugcraft:arcane_concordance/circles/root_and_rivet) rite.",
+                 rid("crucible_stand")),
+                ("text", "Heat for the Next Stir",
+                 f"Following a formula it heats the crucible for the next stir: warm {STAND_TARGETS['warm']}, hot "
+                 f"{STAND_TARGETS['hot']}, searing {STAND_TARGETS['searing']} degrees, for {STAND_JE['warm']}, "
+                 f"{STAND_JE['hot']} and {STAND_JE['searing']} JE a tick; for a cold stir it lets the crucible cool. It "
+                 "draws nothing while the crucible waits for anything but heat, while Preserve holds it, or while it is "
+                 "already hot enough. With no formula, use it with an empty hand to set off, warm, hot or searing."),
+                ("text", "Water by Pipe",
+                 "An Electric Pump on a water source, piped into the crucible, fills its tank for the formula's water "
+                 "steps; the tank takes water only and gives none back. A campfire or any other heat beneath a crucible "
+                 "works as it always has."),
+            ],
+        },
     }
 
 
@@ -714,6 +769,7 @@ def tags(tags):
     for ref in ALCHEMY_SPECIMENS:
         tags.add("item", ALCHEMY_SPECIMEN_TAG, ref)
     tags.add("block", "minecraft:mineable/pickaxe", rid("crucible"))
+    tags.add("block", "minecraft:mineable/pickaxe", rid("crucible_stand"))
 
 
 def crucible_geo():
@@ -767,6 +823,37 @@ def crucible_animations():
     }}
 
 
+def _stand_box(frm, to, texture, emissive=False):
+    """One box of the Crucible Stand, every face drawn (closed geometry), its UVs vanilla's from its place."""
+    element = {"from": frm, "to": to,
+               "faces": {d: {"texture": f"#{texture}"} for d in ("north", "east", "south", "west", "up", "down")}}
+    if emissive:
+        element["light_emission"] = 15
+    return element
+
+
+def stand_elements(lit):
+    """The Crucible Stand (Concordance Chunk C, C-05): Root and Rivet's thallite slab, four treated-iron posts carrying the
+    treated-iron deck the crucible stands on, silver-grey cladding round its works, and the owner's copper coil, recessed
+    between cladding and deck, drawn full-bright on the ticks it pays (lit; C-P48). The coil's top lies under the deck and
+    its bottom on the cladding, so only its sides show: the owner's coil seen from its side on every face."""
+    posts = [_stand_box([x, 2, z], [x + 2, 13, z + 2], "frame") for x in (1, 13) for z in (1, 13)]
+    return ([_stand_box([0, 0, 0], [16, 2, 16], "foundation")] + posts
+            + [_stand_box([3, 2, 3], [13, 10, 13], "plates"),
+               _stand_box([4, 10, 4], [12, 13, 12], "coil", emissive=lit),
+               _stand_box([1, 13, 1], [15, 16, 15], "frame")])
+
+
+def stand_model(lit):
+    """The stand's block model with its power sockets on the faces that take JE (STAND_PORTS), none on its seat."""
+    from machine_connections import with_model_sockets
+    textures = {"particle": rid("block/crucible_stand_frame"), "foundation": rid("block/thallite_block"),
+                "plates": rid("block/crucible_stand_plates"), "frame": rid("block/crucible_stand_frame"),
+                "coil": rid("block/crucible_stand_coil")}
+    return with_model_sockets({"parent": "minecraft:block/block", "textures": textures, "elements": stand_elements(lit)},
+                              [((0, 0, 0), face, "power") for face in STAND_PORTS])
+
+
 def write_all(write, assets, data, lang, condition, self_drop):
     lang_entries(lang)
     for item in ("mortar", "stirring_rod", "sampling_spoon", "assay_glass", "reagent", "draught", "salve"):
@@ -791,6 +878,14 @@ def write_all(write, assets, data, lang, condition, self_drop):
           {"parent": "minecraft:item/generated", "textures": {"layer0": rid("item/crucible")}})
     write(assets / "items" / "crucible.json", {"model": {"type": "minecraft:model", "model": rid("item/crucible")}})
     write(data / "loot_table" / "blocks" / "crucible.json", self_drop("crucible"))
+    # Concordance Chunk C, C-05: the Crucible Stand (lit on the ticks it pays); its item shows the block.
+    for lit in (False, True):
+        write(assets / "models" / "block" / f"crucible_stand{'_lit' if lit else ''}.json", stand_model(lit))
+    write(assets / "blockstates" / "crucible_stand.json",
+          {"variants": {"lit=false": {"model": rid("block/crucible_stand")},
+                        "lit=true": {"model": rid("block/crucible_stand_lit")}}})
+    write(assets / "items" / "crucible_stand.json", {"model": {"type": "minecraft:model", "model": rid("block/crucible_stand")}})
+    write(data / "loot_table" / "blocks" / "crucible_stand.json", self_drop("crucible_stand"))
     feature = "concordance"
     recipes = {
         "crucible": {"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["C C", "CKC", "BBB"],
@@ -811,6 +906,12 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "formula": {"type": "minecraft:crafting_shapeless", "category": "misc",
                     "ingredients": ["minecraft:paper", "minecraft:ink_sac", "minecraft:glass_bottle"],
                     "result": {"id": rid("formula"), "count": 1}},
+        # Concordance Chunk C, C-05 (C-P47): on Root and Rivet's foundation; with the machines switch too (its JE) and the
+        # thallite switch (the foundation's plate needs both, as Root and Rivet's offerings do: C-P41).
+        "crucible_stand": {"fabric:load_conditions": condition("concordance") + condition("machines") + condition("thallite"),
+                           "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["ICI", "ICI", "IFI"],
+                           "key": {"I": "minecraft:iron_ingot", "C": "minecraft:copper_ingot", "F": rid("rooted_thallite_foundation")},
+                           "result": {"id": rid("crucible_stand"), "count": 1}},
     }
     for name, recipe in recipes.items():
         write(data / "recipe" / f"{name}.json", dict({"fabric:load_conditions": condition(feature)}, **recipe))

@@ -18,17 +18,17 @@ public enum Code {
 	WRONG_PREPARATION("wrong_preparation", Kind.SHORTAGE),
 	/** (wanted, now: band refs) */
 	WRONG_HEAT("wrong_heat", Kind.CONDITION),
-	/** (what, held, needed: each a line; fixed by C-03, worded for any power) */
+	/** (what, held, needed: each a line; fixed by C-03, worded for any power; C-05: a Crucible Stand short of a tick's JE) */
 	UNAVAILABLE_POWER("unavailable_power", Kind.SHORTAGE),
 	/** () the output is full */
 	INSUFFICIENT_CAPACITY("insufficient_capacity", Kind.BLOCKED),
 	/** () */
 	MISSING_PERMISSION("missing_permission", Kind.BLOCKED),
-	/** parameters fixed by C-06 */
+	/** parameters fixed by their first user (C-06 raises neither: the porter's Status and the Peepo's CompanionStatus say so at their own edges) */
 	UNLOADED_TARGET("unloaded_target", Kind.BLOCKED),
 	/** (structure: a named pattern, faults to mend) */
 	INCOMPLETE_PATTERN("incomplete_pattern", Kind.BLOCKED),
-	/** parameters fixed by C-06 */
+	/** parameters fixed by their first user (C-06 raises neither: the porter's Status and the Peepo's CompanionStatus say so at their own edges) */
 	UNAVAILABLE_WORKER("unavailable_worker", Kind.SHORTAGE),
 	/** parameters fixed by its first user */
 	CONFLICTING_AGREEMENT("conflicting_agreement", Kind.BLOCKED),
@@ -43,7 +43,7 @@ public enum Code {
 	HELD("held", Kind.CONDITION),
 	/** (step from 1, that step's words, the refusal) */
 	INCOMPATIBLE("incompatible", Kind.FAULT),
-	/** parameters fixed by C-06 */
+	/** (count, what: a step's words, seconds until it asks again) */
 	COURIER_QUOTA("courier_quota", Kind.BLOCKED),
 	/** () */
 	OUTPUT_DIFFERS("output_differs", Kind.BLOCKED),
@@ -61,7 +61,10 @@ public enum Code {
 	/** (blocks across, blocks above or below) */
 	TOO_FAR("too_far", Kind.BLOCKED),
 	/** (joined, needed, seconds left to join) */
-	PARTICIPANTS("participants", Kind.SHORTAGE);
+	PARTICIPANTS("participants", Kind.SHORTAGE),
+	// Concordance Chunk C, C-05 (the Crucible Stand).
+	/** () nothing stands on it to heat */
+	NO_CRUCIBLE("no_crucible", Kind.BLOCKED);
 
 	public final String id;
 	public final Kind kind;

@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.compat.jade;
 
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
@@ -33,6 +34,7 @@ public final class JugcraftJadePlugin implements IWailaPlugin {
 		registration.registerBlockDataProvider(ConcordanceDataProvider.ANCHOR, CircleAnchorBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.PYLON, LeyPylonBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.CRUCIBLE, CrucibleBlockEntity.class);
+		registration.registerBlockDataProvider(ConcordanceDataProvider.STAND, CrucibleStandBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.BED, VerdantBedBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.HEART, VerdantHeartBlockEntity.class);
 		registration.registerBlockDataProvider(ConcordanceDataProvider.MAW, MulchMawBlockEntity.class);

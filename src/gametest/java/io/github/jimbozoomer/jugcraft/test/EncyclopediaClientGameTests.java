@@ -16,18 +16,23 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.energy.CreativeEnergyCellBlock;
+import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
+import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairDossiers;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
+import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,6 +75,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 
 /**
@@ -96,6 +102,10 @@ import net.minecraft.world.level.material.Fluids;
  * {@code jugcraft_encyclopedia_inspect_crucible_scale4}). Since C-02, set to a dirty Stillroot Poultice (bone meal
  * stirred in with the Mendvetch), the formula's preview names what fouled its Verdance
  * ({@code jugcraft_encyclopedia_inspect_poultice}).</li>
+ * <li><b>A Crucible Stand</b> (Concordance Chunk C, C-05): a small workshop as a player builds it, a crucible following the
+ * Kiln formula on a stand fed through a copper cable and an Electric Pump piping its water. Lit for the hot stir
+ * ({@code jugcraft_concordance_crucible_stand_workshop}); the crucible's Inspect page names the stand heating it, with no
+ * key or id; Jade on the stand when loaded ({@code jugcraft_concordance_crucible_stand_jade}).</li>
  * <li><b>Readiness</b> (Concordance Chunk C, C-03): an anchor two glowstone short, beside a pylon short of a step and one
  * short of the run; the Inspect page shows the server's lines as decoded and worded on this client, and the stage table
  * ({@code jugcraft_encyclopedia_inspect_readiness}); then, walled and roofed so it is dark at any hour (the player given
@@ -133,6 +143,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				theRoute(context, server);
 				inspection(context, server);
 				crucibleInspection(context, server);
+				crucibleStandWorkshop(context, server);
 				anchorReadiness(context, server);
 				rootedFoundation(context, server);
 				expeditionsAndKeys(context, server);
@@ -485,6 +496,92 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				if (inventory.getItem(slot).is(JugcraftConcordance.ASSAY_GLASS)) {
 					inventory.setItem(slot, ItemStack.EMPTY);
 				}
+			}
+		});
+		context.waitTicks(5);
+	}
+
+	/**
+	 * Concordance Chunk C, C-05: a small workshop as a player builds it, at the ordinary GUI scale: a crucible following the
+	 * Kiln formula on a Crucible Stand fed by a Creative Energy Cell through a copper cable, and an Electric Pump on a spring
+	 * piping into its tank. The crucible's Inspect page names the stand heating it; Jade on the stand, if loaded, is shot too.
+	 */
+	private static void crucibleStandWorkshop(ClientGameTestContext context, TestDedicatedServerContext server) {
+		BlockPos feet = context.computeOnClient(client -> client.player.blockPosition());
+		BlockPos base = feet.offset(0, 0, 3);
+		BlockPos pot = base.above();
+		BlockPos cable = base.west();
+		BlockPos cell = cable.west();
+		BlockPos spring = base.east(2);
+		BlockPos pump = spring.above();
+		List<BlockPos> walls = List.of(spring.west(), spring.east(), spring.north(), spring.south());
+		boolean built = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			for (int dx = -2; dx <= 3; dx++) {
+				for (int dy = 0; dy <= 2; dy++) {
+					for (int dz = 2; dz <= 4; dz++) {
+						level.setBlockAndUpdate(feet.offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
+					}
+				}
+			}
+			walls.forEach(wall -> level.setBlockAndUpdate(wall, Blocks.STONE.defaultBlockState()));
+			level.setBlockAndUpdate(spring, Blocks.WATER.defaultBlockState());
+			level.setBlockAndUpdate(cell, CreativeEnergyCellBlock.BLOCK.defaultBlockState());
+			level.setBlockAndUpdate(cable, JugcraftMachines.COPPER_CABLE.defaultBlockState());
+			level.setBlockAndUpdate(base, JugcraftConcordance.CRUCIBLE_STAND.defaultBlockState());
+			level.setBlockAndUpdate(pot, JugcraftConcordance.CRUCIBLE.defaultBlockState());
+			level.setBlockAndUpdate(pump, JugcraftFluids.ELECTRIC_PUMP.defaultBlockState());
+			level.setBlockAndUpdate(pump.west(), JugcraftFluids.BRONZE_FLUID_PIPE.defaultBlockState());
+			if (!(level.getBlockEntity(pump) instanceof ElectricPumpBlockEntity pumping) || !(level.getBlockEntity(pot) instanceof CrucibleBlockEntity crucible)) {
+				return false;
+			}
+			pumping.energy().setAmount(ElectricPumpBlockEntity.ENERGY_CAPACITY);
+			crucible.follow(Formula.parse(KILN_FORMULA)); // no permission rule of this server can refuse it
+			crucible.setItem(0, new ItemStack(Items.MAGMA_CREAM));
+			crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
+			return true;
+		});
+		check(built, "The workshop should be built");
+		for (int wait = 0; wait < WAIT && !server.computeOnServer(minecraft -> minecraft.overworld().getBlockEntity(pot) instanceof CrucibleBlockEntity crucible
+				&& crucible.band() == Band.HOT && crucible.parts() > 0); wait++) {
+			context.waitTick();
+		}
+		boolean lit = server.computeOnServer(minecraft -> minecraft.overworld().getBlockState(base).getValue(BlockStateProperties.LIT));
+		Jugcraft.LOGGER.info("[encyclopedia-check] the workshop's stand is lit: {}", lit);
+		check(lit, "The stand should be lit, heating the crucible for its hot stir");
+		context.getInput().lookAt(pot);
+		context.waitTicks(20);
+		context.runOnClient(client -> client.gui.toastManager().clear());
+		context.waitTicks(5);
+		context.takeScreenshot("jugcraft_concordance_crucible_stand_workshop");
+		String standName = context.computeOnClient(client -> I18n.get("block.jugcraft.crucible_stand"));
+		open(context);
+		List<String> rows = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			return current == null ? List.<String>of() : current.rows().stream().map(row -> row.text().getString()).toList();
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] looking at a crucible on a stand: rows {}", rows);
+		check(rows.stream().anyMatch(row -> row.contains(standName)) && rows.stream().noneMatch(row -> row.contains("jugcraft.") || row.contains("jugcraft:")),
+				"The crucible's Inspect page should name the Crucible Stand heating it, with no key or id: " + rows);
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		context.getInput().lookAt(base);
+		context.waitTicks(20);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			context.runOnClient(client -> client.gui.toastManager().clear());
+			context.waitTicks(5);
+			context.takeScreenshot("jugcraft_concordance_crucible_stand_jade");
+		} else {
+			Jugcraft.LOGGER.info("[encyclopedia-check] Jade is not loaded: no shot of the stand's lines");
+		}
+		context.getInput().lookAt(0.0F, 30.0F);
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			if (level.getBlockEntity(pot) instanceof CrucibleBlockEntity crucible) {
+				crucible.clearContent(); // nothing drops
+			}
+			for (BlockPos at : List.of(pot, base, cable, cell, pump.west(), pump, spring, walls.get(0), walls.get(1), walls.get(2), walls.get(3))) {
+				level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
 			}
 		});
 		context.waitTicks(5);

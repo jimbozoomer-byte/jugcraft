@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlock;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlock;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
@@ -61,6 +62,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ConcordanceTooltip.ANCHOR, CircleAnchorBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.PYLON, LeyPylonBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.CRUCIBLE, CrucibleBlock.class);
+		registration.registerBlockComponent(StandTooltip.INSTANCE, CrucibleStandBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.BED, VerdantBedBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.HEART, VerdantHeartBlock.class);
 		registration.registerBlockComponent(ConcordanceTooltip.MAW, MulchMawBlock.class);
@@ -453,6 +455,44 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					if (faults > ConcordanceDataProvider.SHOWN_FAULTS) {
 						tooltip.add(Component.literal("+" + (faults - ConcordanceDataProvider.SHOWN_FAULTS)));
 					}
+				}
+			});
+		}
+	}
+
+	/** A Crucible Stand (Concordance Chunk C, C-05): its JE, what decides its heat and at what, what it pays, why it gives none. */
+	private enum StandTooltip implements IBlockComponentProvider {
+		INSTANCE;
+
+		@Override
+		public Identifier getUid() {
+			return ConcordanceDataProvider.STAND.id;
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			accessor.getServerData().getCompound(ConcordanceDataProvider.STAND.dataKey).ifPresent(data -> {
+				if (data.getBooleanOr("disabled", false)) {
+					tooltip.add(Component.translatable("message.jugcraft.concordance.disabled"));
+					return;
+				}
+				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.stand_energy", data.getLongOr("energy", 0L), data.getLongOr("capacity", 0L)));
+				String aim = data.getStringOr("aim", "");
+				Component heat = aim.isEmpty() ? Component.translatable("tooltip.jugcraft.concordance.jade.stand_off")
+						: Component.translatable("tooltip.jugcraft.concordance.jade.stand_heat", Component.translatable("compose.jugcraft.band." + aim),
+								data.getIntOr("target", 0));
+				tooltip.add(Component.translatable(data.getBooleanOr("following", false) ? "tooltip.jugcraft.concordance.jade.stand_following"
+						: "tooltip.jugcraft.concordance.jade.stand_setting", heat));
+				int draw = data.getIntOr("draw", 0);
+				if (draw > 0) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.stand_draw", draw));
+				}
+				Diagnostic reason = Diagnostic.decode(data.getStringOr("reason", ""));
+				if (reason != null) {
+					if (data.getBooleanOr("waits", false)) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.stand_waits"));
+					}
+					tooltip.add(ComposeText.show(reason.text()));
 				}
 			});
 		}

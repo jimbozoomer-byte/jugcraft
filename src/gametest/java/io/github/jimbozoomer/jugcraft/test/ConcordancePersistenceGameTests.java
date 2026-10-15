@@ -10,9 +10,13 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
@@ -40,9 +44,11 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -52,7 +58,8 @@ import net.minecraft.world.level.storage.TagValueInput;
  * Concordance saves in a world reads its own saves from before versions began, is written with its version, brings an
  * older version forward step by step and reads what it can of a newer one; a record keeps an entry it cannot read
  * exactly as written; block entities stamp their version; the crucible keeps Preserve's hold through a save (Concordance
- * Chunk B, unit 3); and the circle index looks only at the chunks in reach.
+ * Chunk B, unit 3); the Crucible Stand keeps its JE and setting (Concordance Chunk C, C-05); and the circle index looks
+ * only at the chunks in reach.
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -167,7 +174,7 @@ public class ConcordancePersistenceGameTests {
 
 	/**
 	 * A Concordance block entity's save carries its version, for a later format to read. The crucible's stays 1 with
-	 * Preserve's optional hold (Concordance Chunk B, unit 3).
+	 * Preserve's optional hold (Concordance Chunk B, unit 3); the Crucible Stand's is 1 (Concordance Chunk C, C-05).
 	 */
 	@GameTest(maxTicks = 20)
 	public void blockEntitiesStampTheirVersion(GameTestHelper helper) {
@@ -175,10 +182,12 @@ public class ConcordancePersistenceGameTests {
 		BlockPos pylon = new BlockPos(1, 1, 1);
 		BlockPos sconce = new BlockPos(3, 1, 1);
 		BlockPos crucible = new BlockPos(5, 1, 1);
+		BlockPos stand = new BlockPos(1, 1, 3);
 		helper.setBlock(pylon, JugcraftConcordance.LEY_PYLON);
 		helper.setBlock(sconce, JugcraftConcordance.LUMEN_SCONCE);
 		helper.setBlock(crucible, JugcraftConcordance.CRUCIBLE);
-		for (BlockPos at : List.of(pylon, sconce, crucible)) {
+		helper.setBlock(stand, JugcraftConcordance.CRUCIBLE_STAND);
+		for (BlockPos at : List.of(pylon, sconce, crucible, stand)) {
 			BlockEntity entity = level.getBlockEntity(helper.absolutePos(at));
 			CompoundTag saved = entity.saveWithoutMetadata(level.registryAccess());
 			helper.assertValueEqual(saved.getIntOr(Saved.VERSION, 0), 1, entity.getType() + " stamps its version");
@@ -288,8 +297,54 @@ public class ConcordancePersistenceGameTests {
 		helper.succeed();
 	}
 
+	/**
+	 * Concordance Chunk C, C-05: a stand saves its JE and setting, stamped 1, and reads them back exactly. An older save
+	 * without them, stamped or not, reads as an empty stand set off. A setting this build does not know reads as off, and JE
+	 * outside its store is brought within it. What it paid for last is never saved.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theCrucibleStandKeepsItsEnergyAndSettingThroughASave(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = new BlockPos(2, 1, 2);
+		helper.setBlock(at, JugcraftConcordance.CRUCIBLE_STAND);
+		CrucibleStandBlockEntity stand = helper.getBlockEntity(at, CrucibleStandBlockEntity.class);
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		for (int i = 0; i < 2; i++) {
+			RateGate.forget(player.getUUID());
+			stand.useEmpty(player, false);
+		}
+		stand.energy.setAmount(300);
+		CompoundTag saved = stand.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getLongOr("energy", -1L) == 300L && "hot".equals(saved.getStringOr("setting", ""))
+				&& !saved.contains("given"), "Saved: its JE and setting, at version 1: " + saved);
+		CrucibleStandBlockEntity read = loadStand(level, stand, saved);
+		helper.assertTrue(read.energy.getAmount() == 300 && read.setting() == Band.HOT && read.given() == Heat.AMBIENT, "Read back exactly");
+		CompoundTag unversioned = saved.copy();
+		unversioned.remove(Saved.VERSION);
+		helper.assertTrue(loadStand(level, stand, unversioned).energy.getAmount() == 300 && loadStand(level, stand, unversioned).setting() == Band.HOT,
+				"An unstamped save reads the same");
+		CrucibleStandBlockEntity older = loadStand(level, stand, new CompoundTag());
+		helper.assertTrue(older.energy.getAmount() == 0 && older.setting() == Band.COLD, "A save without them reads as empty and off");
+		CompoundTag forged = saved.copy();
+		forged.putLong("energy", 1_000_000L);
+		forged.putString("setting", "boiling");
+		CrucibleStandBlockEntity odd = loadStand(level, stand, forged);
+		helper.assertTrue(odd.energy.getAmount() == CrucibleStandBlockEntity.CAPACITY && odd.setting() == Band.COLD,
+				"JE beyond its store is cut to it; an unknown setting is off");
+		forged.putLong("energy", -5L);
+		helper.assertTrue(loadStand(level, stand, forged).energy.getAmount() == 0, "Negative JE reads as none");
+		helper.succeed();
+	}
+
 	private static CrucibleBlockEntity load(ServerLevel level, CrucibleBlockEntity like, CompoundTag saved) {
 		CrucibleBlockEntity copy = new CrucibleBlockEntity(like.getBlockPos(), like.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
+	}
+
+	private static CrucibleStandBlockEntity loadStand(ServerLevel level, CrucibleStandBlockEntity like, CompoundTag saved) {
+		CrucibleStandBlockEntity copy = new CrucibleStandBlockEntity(like.getBlockPos(), like.getBlockState());
 		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
 		return copy;
 	}

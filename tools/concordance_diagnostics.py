@@ -39,6 +39,8 @@ CODES = {
     "too_bright": ("condition", "Too bright: light %s above the anchor, where it allows at most %s"),
     "too_far": ("blocked", "Too far: stand within %s blocks of the anchor across and %s above or below"),
     "participants": ("shortage", "%s of %s participants have joined; the rest have %s s to join (an empty-hand use)"),
+    # Concordance Chunk C, C-05 (the Crucible Stand).
+    "no_crucible": ("blocked", "Nothing to heat: set an Alembic Crucible on it"),
 }
 
 

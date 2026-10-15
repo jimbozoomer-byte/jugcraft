@@ -173,11 +173,11 @@ ITEMS = {
     "adept_wand": {"name": "Adept's Wand",
                    "tooltip": "A second instrument, attuned in a circle: it holds larger spells than an Initiate's "
                               "Wand. Hold it in the main hand to cast."},
-    # Concordance Chunk C, C-04: Root and Rivet's result (no consumer until unit 3's Crucible Stand, C-05).
+    # Concordance Chunk C, C-04: Root and Rivet's result, the Crucible Stand's base (C-05).
     "rooted_thallite_foundation": {"name": "Rooted Thallite Foundation",
                                    "tooltip": "A Thallite plate riveted with copper and bound with Mendvetch roots in a "
                                               "Lesser Circle (Root and Rivet): a foundation that holds still under living "
-                                              "work."},
+                                              "work, and a Crucible Stand's base."},
 }
 BLOCKS = {
     "circle_anchor": {"name": "Circle Anchor"},
@@ -516,7 +516,8 @@ def codex(initiate):
                  rid("thallite_plate_by_hand")),
                 ("text", "The Foundation",
                  "A **Rooted Thallite Foundation** is a Thallite plate riveted with copper and bound with Mendvetch roots: "
-                 "a base that holds still under living work. Nothing turns it back into a plate, Ley Charge or Focus, and "
+                 "a base that holds still under living work. It is the base of a **Crucible Stand** (Alembic). Nothing "
+                 "turns it back into a plate, Ley Charge or Focus, and "
                  "the Assayer's Scale will not weigh it.\\\n\\\nCompleting Root and Rivet counts towards "
                  "**Stratawrighting**'s mastery, as any completed ritual does."),
             ],
