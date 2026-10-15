@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -90,40 +91,61 @@ public final class Assay {
 	 * What is never hidden (plan 03:54; Concordance Chunk C, C-01, C-P3, C-P25): the harmful statuses a dose would carry
 	 * and the first searing stir, for anyone, whatever they know. Of {@code program}'s replay under these rules when there
 	 * is a formula (its searing step counted from 1), otherwise of {@code mixture} as it is; nothing for an empty crucible
-	 * with no formula. A formula these rules refuse has no outcome: only its searing step is named.
+	 * with no formula. A formula these rules refuse has no outcome: only its searing step is named. When the mixture in
+	 * the crucible is not the formula's own batch ({@code apart}: it was there before the formula was set, or the rules
+	 * refuse the formula), a dose bottled from it by hand now would carry its own harm, so that is named too (each status
+	 * once) and, if it was stirred searing, that it was. A status harms when its property says so or {@code harmful} (the
+	 * server's judgement of the status: Alchemy.harmfulStatus, C-P29) does.
 	 */
-	public static List<Text> risks(@Nullable Formula program, Mixture mixture, AlchemyCatalog catalog) {
+	public static List<Text> risks(@Nullable Formula program, Mixture mixture, boolean apart, Predicate<String> harmful, AlchemyCatalog catalog) {
 		List<Text> out = new ArrayList<>();
 		List<Operation> operations;
-		Outcome outcome = null;
+		List<Outcome> outcomes = new ArrayList<>();
+		boolean live = false;
 		if (program != null) {
 			operations = program.operations();
 			if (program.replay(catalog) instanceof Mixture.Applied applied) {
-				outcome = applied.mixture().outcome(catalog);
+				outcomes.add(applied.mixture().outcome(catalog));
+			}
+			live = apart && !mixture.isEmpty();
+			if (live) {
+				outcomes.add(mixture.outcome(catalog));
 			}
 		} else if (!mixture.isEmpty()) {
 			operations = mixture.history();
-			outcome = mixture.outcome(catalog);
+			outcomes.add(mixture.outcome(catalog));
 		} else {
 			return out;
 		}
 		List<Text.Ref> harms = new ArrayList<>();
-		if (outcome != null) {
+		for (Outcome outcome : outcomes) {
 			for (Outcome.Effect effect : outcome.effects()) {
-				if (effect.property().intent() == Intent.HARMFUL) {
-					harms.add(new Text.Ref("status", effect.property().status()));
+				Text.Ref status = new Text.Ref("status", effect.property().status());
+				if ((effect.property().intent() == Intent.HARMFUL || harmful.test(status.id())) && !harms.contains(status)) {
+					harms.add(status);
 				}
 			}
 		}
 		if (!harms.isEmpty()) {
 			out.add(Text.of("alchemy.risk.harm", harms));
 		}
-		for (int i = 0; i < operations.size(); i++) {
-			if (operations.get(i) instanceof Operation.Stir stir && stir.band() == Band.SEARING) {
-				out.add(program != null ? Text.of("alchemy.risk.searing", i + 1) : Text.of("alchemy.risk.seared"));
-				break;
-			}
+		int searing = firstSearing(operations);
+		if (searing >= 0) {
+			out.add(program != null ? Text.of("alchemy.risk.searing", searing + 1) : Text.of("alchemy.risk.seared"));
+		}
+		if (live && firstSearing(mixture.history()) >= 0) {
+			out.add(Text.of("alchemy.risk.seared"));
 		}
 		return out;
+	}
+
+	/** The index of the first searing stir in {@code operations}, or -1. */
+	private static int firstSearing(List<Operation> operations) {
+		for (int i = 0; i < operations.size(); i++) {
+			if (operations.get(i) instanceof Operation.Stir stir && stir.band() == Band.SEARING) {
+				return i;
+			}
+		}
+		return -1;
 	}
 }

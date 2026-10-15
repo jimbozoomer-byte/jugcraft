@@ -299,9 +299,13 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 			}
 			case Operation.Stir stir -> {
 				if (band() != stir.band()) {
-					// Waiting for the heat shows no sign, as it never did; Preserve holding it in another band says so.
+					// Waiting for the heat shows no sign, as it never did. Preserve's hold is the reason only while it keeps the
+					// heat from the stir's band: unheld, the block beneath would move it that way (C-01). Over a magma block
+					// (warm at most) a hot stir waits for heat, held or not.
 					int held = held(ConcordanceProgress.now(level));
-					return pause(level, held > 0 ? Diagnostic.held(band().id, (held + 19) / 20) : Diagnostic.wrongHeat(stir.band().id, band().id));
+					Band heading = Band.of(heatBelow(level));
+					boolean kept = held > 0 && Integer.compare(heading.ordinal(), band().ordinal()) == Integer.compare(stir.band().ordinal(), band().ordinal());
+					return pause(level, kept ? Diagnostic.held(band().id, (held + 19) / 20) : Diagnostic.wrongHeat(stir.band().id, band().id));
 				}
 			}
 		}
@@ -572,14 +576,14 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 				return InteractionResult.FAIL;
 			}
 			AlchemyCatalog catalog = Alchemy.catalog();
-			if (formula.replay(catalog) instanceof Mixture.Refused refused) {
-				// Plan 03:54: which step the rules in force refuse, and why (C-01).
-				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_refused",
-						ComposeText.show(formula.incompatible(refused).text())));
+			Component refused = refusal(formula, catalog);
+			if (refused != null) {
+				player.sendOverlayMessage(refused);
 				return InteractionResult.FAIL;
 			}
 			follow(formula);
-			List<Text> risks = Assay.risks(formula, Mixture.EMPTY, catalog);
+			// What is never hidden: the formula's own, and, set over a mixture already in it, that mixture's (C-01).
+			List<Text> risks = Assay.risks(formula, mixture, !mixture.isEmpty(), Alchemy::harmfulStatus, catalog);
 			if (risks.isEmpty()) {
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.formula_set", formula.operations().size()));
 			} else {
@@ -606,6 +610,15 @@ public class CrucibleBlockEntity extends BlockEntity implements GeoBlockEntity, 
 		player.getInventory().placeItemBackInInventory(record, Prediction.SERVER_ONLY);
 		player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.alchemy.recorded", formula.operations().size()));
 		return InteractionResult.SUCCESS;
+	}
+
+	/**
+	 * What the formula item's use tells when the rules in force cannot replay a written formula (plan 03:54; C-01): which
+	 * step they refuse, and why; null when they can replay it. The use sends exactly this.
+	 */
+	public static @Nullable Component refusal(Formula formula, AlchemyCatalog catalog) {
+		Diagnostic why = formula.incompatibility(catalog);
+		return why == null ? null : Component.translatable("message.jugcraft.concordance.alchemy.formula_refused", ComposeText.show(why.text()));
 	}
 
 	/**

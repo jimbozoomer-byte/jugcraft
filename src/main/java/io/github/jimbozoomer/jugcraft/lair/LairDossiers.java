@@ -4,7 +4,9 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Frostward;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
@@ -302,12 +304,19 @@ public final class LairDossiers {
 	}
 
 	/**
-	 * Whether a Stillroot Poultice can be brewed here (Concordance Chunk C, C-02): the Concordance is on and the data's
-	 * Verdance brews {@link Encounter#POULTICE_STATUS}, the status whose heals its helper is credited for. It only reads.
+	 * Whether a Stillroot Poultice can be brewed here and earn its credit (Concordance Chunk C, C-02): the Concordance is
+	 * on, the data's Verdance brews {@link Encounter#POULTICE_STATUS}, the status whose heals its helper is credited for,
+	 * and a salve carrying that status alone is the Stillroot Poultice (Alchemy.product's own match: a data pack that drops
+	 * the product, or adds a second salve of that status so the match is ambiguous, earns nobody credit). It only reads.
 	 */
 	private static boolean poultices() {
-		Property verdance = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE) ? Alchemy.catalog().property(Axis.VERDANCE.id) : null;
-		return brews(verdance, Encounter.POULTICE_STATUS);
+		if (!JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+			return false;
+		}
+		AlchemyCatalog catalog = Alchemy.catalog();
+		Property verdance = catalog.property(Axis.VERDANCE.id);
+		Product salve = catalog.product(Product.Form.SALVE, List.of(Encounter.POULTICE_STATUS), false);
+		return brews(verdance, Encounter.POULTICE_STATUS) && salve != null && Alchemy.STILLROOT_POULTICE.equals(salve.id());
 	}
 
 	/** The player's part in the fight round them so far, and whether it is enough for a share. */

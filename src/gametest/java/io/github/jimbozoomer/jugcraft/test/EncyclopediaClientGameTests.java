@@ -54,6 +54,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -454,11 +455,19 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
 		context.getInput().lookAt(0.0F, 30.0F);
-		// Taken away again (no bottle went in, so nothing drops), so the later shots are as they were.
+		// The crucible and its fire taken away again (no bottle went in, so nothing drops) and the Assay Glass put back. The
+		// Alembic Arts stay mastered, so the later Expeditions shots carry the codex links that research opens (the Winter
+		// Brine's and the Kiln Draught's).
 		server.runOnServer(minecraft -> {
 			ServerLevel level = minecraft.overworld();
 			level.setBlockAndUpdate(pot, Blocks.AIR.defaultBlockState());
 			level.setBlockAndUpdate(fire, Blocks.AIR.defaultBlockState());
+			Inventory inventory = first(minecraft).getInventory();
+			for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+				if (inventory.getItem(slot).is(JugcraftConcordance.ASSAY_GLASS)) {
+					inventory.setItem(slot, ItemStack.EMPTY);
+				}
+			}
 		});
 		context.waitTicks(5);
 	}

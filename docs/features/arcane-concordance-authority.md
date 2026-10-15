@@ -99,7 +99,7 @@ unless stated):
 | Curse cast through a link; scrying a link | only by the link's maker; scrying also within 128 blocks and by the rules | **GAP**: anyone holding the taglock, at any distance |
 | Curse pulses | the rules again at every pulse; skipped while the caster is away | unchanged |
 | Ritual backlash after a part is broken | as the player who broke it within the step (if here), so their PvP and parties apply | **GAP**: sourceless, whoever broke it |
-| Crucible: water, adds, stirs, bottling, setting or clearing a formula (since Concordance Chunk C, C-01) | `mayChange` as the player; clearing also needs the Alembic Arts; recording onto a blank formula stays open (C-P24) | **GAP** until Chunk C: anyone with the Alembic Arts; stopping a formula, an alembist only (this step) |
+| Crucible: water, adds, stirs, bottling, setting or clearing a formula (since Concordance Chunk C, C-01) | `mayChange` as the player; every change also needs the Alembic Arts; recording onto a blank formula stays open (C-P24) | **GAP** until Chunk C: anyone with the Alembic Arts; stopping a formula, an alembist only (this step) |
 | Lampwright Bench buttons | one press every 4 ticks a player | **GAP**: unlimited |
 | `/jugcraft concordance courier request`, `cancel`, `recover` | one every 10 ticks a player (counts bounded by `Logistics.MAX_WANTED` as before) | **GAP**: unlimited |
 | Circle, sconce, garden, sky, relic, spire, vigil, artifice, compose, hex, journal requests | `RateGate`, as before | unchanged |

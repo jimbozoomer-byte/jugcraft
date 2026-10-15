@@ -217,8 +217,9 @@ TEXT = {
     "alchemy.op.add": "%s, %s",
     "alchemy.op.stir": "a %s stir",
     "alchemy.risk.harm": "Danger: a dose would bring %s",
-    "alchemy.risk.searing": "Danger: step %s stirs it searing, which fouls it and spoils its Radiance and Verdance",
-    "alchemy.risk.seared": "Danger: it was stirred searing, which fouled it and spoiled its Radiance and Verdance",
+    # A searing stir fouls the mixture, keeps SEARING_KEEP of its Radiance and Verdance and none of its Rime (RIME_KEEP).
+    "alchemy.risk.searing": "Danger: step %s stirs it searing, which fouls it, spoils its Radiance and Verdance and thaws all its Rime",
+    "alchemy.risk.seared": "Danger: it was stirred searing, which fouled it, spoiled its Radiance and Verdance and thawed all its Rime",
     # Concordance Chunk C, C-01: the encyclopedia's Inspect page on a crucible (alchemy/CrucibleInspection).
     "alchemy.inspect.heat": "%s degrees (%s)",
     "alchemy.inspect.heated": "%s beneath heats it towards %s degrees",
@@ -396,12 +397,13 @@ def judge(key, amount):
 
 def bottle(operations, drawn=0):
     """The dose (milli-units a part, by axis) and the contaminant a part of the bottle drawn after {drawn} others from the
-    mixture {operations} make (Java: Mixture.bottle)."""
+    mixture {operations} make (Java: Mixture.bottle). Every dose of a batch is the same share, so they stack: what is
+    left after a bottle holds exactly that share for each part still in it, and what did not divide evenly is lost."""
     parts, _, dissolved, contaminant = simulate(operations)
     for _ in range(drawn):
         dose = {axis: dissolved[axis] // parts for axis in AXES}
-        dissolved = {axis: dissolved[axis] - dose[axis] for axis in AXES}
-        contaminant -= contaminant // parts
+        dissolved = {axis: dose[axis] * (parts - 1) for axis in AXES}
+        contaminant = contaminant // parts * (parts - 1)
         parts -= 1
     return {axis: dissolved[axis] // parts for axis in AXES}, contaminant // parts
 

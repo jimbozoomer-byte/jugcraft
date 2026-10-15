@@ -98,9 +98,9 @@ Figures from the generator's model, not yet measured in a game:
 - **Stillroot Poultice**, a salve of Regeneration: two Mendvetch as they come in one part of water, stirred warm four
   times, hold 2.127 Verdance a part: Regeneration II for 22.5 s. Stirred in with them, one, two and three bone meal
   leave 1.935, 1.743 and 1.551 after fouling: Regeneration I, then Poison too, then Nausea too. A searing stir in place
-  of the last warm one leaves 0.215 (2.215 less 2.000): Nausea only. In two parts of water the batch makes doses of
-  1.063 and 1.064, Regeneration I for 318 and 319 ticks. Use it on a friend, or on yourself while sneaking; the bowl
-  comes back. A poultice another player puts on you in a lair fight earns them healing credit
+  of the last warm one leaves 0.215 (2.215 less 2.000): Nausea only. In two parts of water the batch makes two doses
+  of 1.063, Regeneration I for 318 ticks each: every dose of a batch is the same, so they stack. Use it on a friend, or
+  on yourself while sneaking; the bowl comes back. A poultice another player puts on you in a lair fight earns them healing credit
   ([lair-encounter-credit.md](lair-encounter-credit.md)).
 - **Kiln Draught**, a draught of Fire Resistance: one magma cream as it comes in one part of water, stirred hot twice,
   holds 1.276 Ember a part (and 0.200 contaminant, under Nausea's 0.500): 76.55 s. Two sugar stirred the same way hold
@@ -141,12 +141,17 @@ Since Concordance Chunk C (C-01):
   (or the same one prepared otherwise), the heat, Preserve's hold, a bottle or bowl, an output that is full or holds
   another brew, a batch to empty before a repeat. Jade and the Inspect page show the same reason. A shortage or a
   blockage shows a want sign once when it begins; a formula it cannot follow shows danger with the breaking sound;
-  waiting for heat or a hold shows nothing.
+  waiting for heat or a hold shows nothing. Preserve's hold is named only while it is what keeps the heat from the
+  stir's band; over a block that cannot heat it that far (a magma block for a hot stir), it waits for the heat, held
+  or not.
 - **A formula is kept honestly:** a formula the rules in force can no longer make (after a reload or a data pack) stays
   set at its step. It names the step and why, and does nothing, not even bottling a finished batch, until the rules can
   follow it again; then it carries on. A saved formula this build cannot read is kept as written and reported. Setting a
   written formula the rules refuse names the step and why, and setting one that would harm says so: the risk line names
-  the harmful statuses a dose would carry and the first searing stir.
+  the harmful statuses a dose would carry and the first searing stir. When the mixture in the crucible is not the
+  formula's own batch (it was there before the formula was set, or the rules refuse the formula), the risk line also
+  names that mixture's harm, and that it was stirred searing, since a dose of it can still be bottled by hand. Harm is
+  judged by the server (a harmful or unknown status) as well as by the property's data.
 - **Setting is a plain use;** the formula's tooltip said "sneak" until Chunk C.
 - **Only someone who could break the crucible by hand** may pour, add, stir, bottle, or set or clear its formula
   (claims, protected towns, adventure mode and spawn protection refuse). Tasting, the glass and recording onto a blank
@@ -163,7 +168,10 @@ unknown or out of range, with a reason.
 **The simulation is pure and deterministic** (`Mixture`, `Operation`, `Band`, `Heat`, `Outcome`, `Formula`, `Assay`).
 A mixture is its volume in parts, its pending and dissolved vectors, its contaminant, the doses drawn and its history
 of operations (at most 32). All amounts are whole thousandths (`Vector`, longs) with floor division, so identical
-operations always give identical mixtures and doses on every machine. `Operation` is one of `water <n>`,
+operations always give identical mixtures and doses on every machine. Every dose of a batch is the same share: what is
+left after a bottle holds exactly that share for each part still in it, and what did not divide evenly (under a
+thousandth a part) is lost, never given to a later dose (since Chunk C's unit review; before, the last dose took it, and
+an automated batch's doses could differ and not stack). `Operation` is one of `water <n>`,
 `add <item> <preparation>` and `stir <band>`, each with one canonical text; a `Formula` is the history as text,
 parsed back and replayed against the catalog before it is accepted.
 
@@ -358,12 +366,13 @@ new `check_winter_brine` holds the rest. `check_mod_data` passes, locally and in
 They were written where no Minecraft jar is available, so none of this Java has been compiled; CI is their first
 compile and run.
 - **New server game tests:**
-  - `ConcordanceAlchemyGameTests` +19 (32 in all). C-01's 12:
+  - `ConcordanceAlchemyGameTests` +20 (33 in all). C-01's 13:
     - `aChangedRuleKeepsTheFormulaAndSaysWhy`, `aRestoredRuleResumesTheFormula`,
       `aWrittenFormulaThatNoLongerReplaysSaysWhichStep` and `aSavedFormulaThatNoLongerReadsIsKeptAndReported`;
     - `anIncompatibleFormulaAsksForNothing`, which also shows that an incompatible formula bottles nothing;
     - `aFullOutputPausesAndVoidsNothing`, `twoHoppersRaceForTheBuffer`, `partialWaterWaitsThenDrawsExactly`,
       `aRestartJustBeforeOutputBottlesOnce` and `theCompanionAndTheCrucibleAgreeOnFull`;
+    - `aHoldIsTheReasonOnlyWhileItKeepsTheHeat` (added by the unit review's fixes);
     - `onlyThoseWhoMayChangeACrucibleWorkIt` (a claim and adventure mode);
     - `jadeIsToldTheTankAndWhyNeverTheMakeup`, whose Jade checks run only when Jade is loaded.
   - C-02's 7: `aStillrootPoulticeRepeatsAndADirtyBatchHealsLess`, `aKilnDraughtCarriesItsDrinkerAcrossTheSlag`,
@@ -390,10 +399,38 @@ compile and run.
   - `check_signs`: Jade's crucible snapshot and its client;
   - `check_encyclopedia`: the crucible page's reach and glass, and that it only reads;
   - the crucible in `AUTHORITY_ROUTES`, and `diagnostic` in the pure-package list.
+- **Fixes from the unit review** (a sixth commit; none of it run in a game):
+  - every dose of a batch is the same share (`Mixture.bottle`, `Vector.times`, and the generator's `bottle`), so a
+    poultice in two parts bottles 1.063 twice and an automated batch's doses stack. Before, the last dose took the
+    remainder (1.063 then 1.064), the two salves differed, and an automated crucible paused on its own second dose
+    ("holds something else"). `dilutionNeverHealsMore` now runs the two-part poultice as a formula and expects one
+    stack of two;
+  - the risk line (`Assay.risks`) also names the harm of a mixture that is not the formula's own batch: one there
+    before the formula was set, or under a formula the rules refuse. Harm is judged by the server as well
+    (`Alchemy.harmfulStatus`), on the Inspect page and when a formula is set;
+  - the formula item's refusal is built by `CrucibleBlockEntity.refusal`, which the test asserts against step 2's
+    refusal;
+  - Preserve's hold is the reason only while it keeps the heat from the stir's band
+    (`aHoldIsTheReasonOnlyWhileItKeepsTheHeat`);
+  - the dossiers name the poultice's credit only while a salve of Regeneration alone is the Stillroot Poultice;
+  - the searing danger words also say a searing stir thaws all Rime;
+  - the Peepo status is asserted where each wait already happens: `NEEDS_WATER`, `NEEDS_BOTTLES`, `NO_INPUT`, `OCCUPIED`
+    and `WRONG_TEMPERATURE`, beside `FULL` and `RECIPE_MISSING`;
+  - the client test puts the Assay Glass back after its crucible shots;
+  - audits: `canPlaceItem`'s two returns and the mortar's whole refusal condition; equal doses in the generator and in
+    `Mixture.bottle`; `formula()`'s refusal and risk line; the Inspect page's risk-line inputs; the dossier's product
+    match.
 - **Run locally for each of the unit's commits, and passed:** `python3 tools/check_mod_data.py`,
   `python3 scripts/check_repository.py`, `python3 tools/owner_art.py --check`,
   `python3 tools/concordance_journey.py --check`, `python -m unittest discover -s scripts/tests` and `git diff --check`.
   The audit mutations tried on a scratch copy were each reported (30 for the products' commit, 22 for the credit's).
+  The first two commits' listed mutations were not run when they were made. They were run with the unit review's fixes,
+  on a scratch copy against `check_mod_data`'s Concordance checks: commit 1's twelve (20 variants) and commit 2's seven
+  were each reported, but for dropping `ground` from `PREPARATION_NAMES`, which is reported only once the generator has
+  rewritten the lang (the stale key hides it from the audit alone). The fixes' own twelve mutations were each reported.
+  The pure alchemy packages also compiled with `javac` against a stub of jspecify's `@Nullable`, and a scratch harness
+  replayed the new assertions' alchemy against the real data: two doses of 1.063 for 318 ticks, the Kiln Draught's 765
+  and 765, equal doses in 2 to 6 parts, and the risk lines (with a stand-in for the registry's harm test).
 - **Not run:** `./gradlew build` with and without the optional integrations, `./gradlew runClientGameTest`, CI, any
   play by hand, and two clients.
 

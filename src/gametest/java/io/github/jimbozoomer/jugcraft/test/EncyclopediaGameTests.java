@@ -17,6 +17,7 @@ import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
@@ -722,6 +723,9 @@ public class EncyclopediaGameTests {
 		helper.assertTrue(poultice != null && poultice.icons().equals(List.of(JugcraftConcordance.SALVE))
 				&& keys.indexOf(dossier + "credit.poultice") == keys.indexOf(dossier + "credit.wards") + 1,
 				"beaten, the keeper's dossier names the poultice's credit, with a salve, after the wards' rule: " + keys);
+		Product salve = Alchemy.catalog().product(Product.Form.SALVE, List.of(Encounter.POULTICE_STATUS), false);
+		helper.assertTrue(salve != null && Alchemy.STILLROOT_POULTICE.equals(salve.id()),
+				"named because a salve of that status alone is the Stillroot Poultice, whose credit Alchemy.product finds: " + salve);
 
 		// The Concordance off: not named (switched back at once; the server runs other tests).
 		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
@@ -886,8 +890,9 @@ public class EncyclopediaGameTests {
 	 * heat and what heats it, volume, tank, formula, the risk line (a spider eye's Poison), its slots and a spoon's sample;
 	 * a carried Assay Glass adds the glass's measures once the Alembic Arts are understood and the formula's outcome under
 	 * the rules in force once they are mastered (a glass without the research, or the research without a glass, reads as a
-	 * spoon). Reading shows no sign and changes nothing. A crucible past the reader's reach (though within the anchor's 16
-	 * blocks), or not loaded, has no page; and a formula's own reason for waiting is on its page.
+	 * spoon). Reading shows no sign and changes nothing. A clean formula set over a harmful mixture still has that
+	 * mixture's harm named. A crucible past the reader's reach (though within the anchor's 16 blocks), or not loaded, has
+	 * no page; and a formula's own reason for waiting is on its page.
 	 */
 	@GameTest(maxTicks = 60)
 	public void theInspectPageReadsACrucibleByResearch(GameTestHelper helper) {
@@ -959,6 +964,16 @@ public class EncyclopediaGameTests {
 		helper.assertTrue(watch.all().isEmpty(), "Reading shows no sign: " + watch.all());
 		helper.assertTrue(a.mixture().equals(mixtureA) && a.temperature() == temperatureA && a.getItem(0).getCount() == 3,
 				"Reading changes nothing: " + a.mixture());
+
+		// A clean formula set over that mixture: the mixture is not its batch and can still be bottled by hand, so the
+		// page names its Poison to anyone, though the formula's own dose would carry none (plan 03:54).
+		ItemStack clean = new ItemStack(JugcraftConcordance.FORMULA_ITEM);
+		clean.set(JugcraftConcordance.FORMULA, "water 1; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot");
+		helper.assertTrue(work(a, alembist, clean).consumesAction() && a.program() != null && a.step() == 0 && a.mixture().equals(mixtureA),
+				"A clean formula is set over it");
+		List<String> over = allKeys(inspected(player(helper), absA));
+		helper.assertTrue(over.contains("compose.jugcraft.alchemy.risk.harm") && over.contains("effect.minecraft.poison"),
+				"The page still names the mixture's Poison: " + over);
 
 		// A formula: its step in words, the tank, and the risk of its outcome and its searing stir, to anyone.
 		BlockPos atB = new BlockPos(3, 2, 4);

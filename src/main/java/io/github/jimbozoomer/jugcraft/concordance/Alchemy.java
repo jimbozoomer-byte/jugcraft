@@ -136,9 +136,17 @@ public final class Alchemy {
 	 * can only make it stricter.
 	 */
 	public static boolean harmful(Brew.Dose dose) {
-		Identifier id = Identifier.tryParse(dose.status());
+		return dose.harmful() || harmfulStatus(dose.status());
+	}
+
+	/**
+	 * Whether a status harms as the server judges it: its category, or unknown (C-P29). The crucible's risk line asks this
+	 * too (Assay.risks), so a property whose data calls a harmful status helpful still shows its danger.
+	 */
+	public static boolean harmfulStatus(String status) {
+		Identifier id = Identifier.tryParse(status);
 		MobEffect effect = id == null ? null : BuiltInRegistries.MOB_EFFECT.getValue(id);
-		return dose.harmful() || effect == null || effect.getCategory() == MobEffectCategory.HARMFUL;
+		return effect == null || effect.getCategory() == MobEffectCategory.HARMFUL;
 	}
 
 	/** Sends a list of the simulation's lines (an assay, an outcome's reasons) to a player. */
