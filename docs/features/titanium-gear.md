@@ -77,6 +77,8 @@ Fork CI run 38774406665 on `1ee5f7a6`: the mod build, generated-data and materia
 
 **Tool shapes.** At the contributor's request, the shared sword, pickaxe, axe and hoe maps (`tools/material_icons/<tool>.txt`) are redrawn fresh in vanilla's layout (rule 9 of [ITEM_ICONS.md](../ITEM_ICONS.md): the crossguard sword, the arched pickaxe, the flat-backed axe and the hooked hoe; no Mojang texture opened or recoloured). They are the base for every metal's basic tools: bronze, steel, thallite and titanium. The shovel keeps its map; paxels are unchanged. The contributor approved these four shapes from a preview.
 
+Fork CI run 38797887571 on `842d6ef0` (the redrawn tool maps) passed every job after one re-run of a shard-3 time-out. Fork CI run [38817959827](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38817959827) on `2f9c9430` (the titanium paxel, checked in `TitaniumGearGameTests`) passed every job on the first attempt.
+
 **Not yet done:** a survival playtest and a two-client test.
 
 ## Rollout and open questions
