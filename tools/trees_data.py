@@ -22,6 +22,7 @@ def variants(looks):
 
 def assets(root, write):
     models = root / "models" / "block"
+    write(root / "particles" / "snowpetal.json", {"textures": [rid("snowpetal")]})
     write(root / "tree_leaf_tints.json", {info["leaves"]: info["leaf_tint"] for info in TREES.values() if "leaf_tint" in info})
     for tree, info in TREES.items():
         young = sapling(tree)
@@ -131,8 +132,10 @@ def foliage_placer(foliage):
     return out
 
 
-def tree_blocks(wood):
+def tree_blocks(wood, tree=None):
     """A shape's log and leaves: its own (agriculture.TREES) or a vanilla wood's ("minecraft:oak")."""
+    if tree is not None:
+        return rid(f"{wood}_log"), rid(TREES[tree]["leaves"]), TREES[tree]["season"]
     if wood.startswith("minecraft:"):
         return f"{wood}_log", f"{wood}_leaves", None
     leaves = TREES[wood]["leaves"] if wood in TREES else None
@@ -142,6 +145,8 @@ def tree_blocks(wood):
 def minimum_size(info):
     """The free space a tree needs, as vanilla sets it for the same placers (spruce, pine, fancy oak, bush, oak)."""
     foliage = (info["foliage"] or {}).get("type")
+    if "minimum_size" in info:
+        return dict(info["minimum_size"])
     if info["trunk"]["type"] == "dark_oak":
         return {"type": "minecraft:three_layers_feature_size", "upper_size": 2}
     if info.get("giant") or info["trunk"]["type"] in ("giant", "mega_jungle"):
@@ -169,7 +174,7 @@ def worldgen(data, write):
         else:
             foliage = foliage_placer(info["foliage"])
             properties = {"distance": "7", "persistent": "false", "waterlogged": "false"}
-            log, leaves, season = tree_blocks(wood)
+            log, leaves, season = tree_blocks(wood, info.get("tree"))
             if season is not None:
                 properties["season"] = SEASON_STATES[0]
                 decorators.append({"type": rid(DECORATOR)})
@@ -180,7 +185,8 @@ def worldgen(data, write):
             "minimum_size": minimum_size(info),
             "trunk_placer": trunk_placer(info["trunk"]),
             "trunk_provider": {"id": tree_blocks(wood)[0], "properties": {"axis": "y"}}})
-        survives = info.get("survives_as") or (f"{wood}_sapling" if wood.startswith("minecraft:") else rid(sapling(wood)))
+        tree = info.get("tree", wood)
+        survives = info.get("survives_as") or (f"{tree}_sapling" if tree.startswith("minecraft:") else rid(sapling(tree)))
         write(folder / "placed_feature" / f"{shape}_checked.json", {"feature": rid(shape), "placement": [
             {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": survives}}]})
     for wood, length in FALLEN.items():
