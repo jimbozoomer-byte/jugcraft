@@ -1,7 +1,7 @@
 # The Cydonian Sentinel (Adam-ondi-Ahman, part 3)
 
-Status: implemented on branch `claude/cydonian-sentinel` (stacked on part 2's `claude/cydonian-sanctum`, PR #372, which is
-stacked on part 1's PR #370); see Verification for what has run. It has not been played by hand, and the two-client
+Status: implemented on branch `claude/cydonian-sentinel` (PR #382, stacked on part 2's `claude/cydonian-sanctum`, PR #372,
+which is stacked on part 1's PR #370); CI passes on it (see Verification). It has not been played by hand, and the two-client
 dedicated-server playtest is still to do.
 Proposal issue: none; the owner's own idea of 14 October 2026 is the scope approval, and on the same day the owner chose to
 start part 3 ("START PART 3 FINISH THIS ADDITION"). The plan is [BOSSES.md](../branches/BOSSES.md), "Adam-ondi-Ahman and
@@ -286,7 +286,20 @@ No Mojang texture is read, traced or copied.
 
 ## Verification
 
-CI: not run yet on this branch. Its results, and the client test's pictures, go here once it has run.
+CI on 051daf62d (Build run 38660094306): **every check passed.**
+- `mod` (compile, data checks, every server game test) and `optional integrations absent`: "All 1669 required tests
+  passed", among them the 14 of `CydonianSentinelGameTests` and the Rust test in `ArmsVIIGameTests`.
+- `CydonianSentinelClientGameTests` passed from end to end (client shard 1: "its fight passed end to end"), with its 16
+  pictures. The other client classes the change picked (the armour tiers, the knight armour and Arms VII's, which show
+  the new trophies) passed on the other shards.
+- What CI found on the way there:
+  - the waking test found the Sentinel a block below where it looked. The game tests laid the crater's floor in red
+    sand, and, the arena being empty air, it fell before the Sentinel woke. They now lay red sandstone, which does not.
+    (The Sanctum's own sand lies on rock.) Every other server test had passed;
+  - 9acef93ff did not compile: `Blocks` has no `RED_TERRACOTTA` by that name in 26.3. Red sandstone, already used for
+    the tests' standing stones, took its place.
+- Three of the client test's cameras were moved after the first run, so the Quake Line, the rising sentries and the Red
+  Giant's core are in view.
 
 Run locally (14 October 2026):
 
@@ -303,8 +316,8 @@ The audit caught one real fault before any build: the Corelance was first a vari
 fighting numbers to be a variant of, and the game would have refused to start ("Arms VII: no kind lance"). It is a pike.
 
 The game tests (`CydonianSentinelGameTests`) show what a game-test server can, with a Sentinel put down on its own (no
-lair) over a Sanctum laid out from beyond the corner of an arena the crater's size; each test lays the crater's floor and
-the standing stones it needs:
+lair) over a Sanctum laid out from beyond the corner of an arena the crater's size; each test lays the crater's floor (in
+red sandstone, which, unlike sand, stays put over empty air) and the standing stones it needs:
 1. it waits on its plinth, its core dark, and takes no harm; a creative player's blow does not wake it; a player who may
    fight it standing on the crater's floor does, at full health, its core flaring, unhurt while it wakes; it steps down
    to the crater's floor where it wakes, its health one player's, its core lit in its shut shell;
@@ -351,12 +364,22 @@ a Red Storm from the west, blowing, then passing; the Shell Cracks, two sentries
 floating free; the Unbound Core's Sweeping Lance, Shard Burst and Starfall (a meteor falling, then it sunk and dimmed); the
 Red Giant; and its fall: the player's Cydonian Shards, trophy and Red Planet, its sentries and shards gone, the Red Mist in
 the crater's middle, a stand beside it wearing the Sentinel's Visor and holding the Corelance; then a fresh instance in its
-slot with no Red Mist and it on its plinth again, its core dark. Fifteen pictures along the way.
+slot with no Red Mist and it on its plinth again, its core dark. Sixteen pictures along the way.
 
 **New game APIs:** only `SoundEvents.IRON_GOLEM_DAMAGE` (its stagger; a sibling of the iron golem's sounds already used).
 Everything else it calls is already called elsewhere in Jugcraft: Rusted is registered as the hexes' effects are, with an
 attribute modifier, and its unbound size changes as the companions' does. The build compiles it against the pinned
 game.
+
+*In-game screenshots from CI's client game test (`CydonianSentinelClientGameTests`, software rendering, small previews),
+051daf62d.*
+
+![The Cydonian Sentinel waiting on its plinth on the crater's north rim, a statue of red stone with the red star on its chest, the rim's rock beyond](../images/ingame_cydonian_sentinel_waiting.jpg)
+![Charging its Core Lance: its arms spread, its chest plates swung open on its glowing core, standing stones carved with the red star either side](../images/ingame_cydonian_sentinel_lance_open.jpg)
+![The Quake Line: the Sentinel stamping, and spikes of red rock bursting up in a line across the crater floor from its feet](../images/ingame_cydonian_sentinel_quake.jpg)
+![The Shell Cracks: the Sentinel roaring with its arms thrown wide between two standing stones, a Shard Sentry rising from a small crater on either side](../images/ingame_cydonian_sentinel_cracks.jpg)
+![After the Starfall: the unbound core sunk to the crater floor, its light gone dark](../images/ingame_cydonian_sentinel_sunk.jpg)
+![The Red Giant: the unbound core floating over the crater floor, burning white-hot](../images/ingame_cydonian_sentinel_red_giant.jpg)
 
 ## Rollout and open questions
 
