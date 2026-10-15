@@ -396,6 +396,16 @@ FLUID_RECIPES = {
         # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
         {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
+        # Pharmacy (docs/features/aspirin.md): willow bark steeped and hydrolysed in hot water gives salicylic acid; birch
+        # bark gives less. Salicylic acid acetylated with cider vinegar over a little sulfuric acid makes aspirin tablets.
+        # Quantities for review.
+        {"name": "salicylic_acid_willow", "items": [("jugcraft:willow_log", 4)], "fluids": [("minecraft:water", 500)],
+         "results": [("jugcraft:salicylic_acid", 2)], "ticks": 160, "features": ["biomes", "machines"]},
+        {"name": "salicylic_acid_birch", "items": [("minecraft:birch_log", 4)], "fluids": [("minecraft:water", 500)],
+         "results": [("jugcraft:salicylic_acid", 1)], "ticks": 160, "features": ["machines"]},
+        {"name": "aspirin", "items": [("jugcraft:salicylic_acid", 2), ("jugcraft:cider_vinegar", 1)],
+         "fluids": [("jugcraft:sulfuric_acid", 50)], "results": [("jugcraft:aspirin", 4)], "ticks": 120,
+         "features": ["agriculture", "sulfur", "machines"]},
         # Saponification (batch 15): fat (rotten flesh, rendered) boiled in lye sets into soap.
         {"name": "soap", "items": [("minecraft:rotten_flesh", 2)], "fluids": [("jugcraft:lye", 250)],
          "results": [("jugcraft:soap", 4)], "ticks": 80, "features": ["salt"]},

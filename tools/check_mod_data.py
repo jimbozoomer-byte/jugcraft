@@ -1466,7 +1466,8 @@ def check_field_chemistry():
     java = (JAVA_ROOT / "weapons" / "FieldChemistry.java").read_text(encoding="utf-8")
     for const in ("CHLORINE_RADIUS", "CHLORINE_TICKS", "CHLORINE_DAMAGE", "SMOKE_RADIUS", "SMOKE_TICKS", "THERMITE_RADIUS",
                   "THERMITE_TICKS", "THERMITE_DAMAGE", "THERMITE_FIRE_SECONDS", "FLASH_RADIUS", "FLASH_BLIND_TICKS",
-                  "FLASH_STUN_TICKS", "GAS_MASK_DURABILITY", "SCUBA_GAS_OXYGEN", "FIRST_AID_COOLDOWN", "STIMULANT_TICKS"):
+                  "FLASH_STUN_TICKS", "GAS_MASK_DURABILITY", "SCUBA_GAS_OXYGEN", "FIRST_AID_COOLDOWN", "STIMULANT_TICKS",
+                  "ASPIRIN_REGENERATION_TICKS", "ASPIRIN_COOLDOWN"):
         value = getattr(field_chemistry, const)
         m = re.search(rf"\b{const} = ([0-9_.]+)F?;", java)
         if not m or float(m.group(1).replace("_", "")) != float(value):
