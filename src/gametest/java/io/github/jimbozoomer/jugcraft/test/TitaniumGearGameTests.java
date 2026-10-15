@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 
 /**
  * Titanium tools and armor (docs/features/titanium-gear.md): the step above steel. Its pickaxe gets obsidian, its tools
- * outlast and outmine steel's, its armor protects more and is tougher, every piece goes in its slot, a titanium ingot
+ * outlast and outmine steel's (its paxel three pickaxes' worth), its armor protects more and is tougher, every piece goes in its slot, a titanium ingot
  * mends them, and they are crafted from titanium ingots.
  */
 public class TitaniumGearGameTests {
@@ -45,6 +45,9 @@ public class TitaniumGearGameTests {
 		helper.assertTrue(JugcraftGear.TITANIUM.attackDamageBonus() > JugcraftGear.STEEL.attackDamageBonus(),
 				"Titanium hits no harder than steel");
 		helper.assertTrue(pickaxe.getMaxDamage() < new ItemStack(Items.NETHERITE_PICKAXE).getMaxDamage(), "Titanium outlasts netherite");
+		ItemStack paxel = new ItemStack(item("titanium_paxel"));
+		helper.assertTrue(paxel.getMaxDamage() == 3 * pickaxe.getMaxDamage() && paxel.isCorrectToolForDrops(Blocks.OBSIDIAN.defaultBlockState()),
+				"The titanium paxel lasts " + paxel.getMaxDamage() + " and must get obsidian");
 		helper.succeed();
 	}
 

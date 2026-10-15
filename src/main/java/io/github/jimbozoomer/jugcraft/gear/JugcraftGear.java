@@ -59,7 +59,7 @@ public final class JugcraftGear {
 			"leggings", "boots");
 	/** Paxel tiers (tools/gear.py: PAXEL_TIERS). */
 	public static final List<String> PAXEL_TIERS = List.of("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
-			"steel");
+			"steel", "titanium");
 	/** A paxel lasts as long as the three tools it is made from. */
 	public static final int PAXEL_DURABILITY = 3;
 	/** What a paxel mines fast: everything a pickaxe, axe or shovel does (data/jugcraft/tags/block/mineable/paxel.json). */
@@ -359,6 +359,7 @@ public final class JugcraftGear {
 			case "netherite" -> ToolMaterial.NETHERITE;
 			case "bronze" -> BRONZE;
 			case "steel" -> STEEL;
+			case "titanium" -> TITANIUM;
 			default -> throw new IllegalArgumentException(tier);
 		};
 	}

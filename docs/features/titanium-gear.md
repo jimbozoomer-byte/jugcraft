@@ -41,12 +41,13 @@ Titanium sits above steel in every number and around diamond: a little less dura
 - **Input producer:** titanium ingots from the titanium line (raw titanium → crude titanium chloride → purification → magnesium reduction → titanium sponge → arc furnace).
 - **Output consumer:** the player; nothing else consumes the gear.
 - **Shared systems:** `JugcraftGear`'s tier list and `tools/gear.py`'s `GEAR_TIERS` (items, recipes, tags, repair tag, language), the knight armor's 3D model (`tools/knight_armor.py`, a third `ArmorSet`), `tools/armor_icons.py` and `tools/material_icons.py`.
-- **Not done:** titanium arms (the arms kinds; `"arms": False` as for thallite), a titanium paxel, and an advancement.
+- **Paxel:** a titanium paxel, from a titanium pickaxe, axe and shovel, lasts as long as the three (3,900 uses) and counts toward the "Jack of All Trades" advancement.
+- **Not done:** titanium arms (the arms kinds; `"arms": False` as for thallite) and an advancement of its own.
 - **Feature switch:** `titanium`, as the titanium line itself.
 
 ## Multiplayer and persistence
 
-- **New registrations,** stable from now on: `jugcraft:titanium_sword`, `_pickaxe`, `_axe`, `_shovel`, `_hoe`, `_helmet`, `_chestplate`, `_leggings`, `_boots`; the item tag `jugcraft:repairs_titanium_gear`; the worn-model atlas `textures/entity/equipment/3d/titanium_knight.png`.
+- **New registrations,** stable from now on: `jugcraft:titanium_sword`, `_pickaxe`, `_axe`, `_shovel`, `_hoe`, `_paxel`, `_helmet`, `_chestplate`, `_leggings`, `_boots`; the item tag `jugcraft:repairs_titanium_gear`; the worn-model atlas `textures/entity/equipment/3d/titanium_knight.png`.
 - Plain vanilla items: the 26.3 item properties do the work. The server decides everything.
 
 ## Dependencies and assets
@@ -81,4 +82,4 @@ Fork CI run 38774406665 on `1ee5f7a6`: the mod build, generated-data and materia
 ## Rollout and open questions
 
 - The statistics await the owner's review.
-- Titanium arms and a titanium paxel could follow.
+- Titanium arms could follow.

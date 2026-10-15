@@ -35,7 +35,7 @@ PIECES = TOOLS + ARMOR
 
 # Paxels: pickaxe, axe and shovel in one, three times the durability of the tier's tools.
 PAXEL_TIERS = {"wood": "Wooden", "stone": "Stone", "iron": "Iron", "gold": "Golden", "diamond": "Diamond",
-               "netherite": "Netherite", "bronze": "Bronze", "steel": "Steel"}
+               "netherite": "Netherite", "bronze": "Bronze", "steel": "Steel", "titanium": "Titanium"}
 PAXEL_DURABILITY = 3
 # The vanilla tools a vanilla-tier paxel is made from.
 VANILLA_TOOL_PREFIX = {"wood": "wooden", "stone": "stone", "iron": "iron", "gold": "golden", "diamond": "diamond",
