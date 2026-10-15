@@ -12379,8 +12379,9 @@ def check_load_card():
     windows of MinecraftServer's ring over at least 6,000 ticks, has room in maxTicks for its phases, force-loads its
     yard from begin() (the game test server sets no simulation distance) and never schedules an entry for every
     remaining tick (test work that shrinks as the run goes on). It builds every part of C-10's workload, checks the
-    courier ledger and is registered. docs/TESTING.md, and the Build workflow if it carries the job, name the same id,
-    and the Gleaner's Heart search is timed (C-P21). Comments are ignored."""
+    courier ledger and is registered; a selected card begins. docs/TESTING.md, and the Build workflow if it carries the
+    job, name the same id; the workflow's filter is only in the load-card job, behind exactly the manual-run guard. The
+    Gleaner's Heart search is timed (C-P21). Comments are ignored."""
     name = "ConcordanceWorkshopLoadGameTests"
     test_dir = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
     path = test_dir / f"{name}.java"
@@ -12394,8 +12395,9 @@ def check_load_card():
         err(f"{name}.java: ID must be Fabric's id for loadCard, {ident}")
     if 'static final String FILTER = "fabric-api.gametest.filter";' not in code or "return ID.equals(System.getProperty(FILTER));" not in code:
         err(f"{name}.java: selected() must compare Fabric's filter property with ID exactly")
-    if not re.search(r"public void loadCard\(GameTestHelper helper\) \{\s*if \(!selected\(\)\) \{\s*helper\.succeed\(\);\s*return;\s*\}", code):
-        err(f"{name}.java: loadCard must pass at once unless it is selected")
+    if not re.search(r"public void loadCard\(GameTestHelper helper\) \{\s*if \(!selected\(\)\) \{\s*helper\.succeed\(\);\s*return;\s*\}"
+                     r"\s*new Card\(helper\)\.begin\(\);\s*\}", code):
+        err(f"{name}.java: loadCard must pass at once unless it is selected, and selected, begin the card (new Card(helper).begin())")
     if "@GameTest(maxTicks = MAX_TICKS, skyAccess = true)" not in code:
         err(f"{name}.java: loadCard's @GameTest must take maxTicks = MAX_TICKS")
     numbers = {key: int(value.replace("_", "")) for key, value in re.findall(r"static final int ([A-Z_]+) = ([0-9_]+);", code)}
@@ -12432,11 +12434,19 @@ def check_load_card():
         err(f"src/gametest/resources/fabric.mod.json: {name} must be a fabric-gametest entrypoint")
     if f"fabric-api.gametest.filter={ident}" not in (ROOT / "docs" / "TESTING.md").read_text(encoding="utf-8"):
         err("docs/TESTING.md: the load card's command must select its id")
+    # The workflow, if it carries the card: the filter appears once, inside the load-card job, and that job's own if is
+    # exactly the manual-run guard, so no ordinary run selects the card and the card's job runs nothing else. Whole-line
+    # comments are dropped first, so a guard or filter only in a comment does not count.
     workflow = (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8")
+    workflow = re.sub(r"^[ \t]*#[^\n]*\n", "", workflow, flags=re.M)
+    job = re.search(r"^  load-card:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    body = job.group(1) if job else ""
     if "fabric-api.gametest.filter" in workflow and (workflow.count("fabric-api.gametest.filter") != 1
-                                                     or f"fabric-api.gametest.filter={ident}" not in workflow
-                                                     or "inputs.load_card" not in workflow):
-        err(".github/workflows/build.yml: only a manual run asking for load_card may select the load card, and only it")
+                                                     or f"fabric-api.gametest.filter={ident}" not in body
+                                                     or not re.search(r"^    if: github\.event_name == 'workflow_dispatch' && inputs\.load_card[ \t]*$",
+                                                                      body, re.M)):
+        err(".github/workflows/build.yml: the load card's filter must appear once, in the load-card job, whose if must be exactly "
+            "github.event_name == 'workflow_dispatch' && inputs.load_card")
     workload = (test_dir / "ConcordanceWorkloadGameTests.java").read_text(encoding="utf-8")
     if "public void gleanersHeartSearch(GameTestHelper helper)" not in workload or "GleanerBlockEntity.HEART_REACH" not in workload:
         err("ConcordanceWorkloadGameTests.java: the Gleaner's Heart search must be timed (C-P21)")
@@ -12455,8 +12465,11 @@ def check_workshop_client_evidence():
     """Concordance Chunk C, C-10: the living workshop's client evidence (plan 08:169-181). ConcordanceWorkshopClientGameTests
     is listed by the test mod and weighed by tools/select_client_tests.py (an entry that is not a comment), so its shard
     stays inside the client jobs' 60 minutes (.github/workflows/build.yml); it builds the whole workshop in one view,
-    takes the shots the contract names and records a client frame time (Mesa's, C-P70); and it uses Jade's provider only
-    inside an isModLoaded("jade") block, so it runs without Jade. Comments are ignored."""
+    takes its shots (the high-scale one in a window resized for it, its applied GUI scale checked: at the client tests'
+    854x480 no scale above 2 applies) and records a client frame time (Mesa's, C-P70), calling the sampler; and it uses
+    Jade's provider (a call or a method reference) only inside an isModLoaded("jade") block, so it runs without Jade.
+    The contract's other client shot, a bed's Inspect page, is EncyclopediaClientGameTests'
+    jugcraft_encyclopedia_inspect_bed (unit 4), held here to that class. Comments are ignored."""
     name = "src/gametest/ConcordanceWorkshopClientGameTests.java"
     path = (ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
             / "ConcordanceWorkshopClientGameTests.java")
@@ -12480,15 +12493,24 @@ def check_workshop_client_evidence():
     for shot in WORKSHOP_CLIENT_SHOTS:
         if f'takeScreenshot("{shot}")' not in code:
             err(f"{name}: no shot {shot}")
-    if "getFrameTimeNs()" not in code:
-        err(f"{name}: records no client frame time (C-10)")
+    if "getFrameTimeNs()" not in code or not re.search(r"\bframeTimes\(context\)", code):
+        err(f"{name}: records no client frame time (C-10): getFrameTimeNs() read in frameTimes, and frameTimes(context) called")
+    large = any(int(w) >= 1280 and int(h) >= 960 for w, h in re.findall(r"\bresizeWindow\((\d+),\s*(\d+)\)", code))
+    if not large or not re.search(r"getGuiScale\(\)\);[\s\S]{0,400}?check\(\w+ == 4\b", code):
+        err(f"{name}: the GUI scale 4 shot needs a window large enough for it (resizeWindow to at least 1280x960) and its "
+            "applied scale checked (getGuiScale() == 4): at 854x480 no scale above 2 applies")
     blank = re.sub(r'"(?:\\.|[^"\\\n])*"', lambda m: '"' + " " * (len(m.group(0)) - 2) + '"', code)
     guard = 'if (FabricLoader.getInstance().isModLoaded("jade")) {'
     opens = [m.end() for m in re.finditer(re.escape(guard), code)]
-    for use in re.finditer(r"\bConcordanceDataProvider\.", blank):
+    for use in re.finditer(r"\bConcordanceDataProvider(?:\.|::)", blank):
         if not any(start <= use.start() and _inside_block(blank, start, use.start()) for start in opens):
             err(f"{name}: Jade's provider is used outside an isModLoaded(\"jade\") block "
                 f"(line {code.count(chr(10), 0, use.start()) + 1})")
+    encyclopedia = (ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+                    / "EncyclopediaClientGameTests.java")
+    shots = re.sub(r"//[^\n]*|/\*.*?\*/", " ", encyclopedia.read_text(encoding="utf-8"), flags=re.S) if encyclopedia.exists() else ""
+    if 'takeScreenshot("jugcraft_encyclopedia_inspect_bed")' not in shots:
+        err("src/gametest/EncyclopediaClientGameTests.java: no shot jugcraft_encyclopedia_inspect_bed (C-10's bed Inspect page)")
 
 
 def _inside_block(text, start, at):

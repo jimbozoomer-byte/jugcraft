@@ -346,15 +346,16 @@ public class ConcordanceJourneyGameTests {
 	/**
 	 * Concordance Chunk C, C-10 (09:140): the living workshop from a manual start, played by one survival player with real
 	 * blocks (tools/concordance_journey.py WORKSHOP, step by step). Given only vanilla materials, two Thallite ingots, two
-	 * full Kindled Lanterns (a Lampwright's Bench working, ConcordanceGameTests) and a blank formula, they craft Mendvetch by
-	 * the server's own recipe matcher; brew the Kiln Draught over a campfire and the Stillroot Poultice over a magma block by
-	 * hand, recording the poultice's process; fill a Lesser Circle's pylons from a lantern and perform Root and Rivet; craft
-	 * a Crucible Stand from its foundation and set a crafted crucible on it, fed JE by a coal generator through a cable and
-	 * water by an electric pump; set the recorded formula, whose Mendvetch a Clockwork Porter (set down, keyed to a crafted
-	 * Courier Post and fuelled by a lantern-filled pylon) brings by itself from a chest at the post; and lay a garden of
-	 * crafted beds and seeds with a mixed bed and a Dewlit graft. Nothing is lost or made twice: every crafted Mendvetch is
-	 * spent once, the post's chest gives exactly two, the courier ledger agrees with its cargo, and the powered poultice is
-	 * the hand-made one; the stand pays nothing while the crucible waits for its Mendvetch.
+	 * Kindled Lanterns kindled and infused full at a Lampwright's Bench (amethyst shards, ConcordanceGameTests) and a blank
+	 * formula, they craft Mendvetch by the server's own recipe matcher; brew the Kiln Draught over a campfire and the
+	 * Stillroot Poultice over a magma block by hand, recording the poultice's process; fill a Lesser Circle's pylons from a
+	 * lantern and perform Root and Rivet; craft a Crucible Stand from its foundation and set a crafted crucible on it, fed
+	 * JE by a coal generator through a cable and water by an electric pump; set the recorded formula, whose Mendvetch a
+	 * Clockwork Porter (set down, keyed to a crafted Courier Post and fuelled by a lantern-filled pylon) brings by itself
+	 * from a chest at the post; and lay a garden of crafted beds and seeds with a mixed bed and a Dewlit graft. Nothing is
+	 * lost or made twice: every crafted Mendvetch is spent once, the post's chest gives exactly two, the courier ledger
+	 * agrees with its cargo, and the powered poultice is the hand-made one; the stand pays nothing while the crucible waits
+	 * for its Mendvetch.
 	 */
 	// The drone tests' 16 by 8 by 16 air box, reused: a structure file of its own would make tools/select_client_tests.py
 	// count a shared file and run every client class.

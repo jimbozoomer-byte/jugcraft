@@ -15,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
@@ -67,12 +68,14 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
  * crucible has drawn the water only the pump gave it. Then 100 frames' render times are logged: Mesa's software renderer's
  * on a CI runner, never a player's hardware (C-10's client frame time).</li>
  * <li><b>The stand's tell</b> (plan 08:176): the stand lit while it heats ({@code jugcraft_concordance_stand_lit}) and dark
- * once its crucible waits for Mendvetch ({@code jugcraft_concordance_stand_dark}), from the same place, at noon.</li>
+ * once its crucible waits for Mendvetch ({@code jugcraft_concordance_stand_dark}; both the reason and the dark stand are
+ * checked as it is shot), from the same place, at noon.</li>
  * <li><b>The crucible's Inspect page on its stand</b> ({@code jugcraft_encyclopedia_inspect_crucible_stand}): it names the
  * stand heating it, with no key or id.</li>
  * <li><b>Root and Rivet under way</b>, begun beside the workshop: the anchor's Inspect page shows what the rite has spent
  * apart from what it holds, and its stage and payment table ({@code jugcraft_encyclopedia_inspect_root_and_rivet}; at GUI
- * scale 4, {@code jugcraft_encyclopedia_inspect_root_and_rivet_scale4}); with Jade loaded, Jade's snapshot is checked and
+ * scale 4, checked as applied, in a 1920x1080 window, {@code jugcraft_encyclopedia_inspect_root_and_rivet_scale4}: in
+ * the test's own 854x480 window the game allows no more than 2); with Jade loaded, Jade's snapshot is checked and
  * its overlay shot ({@code jugcraft_concordance_anchor_root_and_rivet_jade}). It completes: one Rooted Thallite
  * Foundation from exactly its offerings, 2 Ley Charge a step from each pylon, taken by its participant.</li>
  * <li><b>The batch</b>: four Mendvetch, the piped water and the stand's heat make two Stillroot Poultices in the crucible's
@@ -352,18 +355,28 @@ public class ConcordanceWorkshopClientGameTests implements FabricClientGameTest 
 						+ "payment table, in words: " + rows);
 		clearToasts(context);
 		context.takeScreenshot("jugcraft_encyclopedia_inspect_root_and_rivet");
+		// A high GUI scale needs a larger window: Fabric's client game tests hold it at 854x480, where Window.calculateScale
+		// stops at 2 (a scale n needs width / n >= 320 and height / n >= 240), so scale 4 needs at least 1280x960.
 		int scale = context.computeOnClient(client -> client.options.guiScale().get());
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
 		context.runOnClient(client -> {
 			client.options.guiScale().set(4);
 			client.resizeGui();
 			client.gui.toastManager().clear();
 		});
 		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		Jugcraft.LOGGER.info("[workshop-check] Root and Rivet's Inspect page at GUI scale {} in a 1920x1080 window", applied);
+		check(applied == 4, "The high-scale shot should be at GUI scale 4: " + applied);
 		context.takeScreenshot("jugcraft_encyclopedia_inspect_root_and_rivet_scale4");
 		context.runOnClient(client -> {
 			client.options.guiScale().set(scale);
 			client.resizeGui();
 		});
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(5);
 		close(context);
 
 		if (FabricLoader.getInstance().isModLoaded("jade")) {
@@ -423,12 +436,16 @@ public class ConcordanceWorkshopClientGameTests implements FabricClientGameTest 
 		check(done.equals("ok"), "Root and Rivet should make one foundation from exactly its offerings, 2 Ley Charge a step from each pylon: " + done);
 	}
 
-	/** Four Mendvetch and the piped water make two Stillroot Poultices; the stand goes dark while the repeat waits for more. */
+	/**
+	 * Four Mendvetch and the piped water make two Stillroot Poultices; the stand goes dark while the repeat waits for more.
+	 * The wait is for the reason itself (MISSING_INGREDIENT), not only a dark stand: between the batch and that wait the
+	 * repeat's first steps may light the stand again.
+	 */
 	private static void theBatch(ClientGameTestContext context, TestDedicatedServerContext server, Workshop at) {
 		BlockPos pot = at.pot();
 		BlockPos stand = at.stand();
 		for (int wait = 0; wait < WAIT && !server.computeOnServer(minecraft -> minecraft.overworld().getBlockEntity(pot) instanceof CrucibleBlockEntity crucible
-				&& crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT).getCount() == 2 && !lit(minecraft.overworld(), stand)); wait++) {
+				&& crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT).getCount() == 2 && waitsForMendvetch(crucible) && !lit(minecraft.overworld(), stand)); wait++) {
 			context.waitTick();
 		}
 		String made = server.computeOnServer(minecraft -> {
@@ -440,16 +457,28 @@ public class ConcordanceWorkshopClientGameTests implements FabricClientGameTest 
 			Product product = Alchemy.product(output);
 			Diagnostic reason = crucible.waiting();
 			boolean right = output.getCount() == 2 && product != null && product.id().equals(Alchemy.STILLROOT_POULTICE)
-					&& crucible.getItem(0).isEmpty() && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty() && !lit(level, stand);
+					&& crucible.getItem(0).isEmpty() && crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty() && waitsForMendvetch(crucible)
+					&& !lit(level, stand);
 			return (right ? "ok " : "bad ") + output + " (" + (product == null ? "no product" : product.id()) + "), buffer " + crucible.getItem(0)
 					+ ", bowls " + crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT) + ", stand lit " + lit(level, stand) + ", waiting "
 					+ (reason == null ? "for nothing" : reason.encode());
 		});
 		Jugcraft.LOGGER.info("[workshop-check] the powered crucible's batch: {}", made);
 		check(made.startsWith("ok"), "Four Mendvetch, the piped water and the stand's heat should make two Stillroot Poultices, "
-				+ "and the stand go dark while the repeat waits: " + made);
+				+ "and the stand go dark while the repeat waits for Mendvetch: " + made);
 		standAt(context, server, at);
+		String still = server.computeOnServer(minecraft -> describe(minecraft.overworld(), at));
+		Jugcraft.LOGGER.info("[workshop-check] the stand close up, the repeat waiting: {}", still);
+		check(server.computeOnServer(minecraft -> !lit(minecraft.overworld(), stand)
+				&& minecraft.overworld().getBlockEntity(pot) instanceof CrucibleBlockEntity crucible && waitsForMendvetch(crucible)),
+				"The stand should still be dark, its crucible waiting for Mendvetch, when it is shot: " + still);
 		context.takeScreenshot("jugcraft_concordance_stand_dark");
+	}
+
+	/** Whether the crucible's repeat waits for an ingredient (its Mendvetch). Server only. */
+	private static boolean waitsForMendvetch(CrucibleBlockEntity crucible) {
+		Diagnostic reason = crucible.waiting();
+		return reason != null && reason.code() == Code.MISSING_INGREDIENT;
 	}
 
 	/** Stands the player at the reader's place looking at the stand, its toasts cleared. */

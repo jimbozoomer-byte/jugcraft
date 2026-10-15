@@ -244,7 +244,7 @@ VANILLA_SOURCES = {
     "minecraft:tuff": ("gathered", "stone veins below Y 0", "another kind of stone serves instead", ""),
     # The living workshop's route (Concordance Chunk C, C-10; tools/concordance_journey.py WORKSHOP): Dewmoss's kelp, the
     # Courier Post's barrel and book, the Clockwork Porter's barrel and the Stillroot Poultice's bowl.
-    "minecraft:kelp": ("renewable", "grows in every ocean; bone meal under water grows more", "", ""),
+    "minecraft:kelp": ("renewable", "grows in most oceans (not warm or frozen ones); bone meal under water grows more", "", ""),
     "minecraft:barrel": ("craftable", "planks and wooden slabs", "", ""),
     "minecraft:writable_book": ("craftable", "a book, an ink sac and a feather", "", ""),
     "minecraft:bowl": ("craftable", "planks", "", ""),

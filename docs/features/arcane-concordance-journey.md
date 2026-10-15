@@ -248,10 +248,11 @@ existing test structure `jugcraft-test:drone_depot` (16×8×16 air); no structur
   - Server game tests added, not yet compiled or run: `ConcordanceJourneyGameTests.theLivingWorkshopFromAManualStart`
     (up to 900 ticks; one survival mock player and a mock friend; the porter works by itself on the server's own time)
     and `theWorkshopsRecipesLoad`.
-  - The test's given inputs: vanilla materials and coal, two Thallite ingots, two full Kindled Lanterns (a Lampwright's
-    Bench working, covered by the first loadout) and a blank formula. Placed with `setBlock`: the hand crucibles, the
-    circle's blocks, two compact one-block coal generators (a crafted generator builds the full multi-block), the cable,
-    pump, pipe, hopper, chest and the post's pylon; `theWorkshopsRecipesLoad` loads their recipes.
+  - The test's given inputs: vanilla materials and coal, two Thallite ingots, two Kindled Lanterns kindled and infused
+    full at a Lampwright's Bench (amethyst shards; covered by the first loadout) and a blank formula. Placed with
+    `setBlock`: the hand crucibles, the circle's blocks, two compact one-block coal generators (a crafted generator
+    builds the full multi-block), the cable, pump, pipe, hopper, chest and the post's pylon; `theWorkshopsRecipesLoad`
+    loads their recipes.
   - Run locally: `python3 tools/concordance_journey.py --check` (now exits 1 on a problem) and `check_acquisition`'s
     workshop rows; their results and the audit mutations are in the pull request.
 
