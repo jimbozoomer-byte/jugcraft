@@ -79,6 +79,21 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The Tabby Revolver is made from iron, brass, a lever and a plank; the Lookout Rifle from iron, brass, a lever and planks; the Ammonite Carbine from copper, iron, a lever and a plank. The Tabby Revolver takes the barrel attachments; the Lookout Rifle the stocks, grips, bayonets, scopes and Laser Sight; the Ammonite Carbine the stocks.
 - Record: [guns.md, slice 13A](docs/features/guns.md#slice-13a-the-frontier-guns).
 
+### Unmerged: Machine screens in five looks by tech level
+- **Every machine screen takes the look of its tech level**, after the owner's five references:
+  - workshop brass and orange for the first machines;
+  - industrial steel and green for steel, oil and the industrial forms;
+  - an electric blue device for the power gear;
+  - a lab blueprint for chemistry;
+  - an advanced cyan hologram for electronics and nuclear fuel.
+- **Simpler to read:**
+  - a status lamp by the title;
+  - one word for what the machine is doing, and the fix when it is stuck ("Connect a cable or a generator.", "Take the results from OUT, or turn on Eject.");
+  - progress with the time left;
+  - a help box saying what the machine is for.
+- **Controls are icon buttons with tooltips**, along the top of the help box. The six face buttons move behind one Sides button, which shows the faces with a colour key. Batteries and solar panels show a big charge gauge with its percentage. Empty slots show IN and OUT labels and hint icons, and say what goes in them when hovered. The decorative keyboard is gone.
+- Industrial forms share the layout: pause, cancel, recipes and vent or drain icons, and their tool sockets in the help box. Slot positions, menus and saves are unchanged. Record: [machine-screens.md](docs/features/machine-screens.md).
+
 ### Added: The Howitzer Walker, playable
 - Owner accepted the updated local playtest on October 13: aim without holding fire, no close-ground aim freeze, and hide the pilot model/equipment while mounted. Implementation and correction record: [Howitzer Walker](docs/features/howitzer-walker.md).
 - **The owner's Howitzer Walker is in the game:** a tall, two-legged artillery walker in riveted olive plate with a big howitzer in an open cradle, made from a Diesel Walker beside the Armoured Walker (`SDS / PWP / R R`: two steel blocks, a dispenser, steel plates, the Diesel Walker and pistons). It walks, turns, climbs and refuels as the other walkers do.
