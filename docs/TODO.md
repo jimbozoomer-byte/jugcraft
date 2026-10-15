@@ -69,6 +69,8 @@ A [first-slice prototype](features/jugcraft-encyclopedia.md#first-slice-entry-po
 
 Related owner planning records: [industrial agriculture, PR #208](https://github.com/jimbozoomer-byte/jugcraft/pull/208), [mineral sands/refining, PR #209](https://github.com/jimbozoomer-byte/jugcraft/pull/209), and [waste/recycling/pollution, PR #210](https://github.com/jimbozoomer-byte/jugcraft/pull/210). These are planning work, not claims that those proposed systems are implemented.
 
+- Regional mineral-sand world generation and finite reserves are implemented and visually accepted by the owner in [PR #354](https://github.com/jimbozoomer-byte/jugcraft/pull/354), public branch `speedygroyper:codex/regional-mineral-sands`; not yet merged. See the [deposit implementation record](features/regional-mineral-sands.md). Dedicated extraction and chemical separation/refining remain separate work.
+
 ## Industrial machine models textures and dimensions
 
 Owner-requested 10 October 2026. Independent art specification: [industrial machine models, textures and dimensions](features/industrial-machine-models-and-textures.md). It covers 79 unbuilt machine/module forms and later candidates, with 23 additional larger variants. All sizes are **width × depth × height**, each axis 2–6 blocks; several installations are 6×6×6.

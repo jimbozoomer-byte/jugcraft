@@ -41,6 +41,7 @@ public final class JugcraftMaterials {
 	public static Block BAUXITE;
 	public static Block OIL_SAND;
 	public static Block TINCAL;
+	public static Block TITANIUM_SAND, ZIRCON_SAND, RARE_EARTH_SAND, GARNET_SAND;
 
 	public static Item BITUMEN;
 	/** Glass chemistry (batch 16). */
@@ -84,6 +85,10 @@ public final class JugcraftMaterials {
 		BAUXITE = JugcraftRegistry.block("bauxite", Blocks.GRANITE);
 		OIL_SAND = JugcraftRegistry.block("oil_sand", Blocks.SAND);
 		TINCAL = JugcraftRegistry.block("tincal", Blocks.SANDSTONE);
+		TITANIUM_SAND = JugcraftRegistry.block("titanium_sand", Blocks.SAND);
+		ZIRCON_SAND = JugcraftRegistry.block("zircon_sand", Blocks.SAND);
+		RARE_EARTH_SAND = JugcraftRegistry.block("rare_earth_sand", Blocks.SAND);
+		GARNET_SAND = JugcraftRegistry.block("garnet_sand", Blocks.SAND);
 
 		BITUMEN = JugcraftRegistry.item("bitumen");
 		SULFUR_DUST = JugcraftRegistry.item("sulfur_dust");
@@ -128,6 +133,7 @@ public final class JugcraftMaterials {
 		natural.add(BAUXITE);
 		natural.add(OIL_SAND);
 		natural.add(TINCAL);
+		natural.addAll(List.of(TITANIUM_SAND, ZIRCON_SAND, RARE_EARTH_SAND, GARNET_SAND));
 		ingredients.addAll(List.of(BITUMEN, SULFUR_DUST, SILICON, LITHIUM_CARBONATE, RARE_EARTH_OXIDE, COKE, BORAX,
 				BOROSILICATE_GLASS, OPTICAL_FIBRE, FERROBORON));
 
