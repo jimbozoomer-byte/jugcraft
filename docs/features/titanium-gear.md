@@ -1,6 +1,6 @@
 # Titanium tools and armor
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork; CI green; pending review.
 
 Proposal issue: none. TODO item: "Add aluminum's affordable bulk electrical/lightweight structural/panel/vehicle roles; titanium advanced process/precision equipment and vehicle components; and stronger titanium tools/armor above steel with balanced statistics." This change does the last part: titanium tools and armor.
 
@@ -72,7 +72,9 @@ There are no new dependencies. All art is drawn by this repository's scripts: no
 
 ### Results
 
-Not yet run in CI.
+Fork CI run 38774406665 on `1ee5f7a6`: the mod build, generated-data and material checks, all server game tests (these three included), the server tests without optional integrations, and all five client shards passed. Client shard 3, which holds none of these tests, hit the 60-minute job limit on the first attempt and passed on its one re-run.
+
+The tool icons use the shared material-set maps for now. The contributor asked for vanilla-looking tools; that waits on hand-drawn base tools from them or the owner, which every metal's tools would then be recoloured from.
 
 **Not yet done:** a survival playtest and a two-client test.
 
