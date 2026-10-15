@@ -1300,6 +1300,12 @@ def recipes():
         write(out / f"{name}.json", recipe)
     drone_recipes(out)
 
+    # Food chemistry (docs/features/sour-candy.md): a bottle of glucose syrup crafts into three sugar, leaving the bottle.
+    syrup = shapeless(MACHINE_FEATURE, [rid("glucose_syrup")], "glucose_syrup", 3)
+    syrup["result"]["id"] = "minecraft:sugar"
+    syrup["fabric:load_conditions"] = [c for f in ("agriculture", MACHINE_FEATURE) for c in condition(f)]
+    write(out / "sugar_from_glucose_syrup.json", syrup)
+
     # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
     boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]
     for name, recipe in (

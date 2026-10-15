@@ -6021,6 +6021,79 @@
         {
           "items": [
             [
+              "jugcraft:lemon",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:citric_acid",
+              2
+            ]
+          ],
+          "ticks": 120,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:orange",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:citric_acid",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:corn",
+              4
+            ],
+            [
+              "minecraft:glass_bottle",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:hydrochloric_acid",
+              50
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:glucose_syrup",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "minecraft:rotten_flesh",
               2
             ]

@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.weapons.GrenadeLauncherItem;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 /** Plain items of the oil line (ITEMS in tools/petro.py). */
 public final class PetroItems {
@@ -47,6 +48,9 @@ public final class PetroItems {
 	public static Item VANADIUM_PENTOXIDE;
 	public static Item GASIFICATION_RESIDUE;
 	public static Item AMMONIUM_NITRATE;
+	/** Food chemistry (docs/features/sour-candy.md): citric acid, a candy flavour, and glucose syrup, which crafts into sugar. */
+	public static Item CITRIC_ACID;
+	public static Item GLUCOSE_SYRUP;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -137,6 +141,9 @@ public final class PetroItems {
 		// A nitrogen fertilizer: superphosphate's 5x5 area, three doses a crop instead of two.
 		AMMONIUM_NITRATE = JugcraftRegistry.item("ammonium_nitrate",
 				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
+		CITRIC_ACID = JugcraftRegistry.item("citric_acid");
+		GLUCOSE_SYRUP = JugcraftRegistry.item("glucose_syrup",
+				properties -> new Item(properties.stacksTo(16).craftRemainder(Items.GLASS_BOTTLE)));
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -263,6 +270,8 @@ public final class PetroItems {
 			output.accept(VANADIUM_PENTOXIDE);
 			output.accept(GASIFICATION_RESIDUE);
 			output.accept(AMMONIUM_NITRATE);
+			output.accept(CITRIC_ACID);
+			output.accept(GLUCOSE_SYRUP);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
