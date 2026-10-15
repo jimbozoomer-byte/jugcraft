@@ -28,9 +28,11 @@ import org.jspecify.annotations.Nullable;
  * into the Glacier Hall as the horn's blower did ({@link FrostHornRite#follow}); on the Kiln Seal's magma a vent of sparks
  * and smoke, through which followers sink into the Cinder Kiln ({@link KilnSealRite#follow}); and where the Hag Stone was
  * looked through, mist rising from the water with a marsh-light bobbing in it, which closes round followers and takes them
- * to the Lantern Fen ({@link HagStoneRite#follow}); and over a sarcophagus the Writ of Exhumation opened, grey mist and
+ * to the Lantern Fen ({@link HagStoneRite#follow}); over a sarcophagus the Writ of Exhumation opened, grey mist and
  * cold blue fire welling up out of the dark under its lid, souls rising in it, down which followers go to the Archive of
- * Last Names ({@link ExhumationRite#follow}).
+ * Last Names ({@link ExhumationRite#follow}); and over a Field Telephone Sealed Orders were used on, the open line:
+ * sparks crackling off it and a wisp of smoke, its bell ringing, down which followers go over the top into the Foundry
+ * Trench ({@link OrdersRite#follow}).
  */
 public class MistGateEntity extends Entity {
 	private @Nullable Lair lair;
@@ -79,9 +81,13 @@ public class MistGateEntity extends Entity {
 		boolean vent = lair == Lair.CINDER_KILN;
 		boolean fen = lair == Lair.LANTERN_FEN;
 		boolean tomb = lair == Lair.CRYPT_ARCHIVE;
+		boolean line = lair == Lair.FOUNDRY_TRENCH;
 		if (instance() == null || level.getGameTime() >= until) {
 			if (vent) {
 				level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.6, getZ(), 24, 0.4, 0.6, 0.4, 0.03);
+			} else if (line) {
+				// The line goes dead: a last crackle off the telephone.
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() - 0.3, getZ(), 12, 0.3, 0.2, 0.3, 0.05);
 			} else {
 				level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 1.2, getZ(), 24, 0.4, 0.8, 0.4, 0.02);
 			}
@@ -115,6 +121,14 @@ public class MistGateEntity extends Entity {
 			if (tickCount % 7 == 0) {
 				level.sendParticles(ParticleTypes.SOUL, getX(), getY() + 0.3, getZ(), 1, 0.2, 0.1, 0.2, 0.02);
 			}
+		} else if (line) {
+			// The open line: sparks crackling off the telephone under it, a wisp of smoke going up.
+			if (tickCount % 3 == 0) {
+				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() - 0.3, getZ(), 2, 0.25, 0.15, 0.25, 0.05);
+			}
+			if (tickCount % 5 == 0) {
+				level.sendParticles(ParticleTypes.SMOKE, getX(), getY() - 0.2, getZ(), 1, 0.1, 0.05, 0.1, 0.01);
+			}
 		} else if (tickCount % 2 == 0) {
 			if (snow) {
 				// A whirl: three flakes circling and rising round it, white mist welling up in it.
@@ -130,7 +144,11 @@ public class MistGateEntity extends Entity {
 				level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, getX(), getY() + 0.1, getZ(), 1, 0.45, 0.05, 0.45, 0.0);
 			}
 		}
-		if (tickCount % 40 == 0) {
+		if (line) {
+			if (tickCount % OrdersRite.BELL_TICKS == 0) {
+				level.playSound(null, blockPosition().below(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 0.8F, 1.8F);
+			}
+		} else if (tickCount % 40 == 0) {
 			if (snow) {
 				level.playSound(null, blockPosition(), SoundEvents.BREEZE_IDLE_AIR, SoundSource.AMBIENT, 0.8F, 0.6F);
 			} else if (vent) {
@@ -161,6 +179,8 @@ public class MistGateEntity extends Entity {
 			HagStoneRite.follow(server, open);
 		} else if (open.lair == Lair.CRYPT_ARCHIVE) {
 			ExhumationRite.follow(server, open);
+		} else if (open.lair == Lair.FOUNDRY_TRENCH) {
+			OrdersRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}
