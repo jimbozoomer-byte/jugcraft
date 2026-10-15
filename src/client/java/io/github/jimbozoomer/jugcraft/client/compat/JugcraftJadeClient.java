@@ -37,10 +37,12 @@ import io.github.jimbozoomer.jugcraft.compat.jade.SpireDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlock;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.EntityAccessor;
 import snownee.jade.api.IEntityComponentProvider;
@@ -290,7 +292,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 	private static Component anchorPhase(String phase, CompoundTag data) {
 		String key = "message.jugcraft.concordance.circle.phase." + phase;
 		return switch (phase) {
-			case "gathering" -> Component.translatable(key, data.getIntOr("joined", 0), "?");
+			case "gathering" -> Component.translatable(key, data.getIntOr("joined", 0), data.getIntOr("needed", 0));
 			case "channeling" -> Component.translatable(key, data.getIntOr("done", 0) + 1, data.getIntOr("steps", 0));
 			default -> Component.translatable(key);
 		};
@@ -419,6 +421,28 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				String phase = data.getStringOr("phase", "");
 				if (!phase.isEmpty()) {
 					tooltip.add(anchorPhase(phase, data));
+					// Concordance Chunk C (C-03): who is channelling, what lies in the anchor, and while a rite holds it what it
+					// has spent apart from what it still holds, as the server worked them out.
+					if (phase.equals("channeling") || phase.equals("complete")) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.participants", data.getIntOr("joined", 0)));
+					}
+					int offerings = data.getIntOr("offerings", 0);
+					for (int i = 0; i < Math.min(offerings, ConcordanceDataProvider.SHOWN_OFFERINGS); i++) {
+						String[] offering = data.getStringOr("offering" + i, "").split("\\|");
+						Identifier item = offering.length == 2 ? Identifier.tryParse(offering[0]) : null;
+						if (item != null) {
+							tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.offering",
+									new ItemStack(BuiltInRegistries.ITEM.getValue(item)).getHoverName(), offering[1]));
+						}
+					}
+					if (offerings > ConcordanceDataProvider.SHOWN_OFFERINGS) {
+						tooltip.add(Component.literal("+" + (offerings - ConcordanceDataProvider.SHOWN_OFFERINGS)));
+					}
+					int spentFocus = data.getIntOr("spent_focus", -1);
+					if (spentFocus >= 0) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.spent", spentFocus, data.getIntOr("spent_ley", 0)));
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.reserved", data.getIntOr("reserved", 0)));
+					}
 					int faults = data.getIntOr("faults", 0);
 					for (int i = 0; i < Math.min(faults, ConcordanceDataProvider.SHOWN_FAULTS); i++) {
 						String[] fault = data.getStringOr("fault" + i, "").split("\\|");

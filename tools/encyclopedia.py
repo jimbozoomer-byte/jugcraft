@@ -236,6 +236,18 @@ INSPECT = {
     "crucible.none": "nothing",
     "crucible.count": "%s %s",
     "crucible.glass": "An Assay Glass, carried by someone who understands the Alembic Arts, reads its makeup here",
+    # Concordance Chunk C (C-03): a rite's readiness, what a running one has spent and holds, how the last broke off, and
+    # its stages and payments.
+    "readiness": "Before %s can begin",
+    "readiness.ready": "Nothing is missing: use the anchor with an empty hand to begin it",
+    "readiness.unknown": "These offerings answer a rite you have not learned; the codex says how to learn it",
+    "unknown_rite": "a rite you have not learned",
+    "under_way": "%s, under way",
+    "completed": "%s, complete",
+    "anchor.held": "Held until it ends, then consumed: %s",
+    "anchor.count": "%s %s",
+    "last": "Last attempt: %s",
+    "stages": "%s: its stages and what each pays",
 }
 
 DOSSIER = {

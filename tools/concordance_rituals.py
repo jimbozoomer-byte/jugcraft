@@ -28,6 +28,7 @@ PARTICIPANT_HEIGHT = 3  # ...and within this many blocks above or below the anch
 # The anchor (Java: CircleAnchorBlockEntity.java).
 ANCHOR_SLOTS = 6  # offering slots (Java also RitualDefinition.MAX_OFFERINGS)
 REPORT_CACHE_TICKS = 100  # an idle anchor reuses its structure report this long unless a change nearby voids it
+STATUS_MARK_TICKS = 20  # Concordance Chunk C (C-03): a reading in chat marks faulted parts at most once a second a player
 # The Ley Pylon (Java: LeyPylonBlockEntity.java).
 PYLON_CAPACITY = 64  # Ley Charge held
 PYLON_POUR = 15  # the most Radiance one pour from a Kindled Lantern turns into Ley Charge (whole batches only)
@@ -216,7 +217,12 @@ MESSAGES = {
     "circle.interrupted.disabled": "%s broke off: the Concordance is switched off",
     "circle.interrupted.forgotten": "%s broke off: it is no longer known",
     "circle.interrupted.tampered": "%s broke off: the offerings were disturbed",
-    "circle.kept": "The offerings are still in the anchor",
+    # Concordance Chunk C (C-03): an interruption in one line, and a fault's place with where it is from the anchor.
+    "circle.ended": "%s. %s",
+    "circle.ended.spent": "%s. %s; lost: %s Focus and %s Ley Charge",
+    "circle.release.kept": "The offerings are still in the anchor",
+    "circle.release.dropped": "The offerings fell where the anchor stood",
+    "circle.where": "%s (%s from the anchor)",
     "pylon.status": "Ley Pylon: %s / %s Ley Charge",
     "pylon.poured": "Poured %s Radiance: %s Ley Charge (%s / %s)",
     "pylon.full": "The pylon is full",
@@ -233,6 +239,37 @@ TOOLTIPS = {
     "jade.fault": "%s",
     "jade.ley": "Ley Charge: %s / %s",
     "jade.participants": "Participants: %s",
+    # Concordance Chunk C (C-03): while a rite holds the anchor, what it has spent apart from what it still holds.
+    "jade.spent": "Spent: %s Focus, %s Ley Charge",
+    "jade.reserved": "Held until it ends: %s offerings",
+}
+
+# Concordance Chunk C, C-03 (Java: concordance/ritual/Readiness.java): readiness, what a running rite has spent, and the
+# stage and payment table, in the player's words (compose.jugcraft.<key>). The shortfalls' own words are the shared
+# diagnostic codes' (tools/concordance_diagnostics.py).
+TEXT = {
+    "ritual.pylon_at": "The Ley Pylon at %s (%s from the anchor)",
+    "ritual.ley": "%s Ley Charge",
+    "ritual.ley_step": "%s Ley Charge for each step",
+    "ritual.ley_run": "%s Ley Charge for the whole rite: it can begin, but would break off at step %s",
+    "ritual.ley_left": "%s Ley Charge for the steps still to come: it would break off at step %s",
+    "ritual.spent": "Spent so far: %s Focus and %s Ley Charge (%s of %s steps drawn)",
+    "ritual.spent_all": "Spent in all: %s Focus, %s Ley Charge and the offerings",
+    "ritual.stage.offer": "Offer: put its offerings in the anchor; until it begins, a sneaking empty-hand use takes them back",
+    "ritual.stage.begin": "Begin, by the leader's empty-hand use: the leader pays %s Focus, and the offerings are held until it ends",
+    "ritual.stage.gather": "Gather: %s more join within %s s by an empty-hand use, each paying %s Focus (%s Focus in all)",
+    "ritual.stage.steps": "%s steps, one every %s s: each draws %s Ley Charge from each of the %s pylons (%s a step); after "
+                          "k steps, %s Focus and k times %s Ley Charge are spent",
+    "ritual.stage.commit.transform": "Commit, at step %s: the offerings are consumed and %s is made, in one moment; spent in "
+                                     "all: %s Focus, %s Ley Charge and the offerings",
+    "ritual.stage.commit.effects": "Commit, at step %s: the offerings are consumed and its effects given, in one moment; "
+                                   "spent in all: %s Focus, %s Ley Charge and the offerings",
+    "ritual.stage.complete": "Complete: %s waits in the anchor until a participant takes it with an empty hand; broken, the "
+                             "anchor drops it",
+    "ritual.stage.broken": "Broken off before it commits: nothing is made; the offerings stay in the anchor, or drop where "
+                           "it stood if the anchor is broken; the Focus and Ley Charge spent are lost",
+    "ritual.stage.backlash": "Backlash: a Warding Stone lost while it runs deals %s damage to each participant",
+    "ritual.stage.no_backlash": "Backlash: none, even if a Warding Stone is lost while it runs",
 }
 
 SOUND_EVENTS = {
@@ -254,6 +291,8 @@ def lang_entries(lang):
     lang[f"config.jade.plugin_{MOD}.ley_pylon"] = BLOCKS["ley_pylon"]["name"]
     lang[f"pack.{MOD}.fusion_textures"] = "Jugcraft: connected textures (Fusion)"
     lang[f"jei.{MOD}.concordance.ritual"] = "%s steps in a Lesser Circle; needs Circle Lore"
+    for key, text in TEXT.items():
+        lang[f"compose.{MOD}.{key}"] = text
 
 
 # ------------------------------------------------------------------------------------------------- codex
@@ -321,7 +360,12 @@ def codex(initiate):
                  "Use the anchor with an empty hand to hear what is wrong: a part **missing**, the **wrong block**, "
                  "the space **obstructed**, a pylon **without charge** or **someone else's**, or part of it **out of "
                  "reach** (an unloaded chunk). Jade shows the first faults at a glance, and "
-                 "`/jugcraft concordance circle` reads the whole circle."),
+                 "`/jugcraft concordance circle` reads the whole circle. Each wrong part is also marked where it stands. "
+                 "The encyclopedia's **Inspect** page, opened looking at the anchor, lists everything the rite your "
+                 "offerings answer still needs before it can begin (offerings, each pylon's charge for a step and for the "
+                 "whole rite, whose pylons lend, where you stand, your Focus, the light and the circle's faults), and its "
+                 "stages and what each pays, the backlash included; while one runs, what it has spent and what it still "
+                 "holds."),
                 ("crafting_recipe", "Warding Stone", "Any block in the ritual boundary tag will hold; these are made "
                                                      "for it.", rid("warding_stone")),
             ],
@@ -361,7 +405,8 @@ def codex(initiate):
                  "**Completed:** the offerings are used and the result is made, both at the same moment, once.\\\n\\\n"
                  "**Broken off** (a part broken, a pylon dry, someone gone, too bright, the anchor's chunk unloaded or "
                  "the server restarted): nothing is made, the offerings stay in the anchor for you to take back or "
-                 "try again, and the Focus and Ley Charge already spent are gone."),
+                 "try again, and the Focus and Ley Charge already spent are gone. The message says why, where the "
+                 "offerings are and how much was lost."),
                 ("text", "Containment",
                  "If a **Warding Stone** is lost while a ritual runs, the working lashes out: every participant "
                  "takes its backlash. The offerings are still returned. If the anchor itself is broken, they drop "

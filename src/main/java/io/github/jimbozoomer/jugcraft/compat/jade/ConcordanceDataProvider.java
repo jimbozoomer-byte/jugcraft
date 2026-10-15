@@ -18,12 +18,16 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.LivingDeviceBlockEntity
 import io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.Offerings;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructureValidator;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -57,6 +61,9 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 
 	/** The most structural faults the anchor's tooltip lists (the command lists them all). */
 	public static final int SHOWN_FAULTS = 3;
+
+	/** The most offerings the anchor's tooltip lists (Concordance Chunk C, C-03). */
+	public static final int SHOWN_OFFERINGS = 3;
 
 	public final Identifier id;
 	public final String dataKey;
@@ -115,7 +122,10 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 
 	/**
 	 * The anchor: its phase and progress, how many have joined, and its first faults as {@code role|problem|x,y,z}
-	 * (from the anchor's cached report: looking at it never rescans the circle more than the anchor would).
+	 * (from the anchor's cached report: looking at it never rescans the circle more than the anchor would). Since
+	 * Concordance Chunk C (C-03) also the participants the rite holding it needs, what lies in its slots as
+	 * {@code item|count}, and while a rite holds it the Focus and Ley Charge spent apart from the offerings held: never the
+	 * rite's name, nobody's Focus held and nobody's research.
 	 */
 	public static CompoundTag snapshot(CircleAnchorBlockEntity anchor, ServerLevel level) {
 		CompoundTag snapshot = new CompoundTag();
@@ -123,6 +133,26 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		snapshot.putInt("joined", anchor.run().joined().size());
 		snapshot.putInt("done", anchor.run().done());
 		snapshot.putInt("steps", anchor.steps());
+		if (anchor.phase() != RitualMachine.Phase.IDLE) {
+			snapshot.putInt("needed", anchor.participantsNeeded());
+		}
+		int offered = 0;
+		for (ItemStack stack : anchor.offerings()) {
+			if (!stack.isEmpty()) {
+				snapshot.putString("offering" + offered, BuiltInRegistries.ITEM.getKey(stack.getItem()) + "|" + stack.getCount());
+				offered++;
+			}
+		}
+		if (offered > 0) {
+			snapshot.putInt("offerings", offered);
+		}
+		Readiness.Spent spent = anchor.phase().reserving() ? anchor.spent() : null;
+		Offerings.Plan plan = anchor.run().plan();
+		if (spent != null && plan != null) {
+			snapshot.putInt("spent_focus", spent.focus());
+			snapshot.putInt("spent_ley", spent.ley());
+			snapshot.putInt("reserved", plan.total());
+		}
 		StructureValidator.Report report = anchor.report(level);
 		if (report != null) {
 			snapshot.putInt("faults", report.faults().size());

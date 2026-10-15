@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.Invocations;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
@@ -22,6 +23,9 @@ import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.encyclopedia.InspectPage;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualDefinition;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
@@ -88,7 +92,8 @@ import net.minecraft.world.phys.Vec3;
  * and (B-08) the Glacier Hall's rite names Winter Brine and the Yeti Mitten. Since Concordance Chunk C (C-01) the
  * Inspect page reads an Alembic Crucible within the reader's own block reach, more with an Assay Glass carried and the
  * Alembic Arts learned, showing no sign and changing nothing, and gives a waiting formula's own reason; and (C-02) the
- * Cinder Kiln's rite names the Kiln Draught and the Salamander Charm.
+ * Cinder Kiln's rite names the Kiln Draught and the Salamander Charm. Since Concordance Chunk C (C-03), an anchor's
+ * Inspect page states a known rite's readiness and its stage and payment table.
  */
 public class EncyclopediaGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -1031,6 +1036,101 @@ public class EncyclopediaGameTests {
 				"a page no longer sent falls back to the one preferred");
 		navigator.reset();
 		helper.assertTrue(!navigator.received() && navigator.pages().isEmpty() && navigator.current() == null, "forgotten on leaving");
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- a rite's readiness (Concordance Chunk C, C-03)
+
+	/** A stone floor and a complete Lesser Circle round an anchor at (3, 2, 3), its pylons full (Concordance Chunk C, C-03). */
+	private static CircleAnchorBlockEntity circle(GameTestHelper helper) {
+		for (int x = 0; x <= 7; x++) {
+			for (int z = 0; z <= 7; z++) {
+				helper.setBlock(new BlockPos(x, 1, z), Blocks.STONE);
+			}
+		}
+		BlockPos anchor = new BlockPos(3, 2, 3);
+		helper.setBlock(anchor, JugcraftConcordance.CIRCLE_ANCHOR);
+		for (StructurePattern.Part part : ConcordanceData.rules().structure("jugcraft:lesser_circle").parts()) {
+			BlockPos at = anchor.offset(part.offset().x(), part.offset().y(), part.offset().z());
+			if (part.role() == StructurePattern.Role.CHANNEL) {
+				helper.setBlock(at, JugcraftConcordance.LEY_PYLON);
+				((LeyPylonBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(at))).setLey(helper.getLevel(), 64);
+			} else if (part.role() == StructurePattern.Role.BOUNDARY) {
+				helper.setBlock(at, JugcraftConcordance.WARDING_STONE);
+			}
+		}
+		return (CircleAnchorBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(anchor));
+	}
+
+	/** The rows after the heading keyed {@code headingKey}, up to the next heading. */
+	private static List<EncyclopediaPayload.Row> rowsUnder(List<EncyclopediaPayload.Row> rows, String headingKey) {
+		List<EncyclopediaPayload.Row> out = new ArrayList<>();
+		boolean in = false;
+		for (EncyclopediaPayload.Row row : rows) {
+			if (row.kindOf() == EncyclopediaPayload.Kind.HEADING) {
+				in = key(row.text()).equals(headingKey);
+			} else if (in) {
+				out.add(row);
+			}
+		}
+		return out;
+	}
+
+	private static List<String> stageKeys(List<EncyclopediaPayload.Row> rows) {
+		return rows.stream().map(row -> key(row.text()).replace("compose.jugcraft.ritual.stage.", "")).toList();
+	}
+
+	/**
+	 * C-03 (plan 03:107, 03:122): looking at an anchor whose offerings answer a rite the reader knows, the Inspect page
+	 * names the rite, says nothing is missing, and states its stages and what each pays, from its data (the attunement's
+	 * transform, the vigil's gathering and effects), backlash included. It shows no sign.
+	 */
+	@GameTest(maxTicks = 40)
+	public void theInspectPageShowsARitesReadinessAndPayments(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		SignWatch signs = new SignWatch(helper);
+		CircleAnchorBlockEntity anchor = circle(helper);
+		ServerPlayer reader = player(helper);
+		BlockPos stand = helper.absolutePos(new BlockPos(4, 2, 4));
+		reader.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0F, 0.0F);
+		ConcordanceProgress.grant(reader, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(reader, "jugcraft:circle_lore", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.setFocus(reader, 20);
+		for (ItemStack stack : List.of(new ItemStack(JugcraftConcordance.INITIATE_WAND), new ItemStack(Items.AMETHYST_SHARD, 4),
+				new ItemStack(Items.GOLD_INGOT, 2), new ItemStack(Items.GLOWSTONE_DUST, 4))) {
+			anchor.offer(reader, stack);
+		}
+		List<EncyclopediaPayload.Row> rows = inspected(reader, anchor.getBlockPos());
+		helper.assertValueEqual(headingKeys(rows), List.of("encyclopedia.jugcraft.inspect.at", "encyclopedia.jugcraft.inspect.readiness",
+				"encyclopedia.jugcraft.inspect.stages", "encyclopedia.jugcraft.inspect.rituals"), "the anchor, its rite's readiness and payments");
+		EncyclopediaPayload.Row named = row(rows, "encyclopedia.jugcraft.inspect.readiness");
+		List<EncyclopediaPayload.Row> ready = rowsUnder(rows, "encyclopedia.jugcraft.inspect.readiness");
+		helper.assertTrue(key((Component) args(named.text())[0]).equals("ritual.jugcraft.adept_attunement") && ready.size() == 1
+				&& key(ready.get(0).text()).equals("encyclopedia.jugcraft.inspect.readiness.ready"), "nothing is missing");
+		RitualDefinition attunement = ConcordanceData.rules().ritual("jugcraft:adept_attunement");
+		List<EncyclopediaPayload.Row> stages = rowsUnder(rows, "encyclopedia.jugcraft.inspect.stages");
+		helper.assertValueEqual(stages.stream().map(row -> row.text().getString()).toList(),
+				Readiness.stages(attunement, 4).stream().map(line -> ComposeText.show(line).getString()).toList(), "the attunement's table");
+		helper.assertValueEqual(stageKeys(stages), List.of("offer", "begin", "steps", "commit.transform", "complete", "broken", "backlash"), "its stages");
+		Object[] commit = args(stages.get(3).text());
+		helper.assertTrue(List.of(args(stages.get(1).text())).equals(List.of(6)) && List.of(args(stages.get(2).text())).equals(List.of(5, "2", 2, 4, 8, 6, 8))
+				&& List.of(commit[0], commit[2], commit[3]).equals(List.of(5, 6, 40)) && key((Component) commit[1]).equals("item.jugcraft.adept_wand")
+				&& List.of(args(stages.get(6).text())).equals(List.of(4)), "its payments, from its data");
+		anchor.use(reader, level, true); // takes the attunement's offerings back
+		anchor.offer(reader, new ItemStack(Items.GLOW_BERRIES, 4));
+		rows = inspected(reader, anchor.getBlockPos());
+		RitualDefinition vigil = ConcordanceData.rules().ritual("jugcraft:lumen_vigil");
+		stages = rowsUnder(rows, "encyclopedia.jugcraft.inspect.stages");
+		helper.assertTrue(key((Component) args(row(rows, "encyclopedia.jugcraft.inspect.readiness").text())[0]).equals("ritual.jugcraft.lumen_vigil"),
+				"the vigil's readiness");
+		helper.assertValueEqual(stages.stream().map(row -> row.text().getString()).toList(),
+				Readiness.stages(vigil, 4).stream().map(line -> ComposeText.show(line).getString()).toList(), "the vigil's table");
+		helper.assertValueEqual(stageKeys(stages), List.of("offer", "begin", "gather", "steps", "commit.effects", "broken", "backlash"), "with its gathering");
+		helper.assertTrue(List.of(args(stages.get(1).text())).equals(List.of(4)) && List.of(args(stages.get(2).text())).equals(List.of(1, 30, 4, 8))
+				&& List.of(args(stages.get(3).text())).equals(List.of(3, "2", 1, 4, 4, 8, 4)) && List.of(args(stages.get(4).text())).equals(List.of(3, 8, 12))
+				&& List.of(args(stages.get(6).text())).equals(List.of(2)), "the vigil's payments");
+		signs.close();
+		helper.assertTrue(signs.all().isEmpty(), "The page shows no sign: " + signs.all());
 		helper.succeed();
 	}
 }

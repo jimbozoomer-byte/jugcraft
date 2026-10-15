@@ -14,14 +14,14 @@ KINDS = ("shortage", "blocked", "condition", "fault")
 # id -> (kind, words). Plan 03:9's list first, in its order; then Chunk C's. Codes no unit raises yet take their
 # parameters and fuller words from the unit that first raises them.
 CODES = {
-    "missing_ingredient": ("shortage", "Needs %s more in its buffer: %s"),
+    "missing_ingredient": ("shortage", "Needs %s more: %s"),
     "wrong_preparation": ("shortage", "Needs %s, but its buffer holds %s"),
     "wrong_heat": ("condition", "Waiting for %s heat; it is %s"),
-    "unavailable_power": ("shortage", "It has not the power it needs"),
+    "unavailable_power": ("shortage", "%s holds %s; it needs %s"),
     "insufficient_capacity": ("blocked", "Its output is full: take some out"),
     "missing_permission": ("blocked", "You may not change this here"),
     "unloaded_target": ("blocked", "What it works with is not loaded"),
-    "incomplete_pattern": ("blocked", "Its pattern is not complete"),
+    "incomplete_pattern": ("blocked", "%s is not complete: faults to mend: %s"),
     "unavailable_worker": ("shortage", "No worker is free for it"),
     "conflicting_agreement": ("blocked", "Another agreement already covers it"),
     "dormant_occurrence": ("condition", "It waits for its occurrence"),
@@ -33,6 +33,12 @@ CODES = {
     "output_differs": ("blocked", "Its output holds something else: take it out"),
     "needs_emptying": ("blocked", "A repeat starts from an empty crucible: bottle what is in it"),
     "unreadable": ("fault", "Its formula can no longer be read: set it again, or clear it (sneak with an empty hand)"),
+    # Concordance Chunk C, C-03 (ritual readiness).
+    "not_lent": ("blocked", "%s belongs to someone not taking part: it lends only to rites its owner joins"),
+    "needs_focus": ("shortage", "You have %s Focus; it takes %s"),
+    "too_bright": ("condition", "Too bright: light %s above the anchor, where it allows at most %s"),
+    "too_far": ("blocked", "Too far: stand within %s blocks of the anchor across and %s above or below"),
+    "participants": ("shortage", "%s of %s participants have joined; the rest have %s s to join (an empty-hand use)"),
 }
 
 

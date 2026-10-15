@@ -10,8 +10,8 @@ import net.minecraft.resources.Identifier;
  * Shows the compiler's {@link Text} in the player's language: the key under {@code compose.jugcraft.}, numbers and
  * strings as they are, and named things by their translated names (a component's {@code component.<ns>.<path>}, a
  * research entry's, a status effect's, an item's; a block by its block name, a preparation by
- * {@code preparation.<ns>.<path>}). A line inside a line (a diagnostic's step and refusal, Concordance Chunk C, C-01) is
- * shown the same way.
+ * {@code preparation.<ns>.<path>}, and since C-03 a ritual structure by {@code structure.<ns>.<path>}). A line inside a
+ * line (a diagnostic's step and refusal, Concordance Chunk C, C-01) is shown the same way.
  */
 public final class ComposeText {
 	private ComposeText() {
@@ -52,6 +52,7 @@ public final class ComposeText {
 			case "principle" -> "principle.jugcraft." + ref.id();
 			case "block" -> "block." + namespace + "." + path;
 			case "preparation" -> "preparation." + namespace + "." + path;
+			case "structure" -> "structure." + namespace + "." + path;
 			default -> Text.PREFIX + ref.kind() + "." + ref.id();
 		};
 		return Component.translatableWithFallback(key, ref.id());

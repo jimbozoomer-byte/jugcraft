@@ -14,8 +14,10 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.CrucibleInspection;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualMachine;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
@@ -25,12 +27,15 @@ import io.github.jimbozoomer.jugcraft.guide.encyclopedia.PageWriter;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
@@ -44,7 +49,11 @@ import net.minecraft.world.phys.Vec3;
  * charge, how it fills and whose rituals it lends to; for a crucible, what anyone sees (heat and what heats it, volume,
  * tank, formula step, why it waits, the risk line), its slots, and with the glass what the glass would tell
  * ({@link CrucibleInspection}). The position is the client's claim, so it is checked here: the same reach as the command
- * gives a player (a crucible: the player's own reach), and never a chunk that is not loaded. It only reads.
+ * gives a player (a crucible: the player's own reach), and never a chunk that is not loaded. It only reads. Since
+ * Concordance Chunk C (C-03), for an anchor also the readiness of the rite the offerings answer, every shortfall at once,
+ * for the reader as its leader; while a rite holds it, what it has spent apart from what it still holds; how the last
+ * attempt broke off; and the rite's stage and payment table with its backlash. A rite the reader has not learned is never
+ * named.
  */
 public final class InspectPage {
 	public static final String PAGE = "inspect";
@@ -78,8 +87,9 @@ public final class InspectPage {
 		out.heading(Component.translatable("encyclopedia.jugcraft.inspect.at", Component.translatable("block.jugcraft.circle_anchor"),
 				pos.getX(), pos.getY(), pos.getZ()));
 		anchor.status(level, out::fact);
-		out.heading(Component.translatable("encyclopedia.jugcraft.inspect.rituals"));
 		Knowledge knowledge = ConcordanceProgress.knowledge(player);
+		readiness(player, level, anchor, knowledge, out);
+		out.heading(Component.translatable("encyclopedia.jugcraft.inspect.rituals"));
 		List<RitualDefinition> rituals = ConcordanceData.rules().ritualsAt(CircleAnchorBlockEntity.ANCHOR);
 		int unknown = 0;
 		for (RitualDefinition ritual : rituals) {
@@ -98,6 +108,74 @@ public final class InspectPage {
 		}
 		out.codex("circles/lesser_circle", "jugcraft:circle_lore", ResearchState.ENCOUNTERED);
 		out.codex("circles/rituals", "jugcraft:circle_lore", ResearchState.UNDERSTOOD);
+	}
+
+	/**
+	 * Concordance Chunk C (C-03): readiness, or spent and held, how the last attempt broke off, and the stage and payment
+	 * table (plan 03:107, 03:122). From the anchor (CircleAnchorBlockEntity.readiness); a rite the reader has not learned is
+	 * never named and its table not shown. No sign: this page only reads.
+	 */
+	private static void readiness(ServerPlayer player, ServerLevel level, CircleAnchorBlockEntity anchor, Knowledge knowledge, PageWriter out) {
+		Readiness readiness = anchor.readiness(level, player);
+		RitualDefinition rite = readiness == null ? null : readiness.rite();
+		boolean known = rite != null && ResearchEngine.knowsRitual(knowledge, rite);
+		Component unknown = Component.translatable("encyclopedia.jugcraft.inspect.unknown_rite");
+		Component name = known ? CircleAnchorBlockEntity.ritualName(rite.id()) : unknown;
+		if (readiness != null && readiness.spent() == null) {
+			if (rite == null) {
+				out.fact(Component.translatable("encyclopedia.jugcraft.inspect.readiness.unknown"));
+			} else {
+				out.heading(Component.translatable("encyclopedia.jugcraft.inspect.readiness", name));
+				if (readiness.lines().isEmpty()) {
+					out.fact(Component.translatable("encyclopedia.jugcraft.inspect.readiness.ready"));
+				}
+				for (Readiness.Line line : readiness.lines()) {
+					out.fact(ComposeText.show(line.diagnostic().text()));
+				}
+			}
+		} else if (readiness != null) {
+			out.heading(Component.translatable(anchor.phase() == RitualMachine.Phase.COMPLETE ? "encyclopedia.jugcraft.inspect.completed"
+					: "encyclopedia.jugcraft.inspect.under_way", name));
+			out.fact(ComposeText.show(readiness.spentText()));
+			heldOfferings(readiness, out);
+			for (Readiness.Line line : readiness.lines()) {
+				out.fact(ComposeText.show(line.diagnostic().text()));
+			}
+		}
+		Readiness.Ending ending = anchor.ending();
+		if (ending != null && anchor.phase() == RitualMachine.Phase.IDLE) {
+			RitualDefinition last = anchor.run().ritual() == null ? null : ConcordanceData.rules().ritual(anchor.run().ritual());
+			Component lastName = last != null && ResearchEngine.knowsRitual(knowledge, last) ? CircleAnchorBlockEntity.ritualName(last.id()) : unknown;
+			out.fact(Component.translatable("encyclopedia.jugcraft.inspect.last", CircleAnchorBlockEntity.endingLine(lastName, ending)));
+		}
+		StructurePattern pattern = known ? ConcordanceData.rules().structure(rite.structure()) : null;
+		if (pattern != null) {
+			out.heading(Component.translatable("encyclopedia.jugcraft.inspect.stages", name));
+			for (Text stage : Readiness.stages(rite, pattern.channels().size())) {
+				out.fact(ComposeText.show(stage));
+			}
+		}
+	}
+
+	/** What a running rite holds until it ends, with each item's icon (unknown items left out). */
+	private static void heldOfferings(Readiness readiness, PageWriter out) {
+		MutableComponent items = Component.empty();
+		List<Item> icons = new ArrayList<>();
+		for (Readiness.Held held : readiness.held()) {
+			Identifier id = Identifier.tryParse(held.item());
+			Item item = id == null ? Items.AIR : BuiltInRegistries.ITEM.getValue(id);
+			if (item == Items.AIR) {
+				continue;
+			}
+			if (!icons.isEmpty()) {
+				items.append(", ");
+			}
+			items.append(Component.translatable("encyclopedia.jugcraft.inspect.anchor.count", held.count(), new ItemStack(item).getHoverName()));
+			icons.add(item);
+		}
+		if (!icons.isEmpty()) {
+			out.fact(Component.translatable("encyclopedia.jugcraft.inspect.anchor.held", items), null, icons);
+		}
 	}
 
 	private static void pylon(ServerPlayer player, BlockPos pos, LeyPylonBlockEntity pylon, PageWriter out) {

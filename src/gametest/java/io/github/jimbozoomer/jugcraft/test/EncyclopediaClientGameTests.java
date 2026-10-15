@@ -6,14 +6,20 @@ import io.github.jimbozoomer.jugcraft.agriculture.TrickOrTreat;
 import io.github.jimbozoomer.jugcraft.client.EncyclopediaClient;
 import io.github.jimbozoomer.jugcraft.client.EncyclopediaInventoryButton;
 import io.github.jimbozoomer.jugcraft.client.EncyclopediaScreen;
+import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
+import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
+import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
@@ -48,12 +54,15 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -86,6 +95,11 @@ import net.minecraft.world.level.material.Fluids;
  * {@code jugcraft_encyclopedia_inspect_crucible_scale4}). Since C-02, set to a dirty Stillroot Poultice (bone meal
  * stirred in with the Mendvetch), the formula's preview names what fouled its Verdance
  * ({@code jugcraft_encyclopedia_inspect_poultice}).</li>
+ * <li><b>Readiness</b> (Concordance Chunk C, C-03): an anchor two glowstone short, beside a pylon short of a step and one
+ * short of the run; the Inspect page shows the server's lines as decoded and worded on this client, and the stage table
+ * ({@code jugcraft_encyclopedia_inspect_readiness}); then, walled and roofed so it is dark at any hour (the player given
+ * night vision, which changes only what the client draws, so the shot is not black), the Lumen Vigil gathering, in Jade
+ * ({@code jugcraft_concordance_anchor_gathering_jade}).</li>
  * <li><b>Expeditions and keys</b> ({@code jugcraft_encyclopedia_expedition}, {@code jugcraft_encyclopedia_keys}), and the
  * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
  * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
@@ -116,6 +130,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				theRoute(context, server);
 				inspection(context, server);
 				crucibleInspection(context, server);
+				anchorReadiness(context, server);
 				expeditionsAndKeys(context, server);
 				creative(context, server);
 				sizes(context);
@@ -460,6 +475,147 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			level.setBlockAndUpdate(pot, Blocks.AIR.defaultBlockState());
 			level.setBlockAndUpdate(fire, Blocks.AIR.defaultBlockState());
 		});
+		context.waitTicks(5);
+	}
+
+	/**
+	 * C-03: an anchor two glowstone short, beside a pylon short of a step and one short of the whole run. The server's
+	 * readiness lines, encoded as Jade carries a diagnostic, read back on this client in words with no key or id, and the
+	 * Inspect page shows each with the rite's stage table. Then, walled and roofed so the vigil's light check holds at any
+	 * hour, the Lumen Vigil gathers, and Jade's snapshot shows who it needs, what it has spent and what it holds.
+	 */
+	private static void anchorReadiness(ClientGameTestContext context, TestDedicatedServerContext server) {
+		BlockPos stand = context.computeOnClient(client -> client.player.blockPosition());
+		BlockPos anchor = stand.offset(1, 0, 2); // the player stands at (-1, 0, -2) from it: inside the ring, on no part
+		List<String> encoded = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			for (int dx = -4; dx <= 4; dx++) {
+				for (int dz = -4; dz <= 4; dz++) {
+					level.setBlockAndUpdate(anchor.offset(dx, -1, dz), Blocks.STONE.defaultBlockState());
+					for (int dy = 0; dy <= 3; dy++) {
+						level.setBlockAndUpdate(anchor.offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
+					}
+				}
+			}
+			level.setBlockAndUpdate(anchor, JugcraftConcordance.CIRCLE_ANCHOR.defaultBlockState());
+			int channel = 0;
+			for (StructurePattern.Part part : ConcordanceData.rules().structure("jugcraft:lesser_circle").parts()) {
+				BlockPos at = anchor.offset(part.offset().x(), part.offset().y(), part.offset().z());
+				if (part.role() == StructurePattern.Role.CHANNEL) {
+					level.setBlockAndUpdate(at, JugcraftConcordance.LEY_PYLON.defaultBlockState());
+					((LeyPylonBlockEntity) level.getBlockEntity(at)).setLey(level, channel == 0 ? 1 : channel == 1 ? 9 : 64);
+					channel++;
+				} else if (part.role() == StructurePattern.Role.BOUNDARY) {
+					level.setBlockAndUpdate(at, JugcraftConcordance.WARDING_STONE.defaultBlockState());
+				}
+			}
+			ServerPlayer player = first(minecraft);
+			ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+			ConcordanceProgress.grant(player, "jugcraft:circle_lore", ResearchState.UNDERSTOOD);
+			ConcordanceProgress.setFocus(player, 20);
+			CircleAnchorBlockEntity circle = (CircleAnchorBlockEntity) level.getBlockEntity(anchor);
+			for (ItemStack stack : List.of(new ItemStack(JugcraftConcordance.INITIATE_WAND), new ItemStack(Items.AMETHYST_SHARD, 4),
+					new ItemStack(Items.GOLD_INGOT, 2), new ItemStack(Items.GLOWSTONE_DUST, 2))) {
+				circle.offer(player, stack);
+			}
+			Readiness readiness = circle.readiness(level, player);
+			return readiness == null ? List.<String>of() : readiness.lines().stream().map(line -> line.diagnostic().encode()).toList();
+		});
+		check(encoded.size() == 3, "The anchor should lack two glowstone dust, a step at one pylon and the run at another: " + encoded);
+		context.waitTicks(10);
+		context.getInput().lookAt(anchor);
+		context.waitTicks(5);
+		open(context);
+		String page = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).page());
+		List<String> worded = context.computeOnClient(client -> encoded.stream().map(each -> {
+			Diagnostic diagnostic = Diagnostic.decode(each);
+			return diagnostic == null ? "" : ComposeText.show(diagnostic.text()).getString();
+		}).toList());
+		List<String> shown = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			return current == null ? List.<String>of() : current.rows().stream().map(row -> row.text().getString()).toList();
+		});
+		boolean table = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			return current != null && current.rows().stream().anyMatch(row -> row.text().getContents() instanceof TranslatableContents key
+					&& key.getKey().equals("compose.jugcraft.ritual.stage.backlash"));
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] an anchor's readiness: page {}, lines {}, stage table {}", page, worded, table);
+		check(page.equals("inspect") && worded.stream().noneMatch(String::isEmpty) && shown.containsAll(worded) && table
+				&& worded.stream().noneMatch(line -> line.contains("jugcraft.") || line.contains("jugcraft:")),
+				"The Inspect page should list the anchor's shortfalls in words, with no key or id, and its table: " + shown);
+		context.runOnClient(client -> client.gui.toastManager().clear());
+		context.waitTicks(5);
+		context.takeScreenshot("jugcraft_encyclopedia_inspect_readiness");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		// The vigil needs light 7 or less above the anchor: walls and a roof make it dark whatever the sky gives at midnight.
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			for (int dx = -4; dx <= 4; dx++) {
+				for (int dz = -4; dz <= 4; dz++) {
+					level.setBlockAndUpdate(anchor.offset(dx, 3, dz), Blocks.STONE.defaultBlockState());
+					for (int dy = 0; dy <= 2 && (Math.abs(dx) == 4 || Math.abs(dz) == 4); dy++) {
+						level.setBlockAndUpdate(anchor.offset(dx, dy, dz), Blocks.STONE.defaultBlockState());
+					}
+				}
+			}
+			ServerPlayer player = first(minecraft);
+			// Night vision changes only what the client draws, not the light the server's vigil checks: the shot is not black.
+			player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 600));
+			CircleAnchorBlockEntity circle = (CircleAnchorBlockEntity) level.getBlockEntity(anchor);
+			circle.use(player, level, true); // the attunement's offerings back
+			for (StructurePattern.Part part : ConcordanceData.rules().structure("jugcraft:lesser_circle").channels()) {
+				((LeyPylonBlockEntity) level.getBlockEntity(anchor.offset(part.offset().x(), part.offset().y(), part.offset().z()))).setLey(level, 64);
+			}
+			circle.offer(player, new ItemStack(Items.GLOW_BERRIES, 4));
+		});
+		server.runCommand("time set midnight");
+		context.waitTicks(10);
+		String phase = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			ServerPlayer player = first(minecraft);
+			RateGate.forget(player.getUUID());
+			CircleAnchorBlockEntity circle = (CircleAnchorBlockEntity) level.getBlockEntity(anchor);
+			circle.use(player, level, false);
+			return circle.phase().id + " at light " + level.getMaxLocalRawBrightness(anchor.above());
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] the Lumen Vigil begun in the dark: {}", phase);
+		check(phase.startsWith("gathering"), "The vigil should gather: " + phase);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			String jade = server.computeOnServer(minecraft -> {
+				CompoundTag shownTag = ConcordanceDataProvider.snapshot((CircleAnchorBlockEntity) minecraft.overworld().getBlockEntity(anchor), minecraft.overworld());
+				boolean right = shownTag.getIntOr("needed", -1) == 2 && shownTag.getIntOr("joined", -1) == 1 && shownTag.getIntOr("spent_focus", -1) == 4
+						&& shownTag.getIntOr("reserved", -1) == 4 && shownTag.getStringOr("offering0", "").equals("minecraft:glow_berries|4");
+				return (right ? "ok " : "bad ") + shownTag;
+			});
+			Jugcraft.LOGGER.info("[encyclopedia-check] a gathering anchor in Jade: {}", jade);
+			check(jade.startsWith("ok"), "Jade's snapshot of a gathering anchor: " + jade);
+			context.getInput().lookAt(anchor);
+			context.waitTicks(20);
+			context.runOnClient(client -> client.gui.toastManager().clear());
+			context.waitTicks(5);
+			context.takeScreenshot("jugcraft_concordance_anchor_gathering_jade");
+		} else {
+			Jugcraft.LOGGER.info("[encyclopedia-check] Jade is absent: no shot of a gathering anchor");
+		}
+		server.runOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			ServerPlayer player = first(minecraft);
+			CircleAnchorBlockEntity circle = (CircleAnchorBlockEntity) level.getBlockEntity(anchor);
+			circle.use(player, level, true); // the leader calls it off; the berries stay
+			circle.use(player, level, true); // and takes them back, so nothing drops below
+			player.removeEffect(MobEffects.NIGHT_VISION);
+			for (int dx = -4; dx <= 4; dx++) {
+				for (int dz = -4; dz <= 4; dz++) {
+					for (int dy = 0; dy <= 3; dy++) {
+						level.setBlockAndUpdate(anchor.offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
+					}
+				}
+			}
+		});
+		server.runCommand("time set noon");
+		context.getInput().lookAt(0.0F, 30.0F);
 		context.waitTicks(5);
 	}
 

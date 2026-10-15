@@ -12335,7 +12335,9 @@ def check_rituals(co, root, lang, registered, research):
     """Roadmap step 12: the Java lifecycle and limits mirror tools/concordance_rituals.py; every structure and ritual
     names things that exist, stays within its limits and is reachable (each offering can be crafted or found, each
     ritual is unlocked by the research that teaches it); every interruption, fault, role and phase has its words; and
-    the anchor's GeckoLib assets, the participants' gesture and the Fusion built-in pack are all there."""
+    the anchor's GeckoLib assets, the participants' gesture and the Fusion built-in pack are all there. Concordance Chunk
+    C, C-03: a full pylon pays a whole run; a start and readiness choose through one function; what the Inspect page and
+    Jade read only reads; readings and refused starts mark the faulted parts; an interruption is told in one line."""
     ri = co.rituals
     def java(name, base=root):
         path = base / name
@@ -12343,7 +12345,7 @@ def check_rituals(co, root, lang, registered, research):
     constants = {
         "ritual/RitualMachine.java": {"STEP_TICKS": ri.STEP_TICKS, "GATHER_TICKS": ri.GATHER_TICKS,
                                       "PARTICIPANT_MARGIN": ri.PARTICIPANT_MARGIN, "PARTICIPANT_HEIGHT": ri.PARTICIPANT_HEIGHT},
-        "CircleAnchorBlockEntity.java": {"SLOTS": ri.ANCHOR_SLOTS, "CACHE_TICKS": ri.REPORT_CACHE_TICKS},
+        "CircleAnchorBlockEntity.java": {"SLOTS": ri.ANCHOR_SLOTS, "CACHE_TICKS": ri.REPORT_CACHE_TICKS, "MARK_TICKS": ri.STATUS_MARK_TICKS},
         "LeyPylonBlockEntity.java": {"CAPACITY": ri.PYLON_CAPACITY, "POUR": ri.PYLON_POUR, "JE_PER_LEY": ri.JE_PER_LEY,
                                      "JE_RATE": ri.PYLON_JE_RATE},
         "ritual/StructurePattern.java": ri.STRUCTURE_LIMITS,
@@ -12503,6 +12505,70 @@ def check_rituals(co, root, lang, registered, research):
         err("textures/block/warding_stone_connected.png needs its Fusion metadata")
     if 'isModLoaded("fusion")' not in java("CircleClient.java", CLIENT_JAVA_ROOT):
         err("CircleClient.java: register the Fusion pack only when Fusion is installed (it is optional)")
+    # Concordance Chunk C, C-03: a full pylon pays a whole run; every rite at the Circle Anchor uses one structure (the
+    # idle report's); a start and readiness choose through one function; what the Inspect page and Jade read only reads;
+    # a reading in chat and a refused start mark every faulted part, the start still asking one step's Ley Charge (C-P10);
+    # an interruption is told in one line; the readiness words exist; Jade's anchor lines name no rite, Focus or research.
+    anchor_structures = set()
+    for key, entry in rituals.items():
+        need = entry.get("steps", 0) * entry.get("ley", 0)
+        if need > ri.PYLON_CAPACITY:
+            err(f"ritual {key}: {entry.get('steps')} steps of {entry.get('ley')} Ley Charge draw {need} from each pylon, "
+                f"more than a full pylon holds ({ri.PYLON_CAPACITY})")
+        if structures.get(split(entry.get("structure", ":"))[1], {}).get("anchor") == f"{MOD}:circle_anchor":
+            anchor_structures.add(entry.get("structure"))
+    if len(anchor_structures) > 1:
+        err(f"rituals at the Circle Anchor use {sorted(anchor_structures)}: an idle report and readiness read one structure")
+    anchor = java("CircleAnchorBlockEntity.java")
+    begin = _java_body(anchor, "private void begin(ServerPlayer player, ServerLevel level)")
+    if "Offerings.match(" in anchor or "Choice.of(" not in _java_body(anchor, "public Choice choose(ServerPlayer player)") \
+            or "Choice choice = choose(player);" not in begin:
+        err("CircleAnchorBlockEntity: a start and readiness choose the rite through one function, choose() (C-03)")
+    for signature in ("public void status(ServerLevel level, Consumer<Component> out)",
+                      "public @Nullable Readiness readiness(ServerLevel level, ServerPlayer reader)",
+                      "public Choice choose(ServerPlayer player)", "private List<Readiness.Channel> channels(",
+                      "public Readiness.@Nullable Spent spent()"):
+        body = _java_body(anchor, signature)
+        found = [n for n in ("Signs.", "mark", "setChanged(", "sync(", "tell(", "Message(", "apply(", "RateGate.",
+                             "spendFocus(", ".draw(", "setLey(") if n in body]
+        if not body or found:
+            err(f"CircleAnchorBlockEntity {signature}: what the Inspect page and Jade read only reads ({found or 'missing'})")
+    chat = _java_body(anchor, "public void status(ServerPlayer player, ServerLevel level)")
+    if "status(level, player::sendSystemMessage);" not in chat or "markReadiness(level, player);" not in chat \
+            or 'RateGate.allow(player, "circle_marks", MARK_TICKS)' not in chat:
+        err("CircleAnchorBlockEntity.status(player, level): a reading in chat marks every faulted part, once a second a player (C-03)")
+    if "markFaults(level, seen.report(), warning);" not in begin \
+            or "check(level, pattern, ritual.ley(), joined)" not in _java_body(anchor, "private RitualMachine.Observation observe(") \
+            or "leyPerRun" in anchor:
+        err("CircleAnchorBlockEntity: a refused start marks the parts that refused it, and a start asks one step's Ley Charge a "
+            "channel; a run's shortfall only warns (C-03, C-P10)")
+    applied = _java_body(anchor, "private boolean apply(ServerLevel level, RitualRun.Transition transition")
+    ended = applied[applied.find("run.last() != null"):]
+    if ended.count("tell(") != 1 or "tell(level, before.joined(), endingLine(" not in ended or "circle.kept" in anchor \
+            or "circle.kept" in ri.MESSAGES:
+        err("CircleAnchorBlockEntity.apply: an interruption is told in one line, with where the offerings are and what it lost (C-03)")
+    for path in sorted((root / "ritual").glob("*.java")):
+        for key in re.findall(r'Text\.of\("([a-z_.]+)"', path.read_text(encoding="utf-8")):
+            if f"compose.{MOD}.{key}" not in lang:
+                err(f"concordance/ritual/{path.name}: missing lang compose.{MOD}.{key}")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.concordance\.circle\.[a-z_.]*[a-z_])"', anchor))):
+        if key not in lang:
+            err(f"CircleAnchorBlockEntity.java: missing lang {key}")
+    snapshot = _java_body(java("ConcordanceDataProvider.java", JAVA_ROOT / "compat" / "jade"),
+                          "public static CompoundTag snapshot(CircleAnchorBlockEntity anchor, ServerLevel level)")
+    put = set(re.findall(r'snapshot\.put\w+\("([a-z_]+)"', snapshot))
+    if not put <= {"phase", "joined", "done", "steps", "needed", "offerings", "offering", "spent_focus", "spent_ley", "reserved",
+                   "faults", "fault"} or not {"needed", "offering", "spent_focus", "spent_ley", "reserved"} <= put:
+        err(f"ConcordanceDataProvider.java: Jade's anchor snapshot is phase, participants, offerings, spent, held and faults, not {sorted(put)}")
+    for needle in ("ConcordanceProgress.", "knowledge", "Focus(", "getPlayer", "readiness(", "ritualName(", "run().ritual()"):
+        if needle in snapshot:
+            err(f"ConcordanceDataProvider.java: Jade's anchor snapshot names no rite and no one's Focus or research ({needle})")
+    client = java("JugcraftJadeClient.java", CLIENT_JAVA_ROOT / "compat")
+    if '"?"' in client or 'data.getIntOr("needed", 0)' not in client:
+        err("JugcraftJadeClient.java: the gathering line shows the participants the rite needs, from the server (C-03)")
+    for key in ("offering", "participants", "spent", "reserved"):
+        if f'"tooltip.{MOD}.concordance.jade.{key}"' not in client or f"tooltip.{MOD}.concordance.jade.{key}" not in lang:
+            err(f"JugcraftJadeClient.java: the anchor's Jade lines use tooltip.{MOD}.concordance.jade.{key} (C-03)")
 
 
 def check_ember(co, root, lang, research):
@@ -16513,7 +16579,9 @@ def check_encyclopedia(root, lang):
                            r"Composing\.(compose|clear)\(|\.set\(JugcraftConcordance\.INSCRIPTION|StructureValidator\.check\(|"
                            r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(|"
                            # Concordance Chunk C, C-01: reading a crucible shows no sign, holds, heats, works or saves nothing.
-                           r"Signs\.(?:show|flow)\(|\.hold\(|setTemperature\(|useEmpty\(|setChanged\(|sendBlockUpdated\(|\.automate\(")
+                           r"Signs\.(?:show|flow)\(|\.hold\(|setTemperature\(|useEmpty\(|setChanged\(|sendBlockUpdated\(|\.automate\("
+                           # Concordance Chunk C, C-03: reading an anchor marks no part and never takes the chat reading's path.
+                           r"|markReadiness\(|markFaults\(|\.status\([a-z]+, [a-z]+\)")
     for name, source in builders.items():
         if forbidden.search(source):
             err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")

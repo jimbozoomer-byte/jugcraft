@@ -12,13 +12,13 @@ import org.jspecify.annotations.Nullable;
  */
 public enum Code {
 	// Plan 03:9's list, in its order.
-	/** (count, what: a step's words) */
+	/** (count, what: a step's words, an offering's item, or "#tag") */
 	MISSING_INGREDIENT("missing_ingredient", Kind.SHORTAGE),
 	/** (wanted: a step's words, found: the same item as the buffer holds it) */
 	WRONG_PREPARATION("wrong_preparation", Kind.SHORTAGE),
 	/** (wanted, now: band refs) */
 	WRONG_HEAT("wrong_heat", Kind.CONDITION),
-	/** parameters fixed by C-05 */
+	/** (what, held, needed: each a line; fixed by C-03, worded for any power) */
 	UNAVAILABLE_POWER("unavailable_power", Kind.SHORTAGE),
 	/** () the output is full */
 	INSUFFICIENT_CAPACITY("insufficient_capacity", Kind.BLOCKED),
@@ -26,7 +26,7 @@ public enum Code {
 	MISSING_PERMISSION("missing_permission", Kind.BLOCKED),
 	/** parameters fixed by C-06 */
 	UNLOADED_TARGET("unloaded_target", Kind.BLOCKED),
-	/** parameters fixed by C-03 */
+	/** (structure: a named pattern, faults to mend) */
 	INCOMPLETE_PATTERN("incomplete_pattern", Kind.BLOCKED),
 	/** parameters fixed by C-06 */
 	UNAVAILABLE_WORKER("unavailable_worker", Kind.SHORTAGE),
@@ -50,7 +50,18 @@ public enum Code {
 	/** () */
 	NEEDS_EMPTYING("needs_emptying", Kind.BLOCKED),
 	/** () */
-	UNREADABLE("unreadable", Kind.FAULT);
+	UNREADABLE("unreadable", Kind.FAULT),
+	// Concordance Chunk C, C-03 (ritual readiness).
+	/** (what: a pylon's words) */
+	NOT_LENT("not_lent", Kind.BLOCKED),
+	/** (Focus held, Focus it takes) */
+	NEEDS_FOCUS("needs_focus", Kind.SHORTAGE),
+	/** (light now, the most it allows) */
+	TOO_BRIGHT("too_bright", Kind.CONDITION),
+	/** (blocks across, blocks above or below) */
+	TOO_FAR("too_far", Kind.BLOCKED),
+	/** (joined, needed, seconds left to join) */
+	PARTICIPANTS("participants", Kind.SHORTAGE);
 
 	public final String id;
 	public final Kind kind;
