@@ -1,8 +1,10 @@
 # Concordance Chunk C: the living workshop (contract and handoff)
 
 Status: contract written; unit 1 (C-01 and C-02) built, in four commits on this contract (`8d61fdb7b`) and a fifth
-for its records. Every local check passes; none of its Java has been compiled and none of its game tests has run (no
-CI run yet; see the As built notes of C-01 and C-02). Units 2 to 5 not started. Chunk C is developed on branch
+for its records (`807da7f5e`); unit 2 (C-03 and C-04) built, in two commits (`a0e73881c`, `2c98d6d68`) and a third for
+its records. Every local check passes; none of their game code has been compiled against Minecraft and none of their
+game tests has run (no CI run yet; see the As built notes of C-01 to C-04). Units 3 to 5 not started. Chunk C is
+developed on branch
 `claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in;
 CI run 38617471274 on that base passed every job (see The merge and its CI run). Not merged; no pull request. Chunk B,
 beneath it, is not merged and has no pull request either.
@@ -87,8 +89,8 @@ path before multiplying content variants"; MP:66).
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records in the next commit): local checks pass; not compiled, no game test run, no CI run yet |
-| 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Not started |
+| 1 | C-01, C-02 | The crucible's diagnostics and honest formula reload; the Stillroot Poultice and the Kiln Draught with their consumers, container returns and audits (C-D1) | `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` | Built (`f4efbf82c`, `ff11cc062`, `2b53fbff0`, `e1d69574e`; records `807da7f5e`): local checks pass; not compiled, no game test run, no CI run yet |
+| 2 | C-03, C-04 | Ritual readiness, fault positions, spent and reserved; Root and Rivet with its stage and payment table (C-D2) | `arcane-concordance-rituals.md`, `thallite.md` | Built (`a0e73881c`, `2c98d6d68`; records in the next commit): checks run and passed: `check_mod_data`, `check_repository`, `owner_art --check`, `concordance_journey --check`, `check_icon_maps`, the World Designer's node tests, `scripts/tests`, `git diff --check`; not compiled against Minecraft, no game test run, no CI run yet |
 | 3 | C-05, C-06 | The Crucible Stand with JE heat and piped water (C-D3); the shared "supply this crucible's formula" job (C-D4) | new `crucible-stand.md`; `arcane-concordance-logistics.md`, `arcane-concordance-economy.md` | Not started |
 | 4 | C-07, C-08, C-09 | Habitat made visible; one mixed-bed rule with harvest strain and recovery; one stable graft trait | `arcane-concordance-ecology.md` | Not started |
 | 5 | C-10 | The measured small-workshop load, the end-to-end journey, client evidence, combined fixes, the checkpoint and the handoff | this page | Not started |
@@ -161,12 +163,12 @@ on `e079ad4a3`), read by REST on 14 October 2026: conclusion success on attempt 
 | Pylons: 3 Radiance → 2 Ley (01:114) | Also 3 Verdance → 2 Ley | `concordance/conversion/verdance_to_ley.json` |
 | "Reuse FluidRecipe … MachineCompanionPort and CourierLedger" (09:136) | The crucible uses neither `FluidRecipe` nor `MachineCompanionPort`. Its Peepo port, `CrucibleCompanion`, implements the same `CompanionLogistics.Port`; water reaches it through the shared fluid storage | `CrucibleCompanion.java:18`; `JugcraftConcordance.java:259`; `machine/MachineCompanionPort.java:18`; neither name appears in `concordance/` or `CrucibleCompanion.java` |
 | "locate CourierLedger before adding delivery work" (01:90) | `concordance/courier/CourierLedger.java`; `file(...)` is public and takes any destination | `CourierLedger.java:170-179` |
-| Thallite components (06:78) | `jugcraft:thallite_plate` has two recipes and no consumer; it appears only in the `c:plates/thallite` tag, which `c:plates` includes, and no recipe asks for either tag. Both recipes load only with the `machines` feature, the hand one also with `thallite` | `recipe/thallite_plate_by_hand.json:2-11`; `recipe/pressing/thallite_ingot.json:2-7`; `src/main/resources/data/c/tags/item/plates/thallite.json:4`; `src/main/resources/data/c/tags/item/plates.json:16` |
+| Thallite components (06:78) | `jugcraft:thallite_plate` has two recipes and no consumer; it appears only in the `c:plates/thallite` tag, which `c:plates` includes, and no recipe asks for either tag. Both recipes load only with the `machines` feature, the hand one also with `thallite`. Since unit 2, its first consumer is Root and Rivet (C-04) | `recipe/thallite_plate_by_hand.json:2-11`; `recipe/pressing/thallite_ingot.json:2-7`; `src/main/resources/data/c/tags/item/plates/thallite.json:4`; `src/main/resources/data/c/tags/item/plates.json:16` |
 | Records cite pure harnesses ("61 checks", "52", "98", "41") | Not in Git: `src/test` holds only `VanillaReferences.java` | `find src/test` |
 
 ### Defects and gaps found
 
-**Fixed in this chunk** (1 to 7 in unit 1; see C-01's As built notes):
+**Fixed in this chunk** (1 to 7 in unit 1, 8 to 10 in unit 2; see the As built notes of C-01 and C-03):
 
 1. A formula refused under new rules vanishes with only a sound (`CrucibleBlockEntity.java:282-289`). C-01.
 2. Setting a written formula that no longer replays says only "formula invalid", without the step or the reason
@@ -186,12 +188,14 @@ on `e079ad4a3`), read by REST on 14 October 2026: conclusion success on attempt 
    formula's setter the courier requester.
 8. A ritual's interruption reason and "the offerings are still in the anchor" both go to the action bar in one tick
    (`CircleAnchorBlockEntity.java:650-656, 892-898`), so the second probably replaces the first. A code reading; no client
-   was run to see it. C-03.
+   was run to see it. C-03. Fixed in unit 2: one line (`circle.ended`, `.ended.spent`), held by `check_rituals`.
 9. Jade's gathering line prints "?" for the participants needed (`client/compat/JugcraftJadeClient.java:290`); the
    generated `tooltip.jugcraft.concordance.jade.offering` and `.participants` keys are unused
-   (`src/main/resources/assets/jugcraft/lang/en_us.json:7953-7954`). C-03.
+   (`src/main/resources/assets/jugcraft/lang/en_us.json:7953-7954`). C-03. Fixed in unit 2: the snapshot carries
+   `needed`, and both keys are used.
 10. A start checks one step's Ley (`CircleAnchorBlockEntity.java:508`), so a run can start that its pylons cannot finish,
-    with nothing said beforehand. C-03 warns (C-P10).
+    with nothing said beforehand. C-03 warns (C-P10). Warned in unit 2: readiness names the step a run would break off
+    at; the start rule is unchanged.
 11. The ecology docs say a canteen waters beds (`arcane-concordance-ecology.md:25`; the codex's habitats page), but
     `agriculture/GourdCanteenItem.java:87-100, 116` pours only on farmland, a giant pumpkin, fire or a cauldron, never a
     bed. C-07.
@@ -208,6 +212,8 @@ Gloamcap and Mendvetch are missing); the rituals record says thirteen tests
 alchemy record's "Nothing alchemy makes is a resource another system consumes, so there is no conversion loop"
 (`arcane-concordance-alchemy.md:164`) stops being true with C-02; the pure harnesses those records cite are not in Git.
 Unit 1 corrected the alchemy record's table (15 rows) and its line 164, and says there that its harness is not in Git.
+Unit 2 corrected the rituals record's count (thirteen when step 12 was built, eighteen before Chunk C, 29 now) and says
+there that its "98 checks" harness is not in Git.
 
 **Not Chunk C's:** main's shortened `CHANGELOG.md` (above).
 
@@ -618,15 +624,87 @@ payloads.
 - `theCircleIsCheckedPartByPart` must keep passing unchanged: its comment says charge and ownership count only when a
   ritual asks, and it asserts that someone else's pylon and a pylon short of a step's charge each refuse the start,
   taking no Focus (`ConcordanceRitualGameTests.java:229-240`).
-- `EncyclopediaGameTests`: the anchor's Inspect readiness and payment lines.
+- `EncyclopediaGameTests`: the anchor's Inspect readiness and payment lines
+  (`theInspectPageShowsARitesReadinessAndPayments`).
 
-**Tests (client):** an anchor's Inspect page; a Jade shot of a gathering anchor.
+**Tests (client):** an anchor's Inspect page (`jugcraft_encyclopedia_inspect_readiness`); a Jade shot of a gathering
+anchor (`jugcraft_concordance_anchor_gathering_jade`, when Jade is loaded).
 
 **Acceptance:** "Show missing positions and resource readiness" (09:132); 03:107; 03:122; 10:48.
 
 **Save effects:** none. **Network:** no new payload; Jade's anchor snapshot carries more values.
 
 **Review boundary:** ritual diagnostics only; no change to `RitualMachine`.
+
+**As built (unit 2: commit `a0e73881c`).**
+- **Built:**
+  - the pure `ritual/Choice`: the one choice of rite a leader's start and readiness share (`CircleAnchorBlockEntity.choose`);
+    nothing offered chooses nothing;
+  - the pure `ritual/Readiness`: `before` (every shortfall before a start, each marked as refusing or not), `running`
+    (spent apart from held, and what may stop the next step, the light included), `stages` (the stage and payment table
+    from the rite's data, for every rite), `shapeFaults`; with `Spent`, `Held`, `Ending`, `Channel`, `Line` and
+    `Reader`;
+  - the anchor's `readiness` (the cached report, one reading of each channel, the reader's Focus and place, the light;
+    no sign), `spent`, `ending` and `endingLine`; `participantsNeeded` made public for Jade;
+  - signs: a reading in chat (an empty-hand reading, the command) marks every faulted part, once every `MARK_TICKS` (20)
+    ticks a player (`markReadiness`); a refused start marks the parts that refused it (`markFaults`, which an
+    interruption now shares). Nothing on the Inspect page's or Jade's path shows a sign;
+  - an interruption in one line (`circle.ended`, `.ended.spent`: why, where the offerings are, the Focus and Ley Charge
+    lost), its `Ending` kept in memory until the next start or a load; `circle.kept` gave way to `circle.release.kept`
+    and `.release.dropped`;
+  - fault positions as "x, y, z (dx, dy, dz from the anchor)" (`circle.where`); Jade keeps "x,y,z";
+  - the Inspect page's anchor branch: readiness, or spent and held while a rite runs, the last attempt, and the stage
+    table, for a rite the reader knows;
+  - Jade: the participants needed (the "?" fixed), how many are channelling, the first three offerings and "+n",
+    spent and held while a rite holds the anchor (`ConcordanceDataProvider.SHOWN_OFFERINGS`);
+  - five diagnostic codes appended to `Code` and `tools/concordance_diagnostics.py` (`not_lent`, `needs_focus`,
+    `too_bright`, `too_far`, `participants`); `unavailable_power` and `incomplete_pattern` given their parameters, and
+    `missing_ingredient`'s words made general (C-P33); `ComposeText` names a `structure`;
+  - audits: `check_rituals` (steps × Ley Charge within a full pylon's 64; every rite at the anchor on one structure; one
+    choice; the read-only paths; the chat reading's marks and gate; a refused start's marks and the one-step start; one
+    `tell` an interruption; the readiness words; Jade's anchor snapshot keys, and that it names no rite, Focus or
+    research; the client's "?" gone) and `check_encyclopedia` (`markReadiness`, `markFaults` and the chat reading
+    forbidden on the encyclopedia's path).
+- **Departures from the ticket,** each a proposal below or a spec reconciliation:
+  - "participants" is not an idle shortfall: a start needs only its leader. Before a start the others appear as the
+    stage table's gather row; while a rite gathers, a `participants` line shows joined, needed and the seconds left
+    (C-P34);
+  - each shape fault is not repeated in readiness: one `incomplete_pattern` line counts the faults to mend, and the
+    anchor's status lines above it, on the same page, list each with both positions;
+  - a pylon short only of the whole run is a warning naming the step the run would break off at; the start is unchanged
+    (C-P10);
+  - a fully matched rite the reader has not learned is never named on the Inspect page or in Jade; the start's refusal
+    still names it, as before (C-P34);
+  - a joined participant who has walked away is not listed while a rite runs: the next step's own check finds them;
+  - the held line leaves out an item the client does not know, rather than showing an empty icon;
+  - in the tests, pylons are set with `setLey(level, n)`; the idle test waits 5 ticks after placing glowstone, as
+    `theVigilNeedsTheDark` does, before reading the light; the client circle for the Jade shot is walled and roofed so
+    the vigil's light check holds at any hour (the overworld's midnight sky light was not confirmed), with
+    `time set midnight` kept as well.
+- **From the spec review:** `InspectPage.anchor` declares its ritual list once (the spec's block would not have
+  compiled); running readiness reads the light, as the ticket's "what may still stop it" asks; the Jade shot is taken
+  under night vision so the sealed circle is not black (night vision changes only the client's rendering, not the
+  server's light); the client check rejects `jugcraft:` ids as well as keys; `incomplete_pattern` reads "... is not
+  complete: faults to mend: n"; the decisions are numbered C-P33 on, after unit 1's C-P32.
+- **Tests (none run):**
+  - 6 new `ConcordanceRitualGameTests` (24 then): `anIdleCircleSaysEverythingARiteStillNeeds`,
+    `aRefusedStartMarksEveryFault`, `aStatusReadingMarksFaultsButTheInspectPageDoesNot`,
+    `spentAndReservedAreShownApart`, `theInterruptionReasonIsKept`, `unknownRitesStayUnnamed`;
+  - `EncyclopediaGameTests.theInspectPageShowsARitesReadinessAndPayments` (21);
+  - the client test `EncyclopediaClientGameTests.anchorReadiness`, with shots `jugcraft_encyclopedia_inspect_readiness`
+    and `jugcraft_concordance_anchor_gathering_jade` (when Jade is loaded).
+  No test reads the action bar's one line: a mock player's overlay cannot be read. No test covers running readiness's
+  light line; only the scratch harness below does.
+- **Commands** for commit `a0e73881c`:
+  - run and passed: `python3 tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+    `python3 tools/owner_art.py --check`, `python3 tools/concordance_journey.py --check`,
+    `python3 tools/check_icon_maps.py`, `node --test tools/world-designer/model.test.cjs`,
+    `python -m unittest discover -s scripts/tests` and `git diff --check`;
+  - the spec's audit mutations on a scratch copy, each reverted: all 19 caught (its 14, five of them in two variants);
+    one more, running readiness without the light, is caught by no audit;
+  - a scratch harness outside Git, re-run for the records at `2c98d6d68`: the pure Concordance packages compiled with
+    JDK 21 and 37 checks of `Choice` and `Readiness` with the game tests' figures passed;
+  - not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest` and CI.
 
 ### C-04. Root and Rivet (unit 2; C-D2)
 
@@ -678,6 +756,59 @@ RitualMachine and pylon economics" (09:132); interruption tested (09:140).
 first release.
 
 **Review boundary:** ritual data, one item, the generator and audit entries.
+
+**As built (unit 2: commit `2c98d6d68`).**
+- **Built:**
+  - `concordance/ritual/root_and_rivet.json`, generated from `RITUALS` in `tools/concordance_rituals.py` with C-P11's
+    numbers; Circle Lore understood unlocks it;
+  - the item `rooted_thallite_foundation` (`JugcraftConcordance.ROOTED_THALLITE_FOUNDATION`, a `DescribedItem` in the
+    Ingredients tab), its lang, models and icon;
+  - the codex entry `circles/root_and_rivet`: the rite, "Stages and Payment" (`_payment_text`), the plate's crafting
+    recipe with the switches it needs (`_switches_text`), and the foundation; Stratawrighting's Understood page links it,
+    the codex's first `entry://` link;
+  - JEI: the rite in the Circle Anchor category and an information page on where the foundation comes from
+    (`tools/acquisition.py` `RITUALS`);
+  - registrations: `PRODUCERS` in `tools/concordance_progression.py`, `EXCLUDED` in
+    `tools/concordance_equivalence.py` (and the generated tag), and `RITUAL_SINKS` in `tools/concordance_economy.py`
+    with its row in the economy record's table.
+- **Three checker gaps found by the design and fixed:**
+  - `check_rituals` looked an offering's recipe up by file name; it now counts any recipe, in any recipe folder, whose
+    result the offering is (the plate's hand recipe is `thallite_plate_by_hand`, its pressing `pressing/thallite_ingot`);
+  - `#c:ingots/thallite` joined the progression's `VANILLA_TAGS`, so the plate's hand recipe has a reachable input;
+  - `check_progression` asks for a codex recipe page readable before a step needs the plate: the entry's crafting page.
+- **The switch statement** (C-P41): `RITUALS` states the feature switches a rite's offerings need beside the
+  Concordance's (`"switches": ["machines", "thallite"]`), and `check_rituals` holds the statement to the recipes, one
+  step down, an offering that is a tag included. Concordance data carries no load condition, and the checker forbids
+  one.
+- **Also held by the checks:** what a ritual makes is excluded from the scale, made by that ritual in the progression
+  graph and given its JEI page (`check_rituals`); every codex `entry://` link names an entry on disk, the foundation's
+  icon is its map pixel for pixel, and the `thallite` material's four tones are the metal's (`check_concordance`); the
+  sink is its ritual's run (`check_economy`).
+- **The icon:** the owner's library was searched first (its candidates are in the rituals record's Item-icon
+  provenance); nothing fitted, so it is drawn fresh to ITEM_ICONS.md from `tools/item_icons/rooted_thallite_foundation.txt`
+  in a new `thallite` material, the Thallite metal's ramp with a darker outline. Not yet reviewed by the owner.
+- **Departures from the spec:**
+  - the icon's PNG was written by the texture generator's own `save` for this one image, from
+    `concordance_ritual_art.textures()`, rather than by running `tools/generate_textures.py` whole, which this unit's
+    instructions ruled out; `check_concordance` holds it to its map;
+  - from the spec review: the codex's payment page reads "k times 8 Ley Charge" and names Verdance beside Radiance and
+    JE; the JEI page says "Root and Rivet turns", without "the", and only an instrument "keeps what was inscribed";
+    `RITUAL_SINKS`' comment says why the Adept's Attunement is not a sink (its wand is an excluded instrument); the switch
+    audit reads an offering that is a tag through its members; the five ritual tests, their helpers and the assay test
+    were written from the review's code.
+- **Tests (none run):**
+  - 5 new `ConcordanceRitualGameTests` (29 in all): `rootAndRivetAttunesOnePlateOnce`,
+    `aDryPylonStopsRootAndRivetAndKeepsTheOfferings`, `rootAndRivetSavedMidRunLapses`,
+    `theAttunementsOfferingsNeverChooseRootAndRivet`, `rootAndRivetIsStrataFoundationWork`;
+  - `ConcordanceAssayGameTests.theFoundationIsNeverWeighed` (8);
+  - `ConcordanceProgressionGameTests.theLiveGraphIsWhole`: the node `ritual:jugcraft:root_and_rivet`, reachable alone;
+  - the client shot `jugcraft_rooted_thallite_foundation` (`EncyclopediaClientGameTests.rootedFoundation`).
+- **Commands** for commit `2c98d6d68`:
+  - run and passed: as C-03's;
+  - the spec's audit mutations on a scratch copy, each reverted: its 13 in 22 variants and two more for the tag
+    offering, all 24 caught; a foundation-to-Ley conversion of 31 is, as the spec expects, not a gaining cycle;
+  - `python3 tools/select_client_tests.py --base 807da7f5e` chose `EncyclopediaClientGameTests`;
+  - not run: the build, the game tests and CI.
 
 ### C-05. The Crucible Stand: JE heat for the next stir, piped water (unit 3; C-D3)
 
@@ -1017,6 +1148,25 @@ niche helper and tests.
   `check_poultice_credit`.
 - **No new saved key:** an unreadable program reuses `program`. The crucible's update tag still has its four keys.
 
+**As built in unit 2:**
+- **Pure ritual code:** `ritual/Choice` (`of`, `NONE`, `rite`) and `ritual/Readiness` (`before`, `running`, `stages`,
+  `shapeFaults`, `holding`, `ready`, `spentText`, `UNKNOWN`; records `Channel`, `Line`, `Reader`, `Spent`, `Held`,
+  `Ending`).
+- **The anchor:** `CircleAnchorBlockEntity.choose`, `readiness`, `spent`, `ending`, `endingLine` (an instance method and
+  a static one) and `MARK_TICKS`; `participantsNeeded` made public; `faultText` gives both positions; the private
+  `markReadiness`, `markFaults` and `part`.
+- **Jade:** `ConcordanceDataProvider.SHOWN_OFFERINGS`; the anchor snapshot's `needed`, `offering<i>`, `offerings`,
+  `spent_focus`, `spent_ley` and `reserved`.
+- **Diagnostics:** `Code` gains `NOT_LENT`, `NEEDS_FOCUS`, `TOO_BRIGHT`, `TOO_FAR` and `PARTICIPANTS`, after unit 1's
+  codes; `MISSING_INGREDIENT`, `UNAVAILABLE_POWER` and `INCOMPLETE_PATTERN` take their parameters. `ComposeText` names a
+  `structure`.
+- **Registries:** `JugcraftConcordance.ROOTED_THALLITE_FOUNDATION`; the ritual `jugcraft:root_and_rivet`.
+- **Tools:** `RITUAL_SINKS` (with `STEP_TICKS` and `FOCUS_REGEN_TICKS`) in `tools/concordance_economy.py`;
+  `PRODUCERS` and `VANILLA_TAGS` in `tools/concordance_progression.py`; `RITUALS` in `tools/acquisition.py`; the
+  `"switches"` key, `_payment_text` and `_switches_text` in `tools/concordance_rituals.py`; `ROOT_AND_RIVET` in
+  `tools/concordance_strata.py`; the `thallite` material in `tools/icon_materials.py`.
+- **No new saved key or payload:** the ending lives in memory; Jade's anchor snapshot carries more values.
+
 ## Dependencies and order
 
 1. C-00: done (the merge, its CI, this page).
@@ -1083,6 +1233,23 @@ after the first path (09:16).
   (C-P28).
 - **Load measurement** on CI is noisy and hardware-specific: numbers are recorded, and only an agreed, generous limit is
   asserted.
+- **Unit 2, not yet seen in a game:**
+  - the cached shape report can hold a refused start's charge and ownership faults for up to 100 ticks: the status lines
+    and Jade show them while readiness reads the channels itself, so the two can disagree for that window;
+  - `report()` may send a block update when the linked channels change under the Inspect page or Jade, as it already
+    did: a cache refresh, not a sign or a saved change;
+  - the one interruption line is long and may be clipped on a narrow action bar; no test reads the action bar;
+  - the ending is lost on a reload (C-P37), and `TAMPERED`'s line under-counts its last draw;
+  - an operator's command reads any loaded circle, so it can mark one from afar; the marks are signs only;
+  - the foundation has no consumer until unit 3 (against 09:124's "no decorative recipes"), and its icon is a draft
+    whose roots may read as legs;
+  - the codex's first `entry://` link was checked against Modonomicon's source by the design, never clicked; the audit
+    stops a link to a missing entry, not a wrong link format;
+  - widening `VANILLA_TAGS` with `c:ingots/thallite` also lets the "Overworld things" recipe rules accept thallite
+    ingots; the switch rule looks one step down only, so an ore-only or loot-only route is not seen;
+  - combined offerings: the Kindling's 11 items beat Root and Rivet's 9 (the existing rule, now pinned by a test);
+  - the economy model is conservative: it states 900 Focus a day where one player regains 600;
+  - the client shots depend on Jade drawing into `takeScreenshot` and on the client test's server sharing its process.
 - **Unverified:** the null-side Fabric item insert (inferred from a passing post test *(survey)*); vanilla's container
   drop when a crucible overrides `preRemoveSideEffects` (the mirror has no `BlockEntity`; the Spire drops explicitly);
   whether Jade's accessor gives the viewing player; bees and `#minecraft:supports_crops` on these crops; Fabric's load
@@ -1177,8 +1344,8 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P7 | 14 October 2026 | The yield rule: a property may declare `fouling`; Verdance alone does, 4.0 (each unit of contaminant a part takes 4 units of Verdance before level and duration), a starting value; a reason names the foulers. As built in unit 1; `check_alchemy` holds the order (taken, subtracted, then judged) and the generator's mirror | Proposed | C-02 |
 | C-P8 | 14 October 2026 | The poultice's credit: on each tick Regeneration heals, the health a patient gains, at most 1, credited through `Encounter.healed` to the player who applied the poultice, while it lasts; transient; only a poultice (a Frostward or any other salve earns nothing); no mixin. As built in unit 1 as C-P30 refines it, credited through `creditHealing` (`healed`'s old body) | Proposed | C-02 |
 | C-P9 | 14 October 2026 | The Kiln Draught is a draught carrying Fire Resistance and nothing harmful; its dossier fact is text and icons in the Cinder Kiln's rite section with a codex link at the Alembic Arts observed and the Salamander Charm as the lasting answer (the Charm alone when the Concordance is off or Ember no longer brews Fire Resistance); the Tyrant Scale → magma cream edge (C-D1's audit) is recorded as a reward route, not a loop: the draught makes no Kiln Seal or scale, and magma cream has vanilla sources. As built in unit 1, with C-P31 (his flame) and C-P32 (the Grave Dust route) | Proposed | C-02 |
-| C-P10 | 14 October 2026 | A run-level Ley shortfall warns and does not refuse; the start rule (one step's Ley) is unchanged; signs mark faults on the empty-hand, chat and refusal paths only | Proposed | C-03 |
-| C-P11 | 14 October 2026 | Root and Rivet is taught by Circle Lore understood; offerings a Thallite plate, 4 copper ingots, 4 Mendvetch; 1 participant, 6 Focus, 4 steps of 2 Ley a pylon, any light, backlash 4 (starting values) | Proposed | C-04 |
+| C-P10 | 14 October 2026 | A run-level Ley shortfall warns and does not refuse; the start rule (one step's Ley) is unchanged; signs mark faults on the empty-hand, chat and refusal paths only. As built in unit 2: the warning names the step the run would break off at; `check_rituals` holds the one-step start; how signs mark is C-P35 | Proposed | C-03 |
+| C-P11 | 14 October 2026 | Root and Rivet is taught by Circle Lore understood; offerings a Thallite plate, 4 copper ingots, 4 Mendvetch; 1 participant, 6 Focus, 4 steps of 2 Ley a pylon, any light, backlash 4 (starting values). As built in unit 2, with these numbers; the foundation it makes is C-P40 | Proposed | C-04 |
 | C-P12 | 14 October 2026 | The stand: targets warm 65, hot 120, searing 175 (starting values) at C-D3's rates; it follows the next stir's band only while the formula can proceed and idles otherwise; a Preserve hold wins; with no formula an empty-hand use by someone who may change it cycles its setting; crafted from the foundation, iron and copper; no wear | Proposed | C-05 |
 | C-P13 | 14 October 2026 | Crucible filing: the requester is the formula's setter; one open request; filed on entering the ingredient wait, with backoff after no post or `TOO_MANY` (200 ticks doubling to 1200, starting values); cancelled when the formula is cleared, replaced, set by another or incompatible; the Peepo port subtracts the open remainder | Proposed | C-06 |
 | C-P14 | 14 October 2026 | Light is shown as sky and lamps; niches are unchanged | Proposed | C-07 |
@@ -1200,21 +1367,38 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P30 | 14 October 2026 | Poultice credit is read from Regeneration's own time left at each tick's end, each blow and each Concordance heal, at most one health a heal. One note per patient; a later poultice that takes replaces it; it ends when the Regeneration is no longer the poultice's or the patient leaves the fight. The helper is credited wherever they stand, as a ward's caster is | Proposed | C-02 |
 | C-P31 | 14 October 2026 | The Kiln Draught's dossier fact says it also turns the Tyrant's flame (breath, waves, patches), as Fire Resistance already does | Proposed | C-02 |
 | C-P32 | 14 October 2026 | Grave Dust → bone meal → Mendvetch is a second declared reward route; boss routes are audited by recipes alone, not through the Assayer's Scale | Proposed | C-02 |
+| C-P33 | 14 October 2026 | Rites use the shared codes. An offering short is `missing_ingredient`, its words made general for crucible and anchor. `unavailable_power` takes (what, held, needed) as lines and `incomplete_pattern` takes (structure, faults to mend); both are first raised here. `not_lent`, `needs_focus`, `too_bright`, `too_far` and `participants` are appended after unit 1's codes | Proposed | C-03, C-05 |
+| C-P34 | 14 October 2026 | Readiness judges its reader as the rite's leader. Nothing offered chooses no rite. A fully matched rite the reader has not learned is never named on the Inspect page or in Jade; the start's refusal still names it, as before. Before a start, the other participants appear as the stage table's gather row; during a gathering, as `participants`. As built in unit 2, where a joined participant who has walked away is not listed while the rite runs: the next step's own check finds them | Proposed | C-03 |
+| C-P35 | 14 October 2026 | An empty-hand or command reading marks every faulted part where it stands, at most once a second a player: shape faults with their interruption's sign, and a channel short or unlent for the reader with WANT. A refused start marks the refusing check's faults with that refusal's sign. The Inspect page and Jade never mark | Proposed | C-03 |
+| C-P36 | 14 October 2026 | Fault positions read "x, y, z (dx, dy, dz from the anchor)" in chat, the command and the Inspect page; Jade keeps "x,y,z" | Proposed | C-03 |
+| C-P37 | 14 October 2026 | An interruption is told in one line: why, where the offerings are, and the Focus and Ley Charge lost (without the loss when the rules no longer know the rite). It is kept in memory for the Inspect page until the next start or a load, never saved. TAMPERED's line under-counts its last draw | Proposed | C-03 |
+| C-P38 | 14 October 2026 | Jade on an anchor shows the participants it needs, who is channelling, the first three offerings and "+n", and, while gathering or channelling, the Focus and Ley Charge spent and the offerings held. Never the rite, anyone's Focus held or research | Proposed | C-03 |
+| C-P39 | 14 October 2026 | Every rite's stage and payment table is worded from its data on the Inspect page, for a reader who knows the rite; the codex states Root and Rivet's in its own words (`_payment_text`, for a transforming rite; C-04) | Proposed | C-03, C-04 |
+| C-P40 | 14 October 2026 | The Rooted Thallite Foundation is a plain described item in the Ingredients tab. The Assayer's Scale never weighs it, nothing turns it back, and the economy models it as a sink of 32 Ley Charge and 6 Focus a run. Its icon is drawn fresh, because nothing in the owner's library fitted, and awaits the owner's review | Proposed | C-04, C-05 |
+| C-P41 | 14 October 2026 | A rite's offerings may need feature switches beside the Concordance's. The generator states them (`"switches"`) and `check_rituals` holds that statement to the recipes, one step down, an offering that is a tag through its members. Concordance data carries no load condition. Any recipe that makes an offering counts as its way to make it | Proposed | C-04 |
+| C-P42 | 14 October 2026 | The codex's first `entry://` link (Stratawrighting's Understood page to Root and Rivet). Every codex link is audited to an entry on disk, since a broken link stops Modonomicon opening the book (as read from its source by the C-04 design; not seen in a client) | Proposed | C-04 |
 
 ## Where to resume
 
-Unit 1 (C-01, C-02) is built and recorded, and nothing of it has been compiled or run. Next:
+Units 1 (C-01, C-02) and 2 (C-03, C-04) are built and recorded, and none of their game code has been compiled against
+Minecraft or run. Next:
 1. refresh main and the open pull requests (#357 and #369 for the Peepo files; the hot shared files: lang,
    `check_mod_data.py`, `CHANGELOG.md`, `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and
    merge main again if it moved;
 2. run CI on the pushed head by workflow_dispatch of the Build workflow, with every client test class. The Build runs
    the server game tests twice, with Jade (the default) and with `-PjugcraftOptionalIntegrations=false`; the Jade checks
-   of `jadeIsToldTheTankAndWhyNeverTheMakeup` run only in the first. Record each result in the As built notes,
-   `arcane-concordance-alchemy.md`, `lair-encounter-credit.md` and `cinder-kiln.md`;
-3. unit 1's checkpoint evidence, then unit 2 (C-03 appends its codes to `Code` and `tools/concordance_diagnostics.py`,
-   and fixes `incomplete_pattern`'s parameters).
+   of `jadeIsToldTheTankAndWhyNeverTheMakeup` and of unit 2's anchor tests run only in the first. Unit 2's classes:
+   `ConcordanceRitualGameTests` (29), `EncyclopediaGameTests` (21), `ConcordanceAssayGameTests` (8),
+   `ConcordanceProgressionGameTests`, `ConcordanceGameTests` (`codexLoadsWithoutErrors`, with the new entry),
+   `ConcordanceRimeStrataGameTests`, `ConcordanceSpireGameTests`, `ConcordanceEconomyGameTests`,
+   `ConcordanceJourneyGameTests`, `ConcordancePersistenceGameTests`; on the client, `EncyclopediaClientGameTests` (three
+   new shots) and `EncyclopediaRoutesClientGameTests`. Record each result in the As built notes,
+   `arcane-concordance-alchemy.md`, `lair-encounter-credit.md`, `cinder-kiln.md` and `arcane-concordance-rituals.md`;
+3. units 1 and 2's checkpoint evidence (the owner's look at the foundation's icon among it), then unit 3 (C-05, C-06):
+   the Crucible Stand's recipe consumes the foundation and needs a codex recipe page; `PRODUCERS` already routes the
+   foundation to the rite.
 
-The owner's choices are C-D0, C-D0b and C-D1 to C-D3; C-D4 and C-P1 to C-P32 are Proposed. Open for the owner's
+The owner's choices are C-D0, C-D0b and C-D1 to C-D3; C-D4 and C-P1 to C-P42 are Proposed. Open for the owner's
 checkpoint: the review route for Chunk B and Chunk C (above), and 09:144's three questions.
 
 ## How this contract was checked
@@ -1264,3 +1448,7 @@ checkpoint: the review route for Chunk B and Chunk C (above), and 09:144's three
   names given; the figures re-run from the generator's model (`bottle`, `outcome`, `poultice_verdance`, `realised`,
   imported read-only from a scratch script). The checks run for the records' commit are in the alchemy record's
   Verification.
+- Unit 2's notes (15 October 2026): written from the unit's two commits (`a0e73881c`, `2c98d6d68`) and their scratch
+  logs (the checks, the audit mutations and the client-test selection), re-read for the names, keys, counts, test names
+  and lang given; the library candidates' hashes taken again from `art/owner-library` (read, nothing executed). Run for
+  the records: the scratch harness (above, C-03's As built), and the checks in the rituals record's Verification.

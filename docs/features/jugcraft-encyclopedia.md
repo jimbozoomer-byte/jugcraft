@@ -101,7 +101,9 @@ No reward economy, repeatable material farm or new currency is approved by this 
   and Back open a fresh inventory.
 - **Pages:** Discover (the First Light route, then the journal's research and stage reports), Spellcraft, Expeditions
   (lair dossiers), Inspect (a Circle Anchor or Ley Pylon looked at, or, since Concordance Chunk C, an Alembic Crucible
-  within reach) and Keys. A page with nothing to show is left out.
+  within reach; on an anchor, since Chunk C, the readiness of the rite its offerings answer, what a running one has
+  spent and holds, the last attempt, and the stage and payment table) and Keys. A page with nothing to show is left
+  out.
 - **The route's honesty:** steps and ways are labelled in words and shapes as well as colour; required, recommended,
   trade and after-a-boss ways are kept apart; every recipe shown is the server's own, and one the server lacks is never
   advertised.

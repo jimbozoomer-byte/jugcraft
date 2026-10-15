@@ -125,8 +125,10 @@ Two bounded traits; neither adds damage, defense or speed.
   - Crusher and Pulverizer: 2 a block (the Pulverizer with a 10% iron dust byproduct);
   - Ore Washer: 3;
   - acid leaching: 4.
-- **Existing output consumer:** players' tools, armor and arms. Machines take thallite plates and dust through shared
-  `c:` tags.
+- **Existing output consumer:** players' tools, armor and arms; and since Concordance Chunk C (C-04), Root and Rivet,
+  which roots a Thallite plate into a Rooted Thallite Foundation ([rituals](arcane-concordance-rituals.md)). No other
+  recipe asks for a plate (`c:plates/thallite`). With the machines or thallite switch off there is no plate, and the
+  rite cannot be offered. Thallite dust smelts into ingots.
 - **Technology connection:**
   - a METALS entry with its `c:` tags, so the Ore Drill and Prospector find it;
   - ore processing as above;

@@ -42,6 +42,9 @@ bone meal, relic charge, a Crimson Surge) were in no loop check.
   - Every conversion and every source driven by time is modelled, each figure tied to the Java or data it comes from,
     so the model cannot drift from the game.
   - No cycle of conversions comes back with as much as it started with.
+  - **Ritual sinks** (`RITUAL_SINKS`, since Concordance Chunk C, C-04): Root and Rivet takes 32 Ley Charge and 6 Focus a
+    run for one Rooted Thallite Foundation, which nothing turns back; modelled as an edge into a node with no way out,
+    so a later conversion out of it is weighed with it. `check_economy` holds the sink to the ritual's data.
   - Every crop's regrow-and-compost loop is included, at its natural cost and when a spire hastens it.
 
 ## Bounded on purpose

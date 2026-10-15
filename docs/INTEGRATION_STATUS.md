@@ -13,16 +13,19 @@ Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer
 
 ## Not merged: Concordance Chunk C (living workshop)
 
-Stacked on Chunk B, on branch `claude/chunk-c-living-workshop`; not merged, no pull request. Unit 1 (C-01, C-02) is
-built and recorded. Its local checks pass (`check_mod_data`, `check_repository`, `owner_art --check`,
-`concordance_journey --check`, `scripts/tests`). None of its Java has been compiled, and none of its game tests has run:
-no CI run yet. Units 2 to 5 have not started. Not played by hand or with two clients
+Stacked on Chunk B, on branch `claude/chunk-c-living-workshop`; not merged, no pull request. Unit 1 (C-01, C-02) and
+unit 2 (C-03, C-04) are built and recorded. Their local checks pass (`check_mod_data`, `check_repository`,
+`owner_art --check`, `concordance_journey --check`, `scripts/tests`; for unit 2 also `check_icon_maps` and the World
+Designer's node tests). None of their game code has been compiled against Minecraft, and none of their game tests has
+run: no CI run yet. Units 3 to 5 have not started. Not played by hand or with two clients
 ([the chunk's contract](features/concordance-chunk-c.md)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
 | The crucible says what it is doing (unit 1, C-01) | An Alembic Crucible following a formula says why it waits: the empty-hand status line, Jade (with its tank) and the encyclopedia's new Inspect page for a crucible within reach (more with an Assay Glass carried). A formula the rules can no longer make stays set, names its step and why, and carries on when they change back; an unreadable saved one is kept. Only someone who could break it by hand may work it or set or clear its formula. Peepo's crucible status reads the same reason, and is FULL only when the output is full or holds another brew | [alchemy](features/arcane-concordance-alchemy.md), [authority](features/arcane-concordance-authority.md), [Peepo port](features/companion-farm-stand-crucible.md), [first route](features/arcane-concordance-first-route.md) |
 | Two workshop products (unit 1, C-02) | The Stillroot Poultice (Mendvetch stirred warm: a Regeneration II salve) and the Kiln Draught (magma cream or sugar stirred hot: Fire Resistance), named on the stack, as Winter Brine now is; contaminant fouls Verdance, so a dirty batch heals less, and the glass and the outcome say so. A poultice put on a friend in a lair fight earns its helper healing credit for each heal of its Regeneration; the Kiln Draught carries its drinker over the Cinder Kiln's slag, and the kiln's dossier names it | [alchemy](features/arcane-concordance-alchemy.md), [encounter credit](features/lair-encounter-credit.md), [Cinder Kiln](features/cinder-kiln.md), [the contract](features/concordance-chunk-c.md) |
+| A circle says what a rite still needs (unit 2, C-03) | Looking at a Circle Anchor, the encyclopedia's Inspect page lists everything the rite the offerings answer still needs before it can begin, all at once (offerings, each pylon's charge for a step and for the whole rite, pylons that will not lend, place, Focus, light, the circle's faults), then the rite's stages and what each pays, its backlash included; a pylon short only of the whole run is a warning. While a rite runs, the page and Jade show what it has spent apart from what it holds; Jade's gathering line shows the participants needed and lists the offerings. Readings in chat and refused starts mark every faulted part where it stands; an interruption is told in one line (why, where the offerings are, what was lost). A rite the reader has not learned is never named. Tests written, not run | [rituals](features/arcane-concordance-rituals.md), [encyclopedia](features/jugcraft-encyclopedia.md), [the contract](features/concordance-chunk-c.md) |
+| Root and Rivet (unit 2, C-04) | A rite of the Lesser Circle, taught by Circle Lore understood: a Thallite plate, 4 copper ingots and 4 Mendvetch become a Rooted Thallite Foundation (6 Focus, 32 Ley Charge, 8 s), the base unit 3's Crucible Stand is to be built on; nothing turns it back, and the Assayer's Scale never weighs it. A codex entry with its stage and payment table, linked from Stratawrighting's; JEI's ritual and information pages; the economy models it as a sink. The plate needs the `machines` and `thallite` switches. Its icon is drawn fresh and awaits the owner's review. Tests written, not run | [rituals](features/arcane-concordance-rituals.md), [Thallite](features/thallite.md), [economy](features/arcane-concordance-economy.md), [the contract](features/concordance-chunk-c.md) |
 
 ## Not merged: Concordance Chunk B (winter and stone)
 
