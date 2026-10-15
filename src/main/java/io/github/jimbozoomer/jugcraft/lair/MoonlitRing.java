@@ -38,6 +38,18 @@ public final class MoonlitRing {
 	public static final int EXIT_WEST = 36;
 	public static final int EXIT_EAST = 38;
 	public static final int EXIT_Z = 72;
+	/**
+	 * The Howling Stone's steps: cells whose middle is within STONE_CORE of the centre stand three blocks high, within
+	 * STONE_STEP two, within STONE_FOOT one (tools/moonlit_ring.py STONE). The Alpha bounds over it as he runs.
+	 */
+	public static final double STONE_CORE = 1.6;
+	public static final double STONE_STEP = 2.8;
+	public static final double STONE_FOOT = 3.8;
+	/** Where the Grey Mist opens on the Howling Stone's top when the Alpha falls: three columns, two high. */
+	public static final int STONE_EXIT_WEST = 36;
+	public static final int STONE_EXIT_EAST = 38;
+	public static final int STONE_EXIT_Y = 8;
+	public static final int STONE_EXIT_Z = 36;
 
 	/** The three Warden Bells, west, north and east (tools/lairs.py BELL_NAMES). */
 	public enum Bell {
@@ -98,6 +110,14 @@ public final class MoonlitRing {
 		return Math.hypot(x - CENTRE_X, z - CENTRE_Z) <= RING;
 	}
 
+	/** How high the Howling Stone stands over the floor at (x, z) (in the template): 0 off it. */
+	public static int stoneHeight(double x, double z) {
+		double cellX = Math.floor(x) + 0.5;
+		double cellZ = Math.floor(z) + 0.5;
+		double from = Math.hypot(cellX - CENTRE_X, cellZ - CENTRE_Z);
+		return from <= STONE_CORE ? 3 : from <= STONE_STEP ? 2 : from <= STONE_FOOT ? 1 : 0;
+	}
+
 	/** Whether (x, z) (in the template) is in the Hunters' Camp, where nobody is hunted. */
 	public static boolean inCamp(double x, double z) {
 		return x >= CAMP_WEST && x < CAMP_EAST + 1 && z >= CAMP_NORTH && z < CAMP_SOUTH + 1;
@@ -121,6 +141,17 @@ public final class MoonlitRing {
 			}
 		}
 		return null;
+	}
+
+	/** The cells of the Grey Mist that opens on the Howling Stone when the Alpha falls. */
+	public static List<BlockPos> stoneExitCells() {
+		List<BlockPos> out = new ArrayList<>();
+		for (int y = STONE_EXIT_Y; y <= STONE_EXIT_Y + 1; y++) {
+			for (int x = STONE_EXIT_WEST; x <= STONE_EXIT_EAST; x++) {
+				out.add(new BlockPos(x, y, STONE_EXIT_Z));
+			}
+		}
+		return out;
 	}
 
 	/** The cells of the Grey Mist behind the camp. */

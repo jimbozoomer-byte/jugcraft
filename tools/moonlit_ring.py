@@ -74,6 +74,9 @@ RUGS = [(33, 64, "east"), (33, 65, "east"), (39, 67, "north")]   # werewolf rugs
 # step of one round that), and where the Alpha waits on its top (part 2): x, y, z and yaw (facing north, to the moon).
 STONE = ((1.6, 3), (2.8, 2), (3.8, 1))
 WAIT = (37.5, STAND + 3, 36.5, 180.0)
+# Where the Grey Mist opens on the Howling Stone's top when the Alpha falls (part 2): three columns across its middle, two
+# high.
+STONE_EXIT = {"x": (36, 38), "z": 36, "y": STAND + 3}
 # The trees: trunk rings (radius from the centre, how many trunks, the angle of the first, the trunks' radius); a trunk
 # that would stand in the clearing, a passage, a glade or the camp is left out. The thicket of Moonwood Leaves fills the
 # floor of the wood up to THICKET_TOP, and the canopy hangs from CANOPY_LOW to CANOPY_HIGH over every cell farther than
@@ -440,6 +443,12 @@ def exit_mist(put):
     for x in range(x0, x1 + 1):
         for y in range(STAND, STAND + 3):
             put(x, y, z, EXIT_MIST)
+
+
+def stone_exit_cells():
+    """Where the Grey Mist opens on the Howling Stone when the Alpha falls."""
+    (x0, x1), z, y = STONE_EXIT["x"], STONE_EXIT["z"], STONE_EXIT["y"]
+    return [(x, yy, z) for yy in (y, y + 1) for x in range(x0, x1 + 1)]
 
 
 def exit_cells():

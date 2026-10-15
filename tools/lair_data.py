@@ -12,6 +12,7 @@ the dimension type copies the shape of vanilla's End (logged from the running ga
 flat generator with no layers, and the biome vanilla's void with no spawns.
 """
 from decor_data import MOD, HORIZONTAL, rid, self_drop
+import alpha_werewolf as aw
 import cinder_kiln
 import crypt_archive
 import foundry_trench
@@ -547,7 +548,7 @@ def warden_bell(ringing):
 
 
 def moonlit_ring_assets(models, states, write):
-    """The Moonlit Ring's lair-only blocks (tools/moonlit_ring.py): Moonwood Leaves and the Warden Bells."""
+    """The Moonlit Ring's lair-only blocks (tools/moonlit_ring.py): Moonwood Leaves, the Warden Bells and raked turf."""
     write(models / "moonwood_leaves.json", {"parent": "minecraft:block/cube_all",
                                             "textures": {"all": rid("block/moonwood_leaves")}})
     write(states / "moonwood_leaves.json", {"variants": {"": {"model": rid("block/moonwood_leaves")}}})
@@ -558,6 +559,10 @@ def moonlit_ring_assets(models, states, write):
         for facing in HORIZONTAL:
             variants[f"facing={facing},ringing={str(ringing).lower()}"] = turned(name, facing)
     write(states / "warden_bell.json", {"variants": variants})
+    # Raked turf (the Alpha's trail, part 2): moss torn by his claws, on its earth.
+    write(models / "raked_turf.json", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": rid("block/raked_turf"), "side": rid("block/raked_turf_side"), "bottom": rid("block/raked_turf_side")}})
+    write(states / "raked_turf.json", {"variants": {f"turf={i}": {"model": rid("block/raked_turf")} for i in range(len(aw.TURFS))}})
 
 
 def assets(root, write, lang):

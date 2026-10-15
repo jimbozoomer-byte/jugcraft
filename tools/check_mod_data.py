@@ -8847,8 +8847,9 @@ def check_lairs():
             err(f"HowlingTotemRite.{name} is not tools/lairs.py TOTEM {key} ({la.TOTEM[key]})")
     if not java_number((folder / "WardenBellBlock.java").read_text(encoding="utf-8"), "SWING_TICKS", la.WARDEN_BELL["swing_ticks"]):
         err(f"WardenBellBlock.SWING_TICKS is not tools/lairs.py WARDEN_BELL swing_ticks ({la.WARDEN_BELL['swing_ticks']})")
-    if sorted(la.WEREWOLF_PELTS) != sorted(f"{MOD}:{pelt}" for pelt in ag.WEREWOLF_PELTS):
-        err(f"tools/lairs.py WEREWOLF_PELTS {la.WEREWOLF_PELTS} are not every werewolf kind's pelt {ag.WEREWOLF_PELTS}")
+    if sorted(la.WEREWOLF_PELTS) != sorted([f"{MOD}:{pelt}" for pelt in ag.WEREWOLF_PELTS] + [f"{MOD}:alpha_pelt"]):
+        err(f"tools/lairs.py WEREWOLF_PELTS {la.WEREWOLF_PELTS} are not every werewolf kind's pelt {ag.WEREWOLF_PELTS} "
+            "and the Alpha's")
     pelts = (load(DATA / MOD / "tags" / "item" / "werewolf_pelts.json") or {}).get("values", [])
     if sorted(pelts) != sorted(la.WEREWOLF_PELTS):
         err(f"#jugcraft:werewolf_pelts is not tools/lairs.py WEREWOLF_PELTS: {pelts}")
@@ -11840,6 +11841,370 @@ def check_iron_dreadnought():
         if f'"message.jugcraft.iron_dreadnought.{key}"' not in sent:
             err(f"tools/iron_dreadnought.py MESSAGES has {key}, which the Java never sends")
     for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
+def check_alpha_werewolf():
+    """The Alpha Werewolf (tools/alpha_werewolf.py, docs/features/alpha-werewolf.md): every number the Java uses is the
+    table's; his attacks are the table's, and his rule can be played (the Pack Gathers before the Last Hunt; his hide
+    turns some of a blow and a flush opens it; his hunts come sooner as he weakens, and each ends before the next is due;
+    the shadow spreads before he springs; in the Last Hunt he slips and arrives before the shadow spreads; the Tree
+    Leap's wind-up is its time in the trees and its shadow; each attack's reach is its range; his trail outlasts his
+    ambush); his clips last as long as the Java waits on them; where his fight looks for the ring's parts
+    (MoonlitRing.java) is where tools/moonlit_ring.py builds them: he waits on the stone's top with room for his body,
+    leaps down onto open floor, hides in each bell clearing's middle, staggers out onto open floor within his leash, his
+    pack lopes out of the trees onto open path, he lurks in the canopy, he bounds over the stone at its steps' heights,
+    and the Grey Mist he leaves opens in open cells on the stone's top; every floor he runs over in the clearing, its
+    spokes and its bell clearings is one his claws tear (so his trail always shows); a sprinting player anywhere in the
+    clearing comes within reach of any bell before he springs, and in the Last Hunt one at the stone's foot who sets off
+    as he slips comes within reach of any bell before he springs; his hide lets half of a plain blow through, silver
+    and a flush more; a bell is answered only by the fight it belongs to; every entity is registered, named and drawn;
+    his GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet
+    without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is
+    animated by both his controllers; his loot table is the table's and his trophies are Arms VII's; his recipe (and
+    none that makes the Alpha Pelt), tags and advancement are there; every message he sends has its words; and nothing
+    of his loads a chunk or leaves its dimension."""
+    import heapq
+    import math
+    import arms_variants
+    import alpha_werewolf as aw
+    import alpha_werewolf_models as am
+    import moonlit_ring as mr
+    import lairs as la
+    folder = JAVA_ROOT / "lair" / "alpha"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/alpha: no Java")
+        return
+    raked_java = (JAVA_ROOT / "lair" / "RakedTurfBlock.java").read_text(encoding="utf-8")
+    sources_all = {**sources, "RakedTurfBlock": raked_java}
+    for cls, table in (("AlphaWerewolfEntity", aw.ALPHA_WEREWOLF), ("AlphaWerewolfEntity", {"PACK_RADIUS": aw.PACK_RADIUS}),
+                       ("PackmateEntity", aw.PACKMATE), ("RakedTurfBlock", aw.RAKED), ("JugcraftAlpha", aw.CHARM)):
+        for name, value in table.items():
+            if not java_number(sources_all.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/alpha_werewolf.py's {value}")
+    boss = sources.get("AlphaWerewolfEntity", "")
+    angles = "PACK_ANGLES = {" + ", ".join(str(float(a)) for a in aw.PACK_ANGLES) + "};"
+    if angles not in boss:
+        err(f"AlphaWerewolfEntity.PACK_ANGLES is not tools/alpha_werewolf.py's: expected {angles}")
+    turfs = "new Block[] {" + ", ".join("Blocks." + t.split(":")[1].upper() for t in aw.TURFS) + "}"
+    if turfs not in raked_java or f'IntegerProperty.create("turf", 0, {len(aw.TURFS) - 1})' not in raked_java:
+        err(f"RakedTurfBlock's floors are not tools/alpha_werewolf.py TURFS, in order: expected {turfs}")
+    for attack, (windup, active, recovery, cooldown, near, far, chase, fury) in aw.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(chase).lower()}, {str(fury).lower()})")
+        if expected not in boss:
+            err(f"AlphaWerewolfEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"AlphaWerewolfEntity does not scale as every lair boss does ({call})")
+    d = aw.ALPHA_WEREWOLF
+    if not 0.0 < d["LAST_AT"] < d["GATHER_AT"] < 1.0:
+        err("tools/alpha_werewolf.py: the Last Hunt (LAST_AT) must come after the Pack Gathers (GATHER_AT)")
+    if not 0.0 < d["HIDE"] < 1.0 or d["FLUSHED_SILVER"] <= 1.0:
+        err("tools/alpha_werewolf.py: his hide must let some of a blow through and turn some, and a flush must let silver bite deeper")
+    hunt = d["MARK_TICKS"] + d["RUN_TICKS"] + d["AMBUSH_TICKS"]
+    if not hunt < d["LAST_HUNT_EVERY"] < d["FURY_HUNT_EVERY"] < d["HUNT_EVERY"]:
+        err("tools/alpha_werewolf.py: his hunts must come sooner as he weakens, and each must end before the next is due "
+            f"(MARK_TICKS + RUN_TICKS + AMBUSH_TICKS {hunt} < LAST_HUNT_EVERY < FURY_HUNT_EVERY < HUNT_EVERY)")
+    if not 0 < d["SPRING_TICKS"] < d["SHADOW_TICKS"] < d["AMBUSH_TICKS"]:
+        err("tools/alpha_werewolf.py: the shadow must spread before he springs (SPRING_TICKS < SHADOW_TICKS < AMBUSH_TICKS)")
+    if not 0 < d["SWITCH_AT"] and d["SWITCH_AT"] + d["RUN_TICKS"] < d["AMBUSH_TICKS"] - d["SHADOW_TICKS"]:
+        err("tools/alpha_werewolf.py: in the Last Hunt he must reach his second clearing before the shadow spreads "
+            "(SWITCH_AT + RUN_TICKS < AMBUSH_TICKS - SHADOW_TICKS)")
+    if not 0 < d["STAGGER_TICKS"] < d["FLUSHED_TICKS"] or not 0 < d["COWER_TICKS"] <= d["FLUSHED_TICKS"]:
+        err("tools/alpha_werewolf.py: a flush must outlast his stagger, and his pack must cower no longer than it")
+    leap = aw.ATTACKS["TREE_LEAP"]
+    if leap[0] != d["TREE_TICKS"] + d["SHADOW_TICKS"] or d["SPRING_TICKS"] > d["SHADOW_TICKS"]:
+        err("tools/alpha_werewolf.py: the Tree Leap's wind-up must be his time in the trees and its shadow "
+            "(TREE_LEAP windup = TREE_TICKS + SHADOW_TICKS), and he must drop within the shadow's time")
+    if aw.ATTACKS["CLAW_RAKE"][1] <= d["RAKE_GAP"]:
+        err("tools/alpha_werewolf.py: both rakes of the Claw Rake must fall in its active ticks (RAKE_GAP < active)")
+    for attack, reach in (("CLAW_RAKE", d["RAKE_REACH"]), ("POUNCE", d["POUNCE_RANGE"]), ("RENDING_HOWL", d["HOWL_REACH"]),
+                          ("HAMSTRING_BITE", d["BITE_REACH"])):
+        if aw.ATTACKS[attack][5] != reach:
+            err(f"tools/alpha_werewolf.py: he must use {attack} only on a foe within its reach ({reach})")
+    if len(aw.PACK_ANGLES) != d["PACK_SIZE"]:
+        err("tools/alpha_werewolf.py: PACK_ANGLES must give each of his PACK_SIZE Packmates a place")
+    if aw.RAKED["KNIT_TICKS"] < d["RUN_TICKS"] + d["AMBUSH_TICKS"]:
+        err("tools/alpha_werewolf.py: his trail must last as long as his run and his ambush (KNIT_TICKS)")
+    clips = am.alpha_werewolf_animations()["animations"]
+    for clip, ticks in (("wake", d["WAKE_TICKS"]), ("gather", d["GATHER_TICKS"]), ("mark", d["MARK_TICKS"]),
+                        ("rake_windup", aw.ATTACKS["CLAW_RAKE"][0]), ("pounce_windup", aw.ATTACKS["POUNCE"][0]),
+                        ("howl_windup", aw.ATTACKS["RENDING_HOWL"][0]), ("bite_windup", aw.ATTACKS["HAMSTRING_BITE"][0])):
+        length = clips.get(f"animation.alpha_werewolf.{clip}", {}).get("animation_length", 0)
+        if round(length * 20) != ticks:
+            err(f"tools/alpha_werewolf_models.py: his {clip} clip ({length} s) must last {ticks} ticks, as the Java waits on it")
+
+    # Where his fight looks for the ring's parts is where tools/moonlit_ring.py builds them.
+    ring_java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "MoonlitRing.java").read_text(encoding="utf-8"))
+    for jname, value in (("STONE_CORE", mr.STONE[0][0]), ("STONE_STEP", mr.STONE[1][0]), ("STONE_FOOT", mr.STONE[2][0]),
+                         ("STONE_EXIT_WEST", mr.STONE_EXIT["x"][0]), ("STONE_EXIT_EAST", mr.STONE_EXIT["x"][1]),
+                         ("STONE_EXIT_Y", mr.STONE_EXIT["y"]), ("STONE_EXIT_Z", mr.STONE_EXIT["z"])):
+        if not java_number(ring_java, jname, value):
+            err(f"MoonlitRing.{jname} is not tools/moonlit_ring.py's {value}")
+    if [h for _, h in mr.STONE] != [3, 2, 1] or "return from <= STONE_CORE ? 3 : from <= STONE_STEP ? 2 : from <= STONE_FOOT ? 1 : 0;" not in ring_java:
+        err("MoonlitRing.stoneHeight must step the Howling Stone as tools/moonlit_ring.py STONE does")
+    blocks = mr.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:fern", "jugcraft:lair_exit", "jugcraft:werewolf_rug"}
+    free = lambda pos: name(pos) in passable
+    solid = lambda pos: not free(pos) and name(pos) not in ("minecraft:moss_carpet",)
+    registry = sources.get("JugcraftAlpha", "")
+    size = re.search(r'entity\("alpha_werewolf".*?sized\(([\d.]+)F, ([\d.]+)F\)', registry, re.S)
+    width, height = (float(size.group(1)), float(size.group(2))) if size else (0.0, 0.0)
+    if not size:
+        err("JugcraftAlpha: no box for the Alpha Werewolf (sized(...)), which the audit measures his room by")
+    tall = math.ceil(height)
+
+    def room(x, z, floor_y, wide=None, high=None):
+        """Whether a box `wide` across and `high` tall (his, by default) fits standing at (x, z) on the floor at floor_y."""
+        w = width if wide is None else wide
+        t = tall if high is None else math.ceil(high)
+        for bx in range(math.floor(x - w / 2), math.floor(x + w / 2 - 1.0E-6) + 1):
+            for bz in range(math.floor(z - w / 2), math.floor(z + w / 2 - 1.0E-6) + 1):
+                if not solid((bx, floor_y - 1, bz)) or not all(free((bx, floor_y + dy, bz)) for dy in range(t)):
+                    return False
+        return True
+    wx, wy, wz, _ = mr.WAIT
+    if not room(wx, wz, wy):
+        err(f"Where the Alpha waits on the stone, ({wx}, {wy}, {wz}), has no room for him")
+    cx, cz = mr.CENTRE
+    for x, z in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+        down = (cx + x * d["DOWN_AT"], cz + z * d["DOWN_AT"])
+        if not room(*down, mr.STAND):
+            err(f"Where he leaps down off the stone, {down}, is not open floor with room for him")
+    for bell in la.BELL_NAMES:
+        gx, gz = mr.glade_middle(bell)
+        if not room(gx, gz, mr.STAND):
+            err(f"The middle of the {bell} bell's clearing, where he hides, has no room for him")
+        way = mr.BELLS[bell]["way"]
+        out = (cx + way[0] * d["FLUSHED_TO"], cz + way[1] * d["FLUSHED_TO"])
+        if not room(*out, mr.STAND) or not mr.in_ring(math.floor(out[0]), math.floor(out[1])) or d["FLUSHED_TO"] > d["LEASH"]:
+            err(f"Where he staggers out of the {bell} bell's clearing, {out}, is not open floor in the clearing within his leash")
+    pack_wide, pack_high = 0.9 * aw.PACKMATE["SCALE"], 2.4 * aw.PACKMATE["SCALE"]
+    if "sized(0.9F, 2.4F)" not in registry:
+        err("JugcraftAlpha: a Packmate's box must be a werewolf's (0.9 by 2.4), as the audit measures its room")
+    for angle in aw.PACK_ANGLES:
+        rad = math.radians(angle)
+        spot = (cx + math.sin(rad) * aw.PACK_RADIUS, cz - math.cos(rad) * aw.PACK_RADIUS)
+        if not room(*spot, mr.STAND, pack_wide, pack_high) or not mr.PATH[0] - 0.5 <= aw.PACK_RADIUS <= mr.PATH[1] + 0.5:
+            err(f"Where a Packmate lopes out of the trees, {spot}, is not open path with room for it")
+    if not (mr.CANOPY_LOW <= mr.STAND + d["TREE_UP"] <= mr.CANOPY_HIGH and mr.CANOPY_INNER + mr.CANOPY_RAG < d["TREE_AT"]):
+        err("tools/alpha_werewolf.py: where he lurks in the Tree Leap (TREE_AT, TREE_UP) must be in the canopy")
+    for (x, y, z) in mr.stone_exit_cells():
+        bottom = y == mr.STONE_EXIT["y"]
+        if not free((x, y, z)) or bottom and (not solid((x, y - 1, z)) or mr.stone_height(x, z) != y - mr.STAND):
+            err(f"The Grey Mist he leaves on the stone would not stand on its top in the open at {(x, y, z)}")
+    # Every floor he runs over is one his claws tear, so his trail always shows.
+    tearable = set(aw.TURFS)
+    for x in range(mr.SIZE[0]):
+        for z in range(mr.SIZE[2]):
+            if (mr.in_ring(x, z) or mr.in_glade(x, z)) and free((x, mr.STAND, z)) and name((x, mr.SOIL, z)) not in tearable \
+                    and mr.stone_height(x, z) == 0:
+                err(f"His claws would not tear the floor at {(x, mr.SOIL, z)} ({name((x, mr.SOIL, z))}): his trail would not show there")
+                break
+    # A sprinting player reaches a bell in time: from anywhere in the clearing before he springs, and in the Last Hunt
+    # from the stone's foot, setting off as he slips. The walk is over open floor cells, never cutting a corner.
+    floors = tearable | {"minecraft:dirt"}
+    cells = {(x, z) for x in range(mr.SIZE[0]) for z in range(mr.SIZE[2])
+             if math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= mr.GLADE_AT + mr.GLADE_RADIUS + 2 and not mr.in_camp(x, z)
+             and name((x, mr.SOIL, z)) in floors and free((x, mr.STAND, z)) and free((x, mr.STAND + 1, z))}
+    ring = [c for c in cells if mr.in_ring(*c)]
+    foot = [c for c in ring if math.hypot(c[0] + 0.5 - cx, c[1] + 0.5 - cz) <= mr.STONE[-1][0] + 2.5]
+    if not ring or not foot:
+        err("The audit found no open floor in the clearing to walk")
+    for bell, (bx, by, bz) in mr.bell_cells().items():
+        def near(c):
+            return math.dist((c[0] + 0.5, mr.STAND + 1.62, c[1] + 0.5), (bx + 0.5, by + 0.5, bz + 0.5)) <= aw.REACH
+        dist = {c: 0.0 for c in cells if near(c)}
+        queue = [(0.0, c) for c in dist]
+        while queue:
+            dd, (x, z) = heapq.heappop(queue)
+            if dd > dist[(x, z)]:
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in cells or (dx and dz and ((x + dx, z) not in cells or (x, z + dz) not in cells)):
+                    continue
+                nd = dd + (math.sqrt(2.0) if dx and dz else 1.0)
+                if nd < dist.get(n, math.inf):
+                    dist[n] = nd
+                    heapq.heappush(queue, (nd, n))
+        far = max(ring, key=lambda c: dist.get(c, math.inf)) if ring else (0, 0)
+        if dist.get(far, math.inf) / aw.SPRINT > d["AMBUSH_TICKS"] - d["SPRING_TICKS"]:
+            err(f"From the clearing at {far} a sprinting player cannot come within reach of the {bell} bell before he springs "
+                f"({dist.get(far, math.inf):.1f} blocks)")
+        far = max(foot, key=lambda c: dist.get(c, math.inf)) if foot else (0, 0)
+        if dist.get(far, math.inf) / aw.SPRINT > d["AMBUSH_TICKS"] - d["SPRING_TICKS"] - d["SWITCH_AT"]:
+            err(f"In the Last Hunt, from the stone's foot at {far} a sprinting player setting off as he slips cannot come "
+                f"within reach of the {bell} bell before he springs ({dist.get(far, math.inf):.1f} blocks)")
+
+    # His rule: his hide, the flush, and the bells.
+    if not re.search(r"\} else \{\s*dealt = amount \* HIDE;", boss) or "dealt = silver ? amount * FLUSHED_SILVER : amount;" not in boss:
+        err("AlphaWerewolfEntity.hurtServer must let HIDE of a plain blow through his hide, and a flush let it all through "
+            "(silver FLUSHED_SILVER times)")
+    if "Bell bell = MoonlitRing.bellAt(origin, pos);" not in boss or "if (hunt == Hunt.HIDE && glade == bell) {" not in boss:
+        err("AlphaWerewolfEntity.bellRung must answer only his own ring's bells, and flush him only from the clearing he hides in")
+    if "if (phase == Phase.WAKING || phase == Phase.GATHERING || hidden()) {" not in boss:
+        err("AlphaWerewolfEntity.hurtServer: waking, gathering his pack and hidden, no blow may reach him")
+    for needed, why in (("Lairs.onPlaced(Lair.MOONLIT_RING, AlphaWerewolfEntity::summon)", "crouch him on the stone of every ring"),
+                        ("WardenBellBlock.onRung(JugcraftAlpha::bellRung)", "answer the bells"),
+                        ("alpha.bellRung(level, pos, player)", "tell him who rang which bell"),
+                        ("getOffhandItem().is(PACKFINDER_CHARM)", "make the Packfinder Charm work from the offhand")):
+        if needed not in registry:
+            err(f"JugcraftAlpha must {why} ({needed})")
+    packmate = sources.get("PackmateEntity", "")
+    if "master.took(player, dealt)" not in packmate or "meltAway(level)" not in packmate or "amount * SILVER" not in packmate:
+        err("PackmateEntity: whoever hurts one takes part, silver bites deeper, and it melts away when he is gone")
+    if "level.scheduleTick(pos, this, KNIT_TICKS)" not in raked_java:
+        err("RakedTurfBlock must knit back by itself (a tick scheduled as it is torn)")
+    if 'fixture("raked_turf", RakedTurfBlock::new' not in (JAVA_ROOT / "lair" / "JugcraftLairs.java").read_text(encoding="utf-8"):
+        err("JugcraftLairs must register raked turf as one of the ring's fixtures")
+    client = (CLIENT_JAVA_ROOT / "AlphaWerewolfClient.java").read_text(encoding="utf-8")
+    if "AlphaWerewolfClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register AlphaWerewolfClient")
+    if "lair.alpha.JugcraftAlpha.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftAlpha")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftAlpha.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if "new WerewolfModel(context.bakeLayer(WerewolfModel.LAYER))" not in client:
+        err("AlphaWerewolfClient must draw his Packmates as the werewolves are (WerewolfModel)")
+    loot_java = sources.get("AlphaWerewolfLoot", "")
+    if f'ADVANCEMENT = "{aw.ADVANCEMENT["key"]}";' not in loot_java:
+        err("AlphaWerewolfLoot's advancement differs from tools/alpha_werewolf.py")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in aw.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftAlpha does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != aw.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {aw.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"AlphaWerewolfClient draws no {entity}")
+    for item in aw.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftAlpha does not register {item}")
+    # His GeckoLib body.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("alpha_werewolf", set()).add(f"animation.alpha_werewolf.{clip}")
+    for entity, body in aw.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in am.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        sheet_w = definition.get("description", {}).get("texture_width", 0)
+        sheet_h = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, dd = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + dd), v + dd + h_)
+                if region[2] > sheet_w or region[3] > sheet_h:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {sheet_w}x{sheet_h} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in aw.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"AlphaWerewolfClient: the {entity}'s glow layer must match tools/alpha_werewolf.py GLOWING")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (sheet_w * am.TEXTURE_SCALE, sheet_h * am.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {sheet_w * am.TEXTURE_SCALE}x{sheet_h * am.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key his eyes.
+    owned = {bone: controller for controller, bones in am.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in clips.items() if aw.GECKO else ():
+        short = clip_name.split(".")[-1]
+        controller = "eyes" if short.startswith("eyes_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"alpha_werewolf: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *am.CONTROLLERS):
+        if f'new AnimationController<AlphaWerewolfEntity>("{controller}"' not in boss:
+            err(f"AlphaWerewolfEntity has no {controller} controller (tools/alpha_werewolf_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/werewolf_alpha table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "alpha_werewolf.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/alpha_werewolf.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            found_loot[entry.get("name", "").split(":")[-1]] = pool.get("condition", {}).get("chance", 1.0)
+    expected = {"alpha_pelt": 1.0, **{item: aw.TROPHY_CHANCE for item in aw.TROPHIES}, **aw.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/alpha_werewolf.json gives {found_loot}, not tools/alpha_werewolf.py's {expected}")
+    if tuple(arms_variants.trophies("werewolf_alpha")) != tuple(aw.TROPHIES):
+        err(f"tools/alpha_werewolf.py TROPHIES {aw.TROPHIES} are not Arms VII's: {arms_variants.trophies('werewolf_alpha')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "werewolf_alpha.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in aw.TROPHIES]:
+        err(f"loot_table/bosses/werewolf_alpha.json holds {held_items}, not his trophies {aw.TROPHIES}")
+    for table_id in ("entities/alpha_werewolf", "bosses/werewolf_alpha"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"AlphaWerewolfLoot must roll loot_table/{table_id}.json")
+    for trophy in aw.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftAlpha must find the {trophy} (Arms VII registers it)")
+    for key in aw.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # The Alpha Pelt comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:alpha_pelt":
+            err(f"recipe/{path.name} makes the Alpha Pelt, which only the Alpha Werewolf gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in aw.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{aw.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{aw.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in aw.MESSAGES:
+        if f'"message.jugcraft.alpha_werewolf.{key}"' not in sent:
+            err(f"tools/alpha_werewolf.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources_all.items():
         for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
             if key not in lang:
                 err(f"{cls}.java sends {key}, which has no words in en_us.json")
@@ -15611,6 +15976,7 @@ def main():
     check_acquisition(registered)
     check_crypt_lich()
     check_iron_dreadnought()
+    check_alpha_werewolf()
     check_material_sets()
     check_art()
     check_pixel_hollows()

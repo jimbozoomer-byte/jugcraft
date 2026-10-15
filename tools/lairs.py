@@ -66,6 +66,7 @@ LAIR_BLOCKS = {
     "ground_terminal": "Ground Terminal",
     "moonwood_leaves": "Moonwood Leaves",
     "warden_bell": "Warden Bell",
+    "raked_turf": "Raked Turf",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
@@ -255,8 +256,10 @@ RECIPES = {
     "howling_totem": {"pattern": ["SPS", " B ", "BB "], "key": {
         "S": "#c:ingots/silver", "P": "#jugcraft:werewolf_pelts", "B": "minecraft:bone"}},
 }
-# What counts as a werewolf's pelt for the totem: every kind's (tools/agriculture.py WEREWOLF kinds).
-WEREWOLF_PELTS = ["jugcraft:werewolf_pelt", "jugcraft:snow_werewolf_pelt", "jugcraft:shadow_werewolf_pelt"]
+# What counts as a werewolf's pelt for the totem: every kind's (tools/agriculture.py WEREWOLF kinds), and the Alpha's
+# own (tools/alpha_werewolf.py), one for one.
+WEREWOLF_PELTS = ["jugcraft:werewolf_pelt", "jugcraft:snow_werewolf_pelt", "jugcraft:shadow_werewolf_pelt",
+                  "jugcraft:alpha_pelt"]
 
 # Each lair's dimension: a void with its own biome; fixed time, no weather, no beds or respawn anchors. Its sky, fog and
 # light colours, its music, and the motes drifting in its air; and what a player is told on coming in.
