@@ -14,7 +14,7 @@ Eight screens that each had their own style now share the machine screens' looks
 | Screen | Look | What changed |
 | --- | --- | --- |
 | Geo-Resonance Prospector | workshop | Brass body and orange glass from the workshop machines. The signal count is in a chip, and each reading's depth is a tag (brighter nearer the surface). The resonance gauge sits beside a help strip: "Strongest first. More bars, more ore. Readings are approximate." The warm-up and scan line stay. |
-| Rocket pad | industrial | The plain grey screen is gone. It now has the industrial body, pane and tray, an arrow from the cargo to the rocket, and faint rocket and plan hints in the empty slots. Hovering a slot says what goes there. Launch is a key with a tooltip. The last result sits in a chip by the title, and the lamp is green after a launch and red when one failed. |
+| Rocket pad | industrial | The plain grey screen is gone. It now has the industrial body, pane and tray, an arrow from the cargo to the rocket (lit once a rocket is loaded), and faint rocket and plan hints in the empty slots. Hovering a slot says what goes there. Launch is a key with a tooltip. The last result sits in a chip by the title, and the lamp is green after a launch and red when one failed. |
 | Storage tank | industrial | The cutaway tank picture stays, in its own pane. Its readouts are grouped into Contents (with a fill bar), Flow and Outlet (with a lamp). The rating is a chip, and the outlet hint is a help strip. |
 | Logic controller | advanced | A heading row (#, SENSOR, LEVEL, TARGET, SET) and hologram keys with tooltips. Rules that are on stand out, and an ON action key is lit. The channel strip shows each reading under its swatch (hover one for its name), plus a help strip. |
 | Reactor console | advanced | The owner-approved layout is unchanged. It now has the hologram body and panes, a status lamp by the title, and the status in a chip. |
@@ -60,9 +60,17 @@ Client game tests take screenshots of:
 Local, without Gradle or a game:
 - `python tools/generate_material_data.py` regenerated `gui/machine_themes.json` (the drone theme, frame colours, the screens map) and the new lang strings. A second run changed nothing.
 - The tiles were checked by tiling them 3×2: no visible seams.
-- The other checks and the Java syntax parse: see the PR.
+- `python tools/check_mod_data.py`: PASS (2648 material IDs, data files and recipe audit). `python scripts/check_repository.py`: PASS. `python -m unittest discover -s scripts/tests`: OK. Tree-sitter Java syntax parse, 624 files: 0 errors.
 
-CI: pending.
+CI, [run 38657990009](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38657990009) on 1e3b48489: green. The mod compiled, the repository checks passed, and all five client shards passed (JugcraftClientGameTests, GuideScreenshotGameTests, JugcraftServerClientGameTests, NuclearClientGameTests, DroneClientGameTests and TowerClientGameTests). Every screen above was in its shots (480×270 thumbnails of an 854×480 window, GUI 427×240), and they showed these faults, fixed in the next commit:
+- The logic controller was 252 high, taller than the 240 window, so its title and help strip were cut off. It is now 236: rows 18 apart, a lower channel strip, and the help strip under it.
+- The rocket pad's arrow from the cargo to the rocket was drawn in the slot shadow colour on the dark pane, so it could not be seen. It is now faint, and lit once a rocket is loaded.
+- The remote shutdown panel's "Reset from the console" ran under the SCRAM button (a fault from before the restyle). The trip text now wraps to the left of the button.
+- The depot terminal's FLEET tab with ten tiers drew the last row on the pane's edge. The rows are now 10 apart.
+- The drone tower's hint and legend were cut short with an ellipsis (also from before). They now wrap.
+- The workshop glass's band ran across the middle of the prospector's readings. It is now the rule under the heading.
+
+The re-run with these fixes: see the PR.
 
 Not run:
 - a human using each screen;

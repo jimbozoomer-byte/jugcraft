@@ -65,9 +65,14 @@ public class RocketPadScreen extends AbstractContainerScreen<RocketPadMenu> {
 		for (int slot = 0; slot < RocketPadBlockEntity.CARGO; slot++) {
 			MachineSkin.slot(graphics, theme, x + RocketPadMenu.CARGO_X + (slot % 3) * 18, y + RocketPadMenu.CARGO_Y + (slot / 3) * 18);
 		}
-		// The cargo goes into the rocket.
-		MachineSkin.arrow(graphics, theme, x + RocketPadMenu.CARGO_X + 58, y + RocketPadMenu.ROCKET_Y + 8,
-				result == RocketPadBlockEntity.Result.LAUNCHED ? 1 : 0);
+		// The cargo goes into the rocket: an arrow, lit once a rocket is loaded, faint until then.
+		boolean loaded = RocketPadBlockEntity.ROCKET < menu.slots.size() && menu.slots.get(RocketPadBlockEntity.ROCKET).hasItem();
+		int arrowX = x + RocketPadMenu.CARGO_X + 58;
+		int arrowY = y + RocketPadMenu.ROCKET_Y + 8;
+		for (int column = 0; column < 24; column++) {
+			int half = column < 18 ? 1 : 5 - (column - 18);
+			graphics.fill(arrowX + column, arrowY - half, arrowX + column + 1, arrowY + half + 1, loaded ? theme.progress() : theme.dim());
+		}
 		slot(graphics, RocketPadMenu.ROCKET_X, RocketPadMenu.ROCKET_Y, RocketPadBlockEntity.ROCKET, MachineSkin.Icon.ROCKET);
 		slot(graphics, RocketPadMenu.PLAN_X, RocketPadMenu.PLAN_Y, RocketPadBlockEntity.PLAN, MachineSkin.Icon.PLAN);
 	}

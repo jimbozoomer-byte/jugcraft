@@ -134,7 +134,8 @@ public class TowerScreen extends Screen {
 			say(graphics, Component.translatable("screen.jugcraft.tower.plinth_missing").getString(), x, y, AMBER);
 			y += 11;
 		}
-		say(graphics, Component.translatable("screen.jugcraft.tower.hint").getString(), x, y, theme.dim());
+		MachineSkin.wrap(graphics, font, Component.translatable("screen.jugcraft.tower.hint"), x, y, left + WIDTH - 12 - x, upgrade.getY() - 2,
+				theme.dim());
 	}
 
 	/** How many of a module the core holds. */
@@ -163,7 +164,7 @@ public class TowerScreen extends Screen {
 		showTop = Math.max(24, Math.min(IMAGE_BLOCKS, showTop));
 		float v0 = 1f - (float) showTop / IMAGE_BLOCKS;
 		int panelW = 88;
-		int panelH = HEIGHT - 48;
+		int panelH = HEIGHT - 56;
 		float aspect = (float) IMAGE_W / (showTop * 2f);
 		int w = Math.min(panelW, Math.round(panelH * aspect));
 		int h = Math.min(panelH, Math.round(w / aspect));
@@ -171,8 +172,9 @@ public class TowerScreen extends Screen {
 		int py = top + 24 + panelH - h;
 		Identifier image = Jugcraft.id("textures/gui/drone_tower/tier_" + Math.max(0, Math.min(9, tier)) + ".png");
 		graphics.blit(image, px, py, px + w, py + h, 0f, 1f, v0, 1f);
-		graphics.text(font, ScreenKit.fit(font, Component.translatable("screen.jugcraft.tower.legend").getString(), 86), left + 9, top + HEIGHT - 16,
-				theme.dim(), false);
+		// The legend, on two lines under the picture.
+		MachineSkin.wrap(graphics, font, Component.translatable("screen.jugcraft.tower.legend"), left + 9, top + HEIGHT - 26, 86, top + HEIGHT - 7,
+				theme.dim());
 	}
 
 	private void say(GuiGraphicsExtractor g, String text, int x, int y, int color) {

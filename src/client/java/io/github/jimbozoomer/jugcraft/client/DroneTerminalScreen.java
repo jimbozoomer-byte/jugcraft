@@ -153,7 +153,7 @@ public class DroneTerminalScreen extends Screen {
 			g.text(font, fit(name, docked - x - 6), x, row, theme.text(), false);
 			g.text(font, String.valueOf(entry.getValue()[0]), docked, row, theme.text(), false);
 			g.text(font, String.valueOf(entry.getValue()[1]), airborne, row, entry.getValue()[1] > 0 ? theme.label() : theme.text(), false);
-			row += 11;
+			row += 10;
 		}
 	}
 

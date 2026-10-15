@@ -91,10 +91,6 @@ public final class ScreenKit {
 				g.fill(x - 1, y - 1, x + w + 1, y + h + 1, f.outline());
 				g.fill(x, y, x + w, y + h, f.screen());
 				grid(g, x + 1, y + 1, w - 2, h - 2, 5, f.grid());
-				int band = y + h * 3 / 5;
-				if (f.band() != 0) {
-					g.fill(x + 1, band, x + w - 1, Math.min(band + 3, y + h - 1), f.band());
-				}
 				g.outline(x, y, w, h, f.rim());
 			}
 			case "industrial" -> {

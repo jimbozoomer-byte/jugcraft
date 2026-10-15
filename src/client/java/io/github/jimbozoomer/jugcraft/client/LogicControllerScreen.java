@@ -21,9 +21,9 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 	/** The channel colours, as drawn on the sensor and relay lamps (tools/control_electronics.py CHANNEL_COLORS). */
 	public static final int[] COLORS = {0xF0F0F0, 0xF9801D, 0xC74EBD, 0x3AB3DA, 0xFED83D, 0x80C71F, 0xF38BAA, 0x474F52,
 			0x9D9D97, 0x169C9C, 0x8932B8, 0x3C44AA, 0x835432, 0x5E7C16, 0xB02E26, 0x1D1D21};
-	private static final int ROW = 19;
-	private static final int TOP = 31;
-	private static final int STRIP = 189;
+	private static final int ROW = 18;
+	private static final int TOP = 29;
+	private static final int STRIP = 176;
 	/** Each key of a rule: its left edge and width (the rule number, sensor, compare, -, +, target, on/off). */
 	private static final int[][] KEYS = {{8, 20}, {48, 60}, {110, 20}, {134, 14}, {182, 14}, {222, 48}, {272, 22}};
 	private static final String[] TIPS = {"enable", "sensor", "compare", "down", "up", "target", "action"};
@@ -31,7 +31,7 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 	private final ScreenKit.TextButton[][] buttons = new ScreenKit.TextButton[LogicControllerBlockEntity.RULES][];
 
 	public LogicControllerScreen(LogicControllerMenu menu, Inventory inventory, Component title) {
-		super(menu, inventory, title, 300, 252);
+		super(menu, inventory, title, 300, 236);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 		// A channel swatch hovered: its name, its reading and whether this controller has it on.
 		int mx = mouseX - leftPos;
 		int my = mouseY - topPos;
-		if (my >= STRIP + 4 && my < STRIP + 30) {
+		if (my >= STRIP + 4 && my < STRIP + 28) {
 			int channel = (mx - 8) / 18;
 			if (mx >= 8 && channel >= 0 && channel < Channels.COUNT && (mx - 8) % 18 < 14) {
 				int reading = menu.reading(channel);
@@ -106,7 +106,7 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 		}
 		MachineSkin.lamp(graphics, x + 4, y + 3, anyOn ? theme.ok() : theme.dim());
 		ScreenKit.pane(graphics, theme, x + 4, y + 13, imageWidth - 8, STRIP - 16);
-		graphics.fill(x + 8, y + 27, x + imageWidth - 8, y + 28, (theme.dim() & 0x00FFFFFF) | 0x90000000);
+		graphics.fill(x + 8, y + 26, x + imageWidth - 8, y + 27, (theme.dim() & 0x00FFFFFF) | 0x90000000);
 		// The rules that are on stand out behind their keys.
 		for (int rule = 0; rule < LogicControllerBlockEntity.RULES; rule++) {
 			if (menu.rule(rule, LogicControllerBlockEntity.ENABLED) == 1) {
@@ -115,7 +115,7 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 			}
 		}
 		// The channel strip: a swatch per channel, lit under while this controller has it on.
-		ScreenKit.pane(graphics, theme, x + 4, y + STRIP, imageWidth - 8, 34);
+		ScreenKit.pane(graphics, theme, x + 4, y + STRIP, imageWidth - 8, 30);
 		for (int channel = 0; channel < Channels.COUNT; channel++) {
 			int sx = x + 8 + channel * 18;
 			graphics.fill(sx - 1, y + STRIP + 4, sx + 15, y + STRIP + 13, theme.slotDark());
@@ -124,7 +124,7 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 				graphics.fill(sx + 4, y + STRIP + 14, sx + 10, y + STRIP + 16, theme.ok());
 			}
 		}
-		ScreenKit.help(graphics, font, theme, x + 4, y + STRIP + 37, imageWidth - 8, imageHeight - STRIP - 41,
+		ScreenKit.help(graphics, font, theme, x + 4, y + STRIP + 33, imageWidth - 8, imageHeight - STRIP - 37,
 				Component.translatable("screen.jugcraft.logic_controller.help"));
 	}
 
@@ -145,7 +145,7 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 			graphics.text(font, level, 165 - font.width(level) / 2, y, color, false);
 			graphics.text(font, Component.translatable("screen.jugcraft.logic_controller.then").getString(), 199, y, theme.dim(), false);
 		}
-		int y = STRIP + 19;
+		int y = STRIP + 18;
 		for (int channel = 0; channel < Channels.COUNT; channel++) {
 			int reading = menu.reading(channel);
 			String text = reading < 0 ? "-" : String.valueOf(reading);
@@ -155,6 +155,6 @@ public class LogicControllerScreen extends AbstractContainerScreen<LogicControll
 
 	private void heading(GuiGraphicsExtractor graphics, String key, int x, int width) {
 		String text = Component.translatable("screen.jugcraft.logic_controller." + key).getString();
-		graphics.text(font, text, x + (width - font.width(text)) / 2, 17, theme.dim(), false);
+		graphics.text(font, text, x + (width - font.width(text)) / 2, 16, theme.dim(), false);
 	}
 }

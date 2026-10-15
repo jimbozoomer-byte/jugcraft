@@ -74,7 +74,9 @@ public class ProspectorScreen extends Screen {
 		int text = t < 0.4F ? theme.dim() : theme.text();
 
 		graphics.text(font, t("survey"), sx + 6, sy + 5, text, false);
-		graphics.fill(sx + 4, sy + 15, sx + sw - 4, sy + 16, (theme.dim() & 0x00FFFFFF) | 0xA0000000);
+		// Under the heading, the workshop glass's band (a plain rule if the look has none).
+		int band = theme.frame().band();
+		graphics.fill(sx + 4, sy + 15, sx + sw - 4, sy + 17, band != 0 ? band : (theme.dim() & 0x00FFFFFF) | 0xA0000000);
 
 		if (readings.isEmpty() && (int) (t * 2) % 2 == 0) {
 			String none = t("none");

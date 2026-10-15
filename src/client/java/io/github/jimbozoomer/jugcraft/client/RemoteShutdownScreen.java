@@ -184,8 +184,11 @@ public class RemoteShutdownScreen extends Screen {
 	/** The reactor trip under its guard, and what it does. */
 	private void trip(GuiGraphicsExtractor g, ReactorCore core, int x, int y) {
 		panel(g, x, y, 164, 60, t("trip"));
-		g.text(font, t(core.scrammed ? "tripped_line" : "trip_line"), x + 6, y + 22, core.scrammed ? RED : DIM, false);
-		g.text(font, t("trip_line2"), x + 6, y + 32, DIM, false);
+		// Wrapped to the left of the trip button, which sits over the pane's right side.
+		int width = left + TRIP[0] - 4 - (x + 6);
+		int line = MachineSkin.wrap(g, font, Component.literal(t(core.scrammed ? "tripped_line" : "trip_line")), x + 6, y + 21, width, y + 58,
+				core.scrammed ? RED : DIM);
+		MachineSkin.wrap(g, font, Component.literal(t("trip_line2")), x + 6, line + 1, width, y + 58, DIM);
 		g.blit(RenderPipelines.GUI_TEXTURED, ReactorConsoleScreen.SCRAM_TEXTURE, left + TRIP[0], top + TRIP[1], 0, 0, 48, 48, 48, 48, 48, 48);
 	}
 
