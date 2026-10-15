@@ -12055,6 +12055,7 @@ def check_concordance(registered):
     check_journey()
     check_delivery()
     check_game_test_entrypoints()
+    check_load_card()
 
 
 def check_composition(co, root, lang, registered, research):
@@ -12331,6 +12332,75 @@ def check_game_test_entrypoints():
         text = path.read_text(encoding="utf-8")
         if ("@GameTest" in text or "ClientGameTest" in text) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
             err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
+
+
+def check_load_card():
+    """Concordance Chunk C, C-10 (C-P20, C-P66): the workshop load card. It stays opted in: it measures only when Fabric's
+    filter names it alone, so ordinary runs pass it at once. It names Fabric's own id for itself, reads whole 100-tick
+    windows of MinecraftServer's ring over at least 6,000 ticks, has room in maxTicks for its phases, force-loads its
+    yard from begin() (the game test server sets no simulation distance) and never schedules an entry for every
+    remaining tick (test work that shrinks as the run goes on). It builds every part of C-10's workload, checks the
+    courier ledger and is registered. docs/TESTING.md, and the Build workflow if it carries the job, name the same id,
+    and the Gleaner's Heart search is timed (C-P21). Comments are ignored."""
+    name = "ConcordanceWorkshopLoadGameTests"
+    test_dir = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    path = test_dir / f"{name}.java"
+    if not path.exists():
+        err(f"src/gametest/{name}.java: missing (Concordance Chunk C's load card, C-10)")
+        return
+    text = path.read_text(encoding="utf-8")
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text, flags=re.S)
+    ident = "jugcraft-test:" + re.sub(r"([a-z])([A-Z])", r"\1_\2", f"{name}_loadCard").lower()
+    if f'public static final String ID = "{ident}";' not in code:
+        err(f"{name}.java: ID must be Fabric's id for loadCard, {ident}")
+    if 'static final String FILTER = "fabric-api.gametest.filter";' not in code or "return ID.equals(System.getProperty(FILTER));" not in code:
+        err(f"{name}.java: selected() must compare Fabric's filter property with ID exactly")
+    if not re.search(r"public void loadCard\(GameTestHelper helper\) \{\s*if \(!selected\(\)\) \{\s*helper\.succeed\(\);\s*return;\s*\}", code):
+        err(f"{name}.java: loadCard must pass at once unless it is selected")
+    if "@GameTest(maxTicks = MAX_TICKS, skyAccess = true)" not in code:
+        err(f"{name}.java: loadCard's @GameTest must take maxTicks = MAX_TICKS")
+    numbers = {key: int(value.replace("_", "")) for key, value in re.findall(r"static final int ([A-Z_]+) = ([0-9_]+);", code)}
+    missing = [key for key in ("WINDOW", "MEASURED", "WARMUP_CAP", "MAX_TICKS", "OFF") if key not in numbers]
+    if missing:
+        err(f"{name}.java: missing constants {missing}")
+    else:
+        if numbers["WINDOW"] != 100:
+            err(f"{name}.java: WINDOW must be MinecraftServer's 100-tick ring of tick times")
+        if numbers["MEASURED"] < 6000 or numbers["MEASURED"] % numbers["WINDOW"]:
+            err(f"{name}.java: MEASURED must be at least 6,000 ticks in whole windows (C-10)")
+        if numbers["MAX_TICKS"] < 2 * numbers["WARMUP_CAP"] + 2 * numbers["MEASURED"] + 2 * numbers["WINDOW"] + 100:
+            err(f"{name}.java: MAX_TICKS leaves no room for two warm-ups and two measured spans")
+        if numbers["OFF"] < 9:
+            err(f"{name}.java: OFF must keep the yard clear of the default structure's barrier walls (x and z of 8)")
+    # setChunkForced appears twice (forcing, and releasing at the end), so the forcing call and its caller are checked.
+    if not re.search(r"\bsetChunkForced\([^;]*,\s*true\)", code) or not re.search(r"\bvoid begin\(\)\s*\{[^}]*\bforce\(\);", code):
+        err(f"{name}.java: loadCard must force-load its yard's chunks (setChunkForced(..., true), from begin())")
+    for needle, what in (("getTickTimesNanos()", "the server's ring of tick times"), ("problems()", "the courier ledger's own check"),
+                         ("Signs.observe(", "the signs it would be sent"),
+                         ("JugcraftConcordance.CRUCIBLE_STAND", "a Crucible Stand"), ("JugcraftConcordance.CRUCIBLE)", "an Alembic Crucible"),
+                         ("STILLROOT_POULTICE", "the Stillroot Poultice"), ("JugcraftFluids.ELECTRIC_PUMP", "an Electric Pump"),
+                         ("JugcraftConcordance.CIRCLE_ANCHOR", "a circle"), ("ROOTED_THALLITE_FOUNDATION", "Root and Rivet"),
+                         ("PeepoMod.PEEPO", "a Peepo"), ("Workers.CLOCKWORK_PORTER", "a porter"),
+                         ("Garden.MULCH_MAW", "a Mulch Maw"), ("Garden.GLEANER", "a Gleaner")):
+        if needle not in code:
+            err(f"{name}.java: C-10's workload lacks {what}")
+    if len(re.findall(r"new Planting\(", code)) != 9:
+        err(f"{name}.java: C-10's workload plants nine beds")
+    if "onEachTick" in code:
+        err(f"{name}.java: no onEachTick (its entry for every remaining tick is test work that shrinks as the run goes on)")
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if f"io.github.jimbozoomer.jugcraft.test.{name}" not in mod.get("entrypoints", {}).get("fabric-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {name} must be a fabric-gametest entrypoint")
+    if f"fabric-api.gametest.filter={ident}" not in (ROOT / "docs" / "TESTING.md").read_text(encoding="utf-8"):
+        err("docs/TESTING.md: the load card's command must select its id")
+    workflow = (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8")
+    if "fabric-api.gametest.filter" in workflow and (workflow.count("fabric-api.gametest.filter") != 1
+                                                     or f"fabric-api.gametest.filter={ident}" not in workflow
+                                                     or "inputs.load_card" not in workflow):
+        err(".github/workflows/build.yml: only a manual run asking for load_card may select the load card, and only it")
+    workload = (test_dir / "ConcordanceWorkloadGameTests.java").read_text(encoding="utf-8")
+    if "public void gleanersHeartSearch(GameTestHelper helper)" not in workload or "GleanerBlockEntity.HEART_REACH" not in workload:
+        err("ConcordanceWorkloadGameTests.java: the Gleaner's Heart search must be timed (C-P21)")
 
 
 def check_baselines(root):
