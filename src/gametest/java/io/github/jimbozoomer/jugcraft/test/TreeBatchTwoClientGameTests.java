@@ -32,20 +32,28 @@ import net.minecraft.world.level.storage.LevelResource;
 
 /** An exported comparison garden plus untouched natural biome stops in the same normal world. */
 public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
-	private static final BlockPos GARDEN = new BlockPos(1000, 180, -1000);
+	protected static final BlockPos GARDEN = new BlockPos(1000, 180, -1000);
 	private static final List<String> BIOMES = List.of("lush_desert", "outback", "eucalyptus_forest", "hot_springs",
 			"karst_pinnacles", "shield", "jacaranda_glade", "floodplain", "subtropics", "flower_isle");
+
+	protected List<String> shapes() { return TreeBatchTwoGameTests.SHAPES; }
+	protected List<String> biomes() { return BIOMES; }
+	protected String worldName() { return "Tree Batch 2 Inspection"; }
+	protected String exportName() { return "tree-batch-2-preview"; }
+	protected String screenshotPrefix() { return "jugcraft_tree2_"; }
+	protected void extraDisplays(ClientGameTestContext context, TestSingleplayerContext world, List<String> tour) { }
+	protected void validateSurvey(String biome, Map<String, Integer> survey) { }
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		Path source;
 		TestWorldSave save;
 		Map<BlockPos, TreeBatchTwoGameTests.Size> expected = new LinkedHashMap<>();
-		List<String> tour = new ArrayList<>(List.of("Tree Batch 2 inspection — normal world, seed jugcraft.",
+		List<String> tour = new ArrayList<>(List.of(worldName() + " — normal world, seed jugcraft.",
 				"The elevated garden is an authored comparison area. Listed biome stops are naturally generated.",
 				"Three seeds per new shape; all use the real configured features. New terrain only, no retrogen.", ""));
 		try (var world = context.worldBuilder().adjustSettings(creator -> {
-			creator.setName("Tree Batch 2 Inspection");
+			creator.setName(worldName());
 			creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE);
 			creator.setSeed("jugcraft");
 			creator.setWorldType(new WorldCreationUiState.WorldTypeEntry(creator.getSettings().worldgenLoadContext()
@@ -58,8 +66,8 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 					"gamerule minecraft:advance_weather false", "gamerule minecraft:random_tick_speed 0",
 					"gamerule minecraft:spawn_mobs false", "gamerule minecraft:respawn_radius 0")) server.runCommand(command);
 			server.runOnServer(minecraft -> JugcraftSeasons.setMode(minecraft, SeasonCalendar.Mode.SUMMER));
-			for (int i = 0; i < TreeBatchTwoGameTests.SHAPES.size(); i++) {
-				String shape = TreeBatchTwoGameTests.SHAPES.get(i);
+			for (int i = 0; i < shapes().size(); i++) {
+				String shape = shapes().get(i);
 				BlockPos row = GARDEN.offset(i * 40, 0, 0);
 				for (int sample = 0; sample < 3; sample++) {
 					BlockPos at = row.offset(0, 0, -sample * 40);
@@ -80,11 +88,11 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 						shape.replace('_', ' '), "Seeds 1 / 2 / 3", "Walk north"));
 				tour.add(shape + ": /tp @s " + xyz(row.offset(0, 0, 12)) + " 180 0");
 				shoot(context, world, row.offset(20, shape.equals("giant_eucalyptus") ? 24 : 7, 24),
-						row.above(shape.equals("giant_eucalyptus") ? 22 : 5), "jugcraft_tree2_" + shape);
+						row.above(shape.equals("giant_eucalyptus") ? 22 : 5), screenshotPrefix() + shape);
 			}
 			// A natural-world survey, separate from the authored garden. No tree commands at these stops.
 			int found = 0;
-			for (String name : BIOMES) {
+			for (String name : biomes()) {
 				ResourceKey<Biome> key = ResourceKey.create(Registries.BIOME, Jugcraft.id(name));
 				BlockPos place = server.computeOnServer(minecraft -> {
 					var level = minecraft.overworld();
@@ -94,6 +102,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 				if (place == null) { tour.add(name + ": no surface stop found within the survey radius"); continue; }
 				found++;
 				var survey = server.computeOnServer(minecraft -> survey(minecraft.overworld(), place, key));
+				validateSurvey(name, survey);
 				Jugcraft.LOGGER.info("[tree batch 2 survey] {} at {}: {}", name, place, survey);
 				if (name.equals("lush_desert")) {
 					double grassShare = survey.getOrDefault("surface:minecraft:grass_block", 0) / (double) survey.get("dry_columns");
@@ -105,10 +114,11 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 					check(dirtShare >= .95, "Most desert grass islands should have dirt beneath: " + dirtShare);
 				}
 				tour.add(name + ": /tp @s " + xyz(place.above(18)) + " 135 25; " + survey);
-				shoot(context, world, place.above(22), place.offset(-20, 2, -20), "jugcraft_tree2_biome_" + name);
+				shoot(context, world, place.above(22), place.offset(-20, 2, -20), screenshotPrefix() + "biome_" + name);
 			}
-			check(found == BIOMES.size(), "Missing natural biome stops: " + found);
-			BlockPos start = GARDEN.offset(3 * 40, 0, 12);
+			check(found == biomes().size(), "Missing natural biome stops: " + found);
+			extraDisplays(context, world, tour);
+			BlockPos start = GARDEN.offset(Math.min(3, shapes().size() - 1) * 40, 0, 12);
 			server.runCommand("tp @a " + xyz(start) + " 180 0");
 			server.runCommand("setworldspawn " + xyz(start));
 			server.runOnServer(minecraft -> {
@@ -127,14 +137,21 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 		Path root = Path.of("").toAbsolutePath();
 		while (root != null && !Files.isRegularFile(root.resolve("build.gradle"))) root = root.getParent();
 		check(root != null, "Missing export root");
-		Path out = root.resolve("build/tree-batch-2-preview");
+		Path out = root.resolve("build/" + exportName());
 		try (var files = Files.walk(source)) {
 			for (Path file : files.toList()) {
-				Path dest = out.resolve("Tree Batch 2 Inspection").resolve(source.relativize(file).toString());
+				Path dest = out.resolve(worldName()).resolve(source.relativize(file).toString());
 				if (Files.isDirectory(file)) Files.createDirectories(dest);
 				else if (!file.getFileName().toString().equals("session.lock")) Files.copy(file, dest, StandardCopyOption.REPLACE_EXISTING);
 			}
 			Files.write(out.resolve("TOUR.txt"), tour);
+		} catch (IOException e) { throw new RuntimeException(e); }
+		// Loom clears clientGameTest during later builds; preserve the visual evidence with the exported world.
+		try (var screenshots = Files.list(root.resolve("build/run/clientGameTest/screenshots"))) {
+			Path images = out.resolve("screenshots");
+			Files.createDirectories(images);
+			for (Path file : screenshots.filter(p -> p.getFileName().toString().contains(screenshotPrefix())).toList())
+				Files.copy(file, images.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) { throw new RuntimeException(e); }
 		Jugcraft.LOGGER.info("[tree batch 2] Exported {} after save/reopen of {} trees", out, expected.size());
 	}
@@ -173,7 +190,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 		return counts;
 	}
 
-	private static void shoot(ClientGameTestContext context, TestSingleplayerContext world, BlockPos camera, BlockPos target, String name) {
+	protected static void shoot(ClientGameTestContext context, TestSingleplayerContext world, BlockPos camera, BlockPos target, String name) {
 		world.getServer().runCommand("tp @a " + xyz(camera));
 		world.getServer().runOnServer(server -> {
 			var player = server.getPlayerList().getPlayers().getFirst();

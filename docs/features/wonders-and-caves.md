@@ -8,6 +8,8 @@ Primary specialty and supported player role: exploration; decoration (glowing pl
 
 Tree-generation update (15 October 2026): [batch 2](trees-batch-2.md) adds the approved warm and mountain shapes and adjusts existing tree picks without changing biome placement or per-chunk attempt budgets. Its feature record holds the current mixes, measurements and fresh validation; older evidence below remains historical.
 
+Tree-generation batch 3, implemented and tested: [yew and Gloomweald](trees-batch-3.md) replaces the retained vanilla dark-forest canopy with one deliberate 16-17-attempt list: dark oak 45%, yew 20%, dead tree 10%, dead snag 10%, red mushroom 8%, brown mushroom 7%.
+
 ## Player experience
 Fifteen rare, strange lands and two cave biomes, spread over all four layouts of Jugcraft regions on climates the earlier batches left free, so each layout has a few wonders:
 
@@ -18,7 +20,7 @@ Fifteen rare, strange lands and two cave biomes, spread over all four layouts of
 | **Frostlight Garden** | woodland: dry snowy plains | firs and birches in the snow, frost irises and glimmerblooms, a cold, shimmering sky; no monsters spawn |
 | **Gilded Shrubland** | wetland: savanna plateaus | golden grass and golden-leaved oak scrub, goldenrod, dry grass, little lakes |
 | **Glimmer Grove** | wild: flower forests | jacarandas, mature branching jacarandas and giant red mushrooms, glimmerblooms, alliums, lilacs and hydrangeas under pink air, pink water; only witches spawn |
-| **Gloomweald** | wild: dark forests | dark oaks, dead trees and giant mushrooms over leaf litter and toadstools, dark purple pools, a dim sky |
+| **Gloomweald** | wild: dark forests | dark oaks, dense evergreen yews, dead trees/snags and giant mushrooms over leaf litter and toadstools, dark purple pools, a dim sky |
 | **Glowcap Grotto** | wetland: dripstone caves | a cave of mud floors grown with **glowcaps** that light the dark, moss and glow lichen |
 | **Hallowed Bog** | meadow: swamps | a pale, bright bog of willows and young white aspens standing in its water, lilies of the valley and daisies, clear blue water; no monsters spawn |
 | **Highsun Meadow** | wetland: savannas, warm plains | sunny, golden-green grass, sunflowers, goldenrod and wildflowers, a few small oaks |

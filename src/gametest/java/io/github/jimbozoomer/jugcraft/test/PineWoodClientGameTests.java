@@ -140,7 +140,7 @@ public class PineWoodClientGameTests implements FabricClientGameTest {
 		return snapshot;
 	}
 
-	private static void comparisonRow(ServerLevel level, BlockPos origin, int z, String[] woods) {
+	static void comparisonRow(ServerLevel level, BlockPos origin, int z, String[] woods) {
 		for (int i = 0; i < woods.length; i++) {
 			String wood = woods[i];
 			int x = -20 + i * 9;

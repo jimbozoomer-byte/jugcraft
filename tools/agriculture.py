@@ -191,6 +191,7 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "yew_arils": {"display": "Yew Arils", "food": [1, 0.1], "sweet": ["POISON", 10], "tags": []},
     "corn": {"display": "Corn", "food": [3, 0.6], "compost": "medium", "tags": ["c:crops/corn", "c:foods/vegetable", "minecraft:pig_food"]},
     "corn_kernels": {"display": "Corn Kernels", "plants": "corn_crop", "compost": "low",
                      "tags": ["c:seeds/corn", "minecraft:chicken_food", "minecraft:parrot_food"]},
@@ -415,7 +416,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # (docs/branches/TREES.md), the swamp cedar of its wetlands.
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
-             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine"}
+             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -423,7 +424,7 @@ WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen"
 WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "biomes"], "maple": ["biomes"],
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
-                 "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"]}
+                 "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"], "yew": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -449,6 +450,8 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # placed or grown from a sapling start in today's state. With seasons off they stay green. "autumn": the gold
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 TREES = {
+    "yew": {"leaves": "yew_needles", "leaves_display": "Yew Needles", "season": None, "base": "spruce",
+            "giant": "ancient_yew", "fruit": {"item": "yew_arils", "min": 1, "max": 2, "chance": 16}},
     "larch": {"leaves": "larch_needles", "leaves_display": "Larch Needles", "season": [91, 268, 318], "autumn": {"gold": 1},
               "base": "spruce"},
     "maple": {"leaves": "maple_leaves", "leaves_display": "Maple Leaves", "season": [95, 265, 310],
@@ -504,7 +507,8 @@ TREE_TEXTURES = (["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "
                  + [name for wood in WOOD_SETS if wood != "chestnut" for name in (
                      f"{wood}_log", f"{wood}_log_top", f"stripped_{wood}_log", f"stripped_{wood}_log_top", f"{wood}_planks")]
                  + [texture for tree in TREES for looks in leaf_looks(tree).values() for texture in looks]
-                 + [sapling(tree) for tree in TREES])
+                 + [sapling(tree) for tree in TREES]
+                 + [f"{info['leaves']}_{stage}" for info in TREES.values() if "fruit" in info for stage in ("unripe", "ripe")])
 
 # Decorations. The Turnip Lantern is the original jack-o'-lantern: a carved turnip with a candle inside.
 DECOR = {"turnip_lantern": {"display": "Turnip Lantern", "light": 13}}
@@ -2130,6 +2134,8 @@ for _cake, _info in LANTERNS["mooncakes"].items():
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    {"id": "red_dye_from_yew_arils", "inputs": ["jugcraft:yew_arils"], "result": "minecraft:red_dye", "count": 1,
+     "category": "misc", "switch": ["biomes"]},
     # Fall additions 13: bat guano is rich in phosphate.
     {"id": "phosphate_from_bat_guano", "inputs": ["jugcraft:bat_guano"] * 4, "result": "phosphate", "count": 1, "category": "misc",
      "features": ["phosphate"]},
@@ -2665,7 +2671,7 @@ def switch_of(entry_id):
         if entry_id in wood_blocks(wood, WOOD_SETS[wood]):
             return switch
     for tree in TREES:
-        if entry_id in (sapling(tree), TREES[tree]["leaves"]):
+        if entry_id in (sapling(tree), TREES[tree]["leaves"], TREES[tree].get("fruit", {}).get("item")):
             return WOOD_SWITCHES[tree]
     if entry_id in plants.blocks():
         return plants.FEATURE

@@ -68,6 +68,7 @@ WOOD = {
     # Initial batch-2 fallback; owner_art replaces pine with the owner's originals (15 October).
     # Keep this slot so future woods retain their deterministic seeds.
     "pine": (6, "a49a84"),
+    "yew": ("2:7", "654135"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -90,6 +91,7 @@ EUCALYPTUS_FLECKS = pal("e8a578", "e3a0a0", "9cc0d8", "e6c87a", "f0e0c0")
 
 # Each tree's bark: its colour (dark to light) and its character.
 BARK = {
+    "yew": (OWNER_BANK["yew"][2], OWNER_BANK["yew"][3]),
     "chestnut": (pal("3a3226", "4c4232", "5e5341", "706552", "857a66"), "furrowed"),
     "larch": (pal("2e1914", "44241a", "5c3222", "74422c", "8e5638"), "plated"),
     "maple": (pal("3a3330", "4d4540", "615751", "776b63", "8c8077"), "furrowed"),
@@ -135,7 +137,9 @@ LEAVES = {
     # The cedar's flat sprays of scale-leaves: a muted sage green (hue 84), yellower than the cypress's blue-green and
     # the fir's (mean dE 14.8 and 16.1); evergreen. Appended last, so every other look keeps its seed.
     "cedar_leaves": (pal("27301a", "343f22", "43522c", "536539", "657a46", "7d9657"), "needles"),
+    "yew_needles": (pal("111a12", "182419", "1f3021", "2b3d2d", "354c38", "425f45"), "needles"),
 }
+LEAF_OPTIONS = {"yew_needles": {"gap_threshold": 0.15}}
 # Logs of their own that are no wood set (no planks), drawn as the woods are: the Cinnamon Tree's (tools/spices.py
 # CINNAMON). Each: its stripped side's colour and its bark, as in WOOD and BARK. The cinnamon's stripped side is its inner
 # bark, which is the spice, so it takes the spice's colour, not one of the owner's paintings; its bark is the smooth
@@ -319,21 +323,26 @@ def planks(wood, seed):
 def leaves(name, seed):
     """Vanilla's speckle: one- and two-pixel leaves in four tones, light on top of each clump, with gaps."""
     p, kind = LEAVES[name]
-    return paint_leaves(p, kind, seed)
+    return paint_leaves(p, kind, seed, **LEAF_OPTIONS.get(name, {}))
 
 
-def paint_leaves(p, kind, seed):
+def paint_leaves(p, kind, seed, *, gap_threshold=None, edge_green=None, under_gap=None,
+                 flower_coverage=None, midrib_count=3, midrib_length=8, midrib_angle=None):
     """Leaves of six tones `p` (dark to light) in the manner `kind` ("leaves", "needles", "blossom" or "fronds"), as
     leaves() paints each tree's; the orchards' fruit trees (tools/orchard_textures.py) are painted with it too."""
     rng = random.Random(seed)
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.img.putpixel((x, y), p[0] + (0,))
+            c.img.putpixel((x, y), (under_gap or p[0]) + (0,))
     noise = [[rng.random() for _ in range(16)] for _ in range(16)]
     field = [[0.55 * noise[y][x] + 0.45 * (noise[(y - 1) % 16][x] + noise[y][(x - 1) % 16]) / 2 for x in range(16)]
              for y in range(16)]
-    gaps = {"leaves": 0.2, "needles": 0.16, "blossom": 0.18, "fronds": 0.22}[kind]
+    gaps = {"leaves": 0.2, "needles": 0.16, "blossom": 0.18, "fronds": 0.22}[kind] if gap_threshold is None else gap_threshold
+    if not 0 <= gaps <= 1 or (flower_coverage is not None and not 0 <= flower_coverage <= 1):
+        raise ValueError("Leaf gap threshold and flower coverage must be between zero and one")
+    if midrib_count < 0 or midrib_length < 1:
+        raise ValueError("Invalid frond midrib count or length")
     for y in range(16):
         for x in range(16):
             v = field[y][x]
@@ -357,16 +366,21 @@ def paint_leaves(p, kind, seed):
             c.px((x0 + 1) % 16, y0, p[1])
     elif kind == "blossom":
         # Blossom over a little green: clumps of flowers, the leaves showing at the edges.
+        green = edge_green or LEAF_GREEN[2:4]
+        opaque = sorted(field[y][x] for y in range(16) for x in range(16) if not c.empty(x, y))
+        edge_cutoff = .34 if flower_coverage is None else (float("inf") if flower_coverage == 0 else
+            opaque[min(len(opaque) - 1, int(len(opaque) * (1 - flower_coverage)))] if opaque else 0)
         for y in range(16):
             for x in range(16):
-                if not c.empty(x, y) and field[y][x] < 0.34:
-                    c.px(x, y, LEAF_GREEN[2 + (1 if field[y][x] > 0.27 else 0)])
+                if not c.empty(x, y) and field[y][x] < edge_cutoff:
+                    c.px(x, y, green[1 if field[y][x] > edge_cutoff - .07 else 0])
     elif kind == "fronds":
         # Long leaflets crossing the tile on a lit midrib.
-        for _ in range(3):
+        for _ in range(midrib_count):
             x0, y0 = rng.randrange(16), rng.randrange(16)
-            for i in range(8):
-                c.px((x0 + i) % 16, (y0 + i // 2) % 16, p[4])
+            for i in range(midrib_length):
+                dx, dy = (i, i // 2) if midrib_angle is None else (round(i * math.cos(math.radians(midrib_angle))), round(i * math.sin(math.radians(midrib_angle))))
+                c.px((x0 + dx) % 16, (y0 + dy) % 16, p[4])
     return c.img
 
 
@@ -439,6 +453,8 @@ def wood_textures():
         out[("block", name)] = leaves(name, 800 + index)
     for index, name in enumerate(BARE):
         out[("block", name)] = bare(name, 840 + index)
+    from tree_roster_textures import textures as roster_textures
+    out.update(roster_textures(out))
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)
     out[("block", "chestnut_leaves_ripe")] = chestnut_fruit(chestnut, 2)

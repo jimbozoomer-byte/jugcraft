@@ -26,7 +26,7 @@ art and fit, and every colour figure was recomputed by script. Their points and 
 own-wood revision" in Decisions, which ends with the choices still left to the owner. The owner has since approved the
 cedar as batch 1 built it ("Cedar looks sooo good!!"), so every check here is made against that cedar, #725543.
 
-**Batch 2 is implemented and tested (15 October 2026)** in [PR #386](https://github.com/jimbozoomer-byte/jugcraft/pull/386); [feature record and actual measurements](../features/trees-batch-2.md). The owner approved the original pine textures, then authorized the trees/biomes and the remaining roster. The original pine wood supersedes the older proposed pine palette below. The new tree inspection world awaits owner review; this is not a merge or server-world deployment.
+**Batch 2 is implemented and tested (15 October 2026)** in [PR #386](https://github.com/jimbozoomer-byte/jugcraft/pull/386); [feature record and actual measurements](../features/trees-batch-2.md). The owner approved the original pine textures, then authorized the trees/biomes and the remaining roster. The original pine wood supersedes the older proposed pine palette below. The owner approved the batch-2 inspection world on 15 October (“Batch 2 looks good”). Batch 3 yew is implemented on a separate public branch; the owner instructed us to finish it and not start batch 4. This is not a merge or server-world deployment.
 
 **The new woods' colours are approved.** On 6 October 2026 the owner saw the sixteen new woods as previewed (each wood's
 bark, log end, stripped side and planks, with this roster's defaults: the yew as painted and one fruitwood) and said:

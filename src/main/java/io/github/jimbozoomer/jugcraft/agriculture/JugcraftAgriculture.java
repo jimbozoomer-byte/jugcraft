@@ -171,12 +171,14 @@ public final class JugcraftAgriculture {
 	/** The tree roster's batch 1: the swamp cedar, on its own wood (tools/trees.py "cedar"). */
 	public static final TreeGrower CEDAR_GROWER = grower("cedar");
 	public static final TreeGrower PINE_GROWER = grower("pine");
+	public static final TreeGrower YEW_GROWER = grower("yew");
+	public static final TreeGrower ANCIENT_YEW_GROWER = grower("ancient_yew");
 	/** Giant trees, which four saplings in a square grow ({@link GiantSaplingBlock}; agriculture.TREES "giant"). */
 	public static final TreeGrower GIANT_REDWOOD_GROWER = grower("giant_redwood");
 	public static final TreeGrower GIANT_MAHOGANY_GROWER = grower("giant_mahogany");
 	public static final TreeGrower GIANT_EUCALYPTUS_GROWER = grower("giant_eucalyptus");
 	private static final Map<String, TreeGrower> GIANT_GROWERS = Map.of("redwood", GIANT_REDWOOD_GROWER,
-			"mahogany", GIANT_MAHOGANY_GROWER, "eucalyptus", GIANT_EUCALYPTUS_GROWER);
+			"mahogany", GIANT_MAHOGANY_GROWER, "eucalyptus", GIANT_EUCALYPTUS_GROWER, "yew", ANCIENT_YEW_GROWER);
 	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
 	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
 	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
@@ -527,6 +529,9 @@ public final class JugcraftAgriculture {
 		registerTree("cedar", "cedar_leaves", CEDAR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.COLOR_BROWN);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
+		registerTree("yew", "yew_needles", YEW_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_RED);
+		sweet("yew_arils", 1, 0.1F, MobEffects.POISON, 10);
 		registerTree("pine", "pine_needles", PINE_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.COLOR_BROWN, MapColor.COLOR_LIGHT_GRAY);
 		registerWildPlants();
@@ -2849,7 +2854,7 @@ public final class JugcraftAgriculture {
 		} : props -> new GiantSaplingBlock(grower, giant, props), BlockBehaviour.Properties.ofFullCopy(saplingLike));
 		registerItem(tree + "_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
 				.compostable(COMPOST_LOW), SEEDS_TAB);
-		Function<BlockBehaviour.Properties, Block> leavesFactory = schedule == null
+		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("yew") ? YewLeavesBlock::new : schedule == null
 				? props -> new TintedParticleLeavesBlock(0.01F, props)
 				: props -> new SeasonalLeavesBlock(schedule, props);
 		Block leaves = registerBlock(leavesId, leavesFactory, BlockBehaviour.Properties.ofFullCopy(leavesLike).mapColor(MapColor.PLANT));

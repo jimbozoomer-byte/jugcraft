@@ -40,6 +40,16 @@ def assets(root, write):
             state = {"variants": {"": variants(looks[None])}}
         else:
             state = {"variants": {f"season={season}": variants(looks[season]) for season in SEASON_STATES}}
+        if "fruit" in info:
+            fruit_variants = {}
+            for season, choices in looks.items():
+                for fruit, suffix in enumerate(("", "_unripe", "_ripe")):
+                    fruit_looks = {texture + suffix: weight for texture, weight in choices.items()}
+                    for texture in fruit_looks:
+                        write(models / f"{texture}.json", {"parent": "minecraft:block/cube_all", "textures": {"all": rid(f"block/{texture}")}})
+                    key = f"fruit={fruit}" if season is None else f"fruit={fruit},season={season}"
+                    fruit_variants[key] = variants(fruit_looks)
+            state = {"variants": fruit_variants}
         write(root / "blockstates" / f"{leaves}.json", state)
         item_model = {"type": "minecraft:model", "model": rid(f"block/{leaves}")}
         if "leaf_tint" in info:
@@ -62,7 +72,7 @@ def loot(out, write):
     for tree, info in TREES.items():
         leaves, young = info["leaves"], rid(sapling(tree))
         # Vanilla spruce leaves' drops, with this tree's sapling.
-        write(out / f"{leaves}.json", {"type": "minecraft:block", "pools": [
+        table = {"type": "minecraft:block", "pools": [
             {"entries": [{"type": "minecraft:alternatives", "children": [
                 {"type": "minecraft:item", "condition": SHEARS_OR_SILK, "name": rid(leaves)},
                 {"type": "minecraft:item", "condition": {"type": "minecraft:all_of", "terms": [
@@ -73,7 +83,15 @@ def loot(out, write):
                 "type": "minecraft:table_bonus", "chances": [0.02, 0.022222223, 0.025, 0.033333335, 0.1], "enchantment": "minecraft:fortune"},
                 "modifier": [{"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": 1, "max": 2}},
                              {"type": "minecraft:explosion_decay"}], "name": "minecraft:stick"}], "rolls": 1}],
-            "random_sequence": rid(f"blocks/{leaves}")})
+            "random_sequence": rid(f"blocks/{leaves}")}
+        if "fruit" in info:
+            fruit = info["fruit"]
+            table["pools"].append({"condition": {"type": "minecraft:all_of", "terms": [not_shears,
+                {"type": "minecraft:match_block", "blocks": rid(leaves), "state": {"fruit": "2"}}]},
+                "entries": [{"type": "minecraft:item", "name": rid(fruit["item"]), "modifier": [
+                    {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": fruit["min"], "max": fruit["max"]}},
+                    {"type": "minecraft:explosion_decay"}]}], "rolls": 1})
+        write(out / f"{leaves}.json", table)
         write(out / f"{sapling(tree)}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": young}], "rolls": 1}],
             "random_sequence": rid(f"blocks/{sapling(tree)}")})
@@ -124,6 +142,8 @@ def tree_blocks(wood):
 def minimum_size(info):
     """The free space a tree needs, as vanilla sets it for the same placers (spruce, pine, fancy oak, bush, oak)."""
     foliage = (info["foliage"] or {}).get("type")
+    if info["trunk"]["type"] == "dark_oak":
+        return {"type": "minecraft:three_layers_feature_size", "upper_size": 2}
     if info.get("giant") or info["trunk"]["type"] in ("giant", "mega_jungle"):
         # Two blocks wide: vanilla's giant spruce and mega jungle tree.
         return {"type": "minecraft:two_layers_feature_size", "lower_size": 1, "upper_size": 2}

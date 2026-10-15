@@ -79,7 +79,7 @@ FLOATERS = ["minecraft:apple", "minecraft:bone", "minecraft:spider_eye", "minecr
             "minecraft:beetroot", "minecraft:sweet_berries", "minecraft:glow_berries", "minecraft:egg", "minecraft:feather",
             "minecraft:slime_ball", "minecraft:magma_cream", "minecraft:ghast_tear", "minecraft:nether_wart", "minecraft:pufferfish",
             "minecraft:rabbit_foot", "minecraft:phantom_membrane", "minecraft:amethyst_shard", "minecraft:wither_rose",
-            "jugcraft:mandrake_root", "jugcraft:garlic", "jugcraft:acorn", "jugcraft:chestnut", "jugcraft:cranberries"]
+            "jugcraft:yew_arils", "jugcraft:mandrake_root", "jugcraft:garlic", "jugcraft:acorn", "jugcraft:chestnut", "jugcraft:cranberries"]
 MESSAGES = {"message.jugcraft.enchanted_broom.anointed": "The broom stirs and twitches its bristles: it will sweep for three days.",
             "message.jugcraft.enchanted_broom.full": "The broom is still wide awake.",
             "message.jugcraft.beating_heart_jar.tempo": "%s beats a minute",
