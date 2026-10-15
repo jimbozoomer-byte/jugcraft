@@ -73,11 +73,11 @@ public class CydonianSentinelGameTests {
 	}
 
 	/**
-	 * The crater's floor in every cell whose middle is within its radius: red rock, not the Sanctum's red sand, which
+	 * The crater's floor in every cell whose middle is within its radius: red sandstone, not the Sanctum's red sand, which
 	 * here would have nothing under it and fall.
 	 */
 	private static void crater(ServerLevel level, BlockPos origin) {
-		BlockState floor = Blocks.RED_TERRACOTTA.defaultBlockState();
+		BlockState floor = Blocks.RED_SANDSTONE.defaultBlockState();
 		int reach = (int) Math.ceil(CydonianSanctum.CRATER);
 		int cx = (int) Math.floor(CydonianSanctum.CENTRE_X);
 		int cz = (int) Math.floor(CydonianSanctum.CENTRE_Z);
