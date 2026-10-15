@@ -171,6 +171,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 				var state = level.getBlockState(pos);
 				if (!state.getFluidState().isEmpty()) submerged = true;
 				if (state.is(BlockTags.LOGS)) logs.merge("log:" + BuiltInRegistries.BLOCK.getKey(state.getBlock()), 1, Integer::sum);
+				if (state.is(BlockTags.LEAVES)) logs.merge("leaf:" + BuiltInRegistries.BLOCK.getKey(state.getBlock()), 1, Integer::sum);
 				if (!state.isAir() && !state.is(BlockTags.LEAVES) && !state.is(BlockTags.LOGS) && state.isSolidRender()) { floor = pos; break; }
 			}
 			if (!level.getBiome(floor).is(biome) || submerged) continue;

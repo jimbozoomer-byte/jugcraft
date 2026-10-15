@@ -172,6 +172,8 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower CEDAR_GROWER = grower("cedar");
 	public static final TreeGrower PINE_GROWER = grower("pine");
 	public static final TreeGrower YEW_GROWER = grower("yew");
+	public static final TreeGrower SNOWPETAL_CHERRY_GROWER = grower("snowpetal_cherry");
+	public static final TreeGrower SHIMMER_BIRCH_GROWER = weightedGrower("shimmer_birch", "tall_shimmer_birch", 4, 1);
 	public static final TreeGrower ANCIENT_YEW_GROWER = grower("ancient_yew");
 	/** Giant trees, which four saplings in a square grow ({@link GiantSaplingBlock}; agriculture.TREES "giant"). */
 	public static final TreeGrower GIANT_REDWOOD_GROWER = grower("giant_redwood");
@@ -434,6 +436,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<ScarePropBlockEntity> SCARE_PROP_ENTITY;
 	/** Low ground fog from the Fog Machine (drawn by the client: client/FogParticle.java). */
 	public static final SimpleParticleType FOG = FabricParticleTypes.simple();
+	public static final SimpleParticleType SNOWPETAL = FabricParticleTypes.simple();
 	/** What each kind of pumpkin becomes when first carved by hand, and the loot table its seeds come from. */
 	private static final Map<Block, Block> CARVED_FROM = new HashMap<>();
 	private static final Map<Block, ResourceKey<LootTable>> CARVE_LOOT = new HashMap<>();
@@ -535,6 +538,12 @@ public final class JugcraftAgriculture {
 		registerTree("pine", "pine_needles", PINE_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.COLOR_BROWN, MapColor.COLOR_LIGHT_GRAY);
 		registerWildPlants();
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE, Jugcraft.id("snowpetal"), SNOWPETAL);
+		registerFoliage("snowpetal_cherry", "snowpetal_cherry_leaves", SNOWPETAL_CHERRY_GROWER, Blocks.CHERRY_SAPLING, Blocks.CHERRY_LEAVES,
+				props -> new net.minecraft.world.level.block.UntintedParticleLeavesBlock(0.1F, SNOWPETAL,
+						net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer.noAmbientSound(), props));
+		registerFoliage("shimmer_birch", "shimmer_birch_leaves", SHIMMER_BIRCH_GROWER, Blocks.BIRCH_SAPLING, Blocks.BIRCH_LEAVES,
+				props -> new TintedParticleLeavesBlock(0.01F, props));
 
 		// Seeds, produce and food.
 		food("corn", 3, 0.6F, COMPOST_MEDIUM);
@@ -2841,6 +2850,14 @@ public final class JugcraftAgriculture {
 		return new TreeGrower(Jugcraft.MOD_ID + "_" + shape, WeightedList.of(tree), WeightedList.of(), WeightedList.of(), tree);
 	}
 
+	private static TreeGrower weightedGrower(String normal, String tall, int normalWeight, int tallWeight) {
+		ResourceKey<Feature> small = ResourceKey.create(Registries.FEATURE, Jugcraft.id(normal));
+		ResourceKey<Feature> large = ResourceKey.create(Registries.FEATURE, Jugcraft.id(tall));
+		return new TreeGrower(Jugcraft.MOD_ID + "_" + normal, WeightedList.of(
+				new net.minecraft.util.random.Weighted<>(small, normalWeight), new net.minecraft.util.random.Weighted<>(large, tallWeight)),
+				WeightedList.of(), WeightedList.of(), small);
+	}
+
 	/**
 	 * A tree with its own sapling and leaves, and its wood set (agriculture.TREES and WOOD_SETS in tools). Leaves with a
 	 * {@code schedule} follow the seasons ({@link SeasonalLeavesBlock}); null: evergreen. The sapling and leaves copy
@@ -2849,17 +2866,23 @@ public final class JugcraftAgriculture {
 	 */
 	private static void registerTree(String tree, String leavesId, TreeGrower grower, SeasonalLeavesBlock.Schedule schedule,
 			Block saplingLike, Block leavesLike, MapColor bark, MapColor inner) {
+		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("yew") ? YewLeavesBlock::new : schedule == null
+				? props -> new TintedParticleLeavesBlock(0.01F, props)
+				: props -> new SeasonalLeavesBlock(schedule, props);
+		registerFoliage(tree, leavesId, grower, saplingLike, leavesLike, leavesFactory);
+		registerWoodSet(tree, bark, inner);
+	}
+
+	/** Foliage can share existing timber without registering a second wood set. */
+	private static void registerFoliage(String tree, String leavesId, TreeGrower grower, Block saplingLike, Block leavesLike,
+			Function<BlockBehaviour.Properties, Block> leavesFactory) {
 		TreeGrower giant = GIANT_GROWERS.get(tree);
 		Block sapling = registerBlock(tree + "_sapling", giant == null ? props -> new SaplingBlock(grower, props) {
 		} : props -> new GiantSaplingBlock(grower, giant, props), BlockBehaviour.Properties.ofFullCopy(saplingLike));
 		registerItem(tree + "_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
 				.compostable(COMPOST_LOW), SEEDS_TAB);
-		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("yew") ? YewLeavesBlock::new : schedule == null
-				? props -> new TintedParticleLeavesBlock(0.01F, props)
-				: props -> new SeasonalLeavesBlock(schedule, props);
 		Block leaves = registerBlock(leavesId, leavesFactory, BlockBehaviour.Properties.ofFullCopy(leavesLike).mapColor(MapColor.PLANT));
 		registerItem(leavesId, props -> new BlockItem(leaves, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
-		registerWoodSet(tree, bark, inner);
 		FlammableBlockRegistry.getDefaultInstance().add(leaves, 30, 60);
 	}
 

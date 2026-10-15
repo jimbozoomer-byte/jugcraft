@@ -892,7 +892,11 @@ def _own_trees():
 
 
 def _tree_farm():
-    return [{"input": f"{ns}:{sapling}", "output": f"{ns}:{wood}_log", "count": 6, "ticks": 400,
+    from agriculture import TREES as own, timber
+    def log(ns, tree):
+        wood = timber(tree) if ns == "jugcraft" else f"minecraft:{tree}"
+        return f"{wood if ':' in wood else 'jugcraft:' + wood}_log"
+    return [{"input": f"{ns}:{sapling}", "output": log(ns, wood), "count": own[wood].get("farm_yield", 6) if ns == "jugcraft" else 6, "ticks": 400,
              "features": [FEATURE], "renewable": True,
              "byproducts": [[f"{ns}:{sapling}", 1, 1.0, None], [extra, 1, 0.1, None]]}
             for ns, trees in (("minecraft", TREES), ("jugcraft", _own_trees())) for wood, (sapling, extra) in trees.items()]

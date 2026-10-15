@@ -2,7 +2,8 @@
 "<shape>_checked" placed features (only where the tree's sapling would survive), which biomes pick from.
 
 Each shape grows one tree's wood (agriculture.WOOD_SETS, or a vanilla wood such as "minecraft:oak") and leaves
-(agriculture.TREES, or the vanilla wood's leaves; the dead tree has none),
+(agriculture.TREES, or the vanilla wood's leaves; the dead tree has none). Optional "tree" selects a distinct
+foliage/sapling identity while "wood" continues to select the logs,
 using vanilla 26.3's trunk and foliage placers. "sapling": the tree a sapling of that wood grows. Seasonal leaves take
 today's look as the tree is placed: every shape with seasonal leaves lists the DECORATOR tree decorator
 (agriculture/SeasonalLeavesDecorator), since world generation does not run the block's own placement hook.
@@ -13,6 +14,22 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "snowpetal_cherry": {"wood": "minecraft:cherry", "tree": "snowpetal_cherry", "sapling": True,
+                         "minimum_size": {"type": "minecraft:two_layers_feature_size", "upper_size": 2},
+                         "trunk": {"type": "cherry", "base_height": 7, "height_rand_a": 1,
+                                   "branch_count": {"type": "minecraft:weighted_list", "distribution": [
+                                       {"data": 1, "weight": 1}, {"data": 2, "weight": 1}, {"data": 3, "weight": 1}]},
+                                   "branch_horizontal_length": [2, 4], "branch_start_offset_from_top": [-4, -3],
+                                   "branch_end_offset_from_top": [-1, 0]},
+                         "foliage": {"type": "cherry", "radius": 4, "offset": 0, "height": 5,
+                                     "wide_bottom_layer_hole_chance": 0.25, "corner_hole_chance": 0.25,
+                                     "hanging_leaves_chance": 0.16666667, "hanging_leaves_extension_chance": 0.33333334}},
+    "shimmer_birch": {"wood": "minecraft:birch", "tree": "shimmer_birch", "sapling": True,
+                      "trunk": {"type": "straight", "base_height": 5, "height_rand_a": 2},
+                      "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 3}},
+    "tall_shimmer_birch": {"wood": "minecraft:birch", "tree": "shimmer_birch",
+                           "trunk": {"type": "straight", "base_height": 10, "height_rand_a": 4},
+                           "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 5}},
     "yew": {"wood": "yew", "sapling": True,
             "trunk": {"type": "straight", "base_height": 4, "height_rand_a": 2},
             "foliage": {"type": "blob", "radius": 3, "offset": 0, "height": 4}},

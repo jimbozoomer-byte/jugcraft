@@ -2745,18 +2745,22 @@ def check_biomes():
             for field, low, high in (("branch_count", 1, 3), ("branch_horizontal_length", 2, 16),
                                      ("branch_start_offset_from_top", -16, 0), ("branch_end_offset_from_top", -16, 16)):
                 value = trunk.get(field)
-                bounds = value if isinstance(value, list) else [value, value]
+                bounds = (sorted(entry["data"] for entry in value["distribution"]) if isinstance(value, dict)
+                          and value.get("type") == "minecraft:weighted_list" else value if isinstance(value, list) else [value, value])
                 if None in bounds or not low <= bounds[0] <= bounds[-1] <= high:
                     err(f"{shape}: {field} is outside native cherry placer bounds {low}..{high}: {value}")
                 if field == "branch_start_offset_from_top" and (not isinstance(value, list) or bounds[-1] - bounds[0] < 1):
                     err(f"{shape}: cherry branch starts need a uniform range with at least two values")
         vanilla = info["wood"] in ("minecraft:oak", "minecraft:birch", "minecraft:spruce", "minecraft:jungle", "minecraft:acacia",
                                    "minecraft:dark_oak", "minecraft:cherry", "minecraft:mangrove", "minecraft:pale_oak")
-        if not vanilla and (info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES)):
+        tree = info.get("tree", info["wood"])
+        if tree in ag.TREES and info["wood"] != ag.timber(tree):
+            err(f"Tree shape {shape} timber {info['wood']} differs from {tree}'s {ag.timber(tree)}")
+        if (not vanilla and info["wood"] not in ag.WOOD_SETS) or (info["foliage"] and not tree.startswith("minecraft:") and tree not in ag.TREES):
             err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
             continue
         # Generated seasonal leaves need the decorator to start in today's look (world generation skips onPlace).
-        seasonal = bool(info["foliage"]) and not vanilla and ag.TREES[info["wood"]]["season"] is not None
+        seasonal = bool(info["foliage"]) and tree in ag.TREES and ag.TREES[tree]["season"] is not None
         decorators = [decorator.get("type") for decorator in (load(features / f"{shape}.json") or {}).get("decorators", [])]
         if seasonal != (f"{MOD}:{tr.DECORATOR}" in decorators):
             err(f"Tree shape {shape}: the {MOD}:{tr.DECORATOR} decorator belongs on exactly the trees with seasonal leaves")
@@ -2829,6 +2833,12 @@ def check_wood_switches():
         if missing:
             err(f"{what} is placed by {sorted(missing)}, which the {wood} wood's switches {ag.WOOD_SWITCHES.get(wood)} "
                 f"lack (agriculture.WOOD_SWITCHES, TREES.md rule 4)")
+    for shape, info in tr.SHAPES.items():
+        tree = info.get("tree", info["wood"])
+        if info["foliage"] and tree in ag.TREES:
+            missing = placers.get(shape, set()) - set(ag.tree_switches(tree))
+            if missing:
+                err(f"{shape} places {tree} foliage through uncovered switches {sorted(missing)}")
 
 
 def check_alpine():
@@ -4915,11 +4925,25 @@ def check_festival(java, main):
     for block in [b for b in ag.TREE_BLOCKS if b not in tree_blocks] + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
         if f'registerBlock("{block}"' not in main:
             err(f"JugcraftAgriculture.java does not register {block}")
-    for tree, info in ag.TREES.items():  # registerTree registers the sapling, the leaves and the wood set
+    for tree, info in ag.TREES.items():
         base = info["base"].upper()
-        if not re.search(rf'registerTree\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
-                         rf'{tree.upper() + "_LEAVES" if info["season"] else "null"}, Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
+        own_wood = ag.timber(tree) == tree
+        call = "registerTree" if own_wood else "registerFoliage"
+        schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if own_wood else ""
+        if not re.search(rf'{call}\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
+                         rf'{schedule}Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
             err(f"JugcraftAgriculture.java does not register the {tree} tree as TREES in tools/agriculture.py says")
+        if not own_wood:
+            if tree in ag.WOOD_SETS or f'registerWoodSet("{tree}",' in main:
+                err(f"{tree} shares timber and must not register a wood set")
+            for suffix in ("log", "wood", "planks", "stairs", "slab", "fence", "fence_gate"):
+                if (ASSETS / "blockstates" / f"{tree}_{suffix}.json").exists():
+                    err(f"Phantom timber block {tree}_{suffix}")
+        if "sapling_shapes" in info:
+            choices = info["sapling_shapes"]
+            expected = f'{tree.upper()}_GROWER = weightedGrower(' + ", ".join([f'"{shape}"' for shape in choices] + [str(w) for w in choices.values()]) + ")"
+            if expected not in main:
+                err(f"{tree} grower weights differ from sapling_shapes")
     for wood in ag.WOOD_SETS:  # registerWoodSet registers every block in agriculture.wood_blocks
         if f'registerWoodSet("{wood}",' not in main and wood not in ag.TREES:
             err(f"JugcraftAgriculture.java does not register the {wood} wood set")

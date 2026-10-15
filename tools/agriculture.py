@@ -440,8 +440,9 @@ WOOD_TAGS = {wood: f"jugcraft:{wood}_logs" for wood in WOOD_SETS}
 WOOD_TAG = WOOD_TAGS["chestnut"]
 STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS for part in ("log", "wood")}
 # Trees with their own leaves and sapling (besides the chestnut, whose sapling is planted from a chestnut). Their
-# wood is in WOOD_SETS under the same name; their shapes are in tools/trees.py. Leaves drop saplings and sticks like
-# spruce leaves (SAPLING_CHANCES with Fortune); leaves and saplings follow the wood's switch.
+# wood defaults to WOOD_SETS under the same name; optional "wood" reuses established timber. Their shapes are in
+# tools/trees.py. Leaves drop saplings and sticks like spruce leaves (SAPLING_CHANCES with Fortune). Leaves and
+# saplings follow the timber's switch, or explicit "switches" when using vanilla timber.
 # "season": deciduous leaves (agriculture/SeasonalLeavesBlock, state "season": green, gold, bare) follow the server's
 # season day (season/JugcraftSeasons): green from the first day, their autumn colour ("gold") from the second, bare
 # from the third until the first comes round again (northern calendar days; seasons.hemisphere shifts the south).
@@ -450,6 +451,12 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # placed or grown from a sapling start in today's state. With seasons off they stay green. "autumn": the gold
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 TREES = {
+    "snowpetal_cherry": {"wood": "minecraft:cherry", "display": "Snowpetal Cherry", "switches": ["biomes"],
+                         "leaves": "snowpetal_cherry_leaves", "leaves_display": "Snowpetal Cherry Leaves",
+                         "season": None, "base": "cherry"},
+    "shimmer_birch": {"wood": "minecraft:birch", "display": "Shimmer Birch", "switches": ["biomes"],
+                      "leaves": "shimmer_birch_leaves", "leaves_display": "Shimmer Birch Leaves",
+                      "season": None, "base": "birch", "sapling_shapes": {"shimmer_birch": 4, "tall_shimmer_birch": 1}},
     "yew": {"leaves": "yew_needles", "leaves_display": "Yew Needles", "season": None, "base": "spruce",
             "giant": "ancient_yew", "fruit": {"item": "yew_arils", "min": 1, "max": 2, "chance": 16}},
     "larch": {"leaves": "larch_needles", "leaves_display": "Larch Needles", "season": [91, 268, 318], "autumn": {"gold": 1},
@@ -490,6 +497,16 @@ def sapling(tree):
     return f"{tree}_sapling"
 
 
+def timber(tree):
+    """Timber identity, independent of the tree's leaves and sapling."""
+    return TREES[tree].get("wood", tree)
+
+
+def tree_switches(tree):
+    wood = timber(tree)
+    return TREES[tree]["switches"] if wood.startswith("minecraft:") else WOOD_SWITCHES[wood]
+
+
 def leaf_looks(tree):
     """Texture (and model) names for each state of a tree's leaves: {state: {texture: weight}}."""
     leaves = TREES[tree]["leaves"]
@@ -501,7 +518,7 @@ def leaf_looks(tree):
 
 TREE_BLOCKS = {"chestnut_sapling": "Chestnut Sapling", "chestnut_leaves": "Chestnut Leaves",
                **{block: name for tree in TREES for block, name in
-                  ((sapling(tree), f"{WOOD_SETS[tree]} Sapling"), (TREES[tree]["leaves"], TREES[tree]["leaves_display"]))}}
+                  ((sapling(tree), f"{TREES[tree].get('display', WOOD_SETS.get(tree))} Sapling"), (TREES[tree]["leaves"], TREES[tree]["leaves_display"]))}}
 TREE_TEXTURES = (["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "stripped_chestnut_log_top", "chestnut_planks",
                   "chestnut_leaves", "chestnut_leaves_burs", "chestnut_leaves_ripe", "chestnut_sapling"]
                  + [name for wood in WOOD_SETS if wood != "chestnut" for name in (
@@ -2672,7 +2689,7 @@ def switch_of(entry_id):
             return switch
     for tree in TREES:
         if entry_id in (sapling(tree), TREES[tree]["leaves"], TREES[tree].get("fruit", {}).get("item")):
-            return WOOD_SWITCHES[tree]
+            return tree_switches(tree)
     if entry_id in plants.blocks():
         return plants.FEATURE
     return FEATURE

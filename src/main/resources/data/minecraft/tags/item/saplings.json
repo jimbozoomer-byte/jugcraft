@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:snowpetal_cherry_sapling",
+    "jugcraft:shimmer_birch_sapling",
     "jugcraft:yew_sapling",
     "jugcraft:larch_sapling",
     "jugcraft:maple_sapling",
