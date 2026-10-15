@@ -123,15 +123,18 @@ public record Readiness(@Nullable RitualDefinition rite, List<Line> lines, @Null
 
 	/**
 	 * While a rite holds the anchor or has just completed in it: spent apart from held, and what may still stop it at its
-	 * next step (a channel short or unlent, the light above the rite's limit; while gathering, who has still to join). A
-	 * participant who has walked away is not listed: the next step's own check finds them.
+	 * next step (a channel short or unlent, or its pylon gone or unloaded since the last step; the light above the rite's
+	 * limit; while gathering, who has still to join). A participant who has walked away is not listed, nor another part
+	 * broken since the last step: the next step's own check finds them.
 	 */
 	public static Readiness running(RitualDefinition rite, RitualRun run, List<Channel> channels, long now, int light) {
 		Spent spent = Spent.of(rite, run, channels.size());
 		List<Line> lines = new ArrayList<>();
 		if (run.phase().reserving()) {
+			int missing = 0;
 			for (Channel channel : channels) {
 				if (!channel.pylon()) {
+					missing++; // removed or unloaded since the last step: the shape report shown is that step's
 					continue;
 				}
 				if (!channel.lends()) {
@@ -141,6 +144,9 @@ public record Readiness(@Nullable RitualDefinition rite, List<Line> lines, @Null
 					lines.add(new Line(Diagnostic.of(Code.UNAVAILABLE_POWER, channel.words(), Text.of("ritual.ley", (int) channel.ley()),
 							Text.of("ritual.ley_left", rite.ley() * spent.left(), breaksAt)), channel.ley() < rite.ley(), channel.offset()));
 				}
+			}
+			if (missing > 0) {
+				lines.add(new Line(Diagnostic.of(Code.INCOMPLETE_PATTERN, new Text.Ref("structure", rite.structure()), missing), true, null));
 			}
 			if (rite.maxLight() != null && light > rite.maxLight()) {
 				lines.add(new Line(Diagnostic.of(Code.TOO_BRIGHT, light, rite.maxLight()), true, null));

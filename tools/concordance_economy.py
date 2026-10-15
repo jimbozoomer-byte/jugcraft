@@ -14,6 +14,8 @@ Run it to print the table: python3 tools/concordance_economy.py
 import json
 from pathlib import Path
 
+import concordance_rituals as rituals
+
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "src" / "main" / "resources" / "data" / "jugcraft"
 JAVA = ROOT / "src" / "main" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "concordance"
@@ -92,12 +94,18 @@ FOCUS_REGEN_TICKS = 40  # a player's Focus comes back one point this often (rule
 # the Adept's Attunement's wand is an instrument, excluded and never converted): what one completed run takes, the Ley
 # Charge of every channel and each participant's Focus, for the one thing it makes. Each is an edge into a node with no
 # way out, so it closes no cycle today; it is in the audit so that a later conversion out of that thing is weighed with
-# it. check_economy holds each to its ritual's data.
+# it. check_economy holds each figure to its ritual's data; the offerings are worded from it (offerings()).
 RITUAL_SINKS = {
     "root_and_rivet": {"rite": "Root and Rivet", "makes": "rooted_thallite_foundation", "name": "Rooted Thallite Foundations",
-                       "ley": 32, "focus": 6, "ticks": 160, "offerings": "a Thallite plate, 4 copper ingots and 4 Mendvetch",
+                       "ley": 32, "focus": 6, "ticks": 160,
                        "consequence": "none; a foundation never becomes Ley Charge, Focus or a plate again"},
 }
+
+
+def offerings(key):
+    """A ritual's offerings in words, from tools/concordance_rituals.py RITUALS, as its JEI page words them."""
+    said = [f"{o['count']} {rituals._item_name(o['item'])}" for o in rituals.RITUALS[key]["offerings"]]
+    return ", ".join(said[:-1]) + f" and {said[-1]}" if len(said) > 1 else said[0]
 
 
 def load(path):
@@ -209,10 +217,10 @@ def installations():
         ("Crimson Surge", f"{DAY // SURGE_COOLDOWN * 6} Vitae", f"{DAY // SURGE_COOLDOWN * 6} Focus",
          f"one every {SURGE_COOLDOWN} ticks", "health given (offering exhaustion)"),
     ]
-    for sink in RITUAL_SINKS.values():
+    for key, sink in RITUAL_SINKS.items():
         runs = DAY // sink["ticks"]
         rows.append((f"{sink['rite']}, worked again and again at one Lesser Circle",
-                     f"{runs * sink['ley']:,} Ley Charge, {runs * sink['focus']:,} Focus, and {sink['offerings']} a run",
+                     f"{runs * sink['ley']:,} Ley Charge, {runs * sink['focus']:,} Focus, and {offerings(key)} a run",
                      f"{runs} {sink['name']}", f"one run every {sink['ticks']} ticks; one player's Focus, back 1 every "
                      f"{FOCUS_REGEN_TICKS} ticks, pays for {DAY // FOCUS_REGEN_TICKS // sink['focus']} runs",
                      sink["consequence"]))

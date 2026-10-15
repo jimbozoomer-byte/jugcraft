@@ -15,12 +15,12 @@ Machines covered: crusher, arc furnace, alloy smelter, metal press, wire drawer,
 
 Crafting-table recipes show in JEI's own crafting page when JEI's recipe sync reaches the client: always in a single-player world, and on a server only if JEI is installed there too. A server without JEI sends none, and JEI falls back to vanilla's own recipes (read in JEI's 31.9 source; the pin is 31.8.0.49).
 
-**Information pages** (JEI's Information tab) cover what no recipe shows: the alchemy ingredients' properties and the mortar, how a Resonant Ring is forged, and, since Concordance Chunk A, where the things only a ritual or a lair boss gives come from (the Adept's Wand, and since Concordance Chunk C the Rooted Thallite Foundation, and Vesperine's and Madame Tatterlace's loot; the Yeti King's and the Cinder Tyrant's since Concordance Chunk B), with the default data's chances ([concordance-first-loadout.md](concordance-first-loadout.md)).
+**Information pages** (JEI's Information tab) cover what no recipe shows: the alchemy ingredients' properties and the mortar, how a Resonant Ring is forged, and, since Concordance Chunk A, where the things only a ritual or a lair boss gives come from (the Adept's Wand, and the Rooted Thallite Foundation (Concordance Chunk C, C-04; not merged, not run), and Vesperine's and Madame Tatterlace's loot; the Yeti King's and the Cinder Tyrant's since Concordance Chunk B), with the default data's chances ([concordance-first-loadout.md](concordance-first-loadout.md)).
 
 ## How it works
 - **Optional:** the plugin compiles against JEI's API only (`compileOnly`, maven.blamejared.com). The JEI mod itself is an optional entry of the framework lock, which `build.gradle` loads at runtime in development and test runs unless `-PjugcraftOptionalIntegrations=false` (as CI's "optional integrations absent" job runs). The plugin class is reached only through JEI's `jei_mod_plugin` entrypoint, so Jugcraft runs normally without JEI.
 - **Recipes:** these are server data in 26.x and are not sent to clients. The plugin reads `assets/jugcraft/recipe_view.json` instead, which `tools/recipe_view.py` generates from the same tables as the recipe data.
-  - A data pack that changes machine recipes on a server is not reflected in JEI; nor is one that changes a lair boss's loot table or a ritual's data (the Adept's Attunement, Root and Rivet), which is why those information pages say "with the default data".
+  - A data pack that changes machine recipes on a server is not reflected in JEI; nor is one that changes a lair boss's loot table or a ritual's data (the Adept's Attunement, and Root and Rivet (Concordance Chunk C, C-04; not merged, not run)), which is why those information pages say "with the default data".
 
 ## Dependencies and assets
 - JEI 31.8.0.49 for 26.3 (MIT): its API at compile time; the mod optional (`distribution/frameworks.lock.json`).

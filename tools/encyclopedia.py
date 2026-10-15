@@ -244,7 +244,7 @@ INSPECT = {
     "unknown_rite": "a rite you have not learned",
     "under_way": "%s, under way",
     "completed": "%s, complete",
-    "anchor.held": "Held until it ends, then consumed: %s",
+    "anchor.held": "Held until it ends, and consumed only if it completes: %s",
     "anchor.count": "%s %s",
     "last": "Last attempt: %s",
     "stages": "%s: its stages and what each pays",

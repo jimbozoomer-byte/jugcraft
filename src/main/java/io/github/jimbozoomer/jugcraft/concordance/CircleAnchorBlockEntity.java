@@ -559,7 +559,8 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 	/**
 	 * A reading in chat marks every faulted part where it stands (C-03): each part the report finds at fault, with the sign
 	 * its interruption would show (danger for a broken boundary, else a shortage), and each channel readiness finds short
-	 * or unlent for {@code reader}, a shortage. One sign a part, within the Signs budget. Never from status(level, out).
+	 * of a step or unlent for {@code reader} (a blocking line; one only warned short of the run is not marked), a shortage.
+	 * One sign a part, within the Signs budget. Never from status(level, out).
 	 */
 	private void markReadiness(ServerLevel level, ServerPlayer reader) {
 		Map<BlockPos, Sign> marks = new LinkedHashMap<>();
@@ -578,7 +579,7 @@ public class CircleAnchorBlockEntity extends BlockEntity implements GeoBlockEnti
 		Readiness readiness = readiness(level, reader);
 		if (readiness != null) {
 			for (Readiness.Line line : readiness.lines()) {
-				if (line.at() != null) {
+				if (line.blocks() && line.at() != null) {
 					marks.putIfAbsent(part(line.at()), Sign.WANT);
 				}
 			}

@@ -938,7 +938,8 @@ public class ConcordanceRitualGameTests {
 
 	/**
 	 * While a rite runs, what it has spent (six Focus, then 2 Ley Charge from each of four pylons a step) is shown apart
-	 * from what it still holds (its plan, the spare gold not), on the Inspect page and in Jade; called off, its ending is
+	 * from what it still holds (its plan, the spare gold not), on the Inspect page and in Jade, and a pylon gone since the
+	 * last step is a blocking line (the unit review); called off, its ending is
 	 * kept with what it spent, and the one line for every interruption says why, where the offerings are and what was
 	 * lost. A new attempt clears the last; broken, the anchor drops everything once.
 	 */
@@ -961,6 +962,16 @@ public class ConcordanceRitualGameTests {
 			Readiness running = anchor.readiness(level, player);
 			helper.assertTrue(running != null && oneStep.equals(running.spent()) && held.equals(running.held()) && running.lines().isEmpty(),
 					"running: spent apart from held, nothing short: " + running);
+			// A pylon gone or unloaded since the last step: the shape shown is still that step's, so readiness says it,
+			// blocking, as the next step will (the unit review).
+			var rite = ConcordanceData.rules().ritual(anchor.run().ritual());
+			List<Readiness.Channel> oneGone = new ArrayList<>();
+			for (StructurePattern.Part part : ConcordanceData.rules().structure(rite.structure()).channels()) {
+				oneGone.add(new Readiness.Channel(part.offset(), "", !oneGone.isEmpty(), 64, true));
+			}
+			Readiness gone = Readiness.running(rite, anchor.run(), oneGone, 0L, 0);
+			helper.assertTrue(gone.lines().equals(List.of(new Readiness.Line(Diagnostic.of(Code.INCOMPLETE_PATTERN, CIRCLE, 1), true, null))),
+					"A pylon gone since the last step is said, and blocks: " + gone.lines());
 			List<EncyclopediaPayload.Row> rows = inspect(helper, player);
 			EncyclopediaPayload.Row heading = row(rows, "encyclopedia.jugcraft.inspect.under_way");
 			EncyclopediaPayload.Row spent = row(rows, "compose.jugcraft.ritual.spent");

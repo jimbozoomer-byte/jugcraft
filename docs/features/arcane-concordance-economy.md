@@ -42,9 +42,11 @@ bone meal, relic charge, a Crimson Surge) were in no loop check.
   - Every conversion and every source driven by time is modelled, each figure tied to the Java or data it comes from,
     so the model cannot drift from the game.
   - No cycle of conversions comes back with as much as it started with.
-  - **Ritual sinks** (`RITUAL_SINKS`, since Concordance Chunk C, C-04): Root and Rivet takes 32 Ley Charge and 6 Focus a
-    run for one Rooted Thallite Foundation, which nothing turns back; modelled as an edge into a node with no way out,
-    so a later conversion out of it is weighed with it. `check_economy` holds the sink to the ritual's data.
+  - **Ritual sinks** (`RITUAL_SINKS`; Concordance Chunk C, C-04; not merged, not run): Root and Rivet takes 32 Ley
+    Charge and 6 Focus a run for one Rooted Thallite Foundation, which nothing turns back; modelled as an edge into a
+    node with no way out, so a later conversion out of it is weighed with it. `check_economy` holds the sink's figures
+    to the ritual's data, and its offerings are worded from that data. The table's Root and Rivet row below is the same
+    C-04 addition (not merged).
   - Every crop's regrow-and-compost loop is included, at its natural cost and when a spire hastens it.
 
 ## Bounded on purpose
@@ -73,7 +75,7 @@ The table is rendered by `python3 tools/concordance_economy.py`, and `check_econ
 | Lumen Sconce | 20 Radiance | light 15 | a measure every 1200 ticks; a measure begun is spent | light |
 | Reliquary Shrine recharging | 2,400 Ley Charge | 9,600 relic charge | 8 charge a second | none; relic charge never becomes Ley Charge again |
 | Crimson Surge | 120 Vitae | 120 Focus | one every 1200 ticks | health given (offering exhaustion) |
-| Root and Rivet, worked again and again at one Lesser Circle | 4,800 Ley Charge, 900 Focus, and a Thallite plate, 4 copper ingots and 4 Mendvetch a run | 150 Rooted Thallite Foundations | one run every 160 ticks; one player's Focus, back 1 every 40 ticks, pays for 100 runs | none; a foundation never becomes Ley Charge, Focus or a plate again |
+| Root and Rivet, worked again and again at one Lesser Circle | 4,800 Ley Charge, 900 Focus, and 1 Thallite Plate, 4 Copper Ingot and 4 Mendvetch a run | 150 Rooted Thallite Foundations | one run every 160 ticks; one player's Focus, back 1 every 40 ticks, pays for 100 runs | none; a foundation never becomes Ley Charge, Focus or a plate again |
 | Verdant Spire, kept | 8 bone meal and 6 Ley Charge | 1,440 crop steps | 6 a pulse, a pulse every 100 ticks | Concordance crops pay their beds |
 | Star Spire, kept | 2 glow ink sacs and 8 Ley Charge | 240 Focus a player | 6 a pulse, a pulse every 100 ticks | hostile creatures revealed |
 | Lantern Spire, kept | 4 glowstone dust and 8 Ley Charge | 960 lights | 4 a pulse, a pulse every 100 ticks | no hostile spawns in its light |

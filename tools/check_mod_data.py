@@ -11961,14 +11961,23 @@ def check_concordance(registered):
     # A codex link (Modonomicon's entry://) names an entry of this book (Concordance Chunk C, C-04, C-P42). Modonomicon
     # will not open a book with a broken link (allow_open_book_with_invalid_links defaults to false), so one stale link
     # would close the whole codex.
+    # Its @anchor must be a page's id and its #page a page of the entry: BookLink.fromEntry refuses either otherwise.
     for key, text in sorted(lang.items()):
         if not key.startswith(f"book.{MOD}.{co.BOOK}."):
             continue
         for link in re.findall(r"\]\((entry://[^)\s]*)\)", text):
-            target = re.split(r"[#@]", link[len("entry://"):])[0]
+            target, at, anchor = link[len("entry://"):].rpartition("@") if "@" in link else (link[len("entry://"):], "", "")
+            target, hashed, page = target.rpartition("#") if "#" in target else (target, "", "")
             owner, _, path = target.partition("/")
-            if owner != f"{MOD}:{co.BOOK}" or not (book / "entries" / f"{path}.json").is_file():
+            entry = book / "entries" / f"{path}.json"
+            if owner != f"{MOD}:{co.BOOK}" or not entry.is_file():
                 err(f"codex lang {key}: {link} names no entry of the codex ({MOD}:{co.BOOK}/<category>/<entry>)")
+                continue
+            pages = (load(entry) or {}).get("pages", [])
+            if at and anchor not in {each.get("id") for each in pages}:
+                err(f"codex lang {key}: {link} names no page id of {path} (@{anchor})")
+            if hashed and not (page.isdigit() and int(page) < len(pages)):
+                err(f"codex lang {key}: {link} names no page of {path} (#{page}: it has {len(pages)})")
     # Opt-outs name real items; the Kindled mote has its block state and name; LambDynamicLights names a real item.
     for path in (DATA / MOD / "spell_assignments").glob("*.json"):
         if path.stem not in registered:
@@ -12497,8 +12506,9 @@ def check_rituals(co, root, lang, registered, research):
     # tools/concordance_rituals.py states for it ("switches"): those every recipe making an offering asks for, with those
     # every recipe making each thing it is made from asks for (one step down; a tag needs what all its members need, and a
     # thing not Jugcraft's needs none), an offering that is itself a tag likewise. With one off the rite stays known but its
-    # offering cannot be made. Concordance data carries no load condition: whether Fabric applies one to the Concordance's
-    # loader is unverified.
+    # offering cannot be made. A condition with "or" alternatives needs none of its switches alone (FeatureEnabledCondition
+    # loads it if any is on), and a machine recipe's {"ingredient", "count"} entries are followed like any other. Concordance
+    # data carries no load condition: whether Fabric applies one to the Concordance's loader is unverified.
     makers = {}
     for path in sorted(DATA.glob("*/recipe/**/*.json")):
         body = load(path) or {}
@@ -12507,15 +12517,15 @@ def check_rituals(co, root, lang, registered, research):
         if not isinstance(result, str):
             continue
         switches = {c.get("feature") for c in body.get("fabric:load_conditions", [])
-                    if c.get("condition") == f"{MOD}:feature_enabled"} - {"concordance"}
+                    if c.get("condition") == f"{MOD}:feature_enabled" and not c.get("or")} - {"concordance"}
         refs = list(body.get("key", {}).values()) + list(body.get("ingredients", [])) + [body.get("ingredient")]
         makers.setdefault(result, []).append((switches, refs))
     def members(ref):
-        """What an ingredient stands for: an item, a #tag's values, or a list of either."""
+        """What an ingredient stands for: an item, a #tag's values, a machine recipe's {"ingredient", "count"}, or a list."""
         if isinstance(ref, list):
             return [m for each in ref for m in members(each)]
         if isinstance(ref, dict):
-            return members(ref.get("id"))
+            return members(ref.get("ingredient", ref.get("id")))
         if not isinstance(ref, str):
             return []
         if ref.startswith("#"):

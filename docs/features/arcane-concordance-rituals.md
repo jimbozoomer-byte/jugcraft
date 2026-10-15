@@ -43,9 +43,10 @@ answer still needs before it can begin, all at once, for the reader as its leade
 charge against one step and against the whole rite; pylons that will not lend; whether the reader stands near enough;
 their Focus; the light; and how many faults the circle has (the status lines above list each). A pylon short only of the
 whole run is a warning, not a refusal: the start still asks one step's charge (C-P10), and the line names the step the
-rite would break off at. While a rite runs, the page shows what it has spent (Focus, Ley Charge, steps drawn) apart from
-the offerings it still holds; after an interruption, how that attempt ended, until the next start or a load. Then the
-rite's stages and what each pays, worded from its data, the backlash included. A rite the reader has not learned is
+rite would break off at unless the pylon is refilled meanwhile (on JE a pylon gains about 2.56 Ley Charge a step, more
+than any rite draws from it). While a rite runs, the page shows what it has spent (Focus, Ley Charge, steps drawn) apart
+from the offerings it still holds; after an interruption, how that attempt ended, until the next start or a load. Then
+the rite's stages and what each pays, worded from its data, the backlash included. A rite the reader has not learned is
 never named there: the page says only that the offerings answer a rite they have not learned.
 
 With Jade, looking at the anchor shows its phase, its step, the participants a running rite needs ("Gathering: 1 of 2")
@@ -106,9 +107,9 @@ present, as any completed ritual does. Its stages and what each pays, as its cod
 
 Since Concordance Chunk C (C-03) each way a ritual breaks off is told to its participants in **one line**: why it broke
 off, where the offerings are, and the Focus and Ley Charge the attempt spent and lost, for example "Adept's Attunement
-broke off: a pylon ran dry. The offerings are still in the anchor; lost: 6 Focus and 8 Ley Charge". Before, the reason
-and "the offerings are still in the anchor" went to the action bar in the same tick, so the second probably replaced the
-first.
+broke off: a pylon ran dry. The offerings are still in the anchor; the attempt lost 6 Focus and 8 Ley Charge". The Focus
+is the whole attempt's, every participant's together. Before, the reason and "the offerings are still in the anchor"
+went to the action bar in the same tick, so the second probably replaced the first.
 
 ## How it works
 
@@ -328,9 +329,10 @@ connected texture and the codex pages in game), a two-client dedicated server (L
 participant disconnecting), and a real server restart mid-ritual (the lapse is tested by saving and loading the block
 entity).
 
-**Concordance Chunk C, unit 2 (C-03 and C-04; commits `a0e73881c` and `2c98d6d68`, records in the next).** Written with
-no Minecraft jar, so none of its game code has been compiled against Minecraft, and none of the tests below has run: no
-CI run yet. Every one is **not run**.
+**Concordance Chunk C, unit 2 (C-03 and C-04; commits `a0e73881c` and `2c98d6d68`, records `4df687cc7`, merged with unit
+1's review fixes in `2263f851b`, and the unit review's fixes in the commit after it).** Written with no Minecraft jar,
+so none of its game code has been compiled against Minecraft, and none of the tests below has run: no CI run yet. Every
+one is **not run**.
 - `ConcordanceRitualGameTests`, 11 new (29 in all), not run:
   - C-03: `anIdleCircleSaysEverythingARiteStillNeeds`, `aRefusedStartMarksEveryFault`,
     `aStatusReadingMarksFaultsButTheInspectPageDoesNot`, `spentAndReservedAreShownApart`, `theInterruptionReasonIsKept`
@@ -352,12 +354,19 @@ CI run yet. Every one is **not run**.
   `python3 scripts/check_repository.py`, `python3 tools/owner_art.py --check`,
   `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
   `node --test tools/world-designer/model.test.cjs`, `python -m unittest discover -s scripts/tests` and `git diff --check`.
-- Audit mutations on scratch copies, each reverted: C-03's 19 and C-04's 24 (two of them for an offering that is a
-  tag) were all caught. A foundation-to-Ley conversion of 31 is, as intended, not a gaining cycle. No audit holds that
+- Audit mutations on scratch copies, each reverted: C-03's 19 were all caught, and C-04's 23 (one of them a scratch rite
+  offering a tag); deleting Mendvetch from `_item_name` surfaced as a crash (`KeyError`), not as a reported error. One
+  control (C5', the spec's original switch loop) raised no switch error for the tag offering, so that loop would have
+  missed it. A foundation-to-Ley conversion of 31 is, as intended, not a gaining cycle. No audit holds that
   running readiness reads the light, and no game test covers that line: only the scratch harness below does.
 - A scratch harness outside Git compiled the pure Concordance packages at `2c98d6d68` with JDK 21 and ran 37 checks of
   `Choice` and `Readiness` with the game tests' figures (readiness lines and their order, warnings, spent and held, the
   stage tables of the attunement and the vigil); all passed. It is not a game test and it is not in Git.
+- The unit review's fixes ([the contract](concordance-chunk-c.md), Fixes from the unit review under C-04):
+  `spentAndReservedAreShownApart` also asserts that a pylon gone since the last step is a blocking line (not run); the
+  same local checks run and passed; the fixes' audit mutations were each reported, their negative cases and controls
+  were not, and C-03's and C-04's suites gave the results above again; the scratch harness passed with three new
+  checks.
 - Not run: `./gradlew build` (with or without the optional integrations), `./gradlew runClientGameTest`, CI, any client
   by hand, and two clients.
 
@@ -376,10 +385,13 @@ the shared effect boundary.
   Concordance specimen, which examination now reads); built-in pack
   `jugcraft:fusion_textures`; the four sounds above.
 - New stable ids since Concordance Chunk C (C-04): the ritual `jugcraft:root_and_rivet` and the item
-  `jugcraft:rooted_thallite_foundation`, with its codex entry `circles/root_and_rivet`. New lang: `compose.jugcraft.ritual.*`
-  (readiness, spent and the stage table), `encyclopedia.jugcraft.inspect.*` for the anchor, and the C-03 diagnostic
-  codes `not_lent`, `needs_focus`, `too_bright`, `too_far` and `participants`. `message.jugcraft.concordance.circle.kept`
-  was removed (a message, never saved) for `circle.release.kept` and `.release.dropped`.
+  `jugcraft:rooted_thallite_foundation`, with its codex entry `circles/root_and_rivet`. New lang, among them:
+  `compose.jugcraft.ritual.*` (readiness, spent and the stage table), `encyclopedia.jugcraft.inspect.*` for the anchor,
+  the C-03 diagnostic codes `not_lent`, `needs_focus`, `too_bright`, `too_far` and `participants`,
+  `message.jugcraft.concordance.circle.ended`, `.ended.spent` and `.where`, `tooltip.jugcraft.concordance.jade.spent`
+  and `.reserved`, `jei.jugcraft.acquire.rooted_thallite_foundation`, and the foundation's item, tooltip and codex keys.
+  `message.jugcraft.concordance.circle.kept` was removed (a message, never saved) for `circle.release.kept` and
+  `.release.dropped`.
 - Save compatibility: additive. Existing worlds keep knowledge, Focus and inscriptions. Chunk C adds no saved key: the
   last attempt's ending is kept in memory only.
 - Open: larger circles and rituals for the other Principles arrive with their research; a GuiLib schematic.
@@ -397,7 +409,7 @@ its map. Nothing is taken from Mojang's files. The owner's library was searched 
 | `originals/Magic/assets/ars_nouveau/textures/item/ritual_flashing_base.png` | `e9e50d806f53` | a grey studded square tile filling the slot (ITEM_ICONS rule 2), soft and dithered; no Thallite, no roots |
 | `originals/Blocks/Guns/item/armor_plate.png`, `heavy_armor_plate.png` | `359667a0c053`, `4df8b0c187a5` | copper gun armour plates; no rivets or roots |
 | `originals/Blocks/Weapon Smithing/Items/materials/reinforcement/base.png`, `iron.png` | `fea48a7743d8`, `6530304cd6ca` | framed square tiles filling the slot |
-| `originals/Blocks/Weapon Smithing/Items/cast/plate.png`, `foundry/casting/table_plate.png` | `c6a65ce984c8`, `c74ae07f1feb` | casting moulds |
+| `originals/Blocks/Weapon Smithing/Items/cast/plate.png`, `originals/Blocks/Weapon Smithing/foundry/casting/table_plate.png` | `c6a65ce984c8`, `c74ae07f1feb` | casting moulds |
 | `originals/Blocks/metal_plate_copper.png` | `a11a33069e1c` | a copper plate |
 | `originals/Blocks/Big Cannons and Mounted Guns/textures/item/aluminumplate.png`, `brassplate.png`, `copperplate.png`, `steelplate.png` | `d285627c2fcd`, `822276c5d019`, `9f4cfa8879d0`, `69034e74d357` | plain plates of other metals, with no rivets or roots |
 | `originals/Blocks/Weapon Smithing/slime/foliage/roots.png` (and the enderbark `roots` and `slimy_roots` block textures) | `b54c05377316` | block foliage and wood, not an item |
