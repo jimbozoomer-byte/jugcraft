@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      load_card:
+        description: Also run the Concordance workshop load card (docs/TESTING.md); ordinary runs never do
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -60,6 +65,36 @@ jobs:
           java-version: '25'
       - name: Build and run server tests without optional integrations
         run: ./gradlew build --no-daemon -PjugcraftOptionalIntegrations=false
+
+  # Concordance Chunk C, C-10 (C-P20, C-P66): the measured small workshop, only when a manual run asks for it. Fabric's
+  # filter makes it the only server game test in its own job; its lines are repeated as one notice on the run.
+  load-card:
+    name: workshop load card
+    if: github.event_name == 'workflow_dispatch' && inputs.load_card
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+      - name: Run the workshop load card
+        env:
+          JAVA_TOOL_OPTIONS: -Dfabric-api.gametest.filter=jugcraft-test:concordance_workshop_load_game_tests_load_card
+        run: |
+          set -o pipefail
+          ./gradlew runGameTest --no-daemon 2>&1 | tee gametest.out
+      - name: Show the load card as a notice
+        if: always()
+        run: |
+          grep -F 'Concordance load card |' gametest.out | sed 's/^.*Concordance load card | //' > card.txt || true
+          if [ -s card.txt ]; then
+            echo "::notice title=Concordance load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' card.txt)"
+          fi
 
   # Which client game test classes to run, shared out between five client jobs (tools/select_client_tests.py).
   # A pull request runs the classes that show what it changed; main and a manual run of this workflow run them all.
