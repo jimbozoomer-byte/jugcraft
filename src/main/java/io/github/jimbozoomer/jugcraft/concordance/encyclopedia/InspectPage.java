@@ -244,6 +244,11 @@ public final class InspectPage {
 			out.heading(Component.translatable("encyclopedia.jugcraft.inspect.garden.habitat", plant.getBlock().getName()));
 			out.fact(ComposeText.show(HabitatInspection.verdict(verdict)));
 			facts(out, HabitatInspection.judged(state, niche, verdict));
+			// Concordance Chunk C (C-08, C-P58): a mixed bed's bonus (the strain is in the disturbance row).
+			Text mixed = bed.mixedLine(organism);
+			if (mixed != null) {
+				out.fact(ComposeText.show(mixed));
+			}
 		}
 		out.codex("garden/habitats", "jugcraft:verdant_husbandry", ResearchState.ENCOUNTERED);
 		out.codex("garden/organisms", "jugcraft:verdant_husbandry", ResearchState.OBSERVED);

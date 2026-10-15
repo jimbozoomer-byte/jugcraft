@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.concordance.Illumination;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.farming.SprinklerBlock;
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -44,8 +45,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Bone meal on it gives {@value Garden#BONE_MEAL_NUTRIENTS} nutrients. An empty main hand reports it (an item there is
  * that item's own use, so a crop plants and a canteen pours without sneaking: Concordance Chunk C, C-07, C-P56); a
- * Greenwarden's empty hand wakes it and the dormant beds joined to it (up to {@value Garden#AWAKEN_LIMIT}). A Gourd
- * Canteen's sip wets a dry bed to 7 for someone who may change it ({@link #pour}).
+ * Greenwarden's empty hand wakes it and the dormant beds joined to it (up to {@value Garden#AWAKEN_LIMIT}), or tends a
+ * strained one (Concordance Chunk C, C-08, C-P61: {@link #tend}). A Gourd Canteen's sip wets a dry bed to 7 for someone who
+ * may change it ({@link #pour}). Bone meal on it is compost: it eases a strain as it feeds the bed (C-08).
  */
 public class VerdantBedBlock extends BaseEntityBlock {
 	public static final IntegerProperty MOISTURE = BlockStateProperties.MOISTURE;
@@ -73,7 +75,8 @@ public class VerdantBedBlock extends BaseEntityBlock {
 
 	/**
 	 * Wets the bed from water, rain or a wet sprinkler nearby, or lets it dry a step; and (Concordance Chunk C, C-07, C-P55)
-	 * forgets its last verdict once nothing that notes it, a crop or a Verdant Heart, stands on it.
+	 * forgets its last verdict once nothing that notes it, a crop or a Verdant Heart, stands on it; and (C-08, C-P59, C-P60)
+	 * counts a harvest it saw, or, at rest, eases a strain.
 	 */
 	@Override
 	protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
@@ -90,6 +93,8 @@ public class VerdantBedBlock extends BaseEntityBlock {
 			if (!(above.getBlock() instanceof OrganismCropBlock) && !above.is(Garden.VERDANT_HEART)) {
 				bed.forgetVerdict();
 			}
+			// Concordance Chunk C (C-08, C-P59, C-P60): a harvest the bed saw is counted; otherwise a bed at rest eases a strain.
+			bed.rest();
 		}
 	}
 
@@ -145,6 +150,8 @@ public class VerdantBedBlock extends BaseEntityBlock {
 				Garden.tell(server, "garden.bed_full");
 				return InteractionResult.FAIL;
 			}
+			// Concordance Chunk C (C-08, C-P61): bone meal is compost; it eases a strain as it feeds the bed.
+			bed.compost();
 			stack.consume(1, player);
 			level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos.above(), 5);
 			Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);
@@ -167,6 +174,7 @@ public class VerdantBedBlock extends BaseEntityBlock {
 			if (!bed.awake() && Garden.knows(server) && Garden.enabled()) {
 				Garden.tell(server, "garden.awakened", awaken(serverLevel, pos, server));
 			} else {
+				tend(serverLevel, pos, server, bed);
 				bed.report(serverLevel, server);
 			}
 		}
@@ -189,6 +197,22 @@ public class VerdantBedBlock extends BaseEntityBlock {
 		}
 		level.setBlock(pos, state.setValue(MOISTURE, WET), Block.UPDATE_CLIENTS);
 		return true;
+	}
+
+	/**
+	 * Concordance Chunk C (C-08, C-P61): a Greenwarden's empty hand tends an awake, strained bed they may change (Authority),
+	 * easing one strain at most once every {@value Garden#TEND_TICKS} ticks a bed; anyone else's touch only reads it.
+	 */
+	private static void tend(ServerLevel level, BlockPos pos, ServerPlayer player, VerdantBedBlockEntity bed) {
+		if (!bed.awake() || !Garden.enabled() || !Garden.knows(player) || bed.strainNow() == 0
+				|| !Authority.mayChange(level, player, pos)) {
+			return;
+		}
+		if (bed.tend(level.getGameTime())) {
+			Garden.tell(player, "garden.tended", bed.strain(), Habitat.MAX_STRAIN);
+		} else {
+			Garden.tell(player, "garden.tended_lately", Garden.TEND_TICKS / 20);
+		}
 	}
 
 	/**

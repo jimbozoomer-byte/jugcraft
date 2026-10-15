@@ -13,6 +13,10 @@ and disturbance, read by Java's concordance/ecology); the area round a plant is 
 SAMPLES_PER_TICK a level a tick, and a sample is reused for FRESH_TICKS.
 
 tools/concordance.py merges these tables into its own. Numbers the Java repeats are checked by tools/check_mod_data.py.
+
+Concordance Chunk C, C-08: Dewmoss and Gloamcap make a mixed bed (each grows MIXED_BED_PERCENT per cent faster with the
+other in the 5x5; speed only, never cost); a harvest strains its bed (up to MAX_STRAIN), counted against a plant's
+disturbance limit, eased by rest, compost and a Greenwarden's tending (once every TEND_TICKS).
 """
 
 MOD = "jugcraft"
@@ -58,6 +62,16 @@ GLEANER_CAPACITY = 16  # Verdance it holds
 GLEANER_DRAW = 8  # the most it draws from a Heart at once
 HEART_REACH = 4  # Hearts this far away feed it
 GLEAN_COST = 1  # Verdance a harvest costs
+# Concordance Chunk C, C-08 (C-P58 to C-P61; starting values). A mixed bed: a crop whose declared neighbours (other crops
+# that cost nutrients) grow in the 5x5 round it at plant height steps this many percent more often; never what a step
+# costs (Java: ecology/Neighbours.java). Harvest strain: each harvest its bed saw strains it by one, up to MAX_STRAIN,
+# counted against its plant's disturbance limit, never as disturbance it needs (ecology/Habitat.java, Verdict.java); a bed
+# rests one a random tick while no crop grows on it, a dose of compost (bone meal, fertilizer, a Maw's nutrient) eases
+# one, and a Greenwarden's tending one, at most once every TEND_TICKS ticks (garden/Garden.java).
+MIXED_BED_PERCENT = 25
+MAX_MIXED_BED_PERCENT = 50
+MAX_STRAIN = 3
+TEND_TICKS = 600
 # What the Mulch Maw eats, in quarters of a nutrient (item tags #jugcraft:mulch/<name>, so data packs can add more).
 # Roughly vanilla's composting chances times four, rounded down. Nothing composted gives back what it cost to grow.
 MULCH = {
@@ -128,10 +142,12 @@ ORGANISMS = {
                  "summary": "Wants bright sun (13 or more), a moist bed and different plants round it."},
     # Shade and wet: it drinks what the bed holds.
     "dewmoss": {"role": "crop", "name": "Dewmoss", "growth": 1.5, "cost": 1, "replant": 1, "produce": 2, "chaff": 1,
+                "neighbours": ["gloamcap"],
                 "niche": {"moisture": [5, 7, 7, 7], "light": [0, 0, 9, 12], "nutrients": [1, 2, 32, 32]},
                 "summary": "Wants shade (9 or less) and a soaking bed."},
     # Dark, and fed by working magic nearby.
     "gloamcap": {"role": "crop", "name": "Gloamcap", "growth": 2.5, "cost": 2, "replant": 1, "produce": 1, "chaff": 1,
+                 "neighbours": ["dewmoss"],
                  "niche": {"moisture": [2, 3, 7, 7], "light": [0, 0, 6, 9], "nutrients": [2, 4, 32, 32],
                            "disturbance": [1, 3, 10, 15]},
                  "summary": "Wants the dark (6 or less), a rich bed and working magic close by."},
@@ -220,6 +236,8 @@ MESSAGES = {
     "garden.gauge_attuned": "Now judging the habitat for %s",
     "garden.gleaner": "Gleaner: %s / %s Verdance, %s",
     "garden.not_owner": "Only its keeper (or their party) may change it",
+    "garden.tended": "Tended: strain %s of %s",
+    "garden.tended_lately": "It was tended lately: once every %s seconds",
 }
 
 # The simulation's own words (compose.jugcraft.*, shown through ComposeText like the compiler's).
@@ -262,6 +280,13 @@ TEXT = {
     "ecology.inspect.excess": "too much: it stops above %s (best %s to %s; at least %s)",
     "ecology.inspect.verdict": "On this reading: %s",
     "ecology.inspect.unplanted": "Nothing grows on it to judge these by",
+    # Concordance Chunk C, C-08 (Neighbours.line, VerdantBedBlockEntity.strainLine, Verdict.reasons, HabitatInspection.line).
+    "ecology.mixed": "Mixed bed: +%s%%",
+    "ecology.strain": "Recently harvested: strain %s of %s",
+    "ecology.strained.excess": "%s %s, recently harvested (+%s): too much (at most %s)",
+    "ecology.strained.tolerable": "%s %s, recently harvested (+%s): tolerable (best from %s to %s)",
+    "ecology.inspect.disturbance_strained": "Disturbance %s, and %s more from recent harvests counted against its limit: the "
+                                            "working magic in the %s by %s round the plant, %s block above and below",
 }
 for _factor in FACTORS:
     TEXT[f"factor.{_factor}"] = _factor.title()
@@ -329,6 +354,17 @@ def _crop_table():
     return "\\\n".join(rows)
 
 
+def _mixed_and_strain_text():
+    """Concordance Chunk C, C-08: the codex's words for a mixed bed and harvest strain, from the numbers above."""
+    pairs = " and ".join(ORGANISMS[key]["name"] for key in CROPS if ORGANISMS[key].get("neighbours"))
+    return (f"**A mixed bed:** {pairs} grow {MIXED_BED_PERCENT} per cent faster with the other in the 5x5 round them. "
+            f"Copies of one plant never count, and a step costs what it always did.\\\n"
+            f"**Strain:** each harvest strains its bed by one, up to {MAX_STRAIN}. Strain counts against a plant's "
+            f"disturbance limit, never as the magic it needs. A bed rests it away while nothing grows on it; compost "
+            f"(bone meal, fertilizer, a Mulch Maw) and a Greenwarden's empty hand (once every {TEND_TICKS // 20} "
+            f"seconds) ease it too. It never kills.")
+
+
 def codex():
     art = "verdant_husbandry"
     specimens = "\\\n".join(f"- {name}" for name in GARDEN_SPECIMENS.values())
@@ -387,7 +423,7 @@ def codex():
                  f"speeds them, as legumes do."),
             ] + [("crafting_recipe", ORGANISMS[key]["name"],
                   f"Your first {ORGANISMS[key]['name']} comes from the crafting grid; after that, its harvests give "
-                  f"more.", rid(key)) for key in CROPS],
+                  f"more.", rid(key)) for key in CROPS] + [("text", "Mixed Beds and Strain", _mixed_and_strain_text())],
         },
         ("garden", "devices"): {
             "name": "Living Devices", "x": 2, "y": 2, "icon": rid("verdant_heart"), "condition": (art, "understood"),
@@ -431,6 +467,8 @@ def organism_json(key):
         if info.get("fix"):
             out["fix"] = info["fix"]
         out.update({"replant": info["replant"], "produce": info["produce"], "chaff": info["chaff"]})
+        if info.get("neighbours"):
+            out["neighbours"] = {"organisms": [rid(name) for name in info["neighbours"]], "percent": MIXED_BED_PERCENT}
     else:
         out.update({"cost": info["cost"], "thriving": info["thriving"], "tolerating": info["tolerating"]})
     out["niche"] = info["niche"]

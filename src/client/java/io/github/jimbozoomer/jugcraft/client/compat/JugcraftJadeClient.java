@@ -10,6 +10,8 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlock;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
@@ -215,12 +217,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 	}
 
-	/** One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note). */
+	/**
+	 * One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note): a field 1 that names a
+	 * factor is shown by its name. Since Concordance Chunk C (C-08) a reason may carry no factor ("ecology.mixed|25"): its
+	 * fields are shown as sent.
+	 */
 	private static Component reasonText(String encoded) {
 		String[] parts = encoded.split("\\|");
+		boolean factor = parts.length > 1 && Factor.fromId(parts[1]) != null;
 		Object[] args = new Object[parts.length - 1];
 		for (int i = 1; i < parts.length; i++) {
-			args[i - 1] = i == 1 ? Component.translatable("compose.jugcraft.factor." + parts[1]) : parts[i];
+			args[i - 1] = i == 1 && factor ? Component.translatable("compose.jugcraft.factor." + parts[1]) : parts[i];
 		}
 		return Component.translatable("compose.jugcraft." + parts[0], args);
 	}
@@ -233,6 +240,13 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 			for (String reason : reasons.split("\n")) {
 				tooltip.add(reasonText(reason));
 			}
+		}
+	}
+
+	/** Concordance Chunk C (C-08): how far its harvests have strained a bed, as the server counts it. */
+	private static void strain(ITooltip tooltip, int strain) {
+		if (strain > 0) {
+			tooltip.add(Component.translatable("compose.jugcraft.ecology.strain", strain, Habitat.MAX_STRAIN));
 		}
 	}
 
@@ -265,6 +279,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 					growth = "";
 				}
 				verdict(tooltip, growth, String.join("\n", bed.reasons()));
+				strain(tooltip, bed.strainNow());
 			}
 		}
 	}
@@ -395,6 +410,7 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.area", habitat[3], habitat[4]));
 					}
 					verdict(tooltip, data.getStringOr("growth", ""), data.getStringOr("reasons", ""));
+					strain(tooltip, data.getIntOr("strain", 0));
 				}
 				String device = data.getStringOr("device", "");
 				if (!device.isEmpty()) {

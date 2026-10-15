@@ -1,15 +1,20 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.agriculture.CropGrowth;
 import io.github.jimbozoomer.jugcraft.agriculture.GourdCanteenItem;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
+import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.EcologyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Fit;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
@@ -26,10 +31,19 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
+import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
+import io.github.jimbozoomer.jugcraft.machine.LargeMachineBlock;
+import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
+import io.github.jimbozoomer.jugcraft.machine.MachineKind;
+import io.github.jimbozoomer.jugcraft.weapons.ArmItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -40,6 +54,7 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
@@ -61,7 +76,9 @@ import net.minecraft.world.phys.Vec3;
  * beds and devices keep what they hold through a save. Since Concordance Chunk C (C-07): the reading the Inspect page
  * shows judges each factor as growth does and names its reach, the light as sky and lamps; a bed forgets its verdict once
  * nothing that notes it stands on it; an item held on a bed is its own use, and a canteen's sip wets a bed, by permission
- * and rate.
+ * and rate. Concordance Chunk C (C-08): a mixed bed speeds only another kind's company and mints nothing; every harvest path
+ * strains a bed once, rest, compost and tending ease it and a fixer's gift does not, strain never supplies disturbance,
+ * never kills, never reads a machine, and survives a save.
  */
 public class ConcordanceGardenGameTests {
 	private static final UUID KEEPER = new UUID(14L, 1L);
@@ -153,6 +170,100 @@ public class ConcordanceGardenGameTests {
 				}
 			});
 		}
+	}
+
+	/** Re-wets a bed (its block entity stays: the same block, another state). */
+	private static void wet(GameTestHelper helper, BlockPos at) {
+		helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+	}
+
+	private static void crop(GameTestHelper helper, BlockPos at, Block crop, int age) {
+		helper.setBlock(at, ((OrganismCropBlock) crop).getStateForAge(age));
+	}
+
+	/** Grows the Sunpetal at {@code at} from step 2 to ripe, as growth does: its bed notes the ripening. */
+	private static void ripen(GameTestHelper helper, BlockPos at, VerdantBedBlockEntity bed) {
+		crop(helper, at, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE - 1);
+		bed.setStrain(0);
+		bed.setNutrients(10);
+		helper.assertTrue(grow(helper, at) == OrganismCropBlock.Growth.GREW && age(helper, at) == OrganismCropBlock.MAX_AGE
+				&& bed.ripened() && bed.strain() == 0, "The crop at " + at + " ripens by growth, and its bed notes it");
+	}
+
+	/** A survival player at the test, with Verdant Husbandry understood when {@code greenwarden}, and no recent use. */
+	private static ServerPlayer gardener(GameTestHelper helper, boolean greenwarden) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		if (greenwarden) {
+			ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+			ConcordanceProgress.grant(player, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		}
+		RateGate.forget(player.getUUID());
+		return player;
+	}
+
+	private static Organism organism(String id) {
+		Organism organism = Garden.catalog().organism(id);
+		if (organism == null) {
+			throw new IllegalStateException("no organism " + id);
+		}
+		return organism;
+	}
+
+	/** Fills the energy store at {@code relative}, as JugcraftGameTests.charge does (its own is private). */
+	private static void charge(GameTestHelper helper, BlockPos relative, Direction side) {
+		EnergyStorage storage = EnergyStorage.SIDED.find(helper.getLevel(), helper.absolutePos(relative), side);
+		helper.assertTrue(storage instanceof SimpleEnergyStorage, "No energy storage at " + relative + " on " + side);
+		((SimpleEnergyStorage) storage).setAmount(storage.getCapacity());
+	}
+
+	/**
+	 * After a harvest by {@code path}: the crop is below ripe or gone, its bed shows one strain not yet counted (notes and
+	 * Jade), growth (replanted if need be) counts it once, and, the crop still growing (never ripe again here, so no later
+	 * path can take it), its bed's random tick counts nothing more and rests nothing.
+	 */
+	private static void strained(GameTestHelper helper, BlockPos at, VerdantBedBlockEntity bed, String path) {
+		BlockState state = helper.getBlockState(at);
+		helper.assertTrue(!(state.getBlock() instanceof OrganismCropBlock c) || !c.isMaxAge(state), path + " took the ripe crop: " + state);
+		helper.assertTrue(bed.strain() == 0 && bed.ripened() && bed.strainNow() == 1,
+				path + ": a harvest not yet counted shows as one strain: " + bed.strain() + ", " + bed.strainNow());
+		helper.assertTrue(bed.notes(null).contains(Text.of("ecology.strain", 1, Habitat.MAX_STRAIN)), path + ": recently harvested: " + bed.notes(null));
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			helper.assertTrue(ConcordanceDataProvider.bedSnapshot(bed, level(helper)).getIntOr("strain", 0) == 1, path + ": Jade is told the strain");
+		}
+		if (!(state.getBlock() instanceof OrganismCropBlock)) {
+			helper.setBlock(at, Garden.SUNPETAL_CROP);
+		}
+		helper.assertTrue(grow(helper, at) == OrganismCropBlock.Growth.GREW && bed.strain() == 1 && !bed.ripened(),
+				path + ": the next growth counted it once: " + bed.strain());
+		tickBed(helper, at.below());
+		helper.assertTrue(bed.strain() == 1 && age(helper, at) < OrganismCropBlock.MAX_AGE, path + ": and nothing more: " + bed.strain());
+	}
+
+	/**
+	 * With {@code near} two blocks east of the crop at {@code at} and {@code far} three: a fresh sample, its verdict noted;
+	 * the speed is CropGrowth's for its pace, times 1.25 in a mixed bed and unchanged otherwise. Returns whether mixed.
+	 */
+	private static boolean mixedSpeed(GameTestHelper helper, BlockPos at, VerdantBedBlockEntity bed, Block near, Block far) {
+		ServerLevel level = level(helper);
+		helper.setBlock(at.offset(2, 0, 0), near);
+		helper.setBlock(at.offset(3, 0, 0), far);
+		wet(helper, at.below());
+		bed.forgetSample();
+		Habitat habitat = bed.habitat(level);
+		OrganismCropBlock crop = (OrganismCropBlock) helper.getBlockState(at).getBlock();
+		Organism definition = crop.organism();
+		helper.assertTrue(habitat != null && definition != null, "The crop's bed is read");
+		Verdict verdict = Verdict.of(definition.niche(), habitat);
+		bed.note(verdict, habitat, definition);
+		helper.assertTrue(verdict.growth() != Verdict.Growth.STALLED, "It can grow here: " + habitat + ", " + bed.reasons());
+		BlockPos plant = helper.absolutePos(at);
+		float base = CropGrowth.speed(level, plant, definition.fix() > 0) * verdict.growth().pace / 2.0F;
+		float speed = crop.speed(level, plant, definition, verdict, bed);
+		boolean mixed = bed.mixed(definition);
+		helper.assertTrue(mixed ? Math.abs(speed - base * 1.25F) < 1.0E-4F : speed == base,
+				(mixed ? "A mixed bed steps 25% more often: " : "No bonus: ") + speed + " for " + base);
+		return mixed;
 	}
 
 	// ---------------------------------------------------------------- waking
@@ -528,6 +639,24 @@ public class ConcordanceGardenGameTests {
 			int used = Garden.budget(level).used(level.getGameTime());
 			helper.assertTrue(read <= SampleBudget.PER_TICK && used <= SampleBudget.PER_TICK && read < beds.size(),
 					"At most 16 samples this tick: " + read + " read, " + used + " used");
+			// Concordance Chunk C (C-08): a sample still reads exactly 100 positions; the kinds a mixed bed reads are the 25 it
+			// already read for diversity.
+			int[] calls = {0};
+			Sampler.Area every = Sampler.sample(new Sampler.Probe() {
+				@Override
+				public String species(int dx, int dz) {
+					calls[0]++;
+					return "test:kind_" + dx + "_" + dz;
+				}
+
+				@Override
+				public int disturbance(int dx, int dy, int dz) {
+					calls[0]++;
+					return 0;
+				}
+			});
+			helper.assertTrue(calls[0] == Sampler.READS && Sampler.READS == 100 && every.reads() == 100 && every.kinds().size() == 25
+					&& every.diversity() == Sampler.MAX_DIVERSITY, "Still 100 reads, and its 25 kinds: " + calls[0] + ", " + every.kinds().size());
 		});
 		helper.succeedWhen(() -> {
 			ServerLevel level = level(helper);
@@ -711,5 +840,486 @@ public class ConcordanceGardenGameTests {
 		handUse(helper, gardener, at, seed, false);
 		helper.assertTrue(helper.getBlockState(at.above()).is(Garden.SUNPETAL_CROP) && seed.getCount() == 1, "A seed in hand plants on the bed, not sneaking");
 		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- a mixed bed and harvest strain (Concordance Chunk C, C-08)
+
+	/**
+	 * C-08 (C-P16, C-P58): a Dewmoss in the dark steps 25% more often with a Gloamcap two blocks off, and only then: not
+	 * alone, not beside another Dewmoss (copies never count), a Sunpetal or a Mendvetch, nor with a Gloamcap three blocks
+	 * off, outside the 5 by 5. Each way: the Gloamcap has the Dewmoss for company. No Mendvetch or Sunpetal pairing.
+	 */
+	@GameTest(maxTicks = 80)
+	public void aMixedBedGrowsFasterOnlyForAnotherKind(GameTestHelper helper) {
+		BlockPos moss = new BlockPos(2, 2, 2);
+		VerdantBedBlockEntity bed = bed(helper, moss.below(), 10);
+		VerdantBedBlockEntity nearBed = bed(helper, moss.offset(2, -1, 0), 10);
+		bed(helper, moss.offset(3, -1, 0), 10);
+		helper.setBlock(moss, Garden.DEWMOSS_CROP);
+		shut(helper, moss);
+		// One fresh sample a tick (41 to 47): the area changes between them, and each reading is asserted present.
+		List<Block> unmixed = List.of(Blocks.AIR, Garden.DEWMOSS_CROP, Garden.SUNPETAL_CROP, Garden.MENDVETCH_CROP);
+		for (int i = 0; i < unmixed.size(); i++) {
+			Block other = unmixed.get(i);
+			helper.runAtTickTime(41 + i, () -> helper.assertTrue(!mixedSpeed(helper, moss, bed, other, Blocks.AIR),
+					other + " two blocks off makes no mixed bed for a Dewmoss"));
+		}
+		helper.runAtTickTime(45, () -> helper.assertTrue(!mixedSpeed(helper, moss, bed, Blocks.AIR, Garden.GLOAMCAP_CROP),
+				"A Gloamcap three blocks off is outside the 5x5"));
+		helper.runAtTickTime(46, () -> {
+			helper.assertTrue(mixedSpeed(helper, moss, bed, Garden.GLOAMCAP_CROP, Blocks.AIR), "A Gloamcap two blocks off makes a mixed bed");
+			helper.assertTrue(bed.reasons().contains("ecology.mixed|25"), "and the bed says so: " + bed.reasons());
+		});
+		helper.runAtTickTime(47, () -> {
+			nearBed.forgetSample();
+			helper.assertTrue(nearBed.habitat(level(helper)) != null, "The Gloamcap's bed is read");
+			Organism gloamcap = organism("jugcraft:gloamcap");
+			helper.assertTrue(nearBed.mixed(gloamcap) && gloamcap.neighbours().percent() == 25, "Each way: the Gloamcap has the Dewmoss for company");
+			EcologyCatalog catalog = Garden.catalog();
+			Set<String> every = Set.of("jugcraft:sunpetal_crop", "jugcraft:dewmoss_crop", "jugcraft:gloamcap_crop", "jugcraft:mendvetch_crop");
+			Organism mendvetch = organism("jugcraft:mendvetch");
+			Organism sunpetal = organism("jugcraft:sunpetal");
+			helper.assertTrue(!catalog.mixed(mendvetch, every) && !catalog.mixed(sunpetal, every) && !mendvetch.neighbours().any()
+					&& !sunpetal.neighbours().any(), "No Mendvetch or Sunpetal pairing (C-P16)");
+			helper.assertTrue(!catalog.mixed(gloamcap, Set.of("jugcraft:gloamcap_crop")), "A Gloamcap's own kind never counts");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-08 (C-P58): a Dewmoss and a Gloamcap two blocks apart, each the other's company, grow ripe step by step: every step
+	 * costs its crop's own price and nothing is made; both beds say mixed bed; ripe and unharvested, neither is strained.
+	 */
+	@GameTest(maxTicks = 80)
+	public void theBonusSpendsNoExtraNutrientAndMintsNone(GameTestHelper helper) {
+		BlockPos moss = new BlockPos(2, 2, 2);
+		BlockPos cap = new BlockPos(4, 2, 2);
+		VerdantBedBlockEntity mossBed = bed(helper, moss.below(), 10);
+		VerdantBedBlockEntity capBed = bed(helper, cap.below(), 10);
+		helper.setBlock(moss, Garden.DEWMOSS_CROP);
+		helper.setBlock(cap, Garden.GLOAMCAP_CROP);
+		shut(helper, moss);
+		shut(helper, cap);
+		// Working magic for the Gloamcap alone: three budding amethyst (1 each) beside its bed, outside the Dewmoss's 5x5.
+		for (int dz = -1; dz <= 1; dz++) {
+			helper.setBlock(cap.offset(1, -1, dz), Blocks.BUDDING_AMETHYST);
+		}
+		prefetch(helper, mossBed, capBed);
+		helper.runAtTickTime(49, () -> {
+			crop(helper, moss, Garden.DEWMOSS_CROP, 0);
+			crop(helper, cap, Garden.GLOAMCAP_CROP, 0);
+			wet(helper, moss.below());
+			wet(helper, cap.below());
+			for (VerdantBedBlockEntity bed : List.of(mossBed, capBed)) {
+				bed.setNutrients(10);
+				bed.setStrain(0);
+			}
+			Organism dewmoss = organism("jugcraft:dewmoss");
+			Organism gloamcap = organism("jugcraft:gloamcap");
+			helper.assertTrue(mossBed.mixed(dewmoss) && capBed.mixed(gloamcap), "Each is the other's company");
+			int before = mossBed.nutrients() + capBed.nutrients();
+			for (int step = 1; step <= OrganismCropBlock.MAX_AGE; step++) {
+				helper.assertTrue(grow(helper, moss) == OrganismCropBlock.Growth.GREW && grow(helper, cap) == OrganismCropBlock.Growth.GREW,
+						"Both grow step " + step + ": " + mossBed.reasons() + " / " + capBed.reasons());
+			}
+			helper.assertTrue(mossBed.nutrients() == 10 - OrganismCropBlock.MAX_AGE * dewmoss.cost()
+					&& capBed.nutrients() == 10 - OrganismCropBlock.MAX_AGE * gloamcap.cost(),
+					"Every step cost its crop's own price: " + mossBed.nutrients() + ", " + capBed.nutrients());
+			helper.assertTrue(mossBed.nutrients() + capBed.nutrients() == before - 9, "and nothing was made");
+			helper.assertTrue(mossBed.reasons().contains("ecology.mixed|25") && capBed.reasons().contains("ecology.mixed|25"), "Both beds say mixed bed");
+			helper.assertTrue(mossBed.ripened() && capBed.ripened() && mossBed.strain() == 0 && capBed.strain() == 0, "Ripe, unharvested: no strain");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-08 (C-P59): however a ripe crop is taken, its bed shows one strain not yet counted, and the next growth counts it
+	 * once: an empty hand, a Gleaner, a sickle's area harvest (sneaking: a plain use is the hand's harvest), a reap (as an
+	 * arm weapon and the harvesting spell make it), and breaking it and planting it again from its item without sneaking.
+	 */
+	@GameTest(maxTicks = 80)
+	public void everyHarvestPathStrainsTheBedOnce(GameTestHelper helper) {
+		BlockPos byHand = new BlockPos(1, 2, 1), byGleaner = new BlockPos(6, 2, 1), bySickle = new BlockPos(1, 2, 6);
+		BlockPos byReap = new BlockPos(3, 2, 4), byBreaking = new BlockPos(6, 2, 6);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (BlockPos at : List.of(byHand, byGleaner, bySickle, byReap, byBreaking)) {
+			beds.add(bed(helper, at.below(), 10));
+			crop(helper, at, Garden.SUNPETAL_CROP, 1);
+			helper.setBlock(at.south(), Blocks.GLOWSTONE);
+		}
+		VerdantBedBlockEntity handBed = beds.get(0), gleanerBed = beds.get(1), sickleBed = beds.get(2), reapBed = beds.get(3);
+		VerdantBedBlockEntity breakingBed = beds.get(4);
+		BlockPos heartAt = new BlockPos(4, 2, 2); // within the Gleaner's draw (4 blocks); not a crop
+		bed(helper, heartAt.below(), 10);
+		helper.setBlock(heartAt, Garden.VERDANT_HEART);
+		BlockPos gleanerAt = new BlockPos(6, 2, 0); // reach 3: of these crops, only its own
+		helper.setBlock(gleanerAt, Garden.GLEANER);
+		prefetch(helper, handBed, gleanerBed, sickleBed, reapBed, breakingBed);
+		helper.runAtTickTime(42, () -> {
+			ServerLevel level = level(helper);
+			ServerPlayer keeper = gardener(helper, false);
+			// Woken only now, so neither works before this tick.
+			VerdantHeartBlockEntity heart = entity(helper, heartAt);
+			heart.awaken(keeper.getUUID());
+			heart.setVerdance(5);
+			GleanerBlockEntity gleaner = entity(helper, gleanerAt);
+			gleaner.awaken(keeper.getUUID());
+			ripen(helper, byHand, handBed);
+			helper.assertTrue(handUse(helper, keeper, byHand, ItemStack.EMPTY, false).consumesAction() && age(helper, byHand) == 1, "harvested by hand");
+			strained(helper, byHand, handBed, "by hand");
+			ripen(helper, byGleaner, gleanerBed);
+			helper.assertValueEqual(gleaner.glean(level), "working", "the Gleaner harvests it");
+			strained(helper, byGleaner, gleanerBed, "by a Gleaner");
+			ripen(helper, bySickle, sickleBed);
+			helper.assertTrue(handUse(helper, keeper, bySickle, new ItemStack(JugcraftAgriculture.item("flint_sickle")), true).consumesAction(),
+					"a sneaking sickle reaps it (a plain use is the hand's harvest)");
+			strained(helper, bySickle, sickleBed, "by a sickle");
+			ripen(helper, byReap, reapBed);
+			ArmItem.reap(level, helper.absolutePos(byReap), null, ItemStack.EMPTY);
+			strained(helper, byReap, reapBed, "by a reap");
+			ripen(helper, byBreaking, breakingBed);
+			helper.assertTrue(level.destroyBlock(helper.absolutePos(byBreaking), true, keeper) && helper.getBlockState(byBreaking).isAir()
+					&& breakingBed.strainNow() == 1, "Broken ripe: its harvest shows before it is counted");
+			helper.assertTrue(handUse(helper, keeper, byBreaking.below(), new ItemStack(Garden.SUNPETAL), false).consumesAction()
+					&& helper.getBlockState(byBreaking).is(Garden.SUNPETAL_CROP), "planted again, not sneaking");
+			strained(helper, byBreaking, breakingBed, "by breaking and planting again");
+			helper.succeed();
+		});
+	}
+
+	/** C-08 (C-P59): a Crop Harvester takes a ripe Sunpetal from its field, and its bed counts that harvest once. */
+	@GameTest(maxTicks = 200)
+	public void theCropHarvesterStrainsTheBedOnce(GameTestHelper helper) {
+		if (TestFocus.skip("machines")) {
+			helper.succeed();
+			return;
+		}
+		BlockPos master = new BlockPos(4, 1, 0);
+		LargeMachineBlock block = (LargeMachineBlock) JugcraftMachines.MACHINES.get(MachineKind.CROP_HARVESTER);
+		helper.setBlock(master, block.defaultBlockState().setValue(MachineBlock.FACING, Direction.SOUTH));
+		block.setPlacedBy(level(helper), helper.absolutePos(master), helper.getBlockState(master), null, ItemStack.EMPTY);
+		charge(helper, master.above(), Direction.UP);
+		BlockPos field = new BlockPos(3, 1, 2);
+		VerdantBedBlockEntity bed = bed(helper, field.below(), 10);
+		crop(helper, field, Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(field.west(), Blocks.GLOWSTONE);
+		prefetch(helper, bed);
+		helper.runAtTickTime(40, () -> ripen(helper, field, bed));
+		// Checked every tick: the first tick the crop stands below ripe is the harvester's (a block entity ticks after the
+		// random ticks), so its bed has not rested; a strain of 2 is never accepted.
+		helper.succeedWhen(() -> {
+			BlockState state = helper.getBlockState(field);
+			helper.assertTrue(bed.strainNow() == 1 && (!(state.getBlock() instanceof OrganismCropBlock c) || !c.isMaxAge(state)),
+					"The harvester has taken the ripe crop: " + state + ", strain " + bed.strainNow());
+			if (!(state.getBlock() instanceof OrganismCropBlock)) {
+				helper.setBlock(field, Garden.SUNPETAL_CROP);
+			}
+			grow(helper, field);
+			helper.assertTrue(bed.strain() == 1 && !bed.ripened(), "Growth counted the harvester's harvest once: " + bed.strain());
+		});
+	}
+
+	/** C-08 (C-P61): a Mendvetch's fixed nutrient feeds the poorest bed and eases no strain; nor does any gift or nourishing. */
+	@GameTest(maxTicks = 80)
+	public void fixingDoesNotEaseStrain(GameTestHelper helper) {
+		BlockPos centre = new BlockPos(3, 1, 3);
+		VerdantBedBlockEntity own = bed(helper, centre, 4);
+		VerdantBedBlockEntity east = bed(helper, centre.east(), 1);
+		VerdantBedBlockEntity west = bed(helper, centre.west(), 6);
+		helper.setBlock(centre.above(), Garden.MENDVETCH_CROP);
+		helper.setBlock(centre.above().north(), Blocks.GLOWSTONE);
+		prefetch(helper, own);
+		helper.runAtTickTime(44, () -> {
+			helper.setBlock(centre.above(), Garden.MENDVETCH_CROP);
+			wet(helper, centre);
+			own.setNutrients(4);
+			east.setNutrients(1);
+			west.setNutrients(6);
+			for (VerdantBedBlockEntity bed : List.of(own, east, west)) {
+				bed.setStrain(2);
+			}
+			helper.assertTrue(grow(helper, centre.above()) == OrganismCropBlock.Growth.GREW && east.nutrients() == 2,
+					"The vetch grows and feeds the poorest bed: " + east.nutrients());
+			helper.assertTrue(own.strain() == 2 && east.strain() == 2 && west.strain() == 2,
+					"A fixer's nutrient is not compost: " + own.strain() + "/" + east.strain() + "/" + west.strain());
+			helper.assertTrue(east.give(3) == 3 && east.strain() == 2, "Nor is any gift");
+			helper.assertTrue(Garden.nourish(List.of(west), 2) == 2 && west.strain() == 2, "Nor nourishing");
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-08 (C-P60, C-P61): strain eases by rest (one a bed random tick, only while no crop grows on it; a tick that counts a
+	 * harvest rests nothing; nothing switched off), by compost (bone meal on the bed and, a plain use, on its crop;
+	 * fertilizer's two doses; a Mulch Maw's nutrient, for the bed it feeds only; a full bed takes none) and by a
+	 * Greenwarden's empty hand, once every TEND_TICKS a bed. An item in hand is its own use and tends nothing; a novice's hand
+	 * only reads; a bed its tender may not change is neither tended nor fed by bone meal on its crop.
+	 */
+	@GameTest(maxTicks = 80)
+	public void restCompostAndTendingEaseStrain(GameTestHelper helper) {
+		BlockPos fallowAt = new BlockPos(1, 1, 1);
+		BlockPos growingAt = new BlockPos(3, 1, 1);
+		BlockPos ripeAt = new BlockPos(5, 1, 1);
+		BlockPos compostAt = new BlockPos(1, 1, 4);
+		BlockPos poorAt = new BlockPos(3, 1, 4);
+		BlockPos mawAt = new BlockPos(4, 1, 4);
+		BlockPos richAt = new BlockPos(6, 1, 4);
+		BlockPos tendAt = new BlockPos(6, 1, 7);
+		BlockPos claimedAt = new BlockPos(3, 1, 7);
+		VerdantBedBlockEntity fallowBed = bed(helper, fallowAt, 10);
+		VerdantBedBlockEntity growingBed = bed(helper, growingAt, 10);
+		VerdantBedBlockEntity ripeBed = bed(helper, ripeAt, 10);
+		VerdantBedBlockEntity compostBed = bed(helper, compostAt, 10);
+		VerdantBedBlockEntity poorBed = bed(helper, poorAt, 3);
+		VerdantBedBlockEntity richBed = bed(helper, richAt, 5);
+		VerdantBedBlockEntity tendBed = bed(helper, tendAt, 10);
+		VerdantBedBlockEntity claimedBed = bed(helper, claimedAt, 10);
+		crop(helper, growingAt.above(), Garden.SUNPETAL_CROP, 1);
+		crop(helper, ripeAt.above(), Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE);
+		crop(helper, compostAt.above(), Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(fallowAt.above().north(), Blocks.GLOWSTONE);
+		helper.setBlock(mawAt, Garden.MULCH_MAW);
+		MulchMawBlockEntity maw = entity(helper, mawAt);
+		prefetch(helper, fallowBed);
+		helper.runAtTickTime(46, () -> {
+			ServerLevel level = level(helper);
+			// Rest: a fallow bed rests one strain a random tick, down to none.
+			fallowBed.setStrain(2);
+			tickBed(helper, fallowAt);
+			helper.assertTrue(fallowBed.strain() == 1, "A fallow bed rests a strain a random tick: " + fallowBed.strain());
+			tickBed(helper, fallowAt);
+			tickBed(helper, fallowAt);
+			helper.assertTrue(fallowBed.strain() == 0, "down to none: " + fallowBed.strain());
+			// A crop growing below ripe keeps its bed working; a ripe one, or a stalled one, lets it rest.
+			growingBed.setStrain(2);
+			ripeBed.setStrain(2);
+			crop(helper, growingAt.above(), Garden.SUNPETAL_CROP, 1);
+			growingBed.note(Verdict.Growth.TOLERATING.id, List.of()); // its last note says it grows
+			tickBed(helper, growingAt);
+			tickBed(helper, ripeAt);
+			helper.assertTrue(growingBed.strain() == 2 && ripeBed.strain() == 1, "Rest only while no crop grows: " + growingBed.strain() + ", " + ripeBed.strain());
+			growingBed.note(Verdict.Growth.STALLED.id, List.of());
+			tickBed(helper, growingAt);
+			helper.assertTrue(growingBed.strain() == 1, "A stalled crop's bed rests: " + growingBed.strain());
+			// The bed's random tick counts a harvest it saw, resting nothing that tick; the next rests.
+			ripen(helper, fallowAt.above(), fallowBed);
+			level.destroyBlock(helper.absolutePos(fallowAt.above()), false);
+			tickBed(helper, fallowAt);
+			helper.assertTrue(fallowBed.strain() == 1 && !fallowBed.ripened(), "The random tick counted the harvest: " + fallowBed.strain());
+			tickBed(helper, fallowAt);
+			helper.assertTrue(fallowBed.strain() == 0, "and the next rested it: " + fallowBed.strain());
+			// Switched off, nothing changes.
+			boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+			try {
+				fallowBed.setStrain(2);
+				tickBed(helper, fallowAt);
+				helper.assertTrue(fallowBed.strain() == 2, "Switched off, a bed does not rest: " + fallowBed.strain());
+			} finally {
+				JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+			}
+			// Compost: bone meal on the bed; on its crop, by a plain use; fertilizer's two doses.
+			ServerPlayer greenwarden = gardener(helper, true);
+			crop(helper, compostAt.above(), Garden.SUNPETAL_CROP, 1); // growing, whatever random ticks made of it
+			compostBed.setStrain(3);
+			ItemStack meal = new ItemStack(Items.BONE_MEAL, 2);
+			handUse(helper, greenwarden, compostAt, meal, false);
+			helper.assertTrue(compostBed.strain() == 2 && compostBed.nutrients() == 10 + Garden.BONE_MEAL_NUTRIENTS && meal.getCount() == 1,
+					"Bone meal on the bed is compost: " + compostBed.strain());
+			handUse(helper, greenwarden, compostAt.above(), meal, false);
+			helper.assertTrue(compostBed.strain() == 1 && compostBed.nutrients() == 10 + 2 * Garden.BONE_MEAL_NUTRIENTS && meal.isEmpty()
+					&& age(helper, compostAt.above()) == 1, "A plain use of bone meal on its crop feeds the bed and eases one: " + compostBed.strain());
+			compostBed.setStrain(3);
+			helper.assertTrue(FertilizerItem.fertilize(level, helper.absolutePos(compostAt.above())) == 1 && compostBed.strain() == 1,
+					"Fertilizer's two doses ease two: " + compostBed.strain());
+			compostBed.setNutrients(VerdantBedBlockEntity.CAPACITY);
+			compostBed.setStrain(2);
+			ItemStack more = new ItemStack(Items.BONE_MEAL);
+			handUse(helper, greenwarden, compostAt, more, false);
+			helper.assertTrue(compostBed.strain() == 2 && more.getCount() == 1, "A full bed takes no compost, and keeps the bone meal");
+			// A Maw's nutrient is compost for the bed it feeds, and only that bed.
+			for (VerdantBedBlockEntity other : List.of(fallowBed, growingBed, ripeBed, tendBed, claimedBed)) {
+				other.setNutrients(10);
+			}
+			poorBed.setNutrients(3);
+			poorBed.setStrain(2);
+			richBed.setNutrients(5);
+			richBed.setStrain(2);
+			maw.awaken(KEEPER);
+			helper.assertTrue(maw.feed(new ItemStack(Garden.VERDANT_CHAFF, 2)) == 2, "The Maw takes the chaff");
+			maw.digest(level);
+			maw.digest(level);
+			helper.assertTrue(poorBed.nutrients() == 4 && poorBed.strain() == 1 && richBed.nutrients() == 5 && richBed.strain() == 2,
+					"The Maw's nutrient eased the bed it fed only: " + poorBed.strain() + "/" + richBed.strain());
+			// Tending: a Greenwarden's empty hand, once every TEND_TICKS a bed.
+			tendBed.setStrain(2);
+			handUse(helper, greenwarden, tendAt, ItemStack.EMPTY, false);
+			helper.assertTrue(tendBed.strain() == 1, "A Greenwarden's empty hand tends it: " + tendBed.strain());
+			handUse(helper, greenwarden, tendAt, ItemStack.EMPTY, false);
+			helper.assertTrue(tendBed.strain() == 1, "but not again so soon: " + tendBed.strain());
+			long now = level.getGameTime();
+			helper.assertTrue(!tendBed.tend(now + Garden.TEND_TICKS - 1) && tendBed.tend(now + Garden.TEND_TICKS) && tendBed.strain() == 0,
+					"once every " + Garden.TEND_TICKS + " ticks: " + tendBed.strain());
+			// An item in hand is its own use: a Sunpetal plants without sneaking and tends nothing.
+			tendBed.setStrain(2);
+			handUse(helper, greenwarden, tendAt, new ItemStack(Garden.SUNPETAL), false);
+			helper.assertTrue(helper.getBlockState(tendAt.above()).is(Garden.SUNPETAL_CROP) && tendBed.strain() == 2,
+					"A Sunpetal in hand plants on the bed and tends nothing");
+			handUse(helper, gardener(helper, false), tendAt, ItemStack.EMPTY, false);
+			helper.assertTrue(tendBed.strain() == 2, "A novice's empty hand only reads it");
+			claimedBed.setStrain(2);
+			crop(helper, claimedAt.above(), Garden.SUNPETAL_CROP, 1);
+			try (TestClaims claims = TestClaims.open()) {
+				claims.block(helper.absolutePos(claimedAt), new UUID(14L, 3L));
+				handUse(helper, greenwarden, claimedAt, ItemStack.EMPTY, false);
+				helper.assertTrue(claimedBed.strain() == 2, "A bed its tender may not change is not tended: " + claimedBed.strain());
+				ItemStack refused = new ItemStack(Items.BONE_MEAL);
+				helper.assertTrue(handUse(helper, greenwarden, claimedAt.above(), refused, false).consumesAction() && claimedBed.strain() == 2
+						&& claimedBed.nutrients() == 10 && refused.getCount() == 1,
+						"Bone meal on its crop asks as bone meal on the bed: refused, it feeds and eases nothing and is kept");
+			}
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-08 (C-P59): strain counts only against a plant's disturbance limit. A Gloamcap with no working magic near it stalls,
+	 * strained or not; strain never lifts a little magic to its best; a Sunpetal on a quiet bed thrives up to strain 2 and
+	 * goes at half pace at 3, saying why, and the Inspect page names the strain against the limit; where the area already
+	 * disturbs it, strain can stop it; a Mendvetch thrives and a Dewmoss never minds.
+	 */
+	@GameTest(maxTicks = 80)
+	public void strainNeverSuppliesDisturbance(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 2, 2);
+		VerdantBedBlockEntity bed = bed(helper, at.below(), 10);
+		helper.setBlock(at, Garden.GLOAMCAP_CROP);
+		shut(helper, at);
+		prefetch(helper, bed);
+		helper.runAtTickTime(48, () -> {
+			helper.setBlock(at, Garden.GLOAMCAP_CROP);
+			wet(helper, at.below());
+			bed.setStrain(Habitat.MAX_STRAIN);
+			helper.assertTrue(grow(helper, at) == OrganismCropBlock.Growth.STALLED && age(helper, at) == 0, "No working magic: it stalls, strained or not");
+			helper.assertTrue(bed.reasons().contains("ecology.short|disturbance|0|1"), "short of disturbance; the strain counted as none: " + bed.reasons());
+			Organism gloamcap = organism("jugcraft:gloamcap");
+			Organism sunpetal = organism("jugcraft:sunpetal");
+			Organism mendvetch = organism("jugcraft:mendvetch");
+			Organism dewmoss = organism("jugcraft:dewmoss");
+			Verdict quiet = Verdict.of(gloamcap.niche(), new Habitat(7, 3, 10, 1, 0, 3));
+			helper.assertTrue(quiet.fit(Factor.DISTURBANCE) == Fit.SHORT && !quiet.strained(), "Strain never supplies the magic a Gloamcap needs");
+			Verdict low = Verdict.of(gloamcap.niche(), new Habitat(7, 3, 10, 1, 2, 3));
+			helper.assertTrue(low.fit(Factor.DISTURBANCE) == Fit.TOLERABLE && !low.strained(), "nor lifts a little to its best");
+			for (int strain = 0; strain <= 2; strain++) {
+				helper.assertTrue(Verdict.of(sunpetal.niche(), new Habitat(7, 15, 10, 3, 0, strain)).growth() == Verdict.Growth.THRIVING,
+						"A Sunpetal on a quiet bed thrives at strain " + strain);
+			}
+			Habitat three = new Habitat(7, 15, 10, 3, 0, 3);
+			Verdict slowed = Verdict.of(sunpetal.niche(), three);
+			helper.assertTrue(slowed.growth() == Verdict.Growth.TOLERATING && slowed.strained()
+					&& slowed.reasons(sunpetal.niche(), three).equals(List.of(Text.of("ecology.strained.tolerable", new Text.Ref("factor", "disturbance"), 0, 3, 0, 2))),
+					"and at half pace at 3, saying why: " + slowed.reasons(sunpetal.niche(), three));
+			Habitat loud = new Habitat(7, 15, 10, 3, 3, 3);
+			Verdict stopped = Verdict.of(sunpetal.niche(), loud);
+			helper.assertTrue(stopped.growth() == Verdict.Growth.STALLED
+					&& stopped.reasons(sunpetal.niche(), loud).equals(List.of(Text.of("ecology.strained.excess", new Text.Ref("factor", "disturbance"), 3, 3, 5))),
+					"Where the area already disturbs it, strain can stop it: " + stopped.reasons(sunpetal.niche(), loud));
+			helper.assertTrue(Verdict.of(sunpetal.niche(), new Habitat(7, 15, 10, 3, 3, 0)).growth() == Verdict.Growth.TOLERATING, "(the area alone slows it)");
+			for (int strain = 0; strain <= Habitat.MAX_STRAIN; strain++) {
+				helper.assertTrue(Verdict.of(mendvetch.niche(), new Habitat(7, 15, 10, 1, 0, strain)).growth() == Verdict.Growth.THRIVING, "A Mendvetch thrives at strain " + strain);
+				helper.assertTrue(Verdict.of(dewmoss.niche(), new Habitat(7, 5, 10, 1, 15, strain)).fit(Factor.DISTURBANCE) == Fit.IDEAL, "A Dewmoss never minds");
+			}
+			List<Text> rows = HabitatInspection.judged(new HabitatInspection.State(three, 15, 0, Garden.WATER_REACH), sunpetal.niche(), slowed);
+			Text row = rows.get(Factor.DISTURBANCE.ordinal());
+			helper.assertTrue(((Text) row.args().get(0)).key().equals("ecology.inspect.disturbance_strained")
+					&& ((Text) row.args().get(0)).args().subList(0, 2).equals(List.of(0, 3))
+					&& ((Text) row.args().get(1)).key().equals("ecology.inspect.tolerable"), "The Inspect page names the strain against the limit: " + row);
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-08 (C-P59, C-P60): a battery box beside a Sunpetal disturbs and strains nothing. Harvested again and again, its bed's
+	 * strain rises one a harvest and stops at its cap; where the area also disturbs it the strain stalls it, yet the crop
+	 * stands, its bed rests while it is stalled, and it grows again: strain never stops a plant for good.
+	 */
+	@GameTest(maxTicks = 80)
+	public void strainNeverKillsAndNeverReadsPollution(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 2, 2);
+		VerdantBedBlockEntity bed = bed(helper, at.below(), 10);
+		crop(helper, at, Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(at.north(), Blocks.GLOWSTONE);
+		helper.setBlock(at.east(), JugcraftMachines.MACHINES.get(MachineKind.BATTERY_BOX));
+		prefetch(helper, bed);
+		helper.runAtTickTime(50, () -> {
+			ServerLevel level = level(helper);
+			Habitat habitat = bed.habitat(level);
+			helper.assertTrue(habitat != null && habitat.disturbance() == 0 && habitat.strain() == 0, "A machine beside it disturbs and strains nothing: " + habitat);
+			OrganismCropBlock sunpetal = (OrganismCropBlock) Garden.SUNPETAL_CROP;
+			bed.setStrain(0);
+			for (int round = 1; round <= Habitat.MAX_STRAIN + 2; round++) {
+				crop(helper, at, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE - 1);
+				wet(helper, at.below());
+				bed.setNutrients(10);
+				helper.assertTrue(grow(helper, at) == OrganismCropBlock.Growth.GREW && bed.ripened(), "Round " + round + ": it ripens");
+				helper.assertTrue(!sunpetal.harvest(level, helper.absolutePos(at), helper.getBlockState(at)).isEmpty(), "and is harvested");
+				grow(helper, at);
+				helper.assertTrue(bed.strain() == Math.min(round, Habitat.MAX_STRAIN), "After " + round + " harvests: strain " + bed.strain());
+			}
+			for (int dz = -1; dz <= 1; dz++) {
+				helper.setBlock(at.offset(-1, -1, dz), Blocks.BUDDING_AMETHYST);
+			}
+			bed.forgetSample();
+		});
+		helper.runAtTickTime(52, () -> {
+			wet(helper, at.below());
+			bed.setNutrients(10);
+			helper.assertTrue(bed.habitat(level(helper)) != null, "The bed is read again, the amethyst in its area");
+			for (int attempt = 0; attempt < 20; attempt++) {
+				helper.assertTrue(grow(helper, at) == OrganismCropBlock.Growth.STALLED && helper.getBlockState(at).is(Garden.SUNPETAL_CROP),
+						"Stalled at its cap, attempt " + attempt + ": it stands");
+			}
+			helper.assertTrue(bed.strain() == Habitat.MAX_STRAIN && bed.reasons().contains("ecology.strained.excess|disturbance|3|3|5"),
+					"Its area's 3 and strain's 3 pass a Sunpetal's 5: " + bed.reasons());
+			tickBed(helper, at.below());
+			helper.assertTrue(bed.strain() == Habitat.MAX_STRAIN - 1, "A stalled crop's bed rests: " + bed.strain());
+			wet(helper, at.below());
+			helper.assertTrue(grow(helper, at) == OrganismCropBlock.Growth.GREW && bed.growth().equals(Verdict.Growth.TOLERATING.id),
+					"so strain never stops a plant for good: " + bed.growth());
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * C-08 (C-P59): a strained bed whose crop has ripened keeps both through a save, at version 1, and sends both to clients
+	 * (never the keeper), who read them back; an unstrained bed writes neither key.
+	 */
+	@GameTest(maxTicks = 80)
+	public void strainSurvivesASave(GameTestHelper helper) {
+		BlockPos at = new BlockPos(2, 2, 2);
+		VerdantBedBlockEntity bed = bed(helper, at.below(), 10);
+		crop(helper, at, Garden.SUNPETAL_CROP, 1);
+		helper.setBlock(at.north(), Blocks.GLOWSTONE);
+		prefetch(helper, bed);
+		helper.runAtTickTime(53, () -> {
+			ServerLevel level = level(helper);
+			crop(helper, at, Garden.SUNPETAL_CROP, OrganismCropBlock.MAX_AGE - 1);
+			bed.setStrain(2);
+			bed.setNutrients(10);
+			helper.assertTrue(grow(helper, at) == OrganismCropBlock.Growth.GREW && bed.ripened() && bed.strain() == 2, "Strained 2 and ripe");
+			CompoundTag saved = bed.saveWithoutMetadata(level.registryAccess());
+			helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getIntOr(VerdantBedBlockEntity.STRAIN, -1) == 2
+					&& saved.getBooleanOr(VerdantBedBlockEntity.RIPENED, false), "Saved at version 1 with its strain and ripening: " + saved);
+			VerdantBedBlockEntity copy = reload(helper, bed, saved);
+			helper.assertTrue(copy.strain() == 2 && copy.ripened() && copy.nutrients() == bed.nutrients() && copy.awake(), "Read back exactly");
+			CompoundTag sent = bed.getUpdateTag(level.registryAccess());
+			helper.assertTrue(sent.getIntOr(VerdantBedBlockEntity.STRAIN, -1) == 2 && sent.getBooleanOr(VerdantBedBlockEntity.RIPENED, false)
+					&& !sent.contains("keeper"), "A client is sent the strain and ripening, never the keeper: " + sent);
+			VerdantBedBlockEntity client = reload(helper, bed, sent);
+			helper.assertTrue(client.strain() == 2 && client.ripened() && client.keeper() == null, "and reads them as a client does");
+			bed.setStrain(0);
+			CompoundTag plain = bed.saveWithoutMetadata(level.registryAccess());
+			helper.assertTrue(!plain.contains(VerdantBedBlockEntity.STRAIN) && !plain.contains(VerdantBedBlockEntity.RIPENED), "An unstrained bed writes neither key");
+			helper.succeed();
+		});
 	}
 }

@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.concordance.ecology;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import org.jspecify.annotations.Nullable;
 
@@ -46,5 +47,24 @@ public final class EcologyCatalog {
 	/** The crop an item plants, or null. */
 	public @Nullable Organism byItem(String item) {
 		return byItem.get(item);
+	}
+
+	/**
+	 * Whether {@code kinds} (the plants round one, {@link Sampler.Area#kinds}, by block) holds another crop that speeds
+	 * {@code organism}: a mixed bed (Concordance Chunk C, C-08). A neighbour that is not a crop costing nutrients, or is the
+	 * organism itself, never counts (the rules report it), and a fixer is never sped.
+	 */
+	public boolean mixed(Organism organism, Set<String> kinds) {
+		if (organism.fix() > 0) {
+			return false;
+		}
+		for (String id : organism.neighbours().organisms()) {
+			Organism neighbour = organisms.get(id);
+			if (neighbour != null && neighbour.crop() && neighbour.fix() == 0 && !neighbour.id().equals(organism.id())
+					&& kinds.contains(neighbour.block())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

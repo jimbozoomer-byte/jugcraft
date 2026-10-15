@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.concordance.garden;
 
 import io.github.jimbozoomer.jugcraft.agriculture.CropGrowth;
+import io.github.jimbozoomer.jugcraft.chemistry.FertilizerItem;
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.Illumination;
@@ -20,10 +21,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
@@ -31,6 +34,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -44,9 +48,14 @@ import org.jspecify.annotations.Nullable;
  * organism's niche allows ({@link #grow}). Its organism is data ({@code concordance/organism}); this block only knows
  * which one it is.
  * <p>
- * Bone meal and fertilizer feed its bed rather than forcing a step, so they are a nutrient source like any other. Ripe,
- * an empty hand harvests it (its produce and chaff, and it falls back to its replanting step); otherwise an empty hand
- * says how it grows.
+ * Bone meal and fertilizer feed its bed rather than forcing a step, so they are a nutrient source like any other (and
+ * compost: Concordance Chunk C, C-08, C-P61); used on a growing crop they are their own use, as on a sweet berry bush,
+ * bone meal by the bed's own rule (rate-limited, for someone who may change the bed). Ripe, an empty hand harvests it (its
+ * produce and chaff, and it falls back to its replanting step); otherwise an empty hand says how it grows.
+ * <p>
+ * Concordance Chunk C (C-08, C-P58, C-P59): a growth attempt first counts a harvest its bed saw
+ * ({@link VerdantBedBlockEntity#settle}); a step taken to ripe tells the bed; a mixed bed's bonus is in the step's chance
+ * only ({@link #speed}), never in what it costs.
  */
 public class OrganismCropBlock extends CropBlock {
 	public static final int MAX_AGE = Organism.STAGES;
@@ -148,6 +157,8 @@ public class OrganismCropBlock extends CropBlock {
 		if (!(level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed)) {
 			return Growth.NO_BED;
 		}
+		// Concordance Chunk C (C-08, C-P59): growing below ripe, it is a harvest the bed saw it ripen for, whatever took it.
+		bed.settle();
 		if (!bed.awake()) {
 			bed.note("dormant", List.of());
 			return Growth.DORMANT;
@@ -162,20 +173,36 @@ public class OrganismCropBlock extends CropBlock {
 		if (verdict.growth() == Verdict.Growth.STALLED) {
 			return Growth.STALLED;
 		}
-		float speed = CropGrowth.speed(level, pos, definition.fix() > 0) * verdict.growth().pace / 2.0F;
+		float speed = speed(level, pos, definition, verdict, bed);
 		if (!certain && random.nextInt(CropGrowth.chanceDivisor(speed, (float) definition.growth())) != 0) {
 			return Growth.NOT_THIS_TICK;
 		}
 		// The niche's nutrient floor is at least the cost, so a bed that passed it can pay (a hastened step may still not).
+		// A mixed bed's bonus is in the speed only: a step costs the same, so it mints nothing (C-P58).
 		if (!bed.take(hastened ? Math.max(HASTENED_COST, definition.cost()) : definition.cost())) {
 			return Growth.STALLED;
 		}
-		level.setBlock(pos, getStateForAge(getAge(state) + 1), Block.UPDATE_CLIENTS);
+		int age = getAge(state) + 1;
+		level.setBlock(pos, getStateForAge(age), Block.UPDATE_CLIENTS);
 		bed.dry(level);
+		if (age >= MAX_AGE) {
+			// Ripe: the next time it stands below ripe, it was harvested (C-08).
+			bed.ripen();
+		}
 		if (!hastened && definition.fix() > 0) {
 			Garden.nourish(Garden.bedAndNeighbours(level, pos.below()), definition.fix());
 		}
 		return Growth.GREW;
+	}
+
+	/**
+	 * The speed a growth attempt steps at: CropGrowth's (the soil round it, a legume beside it, the Harvest Moon) times its
+	 * pace (half while a factor is only tolerable), and in a mixed bed its neighbours' bonus (Concordance Chunk C, C-08,
+	 * C-P58). It sets only the chance of a step; what a step costs never depends on it.
+	 */
+	public float speed(ServerLevel level, BlockPos pos, Organism definition, Verdict verdict, VerdantBedBlockEntity bed) {
+		float speed = CropGrowth.speed(level, pos, definition.fix() > 0) * verdict.growth().pace / 2.0F;
+		return bed.mixed(definition) ? speed * (100 + definition.neighbours().percent()) / 100.0F : speed;
 	}
 
 	/** What harvesting it ripe yields: its produce and its chaff. Empty while it is not ripe. */
@@ -199,6 +226,38 @@ public class OrganismCropBlock extends CropBlock {
 		level.setBlock(pos, getStateForAge(definition.replant()), Block.UPDATE_CLIENTS);
 		level.playSound(null, pos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
 		return out;
+	}
+
+	/**
+	 * Concordance Chunk C (C-08, C-P61): fertilizer on a growing crop is its own use (its own area rule, as on any crop), and
+	 * bone meal on one feeds the bed below as bone meal on the bed does (rate-limited, for someone who may change the bed),
+	 * which is compost; as on vanilla's sweet berry bush, a ripe crop still harvests. Anything else goes on as before.
+	 */
+	@Override
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+			InteractionHand hand, BlockHitResult hit) {
+		if (!isMaxAge(state) && stack.getItem() instanceof FertilizerItem) {
+			return InteractionResult.PASS; // its own area rule, as on any crop
+		}
+		if (!isMaxAge(state) && stack.is(Items.BONE_MEAL)) {
+			// As bone meal on the bed: rate-limited, for someone who may change the bed; compost.
+			if (player instanceof ServerPlayer server && level instanceof ServerLevel serverLevel
+					&& level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed) {
+				if (!RateGate.allow(server, "garden", 4) || !Illumination.mayChange(serverLevel, player, pos.below())) {
+					return InteractionResult.CONSUME; // refused: the bone meal's own use must not feed it either
+				}
+				if (bed.give(Garden.BONE_MEAL_NUTRIENTS) == 0) {
+					Garden.tell(server, "garden.bed_full");
+					return InteractionResult.CONSUME;
+				}
+				bed.compost();
+				stack.consume(1, player);
+				level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 5);
+				Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);
+			}
+			return InteractionResult.SUCCESS;
+		}
+		return super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
 	@Override
@@ -254,6 +313,10 @@ public class OrganismCropBlock extends CropBlock {
 		for (Text line : verdict.reasons(definition.niche(), habitat)) {
 			player.sendSystemMessage(ComposeText.show(line));
 		}
+		// Concordance Chunk C (C-08): a mixed bed's bonus and the strain its harvests left.
+		for (Text line : bed.notes(definition)) {
+			player.sendSystemMessage(ComposeText.show(line));
+		}
 	}
 
 	// ---------------------------------------------------------------- bone meal feeds the bed
@@ -270,8 +333,9 @@ public class OrganismCropBlock extends CropBlock {
 
 	@Override
 	public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
-		if (level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed) {
-			bed.give(Garden.BONE_MEAL_NUTRIENTS);
+		if (level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity bed && bed.give(Garden.BONE_MEAL_NUTRIENTS) > 0) {
+			// Concordance Chunk C (C-08, C-P61): bone meal and fertilizer are compost; each dose that feeds the bed eases a strain.
+			bed.compost();
 		}
 	}
 }

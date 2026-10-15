@@ -654,7 +654,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 	/**
 	 * Concordance Chunk C, C-07 (C-P54, C-P55): a Sunpetal grown ripe in a lit Verdant Bed. The client holds its bed's last
 	 * verdict, which Jade shows on the ripe crop as it grew; the Inspect page, opened looking at the bed, judges each factor
-	 * in words, the light as sky and lamps. Random ticks are held still meanwhile, so only this test grows the crop.
+	 * in words, the light as sky and lamps. Random ticks are held still meanwhile, so only this test grows the crop. C-08
+	 * (C-P59): its bed strained 2, the client is told the strain, Jade shows "recently harvested" and the page's disturbance
+	 * row names the strain counted against its limit.
 	 */
 	private static void gardenInspection(ClientGameTestContext context, TestDedicatedServerContext server) {
 		server.runCommand("gamerule minecraft:random_tick_speed 0");
@@ -695,6 +697,14 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				&& client.level.getBlockState(plant).getBlock() instanceof OrganismCropBlock crop && crop.isMaxAge(client.level.getBlockState(plant)) ? bed.growth() : "");
 		Jugcraft.LOGGER.info("[encyclopedia-check] a ripe sunpetal: its bed noted {}, the client holds {}", grown, seen);
 		check(seen.equals(grown), "The client should hold the ripe crop's last verdict, which Jade now shows: " + seen + " vs " + grown);
+		server.runOnServer(minecraft -> {
+			if (minecraft.overworld().getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed) {
+				bed.setStrain(2); // Concordance Chunk C (C-08): so Jade and the page show "recently harvested"
+			}
+		});
+		context.waitTicks(5);
+		int strain = context.computeOnClient(client -> client.level.getBlockEntity(bedAt) instanceof VerdantBedBlockEntity bed ? bed.strainNow() : -1);
+		check(strain == 2, "The client should be told the bed's strain (the update tag): " + strain);
 		context.getInput().lookAt(plant);
 		context.waitTicks(20);
 		if (FabricLoader.getInstance().isModLoaded("jade")) {
@@ -717,11 +727,12 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			List<EncyclopediaPayload.Row> found = current == null ? List.of() : current.rows();
 			return found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.light"))
 					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.diversity"))
-					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.verdict"));
+					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.verdict"))
+					&& found.stream().anyMatch(row -> holds(row.text(), "compose.jugcraft.ecology.inspect.disturbance_strained"));
 		});
 		Jugcraft.LOGGER.info("[encyclopedia-check] looking at a bed: page {}, rows {}", page, rows);
 		check(page.equals("inspect") && judged && rows.stream().noneMatch(row -> row.contains("jugcraft.") || row.contains("jugcraft:")),
-				"Looking at a bed, the Inspect page should judge each factor in words, the light as sky and lamps: " + rows);
+				"Looking at a bed, the Inspect page should judge each factor in words, the light as sky and lamps, and name its strain: " + rows);
 		context.runOnClient(client -> client.gui.toastManager().clear());
 		context.waitTicks(5);
 		context.takeScreenshot("jugcraft_encyclopedia_inspect_bed");

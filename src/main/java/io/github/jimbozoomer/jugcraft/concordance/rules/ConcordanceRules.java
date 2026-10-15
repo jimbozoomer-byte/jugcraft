@@ -713,6 +713,16 @@ public final class ConcordanceRules {
 				organisms.remove(organism.id());
 			}
 		}
+		// Concordance Chunk C (C-08, C-P58): a mixed bed names other crops that cost nutrients (a fixer's company already speeds
+		// its neighbours as a legume). A name that is not one is reported, and never speeds anything (EcologyCatalog.mixed).
+		for (Organism organism : organisms.values()) {
+			for (String neighbour : organism.neighbours().organisms()) {
+				Organism other = organisms.get(neighbour);
+				if (other == null || !other.crop() || other.fix() > 0 || other.id().equals(organism.id())) {
+					problems.add("organism " + organism.id() + ": neighbour " + neighbour + " is not another crop that costs nutrients");
+				}
+			}
+		}
 		EcologyCatalog ecology = new EcologyCatalog(organisms, disturbances);
 		// Unlock lists and invoke evidence must name things that exist (a typo would silently teach nothing).
 		for (Definitions.Research entry : research.values()) {

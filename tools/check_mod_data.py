@@ -14636,7 +14636,10 @@ def check_geckolib(name, java_text, uvs, sizes, kind="block"):
 def check_ecology(co, root, lang, registered, research):
     """Roadmap step 14: the Java mirrors tools/concordance_ecology.py (factors, sampling bounds, devices); every organism
     and disturbance names things that exist and can be grown or made; composting never gives back what growing cost (no
-    positive loop); every word the garden says has its text; its icons are their maps; its GeckoLib assets agree."""
+    positive loop); every word the garden says has its text; its icons are their maps; its GeckoLib assets agree.
+    Concordance Chunk C, C-08: a mixed bed is the generator's, names other crops that cost nutrients and speeds only;
+    harvest strain is saved and sent as it should, eased only by rest, compost and tending (never a gift), counted only
+    against a disturbance limit, never written by a reader, and nothing in the garden reads industrial pollution."""
     ec = co.ecology
     garden = root / "garden"
     registered = set(registered) | set(co.itemless_blocks())
@@ -14644,14 +14647,15 @@ def check_ecology(co, root, lang, registered, research):
         path = base / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
     constants = {
-        "ecology/Habitat.java": {"MAX_NUTRIENTS": ec.MAX_NUTRIENTS},
+        "ecology/Habitat.java": {"MAX_NUTRIENTS": ec.MAX_NUTRIENTS, "MAX_STRAIN": ec.MAX_STRAIN},
+        "ecology/Neighbours.java": {"MAX_PERCENT": ec.MAX_MIXED_BED_PERCENT},
         "ecology/Sampler.java": {"RADIUS": ec.SAMPLE_RADIUS, "HEIGHT": ec.SAMPLE_HEIGHT, "MAX_DIVERSITY": ec.MAX_DIVERSITY,
                                  "MAX_DISTURBANCE": ec.MAX_DISTURBANCE, "FRESH_TICKS": ec.FRESH_TICKS},
         "ecology/SampleBudget.java": {"PER_TICK": ec.SAMPLES_PER_TICK},
         "ecology/Mulch.java": {"QUARTERS": ec.MULCH_QUARTERS},
         "ecology/Organism.java": {"STAGES": ec.STAGES},
         "garden/Garden.java": {"BONE_MEAL_NUTRIENTS": ec.BONE_MEAL_NUTRIENTS, "AWAKEN_LIMIT": ec.AWAKEN_LIMIT,
-                               "WATER_REACH": ec.WATER_REACH},
+                               "WATER_REACH": ec.WATER_REACH, "TEND_TICKS": ec.TEND_TICKS},
         "garden/VerdantHeartBlockEntity.java": {"BEAT_TICKS": ec.BEAT_TICKS, "CAPACITY": ec.HEART_CAPACITY},
         "garden/MulchMawBlockEntity.java": {"DIGEST_TICKS": ec.DIGEST_TICKS, "REACH": ec.MAW_REACH},
         "garden/HabitatGaugeBlockEntity.java": {"GAUGE_TICKS": ec.GAUGE_TICKS},
@@ -14724,6 +14728,102 @@ def check_ecology(co, root, lang, registered, research):
     for device in ("verdant_bed", "verdant_heart", "mulch_maw", "habitat_gauge", "gleaner"):
         if device not in recipes:
             err(f"garden: {device} has no recipe")
+    # Concordance Chunk C, C-08 (C-P58): a mixed bed. Each "neighbours" is the generator's; only a crop that costs nutrients
+    # takes one, naming other such crops (no fixer either way), never itself; it speeds by 1 to MAX_MIXED_BED_PERCENT.
+    for key, entry in sorted(organisms.items()):
+        mixed = entry.get("neighbours")
+        if mixed is None:
+            continue
+        expected = ec.organism_json(key).get("neighbours") if key in ec.ORGANISMS else None
+        if mixed != expected:
+            err(f"organism {key}: neighbours {mixed} differ from tools/concordance_ecology.py ({expected})")
+        if entry.get("role") != "crop" or entry.get("fix", 0) > 0:
+            err(f"organism {key}: only a crop that costs nutrients takes a mixed bed")
+        if not isinstance(mixed, dict) or set(mixed) != {"organisms", "percent"} or not mixed.get("organisms"):
+            err(f"organism {key}: neighbours must be {{\"organisms\": [ids], \"percent\": n}}")
+            continue
+        percent = mixed.get("percent")
+        if not isinstance(percent, int) or not 1 <= percent <= ec.MAX_MIXED_BED_PERCENT:
+            err(f"organism {key}: a mixed bed speeds by 1 to {ec.MAX_MIXED_BED_PERCENT} percent, not {percent}")
+        for ref in mixed["organisms"]:
+            ns, name = split(ref)
+            other = organisms.get(name) if ns == MOD else None
+            if other is None or other.get("role") != "crop" or other.get("fix", 0) > 0 or name == key:
+                err(f"organism {key}: neighbour {ref} is not another crop that costs nutrients")
+    crop = java("garden/OrganismCropBlock.java")
+    takes = [line for line in crop.splitlines() if "bed.take(" in line]
+    speed = _java_body(crop, "public float speed(")
+    if not takes or any(re.search(r"neighbours|mixed|percent", line) for line in takes) \
+            or "definition.neighbours().percent()" not in speed or "bed.mixed(definition)" not in speed:
+        err("OrganismCropBlock: a mixed bed's bonus is in the speed only, never in what a step costs (C-P58: it mints no nutrient)")
+    grow_body = _java_body(crop, "private Growth grow(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, boolean certain, boolean hastened)")
+    if "float speed = speed(level, pos, definition, verdict, bed);" not in grow_body \
+            or "CropGrowth.chanceDivisor(speed, (float) definition.growth())" not in grow_body or "CropGrowth.speed(" in grow_body:
+        err("OrganismCropBlock.grow: a growth attempt's chance is speed()'s, the mixed bed's bonus included (C-P58)")
+    # C-08 (C-P59 to C-P61): harvest strain only ever worsens the disturbance fit; a gift never eases it; only the explicit
+    # compost points do, and tending only through the bed's empty-hand use, after the rate gate, Garden.knows and Authority.
+    verdict_java = java("ecology/Verdict.java")
+    if "habitat.strained()" not in verdict_java or "worse(" not in _java_body(verdict_java, "public static Verdict of("):
+        err("Verdict.of: disturbance is judged as the worse of the area alone and the area with the strain (C-P59)")
+    if "state.habitat().strain()" not in _java_body(java("ecology/HabitatInspection.java"), "static Text line("):
+        err("HabitatInspection.line: the disturbance row names the strain counted against its limit (C-P59)")
+    bed_java = java("garden/VerdantBedBlockEntity.java")
+    if re.search(r"strain|compost\(|ease\(|settle\(", _java_body(bed_java, "public int give(")):
+        err("VerdantBedBlockEntity.give: a gift never eases strain (C-P61: nitrogen fixing would keep beds unstrained)")
+    if re.search(r"changed\(|settle\(|ease\(|ripened =|strain =", _java_body(bed_java, "public int strainNow()")):
+        err("VerdantBedBlockEntity.strainNow: a reading counts nothing (C-P59)")
+    if re.search(r"strain|compost\(", _java_body(java("garden/Garden.java"), "public static int nourish(")):
+        err("Garden.nourish: a fixer's gift never eases strain (C-P61)")
+    callers = {"compost": set(), "tend": set(), "setStrain": set()}
+    for path in sorted((ROOT / "src" / "main" / "java").rglob("*.java")):
+        source = path.read_text(encoding="utf-8")
+        for method in callers:
+            if re.search(rf"\.{method}\(", source):
+                callers[method].add(path.name)
+    if callers["compost"] != {"MulchMawBlockEntity.java", "OrganismCropBlock.java", "VerdantBedBlock.java"}:
+        err(f"garden: strain is eased by compost only at bone meal on a bed, bone meal or fertilizer on a crop and a Maw's nutrient, not {sorted(callers['compost'])}")
+    if callers["tend"] != {"VerdantBedBlock.java"} or callers["setStrain"]:
+        err(f"garden: only a Greenwarden's use tends a bed, and no game code sets a strain ({sorted(callers['tend'])}, {sorted(callers['setStrain'])})")
+    block = java("garden/VerdantBedBlock.java")
+    use = _java_body(block, "protected InteractionResult useWithoutItem(")
+    tending = _java_body(block, "private static void tend(")
+    if not 0 <= use.find("RateGate.allow(") < use.find("tend(serverLevel") \
+            or not all(needle in tending for needle in ("Garden.knows(", "Garden.enabled()", "Authority.mayChange(level, player, pos)")) \
+            or not 0 <= tending.find("Authority.mayChange(") < tending.find("bed.tend("):
+        err("VerdantBedBlock: a Greenwarden's empty hand tends, after the rate gate, Garden.knows and Authority (C-P61)")
+    # Fertilizer on a growing crop is its own use; bone meal on one feeds the bed below by the bed's own rule (the rate gate,
+    # then whether its user may change the bed) before it composts, and a refusal consumes the use so the bone meal's own
+    # use cannot feed the bed either (C-P61).
+    use_item = _java_body(crop, "protected InteractionResult useItemOn(")
+    if not re.search(r"!isMaxAge\(state\) && stack\.getItem\(\) instanceof FertilizerItem\) \{\s*return InteractionResult\.PASS;", use_item) \
+            or "!isMaxAge(state) && stack.is(Items.BONE_MEAL)" not in use_item \
+            or not 0 <= use_item.find('RateGate.allow(server, "garden", 4)') \
+            < use_item.find("Illumination.mayChange(serverLevel, player, pos.below())") < use_item.find("bed.compost();"):
+        err("OrganismCropBlock.useItemOn: fertilizer on a growing crop is its own use, and bone meal on one feeds its bed only "
+            "by the bed's rule (rate gate, then who may change the bed) before it composts (C-P61)")
+    load_body = _java_body(bed_java, "protected void loadAdditional(")
+    save_body = _java_body(bed_java, "protected void saveAdditional(")
+    update = _java_body(bed_java, "public CompoundTag getUpdateTag(")
+    if "input.getIntOr(STRAIN, 0)" not in load_body or "input.getBooleanOr(RIPENED, false)" not in load_body \
+            or "Saved.stamp(output, 1)" not in save_body or "keeper" in update \
+            or "tag.putInt(STRAIN, strain)" not in update or "tag.putBoolean(RIPENED, ripened)" not in update:
+        err("VerdantBedBlockEntity: strain and ripened are optional saved keys read with defaults at stamp 1, and sent to clients without the keeper (C-08)")
+    snapshot = _java_body(java("compat/jade/ConcordanceDataProvider.java", JAVA_ROOT), "public static CompoundTag bedSnapshot(")
+    found = re.search(r"\.(settle|compost|tend|setStrain|ripen|note)\(", snapshot)
+    if found:
+        err(f"ConcordanceDataProvider.bedSnapshot: reading a bed never counts, eases or notes its strain ({found.group(0)})")
+    if not re.search(r"new int\[\] \{habitat\.moisture\(\), habitat\.light\(\), habitat\.nutrients\(\), habitat\.diversity\(\),\s*habitat\.disturbance\(\)\}", snapshot) \
+            or 'snapshot.putInt("strain", strain)' not in snapshot:
+        err("ConcordanceDataProvider.bedSnapshot: the habitat stays the five factors, and the strain is its own value (C-08)")
+    jade_client = java("compat/JugcraftJadeClient.java", CLIENT_JAVA_ROOT)
+    if "Factor.fromId(" not in _java_body(jade_client, "private static Component reasonText(") or '"compose.jugcraft.ecology.strain"' not in jade_client:
+        err("JugcraftJadeClient: a reason with no factor is shown as sent, and a bed's strain has its line (C-08)")
+    if "bed.mixedLine(organism)" not in _java_body(java("encyclopedia/InspectPage.java"), "private static void garden("):
+        err("InspectPage.garden: a mixed bed's bonus is on the page (C-P58)")
+    # The garden never reads industrial pollution or process emissions (D-005; 09:128).
+    for path in sorted((root / "ecology").glob("*.java")) + sorted(garden.glob("*.java")):
+        if re.search(r"(?i)pollution|emission|FormMachine|FluidRecipe", path.read_text(encoding="utf-8")):
+            err(f"{path.name}: the garden never reads industrial pollution or process emissions (D-005)")
     # Every word the garden says has its text.
     for path in sorted((root / "ecology").glob("*.java")) + sorted(garden.glob("*.java")):
         text = path.read_text(encoding="utf-8")
@@ -16767,7 +16867,9 @@ def check_encyclopedia(root, lang):
                            # Concordance Chunk C, C-03: reading an anchor marks no part and never takes the chat reading's path.
                            r"|markReadiness\(|markFaults\(|\.status\([a-z]+, [a-z]+\)"
                            # Concordance Chunk C, C-07: reading a bed or a crop notes, grows, feeds, takes and forgets nothing.
-                           r"|\.note\(|forgetVerdict\(|forgetSample\(|\.take\(|\.give\(|\.grow\(|\.hasten\(")
+                           r"|\.note\(|forgetVerdict\(|forgetSample\(|\.take\(|\.give\(|\.grow\(|\.hasten\("
+                           # Concordance Chunk C, C-08: nor counts, eases or sets a strain.
+                           r"|\.settle\(|\.compost\(|\.tend\(|setStrain\(|\.ripen\(")
     for name, source in builders.items():
         if forbidden.search(source):
             err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
@@ -16982,7 +17084,7 @@ AUTHORITY_ROUTES = {
     "ConcordanceEffects.java": ["Authority.answering(level, behind(context))", "Authority.mayStrike(context.level(), context.actor(), behind(context), target)"],
     "Illumination.java": ["return Authority.mayChange(level, player, pos);"],
     "garden/GleanerBlockEntity.java": ["Authority.answering(level, keeper)", "Authority.mayChange(level, answering, pos)"],
-    # Concordance Chunk C, C-07 (C-P56): a canteen's sip on a Verdant Bed.
+    # Concordance Chunk C, C-07 (C-P56): a canteen's sip on a Verdant Bed; and (C-08, C-P61) a Greenwarden's tending.
     "garden/VerdantBedBlock.java": ["Authority.mayChange(level, player, pos)"],
     "spirits/ClockworkPorterEntity.java": ["Authority.answering(level, owner) == null", "Authority.mayChangeFor(level, owner, source)",
                                            "Authority.mayChangeFor(level, owner, target)",

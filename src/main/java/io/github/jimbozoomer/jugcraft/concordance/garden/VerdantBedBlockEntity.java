@@ -37,9 +37,18 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Nutrients only change through {@link #take} (a step of growth, a Heart's beat), {@link #give} (bone meal, fertilizer,
  * a Maw, a fixer) and nothing else. A broken bed loses them.
+ * <p>
+ * Concordance Chunk C (C-08, C-P59 to C-P61): harvest strain. Growth notes when its crop ripens ({@link #ripen}); the next
+ * time it sees that crop below ripe or gone (a growth attempt, its random tick, compost or tending) it counts one harvest,
+ * up to {@link Habitat#MAX_STRAIN} ({@link #settle}), whatever took the crop. It rests away one a random tick while no crop
+ * grows on it, one a dose of compost, one a Greenwarden's tending; {@link #give} never eases it. Saved as optional keys
+ * (stamp 1) and sent to clients.
  */
 public class VerdantBedBlockEntity extends BlockEntity {
 	public static final int CAPACITY = Habitat.MAX_NUTRIENTS;
+	/** Saved and sent keys (Concordance Chunk C, C-08): in a save only when set; absent in older saves (read as 0 and false). */
+	public static final String STRAIN = "strain";
+	public static final String RIPENED = "ripened";
 
 	private int nutrients;
 	private boolean awake;
@@ -50,6 +59,14 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	/** The crop above's last verdict, for clients: its growth id and its reasons as "key|factor|value|a|b". */
 	private String growth = "";
 	private List<String> reasons = List.of();
+	/**
+	 * C-08: what its harvests have strained it (0 to Habitat.MAX_STRAIN), and whether its crop has ripened since the last
+	 * harvest it counted.
+	 */
+	private int strain;
+	private boolean ripened;
+	/** When a Greenwarden last tended it (game time); not saved. */
+	private long tendedAt = Long.MIN_VALUE;
 
 	public VerdantBedBlockEntity(BlockPos pos, BlockState state) {
 		super(Garden.BED_ENTITY, pos, state);
@@ -159,7 +176,7 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		if (area == null) {
 			return null;
 		}
-		return Sampler.habitat(moisture(), level.getRawBrightness(plant, 0), nutrients, area);
+		return Sampler.habitat(moisture(), level.getRawBrightness(plant, 0), nutrients, area, strainNow());
 	}
 
 	/** Forgets the area's sample, so the next reading takes a fresh one (a test changes the area round it). */
@@ -183,17 +200,29 @@ public class VerdantBedBlockEntity extends BlockEntity {
 				Garden.WATER_REACH);
 	}
 
-	/** Records what the crop or device above makes of the habitat, for its tooltip; sends it only when it changes. */
+	/**
+	 * Records what the crop or device above makes of the habitat, for its tooltip; sends it only when it changes. A mixed
+	 * bed's line (Concordance Chunk C, C-08) follows the verdict's reasons.
+	 */
 	public void note(Verdict verdict, Habitat habitat, Organism organism) {
 		List<String> encoded = new ArrayList<>();
 		for (Text line : verdict.reasons(organism.niche(), habitat)) {
-			StringBuilder out = new StringBuilder(line.key());
-			for (Object arg : line.args()) {
-				out.append('|').append(arg instanceof Text.Ref ref ? ref.id() : String.valueOf(arg));
-			}
-			encoded.add(out.toString());
+			encoded.add(encode(line));
+		}
+		Text mixed = mixedLine(organism);
+		if (mixed != null) {
+			encoded.add(encode(mixed));
 		}
 		note(verdict.growth().id, encoded);
+	}
+
+	/** A line as a client reads it back: "key|arg|arg", a named thing by its id. */
+	private static String encode(Text line) {
+		StringBuilder out = new StringBuilder(line.key());
+		for (Object arg : line.args()) {
+			out.append('|').append(arg instanceof Text.Ref ref ? ref.id() : String.valueOf(arg));
+		}
+		return out.toString();
 	}
 
 	/** Records a growth word with no reasons (a dormant bed, a crop waiting for a reading). */
@@ -230,6 +259,173 @@ public class VerdantBedBlockEntity extends BlockEntity {
 			player.sendSystemMessage(ComposeText.show(Text.of("ecology.habitat", habitat.moisture(), habitat.light(),
 					habitat.nutrients(), habitat.diversity(), habitat.disturbance())));
 		}
+		// Concordance Chunk C (C-08): its strain, as growth will count it.
+		for (Text line : notes(null)) {
+			player.sendSystemMessage(ComposeText.show(line));
+		}
+	}
+
+	// ---------------------------------------------------------------- harvest strain (Concordance Chunk C, C-08, C-P59)
+
+	/** The strain its harvests left, as saved: 0 to Habitat.MAX_STRAIN. */
+	public int strain() {
+		return strain;
+	}
+
+	/** Whether its crop has ripened by growth since the last harvest it counted. */
+	public boolean ripened() {
+		return ripened;
+	}
+
+	/**
+	 * The strain the next reading of its plant counts: the saved strain, and one more (up to Habitat.MAX_STRAIN) for a
+	 * harvest not yet counted. It only reads, on either side, so the Inspect page, Jade and a client show what growth
+	 * counts.
+	 */
+	public int strainNow() {
+		return harvestSeen() ? Math.min(Habitat.MAX_STRAIN, strain + 1) : strain;
+	}
+
+	/** Growth has taken its crop to its last step: the next time it stands below ripe (or is gone), it was harvested. */
+	void ripen() {
+		if (!ripened) {
+			ripened = true;
+			changed();
+		}
+	}
+
+	/**
+	 * Counts a harvest it saw: its crop ripened and no longer stands ripe on it, whatever took it (a hand, a Gleaner, a Peepo,
+	 * a Crop Harvester, a Hay Golem, a sickle, a reap, a crow, breaking). The strain rises by one, at most to
+	 * Habitat.MAX_STRAIN, and the ripening is forgotten. Returns whether it counted one.
+	 */
+	public boolean settle() {
+		if (!harvestSeen()) {
+			return false;
+		}
+		ripened = false;
+		strain = Math.min(Habitat.MAX_STRAIN, strain + 1);
+		changed();
+		return true;
+	}
+
+	/**
+	 * Its random tick (C-P60): a harvest it saw is counted (and it does not rest that tick); otherwise, while no crop grows on
+	 * it (fallow, its crop ripe, or its crop stalled or dormant), it rests a strain away. Nothing changes while the
+	 * Concordance is switched off.
+	 */
+	public void rest() {
+		if (!Garden.enabled()) {
+			return;
+		}
+		if (!settle() && strain > 0 && !growing()) {
+			ease();
+		}
+	}
+
+	/**
+	 * A dose of compost has fed it (C-P61: bone meal or fertilizer on it or its crop, a Mulch Maw's nutrient): a harvest it
+	 * saw is counted, then one strain eased. Never called from {@link #give}: a nitrogen fixer's gift is not compost.
+	 */
+	public void compost() {
+		if (!Garden.enabled()) {
+			return;
+		}
+		settle();
+		if (strain > 0) {
+			ease();
+		}
+	}
+
+	/**
+	 * A Greenwarden tends it at game time {@code now} (C-P61): a harvest it saw is counted, then one strain eased, at most
+	 * once every {@value Garden#TEND_TICKS} ticks. Returns whether it eased one. Who may tend is VerdantBedBlock's business.
+	 */
+	public boolean tend(long now) {
+		if (!Garden.enabled()) {
+			return false;
+		}
+		settle();
+		if (strain == 0 || tendedAt != Long.MIN_VALUE && now >= tendedAt && now - tendedAt < Garden.TEND_TICKS) {
+			return false;
+		}
+		tendedAt = now;
+		ease();
+		return true;
+	}
+
+	/** Operators and tests: sets the strain (clamped) and forgets a ripening not yet counted. */
+	public void setStrain(int amount) {
+		strain = Math.clamp(amount, 0, Habitat.MAX_STRAIN);
+		ripened = false;
+		changed();
+	}
+
+	private void ease() {
+		strain--;
+		changed();
+	}
+
+	private void changed() {
+		setChanged();
+		sync();
+	}
+
+	/** Its crop ripened and no longer stands ripe on it (gone, or below ripe). Reads one block, only while ripened. */
+	private boolean harvestSeen() {
+		if (!ripened || level == null) {
+			return false;
+		}
+		BlockState above = level.getBlockState(worldPosition.above());
+		return !(above.getBlock() instanceof OrganismCropBlock crop && crop.isMaxAge(above));
+	}
+
+	/** An organism crop grows on it: below ripe, and neither stalled nor dormant by its last note. */
+	private boolean growing() {
+		if (level == null) {
+			return false;
+		}
+		BlockState above = level.getBlockState(worldPosition.above());
+		return above.getBlock() instanceof OrganismCropBlock crop && !crop.isMaxAge(above)
+				&& !growth.equals(Verdict.Growth.STALLED.id) && !growth.equals("dormant");
+	}
+
+	// ---------------------------------------------------------------- a mixed bed (Concordance Chunk C, C-08, C-P58)
+
+	/**
+	 * Whether another crop that speeds {@code organism} grows in the area round its plant, from the last sample (no new
+	 * read). Server only.
+	 */
+	public boolean mixed(Organism organism) {
+		return area != null && organism.neighbours().any() && Garden.catalog().mixed(organism, area.kinds());
+	}
+
+	/** A mixed bed's line for {@code organism} ("Mixed bed: +25%"), or null. Server only; it only reads. */
+	public @Nullable Text mixedLine(Organism organism) {
+		return mixed(organism) ? organism.neighbours().line() : null;
+	}
+
+	/** Its strain as the next reading counts it ("Recently harvested: strain n of 3"), or null when none. It only reads. */
+	public @Nullable Text strainLine() {
+		int shown = strainNow();
+		return shown > 0 ? Text.of("ecology.strain", shown, Habitat.MAX_STRAIN) : null;
+	}
+
+	/**
+	 * What the reports add after a reading of its plant: the mixed bed's line for {@code organism} (none for null), then its
+	 * strain.
+	 */
+	public List<Text> notes(@Nullable Organism organism) {
+		List<Text> lines = new ArrayList<>();
+		Text mixed = organism == null ? null : mixedLine(organism);
+		if (mixed != null) {
+			lines.add(mixed);
+		}
+		Text strained = strainLine();
+		if (strained != null) {
+			lines.add(strained);
+		}
+		return lines;
 	}
 
 	// ---------------------------------------------------------------- saving and clients
@@ -249,6 +445,9 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		growth = input.getStringOr("growth", "");
 		String joined = input.getStringOr("reasons", "");
 		reasons = joined.isEmpty() ? List.of() : List.of(joined.split("\n"));
+		// Concordance Chunk C (C-08): optional; a bed saved before them reads unstrained and unripened (the stamp stays 1).
+		strain = Math.clamp(input.getIntOr(STRAIN, 0), 0, Habitat.MAX_STRAIN);
+		ripened = input.getBooleanOr(RIPENED, false);
 	}
 
 	@Override
@@ -262,6 +461,12 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		}
 		output.putString("growth", growth);
 		output.putString("reasons", String.join("\n", reasons));
+		if (strain > 0) {
+			output.putInt(STRAIN, strain);
+		}
+		if (ripened) {
+			output.putBoolean(RIPENED, true);
+		}
 	}
 
 	@Override
@@ -269,7 +474,11 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	/** Clients get the nutrients, whether it is awake and the crop's last verdict; never the keeper. */
+	/**
+	 * Clients get the nutrients, whether it is awake, the crop's last verdict (its reasons with a mixed bed's line), and
+	 * (C-08) its strain and whether its crop has ripened since (so a client shows a harvest not yet counted as the server
+	 * counts it); never the keeper.
+	 */
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
 		CompoundTag tag = new CompoundTag();
@@ -277,6 +486,8 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		tag.putBoolean("awake", awake);
 		tag.putString("growth", growth);
 		tag.putString("reasons", String.join("\n", reasons));
+		tag.putInt(STRAIN, strain);
+		tag.putBoolean(RIPENED, ripened);
 		return tag;
 	}
 }
