@@ -148,7 +148,7 @@ public final class HowlingTotemRite {
 		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos(feet.getX(), feet.getY(), feet.getZ());
 		for (int y = feet.getY() + 1; y < top; y++) {
 			BlockState state = level.getBlockState(at.setY(y));
-			if (!state.is(Blocks.BARRIER) && (state.blocksMotion() || !state.getFluidState().isEmpty())) {
+			if (!state.is(Blocks.BARRIER) && (!state.getCollisionShape(level, at).isEmpty() || !state.getFluidState().isEmpty())) {
 				return true;
 			}
 		}
