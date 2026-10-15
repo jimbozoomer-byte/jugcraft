@@ -79,6 +79,19 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - The Tabby Revolver is made from iron, brass, a lever and a plank; the Lookout Rifle from iron, brass, a lever and planks; the Ammonite Carbine from copper, iron, a lever and a plank. The Tabby Revolver takes the barrel attachments; the Lookout Rifle the stocks, grips, bayonets, scopes and Laser Sight; the Ammonite Carbine the stocks.
 - Record: [guns.md, slice 13A](docs/features/guns.md#slice-13a-the-frontier-guns).
 
+### Unmerged: The other machine screens in their looks
+- **Eight more screens take the look of their tech level**, with the machine screens' status lamp, plain status and help:
+  - the prospector in the workshop look;
+  - the rocket pad and the storage tank in the industrial look;
+  - the logic controller, reactor console and remote shutdown panel in the advanced look;
+  - the drone depot terminal and drone tower in a drone variant of it (the tower's graphite and red).
+- **Simpler to use:**
+  - the rocket pad gets hint icons and help on its slots and a Launch key, with the last result by the title;
+  - the logic controller gets headings, keys with tooltips, lit rules and channel readings;
+  - the storage tank's readouts are grouped, with a fill bar and an outlet lamp;
+  - the drone keys light when they can be used.
+- Buttons, slots, menus and saves are unchanged. Record: [other-machine-screens.md](docs/features/other-machine-screens.md).
+
 ### Unmerged: Machine screens in five looks by tech level
 - **Every machine screen takes the look of its tech level**, after the owner's five references:
   - workshop brass and orange for the first machines;

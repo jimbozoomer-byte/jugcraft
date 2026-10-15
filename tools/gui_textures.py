@@ -72,6 +72,16 @@ SKINS = {
         "slot": [(42, 168, 168), (10, 26, 28), (42, 168, 168)],
         "help": (8, 20, 22),
     },
+    # The drone family's screens (depot terminal, drone tower): the advanced look's shapes in the tower's graphite and
+    # dull red. No machine uses it.
+    "drone": {
+        "casing": [(10, 8, 9), (20, 16, 18), (28, 22, 24), (40, 30, 32), (96, 44, 40)],
+        "outline": (6, 4, 4),
+        "screen": (30, 26, 28), "grid": (40, 32, 33), "frame": (224, 80, 64), "band": None,
+        "tray": [(20, 16, 18), (20, 16, 18), (150, 70, 60)],
+        "slot": [(150, 70, 60), (20, 16, 18), (150, 70, 60)],
+        "help": (30, 26, 28),
+    },
 }
 # Colours the screen draws with (ARGB), per look: screen text bright and dim, warnings, all's-well, the energy and
 # progress fills, the title on the body, the help box's text, and the buttons' face, edge, highlight and icon.
@@ -91,9 +101,26 @@ COLORS = {
     "advanced": {"text": 0xFF80F4F0, "dim": 0xFF349696, "warn": 0xFFFF6E60, "ok": 0xFF80F4F0, "energy": 0xFF5AECE8,
                  "progress": 0xFFAAFFFA, "label": 0xFF80F4F0, "help": 0xFF80F4F0, "button_face": 0xFF0A1A1C,
                  "button_edge": 0xFF38D6D6, "button_light": 0xFF80F4F0, "button_icon": 0xFF80F4F0},
+    "drone": {"text": 0xFFECE6E6, "dim": 0xFFA8564A, "warn": 0xFFFF6A5A, "ok": 0xFF78DC8C, "energy": 0xFFE05040,
+              "progress": 0xFFFF8A70, "label": 0xFFE05040, "help": 0xFFC8B4B0, "button_face": 0xFF1E1416,
+              "button_edge": 0xFFE05040, "button_light": 0xFFFF8A70, "button_icon": 0xFFECE6E6},
 }
 # How slots and buttons are drawn: sunken bevels on the casing looks, thin outlines on the screen-like ones.
-OUTLINED = {"lab", "advanced"}
+OUTLINED = {"lab", "advanced", "drone"}
+# The five looks machines use; the others are for screens only, drawn in the shapes of the look named here.
+MACHINE_LOOKS = ("workshop", "industrial", "electric", "lab", "advanced")
+SHAPES = {"drone": "advanced"}
+# The other machine screens (docs/features/machine-screens.md) and their looks, by tech level.
+SCREENS = {
+    "prospector": "workshop",
+    "rocket_pad": "industrial",
+    "storage_tank": "industrial",
+    "logic_controller": "advanced",
+    "reactor_console": "advanced",
+    "remote_shutdown": "advanced",
+    "drone_terminal": "drone",
+    "drone_tower": "drone",
+}
 
 WORKSHOP = {"coal_generator", "steam_generator", "water_wheel", "wind_turbine", "crusher", "electric_furnace",
             "alloy_smelter", "metal_press", "wire_drawer", "pulverizer", "ore_washer", "sieve", "sawmill",
@@ -387,10 +414,40 @@ def background(name):
     return img
 
 
+def body_tile(name):
+    """A 96-pixel tile of a patterned look's casing, which the other screens repeat over bodies of any size."""
+    c = SKINS[name]["casing"]
+    img = Image.new("RGBA", (96, 96), c[2] + (255,))
+    if name == "workshop":
+        # The machine backgrounds' soft brass blotches, on a grid that wraps so the tiles join unseen.
+        rng = random.Random(1401)
+        cells = 8
+        cell = 96 // cells
+        grid = [[rng.random() for _ in range(cells)] for _ in range(cells)]
+
+        def smooth(v):
+            return v * v * (3 - 2 * v)
+        for y in range(96):
+            for x in range(96):
+                ix, iy = x // cell, y // cell
+                tx, ty = smooth(x % cell / cell), smooth(y % cell / cell)
+                top = grid[iy][ix] * (1 - tx) + grid[iy][(ix + 1) % cells] * tx
+                bottom = grid[(iy + 1) % cells][ix] * (1 - tx) + grid[(iy + 1) % cells][(ix + 1) % cells] * tx
+                v = top * (1 - ty) + bottom * ty
+                img.putpixel((x, y), (c[2] if v < 0.38 else c[3] if v < 0.72 else c[4]) + (255,))
+    else:  # industrial: brushed steel, a lighter line every third pair of rows
+        d = ImageDraw.Draw(img)
+        for y in range(0, 96, 2):
+            d.line((0, y, 95, y), fill=c[3] if (y // 2) % 3 == 0 else c[2])
+    return img
+
+
 def draw_all(save_gui):
     """save_gui(img, name) writes textures/gui/<name>.png."""
-    for name in SKINS:
+    for name in MACHINE_LOOKS:
         save_gui(background(name), f"machine_{name}")
+    for name in ("workshop", "industrial"):
+        save_gui(body_tile(name), f"screen_{name}")
 
 
 def write_all(write, assets, lang, machines):
@@ -401,9 +458,18 @@ def write_all(write, assets, lang, machines):
         dark, face, light = SKINS[name]["slot"]
         look.update({"slot_dark": "FF%02X%02X%02X" % dark, "slot_face": "FF%02X%02X%02X" % face,
                      "slot_light": "FF%02X%02X%02X" % light, "outlined": name in OUTLINED})
+        # What the other screens draw their bodies and panes with (client/ScreenKit).
+        skin = SKINS[name]
+        look.update({"shape": SHAPES.get(name, name), "casing": ["FF%02X%02X%02X" % c for c in skin["casing"]],
+                     "outline": "FF%02X%02X%02X" % skin["outline"], "screen": "FF%02X%02X%02X" % skin["screen"],
+                     "grid": "FF%02X%02X%02X" % skin["grid"], "frame": "FF%02X%02X%02X" % skin["frame"],
+                     "help_box": "FF%02X%02X%02X" % skin["help"]})
+        if skin["band"] is not None:
+            look["band"] = "FF%02X%02X%02X" % skin["band"]
         looks[name] = look
     write(assets / "gui" / "machine_themes.json",
-          {"themes": looks, "machines": {machine: look_of(machine) for machine in machines}, "forms": FORM_LOOK})
+          {"themes": looks, "machines": {machine: look_of(machine) for machine in machines}, "forms": FORM_LOOK,
+           "screens": SCREENS})
     for machine in machines:
         lang[f"container.jugcraft.tagline.{machine}"] = TAGLINES[machine]
     import industrial_forms
@@ -446,3 +512,37 @@ def write_all(write, assets, lang, machines):
     # The faces' key in the help box: short enough for one line each.
     for key, text in {"input": "in", "output": "out", "both": "in and out", "none": "closed"}.items():
         lang[f"container.jugcraft.sides.key.{key}"] = text
+    # The other machine screens' new words: headings, slot help and a line on how to use each.
+    screens = {
+        "prospector.survey": "Survey: 3x3 chunks",
+        "prospector.signals": "%s signals",
+        "prospector.none": "No resonance detected",
+        "prospector.fainter": "+%s fainter",
+        "prospector.depth.0": "Shallow",
+        "prospector.depth.1": "Middle",
+        "prospector.depth.2": "Deep",
+        "prospector.help": "Strongest first. More bars, more ore. Readings are approximate.",
+        "rocket_pad.slot.cargo": "Cargo: what the rocket carries",
+        "rocket_pad.slot.rocket": "Rocket: a Delivery Rocket, used up on launch",
+        "rocket_pad.slot.plan": "Flight plan: the pad to deliver to",
+        "rocket_pad.launch_help": "Sends the cargo to the pad the flight plan names.",
+        "logic_controller.rule": "#",
+        "logic_controller.sensor": "SENSOR",
+        "logic_controller.level": "LEVEL",
+        "logic_controller.target": "TARGET",
+        "logic_controller.set": "SET",
+        "logic_controller.channels": "CHANNELS",
+        "logic_controller.help": "Click any part of a rule to change it; its number turns it on or off.",
+        "logic_controller.tip.enable": "Turn this rule on or off",
+        "logic_controller.tip.sensor": "The channel to read: click for the next",
+        "logic_controller.tip.compare": "Below or above the level",
+        "logic_controller.tip.down": "Lower the level by 5%",
+        "logic_controller.tip.up": "Raise the level by 5%",
+        "logic_controller.tip.target": "The channel to switch: click for the next",
+        "logic_controller.tip.action": "Switch it on or off",
+        "tank.heading.contents": "CONTENTS",
+        "tank.heading.flow": "FLOW",
+        "tank.heading.outlet": "OUTLET",
+    }
+    for key, text in screens.items():
+        lang[f"screen.jugcraft.{key}"] = text

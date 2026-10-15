@@ -706,6 +706,48 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_auto_crafter_screen");
 			context.setScreen(() -> null);
 
+			// Two of the other machine screens in their looks, on the floor in front of the auto-crafter: the rocket pad
+			// (industrial), with a rocket and some cargo but no flight plan yet, then the logic controller (advanced),
+			// with two rules set.
+			BlockPos front = crafter.south();
+			server.runOnServer(minecraft -> {
+				minecraft.overworld().setBlockAndUpdate(front, io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD.defaultBlockState());
+				if (minecraft.overworld().getBlockEntity(front) instanceof io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity rocketPad) {
+					rocketPad.setItem(io.github.jimbozoomer.jugcraft.rocketry.RocketPadBlockEntity.ROCKET,
+							new ItemStack(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.DELIVERY_ROCKET));
+					rocketPad.setItem(0, new ItemStack(Items.IRON_INGOT, 32));
+					rocketPad.setItem(1, new ItemStack(Items.REDSTONE, 16));
+				}
+			});
+			context.waitTicks(5);
+			context.getInput().lookAt(front);
+			context.waitTick();
+			context.getInput().pressKey(options -> options.keyUse);
+			context.waitForScreen(io.github.jimbozoomer.jugcraft.client.RocketPadScreen.class);
+			context.waitTicks(5);
+			context.takeScreenshot("jugcraft_rocket_pad_screen");
+			context.setScreen(() -> null);
+			server.runOnServer(minecraft -> {
+				// Emptied first, so its cargo is not dropped in front of the later shots.
+				if (minecraft.overworld().getBlockEntity(front) instanceof net.minecraft.world.Container pad) {
+					pad.clearContent();
+				}
+				minecraft.overworld().setBlockAndUpdate(front, io.github.jimbozoomer.jugcraft.control.JugcraftControl.LOGIC_CONTROLLER.defaultBlockState());
+				if (minecraft.overworld().getBlockEntity(front) instanceof io.github.jimbozoomer.jugcraft.control.LogicControllerBlockEntity controller) {
+					controller.setRule(0, true, net.minecraft.world.item.DyeColor.BLUE, false, 20, net.minecraft.world.item.DyeColor.RED, true);
+					controller.setRule(1, true, net.minecraft.world.item.DyeColor.YELLOW, true, 80, net.minecraft.world.item.DyeColor.LIME, false);
+				}
+			});
+			context.waitTicks(5);
+			context.getInput().lookAt(front);
+			context.waitTick();
+			context.getInput().pressKey(options -> options.keyUse);
+			context.waitForScreen(io.github.jimbozoomer.jugcraft.client.LogicControllerScreen.class);
+			context.waitTicks(5);
+			context.takeScreenshot("jugcraft_logic_controller_screen");
+			context.setScreen(() -> null);
+			server.runOnServer(minecraft -> minecraft.overworld().setBlockAndUpdate(front, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()));
+
 			// The Engineer's Handbook: the first page and the crusher's page.
 			context.setScreen(HandbookScreen::new);
 			context.waitTicks(2);
