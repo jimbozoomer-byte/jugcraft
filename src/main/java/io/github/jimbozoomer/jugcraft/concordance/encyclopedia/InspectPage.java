@@ -13,6 +13,14 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.CrucibleInspection;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Conversion;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualDefinition;
@@ -36,8 +44,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The encyclopedia's Inspect page (Concordance Chunk A, A-04 and A-07): shown when the encyclopedia is opened while
@@ -53,12 +64,18 @@ import net.minecraft.world.phys.Vec3;
  * Concordance Chunk C (C-03), for an anchor also the readiness of the rite the offerings answer, every shortfall at once,
  * for the reader as its leader; while a rite holds it, what it has spent apart from what it still holds; how the last
  * attempt broke off; and the rite's stage and payment table with its backlash. A rite the reader has not learned is never
- * named.
+ * named. Since Concordance Chunk C (C-07) also a Verdant Bed, or a crop through the bed below it, within the reader's own
+ * block reach: the bed's moisture and nutrients, the crop's step, the verdict and each factor against the plant's niche
+ * with how far it reaches, the light as sky and lamps (HabitatInspection). Since C-09, a bed's page names the graft it
+ * carries and the ranges it changes, and a crop's page does when the crop is the graft's host; the factors are judged by
+ * the niche the bed gives (VerdantBedBlockEntity.niche).
  */
 public final class InspectPage {
 	public static final String PAGE = "inspect";
 	/** How far beyond the reader's own block reach a crucible is read: the allowance the server gives a use, never the anchor's 16 (C-P26). */
 	public static final double CRUCIBLE_REACH = 1.0;
+	/** How far beyond the reader's own block reach a Verdant Bed or a crop is read: as a crucible's (C-07, C-P54). */
+	public static final double GARDEN_REACH = 1.0;
 
 	private InspectPage() {
 	}
@@ -80,6 +97,17 @@ public final class InspectPage {
 			pylon(player, pos, pylon, out);
 		} else if (entity instanceof CrucibleBlockEntity crucible && player.isWithinBlockInteractionRange(pos, CRUCIBLE_REACH)) {
 			crucible(player, level, pos, crucible, out);
+		} else if (entity instanceof VerdantBedBlockEntity bed && player.isWithinBlockInteractionRange(pos, GARDEN_REACH)) {
+			garden(level, pos, level.getBlockState(pos).getBlock(), pos, bed, out);
+		} else if (entity == null && level.getBlockState(pos).getBlock() instanceof OrganismCropBlock crop
+				&& player.isWithinBlockInteractionRange(pos, GARDEN_REACH)) {
+			// A crop has no block entity: the bed below it holds what it grows by (Concordance Chunk C, C-07).
+			if (level.getBlockEntity(pos.below()) instanceof VerdantBedBlockEntity soil) {
+				garden(level, pos, crop, pos.below(), soil, out);
+			} else {
+				out.heading(Component.translatable("encyclopedia.jugcraft.inspect.at", crop.getName(), pos.getX(), pos.getY(), pos.getZ()));
+				out.fact(Component.translatable("message.jugcraft.concordance.garden.no_bed"));
+			}
 		}
 	}
 
@@ -191,6 +219,53 @@ public final class InspectPage {
 	}
 
 	/**
+	 * A Verdant Bed, or the crop on it (Concordance Chunk C, C-07, C-P14, C-P54): the bed's moisture and nutrients; dormant,
+	 * or with no reading this tick, it says so; otherwise the bed's own reading (VerdantBedBlockEntity.inspect), each factor
+	 * naming how far it reaches, and, with a crop or a Verdant Heart on it, its step and the verdict growth would reach from
+	 * the same reading, each factor judged against that organism's niche (HabitatInspection). It notes, grows and marks nothing.
+	 */
+	private static void garden(ServerLevel level, BlockPos pos, Block looked, BlockPos bedPos, VerdantBedBlockEntity bed, PageWriter out) {
+		out.heading(Component.translatable("encyclopedia.jugcraft.inspect.at", looked.getName(), pos.getX(), pos.getY(), pos.getZ()));
+		out.fact(Component.translatable("message.jugcraft.concordance.garden.bed", bed.moisture(), bed.nutrients(), VerdantBedBlockEntity.CAPACITY));
+		BlockState plant = level.getBlockState(bedPos.above());
+		Organism organism = Garden.organism(plant);
+		HabitatInspection.State state = bed.awake() ? bed.inspect(level) : null;
+		if (!bed.awake()) {
+			out.fact(Component.translatable("message.jugcraft.concordance.garden.dormant"));
+		} else if (state == null) {
+			out.fact(Garden.status("waiting"));
+		} else if (organism == null) {
+			out.heading(Component.translatable("encyclopedia.jugcraft.inspect.garden.here"));
+			out.fact(ComposeText.show(HabitatInspection.unplanted()));
+			facts(out, HabitatInspection.unjudged(state));
+		} else {
+			Niche niche = bed.niche(organism);
+			Verdict verdict = Verdict.of(niche, state.habitat());
+			if (plant.getBlock() instanceof OrganismCropBlock crop) {
+				out.fact(Component.translatable("message.jugcraft.concordance.garden.crop", crop.getName(), crop.getAge(plant), OrganismCropBlock.MAX_AGE,
+						ComposeText.show(HabitatInspection.pace(verdict, crop.isMaxAge(plant)))));
+			}
+			out.heading(Component.translatable("encyclopedia.jugcraft.inspect.garden.habitat", plant.getBlock().getName()));
+			out.fact(ComposeText.show(HabitatInspection.verdict(verdict)));
+			facts(out, HabitatInspection.judged(state, niche, verdict));
+			// Concordance Chunk C (C-08, C-P58): a mixed bed's bonus (the strain is in the disturbance row).
+			Text mixed = bed.mixedLine(organism);
+			if (mixed != null) {
+				out.fact(ComposeText.show(mixed));
+			}
+		}
+		grafted(out, bed, looked instanceof OrganismCropBlock crop ? crop.organismId() : null);
+		out.codex("garden/habitats", "jugcraft:verdant_husbandry", ResearchState.ENCOUNTERED);
+		out.codex("garden/organisms", "jugcraft:verdant_husbandry", ResearchState.OBSERVED);
+	}
+
+	private static void facts(PageWriter out, List<Text> lines) {
+		for (Text line : lines) {
+			out.fact(ComposeText.show(line));
+		}
+	}
+
+	/**
 	 * An Alembic Crucible (C-01, C-P3): what anyone sees and its slots; the makeup only with an Assay Glass carried, at the
 	 * level the glass would tell this reader (Alchemy.glassLevel). Reads the crucible's own reason; changes nothing.
 	 */
@@ -253,5 +328,26 @@ public final class InspectPage {
 			icons.add(stack.getItem());
 		}
 		out.fact(Component.translatable(key, icons.isEmpty() ? Component.translatable("encyclopedia.jugcraft.inspect.crucible.none") : held), null, icons);
+	}
+
+	/**
+	 * Concordance Chunk C (C-09, C-P65): the graft a bed carries, when the rules know it, and on a crop's page only when the
+	 * crop ({@code crop}, its organism; null on the bed's page) is the graft's host, as Jade names it: its name with its host
+	 * and donor, then each range it changes against the host's own. The factor rows above already read the grafted niche
+	 * (VerdantBedBlockEntity.niche). Reads only.
+	 */
+	private static void grafted(PageWriter out, VerdantBedBlockEntity bed, @Nullable String crop) {
+		Graft held = Garden.catalog().graft(bed.graft());
+		if (held == null || crop != null && !held.host().equals(crop)) {
+			return;
+		}
+		List<Text> lines = Garden.catalog().graftLines(held.id());
+		if (lines.isEmpty()) {
+			return;
+		}
+		out.heading(ComposeText.show(lines.getFirst()));
+		for (Text line : lines.subList(1, lines.size())) {
+			out.fact(ComposeText.show(line));
+		}
 	}
 }

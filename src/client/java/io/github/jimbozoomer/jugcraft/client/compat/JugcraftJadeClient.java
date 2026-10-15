@@ -10,7 +10,10 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlock;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlock;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlock;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
@@ -217,12 +220,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 	}
 
-	/** One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note). */
+	/**
+	 * One of the simulation's reasons, sent as "key|factor|value|a|b" (VerdantBedBlockEntity.note): a field 1 that names a
+	 * factor is shown by its name. Since Concordance Chunk C (C-08) a reason may carry no factor ("ecology.mixed|25"): its
+	 * fields are shown as sent.
+	 */
 	private static Component reasonText(String encoded) {
 		String[] parts = encoded.split("\\|");
+		boolean factor = parts.length > 1 && Factor.fromId(parts[1]) != null;
 		Object[] args = new Object[parts.length - 1];
 		for (int i = 1; i < parts.length; i++) {
-			args[i - 1] = i == 1 ? Component.translatable("compose.jugcraft.factor." + parts[1]) : parts[i];
+			args[i - 1] = i == 1 && factor ? Component.translatable("compose.jugcraft.factor." + parts[1]) : parts[i];
 		}
 		return Component.translatable("compose.jugcraft." + parts[0], args);
 	}
@@ -238,9 +246,17 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		}
 	}
 
+	/** Concordance Chunk C (C-08): how far its harvests have strained a bed, as the server counts it. */
+	private static void strain(ITooltip tooltip, int strain) {
+		if (strain > 0) {
+			tooltip.add(Component.translatable("compose.jugcraft.ecology.strain", strain, Habitat.MAX_STRAIN));
+		}
+	}
+
 	/**
-	 * A Greenwarden crop: its step, and its bed's last verdict for it, which the server sends with the bed (a crop
-	 * has no block entity of its own to ask).
+	 * A Greenwarden crop: its step, and its bed's last verdict for it (ripe, as it grew: Concordance Chunk C, C-07, C-P55),
+	 * which the server sends with the bed (a crop has no block entity of its own to ask), its bed's strain (C-08), and (C-09)
+	 * its bed's graft when the crop is its host (the server sends the organism the graft is for).
 	 */
 	private enum CropTooltip implements IBlockComponentProvider {
 		INSTANCE;
@@ -256,10 +272,21 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 			if (!(state.getBlock() instanceof OrganismCropBlock crop)) {
 				return;
 			}
+			boolean ripe = crop.isMaxAge(state);
 			tooltip.add(Component.translatable("message.jugcraft.concordance.garden.crop", crop.getName(), crop.getAge(state),
-					OrganismCropBlock.MAX_AGE, crop.isMaxAge(state) ? Component.translatable("compose.jugcraft.ecology.mature") : Component.empty()));
-			if (!crop.isMaxAge(state) && accessor.getLevel().getBlockEntity(accessor.getPosition().below()) instanceof VerdantBedBlockEntity bed) {
-				verdict(tooltip, bed.growth(), String.join("\n", bed.reasons()));
+					OrganismCropBlock.MAX_AGE, ripe ? Component.translatable("compose.jugcraft.ecology.mature") : Component.empty()));
+			if (accessor.getLevel().getBlockEntity(accessor.getPosition().below()) instanceof VerdantBedBlockEntity bed) {
+				String growth = bed.growth();
+				// Concordance Chunk C (C-07): ripe, it still shows its bed's last verdict, as it grew: what its regrowth will meet.
+				if (ripe && !growth.isEmpty() && !growth.equals("dormant") && !growth.equals("waiting")) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.as_it_grew", growthText(growth)));
+					growth = "";
+				}
+				verdict(tooltip, growth, String.join("\n", bed.reasons()));
+				strain(tooltip, bed.strainNow());
+				if (!bed.graft().isEmpty() && bed.graftFor().equals(crop.organismId())) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.graft", ComposeText.name(new Text.Ref("graft", bed.graft()))));
+				}
 			}
 		}
 	}
@@ -390,6 +417,12 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.area", habitat[3], habitat[4]));
 					}
 					verdict(tooltip, data.getStringOr("growth", ""), data.getStringOr("reasons", ""));
+					strain(tooltip, data.getIntOr("strain", 0));
+					// Concordance Chunk C (C-09): the graft it carries, when the rules know it.
+					String graft = data.getStringOr("graft", "");
+					if (!graft.isEmpty()) {
+						tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.graft", ComposeText.name(new Text.Ref("graft", graft))));
+					}
 				}
 				String device = data.getStringOr("device", "");
 				if (!device.isEmpty()) {

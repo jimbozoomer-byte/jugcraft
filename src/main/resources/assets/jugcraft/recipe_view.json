@@ -11066,5 +11066,23 @@
       "item": "jugcraft:yeti_mitten",
       "key": "yeti_mitten"
     }
+  ],
+  "garden_compost": [
+    {
+      "tag": "jugcraft:mulch/quarter",
+      "quarters": 1
+    },
+    {
+      "tag": "jugcraft:mulch/half",
+      "quarters": 2
+    },
+    {
+      "tag": "jugcraft:mulch/three_quarters",
+      "quarters": 3
+    },
+    {
+      "tag": "jugcraft:mulch/whole",
+      "quarters": 4
+    }
   ]
 }

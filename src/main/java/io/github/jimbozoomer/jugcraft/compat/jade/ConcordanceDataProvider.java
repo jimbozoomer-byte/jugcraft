@@ -14,6 +14,7 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.LivingDeviceBlockEntity;
@@ -43,7 +44,7 @@ import snownee.jade.api.IServerDataProvider;
  * someone, the Radiance in the lantern on it), the Lumen Sconce (its Radiance), the Circle Anchor (its ritual's phase
  * and progress and the circle's first faults), the Ley Pylon (its Ley Charge), the Alembic Crucible (its heat,
  * volume, tank, formula step and, since Concordance Chunk C (C-01), its own reason for waiting), the garden (roadmap
- * step 14: a bed's moisture, nutrients and habitat; each living device's status and store), the Orrery Observatory (roadmap step 15: its resonance, status and visible patterns) and the Crucible Stand (Concordance Chunk C, C-05: its JE, heat and draw, and why it gives none). Bounded snapshots of the one block looked at; they name no player, reveal no one's
+ * step 14: a bed's moisture, nutrients and habitat, and since Concordance Chunk C its harvest strain (C-08); each living device's status and store), the Orrery Observatory (roadmap step 15: its resonance, status and visible patterns) and the Crucible Stand (Concordance Chunk C, C-05: its JE, heat and draw, and why it gives none). Bounded snapshots of the one block looked at; they name no player, reveal no one's
  * research and change nothing (a bed's habitat comes from its sample, taken again no more often than a plant would).
  */
 public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor> {
@@ -233,7 +234,11 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		return snapshot;
 	}
 
-	/** A Verdant Bed: moisture, nutrients, whether it is awake, and its habitat (from its sample). */
+	/**
+	 * A Verdant Bed: moisture, nutrients, whether it is awake, and its habitat (from its sample: the five factors); since
+	 * Concordance Chunk C also its harvest strain, a harvest not yet counted included (C-08, read and never counted here), and
+	 * the graft it carries when the rules know it (C-09).
+	 */
 	public static CompoundTag bedSnapshot(VerdantBedBlockEntity bed, ServerLevel level) {
 		CompoundTag snapshot = new CompoundTag();
 		snapshot.putInt("nutrients", bed.nutrients());
@@ -246,6 +251,14 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		}
 		snapshot.putString("growth", bed.growth());
 		snapshot.putString("reasons", String.join("\n", bed.reasons()));
+		int strain = bed.strainNow();
+		if (strain > 0) {
+			snapshot.putInt("strain", strain);
+		}
+		// Concordance Chunk C (C-09): the graft it carries, when the rules know it (named on the client).
+		if (Garden.catalog().graft(bed.graft()) != null) {
+			snapshot.putString("graft", bed.graft());
+		}
 		return snapshot;
 	}
 

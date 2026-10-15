@@ -382,6 +382,8 @@ blocks `jugcraft:verdant_bed`, `jugcraft:sunpetal_crop`, `jugcraft:dewmoss_crop`
 items `jugcraft:sunpetal`, `jugcraft:dewmoss`, `jugcraft:gloamcap`, `jugcraft:mendvetch`, `jugcraft:verdant_chaff`;
 research `jugcraft:verdant_husbandry`; conversion `jugcraft:verdance_to_ley`; organism and disturbance ids; item tags
 `jugcraft:verdant_specimens` and `jugcraft:mulch/*`; data folders `concordance/organism` and `concordance/disturbance`.
+Since Concordance Chunk C (unit 4, not merged): the graft `jugcraft:dewlit` (data folder `concordance/graft`), the
+organism field `neighbours`, and the Verdant Bed's saved keys `strain`, `ripened` and `graft`.
 
 Introduced by milestone 7 (roadmap step 15, [celestial](features/arcane-concordance-celestial.md#rollout-and-open-questions)):
 block and item `jugcraft:observatory`; item `jugcraft:astrolabe`; data components `jugcraft:astral_charge` and

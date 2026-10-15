@@ -22,8 +22,13 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Product;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Property;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Sampler;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.encyclopedia.InspectPage;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlock;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.Readiness;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.RitualDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
@@ -77,6 +82,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -94,7 +100,9 @@ import net.minecraft.world.phys.Vec3;
  * Inspect page reads an Alembic Crucible within the reader's own block reach, more with an Assay Glass carried and the
  * Alembic Arts learned, showing no sign and changing nothing, and gives a waiting formula's own reason; and (C-02) the
  * Cinder Kiln's rite names the Kiln Draught and the Salamander Charm. Since Concordance Chunk C (C-03), an anchor's
- * Inspect page states a known rite's readiness and its stage and payment table.
+ * Inspect page states a known rite's readiness and its stage and payment table; and (C-07) a Verdant Bed and its crop
+ * within the reader's reach, each factor judged with how far it reaches and the light as sky and lamps, reading nothing in;
+ * and (C-09) a bed's page, and its host crop's, name the graft it carries and judge by the grafted niche.
  */
 public class EncyclopediaGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -1025,8 +1033,172 @@ public class EncyclopediaGameTests {
 		});
 	}
 
+	// ---------------------------------------------------------------- a Verdant Bed and its crop (Concordance Chunk C, C-07)
+
+	/** The row judging one factor ("%s: %s", its first argument that factor's line), or null. */
+	private static Component factorRow(List<EncyclopediaPayload.Row> rows, String factor) {
+		for (EncyclopediaPayload.Row row : rows) {
+			Object[] parts = args(row.text());
+			if (key(row.text()).equals("compose.jugcraft.ecology.inspect.judged") && parts.length == 2 && parts[0] instanceof Component line
+					&& key(line).equals("compose.jugcraft.ecology.inspect." + factor)) {
+				return row.text();
+			}
+		}
+		return null;
+	}
+
+	/** The arguments of a judged row's factor line (0) or judgement (1). */
+	private static List<Object> part(Component judged, int which) {
+		return judged == null ? List.of() : List.of(args((Component) args(judged)[which]));
+	}
+
+	/**
+	 * C-07 (C-P14, C-P54): the Inspect page reads a Verdant Bed, and a crop through the bed below it, within the reader's own
+	 * block reach: the bed's moisture and nutrients, the crop's step and pace, the verdict and each factor against the crop's
+	 * niche with how far it reaches, the light as sky and lamps; the bed and the crop give one reading. A bare bed gives its
+	 * readings unjudged; a dormant one says so and is not read. Reading shows no sign and changes nothing; past reach or not
+	 * loaded, there is no page.
+	 */
+	@GameTest(maxTicks = 80)
+	public void theInspectPageReadsABedAndACrop(GameTestHelper helper) {
+		UUID keeper = new UUID(14L, 7L);
+		BlockPos bedAt = new BlockPos(1, 1, 4);
+		BlockPos cropAt = bedAt.above();
+		helper.setBlock(bedAt, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		VerdantBedBlockEntity bed = (VerdantBedBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(bedAt));
+		bed.awaken(keeper);
+		helper.setBlock(cropAt, Garden.SUNPETAL_CROP);
+		helper.setBlock(cropAt.east(), Blocks.GLOWSTONE);
+		BlockPos bareAt = new BlockPos(3, 1, 4);
+		helper.setBlock(bareAt, Garden.VERDANT_BED);
+		VerdantBedBlockEntity bareBed = (VerdantBedBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(bareAt));
+		bareBed.awaken(keeper);
+		BlockPos dormantAt = new BlockPos(5, 1, 4);
+		helper.setBlock(dormantAt, Garden.VERDANT_BED);
+		// Both areas are built now and never change: their samples are taken early, away from the other tests' sampling ticks.
+		for (int tick : new int[] {10, 20, 30}) {
+			helper.runAtTickTime(tick, () -> {
+				bed.habitat(helper.getLevel());
+				bareBed.habitat(helper.getLevel());
+			});
+		}
+		helper.runAtTickTime(45, () -> {
+			ServerLevel level = helper.getLevel();
+			ServerPlayer reader = player(helper);
+			helper.setBlock(cropAt, Garden.SUNPETAL_CROP); // a random tick may have grown it meanwhile
+			bed.setNutrients(10);
+			bed.note("waiting", List.of()); // so a page that noted its reading would be caught
+			int moisture = bed.moisture();
+			BlockPos absBed = helper.absolutePos(bedAt);
+			BlockPos absCrop = helper.absolutePos(cropAt);
+			SignWatch watch = new SignWatch(helper);
+			List<EncyclopediaPayload.Row> onBed = inspected(reader, absBed);
+			List<EncyclopediaPayload.Row> onCrop = inspected(reader, absCrop);
+			helper.assertTrue(onBed != null && onCrop != null, "Anyone within reach reads a bed and the crop on it");
+			helper.assertTrue(key((Component) argsOf(onBed, "encyclopedia.jugcraft.inspect.at").get(0)).equals("block.jugcraft.verdant_bed")
+					&& key((Component) argsOf(onCrop, "encyclopedia.jugcraft.inspect.at").get(0)).equals("block.jugcraft.sunpetal_crop"),
+					"Each page names what was looked at");
+			helper.assertValueEqual(onCrop.stream().skip(1).map(row -> row.text().getString()).toList(),
+					onBed.stream().skip(1).map(row -> row.text().getString()).toList(), "The bed and its crop give one reading");
+			helper.assertValueEqual(argsOf(onCrop, "message.jugcraft.concordance.garden.bed"), List.<Object>of(moisture, 10, VerdantBedBlockEntity.CAPACITY),
+					"the bed's moisture and nutrients");
+			List<Object> step = argsOf(onCrop, "message.jugcraft.concordance.garden.crop");
+			helper.assertTrue(step.size() == 4 && step.get(1).equals(0) && step.get(3) instanceof Component pace
+					&& key(pace).equals("compose.jugcraft.ecology.growth.tolerating"), "Step 0, growing slowly: " + step);
+			List<String> keys = allKeys(onCrop);
+			helper.assertTrue(keys.contains("compose.jugcraft.ecology.inspect.verdict") && keys.contains("compose.jugcraft.ecology.growth.tolerating")
+					&& headingKeys(onCrop).contains("encyclopedia.jugcraft.inspect.garden.habitat"), "the verdict, under the crop's needs: " + keys);
+			List<Object> light = part(factorRow(onCrop, "light"), 0);
+			helper.assertTrue(light.size() == 3 && light.get(0).equals(Math.max((Integer) light.get(1), (Integer) light.get(2)))
+					&& light.get(0).equals(level.getRawBrightness(absCrop, 0)) && light.get(1).equals(level.getBrightness(LightLayer.SKY, absCrop))
+					&& light.get(2).equals(level.getBrightness(LightLayer.BLOCK, absCrop)) && (Integer) light.get(2) >= 13,
+					"The light as sky and lamps, the greater counting: " + light);
+			helper.assertValueEqual(part(factorRow(onCrop, "light"), 1), List.<Object>of(13, 15, 11, 15), "against the sunpetal's light");
+			helper.assertValueEqual(part(factorRow(onCrop, "diversity"), 0), List.<Object>of(1, Sampler.RADIUS), "alone, within 2 blocks");
+			helper.assertTrue(key((Component) args(factorRow(onCrop, "diversity"))[1]).equals("compose.jugcraft.ecology.inspect.tolerable")
+					&& part(factorRow(onCrop, "diversity"), 1).equals(List.<Object>of(3, 8, 1, 8)), "one kind is only tolerable");
+			helper.assertValueEqual(part(factorRow(onCrop, "disturbance"), 0), List.<Object>of(0, 5, 5, Sampler.HEIGHT),
+					"no working magic in the 5 by 5, a block above and below");
+			List<String> bare = allKeys(inspected(reader, helper.absolutePos(bareAt)));
+			helper.assertTrue(bare.contains("compose.jugcraft.ecology.inspect.unplanted") && bare.contains("compose.jugcraft.ecology.inspect.light")
+					&& !bare.contains("compose.jugcraft.ecology.inspect.judged") && !bare.contains("compose.jugcraft.ecology.inspect.verdict"),
+					"A bare bed gives its readings unjudged: " + bare);
+			List<String> dormant = allKeys(inspected(reader, helper.absolutePos(dormantAt)));
+			helper.assertTrue(dormant.contains("message.jugcraft.concordance.garden.dormant") && !dormant.contains("compose.jugcraft.ecology.inspect.light"),
+					"A dormant bed says so and is not read: " + dormant);
+			helper.setBlock(cropAt, ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE));
+			List<Object> ripe = argsOf(inspected(reader, absCrop), "message.jugcraft.concordance.garden.crop");
+			helper.assertTrue(ripe.size() == 4 && ripe.get(3) instanceof Component word && key(word).equals("compose.jugcraft.ecology.mature"), "Ripe: " + ripe);
+			watch.close();
+			helper.assertTrue(watch.all().isEmpty() && bed.growth().equals("waiting") && bed.reasons().isEmpty() && bed.nutrients() == 10
+					&& bed.moisture() == moisture, "Reading shows no sign and notes, takes and dries nothing: " + bed.growth());
+			BlockPos away = helper.absolutePos(new BlockPos(1, 2, -4));
+			reader.snapTo(away.getX() + 0.5, away.getY(), away.getZ() + 0.5, 0.0F, 0.0F);
+			helper.assertTrue(reader.distanceToSqr(Vec3.atCenterOf(absBed)) <= 256 && !reader.isWithinBlockInteractionRange(absBed, InspectPage.GARDEN_REACH),
+					"The reader stands within the anchor's reach but past their own");
+			helper.assertTrue(inspected(reader, absBed) == null && inspected(reader, absCrop) == null, "A bed and a crop past reach have no page");
+			helper.assertTrue(inspected(reader, absBed.offset(100_000, 0, 0)) == null, "nor one not loaded");
+			helper.succeed();
+		});
+	}
+
 	private static EncyclopediaPayload.Page plain(String id) {
 		return new EncyclopediaPayload.Page(id, Component.literal(id), List.of());
+	}
+
+	/**
+	 * C-09 (C-P65): the Inspect page names the graft a bed carries and each range it changes against its host's own, on the
+	 * bed's page and on its host crop's, and judges the crop's factors by the grafted niche (the fifth reader); a plain bed's
+	 * page names none; and a crop that is not the graft's host has none named on its page, judged by its own niche, though
+	 * its bed's page names it.
+	 */
+	@GameTest(maxTicks = 80)
+	public void theInspectPageNamesAGraft(GameTestHelper helper) {
+		UUID keeper = new UUID(14L, 8L);
+		BlockPos graftedAt = new BlockPos(2, 1, 2), plainAt = new BlockPos(2, 1, 5), otherAt = new BlockPos(5, 1, 2);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (BlockPos at : List.of(graftedAt, plainAt, otherAt)) {
+			helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+			VerdantBedBlockEntity bed = (VerdantBedBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(at));
+			bed.awaken(keeper);
+			bed.setNutrients(10);
+			helper.setBlock(at.above(), ((OrganismCropBlock) (at.equals(otherAt) ? Garden.DEWMOSS_CROP : Garden.SUNPETAL_CROP)).getStateForAge(1));
+			beds.add(bed);
+		}
+		beds.get(0).setGraft("jugcraft:dewlit");
+		for (int tick : new int[] {10, 20, 30}) {
+			helper.runAtTickTime(tick, () -> beds.forEach(bed -> bed.habitat(helper.getLevel())));
+		}
+		helper.runAtTickTime(46, () -> {
+			for (BlockPos at : List.of(graftedAt, plainAt, otherAt)) { // re-wet and reset: the block entity stays
+				helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+				helper.setBlock(at.above(), ((OrganismCropBlock) (at.equals(otherAt) ? Garden.DEWMOSS_CROP : Garden.SUNPETAL_CROP)).getStateForAge(1));
+			}
+			// Grafted only now, so no growth of the Dewmoss (another organism) could have cleared it.
+			beds.get(2).setGraft("jugcraft:dewlit");
+			ServerPlayer reader = player(helper);
+			for (BlockPos at : List.of(graftedAt.above(), graftedAt)) {
+				List<EncyclopediaPayload.Row> rows = inspected(reader, helper.absolutePos(at));
+				helper.assertTrue(rows != null && headingKeys(rows).contains("compose.jugcraft.ecology.graft"), "The page at " + at + " names the graft");
+				List<String> keys = allKeys(rows);
+				helper.assertTrue(keys.containsAll(List.of("graft.jugcraft.dewlit", "item.jugcraft.sunpetal", "item.jugcraft.dewmoss")), "Dewlit: " + keys);
+				List<List<Object>> ranges = rows.stream().filter(row -> key(row.text()).equals("compose.jugcraft.ecology.graft.range"))
+						.map(row -> List.of(args(row.text())).subList(1, 9)).toList();
+				helper.assertValueEqual(ranges, List.<List<Object>>of(List.<Object>of(4, 7, 5, 7, 2, 7, 4, 7), List.<Object>of(9, 15, 11, 15, 11, 15, 13, 15)),
+						"each range against the Sunpetal's own");
+				helper.assertValueEqual(part(factorRow(rows, "moisture"), 1), List.<Object>of(5, 7, 4, 7), "moisture judged by Dewlit's range");
+			}
+			List<EncyclopediaPayload.Row> plain = inspected(reader, helper.absolutePos(plainAt));
+			helper.assertTrue(plain != null && !allKeys(plain).contains("compose.jugcraft.ecology.graft"), "An ungrafted bed names none");
+			helper.assertValueEqual(part(factorRow(plain, "moisture"), 1), List.<Object>of(4, 7, 2, 7), "and judges by the Sunpetal's own");
+			List<EncyclopediaPayload.Row> otherCrop = inspected(reader, helper.absolutePos(otherAt.above()));
+			List<EncyclopediaPayload.Row> otherBed = inspected(reader, helper.absolutePos(otherAt));
+			helper.assertTrue(otherCrop != null && !allKeys(otherCrop).contains("compose.jugcraft.ecology.graft")
+					&& otherBed != null && headingKeys(otherBed).contains("compose.jugcraft.ecology.graft"),
+					"A Dewmoss on a Dewlit bed: its page names no graft, as Jade names none; its bed's page names it");
+			helper.assertValueEqual(part(factorRow(otherCrop, "moisture"), 1), List.<Object>of(7, 7, 5, 7), "the Dewmoss judged by its own niche");
+			helper.succeed();
+		});
 	}
 
 	/** The client's page model: the first answer opens on its first page, stale answers are ignored, the page read is kept, Back and turns. */

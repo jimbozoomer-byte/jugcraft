@@ -21,6 +21,10 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
@@ -66,7 +70,8 @@ import net.minecraft.world.level.storage.TagValueInput;
  * older version forward step by step and reads what it can of a newer one; a record keeps an entry it cannot read
  * exactly as written; block entities stamp their version; the crucible keeps Preserve's hold through a save (Concordance
  * Chunk B, unit 3); the Crucible Stand keeps its JE and setting (Concordance Chunk C, C-05); the crucible keeps its
- * formula's setter and its courier request (C-06); and the circle index looks only at the chunks in reach.
+ * formula's setter and its courier request (C-06); the circle index looks only at the chunks in reach; and a Verdant
+ * Bed saved before harvest strain reads unstrained (C-08), and one saved before grafts ungrafted (C-09).
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -401,6 +406,59 @@ public class ConcordancePersistenceGameTests {
 		helper.setBlock(relative, Blocks.AIR);
 		helper.assertTrue(ledger.ledger().get(id) == null, "Broken, its request goes with it");
 		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk C (C-08): a Verdant Bed saved before harvest strain, with or without its version, reads unstrained and
+	 * unripened and keeps the rest; a strain from a save beyond its cap is held to it; the bed's version stays 1. (C-09) A
+	 * graft is saved, never its host, still at version 1; a bed saved before grafts reads ungrafted and saves no graft.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anOlderBedLoadsWithoutItsNewKeys(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos relative = new BlockPos(2, 1, 2);
+		helper.setBlock(relative, Garden.VERDANT_BED);
+		VerdantBedBlockEntity bed = (VerdantBedBlockEntity) level.getBlockEntity(helper.absolutePos(relative));
+		UUID keeper = new UUID(30L, 8L);
+		bed.awaken(keeper);
+		bed.setNutrients(17);
+		bed.setStrain(2);
+		CompoundTag saved = bed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getIntOr(VerdantBedBlockEntity.STRAIN, 0) == 2,
+				"The strain is saved, still at version 1: " + saved);
+		CompoundTag before = saved.copy();
+		before.remove(VerdantBedBlockEntity.STRAIN);
+		before.remove(VerdantBedBlockEntity.RIPENED);
+		CompoundTag unversioned = before.copy();
+		unversioned.remove(Saved.VERSION);
+		for (CompoundTag legacy : List.of(before, unversioned)) {
+			VerdantBedBlockEntity read = loadBed(level, bed, legacy);
+			helper.assertTrue(read.strain() == 0 && !read.ripened() && read.nutrients() == 17 && read.awake() && keeper.equals(read.keeper()),
+					"A bed from before reads unstrained and keeps the rest: " + read.strain() + ", " + read.nutrients());
+		}
+		CompoundTag forged = saved.copy();
+		forged.putInt(VerdantBedBlockEntity.STRAIN, 99);
+		helper.assertTrue(loadBed(level, bed, forged).strain() == Habitat.MAX_STRAIN, "A strain past its cap is held to it");
+		forged.putInt(VerdantBedBlockEntity.STRAIN, -4);
+		helper.assertTrue(loadBed(level, bed, forged).strain() == 0, "and one below none reads as none");
+		bed.setGraft("jugcraft:dewlit");
+		CompoundTag grafted = bed.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(grafted.getStringOr(VerdantBedBlockEntity.GRAFT, "").equals("jugcraft:dewlit") && !grafted.contains(VerdantBedBlockEntity.GRAFT_HOST)
+				&& grafted.getIntOr(Saved.VERSION, 0) == 1, "The graft is saved, never its host, still at version 1: " + grafted);
+		CompoundTag older = grafted.copy();
+		older.remove(VerdantBedBlockEntity.GRAFT);
+		Organism petal = Garden.catalog().organism("jugcraft:sunpetal");
+		VerdantBedBlockEntity read = loadBed(level, bed, older);
+		helper.assertTrue(petal != null && read.graft().isEmpty() && read.niche(petal).equals(petal.niche()) && read.nutrients() == 17,
+				"A bed from before grafts reads ungrafted");
+		helper.assertTrue(!read.saveWithoutMetadata(level.registryAccess()).contains(VerdantBedBlockEntity.GRAFT), "and saves no graft");
+		helper.succeed();
+	}
+
+	private static VerdantBedBlockEntity loadBed(ServerLevel level, VerdantBedBlockEntity like, CompoundTag saved) {
+		VerdantBedBlockEntity copy = new VerdantBedBlockEntity(like.getBlockPos(), like.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
 	}
 
 	private static CrucibleBlockEntity load(ServerLevel level, CrucibleBlockEntity like, CompoundTag saved) {
