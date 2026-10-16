@@ -49,7 +49,7 @@ Primary specialty and supported player role: chemistry and polymers; a player wi
 There are no new dependencies. The art is drawn by `tools/petro_textures.py`:
 
 - the gas's swirl, from its own colours;
-- the glue: a white squeeze bottle with a pointed orange nozzle cap and a cream label band.
+- the glue: a round-shouldered white squeeze bottle with a blue label band and an orange nozzle tipped with a bead of glue (the contributor picked it from three drafts).
 
 No texture is copied.
 
