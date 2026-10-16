@@ -2,7 +2,7 @@
 
 Owner authorization, 15 October 2026: after completing tree-generation batch 2, implement all the other trees. Actual tool: OpenAI Codex (GPT-6).
 
-**Scope update, 16 October:** batches 3, 4 and 4b/4c have since been implemented, tested and visually approved. The owner requested PR #395 ready for review and authorized starting **batch 5 only** (rowan, elder and seasonal fruit). Batch 5b, 5c and all later stages remain outside the current implementation.
+**Scope update, 16 October:** batches 3, 4 and 4b/4c have since been implemented, tested and visually approved. The owner requested PR #395 ready for review and subsequently approved batch 5 and requested PR #396 ready for review. Batches 5b and 5c are now authorized together; batch 6 and later remain outside the current implementation.
 
 The owner approved the new wood palettes on 6 October, and the original pine textures on 15 October. Follow the current runtime vanilla-log treatment for other woods and preserve pine originals. The roster defaults apply unless later code or owner instructions supersede them. Existing orchard, banana and rubber content must be extended without duplicate IDs or replacing their existing routes.
 
@@ -13,7 +13,7 @@ Implementation follows [the roster](../branches/TREES.md) in dependency order. E
 | 3 | Yew and ancient yew, leaf drawing options, Gloomweald canopy | Owner approved; PR #388 ready |
 | 4 | Tree/wood split; snowpetal cherry and shimmer birch | Owner approved; PR #389 ready |
 | 4b-4c | Bald cypress roots; magnolia | Owner approved; PR #395 ready |
-| 5 | Seasonal fruit; rowan, elder and fruitwood | Implemented; awaiting owner inspection in draft PR #396; [record](trees-batch-5.md) |
+| 5 | Seasonal fruit; rowan, elder and fruitwood | Owner approved; PR #396 ready; [record](trees-batch-5.md) |
 | 5b-5c | Hawthorn; persimmon | Pending |
 | 6-6b | Juniper, gorse, sagebrush, holly | Pending |
 | 7-8c | Olive, stone pine, wattle, tamarisk, Joshua tree | Pending |

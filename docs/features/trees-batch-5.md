@@ -1,6 +1,6 @@
 # Tree generation batch 5: rowan, elder and seasonal fruit
 
-Status: implemented on `codex/tree-generation-batch-5` in [draft PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396), awaiting owner visual approval. Authorized by the owner on 16 October 2026. OpenAI Codex (GPT-6). Builds on owner-approved PR #395 and its tree-batch prerequisites. The 41 open upstream PRs and public branches of upstream plus all four public forks were checked: no rowan, elder or seasonal-fruit implementation was identified. The existing tree-roster branch is the design source.
+Status: implemented on `codex/tree-generation-batch-5` in [PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396), owner visually approved on 16 October 2026 and ready for review. Authorized by the owner on 16 October 2026. OpenAI Codex (GPT-6). Builds on owner-approved PR #395 and its tree-batch prerequisites. The 41 open upstream PRs and public branches of upstream plus all four public forks were checked: no rowan, elder or seasonal-fruit implementation was identified. The existing tree-roster branch is the design source.
 
 ## Design published before implementation
 
