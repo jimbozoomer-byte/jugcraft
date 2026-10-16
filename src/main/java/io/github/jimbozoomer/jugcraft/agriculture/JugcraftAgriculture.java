@@ -278,6 +278,7 @@ public final class JugcraftAgriculture {
 	public static EntityType<WillOWisp> WILL_O_WISP;
 	public static EntityType<FlyingPumpkin> FLYING_PUMPKIN;
 	public static EntityType<BowlingPumpkin> BOWLING_PUMPKIN;
+	public static EntityType<DoorWreath> DOOR_WREATH;
 	public static EntityType<ToiletPaperRoll> TOILET_PAPER_ROLL;
 	public static EntityType<HauntedHayride> HAUNTED_HAYRIDE;
 	public static EntityType<ThrowMarker> THROW_MARKER;
@@ -1603,6 +1604,8 @@ public final class JugcraftAgriculture {
 				.strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava());
 		SEAT = entity("chair_seat", EntityType.Builder.<Seat>of(Seat::new, MobCategory.MISC).noLootTable().noSummon()
 				.sized(0.5F, 0.1F).passengerAttachments(0.0F).clientTrackingRange(10).updateInterval(20));
+		DOOR_WREATH = entity("door_wreath", EntityType.Builder.<DoorWreath>of(DoorWreath::new, MobCategory.MISC).noLootTable().noSummon()
+				.sized(0.875F, 0.875F).clientTrackingRange(10).updateInterval(1));
 		Block wreath = registerBlock("autumn_wreath", AutumnWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		Block hollyWreath = registerBlock("holly_wreath", HollyWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
@@ -1615,7 +1618,7 @@ public final class JugcraftAgriculture {
 		}
 		for (Block block : List.of(tub, crate, bale, wreath, hollyWreath)) {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
-			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+			registerItem(id, props -> block instanceof AutumnWreathBlock ? new WreathBlockItem(block, props) : new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
 		fire.add(bale, 60, 20);

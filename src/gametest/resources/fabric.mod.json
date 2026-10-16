@@ -12,6 +12,7 @@
     ],
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.HollyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DoorWreathGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchSixGameTests",

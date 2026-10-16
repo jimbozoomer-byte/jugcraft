@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -119,29 +118,17 @@ public class AutumnWreathBlock extends Block {
 			level.scheduleTick(pos, this, 1);
 	}
 
-	/** The outer edge of the door's current panel, including its hinge-dependent quarter turn. */
-	public static Direction doorFace(BlockState door) {
-		Direction facing = door.getValue(DoorBlock.FACING);
-		if (door.getValue(DoorBlock.OPEN))
-			facing = door.getValue(DoorBlock.HINGE) == DoorHingeSide.RIGHT ? facing.getCounterClockWise() : facing.getClockWise();
-		return facing.getOpposite();
-	}
-
-	/** Wait for both door halves to update, then keep the wreath against the actual panel. */
+	/** Convert a previously saved block attachment without moving it through or replacing other blocks. */
 	@Override
 	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-		BlockPos support = pos.relative(state.getValue(FACING).getOpposite());
+		Direction face = state.getValue(FACING);
+		BlockPos support = pos.relative(face.getOpposite());
 		BlockState door = level.getBlockState(support);
 		if (!(door.getBlock() instanceof DoorBlock)) return;
-		Direction face = doorFace(door);
-		if (face == state.getValue(FACING)) return;
-		BlockPos destination = support.relative(face);
-		if (!level.isLoaded(destination) || !level.isEmptyBlock(destination)) {
-			level.destroyBlock(pos, true);
-			return;
-		}
-		level.removeBlock(pos, false);
-		level.setBlock(destination, state.setValue(FACING, face), Block.UPDATE_ALL);
+		// A door update may have arrived before migration: infer the old physical face from the old axis.
+		BlockState before = DoorWreath.frontFace(door).getAxis() == face.getAxis() ? door : door.cycle(DoorBlock.OPEN);
+		if (DoorWreath.attach(level, support, face == DoorWreath.frontFace(before), state) != null) level.removeBlock(pos, false);
+		else level.destroyBlock(pos, true);
 	}
 
 	/** A mum of another colour swaps the wreath's flowers for its own. */

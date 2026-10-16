@@ -18,7 +18,7 @@ The leaves stay green all year. They reuse the shared seasonal state and [100, 3
 
 Right-click supported natural leaves with shears to clip one sprig, damaging the shears once and visibly removing berries from that block. Clipped leaves have a one-in-sixteen regrowth chance on each random tick in every calendar mode; repeated immediate use and player-placed leaves yield nothing. Ordinary shearing/Silk Touch still obtains the leaf block without bonus sprigs. Natural decay and renewable sapling drops remain intact.
 
-Craft one Holly Wreath from eight sprigs around a central string. Reuse the Autumn Wreath's wall/door placement, facing and support-loss behavior, with a dark green ring and scarlet clusters. It is permanent decoration, available year-round; mums do not recolor it. Both wreaths now follow the door panel when it opens or closes, including either hinge and redstone-operated doors. An occupied destination drops the wreath once without replacing the obstruction; the Autumn Wreath keeps its flower colour.
+Craft one Holly Wreath from eight sprigs around a central string. Reuse the Autumn Wreath's wall/door placement, facing and support-loss behavior, with a dark green ring and scarlet clusters. It is permanent decoration, available year-round; mums do not recolor it. Both wreaths stay on the same physical face of the door as it opens or closes, including either hinge and redstone-operated doors. Crouch and right-click either broad face to place one on an open or closed door. Clicking the wreath operates its wooden door; punching removes the wreath. An obstruction drops the wreath once without replacing another block, and the Autumn Wreath keeps its flower colour.
 
 The inspection's flat foliage panels are player-placed decorative leaves and cannot yield sprigs. Use shears on an actual holly tree (including one grown from a sapling) or the marked natural demonstration leaf. An empty hand cannot clip sprigs. The panels are now labelled "Display only".
 
@@ -34,9 +34,15 @@ Initial delivery files are `Jugcraft-Tree-Batch-6b.mrpack`, `Tree-Batch-6b-World
 
 ### Door attachment and clipping clarification, 16 October
 
-The owner reported trying to harvest the decorative panels and a wreath left floating when its door opened. Sprig acquisition rules are unchanged; the gallery labels and instructions now explain the distinction. Shared wreath support now follows the physical panel after both door halves update. Movement preserves the wreath state, does not overwrite another block and drops exactly once if obstructed.
+The owner reported trying to harvest the decorative panels and a wreath left floating when its door opened. Sprig acquisition rules are unchanged; the gallery labels and instructions explain the distinction. The first correction (`e4dca698`) followed the panel's outside block edge, but the owner's follow-up showed that this changed the physical face when opening. Its five focused server checks and rendered client check passed because they checked contact with the panel, not which face was retained.
 
-Only focused checks were run for this correction, as requested: the five holly server tests passed, including actual scheduled movement across 16 combinations of wreath type, door direction and hinge, on both halves, with manual oak-door and powered iron-door opening/closing, obstruction and support-loss checks. The full suite and full data audit were not rerun. The single `HollyClientGameTests` class also passed actual input checks (empty hand refused, shears clipped the natural leaf once, repeat clipping and the display leaf refused), rendered the wreath on the opened door, and saved/reopened the gallery. The open/closed door screenshots were inspected. Its refreshed preview preserves 89 save files, with only the same three development-metadata files cleaned after scanning 6,212 region records. Existing floating wreaths in earlier saves are corrected when the door is operated.
+The corrected door attachment stores the door half and physical front/back face in a native `BlockAttachedEntity` (`jugcraft:door_wreath`), retaining the normal block model, textures and Autumn Wreath flower state. This lets the ring occupy the inner face inside the door's block cell, with its real picking box, rather than forcing it into an adjacent block. Wall wreaths retain their block representation. The attachment is saved and synchronized normally and has a bounded local support/obstruction check. Existing door-mounted wreath blocks convert on their scheduled placement tick or when their door is operated; they do not replace another block. A wreath that had already flipped in an older build uses its current visible face as the migration starting point. Remove/re-hang it to choose the other face.
+
+Door decorations add a saved entity registration; retain this version or a later compatible version when reopening saves containing them. The gallery includes a left-hinged door and a right-hinged door with Holly on the front and Autumn on the back, making both faces easy to check. The right-hinged sample is saved open.
+
+Focused server validation: all five wreath tests passed (`jugcraft-test:*wreath*`). They cover 128 placements across both wreath types, four door orientations, both hinges and halves, both physical faces, and initially open/closed doors. Checks include manual oak and powered iron opening/closing, serialized face/appearance/anchor round-trips, duplicate-placement refusal, obstruction/support-loss drops, mum recolouring, survival/creative removal, wall behavior, and migration of an older block attachment. The full suite and full data/art audit were not rerun for this correction, as requested.
+
+The single `HollyClientGameTests` class passed with the pinned Sodium/Iris setup and with optional integrations absent. Actual mouse/key input placed a wreath on an open door's inner face, picked it, closed the door through it, and punched it off. Both configurations saved and reopened the gallery, loading the door display before asserting all three saved wreaths and their faces/colours. Open/closed and front/back screenshots were inspected. The refreshed save opens beside the wreaths at 1050.5, 180, -865.5; earlier inspection saves are preserved. The ordinary Minecraft client joined this cleaned save at that position. Its delivery copy preserves all 90 save files; a scan of 6,254 region records found no test content, and only the same three unused development-metadata files were changed.
 
 ### In-game screenshots
 
@@ -44,7 +50,9 @@ Only focused checks were run for this correction, as requested: the five holly s
 ![Holly and birch wood comparison](../images/trees-batch-6b/wood.png)
 ![Seasonal and clipped foliage](../images/trees-batch-6b/foliage.png)
 ![Wall and door Holly Wreaths](../images/trees-batch-6b/wreaths.png)
-![Holly Wreath follows the opened door panel](../images/trees-batch-6b/wreath-open-door.png)
+![Holly Wreath retains the front of the opened door](../images/trees-batch-6b/wreath-open-door.png)
+![Holly on the front of the right-hinged door](../images/trees-batch-6b/wreath-right-front.png)
+![Autumn on the back of the same right-hinged door](../images/trees-batch-6b/wreath-right-back.png)
 ![Evergreen winter berries](../images/trees-batch-6b/winter.png)
 ![Natural Woodland sample](../images/trees-batch-6b/woodland.png)
 ![Natural Dense Forest sample](../images/trees-batch-6b/dense-forest.png)

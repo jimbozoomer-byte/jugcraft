@@ -143,6 +143,7 @@ def assets(root, write, lang):
     write(states / f"{holly}.json", {"variants": {f"facing={f}": turned(rid(f"block/{holly}"), f) for f in HORIZONTAL}})
     write(root / "items" / f"{holly}.json", {"model": {"type": "minecraft:model", "model": rid(f"block/{holly}")}})
     lang[f"block.{MOD}.{holly}"] = "Holly Wreath"
+    lang[f"entity.{MOD}.door_wreath"] = "Door Wreath"
 
     for colour, display in LEAF_PILES["colours"].items():
         pile = f"{colour}_leaf_pile"
