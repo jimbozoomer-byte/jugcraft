@@ -206,6 +206,9 @@ ITEMS = {
     # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
     # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
     "ammonium_nitrate": "Ammonium Nitrate",
+    # PVAc (docs/features/pvac-glue.md): vinyl acetate polymerized into a pot of white wood glue, which binds paper into
+    # a book without leather and makes a piston sticky without slime.
+    "pvac_glue": "PVAc Wood Glue",
 }
 
 
@@ -358,6 +361,9 @@ FLUID_RECIPES = {
         # PVC (batch 15): vinyl chloride polymerized into resin.
         {"name": "vinyl_chloride", "fluids": [("jugcraft:vinyl_chloride", 500)], "fluid_results": [],
          "results": [("jugcraft:pvc_resin", 4)], "source": 0, "ticks": 100, "features": ["crude_oil", "salt"]},
+        # PVAc (docs/features/pvac-glue.md): vinyl acetate polymerized in water into white wood glue.
+        {"name": "vinyl_acetate", "fluids": [("jugcraft:vinyl_acetate", 500)], "fluid_results": [],
+         "results": [("jugcraft:pvac_glue", 4)], "source": 0, "ticks": 100, "features": ["agriculture", "machines"]},
         # Synthetic rubber (batch 14): butadiene polymerized into crumbs of rubber.
         {"name": "butadiene", "fluids": [("jugcraft:butadiene", 500)], "fluid_results": [],
          "results": [("jugcraft:rubber", 4)], "source": 0, "ticks": 100, "features": ["crude_oil"]},
@@ -396,6 +402,11 @@ FLUID_RECIPES = {
         # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
         {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
+        # Vinyl acetate (docs/features/pvac-glue.md): ethylene and oxygen with cider vinegar's acetic acid over a hot
+        # catalyst. Quantities for review.
+        {"name": "vinyl_acetate", "items": [("jugcraft:cider_vinegar", 2)],
+         "fluids": [("jugcraft:ethylene", 500), ("jugcraft:oxygen", 250)],
+         "fluid_results": [("jugcraft:vinyl_acetate", 500)], "ticks": 120, "features": ["agriculture", "machines"]},
         # Saponification (batch 15): fat (rotten flesh, rendered) boiled in lye sets into soap.
         {"name": "soap", "items": [("minecraft:rotten_flesh", 2)], "fluids": [("jugcraft:lye", 250)],
          "results": [("jugcraft:soap", 4)], "ticks": 80, "features": ["salt"]},
@@ -613,4 +624,8 @@ ITEMS.update({k: v for k, v in POLYMER_ITEMS.items() if k not in ITEMS})
 from fluorochemistry import FLUIDS as FLUORO_FLUIDS, GASES as FLUORO_GASES, ITEMS as FLUORO_ITEMS
 FLUIDS.update({k: v for k, v in FLUORO_FLUIDS.items() if k not in FLUIDS})
 GASES.update({k: v for k, v in FLUORO_GASES.items() if k not in GASES})
+# Vinyl acetate (docs/features/pvac-glue.md): ethylene, oxygen and cider vinegar's acetic acid in the Chemical Reactor,
+# polymerized into PVAc wood glue. Last, so the swirls drawn by index for the gases before it keep their seeds.
+GASES["vinyl_acetate"] = {"display": "Vinyl Acetate", "feature": "machines",
+                          "colors": [(150, 160, 150), (182, 192, 182), (208, 216, 206), (234, 240, 232)]}
 ITEMS.update({k: v for k, v in FLUORO_ITEMS.items() if k not in ITEMS})

@@ -84,6 +84,7 @@
       "io.github.jimbozoomer.jugcraft.test.GhostGameTests",
       "io.github.jimbozoomer.jugcraft.test.FacePaintGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PvacGlueGameTests",
       "io.github.jimbozoomer.jugcraft.test.ForagingGameTests",
       "io.github.jimbozoomer.jugcraft.test.BatHouseGameTests",
       "io.github.jimbozoomer.jugcraft.test.HayGolemGameTests",

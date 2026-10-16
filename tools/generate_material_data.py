@@ -1300,6 +1300,17 @@ def recipes():
         write(out / f"{name}.json", recipe)
     drone_recipes(out)
 
+    # PVAc wood glue (docs/features/pvac-glue.md): it binds three paper into a book without leather, and makes a piston
+    # sticky without slime.
+    glue = [c for f in ("agriculture", MACHINE_FEATURE) for c in condition(f)]
+    for name, ingredients, result in (("book_from_pvac_glue", ["minecraft:paper"] * 3 + [rid("pvac_glue")], "minecraft:book"),
+                                      ("sticky_piston_from_pvac_glue", ["minecraft:piston", rid("pvac_glue")],
+                                       "minecraft:sticky_piston")):
+        recipe = shapeless(MACHINE_FEATURE, ingredients, "pvac_glue", 1, "redstone" if "piston" in name else "misc")
+        recipe["result"]["id"] = result
+        recipe["fabric:load_conditions"] = glue
+        write(out / f"{name}.json", recipe)
+
     # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
     boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]
     for name, recipe in (

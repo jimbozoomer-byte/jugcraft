@@ -200,6 +200,8 @@ public final class PetroFluids {
 	public static Gas HYDROGEN_FLUORIDE;
 	public static Gas CHLORODIFLUOROMETHANE;
 	public static Gas TETRAFLUOROETHYLENE;
+	/** Vinyl acetate (docs/features/pvac-glue.md), polymerized into PVAc wood glue. */
+	public static Gas VINYL_ACETATE;
 
 	public static void register() {
 
@@ -270,6 +272,7 @@ public final class PetroFluids {
 		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
 		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
 		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);
+		VINYL_ACETATE = gas("vinyl_acetate", 0xFFD0D8CE);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
