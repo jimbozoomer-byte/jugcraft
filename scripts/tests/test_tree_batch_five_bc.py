@@ -34,23 +34,24 @@ class TreeBatchFiveBCTests(unittest.TestCase):
         self.assertEqual(biomes.EXTRAS["lone_rowan"]["placement"][0]["chance"],8)
         self.assertEqual(biomes.EXTRAS["open_scrub"]["configured"], {"type":"minecraft:no_op"})
 
-    def test_haws_have_three_exclusive_seasonal_loot_pools(self):
+    def test_haws_drop_only_when_ripe_without_shears_or_silk(self):
         generated = {}
         trees_data.loot(Path("loot"), lambda p,d: generated.__setitem__(p.name,d))
         pools = generated["hawthorn_leaves.json"]["pools"][2:]
-        self.assertEqual(len(pools),3)
-        for season, pool in zip(ag.SEASON_STATES,pools):
-            terms=pool["condition"]["terms"]
-            self.assertEqual(terms[1]["state"], {"season":season,"persistent":"false"})
-            self.assertEqual(terms[2]["chance"], .02 if season=="green" else .10)
-            self.assertEqual(terms[0]["type"],"minecraft:inverted")
-            self.assertEqual(pool["entries"][0]["name"],"jugcraft:haws")
+        self.assertEqual(len(pools),1)
+        pool=pools[0]
+        terms=pool["condition"]["terms"]
+        self.assertEqual(terms[1]["state"], {"fruit":"2"})
+        self.assertEqual(terms[0], {"type":"minecraft:inverted", "term":trees_data.SHEARS_OR_SILK})
+        self.assertEqual(pool["entries"][0]["name"],"jugcraft:haws")
+        self.assertEqual(pool["entries"][0]["modifier"][0]["count"], {"type":"minecraft:uniform","min":1,"max":2})
+        self.assertTrue(ag.TREES["hawthorn"]["fruit"]["exposed_sides"])
 
     def test_models_art_and_shared_timber_are_complete(self):
         generated={}
         trees_data.assets(Path("assets"),lambda p,d:generated.__setitem__(p.as_posix(),d))
         textures=art.textures()
-        for tree, count in (("hawthorn",3),("persimmon",9)):
+        for tree, count in (("hawthorn",9),("persimmon",9)):
             variants=generated[f"assets/blockstates/{tree}_leaves.json"]["variants"]
             self.assertEqual(len(variants),count)
             for variant in variants.values():
@@ -62,6 +63,10 @@ class TreeBatchFiveBCTests(unittest.TestCase):
         self.assertNotIn("hawthorn",ag.WOOD_SETS)
         self.assertEqual(len(ag.wood_blocks("persimmon","Persimmon")),9)
         self.assertEqual(len(art.CENTRES["persimmon"]),5)
+        for suffix in ("", "_gold", "_bare"):
+            base = "hawthorn_leaves" + suffix
+            self.assertNotEqual(textures["block",base].tobytes(), textures["block",base+"_ripe"].tobytes())
+            self.assertNotEqual(textures["block",base+"_unripe"].tobytes(), textures["block",base+"_ripe"].tobytes())
 
     def test_old_pie_ordinals_are_preserved(self):
         source=(ROOT/"src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieFilling.java").read_text(encoding="utf-8")

@@ -57,12 +57,9 @@ def textures():
                  "_bare": bare}
         for suffix, image in looks.items():
             name = tree + "_leaves" + suffix
-            if tree == "hawthorn":
-                out[("block", name)] = fruit_overlay(image, bare, tree, suffix != "")
-            else:
-                out[("block", name)] = image
-                for ripe, fruit_suffix in ((False, "_unripe"), (True, "_ripe")):
-                    out[("block", name + fruit_suffix)] = fruit_overlay(image, bare, tree, ripe)
+            out[("block", name)] = image
+            for ripe, fruit_suffix in ((False, "_unripe"), (True, "_ripe")):
+                out[("block", name + fruit_suffix)] = fruit_overlay(image, bare, tree, ripe)
         c = Canvas()
         c.line(8, 15, 8, 4, bark[3]); c.line(7, 15, 7, 11, bark[1])
         p = pal(*green)

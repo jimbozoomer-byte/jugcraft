@@ -4921,7 +4921,8 @@ def check_festival(java, main):
                          rf'{schedule}Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
             err(f"JugcraftAgriculture.java does not register the {tree} tree as TREES in tools/agriculture.py says")
         if composed:
-            factory = f'props -> new SeasonalFruitLeavesBlock({tree.upper()}_LEAVES, "{info["fruit"]["item"]}", props)'
+            edge_fruiting = ", true" if info["fruit"].get("exposed_sides") else ""
+            factory = f'props -> new SeasonalFruitLeavesBlock({tree.upper()}_LEAVES, "{info["fruit"]["item"]}", props{edge_fruiting})'
             registration = re.search(rf'registerFoliage\("{tree}",.*?;', main, re.S)
             if registration is None or factory not in registration.group():
                 err(f"{tree} must register its own seasonal fruit schedule and fruit item")

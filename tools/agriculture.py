@@ -462,7 +462,7 @@ TREES = {
     "hawthorn": {"wood": "fruitwood", "display": "Hawthorn", "leaves": "hawthorn_leaves", "leaves_display": "Hawthorn Leaves",
                  "season": [85, 280, 325], "autumn": {"gold": 1}, "base": "oak",
                  "sapling_shapes": {"hawthorn": 1, "hawthorn_bush": 3},
-                 "seasonal_drop": {"item": "haws", "green": 0.02, "gold": 0.1, "bare": 0.1}},
+                 "fruit": {"item": "haws", "min": 1, "max": 2, "chance": 10, "exposed_sides": True}},
     "persimmon": {"display": "Persimmon", "leaves": "persimmon_leaves", "leaves_display": "Persimmon Leaves",
                   "season": [98, 280, 315], "autumn": {"gold": 1}, "base": "oak",
                   "fruit": {"item": "persimmon", "min": 1, "max": 2, "chance": 10}},

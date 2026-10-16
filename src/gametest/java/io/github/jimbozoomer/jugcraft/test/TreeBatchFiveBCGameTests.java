@@ -17,6 +17,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -106,28 +108,96 @@ public class TreeBatchFiveBCGameTests {
             }
         } finally { JugcraftSeasons.setMode(level.getServer(), before.mode()); }
         TreeBatchTwoGameTests.reset(level, AT, Blocks.GRASS_BLOCK);
-        int green = 0, autumn = 0;
         for (var look : SeasonalLeavesBlock.Foliage.values()) {
-            var state = block("hawthorn_leaves").defaultBlockState().setValue(SeasonalLeavesBlock.SEASON, look);
+            var state = block("hawthorn_leaves").defaultBlockState().setValue(SeasonalLeavesBlock.SEASON, look).setValue(FruitingLeavesBlock.FRUIT, 2);
             int haws = 0, saplings = 0;
             for (int n = 0; n < 2048; n++) {
                 for (var drop : Block.getDrops(state, level, pos, null)) {
                     if (drop.is(JugcraftAgriculture.item("haws"))) haws += drop.getCount();
                     if (drop.is(block("hawthorn_sapling").asItem())) saplings++;
                 }
-                helper.assertTrue(Block.getDrops(state.setValue(LeavesBlock.PERSISTENT, true), level, pos, null).stream()
+                helper.assertTrue(Block.getDrops(state.setValue(LeavesBlock.PERSISTENT, true).setValue(FruitingLeavesBlock.FRUIT, 0), level, pos, null).stream()
                         .noneMatch(d -> d.is(JugcraftAgriculture.item("haws"))), "Placed leaves farm haws");
             }
-            helper.assertTrue(haws > 0 && saplings > 0, "Season lost haws or renewal " + look);
-            if (look == SeasonalLeavesBlock.Foliage.GREEN) green = haws;
-            if (look == SeasonalLeavesBlock.Foliage.GOLD) autumn = haws;
+            helper.assertTrue(haws >= 2048 && haws <= 4096 && saplings > 0, "Season lost ripe haws or renewal " + look);
+            for (int fruit = 0; fruit < 2; fruit++) helper.assertTrue(Block.getDrops(state.setValue(FruitingLeavesBlock.FRUIT, fruit), level, pos, null).stream()
+                    .noneMatch(d -> d.is(JugcraftAgriculture.item("haws"))), "Unripe/picked leaves duplicated haws");
             for (var tool : List.of(silk, new ItemStack(Items.SHEARS))) {
                 var drops = Block.getDrops(state, level, pos, null, null, tool);
                 helper.assertTrue(drops.size() == 1 && drops.getFirst().is(state.getBlock().asItem()), "Silk/shears duplicates fruit");
             }
         }
-        helper.assertTrue(autumn > green * 2, "Summer fruit is not rarer than autumn");
         helper.assertTrue(new ItemStack(JugcraftAgriculture.item("haws")).is(TagKey.create(Registries.ITEM, net.minecraft.resources.Identifier.withDefaultNamespace("fox_food"))), "Haws not fox food");
+        helper.succeed();
+    }
+
+    @GameTest
+    public void hawsRightClickHarvestsOnceAndRegrowsOnHedges(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var relative = new BlockPos(3, 3, 3);
+        var pos = helper.absolutePos(relative);
+        var leaves = (SeasonalFruitLeavesBlock) block("hawthorn_leaves");
+        var natural = leaves.defaultBlockState().setValue(LeavesBlock.DISTANCE, 1);
+        var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        var area = new AABB(pos).inflate(3);
+        var before = JugcraftSeasons.settings();
+        try {
+            for (var mode : SeasonCalendar.Mode.values()) {
+                JugcraftSeasons.setMode(level.getServer(), mode);
+                level.setBlock(pos.west(), block("fruitwood_log").defaultBlockState(), Block.UPDATE_CLIENTS);
+                level.setBlock(pos.below(), Blocks.GRASS_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+                for (var side : List.of(Direction.NORTH, Direction.SOUTH)) level.setBlock(pos.relative(side), Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+                level.setBlock(pos.east(), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                level.setBlock(pos, natural, Block.UPDATE_CLIENTS);
+                var random = RandomSource.create(5101);
+                for (int i = 0; i < 512; i++) level.getBlockState(pos).randomTick(level, pos, random);
+                var ripe = level.getBlockState(pos);
+                helper.assertTrue(ripe.getValue(FruitingLeavesBlock.FRUIT) == 2, "Grounded hedge failed ripening in " + mode);
+                int countBefore = level.getEntitiesOfClass(ItemEntity.class, area, e -> e.getItem().is(JugcraftAgriculture.item("haws"))).stream().mapToInt(e -> e.getItem().getCount()).sum();
+                helper.useBlock(relative, player);
+                var drops = level.getEntitiesOfClass(ItemEntity.class, area, e -> e.getItem().is(JugcraftAgriculture.item("haws")));
+                int countAfter = drops.stream().mapToInt(e -> e.getItem().getCount()).sum();
+                helper.assertTrue(countAfter - countBefore >= 1 && countAfter - countBefore <= 2, "Right-click did not drop 1-2 haws");
+                helper.assertTrue(drops.stream().allMatch(e -> e.blockPosition().equals(pos.east())), "Haws dropped inside hedge soil");
+                helper.assertTrue(level.getBlockState(pos).equals(ripe.setValue(FruitingLeavesBlock.FRUIT, 0)), "Picking changed more than fruit stage");
+                helper.useBlock(relative, player);
+                helper.assertTrue(level.getEntitiesOfClass(ItemEntity.class, area, e -> e.getItem().is(JugcraftAgriculture.item("haws"))).stream().mapToInt(e -> e.getItem().getCount()).sum() == countAfter, "Repeated click duplicated haws");
+                for (int i = 0; i < 512; i++) level.getBlockState(pos).randomTick(level, pos, random);
+                helper.assertTrue(level.getBlockState(pos).getValue(FruitingLeavesBlock.FRUIT) == 2, "Picked hedge did not regrow");
+                for (var item : drops) item.discard();
+            }
+            for (boolean persistent : List.of(true, false)) {
+                level.setBlock(pos, natural.setValue(LeavesBlock.PERSISTENT, persistent), Block.UPDATE_CLIENTS);
+                // Natural but fully enclosed leaves, and exposed player-placed leaves, cannot grow haws.
+                level.setBlock(pos.east(), persistent ? Blocks.AIR.defaultBlockState() : Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+                for (int i = 0; i < 512; i++) level.getBlockState(pos).randomTick(level, pos, RandomSource.create(i));
+                helper.assertTrue(level.getBlockState(pos).getValue(FruitingLeavesBlock.FRUIT) == 0, "Placed/enclosed leaves farm haws");
+            }
+            level.setBlock(pos, natural.setValue(LeavesBlock.DISTANCE, 7), Block.UPDATE_CLIENTS);
+            level.getBlockState(pos).randomTick(level, pos, RandomSource.create(1));
+            helper.assertTrue(level.getBlockState(pos).isAir(), "Unsupported hawthorn leaves did not decay");
+        } finally { JugcraftSeasons.setMode(level.getServer(), before.mode()); }
+        helper.succeed();
+    }
+
+    @GameTest(maxTicks = 300)
+    public void hawsRipenOnGeneratedTreesAndBushes(GameTestHelper helper) {
+        var level = helper.getLevel();
+        for (String shape : List.of("hawthorn", "hawthorn_bush")) {
+            TreeBatchTwoGameTests.reset(level, AT, Blocks.GRASS_BLOCK);
+            helper.assertTrue(TreeBatchTwoGameTests.feature(level, shape).place(level, level.getChunkSource().getGenerator(), RandomSource.create(1), AT), "Hawthorn failed to grow");
+            int ripe = 0;
+            var random = RandomSource.create(5102);
+            for (var p : BlockPos.betweenClosed(AT.offset(-8, 0, -8), AT.offset(8, 8, 8))) {
+                var state = level.getBlockState(p);
+                if (!state.is(block("hawthorn_leaves")) || !FruitingLeavesBlock.canFruit(state, level, p)) continue;
+                for (int i = 0; i < 512; i++) level.getBlockState(p).randomTick(level, p, random);
+                if (level.getBlockState(p).getValue(FruitingLeavesBlock.FRUIT) == 2) ripe++;
+            }
+            helper.assertTrue(ripe >= 4, "Generated " + shape + " cannot grow accessible haws");
+        }
+        TreeBatchTwoGameTests.reset(level, AT, Blocks.GRASS_BLOCK);
         helper.succeed();
     }
 	@GameTest

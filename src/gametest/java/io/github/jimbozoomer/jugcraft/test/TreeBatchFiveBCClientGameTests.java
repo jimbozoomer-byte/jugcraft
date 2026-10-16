@@ -75,12 +75,11 @@ public class TreeBatchFiveBCClientGameTests extends TreeBatchTwoClientGameTests 
 			PineWoodClientGameTests.comparisonRow(level, wall, 0, new String[] {"jugcraft:persimmon", "minecraft:dark_oak", "jugcraft:yew", "jugcraft:fruitwood", "jugcraft:bald_cypress"});
 			for (int t = 0; t < 2; t++) for (int season = 0; season < 3; season++) for (int fruit = 0; fruit < 3; fruit++) {
 				String tree = List.of("hawthorn", "persimmon").get(t);
-				if (tree.equals("hawthorn") && fruit != 0) continue;
 				var leaf = JugcraftAgriculture.block(tree + "_leaves").defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
 				BlockPos pos = fruitWall.offset(t * 18 + fruit * 4, season * 3 + 1, -8);
 				level.setBlock(pos, leaf, Block.UPDATE_CLIENTS);
 				var state = leaf.setValue(SeasonalLeavesBlock.SEASON, SeasonalLeavesBlock.Foliage.values()[season]);
-				if (tree.equals("persimmon")) state = state.setValue(FruitingLeavesBlock.FRUIT, fruit);
+				state = state.setValue(FruitingLeavesBlock.FRUIT, fruit);
 				level.setBlock(pos, state, Block.UPDATE_CLIENTS);
 				savedFruit.put(pos, state);
 				if (season == 0) PineWoodClientGameTests.label(level, pos.offset(0, -1, 2), tree, "Fruit stage " + fruit, "Green / Gold / Bare");
@@ -106,7 +105,7 @@ public class TreeBatchFiveBCClientGameTests extends TreeBatchTwoClientGameTests 
 					var state = level.getBlockState(p);
 					if (state.is(JugcraftAgriculture.block(tree + "_leaves"))) {
 						state = state.setValue(SeasonalLeavesBlock.SEASON, look);
-						if (tree.equals("persimmon") && FruitingLeavesBlock.canFruit(state, level, p)) state = state.setValue(FruitingLeavesBlock.FRUIT, 2);
+						if (FruitingLeavesBlock.canFruit(state, level, p)) state = state.setValue(FruitingLeavesBlock.FRUIT, 2);
 						level.setBlock(p, state, Block.UPDATE_CLIENTS);
 					}
 				}
@@ -130,7 +129,7 @@ public class TreeBatchFiveBCClientGameTests extends TreeBatchTwoClientGameTests 
         });
         tour.add("Cold ovens along the wood display preserve all 27 filling IDs across save/reopen; persimmon is last.");
 		tour.add("Persimmon wood comparison: /tp @s 1013 181 -900 180 0");
-		tour.add("All 12 foliage/fruit combinations: /tp @s 1013 181 -850 180 0");
+		tour.add("All 18 foliage/fruit combinations: /tp @s 1013 181 -850 180 0");
 		tour.add("Random ticks are frozen for inspection. /gamerule minecraft:random_tick_speed 3 restores natural fruit ripening.");
 	}
 }

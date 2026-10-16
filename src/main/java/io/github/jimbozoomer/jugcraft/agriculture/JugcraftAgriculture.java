@@ -557,7 +557,7 @@ public final class JugcraftAgriculture {
 		registerFoliage("elder", "elder_leaves", ELDER_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				props -> new SeasonalFruitLeavesBlock(ELDER_LEAVES, "elderberries", props));
 		registerFoliage("hawthorn", "hawthorn_leaves", HAWTHORN_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
-				props -> new SeasonalLeavesBlock(HAWTHORN_LEAVES, props));
+				props -> new SeasonalFruitLeavesBlock(HAWTHORN_LEAVES, "haws", props, true));
 		registerWoodSet("persimmon", MapColor.COLOR_BLACK, MapColor.COLOR_GRAY);
 		registerFoliage("persimmon", "persimmon_leaves", PERSIMMON_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				props -> new SeasonalFruitLeavesBlock(PERSIMMON_LEAVES, "persimmon", props));
