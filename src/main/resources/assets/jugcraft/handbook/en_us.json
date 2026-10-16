@@ -5508,6 +5508,29 @@
           }
         },
         {
+          "title": "Lead-Acid Battery",
+          "icon": "jugcraft:lead_acid_battery",
+          "text": [
+            "Three lead-acid cells in a rack: 1,600,000 JE, four battery boxes' worth. It charges from any side and gives power out of its front, 1,024 JE/t. Made with lead plates and a bucket of sulfuric acid (the bucket comes back).",
+            "Holds 1,600,000 JE; 1024 JE/t in and out."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:lead_plate",
+              "jugcraft:sulfuric_acid_bucket",
+              "jugcraft:lead_plate",
+              "jugcraft:steel_plate",
+              "jugcraft:battery_box",
+              "jugcraft:steel_plate",
+              "jugcraft:lead_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:lead_plate"
+            ],
+            "result": "jugcraft:lead_acid_battery",
+            "count": 1
+          }
+        },
+        {
           "title": "Capacitor Bank",
           "icon": "jugcraft:capacitor_bank",
           "text": [

@@ -61,6 +61,9 @@ ABOUT = {
     "high_pressure_extractor": "A steel extractor: 32 items every 4 ticks, four times the brass one.",
     "capacitor_bank": "A 2x2 bank of Leyden jars: 4,000,000 JE. It charges from any side and gives power out of the "
                       "sockets on its front, 4,096 JE/t.",
+    "lead_acid_battery": "Three lead-acid cells in a rack: 1,600,000 JE, four battery boxes' worth. It charges from any side "
+                         "and gives power out of its front, 1,024 JE/t. Made with lead plates and a bucket of sulfuric "
+                         "acid (the bucket comes back).",
     "sprinkler": "Pipe water in (or use a water bucket) and it sprays the crops within 4 blocks, at its height and one "
                  "below: every 5 seconds it uses 50 mB and gives each growing crop an extra growth tick. Load up to 16 "
                  "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
@@ -1190,7 +1193,7 @@ def build():
         ]},
         {"title": "Storage", "icon": f"{MOD}:item_crate", "pages":
             [block_page("item_crate", STORAGE_BLOCKS["item_crate"]["display"])]
-            + [machine_page(m) for m in ("capacitor_bank", "steel_tank", "gas_holder")]},
+            + [machine_page(m) for m in ("lead_acid_battery", "capacitor_bank", "steel_tank", "gas_holder")]},
         {"title": "Renewables", "icon": f"{MOD}:tree_farm", "pages":
             [machine_page(m) for m in ("water_wheel", "cobblestone_generator", "tree_farm")]},
         {"title": "Farming", "icon": f"{MOD}:crop_harvester", "pages": [

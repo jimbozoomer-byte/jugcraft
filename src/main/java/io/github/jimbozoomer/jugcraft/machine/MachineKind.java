@@ -37,6 +37,7 @@ public enum MachineKind implements StringRepresentable {
 	STEEL_FOUNDRY("steel_foundry", 0, 0, 0, 0, 3),
 	// Storage: a 2x2 capacitor bank (outputs from its front, like the battery box) and a 2x2 steel tank.
 	CAPACITOR_BANK("capacitor_bank", 4_000_000, 4_096, 4_096, 0, 0),
+	LEAD_ACID_BATTERY("lead_acid_battery", 1_600_000, 1_024, 1_024, 0, 0),
 	STEEL_TANK("steel_tank", 0, 0, 0, 0, 0),
 	// Mining: a 2-tall derrick that mines the ores in a 9x9 column below it. No inputs; three result slots.
 	ORE_DRILL("ore_drill", 20_000, 256, 0, 32, 3),
@@ -335,7 +336,8 @@ public enum MachineKind implements StringRepresentable {
 
 	/** Stores energy and gives it out of its front face only. */
 	public boolean isBattery() {
-		return this == BATTERY_BOX || this == CAPACITOR_BANK || this == LITHIUM_BATTERY_BANK || this == FLOW_BATTERY;
+		return this == BATTERY_BOX || this == CAPACITOR_BANK || this == LEAD_ACID_BATTERY || this == LITHIUM_BATTERY_BANK
+				|| this == FLOW_BATTERY;
 	}
 
 	/** Whether the machine runs on JE at all. Unpowered machines have no battery and cables never connect to them. */

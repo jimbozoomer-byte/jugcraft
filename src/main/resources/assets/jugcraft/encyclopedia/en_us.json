@@ -231,7 +231,7 @@
         {
           "title": "Storage",
           "icon": "jugcraft:item_crate",
-          "text": "Item Crate, Capacitor Bank, Steel Tank and more",
+          "text": "Item Crate, Lead-Acid Battery, Capacitor Bank and more",
           "link": {
             "type": "handbook",
             "chapter": 13,

@@ -1229,6 +1229,7 @@ def machines():
     save(grate(952, glow=ember), "block", "coke_oven_front_on")
     save(window(953, [(30, 26, 26), (44, 36, 34)]), "block", "steel_foundry_front")
     save(battery_front(954), "block", "capacitor_bank_front")
+    save(battery_front(962), "block", "lead_acid_battery_front")
     save(battery_front(978), "block", "lithium_battery_bank_front")
     save(battery_front(985), "block", "flow_battery_front")
     for seed, name in ((990, "gas_centrifuge_cascade_front"), (991, "fuel_fabricator_front")):
