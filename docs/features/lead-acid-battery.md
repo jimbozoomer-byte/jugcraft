@@ -1,6 +1,6 @@
 # Lead-acid battery
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork, pending review.
 
 Proposal issue: none. TODO item: "Develop general storage first, including requested lead-acid, later LiPF6 lithium-ion and major vanadium redox-flow chemistry; defer portable packs and specialty high-output banks." This change delivers the lead-acid step. The lithium bank and flow battery already exist.
 
@@ -67,7 +67,7 @@ There are no new dependencies. The model is drawn in `tools/electric_models.py`,
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38874556887](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38874556887) on commit `76269d9e` passed on its second attempt; the first attempt's optional-integrations-absent job failed only on the unrelated LaunchersGameTests.rocketsBurstOnWhatTheyHit: the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
