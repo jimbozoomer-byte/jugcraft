@@ -4,6 +4,7 @@
     "jugcraft:bronze_pickaxe",
     "jugcraft:steel_pickaxe",
     "jugcraft:thallite_pickaxe",
+    "jugcraft:titanium_pickaxe",
     "jugcraft:wood_paxel",
     "jugcraft:stone_paxel",
     "jugcraft:iron_paxel",
@@ -11,6 +12,7 @@
     "jugcraft:diamond_paxel",
     "jugcraft:netherite_paxel",
     "jugcraft:bronze_paxel",
-    "jugcraft:steel_paxel"
+    "jugcraft:steel_paxel",
+    "jugcraft:titanium_paxel"
   ]
 }
