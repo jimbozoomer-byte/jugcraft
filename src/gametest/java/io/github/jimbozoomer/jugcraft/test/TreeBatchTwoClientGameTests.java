@@ -44,6 +44,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 	protected void extraDisplays(ClientGameTestContext context, TestSingleplayerContext world, List<String> tour) { }
 	protected void validateSurvey(String biome, Map<String, Integer> survey) { }
 	protected boolean includeSubmergedColumns() { return false; }
+	protected void validateReopened(ServerLevel level) { }
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -134,6 +135,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 			reopened.getConnection().waitForChunksRender();
 			reopened.getServer().runOnServer(minecraft -> expected.forEach((at, size) ->
 					check(TreeBatchTwoGameTests.measure(minecraft.overworld(), at).equals(size), "Tree changed across save/reopen at " + at)));
+			reopened.getServer().runOnServer(minecraft -> validateReopened(minecraft.overworld()));
 		}
 		Path root = Path.of("").toAbsolutePath();
 		while (root != null && !Files.isRegularFile(root.resolve("build.gradle"))) root = root.getParent();

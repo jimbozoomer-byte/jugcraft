@@ -13,6 +13,10 @@
     {
       "chance": 0.03,
       "feature": "minecraft:fallen_oak_tree"
+    },
+    {
+      "chance": 0.06109201985490645,
+      "feature": "jugcraft:elder_checked"
     }
   ]
 }

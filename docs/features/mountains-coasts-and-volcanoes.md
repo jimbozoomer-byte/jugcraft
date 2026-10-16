@@ -15,7 +15,7 @@ Thirteen biomes of mountains, shores and seas. A biome in Minecraft 26.3 does no
 | --- | --- | --- |
 | **Volcano** | wild: stony peaks, windswept savannas | blackstone and basalt slopes cracked with magma, lava pools banked with blackstone, basalt spires, drifting ash under a grey sky; no animals |
 | **Canyon** | wild: wooded badlands | cliffs banded in terracotta with grassy ledges, pines and spruce scrub, pools of lava |
-| **Highland** | wild: windswept hills | high, treeless grassland: tall grass, coarse dirt, gravel and stone, mossy boulders; sheep, cattle and rabbits |
+| **Highland** | wild: windswept hills | high, open grassland with rare lone rowans: tall grass, coarse dirt, gravel and stone, mossy boulders; sheep, cattle and rabbits |
 | **Basin** | wild: windswept gravelly hills | a barren basin of gravel, stone and andesite with dead bushes; no animals |
 | **Shield** | wild: windswept forests | humps of bare stone and andesite with seams of coal at the surface, firs, windswept Jugcraft pines, spruces, larches and aspens, and lakes |
 | **Karst Pinnacles** | wild: jagged peaks | steep peaks clothed in grass, windswept Jugcraft pines and spruce scrub, pale limestone (calcite) showing through, a grey-green sky; pandas |
@@ -86,3 +86,5 @@ Results are recorded under "Results" below after CI runs.
 - Seasons: see above.
 
 Tree roster batch 4c makes Flower Isle 55% magnolia, 30% oak bush and 15% apple tree attempts, retaining its sparse 1/2 attempts per chunk and flower decoration. See [the implementation record](trees-batch-4bc.md).
+
+Tree roster batch 5 adds a lone rowan attempt per eight Highland chunks on average, subject to dry ground and sapling survival. It remains open grassland without a forest tree-count layer. See [the implementation and verification record](trees-batch-5.md).
