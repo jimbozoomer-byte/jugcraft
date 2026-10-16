@@ -390,6 +390,9 @@ def item_units(ref):
     if path == "titanium_sponge":
         # Kroll-process sponge: one ingot of titanium each, melted in the arc furnace.
         return {"titanium": 9}
+    if path == "magnesium_ingot":
+        # The coastal magnesium cell's ingot (tools/coastal_metals.py), alloyed into magnalium.
+        return {"magnesium": 9}
     if path == "alumina":
         # Bayer-process alumina: one ingot of aluminum each, smelted out in the electrolytic cell.
         return {"aluminum": 9}

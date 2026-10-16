@@ -72,6 +72,7 @@ METAL_RAMPS = {
     "invar": ramp("343d3b 768d88 b3c0bd e2e6e5 f5f7f6"),     # pale sage white
     "solder": ramp("2a2c31 616572 8f93a0 babcc5 e7e7ea"),    # plain mid grey
     "steel": ramp("1e2129 4a5262 6e7889 98a2b4 d0d8e4"),     # the owner's choice
+    "magnalium": ramp("3f2f36 917482 c8aab6 ead8e0 f9f1f5"),  # faintly rosy silver
 }
 
 # How far apart any two metals' ramps must be (ramp_distance): ours, and ours against the mod's stand-ins for vanilla's

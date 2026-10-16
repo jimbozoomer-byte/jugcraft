@@ -13,6 +13,7 @@
     "#c:plates/tungsten",
     "#c:plates/steel",
     "#c:plates/titanium",
-    "#c:plates/thallite"
+    "#c:plates/thallite",
+    "#c:plates/magnalium"
   ]
 }

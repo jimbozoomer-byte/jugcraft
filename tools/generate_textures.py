@@ -263,6 +263,9 @@ ALLOY_COLORS = {
     # Steel: a dark blue-gray, darker and cooler than iron.
     "steel": (None, None,
               [(44, 48, 56), (72, 78, 88), (102, 108, 120), (136, 142, 154), (176, 182, 194)]),
+    # Magnalium: aluminum's pale silver with a faint rosy cast from its magnesium.
+    "magnalium": (None, None,
+                  [(118, 94, 106), (166, 138, 152), (204, 176, 188), (232, 214, 222), (249, 241, 245)]),
 }
 
 # name: (ore specks, glint, item/block palette)

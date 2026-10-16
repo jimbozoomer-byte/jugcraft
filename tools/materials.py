@@ -59,6 +59,9 @@ METALS = {
     "solder": {"mined": False, "display": "Solder", "feature": "lead"},
     # Iron refined with coke in the steel foundry (tools/machines.py STEEL_FOUNDRY): the second tier.
     "steel": {"mined": False, "display": "Steel", "feature": "machines"},
+    # Aluminum with a quarter magnesium (docs/features/magnalium.md), made in the alloy smelter: a lighter, stiffer
+    # structural alloy for panels and vehicle parts.
+    "magnalium": {"mined": False, "display": "Magnalium", "feature": "aluminum"},
 }
 
 # Non-metal ores: <name>_ore, deepslate_<name>_ore, item <name>, storage block <name>_block.
@@ -137,7 +140,7 @@ EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}
 PART_UNITS = {"plate": 9, "gear": 36, "wire": 3, "dust": 9}
 COMPONENTS = {
     "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel",
-              "titanium", "thallite"],
+              "titanium", "thallite", "magnalium"],
     "gear": ["iron", "bronze", "brass", "invar", "steel"],
     "wire": ["copper", "silver", "aluminum"],
     # Pulverizer output (see tools/machines.py); one dust smelts back into one ingot.

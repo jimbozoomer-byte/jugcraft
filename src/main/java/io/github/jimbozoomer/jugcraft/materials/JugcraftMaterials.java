@@ -30,6 +30,7 @@ public final class JugcraftMaterials {
 	public static MetalFamily INVAR;
 	public static MetalFamily SOLDER;
 	public static MetalFamily STEEL;
+	public static MetalFamily MAGNALIUM;
 
 	public static MineralFamily SALT;
 	public static MineralFamily PHOSPHATE;
@@ -75,6 +76,7 @@ public final class JugcraftMaterials {
 		INVAR = MetalFamily.builder("invar").build();
 		SOLDER = MetalFamily.builder("solder").build();
 		STEEL = MetalFamily.builder("steel").build();
+		MAGNALIUM = MetalFamily.builder("magnalium").build();
 
 		SALT = MineralFamily.register("salt");
 		PHOSPHATE = MineralFamily.register("phosphate");
@@ -107,7 +109,7 @@ public final class JugcraftMaterials {
 	}
 
 	private static void registerCreativeTabs() {
-		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, THALLITE, BRONZE, ALUMINUM, BRASS, INVAR, SOLDER, STEEL};
+		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, THALLITE, BRONZE, ALUMINUM, BRASS, INVAR, SOLDER, STEEL, MAGNALIUM};
 		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE, FLUORITE, SPODUMENE, VANADIUM_IRON};
 
 		List<ItemLike> natural = new ArrayList<>();
