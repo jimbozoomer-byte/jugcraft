@@ -200,6 +200,8 @@ public final class PetroFluids {
 	public static Gas HYDROGEN_FLUORIDE;
 	public static Gas CHLORODIFLUOROMETHANE;
 	public static Gas TETRAFLUOROETHYLENE;
+	/** Methane and chlorine (docs/features/silicone.md), reacted over silicon into silicone rubber. */
+	public static Gas METHYL_CHLORIDE;
 
 	public static void register() {
 
@@ -270,6 +272,7 @@ public final class PetroFluids {
 		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
 		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
 		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);
+		METHYL_CHLORIDE = gas("methyl_chloride", 0xFF9ABA98);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {
