@@ -1,6 +1,6 @@
 # Alumina ceramics
 
-Status: implemented on the contributor's fork, pending CI and review. Builds on [porcelain insulators](porcelain-insulators.md) (`claude/porcelain-insulators`).
+Status: implemented on the contributor's fork, pending review. Builds on [porcelain insulators](porcelain-insulators.md) (`claude/porcelain-insulators`).
 
 Proposal issue: none. TODO item: "Implement ceramic powders -> blanks -> firing -> shared grinding/polishing where needed: clay foundation, porcelain-style insulators and alumina, then specialist zirconia…". This change is the second slice, alumina components, after porcelain. The contributor chose it.
 
@@ -55,7 +55,7 @@ There are no new dependencies. Both icons are drawn by `tools/petro_textures.py`
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38949036287](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38949036287) on commit `13b30863` passed on its first attempt: the mod job (compilation and every server game test, these two included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
