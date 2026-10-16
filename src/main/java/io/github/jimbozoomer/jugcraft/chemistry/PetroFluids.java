@@ -120,6 +120,8 @@ public final class PetroFluids {
 	public static Entry DIGESTATE;
 	public static Gas RAW_BIOGAS;
 	public static Gas CLEAN_BIOGAS;
+	/** The Reagent Purification Station's electronic-grade acid, purified from concentrated acid. */
+	public static Entry ELECTRONIC_GRADE_SULFURIC_ACID;
 	/** Nitrogen chemistry (batch 12): air separated into nitrogen and oxygen; ammonia from them and hydrogen. */
 	public static Gas NITROGEN;
 	public static Gas OXYGEN;
@@ -242,6 +244,7 @@ public final class PetroFluids {
 		RAW_SYNGAS = gas("raw_syngas", 0xFF9A9286);
 		CARBON_MONOXIDE = gas("carbon_monoxide", 0xFFC2BED2);
 		SULFUR_TRIOXIDE = gas("sulfur_trioxide", 0xFFE2DCBC);
+		ELECTRONIC_GRADE_SULFURIC_ACID = fluid("electronic_grade_sulfuric_acid", 10, 3, 1, 0xFFE2ECF0, MapColor.SNOW);
 
 
 		DIRTY_SYNTHESIS_GAS = gas("dirty_synthesis_gas", 0xFF625B4A);

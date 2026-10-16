@@ -571,7 +571,9 @@ CRAFTING = {
     "gas_turbine": (["PBP", "DCD", "PGP"], {"P": "#c:plates/steel", "B": "minecraft:iron_bars",
                                             "D": "jugcraft:diesel_generator", "C": "jugcraft:advanced_circuit",
                                             "G": "#c:gears/steel"}, 1),
-    "electrolytic_cell": (["PWP", "TCT", "PMP"], {"P": "#c:plates/steel", "W": "jugcraft:aluminum_cable",
+    # The owner's tenth-batch selection: entry aluminum-processing equipment is wired with earlier copper cable, so
+    # the cell that smelts aluminum never needs aluminum to be built (docs/features/industrial-copper-entry-aluminum.md).
+    "electrolytic_cell": (["PWP", "TCT", "PMP"], {"P": "#c:plates/steel", "W": "jugcraft:copper_cable",
                                                   "T": "jugcraft:steel_tank", "C": "jugcraft:advanced_circuit",
                                                   "M": "jugcraft:machine_casing"}, 1),
     "air_separation_unit": (["SPS", "TMT", "ECE"], {"S": "#c:plates/steel", "P": "jugcraft:steel_fluid_pipe",

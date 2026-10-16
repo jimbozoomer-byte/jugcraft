@@ -86,6 +86,11 @@ FLUIDS = {
     "ethylene_dichloride": {"display": "Ethylene Dichloride", "feature": "machines",
                             "colors": [(140, 150, 96), (176, 186, 128), (204, 212, 160), (232, 238, 200)],
                             "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # The Reagent Purification Station's electronic-grade acid (docs/features/industrial-reagent-purification.md),
+    # purified from the Concentrator's concentrated acid: clear.
+    "electronic_grade_sulfuric_acid": {"display": "Electronic-Grade Sulfuric Acid", "feature": "sulfur",
+                                       "colors": [(176, 196, 204), (204, 220, 226), (226, 236, 240), (246, 250, 252)],
+                                       "tick_delay": 10, "slope": 3, "drop_off": 1},
 }
 
 FLUIDS["hydrochloric_acid"] = {"display": "Hydrochloric Acid", "feature": "machines",
@@ -206,6 +211,10 @@ ITEMS = {
     # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
     # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
     "ammonium_nitrate": "Ammonium Nitrate",
+    # The owner's optional later methanation catalyst (tools/industrial_forms.py): ruthenium recovered from washed nickel
+    # ore with hydrochloric acid and chlorine in the Bulk Chemical Reactor, laid on the nickel bed. Never used up.
+    "ruthenium_powder": "Ruthenium Powder",
+    "ruthenium_catalyst_bed": "Ruthenium Catalyst Bed",
 }
 
 
@@ -489,6 +498,11 @@ FLUID_RECIPES = {
         {"name": "microchip_nitric", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
          "fluids": [("jugcraft:nitric_acid", 50)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
          "features": ["silicon", "machines"]},
+        # Electronic-grade acid (the Reagent Purification Station) leaves no residue on the die: half again as many
+        # chips from a wafer, for 50 mB. For review.
+        {"name": "microchip_electronic_grade", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
+         "fluids": [("jugcraft:electronic_grade_sulfuric_acid", 50)], "results": [("jugcraft:microchip", 6)], "ticks": 200,
+         "features": ["silicon", "sulfur", "machines"]},
     ],
     # Nitrogen chemistry (batch 12). Fluid volumes shrink: 400 mB of gas in gives 200 of ammonia, so no recipe
     # makes fluid from nothing.

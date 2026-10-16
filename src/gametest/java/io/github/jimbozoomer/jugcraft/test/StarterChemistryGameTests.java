@@ -90,7 +90,8 @@ public class StarterChemistryGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 24, "Gas processes including all shared scrubber feeds exercised, found " + checked);
+        // 24 of main's, and the Infuser's three ruthenium methanation recipes.
+        h.assertTrue(checked == 27, "Gas processes including all shared scrubber feeds exercised, found " + checked);
         h.succeed();
     }
 

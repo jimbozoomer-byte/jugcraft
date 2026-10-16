@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "sulfur"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PIP",
+    "TRT",
+    "PCP"
+  ],
+  "key": {
+    "P": "#c:plates/steel",
+    "I": "jugcraft:steel_fluid_pipe",
+    "T": "jugcraft:steel_tank",
+    "R": "jugcraft:chemical_reactor",
+    "C": "jugcraft:basic_circuit"
+  },
+  "result": {
+    "id": "jugcraft:reagent_purification_station",
+    "count": 1
+  }
+}
