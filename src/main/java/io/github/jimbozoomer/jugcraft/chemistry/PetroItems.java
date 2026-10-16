@@ -50,6 +50,8 @@ public final class PetroItems {
 	/** Boron (docs/features/boric-acid.md): boric acid from borax, and the reactor's control rod assembly made with it. */
 	public static Item BORIC_ACID;
 	public static Item CONTROL_ROD_ASSEMBLY;
+	/** Boron in solar cells (docs/features/boron-solar.md): the Advanced Solar Panel's doped silicon. */
+	public static Item BORON_DOPED_SILICON;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -142,6 +144,7 @@ public final class PetroItems {
 				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
 		BORIC_ACID = JugcraftRegistry.item("boric_acid");
 		CONTROL_ROD_ASSEMBLY = JugcraftRegistry.item("control_rod_assembly", properties -> new Item(properties.stacksTo(16)));
+		BORON_DOPED_SILICON = JugcraftRegistry.item("boron_doped_silicon");
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -270,6 +273,7 @@ public final class PetroItems {
 			output.accept(AMMONIUM_NITRATE);
 			output.accept(BORIC_ACID);
 			output.accept(CONTROL_ROD_ASSEMBLY);
+			output.accept(BORON_DOPED_SILICON);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

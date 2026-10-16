@@ -210,6 +210,9 @@ ITEMS = {
     # tungsten and steel it makes the neutron-absorbing control rod assembly every reactor pressure vessel holds.
     "boric_acid": "Boric Acid",
     "control_rod_assembly": "Control Rod Assembly",
+    # Boron in solar cells (docs/features/boron-solar.md): silicon doped with boric acid, the p-type layer of the
+    # Advanced Solar Panel's cells.
+    "boron_doped_silicon": "Boron-Doped Silicon",
 }
 
 

@@ -58,6 +58,26 @@ public class BoricAcidGameTests {
 		helper.succeed();
 	}
 
+	/** Boron in solar cells (docs/features/boron-solar.md): two silicon and a boric acid give two boron-doped silicon,
+	 * and two of those go into the Advanced Solar Panel in place of its aluminum plates. */
+	@GameTest
+	public void dopedSiliconGoesIntoTheAdvancedSolarPanel(GameTestHelper helper) {
+		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+		ItemStack silicon = stack("silicon");
+		CraftingInput dope = CraftingInput.of(3, 1, List.of(silicon, silicon, new ItemStack(PetroItems.BORIC_ACID)));
+		Optional<RecipeHolder<CraftingRecipe>> doped = crafting.getRecipeFor(dope, helper.getLevel());
+		ItemStack wafers = doped.map(r -> r.value().assemble(dope)).orElse(ItemStack.EMPTY);
+		helper.assertTrue(wafers.is(PetroItems.BORON_DOPED_SILICON) && wafers.getCount() == 2, "Silicon and boric acid give " + wafers);
+		ItemStack panel = stack("solar_panel");
+		ItemStack wafer = new ItemStack(PetroItems.BORON_DOPED_SILICON);
+		CraftingInput advanced = CraftingInput.of(3, 3, List.of(panel, panel, panel, wafer, stack("processor"), wafer,
+				stack("aluminum_cable"), stack("titanium_ingot"), stack("aluminum_cable")));
+		Optional<RecipeHolder<CraftingRecipe>> built = crafting.getRecipeFor(advanced, helper.getLevel());
+		helper.assertTrue(built.isPresent() && built.get().value().assemble(advanced).is(item("advanced_solar_panel")),
+				"Doped silicon does not complete the Advanced Solar Panel");
+		helper.succeed();
+	}
+
 	private static Item item(String path) {
 		return BuiltInRegistries.ITEM.getValue(Jugcraft.id(path));
 	}

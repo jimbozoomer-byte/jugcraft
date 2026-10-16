@@ -214,6 +214,34 @@ def boric_acid():
     return img
 
 
+def boron_doped_silicon():
+    """Boron-doped silicon: a round wafer of dark blue-grey silicon, the standard 12-pixel pixel circle (symmetric on
+    both axes), with a grid of cells, lit from the top left and outlined in its own darkest tone."""
+    o, d, m, l, h = (30, 34, 52), (58, 66, 96), (84, 96, 136), (120, 136, 180), (178, 194, 232)
+    widths = [4, 8, 10, 10, 12, 12, 12, 12, 10, 10, 8, 4]  # rows 2 to 13, centred on the middle two columns
+    top = 2
+    span = {top + i: (8 - w // 2, 8 + w // 2 - 1) for i, w in enumerate(widths)}
+
+    def inside(x, y):
+        return y in span and span[y][0] <= x <= span[y][1]
+
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in span:
+        for x in range(span[y][0], span[y][1] + 1):
+            if not all(inside(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                c = o
+            elif x in (5, 10) or y in (5, 10):
+                c = d
+            elif x + y <= 11:
+                c = h if x + y <= 9 else l
+            elif x + y >= 19:
+                c = d
+            else:
+                c = m
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
 def control_rod_assembly():
     """A control rod assembly: four dark boron rods hanging apart from a steel spider and hub, outlined in their darkest tones."""
     steel = {"o": (52, 56, 62), "d": (110, 116, 124), "m": (160, 166, 174), "l": (210, 214, 220)}
@@ -647,6 +675,7 @@ def draw_all(save, save_animation):
     save(ammonium_nitrate(), "item", "ammonium_nitrate")
     save(boric_acid(), "item", "boric_acid")
     save(control_rod_assembly(), "item", "control_rod_assembly")
+    save(boron_doped_silicon(), "item", "boron_doped_silicon")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")
