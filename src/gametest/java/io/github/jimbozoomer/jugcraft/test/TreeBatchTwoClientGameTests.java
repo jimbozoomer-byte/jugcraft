@@ -43,6 +43,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 	protected String screenshotPrefix() { return "jugcraft_tree2_"; }
 	protected void extraDisplays(ClientGameTestContext context, TestSingleplayerContext world, List<String> tour) { }
 	protected void validateSurvey(String biome, Map<String, Integer> survey) { }
+	protected BlockPos surveySpot(ServerLevel level, BlockPos first, ResourceKey<Biome> biome) { return first; }
 	protected boolean includeSubmergedColumns() { return false; }
 	protected void validateReopened(ServerLevel level) { }
 
@@ -99,7 +100,8 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 				BlockPos place = server.computeOnServer(minecraft -> {
 					var level = minecraft.overworld();
 					var nearest = level.findClosestBiome3d(holder -> holder.is(key), BlockPos.ZERO, 12800, 64, 64);
-					return nearest == null ? null : BiomeClientGameTests.surfaceSpot(level, nearest.getFirst(), key);
+					BlockPos first = nearest == null ? null : BiomeClientGameTests.surfaceSpot(level, nearest.getFirst(), key);
+					return first == null ? null : surveySpot(level, first, key);
 				});
 				if (place == null) { tour.add(name + ": no surface stop found within the survey radius"); continue; }
 				found++;
@@ -163,7 +165,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 		return survey(level, at, biome, false);
 	}
 
-	private static Map<String, Integer> survey(ServerLevel level, BlockPos at, ResourceKey<Biome> biome, boolean includeSubmerged) {
+	protected static Map<String, Integer> survey(ServerLevel level, BlockPos at, ResourceKey<Biome> biome, boolean includeSubmerged) {
 		Map<String, Integer> counts = new java.util.TreeMap<>();
 		// 16,641 columns, at most 81 chunks; count only this biome, ignore canopy in surface coverage.
 		for (int dx = -64; dx <= 64; dx++) for (int dz = -64; dz <= 64; dz++) {

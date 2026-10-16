@@ -13,7 +13,7 @@ Implementation follows [the roster](../branches/TREES.md) in dependency order. E
 | 3 | Yew and ancient yew, leaf drawing options, Gloomweald canopy | Owner approved; PR #388 ready |
 | 4 | Tree/wood split; snowpetal cherry and shimmer birch | Owner approved; PR #389 ready |
 | 4b-4c | Bald cypress roots; magnolia | Owner approved; PR #395 ready |
-| 5 | Seasonal fruit; rowan, elder and fruitwood | In progress; draft PR #396; [record](trees-batch-5.md) |
+| 5 | Seasonal fruit; rowan, elder and fruitwood | Implemented; awaiting owner inspection in draft PR #396; [record](trees-batch-5.md) |
 | 5b-5c | Hawthorn; persimmon | Pending |
 | 6-6b | Juniper, gorse, sagebrush, holly | Pending |
 | 7-8c | Olive, stone pine, wattle, tamarisk, Joshua tree | Pending |

@@ -9,12 +9,14 @@ import java.util.Map;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.biome.Biome;
 
 /** Saved fruit-stage comparisons and natural biome stops, alongside three real seeds of each shape. */
 public class TreeBatchFiveClientGameTests extends TreeBatchTwoClientGameTests {
@@ -25,6 +27,32 @@ public class TreeBatchFiveClientGameTests extends TreeBatchTwoClientGameTests {
 	@Override protected String exportName() { return "tree-batch-5-preview"; }
 	@Override protected String screenshotPrefix() { return "jugcraft_tree5_"; }
 	@Override protected boolean includeSubmergedColumns() { return true; }
+	@Override protected BlockPos surveySpot(ServerLevel level, BlockPos first, ResourceKey<Biome> biome) {
+		if (!biome.identifier().getPath().equals("wetland")) return first;
+		var checked = new java.util.HashSet<BlockPos>();
+		// This is a content-presence inspection stop, not a statistical estimate of the placement share.
+		for (int[] offset : new int[][] {{0,0}, {256,0}, {-256,0}, {0,256}, {0,-256},
+				{256,256}, {-256,256}, {256,-256}, {-256,-256}}) {
+			BlockPos at = offset[0] == 0 && offset[1] == 0 ? first
+					: BiomeClientGameTests.surfaceSpot(level, first.offset(offset[0], 0, offset[1]), biome);
+			if (at == null || !checked.add(at)) continue;
+			var counts = survey(level, at, biome, true);
+			io.github.jimbozoomer.jugcraft.Jugcraft.LOGGER.info("[tree 5 wetland sample] {}: {}", at, counts);
+			if (counts.getOrDefault("leaf:jugcraft:elder_leaves", 0) > 0) return at;
+		}
+		// The closest Wetland in this seed is a tiny flooded coastal fragment (one dry column).
+		// Inspect at most eight other regional anchors rather than demanding a shrub in that water.
+		for (int[] offset : new int[][] {{4096,0}, {-4096,0}, {0,4096}, {0,-4096},
+				{4096,4096}, {-4096,4096}, {4096,-4096}, {-4096,-4096}}) {
+			var nearest = level.findClosestBiome3d(holder -> holder.is(biome), first.offset(offset[0], 0, offset[1]), 4096, 64, 64);
+			BlockPos at = nearest == null ? null : BiomeClientGameTests.surfaceSpot(level, nearest.getFirst(), biome);
+			if (at == null || !checked.add(at)) continue;
+			var counts = survey(level, at, biome, true);
+			io.github.jimbozoomer.jugcraft.Jugcraft.LOGGER.info("[tree 5 wetland regional sample] {}: {}", at, counts);
+			if (counts.getOrDefault("leaf:jugcraft:elder_leaves", 0) > 0) return at;
+		}
+		throw new AssertionError("No natural elder in " + checked.size() + " distinct Wetland samples");
+	}
 	@Override protected void validateSurvey(String biome, Map<String, Integer> survey) {
 		String tree = biome.equals("woodland") || biome.equals("wetland") ? "elder" : "rowan";
 		if (survey.getOrDefault("leaf:jugcraft:" + tree + "_leaves", 0) == 0) throw new AssertionError("No natural " + tree + " in " + biome);
@@ -36,14 +64,15 @@ public class TreeBatchFiveClientGameTests extends TreeBatchTwoClientGameTests {
 	}
 	@Override protected void extraDisplays(ClientGameTestContext context, TestSingleplayerContext world, List<String> tour) {
 		BlockPos wall = GARDEN.offset(0, 0, 80);
+		BlockPos fruitWall = wall.offset(0, 0, 50);
 		world.getServer().runOnServer(server -> {
 			var level = server.overworld();
-			for (var p : BlockPos.betweenClosed(wall.offset(-12, -1, -12), wall.offset(65, -1, 24))) level.setBlock(p, Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+			for (var p : BlockPos.betweenClosed(wall.offset(-12, -1, -12), wall.offset(65, -1, 72))) level.setBlock(p, Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
 			PineWoodClientGameTests.comparisonRow(level, wall, 0, new String[] {"jugcraft:fruitwood", "minecraft:cherry", "minecraft:jungle", "jugcraft:bald_cypress", "jugcraft:maple"});
 			for (int t = 0; t < 2; t++) for (int season = 0; season < 3; season++) for (int fruit = 0; fruit < 3; fruit++) {
 				String tree = shapes().get(t);
 				var leaf = JugcraftAgriculture.block(tree + "_leaves").defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
-				BlockPos pos = wall.offset(t * 18 + fruit * 4, season * 3 + 1, -8);
+				BlockPos pos = fruitWall.offset(t * 18 + fruit * 4, season * 3 + 1, -8);
 				level.setBlock(pos, leaf, Block.UPDATE_CLIENTS);
 				var state = leaf.setValue(SeasonalLeavesBlock.SEASON, SeasonalLeavesBlock.Foliage.values()[season]).setValue(FruitingLeavesBlock.FRUIT, fruit);
 				level.setBlock(pos, state, Block.UPDATE_CLIENTS);
@@ -54,7 +83,7 @@ public class TreeBatchFiveClientGameTests extends TreeBatchTwoClientGameTests {
 		shoot(context, world, wall.offset(12, 6, 25), wall.offset(12, 2, 0), screenshotPrefix() + "fruitwood");
 		for (boolean cutout : List.of(true, false)) {
 			context.runOnClient(client -> client.options.cutoutLeaves().set(cutout));
-			shoot(context, world, wall.offset(13, 6, 12), wall.offset(13, 5, -8), screenshotPrefix() + (cutout ? "fruit_cutout" : "fruit_solid"));
+			shoot(context, world, fruitWall.offset(13, 6, 12), fruitWall.offset(13, 5, -8), screenshotPrefix() + (cutout ? "fruit_cutout" : "fruit_solid"));
 		}
 		context.runOnClient(client -> client.options.cutoutLeaves().set(true));
 		for (int t = 0; t < 2; t++) for (int season = 0; season < 3; season++) {
@@ -79,7 +108,8 @@ public class TreeBatchFiveClientGameTests extends TreeBatchTwoClientGameTests {
 			shoot(context, world, at.offset(12, tree.equals("rowan") ? 6 : 3, 15), at.above(tree.equals("rowan") ? 4 : 1), screenshotPrefix() + tree + "_" + look.getSerializedName());
 			tour.add(tree + " " + look.getSerializedName() + ": /tp @s " + at.getX() + " 181 " + (at.getZ() + 12) + " 180 0");
 		}
-		tour.add("Fruitwood and all 18 fruit/season combinations: /tp @s 1013 181 -900 180 0");
+		tour.add("Fruitwood comparison: /tp @s 1013 181 -900 180 0");
+		tour.add("All 18 fruit/season combinations: /tp @s 1013 181 -850 180 0");
 		tour.add("Random ticks are frozen for inspection. /gamerule minecraft:random_tick_speed 3 restores natural fruit ripening.");
 	}
 }

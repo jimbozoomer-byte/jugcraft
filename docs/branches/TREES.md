@@ -41,7 +41,7 @@ changed and why. Leaf and bark colours were worked out by script from the ramps 
 checked against every other wood, vanilla's and Jugcraft's, by CIE76 ΔE and by CIEDE2000, and each leaf and bark against
 the trees it grows beside.
 
-**Batches 4b and 4c are implemented and owner-approved (16 October 2026)** on `codex/tree-generation-batch-4bc` in [PR #395](https://github.com/jimbozoomer-byte/jugcraft/pull/395), following the owner-approved batch 4. The owner requested both together; [the feature record](../features/trees-batch-4bc.md) records the shared scope and actual verification. PR #395 is ready for review. Batch 5 (rowan, elder and seasonal fruit) is in progress on its own public branch in [draft PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396); [implementation record](../features/trees-batch-5.md). Batch 5b and later trees remain unstarted.
+**Batches 4b and 4c are implemented and owner-approved (16 October 2026)** on `codex/tree-generation-batch-4bc` in [PR #395](https://github.com/jimbozoomer-byte/jugcraft/pull/395), following the owner-approved batch 4. The owner requested both together; [the feature record](../features/trees-batch-4bc.md) records the shared scope and actual verification. PR #395 is ready for review. Batch 5 (rowan, elder and seasonal fruit) is implemented and awaiting owner inspection on its own public branch in [draft PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396); [implementation record](../features/trees-batch-5.md). Batch 5b and later trees remain unstarted.
 
 ## How to read this
 
