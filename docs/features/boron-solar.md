@@ -1,6 +1,6 @@
 # Boron in solar cells
 
-Status: implemented on the contributor's fork, pending CI and review. Builds on [boric acid](boric-acid.md) (`claude/boric-acid`).
+Status: implemented on the contributor's fork, pending review. Builds on [boric acid](boric-acid.md) (`claude/boric-acid`).
 
 Proposal issue: none. TODO item: "Add boric-acid/boron connections for suitable nuclear control and advanced solar manufacturing…". The nuclear half is the boric-acid change's control rod assembly; this change adds the solar half.
 
@@ -49,7 +49,7 @@ There are no new dependencies. The icon is drawn by `tools/petro_textures.py`: a
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38872869983](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38872869983) on commit `dafd4de3` passed on its second attempt; the first attempt's optional-integrations-absent job failed only on the unrelated NuclearPlantGameTests.reactorBuildingsKeepRadiationIn and client shard 2 hit the 60-minute limit: the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
