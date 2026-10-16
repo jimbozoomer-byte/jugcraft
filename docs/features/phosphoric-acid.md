@@ -1,6 +1,6 @@
 # Phosphoric acid, triple superphosphate and cola
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork, pending review.
 
 Proposal issue: none. TODO items:
 - "Add phosphate-rock wet/hydrometallurgical dissolution, slurry filtration and phosphoric-acid recovery, with triple-superphosphate fertilizer and advanced technology consumers. Add the selected optional paid gypsum-rich residue preparation into plaster/board ingredients…"
@@ -78,7 +78,7 @@ No texture is copied.
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38859011089](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38859011089) on commit `b950557b` passed: the mod job (compilation and every server game test, these three included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
