@@ -174,6 +174,10 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower YEW_GROWER = grower("yew");
 	public static final TreeGrower BALD_CYPRESS_GROWER = grower("bald_cypress");
 	public static final TreeGrower MAGNOLIA_GROWER = grower("magnolia");
+	public static final TreeGrower HAWTHORN_GROWER = weightedGrower("hawthorn", "hawthorn_bush", 1, 3);
+	public static final TreeGrower PERSIMMON_GROWER = grower("persimmon");
+	public static final SeasonalLeavesBlock.Schedule HAWTHORN_LEAVES = new SeasonalLeavesBlock.Schedule(85, 280, 325);
+	public static final SeasonalLeavesBlock.Schedule PERSIMMON_LEAVES = new SeasonalLeavesBlock.Schedule(98, 280, 315);
 	public static final TreeGrower ROWAN_GROWER = grower("rowan");
 	public static final TreeGrower ELDER_GROWER = grower("elder");
 	public static final SeasonalLeavesBlock.Schedule ROWAN_LEAVES = new SeasonalLeavesBlock.Schedule(98, 255, 305);
@@ -552,6 +556,13 @@ public final class JugcraftAgriculture {
 				props -> new SeasonalFruitLeavesBlock(ROWAN_LEAVES, "rowan_berries", props));
 		registerFoliage("elder", "elder_leaves", ELDER_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				props -> new SeasonalFruitLeavesBlock(ELDER_LEAVES, "elderberries", props));
+		registerFoliage("hawthorn", "hawthorn_leaves", HAWTHORN_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				props -> new SeasonalFruitLeavesBlock(HAWTHORN_LEAVES, "haws", props, true));
+		registerWoodSet("persimmon", MapColor.COLOR_BLACK, MapColor.COLOR_GRAY);
+		registerFoliage("persimmon", "persimmon_leaves", PERSIMMON_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				props -> new SeasonalFruitLeavesBlock(PERSIMMON_LEAVES, "persimmon", props));
+		food("haws", 1, 0.1F, COMPOST_MEDIUM);
+		food("persimmon", 3, 0.3F, COMPOST_MEDIUM);
 		food("rowan_berries", 1, 0.1F, COMPOST_MEDIUM);
 		food("elderberries", 2, 0.2F, COMPOST_MEDIUM);
 		registerTree("pine", "pine_needles", PINE_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
@@ -1915,6 +1926,8 @@ public final class JugcraftAgriculture {
 		registerItem("mason_jar", Item::new, new Item.Properties().stacksTo(16), INGREDIENT_TAB);
 		registerItem("cider_vinegar", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
 		preserve("sweet_berry_jam", 3, 0.4F, null, 0, 0x9A1E3A);
+		preserve("haw_jelly", 3, 0.4F, null, 0, 0xB8302A);
+		preserve("persimmon_preserve", 3, 0.4F, null, 0, 0xDE7A2A);
 		preserve("rowan_jelly", 3, 0.4F, null, 0, 0xC4300F);
 		preserve("apple_butter", 4, 0.5F, null, 0, 0x7A3A14);
 		preserve("pumpkin_butter", 4, 0.5F, null, 0, 0xC8701E);

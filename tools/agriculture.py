@@ -192,6 +192,8 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "haws": {"display": "Haws", "food": [1, 0.1], "compost": "medium", "tags": ["c:foods/berry", "minecraft:fox_food"]},
+    "persimmon": {"display": "Persimmon", "food": [3, 0.3], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable"]},
     "rowan_berries": {"display": "Rowan Berries", "food": [1, 0.1], "compost": "medium",
                        "tags": ["c:foods/berry", "minecraft:fox_food"]},
     "elderberries": {"display": "Elderberries", "food": [2, 0.2], "compost": "medium",
@@ -422,7 +424,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
              "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
-             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood"}
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -431,7 +433,7 @@ WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "bio
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
                  "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"]}
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -457,7 +459,15 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # differ; blocks catch up on random ticks (a changed block brings up to SPREAD touching leaves along), and leaves
 # placed or grown from a sapling start in today's state. With seasons off they stay green. "autumn": the gold
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
+# "seasonal_drop": fruit item and green/gold/bare loot chances; natural leaves only, without Silk Touch/shears.
 TREES = {
+    "hawthorn": {"wood": "fruitwood", "display": "Hawthorn", "leaves": "hawthorn_leaves", "leaves_display": "Hawthorn Leaves",
+                 "season": [85, 280, 325], "autumn": {"gold": 1}, "base": "oak",
+                 "sapling_shapes": {"hawthorn": 1, "hawthorn_bush": 3},
+                 "fruit": {"item": "haws", "min": 1, "max": 2, "chance": 10, "exposed_sides": True}},
+    "persimmon": {"display": "Persimmon", "leaves": "persimmon_leaves", "leaves_display": "Persimmon Leaves",
+                  "season": [98, 280, 315], "autumn": {"gold": 1}, "base": "oak",
+                  "fruit": {"item": "persimmon", "min": 1, "max": 2, "chance": 10}},
     "rowan": {"wood": "fruitwood", "display": "Rowan", "leaves": "rowan_leaves", "leaves_display": "Rowan Leaves",
               "season": [98, 255, 305], "autumn": {"gold": 1}, "base": "birch",
               "fruit": {"item": "rowan_berries", "min": 1, "max": 2, "chance": 10}},
@@ -1566,6 +1576,8 @@ PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vine
           "kettle": "canning_kettle", "kettle_display": "Canning Kettle", "shelf": "pantry_shelf", "shelf_display": "Pantry Shelf",
           "servings": 4, "spoil_ticks": 72000, "kettle_jars": 4, "boil_ticks": 200, "process_ticks": 400, "shelf_slots": 6,
           "preserves": {
+              "haw_jelly": {"display": "Haw Jelly", "food": [3, 0.4], "effect": None, "color": 0xB8302A, "kind": "sweet"},
+              "persimmon_preserve": {"display": "Persimmon Preserve", "food": [3, 0.4], "effect": None, "color": 0xDE7A2A, "kind": "sweet"},
               "rowan_jelly": {"display": "Rowan Jelly", "food": [3, 0.4], "effect": None, "color": 0xC4300F, "kind": "sweet"},
               "sweet_berry_jam": {"display": "Sweet Berry Jam", "food": [3, 0.4], "effect": None, "color": 0x9A1E3A, "kind": "sweet"},
               "apple_butter": {"display": "Apple Butter", "food": [4, 0.5], "effect": None, "color": 0x7A3A14, "kind": "sweet"},
@@ -1872,6 +1884,9 @@ PIES = {"oven": "hearth_oven", "oven_display": "Hearth Oven", "dough": "pastry_d
 PIES["fillings"]["apple"]["owner"] = True
 # Orchards (tools/orchard.py): the peach and lemon meringue pies, in Jugcraft's art (after the others: PieFilling's order).
 PIES["fillings"].update(orchard.PIES)
+# Appended among round pies; the runtime enum appends after all existing cakes/tarts to preserve saved ordinals.
+PIES["fillings"]["persimmon"] = {"display": "Persimmon", "food": [4, 0.6], "color": 0xDE7A2A,
+                                  "with": ["jugcraft:persimmon", "jugcraft:persimmon"]}
 
 
 def pie_name(filling):
@@ -2147,6 +2162,8 @@ POT_RECIPES = {
     # fruit butters with sugar (apple butter cooked in sweet cider, pumpkin butter with mulling spices), and pickles and
     # relish in cider vinegar.
     "cider_vinegar": {"inputs": {"jugcraft:aged_cider": 1, "jugcraft:apple_pomace": 1}, "time": 200},
+    "haw_jelly": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:haws": 6, "minecraft:sugar": 2}, "time": 300},
+    "persimmon_preserve": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:persimmon": 6, "minecraft:sugar": 2}, "time": 300},
     "rowan_jelly": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:rowan_berries": 6, "minecraft:sugar": 2}, "time": 300},
     "sweet_berry_jam": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:sweet_berries": 6, "minecraft:sugar": 2}, "time": 300},
     "apple_butter": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:apple": 3, "minecraft:sugar": 1, "jugcraft:sweet_cider": 1}, "time": 300},

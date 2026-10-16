@@ -4528,9 +4528,16 @@ def check_cakes():
     wanted = [(cake.upper(), cake, str(info["food"][0]), str(info["food"][1]), f"{info['color']:06X}") for cake, info in cakes.CAKES.items()]
     if [(c, i, f, s_, col.upper()) for c, i, f, s_, col in declared] != wanted:
         err(f"PieFilling.java's cakes {declared} differ from tools/cakes.py CAKES (ID, slice food, colour, in order)")
-    last_pie = max((filling.find(f'"{ag.pie_name(f)}"') for f in ag.PIES["fillings"]), default=-1)
-    if declared and filling.find(f'"{next(iter(cakes.CAKES))}"') < last_pie:
-        err("PieFilling.java must list the cakes after the pies: the Hearth Oven saves a filling by its place")
+    # Ordinals are saved by HearthOvenBlockEntity. New round pies may follow the old cakes/tarts,
+    # but none of the 26 already released fillings may move.
+    saved_prefix = ("APPLE", "PUMPKIN_CREAM", "CRANBERRY", "SWEET_POTATO", "CHESTNUT", "CHOCOLATE",
+                    "SWEET_BERRY", "PEACH", "LEMON", "CARROT_CAKE", "BIRTHDAY_CAKE", "ICE_CREAM_CAKE",
+                    "RED_VELVET_CAKE", "CHEESECAKE", "COFFEE_CAKE", "APPLE_CAKE", "STRAWBERRY_PIE",
+                    "BLUEBERRY_TART", "PLUM_PIE", "BANOFFEE_PIE", "SWEET_BERRY_TART", "LEMON_TART",
+                    "WHIPPED_PUMPKIN_PIE", "PORK_PIE", "STRAWBERRY_TART", "COFFEE_TART")
+    actual_order = re.findall(r'^\t([A-Z_]+)\(', filling, re.M)
+    if tuple(actual_order[:len(saved_prefix)]) != saved_prefix:
+        err("PieFilling.java changed an existing saved filling ordinal; append new fillings instead")
     block = java.get("CakeBlock", "")
     height = re.search(r"\bint HEIGHT = (\d+);", block)
     if not height or int(height.group(1)) != cakes.HEIGHT:
@@ -4928,11 +4935,20 @@ def check_festival(java, main):
     for tree, info in ag.TREES.items():
         base = info["base"].upper()
         own_wood = ag.timber(tree) == tree
-        call = "registerTree" if own_wood else "registerFoliage"
-        schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if own_wood else ""
+        composed = "fruit" in info and info["season"] is not None
+        call = "registerTree" if own_wood and not composed else "registerFoliage"
+        schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if call == "registerTree" else ""
         if not re.search(rf'{call}\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
                          rf'{schedule}Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
             err(f"JugcraftAgriculture.java does not register the {tree} tree as TREES in tools/agriculture.py says")
+        if composed:
+            edge_fruiting = ", true" if info["fruit"].get("exposed_sides") else ""
+            factory = f'props -> new SeasonalFruitLeavesBlock({tree.upper()}_LEAVES, "{info["fruit"]["item"]}", props{edge_fruiting})'
+            registration = re.search(rf'registerFoliage\("{tree}",.*?;', main, re.S)
+            if registration is None or factory not in registration.group():
+                err(f"{tree} must register its own seasonal fruit schedule and fruit item")
+            if own_wood and f'registerWoodSet("{tree}",' not in main:
+                err(f"{tree} seasonal fruit tree must register its own timber separately")
         if not own_wood:
             if tree in ag.WOOD_SETS or f'registerWoodSet("{tree}",' in main:
                 err(f"{tree} shares timber and must not register a wood set")

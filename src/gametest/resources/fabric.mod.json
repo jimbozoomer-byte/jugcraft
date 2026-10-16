@@ -12,6 +12,7 @@
     ],
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourBCGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourGameTests",
       "io.github.jimbozoomer.jugcraft.test.YewGameTests",
@@ -234,6 +235,7 @@
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourBCClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.YewClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourClientGameTests",
