@@ -4914,11 +4914,19 @@ def check_festival(java, main):
     for tree, info in ag.TREES.items():
         base = info["base"].upper()
         own_wood = ag.timber(tree) == tree
-        call = "registerTree" if own_wood else "registerFoliage"
-        schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if own_wood else ""
+        composed = "fruit" in info and info["season"] is not None
+        call = "registerTree" if own_wood and not composed else "registerFoliage"
+        schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if call == "registerTree" else ""
         if not re.search(rf'{call}\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
                          rf'{schedule}Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
             err(f"JugcraftAgriculture.java does not register the {tree} tree as TREES in tools/agriculture.py says")
+        if composed:
+            factory = f'props -> new SeasonalFruitLeavesBlock({tree.upper()}_LEAVES, "{info["fruit"]["item"]}", props)'
+            registration = re.search(rf'registerFoliage\("{tree}",.*?;', main, re.S)
+            if registration is None or factory not in registration.group():
+                err(f"{tree} must register its own seasonal fruit schedule and fruit item")
+            if own_wood and f'registerWoodSet("{tree}",' not in main:
+                err(f"{tree} seasonal fruit tree must register its own timber separately")
         if not own_wood:
             if tree in ag.WOOD_SETS or f'registerWoodSet("{tree}",' in main:
                 err(f"{tree} shares timber and must not register a wood set")

@@ -44,12 +44,15 @@ public class TreeBatchFiveBCGameTests {
                 helper.assertTrue(size.logs() >= 1 && size.leaves() >= 15, "Empty crown " + shape);
                 helper.assertTrue(shape.equals("hawthorn_bush") ? size.logs() == 1 && size.height() <= 3 && size.width() <= 5
                         : shape.equals("hawthorn") ? size.height() >= 4 && size.height() <= 5 && size.width() == 6
-                        : size.height() >= 6 && size.height() <= 9 && size.width() == 7, "Outside size envelope " + size);
+                        : size.height() >= 7 && size.height() <= 10 && size.width() == 5, "Outside size envelope " + size);
                 int exposed = 0;
                 for (var at : BlockPos.betweenClosed(AT.offset(-12,0,-12), AT.offset(12,16,12))) {
                     var state = level.getBlockState(at);
                     if (state.is(BlockTags.LOGS)) helper.assertTrue(state.is(timber(tree)), "Wrong timber");
-                    if (state.is(BlockTags.LEAVES)) helper.assertTrue(state.is(block(tree + "_leaves")), "Wrong leaves");
+                    if (state.is(BlockTags.LEAVES)) {
+                        helper.assertTrue(state.is(block(tree + "_leaves")), "Wrong leaves");
+                        if (tree.equals("persimmon")) helper.assertTrue(at.getY() >= AT.getY() + 2, "Oval crown must leave a visible lower trunk");
+                    }
                     if (tree.equals("persimmon") && state.is(block(tree + "_leaves")) && FruitingLeavesBlock.canFruit(state, level, at)) exposed++;
                 }
                 if (tree.equals("persimmon")) helper.assertTrue(exposed > 0, "No fruit-capable crown leaves");

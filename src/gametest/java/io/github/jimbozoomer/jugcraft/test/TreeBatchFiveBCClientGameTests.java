@@ -25,7 +25,7 @@ public class TreeBatchFiveBCClientGameTests extends TreeBatchTwoClientGameTests 
 	@Override protected List<String> shapes() { return TreeBatchFiveBCGameTests.SHAPES; }
 	@Override protected List<String> biomes() { return List.of("field", "shrubland", "woodland", "highland", "seasonal_forest"); }
 	@Override protected String worldName() { return "Hawthorn and Persimmon Inspection"; }
-	@Override protected String exportName() { return "tree-batch-5bc-preview"; }
+	@Override protected String exportName() { return "tree-batch-5bc-preview-oval"; }
 	@Override protected String screenshotPrefix() { return "jugcraft_tree5bc_"; }
 	@Override protected boolean includeSubmergedColumns() { return true; }
 	@Override protected BlockPos surveySpot(ServerLevel level, BlockPos first, ResourceKey<Biome> biome) {
