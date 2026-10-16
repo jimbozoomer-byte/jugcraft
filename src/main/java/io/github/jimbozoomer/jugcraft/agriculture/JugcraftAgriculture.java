@@ -174,6 +174,10 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower YEW_GROWER = grower("yew");
 	public static final TreeGrower BALD_CYPRESS_GROWER = grower("bald_cypress");
 	public static final TreeGrower MAGNOLIA_GROWER = grower("magnolia");
+	public static final TreeGrower ROWAN_GROWER = grower("rowan");
+	public static final TreeGrower ELDER_GROWER = grower("elder");
+	public static final SeasonalLeavesBlock.Schedule ROWAN_LEAVES = new SeasonalLeavesBlock.Schedule(98, 255, 305);
+	public static final SeasonalLeavesBlock.Schedule ELDER_LEAVES = new SeasonalLeavesBlock.Schedule(88, 283, 328);
 	public static final SeasonalLeavesBlock.Schedule BALD_CYPRESS_LEAVES = new SeasonalLeavesBlock.Schedule(98, 286, 330);
 	public static final TreeGrower SNOWPETAL_CHERRY_GROWER = grower("snowpetal_cherry");
 	public static final TreeGrower SHIMMER_BIRCH_GROWER = weightedGrower("shimmer_birch", "tall_shimmer_birch", 4, 1);
@@ -510,6 +514,7 @@ public final class JugcraftAgriculture {
 		registerOrchardTrees();
 		// Generated trees' seasonal leaves start in today's look (tools/trees.py DECORATOR).
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
+		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("fruiting_shrub"), FruitingShrubDecorator.TYPE);
 		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
 		registerTree("maple", "maple_leaves", MAPLE_GROWER, MAPLE_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
@@ -542,6 +547,13 @@ public final class JugcraftAgriculture {
 		registerTree("yew", "yew_needles", YEW_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_RED);
 		sweet("yew_arils", 1, 0.1F, MobEffects.POISON, 10);
+		registerWoodSet("fruitwood", MapColor.TERRACOTTA_LIGHT_GRAY, MapColor.TERRACOTTA_PINK);
+		registerFoliage("rowan", "rowan_leaves", ROWAN_GROWER, Blocks.BIRCH_SAPLING, Blocks.BIRCH_LEAVES,
+				props -> new SeasonalFruitLeavesBlock(ROWAN_LEAVES, "rowan_berries", props));
+		registerFoliage("elder", "elder_leaves", ELDER_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				props -> new SeasonalFruitLeavesBlock(ELDER_LEAVES, "elderberries", props));
+		food("rowan_berries", 1, 0.1F, COMPOST_MEDIUM);
+		food("elderberries", 2, 0.2F, COMPOST_MEDIUM);
 		registerTree("pine", "pine_needles", PINE_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.COLOR_BROWN, MapColor.COLOR_LIGHT_GRAY);
 		registerWildPlants();
@@ -1903,6 +1915,7 @@ public final class JugcraftAgriculture {
 		registerItem("mason_jar", Item::new, new Item.Properties().stacksTo(16), INGREDIENT_TAB);
 		registerItem("cider_vinegar", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
 		preserve("sweet_berry_jam", 3, 0.4F, null, 0, 0x9A1E3A);
+		preserve("rowan_jelly", 3, 0.4F, null, 0, 0xC4300F);
 		preserve("apple_butter", 4, 0.5F, null, 0, 0x7A3A14);
 		preserve("pumpkin_butter", 4, 0.5F, null, 0, 0xC8701E);
 		preserve("cranberry_preserves", 3, 0.4F, null, 0, 0xB0122E);

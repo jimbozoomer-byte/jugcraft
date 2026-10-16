@@ -192,6 +192,10 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "rowan_berries": {"display": "Rowan Berries", "food": [1, 0.1], "compost": "medium",
+                       "tags": ["c:foods/berry", "minecraft:fox_food"]},
+    "elderberries": {"display": "Elderberries", "food": [2, 0.2], "compost": "medium",
+                     "tags": ["c:foods/berry", "minecraft:fox_food"]},
     "yew_arils": {"display": "Yew Arils", "food": [1, 0.1], "sweet": ["POISON", 10], "tags": []},
     "corn": {"display": "Corn", "food": [3, 0.6], "compost": "medium", "tags": ["c:crops/corn", "c:foods/vegetable", "minecraft:pig_food"]},
     "corn_kernels": {"display": "Corn Kernels", "plants": "corn_crop", "compost": "low",
@@ -418,7 +422,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
              "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
-             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia"}
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -427,7 +431,7 @@ WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "bio
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
                  "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"]}
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -454,6 +458,13 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # placed or grown from a sapling start in today's state. With seasons off they stay green. "autumn": the gold
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 TREES = {
+    "rowan": {"wood": "fruitwood", "display": "Rowan", "leaves": "rowan_leaves", "leaves_display": "Rowan Leaves",
+              "season": [98, 255, 305], "autumn": {"gold": 1}, "base": "birch",
+              "fruit": {"item": "rowan_berries", "min": 1, "max": 2, "chance": 10}},
+    "elder": {"wood": "minecraft:oak", "display": "Elder", "switches": ["biomes"],
+              "leaves": "elder_leaves", "leaves_display": "Elder Leaves",
+              "season": [88, 283, 328], "autumn": {"gold": 1}, "base": "oak",
+              "fruit": {"item": "elderberries", "min": 1, "max": 2, "chance": 10}},
     "bald_cypress": {"leaves": "bald_cypress_needles", "leaves_display": "Bald Cypress Needles",
                      "season": [98, 286, 330], "autumn": {"gold": 1}, "base": "spruce"},
     "magnolia": {"leaves": "magnolia_leaves", "leaves_display": "Magnolia Leaves", "season": None, "base": "oak"},
@@ -531,7 +542,8 @@ TREE_TEXTURES = (["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "
                      f"{wood}_log", f"{wood}_log_top", f"stripped_{wood}_log", f"stripped_{wood}_log_top", f"{wood}_planks")]
                  + [texture for tree in TREES for looks in leaf_looks(tree).values() for texture in looks]
                  + [sapling(tree) for tree in TREES]
-                 + [f"{info['leaves']}_{stage}" for info in TREES.values() if "fruit" in info for stage in ("unripe", "ripe")])
+                 + [f"{texture}_{stage}" for tree, info in TREES.items() if "fruit" in info
+                    for looks in leaf_looks(tree).values() for texture in looks for stage in ("unripe", "ripe")])
 
 # Decorations. The Turnip Lantern is the original jack-o'-lantern: a carved turnip with a candle inside.
 DECOR = {"turnip_lantern": {"display": "Turnip Lantern", "light": 13}}
@@ -1495,7 +1507,7 @@ CHANDLERY = {"pot": "wax_melting_pot", "pot_display": "Wax Melting Pot", "candle
                         "ember": {"display": "Ember", "items": ["minecraft:magma_cream"], "effect": "FIRE_RESISTANCE", "color": 0xFF6A1A},
                         "diligence": {"display": "Diligence", "items": ["minecraft:amethyst_shard"], "effect": "HASTE", "color": 0xE8C84A},
                         "mending": {"display": "Mending", "items": ["minecraft:ghast_tear"], "effect": "REGENERATION", "color": 0xF27ACB},
-                        "warding": {"display": "Warding", "items": ["minecraft:fermented_spider_eye"], "effect": None, "color": 0x7A3FCF},
+                        "warding": {"display": "Warding", "items": ["minecraft:fermented_spider_eye", "jugcraft:rowan_berries"], "effect": None, "color": 0x7A3FCF},
                         "harvest": {"display": "Harvest", "items": ["minecraft:bone_meal"], "effect": None, "color": 0x5FBF3A},
                         "revealing": {"display": "Revealing", "items": ["minecraft:glow_ink_sac"], "effect": None, "color": 0x9FFFE8},
                         # Ectoplasm, caught from restless spirits (fall additions 9): everyone near turns invisible.
@@ -1554,6 +1566,7 @@ PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vine
           "kettle": "canning_kettle", "kettle_display": "Canning Kettle", "shelf": "pantry_shelf", "shelf_display": "Pantry Shelf",
           "servings": 4, "spoil_ticks": 72000, "kettle_jars": 4, "boil_ticks": 200, "process_ticks": 400, "shelf_slots": 6,
           "preserves": {
+              "rowan_jelly": {"display": "Rowan Jelly", "food": [3, 0.4], "effect": None, "color": 0xC4300F, "kind": "sweet"},
               "sweet_berry_jam": {"display": "Sweet Berry Jam", "food": [3, 0.4], "effect": None, "color": 0x9A1E3A, "kind": "sweet"},
               "apple_butter": {"display": "Apple Butter", "food": [4, 0.5], "effect": None, "color": 0x7A3A14, "kind": "sweet"},
               "pumpkin_butter": {"display": "Pumpkin Butter", "food": [4, 0.5], "effect": None, "color": 0xC8701E, "kind": "sweet"},
@@ -1722,7 +1735,7 @@ CANDY = {"kettle": "candy_kettle", "kettle_display": "Candy Kettle", "tray": "ca
          "corn_bands": [0xF8F4EA, 0xF08A24, 0xF6C836],
          "flavours": {"chocolate": {"display": "Chocolate", "items": ["minecraft:cocoa_beans"], "effect": "SPEED", "seconds": 10,
                                     "color": 0x5A3218},
-                      "berry": {"display": "Berry", "items": ["minecraft:sweet_berries"], "effect": "REGENERATION", "seconds": 4,
+                      "berry": {"display": "Berry", "items": ["minecraft:sweet_berries", "jugcraft:rowan_berries", "jugcraft:elderberries"], "effect": "REGENERATION", "seconds": 4,
                                 "color": 0xC8283C},
                       "glow_berry": {"display": "Glow Berry", "items": ["minecraft:glow_berries"], "effect": "NIGHT_VISION", "seconds": 30,
                                      "color": 0xF0B030},
@@ -2134,6 +2147,7 @@ POT_RECIPES = {
     # fruit butters with sugar (apple butter cooked in sweet cider, pumpkin butter with mulling spices), and pickles and
     # relish in cider vinegar.
     "cider_vinegar": {"inputs": {"jugcraft:aged_cider": 1, "jugcraft:apple_pomace": 1}, "time": 200},
+    "rowan_jelly": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:rowan_berries": 6, "minecraft:sugar": 2}, "time": 300},
     "sweet_berry_jam": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:sweet_berries": 6, "minecraft:sugar": 2}, "time": 300},
     "apple_butter": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:apple": 3, "minecraft:sugar": 1, "jugcraft:sweet_cider": 1}, "time": 300},
     "pumpkin_butter": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:pumpkin": 1, "minecraft:sugar": 2, "jugcraft:mulling_spices": 1},
@@ -2157,6 +2171,8 @@ for _cake, _info in LANTERNS["mooncakes"].items():
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    {"id": "purple_dye_from_elderberries", "inputs": ["jugcraft:elderberries"], "result": "minecraft:purple_dye",
+     "count": 1, "category": "misc", "switch": ["biomes"]},
     {"id": "red_dye_from_yew_arils", "inputs": ["jugcraft:yew_arils"], "result": "minecraft:red_dye", "count": 1,
      "category": "misc", "switch": ["biomes"]},
     # Fall additions 13: bat guano is rich in phosphate.

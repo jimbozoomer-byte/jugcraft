@@ -278,5 +278,21 @@
   "stripped_magnolia_wood": [
     10789231,
     10789231
+  ],
+  "fruitwood_log": [
+    10721686,
+    14132895
+  ],
+  "fruitwood_wood": [
+    10721686,
+    14132895
+  ],
+  "stripped_fruitwood_log": [
+    14132895,
+    14132895
+  ],
+  "stripped_fruitwood_wood": [
+    14132895,
+    14132895
   ]
 }

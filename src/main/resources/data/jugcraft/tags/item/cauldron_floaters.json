@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:elderberries",
     "minecraft:apple",
     "minecraft:bone",
     "minecraft:spider_eye",

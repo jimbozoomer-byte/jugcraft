@@ -2,7 +2,7 @@
 
 Owner authorization, 15 October 2026: after completing tree-generation batch 2, implement all the other trees. Actual tool: OpenAI Codex (GPT-6).
 
-**Scope update, 15 October:** the owner subsequently instructed: "Finish batch 3 and don't start the next batch." Complete yew only. The batch-4 design note was published before that instruction; no batch-4 implementation was started. All later stages below remain unstarted and require renewed owner direction.
+**Scope update, 16 October:** batches 3, 4 and 4b/4c have since been implemented, tested and visually approved. The owner requested PR #395 ready for review and subsequently approved batch 5 and requested PR #396 ready for review. Batches 5b and 5c are now authorized together; batch 6 and later remain outside the current implementation.
 
 The owner approved the new wood palettes on 6 October, and the original pine textures on 15 October. Follow the current runtime vanilla-log treatment for other woods and preserve pine originals. The roster defaults apply unless later code or owner instructions supersede them. Existing orchard, banana and rubber content must be extended without duplicate IDs or replacing their existing routes.
 
@@ -10,10 +10,11 @@ Implementation follows [the roster](../branches/TREES.md) in dependency order. E
 
 | Stage | Scope | Status |
 |---|---|---|
-| 3 | Yew and ancient yew, leaf drawing options, Gloomweald canopy | Implemented/tested; owner inspection next |
-| 4 | Tree/wood split; snowpetal cherry and shimmer birch | Pending |
-| 4b-4c | Bald cypress roots; magnolia | Pending |
-| 5-5c | Seasonal fruit; rowan, elder, hawthorn, persimmon | Pending |
+| 3 | Yew and ancient yew, leaf drawing options, Gloomweald canopy | Owner approved; PR #388 ready |
+| 4 | Tree/wood split; snowpetal cherry and shimmer birch | Owner approved; PR #389 ready |
+| 4b-4c | Bald cypress roots; magnolia | Owner approved; PR #395 ready |
+| 5 | Seasonal fruit; rowan, elder and fruitwood | Owner approved; PR #396 ready; [record](trees-batch-5.md) |
+| 5b-5c | Hawthorn; persimmon | Pending |
 | 6-6b | Juniper, gorse, sagebrush, holly | Pending |
 | 7-8c | Olive, stone pine, wattle, tamarisk, Joshua tree | Pending |
 | 9-9b | Giant fungi, bramble, dragonblood | Pending |

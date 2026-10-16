@@ -14,6 +14,14 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "rowan": {"wood": "fruitwood", "tree": "rowan", "sapling": True,
+              "trunk": {"type": "forking", "base_height": 4, "height_rand_a": 2, "height_rand_b": 1},
+              "foliage": {"type": "random_spread", "radius": 2, "offset": 0, "foliage_height": 3,
+                          "leaf_placement_attempts": 40}},
+    "elder": {"wood": "minecraft:oak", "tree": "elder", "sapling": True,
+              "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+              "foliage": {"type": "bush", "radius": 3, "offset": 1, "height": 2},
+              "decorators": [{"type": "jugcraft:fruiting_shrub"}]},
     "bald_cypress": {"wood": "bald_cypress", "sapling": True,
                      "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 2, "upper_size": 2},
                      "trunk": {"type": "upwards_branching", "base_height": 9, "height_rand_a": 3, "height_rand_b": 2,

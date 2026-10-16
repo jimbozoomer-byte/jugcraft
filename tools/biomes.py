@@ -195,6 +195,12 @@ GROUND_COUNT = 5
 
 # Features the biomes add, in one fixed order, after their base's own (keeps the Overworld's feature order acyclic).
 EXTRAS = {
+    # Rare landmark tree: one attempt, then dry-ground and sapling survival checks. No forest count layer.
+    "lone_rowan": {"feature": "jugcraft:rowan", "step": 9, "placement": [
+        {"type": "minecraft:rarity_filter", "chance": 8}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
+        {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": "minecraft:biome"},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": "jugcraft:rowan_sapling"}}]},
     "tundra_rocks": {"feature": "minecraft:forest_rock", "step": 2, "placement": [
         {"type": "minecraft:rarity_filter", "chance": 2}, {"type": "minecraft:in_square"},
         {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING"}, {"type": "minecraft:biome"}]},
@@ -535,7 +541,7 @@ BIOMES = {
     },
     "snowy_forest": {
         "display": "Snowy Forest", "base": "snowy_plains", "temperature": -0.3, "downfall": 0.5, "seasons": False,
-        "trees": {"count": [7, 8], "default": "minecraft:oak_checked", "picks": [
+        "trees": {"count": [7, 8], "default": "jugcraft:rowan_checked", "picks": [
             ["jugcraft:fir_checked", 0.3], ["jugcraft:maple_checked", 0.2], ["jugcraft:aspen_checked", 0.3571]]},
         "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:pig", 10, 4, 4], ["minecraft:chicken", 10, 4, 4],
                       ["minecraft:cow", 8, 4, 4], ["minecraft:rabbit", 6, 2, 3], ["minecraft:wolf", 5, 4, 4]],
@@ -673,7 +679,8 @@ BIOMES = {
     "lake_district": {
         "display": "Lake District", "base": "forest", "temperature": 0.5, "downfall": 0.8, "seasons": True,
         "trees": {"count": [6, 7], "default": "minecraft:oak_checked", "picks": [
-            ["jugcraft:fir_checked", 0.3], ["jugcraft:larch_checked", 0.1429], ["minecraft:fancy_oak_checked", 0.1]]},
+            ["jugcraft:fir_checked", 0.3], ["jugcraft:larch_checked", 1 / 7], ["minecraft:fancy_oak_checked", 0.1],
+            ["jugcraft:rowan_checked", 0.1 / 0.54]]},
         "extras": ["ponds", "mud", "cattails", "lily_pads"],
         "tags": ["c:is_wet"],
     },
@@ -703,7 +710,7 @@ BIOMES = {
         "display": "Wetland", "base": "swamp", "temperature": 0.55, "downfall": 0.9, "seasons": True,
         "effects": {"water_color": "#6b5c9c"},
         "trees": {"count": [2, 3], "default": "jugcraft:cedar_checked", "picks": [
-            ["jugcraft:willow_checked", 0.4], ["minecraft:spruce_checked", 0.1667]], "water_depth": 1},
+            ["jugcraft:willow_checked", 0.4], ["jugcraft:elder_checked", 1 / 6]], "water_depth": 1},
         "extras": ["mud", "ferns", "cattails", "watergrass"],
         "tags": ["c:is_swamp", "c:is_wet", "minecraft:has_structure/village_taiga"],
     },
@@ -954,7 +961,8 @@ BIOMES = {
         "display": "Woodland", "base": "forest", "temperature": 0.7, "downfall": 0.8, "seasons": True,
         "effects": {"grass_color": "#7aa84a", "foliage_color": "#68983e"},
         "trees": {"count": [9, 10], "default": "minecraft:oak_leaf_litter", "picks": [
-            ["minecraft:fancy_oak_leaf_litter", 0.25], ["jugcraft:oak_bush_checked", 0.1], ["minecraft:fallen_oak_tree", 0.03]]},
+            ["minecraft:fancy_oak_leaf_litter", 0.25], ["jugcraft:oak_bush_checked", 0.1], ["minecraft:fallen_oak_tree", 0.03],
+            ["jugcraft:elder_checked", 0.04 / (0.75 * 0.9 * 0.97)]]},
         "extras": ["leaf_litter", "berry_bushes", "oxeye_daisies", "poppies"],
         "tags": ["minecraft:has_structure/village_plains", "minecraft:has_structure/woodland_mansion"],
     },
@@ -993,7 +1001,7 @@ BIOMES = {
         "surface": {"floor": "minecraft:grass_block",
                     "patches": [[0.35, 0.45, "minecraft:coarse_dirt"], [-0.45, -0.38, "minecraft:gravel"], [0.6, 0.75, "minecraft:stone"]]},
         "trees": None,
-        "extras": ["tundra_rocks", "tall_grass_dense"],
+        "extras": ["tundra_rocks", "tall_grass_dense", "lone_rowan"],
         "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:cow", 8, 4, 4], ["minecraft:rabbit", 4, 2, 3]],
         "tags": [],
     },

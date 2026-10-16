@@ -23,10 +23,10 @@ Fourteen wet biomes, most in the **wetland** layout of Jugcraft regions. The swa
 | **Sludge Mire** | dark forests (the other half) | a dense canopy of dark oaks and big oaks over mud and sludgy, algae-covered pools; no animals; villages |
 | **Lush River** | temperate and warm rivers (wetland layout) | duckweed, lily pads and watergrass; willow scrub, willows and cottonwoods on the banks |
 | **Fen** | old-growth spruce taiga (wetland layout) | thin bog firs, tamaracks and willow scrub over muddy pools, cattails and lily pads |
-| **Lake District** | temperate forests (wetland layout) | oaks, firs and larches broken by many lakes with muddy shores |
+| **Lake District** | temperate forests (wetland layout) | oaks, firs, larches and rowans broken by many lakes with muddy shores |
 | **Quagmire** | dry cool plains (wetland layout) | muddy flats and brown ponds, cattails; no trees, no animals |
 | **Marsh** | cool plains (wetland layout) | a wide green plain of shallow lakes full of watergrass, ringed by cattails; no trees |
-| **Wetland** | temperate plains (wetland layout) | grass and mud, ferns, cedars, willows and a few spruces, cattails, purple water; villages |
+| **Wetland** | temperate plains (wetland layout) | grass and mud, ferns, cedars, willows and elder shrubs, cattails, purple water; villages |
 
 - Biomes O' Plenty's Deep Bayou merges into the Bayou, the Land of Lakes Marsh into the Marsh, and the Land of Lakes becomes the Lake District.
 - Seasons: all fourteen change colour with the seasons; all but the Bayou, Floodplain and Lush River take winter snow when `seasons.snow` is on ([seasons.md](seasons.md)).
@@ -94,3 +94,5 @@ Results are recorded under "Results" below after CI runs.
 - Seasons: see above.
 
 Tree roster batches 4b/4c add bald cypress at 60% of Bayou attempts and 25% in Lush Swamp and Swamp Woods, retaining existing attempt counts. See [the implementation record](trees-batch-4bc.md).
+
+Tree roster batch 5 adds rowan to 10% of Lake District attempts (oak 44%, fir 30%, larch 10%, fancy oak 6%) and elder to 10% of Wetland attempts (cedar 50%, willow 40%). Their 6/7 and 2/3 attempts per chunk remain unchanged. See [the implementation and verification record](trees-batch-5.md).

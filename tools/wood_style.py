@@ -71,6 +71,7 @@ WOOD = {
     "yew": ("2:7", "654135"),
     "bald_cypress": (23, "9c9391"),
     "magnolia": ("2:1", "807d55"),
+    "fruitwood": (7, "ab7d76"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -115,6 +116,7 @@ BARK = {
     "pine": (pal("2d2521", "43312a", "5f4433", "805a3d", "9c6c48"), "plated"),
     "bald_cypress": (pal("392d28", "4e3e37", "624e46", "7a6157", "927468"), "stringy"),
     "magnolia": (pal("3b3a30", "515043", "686755", "7e7d67", "95947e"), "plated"),
+    "fruitwood": (pal("2e2928", "655a58", "7b6d6b", "90817f", "a39695"), "marked"),
 }
 EUCALYPTUS_STREAKS = pal("d07a2e", "9a4f9e", "4f7fb8", "c9a63a", "5ea06a")
 
@@ -419,9 +421,9 @@ def bare(name, seed):
     return c.img
 
 
-def cypress_bare(seed):
+def cypress_bare(seed, palette=None):
     """One joined, tapering branch network; shared edge anchors connect neighbouring faces/tiles."""
-    p = BARK["bald_cypress"][0]
+    p = BARK["bald_cypress"][0] if palette is None else palette
     c = Canvas()
     for y in range(16):
         for x in range(16):
@@ -499,6 +501,8 @@ def wood_textures():
         out[("block", name)] = bare(name, 840 + index)
     from tree_roster_textures import textures as roster_textures
     out.update(roster_textures(out))
+    from seasonal_fruit_textures import textures as seasonal_fruit_textures
+    out.update(seasonal_fruit_textures())
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)
     out[("block", "chestnut_leaves_ripe")] = chestnut_fruit(chestnut, 2)
