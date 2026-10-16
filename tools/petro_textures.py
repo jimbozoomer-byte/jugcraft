@@ -205,6 +205,54 @@ def gasification_residue():
     return img
 
 
+def _insulator(body, cap):
+    """A post insulator, symmetric about the middle two columns: a thick column carrying four sheds, each a lit top
+    face over a narrower shadowed rim so it reads as a disc, with a metal cap at each end. `body`: outline, dark, mid,
+    light and highlight; `cap`: the caps' outline, dark, mid and light, or None for an unfired blank (bare ends)."""
+    o, d, m, l, h = body
+    rows = {1: (2, "end_top"), 2: (2, "end"), 14: (2, "end_bottom")}
+    for top in (3, 6, 9, 12):
+        rows[top] = (6, "shed_top")
+        rows[top + 1] = (5, "shed_rim")
+    for y in (5, 8, 11):
+        rows[y] = (3, "column")
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, (half, kind) in rows.items():
+        x0, x1 = 8 - half, 7 + half
+        for x in range(x0, x1 + 1):
+            edge = x in (x0, x1)
+            if kind.startswith("end"):
+                eo, ed, em, el = cap if cap else (o, d, m, l)
+                c = eo if edge or kind in ("end_top", "end_bottom") else el if x == x0 + 1 else ed if x == x1 - 1 else em
+            elif kind == "shed_top":
+                c = o if edge else h if x <= x0 + 2 else l if x < x1 - 1 else m
+            elif kind == "shed_rim":
+                c = o if edge else d
+            else:
+                c = o if edge else l if x == x0 + 1 else d if x == x1 - 1 else m
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def porcelain_body():
+    """Porcelain body: a soft lump of prepared off-white clay, lit from the top left, outlined in its own dark."""
+    import material_style as ms
+    return ms.lumps([(6.0, 9.4, 3.6), (10.2, 9.0, 3.4), (8.2, 6.6, 3.0)],
+                    [(122, 116, 104), (184, 178, 164), (214, 210, 198), (232, 230, 220), (248, 246, 240)])
+
+
+def unfired_porcelain_insulator():
+    """An unfired porcelain insulator: the post-insulator shape in matte pale buff clay, without its metal caps."""
+    return _insulator([(132, 120, 100), (176, 166, 146), (204, 196, 178), (222, 216, 200), (236, 232, 220)], None)
+
+
+def porcelain_insulator():
+    """A porcelain insulator: the post-insulator shape glazed glossy brown, with a shine on its left, and galvanized
+    steel caps at both ends."""
+    return _insulator([(58, 26, 12), (110, 50, 24), (150, 74, 36), (194, 112, 64), (236, 172, 128)],
+                      [(62, 66, 74), (110, 116, 126), (156, 162, 172), (206, 212, 220)])
+
+
 def ammonium_nitrate():
     """Ammonium nitrate: a heap of small round white prills, lit from the top left and outlined in their own darkest
     tone (docs/ITEM_ICONS.md)."""
@@ -605,6 +653,9 @@ def draw_all(save, save_animation):
     save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
     save(gasification_residue(), "item", "gasification_residue")
     save(ammonium_nitrate(), "item", "ammonium_nitrate")
+    save(porcelain_body(), "item", "porcelain_body")
+    save(unfired_porcelain_insulator(), "item", "unfired_porcelain_insulator")
+    save(porcelain_insulator(), "item", "porcelain_insulator")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")

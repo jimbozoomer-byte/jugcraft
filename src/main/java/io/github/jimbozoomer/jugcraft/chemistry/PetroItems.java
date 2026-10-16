@@ -47,6 +47,10 @@ public final class PetroItems {
 	public static Item VANADIUM_PENTOXIDE;
 	public static Item GASIFICATION_RESIDUE;
 	public static Item AMMONIUM_NITRATE;
+	/** Porcelain (docs/features/porcelain-insulators.md): the prepared body, the unfired blank and the fired insulator. */
+	public static Item PORCELAIN_BODY;
+	public static Item UNFIRED_PORCELAIN_INSULATOR;
+	public static Item PORCELAIN_INSULATOR;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -137,6 +141,9 @@ public final class PetroItems {
 		// A nitrogen fertilizer: superphosphate's 5x5 area, three doses a crop instead of two.
 		AMMONIUM_NITRATE = JugcraftRegistry.item("ammonium_nitrate",
 				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
+		PORCELAIN_BODY = JugcraftRegistry.item("porcelain_body");
+		UNFIRED_PORCELAIN_INSULATOR = JugcraftRegistry.item("unfired_porcelain_insulator");
+		PORCELAIN_INSULATOR = JugcraftRegistry.item("porcelain_insulator");
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -263,6 +270,9 @@ public final class PetroItems {
 			output.accept(VANADIUM_PENTOXIDE);
 			output.accept(GASIFICATION_RESIDUE);
 			output.accept(AMMONIUM_NITRATE);
+			output.accept(PORCELAIN_BODY);
+			output.accept(UNFIRED_PORCELAIN_INSULATOR);
+			output.accept(PORCELAIN_INSULATOR);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

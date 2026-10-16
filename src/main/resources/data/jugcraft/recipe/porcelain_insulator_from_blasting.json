@@ -1,0 +1,16 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": "jugcraft:unfired_porcelain_insulator",
+  "result": {
+    "id": "jugcraft:porcelain_insulator"
+  },
+  "experience": 0.2,
+  "cookingtime": 100
+}

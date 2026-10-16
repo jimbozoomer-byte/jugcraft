@@ -290,7 +290,8 @@ CRAFTING = {
                                          "B": "#c:storage_blocks/steel"}, 1),
     "feedwater_pump": (["SMS", "P P", "SSS"], {"S": "#c:plates/steel", "M": "jugcraft:electric_motor",
                                               "P": "jugcraft:steel_fluid_pipe"}, 1),
-    "main_transformer": (["IAI", "CBC", "SSS"], {"I": "minecraft:white_terracotta", "A": "jugcraft:aluminum_cable",
+    # Its bushings are fired porcelain insulators (docs/features/porcelain-insulators.md).
+    "main_transformer": (["IAI", "CBC", "SSS"], {"I": "jugcraft:porcelain_insulator", "A": "jugcraft:aluminum_cable",
                                                 "C": "minecraft:copper_block", "B": "#c:storage_blocks/steel",
                                                 "S": "#c:plates/steel"}, 1),
     "reactor_control_console": (["GGG", "CPC", "SSS"], {"G": "minecraft:glass_pane", "C": "jugcraft:advanced_circuit",
