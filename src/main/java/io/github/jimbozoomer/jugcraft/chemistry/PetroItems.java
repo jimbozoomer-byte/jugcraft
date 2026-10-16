@@ -205,6 +205,7 @@ public final class PetroItems {
 	public static Item DEVELOPER_CHARGE;
 
 	public static void register() {
+
 		CRACKING_CATALYST = JugcraftRegistry.item("cracking_catalyst");
 		ASPHALT_BINDER = JugcraftRegistry.item("asphalt_binder");
 		PLASTIC_PELLETS = JugcraftRegistry.item("plastic_pellets");
@@ -349,6 +350,21 @@ public final class PetroItems {
 		ETCHED_PROCESS_WAFER = JugcraftRegistry.item("etched_process_wafer");
 		GENERAL_CHIP_PATTERN = JugcraftRegistry.item("general_chip_pattern", properties -> new Item(properties.stacksTo(1)));
 		ADVANCED_CHIP = JugcraftRegistry.item("advanced_chip");
+		NOVOLAC_RESIN = JugcraftRegistry.item("novolac_resin");
+		DNQ_ADDITIVE = JugcraftRegistry.item("dnq_additive");
+		DEVELOPER_CHARGE = JugcraftRegistry.item("developer_charge");
+		GROUND_PHOSPHATE = JugcraftRegistry.item("ground_phosphate");
+		WET_SUPERPHOSPHATE = JugcraftRegistry.item("wet_superphosphate");
+		TRIPLE_SUPERPHOSPHATE = JugcraftRegistry.item("triple_superphosphate", properties -> new SpecializedFertilizerItem(properties, SpecializedFertilizerItem.Blend.PHOSPHATE, "triple_superphosphate"));
+		NITROGEN_FERTILIZER = JugcraftRegistry.item("nitrogen_fertilizer", properties -> new SpecializedFertilizerItem(properties, SpecializedFertilizerItem.Blend.NITROGEN, "nitrogen_fertilizer"));
+		MIXED_FARM_BLEND = JugcraftRegistry.item("mixed_farm_blend", properties -> new SpecializedFertilizerItem(properties, SpecializedFertilizerItem.Blend.MIXED, "mixed_farm_blend"));
+		ORGANIC_FERTILIZER_CARRIER = JugcraftRegistry.item("organic_fertilizer_carrier");
+		GYPSUM_RICH_RESIDUE = JugcraftRegistry.item("gypsum_rich_residue");
+		WASHED_GYPSUM = JugcraftRegistry.item("washed_gypsum");
+		COBALT_CONCENTRATE = JugcraftRegistry.item("cobalt_concentrate");
+		COBALT_INGOT = JugcraftRegistry.item("cobalt_ingot");
+		COBALT_CATALYST_BED = JugcraftRegistry.item("cobalt_catalyst_bed", properties -> new Item(properties.stacksTo(1)));
+		STABILIZED_PROCESS_RESIDUE = JugcraftRegistry.item("stabilized_process_residue");
 		CRYOGENIC_INSULATION = JugcraftRegistry.item("cryogenic_insulation", DescribedItem::new);
 		METHANE_COOLING_MODULE = JugcraftRegistry.item("methane_cooling_module", properties -> new DescribedItem(properties.stacksTo(1)));
 		HYDROGEN_COOLING_MODULE = JugcraftRegistry.item("hydrogen_cooling_module", properties -> new DescribedItem(properties.stacksTo(1)));
@@ -361,21 +377,6 @@ public final class PetroItems {
 		HYDRAZINE_THRUSTER = JugcraftRegistry.item("hydrazine_thruster", DescribedItem::new);
 		STORABLE_BIPROPELLANT_MOTOR = JugcraftRegistry.item("storable_bipropellant_motor", DescribedItem::new);
 		PROPELLANT_RESIDUE = JugcraftRegistry.item("propellant_residue", DescribedItem::new);
-		COBALT_CONCENTRATE = JugcraftRegistry.item("cobalt_concentrate");
-		COBALT_INGOT = JugcraftRegistry.item("cobalt_ingot");
-		COBALT_CATALYST_BED = JugcraftRegistry.item("cobalt_catalyst_bed", properties -> new Item(properties.stacksTo(1)));
-		STABILIZED_PROCESS_RESIDUE = JugcraftRegistry.item("stabilized_process_residue");
-		GROUND_PHOSPHATE = JugcraftRegistry.item("ground_phosphate");
-		WET_SUPERPHOSPHATE = JugcraftRegistry.item("wet_superphosphate");
-		TRIPLE_SUPERPHOSPHATE = JugcraftRegistry.item("triple_superphosphate", properties -> new SpecializedFertilizerItem(properties, SpecializedFertilizerItem.Blend.PHOSPHATE, "triple_superphosphate"));
-		NITROGEN_FERTILIZER = JugcraftRegistry.item("nitrogen_fertilizer", properties -> new SpecializedFertilizerItem(properties, SpecializedFertilizerItem.Blend.NITROGEN, "nitrogen_fertilizer"));
-		MIXED_FARM_BLEND = JugcraftRegistry.item("mixed_farm_blend", properties -> new SpecializedFertilizerItem(properties, SpecializedFertilizerItem.Blend.MIXED, "mixed_farm_blend"));
-		ORGANIC_FERTILIZER_CARRIER = JugcraftRegistry.item("organic_fertilizer_carrier");
-		GYPSUM_RICH_RESIDUE = JugcraftRegistry.item("gypsum_rich_residue");
-		WASHED_GYPSUM = JugcraftRegistry.item("washed_gypsum");
-		NOVOLAC_RESIN = JugcraftRegistry.item("novolac_resin");
-		DNQ_ADDITIVE = JugcraftRegistry.item("dnq_additive");
-		DEVELOPER_CHARGE = JugcraftRegistry.item("developer_charge");
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(HIGH_PURITY_SILICON);

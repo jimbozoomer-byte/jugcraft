@@ -1,5 +1,5 @@
 # Formed Aluminum-Magnesium Panel: original Jugcraft component map.
-# materials: main=structural_alloy
+# materials: main=iron
 # family: compact
 ................
 ................

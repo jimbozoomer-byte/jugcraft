@@ -10,12 +10,7 @@
     }
   ],
   "type": "jugcraft:pulverizing",
-  "ingredients": [
-    {
-      "ingredient": "jugcraft:phosphate",
-      "count": 1
-    }
-  ],
+  "ingredient": "jugcraft:phosphate",
   "result": {
     "id": "jugcraft:ground_phosphate",
     "count": 1

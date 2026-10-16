@@ -13,7 +13,7 @@
   "capability": "jugcraft:electronics_conditioning",
   "fluids": [
     {
-      "fluid": "jugcraft:sulfuric_acid",
+      "fluid": "jugcraft:concentrated_sulfuric_acid",
       "amount": 1000
     },
     {

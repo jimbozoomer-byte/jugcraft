@@ -233,9 +233,9 @@ public final class IndustrialForms {
 			.port("items_out", FormPort.Kind.ITEM_OUT, FormPort.ALL, 1, 0, 0, FormSide.FRONT)
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 3, 3, 0, FormSide.RIGHT)
 			.capability("jugcraft:battery_bulk_chemical_reactor")
-            .capability("jugcraft:storable_propellants")
-			.capability("jugcraft:electronics_reagents")
+            .capability("jugcraft:electronics_reagents")
 			.capability("jugcraft:phosphate_formulation")
+			.capability("jugcraft:storable_propellants")
 			.build();
 
 	/**
@@ -487,8 +487,8 @@ public final class IndustrialForms {
 			.outputTank("recovered_water")
 			.items(0, 2)
 			.capability("jugcraft:aluminate_recovery")
-			.capability("jugcraft:phosphate_filtration")
 			.capability("jugcraft:digestate_separation")
+			.capability("jugcraft:phosphate_filtration")
 			.upgrades()
 			.warmup(40)
 			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)

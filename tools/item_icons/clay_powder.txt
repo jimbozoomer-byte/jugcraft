@@ -1,5 +1,5 @@
 # Clay Powder: original Jugcraft pixel map.
-# materials: main=terracotta
+# materials: main=tech_clay
 # family: compact
 ................
 ................

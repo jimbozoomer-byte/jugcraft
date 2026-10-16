@@ -424,6 +424,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				&& stored.variant().isOf(PetroFluids.SULFURIC_ACID.source()) && stored.amount() > 0) {
 			stored.restore(tanks.input(2));
 		}
+		if (stored != null && kind == MachineKind.CHEMICAL_REACTOR
+				&& stored.variant().isOf(PetroFluids.SULFURIC_ACID.source()) && stored.amount() > 0) {
+			stored.restore(tanks.input(2));
+		}
 	}
 
 	/** A fluid processor's tanks, or null for other machines. */

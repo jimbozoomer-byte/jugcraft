@@ -746,8 +746,13 @@
             "Monazite: Y -64 to 16.",
             "Fluorite: Y -32 to 48. Large pockets below permanently snowy inland biomes; needs an iron pickaxe. Mineral faces in small stone outcrops can point to a pocket below. Seasonal snow, beaches, rivers and oceans do not qualify. The prospector and ore drill work here; nine fluorite make a decorative storage block. Fluorite chemistry is planned separately.",
             "Spodumene: Y -16 to 64. Large pockets below Shield, Highland, Basin, Windswept Hills, Windswept Gravelly Hills, Windswept Forest and Stony Peaks; most centers are near Y 24. Needs an iron pickaxe. Look for pale-green mineral faces in small stone outcrops, or use the prospector and ore drill. The crusher gives two spodumene per ore; nine compact into a storage block. Fire spodumene in the Industrial Oven, then condition two activated spodumene with 500 mB sulfuric acid into two Lithium Carbonate. See Batteries and Power Management; existing lepidolite processing remains available.",
+            "Vanadium-bearing Iron: Y -48 to 32. Vanadiferous magnetite: richest below Shield and Volcano, with smaller, rarer pockets below Highland, Basin, Windswept Hills, Windswept Gravelly Hills, Windswept Forest and Stony Peaks. Centers peak near Y -8. Small stone outcrops sometimes mark pockets, except in Volcano. Needs an iron pickaxe; Fortune cannot increase the one raw feed per block. Crush one raw feed or intact ore into one Vanadium-bearing Iron Concentrate (200 ticks at 16 JE/t), then wash with 500 mB water into one Vanadium Oxide (200 ticks at 16 JE/t). Two bricks and the oxide make a reusable Vanadium Contact Bed, without acid. The prospector and ore drill work here; nine raw feeds compact into a storage block. Deposits never replenish. Ordinary iron shortcuts require the legacy configuration option.",
             "Chromite: Y -32 to 64.",
-            "Cobaltite: Y -48 to 32."
+            "Cobaltite: Y -48 to 32.",
+            "Titanium-rich Mineral Sand: shallow beds in the Dune Beach, the Overgrown Beach and Beach. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Zircon-rich Mineral Sand: shallow beds in the Outback, the Lush Desert, the Dry River, Desert and Badlands. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Rare-earth-rich Mineral Sand: shallow beds in the Basin, the Lake District, the Lush River and River. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Garnet-rich Mineral Sand: shallow beds in the Gravel Beach, the Highland, the Shield, Stony Shore and Windswept Gravelly Hills. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it."
           ]
         },
         {
@@ -3117,10 +3122,10 @@
             "The Cinder Tyrant, in the Cinder Kiln: Cinderbrand and Magmaw.",
             "The Mire Hag, in the Lantern Fen: Hagthorn and Bogfang.",
             "The Crypt Lich, in the Archive of Last Names: Soulreaver and Gravewarden.",
+            "The Iron Dreadnought, in the Foundry Trench: Dynamo Halberd and Piston Hammer.",
             "Vesperine, the Last Reaper, in the Hollow Acre: Vesper Scythe.",
             "Madame Tatterlace, in the Spindle Loft: Needle Rapier.",
             "These are yet to be met in the world, and will each carry two:",
-            "The Iron Dreadnought: Dynamo Halberd and Piston Hammer.",
             "The Alpha Werewolf: Moonfang and Howler.",
             "The Storm Roc: Stormcaller and Galefeather.",
             "The Abyssal Leviathan: Tidebreaker and Leviathan's Hook.",
@@ -3795,7 +3800,7 @@
           "craft": {
             "grid": [
               "jugcraft:steel_plate",
-              "jugcraft:aluminum_cable",
+              "jugcraft:copper_cable",
               "jugcraft:steel_plate",
               "jugcraft:steel_tank",
               "jugcraft:advanced_circuit",
@@ -6024,6 +6029,13 @@
           }
         },
         {
+          "title": "Automation Upgrade",
+          "icon": "jugcraft:automation_upgrade",
+          "text": [
+            "Enables saved recipe priorities and output stock targets in supported machines. Open Recipes to configure up to eight rules. Removing the card suspends the rules without deleting them."
+          ]
+        },
+        {
           "title": "Comparators",
           "icon": "minecraft:comparator",
           "text": [
@@ -6059,7 +6071,7 @@
           "title": "Specialist zirconia tooling",
           "icon": "jugcraft:zirconia_insert",
           "text": [
-            "The Conditioner recovers one trace Zircon Concentrate from 16 sand and 1000 mB water. Two concentrate plus 500 mB lye make one precursor; calcine it in the Industrial Oven for zirconia powder. This expensive, deterministic starter route works in existing worlds without new chunks. Regional mineral-sand integration is a future improvement.",
+            "The Conditioner recovers one trace Zircon Concentrate from 16 sand and 1000 mB water. Two concentrate plus 500 mB lye make one precursor; calcine it in the Industrial Oven for zirconia powder. This expensive, deterministic starter route works in existing worlds without new chunks. Regional Zircon-rich Mineral Sand is the efficient route: two sand and 500 mB water produce one concentrate.",
             "Condition, press and fire zirconia like alumina, then finish one fired blank into two cutting inserts. An insert, steel plate and iron ingot craft a reusable polymer mold or extrusion die in a selected pattern. The original all-metal tool recipes remain available.",
             "Inputs and costs are simplified game balance. Consumed preparation liquids are spent; only the Finisher returns its cooling water. There is no recycling recipe that turns finished components back into more feedstock."
           ]

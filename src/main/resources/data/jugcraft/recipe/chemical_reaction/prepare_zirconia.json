@@ -13,22 +13,22 @@
   "capability": "jugcraft:mineral_conditioning",
   "items": [
     {
-      "ingredient": "jugcraft:zircon_concentrate",
-      "count": 2
+      "ingredient": "jugcraft:zirconia_powder",
+      "count": 1
     }
   ],
   "fluids": [
     {
-      "fluid": "jugcraft:lye",
-      "amount": 500
+      "fluid": "minecraft:water",
+      "amount": 125
     }
   ],
   "results": [
     {
-      "id": "jugcraft:zirconia_precursor",
+      "id": "jugcraft:zirconia_charge",
       "count": 1
     }
   ],
-  "energy_per_tick": 64,
-  "time": 240
+  "energy_per_tick": 32,
+  "time": 160
 }

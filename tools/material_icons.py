@@ -73,8 +73,8 @@ METAL_RAMPS = {
     "solder": ramp("2a2c31 616572 8f93a0 babcc5 e7e7ea"),    # plain mid grey
     "steel": ramp("1e2129 4a5262 6e7889 98a2b4 d0d8e4"),     # the owner's choice
     "ferrochromium": ramp("252331 514a67 817395 b0a1bf dccfe7"),  # dark violet cast, alloying stock
-    "stainless_steel": ramp("263d42 567a80 8dadae becfcb e9f2e8"),  # satin silver, restrained teal cast
-    "aluminum_magnesium": ramp("3d3842 81788c b7a8ba dfcddd f7eef2"),  # pale violet silver, structural alloy
+    "stainless_steel": ramp("253a3c 4d7272 729697 a3bcb8 d9e3dd"),  # satin silver, restrained teal cast
+    "aluminum_magnesium": ramp("352c36 795b79 ac89ac d2b1cc ecd9e8"),  # pale violet silver, structural alloy
 }
 
 # How far apart any two metals' ramps must be (ramp_distance): ours, and ours against the mod's stand-ins for vanilla's
@@ -100,6 +100,7 @@ ORE_RAMPS = {
     "spodumene": ramp("455847 7e9574 b5c79b dfe7ba f6f7de"),  # pale-green crystal; append to preserve existing overlays
     "chromite": ramp("211d25 423848 65536c 907a96 c5b6c8"),  # dark chromite grains; append, never reorder old layouts
     "cobaltite": ramp("202735 3e5069 627d98 94adbc c7d8dd"),
+    "vanadium_iron": ramp("202832 3c4750 66757e 99a6ad d2dbe0"),  # dark vanadiferous magnetite
 }
 
 # The three overlay layouts, taken in turn down ORE_RAMPS, so neighbouring ores do not look alike.
@@ -216,6 +217,8 @@ def material_textures():
     out[("block", "cobaltite_block")] = draw("raw_block", tones(ORE_RAMPS["cobaltite"]))
     out[("item", "chromite")] = draw("raw", tones(ORE_RAMPS["chromite"]))
     out[("block", "chromite_block")] = draw("raw_block", tones(ORE_RAMPS["chromite"]))
+    out[("item", "vanadium_iron")] = draw("raw", tones(ORE_RAMPS["vanadium_iron"]))
+    out[("block", "vanadium_iron_block")] = draw("raw_block", tones(ORE_RAMPS["vanadium_iron"]))
     return out
 
 

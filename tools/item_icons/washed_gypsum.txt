@@ -1,5 +1,5 @@
 # washed_gypsum: package 5 native editable icon.
-# materials: main=glass
+# materials: main=tech_glass
 # family: compact
 ................
 ................

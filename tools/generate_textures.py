@@ -1592,5 +1592,14 @@ def fluorite_assets(assets):
     material_icons.draw("raw",material_icons.tones(material_icons.ORE_RAMPS["fluorite"])).save(assets/"textures/item/fluorite.png")
 
 
+def fluorite_assets(assets):
+    from pathlib import Path
+    import shutil
+    import material_icons
+    source=Path(__file__).resolve().parents[1]/"art/owner-library/originals/Blocks/block_fluorite.png"
+    shutil.copyfile(source,assets/"textures/block/fluorite_block.png")
+    material_icons.draw("raw",material_icons.tones(material_icons.ORE_RAMPS["fluorite"])).save(assets/"textures/item/fluorite.png")
+
+
 if __name__ == "__main__":
     main()

@@ -1,10 +1,14 @@
 # Advanced electronics and local automation — package 4
 
-Owner request: 14 October 2026. Implemented locally by OpenAI Codex (GPT-6).
-**Unbuilt, untested, uncommitted and unpushed.** The owner explicitly deferred
-builds, checks and playtesting until the selected packages 1–7 are implemented.
-Only source/resource authoring and static inspection were performed. Generated
-resources are not proof that the mod compiles or that any gameplay works.
+Technology package 4, implemented locally with OpenAI Codex (GPT-6). On 16 October
+2026 the owner authorized integration with main and local validation of all seven
+packages. The earlier testing hold is superseded. **Keep this work local until the
+owner has played it and approves publication.**
+
+Current build, test evidence, draft reconciliation and remaining release checks:
+[seven-package integration record](tech-seven-local-integration.md). The detailed
+verification lists below are release checklists; only results explicitly recorded
+there are claimed complete.
 
 ## Player progression
 
@@ -43,7 +47,7 @@ outlet stops new batches. Existing paid batches keep their inputs and outputs.
 All quantities below are simplified game receipts. They are not a real chemical
 composition model; the single spent mixture abstracts acids, rinse and resist waste.
 
-- **Electronic sulfuric acid:** Conditioner takes 1000 mB ordinary sulfuric acid
+- **Electronic sulfuric acid:** Conditioner takes 1000 mB concentrated sulfuric acid
   and 250 mB water, returning 750 mB electronic-grade acid and 500 mB spent mixture.
   Purity remains distinct from concentrated acid. Conditioning water is internal
   to this job; no new purified-water currency is required.
@@ -123,7 +127,7 @@ extends its current factory geometry/material kit. No owner-library originals
 were modified or executed. Six fluids use the canonical animated-fluid writer.
 The Handbook, Encyclopedia and recipe-view resources include this chain.
 
-## Verification still required after packages 1–7
+## Release verification checklist
 
 - Compile both optional-integration configurations; resource, recipe, item-map,
   registration, feature-gating and port/model audits.
@@ -137,7 +141,7 @@ The Handbook, Encyclopedia and recipe-view resources include this chain.
   cap/reset; representative factory performance and absence of remote scans.
 - Owner-controlled local playtest of visuals, screen layout at different scales,
   hover explanations, animations, sound inherited from existing machinery, ports
-  and full progression. Nothing was launched during implementation.
+  and full progression. The owner controls the separate manual playtest.
 
 Later extensions: remote/coordinated automation, external storage targets,
 larger advanced equipment where justified, silane/deposition and spent-wafer

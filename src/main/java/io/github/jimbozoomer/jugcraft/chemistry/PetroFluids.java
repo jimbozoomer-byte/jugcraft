@@ -208,6 +208,7 @@ public final class PetroFluids {
 	public static Entry SEMICONDUCTOR_PHOTORESIST;
 	public static Entry SPENT_WAFER_MIXTURE;
 	public static void register() {
+
 		CRUDE_OIL = fluid("crude_oil", 20, 2, 2, 0xFF1E1711, MapColor.COLOR_BLACK);
 		NAPHTHA = fluid("naphtha", 5, 4, 1, 0xFFBEAA64, MapColor.COLOR_YELLOW);
 		DIESEL = fluid("diesel", 8, 3, 1, 0xFFAA6E19, MapColor.COLOR_ORANGE);
@@ -286,13 +287,13 @@ public final class PetroFluids {
 		PHOSPHATE_SLURRY = fluid("phosphate_slurry", 8, 3, 1, 0xFF5B573E, MapColor.COLOR_LIGHT_GRAY);
 		PHOSPHORIC_ACID = fluid("phosphoric_acid", 8, 3, 1, 0xFF60786C, MapColor.COLOR_LIGHT_GRAY);
 
+		SYNTHETIC_CRUDE = fluid("synthetic_crude", 8, 3, 1, 0xFF423927, MapColor.COLOR_LIGHT_GRAY);
+		TREATED_PROCESS_WATER = fluid("treated_process_water", 8, 3, 1, 0xFF4C655F, MapColor.COLOR_LIGHT_GRAY);
+		RECOVERY_CONCENTRATE = fluid("recovery_concentrate", 8, 3, 1, 0xFF524656, MapColor.COLOR_LIGHT_GRAY);
 		LIQUID_METHANE = fluid("liquid_methane", 8, 3, 1, 0xFF48656D, MapColor.COLOR_LIGHT_GRAY);
 		LIQUID_HYDROGEN = fluid("liquid_hydrogen", 8, 3, 1, 0xFF51607C, MapColor.COLOR_LIGHT_GRAY);
 		HYDRAZINE = fluid("hydrazine", 8, 3, 1, 0xFF606749, MapColor.COLOR_LIGHT_GRAY);
 		DINITROGEN_TETROXIDE = fluid("dinitrogen_tetroxide", 8, 3, 1, 0xFF734830, MapColor.COLOR_LIGHT_GRAY);
-		SYNTHETIC_CRUDE = fluid("synthetic_crude", 8, 3, 1, 0xFF423927, MapColor.COLOR_LIGHT_GRAY);
-		TREATED_PROCESS_WATER = fluid("treated_process_water", 8, 3, 1, 0xFF4C655F, MapColor.COLOR_LIGHT_GRAY);
-		RECOVERY_CONCENTRATE = fluid("recovery_concentrate", 8, 3, 1, 0xFF524656, MapColor.COLOR_LIGHT_GRAY);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

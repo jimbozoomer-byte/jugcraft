@@ -75,7 +75,9 @@ for grade, feed, feature in [('porcelain', 'porcelain_batch', 'silicon'),
 # add a better receipt without becoming a mandatory gate or renaming this item.
 add('recover_trace_zircon', 'mineral_conditioner', 'minecraft:sand', 16,
     'zircon_concentrate', water=1000, ticks=400, power=48)
-add('prepare_zirconia', 'mineral_conditioner', 'jugcraft:zircon_concentrate', 2,
+add('recover_regional_zircon', 'mineral_conditioner', 'jugcraft:zircon_sand', 2,
+    'zircon_concentrate', water=500, ticks=200, power=48, features=['mineral_sands'])
+add('prepare_zirconia_precursor', 'mineral_conditioner', 'jugcraft:zircon_concentrate', 2,
     'zirconia_precursor', reagent=('jugcraft:lye', 500), ticks=240, power=64, features=['salt'])
 add('calcine_zirconia', 'alumina_calciner', 'jugcraft:zirconia_precursor', 1,
     'zirconia_powder', ticks=320, power=80, features=['salt'])
@@ -97,6 +99,7 @@ for product, feed, count, tool, feature in FINISHING:
 MACHINE_RECIPES = {
     'pulverizer': [dict(name='ceramics_clay_powder', input='minecraft:clay_ball',
                        output='jugcraft:clay_powder', count=1, ticks=80, features=['machines'])],
+    'circuit_assembler': [dict(name='ceramics_processor_on_alumina', inputs=[('jugcraft:microchip',4),('jugcraft:advanced_circuit',1),('jugcraft:alumina_plate',1)], output='jugcraft:processor',count=1,ticks=200,features=['machines','silicon','aluminum'])],
     'metal_press': [dict(name='ceramics_' + grade + '_blank', input='jugcraft:' + grade + '_charge',
                         output='jugcraft:' + grade + '_blank', count=1, ticks=100,
                         features=['machines']) for grade in ('porcelain', 'alumina', 'zirconia')],
@@ -123,7 +126,7 @@ GUIDE_PAGES = [
         'Finished Alumina Plates provide the insulating body of an alternate Efficiency Upgrade. Porcelain insulators make existing placed Ceramic Insulators and an alternate Copper Cable recipe. These are extra recipes: old recipes and saved equipment stay available.',
         'Two borosilicate glass make two Optical Blanks. The Felt Polishing Head finishes each into a lens; two lenses, a brass plate and a compass make the existing Range Finder. Lenses also make spyglasses. Advanced wafer equipment will use this same finishing specialty in a later package.']},
     {'title': 'Specialist zirconia tooling', 'icon': 'jugcraft:zirconia_insert', 'text': [
-        'The Conditioner recovers one trace Zircon Concentrate from 16 sand and 1000 mB water. Two concentrate plus 500 mB lye make one precursor; calcine it in the Industrial Oven for zirconia powder. This expensive, deterministic starter route works in existing worlds without new chunks. Regional mineral-sand integration is a future improvement.',
+        'The Conditioner recovers one trace Zircon Concentrate from 16 sand and 1000 mB water. Two concentrate plus 500 mB lye make one precursor; calcine it in the Industrial Oven for zirconia powder. This expensive, deterministic starter route works in existing worlds without new chunks. Regional Zircon-rich Mineral Sand is the efficient route: two sand and 500 mB water produce one concentrate.',
         'Condition, press and fire zirconia like alumina, then finish one fired blank into two cutting inserts. An insert, steel plate and iron ingot craft a reusable polymer mold or extrusion die in a selected pattern. The original all-metal tool recipes remain available.',
         'Inputs and costs are simplified game balance. Consumed preparation liquids are spent; only the Finisher returns its cooling water. There is no recycling recipe that turns finished components back into more feedstock.']},
 ]
@@ -183,6 +186,10 @@ def write_extras(write, assets, data, lang, condition):
            'jugcraft:range_finder', features=['silicon'])
     shaped('spyglass', ['L', 'C', 'C'], {'L': 'jugcraft:polished_lens', 'C': 'minecraft:copper_ingot'},
            'minecraft:spyglass', features=['silicon'])
+    shaped('main_transformer', ['IAI', 'CBC', 'SSS'],
+           {'I': 'jugcraft:porcelain_insulator', 'A': 'jugcraft:aluminum_cable',
+            'C': 'minecraft:copper_block', 'B': '#c:storage_blocks/steel', 'S': '#c:plates/steel'},
+           'jugcraft:main_transformer', features=['aluminum', 'silicon'])
     # Each tool has a unique arrangement, no overlapping shapeless choice.
     from coastal_metals import MOLDS
     from polymers import DIES

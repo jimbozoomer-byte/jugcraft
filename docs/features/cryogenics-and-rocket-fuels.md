@@ -1,10 +1,14 @@
 # Cryogenics and rocket fuels — package 7
 
-Owner request, 14 October 2026: implement cryogenics and rocket fuels, reuse machines,
-update TODO, **do not test or push yet**. Local implementation only; not built,
-audited, run in Minecraft or verified in multiplayer. Earlier CI does not cover it.
-Packages 1–6 remain in the same local work. Completing this package does not lift
-the validation/publishing hold.
+Technology package 7, implemented locally with OpenAI Codex (GPT-6). On 16 October
+2026 the owner authorized integration with main and local validation of all seven
+packages. The earlier testing hold is superseded. **Keep this work local until the
+owner has played it and approves publication.**
+
+Current build, test evidence, draft reconciliation and remaining release checks:
+[seven-package integration record](tech-seven-local-integration.md). The detailed
+verification lists below are release checklists; only results explicitly recorded
+there are claimed complete.
 
 ## Player route
 
@@ -79,14 +83,13 @@ enforced by assembly ingredients. These items do not create new vehicles or alte
 payload flight, range, damage or destination access. Future MMH and orbital/station
 systems remain TODO items. No live-server change or PR is part of this work.
 
-## Deferred verification
+## Release verification checklist
 
 When the owner authorizes it: compile and data/icon audit; cooling/tool gating and
 old save loading; manual and shift-click tool removal; output backpressure; fluid
 volume and complete production energy balance; tank break/place, save/reload,
 mixed capacities and pipe/comparator operation; all five payload substitutions and
 invalid fuel pairs; optional feature configuration; guide/viewer readability;
-multiplayer permissions and an owner-controlled local visual playtest. No such
-checks have been run for this package.
+multiplayer permissions and an owner-controlled local visual playtest. Only the checks recorded in the integration record have been run.
 
 AI assistance: OpenAI Codex (GPT-6). Resource authoring is not validation.

@@ -1,5 +1,5 @@
 # Lithium Iron Phosphate Cathode: original battery component map.
-# materials: main=structural_alloy
+# materials: main=iron
 # family: compact
 ................
 ................

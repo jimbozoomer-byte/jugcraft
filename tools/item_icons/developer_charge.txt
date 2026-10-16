@@ -1,5 +1,5 @@
 # TMAH Developer Charge: original editable electronics icon.
-# materials: main=glass
+# materials: main=tech_glass
 # family: compact
 ................
 ................

@@ -1,9 +1,14 @@
 # Advanced ceramics and precision components
 
-Owner-authorized technology package 1, 14 October 2026. Implemented locally with
-OpenAI Codex (GPT-6). **Unbuilt and untested**, intentionally: the owner requested
-deferring validation until the seven selected technology packages are implemented.
-Do not describe this branch as release-ready or merge it on the strength of older CI.
+Technology package 1, implemented locally with OpenAI Codex (GPT-6). On 16 October
+2026 the owner authorized integration with main and local validation of all seven
+packages. The earlier testing hold is superseded. **Keep this work local until the
+owner has played it and approves publication.**
+
+Current build, test evidence, draft reconciliation and remaining release checks:
+[seven-package integration record](tech-seven-local-integration.md). The detailed
+verification lists below are release checklists; only results explicitly recorded
+there are claimed complete.
 
 ## Player outcome
 
@@ -28,7 +33,8 @@ crusher, press, kiln or polishing machine is introduced.
 | Firing | One unfired blank | Industrial Oven | One fired blank; 240 ticks / 48 JE/t for porcelain, 320 ticks / 80 JE/t for alumina or zirconia |
 | Insulation | One fired porcelain blank | Precision Finisher + abrasive head | Two porcelain insulators |
 | Alumina products | One fired alumina blank | Precision Finisher + abrasive head | One finished plate OR one set of bearing balls, selected with the recipe lock |
-| Zircon supply | 16 sand, 1000 mB water | Mineral Conditioner | One zircon concentrate, 400 ticks / 48 JE/t |
+| Regional zircon supply | Two zircon sand, 500 mB water | Mineral Conditioner | One zircon concentrate, 200 ticks / 48 JE/t |
+| Trace zircon supply | 16 sand, 1000 mB water | Mineral Conditioner | One zircon concentrate, 400 ticks / 48 JE/t |
 | Zirconia preparation | Two zircon concentrate, 500 mB lye | Mineral Conditioner | One precursor, 240 ticks / 64 JE/t |
 | Zirconia powder | One precursor | Industrial Oven | One powder, 320 ticks / 80 JE/t; continue through preparation/shaping/firing |
 | Cutting inserts | One fired zirconia blank | Precision Finisher + abrasive head | Two zirconia inserts |
@@ -102,10 +108,10 @@ set the existing `JUGCRAFT_FONT_DIR` to the installed DejaVu TTF directory first
 Generation is not validation. Handbook and Encyclopedia gain a Ceramics and Precision
 chapter describing reachable routes, tools, ports and consumers.
 
-## Deferred validation: run after packages 1–7
+## Release verification checklist
 
-No compilation, data/icon audits, automated game tests or local playtest run for this
-package. No PR, push, main merge or replacement of the owner's installed test pack.
+Current automated results are in the integration record. These broader release
+checks remain subject to manual verification. No remote PR, push or main merge.
 
 - [ ] Build and audit generated data/icons, recipe identities, feature switches and
   full regeneration parity; inspect all new item icons and all machine facings.

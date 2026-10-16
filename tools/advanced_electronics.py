@@ -45,7 +45,7 @@ RECIPES = {
  'mineral_conditioner': [
     rec('purify_silicon','electronics_conditioning',[('jugcraft:silicon',4)],
         [('jugcraft:hydrochloric_acid',500),('minecraft:water',500)], [('jugcraft:high_purity_silicon',2)], [('jugcraft:spent_wafer_mixture',1000,0)],ticks=320),
-    rec('purify_sulfuric','electronics_conditioning',fluids=[('jugcraft:sulfuric_acid',1000),('minecraft:water',250)],
+    rec('purify_sulfuric','electronics_conditioning',fluids=[('jugcraft:concentrated_sulfuric_acid',1000),('minecraft:water',250)],
         fluid_results=[('jugcraft:electronic_sulfuric_acid',750,0),('jugcraft:spent_wafer_mixture',500,1)],ticks=280),
  ],
  'precision_finisher': [

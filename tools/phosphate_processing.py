@@ -63,8 +63,11 @@ REACTOR_RECIPES = [
         results=[('jugcraft:fluorophosphate_precursor',1)],ticks=280,power=64),
 ]
 for recipe in REACTOR_RECIPES: recipe.pop('capability')
+# Drying returns the 125 mB held in each wet intermediate, not newly created water.
+RECIPES['alumina_calciner'][0]['source'] = 125
+
 MACHINE_RECIPES = {
-    'pulverizer': [dict(name='phosphate_grinding',inputs=[('jugcraft:phosphate',1)],
+    'pulverizer': [dict(name='phosphate_grinding',input='jugcraft:phosphate',
         output='jugcraft:ground_phosphate',count=1,ticks=160,features=['machines','phosphate'])],
 }
 TANK_NAMES = {'fluoride_gas': 'Process outlet (HF / phosphate slurry)'}

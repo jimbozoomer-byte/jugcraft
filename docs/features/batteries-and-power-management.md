@@ -1,10 +1,14 @@
 # Batteries and power management
 
-Owner technology package 3, 14 October 2026. Implemented locally with OpenAI Codex
-(GPT-6), following ceramics/precision and structural alloys. **Unbuilt, untested,
-unmerged.** The owner requested deferring builds, automated checks and playtesting
-until packages 1–7 are implemented. Resource authoring and static source inspection
-are not evidence that the game runs or that compatibility tests pass.
+Technology package 3, implemented locally with OpenAI Codex (GPT-6). On 16 October
+2026 the owner authorized integration with main and local validation of all seven
+packages. The earlier testing hold is superseded. **Keep this work local until the
+owner has played it and approves publication.**
+
+Current build, test evidence, draft reconciliation and remaining release checks:
+[seven-package integration record](tech-seven-local-integration.md). The detailed
+verification lists below are release checklists; only results explicitly recorded
+there are claimed complete.
 
 ## Storage progression
 
@@ -144,7 +148,7 @@ module interfaces; the cell stack connects to its controller socket. No loose
 decorative pipe runs. New component art uses editable 16×16 text pixel maps and
 existing material ramps. No source-library files were modified or executables run.
 
-## Deferred verification
+## Release verification checklist
 
 After packages 1–7: compile both optional-framework configurations; resource/icon,
 recipe and registration audits; capacity and recipe progression checks; old battery
@@ -153,4 +157,4 @@ mode/reserve/hysteresis/priority saturation and starvation behavior; expanded-fl
 pickup, detach/rejoin, unload/reload and rotated module layouts; automation and full
 outputs; two-player controls and representative grid load. Review the lossless
 compatibility decision and old/new recipe costs before release. The owner controls
-the local playtest. No builds, tests, launch, commit, push or merge were performed.
+the local playtest. Local build/test results are recorded in the integration record; no remote publication was performed.

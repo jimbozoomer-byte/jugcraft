@@ -1,9 +1,14 @@
 # Synthetic fuels and recovery — package 6
 
-Local implementation, 14 October 2026. **Unbuilt and untested.** The owner requires
-packages 1–7 to be implemented before builds, checks or playtesting. No commits,
-pushes, PRs, merges or launches performed for this package. Prior green CI does not
-validate this work. AI implementation: OpenAI Codex (GPT-6).
+Technology package 6, implemented locally with OpenAI Codex (GPT-6). On 16 October
+2026 the owner authorized integration with main and local validation of all seven
+packages. The earlier testing hold is superseded. **Keep this work local until the
+owner has played it and approves publication.**
+
+Current build, test evidence, draft reconciliation and remaining release checks:
+[seven-package integration record](tech-seven-local-integration.md). The detailed
+verification lists below are release checklists; only results explicitly recorded
+there are claimed complete.
 
 ## Player route and equipment
 

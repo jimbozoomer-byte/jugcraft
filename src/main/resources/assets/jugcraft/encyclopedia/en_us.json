@@ -261,7 +261,7 @@
         {
           "title": "Upgrades",
           "icon": "jugcraft:speed_upgrade",
-          "text": "Speed Upgrade, Efficiency Upgrade, Comparators",
+          "text": "Speed Upgrade, Efficiency Upgrade, Automation Upgrade and more",
           "link": {
             "type": "handbook",
             "chapter": 16,

@@ -143,26 +143,19 @@ public final class MachineRecipeScreen extends Screen {
         if (filtered.isEmpty()) { text(lines, tr(menu.catalog().isEmpty() ? "no_recipes" : "no_recipe_matches"), DIM); return lines; }
         var r = menu.catalog().get(selected).recipe();
         text(lines, name(selected), GREEN);
-        text(lines, menu.hasAutomation() ? tr("automation_summary", menu.recipePriority(selected), targetLabel())
-            : tr("automation_missing"), DIM);
-        text(lines, tr("automation_help"), DIM);
-        var effect = menu.upgrades();
-        int ticks = effect.ticks(r.time());
-        long rate = menu.form().profile().lanePerTick(effect.use(r.energyPerTick() > 0 ? r.energyPerTick() : menu.form().family().usePerTick));
-        text(lines, tr("recipe_cost", ticks, String.format(Locale.ROOT,"%.1f",ticks/20.0), rate, rate*ticks), TEXT);
-        text(lines, tr("recipe_cost_hint", menu.form().profile().lanes()), DIM);
+        var portDetails = new ArrayList<Line>();
         text(lines, tr("recipe_inputs"), GREEN);
         for (int i = 0; i < r.items().size(); i++) {
             var part = r.items().get(i);
             var names = part.ingredient().items().map(item -> new ItemStack(item).getHoverName().getString()).toList();
             var icon = new ItemStack(part.ingredient().items().findFirst().orElseThrow());
             lines.add(new Line(icon, tr("recipe_item_in", i+1, part.count(), String.join(" / ", names)), TEXT));
-            text(lines, Component.literal(port(FormPort.Kind.ITEM_IN, i)), DIM);
+            text(portDetails, Component.literal(port(FormPort.Kind.ITEM_IN, i)), DIM);
         }
         for (int i = 0; i < r.fluids().size(); i++) {
             var f = r.fluids().get(i);
             lines.add(new Line(new ItemStack(f.fluid().getBucket()), tr("recipe_fluid_in", i+1, f.amount(), fluidName(f.fluid())), TEXT));
-            text(lines, Component.literal(port(FormPort.Kind.FLUID_IN, i)), DIM);
+            text(portDetails, Component.literal(port(FormPort.Kind.FLUID_IN, i)), DIM);
         }
         r.tool().ifPresentOrElse(tool -> {
             String names = String.join(" / ", tool.items().map(item -> new ItemStack(item).getHoverName().getString()).toList());
@@ -174,16 +167,25 @@ public final class MachineRecipeScreen extends Screen {
         for (int i = 0; i < r.results().size(); i++) {
             var item = r.results().get(i).create();
             lines.add(new Line(item, tr("recipe_item_out", i+1, item.getCount(), item.getHoverName()), TEXT));
-            text(lines, Component.literal(port(FormPort.Kind.ITEM_OUT, i)), DIM);
+            text(portDetails, Component.literal(port(FormPort.Kind.ITEM_OUT, i)), DIM);
         }
         for (int i = 0; i < r.fluidResults().size(); i++) {
             var f = r.fluidResults().get(i); int tank = f.tank() < 0 ? i : f.tank();
             lines.add(new Line(new ItemStack(f.fluid().getBucket()), tr("recipe_fluid_out", tank+1, f.amount(), fluidName(f.fluid())), TEXT));
-            text(lines, MachineStatus.tankLabel(menu.form(), menu.form().tanks().inputTanks().size()+tank).copy().append(" / " + port(FormPort.Kind.FLUID_OUT, tank)), DIM);
+            text(portDetails, MachineStatus.tankLabel(menu.form(), menu.form().tanks().inputTanks().size()+tank).copy().append(" / " + port(FormPort.Kind.FLUID_OUT, tank)), DIM);
             if (f.retained()) text(lines, tr("recipe_retained"), DIM);
             if (menu.form().waterDrainOutput() == tank) text(lines, tr("recipe_overflow"), DIM);
         }
+        text(lines, menu.hasAutomation() ? tr("automation_summary", menu.recipePriority(selected), targetLabel())
+            : tr("automation_missing"), DIM);
+        var effect = menu.upgrades();
+        int ticks = effect.ticks(r.time());
+        long rate = menu.form().profile().lanePerTick(effect.use(r.energyPerTick() > 0 ? r.energyPerTick() : menu.form().family().usePerTick));
+        text(lines, tr("recipe_cost", ticks, String.format(Locale.ROOT,"%.1f",ticks/20.0), rate, rate*ticks), TEXT);
+        text(lines, tr("recipe_cost_hint", menu.form().profile().lanes()), DIM);
+        text(lines, tr("next_batch_hint"), DIM);
         text(lines, tr("recipe_ports_hint"), DIM);
+        lines.addAll(portDetails);
         text(lines, tr("recipe_status").copy().append(menu.status().title(menu.form())).append(". ").append(menu.status().detail(menu.form())), TEXT);
         return lines;
     }

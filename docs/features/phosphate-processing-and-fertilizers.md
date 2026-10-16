@@ -1,9 +1,14 @@
 # Phosphate processing and fertilizers — package 5
 
-Local implementation, 14 October 2026. **Unbuilt and untested.** Owner instruction:
-finish packages 1–7 before any builds, automated checks or playtesting; keep this
-work local. No commit, push, PR or merge is part of this package. Earlier green
-results do not cover it. AI implementation: OpenAI Codex (GPT-6).
+Technology package 5, implemented locally with OpenAI Codex (GPT-6). On 16 October
+2026 the owner authorized integration with main and local validation of all seven
+packages. The earlier testing hold is superseded. **Keep this work local until the
+owner has played it and approves publication.**
+
+Current build, test evidence, draft reconciliation and remaining release checks:
+[seven-package integration record](tech-seven-local-integration.md). The detailed
+verification lists below are release checklists; only results explicitly recorded
+there are claimed complete.
 
 ## Processing and existing-machine reuse
 
@@ -112,7 +117,7 @@ Owner library consulted: `originals/Blocks/fertilizer.png` and
 No downloaded art or owner-library scripts/JARs were executed. Machines retain
 the existing olive/silver models and functional connection points.
 
-## Deferred verification after packages 1–7
+## Release verification checklist after packages 1–7
 
 - Build, registry/data/icon audits and server/client suites, with optional features disabled.
 - Full survival chain, exact hatches/tanks, wrong leftovers, output backpressure,

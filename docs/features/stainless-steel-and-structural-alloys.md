@@ -1,11 +1,14 @@
 # Stainless steel and structural alloys
 
-Owner-authorized technology package 2, 14 October 2026. Implemented locally with
-OpenAI Codex (GPT-6), on top of [package 1](advanced-ceramics-and-precision.md).
-**Unbuilt, untested and unmerged.** The owner requested no builds, automated checks
-or playtests until packages 1–7 are implemented. Resource generation and source
-inspection are the only verification activities so far; they do not establish
-runtime correctness. Older passing CI does not validate this work.
+Technology package 2, implemented locally with OpenAI Codex (GPT-6). On 16 October
+2026 the owner authorized integration with main and local validation of all seven
+packages. The earlier testing hold is superseded. **Keep this work local until the
+owner has played it and approves publication.**
+
+Current build, test evidence, draft reconciliation and remaining release checks:
+[seven-package integration record](tech-seven-local-integration.md). The detailed
+verification lists below are release checklists; only results explicitly recorded
+there are claimed complete.
 
 ## Player outcome
 
@@ -94,7 +97,7 @@ material geometry/ore-overlay pipeline with new restrained metal palettes.
 No external asset pack or owner-library executable was introduced. Handbook,
 Encyclopedia and shared recipe-view data describe both supply routes and consumers.
 
-## Deferred validation — after packages 1–7
+## Release verification checklist
 
 - Build, registration/resource audits, icon/style review and server/client suites.
 - Ore provinces, surface-versus-cave biome selection, height, feature disabling,
@@ -108,4 +111,5 @@ Encyclopedia and shared recipe-view data describe both supply routes and consume
 - Optional-mod compatibility and the pre-existing recipes, equipment and vehicles.
 - Owner-led local playtest and multiplayer review before publication or merge.
 
-No test results or performance claims are available for this package yet.
+Current automated results are in the integration record. Representative factory
+performance and human survival balance remain unverified.

@@ -133,6 +133,7 @@ ABOUT = {
     "brass_wrench": "Right-click turns a machine. Sneak and right-click to pick a Jugcraft block up, with everything inside.",
     "speed_upgrade": "In a machine's upgrade slot: each card makes it faster but uses more energy per item. Four cards: 3x as "
                      "fast for twice the energy.",
+    "automation_upgrade": "Enables saved recipe priorities and output stock targets in supported machines. Open Recipes to configure up to eight rules. Removing the card suspends the rules without deleting them.",
     "efficiency_upgrade": "In a machine's upgrade slot: each card cuts energy use by a fifth. Four cards: 41% of the energy.",
     "prospector": "Right-click to survey the 3x3 chunks around you, from the bottom of the world to a little above you. "
                   "It shows which ores resonate, how strongly (1 to 5 bars) and roughly how deep, never exactly where.",
@@ -797,7 +798,24 @@ def ores_page():
                      "Look for pale-green mineral faces in small stone outcrops, or use the prospector and ore drill. "
                      "The crusher gives two spodumene per ore; nine compact into a storage block. "
                      "Fire spodumene in the Industrial Oven, then condition two activated spodumene with 500 mB sulfuric acid into two Lithium Carbonate. See Batteries and Power Management; existing lepidolite processing remains available.")
+        elif mineral == "vanadium_iron":
+            line += (" Vanadiferous magnetite: richest below Shield and Volcano, with smaller, rarer pockets below "
+                     "Highland, Basin, Windswept Hills, Windswept Gravelly Hills, Windswept Forest and Stony Peaks. "
+                     "Centers peak near Y -8. Small stone outcrops sometimes mark pockets, except in Volcano. "
+                     "Needs an iron pickaxe; Fortune cannot increase the one raw feed per block. "
+                     "Crush one raw feed or intact ore into one Vanadium-bearing Iron Concentrate (200 ticks at 16 JE/t), "
+                     "then wash with 500 mB water into one Vanadium Oxide (200 ticks at 16 JE/t). "
+                     "Two bricks and the oxide make a reusable Vanadium Contact Bed, without acid. "
+                     "The prospector and ore drill work here; nine raw feeds compact into a storage block. "
+                     "Deposits never replenish. Ordinary iron shortcuts require the legacy configuration option.")
         lines.append(line)
+    from mineral_sands import SANDS
+    for name, info in SANDS.items():
+        lines.append(f"{info['display']}: shallow beds in {biome_names(info['biomes'])}. "
+                     "Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. "
+                     "Each mineral-sand block is one finite feed unit; Fortune does not increase it. "
+                     "The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; "
+                     "the Deposit Drill and generic ore-doubling recipes do not process it.")
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
             "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}
 

@@ -27,6 +27,7 @@ public final class JugcraftWorldgen {
 
 	public static void register() {
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("surface_linked_ore"), SurfaceLinkedOreFeature.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("mineral_sand"), MineralSandFeature.CODEC);
 		Predicate<BiomeSelectionContext> overworld = BiomeSelectors.foundInOverworld();
 
 		// Metal and mineral ores: placed feature name, feature switch.
@@ -40,6 +41,9 @@ public final class JugcraftWorldgen {
 				{"spodumene", "lithium"},
 				{"chromite", "machines"},
 				{"cobaltite", "machines"},
+				{"titanium_sand", "mineral_sands"}, {"zircon_sand", "mineral_sands"},
+				{"rare_earth_sand", "mineral_sands"}, {"garnet_sand", "mineral_sands"},
+				{"vanadium_iron", "vanadium"}, {"vanadium_iron_rich", "vanadium"},
 		};
 		for (String[] ore : ores) {
 			add(ore[0], ore[1], overworld);

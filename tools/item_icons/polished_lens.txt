@@ -1,5 +1,5 @@
 # Polished Glass Lens: original Jugcraft pixel map.
-# materials: main=glass
+# materials: main=tech_glass
 # family: compact
 ................
 ................
