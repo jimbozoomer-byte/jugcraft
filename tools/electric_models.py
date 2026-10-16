@@ -283,7 +283,47 @@ def flow_battery():
     return m
 
 
-MODELS = {"battery_box": battery_box(), "capacitor_bank": capacitor_bank(), "solar_panel": solar_panel(),
+def lead_acid_battery():
+    """A lead-acid battery bank (docs/features/lead-acid-battery.md): three black moulded cells side by side in a
+    graphite rack, open at the top so their red (+) and black (-) terminal posts show, wired in series by lead straps;
+    a hazard-striped front rail with the output port and a status lamp, and cable ports in the middle of the other sides."""
+    m = [box((0, 0, 0), (16, 1.5, 16), FRAME)]
+    for x, z in ((0.25, 0.25), (13.75, 0.25), (0.25, 13.75), (13.75, 13.75)):
+        m.append(box((x, 1.5, z), (x + 2, 12, z + 2), FRAME))
+    m.append(box((1, 10.5, 1), (15, 11.5, 2), FRAME))
+    m.append(box((1, 10.5, 14), (15, 11.5, 15), FRAME))
+    # The electric look's glowing strips along the front and back rails.
+    m.append(box((2.25, 10.75, 0.6), (13.75, 11.25, 1), GLOW))
+    m.append(box((2.25, 10.75, 15), (13.75, 11.25, 15.4), GLOW))
+    # Three cells: case walls ribbed, lid dark. Terminals alternate front and back so the straps chain them in series.
+    for i, x0 in enumerate((1.75, 6, 10.25)):
+        x1 = x0 + 4
+        m.append(box((x0, 1.5, 2.25), (x1, 10, 13.75), {"*": "el_battery_case", "up": "el_dark"}))
+        cx = (x0 + x1) / 2
+        front, back = ("el_terminal_red", "el_dark") if i % 2 == 0 else ("el_dark", "el_terminal_red")
+        m += cyl("y", cx, 4.5, 0.9, 10, 11.75, front)
+        m += cyl("y", cx, 11.5, 0.9, 10, 11.75, back)
+        m.append(box((cx - 1.25, 10, 6.75), (cx + 1.25, 10.5, 9.25), "el_vent"))
+        # A light label band across the cell's front, as moulded batteries carry.
+        m.append(box((x0 + 0.5, 5.5, 2), (x1 - 0.5, 8, 2.25), "el_white"))
+    # Lead straps: cell 1 back to cell 2 back, cell 2 front to cell 3 front.
+    m.append(box((3.5, 11.75, 11), (8.5, 12.25, 12), "el_lead"))
+    m.append(box((7.75, 11.75, 4), (12.75, 12.25, 5), "el_lead"))
+    # Leads from the end terminals down to the output port.
+    m.append(box((3.25, 11.75, 2), (4.25, 12.25, 5), "el_lead"))
+    m.append(box((11.75, 11.75, 11), (12.75, 12.25, 14.25), "el_lead"))
+    # Front rail: hazard stripe, output port and status lamp.
+    m.append(box((1, 1.5, 0.75), (15, 4, 2.25), {"*": FRAME, "north": HAZARD}))
+    m.append(box((6.75, 4.5, 0.75), (9.25, 7, 2.25), {"*": FRAME, "north": PORT + "!"}))
+    m.append(dial("north", (12, 5.75, 1.25), 1.75, texture=LAMP, body=FRAME))
+    # Ports where cables meet the other sides.
+    m.append(box((0.25, 5.5, 6), (1.75, 10, 10), {"*": FRAME, "west": PORT + "!"}))
+    m.append(box((14.25, 5.5, 6), (15.75, 10, 10), {"*": FRAME, "east": PORT + "!"}))
+    m.append(box((6, 5.5, 13.75), (10, 10, 15.75), {"*": FRAME, "south": PORT + "!"}))
+    return m
+
+
+MODELS = {"battery_box": battery_box(), "lead_acid_battery": lead_acid_battery(), "capacitor_bank": capacitor_bank(), "solar_panel": solar_panel(),
           "electric_pump": electric_pump(), "fuel_cell": fuel_cell(),
           "lithium_battery_bank": lithium_battery_bank(), "advanced_solar_panel": advanced_solar_panel(),
           "advanced_engine": advanced_engine(), "flow_battery": flow_battery()}

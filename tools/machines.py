@@ -28,6 +28,8 @@ MACHINES = {
     "steel_foundry": {"display": "Steel Foundry", "lit": True},
     # Storage multi-blocks (2x2): a capacitor bank and a steel tank.
     "capacitor_bank": {"display": "Capacitor Bank", "lit": False},
+    # Storage (docs/features/lead-acid-battery.md): three lead-acid cells in a rack, between the battery box and the bank.
+    "lead_acid_battery": {"display": "Lead-Acid Battery", "lit": False},
     "steel_tank": {"display": "Steel Tank", "lit": False},
     # Mining: a 2-tall powered derrick that mines ores in a 9x9 column below it.
     "ore_drill": {"display": "Ore Drill", "lit": True},
@@ -240,6 +242,7 @@ STATS = {
     "sawmill": {"capacity": 10_000, "input_per_tick": 128, "use_per_tick": 12},
     # 2x2. Outputs from its front (all four blocks), charges from any other face.
     "capacitor_bank": {"capacity": 4_000_000, "io_per_tick": 4_096},
+    "lead_acid_battery": {"capacity": 1_600_000, "io_per_tick": 1_024},
     # 2x2, one tall with a dome: 128 buckets of one fluid. No power.
     "steel_tank": {"capacity": 0, "tank": 128_000},
     # 3x3x3 sphere on legs: 1,024 buckets of one gas, and only gases. No power.
@@ -461,6 +464,10 @@ CRAFTING = {
                                                    "C": "jugcraft:basic_circuit"}, 1),
     # Storage.
     "item_crate": (["PWP", "W W", "PWP"], {"P": "#c:plates/iron", "W": "#minecraft:planks"}, 1),
+    # Lead plates and a bucket of sulfuric acid (the bucket comes back) round a battery box, in a steel rack.
+    "lead_acid_battery": (["LAL", "PBP", "LCL"], {"L": "#c:plates/lead", "A": "jugcraft:sulfuric_acid_bucket",
+                                                  "P": "#c:plates/steel", "B": "jugcraft:battery_box",
+                                                  "C": "jugcraft:copper_cable"}, 1),
     "capacitor_bank": (["PBP", "BCB", "PBP"], {"P": "#c:plates/steel", "B": "jugcraft:battery_box",
                                                "C": "jugcraft:advanced_circuit"}, 1),
     "steel_tank": (["PPP", "PTP", "PPP"], {"P": "#c:plates/steel", "T": "jugcraft:fluid_tank"}, 1),

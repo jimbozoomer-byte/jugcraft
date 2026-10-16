@@ -575,6 +575,47 @@ def receiver(seed):
     return img
 
 
+# The lead-acid battery (docs/features/lead-acid-battery.md): moulded black polypropylene cases with ribbed walls, red
+# and black terminal posts, and dull lead bus straps.
+CASE = [(18, 20, 22), (28, 31, 34), (40, 44, 48), (56, 61, 66), (78, 84, 90)]
+TERMINAL_RED = [(96, 18, 16), (150, 32, 26), (196, 52, 40), (232, 96, 80)]
+LEAD = [(70, 74, 82), (96, 100, 110), (122, 128, 138), (150, 156, 166)]
+
+
+def battery_case(seed):
+    """A lead-acid cell's case: black moulded plastic with a ridge every four pixels and a lighter rim along the top."""
+    rng = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = _noise(rng, CASE[1], CASE[2], 0.12)
+            if x % 4 == 0:
+                c = CASE[3]
+            elif x % 4 == 1:
+                c = CASE[0]
+            if y in (0, 1):
+                c = CASE[4] if y == 0 else CASE[3]
+            if y == 15:
+                c = CASE[0]
+            put(img, x, y, c)
+    return img
+
+
+def flat(colours, seed, light_top=True):
+    """A flat moulded or cast surface in a four-tone ramp, lit from the top left."""
+    rng = random.Random(seed)
+    img = new()
+    for y in range(16):
+        for x in range(16):
+            c = _noise(rng, colours[1], colours[2], 0.15)
+            if light_top and (x == 0 or y == 0):
+                c = colours[3]
+            elif x == 15 or y == 15:
+                c = colours[0]
+            put(img, x, y, c)
+    return img
+
+
 def draw_all():
     save(casing(730), "el_casing")
     save(seams(731), "el_seams")
@@ -616,3 +657,6 @@ def draw_all():
     save(beige(745), "rt_beige")
     save(floppy(746), "rt_floppy")
     save(retro_keys(747), "rt_keys")
+    save(battery_case(759), "el_battery_case")
+    save(flat(TERMINAL_RED, 760), "el_terminal_red")
+    save(flat(LEAD, 761), "el_lead")

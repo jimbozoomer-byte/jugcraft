@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LAL",
+    "PBP",
+    "LCL"
+  ],
+  "key": {
+    "L": "#c:plates/lead",
+    "A": "jugcraft:sulfuric_acid_bucket",
+    "P": "#c:plates/steel",
+    "B": "jugcraft:battery_box",
+    "C": "jugcraft:copper_cable"
+  },
+  "result": {
+    "id": "jugcraft:lead_acid_battery",
+    "count": 1
+  }
+}

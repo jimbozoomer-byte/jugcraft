@@ -53,6 +53,7 @@
     "coke_oven": "diesel",
     "steel_foundry": "diesel",
     "capacitor_bank": "electric",
+    "lead_acid_battery": "electric",
     "steel_tank": "diesel",
     "ore_drill": "diesel",
     "deposit_drill": "diesel",

@@ -54,7 +54,7 @@ COLORS = {
             "progress": 0xFFB8F6FF, "label": 0xFFC6E2E6},
 }
 
-ELECTRIC = {"battery_box", "capacitor_bank", "solar_panel", "fuel_cell", "lithium_battery_bank", "advanced_solar_panel",
+ELECTRIC = {"battery_box", "capacitor_bank", "lead_acid_battery", "solar_panel", "fuel_cell", "lithium_battery_bank", "advanced_solar_panel",
             "advanced_engine", "flow_battery"}
 LAB = {"gas_centrifuge_cascade", "fuel_fabricator", "lithography_station", "chemical_reactor", "electrolytic_cell", "air_separation_unit",
        "synthesis_converter", "polymerization_reactor", "flowback_treatment_unit",
@@ -80,6 +80,7 @@ TAGLINES = {
     "coke_oven": "Bakes coal into coke. No power needed.",
     "steel_foundry": "Refines iron and coke into steel.",
     "capacitor_bank": "Stores power. Gives it out of its front.",
+    "lead_acid_battery": "Stores power. Gives it out of its front.",
     "steel_tank": "Holds 128 buckets of one fluid.",
     "ore_drill": "Mines the ore under it, layer by layer.",
     "deposit_drill": "Works surface deposits into ore.",

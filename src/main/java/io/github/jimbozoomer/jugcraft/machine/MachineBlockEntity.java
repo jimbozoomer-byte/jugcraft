@@ -489,7 +489,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			case ADVANCED_SOLAR_PANEL -> tickSolar(level, pos);
 			case STEAM_GENERATOR -> tickSteam(level, pos);
 			case LARGE_STEAM_ENGINE -> tickLargeEngine(level, pos, state);
-			case BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK, FLOW_BATTERY -> tickBattery(level, pos, state);
+			case BATTERY_BOX, CAPACITOR_BANK, LEAD_ACID_BATTERY, LITHIUM_BATTERY_BANK, FLOW_BATTERY -> tickBattery(level, pos, state);
 			case STEEL_TANK, GAS_HOLDER -> false;
 			case GEOTHERMAL_GENERATOR -> tickGeothermal(level, pos, state);
 			case WIND_TURBINE -> tickWind(level, pos, state);
