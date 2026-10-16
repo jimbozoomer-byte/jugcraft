@@ -14,7 +14,7 @@ Implementation follows [the roster](../branches/TREES.md) in dependency order. E
 | 4 | Tree/wood split; snowpetal cherry and shimmer birch | Owner approved; PR #389 ready |
 | 4b-4c | Bald cypress roots; magnolia | Owner approved; PR #395 ready |
 | 5 | Seasonal fruit; rowan, elder and fruitwood | Owner approved; PR #396 ready; [record](trees-batch-5.md) |
-| 5b-5c | Hawthorn; persimmon | In progress; [design and evidence](trees-batch-5bc.md) |
+| 5b-5c | Hawthorn; persimmon | Implemented; owner inspection pending in draft PR #397; [record](trees-batch-5bc.md) |
 | 6-6b | Juniper, gorse, sagebrush, holly | Pending |
 | 7-8c | Olive, stone pine, wattle, tamarisk, Joshua tree | Pending |
 | 9-9b | Giant fungi, bramble, dragonblood | Pending |
