@@ -119,6 +119,7 @@ KEY_HELP = {
 # used; that set's language file credits "Icons by JoeCreates (CC-BY-SA 3.0)" (waystones.iconCredits), a notice kept
 # with the asset in docs/features/arcane-concordance-first-route.md.
 OWNER_FILES = {
+    "textures/gui/encyclopedia/book.png": "gui/spell_book_template.png",
     "textures/gui/sprites/encyclopedia/inventory_button.png": "textures/gui/sprites/inventory/inventory_button.png",
 }
 
@@ -316,6 +317,8 @@ def lang_entries(lang):
     for key, text in KEY_HELP.items():
         lang[f"encyclopedia.{MOD}.key.{key}"] = text
     lang.update(CLIENT)
+    import reading_ui
+    reading_ui.lang_entries(lang)
 
 
 # ---------------------------------------------------------------- the record's table

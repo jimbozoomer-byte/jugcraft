@@ -1,5 +1,14 @@
 # Jugcraft TODO list
 
+## Spellcraft and encyclopedia UI — 16 October 2026
+
+- [x] Local implementation: replace spell text entry with an animated, keyboard-accessible constellation editor over the existing compiler.
+- [x] Local implementation: illustrated two-page encyclopedia, simple contents, topic directories and focused detail/recipe pages.
+- [x] Rendered interaction/scale checks, full server regression and optional-library absence checks passed locally.
+- [ ] Owner visual review and manual playtest before pushing this redesign.
+- [ ] After UI acceptance, expand the bestiary beyond encountered-lair dossiers and consider optional search/favorites.
+- Evidence and scope: [constellation and field-guide record](features/constellation-and-field-guide.md).
+
 ## Spawn-city refinement — 16 October 2026
 
 - [x] Local architectural pass: repair church roof/rear enclosure, refine facade

@@ -16124,8 +16124,8 @@ def check_composer(co, root, lang):
     """Chunk A (A-01 to A-03): the composer screen and the compose command are one service. Composing asks its questions
     in the command's order (the Concordance on, an instrument in hand, still the one a screen showed, the shared rate,
     then the compiler) and is the only writer of a composed inscription; the composer's server side answers through it,
-    writes nothing itself, bounds its request and rate-limits opening; the GuiLib workspace is reached only when GuiLib
-    is installed and its stylesheet ships; and every word the screens use has its text."""
+    writes nothing itself, bounds its request and rate-limits opening; every UI entry point opens the shared
+    constellation editor without text entry or client-side validation authority."""
     cm = co.composer
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -16164,22 +16164,15 @@ def check_composer(co, root, lang):
     screens = client + text(CLIENT_JAVA_ROOT / "ComposerScreen.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
     workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ComposerWorkspace.kt"
     workspace = text(workspace_path)
-    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*ComposerWorkspace\.open\(parent\)', client):
-        err("ComposerClient.java: the composer's GuiLib workspace opens only when GuiLib is installed")
-    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
-        if path.name != "ComposerClient.java" and "ComposerWorkspace" in text(path):
-            err(f"{path.name}: only ComposerClient reaches the composer's GuiLib workspace (behind its isModLoaded check)")
-    if '"jugcraft:ui/composer.css"' not in workspace or not (ASSETS / "ui" / "composer.css").is_file():
-        err("composer: the GuiLib workspace's stylesheet assets/jugcraft/ui/composer.css must exist and be the one it opens")
-    # GuiLib's inputs clip (overflow: hidden), so a flex column may squeeze one to its padding: CI's screenshot of the
-    # workspace showed the spell box a sliver. The box keeps its height and the scrolling body takes what is left.
-    stylesheet = (ASSETS / "ui" / "composer.css").read_text(encoding="utf-8") if (ASSETS / "ui" / "composer.css").is_file() else ""
-    spell_rule = re.search(r"^\.spell\s*\{([^}]*)\}", stylesheet, re.M)
-    body_rule = re.search(r"^\.body\s*\{([^}]*)\}", stylesheet, re.M)
-    if not spell_rule or not re.search(r"(^|;|\s)flex-shrink:\s*0\s*;", spell_rule.group(1)):
-        err("composer.css: the spell box (.spell) must not shrink (flex-shrink: 0)")
-    if not body_rule or not re.search(r"(^|;|\s)flex:\s*1\s*;", body_rule.group(1)) or "min-height: 0" not in body_rule.group(1):
-        err("composer.css: the scrolling body (.body) takes the space left (flex: 1; min-height: 0)")
+    if 'new ComposerScreen(parent)' not in client or 'ComposerClient.open(Minecraft.getInstance(), parent)' not in workspace:
+        err("composer: every entry point opens the shared narrated constellation editor")
+    visual = text(CLIENT_JAVA_ROOT / "ComposerScreen.java")
+    for forbidden in ('new EditBox(', 'Compiler.compile(', '.set(JugcraftConcordance.INSCRIPTION'):
+        if forbidden in visual:
+            err(f"composer: constellation view must not require text entry or decide server state ({forbidden})")
+    for required in ('ComposerClient.inscribable()', 'ComposerClient::inscribe', 'ComposerClient.edited()', 'ConcordanceClientOptions.reducedMotion()'):
+        if required not in visual:
+            err(f"composer: visual editor retains validation, inscription and accessibility ({required})")
     for source, name in ((screens, "the composer's screens"), (workspace, "ComposerWorkspace.kt")):
         for key in re.findall(r'"((?:screen|key|compose|message)\.jugcraft\.[a-z_.]+)"', source):
             if not key.endswith(".") and key not in lang:
