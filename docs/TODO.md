@@ -1,5 +1,21 @@
 # Jugcraft TODO list
 
+## Spawn-city refinement — 16 October 2026
+
+- [x] Local architectural pass: repair church roof/rear enclosure, refine facade
+  and interior, fix house flue collisions, coordinate timber palettes, furnish
+  upper floors, and refine the bank and town hall. See the
+  [city refinement record](features/town-architecture-refinement.md).
+- [ ] Owner visual walkthrough of the new city before publication; existing
+  generated towns are not automatically rebuilt.
+- [ ] Proposed next slice: district wayfinding and recognizable shop entrances.
+- [ ] Proposed next slice: one public workshop demonstrating connected technology
+  and magic using existing machines, benches and encyclopedia guidance.
+- [ ] Design civic commissions, NPC routines and an outer player workshop/shop
+  district using existing currency and protection hooks. Plot ownership still
+  needs a design or compatible claim integration. These are proposals,
+  not implemented systems.
+
 ## Selected technology completion queue — 14 October 2026
 
 **16 October owner instruction:** finish and reconcile packages 1–7 with main and overlapping drafts, run local validation and prepare a separate owner-controlled playtest. Do not push or merge this work to main before owner review. Current evidence and draft decisions are recorded in [the local integration record](features/tech-seven-local-integration.md).
