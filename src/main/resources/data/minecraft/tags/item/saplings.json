@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:hawthorn_sapling",
+    "jugcraft:persimmon_sapling",
     "jugcraft:rowan_sapling",
     "jugcraft:elder_sapling",
     "jugcraft:bald_cypress_sapling",

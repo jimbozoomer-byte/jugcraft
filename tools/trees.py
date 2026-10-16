@@ -14,6 +14,15 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "hawthorn": {"wood": "fruitwood", "tree": "hawthorn", "sapling": True,
+                 "trunk": {"type": "bending", "base_height": 3, "height_rand_a": 1, "min_height_for_leaves": 3, "bend_length": 1},
+                 "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 2}},
+    "hawthorn_bush": {"wood": "fruitwood", "tree": "hawthorn",
+                      "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                      "foliage": {"type": "bush", "radius": 2, "offset": 1, "height": 2}},
+    "persimmon": {"wood": "persimmon", "sapling": True,
+                  "trunk": {"type": "straight", "base_height": 5, "height_rand_a": 3},
+                  "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 4}},
     "rowan": {"wood": "fruitwood", "tree": "rowan", "sapling": True,
               "trunk": {"type": "forking", "base_height": 4, "height_rand_a": 2, "height_rand_b": 1},
               "foliage": {"type": "random_spread", "radius": 2, "offset": 0, "foliage_height": 3,

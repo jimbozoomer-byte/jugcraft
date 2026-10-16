@@ -92,6 +92,15 @@ def loot(out, write):
                 "entries": [{"type": "minecraft:item", "name": rid(fruit["item"]), "modifier": [
                     {"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": fruit["min"], "max": fruit["max"]}},
                     {"type": "minecraft:explosion_decay"}]}], "rolls": 1})
+        if "seasonal_drop" in info:
+            drop = info["seasonal_drop"]
+            for season in SEASON_STATES:
+                table["pools"].append({"rolls": 1, "condition": {"type": "minecraft:all_of", "terms": [
+                    not_shears, {"type": "minecraft:match_block", "blocks": rid(leaves),
+                                 "state": {"season": season, "persistent": "false"}},
+                    {"type": "minecraft:random_chance", "chance": drop[season]}]},
+                    "entries": [{"type": "minecraft:item", "name": rid(drop["item"]),
+                                 "modifier": [{"type": "minecraft:explosion_decay"}]}]})
         write(out / f"{leaves}.json", table)
         write(out / f"{sapling(tree)}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": young}], "rolls": 1}],

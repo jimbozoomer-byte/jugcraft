@@ -196,6 +196,13 @@ GROUND_COUNT = 5
 # Features the biomes add, in one fixed order, after their base's own (keeps the Overworld's feature order acyclic).
 EXTRAS = {
     # Rare landmark tree: one attempt, then dry-ground and sapling survival checks. No forest count layer.
+    # A selector's unoccupied slot: no replacement plants or future-batch species.
+    "open_scrub": {"configured": {"type": "minecraft:no_op"}, "step": 9, "placement": []},
+    "lone_hawthorn": {"feature": "jugcraft:hawthorn", "step": 9, "placement": [
+        {"type": "minecraft:rarity_filter", "chance": 16}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
+        {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": "minecraft:biome"},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": "jugcraft:hawthorn_sapling"}}]},
     "lone_rowan": {"feature": "jugcraft:rowan", "step": 9, "placement": [
         {"type": "minecraft:rarity_filter", "chance": 8}, {"type": "minecraft:in_square"},
         {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
@@ -500,7 +507,8 @@ BIOMES = {
         "display": "Seasonal Forest", "base": "forest", "temperature": 0.6, "downfall": 0.8, "seasons": True,
         "trees": {"count": [10, 11], "default": "minecraft:oak_bees_0002_leaf_litter", "picks": [
             ["jugcraft:maple_checked", 0.35], ["jugcraft:aspen_checked", 0.2], ["jugcraft:big_maple_checked", 0.0577],
-            ["jugcraft:fir_checked", 0.0816], ["jugcraft:fallen_maple_tree", 0.0222]]},
+            ["jugcraft:fir_checked", 0.0816], ["jugcraft:fallen_maple_tree", 0.0222],
+            ["jugcraft:persimmon_checked", 0.10 / (0.65 * 0.8 * 0.9423 * 0.9184 * 0.9778)]]},
         "extras": ["patch_pumpkin_dense"],
         "tags": ["minecraft:has_structure/village_plains", "c:is_deciduous_tree"],
     },
@@ -961,8 +969,9 @@ BIOMES = {
         "display": "Woodland", "base": "forest", "temperature": 0.7, "downfall": 0.8, "seasons": True,
         "effects": {"grass_color": "#7aa84a", "foliage_color": "#68983e"},
         "trees": {"count": [9, 10], "default": "minecraft:oak_leaf_litter", "picks": [
-            ["minecraft:fancy_oak_leaf_litter", 0.25], ["jugcraft:oak_bush_checked", 0.1], ["minecraft:fallen_oak_tree", 0.03],
-            ["jugcraft:elder_checked", 0.04 / (0.75 * 0.9 * 0.97)]]},
+            ["minecraft:fancy_oak_leaf_litter", 0.25], ["jugcraft:hawthorn_bush_checked", 0.04 / 0.75],
+            ["jugcraft:oak_bush_checked", 0.035 / 0.71], ["minecraft:fallen_oak_tree", 0.03],
+            ["jugcraft:elder_checked", 0.04 / (0.675 * 0.97)]]},
         "extras": ["leaf_litter", "berry_bushes", "oxeye_daisies", "poppies"],
         "tags": ["minecraft:has_structure/village_plains", "minecraft:has_structure/woodland_mansion"],
     },
@@ -1001,7 +1010,7 @@ BIOMES = {
         "surface": {"floor": "minecraft:grass_block",
                     "patches": [[0.35, 0.45, "minecraft:coarse_dirt"], [-0.45, -0.38, "minecraft:gravel"], [0.6, 0.75, "minecraft:stone"]]},
         "trees": None,
-        "extras": ["tundra_rocks", "tall_grass_dense", "lone_rowan"],
+        "extras": ["tundra_rocks", "tall_grass_dense", "lone_rowan", "lone_hawthorn"],
         "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:cow", 8, 4, 4], ["minecraft:rabbit", 4, 2, 3]],
         "tags": [],
     },
@@ -1475,12 +1484,13 @@ BIOMES = {
         "tags": [],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows
-    # Cool, flat land with teal grass, scattered small spruces and clumps of oak bush, and many flowers.
+    # Cool, flat land with teal grass, scattered spruces and bent hawthorns, hawthorn hedges and many flowers.
     "field": {
         "display": "Field", "base": "forest", "temperature": 0.35, "downfall": 0.6, "seasons": True,
         "effects": {"grass_color": "#7fb38c", "foliage_color": "#6fa880"},
-        "trees": {"count": [2, 3], "default": "jugcraft:oak_bush_checked", "picks": [
-            ["minecraft:spruce_checked", 0.3], ["minecraft:oak_bees_002", 0.05]]},
+        "trees": {"count": [2, 3], "default": "jugcraft:hawthorn_bush_checked", "picks": [
+            ["minecraft:spruce_checked", 0.3], ["minecraft:oak_bees_002", 0.05],
+            ["jugcraft:hawthorn_checked", 0.10 / 0.665], ["jugcraft:oak_bush_checked", 0.015 / 0.565]]},
         "extras": ["field_sunflowers", "field_flowers"],
         "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:pig", 10, 4, 4], ["minecraft:chicken", 10, 4, 4],
                       ["minecraft:cow", 8, 4, 4], ["minecraft:rabbit", 4, 2, 3], ["minecraft:fox", 2, 2, 4]],
@@ -1549,11 +1559,12 @@ BIOMES = {
         "extras": ["goldenrod", "tall_grass_dense"],
         "tags": ["c:is_plains"],
     },
-    # Low hills of grass densely set with oak bushes and bushes, and alliums; no trees; wild horses.
+    # Low hills of grass and hawthorn hedges, occasional oak bushes and open gaps; alliums and wild horses.
     "shrubland": {
         "display": "Shrubland", "base": "plains", "temperature": 0.7, "downfall": 0.3, "seasons": True,
         "effects": {"grass_color": "#93ab5a", "foliage_color": "#7f9a49"},
-        "trees": {"count": [4, 6], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "trees": {"count": [4, 6], "default": "jugcraft:hawthorn_bush_checked", "picks": [
+            ["jugcraft:open_scrub", 0.3], ["jugcraft:oak_bush_checked", 0.1 / 0.7]]},
         "extras": ["bushes_dense", "alliums"],
         "creatures": [["minecraft:horse", 8, 2, 6], ["minecraft:donkey", 1, 1, 3], ["minecraft:sheep", 12, 4, 4],
                       ["minecraft:pig", 8, 4, 4], ["minecraft:chicken", 10, 4, 4], ["minecraft:cow", 8, 4, 4]],

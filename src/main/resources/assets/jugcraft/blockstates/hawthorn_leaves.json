@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "season=green": {
+      "model": "jugcraft:block/hawthorn_leaves"
+    },
+    "season=gold": {
+      "model": "jugcraft:block/hawthorn_leaves_gold"
+    },
+    "season=bare": {
+      "model": "jugcraft:block/hawthorn_leaves_bare"
+    }
+  }
+}

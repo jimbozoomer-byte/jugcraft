@@ -25,6 +25,7 @@ LOGS = {
     "bald_cypress": ("spruce", 0xDBC0BB, 0xC8BEBF),
     "magnolia": ("oak", 0xC0C0A3, 0xA4A16F),
     "fruitwood": ("birch", 0xA39996, 0xD7A69F),
+    "persimmon": ("oak", 0x484A50, 0x504A46),
 }
 # Pine uses the owner's original local textures without tints (15 October correction).
 # Its ordinary wood models from festival_data.wood_assets must not be overridden here.
