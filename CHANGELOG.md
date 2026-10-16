@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Added: Adam-ondi-Ahman, the valley and its altar (part 1 of the owner's Mars boss)
+- **A quiet valley near the start of every new world,** 800 to 1,600 blocks away: rolling prairie grass, wildflowers and goldenrod, lone oaks and birches, grazing animals and few monsters, with four seasons. **Rare valleys** grow elsewhere (`adam_ondi_ahman.spacing`, `adam_ondi_ahman.chance`). Modelled on the real Adam-ondi-Ahman in northern Missouri.
+- **A knoll of three stacked stone altars** at each valley's heart, with a path up it, the log footings of two cabins, a fallen chimney, a spring and a ring of gathering stones at its foot. On the top lies the **Ancient Altar**, carved with a red star: unbreakable, and dormant until part 2's Altar Keystone wakes it.
+- The plan for all three parts, the Mars dungeon and the Cydonian Sentinel included: [branches/BOSSES.md](docs/branches/BOSSES.md). Record: [adam-ondi-ahman.md](docs/features/adam-ondi-ahman.md).
+
 
 ### Added: The Howitzer Walker, playable
 - Owner accepted the updated local playtest on October 13: aim without holding fire, no close-ground aim freeze, and hide the pilot model/equipment while mounted. Implementation and correction record: [Howitzer Walker](docs/features/howitzer-walker.md).

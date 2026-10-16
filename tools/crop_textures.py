@@ -794,6 +794,8 @@ def crop_textures():
     out.update(pumpkin_night_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
+    from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar
+    out.update(adam_ondi_ahman_textures())
     from vesperine_art import vesperine_textures  # and Vesperine, her skulls, thralls and scythe, and her loot
     out.update(vesperine_textures())
     from tatterlace_art import tatterlace_textures  # and Madame Tatterlace, her thimbles, spools, egg sacs and brood, and her loot

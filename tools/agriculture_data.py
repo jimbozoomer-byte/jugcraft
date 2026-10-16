@@ -54,6 +54,7 @@ import leaf_blower_data
 import decor15_data
 import decor16_data
 import decor17_data
+import adam_ondi_ahman_data
 import lair_data
 import tatterlace_data
 import yeti_king_data
@@ -297,6 +298,7 @@ def assets(root, write, lang):
     decor19_data.assets(root, write, lang)
     decor20_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
+    adam_ondi_ahman_data.assets(root, write, lang)
     vesperine_data.assets(root, write, lang)
     tatterlace_data.assets(root, write, lang)
     yeti_king_data.assets(root, write, lang)
@@ -455,6 +457,7 @@ def loot(data, write):
     decor19_data.loot(out, write)
     decor20_data.loot(out, write)
     lair_data.loot(out, write)
+    adam_ondi_ahman_data.loot(out, write)
     vesperine_data.loot(out, write)
     tatterlace_data.loot(out, write)
     yeti_king_data.loot(out, write)
@@ -584,6 +587,7 @@ def tags(tags):
     decor19_data.tags(tags)
     decor20_data.tags(tags)
     lair_data.tags(tags)
+    adam_ondi_ahman_data.tags(tags)
     vesperine_data.tags(tags)
     tatterlace_data.tags(tags)
     yeti_king_data.tags(tags)
@@ -685,3 +689,4 @@ def worldgen(data, write):
             ],
         })
     lair_data.worldgen(data, write)
+    adam_ondi_ahman_data.worldgen(data, write)
