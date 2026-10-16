@@ -18,7 +18,9 @@ The leaves stay green all year. They reuse the shared seasonal state and [100, 3
 
 Right-click supported natural leaves with shears to clip one sprig, damaging the shears once and visibly removing berries from that block. Clipped leaves have a one-in-sixteen regrowth chance on each random tick in every calendar mode; repeated immediate use and player-placed leaves yield nothing. Ordinary shearing/Silk Touch still obtains the leaf block without bonus sprigs. Natural decay and renewable sapling drops remain intact.
 
-Craft one Holly Wreath from eight sprigs around a central string. Reuse the Autumn Wreath's wall/door placement, facing and support-loss behavior, with a dark green ring and scarlet clusters. It is permanent decoration, available year-round; mums do not recolor it. Keep the original Autumn Wreath unchanged.
+Craft one Holly Wreath from eight sprigs around a central string. Reuse the Autumn Wreath's wall/door placement, facing and support-loss behavior, with a dark green ring and scarlet clusters. It is permanent decoration, available year-round; mums do not recolor it. Both wreaths now follow the door panel when it opens or closes, including either hinge and redstone-operated doors. An occupied destination drops the wreath once without replacing the obstruction; the Autumn Wreath keeps its flower colour.
+
+The inspection's flat foliage panels are player-placed decorative leaves and cannot yield sprigs. Use shears on an actual holly tree (including one grown from a sapling) or the marked natural demonstration leaf. An empty hand cannot clip sprigs. The panels are now labelled "Display only".
 
 ## Verification and delivery
 
@@ -28,7 +30,13 @@ The rendered `HollyClientGameTests` passed, saving and reopening all three galle
 
 The `Holly Inspection` world uses seed `jugcraft`. Its authored garden is at 1000, 180, -988; `TOUR.txt` gives the natural stops. Inventory supplies include shears, sprigs, wreaths and saplings. Random ticks are frozen for inspection; restore `minecraft:random_tick_speed` to 3 to observe natural regrowth. A narrowly cleaned copy preserves all 90 save files and every gameplay value, removing only unused development metadata from `level.dat`, `level.dat_old`, and `data/fabric/registry_entries.dat`. The scan covered 6,210 saved region records and found no actual test content. The ordinary Minecraft client opened this cleaned save and joined at 1000.5, 180, -987.5. External launcher import, two-client multiplayer and server deployment are not claimed.
 
-Delivery files are `Jugcraft-Tree-Batch-6b.mrpack`, `Tree-Batch-6b-World.zip` and the matching `jugcraft-tree-batch-6b.jar`, with a readable tour, screenshots and SHA-256 checksums. Archive integrity, every saved-world byte, the exact JAR and all 18 pinned dependency entries were verified. Gameplay/art source is `00211cb936f9dfe2291cb5ed9e51cedcbc0d046c`; the following commit records the completed audit only. GitHub's eight client shards and combined client check also passed for that gameplay commit.
+Initial delivery files are `Jugcraft-Tree-Batch-6b.mrpack`, `Tree-Batch-6b-World.zip` and the matching `jugcraft-tree-batch-6b.jar`, with a readable tour, screenshots and SHA-256 checksums. Archive integrity, every saved-world byte, the exact JAR and all 18 pinned dependency entries were verified. Initial gameplay/art source is `00211cb936f9dfe2291cb5ed9e51cedcbc0d046c`; the following commit records the completed full audit only. GitHub's eight client shards and combined client check also passed for that gameplay commit.
+
+### Door attachment and clipping clarification, 16 October
+
+The owner reported trying to harvest the decorative panels and a wreath left floating when its door opened. Sprig acquisition rules are unchanged; the gallery labels and instructions now explain the distinction. Shared wreath support now follows the physical panel after both door halves update. Movement preserves the wreath state, does not overwrite another block and drops exactly once if obstructed.
+
+Only focused checks were run for this correction, as requested: the five holly server tests passed, including actual scheduled movement across 16 combinations of wreath type, door direction and hinge, on both halves, with manual oak-door and powered iron-door opening/closing, obstruction and support-loss checks. The full suite and full data audit were not rerun. The single `HollyClientGameTests` class also passed actual input checks (empty hand refused, shears clipped the natural leaf once, repeat clipping and the display leaf refused), rendered the wreath on the opened door, and saved/reopened the gallery. The open/closed door screenshots were inspected. Its refreshed preview preserves 89 save files, with only the same three development-metadata files cleaned after scanning 6,212 region records. Existing floating wreaths in earlier saves are corrected when the door is operated.
 
 ### In-game screenshots
 
@@ -36,6 +44,7 @@ Delivery files are `Jugcraft-Tree-Batch-6b.mrpack`, `Tree-Batch-6b-World.zip` an
 ![Holly and birch wood comparison](../images/trees-batch-6b/wood.png)
 ![Seasonal and clipped foliage](../images/trees-batch-6b/foliage.png)
 ![Wall and door Holly Wreaths](../images/trees-batch-6b/wreaths.png)
+![Holly Wreath follows the opened door panel](../images/trees-batch-6b/wreath-open-door.png)
 ![Evergreen winter berries](../images/trees-batch-6b/winter.png)
 ![Natural Woodland sample](../images/trees-batch-6b/woodland.png)
 ![Natural Dense Forest sample](../images/trees-batch-6b/dense-forest.png)

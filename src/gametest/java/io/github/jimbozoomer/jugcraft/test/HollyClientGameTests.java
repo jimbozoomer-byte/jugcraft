@@ -11,8 +11,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +26,7 @@ public class HollyClientGameTests extends TreeBatchTwoClientGameTests {
 	@Override protected List<String> shapes() { return List.of("holly"); }
 	@Override protected List<String> biomes() { return List.of("woodland", "dense_forest"); }
 	@Override protected String worldName() { return "Holly Inspection"; }
-	@Override protected String exportName() { return "tree-batch-6b-preview"; }
+	@Override protected String exportName() { return "tree-batch-6b-fixes-preview"; }
 	@Override protected String screenshotPrefix() { return "jugcraft_holly_"; }
 	@Override protected BlockPos surveySpot(ServerLevel level,BlockPos first,ResourceKey<Biome> biome) {
 		for(int[] offset:new int[][]{{0,0},{256,0},{-256,0},{0,256},{0,-256},{256,256},{-256,-256}}) {
@@ -57,13 +59,13 @@ public class HollyClientGameTests extends TreeBatchTwoClientGameTests {
 					var pos=at.offset(x,y,0); var state=JugcraftAgriculture.block("holly_leaves").defaultBlockState().setValue(LeavesBlock.PERSISTENT,true).setValue(SeasonalLeavesBlock.SEASON,foliage).setValue(HollyLeavesBlock.CLIPPED,clipped);
 					level.setBlock(pos,state,Block.UPDATE_CLIENTS); level.setBlock(pos,state,Block.UPDATE_CLIENTS); saved.put(pos,state);
 				}
-				PineWoodClientGameTests.label(level,at.offset(1,-1,2),foliage.name(),clipped?"Clipped / regrowing":"Evergreen / berries","");
+				PineWoodClientGameTests.label(level,at.offset(1,-1,2),foliage.name(),clipped?"Clipped appearance":"Evergreen / berries","Display only");
 			}
 			// One supported natural clipping demonstration, separate from placed decorative panels.
 			var clip=wall.offset(32,1,0); level.setBlock(clip.below(),JugcraftAgriculture.block("holly_log").defaultBlockState(),Block.UPDATE_CLIENTS);
-			var natural=JugcraftAgriculture.block("holly_leaves").defaultBlockState().setValue(LeavesBlock.DISTANCE,1);
-			level.setBlock(clip,natural,Block.UPDATE_CLIENTS); saved.put(clip,level.getBlockState(clip));
-			PineWoodClientGameTests.label(level,clip.offset(0,-1,2),"Clip with shears","One sprig / regrows","Random ticks paused");
+			var natural=JugcraftAgriculture.block("holly_leaves").defaultBlockState().setValue(LeavesBlock.DISTANCE,1).setValue(SeasonalLeavesBlock.SEASON,SeasonalLeavesBlock.Foliage.BARE);
+			level.setBlock(clip,natural,Block.UPDATE_CLIENTS); level.setBlock(clip,natural,Block.UPDATE_CLIENTS); saved.put(clip,level.getBlockState(clip));
+			PineWoodClientGameTests.label(level,clip.offset(0,-1,2),"Clip with shears","Natural leaf only","Random ticks paused");
 			for(int x=0;x<9;x++) for(int y=0;y<5;y++) level.setBlock(wall.offset(40+x,y,0),JugcraftAgriculture.block("holly_planks").defaultBlockState(),Block.UPDATE_CLIENTS);
 			var wreath=JugcraftAgriculture.block("holly_wreath").defaultBlockState().setValue(AutumnWreathBlock.FACING,Direction.SOUTH);
 			var hung=wall.offset(42,3,1); level.setBlock(hung,wreath,Block.UPDATE_ALL); saved.put(hung,level.getBlockState(hung));
@@ -73,6 +75,7 @@ public class HollyClientGameTests extends TreeBatchTwoClientGameTests {
 			var player=server.getPlayerList().getPlayers().getFirst();
 			for(var stack:List.of(new ItemStack(Items.SHEARS),new ItemStack(JugcraftAgriculture.item("holly_sprig"),32),new ItemStack(JugcraftAgriculture.block("holly_wreath"),8),new ItemStack(JugcraftAgriculture.block("holly_sapling"),16))) player.getInventory().add(stack);
 		});
+		checkClippingInput(context, world, wall.offset(32,1,0), wall.offset(0,4,0));
 		shoot(context,world,GARDEN.offset(8,5,11),GARDEN.above(3),screenshotPrefix()+"tree_close");
 		shoot(context,world,wood.offset(2,7,32),wood.offset(2,2,0),screenshotPrefix()+"wood_comparison");
 		shoot(context,world,wood.offset(-18,4,11),wood.offset(-18,2,0),screenshotPrefix()+"wood_close");
@@ -82,6 +85,17 @@ public class HollyClientGameTests extends TreeBatchTwoClientGameTests {
 		}
 		context.runOnClient(client->client.options.cutoutLeaves().set(true));
 		shoot(context,world,wall.offset(44,4,11),wall.offset(44,2,0),screenshotPrefix()+"wreaths");
+		var doorBase = wall.offset(46,0,1);
+		world.getServer().runOnServer(server -> {
+			var level = server.overworld(); var state = level.getBlockState(doorBase);
+			((DoorBlock)state.getBlock()).setOpen(null, level, state, doorBase, true);
+		});
+		shoot(context,world,wall.offset(42,3,6),doorBase.above(),screenshotPrefix()+"wreath_open_door");
+		world.getServer().runOnServer(server -> {
+			var level = server.overworld(); var state = level.getBlockState(doorBase);
+			((DoorBlock)state.getBlock()).setOpen(null, level, state, doorBase, false);
+		});
+		context.waitTicks(5);
 		// A winter garden view keeps the same geometry, now with scarlet berry foliage.
 		world.getServer().runOnServer(server->{
 			var level=server.overworld();
@@ -95,8 +109,48 @@ public class HollyClientGameTests extends TreeBatchTwoClientGameTests {
 		tour.add("Timber and native comparisons: /tp @s 1002 181 -889 180 0");
 		tour.add("Foliage states and clipping: /tp @s 1010 181 -851 180 0");
 		tour.add("Holly Wreaths on wall and door: /tp @s 1044 181 -859 180 0");
-		tour.add("Shears, sprigs, wreaths and saplings are in your inventory. Right-click natural leaves with shears; placed leaves are decorative.");
+		tour.add("Right-click a holly tree's leaves or the marked natural leaf with shears. An empty hand gives no sprigs. Flat panels are decorative and cannot be clipped.");
+		tour.add("Door wreaths follow opening/closing. An occupied destination makes the wreath drop once without replacing the obstruction.");
 		tour.add("Random ticks are frozen. /gamerule minecraft:random_tick_speed 3 restores sprig regrowth, sapling growth and leaf decay.");
 		tour.add("Garden trees display winter berries; all foliage stays green. Natural biome stops were not planted. Batch 7 is unstarted.");
+	}
+
+	private void checkClippingInput(ClientGameTestContext context, TestSingleplayerContext world, BlockPos natural, BlockPos display) {
+		var server = world.getServer();
+		server.runOnServer(minecraft -> {
+			var player = minecraft.getPlayerList().getPlayers().getFirst();
+			player.setGameMode(GameType.SURVIVAL);
+			player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+			player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+		});
+		server.runCommand("tp @a " + (natural.getX()+0.5) + " " + (natural.getY()-1) + " " + (natural.getZ()+2.5));
+		context.waitTicks(10); context.getInput().lookAt(natural); context.waitTicks(2);
+		context.getInput().pressKey(options -> options.keyUse); context.waitTicks(5);
+		server.runOnServer(minecraft -> {
+			if(minecraft.overworld().getBlockState(natural).getValue(HollyLeavesBlock.CLIPPED)) throw new AssertionError("Empty hand clipped holly");
+			minecraft.getPlayerList().getPlayers().getFirst().setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.SHEARS));
+		});
+		context.waitTicks(5); context.getInput().pressKey(options -> options.keyUse); context.waitTicks(10);
+		server.runOnServer(minecraft -> {
+			var player = minecraft.getPlayerList().getPlayers().getFirst();
+			if(!minecraft.overworld().getBlockState(natural).getValue(HollyLeavesBlock.CLIPPED) || player.getMainHandItem().getDamageValue()!=1)
+				throw new AssertionError("Real shears input failed to clip the marked natural leaf");
+		});
+		context.getInput().pressKey(options -> options.keyUse); context.waitTicks(5);
+		server.runOnServer(minecraft -> {
+			if(minecraft.getPlayerList().getPlayers().getFirst().getMainHandItem().getDamageValue()!=1) throw new AssertionError("Repeat clip consumed shears");
+		});
+		server.runCommand("tp @a " + (display.getX()+0.5) + " " + (display.getY()-1) + " " + (display.getZ()+2.5));
+		server.runOnServer(minecraft -> { var player=minecraft.getPlayerList().getPlayers().getFirst(); player.getAbilities().mayfly=true; player.getAbilities().flying=true; player.onUpdateAbilities(); });
+		context.waitTicks(10); context.getInput().lookAt(display); context.waitTicks(2);
+		context.getInput().pressKey(options -> options.keyUse); context.waitTicks(5);
+		server.runOnServer(minecraft -> {
+			var level=minecraft.overworld(); var player=minecraft.getPlayerList().getPlayers().getFirst();
+			if(level.getBlockState(display).getValue(HollyLeavesBlock.CLIPPED) || player.getMainHandItem().getDamageValue()!=1)
+				throw new AssertionError("Placed display leaf yielded sprigs");
+			level.setBlock(natural, level.getBlockState(natural).setValue(HollyLeavesBlock.CLIPPED,false),Block.UPDATE_CLIENTS);
+			player.setGameMode(GameType.CREATIVE);
+		});
+		Jugcraft.LOGGER.info("[holly interaction] Actual client input: empty hand refused, shears clipped natural leaf once, display leaf refused");
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Locale;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -20,12 +21,14 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -102,7 +105,43 @@ public class AutumnWreathBlock extends Block {
 	@Override
 	protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
 			BlockPos neighborPos, BlockState neighbor, RandomSource random) {
-		return direction == state.getValue(FACING).getOpposite() && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState() : state;
+		if (direction == state.getValue(FACING).getOpposite()) {
+			if (!state.canSurvive(level, pos)) return Blocks.AIR.defaultBlockState();
+			if (neighbor.getBlock() instanceof DoorBlock) ticks.scheduleTick(pos, this, 1);
+		}
+		return state;
+	}
+
+	@Override
+	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+		super.onPlace(state, level, pos, oldState, movedByPiston);
+		if (!level.isClientSide() && level.getBlockState(pos.relative(state.getValue(FACING).getOpposite())).getBlock() instanceof DoorBlock)
+			level.scheduleTick(pos, this, 1);
+	}
+
+	/** The outer edge of the door's current panel, including its hinge-dependent quarter turn. */
+	public static Direction doorFace(BlockState door) {
+		Direction facing = door.getValue(DoorBlock.FACING);
+		if (door.getValue(DoorBlock.OPEN))
+			facing = door.getValue(DoorBlock.HINGE) == DoorHingeSide.RIGHT ? facing.getCounterClockWise() : facing.getClockWise();
+		return facing.getOpposite();
+	}
+
+	/** Wait for both door halves to update, then keep the wreath against the actual panel. */
+	@Override
+	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		BlockPos support = pos.relative(state.getValue(FACING).getOpposite());
+		BlockState door = level.getBlockState(support);
+		if (!(door.getBlock() instanceof DoorBlock)) return;
+		Direction face = doorFace(door);
+		if (face == state.getValue(FACING)) return;
+		BlockPos destination = support.relative(face);
+		if (!level.isLoaded(destination) || !level.isEmptyBlock(destination)) {
+			level.destroyBlock(pos, true);
+			return;
+		}
+		level.removeBlock(pos, false);
+		level.setBlock(destination, state.setValue(FACING, face), Block.UPDATE_ALL);
 	}
 
 	/** A mum of another colour swaps the wreath's flowers for its own. */

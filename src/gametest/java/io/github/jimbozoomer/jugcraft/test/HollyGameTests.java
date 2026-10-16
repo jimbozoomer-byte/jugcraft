@@ -25,6 +25,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -153,5 +154,70 @@ public class HollyGameTests {
 		var door=new BlockPos(6,2,4); helper.setBlock(door.below(),Blocks.STONE); helper.setBlock(door,Blocks.OAK_DOOR.defaultBlockState()); helper.setBlock(door.above(),Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF,DoubleBlockHalf.UPPER));
 		player.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(block("holly_wreath"))); var doorPos=helper.absolutePos(door.above()); player.getMainHandItem().useOn(new UseOnContext(player,InteractionHand.MAIN_HAND,new BlockHitResult(Vec3.atCenterOf(doorPos),Direction.NORTH,doorPos,false)));
 		helper.assertTrue(helper.getBlockState(door.above().north()).is(block("holly_wreath")),"Door placement failed"); helper.succeed();
+	}
+
+	@GameTest(maxTicks = 160)
+	public void bothWreathsFollowEveryDoorFacingHingeAndHalfWithoutReplacingBlocks(GameTestHelper helper) {
+		var level = helper.getLevel(); var base = helper.absolutePos(new BlockPos(4, 2, 4));
+		var area = new AABB(base).inflate(3); int sample = 0;
+		for (String name : List.of("holly_wreath", "autumn_wreath")) for (var facing : Direction.Plane.HORIZONTAL)
+			for (var hinge : DoorHingeSide.values()) {
+				var wreath = block(name); boolean powered = name.equals("autumn_wreath");
+				var doorBlock = (DoorBlock) (powered ? Blocks.IRON_DOOR : Blocks.OAK_DOOR);
+				var closed = doorBlock.defaultBlockState().setValue(DoorBlock.FACING, facing).setValue(DoorBlock.HINGE, hinge);
+				var openedFace = AutumnWreathBlock.doorFace(closed.setValue(DoorBlock.OPEN, true));
+				int start = 1 + sample++ * 8;
+				helper.runAtTickTime(start, () -> {
+					for (var p : BlockPos.betweenClosed(base.offset(-2, 0, -2), base.offset(2, 2, 2))) level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+					level.setBlock(base.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+					level.setBlock(base, closed, Block.UPDATE_ALL);
+					level.setBlock(base.above(), closed.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
+					for (int half = 0; half < 2; half++) level.setBlock(base.above(half).relative(facing.getOpposite()),
+							wreath.defaultBlockState().setValue(AutumnWreathBlock.FACING, facing.getOpposite()).setValue(AutumnWreathBlock.FLOWERS, AutumnWreathBlock.Mums.RED), Block.UPDATE_ALL);
+					if (powered) level.setBlock(base.below(), Blocks.REDSTONE_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+					else doorBlock.setOpen(null, level, level.getBlockState(base), base, true);
+				});
+				helper.runAtTickTime(start + 2, () -> {
+					for (int half = 0; half < 2; half++) assertDoorAttachment(helper, base.above(half), wreath);
+					if (powered) level.setBlock(base.below(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+					else doorBlock.setOpen(null, level, level.getBlockState(base), base, false);
+				});
+				helper.runAtTickTime(start + 4, () -> {
+					for (int half = 0; half < 2; half++) assertDoorAttachment(helper, base.above(half), wreath);
+					level.setBlock(base.above().relative(openedFace), Blocks.DIAMOND_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+					if (powered) level.setBlock(base.below(), Blocks.REDSTONE_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+					else doorBlock.setOpen(null, level, level.getBlockState(base), base, true);
+				});
+				helper.runAtTickTime(start + 6, () -> {
+					assertDoorAttachment(helper, base, wreath);
+					helper.assertTrue(level.getBlockState(base.above().relative(openedFace)).is(Blocks.DIAMOND_BLOCK), "Swing replaced another block");
+					level.destroyBlock(base, false);
+					var drops = level.getEntitiesOfClass(ItemEntity.class, area, e -> e.getItem().is(wreath.asItem()));
+					helper.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 2, "Blocked swing/support loss duplicated or lost a wreath");
+					drops.forEach(ItemEntity::discard);
+				});
+			}
+		helper.runAtTickTime(sample * 8 + 1, helper::succeed);
+	}
+
+	private static void assertDoorAttachment(GameTestHelper helper, BlockPos support, Block wreath) {
+		var level = helper.getLevel(); var panel = level.getBlockState(support).getShape(level, support).bounds().move(support);
+		int count = 0;
+		for (var face : Direction.Plane.HORIZONTAL) {
+			var at = support.relative(face); var state = level.getBlockState(at);
+			if (!state.is(wreath)) continue;
+			count++;
+			helper.assertTrue(state.getValue(AutumnWreathBlock.FACING) == face && state.getValue(AutumnWreathBlock.FLOWERS) == AutumnWreathBlock.Mums.RED, "Swing lost facing or flower colour");
+			var ring = state.getShape(level, at).bounds().move(at);
+			double gap = switch (face) {
+				case NORTH -> panel.minZ - ring.maxZ;
+				case SOUTH -> ring.minZ - panel.maxZ;
+				case WEST -> panel.minX - ring.maxX;
+				case EAST -> ring.minX - panel.maxX;
+				default -> throw new AssertionError(face);
+			};
+			helper.assertTrue(Math.abs(gap) < 0.00001, "Wreath floats away from the actual door panel: " + gap);
+		}
+		helper.assertTrue(count == 1, "Door must keep exactly one wreath per half, got " + count);
 	}
 }
