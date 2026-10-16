@@ -1,6 +1,6 @@
 # Porcelain insulators
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork, pending review.
 
 Proposal issue: none. TODO item: "Implement ceramic powders -> blanks -> firing -> shared grinding/polishing where needed: clay foundation, porcelain-style insulators and alumina, then specialist zirconia…". This change is the first slice, porcelain-style insulators, following the selected chain from the [chemistry plan](industrial-chemistry-and-fuels-plan.md): powder preparation -> shaped blank -> kiln firing. No grinding or polishing is needed for this part.
 
@@ -60,7 +60,7 @@ There are no new dependencies. The icons are drawn by `tools/petro_textures.py`.
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38879961136](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38879961136) on commit `9846790f` passed on its first attempt (an earlier run on 9f3d060b failed to compile the new test, fixed in 9846790f): the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
