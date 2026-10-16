@@ -767,6 +767,11 @@ CIRCUIT_ASSEMBLER = [
     {"name": "processor_with_fibre",
      "inputs": [["jugcraft:microchip", 4], ["jugcraft:advanced_circuit", 1], ["jugcraft:optical_fibre", 2]],
      "output": "jugcraft:processor", "count": 1, "ticks": 400, "features": [FEATURE, "silicon", "sulfur", "silver", "nickel"]},
+    # Alumina ceramics (docs/features/alumina-ceramics.md): the chips bonded on a fired alumina substrate.
+    {"name": "processor_on_alumina",
+     "inputs": [["jugcraft:microchip", 4], ["jugcraft:advanced_circuit", 1], ["jugcraft:alumina_substrate", 1]],
+     "output": "jugcraft:processor", "count": 1, "ticks": 400,
+     "features": [FEATURE, "silicon", "sulfur", "silver", "nickel", "aluminum"]},
 ]
 
 

@@ -1301,6 +1301,29 @@ def recipes():
         write(out / f"{name}.json", recipe)
     drone_recipes(out)
 
+    # Porcelain (docs/features/porcelain-insulators.md): powder preparation (two clay, a quartz and a bone meal make two
+    # porcelain body), shaping (three body stacked into one unfired insulator blank) and firing (furnace or blast
+    # furnace) into a porcelain insulator. Only the fired insulator is used; the blank is not interchangeable with it.
+    porcelain = [c for f in (MACHINE_FEATURE,) for c in condition(f)]
+    body = shapeless(MACHINE_FEATURE, ["minecraft:clay_ball", "minecraft:clay_ball", "minecraft:quartz", "minecraft:bone_meal"],
+                     "porcelain_body", 2)
+    blank = shaped(MACHINE_FEATURE, ["B", "B", "B"], {"B": rid("porcelain_body")}, "unfired_porcelain_insulator", 1)
+    for name, recipe in (("porcelain_body", body), ("unfired_porcelain_insulator", blank)):
+        recipe["fabric:load_conditions"] = porcelain
+        write(out / f"{name}.json", recipe)
+    for kind in ("smelting", "blasting"):
+        recipe = cooking(MACHINE_FEATURE, kind, rid("unfired_porcelain_insulator"), "porcelain_insulator", 0.2)
+        write(out / f"porcelain_insulator_from_{kind}.json", recipe)
+    # Alumina ceramics (docs/features/alumina-ceramics.md): two alumina pressed with a clay binder into an unfired
+    # substrate, which only a blast furnace is hot enough to fire into an alumina substrate.
+    alumina = [c for f in (MACHINE_FEATURE, "aluminum") for c in condition(f)]
+    substrate = shapeless(MACHINE_FEATURE, [rid("alumina"), rid("alumina"), "minecraft:clay_ball"], "unfired_alumina_substrate", 1)
+    substrate["fabric:load_conditions"] = alumina
+    write(out / "unfired_alumina_substrate.json", substrate)
+    fired = cooking(MACHINE_FEATURE, "blasting", rid("unfired_alumina_substrate"), "alumina_substrate", 0.3)
+    fired["fabric:load_conditions"] = alumina
+    write(out / "alumina_substrate_from_blasting.json", fired)
+
     # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
     boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]
     for name, recipe in (

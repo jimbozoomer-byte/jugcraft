@@ -17,7 +17,7 @@
     "SSS"
   ],
   "key": {
-    "I": "minecraft:white_terracotta",
+    "I": "jugcraft:porcelain_insulator",
     "A": "jugcraft:aluminum_cable",
     "C": "minecraft:copper_block",
     "B": "#c:storage_blocks/steel",

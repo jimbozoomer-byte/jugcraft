@@ -206,6 +206,16 @@ ITEMS = {
     # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
     # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
     "ammonium_nitrate": "Ammonium Nitrate",
+    # Porcelain (docs/features/porcelain-insulators.md), the first advanced ceramic: clay, quartz and bone meal prepared
+    # into a porcelain body, shaped into an unfired insulator blank and fired in a furnace or blast furnace into a
+    # glazed porcelain insulator, the high-voltage bushing of the Main Transformer.
+    "porcelain_body": "Porcelain Body",
+    "unfired_porcelain_insulator": "Unfired Porcelain Insulator",
+    "porcelain_insulator": "Porcelain Insulator",
+    # Alumina ceramics (docs/features/alumina-ceramics.md): alumina pressed with a clay binder into an unfired substrate
+    # tile, fired only in a blast furnace into a dense white alumina substrate that carries a processor's chips.
+    "unfired_alumina_substrate": "Unfired Alumina Substrate",
+    "alumina_substrate": "Alumina Substrate",
 }
 
 
