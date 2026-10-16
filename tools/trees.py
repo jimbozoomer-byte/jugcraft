@@ -14,6 +14,21 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "juniper": {"wood": "juniper", "sapling": True,
+                "trunk": {"type": "forking", "base_height": 3, "height_rand_a": 1, "height_rand_b": 1},
+                "foliage": {"type": "fancy", "radius": 1, "offset": 0, "height": 3}},
+    "juniper_column": {"wood": "juniper",
+                       "trunk": {"type": "straight", "base_height": 4, "height_rand_a": 2},
+                       "foliage": {"type": "spruce", "radius": [1, 2], "offset": 0, "trunk_height": 0}},
+    "juniper_bush": {"wood": "juniper",
+                     "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                     "foliage": {"type": "bush", "radius": 2, "offset": 0, "height": 1}},
+    "gorse": {"wood": "minecraft:oak", "tree": "gorse", "sapling": True,
+              "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+              "foliage": {"type": "bush", "radius": 2, "offset": 0, "height": 1}},
+    "sagebrush": {"wood": "dead", "tree": "sagebrush", "sapling": True,
+                  "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                  "foliage": {"type": "bush", "radius": 1, "offset": 0, "height": 1}},
     "hawthorn": {"wood": "fruitwood", "tree": "hawthorn", "sapling": True,
                  "trunk": {"type": "bending", "base_height": 3, "height_rand_a": 1, "min_height_for_leaves": 3, "bend_length": 1},
                  "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 2}},

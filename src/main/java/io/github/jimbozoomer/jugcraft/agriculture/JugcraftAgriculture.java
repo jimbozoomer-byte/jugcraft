@@ -175,6 +175,9 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower BALD_CYPRESS_GROWER = grower("bald_cypress");
 	public static final TreeGrower MAGNOLIA_GROWER = grower("magnolia");
 	public static final TreeGrower HAWTHORN_GROWER = weightedGrower("hawthorn", "hawthorn_bush", 1, 3);
+	public static final TreeGrower JUNIPER_GROWER = weightedGrower("juniper", "juniper_column", "juniper_bush", 2, 1, 1);
+	public static final TreeGrower GORSE_GROWER = grower("gorse");
+	public static final TreeGrower SAGEBRUSH_GROWER = grower("sagebrush");
 	public static final TreeGrower PERSIMMON_GROWER = grower("persimmon");
 	public static final SeasonalLeavesBlock.Schedule HAWTHORN_LEAVES = new SeasonalLeavesBlock.Schedule(85, 280, 325);
 	public static final SeasonalLeavesBlock.Schedule PERSIMMON_LEAVES = new SeasonalLeavesBlock.Schedule(98, 280, 315);
@@ -552,6 +555,13 @@ public final class JugcraftAgriculture {
 				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_RED);
 		sweet("yew_arils", 1, 0.1F, MobEffects.POISON, 10);
 		registerWoodSet("fruitwood", MapColor.TERRACOTTA_LIGHT_GRAY, MapColor.TERRACOTTA_PINK);
+		registerTree("juniper", "juniper_needles", JUNIPER_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_RED);
+		registerFoliage("gorse", "gorse_leaves", GORSE_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				props -> new TintedParticleLeavesBlock(0.01F, props));
+		registerFoliage("sagebrush", "sagebrush_leaves", SAGEBRUSH_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				props -> new TintedParticleLeavesBlock(0.01F, props));
+		food("juniper_berries", 1, 0.1F, COMPOST_MEDIUM);
 		registerFoliage("rowan", "rowan_leaves", ROWAN_GROWER, Blocks.BIRCH_SAPLING, Blocks.BIRCH_LEAVES,
 				props -> new SeasonalFruitLeavesBlock(ROWAN_LEAVES, "rowan_berries", props));
 		registerFoliage("elder", "elder_leaves", ELDER_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
@@ -2891,6 +2901,15 @@ public final class JugcraftAgriculture {
 				WeightedList.of(), WeightedList.of(), small);
 	}
 
+	private static TreeGrower weightedGrower(String normal, String column, String bush, int treeWeight, int columnWeight, int bushWeight) {
+		ResourceKey<Feature> tree = ResourceKey.create(Registries.FEATURE, Jugcraft.id(normal));
+		ResourceKey<Feature> narrow = ResourceKey.create(Registries.FEATURE, Jugcraft.id(column));
+		ResourceKey<Feature> low = ResourceKey.create(Registries.FEATURE, Jugcraft.id(bush));
+		return new TreeGrower(Jugcraft.MOD_ID + "_" + normal, WeightedList.of(
+				new net.minecraft.util.random.Weighted<>(tree, treeWeight), new net.minecraft.util.random.Weighted<>(narrow, columnWeight),
+				new net.minecraft.util.random.Weighted<>(low, bushWeight)), WeightedList.of(), WeightedList.of(), low);
+	}
+
 	/**
 	 * A tree with its own sapling and leaves, and its wood set (agriculture.TREES and WOOD_SETS in tools). Leaves with a
 	 * {@code schedule} follow the seasons ({@link SeasonalLeavesBlock}); null: evergreen. The sapling and leaves copy
@@ -2899,7 +2918,7 @@ public final class JugcraftAgriculture {
 	 */
 	private static void registerTree(String tree, String leavesId, TreeGrower grower, SeasonalLeavesBlock.Schedule schedule,
 			Block saplingLike, Block leavesLike, MapColor bark, MapColor inner) {
-		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("yew") ? YewLeavesBlock::new : schedule == null
+		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("juniper") ? JuniperLeavesBlock::new : tree.equals("yew") ? YewLeavesBlock::new : schedule == null
 				? props -> new TintedParticleLeavesBlock(0.01F, props)
 				: props -> new SeasonalLeavesBlock(schedule, props);
 		registerFoliage(tree, leavesId, grower, saplingLike, leavesLike, leavesFactory);
@@ -2911,6 +2930,9 @@ public final class JugcraftAgriculture {
 			Function<BlockBehaviour.Properties, Block> leavesFactory) {
 		TreeGrower giant = GIANT_GROWERS.get(tree);
 		Block sapling = registerBlock(tree + "_sapling", giant == null ? props -> new SaplingBlock(grower, props) {
+			@Override protected boolean mayPlaceOn(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+				return super.mayPlaceOn(state, level, pos) || tree.equals("juniper") && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
+			}
 		} : props -> new GiantSaplingBlock(grower, giant, props), BlockBehaviour.Properties.ofFullCopy(saplingLike));
 		registerItem(tree + "_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
 				.compostable(COMPOST_LOW), SEEDS_TAB);
@@ -3314,6 +3336,10 @@ public final class JugcraftAgriculture {
 			selector = selector.or(BiomeSelectors.tag(biomes[i]));
 		}
 		ResourceKey<PlacedFeature> key = ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("patch_" + name));
+		// Keep the shrub-steppe low without removing its plains crop/animal tags.
+		if (name.equals("apple_tree") || name.equals("peach_tree")) {
+			selector = selector.and(BiomeSelectors.excludeByKey(ResourceKey.create(Registries.BIOME, Jugcraft.id("steppe"))));
+		}
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld().and(selector), GenerationStep.Decoration.VEGETAL_DECORATION, key);
 	}
 

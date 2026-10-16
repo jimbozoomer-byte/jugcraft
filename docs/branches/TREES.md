@@ -41,7 +41,7 @@ changed and why. Leaf and bark colours were worked out by script from the ramps 
 checked against every other wood, vanilla's and Jugcraft's, by CIE76 ΔE and by CIEDE2000, and each leaf and bark against
 the trees it grows beside.
 
-**Batches 4b and 4c are implemented and owner-approved (16 October 2026)** on `codex/tree-generation-batch-4bc` in [PR #395](https://github.com/jimbozoomer-byte/jugcraft/pull/395), following the owner-approved batch 4. The owner requested both together; [the feature record](../features/trees-batch-4bc.md) records the shared scope and actual verification. PR #395 is ready for review. Batch 5 (rowan, elder and seasonal fruit) is implemented and owner-approved on its own public branch in [PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396); [implementation record](../features/trees-batch-5.md). PR #396 is ready for review. Batches 5b and 5c are implemented together in [draft PR #397](https://github.com/jimbozoomer-byte/jugcraft/pull/397), awaiting owner inspection; [record](../features/trees-batch-5bc.md). Batch 6 and later remain unstarted.
+**Batches 4b and 4c are implemented and owner-approved (16 October 2026)** in [PR #395](https://github.com/jimbozoomer-byte/jugcraft/pull/395); [feature record](../features/trees-batch-4bc.md). Batch 5 (rowan, elder and seasonal fruit) is owner-approved in [PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396); [implementation record](../features/trees-batch-5.md). Batches 5b and 5c are owner-approved after the hawthorn harvest correction in [PR #397](https://github.com/jimbozoomer-byte/jugcraft/pull/397); [record](../features/trees-batch-5bc.md). These earlier batches were incorporated into main by [integration PR #398](https://github.com/jimbozoomer-byte/jugcraft/pull/398). Batch 6 is implemented and owner-approved on `codex/tree-generation-batch-6` in [PR #399](https://github.com/jimbozoomer-byte/jugcraft/pull/399), reapplied unchanged onto the merged main branch; [scope and verification](../features/trees-batch-6.md). Batches 6b and 7 remain unstarted.
 
 ## How to read this
 
@@ -246,7 +246,7 @@ own records, and gives the conifer forests an understory. Two shapes cost nothin
     Forest 10%.
   - bog_fir: Muskeg 30%, replacing the full-size fir; Fen 50%, as its default ("short firs"); Bog 15%.
 - **Shape:**
-  - stunted_fir: straight trunk 4 (+3) under spruce foliage (radius [1, 2], offset [0, 1], trunk_height [0, 1]). A
+  - stunted_fir: straight trunk 4 (+3) under spruce foliage (radius [1, 2], offset 0, trunk_height 0). A
     squat cone 5-8 blocks tall with needles nearly to the ground.
   - bog_fir: the same trunk under spruce foliage (radius [0, 1], offset [0, 1], trunk_height [2, 3]). A pencil-thin,
     ragged spire with a tuft at the top, like black spruce's "club top".
@@ -883,9 +883,9 @@ with a drought-hardy survivor.
   | Alpine Spawn | juniper_bush 10%, in batch 8 with Alpine Spawn's picks list |
 - **Shape:** all three forms survive as a dead bush would, so they stand on sand, red sand, coarse dirt and
   terracotta as well as grass.
-  - juniper: forking trunk 2 (+2, +1) under random_spread foliage (radius 2, offset 0, foliage_height 3, 40
-    attempts). Short, crooked and ragged, 4-6 blocks.
-  - juniper_column: straight trunk 4 (+2) under spruce foliage (radius [1, 2], offset [0, 1], trunk_height [0, 1]). A
+  - juniper: forking trunk 3 (+1, +1) under connected fancy foliage (radius 1, offset 0, height 3).
+    Short and crooked, 4-6 blocks; connected crown lobes avoid floating leaf islands.
+  - juniper_column: straight trunk 4 (+2) under spruce foliage (radius [1, 2], offset 0, trunk_height 0). A
     shaggy flame, leafy from the ground up, 5-7 blocks.
   - juniper_bush: one log under bush foliage (radius 2, offset 0, height 1). A low mat 5 wide and 1-2 high.
 - **Bark and wood:** its own wood, **juniper** (rule 9). The junipers (*Juniperus*) are one of about 30 genera of the
