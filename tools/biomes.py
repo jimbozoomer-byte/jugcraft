@@ -805,7 +805,7 @@ BIOMES = {
     "scrubland": {
         "display": "Scrubland", "base": "savanna", "temperature": 1.2, "downfall": 0.2, "seasons": False, "precipitation": False,
         "effects": {"grass_color": "#aaa65c", "foliage_color": "#949650"},
-        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": [["jugcraft:juniper_checked", 0.15]]},
+        "trees": {"count": [1, 2], "default": "jugcraft:olive_bush_checked", "picks": [["jugcraft:juniper_checked", 0.15], ["jugcraft:oak_bush_checked", 0.25 / 0.85]]},
         "extras": ["dry_grass", "meadow_wildflowers"],
         "tags": ["c:is_dry", "c:is_hot"],
     },
@@ -871,8 +871,8 @@ BIOMES = {
     "mediterranean_forest": {
         "display": "Mediterranean Forest", "base": "forest", "temperature": 0.8, "downfall": 0.5, "seasons": True, "winter_snow": False,
         "trees": {"count": [5, 6], "default": "jugcraft:cypress_checked", "picks": [
-            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.15], ["jugcraft:oak_bush_checked", 0.2],
-            ["jugcraft:lemon_checked", 0.1], ["jugcraft:orange_checked", 0.1]]},
+            ["jugcraft:olive_checked", 0.25], ["jugcraft:olive_bush_checked", 0.15 / 0.75],
+            ["minecraft:oak_checked", 0.124 / 0.6], ["jugcraft:lemon_checked", 0.1], ["jugcraft:orange_checked", 0.1]]},
         "extras": ["peonies", "bushes_dense"],
         "tags": ["minecraft:has_structure/village_plains"],
     },
@@ -1541,9 +1541,9 @@ BIOMES = {
     },
     # Rolling fields smothered in lavender, with blossoming jacarandas and oaks; bees.
     "lavender_field": {
-        "display": "Lavender Field", "base": "sunflower_plains", "temperature": 0.7, "downfall": 0.6, "seasons": True,
+        "display": "Lavender Field", "base": "sunflower_plains", "temperature": 0.7, "downfall": 0.6, "seasons": True, "winter_snow": False,
         "effects": {"grass_color": "#8cbf64"},
-        "trees": {"count": [1, 2], "default": "jugcraft:jacaranda_checked", "picks": [("minecraft:oak_bees_002", 0.4), ("jugcraft:cypress_checked", 0.1 / 0.6)]},
+        "trees": {"count": [1, 2], "default": "jugcraft:jacaranda_checked", "picks": [("jugcraft:olive_bees_checked", 0.3), ("minecraft:oak_bees_002", 0.1 / 0.7), ("jugcraft:cypress_checked", 0.1 / 0.6)]},
         "drop": ["minecraft:patch_sunflower", "minecraft:flower_plains", "minecraft:patch_bush"],
         "extras": ["lavender", "tall_lavender"],
         "tags": ["c:is_plains", "c:is_flower_forest"],

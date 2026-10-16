@@ -30,7 +30,7 @@ class TreeBatchSixTests(unittest.TestCase):
             "canyon": ([2,3], {"jugcraft:juniper_checked":.35,"jugcraft:juniper_bush_checked":.25,"minecraft:pine_checked":.4}),
             "dryland": ([2,3], {"jugcraft:juniper_checked":.3,"jugcraft:juniper_bush_checked":.25,"minecraft:pine_checked":.45}),
             "xeric_shrubland": ([1,2], {"jugcraft:juniper_checked":.25,"jugcraft:desert_acacia_checked":.75}),
-            "scrubland": ([1,2], {"jugcraft:juniper_checked":.15,"jugcraft:oak_bush_checked":.85}),
+            "scrubland": ([1,2], {"jugcraft:juniper_checked":.15,"jugcraft:oak_bush_checked":.25,"jugcraft:olive_bush_checked":.6}),
             "field": ([2,3], {"jugcraft:juniper_column_checked":.3,"minecraft:oak_bees_002":.035,"jugcraft:hawthorn_checked":.1,"jugcraft:oak_bush_checked":.015,"jugcraft:hawthorn_bush_checked":.55}),
             "prairie": ([1,2], {"jugcraft:juniper_column_checked":.15,"jugcraft:cottonwood_checked":.1,"minecraft:fancy_oak_checked":.05,"jugcraft:oak_bush_checked":.7}),
             "heathland": ([2,3], {"jugcraft:gorse_checked":.6,"jugcraft:juniper_bush_checked":.15,"minecraft:pine_checked":.25}),
@@ -89,7 +89,7 @@ class TreeBatchSixTests(unittest.TestCase):
         self.assertEqual(recipes["mulling_spices_from_juniper"]["count"],2)
 
     def test_later_batches_and_alpine_spawn_are_not_added(self):
-        for name in ("olive","olive_bush","ancient_olive"):
+        for name in ("stone_pine", "wattle", "joshua_tree"):
             self.assertNotIn(name,trees.SHAPES)
             self.assertNotIn(name,ag.TREES)
         self.assertEqual(ag.WOOD_SWITCHES["juniper"],["biomes"])

@@ -178,6 +178,9 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower JUNIPER_GROWER = weightedGrower("juniper", "juniper_column", "juniper_bush", 2, 1, 1);
 	public static final TreeGrower GORSE_GROWER = grower("gorse");
 	public static final TreeGrower SAGEBRUSH_GROWER = grower("sagebrush");
+	public static final TreeGrower OLIVE_GROWER = grower("olive");
+	public static final TreeGrower OLIVE_BUSH_GROWER = grower("olive_bush");
+	public static final TreeGrower ANCIENT_OLIVE_GROWER = grower("ancient_olive");
 	public static final TreeGrower HOLLY_GROWER = grower("holly");
 	public static final SeasonalLeavesBlock.Schedule HOLLY_LEAVES = new SeasonalLeavesBlock.Schedule(100, 300, 335);
 	public static final TreeGrower PERSIMMON_GROWER = grower("persimmon");
@@ -196,7 +199,7 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower GIANT_MAHOGANY_GROWER = grower("giant_mahogany");
 	public static final TreeGrower GIANT_EUCALYPTUS_GROWER = grower("giant_eucalyptus");
 	private static final Map<String, TreeGrower> GIANT_GROWERS = Map.of("redwood", GIANT_REDWOOD_GROWER,
-			"mahogany", GIANT_MAHOGANY_GROWER, "eucalyptus", GIANT_EUCALYPTUS_GROWER, "yew", ANCIENT_YEW_GROWER);
+			"mahogany", GIANT_MAHOGANY_GROWER, "eucalyptus", GIANT_EUCALYPTUS_GROWER, "yew", ANCIENT_YEW_GROWER, "olive", ANCIENT_OLIVE_GROWER);
 	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
 	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
 	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
@@ -524,6 +527,7 @@ public final class JugcraftAgriculture {
 		registerOrchardTrees();
 		// Generated trees' seasonal leaves start in today's look (tools/trees.py DECORATOR).
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
+		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("olive_trunk_placer"), OliveTrunkPlacer.TYPE);
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("fruiting_shrub"), FruitingShrubDecorator.TYPE);
 		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
@@ -565,6 +569,11 @@ public final class JugcraftAgriculture {
 		registerFoliage("sagebrush", "sagebrush_leaves", SAGEBRUSH_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				props -> new TintedParticleLeavesBlock(0.01F, props));
 		food("juniper_berries", 1, 0.1F, COMPOST_MEDIUM);
+		registerTree("olive", "olive_leaves", OLIVE_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.COLOR_GRAY, MapColor.TERRACOTTA_YELLOW);
+		registerFoliage("olive_bush", "wild_olive_leaves", OLIVE_BUSH_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				props -> new TintedParticleLeavesBlock(0.01F, props));
+		food("olives", 1, 0.1F, COMPOST_MEDIUM);
 		registerTree("holly", "holly_leaves", HOLLY_GROWER, HOLLY_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				MapColor.COLOR_LIGHT_GRAY, MapColor.SAND);
 		registerItem("holly_sprig", Item::new, new Item.Properties().compostable(COMPOST_LOW), BUILDING_TAB);
@@ -1954,6 +1963,7 @@ public final class JugcraftAgriculture {
 		preserve("pumpkin_butter", 4, 0.5F, null, 0, 0xC8701E);
 		preserve("cranberry_preserves", 3, 0.4F, null, 0, 0xB0122E);
 		preserve("glow_berry_jelly", 2, 0.3F, MobEffects.NIGHT_VISION, 30, 0xF0B030);
+		preserve("pickled_olives", 2, 0.4F, null, 0, 0x5A3F55);
 		preserve("pickled_beets", 2, 0.4F, null, 0, 0x7A1040);
 		preserve("pickled_peppers", 2, 0.4F, MobEffects.FIRE_RESISTANCE, 15, 0x4A8A2A);
 		preserve("corn_relish", 3, 0.5F, null, 0, 0xE0B828);
@@ -2930,7 +2940,7 @@ public final class JugcraftAgriculture {
 	private static void registerTree(String tree, String leavesId, TreeGrower grower, SeasonalLeavesBlock.Schedule schedule,
 			Block saplingLike, Block leavesLike, MapColor bark, MapColor inner) {
 		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("holly") ? props -> new HollyLeavesBlock(schedule, props)
-				: tree.equals("juniper") ? JuniperLeavesBlock::new : tree.equals("yew") ? YewLeavesBlock::new : schedule == null
+				: tree.equals("olive") ? OliveLeavesBlock::new : tree.equals("juniper") ? JuniperLeavesBlock::new : tree.equals("yew") ? YewLeavesBlock::new : schedule == null
 				? props -> new TintedParticleLeavesBlock(0.01F, props)
 				: props -> new SeasonalLeavesBlock(schedule, props);
 		registerFoliage(tree, leavesId, grower, saplingLike, leavesLike, leavesFactory);

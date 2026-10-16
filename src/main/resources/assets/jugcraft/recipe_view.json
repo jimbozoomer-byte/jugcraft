@@ -3350,6 +3350,26 @@
         {
           "in": [
             [
+              "#jugcraft:olive_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:olive_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "#minecraft:planks",
               1
             ]
@@ -3644,6 +3664,56 @@
             ],
             [
               "minecraft:pale_moss_carpet",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:olive_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:olive_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:olive_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:olive_bush_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:olive_log",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:olive_bush_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
               1,
               0.1
             ]

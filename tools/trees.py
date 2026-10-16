@@ -14,6 +14,20 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    # Native connected crown layers avoid isolated random-spread leaf blocks.
+    "olive": {"wood": "olive", "sapling": True,
+              "trunk": {"type": "jugcraft:olive_trunk_placer", "base_height": 4, "height_rand_a": 1, "height_rand_b": 1},
+              "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 2}},
+    "olive_bees": {"wood": "olive",
+                   "trunk": {"type": "jugcraft:olive_trunk_placer", "base_height": 4, "height_rand_a": 1, "height_rand_b": 1},
+                   "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 2},
+                   "decorators": [{"type": "minecraft:beehive", "probability": 0.05}]},
+    "ancient_olive": {"wood": "olive", "giant": True,
+                      "trunk": {"type": "jugcraft:olive_trunk_placer", "base_height": 5, "height_rand_a": 1, "height_rand_b": 1, "giant": True},
+                      "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 2}},
+    "olive_bush": {"wood": "olive", "tree": "olive_bush", "sapling": True,
+                   "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                   "foliage": {"type": "bush", "radius": 2, "offset": 1, "height": 2}},
     # Fancy foliage keeps an upright broadleaf oval; a height-four blob flares out nine blocks wide.
     "holly": {"wood": "holly", "sapling": True,
               "trunk": {"type": "straight", "base_height": 4, "height_rand_a": 2},

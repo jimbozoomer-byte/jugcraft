@@ -75,6 +75,7 @@ WOOD = {
     "persimmon": (18, "3d3733"),
     "juniper": (20, "8b4654"),
     "holly": (10, "b6baa1"),
+    "olive": (3, "9c9951"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -97,6 +98,7 @@ EUCALYPTUS_FLECKS = pal("e8a578", "e3a0a0", "9cc0d8", "e6c87a", "f0e0c0")
 
 # Each tree's bark: its colour (dark to light) and its character.
 BARK = {
+    "olive": (pal("474a3b", "616451", "7b7f66", "93987e", "aaad99"), "furrowed"),
     "holly": (pal("5e655a", "717a6c", "858e7f", "99a094", "acb2a9"), "plated"),
     "juniper": (pal("372625", "4c3533", "624341", "7a5452", "936562"), "stringy"),
     "persimmon": (pal("141416", "1b1c1f", "232528", "2c2e32", "36383c"), "plated"),
@@ -515,6 +517,9 @@ def wood_textures():
     out.update(evergreen_scrub_textures())
     from holly_textures import textures as holly_textures
     out.update(holly_textures())
+    from olive_textures import textures as olive_textures, figure
+    out.update(olive_textures())
+    out["block", "olive_planks"] = figure(out["block", "olive_planks"])
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)
     out[("block", "chestnut_leaves_ripe")] = chestnut_fruit(chestnut, 2)
