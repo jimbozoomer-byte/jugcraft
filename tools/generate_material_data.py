@@ -1313,6 +1313,15 @@ def recipes():
     for kind in ("smelting", "blasting"):
         recipe = cooking(MACHINE_FEATURE, kind, rid("unfired_porcelain_insulator"), "porcelain_insulator", 0.2)
         write(out / f"porcelain_insulator_from_{kind}.json", recipe)
+    # Alumina ceramics (docs/features/alumina-ceramics.md): two alumina pressed with a clay binder into an unfired
+    # substrate, which only a blast furnace is hot enough to fire into an alumina substrate.
+    alumina = [c for f in (MACHINE_FEATURE, "aluminum") for c in condition(f)]
+    substrate = shapeless(MACHINE_FEATURE, [rid("alumina"), rid("alumina"), "minecraft:clay_ball"], "unfired_alumina_substrate", 1)
+    substrate["fabric:load_conditions"] = alumina
+    write(out / "unfired_alumina_substrate.json", substrate)
+    fired = cooking(MACHINE_FEATURE, "blasting", rid("unfired_alumina_substrate"), "alumina_substrate", 0.3)
+    fired["fabric:load_conditions"] = alumina
+    write(out / "alumina_substrate_from_blasting.json", fired)
 
     # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
     boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]

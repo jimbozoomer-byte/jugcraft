@@ -253,6 +253,42 @@ def porcelain_insulator():
                       [(62, 66, 74), (110, 116, 126), (156, 162, 172), (206, 212, 220)])
 
 
+def _substrate(body, pads=None):
+    """A square ceramic substrate tile, 10x10 and centred (symmetric on both axes), lit from the top left and
+    outlined in its own dark: `body` is outline, dark, mid, light and highlight; `pads`, if given, the outline and
+    face of four metal bond pads set symmetrically on it."""
+    o, d, m, l, h = body
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(3, 13):
+        for x in range(3, 13):
+            if x in (3, 12) or y in (3, 12):
+                c = o
+            elif x == 4 or y == 4:
+                c = h
+            elif x == 11 or y == 11:
+                c = d
+            else:
+                c = l
+            img.putpixel((x, y), c + (255,))
+    if pads:
+        for px, py in ((5, 5), (9, 5), (5, 9), (9, 9)):
+            for dx in (0, 1):
+                for dy in (0, 1):
+                    img.putpixel((px + dx, py + dy), (pads[1] if (dx, dy) == (0, 0) else pads[0]) + (255,))
+    return img
+
+
+def unfired_alumina_substrate():
+    """An unfired alumina substrate: the square tile in matte pale grey pressed powder, no pads."""
+    return _substrate([(118, 116, 110), (170, 168, 160), (192, 190, 182), (208, 206, 198), (222, 220, 212)])
+
+
+def alumina_substrate():
+    """An alumina substrate: the square tile fired dense and ivory-white, with four gold bond pads."""
+    return _substrate([(126, 122, 108), (206, 202, 188), (230, 228, 218), (244, 242, 234), (255, 255, 250)],
+                      pads=[(150, 104, 20), (240, 196, 64)])
+
+
 def ammonium_nitrate():
     """Ammonium nitrate: a heap of small round white prills, lit from the top left and outlined in their own darkest
     tone (docs/ITEM_ICONS.md)."""
@@ -656,6 +692,8 @@ def draw_all(save, save_animation):
     save(porcelain_body(), "item", "porcelain_body")
     save(unfired_porcelain_insulator(), "item", "unfired_porcelain_insulator")
     save(porcelain_insulator(), "item", "porcelain_insulator")
+    save(unfired_alumina_substrate(), "item", "unfired_alumina_substrate")
+    save(alumina_substrate(), "item", "alumina_substrate")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")

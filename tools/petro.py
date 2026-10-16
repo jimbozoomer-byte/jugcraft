@@ -212,6 +212,10 @@ ITEMS = {
     "porcelain_body": "Porcelain Body",
     "unfired_porcelain_insulator": "Unfired Porcelain Insulator",
     "porcelain_insulator": "Porcelain Insulator",
+    # Alumina ceramics (docs/features/alumina-ceramics.md): alumina pressed with a clay binder into an unfired substrate
+    # tile, fired only in a blast furnace into a dense white alumina substrate that carries a processor's chips.
+    "unfired_alumina_substrate": "Unfired Alumina Substrate",
+    "alumina_substrate": "Alumina Substrate",
 }
 
 

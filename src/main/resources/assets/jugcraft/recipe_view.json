@@ -1235,6 +1235,28 @@
           ],
           "extra": [],
           "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:microchip",
+              4
+            ],
+            [
+              "jugcraft:advanced_circuit",
+              1
+            ],
+            [
+              "jugcraft:alumina_substrate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:processor",
+            1
+          ],
+          "extra": [],
+          "ticks": 400
         }
       ]
     },
