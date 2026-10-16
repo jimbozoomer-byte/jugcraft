@@ -86,6 +86,27 @@ public class TreeBatchFourBCClientGameTests extends TreeBatchTwoClientGameTests 
 		}
 		tour.add("Wood and leaf samples: /tp @s 1014 183 -900 180 10");
 		tour.add("Cypress seasonal row: /tp @s 1040 180 -1208 180 0");
+		BlockPos bareWall = GARDEN.offset(40, 0, 110);
+		world.getServer().runOnServer(server -> {
+			var level = server.overworld();
+			for (var p : BlockPos.betweenClosed(bareWall.offset(-12, -1, -12), bareWall.offset(12, -1, 12)))
+				level.setBlock(p, Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+			var green = JugcraftAgriculture.block("bald_cypress_needles").defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
+			var bare = green.setValue(SeasonalLeavesBlock.SEASON, SeasonalLeavesBlock.Foliage.BARE);
+			for (var p : BlockPos.betweenClosed(bareWall.offset(-3, 0, 0), bareWall.offset(-1, 3, 0))) {
+				if (p.getY() == bareWall.getY()) level.setBlock(p, JugcraftAgriculture.block("bald_cypress_log").defaultBlockState(), Block.UPDATE_CLIENTS);
+				else {
+					level.setBlock(p, green, Block.UPDATE_CLIENTS);
+					level.setBlock(p, bare, Block.UPDATE_CLIENTS);
+				}
+			}
+			level.setBlock(bareWall.offset(3, 0, 0), JugcraftAgriculture.block("bald_cypress_log").defaultBlockState(), Block.UPDATE_CLIENTS);
+			level.setBlock(bareWall.offset(3, 1, 0), green, Block.UPDATE_CLIENTS);
+			level.setBlock(bareWall.offset(3, 1, 0), bare, Block.UPDATE_CLIENTS);
+			PineWoodClientGameTests.label(level, bareWall.offset(0, 0, 3), "Bare cypress", "Joined twigs", "Wall / single block");
+		});
+		shoot(context, world, bareWall.offset(6, 4, 10), bareWall.offset(0, 2, 0), screenshotPrefix() + "bare_blocks");
+		tour.add("Bare cypress block and tiled wall: /tp @s 1040 181 -882 180 0");
 		tour.add("Season displays are frozen for comparison. /gamerule minecraft:random_tick_speed 3 restores ordinary updates.");
 	}
 }

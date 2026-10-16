@@ -394,6 +394,8 @@ def paint_leaves(p, kind, seed, *, gap_threshold=None, edge_green=None, under_ga
 
 def bare(name, seed):
     """Bare twigs in the bark's colour, crossing and branching, the rest open."""
+    if name == "bald_cypress_needles_bare":
+        return cypress_bare(seed)
     p = BARK[BARE[name]][0]
     rng = random.Random(seed)
     c = Canvas()
@@ -414,6 +416,38 @@ def bare(name, seed):
             x += math.cos(angle)
             y += math.sin(angle)
             angle += rng.uniform(-0.3, 0.3)
+    return c.img
+
+
+def cypress_bare(seed):
+    """One joined, tapering branch network; shared edge anchors connect neighbouring faces/tiles."""
+    p = BARK["bald_cypress"][0]
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.img.putpixel((x, y), p[0] + (0,))
+    paths = [
+        ([(8, 16), (8, 12), (7, 9), (9, 5), (8, 1), (8, -1)], (-1, 0)),
+        ([(-1, 8), (3, 7), (6, 8), (8, 8), (12, 9), (16, 8)], (0, -1)),
+        ([(8, 12), (4, 10), (2, 5), (1, 2)], (-1, 0)),
+        ([(8, 8), (12, 5), (13, 2), (15, 1)], (0, 1)),
+        ([(8, 4), (5, 3), (3, 1)], (0, 1)),
+        ([(3, 7), (1, 10), (1, 13)], (1, 0)),
+        ([(12, 9), (13, 12), (11, 14)], (-1, 0)),
+    ]
+    for points, (dx, dy) in paths:
+        for a, b in zip(points, points[1:]):
+            c.line(a[0] + dx, a[1] + dy, b[0] + dx, b[1] + dy, p[1])
+            c.line(*a, *b, p[2])
+    rng = random.Random(seed)
+    for y in range(1, 15):
+        for x in range(1, 15):
+            if not c.empty(x, y) and rng.random() < .16:
+                c.px(x, y, p[3])
+    # Identical two-pixel ports on all four edges join around corners as well as across a wall.
+    for i in range(16):
+        for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
+            c.img.putpixel((x, y), (p[2] + (255,)) if i in (7, 8) else p[0] + (0,))
     return c.img
 
 
