@@ -133,6 +133,8 @@ public final class PetroFluids {
 	/** Ammonia burnt in oxygen and absorbed in water (the Ostwald process). */
 	public static Entry NITRIC_ACID;
 	public static Entry ETHYLENE_DICHLORIDE;
+	/** Wet-process phosphoric acid (docs/features/phosphoric-acid.md). */
+	public static Entry PHOSPHORIC_ACID;
 	/** Vanadium leached into sulfuric acid (batch 17): the flow battery's electrolyte. */
 	public static Entry VANADIUM_ELECTROLYTE;
 	/** Crops fermented in the chemical reactor (batch 26): fuel for the gas turbine and the advanced engine. */
@@ -267,6 +269,7 @@ public final class PetroFluids {
 
 		CONCENTRATED_SULFURIC_ACID = fluid("concentrated_sulfuric_acid", 8, 3, 1, 0xFF756E33, MapColor.COLOR_LIGHT_GRAY);
 		CHLOROFORM = fluid("chloroform", 8, 3, 1, 0xFF567769, MapColor.COLOR_LIGHT_GRAY);
+		PHOSPHORIC_ACID = fluid("phosphoric_acid", 6, 4, 1, 0xFFDEDCCC, MapColor.SNOW);
 		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
 		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
 		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);

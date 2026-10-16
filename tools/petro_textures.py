@@ -366,6 +366,54 @@ def fertilizer():
     return img
 
 
+def triple_superphosphate():
+    """Triple superphosphate: superphosphate's tied burlap sack, paler and greyer, stencilled with three blue-grey
+    granules in a triangle, a few grey granules spilt."""
+    img = fertilizer()
+    sack = {(176, 146, 96): (168, 156, 128), (162, 132, 86): (154, 142, 116), (196, 166, 112): (190, 178, 150),
+            (120, 96, 60): (108, 98, 78), (96, 76, 44): (84, 76, 58), (60, 140, 50): (168, 156, 128)}
+    for y in range(16):
+        for x in range(16):
+            px = img.getpixel((x, y))
+            if px[3] and px[:3] in sack:
+                img.putpixel((x, y), sack[px[:3]] + (255,))
+    for x, y in ((7, 7), (8, 7), (5, 10), (6, 10), (9, 10), (10, 10)):
+        img.putpixel((x, y), (70, 96, 120, 255))
+    for x, y in ((7, 8), (8, 8), (5, 11), (6, 11), (9, 11), (10, 11)):
+        img.putpixel((x, y), (46, 66, 86, 255))
+    return img
+
+
+def cola():
+    """Cola: a stoppered glass bottle of dark brown cola with a few rising bubbles, outlined in each part's own dark."""
+    tones = {"c": (92, 62, 36), "k": (150, 106, 64), "g": (86, 108, 116), "w": (196, 222, 228),
+             "o": (34, 16, 10), "s": (62, 30, 16), "y": (96, 48, 22), "h": (150, 92, 52), "b": (214, 180, 150)}
+    rows = [
+        "................",
+        "......cccc......",
+        "......ckkc......",
+        "......cccc......",
+        ".......gg.......",
+        "......gwwg......",
+        ".....gwbyyg.....",
+        "....goyhyyyog...",
+        "...goyhyybyyog..",
+        "...goyhyyyysog..",
+        "...goyyybyysog..",
+        "...gosyyyyssog..",
+        "...goossssssog..",
+        "....gooooooog...",
+        ".....ggggggg....",
+        "................",
+    ]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def titanium_sponge():
     """Titanium sponge: a porous, crumbly blue-grey lump with dark pits."""
     img = ms.lumps([(6.0, 9.6, 3.8), (10.6, 8.0, 3.6), (8.2, 5.8, 2.8), (10.0, 11.6, 2.6)],
@@ -605,6 +653,8 @@ def draw_all(save, save_animation):
     save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
     save(gasification_residue(), "item", "gasification_residue")
     save(ammonium_nitrate(), "item", "ammonium_nitrate")
+    save(triple_superphosphate(), "item", "triple_superphosphate")
+    save(cola(), "item", "cola")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")

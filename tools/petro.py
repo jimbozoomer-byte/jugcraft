@@ -206,6 +206,10 @@ ITEMS = {
     # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
     # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
     "ammonium_nitrate": "Ammonium Nitrate",
+    # Phosphoric acid's products (docs/features/phosphoric-acid.md): triple superphosphate, a stronger phosphate
+    # fertilizer (chemistry/FertilizerItem, four doses), and cola, a carbonated drink soured with food-grade acid.
+    "triple_superphosphate": "Triple Superphosphate",
+    "cola": "Cola",
 }
 
 
@@ -396,6 +400,19 @@ FLUID_RECIPES = {
         # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
         {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
+        # Wet-process phosphoric acid (docs/features/phosphoric-acid.md): phosphate rock dissolved in water (first tank)
+        # and sulfuric acid (second tank, so it never meets the superphosphate recipe's acid-first tank); the calcium
+        # sulfate is filtered out as residue for the Mineral Conditioner's gypsum binder. Phosphoric acid on more rock
+        # gives triple superphosphate; a little of it, sugar and carbon dioxide in water bottle cola. Quantities for review.
+        {"name": "phosphoric_acid", "items": [("jugcraft:phosphate", 2)],
+         "fluids": [("minecraft:water", 250), ("jugcraft:sulfuric_acid", 250)],
+         "fluid_results": [("jugcraft:phosphoric_acid", 250)], "results": [("jugcraft:calcium_sulfate", 1)], "ticks": 160,
+         "features": ["phosphate", "sulfur", "machines"]},
+        {"name": "triple_superphosphate", "items": [("jugcraft:phosphate", 1)], "fluids": [("jugcraft:phosphoric_acid", 250)],
+         "results": [("jugcraft:triple_superphosphate", 4)], "ticks": 100, "features": ["phosphate", "sulfur", "machines"]},
+        {"name": "cola", "items": [("minecraft:glass_bottle", 4), ("minecraft:sugar", 4)],
+         "fluids": [("minecraft:water", 1000), ("jugcraft:phosphoric_acid", 50), ("jugcraft:carbon_dioxide", 250)],
+         "results": [("jugcraft:cola", 4)], "ticks": 120, "features": ["phosphate", "sulfur", "machines"]},
         # Saponification (batch 15): fat (rotten flesh, rendered) boiled in lye sets into soap.
         {"name": "soap", "items": [("minecraft:rotten_flesh", 2)], "fluids": [("jugcraft:lye", 250)],
          "results": [("jugcraft:soap", 4)], "ticks": 80, "features": ["salt"]},
@@ -612,5 +629,11 @@ ITEMS.update({k: v for k, v in POLYMER_ITEMS.items() if k not in ITEMS})
 
 from fluorochemistry import FLUIDS as FLUORO_FLUIDS, GASES as FLUORO_GASES, ITEMS as FLUORO_ITEMS
 FLUIDS.update({k: v for k, v in FLUORO_FLUIDS.items() if k not in FLUIDS})
+# Wet-process phosphoric acid (docs/features/phosphoric-acid.md): phosphate rock dissolved in sulfuric acid and water in
+# the Chemical Reactor, the calcium sulfate filtered out. A clear, faintly cream syrupy acid. Last, so the textures drawn
+# by index for the fluids before it keep their seeds.
+FLUIDS["phosphoric_acid"] = {"display": "Phosphoric Acid", "feature": "machines",
+                             "colors": [(150, 148, 128), (192, 190, 170), (222, 220, 204), (244, 244, 234)],
+                             "tick_delay": 6, "slope": 4, "drop_off": 1}
 GASES.update({k: v for k, v in FLUORO_GASES.items() if k not in GASES})
 ITEMS.update({k: v for k, v in FLUORO_ITEMS.items() if k not in ITEMS})
