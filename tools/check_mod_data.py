@@ -3133,6 +3133,10 @@ def check_industrial_forms():
             for row in industrial_forms.FORM_RECIPES.get(form, []):
                 if any(petro.result_tank(i, r) == output and r[0] != gas for i, r in enumerate(row.get("fluid_results", []))):
                     err(f"{form}: declared gas overflow disagrees with a recipe product")
+        # MachineForm's own rule: every form is 2 to 6 blocks on each axis (it refuses to load otherwise).
+        extents = (len(info["layers"][0][0]), len(info["layers"][0]), len(info["layers"]))
+        if any(not 2 <= extent <= 6 for extent in extents):
+            err(f"{form}: must be 2 to 6 blocks on every axis, not {'x'.join(map(str, extents))}")
         if profiles.get(info["profile"]) != info["tank_mb"]:
             err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
         parts = len(industrial_forms.footprint(info["layers"]))

@@ -206,6 +206,10 @@ ITEMS = {
     # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
     # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
     "ammonium_nitrate": "Ammonium Nitrate",
+    # The owner's optional later methanation catalyst (tools/industrial_forms.py): ruthenium recovered from washed nickel
+    # ore with hydrochloric acid and chlorine in the Bulk Chemical Reactor, laid on the nickel bed. Never used up.
+    "ruthenium_powder": "Ruthenium Powder",
+    "ruthenium_catalyst_bed": "Ruthenium Catalyst Bed",
 }
 
 
