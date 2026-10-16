@@ -64,14 +64,22 @@ public class TreeBatchSixClientGameTests extends TreeBatchTwoClientGameTests {
 			throw new AssertionError("Tall fruit tree generated in Steppe");
 	}
 	@Override protected void validateReopened(ServerLevel level) {
-		savedStates.forEach((pos,state) -> { if(!level.getBlockState(pos).equals(state)) throw new AssertionError("Saved berry state changed at " + pos); });
+		savedStates.forEach((pos,state) -> {
+			var actual = level.getBlockState(pos);
+			// Native leaves recalculate their cached log distance as chunks/neighbours load.
+			// Fruit, species, persistence and waterlogging must survive exactly; natural leaves must stay supported.
+			if (!actual.is(state.getBlock()) || !actual.setValue(LeavesBlock.DISTANCE,state.getValue(LeavesBlock.DISTANCE)).equals(state)
+					|| !actual.getValue(LeavesBlock.PERSISTENT) && actual.getValue(LeavesBlock.DISTANCE) >= LeavesBlock.DECAY_DISTANCE)
+				throw new AssertionError("Saved berry/support state changed at " + pos + ": expected " + state + ", actual " + actual);
+			if (!actual.equals(state)) Jugcraft.LOGGER.info("[tree 6 save] Leaf support settled at {}: {} -> {}",pos,state.getValue(LeavesBlock.DISTANCE),actual.getValue(LeavesBlock.DISTANCE));
+		});
 	}
 	@Override protected void extraDisplays(ClientGameTestContext context, TestSingleplayerContext world, List<String> tour) {
 		var wall=GARDEN.offset(0,0,80);
 		var foliageWall=wall.offset(0,0,50);
 		world.getServer().runOnServer(server -> {
 			var level=server.overworld();
-			for(var p:BlockPos.betweenClosed(wall.offset(-12,-1,-12),wall.offset(90,-1,72))) level.setBlock(p,Blocks.STONE.defaultBlockState(),Block.UPDATE_CLIENTS);
+			for(var p:BlockPos.betweenClosed(wall.offset(-28,-1,-12),wall.offset(90,-1,72))) level.setBlock(p,Blocks.STONE.defaultBlockState(),Block.UPDATE_CLIENTS);
 			PineWoodClientGameTests.comparisonRow(level,wall,0,new String[]{"jugcraft:juniper","minecraft:mangrove","minecraft:crimson","jugcraft:jacaranda","jugcraft:fruitwood","jugcraft:cypress"});
 			for(int fruit=0;fruit<3;fruit++) {
 				var pos=foliageWall.offset(fruit*5,2,0);
@@ -95,7 +103,8 @@ public class TreeBatchSixClientGameTests extends TreeBatchTwoClientGameTests {
 				}
 			}
 		});
-		shoot(context,world,wall.offset(22,7,27),wall.offset(22,2,0),screenshotPrefix()+"juniper_wood");
+		shoot(context,world,wall.offset(4,7,34),wall.offset(4,2,0),screenshotPrefix()+"juniper_wood");
+		shoot(context,world,wall.offset(-18,4,12),wall.offset(-18,2,0),screenshotPrefix()+"juniper_wood_close");
 		for(boolean cutout:List.of(true,false)) {
 			context.runOnClient(client -> client.options.cutoutLeaves().set(cutout));
 			shoot(context,world,foliageWall.offset(12,5,15),foliageWall.offset(12,2,0),screenshotPrefix()+(cutout?"foliage_cutout":"foliage_solid"));

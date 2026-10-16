@@ -1,6 +1,6 @@
 # Tree generation batch 6: evergreen scrub
 
-Status: owner-authorized implementation in progress, 16 October 2026. Public branch: `codex/tree-generation-batch-6` in `speedygroyper/jugcraft`. Actual tool/model: OpenAI Codex (GPT-6). Based on the owner-approved tree stack through batch 5c, including the hawthorn harvest and recipe-view corrections; upstream integration PR #398 is still open. Batches 6b and 7 are excluded.
+Status: implemented, awaiting owner inspection, 16 October 2026. Public branch: `codex/tree-generation-batch-6` in `speedygroyper/jugcraft`. Actual tool/model: OpenAI Codex (GPT-6). Based on the owner-approved tree stack through batch 5c, including the hawthorn harvest and recipe-view corrections; upstream integration PR #398 is still open. Batches 6b and 7 are excluded.
 
 ## Scope and acquisition
 
@@ -58,6 +58,20 @@ Completed locally on 16 October 2026:
 - 814 generated tree/biome, loot/model and recipe-view JSON files match their generators, including the normal model-finishing pass; all fourteen new textures match their deterministic generator. All previously committed textures remain byte-identical.
 - All six focused server game tests pass: sixty seeded shapes, renewable saplings on supported soils, all juniper forms, obstruction protection, connected foliage, real right-click harvest/regrowth in every calendar mode, placement/decay rules, renewable loot, wood recipes/stripping, tree farms, native bee attraction and the original and alternative spice recipes.
 
-The complete local `build` passed with all 1,684 server game tests. A subsequent one-line correction makes the juniper grower report its bush as the shortest form for bone-meal height validation; the final focused run verifies that correction and rebuilds the matching JAR.
+The complete local `build` passed with all 1,684 server game tests. A subsequent one-line correction makes the juniper grower report its bush as the shortest form for bone-meal height validation; the final focused run passed all six tests again and rebuilt the matching JAR.
 
-Pending: rendered tree/biome inspection and save/reopen checks. The normal-world client test verifies Steppe's dynamic crop/fruit feature injection, which does not run for custom biomes in the flat server-test world's biome source. Deliver a separate inspection save, matching mod and pack with a labelled garden, fruit/wood comparisons and natural biome stops. No completed preview is claimed yet.
+The final rendered `TreeBatchSixClientGameTests` passed with 26 screenshots and fifteen garden examples (three seeds per form). All twelve natural biome samples contained their intended batch-6 foliage. The normal-world test verifies that Steppe retains wild corn and shrubs while excluding apple and peach patch features. Its photographed sample contained 102 sagebrush leaf blocks and 77 juniper leaf blocks, with no apple or peach foliage. These counts establish presence, not global proportions; neighboring biomes can be visible in the photographs.
+
+Every garden tree kept its shape across save/reopen. All recorded berry states, foliage types, persistence and waterlogging survived exactly; naturally grown leaves remained supported. Native cached leaf distances are allowed to settle as chunks load (observed 2 to 1); their changing cache must not be mistaken for lost fruit. The initial gallery run exposed a crimson-reference naming error, corrected to native stems/hyphae; the final run passed with those references and corrected camera framing.
+
+[Juniper](../images/trees-batch-6/juniper_close.png) · [column form](../images/trees-batch-6/juniper_column_close.png) · [bush form](../images/trees-batch-6/juniper_bush_close.png) · [gorse](../images/trees-batch-6/gorse_close.png) · [sagebrush](../images/trees-batch-6/sagebrush_close.png) · [wood](../images/trees-batch-6/juniper_wood_close.png) · [solid foliage](../images/trees-batch-6/foliage_solid.png) · [natural Heathland](../images/trees-batch-6/biome_heathland.png) · [natural Steppe](../images/trees-batch-6/biome_steppe.png).
+
+## Inspection delivery
+
+The separate delivery is `tree-batch-6-preview-2026-10-16` beside this checkout. It includes **Evergreen Scrub Inspection**, the matching mod/pack, tour, screenshots and checksums. The raised garden is authored; all twelve biome stops are untouched natural generation. Garden junipers start with pickable ripe berries. Random ticks, time and weather are frozen for inspection; `/gamerule minecraft:random_tick_speed 3` restores ripening, sapling growth and leaf decay.
+
+The delivery copy was scanned across **18,368 saved region records** and all other saved files; no actual game-test content was present. All **126 source files** and the source export were preserved. Only unused development metadata in `level.dat`, `level.dat_old` and `data/fabric/registry_entries.dat` changed in the cleaned copy.
+
+The cleaned copy opened in ordinary Minecraft at the garden (1120.5, 180, -987.5), confirmed by the client join log. Both the pack and world ZIP pass integrity checks; every world file, the matching JAR and all eighteen pinned dependency entries match their verified inputs. No external launcher import, two-client dedicated-server session, released-world upgrade or performance benchmark is claimed. Batches 6b and 7 remain unstarted.
+
+This draft is stacked on the approved earlier tree work. Integration PR #398 is still open; GitHub currently reports conflicts with main. Reconcile that prerequisite stack before merging this PR. No upstream PR or server deployment was performed.
