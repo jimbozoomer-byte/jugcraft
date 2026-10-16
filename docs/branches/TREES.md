@@ -41,7 +41,7 @@ changed and why. Leaf and bark colours were worked out by script from the ramps 
 checked against every other wood, vanilla's and Jugcraft's, by CIE76 ΔE and by CIEDE2000, and each leaf and bark against
 the trees it grows beside.
 
-**Batches 4b and 4c are implemented and owner-approved (16 October 2026)** in [PR #395](https://github.com/jimbozoomer-byte/jugcraft/pull/395); [feature record](../features/trees-batch-4bc.md). Batch 5 (rowan, elder and seasonal fruit) is owner-approved in [PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396); [implementation record](../features/trees-batch-5.md). Batches 5b and 5c are owner-approved after the hawthorn harvest correction in [PR #397](https://github.com/jimbozoomer-byte/jugcraft/pull/397); [record](../features/trees-batch-5bc.md). These earlier batches were incorporated into main by [integration PR #398](https://github.com/jimbozoomer-byte/jugcraft/pull/398). Batch 6 is implemented and owner-approved on `codex/tree-generation-batch-6` in [PR #399](https://github.com/jimbozoomer-byte/jugcraft/pull/399), reapplied unchanged onto the merged main branch; [scope and verification](../features/trees-batch-6.md). Batch 6b holly is implemented and awaiting owner inspection in [PR #404](https://github.com/jimbozoomer-byte/jugcraft/pull/404); batch 7 remains unstarted.
+**Batches 4b and 4c are implemented and owner-approved (16 October 2026)** in [PR #395](https://github.com/jimbozoomer-byte/jugcraft/pull/395); [feature record](../features/trees-batch-4bc.md). Batch 5 (rowan, elder and seasonal fruit) is owner-approved in [PR #396](https://github.com/jimbozoomer-byte/jugcraft/pull/396); [implementation record](../features/trees-batch-5.md). Batches 5b and 5c are owner-approved after the hawthorn harvest correction in [PR #397](https://github.com/jimbozoomer-byte/jugcraft/pull/397); [record](../features/trees-batch-5bc.md). These earlier batches were incorporated into main by [integration PR #398](https://github.com/jimbozoomer-byte/jugcraft/pull/398). Batch 6 is implemented and owner-approved on `codex/tree-generation-batch-6` in [PR #399](https://github.com/jimbozoomer-byte/jugcraft/pull/399), reapplied unchanged onto the merged main branch; [scope and verification](../features/trees-batch-6.md). Batch 6b holly is implemented and owner-approved in [PR #404](https://github.com/jimbozoomer-byte/jugcraft/pull/404). Batch 7 olive is implemented and locally tested, awaiting owner visual approval in [draft PR #408](https://github.com/jimbozoomer-byte/jugcraft/pull/408); [scope and verification](../features/trees-batch-7.md). Later batches remain unstarted.
 
 ## How to read this
 
@@ -942,7 +942,7 @@ keeping it open and low.
 
 ### Batch 6b: the holly
 
-**Implemented, awaiting owner inspection** on `codex/tree-generation-batch-6b` in [draft PR #404](https://github.com/jimbozoomer-byte/jugcraft/pull/404). [Scope, balance and verification](../features/trees-batch-6b.md). This follows approved batch 6; batch 7 remains unstarted.
+**Implemented and owner-approved** on `codex/tree-generation-batch-6b` in [PR #404](https://github.com/jimbozoomer-byte/jugcraft/pull/404). [Scope, balance and verification](../features/trees-batch-6b.md). This follows approved batch 6; batch 7 is recorded below.
 
 Its berries use batch 5's season state, so it follows batch 5.
 
@@ -978,6 +978,8 @@ generation to the planned December content.
   - They are decoration only and never gate anything.
 
 ### Batch 7: the olive
+
+**Implementation in progress** on `codex/tree-generation-batch-7`, [draft PR #408](https://github.com/jimbozoomer-byte/jugcraft/pull/408). [Approved scope and verification](../features/trees-batch-7.md). Later batches are excluded.
 
 #### olive
 Olive (*Olea europaea*), wild and cultivated. **High.** The defining tree of the Mediterranean. It fills the biggest
