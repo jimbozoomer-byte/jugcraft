@@ -4,8 +4,14 @@ import io.github.jimbozoomer.jugcraft.materials.JugcraftRegistry;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeItem;
 import io.github.jimbozoomer.jugcraft.weapons.GrenadeLauncherItem;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 
 /** Plain items of the oil line (ITEMS in tools/petro.py). */
 public final class PetroItems {
@@ -49,6 +55,13 @@ public final class PetroItems {
 	public static Item AMMONIUM_NITRATE;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
+	/** Phosphoric acid's products (docs/features/phosphoric-acid.md): triple superphosphate and cola. */
+	public static Item TRIPLE_SUPERPHOSPHATE;
+	public static Item COLA;
+	/** Bone meal doses triple superphosphate gives each crop. */
+	public static final int TRIPLE_SUPERPHOSPHATE_DOSES = 4;
+	/** Cola: Haste I for this long (seconds) when drunk. */
+	public static final int COLA_HASTE_SECONDS = 30;
 	public static Item VANADIUM_CONTACT_BED;
 
 	public static Item VANADIUM_IRON_CONCENTRATE;
@@ -137,6 +150,15 @@ public final class PetroItems {
 		// A nitrogen fertilizer: superphosphate's 5x5 area, three doses a crop instead of two.
 		AMMONIUM_NITRATE = JugcraftRegistry.item("ammonium_nitrate",
 				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
+		// Phosphate rock with phosphoric acid: superphosphate's 5x5 area, four doses a crop.
+		TRIPLE_SUPERPHOSPHATE = JugcraftRegistry.item("triple_superphosphate",
+				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, TRIPLE_SUPERPHOSPHATE_DOSES));
+		// A bottle of cola: drunk even when full, a short burst of Haste, and the bottle back.
+		COLA = JugcraftRegistry.item("cola", properties -> new Item(properties
+				.food(new FoodProperties.Builder().nutrition(3).saturationModifier(0.2F).alwaysEdible().build(),
+						Consumables.defaultDrink().onConsume(new ApplyStatusEffectsConsumeEffect(
+								new MobEffectInstance(MobEffects.HASTE, COLA_HASTE_SECONDS * 20))).build())
+				.usingConvertsTo(Items.GLASS_BOTTLE).stacksTo(16)));
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -263,8 +285,10 @@ public final class PetroItems {
 			output.accept(VANADIUM_PENTOXIDE);
 			output.accept(GASIFICATION_RESIDUE);
 			output.accept(AMMONIUM_NITRATE);
+			output.accept(TRIPLE_SUPERPHOSPHATE);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.accept(COLA));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
 			output.accept(GRENADE);
 			output.accept(GRENADE_LAUNCHER);

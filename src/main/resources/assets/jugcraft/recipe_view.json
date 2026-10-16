@@ -6021,6 +6021,96 @@
         {
           "items": [
             [
+              "jugcraft:phosphate",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ],
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:phosphoric_acid",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:calcium_sulfate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:phosphate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:phosphoric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:triple_superphosphate",
+              4
+            ]
+          ],
+          "ticks": 100,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "minecraft:glass_bottle",
+              4
+            ],
+            [
+              "minecraft:sugar",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ],
+            [
+              "jugcraft:phosphoric_acid",
+              50
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:cola",
+              4
+            ]
+          ],
+          "ticks": 120,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "minecraft:rotten_flesh",
               2
             ]
