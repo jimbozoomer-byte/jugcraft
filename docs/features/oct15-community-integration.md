@@ -1,12 +1,12 @@
 # October 15 community integration
 
-Status: prepared locally on `integrate/ready-prs-oct15`; local validation passed; publishing and combined CI are pending. Do not treat this batch as shipped until its integration PR is merged.
+Status: integration candidate on `integrate/ready-prs-oct15`. The October 15 local validation passed; owner-approved tree PRs #395 and #396 were added on October 16. Combined GitHub CI is pending. Do not treat this batch as shipped until its integration PR is merged.
 
 Owner request: merge all ready open PRs and repair blockers. Integration and fixes by OpenAI Codex (GPT-6). Base: `40381834a75312b8cb8a9b326d32c671f2f20a8e`, which includes the separately reviewed and merged PR #357. The seven uncommitted local technology packages are outside this batch.
 
 ## Source branches
 
-The original branch heads are retained as merge ancestors so contributors keep their history. Some earlier features had already been partly integrated in October 13; their remaining changes and provenance are reconciled here.
+The integration branch retains the original branch heads as merge ancestors. GitHub permits squash merges only; the source PRs will be closed as incorporated after the integration PR merges, with their feature commits preserved on their branches. Some earlier features had already been partly integrated in October 13; their remaining changes and provenance are reconciled here.
 
 | PR | Feature | Source head |
 | --- | --- | --- |
@@ -33,6 +33,8 @@ The original branch heads are retained as merge ancestors so contributors keep t
 | [#386](https://github.com/jimbozoomer-byte/jugcraft/pull/386) | Tree generation batch 2: pine, warm and mountain trees | `00e317d887a7770b36a868969c917454eaf1ac7a` |
 | [#388](https://github.com/jimbozoomer-byte/jugcraft/pull/388) | Tree generation batch 3: yew and the Gloomweald canopy | `42065b0335e26a5a2f4d03e35830cd93b3036228` |
 | [#389](https://github.com/jimbozoomer-byte/jugcraft/pull/389) | Tree generation batch 4: snowpetal cherry and shimmer birch | `d3f60a68c637a2ef472bd4b3963d0db83a81b695` |
+| [#395](https://github.com/jimbozoomer-byte/jugcraft/pull/395) | Bald cypress and magnolia | `6b6c5df60` |
+| [#396](https://github.com/jimbozoomer-byte/jugcraft/pull/396) | Rowan, elder and seasonal fruit | `605005fa9` |
 
 The KV-1/W walker PR (#371) supplies models, textures and animation clips only. It does not implement a playable vehicle.
 
@@ -41,6 +43,7 @@ The KV-1/W walker PR (#371) supplies models, textures and animation clips only. 
 - Preserve newer factory registrations, language entries, acquisition audits and Mire Hag test isolation when reconciling older branches.
 - Register both mineral-sand and vanadium deposit switches/world generation/prospecting; keep both branches in generated handbook data.
 - Preserve the Highwayman recipe fix and ore-survey border fixes across the gun/tree chains.
+- Refresh the generated recipe-view catalogue for the new trees. PR #396 failed CI because its tree-farm and sawmill entries were absent from the committed catalogue.
 - Combine mineral-sand and pine owner-art imports. Preserve the preview renderer’s translation support from the walker assets.
 - Alpha Werewolf client test: Rending Howl was frozen before recovery completed. The hunt timer correctly waits during attacks, so an eight-tick assertion could see `NONE`. Observe the bounded server transition to `MARK`; keep the encounter and hunt assertions intact. Production attack timing is unchanged.
 
@@ -54,7 +57,7 @@ The KV-1/W walker PR (#371) supplies models, textures and animation clips only. 
 - Common, client and game-test compilation: passed. Full offline Gradle build: passed, all 1,734 required server game tests.
 - Optional-integrations-absent offline build: passed, all 1,734 required server game tests.
 - Repaired Alpha Werewolf rendered client test: passed the full fight, loot and fresh-instance reset (`runClientGameTest -PclientTests=AlphaWerewolfClientGameTests`), on the runtime source of `ae1adb4fe`.
-- Combined GitHub CI, including the remaining rendered client classes, is still pending. No local CLI or SSH GitHub login was available to push the candidate.
+- Combined GitHub CI, including the remaining rendered client classes, is still pending. GitHub CLI login was restored on October 16; the newly added tree PRs are subject to the combined checks.
 - All local Gradle commands used the repository pins, JDK 25.0.4.1, the existing dependency cache and `--offline --no-daemon`; the full builds and targeted client run used `-Pkotlin.compiler.execution.strategy=in-process` to avoid sandbox-restricted Kotlin daemon state.
 - No manual playtest, two-player dedicated-server session, or performance approval is claimed.
 
@@ -77,3 +80,7 @@ These PRs were still draft submissions at the initial inventory. Several are cum
 | [#382](https://github.com/jimbozoomer-byte/jugcraft/pull/382) | The Cydonian Sentinel: the Mars boss, its Red Storm and its loot (Adam-ondi-Ahman part 3) |
 | [#387](https://github.com/jimbozoomer-byte/jugcraft/pull/387) | Add the Reagent Purification Station for electronic-grade sulfuric acid |
 | [#390](https://github.com/jimbozoomer-byte/jugcraft/pull/390) | Add titanium tools and armor, the step above steel |
+
+New drafts observed on October 16 and excluded: #391 (aspirin), #392 (boric acid/control rods), #393 (sour candy/glucose), #394 (phosphoric acid/fertilizer/cola), #397 (hawthorn/persimmon).
+
+October 16 pre-push checks after adding #395/#396: 50 Python tests passed; repository/link check passed. Earlier full-build and 1,734-test results apply to the October 15 source only; CI validates the expanded candidate.
