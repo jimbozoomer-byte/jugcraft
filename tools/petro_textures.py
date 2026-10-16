@@ -206,26 +206,26 @@ def gasification_residue():
 
 
 def pvac_glue():
-    """PVAc wood glue: a round-shouldered white squeeze bottle with a blue label band and an orange nozzle tipped with a
-    bead of glue, lit from the top left and outlined in each part's own dark (the contributor's pick of three drafts)."""
+    """PVAc wood glue: a tall white squeeze bottle with a blue label band and a tapered orange nozzle, centred, lit from
+    the top left and outlined in each part's own dark."""
     tones = {"O": (74, 74, 82), "D": (176, 176, 184), "M": (214, 214, 220), "L": (236, 236, 240), "H": (252, 252, 255),
              "a": (98, 40, 8), "n": (212, 104, 26), "N": (244, 156, 64),
              "q": (40, 64, 110), "r": (70, 104, 168), "s": (112, 148, 206)}
     rows = [
-        ".......OO.......",
-        ".......HO.......",
-        "......aNNa......",
+        "................",
+        ".......aa.......",
         "......aNna......",
-        ".....anNnna.....",
+        "......aNna......",
+        ".....aNnnna.....",
+        ".....aNnnna.....",
         "....OOOOOOOO....",
-        "...OHHLLMMMDO...",
-        "...OHLLLMMMDO...",
-        "...qssrrrHrrq...",
-        "...qsrrrrLrrq...",
-        "...qrrrrrrrqq...",
-        "...OHLLMMMMDO...",
-        "...OHLMMMMDDO...",
-        "...OLLMMMDDDO...",
+        "....OHLLMMDO....",
+        "....OHLLMMDO....",
+        "....qssrrrrq....",
+        "....qsrrrrrq....",
+        "....OHLMMMDO....",
+        "....OHLMMMDO....",
+        "....OLMMMDDO....",
         "....OOOOOOOO....",
         "................",
     ]
