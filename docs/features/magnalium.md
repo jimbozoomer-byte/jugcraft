@@ -63,7 +63,7 @@ There are no new dependencies. The ingot, nugget, plate and block are drawn by t
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38976863705](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38976863705) on commit `0ff43225` passed on its first attempt. That covers the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all eight rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
