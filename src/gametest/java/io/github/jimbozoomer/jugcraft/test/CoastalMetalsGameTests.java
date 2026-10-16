@@ -85,7 +85,8 @@ public class CoastalMetalsGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 21, "Coastal, molding and shared concentrator recipes exercised, found " + checked);
+        // 22 since the silicone gasket recipe joined the molding press (docs/features/silicone.md).
+        h.assertTrue(checked == 22, "Coastal, molding and shared concentrator recipes exercised, found " + checked);
         h.succeed();
     }
 

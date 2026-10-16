@@ -62,9 +62,11 @@ No texture is copied.
 | `siliconBecomesSiliconeAndAcid` | One silicon, 500 mB methyl chloride and 250 mB water give two silicone and 250 mB hydrochloric acid. |
 | `gasketMoldPressesSilicone` | The molding press's gasket mold presses two silicone into three gaskets. |
 
+`CoastalMetalsGameTests.everyLoadedRecipePaysItsLedgerAndRetainsItsTool` runs every molding-press recipe in a real press, so it now also runs the silicone gasket recipe. Its expected count rose from 21 to 22.
+
 ### Results
 
-Not yet run in CI.
+The first fork Build run, [38973357673](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38973357673), failed only on that recipe count (22 found, 21 expected). All eight rendered-client shards passed. A second run follows the fix.
 
 ## Rollout and open questions
 
