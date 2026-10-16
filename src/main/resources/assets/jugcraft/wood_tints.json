@@ -246,5 +246,37 @@
   "stripped_yew_wood": [
     8476231,
     8476231
+  ],
+  "bald_cypress_log": [
+    14401723,
+    13156031
+  ],
+  "bald_cypress_wood": [
+    14401723,
+    13156031
+  ],
+  "stripped_bald_cypress_log": [
+    13156031,
+    13156031
+  ],
+  "stripped_bald_cypress_wood": [
+    13156031,
+    13156031
+  ],
+  "magnolia_log": [
+    12632227,
+    10789231
+  ],
+  "magnolia_wood": [
+    12632227,
+    10789231
+  ],
+  "stripped_magnolia_log": [
+    10789231,
+    10789231
+  ],
+  "stripped_magnolia_wood": [
+    10789231,
+    10789231
   ]
 }

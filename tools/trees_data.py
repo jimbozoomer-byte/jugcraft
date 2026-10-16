@@ -184,7 +184,8 @@ def worldgen(data, write):
             "foliage_placer": foliage, "foliage_provider": provider, "ignore_vines": True,
             "minimum_size": minimum_size(info),
             "trunk_placer": trunk_placer(info["trunk"]),
-            "trunk_provider": {"id": tree_blocks(wood)[0], "properties": {"axis": "y"}}})
+            "trunk_provider": {"id": tree_blocks(wood)[0], "properties": {"axis": "y"}},
+            **({"root_placer": info["root_placer"]} if "root_placer" in info else {})})
         tree = info.get("tree", wood)
         survives = info.get("survives_as") or (f"{tree}_sapling" if tree.startswith("minecraft:") else rid(sapling(tree)))
         write(folder / "placed_feature" / f"{shape}_checked.json", {"feature": rid(shape), "placement": [

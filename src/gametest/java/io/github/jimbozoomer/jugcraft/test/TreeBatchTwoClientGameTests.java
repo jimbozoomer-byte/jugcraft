@@ -43,6 +43,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 	protected String screenshotPrefix() { return "jugcraft_tree2_"; }
 	protected void extraDisplays(ClientGameTestContext context, TestSingleplayerContext world, List<String> tour) { }
 	protected void validateSurvey(String biome, Map<String, Integer> survey) { }
+	protected boolean includeSubmergedColumns() { return false; }
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -101,7 +102,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 				});
 				if (place == null) { tour.add(name + ": no surface stop found within the survey radius"); continue; }
 				found++;
-				var survey = server.computeOnServer(minecraft -> survey(minecraft.overworld(), place, key));
+				var survey = server.computeOnServer(minecraft -> survey(minecraft.overworld(), place, key, includeSubmergedColumns()));
 				validateSurvey(name, survey);
 				Jugcraft.LOGGER.info("[tree batch 2 survey] {} at {}: {}", name, place, survey);
 				if (name.equals("lush_desert")) {
@@ -157,6 +158,10 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 	}
 
 	static Map<String, Integer> survey(ServerLevel level, BlockPos at, ResourceKey<Biome> biome) {
+		return survey(level, at, biome, false);
+	}
+
+	private static Map<String, Integer> survey(ServerLevel level, BlockPos at, ResourceKey<Biome> biome, boolean includeSubmerged) {
 		Map<String, Integer> counts = new java.util.TreeMap<>();
 		// 16,641 columns, at most 81 chunks; count only this biome, ignore canopy in surface coverage.
 		for (int dx = -64; dx <= 64; dx++) for (int dz = -64; dz <= 64; dz++) {
@@ -174,8 +179,12 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 				if (state.is(BlockTags.LEAVES)) logs.merge("leaf:" + BuiltInRegistries.BLOCK.getKey(state.getBlock()), 1, Integer::sum);
 				if (!state.isAir() && !state.is(BlockTags.LEAVES) && !state.is(BlockTags.LOGS) && state.isSolidRender()) { floor = pos; break; }
 			}
-			if (!level.getBiome(floor).is(biome) || submerged) continue;
+			if (!level.getBiome(floor).is(biome) || (submerged && !includeSubmerged)) continue;
 			logs.forEach((name, count) -> counts.merge(name, count, Integer::sum));
+			if (includeSubmerged) {
+				counts.merge(submerged ? "wet_columns" : "dry_columns", 1, Integer::sum);
+				if (submerged) logs.forEach((name, count) -> counts.merge("wet_" + name, count, Integer::sum));
+			}
 			if (biome.identifier().getPath().equals("lush_desert")) {
 				double noise = level.getChunkSource().randomState().getOrCreateNoise(net.minecraft.world.level.levelgen.Noises.SURFACE).get(x, 0, z);
 				counts.merge("dry_columns", 1, Integer::sum);

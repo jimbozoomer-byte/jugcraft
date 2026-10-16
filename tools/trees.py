@@ -14,6 +14,29 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "bald_cypress": {"wood": "bald_cypress", "sapling": True,
+                     "minimum_size": {"type": "minecraft:two_layers_feature_size", "limit": 2, "upper_size": 2},
+                     "trunk": {"type": "upwards_branching", "base_height": 9, "height_rand_a": 3, "height_rand_b": 2,
+                               "place_branch_per_log_probability": 0.15, "extra_branch_steps": [1, 2],
+                               "extra_branch_length": [0, 1], "can_grow_through": "#minecraft:mangrove_logs_can_grow_through"},
+                     "root_placer": {"type": "minecraft:mangrove_root_placer", "trunk_offset_y": 1,
+                                     "root_provider": {"id": "jugcraft:bald_cypress_log", "properties": {"axis": "y"}},
+                                     "mangrove_root_placement": {
+                                         # Native roots already pass through water and replaceable plants. Stop at
+                                         # mud instead of drilling through it: a short cypress foot needs firm soil.
+                                         "can_grow_through": [],
+                                         "max_root_length": 3, "max_root_width": 2, "random_skew_chance": 0.2,
+                                         "muddy_roots_in": [],
+                                         "muddy_roots_provider": {"id": "jugcraft:bald_cypress_log", "properties": {"axis": "y"}}}},
+                     "foliage": {"type": "random_spread", "radius": 3, "offset": 0,
+                                 "foliage_height": 2, "leaf_placement_attempts": 50},
+                     "decorators": [{"type": "minecraft:attached_to_leaves", "probability": 0.12,
+                                     "exclusion_radius_xz": 2, "exclusion_radius_y": 1, "required_empty_blocks": 2,
+                                     "block_provider": {"id": "jugcraft:shroud_moss", "properties": {"tip": "true"}},
+                                     "directions": ["down"]}]},
+    "magnolia": {"wood": "magnolia", "sapling": True,
+                 "trunk": {"type": "straight", "base_height": 5, "height_rand_a": 2},
+                 "foliage": {"type": "blob", "radius": 3, "offset": 0, "height": 4}},
     "snowpetal_cherry": {"wood": "minecraft:cherry", "tree": "snowpetal_cherry", "sapling": True,
                          "minimum_size": {"type": "minecraft:two_layers_feature_size", "upper_size": 2},
                          "trunk": {"type": "cherry", "base_height": 7, "height_rand_a": 1,

@@ -58,7 +58,38 @@ def textures(base):
     needles = base[("block", "yew_needles")]
     return {("block", "yew_needles_unripe"): yew_fruit(needles, False),
             ("block", "yew_needles_ripe"): yew_fruit(needles, True),
-            ("block", "yew_sapling"): yew_sapling(), ("item", "yew_arils"): yew_arils(), **wonder_textures()}
+            ("block", "yew_sapling"): yew_sapling(), ("item", "yew_arils"): yew_arils(), **wonder_textures(), **wetland_textures(base)}
+
+
+def wetland_textures(base):
+    """Batches 4b/4c: sparse cream flowers and saplings in the approved species palettes."""
+    from wood_style import BARK, LEAVES, pal
+    flowers = pal("b8962e", "c9b578", "ddd2b2", "e8e1cc")
+    magnolia = Canvas()
+    magnolia.img = base[("block", "magnolia_leaves")].copy()
+    for x, y in cluster_centres(9443, count=3, spacing=5):
+        for dx, dy, tone in ((-1, 0, 2), (0, -1, 3), (1, 0, 1), (0, 1, 2), (0, 0, 0)):
+            magnolia.px((x + dx) % 16, (y + dy) % 16, flowers[tone])
+    out = {("block", "magnolia_leaves"): magnolia.img}
+    for tree, leaf in (("bald_cypress", "bald_cypress_needles"), ("magnolia", "magnolia_leaves")):
+        canvas = Canvas()
+        bark, foliage = BARK[tree][0], LEAVES[leaf][0]
+        canvas.line(8, 15, 8, 3, bark[2])
+        canvas.line(7, 15, 7, 10, bark[1])
+        rng = random.Random(9442 if tree == "bald_cypress" else 9443)
+        for x, y, radius in ((5, 7, 2), (11, 6, 2), (8, 3, 2)) if tree == "bald_cypress" else ((4, 7, 3), (11, 7, 3), (8, 3, 3)):
+            canvas.line(8, y + 4, x, y, bark[2])
+            for dx in range(-radius, radius + 1):
+                for dy in range(-2, 3):
+                    if dx * dx + dy * dy <= radius * radius and rng.random() > .1:
+                        canvas.px(x + dx, y + dy, foliage[rng.choice((2, 3, 4))])
+            canvas.px(x - 1, y - 1, foliage[5])
+        if tree == "magnolia":
+            for x, y in ((4, 6), (10, 6)):
+                canvas.px(x, y, flowers[3])
+                canvas.px(x + 1, y, flowers[1])
+        out[("block", tree + "_sapling")] = canvas.img
+    return out
 
 
 def wonder_textures():
