@@ -584,7 +584,8 @@ BIOMES = {
         "display": "Lush Swamp", "base": "swamp", "temperature": 0.7, "downfall": 0.9, "seasons": True,
         "effects": {"grass_color": "#56b13a", "foliage_color": "#4aa22e", "grass_color_modifier": "none", "water_color": "#2e86a8"},
         "trees": {"count": [3, 4], "default": "jugcraft:tall_vine_oak_checked", "picks": [
-            ["jugcraft:willow_checked", 0.3], ["jugcraft:maple_checked", 0.1429]], "water_depth": 2},
+            ["jugcraft:bald_cypress_checked", 0.25], ["jugcraft:willow_checked", 0.30 / 0.75],
+            ["jugcraft:maple_checked", 0.10 / 0.45]], "water_depth": 2},
         "extras": ["cattails", "watergrass", "duckweed", "lily_pads", "ferns", "berry_bushes"],
         "tags": ["c:is_swamp", "c:is_wet"],
     },
@@ -592,7 +593,8 @@ BIOMES = {
     "swamp_woods": {
         "display": "Swamp Woods", "base": "swamp", "temperature": 0.65, "downfall": 0.9, "seasons": True,
         "trees": {"count": [7, 9], "default": "jugcraft:willow_checked", "picks": [
-            ["jugcraft:tall_vine_oak_checked", 0.2], ["jugcraft:azalea_tree_checked", 0.125]], "water_depth": 2},
+            ["jugcraft:bald_cypress_checked", 0.25], ["jugcraft:tall_vine_oak_checked", 0.20 / 0.75],
+            ["jugcraft:azalea_tree_checked", 0.10 / 0.55]], "water_depth": 2},
         "extras": ["duckweed", "lily_pads", "cattails", "ferns"],
         "creatures": [["minecraft:frog", 10, 2, 5], ["minecraft:sheep", 8, 4, 4], ["minecraft:pig", 8, 4, 4], ["minecraft:cow", 6, 4, 4],
                       ["minecraft:chicken", 8, 4, 4]],
@@ -603,7 +605,8 @@ BIOMES = {
         "display": "Bayou", "base": "mangrove_swamp", "temperature": 0.85, "downfall": 0.95, "seasons": True, "winter_snow": False,
         "effects": {"water_color": "#4d6a4c"},
         "attributes": {"minecraft:visual/fog_color": "#a9b8a6"},
-        "trees": {"count": [5, 6], "default": "jugcraft:willow_checked", "picks": [["jugcraft:live_oak_checked", 0.15]],
+        "trees": {"count": [5, 6], "default": "jugcraft:bald_cypress_checked", "picks": [
+            ["jugcraft:live_oak_checked", 0.15], ["jugcraft:willow_checked", 0.25 / 0.85]],
                   "water_depth": 3},
         "extras": ["mud", "cattails", "ferns", "large_ferns", "duckweed", "flora_shroud_moss"],
         "untags": ["minecraft:has_structure/trail_ruins"],
@@ -1090,7 +1093,8 @@ BIOMES = {
         "display": "Flower Isle", "base": "mushroom_fields", "temperature": 0.75, "downfall": 0.8, "seasons": True,
         "winter_snow": False,
         "effects": {"grass_color": "#6cd15a", "foliage_color": "#5cc04c"},
-        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": [("jugcraft:apple_tree_checked", 0.15)]},
+        "trees": {"count": [1, 2], "default": "jugcraft:magnolia_checked", "picks": [
+            ["jugcraft:apple_tree_checked", 0.15], ["jugcraft:oak_bush_checked", 0.30 / 0.85]]},
         "drop": ["minecraft:mushroom_island_vegetation", "minecraft:brown_mushroom_taiga", "minecraft:red_mushroom_taiga"],
         "extras": ["field_sunflowers", "meadow_flowers", "hydrangeas", "poppies", "tall_grass_dense"],
         "creatures": [["minecraft:chicken", 10, 2, 4], ["minecraft:rabbit", 6, 2, 3], ["minecraft:sheep", 8, 2, 4]],
@@ -1276,7 +1280,8 @@ BIOMES = {
         "effects": {"grass_color": "#5a6a48", "foliage_color": "#4e5e40", "water_color": "#5a6a5a"},
         "attributes": {"minecraft:visual/fog_color": "#9aa0a0"},
         "trees": {"count": [6, 7], "default": "jugcraft:willow_checked", "picks": [
-            ["jugcraft:dead_tree_checked", 0.2], ["jugcraft:tall_vine_oak_checked", 0.2], ["minecraft:birch_checked", 0.1]]},
+            ["jugcraft:dead_tree_checked", 0.20], ["jugcraft:bald_cypress_checked", 0.15 / 0.80],
+            ["jugcraft:tall_vine_oak_checked", 0.08 / 0.65]]},
         "extras": ["tree_cobwebs", "toadstools", "cattails"],
         "monsters": [["minecraft:spider", 200, 2, 4], ["minecraft:zombie", 60, 2, 4], ["minecraft:skeleton", 60, 2, 4],
                      ["minecraft:creeper", 60, 2, 4], ["minecraft:enderman", 10, 1, 4], ["minecraft:witch", 5, 1, 1]],

@@ -172,6 +172,9 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower CEDAR_GROWER = grower("cedar");
 	public static final TreeGrower PINE_GROWER = grower("pine");
 	public static final TreeGrower YEW_GROWER = grower("yew");
+	public static final TreeGrower BALD_CYPRESS_GROWER = grower("bald_cypress");
+	public static final TreeGrower MAGNOLIA_GROWER = grower("magnolia");
+	public static final SeasonalLeavesBlock.Schedule BALD_CYPRESS_LEAVES = new SeasonalLeavesBlock.Schedule(98, 286, 330);
 	public static final TreeGrower SNOWPETAL_CHERRY_GROWER = grower("snowpetal_cherry");
 	public static final TreeGrower SHIMMER_BIRCH_GROWER = weightedGrower("shimmer_birch", "tall_shimmer_birch", 4, 1);
 	public static final TreeGrower ANCIENT_YEW_GROWER = grower("ancient_yew");
@@ -532,6 +535,10 @@ public final class JugcraftAgriculture {
 		registerTree("cedar", "cedar_leaves", CEDAR_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.COLOR_BROWN);
 		registerWoodSet("dead", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_LIGHT_GRAY);
+		registerTree("bald_cypress", "bald_cypress_needles", BALD_CYPRESS_GROWER, BALD_CYPRESS_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_LIGHT_GRAY);
+		registerTree("magnolia", "magnolia_leaves", MAGNOLIA_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.COLOR_GRAY, MapColor.TERRACOTTA_GREEN);
 		registerTree("yew", "yew_needles", YEW_GROWER, null, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_RED);
 		sweet("yew_arils", 1, 0.1F, MobEffects.POISON, 10);

@@ -25,7 +25,7 @@ Thirteen biomes of mountains, shores and seas. A biome in Minecraft 26.3 does no
 | **Gravel Beach** | wetland: cool beaches | a shore of gravel; no animals |
 | **Dune Beach** | wetland: temperate beaches | sand with dune grass and **sea oats** |
 | **Overgrown Beach** | wetland: warm beaches | grass, palms, small palms, oak scrub and tall grass and sea oats, sand between |
-| **Flower Isle** | wetland: mushroom islands | a peaceful island of apple trees and oak scrub among grass, sunflowers, poppies, meadow flowers and hydrangeas; no monsters spawn |
+| **Flower Isle** | wetland: mushroom islands | a peaceful island of magnolias, apple trees and oak scrub among grass, sunflowers, poppies, meadow flowers and hydrangeas; no monsters spawn |
 
 - Biomes O' Plenty's Arctic and Icy Hills merge into the Ice Sheet, the Canyon Ravine into the Canyon, the Knoll, Mountain and Mountain Foothills into the Highland, the Volcano Edge into the Volcano, the Jade Cliffs become the Karst Pinnacles, the Oceanic Abyss the Ocean Trench, and the Flower Island the Flower Isle.
 - The beaches keep vanilla's beach structures (buried treasure, beached shipwrecks), and the Ocean Trench vanilla's deep-sea ones (ocean monuments, ruins).
@@ -84,3 +84,5 @@ Results are recorded under "Results" below after CI runs.
 ## World and event applicability
 - Biome fit: each biome takes the climate and the land shape of the vanilla biome it replaces.
 - Seasons: see above.
+
+Tree roster batch 4c makes Flower Isle 55% magnolia, 30% oak bush and 15% apple tree attempts, retaining its sparse 1/2 attempts per chunk and flower decoration. See [the implementation record](trees-batch-4bc.md).

@@ -69,6 +69,8 @@ WOOD = {
     # Keep this slot so future woods retain their deterministic seeds.
     "pine": (6, "a49a84"),
     "yew": ("2:7", "654135"),
+    "bald_cypress": (23, "9c9391"),
+    "magnolia": ("2:1", "807d55"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -111,6 +113,8 @@ BARK = {
     # Stringy, as cedar bark peels in long fibrous strips. docs/features/trees-batch-1.md.
     "cedar": (pal("3e2b24", "463229", "4a352a", "573f32", "5d4437"), "stringy"),
     "pine": (pal("2d2521", "43312a", "5f4433", "805a3d", "9c6c48"), "plated"),
+    "bald_cypress": (pal("392d28", "4e3e37", "624e46", "7a6157", "927468"), "stringy"),
+    "magnolia": (pal("3b3a30", "515043", "686755", "7e7d67", "95947e"), "plated"),
 }
 EUCALYPTUS_STREAKS = pal("d07a2e", "9a4f9e", "4f7fb8", "c9a63a", "5ea06a")
 
@@ -138,8 +142,12 @@ LEAVES = {
     # the fir's (mean dE 14.8 and 16.1); evergreen. Appended last, so every other look keeps its seed.
     "cedar_leaves": (pal("27301a", "343f22", "43522c", "536539", "657a46", "7d9657"), "needles"),
     "yew_needles": (pal("111a12", "182419", "1f3021", "2b3d2d", "354c38", "425f45"), "needles"),
+    "bald_cypress_needles": (pal("333d19", "485523", "5e702d", "73883a", "8da647", "a2b866"), "needles"),
+    "bald_cypress_needles_gold": (pal("392014", "502d1b", "683b24", "7f492f", "9b5a39", "b56e4a"), "needles"),
+    "magnolia_leaves": (pal("122c12", "1a3d19", "225020", "2b612a", "357733", "438c40"), "leaves"),
 }
-LEAF_OPTIONS = {"yew_needles": {"gap_threshold": 0.15}}
+LEAF_OPTIONS = {"yew_needles": {"gap_threshold": 0.15}, "bald_cypress_needles": {"gap_threshold": 0.2},
+                "bald_cypress_needles_gold": {"gap_threshold": 0.2}, "magnolia_leaves": {"gap_threshold": 0.18}}
 # Logs of their own that are no wood set (no planks), drawn as the woods are: the Cinnamon Tree's (tools/spices.py
 # CINNAMON). Each: its stripped side's colour and its bark, as in WOOD and BARK. The cinnamon's stripped side is its inner
 # bark, which is the spice, so it takes the spice's colour, not one of the owner's paintings; its bark is the smooth
@@ -147,7 +155,7 @@ LEAF_OPTIONS = {"yew_needles": {"gap_threshold": 0.15}}
 LOGS = {"cinnamon": ("b8743a", (pal("3a302a", "4e433b", "62564c", "776a5e", "8c7e70"), "plated"))}
 # Bare deciduous leaves (twigs in the bark's colour), and the chestnut's fruit.
 BARE = {"larch_needles_bare": "larch", "maple_leaves_bare": "maple", "aspen_leaves_bare": "aspen",
-        "willow_leaves_bare": "willow"}
+        "willow_leaves_bare": "willow", "bald_cypress_needles_bare": "bald_cypress"}
 LEAF_GREEN = pal("1f3b16", "2b501d", "3a6826", "4c8231", "659c40", "86b85a")
 BUR = pal("5a7a20", "7c9c2c", "a2bc3e", "d0d86a")
 BUR_DRY = pal("6a4e22", "8c6a30", "b08a44", "d2b064")
@@ -450,7 +458,9 @@ def wood_textures():
         out[("block", f"stripped_{wood}_log")] = stripped_side(wood, 880 + index)
         out[("block", f"stripped_{wood}_log_top")] = stripped_top(wood, 890 + index)
     for index, name in enumerate(LEAVES):
-        out[("block", name)] = leaves(name, 800 + index)
+        # The new cypress keeps exactly the same needle arrangement through its colour change.
+        seed = 800 + list(LEAVES).index("bald_cypress_needles") if name.startswith("bald_cypress_needles") else 800 + index
+        out[("block", name)] = leaves(name, seed)
     for index, name in enumerate(BARE):
         out[("block", name)] = bare(name, 840 + index)
     from tree_roster_textures import textures as roster_textures

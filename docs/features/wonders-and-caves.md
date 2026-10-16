@@ -30,7 +30,7 @@ Fifteen rare, strange lands and two cave biomes, spread over all four layouts of
 | **Spider Nest** | wild: dripstone caves | a cave strung with cobwebs from ceiling to floor; spiders and cave spiders |
 | **Starlit Wood** | meadow: dark forests | soaring birches and tall firs, glimmerblooms and lilies of the valley, motes of light under a twilight-blue sky |
 | **Toadstool Field** | woodland: mushroom islands | mycelium patched with grass, giant mushrooms, toadstools and glowcaps; mooshrooms, and no monsters, as on vanilla's mushroom islands |
-| **Webwood** | meadow: mangrove swamps | willows, dead trees and vine-hung oaks strung with cobwebs, toadstools and cattails, grey air; spiders everywhere |
+| **Webwood** | meadow: mangrove swamps | willows, bald cypresses, dead trees and vine-hung oaks strung with cobwebs, toadstools and cattails, grey air; spiders everywhere |
 | **Wild Greens** | wetland: warm forests | a riot of tall grass, clover, ferns and wildflowers over swathes of coarse dirt; no trees; cattle, sheep and chickens |
 
 - Biomes O' Plenty's names become ours: the Deadlands become the Cinder Barrens, the Origin Valley the Elder Vale, the Auroral Garden the Frostlight Garden, the Sublime Shrubland the Gilded Shrubland, the Mystic Grove the Glimmer Grove, the Ominous Woods the Gloomweald, the Glowing Grotto the Glowcap Grotto, the Blessed Bog the Hallowed Bog, the Majestic Meadow the Highsun Meadow, the Fungal Jungle the Mycelial Jungle, the Sacred Springs the Shrine Springs, the Snowblossom Grove the Snowpetal Grove, the Wondrous Woods the Starlit Wood, the Fungal Field and Fungi Forest the Toadstool Field, the Silkglade the Webwood and the Overgrown Greens the Wild Greens.
@@ -103,3 +103,5 @@ Results are recorded under "Results" below after CI runs.
 ## World and event applicability
 - Biome fit: each biome takes the climate and land shape of the vanilla biome it replaces.
 - Seasons: see above.
+
+Tree roster batch 4b replaces Webwood birches and part of its vine-oak share with 15% bald cypress attempts on dry ground: willow 57%, dead tree 20%, vine oak 8%. Existing density and cobweb decoration remain unchanged. See [the implementation record](trees-batch-4bc.md).

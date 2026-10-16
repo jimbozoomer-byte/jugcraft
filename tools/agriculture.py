@@ -415,7 +415,8 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 # (docs/branches/TREES.md), the swamp cedar of its wetlands.
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
-             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew"}
+             "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -423,7 +424,8 @@ WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen"
 WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "biomes"], "maple": ["biomes"],
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
-                 "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"], "yew": ["biomes"]}
+                 "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"], "yew": ["biomes"],
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -450,6 +452,9 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # placed or grown from a sapling start in today's state. With seasons off they stay green. "autumn": the gold
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 TREES = {
+    "bald_cypress": {"leaves": "bald_cypress_needles", "leaves_display": "Bald Cypress Needles",
+                     "season": [98, 286, 330], "autumn": {"gold": 1}, "base": "spruce"},
+    "magnolia": {"leaves": "magnolia_leaves", "leaves_display": "Magnolia Leaves", "season": None, "base": "oak"},
     "snowpetal_cherry": {"wood": "minecraft:cherry", "display": "Snowpetal Cherry", "switches": ["biomes"],
                          "leaves": "snowpetal_cherry_leaves", "leaves_display": "Snowpetal Cherry Leaves",
                          "season": None, "base": "cherry"},

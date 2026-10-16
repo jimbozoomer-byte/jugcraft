@@ -15,9 +15,9 @@ Fourteen wet biomes, most in the **wetland** layout of Jugcraft regions. The swa
 | --- | --- | --- |
 | **Bog** | cool swamps (one weirdness half) | reddish-orange grass, maple scrub, tamaracks and thin bog firs, bushes and berry bushes; **cranberries** ripe in its shallow, muddy pools |
 | **Dead Swamp** | cool swamps (the other half) | dark, muddy ponds, sparse dead trees and grey snags standing in them, fallen logs, cattails; no animals; villages |
-| **Lush Swamp** | temperate swamps (one half) | vibrant grass and blue water, tall oaks hung with vines, willows, a few maples, cattails, ferns, berries |
-| **Swamp Woods** | temperate swamps (the other half) | willows, vine-hung oaks and azalea trees over duckweed and lily pads; animals |
-| **Bayou** | warm mangrove swamps | willows standing in the water and broad live oaks on the banks, hung with shroud moss, cattails and ferns on mud; overcast |
+| **Lush Swamp** | temperate swamps (one half) | vibrant grass and blue water, bald cypresses, tall oaks hung with vines, willows, a few maples, cattails, ferns, berries |
+| **Swamp Woods** | temperate swamps (the other half) | willows, bald cypresses, vine-hung oaks and azalea trees over duckweed and lily pads; animals |
+| **Bayou** | warm mangrove swamps | rooted bald cypresses and willows standing in the water, with broad live oaks on the banks, hung with shroud moss, cattails and ferns on mud; overcast |
 | **Floodplain** | hot mangrove swamps | willow scrub with broad cottonwoods among it, tall grass, orange cosmos; lily pads and watergrass in the floods |
 | **Ghost Forest** | dark forests (one half; wetland layout) | grey snags and dead trees, with a living fringe of cedars, around many lakes |
 | **Sludge Mire** | dark forests (the other half) | a dense canopy of dark oaks and big oaks over mud and sludgy, algae-covered pools; no animals; villages |
@@ -92,3 +92,5 @@ Results are recorded under "Results" below after CI runs.
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.
 - Seasons: see above.
+
+Tree roster batches 4b/4c add bald cypress at 60% of Bayou attempts and 25% in Lush Swamp and Swamp Woods, retaining existing attempt counts. See [the implementation record](trees-batch-4bc.md).
