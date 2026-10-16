@@ -8,19 +8,21 @@ Primary specialty and supported player role: exploration; building (palm and cyp
 
 Tree-generation update (15 October 2026): [batch 2](trees-batch-2.md) adds the approved warm and mountain shapes and adjusts existing tree picks without changing biome placement or per-chunk attempt budgets. Its feature record holds the current mixes, measurements and fresh validation; older evidence below remains historical.
 
+Tree-generation update (16 October 2026): [batch 6](trees-batch-6.md) adds juniper, gorse and sagebrush, with current placement shares and validation in its feature record. Existing biome placement and attempt budgets are retained except for Steppe's new low shrubs and Cold Desert's rare coarse-dirt juniper. Earlier test results below remain historical.
+
 ## Player experience
 Fifteen warm or dry biomes. The meadow layout takes the dry grasslands and sandy country, the wild layout the harsher deserts and scrub, and the woodland layout two warm forests:
 
 | Biome | Layout: replaces | What grows |
 | --- | --- | --- |
-| **Dryland** | meadow: dry savanna | hot, dry grassland under a lilac sky: pines, oaks and brush oaks, bushes, cacti, pillars of bone; desert villages |
-| **Xeric Shrubland** | meadow: savanna plateau | low hills of sand and grass, small acacias, cacti, dead shrubs, little lakes |
+| **Dryland** | meadow: dry savanna | hot, dry grassland under a lilac sky: pines, crooked junipers and low juniper bushes, cacti, pillars of bone; desert villages |
+| **Xeric Shrubland** | meadow: savanna plateau | low hills of sand and grass, small acacias and scattered junipers, cacti, dead shrubs, little lakes |
 | **Jacaranda Glade** | meadow: warm forest | blossoming jacarandas, occasional mature branching jacarandas, with cherries, oaks with bees and azaleas; blue orchids and lilies of the valley |
 | **Lush Desert** | meadow: desert (one half) | orange dunes of red sand that see rain: dune grass, acacia brush and small palms; scattered grass islands over dirt support bushes and wildflowers; villages |
 | **Bone Flats** | meadow: desert (other half) | dry, coarse flats with pillars of bone, dead bushes and dry grass |
 | **Dry River** | meadow: hot rivers | a river between sandy banks with dead bushes |
-| **Cold Desert** | meadow: dry snowy plains | gravel and coarse dirt, dry grass, hidden powder snow; too dry for snow; no animals; snowy villages |
-| **Scrubland** | wild: dry savanna | flat scrub of dry grass and wildflowers, scattered oak bushes |
+| **Cold Desert** | meadow: dry snowy plains | gravel and coarse dirt, dry grass, rare lone junipers on coarse dirt, hidden powder snow; too dry for snow; no animals; snowy villages |
+| **Scrubland** | wild: dry savanna | flat scrub of dry grass and wildflowers, oak bushes and scattered junipers |
 | **Lush Savanna** | wild: savanna | a field of poppies and rose bushes on grass blotched with coarse dirt; no trees, no animals |
 | **Outback** | wild: desert (one half) | red sand patched with grass, tiny acacias, forking mallee eucalyptus and cacti, pools of water and lava; villages |
 | **Oasis** | wild: desert (other half) | sand around pools of water, palms and small palms, grass and sugar cane |

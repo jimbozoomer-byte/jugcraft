@@ -195,9 +195,17 @@ GROUND_COUNT = 5
 
 # Features the biomes add, in one fixed order, after their base's own (keeps the Overworld's feature order acyclic).
 EXTRAS = {
-    # Rare landmark tree: one attempt, then dry-ground and sapling survival checks. No forest count layer.
+    # One rare dry-ground juniper attempt, without a forest count layer.
+    "lone_juniper": {"feature": "jugcraft:juniper", "step": 9, "placement": [
+        {"type": "minecraft:rarity_filter", "chance": 6}, {"type": "minecraft:in_square"},
+        {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
+        {"type": "minecraft:heightmap", "heightmap": "OCEAN_FLOOR"}, {"type": "minecraft:biome"},
+        {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:all_of", "predicates": [
+            {"type": "minecraft:matching_blocks", "blocks": "minecraft:coarse_dirt", "offset": [0, -1, 0]},
+            {"type": "minecraft:would_survive", "state": "jugcraft:juniper_sapling"}]}}]},
     # A selector's unoccupied slot: no replacement plants or future-batch species.
     "open_scrub": {"configured": {"type": "minecraft:no_op"}, "step": 9, "placement": []},
+    # Rare landmark tree: one attempt, then dry-ground and sapling survival checks. No forest count layer.
     "lone_hawthorn": {"feature": "jugcraft:hawthorn", "step": 9, "placement": [
         {"type": "minecraft:rarity_filter", "chance": 16}, {"type": "minecraft:in_square"},
         {"type": "minecraft:surface_water_depth_filter", "max_water_depth": 0},
@@ -523,7 +531,7 @@ BIOMES = {
         "display": "Dead Forest", "base": "plains", "temperature": 0.4, "downfall": 0.25, "seasons": True,
         "effects": {"grass_color": "#a39a5e", "foliage_color": "#9c8a52"},
         "trees": {"count": [2, 3], "default": "jugcraft:dead_tree_checked", "picks": [
-            ["minecraft:spruce_checked", 0.1], ["minecraft:oak_checked", 0.1111],
+            ["minecraft:spruce_checked", 0.1], ["jugcraft:juniper_checked", 0.1111],
             ["jugcraft:dead_snag_checked", 0.3281], ["jugcraft:dead_snag_bent_checked", 0.1628],
             ["jugcraft:fallen_dead_tree", 0.1111]]},
         "drop": ["minecraft:patch_tall_grass_2", "minecraft:flower_plains"],
@@ -539,7 +547,8 @@ BIOMES = {
         "display": "Tundra", "base": "plains", "temperature": 0.25, "downfall": 0.5, "seasons": True,
         "effects": {"grass_color": "#9a9a5e", "foliage_color": "#a07a3c"},
         "trees": {"count": [3, 4], "default": "jugcraft:maple_bush_checked", "picks": [
-            ["jugcraft:willow_bush_checked", 0.3], ["jugcraft:fir_bush_checked", 0.2857]]},
+            ["jugcraft:willow_bush_checked", 0.3], ["jugcraft:fir_bush_checked", 0.2857],
+            ["jugcraft:juniper_bush_checked", 0.1 / (0.7 * (1 - 0.2857))]]},
         "drop": ["minecraft:flower_plains", "minecraft:patch_tall_grass_2"],
         "swap": {"minecraft:patch_grass_plain": "minecraft:patch_grass_taiga_2"},
         "extras": ["tundra_rocks", "patch_dead_bush"],
@@ -729,7 +738,7 @@ BIOMES = {
         "effects": {"grass_color": "#b2aa5a", "foliage_color": "#9c9a50"},
         "attributes": {"minecraft:visual/sky_color": "#a99fd8"},
         "trees": {"count": [2, 3], "default": "minecraft:pine_checked", "picks": [
-            ["minecraft:oak_checked", 0.25], ["jugcraft:oak_bush_checked", 0.35]]},
+            ["jugcraft:juniper_checked", 0.3], ["jugcraft:juniper_bush_checked", 0.25 / 0.7]]},
         "extras": ["bushes_dense", "patch_dead_bush", "cacti", "bone_spikes"],
         "untags": ["minecraft:has_structure/village_savanna"],
         "tags": ["minecraft:has_structure/village_desert", "c:is_dry", "c:is_hot"],
@@ -739,7 +748,7 @@ BIOMES = {
         "display": "Xeric Shrubland", "base": "savanna_plateau", "temperature": 1.6, "downfall": 0.1, "seasons": False,
         "precipitation": False,
         "surface": {"floor": "minecraft:grass_block", "patches": [[-0.35, 0.35, "minecraft:sand"]]},
-        "trees": {"count": [1, 2], "default": "jugcraft:desert_acacia_checked", "picks": []},
+        "trees": {"count": [1, 2], "default": "jugcraft:desert_acacia_checked", "picks": [["jugcraft:juniper_checked", 0.25]]},
         "extras": ["cacti", "patch_dead_bush", "dry_grass", "ponds"],
         "tags": ["c:is_dry", "c:is_hot"],
     },
@@ -788,7 +797,7 @@ BIOMES = {
                     "patches": [[-0.3, 0.0, "minecraft:coarse_dirt"], [0.45, 0.6, "minecraft:powder_snow"]]},
         "trees": None,
         "drop": ["minecraft:freeze_top_layer"],
-        "extras": ["dry_grass", "patch_dead_bush"],
+        "extras": ["dry_grass", "patch_dead_bush", "lone_juniper"],
         "creatures": [],
         "tags": ["c:is_dry", "c:is_cold", "c:is_desert"],
     },
@@ -796,7 +805,7 @@ BIOMES = {
     "scrubland": {
         "display": "Scrubland", "base": "savanna", "temperature": 1.2, "downfall": 0.2, "seasons": False, "precipitation": False,
         "effects": {"grass_color": "#aaa65c", "foliage_color": "#949650"},
-        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": []},
+        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": [["jugcraft:juniper_checked", 0.15]]},
         "extras": ["dry_grass", "meadow_wildflowers"],
         "tags": ["c:is_dry", "c:is_hot"],
     },
@@ -998,7 +1007,7 @@ BIOMES = {
         "effects": {"grass_color": "#8f9a50", "foliage_color": "#7f8c48"},
         "surface": {"floor": {"type": "minecraft:bandlands"}, "under": {"type": "minecraft:bandlands"},
                     "patches": [[-0.25, 0.1, "minecraft:grass_block"], [0.35, 0.5, "minecraft:coarse_dirt"]]},
-        "trees": {"count": [2, 3], "default": "minecraft:pine_checked", "picks": [["jugcraft:spruce_bush_checked", 0.3]]},
+        "trees": {"count": [2, 3], "default": "minecraft:pine_checked", "picks": [["jugcraft:juniper_checked", 0.35], ["jugcraft:juniper_bush_checked", 0.25 / 0.65]]},
         "extras": ["canyon_lava_pools"],
         "tags": ["c:is_hot", "c:is_dry"],
     },
@@ -1484,12 +1493,12 @@ BIOMES = {
         "tags": [],
     },
     # ---------------------------------------------------------------- batch 2: fields and meadows
-    # Cool, flat land with teal grass, scattered spruces and bent hawthorns, hawthorn hedges and many flowers.
+    # Cool, flat land with teal grass, scattered column junipers and bent hawthorns, hawthorn hedges and many flowers.
     "field": {
         "display": "Field", "base": "forest", "temperature": 0.35, "downfall": 0.6, "seasons": True,
         "effects": {"grass_color": "#7fb38c", "foliage_color": "#6fa880"},
         "trees": {"count": [2, 3], "default": "jugcraft:hawthorn_bush_checked", "picks": [
-            ["minecraft:spruce_checked", 0.3], ["minecraft:oak_bees_002", 0.05],
+            ["jugcraft:juniper_column_checked", 0.3], ["minecraft:oak_bees_002", 0.05],
             ["jugcraft:hawthorn_checked", 0.10 / 0.665], ["jugcraft:oak_bush_checked", 0.015 / 0.565]]},
         "extras": ["field_sunflowers", "field_flowers"],
         "creatures": [["minecraft:sheep", 12, 4, 4], ["minecraft:pig", 10, 4, 4], ["minecraft:chicken", 10, 4, 4],
@@ -1517,11 +1526,11 @@ BIOMES = {
                       ["minecraft:cow", 8, 4, 4]],
         "tags": ["c:is_plains"],
     },
-    # Warm, dry heath: brown-tinged grass, heather and wildflowers, pines and oak bushes; wild horses.
+    # Warm, dry heath: brown-tinged grass, heather and wildflowers, pines, gorse and juniper bushes; wild horses.
     "heathland": {
         "display": "Heathland", "base": "plains", "temperature": 0.9, "downfall": 0.45, "seasons": True, "winter_snow": False,
         "effects": {"grass_color": "#a6a85c", "foliage_color": "#8f9a4c"},
-        "trees": {"count": [2, 3], "default": "jugcraft:oak_bush_checked", "picks": [["minecraft:pine_checked", 0.3]]},
+        "trees": {"count": [2, 3], "default": "jugcraft:gorse_checked", "picks": [["minecraft:pine_checked", 0.25], ["jugcraft:juniper_bush_checked", 0.15 / 0.75]]},
         "drop": ["minecraft:flower_plains"],
         "extras": ["heather", "meadow_wildflowers", "dry_grass"],
         "creatures": [["minecraft:horse", 8, 2, 6], ["minecraft:donkey", 2, 1, 3], ["minecraft:sheep", 10, 4, 4],
@@ -1555,26 +1564,26 @@ BIOMES = {
     "prairie": {
         "display": "Prairie", "base": "plains", "temperature": 0.8, "downfall": 0.4, "seasons": True,
         "effects": {"grass_color": "#a3bd5c", "foliage_color": "#8fae4c"},
-        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": [("jugcraft:cottonwood_checked", 0.1), ("minecraft:fancy_oak_checked", 0.05 / 0.9)]},
+        "trees": {"count": [1, 2], "default": "jugcraft:oak_bush_checked", "picks": [("jugcraft:cottonwood_checked", 0.1), ("minecraft:fancy_oak_checked", 0.05 / 0.9), ("jugcraft:juniper_column_checked", 0.15 / 0.85)]},
         "extras": ["goldenrod", "tall_grass_dense"],
         "tags": ["c:is_plains"],
     },
-    # Low hills of grass and hawthorn hedges, occasional oak bushes and open gaps; alliums and wild horses.
+    # Low hills of grass and hawthorn hedges, with gorse, juniper and occasional oak bushes; alliums and wild horses.
     "shrubland": {
         "display": "Shrubland", "base": "plains", "temperature": 0.7, "downfall": 0.3, "seasons": True,
         "effects": {"grass_color": "#93ab5a", "foliage_color": "#7f9a49"},
         "trees": {"count": [4, 6], "default": "jugcraft:hawthorn_bush_checked", "picks": [
-            ["jugcraft:open_scrub", 0.3], ["jugcraft:oak_bush_checked", 0.1 / 0.7]]},
+            ["jugcraft:gorse_checked", 0.2], ["jugcraft:juniper_bush_checked", 0.1 / 0.8], ["jugcraft:oak_bush_checked", 0.1 / 0.7]]},
         "extras": ["bushes_dense", "alliums"],
         "creatures": [["minecraft:horse", 8, 2, 6], ["minecraft:donkey", 1, 1, 3], ["minecraft:sheep", 12, 4, 4],
                       ["minecraft:pig", 8, 4, 4], ["minecraft:chicken", 10, 4, 4], ["minecraft:cow", 8, 4, 4]],
         "tags": ["c:is_plains"],
     },
-    # Cool, dry, tan grassland with almost nothing growing: dry grass and dead bushes; horses, donkeys and llamas.
+    # Cool, dry shrub-steppe: low sagebrush and juniper, dry grass and dead bushes; horses, donkeys and llamas.
     "steppe": {
         "display": "Steppe", "base": "plains", "temperature": 0.45, "downfall": 0.2, "seasons": True,
         "effects": {"grass_color": "#b8ab6c", "foliage_color": "#a89a5c"},
-        "trees": None,
+        "trees": {"count": [1, 2], "default": "jugcraft:sagebrush_checked", "picks": [["jugcraft:juniper_bush_checked", 0.2]]},
         "drop": ["minecraft:patch_bush", "minecraft:flower_plains", "minecraft:patch_tall_grass_2"],
         "swap": {"minecraft:patch_grass_plain": "minecraft:patch_grass_savanna"},
         "extras": ["dry_grass", "patch_dead_bush"],

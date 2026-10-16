@@ -29,6 +29,20 @@ Percentages are absolute shares of placement attempts. Preserve existing attempt
 
 Juniper sapling planting and generated-tree survival must agree on the supported dry soils. Steppe stays at most two blocks tall. Alpine Spawn's juniper share remains reserved for batch 8.
 
+## Shapes and measured bounds
+
+All five forms use vanilla trunk/foliage placers and real sapling survival checks. The crooked juniper uses a forking trunk with connected small crown lobes, replacing the proposed random-spread foliage so it cannot leave disconnected islands. The column uses a trunk of four plus zero to two logs; its tip makes the complete tree five to seven blocks tall.
+
+| Form | Height | Width | Logs | Leaves |
+| --- | --- | --- | --- | --- |
+| Crooked juniper | 4–6 | 3–6 | 3–7 | 9–20 |
+| Column juniper | 5–7 | 3–5 | 4–6 | 13–57 |
+| Juniper bush | 2 | 5 | 1 | 27–30 |
+| Gorse | 2 | 5 | 1 | 27–30 |
+| Sagebrush | 1–2 | 3 | 1 | 4–8 |
+
+These are observed ranges over twelve fixed seeds per form, not worldwide population statistics. Every tested leaf connects by faces to its own tree's logs; all five forms vary by seed. A juniper sapling selects crooked/column/bush with weights 2:1:1. Juniper accepts normal planting soils plus the native dry-vegetation soils; gorse and sagebrush keep normal sapling soils. Invalid ground and solid obstacles reject growth.
+
 ## Harvest and existing systems
 
 Juniper berries use real empty/unripe/ripe states, side exposure for low bushes, one or two berries per harvest and natural regrowth, including seasons-off. Player-placed leaves do not regrow fruit; shears and Silk Touch do not duplicate it. Berries feed foxes and composters and substitute for sweet berries in an additional Mulling Spices recipe. Gorse flowers support bees. Sagebrush deliberately makes its single deadwood stem renewable.
@@ -37,4 +51,13 @@ Include wood crafting, stripping, tags, fuel, sawmill and appropriate tree-farm 
 
 ## Verification and delivery
 
-Pending: generated-data and recipe audit, focused Python tests, complete build/server checks, rendered tree/biome inspection and save/reopen checks. Deliver a separate inspection save, matching mod and pack with a labelled garden, fruit/wood comparisons and natural biome stops. No test result or completed preview is claimed yet.
+Completed locally on 16 October 2026:
+- Repository structure and documentation links pass.
+- All 25 tree Python regression tests pass, including exact selector shares and retained attempt counts.
+- Material/data/recipe/art audit passes: 2,749 material IDs, 8,385 block/item models, 3,707 quad parts and 171 combined models.
+- 814 generated tree/biome, loot/model and recipe-view JSON files match their generators, including the normal model-finishing pass; all fourteen new textures match their deterministic generator. All previously committed textures remain byte-identical.
+- All six focused server game tests pass: sixty seeded shapes, renewable saplings on supported soils, all juniper forms, obstruction protection, connected foliage, real right-click harvest/regrowth in every calendar mode, placement/decay rules, renewable loot, wood recipes/stripping, tree farms, native bee attraction and the original and alternative spice recipes.
+
+The complete local `build` passed with all 1,684 server game tests. A subsequent one-line correction makes the juniper grower report its bush as the shortest form for bone-meal height validation; the final focused run verifies that correction and rebuilds the matching JAR.
+
+Pending: rendered tree/biome inspection and save/reopen checks. The normal-world client test verifies Steppe's dynamic crop/fruit feature injection, which does not run for custom biomes in the flat server-test world's biome source. Deliver a separate inspection save, matching mod and pack with a labelled garden, fruit/wood comparisons and natural biome stops. No completed preview is claimed yet.

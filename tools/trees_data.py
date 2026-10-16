@@ -112,6 +112,10 @@ def tags(tags):
         for registry in ("block", "item"):
             tags.add(registry, "minecraft:leaves", rid(info["leaves"]))
             tags.add(registry, "minecraft:saplings", rid(sapling(tree)))
+            for tag in info.get("leaf_tags", []):
+                tags.add(registry, tag, rid(info["leaves"]))
+        for tag in info.get("leaf_block_tags", []):
+            tags.add("block", tag, rid(info["leaves"]))
 
 
 def uniform(value):
