@@ -7,6 +7,7 @@ import java.util.Optional;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -40,13 +41,13 @@ public class PorcelainInsulatorGameTests {
 	@GameTest
 	public void porcelainInsulatorsGoIntoTheMainTransformer(GameTestHelper helper) {
 		ItemStack cable = stack("aluminum_cable");
-		ItemStack copper = new ItemStack(Items.COPPER_BLOCK);
+		ItemStack copper = vanilla("copper_block");
 		ItemStack plate = stack("steel_plate");
 		ItemStack insulator = new ItemStack(PetroItems.PORCELAIN_INSULATOR);
 		ItemStack transformer = crafts(helper, CraftingInput.of(3, 3, List.of(insulator, cable, insulator, copper, stack("steel_block"), copper,
 				plate, plate, plate)));
 		helper.assertTrue(transformer.is(stack("main_transformer").getItem()), "Porcelain insulators do not complete the Main Transformer");
-		ItemStack terracotta = new ItemStack(Items.WHITE_TERRACOTTA);
+		ItemStack terracotta = vanilla("white_terracotta");
 		ItemStack old = crafts(helper, CraftingInput.of(3, 3, List.of(terracotta, cable, terracotta, copper, stack("steel_block"), copper,
 				plate, plate, plate)));
 		helper.assertTrue(old.isEmpty(), "The Main Transformer is still made with white terracotta");
@@ -62,6 +63,11 @@ public class PorcelainInsulatorGameTests {
 	private static ItemStack crafts(GameTestHelper helper, CraftingInput input) {
 		Optional<RecipeHolder<CraftingRecipe>> recipe = RecipeManager.createCheck(RecipeType.CRAFTING).getRecipeFor(input, helper.getLevel());
 		return recipe.map(holder -> holder.value().assemble(input)).orElse(ItemStack.EMPTY);
+	}
+
+	/** A vanilla item by ID (copper blocks and terracotta are not plain {@code Items} fields in this version). */
+	private static ItemStack vanilla(String path) {
+		return new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(path)));
 	}
 
 	private static ItemStack stack(String path) {
