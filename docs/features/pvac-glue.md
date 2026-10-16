@@ -1,6 +1,6 @@
 # PVAc wood glue
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork, pending review.
 
 Proposal issue: none. TODO item: "Connect HCl-assisted corn-starch hydrolysis to finished glucose syrup; acetic acid/vinegar to acetate monomers and PVAc adhesives/appropriate fibre applications; …" This change delivers the vinegar → vinyl acetate → PVAc adhesive route and its first uses.
 
@@ -66,7 +66,7 @@ No texture is copied.
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38870250823](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38870250823) on commit `e1092c00` passed on its second attempt; the first attempt's optional-integrations-absent job failed only on the unrelated NuclearPlantGameTests.reactorBuildingsKeepRadiationIn (a steel door missing from the plant blueprint): the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
