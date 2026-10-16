@@ -87,3 +87,11 @@ New drafts observed on October 16 and excluded: #391 (aspirin), #392 (boric acid
 October 16 pre-push checks after adding #395/#396: 50 Python tests passed; repository/link check passed. Earlier full-build and 1,734-test results apply to the October 15 source only; CI validates the expanded candidate.
 
 The first #398 CI run on `94eb778e8` passed the normal build, optional-integrations-absent build, repository checks, generated-resource freshness and material audit. The optional build passed all 1,744 required server tests. Client shards were still running when #397 became ready; those results do not certify the subsequently expanded candidate. The final PR checks must pass after #397 integration before merging.
+
+### Combined CI follow-up
+
+Run `38936177915` on `de2ac0058` passed both builds (all **1,754** required server tests in each), generated resources, the **2,777-ID** data audit, dependency/package checks and three client groups. Two client jobs reached the unchanged 60-minute limit. One was still progressing: the gun gallery's logged assertions spanned 17:22:33–17:52:09 UTC, far beyond its old 260-second scheduling weight. Eight jobs now distribute all selected classes, with a 2,000-second estimate isolating that gallery. Coverage tests verify every registered class exactly once and every selected shard wired through the workflow; no gameplay assertions or CI time limits are removed.
+
+The other group stopped during shutdown of the reopened hawthorn/persimmon inspection world. Its individual source-PR CI was green. An isolated local `runClientGameTest -PclientTests=TreeBatchFiveBCClientGameTests` on the combined runtime passed the full gallery, fruit/oven save-state checks, reopen and shutdown (5m6s including compilation). The CI hang is not reproduced locally and is not claimed fixed by a speculative gameplay edit. Long client jobs now emit periodic test-JVM thread dumps so a repeat can be diagnosed. The revised full CI run remains required before merge.
+
+After the scheduling changes, all **55 Python tests** passed, including shard completeness and workflow wiring. No manual playtest or multiplayer performance result is claimed.
