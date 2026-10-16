@@ -1,6 +1,6 @@
 # Tree generation batches 4b and 4c: bald cypress and magnolia
 
-Status: implemented, awaiting owner visual approval on `codex/tree-generation-batch-4bc`, authorized by the owner on 16 October 2026. Built with OpenAI Codex (GPT-6), on the visually approved batch-4 branch (PR #389, including #388 and #386). No later tree batch is included.
+Status: implemented and visually approved by the owner on 16 October 2026, including the connected bare-cypress revision. PR #395 is ready for review on `codex/tree-generation-batch-4bc`. Built with OpenAI Codex (GPT-6), on the visually approved batch-4 branch (PR #389, including #388 and #386). No later tree batch is included.
 
 ## Player outcome and scope
 
@@ -62,7 +62,7 @@ The owner found the bare needles disconnected and floating. The revised sprite u
 
 The three batch-4bc Python tests passed again, followed by `./build-local.ps1 -Tasks @('jar','runClientGameTest','-PclientTests=TreeBatchFourBCClientGameTests')`. The rendered client passed save/reopen of six trees and exported 19 screenshots, including a new single-block and tiled-wall display at `/tp @s 1040 181 -882 180 0`. The bare tree is at `/tp @s 1080 180 -1208 180 0`. The new [winter tree](../images/trees-batch-4bc-bare.png) and [bare block comparison](../images/trees-batch-4bc-bare-blocks.png) were visually inspected. The full server and data-audit results above are the earlier implementation baseline; they were not rerun for this texture-only revision.
 
-The revised delivery uses a separate folder and preserves the original preview. Its cleaned copy preserves 97 source files, with 10,098 saved region records scanned; again only `level.dat`, `level.dat_old` and `data/fabric/registry_entries.dat` changed during development-metadata cleanup. A separate ordinary client loaded the revised copy successfully, and the local player joined at `1040.5, 180, -987.5`. Owner visual approval remains pending.
+The revised delivery uses a separate folder and preserves the original preview. Its cleaned copy preserves 97 source files, with 10,098 saved region records scanned; again only `level.dat`, `level.dat_old` and `data/fabric/registry_entries.dat` changed during development-metadata cleanup. A separate ordinary client loaded the revised copy successfully, and the local player joined at `1040.5, 180, -987.5`. The owner approved this revision on 16 October 2026 and requested ready-for-review status.
 
 Commands: `./build-local.ps1 -Tasks @('build','runClientGameTest','-PclientTests=TreeBatchFourBCClientGameTests')`; final display-only rerun: `./build-local.ps1 -Tasks @('runClientGameTest','-PclientTests=TreeBatchFourBCClientGameTests')`. Python: `python -m unittest discover -s scripts/tests -v`, `python tools/check_mod_data.py`, `python scripts/check_repository.py`, `python scripts/package_modrinth.py check`. Local Python runs use the existing DejaVu font directory through `JUGCRAFT_FONT_DIR`.
 
