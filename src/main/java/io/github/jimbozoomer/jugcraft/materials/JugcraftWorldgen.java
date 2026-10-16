@@ -38,6 +38,8 @@ public final class JugcraftWorldgen {
 				// The feature itself checks the surface biome. An underground biome filter would reject cave biomes.
 				{"fluorite", "fluorite"},
 				{"spodumene", "lithium"},
+				{"chromite", "machines"},
+				{"cobaltite", "machines"},
 		};
 		for (String[] ore : ores) {
 			add(ore[0], ore[1], overworld);

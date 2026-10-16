@@ -28,6 +28,10 @@
     "jugcraft:fluorite_ore",
     "jugcraft:deepslate_fluorite_ore",
     "jugcraft:spodumene_ore",
-    "jugcraft:deepslate_spodumene_ore"
+    "jugcraft:deepslate_spodumene_ore",
+    "jugcraft:chromite_ore",
+    "jugcraft:deepslate_chromite_ore",
+    "jugcraft:cobaltite_ore",
+    "jugcraft:deepslate_cobaltite_ore"
   ]
 }

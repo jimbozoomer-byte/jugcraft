@@ -59,6 +59,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	private final Button[] faceButtons = new Button[6];
 	private Button ejectButton;
 	private Button redstoneButton;
+	private final Button[] batteryButtons = new Button[4];
 	private int shownSides = -1;
 	private final MachineScreenThemes.Theme theme;
 	/** Energy a second ago (20 ticks of samples), for the rate and the charging/discharging status. */
@@ -75,6 +76,14 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		super.init();
 		titleLabelX = (BAY_WIDTH - font.width(title)) / 2;
 		shownSides = -1;
+		if (menu.kind().isBattery()) {
+			for (int i = 0; i < batteryButtons.length; i++) {
+				int id = 20 + i;
+				batteryButtons[i] = addRenderableWidget(Button.builder(Component.empty(), button -> click(id))
+					.bounds(leftPos + 30, topPos + 19 + i * 13, 140, 12).build());
+			}
+			refreshBatteryButtons();
+		}
 		if (!menu.kind().isProcessor()) {
 			return;
 		}
@@ -93,6 +102,27 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		if (minecraft != null && minecraft.gameMode != null) {
 			minecraft.gameMode.handleInventoryButtonClick(menu.containerId, id);
 		}
+	}
+
+	private void refreshBatteryButtons() {
+		if (!menu.kind().isBattery() || batteryButtons[0] == null) return;
+		int mode = Math.clamp(menu.data(MachineBlockEntity.DATA_BATTERY_MODE), 0, 3);
+		int priority = Math.clamp(menu.data(MachineBlockEntity.DATA_BATTERY_PRIORITY), 0, 2);
+		batteryButtons[0].setMessage(Component.translatable("container.jugcraft.battery.mode",
+			Component.translatable("container.jugcraft.battery.mode." + mode)));
+		batteryButtons[1].setMessage(Component.translatable("container.jugcraft.battery.reserve", menu.data(MachineBlockEntity.DATA_BATTERY_RESERVE)));
+		batteryButtons[2].setMessage(Component.translatable("container.jugcraft.battery.priority",
+			Component.translatable("container.jugcraft.battery.priority." + priority)));
+		batteryButtons[3].setMessage(Component.translatable("container.jugcraft.battery.output", menu.data(MachineBlockEntity.DATA_BATTERY_OUTPUT)));
+		batteryButtons[1].setTooltip(Tooltip.create(Component.translatable("container.jugcraft.battery.reserve.help")));
+		batteryButtons[2].setTooltip(Tooltip.create(Component.translatable("container.jugcraft.battery.priority.help")));
+		batteryButtons[3].setTooltip(Tooltip.create(Component.translatable("container.jugcraft.battery.output.help")));
+		int modules = menu.data(MachineBlockEntity.DATA_BATTERY_MODULES);
+		batteryButtons[0].setTooltip(Tooltip.create(menu.kind() == MachineKind.FLOW_BATTERY
+			? Component.translatable("container.jugcraft.battery.modules", modules & 7,
+				(modules & 32) != 0 ? 16384 : 8192,
+				Component.translatable((modules & 16) != 0 ? "container.jugcraft.battery.detached" : "container.jugcraft.battery.connected"))
+			: Component.translatable("container.jugcraft.battery.mode.help")));
 	}
 
 	/** Recolours the side buttons when the synced configuration changes. */
@@ -134,6 +164,12 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		int mx = mouseX - leftPos;
 		int my = mouseY - topPos;
 		MachineKind kind = menu.kind();
+        if (kind.hasProcessTool() && mx >= MachineMenu.PATTERN_X - 1
+                && mx <= MachineMenu.PATTERN_X + 17 && my >= MachineMenu.PATTERN_Y - 1
+                && my <= MachineMenu.PATTERN_Y + 17 && menu.slots.get(kind.slots).getItem().isEmpty()) {
+            graphics.setTooltipForNextFrame(font, Component.translatable(kind == MachineKind.CRYOGENIC_LIQUEFIER ? "container.jugcraft.cooling_module" : "container.jugcraft.pattern"), mouseX, mouseY);
+            return;
+        }
 		String line = null;
 		if (kind.usesPower() && mx >= BAR_X - 1 && mx <= BAR_X + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
 			line = String.format("%,d / %,d JE", menu.energy(), menu.capacity());
@@ -181,6 +217,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 	@Override
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		refreshSideButtons();
+		refreshBatteryButtons();
 		int x = leftPos;
 		int y = topPos;
 		graphics.blit(RenderPipelines.GUI_TEXTURED, theme.texture(), x, y, 0.0F, 0.0F, imageWidth, imageHeight, 512, 256);
@@ -202,6 +239,9 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			tube(graphics, x + 150, y + BAR_Y, 12, BAR_HEIGHT, menu.data(MachineBlockEntity.DATA_TANK),
 					MachineKind.GEOTHERMAL_TANK, LAVA);
 		} else if (kind.isFluidProcessor()) {
+            if (kind.hasProcessTool()) {
+                slotFrame(graphics, x + MachineMenu.PATTERN_X, y + MachineMenu.PATTERN_Y);
+            }
 			FluidMachineSpec spec = kind.fluidSpec();
 			for (int tank = 0; tank < spec.tanks(); tank++) {
 				int color = menu.tankFluid(tank) != 0 ? fluidColor(fluid(tank)) : 0;
@@ -374,6 +414,8 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 		boolean burning = menu.data(MachineBlockEntity.DATA_BURN) > 0;
 		boolean working = menu.data(MachineBlockEntity.DATA_PROGRESS) > 0;
 		if (kind.isBattery()) {
+			if ((menu.data(MachineBlockEntity.DATA_BATTERY_MODULES) & 16) != 0) return new Status("modules_missing", true);
+			if (menu.data(MachineBlockEntity.DATA_BATTERY_MODE) == 3) return new Status("stopped", false);
 			return new Status(rate > 0 ? "charging" : rate < 0 ? "discharging" : "storing", false);
 		}
 		if (kind.isGenerator()) {

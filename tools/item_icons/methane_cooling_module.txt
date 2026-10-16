@@ -1,0 +1,19 @@
+# methane_cooling_module: original package 7 native item map.
+# materials: main=steel second=khaki
+# family: compact
+................
+................
+................
+..OOOOOOOOOOOO..
+..ODDDDMMMMMMO..
+..ODMMDMggggMO..
+..ODLLDMgFFgMO..
+..ODMMDMgFFgMO..
+..ODLLDMgFFgMO..
+..ODMMDMgFFgMO..
+..ODLLDMggggMO..
+..ODMMDMMMMMMO..
+..ODDDDMMMMMMO..
+..OOOOOOOOOOOO..
+................
+................

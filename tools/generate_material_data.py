@@ -1121,7 +1121,7 @@ def petro_assets(lang):
 # Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
 # multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
 # breaks the master too (machine/LargeMachineBlock).
-TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
+TANKS = {"insulated_fluid_tank": False, "vacuum_insulated_tank": False, "fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
 
 
 def tank_drop(block):
@@ -1470,6 +1470,8 @@ def tags():
             storage_tags(tags, f"raw_{metal}", f"raw_{metal}_block", tool)
             ore_tags(tags, metal, f"{metal}_ore", f"deepslate_{metal}_ore", tool, "singular")
 
+    tags.add("item", "c:ingots/cobalt", rid("cobalt_ingot"))
+    tags.add("item", "c:ingots", "#c:ingots/cobalt")
     for mineral, info in MINERALS.items():
         rate = "singular" if info["drops"] == [1, 1] else "dense"
         ore_tags(tags, mineral, f"{mineral}_ore", f"deepslate_{mineral}_ore", info["tool"], rate)

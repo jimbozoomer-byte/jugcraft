@@ -54,7 +54,7 @@ COLORS = {
             "progress": 0xFFB8F6FF, "label": 0xFFC6E2E6},
 }
 
-ELECTRIC = {"battery_box", "capacitor_bank", "solar_panel", "fuel_cell", "lithium_battery_bank", "advanced_solar_panel",
+ELECTRIC = {"lead_acid_battery_bank", "flow_tank_module", "flow_stack_module", "battery_box", "capacitor_bank", "solar_panel", "fuel_cell", "lithium_battery_bank", "advanced_solar_panel",
             "advanced_engine", "flow_battery"}
 LAB = {"gas_centrifuge_cascade", "fuel_fabricator", "lithography_station", "chemical_reactor", "electrolytic_cell", "air_separation_unit",
        "synthesis_converter", "polymerization_reactor", "flowback_treatment_unit",
@@ -62,6 +62,9 @@ LAB = {"gas_centrifuge_cascade", "fuel_fabricator", "lithography_station", "chem
 
 # What each machine is for, in a line the terminal shows.
 TAGLINES = {
+    "lead_acid_battery_bank":"Steel-era storage. Front output; other faces charge.",
+    "flow_tank_module":"Paired capacity. Connect behind the middle bottom block.",
+    "flow_stack_module":"Rate upgrade. Mount above the middle front top block.",
     "coal_generator": "Burns coal and other fuel into power.",
     "battery_box": "Stores power. Gives it out of its front.",
     "electric_furnace": "Smelts anything a furnace can, on power.",

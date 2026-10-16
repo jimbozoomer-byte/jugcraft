@@ -1566,6 +1566,22 @@ def main():
     import owner_art
     owner_art.write_all()
 
+    import ceramics_art
+    ceramics_art.draw_all(save)
+
+    import structural_alloys_art
+    structural_alloys_art.draw_all(save)
+    import battery_expansion
+    battery_expansion.draw_all(save)
+    import advanced_electronics
+    advanced_electronics.draw_all(save)
+    import phosphate_processing
+    phosphate_processing.draw_all(save)
+    import cryogenic_fuels
+    cryogenic_fuels.draw_all(save)
+    import synthetic_fuels
+    synthetic_fuels.draw_all(save)
+
 
 def fluorite_assets(assets):
     from pathlib import Path

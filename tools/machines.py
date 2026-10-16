@@ -198,11 +198,15 @@ PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250},
          "fluid_filter": {"display": "Fluid Filter", "rate": 1_000, "texture": "steel_fluid_pipe"}}
 # Fluid blocks with their own block entities. top/side/bottom name the textures.
 FLUID_BLOCKS = {
+    "insulated_fluid_tank": {"display": "Insulated Fluid Tank"},
+    "vacuum_insulated_tank": {"display": "Vacuum-insulated Fluid Tank"},
     "fluid_tank": {"display": "Tinplate Tank"},
     "electric_pump": {"display": "Electric Pump"},
     "heavy_pump": {"display": "Heavy Pump"},
 }
 FLUID_STATS = {
+    "insulated_fluid_tank": {"capacity_mb": 32_000},
+    "vacuum_insulated_tank": {"capacity_mb": 64_000},
     # Holds 16 buckets of one fluid; filled and emptied with buckets or by pumps.
     "fluid_tank": {"capacity_mb": 16_000},
     # Draws a water/lava source (or the tank) below it and pushes into pipes/storages on its other sides.
@@ -893,13 +897,35 @@ def _tree_farm():
 
 
 def machine_recipes():
-    return {"crusher": _crusher(), "arc_furnace": _arc_furnace(), "alloy_smelter": ALLOY_SMELTER,
+    recipes = {"crusher": _crusher(), "arc_furnace": _arc_furnace(), "alloy_smelter": ALLOY_SMELTER,
             "metal_press": _metal_press(), "wire_drawer": _wire_drawer(), "circuit_assembler": CIRCUIT_ASSEMBLER,
             "pulverizer": _pulverizer(), "ore_washer": _ore_washer(), "sieve": SIEVE, "sawmill": _sawmill(),
             "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm(),
             "hydroponic_bay": __import__("hydroponics").recipes(),
             "rocket_workshop": __import__("rocketry").workshop_recipes(),
             "gas_centrifuge_cascade": GAS_CENTRIFUGE_CASCADE, "fuel_fabricator": FUEL_FABRICATOR}
+    import ceramics
+    for machine, additions in ceramics.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import structural_alloys
+    for machine, additions in structural_alloys.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import battery_expansion
+    for machine, additions in battery_expansion.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import cryogenic_fuels
+    for machine, additions in cryogenic_fuels.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import synthetic_fuels
+    for machine, additions in synthetic_fuels.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import phosphate_processing
+    for machine, additions in phosphate_processing.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import advanced_electronics
+    for machine, additions in advanced_electronics.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    return recipes
 
 
 def _arc_furnace():
@@ -937,3 +963,9 @@ def machine_items():
             + [info[key] for info in CROPS.values() for key in ("seeds", "product")]
             + drone_items() + tower_items() + list(__import__('blueprints').ITEMS) + list(__import__('nuclear').ITEMS) + list(__import__('plant_interior').UNIFORMS)
             + list(__import__('storage_tank').ITEMS))
+
+import battery_expansion
+MACHINES.update({name:dict(display=label, lit=False) for name,label in battery_expansion.BLOCKS.items()})
+STATS['lead_acid_battery_bank'] = dict(capacity=2_000_000, io_per_tick=1_024)
+STATS['flow_tank_module'] = dict(capacity=0, io_per_tick=0)
+STATS['flow_stack_module'] = dict(capacity=0, io_per_tick=0)

@@ -1,0 +1,19 @@
+# Reusable General-chip Pattern Plate: original editable electronics icon.
+# materials: main=gold
+# family: compact
+................
+...O.O.O.O.O....
+...L.L.L.L.L....
+..OOOOOOOOOOOO..
+..OLLLLLLLLMDO..
+.OLODDDDDDDDOLO.
+..OLOMMMMMMODO..
+.OLOMLLLLMMDOLO.
+..OLOMLMMDDODO..
+.OLOMMMMDDDDOLO.
+..OLODDDDDDODO..
+.OLOOOOOOOOOOLO.
+..OMMMMMDDDDDO..
+..OOOOOOOOOOOO..
+...D.D.D.D.D....
+...O.O.O.O.O....

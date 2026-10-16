@@ -1,0 +1,19 @@
+# cobalt_catalyst_bed: native package 6 icon.
+# materials: main=steel
+# family: compact
+................
+...O.O.O.O.O....
+...L.L.L.L.L....
+..OOOOOOOOOOOO..
+..OLLLLLLLLMDO..
+.OLODDDDDDDDOLO.
+..OLOMMMMMMODO..
+.OLOMLLLLMMDOLO.
+..OLOMLMMDDODO..
+.OLOMMMMDDDDOLO.
+..OLODDDDDDODO..
+.OLOOOOOOOOOOLO.
+..OMMMMMDDDDDO..
+..OOOOOOOOOOOO..
+...D.D.D.D.D....
+...O.O.O.O.O....

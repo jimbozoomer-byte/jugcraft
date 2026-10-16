@@ -92,6 +92,9 @@
     "cryogenic_liquefier": "diesel",
     "rocket_workshop": "diesel",
     "diesel_engine": "diesel",
-    "wind_turbine": "diesel"
+    "wind_turbine": "diesel",
+    "lead_acid_battery_bank": "electric",
+    "flow_tank_module": "electric",
+    "flow_stack_module": "electric"
   }
 }

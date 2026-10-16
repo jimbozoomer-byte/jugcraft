@@ -25,7 +25,7 @@ public final class MachineRecipeScreen extends Screen {
     private List<Integer> filtered = List.of();
     private String query = "";
     private int selected, offset, detailScroll, left, top, panelWidth, panelHeight, listWidth, rowCount;
-    private Button lock, automatic;
+    private Button lock, automatic, priority, stock, clearRules;
     private EditBox search;
     private record Line(ItemStack icon, Component text, int color) { }
     private static final int TEXT = 0xFFD4E1DF, DIM = 0xFF9CADAA, GREEN = 0xFF89C9A4;
@@ -58,6 +58,16 @@ public final class MachineRecipeScreen extends Screen {
         automatic = addRenderableWidget(Button.builder(tr("automatic"), b -> request(FormMachineMenu.BUTTON_AUTO))
                 .bounds(left + 8, top + panelHeight - 47, listWidth - 16, 18).build());
         addRenderableWidget(Button.builder(tr("back_machine"), b -> onClose()).bounds(left + 8, top + panelHeight - 24, listWidth - 16, 18).build());
+        int controlWidth = (panelWidth - listWidth - 20) / 2;
+        priority = addRenderableWidget(Button.builder(tr("automation_priority", 0), b -> request(FormMachineMenu.BUTTON_PRIORITY + selected))
+            .bounds(left + listWidth + 8, top + panelHeight - 24, controlWidth, 18).build());
+        stock = addRenderableWidget(Button.builder(tr("automation_stock", tr("automation_off")), b -> request(FormMachineMenu.BUTTON_TARGET + selected))
+            .bounds(left + listWidth + 12 + controlWidth, top + panelHeight - 24, controlWidth, 18).build());
+        clearRules = addRenderableWidget(Button.builder(tr("automation_reset"), b -> request(FormMachineMenu.BUTTON_CLEAR_RULES))
+            .bounds(left + panelWidth - 116, top + 3, 108, 18).build());
+        priority.setTooltip(Tooltip.create(tr("automation_help")));
+        stock.setTooltip(Tooltip.create(tr("automation_help")));
+        clearRules.setTooltip(Tooltip.create(tr("automation_reset_help")));
         refresh();
     }
     private Component name(int index) {
@@ -124,11 +134,18 @@ public final class MachineRecipeScreen extends Screen {
                 .map(p -> p.side().name().toLowerCase(Locale.ROOT) + " [" + (p.column()+1) + "," + (p.row()+1) + "," + (p.layer()+1) + "]")
                 .reduce((a,b) -> a + "; " + b).orElse("internal");
     }
+    private Component targetLabel() {
+        if (selected < 0 || selected >= menu.catalog().size() || menu.stockTarget(selected) == 0) return tr("automation_off");
+        return tr(menu.catalog().get(selected).recipe().results().isEmpty() ? "automation_mb" : "automation_units", menu.stockTarget(selected));
+    }
     private List<Line> preview() {
         var lines = new ArrayList<Line>();
         if (filtered.isEmpty()) { text(lines, tr(menu.catalog().isEmpty() ? "no_recipes" : "no_recipe_matches"), DIM); return lines; }
         var r = menu.catalog().get(selected).recipe();
         text(lines, name(selected), GREEN);
+        text(lines, menu.hasAutomation() ? tr("automation_summary", menu.recipePriority(selected), targetLabel())
+            : tr("automation_missing"), DIM);
+        text(lines, tr("automation_help"), DIM);
         var effect = menu.upgrades();
         int ticks = effect.ticks(r.time());
         long rate = menu.form().profile().lanePerTick(effect.use(r.energyPerTick() > 0 ? r.energyPerTick() : menu.form().family().usePerTick));
@@ -179,6 +196,10 @@ public final class MachineRecipeScreen extends Screen {
     @Override public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float delta) {
         lock.active = !menu.catalogStale() && !filtered.isEmpty() && menu.selectedRecipe() != selected+1;
         automatic.active = !menu.catalogStale() && menu.selectedRecipe() != 0;
+        priority.active = stock.active = !filtered.isEmpty() && menu.canEditAutomation(selected);
+        clearRules.active = !menu.catalogStale() && menu.hasAutomation() && menu.automationRuleCount() > 0;
+        priority.setMessage(tr("automation_priority", menu.catalog().isEmpty() ? 0 : menu.recipePriority(selected)));
+        stock.setMessage(tr("automation_stock", targetLabel()));
         super.extractRenderState(g,mx,my,delta);
         if (query.isEmpty()) g.text(font,tr("search_recipes"),left+12,top+45,DIM,false);
         g.text(font,title,left+8,top+8,GREEN,false);
@@ -207,6 +228,6 @@ public final class MachineRecipeScreen extends Screen {
             int sy=py+(track-thumb)*detailScroll/Math.max(1,total-track);
             g.fill(left+panelWidth-5,sy,left+panelWidth-3,sy+thumb,GREEN);
         }
-        g.text(font,font.plainSubstrByWidth(tr("next_batch_hint").getString(),panelWidth-listWidth-16),left+listWidth+8,top+panelHeight-19,DIM,false);
+
     }
 }

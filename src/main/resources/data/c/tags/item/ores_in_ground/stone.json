@@ -15,6 +15,8 @@
     "jugcraft:lepidolite_ore",
     "jugcraft:monazite_ore",
     "jugcraft:fluorite_ore",
-    "jugcraft:spodumene_ore"
+    "jugcraft:spodumene_ore",
+    "jugcraft:chromite_ore",
+    "jugcraft:cobaltite_ore"
   ]
 }
