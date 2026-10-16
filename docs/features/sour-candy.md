@@ -1,6 +1,6 @@
 # Sour candy and corn syrup
 
-Status: implemented on the contributor's fork, pending CI and review.
+Status: implemented on the contributor's fork, pending review.
 
 Proposal issue: none. TODO item: "Connect HCl-assisted corn-starch hydrolysis to finished glucose syrup; acetic acid/vinegar to acetate monomers and PVAc adhesives/appropriate fibre applications; citrus/citric acid to preservation, sour candy and drinks; food-grade phosphoric acid to cola." This change delivers the glucose syrup and the citric acid's sour candy; the rest of that item remains open.
 
@@ -67,7 +67,7 @@ There are no new dependencies. Both icons are drawn by `tools/petro_textures.py`
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38824507444](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38824507444) on commit `c6c499a3` passed: the mod job (compilation and every server game test, these three included), the optional-integrations-absent job and all five rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
