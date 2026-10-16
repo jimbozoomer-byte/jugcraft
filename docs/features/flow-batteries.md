@@ -54,5 +54,6 @@ No new dependencies. The model (`tools/electric_models.py`, `flow_battery`), the
 Not applicable: no worldgen, mobs or dimensions.
 
 ## Rollout and open questions
+- A full specification of modules, cell stacks, reserve, losses and the mineral electrolyte route is proposed for the owner's approval in [flow battery grid storage](flow-battery-grid-storage-proposal.md).
 - A vanadium ore, if the owner wants a mined source as well as oil residue.
 - The battery's screen could show the electrolyte level; it comes with the machine screen redesign.
