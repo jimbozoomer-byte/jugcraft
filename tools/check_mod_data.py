@@ -3687,6 +3687,11 @@ def check_agriculture():
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("plain", None, None, compost.lower(), None)
+    # Decorative ingredients can use a different creative tab while retaining the same plain-item properties.
+    for name, compost in re.findall(
+            r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.compostable\(COMPOST_(\w+)\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, compost.lower(), None)
     for name, n, sat, compost in re.findall(r'\bcob\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
         items[name] = ("cob", int(n), float(sat), compost.lower(), None)
     for name, compost in re.findall(r'\bthrown\("([a-z_]+)", COMPOST_(\w+)\)', main):
@@ -4972,6 +4977,8 @@ def check_festival(java, main):
     expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
     for tree, info in ag.TREES.items():
         expected_states[info["leaves"]] = {f"season={state}" for state in ag.SEASON_STATES} if info["season"] else {""}
+        if "clip_sprig" in info:
+            expected_states[info["leaves"]] = {f"clipped={clipped},{season}" for season in expected_states[info["leaves"]] for clipped in ("false", "true")}
         if "fruit" in info:
             expected_states[info["leaves"]] = {
                 f"fruit={fruit}" + (f",{season}" if season else "")
@@ -5007,8 +5014,13 @@ def check_seasonal_trees(main, leaves):
             return "gold" if day >= gold_from else "green"
         for mode, day in modes.items():
             seen = {look((day - 1 + shift) % 365 + 1) for shift in range(-ag.JITTER, ag.JITTER + 1)}
-            if seen != {wanted[mode]}:
-                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, not only {wanted[mode]}")
+            # Evergreen holly uses these states for berries, not leaf loss. Its approved late-autumn
+            # berry date and early-spring fade straddle the fixed mode dates within positional jitter.
+            expected_looks = ({"spring": {"green", "bare"}, "summer": {"green"},
+                               "autumn": {"green", "gold"}, "winter": {"bare"}}[mode]
+                              if tree == "holly" else {wanted[mode]})
+            if seen != expected_looks:
+                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, expected {sorted(expected_looks)}")
 
 
 def check_carving(java, main):

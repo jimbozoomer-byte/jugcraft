@@ -943,7 +943,8 @@ BIOMES = {
         "display": "Dense Forest", "base": "forest", "temperature": 0.7, "downfall": 0.8, "seasons": True,
         "effects": {"grass_color": "#5a9a3a", "foliage_color": "#4a8a2c"},
         "trees": {"count": [14, 16], "default": "minecraft:fancy_oak_checked", "picks": [
-            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.1], ["jugcraft:oak_bush_checked", 0.1111],
+            ["minecraft:oak_checked", 0.3], ["minecraft:dark_oak_checked", 0.1],
+            ["jugcraft:holly_checked", 0.05 / 0.63], ["jugcraft:oak_bush_checked", (0.63 * 0.1111 - 0.05) / 0.58],
             ["jugcraft:great_oak_checked", 0.0357]]},
         "extras": ["leaf_litter", "ferns"],
         "tags": ["minecraft:has_structure/woodland_mansion"],
@@ -980,7 +981,8 @@ BIOMES = {
         "trees": {"count": [9, 10], "default": "minecraft:oak_leaf_litter", "picks": [
             ["minecraft:fancy_oak_leaf_litter", 0.25], ["jugcraft:hawthorn_bush_checked", 0.04 / 0.75],
             ["jugcraft:oak_bush_checked", 0.035 / 0.71], ["minecraft:fallen_oak_tree", 0.03],
-            ["jugcraft:elder_checked", 0.04 / (0.675 * 0.97)]]},
+            ["jugcraft:elder_checked", 0.04 / (0.675 * 0.97)],
+            ["jugcraft:holly_checked", 0.04 / (0.675 * 0.97 - 0.04)]]},
         "extras": ["leaf_litter", "berry_bushes", "oxeye_daisies", "poppies"],
         "tags": ["minecraft:has_structure/village_plains", "minecraft:has_structure/woodland_mansion"],
     },

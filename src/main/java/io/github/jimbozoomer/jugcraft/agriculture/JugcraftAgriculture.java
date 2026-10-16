@@ -178,6 +178,8 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower JUNIPER_GROWER = weightedGrower("juniper", "juniper_column", "juniper_bush", 2, 1, 1);
 	public static final TreeGrower GORSE_GROWER = grower("gorse");
 	public static final TreeGrower SAGEBRUSH_GROWER = grower("sagebrush");
+	public static final TreeGrower HOLLY_GROWER = grower("holly");
+	public static final SeasonalLeavesBlock.Schedule HOLLY_LEAVES = new SeasonalLeavesBlock.Schedule(100, 300, 335);
 	public static final TreeGrower PERSIMMON_GROWER = grower("persimmon");
 	public static final SeasonalLeavesBlock.Schedule HAWTHORN_LEAVES = new SeasonalLeavesBlock.Schedule(85, 280, 325);
 	public static final SeasonalLeavesBlock.Schedule PERSIMMON_LEAVES = new SeasonalLeavesBlock.Schedule(98, 280, 315);
@@ -562,6 +564,9 @@ public final class JugcraftAgriculture {
 		registerFoliage("sagebrush", "sagebrush_leaves", SAGEBRUSH_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				props -> new TintedParticleLeavesBlock(0.01F, props));
 		food("juniper_berries", 1, 0.1F, COMPOST_MEDIUM);
+		registerTree("holly", "holly_leaves", HOLLY_GROWER, HOLLY_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.COLOR_LIGHT_GRAY, MapColor.SAND);
+		registerItem("holly_sprig", Item::new, new Item.Properties().compostable(COMPOST_LOW), BUILDING_TAB);
 		registerFoliage("rowan", "rowan_leaves", ROWAN_GROWER, Blocks.BIRCH_SAPLING, Blocks.BIRCH_LEAVES,
 				props -> new SeasonalFruitLeavesBlock(ROWAN_LEAVES, "rowan_berries", props));
 		registerFoliage("elder", "elder_leaves", ELDER_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
@@ -1600,19 +1605,22 @@ public final class JugcraftAgriculture {
 				.sized(0.5F, 0.1F).passengerAttachments(0.0F).clientTrackingRange(10).updateInterval(20));
 		Block wreath = registerBlock("autumn_wreath", AutumnWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
 				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block hollyWreath = registerBlock("holly_wreath", HollyWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
 		List<Block> piles = new ArrayList<>();
 		for (String colour : LEAF_PILE_COLOURS) {
 			piles.add(registerBlock(colour + "_leaf_pile", LeafPileBlock::new, BlockBehaviour.Properties.of().mapColor(
 					colour.equals("red") ? MapColor.COLOR_RED : colour.equals("orange") ? MapColor.COLOR_ORANGE : MapColor.COLOR_YELLOW)
 					.strength(0.1F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)));
 		}
-		for (Block block : List.of(tub, crate, bale, wreath)) {
+		for (Block block : List.of(tub, crate, bale, wreath, hollyWreath)) {
 			String id = BuiltInRegistries.BLOCK.getKey(block).getPath();
 			registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
 		FlammableBlockRegistry fire = FlammableBlockRegistry.getDefaultInstance();
 		fire.add(bale, 60, 20);
 		fire.add(wreath, 30, 60);
+		fire.add(hollyWreath, 30, 60);
 		for (Block pile : piles) {
 			String id = BuiltInRegistries.BLOCK.getKey(pile).getPath();
 			registerItem(id, props -> new BlockItem(pile, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_LOW), BUILDING_TAB);
@@ -2918,7 +2926,8 @@ public final class JugcraftAgriculture {
 	 */
 	private static void registerTree(String tree, String leavesId, TreeGrower grower, SeasonalLeavesBlock.Schedule schedule,
 			Block saplingLike, Block leavesLike, MapColor bark, MapColor inner) {
-		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("juniper") ? JuniperLeavesBlock::new : tree.equals("yew") ? YewLeavesBlock::new : schedule == null
+		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("holly") ? props -> new HollyLeavesBlock(schedule, props)
+				: tree.equals("juniper") ? JuniperLeavesBlock::new : tree.equals("yew") ? YewLeavesBlock::new : schedule == null
 				? props -> new TintedParticleLeavesBlock(0.01F, props)
 				: props -> new SeasonalLeavesBlock(schedule, props);
 		registerFoliage(tree, leavesId, grower, saplingLike, leavesLike, leavesFactory);

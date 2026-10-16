@@ -41,6 +41,10 @@ def assets(root, write):
             state = {"variants": {"": variants(looks[None])}}
         else:
             state = {"variants": {f"season={season}": variants(looks[season]) for season in SEASON_STATES}}
+        if "clip_sprig" in info:
+            state = {"variants": {f"clipped={str(clipped).lower()},season={season}":
+                                  variants({leaves: 1} if clipped else choices)
+                                  for season, choices in looks.items() for clipped in (False, True)}}
         if "fruit" in info:
             fruit_variants = {}
             for season, choices in looks.items():
