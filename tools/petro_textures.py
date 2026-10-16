@@ -205,6 +205,37 @@ def gasification_residue():
     return img
 
 
+def pvac_glue():
+    """PVAc wood glue: a white squeeze bottle with a pointed orange nozzle cap and a cream label band, lit from the top
+    left and outlined in each part's own dark."""
+    tones = {"a": (120, 62, 18), "n": (226, 128, 40), "N": (246, 170, 82), "o": (118, 118, 112), "w": (236, 236, 230),
+             "W": (252, 252, 248), "s": (196, 196, 188), "l": (150, 120, 70), "L": (214, 188, 132), "m": (234, 214, 168)}
+    rows = [
+        ".......a........",
+        "......aNa.......",
+        "......aNa.......",
+        ".....anNna......",
+        ".....annna......",
+        "....oooooooo....",
+        "....oWwwwwso....",
+        "....oWwwwwso....",
+        "....lmmmmmLl....",
+        "....lmLLLmLl....",
+        "....lmmmmmLl....",
+        "....oWwwwwso....",
+        "....oWwwwsso....",
+        "....owwwssso....",
+        "....oooooooo....",
+        "................",
+    ]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def ammonium_nitrate():
     """Ammonium nitrate: a heap of small round white prills, lit from the top left and outlined in their own darkest
     tone (docs/ITEM_ICONS.md)."""
@@ -605,6 +636,7 @@ def draw_all(save, save_animation):
     save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
     save(gasification_residue(), "item", "gasification_residue")
     save(ammonium_nitrate(), "item", "ammonium_nitrate")
+    save(pvac_glue(), "item", "pvac_glue")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")
