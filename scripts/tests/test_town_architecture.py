@@ -75,6 +75,19 @@ class TownArchitectureTests(unittest.TestCase):
 
     def test_seasonal_sites_remain_empty_and_palette_valid(self):
         self.assertEqual(town.check(self.town), [])
+
+    def test_map_board_has_open_reading_space(self):
+        from town_voxels import STEP
+        for board in self.town.map_boards:
+            x, _, z = board["pos"]
+            dx, dz = STEP[board["facing"]]
+            # Read from two/three blocks away; a low existing square bench sits
+            # immediately in front of the board, below the map's sightline.
+            for step in (2, 3):
+                for y in (1, 2):
+                    self.assertIn(self.town.v.get(x + dx * step, y, z + dz * step),
+                                  (None, S("air")), "Map must face an open approach, not the neighbouring inn")
+            self.assertIn(self.town.v.get(x + dx, 2, z + dz), (None, S("air")))
         self.assertEqual(len(self.town.houses), 44)
         self.assertEqual(len(self.town.spots), 32)
         self.assertEqual(len(self.town.atms), 4)
@@ -92,6 +105,20 @@ class TownArchitectureTests(unittest.TestCase):
         p = buildings.bank(random.Random(1907))
         for x in (5, 6):
             self.assertEqual(block_name(p.v.get(x, 1, 0)), "dark_oak_door")
+
+    def test_wayfinding_is_supported_and_does_not_cover_decor(self):
+        from town_voxels import parse, STEP
+        self.assertGreaterEqual(len(self.town.signs), 10)
+        titles = {s["lines"][0] for s in self.town.signs}
+        self.assertTrue({"GENERAL STORE", "SEASONAL STALL", "CURIOSITIES", "FLORIST"} <= titles)
+        for entry in self.town.signs:
+            x, y, z = entry["pos"]
+            name, props = parse(self.town.v.get(x, y, z))
+            self.assertEqual(name, "minecraft:spruce_wall_sign")
+            dx, dz = STEP[props["facing"]]
+            self.assertEqual(self.town.v.get(x-dx, y, z-dz), S("spruce_planks"))
+            self.assertEqual(len(entry["lines"]), 4)
+        self.assertEqual(town.check(self.town), [])
 
 
 if __name__ == "__main__":

@@ -8,7 +8,25 @@
   [city refinement record](features/town-architecture-refinement.md).
 - [ ] Owner visual walkthrough of the new city before publication; existing
   generated towns are not automatically rebuilt.
-- [ ] Proposed next slice: district wayfinding and recognizable shop entrances.
+- [x] Local town NPC/wayfinding slice: Nordic-inspired 18-skin town roster,
+  13 readable shop/civic/directory signs, a framed north-up town plan and free
+  portable copies from guards (crouch + use), and conversation pauses.
+  See [town NPCs and wayfinding](features/town-npcs-and-wayfinding.md).
+- [ ] Owner review of NPC appearances, sign readability and map navigation.
+- [ ] NPC quality: daytime work, evening tavern gatherings and night rest, with
+  posted shop hours and an always-available essential-trade fallback.
+- [ ] NPC quality: role-specific idle/work animations (baker kneading, florist
+  tending, guards watching gates), prioritizing readable actions over constant motion.
+- [ ] NPC quality: local dialogue about their work, directions and recent events;
+  make bakery/tavern services real before advertising them as functional shops.
+- [ ] NPC quality: small civic commissions using Jugs and the existing contribution
+  systems; rewards should introduce farming, technology and magic without gating them.
+- [ ] NPC quality: give repeated residents individual hairstyle/accessory variants
+  and relationships; preserve names, persistent identities and the approved Styx likeness.
+- [ ] NPC quality: branch mentors with short, practical lessons using existing
+  research and encyclopedia routes. Let Styx demonstrate botany/astronomy and a
+  public workshop demonstrate electrical power charging a Ley Pylon; avoid a
+  second mandatory quest gate or a duplicate magic progression system.
 - [ ] Proposed next slice: one public workshop demonstrating connected technology
   and magic using existing machines, benches and encyclopedia guidance.
 - [ ] Design civic commissions, NPC routines and an outer player workshop/shop

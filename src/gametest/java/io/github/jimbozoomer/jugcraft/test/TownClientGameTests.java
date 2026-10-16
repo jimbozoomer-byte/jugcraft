@@ -166,6 +166,34 @@ public class TownClientGameTests implements FabricClientGameTest {
 				singleplayer.getConnection().waitForChunksRender();
 				context.takeScreenshot("jugcraft_refined_" + names[i]);
 			}
+			server.runOnServer(minecraft -> {
+				var level = minecraft.overworld();
+				for (var entry : TownData.get().signs) {
+					var be = level.getBlockEntity(origin.offset(entry.pos()));
+					if (!(be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign)
+							|| !sign.isWaxed() || !sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT)
+							.getMessages(false).getFirst().getString().equals(entry.lines().get(0))) {
+						throw new AssertionError("Town sign missing or changed after seasonal updates: " + entry.pos());
+					}
+				}
+				var frames = level.getEntitiesOfClass(net.minecraft.world.entity.decoration.ItemFrame.class,
+						new AABB(origin.offset(88, 2, 112)).inflate(1));
+				if (frames.size() != 1 || !frames.getFirst().hasFramedMap()) throw new AssertionError("Town map frame missing");
+				var player = minecraft.getPlayerList().getPlayers().getFirst();
+				io.github.jimbozoomer.jugcraft.town.TownWayfinding.giveMap(player);
+				LOGGER.info("Wayfinding: {} waxed signs, framed map and personal map ready", TownData.get().signs.size());
+			});
+			context.runOnClient(client -> {
+				for (var entry : TownData.get().signs) for (String line : entry.lines()) {
+					if (client.font.width(line) > 90) throw new AssertionError("Sign text would clip: " + line);
+				}
+			});
+			fly(context, server, origin, 88, 1, 109, 0, 0);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_town_directory");
+			fly(context, server, origin, 80, 1, 101, 90, 0);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_town_keeper_skin");
 			// Leave the exported copy at the square, ready for owner-controlled play.
 			setHudHidden(context, false);
 			fly(context, server, origin, 96, 1, 89, 180, -12);
