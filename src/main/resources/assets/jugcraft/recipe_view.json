@@ -3228,6 +3228,46 @@
         {
           "in": [
             [
+              "#jugcraft:fruitwood_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fruitwood_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:persimmon_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:persimmon_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "#minecraft:planks",
               1
             ]
@@ -3522,6 +3562,106 @@
             ],
             [
               "minecraft:pale_moss_carpet",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:hawthorn_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fruitwood_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:hawthorn_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:persimmon_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:persimmon_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:persimmon_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rowan_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fruitwood_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:rowan_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:elder_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:oak_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:elder_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
               1,
               0.1
             ]

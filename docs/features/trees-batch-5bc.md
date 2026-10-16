@@ -1,6 +1,6 @@
 # Tree generation batches 5b and 5c: hawthorn and persimmon
 
-Status: implemented on `codex/tree-generation-batch-5bc` in [draft PR #397](https://github.com/jimbozoomer-byte/jugcraft/pull/397); awaiting owner visual inspection. Authorized by the owner on 16 October 2026 after visual approval of batch 5. Actual tool/model: OpenAI Codex (GPT-6). Builds on owner-approved, unmerged PR #396 and its tree prerequisites. Batch 6 and later are outside this change.
+Status: implemented on `codex/tree-generation-batch-5bc` in [PR #397](https://github.com/jimbozoomer-byte/jugcraft/pull/397), visually approved by the owner after the hawthorn harvest correction on 16 October 2026 and ready for review. Authorized by the owner on 16 October 2026 after visual approval of batch 5. Actual tool/model: OpenAI Codex (GPT-6). Builds on owner-approved, unmerged PR #396 and its tree prerequisites. Batch 6 and later are outside this change.
 
 ## Design published before implementation
 
@@ -59,8 +59,10 @@ Earlier development saves without a hawthorn fruit property load with the normal
 
 ## Inspection delivery and limits
 
+The owner also reported failed checks on PRs #396 and #397. Both `mod` jobs stopped at the generated-resource comparison because `recipe_view.json` omitted the new sawmill/tree-farm entries. This branch now includes the generator's six missing viewer rows: fruitwood/persimmon sawing and hawthorn/persimmon/rowan/elder farming. Regeneration is reproducible, all existing rows and other categories are preserved, and the file matches the exact generated Git blob reported by CI (`c8e4fd36`). This data-only correction does not alter recipes, tree generation or harvesting; no local gameplay suite was repeated.
+
 Local delivery: `tree-batch-5bc-preview-2026-10-16-oval/` beside the checkout. World: **Hawthorn and Persimmon Inspection**, seed `jugcraft`. The raised garden is authored; the five biome stops are natural. The tour includes seasonal examples, wood comparisons and all foliage/fruit states. Random ticks, time, weather and mobs are frozen for inspection; `/gamerule minecraft:random_tick_speed 3` restores ordinary growth, fruit ripening and decay.
 
 The harvest correction is delivered separately in `tree-batch-5bc-preview-2026-10-16-hawthorn-fix/`, with the matching JAR and the updated copy of the saved inspection world. The earlier delivery remains available.
 
-The matching pack, world ZIP and JAR are supplied with a tour, screenshots and SHA-256 hashes. Both archives passed integrity checks; every saved world file, the matching JAR and all 18 dependency entries match the verified inputs. The cleaned final world opened in ordinary Minecraft at the garden (1080.5, 180, -987.5). No external launcher import, two-client dedicated-server session, released-world upgrade or load benchmark is claimed. Batch 6 and later remain unstarted. Owner approval of batches 5b/5c is pending.
+The matching pack, world ZIP and JAR are supplied with a tour, screenshots and SHA-256 hashes. Both archives passed integrity checks; every saved world file, the matching JAR and all 18 dependency entries match the verified inputs. The cleaned final world opened in ordinary Minecraft at the garden (1080.5, 180, -987.5). No external launcher import, two-client dedicated-server session, released-world upgrade or load benchmark is claimed. Batch 6 and later remain unstarted. The owner approved batches 5b/5c after inspecting the hawthorn harvest correction.
