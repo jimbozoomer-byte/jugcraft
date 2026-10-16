@@ -7709,6 +7709,87 @@
           "fluids": [
             [
               "jugcraft:hydrogen",
+              400
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "jugcraft:ruthenium_catalyst_bed",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              300
+            ],
+            [
+              "jugcraft:carbon_monoxide",
+              100
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              100
+            ],
+            [
+              "minecraft:water",
+              200
+            ]
+          ],
+          "results": [],
+          "ticks": 75,
+          "tool": "jugcraft:ruthenium_catalyst_bed",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
+              400
+            ],
+            [
+              "jugcraft:biogas",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              250
+            ],
+            [
+              "minecraft:water",
+              400
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "jugcraft:ruthenium_catalyst_bed",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:hydrogen",
               250
             ],
             [
@@ -7955,7 +8036,7 @@
           "fluid_results": [
             [
               "jugcraft:bioethanol",
-              250
+              375
             ],
             [
               "jugcraft:carbon_dioxide",
@@ -7993,6 +8074,63 @@
       ]
     },
     {
+      "block": "jugcraft:bulk_fermenter",
+      "type": "bulk_fermenter",
+      "recipes": [
+        {
+          "items": [
+            [
+              "#jugcraft:fermentable",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:bioethanol",
+              375
+            ],
+            [
+              "jugcraft:carbon_dioxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "tool": "",
+          "energy_per_tick": 77
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:grain_mash",
+              1250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:ethanol_broth",
+              1000
+            ],
+            [
+              "jugcraft:fermentation_exhaust",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 7
+        }
+      ]
+    },
+    {
       "block": "jugcraft:bulk_chemical_reactor",
       "type": "bulk_chemical_reactor",
       "recipes": [
@@ -8024,7 +8162,7 @@
           "fluids": [
             [
               "minecraft:water",
-              500
+              750
             ],
             [
               "jugcraft:sulfur_trioxide",
@@ -8034,7 +8172,7 @@
           "fluid_results": [
             [
               "jugcraft:sulfuric_acid",
-              500
+              1000
             ]
           ],
           "results": [],
@@ -8092,6 +8230,34 @@
         {
           "items": [
             [
+              "jugcraft:washed_nickel_ore",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:hydrochloric_acid",
+              1000
+            ],
+            [
+              "jugcraft:chlorine",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ruthenium_powder",
+              1
+            ]
+          ],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
               "minecraft:copper_ore",
               1
             ]
@@ -8109,7 +8275,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8133,7 +8299,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8157,7 +8323,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8181,7 +8347,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8205,7 +8371,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8229,7 +8395,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8253,7 +8419,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8277,7 +8443,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8301,7 +8467,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8325,7 +8491,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8349,7 +8515,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8373,7 +8539,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8397,7 +8563,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8421,7 +8587,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8445,7 +8611,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8469,7 +8635,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8493,7 +8659,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8517,7 +8683,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8541,7 +8707,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8565,7 +8731,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8589,7 +8755,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         },
@@ -8613,7 +8779,7 @@
               4
             ]
           ],
-          "ticks": 160,
+          "ticks": 80,
           "tool": "",
           "energy_per_tick": 87
         }

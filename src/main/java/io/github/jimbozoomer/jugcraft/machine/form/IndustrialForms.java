@@ -57,6 +57,8 @@ public final class IndustrialForms {
 	public static final String VANADIUM_RECOVERY = "jugcraft:vanadium_recovery";
 	/** Neutralizing nitric acid with ammonia into solid ammonium nitrate. */
 	public static final String NITRATE_NEUTRALIZATION = "jugcraft:nitrate_neutralization";
+	/** Recovering ruthenium from washed nickel ore with hydrochloric acid and chlorine. */
+	public static final String PRECIOUS_METAL_RECOVERY = "jugcraft:precious_metal_recovery";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
 	/** What the Infuser's bed socket holds: the nickel catalyst bed and the vanadium contact bed. */
@@ -202,6 +204,34 @@ public final class IndustrialForms {
 			.build();
 
 	/**
+	 * The Bulk Fermenter: the art brief's 5x5x6 variant of the Industrial Fermenter, the same vessel enlarged and the same
+	 * controlled fermentation in the bulk profile, four batches at once from 16,000 mB tanks at 80% of the draw a batch.
+	 * Its carbon dioxide tank vents what it cannot hold, like the smaller one's.
+	 */
+	public static final MachineForm BULK_FERMENTER_FORM = MachineForm.builder(Jugcraft.id("bulk_fermenter"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####")
+			.profile(OperatingProfile.BULK)
+			.inputTank("water")
+			.outputTank("product")
+			.outputTank("co2")
+			.vent("co2")
+			.items(1, 0)
+			.capability(CONTROLLED_FERMENTATION)
+			.upgrades()
+			.warmup(40)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 2, 5, FormSide.TOP)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 4, 1, FormSide.BACK)
+			.port("product_out", FormPort.Kind.FLUID_OUT, 0, 2, 0, 0, FormSide.FRONT)
+			.port("co2_out", FormPort.Kind.FLUID_OUT, 1, 2, 4, 4, FormSide.BACK)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 4, 4, 0, FormSide.BACK)
+			.build();
+
+	/**
 	 * The Bulk Chemical Reactor: the Chemical Reactor enlarged (the chemical reactor family's energy figures) into a
 	 * four-block cube in the expanded profile, two batches at once from 8,000 mB tanks. Water or acid goes in at the side,
 	 * gas at the short absorption inlet on the lid and ore at the hatch beside it; acid leaves at the outlet low at the
@@ -221,6 +251,7 @@ public final class IndustrialForms {
 			.capability("jugcraft:chloride_leaching")
 			.capability("jugcraft:vanadium_recovery")
 			.capability("jugcraft:nitrate_neutralization")
+			.capability("jugcraft:precious_metal_recovery")
 			.upgrades()
 			.warmup(40)
 			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 1, 1, 3, FormSide.TOP)
@@ -335,16 +366,62 @@ public final class IndustrialForms {
 			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 0, 2, 0, FormSide.LEFT)
 			.build();
 
+	/**
+	 * The Large Bio Generator: the art brief's 5x6x5 variant of the Bio Generator, the same engine-generator drawn larger,
+	 * in the diesel generator's family. It burns bioethanol and biogas a quarter better and four times as fast, from an
+	 * 8,000 mB tank. Fuel comes in low on the right side and power leaves low on the left, both behind the middle.
+	 */
+	public static final MachineForm LARGE_BIO_GENERATOR_FORM = MachineForm.builder(Jugcraft.id("large_bio_generator"),
+					MachineKind.DIESEL_GENERATOR)
+			.layer("C####", "#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####", "#####")
+			.layer("#####", "#####", "#####", "#####", "#####", "#####")
+			.profile(OperatingProfile.EXPANDED)
+			.inputTank("fuel")
+			.fuel(Jugcraft.id("bioethanol"), FluidFuels.LARGE_BIOETHANOL, FluidFuels.LARGE_BIO_GENERATOR_BIOETHANOL)
+			.fuel(Jugcraft.id("biogas"), FluidFuels.LARGE_BIOGAS, FluidFuels.LARGE_BIO_GENERATOR_BIOGAS)
+			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 4, 3, 0, FormSide.RIGHT)
+			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 0, 3, 0, FormSide.LEFT)
+			.build();
+
+	/**
+	 * The Combined Cycle Power Plant: the factory's big power station, six wide, four deep and five tall, the largest a form may be. A gas turbine
+	 * on its skid draws air from the filter house over its generator end and blows its exhaust through a tall heat-recovery
+	 * steam generator to the stack; the steam turns a second turbine on the same shaft. It burns methane (560 JE/mB) and the
+	 * Coal Gasifier's raw syngas (256 JE/mB) at 2,048 JE/t and hydrogen (128 JE/mB) at 1,024 JE/t, from one inlet at the
+	 * back, and sends the power out of the generator's terminal on its left side.
+	 */
+	public static final MachineForm COMBINED_CYCLE_PLANT_FORM = MachineForm.builder(Jugcraft.id("combined_cycle_power_plant"),
+					MachineKind.GAS_TURBINE)
+			.layer("C#####", "######", "######", "######")
+			.layer("######", "######", "######", "######")
+			.layer("##..##", "##..##", "##..##", "##..##")
+			.layer("##..##", "##..##", "##..##", "##..##")
+			.layer("....##", "....##", "....##", "....##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("fuel")
+			.fuel(Jugcraft.id("methane"), FluidFuels.COMBINED_CYCLE_METHANE, FluidFuels.COMBINED_CYCLE_METHANE_RATE)
+			.fuel(Jugcraft.id("raw_syngas"), FluidFuels.RAW_SYNGAS, FluidFuels.COMBINED_CYCLE_SYNGAS_RATE)
+			.fuel(Jugcraft.id("hydrogen"), FluidFuels.HYDROGEN, FluidFuels.COMBINED_CYCLE_HYDROGEN_RATE)
+			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 2, 3, 0, FormSide.BACK)
+			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 0, 2, 0, FormSide.LEFT)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
 	public static FormMachineBlock CHEMICAL_OXIDIZER;
 	public static FormMachineBlock INDUSTRIAL_FERMENTER;
+	public static FormMachineBlock BULK_FERMENTER;
 	public static FormMachineBlock BULK_CHEMICAL_REACTOR;
 	public static FormMachineBlock ANAEROBIC_DIGESTER;
 	public static FormMachineBlock COAL_GASIFIER;
 	public static FormMachineBlock GAS_CLEANUP_RACK;
 	public static FormMachineBlock BIO_GENERATOR;
+	public static FormMachineBlock LARGE_BIO_GENERATOR;
+	public static FormMachineBlock COMBINED_CYCLE_PLANT;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	public static final MachineForm GAS_CLEANING_RACK_FORM = MachineForm.builder(Jugcraft.id("gas_cleaning_rack"), MachineKind.CHEMICAL_REACTOR)
@@ -869,11 +946,13 @@ public final class IndustrialForms {
 		CHEMICAL_INFUSER = block("chemical_infuser", CHEMICAL_INFUSER_FORM);
 		CHEMICAL_OXIDIZER = block("chemical_oxidizer", CHEMICAL_OXIDIZER_FORM);
 		INDUSTRIAL_FERMENTER = block("industrial_fermenter", INDUSTRIAL_FERMENTER_FORM);
+		BULK_FERMENTER = block("bulk_fermenter", BULK_FERMENTER_FORM);
 		BULK_CHEMICAL_REACTOR = block("bulk_chemical_reactor", BULK_CHEMICAL_REACTOR_FORM);
 		ANAEROBIC_DIGESTER = block("anaerobic_digester", ANAEROBIC_DIGESTER_FORM);
 		COAL_GASIFIER = block("coal_gasifier", COAL_GASIFIER_FORM);
 		GAS_CLEANUP_RACK = block("gas_cleanup_rack", GAS_CLEANUP_RACK_FORM);
 		BIO_GENERATOR = block("bio_generator", BIO_GENERATOR_FORM);
+		LARGE_BIO_GENERATOR = block("large_bio_generator", LARGE_BIO_GENERATOR_FORM);
 		GAS_CLEANING_RACK = block("gas_cleaning_rack", GAS_CLEANING_RACK_FORM);
 		BIOGAS_CLEANER = block("biogas_cleaner", BIOGAS_CLEANER_FORM);
 		DIGESTATE_SEPARATOR = block("digestate_separator", DIGESTATE_SEPARATOR_FORM);
@@ -901,7 +980,8 @@ public final class IndustrialForms {
 		FLUOROMONOMER_CRACKER = block("fluoromonomer_cracker", FLUOROMONOMER_CRACKER_FORM);
 		PTFE_SINTERING_OVEN = block("ptfe_sintering_oven", PTFE_SINTERING_OVEN_FORM);
 		LINED_FLUOROCHEMICAL_REACTOR = block("lined_fluorochemical_reactor", LINED_FLUOROCHEMICAL_REACTOR_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, GAS_CLEANING_RACK, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, MASHING_STATION, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER, ACID_CONCENTRATOR, CHEMICAL_DISSOLUTION_CHAMBER, FLUOROCARBON_REACTOR, FLUOROMONOMER_CRACKER, PTFE_SINTERING_OVEN, LINED_FLUOROCHEMICAL_REACTOR);
+		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, GAS_CLEANING_RACK, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, MASHING_STATION, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER, ACID_CONCENTRATOR, CHEMICAL_DISSOLUTION_CHAMBER, FLUOROCARBON_REACTOR, FLUOROMONOMER_CRACKER, PTFE_SINTERING_OVEN, LINED_FLUOROCHEMICAL_REACTOR, COMBINED_CYCLE_PLANT, BULK_FERMENTER, LARGE_BIO_GENERATOR);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.stream().filter(block -> !isSpecialist(block.form())).forEach(output::accept));
 	}

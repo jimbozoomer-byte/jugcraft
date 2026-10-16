@@ -1008,6 +1008,7 @@ def build():
             machine_page("chemical_reactor"),
             form_page("chemical_oxidizer"),
             form_page("industrial_fermenter"),
+            form_page("bulk_fermenter"),
             form_page("bulk_chemical_reactor"),
             form_page("anaerobic_digester"),
             form_page("coal_gasifier"),
@@ -1015,6 +1016,8 @@ def build():
             machine_page("fuel_cell"),
             form_page("gas_burning_generator"),
             form_page("bio_generator"),
+            form_page("large_bio_generator"),
+            form_page("combined_cycle_power_plant"),
             machine_page("electroplating_bath"),
             {"title": "Rubber", "icon": f"{MOD}:rubber", "text": [
                 "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor "
