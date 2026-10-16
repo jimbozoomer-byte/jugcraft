@@ -57,6 +57,8 @@ public final class IndustrialForms {
 	public static final String VANADIUM_RECOVERY = "jugcraft:vanadium_recovery";
 	/** Neutralizing nitric acid with ammonia into solid ammonium nitrate. */
 	public static final String NITRATE_NEUTRALIZATION = "jugcraft:nitrate_neutralization";
+	/** Recovering ruthenium from washed nickel ore with hydrochloric acid and chlorine. */
+	public static final String PRECIOUS_METAL_RECOVERY = "jugcraft:precious_metal_recovery";
 	/** Joining a carbon oxide and hydrogen into methane over a nickel bed. */
 	public static final String NICKEL_METHANATION = "jugcraft:nickel_methanation";
 	/** What the Infuser's bed socket holds: the nickel catalyst bed and the vanadium contact bed. */
@@ -221,6 +223,7 @@ public final class IndustrialForms {
 			.capability("jugcraft:chloride_leaching")
 			.capability("jugcraft:vanadium_recovery")
 			.capability("jugcraft:nitrate_neutralization")
+			.capability("jugcraft:precious_metal_recovery")
 			.upgrades()
 			.warmup(40)
 			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 1, 1, 3, FormSide.TOP)
@@ -335,6 +338,29 @@ public final class IndustrialForms {
 			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 0, 2, 0, FormSide.LEFT)
 			.build();
 
+	/**
+	 * The Combined Cycle Power Plant: the factory's big power station, six wide, four deep and five tall, the largest a form may be. A gas turbine
+	 * on its skid draws air from the filter house over its generator end and blows its exhaust through a tall heat-recovery
+	 * steam generator to the stack; the steam turns a second turbine on the same shaft. It burns methane (560 JE/mB) and the
+	 * Coal Gasifier's raw syngas (256 JE/mB) at 2,048 JE/t and hydrogen (128 JE/mB) at 1,024 JE/t, from one inlet at the
+	 * back, and sends the power out of the generator's terminal on its left side.
+	 */
+	public static final MachineForm COMBINED_CYCLE_PLANT_FORM = MachineForm.builder(Jugcraft.id("combined_cycle_power_plant"),
+					MachineKind.GAS_TURBINE)
+			.layer("C#####", "######", "######", "######")
+			.layer("######", "######", "######", "######")
+			.layer("##..##", "##..##", "##..##", "##..##")
+			.layer("##..##", "##..##", "##..##", "##..##")
+			.layer("....##", "....##", "....##", "....##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("fuel")
+			.fuel(Jugcraft.id("methane"), FluidFuels.COMBINED_CYCLE_METHANE, FluidFuels.COMBINED_CYCLE_METHANE_RATE)
+			.fuel(Jugcraft.id("raw_syngas"), FluidFuels.RAW_SYNGAS, FluidFuels.COMBINED_CYCLE_SYNGAS_RATE)
+			.fuel(Jugcraft.id("hydrogen"), FluidFuels.HYDROGEN, FluidFuels.COMBINED_CYCLE_HYDROGEN_RATE)
+			.port("fuel_in", FormPort.Kind.FLUID_IN, 0, 2, 3, 0, FormSide.BACK)
+			.port("power_out", FormPort.Kind.ENERGY_OUT, 0, 0, 2, 0, FormSide.LEFT)
+			.build();
+
 	public static FormMachineBlock ELECTROLYTIC_SEPARATOR;
 	public static FormMachineBlock GAS_BURNING_GENERATOR;
 	public static FormMachineBlock CHEMICAL_INFUSER;
@@ -345,6 +371,7 @@ public final class IndustrialForms {
 	public static FormMachineBlock COAL_GASIFIER;
 	public static FormMachineBlock GAS_CLEANUP_RACK;
 	public static FormMachineBlock BIO_GENERATOR;
+	public static FormMachineBlock COMBINED_CYCLE_PLANT;
 	public static BlockEntityType<FormMachineBlockEntity> ENTITY;
 
 	public static final MachineForm GAS_CLEANING_RACK_FORM = MachineForm.builder(Jugcraft.id("gas_cleaning_rack"), MachineKind.CHEMICAL_REACTOR)
@@ -901,7 +928,8 @@ public final class IndustrialForms {
 		FLUOROMONOMER_CRACKER = block("fluoromonomer_cracker", FLUOROMONOMER_CRACKER_FORM);
 		PTFE_SINTERING_OVEN = block("ptfe_sintering_oven", PTFE_SINTERING_OVEN_FORM);
 		LINED_FLUOROCHEMICAL_REACTOR = block("lined_fluorochemical_reactor", LINED_FLUOROCHEMICAL_REACTOR_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, GAS_CLEANING_RACK, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, MASHING_STATION, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER, ACID_CONCENTRATOR, CHEMICAL_DISSOLUTION_CHAMBER, FLUOROCARBON_REACTOR, FLUOROMONOMER_CRACKER, PTFE_SINTERING_OVEN, LINED_FLUOROCHEMICAL_REACTOR);
+		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, GAS_CLEANING_RACK, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, MASHING_STATION, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER, ACID_CONCENTRATOR, CHEMICAL_DISSOLUTION_CHAMBER, FLUOROCARBON_REACTOR, FLUOROMONOMER_CRACKER, PTFE_SINTERING_OVEN, LINED_FLUOROCHEMICAL_REACTOR, COMBINED_CYCLE_PLANT);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.stream().filter(block -> !isSpecialist(block.form())).forEach(output::accept));
 	}

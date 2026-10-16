@@ -46,6 +46,17 @@ public final class FluidFuels {
 	 */
 	public static final int BIOGAS = 268;
 	public static final int BIO_GENERATOR_BIOGAS = 64;
+	/**
+	 * The Combined Cycle Power Plant, the factory's big power station: a gas turbine whose exhaust raises steam for a
+	 * second turbine, so methane gives a quarter more than the gas generator's 448 JE/mB, 560, and it runs at 2,048 JE/t,
+	 * four times the gas turbine. It burns the Coal Gasifier's raw syngas whole, 256 JE/mB at the same rate, and hydrogen at
+	 * the Fuel Cell's 128 JE/mB (below electrolysis's cost) at 1,024 JE/t.
+	 */
+	public static final int COMBINED_CYCLE_METHANE = 560;
+	public static final int COMBINED_CYCLE_METHANE_RATE = 2_048;
+	public static final int RAW_SYNGAS = 256;
+	public static final int COMBINED_CYCLE_SYNGAS_RATE = 2_048;
+	public static final int COMBINED_CYCLE_HYDROGEN_RATE = 1_024;
 	/** The gas turbine's lubricant upkeep: 1 mB for every this many ticks it runs (a bucket lasts 20,000 ticks). */
 	public static final int LUBRICANT_TICKS = 20;
 	/** The advanced combustion engine (KE per mB): turbocharged, it gets a quarter more from diesel than the diesel
