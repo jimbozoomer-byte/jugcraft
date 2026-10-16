@@ -1,6 +1,6 @@
 # October 15 community integration
 
-Status: integration candidate on `integrate/ready-prs-oct15`. The October 15 local validation passed; owner-approved tree PRs #395 and #396 were added on October 16. Combined GitHub CI is pending. Do not treat this batch as shipped until its integration PR is merged.
+Status: integration candidate in [PR #398](https://github.com/jimbozoomer-byte/jugcraft/pull/398) on `integrate/ready-prs-oct15`. The October 15 local validation passed; owner-approved tree PRs #395, #396 and #397 were added on October 16. Combined GitHub CI is pending. Do not treat this batch as shipped until its integration PR is merged.
 
 Owner request: merge all ready open PRs and repair blockers. Integration and fixes by OpenAI Codex (GPT-6). Base: `40381834a75312b8cb8a9b326d32c671f2f20a8e`, which includes the separately reviewed and merged PR #357. The seven uncommitted local technology packages are outside this batch.
 
@@ -34,7 +34,8 @@ The integration branch retains the original branch heads as merge ancestors. Git
 | [#388](https://github.com/jimbozoomer-byte/jugcraft/pull/388) | Tree generation batch 3: yew and the Gloomweald canopy | `42065b0335e26a5a2f4d03e35830cd93b3036228` |
 | [#389](https://github.com/jimbozoomer-byte/jugcraft/pull/389) | Tree generation batch 4: snowpetal cherry and shimmer birch | `d3f60a68c637a2ef472bd4b3963d0db83a81b695` |
 | [#395](https://github.com/jimbozoomer-byte/jugcraft/pull/395) | Bald cypress and magnolia | `6b6c5df60` |
-| [#396](https://github.com/jimbozoomer-byte/jugcraft/pull/396) | Rowan, elder and seasonal fruit | `605005fa9` |
+| [#396](https://github.com/jimbozoomer-byte/jugcraft/pull/396) | Rowan, elder and seasonal fruit | `3b2bdd8df` |
+| [#397](https://github.com/jimbozoomer-byte/jugcraft/pull/397) | Hawthorn, persimmon and ripe hawthorn harvesting | `d0a76a4d652242ff7ec5869d94e510128842c0ea` |
 
 The KV-1/W walker PR (#371) supplies models, textures and animation clips only. It does not implement a playable vehicle.
 
@@ -81,6 +82,8 @@ These PRs were still draft submissions at the initial inventory. Several are cum
 | [#387](https://github.com/jimbozoomer-byte/jugcraft/pull/387) | Add the Reagent Purification Station for electronic-grade sulfuric acid |
 | [#390](https://github.com/jimbozoomer-byte/jugcraft/pull/390) | Add titanium tools and armor, the step above steel |
 
-New drafts observed on October 16 and excluded: #391 (aspirin), #392 (boric acid/control rods), #393 (sour candy/glucose), #394 (phosphoric acid/fertilizer/cola), #397 (hawthorn/persimmon).
+New drafts observed on October 16 and excluded: #391 (aspirin), #392 (boric acid/control rods), #393 (sour candy/glucose), #394 (phosphoric acid/fertilizer/cola). PR #397 was initially draft, then marked ready with its owner visual approval recorded; its latest hawthorn harvest and recipe-view fixes are included. The final shared recipe catalogue is generated from all merged inputs.
 
 October 16 pre-push checks after adding #395/#396: 50 Python tests passed; repository/link check passed. Earlier full-build and 1,734-test results apply to the October 15 source only; CI validates the expanded candidate.
+
+The first #398 CI run on `94eb778e8` passed the normal build, optional-integrations-absent build, repository checks, generated-resource freshness and material audit. The optional build passed all 1,744 required server tests. Client shards were still running when #397 became ready; those results do not certify the subsequently expanded candidate. The final PR checks must pass after #397 integration before merging.
