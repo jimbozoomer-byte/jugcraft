@@ -1,6 +1,6 @@
 # Tree generation batch 6: evergreen scrub
 
-Status: implemented, awaiting owner inspection, 16 October 2026. Public branch: `codex/tree-generation-batch-6` in `speedygroyper/jugcraft`. Actual tool/model: OpenAI Codex (GPT-6). Based on the owner-approved tree stack through batch 5c, including the hawthorn harvest and recipe-view corrections; upstream integration PR #398 is still open. Batches 6b and 7 are excluded.
+Status: implemented and owner-approved, 16 October 2026. Public branch: `codex/tree-generation-batch-6` in `speedygroyper/jugcraft`, [PR #399](https://github.com/jimbozoomer-byte/jugcraft/pull/399). Actual tool/model: OpenAI Codex (GPT-6). Based on main after integration PR #398 merged the earlier approved tree batches, including the hawthorn harvest and recipe-view corrections. Batches 6b and 7 are excluded.
 
 ## Scope and acquisition
 
@@ -74,4 +74,4 @@ The delivery copy was scanned across **18,368 saved region records** and all oth
 
 The cleaned copy opened in ordinary Minecraft at the garden (1120.5, 180, -987.5), confirmed by the client join log. Both the pack and world ZIP pass integrity checks; every world file, the matching JAR and all eighteen pinned dependency entries match their verified inputs. No external launcher import, two-client dedicated-server session, released-world upgrade or performance benchmark is claimed. Batches 6b and 7 remain unstarted.
 
-This draft is stacked on the approved earlier tree work. Integration PR #398 is still open; GitHub currently reports conflicts with main. Reconcile that prerequisite stack before merging this PR. No upstream PR or server deployment was performed.
+The owner approved the inspection world on 16 October 2026 ("It looks good") and requested the main-branch conflict check before PR approval. After integration PR #398 was squash-merged, the three batch-6 commits were reapplied onto main at `2804ba015b76e99ff341687801cb01fb908a9670`. All three patches applied unchanged, confirmed by `git range-diff`; this PR now contains only batch 6. The 25 tree regression tests, repository checks, 814 generated JSON comparisons and fourteen deterministic texture comparisons pass on that base. Combined build and current CI results are recorded on PR #399. The previously delivered inspection world is preserved. No merge or server deployment was performed.
