@@ -49,6 +49,8 @@ No dependency or platform pins change: Minecraft 26.3, Fabric Loader 0.19.5, Fab
 
 ## Verification on 16 October 2026
 
+CI follow-up: the owner reported a failed check on PR #396. The `mod` job stopped before compilation because the generated-resource comparison found three missing rows in `recipe_view.json`: fruitwood sawing and rowan/elder tree farming. The committed viewer data now matches the shared generator and the exact generated Git blob reported by CI (`e31c4936`), preserving every prior recipe row and other category. This data-only correction leaves gameplay recipes and trees unchanged; the focused generation check was repeated without rerunning the local gameplay suite. Actual tool/model: OpenAI Codex (GPT-6).
+
 Production implementation: `1af1b026e2b3e71a5e7fd1df3470b3860af19db6`, based on public design commit `558dd01364ba76f9259cbff68b7ee1427533871b` and approved PR #395. Subsequent changes refine the inspection survey and normalize generated JSON key order; no tree, biome, berry or recipe behavior changed after the full server pass. Actual tool/model: OpenAI Codex (GPT-6).
 
 - The complete `build` server stage passed **all 1,668 required tests**, including six new batch-5 tests. Coverage includes twelve seeds per sapling, real fruit-bearing crowns, soil/obstacle protection, stripping and wood recipes, every calendar mode, repeat harvest, fruit-preserving seasonal catch-up, leaf decay, persistent/buried leaves, shears/Silk Touch, renewable saplings, tree farms, berry consumers and Cooking Pot jelly.
