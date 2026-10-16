@@ -205,6 +205,45 @@ def gasification_residue():
     return img
 
 
+def citric_acid():
+    """Citric acid: a heap of clear white crystals with a faint lemon cast, a few glinting, lit from the top left."""
+    import material_style as ms
+    img = ms.dust([(150, 148, 112), (204, 202, 160), (230, 230, 196), (244, 244, 222), (254, 254, 240)])
+    for x, y in ((6, 10), (9, 9), (11, 12)):
+        img.putpixel((x, y), (255, 255, 255, 255))
+    return img
+
+
+def glucose_syrup():
+    """Glucose syrup: a stoppered glass bottle of thick clear pale-gold syrup, outlined in each part's own dark."""
+    tones = {"c": (92, 62, 36), "k": (150, 106, 64), "g": (86, 108, 116), "w": (196, 222, 228),
+             "o": (150, 104, 20), "s": (214, 164, 48), "y": (240, 204, 92), "h": (255, 240, 180)}
+    rows = [
+        "................",
+        "......cccc......",
+        "......ckkc......",
+        "......cccc......",
+        ".......gg.......",
+        "......gwwg......",
+        ".....gwyyyg.....",
+        "....goyhyyyog...",
+        "...goyhyyyyyog..",
+        "...goyhyyyysog..",
+        "...goyyyyyysog..",
+        "...gosyyyyssog..",
+        "...goossssssog..",
+        "....gooooooog...",
+        ".....ggggggg....",
+        "................",
+    ]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def ammonium_nitrate():
     """Ammonium nitrate: a heap of small round white prills, lit from the top left and outlined in their own darkest
     tone (docs/ITEM_ICONS.md)."""
@@ -605,6 +644,8 @@ def draw_all(save, save_animation):
     save(vanadium_contact_bed(), "item", "vanadium_contact_bed")
     save(gasification_residue(), "item", "gasification_residue")
     save(ammonium_nitrate(), "item", "ammonium_nitrate")
+    save(citric_acid(), "item", "citric_acid")
+    save(glucose_syrup(), "item", "glucose_syrup")
     save(guncotton(), "item", "guncotton")
     save(grenade(), "item", "grenade")
     save(grenade_launcher(), "item", "grenade_launcher")
