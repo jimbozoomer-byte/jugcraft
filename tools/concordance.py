@@ -71,7 +71,7 @@ RESOURCES = {
     "bound_will": {"name": "Bound Will", "kind": "supernatural identity", "unit": "record",
                    "summary": "A record of an agreement with a named spirit or construct: an obligation with an "
                               "identity, never an anonymous fluid."},
-    "prima_materia": {"name": "Prima Materia", "kind": "equivalence value", "unit": "grain",
+    "prima_materia": {"name": "Prima Materia", "kind": "equivalence value", "unit": "essence",
                       "summary": "The exact value assigned to an eligible mundane material for transmutation, rounded "
                                  "down and never created from nothing."},
 }

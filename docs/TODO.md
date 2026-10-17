@@ -4,7 +4,8 @@
 
 - [x] Local first slice: Philosopher's Stone interface, paid Repair Talisman and Black Hole Band, using supplied owner icons and the existing Prima Materia ledger.
 - [x] Automated validation: 1,771 server tests, full data/art audit, rendered interface and live equipment checks.
-- [ ] Owner playtest of the local Alchemy Workshop pack before publication.
+- [x] Replace the transmutation book with a stone tablet and rename its currency to essence across Assay, gear and guides, preserving existing balances.
+- [ ] Owner playtest of the updated Alchemy Tablet pack before publication.
 - [ ] Dark/red matter tools and armor with their supplied art.
 - [ ] Charged storage stars, alchemical fuel tiers and covalence repair.
 - [ ] Elemental utility amulets, mobility rings and bounded collector/condenser automation.

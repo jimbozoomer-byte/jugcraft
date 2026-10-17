@@ -1,7 +1,7 @@
 """Roadmap step 21: bounded material equivalence (docs/features/arcane-concordance-equivalence.md).
 
-The Balancewrights' Assay. A restricted catalogue of mundane materials each has an exact Prima Materia value (grains a
-unit, as a fraction), and says whether an Assayer's Scale may dissolve it into grains or form it from them. Dissolving
+The Balancewrights' Assay. A restricted catalogue of mundane materials each has an exact Prima Materia value (essence per
+unit, as a fraction; the stable data field remains named grains), and says whether an Assayer's Scale may dissolve it into essence or form matter from essence. Dissolving
 gives the batch's exact value rounded down once; forming costs FORM_MARKUP of it, rounded up once; so nothing is ever
 rounded into existence and every round trip loses. Only catalogued, plain items are weighed: anything carrying an
 inventory, a unique identity, a bound creature, other data or magic, or tagged as excluded, never is (Java:
@@ -51,8 +51,8 @@ REASONS = {
     "uncatalogued": "the scale does not know its worth",
     "not_dissolvable": "the scale knows its worth but will not dissolve it",
     "not_formable": "the scale will not form it",
-    "too_poor": "you have too few grains",
-    "full": "your ledger cannot hold more grains",
+    "too_poor": "you have too little essence",
+    "full": "your ledger cannot hold more essence",
     "unbalanced": "the scale is out of balance: an operator must fix its data (/jugcraft concordance equivalence audit)",
 }
 
@@ -248,7 +248,7 @@ def audit():
             continue
         g = gain(entry)
         if g > 0:
-            problems.append(f"transmutation {key} gains {g} grains")
+            problems.append(f"transmutation {key} gains {g} essence")
         for i, a in entry["inputs"].items():
             for o, b in gives(entry).items():
                 edges.setdefault(i, []).append((key, o, a, b, g))
@@ -314,16 +314,16 @@ RESEARCH = {
 ITEMS = {}
 BLOCKS = {"assayers_scale": {"name": "Assayer's Scale"}}
 DEVICE_TOOLTIPS = {
-    "assayers_scale": "Use with a material to weigh it, and again to dissolve it into grains; with an empty hand and a "
+    "assayers_scale": "Use with a material to weigh it, and again to dissolve it into essence; with an empty hand and a "
                       "material in your other hand, to form one more of it",
 }
 
 MESSAGES = {
-    "assay.value": "%s: worth %s grains each; %s dissolve into %s grains; one costs %s grains to form",
+    "assay.value": "%s: worth %s essence each; %s dissolve into %s essence; one costs %s essence to form",
     "assay.confirm": "Use the scale again within ten seconds to dissolve them",
-    "assay.dissolved": "%s %s dissolved into %s grains (ledger: %s)",
-    "assay.formed": "%s formed for %s grains (ledger: %s)",
-    "assay.balance": "Your ledger holds %s grains of Prima Materia (at most %s)",
+    "assay.dissolved": "%s %s dissolved into %s essence (ledger: %s)",
+    "assay.formed": "%s formed for %s essence (ledger: %s)",
+    "assay.balance": "Your ledger holds %s essence (Prima Materia) (at most %s)",
     "assay.refused": "%s: %s",
     "assay.unknown": "You have not understood Assay (the codex says how)",
     "assay.audit_clean": "The conversion graph is balanced: %s conversions, %s cycles searched, none profitable",
@@ -355,18 +355,18 @@ def codex():
          "Once you understand First Light, examine raw matter (**sneak and use**): raw iron, copper or gold, calcite or "
          "clay. Study one at a Lampwright's Bench to understand Assay."),
         ("crafting_recipe", "Assayer's Scale",
-         "Use the scale with a material in your main hand to **weigh** it: its worth in grains of Prima Materia, what "
+         "Use the scale with a material in your main hand to **weigh** it: its worth in essence (Prima Materia), what "
          "the stack would dissolve into, and what forming one costs. Use it again within ten seconds to **dissolve** "
          "the stack into your ledger. With an empty main hand and a material in your other hand, use it to **form** one "
          f"more of it (the one you hold is the scale's pattern and is kept). Dissolving pays the exact worth of the whole "
          f"stack rounded down; forming costs {FORM_MARKUP.numerator}/{FORM_MARKUP.denominator} of the worth rounded up, so "
-         f"every round trip loses. Your ledger holds at most {MAX_BALANCE:,} grains.", rid("assayers_scale")),
+         f"every round trip loses. Your ledger holds at most {MAX_BALANCE:,} essence.", rid("assayers_scale")),
         ("text", "What Is Weighed",
          "Only catalogued, plain materials. The scale refuses anything that holds other things, is named, written or "
          "marked, carries a creature or a block's state, has been changed in any other way, or carries magic: research, "
          "spells, relics, rings, living equipment, bound spirits. Owning something, or seeing it in a recipe book, never "
          "makes it weighable."),
-        ("text", "The Catalogue (grains each)", table),
+        ("text", "The Catalogue (essence each)", table),
         ("text", "A Balanced Graph",
          "Every recipe between catalogued materials is declared, with the containers it gives back and its byproducts, "
          "and none may be worth more after than before. The scale's own dissolving and forming are part of the graph. "

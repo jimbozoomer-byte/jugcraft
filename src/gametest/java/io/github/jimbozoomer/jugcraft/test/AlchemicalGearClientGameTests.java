@@ -60,6 +60,10 @@ public class AlchemicalGearClientGameTests implements FabricClientGameTest {
                 m.getSlot(0).set(new ItemStack(Items.COPPER_INGOT,8)); m.getSlot(1).set(new ItemStack(Items.IRON_INGOT)); m.broadcastChanges();
             });
             c.waitForScreen(TransmutationScreen.class); c.waitTicks(8);
+            c.runOnClient(mc->{
+                String balance=Component.translatable("screen.jugcraft.alchemy.balance",100000).getString();
+                if(!balance.equals("100000 essence"))throw new AssertionError("Tablet must display essence with the existing balance");
+            });
             c.runOnClient(mc->mc.gui.toastManager().clear()); c.takeScreenshot("alchemy_stone_ready");
             c.clickScreenButton("screen.jugcraft.alchemy.dissolve"); c.waitTicks(6);
             c.takeScreenshot("alchemy_stone_confirm");
@@ -70,7 +74,10 @@ public class AlchemicalGearClientGameTests implements FabricClientGameTest {
             if(!paid)throw new AssertionError("Server menu must consume eight copper, retain sample and form one iron at exact price");
             c.runOnClient(mc->mc.gui.toastManager().clear()); c.takeScreenshot("alchemy_stone_result");
             int scale=c.computeOnClient(mc->mc.options.guiScale().get());
-            c.runOnClient(mc->{mc.options.guiScale().set(4);mc.resizeGui();});c.waitTicks(5);c.takeScreenshot("alchemy_stone_scale4");
+            c.runOnClient(mc->{mc.options.guiScale().set(1);mc.resizeGui();});c.waitTicks(5);c.takeScreenshot("alchemy_tablet_scale1");
+            int smallGuiWidth=c.computeOnClient(mc->mc.gui.screen().width);
+            c.runOnClient(mc->{mc.options.guiScale().set(2);mc.resizeGui();});c.waitTicks(5);c.takeScreenshot("alchemy_tablet_scale2");
+            c.runOnClient(mc->{if(mc.gui.screen().width>=smallGuiWidth)throw new AssertionError("Test must exercise two genuinely different GUI scales");});
             c.getInput().pressKey(InputConstants.KEY_TAB); c.waitTicks(2);
             c.runOnClient(mc->{if(mc.gui.screen().getFocused()==null)throw new AssertionError("Menu actions must be keyboard focusable");mc.options.guiScale().set(scale);mc.resizeGui();});
             c.getInput().pressKey(InputConstants.KEY_ESCAPE);c.waitForScreen(null);c.waitTicks(5);

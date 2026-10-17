@@ -25,17 +25,17 @@ public final class TransmutationMenu extends AbstractContainerMenu {
     public TransmutationMenu(int id, Inventory inventory) {
         super(AlchemicalGear.MENU, id);
         owner = inventory.player;
-        addSlot(new Slot(contents, INPUT, 56, 63) {
+        addSlot(new Slot(contents, INPUT, 56, 70) {
             @Override public boolean mayPlace(ItemStack stack) { return !stack.is(AlchemicalGear.STONE); }
         });
-        addSlot(new Slot(contents, SAMPLE, 198, 63) {
+        addSlot(new Slot(contents, SAMPLE, 199, 70) {
             @Override public boolean mayPlace(ItemStack stack) { return !stack.is(AlchemicalGear.STONE); }
             @Override public int getMaxStackSize() { return 1; }
         });
-        addSlot(new Slot(contents, OUTPUT, 260, 63) {
+        addSlot(new Slot(contents, OUTPUT, 270, 70) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
         });
-        addStandardInventorySlots(inventory, 74, 140);
+        addStandardInventorySlots(inventory, 74, 150);
         addDataSlots(data);
         refresh();
     }
