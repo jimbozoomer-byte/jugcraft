@@ -68,5 +68,33 @@ public class BackpackClientGameTests implements FabricClientGameTest {
 				context.waitTicks(5);
 			}
 		}
+		dedicatedReconnect(context);
+	}
+
+	private static void dedicatedReconnect(ClientGameTestContext context) {
+		try (var server = context.worldBuilder().createServer()) {
+			for (int attempt = 0; attempt < 3; attempt++) {
+				if (attempt > 0) InProcessServerConfigs.beforeReconnect(server);
+				try (var connection = server.connect()) {
+					connection.waitForChunksRender();
+					if (attempt == 0) server.runOnServer(minecraft -> {
+						ItemStack bag = BackpackGameTests.stack("standard");
+						BackpackWrapper.initializeSize(bag);
+						TrinketsApi.getAttachment(minecraft.getPlayerList().getPlayers().getFirst())
+								.getInventory("chest/back").setItem(0, bag);
+					});
+					context.waitFor(client -> AttachmentUtils.isWearingBackpack(client.player), 100);
+					context.getInput().pressKey(KeybindHandler.OPEN_BACKPACK);
+					context.waitFor(client -> client.gui.screen() instanceof BackpackScreen, 100);
+					context.runOnClient(client -> {
+						var bag = ((BackpackItemMenu) client.player.containerMenu).getWrapper();
+						if (bag.getStorageSize() != 27 || bag.getToolSize() != 2 || bag.getUpgradesSize() != 2)
+							throw new AssertionError("Backpack capacities changed across dedicated reconnect");
+						client.player.closeContainer();
+					});
+					context.waitTicks(5);
+				}
+			}
+		}
 	}
 }

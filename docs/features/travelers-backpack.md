@@ -105,3 +105,11 @@ Validation on Windows, 17 October 2026, from base commit `2804ba015b76e99ff34168
 - `gradlew.bat build runClientGameTest -PjugcraftOptionalIntegrations=false -PclientTests=BackpackClientGameTests --continue`: passed, including **1,757 server tests** and a real client creating/joining a world without the optional mods. The first attempt had one failure in the unchanged `LaunchersGameTests.rocketsBurstOnWhatTheyHit` timing test; the full rerun passed without changing that test or rocket code.
 
 Not yet certified: clean launcher import, two independent clients, save/restart of an existing production world, owner-driven downsizing, native death/void recovery under all conditions and performance at scale. No production server is modified by this change.
+
+### PR check repair
+
+The first GitHub Actions run exposed two integration issues beyond the initial focused tests: material regeneration removed the authored backpack pack, and dedicated-server reconnect tests lost Forge Config API Port's shared config state. The generator now cleans only its two generated packs; a cleanup regression checks that authored backpack recipes survive. The reconnect fixtures reload the original server config files after the in-process client disconnects, as explained in [Testing](../TESTING.md#dedicated-server-and-two-clients). No production mixin, config-sync bypass or skipped assertion is added. The backpack client test now includes three dedicated-server connections.
+
+Repair validation with OpenAI Codex (GPT-6), 17 October 2026: all 57 Python tests passed, as did repository and dependency-pin checks. Full material regeneration retained the authored backpack pack unchanged. The Windows generator also reproduced unrelated platform-dependent differences in one existing wind-chime model's floating-point coordinates and 16 townsfolk PNGs; those generated changes were discarded. Linux CI remains the authoritative full regeneration comparison.
+
+`gradlew.bat runClientGameTest -PclientTests=BackpackClientGameTests,JugcraftServerClientGameTests,PeepoCompanionClientTests --no-daemon` with `CI=true` passed after the repair. This covers the three backpack connections, the companion suite's dedicated reconnect, and machine/trader world save/reopen and reconnect assertions with the locked dependencies present.

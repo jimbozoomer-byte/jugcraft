@@ -45,6 +45,8 @@ Record commit SHA, exact client/server/dependency versions, test world origin, c
 
 **Automated (one client):** the client job's `JugcraftServerClientGameTests` starts the game's own dedicated server in-process (Fabric's client gametest API), joins it, opens a machine's screen and a Retro Trader's trades through the network, leaves and joins again, and checks the inventory and world. It also saves, closes and reopens a singleplayer world holding a trader, a machine and a cabinet. It is not `./gradlew runServer`, and it has one client.
 
+Forge Config API Port's server config registry is shared by both sides in that test JVM. Its remote-client config sync replaces the file-backed config with an in-memory copy, and disconnect unloads it, also affecting the still-running test server. Reconnect tests call the test-only `InProcessServerConfigs.beforeReconnect` helper after disconnect to reload the same global/world config files before the next handshake. Config packets, backpack synchronization and reconnect assertions still run. This helper is absent from the released JAR; it does not certify separate-process multiplayer or config isolation. `BackpackClientGameTests` exercises three consecutive connections with the equipped backpack and approved capacities preserved.
+
 **Manual (two clients):** needs two people or two accounts. Record the commit, exact versions and pass/fail for each line, with redacted screenshots or logs.
 
 Setup:

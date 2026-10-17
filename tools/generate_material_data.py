@@ -31,7 +31,9 @@ GENERATED_DIRS = [
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     # The lairs' dimensions and templates (tools/lair_data.py).
     DATA / MOD / "dimension", DATA / MOD / "dimension_type", DATA / MOD / "structure" / "lair",
-    DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
+    DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD,
+    # Only these packs are generated here. Preserve authored integration packs.
+    PACKS / model_writer.PACK_ID, PACKS / "fusion_textures",
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
     RES / "assets" / "minecraft",
     # The Arcane Concordance (tools/concordance.py): its rules, spells, Spell Engine opt-outs, codex and client clips.
@@ -1728,10 +1730,16 @@ def retro_trader_trades():
             "random_sequence": rid(f"trade_set/retro_trader/level_{level}")})
 
 
-def main():
+def clean_generated_resources():
     for directory in GENERATED_DIRS:
+        if not directory.resolve().is_relative_to(RES.resolve()) or directory.resolve() == RES.resolve():
+            raise ValueError(f"Generated directory is outside the resource subtree: {directory}")
         if directory.exists():
             shutil.rmtree(directory)
+
+
+def main():
+    clean_generated_resources()
     assets()
     import handbook
     book = handbook.build()

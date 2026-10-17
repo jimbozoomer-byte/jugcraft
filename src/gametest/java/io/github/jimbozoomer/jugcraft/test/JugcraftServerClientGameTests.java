@@ -135,6 +135,7 @@ public class JugcraftServerClientGameTests implements FabricClientGameTest {
 				context.waitTicks(10);
 			}
 			// Leave and join again: the player's inventory and the world are as they were.
+			InProcessServerConfigs.beforeReconnect(server);
 			try (TestDedicatedServerConnection connection = server.connect()) {
 				connection.waitForChunksRender();
 				int shards = context.computeOnClient(client -> count(client.player.getInventory(), PixelHollows.PIXEL_SHARD));
