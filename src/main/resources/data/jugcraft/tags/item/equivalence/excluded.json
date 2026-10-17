@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:collector_mk1",
+    "jugcraft:collector_mk2",
+    "jugcraft:collector_mk3",
+    "jugcraft:condenser_mk1",
+    "jugcraft:condenser_mk2",
     "jugcraft:research_notes",
     "jugcraft:initiate_wand",
     "jugcraft:adept_wand",

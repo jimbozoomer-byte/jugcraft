@@ -63,6 +63,8 @@ final class ConcordanceClient {
 		MenuScreens.register(JugcraftConcordance.BENCH_MENU, LampwrightBenchScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalGear.MENU, TransmutationScreen::new);
         MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.KleinStars.MENU, KleinStarScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalWorkshops.COLLECTOR_MENU, AlchemicalWorkshopScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalWorkshops.CONDENSER_MENU, AlchemicalWorkshopScreen::new);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, Jugcraft.id("concordance_focus"), ConcordanceClient::focusLine);
 		ItemTooltipCallback.EVENT.register(ConcordanceClient::tooltip);
 		CircleClient.register();

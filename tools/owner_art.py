@@ -35,6 +35,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import arms_pixel  # noqa: E402
+import concordance_workshops
 import concordance_elemental_gear
 import concordance_dark_matter
 import concordance_alchemical_gear
@@ -76,7 +77,7 @@ def imports():
 
 def magic_imports():
     """(runtime path under assets/jugcraft, library path under Magic/) for every copied magic-collection file."""
-    return sorted({**concordance_elemental_gear.OWNER_FILES, **concordance_dark_matter.OWNER_FILES, **concordance_alchemical_gear.OWNER_FILES, **concordance_ember.OWNER_FILES, **concordance_trinkets.OWNER_FILES, **encyclopedia.OWNER_FILES}.items())
+    return sorted({**concordance_workshops.OWNER_FILES, **concordance_elemental_gear.OWNER_FILES, **concordance_dark_matter.OWNER_FILES, **concordance_alchemical_gear.OWNER_FILES, **concordance_ember.OWNER_FILES, **concordance_trinkets.OWNER_FILES, **encyclopedia.OWNER_FILES}.items())
 
 
 def block_asset_imports():

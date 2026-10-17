@@ -13,7 +13,10 @@
 - [x] Stars/amulets: 1,801 server tests, rendered transfers/amulet use, full data audit and original-art checks passed locally.
 - [ ] Owner playtest of the Stars and Elemental Amulets pack before publication. See [feature record](features/elemental-alchemy.md).
 - [ ] Remaining Dark Matter equipment, red matter tools and armor with their supplied art.
-- [ ] Mobility rings and bounded collector/condenser automation with remaining supplied assets.
+- [x] Local collectors/condensers: three daylight collectors, two material condensers, retained targets, essence/star transfers, hopper faces, pause controls and charge-preserving upgrades using supplied assets.
+- [x] Collector/condenser validation: 1,820 server tests, rendered menus/models, live hoppers, daylight/roof behavior, full data/art audit and showroom ownership binding passed locally.
+- [ ] Owner playtest of the Collectors and Condensers pack before publication. See [feature record](features/alchemical-workshops.md).
+- [ ] Mobility rings with remaining supplied assets.
 - Scope and evidence: [alchemical gear](features/alchemical-gear.md).
 
 ## Spellcraft and encyclopedia UI — 16 October 2026

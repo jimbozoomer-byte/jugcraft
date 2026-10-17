@@ -767,6 +767,11 @@
     "jugcraft:reliquary_shrine",
     "jugcraft:oneiric_censer",
     "jugcraft:spire_heart",
+    "jugcraft:collector_mk1",
+    "jugcraft:collector_mk2",
+    "jugcraft:collector_mk3",
+    "jugcraft:condenser_mk1",
+    "jugcraft:condenser_mk2",
     "jugcraft:lumen_sconce"
   ]
 }
