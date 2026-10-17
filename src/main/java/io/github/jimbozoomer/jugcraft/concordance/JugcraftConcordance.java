@@ -267,6 +267,7 @@ public final class JugcraftConcordance {
 		// Roadmap step 21: bounded material equivalence, the Assayer's Scale and its Prima Materia ledger.
 		io.github.jimbozoomer.jugcraft.concordance.assay.Assaying.register();
 		io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalGear.register();
+		io.github.jimbozoomer.jugcraft.concordance.assay.DarkMatter.register();
 		// Roadmap step 22: sympathetic links, curses and wards; dream expeditions at the Oneiric Censer.
 		io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy.register();
 		io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming.register();

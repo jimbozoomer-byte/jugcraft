@@ -81,6 +81,9 @@
     "jugcraft:golden_knife",
     "jugcraft:steel_knife",
     "jugcraft:diamond_knife",
-    "jugcraft:netherite_knife"
+    "jugcraft:netherite_knife",
+    "jugcraft:dark_matter_pickaxe",
+    "jugcraft:dark_matter_hammer",
+    "jugcraft:dark_matter_axe"
   ]
 }

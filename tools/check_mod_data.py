@@ -1763,6 +1763,12 @@ def check_gear():
     check_armor_styles(java)
     check_armor_looks()
     check_armor_tiers(java)
+    # Replay the shared tag writer, so a later feature cannot silently replace
+    # existing weapons/knives/armor with only its own equipment.
+    def check_shared_tag(path, expected):
+        if path.is_relative_to(DATA / "minecraft" / "tags" / "item") and load(path) != expected:
+            err(f"{path.relative_to(ROOT)} differs from the canonical shared equipment tag writer")
+    gear.write_all(check_shared_tag, ASSETS, DATA / MOD, {}, lambda feature: [])
 
 
 def check_armor_tiers(java):

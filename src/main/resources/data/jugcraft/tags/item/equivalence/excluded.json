@@ -49,6 +49,16 @@
     "minecraft:heart_of_the_sea",
     "jugcraft:philosophers_stone",
     "jugcraft:repair_talisman",
-    "jugcraft:black_hole_band"
+    "jugcraft:black_hole_band",
+    "jugcraft:low_covalence_dust",
+    "jugcraft:medium_covalence_dust",
+    "jugcraft:high_covalence_dust",
+    "jugcraft:alchemical_coal",
+    "jugcraft:mobius_fuel",
+    "jugcraft:aeternalis_fuel",
+    "jugcraft:dark_matter",
+    "jugcraft:dark_matter_pickaxe",
+    "jugcraft:dark_matter_hammer",
+    "jugcraft:dark_matter_axe"
   ]
 }

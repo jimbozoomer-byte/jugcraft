@@ -472,6 +472,8 @@ import concordance_trinkets as trinkets  # noqa: E402
 ITEMS.update(trinkets.ITEMS)
 import concordance_alchemical_gear as alchemical_gear
 ITEMS.update(alchemical_gear.ITEMS)
+import concordance_dark_matter as dark_matter
+ITEMS.update(dark_matter.ITEMS)
 BLOCKS.update(trinkets.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
@@ -827,7 +829,7 @@ def advancement_ids():
 def spell_opt_outs():
     import arms
     import arms_variants
-    return sorted(set(arms.items()) | set(arms_variants.items())
+    return sorted(set(arms.items()) | set(arms_variants.items()) | set(dark_matter.TOOLS)
                   | {"power_katana", "power_bow", "ronin_katana", "carnival_mallet", "pinata_stick"})
 
 
@@ -1014,6 +1016,7 @@ def codex():
         **ember.codex(),
         **trinkets.codex(),
         **alchemical_gear.codex(),
+        **dark_matter.codex(),
         **journal.codex(),
         **signs.codex(),
     }
@@ -1593,6 +1596,7 @@ TOOLTIPS = {
     **relics.TOOLTIPS,
     **equivalence.TOOLTIPS,
     **alchemical_gear.TOOLTIPS,
+    **dark_matter.TOOLTIPS,
     **hexes.TOOLTIPS,
     **conclave.TOOLTIPS,
     **spire.TOOLTIPS,
@@ -1792,6 +1796,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     ember.write_all(write, assets, data, lang, condition, self_drop)
     trinkets.write_all(write, assets, data, lang, condition, self_drop)
     alchemical_gear.write_all(write, assets, data, lang, condition, self_drop)
+    dark_matter.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
     composer.lang_entries(lang)
     signs.lang_entries(lang)
@@ -1969,6 +1974,7 @@ def tags(tags):
     ember.tags(tags)
     trinkets.tags(tags)
     alchemical_gear.tags(tags)
+    dark_matter.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     for item in LUMINOUS_MATTER:

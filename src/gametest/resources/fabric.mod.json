@@ -233,7 +233,8 @@
       "io.github.jimbozoomer.jugcraft.test.FluorochemistryGameTests",
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationGameTests",
       "io.github.jimbozoomer.jugcraft.test.MineralSandGameTests",
-      "io.github.jimbozoomer.jugcraft.test.TechSevenGameTests"
+      "io.github.jimbozoomer.jugcraft.test.TechSevenGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DarkMatterGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
@@ -419,7 +420,8 @@
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.MineralSandClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TechSevenClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.AlchemicalGearClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalGearClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DarkMatterClientGameTests"
     ]
   },
   "depends": {

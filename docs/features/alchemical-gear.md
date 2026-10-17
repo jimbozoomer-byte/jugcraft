@@ -24,7 +24,7 @@ Exercise menu authority, sample retention, explicit dissolution confirmation, ed
 
 ## Later slices
 
-Dark/red matter tools and armor; charged storage stars; fuel tiers and covalence repair; elemental utility amulets and mobility rings; bounded collectors/condensers and automation. Each needs its own cost, progression and exploit review. These are planned, not implemented by this first slice.
+The [Dark Matter workshop](dark-matter-workshop.md) follow-up implements fuel tiers, covalence repair and three Dark Matter tools locally. Remaining Dark Matter equipment, red matter tools and armor, charged storage stars, elemental utility amulets and mobility rings, and bounded collectors/condensers and automation are still planned. Each needs its own cost, progression and exploit review.
 
 ## Results
 

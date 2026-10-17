@@ -190,6 +190,9 @@ EXCLUDED = [
     "minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:written_book",
     "minecraft:filled_map", "minecraft:player_head", "minecraft:spawner", "minecraft:trial_spawner", "minecraft:heart_of_the_sea",
     rid("philosophers_stone"), rid("repair_talisman"), rid("black_hole_band"),
+    rid("low_covalence_dust"), rid("medium_covalence_dust"), rid("high_covalence_dust"),
+    rid("alchemical_coal"), rid("mobius_fuel"), rid("aeternalis_fuel"), rid("dark_matter"),
+    rid("dark_matter_pickaxe"), rid("dark_matter_hammer"), rid("dark_matter_axe"),
 ]
 
 ASSAY_SPECIMEN_TAG = f"{MOD}:assay_specimens"
