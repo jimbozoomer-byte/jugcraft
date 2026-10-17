@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:pine_nuts",
+    "jugcraft:roasted_pine_nuts",
     "jugcraft:roasted_corn",
     "jugcraft:popcorn",
     "jugcraft:roasted_sunflower_seeds",
@@ -127,6 +129,7 @@
     "jugcraft:pumpkin_butter",
     "jugcraft:cranberry_preserves",
     "jugcraft:glow_berry_jelly",
+    "jugcraft:pickled_olives",
     "jugcraft:pickled_beets",
     "jugcraft:pickled_peppers",
     "jugcraft:corn_relish",

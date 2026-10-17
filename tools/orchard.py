@@ -31,6 +31,8 @@ FRUIT_CHANCE = 10
 # places: the pear tall and pointed, the peach low and wide, the citrus small and round); biomes: the vanilla biome tags
 # (ConventionalBiomeTags) a wild patch grows in, one tree in `rarity` chunks; regions: Jugcraft biomes whose trees include
 # it, and how often (tools/biomes.py "picks").
+# regions records conditional random-selector probabilities, not final biome-wide shares.
+# Mediterranean lemon/orange remain 5% each after the earlier olive and umbrella-pine picks.
 TREES = {
     "pear": {"display": "Pear", "seed": "pear_seeds", "seed_display": "Pear Seeds", "food": [4, 0.3], "pick": [1, 3],
              "trunk": {"base_height": 5, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 4},
@@ -40,10 +42,10 @@ TREES = {
               "biomes": ["IS_PLAINS", "IS_SAVANNA"], "rarity": 16, "regions": {"orchard": 0.2}},
     "lemon": {"display": "Lemon", "seed": "lemon_seeds", "seed_display": "Lemon Seeds", "food": [2, 0.1], "pick": [1, 3],
               "trunk": {"base_height": 3, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 3},
-              "biomes": ["IS_SAVANNA"], "rarity": 16, "regions": {"mediterranean_forest": 0.1, "subtropics": 0.15}},
+              "biomes": ["IS_SAVANNA"], "rarity": 16, "regions": {"mediterranean_forest": 0.05 / 0.45, "subtropics": 0.15}},
     "orange": {"display": "Orange", "seed": "orange_seeds", "seed_display": "Orange Seeds", "food": [4, 0.3], "pick": [1, 3],
                "trunk": {"base_height": 4, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 3},
-               "biomes": ["IS_SAVANNA", "IS_JUNGLE"], "rarity": 16, "regions": {"mediterranean_forest": 0.1, "subtropics": 0.15}},
+               "biomes": ["IS_SAVANNA", "IS_JUNGLE"], "rarity": 16, "regions": {"mediterranean_forest": 0.05 / 0.4, "subtropics": 0.15}},
     # The fruit crops (tools/fruit_crops.py, 8 October 2026): the plum, an oak-trunked tree as the others; and the banana,
     # a soft green-brown stem of its own (`log`, BANANA_STEM below) under a crown of long fronds that droop and hang
     # (vanilla's cherry foliage placer, `foliage` "type"), its fruit hanging in bunches among them.

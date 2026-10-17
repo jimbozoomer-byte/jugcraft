@@ -46,6 +46,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 	protected BlockPos surveySpot(ServerLevel level, BlockPos first, ResourceKey<Biome> biome) { return first; }
 	protected boolean includeSubmergedColumns() { return false; }
 	protected void validateReopened(ServerLevel level) { }
+	protected void beforeReopenValidation(ClientGameTestContext context, TestSingleplayerContext world) { }
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -135,6 +136,7 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 		}
 		try (var reopened = save.open()) {
 			reopened.getConnection().waitForChunksRender();
+			beforeReopenValidation(context, reopened);
 			reopened.getServer().runOnServer(minecraft -> expected.forEach((at, size) ->
 					check(TreeBatchTwoGameTests.measure(minecraft.overworld(), at).equals(size), "Tree changed across save/reopen at " + at)));
 			reopened.getServer().runOnServer(minecraft -> validateReopened(minecraft.overworld()));
