@@ -69,7 +69,7 @@ public final class DarkMatterTool extends Item {
                 && !stack.isEmpty() && player.getMainHandItem() == stack && !player.isShiftKeyDown()
                 && player.mayBuild() && !player.getAbilities().instabuild && AlchemicalGear.ready(player)
                 && player.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) <= 64
-                && Assaying.balance(player) >= kind.cost && state.getDestroySpeed(level, pos) > 0
+                && AlchemyPower.available(player) >= kind.cost && state.getDestroySpeed(level, pos) > 0
                 && state.is(kind == Kind.AXE ? BlockTags.MINEABLE_WITH_AXE : BlockTags.MINEABLE_WITH_PICKAXE)
                 && EXPANDING.add(player.getUUID())) {
             try { expand(stack, server, state, pos, player); }
@@ -100,7 +100,7 @@ public final class DarkMatterTool extends Item {
         ArrayDeque<BlockPos> queue = new ArrayDeque<>(); Set<BlockPos> seen = new HashSet<>();
         queue.add(origin); seen.add(origin); int broken = 0;
         int limit = kind == Kind.AXE ? TREE_EXTRA : VEIN_EXTRA;
-        while (!queue.isEmpty() && broken < limit && seen.size() < SCAN_LIMIT && Assaying.balance(player) >= kind.cost) {
+        while (!queue.isEmpty() && broken < limit && seen.size() < SCAN_LIMIT && AlchemyPower.available(player) >= kind.cost) {
             BlockPos from = queue.removeFirst();
             // Six-way connectivity; trees also accept upward diagonals, but never follow roots downward.
             for (int dx = -1; dx <= 1; dx++) for (int dy = -1; dy <= 1; dy++) for (int dz = -1; dz <= 1; dz++) {
@@ -117,16 +117,16 @@ public final class DarkMatterTool extends Item {
 
     private boolean breakExtra(ItemStack stack, ServerLevel level, BlockPos pos, ServerPlayer player, float hardness) {
         if (!level.hasChunkAt(pos) || !level.isInWorldBounds(pos) || player.getMainHandItem() != stack || stack.isEmpty()
-                || Assaying.balance(player) < kind.cost) return false;
+                || AlchemyPower.available(player) < kind.cost) return false;
         BlockState state = level.getBlockState(pos);
         if (state.isAir() || state.hasBlockEntity() || !state.getFluidState().isEmpty()
                 || !state.is(kind == Kind.AXE ? BlockTags.MINEABLE_WITH_AXE : BlockTags.MINEABLE_WITH_PICKAXE)
                 || state.getDestroySpeed(level, pos) < 0 || state.getDestroySpeed(level, pos) > hardness + .001F
                 || !isCorrectToolForDrops(stack, state) || !Authority.mayChange(level, player, pos)) return false;
         // Reserve before callbacks, refund only a refused break. Other ledger changes are not overwritten.
-        Assaying.setBalance(player, Assaying.balance(player) - kind.cost);
+        AlchemyPower.pay(player, kind.cost);
         boolean broken = player.gameMode.destroyBlock(pos);
-        if (!broken) Assaying.setBalance(player, Assaying.balance(player) + kind.cost);
+        if (!broken) AlchemyPower.refund(player, kind.cost);
         return broken;
     }
 

@@ -2,6 +2,8 @@
 
 Owner request: implement all remaining entries in the audited Equivalent Exchange-style asset inventory, then test the combined result at the end. Keep this work local for an owner-controlled playtest before publication. Implementation and integration by **OpenAI Codex (GPT-6)**, including bounded delegated equipment, machine and storage work.
 
+**Current extension:** [Connected Alchemy](connected-alchemy.md) supersedes the original manual-only converter, offhand-only Eye and six-artifact pedestal behavior described below. This record preserves the preceding slice and its actual validation.
+
 ## Scope and player outcome
 
 The audited collection has **108 logical item/block entries**; texture states, armor trims and supporting GUI/audio images are not separate gameplay features. The preceding local slices implemented 26. This integration adds the remaining **82**, using the supplied assets and original Jugcraft behavior within the existing Assay/essence system.

@@ -19,6 +19,7 @@ public final class AlchemyStorageScreen extends AbstractContainerScreen<AlchemyS
         g.fill(x+20,y+27,x+195,y+137,0xFF20232D);g.fill(x+20,y+147,x+195,y+227,0xFF20232D);
         for(var slot:menu.slots){int sx=x+slot.x,sy=y+slot.y;
             g.fill(sx-1,sy-1,sx+17,sy+17,0xFF151822);g.fill(sx,sy,sx+16,sy+16,0xFF535B66);g.fill(sx,sy+16,sx+17,sy+17,0xFF9DA8BA);
+            OwnerAlchemyArt.slot(g,"alchchest",sx,sy,11,3);
             if(slot.index>=54&&slot.getContainerSlot()==menu.lockedSlot())g.fill(sx-2,sy+17,sx+18,sy+19,0xFFE4C786);
         }
     }

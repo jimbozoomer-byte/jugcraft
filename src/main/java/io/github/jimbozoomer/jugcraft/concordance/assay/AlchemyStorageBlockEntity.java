@@ -23,6 +23,15 @@ public final class AlchemyStorageBlockEntity extends BlockEntity implements Worl
     public boolean mayUse(ServerPlayer player){return owner!=null&&(owner.equals(player.getUUID())||JugcraftParties.sameParty(owner,player.getUUID()))
             &&player.isAlive()&&!player.isSpectator()&&level instanceof ServerLevel server&&Authority.mayChange(server,player,worldPosition);}
     @Override public boolean stillValid(Player player){return level!=null&&level.getBlockEntity(worldPosition)==this&&player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(worldPosition))<=64&&(!(player instanceof ServerPlayer p)||mayUse(p));}
+    public int viewers;
+    public final AlchemyLid lid=new AlchemyLid();
+    public static void tick(net.minecraft.world.level.Level level,BlockPos pos,BlockState state,AlchemyStorageBlockEntity be){
+        be.lid.tick(level,pos,be.viewers);
+        if(level instanceof ServerLevel server&&Math.floorMod(level.getGameTime()+pos.asLong(),20)==0&&be.viewers==0&&!level.hasNeighborSignal(pos)){
+            var p=Authority.present(server,be.owner);
+            if(p!=null&&be.mayUse(p)&&AlchemyAutomation.pulse(p,be,net.minecraft.world.phys.Vec3.atCenterOf(pos)))be.setChanged();
+        }
+    }
     @Override public int[] getSlotsForFace(Direction side){return new int[0];}
     @Override public boolean canPlaceItemThroughFace(int slot,ItemStack stack,@Nullable Direction side){return false;}
     @Override public boolean canTakeItemThroughFace(int slot,ItemStack stack,Direction side){return false;}

@@ -86,14 +86,21 @@ public final class TransmutationMenu extends AbstractContainerMenu {
     @Override public void broadcastChanges() { refresh(); super.broadcastChanges(); }
 
     @Override public boolean clickMenuButton(Player player, int id) {
-        if (player != owner || !(player instanceof ServerPlayer server) || id < 0 || id > 1 || !stillValid(player)
+        if (player != owner || !(player instanceof ServerPlayer server) || id < 0 || id > 2 || !stillValid(player)
                 || !RateGate.allow(server, "transmutation", 4)) return false;
         refresh();
+        if (id == 2) {
+            AlchemyPatterns.learn(server, contents.getItem(SAMPLE));
+            server.openMenu(new net.minecraft.world.SimpleMenuProvider((menuId, inv, who) ->
+                    new AlchemyPatternMenu(menuId, inv, access, ItemStack.EMPTY), net.minecraft.network.chat.Component.translatable("screen.jugcraft.pattern.title")));
+            return true;
+        }
         if (id == 0 && canDissolve()) {
             if (!confirming()) {
                 confirmation = contents.getItem(INPUT).copy();
                 confirmUntil = server.level().getGameTime() + Assaying.CONFIRM_TICKS;
             } else {
+                AlchemyPatterns.learn(server, contents.getItem(INPUT));
                 Assaying.dissolve(server, contents.getItem(INPUT), material(INPUT));
                 confirmation = ItemStack.EMPTY;
             }

@@ -99,9 +99,9 @@ public class AlchemyStorageGameTests {
         h.assertTrue(m.getCarried().isEmpty()&&m.quickMoveStack(p,0).isEmpty()&&p.getInventory().getItem(1).isEmpty(),"All click variants leave display samples read-only");
         p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);h.assertTrue(!m.stillValid(p),"Tome must still be held");h.succeed();
     }
-    @GameTest(maxTicks=20) public void tabletAndDensityGemUseExistingPaidInterface(GameTestHelper h){
+    @GameTest(maxTicks=20) public void tabletAndDensityGemOpenTheirAuthorizedMenus(GameTestHelper h){
         var p=player(h);for(String name:List.of("transmutation_tablet","gem_of_eternal_density")){
-            use(p,item(name));h.assertTrue(p.containerMenu instanceof TransmutationMenu,"Opens shared conversion interface");var m=(TransmutationMenu)p.containerMenu;
+            use(p,item(name));h.assertTrue(name.equals("transmutation_tablet")?p.containerMenu instanceof TransmutationMenu:p.containerMenu instanceof AlchemyAutomationMenu,"Tablet opens paid conversion; Density opens explicit filters");var m=p.containerMenu;
             h.assertTrue(m.stillValid(p),"Own held instrument grants access");p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);h.assertTrue(!m.stillValid(p),"Cannot use after dropping instrument");p.closeContainer();}
         h.succeed();
     }

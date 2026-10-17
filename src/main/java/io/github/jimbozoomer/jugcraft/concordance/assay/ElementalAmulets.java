@@ -50,9 +50,9 @@ public final class ElementalAmulets {
     }
     private static void ward(ServerPlayer player,Holder<MobEffect> effect,int cost){
         var existing=player.getEffect(effect);
-        if(existing!=null&&(existing.getDuration()>40||existing.getAmplifier()>0)||Assaying.balance(player)<cost)return;
+        if(existing!=null&&(existing.getDuration()>40||existing.getAmplifier()>0)||AlchemyPower.available(player)<cost)return;
         if(player.addEffect(new MobEffectInstance(effect,WARD_TICKS,0,true,false,true)))
-            Assaying.setBalance(player,Assaying.balance(player)-cost);
+            AlchemyPower.pay(player, cost);
     }
     /** Refuse before consuming anything when a stacked bucket has nowhere to put its filled output. */
     public static boolean fillBucket(ServerPlayer player,InteractionHand amuletHand,boolean water){
@@ -62,14 +62,14 @@ public final class ElementalAmulets {
         ItemStack bucket=player.getItemInHand(other);
         if(!bucket.is(Items.BUCKET)||!ItemStack.isSameItemSameComponents(bucket,new ItemStack(Items.BUCKET)))return false;
         int cost=water?WATER_COST:LAVA_COST;
-        if(Assaying.balance(player)<cost)return false;
+        if(AlchemyPower.available(player)<cost)return false;
         int free=-1;
         if(bucket.getCount()>1){
             for(int i=0;i<36;i++)if(player.getInventory().getItem(i).isEmpty()){free=i;break;}
             if(free<0)return false;
         }
         ItemStack filled=new ItemStack(water?Items.WATER_BUCKET:Items.LAVA_BUCKET);
-        Assaying.setBalance(player,Assaying.balance(player)-cost);
+        AlchemyPower.pay(player, cost);
         if(bucket.getCount()==1)player.setItemInHand(other,filled);
         else{bucket.shrink(1);player.getInventory().setItem(free,filled);}
         player.getInventory().setChanged();player.inventoryMenu.broadcastChanges();return true;

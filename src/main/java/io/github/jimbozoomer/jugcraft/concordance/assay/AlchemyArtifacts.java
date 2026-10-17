@@ -85,10 +85,9 @@ public final class AlchemyArtifacts {
         ServerLifecycleEvents.SERVER_STOPPING.register(server->{for(var p:new ArrayList<>(FLIGHT.keySet()))releaseFlight(p);});
     }
     public static boolean pay(ServerPlayer p,int cost) {
-        if(cost<0||!AlchemicalGear.ready(p)||Assaying.balance(p)<cost)return false;
-        Assaying.setBalance(p,Assaying.balance(p)-cost);return true;
+        return AlchemyPower.pay(p,cost);
     }
-    private static void refund(ServerPlayer p,int cost) {Assaying.setBalance(p,Assaying.balance(p)+cost);}
+    private static void refund(ServerPlayer p,int cost) {AlchemyPower.refund(p,cost);}
     public static void sound(ServerPlayer p,String name) {p.level().playSound(null,p.getX(),p.getY(),p.getZ(),SOUNDS.get(name),SoundSource.PLAYERS,.5F,1F);}
     public static int mode(ItemStack stack) {return Math.floorMod(stack.getOrDefault(MODE,0),stack.is(ITEMS.get("swiftwolf_rending_gale"))?3:4);}
     public static void setMode(ItemStack stack,int mode) {
@@ -105,7 +104,7 @@ public final class AlchemyArtifacts {
     }
     private static boolean on(ServerPlayer p,String id){return !equipped(p,id).isEmpty();}
     private static boolean arcana(ServerPlayer p,int mode){var stack=equipped(p,"arcana_ring");return !stack.isEmpty()&&mode(stack)==mode;}
-    private static boolean flightEquipped(ServerPlayer p){var s=equipped(p,"swiftwolf_rending_gale");return !s.isEmpty()&&mode(s)!=1||arcana(p,3);}
+    private static boolean flightEquipped(ServerPlayer p){var s=equipped(p,"swiftwolf_rending_gale");return !s.isEmpty()&&mode(s)!=1||arcana(p,3)||GemAbilities.flight(p);}
     public static void releaseFlight(ServerPlayer p) {
         boolean ours=FLIGHT.remove(p)!=null||Boolean.TRUE.equals(p.getAttached(FLIGHT_LEASE));
         p.removeAttached(FLIGHT_LEASE);
@@ -141,7 +140,7 @@ public final class AlchemyArtifacts {
             if(hit instanceof BlockHitResult b&&hit.getType()==HitResult.Type.BLOCK&&pay(p,128)) {
                 var be=p.level().getBlockEntity(b.getBlockPos());boolean advanced=false;
                 if(be instanceof AlchemicalWorkshopBlockEntity w&&!w.collector()&&p.getUUID().equals(w.owner())&&w.mayUse(p)&&!w.paused()) {
-                    int before=w.essence();w.pulse(p);advanced=w.status()==AlchemicalWorkshopBlockEntity.FORMING||before!=w.essence();
+                    advanced=w.bonusPulse(p);
                 }else advanced=AlchemyMachines.bonusWork(p,b.getBlockPos());
                 if(!advanced)refund(p,128);
             }
@@ -230,6 +229,8 @@ public final class AlchemyArtifacts {
         return switch(normal.getAxis()){case X->origin.offset(0,a,b);case Y->origin.offset(a,0,b);case Z->origin.offset(a,b,0);};
     }
     public static int build(ServerPlayer p,BlockHitResult hit) {
+        var eye=p.getMainHandItem();
+        if(eye.is(ITEMS.get("mercurial_eye"))&&eye.has(AlchemyPatterns.TARGET))return MercurialBuilding.build(p,eye,hit);
         ItemStack materials=p.getOffhandItem();
         if(!(materials.getItem() instanceof BlockItem block)||materials.isEmpty()||!Assaying.eligibility(materials).isEmpty()
                 ||block.getBlock().defaultBlockState().hasBlockEntity()||!AlchemicalGear.ready(p)||p.distanceToSqr(hit.getLocation())>64)return 0;
@@ -307,6 +308,10 @@ public final class AlchemyArtifacts {
                 }return InteractionResult.SUCCESS;
             }
             if(id.equals("archangel_smite")&&!p.isShiftKeyDown()) {shoot(p,false);return InteractionResult.SUCCESS;}
+            if(id.equals("mercurial_eye")){
+                p.openMenu(new SimpleMenuProvider((menuId,inv,who)->new AlchemyPatternMenu(menuId,inv,()->p.getItemInHand(hand)==stack,stack),Component.translatable("screen.jugcraft.pattern.build")));
+                return InteractionResult.SUCCESS;
+            }
             if(!passive(id))return InteractionResult.PASS;
             if(p.isShiftKeyDown()&&(id.equals("arcana_ring")||id.equals("swiftwolf_rending_gale")))setMode(stack,(mode(stack)+1)%(id.equals("arcana_ring")?4:3));
             else {if(stack.has(AlchemicalGear.ACTIVE))stack.remove(AlchemicalGear.ACTIVE);else stack.set(AlchemicalGear.ACTIVE,Unit.INSTANCE);}

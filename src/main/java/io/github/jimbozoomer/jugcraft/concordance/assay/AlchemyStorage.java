@@ -42,6 +42,7 @@ public final class AlchemyStorage {
     private AlchemyStorage() {}
 
     public static void register() {
+        AlchemyPatterns.register(); AlchemyAutomation.register(); GemAbilities.register();
         EXPERIENCE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("mind_experience"),
                 DataComponentType.<Integer>builder().persistent(Codec.intRange(0,XP_CAPACITY)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
         MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("alchemical_storage"), new MenuType<>(AlchemyStorageMenu::new,FeatureFlags.DEFAULT_FLAGS));
@@ -94,7 +95,7 @@ public final class AlchemyStorage {
         // Vanilla resets and restores the exact integer point count, avoiding negative fractional level arithmetic.
         player.experienceLevel=0;player.experienceProgress=0;player.totalExperience=0;
         player.giveExperiencePoints(actual+(withdraw?moved:-moved));
-        stone.set(EXPERIENCE,held+(withdraw?-moved:moved));player.getInventory().setChanged();
+        stone.set(EXPERIENCE,held+(withdraw?-moved:moved));if(storedXp(stone)>0)stone.set(AlchemicalGear.ACTIVE,net.minecraft.util.Unit.INSTANCE);else stone.remove(AlchemicalGear.ACTIVE);player.getInventory().setChanged();
         return moved;
     }
     private static boolean holds(Player p, Item item) { return p.getMainHandItem().is(item)||p.getOffhandItem().is(item); }
@@ -115,13 +116,17 @@ public final class AlchemyStorage {
             switch(name) {
                 case "transmutation_tablet" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new TransmutationMenu(id,inv,()->holds(p,this)),held.getHoverName()));
                 case "alchemy_tome" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyStorageCatalogueMenu(id,inv),held.getHoverName()));
-                case "gem_of_eternal_density" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new TransmutationMenu(id,inv,()->holds(p,this)),held.getHoverName()));
+                case "gem_of_eternal_density" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyAutomationMenu(id,inv,held,hand==InteractionHand.MAIN_HAND?inv.getSelectedSlot():net.minecraft.world.entity.player.Inventory.SLOT_OFFHAND),held.getHoverName()));
                 case "void_ring" -> {
+                    if(p.isShiftKeyDown()) {
+                        p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyAutomationMenu(id,inv,held,hand==InteractionHand.MAIN_HAND?inv.getSelectedSlot():net.minecraft.world.entity.player.Inventory.SLOT_OFFHAND),held.getHoverName()));
+                        return InteractionResult.SUCCESS;
+                    }
                     ItemStack feed=p.getItemInHand(hand==InteractionHand.MAIN_HAND?InteractionHand.OFF_HAND:InteractionHand.MAIN_HAND);
                     if(feed.isEmpty())p.sendOverlayMessage(Component.translatable("message.jugcraft.alchemy_storage.void_help"));
                     else Assaying.use(p,p.level(),feed,ItemStack.EMPTY);
                 }
-                case "mind_stone" -> {int n=transferXp(p,held,p.isShiftKeyDown());p.sendOverlayMessage(Component.translatable("message.jugcraft.alchemy_storage.xp",n,storedXp(held),XP_CAPACITY));}
+                case "mind_stone" -> {if(storedXp(held)>0)held.set(AlchemicalGear.ACTIVE,net.minecraft.util.Unit.INSTANCE);else held.remove(AlchemicalGear.ACTIVE);int n=transferXp(p,held,p.isShiftKeyDown());p.sendOverlayMessage(Component.translatable("message.jugcraft.alchemy_storage.xp",n,storedXp(held),XP_CAPACITY));}
                 default -> {}
             }
             return InteractionResult.SUCCESS;

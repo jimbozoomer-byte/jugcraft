@@ -25,6 +25,8 @@ public final class TransmutationScreen extends AbstractContainerScreen<Transmuta
         super.init();
         dissolve = addRenderableWidget(new ActionButton(leftPos + 24, topPos + 114, 116, ui("dissolve"), b -> press(0)));
         form = addRenderableWidget(new ActionButton(leftPos + 170, topPos + 114, 116, ui("form"), b -> press(1)));
+        addRenderableWidget(new ActionButton(leftPos+10,topPos+157,58,ui("patterns"),b->press(2)));
+        addRenderableWidget(new ActionButton(leftPos+10,topPos+183,58,ui("gem_controls"),b->{if(minecraft.player!=null)minecraft.player.closeContainer();minecraft.gui.setScreen(new GemAbilitiesScreen());}));
         refresh();
     }
     private void press(int id) {

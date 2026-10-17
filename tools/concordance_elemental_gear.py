@@ -61,3 +61,7 @@ def codex():
             ("crafting_recipe", "Volcanite Amulet", "Fills a carried empty bucket with lava for **4,096 essence**. **Sneak-use** enables a ward granting fire resistance while burning or in lava, for **8 essence per second**. Keep a balance before approaching lava; the ward checks once a second and is not a shield against every damage type. Hold or wear in a **Charm** slot. Crafting returns two buckets.", rid("volcanite_amulet")),
             ("text", "Practical Limits", "Wards start **off**, need understood Assay and spend only while the matching danger is present. Multiple copies do not stack. Existing longer or stronger potions are left alone. Filling a bucket never places fluid in the world: use the ordinary bucket afterward, with normal placement and protection rules. No automatic inventory search, chunk scanning, passive essence generation, flying or new spell system is involved."),
         ]}}
+
+# Owner-requested connected behavior supersedes the original manual-only descriptions.
+from concordance_ee_expansion import TOOLTIPS as _connected_tooltips
+TOOLTIPS.update({k:v for k,v in _connected_tooltips.items() if k in TOOLTIPS})

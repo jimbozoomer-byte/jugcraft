@@ -141,6 +141,7 @@ public final class ExtendedAlchemyEquipment {
         if (enabled(player, EquipmentSlot.HEAD, "gem_helmet") && player.isUnderWater()) ward(player, MobEffects.WATER_BREATHING, 4);
         if (enabled(player, EquipmentSlot.CHEST, "gem_chestplate") && (player.isOnFire() || player.isInLava())) ward(player, MobEffects.FIRE_RESISTANCE, 8);
         if (enabled(player, EquipmentSlot.LEGS, "gem_leggings") && player.isSprinting()) ward(player, MobEffects.SPEED, 4);
+        GemAbilities.pulse(player);
         pulseBoots(player);
     }
 
@@ -151,8 +152,8 @@ public final class ExtendedAlchemyEquipment {
 
     private static void ward(ServerPlayer player, Holder<MobEffect> effect, int cost) {
         var previous = player.getEffect(effect);
-        if (previous != null && (previous.getAmplifier() > 0 || previous.getDuration() > 40) || Assaying.balance(player) < cost) return;
-        if (player.addEffect(new MobEffectInstance(effect, 60, 0, true, false, true))) Assaying.setBalance(player, Assaying.balance(player) - cost);
+        if (previous != null && (previous.getAmplifier() > 0 || previous.getDuration() > 40) || AlchemyPower.available(player) < cost) return;
+        if (player.addEffect(new MobEffectInstance(effect, 60, 0, true, false, true))) AlchemyPower.pay(player, cost);
     }
 
     private static class Described extends Item {

@@ -42,6 +42,8 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     private int essence,status,progress,scanCursor;
     private float experience;
     private boolean paused;
+    private long lastBonusSecond=Long.MIN_VALUE;
+    public boolean bonusWork(){if(level==null||lastBonusSecond==level.getGameTime()/20||!readyOwner())return false;lastBonusSecond=level.getGameTime()/20;return furnaceStep();}
     private ItemStack displayedArtifact=ItemStack.EMPTY,lastSentArtifact=ItemStack.EMPTY;
     public AlchemyMachinesBlockEntity(BlockPos pos,BlockState state){super(AlchemyMachines.ENTITY,pos,state);}
     public AlchemyMachines.Kind kind(){return ((AlchemyMachinesBlock)getBlockState().getBlock()).kind;}
@@ -146,16 +148,18 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
         status=worked?WORKING:NO_ESSENCE;setChanged();return worked;
     }
     public void claimExperience(ServerPlayer p){if(!mayUse(p)||!(level instanceof ServerLevel server))return;int whole=(int)experience;if(whole>0){experience-=whole;ExperienceOrb.award(server,p.position(),whole);setChanged();}}
-    public static boolean pedestalArtifact(ItemStack stack){return Set.of("repair_talisman","harvest_goddess_band","body_stone","soul_stone","life_stone","swiftwolf_rending_gale").contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath())&&BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace().equals("jugcraft");}
+    public static boolean pedestalArtifact(ItemStack stack){return Set.of("black_hole_band","archangel_smite","ignition_ring","zero_ring","watch_of_flowing_time","mind_stone","repair_talisman","harvest_goddess_band","body_stone","soul_stone","life_stone","swiftwolf_rending_gale").contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath())&&BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace().equals("jugcraft");}
     private boolean pedestal(ServerPlayer player){
         var artifact=items.get(1);if(!pedestalArtifact(artifact)){status=BAD_ARTIFACT;return false;}
         String id=BuiltInRegistries.ITEM.getKey(artifact.getItem()).getPath();boolean worked=false;
-        if(id.equals("harvest_goddess_band")){
+        if(AlchemyPedestalEffects.EXTRA.contains(id))worked=AlchemyPedestalEffects.run(this,player,id);
+        else if(id.equals("harvest_goddess_band")){
             ServerLevel server=(ServerLevel)level;
             // Persisted rolling cursor: at most49 cells each second, at most4 growths, no full farm scan.
             for(int n=0,changed=0;n<49&&changed<4;n++){
                 int cell=scanCursor;scanCursor=(scanCursor+1)%147;BlockPos pos=worldPosition.offset(cell%7-3,cell/49-1,(cell/7)%7-3);
                 if(essence<16||!server.hasChunkAt(pos))continue;var state=server.getBlockState(pos);
+                if(AlchemyPedestalEffects.harvest(this,player,pos,state)){worked=true;changed++;continue;}
                 if(state.getBlock() instanceof CropBlock crop&&!crop.isMaxAge(state)&&state.canSurvive(server,pos)&&Authority.mayChange(server,player,pos)){
                     if(crop instanceof io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock organism){
                         if(!Authority.mayChange(server,player,pos.below())||organism.hasten(server,pos,state,server.getRandom())!=io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock.Growth.GREW)continue;

@@ -82,7 +82,7 @@ public class CompleteAlchemyClientGameTests implements FabricClientGameTest {
                 var pedestal=machine(p,base.offset(8,0,-8),"dark_matter_pedestal");pedestal.setItem(1,new ItemStack(AlchemyArtifacts.ITEMS.get("life_stone")));
                 machine(p,base.offset(12,0,-8),"interdiction_torch");
                 sign(p,base.offset(8,0,-6),"PEDESTAL / WARD","Life Stone is kept","Party support","Nearby monster ward");
-                p.level().setBlockAndUpdate(base.offset(-8,0,0),AlchemyStorage.BLOCKS.get("alchemical_chest").defaultBlockState());
+                p.level().setBlockAndUpdate(base.offset(-8,0,0),AlchemyStorage.BLOCKS.get("alchemical_chest").defaultBlockState().setValue(AlchemyStorageBlock.FACING,Direction.SOUTH));
                 var chest=(AlchemyStorageBlockEntity)p.level().getBlockEntity(base.offset(-8,0,0));chest.placedBy(p);OWNED.add(base.offset(-8,0,0));chest.setItem(0,new ItemStack(Items.COAL,64));
                 p.level().setBlockAndUpdate(base.offset(-4,0,0),AlchemyStorage.BLOCKS.get("transmutation_table").defaultBlockState());
                 sign(p,base.offset(-8,0,2),"ALCHEMICAL CHEST","54 physical slots","Party access","Mine -> contents drop");
@@ -92,6 +92,11 @@ public class CompleteAlchemyClientGameTests implements FabricClientGameTest {
                 var collector=(AlchemicalWorkshopBlockEntity)p.level().getBlockEntity(base.offset(3,0,1));collector.placedBy(p);OWNED.add(base.offset(3,0,1));
                 machine(p,base.offset(4,0,1),"relay_mk3");var connected=machine(p,base.offset(4,0,2),"red_matter_furnace");connected.setEssence(0);connected.setItem(1,new ItemStack(Items.RAW_GOLD,64));
                 sign(p,base.offset(7,0,2),"CONNECTED LINE","Collector -> relay","Relay -> furnace","Gold in output slots");
+                for(int tier=1;tier<=2;tier++){
+                    var at=base.offset(6+4*tier,0,6);p.level().setBlockAndUpdate(at,AlchemicalWorkshops.BLOCKS.get("condenser_mk"+tier).defaultBlockState().setValue(AlchemicalWorkshopBlock.FACING,Direction.SOUTH));
+                    var be=(AlchemicalWorkshopBlockEntity)p.level().getBlockEntity(at);be.placedBy(p);be.setEssence(8000);be.setItem(1,new ItemStack(Items.IRON_INGOT));OWNED.add(at);
+                    sign(p,at.south(2),"CONDENSER MK "+tier,"Sample -> copies","Uses stored essence","Animated owner art");
+                }
                 var equipment=new ArrayList<>(ExtendedAlchemyEquipment.ITEMS.values());
                 supplies(p,base.offset(-15,0,10),equipment.subList(0,27),"EQUIPMENT / I");supplies(p,base.offset(-10,0,10),equipment.subList(27,equipment.size()),"EQUIPMENT / II");
                 supplies(p,base.offset(-5,0,10),new ArrayList<>(AlchemyStorage.ITEMS.values()),"BAGS / TABLETS");
@@ -169,6 +174,11 @@ public class CompleteAlchemyClientGameTests implements FabricClientGameTest {
                 Item[] hotbar={AlchemyStorage.ITEMS.get("transmutation_tablet"),AlchemyStorage.ITEMS.get("alchemy_manual"),AlchemyStorage.ITEMS.get("alchemy_tome"),AlchemyArtifacts.ITEMS.get("swiftwolf_rending_gale"),ExtendedAlchemyEquipment.ITEMS.get("red_matter_morning_star"),AlchemyArtifacts.ITEMS.get("harvest_goddess_band"),AlchemyStorage.ITEMS.get("purple_alchemical_bag"),KleinStars.ITEMS.get("klein_star_6"),Items.COOKED_BEEF};
                 for(int i=0;i<hotbar.length;i++)p.getInventory().setItem(i,new ItemStack(hotbar[i],i==8?64:1));
                 Assaying.setBalance(p,500000);p.getFoodData().setFoodLevel(20);p.setHealth(p.getMaxHealth());p.getInventory().setChanged();p.inventoryMenu.broadcastChanges();
+            });
+            ConnectedAlchemyClientChecks.run(c,server,base);
+            server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();
+                Item[] hotbar={AlchemyStorage.ITEMS.get("transmutation_tablet"),AlchemicalGear.STONE,AlchemyArtifacts.ITEMS.get("mercurial_eye"),AlchemyStorage.ITEMS.get("gem_of_eternal_density"),AlchemyStorage.ITEMS.get("void_ring"),AlchemyStorage.ITEMS.get("alchemy_manual"),AlchemyStorage.ITEMS.get("purple_alchemical_bag"),KleinStars.ITEMS.get("klein_star_6"),Items.COOKED_BEEF};
+                for(int i=0;i<hotbar.length;i++)p.getInventory().setItem(i,new ItemStack(hotbar[i],i==8?64:1));KleinStars.setStored(p.getInventory().getItem(7),500000);Assaying.setBalance(p,500000);p.inventoryMenu.broadcastChanges();
             });
             bindPack(world.getWorldSave().getSaveDirectory());
             server.runCommand("data remove block %d %d %d owner".formatted(x,y,z-8));server.runCommand("reload");

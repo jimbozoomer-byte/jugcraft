@@ -69,3 +69,7 @@ def codex():
             ("text","Upgrade and Recover","Mine a workshop to carry its essence **on the dropped block**; its sample, inputs, outputs and star drop separately. At a **smithing table**, combine the current block with **High Covalence Dust** in the template slot and **Dark Matter** in the addition slot to upgrade one tier. Stored essence and custom names survive. **Take essence** withdraws to your personal ledger with its normal **1,000,000** cap. Nothing is transmuted into a workshop or a charged star."),
             ("text","Loaded Workshops Only","The owner must be **online, alive, in the same dimension and understand Assay**. Work checks protection and the equivalence audit every pulse. Unloaded chunks never run and time away never catches up. Paused or disabled systems retain contents. Collector transfer caps are **64 / 256 / 1,024 essence per second** total; condenser star draw caps **4,096 / 32,768**. No cables, remote networks or chunk loading are required."),
         ]}}
+
+# Owner-requested connected behavior supersedes the original manual-only descriptions.
+from concordance_ee_expansion import TOOLTIPS as _connected_tooltips
+TOOLTIPS.update({k:v for k,v in _connected_tooltips.items() if k in TOOLTIPS})

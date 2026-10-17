@@ -91,13 +91,13 @@ public final class ExtendedMatterTool extends Item {
             ItemStack stack = context.getItemInHand();
             BlockPos origin = context.getClickedPos();
             for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
-                if (dx == 0 && dz == 0 || stack.isEmpty() || player.getMainHandItem() != stack || Assaying.balance(player) < cost()) continue;
+                if (dx == 0 && dz == 0 || stack.isEmpty() || player.getMainHandItem() != stack || AlchemyPower.available(player) < cost()) continue;
                 BlockPos at = origin.offset(dx, 0, dz);
                 if (!player.level().hasChunkAt(at) || !Authority.mayChange(player.level(), player, at)
                         || player.distanceToSqr(Vec3.atCenterOf(at)) > 64) continue;
-                Assaying.setBalance(player, Assaying.balance(player) - cost());
+                AlchemyPower.pay(player, cost());
                 var next = new UseOnContext(player, context.getHand(), new BlockHitResult(Vec3.atCenterOf(at).add(0, .5, 0), Direction.UP, at, false));
-                if (!Items.NETHERITE_HOE.useOn(next).consumesAction()) Assaying.setBalance(player, Assaying.balance(player) + cost());
+                if (!Items.NETHERITE_HOE.useOn(next).consumesAction()) AlchemyPower.refund(player, cost());
             }
         }
         return result;
@@ -107,7 +107,7 @@ public final class ExtendedMatterTool extends Item {
         boolean result = super.mineBlock(stack, level, state, pos, miner);
         if (level instanceof ServerLevel server && miner instanceof ServerPlayer player && mode(stack) > 0
                 && !stack.isEmpty() && player.getMainHandItem() == stack && !player.isShiftKeyDown() && player.mayBuild()
-                && !player.getAbilities().instabuild && AlchemicalGear.ready(player) && Assaying.balance(player) >= cost()
+                && !player.getAbilities().instabuild && AlchemicalGear.ready(player) && AlchemyPower.available(player) >= cost()
                 && player.distanceToSqr(Vec3.atCenterOf(pos)) <= 64 && state.getDestroySpeed(level, pos) > 0
                 && matches(state) && EXPANDING.add(player.getUUID())) {
             try { expand(stack, server, state, pos, player); } finally { EXPANDING.remove(player.getUUID()); }
@@ -143,7 +143,7 @@ public final class ExtendedMatterTool extends Item {
                 || selected.equals("shear") && original.is(BlockTags.LEAVES)) {
             ArrayDeque<BlockPos> queue = new ArrayDeque<>(); Set<BlockPos> seen = new HashSet<>();
             queue.add(origin); seen.add(origin); int broken = 0, limit = selected.equals("fell") ? 24 : red ? 16 : 8;
-            while (!queue.isEmpty() && seen.size() < 192 && broken < limit && Assaying.balance(player) >= cost()) {
+            while (!queue.isEmpty() && seen.size() < 192 && broken < limit && AlchemyPower.available(player) >= cost()) {
                 BlockPos from = queue.removeFirst();
                 for (Direction direction2 : Direction.values()) {
                     BlockPos at = from.relative(direction2);
@@ -159,15 +159,15 @@ public final class ExtendedMatterTool extends Item {
     }
 
     private boolean breakExtra(ItemStack stack, ServerLevel level, BlockPos pos, ServerPlayer player, float hardness) {
-        if (stack.isEmpty() || player.getMainHandItem() != stack || Assaying.balance(player) < cost() || !level.hasChunkAt(pos)
+        if (stack.isEmpty() || player.getMainHandItem() != stack || AlchemyPower.available(player) < cost() || !level.hasChunkAt(pos)
                 || !level.isInWorldBounds(pos)) return false;
         BlockState state = level.getBlockState(pos);
         if (state.isAir() || state.hasBlockEntity() || !state.getFluidState().isEmpty() || !matches(state)
                 || state.getDestroySpeed(level, pos) < 0 || state.getDestroySpeed(level, pos) > hardness + .001F
                 || !isCorrectToolForDrops(stack, state) || !Authority.mayChange(level, player, pos)) return false;
-        Assaying.setBalance(player, Assaying.balance(player) - cost());
+        AlchemyPower.pay(player, cost());
         boolean broken = player.gameMode.destroyBlock(pos);
-        if (!broken) Assaying.setBalance(player, Assaying.balance(player) + cost());
+        if (!broken) AlchemyPower.refund(player, cost());
         return broken;
     }
 
@@ -178,10 +178,10 @@ public final class ExtendedMatterTool extends Item {
         if (selected(stack).equals("shear") && !player.isShiftKeyDown() && AlchemicalGear.ready(player)) {
             int count = 0;
             for (Sheep other : player.level().getEntitiesOfClass(Sheep.class, sheep.getBoundingBox().inflate(3))) {
-                if (count >= 6 || stack.isEmpty() || Assaying.balance(player) < cost()) break;
+                if (count >= 6 || stack.isEmpty() || AlchemyPower.available(player) < cost()) break;
                 if (other == sheep || !other.readyForShearing() || player.distanceToSqr(other) > 36) continue;
-                Assaying.setBalance(player, Assaying.balance(player) - cost());
-                if (shear(player, other, stack, hand)) count++; else Assaying.setBalance(player, Assaying.balance(player) + cost());
+                AlchemyPower.pay(player, cost());
+                if (shear(player, other, stack, hand)) count++; else AlchemyPower.refund(player, cost());
             }
         }
         return InteractionResult.SUCCESS;
@@ -210,12 +210,12 @@ public final class ExtendedMatterTool extends Item {
         var cause = Cause.of(player.getUUID(), Cause.Origin.ITEM, "jugcraft:alchemical_sweep", ConcordanceEffects.nextSerial());
         var ledger = new Ledger(new Ledger.Limits(4, 4 * EffectKind.DAMAGE.work, 0));
         for (LivingEntity victim : player.level().getEntitiesOfClass(LivingEntity.class, original.getBoundingBox().inflate(2), e -> e instanceof Enemy && e != original && e.isAlive())) {
-            if (hits >= 4 || Assaying.balance(player) < cost()) break;
+            if (hits >= 4 || AlchemyPower.available(player) < cost()) break;
             if (player.distanceToSqr(victim) > 36 || !player.hasLineOfSight(victim)) continue;
             var context = new ConcordanceEffects.Context(player.level(), cause, player, ledger, "cleave", player.position());
-            Assaying.setBalance(player, Assaying.balance(player) - cost());
+            AlchemyPower.pay(player, cost());
             if (ConcordanceEffects.apply(context, EffectSpec.of(EffectKind.DAMAGE, Intent.HARMFUL, red ? 4 : 2, 0), victim).applied()) hits++;
-            else Assaying.setBalance(player, Assaying.balance(player) + cost());
+            else AlchemyPower.refund(player, cost());
         }
         return hits;
     }

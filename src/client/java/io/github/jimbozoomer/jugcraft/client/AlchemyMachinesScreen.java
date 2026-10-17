@@ -32,8 +32,12 @@ public final class AlchemyMachinesScreen extends AbstractContainerScreen<Alchemy
         if(menu.capacity()>0)g.fill(x+24,y+40,x+24+(int)(300L*menu.essence()/menu.capacity()),y+44,0xFF79CECC);
         if(menu.kind()==AlchemyMachines.Kind.FURNACE){g.fill(x+185,y+76,x+225,y+79,0xFF596571);int advance=ConcordanceClientOptions.reducedMotion()?17:(int)(minecraft.level.getGameTime()%30)*34/30;if(menu.status()==7)g.fill(x+186+advance,y+75,x+191+advance,y+80,0xFFEFAD6B);}
         else if(menu.kind()==AlchemyMachines.Kind.RELAY){double phase=ConcordanceClientOptions.reducedMotion()?0:(minecraft.level.getGameTime()+delta)*.035;for(int i=0;i<4;i++)BookArt.star(g,x+259+(int)(Math.cos(phase+i*Math.PI/2)*23),y+79+(int)(Math.sin(phase+i*Math.PI/2)*16),2,menu.status()==7?0xFF9CE2DA:0xFF6E788E);}
+        if(menu.kind()==AlchemyMachines.Kind.FURNACE)OwnerAlchemyArt.crop(g,menu.tier()==1?"dmfurnace":"rmfurnace",x+187,y+65,menu.tier()==1?72:88,32,24,20);
+        if(menu.kind()==AlchemyMachines.Kind.RELAY)OwnerAlchemyArt.crop(g,"relay"+menu.tier(),x+244,y+65,menu.tier()==1?120:menu.tier()==2?137:157,menu.tier()==3?52:38,29,28);
         g.fill(x+89,y+151,x+259,y+232,0xFF22232B);
-        for(var slot:menu.slots){if(!slot.isActive())continue;int sx=x+slot.x,sy=y+slot.y;if(slot.index==0)g.fill(sx-3,sy-3,sx+19,sy+19,0xFFAB9BCA);g.fill(sx-1,sy-1,sx+17,sy+17,0xFF131822);g.fill(sx,sy,sx+16,sy+16,0xFF525761);g.fill(sx,sy+16,sx+17,sy+17,0xFFB5BDCB);}
+        for(var slot:menu.slots){if(!slot.isActive())continue;int sx=x+slot.x,sy=y+slot.y;if(slot.index==0)g.fill(sx-3,sy-3,sx+19,sy+19,0xFFAB9BCA);g.fill(sx-1,sy-1,sx+17,sy+17,0xFF131822);g.fill(sx,sy,sx+16,sy+16,0xFF525761);g.fill(sx,sy+16,sx+17,sy+17,0xFFB5BDCB);
+            if(menu.kind()==AlchemyMachines.Kind.FURNACE)OwnerAlchemyArt.slot(g,menu.tier()==1?"dmfurnace":"rmfurnace",sx,sy,menu.tier()==1?12:10,7);
+            else if(menu.kind()==AlchemyMachines.Kind.RELAY)OwnerAlchemyArt.slot(g,"relay"+menu.tier(),sx,sy,26,16);}
     }
     private void line(GuiGraphicsExtractor g,Component text,int x,int y,int width,int color){g.text(font,BookArt.fit(font,text.getString(),width),x,y,color,false);}
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mx,int my){

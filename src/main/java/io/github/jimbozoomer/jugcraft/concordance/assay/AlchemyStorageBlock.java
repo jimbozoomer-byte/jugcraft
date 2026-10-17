@@ -18,18 +18,21 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.*;
 import org.jspecify.annotations.Nullable;
 
-/** Physical chest and low stone transmutation slab. No background ticks or remote inventory access. */
+/** Physical chest and low stone transmutation slab. Chest automation remains bounded; no remote inventory access. */
 public final class AlchemyStorageBlock extends BaseEntityBlock {
     public static final EnumProperty<Direction> FACING=BlockStateProperties.HORIZONTAL_FACING;
     private final boolean chest;
-    public AlchemyStorageBlock(Properties properties,boolean chest){super(properties);this.chest=chest;registerDefaultState(stateDefinition.any().setValue(FACING,Direction.NORTH));}
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(FACING);}
+    public AlchemyStorageBlock(Properties properties,boolean chest){super(properties);this.chest=chest;registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.OPEN,false).setValue(FACING,Direction.NORTH));}
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(FACING,BlockStateProperties.OPEN);}
     @Override public BlockState getStateForPlacement(BlockPlaceContext ctx){return defaultBlockState().setValue(FACING,ctx.getHorizontalDirection().getOpposite());}
     @Override protected BlockState rotate(BlockState state,Rotation rot){return state.setValue(FACING,rot.rotate(state.getValue(FACING)));}
     @Override protected BlockState mirror(BlockState state,Mirror mirror){return rotate(state,mirror.getRotation(state.getValue(FACING)));}
-    @Override protected RenderShape getRenderShape(BlockState state){return RenderShape.MODEL;}
+    @Override protected RenderShape getRenderShape(BlockState state){return chest?RenderShape.INVISIBLE:RenderShape.MODEL;}
     @Override protected VoxelShape getShape(BlockState state,BlockGetter level,BlockPos pos,CollisionContext context){return chest?Block.box(1,0,1,15,15,15):Block.box(0,0,0,16,4,16);}
     @Override public @Nullable BlockEntity newBlockEntity(BlockPos pos,BlockState state){return chest?new AlchemyStorageBlockEntity(pos,state):null;}
+    @Override public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level,BlockState state,net.minecraft.world.level.block.entity.BlockEntityType<T> type){
+        return chest?createTickerHelper(type,AlchemyStorage.ENTITY,AlchemyStorageBlockEntity::tick):null;
+    }
     @Override public void setPlacedBy(Level level,BlockPos pos,BlockState state,@Nullable LivingEntity by,ItemStack stack){
         super.setPlacedBy(level,pos,state,by,stack);if(by instanceof ServerPlayer player&&level.getBlockEntity(pos) instanceof AlchemyStorageBlockEntity be)be.placedBy(player);
     }

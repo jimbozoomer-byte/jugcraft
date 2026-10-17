@@ -109,6 +109,7 @@ KEY_HELP = {
     "concordance_composer": "Opens the Spell Composer straight away (not bound at first)",
     "concordance_config": "Opens the Concordance's settings on this computer (not bound at first)",
     "party": "Opens the Party screen",
+    "gem_abilities": "Opens worn Gem armor abilities (not bound at first)",
     "reload": "Reloads the gun in your hand",
     "inspect": "Inspects the gun in your hand",
     "stab": "Stabs with the bayonet on your gun",

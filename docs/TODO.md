@@ -19,6 +19,9 @@
 - [x] Local implementation of all remaining alchemy content: 82 entries across equipment, relays/furnaces/pedestals/wards/Nova charges, bags/chest/tablets/books/XP storage, mobility/combat/farming/support rings and mining/building artifacts. Existing 26 entries remain integrated.
 - [x] Complete the requested combined validation phase after all 82 entries are integrated: 1,886 server tests, 67 Python tests, full data/art audits and the rendered client check passed. Final layout changes were rebuilt and client-tested. See [complete alchemy](features/complete-alchemy.md).
 - [ ] Owner-controlled playtest of Complete Alchemy, including survival costs, UI clarity, flight, farming and connected workshop throughput, before pushing to main.
+- [x] Local connected alchemy: learned patterns/favorites/search, Stone terrain/crafting, filtered converters and storage artifacts, expanded pedestals, collector fuel tiers, carried-star power, Gem controls, learned Eye building, remaining UI/state art and animated chest lids. See [connected alchemy](features/connected-alchemy.md).
+- [x] Connected Alchemy automated validation: all 1,909 server tests, 67 Python tests, full data/art audit and real rendered interface checks passed locally.
+- [ ] Owner-controlled playtest of Connected Alchemy before pushing; independent multiplayer and load testing remain pending.
 - Scope and evidence: [alchemical gear](features/alchemical-gear.md).
 
 ## Spellcraft and encyclopedia UI — 16 October 2026

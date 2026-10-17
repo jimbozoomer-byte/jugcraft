@@ -15,10 +15,10 @@ public final class AlchemicalWorkshopMenu extends AbstractContainerMenu {
     private final Player owner;
     private final Container contents;
     private final @Nullable AlchemicalWorkshopBlockEntity workshop;
-    private final SimpleContainerData data = new SimpleContainerData(14);
+    private final SimpleContainerData data = new SimpleContainerData(15);
 
     public AlchemicalWorkshopMenu(int id, Inventory inventory, boolean collector) {
-        this(id, inventory, collector, new SimpleContainer(collector ? 1 : 11), null);
+        this(id, inventory, collector, new SimpleContainer(11), null);
     }
     public AlchemicalWorkshopMenu(int id, Inventory inventory, AlchemicalWorkshopBlockEntity workshop) {
         this(id, inventory, workshop.collector(), workshop, workshop);
@@ -30,8 +30,9 @@ public final class AlchemicalWorkshopMenu extends AbstractContainerMenu {
             @Override public boolean mayPlace(ItemStack stack) { return KleinStars.capacity(stack) > 0; }
             @Override public int getMaxStackSize() { return 1; }
         });
-        if (!collector) {
+        {
             addSlot(new Slot(contents, 1, 142, 67) {
+                @Override public boolean isActive(){return !collector;}
                 // Dedicated clients have no server datapack catalogue. Let their prediction proceed;
                 // the real server container remains the only item validator.
                 @Override public boolean mayPlace(ItemStack stack) { return workshop == null || contents.canPlaceItem(1, stack); }
@@ -44,6 +45,7 @@ public final class AlchemicalWorkshopMenu extends AbstractContainerMenu {
                 @Override public boolean mayPlace(ItemStack stack) { return false; }
             });
         }
+        if(workshop!=null&&owner instanceof ServerPlayer)workshop.viewers++;
         addStandardInventorySlots(inventory, 93, 154); addDataSlots(data); refresh();
     }
     private void put(int offset, long value) { data.set(offset, (int)value & 65535); data.set(offset+1, (int)(value >>> 16)); }
@@ -52,6 +54,7 @@ public final class AlchemicalWorkshopMenu extends AbstractContainerMenu {
     public long capacity() { return number(2); }
     public long cost() { return number(4); }
     public long wallet() { return number(6); }
+    public int fuelTarget(){return data.get(14);}
     public int tier() { return data.get(8); }
     public int status() { return data.get(9); }
     public boolean paused() { return data.get(10) != 0; }
@@ -61,15 +64,16 @@ public final class AlchemicalWorkshopMenu extends AbstractContainerMenu {
     private void refresh() {
         if (workshop == null || !(owner instanceof ServerPlayer server)) return;
         put(0, workshop.essence()); put(2, workshop.capacity()); put(4, collector ? 0 : workshop.cost()); put(6, Assaying.balance(owner));
-        data.set(8, workshop.tier()); data.set(9, workshop.status()); data.set(10, workshop.paused() ? 1 : 0);
+        data.set(14,workshop.fuelTarget());data.set(8, workshop.tier()); data.set(9, workshop.status()); data.set(10, workshop.paused() ? 1 : 0);
         data.set(11, workshop.rate()); data.set(12, workshop.sunlight()); data.set(13, stillValid(server) && AlchemicalGear.ready(server) ? 1 : 0);
     }
     @Override public void broadcastChanges() { refresh(); super.broadcastChanges(); }
     @Override public boolean stillValid(Player player) { return player == owner && (workshop == null ? !(player instanceof ServerPlayer) : workshop.stillValid(player)); }
     @Override public boolean clickMenuButton(Player player, int id) {
-        if (player != owner || !(player instanceof ServerPlayer server) || workshop == null || id < 0 || id > 2
+        if (player != owner || !(player instanceof ServerPlayer server) || workshop == null || id < 0 || id > 3
                 || !stillValid(server) || !AlchemicalGear.ready(server) || !RateGate.allow(server, "alchemy_workshop", 4)) return false;
-        if (id == 0) workshop.setPaused(!workshop.paused());
+        if(id==3){if(!collector)return false;workshop.setFuelTarget((workshop.fuelTarget()+1)%4);}
+        else if (id == 0) workshop.setPaused(!workshop.paused());
         else if (id == 1) {
             int moved = (int)Math.min(Assaying.balance(player), workshop.capacity() - workshop.essence());
             Assaying.setBalance(player, Assaying.balance(player) - moved); workshop.setEssence(workshop.essence() + moved);
@@ -79,14 +83,15 @@ public final class AlchemicalWorkshopMenu extends AbstractContainerMenu {
         }
         broadcastChanges(); return true;
     }
+    @Override public void removed(Player player){if(workshop!=null&&player instanceof ServerPlayer)workshop.viewers=Math.max(0,workshop.viewers-1);super.removed(player);}
     @Override public ItemStack quickMoveStack(Player player, int index) {
         if (!stillValid(player) || index < 0 || index >= slots.size()) return ItemStack.EMPTY;
         Slot slot = slots.get(index); if (!slot.hasItem()) return ItemStack.EMPTY;
-        int end = collector ? 1 : 11;
+        int end = 11;
         ItemStack stack = slot.getItem(), copy = stack.copy();
         if (index < end) { if (!moveItemStackTo(stack, end, slots.size(), true)) return ItemStack.EMPTY; }
         else if (KleinStars.capacity(stack) > 0) { if (!moveItemStackTo(stack, 0, 1, false)) return ItemStack.EMPTY; }
-        else if (collector || !moveItemStackTo(stack, 2, 5, false)) return ItemStack.EMPTY;
+        else if (!moveItemStackTo(stack, 2, 5, false)) return ItemStack.EMPTY;
         if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY); else slot.setChanged();
         slot.onTake(player, stack); return copy;
     }

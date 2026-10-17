@@ -39,7 +39,7 @@ public final class AlchemyStorageMenu extends AbstractContainerMenu {
         });
         for(int row=0;row<3;row++)for(int col=0;col<9;col++)inventorySlot(inv,9+row*9+col,27+col*18,148+row*18);
         for(int col=0;col<9;col++)inventorySlot(inv,col,27+col*18,206);
-        loading=false;addDataSlots(data);
+        loading=false;if(chest!=null&&owner instanceof ServerPlayer)chest.viewers++;addDataSlots(data);
     }
     private void inventorySlot(Inventory inv,int index,int x,int y){addSlot(new Slot(inv,index,x,y){
         @Override public boolean mayPickup(Player player){return index!=lockedSlot()&&stillValid(player);}
@@ -70,5 +70,5 @@ public final class AlchemyStorageMenu extends AbstractContainerMenu {
         else if(!AlchemyStorage.canStore(stack)||!moveItemStackTo(stack,0,SIZE,false))return ItemStack.EMPTY;
         if(stack.isEmpty())slot.setByPlayer(ItemStack.EMPTY);else slot.setChanged();slot.onTake(player,stack);saveBag();return copy;
     }
-    @Override public void removed(Player player){saveBag();super.removed(player);}
+    @Override public void removed(Player player){saveBag();if(chest!=null&&player instanceof ServerPlayer)chest.viewers=Math.max(0,chest.viewers-1);super.removed(player);}
 }

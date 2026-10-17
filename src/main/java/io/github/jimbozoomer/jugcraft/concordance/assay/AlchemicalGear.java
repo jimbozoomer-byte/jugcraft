@@ -94,9 +94,9 @@ public final class AlchemicalGear {
     /** Once per player, not once per duplicate item. No scans when disabled, unequipped or out of fuel. */
     public static void pulse(ServerPlayer player) {
         boolean repair = active(player, TALISMAN), gather = active(player, BAND);
-        if ((!repair && !gather) || !ready(player) || Assaying.balance(player) == 0) return;
+        if ((!repair && !gather) || !ready(player) || AlchemyPower.available(player) == 0) return;
         if (repair) repair(player);
-        if (gather && Assaying.balance(player) > 0) gather(player);
+        if (gather && AlchemyPower.available(player) > 0) gather(player);
     }
 
     private static void repair(ServerPlayer player) {
@@ -105,10 +105,10 @@ public final class AlchemicalGear {
             ItemStack stack = player.getItemBySlot(slot);
             if (!stack.isDamageableItem() || !stack.isDamaged() || !stack.has(DataComponents.REPAIRABLE)
                     || stack.has(DataComponents.UNBREAKABLE)) continue;
-            int points = (int) Math.min(Math.min(REPAIR, stack.getDamageValue()), Assaying.balance(player));
+            int points = (int) Math.min(Math.min(REPAIR, stack.getDamageValue()), AlchemyPower.available(player));
             if (points <= 0) return;
             stack.setDamageValue(stack.getDamageValue() - points);
-            Assaying.setBalance(player, Assaying.balance(player) - points);
+            AlchemyPower.pay(player, points);
             player.getInventory().setChanged();
             return;
         }
@@ -130,7 +130,7 @@ public final class AlchemicalGear {
                 item -> true, drops, SCAN_LIMIT);
         int moved = 0;
         for (ItemEntity drop : drops) {
-            if (moved >= TARGETS || Assaying.balance(player) == 0) break;
+            if (moved >= TARGETS || AlchemyPower.available(player) == 0) break;
             UUID target = ((AlchemicalItemAccess) drop).jugcraft$pickupTarget();
             if (!drop.isAlive() || drop.hasPickUpDelay() || drop.distanceToSqr(player) > RADIUS * RADIUS
                     || target != null && !target.equals(player.getUUID())
@@ -141,7 +141,7 @@ public final class AlchemicalGear {
                     player.getEyePosition(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() != HitResult.Type.MISS) continue;
             drop.setDeltaMovement(toward.normalize().scale(0.55));
             drop.syncVelocity = true;
-            Assaying.setBalance(player, Assaying.balance(player) - 1);
+            AlchemyPower.pay(player, 1);
             moved++;
         }
     }
@@ -157,19 +157,30 @@ public final class AlchemicalGear {
                             : !Assaying.knows(server) ? "message.jugcraft.concordance.assay.unknown" : "compose.jugcraft.assay.reason.unbalanced"));
                     return InteractionResult.FAIL;
                 }
-                if (this == STONE) server.openMenu(new SimpleMenuProvider((id, inv, p) -> new TransmutationMenu(id, inv),
-                        Component.translatable("screen.jugcraft.alchemy.title")));
+                if (this == STONE) {
+                    if(server.isShiftKeyDown()) PhilosopherTransforms.crafting(server);
+                    else server.openMenu(new SimpleMenuProvider((id, inv, p) -> new TransmutationMenu(id, inv), Component.translatable("screen.jugcraft.alchemy.title")));
+                }
                 else {
                     ItemStack stack = player.getItemInHand(hand);
                     boolean on = !stack.has(ACTIVE);
                     if (on) stack.set(ACTIVE, Unit.INSTANCE); else stack.remove(ACTIVE);
                     server.sendOverlayMessage(Component.translatable("message.jugcraft.alchemy.toggle", stack.getHoverName(),
-                            Component.translatable("screen.jugcraft.alchemy." + (on ? "on" : "off")), Assaying.balance(player)));
+                            Component.translatable("screen.jugcraft.alchemy." + (on ? "on" : "off")), AlchemyPower.available(player)));
                 }
             }
             return InteractionResult.SUCCESS;
         }
 
+        @Override public InteractionResult useOn(net.minecraft.world.item.context.UseOnContext c) {
+            if(this!=STONE||!(c.getPlayer() instanceof ServerPlayer p))return InteractionResult.PASS;
+            if(!ready(p)||!RateGate.allow(p,"stone_transform",6))return InteractionResult.FAIL;
+            if(p.isShiftKeyDown()){
+                int charge=(AlchemyArtifacts.mode(c.getItemInHand())+1)%3;AlchemyArtifacts.setMode(c.getItemInHand(),charge);
+                p.sendOverlayMessage(Component.translatable("message.jugcraft.stone.charge",charge*2+1,charge*2+1));
+            }else PhilosopherTransforms.transform(p,c.getItemInHand(),c.getClickedPos(),c.getClickedFace());
+            return InteractionResult.SUCCESS;
+        }
         @Override public boolean canEquip(ItemStack stack, TrinketSlotAccess slot, LivingEntity entity) {
             return entity instanceof Player player && Assaying.knows(player) && this != STONE;
         }

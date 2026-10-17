@@ -85,6 +85,10 @@ def codex():
  groups=[('artifact_rings','Rings and Living Stones',list(SPECS)[:10],10,2),('artifact_tools','Divining and Shaping',list(SPECS)[10:],12,2)]
  for key,title,names,x,y in groups:
   entries['equivalence',key]={'name':title,'x':x,'y':y,'icon':rid(names[0]),'condition':None,'description':'Paid alchemical equipment, no spell composer required','pages':
-   [('text','Shared Controls','Understand **Assay**. Passive artifacts work only while held or worn in the matching Ring/Charm slot, with enough personal **essence**. Merely carrying one does nothing. Use toggles activation; Arcana/Swiftwolf sneak-use changes mode. All areas and entity counts are bounded, claims and friendly-fire checks apply. Stars must be withdrawn into your ledger first.')] +
+   [('text','Shared Controls','Understand **Assay**. Passive artifacts work only while held or worn in the matching Ring/Charm slot, with enough personal **essence**. Merely carrying one does nothing. Use toggles activation; Arcana/Swiftwolf sneak-use changes mode. All areas and entity counts are bounded, claims and friendly-fire checks apply. Equipment uses the wallet first, then carried Klein Stars. Active artifacts can also have bag/chest or pedestal behavior described in Connected Alchemy.')] +
    [('crafting_recipe',SPECS[n][0],TOOLTIPS[n],rid(n)) for n in names]}
  return entries
+
+# Owner-requested connected behavior supersedes the original manual-only descriptions.
+from concordance_ee_expansion import TOOLTIPS as _connected_tooltips
+TOOLTIPS.update({k:v for k,v in _connected_tooltips.items() if k in TOOLTIPS})

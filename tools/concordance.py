@@ -482,7 +482,8 @@ import concordance_ee_equipment as ee_equipment
 import concordance_ee_machines as ee_machines
 import concordance_ee_storage as ee_storage
 import concordance_ee_artifacts as ee_artifacts
-EE_MODULES = (ee_equipment, ee_machines, ee_storage, ee_artifacts)
+import concordance_ee_expansion as ee_expansion
+EE_MODULES = (ee_equipment, ee_machines, ee_storage, ee_artifacts, ee_expansion)
 for _module in EE_MODULES:
     ITEMS.update({name: {**info, "tooltip": _module.TOOLTIPS[name]}
                   for name, info in getattr(_module, "ITEMS", {}).items()})
@@ -1031,7 +1032,7 @@ def codex():
         **trinkets.codex(),
         **alchemical_gear.codex(),
         **dark_matter.codex(),
-        **ee_equipment.codex(), **ee_machines.codex(), **ee_storage.codex(), **ee_artifacts.codex(),
+        **ee_equipment.codex(), **ee_machines.codex(), **ee_storage.codex(), **ee_artifacts.codex(), **ee_expansion.codex(),
         **elemental_gear.codex(),
         **workshops.codex(),
         **journal.codex(),
@@ -1614,7 +1615,7 @@ TOOLTIPS = {
     **equivalence.TOOLTIPS,
     **alchemical_gear.TOOLTIPS,
     **dark_matter.TOOLTIPS,
-    **ee_equipment.TOOLTIPS, **ee_machines.TOOLTIPS, **ee_storage.TOOLTIPS, **ee_artifacts.TOOLTIPS,
+    **ee_equipment.TOOLTIPS, **ee_machines.TOOLTIPS, **ee_storage.TOOLTIPS, **ee_artifacts.TOOLTIPS, **ee_expansion.TOOLTIPS,
     **elemental_gear.TOOLTIPS,
     **workshops.TOOLTIPS,
     **hexes.TOOLTIPS,

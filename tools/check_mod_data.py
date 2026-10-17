@@ -13315,7 +13315,7 @@ def check_game_test_entrypoints():
     listed = {cls for classes in mod.get("entrypoints", {}).values() for cls in classes}
     for path in sorted((ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test").glob("*.java")):
         text = path.read_text(encoding="utf-8")
-        if ("@GameTest" in text or "ClientGameTest" in text) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
+        if ("@GameTest" in text or re.search(r"\bimplements\b[^{]+\bFabricClientGameTest\b", text)) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
             err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
 
 

@@ -56,6 +56,6 @@ public final class AlchemyMachines {
     public static boolean bonusWork(ServerPlayer player,BlockPos pos) {
         if(!player.level().hasChunkAt(pos)||!(player.level().getBlockEntity(pos) instanceof AlchemyMachinesBlockEntity be)
                 ||be.kind()!=Kind.FURNACE||!be.mayUse(player)||!be.readyOwner())return false;
-        return be.furnaceStep();
+        return be.bonusWork();
     }
 }
