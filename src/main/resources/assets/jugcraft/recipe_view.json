@@ -6339,6 +6339,60 @@
           ]
         },
         {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:methane",
+              500
+            ],
+            [
+              "jugcraft:chlorine",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methyl_chloride",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 100,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:silicon",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:methyl_chloride",
+              500
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:hydrochloric_acid",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:silicone",
+              2
+            ]
+          ],
+          "ticks": 160,
+          "retained_inputs": []
+        },
+        {
           "items": [
             [
               "minecraft:raw_copper",
@@ -10293,6 +10347,25 @@
           ],
           "ticks": 120,
           "tool": "jugcraft:panel_mold",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:silicone",
+              2
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:gasket",
+              3
+            ]
+          ],
+          "ticks": 120,
+          "tool": "jugcraft:gasket_mold",
           "energy_per_tick": 32
         },
         {
