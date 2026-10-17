@@ -193,6 +193,7 @@ EXCLUDED = [
     rid("low_covalence_dust"), rid("medium_covalence_dust"), rid("high_covalence_dust"),
     rid("alchemical_coal"), rid("mobius_fuel"), rid("aeternalis_fuel"), rid("dark_matter"),
     rid("dark_matter_pickaxe"), rid("dark_matter_hammer"), rid("dark_matter_axe"),
+    *[rid(f"klein_star_{i}") for i in range(1, 7)], rid("evertide_amulet"), rid("volcanite_amulet"),
 ]
 
 ASSAY_SPECIMEN_TAG = f"{MOD}:assay_specimens"

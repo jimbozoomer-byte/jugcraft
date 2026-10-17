@@ -474,6 +474,8 @@ import concordance_alchemical_gear as alchemical_gear
 ITEMS.update(alchemical_gear.ITEMS)
 import concordance_dark_matter as dark_matter
 ITEMS.update(dark_matter.ITEMS)
+import concordance_elemental_gear as elemental_gear
+ITEMS.update(elemental_gear.ITEMS)
 BLOCKS.update(trinkets.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
@@ -1017,6 +1019,7 @@ def codex():
         **trinkets.codex(),
         **alchemical_gear.codex(),
         **dark_matter.codex(),
+        **elemental_gear.codex(),
         **journal.codex(),
         **signs.codex(),
     }
@@ -1597,6 +1600,7 @@ TOOLTIPS = {
     **equivalence.TOOLTIPS,
     **alchemical_gear.TOOLTIPS,
     **dark_matter.TOOLTIPS,
+    **elemental_gear.TOOLTIPS,
     **hexes.TOOLTIPS,
     **conclave.TOOLTIPS,
     **spire.TOOLTIPS,
@@ -1797,6 +1801,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     trinkets.write_all(write, assets, data, lang, condition, self_drop)
     alchemical_gear.write_all(write, assets, data, lang, condition, self_drop)
     dark_matter.write_all(write, assets, data, lang, condition, self_drop)
+    elemental_gear.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
     composer.lang_entries(lang)
     signs.lang_entries(lang)
@@ -1975,6 +1980,7 @@ def tags(tags):
     trinkets.tags(tags)
     alchemical_gear.tags(tags)
     dark_matter.tags(tags)
+    elemental_gear.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     for item in LUMINOUS_MATTER:

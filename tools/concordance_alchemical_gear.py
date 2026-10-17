@@ -59,10 +59,11 @@ def write_all(write, assets, data, lang, condition, self_drop):
         write(assets / "items" / f"{name}.json", {"model": model})
     for name, recipe in RECIPES.items():
         write(data / "recipe" / f"{name}.json", {"fabric:load_conditions": condition("concordance"), "type": "minecraft:crafting_shaped", "category": "equipment", **recipe, "result": {"id": rid(name), "count": 1}})
-    # Existing Charm tag is written by the trinkets module; add the talisman there after that writer runs.
+    # Merge alchemical charms after the existing trinkets writer, retaining all earlier Charm items.
     import concordance_trinkets
+    from concordance_elemental_gear import AMULETS
     write(data.parent / "trinkets" / "tags" / "item" / "legs" / "charm.json", {"replace": False, "values":
-          [rid(item) for item, slot in concordance_trinkets.TRINKETS.items() if slot == "legs/charm"] + [rid("repair_talisman")]})
+          [rid(item) for item, slot in concordance_trinkets.TRINKETS.items() if slot == "legs/charm"] + [rid("repair_talisman")] + [rid(item) for item in AMULETS]})
     # Resonant Ring already owns hand/ring; tags() merges this new ring into that shared tag.
 
 def tags(tags):

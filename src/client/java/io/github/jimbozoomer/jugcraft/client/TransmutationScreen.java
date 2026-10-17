@@ -113,13 +113,13 @@ public final class TransmutationScreen extends AbstractContainerScreen<Transmuta
         BookArt.line(g, end - 3, y - 3, end, y, color);
         BookArt.line(g, end - 3, y + 3, end, y, color);
     }
-    private static void slab(GuiGraphicsExtractor g, int x, int y, int w, int h, int color) {
+    static void slab(GuiGraphicsExtractor g, int x, int y, int w, int h, int color) {
         g.fill(x + 6, y, x + w - 6, y + h, color);
         g.fill(x + 3, y + 3, x + w - 3, y + h - 3, color);
         g.fill(x, y + 6, x + w, y + h - 6, color);
     }
     /** Native keyboard activation and narration, with a tactile inset metal key. */
-    private static final class ActionButton extends Button {
+    static final class ActionButton extends Button {
         boolean confirming;
         ActionButton(int x, int y, int w, Component title, OnPress action) {
             super(x, y, w, 20, title, action, DEFAULT_NARRATION);

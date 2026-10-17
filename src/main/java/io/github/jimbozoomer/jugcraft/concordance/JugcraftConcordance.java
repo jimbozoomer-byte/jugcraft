@@ -268,6 +268,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.assay.Assaying.register();
 		io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalGear.register();
 		io.github.jimbozoomer.jugcraft.concordance.assay.DarkMatter.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.KleinStars.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.ElementalAmulets.register();
 		// Roadmap step 22: sympathetic links, curses and wards; dream expeditions at the Oneiric Censer.
 		io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy.register();
 		io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming.register();

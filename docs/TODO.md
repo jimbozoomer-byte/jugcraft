@@ -9,9 +9,11 @@
 - [x] Local Dark Matter workshop: three fuel tiers, three covalence dusts, Dark Matter, pickaxe/hammer/axe modes, essence costs and anvil repair, using ten supplied icons unchanged.
 - [x] Dark Matter validation: 1,787 server tests, full data/art checks, rendered mode switching/mining and held-model inspection passed locally.
 - [ ] Owner playtest of the Dark Matter Workshop pack before publication. See [feature record](features/dark-matter-workshop.md).
+- [x] Local stars/amulets: six Klein Stars, storage tablet, charge-preserving smithing upgrades and Evertide/Volcanite utility amulets using eight supplied icons unchanged.
+- [x] Stars/amulets: 1,801 server tests, rendered transfers/amulet use, full data audit and original-art checks passed locally.
+- [ ] Owner playtest of the Stars and Elemental Amulets pack before publication. See [feature record](features/elemental-alchemy.md).
 - [ ] Remaining Dark Matter equipment, red matter tools and armor with their supplied art.
-- [ ] Charged storage stars.
-- [ ] Elemental utility amulets, mobility rings and bounded collector/condenser automation.
+- [ ] Mobility rings and bounded collector/condenser automation with remaining supplied assets.
 - Scope and evidence: [alchemical gear](features/alchemical-gear.md).
 
 ## Spellcraft and encyclopedia UI — 16 October 2026
