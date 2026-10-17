@@ -1,6 +1,6 @@
 # Tree batches 8, 8b and 8c: dry-country trees
 
-Status: implemented; inspection world awaiting owner review, authorized 17 October 2026. Draft PR: [#411](https://github.com/jimbozoomer-byte/jugcraft/pull/411). Public branch: `codex/tree-generation-batch-8abc` in `speedygroyper/jugcraft`. Actual tool/model: OpenAI Codex (GPT-6). Starts at `8b98d4c4d`, retaining approved batches 6, 6b and 7 (PRs #399, #404 and #408) above main `2804ba015`. No later batch is included.
+Status: implemented and owner-approved, 17 October 2026. Ready-for-review PR: [#411](https://github.com/jimbozoomer-byte/jugcraft/pull/411). Public branch: `codex/tree-generation-batch-8abc` in `speedygroyper/jugcraft`. Actual tool/model: OpenAI Codex (GPT-6). Starts at `8b98d4c4d`, retaining approved batches 6, 6b and 7 (PRs #399, #404 and #408) above main `2804ba015`. No later batch is included.
 
 ## Authorized plan
 
@@ -58,6 +58,19 @@ The real client created a normal world with seed `jugcraft`, grew three examples
 The exported world contains a separate authored gallery and untouched natural biome stops. Flat leaf panels are decorative; the marked natural ripe leaf is the harvest demonstration. Random ticks are paused for review; `/gamerule minecraft:random_tick_speed 3` resumes growth, ripening and decay. The delivery cleanup scanned 20,989 saved region records, found no actual test content, and preserved all 141 save files. Only unused development metadata in `level.dat`, `level.dat_old` and `data/fabric/registry_entries.dat` changed; all other NBT values and files were preserved.
 
 Not claimed: two independent clients, dedicated-server deployment, external launcher import, live season transitions, global frequency measurements, or a prior-release world upgrade.
+
+## Steppe client-survey correction
+
+PR #411's CI on `463047146` failed in `TreeBatchSixClientGameTests`: the Steppe sample at (-1480, 66, 2224) contained 20 apple-leaf blocks but no oak logs. The survey classifies each column by its ground biome, so a neighboring canopy crossing the boundary was mistaken for a fruit tree growing in Steppe. Both configured apple and peach trees use straight oak trunks; Steppe's own shrubs use deadwood and juniper.
+
+The client assertion now rejects oak trunks in Steppe columns instead of rejecting overhanging apple/peach leaves. The existing runtime checks still require Steppe's shrub and corn features and exclude both apple and peach patches. No world generation, biome mix, texture or gameplay changed. Fix prepared with OpenAI Codex (GPT-6).
+
+Focused validation on 17 October 2026 (same pinned Windows/JDK/platform as above):
+
+- `python -m unittest discover -s scripts/tests -p test_tree_batch_six.py -v`: all five passed.
+- `runGameTest` filtered to `jugcraft-test:tree_batch_six_game_tests_steppe_has_low_shrubs_and_keeps_its_plains_crop_tag`: exactly one test ran and passed.
+- `runClientGameTest -PclientTests=TreeBatchSixClientGameTests`: passed all twelve natural biome surveys, including the identical Steppe coordinates and 20-leaf/no-oak-trunk sample from CI, plus the existing 15-tree garden and save/reopen validation.
+- The two game-test tasks ran together using the local wrapper and ignored `build/focused.gradle` filter adapter; Gradle reported `BUILD SUCCESSFUL in 5m 14s`. The first sandboxed launch could not connect to its local Gradle daemon; the permitted retry completed successfully. No full test suite was rerun.
 
 ## Delivery
 

@@ -60,8 +60,12 @@ public class TreeBatchSixClientGameTests extends TreeBatchTwoClientGameTests {
 	}
 	@Override protected void validateSurvey(String biome, Map<String,Integer> counts) {
 		if(!hasTarget(biome,counts)) throw new AssertionError("Missing natural vegetation: " + biome);
-		if(biome.equals("steppe") && (counts.containsKey("leaf:jugcraft:apple_leaves") || counts.containsKey("leaf:jugcraft:peach_leaves")))
-			throw new AssertionError("Tall fruit tree generated in Steppe");
+		// The survey assigns columns by their ground biome. A neighboring tree's canopy can
+		// overhang Steppe without growing there (the CI sample had 20 apple leaves, no oak logs).
+		// Apple and peach both have straight oak trunks; Steppe's shrubs use juniper/deadwood.
+		// Keep the dynamic fruit-feature exclusions in surveySpot as the generation-policy check.
+		if(biome.equals("steppe") && counts.getOrDefault("log:minecraft:oak_log", 0) > 0)
+			throw new AssertionError("Oak trunk generated in Steppe's shrub-only survey: " + counts);
 	}
 	@Override protected void validateReopened(ServerLevel level) {
 		savedStates.forEach((pos,state) -> {
