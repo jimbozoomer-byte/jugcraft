@@ -48,6 +48,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
 
 def tags(tags):
     for key in ITEMS: tags.add("item", rid("equivalence/excluded"), rid(key))
+    for key in AMULETS: tags.add("item", "trinkets:legs/charm", rid(key))
 
 def codex():
     return {("equivalence", "elemental_gear"): {

@@ -236,7 +236,11 @@
       "io.github.jimbozoomer.jugcraft.test.TechSevenGameTests",
       "io.github.jimbozoomer.jugcraft.test.DarkMatterGameTests",
       "io.github.jimbozoomer.jugcraft.test.ElementalAlchemyGameTests",
-      "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopGameTests"
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ExtendedAlchemyEquipmentGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemyMachinesGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemyStorageGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemyArtifactGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
@@ -425,7 +429,8 @@
       "io.github.jimbozoomer.jugcraft.test.AlchemicalGearClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.DarkMatterClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ElementalAlchemyClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CompleteAlchemyClientGameTests"
     ]
   },
   "depends": {

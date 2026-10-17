@@ -17,6 +17,10 @@ the server side is concordance/assay). tools/concordance.py merges these tables 
 """
 
 from fractions import Fraction
+import concordance_ee_equipment
+import concordance_ee_machines
+import concordance_ee_storage
+import concordance_ee_artifacts
 
 MOD = "jugcraft"
 
@@ -195,6 +199,10 @@ EXCLUDED = [
     rid("alchemical_coal"), rid("mobius_fuel"), rid("aeternalis_fuel"), rid("dark_matter"),
     rid("dark_matter_pickaxe"), rid("dark_matter_hammer"), rid("dark_matter_axe"),
     *[rid(f"klein_star_{i}") for i in range(1, 7)], rid("evertide_amulet"), rid("volcanite_amulet"),
+    *sorted({rid(name)
+             for module in (concordance_ee_equipment, concordance_ee_machines,
+                            concordance_ee_storage, concordance_ee_artifacts)
+             for name in (*getattr(module, "ITEMS", {}), *getattr(module, "BLOCKS", {}))}),
 ]
 
 ASSAY_SPECIMEN_TAG = f"{MOD}:assay_specimens"

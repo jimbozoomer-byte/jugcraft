@@ -41,6 +41,13 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
     public int essence() { return essence; }
     public int status() { return status; }
     public int sunlight() { return sunlight; }
+    /** Conservative adjacent relay intake, using the condenser's existing readiness and target gates. */
+    public int acceptEssence(ServerPlayer from, int offered) {
+        if (offered <= 0 || collector() || !related(from.getUUID()) || !(level instanceof ServerLevel server)
+                || !Authority.mayChange(server, from, worldPosition)
+                || gate(owner.equals(from.getUUID()) ? from : Authority.present(server, owner)) != IDLE || targetStatus() != WAITING) return 0;
+        int moved = Math.min(offered, capacity() - essence); setEssence(essence + moved); return moved;
+    }
     public boolean paused() { return paused; }
     public @Nullable UUID owner() { return owner; }
     public void setEssence(int value) { essence = Math.clamp(value, 0, capacity()); setChanged(); }
@@ -114,6 +121,15 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
                             && other.targetStatus() == WAITING && Authority.mayChange(server, player, to)) {
                         int moved = Math.min(budget, other.capacity() - other.essence);
                         other.setEssence(other.essence + moved); essence -= moved; budget -= moved; worked |= moved > 0;
+                    }
+                }
+                // Preserve the original condenser-first priority, then feed relays and other adjacent consumers.
+                for (Direction direction : Direction.values()) {
+                    BlockPos to = worldPosition.relative(direction);
+                    if (budget <= 0 || !server.hasChunkAt(to)) continue;
+                    if (server.getBlockEntity(to) instanceof AlchemyMachinesBlockEntity other && Authority.mayChange(server, player, to)) {
+                        int moved = other.acceptEssence(player, budget);
+                        essence -= moved; budget -= moved; worked |= moved > 0;
                     }
                 }
                 ItemStack star = items.get(STAR);

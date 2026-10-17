@@ -13883,6 +13883,8 @@ def check_wayfaring(co, root, lang):
             expected.add(f"{MOD}:repair_talisman")
             import concordance_elemental_gear
             expected.update(f"{MOD}:{item}" for item in concordance_elemental_gear.AMULETS)
+            import concordance_ee_artifacts
+            expected.update(f"{MOD}:{item}" for item in concordance_ee_artifacts.CHARMS)
         if held != expected:
             err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
     # Two items with one English name cannot be told apart (the kinetic belt is the Drive Belt for this reason).

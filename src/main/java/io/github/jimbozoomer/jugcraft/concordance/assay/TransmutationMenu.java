@@ -17,14 +17,20 @@ import net.minecraft.world.item.ItemStack;
 public final class TransmutationMenu extends AbstractContainerMenu {
     public static final int INPUT = 0, SAMPLE = 1, OUTPUT = 2;
     private final Player owner;
+    private final java.util.function.BooleanSupplier access;
     private final SimpleContainer contents = new SimpleContainer(3);
     private final SimpleContainerData data = new SimpleContainerData(9);
     private ItemStack confirmation = ItemStack.EMPTY;
     private long confirmUntil;
 
     public TransmutationMenu(int id, Inventory inventory) {
+        this(id, inventory, () -> inventory.player.getInventory().contains(stack -> stack.is(AlchemicalGear.STONE))
+                || inventory.player.getOffhandItem().is(AlchemicalGear.STONE));
+    }
+    public TransmutationMenu(int id, Inventory inventory, java.util.function.BooleanSupplier access) {
         super(AlchemicalGear.MENU, id);
         owner = inventory.player;
+        this.access = access;
         addSlot(new Slot(contents, INPUT, 56, 70) {
             @Override public boolean mayPlace(ItemStack stack) { return !stack.is(AlchemicalGear.STONE); }
         });
@@ -106,7 +112,7 @@ public final class TransmutationMenu extends AbstractContainerMenu {
 
     @Override public boolean stillValid(Player player) {
         return player == owner && (!(player instanceof ServerPlayer server) || AlchemicalGear.ready(server))
-                && (player.getInventory().contains(stack -> stack.is(AlchemicalGear.STONE)) || player.getOffhandItem().is(AlchemicalGear.STONE));
+                && (!(player instanceof ServerPlayer) || access.getAsBoolean());
     }
     @Override public void removed(Player player) {
         super.removed(player);

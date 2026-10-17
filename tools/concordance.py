@@ -478,6 +478,15 @@ import concordance_elemental_gear as elemental_gear
 ITEMS.update(elemental_gear.ITEMS)
 import concordance_workshops as workshops
 BLOCKS.update(workshops.BLOCKS)
+import concordance_ee_equipment as ee_equipment
+import concordance_ee_machines as ee_machines
+import concordance_ee_storage as ee_storage
+import concordance_ee_artifacts as ee_artifacts
+EE_MODULES = (ee_equipment, ee_machines, ee_storage, ee_artifacts)
+for _module in EE_MODULES:
+    ITEMS.update({name: {**info, "tooltip": _module.TOOLTIPS[name]}
+                  for name, info in getattr(_module, "ITEMS", {}).items()})
+    BLOCKS.update(getattr(_module, "BLOCKS", {}))
 BLOCKS.update(trinkets.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
@@ -834,6 +843,7 @@ def spell_opt_outs():
     import arms
     import arms_variants
     return sorted(set(arms.items()) | set(arms_variants.items()) | set(dark_matter.TOOLS)
+                  | set(ee_equipment.TOOLS) | set(ee_artifacts.TOOLS)
                   | {"power_katana", "power_bow", "ronin_katana", "carnival_mallet", "pinata_stick"})
 
 
@@ -1021,6 +1031,7 @@ def codex():
         **trinkets.codex(),
         **alchemical_gear.codex(),
         **dark_matter.codex(),
+        **ee_equipment.codex(), **ee_machines.codex(), **ee_storage.codex(), **ee_artifacts.codex(),
         **elemental_gear.codex(),
         **workshops.codex(),
         **journal.codex(),
@@ -1486,10 +1497,10 @@ SOUND_EVENTS.update(ember.SOUND_EVENTS)
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
     (tools/concordance_ember.py SOUND_FILES), one picked at random."""
-    return {event: {"subtitle": f"subtitles.{MOD}.{event}",
+    return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
                     "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
                                for name in ember.SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
-            for event in SOUND_EVENTS}
+            for event in SOUND_EVENTS}, **ee_artifacts.sounds()}
 
 
 MESSAGES = {
@@ -1603,6 +1614,7 @@ TOOLTIPS = {
     **equivalence.TOOLTIPS,
     **alchemical_gear.TOOLTIPS,
     **dark_matter.TOOLTIPS,
+    **ee_equipment.TOOLTIPS, **ee_machines.TOOLTIPS, **ee_storage.TOOLTIPS, **ee_artifacts.TOOLTIPS,
     **elemental_gear.TOOLTIPS,
     **workshops.TOOLTIPS,
     **hexes.TOOLTIPS,
@@ -1807,6 +1819,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     dark_matter.write_all(write, assets, data, lang, condition, self_drop)
     elemental_gear.write_all(write, assets, data, lang, condition, self_drop)
     workshops.write_all(write, assets, data, lang, condition, self_drop)
+    for module in EE_MODULES:
+        module.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
     composer.lang_entries(lang)
     signs.lang_entries(lang)
@@ -1987,6 +2001,8 @@ def tags(tags):
     dark_matter.tags(tags)
     elemental_gear.tags(tags)
     workshops.tags(tags)
+    for module in EE_MODULES:
+        module.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     for item in LUMINOUS_MATTER:

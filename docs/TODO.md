@@ -12,11 +12,13 @@
 - [x] Local stars/amulets: six Klein Stars, storage tablet, charge-preserving smithing upgrades and Evertide/Volcanite utility amulets using eight supplied icons unchanged.
 - [x] Stars/amulets: 1,801 server tests, rendered transfers/amulet use, full data audit and original-art checks passed locally.
 - [ ] Owner playtest of the Stars and Elemental Amulets pack before publication. See [feature record](features/elemental-alchemy.md).
-- [ ] Remaining Dark Matter equipment, red matter tools and armor with their supplied art.
+- [x] Local implementation of remaining Dark Matter equipment, Red Matter tools, three armor sets and material/fuel blocks with supplied art. Combined automated validation passed; owner playtest pending. See [complete alchemy](features/complete-alchemy.md).
 - [x] Local collectors/condensers: three daylight collectors, two material condensers, retained targets, essence/star transfers, hopper faces, pause controls and charge-preserving upgrades using supplied assets.
 - [x] Collector/condenser validation: 1,820 server tests, rendered menus/models, live hoppers, daylight/roof behavior, full data/art audit and showroom ownership binding passed locally.
 - [ ] Owner playtest of the Collectors and Condensers pack before publication. See [feature record](features/alchemical-workshops.md).
-- [ ] Mobility rings with remaining supplied assets.
+- [x] Local implementation of all remaining alchemy content: 82 entries across equipment, relays/furnaces/pedestals/wards/Nova charges, bags/chest/tablets/books/XP storage, mobility/combat/farming/support rings and mining/building artifacts. Existing 26 entries remain integrated.
+- [x] Complete the requested combined validation phase after all 82 entries are integrated: 1,886 server tests, 67 Python tests, full data/art audits and the rendered client check passed. Final layout changes were rebuilt and client-tested. See [complete alchemy](features/complete-alchemy.md).
+- [ ] Owner-controlled playtest of Complete Alchemy, including survival costs, UI clarity, flight, farming and connected workshop throughput, before pushing to main.
 - Scope and evidence: [alchemical gear](features/alchemical-gear.md).
 
 ## Spellcraft and encyclopedia UI — 16 October 2026
