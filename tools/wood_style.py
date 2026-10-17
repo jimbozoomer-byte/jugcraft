@@ -189,6 +189,8 @@ def bark_of(wood):
 
 def bark(wood, seed):
     """A log's side: vertical furrows in the bark's darkest tones, ridges between, tiling top to bottom."""
+    if wood == "yucca":
+        return yucca_bark(seed)
     p, kind = bark_of(wood)
     rng = random.Random(seed)
     c = Canvas()
@@ -236,6 +238,36 @@ def bark(wood, seed):
             c.px(x, y, p[4])
             if rng.random() < 0.5:
                 c.px(x, (y + 1) % 16, p[4 if kind == "stringy" else 3])
+    return c.img
+
+
+def yucca_bark(seed):
+    """Short, overlapping dry fibers with shaded creases and raised pale edges."""
+    p = pal("4d4938", "6d674e", "898267", "a39c7d", "b4ae92", "c8c3ac")
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, p[3])
+    # Stagger the fiber ends and wrap each plate across the texture boundary.
+    # Narrow stepped creases give depth without unbroken dark vertical stripes.
+    for x0, width in ((0, 3), (3, 3), (6, 4), (10, 3), (13, 3)):
+        y0 = rng.randrange(16)
+        lengths = rng.choice(((5, 4, 7), (6, 6, 4), (4, 7, 5)))
+        for length in lengths:
+            tone = rng.choice((2, 3, 3, 4))
+            step = rng.choice((1, length - 2, length - 1))
+            for dy in range(length):
+                y = (y0 + dy) % 16
+                for dx in range(width):
+                    c.px(x0 + dx, y, p[tone])
+                crease = x0 + (1 if dy >= step else 0)
+                c.px(crease, y, p[1 if dy in (0, length - 1) else 0])
+                if crease + 1 < x0 + width:
+                    c.px(crease + 1, y, p[2 if dy >= length - 2 else 4])
+                if 1 <= dy < length - 2:
+                    c.px(x0 + width - 1, y, p[5 if tone >= 3 else 3])
+            y0 += length
     return c.img
 
 
