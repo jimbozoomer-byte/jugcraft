@@ -26,6 +26,7 @@
       "io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorGameTests",
       "io.github.jimbozoomer.jugcraft.test.GasTankHandlingGameTests",
       "io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BackpackGameTests",
       "io.github.jimbozoomer.jugcraft.test.LairGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceSharingGameTests",
@@ -234,6 +235,7 @@
       "io.github.jimbozoomer.jugcraft.test.MineralSandGameTests"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.BackpackClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourBCClientGameTests",

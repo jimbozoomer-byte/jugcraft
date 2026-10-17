@@ -7,6 +7,8 @@ Jugcraft has two artifacts:
 
 Opening a website alone does not install software. Fabric dependency metadata checks requirements but does not download them. Jugcraft never downloads mods at game startup.
 
+Complete also supplies the approved [Traveler's Backpack progression and Back slot settings](features/travelers-backpack.md). Its `defaultconfigs/travelersbackpack-server.toml` seeds the missing global server config; an existing world's `serverconfig` override takes priority. Existing configs need an owner-managed settings merge. Standalone users installing Traveler's Backpack separately must copy the supplied configuration templates to receive the Complete balance settings.
+
 ## Current delivery status
 
 The Build workflow produces a downloadable **jugcraft-installers** artifact containing the mod, the complete pack, a SHA-512 checksum, and standalone Modrinth dependency metadata. This is a build artifact, not an automatic Modrinth publication. There is no Modrinth project ID or publishing credential configured in this repository yet.
