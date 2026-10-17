@@ -64,7 +64,7 @@ No texture is copied.
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [38992402213](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38992402213) on commit `4a159946` passed on its first attempt. That covers the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all eight rendered-client shards. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
