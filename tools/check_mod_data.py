@@ -13872,7 +13872,10 @@ def check_wayfaring(co, root, lang):
     for slot in tr.GRANTED_SLOTS:
         group, name = slot.split("/")
         held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
-        if held != {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}:
+        expected = {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}
+        if slot == tr.CHARM_SLOT:
+            expected.add(f"{MOD}:repair_talisman")
+        if held != expected:
             err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
     # Two items with one English name cannot be told apart (the kinetic belt is the Drive Belt for this reason).
     names = {}

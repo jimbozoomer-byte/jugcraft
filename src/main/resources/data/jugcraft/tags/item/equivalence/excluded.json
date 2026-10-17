@@ -46,6 +46,9 @@
     "minecraft:player_head",
     "minecraft:spawner",
     "minecraft:trial_spawner",
-    "minecraft:heart_of_the_sea"
+    "minecraft:heart_of_the_sea",
+    "jugcraft:philosophers_stone",
+    "jugcraft:repair_talisman",
+    "jugcraft:black_hole_band"
   ]
 }

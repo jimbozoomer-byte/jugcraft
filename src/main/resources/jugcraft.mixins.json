@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "AttackStrengthAccessor",
+    "AlchemicalItemAccess",
     "CompanionGateMixin",
     "CompanionShearingInvoker",
     "CompanionLootMixin",

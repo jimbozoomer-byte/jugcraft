@@ -47,6 +47,7 @@
       "io.github.jimbozoomer.jugcraft.test.ConcordanceArtificeGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceRelicGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceAssayGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalGearGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceHexGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceConclaveGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceProgressionGameTests",
@@ -417,7 +418,8 @@
       "io.github.jimbozoomer.jugcraft.test.FluorochemistryClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.MineralSandClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.TechSevenClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.TechSevenClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalGearClientGameTests"
     ]
   },
   "depends": {

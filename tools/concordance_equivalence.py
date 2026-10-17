@@ -189,6 +189,7 @@ EXCLUDED = [
     "minecraft:enchanted_book", "minecraft:totem_of_undying", "minecraft:nether_star", "minecraft:experience_bottle",
     "minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:written_book",
     "minecraft:filled_map", "minecraft:player_head", "minecraft:spawner", "minecraft:trial_spawner", "minecraft:heart_of_the_sea",
+    rid("philosophers_stone"), rid("repair_talisman"), rid("black_hole_band"),
 ]
 
 ASSAY_SPECIMEN_TAG = f"{MOD}:assay_specimens"

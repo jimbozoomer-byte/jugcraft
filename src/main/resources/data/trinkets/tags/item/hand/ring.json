@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:black_hole_band",
     "jugcraft:resonant_ring"
   ]
 }
