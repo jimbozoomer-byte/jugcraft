@@ -90,3 +90,7 @@ Results are recorded under "Results" below after CI runs.
 Tree roster batch 4c makes Flower Isle 55% magnolia, 30% oak bush and 15% apple tree attempts, retaining its sparse 1/2 attempts per chunk and flower decoration. See [the implementation record](trees-batch-4bc.md).
 
 Tree roster batch 5 adds a lone rowan attempt per eight Highland chunks on average, subject to dry ground and sapling survival. It remains open grassland without a forest tree-count layer. See [the implementation and verification record](trees-batch-5.md).
+
+## Tree batches 8–8c update
+
+Tree batch 8 replaces Canyon's 40% vanilla pine with pinyon, retaining juniper 35%, juniper bush 25% and 2–3 attempts/chunk. Dune Beach remains treeless. See [implementation and verification](trees-batch-8abc.md).

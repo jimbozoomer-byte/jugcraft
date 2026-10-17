@@ -4,7 +4,7 @@
   "features": [
     {
       "chance": 0.25,
-      "feature": "minecraft:pine_checked"
+      "feature": "jugcraft:umbrella_pine_checked"
     },
     {
       "chance": 0.19999999999999998,

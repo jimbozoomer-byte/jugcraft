@@ -77,3 +77,7 @@ Results are recorded under "Results" below after CI runs.
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces, so it borders what that biome bordered.
 - Seasons: see above.
+
+## Tree batches 8–8c update
+
+Tree batch 8 replaces Heathland's 25% vanilla pine with umbrella pine, retaining gorse 60%, juniper bush 15%, and 2–3 planting attempts/chunk. See [implementation and verification](trees-batch-8abc.md).

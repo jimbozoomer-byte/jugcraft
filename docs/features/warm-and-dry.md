@@ -93,3 +93,7 @@ Results are recorded under "Results" below after CI runs.
 
 ## World and event applicability
 - Biome fit: each biome takes the climate of the vanilla biome it replaces.
+
+## Tree batches 8–8c update
+
+Tree batches 8–8c: Dryland replaces its 45% vanilla pine with pinyon; Xeric Shrubland is acacia 45%, Joshua 30%, juniper 25%; Lush Desert is acacia 45%, Joshua 35%, small palm 20%. Oasis is palm 75%, small palm 15%, tamarisk 10%. Wasteland is dead tree 45%, snags 40%, tamarisk 15%. Dry River gains one candidate/chunk, 40% tamarisk on suitable dry banks and 60% deliberately empty until date palms. Mediterranean Forest is cypress 35%, olive 25%, olive bush 15%, umbrella pine 15%, lemon 5%, orange 5%. Other attempt budgets remain unchanged. See [implementation and verification](trees-batch-8abc.md).

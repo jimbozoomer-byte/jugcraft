@@ -192,6 +192,8 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "pine_nuts": {"display": "Pine Nuts", "food": [1, 0.1], "compost": "low", "tags": ["c:foods", "jugcraft:squirrel_food"]},
+    "roasted_pine_nuts": {"display": "Roasted Pine Nuts", "food": [3, 0.4], "compost": "medium", "tags": ["c:foods", "jugcraft:squirrel_food"]},
     "olives": {"display": "Olives", "food": [1, 0.1], "compost": "medium", "tags": ["c:foods/fruit"]},
     "holly_sprig": {"display": "Holly Sprig", "compost": "low", "tags": []},
     "juniper_berries": {"display": "Juniper Berries", "food": [1, 0.1], "compost": "medium",
@@ -428,7 +430,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
              "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
-             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive"}
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive", "tamarisk": "Tamarisk", "yucca": "Yucca"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -436,8 +438,8 @@ WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen"
 WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "biomes"], "maple": ["biomes"],
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
-                 "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes"], "holly": ["biomes"], "olive": ["biomes"]}
+                 "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes", "alpine_spawn"], "yew": ["biomes"],
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -465,6 +467,16 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 # "seasonal_drop": fruit item and green/gold/bare loot chances; natural leaves only, without Silk Touch/shears.
 TREES = {
+    "stone_pine": {"wood": "pine", "display": "Stone Pine", "leaves": "stone_pine_needles", "leaves_display": "Stone Pine Needles",
+                   "season": None, "base": "spruce", "sapling_shapes": {"stone_pine": 1, "umbrella_pine": 1, "pinyon": 1},
+                   "fruit": {"item": "pine_nuts", "min": 1, "max": 2, "chance": 10}},
+    "wattle": {"wood": "minecraft:acacia", "display": "Wattle", "switches": ["biomes"], "leaves": "wattle_leaves",
+               "leaves_display": "Wattle Leaves", "season": None, "base": "acacia",
+               "sapling_shapes": {"wattle": 3, "wattle_bush": 7}, "farm_yield": 1,
+               "leaf_tags": ["minecraft:flowers"], "leaf_block_tags": ["minecraft:bee_attractive"]},
+    "tamarisk": {"leaves": "tamarisk_leaves", "leaves_display": "Tamarisk Leaves", "season": None, "base": "oak"},
+    "joshua_tree": {"wood": "yucca", "display": "Joshua Tree", "leaves": "joshua_tree_fronds",
+                    "leaves_display": "Joshua Tree Fronds", "season": None, "base": "oak"},
     "olive": {"leaves": "olive_leaves", "leaves_display": "Olive Leaves", "season": None, "base": "oak",
               "giant": "ancient_olive", "fruit": {"item": "olives", "min": 1, "max": 2, "chance": 10}},
     "olive_bush": {"wood": "olive", "display": "Wild Olive Bush", "farm_yield": 1,
@@ -1117,7 +1129,7 @@ SQUIRRELS = {"entity": "squirrel", "display": "Squirrel", "health": 6, "speed": 
              "bury_ticks": 200, "sapling_chance": 0.25, "sapling_space": 3, "acorn_chance": 0.05,
              "acorn_leaves": ["oak_leaves", "dark_oak_leaves"], "acorn": "acorn", "acorn_display": "Acorn", "roasted": "roasted_acorns",
              "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga"],
-             "food": ["jugcraft:acorn", "jugcraft:chestnut", "jugcraft:roasted_chestnuts"]}
+             "food": ["jugcraft:acorn", "jugcraft:chestnut", "jugcraft:roasted_chestnuts", "jugcraft:pine_nuts", "jugcraft:roasted_pine_nuts"]}
 # The Pumpkling (Pumpkling): a hand-carved pumpkin woken by a spark into a pet; follows past `follow_start`, stops at
 # `follow_stop`, comes to its owner past `teleport`; treats heal `treat_heal`.
 PUMPKLING = {"entity": "pumpkling", "display": "Pumpkling", "health": 16, "speed": 0.3, "size": [0.6, 0.9],
@@ -2133,6 +2145,7 @@ COOKING = {
     "popcorn": {"input": "corn_kernels", "xp": 0.1},
     "baked_sweet_potato": {"input": "sweet_potato", "xp": 0.35},
     "roasted_sunflower_seeds": {"input": "sunflower_seeds", "xp": 0.1},
+    "roasted_pine_nuts": {"input": "pine_nuts", "xp": 0.1, "switch": ["biomes", "alpine_spawn"]},
     "roasted_chestnuts": {"input": "chestnut", "xp": 0.35},
     "baked_acorn_squash": {"input": "acorn_squash", "xp": 0.35},
     "roasted_pumpkin_seeds": {"input": "minecraft:pumpkin_seeds", "xp": 0.1},
@@ -2749,13 +2762,15 @@ def owns(entry_id):
 
 def switch_of(entry_id):
     """The feature switch that owns one of this branch's IDs: for a wood set and for a tree's sapling and leaves, its
-    wood's WOOD_SWITCHES list (any of which turns it on), otherwise FEATURE."""
+    wood's WOOD_SWITCHES list (any of which turns it on). Cooking can inherit an explicit switch list; otherwise FEATURE."""
     for wood, switch in WOOD_SWITCHES.items():
         if entry_id in wood_blocks(wood, WOOD_SETS[wood]):
             return switch
     for tree in TREES:
         if entry_id in (sapling(tree), TREES[tree]["leaves"], TREES[tree].get("fruit", {}).get("item")):
             return tree_switches(tree)
+    if entry_id in COOKING and "switch" in COOKING[entry_id]:
+        return COOKING[entry_id]["switch"]
     if entry_id in plants.blocks():
         return plants.FEATURE
     return FEATURE

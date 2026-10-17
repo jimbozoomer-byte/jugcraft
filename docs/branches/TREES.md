@@ -2180,3 +2180,7 @@ Prepared on 5 October 2026 with Claude Opus 5.5, revised on 6 October 2026 with 
 update, and finalized the same day with Claude Opus 5.5 after that revision's review. Colour ramps and distances were
 computed by script from `tools/wood_style.py`, and current shares from `tools/biomes.py`. Batch 1 has since been built
 (not played); nothing else in this plan has been built, run in game or play-tested.
+
+## Batches 8, 8b and 8c implementation, 17 October 2026
+
+Owner-authorized together on `codex/tree-generation-batch-8abc`, [draft PR #411](https://github.com/jimbozoomer-byte/jugcraft/pull/411). [Scope and verification](../features/trees-batch-8abc.md). Based on the owner-approved batches 6, 6b and 7, still separate PR dependencies. Batch 8 retains Eucalyptus Forest's existing 20% understory share as wattle, and keeps Mediterranean citrus at 5% each with cypress 35%, olive 25%, olive bush 15% and umbrella pine 15%. Dry River reserves 60% empty for future date palms. Tamarisk uses connected foliage sprays; Joshua arms are face-connected. No batch 9 work is included. Actual implementation tool/model: OpenAI Codex (GPT-6).

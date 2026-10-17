@@ -3370,6 +3370,46 @@
         {
           "in": [
             [
+              "#jugcraft:tamarisk_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:tamarisk_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:yucca_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:yucca_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "#minecraft:planks",
               1
             ]
@@ -3664,6 +3704,106 @@
             ],
             [
               "minecraft:pale_moss_carpet",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:stone_pine_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:pine_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:stone_pine_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:wattle_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:acacia_log",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:wattle_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:tamarisk_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:tamarisk_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:tamarisk_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:joshua_tree_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:yucca_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:joshua_tree_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
               1,
               0.1
             ]

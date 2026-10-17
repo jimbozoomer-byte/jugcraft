@@ -178,6 +178,10 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower JUNIPER_GROWER = weightedGrower("juniper", "juniper_column", "juniper_bush", 2, 1, 1);
 	public static final TreeGrower GORSE_GROWER = grower("gorse");
 	public static final TreeGrower SAGEBRUSH_GROWER = grower("sagebrush");
+	public static final TreeGrower STONE_PINE_GROWER = weightedGrower("stone_pine", "umbrella_pine", "pinyon", 1, 1, 1);
+	public static final TreeGrower WATTLE_GROWER = weightedGrower("wattle", "wattle_bush", 3, 7);
+	public static final TreeGrower TAMARISK_GROWER = grower("tamarisk");
+	public static final TreeGrower JOSHUA_TREE_GROWER = grower("joshua_tree");
 	public static final TreeGrower OLIVE_GROWER = grower("olive");
 	public static final TreeGrower OLIVE_BUSH_GROWER = grower("olive_bush");
 	public static final TreeGrower ANCIENT_OLIVE_GROWER = grower("ancient_olive");
@@ -528,6 +532,7 @@ public final class JugcraftAgriculture {
 		// Generated trees' seasonal leaves start in today's look (tools/trees.py DECORATOR).
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
 		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("olive_trunk_placer"), OliveTrunkPlacer.TYPE);
+		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("dry_country_trunk_placer"), DryCountryTrunkPlacer.TYPE);
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("fruiting_shrub"), FruitingShrubDecorator.TYPE);
 		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
@@ -574,6 +579,16 @@ public final class JugcraftAgriculture {
 		registerFoliage("olive_bush", "wild_olive_leaves", OLIVE_BUSH_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				props -> new TintedParticleLeavesBlock(0.01F, props));
 		food("olives", 1, 0.1F, COMPOST_MEDIUM);
+		registerFoliage("stone_pine", "stone_pine_needles", STONE_PINE_GROWER, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES, StonePineLeavesBlock::new);
+		registerFoliage("wattle", "wattle_leaves", WATTLE_GROWER, Blocks.ACACIA_SAPLING, Blocks.ACACIA_LEAVES,
+				props -> new TintedParticleLeavesBlock(0.01F, props));
+		registerTree("tamarisk", "tamarisk_leaves", TAMARISK_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_PINK);
+		registerFoliage("joshua_tree", "joshua_tree_fronds", JOSHUA_TREE_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+				props -> new TintedParticleLeavesBlock(0.01F, props));
+		registerWoodSet("yucca", MapColor.SAND, MapColor.TERRACOTTA_GRAY);
+		food("pine_nuts", 1, 0.1F, COMPOST_LOW);
+		food("roasted_pine_nuts", 3, 0.4F, COMPOST_MEDIUM);
 		registerTree("holly", "holly_leaves", HOLLY_GROWER, HOLLY_LEAVES, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				MapColor.COLOR_LIGHT_GRAY, MapColor.SAND);
 		registerItem("holly_sprig", Item::new, new Item.Properties().compostable(COMPOST_LOW), BUILDING_TAB);
@@ -2953,7 +2968,7 @@ public final class JugcraftAgriculture {
 		TreeGrower giant = GIANT_GROWERS.get(tree);
 		Block sapling = registerBlock(tree + "_sapling", giant == null ? props -> new SaplingBlock(grower, props) {
 			@Override protected boolean mayPlaceOn(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-				return super.mayPlaceOn(state, level, pos) || tree.equals("juniper") && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
+				return super.mayPlaceOn(state, level, pos) || java.util.Set.of("juniper", "stone_pine", "tamarisk", "joshua_tree").contains(tree) && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
 			}
 		} : props -> new GiantSaplingBlock(grower, giant, props), BlockBehaviour.Properties.ofFullCopy(saplingLike));
 		registerItem(tree + "_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()

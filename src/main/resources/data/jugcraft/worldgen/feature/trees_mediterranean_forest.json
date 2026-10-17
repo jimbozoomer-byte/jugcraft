@@ -11,15 +11,15 @@
       "feature": "jugcraft:olive_bush_checked"
     },
     {
-      "chance": 0.20666666666666667,
-      "feature": "minecraft:oak_checked"
+      "chance": 0.25,
+      "feature": "jugcraft:umbrella_pine_checked"
     },
     {
-      "chance": 0.1,
+      "chance": 0.11111111111111112,
       "feature": "jugcraft:lemon_checked"
     },
     {
-      "chance": 0.1,
+      "chance": 0.125,
       "feature": "jugcraft:orange_checked"
     }
   ]

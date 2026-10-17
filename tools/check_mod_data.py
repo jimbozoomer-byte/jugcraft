@@ -2807,8 +2807,8 @@ def check_wood_switches():
         for extra in info.get("extras", []):
             if "feature" in bm.EXTRAS.get(extra, {}):
                 placed_by(bm.EXTRAS[extra]["feature"], bm.FEATURE)
-    for key in ("larch", "spruce"):
-        placed_by(al.TREES[key], al.FEATURE)
+    for ref in [al.TREES["default"]] + [feature for feature, _ in al.TREES["picks"]]:
+        placed_by(ref, al.FEATURE)
     # Agriculture's wild patches (JugcraftAgriculture.registerWorldgen, under the agriculture switch): the wild chestnut
     # trees, and anything else a patch_<name> placed feature places. A patch placed anywhere else has no known switch.
     agriculture = (AGRICULTURE_JAVA / "JugcraftAgriculture.java").read_text(encoding="utf-8")
@@ -2880,8 +2880,8 @@ def check_alpine():
         err("The start search looks for alpine villages less far than for the biome (SPAWN in tools/alpine.py)")
     selector = load(folder / "feature" / f"{al.TREES['feature']}.json") or {}
     picks = {selector.get("default")} | {entry.get("feature") for entry in selector.get("features", [])}
-    if picks != {al.TREES["larch"], al.TREES["spruce"]}:
-        err(f"{al.TREES['feature']}.json should pick larches and spruces, found {sorted(map(str, picks))}")
+    if picks != {al.TREES["default"]} | {feature for feature, _ in al.TREES["picks"]}:
+        err(f"{al.TREES['feature']}.json should match the Alpine tree picks, found {sorted(map(str, picks))}")
     for placed in picks:
         ns, path = split(str(placed))
         if ns == MOD and not (folder / "placed_feature" / f"{path}.json").is_file():

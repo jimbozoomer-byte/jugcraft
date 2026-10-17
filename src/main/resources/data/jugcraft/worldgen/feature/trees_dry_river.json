@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:random_selector",
+  "default": "jugcraft:dry_river_empty",
+  "features": [
+    {
+      "chance": 0.4,
+      "feature": "jugcraft:tamarisk_checked"
+    }
+  ]
+}

@@ -207,6 +207,8 @@ def worldgen(data, write):
         survives = info.get("survives_as") or (f"{tree}_sapling" if tree.startswith("minecraft:") else rid(sapling(tree)))
         write(folder / "placed_feature" / f"{shape}_checked.json", {"feature": rid(shape), "placement": [
             {"type": "minecraft:block_predicate_filter", "predicate": {"type": "minecraft:would_survive", "state": survives}}]})
+    write(folder / "feature" / "dry_river_empty.json", {"type": "minecraft:no_op"})
+    write(folder / "placed_feature" / "dry_river_empty.json", {"feature": rid("dry_river_empty"), "placement": []})
     for wood, length in FALLEN.items():
         write(folder / "feature" / f"fallen_{wood}_tree.json", {
             "type": "minecraft:fallen_tree",

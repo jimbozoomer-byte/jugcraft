@@ -24,8 +24,8 @@ class OliveTests(unittest.TestCase):
     def test_absolute_mixes_and_existing_citrus_shares(self):
         expected = {
             'mediterranean_forest': ([5,6], {'jugcraft:olive_checked':.25, 'jugcraft:olive_bush_checked':.15,
-                'minecraft:oak_checked':.124, 'jugcraft:lemon_checked':.0476, 'jugcraft:orange_checked':.04284,
-                'jugcraft:cypress_checked':.38556}),
+                'jugcraft:umbrella_pine_checked':.15, 'jugcraft:lemon_checked':.05, 'jugcraft:orange_checked':.05,
+                'jugcraft:cypress_checked':.35}),
             'lavender_field': ([1,2], {'jugcraft:olive_bees_checked':.3, 'minecraft:oak_bees_002':.1,
                 'jugcraft:cypress_checked':.1, 'jugcraft:jacaranda_checked':.5}),
             'scrubland': ([1,2], {'jugcraft:olive_bush_checked':.6, 'jugcraft:oak_bush_checked':.25, 'jugcraft:juniper_checked':.15}),
@@ -63,7 +63,7 @@ class OliveTests(unittest.TestCase):
             self.assertEqual(farm['output'],'jugcraft:olive_log')
             self.assertEqual(farm['count'],count)
             self.assertIn([f'jugcraft:{tree}_sapling',1,1.,None],farm['byproducts'])
-        for name in ('stone_pine','wattle','joshua_tree'): self.assertNotIn(name,trees.SHAPES)
+        for name in ('huge_glowcap','blight_fungus','dragonblood'): self.assertNotIn(name,trees.SHAPES)
 
     def test_fruit_is_visible_and_evergreen_art_is_dense(self):
         art=olive_textures.textures()

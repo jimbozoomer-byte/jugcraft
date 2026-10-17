@@ -94,3 +94,7 @@ Results are recorded under "Results" below after CI runs.
 Tree roster batch 5 draws 4% of Woodland's existing tree attempts from ordinary oak into elder shrubs. The 9/10 attempts per chunk, fancy oaks, oak bushes, fallen logs and other decoration remain unchanged. See [the implementation and verification record](trees-batch-5.md).
 
 Tree roster batch 6b adds 4% holly to Woodland from ordinary oak and 5% to Dense Forest from oak bushes. Attempt counts and every other species share are preserved. Holly stays green under winter snow, with decorative sprigs clipped using shears and crafted into a permanent Holly Wreath. See [the holly implementation record](trees-batch-6b.md).
+
+## Tree batches 8–8c update
+
+Tree batch 8 replaces Eucalyptus Forest's 20% oak bushes with wattle bushes. Ordinary eucalyptus remains 47%, big eucalyptus 25%, giant eucalyptus 8%, at 8–9 planting attempts/chunk. See [implementation and verification](trees-batch-8abc.md).

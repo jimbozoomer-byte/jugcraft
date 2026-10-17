@@ -14,6 +14,27 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "umbrella_pine": {"wood": "pine", "tree": "stone_pine",
+                      "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "umbrella", "base_height": 8, "height_rand_a": 2},
+                      "foliage": {"type": "acacia", "radius": 3, "offset": 0}},
+    "stone_pine": {"wood": "pine", "tree": "stone_pine", "sapling": True,
+                   "trunk": {"type": "straight", "base_height": 5, "height_rand_a": 4},
+                   "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 2}},
+    "pinyon": {"wood": "pine", "tree": "stone_pine", "survives_as": "minecraft:dead_bush",
+               "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "small", "base_height": 3, "height_rand_a": 2},
+               "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 1}},
+    "wattle": {"wood": "minecraft:acacia", "tree": "wattle", "sapling": True,
+               "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "small", "base_height": 3, "height_rand_a": 2},
+               "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 1}},
+    "wattle_bush": {"wood": "minecraft:acacia", "tree": "wattle",
+                    "trunk": {"type": "straight", "base_height": 1, "height_rand_a": 0},
+                    "foliage": {"type": "bush", "radius": 2, "offset": 1, "height": 2}},
+    "tamarisk": {"wood": "tamarisk", "sapling": True, "survives_as": "minecraft:dead_bush",
+                 "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "tamarisk", "base_height": 3, "height_rand_a": 2},
+                 "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 1}},
+    "joshua_tree": {"wood": "yucca", "tree": "joshua_tree", "sapling": True, "survives_as": "minecraft:dead_bush",
+                    "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "joshua", "base_height": 3, "height_rand_a": 2},
+                    "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 1}},
     # Native connected crown layers avoid isolated random-spread leaf blocks.
     "olive": {"wood": "olive", "sapling": True,
               "trunk": {"type": "jugcraft:olive_trunk_placer", "base_height": 4, "height_rand_a": 1, "height_rand_b": 1},
