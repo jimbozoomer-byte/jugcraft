@@ -837,6 +837,24 @@
         {
           "in": [
             [
+              "jugcraft:aluminum_ingot",
+              3
+            ],
+            [
+              "jugcraft:magnesium_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:magnalium_ingot",
+            4
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "jugcraft:rare_earth_oxide",
               1
             ],
@@ -1089,6 +1107,20 @@
           ],
           "out": [
             "jugcraft:thallite_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "jugcraft:magnalium_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:magnalium_plate",
             1
           ],
           "extra": [],

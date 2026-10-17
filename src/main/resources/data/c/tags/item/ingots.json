@@ -15,6 +15,7 @@
     "#c:ingots/brass",
     "#c:ingots/invar",
     "#c:ingots/solder",
-    "#c:ingots/steel"
+    "#c:ingots/steel",
+    "#c:ingots/magnalium"
   ]
 }

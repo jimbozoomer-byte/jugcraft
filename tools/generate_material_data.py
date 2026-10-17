@@ -1301,6 +1301,18 @@ def recipes():
         write(out / f"{name}.json", recipe)
     drone_recipes(out)
 
+    # Magnalium (docs/features/magnalium.md): the stiffer alloy's plates make more cladding panels and propellers than
+    # plain aluminum's.
+    light = [c for f in (MACHINE_FEATURE, "drones", "aluminum") for c in condition(f)]
+    for name, recipe in (
+            ("aluminum_cladding_from_magnalium",
+             shaped(MACHINE_FEATURE, ["PP", "PP"], {"P": "#c:plates/magnalium"}, "aluminum_cladding", 6, "building")),
+            ("aluminum_propeller_set_from_magnalium",
+             shaped(MACHINE_FEATURE, ["P P", " S ", "P P"], {"P": "#c:plates/magnalium", "S": "minecraft:stick"},
+                    "aluminum_propeller_set", 2))):
+        recipe["fabric:load_conditions"] = light
+        write(out / f"{name}.json", recipe)
+
     # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
     boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]
     for name, recipe in (

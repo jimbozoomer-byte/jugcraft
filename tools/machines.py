@@ -717,6 +717,9 @@ ALLOY_SMELTER = [
      "count": 3, "ticks": 240, "features": [FEATURE, "nickel"]},
     {"inputs": [["jugcraft:tin_ingot", 1], ["jugcraft:lead_ingot", 1]], "output": "jugcraft:solder_ingot",
      "count": 2, "ticks": 120, "features": [FEATURE, "tin", "lead"]},
+    # Magnalium (docs/features/magnalium.md): three aluminum to one magnesium from the coastal magnesium cell.
+    {"inputs": [["jugcraft:aluminum_ingot", 3], ["jugcraft:magnesium_ingot", 1]], "output": "jugcraft:magnalium_ingot",
+     "count": 4, "ticks": 200, "features": [FEATURE, "aluminum"]},
     # Batch 6: rare earths alloyed with iron (and boron, left out) make neodymium magnets.
     {"inputs": [["jugcraft:rare_earth_oxide", 1], ["minecraft:iron_ingot", 1]], "output": "jugcraft:neodymium_magnet",
      "count": 1, "ticks": 200, "features": [FEATURE, "rare_earths"]},
