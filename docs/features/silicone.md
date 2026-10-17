@@ -66,7 +66,7 @@ No texture is copied.
 
 ### Results
 
-The first fork Build run, [38973357673](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38973357673), failed only on that recipe count (22 found, 21 expected). All eight rendered-client shards passed. A second run follows the fix.
+The first fork Build run, [38973357673](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38973357673), failed only on that recipe count (22 found, 21 expected). All eight rendered-client shards passed in it. After the fix, fork Build run [38978639713](https://github.com/mmme123-spec/jugcraftfork/actions/runs/38978639713) on commit `516684dd` passed on its second attempt. That covers the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all eight rendered-client shards. The first attempt's client shard 5 failed only on the unrelated `PeepoPopulationClientTests` companion check timing out. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
