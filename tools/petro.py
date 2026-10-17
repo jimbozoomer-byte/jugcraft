@@ -614,3 +614,8 @@ from fluorochemistry import FLUIDS as FLUORO_FLUIDS, GASES as FLUORO_GASES, ITEM
 FLUIDS.update({k: v for k, v in FLUORO_FLUIDS.items() if k not in FLUIDS})
 GASES.update({k: v for k, v in FLUORO_GASES.items() if k not in GASES})
 ITEMS.update({k: v for k, v in FLUORO_ITEMS.items() if k not in ITEMS})
+# Liquid methane (docs/features/methalox.md): methane condensed in the cryogenic liquefier, a rocket fuel. Last, so the
+# textures drawn by index for the fluids before it keep their seeds.
+FLUIDS["liquid_methane"] = {"display": "Liquid Methane", "feature": "machines",
+                            "colors": [(96, 112, 120), (138, 154, 162), (182, 196, 202), (226, 234, 238)],
+                            "tick_delay": 3, "slope": 4, "drop_off": 1}

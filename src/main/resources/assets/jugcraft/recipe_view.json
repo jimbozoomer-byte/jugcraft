@@ -5755,6 +5755,28 @@
         {
           "in": [
             [
+              "jugcraft:methane_tank",
+              1
+            ],
+            [
+              "jugcraft:lox_tank",
+              1
+            ],
+            [
+              "jugcraft:rocket_nozzle",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:rocket_motor",
+            4
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "jugcraft:rocket_motor",
               1
             ],
@@ -7486,6 +7508,29 @@
           ],
           "ticks": 60,
           "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rocket_casing",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:liquid_methane",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methane_tank",
+              1
+            ]
+          ],
+          "ticks": 60,
+          "retained_inputs": []
         }
       ]
     },
@@ -7897,6 +7942,24 @@
           "fluid_results": [
             [
               "jugcraft:liquid_oxygen",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 80,
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:methane",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:liquid_methane",
               250
             ]
           ],

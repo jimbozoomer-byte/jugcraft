@@ -55,6 +55,8 @@ ITEMS = {
     # Batch 43: liquid fuels.
     "kerosene_tank": "Kerosene Tank",
     "lox_tank": "Liquid Oxygen Tank",
+    # Methane/LOX (docs/features/methalox.md): liquefied methane, the fuel without crude oil.
+    "methane_tank": "Liquid Methane Tank",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -77,6 +79,7 @@ TOOLTIPS = {
     "he_rocket": "Rocket launcher ammunition: a big blast where it hits (12 hearts at the centre, 5 blocks across).",
     "kerosene_tank": "A rocket casing filled with RP-1 kerosene, the fuel of a liquid rocket motor.",
     "lox_tank": "A rocket casing filled with liquid oxygen, the oxidizer of a liquid rocket motor.",
+    "methane_tank": "A rocket casing filled with liquid methane, a cleaner-burning fuel for a liquid rocket motor.",
     "homing_rocket": "Rocket launcher ammunition: locks on to the hostile mob nearest your crosshair within 48 blocks "
                      "and steers into it. A smaller blast.",
 }
@@ -144,6 +147,11 @@ def workshop_recipes():
         # Batch 43: a liquid rocket motor pair, kerosene and liquid oxygen feeding one nozzle each.
         {"name": "liquid_rocket_motor", "inputs": [[rid("kerosene_tank"), 1], [rid("lox_tank"), 1], [rid("rocket_nozzle"), 2]],
          "output": rid("rocket_motor"), "count": 3, "ticks": 200, "features": feature + ["crude_oil"]},
+        # Methane/LOX (docs/features/methalox.md): liquid methane burns hotter and cleaner than kerosene, so the pair
+        # loads four motors, and needs no crude oil (methane comes from biogas or methanation).
+        {"name": "methalox_rocket_motor",
+         "inputs": [[rid("methane_tank"), 1], [rid("lox_tank"), 1], [rid("rocket_nozzle"), 2]],
+         "output": rid("rocket_motor"), "count": 4, "ticks": 200, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("guidance_unit"), 1], [rid("sensor"), 1]],
          "output": rid("survey_rocket"), "count": 1, "ticks": 300, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("silver_iodide"), 2]],
@@ -178,6 +186,9 @@ LIQUEFIER_RECIPES = [
     # Oxygen gas condensed to liquid at -183 C: four parts of gas to one of liquid, power doing the cooling.
     {"name": "liquid_oxygen", "fluids": [("jugcraft:oxygen", 1000)], "fluid_results": [("jugcraft:liquid_oxygen", 250)],
      "ticks": 80, "features": ["machines"]},
+    # Methane condensed at -162 C (docs/features/methalox.md), at the same four-to-one as oxygen.
+    {"name": "liquid_methane", "fluids": [("jugcraft:methane", 1000)], "fluid_results": [("jugcraft:liquid_methane", 250)],
+     "ticks": 80, "features": ["machines"]},
 ]
 # Hydrocracking in the catalytic cracker: heavy fuel oil and hydrogen (in the water tank) over the catalyst give RP-1
 # kerosene (the naphtha tank) and a little refinery gas.
@@ -193,6 +204,8 @@ TANK_RECIPES = [
      "results": [("jugcraft:kerosene_tank", 1)], "ticks": 60, "features": ["machines", "crude_oil"]},
     {"name": "lox_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:liquid_oxygen", 1000)],
      "results": [("jugcraft:lox_tank", 1)], "ticks": 60, "features": ["machines"]},
+    {"name": "methane_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:liquid_methane", 1000)],
+     "results": [("jugcraft:methane_tank", 1)], "ticks": 60, "features": ["machines"]},
 ]
 
 # Chemical reactor recipes (tools/petro.py FLUID_RECIPES["chemical_reactor"]).
@@ -523,7 +536,8 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "delivery_rocket": lambda: delivery_rocket(), "flight_plan": lambda: flight_plan(),
             "line_rocket": lambda: line_rocket(), "rocket_launcher": lambda: rocket_launcher(),
             "he_rocket": lambda: he_rocket(), "homing_rocket": lambda: homing_rocket(),
-            "kerosene_tank": lambda: propellant_tank(False), "lox_tank": lambda: propellant_tank(True)}
+            "kerosene_tank": lambda: propellant_tank(False), "lox_tank": lambda: propellant_tank(True),
+            "methane_tank": lambda: methane_tank()}
 
 
 def propellant_tank(oxygen):
@@ -540,6 +554,41 @@ def propellant_tank(oxygen):
         for x, y in ((22, 16), (26, 14), (40, 15), (43, 18), (20, 52), (44, 50)):
             c.disc((x, y), 1.6, hd.WHITE_PAINT, 0.6)
     return c.finish()
+
+
+def methane_tank():
+    """Liquid methane tank (docs/features/methalox.md), 16x16 in the owner's manner (docs/ITEM_ICONS.md): the propellant
+    tanks' upright steel casing with an olive band, a red fuel valve on top and frost on its sides, lit from the top
+    left and outlined in each part's own dark."""
+    from PIL import Image
+    tones = {"O": (52, 56, 66), "H": (232, 236, 240), "L": (196, 202, 210), "M": (150, 158, 170),
+             "D": (104, 112, 124), "S": (90, 96, 108), "R": (110, 24, 20), "r": (210, 64, 52),
+             "g": (50, 59, 32), "G": (156, 170, 110), "m": (110, 124, 72), "W": (250, 252, 255)}
+    rows = [
+        "................",
+        "......RRRR......",
+        "......RrrR......",
+        "......RRRR......",
+        ".......SS.......",
+        "....OOOOOOOO....",
+        "...OHLWLMMMDO...",
+        "...OHLLLMMWDO...",
+        "...OHLLLMMMDO...",
+        "...gGGGmmmmmg...",
+        "...gGGGmmmmmg...",
+        "...OHLLLMMMDO...",
+        "...OHWLLMMMDO...",
+        "...OHLLLMMWDO...",
+        "....OOOOOOOO....",
+        "................",
+    ]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        assert len(row) == 16, row
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
 
 
 def rocket_launcher():

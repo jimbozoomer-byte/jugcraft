@@ -197,6 +197,8 @@ public final class PetroFluids {
 
 	public static Entry CONCENTRATED_SULFURIC_ACID;
 	public static Entry CHLOROFORM;
+	/** Methane liquefied in the cryogenic liquefier (docs/features/methalox.md), a rocket fuel. */
+	public static Entry LIQUID_METHANE;
 	public static Gas HYDROGEN_FLUORIDE;
 	public static Gas CHLORODIFLUOROMETHANE;
 	public static Gas TETRAFLUOROETHYLENE;
@@ -267,6 +269,7 @@ public final class PetroFluids {
 
 		CONCENTRATED_SULFURIC_ACID = fluid("concentrated_sulfuric_acid", 8, 3, 1, 0xFF756E33, MapColor.COLOR_LIGHT_GRAY);
 		CHLOROFORM = fluid("chloroform", 8, 3, 1, 0xFF567769, MapColor.COLOR_LIGHT_GRAY);
+		LIQUID_METHANE = fluid("liquid_methane", 3, 4, 1, 0xFFB6C4CA, MapColor.COLOR_LIGHT_GRAY);
 		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
 		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
 		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);
