@@ -192,6 +192,10 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "olives": {"display": "Olives", "food": [1, 0.1], "compost": "medium", "tags": ["c:foods/fruit"]},
+    "holly_sprig": {"display": "Holly Sprig", "compost": "low", "tags": []},
+    "juniper_berries": {"display": "Juniper Berries", "food": [1, 0.1], "compost": "medium",
+                        "tags": ["c:foods/berry", "minecraft:fox_food"]},
     "haws": {"display": "Haws", "food": [1, 0.1], "compost": "medium", "tags": ["c:foods/berry", "minecraft:fox_food"]},
     "persimmon": {"display": "Persimmon", "food": [3, 0.3], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable"]},
     "rowan_berries": {"display": "Rowan Berries", "food": [1, 0.1], "compost": "medium",
@@ -424,7 +428,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
              "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
-             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon"}
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -433,7 +437,7 @@ WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "bio
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
                  "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"]}
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes"], "holly": ["biomes"], "olive": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -461,6 +465,20 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 # "seasonal_drop": fruit item and green/gold/bare loot chances; natural leaves only, without Silk Touch/shears.
 TREES = {
+    "olive": {"leaves": "olive_leaves", "leaves_display": "Olive Leaves", "season": None, "base": "oak",
+              "giant": "ancient_olive", "fruit": {"item": "olives", "min": 1, "max": 2, "chance": 10}},
+    "olive_bush": {"wood": "olive", "display": "Wild Olive Bush", "farm_yield": 1,
+                   "leaves": "wild_olive_leaves", "leaves_display": "Wild Olive Leaves", "season": None, "base": "oak"},
+    "holly": {"leaves": "holly_leaves", "leaves_display": "Holly Leaves", "season": [100, 300, 335],
+              "autumn": {"berries": 1}, "base": "oak", "clip_sprig": "holly_sprig"},
+    "juniper": {"leaves": "juniper_needles", "leaves_display": "Juniper Needles", "season": None, "base": "spruce",
+                "sapling_shapes": {"juniper": 2, "juniper_column": 1, "juniper_bush": 1},
+                "fruit": {"item": "juniper_berries", "min": 1, "max": 2, "chance": 10, "exposed_sides": True}},
+    "gorse": {"wood": "minecraft:oak", "display": "Gorse", "switches": ["biomes"], "farm_yield": 1,
+              "leaves": "gorse_leaves", "leaves_display": "Gorse Leaves", "season": None, "base": "oak",
+              "leaf_tags": ["minecraft:flowers"], "leaf_block_tags": ["minecraft:bee_attractive"]},
+    "sagebrush": {"wood": "dead", "display": "Sagebrush", "switches": ["biomes"], "farm_yield": 1,
+                  "leaves": "sagebrush_leaves", "leaves_display": "Sagebrush Leaves", "season": None, "base": "oak"},
     "hawthorn": {"wood": "fruitwood", "display": "Hawthorn", "leaves": "hawthorn_leaves", "leaves_display": "Hawthorn Leaves",
                  "season": [85, 280, 325], "autumn": {"gold": 1}, "base": "oak",
                  "sapling_shapes": {"hawthorn": 1, "hawthorn_bush": 3},
@@ -537,6 +555,9 @@ def tree_switches(tree):
 def leaf_looks(tree):
     """Texture (and model) names for each state of a tree's leaves: {state: {texture: weight}}."""
     leaves = TREES[tree]["leaves"]
+    if tree == "holly":
+        return {"green": {leaves: 2, f"{leaves}_berries": 1},
+                "gold": {f"{leaves}_berries": 1}, "bare": {f"{leaves}_berries": 1}}
     if TREES[tree]["season"] is None:
         return {None: {leaves: 1}}
     return {"green": {leaves: 1}, "gold": {f"{leaves}_{look}": weight for look, weight in TREES[tree]["autumn"].items()},
@@ -1160,7 +1181,7 @@ def leaf_piles():
 
 
 def decor5_blocks():
-    return [BOBBING_TUB["block"], PUMPKIN_CRATE["block"], HAY_BALE_SEAT["block"], AUTUMN_WREATH["block"]] + leaf_piles()
+    return [BOBBING_TUB["block"], PUMPKIN_CRATE["block"], HAY_BALE_SEAT["block"], AUTUMN_WREATH["block"], "holly_wreath"] + leaf_piles()
 
 
 def decor5_items():
@@ -1585,6 +1606,7 @@ PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vine
               "cranberry_preserves": {"display": "Cranberry Preserves", "food": [3, 0.4], "effect": None, "color": 0xB0122E, "kind": "sweet"},
               "glow_berry_jelly": {"display": "Glow Berry Jelly", "food": [2, 0.3], "effect": ["NIGHT_VISION", 30], "color": 0xF0B030,
                                    "kind": "sweet"},
+              "pickled_olives": {"display": "Pickled Olives", "food": [2, 0.4], "effect": None, "color": 0x5A3F55, "kind": "pickle"},
               "pickled_beets": {"display": "Pickled Beets", "food": [2, 0.4], "effect": None, "color": 0x7A1040, "kind": "pickle"},
               "pickled_peppers": {"display": "Pickled Peppers", "food": [2, 0.4], "effect": ["FIRE_RESISTANCE", 15], "color": 0x4A8A2A,
                                   "kind": "pickle"},
@@ -2176,6 +2198,7 @@ POT_RECIPES = {
                                  "minecraft:potato": 1}, "time": 200},
     # Bunker interiors (batch 59, tools/bunkerworks.py TRENCH_STEW).
     "trench_stew": {"inputs": {"minecraft:bowl": 1, "minecraft:beef": 1, "minecraft:potato": 1, "minecraft:carrot": 1}, "time": 300},
+    "pickled_olives": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:olives": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "pickled_beets": {"inputs": {"jugcraft:mason_jar": 1, "minecraft:beetroot": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "pickled_peppers": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:pepper": 4, "jugcraft:cider_vinegar": 1}, "time": 300},
     "corn_relish": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:corn": 2, "jugcraft:pepper": 1, "jugcraft:onion": 1,
@@ -2188,6 +2211,8 @@ for _cake, _info in LANTERNS["mooncakes"].items():
 
 # Crafting. result: an ID (jugcraft unless namespaced) and count. features: switches besides agriculture.
 SHAPELESS = [
+    {"id": "mulling_spices_from_juniper", "inputs": ["minecraft:sugar", "jugcraft:juniper_berries", "minecraft:cocoa_beans"],
+     "result": "mulling_spices", "count": 2, "category": "misc"},
     {"id": "purple_dye_from_elderberries", "inputs": ["jugcraft:elderberries"], "result": "minecraft:purple_dye",
      "count": 1, "category": "misc", "switch": ["biomes"]},
     {"id": "red_dye_from_yew_arils", "inputs": ["jugcraft:yew_arils"], "result": "minecraft:red_dye", "count": 1,
@@ -2429,6 +2454,8 @@ SHAPED = [
      "result": "bobbing_tub", "count": 1, "category": "misc"},
     {"id": "pumpkin_crate", "pattern": ["S S", "SSS"], "key": {"S": "#minecraft:wooden_slabs"}, "result": "pumpkin_crate", "count": 1,
      "category": "building"},
+    {"id": "holly_wreath", "pattern": ["HHH", "HSH", "HHH"], "key": {"H": "jugcraft:holly_sprig", "S": "minecraft:string"},
+     "result": "holly_wreath", "count": 1, "category": "building"},
     {"id": "autumn_wreath_yellow", "pattern": ["LCL", "L L", "LML"], "key": {"L": "jugcraft:chestnut_leaves", "C": "jugcraft:ornamental_corn",
                                                                           "M": "jugcraft:yellow_mum"},
      "result": "autumn_wreath", "count": 1, "category": "building", "group": "autumn_wreath",

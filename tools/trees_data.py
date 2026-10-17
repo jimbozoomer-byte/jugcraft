@@ -41,6 +41,10 @@ def assets(root, write):
             state = {"variants": {"": variants(looks[None])}}
         else:
             state = {"variants": {f"season={season}": variants(looks[season]) for season in SEASON_STATES}}
+        if "clip_sprig" in info:
+            state = {"variants": {f"clipped={str(clipped).lower()},season={season}":
+                                  variants({leaves: 1} if clipped else choices)
+                                  for season, choices in looks.items() for clipped in (False, True)}}
         if "fruit" in info:
             fruit_variants = {}
             for season, choices in looks.items():
@@ -112,6 +116,10 @@ def tags(tags):
         for registry in ("block", "item"):
             tags.add(registry, "minecraft:leaves", rid(info["leaves"]))
             tags.add(registry, "minecraft:saplings", rid(sapling(tree)))
+            for tag in info.get("leaf_tags", []):
+                tags.add(registry, tag, rid(info["leaves"]))
+        for tag in info.get("leaf_block_tags", []):
+            tags.add("block", tag, rid(info["leaves"]))
 
 
 def uniform(value):
@@ -121,7 +129,7 @@ def uniform(value):
 
 
 def trunk_placer(trunk):
-    out = {"type": f"minecraft:{trunk['type']}_trunk_placer", "base_height": trunk["base_height"],
+    out = {"type": trunk["type"] if ":" in trunk["type"] else f"minecraft:{trunk['type']}_trunk_placer", "base_height": trunk["base_height"],
            "height_rand_a": trunk["height_rand_a"], "height_rand_b": trunk.get("height_rand_b", 0)}
     # Any other field of vanilla's placer (the bending trunk's bend length, for example), ranges as uniform.
     out.update({key: uniform(value) for key, value in trunk.items() if key not in ("type", "base_height", "height_rand_a", "height_rand_b")})

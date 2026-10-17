@@ -2,6 +2,12 @@
   "replace": false,
   "values": [
     "jugcraft:chestnut_sapling",
+    "jugcraft:olive_sapling",
+    "jugcraft:olive_bush_sapling",
+    "jugcraft:holly_sapling",
+    "jugcraft:juniper_sapling",
+    "jugcraft:gorse_sapling",
+    "jugcraft:sagebrush_sapling",
     "jugcraft:hawthorn_sapling",
     "jugcraft:persimmon_sapling",
     "jugcraft:rowan_sapling",
