@@ -59,6 +59,12 @@ The exported world contains a separate authored gallery and untouched natural bi
 
 Not claimed: two independent clients, dedicated-server deployment, external launcher import, live season transitions, global frequency measurements, or a prior-release world upgrade.
 
+## Delivery
+
+Gameplay/art source: `273e6bac146e74fd3034833e45d914fa9523e895`. The matching `Jugcraft-Tree-Batches-8-8c.mrpack`, `Tree-Batches-8-8c-World.zip`, standalone JAR, tour, thirty screenshots and SHA-256 checksums were delivered in the local `tree-batch-8abc-2026-10-17` folder. Both archive integrity checks, every world file, the exact built JAR and all eighteen locked dependency entries passed. All 1,474 generated tree/biome/recipe resources also match the delivered JAR; no obsolete Grassland selector remains.
+
+Ordinary `runClient -I build/tree-batch-8abc-runtime.init.gradle` opened the cleaned save successfully and the local player joined. The original export, delivery save and earlier inspection worlds are preserved; the open game uses a separate runtime copy. These delivery notes change no gameplay or art after the recorded source commit.
+
 ## Rendered evidence
 
 ![Umbrella pine](../images/trees-batch-8abc/umbrella_pine_close.png)
