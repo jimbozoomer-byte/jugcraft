@@ -38,6 +38,8 @@ This makes a small, power-cheap hydrogen source for early fuel cells, the Gas Bu
 
 **Server game test for CI:** `ZincHydrogenGameTests.reactorDissolvesZincIntoHydrogen` checks the recipe takes a zinc ingot and 500 mB of hydrochloric acid and gives 500 mB of hydrogen.
 
+**Results:** the fork's Build workflow passed on commit 84244fc2 ([run 39168464393](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39168464393)): compilation, the headless server game tests and the rendered-client shards.
+
 **Not run:** an in-game reactor batch.
 
 ## AI attribution
