@@ -39,6 +39,8 @@ Casings go into every rocket motor, propellant tank (kerosene, liquid oxygen and
 
 **Server game test for CI:** `TitaniumCasingGameTests.workshopMakesCasingsFromTitanium` checks that the Rocket Workshop makes two rocket casings from two titanium plates.
 
+**Results:** the fork's Build workflow passed on commit f485bac3 ([run 39171276025](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39171276025)): compilation, the headless server game tests and the rendered-client shards.
+
 **Not run:** an in-game workshop batch.
 
 ## AI attribution
