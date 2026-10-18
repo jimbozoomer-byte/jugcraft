@@ -1,13 +1,18 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -20,7 +25,26 @@ public class TreeBatchFourBCClientGameTests extends TreeBatchTwoClientGameTests 
 	@Override protected String exportName() { return "tree-batch-4bc-preview"; }
 	@Override protected String screenshotPrefix() { return "jugcraft_tree4bc_"; }
 	@Override protected boolean includeSubmergedColumns() { return true; }
+	@Override protected BlockPos surveySpot(ServerLevel level, BlockPos first, ResourceKey<Biome> biome) {
+		if (!biome.identifier().getPath().equals("bayou")) return first;
+		// surfaceSpot prefers dry ground. One screenshot window need not contain an over-water limb:
+		// the solid cypress roots replace water rather than retaining it in their own columns.
+		// Keep the natural wet-timber assertion, with a bounded search like the other tree surveys.
+		var visited = new HashSet<BlockPos>();
+		for (int[] offset : new int[][] {{0, 0}, {256, 0}, {-256, 0}, {0, 256}, {0, -256},
+				{256, 256}, {-256, -256}, {256, -256}, {-256, 256}}) {
+			BlockPos at = offset[0] == 0 && offset[1] == 0 ? first
+					: BiomeClientGameTests.surfaceSpot(level, first.offset(offset[0], 0, offset[1]), biome);
+			if (at == null || !visited.add(at)) continue;
+			var counts = survey(level, at, biome, true);
+			Jugcraft.LOGGER.info("[tree 4bc Bayou sample] {}: {}", at, counts);
+			if (counts.getOrDefault("leaf:jugcraft:bald_cypress_needles", 0) > 0
+					&& counts.getOrDefault("wet_log:jugcraft:bald_cypress_log", 0) > 0) return at;
+		}
+		throw new AssertionError("No natural cypress timber over wet Bayou columns in " + visited.size() + " samples");
+	}
 	@Override protected void validateSurvey(String biome, Map<String, Integer> survey) {
+		Jugcraft.LOGGER.info("[tree 4bc survey] {}: {}", biome, survey);
 		String leaves = biome.equals("flower_isle") ? "magnolia_leaves" : "bald_cypress_needles";
 		if (survey.getOrDefault("leaf:jugcraft:" + leaves, 0) == 0) throw new AssertionError("No new foliage in " + biome);
 		if (biome.equals("bayou") && survey.getOrDefault("wet_log:jugcraft:bald_cypress_log", 0) == 0)
