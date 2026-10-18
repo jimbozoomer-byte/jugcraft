@@ -53,6 +53,81 @@ currency or mandatory research gate.
 This is a first storage integration, not complete parity with the older mod's
 storage/crafting system or its Book Wyrm familiar. Aggregated search, crafting
 requests, physical item-delivery jobs and familiar effects remain port work.
+
+## Second player outcome: Starbuncle delivery
+
+The owner confirmed: **use the files already in the repository**. This chunk,
+implemented with OpenAI Codex, adds a complete chest-to-chest helper locally on
+top of `4768ff667`. An October 18 read of all 34 open PR titles/branches found no
+Jug Nouveau/Starbuncle contribution. Existing local packages remain intact.
+
+- **Acquisition and setup:** craft a Starbuncle Charm with three gold ingots,
+  amethyst and sugar; use it on clear ground. Use the Dominion Wand on the
+  Starbuncle, then a pickup chest/barrel, then a delivery chest/barrel within
+  32 blocks of the first. No research prerequisite. Selecting a lectern switches
+  the wand back to Book Wyrm storage; sneak-use a chest restarts route selection.
+- **Connected workshop:** transports up to 16 items of one kind per trip between
+  real vanilla containers. Technology or magic workshops may feed those chests
+  with their existing automation. No new energy, currency or upkeep. This is a
+  short-range creature alternative, not a replacement for item pipes or the
+  powered Clockwork Porter's courier-post request service.
+- **Shared systems:** extends `WorkerEntity` for SmartBrainLib navigation,
+  once-per-second staggered decisions, failure statuses, signs and worker roster;
+  reuses the existing route codec/component, Authority, parties and RateGate.
+  `NouveauStorage` provides the same locked-chest/vanilla-storage boundary for
+  both Book Wyrms and Starbuncles. No arbitrary mod-private inventory access.
+- **Presentation:** original Starbuncle geometry, idle/run animation file,
+  sixteen color textures and charm icon (19 additional unchanged source files).
+  GeckoLib owns the posing; a display-only synced item appears on the model's
+  existing item bone over its basket. Dyeing and packing retain the color.
+  Runtime paths, registration and rendering code are technical adaptations;
+  source designs and originals remain unchanged.
+- **Failure/recovery:** full, locked, removed, newly protected or unloaded
+  destinations stop transfers and keep cargo. Owner absence pauses work by
+  default, using the existing server option if enabled. Cargo is removed only
+  at pickup, stored once on the entity, and inserted only upon physical arrival.
+  Assignment is refused while carrying. Sneak-use empty-handed returns the
+  color-preserving charm and cargo as drops; destruction also refunds them once.
+  Unloading does not drop anything. No chunk tickets or world-wide searches.
+- **Bounds and saves:** eight Starbuncles per owner, including unloaded entries,
+  within the shared 32-worker roster. One stack up to 16 items, two endpoints,
+  32-block endpoint separation and at most 27 slots examined per decision.
+  Owner, color, route and full item components persist with the entity; synced
+  cargo is rendering data only. Existing IDs/saves keep their meaning.
+
+The original charm recipe uses an enchanting apparatus and Starbuncle shards.
+That source recipe is preserved unchanged; the reachable crafting recipe above
+is an explicit bridge until its workshop and acquisition are ported. Natural
+spawning/taming, loose-item gathering, filters/multiple routes, accessories,
+special cosmetic models, familiar effects and courier-post jobs remain separate
+port work. This is not full original-mod parity.
+
+Validation on October 18:
+
+- `gradlew.bat build runClientGameTest
+  -PclientTests=JugNouveauClientGameTests,StarbuncleClientGameTests --offline`:
+  **all 1,945 required server game tests passed**, and both client suites passed.
+  The eight new server cases cover ordinary charm/wand clicks without research,
+  real concurrent cargo, full/locked storage, save/load, invalid routes/owners,
+  recovery and roster caps. The client actually navigated and delivered two
+  16-item loads, and rendered all sixteen colors and the existing storage UI.
+- `tools/check_mod_data.py`: passed (3,025 material IDs, recipe/data checks and
+  the model/owner-art audits). All **34** Jug Nouveau runtime resource files also
+  match their source bytes in a direct comparison.
+- `scripts/check_repository.py`, `scripts/package_modrinth.py check` and
+  `git diff --check`: passed. Player-facing codex text matches its generator.
+- Final targeted `StarbuncleClientGameTests` rerun and JAR/source-JAR rebuild
+  passed after the status/codex wording cleanup. The additional close-up asserts
+  real cargo synchronization; its screenshot shows the diamond on the supplied
+  basket item bone. No gameplay logic changed after the full server run.
+- Packaged locally as `jugcraft-complete-nouveau-couriers-oct18.mrpack`, alongside
+  instructions, screenshots and a source/hash record. The pack retains the
+  existing Book Wyrm feature and other local branch content. Nothing pushed.
+
+These are independent disposable automated worlds; no owner's Modrinth session
+was operated. Human survival balance, independent multiplayer, full restart and
+unloaded-boundary field testing, and measured large-workshop performance remain
+unverified. The first port's broader release requirements below still apply.
 The menu shows one real linked container at a time. Double-chest halves are
 separate links. Wyrms fly between their home and loaded links; they are not a
 second item-transport inventory. Existing delivery workers remain separate.

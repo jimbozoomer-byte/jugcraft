@@ -257,8 +257,10 @@
       "source": "assets/ars_jimbaux/animations/starbuncle_animations.json",
       "sha256": "f0e111f2f5bf1c5a67b328004525b9e5d43b8e09f7bb70160e42b6a252b9d592",
       "kind": "animation JSON",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "geckolib/animations/entity/starbuncle.animation.json"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/animations/storage_catalog_animations.json",
@@ -2334,8 +2336,10 @@
       "source": "assets/ars_jimbaux/geo/starbuncle.geo.json",
       "sha256": "21228cb5a0004b5e99ec0565684aac3684916b6965d1eca0fb72c6a71eeaafe2",
       "kind": "model JSON",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "geckolib/models/entity/starbuncle.geo.json"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/geo/starbuncle_jarva.geo.json",
@@ -11063,29 +11067,37 @@
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_black.png",
       "sha256": "f4633abd3137987c171fe734fe9af0c4bdc2bda04c927c8de5f06301debe03f9",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_black.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_blue.png",
       "sha256": "b6a64c4c6748fe06425156caa6977500fce3e717d8e0db2e7cd9d6568814826a",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_blue.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_brown.png",
       "sha256": "31ab92899252ec85de5ab6ffc712413084ddd18a46b6a7c27d00a6f263bec812",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_brown.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_cyan.png",
       "sha256": "c88f1be0f25cd8ecefe750807b8bbb59e9fcb87b8bfad66e93e4167dbb51270a",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_cyan.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_goo.png",
@@ -11098,15 +11110,19 @@
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_gray.png",
       "sha256": "5420dbc1419a67d6997dd59567476e37cf553a5accd53c4362825907929c8847",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_gray.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_green.png",
       "sha256": "6477e7728e6afa973d8404db53d7f1827c407b214c7adb176722bf215b3a63ac",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_green.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_jarva.png",
@@ -11119,29 +11135,37 @@
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_light_blue.png",
       "sha256": "8b4962eaa9ed0d044d9cef32946c152348f2897d314e511938908e7d10b9ceb0",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_light_blue.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_light_gray.png",
       "sha256": "f7bdeb68f8bf52f27aaa5580284bcc6310f38e578436f2f93c7854e5c92311c4",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_light_gray.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_lime.png",
       "sha256": "2dc22203c55c7370c8e40de0e7067fc0fb62e8359466249282e9fb9c7a885f59",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_lime.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_magenta.png",
       "sha256": "5abccbaee4aace2698281ae1c16997fd793d96f6d212f8fe77e15657ea8e6d87",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_magenta.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_mask.png",
@@ -11154,43 +11178,55 @@
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_orange.png",
       "sha256": "e4a89425c6f2b2138ceaa413e6080294ef4f8b027c67499219a8b239234b9c97",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_orange.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_pink.png",
       "sha256": "0a21b5cdabb5cddbd6494318d011fb701a41ee7d78931259fe624ab6ae8291a8",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_pink.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_purple.png",
       "sha256": "779911bc9f8ae895b7366c656a972983f04a8fc1c299bf52d8efd62ced91f95d",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_purple.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_red.png",
       "sha256": "388935a42457cb2dd7ffade97f024011d644d8e440e184951b058cc1946ac915",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_red.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_white.png",
       "sha256": "a6eb4564eeb33b5096e47864e53590ddc46bcc66f2b2288cfd111946f7f3c34a",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_white.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/starbuncle_yellow.png",
       "sha256": "d86beab0af9f795100e10dc163f06c57ffa79fa44c76d300901a32d170b33307",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/entity/starbuncle_yellow.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/entity/vexing_weald_waddler.png",
@@ -14658,8 +14694,10 @@
       "source": "assets/ars_jimbaux/textures/item/starbuncle_charm.png",
       "sha256": "52781ae23fc7152a99829da3bef1418a79f689db1d261311222a03f87ec7d333",
       "kind": "texture",
-      "jug_nouveau_runtime": null,
-      "status": "available_for_port"
+      "jug_nouveau_runtime": [
+        "textures/item/starbuncle_charm.png"
+      ],
+      "status": "integrated_starbuncle"
     },
     {
       "source": "assets/ars_jimbaux/textures/item/starbuncle_shades.png",

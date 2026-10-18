@@ -17,8 +17,29 @@ import org.jspecify.annotations.Nullable;
 /** GeckoLib owns all posing; the server owns links, colors and movement. */
 public final class JugNouveauClient {
     private static final DataTicket<Integer> COLOR=DataTicket.create("jugcraft_bookwyrm_color",Integer.class);
+    private static final DataTicket<Integer> STAR_COLOR=DataTicket.create("jugcraft_starbuncle_color",Integer.class);
+    private static final DataTicket<net.minecraft.client.renderer.item.ItemStackRenderState> CARGO=DataTicket.create("jugcraft_starbuncle_cargo",net.minecraft.client.renderer.item.ItemStackRenderState.class);
     private JugNouveauClient(){}
     public static void register(){
+        EntityRendererRegistry.register(JugNouveau.STARBUNCLE,context->new GeoEntityRenderer<Starbuncle,EntityRenderState>(context,JugNouveau.STARBUNCLE){
+            @Override public void addRenderData(Starbuncle star,@Nullable Void unused,EntityRenderState state,float partial){
+                state.addGeckolibData(STAR_COLOR,star.color());
+                var item=new net.minecraft.client.renderer.item.ItemStackRenderState();
+                context.getItemModelResolver().updateForLiving(item,star.cargoDisplay(),net.minecraft.world.item.ItemDisplayContext.FIXED,star);
+                state.addGeckolibData(CARGO,item);
+            }
+            @Override public void preRenderPass(com.geckolib.renderer.base.RenderPassInfo<EntityRenderState> info,net.minecraft.client.renderer.SubmitNodeCollector tasks){
+                super.preRenderPass(info,tasks);
+                info.model().getBone("item").ifPresent(bone->info.addPerBoneRender(bone,(pass,part,collector)->{
+                    var item=pass.getGeckolibData(CARGO);if(item==null||item.isEmpty())return;
+                    var pose=pass.poseStack();pose.pushPose();pose.translate(0,.16,0);pose.scale(.35F,.35F,.35F);
+                    item.submit(pose,collector,pass.packedLight(),pass.packedOverlay(),0);pose.popPose();
+                }));
+            }
+            @Override public Identifier getTextureLocation(EntityRenderState state){
+                Integer color=state.getGeckolibData(STAR_COLOR);return Jugcraft.id("textures/entity/starbuncle_"+Starbuncle.COLORS[color==null?4:Math.clamp(color,0,15)]+".png");
+            }
+        });
         EntityRendererRegistry.register(JugNouveau.BOOK_WYRM,context->new GeoEntityRenderer<BookWyrm,EntityRenderState>(context,JugNouveau.BOOK_WYRM){
             @Override public void addRenderData(BookWyrm wyrm,@Nullable Void unused,EntityRenderState state,float partial){state.addGeckolibData(COLOR,wyrm.color());}
             @Override public Identifier getTextureLocation(EntityRenderState state){

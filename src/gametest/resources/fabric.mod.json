@@ -243,7 +243,8 @@
       "io.github.jimbozoomer.jugcraft.test.AlchemyArtifactGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConnectedAlchemyGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlchemyPlayabilityGameTests",
-      "io.github.jimbozoomer.jugcraft.test.JugNouveauGameTests"
+      "io.github.jimbozoomer.jugcraft.test.JugNouveauGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StarbuncleGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
@@ -434,7 +435,8 @@
       "io.github.jimbozoomer.jugcraft.test.ElementalAlchemyClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CompleteAlchemyClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.JugNouveauClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.JugNouveauClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StarbuncleClientGameTests"
     ]
   },
   "depends": {

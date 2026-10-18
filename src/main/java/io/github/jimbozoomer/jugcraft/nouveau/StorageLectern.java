@@ -56,16 +56,8 @@ public final class StorageLectern extends BlockEntity implements GeoBlockEntity 
     public boolean unlink(BlockPos pos){boolean changed=links.remove(pos);if(changed)setChanged();return changed;}
     /** Only ordinary vanilla storage is accepted: no furnace output slots, private mod inventories or Ender chests. */
     public @Nullable Container accessible(ServerPlayer player,BlockPos pos){
-        if(!(level instanceof ServerLevel server)||!server.isLoaded(pos)||pos.distSqr(worldPosition)>RANGE*RANGE
-            ||!Authority.mayChange(server,player,pos))return null;
-        var entity=server.getBlockEntity(pos);
-        if(!(entity instanceof ChestBlockEntity)&&!(entity instanceof BarrelBlockEntity))return null;
-        var state=entity.getBlockState();
-        if(!state.is(Blocks.CHEST)&&!state.is(Blocks.TRAPPED_CHEST)&&!state.is(Blocks.BARREL))return null;
-        var chest=(BaseContainerBlockEntity)entity;
-        // Locking an already-linked chest immediately removes it from this live view.
-        // Locked containers are deliberately excluded, including when a key is held.
-        return !chest.isLocked()?chest:null;
+        if(!(level instanceof ServerLevel server)||pos.distSqr(worldPosition)>RANGE*RANGE)return null;
+        return NouveauStorage.accessible(server,player,pos);
     }
     public @Nullable Container linkedContainer(ServerPlayer player,int index){
         if(!mayUse(player)||index<0||index>=links.size()||index>=capacity())return null;

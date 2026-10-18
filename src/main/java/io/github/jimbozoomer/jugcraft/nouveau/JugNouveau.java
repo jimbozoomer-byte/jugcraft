@@ -23,20 +23,32 @@ import net.minecraft.world.level.material.*;
 public final class JugNouveau {
     public static final String[] COLORS = {"black", "blue", "green", "purple", "red", "white"};
     public static EntityType<BookWyrm> BOOK_WYRM;
+    public static EntityType<Starbuncle> STARBUNCLE;
     public static Block LECTERN;
     public static BlockEntityType<StorageLectern> LECTERN_ENTITY;
     public static MenuType<StorageLecternMenu> MENU;
     public static Item CHARM, WAND, LECTERN_ITEM;
+    public static Item STARBUNCLE_CHARM;
     public static DataComponentType<GlobalPos> WAND_LECTERN;
+    public static DataComponentType<java.util.UUID> WAND_WORKER;
+    public static DataComponentType<Integer> CHARM_COLOR;
     private JugNouveau() {}
 
     public static void register() {
         WAND_LECTERN=Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,Jugcraft.id("nouveau_lectern"),
             DataComponentType.<GlobalPos>builder().persistent(GlobalPos.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(GlobalPos.CODEC)).build());
+        WAND_WORKER=Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,Jugcraft.id("nouveau_worker"),
+            DataComponentType.<java.util.UUID>builder().persistent(UUIDUtil.CODEC).networkSynchronized(ByteBufCodecs.fromCodec(UUIDUtil.CODEC)).build());
+        CHARM_COLOR=Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,Jugcraft.id("nouveau_color"),
+            DataComponentType.<Integer>builder().persistent(com.mojang.serialization.Codec.intRange(0,15)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
         var entityKey=ResourceKey.create(Registries.ENTITY_TYPE,Jugcraft.id("book_wyrm"));
         BOOK_WYRM=Registry.register(BuiltInRegistries.ENTITY_TYPE,entityKey,EntityType.Builder.<BookWyrm>of(BookWyrm::new,MobCategory.MISC)
             .sized(0.65F,0.65F).eyeHeight(0.45F).clientTrackingRange(10).build(entityKey));
         FabricDefaultAttributeRegistry.register(BOOK_WYRM,BookWyrm.attributes());
+        var starKey=ResourceKey.create(Registries.ENTITY_TYPE,Jugcraft.id("starbuncle"));
+        STARBUNCLE=Registry.register(BuiltInRegistries.ENTITY_TYPE,starKey,EntityType.Builder.<Starbuncle>of(Starbuncle::new,MobCategory.MISC)
+            .sized(.6F,.8F).eyeHeight(.5F).clientTrackingRange(10).build(starKey));
+        FabricDefaultAttributeRegistry.register(STARBUNCLE,Starbuncle.attributes());
         var key=ResourceKey.create(Registries.BLOCK,Jugcraft.id("bookwyrm_lectern"));
         LECTERN=Registry.register(BuiltInRegistries.BLOCK,key,new StorageLecternBlock(BlockBehaviour.Properties.of().setId(key)
             .mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE)));
@@ -46,6 +58,7 @@ public final class JugNouveau {
         LECTERN_ITEM=item("bookwyrm_lectern",p->new LecternItem(LECTERN,p.useBlockDescriptionPrefix()));
         CHARM=item("bookwyrm_charm",p->new NouveauItem(p,NouveauItem.Kind.CHARM));
         WAND=item("dominion_wand",p->new NouveauItem(p.stacksTo(1),NouveauItem.Kind.WAND));
+        STARBUNCLE_CHARM=item("starbuncle_charm",p->new NouveauItem(p,NouveauItem.Kind.STARBUNCLE));
         // Intercept before a chest consumes the right-click to open its ordinary inventory.
         net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player,level,hand,hit)->{
             var stack=player.getItemInHand(hand);
@@ -54,7 +67,7 @@ public final class JugNouveau {
             return item.useOn(new net.minecraft.world.item.context.UseOnContext(player,hand,hit));
         });
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(out->out.accept(LECTERN_ITEM));
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(out->{out.accept(CHARM);out.accept(WAND);});
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(out->{out.accept(CHARM);out.accept(WAND);out.accept(STARBUNCLE_CHARM);});
     }
     private static Item item(String id,java.util.function.Function<Item.Properties,Item> make) {
         var key=ResourceKey.create(Registries.ITEM,Jugcraft.id(id));

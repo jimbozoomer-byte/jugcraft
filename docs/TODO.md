@@ -8,7 +8,11 @@
 - [x] First storage integration validated: all 1,937 server tests, rendered six-color models/lectern/menu, page synchronization, GUI scales, data/recipe checks and unchanged-owner-art checks passed.
 - [ ] Owner-controlled Book Wyrm storage playtest before publishing; independent multiplayer/restart field testing and larger-network performance remain to do.
 - [ ] Extend Book Wyrm storage toward the source's aggregated catalog/crafting requests and physical delivery behavior; port the separate familiar effects.
-- [ ] Port remaining helper jobs: Starbuncle, Drygmy, Whirlisprig, Wixie and Amethyst Golem, reusing worker/logistics systems where suitable.
+- [x] Local Starbuncle delivery: supplied model, idle/run animations and all 16 dye colors, charm, Dominion Wand setup, real saved cargo, owner/party controls and recovery; reuse shared workers/navigation/authority.
+- [x] Starbuncle validation: all 1,945 server tests, actual client walking/two delivery trips, sixteen-color gallery, Book Wyrm storage regression and data/art audits passed locally.
+- [ ] Owner-controlled combined Jug Nouveau playtest and independent survival/multiplayer feedback before publication.
+- [ ] Extend Starbuncles with source spawning/taming, loose-item gathering, filters/multiple routes, accessories/special models and familiar effects; restore source charm recipe when its apparatus/shards are reachable.
+- [ ] Port remaining helper jobs: Drygmy, Whirlisprig, Wixie and Amethyst Golem, reusing worker/logistics systems where suitable.
 - [ ] Port enchanting, imbuement, alteration, glyph and potion workshops with real recipes, input/output previews and usable interfaces.
 - [ ] Port source transport and spell devices through existing magical power/compiler/authority systems.
 - [ ] Port archwood, magical crops/fruit, sourcestone and decorative building families with complete survival routes and compatible generation.
