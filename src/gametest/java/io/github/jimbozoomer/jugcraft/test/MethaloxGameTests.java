@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.machine.MachineRecipes;
 import java.util.List;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -135,6 +136,28 @@ public class MethaloxGameTests {
 				.orElseThrow(() -> helper.assertionException("The workshop does not pair MMH and N2O4 tanks"))
 				.recipe().output().create();
 		helper.assertTrue(motors.is(item("rocket_motor")) && motors.getCount() == 4, "The workshop makes " + motors);
+		helper.succeed();
+	}
+
+	/**
+	 * The Rotary Condensator's other direction (docs/features/cryogenic-warm-back.md): the liquefier takes each liquid
+	 * in its input tank and warms it back into exactly the gas its condensing recipe used, so the round trip neither
+	 * makes nor loses gas.
+	 */
+	@GameTest
+	public void liquefierWarmsLiquidsBackToTheirGas(GameTestHelper helper) {
+		for (String gas : List.of("oxygen", "methane", "hydrogen")) {
+			FluidRecipe condense = recipe(helper, MachineKind.CRYOGENIC_LIQUEFIER, "liquefaction/liquid_" + gas);
+			FluidRecipe warm = recipe(helper, MachineKind.CRYOGENIC_LIQUEFIER, "liquefaction/" + gas + "_from_liquid");
+			var liquid = condense.fluidResults().getFirst();
+			var used = condense.fluids().getFirst();
+			helper.assertTrue(warm.fluids().size() == 1 && warm.fluids().getFirst().fluid() == liquid.fluid()
+					&& warm.fluids().getFirst().amount() == liquid.amount(), gas + ": the warm-back takes " + warm.fluids());
+			helper.assertTrue(warm.fluidResults().size() == 1 && warm.fluidResults().getFirst().fluid() == used.fluid()
+					&& warm.fluidResults().getFirst().amount() == used.amount(), gas + ": the warm-back gives " + warm.fluidResults());
+			helper.assertTrue(FluidRecipes.usesFluid(helper.getLevel().getServer(), MachineKind.CRYOGENIC_LIQUEFIER, 0,
+					FluidVariant.of(liquid.fluid())), "The liquefier's input tank refuses liquid " + gas);
+		}
 		helper.succeed();
 	}
 

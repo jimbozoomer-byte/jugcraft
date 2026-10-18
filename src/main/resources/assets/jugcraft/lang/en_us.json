@@ -3911,7 +3911,7 @@
   "container.jugcraft.tagline.coke_oven": "Bakes coal into coke. No power needed.",
   "container.jugcraft.tagline.crop_harvester": "Harvests and replants ripe crops.",
   "container.jugcraft.tagline.crusher": "Crushes one ore into two raw ores.",
-  "container.jugcraft.tagline.cryogenic_liquefier": "Condenses oxygen into liquid oxygen.",
+  "container.jugcraft.tagline.cryogenic_liquefier": "Liquefies oxygen, methane or hydrogen, and warms them back.",
   "container.jugcraft.tagline.deposit_drill": "Works surface deposits into ore.",
   "container.jugcraft.tagline.diesel_engine": "Burns diesel into rotation for shafts.",
   "container.jugcraft.tagline.diesel_generator": "Burns diesel into power.",

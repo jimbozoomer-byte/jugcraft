@@ -628,7 +628,14 @@ def check_fluid_recipes(registered):
             fluid_out = sum(r[1] for r in recipe.get("fluid_results", []))
             if recipe.get("items") and "source" not in recipe and fluid_out > sum(mb for _, mb in recipe.get("fluids", [])):
                 err(f"{label}: makes fluid from items without saying how much (\"source\")")
-            if fluid_out > fluid_in:
+            # A recipe that "reverses" another of the same machine (warming a liquid back into its gas) may give more
+            # mB than it takes, but only as that recipe's exact mirror: the same fluids and amounts, swapped.
+            undone = next((r for r in recipes if r["name"] == recipe.get("reverses")), None)
+            if "reverses" in recipe and (undone is None or undone.get("items") or recipe.get("items")
+                                         or [tuple(f) for f in recipe["fluids"]] != [tuple(r[:2]) for r in undone["fluid_results"]]
+                                         or [tuple(r[:2]) for r in recipe["fluid_results"]] != [tuple(f) for f in undone["fluids"]]):
+                err(f"{label}: is not the exact reverse of {machine} recipe {recipe.get('reverses')}")
+            elif fluid_out > fluid_in and "reverses" not in recipe:
                 err(f"{label}: {fluid_out} mB out from {fluid_in} mB in")
 
 
@@ -3082,7 +3089,7 @@ def cheapest_electrolysis(fluid, _seen=None):
 
     A recipe that uses up items (coal, crops, waste) draws its energy partly from them, so it is not an electricity
     route, and neither is one using a fluid only such recipes make: a fuel with no other route is a primary fuel, never
-    an electricity loop. A fluid already being costed further up (a cycle) adds nothing."""
+    an electricity loop. A route through a fluid already being costed further up (a cycle) is not a route."""
     import machines
     seen = (_seen or set()) | {fluid}
 
@@ -3090,11 +3097,16 @@ def cheapest_electrolysis(fluid, _seen=None):
         total = 0.0
         for source, mb in recipe.get("fluids", []):
             # Water and lava are free in the world, whatever else also gives some off.
-            if source not in seen and not source.startswith("minecraft:"):
-                cost = cheapest_electrolysis(source, seen)
-                if cost is None:
-                    return None
-                total += cost * mb
+            if source.startswith("minecraft:"):
+                continue
+            # A fluid already being costed further up (a cycle: liquid hydrogen warmed back into the hydrogen it was
+            # made from) cannot be a way to make it: it needs the fluid first.
+            if source in seen:
+                return None
+            cost = cheapest_electrolysis(source, seen)
+            if cost is None:
+                return None
+            total += cost * mb
         return total
     costs = []
 

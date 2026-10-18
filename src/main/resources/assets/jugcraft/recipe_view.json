@@ -8284,6 +8284,60 @@
           "results": [],
           "ticks": 160,
           "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:liquid_oxygen",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:oxygen",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 40,
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:liquid_methane",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 40,
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:liquid_hydrogen",
+              125
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:hydrogen",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 80,
+          "retained_inputs": []
         }
       ]
     },

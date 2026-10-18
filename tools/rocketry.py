@@ -217,6 +217,16 @@ LIQUEFIER_RECIPES = [
     # twice as long.
     {"name": "liquid_hydrogen", "fluids": [("jugcraft:hydrogen", 1000)], "fluid_results": [("jugcraft:liquid_hydrogen", 125)],
      "ticks": 160, "features": ["machines", "salt"]},
+    # The Rotary Condensator's other direction, on the same machine (docs/features/cryogenic-warm-back.md): a liquid
+    # in the input tank is warmed back into exactly the gas it was made from, in half the time. Both directions cost
+    # power and neither makes or loses gas, so the pair is no loop. "reverses" names the recipe each one undoes; the
+    # recipe audit (tools/check_mod_data.py) lets it give more mB than it takes only as that recipe's exact reverse.
+    {"name": "oxygen_from_liquid", "reverses": "liquid_oxygen", "fluids": [("jugcraft:liquid_oxygen", 250)], "fluid_results": [("jugcraft:oxygen", 1000)],
+     "ticks": 40, "features": ["machines"]},
+    {"name": "methane_from_liquid", "reverses": "liquid_methane", "fluids": [("jugcraft:liquid_methane", 250)], "fluid_results": [("jugcraft:methane", 1000)],
+     "ticks": 40, "features": ["machines"]},
+    {"name": "hydrogen_from_liquid", "reverses": "liquid_hydrogen", "fluids": [("jugcraft:liquid_hydrogen", 125)], "fluid_results": [("jugcraft:hydrogen", 1000)],
+     "ticks": 80, "features": ["machines", "salt"]},
 ]
 # Hydrocracking in the catalytic cracker: heavy fuel oil and hydrogen (in the water tank) over the catalyst give RP-1
 # kerosene (the naphtha tank) and a little refinery gas.
