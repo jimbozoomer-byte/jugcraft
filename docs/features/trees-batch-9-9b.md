@@ -1,6 +1,6 @@
 # Tree batches 9 and 9b: giant fungi and dragonblood
 
-Status: in progress, owner-authorized 17 October 2026. Public branch: `codex/tree-generation-batch-9-9b` in `speedygroyper/jugcraft`; [draft PR #413](https://github.com/jimbozoomer-byte/jugcraft/pull/413). Based on approved PR #411 (`964c2e775`), which remains a dependency until integrated. Actual tool/model: OpenAI Codex (GPT-6). No batch 10 or later work is included.
+Status: implemented, awaiting owner inspection; owner-authorized 17 October 2026. Public branch: `codex/tree-generation-batch-9-9b` in `speedygroyper/jugcraft`; [draft PR #413](https://github.com/jimbozoomer-byte/jugcraft/pull/413). Based on approved PR #411 (`964c2e775`), which remains a dependency until integrated. Actual tool/model: OpenAI Codex (GPT-6). No batch 10 or later work is included.
 
 ## Authorized scope
 
@@ -10,7 +10,7 @@ Batch 9b adds dragonblood timber, dark teal fronds, renewable End saplings, umbr
 
 ## Integration and verification contract
 
-Discovery-tier building and optional renewable materials, with no new dependency or core progression gate. Extend existing wood crafting, stripping, sawmill, tree-farm, loot and feature switches. Existing chunks and registrations remain intact. Marrow fungi cannot be grown from bone meal. Test substrate/space restrictions, seed variation, leaf connectivity, renewal, drops and compost economics, generation in all three dimensions, save/reopen, and optional integrations absent. Deliver a normal inspection world with a gallery and untouched natural stops. Results and provenance will be recorded here after implementation; no tests or gameplay are claimed yet.
+Discovery-tier building and optional renewable materials, with no new dependency or core progression gate. Extend existing wood crafting, stripping, sawmill, tree-farm, loot and feature switches. Existing chunks and registrations remain intact. Marrow fungi cannot be grown from bone meal. Test substrate/space restrictions, seed variation, leaf connectivity, renewal, drops and compost economics, generation in all three dimensions, save/reopen, and optional integrations absent. Deliver a normal inspection world with a gallery and untouched natural stops. Verification below distinguishes automated tests from owner inspection and launcher import.
 
 ## Implementation
 
@@ -31,4 +31,21 @@ The earlier planning estimate of 45 cap blocks omitted the largest dome and coll
 - New cap, pore, small-blight, frond, sapling and resin sprites are authored in the existing editable 16px Python/Canvas pipeline in `tools/fungal_trees_textures.py`. They add no rendering dependency. Ordinary blocks use native block models; glowcaps use six mushroom face states; bramble tint reuses the pine mechanism.
 - No owner-library executable was run. No copied Minecraft texture is bundled.
 
-The inspection export and final test evidence are pending below; implementation does not claim human approval or launcher import.
+## Verification and inspection export (17 October 2026)
+
+Validated code/test commit: `02d9cfb1fcedeac496736f7cc28814a1a97095a1`. Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, JDK 25.0.4.1+1 and the unchanged 18-library framework lock.
+
+- `python -m unittest discover -s scripts/tests -v`: **76 passed**, with the existing `JUGCRAFT_FONT_DIR` configured for the local DejaVu fonts. Includes generation budgets, species shares, soil restrictions, owner-asset preservation and compost bounds.
+- `python scripts/check_repository.py`, `python scripts/package_modrinth.py check` and `verify`: passed; all 18 pinned downloads and hashes verified.
+- `python tools/check_mod_data.py`: passed the complete material/recipe/art audit. The final cave-placement update additionally passed `check_worldgen()` and `check_biomes()`.
+- `./gradlew build` (through the local pinned-JDK wrapper): **BUILD SUCCESSFUL, all 1,784 required server GameTests passed**. The seven new tests cover 12 seeds per form, bounded connected shapes, retained soil, failure without partial writes, ground-cover replacement, protection of water/leaves/saplings, dark End growth, native crafting/stripping, seed/resin drops and compost economics.
+- Focused `runGameTest` with `-PjugcraftOptionalIntegrations=false` and `fabric-api.gametest.filter=jugcraft-test:fungal_end_tree_game_tests*` supplied through the local test init script: **all seven passed; BUILD SUCCESSFUL**. This is server-side optional-absence evidence; a separate client run without the presentation mods was not performed.
+- `./gradlew runClientGameTest -PclientTests=FungalEndTreeClientGameTests`: **passed** with the full presentation stack. Rendered 21 gallery examples, all nine timber forms, both leaf rendering modes, night glowcaps and naturally generated examples in all 11 target biomes across the Overworld, Nether and End. Saved, closed and reopened the normal world, then compared every gallery block state exactly. Native leaf-distance settling changed only 12/18/23 derived distance values in the three dragonblood trees; every block and every other property was preserved before the persistence baseline was captured.
+
+The client survey now asserts its actual dimension, samples biome edges for sparse End extras, and preserves the one-in-ten-chunk Outer Flats attempt rate. The natural stops are observed terrain, never planted fixtures. The bounded cave selector and ground-cover regression arose from real-world failures found and fixed during this verification.
+
+The exported **Fungi and Dragonblood Inspection** is a normal world with seed `jugcraft`, an elevated authored gallery, growth demonstration plots and an 11-stop natural tour. The delivery contains a matching JAR, complete `.mrpack`, world ZIP, screenshots, tour and SHA-256 checksums. Both archives passed integrity checks, every saved world file matches the prepared copy, and the pack preserves all 18 dependency pins. The original export remains untouched: preparation scanned 20,861 region records and all 130 saved files, removed only two unused test-pack selections and five unused registry-presence names, and changed only `level.dat`, `level.dat_old` and `data/fabric/registry_entries.dat` in the delivery copy.
+
+The ordinary `runClient` (without the gametest mod) opened the prepared copy successfully and joined at `(960.5, 180, -987.5)`, the gallery entrance. This verifies local client loading, not an external launcher import.
+
+Existing generated chunks are not rewritten. Added IDs require this matching mod build; rollback uses a backup of both the world and its previous mod set. Registrations remain present when feature switches are disabled. There is no new dependency, per-tick scanner or server deployment. Shape/cave work is bounded, but this inspection is not a multiplayer load benchmark. Two-client dedicated-server play, external launcher import, prior-release world migration and human visual approval are not claimed. No later batch is implemented.
