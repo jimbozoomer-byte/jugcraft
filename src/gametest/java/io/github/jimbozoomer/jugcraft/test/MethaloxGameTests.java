@@ -20,7 +20,9 @@ import net.minecraft.world.item.ItemStack;
  * (docs/features/hydrolox.md) follows: 1,000 mB of hydrogen condenses to 125 mB of liquid hydrogen, a casing fills with
  * 1,000 mB of it, and a hydrogen tank, a liquid oxygen tank and two nozzles load five rocket motors. Hydrazine/N2O4
  * (docs/features/hypergolic-fuels.md): chlorine and lye make bleach, bleach and ammonia make hydrazine and salt, ammonia
- * and oxygen make dinitrogen tetroxide, and a hydrazine tank, an N2O4 tank and two nozzles load three motors.
+ * and oxygen make dinitrogen tetroxide, and a hydrazine tank, an N2O4 tank and two nozzles load three motors. MMH: the
+ * Synthesis Converter makes methanol from hydrogen and carbon monoxide and methylamine from ammonia and methanol, bleach
+ * oxidizes methylamine to MMH, and an MMH tank with an N2O4 tank and two nozzles loads four motors.
  */
 public class MethaloxGameTests {
 	@GameTest
@@ -106,6 +108,33 @@ public class MethaloxGameTests {
 				.orElseThrow(() -> helper.assertionException("The workshop does not pair hydrazine and N2O4 tanks"))
 				.recipe().output().create();
 		helper.assertTrue(motors.is(item("rocket_motor")) && motors.getCount() == 3, "The workshop makes " + motors);
+		helper.succeed();
+	}
+
+	@GameTest
+	public void methanolChainMakesMmhForFourMotors(GameTestHelper helper) {
+		FluidRecipe methanol = recipe(helper, MachineKind.SYNTHESIS_CONVERTER, "gas_synthesis/methanol");
+		helper.assertTrue(methanol.fluids().get(0).fluid() == PetroFluids.HYDROGEN.fluid() && methanol.fluids().get(0).amount() == 1000
+				&& methanol.fluids().get(1).fluid() == PetroFluids.CARBON_MONOXIDE.fluid() && methanol.fluids().get(1).amount() == 500
+				&& methanol.fluidResults().getFirst().fluid() == PetroFluids.METHANOL.source()
+				&& methanol.fluidResults().getFirst().amount() == 500, "Methanol is " + methanol.fluids() + " -> " + methanol.fluidResults());
+		FluidRecipe amine = recipe(helper, MachineKind.SYNTHESIS_CONVERTER, "gas_synthesis/methylamine");
+		helper.assertTrue(amine.fluids().get(0).fluid() == PetroFluids.AMMONIA.fluid()
+				&& amine.fluids().get(1).fluid() == PetroFluids.METHANOL.source()
+				&& amine.fluidResults().getFirst().fluid() == PetroFluids.METHYLAMINE.source(), "Methylamine is " + amine.fluidResults());
+		FluidRecipe mmh = recipe(helper, MachineKind.CHEMICAL_REACTOR, "chemical_reaction/monomethylhydrazine");
+		helper.assertTrue(mmh.fluids().get(0).fluid() == PetroFluids.METHYLAMINE.source()
+				&& mmh.fluids().get(1).fluid() == PetroFluids.SODIUM_HYPOCHLORITE.source()
+				&& mmh.fluidResults().getFirst().fluid() == PetroFluids.MONOMETHYLHYDRAZINE.source()
+				&& mmh.fluidResults().getFirst().amount() == 250, "MMH is " + mmh.fluidResults());
+		ItemStack tank = recipe(helper, MachineKind.CHEMICAL_REACTOR, "chemical_reaction/mmh_tank").results().getFirst().create();
+		helper.assertTrue(tank.is(item("mmh_tank")), "The reactor makes " + tank);
+		List<ItemStack> inputs = List.of(new ItemStack(item("mmh_tank")), new ItemStack(item("n2o4_tank")),
+				new ItemStack(item("rocket_nozzle"), 2));
+		ItemStack motors = MachineRecipes.findMulti(helper.getLevel(), MachineKind.ROCKET_WORKSHOP, inputs)
+				.orElseThrow(() -> helper.assertionException("The workshop does not pair MMH and N2O4 tanks"))
+				.recipe().output().create();
+		helper.assertTrue(motors.is(item("rocket_motor")) && motors.getCount() == 4, "The workshop makes " + motors);
 		helper.succeed();
 	}
 

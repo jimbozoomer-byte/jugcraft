@@ -205,6 +205,10 @@ public final class PetroFluids {
 	public static Entry SODIUM_HYPOCHLORITE;
 	public static Entry HYDRAZINE;
 	public static Entry DINITROGEN_TETROXIDE;
+	/** MMH (docs/features/hypergolic-fuels.md): methanol, methylamine solution and monomethylhydrazine. */
+	public static Entry METHANOL;
+	public static Entry METHYLAMINE;
+	public static Entry MONOMETHYLHYDRAZINE;
 	public static Gas HYDROGEN_FLUORIDE;
 	public static Gas CHLORODIFLUOROMETHANE;
 	public static Gas TETRAFLUOROETHYLENE;
@@ -280,6 +284,9 @@ public final class PetroFluids {
 		SODIUM_HYPOCHLORITE = fluid("sodium_hypochlorite", 5, 4, 1, 0xFFD6DE9C, MapColor.COLOR_YELLOW);
 		HYDRAZINE = fluid("hydrazine", 5, 4, 1, 0xFFC8C4DC, MapColor.COLOR_PURPLE);
 		DINITROGEN_TETROXIDE = fluid("dinitrogen_tetroxide", 5, 4, 1, 0xFFB66234, MapColor.COLOR_BROWN);
+		METHANOL = fluid("methanol", 5, 4, 1, 0xFFCED8E0, MapColor.COLOR_LIGHT_GRAY);
+		METHYLAMINE = fluid("methylamine", 5, 4, 1, 0xFFD2DABE, MapColor.COLOR_LIGHT_GRAY);
+		MONOMETHYLHYDRAZINE = fluid("monomethylhydrazine", 5, 4, 1, 0xFFB4D6D2, MapColor.COLOR_CYAN);
 		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
 		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
 		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);

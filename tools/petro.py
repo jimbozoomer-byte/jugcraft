@@ -558,6 +558,7 @@ FLUID_RECIPES["catalytic_cracker"] += _rocketry.CRACKER_RECIPES
 FLUID_MACHINES["cryogenic_liquefier"] = _rocketry.LIQUEFIER
 FLUID_RECIPES["cryogenic_liquefier"] = _rocketry.LIQUEFIER_RECIPES
 FLUID_RECIPES["chemical_reactor"] += _rocketry.TANK_RECIPES
+FLUID_RECIPES["synthesis_converter"] += _rocketry.CONVERTER_RECIPES
 
 # Crops that ferment into bioethanol (data/jugcraft/tags/item/fermentable.json).
 FERMENTABLE = ["minecraft:wheat", "minecraft:sugar_cane", "minecraft:potato", "minecraft:carrot", "minecraft:beetroot",
@@ -635,3 +636,14 @@ FLUIDS["hydrazine"] = {"display": "Hydrazine", "feature": "salt",
 FLUIDS["dinitrogen_tetroxide"] = {"display": "Dinitrogen Tetroxide", "feature": "machines",
                                   "colors": [(96, 40, 20), (140, 66, 32), (182, 98, 52), (216, 138, 86)],
                                   "tick_delay": 5, "slope": 4, "drop_off": 1}
+# MMH (docs/features/hypergolic-fuels.md): methanol from the Synthesis Converter, methylamine solution and
+# monomethylhydrazine. Last, for the same reason.
+FLUIDS["methanol"] = {"display": "Methanol", "feature": "machines",
+                      "colors": [(132, 146, 160), (172, 186, 198), (206, 216, 224), (236, 242, 246)],
+                      "tick_delay": 5, "slope": 4, "drop_off": 1}
+FLUIDS["methylamine"] = {"display": "Methylamine Solution", "feature": "salt",
+                         "colors": [(140, 150, 120), (178, 188, 156), (210, 218, 190), (238, 242, 224)],
+                         "tick_delay": 5, "slope": 4, "drop_off": 1}
+FLUIDS["monomethylhydrazine"] = {"display": "Monomethylhydrazine", "feature": "salt",
+                                 "colors": [(96, 140, 138), (138, 180, 176), (180, 214, 210), (222, 240, 238)],
+                                 "tick_delay": 5, "slope": 4, "drop_off": 1}

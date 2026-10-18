@@ -62,6 +62,8 @@ ITEMS = {
     # Hydrazine/N2O4 (docs/features/hypergolic-fuels.md): storable propellants that ignite on contact, no liquefier.
     "hydrazine_tank": "Hydrazine Tank",
     "n2o4_tank": "Dinitrogen Tetroxide Tank",
+    # MMH (docs/features/hypergolic-fuels.md): methylated hydrazine, a longer chain for one more motor.
+    "mmh_tank": "MMH Tank",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -88,6 +90,8 @@ TOOLTIPS = {
     "hydrogen_tank": "A rocket casing filled with liquid hydrogen, the most efficient fuel for a liquid rocket motor.",
     "hydrazine_tank": "A rocket casing filled with hydrazine, a storable fuel that ignites on contact with dinitrogen tetroxide.",
     "n2o4_tank": "A rocket casing filled with dinitrogen tetroxide, the storable oxidizer that pairs with hydrazine.",
+    "mmh_tank": "A rocket casing filled with monomethylhydrazine, a storable fuel that ignites on contact with dinitrogen "
+                "tetroxide.",
     "homing_rocket": "Rocket launcher ammunition: locks on to the hostile mob nearest your crosshair within 48 blocks "
                      "and steers into it. A smaller blast.",
 }
@@ -168,6 +172,10 @@ def workshop_recipes():
         {"name": "hypergolic_rocket_motor",
          "inputs": [[rid("hydrazine_tank"), 1], [rid("n2o4_tank"), 1], [rid("rocket_nozzle"), 2]],
          "output": rid("rocket_motor"), "count": 3, "ticks": 200, "features": feature + ["salt"]},
+        # MMH/N2O4 (docs/features/hypergolic-fuels.md): the longer methanol chain buys one more motor than hydrazine.
+        {"name": "mmh_rocket_motor",
+         "inputs": [[rid("mmh_tank"), 1], [rid("n2o4_tank"), 1], [rid("rocket_nozzle"), 2]],
+         "output": rid("rocket_motor"), "count": 4, "ticks": 200, "features": feature + ["salt"]},
         {"inputs": [[rid("rocket_motor"), 1], [rid("guidance_unit"), 1], [rid("sensor"), 1]],
          "output": rid("survey_rocket"), "count": 1, "ticks": 300, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("silver_iodide"), 2]],
@@ -232,6 +240,18 @@ TANK_RECIPES = [
      "results": [("jugcraft:hydrazine_tank", 1)], "ticks": 60, "features": ["machines", "salt"]},
     {"name": "n2o4_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:dinitrogen_tetroxide", 1000)],
      "results": [("jugcraft:n2o4_tank", 1)], "ticks": 60, "features": ["machines"]},
+    {"name": "mmh_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:monomethylhydrazine", 1000)],
+     "results": [("jugcraft:mmh_tank", 1)], "ticks": 60, "features": ["machines", "salt"]},
+]
+
+# Synthesis Converter recipes (tools/petro.py FLUID_RECIPES["synthesis_converter"]), for MMH
+# (docs/features/hypergolic-fuels.md): carbon monoxide and hydrogen over a catalyst make methanol, and methanol with
+# ammonia makes methylamine (kept as its water solution).
+CONVERTER_RECIPES = [
+    {"name": "methanol", "fluids": [("jugcraft:hydrogen", 1000), ("jugcraft:carbon_monoxide", 500)],
+     "fluid_results": [("jugcraft:methanol", 500)], "ticks": 120, "features": ["machines", "salt"]},
+    {"name": "methylamine", "fluids": [("jugcraft:ammonia", 250), ("jugcraft:methanol", 250)],
+     "fluid_results": [("jugcraft:methylamine", 250)], "ticks": 120, "features": ["machines", "salt"]},
 ]
 
 # Chemical reactor recipes (tools/petro.py FLUID_RECIPES["chemical_reactor"]).
@@ -246,6 +266,10 @@ REACTOR_RECIPES = [
      "features": ["machines", "salt"]},
     {"name": "dinitrogen_tetroxide", "fluids": [("jugcraft:ammonia", 250), ("jugcraft:oxygen", 1000)],
      "fluid_results": [("jugcraft:dinitrogen_tetroxide", 250)], "ticks": 120, "features": ["machines"]},
+    # MMH: methylamine (methanol and ammonia, in the Synthesis Converter) oxidized with bleach as hydrazine is.
+    {"name": "monomethylhydrazine", "fluids": [("jugcraft:methylamine", 500), ("jugcraft:sodium_hypochlorite", 500)],
+     "fluid_results": [("jugcraft:monomethylhydrazine", 250)], "results": [("jugcraft:salt", 1)], "ticks": 120,
+     "features": ["machines", "salt"]},
     # Iodine leached from kelp ash with sulfuric acid (where iodine was first found, and long made).
     {"name": "iodine", "items": [("minecraft:dried_kelp", 8)], "fluids": [("jugcraft:sulfuric_acid", 100)],
      "results": [("jugcraft:iodine", 1)], "ticks": 120, "features": ["machines", "sulfur"]},
@@ -574,7 +598,7 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "he_rocket": lambda: he_rocket(), "homing_rocket": lambda: homing_rocket(),
             "kerosene_tank": lambda: propellant_tank(False), "lox_tank": lambda: propellant_tank(True),
             "methane_tank": lambda: methane_tank(), "hydrogen_tank": lambda: hydrogen_tank(),
-            "hydrazine_tank": lambda: hydrazine_tank(), "n2o4_tank": lambda: n2o4_tank()}
+            "hydrazine_tank": lambda: hydrazine_tank(), "n2o4_tank": lambda: n2o4_tank(), "mmh_tank": lambda: mmh_tank()}
 
 
 def propellant_tank(oxygen):
@@ -609,6 +633,11 @@ def hydrazine_tank():
     """Hydrazine tank (docs/features/hypergolic-fuels.md): a storable fuel, so no frost; a violet band and a red fuel
     valve."""
     return _cryogenic_tank((54, 36, 84), (170, 146, 214), (116, 90, 160), frost=False)
+
+
+def mmh_tank():
+    """MMH tank (docs/features/hypergolic-fuels.md): a storable fuel, so no frost; a teal band and a red fuel valve."""
+    return _cryogenic_tank((14, 66, 66), (96, 194, 186), (36, 132, 128), frost=False)
 
 
 def n2o4_tank():
