@@ -1,5 +1,7 @@
 # Alchemy playability — local owner test, 17 October 2026
 
+**Current equipment access:** [the interface/access revision](alchemy-interface-and-access.md) removes the research prerequisite described below. Possessing equipment is sufficient to operate it; tablet pattern learning and essence costs remain.
+
 Implemented with **OpenAI Codex (GPT-6)** at the owner's request. This supersedes the corresponding interface, valuation and owner-presence rules in [Connected Alchemy](connected-alchemy.md). Keep this work local until the owner has played it personally.
 
 ## Player workflow

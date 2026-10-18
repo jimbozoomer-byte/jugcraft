@@ -85,7 +85,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
             server.setBlock(worldPosition, getBlockState().setValue(AlchemicalWorkshopBlock.ACTIVE, false), Block.UPDATE_CLIENTS);
         setChanged();
     }
-    public void placedBy(ServerPlayer player) { owner = player.getUUID(); authorized=Assaying.knows(player); setChanged(); }
+    public void placedBy(ServerPlayer player) { owner = player.getUUID(); authorized=true; setChanged(); }
     private boolean related(UUID by) { return owner != null && (owner.equals(by) || JugcraftParties.sameParty(owner, by)); }
     public boolean mayUse(ServerPlayer player) {
         return related(player.getUUID()) && !player.isSpectator() && player.isAlive()
@@ -122,7 +122,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
         if (!Assaying.enabled()) return DISABLED;
         if (paused || (level != null && level.hasNeighborSignal(worldPosition))) return PAUSED;
         if (player == null || owner == null || !owner.equals(player.getUUID()) || !player.isAlive() || player.isSpectator()) return OWNER_AWAY;
-        if (!AlchemyOwner.knows(player,authorized)) return RESEARCH;
+        // Possessing/placing the device is enough; research is optional guidance.
         if(!Authority.isStandIn(player))authorized=true;
         if (!(level instanceof ServerLevel server) || !Assaying.problems(server).isEmpty()) return UNBALANCED;
         return Authority.mayChange(server, player, worldPosition) ? IDLE : DENIED;
@@ -237,7 +237,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
     }
     @Override protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input); items = NonNullList.withSize(SLOTS, ItemStack.EMPTY); ContainerHelper.loadAllItems(input, items);
-        owner = input.read("owner", UUIDUtil.CODEC).orElse(null); authorized=input.getBooleanOr("factory_authorized",false);
+        owner = input.read("owner", UUIDUtil.CODEC).orElse(null); authorized=owner!=null /* Upgrade old research-locked factories without changing their owner. */;
         essence = Math.clamp(input.getIntOr("essence", 0), 0, capacity()); paused = input.getBooleanOr("paused", false);fuelTarget=Math.clamp(input.getIntOr("fuel_target",0),0,3);
     }
     @Override protected void saveAdditional(ValueOutput output) {

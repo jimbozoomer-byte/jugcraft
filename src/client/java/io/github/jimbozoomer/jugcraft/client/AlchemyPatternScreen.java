@@ -22,7 +22,7 @@ public final class AlchemyPatternScreen extends AbstractContainerScreen<AlchemyP
     @Override protected void init(){
         String saved=search==null?sent:search.getValue();super.init();
         search=addRenderableWidget(new EditBox(font,leftPos+204,topPos+30,134,18,ui("search")));search.setMaxLength(48);search.setHint(ui("search"));search.setValue(saved);
-        search.setResponder(s->debounce=5);
+        search.setResponder(s->debounce=5);search.setTextColor(0xFFE4F1ED);search.setTextColorUneditable(0xFF8599A5);
         learn=button(16,88,82,"learn",0);learn.setTooltip(Tooltip.create(ui("learn_help")));make=button(103,88,89,"make",1);
         for(int i=0;i<4;i++)batches[i]=button(16+i*45,114,41,"batch_"+i,6+i);
         area=button(16,114,176,"area",10);
@@ -34,12 +34,12 @@ public final class AlchemyPatternScreen extends AbstractContainerScreen<AlchemyP
     }
     private void refresh(){
         area.visible=menu.eye();area.setMessage(ui("area",menu.area(),menu.area()));
-        learn.active=menu.canDissolve();learn.setMessage(ui(menu.confirming()?"confirm":"learn"));
+        learn.confirming=menu.confirming();learn.active=menu.canDissolve();learn.setMessage(ui(menu.confirming()?"confirm":"learn"));
         learn.visible=!menu.eye();favorite.active=!menu.selection().isEmpty();previous.active=menu.page()>0;next.active=menu.page()+1<menu.pages();
         make.active=menu.canMake();make.setMessage(ui(menu.eye()?"choose":"make"));
-        favorite.setMessage(ui(menu.isFavorite()?"unfavorite":"favorite"));filter.setMessage(ui(menu.favorites()?"favorites":"all"));
+        favorite.setMessage(ui(menu.isFavorite()?"unfavorite":"favorite"));filter.setMessage(ui(menu.favorites()?"favorites":"all"));filter.selected=menu.favorites();favorite.selected=menu.isFavorite();
         make.setTooltip(Tooltip.create(ui(menu.eye()?"build_help":"make_help")));
-        for(int i=0;i<4;i++){batches[i].visible=!menu.eye();batches[i].active=menu.batch()!=new int[]{1,16,64,0}[i];}
+        for(int i=0;i<4;i++){batches[i].visible=!menu.eye();batches[i].selected=menu.batch()==new int[]{1,16,64,0}[i];batches[i].active=!batches[i].selected;}
     }
     @Override protected void containerTick(){
         super.containerTick();refresh();
@@ -47,21 +47,40 @@ public final class AlchemyPatternScreen extends AbstractContainerScreen<AlchemyP
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){extractBackground(g,mx,my,delta);super.extractRenderState(g,mx,my,delta);extractTooltip(g,mx,my);}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){
-        int x=leftPos,y=topPos;g.fill(0,0,width,height,0xA00B0B14);OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
-        g.fill(x+10,y+48,x+195,y+84,0xFF20232D);
-        OwnerAlchemyArt.crop(g,menu.eye()?"mercurial_eye":"nei",x+68,y+61,menu.eye()?83:88,menu.eye()?23:34,menu.eye()?16:22,16);
-        g.fill(x+200,y+51,x+344,y+128,0xFF20232D);
-        for(var s:menu.slots){int sx=x+s.x,sy=y+s.y;OwnerAlchemyArt.slot(g,"alchchest",sx,sy,11,3);
-            if(s.index>=AlchemyPatternMenu.GHOST_START&&net.minecraft.world.item.ItemStack.isSameItemSameComponents(s.getItem(),menu.selection())&&!s.getItem().isEmpty())g.outline(sx-2,sy-2,20,20,0xFFE9C989);
+        int x=leftPos,y=topPos;
+        g.fill(0,0,width,height,0xB0081018);
+        OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
+
+        OwnerAlchemyArt.panel(g,x+11,y+48,183,36,OwnerAlchemyArt.VIOLET);
+        OwnerAlchemyArt.panel(g,x+199,y+29,145,100,OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.panel(g,x+178,y+149,173,82,OwnerAlchemyArt.SILVER);
+        OwnerAlchemyArt.panel(g,x+11,y+178,164,28,OwnerAlchemyArt.GOLD);
+        OwnerAlchemyArt.sigil(g,x+39,y+71,12,OwnerAlchemyArt.VIOLET,menu.canDissolve(),delta);
+        OwnerAlchemyArt.flow(g,x+54,x+96,y+71,OwnerAlchemyArt.TEAL,menu.canDissolve(),delta);
+        OwnerAlchemyArt.socket(g,x+165,y+63,OwnerAlchemyArt.GOLD);
+        for(var s:menu.slots){
+            if(!s.isActive())continue;
+            int sx=x+s.x,sy=y+s.y;
+            OwnerAlchemyArt.slot(g,"alchchest",sx,sy,11,3);
+            if(s.index<2)OwnerAlchemyArt.socket(g,sx,sy,s.index==0?OwnerAlchemyArt.VIOLET:OwnerAlchemyArt.TEAL);
+            if(s.index>=AlchemyPatternMenu.GHOST_START&&net.minecraft.world.item.ItemStack.isSameItemSameComponents(s.getItem(),menu.selection())&&!s.getItem().isEmpty())
+                g.outline(sx-2,sy-2,20,20,OwnerAlchemyArt.GOLD);
         }
         if(!menu.selection().isEmpty())g.item(menu.selection(),x+165,y+63);
+        if(menu.eye()){
+            OwnerAlchemyArt.panel(g,x+11,y+48,135,36,OwnerAlchemyArt.VIOLET);
+            BookArt.icon(g,"jugcraft:mercurial_eye",x+23,y+60);
+            OwnerAlchemyArt.flow(g,x+53,x+145,y+71,OwnerAlchemyArt.TEAL,!menu.selection().isEmpty(),delta);
+        }
+
     }
     private void line(GuiGraphicsExtractor g,String s,int x,int y,int width,int color){g.text(font,BookArt.fit(font,s,width),x,y,color,false);}
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mx,int my){
         g.text(font,ui(menu.eye()?"build":"title"),13,12,0xFFE5DDEB,false);
-        line(g,ui("balance",menu.balance()).getString(),13,26,180,0xFFAADCD9);
+        line(g,ui("balance",String.format("%,d",menu.balance())).getString(),13,26,180,0xFFAADCD9);
+        g.text(font,ui("collection"),204,16,0xFF9FC8CA,false);
         line(g,ui("sources",menu.balance()-menu.stars(),menu.stars()).getString(),13,37,180,0xFF9AAFB8);
-        g.text(font,ui("sample"),16,51,0xFFE4C786,false);g.text(font,ui("output"),104,51,0xFFE4C786,false);g.text(font,ui("target"),153,51,0xFFE4C786,false);
+        if(!menu.eye()){g.text(font,ui("sample"),16,51,0xFFE4C786,false);g.text(font,ui("output"),104,51,0xFFE4C786,false);}g.text(font,ui("target"),150,51,0xFFE4C786,false);
         line(g,ui(menu.eye()?"cost":"total",menu.eye()?menu.price()+8:menu.batchCost()).getString(),16,140,178,0xFFBBCBD7);
         line(g,ui(menu.eye()?"area_help":"input_"+menu.inputStatus(),menu.gain()).getString(),16,181,164,0xFFE4C786);
         if(!menu.eye())line(g,ui("form_"+menu.formStatus()).getString(),16,193,164,0xFFBBCBD7);

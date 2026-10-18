@@ -14,10 +14,10 @@ ITEMS = {key: {"name": name, "tooltip": TOOLTIPS[key]} for key, name in NAMES.it
 OWNER_FILES = {**{f"textures/item/{key}.png": f"textures/item/stars/{key}.png" for key in STARS},
                **{f"textures/item/{key}.png": f"textures/item/rings/{key}.png" for key in AMULETS}}
 LANG = {
-    "message.jugcraft.star.research": "Understand Assay to use this equipment. Concordance must be enabled.",
+    "message.jugcraft.star.research": "Equipment is unavailable: check that Concordance is enabled and its essence data is valid.",
     "tooltip.jugcraft.star.charge": "%s / %s essence stored",
     "tooltip.jugcraft.star.use": "Use: open essence storage. Close to reclaim the star. Upgrade at a smithing table; stored essence is kept.",
-    "tooltip.jugcraft.amulet.controls": "Use in air with a plain empty bucket in your other hand. Sneak-use: toggle ward. Hold or wear in a Charm slot. Requires understood Assay.",
+    "tooltip.jugcraft.amulet.controls": "Use in air with a plain empty bucket in your other hand. Sneak-use: toggle ward. Hold or wear in a Charm slot. No research required.",
     "message.jugcraft.amulet.toggle": "%s ward: %s",
     "message.jugcraft.amulet.bucket": "Needs a plain empty bucket in the other hand, room for its output, and %s essence in your ledger.",
     "message.jugcraft.amulet.filled": "Bucket filled. %s essence remaining.",
@@ -55,11 +55,11 @@ def codex():
         "name": "Stars and Elemental Amulets", "x": 6, "y": 0, "icon": rid("klein_star_1"), "condition": None,
         "description": "Carry essence, supply fluids and protect yourself",
         "pages": [
-            ("crafting_recipe", "Klein Star Ein", "**Use** a star to open its storage tablet. Store or take **1,024**, **16,384**, or **all available** essence. Transfers stop at the star's capacity or the personal ledger's **2,000,000,000** limit. Nothing is generated or lost. Closing returns the real star. Equipment spends your personal ledger first, then carried stars in inventory order. Nested stars are not power sources. Understand **Assay** to use it.", rid("klein_star_1")),
+            ("crafting_recipe", "Klein Star Ein", "**Use** a star to open its storage tablet. Store or take **1,024**, **16,384**, or **all available** essence. Transfers stop at the star's capacity or the personal ledger's **2,000,000,000** limit. Nothing is generated or lost. Closing returns the real star. Equipment spends your personal ledger first, then carried stars in inventory order. Nested stars are not power sources. No research required.", rid("klein_star_1")),
             ("text", "Six Capacities", "**Ein: 4,096**; **Zwei: 16,384**; **Drei: 65,536**; **Vier: 262,144**; **Sphere: 1,048,576**; **Omega: 4,194,304**. At a **smithing table**, put **High Covalence Dust** in the template slot, your current star in the base slot and **Dark Matter** in the addition slot. Each upgrade consumes one dust and one Dark Matter and preserves the star's **charge and custom name**. Filled stars can be traded; on death they follow normal inventory/drop rules. None can be transmuted."),
             ("crafting_recipe", "Evertide Amulet", "Hold a **plain empty bucket** in your other hand and **use in air** to fill one water bucket for **64 essence**. A stack of buckets needs a spare inventory slot. **Sneak-use** switches its ward on/off. Hold the active amulet or equip it in a **Charm** slot for water breathing while submerged, at **4 essence per second**. The ward is short-lived when you run out or remove it. Crafting returns the two empty buckets.", rid("evertide_amulet")),
             ("crafting_recipe", "Volcanite Amulet", "Fills a carried empty bucket with lava for **4,096 essence**. **Sneak-use** enables a ward granting fire resistance while burning or in lava, for **8 essence per second**. Keep a balance before approaching lava; the ward checks once a second and is not a shield against every damage type. Hold or wear in a **Charm** slot. Crafting returns two buckets.", rid("volcanite_amulet")),
-            ("text", "Practical Limits", "Wards start **off**, need understood Assay and spend only while the matching danger is present. Multiple copies do not stack. Existing longer or stronger potions are left alone. Filling a bucket never places fluid in the world: use the ordinary bucket afterward, with normal placement and protection rules. No automatic inventory search, chunk scanning, passive essence generation, flying or new spell system is involved."),
+            ("text", "Practical Limits", "Wards start **off**, spend essence only while the matching danger is present. Multiple copies do not stack. Existing longer or stronger potions are left alone. Filling a bucket never places fluid in the world: use the ordinary bucket afterward, with normal placement and protection rules. No automatic inventory search, chunk scanning, passive essence generation, flying or new spell system is involved."),
         ]}}
 
 # Owner-requested connected behavior supersedes the original manual-only descriptions.

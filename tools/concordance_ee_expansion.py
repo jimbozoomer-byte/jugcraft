@@ -57,7 +57,7 @@ def write_all(write,assets,data,lang,condition,self_drop):
               'on_false':{'type':'minecraft:model','model':f'jugcraft:item/{name}'},'on_true':{'type':'minecraft:model','model':f'jugcraft:item/{name}_active'}}})
     # Actual player help is replaced together with mechanics; older feature records remain historical evidence.
     bodies=[
-     'Examine iron and coal, then study an Assay specimen at the Lampwright Bench after First Light. Craft a Stone or tablet. Dissolve one plain item to learn it permanently. Choose its icon to withdraw it for essence.',
+     'Craft, find or trade for a Stone or tablet. Use it immediately: no research or study is required. Dissolve one plain item to learn it permanently. Choose its icon to withdraw it for essence.',
      'All default item types have values. Dissolve rounds down; withdrawal rounds up, with no surcharge. Use 1 / 16 / 64 / Max. Search and favorites are optional. Empty charged or filled items before dissolving; their contents are never copied.',
      'Next craft a Klein Star, daylight collector and condenser. Charge feeds neighbors; Fuel upgrades coal for the difference in item values. Loaded factories work while you are away. Claims, pause and redstone still stop them.',
      'Bags have 54 independent slots. Sort and Stack merge identical items. Pause disables stored artifacts. Repair Talisman repairs gear; Black Hole Band gathers matching drops. Open menus pause automation. No nesting.',
@@ -108,7 +108,7 @@ LANG.update({"hud.jugcraft.alchemy."+k:v for k,v in {
 }.items()})
 LANG.update({"key.jugcraft.gem_"+key:value for key,value in zip(("night_vision","repel","dash","flight"),("Gem helmet: night vision","Gem chest: repel","Gem leggings: dash","Gem boots: flight"))})
 LANG.update({"screen.jugcraft.gem."+k:v for k,v in {
- "short_0":"Night vision", "short_1":"Repel", "short_2":"Dash", "short_3":"Flight", "on":"On", "off":"Off", "ready":"Ready", "missing":"Equip + enable armor", "cooldown":"Cooling down", "power":"Available essence: %s (wallet + stars)"
+ "short_0":"Night vision", "short_1":"Repel", "short_2":"Dash", "short_3":"Flight", "on":"On", "off":"Off", "ready":"Ready", "missing":"Equip this armor", "cooldown":"Cooling down", "power":"Available essence: %s (wallet + stars)"
 }.items()})
 LANG.update({"screen.jugcraft.alchemy_machine."+k:v for k,v in {
  "range":"Range: %s blocks", "range_help":"Select 2 / 4 / 6 blocks. Aim at the pedestal to see its footprint. Watch affects adjacent machines only; Harvest stays within its 7 x 3 x 7 farm scan. Claims and line of sight still apply.",
@@ -128,3 +128,21 @@ LANG.update({"screen.jugcraft.alchemy_machine."+k:v for k,v in {
 }.items()})
 
 LANG.update({"screen.jugcraft.pattern.guide":"Guide", "screen.jugcraft.alchemy_storage.source_0":"Reference value", "screen.jugcraft.alchemy_storage.source_1":"Derived from a local recipe", "screen.jugcraft.alchemy_storage.source_2":"Provisional local assignment"})
+
+
+# Equipment access and engraved control panels, owner-directed playability revision.
+LANG.update({
+    "message.jugcraft.alchemy.unavailable": "Equipment unavailable: check that Concordance is enabled and its essence data is valid.",
+    "screen.jugcraft.pattern.collection": "LEARNED ITEMS",
+    "screen.jugcraft.pattern.target": "Selected",
+    "screen.jugcraft.pattern.sample": "Input",
+    "screen.jugcraft.pattern.sources": "Wallet %s / stars %s",
+    "screen.jugcraft.pattern.form_1": "Dissolve an item, then select it.",
+    "screen.jugcraft.automation.filters": "Allowed inputs (click with an item)",
+    "screen.jugcraft.gem.missing": "Equip this armor",
+    "screen.jugcraft.alchemy_storage.no_nesting": "54 slots / no bags inside",
+    "screen.jugcraft.gem.help_0": "Wear the Gem Helmet and click to toggle night vision. 4 essence per renewal. No research or pre-activation needed.",
+    "screen.jugcraft.gem.help_1": "Wear the Gem Chestplate and click to repel nearby hostile mobs. Costs essence per target; claims still apply.",
+    "screen.jugcraft.gem.help_2": "Wear Gem Leggings and click to dash while grounded. Costs 64 essence; requires clear space and permission.",
+    "screen.jugcraft.gem.help_3": "Wear Gem Boots and click to toggle flight. Uses the shared paid flight lease; ends without power or when removed.",
+})

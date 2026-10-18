@@ -11,11 +11,11 @@ import net.minecraft.world.entity.player.Inventory;
 public final class AlchemyMachinesScreen extends AbstractContainerScreen<AlchemyMachinesMenu> {
     private TransmutationScreen.ActionButton range;
     private final TransmutationScreen.ActionButton[] buttons=new TransmutationScreen.ActionButton[3];
-    public AlchemyMachinesScreen(AlchemyMachinesMenu menu,Inventory inv,Component title){super(menu,inv,title,348,236);}
+    public AlchemyMachinesScreen(AlchemyMachinesMenu menu,Inventory inv,Component title){super(menu,inv,title,348,240);}
     private static Component ui(String key,Object... args){return Component.translatable("screen.jugcraft.alchemy_machine."+key,args);}
     private static String n(long v){return String.format("%,d",v);}
     @Override protected void init(){
-        super.init();for(int i=0;i<3;i++){final int action=i;buttons[i]=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+21+i*103,topPos+126,100,ui(i==0?"pause":i==1?"deposit":"withdraw"),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,menu.kind()==AlchemyMachines.Kind.NOVA?3:action);}));}range=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+206,topPos+66,112,ui("range",6),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,4);}));refresh();
+        super.init();for(int i=0;i<3;i++){final int action=i;buttons[i]=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+21+i*103,topPos+124,100,ui(i==0?"pause":i==1?"deposit":"withdraw"),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,menu.kind()==AlchemyMachines.Kind.NOVA?3:action);}));}range=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+206,topPos+66,112,ui("range",6),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,4);}));refresh();
     }
     private void refresh(){
         range.visible=menu.kind()==AlchemyMachines.Kind.PEDESTAL;range.setMessage(ui("range",menu.range()));range.setTooltip(Tooltip.create(ui("range_help")));
@@ -28,18 +28,36 @@ public final class AlchemyMachinesScreen extends AbstractContainerScreen<Alchemy
     @Override protected void containerTick(){super.containerTick();refresh();}
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){extractBackground(g,mx,my,delta);super.extractRenderState(g,mx,my,delta);extractTooltip(g,mx,my);}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){
-        int x=leftPos,y=topPos;g.fill(0,0,width,height,0xA00B0B14);TransmutationScreen.slab(g,x+4,y+5,imageWidth,imageHeight,0x70000000);
-        TransmutationScreen.slab(g,x,y,imageWidth,imageHeight,0xFF20222B);TransmutationScreen.slab(g,x+2,y+2,imageWidth-4,imageHeight-4,0xFF747784);TransmutationScreen.slab(g,x+4,y+4,imageWidth-8,imageHeight-8,0xFF353640);
-        g.fill(x+16,y+34,x+332,y+124,0xFF20232D);g.fill(x+23,y+39,x+325,y+45,0xFF111820);
-        if(menu.capacity()>0)g.fill(x+24,y+40,x+24+(int)(300L*menu.essence()/menu.capacity()),y+44,0xFF79CECC);
-        if(menu.kind()==AlchemyMachines.Kind.FURNACE){g.fill(x+185,y+76,x+225,y+79,0xFF596571);int advance=ConcordanceClientOptions.reducedMotion()?17:(int)(minecraft.level.getGameTime()%30)*34/30;if(menu.status()==7)g.fill(x+186+advance,y+75,x+191+advance,y+80,0xFFEFAD6B);}
-        else if(menu.kind()==AlchemyMachines.Kind.RELAY){double phase=ConcordanceClientOptions.reducedMotion()?0:(minecraft.level.getGameTime()+delta)*.035;for(int i=0;i<4;i++)BookArt.star(g,x+259+(int)(Math.cos(phase+i*Math.PI/2)*23),y+79+(int)(Math.sin(phase+i*Math.PI/2)*16),2,menu.status()==7?0xFF9CE2DA:0xFF6E788E);}
-        if(menu.kind()==AlchemyMachines.Kind.FURNACE)OwnerAlchemyArt.crop(g,menu.tier()==1?"dmfurnace":"rmfurnace",x+187,y+65,menu.tier()==1?72:88,32,24,20);
-        if(menu.kind()==AlchemyMachines.Kind.RELAY)OwnerAlchemyArt.crop(g,"relay"+menu.tier(),x+244,y+65,menu.tier()==1?120:menu.tier()==2?137:157,menu.tier()==3?52:38,29,28);
-        g.fill(x+89,y+151,x+259,y+232,0xFF22232B);
-        for(var slot:menu.slots){if(!slot.isActive())continue;int sx=x+slot.x,sy=y+slot.y;if(slot.index==0)g.fill(sx-3,sy-3,sx+19,sy+19,0xFFAB9BCA);g.fill(sx-1,sy-1,sx+17,sy+17,0xFF131822);g.fill(sx,sy,sx+16,sy+16,0xFF525761);g.fill(sx,sy+16,sx+17,sy+17,0xFFB5BDCB);
-            if(menu.kind()==AlchemyMachines.Kind.FURNACE)OwnerAlchemyArt.slot(g,menu.tier()==1?"dmfurnace":"rmfurnace",sx,sy,menu.tier()==1?12:10,7);
-            else if(menu.kind()==AlchemyMachines.Kind.RELAY)OwnerAlchemyArt.slot(g,"relay"+menu.tier(),sx,sy,26,16);}
+        int x=leftPos,y=topPos;
+        g.fill(0,0,width,height,0xB0081018);
+        OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
+
+        OwnerAlchemyArt.panel(g,x+16,y+34,316,88,OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.meter(g,x+23,y+38,302,menu.essence(),menu.capacity(),OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.panel(g,x+89,y+156,170,81,OwnerAlchemyArt.SILVER);
+
+        if(menu.kind()==AlchemyMachines.Kind.FURNACE){
+            OwnerAlchemyArt.flow(g,x+185,x+225,y+78,OwnerAlchemyArt.GOLD,menu.status()==7,delta);
+            OwnerAlchemyArt.meter(g,x+184,y+87,42,menu.progress(),40,OwnerAlchemyArt.GOLD);
+        }else if(menu.kind()==AlchemyMachines.Kind.RELAY){
+            OwnerAlchemyArt.sigil(g,x+262,y+78,17,OwnerAlchemyArt.TEAL,menu.status()==7,delta);
+            BookArt.icon(g,"jugcraft:relay_mk"+menu.tier(),x+254,y+70);
+        }
+        for(var slot:menu.slots){
+            if(!slot.isActive())continue;
+            OwnerAlchemyArt.slot(g,"alchchest",x+slot.x,y+slot.y,11,3);
+            if(slot.index==0||slot.index==1)OwnerAlchemyArt.socket(g,x+slot.x,y+slot.y,slot.index==0?OwnerAlchemyArt.VIOLET:OwnerAlchemyArt.GOLD);
+        }
+        OwnerAlchemyArt.sigil(g,x+44,y+189,20,OwnerAlchemyArt.VIOLET,menu.status()==7,delta);
+        String icon=switch(menu.kind()){
+            case FURNACE -> menu.tier()==1?"dark_matter_furnace":"red_matter_furnace";
+            case RELAY -> "relay_mk"+menu.tier();
+            case PEDESTAL -> "dark_matter_pedestal";
+            case TORCH -> "interdiction_torch";
+            case NOVA -> menu.tier()==1?"nova_catalyst":"nova_cataclysm";
+        };
+        BookArt.icon(g,"jugcraft:"+icon,x+36,y+181);
+
     }
     private void line(GuiGraphicsExtractor g,Component text,int x,int y,int width,int color){g.text(font,BookArt.fit(font,text.getString(),width),x,y,color,false);}
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mx,int my){
@@ -54,6 +72,6 @@ public final class AlchemyMachinesScreen extends AbstractContainerScreen<Alchemy
             line(g,ui("effect_"+id),24,95,296,0xFFB5C3D3);
             line(g,ui("pulse",menu.lastTargets(),menu.lastSpent()),24,105,296,0xFFB5C3D3);
         }else line(g,ui("hint_"+kind.name().toLowerCase(),menu.tier()==1?1:4),24,95,296,0xFFB5C3D3);
-        line(g,ui("status_"+menu.status()),19,116,311,menu.status()==7?0xFF9CE2BC:0xFFE2C99D);line(g,ui("wallet",n(menu.wallet())),93,145,237,0xFFCEC5DF);
+        line(g,ui("status_"+menu.status()),19,112,311,menu.status()==7?0xFF9CE2BC:0xFFE2C99D);line(g,ui("wallet",n(menu.wallet())),93,146,237,0xFFCEC5DF);
     }
 }

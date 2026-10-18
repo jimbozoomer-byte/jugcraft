@@ -31,27 +31,18 @@ public final class KleinStarScreen extends AbstractContainerScreen<KleinStarMenu
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){extractBackground(g,mx,my,delta);super.extractRenderState(g,mx,my,delta);extractTooltip(g,mx,my);}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){
         int x=leftPos,y=topPos;
-        g.fill(0,0,width,height,0xA00B0B14);
-        TransmutationScreen.slab(g,x+4,y+5,imageWidth,imageHeight,0x70000000);
-        TransmutationScreen.slab(g,x,y,imageWidth,imageHeight,0xFF20222B);
-        TransmutationScreen.slab(g,x+2,y+2,imageWidth-4,imageHeight-4,0xFF747784);
-        TransmutationScreen.slab(g,x+4,y+4,imageWidth-8,imageHeight-8,0xFF353640);
-        g.fill(x+14,y+32,x+288,y+90,0xFF22232E);
-        g.enableScissor(x+108,y+33,x+194,y+78);
-        g.blit(RenderPipelines.GUI_TEXTURED,ART,x+112,y+29,12,20,80,76,80,76,256,256);
-        g.disableScissor();
-        g.fill(x+19,y+82,x+283,y+88,0xFF141820);
-        if(menu.capacity()>0)g.fill(x+20,y+83,x+20+(int)(262L*menu.stored()/menu.capacity()),y+87,0xFF78C8CD);
-        if(menu.stored()>0){
-            double phase=ConcordanceClientOptions.reducedMotion()?0:(minecraft.level.getGameTime()+delta)*.04;
-            BookArt.star(g,x+151+(int)(Math.cos(phase)*27),y+56+(int)(Math.sin(phase)*17),2,0xFFE7D3FF);
+        g.fill(0,0,width,height,0xB0081018);
+        OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
+
+        OwnerAlchemyArt.panel(g,x+14,y+32,274,58,OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.sigil(g,x+151,y+57,20,OwnerAlchemyArt.VIOLET,menu.stored()>0,delta);
+        OwnerAlchemyArt.meter(g,x+19,y+81,264,menu.stored(),menu.capacity(),OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.panel(g,x+65,y+147,172,81,OwnerAlchemyArt.SILVER);
+        for(var slot:menu.slots){
+            OwnerAlchemyArt.slot(g,"alchchest",x+slot.x,y+slot.y,11,3);
+            if(slot.index==0)OwnerAlchemyArt.socket(g,x+slot.x,y+slot.y,OwnerAlchemyArt.VIOLET);
         }
-        g.fill(x+65,y+147,x+237,y+228,0xFF20222A);
-        for(var slot:menu.slots){int sx=x+slot.x,sy=y+slot.y;
-            if(slot.index==0)g.fill(sx-3,sy-3,sx+19,sy+19,0xFFD5BCE7);
-            g.fill(sx-1,sy-1,sx+17,sy+17,0xFF181B23);g.fill(sx,sy,sx+16,sy+16,0xFF575462);
-            g.fill(sx,sy+16,sx+17,sy+17,0xFFC0BCCB);
-        }
+
     }
     private void text(GuiGraphicsExtractor g,Component text,int x,int y,int width,int color){g.text(font,BookArt.fit(font,text.getString(),width),x,y,color,false);}
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mx,int my){

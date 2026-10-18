@@ -164,14 +164,14 @@ public class DarkMatterGameTests {
         var restored=ItemStack.CODEC.parse(ops,ItemStack.CODEC.encodeStart(ops,stack).getOrThrow()).getOrThrow();
         h.assertTrue(restored.get(DarkMatter.MODE)==1,"Selected mode persists in a saved item");h.succeed();
     }
-    @GameTest(maxTicks=20) public void disabledOrUnknownMagicLeavesOrdinaryMining(GameTestHelper h) {
+    @GameTest(maxTicks=20) public void disabledMagicStopsExtrasButTradedToolsNeedNoResearch(GameTestHelper h) {
         var p=player(h,"hammer",1);face(h,Blocks.STONE);boolean enabled=JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
         try{JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE,false);mine(h,p,CENTRE);}
         finally{JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE,enabled);}
         h.assertTrue(remainingFace(h,Blocks.STONE)==8&&Assaying.balance(p)==1000,"Disabled feature only allows ordinary mining");
         var novice=h.makeMockServerPlayerInLevel();novice.setGameMode(GameType.SURVIVAL);novice.snapTo(p.getX(),p.getY(),p.getZ(),0,0);
         novice.setItemInHand(InteractionHand.MAIN_HAND,p.getMainHandItem().copy());Assaying.setBalance(novice,1000);h.setBlock(CENTRE,Blocks.STONE);mine(h,novice,CENTRE);
-        h.assertTrue(remainingFace(h,Blocks.STONE)==8&&Assaying.balance(novice)==1000,"Unknown Assay cannot buy extra work");h.succeed();
+        h.assertTrue(remainingFace(h,Blocks.STONE)==0&&Assaying.balance(novice)==872&&!Assaying.knows(novice),"Traded hammer buys eight extras without research");h.succeed();
     }
     @GameTest(maxTicks=20) public void silkTouchUsesNormalLootForEveryBlock(GameTestHelper h) {
         var p=player(h,"hammer",1);face(h,Blocks.STONE);

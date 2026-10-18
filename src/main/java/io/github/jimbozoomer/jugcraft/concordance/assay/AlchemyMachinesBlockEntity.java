@@ -62,7 +62,7 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     private ItemStack visualArtifact(){return kind()==AlchemyMachines.Kind.PEDESTAL&&pedestalArtifact(items.get(1))?new ItemStack(items.get(1).getItem()):ItemStack.EMPTY;}
     public void setEssence(int value){essence=Math.clamp(value,0,capacity());setChanged();}
     public void setPaused(boolean value){paused=value;status=value?PAUSED:READY;if(level instanceof ServerLevel server&&getBlockState().getValue(AlchemyMachinesBlock.ACTIVE))server.setBlock(worldPosition,getBlockState().setValue(AlchemyMachinesBlock.ACTIVE,false),Block.UPDATE_CLIENTS);setChanged();}
-    public void placedBy(ServerPlayer player){owner=player.getUUID();authorized=Assaying.knows(player);setChanged();}
+    public void placedBy(ServerPlayer player){owner=player.getUUID();authorized=true;setChanged();}
     private boolean related(UUID by){return owner!=null&&(owner.equals(by)||JugcraftParties.sameParty(owner,by));}
     public boolean mayUse(ServerPlayer player){return related(player.getUUID())&&player.isAlive()&&!player.isSpectator()&&level instanceof ServerLevel server&&Authority.mayChange(server,player,worldPosition);}
     @Override public boolean stillValid(Player p){return level!=null&&level.getBlockEntity(worldPosition)==this&&p.distanceToSqr(Vec3.atCenterOf(worldPosition))<=64&&(!(p instanceof ServerPlayer player)||mayUse(player));}
@@ -70,7 +70,7 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
         if(!Assaying.enabled())return DISABLED;
         if(paused||level!=null&&level.hasNeighborSignal(worldPosition))return PAUSED;
         if(player==null||owner==null||!owner.equals(player.getUUID())||!player.isAlive()||player.isSpectator())return OWNER_AWAY;
-        if(!AlchemyOwner.knows(player,authorized))return RESEARCH;
+        // Possessing/placing the device is enough; research is optional guidance.
         if(!Authority.isStandIn(player))authorized=true;
         if(!(level instanceof ServerLevel server)||!Assaying.problems(server).isEmpty())return UNBALANCED;
         return Authority.mayChange(server,player,worldPosition)?READY:DENIED;
@@ -260,7 +260,7 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     @Override public void preRemoveSideEffects(BlockPos pos,BlockState state){if(level instanceof ServerLevel server){Containers.dropContents(server,pos,this);clearContent();int whole=(int)experience;if(whole>0)ExperienceOrb.award(server,Vec3.atCenterOf(pos),whole);experience=0;}}
     @Override protected void loadAdditional(ValueInput input){
         if(input.getBooleanOr("display_only",false)){range=Math.clamp(input.getIntOr("effect_range",6),2,6);displayedArtifact=input.read("display_artifact",ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);return;}
-        super.loadAdditional(input);items=NonNullList.withSize(SLOTS,ItemStack.EMPTY);ContainerHelper.loadAllItems(input,items);owner=input.read("owner",UUIDUtil.CODEC).orElse(null);authorized=input.getBooleanOr("factory_authorized",false);range=Math.clamp(input.getIntOr("effect_range",6),2,6);essence=Math.clamp(input.getIntOr("essence",0),0,capacity());paused=input.getBooleanOr("paused",false);progress=Math.clamp(input.getIntOr("progress",0),0,40);experience=Math.max(0,input.getFloatOr("experience",0));scanCursor=Math.floorMod(input.getIntOr("scan_cursor",0),147);displayedArtifact=visualArtifact();lastSentArtifact=displayedArtifact.copy();
+        super.loadAdditional(input);items=NonNullList.withSize(SLOTS,ItemStack.EMPTY);ContainerHelper.loadAllItems(input,items);owner=input.read("owner",UUIDUtil.CODEC).orElse(null);authorized=owner!=null /* Upgrade old research-locked factories without changing their owner. */;range=Math.clamp(input.getIntOr("effect_range",6),2,6);essence=Math.clamp(input.getIntOr("essence",0),0,capacity());paused=input.getBooleanOr("paused",false);progress=Math.clamp(input.getIntOr("progress",0),0,40);experience=Math.max(0,input.getFloatOr("experience",0));scanCursor=Math.floorMod(input.getIntOr("scan_cursor",0),147);displayedArtifact=visualArtifact();lastSentArtifact=displayedArtifact.copy();
     }
     @Override protected void saveAdditional(ValueOutput out){super.saveAdditional(out);Saved.stamp(out,1);ContainerHelper.saveAllItems(out,items);if(owner!=null)out.store("owner",UUIDUtil.CODEC,owner);out.putInt("effect_range",range);out.putBoolean("factory_authorized",authorized);out.putInt("essence",essence);out.putBoolean("paused",paused);out.putInt("progress",progress);out.putFloat("experience",experience);out.putInt("scan_cursor",scanCursor%147);}
     @Override protected void collectImplicitComponents(DataComponentMap.Builder c){super.collectImplicitComponents(c);c.set(AlchemicalWorkshops.ESSENCE,essence);}

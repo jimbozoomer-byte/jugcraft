@@ -32,7 +32,7 @@ public final class AlchemyMachinesMenu extends AbstractContainerMenu {
             @Override public boolean mayPlace(ItemStack s){return false;}
             @Override public void onTake(Player p,ItemStack s){super.onTake(p,s);if(p instanceof ServerPlayer player&&machine!=null)machine.claimExperience(player);}
         });
-        addStandardInventorySlots(inventory,93,154);addDataSlots(data);
+        addStandardInventorySlots(inventory,93,158);addDataSlots(data);
     }
     private void put(int offset,long value){data.set(offset,(int)value&65535);data.set(offset+1,(int)(value>>>16));}
     private long number(int offset){return(data.get(offset)&65535L)|((data.get(offset+1)&65535L)<<16);}

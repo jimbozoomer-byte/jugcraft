@@ -227,10 +227,7 @@ public final class Assaying {
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.disabled"));
 			return;
 		}
-		if (!knows(player)) {
-			player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.assay.unknown"));
-			return;
-		}
+		if (!player.isAlive() || player.isSpectator()) return;
 		if (!problems(level).isEmpty()) {
 			player.sendOverlayMessage(Component.translatable("compose.jugcraft.assay.reason.unbalanced"));
 			return;

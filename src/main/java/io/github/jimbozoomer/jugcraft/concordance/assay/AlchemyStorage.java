@@ -112,7 +112,7 @@ public final class AlchemyStorage {
                 p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyStorageMenu(id,inv,hand,held),held.getHoverName()));
                 return InteractionResult.SUCCESS;
             }
-            if(!AlchemicalGear.ready(p)) {p.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.assay.unknown"));return InteractionResult.FAIL;}
+            if(!AlchemicalGear.ready(p)) {p.sendOverlayMessage(Component.translatable("message.jugcraft.alchemy.unavailable"));return InteractionResult.FAIL;}
             switch(name) {
                 case "transmutation_tablet" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyPatternMenu(id,inv,()->holds(p,this),ItemStack.EMPTY),held.getHoverName()));
                 case "alchemy_tome" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyStorageCatalogueMenu(id,inv),held.getHoverName()));

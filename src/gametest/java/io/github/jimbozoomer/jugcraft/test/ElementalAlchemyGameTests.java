@@ -127,9 +127,9 @@ public class ElementalAlchemyGameTests {
         ElementalAmulets.pulse(p);
         h.assertTrue(p.isUnderWater()&&p.hasEffect(MobEffects.WATER_BREATHING)&&Assaying.balance(p)==99996,"Underwater ward costs four");h.succeed();
     }
-    @GameTest(maxTicks=20) public void researchAndFeatureGatesPreventAllPaidActions(GameTestHelper h){
+    @GameTest(maxTicks=20) public void freshPlayersCanUseEquipmentButFeatureGateStillApplies(GameTestHelper h){
         var unknown=h.makeMockServerPlayerInLevel();unknown.setGameMode(GameType.SURVIVAL);Assaying.setBalance(unknown,100000);
-        var m=menu(unknown,1);press(m,unknown,2);h.assertTrue(m.stored()==0&&!m.stillValid(unknown),"Missing Assay rejects transfers");
+        var m=menu(unknown,1);press(m,unknown,2);h.assertTrue(m.stored()==4096&&m.stillValid(unknown)&&Assaying.balance(unknown)==95904,"Fresh players can charge a star without research; payment remains exact");
         var p=player(h);m=menu(p,1);p.setItemInHand(InteractionHand.MAIN_HAND,active(ElementalAmulets.VOLCANITE));p.setItemInHand(InteractionHand.OFF_HAND,new ItemStack(Items.BUCKET));p.igniteForTicks(200);
         boolean before=JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
         try{JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE,false);press(m,p,2);ElementalAmulets.pulse(p);

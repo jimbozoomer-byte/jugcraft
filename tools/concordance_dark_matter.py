@@ -53,7 +53,7 @@ LANG = {
     "message.jugcraft.dark_matter.mode.face": "3x3 face",
     "message.jugcraft.dark_matter.mode.fell": "Fell logs",
     "tooltip.jugcraft.dark_matter.mode": "Selected: %s",
-    "tooltip.jugcraft.dark_matter.controls": "Use in air (or sneak-use a block): next mode. Sneak while mining: one block. Extra breaks cost %s essence each and require understood Assay; ordinary mining is free.",
+    "tooltip.jugcraft.dark_matter.controls": "Use in air (or sneak-use a block): next mode. Sneak while mining: one block. Extra breaks cost %s essence each and spend essence; ordinary mining is free.",
 }
 
 def codex():
@@ -61,7 +61,7 @@ def codex():
         "name": "Dark Matter Workshop", "x": 4, "y": 0, "icon": rid("dark_matter_pickaxe"), "condition": None,
         "description": "Alchemical fuels, covalence and tools powered by essence",
         "pages": [
-            ("text", "A Working Alchemist", "Use an ordinary **crafting table**, furnace and anvil. These materials need no new machine and no spell casting. Crafting and single-block mining are available immediately; tool modes require **understood Assay** and the same essence balance as the tablet. Dissolve surplus plain materials in the tablet to supply it."),
+            ("text", "A Working Alchemist", "Use an ordinary **crafting table**, furnace and anvil. These materials need no new machine and no spell casting. Crafting and single-block mining are available immediately; tool modes use the same essence balance as the tablet, without research. Dissolve surplus plain materials in the tablet to supply it."),
             ("crafting_recipe", "Low Covalence", "Cobblestone and charcoal make four dust. One dust binds four coal into one Alchemical Coal.", rid("low_covalence_dust")),
             ("crafting_recipe", "Medium Covalence", "Iron and redstone make four dust. One dust binds two Alchemical Coal into one Mobius Fuel.", rid("medium_covalence_dust")),
             ("crafting_recipe", "High Covalence", "Diamond and lapis make four dust. One dust binds two Mobius Fuel into one Aeternalis Fuel. In an **anvil**, one dust also repairs up to **1,024 durability** on a Dark Matter tool, with the usual XP cost. Existing repair enchantments and the Repair Talisman still work.", rid("high_covalence_dust")),

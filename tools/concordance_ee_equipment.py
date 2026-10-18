@@ -35,7 +35,7 @@ for name, (tier, piece) in ARMOR.items():
                     "chestplate": "Fire Resistance while burning: 8 essence per renewal.",
                     "leggings": "Speed I while sprinting: 4 essence per renewal.",
                     "boots": "Slow Falling after a two-block fall: 4 essence per renewal."}[piece] + " Full enabled suit: Resistance I (12 essence)."}[tier]
-    TOOLTIPS[name] = text + " Wards require understood Assay; ordinary protection works without essence."
+    TOOLTIPS[name] = text + " Enable wards to spend essence; ordinary protection is always available."
 
 ITEMS = {name: {"name": NAMES[name], "tooltip": TOOLTIPS[name]} for name in NAMES if name not in BLOCKS}
 OWNER_FILES = {
@@ -49,7 +49,7 @@ OWNER_FILES = {
 }
 LANG = {
     "message.jugcraft.extended_matter.mode": "%s: %s. Extra work costs %s essence per target.",
-    "tooltip.jugcraft.extended_matter.controls": "%s | %s essence per extra. Use in air or sneak-use a block to change mode; sneak while mining for precision. Requires understood Assay.",
+    "tooltip.jugcraft.extended_matter.controls": "%s | %s essence per extra. Use in air or sneak-use a block to change mode; sneak while mining for precision. No research required.",
     **{f"message.jugcraft.extended_matter.mode.{key}": value for key, value in {
         "single":"Single target", "vein":"Ore vein", "tunnel":"Five-block tunnel", "fell":"Fell logs", "face":"3x3 face",
         "cultivate":"3x3 cultivation", "shear":"Flock / leaves", "sweep":"Hostile sweep"}.items()},
@@ -149,7 +149,7 @@ def codex():
         "description":"Durable tools, protective suits and compact alchemical materials",
         "pages":[
             ("crafting_recipe", "Red Matter", "Combine **three Dark Matter** and **six Aeternalis Fuel**. Upgrade each Dark Matter tool or armor piece at a **smithing table**: High Covalence Dust template, old equipment base, Red Matter addition. Names, damage and enchantments survive. Red tools have **8,192 durability** and netherite-tier harvest. Ordinary use costs no essence.", rid("red_matter")),
-            ("text", "Tools and Modes", "Use in air, or sneak-use a block, to change mode. **Sneak while mining** for precision. Pickaxe: sixteen connected ores or four more blocks in a tunnel. Axe: twenty-four logs, upward only. Hammer: a 3x3 face. Shovel: 3x3 earth and ordinary path making. Hoe: 3x3 cultivation. Shears: six extra sheep or eight/sixteen connected leaves. All paid work needs understood Assay, the personal essence ledger or carried Klein Stars, loaded chunks and permission."),
+            ("text", "Tools and Modes", "Use in air, or sneak-use a block, to change mode. **Sneak while mining** for precision. Pickaxe: sixteen connected ores or four more blocks in a tunnel. Axe: twenty-four logs, upward only. Hammer: a 3x3 face. Shovel: 3x3 earth and ordinary path making. Hoe: 3x3 cultivation. Shears: six extra sheep or eight/sixteen connected leaves. Paid work uses the personal essence ledger or carried Klein Stars, loaded chunks and permission. No research is required."),
             ("crafting_recipe", "Red Katar", "Combine the four Red Matter sword/axe/hoe/shears with four Red Matter and High Covalence Dust. Mines axe/hoe blocks and leaves; strips logs, tills soil, shears sheep, and selects felling or hostile sweep. The combination is ordinary crafting: ingredient enchantments and names are not transferred. **16 essence** per extra log or hostile creature.", rid("red_matter_katar")),
             ("crafting_recipe", "Red Morning Star", "Combine Red Matter pickaxe/shovel/hammer, four Red Matter, an Iron Band and High Covalence Dust. Mines pickaxe and shovel materials; makes paths. Select a **3x3 face** or **five-block tunnel**, costing **12 essence** per extra block. Ingredient enchantments and names do not transfer through this crafting recipe.", rid("red_matter_morning_star")),
             ("text", "Safe Extra Work", "Single hits/breaks retain normal loot, durability and protection. Extra blocks never include block entities, fluid-bearing blocks, harder materials or protected terrain. An unaffordable operation stops before spending. Most tools cost **8 essence** per extra; hammer and Morning Star **12**; sword and Katar **16**. Sword sweep affects up to **four nearby hostile mobs** for two/four damage and uses the shared Concordance effect boundary. Pets, villagers and players are never swept."),

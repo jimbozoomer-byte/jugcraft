@@ -23,6 +23,61 @@ public class AlchemyPlayabilityGameTests {
     private static ItemStack item(String id){return new ItemStack(BuiltInRegistries.ITEM.getValue(io.github.jimbozoomer.jugcraft.Jugcraft.id(id)));}
     private static void press(net.minecraft.world.inventory.AbstractContainerMenu m,ServerPlayer p,int action){RateGate.forget(p.getUUID());m.clickMenuButton(p,action);}
     private static AlchemyPatternMenu tablet(ServerPlayer p){return new AlchemyPatternMenu(1,p.getInventory(),()->true,ItemStack.EMPTY);}
+    private static ServerPlayer fresh(GameTestHelper h){
+        // Vanilla's in-level mock always reports Creative; use a real player for mode-sensitive checks.
+        var profile=new com.mojang.authlib.GameProfile(UUID.randomUUID(),"fresh-alchemy-player");
+        var p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),profile,net.minecraft.server.level.ClientInformation.createDefault());
+        var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+        new io.netty.channel.embedded.EmbeddedChannel(connection);
+        h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));
+        p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        h.assertTrue(!p.isCreative()&&!p.isSpectator()&&!Assaying.knows(p),"Fixture is an ordinary survival player without research");return p;
+    }
+    @GameTest(maxTicks=20)public void freshPlayerDissolvesLearnsAndWithdrawsWithoutResearch(GameTestHelper h){
+        var p=fresh(h);var m=tablet(p);m.getSlot(0).set(new ItemStack(Items.DIAMOND));
+        h.assertTrue(m.stillValid(p),"Tablet opens immediately");press(m,p,0);press(m,p,0);
+        h.assertTrue(Assaying.balance(p)==8192&&AlchemyPatterns.known(p).contains("minecraft:diamond"),"Dissolution still consumes and teaches the pattern");
+        press(m,p,1);h.assertTrue(m.getSlot(1).getItem().is(Items.DIAMOND)&&Assaying.balance(p)==0,"Withdrawal pays full price without a research gate");
+        h.assertTrue(!Assaying.knows(p),"Using equipment does not silently grant unrelated research");h.succeed();
+    }
+    @GameTest(maxTicks=20)public void eyeHiddenTransactionSlotsNeverSwallowShiftClickedItems(GameTestHelper h){
+        var p=fresh(h);p.getInventory().setItem(9,new ItemStack(Items.IRON_INGOT,12));
+        var menu=new AlchemyPatternMenu(1,p.getInventory(),()->true,item("mercurial_eye"));
+        h.assertTrue(menu.eye()&&!menu.getSlot(0).isActive()&&!menu.getSlot(1).isActive(),"Eye has no transaction sockets");
+        menu.quickMoveStack(p,2);
+        h.assertTrue(menu.getSlot(0).getItem().isEmpty()&&p.getInventory().getItem(9).getCount()==12,"Shift-click leaves real items visible in the inventory");
+        h.assertTrue(!menu.getSlot(0).mayPlace(new ItemStack(Items.GOLD_INGOT)),"Hidden socket cannot accept direct placement either");h.succeed();
+    }
+    @GameTest(maxTicks=20)public void freshPlayerCanEquipTradedCharms(GameTestHelper h){
+        var p=fresh(h);
+        for(var i:List.of(AlchemicalGear.TALISMAN,AlchemicalGear.BAND,ElementalAmulets.EVERTIDE,ElementalAmulets.VOLCANITE,AlchemyArtifacts.ITEMS.get("harvest_goddess_band"))){
+            h.assertTrue(((eu.pb4.trinkets.api.callback.TrinketCallback)i).canEquip(new ItemStack(i),null,p),"Traded charm is equippable: "+i);
+        }h.succeed();
+    }
+    @GameTest(maxTicks=20)public void equippedGemHelmetNeedsNoResearchOrHeldItemActivation(GameTestHelper h){
+        var p=fresh(h);var helmet=item("gem_helmet");p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,helmet);Assaying.setBalance(p,20);
+        h.assertTrue(GemAbilities.activate(p,0)&&helmet.has(AlchemicalGear.ACTIVE),"Explicit control enables the actual equipped item");
+        GemAbilities.pulse(p);h.assertTrue(p.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION)&&Assaying.balance(p)==16,"Ability still pays its normal essence cost");
+        p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,ItemStack.EMPTY);RateGate.forget(p.getUUID());
+        h.assertTrue(!GemAbilities.activate(p,0),"No owned equipped item means no ability");h.succeed();
+    }
+    @GameTest(maxTicks=20)public void oldUnresearchedFactoryMigratesOfflineWithoutLosingContents(GameTestHelper h){
+        var p=fresh(h);var pos=new BlockPos(2,3,2);h.setBlock(pos,AlchemicalWorkshops.BLOCKS.get("condenser_mk1"));
+        var be=h.getBlockEntity(pos,AlchemicalWorkshopBlockEntity.class);be.placedBy(p);be.setEssence(512);be.setItem(1,new ItemStack(Items.IRON_INGOT));
+        var saved=be.saveWithoutMetadata(h.getLevel().registryAccess());saved.putBoolean("factory_authorized",false);
+        be.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,h.getLevel().registryAccess(),saved));
+        h.getLevel().getServer().getPlayerList().remove(p);be.pulse(null);
+        h.assertTrue(be.getItem(5).is(Items.IRON_INGOT)&&be.essence()==256,"Legacy false research flag no longer locks a legitimately owned machine");
+        try(var claims=TestClaims.open()){claims.block(be.getBlockPos(),UUID.randomUUID());be.pulse(null);h.assertTrue(be.essence()==256,"Migration preserves claim boundaries");}h.succeed();
+    }
+    @GameTest(maxTicks=20)public void unresearchedScaleWorksButSpectatorsCannotDissolve(GameTestHelper h){
+        var p=fresh(h);var iron=new ItemStack(Items.IRON_INGOT);
+        Assaying.use(p,p.level(),iron,ItemStack.EMPTY);Assaying.use(p,p.level(),iron,ItemStack.EMPTY);
+        h.assertTrue(iron.isEmpty()&&Assaying.balance(p)==256,"Scale is usable without research");
+        p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);h.assertTrue(p.isSpectator(),"Fixture entered spectator mode");var gold=new ItemStack(Items.GOLD_INGOT);
+        Assaying.use(p,p.level(),gold,ItemStack.EMPTY);Assaying.use(p,p.level(),gold,ItemStack.EMPTY);
+        h.assertTrue(!gold.isEmpty()&&Assaying.balance(p)==256&&!AlchemicalGear.ready(p),"Spectator state still forbids equipment transactions");h.succeed();
+    }
     @GameTest(maxTicks=20)public void everyRegisteredDefaultItemHasPositiveValue(GameTestHelper h){
         int checked=0;for(var item:BuiltInRegistries.ITEM){if(item==Items.AIR)continue;var m=AlchemicalWorkshopBlockEntity.material(new ItemStack(item));
             h.assertTrue(m!=null&&m.formable()&&m.dissolvable()&&Assay.form(m,1)>0,"Positive default-item value: "+BuiltInRegistries.ITEM.getKey(item));checked++;}

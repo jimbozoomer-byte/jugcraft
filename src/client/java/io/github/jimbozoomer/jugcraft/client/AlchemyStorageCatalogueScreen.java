@@ -16,9 +16,18 @@ public final class AlchemyStorageCatalogueScreen extends AbstractContainerScreen
     private void press(int id){if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,id);}
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){extractBackground(g,mx,my,delta);super.extractRenderState(g,mx,my,delta);extractTooltip(g,mx,my);}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){
-        int x=leftPos,y=topPos;g.fill(0,0,width,height,0xA00B0B14);TransmutationScreen.slab(g,x,y,imageWidth,imageHeight,0xFF747784);
-        TransmutationScreen.slab(g,x+3,y+3,imageWidth-6,imageHeight-6,0xFF30333D);
-        for(var slot:menu.slots){int sx=x+slot.x,sy=y+slot.y;g.fill(sx-2,sy-2,sx+18,sy+18,slot.index==menu.selected()?0xFFE4C786:0xFF161B25);g.fill(sx,sy,sx+16,sy+16,0xFF535B66);}
+        int x=leftPos,y=topPos;
+        g.fill(0,0,width,height,0xB0081018);
+        OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
+
+        OwnerAlchemyArt.panel(g,x+15,y+35,190,76,OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.panel(g,x+15,y+113,190,39,OwnerAlchemyArt.GOLD);
+        for(var slot:menu.slots){
+            int sx=x+slot.x,sy=y+slot.y;
+            OwnerAlchemyArt.slot(g,"alchchest",sx,sy,11,3);
+            if(slot.index==menu.selected())g.outline(sx-2,sy-2,20,20,OwnerAlchemyArt.GOLD);
+        }
+
     }
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mx,int my){
         g.text(font,BookArt.fit(font,title.getString(),185),20,12,0xFFE5DDEB,false);

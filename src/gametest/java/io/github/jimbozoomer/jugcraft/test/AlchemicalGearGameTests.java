@@ -99,11 +99,11 @@ public class AlchemicalGearGameTests {
         inventory.setItem(0,active(AlchemicalGear.TALISMAN)); AlchemicalGear.pulse(p);
         h.assertTrue(tool.getDamageValue()==16 && Assaying.balance(p)==996,"Worn charm repairs without occupying either hand"); h.succeed();
     }
-    @GameTest(maxTicks=20) public void unknownAssayCannotUseActiveGear(GameTestHelper h) {
+    @GameTest(maxTicks=20) public void tradedGearWorksWithoutResearch(GameTestHelper h) {
         var p=h.makeMockServerPlayerInLevel();p.setGameMode(GameType.SURVIVAL);Assaying.setBalance(p,100);
         var tool=new ItemStack(Items.IRON_PICKAXE);tool.setDamageValue(20);
         p.setItemInHand(InteractionHand.MAIN_HAND,tool);p.setItemInHand(InteractionHand.OFF_HAND,active(AlchemicalGear.TALISMAN));
-        AlchemicalGear.pulse(p);h.assertTrue(tool.getDamageValue()==20 && Assaying.balance(p)==100,"Traded active gear still requires Assay");h.succeed();
+        AlchemicalGear.pulse(p);h.assertTrue(tool.getDamageValue()==16 && Assaying.balance(p)==96,"Traded active gear works immediately and still pays essence");h.succeed();
     }
     @GameTest(maxTicks=20) public void inactiveAndDisabledGearDoesNothing(GameTestHelper h) {
         var p=player(h); var tool=new ItemStack(Items.IRON_PICKAXE); tool.setDamageValue(20);

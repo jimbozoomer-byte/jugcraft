@@ -21,7 +21,7 @@ SPECS={
  'mercurial_eye':('Mercurial Eye','mercurial_eye',None,'Main hand, use on a block face: place up to nine blocks from your offhand in a 3x3 plane, costing 8 essence per placed block. Plain catalogued blocks only; ordinary placement and collision rules apply.'),
 }
 ITEMS={n:{'name':s[0]} for n,s in SPECS.items()}
-TOOLTIPS={n:s[3]+' Requires understood Assay.' for n,s in SPECS.items()}
+TOOLTIPS={n:s[3]+' No research required.' for n,s in SPECS.items()}
 TOOLS={'destruction_catalyst','catalytic_lens','hyperkinetic_lens'}
 CHARMS={'body_stone','soul_stone','life_stone','watch_of_flowing_time'}
 RINGS=set(SPECS)-TOOLS-CHARMS-{'divining_rod_1','divining_rod_2','divining_rod_3','mercurial_eye'}
@@ -85,7 +85,7 @@ def codex():
  groups=[('artifact_rings','Rings and Living Stones',list(SPECS)[:10],10,2),('artifact_tools','Divining and Shaping',list(SPECS)[10:],12,2)]
  for key,title,names,x,y in groups:
   entries['equivalence',key]={'name':title,'x':x,'y':y,'icon':rid(names[0]),'condition':None,'description':'Paid alchemical equipment, no spell composer required','pages':
-   [('text','Shared Controls','Understand **Assay**. Passive artifacts work only while held or worn in the matching Ring/Charm slot, with enough personal **essence**. Merely carrying one does nothing. Use toggles activation; Arcana/Swiftwolf sneak-use changes mode. All areas and entity counts are bounded, claims and friendly-fire checks apply. Equipment uses the wallet first, then carried Klein Stars. Active artifacts can also have bag/chest or pedestal behavior described in Connected Alchemy.')] +
+   [('text','Shared Controls','Passive artifacts work only while held or worn in the matching Ring/Charm slot, with enough personal **essence**. Merely carrying one does nothing. Use toggles activation; Arcana/Swiftwolf sneak-use changes mode. All areas and entity counts are bounded, claims and friendly-fire checks apply. Equipment uses the wallet first, then carried Klein Stars. Active artifacts can also have bag/chest or pedestal behavior described in Connected Alchemy.')] +
    [('crafting_recipe',SPECS[n][0],TOOLTIPS[n],rid(n)) for n in names]}
  return entries
 

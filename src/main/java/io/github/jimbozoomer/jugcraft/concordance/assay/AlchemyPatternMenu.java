@@ -34,8 +34,8 @@ public final class AlchemyPatternMenu extends AbstractContainerMenu {
     public AlchemyPatternMenu(int id,Inventory inv,BooleanSupplier access,ItemStack eye){
         super(AlchemyPatterns.MENU,id);owner=inv.player;this.access=access;this.eye=eye;
         if(!eye.isEmpty())selected=eye.getOrDefault(AlchemyPatterns.TARGET,"");
-        addSlot(new Slot(real,0,31,63));
-        addSlot(new Slot(real,1,113,63){@Override public boolean mayPlace(ItemStack s){return false;}});
+        addSlot(new Slot(real,0,31,63){@Override public boolean isActive(){return !eye();}@Override public boolean mayPlace(ItemStack s){return !eye();}});
+        addSlot(new Slot(real,1,113,63){@Override public boolean isActive(){return !eye();}@Override public boolean mayPlace(ItemStack s){return false;}});
         addStandardInventorySlots(inv,181,151);
         for(int i=0;i<PAGE_SIZE;i++)addSlot(new Slot(ghost,i,205+(i%6)*22,52+(i/6)*20){
             @Override public boolean mayPlace(ItemStack s){return false;}

@@ -338,7 +338,7 @@ public final class AlchemyArtifacts {
             if(used){sound(p,"pepower");return InteractionResult.SUCCESS;}
             return use(c.getLevel(),p,c.getHand());
         }
-        @Override public boolean canEquip(ItemStack stack,TrinketSlotAccess slot,LivingEntity entity){return passive(id)&&entity instanceof Player p&&Assaying.knows(p);}
+        @Override public boolean canEquip(ItemStack stack,TrinketSlotAccess slot,LivingEntity entity){return passive(id)&&entity instanceof Player;}
         @Override public boolean isFoil(ItemStack stack){return stack.has(AlchemicalGear.ACTIVE)||super.isFoil(stack);}
         @Override public void appendHoverText(ItemStack stack,TooltipContext context,TooltipDisplay display,Consumer<Component> text,TooltipFlag flag){
             text.accept(Component.translatable("tooltip.jugcraft."+id).withStyle(ChatFormatting.GRAY));

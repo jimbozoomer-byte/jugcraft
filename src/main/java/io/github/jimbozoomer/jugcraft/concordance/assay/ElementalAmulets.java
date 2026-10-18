@@ -80,7 +80,7 @@ public final class ElementalAmulets {
         @Override public InteractionResult use(Level level,Player player,InteractionHand hand){
             if(player instanceof ServerPlayer server&&RateGate.allow(server,"elemental_amulet",10)){
                 if(!AlchemicalGear.ready(server)){
-                    server.sendOverlayMessage(Component.translatable("message.jugcraft.star.research"));return InteractionResult.FAIL;
+                    server.sendOverlayMessage(Component.translatable("message.jugcraft.alchemy.unavailable"));return InteractionResult.FAIL;
                 }
                 var stack=player.getItemInHand(hand);
                 if(player.isShiftKeyDown()){
@@ -97,7 +97,7 @@ public final class ElementalAmulets {
         @Override public InteractionResult useOn(UseOnContext context){
             return context.getPlayer()==null?InteractionResult.PASS:use(context.getLevel(),context.getPlayer(),context.getHand());
         }
-        @Override public boolean canEquip(ItemStack stack,TrinketSlotAccess slot,LivingEntity entity){return entity instanceof Player p&&Assaying.knows(p);}
+        @Override public boolean canEquip(ItemStack stack,TrinketSlotAccess slot,LivingEntity entity){return entity instanceof Player;}
         @Override public TrinketDropRule getDropRule(ItemStack stack,TrinketSlotAccess slot,LivingEntity entity){
             return slot.cosmetic()?TrinketDropRule.KEEP:TrinketCallback.super.getDropRule(stack,slot,entity);
         }

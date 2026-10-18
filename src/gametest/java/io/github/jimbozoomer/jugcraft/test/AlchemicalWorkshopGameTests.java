@@ -98,9 +98,9 @@ public class AlchemicalWorkshopGameTests {
         be.pulse(null);h.assertTrue(outputs(be)==1&&be.status()==AlchemicalWorkshopBlockEntity.FORMING,"Authorized factory resolves its owner and processes");
         boolean before=Assaying.enabled();try{JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE,false);be.pulse(p);h.assertTrue(outputs(be)==1&&be.essence()==9744,"Disabled retains buffer");}finally{JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE,before);}h.succeed();
     }
-    @GameTest(maxTicks=20) public void researchAndClaimsGuardProductionAndMenus(GameTestHelper h) {
-        var unknown=h.makeMockServerPlayerInLevel();unknown.setGameMode(GameType.SURVIVAL);var be=condenser(h,unknown,1);be.setEssence(10000);be.pulse(unknown);h.assertTrue(outputs(be)==0&&be.status()==AlchemicalWorkshopBlockEntity.RESEARCH,"Owner requires research");
-        var p=player(h);be.placedBy(p);try(var claims=TestClaims.open()){claims.block(be.getBlockPos(),UUID.randomUUID());be.pulse(p);h.assertTrue(outputs(be)==0&&!new AlchemicalWorkshopMenu(1,p.getInventory(),be).stillValid(p),"Claims stop production and opening");}h.succeed();
+    @GameTest(maxTicks=20) public void freshOwnersCanProduceButClaimsStillGuardMenus(GameTestHelper h) {
+        var unknown=h.makeMockServerPlayerInLevel();unknown.setGameMode(GameType.SURVIVAL);var be=condenser(h,unknown,1);be.setEssence(10000);be.pulse(unknown);h.assertTrue(outputs(be)==1&&be.essence()==9744,"Fresh owner produces without research and pays the exact iron price");
+        var p=player(h);be.placedBy(p);try(var claims=TestClaims.open()){claims.block(be.getBlockPos(),UUID.randomUUID());be.pulse(p);h.assertTrue(outputs(be)==1&&!new AlchemicalWorkshopMenu(1,p.getInventory(),be).stillValid(p),"Claims stop production and opening");}h.succeed();
     }
     @GameTest(maxTicks=20) public void menuTransfersClampsAndRejectsForeignOrDistantClicks(GameTestHelper h) {
         var p=player(h);var be=condenser(h,p,2);var menu=new AlchemicalWorkshopMenu(1,p.getInventory(),be);press(menu,p,1);

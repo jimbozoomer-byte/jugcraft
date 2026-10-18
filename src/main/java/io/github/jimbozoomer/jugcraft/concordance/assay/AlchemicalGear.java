@@ -78,7 +78,7 @@ public final class AlchemicalGear {
     }
 
     public static boolean ready(ServerPlayer player) {
-        return player.isAlive() && !player.isSpectator() && Assaying.enabled() && Assaying.knows(player)
+        return player.isAlive() && !player.isSpectator() && Assaying.enabled()
                 && Assaying.problems(player.level()).isEmpty();
     }
 
@@ -154,7 +154,7 @@ public final class AlchemicalGear {
             if (player instanceof ServerPlayer server && RateGate.allow(server, "alchemical_gear", 4)) {
                 if (!ready(server)) {
                     server.sendOverlayMessage(Component.translatable(!Assaying.enabled() ? "message.jugcraft.concordance.disabled"
-                            : !Assaying.knows(server) ? "message.jugcraft.concordance.assay.unknown" : "compose.jugcraft.assay.reason.unbalanced"));
+                            : "message.jugcraft.alchemy.unavailable"));
                     return InteractionResult.FAIL;
                 }
                 if (this == STONE) {
@@ -182,7 +182,7 @@ public final class AlchemicalGear {
             return InteractionResult.SUCCESS;
         }
         @Override public boolean canEquip(ItemStack stack, TrinketSlotAccess slot, LivingEntity entity) {
-            return entity instanceof Player player && Assaying.knows(player) && this != STONE;
+            return entity instanceof Player && this != STONE;
         }
         @Override public TrinketDropRule getDropRule(ItemStack stack, TrinketSlotAccess slot, LivingEntity entity) {
             return slot.cosmetic() ? TrinketDropRule.KEEP : TrinketCallback.super.getDropRule(stack, slot, entity);

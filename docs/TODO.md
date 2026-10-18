@@ -2,6 +2,10 @@
 
 ## Alchemical equipment — 16 October 2026
 
+- [x] Local interface/access revision: engraved alchemy panels, consistent controls and selected states; remove equipment-use research gates, including traded charms and old owned factories. Gem controls work directly after equipping. See [interface/access record](features/alchemy-interface-and-access.md).
+- [x] Interface/access validation: 1,929 server checks, rendered fresh-player menus and packet interactions, and data/art/repository audits passed locally.
+- [ ] Owner visual/playability feedback on the separate Alchemy Refined playtest before publishing.
+
 - [x] Local first slice: Philosopher's Stone interface, paid Repair Talisman and Black Hole Band, using supplied owner icons and the existing Prima Materia ledger.
 - [x] Automated validation: 1,771 server tests, full data/art audit, rendered interface and live equipment checks.
 - [x] Replace the transmutation book with a stone tablet and rename its currency to essence across Assay, gear and guides, preserving existing balances.

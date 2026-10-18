@@ -55,7 +55,7 @@ public final class KleinStars {
         @Override public InteractionResult use(Level level,Player player,InteractionHand hand){
             if(player instanceof ServerPlayer server && RateGate.allow(server,"klein_star_open",4)){
                 if(!AlchemicalGear.ready(server)){
-                    server.sendOverlayMessage(Component.translatable("message.jugcraft.star.research"));return InteractionResult.FAIL;
+                    server.sendOverlayMessage(Component.translatable("message.jugcraft.alchemy.unavailable"));return InteractionResult.FAIL;
                 }
                 server.openMenu(new SimpleMenuProvider((id,inv,p)->{
                     var menu=new KleinStarMenu(id,inv);

@@ -69,7 +69,7 @@ public class CompleteAlchemyClientGameTests implements FabricClientGameTest {
             server.runCommand("setworldspawn %d %d %d".formatted(x,y,z+3));
             server.runOnServer(s->{
                 var p=s.getPlayerList().getPlayers().getFirst();p.getInventory().clearContent();
-                ConcordanceProgress.grant(p,"jugcraft:first_light",ResearchState.UNDERSTOOD);ConcordanceProgress.grant(p,Assaying.RESEARCH,ResearchState.UNDERSTOOD);
+                if(Assaying.knows(p))throw new AssertionError("Fresh equipment test must start without Assay research");
                 p.getInventory().clearContent();Assaying.setBalance(p,500000);
                 for(int i=1;i<=3;i++){
                     var relay=machine(p,base.offset(-16+4*i,0,-8),"relay_mk"+i);relay.setItem(1,new ItemStack(Items.COAL,64));relay.setItem(0,new ItemStack(KleinStars.ITEMS.get("klein_star_4")));

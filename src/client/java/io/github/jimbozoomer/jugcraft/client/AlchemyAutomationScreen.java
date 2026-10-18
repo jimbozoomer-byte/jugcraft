@@ -21,13 +21,23 @@ public final class AlchemyAutomationScreen extends AbstractContainerScreen<Alche
         reserve.setTooltip(Tooltip.create(ui("reserve_help")));
         active.setTooltip(Tooltip.create(ui("help")));target.setTooltip(Tooltip.create(ui("output_help")));refresh();
     }
-    private void refresh(){budget.setMessage(ui("budget",menu.budget()));reserve.setMessage(ui("reserve",menu.reserve()));active.setMessage(ui(menu.active()?"stop":"start"));target.visible=!menu.voiding();target.setMessage(ui("target_"+Math.max(0,menu.target())));}
+    private void refresh(){budget.setMessage(ui("budget",menu.budget()));reserve.setMessage(ui("reserve",menu.reserve()));active.setMessage(ui(menu.active()?"stop":"start"));active.selected=menu.active();target.visible=!menu.voiding();target.setMessage(ui("target_"+Math.max(0,menu.target())));}
     @Override protected void containerTick(){super.containerTick();refresh();}
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){extractBackground(g,mx,my,delta);super.extractRenderState(g,mx,my,delta);extractTooltip(g,mx,my);}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){
-        int x=leftPos,y=topPos;g.fill(0,0,width,height,0xA00B0B14);OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
-        OwnerAlchemyArt.crop(g,"eternal_density",x+24,y+47,60,24,56,56);
-        for(var s:menu.slots)OwnerAlchemyArt.slot(g,"eternal_density",x+s.x,y+s.y,61,25);
+        int x=leftPos,y=topPos;
+        g.fill(0,0,width,height,0xB0081018);
+        OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
+
+        OwnerAlchemyArt.panel(g,x+17,y+39,66,70,OwnerAlchemyArt.VIOLET);
+        OwnerAlchemyArt.panel(g,x+205,y+35,113,76,OwnerAlchemyArt.GOLD);
+        OwnerAlchemyArt.panel(g,x+12,y+115,306,31,OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.panel(g,x+82,y+148,168,82,OwnerAlchemyArt.SILVER);
+        for(var slot:menu.slots)OwnerAlchemyArt.slot(g,"eternal_density",x+slot.x,y+slot.y,61,25);
+        OwnerAlchemyArt.sigil(g,x+43,y+188,17,OwnerAlchemyArt.VIOLET,menu.active(),delta);
+        BookArt.icon(g,menu.voiding()?"jugcraft:void_ring":"jugcraft:gem_of_eternal_density",x+35,y+180);
+        if(!menu.voiding())BookArt.icon(g,AlchemyAutomationMenu.TARGETS.get(Math.clamp(menu.target(),0,2)),x+281,y+179);
+
     }
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mx,int my){
         g.text(font,BookArt.fit(font,title.getString(),300),13,12,0xFFE5DDEB,false);

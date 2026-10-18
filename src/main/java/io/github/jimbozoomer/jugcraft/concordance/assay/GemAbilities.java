@@ -27,18 +27,24 @@ public final class GemAbilities {
     }
     public static boolean activate(ServerPlayer p,int action){
         if(action<0||action>3||!AlchemicalGear.ready(p)||!RateGate.allow(p,"gem_ability",20))return false;
+        var slot=new EquipmentSlot[]{EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET}[action];
+        var worn=p.getItemBySlot(slot);
+        if(!worn.is(ExtendedAlchemyEquipment.ITEMS.get("gem_"+new String[]{"helmet","chestplate","leggings","boots"}[action])))return false;
         switch(action){
-            case 0->{var helmet=piece(p,EquipmentSlot.HEAD,"gem_helmet");if(helmet.isEmpty())return false;AlchemyArtifacts.setMode(helmet,1-AlchemyArtifacts.mode(helmet)%2);}
-            case 1->{if(piece(p,EquipmentSlot.CHEST,"gem_chestplate").isEmpty())return false;AlchemyArtifacts.affectMonsters(p,"wind",6,16);}
+            case 0->{AlchemyArtifacts.setMode(worn,1-AlchemyArtifacts.mode(worn)%2);}
+            case 1->{AlchemyArtifacts.affectMonsters(p,"wind",6,16);}
             case 2->{
-                if(piece(p,EquipmentSlot.LEGS,"gem_leggings").isEmpty()||p.isPassenger()||!p.onGround())return false;
+                if(p.isPassenger()||!p.onGround())return false;
                 var v=p.getLookAngle().multiply(1,0,1).normalize().scale(1.1);
                 if(!p.level().hasChunkAt(p.blockPosition().offset((int)Math.ceil(v.x),0,(int)Math.ceil(v.z)))
                         ||!Authority.mayChange(p.level(),p,p.blockPosition())||!p.level().noCollision(p,p.getBoundingBox().move(v))||!AlchemyPower.pay(p,64))return false;
                 p.setDeltaMovement(v.x,.18,v.z);p.syncVelocity=true;
             }
-            case 3->{var boots=piece(p,EquipmentSlot.FEET,"gem_boots");if(boots.isEmpty())return false;AlchemyArtifacts.setMode(boots,1-AlchemyArtifacts.mode(boots)%2);AlchemyArtifacts.pulse(p);}
+            case 3->{AlchemyArtifacts.setMode(worn,1-AlchemyArtifacts.mode(worn)%2);}
         }
+        // Clicking an explicit ability is sufficient to enable equipped gear; no hidden held-item ritual.
+        worn.set(AlchemicalGear.ACTIVE,net.minecraft.util.Unit.INSTANCE);
+        if(action==3)AlchemyArtifacts.pulse(p);
         AlchemyTelemetry.cooldown(p);p.getInventory().setChanged();AlchemyArtifacts.sound(p,"pepower");return true;
     }
     public record Action(int action) implements CustomPacketPayload {

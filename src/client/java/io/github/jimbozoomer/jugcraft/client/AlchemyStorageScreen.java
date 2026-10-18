@@ -18,16 +18,19 @@ public final class AlchemyStorageScreen extends AbstractContainerScreen<AlchemyS
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){extractBackground(g,mx,my,delta);super.extractRenderState(g,mx,my,delta);extractTooltip(g,mx,my);}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){
-        int x=leftPos,y=topPos;g.fill(0,0,width,height,0xA00B0B14);
-        TransmutationScreen.slab(g,x+3,y+4,imageWidth,imageHeight,0x70000000);
-        TransmutationScreen.slab(g,x,y,imageWidth,imageHeight,0xFF747784);
-        TransmutationScreen.slab(g,x+3,y+3,imageWidth-6,imageHeight-6,0xFF30333D);
-        g.fill(x+20,y+27,x+195,y+137,0xFF20232D);g.fill(x+20,y+147,x+195,y+227,0xFF20232D);
-        for(var slot:menu.slots){int sx=x+slot.x,sy=y+slot.y;
-            g.fill(sx-1,sy-1,sx+17,sy+17,0xFF151822);g.fill(sx,sy,sx+16,sy+16,0xFF535B66);g.fill(sx,sy+16,sx+17,sy+17,0xFF9DA8BA);
-            OwnerAlchemyArt.slot(g,"alchchest",sx,sy,11,3);
-            if(slot.index>=54&&slot.getContainerSlot()==menu.lockedSlot())g.fill(sx-2,sy+17,sx+18,sy+19,0xFFE4C786);
+        int x=leftPos,y=topPos;
+        g.fill(0,0,width,height,0xB0081018);
+        OwnerAlchemyArt.frame(g,x,y,imageWidth,imageHeight);
+
+        OwnerAlchemyArt.panel(g,x+20,y+27,175,110,OwnerAlchemyArt.TEAL);
+        OwnerAlchemyArt.panel(g,x+20,y+147,175,80,OwnerAlchemyArt.SILVER);
+        for(var slot:menu.slots){
+            int sx=x+slot.x,sy=y+slot.y;OwnerAlchemyArt.slot(g,"alchchest",sx,sy,11,3);
+            if(slot.index>=54&&slot.getContainerSlot()==menu.lockedSlot())g.fill(sx-1,sy+17,sx+17,sy+19,OwnerAlchemyArt.GOLD);
         }
+        OwnerAlchemyArt.sigil(g,x+238,y+165,21,OwnerAlchemyArt.VIOLET,false,delta);
+        BookArt.icon(g,"jugcraft:alchemical_chest",x+230,y+157);
+
     }
     @Override protected void extractLabels(GuiGraphicsExtractor g,int mx,int my){
         g.text(font,BookArt.fit(font,title.getString(),180),19,7,0xFFE5DDEB,false);

@@ -11,8 +11,7 @@ final class AlchemyOwner {
     static @Nullable ServerPlayer factory(ServerLevel level,@Nullable UUID owner,boolean authorized){
         var here=Authority.present(level,owner);if(here!=null||owner==null||!authorized)return here;
         var online=level.getServer().getPlayerList().getPlayer(owner);
-        if(online!=null&&(!online.isAlive()||online.isSpectator()||!Assaying.knows(online)))return null;
+        if(online!=null&&(!online.isAlive()||online.isSpectator()))return null;
         return Authority.loadedAlchemyFactory(level,owner,authorized);
     }
-    static boolean knows(ServerPlayer actor,boolean authorized){return Authority.isStandIn(actor)?authorized:Assaying.knows(actor);}
 }

@@ -12,9 +12,9 @@ OWNER_FILES = {
     "textures/item/black_hole_band_active.png": "textures/item/rings/black_hole_on.png",
 }
 TOOLTIPS = {
-    "philosophers_stone": "Use: open the transmutation tablet. Dissolve plain matter; keep a sample to form more. Requires understood Assay.",
-    "repair_talisman": "Use: toggle. Hold or wear in a Charm slot. Mends up to 4 held-tool / worn-armor durability each second; 1 essence per point. Requires Assay.",
-    "black_hole_band": "Use: toggle. Hold or wear in a Ring slot. Attracts nearby loose items within 6 blocks; 1 essence per item entity moved. Requires Assay.",
+    "philosophers_stone": "Use: open the transmutation tablet. Dissolve plain matter; keep a sample to form more. No research required.",
+    "repair_talisman": "Use: toggle. Hold or wear in a Charm slot. Mends up to 4 held-tool / worn-armor durability each second; 1 essence per point. No research required.",
+    "black_hole_band": "Use: toggle. Hold or wear in a Ring slot. Attracts nearby loose items within 6 blocks; 1 essence per item entity moved. No research required.",
 }
 for _item, _info in ITEMS.items():
     _info["tooltip"] = TOOLTIPS[_item]
@@ -41,7 +41,7 @@ def codex():
         "name": "Alchemical Gear", "x": 2, "y": 0, "icon": rid("philosophers_stone"), "condition": None,
         "description": "Transmute, repair and gather without casting spells",
         "pages": [
-            ("text", "Equipment, Not Spells", "Understand **Assay** through First Light observation and bench study, then raw-matter examination and study. No wand or spell cast is needed. Dissolved matter becomes **essence** in your personal **Prima Materia** balance. These tools spend that same balance, also used by the Assayer's Scale. This alchemical essence is separate from Principle essences in vials. No Focus, mana or spell inscription is involved."),
+            ("text", "Equipment, Not Spells", "Craft, find or trade for the equipment and use it immediately. No research, wand or spell cast is needed. Dissolved matter becomes **essence** in your personal **Prima Materia** balance. These tools spend that same balance, also used by the Assayer's Scale. This alchemical essence is separate from Principle essences in vials. No Focus, mana or spell inscription is involved."),
             ("crafting_recipe", "Philosopher's Stone", "Use to open the combined transmutation tablet. Insert an item, then **Dissolve** and **Confirm**: the input is consumed and its default item is learned. Click a learned icon, choose **1 / 16 / 64 / Max**, then **Withdraw** at its essence value with no surcharge. Search and favorites help find learned items. Default magical gear is valued too; empty containers and reset charge, names or other custom state before dissolving. Real input/output items return when the tablet closes. Sneak-use air opens crafting; use terrain transforms it, and sneak-use terrain cycles the area.", rid("philosophers_stone")),
             ("crafting_recipe", "Repair Talisman", "Use to toggle **Active**, then hold it or equip it in a **Charm** slot. Every second it repairs up to **4 durability** on one held tool or worn armor piece, for **1 essence per point**. Main hand, offhand, then head-to-feet armor are checked in order. Only damaged items with normal repair ingredients qualify. Enchantments and names are preserved. An active talisman inside a carried Alchemical Bag or owned Alchemical Chest can also repair stored equipment while closed.", rid("repair_talisman")),
             ("crafting_recipe", "Black Hole Band", "Use to toggle **Active**, then hold it or equip it in a **Ring** slot. Every second it draws up to **8 item entities** within **6 blocks** toward you, costing **1 essence for each moved entity**. It stops at solid walls, respects loot ownership and claims, and pauses when your inventory cannot accept the item. Minecraft's ordinary pickup collects it. An active band inside Alchemical storage inserts drops matching a stored item; on a pedestal it inserts into adjacent storage. Mobs are unaffected.", rid("black_hole_band")),

@@ -56,6 +56,10 @@ final class ConnectedAlchemyClientChecks {
         server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();p.getInventory().setItem(0,new ItemStack(AlchemyArtifacts.ITEMS.get("mercurial_eye")));p.inventoryMenu.broadcastChanges();});c.waitTicks(12);
         c.getInput().pressMouse(InputConstants.MOUSE_BUTTON_RIGHT);c.waitForScreen(AlchemyPatternScreen.class);c.waitTicks(8);
         c.runOnClient(mc->mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId,38,0,ContainerInput.PICKUP,mc.player));c.waitTicks(6);click(c,"screen.jugcraft.pattern.choose");
+        // A hidden transaction socket must not swallow real inventory items on a shift-click packet.
+        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();p.getInventory().setItem(9,new ItemStack(Items.IRON_INGOT,7));p.containerMenu.broadcastChanges();});c.waitTicks(6);
+        c.runOnClient(mc->mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId,2,0,ContainerInput.QUICK_MOVE,mc.player));c.waitTicks(6);
+        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(!p.containerMenu.getSlot(0).getItem().isEmpty()||p.getInventory().getItem(9).getCount()!=7)throw new AssertionError("Eye shift-click preserves visible player inventory");});
         click(c,"Area: 3 x 3");
         server.runOnServer(s->{if(s.getPlayerList().getPlayers().getFirst().getMainHandItem().getOrDefault(AlchemyPatterns.AREA,3)!=5)throw new AssertionError("Eye area packet persists the selected 5x5 footprint");});
         server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(!p.getMainHandItem().has(AlchemyPatterns.TARGET))throw new AssertionError("Eye retains selected learned building pattern");});shot(c,"mercurial_building_palette");close(c);
@@ -81,7 +85,22 @@ final class ConnectedAlchemyClientChecks {
         click(c,"Range: 6 blocks");
         server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(((AlchemyMachinesBlockEntity)p.level().getBlockEntity(base.offset(8,0,-8))).range()!=2)throw new AssertionError("Pedestal range action persists");});
         c.runOnClient(mc->{if(((AlchemyMachinesBlockEntity)mc.level.getBlockEntity(base.offset(8,0,-8))).range()!=2)throw new AssertionError("Public range display synchronizes");});shot(c,"pedestal_effect_controls");close(c);c.waitTicks(12);shot(c,"pedestal_range_and_power_hud");
-        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();p.setItemSlot(EquipmentSlot.HEAD,new ItemStack(ExtendedAlchemyEquipment.ITEMS.get("gem_helmet")));});c.waitTicks(8);
+        server.runCommand("tp @p %.1f %d %.1f".formatted(base.getX()+10.5,base.getY(),base.getZ()+8.5));
+        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();var be=(AlchemicalWorkshopBlockEntity)p.level().getBlockEntity(base.offset(10,0,6));p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemicalWorkshopMenu(id,inv,be),Component.literal("Essence Condenser")));});
+        c.waitForScreen(AlchemicalWorkshopScreen.class);c.waitTicks(8);shot(c,"refined_condenser_interface");close(c);
+        server.runCommand("tp @p %.1f %d %.1f".formatted(base.getX()+4.5,base.getY(),base.getZ()+3.5));
+        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();var be=(AlchemyMachinesBlockEntity)p.level().getBlockEntity(base.offset(4,0,1));p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyMachinesMenu(id,inv,be),Component.literal("Essence Relay")));});
+        c.waitForScreen(AlchemyMachinesScreen.class);c.waitTicks(8);shot(c,"refined_relay_interface");close(c);
+        // Look into open sky so use-in-air tests the star rather than reopening the relay in front of us.
+        server.runCommand("tp @p %.1f %d %.1f 0 -40".formatted(base.getX()+.5,base.getY(),base.getZ()+5.5));
+        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();p.getInventory().setItem(0,new ItemStack(KleinStars.ITEMS.get("klein_star_6")));p.inventoryMenu.broadcastChanges();});c.waitTicks(8);
+        c.getInput().pressMouse(InputConstants.MOUSE_BUTTON_RIGHT);c.waitForScreen(KleinStarScreen.class);c.waitTicks(8);
+        click(c,"screen.jugcraft.star.button_0");shot(c,"refined_star_interface");close(c);
+        c.runOnClient(mc->{
+            for(int i=0;i<6;i++)if(mc.font.split(Component.translatable("screen.jugcraft.alchemy_storage.manual.body_"+i),206).size()>11)
+                throw new AssertionError("Guide topic exceeds its readable content panel: "+i);
+        });
+        server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(Assaying.knows(p))throw new AssertionError("Whole workshop route must work without research");p.setItemSlot(EquipmentSlot.HEAD,new ItemStack(ExtendedAlchemyEquipment.ITEMS.get("gem_helmet")));});c.waitTicks(8);
         c.runOnClient(mc->mc.gui.setScreen(new GemAbilitiesScreen()));shot(c,"gem_armor_controls");click(c,"Night vision | Off");c.waitTicks(25);close(c);
         server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(!p.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION))throw new AssertionError("Gem button causes real paid helmet effect");p.setItemSlot(EquipmentSlot.HEAD,ItemStack.EMPTY);});
     }
