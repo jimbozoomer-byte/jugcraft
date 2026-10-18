@@ -50,6 +50,8 @@ The methane feeds the Gas Burning Generator and every other methane user.
 
 **Server game test for CI:** `CokeGasGameTests.reactorCokesCoalAndKeepsTheGas` checks the recipe takes four coal and gives four coke and 200 mB of methane.
 
+**Results:** the fork's Build workflow passed on commit cc090bad ([run 39169804033](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39169804033), second attempt; the first attempt's client shard 5 stopped during setup, 23 seconds in, before any test ran): compilation, the headless server game tests and the rendered-client shards.
+
 **Not run:** an in-game reactor batch.
 
 ## AI attribution
