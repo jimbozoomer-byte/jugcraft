@@ -94,15 +94,16 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 	private static void theKey(ClientGameTestContext context) {
 		KeyMapping key = EncyclopediaClient.key();
 		String clash = context.computeOnClient(client -> Arrays.stream(client.options.keyMappings)
-				.filter(other -> other != key && other.getCategory() != KeyMapping.Category.DEBUG && other.getDefaultKey().equals(key.getDefaultKey()))
+				.filter(other -> other != key && other.getCategory() != KeyMapping.Category.DEBUG && other.same(key))
 				.map(KeyMapping::getName).toList().toString());
 		// Every loaded default outside the debug keys, so one run shows which keys a new default could still take.
 		String taken = context.computeOnClient(client -> Arrays.stream(client.options.keyMappings)
 				.filter(other -> other.getCategory() != KeyMapping.Category.DEBUG && !other.getDefaultKey().equals(InputConstants.UNKNOWN))
 				.map(other -> other.getDefaultKey().getName() + "=" + other.getName()).sorted().toList().toString());
 		Jugcraft.LOGGER.info("[encyclopedia-check] loaded defaults: {}", taken);
-		Jugcraft.LOGGER.info("[encyclopedia-check] the default key {}; other keys with that default: {}", key.getDefaultKey().getName(), clash);
-		check(!key.isUnbound() && clash.equals("[]"), "The encyclopedia's default key should be bound and shared with no other key: " + clash);
+		// Complete supplies options.txt overrides (Traveler's Backpack uses N instead of its upstream B).
+		Jugcraft.LOGGER.info("[encyclopedia-check] the configured key {}; other keys with that binding: {}", key.saveString(), clash);
+		check(!key.isUnbound() && clash.equals("[]"), "The encyclopedia's configured key should be bound and shared with no other key: " + clash);
 
 		context.getInput().pressKey(key);
 		context.waitForScreen(EncyclopediaScreen.class);
