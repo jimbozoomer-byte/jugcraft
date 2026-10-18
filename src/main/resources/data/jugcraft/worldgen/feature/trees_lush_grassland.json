@@ -7,11 +7,11 @@
       "feature": "jugcraft:oak_bush_checked"
     },
     {
-      "chance": 0.1,
-      "feature": "minecraft:jungle_tree"
+      "chance": 0.28571428571428575,
+      "feature": "jugcraft:mango_checked"
     },
     {
-      "chance": 0.15873015873015875,
+      "chance": 0.20000000000000004,
       "feature": "jugcraft:small_palm_checked"
     }
   ]

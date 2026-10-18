@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:flame_tree_sapling",
+    "jugcraft:sea_grape_sapling",
+    "jugcraft:osmanthus_sapling",
+    "jugcraft:banyan_sapling",
+    "jugcraft:mango_sapling",
     "jugcraft:baobab_sapling",
     "jugcraft:dragonblood_sapling",
     "jugcraft:stone_pine_sapling",

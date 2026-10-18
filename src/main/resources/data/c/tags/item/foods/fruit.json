@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:sea_grapes",
+    "jugcraft:mango",
     "jugcraft:baobab_fruit",
     "jugcraft:dates",
     "jugcraft:olives",

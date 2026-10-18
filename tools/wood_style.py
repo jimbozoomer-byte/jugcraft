@@ -80,6 +80,8 @@ WOOD = {
     "yucca": ("2:3", "68654e"),
     "dragonblood": (12, "689db2"),
     "baobab": (21, "bb9b8e"),
+    "fig": (8, "7f6f63"),
+    "mango": ("2:4", "938167"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -102,6 +104,8 @@ EUCALYPTUS_FLECKS = pal("e8a578", "e3a0a0", "9cc0d8", "e6c87a", "f0e0c0")
 
 # Each tree's bark: its colour (dark to light) and its character.
 BARK = {
+    "fig": (pal("4f4d4a", "686561", "817d79", "989592", "b0adab"), "stringy"),
+    "mango": (pal("312d2b", "413c39", "514b48", "615a56", "716965"), "furrowed"),
     "baobab": (pal("61524c", "7b6861", "937e77", "a69691", "baafab"), "plated"),
     "dragonblood": (pal("2f3237", "444950", "5a6068", "6f7680", "878e96"), "streaked"),
     "tamarisk": (pal("312022", "483032", "5e4043", "745153", "896165"), "furrowed"),
@@ -565,6 +569,8 @@ def wood_textures():
     out.update(fungal_textures())
     from hanging_fruit_textures import textures as hanging_textures
     out.update(hanging_textures())
+    from tropical_tree_textures import textures as tropical_textures
+    out.update(tropical_textures())
     out["block", "olive_planks"] = figure(out["block", "olive_planks"])
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)

@@ -1603,3 +1603,6 @@ def biome_tags(name):
 # Tree batches 9/9b extend the established dimension biomes and preserve their other features.
 from fungal_trees_biomes import configure as configure_fungal_trees
 configure_fungal_trees(BIOMES, EXTRAS)
+
+from tropical_tree_biomes import configure as configure_tropical_trees
+configure_tropical_trees(BIOMES, EXTRAS)

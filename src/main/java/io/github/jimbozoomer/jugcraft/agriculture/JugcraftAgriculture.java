@@ -180,7 +180,12 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower SAGEBRUSH_GROWER = grower("sagebrush");
 	public static final TreeGrower STONE_PINE_GROWER = weightedGrower("stone_pine", "umbrella_pine", "pinyon", 1, 1, 1);
 	public static final TreeGrower WATTLE_GROWER = weightedGrower("wattle", "wattle_bush", 3, 7);
-	public static final TreeGrower BAOBAB_GROWER = grower("baobab");
+	public static final TreeGrower FLAME_TREE_GROWER = grower("flame_tree");
+    public static final TreeGrower SEA_GRAPE_GROWER = grower("sea_grape");
+    public static final TreeGrower OSMANTHUS_GROWER = grower("osmanthus");
+    public static final TreeGrower BANYAN_GROWER = grower("banyan");
+    public static final TreeGrower MANGO_GROWER = grower("mango");
+    public static final TreeGrower BAOBAB_GROWER = grower("baobab");
 	public static final TreeGrower GIANT_BAOBAB_GROWER = grower("giant_baobab");
 	public static final TreeGrower DRAGONBLOOD_GROWER = grower("dragonblood");
 	public static final TreeGrower TAMARISK_GROWER = grower("tamarisk");
@@ -414,7 +419,7 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<PunchBowlBlockEntity> PUNCH_BOWL_ENTITY;
 	public static BlockEntityType<CornMazeGateBlockEntity> CORN_MAZE_GATE_ENTITY;
 	/** The mooncakes, baked in the Cooking Pot. */
-	public static final List<String> MOONCAKES = List.of("red_bean_mooncake", "chestnut_mooncake", "pumpkin_mooncake");
+	public static final List<String> MOONCAKES = List.of("osmanthus_mooncake", "red_bean_mooncake", "chestnut_mooncake", "pumpkin_mooncake");
 	public static BlockEntityType<ShowLauncherBlockEntity> SHOW_LAUNCHER_ENTITY;
 	/** A spooky firework made with glowstone dust: its sparks twinkle. */
 	public static DataComponentType<Boolean> TWINKLE;
@@ -537,6 +542,7 @@ public final class JugcraftAgriculture {
 		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("olive_trunk_placer"), OliveTrunkPlacer.TYPE);
 		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("dry_country_trunk_placer"), DryCountryTrunkPlacer.TYPE);
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("fungal_growth"), FungalGrowthFeature.CODEC);
+        Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("driftwood"), DriftwoodFeature.CODEC);
 		Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, Jugcraft.id("cave_fungal_floor"), CaveFungalFloorPlacement.CODEC);
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("fruiting_shrub"), FruitingShrubDecorator.TYPE);
 		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
@@ -587,6 +593,20 @@ public final class JugcraftAgriculture {
 		registerFoliage("stone_pine", "stone_pine_needles", STONE_PINE_GROWER, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES, StonePineLeavesBlock::new);
 		registerFoliage("wattle", "wattle_leaves", WATTLE_GROWER, Blocks.ACACIA_SAPLING, Blocks.ACACIA_LEAVES,
 				props -> new TintedParticleLeavesBlock(0.01F, props));
+        registerFoliage("flame_tree", "flame_tree_leaves", FLAME_TREE_GROWER, Blocks.ACACIA_SAPLING, Blocks.ACACIA_LEAVES,
+                props -> new TintedParticleLeavesBlock(0.01F, props));
+        registerFoliage("sea_grape", "sea_grape_leaves", SEA_GRAPE_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+                props -> new TropicalFruitLeavesBlock("sea_grapes", true, props));
+        registerFoliage("osmanthus", "osmanthus_leaves", OSMANTHUS_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+                props -> new TropicalFruitLeavesBlock("osmanthus_flowers", true, props));
+        registerFoliage("banyan", "banyan_leaves", BANYAN_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+                BanyanLeavesBlock::new);
+        registerWoodSet("fig", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_BROWN);
+        registerTree("mango", "mango_leaves", MANGO_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+                MapColor.COLOR_GRAY, MapColor.WOOD);
+        food("sea_grapes", 2, 0.2F, COMPOST_MEDIUM);
+        food("mango", 3, 0.3F, COMPOST_MEDIUM);
+        registerItem("osmanthus_flowers", Item::new, new Item.Properties().compostable(COMPOST_LOW), INGREDIENT_TAB);
         registerTree("baobab", "baobab_leaves", BAOBAB_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
                 MapColor.TERRACOTTA_LIGHT_GRAY, MapColor.TERRACOTTA_WHITE);
         food("baobab_fruit", 2, 0.3F, COMPOST_MEDIUM);
@@ -1999,7 +2019,9 @@ public final class JugcraftAgriculture {
 		registerItem("mason_jar", Item::new, new Item.Properties().stacksTo(16), INGREDIENT_TAB);
 		registerItem("cider_vinegar", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
 		preserve("sweet_berry_jam", 3, 0.4F, null, 0, 0x9A1E3A);
-		preserve("haw_jelly", 3, 0.4F, null, 0, 0xB8302A);
+		preserve("sea_grape_jelly", 3, 0.4F, null, 0, 0x7A4A7E);
+        preserve("mango_chutney", 3, 0.5F, null, 0, 0xD98B2B);
+        preserve("haw_jelly", 3, 0.4F, null, 0, 0xB8302A);
 		preserve("persimmon_preserve", 3, 0.4F, null, 0, 0xDE7A2A);
 		preserve("rowan_jelly", 3, 0.4F, null, 0, 0xC4300F);
 		preserve("apple_butter", 4, 0.5F, null, 0, 0x7A3A14);
@@ -2984,7 +3006,7 @@ public final class JugcraftAgriculture {
 	private static void registerTree(String tree, String leavesId, TreeGrower grower, SeasonalLeavesBlock.Schedule schedule,
 			Block saplingLike, Block leavesLike, MapColor bark, MapColor inner) {
 		Function<BlockBehaviour.Properties, Block> leavesFactory = tree.equals("holly") ? props -> new HollyLeavesBlock(schedule, props)
-				: tree.equals("olive") ? OliveLeavesBlock::new : tree.equals("juniper") ? JuniperLeavesBlock::new : tree.equals("yew") ? YewLeavesBlock::new : schedule == null
+				: tree.equals("mango") ? props -> new TropicalFruitLeavesBlock("mango", false, props) : tree.equals("olive") ? OliveLeavesBlock::new : tree.equals("juniper") ? JuniperLeavesBlock::new : tree.equals("yew") ? YewLeavesBlock::new : schedule == null
 				? props -> new TintedParticleLeavesBlock(0.01F, props)
 				: props -> new SeasonalLeavesBlock(schedule, props);
 		registerFoliage(tree, leavesId, grower, saplingLike, leavesLike, leavesFactory);
@@ -2997,7 +3019,7 @@ public final class JugcraftAgriculture {
 		TreeGrower giant = GIANT_GROWERS.get(tree);
 		Block sapling = registerBlock(tree + "_sapling", tree.equals("dragonblood") ? props -> new EndTreeSaplingBlock(grower, props) : giant == null ? props -> new SaplingBlock(grower, props) {
 			@Override protected boolean mayPlaceOn(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-				return super.mayPlaceOn(state, level, pos) || java.util.Set.of("juniper", "stone_pine", "tamarisk", "joshua_tree", "palm").contains(tree) && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
+				return super.mayPlaceOn(state, level, pos) || java.util.Set.of("juniper", "stone_pine", "tamarisk", "joshua_tree", "palm", "sea_grape").contains(tree) && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
 			}
 		} : props -> new GiantSaplingBlock(grower, giant, props) {
             @Override protected boolean mayPlaceOn(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {

@@ -52,11 +52,12 @@ TREES = {
     "plum": {"display": "Plum", "seed": "plum_pit", "seed_display": "Plum Pit", "food": [4, 0.3], "pick": [1, 3],
              "trunk": {"base_height": 4, "height_rand_a": 1}, "foliage": {"radius": 2, "height": 3},
              "biomes": ["IS_FOREST", "IS_TAIGA"], "rarity": 16, "regions": {"orchard": 0.15}},
+    # Batch 11 keeps Tropics bananas at 7.65% overall; regions stores conditional selector chances.
     "banana": {"display": "Banana", "seed": "banana_pup", "seed_display": "Banana Pup", "food": [4, 0.4], "pick": [2, 4],
                "log": "jugcraft:banana_stem", "trunk": {"base_height": 4, "height_rand_a": 2},
                "foliage": {"type": "cherry", "radius": 3, "height": 4, "wide_bottom_layer_hole_chance": 0.25,
                            "corner_hole_chance": 0.4, "hanging_leaves_chance": 0.7, "hanging_leaves_extension_chance": 0.3},
-               "biomes": ["IS_JUNGLE"], "rarity": 12, "regions": {"tropics": 0.15, "rainforest": 0.1}},
+               "biomes": ["IS_JUNGLE"], "rarity": 12, "regions": {"tropics": 0.0765 / 0.5, "rainforest": 0.1}},
 }
 # The banana's stem: a log of its own (a pillar, in #minecraft:logs so its fronds count it as their tree, as the TREES.md
 # roster asks; it does not burn as fuel).

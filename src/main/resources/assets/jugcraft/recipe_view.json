@@ -3450,6 +3450,46 @@
         {
           "in": [
             [
+              "#jugcraft:fig_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fig_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
+              "#jugcraft:mango_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:mango_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "#minecraft:planks",
               1
             ]
@@ -3744,6 +3784,131 @@
             ],
             [
               "minecraft:pale_moss_carpet",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:flame_tree_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:acacia_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:flame_tree_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:sea_grape_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:oak_log",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:sea_grape_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:osmanthus_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:olive_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:osmanthus_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:banyan_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:fig_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:banyan_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:mango_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:mango_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:mango_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
               1,
               0.1
             ]

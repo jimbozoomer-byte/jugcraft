@@ -1282,7 +1282,7 @@ stone.
 
 ### Batch 10: hanging fruit
 
-Implementation: [tree batch 10](../features/trees-batch-10.md), [draft PR #417](https://github.com/jimbozoomer-byte/jugcraft/pull/417). Includes baobabs, date palms and renewable hanging fruit; awaiting owner inspection. The implementation record documents the 26.3 foliage constraints and preserves the established tamarisk shares and biome attempt budgets. Batch 11 remains future work.
+Implementation: [tree batch 10](../features/trees-batch-10.md), [PR #417](https://github.com/jimbozoomer-byte/jugcraft/pull/417). Owner-approved and ready for review. Includes baobabs, date palms and renewable hanging fruit. The implementation record documents the 26.3 foliage constraints and preserves the established tamarisk shares and biome attempt budgets.
 
 #### baobab
 African baobab and Australian boab (*Adansonia digitata*, *A. gregorii*). **High.** The outback's icon, a silhouette no
@@ -1331,6 +1331,8 @@ food and a reason to visit.
   in `TreeGrower`.
 
 ### Batch 11: tropics, subtropics and coasts
+
+Implementation of batches 11, 11b and 11c: [feature record](../features/trees-batch-11.md), [draft PR #418](https://github.com/jimbozoomer-byte/jugcraft/pull/418). Owner requested all three together on 18 October 2026. Pandanus is omitted as recommended. The record explains current biome weights, renewable harvests and native placement adjustments. Owner inspection is pending; Batch 12 and later remain future work.
 
 #### flame_tree
 Flame tree, or royal poinciana (*Delonix regia*). **Medium.** A flowering tree of the tropics. In the Jacaranda Glade

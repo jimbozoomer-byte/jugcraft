@@ -192,6 +192,9 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "sea_grapes": {"display": "Sea Grapes", "food": [2, 0.2], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable"]},
+    "mango": {"display": "Mango", "food": [3, 0.3], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable", "minecraft:parrot_food"]},
+    "osmanthus_flowers": {"display": "Osmanthus Flowers", "compost": "low", "tags": []},
     "baobab_fruit": {"display": "Baobab Fruit", "food": [2, 0.3], "compost": "medium", "tags": ["c:foods/fruit"]},
     "baobab_seeds": {"display": "Baobab Seeds", "plants": "baobab_sapling", "compost": "low", "tags": []},
     "dates": {"display": "Dates", "food": [2, 0.3], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable"]},
@@ -434,7 +437,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
              "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
-             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive", "tamarisk": "Tamarisk", "yucca": "Yucca", "dragonblood": "Dragonblood", "baobab": "Baobab"}
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive", "tamarisk": "Tamarisk", "yucca": "Yucca", "dragonblood": "Dragonblood", "baobab": "Baobab", "fig": "Fig", "mango": "Mango"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -443,7 +446,7 @@ WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "bio
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
                  "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes", "alpine_spawn"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"], "baobab": ["biomes"]}
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"], "baobab": ["biomes"], "fig": ["biomes"], "mango": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -471,6 +474,11 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 # "seasonal_drop": fruit item and green/gold/bare loot chances; natural leaves only, without Silk Touch/shears.
 TREES = {
+    "flame_tree": {"wood": "minecraft:acacia", "display": "Flame Tree", "switches": ["biomes"], "leaves": "flame_tree_leaves", "leaves_display": "Flame Tree Leaves", "season": None, "base": "acacia", "leaf_tags": ["minecraft:flowers"], "leaf_block_tags": ["minecraft:bee_attractive"]},
+    "sea_grape": {"wood": "minecraft:oak", "display": "Sea Grape", "switches": ["biomes"], "leaves": "sea_grape_leaves", "leaves_display": "Sea Grape Leaves", "season": None, "base": "oak", "farm_yield": 1, "fruit": {"item": "sea_grapes", "min": 1, "max": 2, "chance": 10}},
+    "osmanthus": {"wood": "olive", "display": "Osmanthus", "leaves": "osmanthus_leaves", "leaves_display": "Osmanthus Leaves", "season": None, "base": "oak", "fruit": {"item": "osmanthus_flowers", "min": 1, "max": 2, "chance": 10}, "leaf_tags": ["minecraft:flowers"], "leaf_block_tags": ["minecraft:bee_attractive"]},
+    "banyan": {"wood": "fig", "display": "Banyan", "leaves": "banyan_leaves", "leaves_display": "Banyan Leaves", "season": None, "base": "oak"},
+    "mango": {"leaves": "mango_leaves", "leaves_display": "Mango Leaves", "season": None, "base": "oak", "fruit": {"item": "mango", "min": 1, "max": 2, "chance": 10}},
     "baobab": {"leaves": "baobab_leaves", "leaves_display": "Baobab Leaves", "season": None, "base": "oak", "giant": "giant_baobab"},
     "dragonblood": {"leaves": "dragonblood_fronds", "leaves_display": "Dragonblood Fronds", "season": None, "base": "oak"},
     "stone_pine": {"wood": "pine", "display": "Stone Pine", "leaves": "stone_pine_needles", "leaves_display": "Stone Pine Needles",
@@ -1616,6 +1624,8 @@ PANTRY = {"jar": "mason_jar", "jar_display": "Mason Jar", "vinegar": "cider_vine
           "kettle": "canning_kettle", "kettle_display": "Canning Kettle", "shelf": "pantry_shelf", "shelf_display": "Pantry Shelf",
           "servings": 4, "spoil_ticks": 72000, "kettle_jars": 4, "boil_ticks": 200, "process_ticks": 400, "shelf_slots": 6,
           "preserves": {
+              "sea_grape_jelly": {"display": "Sea Grape Jelly", "food": [3, 0.4], "effect": None, "color": 0x7A4A7E, "kind": "sweet"},
+              "mango_chutney": {"display": "Mango Chutney", "food": [3, 0.5], "effect": None, "color": 0xD98B2B, "kind": "pickle"},
               "haw_jelly": {"display": "Haw Jelly", "food": [3, 0.4], "effect": None, "color": 0xB8302A, "kind": "sweet"},
               "persimmon_preserve": {"display": "Persimmon Preserve", "food": [3, 0.4], "effect": None, "color": 0xDE7A2A, "kind": "sweet"},
               "rowan_jelly": {"display": "Rowan Jelly", "food": [3, 0.4], "effect": None, "color": 0xC4300F, "kind": "sweet"},
@@ -1692,7 +1702,7 @@ LANTERNS = {"item": "sky_lantern", "display": "Sky Lantern", "entity": "sky_lant
             "rise": 0.035, "wind": 0.015, "wind_period": 72000, "lifetime": 2400, "lifetime_spread": 600, "fade_ticks": 100,
             "per_craft": 2, "festival_lanterns": 8, "festival_radius": 32, "festival_window": 2400, "festival_cooldown": 24000,
             "luck_ticks": 6000, "memory": 256,
-            "mooncakes": {"red_bean_mooncake": {"display": "Red Bean Mooncake", "filling": {"jugcraft:beans": 2}},
+            "mooncakes": {"osmanthus_mooncake": {"display": "Osmanthus Mooncake", "filling": {"jugcraft:osmanthus_flowers": 2}}, "red_bean_mooncake": {"display": "Red Bean Mooncake", "filling": {"jugcraft:beans": 2}},
                           "chestnut_mooncake": {"display": "Chestnut Mooncake", "filling": {"jugcraft:roasted_chestnuts": 2}},
                           "pumpkin_mooncake": {"display": "Pumpkin Mooncake", "filling": {"minecraft:pumpkin": 1}}},
             "mooncake_base": {"minecraft:wheat": 2, "minecraft:sugar": 1, "minecraft:egg": 1}, "mooncake_count": 4,
@@ -1786,7 +1796,7 @@ CANDY = {"kettle": "candy_kettle", "kettle_display": "Candy Kettle", "tray": "ca
                    "burnt_sugar": 0x2A1A10},
          # Candy corn's bands, tip to base, where a layer is undyed.
          "corn_bands": [0xF8F4EA, 0xF08A24, 0xF6C836],
-         "flavours": {"chocolate": {"display": "Chocolate", "items": ["minecraft:cocoa_beans"], "effect": "SPEED", "seconds": 10,
+         "flavours": {"osmanthus": {"display": "Osmanthus", "items": ["jugcraft:osmanthus_flowers"], "effect": "LUCK", "seconds": 30, "color": 0xE8D08A}, "chocolate": {"display": "Chocolate", "items": ["minecraft:cocoa_beans"], "effect": "SPEED", "seconds": 10,
                                     "color": 0x5A3218},
                       "berry": {"display": "Berry", "items": ["minecraft:sweet_berries", "jugcraft:rowan_berries", "jugcraft:elderberries"], "effect": "REGENERATION", "seconds": 4,
                                 "color": 0xC8283C},
@@ -2204,6 +2214,8 @@ POT_RECIPES = {
     # fruit butters with sugar (apple butter cooked in sweet cider, pumpkin butter with mulling spices), and pickles and
     # relish in cider vinegar.
     "cider_vinegar": {"inputs": {"jugcraft:aged_cider": 1, "jugcraft:apple_pomace": 1}, "time": 200},
+    "sea_grape_jelly": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:sea_grapes": 6, "minecraft:sugar": 2}, "time": 300},
+    "mango_chutney": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:mango": 4, "jugcraft:cider_vinegar": 1, "minecraft:sugar": 1}, "time": 300},
     "haw_jelly": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:haws": 6, "minecraft:sugar": 2}, "time": 300},
     "persimmon_preserve": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:persimmon": 6, "minecraft:sugar": 2}, "time": 300},
     "rowan_jelly": {"inputs": {"jugcraft:mason_jar": 1, "jugcraft:rowan_berries": 6, "minecraft:sugar": 2}, "time": 300},
