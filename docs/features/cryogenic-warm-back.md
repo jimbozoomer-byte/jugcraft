@@ -55,6 +55,8 @@ Each is exactly its condensing recipe reversed, at half the time. The machine's 
 - each warm-back recipe takes exactly the liquid its condensing recipe gives, and gives back exactly the gas that recipe used;
 - the liquefier's input tank accepts the liquid.
 
+**Results:** the fork's Build workflow passed on commit 8d8a06cb ([run 39108216361](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39108216361)): compilation, the headless server game tests including `liquefierWarmsLiquidsBackToTheirGas`, and the rendered-client shards.
+
 **Not run:** an in-game test of a liquefier running a warm-back batch end to end.
 
 ## AI attribution
