@@ -118,11 +118,12 @@ public class FungalEndTreeClientGameTests extends TreeBatchTwoClientGameTests {
         throw new AssertionError("No safe inspection camera near "+target);
     }
     private static Block expected(String biome){return switch(biome){case "blighted_sands","withered_hollow","rotted_expanse"->JugcraftAgriculture.block("blight_wart_block");case "marrow_heap"->Blocks.SHROOMLIGHT;case "netherbrush"->JugcraftAgriculture.block("bramble_bush_leaves");case "ender_wilds","outer_flats"->JugcraftAgriculture.block("dragonblood_log");default->JugcraftAgriculture.block("glowcap_block");};}
+    private static boolean rareEndBiome(String name){return name.equals("outer_flats")||name.equals("rotted_expanse");}
     private static BlockPos natural(ServerLevel level,String name){
         var key=ResourceKey.create(Registries.BIOME,Jugcraft.id(name));
         // A rare one-in-ten placement cannot be required in the nearest tiny island fringe.
-        // Sample additional distant regions for Outer Flats, keeping the search bounded.
-        int[][] anchors=name.equals("outer_flats")?new int[][]{{0,0},{4096,0},{0,4096},{-4096,0},{0,-4096}}:new int[][]{{0,0}};
+        // Sample additional distant regions for sparse End extras, keeping the search bounded.
+        int[][] anchors=rareEndBiome(name)?new int[][]{{0,0},{4096,0},{0,4096},{-4096,0},{0,-4096}}:new int[][]{{0,0}};
         for(int[] anchor:anchors){
             var result=naturalNear(level,name,key,new BlockPos(anchor[0],64,anchor[1]));
             if(result!=null)return result;
@@ -134,21 +135,22 @@ public class FungalEndTreeClientGameTests extends TreeBatchTwoClientGameTests {
         if(nearest==null)return null;
         var first=nearest.getFirst();var wanted=expected(name);int chunks=0;
         // A bounded spiral covers sparse placements without planting anything or changing terrain.
-        for(int r=0;r<=10;r++)for(int dx=-r;dx<=r;dx++)for(int dz=-r;dz<=r;dz++){
+        for(int r=0;r<=(rareEndBiome(name)?24:10);r++)for(int dx=-r;dx<=r;dx++)for(int dz=-r;dz<=r;dz++){
             if(Math.max(Math.abs(dx),Math.abs(dz))!=r)continue;
             int x0=(first.getX()>>4)*16+dx*16,z0=(first.getZ()>>4)*16+dz*16;
-            if(!level.getBiome(new BlockPos(x0+8,first.getY(),z0+8)).is(key))continue;
+            // Rare End extras may occupy a biome corner even when the chunk centre belongs to another biome.
+            if(!rareEndBiome(name)&&!level.getBiome(new BlockPos(x0+8,first.getY(),z0+8)).is(key))continue;
             level.getChunk(x0>>4,z0>>4);chunks++;
             for(int x=x0;x<x0+16;x++)for(int z=z0;z<z0+16;z++){
                 int lo=level.dimension()==Level.NETHER?1:name.equals("glowcap_grotto")?level.getMinY()+1:Math.max(level.getMinY()+1,level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,x,z)-20);
                 int hi=level.dimension()==Level.NETHER?124:level.getHeight(Heightmap.Types.WORLD_SURFACE,x,z);
                 for(int y=lo;y<hi;y++){
                     var p=new BlockPos(x,y,z);if(level.getBlockState(p).is(wanted)&&level.getBiome(p).is(key)){
-                        Jugcraft.LOGGER.info("[fungal End natural] {} {} after {} eligible chunks",name,p,chunks);return p;
+                        Jugcraft.LOGGER.info("[fungal End natural] {} {} after {} surveyed chunks",name,p,chunks);return p;
                     }
                 }
             }
         }
-        Jugcraft.LOGGER.warn("[fungal End natural] no {} in {} eligible chunks near {}",name,chunks,first);return null;
+        Jugcraft.LOGGER.warn("[fungal End natural] no {} in {} surveyed chunks near {}",name,chunks,first);return null;
     }
 }
