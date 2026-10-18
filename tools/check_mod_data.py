@@ -2762,7 +2762,7 @@ def check_biomes():
         tree = info.get("tree", info["wood"])
         if tree in ag.TREES and info["wood"] != ag.timber(tree):
             err(f"Tree shape {shape} timber {info['wood']} differs from {tree}'s {ag.timber(tree)}")
-        if (not vanilla and info["wood"] not in ag.WOOD_SETS) or (info["foliage"] and not tree.startswith("minecraft:") and tree not in ag.TREES):
+        if (not vanilla and info["wood"] not in ag.WOOD_SETS and ag.TREES.get(tree, {}).get("trunk_block", "").removeprefix("jugcraft:") not in ag.TREE_BLOCKS) or (info["foliage"] and not tree.startswith("minecraft:") and tree not in ag.TREES):
             err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
             continue
         # Generated seasonal leaves need the decorator to start in today's look (world generation skips onPlace).
@@ -3697,6 +3697,13 @@ def check_agriculture():
     for name in re.findall(r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\), \w+_TAB\)', main):
         if name in ag.ITEMS:
             items[name] = ("plain", None, None, None, None)
+    # Bottled nonfood ingredients keep their shell without acquiring drink behavior.
+    for name, remainder, limit in re.findall(
+            r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.craftRemainder\(Items\.(\w+)\)\.stacksTo\((\d+)\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, None, None)
+            if ag.ITEMS[name].get("craft_remainder") != "minecraft:" + remainder.lower() or ag.ITEMS[name].get("stack_size") != int(limit):
+                err(f"JugcraftAgriculture.java {name}: container or stack limit differs from agriculture data")
     # Decorative ingredients can use a different creative tab while retaining the same plain-item properties.
     for name, compost in re.findall(
             r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.compostable\(COMPOST_(\w+)\), \w+_TAB\)', main):
@@ -3863,7 +3870,7 @@ def check_agriculture():
             err(f"Missing crop texture {texture}")
 
     # Cooking Pot recipes: one file each, known items, room in the pot, and no two with the same ingredients.
-    registered = set(ag.all_items()) | set(all_items()) | set(all_blocks())
+    registered = set(ag.all_items()) | set(all_items()) | set(all_blocks()) | set(petro.petro_items())
     folder = DATA / MOD / "recipe" / "pot_cooking"
     if sorted(path.stem for path in folder.glob("*.json")) != sorted(ag.POT_RECIPES):
         err("recipe/pot_cooking/ files differ from POT_RECIPES in tools/agriculture.py")
@@ -4799,7 +4806,7 @@ def check_orchard():
         if bm.PLACED_TREES.get(orchard.checked(tree)) != (f"{MOD}:{orchard.feature(tree)}", f"{MOD}:{sapling}"):
             err(f"tools/biomes.py PLACED_TREES must place {orchard.checked(tree)} where the {tree} sapling could stand")
         for biome, share in info["regions"].items():
-            if [f"{MOD}:{orchard.checked(tree)}", share] not in bm.BIOMES[biome]["trees"]["picks"]:
+            if not (share == 1 and bm.BIOMES[biome]["trees"]["default"] == f"{MOD}:{orchard.checked(tree)}") and not any(ref == f"{MOD}:{orchard.checked(tree)}" and abs(chance - share) < 1e-9 for ref, chance in bm.BIOMES[biome]["trees"]["picks"]):
                 err(f"tools/biomes.py {biome} must pick {orchard.checked(tree)} ({share})")
     # The banana's stem: a pillar block (registered, with its item) that is a log to its fronds and to an axe, but no fuel.
     stem = orchard.BANANA_STEM["block"]
@@ -4949,7 +4956,7 @@ def check_festival(java, main):
             err(f"JugcraftAgriculture.java does not register {block}")
     for tree, info in ag.TREES.items():
         base = info["base"].upper()
-        own_wood = ag.timber(tree) == tree
+        own_wood = ag.timber(tree) == tree and "trunk_block" not in info
         composed = "fruit" in info and info["season"] is not None
         call = "registerTree" if own_wood and not composed else "registerFoliage"
         schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if call == "registerTree" else ""

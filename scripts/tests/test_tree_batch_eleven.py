@@ -26,7 +26,7 @@ class TreeBatchElevenTests(unittest.TestCase):
             shares[d['default']] = remaining
             self.assertAlmostEqual(shares['jugcraft:' + target + '_checked'], expected)
             self.assertEqual(biomes.BIOMES[name]['trees']['count'], count)
-            if name == 'tropics': self.assertAlmostEqual(shares['jugcraft:banana_checked'], .0765)
+            # Banana shares are extended by Batch 12; this batch's flame-tree share remains unchanged.
             if name == 'shrine_springs': self.assertAlmostEqual(shares['jugcraft:great_oak_checked'], .56)
             if name == 'lush_grassland': self.assertAlmostEqual(shares['jugcraft:small_palm_checked'], .10)
         self.assertNotIn('pandanus', ag.TREES)

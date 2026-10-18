@@ -183,6 +183,8 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower FLAME_TREE_GROWER = grower("flame_tree");
     public static final TreeGrower SEA_GRAPE_GROWER = grower("sea_grape");
     public static final TreeGrower OSMANTHUS_GROWER = grower("osmanthus");
+    public static final TreeGrower RUBBER_TREE_GROWER = grower("rubber_tree");
+    public static final TreeGrower TREE_FERN_GROWER = grower("tree_fern");
     public static final TreeGrower BANYAN_GROWER = grower("banyan");
     public static final TreeGrower MANGO_GROWER = grower("mango");
     public static final TreeGrower BAOBAB_GROWER = grower("baobab");
@@ -594,6 +596,22 @@ public final class JugcraftAgriculture {
 		registerFoliage("stone_pine", "stone_pine_needles", STONE_PINE_GROWER, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES, StonePineLeavesBlock::new);
 		registerFoliage("wattle", "wattle_leaves", WATTLE_GROWER, Blocks.ACACIA_SAPLING, Blocks.ACACIA_LEAVES,
 				props -> new TintedParticleLeavesBlock(0.01F, props));
+        Block rubberLog = registerBlock("rubber_log", RubberLogBlock::new,
+                BlockBehaviour.Properties.ofFullCopy(Blocks.JUNGLE_LOG).pushReaction(net.minecraft.world.level.material.PushReaction.IMMOVEABLE));
+        registerItem("rubber_log", props -> new BlockItem(rubberLog, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+        registerFoliage("rubber_tree", "rubber_leaves", RUBBER_TREE_GROWER, Blocks.JUNGLE_SAPLING, Blocks.JUNGLE_LEAVES,
+                props -> new TintedParticleLeavesBlock(0.01F, props));
+        Block treeTap = registerBlock("tree_tap", TreeTapBlock::new, BlockBehaviour.Properties.of().strength(.5F).sound(SoundType.WOOD).noOcclusion()
+                .pushReaction(net.minecraft.world.level.material.PushReaction.POPPED));
+        registerItem("tree_tap", props -> new BlockItem(treeTap, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+        registerItem("latex_bottle", Item::new, new Item.Properties().craftRemainder(Items.GLASS_BOTTLE).stacksTo(16), INGREDIENT_TAB);
+        Block fernTrunk = registerBlock("tree_fern_trunk", RotatedPillarBlock::new,
+                BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(1.0F).sound(SoundType.WOOD).ignitedByLava());
+        registerItem("tree_fern_trunk", props -> new BlockItem(fernTrunk, props), new Item.Properties().useBlockDescriptionPrefix()
+                .compostable(COMPOST_MEDIUM_HIGH), BUILDING_TAB);
+        FlammableBlockRegistry.getDefaultInstance().add(fernTrunk, 5, 5);
+        registerFoliage("tree_fern", "tree_fern_fronds", TREE_FERN_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+                props -> new TintedParticleLeavesBlock(0.01F, props));
         registerFoliage("flame_tree", "flame_tree_leaves", FLAME_TREE_GROWER, Blocks.ACACIA_SAPLING, Blocks.ACACIA_LEAVES,
                 props -> new TintedParticleLeavesBlock(0.01F, props));
         registerFoliage("sea_grape", "sea_grape_leaves", SEA_GRAPE_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,

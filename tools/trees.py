@@ -20,6 +20,20 @@ def hanging_fruit(block, probability):
 
 
 SHAPES = {
+    "rubber_tree": {"wood": "minecraft:jungle", "tree": "rubber_tree", "sapling": True,
+                    "trunk_properties": {"natural": "true"},
+                    "trunk": {"type": "straight", "base_height": 9, "height_rand_a": 3},
+                    "foliage": {"type": "blob", "radius": 2, "offset": 0, "height": 4},
+                    "decorators": [{"type": "minecraft:leave_vine", "probability": .1}]},
+    "tree_fern": {"wood": "tree_fern", "sapling": True,
+                  "trunk": {"type": "straight", "base_height": 3, "height_rand_a": 2},
+                  "foliage": {"type": "acacia", "radius": 2, "offset": 0}},
+    # Native mangrove roots reject some flat-soil placements with this 2x2 trunk.
+    # Use the roster's soil-supported emergent fallback; the existing giant sapling route stays intact.
+    "emergent_mahogany": {"wood": "mahogany",
+                  "trunk": {"type": "mega_jungle", "base_height": 18, "height_rand_a": 4, "height_rand_b": 10},
+                  "foliage": {"type": "jungle", "radius": 3, "offset": 0, "height": 2},
+                  "decorators": [{"type": "minecraft:trunk_vine"}, {"type": "minecraft:leave_vine", "probability": .25}]},
     "flame_tree": {"wood": "minecraft:acacia", "tree": "flame_tree", "sapling": True,
                    "trunk": {"type": "forking", "base_height": 4, "height_rand_a": 1, "height_rand_b": 1},
                    "foliage": {"type": "acacia", "radius": 3, "offset": 0}},

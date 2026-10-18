@@ -1,0 +1,84 @@
+{
+  "variants": {
+    "facing=north,latex=0": {
+      "model": "jugcraft:block/tree_tap_0",
+      "y": 0
+    },
+    "facing=north,latex=1": {
+      "model": "jugcraft:block/tree_tap_1",
+      "y": 0
+    },
+    "facing=north,latex=2": {
+      "model": "jugcraft:block/tree_tap_2",
+      "y": 0
+    },
+    "facing=north,latex=3": {
+      "model": "jugcraft:block/tree_tap_3",
+      "y": 0
+    },
+    "facing=north,latex=4": {
+      "model": "jugcraft:block/tree_tap_4",
+      "y": 0
+    },
+    "facing=east,latex=0": {
+      "model": "jugcraft:block/tree_tap_0",
+      "y": 90
+    },
+    "facing=east,latex=1": {
+      "model": "jugcraft:block/tree_tap_1",
+      "y": 90
+    },
+    "facing=east,latex=2": {
+      "model": "jugcraft:block/tree_tap_2",
+      "y": 90
+    },
+    "facing=east,latex=3": {
+      "model": "jugcraft:block/tree_tap_3",
+      "y": 90
+    },
+    "facing=east,latex=4": {
+      "model": "jugcraft:block/tree_tap_4",
+      "y": 90
+    },
+    "facing=south,latex=0": {
+      "model": "jugcraft:block/tree_tap_0",
+      "y": 180
+    },
+    "facing=south,latex=1": {
+      "model": "jugcraft:block/tree_tap_1",
+      "y": 180
+    },
+    "facing=south,latex=2": {
+      "model": "jugcraft:block/tree_tap_2",
+      "y": 180
+    },
+    "facing=south,latex=3": {
+      "model": "jugcraft:block/tree_tap_3",
+      "y": 180
+    },
+    "facing=south,latex=4": {
+      "model": "jugcraft:block/tree_tap_4",
+      "y": 180
+    },
+    "facing=west,latex=0": {
+      "model": "jugcraft:block/tree_tap_0",
+      "y": 270
+    },
+    "facing=west,latex=1": {
+      "model": "jugcraft:block/tree_tap_1",
+      "y": 270
+    },
+    "facing=west,latex=2": {
+      "model": "jugcraft:block/tree_tap_2",
+      "y": 270
+    },
+    "facing=west,latex=3": {
+      "model": "jugcraft:block/tree_tap_3",
+      "y": 270
+    },
+    "facing=west,latex=4": {
+      "model": "jugcraft:block/tree_tap_4",
+      "y": 270
+    }
+  }
+}

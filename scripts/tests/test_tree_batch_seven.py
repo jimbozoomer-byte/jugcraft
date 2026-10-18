@@ -63,7 +63,6 @@ class OliveTests(unittest.TestCase):
             self.assertEqual(farm['output'],'jugcraft:olive_log')
             self.assertEqual(farm['count'],count)
             self.assertIn([f'jugcraft:{tree}_sapling',1,1.,None],farm['byproducts'])
-        for name in ('tree_fern',): self.assertNotIn(name,trees.SHAPES)
 
     def test_fruit_is_visible_and_evergreen_art_is_dense(self):
         art=olive_textures.textures()

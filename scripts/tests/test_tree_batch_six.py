@@ -88,10 +88,7 @@ class TreeBatchSixTests(unittest.TestCase):
         self.assertEqual(recipes["mulling_spices_from_juniper"]["inputs"],["minecraft:sugar","jugcraft:juniper_berries","minecraft:cocoa_beans"])
         self.assertEqual(recipes["mulling_spices_from_juniper"]["count"],2)
 
-    def test_later_batches_are_not_added_and_juniper_supports_alpine(self):
-        for name in ("tree_fern",):
-            self.assertNotIn(name,trees.SHAPES)
-            self.assertNotIn(name,ag.TREES)
+    def test_juniper_supports_alpine(self):
         self.assertEqual(ag.WOOD_SWITCHES["juniper"],["biomes", "alpine_spawn"])
 
 if __name__ == "__main__": unittest.main()

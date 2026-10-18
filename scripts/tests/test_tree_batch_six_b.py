@@ -69,9 +69,6 @@ class HollyTests(unittest.TestCase):
         self.assertEqual(farm["count"], 6)
         self.assertIn(["jugcraft:holly_sapling", 1, 1.0, None], farm["byproducts"])
         self.assertEqual(ag.WOOD_SWITCHES["holly"], ["biomes"])
-        for name in ("tree_fern",):
-            self.assertNotIn(name, trees.SHAPES)
-            self.assertNotIn(name, ag.TREES)
 
 
 if __name__ == "__main__": unittest.main()

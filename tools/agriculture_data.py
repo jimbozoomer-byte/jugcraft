@@ -74,6 +74,7 @@ import plants_data
 import trees_data
 import fungal_trees_data
 import hanging_fruit_data
+import rainforest_data
 import kitchen_data
 import feasts_data
 import menu_data
@@ -235,6 +236,7 @@ def assets(root, write, lang):
     trees_data.assets(root, write)
     fungal_trees_data.assets(root, write, lang)
     hanging_fruit_data.assets(root, write, lang)
+    rainforest_data.assets(root, write, lang)
     plants_data.assets(root, write, lang)
     carving_data.assets(root, write, lang)
     halloween_data.assets(root, write, lang)
@@ -424,6 +426,7 @@ def loot(data, write):
     trees_data.loot(out, write)
     fungal_trees_data.loot(out, write)
     hanging_fruit_data.loot(out, write)
+    rainforest_data.loot(out, write)
     plants_data.loot(out, write)
     carving_data.loot(out, write)
     halloween_data.loot(out, write)
@@ -586,6 +589,7 @@ def tags(tags):
     trees_data.tags(tags)
     fungal_trees_data.tags(tags)
     hanging_fruit_data.tags(tags)
+    rainforest_data.tags(tags)
     plants_data.tags(tags)
     carving_data.tags(tags)
     halloween_data.tags(tags)

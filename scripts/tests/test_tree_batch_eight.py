@@ -19,7 +19,7 @@ class DryCountryTests(unittest.TestCase):
             'heathland':([2,3],{'gorse':.6,'juniper_bush':.15,'umbrella_pine':.25}),
             'dryland':([2,3],{'pinyon':.45,'juniper':.3,'juniper_bush':.25}),
             'canyon':([2,3],{'pinyon':.4,'juniper':.35,'juniper_bush':.25}),
-            'eucalyptus_forest':([8,9],{'eucalyptus':.47,'big_eucalyptus':.25,'giant_eucalyptus':.08,'wattle_bush':.2}),
+            'eucalyptus_forest':([8,9],{'eucalyptus':.42,'tree_fern':.05,'big_eucalyptus':.25,'giant_eucalyptus':.08,'wattle_bush':.2}),
             'gilded_shrubland':([3,4],{'wattle_bush':.7,'wattle':.3}),
             'wasteland':([1,1],{'dead_tree':.45,'dead_snag':.3,'dead_snag_bent':.1,'tamarisk':.15}),
             'oasis':([2,3],{'palm':.4,'small_palm':.15,'tamarisk':.1,'date_palm':.35}),
@@ -52,7 +52,7 @@ class DryCountryTests(unittest.TestCase):
         selector=out['data/jugcraft/worldgen/feature/alpine_spawn_trees.json']
         self.assertEqual(len(selector['features']),3)
 
-    def test_wood_identity_renewability_food_and_no_later_batch(self):
+    def test_wood_identity_renewability_and_food(self):
         for tree,wood,count in (('stone_pine','pine',6),('wattle','minecraft:acacia',1),('tamarisk','tamarisk',6),('joshua_tree','yucca',6)):
             self.assertEqual(ag.timber(tree),wood)
             farm=next(r for r in machines._tree_farm() if r['input']==f'jugcraft:{tree}_sapling')
@@ -63,7 +63,6 @@ class DryCountryTests(unittest.TestCase):
         for tree in ('stone_pine','wattle','joshua_tree'):self.assertNotIn(tree,ag.WOOD_SETS)
         self.assertEqual(ag.COOKING['roasted_pine_nuts']['input'],'pine_nuts')
         for item in ('pine_nuts','roasted_pine_nuts'):self.assertIn('jugcraft:squirrel_food',ag.ITEMS[item]['tags'])
-        for name in ('tree_fern','buttressed_mahogany'):self.assertNotIn(name,trees.SHAPES)
 
     def test_art_is_native_size_with_distinct_fruit_stages_and_leaf_backing(self):
         art=textures()

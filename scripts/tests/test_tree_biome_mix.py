@@ -27,7 +27,7 @@ class TreeBiomeMixTests(unittest.TestCase):
             "shield": {"pine": .25}, "karst_pinnacles": {"pine": .65},
             "jacaranda_glade": {"big_jacaranda": .15}, "glimmer_grove": {"big_jacaranda": .15},
             "outback": {"mallee": .30, "desert_acacia": .50, "baobab": .10, "giant_baobab": .10},
-            "eucalyptus_forest": {"eucalyptus": .47, "big_eucalyptus": .25, "wattle_bush": .20, "giant_eucalyptus": .08},
+            "eucalyptus_forest": {"eucalyptus": .42, "tree_fern": .05, "big_eucalyptus": .25, "wattle_bush": .20, "giant_eucalyptus": .08},
             "lush_desert": {"desert_acacia": .45, "small_palm": .20, "joshua_tree": .35},
             "flower_isle": {"apple_tree": .15}, "lavender_field": {"cypress": .10},
             "lush_grassland": {"small_palm": .10}, "oasis": {"small_palm": .15},

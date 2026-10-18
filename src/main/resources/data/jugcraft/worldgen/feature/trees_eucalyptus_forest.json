@@ -13,6 +13,10 @@
     {
       "chance": 0.14545454545454545,
       "feature": "jugcraft:giant_eucalyptus_checked"
+    },
+    {
+      "chance": 0.10638297872340426,
+      "feature": "jugcraft:tree_fern_checked"
     }
   ]
 }

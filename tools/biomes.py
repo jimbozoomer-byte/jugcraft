@@ -1606,3 +1606,6 @@ configure_fungal_trees(BIOMES, EXTRAS)
 
 from tropical_tree_biomes import configure as configure_tropical_trees
 configure_tropical_trees(BIOMES, EXTRAS)
+
+from rainforest_biomes import configure as configure_rainforest
+configure_rainforest(BIOMES)

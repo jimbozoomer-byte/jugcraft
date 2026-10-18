@@ -1489,7 +1489,13 @@ and its villages, a tree of their own and a warm-climate fruit.
 
 ### Batch 12: rainforest
 
-This batch follows agriculture slice 5, which already plans the rubber tree and its tapping.
+**Implementation update, 18 October 2026:** active in [draft PR #420](https://github.com/jimbozoomer-byte/jugcraft/pull/420).
+The owner explicitly included the missing rubber tree, tapping and latex-processing prerequisite.
+The [Batch 12 feature record](../features/trees-batch-12.md) records the current biome shares,
+existing banana integration and soil-supported emergent mahogany fallback. Batch 13 is not started.
+The original proposals below remain planning context where superseded by that record.
+
+This batch originally followed agriculture slice 5, which planned the rubber tree and its tapping.
 
 #### rubber_tree
 Pará rubber tree (*Hevea brasiliensis*). **High.** `docs/features/rubber.md` names natural rubber trees as a planned

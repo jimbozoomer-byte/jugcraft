@@ -192,6 +192,7 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "latex_bottle": {"display": "Latex Bottle", "craft_remainder": "minecraft:glass_bottle", "stack_size": 16, "tags": []},
     "sea_grapes": {"display": "Sea Grapes", "food": [2, 0.2], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable"]},
     "mango": {"display": "Mango", "food": [3, 0.3], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable", "minecraft:parrot_food"]},
     "osmanthus_flowers": {"display": "Osmanthus Flowers", "compost": "low", "tags": []},
@@ -474,6 +475,10 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 # "seasonal_drop": fruit item and green/gold/bare loot chances; natural leaves only, without Silk Touch/shears.
 TREES = {
+    "rubber_tree": {"wood": "minecraft:jungle", "display": "Rubber Tree", "trunk_block": "jugcraft:rubber_log", "switches": ["biomes", "agriculture"],
+                    "leaves": "rubber_leaves", "leaves_display": "Rubber Leaves", "season": None, "base": "jungle"},
+    "tree_fern": {"display": "Tree Fern", "trunk_block": "jugcraft:tree_fern_trunk", "switches": ["biomes"],
+                  "leaves": "tree_fern_fronds", "leaves_display": "Tree Fern Fronds", "season": None, "base": "oak"},
     "flame_tree": {"wood": "minecraft:acacia", "display": "Flame Tree", "switches": ["biomes"], "leaves": "flame_tree_leaves", "leaves_display": "Flame Tree Leaves", "season": None, "base": "acacia", "leaf_tags": ["minecraft:flowers"], "leaf_block_tags": ["minecraft:bee_attractive"]},
     "sea_grape": {"wood": "minecraft:oak", "display": "Sea Grape", "switches": ["biomes"], "leaves": "sea_grape_leaves", "leaves_display": "Sea Grape Leaves", "season": None, "base": "oak", "farm_yield": 1, "fruit": {"item": "sea_grapes", "min": 1, "max": 2, "chance": 10}},
     "osmanthus": {"wood": "olive", "display": "Osmanthus", "leaves": "osmanthus_leaves", "leaves_display": "Osmanthus Leaves", "season": None, "base": "oak", "fruit": {"item": "osmanthus_flowers", "min": 1, "max": 2, "chance": 10}, "leaf_tags": ["minecraft:flowers"], "leaf_block_tags": ["minecraft:bee_attractive"]},
@@ -575,7 +580,13 @@ def timber(tree):
 
 def tree_switches(tree):
     wood = timber(tree)
-    return TREES[tree]["switches"] if wood.startswith("minecraft:") else WOOD_SWITCHES[wood]
+    return TREES[tree]["switches"] if "switches" in TREES[tree] else WOOD_SWITCHES[wood]
+
+
+def trunk_block(tree):
+    """Fibrous plants support foliage without pretending to have a timber set."""
+    wood = timber(tree)
+    return TREES[tree].get("trunk_block", f"{wood if ':' in wood else 'jugcraft:' + wood}_log")
 
 
 def leaf_looks(tree):
@@ -590,10 +601,10 @@ def leaf_looks(tree):
             "bare": {f"{leaves}_bare": 1}}
 
 
-TREE_BLOCKS = {"chestnut_sapling": "Chestnut Sapling", "chestnut_leaves": "Chestnut Leaves",
+TREE_BLOCKS = {"rubber_log": "Rubber Log", "tree_tap": "Tree Tap", "tree_fern_trunk": "Tree Fern Trunk", "chestnut_sapling": "Chestnut Sapling", "chestnut_leaves": "Chestnut Leaves",
                **{block: name for tree in TREES for block, name in
                   ((sapling(tree), f"{TREES[tree].get('display', WOOD_SETS.get(tree))} Sapling"), (TREES[tree]["leaves"], TREES[tree]["leaves_display"]))}}
-TREE_TEXTURES = (["chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "stripped_chestnut_log_top", "chestnut_planks",
+TREE_TEXTURES = (["rubber_log", "rubber_log_top", "tree_tap", "tree_fern_trunk", "tree_fern_trunk_top", "chestnut_log", "chestnut_log_top", "stripped_chestnut_log", "stripped_chestnut_log_top", "chestnut_planks",
                   "chestnut_leaves", "chestnut_leaves_burs", "chestnut_leaves_ripe", "chestnut_sapling"]
                  + [name for wood in WOOD_SETS if wood != "chestnut" for name in (
                      f"{wood}_log", f"{wood}_log_top", f"stripped_{wood}_log", f"stripped_{wood}_log_top", f"{wood}_planks")]
@@ -2180,6 +2191,7 @@ COOK_TIMES = {"smelting": 200, "smoking": 100, "campfire_cooking": 600}
 # ingredients may be stacked for batch cooking. Every filled slot must belong to the recipe. No two
 # recipes may share the same set of ingredient items. time: ticks with heat.
 POT_RECIPES = {
+    "rubber": {"inputs": {"jugcraft:latex_bottle": 2, "jugcraft:cider_vinegar": 1}, "time": 600},
     "tomato_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:tomato": 2, "jugcraft:onion": 1}, "time": 200},
     "onion_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:onion": 2, "jugcraft:garlic": 1, "minecraft:bread": 1}, "time": 200},
     "vegetable_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:cabbage": 1, "minecraft:carrot": 1, "minecraft:potato": 1,
@@ -2766,7 +2778,7 @@ def all_blocks():
 
 
 def all_items():
-    return (HANGING_FRUIT_BLOCKS + FUNGAL_BLOCKS + list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
+    return (["rubber_log", "tree_tap", "tree_fern_trunk"] + HANGING_FRUIT_BLOCKS + FUNGAL_BLOCKS + list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
             + [block for tree in TREES for block in (sapling(tree), TREES[tree]["leaves"])] + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
@@ -2786,7 +2798,7 @@ def owns(entry_id):
 def switch_of(entry_id):
     """The feature switch that owns one of this branch's IDs: for a wood set and for a tree's sapling and leaves, its
     wood's WOOD_SWITCHES list (any of which turns it on). Cooking can inherit an explicit switch list; otherwise FEATURE."""
-    if entry_id in HANGING_FRUIT_BLOCKS or entry_id in ("baobab_fruit", "baobab_seeds", "dates") or entry_id in FUNGAL_BLOCKS or entry_id == "dragonblood_resin":
+    if entry_id == "tree_fern_trunk" or entry_id in HANGING_FRUIT_BLOCKS or entry_id in ("baobab_fruit", "baobab_seeds", "dates") or entry_id in FUNGAL_BLOCKS or entry_id == "dragonblood_resin":
         return ["biomes"]
     for wood, switch in WOOD_SWITCHES.items():
         if entry_id in wood_blocks(wood, WOOD_SETS[wood]):
@@ -2973,5 +2985,9 @@ POT_RECIPES.update(herbs.PRESERVE_RECIPES)
 PANTRY["preserves"].update(herbs.PRESERVES)
 
 SHAPELESS += [{"id": "red_dye_from_dragonblood_resin", "inputs": ["jugcraft:dragonblood_resin"], "result": "minecraft:red_dye", "count": 1, "category": "misc", "switch": "biomes"}]
+
+SHAPED += [{"id": "tree_tap", "pattern": [" I ", "P P", " P "], "key": {"I": "minecraft:iron_nugget", "P": "#minecraft:planks"},
+            "result": "jugcraft:tree_tap", "count": 1, "category": "misc", "switch": "agriculture"}]
+SHAPELESS += [{"id": "rubber_log_planks", "inputs": ["jugcraft:rubber_log"], "result": "minecraft:jungle_planks", "count": 4, "category": "building", "switch": ["biomes", "agriculture"]}]
 
 SHAPELESS += [{"id": "baobab_seeds", "inputs": ["jugcraft:baobab_fruit"], "result": "jugcraft:baobab_seeds", "count": 1, "category": "misc", "switch": "biomes"}]

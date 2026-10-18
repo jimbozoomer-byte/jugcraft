@@ -249,7 +249,8 @@
       "io.github.jimbozoomer.jugcraft.test.ConnectedAlchemyGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlchemyPlayabilityGameTests",
       "io.github.jimbozoomer.jugcraft.test.HangingFruitGameTests",
-      "io.github.jimbozoomer.jugcraft.test.TropicalTreeGameTests"
+      "io.github.jimbozoomer.jugcraft.test.TropicalTreeGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RainforestGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.FungalEndTreeClientGameTests",
@@ -445,7 +446,8 @@
       "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CompleteAlchemyClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.HangingFruitClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.TropicalTreeClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.TropicalTreeClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RainforestClientGameTests"
     ]
   },
   "depends": {

@@ -7067,6 +7067,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:laser_sight"
     },
+    "jugcraft:latex_bottle": {
+      "numerator": 2,
+      "denominator": 1,
+      "source": "local natural rubber/container accounting"
+    },
     "jugcraft:lattice_tower": {
       "numerator": 29,
       "denominator": 1,
@@ -10540,12 +10545,27 @@
     "jugcraft:rubber": {
       "numerator": 1,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local natural rubber/container accounting"
+    },
+    "jugcraft:rubber_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:rubber_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
     },
     "jugcraft:rubber_offcut": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:rubber_tree_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:runebound_moonblade": {
       "numerator": 565,
@@ -13186,6 +13206,26 @@
       "numerator": 2381,
       "denominator": 1,
       "source": "recipe jugcraft:tree_farm"
+    },
+    "jugcraft:tree_fern_fronds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:tree_fern_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:tree_fern_trunk": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:tree_tap": {
+      "numerator": 472,
+      "denominator": 9,
+      "source": "recipe jugcraft:tree_tap"
     },
     "jugcraft:trellis": {
       "numerator": 10,

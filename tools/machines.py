@@ -839,6 +839,8 @@ def _sawmill():
     # Electronics (batch 7): a wire saw slices a silicon boule into wafers.
     recipes.append({"input": "jugcraft:silicon_boule", "output": "jugcraft:silicon_wafer", "count": 8, "ticks": 200,
                     "features": [FEATURE, "silicon"]})
+    recipes.append({"input": "jugcraft:rubber_log", "output": "minecraft:jungle_planks", "count": 6, "ticks": 100,
+                    "features": [FEATURE, ["biomes", "agriculture"]], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     return recipes
 
 
@@ -888,14 +890,13 @@ TREES = {"oak": ("oak_sapling", "minecraft:apple"), "spruce": ("spruce_sapling",
 # so it has none), with sticks as their extra.
 def _own_trees():
     from agriculture import TREES, sapling
-    return {tree: (sapling(tree), "minecraft:stick") for tree in TREES}
+    return {tree: (sapling(tree), "minecraft:stick") for tree in TREES if tree != "tree_fern"}
 
 
 def _tree_farm():
-    from agriculture import TREES as own, timber
+    from agriculture import TREES as own, trunk_block
     def log(ns, tree):
-        wood = timber(tree) if ns == "jugcraft" else f"minecraft:{tree}"
-        return f"{wood if ':' in wood else 'jugcraft:' + wood}_log"
+        return trunk_block(tree) if ns == "jugcraft" else f"minecraft:{tree}_log"
     return [{"input": f"{ns}:{sapling}", "output": log(ns, wood), "count": own[wood].get("farm_yield", 6) if ns == "jugcraft" else 6, "ticks": 400,
              "features": [FEATURE], "renewable": True,
              "byproducts": [[f"{ns}:{sapling}", 1, 1.0, None], [extra, 1, 0.1, None]]}
