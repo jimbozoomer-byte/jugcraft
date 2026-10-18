@@ -388,6 +388,10 @@ FLUID_RECIPES = {
          "retained_inputs": [2], "fluid_results": [("jugcraft:sulfuric_acid", 500)], "ticks": 100, "features": ["machines", "sulfur"]},
         {"name": "hydrochloric_copper", "items": [("minecraft:raw_copper", 1)], "fluids": [("jugcraft:hydrochloric_acid", 250)],
          "results": [("jugcraft:washed_copper_ore", 1)], "ticks": 160, "features": ["machines"]},
+        # Cement burnt with its carbon dioxide captured (docs/features/cement-co2-capture.md): the furnace's cement, with
+        # the CO2 the lime gives off kept in a tank instead of lost. The calcite in four cement mix releases 250 mB.
+        {"name": "cement_with_co2_capture", "items": [("jugcraft:cement_mix", 4)], "results": [("jugcraft:cement", 4)],
+         "fluid_results": [("jugcraft:carbon_dioxide", 250)], "source": 250, "ticks": 200, "features": ["machines"]},
         {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
         # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).
