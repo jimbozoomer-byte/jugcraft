@@ -51,6 +51,8 @@ There are no new dependencies. `tools/aged_wood.py` draws the textures from Jugc
 | `reactorAgesPineAndMaple` | For pine and maple, the reactor recipe takes 8 planks and 100 mB of nitric acid and gives 8 aged planks. |
 | `agedPlanksCraftStairsSlabsAndCountAsPlanks` | Aged planks are `#minecraft:planks`; six craft four stairs and three craft six slabs. |
 
+**Results:** the fork's Build workflow passed on commit 62d1a3c5 ([run 39162549690](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39162549690)): compilation, the headless server game tests including `AgedWoodGameTests`, and the rendered-client shards.
+
 **Not run:** the blocks have not been placed in a running game client, and there is no multiplayer playtest.
 
 ## AI attribution
