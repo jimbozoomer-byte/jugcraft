@@ -62,7 +62,7 @@ There are no new dependencies.
 
 ## Verification
 
-**Local checks** (no Gradle or game): `python tools/generate_material_data.py`, `python tools/check_mod_data.py`, `python tools/check_icon_maps.py` and `python scripts/check_repository.py`. The results are below. The icons were inspected at 8× beside steel's and thallite's.
+**Local checks** (no Gradle or game): `python tools/generate_material_data.py`, `python tools/check_mod_data.py`, `python tools/check_icon_maps.py` and `python scripts/check_repository.py` passed. The icons were inspected at 8× beside steel's and thallite's.
 
 **Server game tests for CI** (`TitaniumGearGameTests`):
 
@@ -70,6 +70,8 @@ There are no new dependencies.
 | --- | --- |
 | `titaniumIngotsCraftAnObsidianPickaxe` | Three titanium ingots and two sticks craft a titanium pickaxe, which can mine obsidian. |
 | `titaniumOutlastsSteelAndNotDiamond` | Every titanium tool lasts longer than steel's and less than diamond's. Every armor piece goes in its slot and lasts longer than steel's. |
+
+**Results:** the fork's Build workflow passed on commit 326a49b1 ([run 39104292623](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39104292623)): compilation, the headless server game tests including `TitaniumGearGameTests`, and the rendered-client shards.
 
 **Not yet run:** the worn armor has not been looked at in a running game client, and there is no multiplayer playtest.
 
