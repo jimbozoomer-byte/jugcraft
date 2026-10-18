@@ -3890,6 +3890,10 @@ def check_agriculture():
         if recipe.get("type") != f"{MOD}:pot_cooking" or not recipe.get("fabric:load_conditions"):
             err(f"pot_cooking/{result}: wrong type or missing feature switch condition")
 
+    check_agriculture_recipe_loops()
+
+
+def check_agriculture_recipe_loops():
     # No recipe loop among agriculture items: every conversion leads away from where it started. Unpacking a storage block
     # (tools/agriculture.py UNPACKING: tools/rice.py's and tools/soil.py's) only gives back what packed it, so it is left out.
     edges = {}
@@ -3902,7 +3906,18 @@ def check_agriculture():
         for ref in recipe["inputs"]:
             edge(ref, recipe["result"])
     for recipe in ag.SHAPED:
+        # This paid, one-for-one upgrade keeps the item ID but sets its bucket state.
+        # Match the complete recipe, not just its ID or the presence of components:
+        # a changed cost, output count or state must go through normal loop detection.
+        tap_upgrade = recipe == {
+            "id": "tree_tap_bucket", "pattern": ["TB"],
+            "key": {"T": "jugcraft:tree_tap", "B": "minecraft:bucket"},
+            "result": "jugcraft:tree_tap", "count": 1, "category": "misc", "switch": "agriculture",
+            "components": {"minecraft:block_state": {"upgraded": "true"}},
+        }
         for ref in recipe["key"].values():
+            if tap_upgrade and ref == "jugcraft:tree_tap":
+                continue  # Retain bucket -> tap, so any route back to buckets still forms a cycle.
             edge(ref, recipe["result"])
     for result, info in ag.POT_RECIPES.items():
         for ref in info["inputs"]:

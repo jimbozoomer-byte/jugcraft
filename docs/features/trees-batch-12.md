@@ -1,6 +1,6 @@
 # Tree batch 12: rainforest
 
-Status: implemented on `codex/tree-generation-batch-12`; awaiting owner inspection in [draft PR #420](https://github.com/jimbozoomer-byte/jugcraft/pull/420).
+Status: owner approved the preview and tap refinement; [PR #420](https://github.com/jimbozoomer-byte/jugcraft/pull/420) is ready for review on `codex/tree-generation-batch-12`.
 Requested by the owner on 18 October 2026; actual tool/model: OpenAI Codex (GPT-6).
 Based on the owner-approved Batch 11 branch in PR #418. Batch 13 and later are excluded.
 
@@ -142,7 +142,7 @@ The cleaned runtime copy opened successfully through ordinary `runClient` (the t
 mod absent), and its garden and supplied inventory were observed in the game.
 The world ZIP, matching JAR, complete `.mrpack`, tour, screenshots and checksums are
 provided locally in `tree-batch-12-2026-10-18`. The package reuses and verifies all
-18 pinned dependency entries. Owner visual approval is pending.
+18 pinned dependency entries. The owner approved the visual preview.
 
 External launcher import, a two-account dedicated-server session, live-server load
 and an upgrade of a production save are not claimed.
@@ -205,5 +205,21 @@ The cleaned copy retains all 94 source files and all gameplay NBT; only the same
 three development-metadata files changed, after scanning 7,723 region records.
 The garden supplies buckets and bottle stacks. Basic/partial/full tap samples
 are on the north sides of the rubber trees at z=-1001/-1041/-1081, x=1040.
-Use `/tp @s 1040 180 -1085 0 0` for the full collector. Owner approval of this
-storage refinement is pending; PR #420 stays draft and Batch 13 is excluded.
+Use `/tp @s 1040 180 -1085 0 0` for the full collector. The owner approved this
+storage refinement; PR #420 is ready for review and Batch 13 is excluded.
+
+## Recipe-checker correction (18 October 2026)
+
+The CI material-data check treated the bucket upgrade as a `tree_tap` self-loop
+because both variants share the same item ID. The checker now recognizes only
+the complete one-tap-plus-one-bucket recipe producing one tap with
+`minecraft:block_state.upgraded=true`. Only that recipe's tap-to-tap edge is
+omitted. Its bucket-to-tap dependency remains, so a route back to buckets still
+fails. Other self-loops, multi-recipe cycles, changed output counts, free or
+cheaper upgrades, and unrelated component recipes remain checked.
+
+OpenAI Codex (GPT-6) implemented this checker-only correction. Eight focused
+regression tests passed, including the real agriculture graph and its integration
+into `check_agriculture()`. The five existing Batch 12 Python tests also passed.
+The full data/art audit, Java build and game tests were not rerun for this
+Python-only change. No gameplay resources or preview-world files changed.
