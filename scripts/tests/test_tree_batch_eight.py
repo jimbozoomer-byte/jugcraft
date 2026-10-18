@@ -63,7 +63,7 @@ class DryCountryTests(unittest.TestCase):
         for tree in ('stone_pine','wattle','joshua_tree'):self.assertNotIn(tree,ag.WOOD_SETS)
         self.assertEqual(ag.COOKING['roasted_pine_nuts']['input'],'pine_nuts')
         for item in ('pine_nuts','roasted_pine_nuts'):self.assertIn('jugcraft:squirrel_food',ag.ITEMS[item]['tags'])
-        for name in ('huge_glowcap','blight_fungus','dragonblood'):self.assertNotIn(name,trees.SHAPES)
+        for name in ('date_palm','banyan','mango'):self.assertNotIn(name,trees.SHAPES)
 
     def test_art_is_native_size_with_distinct_fruit_stages_and_leaf_backing(self):
         art=textures()

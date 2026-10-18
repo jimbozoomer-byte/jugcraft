@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 
 /** Bounded face-connected forks: high parasols, low tamarisk sprays, and upturned Joshua arms. */
 public final class DryCountryTrunkPlacer extends TrunkPlacer {
-	private static final Codec<String> SHAPE = Codec.STRING.validate(s -> Set.of("umbrella", "tamarisk", "joshua", "small").contains(s)
+	private static final Codec<String> SHAPE = Codec.STRING.validate(s -> Set.of("umbrella", "tamarisk", "joshua", "small", "dragonblood", "end_shrub").contains(s)
 			? DataResult.success(s) : DataResult.error(() -> "Unknown dry-country trunk shape: " + s));
 	public static final MapCodec<DryCountryTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(i -> trunkPlacerParts(i)
 			.and(SHAPE.fieldOf("shape").forGetter(p -> p.shape)).apply(i, DryCountryTrunkPlacer::new));
@@ -34,9 +34,9 @@ public final class DryCountryTrunkPlacer extends TrunkPlacer {
 	@Override public List<FoliagePlacer.FoliageAttachment> placeTrunk(WorldGenLevel level, BiConsumer<BlockPos, BlockState> setter,
 			RandomSource random, int height, BlockPos origin, TreeFeature tree) {
 		var crowns = new ArrayList<FoliagePlacer.FoliageAttachment>();
-		boolean umbrella = shape.equals("umbrella"), joshua = shape.equals("joshua");
-		placeBelowTrunkBlock(level, setter, random, origin.below(), tree);
-		int trunkHeight = joshua ? 2 : height;
+		boolean umbrella = shape.equals("umbrella"), joshua = shape.equals("joshua") || shape.equals("dragonblood");
+		if (!shape.equals("dragonblood") && !shape.equals("end_shrub")) placeBelowTrunkBlock(level, setter, random, origin.below(), tree);
+		int trunkHeight = shape.equals("dragonblood") ? Math.max(2, height - 3) + 1 : joshua ? 2 : height;
 		BlockPos top = null;
 		for (int y = 0; y < trunkHeight; y++) {
 			BlockPos next = origin.above(y);
@@ -44,12 +44,13 @@ public final class DryCountryTrunkPlacer extends TrunkPlacer {
 			top = next;
 		}
 		if (top == null) return crowns;
+		if (shape.equals("end_shrub")) { crowns.add(new FoliagePlacer.FoliageAttachment(top.above(), 0, false)); return crowns; }
 		if (!joshua) crowns.add(new FoliagePlacer.FoliageAttachment(top.above(), 0, false));
 		Direction first = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		int count = 2 + random.nextInt(2);
 		for (int branch = 0; branch < count; branch++) {
 			Direction side = first; for (int turn = 0; turn < branch; turn++) side = side.getClockWise();
-			int baseY = umbrella ? Math.max(0, height - 3) : 1;
+			int baseY = shape.equals("dragonblood") ? Math.max(2, height - 3) : umbrella ? Math.max(0, height - 3) : 1;
 			if (origin.getY() + baseY > top.getY()) continue;
 			BlockPos end = origin.above(baseY);
 			int length = umbrella || shape.equals("small") ? 1 : branch == 0 ? 2 : 1 + random.nextInt(2);

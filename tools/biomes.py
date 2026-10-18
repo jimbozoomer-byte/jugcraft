@@ -1599,3 +1599,7 @@ def biome_tags(name):
     info = BIOMES[name]
     tags = [t for t in BASE_TAGS[info["base"]] if t not in info.get("untags", [])]
     return tags + [t for t in info.get("tags", []) if t not in tags]
+
+# Tree batches 9/9b extend the established dimension biomes and preserve their other features.
+from fungal_trees_biomes import configure as configure_fungal_trees
+configure_fungal_trees(BIOMES, EXTRAS)

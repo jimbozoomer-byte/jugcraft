@@ -105,6 +105,10 @@ def loot(out, write):
                     {"type": "minecraft:random_chance", "chance": drop[season]}]},
                     "entries": [{"type": "minecraft:item", "name": rid(drop["item"]),
                                  "modifier": [{"type": "minecraft:explosion_decay"}]}]})
+        if tree == "dragonblood":
+            table["pools"].append({"rolls": 1, "condition": {"type": "minecraft:all_of", "terms": [not_shears,
+                {"type": "minecraft:random_chance", "chance": 0.01}, {"type": "minecraft:survives_explosion"}]},
+                "entries": [{"type": "minecraft:item", "name": "jugcraft:dragonblood_resin"}]})
         write(out / f"{leaves}.json", table)
         write(out / f"{sapling(tree)}.json", {"type": "minecraft:block", "pools": [{
             "condition": {"type": "minecraft:survives_explosion"}, "entries": [{"type": "minecraft:item", "name": young}], "rolls": 1}],

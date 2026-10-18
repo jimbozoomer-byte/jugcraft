@@ -78,6 +78,7 @@ WOOD = {
     "olive": (3, "9c9951"),
     "tamarisk": ("2:6", "a06f7e"),
     "yucca": ("2:3", "68654e"),
+    "dragonblood": (12, "689db2"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -100,6 +101,7 @@ EUCALYPTUS_FLECKS = pal("e8a578", "e3a0a0", "9cc0d8", "e6c87a", "f0e0c0")
 
 # Each tree's bark: its colour (dark to light) and its character.
 BARK = {
+    "dragonblood": (pal("2f3237", "444950", "5a6068", "6f7680", "878e96"), "streaked"),
     "tamarisk": (pal("312022", "483032", "5e4043", "745153", "896165"), "furrowed"),
     "yucca": (pal("5f5a42", "7c7556", "98906b", "aca688", "c0bca5"), "stringy"),
     "olive": (pal("474a3b", "616451", "7b7f66", "93987e", "aaad99"), "furrowed"),
@@ -226,7 +228,7 @@ def bark(wood, seed):
         # Rainbow eucalyptus: long streaks of colour where the bark has peeled.
         for _ in range(6):
             x0, y0, length = rng.randrange(16), rng.randrange(16), rng.randint(4, 9)
-            col = rng.choice(EUCALYPTUS_STREAKS)
+            col = rng.choice(pal("462a2a", "583232", "683a36") if wood == "dragonblood" else EUCALYPTUS_STREAKS)
             for i in range(length):
                 c.px(x0, (y0 + i) % 16, col)
                 if i % 3 == 1:
@@ -557,6 +559,8 @@ def wood_textures():
     out.update(olive_textures())
     from dry_country_textures import textures as dry_country_textures
     out.update(dry_country_textures())
+    from fungal_trees_textures import textures as fungal_textures
+    out.update(fungal_textures())
     out["block", "olive_planks"] = figure(out["block", "olive_planks"])
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)

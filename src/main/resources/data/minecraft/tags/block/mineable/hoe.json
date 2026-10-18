@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "jugcraft:gas_curtain",
+    "jugcraft:blight_wart_block",
+    "jugcraft:bramble_bush_leaves",
     "jugcraft:corn_shock",
     "jugcraft:harvest_effigy",
     "jugcraft:mourning_wreath",

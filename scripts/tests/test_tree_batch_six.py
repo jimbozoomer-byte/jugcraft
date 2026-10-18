@@ -89,7 +89,7 @@ class TreeBatchSixTests(unittest.TestCase):
         self.assertEqual(recipes["mulling_spices_from_juniper"]["count"],2)
 
     def test_later_batches_are_not_added_and_juniper_supports_alpine(self):
-        for name in ("huge_glowcap", "blight_fungus", "dragonblood"):
+        for name in ("baobab", "date_palm", "banyan"):
             self.assertNotIn(name,trees.SHAPES)
             self.assertNotIn(name,ag.TREES)
         self.assertEqual(ag.WOOD_SWITCHES["juniper"],["biomes", "alpine_spawn"])

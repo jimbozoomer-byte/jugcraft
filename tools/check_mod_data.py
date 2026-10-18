@@ -3687,6 +3687,10 @@ def check_agriculture():
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("plain", None, None, compost.lower(), None)
+    # Plain noncompostable ingredients (for example dragonblood resin) must still match the data exactly.
+    for name in re.findall(r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, None, None)
     # Decorative ingredients can use a different creative tab while retaining the same plain-item properties.
     for name, compost in re.findall(
             r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.compostable\(COMPOST_(\w+)\), \w+_TAB\)', main):

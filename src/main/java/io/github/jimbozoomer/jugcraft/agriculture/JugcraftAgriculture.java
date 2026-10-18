@@ -180,6 +180,7 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower SAGEBRUSH_GROWER = grower("sagebrush");
 	public static final TreeGrower STONE_PINE_GROWER = weightedGrower("stone_pine", "umbrella_pine", "pinyon", 1, 1, 1);
 	public static final TreeGrower WATTLE_GROWER = weightedGrower("wattle", "wattle_bush", 3, 7);
+	public static final TreeGrower DRAGONBLOOD_GROWER = grower("dragonblood");
 	public static final TreeGrower TAMARISK_GROWER = grower("tamarisk");
 	public static final TreeGrower JOSHUA_TREE_GROWER = grower("joshua_tree");
 	public static final TreeGrower OLIVE_GROWER = grower("olive");
@@ -533,6 +534,8 @@ public final class JugcraftAgriculture {
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
 		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("olive_trunk_placer"), OliveTrunkPlacer.TYPE);
 		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("dry_country_trunk_placer"), DryCountryTrunkPlacer.TYPE);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("fungal_growth"), FungalGrowthFeature.CODEC);
+		Registry.register(BuiltInRegistries.PLACEMENT_MODIFIER_TYPE, Jugcraft.id("cave_fungal_floor"), CaveFungalFloorPlacement.CODEC);
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("fruiting_shrub"), FruitingShrubDecorator.TYPE);
 		registerTree("larch", "larch_needles", LARCH_GROWER, LARCH_LEAVES, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES,
 				MapColor.TERRACOTTA_RED, MapColor.TERRACOTTA_ORANGE);
@@ -582,6 +585,16 @@ public final class JugcraftAgriculture {
 		registerFoliage("stone_pine", "stone_pine_needles", STONE_PINE_GROWER, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES, StonePineLeavesBlock::new);
 		registerFoliage("wattle", "wattle_leaves", WATTLE_GROWER, Blocks.ACACIA_SAPLING, Blocks.ACACIA_LEAVES,
 				props -> new TintedParticleLeavesBlock(0.01F, props));
+        registerTree("dragonblood", "dragonblood_fronds", DRAGONBLOOD_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+                MapColor.COLOR_LIGHT_GRAY, MapColor.COLOR_LIGHT_BLUE);
+        registerItem("dragonblood_resin", Item::new, new Item.Properties(), INGREDIENT_TAB);
+        for (String id : java.util.List.of("glowcap_block", "blight_wart_block", "bramble_bush_leaves")) {
+            Block fungus = registerBlock(id, id.equals("glowcap_block") ? net.minecraft.world.level.block.HugeMushroomBlock::new
+                    : id.equals("bramble_bush_leaves") ? props -> new TintedParticleLeavesBlock(0.0F, props) : Block::new,
+                    BlockBehaviour.Properties.ofFullCopy(id.equals("bramble_bush_leaves") ? Blocks.OAK_LEAVES : Blocks.NETHER_WART_BLOCK)
+                            .lightLevel(state -> id.equals("glowcap_block") ? 8 : 0));
+            registerItem(id, props -> new BlockItem(fungus, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+        }
 		registerTree("tamarisk", "tamarisk_leaves", TAMARISK_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
 				MapColor.TERRACOTTA_BROWN, MapColor.TERRACOTTA_PINK);
 		registerFoliage("joshua_tree", "joshua_tree_fronds", JOSHUA_TREE_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
@@ -2843,7 +2856,8 @@ public final class JugcraftAgriculture {
 				}
 				case "floor_plant" -> {
 					int light = plant.has("light") ? plant.get("light").getAsInt() : 0;
-					Block glow = registerBlock(id, FloorPlantBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
+					String growth = switch (id) { case "glowcap" -> "glowcap_dome"; case "blight_fungus" -> "blight"; case "bramble" -> "bramble"; default -> null; };
+					Block glow = registerBlock(id, growth == null ? FloorPlantBlock::new : props -> new GrowingFloorPlantBlock(props, growth), BlockBehaviour.Properties.ofFullCopy(Blocks.BROWN_MUSHROOM)
 							.lightLevel(state -> light));
 					registerItem(id, props -> new BlockItem(glow, props), new Item.Properties().useBlockDescriptionPrefix()
 							.compostable(COMPOST_MEDIUM), SEEDS_TAB);
@@ -2896,7 +2910,7 @@ public final class JugcraftAgriculture {
 				}
 				default -> throw new IllegalStateException("Unknown wild plant kind in /jugcraft/plants.json: " + plant);
 			};
-			if (!(block instanceof WaterPlantBlock) && !(block instanceof FloatingPlantBlock)) {
+			if (!(block instanceof WaterPlantBlock) && !(block instanceof FloatingPlantBlock) && !id.equals("bramble") && !id.equals("blight_fungus")) {
 				fire.add(block, 60, 100);
 			}
 			// Scattered in vanilla's biomes too ("patch": conventional biome tags; placed feature patch_<id>).
@@ -2966,7 +2980,7 @@ public final class JugcraftAgriculture {
 	private static void registerFoliage(String tree, String leavesId, TreeGrower grower, Block saplingLike, Block leavesLike,
 			Function<BlockBehaviour.Properties, Block> leavesFactory) {
 		TreeGrower giant = GIANT_GROWERS.get(tree);
-		Block sapling = registerBlock(tree + "_sapling", giant == null ? props -> new SaplingBlock(grower, props) {
+		Block sapling = registerBlock(tree + "_sapling", tree.equals("dragonblood") ? props -> new EndTreeSaplingBlock(grower, props) : giant == null ? props -> new SaplingBlock(grower, props) {
 			@Override protected boolean mayPlaceOn(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
 				return super.mayPlaceOn(state, level, pos) || java.util.Set.of("juniper", "stone_pine", "tamarisk", "joshua_tree").contains(tree) && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
 			}

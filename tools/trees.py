@@ -14,6 +14,12 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 DECORATOR = "seasonal_leaves"
 
 SHAPES = {
+    "dragonblood": {"wood": "dragonblood", "sapling": True,
+                    "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "dragonblood", "base_height": 5, "height_rand_a": 2},
+                    "foliage": {"type": "acacia", "radius": 2, "offset": 0}},
+    "dragonblood_shrub": {"wood": "dragonblood",
+                          "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "end_shrub", "base_height": 1, "height_rand_a": 0},
+                          "foliage": {"type": "bush", "radius": 2, "offset": 0, "height": 1}},
     "umbrella_pine": {"wood": "pine", "tree": "stone_pine",
                       "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "umbrella", "base_height": 8, "height_rand_a": 2},
                       "foliage": {"type": "acacia", "radius": 3, "offset": 0}},

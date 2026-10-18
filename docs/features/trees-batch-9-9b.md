@@ -1,6 +1,6 @@
 # Tree batches 9 and 9b: giant fungi and dragonblood
 
-Status: in progress, owner-authorized 17 October 2026. Public branch: `codex/tree-generation-batch-9-9b` in `speedygroyper/jugcraft`. Based on approved PR #411 (`964c2e775`), which remains a dependency until integrated. Actual tool/model: OpenAI Codex (GPT-6). No batch 10 or later work is included.
+Status: in progress, owner-authorized 17 October 2026. Public branch: `codex/tree-generation-batch-9-9b` in `speedygroyper/jugcraft`; [draft PR #413](https://github.com/jimbozoomer-byte/jugcraft/pull/413). Based on approved PR #411 (`964c2e775`), which remains a dependency until integrated. Actual tool/model: OpenAI Codex (GPT-6). No batch 10 or later work is included.
 
 ## Authorized scope
 
@@ -11,3 +11,24 @@ Batch 9b adds dragonblood timber, dark teal fronds, renewable End saplings, umbr
 ## Integration and verification contract
 
 Discovery-tier building and optional renewable materials, with no new dependency or core progression gate. Extend existing wood crafting, stripping, sawmill, tree-farm, loot and feature switches. Existing chunks and registrations remain intact. Marrow fungi cannot be grown from bone meal. Test substrate/space restrictions, seed variation, leaf connectivity, renewal, drops and compost economics, generation in all three dimensions, save/reopen, and optional integrations absent. Deliver a normal inspection world with a gallery and untouched natural stops. Results and provenance will be recorded here after implementation; no tests or gameplay are claimed yet.
+
+## Implementation
+
+The fungal feature first prepares a bounded, face-connected placement plan and rejects solid, fluid, tree-leaf or sapling obstacles before writing blocks. This deliberately replaces vanilla huge-fungus height doubling and obstacle-overwrite behavior: glowcaps are 6–10 blocks tall, blight/marrow 4–13, and brambles 2–3. Domed and parasol glowcaps have 5–7-block caps; brambles are five blocks wide. Vanilla mushroom stems, dead logs, bone blocks and crimson stems remain their existing materials. Marrow has no planting item or bone-meal entry point. Bramble leaves are nonflammable, decay when unsupported, and use no extra sapling or timber type. Fungi may replace small ground-cover plants, including the brambles laid down by Netherbrush’s earlier ground pass; treating those as solid obstacles prevented most natural bushes. This does not permit replacing fluids, saplings, tree leaves or solid blocks.
+
+Dragonblood extends the existing connected fork placer and native acacia/bush foliage. The raised fork keeps a clear 3–5-block trunk beneath its umbrella; trees measure 6–8 blocks high and 7–9 wide across the test seeds, while shrubs are two high and five wide. It preserves the end stone/moss floor. The sapling uses the standard two-stage growth and bone-meal path but removes the Overworld skylight threshold. One nine-block wood set shares hand crafting, axe stripping, charcoal, sawmill and tree-farm processing. Fronds drop regular saplings and rare resin (1% without Silk Touch/shears), with a one-resin-to-one-red-dye recipe. This is optional discovery-tier building/dye content; core progression needs none of it. Existing content registrations survive feature switches; generation and recipes follow `biomes`.
+
+Counts are placement attempts, not guaranteed trees. Existing ground, vanilla fungi, bone spires and dead-tree features remain. Ender Wilds keeps its two-to-three attempt budget. Mycelial Jungle retains its existing red/brown mushroom and mahogany probabilities, taking seven percentage points from bushes. Sparse Outer Flats placement explicitly requires end stone. Grotto giants run after mud/moss floor preparation. A bounded placement modifier samples at most eight local columns per attempt and chooses an actual moist cave floor with six blocks of headroom, followed by the native downward floor scan. It excludes the surface and low ceilings. The first real-world run exposed why uniform random-height scans were inadequate: 46 sampled grotto chunks had suitable floors but no giants. The new floor selector preserves the two-to-four attempt budget; larger crowns still require full clearance.
+
+### Renewal and compost balance
+
+The earlier planning estimate of 45 cap blocks omitted the largest dome and collectible mushroom stems. The upper bound here is **109 cap blocks plus nine stems**. Each cap has a 3% chance of dropping one glowcap; cap items have no compost component. Plant growth succeeds on 25% of eligible bone-meal uses (four bone meal per successful growth on average). Even conservatively charging every stem as one full compost layer, plus a free first composter layer, the output bound is `(109 × .03 × .65 + 9 + 1) / 7 = 1.733` bone meal, below four spent, before deducting the planted glowcap. Neither Fortune nor shears multiplies cap seed drops. Blight wart drops a fungus at 5%; bramble leaves drop brambles at 6% and sticks at 10%, with no compostable cap/leaf item. Their returns are smaller. Failed clearance consumes no seed and leaves the world unchanged; normal bone-meal item consumption still applies.
+
+### Assets and provenance
+
+- `art/owner-library/originals/Blocks/biomes and tree blocks/bramble_leaves.png` is imported byte-for-byte through `tools/owner_art.py` as `bramble_bush_leaves.png`. The shared leaf-colour registry applies dark red `#9b545e`; source pixels remain untouched.
+- Dragonblood uses owner painting 12's `#689db2` wood through the established `tools/wood_style.py` procedural source. Silver-grey bark and dark resin streaks are distinct from eucalyptus's rainbow streaks; existing wood seeds and approved yucca/pine assets are preserved.
+- New cap, pore, small-blight, frond, sapling and resin sprites are authored in the existing editable 16px Python/Canvas pipeline in `tools/fungal_trees_textures.py`. They add no rendering dependency. Ordinary blocks use native block models; glowcaps use six mushroom face states; bramble tint reuses the pine mechanism.
+- No owner-library executable was run. No copied Minecraft texture is bundled.
+
+The inspection export and final test evidence are pending below; implementation does not claim human approval or launcher import.

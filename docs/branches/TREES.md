@@ -2184,3 +2184,7 @@ computed by script from `tools/wood_style.py`, and current shares from `tools/bi
 ## Batches 8, 8b and 8c implementation, 17 October 2026
 
 Owner-authorized together on `codex/tree-generation-batch-8abc`, [draft PR #411](https://github.com/jimbozoomer-byte/jugcraft/pull/411). [Scope and verification](../features/trees-batch-8abc.md). Based on the owner-approved batches 6, 6b and 7, still separate PR dependencies. Batch 8 retains Eucalyptus Forest's existing 20% understory share as wattle, and keeps Mediterranean citrus at 5% each with cypress 35%, olive 25%, olive bush 15% and umbrella pine 15%. Dry River reserves 60% empty for future date palms. Tamarisk uses connected foliage sprays; Joshua arms are face-connected. No batch 9 work is included. Actual implementation tool/model: OpenAI Codex (GPT-6).
+
+### Batches 9 and 9b implementation (17 October 2026)
+
+Owner-authorized together on `codex/tree-generation-batch-9-9b`, [draft PR #413](https://github.com/jimbozoomer-byte/jugcraft/pull/413). See the [scope, balance, provenance and verification record](../features/trees-batch-9-9b.md). Adds bounded giant fungi, renewable Nether brambles and the dragonblood wood/tree set while preserving the existing biome attempt budgets. Based on approved PR #411; earlier open tree PRs remain dependencies. No batch 10 or later work is included. Actual tool/model: OpenAI Codex (GPT-6).
