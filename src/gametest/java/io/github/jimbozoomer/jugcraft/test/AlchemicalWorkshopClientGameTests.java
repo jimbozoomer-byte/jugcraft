@@ -64,7 +64,7 @@ public class AlchemicalWorkshopClientGameTests implements FabricClientGameTest {
             server.runOnServer(s->{
                 var p=s.getPlayerList().getPlayers().getFirst();p.getInventory().clearContent();p.getInventory().setSelectedSlot(0);
                 ConcordanceProgress.grant(p,"jugcraft:first_light",ResearchState.UNDERSTOOD);ConcordanceProgress.grant(p,Assaying.RESEARCH,ResearchState.UNDERSTOOD);
-                p.getInventory().clearContent();Assaying.setBalance(p,200000);
+                p.getInventory().clearContent();Assaying.setBalance(p,2000000);
                 for(int i=1;i<=3;i++){
                     var col=place(p,base.offset(-12+4*i,0,-4),"collector_mk"+i);
                     col.setItem(0,new ItemStack(KleinStars.ITEMS.get("klein_star_"+(i+1))));
@@ -95,11 +95,15 @@ public class AlchemicalWorkshopClientGameTests implements FabricClientGameTest {
             c.getInput().pressMouse(InputConstants.MOUSE_BUTTON_RIGHT);c.waitForScreen(AlchemicalWorkshopScreen.class);c.waitTicks(8);
             c.clickScreenButton("screen.jugcraft.workshop.pause");c.waitTicks(6);
             server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(!be(p,base.offset(4,0,-4)).paused())throw new AssertionError("Real pause button");});
+            long conserved=server.computeOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();return Assaying.balance(p)+be(p,base.offset(4,0,-4)).essence();});
             c.clickScreenButton("screen.jugcraft.workshop.deposit");c.waitTicks(6);
-            server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(be(p,base.offset(4,0,-4)).essence()!=65536)throw new AssertionError("Deposit fills actual capacity");});
+            server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();var condenser=be(p,base.offset(4,0,-4));
+                if(condenser.essence()!=condenser.capacity())throw new AssertionError("Deposit fills actual capacity");
+                if(Assaying.balance(p)+condenser.essence()!=conserved)throw new AssertionError("Deposit must debit exactly the essence moved into the condenser");});
             c.runOnClient(mc->mc.gui.toastManager().clear());c.takeScreenshot("essence_condenser_interface");
             c.clickScreenButton("screen.jugcraft.workshop.withdraw");c.waitTicks(5);
-            server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(be(p,base.offset(4,0,-4)).essence()!=0)throw new AssertionError("Take empties buffer");});
+            server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(be(p,base.offset(4,0,-4)).essence()!=0)throw new AssertionError("Take empties buffer");
+                if(Assaying.balance(p)!=conserved)throw new AssertionError("Withdrawal must return all deposited essence exactly once");});
             c.clickScreenButton("screen.jugcraft.workshop.deposit");c.waitTicks(5);c.clickScreenButton("screen.jugcraft.workshop.resume");c.waitTicks(25);
             int scale=c.computeOnClient(mc->mc.options.guiScale().get());
             c.runOnClient(mc->{mc.options.guiScale().set(1);mc.resizeGui();});c.waitTicks(5);c.takeScreenshot("condenser_scale1");
