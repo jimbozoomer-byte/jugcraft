@@ -495,7 +495,7 @@ def recipes(out, write):
     for result, info in COOKING.items():
         for kind, time in COOK_TIMES.items():
             name = result if kind == "smelting" else f"{result}_from_{kind}"
-            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}",
+            write(out / f"{name}.json", {"fabric:load_conditions": conditions(switch=info.get("switch", FEATURE)), "type": f"minecraft:{kind}",
                                          "category": info.get("category", "food"),
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})

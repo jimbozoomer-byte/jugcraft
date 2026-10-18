@@ -73,6 +73,11 @@ WOOD = {
     "magnolia": ("2:1", "807d55"),
     "fruitwood": (7, "ab7d76"),
     "persimmon": (18, "3d3733"),
+    "juniper": (20, "8b4654"),
+    "holly": (10, "b6baa1"),
+    "olive": (3, "9c9951"),
+    "tamarisk": ("2:6", "a06f7e"),
+    "yucca": ("2:3", "68654e"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -95,6 +100,11 @@ EUCALYPTUS_FLECKS = pal("e8a578", "e3a0a0", "9cc0d8", "e6c87a", "f0e0c0")
 
 # Each tree's bark: its colour (dark to light) and its character.
 BARK = {
+    "tamarisk": (pal("312022", "483032", "5e4043", "745153", "896165"), "furrowed"),
+    "yucca": (pal("5f5a42", "7c7556", "98906b", "aca688", "c0bca5"), "stringy"),
+    "olive": (pal("474a3b", "616451", "7b7f66", "93987e", "aaad99"), "furrowed"),
+    "holly": (pal("5e655a", "717a6c", "858e7f", "99a094", "acb2a9"), "plated"),
+    "juniper": (pal("372625", "4c3533", "624341", "7a5452", "936562"), "stringy"),
     "persimmon": (pal("141416", "1b1c1f", "232528", "2c2e32", "36383c"), "plated"),
     "yew": (OWNER_BANK["yew"][2], OWNER_BANK["yew"][3]),
     "chestnut": (pal("3a3226", "4c4232", "5e5341", "706552", "857a66"), "furrowed"),
@@ -179,6 +189,8 @@ def bark_of(wood):
 
 def bark(wood, seed):
     """A log's side: vertical furrows in the bark's darkest tones, ridges between, tiling top to bottom."""
+    if wood == "yucca":
+        return yucca_bark(seed)
     p, kind = bark_of(wood)
     rng = random.Random(seed)
     c = Canvas()
@@ -226,6 +238,36 @@ def bark(wood, seed):
             c.px(x, y, p[4])
             if rng.random() < 0.5:
                 c.px(x, (y + 1) % 16, p[4 if kind == "stringy" else 3])
+    return c.img
+
+
+def yucca_bark(seed):
+    """Short, overlapping dry fibers with shaded creases and raised pale edges."""
+    p = pal("4d4938", "6d674e", "898267", "a39c7d", "b4ae92", "c8c3ac")
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, p[3])
+    # Stagger the fiber ends and wrap each plate across the texture boundary.
+    # Narrow stepped creases give depth without unbroken dark vertical stripes.
+    for x0, width in ((0, 3), (3, 3), (6, 4), (10, 3), (13, 3)):
+        y0 = rng.randrange(16)
+        lengths = rng.choice(((5, 4, 7), (6, 6, 4), (4, 7, 5)))
+        for length in lengths:
+            tone = rng.choice((2, 3, 3, 4))
+            step = rng.choice((1, length - 2, length - 1))
+            for dy in range(length):
+                y = (y0 + dy) % 16
+                for dx in range(width):
+                    c.px(x0 + dx, y, p[tone])
+                crease = x0 + (1 if dy >= step else 0)
+                c.px(crease, y, p[1 if dy in (0, length - 1) else 0])
+                if crease + 1 < x0 + width:
+                    c.px(crease + 1, y, p[2 if dy >= length - 2 else 4])
+                if 1 <= dy < length - 2:
+                    c.px(x0 + width - 1, y, p[5 if tone >= 3 else 3])
+            y0 += length
     return c.img
 
 
@@ -507,6 +549,15 @@ def wood_textures():
     out.update(seasonal_fruit_textures())
     from hawthorn_persimmon_textures import textures as hawthorn_persimmon_textures
     out.update(hawthorn_persimmon_textures())
+    from evergreen_scrub_textures import textures as evergreen_scrub_textures
+    out.update(evergreen_scrub_textures())
+    from holly_textures import textures as holly_textures
+    out.update(holly_textures())
+    from olive_textures import textures as olive_textures, figure
+    out.update(olive_textures())
+    from dry_country_textures import textures as dry_country_textures
+    out.update(dry_country_textures())
+    out["block", "olive_planks"] = figure(out["block", "olive_planks"])
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)
     out[("block", "chestnut_leaves_ripe")] = chestnut_fruit(chestnut, 2)
