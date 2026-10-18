@@ -558,6 +558,9 @@ FLUID_RECIPES["catalytic_cracker"] += _rocketry.CRACKER_RECIPES
 FLUID_MACHINES["cryogenic_liquefier"] = _rocketry.LIQUEFIER
 FLUID_RECIPES["cryogenic_liquefier"] = _rocketry.LIQUEFIER_RECIPES
 FLUID_RECIPES["chemical_reactor"] += _rocketry.TANK_RECIPES
+import aged_wood as _aged_wood  # noqa: E402
+# Aged pine and maple planks (docs/features/aged-wood.md): planks treated with nitric acid.
+FLUID_RECIPES["chemical_reactor"] += _aged_wood.reactor_recipes()
 
 # Crops that ferment into bioethanol (data/jugcraft/tags/item/fermentable.json).
 FERMENTABLE = ["minecraft:wheat", "minecraft:sugar_cane", "minecraft:potato", "minecraft:carrot", "minecraft:beetroot",

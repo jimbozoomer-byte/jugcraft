@@ -7486,6 +7486,52 @@
           ],
           "ticks": 60,
           "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pine_planks",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:nitric_acid",
+              100
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aged_pine_planks",
+              8
+            ]
+          ],
+          "ticks": 100,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:maple_planks",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:nitric_acid",
+              100
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aged_maple_planks",
+              8
+            ]
+          ],
+          "ticks": 100,
+          "retained_inputs": []
         }
       ]
     },
