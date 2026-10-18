@@ -42,6 +42,8 @@ The list is ordered most-defeated first. It shows up to 24 creatures, then one l
 - a newcomer has no field notes;
 - after three defeats of a Jugcraft creature and one defeat by it, the bestiary counts exactly that, and the Expeditions page shows its heading, its name and the tally.
 
+**Results:** the fork's Build workflow passed on commit ce00dcd4 ([run 39165204518](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39165204518)), including `theBestiaryListsOnlyCreaturesFought`. One client shard first failed when the Modonomicon library's book-sync packet disconnected the test client in `EncyclopediaRoutesClientGameTests` (unrelated to this change); its single re-run passed.
+
 **Not run:** reading the page in a running game client.
 
 ## AI attribution
