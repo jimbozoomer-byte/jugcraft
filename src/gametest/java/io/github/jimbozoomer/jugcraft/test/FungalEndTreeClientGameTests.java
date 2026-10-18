@@ -69,6 +69,25 @@ public class FungalEndTreeClientGameTests extends TreeBatchTwoClientGameTests {
         });
         for(String item:List.of("minecraft:bone_meal 64","minecraft:iron_axe","minecraft:shears","jugcraft:glowcap 16","jugcraft:blight_fungus 16","jugcraft:bramble 16","jugcraft:dragonblood_sapling 16"))server.runCommand("give @a "+item);
         tour.add("Growth demonstration plots: /execute in minecraft:overworld run tp @s 1000 180 -905 180 0. Walk east for blight, bramble and dragonblood. The glowcap plot has a roof for low light.");
+        // Native leaves schedule distance updates after TreeFeature returns. Compare the stable
+        // saved state, but first prove settling changed only that derived support-distance property.
+        context.waitTicks(20);
+        server.runOnServer(mc->saved.replaceAll((at,before)->{
+            var after=FungalEndTreeGameTests.snapshot(mc.overworld(),at);
+            check(before.keySet().equals(after.keySet()),"Gallery blocks changed while settling: "+at);
+            int changed=0;
+            for(var entry:before.entrySet()){
+                var old=entry.getValue();var now=after.get(entry.getKey());
+                if(!old.equals(now))changed++;
+                if(old.hasProperty(LeavesBlock.DISTANCE)&&now.hasProperty(LeavesBlock.DISTANCE)){
+                    check(now.getValue(LeavesBlock.DISTANCE)<7,"Unsupported settled leaves: "+at);
+                    old=old.setValue(LeavesBlock.DISTANCE,1);now=now.setValue(LeavesBlock.DISTANCE,1);
+                }
+                check(old.equals(now),"Unexpected settling change at "+at+" / "+entry.getKey()+": "+old+" -> "+now);
+            }
+            if(changed>0)Jugcraft.LOGGER.info("[fungal End settling] {}: {} native leaf-distance updates; every block and other property preserved",at,changed);
+            return after;
+        }));
         for(String name:List.of("toadstool_field","mycelial_jungle","glowcap_grotto","fungal_thicket","blighted_sands","withered_hollow","marrow_heap","netherbrush","ender_wilds","outer_flats","rotted_expanse")){
             ResourceKey<Level> dimension=List.of("fungal_thicket","blighted_sands","withered_hollow","marrow_heap","netherbrush").contains(name)?Level.NETHER:
                 List.of("ender_wilds","outer_flats","rotted_expanse").contains(name)?Level.END:Level.OVERWORLD;
