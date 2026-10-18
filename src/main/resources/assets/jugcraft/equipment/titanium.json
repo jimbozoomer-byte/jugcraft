@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "jugcraft:titanium"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "jugcraft:titanium"
+      }
+    ]
+  }
+}

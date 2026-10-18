@@ -22,6 +22,11 @@ GEAR_TIERS = {
     "thallite": {"display": "Thallite", "ingot": "#c:ingots/thallite", "feature": "thallite",
                  "tool": (200, 6.0, 2.0, 18), "drops": "iron",
                  "armor": (13, (2, 5, 6, 2), 18, 0.0, 0.0), "arms": False},
+    # Titanium (docs/features/titanium-gear.md): the step above steel, below diamond's speed and netherite's everything.
+    # Kroll-process ingots only, so it comes after the chemistry that makes them. "arms": False as for thallite.
+    "titanium": {"display": "Titanium", "ingot": "#c:ingots/titanium", "feature": "titanium",
+                 "tool": (1250, 7.5, 3.0, 14), "drops": "diamond",
+                 "armor": (30, (3, 6, 8, 3), 14, 2.0, 0.05), "arms": False},
 }
 TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 ARMOR = ["helmet", "chestplate", "leggings", "boots"]

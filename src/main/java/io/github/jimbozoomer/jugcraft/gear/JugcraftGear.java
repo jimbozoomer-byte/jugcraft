@@ -47,13 +47,14 @@ import net.minecraft.world.level.block.Block;
  * template ({@link #STYLE_TEMPLATES}) turns a plain piece into a styled one and back (data-driven recipes).
  * <p>Thallite (docs/features/thallite.md) is the third metal with a full set, and Earthbound thallite a style of its
  * armor, one-way and with a perk; their traits, Regrowth and Rooted, are {@link ThalliteGear}.
+ * <p>Titanium (docs/features/titanium-gear.md) is the fourth, the step above steel.
  * <p>Armor-only tiers ({@link #ARMOR_TIERS}; docs/features/bloodthorn-armor.md) are the owner's own armor designs, each
  * a new tier with numbers of its own, worn as a 3D model (client/WornModelLayer) with no flat layer. They have no recipe
  * or drop yet, so for now they come only from the creative tab.
  */
 public final class JugcraftGear {
 	/** Metals with a full set of tools and armor (tools/gear.py: GEAR_TIERS). */
-	public static final List<String> TIERS = List.of("bronze", "steel", "thallite");
+	public static final List<String> TIERS = List.of("bronze", "steel", "thallite", "titanium");
 	public static final List<String> PIECES = List.of("sword", "pickaxe", "axe", "shovel", "hoe", "helmet", "chestplate",
 			"leggings", "boots");
 	/** Paxel tiers (tools/gear.py: PAXEL_TIERS). */
@@ -82,6 +83,12 @@ public final class JugcraftGear {
 	/** Thallite armor: iron's defense, a little less durable, and the best enchantability. */
 	public static final ArmorMaterial THALLITE_ARMOR = new ArmorMaterial(13, defense(2, 5, 6, 2), 18,
 			SoundEvents.ARMOR_EQUIP_IRON, 0.0F, 0.0F, repairs("thallite"), asset("thallite"));
+	/** Titanium: diamond-tier drops, the step above steel; more uses than steel, still short of diamond's. */
+	public static final ToolMaterial TITANIUM = new ToolMaterial(BlockTags.INCORRECT_FOR_DIAMOND_TOOL, 1250, 7.5F, 3.0F, 14,
+			repairs("titanium"));
+	/** Titanium armor: diamond's defense, a little less durable, with steel's knockback resistance. */
+	public static final ArmorMaterial TITANIUM_ARMOR = new ArmorMaterial(30, defense(3, 6, 8, 3), 14,
+			SoundEvents.ARMOR_EQUIP_IRON, 2.0F, 0.05F, repairs("titanium"), asset("titanium"));
 	/** Styled armor (tools/gear.py: ARMOR_STYLES): a metal's armor in every number, in another look. */
 	public static final List<String> ARMOR_STYLES = List.of("steampunk", "kaiser", "earthbound_thallite");
 	/** Their smithing templates (tools/gear.py: style_templates()). */
@@ -197,6 +204,7 @@ public final class JugcraftGear {
 		set("bronze", BRONZE, BRONZE_ARMOR, 6.0F, -3.1F, -2.0F, -1.0F, Item::new);
 		set("steel", STEEL, STEEL_ARMOR, 5.5F, -3.0F, -2.5F, 0.0F, Item::new);
 		set("thallite", THALLITE, THALLITE_ARMOR, 6.0F, -3.1F, -2.0F, -1.0F, properties -> new ThalliteGearItem(properties, false));
+		set("titanium", TITANIUM, TITANIUM_ARMOR, 5.0F, -3.0F, -3.0F, 0.0F, Item::new);
 		styled("steampunk", STEAMPUNK_ARMOR, DescribedItem::new);
 		styled("kaiser", KAISER_ARMOR, DescribedItem::new);
 		styled("earthbound_thallite", EARTHBOUND_THALLITE_ARMOR, properties -> new ThalliteGearItem(properties, true));
