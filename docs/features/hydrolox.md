@@ -1,6 +1,6 @@
 # Hydrogen/LOX rocket fuel
 
-Status: implemented on the contributor's fork, pending review. Built on [methane/LOX](methalox.md); merge that first.
+Status: implemented on the contributor's fork, pending review. Delivered together with [methane/LOX](methalox.md) in one change.
 
 Proposal issue: none. TODO item: "Connect existing RP-1/LOX and requested methane/LOX, LH2/LOX and hydrazine/MMH/N2O4 families … oxygen cooling -> methane -> more advanced hydrogen capability …" This change delivers the LH2/LOX step. Hydrazine stays open.
 
