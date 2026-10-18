@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.phys.*;
 
 public class ConnectedAlchemyGameTests {
-    private static ServerPlayer player(GameTestHelper h){var profile=new com.mojang.authlib.GameProfile(UUID.randomUUID(),"alchemy-connect");
+    static ServerPlayer player(GameTestHelper h){var profile=new com.mojang.authlib.GameProfile(UUID.randomUUID(),"alchemy-connect");
         var p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),profile,net.minecraft.server.level.ClientInformation.createDefault());
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);new io.netty.channel.embedded.EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));p.setGameMode(GameType.SURVIVAL);
@@ -36,9 +36,9 @@ public class ConnectedAlchemyGameTests {
     private static boolean press(AlchemyPatternMenu m,ServerPlayer p,int id){RateGate.forget(p.getUUID());return m.clickMenuButton(p,id);}
     private static AlchemyMachinesBlockEntity pedestal(GameTestHelper h,ServerPlayer p,String artifact){var pos=new BlockPos(2,3,2);h.setBlock(pos,AlchemyMachines.BLOCKS.get("dark_matter_pedestal"));var be=h.getBlockEntity(pos,AlchemyMachinesBlockEntity.class);be.placedBy(p);be.setEssence(1000);be.setItem(1,item(artifact));return be;}
     private static AlchemicalWorkshopBlockEntity collector(GameTestHelper h,ServerPlayer p){var pos=new BlockPos(2,3,2);h.setBlock(pos,AlchemicalWorkshops.BLOCKS.get("collector_mk3"));h.setBlock(pos.above(),Blocks.STONE);var be=h.getBlockEntity(pos,AlchemicalWorkshopBlockEntity.class);be.placedBy(p);return be;}
-    @GameTest(maxTicks=20)public void patternsLearnRetainAndFormWithoutSample(GameTestHelper h){
-        var p=player(h);var m=new AlchemyPatternMenu(1,p.getInventory(),()->true,ItemStack.EMPTY);m.getSlot(0).set(new ItemStack(Items.IRON_INGOT));press(m,p,0);
-        h.assertTrue(AlchemyPatterns.known(p).contains("minecraft:iron_ingot")&&m.getSlot(0).hasItem(),"Learning retains the real sample");
+    @GameTest(maxTicks=20)public void patternsDissolveLearnAndFormWithoutSample(GameTestHelper h){
+        var p=player(h);var m=new AlchemyPatternMenu(1,p.getInventory(),()->true,ItemStack.EMPTY);m.getSlot(0).set(new ItemStack(Items.IRON_INGOT));press(m,p,0);press(m,p,0);
+        h.assertTrue(AlchemyPatterns.known(p).contains("minecraft:iron_ingot")&&!m.getSlot(0).hasItem(),"Dissolving consumes the sample and teaches its identity");
         m.getSlot(0).set(ItemStack.EMPTY);long balance=Assaying.balance(p);press(m,p,1);
         h.assertTrue(m.getSlot(1).getItem().is(Items.IRON_INGOT)&&Assaying.balance(p)==balance-m.price(),"Known pattern forms without a sample at audited cost");h.succeed();
     }
@@ -56,11 +56,11 @@ public class ConnectedAlchemyGameTests {
     }
     @GameTest(maxTicks=20)public void modifiedAndExcludedPatternsCannotBeLearned(GameTestHelper h){
         var p=player(h);var named=new ItemStack(Items.IRON_INGOT);named.set(DataComponents.CUSTOM_NAME,Component.literal("Keepsake"));
-        h.assertTrue(!AlchemyPatterns.learn(p,named)&&!AlchemyPatterns.learn(p,item("klein_star_1"))&&AlchemyPatterns.known(p).isEmpty(),"Stored or patched matter never becomes a pattern");h.succeed();
+        h.assertTrue(!AlchemyPatterns.learn(p,named)&&AlchemyPatterns.learn(p,item("klein_star_1"))&&!AlchemyPatterns.known(p).contains("minecraft:iron_ingot"),"Patched matter is refused; an empty default star is learnable");h.succeed();
     }
     @GameTest(maxTicks=20)public void fullPatternOutputAndLostAccessDoNotSpend(GameTestHelper h){
         var p=player(h);boolean[] access={true};var m=new AlchemyPatternMenu(1,p.getInventory(),()->access[0],ItemStack.EMPTY);
-        m.getSlot(0).set(new ItemStack(Items.IRON_INGOT));press(m,p,0);m.getSlot(1).set(new ItemStack(Items.IRON_INGOT,64));long before=Assaying.balance(p);press(m,p,1);
+        m.getSlot(0).set(new ItemStack(Items.IRON_INGOT));press(m,p,0);press(m,p,0);m.getSlot(1).set(new ItemStack(Items.IRON_INGOT,64));long before=Assaying.balance(p);press(m,p,1);
         h.assertTrue(Assaying.balance(p)==before,"Full output refuses payment");access[0]=false;m.getSlot(1).set(ItemStack.EMPTY);h.assertTrue(!press(m,p,1)&&Assaying.balance(p)==before,"Walking away closes authority");h.succeed();
     }
     @GameTest(maxTicks=20)public void carriedStarsPayAndRefundConservatively(GameTestHelper h){
@@ -90,19 +90,20 @@ public class ConnectedAlchemyGameTests {
         var tool=new ItemStack(Items.IRON_PICKAXE);tool.setDamageValue(20);tool.set(DataComponents.CUSTOM_NAME,Component.literal("Favorite"));c.setItem(1,tool);
         h.assertTrue(AlchemyAutomation.pulse(p,c,p.position())&&tool.getDamageValue()==16&&tool.has(DataComponents.CUSTOM_NAME)&&KleinStars.stored(p.getInventory().getItem(6))==6,"Repair preserves state and pays four points");h.succeed();
     }
+    private static int fuelPrice(int tier){return (int)(Assay.form(Assaying.catalog().material(AlchemicalWorkshopBlockEntity.FUELS[tier+1]),1)-Assay.dissolve(Assaying.catalog().material(AlchemicalWorkshopBlockEntity.FUELS[tier]),1));}
     @GameTest(maxTicks=20)public void collectorFuelStopsAtChosenTier(GameTestHelper h){
         var p=player(h);var be=collector(h,p);be.setFuelTarget(1);be.setItem(2,new ItemStack(Items.COAL,2));
         // A full buffer isolates the upgrade debit from asynchronous skylight updates in a freshly placed test roof.
         be.setEssence(be.capacity());be.pulse(p);
-        h.assertTrue(be.getItem(2).getCount()==1&&be.getItem(5).is(DarkMatter.ITEMS.get("alchemical_coal"))&&be.essence()==be.capacity()-1024,"One fuel step, exact 1024 debit");
-        be.setEssence(be.capacity());be.pulse(p);h.assertTrue(be.getItem(5).getCount()==2&&be.essence()==be.capacity()-1024,"Second fuel has the same exact cost");
+        h.assertTrue(be.getItem(2).getCount()==1&&be.getItem(5).is(DarkMatter.ITEMS.get("alchemical_coal"))&&be.essence()==be.capacity()-fuelPrice(0),"One fuel step, exact value difference");
+        be.setEssence(be.capacity());be.pulse(p);h.assertTrue(be.getItem(5).getCount()==2&&be.essence()==be.capacity()-fuelPrice(0),"Second fuel has the same exact cost");
         be.setEssence(be.capacity());be.pulse(p);h.assertTrue(be.getItem(5).getCount()==2&&be.essence()==be.capacity(),"Selected final tier never upgraded even with a full buffer");h.succeed();
     }
     @GameTest(maxTicks=20)public void collectorFuelProgressesAndRespectsPause(GameTestHelper h){
         var p=player(h);var be=collector(h,p);be.setFuelTarget(3);be.setItem(2,new ItemStack(Items.COAL));int spent=0;
-        for(int price:new int[]{1024,4096,16384}){be.setEssence(be.capacity());be.pulse(p);int debit=be.capacity()-be.essence();h.assertTrue(debit==price,"Each stage charges its exact upgrade price");spent+=debit;}
+        for(int price:new int[]{fuelPrice(0),fuelPrice(1),fuelPrice(2)}){be.setEssence(be.capacity());be.pulse(p);int debit=be.capacity()-be.essence();h.assertTrue(debit==price,"Each stage charges its exact upgrade price");spent+=debit;}
         int count=0;for(int i=5;i<11;i++)if(be.getItem(i).is(DarkMatter.ITEMS.get("aeternalis_fuel")))count+=be.getItem(i).getCount();
-        h.assertTrue(count==1&&spent==21504,"One coal reaches the selected final fuel in exactly three paid steps");be.setPaused(true);be.setItem(2,new ItemStack(Items.COAL));int before=be.essence();be.pulse(p);h.assertTrue(be.getItem(2).getCount()==1&&be.essence()==before,"Pause preserves fuel and buffer");h.succeed();
+        h.assertTrue(count==1&&spent==fuelPrice(0)+fuelPrice(1)+fuelPrice(2),"One coal reaches the selected final fuel in exactly three paid steps");be.setPaused(true);be.setItem(2,new ItemStack(Items.COAL));int before=be.essence();be.pulse(p);h.assertTrue(be.getItem(2).getCount()==1&&be.essence()==before,"Pause preserves fuel and buffer");h.succeed();
     }
     @GameTest(maxTicks=20)public void collectorSavesTargetAndAllInventorySlots(GameTestHelper h){
         var p=player(h);var be=collector(h,p);be.setFuelTarget(2);be.setItem(10,item("mobius_fuel"));

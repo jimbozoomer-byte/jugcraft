@@ -32,12 +32,12 @@ public final class AlchemyPedestalEffects {
     private static boolean visible(ServerPlayer p,BlockPos from,Vec3 to){return p.level().clip(new ClipContext(Vec3.atCenterOf(from).add(0,.5,0),to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,p)).getType()==HitResult.Type.MISS;}
     private static boolean pickup(AlchemyMachinesBlockEntity be,ServerPlayer p){
         var level=p.level();var center=Vec3.atCenterOf(be.getBlockPos());var drops=new ArrayList<ItemEntity>();
-        level.getEntities(EntityTypeTest.forClass(ItemEntity.class),new AABB(be.getBlockPos()).inflate(6),e->e.isAlive(),drops,24);
+        level.getEntities(EntityTypeTest.forClass(ItemEntity.class),new AABB(be.getBlockPos()).inflate(be.range()),e->e.isAlive(),drops,24);
         int moved=0;
         for(var drop:drops){
             if(moved==4||be.essence()<1)break;UUID reserved=((AlchemicalItemAccess)drop).jugcraft$pickupTarget();
             if(drop.hasPickUpDelay()||reserved!=null&&!reserved.equals(p.getUUID())||drop.getOwner()!=null&&!drop.getOwner().getUUID().equals(p.getUUID())
-                    ||drop.position().distanceToSqr(center)>36||!Authority.mayChange(level,p,drop.blockPosition())||!visible(p,be.getBlockPos(),drop.position()))continue;
+                    ||drop.position().distanceToSqr(center)>be.range()*be.range()||!Authority.mayChange(level,p,drop.blockPosition())||!visible(p,be.getBlockPos(),drop.position()))continue;
             var item=drop.getItem();int inserted=0;
             for(var side:Direction.values()){
                 var pos=be.getBlockPos().relative(side);if(!level.hasChunkAt(pos)||!Authority.mayChange(level,p,pos))continue;
@@ -53,14 +53,14 @@ public final class AlchemyPedestalEffects {
                 if(inserted>0)break;
             }
             if(inserted>0){item.shrink(inserted);if(item.isEmpty())drop.discard();else drop.setItem(item);pay(be,1);moved++;}
-        }return moved>0;
+        }be.recordTargets(moved);return moved>0;
     }
     private static boolean experience(AlchemyMachinesBlockEntity be,ServerPlayer p){
         var stone=be.getItem(1);int room=AlchemyStorage.XP_CAPACITY-AlchemyStorage.storedXp(stone),taken=0;
         if(room==0)return false;var orbs=new ArrayList<ExperienceOrb>();
-        p.level().getEntities(EntityTypeTest.forClass(ExperienceOrb.class),new AABB(be.getBlockPos()).inflate(6),e->e.isAlive(),orbs,16);
+        p.level().getEntities(EntityTypeTest.forClass(ExperienceOrb.class),new AABB(be.getBlockPos()).inflate(be.range()),e->e.isAlive(),orbs,16);
         for(var orb:orbs){
-            if(be.essence()<1||taken>=100||!Authority.mayChange(p.level(),p,orb.blockPosition())||!visible(p,be.getBlockPos(),orb.position()))continue;
+            if(be.essence()<1||taken>=100||orb.position().distanceToSqr(Vec3.atCenterOf(be.getBlockPos()))>be.range()*be.range()||!Authority.mayChange(p.level(),p,orb.blockPosition())||!visible(p,be.getBlockPos(),orb.position()))continue;
             int value=orb.getValue();if(value<=0)continue;var access=(AlchemyExperienceAccess)orb;
             int available=Math.min(room-taken,100-taken);
             int count=Math.min(access.jugcraft$count(),available/value);
@@ -75,7 +75,7 @@ public final class AlchemyPedestalEffects {
             if(remaining==0)orb.discard();else access.jugcraft$count(remaining);pay(be,1);
         }
         if(taken>0){stone.set(AlchemyStorage.EXPERIENCE,AlchemyStorage.storedXp(stone)+taken);stone.set(AlchemicalGear.ACTIVE,Unit.INSTANCE);be.setChanged();}
-        return taken>0;
+        be.recordTargets(taken);return taken>0;
     }
     private static boolean accelerate(AlchemyMachinesBlockEntity be,ServerPlayer p){
         boolean worked=false;
@@ -83,24 +83,24 @@ public final class AlchemyPedestalEffects {
             if(be.essence()<128)break;var pos=be.getBlockPos().relative(side);
             if(!p.level().hasChunkAt(pos)||!Authority.mayChange(p.level(),p,pos))continue;
             boolean advanced=p.level().getBlockEntity(pos) instanceof AlchemicalWorkshopBlockEntity w?w.bonusPulse(p):AlchemyMachines.bonusWork(p,pos);
-            if(advanced){pay(be,128);worked=true;}
+            if(advanced){pay(be,128);worked=true;be.recordTargets(1);}
         }return worked;
     }
     private static boolean defend(AlchemyMachinesBlockEntity be,ServerPlayer p,String id){
         var mobs=new ArrayList<LivingEntity>();var center=Vec3.atCenterOf(be.getBlockPos());
-        p.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),new AABB(be.getBlockPos()).inflate(6),e->e instanceof Enemy&&e.isAlive(),mobs,16);
+        p.level().getEntities(EntityTypeTest.forClass(LivingEntity.class),new AABB(be.getBlockPos()).inflate(be.range()),e->e instanceof Enemy&&e.isAlive(),mobs,16);
         int done=0,cost=id.equals("archangel_smite")?64:16;
         var cause=Cause.of(p.getUUID(),Cause.Origin.SHRINE,"jugcraft:"+id,ConcordanceEffects.nextSerial());
         var ledger=new Ledger(new Ledger.Limits(4,32,0));
         for(var target:mobs){
             if(done==4||be.essence()<cost)break;
-            if(target.position().distanceToSqr(center)>36||!Authority.mayChange(p.level(),p,target.blockPosition())||!Authority.mayStrike(p,target)
+            if(target.position().distanceToSqr(center)>be.range()*be.range()||!Authority.mayChange(p.level(),p,target.blockPosition())||!Authority.mayStrike(p,target)
                     ||!ConcordanceEffects.mayHarm(p,target)||!visible(p,be.getBlockPos(),target.getEyePosition()))continue;
             var effect=id.equals("zero_ring")?new EffectSpec(EffectKind.STATUS,Intent.HARMFUL,1,60,"minecraft:slowness",Stacking.STRONGEST,null)
                 :id.equals("ignition_ring")?new EffectSpec(EffectKind.STATUS,Intent.HARMFUL,0,60,"jugcraft:smoulder",Stacking.STRONGEST,null)
                 :EffectSpec.of(EffectKind.DAMAGE,Intent.HARMFUL,8,0);
             if(ConcordanceEffects.apply(new ConcordanceEffects.Context(p.level(),cause,p,ledger,"pedestal",center),effect,target).applied()){pay(be,cost);done++;}
-        }return done>0;
+        }be.recordTargets(done);return done>0;
     }
     public static boolean harvest(AlchemyMachinesBlockEntity be,ServerPlayer p,BlockPos pos,net.minecraft.world.level.block.state.BlockState state){
         if(be.essence()<16||!Authority.mayChange(p.level(),p,pos)||!(state.getBlock() instanceof CropBlock crop)||!crop.isMaxAge(state))return false;

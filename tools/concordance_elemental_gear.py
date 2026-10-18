@@ -28,7 +28,7 @@ LANG = {
     "screen.jugcraft.star.insert": "Insert a Klein Star to transfer essence",
     "screen.jugcraft.star.inventory": "Your inventory",
     "screen.jugcraft.star.store_help": "Move essence from your personal ledger into this star. Stops at its capacity. No fee.",
-    "screen.jugcraft.star.withdraw_help": "Move stored essence into your personal ledger (maximum 1,000,000). Equipment spends the ledger. No fee.",
+    "screen.jugcraft.star.withdraw_help": "Move stored essence into your personal ledger (maximum 2,000,000,000). Equipment spends the ledger. No fee.",
     **{f"screen.jugcraft.star.button_{i}": label for i, label in enumerate(("Store 1,024", "Store 16,384", "Store all", "Take 1,024", "Take 16,384", "Take all"))},
 }
 SHAPED = {"klein_star_1": (["GLG", "LDL", "GLG"], {"G": "minecraft:gold_ingot", "L": "minecraft:lapis_lazuli", "D": rid("dark_matter")}),
@@ -55,7 +55,7 @@ def codex():
         "name": "Stars and Elemental Amulets", "x": 6, "y": 0, "icon": rid("klein_star_1"), "condition": None,
         "description": "Carry essence, supply fluids and protect yourself",
         "pages": [
-            ("crafting_recipe", "Klein Star Ein", "**Use** a star to open its storage tablet. Store or take **1,024**, **16,384**, or **all available** essence. Transfers stop at the star's capacity or the personal ledger's **1,000,000** limit. Nothing is generated or lost. Closing returns the real star. **Withdraw before powering equipment**: tools and wards spend your personal ledger, not a carried star. Understand **Assay** to use it.", rid("klein_star_1")),
+            ("crafting_recipe", "Klein Star Ein", "**Use** a star to open its storage tablet. Store or take **1,024**, **16,384**, or **all available** essence. Transfers stop at the star's capacity or the personal ledger's **2,000,000,000** limit. Nothing is generated or lost. Closing returns the real star. Equipment spends your personal ledger first, then carried stars in inventory order. Nested stars are not power sources. Understand **Assay** to use it.", rid("klein_star_1")),
             ("text", "Six Capacities", "**Ein: 4,096**; **Zwei: 16,384**; **Drei: 65,536**; **Vier: 262,144**; **Sphere: 1,048,576**; **Omega: 4,194,304**. At a **smithing table**, put **High Covalence Dust** in the template slot, your current star in the base slot and **Dark Matter** in the addition slot. Each upgrade consumes one dust and one Dark Matter and preserves the star's **charge and custom name**. Filled stars can be traded; on death they follow normal inventory/drop rules. None can be transmuted."),
             ("crafting_recipe", "Evertide Amulet", "Hold a **plain empty bucket** in your other hand and **use in air** to fill one water bucket for **64 essence**. A stack of buckets needs a spare inventory slot. **Sneak-use** switches its ward on/off. Hold the active amulet or equip it in a **Charm** slot for water breathing while submerged, at **4 essence per second**. The ward is short-lived when you run out or remove it. Crafting returns the two empty buckets.", rid("evertide_amulet")),
             ("crafting_recipe", "Volcanite Amulet", "Fills a carried empty bucket with lava for **4,096 essence**. **Sneak-use** enables a ward granting fire resistance while burning or in lava, for **8 essence per second**. Keep a balance before approaching lava; the ward checks once a second and is not a shield against every damage type. Hold or wear in a **Charm** slot. Crafting returns two buckets.", rid("volcanite_amulet")),

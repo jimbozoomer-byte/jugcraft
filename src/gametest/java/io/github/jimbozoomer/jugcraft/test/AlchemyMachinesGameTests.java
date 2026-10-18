@@ -65,8 +65,8 @@ public class AlchemyMachinesGameTests {
         h.assertTrue(relay.essence()==64,"Collector supplies the new network");relay.pulse(p);h.assertTrue(condenser.essence()==64&&relay.essence()==0,"No loss crossing relay");h.succeed();
     }
     @GameTest(maxTicks=20)public void absentPausedAndRedstoneMachinesDoNoWork(GameTestHelper h){
-        var p=player(h);var be=place(h,p,"red_matter_furnace");be.setItem(1,new ItemStack(Items.RAW_IRON,8));be.setEssence(500);be.pulse(null);h.assertTrue(output(be)==0,"Absent owner");
-        be.setPaused(true);be.pulse(p);h.assertTrue(output(be)==0,"Pause");be.setPaused(false);h.setBlock(new BlockPos(3,3,2),Blocks.REDSTONE_BLOCK);be.pulse(p);h.assertTrue(output(be)==0&&be.essence()==500,"Redstone preserves resources");h.succeed();
+        var p=player(h);var be=place(h,p,"red_matter_furnace");be.setItem(1,new ItemStack(Items.RAW_IRON,8));be.setEssence(500);be.pulse(null);h.assertTrue(output(be)==4,"Resolves authorized factory owner");
+        be.setPaused(true);be.pulse(p);h.assertTrue(output(be)==4,"Pause retains prior output");be.setPaused(false);h.setBlock(new BlockPos(3,3,2),Blocks.REDSTONE_BLOCK);be.pulse(p);h.assertTrue(output(be)==4&&be.essence()==436,"Redstone preserves resources");h.succeed();
     }
     @GameTest(maxTicks=20)public void pedestalGrowsOnlyPermittedCropsAndKeepsArtifact(GameTestHelper h){
         var p=player(h);var be=place(h,p,"dark_matter_pedestal");be.setItem(1,item("harvest_goddess_band"));be.setEssence(1000);h.setBlock(new BlockPos(3,1,2),Blocks.FARMLAND);h.setBlock(new BlockPos(3,2,2),Blocks.WHEAT);
@@ -111,7 +111,7 @@ public class AlchemyMachinesGameTests {
     }
     @GameTest(maxTicks=20)public void menuConservesLedgerAndRejectsForeignAndDistantRequests(GameTestHelper h){
         var p=player(h);var be=place(h,p,"relay_mk3");var m=new AlchemyMachinesMenu(1,p.getInventory(),be);RateGate.forget(p.getUUID());h.assertTrue(m.clickMenuButton(p,1)&&be.essence()==100000&&Assaying.balance(p)==0&&m.essence()==100000,"Unsigned split menu data and ledger conservation");
-        RateGate.forget(p.getUUID());Assaying.setBalance(p,999999);m.clickMenuButton(p,2);h.assertTrue(be.essence()==99999&&Assaying.balance(p)==1000000,"Wallet cap");h.assertTrue(!m.clickMenuButton(player(h),1),"Foreign request");p.snapTo(p.getX()+30,p.getY(),p.getZ(),0,0);RateGate.forget(p.getUUID());h.assertTrue(!m.clickMenuButton(p,1),"Distance checked live");h.succeed();
+        RateGate.forget(p.getUUID());Assaying.setBalance(p,io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE-1);m.clickMenuButton(p,2);h.assertTrue(be.essence()==99999&&Assaying.balance(p)==io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE,"Wallet cap");h.assertTrue(!m.clickMenuButton(player(h),1),"Foreign request");p.snapTo(p.getX()+30,p.getY(),p.getZ(),0,0);RateGate.forget(p.getUUID());h.assertTrue(!m.clickMenuButton(p,1),"Distance checked live");h.succeed();
     }
     @GameTest(maxTicks=20)public void unsidedAutomationCannotTakeStarsAndManualArtifacts(GameTestHelper h){
         var p=player(h);var be=place(h,p,"dark_matter_pedestal");be.setItem(0,star(1000));be.setItem(1,item("repair_talisman"));var storage=ItemStorage.SIDED.find(h.getLevel(),be.getBlockPos(),null);
@@ -121,12 +121,12 @@ public class AlchemyMachinesGameTests {
     @GameTest(maxTicks=20)public void pedestalObserversReceiveOnlySanitizedDisplayItem(GameTestHelper h){
         var p=player(h);var be=place(h,p,"dark_matter_pedestal");be.setEssence(1234);be.setItem(0,star(5678));var artifact=item("life_stone");artifact.set(DataComponents.CUSTOM_NAME,Component.literal("Private family keepsake"));be.setItem(1,artifact);
         var tag=be.getUpdateTag(h.getLevel().registryAccess());var input=TagValueInput.create(ProblemReporter.DISCARDING,h.getLevel().registryAccess(),tag);var visible=input.read("display_artifact",ItemStack.OPTIONAL_CODEC).orElseThrow();
-        h.assertTrue(tag.keySet().equals(Set.of("display_only","display_artifact"))&&visible.is(artifact.getItem())&&visible.getCount()==1&&!visible.has(DataComponents.CUSTOM_NAME),"Observer update contains only the plain public artifact, not ownership, private data or charge");
+        h.assertTrue(tag.keySet().equals(Set.of("display_only","display_artifact","effect_range"))&&visible.is(artifact.getItem())&&visible.getCount()==1&&!visible.has(DataComponents.CUSTOM_NAME),"Observer update contains only the plain public artifact, not ownership, private data or charge");
         var saved=be.saveWithoutMetadata(h.getLevel().registryAccess());var copy=new AlchemyMachinesBlockEntity(be.getBlockPos(),be.getBlockState());copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING,h.getLevel().registryAccess(),saved));
         h.assertTrue(copy.essence()==1234&&copy.owner().equals(p.getUUID())&&KleinStars.stored(copy.getItem(0))==5678&&copy.getItem(1).getHoverName().getString().equals("Private family keepsake"),"Full server save still retains all private state");
         be.removeItemNoUpdate(1);var empty=TagValueInput.create(ProblemReporter.DISCARDING,h.getLevel().registryAccess(),be.getUpdateTag(h.getLevel().registryAccess()));h.assertTrue(empty.read("display_artifact",ItemStack.OPTIONAL_CODEC).orElseThrow().isEmpty(),"Removal publishes empty display");h.succeed();
     }
-    @GameTest(maxTicks=20)public void everyMachineHasSurvivalRecipeAndCannotBeTransmuted(GameTestHelper h){
-        for(var entry:AlchemyMachines.BLOCKS.entrySet()){h.assertTrue(!Assaying.eligibility(new ItemStack(entry.getValue())).isEmpty(),"Charged machine excluded "+entry.getKey());h.assertTrue(h.getLevel().getServer().getRecipeManager().byKey(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,Jugcraft.id(entry.getKey()))).isPresent(),"Survival recipe "+entry.getKey());}h.succeed();
+    @GameTest(maxTicks=20)public void everyDefaultMachineHasSurvivalRecipeAndValue(GameTestHelper h){
+        for(var entry:AlchemyMachines.BLOCKS.entrySet()){h.assertTrue(Assaying.eligibility(new ItemStack(entry.getValue())).isEmpty(),"Default uncharged machine valued "+entry.getKey());h.assertTrue(h.getLevel().getServer().getRecipeManager().byKey(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,Jugcraft.id(entry.getKey()))).isPresent(),"Survival recipe "+entry.getKey());}h.succeed();
     }
 }

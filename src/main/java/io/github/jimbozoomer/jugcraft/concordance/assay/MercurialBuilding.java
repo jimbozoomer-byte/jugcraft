@@ -22,7 +22,8 @@ public final class MercurialBuilding {
         if(!AlchemyPatterns.building(sample)||!(sample.getItem() instanceof BlockItem block))return 0;
         long cost=Assay.form(AlchemicalWorkshopBlockEntity.material(sample),1)+8;
         var face=hit.getDirection();var center=hit.getBlockPos().relative(face);int done=0;
-        for(int a=-1;a<=1;a++)for(int b=-1;b<=1;b++){
+        int radius=Math.clamp(eye.getOrDefault(AlchemyPatterns.AREA,3),1,5)/2;
+        for(int a=-radius;a<=radius;a++)for(int b=-radius;b<=radius;b++){
             var at=switch(face.getAxis()){case X->center.offset(0,a,b);case Y->center.offset(a,0,b);case Z->center.offset(a,b,0);};
             if(!p.level().hasChunkAt(at)||!p.level().getBlockState(at).isAir()||!Authority.mayChange(p.level(),p,at)
                     ||p.distanceToSqr(Vec3.atCenterOf(at))>64||!p.mayUseItemAt(at,face,sample))continue;

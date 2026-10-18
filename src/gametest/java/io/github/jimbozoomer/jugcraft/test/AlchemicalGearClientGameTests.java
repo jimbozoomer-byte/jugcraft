@@ -1,7 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.jimbozoomer.jugcraft.client.TransmutationScreen;
+import io.github.jimbozoomer.jugcraft.client.AlchemyPatternScreen;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.assay.*;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
@@ -56,22 +56,22 @@ public class AlchemicalGearClientGameTests implements FabricClientGameTest {
                 // A wall for the owner to verify the magnet cannot pull through solid blocks.
                 for(int a=0;a<4;a++)for(int b=0;b<3;b++)level.setBlockAndUpdate(new BlockPos(x+6,y+b,z-1+a),Blocks.STONE_BRICKS.defaultBlockState());
                 AlchemicalGear.STONE.use(level,p,InteractionHand.MAIN_HAND);
-                var m=(TransmutationMenu)p.containerMenu;
-                m.getSlot(0).set(new ItemStack(Items.COPPER_INGOT,8)); m.getSlot(1).set(new ItemStack(Items.IRON_INGOT)); m.broadcastChanges();
+                var m=(AlchemyPatternMenu)p.containerMenu;
+                m.getSlot(0).set(new ItemStack(Items.COPPER_INGOT,8)); m.broadcastChanges();
             });
-            c.waitForScreen(TransmutationScreen.class); c.waitTicks(8);
+            c.waitForScreen(AlchemyPatternScreen.class); c.waitTicks(8);
             c.runOnClient(mc->{
                 String balance=Component.translatable("screen.jugcraft.alchemy.balance",100000).getString();
                 if(!balance.equals("100000 essence"))throw new AssertionError("Tablet must display essence with the existing balance");
             });
             c.runOnClient(mc->mc.gui.toastManager().clear()); c.takeScreenshot("alchemy_stone_ready");
-            c.clickScreenButton("screen.jugcraft.alchemy.dissolve"); c.waitTicks(6);
+            c.clickScreenButton("screen.jugcraft.pattern.learn"); c.waitTicks(6);
             c.takeScreenshot("alchemy_stone_confirm");
-            c.clickScreenButton("screen.jugcraft.alchemy.confirm"); c.waitTicks(6);
-            c.clickScreenButton("screen.jugcraft.alchemy.form"); c.waitTicks(8);
-            boolean paid=server.computeOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();var m=(TransmutationMenu)p.containerMenu;
-                return Assaying.balance(p)==100192 && m.getSlot(0).getItem().isEmpty() && m.getSlot(1).getItem().getCount()==1 && m.getSlot(2).getItem().getCount()==1;});
-            if(!paid)throw new AssertionError("Server menu must consume eight copper, retain sample and form one iron at exact price");
+            c.clickScreenButton("screen.jugcraft.pattern.confirm"); c.waitTicks(6);
+            c.clickScreenButton("screen.jugcraft.pattern.make"); c.waitTicks(8);
+            boolean paid=server.computeOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();var m=(AlchemyPatternMenu)p.containerMenu;
+                return Assaying.balance(p)==100896 && m.getSlot(0).getItem().isEmpty() && m.getSlot(1).getItem().is(Items.COPPER_INGOT) && m.getSlot(1).getItem().getCount()==1 && AlchemyPatterns.known(p).contains("minecraft:copper_ingot");});
+            if(!paid)throw new AssertionError("Server menu consumes eight copper, learns copper and forms one at its exact 128 essence value");
             c.runOnClient(mc->mc.gui.toastManager().clear()); c.takeScreenshot("alchemy_stone_result");
             int scale=c.computeOnClient(mc->mc.options.guiScale().get());
             c.runOnClient(mc->{mc.options.guiScale().set(1);mc.resizeGui();});c.waitTicks(5);c.takeScreenshot("alchemy_tablet_scale1");
@@ -81,7 +81,7 @@ public class AlchemicalGearClientGameTests implements FabricClientGameTest {
             c.getInput().pressKey(InputConstants.KEY_TAB); c.waitTicks(2);
             c.runOnClient(mc->{if(mc.gui.screen().getFocused()==null)throw new AssertionError("Menu actions must be keyboard focusable");mc.options.guiScale().set(scale);mc.resizeGui();});
             c.getInput().pressKey(InputConstants.KEY_ESCAPE);c.waitForScreen(null);c.waitTicks(5);
-            server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(p.getInventory().countItem(Items.IRON_INGOT)!=34)throw new AssertionError("Closing returns both sample and output");});
+            server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();if(p.getInventory().countItem(Items.IRON_INGOT)!=32||p.getInventory().countItem(Items.COPPER_INGOT)!=1)throw new AssertionError("Closing returns the actual copper output without manufacturing a retained sample");});
             // Exercise the real server tick hook, not just the pure per-player pulse used by game tests.
             server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();
                 p.getInventory().setItem(8,p.getMainHandItem()); p.setItemInHand(InteractionHand.MAIN_HAND,p.getInventory().getItem(3));p.getInventory().setItem(3,ItemStack.EMPTY);

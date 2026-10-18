@@ -28,7 +28,7 @@ public final class AlchemicalWorkshops {
     public static final Map<String, AlchemicalWorkshopBlock> BLOCKS = new LinkedHashMap<>();
     public static final int[] COLLECTOR_CAPACITY = {4096, 16384, 65536};
     public static final int[] COLLECTOR_RATE = {1, 4, 16};
-    public static final int[] CONDENSER_CAPACITY = {65536, 262144};
+    public static final int[] CONDENSER_CAPACITY = {1048576, 16777216};
     public static DataComponentType<Integer> ESSENCE;
     public static BlockEntityType<AlchemicalWorkshopBlockEntity> ENTITY;
     public static MenuType<AlchemicalWorkshopMenu> COLLECTOR_MENU, CONDENSER_MENU;
@@ -36,7 +36,7 @@ public final class AlchemicalWorkshops {
     private AlchemicalWorkshops() { }
     public static void register() {
         ESSENCE = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("workshop_essence"),
-                DataComponentType.<Integer>builder().persistent(Codec.intRange(0, 262144)).networkSynchronized(ByteBufCodecs.VAR_INT).build());
+                DataComponentType.<Integer>builder().persistent(Codec.intRange(0, CONDENSER_CAPACITY[1])).networkSynchronized(ByteBufCodecs.VAR_INT).build());
         COLLECTOR_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("essence_collector"),
                 new MenuType<>((id, inv) -> new AlchemicalWorkshopMenu(id, inv, true), FeatureFlags.DEFAULT_FLAGS));
         CONDENSER_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("essence_condenser"),

@@ -43,9 +43,9 @@ public final class AlchemyStorageBlock extends BaseEntityBlock {
                 p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyStorageMenu(id,inv,be),getName()));
             }else if(!chest&&AlchemicalGear.ready(p)&&Authority.mayChange(p.level(),p,pos)){
                 var origin=pos.immutable();var original=level;
-                p.openMenu(new SimpleMenuProvider((id,inv,who)->new TransmutationMenu(id,inv,()->p.level()==original
+                p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyPatternMenu(id,inv,()->p.level()==original
                         &&p.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(origin))<=64&&original.getBlockState(origin).is(this)
-                        &&Authority.mayChange(p.level(),p,origin)),getName()));
+                        &&Authority.mayChange(p.level(),p,origin),ItemStack.EMPTY),getName()));
             }else return InteractionResult.FAIL;
         }return InteractionResult.SUCCESS;
     }

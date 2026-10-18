@@ -188,10 +188,10 @@ public class ExtendedAlchemyEquipmentGameTests {
         h.assertTrue(Assaying.balance(p)==984,"Per-tick detection does not become per-tick essence consumption");h.succeed();
     }
 
-    @GameTest(maxTicks=20) public void equipmentIsExcludedAndModernArmorHasWornAssets(GameTestHelper h) {
+    @GameTest(maxTicks=20) public void defaultEquipmentIsValuedAndModernArmorHasWornAssets(GameTestHelper h) {
         var p=player(h,null,0);
         for(var entry:ExtendedAlchemyEquipment.ITEMS.entrySet()) {
-            var stack=new ItemStack(entry.getValue());h.assertTrue(!Assaying.eligibility(stack).isEmpty(),"Excluded from equivalence: "+entry.getKey());
+            var stack=new ItemStack(entry.getValue());h.assertTrue(Assaying.eligibility(stack).isEmpty(),"Default item is valued: "+entry.getKey());
             if(entry.getKey().endsWith("helmet")||entry.getKey().endsWith("chestplate")||entry.getKey().endsWith("leggings")||entry.getKey().endsWith("boots"))
                 h.assertTrue(stack.has(DataComponents.EQUIPPABLE)&&stack.has(DataComponents.MAX_DAMAGE),"Real worn durable equipment: "+entry.getKey());
         }h.succeed();

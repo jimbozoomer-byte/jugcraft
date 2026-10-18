@@ -9,14 +9,14 @@ TOOLTIPS = {
  'void_ring':'Use: confirm dissolving the other-hand material. Sneak-use: configure filtered automatic dissolution. Empty filters consume nothing.',
  'mind_stone':'Use stores 100 XP; sneak-use retrieves 100. On a pedestal, collects nearby XP into this physical stone. The lit icon indicates stored XP.',
  'transmutation_tablet':'Dissolve materials into essence; open Learned patterns to learn, search, favorite and form items without retaining a sample.',
- 'mercurial_eye':'Sneak-use or use in air: choose a learned building material. Use a surface: build a 3x3 face for formation price + 8 essence per placed block. Without a selected pattern, uses offhand blocks.',
+ 'mercurial_eye':'Sneak-use or use in air: choose a learned building material. Use a surface: build the selected 1x1 / 3x3 / 5x5 face for formation price + 8 essence per placed block. Without a selected pattern, uses offhand blocks.',
  'dark_matter_pedestal':'Twelve artifacts: repair, support, grow/harvest, repel, gather into adjacent storage, defend, collect XP, or accelerate adjacent furnaces/condensers. Uses its buffer.',
  'alchemical_chest':'54 party-access slots with an opening lid. Activated artifacts can repair, consolidate and collect matching drops while the chest is closed. Redstone pauses.',
  'repair_talisman':'Activated while held/worn: repairs equipment. Activated inside a carried bag or owned chest: repairs stored gear. 1 essence per point, up to 4 each second.',
  'black_hole_band':'Activated while held/worn: attracts drops. Inside storage: collects matching stored item types. On a pedestal: inserts nearby drops into adjacent inventories.',
 }
 for i in range(1,7):TOOLTIPS[f'klein_star_{i}']='Stores essence. Equipment spends your wallet first, then carried stars in inventory order. Use to store/withdraw; nested stars are not accessed.'
-for i in range(1,4):TOOLTIPS[f'collector_mk{i}']='Collects daylight essence. Charge mode exports to neighbors/stars. Fuel mode upgrades coal to a chosen final alchemical fuel; inputs above/sides, output below.'
+for i in range(1,4):TOOLTIPS[f'collector_mk{i}']='Collects daylight essence. Charge mode exports to neighbors/stars. Fuel mode upgrades coal at the difference in item values to a chosen final alchemical fuel; inputs above/sides, output below.'
 LANG={
  'key.jugcraft.gem_abilities':'Gem armor abilities',
  'message.jugcraft.stone.charge':'Stone area: %s x %s',
@@ -28,7 +28,7 @@ LANG={
  'unfavorite':'Unfavorite','favorites':'Favorites','all':'All patterns','balance':'Essence: %s','sample':'Sample','target':'Target','preview':'Preview',
  'output':'Output','cost':'Price per item: %s','page':'%s / %s','learn_help':'Learn once; keep sample','area':'3 x 3 / up to nine blocks',
  'make_help':'Forms one learned item for the displayed price. Only your actual learned, eligible materials are available.',
- 'build_help':'Select a learned building block. Use the eye on a surface to place up to nine blocks, each at the displayed price. Protected or occupied positions are skipped.',
+ 'build_help':'Select a learned building block. Choose an area and use the eye on a surface to place that face, each block at the displayed price. Protected or occupied positions are skipped.',
  }.items()},
  **{f'screen.jugcraft.automation.{k}':v for k,v in {
  'start':'Start automatic','stop':'Stop automatic','target_0':'Output: Iron','target_1':'Output: Gold','target_2':'Output: Diamond',
@@ -45,7 +45,7 @@ LANG={
  }.items()},
  **{f'screen.jugcraft.workshop.fuel_{i}':v for i,v in enumerate(('Mode: Charge','Stop: Alchemical Coal','Stop: Mobius Fuel','Stop: Aeternalis Fuel'))},
  'screen.jugcraft.workshop.fuel_input':'Fuel to upgrade',
- 'screen.jugcraft.workshop.fuel_help':'One fuel step per second: coal -> Alchemical (1,024 essence), -> Mobius (4,096), -> Aeternalis (16,384). Target fuel is never upgraded further. Charge mode exports essence instead.',
+ 'screen.jugcraft.workshop.fuel_help':'One fuel step per second, paying the difference between input and output essence values: coal -> Alchemical -> Mobius -> Aeternalis. Target fuel is never upgraded further. Charge mode exports essence instead.',
 }
 def tags(tags): pass
 def write_all(write,assets,data,lang,condition,self_drop):
@@ -57,21 +57,74 @@ def write_all(write,assets,data,lang,condition,self_drop):
               'on_false':{'type':'minecraft:model','model':f'jugcraft:item/{name}'},'on_true':{'type':'minecraft:model','model':f'jugcraft:item/{name}_active'}}})
     # Actual player help is replaced together with mechanics; older feature records remain historical evidence.
     bodies=[
-     'Understand Assay. The tablet, table and stone share essence. Dissolving learns eligible items. Open Learned patterns, insert a sample and Learn to keep it permanently. Samples are retained.',
-     'Dissolving rounds down; forming costs 125%, rounded up. Learned patterns persist through death and reconnect. Search or favorite them. Modified, stored and excluded items remain protected.',
-     'Collector Charge mode supplies neighbors and stars. Fuel mode upgrades coal to the selected stopping tier for 1,024 / 4,096 / 16,384 essence per step. Furnaces and condensers accept one Watch bonus each second.',
-     'Bags have independent 54-slot inventories. Active repair talismans repair stored gear. Black Hole Bands collect drops matching a stored item type. Open storage pauses its automation. No nested containers.',
-     'Use Density Gem or sneak-use Void Ring to configure allowed materials, then Start automatic. Empty filters do nothing. Converters never consume modified items; loose converters skip your hotbar. Density forms iron, gold or diamond.',
-     'Mind Stone stores actual XP and collects orbs on a pedestal. Twelve pedestal artifacts support farming, defense and workshops. Open Gem abilities for armor powers. Carried stars power equipment after your wallet empties.',
+     'Examine iron and coal, then study an Assay specimen at the Lampwright Bench after First Light. Craft a Stone or tablet. Dissolve one plain item to learn it permanently. Choose its icon to withdraw it for essence.',
+     'All default item types have values. Dissolve rounds down; withdrawal rounds up, with no surcharge. Use 1 / 16 / 64 / Max. Search and favorites are optional. Empty charged or filled items before dissolving; their contents are never copied.',
+     'Next craft a Klein Star, daylight collector and condenser. Charge feeds neighbors; Fuel upgrades coal for the difference in item values. Loaded factories work while you are away. Claims, pause and redstone still stop them.',
+     'Bags have 54 independent slots. Sort and Stack merge identical items. Pause disables stored artifacts. Repair Talisman repairs gear; Black Hole Band gathers matching drops. Open menus pause automation. No nesting.',
+     'Use Density Gem or sneak-use Void Ring. Set allowed inputs, input limit and wallet reserve, then Start. Empty filters do nothing. Density makes iron, gold or diamond, one per second. Last status explains waiting. Your hotbar is not feedstock.',
+     'Add a pedestal for farming or defense. Its panel shows the effect, range and last cost. Gem controls show toggles and cooldown; bind direct powers in Controls. The HUD shows wallet, stars and last payment. Aim the Eye/tools to preview area and cost.',
     ]
     for i,text in enumerate(bodies):lang[f'screen.jugcraft.alchemy_storage.manual.body_{i}']=text
 def codex():
     return {('equivalence','connected_alchemy'):{'name':'Connected Alchemy','x':18,'y':0,'icon':'jugcraft:transmutation_tablet','condition':None,'description':'Learn patterns; automate a living workshop',
         'pages':[
-         ('text','Learn Once','The tablet’s **Learned patterns** button opens your saved collection. Learning retains the sample. Dissolving also learns eligible materials. Browse icons, search, favorite, and **Form one** at the normal price without carrying a sample. Knowledge is personal and survives death. Server catalogue changes still control eligibility.'),
+         ('text','Learn Once','The tablet opens **dissolving and learned items together**. Put an item into the input, inspect its value and confirm dissolution: the input is consumed and its default form is learned permanently. Choose an icon, then **1 / 16 / 64 / Max** and Withdraw. Pay the exact value, no surcharge, using wallet then carried stars. Max fills one affordable output stack. Empty containers and charge first; custom state is not copied. All registered types are valued; unfamiliar custom items may use provisional local values.'),
          ('text','Automatic Storage','Configure a **Density Gem** or sneak-use a **Void Ring**. Copy up to nine allowed input types into its filter and start it. Only plain matching material is consumed. Density forms its selected iron/gold/diamond target; Void deposits essence. A carried bag or owned chest also supports active **Repair Talisman** and **Black Hole Band**. Seed storage with a desired item to filter pickup. Storage menus pause their own background writer.'),
-         ('text','Collector Fuels','Choose **Charge**, **Alchemical Coal**, **Mobius Fuel** or **Aeternalis Fuel** in a collector. Each step consumes one previous fuel and **1,024 / 4,096 / 16,384 essence**. Intermediate fuels remain in output and can continue until the chosen stop. Clear output space is required. Charge mode retains the existing neighbor/star export behavior.'),
+         ('text','Collector Fuels','Choose **Charge**, **Alchemical Coal**, **Mobius Fuel** or **Aeternalis Fuel** in a collector. Each step consumes one previous fuel and **the difference between input and output item values**. Intermediate fuels remain in output and can continue until the chosen stop. Clear output space is required. Charge mode retains the existing neighbor/star export behavior.'),
          ('text','Pedestal Workshop','Original six effects remain. **Harvest Goddess now replants ripe crops**. **Black Hole Band** transfers drops into adjacent inventories. **Mind Stone** stores nearby XP, preserving merged orb counts. **Archangel**, **Ignition**, **Zero** defend against monsters. **Watch** gives adjacent furnaces/condensers one extra paid work pulse per second, shared across all Watches. All effects use the pedestal buffer and owner authority.'),
-         ('text','Stone and Eye','Stone: use terrain to transmute; sneak-use terrain changes area (1x1, 3x3, 5x5); sneak-use air opens crafting. Each changed block costs at least 8 essence. Eye: open its learned building palette, select a block, then use a surface for a **3x3 face**. Each placed block costs formation price plus 8. Claims, collision, reach and loaded terrain apply.'),
-         ('text','Stars and Gem Armor','Equipment spends your **wallet first**, then carried Klein Stars. No nested-star access. Gem controls are in the tablet and Manual, with an optional Controls keybind. Helmet toggles night vision; chest repels enemies; leggings dash; boots toggle paid flight. Flight shares the existing lease and ends on removal or insufficient power. Ordinary wards remain.'),
+         ('text','Stone and Eye','Stone: use terrain to transmute; sneak-use terrain changes area (1x1, 3x3, 5x5); sneak-use air opens crafting. Each changed block costs at least 8 essence. Eye: open its learned building palette, select a block, then use a surface for a selected **1x1 / 3x3 / 5x5 face**. Each placed block costs formation price plus 8. Claims, collision, reach and loaded terrain apply.'),
+         ('text','Stars and Gem Armor','Equipment spends your **wallet first**, then carried Klein Stars. No nested-star access. Gem controls are in the Manual, with optional menu and direct-action keybinds in Controls. Helmet toggles night vision; chest repels enemies; leggings dash; boots toggle paid flight. Flight shares the existing lease and ends on removal or insufficient power. Ordinary wards remain.'),
         ]}}
+
+# Universal tablet overrides, owner playability pass (17 October).
+LANG.update({"screen.jugcraft.pattern."+k:v for k,v in {
+ "title":"Transmutation tablet", "learn":"Dissolve", "confirm":"Confirm", "make":"Withdraw",
+ "sample":"Dissolve", "sources":"Wallet %s / stars %s", "total":"Total price: %s essence",
+ "learn_help":"Consumes the input stack and permanently teaches its default item. Click twice to confirm. Empty stored contents and reset charged/configured items first.",
+ "make_help":"Withdraw learned items at their exact value, no surcharge. Wallet first, then carried stars. Max fills up to one affordable output stack.",
+ "batch_0":"1", "batch_1":"16", "batch_2":"64", "batch_3":"Max",
+ "input_0":"Dissolve for +%s essence", "input_1":"Put an item in the input.",
+ "input_2":"Empty/reset item state first.", "input_3":"Wallet is full.", "input_4":"Batch is worth less than 1.",
+ "form_0":"Ready to withdraw", "form_1":"Dissolve once to learn an item.",
+ "form_2":"Not enough essence", "form_3":"Take the output first."
+}.items()})
+TOOLTIPS['transmutation_tablet']='Dissolve an item to learn it permanently. Browse learned items, choose 1/16/64/Max and spend their essence value with no surcharge. Stored contents and charge must be emptied first.'
+
+LANG.update({"screen.jugcraft.automation."+k:v for k,v in {
+ "budget":"Input limit: %s/s", "reserve":"Reserve: %s", "preview":"Price: %s essence",
+ "reserve_help":"Density never spends below this wallet reserve. Input limit bounds how many filtered items are dissolved per second. Stars are not used by automatic density.",
+ "menu_pause":"Automation pauses while a menu is open.", "status_0":"Last pulse: working", "status_1":"Last pulse: none", "status_2":"Add at least one input filter",
+ "status_3":"Output space is full", "status_4":"Output has no value", "status_5":"Waiting for filtered inputs", "status_6":"Saving for output / reserve"
+}.items()})
+LANG.update({"screen.jugcraft.alchemy_storage."+k:v for k,v in {
+ "sort":"Sort", "stack":"Stack", "pause":"Pause", "inventory":"Automation pauses while open",
+ "controls_help":"Sort also merges identical stacks; Stack preserves first-seen order. Pause disables artifacts in this container. To configure or re-enable an artifact, take it out and use it, then return it."
+}.items()})
+
+LANG.update({"screen.jugcraft.pattern.area":"Area: %s x %s", "screen.jugcraft.pattern.area_help":"Aim to preview the area."})
+LANG.update({"hud.jugcraft.alchemy."+k:v for k,v in {
+ "power":"Essence: %s", "sources":"Wallet %s | carried stars %s", "low":"Low power: action needs more essence", "spent":"Last payment: %s essence",
+ "preview":"Preview: up to %s blocks / %s essence; claims checked on use", "range":"Pedestal range: %s blocks (effect limits apply)"
+}.items()})
+LANG.update({"key.jugcraft.gem_"+key:value for key,value in zip(("night_vision","repel","dash","flight"),("Gem helmet: night vision","Gem chest: repel","Gem leggings: dash","Gem boots: flight"))})
+LANG.update({"screen.jugcraft.gem."+k:v for k,v in {
+ "short_0":"Night vision", "short_1":"Repel", "short_2":"Dash", "short_3":"Flight", "on":"On", "off":"Off", "ready":"Ready", "missing":"Equip + enable armor", "cooldown":"Cooling down", "power":"Available essence: %s (wallet + stars)"
+}.items()})
+LANG.update({"screen.jugcraft.alchemy_machine."+k:v for k,v in {
+ "range":"Range: %s blocks", "range_help":"Select 2 / 4 / 6 blocks. Aim at the pedestal to see its footprint. Watch affects adjacent machines only; Harvest stays within its 7 x 3 x 7 farm scan. Claims and line of sight still apply.",
+ "pulse":"Last pulse: %s targets/units, %s essence",
+ "effect_air":"Insert an artifact to see its effect.", "effect_black_hole_band":"Gather drops to adjacent storage: 1 essence/stack",
+ "effect_archangel_smite":"Strike hostile mobs: 64 essence/target, max 4/s",
+ "effect_ignition_ring":"Smoulder hostile mobs: 16 essence/target, max 4/s",
+ "effect_zero_ring":"Slow hostile mobs: 16 essence/target, max 4/s",
+ "effect_watch_of_flowing_time":"Accelerate adjacent machines: 128 essence/step",
+ "effect_mind_stone":"Capture XP in the stone: 1 essence/orb, max 100 XP/s",
+ "effect_repair_talisman":"Repair party equipment: 1 essence/durability",
+ "effect_harvest_goddess_band":"Grow/harvest crops: 16 essence/action, max 4/s",
+ "effect_body_stone":"Feed nearby party members: 32 essence/food",
+ "effect_soul_stone":"Heal nearby party members: 32 essence/health",
+ "effect_life_stone":"Heal + feed party members: 32 essence/point",
+ "effect_swiftwolf_rending_gale":"Repel hostile mobs: 4 essence/target, max 8/s"
+}.items()})
+
+LANG.update({"screen.jugcraft.pattern.guide":"Guide", "screen.jugcraft.alchemy_storage.source_0":"Reference value", "screen.jugcraft.alchemy_storage.source_1":"Derived from a local recipe", "screen.jugcraft.alchemy_storage.source_2":"Provisional local assignment"})

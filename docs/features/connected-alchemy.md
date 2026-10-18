@@ -1,5 +1,7 @@
 # Connected alchemy — local integration, 17 October 2026
 
+**Current behavior:** the [alchemy playability pass](alchemy-playability.md) supersedes retained-sample learning, the narrow catalogue, fuel fees, online factory requirements and the old menu flow below. This record preserves the earlier delivery evidence.
+
 Owner request: implement the remaining systems identified after the 108-entry asset audit, use the remaining suitable assets, and keep the result local for an owner-controlled playtest. Implemented by **OpenAI Codex (GPT-6)**. This extends [Complete Alchemy](complete-alchemy.md); it adds behavior to those entries rather than registering duplicate items or another currency.
 
 ## Player controls

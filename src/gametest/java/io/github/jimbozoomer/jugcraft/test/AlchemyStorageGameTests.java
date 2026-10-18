@@ -101,15 +101,15 @@ public class AlchemyStorageGameTests {
     }
     @GameTest(maxTicks=20) public void tabletAndDensityGemOpenTheirAuthorizedMenus(GameTestHelper h){
         var p=player(h);for(String name:List.of("transmutation_tablet","gem_of_eternal_density")){
-            use(p,item(name));h.assertTrue(name.equals("transmutation_tablet")?p.containerMenu instanceof TransmutationMenu:p.containerMenu instanceof AlchemyAutomationMenu,"Tablet opens paid conversion; Density opens explicit filters");var m=p.containerMenu;
+            use(p,item(name));h.assertTrue(name.equals("transmutation_tablet")?p.containerMenu instanceof AlchemyPatternMenu:p.containerMenu instanceof AlchemyAutomationMenu,"Tablet opens paid conversion; Density opens explicit filters");var m=p.containerMenu;
             h.assertTrue(m.stillValid(p),"Own held instrument grants access");p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);h.assertTrue(!m.stillValid(p),"Cannot use after dropping instrument");p.closeContainer();}
         h.succeed();
     }
     @GameTest(maxTicks=20) public void voidRingRequiresSecondUseAndPreservesModifiedItems(GameTestHelper h){
         var p=player(h);var ring=item("void_ring");p.setItemInHand(InteractionHand.OFF_HAND,new ItemStack(Items.COAL,4));Assaying.setBalance(p,0);use(p,ring);
         h.assertTrue(p.getOffhandItem().getCount()==4&&Assaying.balance(p)==0,"First use previews without consumption");use(p,ring);
-        h.assertTrue(p.getOffhandItem().isEmpty()&&Assaying.balance(p)==128,"Second use conserves existing coal value");
+        h.assertTrue(p.getOffhandItem().isEmpty()&&Assaying.balance(p)==512,"Second use conserves existing coal value");
         var named=new ItemStack(Items.COAL,4);named.set(DataComponents.CUSTOM_NAME,Component.literal("Keep me"));p.setItemInHand(InteractionHand.OFF_HAND,named);use(p,ring);use(p,ring);
-        h.assertTrue(named.getCount()==4&&Assaying.balance(p)==128,"Named items never dissolve");h.succeed();
+        h.assertTrue(named.getCount()==4&&Assaying.balance(p)==512,"Named items never dissolve");h.succeed();
     }
 }

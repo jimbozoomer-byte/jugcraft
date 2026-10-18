@@ -22,6 +22,10 @@
 - [x] Local connected alchemy: learned patterns/favorites/search, Stone terrain/crafting, filtered converters and storage artifacts, expanded pedestals, collector fuel tiers, carried-star power, Gem controls, learned Eye building, remaining UI/state art and animated chest lids. See [connected alchemy](features/connected-alchemy.md).
 - [x] Connected Alchemy automated validation: all 1,909 server tests, 67 Python tests, full data/art audit and real rendered interface checks passed locally.
 - [ ] Owner-controlled playtest of Connected Alchemy before pushing; independent multiplayer and load testing remain pending.
+- [x] Local alchemy playability pass: universal default-item values, one-screen dissolve/learn/withdraw, exact-value bulk withdrawal, wallet/star HUD, Gem direct controls/state, Density limits/reserve/status, storage sort/consolidation, factory offline operation, pedestal diagnostics/range and building/mining previews. See [playability record](features/alchemy-playability.md).
+- [x] Replace retained-sample learning and the 25% formation surcharge in the active tablet workflow; preserve saved balances and existing learned identities.
+- [x] Alchemy playability validation: all 1,923 server tests, 75 Python tests, full data/art checks, Stone and complete-showroom rendered checks passed. Final interface corrections were rebuilt and client-tested; the separate owner playtest remains local.
+- [ ] Owner survival/economy feedback: tune provisional custom-item root values; confirm industrial recipe/byproduct economics and the first Star/collector/automation milestones.
 - Scope and evidence: [alchemical gear](features/alchemical-gear.md).
 
 ## Spellcraft and encyclopedia UI — 16 October 2026

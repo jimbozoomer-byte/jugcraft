@@ -26,6 +26,6 @@ public final class AlchemyStorageCatalogueScreen extends AbstractContainerScreen
         var sample=menu.slots.get(menu.selected()).getItem();
         g.text(font,BookArt.fit(font,sample.isEmpty()?"":sample.getHoverName().getString(),180),20,116,0xFFE4C786,false);
         g.text(font,ui("value",menu.dissolve(),menu.form()),20,130,0xFFB9DAD4,false);
-        g.text(font,ui("read_only"),20,142,0xFFB6B9C8,false);
+        g.text(font,ui("source_"+menu.source()),20,142,0xFFB6B9C8,false);
     }
 }

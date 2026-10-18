@@ -26,14 +26,20 @@ import net.minecraft.world.phys.*;
 /** Explicit whitelists only; one active bag per second, one conversion and one repair per storage pulse. */
 public final class AlchemyAutomation {
     public static DataComponentType<List<String>> FILTER;
+    public static DataComponentType<Integer> BUDGET,RESERVE,STATUS;
     public static MenuType<AlchemyAutomationMenu> MENU;
     private AlchemyAutomation() {}
     public static void register(){
         FILTER=Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,Jugcraft.id("alchemy_filter"),DataComponentType.<List<String>>builder()
                 .persistent(Codec.STRING.listOf(0,9)).networkSynchronized(ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list(9))).build());
+        BUDGET=integer("alchemy_budget");RESERVE=integer("alchemy_reserve");STATUS=integer("alchemy_automation_status");
         MENU=Registry.register(BuiltInRegistries.MENU,Jugcraft.id("alchemy_automation"),new MenuType<>(AlchemyAutomationMenu::new,FeatureFlags.DEFAULT_FLAGS));
         ServerTickEvents.END_SERVER_TICK.register(server->{for(var p:server.getPlayerList().getPlayers())if(p.tickCount%20==0)pulsePlayer(p);});
     }
+    private static DataComponentType<Integer> integer(String name){return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,Jugcraft.id(name),DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());}
+    public static int budget(ItemStack a){return Math.clamp(a.getOrDefault(BUDGET,16),1,64);}
+    public static int reserve(ItemStack a){return Math.clamp(a.getOrDefault(RESERVE,0),0,1_000_000);}
+    private static boolean stopped(ItemStack a,int reason){a.set(STATUS,reason);return false;}
     public static boolean matches(ItemStack artifact,ItemStack candidate){
         return !candidate.isEmpty()&&artifact.getOrDefault(FILTER,List.of()).contains(BuiltInRegistries.ITEM.getKey(candidate.getItem()).toString())
                 &&AlchemicalWorkshopBlockEntity.material(candidate)!=null;
@@ -77,16 +83,17 @@ public final class AlchemyAutomation {
     }
     /** Consume only the configured item identities, never patched stacks; output must fit before any conversion. */
     public static boolean convert(ServerPlayer p,Container c,ItemStack artifact,int first,int end){
-        if(!AlchemicalGear.ready(p)||!artifact.has(AlchemicalGear.ACTIVE))return false;
+        if(!AlchemicalGear.ready(p)||!artifact.has(AlchemicalGear.ACTIVE))return stopped(artifact,1);
+        if(artifact.getOrDefault(FILTER,List.of()).isEmpty())return stopped(artifact,2);
         boolean voiding=artifact.is(AlchemyStorage.ITEMS.get("void_ring"));
         var key=Identifier.tryParse(artifact.getOrDefault(AlchemyPatterns.TARGET,"minecraft:diamond"));
         var target=key==null?ItemStack.EMPTY:new ItemStack(BuiltInRegistries.ITEM.getValue(key));
         var targetMaterial=AlchemicalWorkshopBlockEntity.material(target);
         long price=targetMaterial!=null&&targetMaterial.formable()?Assay.form(targetMaterial,1):0;
         int output=voiding?-1:room(c,target,first,end);
-        if(!voiding&&(price<=0||output<0))return false;
+        if(!voiding&&(price<=0||output<0))return stopped(artifact,output<0?3:4);
         boolean changed=false;
-        for(int i=first,budget=16;i<end&&budget>0;i++){
+        for(int i=first,budget=budget(artifact);i<end&&budget>0;i++){
             var feed=c.getItem(i);if(feed==artifact||!matches(artifact,feed)||!voiding&&feed.is(target.getItem()))continue;
             var material=AlchemicalWorkshopBlockEntity.material(feed);if(material==null||!material.dissolvable())continue;
             if(!voiding&&Assay.dissolve(material,1)>=price)continue;
@@ -94,15 +101,17 @@ public final class AlchemyAutomation {
             long gain=Assay.dissolve(material,count);if(gain<=0)continue;
             feed.shrink(count);Assaying.setBalance(p,Assaying.balance(p)+gain);budget-=count;changed=true;
         }
-        if(!voiding&&changed&&Assaying.balance(p)>=price){
+        if(!voiding&&Assaying.balance(p)-reserve(artifact)>=price){
             output=room(c,target,first,end);
-            if(output>=0){var out=c.getItem(output);if(out.isEmpty())c.setItem(output,target);else out.grow(1);Assaying.setBalance(p,Assaying.balance(p)-price);}
+            if(output>=0){var out=c.getItem(output);if(out.isEmpty())c.setItem(output,target);else out.grow(1);Assaying.setBalance(p,Assaying.balance(p)-price);changed=true;}
         }
+        artifact.set(STATUS,changed?0:voiding?5:Assaying.balance(p)-reserve(artifact)<price?6:5);
         if(changed)c.setChanged();return changed;
     }
     public static int room(Container c,ItemStack item,int first,int end){
         if(item.isEmpty()||!AlchemyStorage.canStore(item))return -1;
-        for(int i=first;i<end;i++){var s=c.getItem(i);if(s.isEmpty()||ItemStack.isSameItemSameComponents(s,item)&&s.getCount()<s.getMaxStackSize())return i;}return -1;
+        for(int i=first;i<end;i++){var s=c.getItem(i);if(!s.isEmpty()&&ItemStack.isSameItemSameComponents(s,item)&&s.getCount()<s.getMaxStackSize())return i;}
+        for(int i=first;i<end;i++)if(c.getItem(i).isEmpty())return i;return -1;
     }
     public static boolean gather(ServerPlayer p,Container c,Vec3 center){
         var drops=new ArrayList<ItemEntity>();

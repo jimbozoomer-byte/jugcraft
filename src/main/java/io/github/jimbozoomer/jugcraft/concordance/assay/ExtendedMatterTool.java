@@ -57,7 +57,7 @@ public final class ExtendedMatterTool extends Item {
     public ExtendedMatterTool(Properties properties, Kind kind, boolean red) { super(properties); this.kind = kind; this.red = red; }
     public int mode(ItemStack stack) { return Math.floorMod(stack.getOrDefault(DarkMatter.MODE, 0), kind.modes.length + 1); }
     public int cost() { return kind == Kind.SWORD || kind == Kind.KATAR && kind.modes.length > 1 ? 16 : kind == Kind.HAMMER || kind == Kind.MORNING_STAR ? 12 : 8; }
-    private String selected(ItemStack stack) { return mode(stack) == 0 ? "single" : kind.modes[mode(stack) - 1]; }
+    public String selected(ItemStack stack) { return mode(stack) == 0 ? "single" : kind.modes[mode(stack) - 1]; }
 
     @Override public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (player instanceof ServerPlayer server && RateGate.allow(server, "extended_matter_mode", 4)) {
@@ -115,7 +115,7 @@ public final class ExtendedMatterTool extends Item {
         return result;
     }
 
-    private boolean matches(BlockState state) {
+    public boolean matches(BlockState state) {
         return switch (kind) {
             case PICKAXE, HAMMER -> state.is(BlockTags.MINEABLE_WITH_PICKAXE);
             case AXE -> state.is(BlockTags.MINEABLE_WITH_AXE);

@@ -33,7 +33,7 @@ public final class AlchemicalWorkshopScreen extends AbstractContainerScreen<Alch
         if(fuel!=null)fuel.setMessage(ui("fuel_"+menu.fuelTarget()));
         buttons[0].setMessage(ui(menu.paused() ? "resume" : "pause")); buttons[0].active = menu.canOperate();
         buttons[1].active = menu.canOperate() && menu.wallet() > 0 && menu.essence() < menu.capacity();
-        buttons[2].active = menu.canOperate() && menu.essence() > 0 && menu.wallet() < 1000000;
+        buttons[2].active = menu.canOperate() && menu.essence() > 0 && menu.wallet() < io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE;
     }
     @Override protected void containerTick() { super.containerTick(); refresh(); }
     @Override public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float delta) { extractBackground(g,mx,my,delta); super.extractRenderState(g,mx,my,delta); extractTooltip(g,mx,my); }

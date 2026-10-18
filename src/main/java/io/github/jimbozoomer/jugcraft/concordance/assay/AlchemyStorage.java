@@ -114,7 +114,7 @@ public final class AlchemyStorage {
             }
             if(!AlchemicalGear.ready(p)) {p.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.assay.unknown"));return InteractionResult.FAIL;}
             switch(name) {
-                case "transmutation_tablet" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new TransmutationMenu(id,inv,()->holds(p,this)),held.getHoverName()));
+                case "transmutation_tablet" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyPatternMenu(id,inv,()->holds(p,this),ItemStack.EMPTY),held.getHoverName()));
                 case "alchemy_tome" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyStorageCatalogueMenu(id,inv),held.getHoverName()));
                 case "gem_of_eternal_density" -> p.openMenu(new SimpleMenuProvider((id,inv,who)->new AlchemyAutomationMenu(id,inv,held,hand==InteractionHand.MAIN_HAND?inv.getSelectedSlot():net.minecraft.world.entity.player.Inventory.SLOT_OFFHAND),held.getHoverName()));
                 case "void_ring" -> {

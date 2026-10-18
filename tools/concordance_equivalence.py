@@ -32,8 +32,8 @@ def rid(path):
 # ------------------------------------------------------------------------------------------------------- numbers
 
 # Java: equivalence/Assay.java, equivalence/EquivalenceParser.java, equivalence/CycleAudit.java.
-FORM_MARKUP = Fraction(5, 4)
-MAX_BALANCE = 1_000_000
+FORM_MARKUP = Fraction(1, 1)
+MAX_BALANCE = 2_000_000_000
 MAX_BATCH = 64
 MAX_GRAINS = 100_000
 MAX_PER = 64
@@ -46,6 +46,7 @@ CONFIRM_TICKS = 200
 EXCLUDED_TAG = rid("equivalence/excluded")
 
 REASONS = {
+    "stateful": "empty stored contents and reset custom item state first",
     "excluded": "the scale will not weigh it: it is more than matter",
     "magical": "it carries magic the scale will not weigh",
     "inventory": "it holds other things",
@@ -344,7 +345,7 @@ MESSAGES = {
 }
 TOOLTIPS = {
     "assay_specimen": "Raw matter: sneak and use to examine it",
-    "jade.scale": "Weighs catalogued mundane materials",
+    "jade.scale": "Weighs default items into essence",
 }
 
 
@@ -373,30 +374,25 @@ def codex():
          "the stack into your ledger. With an empty main hand and a material in your other hand, use it to **form** one "
          f"more of it (the one you hold is the scale's pattern and is kept). Dissolving pays the exact worth of the whole "
          f"stack rounded down; forming costs {FORM_MARKUP.numerator}/{FORM_MARKUP.denominator} of the worth rounded up, so "
-         f"every round trip loses. Your ledger holds at most {MAX_BALANCE:,} essence.", rid("assayers_scale")),
+         f"there is no surcharge and a round trip cannot gain value. Your ledger holds at most {MAX_BALANCE:,} essence.", rid("assayers_scale")),
         ("text", "What Is Weighed",
-         "Only catalogued, plain materials. The scale refuses anything that holds other things, is named, written or "
-         "marked, carries a creature or a block's state, has been changed in any other way, or carries magic: research, "
-         "spells, relics, rings, living equipment, bound spirits. Owning something, or seeing it in a recipe book, never "
-         "makes it weighable."),
-        ("text", "The Catalogue (essence each)", table),
-        ("text", "A Balanced Graph",
-         "Every recipe between catalogued materials is declared, with the containers it gives back and its byproducts, "
-         "and none may be worth more after than before. The scale's own dissolving and forming are part of the graph. "
-         "**/jugcraft concordance equivalence audit** (operators) searches every cycle for a profitable one. Matter enters "
-         "only from declared sources:\\\n" + sources),
+         "All registered default item types have a value. Empty stored contents and charge first: custom state is never copied or silently discarded. The tablet teaches an item only after consuming it; its learned menu creates the normal default item at its value."),
+        ("text", "Current Values",
+         "Iron: **256**; gold: **2,048**; diamond: **8,192**; coal: **128**; logs: **32**; planks: **8**. The Tome shows the current full catalogue. Custom items use recipe-derived or provisional local values; those are not historical EE prices."),
+        ("text", "Conservation",
+         "Dissolve for essence, then spend that essence on learned items. No extra formation fee. Fractional batches round down when dissolved and up when formed. Machine buffers, wallet and stars conserve transfers. Industrial and custom-item prices remain subject to owner playtest tuning."),
     ]
     return {
         ("equivalence", "assay"): {
             "name": "Assay", "x": 0, "y": 0, "icon": rid("assayers_scale"), "condition": None,
-            "description": "Bounded material equivalence and the Assayer's Scale",
+            "description": "Learn and exchange items through shared essence",
             "pages": pages,
         },
     }
 
 
 CATEGORY = {"equivalence": {"name": "Equivalence", "icon": rid("assayers_scale"), "sort": 12,
-                            "description": "Mundane matter weighed exactly, and never anything more"}}
+                            "description": "Material equivalence, learned patterns and magical workshops"}}
 
 
 # ------------------------------------------------------------------------------------------------- data and assets

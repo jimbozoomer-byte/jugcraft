@@ -47,7 +47,7 @@ public class AlchemicalGearGameTests {
         slot(m,0,new ItemStack(Items.IRON_INGOT,4)); slot(m,1,new ItemStack(Items.IRON_INGOT));
         press(m,p,0); h.assertTrue(m.confirming() && m.getSlot(0).getItem().getCount()==4 && Assaying.balance(p)==1000,"First click only confirms");
         press(m,p,0); h.assertTrue(m.getSlot(0).getItem().isEmpty() && Assaying.balance(p)==2024,"Four ingots dissolve once");
-        press(m,p,1); h.assertTrue(m.getSlot(1).getItem().getCount()==1 && m.getSlot(2).getItem().getCount()==1 && Assaying.balance(p)==1704,"Sample kept; output charged 320");
+        press(m,p,1); h.assertTrue(m.getSlot(1).getItem().getCount()==1 && m.getSlot(2).getItem().getCount()==1 && Assaying.balance(p)==1768,"Sample kept; output charged 256");
         m.removed(p); h.assertTrue(p.getInventory().countItem(Items.IRON_INGOT)==2,"Closing returns sample and output"); h.succeed();
     }
     @GameTest(maxTicks=20) public void changedInputRequiresFreshConfirmation(GameTestHelper h) {
@@ -69,8 +69,8 @@ public class AlchemicalGearGameTests {
     @GameTest(maxTicks=20) public void ledgerCapAndLargePreviewAreExact(GameTestHelper h) {
         var p=player(h); Assaying.setBalance(p,Assay.MAX_BALANCE-1); var m=new TransmutationMenu(1,p.getInventory());
         slot(m,0,new ItemStack(Items.GOLD_BLOCK,64));
-        h.assertTrue(m.balance()==999999 && m.gain()==589824 && !m.canDissolve(),"32-bit values survive short menu data; full ledger blocks whole stack");
-        press(m,p,0); press(m,p,0); h.assertTrue(Assaying.balance(p)==999999 && m.getSlot(0).getItem().getCount()==64,"No partial surprise dissolve"); h.succeed();
+        h.assertTrue(m.balance()==Assay.MAX_BALANCE-1 && m.gain()==1179648 && !m.canDissolve(),"32-bit values survive short menu data; full ledger blocks whole stack");
+        press(m,p,0); press(m,p,0); h.assertTrue(Assaying.balance(p)==Assay.MAX_BALANCE-1 && m.getSlot(0).getItem().getCount()==64,"No partial surprise dissolve"); h.succeed();
     }
     @GameTest(maxTicks=20) public void missingStoneAndForeignPlayerCannotTransact(GameTestHelper h) {
         var p=player(h); var m=new TransmutationMenu(1,p.getInventory()); slot(m,1,new ItemStack(Items.IRON_INGOT));

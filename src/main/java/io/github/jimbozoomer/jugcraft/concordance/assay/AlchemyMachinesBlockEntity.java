@@ -39,9 +39,9 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
         WORKING=7,EMPTY=8,FULL=9,NO_ESSENCE=10,BAD_ARTIFACT=11,ARMED=12;
     private NonNullList<ItemStack> items=NonNullList.withSize(SLOTS,ItemStack.EMPTY);
     private @Nullable UUID owner;
-    private int essence,status,progress,scanCursor;
+    private int essence,status,progress,scanCursor,range=6,lastSpent,lastTargets;
     private float experience;
-    private boolean paused;
+    private boolean paused, authorized;
     private long lastBonusSecond=Long.MIN_VALUE;
     public boolean bonusWork(){if(level==null||lastBonusSecond==level.getGameTime()/20||!readyOwner())return false;lastBonusSecond=level.getGameTime()/20;return furnaceStep();}
     private ItemStack displayedArtifact=ItemStack.EMPTY,lastSentArtifact=ItemStack.EMPTY;
@@ -52,6 +52,9 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     public int essence(){return essence;}
     public int status(){return status;}
     public int progress(){return progress;}
+    public int range(){return range;} public int lastTargets(){return lastTargets;} public void recordTargets(int n){lastTargets+=n;} public int lastSpent(){return lastSpent;}
+    public void cycleRange(){range=range>=6?2:range+2;setChanged();if(level instanceof ServerLevel server)server.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(),Block.UPDATE_CLIENTS);}
+    public String artifactId(){return BuiltInRegistries.ITEM.getKey(items.get(1).getItem()).getPath();}
     public boolean paused(){return paused;}
     public @Nullable UUID owner(){return owner;}
     /** Public pedestal appearance only: no inventory payload, private item data, charge or owner UUID. */
@@ -59,7 +62,7 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     private ItemStack visualArtifact(){return kind()==AlchemyMachines.Kind.PEDESTAL&&pedestalArtifact(items.get(1))?new ItemStack(items.get(1).getItem()):ItemStack.EMPTY;}
     public void setEssence(int value){essence=Math.clamp(value,0,capacity());setChanged();}
     public void setPaused(boolean value){paused=value;status=value?PAUSED:READY;if(level instanceof ServerLevel server&&getBlockState().getValue(AlchemyMachinesBlock.ACTIVE))server.setBlock(worldPosition,getBlockState().setValue(AlchemyMachinesBlock.ACTIVE,false),Block.UPDATE_CLIENTS);setChanged();}
-    public void placedBy(ServerPlayer player){owner=player.getUUID();setChanged();}
+    public void placedBy(ServerPlayer player){owner=player.getUUID();authorized=Assaying.knows(player);setChanged();}
     private boolean related(UUID by){return owner!=null&&(owner.equals(by)||JugcraftParties.sameParty(owner,by));}
     public boolean mayUse(ServerPlayer player){return related(player.getUUID())&&player.isAlive()&&!player.isSpectator()&&level instanceof ServerLevel server&&Authority.mayChange(server,player,worldPosition);}
     @Override public boolean stillValid(Player p){return level!=null&&level.getBlockEntity(worldPosition)==this&&p.distanceToSqr(Vec3.atCenterOf(worldPosition))<=64&&(!(p instanceof ServerPlayer player)||mayUse(player));}
@@ -67,22 +70,27 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
         if(!Assaying.enabled())return DISABLED;
         if(paused||level!=null&&level.hasNeighborSignal(worldPosition))return PAUSED;
         if(player==null||owner==null||!owner.equals(player.getUUID())||!player.isAlive()||player.isSpectator())return OWNER_AWAY;
-        if(!Assaying.knows(player))return RESEARCH;
+        if(!AlchemyOwner.knows(player,authorized))return RESEARCH;
+        if(!Authority.isStandIn(player))authorized=true;
         if(!(level instanceof ServerLevel server)||!Assaying.problems(server).isEmpty())return UNBALANCED;
         return Authority.mayChange(server,player,worldPosition)?READY:DENIED;
     }
-    public boolean readyOwner(){return level instanceof ServerLevel server&&gate(Authority.present(server,owner))==READY;}
+    private ServerPlayer actor(ServerLevel server){
+        return kind()==AlchemyMachines.Kind.FURNACE||kind()==AlchemyMachines.Kind.RELAY?AlchemyOwner.factory(server,owner,authorized):Authority.present(server,owner);
+    }
+    public boolean readyOwner(){return level instanceof ServerLevel server&&gate(actor(server))==READY;}
     /** Called only by a touching workshop, with both end-point permissions checked. Never draws an unloaded owner. */
     public int acceptEssence(ServerPlayer from,int offered){
         if(offered<=0||!related(from.getUUID())||!(level instanceof ServerLevel server)||!Authority.mayChange(server,from,worldPosition)
-                ||gate(owner.equals(from.getUUID())?from:Authority.present(server,owner))!=READY||kind()==AlchemyMachines.Kind.NOVA)return 0;
+                ||gate(owner.equals(from.getUUID())?from:actor(server))!=READY||kind()==AlchemyMachines.Kind.NOVA)return 0;
         int accepted=Math.min(offered,capacity()-essence);setEssence(essence+accepted);return accepted;
     }
     public static void tick(Level level,BlockPos pos,BlockState state,AlchemyMachinesBlockEntity be){
-        if(level instanceof ServerLevel server&&Math.floorMod(level.getGameTime()+pos.asLong(),20)==0)be.pulse(Authority.present(server,be.owner));
+        if(level instanceof ServerLevel server&&Math.floorMod(level.getGameTime()+pos.asLong(),20)==0)be.pulse(be.actor(server));
     }
     public void pulse(@Nullable ServerPlayer player){
         if(!(level instanceof ServerLevel server))return;
+        if(player==null)player=actor(server);
         status=gate(player);boolean worked=false;
         if(status==READY){
             if(kind()==AlchemyMachines.Kind.RELAY)worked=relay(player);
@@ -151,28 +159,29 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     public static boolean pedestalArtifact(ItemStack stack){return Set.of("black_hole_band","archangel_smite","ignition_ring","zero_ring","watch_of_flowing_time","mind_stone","repair_talisman","harvest_goddess_band","body_stone","soul_stone","life_stone","swiftwolf_rending_gale").contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath())&&BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace().equals("jugcraft");}
     private boolean pedestal(ServerPlayer player){
         var artifact=items.get(1);if(!pedestalArtifact(artifact)){status=BAD_ARTIFACT;return false;}
-        String id=BuiltInRegistries.ITEM.getKey(artifact.getItem()).getPath();boolean worked=false;
+        String id=BuiltInRegistries.ITEM.getKey(artifact.getItem()).getPath();boolean worked=false;int before=essence;lastTargets=0;lastSpent=0;
         if(AlchemyPedestalEffects.EXTRA.contains(id))worked=AlchemyPedestalEffects.run(this,player,id);
         else if(id.equals("harvest_goddess_band")){
             ServerLevel server=(ServerLevel)level;
             // Persisted rolling cursor: at most49 cells each second, at most4 growths, no full farm scan.
             for(int n=0,changed=0;n<49&&changed<4;n++){
                 int cell=scanCursor;scanCursor=(scanCursor+1)%147;BlockPos pos=worldPosition.offset(cell%7-3,cell/49-1,(cell/7)%7-3);
-                if(essence<16||!server.hasChunkAt(pos))continue;var state=server.getBlockState(pos);
-                if(AlchemyPedestalEffects.harvest(this,player,pos,state)){worked=true;changed++;continue;}
+                if(essence<16||!server.hasChunkAt(pos)||Math.abs(pos.getX()-worldPosition.getX())>range||Math.abs(pos.getZ()-worldPosition.getZ())>range)continue;var state=server.getBlockState(pos);
+                if(AlchemyPedestalEffects.harvest(this,player,pos,state)){worked=true;changed++;lastTargets++;continue;}
                 if(state.getBlock() instanceof CropBlock crop&&!crop.isMaxAge(state)&&state.canSurvive(server,pos)&&Authority.mayChange(server,player,pos)){
                     if(crop instanceof io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock organism){
                         if(!Authority.mayChange(server,player,pos.below())||organism.hasten(server,pos,state,server.getRandom())!=io.github.jimbozoomer.jugcraft.concordance.garden.OrganismCropBlock.Growth.GREW)continue;
                     }else server.setBlock(pos,crop.getStateForAge(crop.getAge(state)+1),Block.UPDATE_ALL);
-                    essence-=16;worked=true;changed++;
+                    essence-=16;worked=true;changed++;lastTargets++;
                 }
             }
         }else if(id.equals("swiftwolf_rending_gale"))worked=ward(player);
         else{
             List<ServerPlayer> nearby=new ArrayList<>();
-            ((ServerLevel)level).getEntities(EntityTypeTest.forClass(ServerPlayer.class),new AABB(worldPosition).inflate(6),
-                target->related(target.getUUID())&&target.isAlive()&&!target.isSpectator()&&target.distanceToSqr(Vec3.atCenterOf(worldPosition))<=36,nearby,8);
+            ((ServerLevel)level).getEntities(EntityTypeTest.forClass(ServerPlayer.class),new AABB(worldPosition).inflate(range),
+                target->related(target.getUUID())&&target.isAlive()&&!target.isSpectator()&&target.distanceToSqr(Vec3.atCenterOf(worldPosition))<=range*range,nearby,8);
             for(var target:nearby){
+                int beforeTarget=essence;
                 if(!Authority.mayChange((ServerLevel)level,player,target.blockPosition()))continue;
                 if(id.equals("repair_talisman")){
                     for(var slot:new EquipmentSlot[]{EquipmentSlot.MAINHAND,EquipmentSlot.OFFHAND,EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET}){
@@ -183,23 +192,24 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
                     if(!id.equals("body_stone")&&essence>=32&&target.getHealth()<target.getMaxHealth()){target.heal(1);essence-=32;worked=true;}
                     if(!id.equals("soul_stone")&&essence>=32&&target.getFoodData().needsFood()){target.getFoodData().eat(1,0);essence-=32;worked=true;}
                 }
+                if(essence<beforeTarget)lastTargets++;
             }
         }
-        status=worked?WORKING:essence<4?NO_ESSENCE:READY;return worked;
+        lastSpent=Math.max(0,before-essence);status=worked?WORKING:essence<4?NO_ESSENCE:READY;return worked;
     }
     private boolean ward(ServerPlayer player){
         if(essence<4){status=NO_ESSENCE;return false;}ServerLevel server=(ServerLevel)level;
-        List<LivingEntity> mobs=new ArrayList<>();server.getEntities(EntityTypeTest.forClass(LivingEntity.class),new AABB(worldPosition).inflate(6),m->m instanceof Enemy&&m.isAlive(),mobs,16);
+        List<LivingEntity> mobs=new ArrayList<>();server.getEntities(EntityTypeTest.forClass(LivingEntity.class),new AABB(worldPosition).inflate(range),m->m instanceof Enemy&&m.isAlive(),mobs,16);
         boolean worked=false;int count=0;
         var cause=Cause.of(player.getUUID(),Cause.Origin.SHRINE,BuiltInRegistries.BLOCK.getKey(getBlockState().getBlock()).toString(),ConcordanceEffects.nextSerial());
         var ledger=new Ledger(new Ledger.Limits(8,8*EffectKind.MOVEMENT.work,0));
         var context=new ConcordanceEffects.Context(server,cause,player,ledger,"ward_push",Vec3.atCenterOf(worldPosition));
         for(var mob:mobs){
             if(count>=8||essence<4)break;Vec3 delta=mob.position().subtract(Vec3.atCenterOf(worldPosition));
-            if(delta.lengthSqr()>36||!Authority.mayChange(server,player,mob.blockPosition())||!Authority.mayStrike(player,mob)
+            if(delta.lengthSqr()>range*range||!Authority.mayChange(server,player,mob.blockPosition())||!Authority.mayStrike(player,mob)
                 ||server.clip(new ClipContext(Vec3.atCenterOf(worldPosition).add(0,.75,0),mob.getEyePosition(),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player)).getType()!=HitResult.Type.MISS)continue;
             if(ConcordanceEffects.apply(context,EffectSpec.of(EffectKind.MOVEMENT,Intent.HARMFUL,5,0),mob).applied()){
-                essence-=4;worked=true;count++;
+                essence-=4;worked=true;count++;lastTargets++;
             }
         }
         status=worked?WORKING:READY;return worked;
@@ -227,7 +237,7 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     }
     private boolean automationAllowed(@Nullable Direction side){
         if(!(level instanceof ServerLevel server)||(kind()!=AlchemyMachines.Kind.FURNACE&&kind()!=AlchemyMachines.Kind.RELAY))return false;
-        ServerPlayer p=Authority.present(server,owner);BlockPos neighbour=side==null?worldPosition:worldPosition.relative(side);
+        ServerPlayer p=actor(server);BlockPos neighbour=side==null?worldPosition:worldPosition.relative(side);
         return gate(p)==READY&&server.hasChunkAt(neighbour)&&Authority.mayChange(server,p,neighbour);
     }
     @Override public int[] getSlotsForFace(Direction side){return kind()==AlchemyMachines.Kind.FURNACE?(side==Direction.DOWN?OUTPUT:INPUT):kind()==AlchemyMachines.Kind.RELAY&&side!=Direction.DOWN?INPUT:NONE;}
@@ -249,10 +259,10 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     @Override public void clearContent(){items.clear();setChanged();}
     @Override public void preRemoveSideEffects(BlockPos pos,BlockState state){if(level instanceof ServerLevel server){Containers.dropContents(server,pos,this);clearContent();int whole=(int)experience;if(whole>0)ExperienceOrb.award(server,Vec3.atCenterOf(pos),whole);experience=0;}}
     @Override protected void loadAdditional(ValueInput input){
-        if(input.getBooleanOr("display_only",false)){displayedArtifact=input.read("display_artifact",ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);return;}
-        super.loadAdditional(input);items=NonNullList.withSize(SLOTS,ItemStack.EMPTY);ContainerHelper.loadAllItems(input,items);owner=input.read("owner",UUIDUtil.CODEC).orElse(null);essence=Math.clamp(input.getIntOr("essence",0),0,capacity());paused=input.getBooleanOr("paused",false);progress=Math.clamp(input.getIntOr("progress",0),0,40);experience=Math.max(0,input.getFloatOr("experience",0));scanCursor=Math.floorMod(input.getIntOr("scan_cursor",0),147);displayedArtifact=visualArtifact();lastSentArtifact=displayedArtifact.copy();
+        if(input.getBooleanOr("display_only",false)){range=Math.clamp(input.getIntOr("effect_range",6),2,6);displayedArtifact=input.read("display_artifact",ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);return;}
+        super.loadAdditional(input);items=NonNullList.withSize(SLOTS,ItemStack.EMPTY);ContainerHelper.loadAllItems(input,items);owner=input.read("owner",UUIDUtil.CODEC).orElse(null);authorized=input.getBooleanOr("factory_authorized",false);range=Math.clamp(input.getIntOr("effect_range",6),2,6);essence=Math.clamp(input.getIntOr("essence",0),0,capacity());paused=input.getBooleanOr("paused",false);progress=Math.clamp(input.getIntOr("progress",0),0,40);experience=Math.max(0,input.getFloatOr("experience",0));scanCursor=Math.floorMod(input.getIntOr("scan_cursor",0),147);displayedArtifact=visualArtifact();lastSentArtifact=displayedArtifact.copy();
     }
-    @Override protected void saveAdditional(ValueOutput out){super.saveAdditional(out);Saved.stamp(out,1);ContainerHelper.saveAllItems(out,items);if(owner!=null)out.store("owner",UUIDUtil.CODEC,owner);out.putInt("essence",essence);out.putBoolean("paused",paused);out.putInt("progress",progress);out.putFloat("experience",experience);out.putInt("scan_cursor",scanCursor%147);}
+    @Override protected void saveAdditional(ValueOutput out){super.saveAdditional(out);Saved.stamp(out,1);ContainerHelper.saveAllItems(out,items);if(owner!=null)out.store("owner",UUIDUtil.CODEC,owner);out.putInt("effect_range",range);out.putBoolean("factory_authorized",authorized);out.putInt("essence",essence);out.putBoolean("paused",paused);out.putInt("progress",progress);out.putFloat("experience",experience);out.putInt("scan_cursor",scanCursor%147);}
     @Override protected void collectImplicitComponents(DataComponentMap.Builder c){super.collectImplicitComponents(c);c.set(AlchemicalWorkshops.ESSENCE,essence);}
     @Override protected void applyImplicitComponents(DataComponentGetter c){super.applyImplicitComponents(c);essence=Math.clamp(c.getOrDefault(AlchemicalWorkshops.ESSENCE,0),0,capacity());}
     @Override public void setChanged(){
@@ -261,6 +271,6 @@ public final class AlchemyMachinesBlockEntity extends BlockEntity implements Wor
     }
     @Override public Packet<ClientGamePacketListener> getUpdatePacket(){return ClientboundBlockEntityDataPacket.create(this);}
     @Override public CompoundTag getUpdateTag(HolderLookup.Provider registries){
-        var out=TagValueOutput.createWithContext(ProblemReporter.DISCARDING,registries);out.putBoolean("display_only",true);out.store("display_artifact",ItemStack.OPTIONAL_CODEC,visualArtifact());return out.buildResult();
+        var out=TagValueOutput.createWithContext(ProblemReporter.DISCARDING,registries);out.putBoolean("display_only",true);out.putInt("effect_range",range);out.store("display_artifact",ItemStack.OPTIONAL_CODEC,visualArtifact());return out.buildResult();
     }
 }

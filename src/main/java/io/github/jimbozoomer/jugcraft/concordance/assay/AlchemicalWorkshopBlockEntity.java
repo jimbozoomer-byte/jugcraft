@@ -33,7 +33,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
     public int viewers;
     public final AlchemyLid lid=new AlchemyLid();
     private long lastBonusTick=Long.MIN_VALUE;
-    private boolean paused;
+    private boolean paused, authorized;
 
     public AlchemicalWorkshopBlockEntity(BlockPos pos, BlockState state) { super(AlchemicalWorkshops.ENTITY, pos, state); }
     public boolean collector() { return ((AlchemicalWorkshopBlock)getBlockState().getBlock()).collector; }
@@ -48,7 +48,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
     public int acceptEssence(ServerPlayer from, int offered) {
         if (offered <= 0 || collector() || !related(from.getUUID()) || !(level instanceof ServerLevel server)
                 || !Authority.mayChange(server, from, worldPosition)
-                || gate(owner.equals(from.getUUID()) ? from : Authority.present(server, owner)) != IDLE || targetStatus() != WAITING) return 0;
+                || gate(owner.equals(from.getUUID()) ? from : AlchemyOwner.factory(server, owner, authorized)) != IDLE || targetStatus() != WAITING) return 0;
         int moved = Math.min(offered, capacity() - essence); setEssence(essence + moved); return moved;
     }
     public static final String[] FUELS={"minecraft:coal","jugcraft:alchemical_coal","jugcraft:mobius_fuel","jugcraft:aeternalis_fuel"};
@@ -62,7 +62,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
         if(fuelTarget==0)return false;
         for(int i=INPUT_FIRST;i<SLOTS;i++){
             var input=items.get(i);int stage=fuelTier(input);if(stage<0||stage>=fuelTarget)continue;
-            int price=new int[]{1024,4096,16384}[stage];if(essence<price)continue;
+            long price=Math.max(1,Assay.form(Assaying.catalog().material(FUELS[stage+1]),1)-Assay.dissolve(Assaying.catalog().material(FUELS[stage]),1));if(essence<price)continue;
             var next=new ItemStack(BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(FUELS[stage+1])));
             int output=-1;
             for(int o=OUTPUT_FIRST;o<SLOTS;o++)if(o!=i&&(items.get(o).isEmpty()||ItemStack.isSameItemSameComponents(items.get(o),next)&&items.get(o).getCount()<items.get(o).getMaxStackSize())){output=o;break;}
@@ -85,7 +85,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
             server.setBlock(worldPosition, getBlockState().setValue(AlchemicalWorkshopBlock.ACTIVE, false), Block.UPDATE_CLIENTS);
         setChanged();
     }
-    public void placedBy(ServerPlayer player) { owner = player.getUUID(); setChanged(); }
+    public void placedBy(ServerPlayer player) { owner = player.getUUID(); authorized=Assaying.knows(player); setChanged(); }
     private boolean related(UUID by) { return owner != null && (owner.equals(by) || JugcraftParties.sameParty(owner, by)); }
     public boolean mayUse(ServerPlayer player) {
         return related(player.getUUID()) && !player.isSpectator() && player.isAlive()
@@ -122,18 +122,20 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
         if (!Assaying.enabled()) return DISABLED;
         if (paused || (level != null && level.hasNeighborSignal(worldPosition))) return PAUSED;
         if (player == null || owner == null || !owner.equals(player.getUUID()) || !player.isAlive() || player.isSpectator()) return OWNER_AWAY;
-        if (!Assaying.knows(player)) return RESEARCH;
+        if (!AlchemyOwner.knows(player,authorized)) return RESEARCH;
+        if(!Authority.isStandIn(player))authorized=true;
         if (!(level instanceof ServerLevel server) || !Assaying.problems(server).isEmpty()) return UNBALANCED;
         return Authority.mayChange(server, player, worldPosition) ? IDLE : DENIED;
     }
     public static void tick(Level level, BlockPos pos, BlockState state, AlchemicalWorkshopBlockEntity be) {
         if(!be.collector())be.lid.tick(level,pos,be.viewers);
         if (level instanceof ServerLevel server && Math.floorMod(level.getGameTime() + pos.asLong(), 20) == 0)
-            be.pulse(Authority.present(server, be.owner));
+            be.pulse(AlchemyOwner.factory(server, be.owner, be.authorized));
     }
     /** Actual server pulse; public for deterministic server tests, never called from a client request. */
     public void pulse(@Nullable ServerPlayer player) {
         if (!(level instanceof ServerLevel server)) return;
+        if(player==null)player=AlchemyOwner.factory(server,owner,authorized);
         status = gate(player); boolean worked = false;
         if (status == IDLE) {
             if (collector()) {
@@ -150,7 +152,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
                     BlockPos to = worldPosition.relative(direction);
                     if (budget <= 0 || !server.hasChunkAt(to)) continue;
                     if (server.getBlockEntity(to) instanceof AlchemicalWorkshopBlockEntity other && !other.collector()
-                            && other.related(owner) && other.gate(owner.equals(other.owner) ? player : Authority.present(server, other.owner)) == IDLE
+                            && other.related(owner) && other.gate(owner.equals(other.owner) ? player : AlchemyOwner.factory(server, other.owner, other.authorized)) == IDLE
                             && other.targetStatus() == WAITING && Authority.mayChange(server, player, to)) {
                         int moved = Math.min(budget, other.capacity() - other.essence);
                         other.setEssence(other.essence + moved); essence -= moved; budget -= moved; worked |= moved > 0;
@@ -205,7 +207,7 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
     // Hoppers cannot touch the star or retained sample. Native sided-container adapters also respect these checks.
     private boolean automationAllowed(@Nullable Direction side) {
         if (!(level instanceof ServerLevel server)) return false;
-        ServerPlayer player = Authority.present(server, owner);
+        ServerPlayer player = AlchemyOwner.factory(server, owner, authorized);
         if (gate(player) != IDLE) return false;
         BlockPos neighbour = side == null ? worldPosition : worldPosition.relative(side);
         return server.hasChunkAt(neighbour) && Authority.mayChange(server, player, neighbour);
@@ -235,13 +237,13 @@ public final class AlchemicalWorkshopBlockEntity extends BlockEntity implements 
     }
     @Override protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input); items = NonNullList.withSize(SLOTS, ItemStack.EMPTY); ContainerHelper.loadAllItems(input, items);
-        owner = input.read("owner", UUIDUtil.CODEC).orElse(null);
+        owner = input.read("owner", UUIDUtil.CODEC).orElse(null); authorized=input.getBooleanOr("factory_authorized",false);
         essence = Math.clamp(input.getIntOr("essence", 0), 0, capacity()); paused = input.getBooleanOr("paused", false);fuelTarget=Math.clamp(input.getIntOr("fuel_target",0),0,3);
     }
     @Override protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output); Saved.stamp(output, 1); ContainerHelper.saveAllItems(output, items);
         if (owner != null) output.store("owner", UUIDUtil.CODEC, owner);
-        output.putInt("essence", essence); output.putBoolean("paused", paused);output.putInt("fuel_target",fuelTarget);
+        output.putBoolean("factory_authorized",authorized); output.putInt("essence", essence); output.putBoolean("paused", paused);output.putInt("fuel_target",fuelTarget);
     }
     @Override protected void collectImplicitComponents(DataComponentMap.Builder components) {
         super.collectImplicitComponents(components); components.set(AlchemicalWorkshops.ESSENCE, essence);

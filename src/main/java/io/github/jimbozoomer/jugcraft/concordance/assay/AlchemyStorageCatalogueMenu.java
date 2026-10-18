@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 public final class AlchemyStorageCatalogueMenu extends AbstractContainerMenu {
     private final Player owner;
     private final SimpleContainer samples=new SimpleContainer(36);
-    private final SimpleContainerData data=new SimpleContainerData(7);
+    private final SimpleContainerData data=new SimpleContainerData(8);
     private int page,selected,lastPage=-1,lastSelected=-1;
     private io.github.jimbozoomer.jugcraft.concordance.equivalence.EquivalenceCatalog lastCatalogue;
     private List<String> catalogueItems=List.of();
@@ -28,6 +28,7 @@ public final class AlchemyStorageCatalogueMenu extends AbstractContainerMenu {
     }
     private void put(int offset,long value){data.set(offset,(int)value&0xffff);data.set(offset+1,(int)(value>>>16));}
     private long number(int offset){return (data.get(offset)&0xffffL)|((data.get(offset+1)&0xffffL)<<16);}
+    public int source(){return data.get(7);}
     public long dissolve(){return number(3);}public long form(){return number(5);}
     public int page(){return data.get(0);}public int pages(){return Math.max(1,data.get(1));}public int selected(){return data.get(2);}
     private void refresh(){
@@ -42,6 +43,7 @@ public final class AlchemyStorageCatalogueMenu extends AbstractContainerMenu {
         var material=AlchemicalWorkshopBlockEntity.material(samples.getItem(selected));
         put(3,material!=null&&material.dissolvable()?Assay.dissolve(material,1):0);
         put(5,material!=null&&material.formable()?Assay.form(material,1):0);
+        String origin=material==null?"":AlchemyValues.source(material.item());data.set(7,origin.startsWith("reference")?0:origin.startsWith("recipe")?1:2);
         data.set(0,page);data.set(1,pages);data.set(2,selected);
     }
     @Override public boolean clickMenuButton(Player player,int action){

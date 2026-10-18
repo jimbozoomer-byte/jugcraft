@@ -14,6 +14,7 @@ public final class AlchemyStorageClient {
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(AlchemyStorage.ENTITY,AlchemyChestRenderer::new);
         net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalWorkshops.ENTITY,AlchemyChestRenderer::new);
         GemAbilitiesScreen.register();
+        AlchemyFeedbackClient.register();
         AlchemyStorage.openManual=()->Minecraft.getInstance().gui.setScreen(new AlchemyStorageManualScreen());
     }
 }

@@ -181,8 +181,8 @@ public class DarkMatterGameTests {
                 .stream().filter(e->e.getItem().is(Items.STONE)).mapToInt(e->e.getItem().getCount()).sum();
         h.assertTrue(stones==9,"Every block uses Silk Touch, not raw destroyBlock loot: "+stones);h.succeed();
     }
-    @GameTest(maxTicks=20) public void magicalMaterialsNeverEnterTheEssenceCatalogue(GameTestHelper h) {
-        for(Item item:DarkMatter.ITEMS.values())h.assertTrue(!Assaying.eligibility(new ItemStack(item)).isEmpty(),"Magical crafting chain excluded from transmutation");
+    @GameTest(maxTicks=20) public void defaultMagicalMaterialsCanBeExchanged(GameTestHelper h) {
+        for(Item item:DarkMatter.ITEMS.values())h.assertTrue(Assaying.eligibility(new ItemStack(item)).isEmpty(),"Default magical materials have essence values");
         h.succeed();
     }
 }

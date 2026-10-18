@@ -14,7 +14,7 @@ public final class AlchemyMachinesMenu extends AbstractContainerMenu {
     private final Player owner;
     private final Container contents;
     private final @Nullable AlchemyMachinesBlockEntity machine;
-    private final SimpleContainerData data=new SimpleContainerData(12);
+    private final SimpleContainerData data=new SimpleContainerData(15);
     public AlchemyMachinesMenu(int id,Inventory inventory){this(id,inventory,new SimpleContainer(7),null);}
     public AlchemyMachinesMenu(int id,Inventory inventory,AlchemyMachinesBlockEntity machine){this(id,inventory,machine,machine);}
     private AlchemyMachinesMenu(int id,Inventory inventory,Container contents,@Nullable AlchemyMachinesBlockEntity machine){
@@ -40,11 +40,14 @@ public final class AlchemyMachinesMenu extends AbstractContainerMenu {
     public AlchemyMachines.Kind kind(){return AlchemyMachines.Kind.values()[Math.clamp(data.get(6),0,AlchemyMachines.Kind.values().length-1)];}
     public int tier(){return data.get(7);}public int status(){return data.get(8);}public boolean paused(){return data.get(9)!=0;}
     public int progress(){return data.get(10);}public boolean canOperate(){return data.get(11)!=0;}
-    private void refresh(){if(machine==null||!(owner instanceof ServerPlayer player))return;put(0,machine.essence());put(2,machine.capacity());put(4,Assaying.balance(player));data.set(6,machine.kind().ordinal());data.set(7,machine.tier());data.set(8,machine.status());data.set(9,machine.paused()?1:0);data.set(10,machine.progress());data.set(11,stillValid(player)&&AlchemicalGear.ready(player)?1:0);}
+    public int range(){return data.get(12);} public int lastTargets(){return data.get(14);} public int lastSpent(){return data.get(13);}
+    public net.minecraft.core.BlockPos position(){return machine==null?net.minecraft.core.BlockPos.ZERO:machine.getBlockPos();}
+    private void refresh(){if(machine==null||!(owner instanceof ServerPlayer player))return;data.set(14,machine.lastTargets());data.set(12,machine.range());data.set(13,machine.lastSpent());put(0,machine.essence());put(2,machine.capacity());put(4,Assaying.balance(player));data.set(6,machine.kind().ordinal());data.set(7,machine.tier());data.set(8,machine.status());data.set(9,machine.paused()?1:0);data.set(10,machine.progress());data.set(11,stillValid(player)&&AlchemicalGear.ready(player)?1:0);}
     @Override public void broadcastChanges(){refresh();super.broadcastChanges();}
     @Override public boolean stillValid(Player player){return player==owner&&(machine==null?!(player instanceof ServerPlayer):machine.stillValid(player));}
     @Override public boolean clickMenuButton(Player p,int id){
-        if(p!=owner||!(p instanceof ServerPlayer player)||machine==null||id<0||id>3||!stillValid(p)||!AlchemicalGear.ready(player)||!RateGate.allow(player,"alchemy_machine",4))return false;
+        if(p!=owner||!(p instanceof ServerPlayer player)||machine==null||id<0||id>4||!stillValid(p)||!AlchemicalGear.ready(player)||!RateGate.allow(player,"alchemy_machine",4))return false;
+        if(id==4){if(kind()!=AlchemyMachines.Kind.PEDESTAL)return false;machine.cycleRange();broadcastChanges();return true;}
         if(id==3){if(kind()!=AlchemyMachines.Kind.NOVA)return false;boolean result=machine.activateNova(player);broadcastChanges();return result;}
         if(kind()==AlchemyMachines.Kind.NOVA)return false;
         if(id==0)machine.setPaused(!machine.paused());

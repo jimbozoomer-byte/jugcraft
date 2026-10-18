@@ -16,28 +16,33 @@ public final class AlchemyAutomationMenu extends AbstractContainerMenu {
     private final Player owner;
     private final ItemStack artifact;
     private final SimpleContainer filters=new SimpleContainer(9);
-    private final SimpleContainerData data=new SimpleContainerData(4);
+    private final SimpleContainerData data=new SimpleContainerData(9);
     public AlchemyAutomationMenu(int id,Inventory inv){this(id,inv,ItemStack.EMPTY,-1);}
     public AlchemyAutomationMenu(int id,Inventory inv,ItemStack artifact,int locked){
         super(AlchemyAutomation.MENU,id);owner=inv.player;this.artifact=artifact;data.set(0,locked);
         for(int i=0;i<9;i++)addSlot(new Slot(filters,i,25+(i%3)*18,48+(i/3)*18){public boolean mayPlace(ItemStack s){return false;}public boolean mayPickup(Player p){return false;}});
-        addStandardInventorySlots(inv,25,128);addDataSlots(data);refresh();
+        addStandardInventorySlots(inv,85,151);addDataSlots(data);refresh();
     }
     public boolean active(){return data.get(1)!=0;} public int target(){return data.get(2);} public boolean voiding(){return data.get(3)!=0;}
+    public int budget(){return data.get(4);} public int reserve(){return (data.get(5)&65535)|((data.get(6)&65535)<<16);} public int status(){return data.get(7);} public int outputPrice(){return data.get(8);}
     private void refresh(){
         if(!(owner instanceof ServerPlayer))return;
         var ids=artifact.getOrDefault(AlchemyAutomation.FILTER,List.<String>of());
         for(int i=0;i<9;i++){var key=i<ids.size()?Identifier.tryParse(ids.get(i)):null;filters.setItem(i,key==null?ItemStack.EMPTY:new ItemStack(BuiltInRegistries.ITEM.getValue(key)));}
         data.set(1,artifact.has(AlchemicalGear.ACTIVE)?1:0);data.set(2,TARGETS.indexOf(artifact.getOrDefault(AlchemyPatterns.TARGET,"minecraft:diamond")));
+        data.set(4,AlchemyAutomation.budget(artifact));int reserve=AlchemyAutomation.reserve(artifact);data.set(5,reserve&65535);data.set(6,reserve>>>16);data.set(7,artifact.getOrDefault(AlchemyAutomation.STATUS,1));
+        var m=Assaying.catalog().material(TARGETS.get(Math.clamp(target(),0,2)));data.set(8,m==null?0:(int)io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.form(m,1));
         data.set(3,artifact.is(AlchemyStorage.ITEMS.get("void_ring"))?1:0);
     }
     public static final List<String> TARGETS=List.of("minecraft:iron_ingot","minecraft:gold_ingot","minecraft:diamond");
     @Override public void broadcastChanges(){refresh();super.broadcastChanges();}
     @Override public boolean clickMenuButton(Player p,int action){
-        if(!(p instanceof ServerPlayer server)||!stillValid(p)||action<0||action>2||!RateGate.allow(server,"alchemy_filter",2))return false;
+        if(!(p instanceof ServerPlayer server)||!stillValid(p)||action<0||action>4||!RateGate.allow(server,"alchemy_filter",2))return false;
         if(action==0){if(active())artifact.remove(AlchemicalGear.ACTIVE);else artifact.set(AlchemicalGear.ACTIVE,Unit.INSTANCE);}
         if(action==1)artifact.set(AlchemyPatterns.TARGET,TARGETS.get(Math.floorMod(target()+1,3)));
         if(action==2)artifact.remove(AlchemyAutomation.FILTER);
+        if(action==3){var sizes=List.of(1,4,16,64);artifact.set(AlchemyAutomation.BUDGET,sizes.get(Math.floorMod(sizes.indexOf(budget())+1,sizes.size())));}
+        if(action==4){var reserves=List.of(0,1024,8192,65536);artifact.set(AlchemyAutomation.RESERVE,reserves.get(Math.floorMod(reserves.indexOf(reserve())+1,reserves.size())));}
         p.getInventory().setChanged();broadcastChanges();return true;
     }
     @Override public void clicked(int slot,int button,ContainerInput input,Player p){

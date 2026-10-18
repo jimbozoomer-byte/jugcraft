@@ -86,7 +86,7 @@ public class CompleteAlchemyClientGameTests implements FabricClientGameTest {
                 var chest=(AlchemyStorageBlockEntity)p.level().getBlockEntity(base.offset(-8,0,0));chest.placedBy(p);OWNED.add(base.offset(-8,0,0));chest.setItem(0,new ItemStack(Items.COAL,64));
                 p.level().setBlockAndUpdate(base.offset(-4,0,0),AlchemyStorage.BLOCKS.get("transmutation_table").defaultBlockState());
                 sign(p,base.offset(-8,0,2),"ALCHEMICAL CHEST","54 physical slots","Party access","Mine -> contents drop");
-                sign(p,base.offset(-4,0,2),"TRANSMUTATION","Dissolve -> essence","Keep a target sample","Form costs 125%");
+                sign(p,base.offset(-4,0,2),"TRANSMUTATION","Dissolve -> essence","Dissolve once to learn","Withdraw at value");
                 // Real collector -> relay -> furnace line. Relay's south face points into the furnace.
                 p.level().setBlockAndUpdate(base.offset(3,0,1),AlchemicalWorkshops.BLOCKS.get("collector_mk3").defaultBlockState());
                 var collector=(AlchemicalWorkshopBlockEntity)p.level().getBlockEntity(base.offset(3,0,1));collector.placedBy(p);OWNED.add(base.offset(3,0,1));
@@ -163,7 +163,7 @@ public class CompleteAlchemyClientGameTests implements FabricClientGameTest {
             int scale=c.computeOnClient(mc->mc.options.guiScale().get());c.runOnClient(mc->{mc.options.guiScale().set(1);mc.resizeGui();});c.waitTicks(5);shot(c,"alchemy_manual_scale1");
             c.runOnClient(mc->{mc.options.guiScale().set(scale);mc.resizeGui();});close(c);
             server.runOnServer(s->hold(s.getPlayerList().getPlayers().getFirst(),"transmutation_tablet"));c.waitTicks(15);
-            c.getInput().pressMouse(InputConstants.MOUSE_BUTTON_RIGHT);c.waitForScreen(TransmutationScreen.class);c.waitTicks(8);shot(c,"portable_transmutation_tablet");close(c);
+            c.getInput().pressMouse(InputConstants.MOUSE_BUTTON_RIGHT);c.waitForScreen(AlchemyPatternScreen.class);c.waitTicks(8);shot(c,"portable_transmutation_tablet");close(c);
             server.runCommand("tp @p %.1f %d %.1f 180 9".formatted(x-11.5,y,z+4.5));c.waitTicks(40);shot(c,"alchemy_armor_sets");
             server.runCommand("gamemode spectator @p");server.runCommand("tp @p %.1f %d %.1f 180 30".formatted(x+.5,y+10,z+19.5));c.waitTicks(60);world.getConnection().waitForChunksRender();shot(c,"complete_alchemy_showroom");
             server.runCommand("tp @p %.1f %d %.1f 180 0".formatted(x+.5,y,z+5.5));server.runCommand("gamemode survival @p");

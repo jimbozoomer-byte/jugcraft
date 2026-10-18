@@ -159,7 +159,7 @@ public final class AlchemicalGear {
                 }
                 if (this == STONE) {
                     if(server.isShiftKeyDown()) PhilosopherTransforms.crafting(server);
-                    else server.openMenu(new SimpleMenuProvider((id, inv, p) -> new TransmutationMenu(id, inv), Component.translatable("screen.jugcraft.alchemy.title")));
+                    else server.openMenu(new SimpleMenuProvider((id, inv, p) -> new AlchemyPatternMenu(id, inv, () -> server.getInventory().contains(s -> s.is(STONE)) || server.getOffhandItem().is(STONE), ItemStack.EMPTY), Component.translatable("screen.jugcraft.alchemy.title")));
                 }
                 else {
                     ItemStack stack = player.getItemInHand(hand);

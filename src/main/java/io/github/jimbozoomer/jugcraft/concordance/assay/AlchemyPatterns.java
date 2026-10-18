@@ -23,11 +23,14 @@ import net.minecraft.world.item.*;
 public final class AlchemyPatterns {
     public static AttachmentType<List<String>> KNOWN, FAVORITES;
     public static DataComponentType<String> TARGET;
+    public static DataComponentType<Integer> AREA;
     public static MenuType<AlchemyPatternMenu> MENU;
     private AlchemyPatterns() {}
     public static void register() {
-        KNOWN=AttachmentRegistry.<List<String>>builder().persistent(Saved.versioned("alchemy_patterns",Codec.STRING.listOf(0,4096))).copyOnDeath().buildAndRegister(Jugcraft.id("alchemy_patterns"));
-        FAVORITES=AttachmentRegistry.<List<String>>builder().persistent(Saved.versioned("alchemy_favorites",Codec.STRING.listOf(0,4096))).copyOnDeath().buildAndRegister(Jugcraft.id("alchemy_favorites"));
+        AlchemyTelemetry.register();
+        KNOWN=AttachmentRegistry.<List<String>>builder().persistent(Saved.versioned("alchemy_patterns",Codec.STRING.listOf(0,65536))).copyOnDeath().buildAndRegister(Jugcraft.id("alchemy_patterns"));
+        FAVORITES=AttachmentRegistry.<List<String>>builder().persistent(Saved.versioned("alchemy_favorites",Codec.STRING.listOf(0,65536))).copyOnDeath().buildAndRegister(Jugcraft.id("alchemy_favorites"));
+        AREA=Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,Jugcraft.id("alchemy_build_area"),DataComponentType.<Integer>builder().persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT).build());
         TARGET=Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,Jugcraft.id("alchemy_target"),DataComponentType.<String>builder().persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8).build());
         MENU=Registry.register(BuiltInRegistries.MENU,Jugcraft.id("alchemy_patterns"),new MenuType<>(AlchemyPatternMenu::new,FeatureFlags.DEFAULT_FLAGS));
         PayloadTypeRegistry.serverboundPlay().register(Search.TYPE,Search.CODEC);
@@ -44,7 +47,7 @@ public final class AlchemyPatterns {
         if(!AlchemicalGear.ready(p)||m==null||!m.formable())return false;
         String id=BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
         if(known(p).contains(id))return true;
-        if(known(p).size()>=4096)return false;
+        if(known(p).size()>=65536)return false;
         var ids=new TreeSet<>(known(p));ids.add(id);p.setAttached(KNOWN,List.copyOf(ids));return true;
     }
     public static void favorite(Player p,String id){

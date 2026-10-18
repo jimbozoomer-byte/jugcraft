@@ -15098,8 +15098,8 @@ def check_relics(co, root, lang, registered, research):
 def check_equivalence(co, root, lang, registered, research):
     """Roadmap step 21: the Java mirrors tools/concordance_equivalence.py (the markup, limits, cap, eligibility rules and
     the scale's numbers); the catalogue and graph on disk are the generator's; Python's own audit finds no unvalued
-    item, no recipe that gains value and no profitable cycle (sources apart), and every round trip through the scale
-    loses; nothing catalogued is excluded or scarce; every reason and message has its text; the icon is its map."""
+    item, no recipe that gains value and no profitable cycle (sources apart), and no round trip through the scale
+    gains; the historical restricted catalogue excludes scarce items; every reason and message has its text; the icon is its map."""
     eq = co.equivalence
     def java(name, base=root):
         path = base / name
@@ -15157,7 +15157,8 @@ def check_equivalence(co, root, lang, registered, research):
     transmutations = {p.stem: load(p) or {} for p in (folder / "transmutation").glob("*.json")}
     if set(transmutations) != set(eq.TRANSMUTATIONS):
         err(f"concordance/transmutation: {sorted(transmutations)} differ from TRANSMUTATIONS")
-    # Python's own audit: no unvalued item, no gaining recipe, no profitable cycle; every round trip loses.
+    # Historical restricted graph: no unvalued item, gaining recipe or profitable cycle.
+    # Universal values are separately covered by test_alchemy_values and AlchemyPlayabilityGameTests.
     for problem in eq.audit():
         err(f"equivalence: {problem}")
     for item, (grains, per, dissolve, form) in eq.MATERIALS.items():
@@ -15167,8 +15168,8 @@ def check_equivalence(co, root, lang, registered, research):
             for n in (1, 7, 64):
                 paid = (grains * n) // per
                 cost = -(-(grains * n * eq.FORM_MARKUP.numerator) // (per * eq.FORM_MARKUP.denominator))
-                if cost <= paid:
-                    err(f"material {item}: forming {n} must cost more than dissolving {n} pays")
+                if cost < paid:
+                    err(f"material {item}: forming {n} must never cost less than dissolving {n} pays")
     excluded = set(eq.EXCLUDED)
     for item in eq.MATERIALS:
         if item in excluded or item in ("minecraft:diamond", "minecraft:emerald", "minecraft:netherite_ingot", "minecraft:ancient_debris"):
@@ -16566,7 +16567,8 @@ def check_authority(root, lang):
     audit found asks concordance/Authority at the moment of the change; nothing asks with nobody behind it; the stand-in
     that may answer for an absent owner (Fabric's FakePlayer) is made only in Authority; Fabric's permission events are
     asked as questions only where Jugcraft already asks them; absent owners' devices wait unless the server says
-    otherwise (the option defaults to false); the Spire Heart gives nothing out through a face; and the new words
+    otherwise (the option defaults to false). Owner-authorized loaded alchemy factories have a separate buffer-only
+    Authority route, also tested with current claims. The Spire Heart gives nothing out through a face; and the new words
     exist."""
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""

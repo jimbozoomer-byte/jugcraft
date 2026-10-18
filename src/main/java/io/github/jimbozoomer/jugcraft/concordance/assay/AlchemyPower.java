@@ -13,7 +13,9 @@ public final class AlchemyPower {
         return total;
     }
     public static boolean pay(ServerPlayer p,long cost){
-        if(cost<0||!AlchemicalGear.ready(p)||available(p)<cost)return false;
+        if(cost<0||!AlchemicalGear.ready(p))return false;
+        if(available(p)<cost){AlchemyTelemetry.low(p);return false;}
+        AlchemyTelemetry.paid(p,cost);
         long wallet=Math.min(cost,Assaying.balance(p));Assaying.setBalance(p,Assaying.balance(p)-wallet);cost-=wallet;
         for(int i=0;i<p.getInventory().getContainerSize()&&cost>0;i++){
             var star=p.getInventory().getItem(i);int n=(int)Math.min(cost,KleinStars.stored(star));

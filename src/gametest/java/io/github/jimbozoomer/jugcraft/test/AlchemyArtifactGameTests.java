@@ -46,9 +46,9 @@ public class AlchemyArtifactGameTests {
         Assaying.setBalance(p,10000);return p;
     }
     private static ItemStack active(String id){var s=new ItemStack(AlchemyArtifacts.ITEMS.get(id));s.set(AlchemicalGear.ACTIVE,Unit.INSTANCE);return s;}
-    @GameTest(maxTicks=20) public void everyArtifactRegisteredAndExcludedFromDissolution(GameTestHelper h) {
+    @GameTest(maxTicks=20) public void everyDefaultArtifactRegisteredAndValued(GameTestHelper h) {
         h.assertTrue(AlchemyArtifacts.ITEMS.size()==17,"All seventeen remaining artifacts exist");
-        for(var item:AlchemyArtifacts.ITEMS.values())h.assertTrue(!Assaying.eligibility(new ItemStack(item)).isEmpty(),"Artifact cannot be dissolved");
+        for(var item:AlchemyArtifacts.ITEMS.values())h.assertTrue(Assaying.eligibility(new ItemStack(item)).isEmpty(),"Default artifact can be dissolved");
         h.assertTrue(AlchemyArtifacts.SOUNDS.size()==15,"All supplied item sounds registered");h.succeed();
     }
     @GameTest(maxTicks=20) public void bodySoulLifeUseOnePaidStepAndDoNotStack(GameTestHelper h) {

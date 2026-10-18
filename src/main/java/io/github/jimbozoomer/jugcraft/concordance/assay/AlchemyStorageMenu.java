@@ -52,6 +52,27 @@ public final class AlchemyStorageMenu extends AbstractContainerMenu {
         var saved=NonNullList.withSize(SIZE,ItemStack.EMPTY);for(int i=0;i<SIZE;i++)saved.set(i,contents.getItem(i));
         carrier.set(DataComponents.CONTAINER,ItemContainerContents.fromItems(saved));owner.getInventory().setChanged();
     }
+    @Override public boolean clickMenuButton(Player player,int action){
+        if(!(player instanceof ServerPlayer p)||!stillValid(player)||action<0||action>2
+            ||!io.github.jimbozoomer.jugcraft.concordance.RateGate.allow(p,"alchemy_sort",4))return false;
+        if(action==2){
+            // Explicit pause for artifacts in this physical container, never an inventory-wide toggle.
+            for(int i=0;i<SIZE;i++)contents.getItem(i).remove(AlchemicalGear.ACTIVE);
+        }else{
+            var packed=new java.util.ArrayList<ItemStack>();
+            for(int i=0;i<SIZE;i++){
+                var remainder=contents.getItem(i).copy();if(remainder.isEmpty())continue;
+                for(var existing:packed)if(ItemStack.isSameItemSameComponents(existing,remainder)){
+                    int moved=Math.min(remainder.getCount(),existing.getMaxStackSize()-existing.getCount());existing.grow(moved);remainder.shrink(moved);
+                    if(remainder.isEmpty())break;
+                }
+                if(!remainder.isEmpty())packed.add(remainder);
+            }
+            if(action==0)packed.sort(java.util.Comparator.comparing(s->net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(s.getItem()).toString()));
+            loading=true;for(int i=0;i<SIZE;i++)contents.setItem(i,i<packed.size()?packed.get(i):ItemStack.EMPTY);loading=false;
+        }
+        contents.setChanged();saveBag();broadcastChanges();return true;
+    }
     @Override public boolean stillValid(Player player){
         if(player!=owner||!player.isAlive()||player.isSpectator())return false;
         if(!(player instanceof ServerPlayer))return true;

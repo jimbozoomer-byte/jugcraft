@@ -8,8 +8,14 @@ import net.minecraft.world.entity.player.Inventory;
 
 /** A quiet 54-slot cabinet, with its physical bag lock shown beside the player inventory. */
 public final class AlchemyStorageScreen extends AbstractContainerScreen<AlchemyStorageMenu> {
-    public static final int PANEL_WIDTH=216,PANEL_HEIGHT=232;
+    public static final int PANEL_WIDTH=286,PANEL_HEIGHT=232;
     public AlchemyStorageScreen(AlchemyStorageMenu menu,Inventory inv,Component title){super(menu,inv,title,PANEL_WIDTH,PANEL_HEIGHT);}
+    @Override protected void init(){super.init();
+        for(int i=0;i<3;i++){final int action=i;var button=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+207,topPos+40+i*28,64,
+            Component.translatable("screen.jugcraft.alchemy_storage."+new String[]{"sort","stack","pause"}[i]),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,action);}));
+            button.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("screen.jugcraft.alchemy_storage.controls_help")));
+        }
+    }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float delta){extractBackground(g,mx,my,delta);super.extractRenderState(g,mx,my,delta);extractTooltip(g,mx,my);}
     @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float delta){
         int x=leftPos,y=topPos;g.fill(0,0,width,height,0xA00B0B14);

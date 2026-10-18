@@ -90,7 +90,6 @@ public final class TransmutationMenu extends AbstractContainerMenu {
                 || !RateGate.allow(server, "transmutation", 4)) return false;
         refresh();
         if (id == 2) {
-            AlchemyPatterns.learn(server, contents.getItem(SAMPLE));
             server.openMenu(new net.minecraft.world.SimpleMenuProvider((menuId, inv, who) ->
                     new AlchemyPatternMenu(menuId, inv, access, ItemStack.EMPTY), net.minecraft.network.chat.Component.translatable("screen.jugcraft.pattern.title")));
             return true;

@@ -41,10 +41,10 @@ public class ElementalAlchemyGameTests {
         h.assertTrue(charge==1024,"Returned stack retains charge in whichever inventory slot received it");h.succeed();
     }
     @GameTest(maxTicks=20) public void largeChargesAndLedgerCapStayExact(GameTestHelper h){
-        var p=player(h);var m=menu(p,6);KleinStars.setStored(m.getSlot(0).getItem(),4194304);Assaying.setBalance(p,999999);m.broadcastChanges();
-        h.assertTrue(m.stored()==4194304&&m.capacity()==4194304&&m.balance()==999999,"Large values survive menu data");
-        press(m,p,5);h.assertTrue(m.stored()==4194303&&Assaying.balance(p)==1000000&&!m.canWithdraw(),"Only ledger room is withdrawn");
-        press(m,p,2);h.assertTrue(m.stored()==4194304&&Assaying.balance(p)==999999,"Only star room is deposited");h.succeed();
+        var p=player(h);var m=menu(p,6);KleinStars.setStored(m.getSlot(0).getItem(),4194304);Assaying.setBalance(p,io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE-1);m.broadcastChanges();
+        h.assertTrue(m.stored()==4194304&&m.capacity()==4194304&&m.balance()==io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE-1,"Large values survive menu data");
+        press(m,p,5);h.assertTrue(m.stored()==4194303&&Assaying.balance(p)==io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE&&!m.canWithdraw(),"Only ledger room is withdrawn");
+        press(m,p,2);h.assertTrue(m.stored()==4194304&&Assaying.balance(p)==io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE-1,"Only star room is deposited");h.succeed();
     }
     @GameTest(maxTicks=20) public void foreignClicksInvalidItemsAndRapidClicksAreRefused(GameTestHelper h){
         var p=player(h);var m=menu(p,1);var other=player(h);press(m,other,2);press(m,p,999);
@@ -136,9 +136,9 @@ public class ElementalAlchemyGameTests {
             h.assertTrue(m.stored()==0&&!ElementalAmulets.fillBucket(p,InteractionHand.MAIN_HAND,false)&&!p.hasEffect(MobEffects.FIRE_RESISTANCE)&&Assaying.balance(p)==100000,"Feature gate prevents all new work");
         }finally{JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE,before);}h.succeed();
     }
-    @GameTest(maxTicks=20) public void starsAndAmuletsCannotBeTransmuted(GameTestHelper h){
+    @GameTest(maxTicks=20) public void emptyStarsAndAmuletsCanBeTransmutedButChargeIsProtected(GameTestHelper h){
         var p=player(h);var items=new ArrayList<>(KleinStars.ITEMS.values());items.add(ElementalAmulets.EVERTIDE);items.add(ElementalAmulets.VOLCANITE);
-        for(var item:items){var stack=new ItemStack(item);h.assertTrue(!Assaying.eligibility(stack).isEmpty(),"Magical equipment excluded");if(KleinStars.capacity(stack)>0)KleinStars.setStored(stack,123);
-            h.assertTrue(!Assaying.eligibility(stack).isEmpty(),"Charged state also excluded");}h.succeed();
+        for(var item:items){var stack=new ItemStack(item);h.assertTrue(Assaying.eligibility(stack).isEmpty(),"Default magical equipment is valued");if(KleinStars.capacity(stack)>0){KleinStars.setStored(stack,123);
+            h.assertTrue(!Assaying.eligibility(stack).isEmpty(),"Charged state remains protected");}}h.succeed();
     }
 }

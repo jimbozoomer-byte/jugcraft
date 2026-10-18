@@ -9,18 +9,20 @@ import net.minecraft.world.entity.player.Inventory;
 
 /** Existing silver/stone tablet controls, clear slot purposes and actual server status. */
 public final class AlchemyMachinesScreen extends AbstractContainerScreen<AlchemyMachinesMenu> {
+    private TransmutationScreen.ActionButton range;
     private final TransmutationScreen.ActionButton[] buttons=new TransmutationScreen.ActionButton[3];
     public AlchemyMachinesScreen(AlchemyMachinesMenu menu,Inventory inv,Component title){super(menu,inv,title,348,236);}
     private static Component ui(String key,Object... args){return Component.translatable("screen.jugcraft.alchemy_machine."+key,args);}
     private static String n(long v){return String.format("%,d",v);}
     @Override protected void init(){
-        super.init();for(int i=0;i<3;i++){final int action=i;buttons[i]=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+21+i*103,topPos+126,100,ui(i==0?"pause":i==1?"deposit":"withdraw"),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,menu.kind()==AlchemyMachines.Kind.NOVA?3:action);}));}refresh();
+        super.init();for(int i=0;i<3;i++){final int action=i;buttons[i]=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+21+i*103,topPos+126,100,ui(i==0?"pause":i==1?"deposit":"withdraw"),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,menu.kind()==AlchemyMachines.Kind.NOVA?3:action);}));}range=addRenderableWidget(new TransmutationScreen.ActionButton(leftPos+206,topPos+66,112,ui("range",6),b->{if(minecraft.gameMode!=null)minecraft.gameMode.handleInventoryButtonClick(menu.containerId,4);}));refresh();
     }
     private void refresh(){
+        range.visible=menu.kind()==AlchemyMachines.Kind.PEDESTAL;range.setMessage(ui("range",menu.range()));range.setTooltip(Tooltip.create(ui("range_help")));
         boolean nova=menu.kind()==AlchemyMachines.Kind.NOVA;
         buttons[0].setMessage(ui(nova?"detonate":menu.paused()?"resume":"pause"));buttons[0].active=menu.canOperate();
         buttons[0].setTooltip(Tooltip.create(ui(nova?"nova_help":"pause_help")));
-        buttons[1].active=!nova&&menu.canOperate()&&menu.wallet()>0&&menu.essence()<menu.capacity();buttons[2].active=!nova&&menu.canOperate()&&menu.essence()>0&&menu.wallet()<1000000;
+        buttons[1].active=!nova&&menu.canOperate()&&menu.wallet()>0&&menu.essence()<menu.capacity();buttons[2].active=!nova&&menu.canOperate()&&menu.essence()>0&&menu.wallet()<io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay.MAX_BALANCE;
         buttons[1].visible=!nova;buttons[2].visible=!nova;
     }
     @Override protected void containerTick(){super.containerTick();refresh();}
@@ -47,7 +49,11 @@ public final class AlchemyMachinesScreen extends AbstractContainerScreen<Alchemy
         if(kind==AlchemyMachines.Kind.FURNACE)line(g,ui("output"),239,54,80,0xFFB6E4D0);
         if(kind==AlchemyMachines.Kind.PEDESTAL)line(g,ui("artifact"),115,54,130,0xFFE4C786);
         if(kind==AlchemyMachines.Kind.NOVA)line(g,ui("nova_cost",n(menu.tier()==1?4096:16384)),24,64,295,0xFFE4C786);
-        line(g,ui("hint_"+kind.name().toLowerCase(),menu.tier()==1?1:4),24,95,296,0xFFB5C3D3);
+        if(kind==AlchemyMachines.Kind.PEDESTAL){
+            String id=net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(menu.getSlot(1).getItem().getItem()).getPath();
+            line(g,ui("effect_"+id),24,95,296,0xFFB5C3D3);
+            line(g,ui("pulse",menu.lastTargets(),menu.lastSpent()),24,105,296,0xFFB5C3D3);
+        }else line(g,ui("hint_"+kind.name().toLowerCase(),menu.tier()==1?1:4),24,95,296,0xFFB5C3D3);
         line(g,ui("status_"+menu.status()),19,116,311,menu.status()==7?0xFF9CE2BC:0xFFE2C99D);line(g,ui("wallet",n(menu.wallet())),93,145,237,0xFFCEC5DF);
     }
 }

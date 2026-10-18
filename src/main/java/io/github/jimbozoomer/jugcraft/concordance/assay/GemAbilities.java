@@ -39,7 +39,7 @@ public final class GemAbilities {
             }
             case 3->{var boots=piece(p,EquipmentSlot.FEET,"gem_boots");if(boots.isEmpty())return false;AlchemyArtifacts.setMode(boots,1-AlchemyArtifacts.mode(boots)%2);AlchemyArtifacts.pulse(p);}
         }
-        p.getInventory().setChanged();AlchemyArtifacts.sound(p,"pepower");return true;
+        AlchemyTelemetry.cooldown(p);p.getInventory().setChanged();AlchemyArtifacts.sound(p,"pepower");return true;
     }
     public record Action(int action) implements CustomPacketPayload {
         public static final Type<Action> TYPE=new Type<>(Jugcraft.id("gem_action"));
