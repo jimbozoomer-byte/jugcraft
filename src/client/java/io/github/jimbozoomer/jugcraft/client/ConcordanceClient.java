@@ -73,6 +73,7 @@ final class ConcordanceClient {
 		VigilClient.register();
 		CastPoses.register();
 		WorkerClient.register();
+		JugNouveauClient.register();
 		JournalClient.register();
 		ComposerClient.register();
 		SignClient.register();

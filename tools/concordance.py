@@ -477,6 +477,9 @@ ITEMS.update(dark_matter.ITEMS)
 import concordance_elemental_gear as elemental_gear
 ITEMS.update(elemental_gear.ITEMS)
 import concordance_workshops as workshops
+import jug_nouveau
+ITEMS.update(jug_nouveau.ITEMS)
+BLOCKS.update(jug_nouveau.BLOCKS)
 BLOCKS.update(workshops.BLOCKS)
 import concordance_ee_equipment as ee_equipment
 import concordance_ee_machines as ee_machines
@@ -1020,6 +1023,7 @@ def codex():
         **celestial.codex(),
         **crimson.codex(),
         **workers.codex(),
+        **jug_nouveau.codex(),
         **logistics.codex(),
         **artifice.codex(),
         **relics.codex(),
@@ -1979,6 +1983,7 @@ def write_data(write, res):
 
 
 def tags(tags):
+    tags.add("block", "minecraft:mineable/axe", "jugcraft:bookwyrm_lectern")
     for ref in SPECIMENS:
         tags.add("item", SPECIMEN_TAG, ref)
     for tag in SPECIMEN_TAGS:

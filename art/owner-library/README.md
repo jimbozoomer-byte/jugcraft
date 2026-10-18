@@ -15,6 +15,7 @@ It is shared across the whole project: **blocks, ores, metals, machinery, guns a
 - [Browse the original collection](originals/Blocks).
 - [Browse the magic originals](originals/Magic), their [paginated catalog](catalog/magic/README.md), or [download the unchanged RAR](archives/magic-owner-2026-10-08.rar).
 - [See counts and verification notes](catalog/summary.json).
+- [Jug Nouveau archive cross-check and additional source variants](ports/jug-nouveau/README.md): all 4,847 resource entries from the owner's core/elemental JARs accounted for; 28 colliding elemental variants preserved separately.
 
 Use the category pages for browsing and the CSV for searching across the collection. Texture metadata stays beside its image; sound and animation subfolders keep their supplied structure. Similar or duplicate files stay in place so references and animation pairs are preserved.
 

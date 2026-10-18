@@ -207,6 +207,8 @@ def assets():
     concordance.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     concordance.advancements(DATA, write, lang)
     lang.update(concordance.write_data(write, RES))
+    import jug_nouveau
+    jug_nouveau.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     # JEI's pages on where the things only a ritual or a lair boss gives come from (rows in recipe_view.json).
     import acquisition
     acquisition.lang_entries(lang)

@@ -1,5 +1,22 @@
 # Jugcraft TODO list
 
+## Jug Nouveau owner-library port — 18 October 2026
+
+- [x] Inventory all 3,607 core `ars_jimbaux` source files and preserve their original paths/hashes. These resources are already in the owner library; no gameplay source code was supplied.
+- [x] Cross-check both compiled owner archives: all 4,847 resource entries accounted for, including 28 elemental shared-path variants now preserved separately. Keep original loader metadata/notices; no old archive code executed or bundled.
+- [x] Local Book Wyrm/Storage Lectern implementation: supplied six colors, geometry and animations, craftable charm/wand/lectern, linked real chest inventories, ownership/party access and saved bindings.
+- [x] First storage integration validated: all 1,937 server tests, rendered six-color models/lectern/menu, page synchronization, GUI scales, data/recipe checks and unchanged-owner-art checks passed.
+- [ ] Owner-controlled Book Wyrm storage playtest before publishing; independent multiplayer/restart field testing and larger-network performance remain to do.
+- [ ] Extend Book Wyrm storage toward the source's aggregated catalog/crafting requests and physical delivery behavior; port the separate familiar effects.
+- [ ] Port remaining helper jobs: Starbuncle, Drygmy, Whirlisprig, Wixie and Amethyst Golem, reusing worker/logistics systems where suitable.
+- [ ] Port enchanting, imbuement, alteration, glyph and potion workshops with real recipes, input/output previews and usable interfaces.
+- [ ] Port source transport and spell devices through existing magical power/compiler/authority systems.
+- [ ] Port archwood, magical crops/fruit, sourcestone and decorative building families with complete survival routes and compatible generation.
+- [ ] Port missing gear/familiar behavior and creature/encounter families, including Weald creatures, Wilden and Alakarkinos.
+- [ ] Map every remaining glyph/ritual/data file to existing behavior, a technical adaptation or a missing feature; do not count copied files as finished gameplay.
+- [ ] Audit the elemental/companion resource namespaces after the core port and record overlap with existing Jugcraft content.
+- Scope, limits, source manifest and evidence: [Jug Nouveau integration](features/jug-nouveau.md).
+
 ## Alchemical equipment — 16 October 2026
 
 - [x] Local interface/access revision: engraved alchemy panels, consistent controls and selected states; remove equipment-use research gates, including traded charms and old owned factories. Gem controls work directly after equipping. See [interface/access record](features/alchemy-interface-and-access.md).
