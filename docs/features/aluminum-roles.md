@@ -49,6 +49,8 @@ The aluminum-sheathed cable is the cheaper way to run a lot of top-tier power li
 | `aluminumSheathedCableMakesFour` | Aluminum wire, an aluminum plate and silver cable craft four aluminum cables. |
 | `aluminumFramesAZeppelinAndBacksHeliostats` | Aluminum plates craft the zeppelin and two heliostats. |
 
+**Results:** the fork's Build workflow passed on commit c167e9f3 ([run 39172996865](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39172996865)): compilation, the headless server game tests and the rendered-client shards.
+
 **Not run:** crafting in a running game client.
 
 ## AI attribution
