@@ -59,6 +59,9 @@ ITEMS = {
     "methane_tank": "Liquid Methane Tank",
     # Hydrogen/LOX (docs/features/hydrolox.md): liquefied hydrogen, the hardest gas to condense and the best fuel.
     "hydrogen_tank": "Liquid Hydrogen Tank",
+    # Hydrazine/N2O4 (docs/features/hypergolic-fuels.md): storable propellants that ignite on contact, no liquefier.
+    "hydrazine_tank": "Hydrazine Tank",
+    "n2o4_tank": "Dinitrogen Tetroxide Tank",
 }
 ROCKETS = ["survey_rocket", "cloud_seeding_rocket", "clear_sky_rocket", "signal_flare", "illumination_flare"]
 TOOLTIPS = {
@@ -83,6 +86,8 @@ TOOLTIPS = {
     "lox_tank": "A rocket casing filled with liquid oxygen, the oxidizer of a liquid rocket motor.",
     "methane_tank": "A rocket casing filled with liquid methane, a cleaner-burning fuel for a liquid rocket motor.",
     "hydrogen_tank": "A rocket casing filled with liquid hydrogen, the most efficient fuel for a liquid rocket motor.",
+    "hydrazine_tank": "A rocket casing filled with hydrazine, a storable fuel that ignites on contact with dinitrogen tetroxide.",
+    "n2o4_tank": "A rocket casing filled with dinitrogen tetroxide, the storable oxidizer that pairs with hydrazine.",
     "homing_rocket": "Rocket launcher ammunition: locks on to the hostile mob nearest your crosshair within 48 blocks "
                      "and steers into it. A smaller blast.",
 }
@@ -159,6 +164,10 @@ def workshop_recipes():
         {"name": "hydrolox_rocket_motor",
          "inputs": [[rid("hydrogen_tank"), 1], [rid("lox_tank"), 1], [rid("rocket_nozzle"), 2]],
          "output": rid("rocket_motor"), "count": 5, "ticks": 200, "features": feature + ["salt"]},
+        # Hydrazine/N2O4 (docs/features/hypergolic-fuels.md): storable and needing no liquefier, but weaker: three.
+        {"name": "hypergolic_rocket_motor",
+         "inputs": [[rid("hydrazine_tank"), 1], [rid("n2o4_tank"), 1], [rid("rocket_nozzle"), 2]],
+         "output": rid("rocket_motor"), "count": 3, "ticks": 200, "features": feature + ["salt"]},
         {"inputs": [[rid("rocket_motor"), 1], [rid("guidance_unit"), 1], [rid("sensor"), 1]],
          "output": rid("survey_rocket"), "count": 1, "ticks": 300, "features": feature},
         {"inputs": [[rid("rocket_motor"), 1], [rid("silver_iodide"), 2]],
@@ -219,10 +228,24 @@ TANK_RECIPES = [
      "results": [("jugcraft:methane_tank", 1)], "ticks": 60, "features": ["machines"]},
     {"name": "hydrogen_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:liquid_hydrogen", 1000)],
      "results": [("jugcraft:hydrogen_tank", 1)], "ticks": 60, "features": ["machines", "salt"]},
+    {"name": "hydrazine_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:hydrazine", 1000)],
+     "results": [("jugcraft:hydrazine_tank", 1)], "ticks": 60, "features": ["machines", "salt"]},
+    {"name": "n2o4_tank", "items": [("jugcraft:rocket_casing", 1)], "fluids": [("jugcraft:dinitrogen_tetroxide", 1000)],
+     "results": [("jugcraft:n2o4_tank", 1)], "ticks": 60, "features": ["machines"]},
 ]
 
 # Chemical reactor recipes (tools/petro.py FLUID_RECIPES["chemical_reactor"]).
 REACTOR_RECIPES = [
+    # Hydrazine/N2O4 (docs/features/hypergolic-fuels.md). Chlorine bubbled through lye makes sodium hypochlorite
+    # (bleach); the Olin Raschig process oxidizes ammonia with it to hydrazine, leaving salt; and ammonia burnt in
+    # oxygen (the first step of nitric acid) gives brown nitrogen dioxide, which condenses to dinitrogen tetroxide.
+    {"name": "sodium_hypochlorite", "fluids": [("jugcraft:chlorine", 250), ("jugcraft:lye", 500)],
+     "fluid_results": [("jugcraft:sodium_hypochlorite", 500)], "ticks": 80, "features": ["machines", "salt"]},
+    {"name": "hydrazine", "fluids": [("jugcraft:ammonia", 500), ("jugcraft:sodium_hypochlorite", 500)],
+     "fluid_results": [("jugcraft:hydrazine", 250)], "results": [("jugcraft:salt", 1)], "ticks": 120,
+     "features": ["machines", "salt"]},
+    {"name": "dinitrogen_tetroxide", "fluids": [("jugcraft:ammonia", 250), ("jugcraft:oxygen", 1000)],
+     "fluid_results": [("jugcraft:dinitrogen_tetroxide", 250)], "ticks": 120, "features": ["machines"]},
     # Iodine leached from kelp ash with sulfuric acid (where iodine was first found, and long made).
     {"name": "iodine", "items": [("minecraft:dried_kelp", 8)], "fluids": [("jugcraft:sulfuric_acid", 100)],
      "results": [("jugcraft:iodine", 1)], "ticks": 120, "features": ["machines", "sulfur"]},
@@ -550,7 +573,8 @@ HD_ITEMS = {"survey_rocket": survey_rocket, "cloud_seeding_rocket": cloud_seedin
             "line_rocket": lambda: line_rocket(), "rocket_launcher": lambda: rocket_launcher(),
             "he_rocket": lambda: he_rocket(), "homing_rocket": lambda: homing_rocket(),
             "kerosene_tank": lambda: propellant_tank(False), "lox_tank": lambda: propellant_tank(True),
-            "methane_tank": lambda: methane_tank(), "hydrogen_tank": lambda: hydrogen_tank()}
+            "methane_tank": lambda: methane_tank(), "hydrogen_tank": lambda: hydrogen_tank(),
+            "hydrazine_tank": lambda: hydrazine_tank(), "n2o4_tank": lambda: n2o4_tank()}
 
 
 def propellant_tank(oxygen):
@@ -581,12 +605,26 @@ def hydrogen_tank():
     return _cryogenic_tank((112, 46, 10), (238, 150, 70), (204, 104, 36))
 
 
-def _cryogenic_tank(band_dark, band_light, band_mid):
-    """A 16x16 cryogenic fuel tank: an upright steel casing with a coloured band (its own dark, light and mid), a red
-    fuel valve on top and frost on its sides."""
+def hydrazine_tank():
+    """Hydrazine tank (docs/features/hypergolic-fuels.md): a storable fuel, so no frost; a violet band and a red fuel
+    valve."""
+    return _cryogenic_tank((54, 36, 84), (170, 146, 214), (116, 90, 160), frost=False)
+
+
+def n2o4_tank():
+    """Dinitrogen tetroxide tank: a storable oxidizer, so no frost; a rust-brown band and a yellow oxidizer valve, as on
+    the liquid oxygen tank."""
+    return _cryogenic_tank((64, 22, 10), (150, 74, 50), (104, 44, 26), frost=False,
+                           valve=((112, 76, 6), (232, 188, 36)))
+
+
+def _cryogenic_tank(band_dark, band_light, band_mid, frost=True, valve=((110, 24, 20), (210, 64, 52))):
+    """A 16x16 propellant tank: an upright steel casing with a coloured band (its own dark, light and mid), a valve on
+    top (its dark and light: red for a fuel, yellow for an oxidizer) and, for a cryogenic liquid, frost on its
+    sides."""
     from PIL import Image
     tones = {"O": (52, 56, 66), "H": (232, 236, 240), "L": (196, 202, 210), "M": (150, 158, 170),
-             "D": (104, 112, 124), "S": (90, 96, 108), "R": (110, 24, 20), "r": (210, 64, 52),
+             "D": (104, 112, 124), "S": (90, 96, 108), "R": valve[0], "r": valve[1],
              "g": band_dark, "G": band_light, "m": band_mid, "W": (250, 252, 255)}
     rows = [
         "................",
@@ -606,6 +644,8 @@ def _cryogenic_tank(band_dark, band_light, band_mid):
         "....OOOOOOOO....",
         "................",
     ]
+    if not frost:
+        rows = ["".join(("L" if x < 8 else "M") if ch == "W" else ch for x, ch in enumerate(row)) for row in rows]
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y, row in enumerate(rows):
         assert len(row) == 16, row

@@ -201,6 +201,10 @@ public final class PetroFluids {
 	public static Entry LIQUID_METHANE;
 	/** Hydrogen liquefied in the cryogenic liquefier (docs/features/hydrolox.md), the best rocket fuel. */
 	public static Entry LIQUID_HYDROGEN;
+	/** Storable rocket propellants (docs/features/hypergolic-fuels.md): bleach, hydrazine and dinitrogen tetroxide. */
+	public static Entry SODIUM_HYPOCHLORITE;
+	public static Entry HYDRAZINE;
+	public static Entry DINITROGEN_TETROXIDE;
 	public static Gas HYDROGEN_FLUORIDE;
 	public static Gas CHLORODIFLUOROMETHANE;
 	public static Gas TETRAFLUOROETHYLENE;
@@ -273,6 +277,9 @@ public final class PetroFluids {
 		CHLOROFORM = fluid("chloroform", 8, 3, 1, 0xFF567769, MapColor.COLOR_LIGHT_GRAY);
 		LIQUID_METHANE = fluid("liquid_methane", 3, 4, 1, 0xFFB6C4CA, MapColor.COLOR_LIGHT_GRAY);
 		LIQUID_HYDROGEN = fluid("liquid_hydrogen", 3, 4, 1, 0xFFC8D4EA, MapColor.COLOR_LIGHT_BLUE);
+		SODIUM_HYPOCHLORITE = fluid("sodium_hypochlorite", 5, 4, 1, 0xFFD6DE9C, MapColor.COLOR_YELLOW);
+		HYDRAZINE = fluid("hydrazine", 5, 4, 1, 0xFFC8C4DC, MapColor.COLOR_PURPLE);
+		DINITROGEN_TETROXIDE = fluid("dinitrogen_tetroxide", 5, 4, 1, 0xFFB66234, MapColor.COLOR_BROWN);
 		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
 		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
 		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);

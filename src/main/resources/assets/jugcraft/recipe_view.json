@@ -5799,6 +5799,28 @@
         {
           "in": [
             [
+              "jugcraft:hydrazine_tank",
+              1
+            ],
+            [
+              "jugcraft:n2o4_tank",
+              1
+            ],
+            [
+              "jugcraft:rocket_nozzle",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:rocket_motor",
+            3
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "jugcraft:rocket_motor",
               1
             ],
@@ -7440,6 +7462,77 @@
           "retained_inputs": []
         },
         {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:chlorine",
+              250
+            ],
+            [
+              "jugcraft:lye",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:sodium_hypochlorite",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 80,
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              500
+            ],
+            [
+              "jugcraft:sodium_hypochlorite",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:hydrazine",
+              250
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:salt",
+              1
+            ]
+          ],
+          "ticks": 120,
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:ammonia",
+              250
+            ],
+            [
+              "jugcraft:oxygen",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:dinitrogen_tetroxide",
+              250
+            ]
+          ],
+          "results": [],
+          "ticks": 120,
+          "retained_inputs": []
+        },
+        {
           "items": [
             [
               "minecraft:dried_kelp",
@@ -7571,6 +7664,52 @@
           "results": [
             [
               "jugcraft:hydrogen_tank",
+              1
+            ]
+          ],
+          "ticks": 60,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rocket_casing",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:hydrazine",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:hydrazine_tank",
+              1
+            ]
+          ],
+          "ticks": 60,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rocket_casing",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:dinitrogen_tetroxide",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:n2o4_tank",
               1
             ]
           ],

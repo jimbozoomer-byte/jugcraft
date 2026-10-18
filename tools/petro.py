@@ -624,3 +624,14 @@ FLUIDS["liquid_methane"] = {"display": "Liquid Methane", "feature": "machines",
 FLUIDS["liquid_hydrogen"] = {"display": "Liquid Hydrogen", "feature": "machines",
                              "colors": [(120, 136, 168), (160, 176, 206), (200, 212, 234), (236, 242, 252)],
                              "tick_delay": 3, "slope": 4, "drop_off": 1}
+# Hydrazine/N2O4 (docs/features/hypergolic-fuels.md): bleach, hydrazine and dinitrogen tetroxide from the Chemical
+# Reactor, storable rocket propellants. Last, for the same reason.
+FLUIDS["sodium_hypochlorite"] = {"display": "Sodium Hypochlorite", "feature": "salt",
+                                 "colors": [(150, 160, 90), (186, 196, 120), (214, 222, 156), (238, 242, 196)],
+                                 "tick_delay": 5, "slope": 4, "drop_off": 1}
+FLUIDS["hydrazine"] = {"display": "Hydrazine", "feature": "salt",
+                       "colors": [(126, 120, 150), (164, 158, 188), (200, 196, 220), (234, 232, 246)],
+                       "tick_delay": 5, "slope": 4, "drop_off": 1}
+FLUIDS["dinitrogen_tetroxide"] = {"display": "Dinitrogen Tetroxide", "feature": "machines",
+                                  "colors": [(96, 40, 20), (140, 66, 32), (182, 98, 52), (216, 138, 86)],
+                                  "tick_delay": 5, "slope": 4, "drop_off": 1}

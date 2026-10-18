@@ -189,6 +189,8 @@ public final class JugcraftRocketry {
 		described("lox_tank");
 		described("methane_tank");
 		described("hydrogen_tank");
+		described("hydrazine_tank");
+		described("n2o4_tank");
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("combat_rocket"));
 		COMBAT_ROCKET = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder
 				.<CombatRocket>of(CombatRocket::new, MobCategory.MISC).sized(0.3F, 0.3F)
