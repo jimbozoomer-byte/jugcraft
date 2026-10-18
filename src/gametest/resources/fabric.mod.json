@@ -6,6 +6,9 @@
   "description": "Automated in-game tests for Jugcraft. Not shipped with the mod.",
   "license": "MIT",
   "environment": "*",
+  "mixins": [
+    "jugcraft-test.client.mixins.json"
+  ],
   "entrypoints": {
     "main": [
       "io.github.jimbozoomer.jugcraft.test.TestForms"
