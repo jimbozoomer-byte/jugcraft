@@ -388,6 +388,10 @@ FLUID_RECIPES = {
          "retained_inputs": [2], "fluid_results": [("jugcraft:sulfuric_acid", 500)], "ticks": 100, "features": ["machines", "sulfur"]},
         {"name": "hydrochloric_copper", "items": [("minecraft:raw_copper", 1)], "fluids": [("jugcraft:hydrochloric_acid", 250)],
          "results": [("jugcraft:washed_copper_ore", 1)], "ticks": 160, "features": ["machines"]},
+        # Calcite dissolved in hydrochloric acid gives off carbon dioxide (docs/features/calcite-co2.md): a quick CO2 source
+        # for methanation without a kiln or coal, spending the acid. CaCO3 + 2 HCl -> CaCl2 + H2O + CO2.
+        {"name": "carbon_dioxide_from_calcite", "items": [("minecraft:calcite", 1)], "fluids": [("jugcraft:hydrochloric_acid", 500)],
+         "fluid_results": [("jugcraft:carbon_dioxide", 250)], "ticks": 60, "features": ["machines"]},
         {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
         # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).
