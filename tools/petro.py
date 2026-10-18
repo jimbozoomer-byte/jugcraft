@@ -388,6 +388,10 @@ FLUID_RECIPES = {
          "retained_inputs": [2], "fluid_results": [("jugcraft:sulfuric_acid", 500)], "ticks": 100, "features": ["machines", "sulfur"]},
         {"name": "hydrochloric_copper", "items": [("minecraft:raw_copper", 1)], "fluids": [("jugcraft:hydrochloric_acid", 250)],
          "results": [("jugcraft:washed_copper_ore", 1)], "ticks": 160, "features": ["machines"]},
+        # Coking with gas recovery (docs/features/coke-gas-recovery.md): coal baked into coke in the reactor, faster than the
+        # Coke Oven and on power, keeping the gas the Coke Oven lets go as methane (coke-oven gas's fuel part).
+        {"name": "coke_with_gas_recovery", "items": [("minecraft:coal", 4)], "results": [("jugcraft:coke", 4)],
+         "fluid_results": [("jugcraft:methane", 200)], "source": 200, "ticks": 400, "features": ["machines"]},
         {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
         # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).

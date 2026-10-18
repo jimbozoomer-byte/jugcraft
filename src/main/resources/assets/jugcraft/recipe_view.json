@@ -6364,6 +6364,29 @@
         {
           "items": [
             [
+              "minecraft:coal",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [
+            [
+              "jugcraft:methane",
+              200
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:coke",
+              4
+            ]
+          ],
+          "ticks": 400,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "jugcraft:sulfur_dust",
               2
             ]
