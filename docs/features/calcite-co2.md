@@ -39,6 +39,8 @@ The CO₂ feeds the Chemical Infuser's methanation and any other carbon dioxide 
 
 **Server game test for CI:** `CalciteCarbonDioxideGameTests.reactorDissolvesCalciteIntoCarbonDioxide` checks the recipe takes a calcite and 500 mB of hydrochloric acid and gives 250 mB of carbon dioxide.
 
+**Results:** the fork's Build workflow passed on commit 934a7213 ([run 39174746870](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39174746870)): compilation, the headless server game tests (including the narrowed Fermenter check) and the rendered-client shards.
+
 **Not run:** an in-game reactor batch.
 
 ## AI attribution
