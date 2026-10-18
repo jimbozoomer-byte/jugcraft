@@ -192,6 +192,9 @@ GRASS_SEED_CHANCE = 0.125
 # compost: composter chance tier, as vanilla's (low 30 %, medium 65 %, medium_high 85 %).
 # tags: extra item tags.
 ITEMS = {
+    "baobab_fruit": {"display": "Baobab Fruit", "food": [2, 0.3], "compost": "medium", "tags": ["c:foods/fruit"]},
+    "baobab_seeds": {"display": "Baobab Seeds", "plants": "baobab_sapling", "compost": "low", "tags": []},
+    "dates": {"display": "Dates", "food": [2, 0.3], "compost": "medium", "tags": ["c:foods/fruit", "jugcraft:fermentable"]},
     "dragonblood_resin": {"display": "Dragonblood Resin", "tags": []},
     "pine_nuts": {"display": "Pine Nuts", "food": [1, 0.1], "compost": "low", "tags": ["c:foods", "jugcraft:squirrel_food"]},
     "roasted_pine_nuts": {"display": "Roasted Pine Nuts", "food": [3, 0.4], "compost": "medium", "tags": ["c:foods", "jugcraft:squirrel_food"]},
@@ -431,7 +434,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
              "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
-             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive", "tamarisk": "Tamarisk", "yucca": "Yucca", "dragonblood": "Dragonblood"}
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive", "tamarisk": "Tamarisk", "yucca": "Yucca", "dragonblood": "Dragonblood", "baobab": "Baobab"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -440,7 +443,7 @@ WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "bio
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
                  "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes", "alpine_spawn"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"]}
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"], "baobab": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -468,6 +471,7 @@ STRIPPED = {f"{wood}_{part}": f"stripped_{wood}_{part}" for wood in WOOD_SETS fo
 # state's looks, weighted (random by position, as vanilla picks grass models). None: evergreen.
 # "seasonal_drop": fruit item and green/gold/bare loot chances; natural leaves only, without Silk Touch/shears.
 TREES = {
+    "baobab": {"leaves": "baobab_leaves", "leaves_display": "Baobab Leaves", "season": None, "base": "oak", "giant": "giant_baobab"},
     "dragonblood": {"leaves": "dragonblood_fronds", "leaves_display": "Dragonblood Fronds", "season": None, "base": "oak"},
     "stone_pine": {"wood": "pine", "display": "Stone Pine", "leaves": "stone_pine_needles", "leaves_display": "Stone Pine Needles",
                    "season": None, "base": "spruce", "sapling_shapes": {"stone_pine": 1, "umbrella_pine": 1, "pinyon": 1},
@@ -531,7 +535,7 @@ TREES = {
     "willow": {"leaves": "willow_leaves", "leaves_display": "Willow Leaves", "season": [88, 283, 328], "autumn": {"gold": 1},
                "base": "oak"},
     # Warm and dry lands: the palm of oases (and later the tropics), and the tall, narrow Mediterranean cypress.
-    "palm": {"leaves": "palm_fronds", "leaves_display": "Palm Fronds", "season": None, "base": "jungle"},
+    "palm": {"leaves": "palm_fronds", "leaves_display": "Palm Fronds", "season": None, "base": "jungle", "sapling_shapes": {"palm": 3, "date_palm": 2}},
     "cypress": {"leaves": "cypress_leaves", "leaves_display": "Cypress Leaves", "season": None, "base": "spruce"},
     # Big trees and rainforests: the redwood, the eucalyptus and the mahogany, all evergreen. "giant": the shape (in
     # tools/trees.py) that four saplings planted in a square grow (agriculture/GiantSaplingBlock).
@@ -2723,7 +2727,7 @@ def planted_blocks():
     """Blocks that a seed item places: crops, gourd stems and vines, the cranberry bush and the fruit trees' saplings."""
     return (crop_blocks() + [stem(gourd) for gourd in GOURDS]
             + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"], GIANT_PUMPKIN["vine"]]
-            + [orchard.sapling(tree) for tree in orchard.TREES])
+            + [orchard.sapling(tree) for tree in orchard.TREES] + [sapling(tree) for tree in TREES])
 
 
 def itemless_blocks():
@@ -2733,12 +2737,13 @@ def itemless_blocks():
             + herbs.itemless() + lairs.itemless_blocks())
 
 
+HANGING_FRUIT_BLOCKS = ["baobab_pod", "date_cluster"]
 FUNGAL_BLOCKS = ["glowcap_block", "blight_wart_block", "bramble_bush_leaves"]
 
 
 def all_blocks():
     """Every registered agriculture block. Crops have no block item (seeds place them); wild plants and equipment do."""
-    return (FUNGAL_BLOCKS + crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
+    return (HANGING_FRUIT_BLOCKS + FUNGAL_BLOCKS + crop_blocks() + stem_blocks() + [CRANBERRY["block"]] + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS)
             + list(TREE_BLOCKS) + list(WOOD) + list(DECOR) + [CARVING["block"]] + list(CARVED_VARIETIES.values())
             + giant_blocks() + [HARVEST_SCALE["block"]] + list(HALLOWEEN_DECOR) + list(MUMS) + [potted(m) for m in MUMS]
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
@@ -2749,7 +2754,7 @@ def all_blocks():
 
 
 def all_items():
-    return (FUNGAL_BLOCKS + list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
+    return (HANGING_FRUIT_BLOCKS + FUNGAL_BLOCKS + list(ITEMS) + list(SICKLES) + list(WILD_CROPS) + list(EQUIPMENT) + list(GOURDS) + [CHESTNUT["leaves"]]
             + [block for tree in TREES for block in (sapling(tree), TREES[tree]["leaves"])] + list(WOOD) + list(DECOR) + [CARVING["block"], CARVING["knife"]] + list(CARVED_VARIETIES.values())
             + [HARVEST_SCALE["block"]] + list(HARVEST_SCALE["ribbons"]) + [STENCILS["blank"], STENCILS["stencil"], CANTEEN["item"]]
             + list(HALLOWEEN_DECOR) + list(MUMS) + regatta_items() + festivity_blocks() + night_items() + decor1_items()
@@ -2769,7 +2774,7 @@ def owns(entry_id):
 def switch_of(entry_id):
     """The feature switch that owns one of this branch's IDs: for a wood set and for a tree's sapling and leaves, its
     wood's WOOD_SWITCHES list (any of which turns it on). Cooking can inherit an explicit switch list; otherwise FEATURE."""
-    if entry_id in FUNGAL_BLOCKS or entry_id == "dragonblood_resin":
+    if entry_id in HANGING_FRUIT_BLOCKS or entry_id in ("baobab_fruit", "baobab_seeds", "dates") or entry_id in FUNGAL_BLOCKS or entry_id == "dragonblood_resin":
         return ["biomes"]
     for wood, switch in WOOD_SWITCHES.items():
         if entry_id in wood_blocks(wood, WOOD_SETS[wood]):
@@ -2956,3 +2961,5 @@ POT_RECIPES.update(herbs.PRESERVE_RECIPES)
 PANTRY["preserves"].update(herbs.PRESERVES)
 
 SHAPELESS += [{"id": "red_dye_from_dragonblood_resin", "inputs": ["jugcraft:dragonblood_resin"], "result": "minecraft:red_dye", "count": 1, "category": "misc", "switch": "biomes"}]
+
+SHAPELESS += [{"id": "baobab_seeds", "inputs": ["jugcraft:baobab_fruit"], "result": "jugcraft:baobab_seeds", "count": 1, "category": "misc", "switch": "biomes"}]

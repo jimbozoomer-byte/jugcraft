@@ -22,7 +22,7 @@ class DryCountryTests(unittest.TestCase):
             'eucalyptus_forest':([8,9],{'eucalyptus':.47,'big_eucalyptus':.25,'giant_eucalyptus':.08,'wattle_bush':.2}),
             'gilded_shrubland':([3,4],{'wattle_bush':.7,'wattle':.3}),
             'wasteland':([1,1],{'dead_tree':.45,'dead_snag':.3,'dead_snag_bent':.1,'tamarisk':.15}),
-            'oasis':([2,3],{'palm':.75,'small_palm':.15,'tamarisk':.1}),
+            'oasis':([2,3],{'palm':.4,'small_palm':.15,'tamarisk':.1,'date_palm':.35}),
             'lush_desert':([1,2],{'desert_acacia':.45,'small_palm':.2,'joshua_tree':.35}),
             'xeric_shrubland':([1,2],{'desert_acacia':.45,'juniper':.25,'joshua_tree':.3})}
         for name,(count,mix) in cases.items():
@@ -33,9 +33,9 @@ class DryCountryTests(unittest.TestCase):
         self.assertIsNone(biomes.BIOMES['dune_beach']['trees'])
         self.assertIsNone(biomes.BIOMES['grassland']['trees'])
 
-    def test_dry_river_reserves_date_palm_share_without_underwater_trees(self):
+    def test_dry_river_keeps_tamarisk_beside_date_palms_without_underwater_trees(self):
         spec=biomes.BIOMES['dry_river']['trees'];self.assertEqual(spec['count'],[1,1])
-        self.assertEqual(shares(spec),{'jugcraft:tamarisk_checked':.4,'jugcraft:dry_river_empty':.6})
+        self.assertEqual(shares(spec),{'jugcraft:tamarisk_checked':.4,'jugcraft:date_palm_checked':.6})
         out={};trees_data.worldgen(Path('data'),lambda p,d:out.__setitem__(p.name,d))
         self.assertEqual(out['dry_river_empty.json']['placement'],[])
         self.assertEqual(trees.SHAPES['tamarisk']['survives_as'],'minecraft:dead_bush')
@@ -63,7 +63,7 @@ class DryCountryTests(unittest.TestCase):
         for tree in ('stone_pine','wattle','joshua_tree'):self.assertNotIn(tree,ag.WOOD_SETS)
         self.assertEqual(ag.COOKING['roasted_pine_nuts']['input'],'pine_nuts')
         for item in ('pine_nuts','roasted_pine_nuts'):self.assertIn('jugcraft:squirrel_food',ag.ITEMS[item]['tags'])
-        for name in ('date_palm','banyan','mango'):self.assertNotIn(name,trees.SHAPES)
+        for name in ('banyan','mango'):self.assertNotIn(name,trees.SHAPES)
 
     def test_art_is_native_size_with_distinct_fruit_stages_and_leaf_backing(self):
         art=textures()

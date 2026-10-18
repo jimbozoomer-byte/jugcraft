@@ -1282,6 +1282,8 @@ stone.
 
 ### Batch 10: hanging fruit
 
+Implementation: [tree batch 10](../features/trees-batch-10.md), [draft PR #417](https://github.com/jimbozoomer-byte/jugcraft/pull/417). Includes baobabs, date palms and renewable hanging fruit; awaiting owner inspection. The implementation record documents the 26.3 foliage constraints and preserves the established tamarisk shares and biome attempt budgets. Batch 11 remains future work.
+
 #### baobab
 African baobab and Australian boab (*Adansonia digitata*, *A. gregorii*). **High.** The outback's icon, a silhouette no
 vanilla tree has. Today the Outback's only tree is a generic acacia.

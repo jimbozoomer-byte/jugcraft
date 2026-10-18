@@ -163,7 +163,7 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower FIR_GROWER = grower("fir");
 	public static final TreeGrower JACARANDA_GROWER = grower("jacaranda");
 	public static final TreeGrower WILLOW_GROWER = grower("willow");
-	public static final TreeGrower PALM_GROWER = grower("palm");
+	public static final TreeGrower PALM_GROWER = weightedGrower("palm", "date_palm", 3, 2);
 	public static final TreeGrower CYPRESS_GROWER = grower("cypress");
 	public static final TreeGrower REDWOOD_GROWER = grower("redwood");
 	public static final TreeGrower EUCALYPTUS_GROWER = grower("eucalyptus");
@@ -180,6 +180,8 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower SAGEBRUSH_GROWER = grower("sagebrush");
 	public static final TreeGrower STONE_PINE_GROWER = weightedGrower("stone_pine", "umbrella_pine", "pinyon", 1, 1, 1);
 	public static final TreeGrower WATTLE_GROWER = weightedGrower("wattle", "wattle_bush", 3, 7);
+	public static final TreeGrower BAOBAB_GROWER = grower("baobab");
+	public static final TreeGrower GIANT_BAOBAB_GROWER = grower("giant_baobab");
 	public static final TreeGrower DRAGONBLOOD_GROWER = grower("dragonblood");
 	public static final TreeGrower TAMARISK_GROWER = grower("tamarisk");
 	public static final TreeGrower JOSHUA_TREE_GROWER = grower("joshua_tree");
@@ -204,7 +206,7 @@ public final class JugcraftAgriculture {
 	public static final TreeGrower GIANT_MAHOGANY_GROWER = grower("giant_mahogany");
 	public static final TreeGrower GIANT_EUCALYPTUS_GROWER = grower("giant_eucalyptus");
 	private static final Map<String, TreeGrower> GIANT_GROWERS = Map.of("redwood", GIANT_REDWOOD_GROWER,
-			"mahogany", GIANT_MAHOGANY_GROWER, "eucalyptus", GIANT_EUCALYPTUS_GROWER, "yew", ANCIENT_YEW_GROWER, "olive", ANCIENT_OLIVE_GROWER);
+			"mahogany", GIANT_MAHOGANY_GROWER, "eucalyptus", GIANT_EUCALYPTUS_GROWER, "yew", ANCIENT_YEW_GROWER, "olive", ANCIENT_OLIVE_GROWER, "baobab", GIANT_BAOBAB_GROWER);
 	/** The dead tree, which no sapling grows; it stands in the Dead Forest (and game tests grow it). */
 	public static final TreeGrower DEAD_TREE_GROWER = grower("dead_tree");
 	/** Seasonal trees' leaf schedules, in season days. Keep in sync with TREES in tools/agriculture.py. */
@@ -585,6 +587,19 @@ public final class JugcraftAgriculture {
 		registerFoliage("stone_pine", "stone_pine_needles", STONE_PINE_GROWER, Blocks.SPRUCE_SAPLING, Blocks.SPRUCE_LEAVES, StonePineLeavesBlock::new);
 		registerFoliage("wattle", "wattle_leaves", WATTLE_GROWER, Blocks.ACACIA_SAPLING, Blocks.ACACIA_LEAVES,
 				props -> new TintedParticleLeavesBlock(0.01F, props));
+        registerTree("baobab", "baobab_leaves", BAOBAB_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
+                MapColor.TERRACOTTA_LIGHT_GRAY, MapColor.TERRACOTTA_WHITE);
+        food("baobab_fruit", 2, 0.3F, COMPOST_MEDIUM);
+        seeds("baobab_seeds", "baobab_sapling", COMPOST_LOW);
+        food("dates", 2, 0.3F, COMPOST_MEDIUM);
+        for (String id : List.of("baobab_pod", "date_cluster")) {
+            boolean date = id.equals("date_cluster");
+            Block fruit = registerBlock(id, props -> new HangingFruitBlock(date ? "palm_fronds" : "baobab_leaves",
+                    date ? "dates" : "baobab_fruit", date ? 2 : 1, date ? 4 : 2, props),
+                    BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).instabreak().noCollision().noOcclusion()
+                            .randomTicks().sound(SoundType.CROP).pushReaction(PushReaction.POPPED));
+            registerItem(id, props -> new BlockItem(fruit, props), new Item.Properties().useBlockDescriptionPrefix(), SEEDS_TAB);
+        }
         registerTree("dragonblood", "dragonblood_fronds", DRAGONBLOOD_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
                 MapColor.COLOR_LIGHT_GRAY, MapColor.COLOR_LIGHT_BLUE);
         registerItem("dragonblood_resin", Item::new, new Item.Properties(), INGREDIENT_TAB);
@@ -2982,9 +2997,13 @@ public final class JugcraftAgriculture {
 		TreeGrower giant = GIANT_GROWERS.get(tree);
 		Block sapling = registerBlock(tree + "_sapling", tree.equals("dragonblood") ? props -> new EndTreeSaplingBlock(grower, props) : giant == null ? props -> new SaplingBlock(grower, props) {
 			@Override protected boolean mayPlaceOn(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
-				return super.mayPlaceOn(state, level, pos) || java.util.Set.of("juniper", "stone_pine", "tamarisk", "joshua_tree").contains(tree) && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
+				return super.mayPlaceOn(state, level, pos) || java.util.Set.of("juniper", "stone_pine", "tamarisk", "joshua_tree", "palm").contains(tree) && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
 			}
-		} : props -> new GiantSaplingBlock(grower, giant, props), BlockBehaviour.Properties.ofFullCopy(saplingLike));
+		} : props -> new GiantSaplingBlock(grower, giant, props) {
+            @Override protected boolean mayPlaceOn(net.minecraft.world.level.block.state.BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+                return super.mayPlaceOn(state, level, pos) || tree.equals("baobab") && state.is(net.minecraft.tags.BlockTags.SUPPORTS_DRY_VEGETATION);
+            }
+        }, BlockBehaviour.Properties.ofFullCopy(saplingLike));
 		registerItem(tree + "_sapling", props -> new BlockItem(sapling, props), new Item.Properties().useBlockDescriptionPrefix()
 				.compostable(COMPOST_LOW), SEEDS_TAB);
 		Block leaves = registerBlock(leavesId, leavesFactory, BlockBehaviour.Properties.ofFullCopy(leavesLike).mapColor(MapColor.PLANT));
@@ -3460,7 +3479,10 @@ public final class JugcraftAgriculture {
 
 	private static void seeds(String id, String crop, ResourceKey<ContextIntProvider> compost) {
 		Block block = block(crop);
-		registerItem(id, props -> new BlockItem(block, props), new Item.Properties().useItemDescriptionPrefix().compostable(compost), SEEDS_TAB);
+		registerItem(id, props -> new BlockItem(block, props) {
+			// A sapling may already have its own item. Seeds plant it without replacing that canonical item.
+			@Override public void registerBlocks(Map<Block, Item> map, Item item) { map.putIfAbsent(getBlock(), item); }
+		}, new Item.Properties().useItemDescriptionPrefix().compostable(compost), SEEDS_TAB);
 	}
 
 	/** Seeds of a climbing crop: planted on a trellis standing on farmland. */

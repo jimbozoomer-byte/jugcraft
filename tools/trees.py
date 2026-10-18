@@ -13,7 +13,28 @@ wood grow when planted in a square (agriculture.TREES "giant"; agriculture/Giant
 
 DECORATOR = "seasonal_leaves"
 
+def hanging_fruit(block, probability):
+    return {"type": "minecraft:attached_to_leaves", "probability": probability, "exclusion_radius_xz": 1,
+            "exclusion_radius_y": 1, "required_empty_blocks": 1, "directions": ["down"],
+            "block_provider": {"id": "jugcraft:" + block, "properties": {"age": "0"}}}
+
+
 SHAPES = {
+    "baobab": {"wood": "baobab", "sapling": True, "survives_as": "minecraft:dead_bush",
+               "trunk": {"type": "straight", "base_height": 5, "height_rand_a": 2},
+               "foliage": {"type": "acacia", "radius": 2, "offset": 0},
+               "decorators": [hanging_fruit("baobab_pod", .1)]},
+    "giant_baobab": {"wood": "baobab", "giant": True, "survives_as": "minecraft:dead_bush",
+                     "trunk": {"type": "giant", "base_height": 6, "height_rand_a": 2, "height_rand_b": 1},
+                     "foliage": {"type": "random_spread", "radius": 3, "offset": 0, "foliage_height": 2, "leaf_placement_attempts": 40},
+                     "decorators": [hanging_fruit("baobab_pod", .1)]},
+    "date_palm": {"wood": "palm", "survives_as": "minecraft:dead_bush",
+                  "trunk": {"type": "straight", "base_height": 8, "height_rand_a": 3},
+                  # Vanilla 26.3 requires a cherry crown height of at least four.
+                  "foliage": {"type": "cherry", "radius": 3, "offset": 0, "height": 4,
+                              "wide_bottom_layer_hole_chance": .5, "corner_hole_chance": .5,
+                              "hanging_leaves_chance": .6, "hanging_leaves_extension_chance": .3},
+                  "decorators": [hanging_fruit("date_cluster", .2)]},
     "dragonblood": {"wood": "dragonblood", "sapling": True,
                     "trunk": {"type": "jugcraft:dry_country_trunk_placer", "shape": "dragonblood", "base_height": 5, "height_rand_a": 2},
                     "foliage": {"type": "acacia", "radius": 2, "offset": 0}},
