@@ -88,7 +88,7 @@ No texture is copied.
 
 ### Results
 
-Not yet run in CI.
+Fork Build run [39096846928](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39096846928) on commit `b8433a87`, which covers both the hydrazine and MMH steps, passed on its first attempt. That covers the mod job (compilation and every server game test, this change's included), the optional-integrations-absent job and all eight rendered-client shards. An earlier run for the hydrazine-only commit `de574192` was cut off by a client shard's 60-minute time limit before finishing; the run above supersedes it. No human gameplay or multiplayer test was run.
 
 ## Rollout and open questions
 
