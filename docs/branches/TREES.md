@@ -1332,7 +1332,7 @@ food and a reason to visit.
 
 ### Batch 11: tropics, subtropics and coasts
 
-Implementation of batches 11, 11b and 11c: [feature record](../features/trees-batch-11.md), [draft PR #418](https://github.com/jimbozoomer-byte/jugcraft/pull/418). Owner requested all three together on 18 October 2026. Pandanus is omitted as recommended. The record explains current biome weights, renewable harvests and native placement adjustments. Owner inspection is pending; Batch 12 and later remain future work.
+Implementation of batches 11, 11b and 11c: [feature record](../features/trees-batch-11.md), [PR #418](https://github.com/jimbozoomer-byte/jugcraft/pull/418). Owner requested all three together and approved the final inspection world on 18 October 2026, including the olive/fig bark detail and spreading banyan limbs. Pandanus is omitted as recommended. The record explains current biome weights, renewable harvests and native placement adjustments. Batch 12 and later remain future work.
 
 #### flame_tree
 Flame tree, or royal poinciana (*Delonix regia*). **Medium.** A flowering tree of the tropics. In the Jacaranda Glade

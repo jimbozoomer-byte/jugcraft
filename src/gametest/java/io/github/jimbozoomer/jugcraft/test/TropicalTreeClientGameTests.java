@@ -18,7 +18,7 @@ public class TropicalTreeClientGameTests extends TreeBatchTwoClientGameTests {
     @Override protected List<String> shapes() { return TropicalTreeGameTests.SHAPES; }
     @Override protected List<String> biomes() { return List.of("tropics", "jacaranda_glade", "overgrown_beach", "karst_pinnacles", "shrine_springs", "lush_grassland", "dune_beach", "gravel_beach"); }
     @Override protected String worldName() { return "Tropical Trees and Coastal Shrubs Inspection"; }
-    @Override protected String exportName() { return "tree-batch-11-preview-r2"; }
+    @Override protected String exportName() { return "tree-batch-11-preview-r4"; }
     @Override protected String screenshotPrefix() { return "jugcraft_tree11_"; }
     private String expected(String biome) { return switch (biome) {
         case "tropics", "jacaranda_glade" -> "leaf:jugcraft:flame_tree_leaves";
@@ -95,6 +95,7 @@ public class TropicalTreeClientGameTests extends TreeBatchTwoClientGameTests {
         });
         for (String item : List.of("jugcraft:flame_tree_sapling 16", "jugcraft:sea_grape_sapling 16", "jugcraft:osmanthus_sapling 16", "jugcraft:banyan_sapling 16", "jugcraft:mango_sapling 16", "minecraft:bone_meal 64", "minecraft:shears", "minecraft:iron_axe", "jugcraft:sea_grape_jelly", "jugcraft:mango_chutney", "jugcraft:osmanthus_mooncake 4"))
             world.getServer().runCommand("give @a " + item);
+        shoot(context, world, GARDEN.offset(132, 3, 14), GARDEN.offset(120, 4, 0), screenshotPrefix() + "banyan_branches");
         shoot(context, world, wall.offset(24, 7, 32), wall.offset(24, 2, 0), screenshotPrefix() + "wood_and_harvests");
         for (int index = 0; index < 3; index++) shoot(context, world, wall.offset(index * 24 + 6, 3, 26), wall.offset(index * 24 + 6, 2, 17), screenshotPrefix() + "harvest_" + index);
         for (boolean cutout : List.of(true, false)) {

@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.machine.MachineRecipes;
 import java.util.*;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
@@ -70,6 +71,50 @@ public class TropicalTreeGameTests {
             sapling.advanceTree(level, AT, ready, RandomSource.create(3));
             helper.assertTrue(!level.getBlockState(AT).is(sapling) && TreeBatchTwoGameTests.measure(level, AT).logs() > 0, "Sapling failed " + tree);
         }
+        TreeBatchTwoGameTests.reset(level, AT, Blocks.GRASS_BLOCK); helper.succeed();
+    }
+
+    @GameTest(maxTicks = 600)
+    public void banyanBranchesStayConnectedAndStopAtObstacles(GameTestHelper helper) {
+        var level = helper.getLevel(); var wood = block("fig_log");
+        for (long seed : TreeBatchFourBCGameTests.SEEDS) {
+            TreeBatchTwoGameTests.reset(level, AT, Blocks.GRASS_BLOCK);
+            helper.assertTrue(TreeBatchTwoGameTests.feature(level, "banyan").place(level,
+                    level.getChunkSource().getGenerator(), RandomSource.create(seed), AT), "Banyan failed");
+            var logs = new HashSet<BlockPos>(); int horizontal = 0;
+            for (var p : BlockPos.betweenClosed(AT.offset(-8, 0, -8), AT.offset(8, 16, 8))) {
+                var state = level.getBlockState(p);
+                if (!state.is(wood)) continue;
+                logs.add(p.immutable());
+                if (state.getValue(RotatedPillarBlock.AXIS) != Direction.Axis.Y) horizontal++;
+            }
+            helper.assertTrue(horizontal >= 12, "Too few spreading branch logs: " + horizontal);
+            for (Direction side : Direction.Plane.HORIZONTAL) {
+                helper.assertTrue(logs.stream().anyMatch(p -> p.getY() >= AT.getY() + 3
+                        && (p.getX() - AT.getX()) * side.getStepX() + (p.getZ() - AT.getZ()) * side.getStepZ() >= 3),
+                        "Missing main limb on " + side);
+            }
+            var reached = new HashSet<BlockPos>(); var queue = new ArrayDeque<BlockPos>();
+            queue.add(AT.above()); reached.add(AT.above());
+            while (!queue.isEmpty()) {
+                var p = queue.remove();
+                for (Direction side : Direction.values()) {
+                    var next = p.relative(side);
+                    if (logs.contains(next) && reached.add(next)) queue.add(next);
+                }
+            }
+            helper.assertTrue(logs.stream().filter(p -> p.getY() >= AT.getY() + 3).allMatch(reached::contains),
+                    "Banyan branch has a detached log");
+        }
+        TreeBatchTwoGameTests.reset(level, AT, Blocks.GRASS_BLOCK);
+        for (var p : BlockPos.betweenClosed(AT.offset(2, 3, -6), AT.offset(2, 14, 6)))
+            level.setBlock(p, Blocks.DIAMOND_BLOCK.defaultBlockState(), Block.UPDATE_CLIENTS);
+        helper.assertTrue(TreeBatchTwoGameTests.feature(level, "banyan").place(level,
+                level.getChunkSource().getGenerator(), RandomSource.create(3), AT), "Blocked side prevented whole tree");
+        for (var p : BlockPos.betweenClosed(AT.offset(2, 3, -6), AT.offset(2, 14, 6)))
+            helper.assertTrue(level.getBlockState(p).is(Blocks.DIAMOND_BLOCK), "Branch overwrote obstacle");
+        for (var p : BlockPos.betweenClosed(AT.offset(3, 3, -6), AT.offset(8, 14, 6)))
+            helper.assertFalse(level.getBlockState(p).is(wood), "Branch continued through obstacle");
         TreeBatchTwoGameTests.reset(level, AT, Blocks.GRASS_BLOCK); helper.succeed();
     }
 

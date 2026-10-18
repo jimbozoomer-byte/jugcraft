@@ -1,6 +1,7 @@
 # Tree batches 11, 11b and 11c
 
-Status: implemented on `codex/tree-generation-batch-11-11bc`; owner visual approval pending.
+Status: implemented on `codex/tree-generation-batch-11-11bc`; owner visually approved
+on 18 October 2026 for review in [PR #418](https://github.com/jimbozoomer-byte/jugcraft/pull/418).
 
 Requested by the owner on 18 October 2026. Implemented with OpenAI Codex (GPT-6).
 Scope follows `docs/branches/TREES.md`: flame tree, sea grape, osmanthus,
@@ -57,7 +58,7 @@ unsupported or flooded placements fail without partial logs.
 
 Flame trees use a forked acacia trunk with a low scarlet umbrella; sea grape uses
 one concealed oak log in a rounded spreading bush; osmanthus uses a small forked
-olive trunk. Banyans use branching fig trunks, a broad low crown, narrow prop
+olive trunk. Banyans use four spreading fig limbs, a broad low crown, narrow prop
 roots, trunk vines and sparse vanilla hanging roots. Vanilla 26.3 leaf blocks
 provide no support faces, so banyan leaves alone provide an underside support
 face for those roots; the other five faces keep ordinary leaf support behavior.
@@ -73,15 +74,25 @@ Measured over twelve fixed seeds per species (height / widest span / leaves):
 | Flame tree | 5–7 | 9–12 | 93–148 |
 | Sea grape | 2–3 | 5 | 28–31 |
 | Osmanthus | 4–6 | 3–4 | 18–46 |
-| Banyan | 8–12 | 11–15 | 389–1,319 |
+| Banyan | 9–12 | 14–15 | 466–538 |
 | Mango | 7–9 | 9 | 212–217 |
 
 Vanilla 26.3 blob crowns add height above the trunk and spread farther at their
 lower layers. Mango's trunk base is six to deliver the intended 7–9-block tree;
 osmanthus uses a one-block base plus two random additions to keep its upward
 random-spread foliage in the intended 4–6-block shrub-tree range. Banyan's wider
-spread comes from several branching crown attachments. These measured ranges
+spread comes from a central crown and smaller crowns at the branch tips. These measured ranges
 are a seed sample, not a claim that every terrain placement succeeds.
+
+The owner's 18 October branch follow-up replaces banyan's short vanilla rising
+offshoots with a dedicated native trunk placer: four limbs spread 3–4 blocks
+from staggered heights, rise through connected bends, and sometimes fork for
+another 1–2 blocks. Horizontal logs follow the limb direction. A blocked limb
+stops at the obstacle; no log is placed beyond a gap. Twelve seed samples have
+39–49 fig logs including the unchanged prop-root system (previously 15–23).
+The canopy is raised one block to reveal the spreading limbs from below.
+The biome share, sapling route and other tree species are unchanged. Existing
+trees are not rewritten; the revised inspection export is `tree-batch-11-preview-r4`.
 
 ## Harvests, recipes and costs
 
@@ -132,6 +143,15 @@ entries are appended so existing wood seeds and pixels remain unchanged.
 No source-library originals are edited. Preserves and mooncakes extend their
 existing painters; vanilla hanging roots and existing dead wood are reused.
 
+Owner bark-detail follow-up (18 October, OpenAI Codex GPT-6): olive and fig log
+sides retain their existing five-color palettes and gain short shaded grooves,
+broken ridge highlights and small bark patches. The editable painter changes
+only these two bark outputs; wood blocks inherit their log-side textures.
+Planks, stripped wood, log ends and tree generation remain unchanged. Both
+16×16 opaque textures were visually checked alone and tiled. Full gameplay
+tests were not repeated for this texture-only preview. The owner approved both
+bark textures together with the revised banyan on 18 October 2026.
+
 ## Validation and inspection
 
 Validation on 18 October 2026 uses Minecraft 26.3, Fabric Loader 0.19.5,
@@ -167,7 +187,7 @@ Fabric API 0.161.0+26.3 and the unchanged eighteen-library framework lock.
 
 The ordinary client successfully joins the cleaned runtime copy at
 `(1120.5, 180, -987.5)`, facing the banyan display, at 12:08 on 18 October.
-It remains open for owner inspection.
+It was opened for owner inspection.
 
 The first focused run caught vanilla hanging roots lacking leaf support; the
 banyan-specific underside support and its removal test fix that behavior. The
@@ -178,4 +198,18 @@ banana's actual 7.65% share; the targeted orchard audit passes.
 No claim is made for external launcher import, multiplayer load testing or a
 server deployment. The inspection save freezes time/weather/random ticks for
 comparison and has an authored garden separate from its untouched natural
-biome samples. Owner visual approval remains pending on draft PR #418.
+biome samples. The owner approved the revised inspection world for PR #418.
+
+Follow-up validation for the bark and banyan revisions: all seven focused
+`TropicalTreeGameTests` pass, including the new twelve-seed connected-branch
+check and a solid-wall obstruction check. The three Batch 11 Python tests pass.
+The selected client gallery passes with fifteen trees saved and reopened,
+natural additions in all eight sampled biomes, and a close render showing the
+limbs beneath the raised canopy. The full server suite was not repeated.
+The fresh `tree-batch-11-preview-r4` export preserves the earlier inspection
+worlds. Its delivery copy passes the save-content scan and byte comparisons;
+both archives match the rebuilt JAR and unchanged eighteen-dependency lock.
+The ordinary client joins the revised world at `(1120.5, 180, -987.5)` at 14:29;
+the ground-level view shows the projecting limbs beneath the canopy. This
+preview includes the olive/fig bark revision. The owner approved these changes
+and requested publication for review on 18 October 2026. Batch 12 remains unstarted.

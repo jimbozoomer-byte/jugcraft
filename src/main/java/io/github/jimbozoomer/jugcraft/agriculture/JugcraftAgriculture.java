@@ -540,6 +540,7 @@ public final class JugcraftAgriculture {
 		// Generated trees' seasonal leaves start in today's look (tools/trees.py DECORATOR).
 		Registry.register(BuiltInRegistries.TREE_DECORATOR_TYPE, Jugcraft.id("seasonal_leaves"), SeasonalLeavesDecorator.TYPE);
 		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("olive_trunk_placer"), OliveTrunkPlacer.TYPE);
+		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("banyan_trunk_placer"), BanyanTrunkPlacer.TYPE);
 		Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, Jugcraft.id("dry_country_trunk_placer"), DryCountryTrunkPlacer.TYPE);
 		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("fungal_growth"), FungalGrowthFeature.CODEC);
         Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("driftwood"), DriftwoodFeature.CODEC);

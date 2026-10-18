@@ -246,6 +246,40 @@ def bark(wood, seed):
             c.px(x, y, p[4])
             if rng.random() < 0.5:
                 c.px(x, (y + 1) % 16, p[4 if kind == "stringy" else 3])
+    if wood in ("olive", "fig"):
+        return bark_details(c.img, p, seed + 11000)
+    return c.img
+
+
+def bark_details(image, palette, seed):
+    """Small broken ridges within existing bark bands, retaining the species palette."""
+    rng = random.Random(seed)
+    c = Canvas()
+    c.img = image.copy()
+    # Short, narrow patches interrupt broad flat strips without crossing a furrow.
+    # Use the original pixels as the mask so marks cannot grow into noisy clusters.
+    for _ in range(22):
+        x, y0 = rng.randrange(16), rng.randrange(16)
+        tone = palette.index(image.getpixel((x, y0))[:3])
+        if tone == 0:
+            continue
+        shade = max(1, min(4, tone + rng.choice((-1, 1))))
+        for dy in range(rng.randint(2, 4)):
+            y = (y0 + dy) % 16
+            if image.getpixel((x, y))[:3] != palette[tone]:
+                break
+            c.px(x, y, palette[shade])
+    # Pair a few recessed nicks with a raised edge, staggered around the tile.
+    for x0, y0 in ((2, 3), (7, 10), (12, 5), (5, 15)):
+        for dy in range(2):
+            x, y = (x0 + dy) % 16, (y0 + dy) % 16
+            tone = palette.index(image.getpixel((x, y))[:3])
+            if tone < 2:
+                continue
+            c.px(x, y, palette[tone - 1])
+            edge = (x + 1) % 16
+            if image.getpixel((edge, y))[:3] == palette[tone]:
+                c.px(edge, y, palette[min(4, tone + 1)])
     return c.img
 
 
