@@ -10,6 +10,7 @@ worlds/
 logs/
 # Owner library resource tags named logs are source data, not generated logs.
 !/art/owner-library/originals/**/logs/
+!/art/owner-library/ports/**/logs/
 crash-reports/
 .idea/
 *.iml
