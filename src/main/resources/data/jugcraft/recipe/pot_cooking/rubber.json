@@ -8,8 +8,7 @@
   "type": "jugcraft:pot_cooking",
   "ingredients": [
     {
-      "ingredient": "jugcraft:latex_bottle",
-      "count": 2
+      "ingredient": "jugcraft:latex_bottle"
     },
     {
       "ingredient": "jugcraft:cider_vinegar"

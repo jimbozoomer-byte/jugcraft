@@ -7512,6 +7512,8 @@
   "message.jugcraft.trebuchet.loaded": "Loaded! Release angle %s\u00b0: use it with an empty hand to let fly",
   "message.jugcraft.trebuchet.place": "%s. %s: %s blocks",
   "message.jugcraft.trebuchet.resetting": "Wait for the arm to swing back",
+  "message.jugcraft.tree_tap.fill": "Latex: %s/%s bottles (+%s%% toward the next bottle)",
+  "message.jugcraft.tree_tap.inventory_full": "Make room for Latex Bottles before collecting.",
   "message.jugcraft.trick_or_treat.busy": "Wait for them to answer!",
   "message.jugcraft.trick_or_treat.gone": "You'd walked off before they answered",
   "message.jugcraft.trick_or_treat.no_costume": "\"Where's your costume?\"",

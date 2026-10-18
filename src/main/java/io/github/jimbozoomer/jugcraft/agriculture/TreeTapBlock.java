@@ -2,12 +2,14 @@ package io.github.jimbozoomer.jugcraft.agriculture;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -29,16 +32,26 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
-/** One capped tap per rooted rubber trunk; one minute per fill step, no block entity or catch-up. */
+/** One tap per rooted trunk; four minute-sized fill steps per bottle, with optional bucket storage. */
 public final class TreeTapBlock extends Block {
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final IntegerProperty LATEX = IntegerProperty.create("latex", 0, 4);
+    // Keep the old property and its units so existing 0..4 saves retain their contents.
+    public static final IntegerProperty LATEX = IntegerProperty.create("latex", 0, 32);
+    public static final BooleanProperty UPGRADED = BooleanProperty.create("upgraded");
+    public static final int STEPS_PER_BOTTLE = 4;
     public static final int INTERVAL = 1200;
     public TreeTapBlock(Properties properties) {
         super(properties);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(LATEX, 0));
+        registerDefaultState(defaultBlockState().setValue(FACING, Direction.NORTH).setValue(LATEX, 0).setValue(UPGRADED, false));
     }
+    public static int capacity(BlockState state) { return state.getValue(UPGRADED) ? 32 : 4; }
     @Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        if (state.getValue(UPGRADED)) return switch (state.getValue(FACING)) {
+            case NORTH -> box(3, 0, 3, 13, 13, 16);
+            case SOUTH -> box(3, 0, 0, 13, 13, 13);
+            case WEST -> box(3, 0, 3, 16, 13, 13);
+            default -> box(0, 0, 3, 13, 13, 13);
+        };
         return switch (state.getValue(FACING)) {
             case NORTH -> box(4, 1, 8, 12, 12, 16);
             case SOUTH -> box(4, 1, 0, 12, 12, 8);
@@ -92,24 +105,71 @@ public final class TreeTapBlock extends Block {
     @Override public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         BlockState current = level.getBlockState(pos);
         if (!current.is(this)) return;
-        if (current.getValue(LATEX) < 4 && productive(level, pos, current.getValue(FACING))) {
+        if (current.getValue(LATEX) < capacity(current) && productive(level, pos, current.getValue(FACING))) {
             current = current.setValue(LATEX, current.getValue(LATEX) + 1);
             level.setBlock(pos, current, Block.UPDATE_CLIENTS);
         }
-        if (current.getValue(LATEX) < 4) level.scheduleTick(pos, this, INTERVAL);
+        if (current.getValue(LATEX) < capacity(current)) level.scheduleTick(pos, this, INTERVAL);
+    }
+    private void resume(Level level, BlockPos pos) {
+        // Changing only properties retains the original scheduled tick, including time within a fill step.
+        if (!level.getBlockTicks().hasScheduledTick(pos, this)) level.scheduleTick(pos, this, INTERVAL);
+    }
+    private static void showFill(Player player, BlockState state) {
+        player.sendOverlayMessage(Component.translatable("message.jugcraft.tree_tap.fill",
+                state.getValue(LATEX) / STEPS_PER_BOTTLE, capacity(state) / STEPS_PER_BOTTLE,
+                (state.getValue(LATEX) % STEPS_PER_BOTTLE) * 25));
+    }
+    private static int bottleSpace(Player player, ItemStack held, InteractionHand hand, int available) {
+        var result = new ItemStack(JugcraftAgriculture.item("latex_bottle"));
+        int room = 0;
+        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
+            var existing = player.getInventory().getItem(slot);
+            if (existing.isEmpty()) room += result.getMaxStackSize();
+            else if (ItemStack.isSameItemSameComponents(existing, result)) room += existing.getMaxStackSize() - existing.getCount();
+        }
+        if (!player.getAbilities().instabuild && hand == InteractionHand.MAIN_HAND && held.getCount() <= available)
+            room += result.getMaxStackSize(); // Consuming the entire held stack frees its hotbar slot.
+        return room;
     }
     @Override protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hit) {
         BlockState current = level.getBlockState(pos);
-        if (!stack.is(Items.GLASS_BOTTLE) || !current.is(this) || current.getValue(LATEX) != 4) return InteractionResult.PASS;
+        if (!current.is(this)) return InteractionResult.PASS;
+        if (stack.is(Items.BUCKET)) {
+            if (!level.isClientSide()) {
+                if (!current.getValue(UPGRADED)) {
+                    current = current.setValue(UPGRADED, true);
+                    level.setBlock(pos, current, Block.UPDATE_ALL);
+                    stack.consume(1, player);
+                    resume(level, pos);
+                }
+                showFill(player, current);
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (!stack.is(Items.GLASS_BOTTLE)) return InteractionResult.PASS;
         if (!level.isClientSide()) {
-            level.setBlock(pos, current.setValue(LATEX, 0), Block.UPDATE_CLIENTS);
-            stack.consume(1, player);
-            var bottle = new ItemStack(JugcraftAgriculture.item("latex_bottle"));
-            if (!player.getInventory().add(bottle)) Block.popResource(level, pos, bottle);
-            level.scheduleTick(pos, this, INTERVAL);
+            int count = Math.min(stack.getCount(), current.getValue(LATEX) / STEPS_PER_BOTTLE);
+            count = Math.min(count, bottleSpace(player, stack, hand, count));
+            if (count > 0) {
+                current = current.setValue(LATEX, current.getValue(LATEX) - count * STEPS_PER_BOTTLE);
+                level.setBlock(pos, current, Block.UPDATE_CLIENTS);
+                stack.consume(count, player);
+                var bottles = new ItemStack(JugcraftAgriculture.item("latex_bottle"), count);
+                if (!player.getInventory().add(bottles)) Block.popResource(level, pos, bottles);
+                resume(level, pos);
+            } else if (current.getValue(LATEX) >= STEPS_PER_BOTTLE) {
+                player.sendOverlayMessage(Component.translatable("message.jugcraft.tree_tap.inventory_full"));
+                return InteractionResult.SUCCESS;
+            }
+            showFill(player, current);
         }
         return InteractionResult.SUCCESS;
     }
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, LATEX); }
+    @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!level.isClientSide()) showFill(player, level.getBlockState(pos));
+        return InteractionResult.SUCCESS;
+    }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(FACING, LATEX, UPGRADED); }
 }

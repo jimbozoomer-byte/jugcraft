@@ -101,13 +101,13 @@ public class RainforestGameTests {
     public void latexCooksIntoRubberReturningEveryBottle(GameTestHelper h) {
         var at = new BlockPos(2, 2, 2); h.setBlock(at.below(), Blocks.CAMPFIRE); h.setBlock(at, block("cooking_pot"));
         var pot = h.getBlockEntity(at, CookingPotBlockEntity.class);
-        pot.setItem(0, new ItemStack(JugcraftAgriculture.item("latex_bottle"), 2));
+        pot.setItem(0, new ItemStack(JugcraftAgriculture.item("latex_bottle")));
         pot.setItem(1, new ItemStack(JugcraftAgriculture.item("cider_vinegar")));
         h.succeedWhen(() -> {
             var output = pot.getItem(CookingPotBlockEntity.RESULT);
             h.assertTrue(output.is(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(Jugcraft.id("rubber"))) && output.getCount()==1, "No rubber");
             int bottles=0; for(int i=0; i<CookingPotBlockEntity.SLOTS; i++) if(pot.getItem(i).is(Items.GLASS_BOTTLE)) bottles+=pot.getItem(i).getCount();
-            h.assertTrue(bottles==3, "Bottle loss/duplication " + bottles);
+            h.assertTrue(bottles==2, "Bottle loss/duplication " + bottles);
         });
     }
 
@@ -157,5 +157,154 @@ public class RainforestGameTests {
         h.assertFalse(io.github.jimbozoomer.jugcraft.machine.MachineRecipes.find(h.getLevel(),io.github.jimbozoomer.jugcraft.machine.MachineKind.SAWMILL,new ItemStack(block("tree_fern_trunk"))).isPresent(),"Fern makes planks");
         h.assertTrue(((RubberLogBlock)block("rubber_log")).stripped()==Blocks.STRIPPED_JUNGLE_LOG,"Wrong stripped timber");
         h.succeed();
+    }
+
+    private static void useTap(net.minecraft.server.level.ServerPlayer player, BlockPos at, InteractionHand hand) {
+        player.gameMode.useItemOn(player, player.level(), player.getItemInHand(hand), hand,
+                new BlockHitResult(Vec3.atCenterOf(at), Direction.NORTH, at, false));
+    }
+    @GameTest
+    public void tapSaveStatesRetainOldProgressAndBucketContents(GameTestHelper h) {
+        var codec = net.minecraft.world.level.block.state.BlockState.CODEC;
+        var ops = com.mojang.serialization.JsonOps.INSTANCE;
+        var legacy = com.google.gson.JsonParser.parseString("{\"id\":\"jugcraft:tree_tap\",\"properties\":{\"facing\":\"west\",\"latex\":\"3\"}}");
+        var loaded = codec.parse(ops, legacy).getOrThrow();
+        h.assertTrue(!loaded.getValue(TreeTapBlock.UPGRADED) && loaded.getValue(TreeTapBlock.LATEX) == 3
+                && loaded.getValue(TreeTapBlock.FACING) == Direction.WEST, "Legacy tap lost progress or orientation");
+        for (int fill : new int[]{0, 3, 19, 32}) {
+            var state = loaded.setValue(TreeTapBlock.UPGRADED, true).setValue(TreeTapBlock.LATEX, fill);
+            h.assertTrue(codec.parse(ops, codec.encodeStart(ops, state).getOrThrow()).getOrThrow().equals(state), "Bucket fill did not persist: " + fill);
+        }
+        h.succeed();
+    }
+    @GameTest
+    public void bucketUpgradeCapsAtEightAndBottlesInBatches(GameTestHelper h) {
+        var level = h.getLevel(); var at = AT.offset(400, 0, 0); grow(h, "rubber_tree", at, 2);
+        var pos = at.above().north(); var tap = (TreeTapBlock) block("tree_tap");
+        level.setBlock(pos, tap.defaultBlockState().setValue(TreeTapBlock.LATEX, 3), Block.UPDATE_ALL);
+        var player = h.makeMockServerPlayerInLevel(); player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET, 2));
+        useTap(player, pos, InteractionHand.MAIN_HAND); useTap(player, pos, InteractionHand.MAIN_HAND);
+        h.assertTrue(player.getMainHandItem().getCount() == 1, "Upgrade spent more than one bucket");
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.UPGRADED)
+                && level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 3, "Upgrade lost partial latex");
+        for (int i = 0; i < 40; i++) tap.tick(level.getBlockState(pos), level, pos, RandomSource.create(i));
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 32, "Eight-bottle cap failed");
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GLASS_BOTTLE, 2));
+        useTap(player, pos, InteractionHand.MAIN_HAND);
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 24, "Small batch drained extra latex");
+        player.getInventory().setItem(10, player.getMainHandItem());
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GLASS_BOTTLE, 20));
+        useTap(player, pos, InteractionHand.MAIN_HAND); useTap(player, pos, InteractionHand.MAIN_HAND);
+        h.assertTrue(player.getMainHandItem().getCount() == 14, "Batch bottle count wrong");
+        h.assertTrue(player.getInventory().countItem(JugcraftAgriculture.item("latex_bottle")) == 8, "Lost or duplicated batch");
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 0, "Not drained");
+        h.assertTrue(level.getBlockTicks().hasScheduledTick(pos, tap), "Drained tap did not resume");
+        TreeBatchTwoGameTests.reset(level, at, Blocks.GRASS_BLOCK); h.succeed();
+    }
+
+    @GameTest(maxTicks = 1230)
+    public void upgradeAndBottlingPreservePartialFillAndPendingTick(GameTestHelper h) {
+        var level = h.getLevel(); var at = AT.offset(480, 0, 0); grow(h, "rubber_tree", at, 2);
+        var chunk = net.minecraft.world.level.ChunkPos.containing(at); level.setChunkForced(chunk.x(), chunk.z(), true);
+        var pos = at.above().north(); var tap = (TreeTapBlock) block("tree_tap");
+        level.setBlock(pos, tap.defaultBlockState().setValue(TreeTapBlock.LATEX, 2), Block.UPDATE_ALL);
+        var player = h.makeMockServerPlayerInLevel(); player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        h.runAfterDelay(300, () -> {
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));
+            useTap(player, pos, InteractionHand.MAIN_HAND);
+            h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 2, "Upgrade reset progress");
+        });
+        h.runAfterDelay(600, () -> {
+            level.setBlock(pos, level.getBlockState(pos).setValue(TreeTapBlock.LATEX, 7), Block.UPDATE_CLIENTS);
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GLASS_BOTTLE, 8));
+            useTap(player, pos, InteractionHand.MAIN_HAND); useTap(player, pos, InteractionHand.MAIN_HAND);
+            h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 3, "Bottling discarded partial fill");
+            h.assertTrue(player.getMainHandItem().getCount() == 7, "Incomplete bottle was collected");
+        });
+        h.runAfterDelay(1190, () -> h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 3, "Fill tick accelerated"));
+        h.runAfterDelay(1205, () -> {
+            h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 4, "Upgrade or bottling postponed the pending fill tick");
+            TreeBatchTwoGameTests.reset(level, at, Blocks.GRASS_BLOCK); level.setChunkForced(chunk.x(), chunk.z(), false); h.succeed();
+        });
+    }
+
+    @GameTest
+    public void bucketCraftAndMovedTapKeepUpgradeButNotContents(GameTestHelper h) {
+        var level = h.getLevel(); var at = AT.offset(560, 0, 0); grow(h, "rubber_tree", at, 2);
+        var pos = at.above().north(); var tap = block("tree_tap");
+        var input = net.minecraft.world.item.crafting.CraftingInput.of(2, 1, List.of(new ItemStack(tap), new ItemStack(Items.BUCKET)));
+        var recipe = level.recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, level).orElseThrow().value();
+        var crafted = recipe.assemble(input);
+        h.assertTrue(crafted.is(tap.asItem()), "Wrong upgrade recipe result");
+        var player = h.makeMockServerPlayerInLevel(); player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, crafted);
+        var support = at.above();
+        player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(support).relative(Direction.NORTH, .5), Direction.NORTH, support, false));
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.UPGRADED), "Crafted upgrade did not place upgraded");
+        var filled = level.getBlockState(pos).setValue(TreeTapBlock.LATEX, 23);
+        var drops = Block.getDrops(filled, level, pos, null);
+        h.assertTrue(drops.size() == 1 && drops.getFirst().getCount() == 1, "Upgrade drop duplicated or lost");
+        var properties = drops.getFirst().get(net.minecraft.core.component.DataComponents.BLOCK_STATE);
+        h.assertTrue(properties != null && properties.apply(tap.defaultBlockState()).getValue(TreeTapBlock.UPGRADED), "Drop lost paid bucket");
+        h.assertTrue(properties.apply(tap.defaultBlockState()).getValue(TreeTapBlock.LATEX) == 0, "Drop retained unbottled latex");
+        level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, drops.getFirst());
+        player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(support).relative(Direction.NORTH, .5), Direction.NORTH, support, false));
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.UPGRADED)
+                && level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 0, "Moved upgrade not restored empty");
+        TreeBatchTwoGameTests.reset(level, at, Blocks.GRASS_BLOCK); h.succeed();
+    }
+
+    @GameTest(maxTicks = 2430)
+    public void fullStoppedTapsResumeAfterUpgradeOrBatchCollection(GameTestHelper h) {
+        var level = h.getLevel(); var tap = (TreeTapBlock) block("tree_tap");
+        var bases = List.of(AT.offset(720, 0, 0), AT.offset(800, 0, 0));
+        for (int i = 0; i < bases.size(); i++) {
+            var at = bases.get(i); grow(h, "rubber_tree", at, 2);
+            var chunk = net.minecraft.world.level.ChunkPos.containing(at); level.setChunkForced(chunk.x(), chunk.z(), true);
+            level.setBlock(at.above().north(), tap.defaultBlockState().setValue(TreeTapBlock.UPGRADED, i == 1)
+                    .setValue(TreeTapBlock.LATEX, i == 1 ? 32 : 4), Block.UPDATE_ALL);
+        }
+        var player = h.makeMockServerPlayerInLevel(); player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        h.runAfterDelay(1205, () -> {
+            for (var at : bases) h.assertFalse(level.getBlockTicks().hasScheduledTick(at.above().north(), tap), "Full tap kept scheduling");
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));
+            useTap(player, bases.getFirst().above().north(), InteractionHand.MAIN_HAND);
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GLASS_BOTTLE, 8));
+            useTap(player, bases.getLast().above().north(), InteractionHand.MAIN_HAND);
+            for (var at : bases) h.assertTrue(level.getBlockTicks().hasScheduledTick(at.above().north(), tap), "Stopped tap did not restart");
+        });
+        h.runAfterDelay(2410, () -> {
+            h.assertTrue(level.getBlockState(bases.getFirst().above().north()).getValue(TreeTapBlock.LATEX) == 5, "Full basic tap did not continue after upgrade");
+            h.assertTrue(level.getBlockState(bases.getLast().above().north()).getValue(TreeTapBlock.LATEX) == 1, "Full bucket did not refill after collecting");
+            for (var at : bases) {
+                TreeBatchTwoGameTests.reset(level, at, Blocks.GRASS_BLOCK);
+                var chunk = net.minecraft.world.level.ChunkPos.containing(at); level.setChunkForced(chunk.x(), chunk.z(), false);
+            }
+            h.succeed();
+        });
+    }
+
+    @GameTest
+    public void batchBottlingRespectsInventorySpaceAndOffHand(GameTestHelper h) {
+        var level = h.getLevel(); var at = AT.offset(640, 0, 0); grow(h, "rubber_tree", at, 2);
+        var pos = at.above().north(); var tap = block("tree_tap");
+        level.setBlock(pos, tap.defaultBlockState().setValue(TreeTapBlock.UPGRADED, true).setValue(TreeTapBlock.LATEX, 19), Block.UPDATE_ALL);
+        var player = h.makeMockServerPlayerInLevel(); player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+        for (int i = 0; i < 36; i++) player.getInventory().setItem(i, new ItemStack(Items.COBBLESTONE, 64));
+        player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.GLASS_BOTTLE, 8));
+        useTap(player, pos, InteractionHand.OFF_HAND);
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 19 && player.getOffhandItem().getCount() == 8, "Full inventory consumed bottles or latex");
+        player.getInventory().setItem(10, new ItemStack(JugcraftAgriculture.item("latex_bottle"), 15));
+        useTap(player, pos, InteractionHand.OFF_HAND);
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 15 && player.getOffhandItem().getCount() == 7, "Did not collect only what fits");
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.GLASS_BOTTLE));
+        useTap(player, pos, InteractionHand.MAIN_HAND);
+        h.assertTrue(level.getBlockState(pos).getValue(TreeTapBlock.LATEX) == 11, "Freed hotbar slot not used");
+        h.assertTrue(player.getInventory().countItem(JugcraftAgriculture.item("latex_bottle")) == 17, "Inventory batch reward wrong");
+        TreeBatchTwoGameTests.reset(level, at, Blocks.GRASS_BLOCK); h.succeed();
     }
 }

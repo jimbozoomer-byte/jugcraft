@@ -50,18 +50,33 @@ nonpersistent nearby rubber leaves at the crown. Stockpiles do not produce latex
 Rubber logs cannot be pushed into new productive arrangements with pistons.
 
 One iron nugget and three planks craft a Tree Tap. Its scheduled tick adds one
-fill step every 1,200 loaded ticks, capped at four. A full tap fills one glass
-bottle in four minutes. A heated Cooking Pot consumes two Latex Bottles and one
-Cider Vinegar in 600 ticks (30 seconds), returning one existing Rubber and all
-three Glass Bottles. This abstracts coagulation and drying; there is no new
-rubber currency, sulfur recipe, or replacement for the industrial reactor.
-The bottleneck is eight loaded tree-minutes per rubber per tap, plus vinegar and
-heat. There is no unloaded catch-up, per-tick block entity, or free container.
-Breaking a tap returns the tap and loses its unbottled contents.
-The alchemy catalogue includes every new item and accounts for the latex bottle's
-recoverable glass; rubber keeps its existing value. The processing loop cannot
-mint essence through its three returned bottles. Its shared display name is now
-Rubber, since both natural latex and the existing industrial route make it.
+quarter-bottle every 1,200 loaded ticks. The basic wooden collector holds one
+bottle; attaching an empty iron bucket raises capacity to eight bottles (32
+loaded minutes). Right-click the placed tap with a Bucket, or craft Tree Tap +
+Bucket side by side. An already upgraded tap does not consume another bucket.
+
+Right-click with a stack of Glass Bottles to collect as many whole bottles as
+both the held stack and inventory allow. Fractional latex and any remaining
+whole bottles stay in the tap. Neither upgrading nor harvesting postpones the
+already scheduled fill tick. A stopped full collector resumes when upgraded or
+emptied. Empty-hand use reports whole bottles, capacity and the next bottle's
+quarter-step percentage. The larger iron collector has a rising visible cream
+surface and a front fill gauge at every step, readable even above eye level.
+Its item model also shows the bucket upgrade.
+
+A heated Cooking Pot consumes **one Latex Bottle and one Cider Vinegar** in
+600 ticks (30 seconds), returning one existing Rubber and both Glass Bottles.
+This abstracts coagulation and drying; it retains the canonical material and
+industrial route. The bottleneck is four loaded tree-minutes per rubber per tap,
+plus vinegar and heat. There is no unloaded catch-up or per-tick block entity.
+Breaking a tap loses unbottled contents but retains its paid bucket upgrade in
+the dropped item. The next placement starts empty. The existing `latex` property
+keeps its quarter-bottle units; old 0–4 saved states remain basic collectors with
+the same progress, and the added `upgraded` property defaults to false.
+
+The alchemy catalogue accounts for recoverable glass; rubber keeps its existing
+value. The one-latex recipe and both returned bottles pass the no-gain check.
+Its shared display name is Rubber, since both routes make the same material.
 
 Rubber logs craft into four jungle planks, saw into six with the existing sawdust
 chance, and strip into vanilla stripped jungle logs. They are not fuel logs.
@@ -147,4 +162,48 @@ These are observed samples, not promises that every possible seed has those boun
 Seven focused server tests passed, including every base column, wrong soil,
 obstacles, sapling growth, timed tap placement/filling/harvesting, duplicate-tap
 and stockpile rejection, living-canopy checks, cap, propagation and shared timber
-routes. The real Cooking Pot returned one Rubber and all three bottles.
+routes. The original two-latex Cooking Pot returned one Rubber and three bottles;
+the owner-requested one-latex refinement below supersedes that recipe.
+
+## Bucket-storage refinement (18 October 2026)
+
+Owner-approved follow-up on PR #420, implemented with OpenAI Codex (GPT-6).
+The underlying tree shapes and biome distributions are unchanged. The collector
+extends the existing native model generator and reuses its metal and latex
+textures; no external or source-library asset is modified.
+
+Focused validation for this refinement:
+
+- **13 focused server GameTests passed across scoped runs.** The class run used
+  `-I build/focused.gradle -PgameTestFilter=jugcraft-test:rainforest_game_tests*`.
+  Twelve passed immediately; the save fixture used pre-26.3 field names. After
+  correcting it to `id`/`properties`, only
+  `jugcraft-test:rainforest_game_tests_tap_save_states_retain_old_progress_and_bucket_contents`
+  was rerun and passed. Gameplay code did not change for that repair.
+- New coverage includes bucket consumption and repeated upgrades, eight-bottle
+  cap, limited and full batches, off-hand use, full inventories, retained
+  fractional latex, the original scheduled fill time, stopped-full resumption,
+  crafted and moved upgrades, old-state decoding and new-state round trips.
+  The real heated pot returns one Rubber and two bottles from one latex + vinegar.
+- **5 Python Batch 12 tests passed**, including generator parity, increasing
+  surface/gauge levels and no essence gain through returned bottles.
+- **38 tap models passed** the geometry/UV audit. **58 generated documents**
+  matched the editable sources. The recipe viewer's rubber-log ordering was
+  refreshed to match its existing generator. **40 changed/new resources** were
+  byte-identical in the rebuilt JAR.
+- `jar` plus `runClientGameTest -PclientTests=RainforestClientGameTests` **passed**:
+  the three tap examples, their upgraded flags and contents, 12 trees and banana
+  display survived save/reopen. Fifteen screenshots include basic, partial and
+  full bucket collectors; the tap screenshots were visually inspected.
+- Repository links/whitespace and the 18 pinned pack entries passed their checks.
+  The full server/Python/data-audit suites were **not rerun** for this refinement.
+  The earlier full-suite results above describe the initial Batch 12 version.
+
+The fresh export is **Rainforest and Upgraded Tap Inspection**, delivered under
+`tree-batch-12-tap-upgrade-2026-10-18`. It preserves the previous inspection world.
+The cleaned copy retains all 94 source files and all gameplay NBT; only the same
+three development-metadata files changed, after scanning 7,723 region records.
+The garden supplies buckets and bottle stacks. Basic/partial/full tap samples
+are on the north sides of the rubber trees at z=-1001/-1041/-1081, x=1040.
+Use `/tp @s 1040 180 -1085 0 0` for the full collector. Owner approval of this
+storage refinement is pending; PR #420 stays draft and Batch 13 is excluded.

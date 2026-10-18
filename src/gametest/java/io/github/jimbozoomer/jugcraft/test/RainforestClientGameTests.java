@@ -17,8 +17,8 @@ public class RainforestClientGameTests extends TreeBatchTwoClientGameTests {
     private final Map<BlockPos, BlockState> saved = new LinkedHashMap<>();
     @Override protected List<String> shapes() { return RainforestGameTests.SHAPES; }
     @Override protected List<String> biomes() { return List.of("rainforest", "tropics", "lush_grassland", "eucalyptus_forest", "temperate_rainforest"); }
-    @Override protected String worldName() { return "Rainforest and Tree Tapping Inspection"; }
-    @Override protected String exportName() { return "tree-batch-12-preview"; }
+    @Override protected String worldName() { return "Rainforest and Upgraded Tap Inspection"; }
+    @Override protected String exportName() { return "tree-batch-12-tap-preview"; }
     @Override protected String screenshotPrefix() { return "jugcraft_tree12_"; }
     private List<String> targets(String biome) {
         return switch (biome) {
@@ -47,9 +47,12 @@ public class RainforestClientGameTests extends TreeBatchTwoClientGameTests {
             for(int sample=0;sample<3;sample++) {
                 var tap=GARDEN.offset(40,1,-sample*40-1);
                 if(!TreeTapBlock.productive(level,tap,Direction.NORTH)) throw new AssertionError("Gallery rubber tree cannot be tapped");
-                var state=JugcraftAgriculture.block("tree_tap").defaultBlockState().setValue(TreeTapBlock.FACING,Direction.NORTH).setValue(TreeTapBlock.LATEX,sample*2);
+                int fill = new int[]{2, 19, 32}[sample];
+                var state=JugcraftAgriculture.block("tree_tap").defaultBlockState().setValue(TreeTapBlock.FACING,Direction.NORTH)
+                        .setValue(TreeTapBlock.UPGRADED, sample > 0).setValue(TreeTapBlock.LATEX, fill);
                 level.setBlock(tap,state,Block.UPDATE_ALL); saved.put(tap,state);
-                PineWoodClientGameTests.label(level,tap.offset(3,-1,0),"Tree tap: " + (sample*2) + "/4",sample==2?"Use glass bottle":"1 step / minute");
+                PineWoodClientGameTests.label(level,tap.offset(3,-1,0),sample==0?"Basic tap: 50%":sample==1?"Bucket: 4 + 75%":"Bucket: 8/8 full",
+                        sample==0?"Use empty bucket":"Use bottle stack");
             }
             // Keep the harvest display outside the measured tree plots (radius 16).
             for (var p : BlockPos.betweenClosed(GARDEN.offset(117,-1,16), GARDEN.offset(124,-1,25))) {
@@ -62,19 +65,23 @@ public class RainforestClientGameTests extends TreeBatchTwoClientGameTests {
             level.setBlock(leaf,state,Block.UPDATE_ALL); saved.put(leaf,state);
             PineWoodClientGameTests.label(level,leaf.offset(3,-1,0),"Ripe banana leaves","Right-click to pick");
         });
-        for (String item : List.of("jugcraft:tree_fern_sapling 16","jugcraft:rubber_tree_sapling 16","jugcraft:tree_tap 8","minecraft:glass_bottle 16",
-                "jugcraft:latex_bottle 2","jugcraft:cider_vinegar","jugcraft:cooking_pot","minecraft:campfire","jugcraft:banana_pup 16","minecraft:bone_meal 64","minecraft:shears","minecraft:iron_axe"))
+        for (String item : List.of("jugcraft:tree_fern_sapling 16","jugcraft:rubber_tree_sapling 16","jugcraft:tree_tap 8","minecraft:glass_bottle 64",
+                "minecraft:bucket 8","jugcraft:latex_bottle 8","jugcraft:cider_vinegar 8","jugcraft:cooking_pot","minecraft:campfire","jugcraft:banana_pup 16","minecraft:bone_meal 64","minecraft:shears","minecraft:iron_axe"))
             world.getServer().runCommand("give @a " + item);
-        shoot(context,world,GARDEN.offset(42,2,-84),GARDEN.offset(40,1,-81),screenshotPrefix()+"tap_full");
+        for (int sample=0; sample<3; sample++)
+            shoot(context,world,GARDEN.offset(42,2,-sample*40-4),GARDEN.offset(40,1,-sample*40-1),screenshotPrefix()+"tap_"+sample);
         shoot(context,world,GARDEN.offset(105,20,25),GARDEN.offset(80,12,0),screenshotPrefix()+"mahogany_full");
         for(boolean cutout:List.of(true,false)) {
             context.runOnClient(client->client.options.cutoutLeaves().set(cutout));
             shoot(context,world,GARDEN.offset(6,3,9),GARDEN.offset(0,3,0),screenshotPrefix()+(cutout?"fronds_cutout":"fronds_solid"));
         }
         context.runOnClient(client->client.options.cutoutLeaves().set(true));
-        tour.add("Tap samples: north side of each rubber tree, fill 0/2/4. Full tap: /tp @s 1040 180 -1085 0 0. Use a glass bottle.");
+        tour.add("Tap samples: north side of each rubber tree. Basic half-full z-1001; bucket 4 bottles + 75% z-1041; bucket 8/8 full z-1081.");
+        tour.add("Full bucket: /tp @s 1040 180 -1085 0 0. Use a bottle stack to collect up to eight at once, limited by bottles held and inventory space.");
+        tour.add("Right-click a placed basic tap with an empty bucket to upgrade without losing partial latex or delaying the pending fill tick. Or craft Tree Tap + Bucket side by side.");
+        tour.add("Empty-hand right-click shows whole bottles, capacity and partial fill. Collecting preserves leftover fractional latex. Breaking loses contents but keeps the bucket upgrade.");
         tour.add("One tap per living tree, on its bottom three logs. Four loaded minutes per bottle. Placed logs and leafless trees do not produce latex.");
-        tour.add("Cooking Pot over lit campfire: 2 Latex Bottles + 1 Cider Vinegar -> 1 Rubber in 30 seconds; returns three Glass Bottles.");
+        tour.add("Upgraded capacity is eight bottles / 32 loaded minutes. Cooking Pot over lit campfire: 1 Latex Bottle + 1 Cider Vinegar -> 1 Rubber in 30 seconds; returns two Glass Bottles.");
         tour.add("Bananas use the existing orchard leaves and pups. Right-click ripe leaves; /gamerule minecraft:random_tick_speed 3 enables regrowth.");
         tour.add("Tree tap scheduled ticks continue even while random ticks are frozen. Initial tap levels may advance while inspecting.");
     }
@@ -83,6 +90,7 @@ public class RainforestClientGameTests extends TreeBatchTwoClientGameTests {
             var actual=level.getBlockState(p);
             boolean match=state.getBlock() instanceof TreeTapBlock ? actual.is(state.getBlock())
                     && actual.getValue(TreeTapBlock.FACING)==state.getValue(TreeTapBlock.FACING)
+                    && actual.getValue(TreeTapBlock.UPGRADED)==state.getValue(TreeTapBlock.UPGRADED)
                     && actual.getValue(TreeTapBlock.LATEX)>=state.getValue(TreeTapBlock.LATEX) : actual.equals(state);
             if(!match) throw new AssertionError("Display changed across save/reopen " + p);
         });

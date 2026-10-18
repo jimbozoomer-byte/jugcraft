@@ -8,7 +8,14 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "jugcraft:tree_tap"
+          "name": "jugcraft:tree_tap",
+          "modifier": {
+            "type": "minecraft:copy_state",
+            "block": "jugcraft:tree_tap",
+            "properties": [
+              "upgraded"
+            ]
+          }
         }
       ],
       "rolls": 1

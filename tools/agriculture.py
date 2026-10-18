@@ -2191,7 +2191,7 @@ COOK_TIMES = {"smelting": 200, "smoking": 100, "campfire_cooking": 600}
 # ingredients may be stacked for batch cooking. Every filled slot must belong to the recipe. No two
 # recipes may share the same set of ingredient items. time: ticks with heat.
 POT_RECIPES = {
-    "rubber": {"inputs": {"jugcraft:latex_bottle": 2, "jugcraft:cider_vinegar": 1}, "time": 600},
+    "rubber": {"inputs": {"jugcraft:latex_bottle": 1, "jugcraft:cider_vinegar": 1}, "time": 600},
     "tomato_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:tomato": 2, "jugcraft:onion": 1}, "time": 200},
     "onion_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:onion": 2, "jugcraft:garlic": 1, "minecraft:bread": 1}, "time": 200},
     "vegetable_soup": {"inputs": {"minecraft:bowl": 1, "jugcraft:cabbage": 1, "minecraft:carrot": 1, "minecraft:potato": 1,
@@ -2988,6 +2988,9 @@ SHAPELESS += [{"id": "red_dye_from_dragonblood_resin", "inputs": ["jugcraft:drag
 
 SHAPED += [{"id": "tree_tap", "pattern": [" I ", "P P", " P "], "key": {"I": "minecraft:iron_nugget", "P": "#minecraft:planks"},
             "result": "jugcraft:tree_tap", "count": 1, "category": "misc", "switch": "agriculture"}]
+SHAPED += [{"id": "tree_tap_bucket", "pattern": ["TB"], "key": {"T": "jugcraft:tree_tap", "B": "minecraft:bucket"},
+            "result": "jugcraft:tree_tap", "count": 1, "category": "misc", "switch": "agriculture",
+            "components": {"minecraft:block_state": {"upgraded": "true"}}}]
 SHAPELESS += [{"id": "rubber_log_planks", "inputs": ["jugcraft:rubber_log"], "result": "minecraft:jungle_planks", "count": 4, "category": "building", "switch": ["biomes", "agriculture"]}]
 
 SHAPELESS += [{"id": "baobab_seeds", "inputs": ["jugcraft:baobab_fruit"], "result": "jugcraft:baobab_seeds", "count": 1, "category": "misc", "switch": "biomes"}]

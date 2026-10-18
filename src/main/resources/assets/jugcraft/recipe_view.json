@@ -2670,26 +2670,6 @@
         {
           "in": [
             [
-              "jugcraft:rubber_log",
-              1
-            ]
-          ],
-          "out": [
-            "minecraft:jungle_planks",
-            6
-          ],
-          "extra": [
-            [
-              "jugcraft:sawdust",
-              1,
-              0.5
-            ]
-          ],
-          "ticks": 100
-        },
-        {
-          "in": [
-            [
               "#minecraft:oak_logs",
               1
             ]
@@ -3534,6 +3514,26 @@
           ],
           "extra": [],
           "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rubber_log",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:jungle_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
         }
       ]
     },
