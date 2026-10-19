@@ -79,6 +79,14 @@ public class RocketPadScreen extends AbstractContainerScreen<RocketPadMenu> {
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		extractBackground(graphics, mouseX, mouseY, delta);
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
+		if (!launch.active) {
+			// The shared button only shades a disabled face slightly; an unready Launch should read as unlit.
+			int bx = launch.getX();
+			int by = launch.getY();
+			graphics.fill(bx + 1, by + 1, bx + launch.getWidth() - 1, by + launch.getHeight() - 1, ScreenKit.darken(theme.buttonFace(), 120));
+			String label = launch.getMessage().getString();
+			graphics.text(font, label, bx + (launch.getWidth() - font.width(label)) / 2, by + (launch.getHeight() - 8) / 2, theme.dim(), false);
+		}
 		extractTooltip(graphics, mouseX, mouseY);
 		Slot slot = hoveredSlot;
 		if (slot != null && !slot.hasItem() && slot.index < CONTAINER_SLOTS) {
