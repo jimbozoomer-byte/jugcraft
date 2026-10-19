@@ -10565,7 +10565,7 @@
           "results": [
             [
               "jugcraft:plastic_sheet",
-              3
+              8
             ],
             [
               "jugcraft:hdpe_offcut",
@@ -10574,7 +10574,7 @@
           ],
           "ticks": 160,
           "tool": "jugcraft:sheet_extrusion_die",
-          "energy_per_tick": 48
+          "energy_per_tick": 24
         },
         {
           "items": [
@@ -10597,7 +10597,7 @@
           ],
           "ticks": 160,
           "tool": "jugcraft:film_extrusion_die",
-          "energy_per_tick": 48
+          "energy_per_tick": 24
         },
         {
           "items": [
@@ -10620,13 +10620,13 @@
           ],
           "ticks": 160,
           "tool": "jugcraft:profile_extrusion_die",
-          "energy_per_tick": 48
+          "energy_per_tick": 24
         },
         {
           "items": [
             [
               "jugcraft:rubber",
-              4
+              3
             ]
           ],
           "fluids": [],
@@ -10643,7 +10643,7 @@
           ],
           "ticks": 160,
           "tool": "jugcraft:hose_extrusion_die",
-          "energy_per_tick": 48
+          "energy_per_tick": 24
         },
         {
           "items": [
@@ -10657,7 +10657,7 @@
           "results": [
             [
               "jugcraft:cable_insulation",
-              3
+              6
             ],
             [
               "jugcraft:rubber_offcut",
@@ -10666,7 +10666,7 @@
           ],
           "ticks": 160,
           "tool": "jugcraft:insulation_extrusion_die",
-          "energy_per_tick": 48
+          "energy_per_tick": 24
         },
         {
           "items": [
@@ -10680,7 +10680,7 @@
           "results": [
             [
               "jugcraft:plastic_sheet",
-              3
+              8
             ],
             [
               "jugcraft:pvc_offcut",
@@ -10689,7 +10689,7 @@
           ],
           "ticks": 160,
           "tool": "jugcraft:sheet_extrusion_die",
-          "energy_per_tick": 48
+          "energy_per_tick": 24
         },
         {
           "items": [

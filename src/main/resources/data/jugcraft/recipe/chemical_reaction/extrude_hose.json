@@ -10,7 +10,7 @@
   "items": [
     {
       "ingredient": "jugcraft:rubber",
-      "count": 4
+      "count": 3
     }
   ],
   "results": [
@@ -24,6 +24,6 @@
     }
   ],
   "tool": "jugcraft:hose_extrusion_die",
-  "energy_per_tick": 48,
+  "energy_per_tick": 24,
   "time": 160
 }

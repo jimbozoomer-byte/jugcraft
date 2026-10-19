@@ -30,11 +30,11 @@ All values below are provisional fictional game units. Heat and pressure regulat
 | HDPE polymerization | 1000 mB ethylene + retained HDPE cartridge -> 4 HDPE pellets | 200 x 64 |
 | LDPE polymerization | 1000 mB ethylene + retained LDPE insert -> 4 LDPE pellets | 240 x 80 |
 | PVC / rubber | 500 mB vinyl chloride / butadiene -> 4 existing PVC / rubber | 160 x 64 |
-| Sheets | 4 HDPE pellets or PVC -> 3 existing plastic sheets + 1 matching offcut | 160 x 48 |
-| Film | 4 LDPE pellets -> 3 film rolls + 1 LDPE offcut | 160 x 48 |
-| Profile | 4 PVC -> 3 profiles + 1 PVC offcut | 160 x 48 |
-| Hose | 4 rubber -> 1 existing hose + 1 rubber offcut | 160 x 48 |
-| Insulation | 4 rubber -> 3 existing insulation + 1 rubber offcut | 160 x 48 |
+| Sheets | 4 HDPE pellets or PVC -> 8 existing plastic sheets + 1 matching offcut | 160 x 24 |
+| Film | 4 LDPE pellets -> 3 film rolls + 1 LDPE offcut | 160 x 24 |
+| Profile | 4 PVC -> 3 profiles + 1 PVC offcut | 160 x 24 |
+| Hose | 3 rubber -> 1 existing hose + 1 rubber offcut | 160 x 24 |
+| Insulation | 4 rubber -> 6 existing insulation + 1 rubber offcut | 160 x 24 |
 | Clean recovery | 4 matching offcuts -> 1 original stock; or 3 clean films/profiles -> 1 matching stock | 120 x 32 |
 
 Monomer recovery always needs outlet space; it never vents HCl. Absorb HCl through the existing Chemical Reactor. Drain incompatible feeds/products before switching jobs. The old refinery/PVC/polymer routes remain available.
