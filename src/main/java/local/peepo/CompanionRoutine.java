@@ -205,6 +205,10 @@ final class CompanionRoutine extends Goal {
                 // Finish the actual approach instead of endlessly rebuilding an already-completed block path.
                 npc.getMoveControl().setWantedPosition(target.x,target.y,target.z,1);return;
             }
+            // Like initial discovery, replanning needs ground navigation to be ready.
+            // A brief airborne tick after a direct step is not a failed route. Keep the
+            // existing lease/deadline and retry once grounded instead of blacklisting it.
+            if(!npc.onGround() && !npc.isInLiquid() && !npc.isPassenger())return;
             if(travel.needsPath(npc,target)){
                 if(!CompanionBudget.path(npc)){state=CompanionStatus.WAITING;return;}
                 npc.getNavigation().stop(); // A stuck route must not be returned by vanilla's same-target path cache.
