@@ -53,7 +53,7 @@ No game change: no registrations, recipes or saved data.
 - `python tools/check_mod_data.py` passed (2,885 material IDs, the data files and the recipe audit, including the new check);
 - `python scripts/check_repository.py` passed.
 
-**Results:** the fork's Build workflow results will be recorded here.
+**Results:** fork [run 39189348976](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39189348976) on 348d101e5: green. The mod built, and the generated-data check passed. So did the material check, including this new check. The server game tests and all eight client shards passed. On the first attempt, client shard 5 failed when the companion-population screenshot test (`PeepoPopulationClientTests`) timed out waiting for creatures. This change touches no game code, and the same test passed on other branches that day. Re-running that one job passed. The only later commit records the local checks in this file.
 
 ## AI attribution
 
