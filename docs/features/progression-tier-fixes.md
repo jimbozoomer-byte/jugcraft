@@ -55,7 +55,7 @@ Smaller items the owner may want to look at:
 
 ## Multiplayer and persistence
 
-No new IDs. Recipe yields and a fuel value change; saved machines and items load unchanged. A batch already running finishes with the recipe it started.
+No new IDs. Recipe yields and a fuel value change; saved machines and items load unchanged.
 
 ## Verification
 
@@ -65,7 +65,7 @@ No new IDs. Recipe yields and a fuel value change; saved machines and items load
 
 **Local checks:**
 - `python tools/generate_material_data.py` regenerated the six extruder recipes, the handbook and the recipe viewer data;
-- `python tools/check_mod_data.py` passed (2,885 material IDs, the data files and the recipe audit, including the aluminum and loop checks);
+- `python tools/check_mod_data.py` passed (2,885 material IDs, the data files and the recipe audit);
 - `python scripts/check_repository.py` passed.
 
 **Results:** the fork's Build workflow results will be recorded here.
