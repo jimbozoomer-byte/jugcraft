@@ -72,6 +72,10 @@ CI, [run 38657990009](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/
 
 CI, [run 38659890877](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/38659890877) on 37b86deed with those fixes: green. The shots showed each fix working. They also showed one more fault from before the restyle: on the remote shutdown panel, "This panel (control room locked out)" ran past its pane. It now wraps above the transfer switch. The re-run with that fix: see the PR.
 
+Rocket pad polish (19 October 2026), on the fork:
+- [Run 39188846806](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39188846806) on a576c0c9f: the mod, server tests and shard 4 (`JugcraftClientGameTests`) passed. Its shot showed the centred slots and the stripe, but Launch, though disabled with the plan slot empty, still looked lit: the shared button only shades a disabled face by 20. The pad now draws an unready Launch dark green with a dim label.
+- [Run 39192229706](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39192229706) on 60a629665: green, every job and all eight client shards. Its shot shows Launch unlit with the plan slot empty.
+
 Not run:
 - a human using each screen;
 - other GUI scales.
