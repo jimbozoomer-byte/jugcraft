@@ -43,6 +43,8 @@ Cement mix (calcite, clay and sand) can now be burnt into cement in two ways:
 
 **Server game test for CI:** `CementCaptureGameTests.reactorBurnsCementAndKeepsTheCarbonDioxide` checks the recipe takes four cement mix and gives four cement and 250 mB of carbon dioxide.
 
+**Results:** the fork's Build workflow passed on commit 4ad437f9 ([run 39174745063](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39174745063), second attempt): compilation, the headless server game tests (including the narrowed Fermenter check) and the rendered-client shards. In the first attempt client shard 2, whose classes do not touch this recipe, hit the 60-minute job limit; its re-run passed.
+
 **Not run:** an in-game reactor batch.
 
 ## AI attribution
