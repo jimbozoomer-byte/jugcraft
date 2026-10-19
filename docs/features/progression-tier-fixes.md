@@ -68,7 +68,9 @@ No new IDs. Recipe yields and a fuel value change; saved machines and items load
 - `python tools/check_mod_data.py` passed (2,885 material IDs, the data files and the recipe audit);
 - `python scripts/check_repository.py` passed.
 
-**Results:** the fork's Build workflow results will be recorded here.
+**Results:** fork [run 39191616535](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39191616535) on 10aace3b2: green. The mod built, the generated-data and material checks passed, and the server game tests passed, including the updated polymer and anaerobic tests. All eight client shards passed. On the first attempt, client shard 7 failed before any test ran: the Fabric Loom build plugin could not be downloaded. Re-running that one job passed.
+
+Not run: a human playing through the extruder or Bio-Generator.
 
 ## AI attribution
 
