@@ -50,7 +50,8 @@ No game change: no registrations, recipes or saved data.
 **Local checks:**
 - the new check alone passes;
 - with the two aluminum-cabled machines added to its list it fails on exactly those two;
-- `python tools/check_mod_data.py` and `python scripts/check_repository.py` (results below).
+- `python tools/check_mod_data.py` passed (2,885 material IDs, the data files and the recipe audit, including the new check);
+- `python scripts/check_repository.py` passed.
 
 **Results:** the fork's Build workflow results will be recorded here.
 
