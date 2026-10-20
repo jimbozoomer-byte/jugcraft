@@ -29,7 +29,8 @@ public enum CandyFlavour implements StringRepresentable {
 	SPICED(MobEffects.FIRE_RESISTANCE, 15, 0xA0522D),
 	CHESTNUT(MobEffects.HASTE, 15, 0x8A5A30),
     OSMANTHUS(MobEffects.LUCK, 30, 0xE8D08A),
-    ORANGE(MobEffects.JUMP_BOOST, 15, 0xE0861C);
+    ORANGE(MobEffects.JUMP_BOOST, 15, 0xE0861C),
+	SOUR(MobEffects.JUMP_BOOST, 10, 0xD8E048);
 
 	public static final Codec<CandyFlavour> CODEC = StringRepresentable.fromEnum(CandyFlavour::values);
 

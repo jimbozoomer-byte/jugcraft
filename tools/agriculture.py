@@ -1828,7 +1828,10 @@ CANDY = {"kettle": "candy_kettle", "kettle_display": "Candy Kettle", "tray": "ca
                                  "color": 0xA0522D},
                       "chestnut": {"display": "Chestnut", "items": ["jugcraft:roasted_chestnuts"], "effect": "HASTE", "seconds": 15,
                                    "color": 0x8A5A30},
-                      "orange": {"display": "Orange", "items": ["jugcraft:orange"], "effect": "JUMP_BOOST", "seconds": 15, "color": 0xE0861C}}}
+                      "orange": {"display": "Orange", "items": ["jugcraft:orange"], "effect": "JUMP_BOOST", "seconds": 15, "color": 0xE0861C},
+                      # Citric acid from the Chemical Reactor (tools/petro.py): sour candy makes the eater jump.
+                      "sour": {"display": "Sour", "items": ["jugcraft:citric_acid"], "effect": "JUMP_BOOST", "seconds": 10,
+                               "color": 0xD8E048}}}
 
 
 def candy_blocks():

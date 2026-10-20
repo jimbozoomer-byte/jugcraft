@@ -210,6 +210,11 @@ ITEMS = {
     # tungsten and steel it makes the neutron-absorbing control rod assembly every reactor pressure vessel holds.
     "boric_acid": "Boric Acid",
     "control_rod_assembly": "Control Rod Assembly",
+    # Food chemistry (docs/features/sour-candy.md): citric acid pressed and crystallized from lemons or oranges in the
+    # Chemical Reactor (a Candy Kettle flavour, tools/agriculture.py CANDY "sour"), and corn hydrolysed with dilute
+    # hydrochloric acid into a bottle of glucose syrup that crafts into sugar.
+    "citric_acid": "Citric Acid",
+    "glucose_syrup": "Glucose Syrup",
 }
 
 
@@ -429,6 +434,16 @@ FLUID_RECIPES = {
         # Boric acid (docs/features/boric-acid.md): borax freed with sulfuric acid. Quantities for review.
         {"name": "boric_acid", "items": [("jugcraft:borax", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:boric_acid", 2)], "ticks": 100, "features": ["silicon", "sulfur"]},
+        # Food chemistry (docs/features/sour-candy.md): citrus juice steeped in hot water and crystallized gives citric
+        # acid (lemons give more than oranges); corn starch hydrolysed with a little dilute hydrochloric acid gives glucose
+        # syrup, bottled. Quantities for review.
+        {"name": "citric_acid_lemon", "items": [("jugcraft:lemon", 4)], "fluids": [("minecraft:water", 250)],
+         "results": [("jugcraft:citric_acid", 2)], "ticks": 120, "features": ["agriculture", "machines"]},
+        {"name": "citric_acid_orange", "items": [("jugcraft:orange", 4)], "fluids": [("minecraft:water", 250)],
+         "results": [("jugcraft:citric_acid", 1)], "ticks": 120, "features": ["agriculture", "machines"]},
+        {"name": "glucose_syrup", "items": [("jugcraft:corn", 4), ("minecraft:glass_bottle", 1)],
+         "fluids": [("jugcraft:hydrochloric_acid", 50)], "results": [("jugcraft:glucose_syrup", 1)], "ticks": 160,
+         "features": ["agriculture", "machines"]},
         # Saponification (batch 15): fat (rotten flesh, rendered) boiled in lye sets into soap.
         {"name": "soap", "items": [("minecraft:rotten_flesh", 2)], "fluids": [("jugcraft:lye", 250)],
          "results": [("jugcraft:soap", 4)], "ticks": 80, "features": ["salt"]},

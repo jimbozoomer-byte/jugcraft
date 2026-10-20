@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
+import net.minecraft.world.item.Items;
 
 /** Plain items of the oil line (ITEMS in tools/petro.py). */
 public final class PetroItems {
@@ -51,6 +52,9 @@ public final class PetroItems {
 	/** Boron (docs/features/boric-acid.md): boric acid from borax, and the reactor's control rod assembly made with it. */
 	public static Item BORIC_ACID;
 	public static Item CONTROL_ROD_ASSEMBLY;
+	/** Food chemistry (docs/features/sour-candy.md): citric acid, a candy flavour, and glucose syrup, which crafts into sugar. */
+	public static Item CITRIC_ACID;
+	public static Item GLUCOSE_SYRUP;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -238,6 +242,9 @@ public final class PetroItems {
 				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
 		BORIC_ACID = JugcraftRegistry.item("boric_acid");
 		CONTROL_ROD_ASSEMBLY = JugcraftRegistry.item("control_rod_assembly", properties -> new Item(properties.stacksTo(16)));
+		CITRIC_ACID = JugcraftRegistry.item("citric_acid");
+		GLUCOSE_SYRUP = JugcraftRegistry.item("glucose_syrup",
+				properties -> new Item(properties.stacksTo(16).craftRemainder(Items.GLASS_BOTTLE)));
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -549,6 +556,8 @@ public final class PetroItems {
 			output.accept(AMMONIUM_NITRATE);
 			output.accept(BORIC_ACID);
 			output.accept(CONTROL_ROD_ASSEMBLY);
+			output.accept(CITRIC_ACID);
+			output.accept(GLUCOSE_SYRUP);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {
