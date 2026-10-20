@@ -165,6 +165,27 @@ def rules_file():
     return RULES
 
 
+# These owner additions share the same Fabric picker as the existing End biomes.
+# Calculate one ordered distribution; appending raw weights would put them in
+# the effectively unreachable tail of the absolute-Perlin distribution.
+OWNER_END_BIOMES = ("end_wilds", "end_reef", "end_flats", "end_corruption")
+OWNER_END_SHARE = 1 / 16
+OWNER_NETHER_POINTS = (("erupting_inferno", .95, .15), ("visceral_heap", .3, .8),
+                       ("withered_abyss", -.7, -.4), ("undergrowth", .1, .6),
+                       ("crystalline_chasm", -.5, .3))
+
+
+def owner_dimension_file():
+    base_shares = [info["end"]["share"] for info in BIOMES.values()
+                   if info.get("dimension") == "end" and info["end"]["zone"] == "highlands"]
+    weights, _ = end_noise.highlands_weights(base_shares + [OWNER_END_SHARE] * len(OWNER_END_BIOMES))
+    return {"nether": [{"biome": f"jugcraft:landscape_{name}", "temperature": temp,
+                        "humidity": humidity, "offset": .15} for name, temp, humidity in OWNER_NETHER_POINTS],
+            "end": [{"biome": f"jugcraft:landscape_{name}", "zone": "highlands",
+                     "share": OWNER_END_SHARE, "weight": round(weight, 4)}
+                    for name, weight in zip(OWNER_END_BIOMES, weights[len(base_shares):])]}
+
+
 def dimension_file():
     """The generated Nether and End placements Java reads (/jugcraft/dimension_biomes.json; biome/JugcraftDimensions):
     a Nether biome's [temperature, humidity, offset], an End biome's zone and Fabric weight, in the order Java adds them.
@@ -180,7 +201,8 @@ def dimension_file():
             out["nether"].append({"biome": f"{MOD}:{name}", "temperature": temperature, "humidity": humidity, "offset": offset})
         elif info.get("dimension") == "end":
             (highlands if info["end"]["zone"] == "highlands" else barrens).append((name, info["end"]))
-    weights, vanilla = end_noise.highlands_weights([end["share"] for _, end in highlands])
+    weights, vanilla = end_noise.highlands_weights([end["share"] for _, end in highlands]
+                                                   + [OWNER_END_SHARE] * len(OWNER_END_BIOMES))
     for (name, end), weight in zip(highlands, weights):
         out["end"].append({"biome": f"{MOD}:{name}", "zone": "highlands", "share": round(end["share"], 4),
                            "weight": round(weight, 4)})

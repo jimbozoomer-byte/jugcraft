@@ -2,8 +2,8 @@
   "nether": [
     {
       "biome": "jugcraft:landscape_erupting_inferno",
-      "temperature": 0.8,
-      "humidity": -0.2,
+      "temperature": 0.95,
+      "humidity": 0.15,
       "offset": 0.15
     },
     {
@@ -35,22 +35,26 @@
     {
       "biome": "jugcraft:landscape_end_wilds",
       "zone": "highlands",
-      "weight": 0.3
+      "share": 0.0625,
+      "weight": 0.4744
     },
     {
       "biome": "jugcraft:landscape_end_reef",
       "zone": "highlands",
-      "weight": 0.3
+      "share": 0.0625,
+      "weight": 0.6031
     },
     {
       "biome": "jugcraft:landscape_end_flats",
       "zone": "highlands",
-      "weight": 0.3
+      "share": 0.0625,
+      "weight": 0.8037
     },
     {
       "biome": "jugcraft:landscape_end_corruption",
       "zone": "highlands",
-      "weight": 0.3
+      "share": 0.0625,
+      "weight": 5.5016
     }
   ]
 }

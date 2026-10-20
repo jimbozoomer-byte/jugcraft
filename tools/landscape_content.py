@@ -154,9 +154,8 @@ def main():
         for p in (SOURCE/old).rglob('*.json'):
             rel=p.relative_to(SOURCE/old);d=adapt(read(p));d=recipe(d) if new=='recipe' else modern_loot(d)
             write(DATA/new/rel.parent/('landscape_'+p.name),sound_references(d))
-    dimension={'nether':[],'end':[]}
-    for name,temp,humidity in [('erupting_inferno',.8,-.2),('visceral_heap',.3,.8),('withered_abyss',-.7,-.4),('undergrowth',.1,.6),('crystalline_chasm',-.5,.3)]:dimension['nether'].append({'biome':'jugcraft:landscape_'+name,'temperature':temp,'humidity':humidity,'offset':.15})
-    for name in ('end_wilds','end_reef','end_flats','end_corruption'):dimension['end'].append({'biome':'jugcraft:landscape_'+name,'zone':'highlands','weight':.3})
+    import biomes
+    dimension = biomes.owner_dimension_file()
     write(RES/'jugcraft/menagerie/landscape-dimensions.json',dimension)
     # Explicit sapling routes do not depend on guessing which natural placement selector grows a wood.
     for id,b in catalog['blocks'].items():

@@ -92,6 +92,14 @@ surveys now continue through bounded distinct regional anchors, with normal
 chunk-unload ticks between them. Every target biome still requires its natural
 species; no trees are planted at survey stops and generation rates are unchanged.
 
+The full biome run exposed two placement collisions. Erupting Inferno now uses
+its own Nether climate point instead of shadowing Magma Fields. All eight End
+highlands biomes now share one noise-calibrated weight calculation: the original
+four retain 12.5% each, the four owner additions receive 6.25% each, and vanilla
+retains 25%. Outer Flats keeps its intended conditional barrens share. This
+changes only newly generated terrain. Regression tests check the combined picker
+thresholds and both competing Nether climate centers.
+
 ## Not included merely because a draft exists
 
 - Stacked bulk-factory drafts #361–#365, #374 and #387 still need reconciliation
