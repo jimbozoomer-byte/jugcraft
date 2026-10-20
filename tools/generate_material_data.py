@@ -232,6 +232,8 @@ def assets():
     bunkerworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import aluminum_roles
     aluminum_roles.write_all(write, DATA / MOD, condition)
+    import aged_wood
+    aged_wood.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import fire_control
     fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import raiders
@@ -1473,6 +1475,8 @@ def tags():
     tags.add("block", "minecraft:mineable/pickaxe", rid(guns.RACK))
     import bunkerworks
     bunkerworks.add_tags(tags)
+    import aged_wood
+    aged_wood.add_tags(tags)
     import fire_control
     fire_control.add_tags(tags)
     import raiders
