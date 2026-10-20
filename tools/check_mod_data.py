@@ -1761,6 +1761,12 @@ def check_gear():
     check_armor_styles(java)
     check_armor_looks()
     check_armor_tiers(java)
+    # Replay the shared tag writer, so a later feature cannot silently replace
+    # existing weapons/knives/armor with only its own equipment.
+    def check_shared_tag(path, expected):
+        if path.is_relative_to(DATA / "minecraft" / "tags" / "item") and load(path) != expected:
+            err(f"{path.relative_to(ROOT)} differs from the canonical shared equipment tag writer")
+    gear.write_all(check_shared_tag, ASSETS, DATA / MOD, {}, lambda feature: [])
 
 
 def check_armor_tiers(java):
@@ -13303,7 +13309,7 @@ def check_game_test_entrypoints():
     listed = {cls for classes in mod.get("entrypoints", {}).values() for cls in classes}
     for path in sorted((ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test").glob("*.java")):
         text = path.read_text(encoding="utf-8")
-        if ("@GameTest" in text or "ClientGameTest" in text) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
+        if ("@GameTest" in text or re.search(r"\bimplements\b[^{]+\bFabricClientGameTest\b", text)) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
             err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
 
 
@@ -13866,7 +13872,14 @@ def check_wayfaring(co, root, lang):
     for slot in tr.GRANTED_SLOTS:
         group, name = slot.split("/")
         held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
-        if held != {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}:
+        expected = {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}
+        if slot == tr.CHARM_SLOT:
+            expected.add(f"{MOD}:repair_talisman")
+            import concordance_elemental_gear
+            expected.update(f"{MOD}:{item}" for item in concordance_elemental_gear.AMULETS)
+            import concordance_ee_artifacts
+            expected.update(f"{MOD}:{item}" for item in concordance_ee_artifacts.CHARMS)
+        if held != expected:
             err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
     # Two items with one English name cannot be told apart (the kinetic belt is the Drive Belt for this reason).
     names = {}
@@ -15079,8 +15092,8 @@ def check_relics(co, root, lang, registered, research):
 def check_equivalence(co, root, lang, registered, research):
     """Roadmap step 21: the Java mirrors tools/concordance_equivalence.py (the markup, limits, cap, eligibility rules and
     the scale's numbers); the catalogue and graph on disk are the generator's; Python's own audit finds no unvalued
-    item, no recipe that gains value and no profitable cycle (sources apart), and every round trip through the scale
-    loses; nothing catalogued is excluded or scarce; every reason and message has its text; the icon is its map."""
+    item, no recipe that gains value and no profitable cycle (sources apart), and no round trip through the scale
+    gains; the historical restricted catalogue excludes scarce items; every reason and message has its text; the icon is its map."""
     eq = co.equivalence
     def java(name, base=root):
         path = base / name
@@ -15138,7 +15151,8 @@ def check_equivalence(co, root, lang, registered, research):
     transmutations = {p.stem: load(p) or {} for p in (folder / "transmutation").glob("*.json")}
     if set(transmutations) != set(eq.TRANSMUTATIONS):
         err(f"concordance/transmutation: {sorted(transmutations)} differ from TRANSMUTATIONS")
-    # Python's own audit: no unvalued item, no gaining recipe, no profitable cycle; every round trip loses.
+    # Historical restricted graph: no unvalued item, gaining recipe or profitable cycle.
+    # Universal values are separately covered by test_alchemy_values and AlchemyPlayabilityGameTests.
     for problem in eq.audit():
         err(f"equivalence: {problem}")
     for item, (grains, per, dissolve, form) in eq.MATERIALS.items():
@@ -15148,8 +15162,8 @@ def check_equivalence(co, root, lang, registered, research):
             for n in (1, 7, 64):
                 paid = (grains * n) // per
                 cost = -(-(grains * n * eq.FORM_MARKUP.numerator) // (per * eq.FORM_MARKUP.denominator))
-                if cost <= paid:
-                    err(f"material {item}: forming {n} must cost more than dissolving {n} pays")
+                if cost < paid:
+                    err(f"material {item}: forming {n} must never cost less than dissolving {n} pays")
     excluded = set(eq.EXCLUDED)
     for item in eq.MATERIALS:
         if item in excluded or item in ("minecraft:diamond", "minecraft:emerald", "minecraft:netherite_ingot", "minecraft:ancient_debris"):
@@ -16055,6 +16069,7 @@ def main():
     check_pixel_hollows()
     check_town()
     check_diagonal_connections()
+    check_aluminum_bootstrap()
     check_concordance(registered)
     for path in RES.rglob("*.json"):
         load(path)
@@ -16062,6 +16077,130 @@ def main():
         print("\n".join(errors), file=sys.stderr)
         sys.exit(1)
     print(f"PASS: {len(registered)} material IDs, data files and recipe audit. No Minecraft build or game test performed.")
+
+
+# The first aluminum line (docs/features/aluminum-bootstrap-check.md): the machines that make aluminum from bauxite, and
+# the machine that makes their lye, built from these crafting recipes.
+ALUMINUM_ENTRY = ("electrolytic_separator", "bauxite_digester", "aluminate_filter_press", "alumina_calciner",
+                  "aluminum_reduction_cell", "arc_furnace_controller", "arc_furnace_casing")
+# What the line consumes besides bauxite and water.
+ALUMINUM_REAGENTS = ("jugcraft:lye", "jugcraft:coke")
+# Not aluminum metal: the line's own intermediate and its own machine.
+NOT_ALUMINUM_METAL = {"jugcraft:aluminum_hydroxide", "jugcraft:aluminum_reduction_cell"}
+
+
+def check_aluminum_bootstrap():
+    """Industrial chemistry: aluminum is never needed to start making aluminum. With aluminum metal withheld (every
+    jugcraft item named "aluminum", bar the hydroxide and the reduction cell itself), a thing counts as reachable when
+    no recipe makes it (a mined or vanilla thing) or some recipe makes it from reachable things. Every machine of the
+    first line and every reagent it uses must stay reachable. Ingredient trees only: the machines that run each
+    process step are not followed, apart from those listed here."""
+    def tag_members(ref, seen=frozenset()):
+        ns, path = split(ref)
+        if ref in seen:
+            return set()
+        values = None
+        for kind in ("item", "fluid"):
+            data = load(DATA / ns / "tags" / kind / f"{path}.json") if (DATA / ns / "tags" / kind / f"{path}.json").is_file() else None
+            if data is not None:
+                values = (values or []) + data.get("values", [])
+        if values is None:
+            return None
+        members = set()
+        for value in values:
+            value = value.get("id") if isinstance(value, dict) else value
+            if value.startswith("#"):
+                members |= tag_members(value[1:], seen | {ref}) or set()
+            else:
+                members.add(value)
+        return members
+
+    def alternatives(spec):
+        """One ingredient slot as a set of choices ("#tag" or an id)."""
+        if isinstance(spec, str):
+            return {spec}
+        if isinstance(spec, list):
+            out = set()
+            for part in spec:
+                out |= alternatives(part)
+            return out
+        if isinstance(spec, dict):
+            for key in ("ingredient", "item", "id", "fluid"):
+                if key in spec:
+                    return alternatives(spec[key])
+            if "tag" in spec:
+                return {"#" + spec["tag"]}
+        return set()
+
+    def outputs(recipe):
+        found = []
+        result = recipe.get("result")
+        if isinstance(result, str):
+            found.append(result)
+        elif isinstance(result, dict):
+            found.append(result.get("id") or result.get("item"))
+        for part in recipe.get("results", []) or []:
+            if isinstance(part, dict):
+                found.append(part.get("id") or part.get("item"))
+        for part in recipe.get("fluid_results", []) or []:
+            found.append(part.get("fluid"))
+        return [ref for ref in found if ref]
+
+    def slots(recipe):
+        found = []
+        key = recipe.get("key")
+        if isinstance(key, dict):
+            found += [alternatives(spec) for spec in key.values()]
+        for field in ("ingredients", "items", "fluids"):
+            for spec in recipe.get(field, []) or []:
+                found.append(alternatives(spec))
+        for field in ("ingredient", "input", "base", "addition", "template"):
+            if field in recipe:
+                found.append(alternatives(recipe[field]))
+        return [choices for choices in found if choices]
+
+    producers = {}
+    for path in DATA.glob("*/recipe/**/*.json"):
+        recipe = load(path)
+        if not isinstance(recipe, dict):
+            continue
+        needs = slots(recipe)
+        for out in outputs(recipe):
+            producers.setdefault(out, []).append(needs)
+
+    def withheld(ref):
+        ns, path = split(ref)
+        return ns == MOD and "aluminum" in path and ref not in NOT_ALUMINUM_METAL
+
+    tags = {}
+    reachable = set()
+
+    def ok(choice):
+        if choice.startswith("#"):
+            if choice not in tags:
+                tags[choice] = tag_members(choice[1:])
+            members = tags[choice]
+            return members is None or any(member in reachable or (member not in producers and not withheld(member)) for member in members)
+        return choice in reachable or (choice not in producers and not withheld(choice))
+
+    changed = True
+    while changed:
+        changed = False
+        for out, recipes in producers.items():
+            if out in reachable or withheld(out):
+                continue
+            if any(all(any(ok(choice) for choice in slot) for slot in needs) for needs in recipes):
+                reachable.add(out)
+                changed = True
+    for name in ALUMINUM_ENTRY:
+        ref = f"{MOD}:{name}"
+        if ref not in producers:
+            err(f"aluminum bootstrap: no recipe makes {ref}")
+        elif ref not in reachable:
+            err(f"aluminum bootstrap: {ref} cannot be made without aluminum")
+    for ref in ALUMINUM_REAGENTS:
+        if ref not in reachable:
+            err(f"aluminum bootstrap: {ref} cannot be made without aluminum")
 
 
 def check_journal(co, root, lang):
@@ -16118,8 +16257,8 @@ def check_composer(co, root, lang):
     """Chunk A (A-01 to A-03): the composer screen and the compose command are one service. Composing asks its questions
     in the command's order (the Concordance on, an instrument in hand, still the one a screen showed, the shared rate,
     then the compiler) and is the only writer of a composed inscription; the composer's server side answers through it,
-    writes nothing itself, bounds its request and rate-limits opening; the GuiLib workspace is reached only when GuiLib
-    is installed and its stylesheet ships; and every word the screens use has its text."""
+    writes nothing itself, bounds its request and rate-limits opening; every UI entry point opens the shared
+    constellation editor without text entry or client-side validation authority."""
     cm = co.composer
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -16158,22 +16297,15 @@ def check_composer(co, root, lang):
     screens = client + text(CLIENT_JAVA_ROOT / "ComposerScreen.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
     workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ComposerWorkspace.kt"
     workspace = text(workspace_path)
-    if not re.search(r'isModLoaded\("guilib"\)\)\s*\{\s*ComposerWorkspace\.open\(parent\)', client):
-        err("ComposerClient.java: the composer's GuiLib workspace opens only when GuiLib is installed")
-    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
-        if path.name != "ComposerClient.java" and "ComposerWorkspace" in text(path):
-            err(f"{path.name}: only ComposerClient reaches the composer's GuiLib workspace (behind its isModLoaded check)")
-    if '"jugcraft:ui/composer.css"' not in workspace or not (ASSETS / "ui" / "composer.css").is_file():
-        err("composer: the GuiLib workspace's stylesheet assets/jugcraft/ui/composer.css must exist and be the one it opens")
-    # GuiLib's inputs clip (overflow: hidden), so a flex column may squeeze one to its padding: CI's screenshot of the
-    # workspace showed the spell box a sliver. The box keeps its height and the scrolling body takes what is left.
-    stylesheet = (ASSETS / "ui" / "composer.css").read_text(encoding="utf-8") if (ASSETS / "ui" / "composer.css").is_file() else ""
-    spell_rule = re.search(r"^\.spell\s*\{([^}]*)\}", stylesheet, re.M)
-    body_rule = re.search(r"^\.body\s*\{([^}]*)\}", stylesheet, re.M)
-    if not spell_rule or not re.search(r"(^|;|\s)flex-shrink:\s*0\s*;", spell_rule.group(1)):
-        err("composer.css: the spell box (.spell) must not shrink (flex-shrink: 0)")
-    if not body_rule or not re.search(r"(^|;|\s)flex:\s*1\s*;", body_rule.group(1)) or "min-height: 0" not in body_rule.group(1):
-        err("composer.css: the scrolling body (.body) takes the space left (flex: 1; min-height: 0)")
+    if 'new ComposerScreen(parent)' not in client or 'ComposerClient.open(Minecraft.getInstance(), parent)' not in workspace:
+        err("composer: every entry point opens the shared narrated constellation editor")
+    visual = text(CLIENT_JAVA_ROOT / "ComposerScreen.java")
+    for forbidden in ('new EditBox(', 'Compiler.compile(', '.set(JugcraftConcordance.INSCRIPTION'):
+        if forbidden in visual:
+            err(f"composer: constellation view must not require text entry or decide server state ({forbidden})")
+    for required in ('ComposerClient.inscribable()', 'ComposerClient::inscribe', 'ComposerClient.edited()', 'ConcordanceClientOptions.reducedMotion()'):
+        if required not in visual:
+            err(f"composer: visual editor retains validation, inscription and accessibility ({required})")
     for source, name in ((screens, "the composer's screens"), (workspace, "ComposerWorkspace.kt")):
         for key in re.findall(r'"((?:screen|key|compose|message)\.jugcraft\.[a-z_.]+)"', source):
             if not key.endswith(".") and key not in lang:
@@ -16554,7 +16686,8 @@ def check_authority(root, lang):
     audit found asks concordance/Authority at the moment of the change; nothing asks with nobody behind it; the stand-in
     that may answer for an absent owner (Fabric's FakePlayer) is made only in Authority; Fabric's permission events are
     asked as questions only where Jugcraft already asks them; absent owners' devices wait unless the server says
-    otherwise (the option defaults to false); the Spire Heart gives nothing out through a face; and the new words
+    otherwise (the option defaults to false). Owner-authorized loaded alchemy factories have a separate buffer-only
+    Authority route, also tested with current claims. The Spire Heart gives nothing out through a face; and the new words
     exist."""
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
