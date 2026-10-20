@@ -1,5 +1,9 @@
 # Shared owner asset library
 
+**19 October model recovery:** [original wildlife client model data](catalog/naturalist-models-2026-10-19/README.md), 228 client files preserved with SHA-256 hashes. This supplies 73 geometry layers and 441 animation clips for the 47 existing wildlife species; the supplied classes are inspected as data, never executed.
+
+**18 October, part two:** [nine additional owner-edited collections](catalog/edited-2026-10-18-part2/README.md), 26,765 files preserved with SHA-256 verification. Native integration is tracked separately from intake.
+
 **Owner clarification, 9 October 2026:** the owner says they rebuilt the supplied work using other mods as starting bases, but some earlier names, credits and supporter text remained. [Read the standing implementation rule and metadata locations](PROVENANCE.md). These labels alone are not a reason to reject the collection or ask for the same permission again; use suitable files and address specific issues at the affected file.
 
 The project owner supplied this collection on 6 October 2026 and explicitly authorized Jugcraft contributors and AI coding agents to **use suitable assets directly, recolor or adapt them, or use them as visual/audio reference**. Check this library before making new assets.
@@ -7,6 +11,8 @@ The project owner supplied this collection on 6 October 2026 and explicitly auth
 It is shared across the whole project: **blocks, ores, metals, machinery, guns and mounted weapons, planes and airships, sounds, animations, weapons, armor, trees, biomes, farming, food and accessories**. The folder name `Blocks` is the original collection name, not a restriction on who may use it.
 
 ## Find assets
+
+- [October 18 owner-edited animals, mounts, inventory pets and structures](catalog/edited-2026-10-18/README.md): 3,502 preserved files, including the additional animal data, with a source-completeness audit. Importing the collection does not register gameplay content.
 
 **New: [owner magic collection and direct-use instructions](MAGIC_ASSETS.md) (8 October 2026).** Contributors and AI agents SHOULD use suitable files from these 7,909 textures, models, animations, sounds and data resources as supplied. The owner explicitly does not require redesigning, recoloring or renaming them. No repeat per-asset permission request is needed; make necessary technical compatibility changes in runtime copies and keep the source library intact. This collection-specific instruction takes precedence over generic art defaults.
 
