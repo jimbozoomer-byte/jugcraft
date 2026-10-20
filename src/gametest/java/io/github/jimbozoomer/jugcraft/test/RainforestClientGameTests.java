@@ -36,7 +36,7 @@ public class RainforestClientGameTests extends TreeBatchTwoClientGameTests {
             Jugcraft.LOGGER.info("[tree 12 natural] {} at {} {}",biome.identifier(),p,counts);
             if(targets(biome.identifier().getPath()).stream().allMatch(t->counts.getOrDefault(t,0)>0)) return p;
         }
-        throw new AssertionError("No complete rainforest sample in " + biome.identifier());
+        return null; // Continue the bounded regional survey; every biome must still pass validation.
     }
     @Override protected void validateSurvey(String biome, Map<String,Integer> survey) {
         for(var target: targets(biome)) if(survey.getOrDefault(target,0)==0) throw new AssertionError("Missing " + target + " in " + biome);

@@ -98,24 +98,28 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 			int found = 0;
 			for (String name : biomes()) {
 				ResourceKey<Biome> key = ResourceKey.create(Registries.BIOME, Jugcraft.id(name));
-				BlockPos place = server.computeOnServer(minecraft -> {
-					var level = minecraft.overworld();
-					// The closest 3-D sample may only exist below the actual terrain
-					// surface. Try distinct regional anchors before declaring a biome
-					// absent; every accepted stop must still be naturally on the surface.
-					var checked = new java.util.HashSet<BlockPos>();
-					for (int[] offset : new int[][] {{0,0}, {4096,0}, {-4096,0}, {0,4096}, {0,-4096}}) {
+				BlockPos place = null;
+				var checked = new java.util.HashSet<BlockPos>();
+				// A small surface occurrence need not contain every rare tree. Survey
+				// distinct regions, retaining the actual natural-species assertions.
+				for (int[] offset : new int[][] {{0,0}, {4096,0}, {-4096,0}, {0,4096}, {0,-4096},
+						{4096,4096}, {-4096,-4096}, {4096,-4096}, {-4096,4096},
+						{8192,0}, {-8192,0}, {0,8192}, {0,-8192}}) {
+					place = server.computeOnServer(minecraft -> {
+						var level = minecraft.overworld();
 						var nearest = level.findClosestBiome3d(holder -> holder.is(key), new BlockPos(offset[0], 0, offset[1]), 12800, 64, 64);
-						if (nearest == null || !checked.add(nearest.getFirst())) continue;
+						if (nearest == null || !checked.add(nearest.getFirst())) return null;
 						BlockPos first = BiomeClientGameTests.surfaceSpot(level, nearest.getFirst(), key);
-						if (first != null) return surveySpot(level, first, key);
-					}
-					Jugcraft.LOGGER.warn("No natural surface stop for {} in {} distinct biome samples", name, checked.size());
-					return null;
-				});
+						return first == null ? null : surveySpot(level, first, key);
+					});
+					// Permit normal chunk unloading between distant generation surveys.
+					context.waitTicks(5);
+					if (place != null) break;
+				}
+				final BlockPos surveyedPlace = place;
 				if (place == null) { tour.add(name + ": no surface stop found within the survey radius"); continue; }
 				found++;
-				var survey = server.computeOnServer(minecraft -> survey(minecraft.overworld(), place, key, includeSubmergedColumns()));
+				var survey = server.computeOnServer(minecraft -> survey(minecraft.overworld(), surveyedPlace, key, includeSubmergedColumns()));
 				validateSurvey(name, survey);
 				Jugcraft.LOGGER.info("[tree batch 2 survey] {} at {}: {}", name, place, survey);
 				if (name.equals("lush_desert")) {
