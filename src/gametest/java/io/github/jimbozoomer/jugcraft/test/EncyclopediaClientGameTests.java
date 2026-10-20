@@ -251,7 +251,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND));
 		});
 		context.waitTicks(15);
-		context.getInput().pressKey(InputConstants.KEY_R);
+		context.getInput().pressKey(InputConstants.KEY_F6);
 		answered(context);
 		EncyclopediaPayload.StepState cast = step(context, "cast");
 		check(cast == EncyclopediaPayload.StepState.NEXT, "Understood with a wand in hand, casting comes next: " + cast);

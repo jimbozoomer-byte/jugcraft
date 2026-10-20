@@ -1,0 +1,11 @@
+{
+  "credit": "Made with Blockbench",
+  "texture_size": [
+    128,
+    128
+  ],
+  "textures": {
+    "layer0": "jugcraft:nouveau/item/worn_notebook"
+  },
+  "parent": "minecraft:item/generated"
+}

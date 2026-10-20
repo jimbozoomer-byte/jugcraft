@@ -348,6 +348,9 @@ CONVERSIONS = {
 # The ten common effect operations (Java: concordance/effect/EffectKind.java): what each acts on and the work units
 # one application costs, the unit composed spells are capped in.
 EFFECT_KINDS = {
+    "nouveau": {"on": "any", "work": 3, "name": "Jug Nouveau working"},
+    "nouveau_block": {"on": "block", "work": 3, "name": "Jug Nouveau world working"},
+    "nouveau_creature": {"on": "creature", "work": 3, "name": "Jug Nouveau creature working"},
     "damage": {"on": "creature", "work": 1, "name": "Damage"},
     "restoration": {"on": "creature", "work": 1, "name": "Restoration"},
     "movement": {"on": "creature", "work": 1, "name": "Movement"},
@@ -372,7 +375,7 @@ HARVESTABLE = [{"id": "#minecraft:small_flowers", "required": False}, "minecraft
                "minecraft:pumpkin", "minecraft:melon"]
 # Absolute limits of the grammar (Java: concordance/compose/Grammar.java): data can only set lower ones.
 COMPOSE_LIMITS = {"MAX_TEXT": 256, "MAX_NAMES": 24, "MAX_OPERATIONS": 3, "MAX_MODIFIERS": 2, "MAX_DEPTH": 2,
-                  "MAX_BRANCHES": 2, "MAX_RANGE": 32, "MAX_RADIUS": 6, "MAX_TARGETS": 16, "MAX_WORK": 256,
+                  "MAX_BRANCHES": 2, "MAX_RANGE": 32, "MAX_RADIUS": 6, "MAX_TARGETS": 64, "MAX_WORK": 384,
                   "MAX_CAPACITY": 64, "MAX_PULSES": 5, "MIN_INTERVAL": 10, "MAX_INTERVAL": 200,
                   "MAX_COMPONENT_COST": 16, "MAX_MODIFIER_AMOUNT": 200, "MIN_COOLDOWN": 10, "MAX_COOLDOWN": 200}
 EFFECT_LIMITS = {"MAX_MAGNITUDE": 40, "MAX_DURATION": 2400, "MAX_AMPLIFIER": 4, "MAX_PUSH": 20}
@@ -589,6 +592,10 @@ COMPONENTS = {
              "name": "Mend", "text": "Lanternward's healing light."},
 }
 COMPONENTS.update(ember.COMPONENTS)
+import nouveau_spells
+_nouveau_research, _nouveau_components = nouveau_spells.registry_definitions()
+RESEARCH.update(_nouveau_research)
+COMPONENTS.update(_nouveau_components)
 COMPONENT_DATA_KEYS = ("slot", "requires", "authored", "capacity", "focus", "delivery", "selection", "operation",
                        "modifier", "termination")
 for _component in COMPONENTS.values():
@@ -1070,11 +1077,14 @@ def component_numbers(info):
             return f"Absorbs up to {4 * (amplifier + 1)} damage for {seconds(op['duration'])} seconds."
         if effect == "status":
             return f"Level {op['magnitude'] + 1} for {seconds(op['duration'])} seconds."
-        return f"Lasts {seconds(op['duration'])} seconds."
+        return f"Lasts {seconds(op['duration'])} seconds." if op.get("duration") else "Applies once."
     if "modifier" in info:
         mod = info["modifier"]
-        unit = "%" if mod["aspect"] in ("magnitude", "duration") else " blocks"
-        return f"+{mod['amount']}{unit} {ASPECT_NAMES[mod['aspect']]}."
+        aspect=mod["aspect"]
+        if aspect in {"dampen", "duration_down"}: return f"Reduces {'strength' if aspect == 'dampen' else 'duration'} by {mod['amount']}%."
+        if aspect not in ASPECT_NAMES: return f"{aspect.replace('_', ' ').title()} tier {mod['amount']}."
+        unit = "%" if aspect in ("magnitude", "duration") else " blocks"
+        return f"+{mod['amount']}{unit} {ASPECT_NAMES[aspect]}."
     term = info["termination"]
     return f"{term['pulses']} times, every {seconds(term['interval'])} seconds."
 
@@ -1136,6 +1146,7 @@ def composition_codex():
 
 
 CATEGORIES = {
+    "nouveau": {"name":"Jug Nouveau", "icon":"jugcraft:nouveau_annotated_codex", "sort":30, "description":"The complete magical workshop: glyphs, creatures, Source and exploration"},
     "foundations": {"name": "Foundations", "icon": "minecraft:amethyst_shard", "sort": 0,
                     "description": "The Concordance, its Principles and its resources"},
     "radiance": {"name": "Radiance", "icon": "minecraft:glowstone_dust", "sort": 1,
@@ -1450,8 +1461,8 @@ def advancements(data, write, lang):
     for research, info in RESEARCH.items():
         if research == "first_light":
             continue
-        requirement = info["requires"][0]
-        parent = research_advancement(requirement["research"].split(":")[1], requirement["state"])
+        requirement = info["requires"][0] if info["requires"] else None
+        parent = research_advancement(requirement["research"].split(":")[1], requirement["state"]) if requirement else "concordance"
         for state in RESEARCH_STAGES:
             if state not in info["states"]:
                 continue

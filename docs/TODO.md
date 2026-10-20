@@ -1,23 +1,131 @@
 # Jugcraft TODO list
 
+## Supplied creature models, animations and systems — October 19, local
+
+- [x] Preserve all six newly supplied collections with source hashes; recover 278 source model classes without geometry-parser failures and bind 167 species to original geometry/UVs and unchanged supplied skins.
+- [x] Restore native multipart bodies with shared parent health, original locomotion/keyframe declarations, held items and selected source render layers. Add the ferrouslime gel/head-count/merge implementation and 12-species Rotten family with native encounter adapters.
+- [ ] Complete the remaining specialized source-animation helpers, state machines, accessory renderers and encounter systems. The [recovery catalog](../art/owner-library/catalog/creature-recovery-2026-10-19/README.md) distinguishes implemented adapters from outstanding parity; [model coverage](../art/owner-library/catalog/creature-recovery-2026-10-19/model-coverage.csv) lists exact known gaps. Do not mark this as a complete port of every source behavior.
+- [x] Finish the local validation pass and package a preview: 2,004/2,005 broad server tests passed, then the corrected skylight fixture passed in the seven-test focused build; ten Python checks, offline data audit, final 269-image client gallery and 48 in-game audio lookups pass. Exact evidence and checksum are in the [validation record](../art/owner-library/catalog/creature-recovery-2026-10-19/VALIDATION.md) and [artifact report](../art/owner-library/catalog/creature-recovery-2026-10-19/local-validation.json). The full server suite was not repeated after the fixture correction.
+- [ ] Owner-controlled playtest and visual acceptance before pushing. Keep the build local and preserve all existing owner saves.
+- [ ] Locate the original camel, coconut-crab, penguin and squirrel geometry for the four `jimbologics` species; these supplied folders do not contain those models.
+
+## Original wildlife model recovery — October 19, local
+
+- [x] Recover the newly supplied Naturalist model data: 73 native layers, 441 animation clips, 47 existing wildlife species. Preserve source files/hashes and original texture pixels. Replace palette-patch wildlife rendering with authored geometry/UVs, baby layers and separate dye overlays.
+- [x] Verify all runtime base/overlay atlas pairings, preserved snail shell/eye geometry, part hierarchy and bounded declarative extraction with focused offline tests.
+- [x] Complete the new rendered wildlife gallery: all 47 renderer bindings pass, with 49 captured views reviewed for original anatomy and skin placement.
+- [ ] Owner-playtest and accept the recovered animal appearance before publishing. Automated screenshot completion does not establish owner acceptance.
+- [ ] Obtain missing baby-bird skins and compatible missing baby dye overlays. Current safe display uses scaled original adult birds and normal infant skins where an overlay is incompatible.
+- [x] Recover newly supplied model data for the other collections; see the October 19 recovery section above. Specialized behavioral animation and remaining original-model gaps are tracked there.
+- Source and limitations: [wildlife recovery catalog](../art/owner-library/catalog/naturalist-models-2026-10-19/README.md).
+
+## Vehicle assembly bays — local, awaiting playtest
+
+- [x] Implement 6x6x6 Mecha and 6x6x3 Tank workbenches, existing-vehicle construction/refit, shared power, exact input previews and durable chassis options. See [vehicle assembly bays](features/vehicle-assembly-bays.md).
+- [x] Add grounded animated gantries, attached robot arms, control cabinets and visible power sockets.
+- [x] Pass all 1,999 server tests, the rendered client/menu gallery, full offline data/model checks and the updated 5,759-item acquisition audit. See the feature record for evidence.
+- [ ] Owner visual/gameplay playtest and two-human-client interaction checks before release. Keep this milestone local until the owner approves pushing.
+- [ ] Consider live-vehicle docking, cosmetic palettes and chassis-specific weapon modules after this local milestone.
+
+## Survival recipes and acquisition chains — 19 October 2026
+
+- [x] Audit all 5,757 registered items, with recipe prerequisites, stations, tags, fluids and documented harvesting/loot routes. Keep boss rewards and other intentional loot noncraftable. See the [chain report](features/survival-acquisition-audit-oct19.md) and [sortable inventory](audits/survival-recipes.csv).
+- [x] Add 43 confirmed recipes covering kitchen/storage/garden utilities, insect habitats, food processing, End carpentry/boat fittings, cave equipment and building materials. Reuse existing stations and add recipe-book unlocks.
+- [x] Restore six ordinary-animal material drops; fix the Capsid music-disc tag and all 12 insect habitat capture outputs. Preserve existing creature ownership protections.
+- [x] Validate all 43 recipe grids/outputs in the game, the Capsid and actual item registry (3 tests); run all 20 menagerie regressions and 5 Python graph tests; assemble the local JAR and check repository structure/documentation.
+- [x] Resolve the remaining active acquisition-review queue through native-interaction evidence and real source repairs: 81 more explicit recipes (124 total), 44 additional source pools, breeding eggs, variant starfish capture, Firebird feathers, occupied ant colonies and a Candy Cavity soda source. Keep boss/loot acquisition intact.
+- [x] Connect 77 runtime structure containers to real loot tables, including custom barrels and outdated keep/camp table paths; preserve filled inventories and original supplied files. Make unopened cabinet loot persist and roll only once.
+- [x] Audit base resources and process prerequisites, with zero invalid ingredients or unresolved active chains in the current graph. Publish the [source/consumer catalog](audits/survival-base-sources.csv); exclude unused chest tables from evidence.
+- [ ] Design survival acquisition for the 72 armor pieces and six matching weapons explicitly deferred earlier. These 78 entries remain labeled as deferred, not counted as obtainable.
+- [x] Finish the combined acquisition validation: all 1,990 server tests pass, including all 124 recipes, 44 source pools, 77 container links, collectible soda, breeding eggs, all starfish captures/releases and Firebird production. Five graph regressions, offline data/model checks and repository documentation checks also pass. Evidence is in the feature report.
+- [ ] Owner survival/balance playtest of the completed chains, including quantities, station progression and encounter availability. Current graph reachability is qualitative.
+- **Local only:** no push, merge or owner-profile installation in this pass.
+
+## October 18 owner collections — native gameplay implemented locally
+
+- [x] Finish the remaining native household, ecology/fauna, mutant, creature, landscape/cave, equipment and resource-loop implementations before combined testing. The full roster now contains 265 species.
+- [x] Run the full server suite (1,980 passing tests), then focused menagerie regressions (19 passing tests) after final metadata/plant corrections. Combined rendered client/armor/UI galleries pass; exact final evidence is in [the validation record](../art/owner-library/catalog/edited-2026-10-18-part2/local-validation-oct19.json).
+- [x] Repair worldgen ordering, runtime registrations/loot formats, sided generator APIs, unloaded-chunk equipment access, petal behavior, connected/powered block states, bucket/particle atlases, wearable/audio metadata, pie models and overlapping UI captions.
+- [x] Refine 206 reconstructed species and all 498 wildlife adult/baby mappings; repair hollow furniture, legacy item models and retained geometry diagnostics. The latest block/item audit checks 11,666 models with zero diagnostics. Supplied pixels and 59 supplied creature rigs remain intact.
+- [ ] Owner visual acceptance of the reconstructed models and all skin variants. Automated checks and sampled galleries do not replace this review.
+- [ ] Owner-controlled survival/balance playtest, including biomes/structures on representative new terrain and the machinery/resource loops.
+- [x] Run two independent client JVMs against a disposable loopback server: ownership rejection, capture synchronization and reconnect persistence pass. Record synthetic 0/64/192 live-AI population timings; 192 animals averaged 2.57 ms/tick with 3.04 ms p95 on this PC.
+- [ ] Longer multiplayer/restart soak and representative hosting-capacity validation before release. The short local animal benchmark does not establish a player limit.
+- Latest follow-up evidence: [local polish validation](../art/owner-library/catalog/edited-2026-10-18-part2/local-polish-validation-oct19.json).
+- **Local only:** no push, merge, deployment or automated control of an owner Modrinth profile. Use the existing pinned dependencies with the local JAR. See [the implementation record](features/owner-menagerie-oct18.md#october-19-combined-native-implementation) for native adaptations and remaining scope.
+
+## Owner-edited collection, part two — 18 October 2026
+
+- [x] Preserve and SHA-256 verify all 26,765 files from the nine newly supplied collections. Record direct-use authorization, legacy namespace provenance, model coverage and existing-name overlaps in the [part-two catalog](../art/owner-library/catalog/edited-2026-10-18-part2/README.md).
+- [ ] Owner-playtest the locally implemented nine cnb creatures, variants, equipment and interactions. Combined server testing passed 1,980 cases, followed by focused regressions and client/armor galleries. Full variant/balance acceptance remains.
+- [x] Implement native furniture through shared inventories, seating, utilities and machine interfaces, including construction, appliances, fans, switches, remotes and mats. Owner visual/balance acceptance remains separate.
+- [x] Implement jimbologics and jug_fauna ecology, wildlife, materials, wood families, boats, sap/fruit loops and six supplied ruins.
+- [x] Implement native landscape/cave generation, structures, progression and hazards with stable saved IDs; deterministic biome reachability and a normal-world client load are included in final validation.
+- [ ] Owner-playtest the locally implemented 20 legendary creatures and 16 complete companions inside jims mobs. Combined server tests and the client gallery pass; full variant/balance acceptance remains. The additional 90-species roster, equipment and resource loops now have native implementations; the reconstructed anatomy/skin mapping pass is complete locally, with owner visual acceptance still pending.
+- [x] Implement seven native mutant encounters/minions, Chemical X, equipment, combat and survival acquisition.
+- [x] Reconcile native registrations/resources and validate behavior through server tests and rendered galleries. Full variant/balance and art acceptance remains above.
+
+## Owner-edited animals, mounts, inventory pets and structures — 18 October 2026
+
+- [x] Preserve and checksum-verify all 3,502 supplied files, including the added 501 animal data records. Record the owner's declaration, legacy metadata, animation pairs and missing references in the [collection audit](../art/owner-library/catalog/edited-2026-10-18/README.md).
+- [x] Owner authorized new native Jugcraft gameplay and reconstructed animal geometry/buildings using the supplied resources on 18 October. No further source-project approval is needed; originals remain preserved.
+- [x] Implement the 70 inventory-pet abilities, food/costs, storage interfaces, recipes, persistence and shared protections through native Jugcraft systems.
+- [x] Implement the animal roster, variants, ecology, farming/hunting products, capture/transport and breeding locally, with supplied or reconstructed models.
+- [x] Refine reconstructed wildlife anatomy and all 498 adult/baby UV mappings; verify bounded UVs and rendered adult/baby views.
+- [ ] Obtain owner acceptance of the reconstructed wildlife and every skin variant; unavailable original geometry is not claimed as recovered.
+- [x] Implement all fourteen supplied mount model/animation pairs with taming, riding, movement, ownership, saves and acquisition.
+- [x] Implement supplied ghost/pumpkin/decorative/gear assets, all six supplied pocket-dungeon templates and thirteen reconstructed structure concepts. Missing original templates are not claimed as recovered.
+- [x] Validate native gameplay, extend the encyclopedia and preserve provenance/notices. Art acceptance and owner playtesting remain above. See [the feature record](features/owner-menagerie-oct18.md).
+
+- [x] Resolve Nouveau client-loader warnings about unused `#all` aliases, obsolete entity parents and legacy spawn eggs. Preserve Gecko item renderers, restore the ordinary notebook icon and verify all 425 Nouveau sprite bindings. The corrected client load has no missing-model/texture errors for this group.
+
+## Diorama default map — 18 October 2026
+
+- [x] Add the verified Fabric 26.3 release to the shared pack lock: automatic client installation, excluded from dedicated servers, optional for standalone Jugcraft.
+- [x] Reserve B for the encyclopedia and default Diorama's new waypoint to N. Preserve saved custom controls.
+- [x] Full build and 1,960 server tests passed; map, encyclopedia and gun client tests passed, plus optional-absent assembly/gun startup. Generated the updated local pack. See [Diorama integration](features/diorama-pack.md).
+- [ ] Owner-controlled Modrinth import/playtest and representative exploration performance check.
+
+## Existing validation follow-up — 18 October 2026
+
+- [ ] Reconcile the new Jug Nouveau item registrations with the universal alchemy-value catalogue: the Python coverage check currently first reports `jugcraft:bookwyrm_charm`. Do not assign arbitrary values just to satisfy coverage; validate recipes and conversion conservation.
+
+## Gun controls and crash repair — 18 October 2026
+
+- [x] Repair invalid Nouveau unbound keys, including saved profiles, and reserve R for gun reload. Move shader reload to F8, JEI recipes to Y and encyclopedia/journal refresh to F6.
+- [x] Remove gun inventory/hotbar ammunition bars while retaining the held-gun counter.
+- [x] Targeted gun client validation passed with and without optional integrations; Encyclopedia F6 refresh regression passed. Prepared the local repaired pack and replacement JAR; owner playtest remains.
+- Evidence and migration details: [Gun controls repair](features/gun-controls-oct18.md).
+
 ## Jug Nouveau owner-library port — 18 October 2026
+
+**Owner scope update:** implement the entire core `ars_jimbaux` collection before
+testing. This complete implementation pass is finished locally; combined
+validation began afterward. The full build, all 1,960 required server game tests
+and all three relevant client suites passed. The client suites also passed with
+optional integrations disabled. See the full implementation and validation
+record for scope, evidence and remaining human playtesting.
+Keep this work local. A copied asset or registered item without its intended
+behavior does not complete its checklist entry.
 
 - [x] Inventory all 3,607 core `ars_jimbaux` source files and preserve their original paths/hashes. These resources are already in the owner library; no gameplay source code was supplied.
 - [x] Cross-check both compiled owner archives: all 4,847 resource entries accounted for, including 28 elemental shared-path variants now preserved separately. Keep original loader metadata/notices; no old archive code executed or bundled.
 - [x] Local Book Wyrm/Storage Lectern implementation: supplied six colors, geometry and animations, craftable charm/wand/lectern, linked real chest inventories, ownership/party access and saved bindings.
 - [x] First storage integration validated: all 1,937 server tests, rendered six-color models/lectern/menu, page synchronization, GUI scales, data/recipe checks and unchanged-owner-art checks passed.
 - [ ] Owner-controlled Book Wyrm storage playtest before publishing; independent multiplayer/restart field testing and larger-network performance remain to do.
-- [ ] Extend Book Wyrm storage toward the source's aggregated catalog/crafting requests and physical delivery behavior; port the separate familiar effects.
+- [x] Author the full storage/familiar integration locally: aggregate catalog, real crafting, named groups, remote terminals and redstone-controlled imports.
 - [x] Local Starbuncle delivery: supplied model, idle/run animations and all 16 dye colors, charm, Dominion Wand setup, real saved cargo, owner/party controls and recovery; reuse shared workers/navigation/authority.
 - [x] Starbuncle validation: all 1,945 server tests, actual client walking/two delivery trips, sixteen-color gallery, Book Wyrm storage regression and data/art audits passed locally.
 - [ ] Owner-controlled combined Jug Nouveau playtest and independent survival/multiplayer feedback before publication.
-- [ ] Extend Starbuncles with source spawning/taming, loose-item gathering, filters/multiple routes, accessories/special models and familiar effects; restore source charm recipe when its apparatus/shards are reachable.
-- [ ] Port remaining helper jobs: Drygmy, Whirlisprig, Wixie and Amethyst Golem, reusing worker/logistics systems where suitable.
-- [ ] Port enchanting, imbuement, alteration, glyph and potion workshops with real recipes, input/output previews and usable interfaces.
-- [ ] Port source transport and spell devices through existing magical power/compiler/authority systems.
-- [ ] Port archwood, magical crops/fruit, sourcestone and decorative building families with complete survival routes and compatible generation.
-- [ ] Port missing gear/familiar behavior and creature/encounter families, including Weald creatures, Wilden and Alakarkinos.
-- [ ] Map every remaining glyph/ritual/data file to existing behavior, a technical adaptation or a missing feature; do not count copied files as finished gameplay.
+- [x] Author extended Starbuncles: wild token acquisition, gathering, filters/routes, preferred paths, stacked cargo, beds, accessories/special appearances and familiar effects; restore apparatus charm recipe.
+- [x] Implement locally: port remaining helper jobs: Drygmy, Whirlisprig, Wixie and Amethyst Golem, reusing worker/logistics systems where suitable.
+- [x] Implement locally: port enchanting, imbuement, alteration, glyph and potion workshops with real recipes, input/output previews and usable interfaces.
+- [x] Implement locally: port source transport and spell devices through existing magical power/compiler/authority systems.
+- [x] Implement locally: port archwood, magical crops/fruit, sourcestone and decorative building families with complete survival routes and compatible generation.
+- [x] Implement locally: port missing gear/familiar behavior and creature/encounter families, including Weald creatures, Wilden and Alakarkinos.
+- [x] Author full glyph/ritual adapters and resource-family mapping; copied resources are distinguished from native behavior.
+- [x] Author all fifty preset tomes and their Scribe’s Table acquisition; connect archaeological weights, scrying tags, bat summons, dispels, potted plants and invisible redstone pulses. Resolve starter Source Gem progression and add acquisition guidance.
+- [x] Complete the combined post-implementation validation: full generation/build, 1,960 server tests, three client suites with and without optional integrations, final data/art audit and pack verification. Fixed combined-run failures and prepared the local Modrinth playtest; owner playtesting remains separate.
 - [ ] Audit the elemental/companion resource namespaces after the core port and record overlap with existing Jugcraft content.
 - Scope, limits, source manifest and evidence: [Jug Nouveau integration](features/jug-nouveau.md).
 

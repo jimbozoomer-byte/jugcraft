@@ -11,6 +11,9 @@
       "io.github.jimbozoomer.jugcraft.test.TestForms"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureGameTests",
+      "io.github.jimbozoomer.jugcraft.test.VehicleBayGameTests",
+      "io.github.jimbozoomer.jugcraft.test.SurvivalRecipeGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourBCGameTests",
@@ -244,9 +247,14 @@
       "io.github.jimbozoomer.jugcraft.test.ConnectedAlchemyGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlchemyPlayabilityGameTests",
       "io.github.jimbozoomer.jugcraft.test.JugNouveauGameTests",
-      "io.github.jimbozoomer.jugcraft.test.StarbuncleGameTests"
+      "io.github.jimbozoomer.jugcraft.test.StarbuncleGameTests",
+      "io.github.jimbozoomer.jugcraft.test.NouveauExpansionGameTests",
+      "io.github.jimbozoomer.jugcraft.test.MenagerieGameTests"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureResourceClientTests",
+      "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureClientTests",
+      "io.github.jimbozoomer.jugcraft.test.VehicleBayClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourBCClientGameTests",
@@ -436,7 +444,17 @@
       "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CompleteAlchemyClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.JugNouveauClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.StarbuncleClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.StarbuncleClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.NouveauExpansionClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.GunControlsClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DioramaClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.MenagerieClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.MenagerieWearablesClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerCollectionsClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerVisualPolishClientTests",
+      "io.github.jimbozoomer.jugcraft.test.RecoveredWildlifeClientTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerLegacyItemClientTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerCollectionsNetworkTests"
     ]
   },
   "depends": {

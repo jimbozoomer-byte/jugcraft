@@ -57,6 +57,7 @@ RULES = [
     rule([1], "plains", (2, 2), (0, 4), "shrubland", weirdness=1),
     rule([1], "sunflower_plains", (0, 4), (0, 4), "lavender_field"),
     rule([1], "flower_forest", (0, 4), (0, 4), "flower_meadow"),
+    rule([2], "flower_forest", (0, 4), (0, 4), "nouveau_archwood_forest"),
     rule([1], "savanna", (3, 3), (1, 1), "heathland"),
     rule([1], "sparse_jungle", (3, 3), (0, 4), "lush_grassland"),
     rule([1], "plains", (3, 3), (0, 4), "lush_grassland"),
@@ -481,6 +482,9 @@ EXTRAS = {
 # "seasons": in #jugcraft:has_seasons and #jugcraft:has_winter_snow (four-season biomes; not the frozen ones);
 # "winter_snow": False keeps a seasonal biome out of #jugcraft:has_winter_snow (mild winters).
 BIOMES = {
+    "nouveau_archwood_forest": {"display": "Archwood Forest", "base": "flower_forest", "temperature": .7, "downfall": .8,
+        "seasons": True, "trees": None, "extras": [], "effects": {"grass_color": "#1effcf", "foliage_color": "#21ba85"},
+        "tags": ["minecraft:is_forest", "c:is_forest"]},
     "coniferous_forest": {
         "display": "Coniferous Forest", "base": "taiga", "temperature": 0.25, "downfall": 0.8, "seasons": True,
         "trees": {"count": [9, 10], "default": "jugcraft:fir_checked", "picks": [

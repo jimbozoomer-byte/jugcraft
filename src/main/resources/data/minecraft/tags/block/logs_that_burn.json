@@ -22,6 +22,10 @@
     "#jugcraft:fruitwood_logs",
     "#jugcraft:persimmon_logs",
     "jugcraft:cinnamon_log",
-    "jugcraft:stripped_cinnamon_log"
+    "jugcraft:stripped_cinnamon_log",
+    "#jugcraft:nouveau_vexing_logs",
+    "#jugcraft:nouveau_cascading_logs",
+    "#jugcraft:nouveau_flourishing_logs",
+    "#jugcraft:nouveau_blazing_logs"
   ]
 }

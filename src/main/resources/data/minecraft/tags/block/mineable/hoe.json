@@ -16,6 +16,10 @@
     "jugcraft:straw_bale",
     "jugcraft:tatami",
     "jugcraft:full_tatami_mat",
-    "jugcraft:half_tatami_mat"
+    "jugcraft:half_tatami_mat",
+    "jugcraft:nouveau_blue_archwood_leaves",
+    "jugcraft:nouveau_red_archwood_leaves",
+    "jugcraft:nouveau_green_archwood_leaves",
+    "jugcraft:nouveau_purple_archwood_leaves"
   ]
 }

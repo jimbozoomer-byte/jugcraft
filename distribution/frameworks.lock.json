@@ -587,6 +587,40 @@
         }
       ],
       "embeddedProjects": {}
+    },
+    {
+      "key": "diorama",
+      "name": "Diorama",
+      "purpose": "Default client minimap, angled world map and waypoints",
+      "modId": "diorama",
+      "modVersion": "0.1.1+26.3",
+      "side": "client",
+      "requiredByJugcraft": false,
+      "maven": "maven.modrinth:kwpTgbCk:kWas7LpC",
+      "modrinthProject": "kwpTgbCk",
+      "modrinthVersion": "kWas7LpC",
+      "releaseType": "release",
+      "projectUrl": "https://modrinth.com/mod/diorama-map",
+      "sourceUrl": "https://github.com/SunkenInTime/minecraft-orthogonal-map",
+      "license": "MIT",
+      "artifactLicense": "MIT",
+      "filename": "diorama-0.1.1+26.3.jar",
+      "downloads": [
+        "https://cdn.modrinth.com/data/kwpTgbCk/versions/kWas7LpC/diorama-0.1.1%2B26.3.jar"
+      ],
+      "hashes": {
+        "sha512": "897f456acfb33057e7462c88fad254eaae6c4f97a5841c1cbabfe2e03f6885b0238209984e3e24a1a5b63558ec82e943842706f4961c2523f0795f369a347d87",
+        "sha1": "713c68f99d6566807f63d68a52f1dbc1016f1c2b"
+      },
+      "size": 247101,
+      "requiredProjects": [
+        {
+          "project": "P7dR8mSH",
+          "version": null
+        }
+      ],
+      "embeddedProjects": {},
+      "verifiedDate": "2026-10-18"
     }
   ]
 }

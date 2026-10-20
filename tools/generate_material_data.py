@@ -96,7 +96,7 @@ NUCLEAR_CLOSED_MODELS = (
 
 
 def write(path, obj):
-    if isinstance(obj, dict) and obj.get("elements"):
+    if isinstance(obj, dict) and obj.get("elements") and "models" in path.parts:
         if any(path.stem == name or path.stem.startswith(name + "_") for name in NUCLEAR_CLOSED_MODELS):
             model_writer.finish_closed(obj["elements"])
         else:
@@ -1752,9 +1752,16 @@ def main():
     for key, advancement in advancements.generate(MOD)[0].items():
         write(DATA / MOD / "advancement" / f"{key}.json", advancement)
     agriculture_data.advancements(DATA, write)
+    # Run the owner-data adapter after shared tags/worldgen so neither pass overwrites the other.
+    import nouveau_data
+    language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
+    nouveau_data.write_all(write, ASSETS, DATA / MOD, language)
+    write(ASSETS / "lang/en_us.json", language)
     import town
     for problem in town.write():
         print("town:", problem)
+    import vehicle_bays
+    vehicle_bays.write()
 
 
 if __name__ == "__main__":

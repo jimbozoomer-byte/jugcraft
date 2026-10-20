@@ -271,6 +271,12 @@ def all_items():
 
 def feature_of(entry_id):
     """The feature switch that owns a registered ID."""
+    import vehicle_bays
+    if entry_id in vehicle_bays.BLOCKS:
+        return "machines"
+    import menagerie_registry
+    if entry_id in menagerie_registry.entries():
+        return menagerie_registry.feature()
     for metal, info in METALS.items():
         if entry_id in metal_blocks(metal) + metal_items(metal):
             return info["feature"]

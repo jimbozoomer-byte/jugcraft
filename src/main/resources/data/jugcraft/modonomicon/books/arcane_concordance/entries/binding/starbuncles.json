@@ -17,11 +17,11 @@
   },
   "pages": [
     {
-      "type": "modonomicon:crafting_recipe",
+      "type": "modonomicon:text",
       "id": "p0",
-      "title1": "book.jugcraft.arcane_concordance.binding.starbuncles.p0.title",
-      "recipe_id_1": "jugcraft:starbuncle_charm",
-      "text": "book.jugcraft.arcane_concordance.binding.starbuncles.p0.text"
+      "title": "book.jugcraft.arcane_concordance.binding.starbuncles.p0.title",
+      "text": "book.jugcraft.arcane_concordance.binding.starbuncles.p0.text",
+      "show_title_separator": true
     },
     {
       "type": "modonomicon:text",

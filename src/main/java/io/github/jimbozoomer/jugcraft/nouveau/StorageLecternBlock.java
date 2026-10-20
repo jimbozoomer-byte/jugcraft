@@ -27,13 +27,14 @@ public final class StorageLecternBlock extends BaseEntityBlock {
     @Override protected RenderShape getRenderShape(BlockState s){return RenderShape.INVISIBLE;}
     @Override protected VoxelShape getShape(BlockState s,BlockGetter l,BlockPos p,CollisionContext c){return Block.box(2,0,2,14,17,14);}
     @Override public @Nullable BlockEntity newBlockEntity(BlockPos p,BlockState s){return new StorageLectern(p,s);}
+    @Override public <T extends net.minecraft.world.level.block.entity.BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level,BlockState state,net.minecraft.world.level.block.entity.BlockEntityType<T> type){return level.isClientSide()?null:createTickerHelper(type,JugNouveau.LECTERN_ENTITY,StorageLectern::tick);}
     @Override public void setPlacedBy(Level l,BlockPos p,BlockState s,@Nullable LivingEntity by,ItemStack stack){
         super.setPlacedBy(l,p,s,by,stack);if(by instanceof ServerPlayer player&&l.getBlockEntity(p) instanceof StorageLectern be)be.placedBy(player);
     }
     @Override protected InteractionResult useWithoutItem(BlockState s,Level l,BlockPos p,Player player,BlockHitResult hit){
         if(player instanceof ServerPlayer server&&l.getBlockEntity(p) instanceof StorageLectern be){
             if(!be.mayUse(server)||!RateGate.allow(server,"nouveau_open",4))return InteractionResult.FAIL;
-            server.openMenu(new SimpleMenuProvider((id,inv,who)->new StorageLecternMenu(id,inv,be),Component.translatable("screen.jugcraft.bookwyrm.title")));
+            server.openMenu(new SimpleMenuProvider((id,inv,who)->player.isShiftKeyDown()?new StorageLecternMenu(id,inv,be):new NouveauStorageTerminal.Menu(id,inv,be),Component.translatable("screen.jugcraft.bookwyrm.title")));
         }
         return InteractionResult.SUCCESS;
     }

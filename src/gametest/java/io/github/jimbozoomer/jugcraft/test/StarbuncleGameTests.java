@@ -43,7 +43,7 @@ public class StarbuncleGameTests {
         p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(JugNouveau.WAND));RateGate.forget(p.getUUID());
         s.interact(p,InteractionHand.MAIN_HAND,Vec3.ZERO);click(h,p,FROM);click(h,p,TO);
         h.assertTrue(route(h).equals(s.route()),"Ordinary entity and chest clicks set a route without a research gate");
-        h.assertTrue(h.getLevel().recipeAccess().byKey(net.minecraft.resources.ResourceKey.create(Registries.RECIPE,Jugcraft.id("starbuncle_charm"))).isPresent(),"Survival charm recipe loads");h.succeed();
+        h.assertTrue(io.github.jimbozoomer.jugcraft.nouveau.NouveauRecipes.forStation("enchanting_apparatus").stream().anyMatch(r->io.github.jimbozoomer.jugcraft.nouveau.NouveauRecipes.preview(r,h.getLevel().registryAccess()).is(JugNouveau.STARBUNCLE_CHARM)),"Supplied survival charm recipe loads at the apparatus");h.succeed();
     }
     @GameTest(maxTicks=20)
     public void pickupAndArrivalMoveRealItemsWithComponents(GameTestHelper h){

@@ -15,9 +15,10 @@ public final class NouveauStorage {
     public static @Nullable Container accessible(ServerLevel level, ServerPlayer player, BlockPos pos) {
         if (!level.isLoaded(pos) || player.isSpectator() || !player.isAlive() || !Authority.mayChange(level, player, pos)) return null;
         var entity = level.getBlockEntity(pos);
+        if(entity instanceof NouveauWorkshop workshop)return workshop.storage()&&workshop.permitted(player)?workshop:null;
         if (!(entity instanceof ChestBlockEntity) && !(entity instanceof BarrelBlockEntity)) return null;
         var state = entity.getBlockState();
-        if (!state.is(Blocks.CHEST) && !state.is(Blocks.TRAPPED_CHEST) && !state.is(Blocks.BARREL)) return null;
+        if (!(entity instanceof NouveauChest.Chest) && !state.is(Blocks.CHEST) && !state.is(Blocks.TRAPPED_CHEST) && !state.is(Blocks.BARREL)) return null;
         var chest = (BaseContainerBlockEntity)entity;
         return chest.isLocked() ? null : chest;
     }

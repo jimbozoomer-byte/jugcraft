@@ -39,6 +39,8 @@
     "jugcraft:red_matter_block",
     "jugcraft:alchemical_coal_block",
     "jugcraft:mobius_fuel_block",
-    "jugcraft:aeternalis_fuel_block"
+    "jugcraft:aeternalis_fuel_block",
+    "jugcraft:mecha_workbench",
+    "jugcraft:tank_workbench"
   ]
 }

@@ -46,9 +46,10 @@ public final class JugNouveau {
             .sized(0.65F,0.65F).eyeHeight(0.45F).clientTrackingRange(10).build(entityKey));
         FabricDefaultAttributeRegistry.register(BOOK_WYRM,BookWyrm.attributes());
         var starKey=ResourceKey.create(Registries.ENTITY_TYPE,Jugcraft.id("starbuncle"));
-        STARBUNCLE=Registry.register(BuiltInRegistries.ENTITY_TYPE,starKey,EntityType.Builder.<Starbuncle>of(Starbuncle::new,MobCategory.MISC)
+        STARBUNCLE=Registry.register(BuiltInRegistries.ENTITY_TYPE,starKey,EntityType.Builder.<Starbuncle>of(Starbuncle::new,MobCategory.CREATURE)
             .sized(.6F,.8F).eyeHeight(.5F).clientTrackingRange(10).build(starKey));
-        FabricDefaultAttributeRegistry.register(STARBUNCLE,Starbuncle.attributes());
+        FabricDefaultAttributeRegistry.register(STARBUNCLE,Starbuncle.attributes());NouveauSpawns.register(STARBUNCLE,false);
+        net.fabricmc.fabric.api.biome.v1.BiomeModifications.addSpawn(net.fabricmc.fabric.api.biome.v1.BiomeSelectors.foundInOverworld().and(c->c.getBiomeKey().identifier().getPath().contains("forest")),MobCategory.CREATURE,STARBUNCLE,4,1,2);
         var key=ResourceKey.create(Registries.BLOCK,Jugcraft.id("bookwyrm_lectern"));
         LECTERN=Registry.register(BuiltInRegistries.BLOCK,key,new StorageLecternBlock(BlockBehaviour.Properties.of().setId(key)
             .mapColor(MapColor.WOOD).strength(2.5F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE)));
@@ -59,6 +60,18 @@ public final class JugNouveau {
         CHARM=item("bookwyrm_charm",p->new NouveauItem(p,NouveauItem.Kind.CHARM));
         WAND=item("dominion_wand",p->new NouveauItem(p.stacksTo(1),NouveauItem.Kind.WAND));
         STARBUNCLE_CHARM=item("starbuncle_charm",p->new NouveauItem(p,NouveauItem.Kind.STARBUNCLE));
+        NouveauCatalog.load();NouveauPresentation.load();
+        NouveauStatuses.register();NouveauResources.register();NouveauNature.register();NouveauUtilities.register();NouveauContainment.register();NouveauPotions.register();
+        NouveauDecor.register();NouveauChest.register();NouveauAnimatedDecor.register();NouveauBoat.register();NouveauGear.register();NouveauWorkshops.register();NouveauScrying.register();NouveauPlanarium.register();NouveauSignals.register();NouveauRepositories.register();NouveauStorageTerminal.register();
+        net.fabricmc.fabric.api.object.builder.v1.world.poi.PoiHelper.register(Jugcraft.id("nouveau_arcane_poi"),1,1,NouveauCatalog.block("scribes_table").getStateDefinition().getPossibleStates());
+        NouveauHelpers.register();NouveauEncounters.register();NouveauSpine.register();NouveauFamiliars.register();
+        NouveauControls.register();NouveauAnimatedBlock.register();NouveauSummons.register();NouveauGlyphs.register();NouveauRituals.register();NouveauSource.register();
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(out->{
+            for(var entry:NouveauCatalog.BLOCK_ENTRIES.values()){var item=NouveauCatalog.ITEMS.get(entry.source());if(item!=null&&!entry.kind().equals("internal")&&!entry.kind().contains("wall_sign")&&!entry.source().equals("bookwyrm_lectern"))out.accept(item);}
+        });
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(out->{
+            for(var entry:NouveauCatalog.ITEM_ENTRIES.values()){var item=NouveauCatalog.ITEMS.get(entry.source());if(item!=null&&item!=CHARM&&item!=WAND&&item!=STARBUNCLE_CHARM)out.accept(item);}
+        });
         // Intercept before a chest consumes the right-click to open its ordinary inventory.
         net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player,level,hand,hit)->{
             var stack=player.getItemInHand(hand);

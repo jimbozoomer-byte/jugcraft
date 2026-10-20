@@ -561,6 +561,15 @@
             "type": "codex",
             "category": "jugcraft:hearth"
           }
+        },
+        {
+          "title": "Jug Nouveau",
+          "icon": "jugcraft:nouveau_annotated_codex",
+          "text": "The complete magical workshop: glyphs, creatures, Source and exploration",
+          "link": {
+            "type": "codex",
+            "category": "jugcraft:nouveau"
+          }
         }
       ]
     }

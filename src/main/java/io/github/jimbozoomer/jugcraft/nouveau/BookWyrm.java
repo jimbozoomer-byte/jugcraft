@@ -30,6 +30,7 @@ public final class BookWyrm extends PathfinderMob implements GeoEntity {
     private final AnimatableInstanceCache cache=GeckoLibUtil.createInstanceCache(this);
     private @Nullable BlockPos home;
     private @Nullable UUID owner;
+    public @Nullable UUID owner(){return owner;}
     private int visit;
     public BookWyrm(EntityType<? extends PathfinderMob> type,Level level){super(type,level);setPersistenceRequired();setNoGravity(true);moveControl=new FlyingMoveControl(this,20,true);}
     public static AttributeSupplier.Builder attributes(){return Mob.createMobAttributes().add(Attributes.MAX_HEALTH,12).add(Attributes.FLYING_SPEED,.45).add(Attributes.MOVEMENT_SPEED,.25).add(Attributes.FOLLOW_RANGE,32);}
@@ -69,6 +70,7 @@ public final class BookWyrm extends PathfinderMob implements GeoEntity {
         if(source.getEntity() instanceof Player p&&!Authority.mayChange(level,p,blockPosition()))return false;
         return super.hurtServer(level,source,amount);
     }
+    public boolean dispel(ServerPlayer player){if(home==null||!player.level().hasChunkAt(home)||!(player.level().getBlockEntity(home) instanceof StorageLectern lectern)||!lectern.mayUse(player))return false;lectern.detach(getUUID());home=null;spawnAtLocation(player.level(),new ItemStack(JugNouveau.CHARM));discard();return true;}
     @Override public void die(DamageSource source){
         if(level() instanceof ServerLevel server&&home!=null&&server.isLoaded(home)
             &&server.getBlockEntity(home) instanceof StorageLectern lectern&&lectern.wyrms().contains(getUUID())){

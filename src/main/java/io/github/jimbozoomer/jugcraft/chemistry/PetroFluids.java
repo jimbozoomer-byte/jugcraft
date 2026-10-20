@@ -326,6 +326,12 @@ public final class PetroFluids {
 		return gas;
 	}
 
+	/** Register an additional native liquid through the same pump, pipe, bucket and gauge implementation. */
+	public static Entry registerOwnerLiquid(String id, int gauge) {
+		if (FLUIDS.containsKey(id)) throw new IllegalStateException("Duplicate liquid " + id);
+		return fluid(id, 5, 4, 1, gauge, MapColor.WATER);
+	}
+
 	private static Entry fluid(String id, int tickDelay, int slope, int dropOff, int gauge, MapColor color) {
 		Entry entry = new Entry(id, tickDelay, slope, dropOff, gauge);
 		entry.source = Registry.register(BuiltInRegistries.FLUID, Jugcraft.id(id), new OilFluid.Source(entry));

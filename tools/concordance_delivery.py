@@ -28,6 +28,11 @@ SOURCES = [ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java", ROO
 # key in the lock: (what the Concordance does with it, what happens without it, the game tests, what is still limited).
 # Tests name a game test method, or a client game test class (whose single test is its runTest).
 MATRIX = {
+    "diorama": (
+        "Launcher-installed client title-screen panorama companion; no Concordance gameplay hook",
+        "title screen uses its normal panorama; server gameplay is unchanged",
+        [],
+        "Installed through the pinned pack; panorama configuration has not been manually playtested"),
     "fabric-api": (
         "Attachments for every player record, and each wearer's worn trinkets choice, sent to everyone who sees them; item "
         "components; the rules' reload listener; menus; commands; networking (the journal and its request, signs, the "

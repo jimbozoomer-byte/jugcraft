@@ -189,6 +189,12 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.release = 25
 }
 
+// The combined owner collections exceed classic ZIP's 65,535-entry limit.
+// Java's JAR reader supports ZIP64; apply it to both playable and sources JARs.
+tasks.withType(Jar).configureEach {
+	zip64 = true
+}
+
 java {
 	withSourcesJar()
 	sourceCompatibility = JavaVersion.VERSION_25
