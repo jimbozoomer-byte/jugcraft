@@ -26807,6 +26807,16 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:stripped_walnut_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_walnut_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:stripped_willow_log": {
       "numerator": 32,
       "denominator": 1,
@@ -28036,6 +28046,41 @@
       "numerator": 1268,
       "denominator": 9,
       "source": "recipe jugcraft:wall_girandole"
+    },
+    "jugcraft:walnut_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:walnut_fence"
+    },
+    "jugcraft:walnut_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:walnut_fence_gate"
+    },
+    "jugcraft:walnut_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:walnut_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:walnut_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:walnut_slab"
+    },
+    "jugcraft:walnut_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:walnut_stairs"
+    },
+    "jugcraft:walnut_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
     },
     "jugcraft:ward_sigil": {
       "numerator": 17,

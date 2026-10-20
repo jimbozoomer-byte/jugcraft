@@ -438,7 +438,7 @@ CHESTNUT = {"sapling": "chestnut_sapling", "leaves": "chestnut_leaves", "seed": 
 WOOD_SETS = {"chestnut": "Chestnut", "larch": "Larch", "maple": "Maple", "aspen": "Aspen", "fir": "Fir", "dead": "Dead",
              "jacaranda": "Jacaranda", "willow": "Willow", "palm": "Palm", "cypress": "Cypress", "redwood": "Redwood",
              "eucalyptus": "Eucalyptus", "mahogany": "Mahogany", "cedar": "Cedar", "pine": "Pine", "yew": "Yew",
-             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive", "tamarisk": "Tamarisk", "yucca": "Yucca", "dragonblood": "Dragonblood", "baobab": "Baobab", "fig": "Fig", "mango": "Mango"}
+             "bald_cypress": "Bald Cypress", "magnolia": "Magnolia", "fruitwood": "Fruitwood", "persimmon": "Persimmon", "juniper": "Juniper", "holly": "Holly", "olive": "Olive", "tamarisk": "Tamarisk", "yucca": "Yucca", "dragonblood": "Dragonblood", "baobab": "Baobab", "fig": "Fig", "mango": "Mango", "walnut": "Walnut"}
 # The feature switches each wood's hand and sawmill recipes, and its tree's leaves and sapling, follow: every switch
 # that grows its logs, any one of which turns them on (TREES.md rule 4). The chestnut grows wild (agriculture) and in
 # the Orchard (biomes); the larch in Alpine Spawn and, as the larch and the tamarack, in Jugcraft's biomes.
@@ -447,7 +447,7 @@ WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "bio
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
                  "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes", "alpine_spawn"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"], "baobab": ["biomes"], "fig": ["biomes"], "mango": ["biomes"]}
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"], "baobab": ["biomes"], "fig": ["biomes"], "mango": ["biomes"], "walnut": ["biomes"]}
 
 
 def wood_blocks(wood, display):

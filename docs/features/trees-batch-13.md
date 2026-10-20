@@ -6,8 +6,16 @@ walnut timber approval checkpoint before tree or biome work.
 Actual tool/model: OpenAI Codex (GPT-6).
 
 The open upstream PRs and branch inventories of all five public forks were
-checked before starting. No overlapping walnut or bristlecone work was found.
+checked before starting. No other open Batch 13 implementation was identified.
 PR #421 concerns aged pine/maple and remains separate.
+
+Runtime inspection found that integrated main also contains a recovered
+`ecology_walnut` family from the 18 October owner collection. The initial plan
+predates that integration. The gallery compares it with this candidate timber.
+This is an approval-stage draft, not a finished second walnut acquisition path.
+After approval, reconcile the recovered walnut's existing IDs, furniture, boats,
+saplings and trees with the selected appearance and Batch 13 distribution,
+preserving already placed blocks and inventories.
 
 ## First checkpoint: walnut wood
 
@@ -21,7 +29,9 @@ Use owner painting bank row 2 (`black_walnut`) as the palette reference.
 The planned cool dark brown timber is `#5a4b41`; furrowed bark follows the
 owner's charcoal-brown ramp. Extend the existing deterministic wood painter
 and preserve all existing wood seeds and assets. The owner-library catalog
-contains no separate walnut texture to import. No library originals change.
+used for the initial plan predates the recovered ecology collection. Its
+walnut art remains unchanged and is included as an in-game comparison.
+No library originals change.
 
 Prepare an inspection gallery with all nine forms, exposed end grain, tiled
 walls and a small pavilion. Compare against spruce, dark oak, cedar, yew and
@@ -50,4 +60,32 @@ platform changes or Batch 14 implementation are included.
 
 ## Validation
 
-Pending the first wood implementation and inspection run.
+Wood approval stage, 20 October 2026:
+
+- Five opaque 16x16 textures match their deterministic painter outputs.
+  Existing wood textures are unchanged.
+- `python scripts/check_repository.py`: pass.
+- Client selection unit tests: all six pass.
+- `python tools/check_mod_data.py`: pass, 6,145 material IDs; art audit covers
+  11,745 block/item models, 3,713 quad parts and 173 combined models.
+- Material data regeneration changes only walnut resources, shared membership
+  lists and their generated manifest. Essence regeneration adds the nine
+  walnut forms using existing wood values.
+- `build runClientGameTest -I build/focused.gradle
+  -PgameTestFilter=jugcraft-test:walnut_wood_game_tests*
+  -PclientTests=WalnutWoodClientGameTests`: pass. Exactly four server tests
+  execute: real crafting recipes, axis-preserving paid axe stripping, drops and
+  fuel/tags, and actual sawmill input/output/energy behavior.
+- The final client-only gallery rerun passes in 1m33s after adding the recovered
+  walnut comparison. All nine forms, inventory and 55 sampled block states
+  survive save/reopen. Rendered samples and the pavilion were visually checked.
+- The delivery copy scans 1,554 saved region records and all other save files
+  without finding actual test content. All 83 source files remain unchanged.
+  Only unused development metadata in `level.dat`, `level.dat_old` and
+  `data/fabric/registry_entries.dat` is removed from the copy.
+
+The export is `build/walnut-wood-preview-r2/Walnut Wood Gallery`. The flat
+creative showroom has frozen time/weather/random ticks, comparison rows and a
+walnut pavilion. It is not a Batch 13 world-generation demonstration.
+Full tree/biome testing follows the timber approval and remaining implementation.
+No multiplayer or external launcher import is claimed.

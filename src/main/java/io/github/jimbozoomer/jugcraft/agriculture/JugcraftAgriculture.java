@@ -621,6 +621,8 @@ public final class JugcraftAgriculture {
         registerFoliage("banyan", "banyan_leaves", BANYAN_GROWER, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
                 BanyanLeavesBlock::new);
         registerWoodSet("fig", MapColor.COLOR_LIGHT_GRAY, MapColor.TERRACOTTA_BROWN);
+        // Batch 13 timber approval stage; tree acquisition follows owner approval.
+        registerWoodSet("walnut", MapColor.TERRACOTTA_BROWN, MapColor.COLOR_BROWN);
         registerTree("mango", "mango_leaves", MANGO_GROWER, null, Blocks.OAK_SAPLING, Blocks.OAK_LEAVES,
                 MapColor.COLOR_GRAY, MapColor.WOOD);
         food("sea_grapes", 2, 0.2F, COMPOST_MEDIUM);
