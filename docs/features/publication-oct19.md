@@ -78,6 +78,14 @@ checks distinct regional anchors when its nearest 3-D biome sample is undergroun
 No owner playtest, two-account multiplayer certification, live-server deployment
 or production-save migration is claimed. The owner's local saves are untouched.
 
+The full combined run subsequently passed both 2,075-test server configurations,
+resource/model audits and installer packaging. Client validation found a Backpack/
+Diorama N-key collision; the repair reserves N for the backpack and comma for new
+waypoints, including Controls Reset. The mineral-sand survey now uses all approved
+garnet biomes for its bounded retries and skips duplicate chunk centers; terrain
+protection, rarity, visible natural deposit assertions and save/depletion checks
+are unchanged. Final client validation of these repairs remains required.
+
 ## Not included merely because a draft exists
 
 - Stacked bulk-factory drafts #361–#365, #374 and #387 still need reconciliation
