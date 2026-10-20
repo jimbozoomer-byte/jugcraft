@@ -16,6 +16,13 @@ public final class InProcessServerConfigs {
 		reload(server);
 	}
 
+	public static void beforeAdditionalClient(TestDedicatedServerContext server) {
+		// The first in-process client also replaces the singleton with its received
+		// remote config (which has no disk path). Restore the real test-server files
+		// before another, separate client requests them. Keep normal config sync.
+		beforeReconnect(server);
+	}
+
 	private static void reload(TestDedicatedServerContext server) {
 		// FCAP's remote-client disconnect unloads SERVER configs. In this harness that also clears
 		// the still-running server's singleton registry. A real separate server process retains it.

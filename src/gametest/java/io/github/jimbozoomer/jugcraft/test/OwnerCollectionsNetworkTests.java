@@ -43,6 +43,7 @@ public final class OwnerCollectionsNetworkTests implements FabricClientGameTest 
                     server.runOnServer(s->{var p=s.getPlayerList().getPlayers().getFirst();ownerId[0]=p.getUUID();var pet=Menagerie.TYPES.get("wildlife_hedgehog").create(p.level(),EntitySpawnReason.COMMAND);pet.snapTo(p.getX()+2,p.getY(),p.getZ(),0,0);pet.tame(p.getUUID());pet.sit(true);pet.variant(1);pet.setBaby(true);p.level().addFreshEntity(pet);petId[0]=pet.getUUID();});
                     mark("pet.txt",petId[0]+"\n"+ownerId[0]);
                     server.runOnServer(s->s.getPlayerList().getWhiteList().add(new net.minecraft.server.players.UserWhiteListEntry(net.minecraft.server.players.NameAndId.createOffline("OwnerPeer"))));
+                    InProcessServerConfigs.beforeAdditionalClient(server);
                     peer=launchPeer(server.computeOnServer(s->s.getPort()),c);mark("peer-pid.txt",Long.toString(peer.pid()));
                     final Process startingPeer=peer;peer.onExit().thenAccept(done->mark("peer-exit.txt",Integer.toString(done.exitValue())));
                     server.waitFor(s->{if(!startingPeer.isAlive())throw peerFailure("Second client exited before login: "+startingPeer.exitValue());return s.getPlayerList().getPlayerByName("OwnerPeer")!=null;},2400);
