@@ -16,7 +16,7 @@
   "results": [
     {
       "id": "jugcraft:cable_insulation",
-      "count": 3
+      "count": 6
     },
     {
       "id": "jugcraft:rubber_offcut",
@@ -24,6 +24,6 @@
     }
   ],
   "tool": "jugcraft:insulation_extrusion_die",
-  "energy_per_tick": 48,
+  "energy_per_tick": 24,
   "time": 160
 }

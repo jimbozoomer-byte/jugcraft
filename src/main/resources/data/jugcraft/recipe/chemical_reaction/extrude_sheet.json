@@ -16,7 +16,7 @@
   "results": [
     {
       "id": "jugcraft:plastic_sheet",
-      "count": 3
+      "count": 8
     },
     {
       "id": "jugcraft:hdpe_offcut",
@@ -24,6 +24,6 @@
     }
   ],
   "tool": "jugcraft:sheet_extrusion_die",
-  "energy_per_tick": 48,
+  "energy_per_tick": 24,
   "time": 160
 }
