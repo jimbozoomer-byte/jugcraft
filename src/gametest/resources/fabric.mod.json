@@ -242,7 +242,11 @@
       "io.github.jimbozoomer.jugcraft.test.AlchemyStorageGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlchemyArtifactGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConnectedAlchemyGameTests",
-      "io.github.jimbozoomer.jugcraft.test.AlchemyPlayabilityGameTests"
+      "io.github.jimbozoomer.jugcraft.test.AlchemyPlayabilityGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CokeGasGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ZincHydrogenGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AluminumRolesGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TitaniumCasingGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
