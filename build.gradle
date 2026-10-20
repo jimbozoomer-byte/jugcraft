@@ -165,6 +165,12 @@ tasks.named("runClientGameTest") {
 // -PclientTestShard=<n> -PclientTestShards=<count> keeps the classes at positions n, n + count, n + 2 * count ... of
 // it. Without them every class runs. Server game tests are never split.
 def clientTests = providers.gradleProperty("clientTests").getOrElse("")
+// The complete content/biome suite needs the same practical heap floor as a modded client.
+// Fail immediately on exhaustion so CI retains the cause instead of hanging for an hour.
+tasks.matching { it.name == "runClientGameTest" }.configureEach {
+	maxHeapSize = "4G"
+	jvmArgs "-XX:+ExitOnOutOfMemoryError"
+}
 def clientTestShard = providers.gradleProperty("clientTestShard").getOrElse("")
 def clientTestShards = providers.gradleProperty("clientTestShards").getOrElse("")
 tasks.named("processGametestResources", ProcessResources) {
