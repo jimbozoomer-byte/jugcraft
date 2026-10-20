@@ -1,6 +1,6 @@
 # Underground bulk deposits and deep drilling
 
-Status: implemented in draft PR #438; awaiting owner inspection, scope approved 20 October 2026.
+Status: implemented in PR #438; owner approved the two-block assembly and requested review readiness on 20 October 2026.
 Owner: jimbozoomer-byte. Implementation: OpenAI Codex (GPT-6), under the owner's direct authorization.
 Tier: optional steel workshop mining and logistics; extends the existing deposit drill.
 
@@ -30,7 +30,10 @@ Overworld/new chunks only, no retrogeneration. Existing feature switches continu
 ## Connections and balance
 
 The basic drill retains its 5×5×3 reach, 16 JE/t and one item per resource family per 300 powered ticks.
-A craftable steel-tier assembly adds a visible mast to that same rig and reaches a 9×9 column 128 blocks below it.
+A craftable steel-tier assembly adds a two-block-tall mast to that same rig and reaches a 9×9 column 128 blocks below it.
+Its lower support collar extends into the rig's recessed frame so it visibly rests on the gantry. Both mast
+sections need clear, permitted space; either section can be broken to remove the upgrade, dropping one assembly
+in survival and none in creative. The completed rig is four blocks tall.
 It bores downward one layer per 20 powered ticks at 32 JE/t, without carving a quarry or generating spoil.
 At each working depth it extracts one item per family every 300 powered ticks; shared speed/efficiency cards apply
 to extraction. The upgrade changes access, not reserve capacity or base output rate.
@@ -86,6 +89,11 @@ Jugcraft's `dp_gunmetal`, `dp_chrome`, `dp_olive` and `dp_hazard` textures and s
   The source world is preserved; only unused development datapack/registry metadata is removed from delivery
   copies, with all other saved values and region bytes checked.
 - Two-human-client playtesting remains separate from automated coverage.
+- Owner's two-block mast revision: all 14 focused deposit/drill server tests passed, including upper-space
+  obstruction, rig-click and ordinary block-item placement, breaking either half for one survival drop,
+  and creative removal without a drop. Both mast halves and their fit against the existing rig passed
+  the shared geometry/seam checks. The focused client inspection rendered the full mast and support collar,
+  opened the drill screen, and saved/reopened both halves with depth and partial progress intact.
 
 ## Inspection world
 

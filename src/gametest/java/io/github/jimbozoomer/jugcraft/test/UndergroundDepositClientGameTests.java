@@ -64,6 +64,9 @@ public class UndergroundDepositClientGameTests implements FabricClientGameTest {
 			context.waitTicks(40); world.getConnection().waitForChunksRender();
 			context.getInput().lookAt(RIG.above(2)); context.waitTicks(6);
 			context.takeScreenshot("jugcraft_bulk_deep_drill_gallery");
+			world.getServer().runCommand("tp @a " + xyz(RIG.offset(-4, 1, -5)));
+			context.waitTicks(10); context.getInput().lookAt(RIG.above(2)); context.waitTicks(6);
+			context.takeScreenshot("jugcraft_bulk_tall_mast_and_support");
 			world.getServer().runCommand("tp @a " + xyz(RIG.north(3)));
 			context.waitTicks(10); context.getInput().lookAt(RIG.above()); context.waitTick();
 			context.getInput().pressKey(options -> options.keyUse);
@@ -86,6 +89,7 @@ public class UndergroundDepositClientGameTests implements FabricClientGameTest {
 				check(Deposits.remaining(level, RESERVE) == 777, "Finite reserve changed across real save/reopen");
 				var drill = (MachineBlockEntity) level.getBlockEntity(RIG);
 				check(drill != null && drill.depositDepth() == 8 && drill.processingProgress() == 123, "Drill depth/partial progress not persisted");
+				check(DeepDrillingAssemblyBlock.installed(level, RIG, drill.getBlockState()), "Two-block mast lost on reopen");
 				for (var body : natural.values()) for (var pos : body)
 					check(level.getBlockState(pos).getBlock() instanceof DepositBlock, "Natural deposit lost on reopen: " + pos);
 			});

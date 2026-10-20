@@ -166,31 +166,52 @@ def write_all(write, assets, data, lang):
 
 
 def write_assembly(write, assets, data, lang):
-    """Matches the existing drill: gunmetal legs, chrome drive shaft, hazard cap and an olive gearbox."""
+    """Two-block mast with a lower collar reaching the drill's recessed gantry."""
     import model_writer as mw
     def box(start, end, texture):
         return (start, end, texture)
     name = "deep_drilling_assembly"
-    parts = [box((2, 0, 2), (14, 2, 14), "dp_gunmetal"),
-             box((3, 13, 3), (13, 16, 13), "dp_hazard"),
-             box((6, 2, 6), (10, 13, 10), "dp_chrome"),
-             box((5, 7, 5), (11, 11, 11), "dp_olive")]
+    parts = [box((1, -1.8, 1), (15, 2, 15), "dp_gunmetal"),
+             box((3, 29, 3), (13, 32, 13), "dp_hazard"),
+             box((6.75, -9, 6.75), (9.25, 29, 9.25), "dp_chrome"),
+             box((4, 18, 4), (12, 25, 12), "dp_olive"),
+             box((3.5, 18, 3.5), (12.5, 19, 12.5), "dp_chrome"),
+             box((3.5, 24, 3.5), (12.5, 25, 12.5), "dp_chrome"),
+             box((1, -10.85, 1), (15, -8.85, 15), "dp_gunmetal")]
     for x in (2, 12):
         for z in (2, 12):
-            parts.append(box((x, 2, z), (x + 2, 13, z + 2), "dp_gunmetal"))
-    for y in (4, 11):
+            parts.append(box((x, -10, z), (x + 2, 29, z + 2), "dp_gunmetal"))
+    for y in (-8, 6, 14, 27):
         parts += [box((2, y, 2), (14, y + 1, 4), "dp_chrome"),
                   box((2, y, 12), (14, y + 1, 14), "dp_chrome")]
-    elements = mw.split_model(name, parts, [(0, 0, 0)])[0]
-    mw.finish_closed(elements)
+    # Split each rail at the half boundary; the support collar belongs to the lower model.
+    split_parts = []
+    for start, end, texture in parts:
+        if start[1] < 16 < end[1]:
+            split_parts += [box(start, (end[0], 16, end[2]), texture),
+                            box((start[0], 16, start[2]), end, texture)]
+        else:
+            split_parts.append(box(start, end, texture))
+    models = mw.split_model(name, split_parts, [(0, 0, 0), (0, 1, 0)])
     textures = {n: f"jugcraft:block/{n}" for n in ("dp_gunmetal", "dp_hazard", "dp_chrome", "dp_olive")}
-    write(assets / "models" / "block" / f"{name}.json",
-          {"parent": "minecraft:block/block", "textures": {"particle": "jugcraft:block/dp_gunmetal", **textures}, "elements": elements})
-    write(assets / "blockstates" / f"{name}.json", {"variants": {"": {"model": f"jugcraft:block/{name}"}}})
-    write(assets / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": f"jugcraft:block/{name}"}})
+    for suffix, elements in zip(("", "_upper"), models):
+        mw.finish_closed(elements)
+        write(assets / "models" / "block" / f"{name}{suffix}.json",
+              {"parent": "minecraft:block/block", "textures": {"particle": "jugcraft:block/dp_gunmetal", **textures}, "elements": elements})
+    # A complete, reduced mast in inventory rather than just its lower half.
+    def reduced(point):
+        return (8 + (point[0] - 8) * 0.5, (point[1] + 11) * 0.5, 8 + (point[2] - 8) * 0.5)
+    icon = mw.split_model(name, [box(reduced(a), reduced(b), t) for a, b, t in parts], [(0, 0, 0)])[0]
+    mw.finish_closed(icon)
+    write(assets / "models" / "item" / f"{name}.json",
+          {"parent": "minecraft:block/block", "textures": {"particle": "jugcraft:block/dp_gunmetal", **textures}, "elements": icon})
+    write(assets / "blockstates" / f"{name}.json", {"variants": {
+        "half=lower": {"model": f"jugcraft:block/{name}"}, "half=upper": {"model": f"jugcraft:block/{name}_upper"}}})
+    write(assets / "items" / f"{name}.json", {"model": {"type": "minecraft:model", "model": f"jugcraft:item/{name}"}})
     write(data / "loot_table" / "blocks" / f"{name}.json", {"type": "minecraft:block", "pools": [
         {"rolls": 1, "entries": [{"type": "minecraft:item", "name": f"jugcraft:{name}"}],
-         "condition": {"type": "minecraft:survives_explosion"}}]})
+         "condition": {"type": "minecraft:all_of", "terms": [{"type": "minecraft:survives_explosion"},
+             {"type": "minecraft:match_block", "blocks": f"jugcraft:{name}", "state": {"half": "lower"}}]}}]})
     write(data / "recipe" / f"{name}.json", {
         "fabric:load_conditions": [{"condition": "jugcraft:feature_enabled", "feature": "machines"}],
         "type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["PGP", "GCG", "PDP"],

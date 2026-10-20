@@ -28,6 +28,48 @@ import net.minecraft.world.level.storage.TagValueInput;
 public class UndergroundDepositGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
 
+	@GameTest(structure = ARENA) public void undergroundDepositTallAssemblyPlacesAndBreaksAsOneUpgrade(GameTestHelper h) {
+		var drill = rig(h, false); var level = h.getLevel(); var pos = drill.getBlockPos();
+		var mast = DeepDrillingAssemblyBlock.mount(pos, drill.getBlockState());
+		var block = JugcraftDeposits.DEEP_DRILLING_ASSEMBLY;
+		var player = h.makeMockServerPlayerInLevel();
+		player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		player.snapTo(mast.getX() + 2, mast.getY(), mast.getZ(), 0, 0);
+		ItemStack stack = new ItemStack(block.asItem(), 3);
+		level.setBlock(mast.above(), Blocks.STONE.defaultBlockState(), 3);
+		DeepDrillingAssemblyBlock.install(stack, level, pos, drill.getBlockState(), player);
+		h.assertTrue(stack.getCount() == 3 && level.isEmptyBlock(mast) && level.getBlockState(mast.above()).is(Blocks.STONE),
+				"Upper obstruction must reject the entire upgrade without consuming it");
+		level.removeBlock(mast.above(), false);
+		for (boolean breakUpper : new boolean[]{true, false}) {
+			DeepDrillingAssemblyBlock.install(stack, level, pos, drill.getBlockState(), player);
+			h.assertTrue(DeepDrillingAssemblyBlock.installed(level, pos, drill.getBlockState()), "Two-part mast not installed");
+			h.assertTrue(level.getBlockState(mast.above()).getValue(DeepDrillingAssemblyBlock.HALF)
+					== net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER, "Missing physical upper mast");
+			var broken = breakUpper ? mast.above() : mast;
+			level.destroyBlock(broken, true);
+			h.assertTrue(level.isEmptyBlock(mast) && level.isEmptyBlock(mast.above()), "Breaking either half must remove both");
+			var drops = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+					new net.minecraft.world.phys.AABB(mast).inflate(3), e -> e.getItem().is(block.asItem()));
+			h.assertTrue(drops.stream().mapToInt(e -> e.getItem().getCount()).sum() == 1, "Must drop one assembly, not two");
+			drops.forEach(net.minecraft.world.entity.Entity::discard);
+		}
+		h.assertTrue(stack.getCount() == 1, "Each placement must consume one assembly");
+		player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+		stack.useOn(new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND,
+				new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(mast.below()),
+						Direction.UP, mast.below(), false)));
+		h.assertTrue(stack.isEmpty() && DeepDrillingAssemblyBlock.installed(level, pos, drill.getBlockState()),
+				"Ordinary block-item placement must create both halves and consume one assembly");
+		player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+		player.gameMode.destroyBlock(mast.above());
+		h.assertTrue(level.isEmptyBlock(mast) && level.isEmptyBlock(mast.above()), "Creative break must remove both halves");
+		h.assertTrue(level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+				new net.minecraft.world.phys.AABB(mast).inflate(3), e -> e.getItem().is(block.asItem())).isEmpty(),
+				"Creative removal must not drop an assembly");
+		h.succeed();
+	}
+
 	@GameTest public void undergroundDepositShapesAreBoundedConnectedVariedAndRepeatable(GameTestHelper h) {
 		for (var family : UndergroundDepositFeature.Family.values()) {
 			Set<List<BlockPos>> variants = new HashSet<>();
@@ -241,7 +283,8 @@ public class UndergroundDepositGameTests {
 		var block = JugcraftMachines.MACHINES.get(MachineKind.DEPOSIT_DRILL);
 		var state = block.defaultBlockState().setValue(MachineBlock.FACING, Direction.NORTH);
 		level.setBlock(pos, state, 3); block.setPlacedBy(level, pos, state, null, ItemStack.EMPTY);
-		if (deep) level.setBlock(DeepDrillingAssemblyBlock.mount(pos, state), JugcraftDeposits.DEEP_DRILLING_ASSEMBLY.defaultBlockState(), 3);
+		if (deep) net.minecraft.world.level.block.DoublePlantBlock.placeAt(level,
+				JugcraftDeposits.DEEP_DRILLING_ASSEMBLY.defaultBlockState(), DeepDrillingAssemblyBlock.mount(pos, state), 3);
 		return (MachineBlockEntity) level.getBlockEntity(pos);
 	}
 	private static void put(ServerLevel level, BlockPos pos, String family) { level.setBlock(pos, JugcraftDeposits.BLOCKS.get(family + "_deposit").defaultBlockState(), 3); }

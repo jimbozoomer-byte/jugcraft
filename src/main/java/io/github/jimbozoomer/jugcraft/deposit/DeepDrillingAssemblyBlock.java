@@ -8,17 +8,22 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.Nullable;
 
 /** A removable mast mounted at the centre of the existing rig's roof. No second machine or inventory. */
-public final class DeepDrillingAssemblyBlock extends Block {
+public final class DeepDrillingAssemblyBlock extends DoublePlantBlock {
 	public static final int DEPTH = 128, RADIUS = 4, BORE_TICKS = 20, USE = 32;
 	public DeepDrillingAssemblyBlock(Properties properties) { super(properties); }
 
@@ -35,19 +40,43 @@ public final class DeepDrillingAssemblyBlock extends Block {
 
 	public static boolean installed(Level level, BlockPos master, BlockState state) {
 		BlockPos mount = mount(master, state);
-		return level.isLoaded(mount) && level.getBlockState(mount).is(JugcraftDeposits.DEEP_DRILLING_ASSEMBLY);
+		return level.isLoaded(mount.above()) && isHalf(level.getBlockState(mount), DoubleBlockHalf.LOWER)
+				&& isHalf(level.getBlockState(mount.above()), DoubleBlockHalf.UPPER);
+	}
+
+	private static boolean isHalf(BlockState state, DoubleBlockHalf half) {
+		return state.is(JugcraftDeposits.DEEP_DRILLING_ASSEMBLY) && state.getValue(HALF) == half;
+	}
+
+	private static boolean mayPlace(Level level, BlockPos pos, Player player, ItemStack stack) {
+		return level.isLoaded(pos) && level.getBlockState(pos).isAir() && level.isInWorldBounds(pos)
+				&& level.getWorldBorder().isWithinBounds(pos) && level.mayInteract(player, pos)
+				&& player.mayUseItemAt(pos, Direction.UP, stack) && !TownProtection.denies(player, level, pos)
+				&& (!(level instanceof net.minecraft.server.level.ServerLevel server)
+					|| io.github.jimbozoomer.jugcraft.concordance.Authority.mayChange(server, player, pos));
+	}
+
+	@Override public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
+		Player player = context.getPlayer();
+		BlockPos pos = context.getClickedPos();
+		if (player == null || !mayPlace(context.getLevel(), pos, player, context.getItemInHand())
+				|| !mayPlace(context.getLevel(), pos.above(), player, context.getItemInHand())) return null;
+		BlockState state = super.getStateForPlacement(context);
+		return state != null && state.canSurvive(context.getLevel(), pos) ? state : null;
+	}
+
+	@Override public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+		super.setPlacedBy(level, pos, state, placer, stack);
+		var machine = MachineBlock.machineAt(level, pos.below(), level.getBlockState(pos.below()));
+		if (placer instanceof Player player && machine != null) machine.claimDepositDrill(player);
 	}
 
 	public static InteractionResult install(ItemStack stack, Level level, BlockPos part, BlockState state, Player player) {
 		BlockPos master = ((MachineBlock) state.getBlock()).masterPos(part, state);
 		BlockPos mount = mount(master, state);
-		if (!level.isLoaded(mount) || !level.getBlockState(mount).isAir() || !level.isInWorldBounds(mount)
-				|| !level.getWorldBorder().isWithinBounds(mount) || !level.mayInteract(player, mount)
-				|| !player.mayUseItemAt(mount, Direction.UP, stack) || TownProtection.denies(player, level, mount)) return InteractionResult.FAIL;
+		if (!mayPlace(level, mount, player, stack) || !mayPlace(level, mount.above(), player, stack)) return InteractionResult.FAIL;
 		if (!level.isClientSide()) {
-			if (level instanceof net.minecraft.server.level.ServerLevel server
-					&& !io.github.jimbozoomer.jugcraft.concordance.Authority.mayChange(server, player, mount)) return InteractionResult.FAIL;
-			level.setBlock(mount, JugcraftDeposits.DEEP_DRILLING_ASSEMBLY.defaultBlockState(), 3);
+			DoublePlantBlock.placeAt(level, JugcraftDeposits.DEEP_DRILLING_ASSEMBLY.defaultBlockState(), mount, 3);
 			var machine = MachineBlock.machineAt(level, part, state);
 			if (machine != null) machine.claimDepositDrill(player);
 			stack.consume(1, player);
@@ -57,6 +86,7 @@ public final class DeepDrillingAssemblyBlock extends Block {
 
 	@Override protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
 		BlockState below = level.getBlockState(pos.below());
+		if (state.getValue(HALF) == DoubleBlockHalf.UPPER) return isHalf(below, DoubleBlockHalf.LOWER);
 		if (!(below.getBlock() instanceof MachineBlock machine) || machine.kind() != MachineKind.DEPOSIT_DRILL) return false;
 		BlockPos master = machine.masterPos(pos.below(), below);
 		return mount(master, below).equals(pos);
@@ -64,15 +94,18 @@ public final class DeepDrillingAssemblyBlock extends Block {
 
 	@Override protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
 			Direction direction, BlockPos neighbor, BlockState neighborState, net.minecraft.util.RandomSource random) {
-		return canSurvive(state, level, pos) ? state : Blocks.AIR.defaultBlockState();
+		return canSurvive(state, level, pos)
+				? super.updateShape(state, level, ticks, pos, direction, neighbor, neighborState, random) : Blocks.AIR.defaultBlockState();
 	}
 
 	@Override protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-		return Block.box(2, 0, 2, 14, 16, 14);
+		return state.getValue(HALF) == DoubleBlockHalf.LOWER ? Block.box(1, -11, 1, 15, 16, 15)
+				: Block.box(2, 0, 2, 14, 16, 14);
 	}
 
 	@Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-		var machine = MachineBlock.machineAt(level, pos.below(), level.getBlockState(pos.below()));
+		BlockPos lower = state.getValue(HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
+		var machine = MachineBlock.machineAt(level, lower.below(), level.getBlockState(lower.below()));
 		if (!level.isClientSide() && machine != null) player.sendOverlayMessage(Component.translatable(
 				"message.jugcraft.deep_drilling", machine.depositDepth(), DEPTH, machine.depositBoreProgress() * 100 / BORE_TICKS,
 				machine.processingProgress(), machine.processingDuration()));
