@@ -7787,6 +7787,79 @@
         {
           "items": [
             [
+              "jugcraft:willow_log",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:salicylic_acid",
+              2
+            ]
+          ],
+          "ticks": 160,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "minecraft:birch_log",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:salicylic_acid",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salicylic_acid",
+              2
+            ],
+            [
+              "jugcraft:cider_vinegar",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              50
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aspirin",
+              4
+            ]
+          ],
+          "ticks": 120,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "minecraft:rotten_flesh",
               2
             ]
