@@ -250,7 +250,12 @@
       "io.github.jimbozoomer.jugcraft.test.StarbuncleGameTests",
       "io.github.jimbozoomer.jugcraft.test.NouveauExpansionGameTests",
       "io.github.jimbozoomer.jugcraft.test.MenagerieGameTests",
-      "io.github.jimbozoomer.jugcraft.test.TitaniumCasingGameTests"
+      "io.github.jimbozoomer.jugcraft.test.TitaniumCasingGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CementCaptureGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CalciteCarbonDioxideGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CokeGasGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ZincHydrogenGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AluminumRolesGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureResourceClientTests",
