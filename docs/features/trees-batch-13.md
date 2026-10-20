@@ -83,6 +83,8 @@ Wood approval stage, 20 October 2026:
   without finding actual test content. All 83 source files remain unchanged.
   Only unused development metadata in `level.dat`, `level.dat_old` and
   `data/fabric/registry_entries.dat` is removed from the copy.
+- The ordinary client joins the cleaned gallery at `(0.5, -60, 5.5)` at
+  06:40 on 20 October, facing the samples. It is open for owner inspection.
 
 The export is `build/walnut-wood-preview-r2/Walnut Wood Gallery`. The flat
 creative showroom has frozen time/weather/random ticks, comparison rows and a
