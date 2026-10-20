@@ -86,7 +86,7 @@ garnet biomes for its bounded retries and skips duplicate chunk centers; terrain
 protection, rarity, visible natural deposit assertions and save/depletion checks
 are unchanged. Final client validation of these repairs remains required.
 
-The 16-group run also found three natural-tree surveys stopping at tiny surface
+The 16-group run also found four natural-tree surveys stopping at tiny surface
 occurrences (including a dry-river sample with only 12 dry columns). Those
 surveys now continue through bounded distinct regional anchors, with normal
 chunk-unload ticks between them. Every target biome still requires its natural

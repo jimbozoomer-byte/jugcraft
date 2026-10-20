@@ -42,7 +42,7 @@ public class HangingFruitClientGameTests extends TreeBatchTwoClientGameTests {
 			Jugcraft.LOGGER.info("[tree 10 natural fruit] {} at {}: {}", biome.identifier(), at, fruit);
 			if (fruit > 0) return at;
 		}
-		throw new AssertionError("No natural hanging fruit in " + biome.identifier() + " across " + visited.size() + " samples");
+		return null; // Try another region; only a surviving natural fruit accepts a stop.
 	}
 	@Override protected void extraDisplays(ClientGameTestContext context, TestSingleplayerContext world, List<String> tour) {
 		var wall = GARDEN.offset(0, 0, 75);
