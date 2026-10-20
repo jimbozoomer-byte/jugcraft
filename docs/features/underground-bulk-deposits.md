@@ -1,6 +1,6 @@
 # Underground bulk deposits and deep drilling
 
-Status: in progress, owner approved 20 October 2026.
+Status: implemented; validation and owner preview in progress, owner approved 20 October 2026.
 Owner: jimbozoomer-byte. Implementation: OpenAI Codex (GPT-6), under the owner's direct authorization.
 Tier: optional steel workshop mining and logistics; extends the existing deposit drill.
 
@@ -35,7 +35,8 @@ It bores downward one layer per 20 powered ticks at 32 JE/t, without carving a q
 At each working depth it extracts one item per family every 300 powered ticks; shared speed/efficiency cards apply
 to extraction. The upgrade changes access, not reserve capacity or base output rate.
 
-Inputs: existing steel, gears, basic circuitry and drill head; no circular dependence on underground deposits.
+Inputs: four steel plates, three steel gears, a basic circuit and a steel pickaxe as the cutting head;
+no circular dependence on underground deposits.
 Outputs: existing coal/raw iron/raw copper/raw tin, consumed by existing generators, furnaces and ore processing.
 Item pipes, chests and conveyors retain their roles. No magic or new dependency is required.
 The Prospector distinguishes bulk deposits from ordinary ore and indicates approximate depth and signal.
@@ -46,16 +47,31 @@ Server-authoritative extraction consumes the shared per-dimension reserve. Multi
 duplicate it. Save boring depth and partial progress; power loss and full outputs pause work. Respect protected
 targets, bedrock and loaded chunks. Deposits cannot be moved by pistons to refresh their reserve. Rebuilding a
 machine does not reset the deposit. Existing registrations remain available when generation is disabled.
+The rig records its placing player (legacy rigs record the first operator). The shared Authority helper supplies
+a permission-only stand-in for an offline operator or an unprivileged identity for an unclaimed legacy rig.
+Current spawn, town, border and Fabric break-permission checks still apply. This does not alter the magic branch's
+absent-owner option. Work does not force chunks to load; an unloaded corner pauses the whole deep working layer.
+Removing the assembly returns to basic mode; reinstalling it resumes the saved depth. Boring stops at bedrock.
 
 ## Dependencies and assets
 
 No dependency changes. Extend Jugcraft's existing procedural deposit textures and dieselpunk machine models.
 Keep the owner asset library unchanged; record final asset provenance and runtime inspection evidence here.
+The library catalog's core-sample/drill textures were considered. Existing `tools/deposits.py` rubble and ore
+palettes provide the family reference; the new dark host is authored in the same generator. The mast reuses
+Jugcraft's `dp_gunmetal`, `dp_chrome`, `dp_olive` and `dp_hazard` textures and shared model-writing helpers.
 
 ## Verification
 
-Pending implementation: relevant generation, extraction, persistence, protection, recipe and client-preview checks.
-No test result is claimed yet. Two-human-client playtesting remains separate from automated coverage.
+- 20 October: all **13 focused server game tests passed**, using `runGameTest -I build/focused.gradle
+  -PgameTestFilter=jugcraft-test:*deposit*`. Includes the three existing surface-deposit regressions and ten
+  new shape, cover, host preservation, basic/deep reach, power/full-output pause, saved-payload round-trip,
+  protection, shared-reserve, speed/efficiency, Prospector, recipe and configuration cases.
+- Shape coverage: 160 deterministic seeds per family, checking connected cores, count bounds, variation,
+  dimensions and depth distribution.
+- Repository structure/documentation links passed. Shared art checks accepted the mast model.
+- Remaining at this checkpoint: final data/acquisition checks and normal-world client inspection/save reopening.
+- Two-human-client playtesting remains separate from automated coverage.
 
 ## Rollout
 
