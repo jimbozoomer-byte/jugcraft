@@ -4,8 +4,8 @@
     128,
     128
   ],
+  "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "jugcraft:nouveau/item/worn_notebook"
-  },
-  "parent": "minecraft:item/generated"
+  }
 }

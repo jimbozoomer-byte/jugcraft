@@ -20,28 +20,28 @@
     "Reachability is qualitative; energy, quantities, research and encounter difficulty require playtesting."
   ],
   "summary": {
-    "chain_with_acquisition_evidence": 3046,
-    "recipe_chain_reachable": 1520,
-    "natural_or_interaction_source": 538,
-    "loot_only": 284,
+    "chain_with_acquisition_evidence": 3047,
+    "recipe_chain_reachable": 1521,
+    "natural_or_interaction_source": 539,
+    "loot_only": 286,
     "deferred_acquisition_design": 78,
-    "intentional_noncraftable": 293
+    "intentional_noncraftable": 307
   },
   "recipe_types": {
-    "minecraft:crafting_shaped": 2655,
+    "minecraft:crafting_shaped": 2657,
     "minecraft:crafting_shapeless": 1018,
     "jugcraft:alloying": 10,
     "minecraft:blasting": 40,
     "jugcraft:arc_smelting": 16,
     "minecraft:smithing_trim": 1,
     "minecraft:smelting": 106,
-    "minecraft:campfire_cooking": 64,
-    "minecraft:smoking": 64,
+    "minecraft:campfire_cooking": 65,
+    "minecraft:smoking": 65,
     "minecraft:crafting_dye": 9,
     "jugcraft:beast_bison_upgrade": 1,
     "jugcraft:beast_mimicream_repair": 1,
     "minecraft:smithing_transform": 75,
-    "minecraft:brewing": 88,
+    "minecraft:brewing": 108,
     "jugcraft:catalytic_cracking": 4,
     "jugcraft:chemical_reaction": 218,
     "jugcraft:chilling": 3,
@@ -74,7 +74,7 @@
     "jugcraft:pot_cooking": 76,
     "jugcraft:pressing": 25,
     "jugcraft:pulverizing": 57,
-    "jugcraft:rocket_assembly": 21,
+    "jugcraft:rocket_assembly": 22,
     "jugcraft:sawing": 34,
     "jugcraft:sifting": 3,
     "jugcraft:steelmaking": 1,
@@ -52408,6 +52408,10 @@
       "routes": [],
       "evidence": [
         {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/blue_archwood.json"
+        },
+        {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
           "note": "Archwood generation in temperate Overworld biomes; saplings also grow the trees."
@@ -52422,6 +52426,10 @@
       "route_count": 0,
       "routes": [],
       "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/blue_archwood.json"
+        },
         {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
@@ -54041,6 +54049,10 @@
       "routes": [],
       "evidence": [
         {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/green_archwood.json"
+        },
+        {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
           "note": "Archwood generation in temperate Overworld biomes; saplings also grow the trees."
@@ -54055,6 +54067,10 @@
       "route_count": 0,
       "routes": [],
       "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/green_archwood.json"
+        },
         {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
@@ -54474,6 +54490,10 @@
       "routes": [],
       "evidence": [
         {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/purple_archwood.json"
+        },
+        {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
           "note": "Archwood generation in temperate Overworld biomes; saplings also grow the trees."
@@ -54488,6 +54508,10 @@
       "route_count": 0,
       "routes": [],
       "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/purple_archwood.json"
+        },
         {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
@@ -54537,6 +54561,10 @@
       "routes": [],
       "evidence": [
         {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/red_archwood.json"
+        },
+        {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
           "note": "Archwood generation in temperate Overworld biomes; saplings also grow the trees."
@@ -54551,6 +54579,10 @@
       "route_count": 0,
       "routes": [],
       "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/nouveau/red_archwood.json"
+        },
         {
           "kind": "native_acquisition",
           "source": "src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java",
@@ -63257,10 +63289,11 @@
       "item": "jugcraft:rocket_casing",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 2,
+      "route_count": 3,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/rocket_assembly/alloy_rocket_casing.json",
-        "src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_casing.json"
+        "src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_casing.json",
+        "src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_casing_from_titanium.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -63466,6 +63499,161 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:rotten_burned_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_corrupted_wart",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/rotten_corrupted_wart.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_dead_beard_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_frostbitten_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_frozen_rotten_flesh",
+      "status": "loot_only",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/entities/rotten_frostbitten.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_glacial_hunter_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_hunter_wolf_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_immortal_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_magma_rotten_flesh",
+      "status": "loot_only",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "loot",
+          "source": "src/main/resources/data/jugcraft/loot_table/entities/rotten_burned.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_mummy_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_scarab_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_skeleton_lackey_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_spear",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "native_acquisition",
+          "source": "src/main/java/io/github/jimbozoomer/jugcraft/menagerie/RottenCreatures.java",
+          "note": "Glacial Hunter equips this spear with setItemSlotAndDropWhenKilled; defeat the encounter for the equipment drop."
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_swampy_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_tnt_barrel",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/rotten_tnt_barrel.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:rotten_tomato",
       "status": "natural_or_interaction_source",
       "reason": "",
@@ -63478,6 +63666,42 @@
           "note": "Tomato vine overripening."
         }
       ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_treasure_chest",
+      "status": "intentional_noncraftable",
+      "reason": "Preview encounter storage; Deadbeard treasure placement is still on the creature-recovery TODO. No survival acquisition is implemented yet.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_undead_miner_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_zap_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:rotten_zombie_lackey_spawn_egg",
+      "status": "intentional_noncraftable",
+      "reason": "Creative spawn egg; acquire creatures through world encounters.",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [],
       "blocked_by": []
     },
     {
@@ -84104,6 +84328,306 @@
       ],
       "outputs": [
         "jugcraft:brew_ladle"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_corrupted_dragon_breath.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "minecraft:dragon_breath"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_corrupted_gunpowder.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "minecraft:gunpowder"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_corrupted_lingering_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:lingering_potion"
+        ],
+        [
+          "jugcraft:rotten_corrupted_wart"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_corrupted_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "jugcraft:rotten_corrupted_wart"
+        ]
+      ],
+      "outputs": [
+        "minecraft:potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_corrupted_splash_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "jugcraft:rotten_corrupted_wart"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_freeze_dragon_breath.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "minecraft:dragon_breath"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_freeze_gunpowder.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "minecraft:gunpowder"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_freeze_lingering_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:lingering_potion"
+        ],
+        [
+          "jugcraft:rotten_frozen_rotten_flesh"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_freeze_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "jugcraft:rotten_frozen_rotten_flesh"
+        ]
+      ],
+      "outputs": [
+        "minecraft:potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_freeze_splash_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "jugcraft:rotten_frozen_rotten_flesh"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_long_freeze_dragon_breath.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "minecraft:dragon_breath"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_long_freeze_gunpowder.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "minecraft:gunpowder"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_long_freeze_lingering_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:lingering_potion"
+        ],
+        [
+          "minecraft:redstone"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_long_freeze_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "minecraft:redstone"
+        ]
+      ],
+      "outputs": [
+        "minecraft:potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_long_freeze_splash_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "minecraft:redstone"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_strong_freeze_dragon_breath.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "minecraft:dragon_breath"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_strong_freeze_gunpowder.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "minecraft:gunpowder"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_strong_freeze_lingering_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:lingering_potion"
+        ],
+        [
+          "minecraft:glowstone_dust"
+        ]
+      ],
+      "outputs": [
+        "minecraft:lingering_potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_strong_freeze_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:potion"
+        ],
+        [
+          "minecraft:glowstone_dust"
+        ]
+      ],
+      "outputs": [
+        "minecraft:potion"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/brewing/rotten_strong_freeze_splash_potion.json",
+      "type": "minecraft:brewing",
+      "inputs": [
+        [
+          "minecraft:splash_potion"
+        ],
+        [
+          "minecraft:glowstone_dust"
+        ]
+      ],
+      "outputs": [
+        "minecraft:splash_potion"
       ]
     },
     {
@@ -200477,6 +201001,21 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_casing_from_titanium.json",
+      "type": "jugcraft:rocket_assembly",
+      "inputs": [
+        [
+          "jugcraft:titanium_plate"
+        ],
+        [
+          "jugcraft:rocket_workshop"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:rocket_casing"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_motor.json",
       "type": "jugcraft:rocket_assembly",
       "inputs": [
@@ -201057,6 +201596,90 @@
       ],
       "outputs": [
         "jugcraft:rotor_assembly"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/rotten_corrupted_wart.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:nether_wart"
+        ],
+        [
+          "minecraft:nether_wart"
+        ],
+        [
+          "jugcraft:rotten_frozen_rotten_flesh"
+        ],
+        [
+          "minecraft:nether_wart"
+        ],
+        [
+          "minecraft:nether_wart"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:rotten_corrupted_wart"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/rotten_rotten_flesh_from_campfire_cooking.json",
+      "type": "minecraft:campfire_cooking",
+      "inputs": [
+        [
+          "jugcraft:rotten_frozen_rotten_flesh"
+        ]
+      ],
+      "outputs": [
+        "minecraft:rotten_flesh"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/rotten_rotten_flesh_from_smoking.json",
+      "type": "minecraft:smoking",
+      "inputs": [
+        [
+          "jugcraft:rotten_frozen_rotten_flesh"
+        ]
+      ],
+      "outputs": [
+        "minecraft:rotten_flesh"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/rotten_tnt_barrel.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:gunpowder"
+        ],
+        [
+          "minecraft:gunpowder"
+        ],
+        [
+          "minecraft:gunpowder"
+        ],
+        [
+          "minecraft:gunpowder"
+        ],
+        [
+          "minecraft:barrel"
+        ],
+        [
+          "minecraft:gunpowder"
+        ],
+        [
+          "minecraft:gunpowder"
+        ],
+        [
+          "minecraft:gunpowder"
+        ],
+        [
+          "minecraft:gunpowder"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:rotten_tnt_barrel"
       ]
     },
     {
@@ -266415,71 +267038,6 @@
       ]
     },
     {
-      "source": "src/main/resources/data/jugcraft/loot_table/blocks/nouveau_potted_blue_archwood_sapling.json",
-      "type": "block_drop",
-      "inputs": [
-        [
-          "jugcraft:nouveau_potted_blue_archwood_sapling"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:nouveau_blue_archwood_sapling",
-        "minecraft:flower_pot"
-      ]
-    },
-    {
-      "source": "src/main/resources/data/jugcraft/loot_table/blocks/nouveau_potted_green_archwood_sapling.json",
-      "type": "block_drop",
-      "inputs": [
-        [
-          "jugcraft:nouveau_potted_green_archwood_sapling"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:nouveau_green_archwood_sapling",
-        "minecraft:flower_pot"
-      ]
-    },
-    {
-      "source": "src/main/resources/data/jugcraft/loot_table/blocks/nouveau_potted_magebloom_crop.json",
-      "type": "block_drop",
-      "inputs": [
-        [
-          "jugcraft:nouveau_potted_magebloom_crop"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:nouveau_magebloom_crop",
-        "minecraft:flower_pot"
-      ]
-    },
-    {
-      "source": "src/main/resources/data/jugcraft/loot_table/blocks/nouveau_potted_purple_archwood_sapling.json",
-      "type": "block_drop",
-      "inputs": [
-        [
-          "jugcraft:nouveau_potted_purple_archwood_sapling"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:nouveau_purple_archwood_sapling",
-        "minecraft:flower_pot"
-      ]
-    },
-    {
-      "source": "src/main/resources/data/jugcraft/loot_table/blocks/nouveau_potted_red_archwood_sapling.json",
-      "type": "block_drop",
-      "inputs": [
-        [
-          "jugcraft:nouveau_potted_red_archwood_sapling"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:nouveau_red_archwood_sapling",
-        "minecraft:flower_pot"
-      ]
-    },
-    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/nouveau_purple_archwood_leaves.json",
       "type": "block_drop",
       "inputs": [
@@ -271070,6 +271628,30 @@
       ],
       "outputs": [
         "jugcraft:rosemary"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/rotten_tnt_barrel.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:rotten_tnt_barrel"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:rotten_tnt_barrel"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/rotten_treasure_chest.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:rotten_treasure_chest"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:rotten_treasure_chest"
       ]
     },
     {
@@ -279737,6 +280319,30 @@
         ]
       ],
       "outputs": [
+        "jugcraft:rock_candy"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/syrup",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ]
+      ],
+      "outputs": [
         "jugcraft:salt_water_taffy"
       ]
     },
@@ -279785,55 +280391,7 @@
         ]
       ],
       "outputs": [
-        "jugcraft:rock_candy"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/syrup",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ]
-      ],
-      "outputs": [
         "jugcraft:hard_candy"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/syrup",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:burnt_sugar"
       ]
     },
     {
@@ -279861,7 +280419,7 @@
       ]
     },
     {
-      "source": "tools/agriculture.py:CANDY/cream",
+      "source": "tools/agriculture.py:CANDY/syrup",
       "type": "candy_temperature",
       "inputs": [
         [
@@ -279878,13 +280436,10 @@
         ],
         [
           "minecraft:campfire"
-        ],
-        [
-          "minecraft:milk_bucket"
         ]
       ],
       "outputs": [
-        "jugcraft:toffee"
+        "jugcraft:burnt_sugar"
       ]
     },
     {
@@ -279912,6 +280467,33 @@
       ],
       "outputs": [
         "jugcraft:burnt_sugar"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/cream",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ],
+        [
+          "minecraft:milk_bucket"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:toffee"
       ]
     },
     {

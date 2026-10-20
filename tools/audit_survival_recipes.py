@@ -84,7 +84,7 @@ def vanilla_jar():
     return preferred[0]
 
 
-def build(registry_path=None):
+def reference_from_jars():
     tags = {}
     vanilla_items = set()
     with zipfile.ZipFile(vanilla_jar()) as jar:
@@ -109,6 +109,15 @@ def build(registry_path=None):
             if len(parts) > 4 and parts[0] == 'data' and parts[2:4] == ['tags', 'item'] and name.endswith('.json'):
                 d = json.loads(jar.read(name)); key = parts[1] + ':' + '/'.join(parts[4:])[:-5]
                 tags[key] = ([] if d.get('replace') else tags.get(key, [])) + d.get('values', [])
+    return {"minecraft": "26.3", "fabric_conventions": "4.10.3+6b5b47fd5d", "items": sorted(vanilla_items), "tags": tags}
+
+
+def build(registry_path=None):
+    reference = read(ROOT / 'tools/data/survival-reference-26.3.json')
+    if reference['minecraft'] != '26.3' or reference['fabric_conventions'] != '4.10.3+6b5b47fd5d':
+        raise ValueError('Acquisition reference must match the pinned platform')
+    tags = reference['tags']
+    vanilla_items = set(reference['items'])
     recipes = {}
     for base in (RES, ROOT / 'src/main/generated'):
         for p in sorted((base / 'data').rglob('*.json')):
@@ -331,8 +340,11 @@ def build(registry_path=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write', action='store_true')
+    parser.add_argument('--refresh-reference', action='store_true', help='Re-export pinned vanilla/Fabric item IDs and tag memberships from local development JARs for portable CI.')
     parser.add_argument('--registry', type=Path, help='Actual registry exported by SurvivalRecipeGameTests; --write preserves this snapshot.')
     args = parser.parse_args()
+    if args.refresh_reference:
+        (ROOT / 'tools/data/survival-reference-26.3.json').write_text(json.dumps(reference_from_jars(), indent=2) + '\n', encoding='utf-8')
     report = build(args.registry)
     print(json.dumps(report['summary'], indent=2))
     print('Ingredient diagnostics:', len(report['invalid_ingredients']))

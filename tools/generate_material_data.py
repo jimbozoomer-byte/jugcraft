@@ -24,6 +24,8 @@ RES = ROOT / "src" / "main" / "resources"
 ASSETS = RES / "assets" / MOD
 DATA = RES / "data"
 PACKS = RES / "resourcepacks"
+WRITTEN_RESOURCES = set()
+RESOURCE_MANIFEST = ROOT / "tools/data/generated-material-resources.json"
 
 GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
@@ -96,6 +98,8 @@ NUCLEAR_CLOSED_MODELS = (
 
 
 def write(path, obj):
+    if path.is_relative_to(RES):
+        WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
     if isinstance(obj, dict) and obj.get("elements") and "models" in path.parts:
         if any(path.stem == name or path.stem.startswith(name + "_") for name in NUCLEAR_CLOSED_MODELS):
             model_writer.finish_closed(obj["elements"])
@@ -1733,9 +1737,10 @@ def retro_trader_trades():
 
 
 def main():
-    for directory in GENERATED_DIRS:
-        if directory.exists():
-            shutil.rmtree(directory)
+    # Imported, authored and generated resources share namespaces. Delete only
+    # stale files this generator previously owned, never whole resource folders.
+    previous = set(json.loads(RESOURCE_MANIFEST.read_text(encoding="utf-8"))) if RESOURCE_MANIFEST.exists() else set()
+    WRITTEN_RESOURCES.clear()
     assets()
     import handbook
     book = handbook.build()
@@ -1762,6 +1767,15 @@ def main():
         print("town:", problem)
     import vehicle_bays
     vehicle_bays.write()
+    import owner_resource_patches
+    owner_resource_patches.apply()
+    for relative in previous - WRITTEN_RESOURCES:
+        stale = (RES / relative).resolve()
+        if not stale.is_relative_to(RES.resolve()):
+            raise ValueError("Generated resource manifest escapes resource directory")
+        if stale.is_file():
+            stale.unlink()
+    RESOURCE_MANIFEST.write_text(json.dumps(sorted(WRITTEN_RESOURCES), indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

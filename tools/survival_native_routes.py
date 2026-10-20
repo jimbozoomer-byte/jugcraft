@@ -165,4 +165,7 @@ def extend(root, edge, evidence, items):
         exclusions[j(name)] = 'Creative, debug or presentation-only entry; no survival recipe.'
     from survival_native_followup import extend as followup
     exclusions.update(followup(root, edge, evidence, items))
+    found(['rotten_spear'], java + 'menagerie/RottenCreatures.java',
+          'Glacial Hunter equips this spear with setItemSlotAndDropWhenKilled; defeat the encounter for the equipment drop.')
+    exclusions['jugcraft:rotten_treasure_chest'] = 'Preview encounter storage; Deadbeard treasure placement is still on the creature-recovery TODO. No survival acquisition is implemented yet.'
     return exclusions

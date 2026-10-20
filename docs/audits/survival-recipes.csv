@@ -3899,8 +3899,8 @@ jugcraft:nouveau_belt_of_unstable_gifts,chain_with_acquisition_evidence,,nouveau
 jugcraft:nouveau_blank_glyph,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/survival_completion/nouveau_blank_glyph.json,,
 jugcraft:nouveau_blank_parchment,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blank_parchment.json | src/main/resources/data/jugcraft/recipe/nouveau/scry_to_blank_parchment.json | src/main/resources/data/jugcraft/recipe/nouveau/wipe_spell_parchment.json,,
 jugcraft:nouveau_blank_thread,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blank_thread.json,,
-jugcraft:nouveau_blue_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_blue_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_blue_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/blue_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_blue_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/blue_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_blue_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_cascading_sapling.json,,
 jugcraft:nouveau_blue_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blue_archwood_wood.json,,
 jugcraft:nouveau_blue_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blue_sbed.json,,
@@ -4037,8 +4037,8 @@ jugcraft:nouveau_glyph_wind_shear,chain_with_acquisition_evidence,,nouveau works
 jugcraft:nouveau_glyph_wither,chain_with_acquisition_evidence,,nouveau workshop:jugcraft:nouveau_glyph_wither/0,,
 jugcraft:nouveau_gold_grate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/nouveau/gold_grate.json,,
 jugcraft:nouveau_greater_experience_gem,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/greater_experience_gem.json,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauResources.java
-jugcraft:nouveau_green_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_green_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_green_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/green_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_green_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/green_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_green_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_flourishing_sapling.json,,
 jugcraft:nouveau_green_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/green_archwood_wood.json,,
 jugcraft:nouveau_green_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/green_sbed.json,,
@@ -4074,13 +4074,13 @@ jugcraft:nouveau_potion_flask_amplify,chain_with_acquisition_evidence,,nouveau w
 jugcraft:nouveau_potion_flask_extend_time,chain_with_acquisition_evidence,,nouveau workshop:jugcraft:nouveau_potion_flask_extend_time/0 | nouveau workshop:jugcraft:nouveau_potion_flask_extend_time/1,,
 jugcraft:nouveau_potion_jar,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/potion_jar.json | src/main/resources/data/jugcraft/recipe/nouveau/potion_jar_empty.json,,
 jugcraft:nouveau_potion_melder,chain_with_acquisition_evidence,,nouveau workshop:jugcraft:nouveau_potion_melder/0,,
-jugcraft:nouveau_purple_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_purple_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_purple_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/purple_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_purple_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/purple_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_purple_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_vexing_sapling.json,,
 jugcraft:nouveau_purple_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/purple_archwood_wood.json,,
 jugcraft:nouveau_purple_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/purple_sbed.json,,
-jugcraft:nouveau_red_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_red_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_red_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/red_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_red_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/red_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_red_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_blazin_sapling.json,,
 jugcraft:nouveau_red_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/red_archwood_wood.json,,
 jugcraft:nouveau_red_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/red_sbed.json,,
@@ -4820,7 +4820,7 @@ jugcraft:roasted_porcini,chain_with_acquisition_evidence,,src/main/resources/dat
 jugcraft:roasted_pumpkin_seeds,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/roasted_pumpkin_seeds.json | src/main/resources/data/jugcraft/recipe/roasted_pumpkin_seeds_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_pumpkin_seeds_from_smoking.json,,
 jugcraft:roasted_sunflower_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_sunflower_seeds.json | src/main/resources/data/jugcraft/recipe/roasted_sunflower_seeds_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_sunflower_seeds_from_smoking.json,,
 jugcraft:rock_candy,recipe_chain_reachable,,tools/agriculture.py:CANDY/syrup,,
-jugcraft:rocket_casing,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/alloy_rocket_casing.json | src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_casing.json,,
+jugcraft:rocket_casing,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/alloy_rocket_casing.json | src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_casing.json | src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_casing_from_titanium.json,,
 jugcraft:rocket_launcher,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_launcher.json,,
 jugcraft:rocket_motor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/liquid_rocket_motor.json | src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_motor.json,,
 jugcraft:rocket_nozzle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/rocket_nozzle.json,,
@@ -4839,7 +4839,26 @@ jugcraft:room_sign,chain_with_acquisition_evidence,,src/main/resources/data/jugc
 jugcraft:rosemary,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/rosemary.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:rosemary_bundle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rosemary_bundle.json,,
 jugcraft:rotor_assembly,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rotor_assembly.json,,
+jugcraft:rotten_burned_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_corrupted_wart,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rotten_corrupted_wart.json,,
+jugcraft:rotten_dead_beard_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_frostbitten_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_frozen_rotten_flesh,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/rotten_frostbitten.json
+jugcraft:rotten_glacial_hunter_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_hunter_wolf_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_immortal_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_magma_rotten_flesh,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/rotten_burned.json
+jugcraft:rotten_mummy_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_scarab_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_skeleton_lackey_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_spear,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/menagerie/RottenCreatures.java
+jugcraft:rotten_swampy_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_tnt_barrel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/rotten_tnt_barrel.json,,
 jugcraft:rotten_tomato,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TomatoVineBlock.java
+jugcraft:rotten_treasure_chest,intentional_noncraftable,Preview encounter storage; Deadbeard treasure placement is still on the creature-recovery TODO. No survival acquisition is implemented yet.,,,
+jugcraft:rotten_undead_miner_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_zap_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
+jugcraft:rotten_zombie_lackey_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
 jugcraft:rough_process_wafer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/electronics_slice_boule.json,,
 jugcraft:rounded_gravestone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/rounded_gravestone_from_stonecutting.json,,
 jugcraft:rowan_berries,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/rowan,,
