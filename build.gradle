@@ -208,7 +208,8 @@ tasks.named("processGametestResources", ProcessResources) {
 		}
 		// Exercise integrated startup/controls and long natural-world discovery first,
 		// so their failures surface before unrelated screenshot galleries. Keep every selected test.
-		def early = ["OwnerCollectionsNetworkTests", "MineralSandClientGameTests", "BackpackClientGameTests", "DioramaClientGameTests"]
+		def early = ["OwnerCollectionsNetworkTests", "MineralSandClientGameTests", "BackpackClientGameTests", "DioramaClientGameTests",
+			"DryCountryTreeClientGameTests", "RainforestClientGameTests", "TropicalTreeClientGameTests"]
 		def simpleName = { String name -> name.substring(name.lastIndexOf('.') + 1) }
 		mine = early.collectMany { name -> mine.findAll { simpleName(it) == name } } + mine.findAll { !early.contains(simpleName(it)) }
 		json.entrypoints["fabric-client-gametest"] = mine
