@@ -73,8 +73,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:advanced_solar_panel": {
-      "numerator": 6349,
-      "denominator": 2,
+      "numerator": 12691,
+      "denominator": 4,
       "source": "recipe jugcraft:advanced_solar_panel"
     },
     "jugcraft:aed_cabinet": {
@@ -198,9 +198,9 @@
       "source": "recipe jugcraft:aluminum_block"
     },
     "jugcraft:aluminum_cable": {
-      "numerator": 7,
-      "denominator": 2,
-      "source": "recipe jugcraft:aluminum_cable"
+      "numerator": 21,
+      "denominator": 8,
+      "source": "recipe jugcraft:aluminum_cable_aluminum_sheathed"
     },
     "jugcraft:aluminum_cladding": {
       "numerator": 1,
@@ -7238,8 +7238,8 @@
       "source": "recipe jugcraft:control_tray_waterfall_hanger"
     },
     "jugcraft:converter_station": {
-      "numerator": 11065,
-      "denominator": 2,
+      "numerator": 44253,
+      "denominator": 8,
       "source": "recipe jugcraft:converter_station"
     },
     "jugcraft:conveyor": {
@@ -10468,8 +10468,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:fuel_cell": {
-      "numerator": 2105,
-      "denominator": 2,
+      "numerator": 8413,
+      "denominator": 8,
       "source": "recipe jugcraft:fuel_cell"
     },
     "jugcraft:fuel_fabricator": {
@@ -18233,8 +18233,8 @@
       "source": "local natural rubber/container accounting"
     },
     "jugcraft:lattice_tower": {
-      "numerator": 30,
-      "denominator": 1,
+      "numerator": 113,
+      "denominator": 4,
       "source": "recipe jugcraft:lattice_tower"
     },
     "jugcraft:lavender": {
@@ -18848,8 +18848,8 @@
       "source": "recipe jugcraft:main_control_board"
     },
     "jugcraft:main_transformer": {
-      "numerator": 4643,
-      "denominator": 2,
+      "numerator": 18565,
+      "denominator": 8,
       "source": "recipe jugcraft:ceramics_main_transformer"
     },
     "jugcraft:mandrake_root": {
@@ -18863,7 +18863,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:mango_chutney": {
-      "numerator": 1327,
+      "numerator": 472,
       "denominator": 27,
       "source": "recipe jugcraft:pot_cooking/mango_chutney"
     },
@@ -19008,8 +19008,8 @@
       "source": "recipe jugcraft:mason_jar"
     },
     "jugcraft:mcc_lineup": {
-      "numerator": 539,
-      "denominator": 2,
+      "numerator": 2149,
+      "denominator": 8,
       "source": "recipe jugcraft:mcc_lineup"
     },
     "jugcraft:mecha_workbench": {
@@ -19193,8 +19193,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:monitored_lattice_tower": {
-      "numerator": 4314,
-      "denominator": 1,
+      "numerator": 17235,
+      "denominator": 4,
       "source": "recipe jugcraft:monitored_lattice_tower"
     },
     "jugcraft:monomer_preparation_unit": {
@@ -22008,8 +22008,8 @@
       "source": "reference tag minecraft:leaves"
     },
     "jugcraft:osmanthus_mooncake": {
-      "numerator": 57,
-      "denominator": 2,
+      "numerator": 247,
+      "denominator": 12,
       "source": "recipe jugcraft:pot_cooking/osmanthus_mooncake"
     },
     "jugcraft:osmanthus_sapling": {
@@ -22063,8 +22063,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:pad_mount_transformer": {
-      "numerator": 23,
-      "denominator": 2,
+      "numerator": 85,
+      "denominator": 8,
       "source": "recipe jugcraft:pad_mount_transformer"
     },
     "jugcraft:painted_wall": {
@@ -24133,8 +24133,8 @@
       "source": "recipe jugcraft:reception_desk"
     },
     "jugcraft:reconductored_lattice_tower": {
-      "numerator": 48,
-      "denominator": 1,
+      "numerator": 171,
+      "denominator": 4,
       "source": "recipe jugcraft:reconductored_lattice_tower"
     },
     "jugcraft:recovery_concentrate_bucket": {
@@ -25113,7 +25113,7 @@
       "source": "recipe jugcraft:scuba_tank"
     },
     "jugcraft:sea_grape_jelly": {
-      "numerator": 2191,
+      "numerator": 481,
       "denominator": 27,
       "source": "recipe jugcraft:pot_cooking/sea_grape_jelly"
     },
@@ -26918,8 +26918,8 @@
       "source": "recipe jugcraft:superconducting_motor"
     },
     "jugcraft:superconducting_pylon": {
-      "numerator": 17117,
-      "denominator": 2,
+      "numerator": 68419,
+      "denominator": 8,
       "source": "recipe jugcraft:superconducting_pylon"
     },
     "jugcraft:superconducting_tape": {
@@ -26998,8 +26998,8 @@
       "source": "recipe jugcraft:swiftwolf_rending_gale"
     },
     "jugcraft:switchgear_lineup": {
-      "numerator": 657,
-      "denominator": 2,
+      "numerator": 2621,
+      "denominator": 8,
       "source": "recipe jugcraft:switchgear_lineup"
     },
     "jugcraft:synthesis_converter": {
@@ -27808,13 +27808,13 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:uhv_tower": {
-      "numerator": 5392,
-      "denominator": 1,
+      "numerator": 21547,
+      "denominator": 4,
       "source": "recipe jugcraft:uhv_tower"
     },
     "jugcraft:uhvdc_tower": {
-      "numerator": 14989,
-      "denominator": 2,
+      "numerator": 59907,
+      "denominator": 8,
       "source": "recipe jugcraft:uhvdc_tower"
     },
     "jugcraft:undertone_rifle": {
@@ -27823,8 +27823,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:unit_substation": {
-      "numerator": 4783,
-      "denominator": 2,
+      "numerator": 19125,
+      "denominator": 8,
       "source": "recipe jugcraft:unit_substation"
     },
     "jugcraft:uranium_block": {
