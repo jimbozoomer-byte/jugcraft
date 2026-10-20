@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.creatures.chima.Chima;
+import io.github.jimbozoomer.jugcraft.creatures.chima.ChimaMod;
 import io.github.jimbozoomer.jugcraft.deposit.*;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
 import io.github.jimbozoomer.jugcraft.machine.*;
@@ -33,7 +35,7 @@ public class UndergroundDepositClientGameTests implements FabricClientGameTest {
 	private static final BlockPos RIG = ORIGIN.offset(8, 247, 8), RESERVE = ORIGIN.offset(7, 239, 9);
 	private static final BlockPos START = ORIGIN.offset(4, 249, -1);
 	@Override public void runTest(ClientGameTestContext context) {
-		TestWorldSave save; Path source;
+		TestWorldSave save; Path source; UUID[] companion;
 		Map<UndergroundDepositFeature.Family, Set<BlockPos>> natural = new EnumMap<>(UndergroundDepositFeature.Family.class);
 		Map<String, BlockPos> stops = new LinkedHashMap<>();
 		try (TestSingleplayerContext world = context.worldBuilder().adjustSettings(creator -> {
@@ -54,6 +56,15 @@ public class UndergroundDepositClientGameTests implements FabricClientGameTest {
 				Jugcraft.LOGGER.info("[bulk-deposits] {} natural body: {} blocks, camera {}", family, bodies.size(), stops.get(family.id()));
 			}
 			world.getServer().runOnServer(server -> gallery(server.overworld()));
+			companion = world.getServer().computeOnServer(server -> {
+				var owner = server.getPlayerList().getPlayers().getFirst();
+				var cub = ChimaMod.CHIMA.create(server.overworld(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+				check(cub != null, "Chima must be registered beside the drill");
+				cub.tameTo(owner); cub.setSkin(Chima.Skin.SHARK); cub.setHealth(10);
+				cub.snapTo(RIG.getX() - 2.5, RIG.getY(), RIG.getZ() - 1.5, 180, 0);
+				server.overworld().addFreshEntity(cub);
+				return new UUID[]{cub.getUUID(), owner.getUUID()};
+			});
 			for (var stop : stops.entrySet()) {
 				world.getServer().runCommand("tp @a " + xyz(stop.getValue()));
 				fly(world); context.waitTicks(30); world.getConnection().waitForChunksRender();
@@ -84,12 +95,18 @@ public class UndergroundDepositClientGameTests implements FabricClientGameTest {
 			save = world.getWorldSave();
 		}
 		try (var reopened = save.open()) {
+			context.waitTicks(40); reopened.getConnection().waitForChunksRender();
 			reopened.getServer().runOnServer(server -> {
 				var level = server.overworld();
 				check(Deposits.remaining(level, RESERVE) == 777, "Finite reserve changed across real save/reopen");
 				var drill = (MachineBlockEntity) level.getBlockEntity(RIG);
 				check(drill != null && drill.depositDepth() == 8 && drill.processingProgress() == 123, "Drill depth/partial progress not persisted");
 				check(DeepDrillingAssemblyBlock.installed(level, RIG, drill.getBlockState()), "Two-block mast lost on reopen");
+				check(level.getEntity(companion[0]) instanceof Chima, "Companion lost beside the saved drill");
+				var cub = (Chima) level.getEntity(companion[0]);
+				check(cub.tame() && companion[1].equals(cub.owner()) && cub.sitting()
+						&& cub.skin() == Chima.Skin.SHARK && cub.getHealth() == 10,
+						"Chima owner, sitting, appearance or health changed across save/reopen");
 				for (var body : natural.values()) for (var pos : body)
 					check(level.getBlockState(pos).getBlock() instanceof DepositBlock, "Natural deposit lost on reopen: " + pos);
 			});

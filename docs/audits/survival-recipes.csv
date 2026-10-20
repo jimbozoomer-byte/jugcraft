@@ -1306,6 +1306,7 @@ jugcraft:chicken_cuts,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:chicken_sandwich,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chicken_sandwich.json,,
 jugcraft:chicken_soup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/chicken_soup.json,,
 jugcraft:chili,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/chili.json,,
+jugcraft:chima_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
 jugcraft:chimera_finial,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/chimera_finial.json,,
 jugcraft:chiseled_crypt_stone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/chiseled_crypt_stone_from_stonecutting.json,,
 jugcraft:chitin_smg,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chitin_smg.json,,

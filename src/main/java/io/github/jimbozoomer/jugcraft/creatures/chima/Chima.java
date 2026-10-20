@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.creatures.chima;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import java.util.EnumSet;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -241,6 +243,15 @@ public class Chima extends PathfinderMob {
 	/** A blow that brings a cow down ends the hunt for a while. */
 	@Override
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		// Retaliation also reaches this path: judging only the owner-defense goal would bypass claims/PvP.
+		if (tame() && target instanceof LivingEntity living) {
+			Player actor = ownerPlayer();
+			if (target.getUUID().equals(owner) || target instanceof Player && actor == null
+					|| !ConcordanceEffects.mayHarm(actor, living) || !Authority.mayStrike(level, actor, owner, living)) {
+				setTarget(null);
+				return false;
+			}
+		}
 		boolean hit = super.doHurtTarget(level, target);
 		if (hit && target instanceof Cow && !target.isAlive()) {
 			rest = HUNT_REST;
@@ -316,7 +327,7 @@ public class Chima extends PathfinderMob {
 	/** Comes to its owner: to open ground two or three blocks from them. Returns whether it found a spot. */
 	public boolean comeToOwner() {
 		Player player = ownerPlayer();
-		if (player == null || player.level() != level()) {
+		if (!tame() || sitting() || player == null || player.isSpectator() || player.level() != level()) {
 			return false;
 		}
 		BlockPos center = player.blockPosition();
@@ -329,7 +340,10 @@ public class Chima extends PathfinderMob {
 			for (int dy = 1; dy >= -1; dy--) {
 				BlockPos spot = center.offset(dx, dy, dz);
 				Vec3 to = Vec3.atBottomCenterOf(spot);
-				if (level().getBlockState(spot.below()).isFaceSturdy(level(), spot.below(), Direction.UP)
+				if (level().isLoaded(spot) && level().isInWorldBounds(spot) && level().isInWorldBounds(spot.above())
+						&& level().getWorldBorder().isWithinBounds(spot)
+						&& level().getFluidState(spot).isEmpty() && level().getFluidState(spot.above()).isEmpty()
+						&& level().getBlockState(spot.below()).isFaceSturdy(level(), spot.below(), Direction.UP)
 						&& level().noCollision(this, getBoundingBox().move(to.subtract(position())))) {
 					snapTo(to.x, to.y, to.z, getYRot(), getXRot());
 					getNavigation().stop();

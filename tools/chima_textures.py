@@ -482,11 +482,11 @@ def save_all(assets):
     entity = assets / "textures" / "entity"
     entity.mkdir(parents=True, exist_ok=True)
     for skin in SKINS:
-        texture(skin, False).save(entity / f"chima_{skin}.png")
-        texture(skin, True).save(entity / f"chima_{skin}_tame.png")
+        texture(skin, False).save(entity / f"chima_{skin}.png", compress_level=0)
+        texture(skin, True).save(entity / f"chima_{skin}_tame.png", compress_level=0)
     item = assets / "textures" / "item"
     item.mkdir(parents=True, exist_ok=True)
-    spawn_egg().save(item / "chima_spawn_egg.png")
+    spawn_egg().save(item / "chima_spawn_egg.png", compress_level=0)
 
 
 if __name__ == "__main__":

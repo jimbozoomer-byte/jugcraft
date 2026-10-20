@@ -130,3 +130,15 @@ The pumpkin and zombie looks suit Halloween, but they are not seasonal: the item
 **Known limits:**
 - Looks are textures on one model. The pumpkin and skull are rounded boxes, not spheres.
 - It has no breeding and no drops.
+
+
+## Integration with current main — 20 October 2026
+
+The owner selected Chima and underground drilling for a combined merge. Tamed attack damage,
+including retaliation, now asks the shared owner claim/PvP rules and cannot harm the owner.
+Follow teleports reject unloaded, wet or out-of-border positions and sitting pets stay put.
+The combined underground inspection saves and reopens a tamed shark-look Chima beside the rig,
+checking identity, ownership, sitting, health and appearance alongside the drill's state.
+PNG encoding is made reproducible; all eleven regenerated images were verified pixel-identical
+with the contributor's original assets. Integration/repair author: OpenAI Codex (GPT-6).
+See [combined evidence](drilling-chima-integration-oct20.md) for current validation.

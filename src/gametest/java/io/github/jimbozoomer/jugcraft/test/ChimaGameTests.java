@@ -160,6 +160,29 @@ public class ChimaGameTests {
 		});
 	}
 
+	/** Retaliation cannot bypass the shared creature claim boundary or hurt its owner. */
+	@GameTest
+	public void tameAttacksRespectClaimsAndOwner(GameTestHelper helper) {
+		pen(helper);
+		var owner = player(helper, new BlockPos(2, 2, 3));
+		var stranger = player(helper, new BlockPos(5, 2, 3));
+		var chima = helper.spawn(ChimaMod.CHIMA, new BlockPos(3, 2, 3));
+		var cow = helper.spawn(EntityTypes.COW, new BlockPos(4, 2, 3));
+		chima.tameTo(owner);
+		helper.assertTrue(!chima.comeToOwner(), "A sitting companion must stay put");
+		chima.setSitting(false);
+		try (var claims = TestClaims.open().creature(cow, stranger.getUUID())) {
+			chima.setTarget(cow);
+			helper.assertTrue(!chima.doHurtTarget(helper.getLevel(), cow) && cow.getHealth() == cow.getMaxHealth(),
+					"Tamed retaliation must respect another player's claimed animal");
+			helper.assertTrue(chima.getTarget() == null, "Release a forbidden target");
+		}
+		float health = owner.getHealth();
+		helper.assertTrue(!chima.doHurtTarget(helper.getLevel(), owner) && owner.getHealth() == health,
+				"A pet must not hurt its own owner");
+		helper.succeed();
+	}
+
 	/** Beef is its food; each look's items give that look and others none; its spawn egg makes one. */
 	@GameTest
 	public void chimaDataLoads(GameTestHelper helper) {
