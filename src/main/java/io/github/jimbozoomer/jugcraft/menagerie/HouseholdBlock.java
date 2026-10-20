@@ -28,15 +28,25 @@ import net.minecraft.world.phys.shapes.*;
 import org.jspecify.annotations.Nullable;
 
 /** State and collision adapters retain the supplied connected furniture variants. */
-public class HouseholdBlock extends BaseEntityBlock {
+public class HouseholdBlock extends Block {
     private static final ThreadLocal<JsonObject> BUILDING=new ThreadLocal<>();
     public final String name,kind;
     private final Map<BlockState,VoxelShape> shapes=new IdentityHashMap<>();
     private final JsonObject definition;
     static HouseholdBlock create(Properties p,JsonObject d){
         BUILDING.set(d);
-        try{return d.get("kind").getAsString().equals("cavern")?new CavernBlock(p,d):d.get("kind").getAsString().equals("beast")?new BeastBlock(p,d):d.get("kind").getAsString().equals("seat")?new Seat(p,d):new HouseholdBlock(p,d);}finally{BUILDING.remove();}
+        try {
+            String kind=d.get("kind").getAsString(), name=d.get("source").getAsString();
+            if(kind.equals("cavern"))return CavernControl.CAVE.contains(name)||CavernDevice.KINDS.contains(name)
+                    ?new CavernBlock.WithEntity(p,d):new CavernBlock(p,d);
+            if(kind.equals("beast"))return CavernControl.BEAST.contains(name)||name.equals("capsid")
+                    ?new BeastBlock.WithEntity(p,d):new BeastBlock(p,d);
+            if(kind.equals("seat"))return new Seat(p,d);
+            return name.equals("door_mat")||name.endsWith("ceiling_fan")||kind.equals("storage")||HouseholdCooking.KINDS.contains(kind)
+                    ?new WithEntity(p,d):new HouseholdBlock(p,d);
+        }finally{BUILDING.remove();}
     }
+    private static final class WithEntity extends HouseholdBlock implements EntityBlock { WithEntity(Properties p,JsonObject d){super(p,d);} }
     private static final class Seat extends HouseholdBlock implements Sittable { Seat(Properties p,JsonObject d){super(p,d);} }
     protected HouseholdBlock(Properties p,JsonObject d){
         super(p);definition=d;name=d.get("source").getAsString();kind=d.get("kind").getAsString();
@@ -152,18 +162,24 @@ public class HouseholdBlock extends BaseEntityBlock {
     }
     @Override protected VoxelShape getShape(BlockState s,BlockGetter l,BlockPos p,CollisionContext c){return shapes.get(s);}
     @Override protected VoxelShape getCollisionShape(BlockState s,BlockGetter l,BlockPos p,CollisionContext c){return name.endsWith("fence_gate")&&flag(s,"open")?Shapes.empty():getShape(s,l,p,c);}
-    @Override public @Nullable BlockEntity newBlockEntity(BlockPos p,BlockState s){
+    public @Nullable BlockEntity newBlockEntity(BlockPos p,BlockState s){
         if(name.equals("door_mat"))return new io.github.jimbozoomer.jugcraft.agriculture.GravestoneBlockEntity(p,s);
         if(name.endsWith("ceiling_fan"))return new HouseholdFan(p,s);
         if(kind.equals("storage"))return new KitchenCabinetBlockEntity(p,s);
         if(HouseholdCooking.KINDS.contains(kind))return new HouseholdAppliance(p,s);
         return null;
     }
-    @Override public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level l,BlockState s,BlockEntityType<T> type){
+    public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level l,BlockState s,BlockEntityType<T> type){
         if(l.isClientSide())return null;
         return type==Household.APPLIANCE?(level,pos,state,entity)->AbstractFurnaceBlockEntity.serverTick((ServerLevel)level,pos,state,(HouseholdAppliance)entity):null;
     }
     @Override protected void affectNeighborsAfterRemoval(BlockState s,ServerLevel l,BlockPos p,boolean moved){Containers.updateNeighboursAfterDestroy(s,l,p);}
+    @Override protected boolean triggerEvent(BlockState s,Level l,BlockPos p,int event,int value){
+        var entity=l.getBlockEntity(p);return entity!=null&&entity.triggerEvent(event,value);
+    }
+    @Override protected @Nullable MenuProvider getMenuProvider(BlockState s,Level l,BlockPos p){
+        return l.getBlockEntity(p) instanceof MenuProvider provider?provider:null;
+    }
     @Override protected void tick(BlockState s,ServerLevel l,BlockPos p,RandomSource r){
         if(l.getBlockEntity(p) instanceof KitchenCabinetBlockEntity cabinet)cabinet.recheckOpen();
         if(kind.equals("bell"))l.setBlock(p,set(s,"powered","false"),UPDATE_ALL);

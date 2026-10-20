@@ -253,7 +253,7 @@ public final class MenagerieGameTests {
         h.assertTrue(Menagerie.BLOCKS.get("cavern_flytrap").defaultBlockState().hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.OPEN),"Flytrap keeps its open model state");
         h.assertTrue(Menagerie.BLOCKS.get("cavern_nuclear_furnace") instanceof net.minecraft.world.level.block.BlastFurnaceBlock,"Legacy single furnace retains actual furnace gameplay");
         for(var entry:Menagerie.BLOCKS.entrySet())if(java.util.List.of("household_","ecology_","beast_","landscape_","cavern_").stream().anyMatch(entry.getKey()::startsWith)){
-            var block=entry.getValue();if(block instanceof net.minecraft.world.level.block.EntityBlock factory){var be=factory.newBlockEntity(at,block.defaultBlockState());if(be!=null)h.assertTrue(be.getType().isValid(block.defaultBlockState()),"Block entity supports "+entry.getKey());}
+            var block=entry.getValue();if(block instanceof net.minecraft.world.level.block.EntityBlock factory){var be=factory.newBlockEntity(at,block.defaultBlockState());h.assertTrue(be!=null,"Entity block must create a real saved object: "+entry.getKey());h.assertTrue(be.getType().isValid(block.defaultBlockState()),"Block entity supports "+entry.getKey());}
         }
         for(var type:java.util.List.of(CavernSubmarine.TYPE,CavernSubmarine.BOARD)){var e=type.create(h.getLevel(),EntitySpawnReason.COMMAND);h.assertTrue(e!=null,"Vehicle constructs");var out=TagValueOutput.createWithContext(ProblemReporter.DISCARDING,h.getLevel().registryAccess());e.saveWithoutId(out);var copy=type.create(h.getLevel(),EntitySpawnReason.COMMAND);copy.load(TagValueInput.create(ProblemReporter.DISCARDING,h.getLevel().registryAccess(),out.buildResult()));h.assertTrue(copy.board()==e.board(),"Vehicle identity survives reload");}
         var owner=h.makeMockServerPlayerInLevel();for(String name:OwnerArrow.TYPES.keySet()){var ammo=new ItemStack(Menagerie.item(name));var arrow=((ArrowItem)ammo.getItem()).createArrow(h.getLevel(),ammo,owner,new ItemStack(Items.BOW));h.assertTrue(arrow.getType()==OwnerArrow.TYPES.get(name)&&arrow.getPickupItemStackOrigin().is(ammo.getItem()),"Native arrow preserves ammunition: "+name);}h.succeed();
@@ -384,5 +384,18 @@ public final class MenagerieGameTests {
         h.assertTrue(!ring.getItem().use(p.level(),p,InteractionHand.MAIN_HAND).consumesAction()&&p.getInventory().countItem(Items.AMETHYST_SHARD)==1&&p.getHealth()==16,"Repeated use cannot bypass cost or cooldown");h.succeed();
     }
 
+    @GameTest(maxTicks=20)
+    public void regionalOverlaysPreserveRareSurfaceIslands(GameTestHelper h){
+        var registry=h.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
+        var choices=new LandscapeBiomes.Choices(registry.listElements().collect(java.util.stream.Collectors.toSet()));
+        var target=net.minecraft.world.level.biome.Climate.target(.4F,.2F,0,0,0,0);
+        for(var key:java.util.List.of(net.minecraft.world.level.biome.Biomes.MUSHROOM_FIELDS,ResourceKey.create(Registries.BIOME,Jugcraft.id("flower_isle")))){
+            var original=registry.getOrThrow(key);
+            for(int cell=-32;cell<=32;cell++)h.assertTrue(choices.pick(original,12345L,cell*192,0,target).is(key),"Rare island survives regional overlay: "+key);
+        }
+        for(String name:java.util.List.of("landscape_maple_leaf_litter","landscape_webbing"))
+            h.assertTrue(!Menagerie.BLOCKS.get(name).defaultBlockState().hasBlockEntity(),"Ordinary foliage has no phantom block entity: "+name);
+        h.succeed();
+    }
 }
 

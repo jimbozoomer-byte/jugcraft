@@ -19,7 +19,8 @@ import net.minecraft.world.phys.*;
 import org.jspecify.annotations.Nullable;
 
 /** Native incubators, nectar feeders and working props using the supplied state/model set. */
-final class BeastBlock extends HouseholdBlock {
+class BeastBlock extends HouseholdBlock {
+    static final class WithEntity extends BeastBlock implements EntityBlock { WithEntity(Properties p,JsonObject d){super(p,d);} }
     BeastBlock(Properties p,JsonObject d){super(p,d);}
     @Override public @Nullable BlockEntity newBlockEntity(BlockPos p,BlockState s){return CavernControl.BEAST.contains(name)?new CavernControl(p,s):name.equals("capsid")?new BeastCapsid(p,s):null;}
     @Override public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level l,BlockState s,BlockEntityType<T> type){return !l.isClientSide()&&type==CavernControl.TYPE?(level,p,state,be)->CavernControl.tick((ServerLevel)level,p,state,(CavernControl)be):!l.isClientSide()&&type==BeastCapsid.TYPE?(level,p,state,be)->BeastCapsid.tick((ServerLevel)level,p,state,(BeastCapsid)be):null;}

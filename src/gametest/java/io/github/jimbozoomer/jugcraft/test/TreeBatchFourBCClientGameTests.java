@@ -20,6 +20,30 @@ public class TreeBatchFourBCClientGameTests extends TreeBatchTwoClientGameTests 
 	@Override protected String exportName() { return "tree-batch-4bc-preview"; }
 	@Override protected String screenshotPrefix() { return "jugcraft_tree4bc_"; }
 	@Override protected boolean includeSubmergedColumns() { return true; }
+	@Override protected BlockPos surveySpot(net.minecraft.server.level.ServerLevel level, BlockPos first,
+			net.minecraft.resources.ResourceKey<net.minecraft.world.level.biome.Biome> biome) {
+		if (!biome.identifier().getPath().equals("bayou")) return first;
+		// Presence inspection, not a frequency estimate: regional overlays can leave
+		// the closest Bayou as a dry fragment. Require real wet cypress in a bounded
+		// set of natural samples rather than changing the assertion or planting one.
+		var checked = new java.util.HashSet<BlockPos>();
+		for (int[] offset : new int[][] {{0,0}, {256,0}, {-256,0}, {0,256}, {0,-256},
+				{256,256}, {-256,256}, {256,-256}, {-256,-256},
+				{4096,0}, {-4096,0}, {0,4096}, {0,-4096}}) {
+			BlockPos anchor = first.offset(offset[0], 0, offset[1]);
+			if (Math.abs(offset[0]) + Math.abs(offset[1]) >= 4096) {
+				var nearest = level.findClosestBiome3d(holder -> holder.is(biome), anchor, 4096, 64, 64);
+				if (nearest == null) continue;
+				anchor = nearest.getFirst();
+			}
+			BlockPos at = BiomeClientGameTests.surfaceSpot(level, anchor, biome);
+			if (at == null || !checked.add(at)) continue;
+			var counts = survey(level, at, biome, true);
+			io.github.jimbozoomer.jugcraft.Jugcraft.LOGGER.info("[cypress natural sample] {}: {}", at, counts);
+			if (counts.getOrDefault("wet_log:jugcraft:bald_cypress_log", 0) > 0) return at;
+		}
+		throw new AssertionError("No natural wet cypress in " + checked.size() + " distinct Bayou samples");
+	}
 	@Override protected void validateSurvey(String biome, Map<String, Integer> survey) {
 		String leaves = biome.equals("flower_isle") ? "magnolia_leaves" : "bald_cypress_needles";
 		if (survey.getOrDefault("leaf:jugcraft:" + leaves, 0) == 0) throw new AssertionError("No new foliage in " + biome);

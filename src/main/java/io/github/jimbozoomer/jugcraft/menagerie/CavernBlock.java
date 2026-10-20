@@ -19,7 +19,8 @@ import net.minecraft.world.phys.*;
 import org.jspecify.annotations.Nullable;
 
 /** Working cave stations, incubators and ecosystem props using the owner models. */
-final class CavernBlock extends HouseholdBlock {
+class CavernBlock extends HouseholdBlock {
+    static final class WithEntity extends CavernBlock implements EntityBlock { WithEntity(Properties p,JsonObject d){super(p,d);} }
     CavernBlock(Properties p,JsonObject d){super(p,d);}
     @Override public @Nullable BlockEntity newBlockEntity(BlockPos p,BlockState s){return CavernControl.CAVE.contains(name)?new CavernControl(p,s):CavernDevice.KINDS.contains(name)?new CavernDevice(p,s):super.newBlockEntity(p,s);}
     @Override public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level l,BlockState s,BlockEntityType<T> type){return !l.isClientSide()&&type==CavernControl.TYPE?(level,p,state,be)->CavernControl.tick((ServerLevel)level,p,state,(CavernControl)be):!l.isClientSide()&&type==CavernDevice.TYPE?(level,p,state,be)->CavernDevice.tick((ServerLevel)level,p,state,(CavernDevice)be):super.getTicker(l,s,type);}

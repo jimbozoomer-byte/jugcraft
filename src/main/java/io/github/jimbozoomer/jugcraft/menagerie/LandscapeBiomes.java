@@ -40,6 +40,10 @@ public final class LandscapeBiomes {
                 if(holders.containsKey(key))return holders.get(key);
             }
             if((cell&3)!=0)return fallback; // Existing regions remain the majority of the landscape.
+            // These rare ocean islands have their own climate/terrain contract.
+            // Regional land choices must not consume their only nearby occurrence.
+            if(fallback.is(net.minecraft.world.level.biome.Biomes.MUSHROOM_FIELDS)
+                    ||fallback.is(ResourceKey.create(Registries.BIOME,io.github.jimbozoomer.jugcraft.Jugcraft.id("flower_isle"))))return fallback;
             boolean cave=target.depth()>Climate.quantizeCoord(.35F),water=fallback.is(BiomeTags.IS_OCEAN)||fallback.is(BiomeTags.IS_RIVER),shore=fallback.is(BiomeTags.IS_BEACH);
             float temperature=fallback.value().getBaseTemperature();float rain=(Climate.unquantizeCoord(target.humidity())+1)/2;
             var candidates=new ArrayList<Entry>();double closest=Double.POSITIVE_INFINITY;

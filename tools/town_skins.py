@@ -86,7 +86,7 @@ class Skin:
                     self.px[x + i, y + j] = (0, 0, 0, 0)
 
     def save(self, path):
-        self.img.save(path, optimize=True)
+        self.img.save(path, optimize=False, compress_level=0)
 
 
 def strands(s, hair, style):

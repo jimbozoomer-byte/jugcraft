@@ -155,7 +155,7 @@ def write_all(write, assets, data, lang):
     write(data / 'tags/item/nouveau/reactive_compatible.json', {'values':['#minecraft:enchantable/durability','#minecraft:enchantable/armor'] + ['jugcraft:'+v['id'] for v in CATALOG['items'].values() if v['kind'] in {'spellbook','instrument'}]})
     write(data / 'tags/item/nouveau_armor_repair.json', {'values':['jugcraft:nouveau_magebloom_fiber']})
     write(data / 'tags/block/nouveau/gauntlet_mineable.json', {'values':['#minecraft:mineable/axe','#minecraft:mineable/pickaxe','#minecraft:mineable/shovel','#minecraft:mineable/hoe']})
-    write(data / 'tags/banner_pattern/nouveau_pattern_item/nouveau.json', {'values':['jugcraft:nouveau_'+p.stem for p in (DATA/'banner_pattern').glob('*.json')]})
+    write(data / 'tags/banner_pattern/nouveau_pattern_item/nouveau.json', {'values':['jugcraft:nouveau_'+p.stem for p in sorted((DATA/'banner_pattern').glob('*.json'))]})
     write(data.parent/'minecraft/tags/banner_pattern/no_item_required.json', {'replace':False,'values':[]})
     # Potions use native 26.3 brewing recipes, including every bottle form and both duration/power upgrades.
     for effect, reagent in {'shielding':'bastion_pod','recovery':'mendosteen_pod','freezing':'frostaya_pod','blasting':'bombegranate_pod','mana_regen':'sourceberry_bush'}.items():
@@ -171,7 +171,7 @@ def write_all(write, assets, data, lang):
             for form,out,reagent_item in [('potion','splash_potion','gunpowder'),('splash_potion','lingering_potion','dragon_breath')]:
                 write(data/f'recipe/nouveau/brewing/{effect}{suffix}_{out}.json',{'type':'minecraft:brewing','input':{'item':'minecraft:'+form,'potion_contents':{'potions':potion}},'output':{'id':'minecraft:'+out,'components':{'minecraft:potion_contents':{'potion':potion}}},'reagent':{'item':'minecraft:'+reagent_item}})
             for form in ('potion','splash_potion','lingering_potion','tipped_arrow'): lang[f'item.minecraft.{form}.effect.nouveau_{effect}{suffix}'] = ('Arrow of ' if form=='tipped_arrow' else ('Lingering ' if form=='lingering_potion' else 'Splash ' if form=='splash_potion' else '')+'Potion of ') + effect.replace('_',' ').title()
-    write(assets.parents[1]/'jugcraft/nouveau/particles.json',[p.stem for p in (ASSET/'particles').glob('*.json')])
+    write(assets.parents[1]/'jugcraft/nouveau/particles.json',[p.stem for p in sorted((ASSET/'particles').glob('*.json'))])
     # Translate the supplied NeoForge loot injection into a small Fabric-readable table specification.
     injections=[]
     for path in (DATA/'loot_modifiers').glob('*.json'):

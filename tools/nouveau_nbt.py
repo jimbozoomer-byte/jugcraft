@@ -51,7 +51,10 @@ def write(root):
             for item in value: number('i' if kind == 11 else 'q', item)
         else: raise ValueError(f'Unknown NBT tag {kind}')
     kind, name, value = root; number('B', kind); string(name); payload(kind, value)
-    return gzip.compress(stream.getvalue(), mtime=0)
+    # Python 3.11 delegates mtime=0 to zlib, whose gzip OS byte varies by host.
+    compressed = bytearray(gzip.compress(stream.getvalue(), mtime=0))
+    compressed[9] = 255
+    return bytes(compressed)
 
 
 def adapt(raw, replace):

@@ -1,6 +1,6 @@
 # Jugcraft TODO
 
-**19 October publication authorization:** the owner approved publishing the current local content and merging ready PRs. Earlier local-only checkpoints are historical; remaining behavioral parity and independent multiplayer work stay open. list
+**19 October publication authorization:** the owner approved publishing the current local content and merging ready PRs. Earlier local-only checkpoints are historical; remaining behavioral parity and independent multiplayer work stay open.
 
 ## Supplied creature models, animations and systems — October 19, local
 
