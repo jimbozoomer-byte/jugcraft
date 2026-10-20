@@ -84,7 +84,8 @@ public class TitaniumGearClientGameTests implements FabricClientGameTest {
 			int frames = server.computeOnServer(minecraft -> minecraft.overworld().getEntitiesOfClass(Entity.class,
 					new AABB(x - 1, y, z - 12, x + 6, y + 4, z - 10), entity -> type(entity).equals("item_frame")).size());
 			check(frames == TOOLS.length + PIECES.length, frames + " item frames on the wall");
-			shoot(context, singleplayer, x + 2.5, y, z - 8.5, -9, "jugcraft_titanium_gear_icons");
+			// Center the six-tool row and step back so the new rightmost paxel is fully visible.
+			shoot(context, singleplayer, x + 3.0, y, z - 6.5, -9, "jugcraft_titanium_gear_icons");
 			setHudHidden(context, hudWasHidden);
 		}
 	}
