@@ -6,14 +6,14 @@
   "description": "Automated in-game tests for Jugcraft. Not shipped with the mod.",
   "license": "MIT",
   "environment": "*",
-  "mixins": [
-    "jugcraft-test.client.mixins.json"
-  ],
   "entrypoints": {
     "main": [
       "io.github.jimbozoomer.jugcraft.test.TestForms"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureGameTests",
+      "io.github.jimbozoomer.jugcraft.test.VehicleBayGameTests",
+      "io.github.jimbozoomer.jugcraft.test.SurvivalRecipeGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourBCGameTests",
@@ -29,7 +29,6 @@
       "io.github.jimbozoomer.jugcraft.test.GasBurningGeneratorGameTests",
       "io.github.jimbozoomer.jugcraft.test.GasTankHandlingGameTests",
       "io.github.jimbozoomer.jugcraft.test.FrameworkGameTests",
-      "io.github.jimbozoomer.jugcraft.test.BackpackGameTests",
       "io.github.jimbozoomer.jugcraft.test.LairGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceSharingGameTests",
@@ -51,6 +50,7 @@
       "io.github.jimbozoomer.jugcraft.test.ConcordanceArtificeGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceRelicGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceAssayGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalGearGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceHexGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceConclaveGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceProgressionGameTests",
@@ -235,10 +235,33 @@
       "io.github.jimbozoomer.jugcraft.test.PolymerGameTests",
       "io.github.jimbozoomer.jugcraft.test.FluorochemistryGameTests",
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationGameTests",
-      "io.github.jimbozoomer.jugcraft.test.MineralSandGameTests"
+      "io.github.jimbozoomer.jugcraft.test.MineralSandGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TechSevenGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DarkMatterGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ElementalAlchemyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ExtendedAlchemyEquipmentGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemyMachinesGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemyStorageGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemyArtifactGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConnectedAlchemyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemyPlayabilityGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JugNouveauGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StarbuncleGameTests",
+      "io.github.jimbozoomer.jugcraft.test.NouveauExpansionGameTests",
+      "io.github.jimbozoomer.jugcraft.test.MenagerieGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TitaniumCasingGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CementCaptureGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CalciteCarbonDioxideGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CokeGasGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ZincHydrogenGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AluminumRolesGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BackpackGameTests"
     ],
     "fabric-client-gametest": [
-      "io.github.jimbozoomer.jugcraft.test.BackpackClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureResourceClientTests",
+      "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureClientTests",
+      "io.github.jimbozoomer.jugcraft.test.VehicleBayClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFiveBCClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TreeBatchFourBCClientGameTests",
@@ -420,10 +443,32 @@
       "io.github.jimbozoomer.jugcraft.test.PolymerClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.FluorochemistryClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.MineralSandClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.MineralSandClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TechSevenClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalGearClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DarkMatterClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ElementalAlchemyClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AlchemicalWorkshopClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CompleteAlchemyClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.JugNouveauClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StarbuncleClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.NouveauExpansionClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.GunControlsClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DioramaClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.MenagerieClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.MenagerieWearablesClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerCollectionsClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerVisualPolishClientTests",
+      "io.github.jimbozoomer.jugcraft.test.RecoveredWildlifeClientTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerLegacyItemClientTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerCollectionsNetworkTests",
+      "io.github.jimbozoomer.jugcraft.test.BackpackClientGameTests"
     ]
   },
   "depends": {
     "jugcraft": "*"
-  }
+  },
+  "mixins": [
+    "jugcraft-test.client.mixins.json"
+  ]
 }

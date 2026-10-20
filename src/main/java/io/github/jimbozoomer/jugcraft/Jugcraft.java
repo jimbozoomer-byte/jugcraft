@@ -130,7 +130,10 @@ public final class Jugcraft implements ModInitializer {
 		new io.github.jimbozoomer.jugcraft.creatures.scary.ScaryMod().onInitialize();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
 		io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.register();
+		io.github.jimbozoomer.jugcraft.nouveau.JugNouveau.register();
+		io.github.jimbozoomer.jugcraft.menagerie.Menagerie.register();
 		io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls.register();
+		io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();
 		JugcraftParties.register();

@@ -50,7 +50,7 @@ JOURNAL = {
     "research.unknown": "%s: not in the loaded rules",
     "research.unknown_count": "%s more entries not yet encountered",
     "or": "; or ",
-    "assay.balance": "Prima Materia held: %s grains",
+    "assay.balance": "Essence held: %s",
     "assay.cap": "(at most %s)",
     "unreadable": "This part of the journal could not be read; the server's log says why",
 }
@@ -65,7 +65,7 @@ CLIENT = {
     "screen.jugcraft.journal.exact_on": "Exact values: shown",
     "screen.jugcraft.journal.exact_off": "Exact values: hidden",
     "screen.jugcraft.journal.help": "Left, Right or the section buttons: sections. Up, Down, Page Up, Page Down: scroll. "
-                                    "R: refresh. X: exact values. Tab: next button. Esc: close.",
+                                    "F6: refresh. X: exact values. Tab: next button. Esc: close.",
     "screen.jugcraft.journal.section": "Section %s of %s: %s",
     "screen.jugcraft.journal.missing_guilib": "The full workspace needs GuiLib; showing the simple journal",
     "screen.jugcraft.concordance.config.exact": "Show exact values",

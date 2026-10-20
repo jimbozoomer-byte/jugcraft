@@ -388,6 +388,22 @@ FLUID_RECIPES = {
          "retained_inputs": [2], "fluid_results": [("jugcraft:sulfuric_acid", 500)], "ticks": 100, "features": ["machines", "sulfur"]},
         {"name": "hydrochloric_copper", "items": [("minecraft:raw_copper", 1)], "fluids": [("jugcraft:hydrochloric_acid", 250)],
          "results": [("jugcraft:washed_copper_ore", 1)], "ticks": 160, "features": ["machines"]},
+        # Cement burnt with its carbon dioxide captured (docs/features/cement-co2-capture.md): the furnace's cement, with
+        # the CO2 the lime gives off kept in a tank instead of lost. The calcite in four cement mix releases 250 mB.
+        {"name": "cement_with_co2_capture", "items": [("jugcraft:cement_mix", 4)], "results": [("jugcraft:cement", 4)],
+         "fluid_results": [("jugcraft:carbon_dioxide", 250)], "source": 250, "ticks": 200, "features": ["machines"]},
+        # Calcite dissolved in hydrochloric acid gives off carbon dioxide (docs/features/calcite-co2.md): a quick CO2 source
+        # for methanation without a kiln or coal, spending the acid. CaCO3 + 2 HCl -> CaCl2 + H2O + CO2.
+        {"name": "carbon_dioxide_from_calcite", "items": [("minecraft:calcite", 1)], "fluids": [("jugcraft:hydrochloric_acid", 500)],
+         "fluid_results": [("jugcraft:carbon_dioxide", 250)], "ticks": 60, "features": ["machines"]},
+        # Coking with gas recovery (docs/features/coke-gas-recovery.md): coal baked into coke in the reactor, faster than the
+        # Coke Oven and on power, keeping the gas the Coke Oven lets go as methane (coke-oven gas's fuel part).
+        {"name": "coke_with_gas_recovery", "items": [("minecraft:coal", 4)], "results": [("jugcraft:coke", 4)],
+         "fluid_results": [("jugcraft:methane", 200)], "source": 200, "ticks": 400, "features": ["machines"]},
+        # Zinc dissolved in hydrochloric acid gives off hydrogen (docs/features/zinc-hydrogen.md): a small, power-cheap
+        # hydrogen source before electrolysis, spending the zinc. Zn + 2 HCl -> ZnCl2 + H2.
+        {"name": "hydrogen_from_zinc", "items": [("#c:ingots/zinc", 1)], "fluids": [("jugcraft:hydrochloric_acid", 500)],
+         "fluid_results": [("jugcraft:hydrogen", 500)], "ticks": 80, "features": ["machines", "zinc"]},
         {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
         # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).
@@ -585,6 +601,7 @@ def fluid_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
+            if recipe.get("tool"): data["tool"] = recipe["tool"]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
 
@@ -614,3 +631,36 @@ from fluorochemistry import FLUIDS as FLUORO_FLUIDS, GASES as FLUORO_GASES, ITEM
 FLUIDS.update({k: v for k, v in FLUORO_FLUIDS.items() if k not in FLUIDS})
 GASES.update({k: v for k, v in FLUORO_GASES.items() if k not in GASES})
 ITEMS.update({k: v for k, v in FLUORO_ITEMS.items() if k not in ITEMS})
+
+from ceramics import ITEMS as CERAMIC_ITEMS
+ITEMS.update(CERAMIC_ITEMS)
+
+from structural_alloys import ITEMS as ALLOY_ITEMS
+ITEMS.update(ALLOY_ITEMS)
+
+from battery_expansion import ITEMS as BATTERY_ITEMS, REACTOR_RECIPES as BATTERY_REACTOR_RECIPES
+ITEMS.update(BATTERY_ITEMS)
+FLUID_RECIPES['chemical_reactor'].extend(BATTERY_REACTOR_RECIPES)
+
+import advanced_electronics
+ITEMS.update(advanced_electronics.ITEMS)
+FLUIDS.update(advanced_electronics.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(advanced_electronics.REACTOR_RECIPES)
+FLUID_RECIPES['lithography_station'].extend(advanced_electronics.LITHOGRAPHY_RECIPES)
+
+import phosphate_processing
+ITEMS.update(phosphate_processing.ITEMS)
+FLUIDS.update(phosphate_processing.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(phosphate_processing.REACTOR_RECIPES)
+
+import synthetic_fuels
+ITEMS.update(synthetic_fuels.ITEMS)
+FLUIDS.update(synthetic_fuels.FLUIDS)
+FLUID_RECIPES['distillation_tower'].extend(synthetic_fuels.REFINERY_RECIPES)
+
+# Package 7 reuses the compact liquefier and tank-filling reactor.
+import cryogenic_fuels
+ITEMS.update(cryogenic_fuels.ITEMS)
+FLUIDS.update(cryogenic_fuels.FLUIDS)
+FLUID_RECIPES["cryogenic_liquefier"].extend(cryogenic_fuels.LIQUEFIER_RECIPES)
+FLUID_RECIPES["chemical_reactor"].extend(cryogenic_fuels.TANK_RECIPES)

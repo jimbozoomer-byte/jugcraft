@@ -24,6 +24,8 @@ RES = ROOT / "src" / "main" / "resources"
 ASSETS = RES / "assets" / MOD
 DATA = RES / "data"
 PACKS = RES / "resourcepacks"
+WRITTEN_RESOURCES = set()
+RESOURCE_MANIFEST = ROOT / "tools/data/generated-material-resources.json"
 
 GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
@@ -31,9 +33,7 @@ GENERATED_DIRS = [
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     # The lairs' dimensions and templates (tools/lair_data.py).
     DATA / MOD / "dimension", DATA / MOD / "dimension_type", DATA / MOD / "structure" / "lair",
-    DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD,
-    # Only these packs are generated here. Preserve authored integration packs.
-    PACKS / model_writer.PACK_ID, PACKS / "fusion_textures",
+    DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
     RES / "assets" / "minecraft",
     # The Arcane Concordance (tools/concordance.py): its rules, spells, Spell Engine opt-outs, codex and client clips.
@@ -98,7 +98,9 @@ NUCLEAR_CLOSED_MODELS = (
 
 
 def write(path, obj):
-    if isinstance(obj, dict) and obj.get("elements"):
+    if path.is_relative_to(RES):
+        WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
+    if isinstance(obj, dict) and obj.get("elements") and "models" in path.parts:
         if any(path.stem == name or path.stem.startswith(name + "_") for name in NUCLEAR_CLOSED_MODELS):
             model_writer.finish_closed(obj["elements"])
         else:
@@ -209,6 +211,8 @@ def assets():
     concordance.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     concordance.advancements(DATA, write, lang)
     lang.update(concordance.write_data(write, RES))
+    import jug_nouveau
+    jug_nouveau.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     # JEI's pages on where the things only a ritual or a lair boss gives come from (rows in recipe_view.json).
     import acquisition
     acquisition.lang_entries(lang)
@@ -226,6 +230,8 @@ def assets():
     fortifications.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import bunkerworks
     bunkerworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import aluminum_roles
+    aluminum_roles.write_all(write, DATA / MOD, condition)
     import fire_control
     fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import raiders
@@ -1124,7 +1130,7 @@ def petro_assets(lang):
 # Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
 # multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
 # breaks the master too (machine/LargeMachineBlock).
-TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
+TANKS = {"insulated_fluid_tank": False, "vacuum_insulated_tank": False, "fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
 
 
 def tank_drop(block):
@@ -1473,6 +1479,8 @@ def tags():
             storage_tags(tags, f"raw_{metal}", f"raw_{metal}_block", tool)
             ore_tags(tags, metal, f"{metal}_ore", f"deepslate_{metal}_ore", tool, "singular")
 
+    tags.add("item", "c:ingots/cobalt", rid("cobalt_ingot"))
+    tags.add("item", "c:ingots", "#c:ingots/cobalt")
     for mineral, info in MINERALS.items():
         rate = "singular" if info["drops"] == [1, 1] else "dense"
         ore_tags(tags, mineral, f"{mineral}_ore", f"deepslate_{mineral}_ore", info["tool"], rate)
@@ -1730,16 +1738,12 @@ def retro_trader_trades():
             "random_sequence": rid(f"trade_set/retro_trader/level_{level}")})
 
 
-def clean_generated_resources():
-    for directory in GENERATED_DIRS:
-        if not directory.resolve().is_relative_to(RES.resolve()) or directory.resolve() == RES.resolve():
-            raise ValueError(f"Generated directory is outside the resource subtree: {directory}")
-        if directory.exists():
-            shutil.rmtree(directory)
-
 
 def main():
-    clean_generated_resources()
+    # Imported, authored and generated resources share namespaces. Delete only
+    # stale files this generator previously owned, never whole resource folders.
+    previous = set(json.loads(RESOURCE_MANIFEST.read_text(encoding="utf-8"))) if RESOURCE_MANIFEST.exists() else set()
+    WRITTEN_RESOURCES.clear()
     assets()
     import handbook
     book = handbook.build()
@@ -1756,9 +1760,21 @@ def main():
     for key, advancement in advancements.generate(MOD)[0].items():
         write(DATA / MOD / "advancement" / f"{key}.json", advancement)
     agriculture_data.advancements(DATA, write)
+    # Run the owner-data adapter after shared tags/worldgen so neither pass overwrites the other.
+    import nouveau_data
+    language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
+    nouveau_data.write_all(write, ASSETS, DATA / MOD, language)
+    write(ASSETS / "lang/en_us.json", language)
     import town
     for problem in town.write():
         print("town:", problem)
+    import vehicle_bays
+    vehicle_bays.write()
+    import owner_resource_patches
+    owner_resource_patches.apply()
+    from generated_resource_cleanup import prune
+    prune(RES, previous, WRITTEN_RESOURCES)
+    RESOURCE_MANIFEST.write_text(json.dumps(sorted(WRITTEN_RESOURCES), indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

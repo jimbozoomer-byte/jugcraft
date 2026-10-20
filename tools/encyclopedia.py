@@ -2,7 +2,7 @@
 
 The encyclopedia is one screen with pages the server writes for each player (guide/encyclopedia/Encyclopedia.java):
 Discover (the First Light route, concordance/encyclopedia/FirstLightRoute.java), Spellcraft, Expeditions (the lair
-dossiers, lair/LairDossiers.java) and Inspect, then the client's own Keys page. This module holds every word they show
+dossiers, lair/LairDossiers.java, then the bestiary, guide/encyclopedia/Bestiary.java) and Inspect, then the client's own Keys page. This module holds every word they show
 and the route's shape: its steps in order, the recipes, sales and codex entries each step names, and the game tests
 that exercise it. generate_material_data.py writes the words into the language file; check_mod_data.py
 (check_encyclopedia) checks the Java against PAGES, STATES, EDGES, FIRST_ROUTE, DOSSIERS and KEY_HELP, and the record
@@ -25,9 +25,16 @@ PAGES = {
     "spellcraft": "Spellcraft",
     "expedition": "Expeditions",
     "inspect": "Inspect",
+    "nouveau": "Jug Nouveau",
+    "menagerie": "Wildlife & Companions",
+    "woodland": "Woodland & Fable Creatures",
+    "household": "Furniture & Kitchens",
+    "habitats": "Habitats & Mutations",
+    "beasts": "Creature Equipment",
+    "caverns": "Cave Exploration",
     "keys": "Keys",
 }
-SERVER_PAGES = ["discover", "spellcraft", "expedition", "inspect"]
+SERVER_PAGES = ["discover", "spellcraft", "expedition", "inspect", "nouveau", "menagerie", "woodland", "household", "habitats", "beasts", "caverns"]
 
 # Where a step of a route stands for a player (EncyclopediaPayload.StepState, NONE aside), in words.
 STATES = {
@@ -104,11 +111,20 @@ DOSSIERS = {
 
 # What each Jugcraft key does, for the Keys page (key.jugcraft.<name>; every key the client registers).
 KEY_HELP = {
+    "nouveau_familiar": "Choose an owned familiar (not bound at first)",
+    "nouveau_crown": "Use the worn Alchemist’s Crown (not bound at first)",
+    "nouveau_spell_style": "Set the held spell instrument’s colors, particles and sound",
+    "nouveau_familiar_collection": "Toggle your familiar’s collection of drops",
     "encyclopedia": "Opens this encyclopedia from the game",
     "concordance_journal": "Opens your Concordance Journal: research, stage, and Compose",
     "concordance_composer": "Opens the Spell Composer straight away (not bound at first)",
     "concordance_config": "Opens the Concordance's settings on this computer (not bound at first)",
     "party": "Opens the Party screen",
+    "gem_abilities": "Opens worn Gem armor abilities (not bound at first)",
+    "gem_night_vision": "Toggles active Gem helmet night vision (not bound at first)",
+    "gem_repel": "Uses the active Gem chestplate's repel burst (not bound at first)",
+    "gem_dash": "Dashes with active Gem leggings (not bound at first)",
+    "gem_flight": "Toggles active Gem boots' flight (not bound at first)",
     "reload": "Reloads the gun in your hand",
     "inspect": "Inspects the gun in your hand",
     "stab": "Stabs with the bayonet on your gun",
@@ -119,6 +135,7 @@ KEY_HELP = {
 # used; that set's language file credits "Icons by JoeCreates (CC-BY-SA 3.0)" (waystones.iconCredits), a notice kept
 # with the asset in docs/features/arcane-concordance-first-route.md.
 OWNER_FILES = {
+    "textures/gui/encyclopedia/book.png": "gui/spell_book_template.png",
     "textures/gui/sprites/encyclopedia/inventory_button.png": "textures/gui/sprites/inventory/inventory_button.png",
 }
 
@@ -251,6 +268,17 @@ DOSSIER = {
     "unknown_count": "%s more lairs are yet to be found",
 }
 
+# The bestiary (guide/encyclopedia/Bestiary.java), after the lair dossiers on the Expeditions page: every Jugcraft
+# creature the player has defeated or been defeated by, with the numbers the game itself gives it, and their own tally.
+BESTIARY = {
+    "heading": "Field notes",
+    "intro": "Creatures you have fought, with the game's own numbers. Ones you have not met stay unwritten.",
+    "stats": "Health %s, attack %s, armour %s",
+    "stats.no_attack": "Health %s, armour %s; it does not strike in melee",
+    "record": "You have defeated it %s times; it has defeated you %s times",
+    "more": "%s more creatures you have fought are not listed here",
+}
+
 GENERAL = {
     "absent": "Not available on this server: %s",
     "trade.town": "Buy at the town's %3$s: %1$s × %2$s for %4$s Jugs",
@@ -291,7 +319,7 @@ CLIENT = {
     "screen.jugcraft.encyclopedia.empty": "Nothing to show yet",
     "screen.jugcraft.encyclopedia.unavailable": "This server sends no encyclopedia pages: only your keys are shown",
     "screen.jugcraft.encyclopedia.help": "Left and Right change page; Tab moves between controls; Page Up and Page Down "
-                                         "scroll; Backspace goes back a page; R asks again; X shows exact figures; Esc "
+                                         "scroll; Backspace goes back a page; F6 asks again; X shows exact figures; Esc "
                                          "or %s closes.",
     "screen.jugcraft.encyclopedia.page": "%s (%s of %s)",
     "screen.jugcraft.encyclopedia.open": "Jugcraft Encyclopedia",
@@ -308,7 +336,8 @@ def lang_entries(lang):
         lang[f"encyclopedia.{MOD}.state.{state}"] = name
     for edge, name in EDGES.items():
         lang[f"encyclopedia.{MOD}.edge.{edge}"] = name
-    for prefix, table in (("route", ROUTE), ("spellcraft", SPELLCRAFT), ("inspect", INSPECT), ("dossier", DOSSIER)):
+    for prefix, table in (("route", ROUTE), ("spellcraft", SPELLCRAFT), ("inspect", INSPECT), ("dossier", DOSSIER),
+                          ("bestiary", BESTIARY)):
         for key, text in table.items():
             lang[f"encyclopedia.{MOD}.{prefix}.{key}"] = text
     for key, text in GENERAL.items():
@@ -316,6 +345,8 @@ def lang_entries(lang):
     for key, text in KEY_HELP.items():
         lang[f"encyclopedia.{MOD}.key.{key}"] = text
     lang.update(CLIENT)
+    import reading_ui
+    reading_ui.lang_entries(lang)
 
 
 # ---------------------------------------------------------------- the record's table

@@ -28,6 +28,7 @@ The machine-readable source of truth is [frameworks.lock.json](../distribution/f
 | [Mod Menu](https://github.com/TerraformersMC/ModMenu) | 21.0.0 | Optional, client | Access to library configuration screens |
 | [Iris](https://github.com/IrisShaders/Iris) | 1.11.7+mc26.3 | Optional, client | Shader-pack support; no shader pack is supplied |
 | [Sodium](https://github.com/CaffeineMC/sodium) | 0.9.2+mc26.3 | Optional, client; required by the selected Iris release | Renderer used by the presentation stack |
+| [Diorama](https://modrinth.com/mod/diorama-map) | 0.1.1+26.3 | Client-only; installed by default in Complete, optional to standalone Jugcraft | Angled minimap, fullscreen exploration map and waypoints |
 
 All selected client files are installed by Jugcraft Complete. "Optional" means the standalone mod does not require them to load. It does not mean the complete pack silently omits them. Dedicated-server installs omit files marked client-only.
 

@@ -22,6 +22,22 @@
     "#jugcraft:fruitwood_logs",
     "#jugcraft:persimmon_logs",
     "jugcraft:cinnamon_log",
-    "jugcraft:stripped_cinnamon_log"
+    "jugcraft:stripped_cinnamon_log",
+    "jugcraft:nouveau_red_archwood_log",
+    "jugcraft:nouveau_blue_archwood_log",
+    "jugcraft:nouveau_purple_archwood_log",
+    "jugcraft:nouveau_green_archwood_log",
+    "jugcraft:nouveau_red_archwood_wood",
+    "jugcraft:nouveau_blue_archwood_wood",
+    "jugcraft:nouveau_green_archwood_wood",
+    "jugcraft:nouveau_purple_archwood_wood",
+    "jugcraft:nouveau_stripped_blue_archwood_log",
+    "jugcraft:nouveau_stripped_blue_archwood_wood",
+    "jugcraft:nouveau_stripped_green_archwood_log",
+    "jugcraft:nouveau_stripped_green_archwood_wood",
+    "jugcraft:nouveau_stripped_red_archwood_log",
+    "jugcraft:nouveau_stripped_red_archwood_wood",
+    "jugcraft:nouveau_stripped_purple_archwood_log",
+    "jugcraft:nouveau_stripped_purple_archwood_wood"
   ]
 }

@@ -89,7 +89,7 @@ Three guns, each the owner's model with the owner's animations:
 **Controls:**
 - **Left click** fires (held, for the Midge). With a gun in hand the attack button never mines or punches.
 - **Right click** (held) aims down the sights: the gun slides so its sight sits on the crosshair, the spread tightens, and you walk at 60%.
-- **G** reloads. **H** inspects. Both are rebindable under Jugcraft's controls. They are not R and I because Iris, in the pack, keeps R for reloading shaders and I for its shader screen.
+- **R** reloads. **H** inspects. Both are rebindable under Jugcraft's controls. Iris shader reload defaults to **F8** and JEI recipes to **Y**. See the [October 18 controls/crash repair](gun-controls-oct18.md).
 - Pulling the trigger on an empty gun clicks, and reloads it if you carry its rounds.
 
 **What you see:**
@@ -99,7 +99,7 @@ Three guns, each the owner's model with the owner's animations:
 - The animations' sound cues play the owner's sounds: mag out, mag in, slap, bolt, rack, rustle and the rest.
 - Each shot kicks the view up a little: more for a heavy shot, less when aimed.
 - The counter beside the hotbar shows the rounds loaded and the rounds you carry, or "Reloading".
-- The gun's durability bar shows how full it is.
+- Guns have no inventory or hotbar durability-style bar; ammunition remains in the held-gun counter and tooltip.
 - Other players see your gun fire and reload in your hand, and hear it.
 - In the inventory, on the ground and in frames each gun shows as its 3D model, as the owner's do.
 
@@ -364,8 +364,11 @@ Slice 7 finishes the attachments the owner modelled for these twelve guns, excep
 |---|---|---|
 | Iron Bayonet | 4 | an iron ingot over an iron nugget |
 | Steel Bayonet | 5 | a steel ingot over an iron nugget |
-| Diamond Bayonet | 5 | a diamond over an iron nugget |
+| Diamond Bayonet | 5.5 | a diamond over an iron nugget |
 | Netherite Bayonet | 6 | a Diamond Bayonet, a netherite ingot and a netherite upgrade template, at a smithing table |
+
+Stab is in half hearts. On 19 October 2026 the Diamond Bayonet went from 5 to 5.5 (a provisional figure for the owner to confirm), because it stabbed no harder than the Steel Bayonet; `eachBayonetStabsHarderThanTheTierBelow` now checks that every tier beats the one below.
+Fork [run 39303243194](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39303243194) failed the material data check because `tools/guns.py` still said 5; with it matched, [run 39311203238](https://github.com/mmme123-spec/jugcraftfork/actions/runs/39311203238) on 6aa2a5fbf was green: the data checks, the build, every server game test including the new one, and all eight client shards.
 
 - The owner's art for each: the item icon, and the blade on each gun that takes one. The owner's fourth bayonet is anthralite, a Scorched Guns metal Jugcraft does not have. Its grey blade and wrapped grip read as steel, so it is the Steel Bayonet (a proposed name).
 - **Which guns:** the Patchwork Carbine, Thunderpipe, Longhorn Rifle, Drover Rifle, Coach Gun, Line Musket and Bellmouth take all four. The pistols, the SMG and the Haymaker have no bayonet parts.
@@ -1543,7 +1546,7 @@ The third of the systems the owner chose on 10 October 2026 ("Dual pistols", off
 - **The triggers:** left click fires the main hand's gun, as ever. Right click fires the other's: a press for a shot, held for an automatic (the Rattler Pistol, the Bronco SMG).
 - **Each gun its own:** each keeps its own rate, magazine, sound, animations, flash and casings.
 - **No aiming:** right click is the other trigger, so neither gun is aimed down its sights. From the hip each strays half as far again as one gun alone (`DUAL_SPREAD`, 1.5).
-- **Reloading:** G reloads the main hand's gun, or the other's when the main one is full or has nothing to load. An empty gun's trigger reloads that gun.
+- **Reloading:** R reloads the main hand's gun, or the other's when the main one is full or has nothing to load. An empty gun's trigger reloads that gun.
 - **One reload at a time:** while a magazine is out, neither gun fires. A shot of either cuts a shell-at-a-time reload short.
 - **The other keys:** H inspects both; V stabs with the main gun's bayonet.
 - **The counters:** each gun's counter is on its own side of the hotbar, the other hand's beyond the off-hand slot.
