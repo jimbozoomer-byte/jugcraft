@@ -24,6 +24,8 @@ public class BackpackClientGameTests implements FabricClientGameTest {
 			if (!FabricLoader.getInstance().isModLoaded("travelersbackpack")) return;
 			context.getInput().resizeWindow(1280, 900);
 			context.runOnClient(client -> {
+				if (!KeybindHandler.OPEN_BACKPACK.getDefaultKey().getName().equals("key.keyboard.n"))
+					throw new AssertionError("Backpack Controls Reset should preserve the conflict-free N default");
 				if (!KeybindHandler.OPEN_BACKPACK.saveString().equals("key.keyboard.n"))
 					throw new AssertionError("Complete's backpack binding should be N");
 				for (var key : client.options.keyMappings) {

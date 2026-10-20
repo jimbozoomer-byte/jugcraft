@@ -21,22 +21,25 @@ public class DioramaClientGameTests implements FabricClientGameTest {
         context.runOnClient(client -> {
             var waypoint = Arrays.stream(client.options.keyMappings)
                     .filter(k -> k.getName().equals("key.diorama.new_waypoint")).findFirst().orElseThrow();
-            require(waypoint.getDefaultKey().getValue() == InputConstants.KEY_N, "Waypoint reset default is N");
+            require(waypoint.getDefaultKey().getValue() == InputConstants.KEY_COMMA, "Waypoint reset default is comma");
             require(Arrays.stream(client.options.keyMappings).noneMatch(k -> k != waypoint
                     && k.getCategory() != KeyMapping.Category.DEBUG
                     && k.getDefaultKey().equals(waypoint.getDefaultKey())), "Waypoint default must not conflict");
+            require(Arrays.stream(client.options.keyMappings).noneMatch(k -> k != waypoint
+                    && k.getCategory() != KeyMapping.Category.DEBUG && k.same(waypoint)),
+                    "Waypoint active binding must not conflict with installed pack controls");
         });
         try (var world = context.worldBuilder().create()) {
             world.getConnection().waitForChunksRender();
             context.waitTicks(100);
             context.takeScreenshot("diorama_minimap");
             open(context, InputConstants.KEY_M, "dev.diorama.MapScreen", "diorama_world_map");
-            open(context, InputConstants.KEY_N, "dev.diorama.waypoint.WaypointEditScreen", "diorama_new_waypoint");
+            open(context, InputConstants.KEY_COMMA, "dev.diorama.waypoint.WaypointEditScreen", "diorama_new_waypoint");
             open(context, InputConstants.KEY_U, "dev.diorama.waypoint.WaypointListScreen", "diorama_waypoints");
             context.runOnClient(client -> KeyMapping.setAll());
             context.waitTicks(20);
         }
-        Jugcraft.LOGGER.info("[diorama-check] World load, minimap render, M map, N waypoint and U list passed.");
+        Jugcraft.LOGGER.info("[diorama-check] World load, minimap render, M map, comma waypoint and U list passed.");
     }
 
     private static void open(ClientGameTestContext context, int key, String screen, String screenshot) {

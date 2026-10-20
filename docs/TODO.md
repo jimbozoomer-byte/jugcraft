@@ -84,7 +84,7 @@
 ## Diorama default map — 18 October 2026
 
 - [x] Add the verified Fabric 26.3 release to the shared pack lock: automatic client installation, excluded from dedicated servers, optional for standalone Jugcraft.
-- [x] Reserve B for the encyclopedia and default Diorama's new waypoint to N. Preserve saved custom controls.
+- [x] Reserve B for the encyclopedia, N for the backpack and comma for Diorama's new waypoint. Preserve saved custom controls.
 - [x] Full build and 1,960 server tests passed; map, encyclopedia and gun client tests passed, plus optional-absent assembly/gun startup. Generated the updated local pack. See [Diorama integration](features/diorama-pack.md).
 - [ ] Owner-controlled Modrinth import/playtest and representative exploration performance check.
 

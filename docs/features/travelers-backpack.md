@@ -6,7 +6,7 @@ AI assistance: OpenAI Codex, GPT-6.
 
 ## Player experience and progression
 
-Jugcraft Complete includes Traveler's Backpack Fabric **26.3–11.4.1** and Forge Config API Port **26.3.1**. Equip one backpack in Trinkets Updated's **chest/back** slot, leaving armor free. Press **N** to open it; the pack seeds this binding in `options.txt` because upstream's B conflicts with Jugcraft's Encyclopedia. Players can remap it in Controls; existing development options are preserved. Spare backpacks can be carried and placed, but portable opening requires the equipped bag. Placed bags remain usable and expose native Fabric storage for logistics.
+Jugcraft Complete includes Traveler's Backpack Fabric **26.3–11.4.1** and Forge Config API Port **26.3.1**. Equip one backpack in Trinkets Updated's **chest/back** slot, leaving armor free. Press **N** to open it; the pack seeds this binding in `options.txt` and Jugcraft also supplies N as the Controls Reset default because upstream's B conflicts with the Encyclopedia. Diorama's new-waypoint default is comma. Players can remap it in Controls; existing development options are preserved. Spare backpacks can be carried and placed, but portable opening requires the equipped bag. Placed bags remain usable and expose native Fabric storage for logistics.
 
 The starter backpack requires no machinery. Bigger bags consume Jugcraft industrial materials, reaching brass, steel/invar, aluminum/plastics and titanium/lithium production. All are ordinary material recipes: players can produce or trade the ingredients; no new research flag, seasonal gate, boss drop, magic mastery or circular backpack requirement is added. Backpack tiers describe this integration's progression, not new machine tiers.
 

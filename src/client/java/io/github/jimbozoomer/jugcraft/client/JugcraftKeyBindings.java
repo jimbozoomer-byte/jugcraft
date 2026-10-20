@@ -17,8 +17,10 @@ public final class JugcraftKeyBindings {
     public static int defaultKey(String name, InputConstants.Type type, int value) {
         if (type != InputConstants.Type.KEYBOARD) return value;
         if (name.startsWith("key.jugcraft.") && value < 0) return InputConstants.UNKNOWN.getValue();
-        // Keep the encyclopedia on B when the pack installs Diorama. Saved custom keys remain untouched.
-        if (name.equals("key.diorama.new_waypoint") && value == InputConstants.KEY_B) return InputConstants.KEY_N;
+        // B opens the encyclopedia, N opens the optional backpack, comma creates a waypoint.
+        // Saved custom keys remain untouched.
+        if (name.equals("key.diorama.new_waypoint") && value == InputConstants.KEY_B) return InputConstants.KEY_COMMA;
+        if (name.equals("key.travelersbackpack.inventory") && value == InputConstants.KEY_B) return InputConstants.KEY_N;
         if (value != InputConstants.KEY_R) return value;
         return switch (name) {
             case "iris.keybind.reload" -> InputConstants.KEY_F8;

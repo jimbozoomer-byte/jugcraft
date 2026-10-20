@@ -15,8 +15,8 @@ Diorama. Standalone Jugcraft only suggests it and loads without it. The existing
 lock-driven Gradle configuration also includes it in optional client development
 runs; no optional class is imported by common gameplay code.
 
-The existing client key-default hook assigns Diorama's new-waypoint action to N
-instead of B, preserving B for the encyclopedia. Controls Reset uses N. M opens
+The existing client key-default hook assigns Diorama's new-waypoint action to comma
+instead of B, preserving B for the encyclopedia and N for Traveler's Backpack. Controls Reset uses comma. M opens
 the map, U lists waypoints; saved custom bindings are left intact. Players with
 an earlier Diorama installation can reset its waypoint binding individually.
 
@@ -52,3 +52,8 @@ content in this package.
 Sources: [author's Modrinth release](https://modrinth.com/mod/diorama-map/version/kWas7LpC),
 [source repository](https://github.com/SunkenInTime/minecraft-orthogonal-map),
 [CurseForge listing supplied by owner](https://www.curseforge.com/minecraft/mc-mods/diorama).
+
+October 19 combined-pack correction: the backpack uses N, so the waypoint default
+now uses comma. The client regression also compares active bindings, not only
+reset defaults. Existing customized options are preserved; an upgraded profile
+with the previous N waypoint binding can reset that action in Controls.
