@@ -1,6 +1,6 @@
 # Tree batch 14: orchard fruit
 
-Status: implemented for owner inspection in draft PR #437 on `codex/tree-generation-batch-14`, based on
+Status: owner-approved and ready for review in PR #437 on `codex/tree-generation-batch-14`, based on
 upstream main `511b7ec0`. The owner requested Batch 14 on 20 October 2026 after
 approving Batch 13. Actual tool/model: OpenAI Codex (GPT-6).
 
@@ -105,3 +105,17 @@ External launcher import and separate-process multiplayer are not claimed.
 
 The cleaned runtime copy opened in the ordinary client at `(1120.5, 180, -987.5)`;
 local player join was verified in the client log.
+
+### Foundation CI repair (20 October 2026)
+
+The Build workflow passed; Foundation failed one older Batch 5 assertion that
+required every tested tree to use only the biomes switch. Rowan shares fruitwood
+with orchard pears, and Batch 14 intentionally enables that timber through either
+biomes or agriculture. The test now asserts both switches for rowan and retains
+the exact biome-only expectation for elder, alongside its existing timber and
+renewable sapling checks.
+
+OpenAI Codex (GPT-6) reproduced the failure and verified the fix with all 18
+relevant Python tests in Batch 5, Batch 5b/5c, Batch 14, tree biome mix and tree
+roster. Diff checks pass. This repair changes only the test and this record;
+the approved gameplay, textures and inspection world are unchanged.
