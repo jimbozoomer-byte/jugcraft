@@ -1324,6 +1324,11 @@ def recipes():
         recipe["result"]["id"] = result
         recipe["fabric:load_conditions"] = glue
         write(out / f"{name}.json", recipe)
+    # Boron in solar cells (docs/features/boron-solar.md): two silicon fired with a boric acid dope into two
+    # boron-doped silicon, for the Advanced Solar Panel.
+    doped = shapeless(MACHINE_FEATURE, ["#c:silicon", "#c:silicon", rid("boric_acid")], "boron_doped_silicon", 2)
+    doped["fabric:load_conditions"] = [c for f in (MACHINE_FEATURE, "silicon", "sulfur") for c in condition(f)]
+    write(out / "boron_doped_silicon.json", doped)
 
     # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
     boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]

@@ -218,6 +218,9 @@ ITEMS = {
     # PVAc (docs/features/pvac-glue.md): vinyl acetate polymerized into a pot of white wood glue, which binds paper into
     # a book without leather and makes a piston sticky without slime.
     "pvac_glue": "PVAc Wood Glue",
+    # Boron in solar cells (docs/features/boron-solar.md): silicon doped with boric acid, the p-type layer of the
+    # Advanced Solar Panel's cells.
+    "boron_doped_silicon": "Boron-Doped Silicon",
 }
 
 
