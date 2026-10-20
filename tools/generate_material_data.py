@@ -1586,7 +1586,7 @@ def tags():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     # Deposits break (slowly, for nothing) with a pickaxe; only a deposit drill gets their ore.
     import deposits
-    for block in deposits.DEPOSITS:
+    for block in deposits.all_blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     import tank_display
     for block in tank_display.BLOCKS:
