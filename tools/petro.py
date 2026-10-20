@@ -221,6 +221,9 @@ ITEMS = {
     # Boron in solar cells (docs/features/boron-solar.md): silicon doped with boric acid, the p-type layer of the
     # Advanced Solar Panel's cells.
     "boron_doped_silicon": "Boron-Doped Silicon",
+    # Silicone (docs/features/silicone.md): silicon reacted with methyl chloride and water in the Chemical Reactor, a
+    # heat-proof rubber the Polymer Molding Press's gasket mold presses into gaskets.
+    "silicone": "Silicone Rubber",
 }
 
 
@@ -404,6 +407,14 @@ FLUID_RECIPES = {
          "fluid_results": [("jugcraft:hydrochloric_acid", 1000)], "ticks": 100, "features": ["machines"]},
         {"name": "absorb_sulfur_trioxide", "fluids": [("minecraft:water", 250), ("jugcraft:sulfur_trioxide", 250), ("jugcraft:sulfuric_acid", 1000)],
          "retained_inputs": [2], "fluid_results": [("jugcraft:sulfuric_acid", 500)], "ticks": 100, "features": ["machines", "sulfur"]},
+        # Silicone (docs/features/silicone.md): methane chlorinated to methyl chloride; methyl chloride over silicon
+        # with water gives silicone rubber and gives back some of the chlorine as hydrochloric acid. Quantities for review.
+        {"name": "methyl_chloride", "fluids": [("jugcraft:methane", 500), ("jugcraft:chlorine", 500)],
+         "fluid_results": [("jugcraft:methyl_chloride", 500)], "ticks": 100, "features": ["machines", "salt"]},
+        {"name": "silicone", "items": [("jugcraft:silicon", 1)],
+         "fluids": [("jugcraft:methyl_chloride", 500), ("minecraft:water", 250)],
+         "results": [("jugcraft:silicone", 2)], "fluid_results": [("jugcraft:hydrochloric_acid", 250)], "ticks": 160,
+         "features": ["machines", "silicon"]},
         {"name": "hydrochloric_copper", "items": [("minecraft:raw_copper", 1)], "fluids": [("jugcraft:hydrochloric_acid", 250)],
          "results": [("jugcraft:washed_copper_ore", 1)], "ticks": 160, "features": ["machines"]},
         # Cement burnt with its carbon dioxide captured (docs/features/cement-co2-capture.md): the furnace's cement, with
@@ -714,3 +725,7 @@ ITEMS.update(cryogenic_fuels.ITEMS)
 FLUIDS.update(cryogenic_fuels.FLUIDS)
 FLUID_RECIPES["cryogenic_liquefier"].extend(cryogenic_fuels.LIQUEFIER_RECIPES)
 FLUID_RECIPES["chemical_reactor"].extend(cryogenic_fuels.TANK_RECIPES)
+# Methyl chloride (docs/features/silicone.md): methane and chlorine in the Chemical Reactor, made into silicone rubber.
+# Last, so the swirls drawn by index for the gases before it keep their seeds.
+GASES["methyl_chloride"] = {"display": "Methyl Chloride", "feature": "machines",
+                            "colors": [(120, 150, 120), (154, 186, 152), (186, 212, 182), (220, 238, 214)]}

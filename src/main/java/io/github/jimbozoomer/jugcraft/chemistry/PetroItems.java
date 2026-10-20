@@ -59,6 +59,8 @@ public final class PetroItems {
 	public static Item PVAC_GLUE;
 	/** Boron in solar cells (docs/features/boron-solar.md): the Advanced Solar Panel's doped silicon. */
 	public static Item BORON_DOPED_SILICON;
+	/** Silicone rubber (docs/features/silicone.md): pressed into heat-proof gaskets. */
+	public static Item SILICONE;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -251,6 +253,7 @@ public final class PetroItems {
 				properties -> new Item(properties.stacksTo(16).craftRemainder(Items.GLASS_BOTTLE)));
 		PVAC_GLUE = JugcraftRegistry.item("pvac_glue");
 		BORON_DOPED_SILICON = JugcraftRegistry.item("boron_doped_silicon");
+		SILICONE = JugcraftRegistry.item("silicone");
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -566,6 +569,7 @@ public final class PetroItems {
 			output.accept(GLUCOSE_SYRUP);
 			output.accept(PVAC_GLUE);
 			output.accept(BORON_DOPED_SILICON);
+			output.accept(SILICONE);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

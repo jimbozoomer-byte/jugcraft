@@ -553,6 +553,37 @@ def rubber():
     return img
 
 
+def silicone():
+    """Silicone rubber: a soft, rounded bale of heat-proof red silicone with a pressed seam, lit from the top left and
+    outlined in its own dark (docs/ITEM_ICONS.md)."""
+    tones = {"O": (110, 30, 24), "D": (170, 52, 40), "M": (204, 72, 54), "L": (226, 104, 80), "H": (246, 156, 128)}
+    rows = [
+        "................",
+        "................",
+        "................",
+        "................",
+        "...OOOOOOOOOO...",
+        "..OHHLLLLLLMMO..",
+        "..OHLLLLLLMMMO..",
+        "..OLLLLLLMMMDO..",
+        "..OLLLLLMMMMDO..",
+        "..ODDDDDDDDDDO..",
+        "..OLLLLMMMMMDO..",
+        "..OLLLMMMMMDDO..",
+        "..OMMMMMMMDDDO..",
+        "...OOOOOOOOOO...",
+        "................",
+        "................",
+    ]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        assert len(row) == 16, row
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
 def gasket():
     """Gasket: a flat black rubber ring round a steel face, seen from above."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
@@ -697,6 +728,7 @@ def draw_all(save, save_animation):
     save(catalyst(), "item", "cracking_catalyst")
     save(rubber(), "item", "rubber")
     save(gasket(), "item", "gasket")
+    save(silicone(), "item", "silicone")
     save(pvc_resin(), "item", "pvc_resin")
     save(soap(), "item", "soap")
     save(asphalt_binder(), "item", "asphalt_binder")
