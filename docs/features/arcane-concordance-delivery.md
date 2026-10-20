@@ -44,7 +44,6 @@ Versions, sides and whether Jugcraft needs each library come from
 server game test with the optional libraries removed. The client game tests run with them installed.
 
 <!-- matrix:start -->
-
 | Library | Version (lock) | Side | Jugcraft | What the Concordance does with it | Without it | Game tests | Still limited |
 |---|---|---|---|---|---|---|---|
 | Fabric API | 0.161.0+26.3 | both | required | Attachments for every player record, and each wearer's worn trinkets choice, sent to everyone who sees them; item components; the rules' reload listener; menus; commands; networking (the journal and its request, signs, the Vigil's gesture, the worn trinkets choice, the Spell Composer's request, state and result, the encyclopedia's request and pages); key mappings; the Focus HUD line; block-entity load and unload (the circle index); the block-break and attack questions asked for the person behind a change, with a FakePlayer standing in for an absent owner when a server allows it; the Transfer API for the crucible's water and every courier pickup and delivery | Jugcraft does not start (Fabric Loader names it as missing) | `theJournalSurvivesTheTrip`, `aSignReachesTheClientUnchanged`, `aRequestIsFetchedAndDelivered`, `lightGoesOnlyWhereItsCasterCouldBuild`, `theCircleIndexLooksOnlyInReach`, `eachWearerChoosesWhetherTheirTrinketsShow` | No pipe carries Concordance essences; a real protection mod has not been tried (a stand-in listener answers the two questions in the tests) |
@@ -65,11 +64,9 @@ server game test with the optional libraries removed. The client game tests run 
 | Sodium | 0.9.2+mc26.3 | client | optional | Not used | nothing changes | none | Not tried with the Concordance's renderers |
 | Fabric Language Kotlin | 1.14.1+kotlin.2.4.20 | client | optional | Runs the Kotlin of the journal's and the Spell Composer's GuiLib workspaces | the plain journal and composer screens | `ConcordanceJournalClientGameTests`, `ConcordanceComposerClientGameTests` | Only the workspaces are Kotlin |
 | GuiLib | 0.12.4 | client | optional | The Concordance Journal's workspace (a tab for each section the server sends) and the Spell Composer's (the draft as a strip of words over the words the player has learned) | the plain journal and composer screens, with the same journal and the same draft | `ConcordanceJournalClientGameTests`, `ConcordanceComposerClientGameTests` | No ritual-schematic, crucible or observatory screen is built; the workspaces have no narration (the plain screens do); keyboard use not tried by a person |
+| Diorama | 0.1.1+26.3 | client | optional | Launcher-installed client title-screen panorama companion; no Concordance gameplay hook | title screen uses its normal panorama; server gameplay is unchanged | none | Installed through the pinned pack; panorama configuration has not been manually playtested |
 | Travelers Backpack | 11.4.1 | both | optional | No Concordance-specific behavior; Complete adds portable storage through the Trinkets Back slot and Jugcraft industrial recipes, with variant abilities disabled | no backpack integration; Concordance progression is unchanged | `recipesUseIndustrialMaterialsAndRemoveBypasses`, `backSlotAndPlacedAutomationRemainAvailable`, `BackpackClientGameTests` | No essence tanks, magical upgrades or automatic resizing of existing bags |
 | Forge Config API Port | 26.3.1 | both | optional | No Concordance-specific behavior; loads and synchronizes Traveler's Backpack settings | Traveler's Backpack also must be absent; Concordance progression is unchanged | `sequentialSmithingPreservesContentsAndUsesApprovedCapacities` | Existing world config overrides and saved backpack slot counts require owner-managed changes |
-
-| Diorama | 0.1.1+26.3 | client | optional | Launcher-installed client title-screen panorama companion; no Concordance gameplay hook | title screen uses its normal panorama; server gameplay is unchanged | none | Installed through the pinned pack; panorama configuration has not been manually playtested |
-
 <!-- matrix:end -->
 
 ## What is complete, what is not, and what is assumed

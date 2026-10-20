@@ -41,6 +41,15 @@ def extend(root, edge, evidence, items):
                 route(java + 'menagerie/NaturalCollections.java',
                       [group + '_' + definition['source'].removeprefix('potted_'), 'minecraft:flower_pot'], [name])
 
+    found(['glowcap_block', 'blight_wart_block', 'bramble_bush_leaves'],
+          java + 'agriculture/FungalGrowthFeature.java',
+          'Generated huge fungi and bramble bushes in Glowcap Grotto/Fungal Thicket, Blighted Sands and Netherbrush; harvest caps/leaves with the tools required by their block loot (including Silk Touch).')
+    route(java + 'agriculture/HollyLeavesBlock.java',
+          ['holly_sapling', 'minecraft:shears'], ['holly_sprig'], 'grow_holly_and_clip_supported_regrowing_leaves')
+    route(java + 'agriculture/TreeTapBlock.java',
+          ['rubber_tree_sapling', 'tree_tap', 'minecraft:glass_bottle'], ['latex_bottle'],
+          'grow_rooted_rubber_tree_with_live_canopy_and_wait_four_tap_fill_steps')
+
     for name, tree in ag.TREES.items():
         if tree.get('fruit'):
             route('tools/agriculture.py:TREES/' + name, [tree['leaves']], [tree['fruit']['item']], 'fruit_harvest')

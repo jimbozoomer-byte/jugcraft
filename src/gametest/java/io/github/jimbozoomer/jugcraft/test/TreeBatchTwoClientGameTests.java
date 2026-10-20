@@ -100,9 +100,18 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 				ResourceKey<Biome> key = ResourceKey.create(Registries.BIOME, Jugcraft.id(name));
 				BlockPos place = server.computeOnServer(minecraft -> {
 					var level = minecraft.overworld();
-					var nearest = level.findClosestBiome3d(holder -> holder.is(key), BlockPos.ZERO, 12800, 64, 64);
-					BlockPos first = nearest == null ? null : BiomeClientGameTests.surfaceSpot(level, nearest.getFirst(), key);
-					return first == null ? null : surveySpot(level, first, key);
+					// The closest 3-D sample may only exist below the actual terrain
+					// surface. Try distinct regional anchors before declaring a biome
+					// absent; every accepted stop must still be naturally on the surface.
+					var checked = new java.util.HashSet<BlockPos>();
+					for (int[] offset : new int[][] {{0,0}, {4096,0}, {-4096,0}, {0,4096}, {0,-4096}}) {
+						var nearest = level.findClosestBiome3d(holder -> holder.is(key), new BlockPos(offset[0], 0, offset[1]), 12800, 64, 64);
+						if (nearest == null || !checked.add(nearest.getFirst())) continue;
+						BlockPos first = BiomeClientGameTests.surfaceSpot(level, nearest.getFirst(), key);
+						if (first != null) return surveySpot(level, first, key);
+					}
+					Jugcraft.LOGGER.warn("No natural surface stop for {} in {} distinct biome samples", name, checked.size());
+					return null;
 				});
 				if (place == null) { tour.add(name + ": no surface stop found within the survey radius"); continue; }
 				found++;

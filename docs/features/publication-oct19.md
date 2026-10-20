@@ -67,6 +67,14 @@ textures retained identical pixels. The subsequent combined tree/backpack main,
 client and GameTest sources compiled successfully. These are intermediate results,
 not a substitute for the final combined Build/Foundation workflows on #435.
 
+The combined runtime registry was exported by a passing server GameTest. The
+updated acquisition audit has zero invalid ingredients and zero unresolved active
+recipe chains; 78 explicitly deferred acquisition designs remain labeled as such.
+All 135 Python checks pass locally. GitHub verified generated resource
+reproducibility; the integration pass also corrected the two Pine Nuts display
+names and refreshed the merged library matrix. Natural surface inspection now
+checks distinct regional anchors when its nearest 3-D biome sample is underground.
+
 No owner playtest, two-account multiplayer certification, live-server deployment
 or production-save migration is claimed. The owner's local saves are untouched.
 

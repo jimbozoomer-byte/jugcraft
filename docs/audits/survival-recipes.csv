@@ -38,7 +38,7 @@ jugcraft:alumina_plate,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:aluminate_filter_press,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/aluminate_filter_press.json,,
 jugcraft:aluminate_slurry_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:aluminum_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/aluminum_block.json,,
-jugcraft:aluminum_cable,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/aluminum_cable.json,,
+jugcraft:aluminum_cable,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/aluminum_cable.json | src/main/resources/data/jugcraft/recipe/aluminum_cable_aluminum_sheathed.json,,
 jugcraft:aluminum_cladding,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/aluminum_cladding.json,,
 jugcraft:aluminum_cladding_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/aluminum_cladding_slab.json,,
 jugcraft:aluminum_cladding_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/aluminum_cladding_stairs.json,,
@@ -143,6 +143,20 @@ jugcraft:banana_pup,chain_with_acquisition_evidence,,src/main/resources/data/jug
 jugcraft:banana_stem,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/banana_tree.json
 jugcraft:banoffee_pie,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:banoffee_pie_slice,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
+jugcraft:banyan_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/banyan.json
+jugcraft:banyan_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/banyan_sapling.json,,
+jugcraft:baobab_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/baobab_fence.json,,
+jugcraft:baobab_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/baobab_fence_gate.json,,
+jugcraft:baobab_fruit,natural_or_interaction_source,,,,
+jugcraft:baobab_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/baobab.json | src/main/resources/data/jugcraft/worldgen/feature/giant_baobab.json
+jugcraft:baobab_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/baobab_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/baobab.json | src/main/resources/data/jugcraft/worldgen/feature/giant_baobab.json
+jugcraft:baobab_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/baobab_planks.json | src/main/resources/data/jugcraft/recipe/sawing/baobab_logs.json,,
+jugcraft:baobab_pod,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/baobab.json | src/main/resources/data/jugcraft/worldgen/feature/giant_baobab.json
+jugcraft:baobab_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/baobab_sapling.json,,
+jugcraft:baobab_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/baobab_seeds.json,,
+jugcraft:baobab_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/baobab_slab.json,,
+jugcraft:baobab_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/baobab_stairs.json,,
+jugcraft:baobab_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/baobab_wood.json,,
 jugcraft:barbecue_stick,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/barbecue_stick.json,,
 jugcraft:barbed_wire,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/barbed_wire.json,,
 jugcraft:barley,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/barley_seeds.json | tools/agriculture.py:CROPS/barley,,
@@ -492,6 +506,8 @@ jugcraft:blastproof_concrete,chain_with_acquisition_evidence,,src/main/resources
 jugcraft:blastproof_concrete_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/blastproof_concrete_slab.json,,
 jugcraft:blastproof_concrete_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/blastproof_concrete_stairs.json,,
 jugcraft:bleeding_heart,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/bleeding_heart.json
+jugcraft:blight_fungus,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/blight_fungus.json
+jugcraft:blight_wart_block,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/FungalGrowthFeature.java
 jugcraft:blindfold,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/blindfold.json,,
 jugcraft:bloodthorn_boots,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:bloodthorn_chestplate,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
@@ -541,6 +557,7 @@ jugcraft:bowling_pumpkin,recipe_chain_reachable,,src/main/resources/data/jugcraf
 jugcraft:bowling_scoreboard,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bowling_scoreboard.json,,
 jugcraft:brain_vat_console,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/brain_vat_console.json,,
 jugcraft:bramble,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/bramble.json | src/main/resources/data/jugcraft/worldgen/feature/ground_blighted_sands.json | src/main/resources/data/jugcraft/worldgen/feature/ground_netherbrush.json
+jugcraft:bramble_bush_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/FungalGrowthFeature.java
 jugcraft:branching_chandelier,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/branching_chandelier.json,,
 jugcraft:brass_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/brass_block.json,,
 jugcraft:brass_gear,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/brass_gear.json,,
@@ -1243,7 +1260,7 @@ jugcraft:ceiling_light_panel,chain_with_acquisition_evidence,,src/main/resources
 jugcraft:ceiling_tile,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ceiling_tile.json,,
 jugcraft:cell_rack,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cell_rack.json,,
 jugcraft:celtic_cross,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/celtic_cross.json,,
-jugcraft:cement,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cement_from_blasting.json | src/main/resources/data/jugcraft/recipe/cement_from_smelting.json,,
+jugcraft:cement,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cement_from_blasting.json | src/main/resources/data/jugcraft/recipe/cement_from_smelting.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/cement_with_co2_capture.json,,
 jugcraft:cement_mix,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cement_mix.json | src/main/resources/data/jugcraft/recipe/cement_mix_from_bone_block.json,,
 jugcraft:cemetery_fence,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cemetery_fence.json,,
 jugcraft:cemetery_gate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cemetery_gate.json,,
@@ -1347,7 +1364,7 @@ jugcraft:coffee_tart,chain_with_acquisition_evidence,,src/main/java/io/github/ji
 jugcraft:coffee_tart_slice,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
 jugcraft:coffin,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/coffin.json,,
 jugcraft:coffin_wardrobe,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/coffin_wardrobe.json,,
-jugcraft:coke,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/coking/coal.json,,
+jugcraft:coke,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/chemical_reaction/coke_with_gas_recovery.json | src/main/resources/data/jugcraft/recipe/coking/coal.json,,
 jugcraft:coke_oven,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/coke_oven.json,,
 jugcraft:collector_mk1,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/collector_mk1.json,,
 jugcraft:collector_mk2,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/collector_mk2.json,,
@@ -1546,6 +1563,8 @@ jugcraft:dark_matter_shovel,recipe_chain_reachable,,src/main/resources/data/jugc
 jugcraft:dark_matter_sword,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dark_matter_sword.json,,
 jugcraft:dark_oak_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dark_oak_cabinet.json,,
 jugcraft:data_cable,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/data_cable.json,,
+jugcraft:date_cluster,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/date_palm.json
+jugcraft:dates,natural_or_interaction_source,,,,
 jugcraft:dc_cable_riser,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dc_cable_riser.json,,
 jugcraft:dc_cable_riser_sense,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dc_cable_riser_sense.json,,
 jugcraft:dc_cable_riser_top,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dc_cable_riser_top.json,,
@@ -1558,7 +1577,7 @@ jugcraft:dc_switchboard,chain_with_acquisition_evidence,,src/main/resources/data
 jugcraft:dead_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_fence.json,,
 jugcraft:dead_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_fence_gate.json,,
 jugcraft:dead_hollow_tree,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dead_hollow_tree.json,,
-jugcraft:dead_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/creeping_ivy.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag_bent.json | src/main/resources/data/jugcraft/worldgen/feature/dead_tree.json | src/main/resources/data/jugcraft/worldgen/feature/fallen_dead_tree.json
+jugcraft:dead_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/sagebrush_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/creeping_ivy.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag_bent.json | src/main/resources/data/jugcraft/worldgen/feature/dead_tree.json | src/main/resources/data/jugcraft/worldgen/feature/fallen_dead_tree.json | src/main/resources/data/jugcraft/worldgen/feature/sagebrush.json
 jugcraft:dead_mans_fingers,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/dead_mans_fingers.json
 jugcraft:dead_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_planks.json | src/main/resources/data/jugcraft/recipe/sawing/dead_logs.json,,
 jugcraft:dead_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_slab.json,,
@@ -1620,6 +1639,16 @@ jugcraft:dominion_wand,recipe_chain_reachable,,src/main/resources/data/jugcraft/
 jugcraft:double_arm_pole,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/double_arm_pole.json,,
 jugcraft:double_circuit_monopole,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/double_circuit_monopole.json,,
 jugcraft:drafting_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/drafting_table.json,,
+jugcraft:dragonblood_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dragonblood_fence.json,,
+jugcraft:dragonblood_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dragonblood_fence_gate.json,,
+jugcraft:dragonblood_fronds,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/dragonblood.json | src/main/resources/data/jugcraft/worldgen/feature/dragonblood_shrub.json
+jugcraft:dragonblood_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/dragonblood_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/dragonblood.json | src/main/resources/data/jugcraft/worldgen/feature/dragonblood_shrub.json
+jugcraft:dragonblood_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dragonblood_planks.json | src/main/resources/data/jugcraft/recipe/sawing/dragonblood_logs.json,,
+jugcraft:dragonblood_resin,natural_or_interaction_source,,,,
+jugcraft:dragonblood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/dragonblood_sapling.json,,
+jugcraft:dragonblood_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dragonblood_slab.json,,
+jugcraft:dragonblood_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dragonblood_stairs.json,,
+jugcraft:dragonblood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dragonblood_wood.json,,
 jugcraft:draped_urn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/draped_urn.json,,
 jugcraft:draught,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/concordance/Alchemy.java
 jugcraft:drawing_rack,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/drawing_rack.json,,
@@ -1949,6 +1978,13 @@ jugcraft:ferrochromium_nugget,chain_with_acquisition_evidence,,src/main/resource
 jugcraft:fertilizer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/ammonium_phosphate.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/fertilizer.json | src/main/resources/data/jugcraft/recipe/digestate_fertilizer.json,,
 jugcraft:field_kitchen,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/field_kitchen.json,,
 jugcraft:field_telephone,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/field_telephone.json,,
+jugcraft:fig_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/fig_fence.json,,
+jugcraft:fig_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/fig_fence_gate.json,,
+jugcraft:fig_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/banyan_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/banyan.json
+jugcraft:fig_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/fig_planks.json | src/main/resources/data/jugcraft/recipe/sawing/fig_logs.json,,
+jugcraft:fig_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/fig_slab.json,,
+jugcraft:fig_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/fig_stairs.json,,
+jugcraft:fig_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/fig_wood.json,,
 jugcraft:filing_cabinet,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/filing_cabinet.json,,
 jugcraft:filing_cabinet_open,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/filing_cabinet_open.json,,
 jugcraft:filing_cabinet_tall,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/filing_cabinet_tall.json,,
@@ -1979,6 +2015,8 @@ jugcraft:fizz_rocks,recipe_chain_reachable,,src/main/resources/data/jugcraft/rec
 jugcraft:flak_gun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flak_gun.json,,
 jugcraft:flak_shell,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flak_shell.json,,
 jugcraft:flame_arrester,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flame_arrester.json,,
+jugcraft:flame_tree_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/flame_tree.json
+jugcraft:flame_tree_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/flame_tree_sapling.json,,
 jugcraft:flashbang,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flashbang.json,,
 jugcraft:flat_tv,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/flat_tv.json,,
 jugcraft:flatboat_gun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flatboat_gun.json,,
@@ -2128,6 +2166,7 @@ jugcraft:glow_berry_jelly,recipe_chain_reachable,,src/main/resources/data/jugcra
 jugcraft:glow_gum,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/glow_gum.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_glow_gum.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json
 jugcraft:glow_paint,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/glow_paint.json,,
 jugcraft:glowcap,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/glowcap.json | src/main/resources/data/jugcraft/worldgen/feature/grotto_mud.json | src/main/resources/data/jugcraft/worldgen/feature/ground_ashfall_wastes.json | src/main/resources/data/jugcraft/worldgen/feature/ground_chorus_reef.json | src/main/resources/data/jugcraft/worldgen/feature/ground_ender_wilds.json | src/main/resources/data/jugcraft/worldgen/feature/ground_frost_rift.json | src/main/resources/data/jugcraft/worldgen/feature/ground_fungal_thicket.json | src/main/resources/data/jugcraft/worldgen/feature/ground_magma_fields.json | src/main/resources/data/jugcraft/worldgen/feature/ground_marrow_heap.json | src/main/resources/data/jugcraft/worldgen/feature/ground_outer_flats.json | src/main/resources/data/jugcraft/worldgen/feature/ground_quartz_rift.json | src/main/resources/data/jugcraft/worldgen/feature/ground_rotted_expanse.json | src/main/resources/data/jugcraft/worldgen/feature/ground_withered_hollow.json
+jugcraft:glowcap_block,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/FungalGrowthFeature.java
 jugcraft:glowmouth,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/glowmouth.json,,
 jugcraft:gold_dust,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pulverizing/copper_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/deepslate_copper_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/deepslate_gold_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/gold_ingot.json | src/main/resources/data/jugcraft/recipe/pulverizing/gold_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/raw_gold.json | src/main/resources/data/jugcraft/recipe/pulverizing/washed_copper_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/washed_gold_ore.json,,
 jugcraft:gold_paxel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gold_paxel.json,,
@@ -2135,6 +2174,8 @@ jugcraft:goldbristle_carbine,chain_with_acquisition_evidence,,src/main/resources
 jugcraft:golden_knife,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/golden_knife.json,,
 jugcraft:golden_thimble,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/tatterlace.json
 jugcraft:goldenrod,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/goldenrod.json
+jugcraft:gorse_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/gorse.json
+jugcraft:gorse_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/gorse_sapling.json,,
 jugcraft:goshawk_revolver,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/goshawk_revolver.json,,
 jugcraft:gossamer_silk,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/tatterlace.json
 jugcraft:gothic_headstone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gothic_headstone_from_stonecutting.json,,
@@ -2291,7 +2332,7 @@ jugcraft:heavy_fuel_oil_bucket,chain_with_acquisition_evidence,,src/main/java/io
 jugcraft:heavy_pump,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/heavy_pump.json,,
 jugcraft:heavy_shell,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/heavy_shell.json,,src/main/resources/data/jugcraft/loot_table/chests/raider_camp.json
 jugcraft:hedgehog_plush,loot_only,,,,src/main/resources/data/jugcraft/loot_table/gameplay/midway_prize.json
-jugcraft:heliostat,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/heliostat.json,,
+jugcraft:heliostat,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/heliostat.json | src/main/resources/data/jugcraft/recipe/heliostat_aluminum_backing.json,,
 jugcraft:herb_roasted_mutton,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/herb_roasted_mutton.json,,
 jugcraft:herb_roasted_potatoes,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/herb_roasted_potatoes.json,,
 jugcraft:herbal_black_cloth,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/herbal_black_cloth.json,,
@@ -2339,6 +2380,17 @@ jugcraft:highball_rifle,chain_with_acquisition_evidence,,src/main/resources/data
 jugcraft:highwayman,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/highwayman.json,,
 jugcraft:holler_carbine,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holler_carbine.json,,
 jugcraft:holler_pistol,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holler_pistol.json,,
+jugcraft:holly_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_fence.json,,
+jugcraft:holly_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_fence_gate.json,,
+jugcraft:holly_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/holly.json
+jugcraft:holly_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/holly_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/holly.json
+jugcraft:holly_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_planks.json | src/main/resources/data/jugcraft/recipe/sawing/holly_logs.json,,
+jugcraft:holly_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/holly_sapling.json,,
+jugcraft:holly_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_slab.json,,
+jugcraft:holly_sprig,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HollyLeavesBlock.java,,
+jugcraft:holly_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_stairs.json,,
+jugcraft:holly_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_wood.json,,
+jugcraft:holly_wreath,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_wreath.json,,
 jugcraft:holo_table,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holo_table.json,,
 jugcraft:homing_rocket,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/homing_rocket.json,,
 jugcraft:honey_cookie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/honey_cookie.json,,
@@ -2969,11 +3021,23 @@ jugcraft:jack_o_lantern_string_lights,recipe_chain_reachable,,src/main/resources
 jugcraft:jar_of_eyeballs,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/jar_of_eyeballs.json,,
 jugcraft:jarrahdale_pumpkin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/jarrahdale_pumpkin_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/jarrahdale_pumpkin.json
 jugcraft:jarrahdale_pumpkin_seeds,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hydroponics/jarrahdale_pumpkin_seeds.json | src/main/resources/data/jugcraft/recipe/jarrahdale_pumpkin_seeds.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_jarrahdale_pumpkin_seeds.json,,src/main/resources/data/jugcraft/loot_table/carve/jarrahdale_pumpkin.json
+jugcraft:joshua_tree_fronds,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/joshua_tree.json
+jugcraft:joshua_tree_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/joshua_tree_sapling.json,,
 jugcraft:judges_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/judges_table.json,,
 jugcraft:judging_stand,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/judging_stand.json,,
 jugcraft:jumbo_pumpkin_plush,loot_only,,,,src/main/resources/data/jugcraft/loot_table/gameplay/midway_prize.json
 jugcraft:jump_scare_trap,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/jump_scare_trap.json,,
 jugcraft:jungle_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/jungle_cabinet.json,,
+jugcraft:juniper_berries,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/juniper,,
+jugcraft:juniper_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/juniper_fence.json,,
+jugcraft:juniper_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/juniper_fence_gate.json,,
+jugcraft:juniper_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/juniper_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/juniper.json | src/main/resources/data/jugcraft/worldgen/feature/juniper_bush.json | src/main/resources/data/jugcraft/worldgen/feature/juniper_column.json
+jugcraft:juniper_needles,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/juniper.json | src/main/resources/data/jugcraft/worldgen/feature/juniper_bush.json | src/main/resources/data/jugcraft/worldgen/feature/juniper_column.json
+jugcraft:juniper_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/juniper_planks.json | src/main/resources/data/jugcraft/recipe/sawing/juniper_logs.json,,
+jugcraft:juniper_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/juniper_sapling.json,,
+jugcraft:juniper_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/juniper_slab.json,,
+jugcraft:juniper_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/juniper_stairs.json,,
+jugcraft:juniper_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/juniper_wood.json,,
 jugcraft:kabocha_pumpkin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/kabocha_pumpkin_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/kabocha_pumpkin.json
 jugcraft:kabocha_pumpkin_seeds,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hydroponics/kabocha_pumpkin_seeds.json | src/main/resources/data/jugcraft/recipe/kabocha_pumpkin_seeds.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_kabocha_pumpkin_seeds.json,,src/main/resources/data/jugcraft/loot_table/carve/kabocha_pumpkin.json
 jugcraft:kabocha_tempura,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/kabocha_tempura.json,,
@@ -3578,6 +3642,7 @@ jugcraft:large_ghost_fern,natural_or_interaction_source,,,,src/main/resources/da
 jugcraft:large_print,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/large_print.json,,
 jugcraft:large_steam_engine,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/large_steam_engine.json,,
 jugcraft:laser_sight,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/laser_sight.json,,
+jugcraft:latex_bottle,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TreeTapBlock.java,,
 jugcraft:lattice_tower,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/lattice_tower.json,,
 jugcraft:lavender,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/lavender.json
 jugcraft:ldpe_film,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/extrude_film.json,,
@@ -3693,8 +3758,8 @@ jugcraft:magnolia_wood,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:magpie_smg,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/magpie_smg.json,,
 jugcraft:mahogany_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mahogany_fence.json,,
 jugcraft:mahogany_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mahogany_fence_gate.json,,
-jugcraft:mahogany_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/giant_mahogany.json | src/main/resources/data/jugcraft/worldgen/feature/mahogany.json
-jugcraft:mahogany_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/mahogany_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/giant_mahogany.json | src/main/resources/data/jugcraft/worldgen/feature/mahogany.json
+jugcraft:mahogany_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/emergent_mahogany.json | src/main/resources/data/jugcraft/worldgen/feature/giant_mahogany.json | src/main/resources/data/jugcraft/worldgen/feature/mahogany.json
+jugcraft:mahogany_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/mahogany_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/emergent_mahogany.json | src/main/resources/data/jugcraft/worldgen/feature/giant_mahogany.json | src/main/resources/data/jugcraft/worldgen/feature/mahogany.json
 jugcraft:mahogany_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mahogany_planks.json | src/main/resources/data/jugcraft/recipe/sawing/mahogany_logs.json,,
 jugcraft:mahogany_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/mahogany_sapling.json,,
 jugcraft:mahogany_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mahogany_slab.json,,
@@ -3703,6 +3768,17 @@ jugcraft:mahogany_wood,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:main_control_board,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/main_control_board.json,,
 jugcraft:main_transformer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_main_transformer.json | src/main/resources/data/jugcraft/recipe/main_transformer.json,,
 jugcraft:mandrake_root,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/mandrake_root.json | tools/agriculture.py:CROPS/mandrake,,
+jugcraft:mango,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/mango,,
+jugcraft:mango_chutney,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/mango_chutney.json,,
+jugcraft:mango_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_fence.json,,
+jugcraft:mango_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_fence_gate.json,,
+jugcraft:mango_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/mango.json
+jugcraft:mango_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/mango_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/mango.json
+jugcraft:mango_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_planks.json | src/main/resources/data/jugcraft/recipe/sawing/mango_logs.json,,
+jugcraft:mango_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/mango_sapling.json,,
+jugcraft:mango_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_slab.json,,
+jugcraft:mango_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_stairs.json,,
+jugcraft:mango_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_wood.json,,
 jugcraft:mangrove_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mangrove_cabinet.json,,
 jugcraft:map_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/map_table.json,,
 jugcraft:maple_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/maple_fence.json,,
@@ -3791,7 +3867,7 @@ jugcraft:mourning_wreath,recipe_chain_reachable,,src/main/resources/data/jugcraf
 jugcraft:mulch_maw,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mulch_maw.json,,
 jugcraft:mule,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mule.json,,
 jugcraft:mulled_cider,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/mulled_cider.json,,
-jugcraft:mulling_spices,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mulling_spices.json | src/main/resources/data/jugcraft/recipe/mulling_spices_from_cinnamon.json,,
+jugcraft:mulling_spices,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mulling_spices.json | src/main/resources/data/jugcraft/recipe/mulling_spices_from_cinnamon.json | src/main/resources/data/jugcraft/recipe/mulling_spices_from_juniper.json,,
 jugcraft:mummy_sarcophagus,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mummy_sarcophagus.json,,
 jugcraft:mummy_wraps,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mummy_wraps.json,,
 jugcraft:murmur_smg,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/murmur_smg.json,,
@@ -3899,8 +3975,8 @@ jugcraft:nouveau_belt_of_unstable_gifts,chain_with_acquisition_evidence,,nouveau
 jugcraft:nouveau_blank_glyph,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/survival_completion/nouveau_blank_glyph.json,,
 jugcraft:nouveau_blank_parchment,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blank_parchment.json | src/main/resources/data/jugcraft/recipe/nouveau/scry_to_blank_parchment.json | src/main/resources/data/jugcraft/recipe/nouveau/wipe_spell_parchment.json,,
 jugcraft:nouveau_blank_thread,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blank_thread.json,,
-jugcraft:nouveau_blue_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/blue_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_blue_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/blue_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_blue_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_blue_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_blue_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_cascading_sapling.json,,
 jugcraft:nouveau_blue_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blue_archwood_wood.json,,
 jugcraft:nouveau_blue_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/blue_sbed.json,,
@@ -4037,8 +4113,8 @@ jugcraft:nouveau_glyph_wind_shear,chain_with_acquisition_evidence,,nouveau works
 jugcraft:nouveau_glyph_wither,chain_with_acquisition_evidence,,nouveau workshop:jugcraft:nouveau_glyph_wither/0,,
 jugcraft:nouveau_gold_grate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/nouveau/gold_grate.json,,
 jugcraft:nouveau_greater_experience_gem,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/greater_experience_gem.json,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauResources.java
-jugcraft:nouveau_green_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/green_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_green_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/green_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_green_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_green_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_green_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_flourishing_sapling.json,,
 jugcraft:nouveau_green_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/green_archwood_wood.json,,
 jugcraft:nouveau_green_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/green_sbed.json,,
@@ -4074,13 +4150,13 @@ jugcraft:nouveau_potion_flask_amplify,chain_with_acquisition_evidence,,nouveau w
 jugcraft:nouveau_potion_flask_extend_time,chain_with_acquisition_evidence,,nouveau workshop:jugcraft:nouveau_potion_flask_extend_time/0 | nouveau workshop:jugcraft:nouveau_potion_flask_extend_time/1,,
 jugcraft:nouveau_potion_jar,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/potion_jar.json | src/main/resources/data/jugcraft/recipe/nouveau/potion_jar_empty.json,,
 jugcraft:nouveau_potion_melder,chain_with_acquisition_evidence,,nouveau workshop:jugcraft:nouveau_potion_melder/0,,
-jugcraft:nouveau_purple_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/purple_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_purple_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/purple_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_purple_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_purple_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_purple_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_vexing_sapling.json,,
 jugcraft:nouveau_purple_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/purple_archwood_wood.json,,
 jugcraft:nouveau_purple_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/purple_sbed.json,,
-jugcraft:nouveau_red_archwood_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/red_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
-jugcraft:nouveau_red_archwood_log,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/nouveau/red_archwood.json | src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_red_archwood_leaves,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
+jugcraft:nouveau_red_archwood_log,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/nouveau/NouveauArchwoodFeature.java
 jugcraft:nouveau_red_archwood_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/manipulation_essence_to_blazin_sapling.json,,
 jugcraft:nouveau_red_archwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/red_archwood_wood.json,,
 jugcraft:nouveau_red_sbed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nouveau/red_sbed.json,,
@@ -4283,6 +4359,17 @@ jugcraft:office_desk_long,recipe_chain_reachable,,src/main/resources/data/jugcra
 jugcraft:office_plant,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/office_plant.json,,
 jugcraft:ofrenda,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ofrenda.json,,
 jugcraft:oil_sand,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ore_oil_sand.json
+jugcraft:olive_bush_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/olive_bush_sapling.json,,
+jugcraft:olive_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/olive_fence.json,,
+jugcraft:olive_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/olive_fence_gate.json,,
+jugcraft:olive_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ancient_olive.json | src/main/resources/data/jugcraft/worldgen/feature/olive.json | src/main/resources/data/jugcraft/worldgen/feature/olive_bees.json
+jugcraft:olive_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/olive_bush_sapling.json | src/main/resources/data/jugcraft/recipe/tree_growing/olive_sapling.json | src/main/resources/data/jugcraft/recipe/tree_growing/osmanthus_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/ancient_olive.json | src/main/resources/data/jugcraft/worldgen/feature/olive.json | src/main/resources/data/jugcraft/worldgen/feature/olive_bees.json | src/main/resources/data/jugcraft/worldgen/feature/olive_bush.json | src/main/resources/data/jugcraft/worldgen/feature/osmanthus.json
+jugcraft:olive_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/olive_planks.json | src/main/resources/data/jugcraft/recipe/sawing/olive_logs.json,,
+jugcraft:olive_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/olive_sapling.json,,
+jugcraft:olive_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/olive_slab.json,,
+jugcraft:olive_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/olive_stairs.json,,
+jugcraft:olive_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/olive_wood.json,,
+jugcraft:olives,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/olive,,
 jugcraft:oneiric_censer,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/oneiric_censer.json,,
 jugcraft:onion,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/onion.json | src/main/resources/data/jugcraft/recipe/onion_from_crate.json | tools/agriculture.py:CROPS/onion,,
 jugcraft:onion_crate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/onion_crate.json,,
@@ -4309,6 +4396,10 @@ jugcraft:organic_fertilizer_carrier,chain_with_acquisition_evidence,,src/main/re
 jugcraft:ornamental_corn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/ornamental_corn_kernels.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:ornamental_corn_bundle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ornamental_corn_bundle.json,,
 jugcraft:ornamental_corn_kernels,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/ornamental_corn_kernels.json | src/main/resources/data/jugcraft/recipe/ornamental_corn_kernels.json,,
+jugcraft:osmanthus_flowers,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/osmanthus,,
+jugcraft:osmanthus_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/osmanthus.json
+jugcraft:osmanthus_mooncake,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/osmanthus_mooncake.json,,
+jugcraft:osmanthus_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/osmanthus_sapling.json,,
 jugcraft:ossuary_wall,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ossuary_wall.json,,
 jugcraft:oval_table,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/oval_table.json,,
 jugcraft:overclock_module,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/overclock_module.json,,
@@ -4328,8 +4419,8 @@ jugcraft:pallet_rack,chain_with_acquisition_evidence,,src/main/resources/data/ju
 jugcraft:pallet_rack_drums,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pallet_rack_drums.json,,
 jugcraft:palm_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/palm_fence.json,,
 jugcraft:palm_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/palm_fence_gate.json,,
-jugcraft:palm_fronds,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/palm.json | src/main/resources/data/jugcraft/worldgen/feature/small_palm.json
-jugcraft:palm_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/palm_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/palm.json | src/main/resources/data/jugcraft/worldgen/feature/small_palm.json
+jugcraft:palm_fronds,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/date_palm.json | src/main/resources/data/jugcraft/worldgen/feature/palm.json | src/main/resources/data/jugcraft/worldgen/feature/small_palm.json
+jugcraft:palm_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/palm_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/date_palm.json | src/main/resources/data/jugcraft/worldgen/feature/palm.json | src/main/resources/data/jugcraft/worldgen/feature/small_palm.json
 jugcraft:palm_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/palm_planks.json | src/main/resources/data/jugcraft/recipe/sawing/palm_logs.json,,
 jugcraft:palm_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/palm_sapling.json,,
 jugcraft:palm_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/palm_slab.json,,
@@ -4399,12 +4490,14 @@ jugcraft:phosphoric_acid_bucket,chain_with_acquisition_evidence,,src/main/java/i
 jugcraft:pibal,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pibal.json,,
 jugcraft:picket_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/picket_rifle.json,,
 jugcraft:pickled_beets,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/pickled_beets.json,,
+jugcraft:pickled_olives,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/pickled_olives.json,,
 jugcraft:pickled_peppers,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/pickled_peppers.json,,
 jugcraft:pinata_stick,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pinata_stick.json,,
 jugcraft:pine_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pine_fence.json,,
 jugcraft:pine_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pine_fence_gate.json,,
-jugcraft:pine_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/pine_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/pine.json
+jugcraft:pine_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/pine_sapling.json | src/main/resources/data/jugcraft/recipe/tree_growing/stone_pine_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/pine.json | src/main/resources/data/jugcraft/worldgen/feature/pinyon.json | src/main/resources/data/jugcraft/worldgen/feature/stone_pine.json | src/main/resources/data/jugcraft/worldgen/feature/umbrella_pine.json
 jugcraft:pine_needles,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/pine.json
+jugcraft:pine_nuts,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/stone_pine,,
 jugcraft:pine_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pine_planks.json | src/main/resources/data/jugcraft/recipe/sawing/pine_logs.json,,
 jugcraft:pine_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/pine_sapling.json,,
 jugcraft:pine_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pine_slab.json,,
@@ -4816,6 +4909,7 @@ jugcraft:roasted_chestnuts,chain_with_acquisition_evidence,,src/main/resources/d
 jugcraft:roasted_corn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_corn.json | src/main/resources/data/jugcraft/recipe/roasted_corn_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_corn_from_smoking.json,,
 jugcraft:roasted_eggplant,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_eggplant.json | src/main/resources/data/jugcraft/recipe/roasted_eggplant_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_eggplant_from_smoking.json,,
 jugcraft:roasted_mutton_chops,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/roasted_mutton_chops.json,,
+jugcraft:roasted_pine_nuts,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_pine_nuts.json | src/main/resources/data/jugcraft/recipe/roasted_pine_nuts_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_pine_nuts_from_smoking.json,,
 jugcraft:roasted_porcini,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_porcini.json | src/main/resources/data/jugcraft/recipe/roasted_porcini_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_porcini_from_smoking.json,,
 jugcraft:roasted_pumpkin_seeds,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/roasted_pumpkin_seeds.json | src/main/resources/data/jugcraft/recipe/roasted_pumpkin_seeds_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_pumpkin_seeds_from_smoking.json,,
 jugcraft:roasted_sunflower_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_sunflower_seeds.json | src/main/resources/data/jugcraft/recipe/roasted_sunflower_seeds_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_sunflower_seeds_from_smoking.json,,
@@ -4865,8 +4959,11 @@ jugcraft:rowan_berries,chain_with_acquisition_evidence,,tools/agriculture.py:TRE
 jugcraft:rowan_jelly,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/rowan_jelly.json,,
 jugcraft:rowan_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/rowan.json
 jugcraft:rowan_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/rowan_sapling.json,,
-jugcraft:rubber,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/kettle_rubber.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/reclaim_rubber_offcuts.json | src/main/resources/data/jugcraft/recipe/polymerization/butadiene.json,,src/main/resources/data/jugcraft/loot_table/entities/raider_blimp.json
+jugcraft:rubber,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/kettle_rubber.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/reclaim_rubber_offcuts.json | src/main/resources/data/jugcraft/recipe/polymerization/butadiene.json | src/main/resources/data/jugcraft/recipe/pot_cooking/rubber.json,,src/main/resources/data/jugcraft/loot_table/entities/raider_blimp.json
+jugcraft:rubber_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/rubber_tree.json
+jugcraft:rubber_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/rubber_tree_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/rubber_tree.json
 jugcraft:rubber_offcut,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/extrude_hose.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/extrude_insulation.json,,
+jugcraft:rubber_tree_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/rubber_tree_sapling.json,,
 jugcraft:runebound_moonblade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/runebound_moonblade.json,,
 jugcraft:runebound_nodachi,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/runebound_nodachi.json,,
 jugcraft:runebound_staff,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/runebound_staff.json,,
@@ -4886,6 +4983,8 @@ jugcraft:saffron_rice,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:sage,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/sage.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:sage_and_onion_stuffing,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/sage_and_onion_stuffing.json,,
 jugcraft:sage_bundle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sage_bundle.json,,
+jugcraft:sagebrush_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/sagebrush.json
+jugcraft:sagebrush_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/sagebrush_sapling.json,,
 jugcraft:salamander_charm,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/cinder_tyrant.json
 jugcraft:salmon_roll,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/salmon_roll.json,,
 jugcraft:salmon_slice,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cutting/salmon_slice.json,,
@@ -4902,7 +5001,7 @@ jugcraft:sandbags_stairs,recipe_chain_reachable,,src/main/resources/data/jugcraf
 jugcraft:sapper_revolver,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sapper_revolver.json,,
 jugcraft:sauerkraut,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sauerkraut.json,,
 jugcraft:sauteed_chanterelles,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sauteed_chanterelles.json | src/main/resources/data/jugcraft/recipe/sauteed_chanterelles_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/sauteed_chanterelles_from_smoking.json,,
-jugcraft:sawdust,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ecology/cutting/azalea_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/azalea_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/coconut_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/coconut_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/flowering_azalea_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/flowering_azalea_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/maple_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/maple_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/walnut_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/walnut_wood.json | src/main/resources/data/jugcraft/recipe/sawing/acacia_logs.json | src/main/resources/data/jugcraft/recipe/sawing/aspen_logs.json | src/main/resources/data/jugcraft/recipe/sawing/bald_cypress_logs.json | src/main/resources/data/jugcraft/recipe/sawing/bamboo_blocks.json | src/main/resources/data/jugcraft/recipe/sawing/birch_logs.json | src/main/resources/data/jugcraft/recipe/sawing/cedar_logs.json | src/main/resources/data/jugcraft/recipe/sawing/cherry_logs.json | src/main/resources/data/jugcraft/recipe/sawing/chestnut_logs.json | src/main/resources/data/jugcraft/recipe/sawing/crimson_stems.json | src/main/resources/data/jugcraft/recipe/sawing/cypress_logs.json | src/main/resources/data/jugcraft/recipe/sawing/dark_oak_logs.json | src/main/resources/data/jugcraft/recipe/sawing/dead_logs.json | src/main/resources/data/jugcraft/recipe/sawing/eucalyptus_logs.json | src/main/resources/data/jugcraft/recipe/sawing/fir_logs.json | src/main/resources/data/jugcraft/recipe/sawing/fruitwood_logs.json | src/main/resources/data/jugcraft/recipe/sawing/jacaranda_logs.json | src/main/resources/data/jugcraft/recipe/sawing/jungle_logs.json | src/main/resources/data/jugcraft/recipe/sawing/larch_logs.json | src/main/resources/data/jugcraft/recipe/sawing/magnolia_logs.json | src/main/resources/data/jugcraft/recipe/sawing/mahogany_logs.json | src/main/resources/data/jugcraft/recipe/sawing/mangrove_logs.json | src/main/resources/data/jugcraft/recipe/sawing/maple_logs.json | src/main/resources/data/jugcraft/recipe/sawing/oak_logs.json | src/main/resources/data/jugcraft/recipe/sawing/pale_oak_logs.json | src/main/resources/data/jugcraft/recipe/sawing/palm_logs.json | src/main/resources/data/jugcraft/recipe/sawing/persimmon_logs.json | src/main/resources/data/jugcraft/recipe/sawing/pine_logs.json | src/main/resources/data/jugcraft/recipe/sawing/redwood_logs.json | src/main/resources/data/jugcraft/recipe/sawing/spruce_logs.json | src/main/resources/data/jugcraft/recipe/sawing/warped_stems.json | src/main/resources/data/jugcraft/recipe/sawing/willow_logs.json | src/main/resources/data/jugcraft/recipe/sawing/yew_logs.json,,
+jugcraft:sawdust,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ecology/cutting/azalea_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/azalea_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/coconut_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/coconut_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/flowering_azalea_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/flowering_azalea_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/maple_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/maple_wood.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/walnut_log.json | src/main/resources/data/jugcraft/recipe/ecology/cutting/walnut_wood.json | src/main/resources/data/jugcraft/recipe/sawing/acacia_logs.json | src/main/resources/data/jugcraft/recipe/sawing/aspen_logs.json | src/main/resources/data/jugcraft/recipe/sawing/bald_cypress_logs.json | src/main/resources/data/jugcraft/recipe/sawing/bamboo_blocks.json | src/main/resources/data/jugcraft/recipe/sawing/baobab_logs.json | src/main/resources/data/jugcraft/recipe/sawing/birch_logs.json | src/main/resources/data/jugcraft/recipe/sawing/cedar_logs.json | src/main/resources/data/jugcraft/recipe/sawing/cherry_logs.json | src/main/resources/data/jugcraft/recipe/sawing/chestnut_logs.json | src/main/resources/data/jugcraft/recipe/sawing/crimson_stems.json | src/main/resources/data/jugcraft/recipe/sawing/cypress_logs.json | src/main/resources/data/jugcraft/recipe/sawing/dark_oak_logs.json | src/main/resources/data/jugcraft/recipe/sawing/dead_logs.json | src/main/resources/data/jugcraft/recipe/sawing/dragonblood_logs.json | src/main/resources/data/jugcraft/recipe/sawing/eucalyptus_logs.json | src/main/resources/data/jugcraft/recipe/sawing/fig_logs.json | src/main/resources/data/jugcraft/recipe/sawing/fir_logs.json | src/main/resources/data/jugcraft/recipe/sawing/fruitwood_logs.json | src/main/resources/data/jugcraft/recipe/sawing/holly_logs.json | src/main/resources/data/jugcraft/recipe/sawing/jacaranda_logs.json | src/main/resources/data/jugcraft/recipe/sawing/jungle_logs.json | src/main/resources/data/jugcraft/recipe/sawing/juniper_logs.json | src/main/resources/data/jugcraft/recipe/sawing/larch_logs.json | src/main/resources/data/jugcraft/recipe/sawing/magnolia_logs.json | src/main/resources/data/jugcraft/recipe/sawing/mahogany_logs.json | src/main/resources/data/jugcraft/recipe/sawing/mango_logs.json | src/main/resources/data/jugcraft/recipe/sawing/mangrove_logs.json | src/main/resources/data/jugcraft/recipe/sawing/maple_logs.json | src/main/resources/data/jugcraft/recipe/sawing/oak_logs.json | src/main/resources/data/jugcraft/recipe/sawing/olive_logs.json | src/main/resources/data/jugcraft/recipe/sawing/pale_oak_logs.json | src/main/resources/data/jugcraft/recipe/sawing/palm_logs.json | src/main/resources/data/jugcraft/recipe/sawing/persimmon_logs.json | src/main/resources/data/jugcraft/recipe/sawing/pine_logs.json | src/main/resources/data/jugcraft/recipe/sawing/redwood_logs.json | src/main/resources/data/jugcraft/recipe/sawing/rubber_log.json | src/main/resources/data/jugcraft/recipe/sawing/spruce_logs.json | src/main/resources/data/jugcraft/recipe/sawing/tamarisk_logs.json | src/main/resources/data/jugcraft/recipe/sawing/warped_stems.json | src/main/resources/data/jugcraft/recipe/sawing/willow_logs.json | src/main/resources/data/jugcraft/recipe/sawing/yew_logs.json | src/main/resources/data/jugcraft/recipe/sawing/yucca_logs.json,,
 jugcraft:sawmill,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sawmill.json,,
 jugcraft:scarab_boots,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:scarab_chestplate,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
@@ -4913,6 +5012,10 @@ jugcraft:scarecrow_hat,recipe_chain_reachable,,src/main/resources/data/jugcraft/
 jugcraft:scrying_glass,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/scrying_glass.json,,
 jugcraft:scuba_mask,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/scuba_mask.json,,
 jugcraft:scuba_tank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/scuba_tank.json,,
+jugcraft:sea_grape_jelly,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/sea_grape_jelly.json,,
+jugcraft:sea_grape_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/sea_grape.json
+jugcraft:sea_grape_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/sea_grape_sapling.json,,
+jugcraft:sea_grapes,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/sea_grape,,
 jugcraft:sea_oats,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/sea_oats.json
 jugcraft:sealed_orders,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sealed_orders.json | src/main/resources/data/jugcraft/recipe/sealed_orders_from_salvaged_coil.json,,
 jugcraft:seam_cutter,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/seam_cutter.json,,
@@ -5164,6 +5267,8 @@ jugcraft:stoker,chain_with_acquisition_evidence,,src/main/resources/data/jugcraf
 jugcraft:stolas_starflower,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/styx/Styxhexenhammer.java
 jugcraft:stone_brick_sarcophagus,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/stone_brick_sarcophagus.json,,
 jugcraft:stone_paxel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/stone_paxel.json,,
+jugcraft:stone_pine_needles,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/pinyon.json | src/main/resources/data/jugcraft/worldgen/feature/stone_pine.json | src/main/resources/data/jugcraft/worldgen/feature/umbrella_pine.json
+jugcraft:stone_pine_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/stone_pine_sapling.json,,
 jugcraft:stonemasons_chisel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/stonemasons_chisel.json,,
 jugcraft:storable_bipropellant_motor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/cryo_storable_bipropellant_motor.json,,
 jugcraft:storage_rack,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/storage_rack.json,,
@@ -5197,6 +5302,8 @@ jugcraft:stripped_aspen_log,chain_with_acquisition_evidence,,src/main/java/io/gi
 jugcraft:stripped_aspen_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_aspen_wood.json,,
 jugcraft:stripped_bald_cypress_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_bald_cypress_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_bald_cypress_wood.json,,
+jugcraft:stripped_baobab_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_baobab_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_baobab_wood.json,,
 jugcraft:stripped_cedar_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_cedar_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_cedar_wood.json,,
 jugcraft:stripped_chestnut_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
@@ -5206,22 +5313,34 @@ jugcraft:stripped_cypress_log,chain_with_acquisition_evidence,,src/main/java/io/
 jugcraft:stripped_cypress_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_cypress_wood.json,,
 jugcraft:stripped_dead_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_dead_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_dead_wood.json,,
+jugcraft:stripped_dragonblood_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_dragonblood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_dragonblood_wood.json,,
 jugcraft:stripped_eucalyptus_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_eucalyptus_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_eucalyptus_wood.json,,
+jugcraft:stripped_fig_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_fig_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_fig_wood.json,,
 jugcraft:stripped_fir_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_fir_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_fir_wood.json,,
 jugcraft:stripped_fruitwood_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_fruitwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_fruitwood_wood.json,,
+jugcraft:stripped_holly_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_holly_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_holly_wood.json,,
 jugcraft:stripped_jacaranda_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_jacaranda_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_jacaranda_wood.json,,
+jugcraft:stripped_juniper_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_juniper_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_juniper_wood.json,,
 jugcraft:stripped_larch_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_larch_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_larch_wood.json,,
 jugcraft:stripped_magnolia_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_magnolia_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_magnolia_wood.json,,
 jugcraft:stripped_mahogany_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_mahogany_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_mahogany_wood.json,,
+jugcraft:stripped_mango_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_mango_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_mango_wood.json,,
 jugcraft:stripped_maple_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_maple_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_maple_wood.json,,
+jugcraft:stripped_olive_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_olive_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_olive_wood.json,,
 jugcraft:stripped_palm_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_palm_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_palm_wood.json,,
 jugcraft:stripped_persimmon_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
@@ -5230,10 +5349,14 @@ jugcraft:stripped_pine_log,chain_with_acquisition_evidence,,src/main/java/io/git
 jugcraft:stripped_pine_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_pine_wood.json,,
 jugcraft:stripped_redwood_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_redwood_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_redwood_wood.json,,
+jugcraft:stripped_tamarisk_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_tamarisk_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_tamarisk_wood.json,,
 jugcraft:stripped_willow_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_willow_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_willow_wood.json,,
 jugcraft:stripped_yew_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
 jugcraft:stripped_yew_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_yew_wood.json,,
+jugcraft:stripped_yucca_log,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/StrippableLogBlock.java,,
+jugcraft:stripped_yucca_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stripped_yucca_wood.json,,
 jugcraft:structural_module,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/structural_module.json,,
 jugcraft:stuffed_potato,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stuffed_potato.json,,
 jugcraft:stuffed_pumpkin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stuffed_pumpkin.json,,
@@ -5278,6 +5401,15 @@ jugcraft:taglock,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe
 jugcraft:tall_lavender,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/tall_lavender.json
 jugcraft:tall_specimen_jar,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tall_specimen_jar.json,,
 jugcraft:tall_withered_grass,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/tall_withered_grass.json
+jugcraft:tamarisk_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tamarisk_fence.json,,
+jugcraft:tamarisk_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tamarisk_fence_gate.json,,
+jugcraft:tamarisk_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/tamarisk.json
+jugcraft:tamarisk_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/tamarisk_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/tamarisk.json
+jugcraft:tamarisk_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sawing/tamarisk_logs.json | src/main/resources/data/jugcraft/recipe/tamarisk_planks.json,,
+jugcraft:tamarisk_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/tamarisk_sapling.json,,
+jugcraft:tamarisk_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tamarisk_slab.json,,
+jugcraft:tamarisk_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tamarisk_stairs.json,,
+jugcraft:tamarisk_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tamarisk_wood.json,,
 jugcraft:tank_earthing_boss,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tank_earthing_boss.json,,
 jugcraft:tank_foam_chamber,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tank_foam_chamber.json,,
 jugcraft:tank_foam_line,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tank_foam_line.json,,
@@ -5377,6 +5509,10 @@ jugcraft:travelling_water_screen,chain_with_acquisition_evidence,,src/main/resou
 jugcraft:treated_process_water_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:trebuchet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/trebuchet.json,,
 jugcraft:tree_farm,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_farm.json,,
+jugcraft:tree_fern_fronds,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/tree_fern.json
+jugcraft:tree_fern_sapling,natural_or_interaction_source,,,,
+jugcraft:tree_fern_trunk,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/tree_fern.json
+jugcraft:tree_tap,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tree_tap.json | src/main/resources/data/jugcraft/recipe/tree_tap_bucket.json,,
 jugcraft:trellis,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/trellis.json,,
 jugcraft:trench_lobber,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/trench_lobber.json,,
 jugcraft:trench_periscope,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/trench_periscope.json,,
@@ -5487,6 +5623,8 @@ jugcraft:watch_of_flowing_time,recipe_chain_reachable,,src/main/resources/data/j
 jugcraft:water_cooler,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/water_cooler.json,,
 jugcraft:water_wheel,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/water_wheel.json,,
 jugcraft:watergrass,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/watergrass.json
+jugcraft:wattle_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wattle.json | src/main/resources/data/jugcraft/worldgen/feature/wattle_bush.json
+jugcraft:wattle_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/wattle_sapling.json,,
 jugcraft:wax_melting_pot,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wax_melting_pot.json,,
 jugcraft:wayfarer_boots,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:wayfarer_chestplate,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
@@ -5535,6 +5673,7 @@ jugcraft:wild_mandrake,natural_or_interaction_source,,,,src/main/resources/data/
 jugcraft:wild_mint,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wild_mint.json
 jugcraft:wild_mustard,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wild_mustard.json
 jugcraft:wild_oats,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wild_oats.json
+jugcraft:wild_olive_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/olive_bush.json
 jugcraft:wild_onion,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wild_onion.json
 jugcraft:wild_parsley,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wild_parsley.json
 jugcraft:wild_peas,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wild_peas.json
@@ -5760,7 +5899,14 @@ jugcraft:yew_sapling,chain_with_acquisition_evidence,,src/main/resources/data/ju
 jugcraft:yew_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yew_slab.json,,
 jugcraft:yew_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yew_stairs.json,,
 jugcraft:yew_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yew_wood.json,,
-jugcraft:zeppelin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/alloys_zeppelin.json | src/main/resources/data/jugcraft/recipe/zeppelin.json,,
+jugcraft:yucca_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yucca_fence.json,,
+jugcraft:yucca_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yucca_fence_gate.json,,
+jugcraft:yucca_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/joshua_tree_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/joshua_tree.json
+jugcraft:yucca_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sawing/yucca_logs.json | src/main/resources/data/jugcraft/recipe/yucca_planks.json,,
+jugcraft:yucca_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yucca_slab.json,,
+jugcraft:yucca_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yucca_stairs.json,,
+jugcraft:yucca_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yucca_wood.json,,
+jugcraft:zeppelin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/alloys_zeppelin.json | src/main/resources/data/jugcraft/recipe/zeppelin.json | src/main/resources/data/jugcraft/recipe/zeppelin_aluminum_frame.json,,
 jugcraft:zero_ring,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/zero_ring.json,,
 jugcraft:zinc_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/zinc_block.json,,
 jugcraft:zinc_dust,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pulverizing/deepslate_zinc_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/raw_zinc.json | src/main/resources/data/jugcraft/recipe/pulverizing/washed_zinc_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/zinc_ingot.json | src/main/resources/data/jugcraft/recipe/pulverizing/zinc_ore.json,,
