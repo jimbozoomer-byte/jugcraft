@@ -64,6 +64,9 @@ class SurvivalGraphTests(unittest.TestCase):
         for name in ('ecology_walnut', 'ecology_walnut_door', 'ecology_walnut_cabinet',
                      'ecology_walnut_shelf', 'ecology_walnut_boat'):
             self.assertEqual('', rows['jugcraft:' + name]['reason'], 'Active walnut items must not be excluded')
+        for name in ('hdpe_offcut', 'rubber_offcut'):
+            self.assertEqual('intentional_noncraftable', rows['jugcraft:'+name]['status'])
+            self.assertIn('compatibility offcut', rows['jugcraft:'+name]['reason'])
         # Treasure is not silently converted into an ordinary crafting product.
         self.assertFalse(any(e['source'].find('survival_completion') >= 0 and
                              any(o in {'jugcraft:needle_rapier', 'jugcraft:vesper_scythe'} for o in e['outputs'])

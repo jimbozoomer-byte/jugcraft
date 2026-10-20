@@ -56,7 +56,8 @@ public class ChemistryIntegrationClientGameTests implements FabricClientGameTest
             world.getServer().runCommand("gamemode survival @a");
             context.waitTicks(10);context.getInput().pressKey(options->options.keyInventory);
             context.waitTicks(10);context.takeScreenshot("jugcraft_chemistry_inventory");
-            context.runOnClient(client->client.setScreen(null));
+            context.getInput().pressKey(com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE);
+            context.waitForScreen(null);
             save=world.getWorldSave();
         }
         try(TestSingleplayerContext world=save.open()) {
