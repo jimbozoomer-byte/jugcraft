@@ -24,6 +24,7 @@ import menu
 import rice
 import soil
 import orchard
+from trees_data import trunk_placer as orchard_trunk_placer
 import cakes
 import cake_data
 import pie_tart_data
@@ -2906,6 +2907,11 @@ def check_wood_switches():
             placed_by(patch["feature"], ag.FEATURE if name in inside else f"(patch_{name}, outside registerWorldgen)")
     woods = {shape: info["wood"] for shape, info in tr.SHAPES.items() if info["wood"] in ag.WOOD_SETS}
     woods.update({f"fallen_{wood}_tree": wood for wood in tr.FALLEN})
+    for tree in orchard.TREES:
+        wood = orchard.log(tree).split(":")[-1].removesuffix("_log")
+        if wood in ag.WOOD_SETS:
+            woods[orchard.feature(tree)] = wood
+            woods[tree] = wood
     for placed, (feature, _) in bm.PLACED_TREES.items():
         ns, path = split(feature)
         if ns == MOD and path in ag.WOOD_SETS:
@@ -4898,8 +4904,7 @@ def check_orchard():
         if (feature.get("trunk_provider", {}).get("id") != orchard.log(tree)
                 or feature.get("foliage_placer", {}).get("type") != placer
                 or feature.get("foliage_provider", {}).get("id") != f"{MOD}:{leaves}"
-                or feature.get("trunk_placer", {}).get("base_height") != info["trunk"]["base_height"]
-                or feature.get("trunk_placer", {}).get("height_rand_a") != info["trunk"]["height_rand_a"]
+                or feature.get("trunk_placer") != orchard_trunk_placer({"type": "straight", **info["trunk"]})
                 or feature.get("foliage_placer", {}).get("radius") != info["foliage"]["radius"]
                 or feature.get("foliage_placer", {}).get("height") != info["foliage"]["height"]):
             err(f"worldgen/feature/{orchard.feature(tree)}.json differs from tools/orchard.py TREES[{tree!r}]")
@@ -4917,8 +4922,10 @@ def check_orchard():
     stem = orchard.BANANA_STEM["block"]
     if f'registerBlock("{stem}", RotatedPillarBlock::new' not in main:
         err(f"JugcraftAgriculture must register {stem} as a RotatedPillarBlock")
-    if any(tree_info.get("log", f"{MOD}:{stem}") != f"{MOD}:{stem}" for tree_info in orchard.TREES.values()):
-        err("tools/orchard.py: a tree's own log must be the banana's stem, the only one registered")
+    for tree in orchard.TREES:
+        expected_log = {"pear": "jugcraft:fruitwood_log", "peach": "minecraft:cherry_log", "banana": "jugcraft:banana_stem"}.get(tree, "minecraft:oak_log")
+        if orchard.log(tree) != expected_log:
+            err(f"{tree}: orchard log must be {expected_log}")
     state = load(ASSETS / "blockstates" / f"{stem}.json") or {}
     if set(state.get("variants", {})) != {"axis=x", "axis=y", "axis=z"}:
         err(f"{stem}: blockstate does not cover every axis")

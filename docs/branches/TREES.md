@@ -1630,6 +1630,11 @@ deepen the barren basin's ancient mood without filling it.
 
 ### Batch 14: orchard fruit (agriculture slice 4)
 
+Implementation: [PR #437](https://github.com/jimbozoomer-byte/jugcraft/pull/437),
+`codex/tree-generation-batch-14`. See [the feature record](../features/trees-batch-14.md)
+for current dimensions, exact selector shares, reuse of the already shipped agriculture
+orchards and validation. The roster below records the original planning rationale.
+
 `AGRICULTURE.md` already plans pear, peach, lemon and orange for slice 4, so they are built there with the
 `AppleLeavesBlock` pattern and placed wild by this roster. The same PR:
 - places the existing apple tree in the Orchard (`apple_tree_checked`, with an `apple_tree_bees` variant), in place of

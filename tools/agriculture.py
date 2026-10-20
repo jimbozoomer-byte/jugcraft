@@ -447,7 +447,7 @@ WOOD_SWITCHES = {"chestnut": [FEATURE, "biomes"], "larch": ["alpine_spawn", "bio
                  "aspen": ["biomes"], "fir": ["biomes"], "dead": ["biomes"], "jacaranda": ["biomes"], "willow": ["biomes"],
                  "palm": ["biomes"], "cypress": ["biomes"], "redwood": ["biomes"], "eucalyptus": ["biomes"],
                  "mahogany": ["biomes"], "cedar": ["biomes"], "pine": ["biomes", "alpine_spawn"], "yew": ["biomes"],
-                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"], "baobab": ["biomes"], "fig": ["biomes"], "mango": ["biomes"]}
+                 "bald_cypress": ["biomes"], "magnolia": ["biomes"], "fruitwood": ["biomes", "agriculture"], "persimmon": ["biomes"], "juniper": ["biomes", "alpine_spawn"], "holly": ["biomes"], "olive": ["biomes"], "tamarisk": ["biomes"], "yucca": ["biomes"], "dragonblood": ["biomes"], "baobab": ["biomes"], "fig": ["biomes"], "mango": ["biomes"]}
 
 
 def wood_blocks(wood, display):
@@ -1609,7 +1609,7 @@ CIDER = {"tree": {"sapling": "apple_sapling", "leaves": "apple_leaves", "seed": 
                   "biomes": ["IS_PLAINS", "IS_FLORAL"], "rarity": 12, "display": {"apple_sapling": "Apple Sapling",
                                                                                     "apple_leaves": "Apple Leaves"}},
          "press": {"block": "cider_press", "display": "Cider Press", "apples": "jugcraft:cider_apples",
-                   "apple_items": ["minecraft:apple"], "capacity": 8, "trough": 8, "turns": 4, "work_ticks": 8,
+                   "apple_items": ["minecraft:apple", "jugcraft:pear"], "capacity": 8, "trough": 8, "turns": 4, "work_ticks": 8,
                    "apples_per_pomace": 2},
          "barrel": {"block": "cider_barrel", "display": "Cider Barrel", "capacity": 16, "sparkling_ticks": 24000,
                     "aged_ticks": 72000, "stages": ["sweet_cider", "sparkling_cider", "aged_cider"]}}
@@ -1820,7 +1820,8 @@ CANDY = {"kettle": "candy_kettle", "kettle_display": "Candy Kettle", "tray": "ca
                       "spiced": {"display": "Spiced", "items": ["jugcraft:mulling_spices"], "effect": "FIRE_RESISTANCE", "seconds": 15,
                                  "color": 0xA0522D},
                       "chestnut": {"display": "Chestnut", "items": ["jugcraft:roasted_chestnuts"], "effect": "HASTE", "seconds": 15,
-                                   "color": 0x8A5A30}}}
+                                   "color": 0x8A5A30},
+                      "orange": {"display": "Orange", "items": ["jugcraft:orange"], "effect": "JUMP_BOOST", "seconds": 15, "color": 0xE0861C}}}
 
 
 def candy_blocks():
