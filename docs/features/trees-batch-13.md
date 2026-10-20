@@ -194,3 +194,25 @@ in the running game. The owner approved the darker furniture and requested PR #4
 The focused local run does not claim the entire server/client suite, two-client
 multiplayer, external launcher import, real-day seasonal transitions or a
 population-level performance benchmark. CI retains the normal full server suite.
+
+### Foundation CI repair (20 October 2026)
+
+The game build passed, but Foundation exposed two stale checks. The saved item
+registry lacked 14 new walnut IDs, and the Batch 6b holly test still expected the
+pre-walnut oak shares. OpenAI Codex (GPT-6) refreshed the registry using
+`SurvivalRecipeGameTests.exportActualItemRegistryForTheAcquisitionAudit`: all
+7,714 real IDs are retained, with 14 additions and no removals.
+
+The acquisition adapter now records the actual walnut log/leaf generation and
+seasonal nut/husk harvest. Only the eleven retired basic walnut IDs are marked
+as saved-world compatibility entries; they no longer seed fresh-world chains.
+Nuts, recovered furniture and boats remain active audited survival items.
+Invalid-ingredient checks, unresolved-chain checks and cycle detection remain
+intact. The holly test still checks exact species sets, absolute shares and tree
+attempt counts, including normal/large walnuts and the reduced default oak slot.
+
+Validation: the single registry-export server test passes with
+`-PgameTestFilter=jugcraft-test:*export_actual_item_registry*`; 22 relevant Python
+tests pass across survival recipes, agriculture recipe loops, holly and walnut
+worldgen. Repository documentation and diff checks pass. No gameplay, textures,
+preview saves or dependencies changed for this repair.
