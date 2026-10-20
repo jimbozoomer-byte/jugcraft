@@ -48,6 +48,9 @@ public final class PetroItems {
 	public static Item VANADIUM_PENTOXIDE;
 	public static Item GASIFICATION_RESIDUE;
 	public static Item AMMONIUM_NITRATE;
+	/** Boron (docs/features/boric-acid.md): boric acid from borax, and the reactor's control rod assembly made with it. */
+	public static Item BORIC_ACID;
+	public static Item CONTROL_ROD_ASSEMBLY;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -233,6 +236,8 @@ public final class PetroItems {
 		// A nitrogen fertilizer: superphosphate's 5x5 area, three doses a crop instead of two.
 		AMMONIUM_NITRATE = JugcraftRegistry.item("ammonium_nitrate",
 				properties -> new FertilizerItem(properties, FertilizerItem.RADIUS, AMMONIUM_NITRATE_DOSES));
+		BORIC_ACID = JugcraftRegistry.item("boric_acid");
+		CONTROL_ROD_ASSEMBLY = JugcraftRegistry.item("control_rod_assembly", properties -> new Item(properties.stacksTo(16)));
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -542,6 +547,8 @@ public final class PetroItems {
 			output.accept(VANADIUM_PENTOXIDE);
 			output.accept(GASIFICATION_RESIDUE);
 			output.accept(AMMONIUM_NITRATE);
+			output.accept(BORIC_ACID);
+			output.accept(CONTROL_ROD_ASSEMBLY);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

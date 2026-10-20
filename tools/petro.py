@@ -206,6 +206,10 @@ ITEMS = {
     # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
     # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
     "ammonium_nitrate": "Ammonium Nitrate",
+    # Boron (docs/features/boric-acid.md): borax freed with sulfuric acid in the Chemical Reactor gives boric acid; with
+    # tungsten and steel it makes the neutron-absorbing control rod assembly every reactor pressure vessel holds.
+    "boric_acid": "Boric Acid",
+    "control_rod_assembly": "Control Rod Assembly",
 }
 
 
@@ -422,6 +426,9 @@ FLUID_RECIPES = {
         {"name": "aspirin", "items": [("jugcraft:salicylic_acid", 2), ("jugcraft:cider_vinegar", 1)],
          "fluids": [("jugcraft:sulfuric_acid", 50)], "results": [("jugcraft:aspirin", 4)], "ticks": 120,
          "features": ["agriculture", "sulfur", "machines"]},
+        # Boric acid (docs/features/boric-acid.md): borax freed with sulfuric acid. Quantities for review.
+        {"name": "boric_acid", "items": [("jugcraft:borax", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+         "results": [("jugcraft:boric_acid", 2)], "ticks": 100, "features": ["silicon", "sulfur"]},
         # Saponification (batch 15): fat (rotten flesh, rendered) boiled in lye sets into soap.
         {"name": "soap", "items": [("minecraft:rotten_flesh", 2)], "fluids": [("jugcraft:lye", 250)],
          "results": [("jugcraft:soap", 4)], "ticks": 80, "features": ["salt"]},
