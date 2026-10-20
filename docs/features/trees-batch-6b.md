@@ -1,6 +1,6 @@
 # Tree generation batch 6b: holly
 
-Status: implemented, awaiting owner inspection in [draft PR #404](https://github.com/jimbozoomer-byte/jugcraft/pull/404), 16 October 2026. Public branch: `codex/tree-generation-batch-6b` in `speedygroyper/jugcraft`. Actual tool/model: OpenAI Codex (GPT-6). Based on the approved batch 6 branch (PR #399), already reconciled with main after #398. Batch 7 is excluded.
+Status: implemented, owner-approved and ready for review in [PR #404](https://github.com/jimbozoomer-byte/jugcraft/pull/404), 16 October 2026. Public branch: `codex/tree-generation-batch-6b` in `speedygroyper/jugcraft`. Actual tool/model: OpenAI Codex (GPT-6). Based on the approved batch 6 branch (PR #399), already reconciled with main after #398. Batch 7 is excluded.
 
 ## Scope
 
@@ -43,6 +43,12 @@ Door decorations add a saved entity registration; retain this version or a later
 Focused server validation: all five wreath tests passed (`jugcraft-test:*wreath*`). They cover 128 placements across both wreath types, four door orientations, both hinges and halves, both physical faces, and initially open/closed doors. Checks include manual oak and powered iron opening/closing, serialized face/appearance/anchor round-trips, duplicate-placement refusal, obstruction/support-loss drops, mum recolouring, survival/creative removal, wall behavior, and migration of an older block attachment. The full suite and full data/art audit were not rerun for this correction, as requested.
 
 The single `HollyClientGameTests` class passed with the pinned Sodium/Iris setup and with optional integrations absent. Actual mouse/key input placed a wreath on an open door's inner face, picked it, closed the door through it, and punched it off. Both configurations saved and reopened the gallery, loading the door display before asserting all three saved wreaths and their faces/colours. Open/closed and front/back screenshots were inspected. The refreshed save opens beside the wreaths at 1050.5, 180, -865.5; earlier inspection saves are preserved. The ordinary Minecraft client joined this cleaned save at that position. Its delivery copy preserves all 90 save files; a scan of 6,254 region records found no test content, and only the same three unused development-metadata files were changed.
+
+### Generated language ordering correction, 16 October
+
+The owner approved the corrected wreaths and requested review readiness, then reported the failing PR check. GitHub run `38966841324`, job `117195303739`, failed its generated-resource comparison because `entity.jugcraft.door_wreath` had been inserted after `chair_seat` instead of its alphabetical position after `dirge`. All eight client shards, their combined check, the optional-integrations-absent build/server tests and repository check had passed on `2dc2353fe`.
+
+Rewrote the language JSON using the generator's existing sorted-key writer. Verified every translation key/value is unchanged and the complete file matches that ordering and serialization. This changes only generated JSON ordering; the previously approved tree/wreath behavior and inspection world remain the same. Local gameplay suites were not rerun for this data-order-only correction. Actual tool/model: OpenAI Codex (GPT-6).
 
 ### In-game screenshots
 
