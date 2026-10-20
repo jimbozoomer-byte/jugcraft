@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
@@ -21,6 +22,13 @@ public final class OwnerCollectionsNetworkTests implements FabricClientGameTest 
     private static Path coordination(){return Path.of(System.getProperty("jugcraft.ownerTestCoord","owner-network-evidence")).toAbsolutePath();}
     private static void mark(String name,String text){try{Files.createDirectories(coordination());Files.writeString(coordination().resolve(name),text);}catch(Exception e){throw new RuntimeException(e);}}
     private static boolean marked(String name){return Files.exists(coordination().resolve(name));}
+    private static AssertionError peerFailure(String message) {
+        var tail = new ArrayDeque<String>();
+        try (var lines = Files.lines(coordination().resolve("peer.log"))) {
+            lines.forEach(line -> { if (tail.size() == 120) tail.removeFirst(); tail.addLast(line); });
+        } catch (IOException e) { tail.addLast("Could not read peer log: " + e); }
+        return new AssertionError(message + "\nSecond-client log tail:\n" + String.join("\n", tail));
+    }
     @Override public void runTest(ClientGameTestContext c){
         if(System.getProperty(PEER)!=null){peer(c);return;}
         Process peer=null;
@@ -37,7 +45,7 @@ public final class OwnerCollectionsNetworkTests implements FabricClientGameTest 
                     server.runOnServer(s->s.getPlayerList().getWhiteList().add(new net.minecraft.server.players.UserWhiteListEntry(net.minecraft.server.players.NameAndId.createOffline("OwnerPeer"))));
                     peer=launchPeer(server.computeOnServer(s->s.getPort()),c);mark("peer-pid.txt",Long.toString(peer.pid()));
                     final Process startingPeer=peer;peer.onExit().thenAccept(done->mark("peer-exit.txt",Integer.toString(done.exitValue())));
-                    server.waitFor(s->{if(!startingPeer.isAlive())throw new AssertionError("Second client exited before login: "+startingPeer.exitValue()+"; see peer.log");return s.getPlayerList().getPlayerByName("OwnerPeer")!=null;},2400);
+                    server.waitFor(s->{if(!startingPeer.isAlive())throw peerFailure("Second client exited before login: "+startingPeer.exitValue());return s.getPlayerList().getPlayerByName("OwnerPeer")!=null;},2400);
                     server.runCommand("tp OwnerPeer @p[name=!OwnerPeer]");
                     server.runOnServer(s->{var p=s.getPlayerList().getPlayerByName("OwnerPeer");p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Menagerie.item("wildlife_capture_net")));});
                     mark("ready","");
@@ -50,8 +58,9 @@ public final class OwnerCollectionsNetworkTests implements FabricClientGameTest 
                     server.waitFor(s->s.overworld().getEntity(petId[0])==null,100);
                     mark("captured","");c.waitFor(mc->marked("peer-finished"),1200);
                     final Process other=peer;c.waitFor(mc->!other.isAlive(),1200);
-                    if(peer.exitValue()!=0)throw new AssertionError("Second client failed: see peer.log");
+                    if(peer.exitValue()!=0)throw peerFailure("Second client failed: "+peer.exitValue());
                 }
+                InProcessServerConfigs.beforeReconnect(server);
                 try(var connection=server.connect()){
                     connection.waitForChunksRender();
                     server.runOnServer(s->{var p=s.getPlayerList().getPlayer(ownerId[0]);if(p==null||p.getInventory().getNonEquipmentItems().stream().filter(stack->stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.EMPTY).copyTag().getStringOr("Keeper","").equals(ownerId[0].toString())).mapToInt(ItemStack::getCount).sum()!=1)throw new AssertionError("Exactly one captured pet must survive reconnect");});
