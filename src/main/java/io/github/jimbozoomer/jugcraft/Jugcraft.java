@@ -138,6 +138,12 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftWorldgen.register();
 		JugcraftParties.register();
 		registerMachineStylePack();
+		// Higher-priority data overrides only exist when the optional backpack mod is installed.
+		if (FabricLoader.getInstance().isModLoaded("travelersbackpack")) {
+			FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(container ->
+					ResourceLoader.registerBuiltinPack(id("travelers_backpack"), container,
+							Component.literal("Jugcraft: Backpack Progression"), PackActivationType.ALWAYS_ENABLED));
+		}
 		LOGGER.info("Jugcraft loaded");
 	}
 

@@ -169,6 +169,17 @@ MATRIX = {
         ["ConcordanceJournalClientGameTests", "ConcordanceComposerClientGameTests"],
         "No ritual-schematic, crucible or observatory screen is built; the workspaces have no narration (the plain "
         "screens do); keyboard use not tried by a person"),
+    "travelers-backpack": (
+        "No Concordance-specific behavior; Complete adds portable storage through the Trinkets Back slot and "
+        "Jugcraft industrial recipes, with variant abilities disabled",
+        "no backpack integration; Concordance progression is unchanged",
+        ["recipesUseIndustrialMaterialsAndRemoveBypasses", "backSlotAndPlacedAutomationRemainAvailable", "BackpackClientGameTests"],
+        "No essence tanks, magical upgrades or automatic resizing of existing bags"),
+    "forge-config-api-port": (
+        "No Concordance-specific behavior; loads and synchronizes Traveler's Backpack settings",
+        "Traveler's Backpack also must be absent; Concordance progression is unchanged",
+        ["sequentialSmithingPreservesContentsAndUsesApprovedCapacities"],
+        "Existing world config overrides and saved backpack slot counts require owner-managed changes"),
 }
 
 # Libraries the Concordance does not use: their mod ids must not appear in Jugcraft's code.

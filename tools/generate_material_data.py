@@ -1738,6 +1738,7 @@ def retro_trader_trades():
             "random_sequence": rid(f"trade_set/retro_trader/level_{level}")})
 
 
+
 def main():
     # Imported, authored and generated resources share namespaces. Delete only
     # stale files this generator previously owned, never whole resource folders.
@@ -1771,12 +1772,8 @@ def main():
     vehicle_bays.write()
     import owner_resource_patches
     owner_resource_patches.apply()
-    for relative in previous - WRITTEN_RESOURCES:
-        stale = (RES / relative).resolve()
-        if not stale.is_relative_to(RES.resolve()):
-            raise ValueError("Generated resource manifest escapes resource directory")
-        if stale.is_file():
-            stale.unlink()
+    from generated_resource_cleanup import prune
+    prune(RES, previous, WRITTEN_RESOURCES)
     RESOURCE_MANIFEST.write_text(json.dumps(sorted(WRITTEN_RESOURCES), indent=2) + "\n", encoding="utf-8")
 
 

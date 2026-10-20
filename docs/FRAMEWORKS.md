@@ -18,6 +18,8 @@ The machine-readable source of truth is [frameworks.lock.json](../distribution/f
 | [Trinkets Updated](https://github.com/Patbox/trinkets) | 4.2.1+26.3 | Required, common | Equipment slots; the maintained fork required by the selected Spell Engine release |
 | [Cloth Config](https://github.com/shedaniel/ClothConfig) | 26.3.159 | Required, common artifact; screens only on clients | Configuration; already required by Spell Engine, so do not add YACL just to duplicate it |
 | [Jade](https://github.com/Snownee/Jade) | 26.3.5+fabric | Optional to standalone Jugcraft; included on both sides of the pack | Inspection overlays and server-supplied machine state |
+| [Traveler's Backpack](https://github.com/Tiviacz1337/Travelers-Backpack) | 26.3–11.4.1 | Optional to standalone Jugcraft; included on both sides of the pack | [Industrial backpack progression](features/travelers-backpack.md), Trinkets Back slot and portable storage |
+| [Forge Config API Port](https://github.com/Fuzss/forgeconfigapiport) | 26.3.1 | Optional to standalone Jugcraft; common pack dependency of Traveler's Backpack | Native server/world backpack configuration |
 | [JEI](https://github.com/mezz/JustEnoughItems) | 31.8.0.49 | Optional; existing API integration; included in the pack | Recipes, ingredients, uses, catalysts |
 | [Fusion](https://github.com/SuperMartijn642/Fusion/wiki) | 1.3.16 for Fabric 26.3 | Optional, client | Connected, scrolling, continuous textures and overlays |
 | [LambDynamicLights](https://lambdaurora.dev/projects/lambdynamiclights/docs/v4/) | 4.13.0+26.3 | Optional, client | Moving item/entity illumination; data definitions or API integration |

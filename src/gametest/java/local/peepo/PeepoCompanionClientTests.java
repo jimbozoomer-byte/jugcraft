@@ -518,6 +518,7 @@ public final class PeepoCompanionClientTests implements FabricClientGameTest {
                 });
                 cookingGui(context,server);companionGui(context,server);
             }
+            io.github.jimbozoomer.jugcraft.test.InProcessServerConfigs.beforeReconnect(server);
             try(var connection=server.connect()){
                 connection.waitForChunksRender();
                 server.waitFor(s->s.overworld().getEntity(savedNpc) instanceof PeepoEntity,200);
