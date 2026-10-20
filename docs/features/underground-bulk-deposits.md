@@ -95,6 +95,21 @@ Jugcraft's `dp_gunmetal`, `dp_chrome`, `dp_olive` and `dp_hazard` textures and s
   the shared geometry/seam checks. The focused client inspection rendered the full mast and support collar,
   opened the drill screen, and saved/reopened both halves with depth and partial progress intact.
 
+## Main reconciliation — 20 October 2026
+
+OpenAI Codex (GPT-6) merged upstream main `62c32ad3a` into this branch at the owner's request.
+Resolved the generated-resource manifest by retaining both branches' additions (39 deposit/assembly
+resources and 302 upstream resources, with no removals on either side). Rebuilt the survival acquisition
+reports from the combined sources and verified the merged item registry preserves both sides.
+The approved assembly geometry and deposit behavior are unchanged.
+
+Validation on the combined code: all 14 focused deposit/drill server game tests passed
+(`runGameTest -I build/underground-focused.gradle -PgameTestFilter=jugcraft-test:*deposit*`);
+all five `test_survival_recipes.py` graph tests passed; the regenerated audit has zero ingredient
+diagnostics and a reachable assembly recipe. All 63 deposit/assembly JSON resources and 17 translations
+match their generator, and every generated deposit resource remains in the manifest.
+The full server suite and rendered client suite were not rerun for this reconciliation.
+
 ## Inspection world
 
 The gallery starts at `516 249 511`. The upgraded rig at `520 247 520` is paused at depth 8 with partial
