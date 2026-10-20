@@ -167,7 +167,7 @@ public class UndergroundDepositClientGameTests implements FabricClientGameTest {
 		int x = 22;
 		for (var family : UndergroundDepositFeature.Family.values()) {
 			for (var p : UndergroundDepositFeature.plan(family, RandomSource.create(300 + family.ordinal()), ORIGIN.offset(x, 251, 12))) {
-				boolean deep = p.getX() >= x;
+				boolean deep = p.getX() >= ORIGIN.getX() + x;
 				level.setBlock(p, JugcraftDeposits.BLOCKS.get((deep ? "deepslate_" : "") + family.id() + "_deposit").defaultBlockState(), 2);
 			}
 			sign(level, ORIGIN.offset(x, 247, 1), family.id().toUpperCase(Locale.ROOT), "CUTAWAY", "Stone / Deepslate", "1000 units/block");

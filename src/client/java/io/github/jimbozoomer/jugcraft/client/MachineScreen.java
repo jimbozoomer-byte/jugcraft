@@ -462,7 +462,9 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> {
 			return;
 		}
 		int labelY = MachineMenu.SLOT_Y - 10;
-		graphics.text(font, Component.translatable("container.jugcraft.label.in"), MachineMenu.inputX(kind, 0), labelY, theme.dim(), false);
+		if (kind.outputSlot() > 0) {
+			graphics.text(font, Component.translatable("container.jugcraft.label.in"), MachineMenu.inputX(kind, 0), labelY, theme.dim(), false);
+		}
 		if (kind.byproductSlots() <= 1) {
 			graphics.text(font, Component.translatable("container.jugcraft.label.out"), MachineMenu.OUTPUT_X, labelY, theme.dim(), false);
 		}

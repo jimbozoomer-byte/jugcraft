@@ -1,6 +1,6 @@
 # Underground bulk deposits and deep drilling
 
-Status: implemented; validation and owner preview in progress, owner approved 20 October 2026.
+Status: implemented in draft PR #438; awaiting owner inspection, scope approved 20 October 2026.
 Owner: jimbozoomer-byte. Implementation: OpenAI Codex (GPT-6), under the owner's direct authorization.
 Tier: optional steel workshop mining and logistics; extends the existing deposit drill.
 
@@ -69,9 +69,31 @@ Jugcraft's `dp_gunmetal`, `dp_chrome`, `dp_olive` and `dp_hazard` textures and s
   protection, shared-reserve, speed/efficiency, Prospector, recipe and configuration cases.
 - Shape coverage: 160 deterministic seeds per family, checking connected cores, count bounds, variation,
   dimensions and depth distribution.
-- Repository structure/documentation links passed. Shared art checks accepted the mast model.
-- Remaining at this checkpoint: final data/acquisition checks and normal-world client inspection/save reopening.
+- Repository structure/documentation links and the full material/data/recipe audit passed. Shared art checks
+  accepted the mast model. Deposit JSON/translations and the handbook match their generators.
+- Five focused survival-recipe graph tests passed, including circular-unlock prevention.
+- The actual runtime item-registry export passed. The refreshed acquisition audit has zero ingredient
+  diagnostics, a reachable assembly recipe and exactly five new registered items (assembly plus four dark-host
+  deposits). Natural deposit block items are explicitly noncraftable; their extracted resources retain existing
+  survival routes. The preview JAR built successfully.
+- `UndergroundDepositClientGameTests` passed in a normal Overworld with seed
+  `jugcraft-underground-deposits-1`. Ordinary generation produced connected coal/iron/copper/tin bodies of
+  111/92/55/41 blocks. Surface/cave biome feature attachments, the rendered drill menu, and real save/reopen
+  preserving all four bodies, a 777-unit reserve, depth 8 and 123 extraction ticks passed.
+- That client check exposed the shared menu's assumption that every processor has an input slot. Input labels
+  now require a real input slot; the drill's output-only menu opens and renders.
+- Inspection screenshots show natural bodies in lit glass cutaways and a separate artificial shape/rig gallery.
+  The source world is preserved; only unused development datapack/registry metadata is removed from delivery
+  copies, with all other saved values and region bytes checked.
 - Two-human-client playtesting remains separate from automated coverage.
+
+## Inspection world
+
+The gallery starts at `516 249 511`. The upgraded rig at `520 247 520` is paused at depth 8 with partial
+progress; place the supplied coal generator at `521 247 520` and fuel it to resume. Its chest is at
+`520 247 519`. Use the supplied assembly on the shorter basic rig to try upgrading it.
+Natural viewing-room coordinates: coal `-80 59 336`, iron `11856 -34 -643`, copper `4027 -2 1118`,
+tin `11883 7 -742`. Their original deposit blocks remain intact.
 
 ## Rollout
 
