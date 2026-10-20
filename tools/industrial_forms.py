@@ -51,7 +51,7 @@ NICKEL_METHANATION = f"{MOD}:nickel_methanation"
 # What the Infuser's bed socket holds: the nickel bed and the vanadium contact bed.
 CATALYST_BEDS = "catalyst_beds"
 # Oxidizing sulfur dioxide over the vanadium contact bed (the Infuser), and roasting the bed's vanadium oxide out of
-# washed iron ore with lye (the Bulk Chemical Reactor).
+# vanadium-bearing concentrate with lye (the Bulk Chemical Reactor; washed iron is a legacy fallback).
 CONTACT_CONVERSION = f"{MOD}:contact_conversion"
 VANADIUM_RECOVERY = f"{MOD}:vanadium_recovery"
 # Neutralizing nitric acid with ammonia into solid ammonium nitrate (the Bulk Chemical Reactor).
@@ -59,7 +59,8 @@ NITRATE_NEUTRALIZATION = f"{MOD}:nitrate_neutralization"
 
 # The owner's white tank family (the tank restyle) for the collection towers, with its checker band.
 TANK_BODY, TANK_TOP, TANK_CHECKER = "tk_body", "tk_top", "tk_checker"
-INSULATOR, BUSBAR, COPPER = "ceramic_insulator", "copper_busbar", "sp_copper"
+# Match the silver-grey process-machine fittings, without glossy insulator stripes.
+INSULATOR, BUSBAR, COPPER = "dw_steel_plate", "copper_busbar", "sp_copper"
 # Amber level strips that light while it works (steampunk_models.GLOW).
 STRIP = "dr_amber"
 # The Gas Burning Generator's materials (the art brief): graphite ribs, olive combustion covers, a pale heat shield,
@@ -595,9 +596,13 @@ FORM_RECIPES = {
         {"name": "bulk_sulfuric_acid", "capability": ACID_ABSORPTION,
          "fluids": [("minecraft:water", 500), (f"{MOD}:sulfur_trioxide", 250)],
          "fluid_results": [(f"{MOD}:sulfuric_acid", 500, 0)], "ticks": 100, "features": ["sulfur", "machines"]},
-        # The contact bed's vanadium, from the owner's selected vanadium-bearing iron concentrate: four washed iron ores
-        # roasted with 500 mB of lye (a salt roast, no sulfuric acid) give a vanadium pentoxide. 200 ticks at 96 JE/t.
-        {"name": "bulk_vanadium_pentoxide", "capability": VANADIUM_RECOVERY, "items": [(f"{MOD}:washed_iron_ore", 4)],
+        # Four vanadium-bearing concentrates roasted with lye give pentoxide without an acid gate.
+        # Preserve the ordinary washed-iron recipe only behind the explicit legacy fallback.
+        {"name": "bulk_vanadium_pentoxide_from_concentrate", "capability": VANADIUM_RECOVERY,
+         "items": [(f"{MOD}:vanadium_iron_concentrate", 4)],
+         "fluids": [(f"{MOD}:lye", 500)], "results": [(f"{MOD}:vanadium_pentoxide", 1)], "ticks": 200,
+         "features": ["salt", "machines"]},
+        {"name": "bulk_vanadium_pentoxide", "legacy_vanadium": True, "capability": VANADIUM_RECOVERY, "items": [(f"{MOD}:washed_iron_ore", 4)],
          "fluids": [(f"{MOD}:lye", 500)], "results": [(f"{MOD}:vanadium_pentoxide", 1)], "ticks": 200,
          "features": ["salt", "machines"]},
         # Ammonium nitrate (this change's proposal): HNO3 + NH3 -> NH4NO3, 250 mB of nitric acid (125 reaction amounts at
@@ -1816,7 +1821,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
         "key": {"B": "minecraft:brick", "N": "#c:ingots/nickel"}, "result": {"id": f"{MOD}:nickel_catalyst_bed", "count": 1}})
     for form, info in FORMS.items():
         lang[f"block.{MOD}.{form}"] = info["display"]
-        elements = MODELS[form]
+        from machine_connections import with_sockets, form_ports
+        elements = with_sockets(MODELS[form], form_ports(info))
         item_elements = elements + ITEM_EXTRAS.get(form, [])
         textures = {name: f"{MOD}:block/{name}" for name in model_writer.texture_names(item_elements)}
         textures["particle"] = f"{MOD}:block/{PARTICLE}"
@@ -1845,6 +1851,22 @@ def write_all(write, assets, data, lang, condition, self_drop):
             "fabric:load_conditions": [c for f in info["features"] for c in condition(f)],
             "type": "minecraft:crafting_shaped", "category": "misc", "pattern": pattern, "key": key,
             "result": {"id": f"{MOD}:{form}", "count": 1}})
+    for name, info in FORMS.items():
+        if "alternate_recipe" in info and info["alternate_recipe"] != info["recipe"]:
+            pattern, key = info["alternate_recipe"]
+            write(data / "recipe" / f"expanded_{name}.json", {
+                "fabric:load_conditions": condition("machines"), "type": "minecraft:crafting_shaped",
+                "category": "misc", "pattern": pattern, "key": key,
+                "result": {"id": f"{MOD}:{name}", "count": 1}})
+    machine_consolidation.write_labels(lang, FORMS)
+    import starter_chemistry
+    starter_chemistry.write_extras(write, assets, data, lang, condition)
+    import anaerobic
+    anaerobic.write_extras(write, assets, data, lang, condition)
+    biorefinery.write_extras(write, assets, data, lang, condition)
+    coastal_metals.write_extras(write, assets, data, lang, condition)
+    polymers.write_extras(write, assets, data, lang, condition)
+    fluorochemistry.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -1857,6 +1879,8 @@ def form_recipe_files(condition):
         for recipe in recipes:
             data = {"fabric:load_conditions": [c for f in recipe["features"] for c in condition(f)],
                     "type": f"{MOD}:{kind}", "capability": recipe["capability"]}
+            if recipe.get("legacy_vanadium"):
+                data["fabric:load_conditions"].append({"condition": "jugcraft:vanadium_legacy_iron"})
             if recipe.get("items"):
                 data["items"] = [{"ingredient": item, "count": count} for item, count in recipe["items"]]
             if recipe.get("fluids"):
@@ -1866,10 +1890,25 @@ def form_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
-            if recipe.get("tool"):
-                data["tool"] = recipe["tool"]
+            for field in ("tool", "energy_per_tick", "emissions", "priority"):
+                if field in recipe:
+                    data[field] = recipe[field]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
+
+
+def recipes_for_form(form):
+    """Resolve shared family/capability receipts without writing duplicate recipe IDs."""
+    info=FORMS[form]
+    return [recipe for owner,recipes in FORM_RECIPES.items() if FORMS[owner]['family']==info['family']
+            for recipe in recipes if recipe['capability'] in info['capabilities']]
+
+
+def form_energy(form, power):
+    import machines
+    power = power or machines.STATS[FORMS[form]['family']]['use_per_tick']
+    percent={'ENTRY':100,'EXPANDED':90,'BULK':80}[FORMS[form]['profile']]
+    return max(1,(power*percent+99)//100) if power else 0
 
 
 def recipe_view():
@@ -1880,5 +1919,89 @@ def recipe_view():
                           "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
                           "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],
                           "results": [[item, count] for item, count in recipe.get("results", [])],
-                          "ticks": recipe["ticks"]} for recipe in FORM_RECIPES[form]]}
-            for form in FORMS if FORM_RECIPES.get(form)]
+                          "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "energy_per_tick": form_energy(form,recipe.get("energy_per_tick", 0))} for recipe in recipes_for_form(form)]}
+            for form in FORMS if recipes_for_form(form)]
+
+
+# Preserve released forms while adding the owner-tested expansion below.
+from copy import deepcopy
+_RELEASED = {key: deepcopy(value) for key, value in dict(forms=FORMS, recipes=FORM_RECIPES,
+    handbook=HANDBOOK, models=MODELS, rotors=ROTORS, extras=ITEM_EXTRAS).items()}
+
+# Package 2's four further entry forms. Keep each physical machine in the common controller/renderer pipeline.
+import starter_chemistry
+import starter_chemistry_models
+FORMS.update(starter_chemistry.FORMS)
+FORM_RECIPES.update(starter_chemistry.RECIPES)
+HANDBOOK.update(starter_chemistry.HANDBOOK)
+TANK_NAMES.update(starter_chemistry.TANK_NAMES)
+MODELS.update(starter_chemistry_models.MODELS)
+ROTORS.update(starter_chemistry_models.ROTORS)
+ITEM_EXTRAS.update(starter_chemistry_models.ITEM_EXTRAS)
+HANDBOOK["gas_burning_generator"][-1] = "Methane from the Infuser now burns here too: 448 JE per mB, up to 256 JE/t. Fractional fuel credit is saved, so switching loads or restarting loses and duplicates no fuel. This generator has no upgrade slots."
+
+import anaerobic
+import anaerobic_models
+FORMS.update(anaerobic.FORMS)
+FORM_RECIPES.update(anaerobic.RECIPES)
+FORM_RECIPES["chemical_infuser"].append(anaerobic.UPGRADING)
+HANDBOOK.update(anaerobic.HANDBOOK)
+TANK_NAMES.update(anaerobic.TANK_NAMES)
+MODELS.update(anaerobic_models.MODELS)
+ROTORS.update(anaerobic_models.ROTORS)
+ITEM_EXTRAS.update(anaerobic_models.ITEM_EXTRAS)
+
+import biorefinery
+import biorefinery_models
+FORMS.update(biorefinery.FORMS)
+FORM_RECIPES.update(biorefinery.RECIPES)
+for name, recipes in biorefinery.EXTRA_RECIPES.items(): FORM_RECIPES[name].extend(recipes)
+HANDBOOK.update(biorefinery.HANDBOOK)
+TANK_NAMES.update(biorefinery.TANK_NAMES)
+MODELS.update(biorefinery_models.MODELS)
+ROTORS.update(biorefinery_models.ROTORS)
+ITEM_EXTRAS.update(biorefinery_models.ITEM_EXTRAS)
+
+import coastal_metals
+import coastal_metals_models
+FORMS.update(coastal_metals.FORMS)
+FORM_RECIPES.update({name:list(recipes) for name,recipes in coastal_metals.RECIPES.items()})
+for name, recipes in coastal_metals.EXTRA_RECIPES.items(): FORM_RECIPES[name].extend(recipes)
+HANDBOOK.update(coastal_metals.HANDBOOK)
+TANK_NAMES.update(coastal_metals.TANK_NAMES)
+MODELS.update(coastal_metals_models.MODELS)
+ROTORS.update(coastal_metals_models.ROTORS)
+ITEM_EXTRAS.update(coastal_metals_models.ITEM_EXTRAS)
+
+HANDBOOK['biogas_cleaner'].append('Also cleans wet fermentation CO2: 250 mB gas + 250 mB wash water -> 250 mB usable CO2 + 250 mB recovered water, 100 ticks at 24 JE/t. Drain both previous products before switching between biogas and fermentation gas. No new disposable filter or separate gas-cleaning machine is needed.')
+
+import polymers
+import polymer_models
+FORMS.update(polymers.FORMS)
+FORM_RECIPES.update({name:list(recipes) for name,recipes in polymers.RECIPES.items()})
+HANDBOOK.update(polymers.HANDBOOK)
+TANK_NAMES.update(polymers.TANK_NAMES)
+MODELS.update(polymer_models.MODELS)
+ROTORS.update(polymer_models.ROTORS)
+ITEM_EXTRAS.update(polymer_models.ITEM_EXTRAS)
+
+import fluorochemistry
+import fluorochemistry_models
+FORMS.update(fluorochemistry.FORMS)
+FORM_RECIPES.update(fluorochemistry.RECIPES)
+for machine, recipes in fluorochemistry.EXTRA_RECIPES.items():
+    FORM_RECIPES[machine].extend(recipes)
+HANDBOOK.update(fluorochemistry.HANDBOOK)
+TANK_NAMES.update(fluorochemistry.TANK_NAMES)
+MODELS.update(fluorochemistry_models.MODELS)
+ROTORS.update(fluorochemistry_models.ROTORS)
+ITEM_EXTRAS.update(fluorochemistry_models.ITEM_EXTRAS)
+
+# Owner-requested consolidation: retain IDs/recipes and extend shared capabilities.
+import machine_consolidation
+machine_consolidation.apply(FORMS, HANDBOOK)
+
+# Shared IDs keep main's footprint, slots, port positions and tank roles. The expansion
+# adds recipes and explicitly aliased tanks rather than replacing existing factories.
+import machine_expansion_compat
+machine_expansion_compat.apply(_RELEASED, FORMS, FORM_RECIPES, HANDBOOK, MODELS, ROTORS, ITEM_EXTRAS)

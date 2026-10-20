@@ -224,6 +224,8 @@ def assets():
     fortifications.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import bunkerworks
     bunkerworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import aluminum_roles
+    aluminum_roles.write_all(write, DATA / MOD, condition)
     import fire_control
     fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import raiders
@@ -918,12 +920,13 @@ def self_drop(block):
     return loot(block, [{"type": "minecraft:item", "name": rid(block)}], explosion_condition=True)
 
 
-def ore_drop(block, item, low=1, high=1):
+def ore_drop(block, item, low=1, high=1, fortune=True):
     functions = []
     if (low, high) != (1, 1):
         functions.append({"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}})
-    functions += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
-                  {"type": "minecraft:explosion_decay"}]
+    if fortune:
+        functions.append({"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"})
+    functions.append({"type": "minecraft:explosion_decay"})
     return loot(block, [{"type": "minecraft:alternatives", "children": [
         {"type": "minecraft:item", "condition": SILK, "name": rid(block)},
         {"type": "minecraft:item", "modifier": functions, "name": rid(item)},
@@ -1121,7 +1124,7 @@ def petro_assets(lang):
 # Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
 # multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
 # breaks the master too (machine/LargeMachineBlock).
-TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True}
+TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
 
 
 def tank_drop(block):
@@ -1158,7 +1161,7 @@ def loot_tables():
     for mineral, info in MINERALS.items():
         low, high = info["drops"]
         for block in mineral_blocks(mineral):
-            table = ore_drop(block, mineral, low, high) if block.endswith("_ore") else self_drop(block)
+            table = ore_drop(block, mineral, low, high, fortune=info.get("fortune", True)) if block.endswith("_ore") else self_drop(block)
             write(out / f"{block}.json", table)
     for block in machine_blocks():
         if block in TANKS:
@@ -1480,6 +1483,8 @@ def tags():
 
     for rock, info in ROCKS.items():
         tags.add("block", f"minecraft:mineable/{info['tool']}", rid(rock))
+    import mineral_sands
+    mineral_sands.tags(tags)
     # Veins placed only in some biomes (a "biomes" key on a metal's or mineral's worldgen entry): the biome tag that
     # JugcraftWorldgen places them in.
     for name, info in list(METALS.items()) + list(MINERALS.items()):
@@ -1488,6 +1493,8 @@ def tags():
                 tags.add("worldgen/biome", f"{MOD}:has_ore/{placed}", biome)
             for biome in gen.get("surface_biomes", []):
                 tags.add("worldgen/biome", f"{MOD}:has_surface_ore/{placed}", biome)
+            for biome in gen.get("outcrop_surface_biomes", []):
+                tags.add("worldgen/biome", f"{MOD}:has_outcrop/{placed}", biome)
 
     for block in machine_blocks():
         if block not in CROPS:
@@ -1627,11 +1634,16 @@ def worldgen():
                     "ore": {"size": gen["size"], "discard_chance_on_air_exposure": 0.0, "targets": targets},
                     "surface_biomes": rid(f"has_surface_ore/{placed}"),
                     "outcrop": rid(f"{name}_ore"), "outcrop_chance": gen["outcrop_chance"],
+                    **({"outcrop_biomes": rid(f"has_outcrop/{placed}")} if "outcrop_surface_biomes" in gen else {}),
                 })
             else:
                 ore_feature(placed, gen["size"], targets)
             placed_feature(placed, gen)
+    import mineral_sands
+    mineral_sands.worldgen(write, DATA / MOD)
     for rock, info in ROCKS.items():
+        if rock in mineral_sands.SANDS:
+            continue
         gen = info["gen"]
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},
                                          "state": rid(rock)}])

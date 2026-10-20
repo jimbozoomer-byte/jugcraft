@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "AttackStrengthAccessor",
+    "AlchemicalItemAccess",
     "CompanionGateMixin",
     "CompanionShearingInvoker",
     "CompanionLootMixin",
@@ -13,6 +14,7 @@
     "DiagonalShapeMixin",
     "DiagonalStateMixin",
     "DiagonalWallMixin",
+    "GroundingStrapMixin",
     "JigsawPlacementMixin",
     "LinearInterpolationHandlerInvoker",
     "MultiNoiseBiomeSourceMixin",
@@ -32,7 +34,8 @@
     "CompanionBrewingAccessor",
     "CompanionCampfireMixin",
     "CompanionVanillaDropMixin",
-    "CompanionCrafterMixin"
+    "CompanionCrafterMixin",
+    "AlchemyExperienceAccess"
   ],
   "injectors": {
     "defaultRequire": 1
