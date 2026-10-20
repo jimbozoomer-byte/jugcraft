@@ -11,14 +11,14 @@ Construction follows the accepted provisional costs: bench = crafting table, fou
 
 ## Processing contract
 
-- Manual plates: iron, copper, tin, zinc, lead, bronze and brass, one ingot to one plate, 400 active-work ticks.
-- Manual copper wire: one copper ingot to three wires, 400 active-work ticks.
-- Manual basic circuit: existing silicon, three copper wires and solder to one circuit, 800 active-work ticks with ordinary heating fuel.
+- Manual plates: iron, copper, tin, zinc, lead, bronze and brass, one ingot to one plate, 100 active-work ticks.
+- Manual copper wire: one copper ingot to three wires, 100 active-work ticks.
+- Manual basic circuit: existing silicon, three copper wires and solder to one circuit, 200 active-work ticks with ordinary heating fuel.
 - Kiln: two insulator blanks in 200 ticks; lining in 400 ticks; crucible in 600 ticks.
-- Furnace: three copper and one tin to four bronze, or three copper and one zinc to four brass, in 800 ticks; one tin and one lead to two solder in 480 ticks.
+- Furnace: three copper and one tin to four bronze, or three copper and one zinc to four brass, in 200 ticks; one tin and one lead to two solder in 120 ticks.
 - Preserve machine yields and existing powered recipes, bronze-blend fallback, current copper cable and silicon routes. Add six wires, one tin and two insulators to six copper cables as an alternate starter recipe.
 
-Select a recipe, insert ingredients and hold Work for manual production. Server-validated work pauses when released or the player leaves. Fuel credit, committed ingredients and partial progress survive saves; blocked output or missing requirements spend no fuel. Inventory automation never supplies player work or removes a tool during an active batch. Installed lining and crucible are reusable.
+Select a recipe, insert ingredients and click Start Work for manual production. Work stays enabled until Stop Work is clicked or the player leaves the bench menu. Server-validated presence still prevents work after closing, disconnecting or moving out of reach. Fuel credit, committed ingredients and partial progress survive saves; blocked output or missing requirements spend no fuel. Inventory automation never supplies player work or removes a tool during an active batch. Installed lining and crucible are reusable.
 
 Registration remains stable with features disabled; acquisition uses the machines feature without requiring drones for early insulators. Use shared recipes, inventory, fuel and permission systems. New stations must handle interruption, multiple viewers and breaking either multiblock part without duplicate drops.
 
@@ -30,7 +30,7 @@ Batch 2 is excluded: no quartz world generation, silicon heat upgrade, bellows, 
 
 ## Integration and assets
 
-The workshop shares distinct-slot ingredient matching with powered machines and persists its reserved inputs/results in the existing `WorkLane`. Vanilla cooking-fuel components supply heat; unused credit is retained while idle. Vanilla menu buttons carry only recipe selection and held-work presence, with server-side distance, menu, feature and structure-permission checks. Hoppers can access either station part but cannot supply labor or remove installed tools/ceramics. Recipe reload invalidates open picker snapshots.
+The workshop shares distinct-slot ingredient matching with powered machines and persists its reserved inputs/results in the existing `WorkLane`. Vanilla cooking-fuel components supply heat; unused credit is retained while idle. Vanilla menu buttons carry only recipe selection and enabled-work presence, with server-side distance, menu, feature and structure-permission checks. Hoppers can access either station part but cannot supply labor or remove installed tools/ceramics. Recipe reload invalidates open picker snapshots.
 
 Zinc had no plate item on main. This batch adds it to the shared component registry, common plate tags and normal powered press generator, preserving the same one-ingot yield as the new manual route. Existing cable recipes remain; the alternate ceramic cable has a distinct recipe filename so the tower-cost audit continues to use the established canonical cable cost.
 
@@ -42,7 +42,7 @@ The inspection save is a new normal world with seed `jugcraft-starter-workshop-1
 
 ## Validation
 
-20 October 2026, Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Java 25 and the unchanged pinned Complete-pack libraries:
+Initial validation before the owner-requested speed/toggle revision: 20 October 2026, Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Java 25 and the unchanged pinned Complete-pack libraries:
 
 - `runGameTest` filtered to `jugcraft-test:*starter*workshop*`: all 10 passed. Includes real crafting-grid selection (and preserved vanilla clay blocks), all nine manual receipts, three kiln receipts, three alloys, fuel remainders/credit, saved partial work, cancellation/backpressure, concurrent mock-player requests, permissions/feature disabling, Fabric inventory transfers and both multiblock halves' placement/removal/drops.
 - `runGameTest` filtered to `jugcraft-test:machine_consolidation_game_tests*`: all 8 passed, covering the existing machines sharing the durable work ledger.
@@ -54,3 +54,9 @@ The inspection save is a new normal world with seed `jugcraft-starter-workshop-1
 - Export cleanup verified 92 save files and scanned 2,591 saved region records. Only the known unused test datapack selections and five test registry-presence entries were removed from a separate delivery copy; all other saved data was preserved. The original export is retained.
 
 Delivery packaging records the source commit, matching mod hash, locked library list and archive verification separately with the inspection world. This is not evidence of two independently authenticated clients, a clean external-launcher import, a production-size performance benchmark or the full game-test suite. Batch 2 remains excluded.
+
+## Owner revision: toggle and shorter batches
+
+The owner requested click-to-toggle manual work: Start Work remains active through mouse release and successive batches; Stop Work, Cancel batch, or leaving the menu disables it. Reopening starts disabled. Hammering and wire cutting take 100 ticks (5 seconds); circuits take 200 ticks (10 seconds). Bronze and brass take 200 ticks (10 seconds); solder takes 120 ticks (6 seconds). Kiln firing times are unchanged. This supersedes the original four-times-powered-speed proposal. Powered recipes and material yields are unchanged.
+
+Revision validation: all 10 focused workshop server tests and both workshop Python tests passed. Recipe, handbook, JEI timing and toggle-label generator comparisons passed. The focused real-client test and JAR build passed: clicking enabled work after mouse release, clicking again paused it, closing the menu stopped it, reopening left it disabled, and save/reopen retained partial progress, fuel and completed bronze. The refreshed inspection export preserves 91 files, with 2,563 saved region records checked during removal of unused test metadata from its separate delivery copy. The full test suite was not rerun for this revision.

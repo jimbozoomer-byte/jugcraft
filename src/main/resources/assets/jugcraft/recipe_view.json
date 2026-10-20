@@ -14847,7 +14847,7 @@
               1
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:workshop_hammer",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -14867,7 +14867,7 @@
               1
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:workshop_hammer",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -14887,7 +14887,7 @@
               1
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:workshop_hammer",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -14907,7 +14907,7 @@
               1
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:workshop_hammer",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -14927,7 +14927,7 @@
               1
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:workshop_hammer",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -14947,7 +14947,7 @@
               1
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:workshop_hammer",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -14967,7 +14967,7 @@
               1
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:workshop_hammer",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -14987,7 +14987,7 @@
               3
             ]
           ],
-          "ticks": 400,
+          "ticks": 100,
           "tool": "jugcraft:wire_cutters",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -15015,7 +15015,7 @@
               1
             ]
           ],
-          "ticks": 800,
+          "ticks": 200,
           "tool": "jugcraft:soldering_tool",
           "retained_inputs": [],
           "energy_per_tick": 0
@@ -15119,7 +15119,7 @@
               4
             ]
           ],
-          "ticks": 800,
+          "ticks": 200,
           "tool": "",
           "retained_inputs": [
             2,
@@ -15154,7 +15154,7 @@
               4
             ]
           ],
-          "ticks": 800,
+          "ticks": 200,
           "tool": "",
           "retained_inputs": [
             2,
@@ -15189,7 +15189,7 @@
               2
             ]
           ],
-          "ticks": 480,
+          "ticks": 120,
           "tool": "",
           "retained_inputs": [
             2,

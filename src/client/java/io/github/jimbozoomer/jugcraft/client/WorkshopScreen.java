@@ -1,17 +1,15 @@
 package io.github.jimbozoomer.jugcraft.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.workshop.*;
 import java.util.ArrayList;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-/** A recipe picker, actual inventory, recipe preview and continuous Work button. */
+/** A recipe picker, actual inventory, recipe preview and toggleable Work button. */
 public final class WorkshopScreen extends AbstractContainerScreen<WorkshopMenu> {
     /** Keep the optional map's HUD out of the station inventory without changing saved map settings. */
     public static void registerOverlayCompatibility() {
@@ -23,14 +21,14 @@ public final class WorkshopScreen extends AbstractContainerScreen<WorkshopMenu> 
                     if (!(client.gui.screen() instanceof WorkshopScreen)) original.extractRenderState(graphics, delta);
                 }));
     }
-    private boolean holding;
+    private boolean working;
     private Button work, cancel;
     private final ArrayList<Button> recipes = new ArrayList<>();
     public WorkshopScreen(WorkshopMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, 300, 236); inventoryLabelX = 116; inventoryLabelY = 134;
     }
     @Override protected void init() {
-        super.init(); recipes.clear(); holding = false;
+        super.init(); recipes.clear();
         for (int i = 0; i < Math.min(9, menu.catalog.entries().size()); i++) {
             int index = i; var recipe = menu.catalog.entries().get(i).recipe();
             var button = Button.builder(recipe.result().create().getHoverName(), b -> press(WorkshopMenu.SELECT + index))
@@ -38,30 +36,20 @@ public final class WorkshopScreen extends AbstractContainerScreen<WorkshopMenu> 
             button.setTooltip(Tooltip.create(recipe.result().create().getHoverName().copy().append(" ×" + recipe.result().create().getCount())));
             recipes.add(addRenderableWidget(button));
         }
-        work = addRenderableWidget(Button.builder(Component.translatable("screen.jugcraft.workshop.work"), b -> {})
+        work = addRenderableWidget(Button.builder(Component.translatable("screen.jugcraft.workshop.work"), b -> { working = !working; press(working ? WorkshopMenu.PULSE : WorkshopMenu.RELEASE); })
             .bounds(leftPos + 8, topPos + 188, 105, 20).build());
         work.visible = menu.catalog.station() == 0;
-        cancel = addRenderableWidget(Button.builder(Component.translatable("screen.jugcraft.workshop.cancel"), b -> press(WorkshopMenu.CANCEL))
+        cancel = addRenderableWidget(Button.builder(Component.translatable("screen.jugcraft.workshop.cancel"), b -> { working = false; press(WorkshopMenu.RELEASE); press(WorkshopMenu.CANCEL); })
             .bounds(leftPos + 8, topPos + 211, 105, 16).build());
     }
     private void press(int id) { if (minecraft.gameMode != null) minecraft.gameMode.handleInventoryButtonClick(menu.containerId, id); }
-    @Override public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && work.visible && work.isMouseOver(event.x(), event.y())) {
-            holding = true; press(WorkshopMenu.PULSE); return true;
-        }
-        return super.mouseClicked(event, doubleClick);
-    }
-    @Override public boolean mouseReleased(MouseButtonEvent event) {
-        if (holding) { holding = false; press(WorkshopMenu.RELEASE); }
-        return super.mouseReleased(event);
-    }
-    @Override public void removed() { holding = false; press(WorkshopMenu.RELEASE); super.removed(); }
+    @Override public void removed() { working = false; press(WorkshopMenu.RELEASE); super.removed(); }
     @Override protected void containerTick() {
         super.containerTick();
-        if (holding) press(WorkshopMenu.PULSE);
+        if (working) press(WorkshopMenu.PULSE);
         for (int i = 0; i < recipes.size(); i++) recipes.get(i).active = !menu.busy() && i != menu.data(5);
         cancel.active = menu.busy();
-        work.setMessage(Component.translatable(holding ? "screen.jugcraft.workshop.working" : "screen.jugcraft.workshop.work"));
+        work.setMessage(Component.translatable(working ? "screen.jugcraft.workshop.working" : "screen.jugcraft.workshop.work"));
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float delta) {
         extractBackground(g, mx, my, delta); super.extractRenderState(g, mx, my, delta); extractTooltip(g, mx, my);

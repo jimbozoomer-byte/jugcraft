@@ -19,7 +19,7 @@
     "id": "jugcraft:basic_circuit",
     "count": 1
   },
-  "time": 800,
+  "time": 200,
   "heated": true,
   "tool": {
     "id": "jugcraft:soldering_tool"

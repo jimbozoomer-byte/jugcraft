@@ -22,10 +22,10 @@ import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelResource;
 
-/** Real held mouse input, release, network-synced screen, save/reopen and a separate inspection export. */
+/** Real click-toggle input, menu-close pause, network-synced screen, save/reopen and a separate inspection export. */
 public class StarterWorkshopClientGameTests implements FabricClientGameTest {
     private static final BlockPos BENCH = new BlockPos(512,240,512), KILN=BENCH.east(15), FURNACE=BENCH.east(19);
-    private static final Path EXPORT=Path.of("../../starter-workshop-preview/Starter Workshop Inspection");
+    private static final Path EXPORT=Path.of("../../starter-workshop-toggle-preview/Starter Workshop Inspection");
     @Override public void runTest(ClientGameTestContext c) {
         TestWorldSave save; Path source; int[] saved;
         try(var world=c.worldBuilder().adjustSettings(creator->{
@@ -40,17 +40,21 @@ public class StarterWorkshopClientGameTests implements FabricClientGameTest {
             c.runOnClient(client->client.player.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES,
                 net.minecraft.world.phys.Vec3.atCenterOf(BENCH).add(0,.4,0)));
             c.waitTicks(2); c.getInput().pressKey(o->o.keyUse); c.waitForScreen(WorkshopScreen.class); c.waitTicks(8);
-            hold(c); c.waitTicks(100); c.getInput().releaseMouse(InputConstants.MOUSE_BUTTON_LEFT); c.waitTicks(5);
+            clickWork(c); c.waitTicks(25); c.takeScreenshot("jugcraft_starter_workshop_work_enabled"); clickWork(c); c.waitTicks(5);
             int paused=world.getServer().computeOnServer(s->be(s.overworld(),BENCH).progress());
-            check(paused>=95 && paused<=110,"Actual held input must advance about 100 ticks, got "+paused);
-            c.waitTicks(30); check(world.getServer().computeOnServer(s->be(s.overworld(),BENCH).progress())==paused,"Release did not pause");
+            check(paused>0 && paused<100,"A released click must keep making partial progress until toggled off, got "+paused);
+            c.waitTicks(30); check(world.getServer().computeOnServer(s->be(s.overworld(),BENCH).progress())==paused,"Second click did not pause");
             c.takeScreenshot("jugcraft_starter_workshop_bench_paused");
-            hold(c); c.waitTicks(410-paused); c.getInput().releaseMouse(InputConstants.MOUSE_BUTTON_LEFT); c.waitTicks(5);
+            clickWork(c); c.waitTicks(110-paused); clickWork(c); c.waitTicks(5);
             world.getServer().runOnServer(s->check(be(s.overworld(),BENCH).getItem(5).getCount()==1,"Real manual plate must finish exactly once"));
             c.takeScreenshot("jugcraft_starter_workshop_manual_plate_complete"); close(c);
             // Leave a partially worked plate for the owner to resume in the delivered world.
             world.getServer().runOnServer(s->{ var b=be(s.overworld(),BENCH);b.setItem(0,new ItemStack(Items.IRON_INGOT));b.setItem(5,ItemStack.EMPTY); });
-            c.getInput().pressKey(o->o.keyUse);c.waitForScreen(WorkshopScreen.class);c.waitTicks(5);hold(c);c.waitTicks(80);c.getInput().releaseMouse(InputConstants.MOUSE_BUTTON_LEFT);c.waitTicks(5);close(c);
+            c.getInput().pressKey(o->o.keyUse);c.waitForScreen(WorkshopScreen.class);c.waitTicks(5);clickWork(c);c.waitTicks(25);close(c);
+            int left=world.getServer().computeOnServer(s->be(s.overworld(),BENCH).progress());
+            c.waitTicks(20);check(world.getServer().computeOnServer(s->be(s.overworld(),BENCH).progress())==left,"Leaving the bench must stop enabled work");
+            c.getInput().pressKey(o->o.keyUse);c.waitForScreen(WorkshopScreen.class);c.waitTicks(20);
+            check(world.getServer().computeOnServer(s->be(s.overworld(),BENCH).progress())==left,"Reopening must start with work disabled");close(c);
             world.getServer().runCommand("tp @a 527.5 240 509.5 0 15"); c.waitTicks(10);c.getInput().lookAt(KILN);c.getInput().pressKey(o->o.keyUse);c.waitForScreen(WorkshopScreen.class);c.waitTicks(5);c.takeScreenshot("jugcraft_starter_workshop_kiln");close(c);
             world.getServer().runCommand("tp @a 531.5 240 509.5 0 15");c.waitTicks(10);c.getInput().lookAt(FURNACE.above());c.getInput().pressKey(o->o.keyUse);c.waitForScreen(WorkshopScreen.class);c.waitTicks(5);c.takeScreenshot("jugcraft_starter_workshop_crucible_furnace");close(c);
             world.getServer().runCommand("tp @a 518 243 504 0 20");
@@ -76,11 +80,11 @@ public class StarterWorkshopClientGameTests implements FabricClientGameTest {
         }
         copy(source,EXPORT);
     }
-    private static void hold(ClientGameTestContext c) {
+    private static void clickWork(ClientGameTestContext c) {
         double[] xy=c.computeOnClient(client->{var screen=(WorkshopScreen)client.gui.screen();return new double[]{
             ((screen.width-300)/2.0+50)/MouseHandler.getScaledXPos(client.getWindow(),1),
             ((screen.height-236)/2.0+197)/MouseHandler.getScaledYPos(client.getWindow(),1)};});
-        c.getInput().setCursorPos(xy[0],xy[1]);c.waitTick();c.getInput().holdMouse(InputConstants.MOUSE_BUTTON_LEFT);
+        c.getInput().setCursorPos(xy[0],xy[1]);c.waitTick();c.getInput().holdMouse(InputConstants.MOUSE_BUTTON_LEFT);c.waitTick();c.getInput().releaseMouse(InputConstants.MOUSE_BUTTON_LEFT);
     }
     private static void close(ClientGameTestContext c) {c.runOnClient(client->client.player.closeContainer());c.waitTicks(5);}
     private static WorkshopBlockEntity be(ServerLevel l,BlockPos p){return (WorkshopBlockEntity)l.getBlockEntity(p);}
@@ -100,7 +104,7 @@ public class StarterWorkshopClientGameTests implements FabricClientGameTest {
         var furnace=place(l,FURNACE,2,"bronze_ingot");furnace.setItem(0,new ItemStack(Items.COPPER_INGOT,3));furnace.setItem(1,StarterWorkshopGameTests.stack("jugcraft:tin_ingot",1));furnace.setItem(4,new ItemStack(Items.COAL));furnace.setItem(6,StarterWorkshopGameTests.stack("jugcraft:basic_ceramic_lining",1));furnace.setItem(7,StarterWorkshopGameTests.stack("jugcraft:ceramic_crucible",1));
         // Prepare completed products/leftover heat through normal server processing, not forged state.
         for(int i=0;i<800;i++){kiln.tick(l);furnace.tick(l);}
-        String[][] signs={{"1. HAMMER","Iron plate","Hold Work","20 seconds"},{"2. CUTTERS","3 copper wire","Hold Work","20 seconds"},{"3. SOLDER","Basic circuit","Hold + fuel","40 seconds"},{"4. CERAMICS","Shape clay first","Select + fuel","10 / 20 / 30 s"},{"5. ALLOYS","Install ceramics","Metals + fuel","40 / 24 seconds"}};
+        String[][] signs={{"1. HAMMER","Iron plate","Click Start Work","5 seconds"},{"2. CUTTERS","3 copper wire","Click Start Work","5 seconds"},{"3. SOLDER","Basic circuit","Start + fuel","10 seconds"},{"4. CERAMICS","Shape clay first","Select + fuel","10 / 20 / 30 s"},{"5. ALLOYS","Install ceramics","Metals + fuel","10 / 6 seconds"}};
         int[] offsets={0,5,10,15,19};for(int i=0;i<5;i++)sign(l,BENCH.east(offsets[i]).south(2),signs[i]);
         BlockPos chest=BENCH.offset(7,0,-4);l.setBlock(chest,Blocks.CHEST.defaultBlockState(),3);
         var supplies=(ChestBlockEntity)l.getBlockEntity(chest);int slot=0;

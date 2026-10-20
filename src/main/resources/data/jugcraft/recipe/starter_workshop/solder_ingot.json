@@ -15,7 +15,7 @@
     "id": "jugcraft:solder_ingot",
     "count": 2
   },
-  "time": 480,
+  "time": 120,
   "heated": true,
   "fabric:load_conditions": [
     {

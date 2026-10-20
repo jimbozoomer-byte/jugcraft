@@ -60,7 +60,7 @@ public class StarterWorkshopGameTests {
             h.assertTrue(output.extract(net.fabricmc.fabric.api.transfer.v1.item.ItemVariant.of(JugcraftWorkshop.ITEMS.get("wire_cutters")),1,tx)==0,"Automation never extracts reusable tool");tx.commit();
         }
         tick(h,be,null,400);h.assertTrue(!be.busy() && be.getItem(5).isEmpty(),"Automation is not manual work");
-        var p=worker(h,be);tick(h,be,p,400);be.release(p);
+        var p=worker(h,be);tick(h,be,p,100);be.release(p);
         try(var tx=net.fabricmc.fabric.api.transfer.v1.transaction.Transaction.openOuter()) {
             h.assertTrue(output.extract(net.fabricmc.fabric.api.transfer.v1.item.ItemVariant.of(stack("jugcraft:copper_wire",1)),3,tx)==3,"Finished wire extractable");tx.commit();
         }
@@ -109,7 +109,7 @@ public class StarterWorkshopGameTests {
         p.setGameMode(GameType.ADVENTURE);h.assertTrue(!be.pulse(p),"Adventure cannot work");h.succeed();
     }
 
-    @GameTest(structure=ARENA) public void starterWorkshopEveryManualReceiptMatchesPoweredYieldAndFourTimesWork(GameTestHelper h) {
+    @GameTest(structure=ARENA) public void starterWorkshopEveryManualReceiptMatchesPoweredYieldAndApprovedWorkTime(GameTestHelper h) {
         var be=place(h,0); var player=worker(h,be);
         h.assertTrue(be.catalog().entries().size()==9,"Exactly the nine approved manual recipes");
         for (var entry:be.catalog().entries()) {
@@ -122,8 +122,8 @@ public class StarterWorkshopGameTests {
             tick(h,be,player,1); h.assertTrue(ItemStack.matches(be.getItem(5),r.result().create()),"Same approved yield "+entry.id());
             h.assertTrue(ItemStack.matches(be.getItem(3),r.toolStack()),"Tool must remain unchanged");
             var powered=h.getLevel().getServer().getRecipeManager().getRecipes().stream().filter(holder -> {
-                if(holder.value() instanceof MachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()*4==r.time();
-                if(holder.value() instanceof MultiMachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()*4==r.time();
+                if(holder.value() instanceof MachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()==r.time();
+                if(holder.value() instanceof MultiMachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()==r.time();
                 return false;
             }).findFirst();
             h.assertTrue(powered.isPresent(),"Must correspond to existing powered recipe");
@@ -138,13 +138,13 @@ public class StarterWorkshopGameTests {
         h.assertTrue(be.progress()==0,"Repeated packets cannot advance work"); be.tick(h.getLevel());
         h.assertTrue(be.progress()==1,"One server tick advances once");
         h.assertTrue(!be.pulse(other),"Second viewer cannot add a worker");
-        tick(h,be,p,99); be.release(p); tick(h,be,null,80);
-        h.assertTrue(be.progress()==100,"Release pauses exactly");
-        reload(h,be); tick(h,be,null,40); h.assertTrue(be.progress()==100,"Reload cannot revive held input");
+        tick(h,be,p,24); be.release(p); tick(h,be,null,80);
+        h.assertTrue(be.progress()==25,"Release pauses exactly");
+        reload(h,be); tick(h,be,null,40); h.assertTrue(be.progress()==25,"Reload cannot revive enabled work");
         h.assertTrue(!be.select(Jugcraft.id("starter_workshop/iron_plate")),"Active receipt cannot switch");
         h.assertTrue(!be.canTakeItemThroughFace(3,be.getItem(3),Direction.DOWN),"Automation cannot steal tool");
         h.assertTrue(!p.containerMenu.slots.get(3).mayPickup(p),"Player cannot remove active tool");
-        tick(h,be,other,300); h.assertTrue(be.getItem(5).getCount()==3 && be.getItem(0).isEmpty(),"Another player can resume, no duplicate inputs/results");
+        tick(h,be,other,75); h.assertTrue(be.getItem(5).getCount()==3 && be.getItem(0).isEmpty(),"Another player can resume, no duplicate inputs/results");
         other.setGameMode(GameType.SPECTATOR); h.assertTrue(!be.pulse(other),"Spectator denied");
         p.snapTo(be.getBlockPos().getX()+30,be.getBlockPos().getY(),be.getBlockPos().getZ(),0,0); h.assertTrue(!be.pulse(p),"Remote work denied");
         h.succeed();
@@ -166,23 +166,23 @@ public class StarterWorkshopGameTests {
     }
     @GameTest(structure=ARENA) public void starterWorkshopAlloysRequirePermanentCeramicsAndPreservePaidPartialBatches(GameTestHelper h) {
         var be=place(h,2); recipe(be,"bronze_ingot");
-        be.setItem(0,new ItemStack(Items.COPPER_INGOT,6)); be.setItem(1,stack("jugcraft:tin_ingot",2)); be.setItem(4,new ItemStack(Items.COAL));
+        be.setItem(0,new ItemStack(Items.COPPER_INGOT,24)); be.setItem(1,stack("jugcraft:tin_ingot",8)); be.setItem(4,new ItemStack(Items.COAL));
         tick(h,be,null,30); h.assertTrue(be.progress()==0 && be.getItem(4).getCount()==1,"Missing parts spend nothing");
         ceramics(be); tick(h,be,null,123); reload(h,be);
         h.assertTrue(be.progress()==123 && be.fuelCredit()==1477,"Save paid work and heat");
         be.setItem(5,stack("jugcraft:bronze_ingot",64)); tick(h,be,null,80);
         h.assertTrue(be.progress()==123 && be.fuelCredit()==1477,"Full output pauses active batch without burn");
         be.setItem(5,ItemStack.EMPTY); tick(h,be,null,1477);
-        h.assertTrue(be.getItem(5).getCount()==8 && be.fuelCredit()==0,"One coal makes two bronze batches");
+        h.assertTrue(be.getItem(5).getCount()==32 && be.fuelCredit()==0,"One coal makes eight ten-second bronze batches");
         h.assertTrue(be.getItem(0).isEmpty() && be.getItem(1).isEmpty(),"Metals consumed exactly once per batch");
         h.assertTrue(be.getItem(6).getCount()==1 && be.getItem(7).getCount()==1,"Ceramics permanent");
         recipe(be,"solder_ingot"); be.setItem(5,ItemStack.EMPTY); be.setItem(0,stack("jugcraft:tin_ingot",1)); be.setItem(1,stack("jugcraft:lead_ingot",1));
         be.setItem(4,new ItemStack(Items.STICK)); tick(h,be,null,100);
         h.assertTrue(be.progress()==100 && be.fuelCredit()==0,"Short fuel stops without resetting");
-        tick(h,be,null,20); be.setItem(4,new ItemStack(Items.COAL)); tick(h,be,null,380);
+        tick(h,be,null,20); be.setItem(4,new ItemStack(Items.COAL)); tick(h,be,null,20);
         h.assertTrue(be.getItem(5).is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("solder_ingot"))) && be.getItem(5).getCount()==2,"Solder resumes to exact output");
         recipe(be,"brass_ingot"); be.setItem(5,ItemStack.EMPTY); be.setItem(0,new ItemStack(Items.COPPER_INGOT,3)); be.setItem(1,stack("jugcraft:zinc_ingot",1));
-        tick(h,be,null,800); h.assertTrue(ItemStack.matches(be.getItem(5),stack("jugcraft:brass_ingot",4)),"Brass route"); h.succeed();
+        tick(h,be,null,200); h.assertTrue(ItemStack.matches(be.getItem(5),stack("jugcraft:brass_ingot",4)),"Brass route"); h.succeed();
     }
     @GameTest(structure=ARENA) public void starterWorkshopFuelContainersCancelAndOutputBackpressureAreLossless(GameTestHelper h) {
         var be=place(h,1); recipe(be,"fire_crucible"); be.setItem(0,stack("jugcraft:unfired_ceramic_crucible",1)); be.setItem(4,new ItemStack(Items.LAVA_BUCKET));

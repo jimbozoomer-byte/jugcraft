@@ -463,7 +463,7 @@
           "icon": "jugcraft:small_ceramic_kiln",
           "text": [
             "Fire clay balls in an ordinary furnace for bricks. Four brick blocks and a furnace make the Small Ceramic Kiln. Shape four clay balls into a lining and seven into a crucible. Fire them in the kiln for 20 and 30 seconds. Shape one clay ball into two insulator blanks; fire the pair for 10 seconds.",
-            "Build the Small Crucible Furnace from four brick blocks and a furnace. Leave two blocks of height clear. Install the fired lining and crucible in its screen; both last indefinitely. Select bronze, brass or solder, insert the metals and ordinary fuel. Bronze/brass take 40 seconds; solder takes 24. One coal supplies 80 seconds of active heat.",
+            "Build the Small Crucible Furnace from four brick blocks and a furnace. Leave two blocks of height clear. Install the fired lining and crucible in its screen; both last indefinitely. Select bronze, brass or solder, insert the metals and ordinary fuel. Bronze/brass take 10 seconds; solder takes 6. One coal supplies 80 seconds of active heat.",
             "Hoppers can insert ingredients and fuel and remove finished products and empty fuel containers. A blocked output pauses without spending fuel. Remaining heat and partial batches survive saving. Cancel returns the reserved ingredients if their slots have room; breaking either part returns the station, parts and ingredients once."
           ]
         },
@@ -472,8 +472,8 @@
           "icon": "jugcraft:workshop_hammer",
           "text": [
             "Make the two-block-wide bench with a crafting table, four planks and two cobblestone. A hammer needs two iron and a stick; cutters need two iron and two sticks; the soldering tool needs copper and a stick. Tools are reusable and never wear out.",
-            "Choose a recipe on the left, follow the preview, insert ingredients and the matching tool, then hold Work. Releasing pauses; hoppers cannot work for you. One ingot makes one iron, copper, tin, zinc, lead, bronze or brass plate in 20 seconds. One copper ingot makes three wires in 20 seconds.",
-            "For a basic circuit, use existing silicon, three wires and one solder ingot with the soldering tool and fuel. Hold Work for 40 seconds. Existing powered machines make the same yields four times faster. Silicon still comes from existing processing; a later batch will add the local quartz and upgraded-heat route."
+            "Choose a recipe on the left, follow the preview, insert ingredients and the matching tool, then click Start Work. Click Stop Work or leave the bench menu to pause; hoppers cannot work for you. One ingot makes one iron, copper, tin, zinc, lead, bronze or brass plate in 5 seconds. One copper ingot makes three wires in 5 seconds.",
+            "For a basic circuit, use existing silicon, three wires and one solder ingot with the soldering tool and fuel. A circuit takes 10 seconds. Work remains enabled until you click Stop Work or leave the menu. Powered machines keep the same yields and can run without a player at the bench. Silicon still comes from existing processing; a later batch will add the local quartz and upgraded-heat route."
           ]
         },
         {

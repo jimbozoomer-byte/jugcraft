@@ -11,7 +11,7 @@
     "id": "jugcraft:copper_wire",
     "count": 3
   },
-  "time": 400,
+  "time": 100,
   "heated": false,
   "tool": {
     "id": "jugcraft:wire_cutters"

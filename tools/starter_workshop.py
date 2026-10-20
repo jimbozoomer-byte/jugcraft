@@ -29,7 +29,7 @@ def processes():
             parts = recipe.get('inputs') or [(recipe['input'], 1)]
             row = dict(type='jugcraft:starter_working', station=2 if machine == 'alloy_smelter' else 0,
                 ingredients=[dict(ingredient=i, count=c) for i,c in parts],
-                result=dict(id=recipe['output'], count=recipe['count']), time=recipe['ticks']*4,
+                result=dict(id=recipe['output'], count=recipe['count']), time=recipe['ticks'],
                 heated=machine in ('alloy_smelter','circuit_assembler'))
             if machine in tools: row['tool'] = dict(id='jugcraft:'+tools[machine])
             row['fabric:load_conditions'] = conditions(recipe['features'])
@@ -141,11 +141,11 @@ def write_all(write, assets, data, lang):
             write(data/'loot_table/blocks'/f'{name}.json',dict(type='minecraft:block',pools=[dict(rolls=1,
                 entries=[dict(type='minecraft:item',name='jugcraft:'+name)],condition=dict(type='minecraft:survives_explosion'))]))
         write(assets/'items'/f'{name}.json',dict(model=dict(type='minecraft:model',model='jugcraft:item/'+name)))
-    labels = {'work':'Hold Work','working':'Working…','cancel':'Cancel batch','preview':'Recipe preview →',
+    labels = {'work':'Start Work','working':'Stop Work','cancel':'Cancel batch','preview':'Recipe preview →',
               'heat':'Heat: %s s','lining':'Lining','vessel':'Pot',
               'status.0':'Working','status.1':'Insert recipe ingredients','status.2':'Fit the matching tool',
               'status.3':'Install lining and crucible','status.4':'Add heating fuel','status.5':'Output is full',
-              'status.6':'Hold Work to continue','status.7':'Machines disabled','status.8':'Station is incomplete'}
+              'status.6':'Click Start Work','status.7':'Machines disabled','status.8':'Station is incomplete'}
     lang.update({'screen.jugcraft.workshop.'+k:v for k,v in labels.items()})
     for tool, names in [('axe',[STATIONS[0]]),('pickaxe',STATIONS[1:])]:
         path = data.parent/'minecraft/tags/block/mineable'/f'{tool}.json'
@@ -157,12 +157,12 @@ def chapter():
     return dict(title='Starter workshop',icon='jugcraft:workshop_bench',pages=[
         dict(title='From clay to alloys',icon='jugcraft:small_ceramic_kiln',text=[
             'Fire clay balls in an ordinary furnace for bricks. Four brick blocks and a furnace make the Small Ceramic Kiln. Shape four clay balls into a lining and seven into a crucible. Fire them in the kiln for 20 and 30 seconds. Shape one clay ball into two insulator blanks; fire the pair for 10 seconds.',
-            'Build the Small Crucible Furnace from four brick blocks and a furnace. Leave two blocks of height clear. Install the fired lining and crucible in its screen; both last indefinitely. Select bronze, brass or solder, insert the metals and ordinary fuel. Bronze/brass take 40 seconds; solder takes 24. One coal supplies 80 seconds of active heat.',
+            'Build the Small Crucible Furnace from four brick blocks and a furnace. Leave two blocks of height clear. Install the fired lining and crucible in its screen; both last indefinitely. Select bronze, brass or solder, insert the metals and ordinary fuel. Bronze/brass take 10 seconds; solder takes 6. One coal supplies 80 seconds of active heat.',
             'Hoppers can insert ingredients and fuel and remove finished products and empty fuel containers. A blocked output pauses without spending fuel. Remaining heat and partial batches survive saving. Cancel returns the reserved ingredients if their slots have room; breaking either part returns the station, parts and ingredients once.']),
         dict(title='A bench and three tools',icon='jugcraft:workshop_hammer',text=[
             'Make the two-block-wide bench with a crafting table, four planks and two cobblestone. A hammer needs two iron and a stick; cutters need two iron and two sticks; the soldering tool needs copper and a stick. Tools are reusable and never wear out.',
-            'Choose a recipe on the left, follow the preview, insert ingredients and the matching tool, then hold Work. Releasing pauses; hoppers cannot work for you. One ingot makes one iron, copper, tin, zinc, lead, bronze or brass plate in 20 seconds. One copper ingot makes three wires in 20 seconds.',
-            'For a basic circuit, use existing silicon, three wires and one solder ingot with the soldering tool and fuel. Hold Work for 40 seconds. Existing powered machines make the same yields four times faster. Silicon still comes from existing processing; a later batch will add the local quartz and upgraded-heat route.']),
+            'Choose a recipe on the left, follow the preview, insert ingredients and the matching tool, then click Start Work. Click Stop Work or leave the bench menu to pause; hoppers cannot work for you. One ingot makes one iron, copper, tin, zinc, lead, bronze or brass plate in 5 seconds. One copper ingot makes three wires in 5 seconds.',
+            'For a basic circuit, use existing silicon, three wires and one solder ingot with the soldering tool and fuel. A circuit takes 10 seconds. Work remains enabled until you click Stop Work or leave the menu. Powered machines keep the same yields and can run without a player at the bench. Silicon still comes from existing processing; a later batch will add the local quartz and upgraded-heat route.']),
         dict(title='Connecting the first machine',icon='jugcraft:copper_cable',text=[
             'Six wires, a tin ingot and two fired insulators make six copper cables. Existing direct-ingot cable and bronze-blend recipes remain available. Starter ceramics need the machines feature, not drones.',
             'Use these same alloys and components for existing casings, generators, shafts and powered machines. Nothing here requires a circuit just to make the first furnace, kiln or bench. Advanced ceramics, bellows and mechanical expansion remain separate.'])])
