@@ -58,8 +58,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:advanced_solar_panel": {
-      "numerator": 3173,
-      "denominator": 1,
+      "numerator": 6343,
+      "denominator": 2,
       "source": "recipe jugcraft:advanced_solar_panel"
     },
     "jugcraft:aed_cabinet": {
@@ -163,9 +163,9 @@
       "source": "recipe jugcraft:aluminum_block"
     },
     "jugcraft:aluminum_cable": {
-      "numerator": 3,
-      "denominator": 1,
-      "source": "recipe jugcraft:aluminum_cable"
+      "numerator": 9,
+      "denominator": 4,
+      "source": "recipe jugcraft:aluminum_cable_aluminum_sheathed"
     },
     "jugcraft:aluminum_cladding": {
       "numerator": 1,
@@ -2723,8 +2723,8 @@
       "source": "recipe jugcraft:control_tray_waterfall_hanger"
     },
     "jugcraft:converter_station": {
-      "numerator": 5541,
-      "denominator": 1,
+      "numerator": 22161,
+      "denominator": 4,
       "source": "recipe jugcraft:converter_station"
     },
     "jugcraft:conveyor": {
@@ -3498,7 +3498,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:delivery_rocket": {
-      "numerator": 3145,
+      "numerator": 3139,
       "denominator": 3,
       "source": "recipe jugcraft:rocket_assembly/delivery_rocket"
     },
@@ -3973,8 +3973,8 @@
       "source": "recipe jugcraft:electrical_control_board"
     },
     "jugcraft:electrolytic_cell": {
-      "numerator": 1081,
-      "denominator": 1,
+      "numerator": 4321,
+      "denominator": 4,
       "source": "recipe jugcraft:electrolytic_cell"
     },
     "jugcraft:electrolytic_separator": {
@@ -4743,8 +4743,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:fuel_cell": {
-      "numerator": 1052,
-      "denominator": 1,
+      "numerator": 4205,
+      "denominator": 4,
       "source": "recipe jugcraft:fuel_cell"
     },
     "jugcraft:fuel_fabricator": {
@@ -5146,6 +5146,16 @@
       "numerator": 16,
       "denominator": 1,
       "source": "reference tag minecraft:small_flowers"
+    },
+    "jugcraft:gorse_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:gorse_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:goshawk_revolver": {
       "numerator": 1285,
@@ -5623,7 +5633,7 @@
       "source": "recipe jugcraft:hdpe_process_insert"
     },
     "jugcraft:he_rocket": {
-      "numerator": 11,
+      "numerator": 9,
       "denominator": 4,
       "source": "recipe jugcraft:rocket_assembly/he_rocket"
     },
@@ -6422,6 +6432,56 @@
       "denominator": 1,
       "source": "recipe jugcraft:jungle_cabinet"
     },
+    "jugcraft:juniper_berries": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:juniper_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:juniper_fence"
+    },
+    "jugcraft:juniper_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:juniper_fence_gate"
+    },
+    "jugcraft:juniper_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:juniper_needles": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:juniper_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:juniper_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:juniper_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:juniper_slab"
+    },
+    "jugcraft:juniper_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:juniper_stairs"
+    },
+    "jugcraft:juniper_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:kabocha_pumpkin": {
       "numerator": 1,
       "denominator": 1,
@@ -6748,8 +6808,8 @@
       "source": "recipe jugcraft:laser_sight"
     },
     "jugcraft:lattice_tower": {
-      "numerator": 29,
-      "denominator": 1,
+      "numerator": 55,
+      "denominator": 2,
       "source": "recipe jugcraft:lattice_tower"
     },
     "jugcraft:lavender": {
@@ -7298,7 +7358,7 @@
       "source": "recipe jugcraft:main_control_board"
     },
     "jugcraft:main_transformer": {
-      "numerator": 19577,
+      "numerator": 19571,
       "denominator": 8,
       "source": "recipe jugcraft:main_transformer"
     },
@@ -7403,8 +7463,8 @@
       "source": "recipe jugcraft:mason_jar"
     },
     "jugcraft:mcc_lineup": {
-      "numerator": 269,
-      "denominator": 1,
+      "numerator": 1073,
+      "denominator": 4,
       "source": "recipe jugcraft:mcc_lineup"
     },
     "jugcraft:medicine_cabinet": {
@@ -7558,8 +7618,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:monitored_lattice_tower": {
-      "numerator": 4311,
-      "denominator": 1,
+      "numerator": 8613,
+      "denominator": 2,
       "source": "recipe jugcraft:monitored_lattice_tower"
     },
     "jugcraft:monomer_preparation_unit": {
@@ -8023,8 +8083,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:pad_mount_transformer": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 69,
+      "denominator": 4,
       "source": "recipe jugcraft:pad_mount_transformer"
     },
     "jugcraft:painted_wall": {
@@ -9468,8 +9528,8 @@
       "source": "recipe jugcraft:reception_desk"
     },
     "jugcraft:reconductored_lattice_tower": {
-      "numerator": 45,
-      "denominator": 1,
+      "numerator": 81,
+      "denominator": 2,
       "source": "recipe jugcraft:reconductored_lattice_tower"
     },
     "jugcraft:red_alchemical_bag": {
@@ -9948,9 +10008,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:rocket_casing": {
-      "numerator": 3,
+      "numerator": 1,
       "denominator": 1,
-      "source": "recipe jugcraft:rocket_assembly/rocket_casing"
+      "source": "recipe jugcraft:rocket_assembly/rocket_casing_from_titanium"
     },
     "jugcraft:rocket_launcher": {
       "numerator": 1182,
@@ -10176,6 +10236,16 @@
       "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:sage_bundle"
+    },
+    "jugcraft:sagebrush_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:sagebrush_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:salamander_charm": {
       "numerator": 1,
@@ -11752,6 +11822,16 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:stripped_juniper_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_juniper_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:stripped_larch_log": {
       "numerator": 32,
       "denominator": 1,
@@ -11933,8 +12013,8 @@
       "source": "recipe jugcraft:superconducting_motor"
     },
     "jugcraft:superconducting_pylon": {
-      "numerator": 8559,
-      "denominator": 1,
+      "numerator": 34215,
+      "denominator": 4,
       "source": "recipe jugcraft:superconducting_pylon"
     },
     "jugcraft:superconducting_tape": {
@@ -12013,8 +12093,8 @@
       "source": "recipe jugcraft:swiftwolf_rending_gale"
     },
     "jugcraft:switchgear_lineup": {
-      "numerator": 328,
-      "denominator": 1,
+      "numerator": 1309,
+      "denominator": 4,
       "source": "recipe jugcraft:switchgear_lineup"
     },
     "jugcraft:synthesis_converter": {
@@ -12733,13 +12813,13 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:uhv_tower": {
-      "numerator": 5390,
-      "denominator": 1,
+      "numerator": 10771,
+      "denominator": 2,
       "source": "recipe jugcraft:uhv_tower"
     },
     "jugcraft:uhvdc_tower": {
-      "numerator": 7494,
-      "denominator": 1,
+      "numerator": 29955,
+      "denominator": 4,
       "source": "recipe jugcraft:uhvdc_tower"
     },
     "jugcraft:undertone_rifle": {
@@ -12748,8 +12828,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:unit_substation": {
-      "numerator": 2398,
-      "denominator": 1,
+      "numerator": 9589,
+      "denominator": 4,
       "source": "recipe jugcraft:unit_substation"
     },
     "jugcraft:uranium_block": {
@@ -13855,7 +13935,7 @@
     "minecraft:andesite_slab": {
       "numerator": 8,
       "denominator": 1,
-      "source": "recipe minecraft:andesite_slab"
+      "source": "recipe minecraft:andesite_slab_from_andesite_stonecutting"
     },
     "minecraft:andesite_stairs": {
       "numerator": 16,
@@ -13865,7 +13945,7 @@
     "minecraft:andesite_wall": {
       "numerator": 16,
       "denominator": 1,
-      "source": "recipe minecraft:andesite_wall"
+      "source": "recipe minecraft:andesite_wall_from_andesite_stonecutting"
     },
     "minecraft:angler_pottery_sherd": {
       "numerator": 216,
@@ -14225,7 +14305,7 @@
     "minecraft:blackstone_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:blackstone_slab"
+      "source": "recipe minecraft:blackstone_slab_from_blackstone_stonecutting"
     },
     "minecraft:blackstone_stairs": {
       "numerator": 4,
@@ -14235,7 +14315,7 @@
     "minecraft:blackstone_wall": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:blackstone_wall"
+      "source": "recipe minecraft:blackstone_wall_from_blackstone_stonecutting"
     },
     "minecraft:blade_pottery_sherd": {
       "numerator": 216,
@@ -14425,7 +14505,7 @@
     "minecraft:brick_slab": {
       "numerator": 32,
       "denominator": 1,
-      "source": "recipe minecraft:brick_slab"
+      "source": "recipe minecraft:brick_slab_from_bricks_stonecutting"
     },
     "minecraft:brick_stairs": {
       "numerator": 64,
@@ -14435,7 +14515,7 @@
     "minecraft:brick_wall": {
       "numerator": 64,
       "denominator": 1,
-      "source": "recipe minecraft:brick_wall"
+      "source": "recipe minecraft:brick_wall_from_bricks_stonecutting"
     },
     "minecraft:bricks": {
       "numerator": 64,
@@ -14705,17 +14785,17 @@
     "minecraft:chiseled_copper": {
       "numerator": 288,
       "denominator": 1,
-      "source": "recipe minecraft:chiseled_copper"
+      "source": "recipe minecraft:chiseled_copper_from_copper_block_stonecutting"
     },
     "minecraft:chiseled_deepslate": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:chiseled_deepslate_from_cobbled_deepslate_stonecutting"
+      "source": "recipe minecraft:chiseled_deepslate"
     },
     "minecraft:chiseled_nether_bricks": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:chiseled_nether_bricks_from_nether_bricks_stonecutting"
+      "source": "recipe minecraft:chiseled_nether_bricks"
     },
     "minecraft:chiseled_polished_blackstone": {
       "numerator": 4,
@@ -14725,7 +14805,7 @@
     "minecraft:chiseled_quartz_block": {
       "numerator": 1024,
       "denominator": 1,
-      "source": "recipe minecraft:chiseled_quartz_block"
+      "source": "recipe minecraft:chiseled_quartz_block_from_quartz_block_stonecutting"
     },
     "minecraft:chiseled_red_sandstone": {
       "numerator": 4,
@@ -14740,7 +14820,7 @@
     "minecraft:chiseled_stone_bricks": {
       "numerator": 1,
       "denominator": 1,
-      "source": "recipe minecraft:chiseled_stone_bricks"
+      "source": "recipe minecraft:chiseled_stone_bricks_from_stone_stonecutting"
     },
     "minecraft:chiseled_tuff": {
       "numerator": 4,
@@ -14750,7 +14830,7 @@
     "minecraft:chiseled_tuff_bricks": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:chiseled_tuff_bricks_from_tuff_stonecutting"
+      "source": "recipe minecraft:chiseled_tuff_bricks_from_polished_tuff_stonecutting"
     },
     "minecraft:chorus_flower": {
       "numerator": 96,
@@ -14825,7 +14905,7 @@
     "minecraft:cobbled_deepslate_wall": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:cobbled_deepslate_wall"
+      "source": "recipe minecraft:cobbled_deepslate_wall_from_cobbled_deepslate_stonecutting"
     },
     "minecraft:cobblestone": {
       "numerator": 1,
@@ -14890,12 +14970,12 @@
     "minecraft:cooked_beef": {
       "numerator": 64,
       "denominator": 1,
-      "source": "recipe minecraft:cooked_beef"
+      "source": "recipe minecraft:cooked_beef_from_campfire_cooking"
     },
     "minecraft:cooked_chicken": {
       "numerator": 64,
       "denominator": 1,
-      "source": "recipe minecraft:cooked_chicken"
+      "source": "recipe minecraft:cooked_chicken_from_campfire_cooking"
     },
     "minecraft:cooked_cod": {
       "numerator": 64,
@@ -14905,12 +14985,12 @@
     "minecraft:cooked_mutton": {
       "numerator": 64,
       "denominator": 1,
-      "source": "recipe minecraft:cooked_mutton"
+      "source": "recipe minecraft:cooked_mutton_from_campfire_cooking"
     },
     "minecraft:cooked_porkchop": {
       "numerator": 64,
       "denominator": 1,
-      "source": "recipe minecraft:cooked_porkchop"
+      "source": "recipe minecraft:cooked_porkchop_from_campfire_cooking"
     },
     "minecraft:cooked_rabbit": {
       "numerator": 64,
@@ -14920,7 +15000,7 @@
     "minecraft:cooked_salmon": {
       "numerator": 64,
       "denominator": 1,
-      "source": "recipe minecraft:cooked_salmon"
+      "source": "recipe minecraft:cooked_salmon_from_smoking"
     },
     "minecraft:cookie": {
       "numerator": 14,
@@ -15185,7 +15265,7 @@
     "minecraft:cut_copper_slab": {
       "numerator": 144,
       "denominator": 1,
-      "source": "recipe minecraft:cut_copper_slab"
+      "source": "recipe minecraft:cut_copper_slab_from_cut_copper_stonecutting"
     },
     "minecraft:cut_copper_stairs": {
       "numerator": 288,
@@ -15195,22 +15275,22 @@
     "minecraft:cut_red_sandstone": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:cut_red_sandstone"
+      "source": "recipe minecraft:cut_red_sandstone_from_red_sandstone_stonecutting"
     },
     "minecraft:cut_red_sandstone_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:cut_red_sandstone_slab"
+      "source": "recipe minecraft:cut_red_sandstone_slab_from_red_sandstone_stonecutting"
     },
     "minecraft:cut_sandstone": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:cut_sandstone"
+      "source": "recipe minecraft:cut_sandstone_from_sandstone_stonecutting"
     },
     "minecraft:cut_sandstone_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:cut_sandstone_slab"
+      "source": "recipe minecraft:cut_sandstone_slab_from_sandstone_stonecutting"
     },
     "minecraft:cyan_banner": {
       "numerator": 292,
@@ -15390,7 +15470,7 @@
     "minecraft:dark_prismarine_slab": {
       "numerator": 4097,
       "denominator": 4,
-      "source": "recipe minecraft:dark_prismarine_slab"
+      "source": "recipe minecraft:dark_prismarine_slab_from_dark_prismarine_stonecutting"
     },
     "minecraft:dark_prismarine_stairs": {
       "numerator": 4097,
@@ -15500,7 +15580,7 @@
     "minecraft:deepslate_brick_stairs": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:deepslate_brick_stairs_from_cobbled_deepslate_stonecutting"
+      "source": "recipe minecraft:deepslate_brick_stairs_from_polished_deepslate_stonecutting"
     },
     "minecraft:deepslate_brick_wall": {
       "numerator": 2,
@@ -15510,7 +15590,7 @@
     "minecraft:deepslate_bricks": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:deepslate_bricks_from_cobbled_deepslate_stonecutting"
+      "source": "recipe minecraft:deepslate_bricks_from_polished_deepslate_stonecutting"
     },
     "minecraft:deepslate_tile_slab": {
       "numerator": 1,
@@ -15530,7 +15610,7 @@
     "minecraft:deepslate_tiles": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:deepslate_tiles"
+      "source": "recipe minecraft:deepslate_tiles_from_cobbled_deepslate_stonecutting"
     },
     "minecraft:detector_rail": {
       "numerator": 267,
@@ -15605,7 +15685,7 @@
     "minecraft:diorite_slab": {
       "numerator": 8,
       "denominator": 1,
-      "source": "recipe minecraft:diorite_slab"
+      "source": "recipe minecraft:diorite_slab_from_diorite_stonecutting"
     },
     "minecraft:diorite_stairs": {
       "numerator": 16,
@@ -15645,7 +15725,7 @@
     "minecraft:dried_kelp": {
       "numerator": 1,
       "denominator": 1,
-      "source": "recipe minecraft:dried_kelp_from_campfire_cooking"
+      "source": "recipe minecraft:dried_kelp_from_smelting"
     },
     "minecraft:dried_kelp_block": {
       "numerator": 9,
@@ -15725,7 +15805,7 @@
     "minecraft:end_stone_bricks": {
       "numerator": 1,
       "denominator": 1,
-      "source": "recipe minecraft:end_stone_bricks"
+      "source": "recipe minecraft:end_stone_bricks_from_end_stone_stonecutting"
     },
     "minecraft:ender_chest": {
       "numerator": 2304,
@@ -16010,7 +16090,7 @@
     "minecraft:granite_slab": {
       "numerator": 8,
       "denominator": 1,
-      "source": "recipe minecraft:granite_slab"
+      "source": "recipe minecraft:granite_slab_from_granite_stonecutting"
     },
     "minecraft:granite_stairs": {
       "numerator": 16,
@@ -17020,7 +17100,7 @@
     "minecraft:mossy_cobblestone_wall": {
       "numerator": 9,
       "denominator": 1,
-      "source": "recipe minecraft:mossy_cobblestone_wall"
+      "source": "recipe minecraft:mossy_cobblestone_wall_from_mossy_cobblestone_stonecutting"
     },
     "minecraft:mossy_stone_brick_slab": {
       "numerator": 9,
@@ -17035,7 +17115,7 @@
     "minecraft:mossy_stone_brick_wall": {
       "numerator": 9,
       "denominator": 1,
-      "source": "recipe minecraft:mossy_stone_brick_wall"
+      "source": "recipe minecraft:mossy_stone_brick_wall_from_mossy_stone_bricks_stonecutting"
     },
     "minecraft:mossy_stone_bricks": {
       "numerator": 9,
@@ -17175,7 +17255,7 @@
     "minecraft:nether_brick_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:nether_brick_slab"
+      "source": "recipe minecraft:nether_brick_slab_from_nether_bricks_stonecutting"
     },
     "minecraft:nether_brick_stairs": {
       "numerator": 4,
@@ -17710,7 +17790,7 @@
     "minecraft:polished_andesite_slab": {
       "numerator": 8,
       "denominator": 1,
-      "source": "recipe minecraft:polished_andesite_slab"
+      "source": "recipe minecraft:polished_andesite_slab_from_andesite_stonecutting"
     },
     "minecraft:polished_andesite_stairs": {
       "numerator": 16,
@@ -17720,7 +17800,7 @@
     "minecraft:polished_basalt": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:polished_basalt"
+      "source": "recipe minecraft:polished_basalt_from_basalt_stonecutting"
     },
     "minecraft:polished_blackstone": {
       "numerator": 4,
@@ -17730,7 +17810,7 @@
     "minecraft:polished_blackstone_brick_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:polished_blackstone_brick_slab_from_blackstone_stonecutting"
+      "source": "recipe minecraft:polished_blackstone_brick_slab_from_polished_blackstone_bricks_stonecutting"
     },
     "minecraft:polished_blackstone_brick_stairs": {
       "numerator": 4,
@@ -17745,7 +17825,7 @@
     "minecraft:polished_blackstone_bricks": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:polished_blackstone_bricks"
+      "source": "recipe minecraft:polished_blackstone_bricks_from_blackstone_stonecutting"
     },
     "minecraft:polished_blackstone_button": {
       "numerator": 4,
@@ -17760,7 +17840,7 @@
     "minecraft:polished_blackstone_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:polished_blackstone_slab"
+      "source": "recipe minecraft:polished_blackstone_slab_from_blackstone_stonecutting"
     },
     "minecraft:polished_blackstone_stairs": {
       "numerator": 4,
@@ -17770,12 +17850,12 @@
     "minecraft:polished_blackstone_wall": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:polished_blackstone_wall"
+      "source": "recipe minecraft:polished_blackstone_wall_from_blackstone_stonecutting"
     },
     "minecraft:polished_deepslate": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:polished_deepslate"
+      "source": "recipe minecraft:polished_deepslate_from_cobbled_deepslate_stonecutting"
     },
     "minecraft:polished_deepslate_slab": {
       "numerator": 1,
@@ -17785,22 +17865,22 @@
     "minecraft:polished_deepslate_stairs": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:polished_deepslate_stairs_from_cobbled_deepslate_stonecutting"
+      "source": "recipe minecraft:polished_deepslate_stairs_from_deepslate_stonecutting"
     },
     "minecraft:polished_deepslate_wall": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:polished_deepslate_wall"
+      "source": "recipe minecraft:polished_deepslate_wall_from_cobbled_deepslate_stonecutting"
     },
     "minecraft:polished_diorite": {
       "numerator": 16,
       "denominator": 1,
-      "source": "recipe minecraft:polished_diorite"
+      "source": "recipe minecraft:polished_diorite_from_diorite_stonecutting"
     },
     "minecraft:polished_diorite_slab": {
       "numerator": 8,
       "denominator": 1,
-      "source": "recipe minecraft:polished_diorite_slab"
+      "source": "recipe minecraft:polished_diorite_slab_from_diorite_stonecutting"
     },
     "minecraft:polished_diorite_stairs": {
       "numerator": 16,
@@ -17815,7 +17895,7 @@
     "minecraft:polished_granite_slab": {
       "numerator": 8,
       "denominator": 1,
-      "source": "recipe minecraft:polished_granite_slab"
+      "source": "recipe minecraft:polished_granite_slab_from_granite_stonecutting"
     },
     "minecraft:polished_granite_stairs": {
       "numerator": 16,
@@ -17830,7 +17910,7 @@
     "minecraft:polished_tuff_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:polished_tuff_slab"
+      "source": "recipe minecraft:polished_tuff_slab_from_tuff_stonecutting"
     },
     "minecraft:polished_tuff_stairs": {
       "numerator": 4,
@@ -17840,7 +17920,7 @@
     "minecraft:polished_tuff_wall": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:polished_tuff_wall"
+      "source": "recipe minecraft:polished_tuff_wall_from_tuff_stonecutting"
     },
     "minecraft:poplar_boat": {
       "numerator": 40,
@@ -17990,7 +18070,7 @@
     "minecraft:prismarine_slab": {
       "numerator": 512,
       "denominator": 1,
-      "source": "recipe minecraft:prismarine_slab"
+      "source": "recipe minecraft:prismarine_slab_from_prismarine_stonecutting"
     },
     "minecraft:prismarine_stairs": {
       "numerator": 1024,
@@ -18140,12 +18220,12 @@
     "minecraft:quartz_pillar": {
       "numerator": 1024,
       "denominator": 1,
-      "source": "recipe minecraft:quartz_pillar"
+      "source": "recipe minecraft:quartz_pillar_from_quartz_block_stonecutting"
     },
     "minecraft:quartz_slab": {
       "numerator": 512,
       "denominator": 1,
-      "source": "recipe minecraft:quartz_slab"
+      "source": "recipe minecraft:quartz_slab_from_quartz_block_stonecutting"
     },
     "minecraft:quartz_stairs": {
       "numerator": 1024,
@@ -18170,7 +18250,7 @@
     "minecraft:rabbit_stew": {
       "numerator": 230,
       "denominator": 1,
-      "source": "recipe minecraft:rabbit_stew_from_brown_mushroom"
+      "source": "recipe minecraft:rabbit_stew_from_red_mushroom"
     },
     "minecraft:rail": {
       "numerator": 385,
@@ -18235,7 +18315,7 @@
     "minecraft:red_nether_brick_slab": {
       "numerator": 25,
       "denominator": 1,
-      "source": "recipe minecraft:red_nether_brick_slab"
+      "source": "recipe minecraft:red_nether_brick_slab_from_red_nether_bricks_stonecutting"
     },
     "minecraft:red_nether_brick_stairs": {
       "numerator": 50,
@@ -18270,7 +18350,7 @@
     "minecraft:red_sandstone_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:red_sandstone_slab"
+      "source": "recipe minecraft:red_sandstone_slab_from_red_sandstone_stonecutting"
     },
     "minecraft:red_sandstone_stairs": {
       "numerator": 4,
@@ -18280,7 +18360,7 @@
     "minecraft:red_sandstone_wall": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:red_sandstone_wall"
+      "source": "recipe minecraft:red_sandstone_wall_from_red_sandstone_stonecutting"
     },
     "minecraft:red_stained_glass": {
       "numerator": 9,
@@ -18385,7 +18465,7 @@
     "minecraft:sandstone_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:sandstone_slab"
+      "source": "recipe minecraft:sandstone_slab_from_sandstone_stonecutting"
     },
     "minecraft:sandstone_stairs": {
       "numerator": 4,
@@ -18395,7 +18475,7 @@
     "minecraft:sandstone_wall": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:sandstone_wall"
+      "source": "recipe minecraft:sandstone_wall_from_sandstone_stonecutting"
     },
     "minecraft:scaffolding": {
       "numerator": 34,
@@ -18575,7 +18655,7 @@
     "minecraft:smooth_stone_slab": {
       "numerator": 1,
       "denominator": 2,
-      "source": "recipe minecraft:smooth_stone_slab"
+      "source": "recipe minecraft:smooth_stone_slab_from_smooth_stone_stonecutting"
     },
     "minecraft:sniffer_egg": {
       "numerator": 2048,
@@ -18770,7 +18850,7 @@
     "minecraft:stone_brick_slab": {
       "numerator": 1,
       "denominator": 2,
-      "source": "recipe minecraft:stone_brick_slab_from_stone_stonecutting"
+      "source": "recipe minecraft:stone_brick_slab"
     },
     "minecraft:stone_brick_stairs": {
       "numerator": 1,
@@ -18980,7 +19060,7 @@
     "minecraft:suspicious_stew": {
       "numerator": 86,
       "denominator": 1,
-      "source": "recipe minecraft:suspicious_stew_from_allium"
+      "source": "recipe minecraft:suspicious_stew_from_wither_rose"
     },
     "minecraft:sweet_berries": {
       "numerator": 16,
@@ -19085,17 +19165,17 @@
     "minecraft:tuff_brick_slab": {
       "numerator": 2,
       "denominator": 1,
-      "source": "recipe minecraft:tuff_brick_slab_from_polished_tuff_stonecutting"
+      "source": "recipe minecraft:tuff_brick_slab_from_tuff_stonecutting"
     },
     "minecraft:tuff_brick_stairs": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:tuff_brick_stairs_from_polished_tuff_stonecutting"
+      "source": "recipe minecraft:tuff_brick_stairs_from_tuff_stonecutting"
     },
     "minecraft:tuff_brick_wall": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:tuff_brick_wall_from_polished_tuff_stonecutting"
+      "source": "recipe minecraft:tuff_brick_wall_from_tuff_stonecutting"
     },
     "minecraft:tuff_bricks": {
       "numerator": 4,
@@ -19115,7 +19195,7 @@
     "minecraft:tuff_wall": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe minecraft:tuff_wall"
+      "source": "recipe minecraft:tuff_wall_from_tuff_stonecutting"
     },
     "minecraft:turtle_egg": {
       "numerator": 192,
