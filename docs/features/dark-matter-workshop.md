@@ -1,5 +1,7 @@
 # Dark Matter workshop — local alchemy follow-up
 
+> Publication update, 18 October 2026: the owner accepted the combined alchemy presentation and authorized publishing the alchemy additions and UI fixes. Historical local-only checkpoints below are superseded. Current scope and validation are recorded in [Alchemy interfaces and access](alchemy-interface-and-access.md).
+
 Owner accepted this package on 17 October 2026. Implementation: OpenAI Codex (GPT-6). Built on the local alchemy tablet branch; publication and owner playtest are pending.
 
 ## Player outcome and integration

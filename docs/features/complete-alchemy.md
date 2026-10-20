@@ -1,5 +1,7 @@
 # Complete owner-library alchemy — local integration, 17 October 2026
 
+> Publication update, 18 October 2026: the owner accepted the combined alchemy presentation and authorized publishing the alchemy additions and UI fixes. Historical local-only checkpoints below are superseded. Current scope and validation are recorded in [Alchemy interfaces and access](alchemy-interface-and-access.md).
+
 Owner request: implement all remaining entries in the audited Equivalent Exchange-style asset inventory, then test the combined result at the end. Keep this work local for an owner-controlled playtest before publication. Implementation and integration by **OpenAI Codex (GPT-6)**, including bounded delegated equipment, machine and storage work.
 
 **Current extension:** [Connected Alchemy](connected-alchemy.md) supersedes the original manual-only converter, offhand-only Eye and six-artifact pedestal behavior described below. This record preserves the preceding slice and its actual validation.

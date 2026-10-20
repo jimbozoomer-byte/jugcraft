@@ -1,5 +1,7 @@
 # Constellation composer and illustrated field guide
 
+> Publication update, 18 October 2026: the owner accepted the combined alchemy presentation and authorized publishing the alchemy additions and UI fixes. Historical local-only checkpoints below are superseded. Current scope and validation are recorded in [Alchemy interfaces and access](alchemy-interface-and-access.md).
+
 Owner-directed local redesign, 16 October 2026. Implemented with OpenAI Codex (GPT-6).
 Based on local `364a622129300a46643e812fe6d2aa4053db5bb5`; no main push is part of this slice.
 Open PRs were refreshed before implementation; none of the 27 open PR titles described overlapping composer/encyclopedia UI work.

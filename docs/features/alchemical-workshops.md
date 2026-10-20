@@ -1,5 +1,7 @@
 # Essence collectors and condensers
 
+> Publication update, 18 October 2026: the owner accepted the combined alchemy presentation and authorized publishing the alchemy additions and UI fixes. Historical local-only checkpoints below are superseded. Current scope and validation are recorded in [Alchemy interfaces and access](alchemy-interface-and-access.md).
+
 Owner requested collectors and condensers with existing assets on 17 October 2026. Implemented locally with **OpenAI Codex (GPT-6)** on `local/alchemical-gear-oct16`, based on `a59edd31d`. Publication and owner playtest remain pending. The open-PR refresh found no overlapping alchemical workshop contribution.
 
 ## Player outcome

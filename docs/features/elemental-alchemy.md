@@ -1,5 +1,7 @@
 # Klein Stars and elemental amulets
 
+> Publication update, 18 October 2026: the owner accepted the combined alchemy presentation and authorized publishing the alchemy additions and UI fixes. Historical local-only checkpoints below are superseded. Current scope and validation are recorded in [Alchemy interfaces and access](alchemy-interface-and-access.md).
+
 Owner requested continued use of the remaining Equivalent Exchange-style owner assets on 17 October 2026. Implementation: OpenAI Codex (GPT-6). Local branch only; owner playtest and publication pending.
 
 ## Outcome and connections

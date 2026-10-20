@@ -1,5 +1,7 @@
 # Alchemy playability — local owner test, 17 October 2026
 
+> Publication update, 18 October 2026: the owner accepted the combined alchemy presentation and authorized publishing the alchemy additions and UI fixes. Historical local-only checkpoints below are superseded. Current scope and validation are recorded in [Alchemy interfaces and access](alchemy-interface-and-access.md).
+
 **Current equipment access:** [the interface/access revision](alchemy-interface-and-access.md) removes the research prerequisite described below. Possessing equipment is sufficient to operate it; tablet pattern learning and essence costs remain.
 
 Implemented with **OpenAI Codex (GPT-6)** at the owner's request. This supersedes the corresponding interface, valuation and owner-presence rules in [Connected Alchemy](connected-alchemy.md). Keep this work local until the owner has played it personally.

@@ -1,5 +1,7 @@
 # Alchemical gear — local first slice
 
+> Publication update, 18 October 2026: the owner accepted the combined alchemy presentation and authorized publishing the alchemy additions and UI fixes. Historical local-only checkpoints below are superseded. Current scope and validation are recorded in [Alchemy interfaces and access](alchemy-interface-and-access.md).
+
 Owner request, 16 October 2026: build a non-spellcasting magical equipment branch inspired by Equivalent Exchange 1/2, using the owner's supplied assets. Implementation: OpenAI Codex (GPT-6), under the owner's session authorization. This branch remains local for review.
 
 ## Feature contract

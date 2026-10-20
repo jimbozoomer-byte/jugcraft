@@ -5269,6 +5269,18 @@
             {
               "in": [
                 [
+                  "jugcraft:titanium_plate",
+                  2
+                ]
+              ],
+              "out": [
+                "jugcraft:rocket_casing",
+                2
+              ]
+            },
+            {
+              "in": [
+                [
                   "jugcraft:tungsten_ingot",
                   1
                 ],
@@ -5280,26 +5292,6 @@
               "out": [
                 "jugcraft:rocket_nozzle",
                 2
-              ]
-            },
-            {
-              "in": [
-                [
-                  "jugcraft:processor",
-                  1
-                ],
-                [
-                  "jugcraft:microchip",
-                  2
-                ],
-                [
-                  "jugcraft:copper_wire",
-                  2
-                ]
-              ],
-              "out": [
-                "jugcraft:guidance_unit",
-                1
               ]
             }
           ]

@@ -249,7 +249,8 @@
       "io.github.jimbozoomer.jugcraft.test.JugNouveauGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarbuncleGameTests",
       "io.github.jimbozoomer.jugcraft.test.NouveauExpansionGameTests",
-      "io.github.jimbozoomer.jugcraft.test.MenagerieGameTests"
+      "io.github.jimbozoomer.jugcraft.test.MenagerieGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TitaniumCasingGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureResourceClientTests",

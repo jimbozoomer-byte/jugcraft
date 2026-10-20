@@ -1,6 +1,6 @@
 # Alchemy interfaces and immediate equipment use
 
-Owner-directed local work by **OpenAI Codex (GPT-6)**, 17 October 2026. This supersedes the equipment research requirement in [Alchemy Playability](alchemy-playability.md). Keep local for the owner's independent playtest.
+Owner-directed local work by **OpenAI Codex (GPT-6)**, 17 October 2026. This supersedes the equipment research requirement in [Alchemy Playability](alchemy-playability.md). The owner accepted the presentation and authorized publishing the alchemy suite and UI fixes on 18 October 2026.
 
 ## Player experience
 
@@ -31,4 +31,10 @@ The first server run exposed one obsolete research-gate expectation and a vanill
 
 Local artifacts are in `outputs/Jugcraft-Alchemy-Refined-Oct17` outside the repository: verified JAR and Modrinth pack, screenshots, an independently playable showroom, validation record and exact source SHA in `build-info.json`. The existing owner playtest profile/worlds are preserved. The owner controls the manual playtest; the pack contains no scripted camera or player control.
 
-Independent owner feedback and two-client multiplayer remain untested. Nothing was pushed or published.
+The owner reported that the result looks good and authorized publication on 18 October 2026. This supersedes the earlier local-only publication checkpoints across the alchemy feature records. Independent two-client multiplayer and detailed survival/economy balancing remain unverified. The publication branch contains the alchemy suite and constellation/encyclopedia UI; the separate local seven-tech-package and town changes remain outside this merge.
+
+## Main integration, 18 October 2026
+
+[PR #415](https://github.com/jimbozoomer-byte/jugcraft/pull/415) extracts this scope onto main `2804ba015`. All 90 affected code/test files match the owner-tested local source after line-ending normalization. Shared test registrations, generated resources and the essence value table were rebuilt for main's existing content, without the unpublished tech and town additions. Compilation of common/client/game-test code, all 63 Python checks, the 18-library pin contract and repository documentation checks passed locally. The PR records the fresh combined server, resource and rendered-client results and GitHub check outcomes; the historical 1,929-test result above belongs to the broader local playtest build.
+
+The isolated integration's full build passed all **1,925 required server tests**. Its resource audit passed **2,885 material IDs, 8,409 models and 3,707 quad parts**. GitHub also passed the full build/packaging and optional-integrations-absent build. The cloud workshop client check exposed an old 65,536-essence capacity expectation after the Mk I condenser had increased to 1,048,576. The fixture now supplies enough essence, checks the actual capacity and verifies exact wallet/buffer conservation through both deposit and withdrawal; no production behavior changed for this correction. The four focused Dark Matter, elemental, workshop and complete-alchemy client classes then passed together locally, with all 45 expected screenshots through the final Gem controls. The earlier local invocation exercised the encyclopedia, constellation editor and Stone tablet, but its early clean exit is not claimed as completion of the later four classes. Final cloud outcomes are recorded on the PR.
