@@ -611,6 +611,8 @@ def wood_textures():
     out.update(tropical_textures())
     from rainforest_textures import textures as rainforest_textures
     out.update(rainforest_textures())
+    from walnut_textures import textures as walnut_textures
+    out.update(walnut_textures())
     out["block", "olive_planks"] = figure(out["block", "olive_planks"])
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)

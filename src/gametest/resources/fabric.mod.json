@@ -266,7 +266,8 @@
       "io.github.jimbozoomer.jugcraft.test.HangingFruitGameTests",
       "io.github.jimbozoomer.jugcraft.test.TropicalTreeGameTests",
       "io.github.jimbozoomer.jugcraft.test.RainforestGameTests",
-      "io.github.jimbozoomer.jugcraft.test.BackpackGameTests"
+      "io.github.jimbozoomer.jugcraft.test.BackpackGameTests",
+      "io.github.jimbozoomer.jugcraft.test.WalnutTreeGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureResourceClientTests",
@@ -481,7 +482,8 @@
       "io.github.jimbozoomer.jugcraft.test.HangingFruitClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TropicalTreeClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.RainforestClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.BackpackClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.BackpackClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.WalnutTreeClientGameTests"
     ]
   },
   "depends": {

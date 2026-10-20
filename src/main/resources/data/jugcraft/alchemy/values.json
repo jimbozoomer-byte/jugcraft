@@ -9078,14 +9078,14 @@
       "source": "recipe jugcraft:ecology/stripped_maple_wood"
     },
     "jugcraft:ecology_stripped_walnut_log": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_stripped_walnut_wood": {
-      "numerator": 4,
-      "denominator": 3,
-      "source": "recipe jugcraft:ecology/stripped_walnut_wood"
+      "numerator": 32,
+      "denominator": 1,
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_surface_moss": {
       "numerator": 4,
@@ -9108,72 +9108,72 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ecology_walnut_boat": {
-      "numerator": 5,
-      "denominator": 4,
+      "numerator": 40,
+      "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_boat"
     },
     "jugcraft:ecology_walnut_button": {
-      "numerator": 1,
-      "denominator": 4,
+      "numerator": 8,
+      "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_button"
     },
     "jugcraft:ecology_walnut_cabinet": {
-      "numerator": 9,
-      "denominator": 4,
+      "numerator": 72,
+      "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_cabinet"
     },
     "jugcraft:ecology_walnut_chest_boat": {
-      "numerator": 261,
-      "denominator": 4,
+      "numerator": 104,
+      "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_chest_boat"
     },
     "jugcraft:ecology_walnut_door": {
-      "numerator": 1,
-      "denominator": 2,
+      "numerator": 16,
+      "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_door"
     },
     "jugcraft:ecology_walnut_fence": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 40,
+      "denominator": 3,
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_fence_gate": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_hanging_sign": {
-      "numerator": 2843,
+      "numerator": 3680,
       "denominator": 27,
       "source": "recipe jugcraft:ecology/walnut_hanging_sign"
     },
     "jugcraft:ecology_walnut_leaves": {
       "numerator": 1,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_log": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_planks": {
-      "numerator": 1,
-      "denominator": 4,
-      "source": "recipe jugcraft:ecology/walnut_planks"
+      "numerator": 8,
+      "denominator": 1,
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_pressure_plate": {
-      "numerator": 1,
-      "denominator": 2,
+      "numerator": 16,
+      "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_pressure_plate"
     },
     "jugcraft:ecology_walnut_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_shelf": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_shelf"
     },
@@ -9183,24 +9183,24 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ecology_walnut_slab": {
-      "numerator": 1,
-      "denominator": 8,
-      "source": "recipe jugcraft:ecology/walnut_slab"
+      "numerator": 4,
+      "denominator": 1,
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_stairs": {
-      "numerator": 3,
-      "denominator": 8,
-      "source": "recipe jugcraft:ecology/walnut_stairs"
+      "numerator": 12,
+      "denominator": 1,
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_walnut_trapdoor": {
-      "numerator": 3,
-      "denominator": 4,
+      "numerator": 24,
+      "denominator": 1,
       "source": "recipe jugcraft:ecology/walnut_trapdoor"
     },
     "jugcraft:ecology_walnut_wood": {
-      "numerator": 4,
-      "denominator": 3,
-      "source": "recipe jugcraft:ecology/walnut_wood"
+      "numerator": 32,
+      "denominator": 1,
+      "source": "local walnut compatibility accounting"
     },
     "jugcraft:ecology_yellow_maple_leaves": {
       "numerator": 1,
@@ -24617,6 +24617,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:roasted_sunflower_seeds"
     },
+    "jugcraft:roasted_walnuts": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "recipe jugcraft:roasted_walnuts"
+    },
     "jugcraft:rock_candy": {
       "numerator": 1,
       "denominator": 1,
@@ -28057,25 +28062,45 @@
       "denominator": 1,
       "source": "recipe jugcraft:walnut_fence_gate"
     },
+    "jugcraft:walnut_husk": {
+      "numerator": 64,
+      "denominator": 1,
+      "source": "local walnut dye accounting"
+    },
+    "jugcraft:walnut_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
     "jugcraft:walnut_log": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:walnut_mooncake": {
+      "numerator": 247,
+      "denominator": 12,
+      "source": "recipe jugcraft:pot_cooking/walnut_mooncake"
     },
     "jugcraft:walnut_planks": {
       "numerator": 8,
       "denominator": 1,
       "source": "reference tag minecraft:planks"
     },
+    "jugcraft:walnut_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
     "jugcraft:walnut_slab": {
       "numerator": 4,
       "denominator": 1,
-      "source": "recipe jugcraft:walnut_slab"
+      "source": "recipe jugcraft:ecology/walnut_slab"
     },
     "jugcraft:walnut_stairs": {
       "numerator": 12,
       "denominator": 1,
-      "source": "recipe jugcraft:walnut_stairs"
+      "source": "recipe jugcraft:ecology/walnut_stairs"
     },
     "jugcraft:walnut_wood": {
       "numerator": 32,

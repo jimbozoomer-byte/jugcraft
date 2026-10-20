@@ -1,21 +1,32 @@
 # Tree batch 13: walnut and bristlecone
 
-Status: in progress on `codex/tree-generation-batch-13`, based on integrated
+Status: implemented; awaiting full-world owner approval on `codex/tree-generation-batch-13`, based on integrated
 main `511b7ec0`. Owner requested implementation on 20 October 2026, with a
-walnut timber approval checkpoint before tree or biome work.
+walnut timber approval checkpoint before tree or biome work. The owner approved
+the timber and authorized the complete Batch 13 tree/biome work on the same day.
 Actual tool/model: OpenAI Codex (GPT-6).
 
 The open upstream PRs and branch inventories of all five public forks were
 checked before starting. No other open Batch 13 implementation was identified.
 PR #421 concerns aged pine/maple and remains separate.
 
-Runtime inspection found that integrated main also contains a recovered
-`ecology_walnut` family from the 18 October owner collection. The initial plan
-predates that integration. The gallery compares it with this candidate timber.
-This is an approval-stage draft, not a finished second walnut acquisition path.
-After approval, reconcile the recovered walnut's existing IDs, furniture, boats,
-saplings and trees with the selected appearance and Batch 13 distribution,
-preserving already placed blocks and inventories.
+Integrated main contains a recovered `ecology_walnut` family from the 18 October
+owner collection. Batch 13 keeps every recovered registry ID, placed block,
+block entity and boat entity. The approved `walnut_*` nine-form timber is the
+canonical output. Recovered timber drops and crafting converge on that output;
+shared ingredient tags accept either inventory. Both saplings grow the same 4:1
+normal/large selection; both leaf IDs have the same seasonal harvest. The old
+unconditional taiga injection is removed, while its configured feature remains
+a compatibility entry point. Duplicate basic forms are hidden from the creative
+catalogue; recovered doors, signs, boats, cabinet, shelf, buttons and pressure
+plates remain available and use the shared supply.
+
+Recovered core block models reference the approved textures, and recovered leaf
+and sapling blockstates use the new shared models. The extra furniture/boat art
+and source originals remain intact. The owner library is never rewritten.
+Existing walnut aliases receive the same essence value as their canonical drops;
+husks carry the established brown-dye value. Other established essence values
+remain unchanged.
 
 ## First checkpoint: walnut wood
 
@@ -29,8 +40,8 @@ Use owner painting bank row 2 (`black_walnut`) as the palette reference.
 The planned cool dark brown timber is `#5a4b41`; furrowed bark follows the
 owner's charcoal-brown ramp. Extend the existing deterministic wood painter
 and preserve all existing wood seeds and assets. The owner-library catalog
-used for the initial plan predates the recovered ecology collection. Its
-walnut art remains unchanged and is included as an in-game comparison.
+used for the initial plan predates the recovered ecology collection. That
+collection was included in the initial comparison and is now reconciled above.
 No library originals change.
 
 Prepare an inspection gallery with all nine forms, exposed end grain, tiled
@@ -38,7 +49,7 @@ walls and a small pavilion. Compare against spruce, dark oak, cedar, yew and
 persimmon. Verify crafting, stripping axes, drops, fuel, sawmill costs and
 save/reopen behavior. Record actual results below when available.
 
-## Remaining authorized scope, after timber approval
+## Batch 13 implementation
 
 - Walnut: 10% of Dense Forest tree selections, replacing fancy oak; 4% in
   Woodland, replacing ordinary oak. One fifth of walnut selections are large.
@@ -53,6 +64,26 @@ save/reopen behavior. Record actual results below when available.
   4–7-block trees with sparse connected pine needles, 5–8-block spread.
   Existing pine wood, roughly 70% stripped and 30% bark. Existing pine saplings.
   Supported gravel, stone or andesite without dirt pedestals.
+
+The bounded native feature plans all logs and foliage before writing. Every
+branch bend has face-connected wood; a breadth-first pass computes real leaf
+distances and removes unsupported foliage. Obstructed or wet placements fail
+without a partial tree. Bristlecones require solid support beneath their rocky
+footing and never replace it with dirt.
+
+Walnut uses schedule `[105, 255, 290]`, with the existing seven-day positional
+jitter. Fixed April 15 spring and October 20 autumn modes intentionally straddle
+leaf-out and leaf-fall; summer is green and winter bare. Bare crowns cannot be
+harvested and lose any remaining ripe state on their next random tick. The
+shared deterministic foliage painter supplies six-tone green and gold leaves,
+round green/dark husks and connected winter twigs. No supplied source art changes.
+
+Right-clicking a ripe natural leaf gives 1–2 existing raw Walnuts plus one Walnut
+Husk, then resets the fruit. Placed/persistent and unsupported leaves cannot be
+harvested. Smelting, smoking or campfire cooking yields one Roasted Walnuts item;
+the Cooking Pot consumes two roasted walnuts, two wheat, sugar and egg for four
+Walnut Mooncakes. One consumed husk makes one Brown Dye. Raw and roasted walnuts
+join the existing squirrel food tag.
 
 Tree generation changes apply only to new chunks. Existing registrations and
 placed blocks persist with feature switches disabled. No new dependencies,
@@ -89,5 +120,57 @@ Wood approval stage, 20 October 2026:
 The export is `build/walnut-wood-preview-r2/Walnut Wood Gallery`. The flat
 creative showroom has frozen time/weather/random ticks, comparison rows and a
 walnut pavilion. It is not a Batch 13 world-generation demonstration.
-Full tree/biome testing follows the timber approval and remaining implementation.
+Full tree/biome validation is recorded below.
 No multiplayer or external launcher import is claimed.
+
+
+Full Batch 13 validation, 20 October 2026:
+
+- Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3,
+  Java 25 and the existing 21 pinned Complete-pack dependencies.
+- Repository/documentation check and the complete data/art/recipe audit pass:
+  6,150 material IDs, 11,744 block/item models, 3,713 quad parts and 173 combined
+  models. All 28 related unit tests pass (six walnut worldgen/compatibility,
+  eight alchemy, eight recipe-loop and six client-selection tests).
+- `build runClientGameTest -I build/focused.gradle
+  -PgameTestFilter=jugcraft-test:walnut*
+  -PclientTests=WalnutTreeClientGameTests`: all 12 focused server game tests
+  pass, including the four approved timber tests. They exercise connected
+  shapes, atomic obstruction/soil handling, both saplings, recovered crafting
+  and drops, harvest/repeated-use protection, regrowth/seasons/decay, actual
+  furnace roasting and actual Cooking Pot mooncake consumption.
+- Twelve deterministic seeds per shape measured normal walnuts at 8–10 tall
+  and 7–9 wide, large walnuts at 12–16 tall and 11–13 wide, and bristlecones at
+  4–7 tall and 5–6 wide. All branches connect and all leaves have actual log
+  distances below seven. Repeated seeds reproduce identical trees.
+- Testing caught and fixed grass rejection: Minecraft 26.3's dirt tag excludes
+  grass blocks. Walnut now uses the native oak-sapling survival rule. Tests also
+  caught legacy salvage alternatives containing nested tags, which are expanded
+  to concrete old/new item IDs; recipe-loop accounting still examines all members.
+- The five approved timber PNGs remain byte-identical to the approval checkpoint.
+  Material regeneration and reconciliation were checked for stable output;
+  existing non-walnut essence entries remain unchanged.
+
+- The complete build and client tour pass (8m45s combined). Nine planted trees,
+  harvest/season displays and recovered blocks survive save/reopen. Eight game
+  screenshots were inspected, including natural Basin bristlecones.
+- The normal seed `jugcraft` has verified stops at Dense Forest `(832,85,1744)`,
+  Woodland `(-1664,118,1728)` and Basin `(2744,118,5832)`. Walnut is present in
+  both intended forests; weathered pine is present in Basin. No old walnut-log
+  worldgen was found in those surveys.
+- Delivery-copy inspection scans 7,352 saved region records and other save files
+  without actual test content. All 109 original export files remain untouched.
+  Only unused development metadata in `level.dat`, `level.dat_old` and
+  `data/fabric/registry_entries.dat` changes in the copy.
+
+Full tree-world export: `build/tree-batch-13-preview/Walnut and Bristlecone Inspection`.
+The sibling delivery folder `tree-batch-13-preview-2026-10-20` contains the matching
+mod, launcher pack, standalone world, screenshots and `TOUR.txt` coordinates.
+The original approved timber gallery remains separate and preserved.
+
+The ordinary client joined the cleaned inspection world at `(1080.5,180,-987.5)`
+at 07:39 local time on 20 October. It is open for owner review.
+
+The focused local run does not claim the entire server/client suite, two-client
+multiplayer, external launcher import, real-day seasonal transitions or a
+population-level performance benchmark. CI retains the normal full server suite.

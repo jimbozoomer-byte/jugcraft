@@ -383,7 +383,7 @@ def item_units(ref):
     # metal-recovery recipe. Acquiring them consumes inputs; none yields ingots.
     if ns == MOD and path in menagerie.entries() or ref == '#c:eggs':
         return {}
-    if ref.startswith('#') and ns == MOD and path.startswith(('cavern_','beast_','household_','ecology_','fauna_','mutant_','landscape_')):
+    if ref.startswith('#') and ns == MOD and path.startswith(('cavern_','beast_','household_','ecology_','fauna_','mutant_','landscape_','walnut_compat/')):
         tag = load(DATA / MOD / 'tags' / 'item' / (path+'.json')) or {}
         values = [v if isinstance(v,str) else v['id'] for v in tag.get('values',[])]
         # Ingredients select one member. Conservatively use the least valuable
@@ -2905,6 +2905,7 @@ def check_wood_switches():
         if patch is not None:
             placed_by(patch["feature"], ag.FEATURE if name in inside else f"(patch_{name}, outside registerWorldgen)")
     woods = {shape: info["wood"] for shape, info in tr.SHAPES.items() if info["wood"] in ag.WOOD_SETS}
+    woods.update({shape: info["wood"] for shape, info in tr.BOUNDED_SHAPES.items()})
     woods.update({f"fallen_{wood}_tree": wood for wood in tr.FALLEN})
     for placed, (feature, _) in bm.PLACED_TREES.items():
         ns, path = split(feature)
@@ -2922,6 +2923,13 @@ def check_wood_switches():
             missing = placers.get(shape, set()) - set(ag.tree_switches(tree))
             if missing:
                 err(f"{shape} places {tree} foliage through uncovered switches {sorted(missing)}")
+    for shape, info in tr.BOUNDED_SHAPES.items():
+        configured = load(DATA / MOD / "worldgen/feature" / f"{shape}.json")
+        if configured != {"type": "jugcraft:walnut_tree", "shape": shape}:
+            err(f"{shape} must use its bounded native feature")
+        missing = placers.get(shape, set()) - set(ag.tree_switches(info["tree"]))
+        if missing:
+            err(f"{shape} places foliage through uncovered switches {sorted(missing)}")
 
 
 def check_alpine():
@@ -5071,6 +5079,11 @@ def check_festival(java, main):
         if composed:
             edge_fruiting = ", true" if info["fruit"].get("exposed_sides") else ""
             factory = f'props -> new SeasonalFruitLeavesBlock({tree.upper()}_LEAVES, "{info["fruit"]["item"]}", props{edge_fruiting})'
+            if tree == "walnut":
+                factory = "WalnutLeavesBlock::new"
+                walnut_java = (JAVA_ROOT / "agriculture/WalnutLeavesBlock.java").read_text(encoding="utf-8")
+                if 'super(SCHEDULE, "ecology_walnut", properties)' not in walnut_java or "SCHEDULE = JugcraftAgriculture.WALNUT_LEAVES" not in walnut_java:
+                    err("Walnut leaves must use the shared schedule and recovered raw nut")
             registration = re.search(rf'registerFoliage\("{tree}",.*?;', main, re.S)
             if registration is None or factory not in registration.group():
                 err(f"{tree} must register its own seasonal fruit schedule and fruit item")
@@ -5141,6 +5154,11 @@ def check_seasonal_trees(main, leaves):
             expected_looks = ({"spring": {"green", "bare"}, "summer": {"green"},
                                "autumn": {"green", "gold"}, "winter": {"bare"}}[mode]
                               if tree == "holly" else {wanted[mode]})
+            if tree == "walnut":
+                # The approved late leaf-out/early leaf-fall dates straddle the
+                # fixed April 15 and October 20 modes. Audit those exact sets.
+                expected_looks = {"spring": {"bare", "green"}, "summer": {"green"},
+                                  "autumn": {"bare", "gold"}, "winter": {"bare"}}[mode]
             if seen != expected_looks:
                 err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, expected {sorted(expected_looks)}")
 
