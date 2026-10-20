@@ -45,6 +45,17 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 	protected void validateSurvey(String biome, Map<String, Integer> survey) { }
 	protected BlockPos surveySpot(ServerLevel level, BlockPos first, ResourceKey<Biome> biome) { return first; }
 	protected boolean includeSubmergedColumns() { return false; }
+	protected List<BlockPos> surveyAnchors(String biome) {
+		var anchors = new ArrayList<BlockPos>();
+		anchors.add(BlockPos.ZERO);
+		// Dry River has very little exposed bank. It is valid for the closest
+		// occurrences to have no dry placement candidates, even with trees enabled.
+		int[] rings = biome.equals("dry_river") ? new int[] {4096, 8192, 16384, 32768} : new int[] {4096, 8192};
+		for (int reach : rings) for (int[] direction : new int[][] {{1,0},{-1,0},{0,1},{0,-1},{1,1},{-1,-1},{1,-1},{-1,1}})
+			anchors.add(new BlockPos(reach * direction[0], 0, reach * direction[1]));
+		return anchors;
+	}
+
 	protected void validateReopened(ServerLevel level) { }
 	protected void beforeReopenValidation(ClientGameTestContext context, TestSingleplayerContext world) { }
 
@@ -102,12 +113,10 @@ public class TreeBatchTwoClientGameTests implements FabricClientGameTest {
 				var checked = new java.util.HashSet<BlockPos>();
 				// A small surface occurrence need not contain every rare tree. Survey
 				// distinct regions, retaining the actual natural-species assertions.
-				for (int[] offset : new int[][] {{0,0}, {4096,0}, {-4096,0}, {0,4096}, {0,-4096},
-						{4096,4096}, {-4096,-4096}, {4096,-4096}, {-4096,4096},
-						{8192,0}, {-8192,0}, {0,8192}, {0,-8192}}) {
+				for (BlockPos anchor : surveyAnchors(name)) {
 					place = server.computeOnServer(minecraft -> {
 						var level = minecraft.overworld();
-						var nearest = level.findClosestBiome3d(holder -> holder.is(key), new BlockPos(offset[0], 0, offset[1]), 12800, 64, 64);
+						var nearest = level.findClosestBiome3d(holder -> holder.is(key), anchor, 12800, 64, 64);
 						if (nearest == null || !checked.add(nearest.getFirst())) return null;
 						BlockPos first = BiomeClientGameTests.surfaceSpot(level, nearest.getFirst(), key);
 						return first == null ? null : surveySpot(level, first, key);
