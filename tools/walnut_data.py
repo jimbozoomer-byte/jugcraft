@@ -112,6 +112,8 @@ def reconcile(write):
     write(DATA/"recipe/walnut_husk_dye.json", {"type": "minecraft:crafting_shapeless",
         "fabric:load_conditions": [{"condition": "jugcraft:feature_enabled", "feature": "biomes", "or": ["agriculture"]}],
         "ingredients": ["jugcraft:walnut_husk"], "result": {"id": "minecraft:brown_dye"}})
+    from walnut_furniture import write_all
+    write_all()
 
 
 if __name__ == "__main__":

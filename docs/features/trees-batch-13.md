@@ -1,6 +1,6 @@
 # Tree batch 13: walnut and bristlecone
 
-Status: implemented; awaiting full-world owner approval on `codex/tree-generation-batch-13`, based on integrated
+Status: owner-approved; ready for review on `codex/tree-generation-batch-13`, based on integrated
 main `511b7ec0`. Owner requested implementation on 20 October 2026, with a
 walnut timber approval checkpoint before tree or biome work. The owner approved
 the timber and authorized the complete Batch 13 tree/biome work on the same day.
@@ -22,8 +22,8 @@ catalogue; recovered doors, signs, boats, cabinet, shelf, buttons and pressure
 plates remain available and use the shared supply.
 
 Recovered core block models reference the approved textures, and recovered leaf
-and sapling blockstates use the new shared models. The extra furniture/boat art
-and source originals remain intact. The owner library is never rewritten.
+and sapling blockstates use the new shared models. The owner library is never
+rewritten; the furniture palette adjustment below changes runtime copies only.
 Existing walnut aliases receive the same essence value as their canonical drops;
 husks carry the established brown-dye value. Other established essence values
 remain unchanged.
@@ -170,6 +170,26 @@ The original approved timber gallery remains separate and preserved.
 
 The ordinary client joined the cleaned inspection world at `(1080.5,180,-987.5)`
 at 07:39 local time on 20 October. It is open for owner review.
+
+### Furniture colour follow-up
+
+The owner requested darker door, trapdoor, shelf and cabinet wood to match the
+approved planks. `tools/walnut_furniture.py` adapts nine textures from
+`art/owner-library/originals/Edited-2026-10-18-Part2/jimbologics/textures`:
+`block/walnut_door_bottom.png`, `block/walnut_door_top.png`,
+`item/walnut_door.png`, `block/walnut_trapdoor.png`, `block/walnut_shelf.png`
+and all four `block/farmersdelight/walnut_cabinet_{front,front_open,side,top}.png`.
+Only warm wood colours move to the approved walnut ramp; the supplied pixel
+layout, dimensions, cutouts and metal hardware remain intact. Both resource
+generation routes apply the same adaptation from originals, preventing
+cumulative darkening. Boats and the approved log/plank textures are unchanged.
+The before/after sheet and exact alpha/hardware preservation were checked.
+This is a texture-only follow-up; the gameplay suite is not rerun.
+The texture-only JAR build passes, and all nine packaged images match the
+updated resources exactly. The refreshed preview pack passes archive/world
+integrity checks. The ordinary client reopened the existing save at the owner's
+last position `(1063.14,180,-971.47)` at 07:57; the darker furniture was inspected
+in the running game. The owner approved the darker furniture and requested PR #436 ready for review.
 
 The focused local run does not claim the entire server/client suite, two-client
 multiplayer, external launcher import, real-day seasonal transitions or a
