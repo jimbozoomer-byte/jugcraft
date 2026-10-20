@@ -255,7 +255,16 @@
       "io.github.jimbozoomer.jugcraft.test.CalciteCarbonDioxideGameTests",
       "io.github.jimbozoomer.jugcraft.test.CokeGasGameTests",
       "io.github.jimbozoomer.jugcraft.test.ZincHydrogenGameTests",
-      "io.github.jimbozoomer.jugcraft.test.AluminumRolesGameTests"
+      "io.github.jimbozoomer.jugcraft.test.AluminumRolesGameTests",
+      "io.github.jimbozoomer.jugcraft.test.FungalEndTreeGameTests",
+      "io.github.jimbozoomer.jugcraft.test.OliveGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DryCountryTreeGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HollyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DoorWreathGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TreeBatchSixGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HangingFruitGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TropicalTreeGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RainforestGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.RecoveredCreatureResourceClientTests",
@@ -460,7 +469,15 @@
       "io.github.jimbozoomer.jugcraft.test.OwnerVisualPolishClientTests",
       "io.github.jimbozoomer.jugcraft.test.RecoveredWildlifeClientTests",
       "io.github.jimbozoomer.jugcraft.test.OwnerLegacyItemClientTests",
-      "io.github.jimbozoomer.jugcraft.test.OwnerCollectionsNetworkTests"
+      "io.github.jimbozoomer.jugcraft.test.OwnerCollectionsNetworkTests",
+      "io.github.jimbozoomer.jugcraft.test.FungalEndTreeClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.OliveClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DryCountryTreeClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HollyClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TreeBatchSixClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HangingFruitClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TropicalTreeClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RainforestClientGameTests"
     ]
   },
   "depends": {

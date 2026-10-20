@@ -67,6 +67,7 @@ def imports():
     out = []
     out.append(("block/transport_crate_wood", "biomes and tree blocks/origin_oak_planks"))
     out.append(("block/fluorite_block", "block_fluorite"))
+    out.append(("block/bramble_bush_leaves", "biomes and tree blocks/bramble_leaves"))
     from mineral_sands import SANDS
     out.extend(("block/" + name, info["texture"]) for name, info in SANDS.items())
     # Owner's 15 October pine correction: use the supplied wood textures unchanged.

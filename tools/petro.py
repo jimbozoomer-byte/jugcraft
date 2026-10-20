@@ -182,7 +182,7 @@ ITEMS = {
     # Etched in the lithography station (batch 7).
     "microchip": "Microchip",
     # Rubber and polymers (batch 14): synthetic rubber, and gaskets pressed from it with steel.
-    "rubber": "Synthetic Rubber",
+    "rubber": "Rubber",
     "gasket": "Gasket",
     # Chlor-alkali (batch 15): PVC resin (pressed into plastic sheets) and soap (washes off status effects).
     "pvc_resin": "PVC Resin",

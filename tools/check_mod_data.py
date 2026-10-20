@@ -2839,7 +2839,7 @@ def check_biomes():
         tree = info.get("tree", info["wood"])
         if tree in ag.TREES and info["wood"] != ag.timber(tree):
             err(f"Tree shape {shape} timber {info['wood']} differs from {tree}'s {ag.timber(tree)}")
-        if (not vanilla and info["wood"] not in ag.WOOD_SETS) or (info["foliage"] and not tree.startswith("minecraft:") and tree not in ag.TREES):
+        if (not vanilla and info["wood"] not in ag.WOOD_SETS and ag.TREES.get(tree, {}).get("trunk_block", "").removeprefix("jugcraft:") not in ag.TREE_BLOCKS) or (info["foliage"] and not tree.startswith("minecraft:") and tree not in ag.TREES):
             err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
             continue
         # Generated seasonal leaves need the decorator to start in today's look (world generation skips onPlace).
@@ -2890,8 +2890,8 @@ def check_wood_switches():
         for extra in info.get("extras", []):
             if "feature" in bm.EXTRAS.get(extra, {}):
                 placed_by(bm.EXTRAS[extra]["feature"], bm.FEATURE)
-    for key in ("larch", "spruce"):
-        placed_by(al.TREES[key], al.FEATURE)
+    for ref in [al.TREES["default"]] + [feature for feature, _ in al.TREES["picks"]]:
+        placed_by(ref, al.FEATURE)
     # Agriculture's wild patches (JugcraftAgriculture.registerWorldgen, under the agriculture switch): the wild chestnut
     # trees, and anything else a patch_<name> placed feature places. A patch placed anywhere else has no known switch.
     agriculture = (AGRICULTURE_JAVA / "JugcraftAgriculture.java").read_text(encoding="utf-8")
@@ -2963,8 +2963,8 @@ def check_alpine():
         err("The start search looks for alpine villages less far than for the biome (SPAWN in tools/alpine.py)")
     selector = load(folder / "feature" / f"{al.TREES['feature']}.json") or {}
     picks = {selector.get("default")} | {entry.get("feature") for entry in selector.get("features", [])}
-    if picks != {al.TREES["larch"], al.TREES["spruce"]}:
-        err(f"{al.TREES['feature']}.json should pick larches and spruces, found {sorted(map(str, picks))}")
+    if picks != {al.TREES["default"]} | {feature for feature, _ in al.TREES["picks"]}:
+        err(f"{al.TREES['feature']}.json should match the Alpine tree picks, found {sorted(map(str, picks))}")
     for placed in picks:
         ns, path = split(str(placed))
         if ns == MOD and not (folder / "placed_feature" / f"{path}.json").is_file():
@@ -3783,6 +3783,22 @@ def check_agriculture():
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("plain", None, None, compost.lower(), None)
+    # Plain noncompostable ingredients (for example dragonblood resin) must still match the data exactly.
+    for name in re.findall(r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, None, None)
+    # Bottled nonfood ingredients keep their shell without acquiring drink behavior.
+    for name, remainder, limit in re.findall(
+            r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.craftRemainder\(Items\.(\w+)\)\.stacksTo\((\d+)\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, None, None)
+            if ag.ITEMS[name].get("craft_remainder") != "minecraft:" + remainder.lower() or ag.ITEMS[name].get("stack_size") != int(limit):
+                err(f"JugcraftAgriculture.java {name}: container or stack limit differs from agriculture data")
+    # Decorative ingredients can use a different creative tab while retaining the same plain-item properties.
+    for name, compost in re.findall(
+            r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.compostable\(COMPOST_(\w+)\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, compost.lower(), None)
     for name, n, sat, compost in re.findall(r'\bcob\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
         items[name] = ("cob", int(n), float(sat), compost.lower(), None)
     for name, compost in re.findall(r'\bthrown\("([a-z_]+)", COMPOST_(\w+)\)', main):
@@ -3944,7 +3960,7 @@ def check_agriculture():
             err(f"Missing crop texture {texture}")
 
     # Cooking Pot recipes: one file each, known items, room in the pot, and no two with the same ingredients.
-    registered = set(ag.all_items()) | set(all_items()) | set(all_blocks())
+    registered = set(ag.all_items()) | set(all_items()) | set(all_blocks()) | set(petro.petro_items())
     folder = DATA / MOD / "recipe" / "pot_cooking"
     if sorted(path.stem for path in folder.glob("*.json")) != sorted(ag.POT_RECIPES):
         err("recipe/pot_cooking/ files differ from POT_RECIPES in tools/agriculture.py")
@@ -3964,6 +3980,10 @@ def check_agriculture():
         if recipe.get("type") != f"{MOD}:pot_cooking" or not recipe.get("fabric:load_conditions"):
             err(f"pot_cooking/{result}: wrong type or missing feature switch condition")
 
+    check_agriculture_recipe_loops()
+
+
+def check_agriculture_recipe_loops():
     # No recipe loop among agriculture items: every conversion leads away from where it started. Unpacking a storage block
     # (tools/agriculture.py UNPACKING: tools/rice.py's and tools/soil.py's) only gives back what packed it, so it is left out.
     edges = {}
@@ -3976,7 +3996,18 @@ def check_agriculture():
         for ref in recipe["inputs"]:
             edge(ref, recipe["result"])
     for recipe in ag.SHAPED:
+        # This paid, one-for-one upgrade keeps the item ID but sets its bucket state.
+        # Match the complete recipe, not just its ID or the presence of components:
+        # a changed cost, output count or state must go through normal loop detection.
+        tap_upgrade = recipe == {
+            "id": "tree_tap_bucket", "pattern": ["TB"],
+            "key": {"T": "jugcraft:tree_tap", "B": "minecraft:bucket"},
+            "result": "jugcraft:tree_tap", "count": 1, "category": "misc", "switch": "agriculture",
+            "components": {"minecraft:block_state": {"upgraded": "true"}},
+        }
         for ref in recipe["key"].values():
+            if tap_upgrade and ref == "jugcraft:tree_tap":
+                continue  # Retain bucket -> tap, so any route back to buckets still forms a cycle.
             edge(ref, recipe["result"])
     for result, info in ag.POT_RECIPES.items():
         for ref in info["inputs"]:
@@ -4880,7 +4911,7 @@ def check_orchard():
         if bm.PLACED_TREES.get(orchard.checked(tree)) != (f"{MOD}:{orchard.feature(tree)}", f"{MOD}:{sapling}"):
             err(f"tools/biomes.py PLACED_TREES must place {orchard.checked(tree)} where the {tree} sapling could stand")
         for biome, share in info["regions"].items():
-            if [f"{MOD}:{orchard.checked(tree)}", share] not in bm.BIOMES[biome]["trees"]["picks"]:
+            if not (share == 1 and bm.BIOMES[biome]["trees"]["default"] == f"{MOD}:{orchard.checked(tree)}") and not any(ref == f"{MOD}:{orchard.checked(tree)}" and abs(chance - share) < 1e-9 for ref, chance in bm.BIOMES[biome]["trees"]["picks"]):
                 err(f"tools/biomes.py {biome} must pick {orchard.checked(tree)} ({share})")
     # The banana's stem: a pillar block (registered, with its item) that is a log to its fronds and to an axe, but no fuel.
     stem = orchard.BANANA_STEM["block"]
@@ -5030,7 +5061,7 @@ def check_festival(java, main):
             err(f"JugcraftAgriculture.java does not register {block}")
     for tree, info in ag.TREES.items():
         base = info["base"].upper()
-        own_wood = ag.timber(tree) == tree
+        own_wood = ag.timber(tree) == tree and "trunk_block" not in info
         composed = "fruit" in info and info["season"] is not None
         call = "registerTree" if own_wood and not composed else "registerFoliage"
         schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if call == "registerTree" else ""
@@ -5068,6 +5099,8 @@ def check_festival(java, main):
     expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
     for tree, info in ag.TREES.items():
         expected_states[info["leaves"]] = {f"season={state}" for state in ag.SEASON_STATES} if info["season"] else {""}
+        if "clip_sprig" in info:
+            expected_states[info["leaves"]] = {f"clipped={clipped},{season}" for season in expected_states[info["leaves"]] for clipped in ("false", "true")}
         if "fruit" in info:
             expected_states[info["leaves"]] = {
                 f"fruit={fruit}" + (f",{season}" if season else "")
@@ -5103,8 +5136,13 @@ def check_seasonal_trees(main, leaves):
             return "gold" if day >= gold_from else "green"
         for mode, day in modes.items():
             seen = {look((day - 1 + shift) % 365 + 1) for shift in range(-ag.JITTER, ag.JITTER + 1)}
-            if seen != {wanted[mode]}:
-                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, not only {wanted[mode]}")
+            # Evergreen holly uses these states for berries, not leaf loss. Its approved late-autumn
+            # berry date and early-spring fade straddle the fixed mode dates within positional jitter.
+            expected_looks = ({"spring": {"green", "bare"}, "summer": {"green"},
+                               "autumn": {"green", "gold"}, "winter": {"bare"}}[mode]
+                              if tree == "holly" else {wanted[mode]})
+            if seen != expected_looks:
+                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, expected {sorted(expected_looks)}")
 
 
 def check_carving(java, main):

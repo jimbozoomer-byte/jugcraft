@@ -727,6 +727,76 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:banyan_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:banyan_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:baobab_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:baobab_fence"
+    },
+    "jugcraft:baobab_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:baobab_fence_gate"
+    },
+    "jugcraft:baobab_fruit": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:baobab_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:baobab_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:baobab_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:baobab_pod": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:baobab_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:baobab_seeds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "recipe jugcraft:baobab_seeds"
+    },
+    "jugcraft:baobab_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:baobab_slab"
+    },
+    "jugcraft:baobab_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:baobab_stairs"
+    },
+    "jugcraft:baobab_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:barbecue_stick": {
       "numerator": 1,
       "denominator": 1,
@@ -2472,6 +2542,16 @@
       "denominator": 1,
       "source": "reference tag minecraft:small_flowers"
     },
+    "jugcraft:blight_fungus": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:blight_wart_block": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:blindfold": {
       "numerator": 60,
       "denominator": 1,
@@ -2716,6 +2796,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:bramble_bush_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
     },
     "jugcraft:branching_chandelier": {
       "numerator": 10825,
@@ -7747,6 +7832,16 @@
       "denominator": 4,
       "source": "recipe jugcraft:data_cable"
     },
+    "jugcraft:date_cluster": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dates": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:dc_cable_riser": {
       "numerator": 259,
       "denominator": 4,
@@ -8116,6 +8211,56 @@
       "numerator": 20,
       "denominator": 1,
       "source": "recipe jugcraft:drafting_table"
+    },
+    "jugcraft:dragonblood_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:dragonblood_fence"
+    },
+    "jugcraft:dragonblood_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:dragonblood_fence_gate"
+    },
+    "jugcraft:dragonblood_fronds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:dragonblood_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:dragonblood_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:dragonblood_resin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dragonblood_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:dragonblood_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:dragonblood_slab"
+    },
+    "jugcraft:dragonblood_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:dragonblood_stairs"
+    },
+    "jugcraft:dragonblood_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
     },
     "jugcraft:draped_urn": {
       "numerator": 112,
@@ -9762,6 +9907,41 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:fig_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:fig_fence"
+    },
+    "jugcraft:fig_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:fig_fence_gate"
+    },
+    "jugcraft:fig_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:fig_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:fig_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:fig_slab"
+    },
+    "jugcraft:fig_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:fig_stairs"
+    },
+    "jugcraft:fig_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:filing_cabinet": {
       "numerator": 4,
       "denominator": 1,
@@ -9911,6 +10091,16 @@
       "numerator": 6251,
       "denominator": 16,
       "source": "recipe jugcraft:flame_arrester"
+    },
+    "jugcraft:flame_tree_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:flame_tree_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:flashbang": {
       "numerator": 3739,
@@ -10657,6 +10847,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:glowcap_block": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:glowmouth": {
       "numerator": 5073,
       "denominator": 4,
@@ -10691,6 +10886,16 @@
       "numerator": 16,
       "denominator": 1,
       "source": "reference tag minecraft:small_flowers"
+    },
+    "jugcraft:gorse_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:gorse_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:goshawk_revolver": {
       "numerator": 1285,
@@ -11711,6 +11916,61 @@
       "numerator": 399,
       "denominator": 2,
       "source": "recipe jugcraft:holler_pistol"
+    },
+    "jugcraft:holly_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:holly_fence"
+    },
+    "jugcraft:holly_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:holly_fence_gate"
+    },
+    "jugcraft:holly_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:holly_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:holly_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:holly_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:holly_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:holly_slab"
+    },
+    "jugcraft:holly_sprig": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:holly_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:holly_stairs"
+    },
+    "jugcraft:holly_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:holly_wreath": {
+      "numerator": 20,
+      "denominator": 1,
+      "source": "recipe jugcraft:holly_wreath"
     },
     "jugcraft:holo_table": {
       "numerator": 1387,
@@ -14862,6 +15122,16 @@
       "denominator": 4,
       "source": "recipe jugcraft:jarrahdale_pumpkin_seeds"
     },
+    "jugcraft:joshua_tree_fronds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:joshua_tree_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
     "jugcraft:judges_table": {
       "numerator": 2160,
       "denominator": 1,
@@ -14886,6 +15156,56 @@
       "numerator": 72,
       "denominator": 1,
       "source": "recipe jugcraft:jungle_cabinet"
+    },
+    "jugcraft:juniper_berries": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:juniper_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:juniper_fence"
+    },
+    "jugcraft:juniper_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:juniper_fence_gate"
+    },
+    "jugcraft:juniper_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:juniper_needles": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:juniper_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:juniper_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:juniper_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:juniper_slab"
+    },
+    "jugcraft:juniper_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:juniper_stairs"
+    },
+    "jugcraft:juniper_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
     },
     "jugcraft:kabocha_pumpkin": {
       "numerator": 1,
@@ -17907,6 +18227,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:laser_sight"
     },
+    "jugcraft:latex_bottle": {
+      "numerator": 2,
+      "denominator": 1,
+      "source": "local natural rubber/container accounting"
+    },
     "jugcraft:lattice_tower": {
       "numerator": 30,
       "denominator": 1,
@@ -18531,6 +18856,61 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:mango": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mango_chutney": {
+      "numerator": 1327,
+      "denominator": 27,
+      "source": "recipe jugcraft:pot_cooking/mango_chutney"
+    },
+    "jugcraft:mango_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:mango_fence"
+    },
+    "jugcraft:mango_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:mango_fence_gate"
+    },
+    "jugcraft:mango_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:mango_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:mango_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:mango_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:mango_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:mango_slab"
+    },
+    "jugcraft:mango_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:mango_stairs"
+    },
+    "jugcraft:mango_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
     },
     "jugcraft:mangrove_cabinet": {
       "numerator": 72,
@@ -21432,6 +21812,61 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:olive_bush_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:olive_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:olive_fence"
+    },
+    "jugcraft:olive_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:olive_fence_gate"
+    },
+    "jugcraft:olive_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:olive_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:olive_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:olive_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:olive_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:olive_slab"
+    },
+    "jugcraft:olive_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:olive_stairs"
+    },
+    "jugcraft:olive_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:olives": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:oneiric_censer": {
       "numerator": 6348,
       "denominator": 1,
@@ -21561,6 +21996,26 @@
       "numerator": 1,
       "denominator": 2,
       "source": "recipe jugcraft:ornamental_corn_kernels"
+    },
+    "jugcraft:osmanthus_flowers": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:osmanthus_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:osmanthus_mooncake": {
+      "numerator": 57,
+      "denominator": 2,
+      "source": "recipe jugcraft:pot_cooking/osmanthus_mooncake"
+    },
+    "jugcraft:osmanthus_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:ossuary_wall": {
       "numerator": 31,
@@ -22012,6 +22467,11 @@
       "denominator": 27,
       "source": "recipe jugcraft:pot_cooking/pickled_beets"
     },
+    "jugcraft:pickled_olives": {
+      "numerator": 463,
+      "denominator": 27,
+      "source": "recipe jugcraft:pot_cooking/pickled_olives"
+    },
     "jugcraft:pickled_peppers": {
       "numerator": 463,
       "denominator": 27,
@@ -22041,6 +22501,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:pine_nuts": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:pine_planks": {
       "numerator": 8,
@@ -24132,6 +24597,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:roasted_mutton_chops"
     },
+    "jugcraft:roasted_pine_nuts": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "recipe jugcraft:roasted_pine_nuts"
+    },
     "jugcraft:roasted_porcini": {
       "numerator": 1,
       "denominator": 1,
@@ -24380,12 +24850,27 @@
     "jugcraft:rubber": {
       "numerator": 1,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local natural rubber/container accounting"
+    },
+    "jugcraft:rubber_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:rubber_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
     },
     "jugcraft:rubber_offcut": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:rubber_tree_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:runebound_moonblade": {
       "numerator": 565,
@@ -24481,6 +24966,16 @@
       "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:sage_bundle"
+    },
+    "jugcraft:sagebrush_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:sagebrush_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
     },
     "jugcraft:salamander_charm": {
       "numerator": 1,
@@ -24616,6 +25111,26 @@
       "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:scuba_tank"
+    },
+    "jugcraft:sea_grape_jelly": {
+      "numerator": 2191,
+      "denominator": 27,
+      "source": "recipe jugcraft:pot_cooking/sea_grape_jelly"
+    },
+    "jugcraft:sea_grape_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:sea_grape_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:sea_grapes": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:sea_oats": {
       "numerator": 1,
@@ -25872,6 +26387,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:stone_paxel"
     },
+    "jugcraft:stone_pine_needles": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:stone_pine_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
     "jugcraft:stonemasons_chisel": {
       "numerator": 260,
       "denominator": 1,
@@ -26037,6 +26562,16 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:stripped_baobab_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_baobab_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:stripped_cedar_log": {
       "numerator": 32,
       "denominator": 1,
@@ -26082,12 +26617,32 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:stripped_dragonblood_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_dragonblood_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:stripped_eucalyptus_log": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
     "jugcraft:stripped_eucalyptus_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_fig_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_fig_wood": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
@@ -26112,12 +26667,32 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:stripped_holly_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_holly_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:stripped_jacaranda_log": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
     "jugcraft:stripped_jacaranda_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_juniper_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_juniper_wood": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
@@ -26152,12 +26727,32 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:stripped_mango_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_mango_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:stripped_maple_log": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
     "jugcraft:stripped_maple_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_olive_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_olive_wood": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
@@ -26202,6 +26797,16 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:stripped_tamarisk_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_tamarisk_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
     "jugcraft:stripped_willow_log": {
       "numerator": 32,
       "denominator": 1,
@@ -26218,6 +26823,16 @@
       "source": "reference tag minecraft:logs"
     },
     "jugcraft:stripped_yew_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_yucca_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:stripped_yucca_wood": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
@@ -26441,6 +27056,51 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:tamarisk_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:tamarisk_fence"
+    },
+    "jugcraft:tamarisk_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:tamarisk_fence_gate"
+    },
+    "jugcraft:tamarisk_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:tamarisk_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:tamarisk_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:tamarisk_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:tamarisk_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:tamarisk_slab"
+    },
+    "jugcraft:tamarisk_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:tamarisk_stairs"
+    },
+    "jugcraft:tamarisk_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
     },
     "jugcraft:tank_earthing_boss": {
       "numerator": 129,
@@ -26936,6 +27596,26 @@
       "numerator": 2381,
       "denominator": 1,
       "source": "recipe jugcraft:tree_farm"
+    },
+    "jugcraft:tree_fern_fronds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:tree_fern_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:tree_fern_trunk": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:tree_tap": {
+      "numerator": 472,
+      "denominator": 9,
+      "source": "recipe jugcraft:tree_tap"
     },
     "jugcraft:trellis": {
       "numerator": 10,
@@ -27487,6 +28167,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:wattle_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
+    },
+    "jugcraft:wattle_sapling": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:saplings"
+    },
     "jugcraft:wax_melting_pot": {
       "numerator": 896,
       "denominator": 1,
@@ -27726,6 +28416,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:wild_olive_leaves": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "reference tag minecraft:leaves"
     },
     "jugcraft:wild_onion": {
       "numerator": 1,
@@ -28848,6 +29543,41 @@
       "source": "recipe jugcraft:yew_stairs"
     },
     "jugcraft:yew_wood": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:yucca_fence": {
+      "numerator": 40,
+      "denominator": 3,
+      "source": "recipe jugcraft:yucca_fence"
+    },
+    "jugcraft:yucca_fence_gate": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "recipe jugcraft:yucca_fence_gate"
+    },
+    "jugcraft:yucca_log": {
+      "numerator": 32,
+      "denominator": 1,
+      "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:yucca_planks": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "reference tag minecraft:planks"
+    },
+    "jugcraft:yucca_slab": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:yucca_slab"
+    },
+    "jugcraft:yucca_stairs": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:yucca_stairs"
+    },
+    "jugcraft:yucca_wood": {
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
