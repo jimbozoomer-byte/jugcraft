@@ -55,6 +55,8 @@ public final class PetroItems {
 	/** Food chemistry (docs/features/sour-candy.md): citric acid, a candy flavour, and glucose syrup, which crafts into sugar. */
 	public static Item CITRIC_ACID;
 	public static Item GLUCOSE_SYRUP;
+	/** PVAc wood glue (docs/features/pvac-glue.md): binds books and makes sticky pistons. */
+	public static Item PVAC_GLUE;
 	/** Bone meal doses ammonium nitrate gives each crop. */
 	public static final int AMMONIUM_NITRATE_DOSES = 3;
 	public static Item VANADIUM_CONTACT_BED;
@@ -245,6 +247,7 @@ public final class PetroItems {
 		CITRIC_ACID = JugcraftRegistry.item("citric_acid");
 		GLUCOSE_SYRUP = JugcraftRegistry.item("glucose_syrup",
 				properties -> new Item(properties.stacksTo(16).craftRemainder(Items.GLASS_BOTTLE)));
+		PVAC_GLUE = JugcraftRegistry.item("pvac_glue");
 
 		VANADIUM_IRON_CONCENTRATE = JugcraftRegistry.item("vanadium_iron_concentrate");
 		VANADIUM_OXIDE = JugcraftRegistry.item("vanadium_oxide");
@@ -558,6 +561,7 @@ public final class PetroItems {
 			output.accept(CONTROL_ROD_ASSEMBLY);
 			output.accept(CITRIC_ACID);
 			output.accept(GLUCOSE_SYRUP);
+			output.accept(PVAC_GLUE);
 			output.accept(VANADIUM_CONTACT_BED);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

@@ -7440,6 +7440,24 @@
           "items": [],
           "fluids": [
             [
+              "jugcraft:vinyl_acetate",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pvac_glue",
+              4
+            ]
+          ],
+          "ticks": 100,
+          "retained_inputs": []
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
               "jugcraft:butadiene",
               500
             ]
@@ -7951,6 +7969,33 @@
             ]
           ],
           "ticks": 160,
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:cider_vinegar",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:ethylene",
+              500
+            ],
+            [
+              "jugcraft:oxygen",
+              250
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:vinyl_acetate",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 120,
           "retained_inputs": []
         },
         {

@@ -200,6 +200,8 @@ public final class PetroFluids {
 	public static Gas HYDROGEN_FLUORIDE;
 	public static Gas CHLORODIFLUOROMETHANE;
 	public static Gas TETRAFLUOROETHYLENE;
+	/** Vinyl acetate (docs/features/pvac-glue.md), polymerized into PVAc wood glue. */
+	public static Gas VINYL_ACETATE;
 
 	public static Entry OXYGENATED_PROCESS_WATER;
 	public static Entry HYDROGEN_PEROXIDE;
@@ -276,6 +278,7 @@ public final class PetroFluids {
 		HYDROGEN_FLUORIDE = gas("hydrogen_fluoride", 0xFF4E7B67);
 		CHLORODIFLUOROMETHANE = gas("chlorodifluoromethane", 0xFF59708D);
 		TETRAFLUOROETHYLENE = gas("tetrafluoroethylene", 0xFF69808A);
+		VINYL_ACETATE = gas("vinyl_acetate", 0xFFD0D8CE);
 
 		OXYGENATED_PROCESS_WATER = fluid("oxygenated_process_water", 8, 3, 1, 0xFF4C6E77, MapColor.COLOR_LIGHT_GRAY);
 		HYDROGEN_PEROXIDE = fluid("hydrogen_peroxide", 8, 3, 1, 0xFF5C7B8B, MapColor.COLOR_LIGHT_GRAY);

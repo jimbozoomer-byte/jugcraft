@@ -647,6 +647,7 @@ def draw_all(save, save_animation):
     save(ammonium_nitrate(), "item", "ammonium_nitrate")
     save(citric_acid(), "item", "citric_acid")
     save(glucose_syrup(), "item", "glucose_syrup")
+    save(pvac_glue(), "item", "pvac_glue")
     save(boric_acid(), "item", "boric_acid")
     save(control_rod_assembly(), "item", "control_rod_assembly")
     save(guncotton(), "item", "guncotton")
@@ -708,6 +709,38 @@ def glucose_syrup():
         "...goossssssog..",
         "....gooooooog...",
         ".....ggggggg....",
+        "................",
+    ]
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch] + (255,))
+    return img
+
+
+def pvac_glue():
+    """PVAc wood glue: a tall white squeeze bottle with a blue label band and a tapered orange nozzle, centred, lit from
+    the top left and outlined in each part's own dark."""
+    tones = {"O": (74, 74, 82), "D": (176, 176, 184), "M": (214, 214, 220), "L": (236, 236, 240), "H": (252, 252, 255),
+             "a": (98, 40, 8), "n": (212, 104, 26), "N": (244, 156, 64),
+             "q": (40, 64, 110), "r": (70, 104, 168), "s": (112, 148, 206)}
+    rows = [
+        "................",
+        ".......aa.......",
+        "......aNna......",
+        "......aNna......",
+        ".....aNnnna.....",
+        ".....aNnnna.....",
+        "....OOOOOOOO....",
+        "....OHLLMMDO....",
+        "....OHLLMMDO....",
+        "....qssrrrrq....",
+        "....qsrrrrrq....",
+        "....OHLMMMDO....",
+        "....OHLMMMDO....",
+        "....OLMMMDDO....",
+        "....OOOOOOOO....",
         "................",
     ]
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
