@@ -65,6 +65,159 @@ server game test with the optional libraries removed. The client game tests run 
 | Sodium | 0.9.2+mc26.3 | client | optional | Not used | nothing changes | none | Not tried with the Concordance's renderers |
 | Fabric Language Kotlin | 1.14.1+kotlin.2.4.20 | client | optional | Runs the Kotlin of the journal's and the Spell Composer's GuiLib workspaces | the plain journal and composer screens | `ConcordanceJournalClientGameTests`, `ConcordanceComposerClientGameTests` | Only the workspaces are Kotlin |
 | GuiLib | 0.12.4 | client | optional | The Concordance Journal's workspace (a tab for each section the server sends) and the Spell Composer's (the draft as a strip of words over the words the player has learned) | the plain journal and composer screens, with the same journal and the same draft | `ConcordanceJournalClientGameTests`, `ConcordanceComposerClientGameTests` | No ritual-schematic, crucible or observatory screen is built; the workspaces have no narration (the plain screens do); keyboard use not tried by a person |
+| Travelers Backpack | 11.4.1 | both | optional | No Concordance-specific behavior; Complete adds portable storage through the Trinkets Back slot and Jugcraft industrial recipes, with variant abilities disabled | no backpack integration; Concordance progression is unchanged | `recipesUseIndustrialMaterialsAndRemoveBypasses`, `backSlotAndPlacedAutomationRemainAvailable`, `BackpackClientGameTests` | No essence tanks, magical upgrades or automatic resizing of existing bags |
+| Forge Config API Port | 26.3.1 | both | optional | No Concordance-specific behavior; loads and synchronizes Traveler's Backpack settings | Traveler's Backpack also must be absent; Concordance progression is unchanged | `sequentialSmithingPreservesContentsAndUsesApprovedCapacities` | Existing world config overrides and saved backpack slot counts require owner-managed changes |
 
 | Diorama | 0.1.1+26.3 | client | optional | Launcher-installed client title-screen panorama companion; no Concordance gameplay hook | title screen uses its normal panorama; server gameplay is unchanged | none | Installed through the pinned pack; panorama configuration has not been manually playtested |
 
+<!-- matrix:end -->
+
+## What is complete, what is not, and what is assumed
+
+**Complete in code and tested on a server in CI** (steps 1 to 30). Each has a record with its tests:
+- research and Research Notes;
+- typed resources;
+- spell composition and the shared effect boundary;
+- invocations and their combat and progression baselines;
+- rituals and experimental alchemy;
+- cultivation and celestial cycles;
+- Crimson resources;
+- spirits, familiars and constructs;
+- reservation logistics;
+- equipment construction, relics and shrines;
+- bounded equivalence;
+- links, curses, wards and dreams;
+- the Starbound Conclave;
+- the progression graph and the Concord Spire;
+- the journal and the signs;
+- authority, the economy audit, and persistence.
+
+**Partial:**
+- the player journey (step 31): the routes are checked and the opening is played by keys in a client, but no person has
+  played them;
+- GuiLib screens: the journal's workspace is built, and Concordance Chunk A adds the Spell Composer's
+  ([record](arcane-concordance-composer.md)). The ritual schematic, crucible and observatory screens are not; their
+  commands, the journal, Jade and the codex stand in.
+
+**Placeholder content:** none known. The owner approved the art and models of steps 14 to 25, but they have been seen
+only in CI's small screenshot previews.
+
+**Untested assumptions:**
+- that the balance numbers feel right in play;
+- that the pace suits a real player;
+- that protection mods answer Fabric's questions as the stand-in listener does;
+- that two clients see the same thing;
+- that shaders and a launcher import work;
+- that a world saved by an earlier build loads and survives a server restart;
+- that a large installation stays within its work budget in ticks and frames.
+
+## Remaining issues
+
+| Issue | What a player meets | Next action |
+|---|---|---|
+| No human playtest | Unknown: whether the climb is clear, paced and rewarding | Run the protocol in the [journey record](arcane-concordance-journey.md) for each route, in both setups |
+| No two-client test | Shared rituals, spires, couriers and parties are tested only with mock players on one server | Two people, two clients and one local dedicated server, following the journey record's cooperative script |
+| The spell bar's order | Holding a wand, the use key casts Aegis and 2 casts Kindle (read from the sources: Jugcraft offers the learned invocations sorted by id, and Spell Engine keeps that order) | The owner decides whether Kindle, the light First Light is about, should be on the use key. It would be a small change to the order `ConcordanceSpells` offers them in |
+| No real protection mod tried | A claim mod that ignores Fabric's events would not be asked | Try a Fabric claim mod on a local server: a spell, a porter and a Gleaner at its border |
+| Devices wait while their owner is away | Farms and porters pause when their owner logs off | The owner decides the default of `concordance.absent_owner_authority` |
+| Not profiled under load | Unknown tick cost of many gardens, workers, rituals and spires; unknown frame cost of GeckoLib bodies and particles | Profile a large test world on a local server (tick time) and client (frame time) against the budget |
+| No real old save opened | A world from before step 30 is read as version 0 by design, but no such world has been opened | Open a world saved by a build from before step 30 with a current build, save, reopen |
+| A downgrade needs a backup | An older Jugcraft cannot read the versioned saves | Say so in the release notes |
+| The courier ledger is read whole | A damaged ledger is not partly kept, as the other records are | Read requests one by one, keeping what cannot be read |
+| Item components are not versioned | A changed component shape would need a new component id | Keep component shapes stable; version them if one must change |
+| The art has not been seen in a client | Models and textures may look wrong at full size | Look at each in a client: the client tests' full screenshots are in CI's artifacts |
+| Nothing published | Players cannot install it yet | Merged to `main` through #263; the owner publishes a release as [DISTRIBUTION.md](../DISTRIBUTION.md) describes |
+
+## Test results
+
+Steps 1 to 25: their records and [244](https://github.com/jimbozoomer-byte/jugcraft/pull/244). Steps 26 to 32, in CI:
+
+| Step | Commit | Build run | Server game tests (both jobs) | Client game tests |
+|---|---|---|---|---|
+| 26 | 73de706 | 37663359511 | all 1047 passed | all shards passed |
+| 27 | 8d583c6 | 37670918838 | all 1056 passed | all shards passed |
+| 28 | 3bbd117 | 37676787998 | all 1064 passed | two shards passed; one cancelled by the next push |
+| 29 | 9f50a1d | 37680579216 | all 1069 passed | cancelled by the next push |
+| 30 | 441cd24 | 37683103100 | all 1075 passed | cancelled by the next push |
+| 31 | 314126f | 37685904896 | passed in `optional integrations absent`; `mod` cancelled by the next push | cancelled by the next push |
+| 32 | 6ce87a9 | 37687379240 | all 1077 passed | all shards passed; shard 1 ran `ConcordanceJourneyClientGameTests` and saved both its screenshots |
+
+Checks of the checks: faults injected into a copy of the tree, each of which the check must report:
+
+| Check | Injected faults | Caught |
+|---|---|---|
+| `check_journal` (step 26) | 2 | 2 |
+| `check_signs` (27) | 6 | 6 |
+| `check_authority` (28) | 8 | 8 |
+| `check_economy` (29) | 8 | 8 |
+| `check_persistence` (30) | 5 | 5 |
+| `check_journey` (31) | 9 | 9 |
+| `check_delivery` (32) | 8 | 8 |
+
+## Performance measurements
+
+The work budget, in work rather than time, is in the [persistence record](arcane-concordance-persistence.md).
+`ConcordanceWorkloadGameTests.measuredWorkloads` times four pieces of that work on a real server, and CI's log carries the
+figures. They are a CI runner's, shared with every test running at once, so they are an indication, not a profile.
+
+Measured in Build run 37687379240 on 6ce87a9. Each job runs the test once; the times are per operation:
+
+| Work | `mod` job | `optional integrations absent` job |
+|---|---|---|
+| A block change's look-up of the circle anchors in reach (14 anchors loaded in the level) | under 1 µs | under 1 µs |
+| Compiling a spell (`ray struck sear then here creatures dazzle`) | 30 µs | 29 µs |
+| The progression graph's fixed point (79 nodes) | 250 µs | 200 µs |
+| One garden area sample (all 16 of a tick's allowance taken) | 25 µs | 27 µs |
+
+The log rounds to whole microseconds, so the look-up shows as 0. A tick's whole garden allowance is therefore about
+0.4 ms against a tick of 50 ms. The graph's own audit walks it seven times at every data load, about 1.5 ms; nothing
+walks it during play.
+
+Not measured: server tick time with a large installation, and client frame time.
+
+## Connections
+
+- Input producer and output consumer: every Concordance system.
+- Reachable entry path: the [guide](../ARCANE_CONCORDANCE_GUIDE.md)'s first spell.
+
+## Balance
+
+None changed.
+
+## Multiplayer and persistence
+
+Nothing new is saved. See the persistence record for every saved format.
+
+## Dependencies and assets
+
+No new dependency or asset. Nothing in the lock changed.
+
+## Verification
+
+- Run locally:
+  - `python3 tools/concordance_delivery.py`: the matrix holds;
+  - `python3 tools/check_mod_data.py` on a copy of the tree, with the new `check_delivery`;
+  - `python3 scripts/check_repository.py`;
+  - `python3 scripts/package_modrinth.py check`: 18 locked libraries and platform pins;
+  - `python3 -m unittest discover -s scripts/tests -v`: 9 tests.
+  Their results are in the pull request.
+- `python3 scripts/package_modrinth.py verify` could not run here: this environment's network policy refuses the
+  download host (403). CI's `Verify pinned library downloads` step runs it on every push.
+- `check_delivery` confirms:
+  - every library in the lock has one row, with its version from the lock;
+  - every game test the matrix names exists;
+  - a library called unused is not referred to;
+  - the record's matrix and the guide's tables are the tools'.
+- Server game test added: `ConcordanceWorkloadGameTests.measuredWorkloads`.
+- CI: Build run 37687379240 on 6ce87a9, every job passed: "All 1077 required tests passed" in `mod` and in `optional
+  integrations absent`, and all three client shards.
+
+## World and event applicability
+
+Works everywhere.
+
+## Rollout and open questions
+
+- New identifiers: none.
+- Open questions are the ones in the remaining issues: the spell bar's order, the absent-owner default, and when to
+  playtest.

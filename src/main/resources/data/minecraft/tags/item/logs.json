@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:tree_fern_trunk",
+    "jugcraft:rubber_log",
     "jugcraft:banana_stem",
     "jugcraft:nouveau_red_archwood_log",
     "jugcraft:nouveau_blue_archwood_log",
@@ -17,8 +19,6 @@
     "jugcraft:nouveau_stripped_red_archwood_log",
     "jugcraft:nouveau_stripped_red_archwood_wood",
     "jugcraft:nouveau_stripped_purple_archwood_log",
-    "jugcraft:nouveau_stripped_purple_archwood_wood",
-    "jugcraft:tree_fern_trunk",
-    "jugcraft:rubber_log"
+    "jugcraft:nouveau_stripped_purple_archwood_wood"
   ]
 }

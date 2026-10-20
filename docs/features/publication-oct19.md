@@ -1,0 +1,89 @@
+# October 19 combined publication
+
+The owner authorized publishing the previously local content and integrating ready
+pull requests on 19 October 2026. Actual integration tool: OpenAI Codex (GPT-6).
+This record describes the combined candidate; the linked PR's final checks and
+merge state determine whether it has reached main.
+
+Publication PR: [#435](https://github.com/jimbozoomer-byte/jugcraft/pull/435).
+
+## Included local milestone
+
+- Seven technology packages, shared machine interfaces and production chains.
+- Jug Nouveau, owner collections, original creature geometry/UVs/animations and
+  the recovered native encounter adapters documented in the recovery catalog.
+- Survival recipes and acquisition audits; Mecha and Tank assembly bays.
+- Gun reload/crash repairs, town refinements and Diorama in the Complete pack.
+
+## Previously separate contributions combined here
+
+These source branches are incorporated together so their shared tags, recipe
+catalogue, essence values, registrations and test entrypoints are validated as
+one candidate. They must not be closed as incorporated until #435 is merged.
+
+| Source PR | Included content |
+| --- | --- |
+| [#399](https://github.com/jimbozoomer-byte/jugcraft/pull/399) | Juniper, gorse and sagebrush |
+| [#404](https://github.com/jimbozoomer-byte/jugcraft/pull/404) | Holly, renewable sprigs and door wreaths |
+| [#408](https://github.com/jimbozoomer-byte/jugcraft/pull/408) | Olive trees, timber and pickled olives |
+| [#411](https://github.com/jimbozoomer-byte/jugcraft/pull/411) | Nut pines, wattle, tamarisk and Joshua trees |
+| [#413](https://github.com/jimbozoomer-byte/jugcraft/pull/413) | Giant fungi, Nether brambles and dragonblood trees |
+| [#417](https://github.com/jimbozoomer-byte/jugcraft/pull/417) | Baobabs and hanging fruit |
+| [#418](https://github.com/jimbozoomer-byte/jugcraft/pull/418) | Coastal shrubs, banyans, mangoes and driftwood |
+| [#420](https://github.com/jimbozoomer-byte/jugcraft/pull/420) | Rainforest vegetation, rubber trees, tapping and latex |
+| [#412](https://github.com/jimbozoomer-byte/jugcraft/pull/412) | Traveler's Backpack progression and Back slot; optional standalone integration |
+
+## Integration repairs
+
+- Track the two archwood log tags that the generic `logs/` ignore rule hid.
+- Preserve imported resources during regeneration. A manifest owns generated
+  paths; only stale paths in that manifest may be removed. Authored packs and
+  creature catalogs are retained, including when they share generated folders.
+- Apply explicit, preconditioned authored JSON repairs after generation to retain
+  the approved models, labels, sounds, atlases and loot adaptations.
+- Sort imported particle/banner inventories; normalize gzip headers and tiny
+  trigonometric coordinate differences; use reproducible small-texture encoding.
+  Before/after RGBA hashes matched for all affected town textures.
+- Pin the acquisition audit's vanilla/Fabric reference inventory so it runs on
+  CI without depending on the owner's Windows cache paths.
+- Correct the galena essence seed and the audit's large-denominator batch math.
+- Give only functional imported blocks the EntityBlock interface. Ordinary
+  foliage and decoration no longer advertise nonexistent saved block entities;
+  storage, cooking, fans and cave devices retain their entities and menu/events.
+- Preserve rare Mushroom Fields/Flower Isle surface regions when applying the
+  imported regional landscape overlay. Existing chunks are not rewritten.
+- Keep the Halloween loot test's plain control mob explicitly uncostumed even
+  when the real-world October spawn hook runs. Preserve the production event.
+- Inspect a bounded set of natural Bayou samples for wet cypress rather than
+  assuming the closest dry fragment contains it. No trees are planted by that
+  natural-presence assertion.
+- Preserve both Diorama and Backpack dependency pins and all test entrypoints.
+
+## Validation record
+
+The pre-tree/backpack combined build passed all **2,014 local server GameTests**.
+After the reproducibility fixes, **92 Python tests** passed and regenerated town
+textures retained identical pixels. The subsequent combined tree/backpack main,
+client and GameTest sources compiled successfully. These are intermediate results,
+not a substitute for the final combined Build/Foundation workflows on #435.
+
+No owner playtest, two-account multiplayer certification, live-server deployment
+or production-save migration is claimed. The owner's local saves are untouched.
+
+## Not included merely because a draft exists
+
+- Stacked bulk-factory drafts #361–#365, #374 and #387 still need reconciliation
+  with the approved seven-package machine/progression design; known baseline
+  failures must be resolved before a separate merge.
+- #401, #402, #405 and #409 overlap the existing battery, ceramics and structural
+  alloy routes. Preserve canonical items and progression rather than registering
+  competing versions. See `tech-seven-local-integration.md` for the decisions.
+- #390 and #419 propose competing titanium equipment sets; #419 also has failed
+  checks. #430 fails the extrusion material-balance audit; #421 lacks required
+  essence values. They remain drafts for focused correction/review.
+- #406, #407 and #422 are proposals, not evidence of completed gameplay.
+- #360, #370, #372, #382, #391–#394, #400, #403, #410, #414 and #416 remain draft
+  submissions; individual feature/progression review is still outstanding.
+- Creature recovery still has explicitly documented special-behavior/animation
+  parity work and four missing original animal geometries. This publication does
+  not label those unfinished systems complete.

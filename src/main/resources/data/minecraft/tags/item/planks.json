@@ -21,7 +21,6 @@
     "jugcraft:magnolia_planks",
     "jugcraft:fruitwood_planks",
     "jugcraft:persimmon_planks",
-    "jugcraft:nouveau_archwood_planks",
     "jugcraft:juniper_planks",
     "jugcraft:holly_planks",
     "jugcraft:olive_planks",
@@ -30,6 +29,7 @@
     "jugcraft:dragonblood_planks",
     "jugcraft:baobab_planks",
     "jugcraft:fig_planks",
-    "jugcraft:mango_planks"
+    "jugcraft:mango_planks",
+    "jugcraft:nouveau_archwood_planks"
   ]
 }
