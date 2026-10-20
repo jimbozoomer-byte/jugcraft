@@ -3888,6 +3888,26 @@
         {
           "in": [
             [
+              "#jugcraft:walnut_logs",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:walnut_planks",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:sawdust",
+              1,
+              0.5
+            ]
+          ],
+          "ticks": 100
+        },
+        {
+          "in": [
+            [
               "#minecraft:planks",
               1
             ]
@@ -4672,6 +4692,31 @@
           "extra": [
             [
               "jugcraft:hawthorn_sapling",
+              1,
+              1.0
+            ],
+            [
+              "minecraft:stick",
+              1,
+              0.1
+            ]
+          ],
+          "ticks": 400
+        },
+        {
+          "in": [
+            [
+              "jugcraft:walnut_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:walnut_log",
+            6
+          ],
+          "extra": [
+            [
+              "jugcraft:walnut_sapling",
               1,
               1.0
             ],

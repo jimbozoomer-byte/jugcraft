@@ -1574,6 +1574,14 @@ a rainforest giant read as one, and they remove the last vanilla emergent from t
 
 ### Batch 13: walnut and bristlecone
 
+Implementation: [PR #436](https://github.com/jimbozoomer-byte/jugcraft/pull/436),
+with the owner's approved walnut timber and the recovered walnut family reconciled
+without deleting saved IDs. The final shapes use bounded native placement for
+connected spreading branches and rocky bristlecone support; the large variant is
+named `large_walnut`. Distribution, harvest routes and validation are recorded in
+[the Batch 13 feature record](../features/trees-batch-13.md). The roster below is
+the original visual brief. Batch 14 remains outside this work.
+
 #### walnut
 Walnut (*Juglans regia*; black walnut, *J. nigra*). **Medium.** It gives the dense oak forest a tree of its own and a
 nut to forage. It is medium priority because the plain oak woods are already right.

@@ -1772,6 +1772,8 @@ def main():
     vehicle_bays.write()
     import owner_resource_patches
     owner_resource_patches.apply()
+    import walnut_data
+    walnut_data.reconcile(write)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     RESOURCE_MANIFEST.write_text(json.dumps(sorted(WRITTEN_RESOURCES), indent=2) + "\n", encoding="utf-8")
