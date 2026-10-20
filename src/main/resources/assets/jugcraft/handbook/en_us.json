@@ -4859,7 +4859,7 @@
           "icon": "jugcraft:polymer_extruder",
           "text": [
             "Continuous shaping on a supported heated barrel, cooling bed and draw rollers. Install a reusable sheet, film, profile, hose or insulation die. Feed HDPE or existing PVC for sheets, LDPE for film, PVC for profiles, or rubber for hoses/insulation. Tool sockets lock during a batch; automation handles feed and both products through their marked hatches.",
-            "Each 160-tick batch at 24 JE/t consumes four stock units (three rubber for a hose). It produces eight sheets, six insulation pieces, three films or profiles, or one hose, plus one matching clean offcut: at least as many as the Metal Press or Molding Press make from the same stock. Both output drawers must have room before work starts. The existing Molding Press keeps its six molds and all prior recipes.",
+            "Each 160-tick batch at 24 JE/t consumes four stock units (three rubber for a hose). It produces eight sheets, six insulation pieces, three films or profiles, or one hose. Only films/profiles also return one matching clean offcut: at least as many as the Metal Press or Molding Press make from the same stock. Every required output drawer must have room before work starts. The existing Molding Press keeps its six molds and all prior recipes.",
             "Power: lower front-left. Solid feed: front-right. Finished product: rear-right middle; extrusion offcuts: rear-right upper. Fluid feed: rear middle; fluid products: rear bottom. Pause, Cancel, progress, tank levels, energy, tool locks and upgrade slots use the shared factory screen. Recipes are fictional game quantities."
           ],
           "craft": {

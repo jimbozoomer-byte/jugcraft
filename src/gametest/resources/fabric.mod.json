@@ -491,7 +491,8 @@
       "io.github.jimbozoomer.jugcraft.test.TropicalTreeClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.RainforestClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.BackpackClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.WalnutTreeClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.WalnutTreeClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ChemistryIntegrationClientGameTests"
     ]
   },
   "depends": {

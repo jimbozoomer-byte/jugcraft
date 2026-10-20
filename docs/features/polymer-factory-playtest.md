@@ -63,3 +63,13 @@ This checkpoint completed the ordinary molding/extrusion route described above. 
 - The first full run had one unrelated crow-flight timeout; the complete rerun and final delivery server run passed without changing that test. The data audit caught a missing crude-oil feature condition on the added white-plastic crafting recipe; it was corrected and the complete audit passed.
 
 The local delivery records the source commit, JAR/pack SHA-256 checksums, saved world and validation logs outside Git. No upload or main merge. Automated testing is distinct from owner survival playtesting, Modrinth app import, two-client multiplayer and representative factory-load testing.
+
+
+## Combined integration correction (20 October 2026)
+
+Full-yield sheet, insulation and hose extrusion returns no offcut. Film/profile
+batches retain their one offcut; reclaiming remains four offcuts to one stock.
+This replaces the earlier claim that every improved-yield batch could also return
+scrap. Tests account for each product in stock-equivalent units and verify that
+a full sheet drawer blocks spending and eight sheets survive batch save/reload.
+Integration validation is recorded in [the combined feature record](trees-chemistry-integration-oct20.md).

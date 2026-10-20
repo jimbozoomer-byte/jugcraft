@@ -62,6 +62,13 @@ def build(jar):
     # A consumed husk replaces one brown dye; keep the established dye value.
     values['jugcraft:walnut_husk'] = Fraction(64)
     origins['jugcraft:walnut_husk'] = 'local walnut dye accounting'
+    # Selected chemistry/production integration: include returned bottles and
+    # account for the existing presses' two-sheets-per-stock yield. Fluid processing
+    # has no general derivation below, so record these explicit local budgets.
+    for item, price in {'glucose_syrup': Fraction(2), 'boric_acid': Fraction(1, 2),
+                        'plastic_sheet': Fraction(1, 2), 'silicone': Fraction(9, 8)}.items():
+        values['jugcraft:'+item] = price
+        origins['jugcraft:'+item] = 'local chemistry/output/container accounting'
     locked=set(values)
     edges=[]
     for rid,r in recipes.items():
@@ -95,7 +102,7 @@ def build(jar):
                 costs=[min((values[i] for i in options if i in values),default=None) for options in inputs]
                 if any(v is None for v in costs) or out in locked:continue
                 # Keep fractions: forcing a cheap nugget/slab up to one creates value in crafting loops.
-                v=sum(costs)/count
+                v=(sum(costs) - (values["minecraft:glass_bottle"] if rid == "jugcraft:sugar_from_glucose_syrup" else 0))/count
                 if v<=0 or v>1_000_000_000 or v.numerator>2**63-1 or v.denominator>2**63-1:continue
                 if out not in values or v<values[out]:values[out]=v;origins[out]='recipe '+rid;changed=True
             if not changed:break

@@ -44,7 +44,7 @@ def write_all():
     for name in FILES:
         target = TARGET / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        texture(name).save(target, optimize=True)
+        texture(name).save(target, compress_level=0)
 
 
 if __name__ == "__main__":

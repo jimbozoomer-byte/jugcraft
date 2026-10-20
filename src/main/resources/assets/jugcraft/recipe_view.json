@@ -7452,6 +7452,7 @@
             ]
           ],
           "ticks": 100,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7630,6 +7631,7 @@
           ],
           "results": [],
           "ticks": 100,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7662,6 +7664,7 @@
             ]
           ],
           "ticks": 160,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7877,6 +7880,7 @@
             ]
           ],
           "ticks": 160,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7900,6 +7904,7 @@
             ]
           ],
           "ticks": 160,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7927,6 +7932,7 @@
             ]
           ],
           "ticks": 120,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7950,6 +7956,7 @@
             ]
           ],
           "ticks": 100,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7973,6 +7980,7 @@
             ]
           ],
           "ticks": 120,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -7996,6 +8004,7 @@
             ]
           ],
           "ticks": 120,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -8023,6 +8032,7 @@
             ]
           ],
           "ticks": 160,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -8050,6 +8060,7 @@
           ],
           "results": [],
           "ticks": 120,
+          "tool": "",
           "retained_inputs": []
         },
         {
@@ -9157,6 +9168,54 @@
         {
           "items": [
             [
+              "jugcraft:pine_planks",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:nitric_acid",
+              100
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aged_pine_planks",
+              8
+            ]
+          ],
+          "ticks": 100,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:maple_planks",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:nitric_acid",
+              100
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aged_maple_planks",
+              8
+            ]
+          ],
+          "ticks": 100,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "jugcraft:lithium_fluoride",
               1
             ],
@@ -9424,52 +9483,6 @@
           ],
           "ticks": 80,
           "tool": "",
-          "retained_inputs": []
-        },
-        {
-          "items": [
-            [
-              "jugcraft:pine_planks",
-              8
-            ]
-          ],
-          "fluids": [
-            [
-              "jugcraft:nitric_acid",
-              100
-            ]
-          ],
-          "fluid_results": [],
-          "results": [
-            [
-              "jugcraft:aged_pine_planks",
-              8
-            ]
-          ],
-          "ticks": 100,
-          "retained_inputs": []
-        },
-        {
-          "items": [
-            [
-              "jugcraft:maple_planks",
-              8
-            ]
-          ],
-          "fluids": [
-            [
-              "jugcraft:nitric_acid",
-              100
-            ]
-          ],
-          "fluid_results": [],
-          "results": [
-            [
-              "jugcraft:aged_maple_planks",
-              8
-            ]
-          ],
-          "ticks": 100,
           "retained_inputs": []
         }
       ]
@@ -13827,10 +13840,6 @@
             [
               "jugcraft:plastic_sheet",
               8
-            ],
-            [
-              "jugcraft:hdpe_offcut",
-              1
             ]
           ],
           "ticks": 160,
@@ -13896,10 +13905,6 @@
             [
               "jugcraft:flexible_hose",
               1
-            ],
-            [
-              "jugcraft:rubber_offcut",
-              1
             ]
           ],
           "ticks": 160,
@@ -13919,10 +13924,6 @@
             [
               "jugcraft:cable_insulation",
               6
-            ],
-            [
-              "jugcraft:rubber_offcut",
-              1
             ]
           ],
           "ticks": 160,
@@ -13942,10 +13943,6 @@
             [
               "jugcraft:plastic_sheet",
               8
-            ],
-            [
-              "jugcraft:pvc_offcut",
-              1
             ]
           ],
           "ticks": 160,

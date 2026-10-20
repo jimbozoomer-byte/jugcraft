@@ -75,3 +75,13 @@ Not run: a human playing through the extruder or Bio-Generator.
 ## AI attribution
 
 Implemented with Claude Opus 5.5 (Claude Code) for the contributor; the contributor is responsible for the output.
+
+
+## Combined integration correction (20 October 2026)
+
+Full-yield sheet, insulation and hose extrusion returns no offcut. Film/profile
+batches retain their one offcut; reclaiming remains four offcuts to one stock.
+This replaces the earlier claim that every improved-yield batch could also return
+scrap. Tests account for each product in stock-equivalent units and verify that
+a full sheet drawer blocks spending and eight sheets survive batch save/reload.
+Integration validation is recorded in [the combined feature record](trees-chemistry-integration-oct20.md).
