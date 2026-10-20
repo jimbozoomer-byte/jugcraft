@@ -1791,6 +1791,8 @@ def main():
     import nouveau_data
     language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
     nouveau_data.write_all(write, ASSETS, DATA / MOD, language)
+    import starter_workshop
+    starter_workshop.write_all(write, ASSETS, DATA / MOD, language)
     write(ASSETS / "lang/en_us.json", language)
     import town
     for problem in town.write():
