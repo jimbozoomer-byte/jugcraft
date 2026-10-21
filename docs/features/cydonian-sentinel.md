@@ -6,6 +6,16 @@ The owner selected this three-PR group for integration into main after the titan
 
 Integration and fixes: OpenAI Codex (GPT-6), under direct owner authorization. The integration PR records the exact final commit, combined checks and merge result. The contributor results below are historical evidence for their original branches. No owner-world update, human playtest or independent two-client certification is claimed.
 
+The combined server run exposed vanilla's random damage knockback fighting the Red
+Storm's declared wind impulse. Red Storm now joins `minecraft:no_knockback`, with
+all existing chemistry, gun and owner-content tag entries preserved. Its own server
+wind impulse remains authoritative. A regression checks all four winds with twelve
+random seeds apiece, from rest and with existing movement, while still requiring
+damage. The shelter test retains every assertion and reports health/motion on failure.
+Both full server CI jobs now have a 60-minute limit: the initial runs reached 2,196
+passes but exceeded their former 30/45-minute limits with a test still running.
+No tests or assertions were removed.
+
 Status: implemented on branch `claude/cydonian-sentinel` (PR #382, stacked on part 2's `claude/cydonian-sanctum`, PR #372,
 which is stacked on part 1's PR #370); CI passes on it (see Verification). It has not been played by hand, and the two-client
 dedicated-server playtest is still to do.

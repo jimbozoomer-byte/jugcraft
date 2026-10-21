@@ -13,6 +13,7 @@ from decor_data import MOD, rid
 from regatta_data import box, hat_display
 import cydonian_sentinel as cs
 import cydonian_sentinel_models as sm
+import json
 
 SIDES = ("north", "south", "east", "west")
 
@@ -140,3 +141,11 @@ def worldgen(data, write):
     write(data / MOD / "damage_type" / "red_storm.json", {"message_id": damage["message_id"],
                                                           "exhaustion": damage["exhaustion"],
                                                           "scaling": damage["scaling"]})
+    # The storm applies its own directional wind impulse. Vanilla damage otherwise adds
+    # random knockback first, which can reverse it. Preserve chemistry/gun tag entries
+    # written earlier; the owner-data adapter merges its optional entry afterwards.
+    path = data / "minecraft" / "tags" / "damage_type" / "no_knockback.json"
+    tag = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"replace": False, "values": []}
+    if rid("red_storm") not in tag["values"]:
+        tag["values"].append(rid("red_storm"))
+    write(path, tag)

@@ -328,6 +328,40 @@ public class CydonianSentinelGameTests {
 		});
 	}
 
+	/** Damage must not add vanilla's random knockback on top of the storm's announced wind. */
+	@GameTest(structure = ARENA, padding = 8, maxTicks = 120)
+	public void stormDamageOnlyAddsTheDeclaredWindImpulse(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos origin = origin(helper);
+		crater(level, origin);
+		CydonianSentinelEntity sentinel = waiting(helper, origin);
+		ServerPlayer open = player(helper, origin, 36.5, 50.5);
+		open.setGameMode(GameType.CREATIVE);
+		helper.runAfterDelay(LOADING_TICKS, () -> {
+			ending(level, sentinel, () -> {
+				open.setGameMode(GameType.SURVIVAL);
+				for (Wind wind : Wind.values()) {
+					sentinel.callStorm(level, wind);
+					for (int seed = 0; seed < 12; seed++) {
+						Vec3 before = seed % 2 == 0 ? Vec3.ZERO : new Vec3(-0.12, 0.07, 0.09);
+						open.setDeltaMovement(before);
+						open.setHealth(open.getMaxHealth());
+						open.damageCooldownTime = 0;
+						open.getRandom().setSeed(seed);
+						int hit = sentinel.scour(level);
+						Vec3 expected = before.add(wind.blows().scale(CydonianSentinelEntity.STORM_PUSH));
+						helper.assertTrue(hit == 1 && hurt(open), "Storm damage missing for " + wind + ", seed " + seed);
+						helper.assertTrue(open.getDeltaMovement().distanceTo(expected) < 0.000001,
+								"Storm added random knockback for " + wind + ", seed " + seed + ": "
+								+ open.getDeltaMovement() + " instead of " + expected);
+					}
+				}
+				open.discard();
+			});
+			helper.succeed();
+		});
+	}
+
 	/**
 	 * Its rule, the Red Storm. Rock within {@value CydonianSentinelEntity#LEE} blocks upwind shelters: a player beside a
 	 * standing stone is sheltered from the one wind the stone stands against, and from no other. Called from the west, it
@@ -372,13 +406,15 @@ public class CydonianSentinelGameTests {
 				open.setGameMode(GameType.SURVIVAL);
 				int hit = sentinel.scour(level);
 				boolean scoured = hit == 1 && hurt(open) && open.getDeltaMovement().x > CydonianSentinelEntity.STORM_PUSH - 0.05 && !hurt(east);
+				String scourEvidence = "hits=" + hit + ", open health=" + open.getHealth() + "/" + open.getMaxHealth()
+						+ ", open motion=" + open.getDeltaMovement() + ", sheltered health=" + east.getHealth() + "/" + east.getMaxHealth();
 				open.setGameMode(GameType.CREATIVE);
 				helper.runAfterDelay(CydonianSentinelEntity.STORM_TICKS, () -> {
 					ending(level, sentinel, () -> {
 						helper.assertTrue(wrong.isEmpty(), "Sheltered wrongly from: " + wrong);
 						helper.assertTrue(told, "Called from the west, it did not plant its arms: " + sentinel.storm() + ", " + sentinel.action());
 						helper.assertTrue(blowing, "After its tell the storm did not blow");
-						helper.assertTrue(scoured, "The storm struck " + hit + " players, not the one in the open (pushed downwind), sparing the one in the lee");
+						helper.assertTrue(scoured, "The storm must hurt and push the open player downwind, sparing the sheltered player: " + scourEvidence);
 						helper.assertTrue(sentinel.storm() == CydonianSentinelEntity.Storm.CALM && sentinel.phase() == CydonianSentinelEntity.Phase.SENTINEL,
 								"After " + CydonianSentinelEntity.STORM_TICKS + " ticks the storm did not pass: " + sentinel.storm());
 						List.of(east, west, north, south, open).forEach(ServerPlayer::discard);
