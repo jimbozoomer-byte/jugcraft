@@ -46,6 +46,11 @@ No new dependency or world generation is introduced.
   inventory injection into automation/mock players. Dream fixtures define their inventories
   explicitly and also check that a real Exchange guide survives escrow in its exact slot.
 
+- The full combined run exposed a pre-existing fairy-ring tick scan loading distant
+  chunks around old test players. Two local server stack captures confirmed the scan
+  blocking in chunk generation/loading. Counting and sprouting now inspect loaded
+  terrain only; a regression checks that neither operation loads its distant probe area.
+
 ## Verification
 
 Local combined common/client/GameTest compilation passed. All 13 new Exchange server
