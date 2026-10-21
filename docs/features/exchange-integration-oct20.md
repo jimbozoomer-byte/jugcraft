@@ -42,10 +42,15 @@ No new dependency or world generation is introduced.
   it from covering the Market Chest prices. Closing the screen restores normal map rendering
   without changing the player's map preferences; Diorama remains optional.
 
+- Give the welcome guide only to a client that advertises the Exchange channel, avoiding
+  inventory injection into automation/mock players. Dream fixtures define their inventories
+  explicitly and also check that a real Exchange guide survives escrow in its exact slot.
+
 ## Verification
 
-Local combined common/client/GameTest compilation passed. All 12 new Exchange server
-regressions passed, as did all 160 Python checks and 11 World Designer tests.
+Local combined common/client/GameTest compilation passed. All 13 new Exchange server
+regressions passed. All eight dream/curse regressions passed with an explicit guide
+escrow fixture. There were also 160 Python checks and 11 World Designer tests.
 The six survival recipe/registry tests also passed; the live registry and acquisition
 audit include the purchased Market Chest and paid tickets. The generated material/model audit passed. Full GitHub server configurations,
 rendered client screenshots and installer validation are still required before merge.

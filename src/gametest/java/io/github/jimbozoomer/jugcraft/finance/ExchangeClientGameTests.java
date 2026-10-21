@@ -19,7 +19,9 @@ public class ExchangeClientGameTests implements FabricClientGameTest {
         try(var server=context.worldBuilder().createServer()) {
             long expectedBalance;
             try(var connection=server.connect()) {
-                connection.waitForChunksRender();server.runCommand("time set noon");server.runCommand("weather clear");
+                connection.waitForChunksRender();
+                check(server.computeOnServer(mc->mc.getPlayerList().getPlayers().getFirst().getInventory().countItem(ExchangeGuide.GUIDE))==1,"real compatible client receives one welcome guide");
+                server.runCommand("time set noon");server.runCommand("weather clear");
                 server.runCommand("gamerule minecraft:spawn_mobs false");
                 String clashes=context.computeOnClient(c->Arrays.stream(c.options.keyMappings)
                     .filter(k->k!=FinanceClient.openExchange && k.getCategory()!=KeyMapping.Category.DEBUG && k.same(FinanceClient.openExchange))

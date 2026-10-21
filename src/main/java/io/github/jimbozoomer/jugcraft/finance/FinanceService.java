@@ -54,7 +54,9 @@ public final class FinanceService {
 		FinanceBook book = ledger.book();
 		book.account(player.getUUID(), player.getName().getString());
 		ledger.setDirty();
-		ExchangeGuide.giveOnce(player);
+        // Welcome books are for clients that can read the Exchange. Do not inject items into
+        // automation/mock player inventories that have no compatible client connection.
+        if (ServerPlayNetworking.canSend(player,FinanceSnapshotPayload.TYPE)) ExchangeGuide.giveOnce(player);
 		if (book.starterAvailable(player.getUUID())) {
 			player.sendSystemMessage(Component.literal("[Exchange] ").withStyle(ChatFormatting.GOLD).append(Component.literal(
 					"Welcome! The central bank offers you a starter loan of " + book.format(book.borrowLimit())

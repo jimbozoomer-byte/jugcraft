@@ -182,4 +182,10 @@ public class ExchangeIntegrationGameTests {
         check(h,!restored.redeem(clone,0),"copied paid data never redeems twice");h.succeed();
     }
 
+    @GameTest public void welcomeGuideDoesNotPolluteAutomationInventories(GameTestHelper h) {
+        var player=h.makeMockServerPlayerInLevel();
+        check(h,player.getInventory().countItem(ExchangeGuide.GUIDE)==0,"a player without an Exchange client must not receive an unreadable welcome item");
+        h.succeed();
+    }
+
 }
