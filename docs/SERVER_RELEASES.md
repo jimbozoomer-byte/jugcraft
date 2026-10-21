@@ -6,8 +6,12 @@ and Java 25 remain pinned. No downloader runs inside Minecraft.
 ## Player launch setup (21 October 2026)
 
 The owner selected the new town/church/bird build for the first player release
-and authorized installing it on the hosted server. The intended launch is
-`0.1.0-alpha.20261021.2`, replacing the earlier hosted `.1` build.
+and authorized installing it on the hosted server. Version
+`0.1.0-alpha.20261021.2` replaced the earlier hosted `.1` build through a direct
+`mods/jugcraft.jar` upload after backup and shutdown. Startup completed at
+19:42:31 UTC; the town upgrade request was applied and the world saved at
+19:45:18 UTC. Existing worlds and owner configuration were preserved. See the
+[deployment record](features/living-town-upgrades.md#validation) for migration limits.
 
 - Server: `jugcraft.modrinth.gg`.
 - Stable linked-server page: <https://modrinth.com/server/jugcraft-server>.
