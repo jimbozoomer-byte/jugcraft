@@ -43,6 +43,32 @@ deployment has been configured. A commit to main alone never updates players.
 Before a wider launch, verify a fresh linked install, a join and an old-linked-
 instance update. Preserve the previous pack and matching world backup for rollback.
 
+### Routine updates preserve the live world
+
+Use **Files > mods > Upload file** with the replacement `jugcraft.jar` while
+the server is stopped. Never use Reset server / reinstall for a routine update.
+Keep `world/`, player data, `server.properties`, access lists and owner configs.
+The hosting node rejected **Upload from .zip URL** on October 21 with
+"required functionality is not supported by this server"; use direct uploads.
+
+For updates involving dependencies, compare the release inventories automatically:
+
+```sh
+python scripts/package_server_update.py --previous OLD-server.zip --current NEW-server.zip --output build/server-patch
+```
+
+`JUGCRAFT-changed-mods.zip` contains only changed/new managed mod JARs. Extract it
+locally, then upload its `mods/` files into the host's `mods/` folder. Check
+`UPDATE-PLAN.json` for obsolete managed mods to remove before restarting and
+changed default configs to merge manually. The tool never puts configs, worlds,
+delete commands or player files in the patch. It rejects corrupt inventory files,
+unsafe paths and changed Minecraft/loader/Java pins. Do not overwrite a different
+server's files or assume a manifest reflects manual changes made outside releases.
+
+Replacing the JAR still uploads that whole JAR; this is file-level updating, not
+a binary-delta protocol. The large initial player pack is separate from the host
+update. Modrinth manages linked client updates; no forced update runs inside Minecraft.
+
 ## Prepared files
 
 `scripts/package_release.py` assembles matching files from a tested JAR:
@@ -130,13 +156,13 @@ Assembly is offline and needs the verified dependency cache and an empty output
 directory. Local assembly does not prove the supplied commit passed CI; the
 GitHub workflow enforces that gate. Changed source needs new validation/version.
 
-## Deferred until the owner is awake
+## Remaining release checks
 
-- Server address, Modrinth Server Project identity/access, and published pack vs
-  custom upload (including any publication review needed).
-- Live settings, staging capacity, backup location and maintenance window.
+- Modrinth review of the configured Server Project, plus an actual linked install
+  and old-version update; an uploaded custom pack alone is not proof of either.
+- Deployment/startup/migration results are recorded with the particular release.
 - Custom JUGCRAFT title screen and main server Play button, explicitly deferred.
-- Actual launcher import/update and two-account hosted-server testing.
+- Two-account hosted-server testing.
 
 No credentials in chat, live deployment or existing player installation changes
 are required to prepare these files. AI assistance: OpenAI Codex (GPT-6).
