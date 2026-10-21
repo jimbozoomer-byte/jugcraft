@@ -11,6 +11,9 @@ Input refs may be tags ("#c:ingots/tin"); the plugin shows every item in the tag
 Fluid machines (tools/petro.py) are listed under "fluid_machines": {"block", "type", "recipes": [
   {"items": [[ref, count]], "fluids": [[fluid, mB]], "fluid_results": [[fluid, mB]], "results": [[id, count]],
    "ticks": n}]}.
+
+Things only a ritual or a lair boss gives (tools/acquisition.py) are listed under "acquisition_info": [{"item": id,
+"key": key}], each shown as an information page with the words of jei.jugcraft.acquire.<key>.
 """
 from machines import MACHINES, machine_recipes
 
@@ -46,13 +49,27 @@ def build():
                  "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
                  "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],
                  "results": [[item, count] for item, count in recipe.get("results", [])],
-                 "ticks": recipe["ticks"]} for recipe in recipes]
+                 "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "retained_inputs": recipe.get("retained_inputs", [])} for recipe in recipes]
         fluid_machines.append({"block": f"{MOD}:{block}", "type": petro.FLUID_MACHINES[block]["recipe_type"],
                                "recipes": rows})
     # Industrial forms run their own capability recipes, so each form is its own category.
     import industrial_forms
     fluid_machines += industrial_forms.recipe_view()
+    import starter_workshop
+    for index, station in enumerate(starter_workshop.STATIONS):
+        rows = []
+        for _, r in starter_workshop.processes():
+            if r['station'] != index: continue
+            inputs = [[p['ingredient'], p['count']] for p in r['ingredients']]
+            retained = []
+            if index == 2:
+                retained = [len(inputs), len(inputs)+1]
+                inputs += [['jugcraft:basic_ceramic_lining',1],['jugcraft:ceramic_crucible',1]]
+            rows.append(dict(items=inputs, fluids=[], fluid_results=[], results=[[r['result']['id'],r['result']['count']]],
+                ticks=r['time'], tool=r.get('tool',{}).get('id',''), retained_inputs=retained, energy_per_tick=0))
+        fluid_machines.append(dict(block='jugcraft:'+station,type='starter_'+station,recipes=rows))
     import concordance
+    import acquisition
     return {"machines": machines, "fluid_machines": fluid_machines, "concordance": concordance.recipe_view(),
             "concordance_stations": concordance.recipe_stations(),
-            "alchemy_ingredients": concordance.alchemy.recipe_ingredients()}
+            "alchemy_ingredients": concordance.alchemy.recipe_ingredients(), "acquisition_info": acquisition.rows()}

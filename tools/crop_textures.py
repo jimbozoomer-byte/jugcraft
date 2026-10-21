@@ -794,6 +794,8 @@ def crop_textures():
     out.update(pumpkin_night_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
+    from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar
+    out.update(adam_ondi_ahman_textures())
     from vesperine_art import vesperine_textures  # and Vesperine, her skulls, thralls and scythe, and her loot
     out.update(vesperine_textures())
     from tatterlace_art import tatterlace_textures  # and Madame Tatterlace, her thimbles, spools, egg sacs and brood, and her loot
@@ -802,6 +804,16 @@ def crop_textures():
     out.update(yeti_king_textures())
     from cinder_tyrant_art import cinder_tyrant_textures  # and the Cinder Tyrant, his Cinderlings, gobs and cinders, and his loot
     out.update(cinder_tyrant_textures())
+    from mire_hag_art import mire_hag_textures  # and the Mire Hag, her Likenesses, Root Knot, roots, hands and brew, and her loot
+    out.update(mire_hag_textures())
+    from crypt_lich_art import crypt_lich_textures  # and the Crypt Lich, his dead, bolts and bones, and his loot
+    out.update(crypt_lich_textures())
+    from iron_dreadnought_art import iron_dreadnought_textures  # and the Iron Dreadnought, his Sparkers, rivets and shells, and his loot
+    out.update(iron_dreadnought_textures())
+    from alpha_werewolf_art import alpha_werewolf_textures  # and the Alpha Werewolf, and his loot
+    out.update(alpha_werewolf_textures())
+    from cydonian_sentinel_art import cydonian_sentinel_textures  # and the Cydonian Sentinel, its sentries, shards,
+    out.update(cydonian_sentinel_textures())                      # spikes and meteors, and its loot
     from orchard_textures import orchard_textures  # and the orchards' fruit trees
     out.update(orchard_textures())
     from cake_art import cake_textures  # and the cakes, rebuilt from the owner's drawing of them

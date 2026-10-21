@@ -266,6 +266,15 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary.register();
 		// Roadmap step 21: bounded material equivalence, the Assayer's Scale and its Prima Materia ledger.
 		io.github.jimbozoomer.jugcraft.concordance.assay.Assaying.register();
+		io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalGear.register();
+		io.github.jimbozoomer.jugcraft.concordance.assay.DarkMatter.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.KleinStars.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.ElementalAmulets.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalWorkshops.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.ExtendedAlchemyEquipment.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.AlchemyMachines.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.AlchemyStorage.register();
+        io.github.jimbozoomer.jugcraft.concordance.assay.AlchemyArtifacts.register();
 		// Roadmap step 22: sympathetic links, curses and wards; dream expeditions at the Oneiric Censer.
 		io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy.register();
 		io.github.jimbozoomer.jugcraft.concordance.dreaming.Dreaming.register();
@@ -277,6 +286,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire.register();
 		// Roadmap step 26: the Concordance Journal, every report in one place for the screens.
 		io.github.jimbozoomer.jugcraft.concordance.journal.Journal.register();
+		// Chunk A: the composer screen's server side, answered by the service the compose command uses (Composing).
+		io.github.jimbozoomer.jugcraft.concordance.composer.Composer.register();
 		io.github.jimbozoomer.jugcraft.concordance.sign.Signs.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));

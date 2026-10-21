@@ -13,7 +13,7 @@ Baseline: source at `f736ee3c5`, before this documentation change. [Machine defi
 
 | Existing equipment or recipe | Current relevant cost or behavior | Consequence for the starter factory |
 | --- | --- | --- |
-| Electrolytic Cell | 4 steel plates, 2 Steel Tanks, aluminum cable, advanced circuit, Machine Casing | Aluminum cable cannot gate the cell intended to begin the later aluminum route; provide copper entry |
+| Electrolytic Cell | 4 steel plates, 2 Steel Tanks, copper cable, advanced circuit, Machine Casing | Aluminum cable cannot gate the cell intended to begin the later aluminum route; copper entry implemented ([copper entry](industrial-copper-entry-aluminum.md)) |
 | Synthesis Converter | 4 steel plates, titanium ingot, 2 steel fluid pipes, Machine Casing, advanced circuit | Earlier methanation needs accessible starter hardware; retain the existing machine identity and saved contents |
 | Chemical Reactor | 4 steel plates, glass, 2 Tinplate Tanks, Machine Casing, lead ingot | Existing steel-era foundation for acid absorption and other compatible reactions |
 | Fuel Cell | Aluminum plates/cable, steel plates, advanced circuit, Tinplate Tank | Existing hydrogen consumer remains; the selected shared H2/methane generator needs an earlier reachable construction route |
@@ -34,8 +34,8 @@ The table lists **outer construction ingredients**, not a flattened raw-material
 | Starter role | Proposed construction ingredients | Entry capability and later usefulness |
 | --- | --- | --- |
 | Electrolytic Separator | 4 steel plates, 2 Steel Tanks, 1 copper cable, 1 basic circuit, 1 Machine Casing | Water and ordinary-brine electrolysis; later metals use appropriate process capabilities rather than a self-output construction gate |
-| Chemical Infuser | 4 steel plates, 2 steel fluid pipes, 1 Tinplate Tank, 1 copper cable, 1 basic circuit | Two gas inputs; HCl synthesis and methane reactions. Methane needs an independently made nickel bed and a water output alongside the gas |
-| Chemical Oxidizer | 4 steel plates, 1 furnace, 1 electric motor, 1 glass, 1 basic circuit, 1 Machine Casing | Sulfur dust and metered oxygen produce SO2; other compatible solid/gas recipes can follow |
+| Chemical Infuser | 4 steel plates, 2 steel fluid pipes, 1 Tinplate Tank, 1 copper cable, 1 basic circuit | Two gas inputs; HCl synthesis and methane reactions. Methane needs an independently made nickel bed and a water output alongside the gas. Implemented with this bill and HCl synthesis as the [Chemical Infuser](industrial-chemical-infuser.md); methanation follows |
+| Chemical Oxidizer | 4 steel plates, 1 furnace, 1 electric motor, 1 glass, 1 basic circuit, 1 Machine Casing | Sulfur dust and metered oxygen produce SO2; other compatible solid/gas recipes can follow. Implemented with this bill and sulfur oxidation as the [Chemical Oxidizer](industrial-chemical-oxidizer.md) |
 | Absorption and ordinary reactions | Initially reuse the existing Chemical Reactor and its construction | HCl absorption, ordinary sulfuric-acid supply and other compatible wet reactions. Its future capacity/interface changes must be explicit |
 | Coal Gasifier | 4 steel plates, 2 bricks, 1 furnace, 1 steel fluid pipe, 1 Machine Casing | Coal/steam preparation with paid heat, dirty CO/H2 mixture and substantial numeric pollution |
 | Gas Cleanup and Separation | 4 steel plates, 1 Steel Tank, 2 Tinplate Tanks, 1 electric motor, 1 basic circuit | Cleans and divides the gasifier mixture into CO and H2, with accounted residues; neither gas is created again by separation |

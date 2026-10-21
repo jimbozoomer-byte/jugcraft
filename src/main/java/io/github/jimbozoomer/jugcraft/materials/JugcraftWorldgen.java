@@ -8,6 +8,8 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
@@ -24,6 +26,10 @@ public final class JugcraftWorldgen {
 	}
 
 	public static void register() {
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("surface_linked_ore"), SurfaceLinkedOreFeature.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("mineral_sand"), MineralSandFeature.CODEC);
+		Registry.register(BuiltInRegistries.FEATURE_TYPE, Jugcraft.id("underground_deposit"),
+				io.github.jimbozoomer.jugcraft.deposit.UndergroundDepositFeature.CODEC);
 		Predicate<BiomeSelectionContext> overworld = BiomeSelectors.foundInOverworld();
 
 		// Metal and mineral ores: placed feature name, feature switch.
@@ -32,6 +38,14 @@ public final class JugcraftWorldgen {
 				{"nickel", "nickel"}, {"tungsten", "tungsten"}, {"uranium", "uranium"}, {"titanium", "titanium"},
 				{"thallite", "thallite"},
 				{"salt", "salt"}, {"phosphate", "phosphate"}, {"lepidolite", "lithium"}, {"monazite", "rare_earths"},
+				// The feature itself checks the surface biome. An underground biome filter would reject cave biomes.
+				{"fluorite", "fluorite"},
+				{"spodumene", "lithium"},
+				{"chromite", "machines"},
+				{"cobaltite", "machines"},
+				{"titanium_sand", "mineral_sands"}, {"zircon_sand", "mineral_sands"},
+				{"rare_earth_sand", "mineral_sands"}, {"garnet_sand", "mineral_sands"},
+				{"vanadium_iron", "vanadium"}, {"vanadium_iron_rich", "vanadium"},
 		};
 		for (String[] ore : ores) {
 			add(ore[0], ore[1], overworld);
@@ -69,6 +83,13 @@ public final class JugcraftWorldgen {
 		addDeposit(stonyHills, "iron_deposit", "deposits");
 		addDeposit(stonyHills, "copper_deposit", "deposits");
 		addDeposit(stonyHills, "tin_deposit", "deposits", "tin");
+		if (JugcraftConfig.isFeatureEnabled("deposits")) {
+			for (String name : new String[]{"coal", "iron", "copper", "tin"}) {
+				if (name.equals("tin") && !JugcraftConfig.isFeatureEnabled("tin")) continue;
+				BiomeModifications.addFeature(overworld, GenerationStep.Decoration.UNDERGROUND_ORES,
+						ResourceKey.create(Registries.PLACED_FEATURE, Jugcraft.id("underground_" + name + "_deposit")));
+			}
+		}
 	}
 
 	private static void addDeposit(Predicate<BiomeSelectionContext> biomes, String deposit, String... features) {

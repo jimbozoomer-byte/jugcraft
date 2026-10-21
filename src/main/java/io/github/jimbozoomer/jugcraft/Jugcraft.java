@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.deposit.JugcraftDeposits;
 import io.github.jimbozoomer.jugcraft.electronics.JugcraftElectronics;
 import io.github.jimbozoomer.jugcraft.drone.JugcraftDrones;
 import io.github.jimbozoomer.jugcraft.farming.JugcraftFarming;
+import io.github.jimbozoomer.jugcraft.finance.JugcraftFinance;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftExosuit;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
@@ -62,6 +63,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.machine.Electroplating.register();
 		JugcraftDeposits.register();
 		JugcraftMachines.register();
+		io.github.jimbozoomer.jugcraft.workshop.JugcraftWorkshop.register();
 		io.github.jimbozoomer.jugcraft.machine.form.JugcraftForms.register();
 		io.github.jimbozoomer.jugcraft.machine.form.IndustrialForms.register();
 		JugcraftFluids.register();
@@ -71,6 +73,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftSolar.register();
 		PetroBlocks.register();
 		JugcraftLogistics.register();
+		io.github.jimbozoomer.jugcraft.wallrun.WallRuns.register();
 		JugcraftStorage.register();
 		JugcraftElectronics.register();
 		io.github.jimbozoomer.jugcraft.control.JugcraftControl.register();
@@ -85,6 +88,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.artillery.JugcraftTowerGuns.register();
 		io.github.jimbozoomer.jugcraft.building.Fortifications.register();
 		io.github.jimbozoomer.jugcraft.building.Bunkerworks.register();
+		io.github.jimbozoomer.jugcraft.building.AgedWood.register();
 		io.github.jimbozoomer.jugcraft.building.FireControl.register();
 		io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.register();
 		JugcraftFarming.register();
@@ -99,32 +103,55 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.register();
 		io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry.register();
 		JugcraftGuide.register();
+		JugcraftFinance.register();
 		JugcraftAgriculture.register();
 		io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.register();
 		io.github.jimbozoomer.jugcraft.lair.vesperine.JugcraftVesperine.register();
 		io.github.jimbozoomer.jugcraft.lair.tatterlace.JugcraftTatterlace.register();
 		io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti.register();
 		io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant.register();
+		io.github.jimbozoomer.jugcraft.lair.hag.JugcraftHag.register();
+		io.github.jimbozoomer.jugcraft.lair.lich.JugcraftLich.register();
+		io.github.jimbozoomer.jugcraft.lair.dreadnought.JugcraftDreadnought.register();
+		io.github.jimbozoomer.jugcraft.lair.alpha.JugcraftAlpha.register();
+		io.github.jimbozoomer.jugcraft.lair.sentinel.JugcraftSentinel.register();
 		io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.register();
 		JugcraftDrones.register();
 		io.github.jimbozoomer.jugcraft.tower.JugcraftTower.register();
 		io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints.register();
+		io.github.jimbozoomer.jugcraft.placement.StructureReach.register();
+		// A tank a kit placed comes down whole when any block of it is broken, giving the kit back.
+		io.github.jimbozoomer.jugcraft.nuclear.TankKitBreaking.register();
+		io.github.jimbozoomer.jugcraft.powerline.JugcraftPowerLines.register();
+		io.github.jimbozoomer.jugcraft.nuclear.JugcraftNuclear.register();
 		io.github.jimbozoomer.jugcraft.energy.CreativeEnergyCellBlock.register();
 		io.github.jimbozoomer.jugcraft.drone.CreativeSupplyCrateBlock.register();
 		PixelHollows.register();
 		RetroTrader.register();
 		AlpineSpawn.register();
+		io.github.jimbozoomer.jugcraft.world.AdamOndiAhman.register();
 		JugcraftRegions.register();
 		JugcraftDimensions.register();
 		JugcraftSeasons.register();
 		new io.github.jimbozoomer.jugcraft.creatures.scary.ScaryMod().onInitialize();
+		io.github.jimbozoomer.jugcraft.creatures.chima.ChimaMod.register();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
 		io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.register();
+		io.github.jimbozoomer.jugcraft.academy.JugcraftAcademy.register();
+		io.github.jimbozoomer.jugcraft.nouveau.JugNouveau.register();
+		io.github.jimbozoomer.jugcraft.menagerie.Menagerie.register();
 		io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls.register();
+		io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.register();
 		FeatureEnabledCondition.register();
 		JugcraftWorldgen.register();
 		JugcraftParties.register();
 		registerMachineStylePack();
+		// Higher-priority data overrides only exist when the optional backpack mod is installed.
+		if (FabricLoader.getInstance().isModLoaded("travelersbackpack")) {
+			FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(container ->
+					ResourceLoader.registerBuiltinPack(id("travelers_backpack"), container,
+							Component.literal("Jugcraft: Backpack Progression"), PackActivationType.ALWAYS_ENABLED));
+		}
 		LOGGER.info("Jugcraft loaded");
 	}
 

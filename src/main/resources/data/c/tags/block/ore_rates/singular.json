@@ -20,6 +20,16 @@
     "jugcraft:thallite_ore",
     "jugcraft:deepslate_thallite_ore",
     "jugcraft:monazite_ore",
-    "jugcraft:deepslate_monazite_ore"
+    "jugcraft:deepslate_monazite_ore",
+    "jugcraft:fluorite_ore",
+    "jugcraft:deepslate_fluorite_ore",
+    "jugcraft:spodumene_ore",
+    "jugcraft:deepslate_spodumene_ore",
+    "jugcraft:vanadium_iron_ore",
+    "jugcraft:deepslate_vanadium_iron_ore",
+    "jugcraft:chromite_ore",
+    "jugcraft:deepslate_chromite_ore",
+    "jugcraft:cobaltite_ore",
+    "jugcraft:deepslate_cobaltite_ore"
   ]
 }

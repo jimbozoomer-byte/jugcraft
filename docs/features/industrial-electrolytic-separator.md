@@ -1,6 +1,6 @@
 # Electrolytic Separator (factory package 2, first slice)
 
-Status: implemented (CI green; pending review). Stacked on the [shared machine foundation](industrial-machine-foundation.md) (PR #312).
+Status: implemented and merged (PR #316, on main through the integration in PR #320). Built on the [shared machine foundation](industrial-machine-foundation.md) (PR #312).
 Proposal issue: none. The first slice of package 2, "Starter steel chemistry", of the owner's [factory implementation plan in PR #302](https://github.com/jimbozoomer-byte/jugcraft/pull/302); the owner asked on 10 October 2026 to begin the next part once package 1 was done. Its construction, quantities, times and output policies are the owner's selections in the [starter gas and acid factory](industrial-starter-gas-and-acid-factory.md) (eighth planning batch, questions 1, 2, 3, 9 and 10).
 Owner: jimbozoomer-byte
 Target milestone and tier: steel-era chemistry, the first machine of the starter gas and acid factory
@@ -75,7 +75,7 @@ JEI shows its two recipes in their own category, with the Separator as the stati
   - with four efficiency cards, the cheapest: 84,000 and 42,000 JE (168 JE/mB);
   - speed cards shorten a batch but cost more energy per batch.
 - **No gain loop.** The Fuel Cell returns 128 JE per mB of hydrogen, at most 76% of the cheapest batch's cost, before counting salt or pumping.
-  - The plan's proposed floor of 256 JE per mB of hydrogen for electrolysis is not needed by this entry form, which has no profile saving. It must be enforced before an expanded or bulk Separator, or a generator bonus, could close the gap.
+  - The plan's proposed floor of 256 JE per mB of hydrogen for electrolysis is not needed by this entry form, which has no profile saving. The data check now enforces it on every expanded or bulk form ([electrolysis floor](industrial-electrolysis-floor.md)).
 - **The Cell's brine now matches**: 400 ticks (102,400 JE) instead of 200 (51,200 JE). The plan proposed this and marked it for review; the owner chose it on 11 October 2026. It is a parity change, not a loop fix: the Cell takes no upgrade cards, so its brine already cost more than its hydrogen returns (32,000 JE). Its products and its water and aluminum recipes are unchanged.
 - **Automation**: outlets push every 4 ticks, at most 1,000 mB per port; an idle Separator does nothing. Normal repeat processing needs no automation chip.
 
@@ -153,8 +153,8 @@ Not applicable: a placed machine, with no world generation, creatures, loot or s
   - the Coal Gasifier with Gas Cleanup and Separation;
   - portable handling.
 - **Not done here**:
-  - the 4×4×6 bulk Separator;
-  - the electrolysis energy floor, needed before any larger form;
+  - the 4×4×6 bulk Separator (since built: the [Bulk Electrolytic Separator](industrial-bulk-electrolytic-separator.md));
+  - the electrolysis energy floor, needed before any larger form (since enforced by the data check: [electrolysis floor](industrial-electrolysis-floor.md));
   - a lye disposal route and its pollution record;
   - the peroxide recipe the art brief mentions;
   - a Jade readout for forms;

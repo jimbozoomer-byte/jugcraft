@@ -10,9 +10,17 @@
     "ArmsRenderStateMixin",
     "ClientLevelSeasonMixin",
     "DiagonalParticlesMixin",
+    "ChannelAccessor",
     "GunFovMixin",
     "GunMouseMixin",
-    "JeiRegistryBootstrapMixin"
+    "JeiRegistryBootstrapMixin",
+    "SoundEngineAccessor",
+    "SoundEngineMixin",
+    "SoundManagerAccessor",
+    "HowitzerPilotHandsMixin",
+    "HowitzerPilotRendererMixin",
+    "NouveauScryPlayerMixin",
+    "JugcraftKeyMappingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -44,7 +44,8 @@ import net.minecraft.world.level.Level;
 
 /**
  * The Arcane Concordance on the client: the Lampwright's Bench screen, the Focus line shown while an instrument is in
- * the main hand, specimen and lantern tooltips, the settings key, the journal ({@link JournalClient}), the two fire
+ * the main hand, specimen and lantern tooltips, the settings key, the journal ({@link JournalClient}), the Spell
+ * Composer ({@link ComposerClient}), the two fire
  * sets as worn ({@link EmberClient}) and the render element Wayfaring's belt and boots are drawn through
  * ({@link WayfaringClient}). Everything here reads state the server sent
  * (the player's own Focus attachment, item components, menu data); nothing here decides an outcome.
@@ -60,12 +61,22 @@ final class ConcordanceClient {
 	static void register() {
 		ConcordanceClientOptions.load();
 		MenuScreens.register(JugcraftConcordance.BENCH_MENU, LampwrightBenchScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalGear.MENU, TransmutationScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.KleinStars.MENU, KleinStarScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalWorkshops.COLLECTOR_MENU, AlchemicalWorkshopScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemicalWorkshops.CONDENSER_MENU, AlchemicalWorkshopScreen::new);
+        AlchemyMachinesClient.register();
+        AlchemyStorageClient.register();
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, Jugcraft.id("concordance_focus"), ConcordanceClient::focusLine);
 		ItemTooltipCallback.EVENT.register(ConcordanceClient::tooltip);
 		CircleClient.register();
 		VigilClient.register();
+		CastPoses.register();
 		WorkerClient.register();
+		JugNouveauClient.register();
+		MenagerieClient.register();
 		JournalClient.register();
+		ComposerClient.register();
 		SignClient.register();
 		EmberClient.register();
 		WayfaringClient.register();
@@ -89,7 +100,7 @@ final class ConcordanceClient {
 		}
 		int focus = ConcordanceProgress.currentFocus(player);
 		Font font = client.font;
-		String text = Component.translatable("screen.jugcraft.concordance.focus.hud", focus, FocusPool.MAX).getString();
+		String text = Component.translatable("screen.jugcraft.concordance.focus.hud", focus, ConcordanceProgress.focus(player).capacity()).getString();
 		graphics.text(font, text, graphics.guiWidth() - font.width(text) - 4, graphics.guiHeight() - 12,
 				focus > 0 ? FOCUS_COLOR : LOW_COLOR);
 	}

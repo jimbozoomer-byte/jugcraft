@@ -50,7 +50,7 @@ JOURNAL = {
     "research.unknown": "%s: not in the loaded rules",
     "research.unknown_count": "%s more entries not yet encountered",
     "or": "; or ",
-    "assay.balance": "Prima Materia held: %s grains",
+    "assay.balance": "Essence held: %s",
     "assay.cap": "(at most %s)",
     "unreadable": "This part of the journal could not be read; the server's log says why",
 }
@@ -65,14 +65,15 @@ CLIENT = {
     "screen.jugcraft.journal.exact_on": "Exact values: shown",
     "screen.jugcraft.journal.exact_off": "Exact values: hidden",
     "screen.jugcraft.journal.help": "Left, Right or the section buttons: sections. Up, Down, Page Up, Page Down: scroll. "
-                                    "R: refresh. X: exact values. Tab: next button. Esc: close.",
+                                    "F6: refresh. X: exact values. Tab: next button. Esc: close.",
     "screen.jugcraft.journal.section": "Section %s of %s: %s",
     "screen.jugcraft.journal.missing_guilib": "The full workspace needs GuiLib; showing the simple journal",
     "screen.jugcraft.concordance.config.exact": "Show exact values",
     "screen.jugcraft.concordance.config.exact.tooltip": "The journal shows the exact figures (counts, limits) beside its "
                                                         "descriptions.",
     "screen.jugcraft.concordance.config.simple_journal": "Simple journal",
-    "screen.jugcraft.concordance.config.simple_journal.tooltip": "Open the plain journal screen even when GuiLib is installed.",
+    "screen.jugcraft.concordance.config.simple_journal.tooltip": "Open the plain journal and Spell Composer screens even "
+                                                                 "when GuiLib is installed.",
 }
 
 
@@ -107,6 +108,7 @@ def codex():
             ("text", "Moving Around",
              "**Left**, **Right** or the section buttons change section; **Up**, **Down**, **Page Up** and "
              "**Page Down** scroll; **R** asks for the journal again; **X** shows or hides exact values; **Tab** "
-             "moves between buttons; **Esc** closes it. With GuiLib installed the journal opens as a full workspace; without it, or with "
+             "moves between buttons; **Compose** opens the Spell Composer for the instrument in your hand; **Esc** "
+             "closes it. With GuiLib installed the journal opens as a full workspace; without it, or with "
              "**Simple journal** chosen in the settings, it opens as a plain screen showing the same."),
         ]}}

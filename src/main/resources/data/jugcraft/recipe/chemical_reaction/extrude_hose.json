@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:polymer_extrusion",
+  "items": [
+    {
+      "ingredient": "jugcraft:rubber",
+      "count": 3
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:flexible_hose",
+      "count": 1
+    }
+  ],
+  "tool": "jugcraft:hose_extrusion_die",
+  "energy_per_tick": 24,
+  "time": 160
+}

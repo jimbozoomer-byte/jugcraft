@@ -899,8 +899,16 @@ class StyleWriter:
 
 def write_classic(root, machines, parts, fluid_blocks):
     """The original look: textured orientable cubes, plus the large machines in tools/large_machines.py."""
+    # New battery hardware shares its authored electrical cabinet in both packs.
+    import battery_expansion
+    battery_machines = {k:v for k,v in machines.items() if k in battery_expansion.BLOCKS}
+    machines = {k:v for k,v in machines.items() if k not in battery_machines}
     from large_machines import ENLARGED, FOOTPRINTS, MODELS, FRONTS
+    from machine_connections import with_sockets, legacy_ports, permanent_ports, write_dynamic_sockets
     out = StyleWriter(root)
+    write_dynamic_sockets(root, MODELS, FOOTPRINTS)
+    if battery_machines:
+        write_steampunk(root, battery_machines, {}, {})
     for machine, info in machines.items():
         if machine in ENLARGED:
             # The compact look (copies built before batch 44) is the old orientable cube.
@@ -914,10 +922,11 @@ def write_classic(root, machines, parts, fluid_blocks):
                 })
         if machine in FOOTPRINTS:
             front = FRONTS[machine]
-            textures = {name: rid(f"block/{name}") for name in texture_names(MODELS[machine])}
+            connected_elements = with_sockets(MODELS[machine], permanent_ports(machine, FOOTPRINTS[machine]))
+            textures = {name: rid(f"block/{name}") for name in texture_names(connected_elements)}
             textures["front"] = rid(f"block/{front}")
             textures["particle"] = rid("block/machine_side")
-            sliced = split_model(machine, MODELS[machine], FOOTPRINTS[machine])
+            sliced = split_model(machine, connected_elements, FOOTPRINTS[machine])
             for index, elements in enumerate(sliced):
                 out.model(f"{machine}_part{index}", {"ambientocclusion": False, "textures": textures, "elements": elements})
                 if info["lit"]:
@@ -933,7 +942,7 @@ def write_classic(root, machines, parts, fluid_blocks):
             extras = ITEM_EXTRAS.get(machine, [])
             out.item_model(machine, {"parent": "minecraft:block/block",
                                      "textures": {**textures, **{name: rid(f"block/{name}") for name in texture_names(extras)}},
-                                     "elements": scaled_elements(MODELS[machine] + extras)})
+                                     "elements": scaled_elements(connected_elements + extras)})
             out.item(machine, rid(f"item/{machine}"))
             continue
         for suffix, front in (("", "front"), ("_on", "front_on")):
@@ -954,6 +963,12 @@ def write_classic(root, machines, parts, fluid_blocks):
         out.item(part, rid(f"block/{part}"))
 
     for block in fluid_blocks:
+        if block in ("insulated_fluid_tank", "vacuum_insulated_tank"):
+            from cryogenic_models import tank_model
+            out.single_variant(block, rid(f"block/{block}"))
+            out.model(block, tank_model(block == "vacuum_insulated_tank"))
+            out.item(block, rid(f"block/{block}"))
+            continue
         out.single_variant(block, rid(f"block/{block}"))
         out.model(block, {
             "parent": "minecraft:block/cube_bottom_top",
@@ -966,19 +981,29 @@ def write_steampunk(root, machines, parts, fluid_blocks):
     """Detailed models for everything, from tools/steampunk_models.py."""
     from large_machines import ENLARGED, FOOTPRINTS
     from steampunk_models import COMPACT, MODELS, GLOW, CUBES, PARTICLE
+    from machine_connections import with_sockets, legacy_ports, permanent_ports, write_dynamic_sockets
     out = StyleWriter(root)
+    write_dynamic_sockets(root, MODELS, FOOTPRINTS)
 
-    def textures_for(elements):
+    from large_machines import FRONTS
+
+    def textures_for(elements, machine=None):
         textures = {name: rid(f"block/{name}") for name in texture_names(elements)}
         textures["particle"] = rid(f"block/{PARTICLE}")
+        # Models drawn with the machine's own front ("#front": the nuclear fuel machines) take it from FRONTS.
+        uses_front = any(v is not None and v.rstrip("!") == "#front"
+                         for item in elements
+                         for v in (unpack(item)[2].values() if isinstance(unpack(item)[2], dict) else [unpack(item)[2]]))
+        if uses_front and machine in FRONTS:
+            textures["front"] = rid(f"block/{FRONTS[machine]}")
         return textures
 
     def glow_override(elements):
         return {name: rid(f"block/{GLOW[name]}") for name in texture_names(elements) if name in GLOW}
 
     for machine, info in machines.items():
-        elements = MODELS[machine]
-        textures = textures_for(elements)
+        elements = with_sockets(MODELS[machine], permanent_ports(machine, FOOTPRINTS.get(machine, [(0, 0, 0)])))
+        textures = textures_for(elements, machine)
         lit = info["lit"] and bool(glow_override(elements))
         if machine in FOOTPRINTS:
             sliced = split_model(machine, elements, FOOTPRINTS[machine])
@@ -992,7 +1017,7 @@ def write_steampunk(root, machines, parts, fluid_blocks):
             if machine in ENLARGED:
                 # Copies built before batch 44 keep the old one-block model; it glows only if the big one does, since
                 # both share the LIT state.
-                compact = COMPACT[machine]
+                compact = with_sockets(COMPACT[machine], legacy_ports(machine, [(0, 0, 0)]))
                 out.model(machine, {"parent": "minecraft:block/block", "textures": textures_for(compact),
                                     "elements": slice_model(machine, compact, [(0, 0, 0)])[0]})
                 out.model(f"{machine}_on", {"parent": rid(f"block/{machine}"), "textures": glow_override(compact)}
@@ -1003,7 +1028,7 @@ def write_steampunk(root, machines, parts, fluid_blocks):
             # Parts a renderer draws (giant_models.ITEM_EXTRAS: the sawmill's blade) stand in the item icon too.
             from steampunk_models import ITEM_EXTRAS
             item_elements = elements + ITEM_EXTRAS.get(machine, [])
-            out.item_model(machine, {"parent": "minecraft:block/block", "textures": textures_for(item_elements),
+            out.item_model(machine, {"parent": "minecraft:block/block", "textures": textures_for(item_elements, machine),
                                      "elements": scaled_elements(item_elements)})
             out.item(machine, rid(f"item/{machine}"))
             continue
@@ -1020,7 +1045,15 @@ def write_steampunk(root, machines, parts, fluid_blocks):
         out.item(part, rid(f"block/{part}"))
 
     for block in fluid_blocks:
-        elements = MODELS[block]
+        if block in ("insulated_fluid_tank", "vacuum_insulated_tank"):
+            from cryogenic_models import tank_model
+            out.single_variant(block, rid(f"block/{block}"))
+            out.model(block, tank_model(block == "vacuum_insulated_tank"))
+            out.item(block, rid(f"block/{block}"))
+            continue
+        from machine_connections import exterior_ports
+        sockets = legacy_ports(block, [(0, 0, 0)]) or [(p, f, "fluid") for p, f, _ in exterior_ports()]
+        elements = with_sockets(MODELS[block], sockets)
         out.single_variant(block, rid(f"block/{block}"))
         out.model(block, {"parent": "minecraft:block/block", "textures": textures_for(elements),
                           "elements": slice_model(block, elements, [(0, 0, 0)])[0]})

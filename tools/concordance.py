@@ -71,7 +71,7 @@ RESOURCES = {
     "bound_will": {"name": "Bound Will", "kind": "supernatural identity", "unit": "record",
                    "summary": "A record of an agreement with a named spirit or construct: an obligation with an "
                               "identity, never an anonymous fluid."},
-    "prima_materia": {"name": "Prima Materia", "kind": "equivalence value", "unit": "grain",
+    "prima_materia": {"name": "Prima Materia", "kind": "equivalence value", "unit": "essence",
                       "summary": "The exact value assigned to an eligible mundane material for transmutation, rounded "
                                  "down and never created from nothing."},
 }
@@ -348,6 +348,9 @@ CONVERSIONS = {
 # The ten common effect operations (Java: concordance/effect/EffectKind.java): what each acts on and the work units
 # one application costs, the unit composed spells are capped in.
 EFFECT_KINDS = {
+    "nouveau": {"on": "any", "work": 3, "name": "Jug Nouveau working"},
+    "nouveau_block": {"on": "block", "work": 3, "name": "Jug Nouveau world working"},
+    "nouveau_creature": {"on": "creature", "work": 3, "name": "Jug Nouveau creature working"},
     "damage": {"on": "creature", "work": 1, "name": "Damage"},
     "restoration": {"on": "creature", "work": 1, "name": "Restoration"},
     "movement": {"on": "creature", "work": 1, "name": "Movement"},
@@ -372,7 +375,7 @@ HARVESTABLE = [{"id": "#minecraft:small_flowers", "required": False}, "minecraft
                "minecraft:pumpkin", "minecraft:melon"]
 # Absolute limits of the grammar (Java: concordance/compose/Grammar.java): data can only set lower ones.
 COMPOSE_LIMITS = {"MAX_TEXT": 256, "MAX_NAMES": 24, "MAX_OPERATIONS": 3, "MAX_MODIFIERS": 2, "MAX_DEPTH": 2,
-                  "MAX_BRANCHES": 2, "MAX_RANGE": 32, "MAX_RADIUS": 6, "MAX_TARGETS": 16, "MAX_WORK": 256,
+                  "MAX_BRANCHES": 2, "MAX_RANGE": 32, "MAX_RADIUS": 6, "MAX_TARGETS": 64, "MAX_WORK": 384,
                   "MAX_CAPACITY": 64, "MAX_PULSES": 5, "MIN_INTERVAL": 10, "MAX_INTERVAL": 200,
                   "MAX_COMPONENT_COST": 16, "MAX_MODIFIER_AMOUNT": 200, "MIN_COOLDOWN": 10, "MAX_COOLDOWN": 200}
 EFFECT_LIMITS = {"MAX_MAGNITUDE": 40, "MAX_DURATION": 2400, "MAX_AMPLIFIER": 4, "MAX_PUSH": 20}
@@ -451,6 +454,8 @@ import concordance_progression as progression  # noqa: E402
 import concordance_spire as spire  # noqa: E402
 # Roadmap step 26 (tools/concordance_journal.py): the Concordance Journal's words and codex page.
 import concordance_journal as journal  # noqa: E402
+# Chunk A (tools/concordance_composer.py): the Spell Composer's words.
+import concordance_composer as composer  # noqa: E402
 # Roadmap step 27 (tools/concordance_signs.py): signs of what really happened, the warnings' sounds and the codex page.
 import concordance_signs as signs  # noqa: E402
 ITEMS.update(spire.ITEMS)
@@ -468,6 +473,27 @@ INVOCATIONS.update(ember.INVOCATIONS)
 # Wayfaring (tools/concordance_trinkets.py): the owner's belt, boots and charms, worn once Relic Lore is understood.
 import concordance_trinkets as trinkets  # noqa: E402
 ITEMS.update(trinkets.ITEMS)
+import concordance_alchemical_gear as alchemical_gear
+ITEMS.update(alchemical_gear.ITEMS)
+import concordance_dark_matter as dark_matter
+ITEMS.update(dark_matter.ITEMS)
+import concordance_elemental_gear as elemental_gear
+ITEMS.update(elemental_gear.ITEMS)
+import concordance_workshops as workshops
+import jug_nouveau
+ITEMS.update(jug_nouveau.ITEMS)
+BLOCKS.update(jug_nouveau.BLOCKS)
+BLOCKS.update(workshops.BLOCKS)
+import concordance_ee_equipment as ee_equipment
+import concordance_ee_machines as ee_machines
+import concordance_ee_storage as ee_storage
+import concordance_ee_artifacts as ee_artifacts
+import concordance_ee_expansion as ee_expansion
+EE_MODULES = (ee_equipment, ee_machines, ee_storage, ee_artifacts, ee_expansion)
+for _module in EE_MODULES:
+    ITEMS.update({name: {**info, "tooltip": _module.TOOLTIPS[name]}
+                  for name, info in getattr(_module, "ITEMS", {}).items()})
+    BLOCKS.update(getattr(_module, "BLOCKS", {}))
 BLOCKS.update(trinkets.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
@@ -566,6 +592,10 @@ COMPONENTS = {
              "name": "Mend", "text": "Lanternward's healing light."},
 }
 COMPONENTS.update(ember.COMPONENTS)
+import nouveau_spells
+_nouveau_research, _nouveau_components = nouveau_spells.registry_definitions()
+RESEARCH.update(_nouveau_research)
+COMPONENTS.update(_nouveau_components)
 COMPONENT_DATA_KEYS = ("slot", "requires", "authored", "capacity", "focus", "delivery", "selection", "operation",
                        "modifier", "termination")
 for _component in COMPONENTS.values():
@@ -577,11 +607,13 @@ for _component in COMPONENTS.values():
 # gestures; the composition decides everything else.
 COMPOSED_CAST_SECONDS = 0.5
 COMPOSED_BASE_COOLDOWN_SECONDS = 0.5
-COMPOSE_RATE_TICKS = 20  # the most often a player may check or inscribe a composition
+COMPOSE_RATE_TICKS = 20  # the most often a player may check, inscribe or tune a composition, by command or screen
+                         # (Java: Composing.COMPOSE_RATE_TICKS)
 # Example compositions for the codex; the game tests compile the same texts.
 COMPOSE_EXAMPLES = {
     "touch struck light": "Light where you touch",
     "here struck ward": "Ward yourself",
+    "touch struck ward": "Ward the friend you touch: soaking 4 health in a lair fight earns your share",
     "ray struck sear then here creatures dazzle": "Sear what you aim at, then dazzle what stands round it",
 }
 
@@ -821,7 +853,8 @@ def advancement_ids():
 def spell_opt_outs():
     import arms
     import arms_variants
-    return sorted(set(arms.items()) | set(arms_variants.items())
+    return sorted(set(arms.items()) | set(arms_variants.items()) | set(dark_matter.TOOLS)
+                  | set(ee_equipment.TOOLS) | set(ee_artifacts.TOOLS)
                   | {"power_katana", "power_bow", "ronin_katana", "carnival_mallet", "pinata_stick"})
 
 
@@ -997,6 +1030,7 @@ def codex():
         **celestial.codex(),
         **crimson.codex(),
         **workers.codex(),
+        **jug_nouveau.codex(),
         **logistics.codex(),
         **artifice.codex(),
         **relics.codex(),
@@ -1007,6 +1041,11 @@ def codex():
         **spire.codex(),
         **ember.codex(),
         **trinkets.codex(),
+        **alchemical_gear.codex(),
+        **dark_matter.codex(),
+        **ee_equipment.codex(), **ee_machines.codex(), **ee_storage.codex(), **ee_artifacts.codex(), **ee_expansion.codex(),
+        **elemental_gear.codex(),
+        **workshops.codex(),
         **journal.codex(),
         **signs.codex(),
     }
@@ -1038,11 +1077,14 @@ def component_numbers(info):
             return f"Absorbs up to {4 * (amplifier + 1)} damage for {seconds(op['duration'])} seconds."
         if effect == "status":
             return f"Level {op['magnitude'] + 1} for {seconds(op['duration'])} seconds."
-        return f"Lasts {seconds(op['duration'])} seconds."
+        return f"Lasts {seconds(op['duration'])} seconds." if op.get("duration") else "Applies once."
     if "modifier" in info:
         mod = info["modifier"]
-        unit = "%" if mod["aspect"] in ("magnitude", "duration") else " blocks"
-        return f"+{mod['amount']}{unit} {ASPECT_NAMES[mod['aspect']]}."
+        aspect=mod["aspect"]
+        if aspect in {"dampen", "duration_down"}: return f"Reduces {'strength' if aspect == 'dampen' else 'duration'} by {mod['amount']}%."
+        if aspect not in ASPECT_NAMES: return f"{aspect.replace('_', ' ').title()} tier {mod['amount']}."
+        unit = "%" if aspect in ("magnitude", "duration") else " blocks"
+        return f"+{mod['amount']}{unit} {ASPECT_NAMES[aspect]}."
     term = info["termination"]
     return f"{term['pulses']} times, every {seconds(term['interval'])} seconds."
 
@@ -1072,9 +1114,14 @@ def composition_codex():
                  f"Join a **modifier** to the word it changes with **+**, and write **then** before a second spell "
                  f"that starts where the first landed."),
                 ("text", "Writing and Inscribing",
-                 "Hold an instrument and type `/jugcraft concordance compose check` and the spell to see what it "
-                 "does and costs, or exactly why it cannot work. `compose inscribe` writes it on the instrument and "
-                 "it appears on your spell bar; `compose show` reads it back and `compose clear` wipes it."),
+                 "Hold an instrument and open the **Spell Composer**: press **J** for your journal and choose "
+                 "**Compose** (or bind its own key in Controls). Choose words from those you know, or type the "
+                 "spell; the composer checks it as you go and says what it does and costs, or exactly why it cannot "
+                 "work. **Inscribe** writes it on the instrument and it appears on your spell bar."),
+                ("text", "By Command",
+                 "The same can be done in chat: `/jugcraft concordance compose check` and the spell explains it, "
+                 "`compose inscribe` writes it on the instrument, `compose show` reads it back and `compose clear` "
+                 "wipes it. The composer and the commands give the same answer."),
                 ("text", "Examples", examples),
                 ("text", "Limits",
                  f"The Initiate's Wand holds {wand['capacity']} capacity of words. A spell on it reaches at most "
@@ -1099,6 +1146,7 @@ def composition_codex():
 
 
 CATEGORIES = {
+    "nouveau": {"name":"Jug Nouveau", "icon":"jugcraft:nouveau_annotated_codex", "sort":30, "description":"The complete magical workshop: glyphs, creatures, Source and exploration"},
     "foundations": {"name": "Foundations", "icon": "minecraft:amethyst_shard", "sort": 0,
                     "description": "The Concordance, its Principles and its resources"},
     "radiance": {"name": "Radiance", "icon": "minecraft:glowstone_dust", "sort": 1,
@@ -1413,8 +1461,8 @@ def advancements(data, write, lang):
     for research, info in RESEARCH.items():
         if research == "first_light":
             continue
-        requirement = info["requires"][0]
-        parent = research_advancement(requirement["research"].split(":")[1], requirement["state"])
+        requirement = info["requires"][0] if info["requires"] else None
+        parent = research_advancement(requirement["research"].split(":")[1], requirement["state"]) if requirement else "concordance"
         for state in RESEARCH_STAGES:
             if state not in info["states"]:
                 continue
@@ -1465,10 +1513,10 @@ SOUND_EVENTS.update(ember.SOUND_EVENTS)
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
     (tools/concordance_ember.py SOUND_FILES), one picked at random."""
-    return {event: {"subtitle": f"subtitles.{MOD}.{event}",
+    return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
                     "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
                                for name in ember.SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
-            for event in SOUND_EVENTS}
+            for event in SOUND_EVENTS}, **ee_artifacts.sounds()}
 
 
 MESSAGES = {
@@ -1580,6 +1628,11 @@ TOOLTIPS = {
     **artifice.TOOLTIPS,
     **relics.TOOLTIPS,
     **equivalence.TOOLTIPS,
+    **alchemical_gear.TOOLTIPS,
+    **dark_matter.TOOLTIPS,
+    **ee_equipment.TOOLTIPS, **ee_machines.TOOLTIPS, **ee_storage.TOOLTIPS, **ee_artifacts.TOOLTIPS, **ee_expansion.TOOLTIPS,
+    **elemental_gear.TOOLTIPS,
+    **workshops.TOOLTIPS,
     **hexes.TOOLTIPS,
     **conclave.TOOLTIPS,
     **spire.TOOLTIPS,
@@ -1624,6 +1677,8 @@ COMPOSE_TEXT = {
     "problem.branch_delivery": "A branch starts where the spell before it landed: begin it with here, not %s",
     "problem.no_instrument": "Hold a composing instrument in your main hand",
     "problem.too_fast": "Wait a moment before composing again",
+    "problem.changed": "Your instrument or the Concordance's rules changed since this was checked: nothing was written",
+    "more_problems": "And %s more problems",
     "explain.delivery.here": "%s: lands where you stand",
     "explain.delivery.here_then": "%s: lands where the spell before it landed",
     "explain.delivery.touch": "%s: lands on the first creature or surface within %s blocks",
@@ -1776,7 +1831,14 @@ def write_all(write, assets, data, lang, condition, self_drop):
     spire.write_all(write, assets, data, lang, condition, self_drop)
     ember.write_all(write, assets, data, lang, condition, self_drop)
     trinkets.write_all(write, assets, data, lang, condition, self_drop)
+    alchemical_gear.write_all(write, assets, data, lang, condition, self_drop)
+    dark_matter.write_all(write, assets, data, lang, condition, self_drop)
+    elemental_gear.write_all(write, assets, data, lang, condition, self_drop)
+    workshops.write_all(write, assets, data, lang, condition, self_drop)
+    for module in EE_MODULES:
+        module.write_all(write, assets, data, lang, condition, self_drop)
     journal.lang_entries(lang)
+    composer.lang_entries(lang)
     signs.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
@@ -1932,6 +1994,7 @@ def write_data(write, res):
 
 
 def tags(tags):
+    tags.add("block", "minecraft:mineable/axe", "jugcraft:bookwyrm_lectern")
     for ref in SPECIMENS:
         tags.add("item", SPECIMEN_TAG, ref)
     for tag in SPECIMEN_TAGS:
@@ -1951,6 +2014,12 @@ def tags(tags):
     spire.tags(tags)
     ember.tags(tags)
     trinkets.tags(tags)
+    alchemical_gear.tags(tags)
+    dark_matter.tags(tags)
+    elemental_gear.tags(tags)
+    workshops.tags(tags)
+    for module in EE_MODULES:
+        module.tags(tags)
     for item in INSTRUMENTS:
         tags.add("item", INSTRUMENT_TAG, rid(item))
     for item in LUMINOUS_MATTER:

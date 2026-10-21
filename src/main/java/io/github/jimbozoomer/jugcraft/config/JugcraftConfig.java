@@ -21,10 +21,10 @@ public final class JugcraftConfig {
 	/** Every feature switch. Keep in sync with FEATURES in tools/materials.py. */
 	public static final List<String> FEATURES = List.of(
 			"tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
-			"salt", "phosphate", "lithium", "rare_earths", "sulfur", "silicon", "crude_oil", "machines",
+			"salt", "phosphate", "lithium", "rare_earths", "fluorite", "mineral_sands", "vanadium", "sulfur", "silicon", "crude_oil", "machines",
 			"deposits", "explosives", "agriculture", "parties", "drones",
 			"pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections", "raiders",
-			"concordance", "guns");
+			"concordance", "guns", "adam_ondi_ahman");
 
 	/**
 	 * Other server options, with their defaults. {@code carving.free_draw}: players may carve any face into a
@@ -34,7 +34,7 @@ public final class JugcraftConfig {
 	 * protection and protection mods judge as that owner; false (the default) makes it wait for its owner
 	 * (concordance/Authority).
 	 */
-	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false);
+	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false, "vanadium.legacy_iron_recipes", false);
 
 	/**
 	 * Text options, with their defaults.
@@ -67,9 +67,13 @@ public final class JugcraftConfig {
 	 * The lairs' bosses: {@code lairs.boss_health} and {@code lairs.boss_damage} multiply their health and their blows
 	 * (0.25 to 4), and {@code lairs.event_loot} ({@code on} or {@code off}) gives each participant the Halloween event's
 	 * extra roll (see {@code lair/vesperine/VesperineLoot}).</li>
+	 * <li>Adam-ondi-Ahman (see {@code world/AdamOndiAhman}): {@code adam_ondi_ahman.start} ({@code on} or {@code off}) gives
+	 * every new world a valley near its start; elsewhere one cell in {@code adam_ondi_ahman.chance} (0 to 1) of every
+	 * {@code adam_ondi_ahman.spacing} blocks square (1024 to 16384) may hold one.</li>
 	 * </ul>
 	 */
     public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
+            Map.entry("academy.active", "on"),
             Map.entry("companions.paths_per_tick", "8"), Map.entry("companions.searches_per_tick", "4"),
 			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
 			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"),
@@ -85,7 +89,9 @@ public final class JugcraftConfig {
 			Map.entry("raiders.walkers", "on"), Map.entry("raiders.blimps", "on"),
 			Map.entry("lairs.instances", "8"), Map.entry("lairs.party_size", "4"), Map.entry("lairs.gate_seconds", "60"),
 			Map.entry("lairs.off_season", "on"), Map.entry("lairs.boss_health", "1.0"), Map.entry("lairs.boss_damage", "1.0"),
-			Map.entry("lairs.event_loot", "on"));
+			Map.entry("lairs.event_loot", "on"),
+			Map.entry("adam_ondi_ahman.start", "on"), Map.entry("adam_ondi_ahman.spacing", "3072"),
+			Map.entry("adam_ondi_ahman.chance", "0.5"));
 
 	private static final String FILE_NAME = "jugcraft.properties";
 	private static final Map<String, Boolean> ENABLED = new LinkedHashMap<>();
@@ -97,6 +103,14 @@ public final class JugcraftConfig {
 
 	public static boolean isFeatureEnabled(String feature) {
 		return ENABLED.getOrDefault(feature, false);
+	}
+
+	/** Switches a feature on or off while the server runs (game tests); the file is not changed. */
+	public static void setFeatureEnabled(String feature, boolean enabled) {
+		if (!FEATURES.contains(feature)) {
+			throw new IllegalArgumentException("No Jugcraft feature " + feature);
+		}
+		ENABLED.put(feature, enabled);
 	}
 
 	/** A server option from {@link #OPTIONS}, as set in the file (its default before {@link #load}). */
@@ -172,7 +186,8 @@ public final class JugcraftConfig {
 					+ " alpine_spawn.start on or off: new worlds start in the Alpine Spawn biome;"
 					+ " biomes.region_size in blocks and biomes.region_share from 0 to 1: Jugcraft regions with the new biomes;"
 					+ " town.protection on or off; raiders.raids on or off, raiders.grace_days and raiders.interval_days in game days,"
-					+ " raiders.walkers and raiders.blimps on or off).");
+					+ " raiders.walkers and raiders.blimps on or off; adam_ondi_ahman.start on or off: a valley near each new world's start;"
+					+ " adam_ondi_ahman.spacing in blocks and adam_ondi_ahman.chance from 0 to 1: the rare valleys elsewhere).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

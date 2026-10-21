@@ -1,5 +1,18 @@
 {
   "type": "minecraft:random_selector",
   "default": "jugcraft:desert_acacia_checked",
-  "features": []
+  "features": [
+    {
+      "chance": 0.3,
+      "feature": "jugcraft:mallee_checked"
+    },
+    {
+      "chance": 0.14285714285714288,
+      "feature": "jugcraft:baobab_checked"
+    },
+    {
+      "chance": 0.16666666666666669,
+      "feature": "jugcraft:giant_baobab_checked"
+    }
+  ]
 }

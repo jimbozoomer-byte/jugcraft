@@ -74,6 +74,8 @@ public class DieselWalker extends Entity {
 	private static final EntityDataAccessor<Integer> PUNCHED_AT = SynchedEntityData.defineId(DieselWalker.class, EntityDataSerializers.INT);
 
 	private int fuel;
+	public io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout fitout = io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout.STANDARD;
+	private int fuelPayments;
 	private int forward;
 	private int turn;
 	private int jump;
@@ -182,11 +184,16 @@ public class DieselWalker extends Entity {
 			gait.tick(this);
 		}
 		if (level().isClientSide() && drilling() && tickCount % 2 == 0) {
-			double yaw = Math.toRadians(getYRot());
-			double x = getX() - 1.3 * Math.cos(yaw) - 2.0 * Math.sin(yaw);
-			double z = getZ() - 1.3 * Math.sin(yaw) + 2.0 * Math.cos(yaw);
-			level().addParticle(ParticleTypes.SMOKE, x, getY() + 1.9, z, 0, 0.02, 0);
+			workingEffects();
 		}
+	}
+
+	/** Client side, every other tick while its tool works: the Diesel Walker's drill smokes. */
+	protected void workingEffects() {
+		double yaw = Math.toRadians(getYRot());
+		double x = getX() - 1.3 * Math.cos(yaw) - 2.0 * Math.sin(yaw);
+		double z = getZ() - 1.3 * Math.sin(yaw) + 2.0 * Math.cos(yaw);
+		level().addParticle(ParticleTypes.SMOKE, x, getY() + 1.9, z, 0, 0.02, 0);
 	}
 
 	private void walk(ServerLevel level) {
@@ -201,12 +208,13 @@ public class DieselWalker extends Entity {
 		double yaw = Math.toRadians(getYRot());
 		Vec3 heading = new Vec3(-Math.sin(yaw), 0, Math.cos(yaw));
 		double speed = !fuelled ? 0 : f > 0 ? WALK_SPEED : f < 0 ? -WALK_SPEED / 2 : 0;
+		speed *= fitout.speed();
 		Vec3 motion = getDeltaMovement();
 		double vy = motion.y - 0.08;
 		if (onGround()) {
 			vy = Math.max(vy, -0.1);
-			if (fuelled && listening && jump > 0) {
-				vy = JUMP;
+			if (fuelled && leap(listening && jump > 0)) {
+				vy = leapSpeed();
 			} else if (speed != 0 && horizontalCollision) {
 				vy = 0.45; // Step up one block.
 			}
@@ -218,7 +226,8 @@ public class DieselWalker extends Entity {
 			passenger.resetFallDistance();
 		}
 
-		boolean drilled = listening && drill > 0 && fuelled && pilot instanceof ServerPlayer player && useHeld(level, player);
+		boolean drilled = listening && fuelled && pilot instanceof ServerPlayer player
+				&& operateTool(level, player, drill > 0, t != 0);
 		if (!drilled) {
 			stopDrilling(level);
 		}
@@ -233,7 +242,7 @@ public class DieselWalker extends Entity {
 
 		boolean working = speed != 0 || t != 0 || drilled;
 		if (working && fuelled && tickCount % (20 / FUEL_PER_SECOND) == 0) {
-			fuel--;
+			fuel = Math.max(0, fuel - fitout.fuelCost(++fuelPayments));
 			if (fuel == 0 && pilot instanceof Player player) {
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.walker.empty"));
 			}
@@ -250,8 +259,26 @@ public class DieselWalker extends Entity {
 	}
 
 	/**
-	 * One tick of the pilot holding use: the Diesel Walker drills. Returns whether it is drilling (which burns fuel and
-	 * spins the bit); a walker with another tool overrides this.
+	 * Whether it leaves the ground this tick, called each tick it stands fuelled on the ground, with whether the pilot
+	 * holds jump: the Diesel Walker leaps at once. A walker that crouches first overrides this.
+	 */
+	protected boolean leap(boolean jumpHeld) {
+		return jumpHeld;
+	}
+
+	/** How fast it leaves the ground when it leaps, in blocks a tick. */
+	protected double leapSpeed() {
+		return JUMP;
+	}
+
+	/** Tools normally work only while use is held; artillery can track a target before the trigger is pressed. */
+	protected boolean operateTool(ServerLevel level, ServerPlayer pilot, boolean use, boolean manualTurn) {
+		return use && useHeld(level, pilot);
+	}
+
+	/**
+	 * One tick of the pilot holding use: the Diesel Walker drills. Returns whether its tool is working (which burns fuel,
+	 * spins the bit and calls {@link #workingEffects()}); a walker with another tool overrides this.
 	 */
 	protected boolean useHeld(ServerLevel level, ServerPlayer pilot) {
 		return drill(level, pilot);
@@ -367,8 +394,8 @@ public class DieselWalker extends Entity {
 			return true;
 		}
 		damage += amount;
-		if (damage >= health()) {
-			spawnAtLocation(level, dropStack());
+		if (damage >= health() * fitout.toughness()) {
+			spawnAtLocation(level, fitout.write(dropStack(), fuel));
 			discard();
 		}
 		return true;
@@ -391,10 +418,13 @@ public class DieselWalker extends Entity {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		fuel = Mth.clamp(input.getInt("fuel").orElse(0), 0, FUEL_TANK);
+		fitout = new io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout(input.getIntOr("BayArmor", 0), input.getIntOr("BayDrive", 0));
+		fuelPayments = input.getIntOr("BayPayments", 0);
 	}
 
 	@Override
 	protected void addAdditionalSaveData(ValueOutput output) {
 		output.putInt("fuel", fuel);
+		output.putInt("BayArmor", fitout.armor()); output.putInt("BayDrive", fitout.drive()); output.putInt("BayPayments", fuelPayments);
 	}
 }

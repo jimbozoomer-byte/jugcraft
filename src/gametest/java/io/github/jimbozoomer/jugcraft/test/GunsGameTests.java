@@ -61,7 +61,7 @@ public class GunsGameTests {
 			helper.assertTrue(JugcraftGuns.ammo(spec) != null, name + " fires " + spec.ammo() + ", which is not registered");
 			helper.assertTrue(new ItemStack(JugcraftGuns.GUNS.get(name)).getMaxStackSize() == 1, name + " stacks");
 		});
-		helper.assertTrue(JugcraftGuns.GUNS.size() == 54 && JugcraftGuns.ROUNDS.size() == 4, "Not fifty-four guns and four rounds");
+		helper.assertTrue(JugcraftGuns.GUNS.size() == 84 && JugcraftGuns.ROUNDS.size() == 4, "Not eighty-four guns and four rounds");
 		helper.assertTrue(JugcraftGuns.ATTACHMENT_ITEMS.keySet().equals(JugcraftGuns.ATTACHMENTS.keySet())
 				&& JugcraftGuns.ATTACHMENTS.size() == 20, "Not twenty attachments, each with its item");
 		JugcraftGuns.ACCEPTS.forEach((gun, takes) -> helper.assertTrue(JugcraftGuns.GUNS.containsKey(gun)
@@ -614,6 +614,17 @@ public class GunsGameTests {
 	 * damage, and cannot stab again until its time has passed; a bare carbine cannot stab, and the bayonet does not reach
 	 * a pig seven blocks off.
 	 */
+	@GameTest
+	public void eachBayonetStabsHarderThanTheTierBelow(GameTestHelper helper) {
+		String[] tiers = {"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet"};
+		for (int i = 1; i < tiers.length; i++) {
+			float lower = JugcraftGuns.ATTACHMENTS.get(tiers[i - 1]).stab();
+			float higher = JugcraftGuns.ATTACHMENTS.get(tiers[i]).stab();
+			helper.assertTrue(higher > lower, tiers[i] + " stabs for " + higher + ", not more than " + tiers[i - 1] + "'s " + lower);
+		}
+		helper.succeed();
+	}
+
 	@GameTest(structure = ARENA, maxTicks = 40)
 	public void bayonetStabsWithinReach(GameTestHelper helper) {
 		floor(helper);

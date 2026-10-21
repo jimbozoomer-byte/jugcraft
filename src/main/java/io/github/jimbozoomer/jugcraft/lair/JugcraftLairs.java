@@ -23,9 +23,12 @@ import net.minecraft.world.level.material.PushReaction;
 
 /**
  * The lairs' registrations (docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
- * docs/features/cinder-kiln.md): the lair-only blocks (unbreakable, no items, no drops), the Mourning Wreath and the Death
- * Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Mist Gate, and the lairs' events, rules,
- * rituals and commands. Registered whatever the feature switch says, so saved worlds keep them; the switch
+ * docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md,
+ * docs/features/foundry-trench.md, docs/features/moonlit-ring.md, docs/features/cydonian-sanctum.md): the lair-only blocks (unbreakable, no items, no
+ * drops), the Mourning Wreath and the Death Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal,
+ * the Hag Stone, the Writ of Exhumation, Sealed Orders, the Howling Totem, the Altar Keystone, the Mist Gate, and the lairs' events, rules,
+ * rituals and commands. Registered whatever the
+ * feature switch says, so saved worlds keep them; the switch
  * ({@value #FEATURE}) stops the rituals.
  */
 public final class JugcraftLairs {
@@ -61,12 +64,34 @@ public final class JugcraftLairs {
 	public static Block MOLTEN_SLAG;
 	public static Block TROUGH_STONE;
 	public static Block SLUICE_GATE;
+	public static Block FEN_LAMP;
+	public static Block NAME_STONE;
+	public static Block GRAVE_SEAL;
+	public static Block ARCHIVE_LECTERN;
+	public static Block PHYLACTERY;
+	public static Block PYLON_LATTICE;
+	public static Block PYLON_CROWN;
+	public static Block DISCHARGE_BREAKER;
+	public static Block GROUND_TERMINAL;
+	public static Block MOONWOOD_LEAVES;
+	public static Block WARDEN_BELL;
+	public static Block RAKED_TURF;
+	public static Block RED_MIST;
+	public static Block STAR_STONE;
+	public static Block STAR_DIAL;
+	public static Block STAR_DOOR;
+	public static Block DUST_VENT;
 	public static Block MOURNING_WREATH;
 	public static Item MOURNING_WREATH_ITEM;
 	public static Item DEATH_KNELL;
 	public static Item CURSED_SPINDLE;
 	public static Item FROST_HORN;
 	public static Item KILN_SEAL;
+	public static Item HAG_STONE;
+	public static Item EXHUMATION_WRIT;
+	public static Item SEALED_ORDERS;
+	public static Item HOWLING_TOTEM;
+	public static Item ALTAR_KEYSTONE;
 	public static EntityType<MistGateEntity> MIST_GATE;
 
 	private JugcraftLairs() {
@@ -77,7 +102,7 @@ public final class JugcraftLairs {
 		BLIGHTED_SOIL = fixture("blighted_soil", Block::new, MapColor.COLOR_BLACK, SoundType.ROOTED_DIRT, 0, Fit.SOLID);
 		BLACK_WHEAT = fixture("black_wheat", p -> new LairPlantBlock(14, p), MapColor.COLOR_BLACK, SoundType.CROP, 0, Fit.PASSABLE);
 		MOWN_STUBBLE = fixture("mown_stubble", p -> new LairPlantBlock(4, p), MapColor.TERRACOTTA_BROWN, SoundType.CROP, 0, Fit.PASSABLE);
-		LAIR_BRAZIER = fixture("lair_brazier", LairBrazierBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -1, Fit.SOLID);
+		LAIR_BRAZIER = fixture("lair_brazier", LairBrazierBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -12, Fit.SOLID);
 		LAIR_MOON = fixture("lair_moon", LairMoonBlock::new, MapColor.GOLD, SoundType.STONE, 15, Fit.SOLID);
 		LAIR_EXIT = fixture("lair_exit", LairExitBlock::new, MapColor.COLOR_LIGHT_GRAY, SoundType.WOOL, 6, Fit.PASSABLE);
 		// The Spindle Loft's (docs/features/spindle-loft.md).
@@ -107,6 +132,37 @@ public final class JugcraftLairs {
 		MOLTEN_SLAG = fixture("molten_slag", MoltenSlagBlock::new, MapColor.COLOR_ORANGE, SoundType.DEEPSLATE, 10, Fit.SOLID);
 		TROUGH_STONE = fixture("trough_stone", TroughStoneBlock::new, MapColor.STONE, SoundType.STONE, 0, Fit.SOLID);
 		SLUICE_GATE = fixture("sluice_gate", SluiceGateBlock::new, MapColor.METAL, SoundType.METAL, 0, Fit.SEE_THROUGH);
+		// The Lantern Fen's (docs/features/lantern-fen.md): its lamps burn, and go out.
+		FEN_LAMP = fixture("fen_lamp", FenLampBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -15, Fit.SEE_THROUGH);
+		// The Archive of Last Names' (docs/features/crypt-archive.md): its name-stones and its phylactery burn, and go dark.
+		NAME_STONE = fixture("name_stone", p -> new NameStoneBlock(p.lightLevel(NameStoneBlock::light)), MapColor.STONE,
+				SoundType.STONE, 0, Fit.SEE_THROUGH);
+		GRAVE_SEAL = fixture("grave_seal", GraveSealBlock::new, MapColor.COLOR_RED, SoundType.METAL, 0, Fit.SEE_THROUGH);
+		ARCHIVE_LECTERN = fixture("archive_lectern", ArchiveLecternBlock::new, MapColor.COLOR_BLACK, SoundType.BONE_BLOCK, 0,
+				Fit.SEE_THROUGH);
+		PHYLACTERY = fixture("phylactery", p -> new PhylacteryBlock(p.lightLevel(PhylacteryBlock::light)), MapColor.GOLD,
+				SoundType.BONE_BLOCK, 0, Fit.SEE_THROUGH);
+		// The Foundry Trench's (docs/features/foundry-trench.md): its pylons' crowns, its breakers and its ground terminals
+		// burn while live, and go dark.
+		PYLON_LATTICE = fixture("pylon_lattice", Block::new, MapColor.METAL, SoundType.METAL, 0, Fit.SEE_THROUGH);
+		PYLON_CROWN = fixture("pylon_crown", p -> new PylonCrownBlock(p.lightLevel(PylonCrownBlock::light)), MapColor.COLOR_ORANGE,
+				SoundType.COPPER, 0, Fit.SEE_THROUGH);
+		DISCHARGE_BREAKER = fixture("discharge_breaker", p -> new DischargeBreakerBlock(p.lightLevel(DischargeBreakerBlock::light)),
+				MapColor.COLOR_GREEN, SoundType.METAL, 0, Fit.SEE_THROUGH);
+		GROUND_TERMINAL = fixture("ground_terminal", p -> new GroundTerminalBlock(p.lightLevel(GroundTerminalBlock::light)),
+				MapColor.COLOR_ORANGE, SoundType.COPPER, 0, Fit.SOLID);
+		// The Moonlit Ring's (docs/features/moonlit-ring.md): the giant oaks' leaves, which never fall, and its bells.
+		MOONWOOD_LEAVES = fixture("moonwood_leaves", Block::new, MapColor.PLANT, SoundType.GRASS, 0, Fit.SEE_THROUGH);
+		WARDEN_BELL = fixture("warden_bell", WardenBellBlock::new, MapColor.METAL, SoundType.ANVIL, 0, Fit.SEE_THROUGH);
+		RAKED_TURF = fixture("raked_turf", RakedTurfBlock::new, MapColor.PLANT, SoundType.MOSS, 0, Fit.SOLID);
+		// The Cydonian Sanctum's (docs/features/cydonian-sanctum.md): its way home, its carved stones, its dials and door
+		// (the door's figures burn as the dials match them), and its dust vents.
+		RED_MIST = fixture("red_mist", LairExitBlock::new, MapColor.COLOR_RED, SoundType.WOOL, 6, Fit.PASSABLE);
+		STAR_STONE = fixture("star_stone", Block::new, MapColor.TERRACOTTA_RED, SoundType.STONE, 0, Fit.SOLID);
+		STAR_DIAL = fixture("star_dial", StarDialBlock::new, MapColor.TERRACOTTA_RED, SoundType.STONE, 0, Fit.SOLID);
+		STAR_DOOR = fixture("star_door", p -> new StarDoorBlock(p.lightLevel(StarDoorBlock::light)), MapColor.TERRACOTTA_RED,
+				SoundType.STONE, 0, Fit.SOLID);
+		DUST_VENT = fixture("dust_vent", Block::new, MapColor.TERRACOTTA_RED, SoundType.STONE, 0, Fit.SOLID);
 
 		ResourceKey<Block> wreathKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("mourning_wreath"));
 		MOURNING_WREATH = Registry.register(BuiltInRegistries.BLOCK, wreathKey, new MourningWreathBlock(BlockBehaviour.Properties.of()
@@ -124,6 +180,20 @@ public final class JugcraftLairs {
 		FROST_HORN = Registry.register(BuiltInRegistries.ITEM, hornKey, new FrostHornItem(new Item.Properties().stacksTo(16).setId(hornKey)));
 		ResourceKey<Item> sealKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("kiln_seal"));
 		KILN_SEAL = Registry.register(BuiltInRegistries.ITEM, sealKey, new KilnSealItem(new Item.Properties().stacksTo(16).setId(sealKey)));
+		ResourceKey<Item> stoneKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("hag_stone"));
+		HAG_STONE = Registry.register(BuiltInRegistries.ITEM, stoneKey, new HagStoneItem(new Item.Properties().stacksTo(16).setId(stoneKey)));
+		ResourceKey<Item> writKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("exhumation_writ"));
+		EXHUMATION_WRIT = Registry.register(BuiltInRegistries.ITEM, writKey, new ExhumationWritItem(new Item.Properties().stacksTo(16)
+				.setId(writKey)));
+		ResourceKey<Item> ordersKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("sealed_orders"));
+		SEALED_ORDERS = Registry.register(BuiltInRegistries.ITEM, ordersKey, new SealedOrdersItem(new Item.Properties().stacksTo(16)
+				.setId(ordersKey)));
+		ResourceKey<Item> totemKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("howling_totem"));
+		HOWLING_TOTEM = Registry.register(BuiltInRegistries.ITEM, totemKey, new HowlingTotemItem(new Item.Properties().stacksTo(16)
+				.setId(totemKey)));
+		ResourceKey<Item> keystoneKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("altar_keystone"));
+		ALTAR_KEYSTONE = Registry.register(BuiltInRegistries.ITEM, keystoneKey, new AltarKeystoneItem(new Item.Properties()
+				.stacksTo(16).setId(keystoneKey)));
 
 		ResourceKey<EntityType<?>> gateKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("mist_gate"));
 		MIST_GATE = Registry.register(BuiltInRegistries.ENTITY_TYPE, gateKey, EntityType.Builder.<MistGateEntity>of(MistGateEntity::new,
@@ -134,12 +204,21 @@ public final class JugcraftLairs {
 		Lairs.register();
 		LairRules.register();
 		SpindleRite.register();
+		ExhumationRite.register();
+		OrdersRite.register();
+		AltarKeystoneRite.register();
+		CydonianSanctum.register();
 		LairCommands.register();
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(DEATH_KNELL);
 			output.accept(CURSED_SPINDLE);
 			output.accept(FROST_HORN);
 			output.accept(KILN_SEAL);
+			output.accept(HAG_STONE);
+			output.accept(EXHUMATION_WRIT);
+			output.accept(SEALED_ORDERS);
+			output.accept(HOWLING_TOTEM);
+			output.accept(ALTAR_KEYSTONE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(MOURNING_WREATH_ITEM));
 	}
@@ -157,7 +236,8 @@ public final class JugcraftLairs {
 		if (light > 0) {
 			properties = properties.lightLevel(state -> light);
 		} else if (light < 0) {
-			properties = properties.lightLevel(state -> state.getValue(LairBrazierBlock.LIT) ? 12 : 0);
+			// A fixture that burns and goes out (a brazier, a lamp): -light while lit, dark when out.
+			properties = properties.lightLevel(state -> state.getValue(LairBrazierBlock.LIT) ? -light : 0);
 		}
 		if (fit == Fit.PASSABLE) {
 			properties = properties.noCollision().noOcclusion();

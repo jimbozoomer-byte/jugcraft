@@ -4,6 +4,7 @@
     "jugcraft:bronze_leggings",
     "jugcraft:steel_leggings",
     "jugcraft:thallite_leggings",
+    "jugcraft:titanium_leggings",
     "jugcraft:steampunk_leggings",
     "jugcraft:kaiser_leggings",
     "jugcraft:earthbound_thallite_leggings",
@@ -25,9 +26,14 @@
     "jugcraft:reaper_leggings",
     "jugcraft:banana_leggings",
     "jugcraft:scarab_leggings",
+    "jugcraft:hazmat_trousers",
     "jugcraft:pyromaniacs_pants",
     "jugcraft:pyromancers_leggings",
     "jugcraft:exosuit_leggings",
-    "jugcraft:ronin_exosuit_leggings"
+    "jugcraft:ronin_exosuit_leggings",
+    "jugcraft:dark_matter_leggings",
+    "jugcraft:red_matter_leggings",
+    "jugcraft:gem_leggings",
+    "#jugcraft:nouveau_magic_legs"
   ]
 }

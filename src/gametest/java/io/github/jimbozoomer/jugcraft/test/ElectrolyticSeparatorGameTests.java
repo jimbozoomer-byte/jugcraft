@@ -237,7 +237,8 @@ public class ElectrolyticSeparatorGameTests {
 	public void itRunsItsOwnRecipesAndCostsTwentyPlates(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
-		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
+		List<FluidRecipes.Entry> own = machine.recipes(level.getServer()).stream()
+                .filter(e -> e.id().getPath().startsWith("electrolysis/separator_")).toList();
 		helper.assertTrue(own.size() == 2 && own.get(0).id().equals(Jugcraft.id("electrolysis/separator_brine"))
 				&& own.get(0).recipe().time() == BRINE_TICKS && own.get(1).id().equals(Jugcraft.id("electrolysis/separator_water"))
 				&& own.get(1).recipe().time() == WATER_TICKS, "Its two recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
@@ -256,6 +257,25 @@ public class ElectrolyticSeparatorGameTests {
 		Optional<RecipeHolder<CraftingRecipe>> tank = crafting.getRecipeFor(steelTank, level);
 		helper.assertTrue(tank.isPresent() && tank.get().value().assemble(steelTank).is(item("steel_tank")),
 				"A Steel Tank is eight plates around a tank: 4 + 2 x 8 = 20 plates in all");
+		helper.succeed();
+	}
+
+	/**
+	 * The owner's copper entry for aluminum: the Electrolytic Cell, which smelts aluminum, is wired with copper cable, so
+	 * building it never needs aluminum; aluminum cable no longer makes it.
+	 */
+	@GameTest
+	public void theAluminumCellIsWiredWithCopper(GameTestHelper helper) {
+		RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+		ItemStack plate = stack("steel_plate");
+		ItemStack tank = stack("steel_tank");
+		for (String cable : List.of("copper_cable", "aluminum_cable")) {
+			CraftingInput cell = CraftingInput.of(3, 3, List.of(plate, stack(cable), plate, tank, stack("advanced_circuit"), tank, plate,
+					stack("machine_casing"), plate));
+			boolean builds = crafting.getRecipeFor(cell, helper.getLevel())
+					.map(holder -> holder.value().assemble(cell).is(item("electrolytic_cell"))).orElse(false);
+			helper.assertTrue(builds == cable.equals("copper_cable"), "With " + cable + " the cell " + (builds ? "builds" : "does not build"));
+		}
 		helper.succeed();
 	}
 

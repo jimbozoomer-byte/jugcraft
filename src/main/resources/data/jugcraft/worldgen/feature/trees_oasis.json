@@ -1,5 +1,18 @@
 {
   "type": "minecraft:random_selector",
   "default": "jugcraft:palm_checked",
-  "features": []
+  "features": [
+    {
+      "chance": 0.1,
+      "feature": "jugcraft:tamarisk_checked"
+    },
+    {
+      "chance": 0.16666666666666666,
+      "feature": "jugcraft:small_palm_checked"
+    },
+    {
+      "chance": 0.4666666666666666,
+      "feature": "jugcraft:date_palm_checked"
+    }
+  ]
 }

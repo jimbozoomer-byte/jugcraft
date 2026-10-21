@@ -659,12 +659,18 @@ def _see_through(faces, scale=H1_SCALE):
 
 
 def _quad_files():
-    files = sorted(ASSETS.glob("*_quads.json")) + [ASSETS / "kinetic_rotors.json", ASSETS / "worn_models.json"]
+    files = sorted(ASSETS.glob("*_quads.json")) + [ASSETS / "kinetic_rotors.json", ASSETS / "worn_models.json",
+                                                PACK / "machine_connection_quads.json"]
     for path in files:
         if not path.exists():
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
         for name, raw in data.items():
+            if path.name == "machine_connection_quads.json":
+                for index, port in enumerate(raw):
+                    label = "classic/" + path.name if path.parent == PACK else path.name
+                    yield label, f"{name}/{index}", port["quads"]
+                continue
             raw = raw.get("quads") if isinstance(raw, dict) else raw
             if isinstance(raw, list) and raw:
                 yield path.name, name, raw
@@ -848,6 +854,9 @@ def _cross_errors(name, faces, boxes, cells, shells_for=None, open_allowed=False
 
 # Numbered part models of decor drawn whole and shared out among their blocks: (model, its block's offset in px).
 DRAWN_TOGETHER = {
+    "workshop_bench": [("workshop_bench_part0", (0, 0, 0)), ("workshop_bench_part1", (-16, 0, 0))],
+    "small_crucible_furnace": [("small_crucible_furnace_part0", (0, 0, 0)), ("small_crucible_furnace_part1", (0, 16, 0))],
+    "deep_drilling_assembly": [("deep_drilling_assembly", (0, 0, 0)), ("deep_drilling_assembly_upper", (0, 16, 0))],
     "farm_stand": [("farm_stand_0", (0, 0, 0)), ("farm_stand_1", (-16, 0, 0))],
     "harvest_effigy": [(f"harvest_effigy_{i}", (0, 16 * i, 0)) for i in range(3)],
 }
@@ -873,6 +882,8 @@ def check_assemblies(machines=()):
     family O1_ALLOW lists as built from open boxes (never a machine) may leave its seams open too."""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from large_machines import FOOTPRINTS
+    from vehicle_bays import footprint as bay_footprint
+    FOOTPRINTS = {**FOOTPRINTS, 'mecha_workbench': bay_footprint(6), 'tank_workbench': bay_footprint(3)}
     errors, count, allowed = [], 0, defaultdict(set)
     for style, roots in (("", (ASSETS,)), ("classic ", (PACK, ASSETS))):
         for machine, footprint in FOOTPRINTS.items():

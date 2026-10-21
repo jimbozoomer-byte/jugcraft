@@ -78,6 +78,9 @@ MACHINES = {
     "flow_battery": {"display": "Flow Battery", "lit": False},
     # Electronics (batch 7, the cyan look).
     "lithography_station": {"display": "Lithography Station", "lit": True},
+    # Nuclear fuel (tools/nuclear.py, docs/features/nuclear.md): enrichment and fuel assembly.
+    "gas_centrifuge_cascade": {"display": "Gas Centrifuge Cascade", "lit": True},
+    "fuel_fabricator": {"display": "Fuel Fabricator", "lit": True},
     # Fluid logistics (batch 8): a Horton sphere for gases.
     "gas_holder": {"display": "Gas Holder", "lit": False},
     # Power (batch 10): a pedestal carrying a 3x3 array of solar cells.
@@ -182,7 +185,7 @@ TOOL_BLOCKS = {"charging_station": {"display": "Charging Station"}}
 STORAGE_BLOCKS = {"item_crate": {"display": "Item Crate"}}
 # Machine upgrades (docs/TECH_TREE.md#machine-control): go in a powered processor's two upgrade slots.
 # At most 4 of each kind count. Numbers are in machine/MachineUpgrades.java.
-UPGRADES = {"speed_upgrade": "Speed Upgrade", "efficiency_upgrade": "Efficiency Upgrade"}
+UPGRADES = {"speed_upgrade": "Speed Upgrade", "efficiency_upgrade": "Efficiency Upgrade", "automation_upgrade": "Automation Upgrade"}
 
 # Fluid logistics (physical branch; see docs/TECH_TREE.md). Amounts are millibuckets (mB);
 # 1 bucket = 1000 mB = 81000 Fabric droplets. Pipes are passive: pumps push through them.
@@ -195,11 +198,15 @@ PIPES = {"bronze_fluid_pipe": {"display": "Bronze Fluid Pipe", "rate": 250},
          "fluid_filter": {"display": "Fluid Filter", "rate": 1_000, "texture": "steel_fluid_pipe"}}
 # Fluid blocks with their own block entities. top/side/bottom name the textures.
 FLUID_BLOCKS = {
+    "insulated_fluid_tank": {"display": "Insulated Fluid Tank"},
+    "vacuum_insulated_tank": {"display": "Vacuum-insulated Fluid Tank"},
     "fluid_tank": {"display": "Tinplate Tank"},
     "electric_pump": {"display": "Electric Pump"},
     "heavy_pump": {"display": "Heavy Pump"},
 }
 FLUID_STATS = {
+    "insulated_fluid_tank": {"capacity_mb": 32_000},
+    "vacuum_insulated_tank": {"capacity_mb": 64_000},
     # Holds 16 buckets of one fluid; filled and emptied with buckets or by pumps.
     "fluid_tank": {"capacity_mb": 16_000},
     # Draws a water/lava source (or the tank) below it and pushes into pipes/storages on its other sides.
@@ -322,6 +329,9 @@ STATS = {
     "flow_battery": {"capacity": 64_000_000, "io_per_tick": 8_192, "tank": 64_000, "je_per_mb": 1_000},
     # 3x2x2. Wafer + 2 copper wire + 100 mB sulfuric acid -> 4 microchips.
     "lithography_station": {"capacity": 60_000, "input_per_tick": 1_024, "use_per_tick": 192, "tank": 4_000},
+    # Nuclear fuel: a 5x3x2 hall of tall centrifuges (enrichment takes a lot of power) and a 3x2x2 fuel line.
+    "gas_centrifuge_cascade": {"capacity": 400_000, "input_per_tick": 4_096, "use_per_tick": 1_024},
+    "fuel_fabricator": {"capacity": 100_000, "input_per_tick": 1_024, "use_per_tick": 256},
     # 2x2x3. Up to 512 KE/t: 2 mB of diesel a tick (256 KE/mB) or 4 mB of heavy fuel oil, only for what it delivers.
     "diesel_engine": {"capacity": 0, "use_per_tick": 0, "output_ke": 512, "tank": 8_000},
 }
@@ -369,7 +379,7 @@ ALT_CRAFTING = {
 
 CRAFTING = {
     "machine_casing": (["BZB", "Z Z", "BZB"], {"B": "#c:ingots/bronze", "Z": "#c:ingots/zinc"}, 1),
-    "copper_cable": (["CTC"], {"C": "#c:ingots/copper", "T": "#c:ingots/tin"}, 6),
+    "copper_cable": (["CTC"], {"C": "#c:ingots/copper", "T": "#c:ingots/tin"}, 4),
     # Faster cables: silver wire (wire drawer), then aluminum wire armored with steel.
     "silver_cable": (["WWW", "RRR"], {"W": "#c:wires/silver", "R": "jugcraft:copper_cable"}, 3),
     "aluminum_cable": (["WPW", "RRR"], {"W": "#c:wires/aluminum", "P": "#c:plates/steel", "R": "jugcraft:silver_cable"}, 3),
@@ -465,7 +475,8 @@ CRAFTING = {
     "advanced_engine": (["TPT", "MDM", "TCT"], {"T": "#c:ingots/titanium", "P": "jugcraft:processor",
                                                 "M": "jugcraft:neodymium_magnet", "D": "jugcraft:diesel_engine",
                                                 "C": "jugcraft:machine_casing"}, 1),
-    "advanced_solar_panel": (["SSS", "ACA", "PTP"], {"S": "jugcraft:solar_panel", "A": "#c:plates/aluminum",
+    # Its cells' p-type layer is boron-doped silicon (docs/features/boron-solar.md).
+    "advanced_solar_panel": (["SSS", "ACA", "PTP"], {"S": "jugcraft:solar_panel", "A": "jugcraft:boron_doped_silicon",
                                                      "C": "jugcraft:processor", "P": "jugcraft:aluminum_cable",
                                                      "T": "#c:ingots/titanium"}, 1),
     # Glass walls, grow lights (glowstone), a tank for the solution and a steel frame.
@@ -565,7 +576,7 @@ CRAFTING = {
     "gas_turbine": (["PBP", "DCD", "PGP"], {"P": "#c:plates/steel", "B": "minecraft:iron_bars",
                                             "D": "jugcraft:diesel_generator", "C": "jugcraft:advanced_circuit",
                                             "G": "#c:gears/steel"}, 1),
-    "electrolytic_cell": (["PWP", "TCT", "PMP"], {"P": "#c:plates/steel", "W": "jugcraft:aluminum_cable",
+    "electrolytic_cell": (["PWP", "TCT", "PMP"], {"P": "#c:plates/steel", "W": "jugcraft:copper_cable",
                                                   "T": "jugcraft:steel_tank", "C": "jugcraft:advanced_circuit",
                                                   "M": "jugcraft:machine_casing"}, 1),
     "air_separation_unit": (["SPS", "TMT", "ECE"], {"S": "#c:plates/steel", "P": "jugcraft:steel_fluid_pipe",
@@ -591,6 +602,11 @@ CRAFTING = {
     "lithography_station": (["GSG", "TCT", "PMP"], {"G": "minecraft:glass", "S": "minecraft:redstone_lamp",
                                                     "T": "#c:ingots/titanium", "C": "jugcraft:advanced_circuit",
                                                     "P": "#c:plates/aluminum", "M": "jugcraft:machine_casing"}, 1),
+    "gas_centrifuge_cascade": (["APA", "SMS", "APA"], {"A": "#c:plates/aluminum", "P": "jugcraft:processor",
+                                                       "S": "#c:plates/steel", "M": "jugcraft:machine_casing"}, 1),
+    "fuel_fabricator": (["SGS", "CMC", "SPS"], {"S": "#c:plates/steel", "G": "minecraft:glass",
+                                                "C": "jugcraft:advanced_circuit", "M": "jugcraft:machine_casing",
+                                                "P": "minecraft:piston"}, 1),
     "network_terminal": (["GSG", "PXP", "WKW"], {"G": "minecraft:glass_pane", "S": "jugcraft:processor",
                                                  "P": "jugcraft:plastic_sheet", "X": "minecraft:redstone",
                                                  "W": "jugcraft:copper_cable", "K": "minecraft:stone_button"}, 1),
@@ -654,6 +670,12 @@ def _crusher():
             recipes.append({"input": ore, "output": f"minecraft:raw_{vanilla}", "count": ORE_PROCESSING_MULTIPLIER,
                             "ticks": 160, "features": [FEATURE], "ore": True})
     for mineral, info in MINERALS.items():
+        if mineral == "vanadium_iron":
+            # A finite vanadium feed: neither intact ore nor upgrade cards multiply its yield.
+            for feed in (mineral, f"{mineral}_ore", f"deepslate_{mineral}_ore"):
+                recipes.append({"input": f"jugcraft:{feed}", "output": "jugcraft:vanadium_iron_concentrate",
+                                "count": 1, "ticks": 200, "features": [FEATURE, info["feature"]]})
+            continue
         for ore in (f"jugcraft:{mineral}_ore", f"jugcraft:deepslate_{mineral}_ore"):
             recipes.append({"input": ore, "output": f"jugcraft:{mineral}", "count": info["drops"][1] + 1,
                             "ticks": 160, "features": [FEATURE, info["feature"]], "ore": True})
@@ -666,6 +688,11 @@ def _crusher():
          "features": [FEATURE]},
         {"input": "minecraft:gravel", "output": "minecraft:sand", "count": 1, "ticks": 100, "features": [FEATURE]},
     ]
+    # Boss loot for those who never fight its boss: the Cydonian Sentinel's shards (tools/cydonian_sentinel.py CRUSHING).
+    from cydonian_sentinel import CRUSHING
+    for item, info in CRUSHING.items():
+        recipes.append({"input": f"jugcraft:{item}", "output": info["result"], "count": info["count"], "ticks": info["time"],
+                        "features": list(info["features"])})
     return recipes
 
 
@@ -788,7 +815,8 @@ def _ore_washer():
     from materials import WASHED_ORES, ore_ids
     return [{"input": ore, "output": f"jugcraft:washed_{metal}_ore", "count": ORE_WASHING_MULTIPLIER, "ticks": 200,
              "features": [FEATURE] + _metal_features(metal), "ore_bonus": ORE_WASHING_MULTIPLIER}
-            for metal in WASHED_ORES for ore in ore_ids(metal)]
+            for metal in WASHED_ORES for ore in ore_ids(metal)] + [
+                {"input": "jugcraft:vanadium_iron_concentrate", "output": "jugcraft:vanadium_oxide", "count": 1, "ticks": 200, "features": [FEATURE]}]
 
 
 # Sieve: gravel and soul sand, with small renewable finds.
@@ -821,6 +849,8 @@ def _sawmill():
     # Electronics (batch 7): a wire saw slices a silicon boule into wafers.
     recipes.append({"input": "jugcraft:silicon_boule", "output": "jugcraft:silicon_wafer", "count": 8, "ticks": 200,
                     "features": [FEATURE, "silicon"]})
+    recipes.append({"input": "jugcraft:rubber_log", "output": "minecraft:jungle_planks", "count": 6, "ticks": 100,
+                    "features": [FEATURE, ["biomes", "agriculture"]], "byproducts": [["jugcraft:sawdust", 1, 0.5, None]]})
     return recipes
 
 
@@ -830,6 +860,19 @@ SILICON_BOULE = [
     {"name": "silicon_boule", "inputs": [["jugcraft:silicon", 4], ["jugcraft:phosphate", 1]],
      "output": "jugcraft:silicon_boule",
      "count": 1, "ticks": 400, "features": [FEATURE, "silicon", "phosphate"]},
+]
+
+
+# Nuclear fuel (docs/features/nuclear.md). The cascade enriches uranium: eight ingots' worth of natural uranium make
+# one cylinder of low-enriched uranium (the rest is depleted tails, kept inside). The fabricator presses it into fuel
+# pellets, loads them into steel-clad rods and bundles the rods into a fuel assembly.
+GAS_CENTRIFUGE_CASCADE = [
+    {"inputs": [["jugcraft:uranium_ingot", 8]], "output": "jugcraft:enriched_uranium_cylinder",
+     "count": 1, "ticks": 1_200, "features": [FEATURE, "uranium"]},
+]
+FUEL_FABRICATOR = [
+    {"inputs": [["jugcraft:enriched_uranium_cylinder", 1], ["#c:plates/steel", 2]], "output": "jugcraft:leu_fuel_assembly",
+     "count": 2, "ticks": 400, "features": [FEATURE, "uranium"]},
 ]
 
 
@@ -857,23 +900,49 @@ TREES = {"oak": ("oak_sapling", "minecraft:apple"), "spruce": ("spruce_sapling",
 # so it has none), with sticks as their extra.
 def _own_trees():
     from agriculture import TREES, sapling
-    return {tree: (sapling(tree), "minecraft:stick") for tree in TREES}
+    return {tree: (sapling(tree), "minecraft:stick") for tree in TREES if tree != "tree_fern"}
 
 
 def _tree_farm():
-    return [{"input": f"{ns}:{sapling}", "output": f"{ns}:{wood}_log", "count": 6, "ticks": 400,
+    from agriculture import TREES as own, trunk_block
+    def log(ns, tree):
+        return trunk_block(tree) if ns == "jugcraft" else f"minecraft:{tree}_log"
+    return [{"input": f"{ns}:{sapling}", "output": log(ns, wood), "count": own[wood].get("farm_yield", 6) if ns == "jugcraft" else 6, "ticks": 400,
              "features": [FEATURE], "renewable": True,
              "byproducts": [[f"{ns}:{sapling}", 1, 1.0, None], [extra, 1, 0.1, None]]}
             for ns, trees in (("minecraft", TREES), ("jugcraft", _own_trees())) for wood, (sapling, extra) in trees.items()]
 
 
 def machine_recipes():
-    return {"crusher": _crusher(), "arc_furnace": _arc_furnace(), "alloy_smelter": ALLOY_SMELTER,
+    recipes = {"crusher": _crusher(), "arc_furnace": _arc_furnace(), "alloy_smelter": ALLOY_SMELTER,
             "metal_press": _metal_press(), "wire_drawer": _wire_drawer(), "circuit_assembler": CIRCUIT_ASSEMBLER,
             "pulverizer": _pulverizer(), "ore_washer": _ore_washer(), "sieve": SIEVE, "sawmill": _sawmill(),
             "coke_oven": COKE_OVEN, "steel_foundry": STEEL_FOUNDRY, "tree_farm": _tree_farm(),
             "hydroponic_bay": __import__("hydroponics").recipes(),
-            "rocket_workshop": __import__("rocketry").workshop_recipes()}
+            "rocket_workshop": __import__("rocketry").workshop_recipes(),
+            "gas_centrifuge_cascade": GAS_CENTRIFUGE_CASCADE, "fuel_fabricator": FUEL_FABRICATOR}
+    import ceramics
+    for machine, additions in ceramics.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import structural_alloys
+    for machine, additions in structural_alloys.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import battery_expansion
+    for machine, additions in battery_expansion.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import cryogenic_fuels
+    for machine, additions in cryogenic_fuels.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import synthetic_fuels
+    for machine, additions in synthetic_fuels.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import phosphate_processing
+    for machine, additions in phosphate_processing.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import advanced_electronics
+    for machine, additions in advanced_electronics.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    return recipes
 
 
 def _arc_furnace():
@@ -899,7 +968,8 @@ def machine_blocks():
     return (list(MACHINES) + list(PARTS) + list(CABLES) + list(PIPES) + list(FLUID_BLOCKS)
             + list(ITEM_PIPES) + list(LOGISTICS_BLOCKS) + list(STORAGE_BLOCKS) + list(KINETIC_BLOCKS) + list(TOOL_BLOCKS)
             + list(SLOPE_BLOCKS) + list(ELECTRONICS_BLOCKS) + list(FARMING_BLOCKS) + list(CROPS)
-            + drone_blocks() + tower_blocks() + list(__import__('blueprints').STAKE))
+            + drone_blocks() + tower_blocks() + list(__import__('blueprints').STAKE) + __import__('power_lines').blocks()
+            + list(__import__('nuclear').BLOCKS))
 
 
 def machine_items():
@@ -908,4 +978,11 @@ def machine_items():
     from tower import tower_items
     return (list(TOOLS) + list(UPGRADES) + list(POWERED_TOOLS) + list(UPGRADE_MODULES)
             + [info[key] for info in CROPS.values() for key in ("seeds", "product")]
-            + drone_items() + tower_items() + list(__import__('blueprints').ITEMS))
+            + drone_items() + tower_items() + list(__import__('blueprints').ITEMS) + list(__import__('nuclear').ITEMS) + list(__import__('plant_interior').UNIFORMS)
+            + list(__import__('storage_tank').ITEMS))
+
+import battery_expansion
+MACHINES.update({name:dict(display=label, lit=False) for name,label in battery_expansion.BLOCKS.items()})
+STATS['lead_acid_battery_bank'] = dict(capacity=2_000_000, io_per_tick=1_024)
+STATS['flow_tank_module'] = dict(capacity=0, io_per_tick=0)
+STATS['flow_stack_module'] = dict(capacity=0, io_per_tick=0)

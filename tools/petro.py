@@ -78,7 +78,19 @@ FLUIDS = {
     "liquid_oxygen": {"display": "Liquid Oxygen", "feature": "machines",
                       "colors": [(70, 120, 180), (110, 160, 214), (160, 200, 236), (214, 234, 250)],
                       "tick_delay": 3, "slope": 4, "drop_off": 1},
+    # Factory package 2: hydrogen chloride absorbed in water (the Bulk Chemical Reactor), a faint greenish yellow.
+    "hydrochloric_acid": {"display": "Hydrochloric Acid", "feature": "machines",
+                          "colors": [(150, 164, 120), (184, 196, 150), (210, 220, 180), (236, 242, 218)],
+                          "tick_delay": 5, "slope": 4, "drop_off": 1},
+    # The named PVC intermediate: refinery ethylene chlorinated into ethylene dichloride, an oily pale yellow-green.
+    "ethylene_dichloride": {"display": "Ethylene Dichloride", "feature": "machines",
+                            "colors": [(140, 150, 96), (176, 186, 128), (204, 212, 160), (232, 238, 200)],
+                            "tick_delay": 5, "slope": 4, "drop_off": 1},
 }
+
+FLUIDS["hydrochloric_acid"] = {"display": "Hydrochloric Acid", "feature": "machines",
+    "colors": [(98, 125, 78), (146, 173, 114), (175, 202, 145), (220, 238, 196)],
+    "tick_delay": 5, "slope": 4, "drop_off": 1}
 
 # Gases: fluids that only live in tanks and pipes (no block, no bucket). Gauge colour in Java (PetroFluids.gas).
 GASES = {
@@ -110,8 +122,40 @@ GASES = {
     # chemical reactor recovers it as sulfur (the Claus process). A sickly yellow-green.
     "hydrogen_sulfide": {"display": "Hydrogen Sulfide", "feature": "crude_oil",
                          "colors": [(150, 150, 70), (178, 178, 96), (204, 204, 126), (230, 230, 170)]},
+    # The starter factory's hydrogen chloride (tools/industrial_forms.py): hydrogen burnt in chlorine in the Chemical
+    # Infuser. Colourless, fuming white in damp air: a cool grey-white.
+    "hydrogen_chloride": {"display": "Hydrogen Chloride", "feature": "salt",
+                          "colors": [(160, 172, 170), (188, 198, 196), (212, 220, 218), (238, 242, 241)]},
+    # The starter factory's sulfur dioxide (tools/industrial_forms.py): sulfur burnt in oxygen in the Chemical
+    # Oxidizer, the first step of the contact acid chain. Colourless and choking: a pale sulfur-tinted grey.
+    "sulfur_dioxide": {"display": "Sulfur Dioxide", "feature": "sulfur",
+                       "colors": [(166, 162, 126), (194, 190, 156), (216, 212, 182), (240, 238, 220)]},
+    # The starter factory's carbon dioxide: coal or charcoal burnt in oxygen in the Chemical Oxidizer, the carbon feed
+    # of the Infuser's methanation. A cool grey with a faint blue.
+    "carbon_dioxide": {"display": "Carbon Dioxide", "feature": "machines",
+                       "colors": [(150, 156, 166), (178, 184, 194), (204, 210, 218), (232, 236, 242)]},
+    # Methane from carbon dioxide and hydrogen over the Infuser's nickel bed: the Gas Burning Generator's second fuel.
+    # A pale blue-green.
+    "methane": {"display": "Methane", "feature": "machines",
+                "colors": [(130, 170, 170), (160, 196, 194), (190, 218, 214), (222, 240, 236)]},
+    # Raw biogas from the Anaerobic Digester: the selected 60/40 methane and carbon dioxide game mixture. A dull
+    # grey-green.
+    "biogas": {"display": "Biogas", "feature": "machines",
+               "colors": [(128, 140, 118), (156, 168, 144), (184, 194, 170), (214, 222, 202)]},
+    # The Coal Gasifier's dirty mixture of carbon monoxide and hydrogen, before the cleanup rack. A smoky brown-grey.
+    "raw_syngas": {"display": "Raw Syngas", "feature": "machines",
+                   "colors": [(96, 88, 80), (124, 116, 106), (154, 146, 134), (188, 182, 170)]},
+    # Carbon monoxide separated from it: methanation's second carbon feed. A faint grey-violet.
+    "carbon_monoxide": {"display": "Carbon Monoxide", "feature": "machines",
+                        "colors": [(138, 134, 156), (166, 162, 184), (194, 190, 210), (226, 224, 238)]},
+    # Sulfur dioxide oxidized over the vanadium contact bed, before its absorption into acid. A dense pale cream.
+    "sulfur_trioxide": {"display": "Sulfur Trioxide", "feature": "machines",
+                        "colors": [(176, 168, 132), (204, 196, 160), (226, 220, 188), (244, 240, 218)]},
 }
 
+
+from starter_chemistry import GASES as STARTER_GASES, ITEMS as STARTER_ITEMS
+GASES.update({k: v for k, v in STARTER_GASES.items() if k not in GASES})
 
 # Plain items (chemistry/PetroItems.java): display name.
 ITEMS = {
@@ -138,7 +182,7 @@ ITEMS = {
     # Etched in the lithography station (batch 7).
     "microchip": "Microchip",
     # Rubber and polymers (batch 14): synthetic rubber, and gaskets pressed from it with steel.
-    "rubber": "Synthetic Rubber",
+    "rubber": "Rubber",
     "gasket": "Gasket",
     # Chlor-alkali (batch 15): PVC resin (pressed into plastic sheets) and soap (washes off status effects).
     "pvc_resin": "PVC Resin",
@@ -150,6 +194,40 @@ ITEMS = {
     "grenade_launcher": "Grenade Launcher",
     # Power (batch 19): fitted in the advanced engine's slot; needs coolant water.
     "turbocharger": "Turbocharger",
+    # The starter factory's reusable methanation catalyst (tools/industrial_forms.py): one nickel ingot on two fired
+    # bricks, held in the Chemical Infuser's bed socket and never used up.
+    "nickel_catalyst_bed": "Nickel Catalyst Bed",
+    # The sulfuric acid contact catalyst (tools/industrial_forms.py): vanadium oxide roasted out of washed iron ore with
+    # lye in the Bulk Chemical Reactor, then laid on two fired bricks. The Infuser's bed socket holds it, never used up.
+    "vanadium_pentoxide": "Vanadium Pentoxide",
+    "vanadium_contact_bed": "Vanadium Contact Bed",
+    # The Coal Gasifier's ash: one mixed residue (tools/industrial_forms.py), bound into concrete or asphalt.
+    "gasification_residue": "Gasification Residue",
+    # Nitric acid neutralized with ammonia in the Bulk Chemical Reactor (tools/industrial_forms.py): a nitrogen
+    # fertilizer (chemistry/FertilizerItem, three doses), and the explosive filling of grenades and HE rockets.
+    "ammonium_nitrate": "Ammonium Nitrate",
+    # Boron (docs/features/boric-acid.md): borax freed with sulfuric acid in the Chemical Reactor gives boric acid; with
+    # tungsten and steel it makes the neutron-absorbing control rod assembly every reactor pressure vessel holds.
+    "boric_acid": "Boric Acid",
+    "control_rod_assembly": "Control Rod Assembly",
+    # Food chemistry (docs/features/sour-candy.md): citric acid pressed and crystallized from lemons or oranges in the
+    # Chemical Reactor (a Candy Kettle flavour, tools/agriculture.py CANDY "sour"), and corn hydrolysed with dilute
+    # hydrochloric acid into a bottle of glucose syrup that crafts into sugar.
+    "citric_acid": "Citric Acid",
+    "glucose_syrup": "Glucose Syrup",
+    # PVAc (docs/features/pvac-glue.md): vinyl acetate polymerized into a pot of white wood glue, which binds paper into
+    # a book without leather and makes a piston sticky without slime.
+    "pvac_glue": "PVAc Wood Glue",
+    # Boron in solar cells (docs/features/boron-solar.md): silicon doped with boric acid, the p-type layer of the
+    # Advanced Solar Panel's cells.
+    "boron_doped_silicon": "Boron-Doped Silicon",
+    # Silicone (docs/features/silicone.md): silicon reacted with methyl chloride and water in the Chemical Reactor, a
+    # heat-proof rubber the Polymer Molding Press's gasket mold presses into gaskets.
+    "silicone": "Silicone Rubber",
+    # The owner's optional later methanation catalyst (tools/industrial_forms.py): ruthenium recovered from washed nickel
+    # ore with hydrochloric acid and chlorine in the Bulk Chemical Reactor, laid on the nickel bed. Never used up.
+    "ruthenium_powder": "Ruthenium Powder",
+    "ruthenium_catalyst_bed": "Ruthenium Catalyst Bed",
 }
 
 
@@ -226,7 +304,7 @@ FLUID_MACHINES = {
     "advanced_engine": {"inputs": [8_000, 4_000], "outputs": [], "item_inputs": 1, "item_outputs": 0, "recipe_type": None},
     # Sulfur + water -> sulfuric acid; bauxite + lye -> alumina; phosphate + acid -> fertilizer (batch 5). Batch 24:
     # also the mixing jobs (brine, fracking fluid), replacing the chemical mixer. 96 JE/t.
-    "chemical_reactor": {"inputs": [8_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
+    "chemical_reactor": {"inputs": [8_000, 8_000, 1_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
                          "recipe_type": "chemical_reaction"},
     # Electronics (batch 7): a wafer and copper wire etched with sulfuric acid into microchips. 192 JE/t.
     "lithography_station": {"inputs": [4_000], "outputs": [], "item_inputs": 2, "item_outputs": 1,
@@ -289,6 +367,11 @@ FLUID_RECIPES = {
         {"name": "naphtha", "items": [("jugcraft:cracking_catalyst", 1)], "fluids": [("jugcraft:naphtha", 1000)],
          "fluid_results": [("jugcraft:gasoline", 900, 3), ("jugcraft:refinery_gas", 100, 2)], "source": 0,
          "ticks": 120, "features": ["crude_oil"]},
+        # Ethylene dichloride cracked by heat alone (no catalyst used up) into vinyl chloride, giving back its hydrogen
+        # chloride for oxychlorination: C2H4Cl2 -> C2H3Cl + HCl (the plan's detailed PVC route).
+        {"name": "ethylene_dichloride", "fluids": [("jugcraft:ethylene_dichloride", 500)],
+         "fluid_results": [("jugcraft:vinyl_chloride", 250, 0), ("jugcraft:hydrogen_chloride", 250, 1)], "source": 0,
+         "ticks": 80, "features": ["salt", "machines"]},
     ],
     # Refinery gas polymerizes into plastic: a bucket of gas gives four pellets.
     "polymerization_reactor": [
@@ -297,6 +380,9 @@ FLUID_RECIPES = {
         # PVC (batch 15): vinyl chloride polymerized into resin.
         {"name": "vinyl_chloride", "fluids": [("jugcraft:vinyl_chloride", 500)], "fluid_results": [],
          "results": [("jugcraft:pvc_resin", 4)], "source": 0, "ticks": 100, "features": ["crude_oil", "salt"]},
+        # PVAc (docs/features/pvac-glue.md): vinyl acetate polymerized in water into white wood glue.
+        {"name": "vinyl_acetate", "fluids": [("jugcraft:vinyl_acetate", 500)], "fluid_results": [],
+         "results": [("jugcraft:pvac_glue", 4)], "source": 0, "ticks": 100, "features": ["agriculture", "machines"]},
         # Synthetic rubber (batch 14): butadiene polymerized into crumbs of rubber.
         {"name": "butadiene", "fluids": [("jugcraft:butadiene", 500)], "fluid_results": [],
          "results": [("jugcraft:rubber", 4)], "source": 0, "ticks": 100, "features": ["crude_oil"]},
@@ -321,6 +407,36 @@ FLUID_RECIPES = {
     # Sulfur burnt to sulfur trioxide and absorbed in water (the contact process, simplified): two sulfur dust and a
     # bucket of water make a bucket of sulfuric acid.
     "chemical_reactor": [
+        {"name": "absorb_hydrogen_chloride", "fluids": [("minecraft:water", 500), ("jugcraft:hydrogen_chloride", 500)],
+         "fluid_results": [("jugcraft:hydrochloric_acid", 1000)], "ticks": 100, "features": ["machines"]},
+        {"name": "absorb_sulfur_trioxide", "fluids": [("minecraft:water", 250), ("jugcraft:sulfur_trioxide", 250), ("jugcraft:sulfuric_acid", 1000)],
+         "retained_inputs": [2], "fluid_results": [("jugcraft:sulfuric_acid", 500)], "ticks": 100, "features": ["machines", "sulfur"]},
+        # Silicone (docs/features/silicone.md): methane chlorinated to methyl chloride; methyl chloride over silicon
+        # with water gives silicone rubber and gives back some of the chlorine as hydrochloric acid. Quantities for review.
+        {"name": "methyl_chloride", "fluids": [("jugcraft:methane", 500), ("jugcraft:chlorine", 500)],
+         "fluid_results": [("jugcraft:methyl_chloride", 500)], "ticks": 100, "features": ["machines", "salt"]},
+        {"name": "silicone", "items": [("jugcraft:silicon", 1)],
+         "fluids": [("jugcraft:methyl_chloride", 500), ("minecraft:water", 250)],
+         "results": [("jugcraft:silicone", 2)], "fluid_results": [("jugcraft:hydrochloric_acid", 250)], "ticks": 160,
+         "features": ["machines", "silicon"]},
+        {"name": "hydrochloric_copper", "items": [("minecraft:raw_copper", 1)], "fluids": [("jugcraft:hydrochloric_acid", 250)],
+         "results": [("jugcraft:washed_copper_ore", 1)], "ticks": 160, "features": ["machines"]},
+        # Cement burnt with its carbon dioxide captured (docs/features/cement-co2-capture.md): the furnace's cement, with
+        # the CO2 the lime gives off kept in a tank instead of lost. The calcite in four cement mix releases 250 mB.
+        {"name": "cement_with_co2_capture", "items": [("jugcraft:cement_mix", 4)], "results": [("jugcraft:cement", 4)],
+         "fluid_results": [("jugcraft:carbon_dioxide", 250)], "source": 250, "ticks": 200, "features": ["machines"]},
+        # Calcite dissolved in hydrochloric acid gives off carbon dioxide (docs/features/calcite-co2.md): a quick CO2 source
+        # for methanation without a kiln or coal, spending the acid. CaCO3 + 2 HCl -> CaCl2 + H2O + CO2.
+        {"name": "carbon_dioxide_from_calcite", "items": [("minecraft:calcite", 1)], "fluids": [("jugcraft:hydrochloric_acid", 500)],
+         "fluid_results": [("jugcraft:carbon_dioxide", 250)], "ticks": 60, "features": ["machines"]},
+        # Coking with gas recovery (docs/features/coke-gas-recovery.md): coal baked into coke in the reactor, faster than the
+        # Coke Oven and on power, keeping the gas the Coke Oven lets go as methane (coke-oven gas's fuel part).
+        {"name": "coke_with_gas_recovery", "items": [("minecraft:coal", 4)], "results": [("jugcraft:coke", 4)],
+         "fluid_results": [("jugcraft:methane", 200)], "source": 200, "ticks": 400, "features": ["machines"]},
+        # Zinc dissolved in hydrochloric acid gives off hydrogen (docs/features/zinc-hydrogen.md): a small, power-cheap
+        # hydrogen source before electrolysis, spending the zinc. Zn + 2 HCl -> ZnCl2 + H2.
+        {"name": "hydrogen_from_zinc", "items": [("#c:ingots/zinc", 1)], "fluids": [("jugcraft:hydrochloric_acid", 500)],
+         "fluid_results": [("jugcraft:hydrogen", 500)], "ticks": 80, "features": ["machines", "zinc"]},
         {"name": "sulfuric_acid", "items": [("jugcraft:sulfur_dust", 2)], "fluids": [("minecraft:water", 1000)],
          "fluid_results": [("jugcraft:sulfuric_acid", 1000)], "source": 0, "ticks": 100, "features": ["sulfur"]},
         # The Bayer process: bauxite digested in hot lye leaves alumina (each bauxite holds two ingots' worth).
@@ -329,6 +445,34 @@ FLUID_RECIPES = {
         # Superphosphate: phosphate rock treated with sulfuric acid becomes a soluble fertilizer.
         {"name": "fertilizer", "items": [("jugcraft:phosphate", 2)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:fertilizer", 4)], "ticks": 80, "features": ["phosphate", "sulfur"]},
+        # Pharmacy (docs/features/aspirin.md): willow bark steeped and hydrolysed in hot water gives salicylic acid; birch
+        # bark gives less. Salicylic acid acetylated with cider vinegar over a little sulfuric acid makes aspirin tablets.
+        # Quantities for review.
+        {"name": "salicylic_acid_willow", "items": [("jugcraft:willow_log", 4)], "fluids": [("minecraft:water", 500)],
+         "results": [("jugcraft:salicylic_acid", 2)], "ticks": 160, "features": ["biomes", "machines"]},
+        {"name": "salicylic_acid_birch", "items": [("minecraft:birch_log", 4)], "fluids": [("minecraft:water", 500)],
+         "results": [("jugcraft:salicylic_acid", 1)], "ticks": 160, "features": ["machines"]},
+        {"name": "aspirin", "items": [("jugcraft:salicylic_acid", 2), ("jugcraft:cider_vinegar", 1)],
+         "fluids": [("jugcraft:sulfuric_acid", 50)], "results": [("jugcraft:aspirin", 4)], "ticks": 120,
+         "features": ["agriculture", "sulfur", "machines"]},
+        # Boric acid (docs/features/boric-acid.md): borax freed with sulfuric acid. Quantities for review.
+        {"name": "boric_acid", "items": [("jugcraft:borax", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
+         "results": [("jugcraft:boric_acid", 2)], "ticks": 100, "features": ["silicon", "sulfur"]},
+        # Food chemistry (docs/features/sour-candy.md): citrus juice steeped in hot water and crystallized gives citric
+        # acid (lemons give more than oranges); corn starch hydrolysed with a little dilute hydrochloric acid gives glucose
+        # syrup, bottled. Quantities for review.
+        {"name": "citric_acid_lemon", "items": [("jugcraft:lemon", 4)], "fluids": [("minecraft:water", 250)],
+         "results": [("jugcraft:citric_acid", 2)], "ticks": 120, "features": ["agriculture", "machines"]},
+        {"name": "citric_acid_orange", "items": [("jugcraft:orange", 4)], "fluids": [("minecraft:water", 250)],
+         "results": [("jugcraft:citric_acid", 1)], "ticks": 120, "features": ["agriculture", "machines"]},
+        {"name": "glucose_syrup", "items": [("jugcraft:corn", 4), ("minecraft:glass_bottle", 1)],
+         "fluids": [("jugcraft:hydrochloric_acid", 50)], "results": [("jugcraft:glucose_syrup", 1)], "ticks": 160,
+         "features": ["agriculture", "machines"]},
+        # Vinyl acetate (docs/features/pvac-glue.md): ethylene and oxygen with cider vinegar's acetic acid over a hot
+        # catalyst. Quantities for review.
+        {"name": "vinyl_acetate", "items": [("jugcraft:cider_vinegar", 2)],
+         "fluids": [("jugcraft:ethylene", 500), ("jugcraft:oxygen", 250)],
+         "fluid_results": [("jugcraft:vinyl_acetate", 500)], "ticks": 120, "features": ["agriculture", "machines"]},
         # Saponification (batch 15): fat (rotten flesh, rendered) boiled in lye sets into soap.
         {"name": "soap", "items": [("minecraft:rotten_flesh", 2)], "fluids": [("jugcraft:lye", 250)],
          "results": [("jugcraft:soap", 4)], "ticks": 80, "features": ["salt"]},
@@ -430,6 +574,12 @@ FLUID_RECIPES = {
         {"name": "ammonia", "fluids": [("jugcraft:hydrogen", 300), ("jugcraft:nitrogen", 100)],
          "fluid_results": [("jugcraft:ammonia", 200)], "ticks": 40, "features": ["salt", "machines"]},
         # Vinyl chloride (batch 15): chlorine added to refinery gas (its ethylene), at heat over a catalyst.
+        # Oxychlorination (the plan's detailed PVC route, HCl reused): refinery ethylene, the hydrogen chloride the
+        # cracker gives back and oxygen make ethylene dichloride, C2H4 + 2 HCl + 1/2 O2 -> C2H4Cl2 + H2O. The liquid at
+        # 2 mB a reaction amount; the water is not kept.
+        {"name": "ethylene_dichloride", "fluids": [("jugcraft:refinery_gas", 250), ("jugcraft:hydrogen_chloride", 500),
+                                                   ("jugcraft:oxygen", 125)],
+         "fluid_results": [("jugcraft:ethylene_dichloride", 500)], "ticks": 60, "features": ["salt", "machines"]},
         {"name": "vinyl_chloride", "fluids": [("jugcraft:refinery_gas", 250), ("jugcraft:chlorine", 250)],
          "fluid_results": [("jugcraft:vinyl_chloride", 250)], "ticks": 40, "features": ["crude_oil", "salt"]},
         # Ostwald: ammonia burnt over platinum gauze in oxygen, the gases absorbed in water.
@@ -485,6 +635,9 @@ FLUID_RECIPES["catalytic_cracker"] += _rocketry.CRACKER_RECIPES
 FLUID_MACHINES["cryogenic_liquefier"] = _rocketry.LIQUEFIER
 FLUID_RECIPES["cryogenic_liquefier"] = _rocketry.LIQUEFIER_RECIPES
 FLUID_RECIPES["chemical_reactor"] += _rocketry.TANK_RECIPES
+import aged_wood as _aged_wood  # noqa: E402
+# Aged pine and maple planks (docs/features/aged-wood.md): planks treated with nitric acid.
+FLUID_RECIPES["chemical_reactor"] += _aged_wood.reactor_recipes()
 
 # Crops that ferment into bioethanol (data/jugcraft/tags/item/fermentable.json).
 FERMENTABLE = ["minecraft:wheat", "minecraft:sugar_cane", "minecraft:potato", "minecraft:carrot", "minecraft:beetroot",
@@ -506,11 +659,80 @@ def fluid_recipe_files(condition):
             if recipe.get("items"):
                 data["items"] = [{"ingredient": item, "count": count} for item, count in recipe["items"]]
             if recipe.get("fluids"):
-                data["fluids"] = [{"fluid": fluid, "amount": mb} for fluid, mb in recipe["fluids"]]
+                data["fluids"] = [{"fluid": fluid, "amount": mb} | ({"retained": True} if i in recipe.get("retained_inputs", []) else {}) for i, (fluid, mb) in enumerate(recipe["fluids"])]
             if recipe.get("fluid_results"):
                 data["fluid_results"] = [{"fluid": r[0], "amount": r[1]} | ({"tank": r[2]} if len(r) > 2 else {})
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
+            if recipe.get("tool"): data["tool"] = recipe["tool"]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
+
+ITEMS.update({k: v for k, v in STARTER_ITEMS.items() if k not in ITEMS})
+
+# Farm digestion extends the existing fluids and ingredient registry.
+from anaerobic import GASES as BIO_GASES, FLUIDS as BIO_FLUIDS, ITEMS as BIO_ITEMS
+GASES.update({k: v for k, v in BIO_GASES.items() if k not in GASES})
+FLUIDS.update({k: v for k, v in BIO_FLUIDS.items() if k not in FLUIDS})
+ITEMS.update({k: v for k, v in BIO_ITEMS.items() if k not in ITEMS})
+
+from biorefinery import FLUIDS as REFINERY_FLUIDS, GASES as REFINERY_GASES, ITEMS as REFINERY_ITEMS
+FLUIDS.update({k: v for k, v in REFINERY_FLUIDS.items() if k not in FLUIDS})
+GASES.update({k: v for k, v in REFINERY_GASES.items() if k not in GASES})
+ITEMS.update({k: v for k, v in REFINERY_ITEMS.items() if k not in ITEMS})
+
+from coastal_metals import FLUIDS as COASTAL_FLUIDS, ITEMS as COASTAL_ITEMS
+FLUIDS.update({k: v for k, v in COASTAL_FLUIDS.items() if k not in FLUIDS})
+ITEMS.update({k: v for k, v in COASTAL_ITEMS.items() if k not in ITEMS})
+
+from polymers import FLUIDS as POLYMER_FLUIDS, GASES as POLYMER_GASES, ITEMS as POLYMER_ITEMS
+FLUIDS.update({k: v for k, v in POLYMER_FLUIDS.items() if k not in FLUIDS})
+GASES.update({k: v for k, v in POLYMER_GASES.items() if k not in GASES})
+ITEMS.update({k: v for k, v in POLYMER_ITEMS.items() if k not in ITEMS})
+
+from fluorochemistry import FLUIDS as FLUORO_FLUIDS, GASES as FLUORO_GASES, ITEMS as FLUORO_ITEMS
+FLUIDS.update({k: v for k, v in FLUORO_FLUIDS.items() if k not in FLUIDS})
+GASES.update({k: v for k, v in FLUORO_GASES.items() if k not in GASES})
+# Vinyl acetate (docs/features/pvac-glue.md): ethylene, oxygen and cider vinegar's acetic acid in the Chemical Reactor,
+# polymerized into PVAc wood glue. Last, so the swirls drawn by index for the gases before it keep their seeds.
+GASES["vinyl_acetate"] = {"display": "Vinyl Acetate", "feature": "machines",
+                          "colors": [(150, 160, 150), (182, 192, 182), (208, 216, 206), (234, 240, 232)]}
+ITEMS.update({k: v for k, v in FLUORO_ITEMS.items() if k not in ITEMS})
+
+from ceramics import ITEMS as CERAMIC_ITEMS
+ITEMS.update(CERAMIC_ITEMS)
+
+from structural_alloys import ITEMS as ALLOY_ITEMS
+ITEMS.update(ALLOY_ITEMS)
+
+from battery_expansion import ITEMS as BATTERY_ITEMS, REACTOR_RECIPES as BATTERY_REACTOR_RECIPES
+ITEMS.update(BATTERY_ITEMS)
+FLUID_RECIPES['chemical_reactor'].extend(BATTERY_REACTOR_RECIPES)
+
+import advanced_electronics
+ITEMS.update(advanced_electronics.ITEMS)
+FLUIDS.update(advanced_electronics.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(advanced_electronics.REACTOR_RECIPES)
+FLUID_RECIPES['lithography_station'].extend(advanced_electronics.LITHOGRAPHY_RECIPES)
+
+import phosphate_processing
+ITEMS.update(phosphate_processing.ITEMS)
+FLUIDS.update(phosphate_processing.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(phosphate_processing.REACTOR_RECIPES)
+
+import synthetic_fuels
+ITEMS.update(synthetic_fuels.ITEMS)
+FLUIDS.update(synthetic_fuels.FLUIDS)
+FLUID_RECIPES['distillation_tower'].extend(synthetic_fuels.REFINERY_RECIPES)
+
+# Package 7 reuses the compact liquefier and tank-filling reactor.
+import cryogenic_fuels
+ITEMS.update(cryogenic_fuels.ITEMS)
+FLUIDS.update(cryogenic_fuels.FLUIDS)
+FLUID_RECIPES["cryogenic_liquefier"].extend(cryogenic_fuels.LIQUEFIER_RECIPES)
+FLUID_RECIPES["chemical_reactor"].extend(cryogenic_fuels.TANK_RECIPES)
+# Methyl chloride (docs/features/silicone.md): methane and chlorine in the Chemical Reactor, made into silicone rubber.
+# Last, so the swirls drawn by index for the gases before it keep their seeds.
+GASES["methyl_chloride"] = {"display": "Methyl Chloride", "feature": "machines",
+                            "colors": [(120, 150, 120), (154, 186, 152), (186, 212, 182), (220, 238, 214)]}

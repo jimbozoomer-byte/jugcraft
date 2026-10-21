@@ -12,9 +12,11 @@ import io.github.jimbozoomer.jugcraft.chemistry.PetroFluids;
 import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
 import io.github.jimbozoomer.jugcraft.deposit.DepositBlock;
 import io.github.jimbozoomer.jugcraft.deposit.Deposits;
+import io.github.jimbozoomer.jugcraft.deposit.DeepDrillingAssemblyBlock;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
 import io.github.jimbozoomer.jugcraft.energy.SimpleEnergyStorage;
+import io.github.jimbozoomer.jugcraft.energy.BatteryEnergyStorage;
 import io.github.jimbozoomer.jugcraft.fluid.FluidNetworks;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
 import io.github.jimbozoomer.jugcraft.fluid.StoredFluid;
@@ -105,7 +107,15 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	public static final int DATA_SIDES = 10;
 	/** Fluid processors: two values per tank from here (see {@link FluidTanks#data}): the fluid's id, then mB. */
 	public static final int DATA_TANKS = 11;
-	public static final int DATA_COUNT = DATA_TANKS + 2 * FluidMachineSpec.MAX_TANKS;
+	public static final int DATA_BATTERY_MODE = DATA_TANKS + 2 * FluidMachineSpec.MAX_TANKS;
+	public static final int DATA_BATTERY_RESERVE = DATA_BATTERY_MODE + 1;
+	public static final int DATA_BATTERY_PRIORITY = DATA_BATTERY_MODE + 2;
+	public static final int DATA_BATTERY_OUTPUT = DATA_BATTERY_MODE + 3;
+	public static final int DATA_BATTERY_MODULES = DATA_BATTERY_MODE + 4;
+	public static final int DATA_DRILL_DEPTH = DATA_BATTERY_MODE + 5;
+	public static final int DATA_DRILL_STAGE = DATA_DRILL_DEPTH + 1;
+	public static final int DATA_DRILL_USE = DATA_DRILL_STAGE + 1;
+	public static final int DATA_COUNT = DATA_DRILL_USE + 1;
 	/** Fluid processors push their output tanks into pipes and neighbouring tanks every this many ticks... */
 	public static final int FLUID_PUSH_INTERVAL = 4;
 	/** ...up to this many mB from each output tank. */
@@ -137,6 +147,33 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private long lastProcessorTick = -1000, lastContributed = -1000;
 	private int assistQuarters, assistedArgonTicks;
 	private final SimpleEnergyStorage energy;
+	private int batteryMode, batteryReserve, batteryPriority, batteryOutput = 100;
+
+	private int flowPairs() {
+		return level == null || kind != MachineKind.FLOW_BATTERY ? 0
+			: BatteryInstallation.pairs(level, worldPosition, facing(getBlockState()));
+	}
+	private long flowPhysicalMb() { return (1L + flowPairs()) * MachineKind.FLOW_BATTERY_TANK; }
+	private boolean batteryAvailable() {
+		return kind != MachineKind.FLOW_BATTERY || reservoir == null
+			|| reservoir.amount <= flowPhysicalMb() * FluidNetworks.DROPLETS_PER_MB;
+	}
+	private long batteryRate() {
+		return kind == MachineKind.FLOW_BATTERY && level != null
+			&& BatteryInstallation.stack(level, worldPosition, facing(getBlockState())) ? 16_384 : kind.maxInput;
+	}
+	public boolean clickBatteryButton(int id) {
+		if (!kind.isBattery()) return false;
+		switch (id) {
+			case 20 -> batteryMode = (batteryMode + 1) % 4;
+			case 21 -> batteryReserve = (batteryReserve + 10) % 100;
+			case 22 -> batteryPriority = batteryPriority == 1 ? -1 : batteryPriority + 1;
+			case 23 -> batteryOutput = batteryOutput == 100 ? 50 : batteryOutput == 50 ? 25 : 100;
+			default -> { return false; }
+		}
+		setChanged();
+		return true;
+	}
 	private NonNullList<ItemStack> items;
 	private int progress;
 	private int maxProgress;
@@ -163,7 +200,22 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	/** Ore drill: the next block to check, counted from the top layer below the drill (see {@link OreDrilling}). */
 	private int cursor;
 	/** Deposit drill: the deposit block it is working (found again after loading; not saved). */
-	private @Nullable BlockPos depositTarget;
+	private final List<BlockPos> depositSources = new ArrayList<>();
+	private int depositDepth, depositBoreProgress;
+	private boolean depositLayerReady, deepDepositMode;
+	private java.util.@Nullable UUID depositOwner;
+	public int depositDepth() { return depositDepth; }
+	public int depositBoreProgress() { return depositBoreProgress; }
+	public void claimDepositDrill(net.minecraft.world.entity.player.Player player) {
+		if (kind == MachineKind.DEPOSIT_DRILL && depositOwner == null) { depositOwner = player.getUUID(); setChanged(); }
+	}
+
+	private boolean mayWorkDeposit(ServerLevel level, BlockPos pos) {
+		if (!level.isLoaded(pos) || !level.isInWorldBounds(pos) || !level.getWorldBorder().isWithinBounds(pos)
+				|| io.github.jimbozoomer.jugcraft.town.TownProtection.shieldsBlock(level, pos)) return false;
+		var actor = io.github.jimbozoomer.jugcraft.concordance.Authority.depositDrillActor(level, depositOwner);
+		return io.github.jimbozoomer.jugcraft.concordance.Authority.mayChange(level, actor, pos);
+	}
 	/** Wind turbine, water wheel, cobblestone generator: whether the surroundings check has run since loading. */
 	private boolean checked;
 	/** Water wheel: JE per tick from the water found at the last check. */
@@ -177,13 +229,24 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				case DATA_ENERGY_HIGH -> (int) ((energy.getAmount() >>> 16) & 0xFFFF);
 				case DATA_CAPACITY_LOW -> (int) (energy.getCapacity() & 0xFFFF);
 				case DATA_CAPACITY_HIGH -> (int) ((energy.getCapacity() >>> 16) & 0xFFFF);
-				case DATA_PROGRESS -> progress;
-				case DATA_MAX_PROGRESS -> maxProgress;
+				case DATA_PROGRESS -> deepDepositMode && !depositLayerReady ? depositBoreProgress : progress;
+				case DATA_MAX_PROGRESS -> deepDepositMode && !depositLayerReady ? DeepDrillingAssemblyBlock.BORE_TICKS : maxProgress;
+				case DATA_DRILL_DEPTH -> depositDepth;
+				case DATA_DRILL_STAGE -> deepDepositMode ? (depositLayerReady ? 2 : 1) : 0;
+				case DATA_DRILL_USE -> kind == MachineKind.DEPOSIT_DRILL
+						? (int) (deepDepositMode && !depositLayerReady ? DeepDrillingAssemblyBlock.USE
+						: upgrades().use(deepDepositMode ? DeepDrillingAssemblyBlock.USE : kind.usePerTick)) : 0;
 				case DATA_BURN -> burn;
 				case DATA_MAX_BURN -> maxBurn;
 				case DATA_FORMED -> formed ? 1 : 0;
 				case DATA_TANK -> tank;
 				case DATA_SIDES -> sides.pack();
+				case DATA_BATTERY_MODE -> batteryMode;
+				case DATA_BATTERY_RESERVE -> batteryReserve;
+				case DATA_BATTERY_PRIORITY -> batteryPriority + 1;
+				case DATA_BATTERY_OUTPUT -> batteryOutput;
+				case DATA_BATTERY_MODULES -> flowPairs() + (batteryAvailable() ? 0 : 16)
+					+ (batteryRate() > kind.maxInput ? 32 : 0);
 				default -> tanks != null && index >= DATA_TANKS && index < DATA_TANKS + 2 * tanks.size()
 						? tanks.data(index - DATA_TANKS) : 0;
 			};
@@ -212,13 +275,16 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		// Producers only give energy out; consumers only take it in; the battery box does both.
 		long insert = kind.isGenerator() ? 0 : kind.maxInput;
 		long extract = kind.isProcessor() ? 0 : kind.maxOutput;
-		this.energy = kind == MachineKind.FLOW_BATTERY
-				? new SimpleEnergyStorage(kind.capacity, insert, extract, this::setChanged, this::electrolyteCeiling)
+		this.energy = kind.isBattery()
+				? new BatteryEnergyStorage(kind == MachineKind.FLOW_BATTERY ? BatteryInstallation.MAX_ENERGY : kind.capacity,
+					this::setChanged, () -> kind == MachineKind.FLOW_BATTERY ? electrolyteCeiling() : kind.capacity,
+					() -> level == null ? 0 : level.getGameTime(), this::batteryRate,
+					() -> batteryMode, () -> batteryReserve, () -> batteryPriority, () -> batteryOutput, this::batteryAvailable)
 				: new SimpleEnergyStorage(kind.capacity, insert, extract, this::setChanged);
 		this.reservoir = switch (kind) {
 			case STEEL_TANK -> SingleFluidStorage.withFixedCapacity(MachineKind.STEEL_TANK_CAPACITY * FluidNetworks.DROPLETS_PER_MB, this::setChanged);
 			case GAS_HOLDER -> gasReservoir(MachineKind.GAS_HOLDER_CAPACITY * FluidNetworks.DROPLETS_PER_MB);
-			case FLOW_BATTERY -> electrolyteReservoir(MachineKind.FLOW_BATTERY_TANK * FluidNetworks.DROPLETS_PER_MB);
+			case FLOW_BATTERY -> electrolyteReservoir(BatteryInstallation.MAX_FLUID_MB * FluidNetworks.DROPLETS_PER_MB);
 			default -> null;
 		};
 		this.inlet = switch (kind) {
@@ -295,6 +361,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 */
 	public @Nullable Storage<FluidVariant> fluidFor(@Nullable Direction side) {
 		if (tanks != null) {
+			if (kind == MachineKind.CHEMICAL_REACTOR) {
+				if (side == Direction.UP) return new net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage<>(List.of(tanks.input(2), tanks.input(0), tanks.input(1), tanks.output(0)));
+				return new net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage<>(List.of(tanks.input(0), tanks.input(1), tanks.output(0)));
+			}
 			return tanks.exposed();
 		}
 		return reservoir != null ? reservoir : inlet;
@@ -326,14 +396,14 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 */
 	private SingleFluidStorage electrolyteReservoir(long capacity) {
 		return new SingleFluidStorage() {
-			@Override
-			protected long getCapacity(FluidVariant variant) {
-				return capacity;
+			@Override protected long getCapacity(FluidVariant variant) {
+				// Detached modules strand contents safely; they never delete or duplicate it.
+				return Math.min(capacity, Math.max(amount, flowPhysicalMb() * FluidNetworks.DROPLETS_PER_MB));
 			}
 
 			@Override
 			protected boolean canInsert(FluidVariant variant) {
-				return variant.isOf(PetroFluids.VANADIUM_ELECTROLYTE.source());
+				return variant.isOf(PetroFluids.VANADIUM_ELECTROLYTE.source()) && batteryAvailable();
 			}
 
 			@Override
@@ -357,7 +427,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	@Override
 	protected void collectImplicitComponents(DataComponentMap.Builder components) {
 		super.collectImplicitComponents(components);
-		StoredFluid stored = reservoir == null ? null : StoredFluid.of(reservoir);
+		StoredFluid stored = reservoir != null ? StoredFluid.of(reservoir)
+				: kind == MachineKind.CHEMICAL_REACTOR ? StoredFluid.of(tanks.input(2)) : null;
 		if (stored != null) {
 			components.set(JugcraftFluids.STORED_FLUID, stored);
 		}
@@ -368,7 +439,18 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		super.applyImplicitComponents(components);
 		StoredFluid stored = components.get(JugcraftFluids.STORED_FLUID);
 		if (stored != null && reservoir != null) {
-			stored.restore(reservoir);
+			if (kind == MachineKind.FLOW_BATTERY && stored.variant().isOf(PetroFluids.VANADIUM_ELECTROLYTE.source())) {
+				reservoir.variant = stored.variant();
+				reservoir.amount = Math.clamp(stored.amount(), 0L, BatteryInstallation.MAX_FLUID_MB * FluidNetworks.DROPLETS_PER_MB);
+			} else stored.restore(reservoir);
+		}
+		if (stored != null && kind == MachineKind.CHEMICAL_REACTOR
+				&& stored.variant().isOf(PetroFluids.SULFURIC_ACID.source()) && stored.amount() > 0) {
+			stored.restore(tanks.input(2));
+		}
+		if (stored != null && kind == MachineKind.CHEMICAL_REACTOR
+				&& stored.variant().isOf(PetroFluids.SULFURIC_ACID.source()) && stored.amount() > 0) {
+			stored.restore(tanks.input(2));
 		}
 	}
 
@@ -438,9 +520,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		boolean front = side == getBlockState().getValue(MachineBlock.FACING);
 		return new EnergyStorage() {
+			@Override public Object transferIdentity() { return energy; }
+			@Override public int chargePriority() { return energy.chargePriority(); }
 			@Override
 			public boolean supportsInsertion() {
-				return !front;
+				return !front && energy.supportsInsertion();
 			}
 
 			@Override
@@ -450,7 +534,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 			@Override
 			public boolean supportsExtraction() {
-				return front;
+				return front && energy.supportsExtraction();
 			}
 
 			@Override
@@ -475,12 +559,13 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	public void serverTick(ServerLevel level, BlockPos pos, BlockState state) {
 		if (companionJobs.length > 0) companionStatus = local.peepo.CompanionStatus.NO_INPUT;
 		boolean active = switch (kind) {
+			case FLOW_TANK_MODULE, FLOW_STACK_MODULE -> false;
 			case COAL_GENERATOR -> tickGenerator(level, pos);
 			case SOLAR_PANEL -> tickSolar(level, pos);
 			case ADVANCED_SOLAR_PANEL -> tickSolar(level, pos);
 			case STEAM_GENERATOR -> tickSteam(level, pos);
 			case LARGE_STEAM_ENGINE -> tickLargeEngine(level, pos, state);
-			case BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK, FLOW_BATTERY -> tickBattery(level, pos, state);
+			case LEAD_ACID_BATTERY_BANK, BATTERY_BOX, CAPACITOR_BANK, LITHIUM_BATTERY_BANK, FLOW_BATTERY -> tickBattery(level, pos, state);
 			case STEEL_TANK, GAS_HOLDER -> false;
 			case GEOTHERMAL_GENERATOR -> tickGeothermal(level, pos, state);
 			case WIND_TURBINE -> tickWind(level, pos, state);
@@ -787,7 +872,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private boolean tickBattery(ServerLevel level, BlockPos pos, BlockState state) {
 		Direction front = state.getValue(MachineBlock.FACING);
 		Footprint footprint = footprint(state);
-		long budget = kind.maxOutput;
+		((BatteryEnergyStorage) energy).tickPolicy();
+		long budget = batteryRate() * batteryOutput / 100;
 		for (int part = 0; part < footprint.size() && budget > 0; part++) {
 			budget -= EnergyNetworks.pushToNeighbors(level, footprint.partPos(pos, facing(state), part), energy, budget, List.of(front));
 		}
@@ -986,6 +1072,12 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			return false;
 		}
 		FluidRecipe recipe = found.get();
+        if (recipe.tool().isPresent() && (!kind.hasProcessTool()
+                || !recipe.tool().get().test(items.get(kind.slots)))) {
+            processorStatus(local.peepo.CompanionStatus.MACHINE_TOOL);
+            if (progress != 0) { progress = 0; setChanged(); }
+            return false;
+        }
 		maxProgress = recipe.time();
 		if (energy.getAmount() < kind.usePerTick) {
 			return false; // Keeps progress; resumes when power returns.
@@ -997,7 +1089,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				items.get(slot).shrink(recipe.items().get(slot).count());
 			}
 			for (int i = 0; i < recipe.fluids().size(); i++) {
-				tanks.input(i).drain(recipe.fluids().get(i).amount());
+				if (!recipe.fluids().get(i).retained()) tanks.input(i).drain(recipe.fluids().get(i).amount());
 			}
 			for (int i = 0; i < recipe.fluidResults().size(); i++) {
 				tanks.output(recipe.resultTank(i)).fill(recipe.fluidResults().get(i).fluid(), recipe.fluidResults().get(i).amount());
@@ -1491,49 +1583,65 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	 * into chests, pipes and machines beside it. A full drill waits; a drill with no deposit left in reach stops.
 	 */
 	private boolean tickDepositDrill(ServerLevel level, BlockPos pos, BlockState state) {
-		if (sides.eject() && level.getGameTime() % EJECT_INTERVAL == 0) {
-			eject(level, pos, state);
+		if (sides.eject() && level.getGameTime() % EJECT_INTERVAL == 0) eject(level, pos, state);
+		boolean deep = DeepDrillingAssemblyBlock.installed(level, pos, state);
+		if (deep != deepDepositMode) { deepDepositMode = deep; depositSources.clear(); }
+		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) return false;
+		if (deep) {
+			BlockPos center = DeepDrillingAssemblyBlock.center(pos, state);
+			for (int dx : new int[]{-4, 4}) for (int dz : new int[]{-4, 4})
+				if (!level.isLoaded(center.offset(dx, -Math.max(1, depositDepth), dz))) return false;
 		}
-		if (depositTarget == null || !(level.getBlockState(depositTarget).getBlock() instanceof DepositBlock)) {
-			// Look again at most once a second, so a drill with nothing left costs almost nothing.
-			if (level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL != 0) {
-				return false;
+		if (deep && !depositLayerReady) {
+			if (depositDepth >= DeepDrillingAssemblyBlock.DEPTH) return false;
+			BlockPos next = DeepDrillingAssemblyBlock.center(pos, state).below(depositDepth + 1);
+			if (next.getY() < level.getMinY() || !mayWorkDeposit(level, next)) return false;
+			// Do not load neighbouring chunks or bore through a protected/bedrock barrier.
+			for (int dx = -4; dx <= 4; dx++) for (int dz = -4; dz <= 4; dz++) {
+				BlockPos at = next.offset(dx, 0, dz);
+				if (!level.isLoaded(at) || level.getBlockState(at).is(Blocks.BEDROCK)
+						|| io.github.jimbozoomer.jugcraft.town.TownProtection.shieldsBlock(level, at)) return false;
 			}
-			List<BlockPos> found = findDeposits(level, pos, state);
-			depositTarget = found.isEmpty() ? null : found.get(0);
-			progress = 0;
-			if (depositTarget == null) {
-				return false;
+			boolean room = false;
+			for (var block : io.github.jimbozoomer.jugcraft.deposit.JugcraftDeposits.BLOCKS.values())
+				room |= resultSlotFor(new ItemStack(block.yield())) >= 0;
+			if (!room) return processorStopped(local.peepo.CompanionStatus.FULL);
+			if (energy.getAmount() < DeepDrillingAssemblyBlock.USE) return false;
+			energy.setAmount(energy.getAmount() - DeepDrillingAssemblyBlock.USE);
+			if (++depositBoreProgress >= DeepDrillingAssemblyBlock.BORE_TICKS) {
+				depositBoreProgress = 0; depositDepth++; depositLayerReady = true;
+				depositSources.clear();
 			}
+			setChanged();
+			return true;
 		}
-		ItemStack first = new ItemStack(((DepositBlock) level.getBlockState(depositTarget).getBlock()).yield());
-		if (resultSlotFor(first) < 0) return processorStopped(local.peepo.CompanionStatus.FULL);
-		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
+		// Bounded scans: 75 blocks for a basic rig, 81 for a deep rig's current layer.
+		depositSources.removeIf(source -> !level.isLoaded(source) || !(level.getBlockState(source).getBlock() instanceof DepositBlock));
+		if (depositSources.isEmpty() || level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL == 0) {
+			if (!deep && depositSources.isEmpty() && level.getGameTime() % MachineKind.SOURCE_CHECK_INTERVAL != 0) return false;
+			depositSources.clear(); depositSources.addAll(findDeposits(level, pos, state));
+		}
+		if (depositSources.isEmpty()) {
+			if (deep) { depositLayerReady = false; setChanged(); }
 			return false;
 		}
+		boolean room = depositSources.stream().anyMatch(source -> resultSlotFor(new ItemStack(((DepositBlock) level.getBlockState(source).getBlock()).yield())) >= 0);
+		if (!room) return processorStopped(local.peepo.CompanionStatus.FULL);
 		MachineUpgrades.Effect upgrades = upgrades();
 		maxProgress = upgrades.ticks(MachineKind.DEPOSIT_TICKS);
-		long use = upgrades.use(kind.usePerTick);
-		if (energy.getAmount() < use) {
-			return false;
-		}
+		long use = upgrades.use(deep ? DeepDrillingAssemblyBlock.USE : kind.usePerTick);
+		if (energy.getAmount() < use) return false;
 		energy.setAmount(energy.getAmount() - use);
 		if ((progress += 1 + companionBonus(use, maxProgress - progress - 1)) >= maxProgress) {
 			progress = 0;
 			for (BlockPos source : findDeposits(level, pos, state)) {
-				ItemStack mined = new ItemStack(((DepositBlock) level.getBlockState(source).getBlock()).yield(),
-						MachineKind.DEPOSIT_UNITS);
+				ItemStack mined = new ItemStack(((DepositBlock) level.getBlockState(source).getBlock()).yield(), MachineKind.DEPOSIT_UNITS);
 				int slot = resultSlotFor(mined);
-				if (slot < 0) {
-					continue; // No room for this kind; the others still come out.
-				}
+				if (slot < 0) continue;
 				int got = Deposits.extract(level, source, mined.getCount());
 				if (got > 0) {
-					if (items.get(slot).isEmpty()) {
-						items.set(slot, mined.copyWithCount(got));
-					} else {
-						items.get(slot).grow(got);
-					}
+					if (items.get(slot).isEmpty()) items.set(slot, mined.copyWithCount(got));
+					else items.get(slot).grow(got);
 				}
 			}
 		}
@@ -1541,36 +1649,21 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		return true;
 	}
 
-	/**
-	 * The deposit blocks the drill works next, one of each kind (coal, iron, ...): for each, the highest in the area
-	 * under its 3x3 base and {@link MachineKind#DEPOSIT_REACH} blocks round it, down to {@link MachineKind#DEPOSIT_DEPTH}
-	 * layers. Empty when none is left.
-	 */
+	/** One highest eligible source per output family; stone and deepslate never double the rate. */
 	public List<BlockPos> findDeposits(ServerLevel level, BlockPos pos, BlockState state) {
-		Direction facing = state.getValue(MachineBlock.FACING);
-		Footprint footprint = footprint(state);
-		int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
-		for (int part = 0; part < footprint.size(); part++) {
-			BlockPos partPos = footprint.partPos(pos, facing, part);
-			minX = Math.min(minX, partPos.getX());
-			maxX = Math.max(maxX, partPos.getX());
-			minZ = Math.min(minZ, partPos.getZ());
-			maxZ = Math.max(maxZ, partPos.getZ());
+		boolean deep = DeepDrillingAssemblyBlock.installed(level, pos, state);
+		if (deep && (!depositLayerReady || depositDepth < 1 || depositDepth > DeepDrillingAssemblyBlock.DEPTH)) return List.of();
+		BlockPos center = DeepDrillingAssemblyBlock.center(pos, state);
+		int radius = deep ? DeepDrillingAssemblyBlock.RADIUS : (footprint(state).size() > 1 ? 1 : 0) + MachineKind.DEPOSIT_REACH;
+		int first = deep ? depositDepth : 1, last = deep ? depositDepth : MachineKind.DEPOSIT_DEPTH;
+		Map<Item, BlockPos> byFamily = new LinkedHashMap<>();
+		for (int depth = first; depth <= last; depth++) for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+			BlockPos at = center.offset(dx, -depth, dz);
+			if (!level.isLoaded(at)) continue;
+			if (level.getBlockState(at).getBlock() instanceof DepositBlock deposit && !byFamily.containsKey(deposit.yield())
+					&& mayWorkDeposit(level, at) && Deposits.remaining(level, at) > 0) byFamily.put(deposit.yield(), at);
 		}
-		int reach = MachineKind.DEPOSIT_REACH;
-		Map<Block, BlockPos> byKind = new LinkedHashMap<>();
-		BlockPos.MutableBlockPos at = new BlockPos.MutableBlockPos();
-		for (int y = pos.getY() - 1; y >= pos.getY() - MachineKind.DEPOSIT_DEPTH; y--) {
-			for (int x = minX - reach; x <= maxX + reach; x++) {
-				for (int z = minZ - reach; z <= maxZ + reach; z++) {
-					Block block = level.getBlockState(at.set(x, y, z)).getBlock();
-					if (block instanceof DepositBlock && !byKind.containsKey(block)) {
-						byKind.put(block, at.immutable());
-					}
-				}
-			}
-		}
-		return new ArrayList<>(byKind.values());
+		return new ArrayList<>(byFamily.values());
 	}
 
 	/**
@@ -1956,7 +2049,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	@Override
 	public void setItem(int slot, ItemStack stack) {
 		// A different input restarts processing, so progress cannot carry over to another recipe.
-		if ((kind.isProcessor() || kind.isFluidProcessor()) && slot < kind.outputSlot()
+		if ((kind.isProcessor() || kind.isFluidProcessor()) && (slot < kind.outputSlot() || (kind.hasProcessTool() && slot == kind.slots))
 				&& !ItemStack.isSameItemSameComponents(items.get(slot), stack)) {
 			progress = 0;
 			resetCompanionEffort();
@@ -1966,6 +2059,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 
 	@Override
 	public boolean canPlaceItem(int slot, ItemStack stack) {
+        if (kind.hasProcessTool() && slot == kind.slots)
+            return kind.acceptsProcessTool(stack);
 		if (kind == MachineKind.ADVANCED_ENGINE) {
 			return slot == 0 && stack.is(PetroItems.TURBOCHARGER);
 		}
@@ -2088,6 +2183,11 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		items = NonNullList.withSize(kind.containerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
 		companionPort.load(input);
+		batteryMode = Math.clamp(input.getIntOr("batteryMode", 0), 0, 3);
+		batteryReserve = Math.clamp(input.getIntOr("batteryReserve", 0), 0, 90);
+		batteryPriority = Math.clamp(input.getIntOr("batteryPriority", 0), -1, 1);
+		int savedOutput = input.getIntOr("batteryOutput", 100);
+		batteryOutput = savedOutput == 25 || savedOutput == 50 ? savedOutput : 100;
 		progress = input.getInt("progress").orElse(0);
 		assistedArgonTicks = Math.clamp(input.getIntOr("CompanionArgonTicks", 0), 0, MachineKind.ASU_ARGON_INTERVAL - 1);
 		maxProgress = input.getInt("max_progress").orElse(0);
@@ -2096,8 +2196,19 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		tank = input.getInt("water").orElse(0);
 		sides.unpack(input.getInt("sides").orElse(sides.pack()));
 		cursor = input.getInt("cursor").orElse(0);
+		depositDepth = Math.clamp(input.getIntOr("depositDepth", 0), 0, DeepDrillingAssemblyBlock.DEPTH);
+		depositBoreProgress = Math.clamp(input.getIntOr("depositBoreProgress", 0), 0, DeepDrillingAssemblyBlock.BORE_TICKS - 1);
+		depositLayerReady = input.getBooleanOr("depositLayerReady", false) && depositDepth > 0;
+		depositOwner = input.read("depositOwner", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
+		depositSources.clear();
 		if (reservoir != null) {
 			reservoir.readValue(input);
+			if (kind == MachineKind.FLOW_BATTERY) {
+				// Preserve expanded contents even before modules/chunks are available on load.
+				reservoir.amount = Math.clamp(input.getLong("FlowElectrolyteAmount").orElse(reservoir.amount),
+					0L, BatteryInstallation.MAX_FLUID_MB * FluidNetworks.DROPLETS_PER_MB);
+				if (reservoir.amount > 0) reservoir.variant = FluidVariant.of(PetroFluids.VANADIUM_ELECTROLYTE.source());
+			}
 		}
 		// After the reservoir: the flow battery's charge is capped by its electrolyte.
 		energy.setAmount(input.getLong("energy").orElse(0L));
@@ -2111,8 +2222,20 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		super.saveAdditional(output);
 		ContainerHelper.saveAllItems(output, items);
 		companionPort.save(output);
+		if (kind.isBattery()) {
+			output.putInt("batteryMode", batteryMode);
+			output.putInt("batteryReserve", batteryReserve);
+			output.putInt("batteryPriority", batteryPriority);
+			output.putInt("batteryOutput", batteryOutput);
+		}
 		output.putLong("energy", energy.getAmount());
 		output.putInt("progress", progress);
+		if (kind == MachineKind.DEPOSIT_DRILL) {
+			output.putInt("depositDepth", depositDepth);
+			output.putInt("depositBoreProgress", depositBoreProgress);
+			output.putBoolean("depositLayerReady", depositLayerReady);
+			if (depositOwner != null) output.store("depositOwner", net.minecraft.core.UUIDUtil.CODEC, depositOwner);
+		}
 		if (kind == MachineKind.AIR_SEPARATION_UNIT) output.putInt("CompanionArgonTicks", assistedArgonTicks);
 		output.putInt("max_progress", maxProgress);
 		output.putInt("burn", burn);
@@ -2124,6 +2247,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		if (reservoir != null) {
 			reservoir.writeValue(output);
+			if (kind == MachineKind.FLOW_BATTERY) output.putLong("FlowElectrolyteAmount", reservoir.amount);
 		}
 		if (tanks != null) {
 			tanks.save(output);

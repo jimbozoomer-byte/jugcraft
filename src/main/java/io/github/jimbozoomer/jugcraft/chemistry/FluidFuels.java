@@ -20,12 +20,60 @@ public final class FluidFuels {
 	/** Hydrogen in the fuel cell: 128,000 JE a bucket, less than the 204,800 JE the electrolytic cell spends making
 	 * a bucket of it (four buckets of brine), so electrolysis and the fuel cell are never a power loop. */
 	public static final int HYDROGEN = 128;
+	public static final int METHANE = 448;
+	public static final int GAS_BURNING_METHANE = 256;
 	/**
 	 * The Gas Burning Generator (a machine form, docs/features/industrial-gas-burning-generator.md) burns hydrogen at
 	 * {@link #HYDROGEN}, the Fuel Cell's value, and makes this many JE a tick from it, the owner's selected starter
 	 * output: a millibucket a tick. Its fuels are listed on the form, so the gas turbine never burns hydrogen.
 	 */
 	public static final int GAS_BURNING_HYDROGEN = 128;
+	/**
+	 * Methane, the Gas Burning Generator's second fuel: the plan's 448 JE per mB, three and a half times hydrogen's, at
+	 * the owner's selected 256 JE a tick. Making a mB over the nickel bed takes four of hydrogen, so even with the
+	 * cheapest electrolysis it costs far more than it returns.
+	 */
+
+	/**
+	 * The Bio Generator (docs/features/industrial-bio-generator.md), the lower-output generator for bioethanol and later
+	 * cleaned biogas, burns bioethanol at {@link #BIOETHANOL}, the gas turbine's value, at the plan's proposed 96 JE a
+	 * tick: below the gas-burning generator's 128.
+	 */
+	public static final int BIO_GENERATOR_BIOETHANOL = 96;
+	/**
+	 * The Anaerobic Digester's biogas in the Bio Generator: its 60% methane share of {@link #METHANE}, rounded down (the
+	 * carbon dioxide burns for nothing), at the plan's 64 JE a tick.
+	 */
+	public static final int BIOGAS = 268;
+	public static final int BIO_GENERATOR_BIOGAS = 64;
+	/**
+	 * The Large Gas Burning Generator (docs/features/industrial-large-gas-burning-generator.md), the Gas Burning
+	 * Generator's 5x6x5 variant: four times as fast, hydrogen at the same {@link #HYDROGEN} (more would beat electrolysis's
+	 * cost) and methane an eighth better, between the Gas Burning Generator and the Combined Cycle Power Plant.
+	 */
+	public static final int LARGE_GAS_BURNING_HYDROGEN = 512;
+	public static final int LARGE_GAS_METHANE = 504;
+	public static final int LARGE_GAS_BURNING_METHANE = 1_024;
+	/**
+	 * The Large Bio Generator (docs/features/industrial-large-bio-generator.md), the Bio Generator's 5x6x5 variant: a
+	 * bigger, hotter engine whose exhaust warms its fuel, so it gets a quarter more from each fuel than the Bio Generator,
+	 * and burns them four times as fast. Bioethanol at 240 JE/mB (still below the advanced engine's 256), biogas at 335.
+	 */
+	public static final int LARGE_BIOETHANOL = 240;
+	public static final int LARGE_BIO_GENERATOR_BIOETHANOL = 384;
+	public static final int LARGE_BIOGAS = 335;
+	public static final int LARGE_BIO_GENERATOR_BIOGAS = 256;
+	/**
+	 * The Combined Cycle Power Plant, the factory's big power station: a gas turbine whose exhaust raises steam for a
+	 * second turbine, so methane gives 528 JE/mB, above the large gas generator's 504, and it runs at 2,048 JE/t,
+	 * four times the gas turbine. It burns the Coal Gasifier's raw syngas whole, 256 JE/mB at the same rate, and hydrogen at
+	 * the Fuel Cell's 128 JE/mB (below electrolysis's cost) at 1,024 JE/t.
+	 */
+	public static final int COMBINED_CYCLE_METHANE = 528;
+	public static final int COMBINED_CYCLE_METHANE_RATE = 2_048;
+	public static final int RAW_SYNGAS = 256;
+	public static final int COMBINED_CYCLE_SYNGAS_RATE = 2_048;
+	public static final int COMBINED_CYCLE_HYDROGEN_RATE = 1_024;
 	/** The gas turbine's lubricant upkeep: 1 mB for every this many ticks it runs (a bucket lasts 20,000 ticks). */
 	public static final int LUBRICANT_TICKS = 20;
 	/** The advanced combustion engine (KE per mB): turbocharged, it gets a quarter more from diesel than the diesel

@@ -4,6 +4,7 @@
     "jugcraft:bronze_boots",
     "jugcraft:steel_boots",
     "jugcraft:thallite_boots",
+    "jugcraft:titanium_boots",
     "jugcraft:steampunk_boots",
     "jugcraft:kaiser_boots",
     "jugcraft:earthbound_thallite_boots",
@@ -26,9 +27,14 @@
     "jugcraft:banana_boots",
     "jugcraft:scarab_boots",
     "jugcraft:free_runners",
+    "jugcraft:hazmat_boots",
     "jugcraft:pyromaniacs_shoes",
     "jugcraft:pyromancers_boots",
     "jugcraft:exosuit_boots",
-    "jugcraft:ronin_exosuit_boots"
+    "jugcraft:ronin_exosuit_boots",
+    "jugcraft:dark_matter_boots",
+    "jugcraft:red_matter_boots",
+    "jugcraft:gem_boots",
+    "#jugcraft:nouveau_magic_boots"
   ]
 }

@@ -1,24 +1,37 @@
 """JSON resources for the lairs (tools/lairs.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md,
-docs/features/glacier-hall.md, docs/features/cinder-kiln.md): the lair-only blocks, the Last Rites' Mourning Wreath and
-Death Knell, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Mist Gate's name, the lairs' messages, and each lair's
-dimension (its dimension type, level stem and biome) and structure template (tools/hollow_acre.py, tools/spindle_loft.py,
-tools/glacier_hall.py, tools/cinder_kiln.py).
+docs/features/glacier-hall.md, docs/features/cinder-kiln.md, docs/features/lantern-fen.md,
+docs/features/crypt-archive.md, docs/features/foundry-trench.md, docs/features/moonlit-ring.md): the lair-only blocks,
+the Last Rites' Mourning Wreath and Death Knell, the Cursed Spindle, the Frost Horn, the Kiln Seal, the Hag Stone, the
+Writ of Exhumation, Sealed Orders, the Howling Totem, the Mist Gate's name, the lairs' messages, and each lair's dimension
+(its dimension type, level stem and biome) and structure template (tools/hollow_acre.py, tools/spindle_loft.py,
+tools/glacier_hall.py, tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py,
+tools/moonlit_ring.py, tools/cydonian_sanctum.py).
 
 Called from tools/agriculture_data.py (assets, loot, recipes, tags, worldgen). Formats follow vanilla 26.3's own files:
 the dimension type copies the shape of vanilla's End (logged from the running game by LairGameTests), the level stem a
 flat generator with no layers, and the biome vanilla's void with no spawns.
 """
 from decor_data import MOD, HORIZONTAL, rid, self_drop
+import alpha_werewolf as aw
 import cinder_kiln
+import crypt_archive
+import foundry_trench
+import cydonian_sanctum
 import glacier_hall
 import hollow_acre
+import lantern_fen
+import moonlit_ring
 import spindle_loft
-from lairs import (FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS, MOURNING_FLOWERS,
-                   RECIPES, RITE_CANDLES, SEAL_GROUND, SEAL_LANDS, SLUICE_FLOWS, SLUICE_PARTS, THREAD_COLOURS)
+from lairs import (BELL_NAMES, FIXTURES, GATE, HORN_GROUND, ICICLE_PARTS, ITEMS, LACE_PATTERNS, LAIR_BLOCKS, LAIRS,
+                   MOURNING_FLOWERS, NAME_GLOWS, NAMES, RECIPES, RITE_CANDLES, SEAL_GROUND, SEAL_LANDS, SLUICE_FLOWS,
+                   SLUICE_PARTS, PYLON_NAMES, STONE_GROUND, STONE_LANDS, THREAD_COLOURS, TRENCH_WORKS, WEREWOLF_PELTS,
+                   WRIT_TOMBS)
+from cydonian_sanctum import CONSTELLATIONS, DOOR_FIGURES
 
 # Each lair's template, by the lair's id.
 TEMPLATES = {"hollow_acre": hollow_acre, "spindle_loft": spindle_loft, "glacier_hall": glacier_hall,
-             "cinder_kiln": cinder_kiln}
+             "cinder_kiln": cinder_kiln, "lantern_fen": lantern_fen, "crypt_archive": crypt_archive,
+             "foundry_trench": foundry_trench, "moonlit_ring": moonlit_ring, "cydonian_sanctum": cydonian_sanctum}
 
 
 def cube(lo, hi, faces, texture, cull=None, shade=True, uvs=None):
@@ -65,9 +78,10 @@ def brazier(lit):
     return {"parent": "minecraft:block/block", "textures": textures, "elements": elements}
 
 
-def mist(axis):
-    """Grey Mist: a curtain of mist across the middle of the block, see-through and without collision."""
-    texture = {"force_translucent": True, "sprite": rid("block/lair_exit")}
+def mist(axis, sprite="lair_exit"):
+    """Grey Mist (or the Sanctum's Red Mist): a curtain of mist across the middle of the block, see-through and without
+    collision."""
+    texture = {"force_translucent": True, "sprite": rid(f"block/{sprite}")}
     curtain = {"from": [0, 0, 7], "to": [16, 16, 9], "shade": False,
                "faces": {"north": {"texture": "#mist"}, "south": {"texture": "#mist"}}}
     return {"parent": "minecraft:block/block", "textures": {"particle": texture, "mist": texture}, "elements": [curtain]}
@@ -280,6 +294,333 @@ def cinder_kiln_assets(models, states, write, simple):
     write(states / "sluice_gate.json", {"variants": variants})
 
 
+def fen_lamp(lit):
+    """A fen lamp: a great lantern of blackened iron, its base and cap a plate wider than its panes, a post up each
+    corner and a knob on the cap; lit, its panes burn with the marsh-light, at full light whatever lights them."""
+    sides = ("north", "south", "east", "west")
+    panes = cube([3, 2, 3], [13, 13, 13], sides, "#glass", shade=not lit)
+    if lit:
+        panes["light_emission"] = 15
+    cap = cube([2, 13, 2], [14, 15, 14], ALL, "#frame")
+    cap["faces"]["up"]["texture"] = "#top"
+    elements = [cube([2, 0, 2], [14, 2, 14], ALL, "#frame"), panes, cap, cube([6, 15, 6], [10, 16, 10], ALL, "#frame")]
+    for x in (2, 12):
+        for z in (2, 12):
+            elements.append(cube([x, 2, z], [x + 2, 13, z + 2], sides, "#frame"))
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/fen_lamp_frame"), "frame": rid("block/fen_lamp_frame"),
+                         "top": rid("block/fen_lamp_top"),
+                         "glass": rid("block/fen_lamp_glass_lit" if lit else "block/fen_lamp_glass")},
+            "elements": elements}
+
+
+def lantern_fen_assets(models, states, write):
+    """The Lantern Fen's lair-only block, the fen lamp (tools/lantern_fen.py), lit and gone out."""
+    write(models / "fen_lamp.json", fen_lamp(True))
+    write(models / "fen_lamp_unlit.json", fen_lamp(False))
+    write(states / "fen_lamp.json", {"variants": {"lit=true": {"model": rid("block/fen_lamp")},
+                                                  "lit=false": {"model": rid("block/fen_lamp_unlit")}}})
+
+
+TURNS = {"north": 0, "east": 90, "south": 180, "west": 270}
+
+
+def turned(model, facing):
+    """A blockstate variant: `model` as drawn facing north, turned to face `facing`."""
+    return {"model": rid(f"block/{model}"), **({"y": TURNS[facing]} if TURNS[facing] else {})}
+
+
+def name_stone(rune, glow):
+    """A name-stone, drawn facing north: a tablet 14 across and 14 high, two thick, against the cell's south side, on a
+    ledge of the same stone. Lit, its face burns (full light, unshaded)."""
+    tablet = cube([1, 1, 14], [15, 15, 16], ALL, "#edge", shade=glow != "lit")
+    tablet["faces"]["north"]["texture"] = "#face"
+    if glow == "lit":
+        tablet["light_emission"] = 12
+    ledge = cube([0, 0, 13], [16, 1, 16], ALL, "#edge")
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/name_stone_edge"), "edge": rid("block/name_stone_edge"),
+                         "face": rid(f"block/name_stone_{rune}_{glow}")},
+            "elements": [tablet, ledge]}
+
+
+def grave_seal(rune, broken):
+    """A grave seal, drawn facing north: its iron plate 12 across and 12 high, two thick, against the cell's south side,
+    the wax and the rune on its face."""
+    texture = f"block/grave_seal_{rune}" + ("_broken" if broken else "")
+    seal = cube([2, 2, 14], [14, 14, 16], ALL, "#plate", uvs={"north": [2, 2, 14, 14]})
+    seal["faces"]["north"]["texture"] = "#face"
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/grave_seal_plate"), "plate": rid("block/grave_seal_plate"),
+                         "face": rid(texture)},
+            "elements": [seal]}
+
+
+def archive_lectern():
+    """The Lectern of Last Names, drawn facing north (its reader stands to the north): a foot of crypt stone, a column of
+    bone, and a desk of black wood sloping down toward the reader with the book open on it."""
+    slope = {"origin": [8, 12, 8], "axis": "x", "angle": -22.5}
+    desk = cube([1, 11, 2], [15, 13, 14], ALL, "#desk")
+    desk["rotation"] = slope
+    book = cube([2, 13, 3], [14, 14, 13], ("north", "south", "east", "west", "down"), "#pages")
+    book["faces"]["up"] = {"texture": "#book"}
+    book["rotation"] = slope
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/archive_lectern_desk"), "base": rid("block/archive_lectern_base"),
+                         "column": rid("block/archive_lectern_column"), "desk": rid("block/archive_lectern_desk"),
+                         "book": rid("block/archive_lectern_book"), "pages": rid("block/archive_lectern_pages")},
+            "elements": [cube([3, 0, 3], [13, 2, 13], ALL, "#base"), cube([6, 2, 6], [10, 11, 10], ALL, "#column"),
+                         desk, book]}
+
+
+def phylactery(cracked):
+    """The phylactery: an urn of bone on a gold foot, banded with gold, its lid of bone with a gold knob. Whole, its body
+    burns with the soul-fire in its windows (full light, unshaded); cracked, it is dark."""
+    body = cube([4, 1, 4], [12, 8, 12], ("north", "south", "east", "west"), "#side", shade=cracked)
+    if not cracked:
+        body["light_emission"] = 10
+    body["faces"]["up"] = {"texture": "#top"}
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/phylactery_bone"), "gold": rid("block/phylactery_gold"),
+                         "bone": rid("block/phylactery_bone"), "top": rid("block/phylactery_top"),
+                         "side": rid("block/phylactery_cracked" if cracked else "block/phylactery_side")},
+            "elements": [cube([5, 0, 5], [11, 1, 11], ALL, "#gold"), body,
+                         cube([5, 8, 5], [11, 9, 11], ALL, "#gold"), cube([6, 9, 6], [10, 11, 10], ALL, "#bone"),
+                         cube([7, 11, 7], [9, 12, 9], ALL, "#gold")]}
+
+
+def crypt_archive_assets(models, states, write):
+    """The Archive of Last Names' lair-only blocks (tools/crypt_archive.py): the name-stones, the grave seals, the
+    Lectern of Last Names and the phylactery."""
+    variants = {}
+    for rune in NAMES.values():
+        for glow in NAME_GLOWS:
+            write(models / f"name_stone_{rune}_{glow}.json", name_stone(rune, glow))
+            for facing in HORIZONTAL:
+                variants[f"facing={facing},glow={glow},rune={rune}"] = turned(f"name_stone_{rune}_{glow}", facing)
+    write(states / "name_stone.json", {"variants": variants})
+    variants = {}
+    for rune in NAMES.values():
+        for broken in (False, True):
+            name = f"grave_seal_{rune}" + ("_broken" if broken else "")
+            write(models / f"{name}.json", grave_seal(rune, broken))
+            for facing in HORIZONTAL:
+                variants[f"broken={str(broken).lower()},facing={facing},rune={rune}"] = turned(name, facing)
+    write(states / "grave_seal.json", {"variants": variants})
+    write(models / "archive_lectern.json", archive_lectern())
+    write(states / "archive_lectern.json", {"variants": {f"facing={f}": turned("archive_lectern", f) for f in HORIZONTAL}})
+    write(models / "phylactery.json", phylactery(False))
+    write(models / "phylactery_cracked.json", phylactery(True))
+    write(states / "phylactery.json", {"variants": {"cracked=false": {"model": rid("block/phylactery")},
+                                                    "cracked=true": {"model": rid("block/phylactery_cracked")}}})
+
+
+def pylon_lattice():
+    """A pylon's lattice, a block of its height: four steel corner posts, and between them on each side a plane of X
+    bracing, drawn on both its faces so the far side's bracing shows through the near side's (the gaps are cut out)."""
+    posts = [cube([x, 0, z], [x + 2, 16, z + 2], ALL, "#post") for x in (0, 14) for z in (0, 14)]
+    planes = [
+        {"from": [2, 0, 0.5], "to": [14, 16, 0.5], "faces": {
+            "north": {"uv": [2, 0, 14, 16], "texture": "#side"}, "south": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+        {"from": [2, 0, 15.5], "to": [14, 16, 15.5], "faces": {
+            "north": {"uv": [2, 0, 14, 16], "texture": "#side"}, "south": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+        {"from": [0.5, 0, 2], "to": [0.5, 16, 14], "faces": {
+            "east": {"uv": [2, 0, 14, 16], "texture": "#side"}, "west": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+        {"from": [15.5, 0, 2], "to": [15.5, 16, 14], "faces": {
+            "east": {"uv": [2, 0, 14, 16], "texture": "#side"}, "west": {"uv": [2, 0, 14, 16], "texture": "#side"}}},
+    ]
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/pylon_lattice_post"), "post": rid("block/pylon_lattice_post"),
+                         "side": rid("block/pylon_lattice_side")},
+            "elements": posts + planes}
+
+
+def pylon_crown(live):
+    """A pylon's tesla crown: a ribbed insulator stack, a square ring of copper round it and a copper ball on top. Live, the
+    ring and the ball burn violet (full light, unshaded)."""
+    metal = "#live" if live else "#copper"
+    ring = [cube([2, 8, 2], [14, 11, 5], ALL, metal, shade=not live), cube([2, 8, 11], [14, 11, 14], ALL, metal, shade=not live),
+            cube([2, 8, 5], [5, 11, 11], ALL, metal, shade=not live), cube([11, 8, 5], [14, 11, 11], ALL, metal, shade=not live)]
+    ball = cube([6, 11, 6], [10, 15, 10], ALL, metal, shade=not live)
+    if live:
+        for part in ring + [ball]:
+            part["light_emission"] = 15
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/pylon_crown_copper"), "insulator": rid("block/pylon_crown_insulator"),
+                         "copper": rid("block/pylon_crown_copper"), "live": rid("block/pylon_crown_live")},
+            "elements": [cube([6, 0, 6], [10, 8, 10], ALL, "#insulator")] + ring + [ball]}
+
+
+def discharge_breaker(thrown, live, fouled):
+    """A breaker, drawn facing north (its user stands to the north): a steel cabinet against the cell's south side, its
+    switch panel facing north, an amber lamp in a cage on top; on the panel a knife switch, its copper blade on a hinge at
+    the panel's foot with a bakelite handle. Open, the blade leans out 45 degrees; thrown, it stands in its jaws against
+    the panel. Live, the lamp burns (full light, unshaded); fouled, a bent plate of armour is jammed across the blade."""
+    cabinet = cube([2, 0, 7], [14, 13, 16], ALL, "#cabinet", uvs={"north": [2, 3, 14, 16]})
+    cabinet["faces"]["north"]["texture"] = "#panel"
+    lamp = cube([6, 13, 9], [10, 16, 13], ALL, "#lamp_lit" if live else "#lamp", shade=not live)
+    if live:
+        lamp["light_emission"] = 15
+    swing = {"origin": [8, 3, 6], "axis": "x", "angle": 0 if thrown else -45}
+    blade = cube([7, 3, 5.5], [9, 12, 6.5], ALL, "#blade")
+    handle = cube([6.5, 12, 5], [9.5, 14, 7], ALL, "#handle")
+    blade["rotation"] = dict(swing)
+    handle["rotation"] = dict(swing)
+    hinge = cube([6, 2, 5], [10, 4, 7], ALL, "#handle")
+    elements = [cabinet, lamp, hinge, blade, handle]
+    if fouled:
+        plate = cube([3, 6, 3.5], [13, 9, 4.5], ALL, "#plate")
+        plate["rotation"] = {"origin": [8, 7.5, 4], "axis": "z", "angle": 22.5}
+        elements.append(plate)
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/breaker_cabinet"), "cabinet": rid("block/breaker_cabinet"),
+                         "panel": rid("block/breaker_panel"), "lamp": rid("block/breaker_lamp"),
+                         "lamp_lit": rid("block/breaker_lamp_lit"), "blade": rid("block/breaker_blade"),
+                         "handle": rid("block/breaker_handle"), "plate": rid("block/breaker_plate")},
+            "elements": elements}
+
+
+def ground_terminal(live):
+    """A ground terminal: a block of the pit's floor whose top is a riveted copper plate. Live, the plate burns violet
+    with the discharge it is earthing (full light, unshaded)."""
+    top = "#live" if live else "#top"
+    element = cube([0, 0, 0], [16, 16, 16], ALL, "#side", shade=not live)
+    element["faces"]["up"]["texture"] = top
+    element["faces"]["down"]["texture"] = "#bottom"
+    for face, side in (("north", "north"), ("south", "south"), ("east", "east"), ("west", "west"), ("down", "down")):
+        element["faces"][face]["cullface"] = side
+    if live:
+        element["light_emission"] = 15
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/ground_terminal_side"), "side": rid("block/ground_terminal_side"),
+                         "bottom": rid("block/ground_terminal_side"), "top": rid("block/ground_terminal_top"),
+                         "live": rid("block/ground_terminal_live")},
+            "elements": [element]}
+
+
+def foundry_trench_assets(models, states, write):
+    """The Foundry Trench's lair-only blocks (tools/foundry_trench.py): the pylons' lattice and crowns, the breakers and
+    the ground terminals."""
+    write(models / "pylon_lattice.json", pylon_lattice())
+    write(states / "pylon_lattice.json", {"variants": {"": {"model": rid("block/pylon_lattice")}}})
+    write(models / "pylon_crown.json", pylon_crown(False))
+    write(models / "pylon_crown_live.json", pylon_crown(True))
+    write(states / "pylon_crown.json", {"variants": {"live=false": {"model": rid("block/pylon_crown")},
+                                                     "live=true": {"model": rid("block/pylon_crown_live")}}})
+    variants = {}
+    for thrown in (False, True):
+        for live in (False, True):
+            for fouled in (False, True):
+                name = "discharge_breaker" + ("_thrown" if thrown else "") + ("_live" if live else "") + (
+                    "_fouled" if fouled else "")
+                write(models / f"{name}.json", discharge_breaker(thrown, live, fouled))
+                for facing in HORIZONTAL:
+                    key = f"facing={facing},fouled={str(fouled).lower()},live={str(live).lower()},thrown={str(thrown).lower()}"
+                    variants[key] = turned(name, facing)
+    write(states / "discharge_breaker.json", {"variants": variants})
+    write(models / "ground_terminal.json", ground_terminal(False))
+    write(models / "ground_terminal_live.json", ground_terminal(True))
+    write(states / "ground_terminal.json", {"variants": {"live=false": {"model": rid("block/ground_terminal")},
+                                                         "live=true": {"model": rid("block/ground_terminal_live")}}})
+
+
+def warden_bell(ringing):
+    """A Warden Bell, drawn facing north (its ringer stands to the north): a yoke of old wood across the top of the cell
+    under the frame's beam, the bell hung from it on an iron hanger (a crown, a waist and a flared lip, a clapper inside),
+    and a lever arm out over the north side with the pull rope hanging from it down into the cell below. Ringing, the
+    bell and its clapper swing toward the ringer."""
+    yoke = cube([2, 14, 7], [14, 16, 9], ALL, "#yoke")
+    arm = cube([7, 13, 1], [9, 14, 7], ALL, "#yoke")
+    hanger = cube([7, 12.5, 7], [9, 14, 9], ALL, "#clapper")
+    crown = cube([6, 11, 6], [10, 12.5, 10], ALL, "#metal")
+    waist = cube([5, 7, 5], [11, 11, 11], ALL, "#metal")
+    lip = cube([4, 4.5, 4], [12, 7, 12], ALL, "#metal", uvs={face: [2, 13, 10, 15.5] for face in ("north", "south", "east", "west")})
+    clapper = cube([7.5, 3, 7.5], [8.5, 5, 8.5], ALL, "#clapper")
+    # The rope runs down past the cell's foot: its faces take the texture whole, stretched, rather than run off it.
+    rope = cube([7.5, -13, 1.5], [8.5, 13, 2.5], ALL, "#rope", uvs={**{face: [7, 0, 8, 16] for face in ("north", "south", "east", "west")},
+                                                              "up": [7, 7, 8, 8], "down": [7, 7, 8, 8]})
+    swinging = [hanger, crown, waist, lip, clapper]
+    if ringing:
+        for part in swinging:
+            part["rotation"] = {"origin": [8, 14, 8], "axis": "x", "angle": 22.5}
+    return {"parent": "minecraft:block/block",
+            "textures": {"particle": rid("block/warden_bell_metal"), "metal": rid("block/warden_bell_metal"),
+                         "yoke": rid("block/warden_bell_yoke"), "clapper": rid("block/warden_bell_clapper"),
+                         "rope": rid("block/warden_bell_rope")},
+            "elements": [yoke, arm, rope] + swinging}
+
+
+def moonlit_ring_assets(models, states, write):
+    """The Moonlit Ring's lair-only blocks (tools/moonlit_ring.py): Moonwood Leaves, the Warden Bells and raked turf."""
+    write(models / "moonwood_leaves.json", {"parent": "minecraft:block/cube_all",
+                                            "textures": {"all": rid("block/moonwood_leaves")}})
+    write(states / "moonwood_leaves.json", {"variants": {"": {"model": rid("block/moonwood_leaves")}}})
+    variants = {}
+    for ringing in (False, True):
+        name = "warden_bell_ringing" if ringing else "warden_bell"
+        write(models / f"{name}.json", warden_bell(ringing))
+        for facing in HORIZONTAL:
+            variants[f"facing={facing},ringing={str(ringing).lower()}"] = turned(name, facing)
+    write(states / "warden_bell.json", {"variants": variants})
+    # Raked turf (the Alpha's trail, part 2): moss torn by his claws, on its earth.
+    write(models / "raked_turf.json", {"parent": "minecraft:block/cube_bottom_top", "textures": {
+        "top": rid("block/raked_turf"), "side": rid("block/raked_turf_side"), "bottom": rid("block/raked_turf_side")}})
+    write(states / "raked_turf.json", {"variants": {f"turf={i}": {"model": rid("block/raked_turf")} for i in range(len(aw.TURFS))}})
+def star_door(figure, lit):
+    """A block of the Star Door: carved red stone, a constellation carved on its south face (the gallery's side), lit or
+    dark."""
+    face = "star_door" if figure == "plain" else f"star_door_{figure}" + ("_lit" if lit else "")
+    model = {"parent": "minecraft:block/cube", "textures": {
+        "particle": rid("block/star_door"), "north": rid("block/star_door"), "east": rid("block/star_door"),
+        "west": rid("block/star_door"), "up": rid("block/star_door"), "down": rid("block/star_door"),
+        "south": rid(f"block/{face}")}}
+    if lit:
+        # The lit figure burns: full light, unshaded, on its own face.
+        model = {"parent": "minecraft:block/block", "textures": model["textures"], "elements": [
+            cube([0, 0, 0], [16, 16, 16], ("north", "east", "west", "up", "down"), "#north", cull=ALL),
+            {**cube([0, 0, 0], [16, 16, 16], ("south",), "#south", cull=("south",), shade=False), "light_emission": 12}]}
+        for face_name in ("east", "west", "up", "down"):
+            model["elements"][0]["faces"][face_name]["texture"] = f"#{face_name}"
+    return model
+
+
+def cydonian_sanctum_assets(models, states, write, simple):
+    """The Cydonian Sanctum's lair-only blocks (tools/cydonian_sanctum.py): the Red Mist (its way home), the star stones,
+    the star dials, the Star Door and the dust vents."""
+    write(models / "red_mist.json", mist("x", "red_mist"))
+    write(states / "red_mist.json", {"variants": {"axis=x": {"model": rid("block/red_mist")},
+                                                  "axis=z": {"model": rid("block/red_mist"), "y": 90}}})
+    simple("star_stone", {"parent": "minecraft:block/cube_column", "textures": {
+        "side": rid("block/star_stone"), "end": rid("block/star_stone_end")}})
+    variants = {}
+    for stars in CONSTELLATIONS:
+        write(models / f"star_dial_{stars}.json", {"parent": "minecraft:block/orientable", "textures": {
+            "top": rid("block/star_dial_top"), "side": rid("block/star_dial_side"), "front": rid(f"block/star_dial_{stars}")}})
+        for facing in HORIZONTAL:
+            variants[f"facing={facing},stars={stars}"] = turned(f"star_dial_{stars}", facing)
+    write(states / "star_dial.json", {"variants": variants})
+    variants = {}
+    for figure in ("plain", *DOOR_FIGURES):
+        for lit in (False, True):
+            name = "star_door" if figure == "plain" else f"star_door_{figure}" + ("_lit" if lit else "")
+            if figure != "plain" or not lit:
+                write(models / f"{name}.json", star_door(figure, lit))
+            for opening in (False, True):
+                variants[f"figure={figure},lit={str(lit).lower()},opening={str(opening).lower()}"] = {
+                    "model": rid(f"block/{'star_door' if figure == 'plain' else name}")}
+    write(states / "star_door.json", {"variants": variants})
+    # The dust vent: the owner's sulfur vent (art/owner-library, Guns), its faces cut from one 32 x 32 sheet.
+    simple("dust_vent", {"parent": "minecraft:block/block", "textures": {
+        "vent": rid("block/dust_vent"), "particle": rid("block/dust_vent")}, "elements": [{
+            "from": [0, 0, 0], "to": [16, 16, 16], "faces": {
+                "north": {"uv": [0, 0, 8, 8], "texture": "#vent", "cullface": "north"},
+                "east": {"uv": [8, 8, 16, 16], "texture": "#vent", "cullface": "east"},
+                "south": {"uv": [0, 0, 8, 8], "texture": "#vent", "cullface": "south"},
+                "west": {"uv": [8, 8, 16, 16], "texture": "#vent", "cullface": "west"},
+                "up": {"uv": [8, 16, 0, 8], "texture": "#vent", "cullface": "up"},
+                "down": {"uv": [16, 0, 8, 8], "texture": "#vent", "cullface": "down"}}}]})
+
+
 def assets(root, write, lang):
     models, states, items = root / "models" / "block", root / "blockstates", root / "items"
 
@@ -305,6 +646,11 @@ def assets(root, write, lang):
     spindle_loft_assets(models, states, write, simple)
     glacier_hall_assets(models, states, write, simple)
     cinder_kiln_assets(models, states, write, simple)
+    lantern_fen_assets(models, states, write)
+    crypt_archive_assets(models, states, write)
+    foundry_trench_assets(models, states, write)
+    moonlit_ring_assets(models, states, write)
+    cydonian_sanctum_assets(models, states, write, simple)
     for name, display in LAIR_BLOCKS.items():
         lang[f"block.{MOD}.{name}"] = display
 
@@ -321,12 +667,35 @@ def assets(root, write, lang):
     lang[f"item.{MOD}.cursed_spindle"] = ITEMS["cursed_spindle"]
     lang[f"item.{MOD}.frost_horn"] = ITEMS["frost_horn"]
     lang[f"item.{MOD}.kiln_seal"] = ITEMS["kiln_seal"]
+    lang[f"item.{MOD}.hag_stone"] = ITEMS["hag_stone"]
+    lang[f"item.{MOD}.exhumation_writ"] = ITEMS["exhumation_writ"]
+    lang[f"item.{MOD}.sealed_orders"] = ITEMS["sealed_orders"]
+    lang[f"item.{MOD}.howling_totem"] = ITEMS["howling_totem"]
+    lang[f"item.{MOD}.altar_keystone"] = ITEMS["altar_keystone"]
     lang[f"tooltip.{MOD}.death_knell"] = "Rung at a grave at night, among lit candles, with a wreath laid on it"
     lang[f"tooltip.{MOD}.cursed_spindle"] = "Used on a Spinning Wheel at night: prick your finger, and wake in the Spindle Loft"
     lang[f"tooltip.{MOD}.mourning_wreath"] = "Lay it on a grave for the Last Rites"
     lang[f"tooltip.{MOD}.frost_horn"] = "Blown at night, standing on snow or ice: the snow opens onto the Glacier Hall"
     lang[f"tooltip.{MOD}.kiln_seal"] = ("Pressed into a magma block in the Nether or a volcanic land: the magma opens onto "
                                         "the Cinder Kiln")
+    lang[f"tooltip.{MOD}.hag_stone"] = ("Looked through at night, standing in shallow water or on mud in a wetland: a lantern "
+                                        "burns far off, and the mist takes you to the Lantern Fen")
+    lang[f"tooltip.{MOD}.exhumation_writ"] = ("Served on a stone sarcophagus in a crypt, under a roof: the lid grinds aside on a "
+                                              "stair down to the Archive of Last Names")
+    lang[f"tooltip.{MOD}.sealed_orders"] = ("Used on a Field Telephone that stands in a trench, under the open sky: the line "
+                                            "crackles, and a whistle calls you to the Foundry Trench")
+    lang[f"tooltip.{MOD}.howling_totem"] = ("Used at night in werewolf country, under the open sky: it howls, something far off "
+                                            "answers, and the mist takes you to the Moonlit Ring")
+    for name, rune in NAMES.items():
+        lang[f"lair.{MOD}.crypt_archive.name.{name}"] = f"the {name.capitalize()}"
+    for name in PYLON_NAMES:
+        lang[f"lair.{MOD}.foundry_trench.pylon.{name}"] = f"the {name} pylon"
+    for name in BELL_NAMES:
+        lang[f"lair.{MOD}.moonlit_ring.bell.{name}"] = f"the {name} bell"
+    lang[f"tooltip.{MOD}.altar_keystone"] = ("Set into the Ancient Altar of Adam-ondi-Ahman at night: the altars kindle red, "
+                                             "and the red mist opens onto Mars")
+    for stars in CONSTELLATIONS:
+        lang[f"lair.{MOD}.cydonian_sanctum.stars.{stars}"] = f"the {stars.capitalize()}"
     lang[f"entity.{MOD}.{GATE['entity']}"] = GATE["display"]
 
     for lair, info in LAIRS.items():
@@ -359,6 +728,47 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.seal.not_volcanic": "The seal takes only in the Nether, or in a volcanic land",
         f"message.{MOD}.lair.seal.venting": "The magma already vents here: use the vent to follow",
         f"message.{MOD}.lair.seal.opened": "The magma cracks open, and a vent of sparks and smoke rises from it",
+        f"message.{MOD}.lair.stone.not_overworld": "Through the stone you see only stone",
+        f"message.{MOD}.lair.stone.not_night": "By day the stone shows nothing but the sky",
+        f"message.{MOD}.lair.stone.not_wetland": "The stone shows its lantern only in a wetland",
+        f"message.{MOD}.lair.stone.not_wet": "Stand in shallow water or on mud to look through it",
+        f"message.{MOD}.lair.stone.misting": "The mist has already risen here: use it to follow",
+        f"message.{MOD}.lair.stone.opened": "Through the stone a lantern burns far off; the water stills, and mist rises from it",
+        f"message.{MOD}.lair.writ.not_overworld": "The writ holds only in the Overworld",
+        f"message.{MOD}.lair.writ.open_sky": "The dead are not called up under the open sky: serve the writ in a crypt",
+        f"message.{MOD}.lair.writ.misting": "This tomb already stands open: use its mist to follow",
+        f"message.{MOD}.lair.writ.opened": "The lid grinds aside, and a stair goes down into blue fire and mist",
+        f"message.{MOD}.lair.writ.not_tomb": "Serve the writ on a stone sarcophagus",
+        f"message.{MOD}.lair.orders.not_phone": "Use the orders on a Field Telephone that stands in a trench",
+        f"message.{MOD}.lair.orders.not_overworld": "No line runs to the front from here",
+        f"message.{MOD}.lair.orders.roofed": "The line is dead under a roof: use the telephone in an open trench",
+        f"message.{MOD}.lair.orders.no_trench": "The telephone must stand in a trench: sandbags, revetments or duckboards round it",
+        f"message.{MOD}.lair.orders.ringing": "This line is already open: use the telephone to follow",
+        f"message.{MOD}.lair.orders.opened": "The bell rings, a whistle shrills down the line, and you go over the top",
+        f"message.{MOD}.lair.breaker.dead": "No current: the pylon is dark",
+        f"message.{MOD}.lair.totem.not_overworld": "Nothing here answers the totem's howl",
+        f"message.{MOD}.lair.totem.not_night": "Nothing answers the totem by day",
+        f"message.{MOD}.lair.totem.not_woods": "The totem's howl is answered only in werewolf country: the woods",
+        f"message.{MOD}.lair.totem.roofed": "Howl under the open sky, where the moon can hear",
+        f"message.{MOD}.lair.totem.not_ground": "Stand on the woodland floor to plant the totem",
+        f"message.{MOD}.lair.totem.wolfsbane": "The wolfsbane keeps them away",
+        f"message.{MOD}.lair.totem.misting": "The mist has already risen here: use it to follow",
+        f"message.{MOD}.lair.totem.opened": "The totem howls at the moon, and something far off answers",
+        f"message.{MOD}.lair.bell.resting": "The bell is still swinging",
+        f"message.{MOD}.lair.seal.cold": "The seal is cold: no chain binds it now",
+        f"message.{MOD}.lair.keystone.not_overworld": "The altar answers only in the Overworld",
+        f"message.{MOD}.lair.keystone.not_night": "By day the red star lies cold: set the keystone at night",
+        f"message.{MOD}.lair.keystone.misting": "The altar already burns red: use the red mist to follow",
+        f"message.{MOD}.lair.keystone.kindled": "The keystone crumbles, and the altars kindle with red fire one after another",
+        f"message.{MOD}.lair.keystone.opened": "A column of red light rises, and the red mist opens over the altar",
+        f"message.{MOD}.lair.keystone.not_altar": "Set the keystone into the Ancient Altar of Adam-ondi-Ahman",
+        f"message.{MOD}.lair.dial.turned": "The dial turns to %s",
+        f"message.{MOD}.lair.dial.matched": "%s lights on the Star Door",
+        f"message.{MOD}.lair.door.opened": "The Star Door grinds open",
+        f"death.attack.{MOD}.dust_vent": "%1$s was scoured by a dust vent",
+        f"death.attack.{MOD}.dust_vent.player": "%1$s was scoured by a dust vent while fighting %2$s",
+        f"message.{MOD}.lair.lectern.read": "The Archive of Last Names: %s, %s and %s",
+        f"message.{MOD}.lair.lectern.restored": "You read the name back: %s is cut into its stone again",
         f"message.{MOD}.lair.sluice.open": "The sluice is already open",
         f"message.{MOD}.lair.sluice.filling": "The sluice is filling again",
         f"message.{MOD}.lair.sluice.choked": "Slag chokes the sluice: it will not turn",
@@ -369,6 +779,8 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.protected": "Nothing in a lair can be changed",
         f"message.{MOD}.lair.grave_goods.kept": "Your belongings are gathered up as Grave Goods",
         f"message.{MOD}.lair.grave_goods.returned": "Your Grave Goods are returned to you",
+        f"message.{MOD}.lair.reward.kept": "Your share of the spoils is kept for you until you are back on your feet",
+        f"message.{MOD}.lair.reward.returned": "You are handed your share of the spoils",
         f"commands.{MOD}.lair.not_inside": "You are not in a lair",
         f"commands.{MOD}.lair.list.none": "No lair is open",
         f"commands.{MOD}.lair.list.entry": "%s, slot %s: %s inside, open %s seconds",
@@ -385,10 +797,10 @@ def loot(out, write):
 
 
 def recipes(out, write, conditions):
-    for item, recipe in RECIPES.items():
-        write(out / f"{item}.json", {"fabric:load_conditions": conditions(), "type": "minecraft:crafting_shaped",
-                                     "category": "misc", "pattern": recipe["pattern"], "key": recipe["key"],
-                                     "result": {"id": rid(item), "count": 1}})
+    for name, recipe in RECIPES.items():
+        write(out / f"{name}.json", {"fabric:load_conditions": conditions(*recipe.get("features", [])),
+                                     "type": "minecraft:crafting_shaped", "category": "misc", "pattern": recipe["pattern"],
+                                     "key": recipe["key"], "result": {"id": rid(recipe.get("result", name)), "count": 1}})
 
 
 def tags(tags):
@@ -408,6 +820,16 @@ def tags(tags):
         tags.add("block", f"{MOD}:kiln_seal_ground", block)
     for biome in SEAL_LANDS:
         tags.add("worldgen/biome", f"{MOD}:kiln_seal_lands", biome)
+    for block in STONE_GROUND:
+        tags.add("block", f"{MOD}:hag_stone_ground", block)
+    for biome in STONE_LANDS:
+        tags.add("worldgen/biome", f"{MOD}:hag_stone_lands", biome)
+    for block in WRIT_TOMBS:
+        tags.add("block", f"{MOD}:writ_tombs", block)
+    for block in TRENCH_WORKS:
+        tags.add("block", f"{MOD}:trench_works", block)
+    for pelt in WEREWOLF_PELTS:
+        tags.add("item", f"{MOD}:werewolf_pelts", pelt)
     # Blighted soil is earth: plants stand on it.
     tags.add("block", "minecraft:dirt", rid("blighted_soil"))
     tags.add("block", "minecraft:mineable/hoe", rid("mourning_wreath"))
@@ -466,3 +888,6 @@ def worldgen(data, write):
                                                    "features": False, "biome": rid(lair)}}})
     for module in TEMPLATES.values():
         module.write(data / MOD / "structure" / f"{module.TEMPLATE}.nbt")
+    # The Cydonian Sanctum's dust vents strike with their own damage (its death message is in the lang).
+    write(data / MOD / "damage_type" / "dust_vent.json", {"message_id": f"{MOD}.dust_vent", "exhaustion": 0.1,
+                                                          "scaling": "when_caused_by_living_non_player"})

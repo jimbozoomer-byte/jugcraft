@@ -66,7 +66,9 @@ ABOUT = {
                  "fertilizer (by hand or hopper) and every 30 seconds it spreads one over the 5x5 crops around it.",
     "cryogenic_liquefier": "A cold box of chrome heat exchangers under frost. Pipe oxygen (from the air separation unit) "
                            "into its tank: every 4 seconds a bucket of oxygen condenses into 250 mB of liquid oxygen, "
-                           "the oxidizer for liquid rocket motors. 96 JE/t.",
+                           "the oxidizer for liquid rocket motors. 96 JE/t. Install a Methane Cooling Module for liquid "
+                           "methane, or an advanced Hydrogen Cooling Module for either methane or hydrogen. Tools are "
+                           "retained. See Cryogenics and Rocket Fuels for timings, storage and loaded motor assemblies.",
     "ammonia_chiller": "Ammonia boiling in its coils draws the heat out of water. Pipe ammonia into its first tank and "
                        "water into its second: every 5 seconds a bucket of water freezes into a block of ice. Put four "
                        "ice in its slot and it presses them into packed ice, and four packed ice into blue ice, against "
@@ -131,6 +133,7 @@ ABOUT = {
     "brass_wrench": "Right-click turns a machine. Sneak and right-click to pick a Jugcraft block up, with everything inside.",
     "speed_upgrade": "In a machine's upgrade slot: each card makes it faster but uses more energy per item. Four cards: 3x as "
                      "fast for twice the energy.",
+    "automation_upgrade": "Enables saved recipe priorities and output stock targets in supported machines. Open Recipes to configure up to eight rules. Removing the card suspends the rules without deleting them.",
     "efficiency_upgrade": "In a machine's upgrade slot: each card cuts energy use by a fifth. Four cards: 41% of the energy.",
     "prospector": "Right-click to survey the 3x3 chunks around you, from the bottom of the world to a little above you. "
                   "It shows which ores resonate, how strongly (1 to 5 bars) and roughly how deep, never exactly where.",
@@ -168,12 +171,12 @@ ABOUT = {
                          "and a bucket of water. It also splits plain water, slowly: a bucket gives 500 mB of hydrogen "
                          "(middle row) and 250 mB of oxygen (top row) every 40 seconds, an early fuel for the fuel cell.",
     "chemical_reactor": "Two by two by two, lined with lead against the acid: the general chemistry vessel, with two "
-                        "item slots, a tank in and a tank out. Two sulfur dust and a bucket of water make a bucket of "
+                        "item slots, liquid and gas feeds, a retained acid charge and a product tank. Two sulfur dust and a bucket of water make a bucket of "
                         "sulfuric acid. It also mixes: two salt and a bucket of water make brine; two sand, a dried "
                         "kelp and a bucket of water make fracking fluid. An ore in 250 mB of sulfuric acid gives four washed "
                         "ores, the best ore route. Eight crops (wheat, sugar cane, potatoes, carrots, beetroot, "
                         "berries, melon or apples) in a bucket of water ferment into 250 mB of bioethanol. Its other "
-                        "reactions are on its recipe pages.",
+                        "reactions are on its recipe pages. Absorption: 500 mB water + 500 mB hydrogen chloride gas makes 1000 mB hydrochloric acid; 250 mB water + 250 mB sulfur trioxide makes 500 mB sulfuric acid. Both take 5 seconds at 96 JE/t. For sulfuric absorption, first use a sulfuric-acid bucket on the TOP: the dedicated 1000 mB charge is retained, including in the dropped reactor. Normal liquid/gas feeds and products connect at the sides. Other process liquids are not preserved when broken: drain them first. HCl leaches one raw copper into two washed copper in 8 seconds. These are game recipes, not real chemical procedures.",
     "air_separation_unit": "Two by two and six tall: a cold box and its distillation column. It needs no input: it "
                            "liquefies air and splits it, 8 mB of nitrogen a tick out of the top row, 2 mB of oxygen "
                            "out of the bottom row and a little argon (1 mB every 2 ticks) out of the middle, at 64 "
@@ -237,7 +240,15 @@ ABOUT = {
                      "stony hills): every 15 seconds it takes one coal or raw ore from each kind of deposit under it "
                      "or one block round it, down to 3 blocks deep, using 16 JE/t. It pushes what it mines out of every side "
                      "into a chest, item pipe, conveyor or machine beside it. Each deposit block holds 1,000 and then "
-                     "turns to stone; right-click one to see how much is left. Picks only break deposits, for nothing.",
+                     "turns to its host rock; right-click one to see how much is left. Picks only break deposits, for nothing. "
+                     "The same four resources also form underground seams, lenses and veins. A basic rig built down "
+                     "at the seam works normally. Craft a Deep-Drilling Assembly from four steel plates, three steel gears, "
+                     "a basic circuit and a steel pickaxe, then use it on the rig to add a taller mast. It bores a 9x9 "
+                     "column up to 128 blocks below the base, one layer per powered second at 32 JE/t, and works each "
+                     "depth until exhausted. Extraction remains one item per family every 15 seconds; speed and "
+                     "efficiency cards apply. Power loss and full outputs preserve progress. Right-click the mast "
+                     "for depth or open the rig for live progress. Stone and deepslate deposits share the same rate. "
+                     "The Prospector shows separate bulk-deposit readings. High mountain rigs may need a lower platform.",
     "ore_drill": "Two blocks tall. Mines the ore blocks in a 9x9 column below it, one layer at a time down to the bottom "
                  "of the world, one ore every 2 seconds. Each hole is refilled with stone or deepslate. The ores come "
                  "out whole, ready for ore processing.",
@@ -540,11 +551,31 @@ def arms_pages():
 
 
 def variant_pages():
-    """Arms VII (batch 56): the styles' patterns, the bosses' trophies and the armor sets' arms."""
+    """Arms VII (batch 56): the styles' patterns, the bosses' trophies and the armor sets' arms. A boss that is built
+    names its lair (tools/arms_variants.py BOSSES), so the trophy page lists it among the foes met, the rest among those
+    yet to be met."""
     import arms_variants as av
+    import lairs
     rows, key = av.STYLES["gilded"]["pattern_recipe"]
     grid = [item_for(key[ch]) if ch in key else None for row in rows for ch in row.ljust(3)]
     styles = ", ".join(info["display"].lower() for info in av.STYLES.values())
+
+    def trophies(boss, info):
+        # "Vesperine, the Last Reaper, in the Hollow Acre: Vesper Scythe."
+        name = info["display"][0].upper() + info["display"][1:]
+        if "lair" in info:
+            lair = lairs.LAIRS[info["lair"]]["display"]
+            name += ", in " + ("the " + lair[4:] if lair.startswith("The ") else lair)
+        return f"{name}: " + " and ".join(av.BY_ID[trophy][3] for trophy in av.trophies(boss)) + "."
+    met = [trophies(boss, info) for boss, info in av.BOSSES.items() if "lair" in info]
+    unmet = [trophies(boss, info) for boss, info in av.BOSSES.items() if "lair" not in info]
+    trophy_text = ["Great foes carry arms of their own, with a boon."]
+    if met:
+        trophy_text += ["These are met in their lairs. Anyone who takes part in one's fall may win its trophy, and "
+                        "always does the first time:"] + met
+    if unmet:
+        trophy_text += ["These are yet to be met in the world, and will each carry two:"] + unmet
+    trophy_text += ["Trophies last twice as long as steel, and fight as their kinds do."]
     return [
         {"title": "Arms: Styles", "icon": f"{MOD}:gilded_longsword", "text": [
             f"Four styles restyle a steel arm at a smithing table: {styles}. Put the style's pattern, the steel arm and "
@@ -556,12 +587,7 @@ def variant_pages():
             f"for {av.MARK_TICKS // 20} seconds, seen through walls.",
             "Each fights as its kind does: the same swing, reach, trait and art."],
          "craft": {"grid": grid, "result": f"{MOD}:gilders_pattern", "count": 1}},
-        {"title": "Arms: Trophies", "icon": f"{MOD}:glacier_maul", "text": [
-            "Great foes yet to be met in the world will each carry two arms of their own, with a boon:",
-            ] + [f"{info['display'][0].upper()}{info['display'][1:]}: "
-                 + " and ".join(av.BY_ID[name][3] for name in av.trophies(boss)) + "."
-                 for boss, info in av.BOSSES.items()] + [
-            "Trophies last twice as long as steel, and fight as their kinds do."]},
+        {"title": "Arms: Trophies", "icon": f"{MOD}:glacier_maul", "text": trophy_text},
     ] + set_pages()
 
 
@@ -768,9 +794,38 @@ def ores_page():
             lines.append(line)
     for mineral, info in MINERALS.items():
         gen = info["gen"]
-        lines.append(f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}.")
+        line = f"{info['ore_display']}: Y {gen['min_y']} to {gen['max_y']}."
+        if mineral == "fluorite":
+            line += (f" Large pockets below permanently snowy inland biomes; needs an {info['tool']} pickaxe. "
+                     "Mineral faces in small stone outcrops can point to a pocket below. Seasonal snow, beaches, rivers and oceans do not qualify. "
+                     "The prospector and ore drill work here; nine fluorite make a decorative storage block. "
+                     "Fluorite chemistry is planned separately.")
+        elif mineral == "spodumene":
+            line += (" Large pockets below Shield, Highland, Basin, Windswept Hills, Windswept Gravelly Hills, "
+                     "Windswept Forest and Stony Peaks; most centers are near Y 24. Needs an iron pickaxe. "
+                     "Look for pale-green mineral faces in small stone outcrops, or use the prospector and ore drill. "
+                     "The crusher gives two spodumene per ore; nine compact into a storage block. "
+                     "Fire spodumene in the Industrial Oven, then condition two activated spodumene with 500 mB sulfuric acid into two Lithium Carbonate. See Batteries and Power Management; existing lepidolite processing remains available.")
+        elif mineral == "vanadium_iron":
+            line += (" Vanadiferous magnetite: richest below Shield and Volcano, with smaller, rarer pockets below "
+                     "Highland, Basin, Windswept Hills, Windswept Gravelly Hills, Windswept Forest and Stony Peaks. "
+                     "Centers peak near Y -8. Small stone outcrops sometimes mark pockets, except in Volcano. "
+                     "Needs an iron pickaxe; Fortune cannot increase the one raw feed per block. "
+                     "Crush one raw feed or intact ore into one Vanadium-bearing Iron Concentrate (200 ticks at 16 JE/t), "
+                     "then wash with 500 mB water into one Vanadium Oxide (200 ticks at 16 JE/t). "
+                     "Two bricks and the oxide make a reusable Vanadium Contact Bed, without acid. "
+                     "The prospector and ore drill work here; nine raw feeds compact into a storage block. "
+                     "Deposits never replenish. Ordinary iron shortcuts require the legacy configuration option.")
+        lines.append(line)
+    from mineral_sands import SANDS
+    for name, info in SANDS.items():
+        lines.append(f"{info['display']}: shallow beds in {biome_names(info['biomes'])}. "
+                     "Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. "
+                     "Each mineral-sand block is one finite feed unit; Fortune does not increase it. "
+                     "The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; "
+                     "the Deposit Drill and generic ore-doubling recipes do not process it.")
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
-            "text": ["Jugcraft ores appear in the stone and deepslate of every Overworld biome:"] + lines}
+            "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}
 
 
 # The path through the mod, stage by stage (the "Progression" chapter). Each stage: title, icon, what it is for, a
@@ -978,9 +1033,22 @@ def build():
                 "chlorine, hydrogen and lye. Gases live only in tanks, pipes and gas cylinders."]},
             machine_page("electrolytic_cell"),
             form_page("electrolytic_separator"),
+            form_page("bulk_electrolytic_separator"),
             machine_page("chemical_reactor"),
+            form_page("chemical_oxidizer"),
+            form_page("bulk_chemical_oxidizer"),
+            form_page("industrial_fermenter"),
+            form_page("bulk_fermenter"),
+            form_page("bulk_chemical_reactor"),
+            form_page("anaerobic_digester"),
+            form_page("coal_gasifier"),
+            form_page("gas_cleanup_rack"),
             machine_page("fuel_cell"),
             form_page("gas_burning_generator"),
+            form_page("large_gas_burning_generator"),
+            form_page("bio_generator"),
+            form_page("large_bio_generator"),
+            form_page("combined_cycle_power_plant"),
             machine_page("electroplating_bath"),
             {"title": "Rubber", "icon": f"{MOD}:rubber", "text": [
                 "Crack a bucket of naphtha in the chemical reactor: 500 mB of butadiene. The polymerization reactor "
@@ -1013,6 +1081,8 @@ def build():
                 "Nitric acid etches microchips with half as much acid as sulfuric."]},
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
+            form_page("chemical_infuser"),
+            form_page("bulk_chemical_infuser"),
             machine_page("ammonia_chiller"),
             machine_page("cryogenic_liquefier"),
             {"title": "Gas Cylinders", "icon": f"{MOD}:gas_cylinder", "text": [
@@ -1174,4 +1244,34 @@ def build():
                 "A comparator next to a generator or battery shows how full it is.",
                 "Next to a processing machine, it shows how full its slots are, like a chest."]}]},
     ]
+    # Keep every registered industrial form discoverable, including later chemistry/farm additions.
+    # Existing authored pages keep their positions; only missing station pages are appended.
+    import industrial_forms
+    covered = {page.get("icon") for chapter in chapters for page in chapter["pages"]}
+    chemistry = next(chapter for chapter in chapters if chapter["title"] == "Chemistry")
+    for form in industrial_forms.FORMS:
+        if f"{MOD}:{form}" not in covered:
+            chemistry["pages"].append(form_page(form))
+    chemistry["pages"].append({"title": "Four shared process machines", "icon": "jugcraft:brine_concentrator", "text": [
+        "Build a Concentrator for seawater or acid; a Gas Scrubber for synthesis gas, biogas or fermentation gas; a Filter Press for aluminate or digestate; and an Industrial Oven for drying, calcination or PTFE sintering. Each handles multiple resources without a separate named machine for every output.",
+        "The five older specialist designs stay craftable and continue working in existing factories. The four recommended machines also keep their original saved block IDs, inventories and ports. The Oven gains one connected solution inlet on its lower rear face.",
+        "Open Recipes to search and preview inputs, outputs and costs. Lock recipe chooses the only job new batches may start; Automatic restores input-driven selection. Saved locks also filter automated inputs. Drain incompatible input AND output fluids and clear other feed items when changing jobs; running batches finish unchanged."]})
+    import ceramics
+    chapters.append({"title": "Ceramics and Precision", "icon": "jugcraft:porcelain_insulator",
+                     "pages": ceramics.GUIDE_PAGES + [form_page('precision_finisher')]})
+    import structural_alloys
+    chapters.append({"title": "Stainless and Structural Alloys", "icon": "jugcraft:stainless_steel_ingot",
+                     "pages": structural_alloys.GUIDE_PAGES})
+    import battery_expansion
+    chapters.append(dict(title='Batteries and Power Management', icon='jugcraft:lead_acid_battery_bank', pages=battery_expansion.GUIDE_PAGES))
+    import cryogenic_fuels
+    chapters.append(dict(title='Cryogenics and Rocket Fuels', icon='jugcraft:hydrolox_motor', pages=cryogenic_fuels.GUIDE_PAGES))
+    import synthetic_fuels
+    chapters.append(dict(title='Synthetic Fuels and Recovery', icon='jugcraft:synthetic_crude_bucket', pages=synthetic_fuels.GUIDE_PAGES))
+    import phosphate_processing
+    chapters.append(dict(title='Phosphate Processing and Fertilizers', icon='jugcraft:triple_superphosphate', pages=phosphate_processing.GUIDE_PAGES))
+    import advanced_electronics
+    chapters.append(dict(title='Advanced Electronics and Automation', icon='jugcraft:advanced_chip', pages=advanced_electronics.GUIDE_PAGES))
+    import starter_workshop
+    chapters.insert(1, starter_workshop.chapter())
     return {"chapters": chapters}

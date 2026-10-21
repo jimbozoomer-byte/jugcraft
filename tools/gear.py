@@ -22,6 +22,12 @@ GEAR_TIERS = {
     "thallite": {"display": "Thallite", "ingot": "#c:ingots/thallite", "feature": "thallite",
                  "tool": (200, 6.0, 2.0, 18), "drops": "iron",
                  "armor": (13, (2, 5, 6, 2), 18, 0.0, 0.0), "arms": False},
+    # Titanium (docs/features/titanium-gear.md): the step above steel, below netherite. Diamond's drops (netherite's
+    # need netherite), steel's uses half again, diamond's speed and damage, and better enchanting than either; its armor
+    # is diamond's defense and toughness with steel's knockback resistance. Its arms are not drawn yet ("arms": False).
+    "titanium": {"display": "Titanium", "ingot": "#c:ingots/titanium", "feature": "titanium",
+                 "tool": (1300, 8.0, 3.0, 15), "drops": "diamond",
+                 "armor": (30, (3, 6, 8, 3), 14, 2.0, 0.05), "arms": False},
 }
 TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 ARMOR = ["helmet", "chestplate", "leggings", "boots"]
@@ -29,7 +35,7 @@ PIECES = TOOLS + ARMOR
 
 # Paxels: pickaxe, axe and shovel in one, three times the durability of the tier's tools.
 PAXEL_TIERS = {"wood": "Wooden", "stone": "Stone", "iron": "Iron", "gold": "Golden", "diamond": "Diamond",
-               "netherite": "Netherite", "bronze": "Bronze", "steel": "Steel"}
+               "netherite": "Netherite", "bronze": "Bronze", "steel": "Steel", "titanium": "Titanium"}
 PAXEL_DURABILITY = 3
 # The vanilla tools a vanilla-tier paxel is made from.
 VANILLA_TOOL_PREFIX = {"wood": "wooden", "stone": "stone", "iron": "iron", "gold": "golden", "diamond": "diamond",
@@ -405,6 +411,9 @@ def write_all(write, assets, data, lang, condition):
     by_tag["head_armor"].append(f"{MOD}:gas_mask")  # batch 31, tools/field_chemistry.py
     by_tag["chest_armor"].append(f"{MOD}:scuba_tank")
     by_tag["foot_armor"].append(f"{MOD}:free_runners")
+    import nuclear  # the hazmat suit (tools/nuclear.py)
+    for tag, item in nuclear.HAZMAT_TAGS.items():
+        by_tag[tag].append(f"{MOD}:{item}")
     # The two fire sets (tools/concordance_ember.py ARMOR): armor of their slots, so they enchant and equip as any armor.
     import concordance_ember
     for item, piece in concordance_ember.ARMOR.items():
@@ -429,6 +438,14 @@ def write_all(write, assets, data, lang, condition):
     from kitchen import KNIVES
     for tag in ("enchantable/melee_weapon", "enchantable/durability"):
         by_tag.setdefault(tag, []).extend(f"{MOD}:{knife}" for knife in KNIVES)
+    import concordance_dark_matter
+    for tag, values in concordance_dark_matter.item_tags().items():
+        by_tag.setdefault(tag, []).extend(values)
+    import concordance_ee_equipment, concordance_ee_artifacts
+    import nouveau_content
+    for module in (concordance_ee_equipment, concordance_ee_artifacts, nouveau_content):
+        for tag, values in module.item_tags().items():
+            by_tag.setdefault(tag, []).extend(values)
     for tag, values in by_tag.items():
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():

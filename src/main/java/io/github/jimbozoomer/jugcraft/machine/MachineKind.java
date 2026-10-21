@@ -118,7 +118,15 @@ public enum MachineKind implements StringRepresentable {
 	ROCKET_WORKSHOP("rocket_workshop", 20_000, 256, 0, 48, 4),
 	// Chemistry (batch 17, the electric look): a 3x3x2 vanadium redox flow battery. Its charge is capped by the
 	// electrolyte in its tanks (FLOW_BATTERY_JE_PER_MB a millibucket); it gives power out of its front.
-	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0);
+	FLOW_BATTERY("flow_battery", 64_000_000, 8_192, 8_192, 0, 0),
+	// Nuclear fuel (docs/features/nuclear.md): a 5x3x2 hall of gas centrifuges enriching uranium (one input, one
+	// output), and a 3x2x2 fuel line making fuel assemblies (two inputs, one output).
+	GAS_CENTRIFUGE_CASCADE("gas_centrifuge_cascade", 400_000, 4_096, 0, 1_024, 2),
+	FUEL_FABRICATOR("fuel_fabricator", 100_000, 1_024, 0, 256, 3),
+	// Append storage hardware to preserve existing ordinal-based integrations.
+	LEAD_ACID_BATTERY_BANK("lead_acid_battery_bank", 2_000_000, 1_024, 1_024, 0, 0),
+	FLOW_TANK_MODULE("flow_tank_module", 0, 0, 0, 0, 0),
+	FLOW_STACK_MODULE("flow_stack_module", 0, 0, 0, 0, 0);
 
 	/** JE produced per tick while the coal generator burns. */
 	public static final int GENERATION_PER_TICK = 32;
@@ -325,12 +333,13 @@ public enum MachineKind implements StringRepresentable {
 				|| this == PULVERIZER || this == ORE_WASHER || this == SIEVE || this == SAWMILL
 				|| this == COKE_OVEN || this == STEEL_FOUNDRY || this == ORE_DRILL || this == DEPOSIT_DRILL
 				|| this == COBBLESTONE_GENERATOR || this == TREE_FARM || this == AUTO_CRAFTER
-				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY || this == ELECTROPLATING_BATH || this == ROCKET_WORKSHOP;
+				|| this == CROP_HARVESTER || this == HYDROPONIC_BAY || this == ELECTROPLATING_BATH || this == ROCKET_WORKSHOP
+				|| this == GAS_CENTRIFUGE_CASCADE || this == FUEL_FABRICATOR;
 	}
 
 	/** Stores energy and gives it out of its front face only. */
 	public boolean isBattery() {
-		return this == BATTERY_BOX || this == CAPACITOR_BANK || this == LITHIUM_BATTERY_BANK || this == FLOW_BATTERY;
+		return this == LEAD_ACID_BATTERY_BANK || this == BATTERY_BOX || this == CAPACITOR_BANK || this == LITHIUM_BATTERY_BANK || this == FLOW_BATTERY;
 	}
 
 	/** Whether the machine runs on JE at all. Unpowered machines have no battery and cables never connect to them. */
@@ -341,7 +350,7 @@ public enum MachineKind implements StringRepresentable {
 	/** Processors whose recipes combine several ingredient stacks placed in any input slots. */
 	public boolean isMultiInput() {
 		return this == ALLOY_SMELTER || this == CIRCUIT_ASSEMBLER || this == STEEL_FOUNDRY || this == ARC_FURNACE
-				|| this == ROCKET_WORKSHOP;
+				|| this == ROCKET_WORKSHOP || this == GAS_CENTRIFUGE_CASCADE || this == FUEL_FABRICATOR;
 	}
 
 	/**
@@ -376,6 +385,8 @@ public enum MachineKind implements StringRepresentable {
 			case LITHOGRAPHY_STATION -> "lithography";
 			case AMMONIA_CHILLER -> "chilling";
 			case CRYOGENIC_LIQUEFIER -> "liquefaction";
+			case GAS_CENTRIFUGE_CASCADE -> "enrichment";
+			case FUEL_FABRICATOR -> "fuel_fabrication";
 			default -> null;
 		};
 	}
@@ -385,9 +396,23 @@ public enum MachineKind implements StringRepresentable {
 		return isProcessor() && usesPower() ? 2 : 0;
 	}
 
-	/** Size of the machine's inventory: {@link #slots} (inputs, output, byproducts) plus upgrade slots. */
+	/** Manual retained tooling; never exposed through sided item transfer. */
+    public boolean hasProcessTool() {
+        return this == LITHOGRAPHY_STATION || this == CRYOGENIC_LIQUEFIER;
+    }
+
+    public boolean acceptsProcessTool(net.minecraft.world.item.ItemStack stack) {
+        return switch (this) {
+            case LITHOGRAPHY_STATION -> stack.is(io.github.jimbozoomer.jugcraft.chemistry.PetroItems.GENERAL_CHIP_PATTERN);
+            case CRYOGENIC_LIQUEFIER -> stack.is(io.github.jimbozoomer.jugcraft.chemistry.PetroItems.METHANE_COOLING_MODULE)
+                    || stack.is(io.github.jimbozoomer.jugcraft.chemistry.PetroItems.HYDROGEN_COOLING_MODULE);
+            default -> false;
+        };
+    }
+
+	/** Existing process slots plus upgrades or one appended retained tool socket. */
 	public int containerSize() {
-		return slots + upgradeSlots();
+		return slots + upgradeSlots() + (hasProcessTool() ? 1 : 0);
 	}
 
 	/**
@@ -413,7 +438,8 @@ public enum MachineKind implements StringRepresentable {
 			case AIR_SEPARATION_UNIT -> new FluidMachineSpec(List.of(), List.of(ASU_TANK, ASU_TANK, ASU_TANK), 0, 0);
 			case SYNTHESIS_CONVERTER -> new FluidMachineSpec(List.of(CONVERTER_TANK, CONVERTER_TANK, CONVERTER_TANK),
 					List.of(CONVERTER_TANK), 0, 0);
-			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK), List.of(CHEM_REACTOR_TANK), 2, 1);
+			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK, CHEM_REACTOR_TANK, 1000),
+					List.of(CHEM_REACTOR_TANK), 2, 1).migratedFrom(0, 1, 0, 3);
 			case LITHOGRAPHY_STATION -> new FluidMachineSpec(List.of(LITHOGRAPHY_TANK), List.of(), 2, 1);
 			case AMMONIA_CHILLER -> new FluidMachineSpec(List.of(CHILLER_AMMONIA_TANK, CHILLER_WATER_TANK), List.of(), 1, 1);
 			case CRYOGENIC_LIQUEFIER -> new FluidMachineSpec(List.of(LIQUEFIER_TANK), List.of(LIQUEFIER_TANK), 0, 0);
@@ -568,6 +594,9 @@ public enum MachineKind implements StringRepresentable {
 			case GAS_HOLDER -> Footprint.cuboid(3, 3, 3);
 			// Two electrolyte tanks either side of the cell stack, three wide, three tall and two deep.
 			case FLOW_BATTERY -> Footprint.cuboid(3, 3, 2);
+			// Nine tall centrifuges in two rows, five wide, three tall, two deep; and the fuel line, three by two by two.
+			case GAS_CENTRIFUGE_CASCADE -> Footprint.cuboid(5, 3, 2);
+			case FUEL_FABRICATOR -> Footprint.cuboid(3, 2, 2);
 			// The pedestal (the master) and the 3x3 array of cells on the layer above it, centred over it.
 			case ADVANCED_SOLAR_PANEL -> Footprint.of(Vec3i.ZERO, new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0), new Vec3i(1, 1, 0),
 					new Vec3i(0, 1, -1), new Vec3i(0, 1, 1), new Vec3i(-1, 1, -1), new Vec3i(1, 1, -1), new Vec3i(-1, 1, 1),

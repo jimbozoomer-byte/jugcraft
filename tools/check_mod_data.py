@@ -8,6 +8,7 @@ import hashlib
 import json
 import re
 import sys
+from functools import cache
 from pathlib import Path
 
 from PIL import Image
@@ -23,6 +24,7 @@ import menu
 import rice
 import soil
 import orchard
+from trees_data import trunk_placer as orchard_trunk_placer
 import cakes
 import cake_data
 import pie_tart_data
@@ -72,9 +74,11 @@ import tower_guns
 import guns
 import fortifications
 import bunkerworks
+import aged_wood
 import fire_control
 import raiders
 import armoured_walker
+import howitzer_walker
 import gear
 import arms
 import arms_variants
@@ -92,6 +96,7 @@ import styx
 import town_assets
 import graveyard as gy
 import diagonal_connections as dg
+import menagerie_registry as menagerie
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -109,7 +114,7 @@ WORLD_JAVA = JAVA_ROOT / "world"
 STYLE_PACK = RES / "resourcepacks" / "alternate_machines"
 
 # Tags that Jugcraft reads but that vanilla/Fabric API define.
-EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
+EXTERNAL_TAGS = ({"minecraft:substrate_overworld","minecraft:boat","c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_replaceables",
                   "minecraft:deepslate_ore_replaceables", "minecraft:planks", "minecraft:campfires", "minecraft:mineable/axe",
                   "minecraft:mineable/shovel", "minecraft:leaves", "minecraft:eggs", "minecraft:dirt", "minecraft:mud",
                   "minecraft:grass_blocks", "minecraft:sand", "minecraft:wool", "minecraft:logs", "minecraft:candles",
@@ -123,8 +128,12 @@ EXTERNAL_TAGS = ({"c:ingots/copper", "c:ingots/iron", "minecraft:stone_ore_repla
                   "c:is_snowy",
                   # Vanilla's Overworld stone (stone, granite, diorite, andesite, tuff, deepslate): thallite's natural
                   # ground (tools/gear.py EARTHEN_GROUND).
-                  "minecraft:base_stone_overworld"}
+                  "minecraft:base_stone_overworld", "minecraft:base_stone_nether", "minecraft:nylium"}
                  | {f"minecraft:{tag}" for tag in WOODS.values()})
+
+# Verified against the pinned 26.3 vanilla registry data.
+EXTERNAL_TAGS |= {'minecraft:'+tag for tag in ('terracotta','beehives','coral_blocks','ice',
+    'soul_fire_base_blocks','anvil','supports_vegetation','air','skeletons','zombies','illager','fishes')}
 
 errors = []
 
@@ -151,6 +160,7 @@ def tag_exists(registry, ref):
     return ref in EXTERNAL_TAGS or (DATA / ns / "tags" / registry / f"{path}.json").is_file()
 
 
+@cache
 def texture(ref):
     ns, path = split(ref)
     if ns == "minecraft":
@@ -159,7 +169,8 @@ def texture(ref):
     if not png.is_file():
         err(f"Missing texture {ref}")
         return
-    animated = png.with_name(png.name + ".mcmeta").is_file()
+    meta = png.with_name(png.name + ".mcmeta")
+    animated = meta.is_file() and "animation" in (load(meta) or {})
     with Image.open(png) as img:
         # Square: 16x16, or 32x32, 48x48 or 64x64 for high-resolution art, or 128x128 for a sculpted prop's packed texture
         # (docs/ART_DIRECTION.md, "High resolution"). New item icons are 16x16 (docs/ITEM_ICONS.md): 32, 48 and 64 remain
@@ -168,14 +179,25 @@ def texture(ref):
         # Animated textures are a vertical strip of square frames of 16x16, 32x32, 48x48 or 64x64 with an .mcmeta beside
         # them.
         width, height = img.size
+        if not animated and ref == "jugcraft:menagerie/rotten/block/treasure_chest" and img.size == (48, 32):
+            return  # Supplied chest atlas; its original block-model UVs are normalized to 0..16.
+        if not animated and ref.startswith(("jugcraft:household/", "jugcraft:menagerie/")) and all(v > 0 and v <= 1024 and v & (v-1) == 0 for v in img.size):
+            return  # supplied model atlases use rectangular UV sheets
         if animated and not (width in (16, 32, 48, 64) and height % width == 0 and height > width):
             err(f"Animated texture {ref} is {img.size}, expected a strip of 16x16, 32x32, 48x48 or 64x64 frames")
-        elif not animated and img.size not in ((16, 16), (32, 32), (48, 48), (64, 64), (128, 128)):
+        elif not animated and not (ref in {"jugcraft:nouveau/entity/signs/archwood", "jugcraft:nouveau/entity/signs/hanging/archwood"} and img.size == (64,32)) and img.size not in ((16, 16), (32, 32), (48, 48), (64, 64), (128, 128)) \
+                and not (img.size in ((256, 256), (512, 512), (1024, 1024)) and _sharp(png.stem)):
             err(f"Texture {ref} is {img.size}, expected 16x16, 32x32, 48x48, 64x64 or 128x128")
 
 
+# The special item renderers registered by client/StructureItemRenderers.java.
+# The special item models: the 3D miniatures (client/StructureItemRenderers.java), and GeckoLib's animated items.
+SPECIAL_ITEM_RENDERERS = {f"{MOD}:equipment", f"{MOD}:power_line", f"{MOD}:drone", "geckolib:geckolib"}
+
+
+@cache
 def model(ref):
-    ns, path = split(ref)
+    ns, path = split(ref if ":" in ref else "minecraft:" + ref)
     if ns == "minecraft":
         return
     data = load(RES / "assets" / ns / "models" / f"{path}.json")
@@ -183,12 +205,31 @@ def model(ref):
         return
     for tex in data.get("textures", {}).values():
         # A texture is a reference, or {"sprite": reference, "force_translucent": ...}.
-        texture(tex["sprite"] if isinstance(tex, dict) else tex)
+        ref = tex["sprite"] if isinstance(tex, dict) else tex
+        if not ref.startswith("#"):
+            texture(ref if ":" in ref else "minecraft:" + ref)
+
+
+def _sharp(name):
+    """Plant kit textures with writing on them (paperwork, book spines) are kept at 128 or 256 so the text reads."""
+    import plant_office3
+    import plant_office4
+    import plant_panels
+    import nuclear
+    import nuclear_storage
+    return (name in plant_office3.SHARP or name in plant_office4.SHARP or name in plant_panels.SHARP or name in nuclear.SHARP
+            or name in nuclear_storage.SHARP)
 
 
 def item_models(definition):
     """Every model an item definition can show, through select (the blueprint's kinds), condition and range_dispatch
-    (the power bow's draw)."""
+    (the power bow's draw). A special model (the miniatures of client/StructureItemRenderers.java) shows its base
+    model's display and particle, and one of the special renderers the client registers."""
+    if definition.get("type") == "minecraft:special":
+        model(definition["base"])
+        if definition["model"].get("type") not in SPECIAL_ITEM_RENDERERS:
+            err(f"An item's special model is of {definition['model'].get('type')}, not one of {sorted(SPECIAL_ITEM_RENDERERS)}")
+        return
     if "model" in definition:
         if isinstance(definition["model"], str):
             model(definition["model"])
@@ -206,33 +247,39 @@ def item_models(definition):
 
 
 def check_assets(registered):
+    import vehicle_bays
+    import starter_workshop
     lang = load(ASSETS / "lang" / "en_us.json") or {}
-    for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
+    for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                   + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks()) + seasons.BLOCKS
-                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks()):
+                  + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
+                  + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS):
         state = load(ASSETS / "blockstates" / f"{block}.json")
         if state:
             for variant in state.get("variants", {}).values():
                 for choice in variant if isinstance(variant, list) else [variant]:  # a list: weighted, picked by position
                     model(choice["model"])
             for part in state.get("multipart", []):
-                model(part["apply"]["model"])
+                applies = part["apply"]
+                for choice in applies if isinstance(applies, list) else [applies]:
+                    model(choice["model"])
         if f"block.{MOD}.{block}" not in lang:
             err(f"Missing name for block {block}")
         if not (DATA / MOD / "loot_table" / "blocks" / f"{block}.json").is_file():
             err(f"Missing loot table for {block}")
     # Crops, stems, the cranberry bush and the chestnut sapling have no item of their own: what plants them stands in.
+    import plant_interior
     for item in registered:
-        if item in CROPS or item in ag.itemless_blocks():
+        if item in CROPS or item in ag.itemless_blocks() or item in plant_interior.NO_ITEM or item in menagerie.itemless_blocks():
             continue
         definition = load(ASSETS / "items" / f"{item}.json")
         if definition:
             item_models(definition["model"])
-        if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + list(deposits.DEPOSITS)
+        if item not in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
                         + list(tank_display.BLOCKS) + plastic.blocks() + ph.blocks() + (town_assets.blocks() + styx.blocks())
-                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks()
-                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks()) and f"item.{MOD}.{item}" not in lang:
+                        + construction.blocks() + control_electronics.blocks() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks()
+                        + concordance.blocks() + guns.blocks() + industrial_forms.blocks() + list(vehicle_bays.BLOCKS) + menagerie.blocks() + starter_workshop.STATIONS
+                        + exchange_blocks.BLOCKS + exchange_poker.BLOCKS + exchange_casino.BLOCKS + exchange_casino.ITEMS) and f"item.{MOD}.{item}" not in lang:
             err(f"Missing name for item {item}")
 
 
@@ -243,7 +290,7 @@ def check_petro():
     expected = [(f, str(i["tick_delay"]), str(i["slope"]), str(i["drop_off"])) for f, i in petro.FLUIDS.items()]
     if declared != expected:
         err(f"PetroFluids.java fluids {declared} != tools/petro.py {expected}")
-    items_java = re.findall(r'JugcraftRegistry\.item\("([a-z_]+)"[,)]',
+    items_java = re.findall(r'JugcraftRegistry\.item\("([a-z0-9_]+)"[,)]',
                             (JAVA_ROOT / "chemistry" / "PetroItems.java").read_text(encoding="utf-8"))
     if items_java != list(petro.ITEMS):
         err(f"PetroItems.java items {items_java} != tools/petro.py {list(petro.ITEMS)}")
@@ -298,8 +345,19 @@ def old_loot_keys(node):
 
 
 def check_loot(registered):
+    def check_condition_type(node, label):
+        if isinstance(node, dict):
+            condition = node.get("condition")
+            if isinstance(condition, dict) and "type" not in condition:
+                err(f"{label}: loot condition object needs the 26.3 type discriminator")
+            for value in node.values():
+                check_condition_type(value, label)
+        elif isinstance(node, list):
+            for value in node:
+                check_condition_type(value, label)
     for path in sorted((DATA / MOD / "loot_table").rglob("*.json")):
         text = path.read_text(encoding="utf-8")
+        check_condition_type(load(path), path.name)
         stale = old_loot_keys(load(path))
         if stale:
             err(f"{path.name}: uses the pre-26.x loot keys {sorted(stale)}; use \"condition\" and \"modifier\"")
@@ -316,19 +374,38 @@ UNITS = {"ingots": 9, "nuggets": 1, "raw_materials": 9, "ores": 9, "storage_bloc
 
 
 import guide_books
+import exchange_blocks
+import exchange_poker
+import exchange_casino
 NON_METAL = set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
 
 
 def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
+    import vehicle_bays
     ns, path = split(ref.lstrip("#"))
+    if ns == MOD and path == "deep_drilling_assembly":
+        return {}  # Assembled machinery: no ingot-recovery recipe, like the deposit drill itself.
+    if ns == MOD and path in vehicle_bays.BLOCKS:
+        return {}  # Like other assembled machines, bays have no ingot-recovery recipe.
+    # Animal products, cloth, stone, pet tokens and crafted equipment have no
+    # metal-recovery recipe. Acquiring them consumes inputs; none yields ingots.
+    if ns == MOD and path in menagerie.entries() or ref == '#c:eggs':
+        return {}
+    if ref.startswith('#') and ns == MOD and path.startswith(('cavern_','beast_','household_','ecology_','fauna_','mutant_','landscape_','walnut_compat/')):
+        tag = load(DATA / MOD / 'tags' / 'item' / (path+'.json')) or {}
+        values = [v if isinstance(v,str) else v['id'] for v in tag.get('values',[])]
+        # Ingredients select one member. Conservatively use the least valuable
+        # member; the tag/reference audit independently checks every member.
+        return min((item_units(v) for v in values),key=lambda units:sum(units.values()),default={})
     if ref.startswith("#") and (ns == "minecraft" or ref[1:] in (*ag.WOOD_TAGS.values(), ag.HEIRLOOM_TAG)):
         return {}  # vanilla tags used here (logs, planks), Jugcraft logs and heirloom pumpkins hold no metal
     if ref.startswith("#"):
         form, _, metal = path.partition("/")
-        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} or path in ("fermentable", "grave_flowers", "mourning_flowers") \
+        if metal in MINERALS or path in {info["tag"] for info in ITEMS.values()} \
+                or path in ("fermentable", "grave_flowers", "mourning_flowers", "werewolf_pelts", "atmospheric_rocket_motors") \
                 or ns == MOD and form == "concordance":
-            return {}  # ... and the Concordance's own item tags (luminous matter) hold no metal
+            return {}  # ... and the Concordance's own item tags (luminous matter) and the werewolves' pelts hold no metal
         if form not in UNITS or not metal:
             err(f"Recipe uses unsupported tag {ref}")
             return {}
@@ -357,6 +434,8 @@ def item_units(ref):
         for metal in metals:
             if path == f"{metal}_{form}":
                 return {metal: PART_UNITS[form]}
+    if path in {"chromite_concentrate", "galena_concentrate", "magnesium_ingot", "cobalt_concentrate", "cobalt_ingot"}:
+        return {{"chromite_concentrate":"ferrochromium", "galena_concentrate":"lead", "magnesium_ingot":"magnesium", "cobalt_concentrate":"cobalt", "cobalt_ingot":"cobalt"}[path]:9}
     if path == "bauxite":
         # One bauxite holds two ingots of aluminum (it is about half alumina): the Bayer route (chemical reactor and
         # electrolytic cell) recovers all of it, the arc furnace stand-in half, the blast-furnace stand-in a nugget.
@@ -370,8 +449,9 @@ def item_units(ref):
     if path in NON_METAL:
         return {}
     if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
-            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
-            or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks():
+            or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in aged_wood.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
+            or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks()\
+            or path in exchange_poker.BLOCKS or path in exchange_casino.BLOCKS or path in exchange_casino.ITEMS:
         return {}
     if path in arms.items():
         return arms.metal_content(path)
@@ -401,7 +481,18 @@ def item_units(ref):
 
 
 # Special recipes, which make their result from what is in the grid: their type, registered by Java.
-SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}", f"{MOD}:gun_attachment", f"{MOD}:gun_attachment_removal"}
+SPECIAL_RECIPES = {f"{MOD}:{decor18.KEY['recipe']}", f"{MOD}:gun_attachment", f"{MOD}:gun_attachment_removal",
+                   f"{MOD}:household_door_mat_copy", f"{MOD}:beast_bison_upgrade", f"{MOD}:beast_mimicream_repair"}
+
+
+def ingredient_choices(value):
+    """26.3 ingredients may be one item/tag or a nonempty alternative list."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list) and value and all(isinstance(v, str) for v in value):
+        return value
+    err(f"Invalid ingredient: {value!r}")
+    return []
 
 
 def check_recipes(registered):
@@ -432,6 +523,10 @@ def check_recipes(registered):
         kind = recipe["type"]
         if kind == "minecraft:crafting_shaped":
             symbols = "".join(recipe["pattern"])
+            used = set(symbols) - {" "}
+            if used != set(recipe["key"]):
+                err(f"{name}: pattern symbols {sorted(used)} differ from recipe keys {sorted(recipe['key'])}")
+                continue
             inputs = [recipe["key"][ch] for ch in symbols if ch != " "]
         elif kind == "minecraft:crafting_shapeless":
             inputs = recipe["ingredients"]
@@ -445,7 +540,8 @@ def check_recipes(registered):
         else:
             inputs = [recipe["ingredient"]]
 
-        for ref in inputs:
+        choices = [ingredient_choices(value) for value in inputs]
+        for ref in (ref for options in choices for ref in options):
             if ref.startswith("#"):
                 if not tag_exists("item", ref[1:]):
                     err(f"{name}: unknown tag {ref}")
@@ -457,11 +553,14 @@ def check_recipes(registered):
             err(f"{name}: unknown result {result}")
         count = recipe["result"].get("count", 1)
 
-        total_in = sum(sum(item_units(ref).values()) for ref in inputs)
+        # Each slot consumes ONE alternative. Check its cheapest option so a
+        # richer alternate cannot conceal an ingot-duplication recipe.
+        total_in = sum(min((sum(item_units(ref).values()) for ref in options), default=0)
+                       for options in choices)
         out = {metal: units * count for metal, units in item_units(result).items()}
         if sum(out.values()) > total_in:
             err(f"{name}: creates metal ({total_in} units in, {sum(out.values())} out)")
-        if any(item_units(ref).keys() == {"bronze"} for ref in inputs) and set(out) - {"bronze"}:
+        if any(item_units(ref).keys() == {"bronze"} for options in choices for ref in options) and set(out) - {"bronze"}:
             err(f"{name}: turns bronze back into its ingredients")
 
 
@@ -508,6 +607,8 @@ def check_machine_recipe_files(registered):
 
 
 # Jugcraft entries of registries other than blocks and items that tags may name.
+# Vanilla 26.3's damage types that Jugcraft's damage type tags name (the electric harm the Grounding Strap halves).
+VANILLA_DAMAGE_TYPES = {"minecraft:lightning_bolt", "minecraft:thorns"}
 OTHER_ENTRIES = {"worldgen": {"pixel_hollows", al.BIOME, al.VILLAGE} | set(bm.BIOMES), "point_of_interest_type": {"arcade_cabinet"},
                  "villager_trade": {f"retro_trader/{name}" for name in ph.TRADES},
                  "spell": set(concordance.INVOCATIONS) | {"composed"}}
@@ -605,6 +706,8 @@ DIAGONAL_WALLS = {dg.DIAGONAL_WALL.format(name) for _, name in dg.all_walls()}
 
 
 def check_tags():
+    import vehicle_bays
+    import starter_workshop
     # Shared generation must retain both kitchen tools and combat equipment.
     from kitchen import KNIVES
     for tag in ("enchantable/melee_weapon", "enchantable/durability"):
@@ -616,28 +719,49 @@ def check_tags():
     for path in sorted(DATA.rglob("tags/*/**/*.json")):
         registry = path.relative_to(DATA).parts[2]
         known = OTHER_ENTRIES.get(registry) or set(all_blocks() + all_items() + machine_blocks() + machine_items()
-                                                    + petro.petro_blocks() + petro.petro_items() + list(deposits.DEPOSITS)
+                                                    + list(exchange_blocks.BLOCKS) + list(exchange_poker.BLOCKS) + list(exchange_casino.BLOCKS) + list(exchange_casino.ITEMS)
+                                                    + petro.petro_blocks() + petro.petro_items() + deposits.all_blocks()
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
                                                     + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
+        import nouveau_content
+        known = set(known)
+        if registry == 'block': known.update(starter_workshop.STATIONS)
+        if registry == 'item': known.update(starter_workshop.NAMES)
+        if registry in {'item', 'block'}: known.update(vehicle_bays.BLOCKS)
+        if registry in {'item','block'}:known.update(menagerie.entries())
+        if registry == 'entity_type':known.update(menagerie.entities())
+        if registry == 'mob_effect':known.add('wildlife_antivenom')
+        if registry == 'painting_variant':known.add('wildlife_bear_necessities')
+        if registry == 'block': known.update(e['id'] for e in nouveau_content.CATALOG['blocks'].values())
+        if registry in {'enchantment','banner_pattern','point_of_interest_type'} or registry == 'worldgen':
+            registry_path = '/'.join(path.relative_to(DATA).parts[2:4]) if registry == 'worldgen' else registry
+            known.update(p.relative_to(DATA/MOD/registry_path).as_posix().removesuffix('.json') for p in (DATA/MOD/registry_path).rglob('*.json'))
+        if registry == 'point_of_interest_type':known.add('nouveau_arcane_poi')
+        if registry == 'entity_type':known.update(nouveau_content.ENTITY_IDS)
+        if registry == 'mob_effect':known.update(nouveau_content.EFFECT_IDS)
         if registry == "entity_type":
             # These entity IDs have no same-named item. Derive them from actual registrations.
             scary = (JAVA_ROOT / "creatures" / "scary" / "ScaryMod.java").read_text(encoding="utf-8")
             known |= set(re.findall(r'Registry\.register\(BuiltInRegistries\.ENTITY_TYPE,\s*id\("([a-z_]+)"\)', scary))
+        # A worldgen tag's registry is two folders deep (worldgen/biome): a tag it names lives beside it there.
+        tag_registry = "/".join(path.relative_to(DATA).parts[2:4]) if registry == "worldgen" else registry
         for value in (load(path) or {}).get("values", []):
+            if isinstance(value, dict) and value.get('required') is False:
+                continue  # Compatibility entries are explicitly allowed to be absent.
             value = value["id"] if isinstance(value, dict) else value
             if value.startswith("#"):
-                if not tag_exists(registry, value[1:]):
+                if not tag_exists(tag_registry, value[1:]):
                     err(f"{path.relative_to(ROOT)}: unknown tag {value}")
             elif registry == "damage_type":
                 ns, name = split(value)
-                if not (DATA / ns / "damage_type" / f"{name}.json").is_file():
+                if value not in VANILLA_DAMAGE_TYPES and not (DATA / ns / "damage_type" / f"{name}.json").is_file():
                     err(f"{path.relative_to(ROOT)}: unknown damage type {value}")
             elif registry == "fluid":
-                if split(value)[1] not in petro.fluid_ids():
+                if split(value)[1] not in set(petro.fluid_ids()) | menagerie.fluids():
                     err(f"{path.relative_to(ROOT)}: unknown fluid {value}")
             elif registry == "villager_trade":
                 namespace, trade = split(value)
@@ -648,15 +772,16 @@ def check_tags():
 
 
 def check_worldgen():
-    if (DATA / MOD / "worldgen" / "configured_feature").exists():
+    if any((DATA / MOD / "worldgen" / "configured_feature").rglob('*.json')):
         err("worldgen/configured_feature/ is the pre-26.x layout; Minecraft 26.3 reads worldgen/feature/")
     for path in sorted((DATA / MOD / "worldgen" / "feature").glob("*.json")):
         feature = load(path) or {}
         if "config" in feature:
             err(f"{path.name}: 26.x features have no \"config\" wrapper")
         for target in feature.get("targets", []):
-            block = split(target["state"])[1]
-            if block not in all_blocks() + ph.blocks():
+            state = target["state"]
+            namespace, block = split(state.get("id", "") if isinstance(state, dict) else state)
+            if namespace == MOD and block not in all_blocks() + ph.blocks() + menagerie.blocks():
                 err(f"{path.name}: places unknown block {block}")
     check_nested_features()
     for path in sorted((DATA / MOD / "worldgen" / "placed_feature").glob("*.json")):
@@ -856,6 +981,60 @@ def check_armoured_walker():
             err(f"armoured_walker_quads.json lacks {part}: run tools/generate_material_data.py")
 
 
+def check_howitzer_walker():
+    """walker/HowitzerWalker.java and client/HowitzerWalkerRenderer.java against tools/howitzer_walker.py: the gun, leap,
+    stomp, toughness, size and joints, the curves' constants the renderer draws the walk, shot and jump clips with, the
+    exported parts, and the shells it fires (artillery.py's Heavy Shell)."""
+    java_path = JAVA_ROOT / "walker" / "HowitzerWalker.java"
+    java = java_path.read_text(encoding="utf-8") if java_path.is_file() else ""
+    hw = howitzer_walker
+    floats = ("LAY_RATE", "MIN_ELEVATION", "MAX_ELEVATION", "REST_ELEVATION", "WIDTH", "HEIGHT")
+    for const in ("GUN_COOLDOWN", "LAY_RATE", "MIN_ELEVATION", "MAX_ELEVATION", "REST_ELEVATION", "AIM_REACH", "LEAP",
+                  "CROUCH_TICKS", "STOMP_HOP", "SLAM", "STOMP_DAMAGE", "STOMP_RADIUS", "STOMP_KNOCKBACK", "STOMP_COOLDOWN",
+                  "HEALTH", "WIDTH", "HEIGHT"):
+        value = getattr(hw, const)
+        literal = f"{value}F" if const in floats else str(value)
+        if f" {const} = {literal};" not in java:
+            err(f"HowitzerWalker.{const} differs from tools/howitzer_walker.py ({literal})")
+
+    def vec(pixels):
+        return "new Vec3(" + ", ".join(f"{v / 16:g}" for v in pixels) + ")"
+    flat = java.replace(".0,", ",").replace(".0)", ")")
+    if f"TRUNNION = {vec(hw.TRUNNION)};" not in flat:
+        err(f"HowitzerWalker.TRUNNION differs from tools/howitzer_walker.py ({vec(hw.TRUNNION)})")
+    if f"HATCH = {vec(hw.HATCH)};" not in flat:
+        err(f"HowitzerWalker.HATCH differs from tools/howitzer_walker.py ({vec(hw.HATCH)})")
+    barrel = hw.BARREL_END[2] / 16
+    if f" BARREL = {barrel:g};" not in java:
+        err(f"HowitzerWalker.BARREL differs from tools/howitzer_walker.py's barrel ({barrel:g} blocks)")
+    if abs(hw.REST_ELEVATION + hw.ELEVATION) > 1e-9:
+        err("tools/howitzer_walker.py: REST_ELEVATION is the model's ELEVATION, up positive")
+    renderer_path = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                     / "HowitzerWalkerRenderer.java")
+    text = renderer_path.read_text(encoding="utf-8") if renderer_path.is_file() else ""
+
+    def joint(values):
+        return "{" + ", ".join(f"{v:g}F" if v != int(v) else str(int(v)) for v in values) + "}"
+    for name, values in (("HIPS[left]", hw.HIPS["left"]), ("HIPS[right]", hw.HIPS["right"]), ("TRUNNION", hw.TRUNNION),
+                         ("KNEE", hw.KNEE), ("BARREL_END", hw.BARREL_END)):
+        if joint(values) not in text:
+            err(f"HowitzerWalkerRenderer lacks the joint {name} {joint(values)} from tools/howitzer_walker.py")
+    for const in ("STRIDE_RATE", "LEG_SWING", "KNEE_BEND", "BOB", "SQUASH", "ROLL", "PITCH", "GUN_WOBBLE", "RECOIL_STROKE",
+                  "RECOIL_TICKS", "KICK", "SQUAT", "FLASH_TICKS", "PUFF_TICKS"):
+        value = float(getattr(hw, const))
+        if f" {const} = {value:g}F;" not in text.replace(".0F;", "F;"):
+            err(f"HowitzerWalkerRenderer.{const} differs from tools/howitzer_walker.py ({value:g})")
+    leap = JAVA_ROOT / "walker" / "WalkerLeap.java"
+    if f" END = {hw.JUMP_TICKS}.0F;" not in (leap.read_text(encoding="utf-8") if leap.is_file() else ""):
+        err(f"WalkerLeap.END differs from tools/howitzer_walker.py's JUMP_TICKS ({hw.JUMP_TICKS})")
+    if "JugcraftArtillery.HEAVY_SPEED" not in java or "JugcraftArtillery.HEAVY_SHELL" not in java:
+        err("HowitzerWalker should fire the big guns' Heavy Shell at its speed (artillery.py)")
+    quads = load(ASSETS / "howitzer_walker_quads.json") or {}
+    for part in hw.parts():
+        if not quads.get(f"howitzer_walker_{part}"):
+            err(f"howitzer_walker_quads.json lacks howitzer_walker_{part}: run tools/generate_material_data.py")
+
+
 def check_artillery():
     """artillery/JugcraftArtillery.java against tools/artillery.py: the shells, guns, balloon and range finder, and the
     renderers' pivots and the howitzer's track."""
@@ -1023,7 +1202,7 @@ def check_gun_art():
     import gun_poses
     import item_icons
     kinds = sorted(set(artillery.ITEMS) | set(tower_guns.items()) | set(landship.ITEMS) | set(mech.ITEMS)
-                   | set(zeppelin.ITEMS))
+                   | set(zeppelin.ITEMS) | set(howitzer_walker.ITEMS))
     for kind in kinds:
         if not item_icons.has(kind):
             err(f"tools/item_icons/{kind}.txt is missing: every war machine's icon is a 16x16 map (docs/ITEM_ICONS.md)")
@@ -1041,7 +1220,8 @@ def check_gun_art():
             saved = img.convert("RGBA")
         if saved.size != drawn.size or saved.tobytes() != drawn.tobytes():
             err(f"textures/item/{kind}.png differs from its map in tools/item_icons/: run tools/generate_textures.py")
-    files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json")
+    files = ("artillery_quads.json", "tower_gun_quads.json", "landship_quads.json", "walker_quads.json", "balloon_quads.json",
+             "howitzer_walker_quads.json")
     quads = {name: load(ASSETS / name) or {} for name in files}
     opacity = {}
 
@@ -1380,7 +1560,8 @@ def check_field_chemistry():
     java = (JAVA_ROOT / "weapons" / "FieldChemistry.java").read_text(encoding="utf-8")
     for const in ("CHLORINE_RADIUS", "CHLORINE_TICKS", "CHLORINE_DAMAGE", "SMOKE_RADIUS", "SMOKE_TICKS", "THERMITE_RADIUS",
                   "THERMITE_TICKS", "THERMITE_DAMAGE", "THERMITE_FIRE_SECONDS", "FLASH_RADIUS", "FLASH_BLIND_TICKS",
-                  "FLASH_STUN_TICKS", "GAS_MASK_DURABILITY", "SCUBA_GAS_OXYGEN", "FIRST_AID_COOLDOWN", "STIMULANT_TICKS"):
+                  "FLASH_STUN_TICKS", "GAS_MASK_DURABILITY", "SCUBA_GAS_OXYGEN", "FIRST_AID_COOLDOWN", "STIMULANT_TICKS",
+                  "ASPIRIN_REGENERATION_TICKS", "ASPIRIN_COOLDOWN"):
         value = getattr(field_chemistry, const)
         m = re.search(rf"\b{const} = ([0-9_.]+)F?;", java)
         if not m or float(m.group(1).replace("_", "")) != float(value):
@@ -1466,6 +1647,9 @@ def check_guns():
     one_handed = ", ".join(f'"{gun}"' for gun in guns.one_handed())
     if f"ONE_HANDED = Set.of({one_handed});" not in java:
         err(f"JugcraftGuns.ONE_HANDED differs from tools/guns.py one_handed(): expected Set.of({one_handed})")
+    carbines = ", ".join(f'"{gun}"' for gun in guns.CARBINES)
+    if f"CARBINES = Set.of({carbines});" not in java:
+        err(f"JugcraftGuns.CARBINES differs from tools/guns.py CARBINES: expected Set.of({carbines})")
     if f"DUAL_SPREAD = {guns.DUAL_SPREAD}F;" not in java:
         err(f"JugcraftGuns.DUAL_SPREAD differs from tools/guns.py: expected {guns.DUAL_SPREAD}F")
     # Slice 11A: the Nether guns, whose bullets set what they hurt alight, and for how long.
@@ -1478,6 +1662,15 @@ def check_guns():
     shots_java = (JAVA_ROOT / "guns" / "GunShots.java").read_text(encoding="utf-8")
     if f"BURN_SECONDS = {guns.BURN_SECONDS};" not in shots_java:
         err(f"GunShots.BURN_SECONDS differs from tools/guns.py: expected {guns.BURN_SECONDS}")
+    # Slice 12A: the End guns, whose bullets make what they hurt float, and for how long.
+    levitating = ", ".join(f'"{gun}"' for gun in guns.LEVITATING)
+    if f"LEVITATING = Set.of({levitating});" not in java:
+        err(f"JugcraftGuns.LEVITATING differs from tools/guns.py: expected Set.of({levitating})")
+    for gun in guns.LEVITATING:
+        if gun not in guns.GUNS or guns.GUNS[gun].get("shot", "bullet") != "bullet":
+            err(f"tools/guns.py LEVITATING names {gun}, which is not a gun that fires bullets")
+    if f"LIFT_TICKS = {guns.LIFT_TICKS};" not in shots_java:
+        err(f"GunShots.LIFT_TICKS differs from tools/guns.py: expected {guns.LIFT_TICKS}")
     # Slice 8D: the energy weapons' charge a round, the arcs' leaps and the Energy Cell's capacity.
     charges = ", ".join(f'"{gun}", {spec["charge"]}' for gun, spec in guns.GUNS.items() if spec.get("charge"))
     if f"CHARGE = Map.of({charges});" not in java:
@@ -1660,6 +1853,12 @@ def check_gear():
     check_armor_styles(java)
     check_armor_looks()
     check_armor_tiers(java)
+    # Replay the shared tag writer, so a later feature cannot silently replace
+    # existing weapons/knives/armor with only its own equipment.
+    def check_shared_tag(path, expected):
+        if path.is_relative_to(DATA / "minecraft" / "tags" / "item") and load(path) != expected:
+            err(f"{path.relative_to(ROOT)} differs from the canonical shared equipment tag writer")
+    gear.write_all(check_shared_tag, ASSETS, DATA / MOD, {}, lambda feature: [])
 
 
 def check_armor_tiers(java):
@@ -2083,6 +2282,24 @@ def check_arms():
             err(f"items/{item}.json has no swap_animation_scale")
 
 
+def check_nuclear_sounds():
+    """The sound events nuclear/JugcraftNuclear.java registers by name (the Geiger counter, the diesel generators' start,
+    run and stop) are in sounds.json, each sound with its .ogg: a sounds.json written on its own is replaced the next
+    time the data is generated, and the game then plays nothing (Oct 8: the diesel generators were silent)."""
+    java = (JAVA_ROOT / "nuclear" / "JugcraftNuclear.java").read_text(encoding="utf-8")
+    events = re.findall(r'create(?:Variable|Fixed)RangeEvent\(Jugcraft\.id\("([a-z0-9_.]+)"\)', java)
+    if not events:
+        err("JugcraftNuclear.java registers no sound events by name (check_nuclear_sounds needs updating)")
+    sounds = load(ASSETS / "sounds.json") or {}
+    for event in events:
+        if event not in sounds:
+            err(f"sounds.json has no {event} (registered in JugcraftNuclear.java)")
+        for sound in sounds.get(event, {}).get("sounds", []):
+            ns, path = sound["name"].split(":")
+            if ns == MOD and not (RES / "assets" / ns / "sounds" / f"{path}.ogg").is_file():
+                err(f"The sound {sound['name']} has no .ogg")
+
+
 def check_item_icons():
     """The 16x16 item icon maps, the materials they are coloured in and the item icons' sizes (tools/check_icon_maps.py,
     docs/ITEM_ICONS.md); and the checker's own self-test, so a later edit cannot quietly weaken it."""
@@ -2096,7 +2313,8 @@ def check_arms_variants():
     each boss's trophy loot table, and that an armor set's arm has neither a recipe nor any loot table yet (how a set is
     won is the owner's to decide); the boons' and lines' tooltips, a boss's line naming its boss and a set's its set;
     that every boon is bounded; that no variant deals as much a second as a netherite sword, whatever its boon adds;
-    and the armor sets' shields (SET_SHIELDS), each of a set and blocking as a kit shield, with no recipe or drop yet."""
+    and the armor sets' shields (SET_SHIELDS), each of a set and blocking as a kit shield, with no recipe or drop yet; and
+    that a boss names its lair (a tools/lairs.py LAIRS key) exactly when it is built (its own entity loot table)."""
     import arms_variants as av
     java = (JAVA_ROOT / "weapons" / "ArmVariants.java").read_text(encoding="utf-8")
     found = [(name, kind, line, None if boon == "null" else boon.split(".")[1].lower())
@@ -2114,15 +2332,27 @@ def check_arms_variants():
         err(f"ArmVariants.SETS differs from tools/arms_variants.py {list(av.SETS)}")
     if len(set(av.LINES)) != len(av.STYLES) + len(av.BOSSES) + len(av.SETS):
         err("tools/arms_variants.py: a line is in more than one of STYLES, BOSSES and SETS")
+    # A boss that is built (it has its own loot table, loot_table/entities/<boss>.json) names its lair, and only a built
+    # boss does: the handbook's trophy page lists a boss among the foes met by that key.
+    import lairs
+    for boss, info in av.BOSSES.items():
+        built = (DATA / MOD / "loot_table" / "entities" / f"{boss}.json").is_file()
+        if built != ("lair" in info):
+            err(f"tools/arms_variants.py BOSSES[{boss!r}] must name its lair exactly when loot_table/entities/{boss}.json "
+                f"exists (the boss is built): {'it has the table but no lair' if built else 'it names a lair but has no table'}")
+        if "lair" in info and info["lair"] not in lairs.LAIRS:
+            err(f"tools/arms_variants.py BOSSES[{boss!r}] names the lair {info['lair']!r}, which tools/lairs.py LAIRS does not have")
     if re.findall(r'"([a-z_]+)"', re.search(r"PATTERN_NAMES = List\.of\(([^)]*)\)", java, re.S).group(1)) != av.patterns():
         err(f"ArmVariants.PATTERN_NAMES differs from tools/arms_variants.py {av.patterns()}")
     ints = {"FROST_TICKS": av.FROST[0], "FROST_AMPLIFIER": av.FROST[1], "EMBER_SECONDS": av.EMBER_SECONDS,
             "VENOM_TICKS": av.VENOM[0], "VENOM_AMPLIFIER": av.VENOM[1], "WITHER_TICKS": av.WITHER[0],
             "WITHER_AMPLIFIER": av.WITHER[1], "HOWL_TICKS": av.HOWL[0], "HOWL_AMPLIFIER": av.HOWL[1],
-            "MARK_TICKS": av.MARK_TICKS, "GILDED_ENCHANTABILITY": av.GILDED_ENCHANTABILITY,
+            "MARK_TICKS": av.MARK_TICKS, "RUST_TICKS": av.RUST[0], "RUST_AMPLIFIER": av.RUST[1],
+            "GILDED_ENCHANTABILITY": av.GILDED_ENCHANTABILITY,
             "IRONCLAD_DURABILITY": av.IRONCLAD_DURABILITY, "TROPHY_DURABILITY": av.TROPHY_DURABILITY}
     floats = {"DRAIN_HEAL": av.DRAIN_HEAL, "SHOCK_SHARE": av.SHOCK_SHARE, "SHOCK_RANGE": av.SHOCK_RANGE,
-              "GALE_KNOCKBACK": av.GALE_KNOCKBACK, "GALE_LIFT": av.GALE_LIFT, "TIDE": av.TIDE, "GRAVEBANE": av.GRAVEBANE}
+              "GALE_KNOCKBACK": av.GALE_KNOCKBACK, "GALE_LIFT": av.GALE_LIFT, "TIDE": av.TIDE, "GRAVEBANE": av.GRAVEBANE,
+              "RUST_ARMOR": av.RUST_ARMOR}
     for name, value in ints.items():
         if f"{name} = {value};" not in java:
             err(f"ArmVariants.{name} differs from tools/arms_variants.py ({value})")
@@ -2130,11 +2360,17 @@ def check_arms_variants():
         if f"{name} = {float(value)}F;" not in java:
             err(f"ArmVariants.{name} differs from tools/arms_variants.py ({value})")
     # Bounded: no effect longer than 5 s or above amplifier 1; no share above half a blow.
-    for ticks, amplifier in (av.FROST, av.VENOM, av.WITHER, av.HOWL, (av.MARK_TICKS, 0), (av.EMBER_SECONDS * 20, 0)):
+    for ticks, amplifier in (av.FROST, av.VENOM, av.WITHER, av.HOWL, av.RUST, (av.MARK_TICKS, 0), (av.EMBER_SECONDS * 20, 0)):
         if ticks > 100 or amplifier > 1:
             err(f"tools/arms_variants.py: a boon lasts {ticks} ticks at amplifier {amplifier}, over 5 s or amplifier 1")
-    if av.SHOCK_SHARE > 0.5 or av.TIDE > 0.5 or av.GRAVEBANE > 0.5:
-        err("tools/arms_variants.py: SHOCK_SHARE, TIDE and GRAVEBANE must be at most half a blow")
+    if av.SHOCK_SHARE > 0.5 or av.TIDE > 0.5 or av.GRAVEBANE > 0.5 or not 0.0 < av.RUST_ARMOR <= 0.5:
+        err("tools/arms_variants.py: SHOCK_SHARE, TIDE, GRAVEBANE and RUST_ARMOR must be at most half a blow (or armor)")
+    # Rusted is the Rust boon's own effect: registered with its armor's share, its name and its icon.
+    if "Jugcraft.id(\"rusted\"), -RUST_ARMOR, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL" not in java:
+        err("ArmVariants must register Rusted, taking RUST_ARMOR of its holder's armor")
+    if not (ASSETS / "textures" / "mob_effect" / "rusted.png").is_file() \
+            or "effect.jugcraft.rusted" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+        err("Rusted needs its icon (textures/mob_effect/rusted.png) and its name (effect.jugcraft.rusted)")
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for name, kind, line, boon, _display in av.VARIANTS:
         if kind not in arms.KINDS or kind in arms.CHARGING:
@@ -2494,7 +2730,7 @@ def check_nested_features():
         elif kind == "minecraft:simple_random_selector" and isinstance(feature.get("features"), list):
             for entry in feature["features"]:
                 check(entry, where)
-        elif kind in ("minecraft:random_patch", "minecraft:root_system") and "feature" in feature:
+        elif kind in ("minecraft:random_patch", "jugcraft:owner_patch", "minecraft:root_system") and "feature" in feature:
             check(feature["feature"], where)
 
     for path in sorted((DATA / MOD / "worldgen" / "feature").glob("*.json")):
@@ -2591,6 +2827,10 @@ def check_biomes():
         if info.get("dimension") in ("nether", "end"):
             if f"{MOD}:{name}" in {rule["biome"] for rule in bm.RULES} or "surface" in info or info["seasons"]:
                 err(f"{name}: a {info['dimension']} biome has region rules, an Overworld surface or seasons")
+        elif info.get("placement") == "site":
+            # Placed round its sites by Java (world/AdamOndiAhman), never by a region rule.
+            if f"{MOD}:{name}" in {rule["biome"] for rule in bm.RULES}:
+                err(f"{name}: a biome placed round its sites also has region rules")
         elif f"{MOD}:{name}" not in {rule["biome"] for rule in bm.RULES}:
             err(f"No region rule places the {name} biome")
         if lang.get(f"biome.{MOD}.{name}") != info["display"]:
@@ -2609,13 +2849,28 @@ def check_biomes():
             err(f"{name}: seasons {info['seasons']} but seasons.BIOMES says otherwise")
     features = DATA / MOD / "worldgen" / "feature"
     for shape, info in tr.SHAPES.items():
+        trunk = info["trunk"]
+        if trunk["type"] == "cherry":
+            # Native 26.3 CherryTrunkPlacer codec bounds, including two distinct branch starts.
+            for field, low, high in (("branch_count", 1, 3), ("branch_horizontal_length", 2, 16),
+                                     ("branch_start_offset_from_top", -16, 0), ("branch_end_offset_from_top", -16, 16)):
+                value = trunk.get(field)
+                bounds = (sorted(entry["data"] for entry in value["distribution"]) if isinstance(value, dict)
+                          and value.get("type") == "minecraft:weighted_list" else value if isinstance(value, list) else [value, value])
+                if None in bounds or not low <= bounds[0] <= bounds[-1] <= high:
+                    err(f"{shape}: {field} is outside native cherry placer bounds {low}..{high}: {value}")
+                if field == "branch_start_offset_from_top" and (not isinstance(value, list) or bounds[-1] - bounds[0] < 1):
+                    err(f"{shape}: cherry branch starts need a uniform range with at least two values")
         vanilla = info["wood"] in ("minecraft:oak", "minecraft:birch", "minecraft:spruce", "minecraft:jungle", "minecraft:acacia",
                                    "minecraft:dark_oak", "minecraft:cherry", "minecraft:mangrove", "minecraft:pale_oak")
-        if not vanilla and (info["wood"] not in ag.WOOD_SETS or (info["foliage"] and info["wood"] not in ag.TREES)):
+        tree = info.get("tree", info["wood"])
+        if tree in ag.TREES and info["wood"] != ag.timber(tree):
+            err(f"Tree shape {shape} timber {info['wood']} differs from {tree}'s {ag.timber(tree)}")
+        if (not vanilla and info["wood"] not in ag.WOOD_SETS and ag.TREES.get(tree, {}).get("trunk_block", "").removeprefix("jugcraft:") not in ag.TREE_BLOCKS) or (info["foliage"] and not tree.startswith("minecraft:") and tree not in ag.TREES):
             err(f"Tree shape {shape} grows unknown wood or leaves ({info['wood']})")
             continue
         # Generated seasonal leaves need the decorator to start in today's look (world generation skips onPlace).
-        seasonal = bool(info["foliage"]) and not vanilla and ag.TREES[info["wood"]]["season"] is not None
+        seasonal = bool(info["foliage"]) and tree in ag.TREES and ag.TREES[tree]["season"] is not None
         decorators = [decorator.get("type") for decorator in (load(features / f"{shape}.json") or {}).get("decorators", [])]
         if seasonal != (f"{MOD}:{tr.DECORATOR}" in decorators):
             err(f"Tree shape {shape}: the {MOD}:{tr.DECORATOR} decorator belongs on exactly the trees with seasonal leaves")
@@ -2662,8 +2917,8 @@ def check_wood_switches():
         for extra in info.get("extras", []):
             if "feature" in bm.EXTRAS.get(extra, {}):
                 placed_by(bm.EXTRAS[extra]["feature"], bm.FEATURE)
-    for key in ("larch", "spruce"):
-        placed_by(al.TREES[key], al.FEATURE)
+    for ref in [al.TREES["default"]] + [feature for feature, _ in al.TREES["picks"]]:
+        placed_by(ref, al.FEATURE)
     # Agriculture's wild patches (JugcraftAgriculture.registerWorldgen, under the agriculture switch): the wild chestnut
     # trees, and anything else a patch_<name> placed feature places. A patch placed anywhere else has no known switch.
     agriculture = (AGRICULTURE_JAVA / "JugcraftAgriculture.java").read_text(encoding="utf-8")
@@ -2677,7 +2932,13 @@ def check_wood_switches():
         if patch is not None:
             placed_by(patch["feature"], ag.FEATURE if name in inside else f"(patch_{name}, outside registerWorldgen)")
     woods = {shape: info["wood"] for shape, info in tr.SHAPES.items() if info["wood"] in ag.WOOD_SETS}
+    woods.update({shape: info["wood"] for shape, info in tr.BOUNDED_SHAPES.items()})
     woods.update({f"fallen_{wood}_tree": wood for wood in tr.FALLEN})
+    for tree in orchard.TREES:
+        wood = orchard.log(tree).split(":")[-1].removesuffix("_log")
+        if wood in ag.WOOD_SETS:
+            woods[orchard.feature(tree)] = wood
+            woods[tree] = wood
     for placed, (feature, _) in bm.PLACED_TREES.items():
         ns, path = split(feature)
         if ns == MOD and path in ag.WOOD_SETS:
@@ -2688,6 +2949,129 @@ def check_wood_switches():
         if missing:
             err(f"{what} is placed by {sorted(missing)}, which the {wood} wood's switches {ag.WOOD_SWITCHES.get(wood)} "
                 f"lack (agriculture.WOOD_SWITCHES, TREES.md rule 4)")
+    for shape, info in tr.SHAPES.items():
+        tree = info.get("tree", info["wood"])
+        if info["foliage"] and tree in ag.TREES:
+            missing = placers.get(shape, set()) - set(ag.tree_switches(tree))
+            if missing:
+                err(f"{shape} places {tree} foliage through uncovered switches {sorted(missing)}")
+    for shape, info in tr.BOUNDED_SHAPES.items():
+        configured = load(DATA / MOD / "worldgen/feature" / f"{shape}.json")
+        if configured != {"type": "jugcraft:walnut_tree", "shape": shape}:
+            err(f"{shape} must use its bounded native feature")
+        missing = placers.get(shape, set()) - set(ag.tree_switches(info["tree"]))
+        if missing:
+            err(f"{shape} places foliage through uncovered switches {sorted(missing)}")
+
+
+def check_adam_ondi_ahman():
+    """Adam-ondi-Ahman (docs/features/adam-ondi-ahman.md): Java's numbers match tools/adam_ondi_ahman.py; the knoll as its
+    template builds it has three altars stacked with nothing missing under an upper one, the Ancient Altar alone on the
+    top with room to stand beside it, a path up the south side a block at a time with headroom, and the old settlement and
+    the spring off the mound; the committed template, structure, structure set and pool are current and wired together;
+    the biome is placed round its sites and by no rule; and the hooks (biome lookups, the climate table, the mod's start)
+    are in place."""
+    import adam_ondi_ahman as aa
+    import math
+    from lair_layout import template
+    from retro_game_shop import nbt_bytes
+    java = (WORLD_JAVA / "AdamOndiAhman.java").read_text(encoding="utf-8")
+    suitable = aa.SUITABLE
+    for expected in (f'FEATURE = "{aa.FEATURE}"', f'Jugcraft.id("{aa.BIOME}")', f'Jugcraft.id("{aa.ALTAR}")', "AltarKnolls.register();",
+                     f"SPACING = {aa.SPACING};", f"MIN_SPACING = {aa.MIN_SPACING};", f"MAX_SPACING = {aa.MAX_SPACING};",
+                     f"CHANCE = {aa.CHANCE};", f"RADIUS = {aa.RADIUS};", f"WOBBLE = {aa.WOBBLE};", "INSET = RADIUS + WOBBLE + 64;",
+                     f"START_MIN = {aa.START['min']};", f"START_MAX = {aa.START['max']};", f"START_STEP = {aa.START['step']};",
+                     f"START_ANGLE = {aa.START['angle']};", f"ORIGIN_CLEARANCE = {aa.ORIGIN_CLEARANCE};",
+                     f"CONTINENTALNESS = {suitable['continentalness']}F;", f"EROSION = {suitable['erosion']}F;",
+                     f"TEMPERATURE_MIN = {suitable['temperature'][0]}F;", f"TEMPERATURE_MAX = {suitable['temperature'][1]}F;",
+                     f"HUMIDITY_MIN = {suitable['humidity'][0]}F;", f"HUMIDITY_MAX = {suitable['humidity'][1]}F;",
+                     f"PEAKS_VALLEYS = {suitable['peaks_valleys']}F;", f"REACH = {aa.REACH};", f"GROUND_MIN = {aa.GROUND['min']};",
+                     f"GROUND_MAX = {aa.GROUND['max']};", f"MAX_SLOPE = {aa.GROUND['slope']};", f"DEPTH = {aa.DEPTH}F;",
+                     f"KNOLL_GROUND = {aa.KNOLL_GROUND};", f"TRIES = {aa.TRIES};"):
+        if expected not in java:
+            err(f"AdamOndiAhman.java has no {expected} (tools/adam_ondi_ahman.py)")
+    if aa.INSET != aa.RADIUS + aa.WOBBLE + 64 or aa.MIN_SPACING <= 2 * aa.INSET:
+        err("tools/adam_ondi_ahman.py: a rare valley must sit INSET (RADIUS + WOBBLE + 64) inside a cell of at least MIN_SPACING")
+    if aa.KNOLL_GROUND < max(aa.SIZE[0], aa.SIZE[2]) or aa.KNOLL_GROUND >= aa.RADIUS - aa.WOBBLE:
+        err("tools/adam_ondi_ahman.py: KNOLL_GROUND must cover the knoll's template however it turns, inside the valley")
+    if aa.START["min"] <= aa.RADIUS + aa.WOBBLE:
+        err("tools/adam_ondi_ahman.py: the start valley must clear the start")
+    builder = (WORLD_JAVA / "AltarKnolls.java").read_text(encoding="utf-8")
+    for expected in (f'Jugcraft.id("{aa.TEMPLATE}")', f"SIZE = {aa.SIZE[0]};", f"CENTRE = {aa.CENTRE[0]};", f"GROUND_Y = {aa.GROUND_Y};",
+                     f"HALF = {aa.BUILD['half']};", f"BLEND = {aa.BUILD['blend']};", f"FILL_DEPTH = {aa.BUILD['fill_depth']};",
+                     f"CLEAR_HEIGHT = {aa.BUILD['clear_height']};"):
+        if expected not in builder:
+            err(f"AltarKnolls.java has no {expected} (tools/adam_ondi_ahman.py)")
+    if (aa.SIZE[0] != aa.SIZE[2] or aa.CENTRE[0] != aa.CENTRE[1] or aa.BUILD["half"] < aa.CENTRE[0] + 1
+            or aa.BUILD["half"] < aa.SIZE[0] - aa.CENTRE[0] or aa.INSET <= aa.BUILD["half"] + aa.BUILD["blend"] + 16):
+        err("tools/adam_ondi_ahman.py: the knoll's pad must hold its template however it turns, and stay inside its cell")
+    config = CONFIG.read_text(encoding="utf-8")
+    for option, value in (("start", "on"), ("spacing", aa.SPACING), ("chance", aa.CHANCE)):
+        if f'"adam_ondi_ahman.{option}", "{value}"' not in config:
+            err(f"JugcraftConfig has no adam_ondi_ahman.{option} defaulting to {value}")
+    if aa.FEATURE not in FEATURES:
+        err(f"{aa.FEATURE} is not a feature switch")
+    mixin = (JAVA_ROOT / "mixin" / "MultiNoiseBiomeSourceMixin.java").read_text(encoding="utf-8")
+    if mixin.count("AdamOndiAhman.override(source, x, z, target, ") != 2:
+        err("MultiNoiseBiomeSourceMixin does not answer the valley in both resolvers (AdamOndiAhman.override)")
+    if "AdamOndiAhman.addToOverworld(" not in (JAVA_ROOT / "mixin" / "OverworldBiomeBuilderMixin.java").read_text(encoding="utf-8"):
+        err("OverworldBiomeBuilderMixin does not list the valley in the Overworld's table")
+    if "AdamOndiAhman.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft.java does not register Adam-ondi-Ahman")
+    altar_java = (WORLD_JAVA / "AncientAltarBlock.java").read_text(encoding="utf-8")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if f'"message.{MOD}.adam_ondi_ahman.dormant"' not in altar_java or lang.get(f"message.{MOD}.adam_ondi_ahman.dormant") != aa.DORMANT:
+        err("The Ancient Altar's dormant message is missing from AncientAltarBlock.java or the lang file")
+    if lang.get(f"block.{MOD}.{aa.ALTAR}") != aa.ALTAR_DISPLAY or lang.get(f"biome.{MOD}.{aa.BIOME}") != aa.DISPLAY:
+        err("Adam-ondi-Ahman's biome or the Ancient Altar has no name")
+    info = bm.BIOMES.get(aa.BIOME, {})
+    if info.get("placement") != "site" or info.get("display") != aa.DISPLAY:
+        err(f"tools/biomes.py: {aa.BIOME} must be placed round its sites (\"placement\": \"site\")")
+    blocks = aa.blocks()
+    nbt = DATA / MOD / "structure" / f"{aa.TEMPLATE}.nbt"
+    if not nbt.is_file() or nbt.read_bytes() != nbt_bytes(template(blocks, aa.SIZE)):
+        err(f"{nbt.relative_to(ROOT)} is out of date (run tools/generate_material_data.py)")
+    # The knoll itself.
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    open_ = lambda pos: name(pos) in (None, "minecraft:air", "minecraft:short_grass", "minecraft:tall_grass")
+    if any(not all(0 <= pos[i] < aa.SIZE[i] for i in range(3)) for pos in blocks):
+        err("The knoll's template has blocks outside its size")
+    altars = [pos for pos, state in blocks.items() if state[0] == f"{MOD}:{aa.ALTAR}"]
+    if altars != [aa.ALTAR_POS]:
+        err(f"The knoll should hold one Ancient Altar, at {aa.ALTAR_POS}: {altars}")
+    cx, cz = aa.CENTRE
+    for i in range(1, len(aa.TIERS)):
+        half = aa.TIERS[i][0]
+        for x in range(cx - half, cx + half + 1):
+            for z in range(cz - half, cz + half + 1):
+                if open_((x, aa.CROWN_Y + i, z)) or open_((x, aa.CROWN_Y + i + 1, z)):
+                    err(f"The knoll's altar {i + 1} has a gap at {x} {z}, or nothing under it")
+    ax, ay, az = aa.ALTAR_POS
+    if open_((ax, ay - 1, az)) or not any(open_((ax + dx, ay, az + dz)) and open_((ax + dx, ay + 1, az + dz))
+                                          for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+        err("The Ancient Altar does not lie on the top altar with room to stand beside it")
+    tops = aa.heights()
+    path = [tops[(cx, z)] for z in range(cz + aa.MOUND["crown"], aa.SIZE[2])]
+    if any(abs(a - b) > 1 for a, b in zip(path, path[1:])):
+        err(f"The path up the knoll climbs more than a block at a time: {path}")
+    for z in range(cz + aa.MOUND["crown"] + 1, aa.SIZE[2]):
+        for x in range(cx - aa.PATH_HALF, cx + aa.PATH_HALF + 1):
+            top = tops[(x, z)]
+            if not open_((x, top + 1, z)) or not open_((x, top + 2, z)):
+                err(f"The path up the knoll has no headroom at {x} {z}")
+    footings = [(x, z) for x0, z0, x1, z1 in aa.CABINS for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)]
+    for (sx, sz), r in (aa.SPRING, aa.GATHERING):
+        footings += [(x, z) for x in range(sx - r - 1, sx + r + 2) for z in range(sz - r - 1, sz + r + 2) if math.hypot(x - sx, z - sz) <= r + 0.5]
+    if any(aa.mound_height(x, z) for x, z in footings):
+        err("Part of the old settlement or the spring sits on the knoll's mound")
+    for x in range(aa.SIZE[0]):
+        for z in range(aa.SIZE[2]):
+            if name((x, aa.GROUND_Y, z)) is None:
+                err(f"The knoll's template has no ground at {x} {z}")
+            for y in range(aa.SIZE[1] - 1):
+                if blocks.get((x, y, z)) == ("minecraft:tall_grass", (("half", "lower"),)) \
+                        and blocks.get((x, y + 1, z)) != ("minecraft:tall_grass", (("half", "upper"),)):
+                    err(f"Tall grass at {x} {y} {z} has no top")
 
 
 def check_alpine():
@@ -2729,8 +3113,8 @@ def check_alpine():
         err("The start search looks for alpine villages less far than for the biome (SPAWN in tools/alpine.py)")
     selector = load(folder / "feature" / f"{al.TREES['feature']}.json") or {}
     picks = {selector.get("default")} | {entry.get("feature") for entry in selector.get("features", [])}
-    if picks != {al.TREES["larch"], al.TREES["spruce"]}:
-        err(f"{al.TREES['feature']}.json should pick larches and spruces, found {sorted(map(str, picks))}")
+    if picks != {al.TREES["default"]} | {feature for feature, _ in al.TREES["picks"]}:
+        err(f"{al.TREES['feature']}.json should match the Alpine tree picks, found {sorted(map(str, picks))}")
     for placed in picks:
         ns, path = split(str(placed))
         if ns == MOD and not (folder / "placed_feature" / f"{path}.json").is_file():
@@ -2804,14 +3188,48 @@ def check_java():
     limited = sorted(placed for placed, gen in gens.items() if gen.get("biomes"))
     if sorted(java_list("biomeOres")) != limited:
         err(f"JugcraftWorldgen.biomeOres {sorted(java_list('biomeOres'))} != the veins with biomes in tools/materials.py {limited}")
-    if sorted(java_list("ores")) != sorted(set(gens) - set(limited)):
+    from mineral_sands import SANDS
+    if sorted(java_list("ores")) != sorted((set(gens) - set(limited)) | set(SANDS)):
         err(f"JugcraftWorldgen.ores {sorted(java_list('ores'))} != the Overworld-wide veins in tools/materials.py")
+    for name, info in SANDS.items():
+        feature = load(DATA / MOD / "worldgen" / "feature" / f"ore_{name}.json") or {}
+        expected = {"type": f"{MOD}:mineral_sand", "sand": f"{MOD}:{name}",
+                    "surface_biomes": f"{MOD}:has_surface_sand/{name}", "family": info["family"]}
+        for key in ("length", "width", "thickness", "cover"):
+            expected["min_" + key], expected["max_" + key] = info[key]
+        if feature != expected:
+            err(f"Mineral sand {name}: geometry differs from its approved configuration")
+        tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_surface_sand" / f"{name}.json") or {}
+        if tag.get("values") != info["biomes"]:
+            err(f"Mineral sand {name}: eligible surface regions differ")
+        placed = load(DATA / MOD / "worldgen" / "placed_feature" / f"ore_{name}.json") or {}
+        if placed.get("placement") != [{"type": "minecraft:rarity_filter", "chance": info["rarity"]}]:
+            err(f"Mineral sand {name}: rarity or bounded chunk anchor changed")
     if limited and 'Jugcraft.id("has_ore/" + ore[0])' not in worldgen:
         err("JugcraftWorldgen does not place biomeOres by their biome tag jugcraft:has_ore/<name>")
     for placed in limited:
         tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_ore" / f"{placed}.json") or {}
         if tag.get("values") != gens[placed]["biomes"]:
             err(f"#{MOD}:has_ore/{placed} {tag.get('values')} != tools/materials.py {gens[placed]['biomes']}")
+    for placed, gen in gens.items():
+        if not gen.get("surface_biomes"):
+            continue
+        tag = load(DATA / MOD / "tags" / "worldgen" / "biome" / "has_surface_ore" / f"{placed}.json") or {}
+        if tag.get("values") != gen["surface_biomes"]:
+            err(f"#{MOD}:has_surface_ore/{placed} differs from tools/materials.py")
+        feature = load(DATA / MOD / "worldgen" / "feature" / f"ore_{placed}.json") or {}
+        if feature.get("type") != f"{MOD}:surface_linked_ore" or feature.get("ore", {}).get("size") != gen["size"]:
+            err(f"Surface-linked ore {placed} is not its configured native-size pocket")
+        modifiers = (load(DATA / MOD / "worldgen" / "placed_feature" / f"ore_{placed}.json") or {}).get("placement", [])
+        if any(m.get("type") == "minecraft:biome" for m in modifiers):
+            err(f"Surface-linked ore {placed} must not filter by the underground cave biome")
+        rarity = next((m.get("chance") for m in modifiers if m.get("type") == "minecraft:rarity_filter"), None)
+        height = next((m.get("height", {}) for m in modifiers if m.get("type") == "minecraft:height_range"), {})
+        if rarity != gen["rarity"] or height != {"type": "minecraft:trapezoid",
+                "min_inclusive": {"absolute": gen["min_y"]}, "max_inclusive": {"absolute": gen["max_y"]}}:
+            err(f"Surface-linked ore {placed} rarity/depth differs from tools/materials.py")
+        if feature.get("outcrop_chance") != gen["outcrop_chance"]:
+            err(f"Surface-linked ore {placed} outcrop probability differs from tools/materials.py")
 
 
 def check_machines(registered):
@@ -2889,27 +3307,53 @@ def machines_stats(family):
     return machines.STATS.get(family, {})
 
 
-def cheapest_electrolysis(fluid):
-    """The least JE any recipe spends per mB of `fluid` it makes, with the most efficiency cards its machine takes (the
-    legacy fluid machines take none), or None when no recipe makes it. All the recipe's energy counts against `fluid`,
-    so a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too."""
+def cheapest_electrolysis(fluid, _seen=None):
+    """The least JE electricity alone spends per mB of `fluid`, with the most efficiency cards its machine takes (the
+    legacy fluid machines take none) and its form's profile saving (an expanded or bulk form pays 90% or 80% a lane), counting the cheapest cost of the fluids it uses up as well (methane's hydrogen,
+    say; water is free), or None when electricity alone cannot make it. All of a recipe's cost counts against `fluid`, so
+    a fuel burning for less than this cannot pay back the electricity that made it, whatever else came out too.
+
+    A recipe that uses up items (coal, crops, waste) draws its energy partly from them, so it is not an electricity
+    route, and neither is one using a fluid only such recipes make: a fuel with no other route is a primary fuel, never
+    an electricity loop. A cyclic candidate is not a free feed: discard that candidate and look for an independently reachable producer."""
     import machines
+    seen = (_seen or set()) | {fluid}
+
+    def inputs(recipe):
+        total = 0.0
+        for source, mb in recipe.get("fluids", []):
+            # Water and lava are free in the world, whatever else also gives some off.
+            if source in seen:
+                return None
+            if not source.startswith("minecraft:"):
+                cost = cheapest_electrolysis(source, seen)
+                if cost is None:
+                    return None
+                total += cost * mb
+        return total
     costs = []
+
+    def offer(recipe, per_tick):
+        if recipe.get("items"):
+            return
+        for result in recipe.get("fluid_results", []):
+            if result[0] == fluid and per_tick:
+                spent = inputs(recipe)
+                if spent is not None:
+                    costs.append((recipe["ticks"] * per_tick + spent) / result[1])
     for machine, recipes in petro.FLUID_RECIPES.items():
         use = machines.STATS.get(machine, {}).get("use_per_tick", 0)
         for recipe in recipes:
-            for result in recipe.get("fluid_results", []):
-                if result[0] == fluid and use:
-                    costs.append(recipe["ticks"] * use / result[1])
-    for form, recipes in industrial_forms.FORM_RECIPES.items():
-        info = industrial_forms.FORMS[form]
+            offer(recipe, use)
+    for form, info in industrial_forms.FORMS.items():
+        recipes = industrial_forms.recipes_for_form(form)
+        if not recipes:
+            continue
         use = machines.STATS[info["family"]]["use_per_tick"]
-        # MachineUpgrades.Effect.use with four efficiency cards, the most that count.
-        cheapest = max(1, round(use * 0.8 ** 4)) if info["upgrades"] else use
         for recipe in recipes:
-            for result in recipe.get("fluid_results", []):
-                if result[0] == fluid:
-                    costs.append(recipe["ticks"] * cheapest / result[1])
+            base_use = recipe.get("energy_per_tick", 0) or use
+            discounted = max(1, round(base_use * 0.8 ** 4)) if info["upgrades"] else base_use
+            offer(recipe, industrial_forms.form_energy(form, discounted))
     return min(costs) if costs else None
 
 
@@ -2955,6 +3399,21 @@ def check_industrial_forms():
             described = info.get(key, []) if key == "fuels" else info[key]
             if [tuple(item) for item in described] != [tuple(item) for item in built] if key == "fuels" else described != built:
                 err(f"{form}: {key} is {built} in IndustrialForms.java but {described} in tools/industrial_forms.py")
+        vents = re.findall(r'\.gasVentOutput\((\d+), Jugcraft\.id\("(\w+)"\)\)', body)
+        actual_vent = (int(vents[0][0]), f"{MOD}:{vents[0][1]}") if len(vents) == 1 else None
+        if len(vents) > 1 or actual_vent != info.get("gas_vent"):
+            err(f"{form}: Java gas overflow must match its declared output and exact gas")
+        if actual_vent is not None:
+            output, gas = actual_vent
+            if not 0 <= output < len(info["output_tanks"]) or gas not in {f"{MOD}:{g}" for g in petro.GASES}:
+                err(f"{form}: overflow must target a real output and registered gas, never a liquid")
+            for row in industrial_forms.FORM_RECIPES.get(form, []):
+                if any(petro.result_tank(i, r) == output and r[0] != gas for i, r in enumerate(row.get("fluid_results", []))):
+                    err(f"{form}: declared gas overflow disagrees with a recipe product")
+        # MachineForm's own rule: every form is 2 to 6 blocks on each axis (it refuses to load otherwise).
+        extents = (len(info["layers"][0][0]), len(info["layers"][0]), len(info["layers"]))
+        if any(not 2 <= extent <= 6 for extent in extents):
+            err(f"{form}: must be 2 to 6 blocks on every axis, not {'x'.join(map(str, extents))}")
         if profiles.get(info["profile"]) != info["tank_mb"]:
             err(f"{form}: the {info['profile']} profile's tanks hold {profiles.get(info['profile'])} mB, not {info['tank_mb']}")
         parts = len(industrial_forms.footprint(info["layers"]))
@@ -2963,7 +3422,7 @@ def check_industrial_forms():
                     for lit in ("false", "true") for part in range(parts)}
         if set(state.get("variants", {})) != expected:
             err(f"{form}: its blockstate must cover exactly 4 facings x 2 lights x {parts} parts")
-        if bool(industrial_forms.FORM_RECIPES.get(form)) != (f"{MOD}:{form}" in viewed):
+        if bool(industrial_forms.recipes_for_form(form)) != (f"{MOD}:{form}" in viewed):
             err(f"{form}: a JEI category in recipe_view.json exactly when it runs recipes")
         if info.get("fuels"):
             kinds = [port[1] for port in info["ports"]]
@@ -2981,7 +3440,7 @@ def check_industrial_forms():
                     err(f"{form}: {fluid} burns for {per_mb} JE/mB, at least the {cost:.1f} JE/mB its cheapest making costs: a power loop")
         tanks = info["input_tanks"] + info["output_tanks"]
         fluids = {f"{MOD}:{f}" for f in list(petro.FLUIDS) + list(petro.GASES)} | {"minecraft:water", "minecraft:lava"}
-        for recipe in industrial_forms.FORM_RECIPES.get(form, []):
+        for recipe in industrial_forms.recipes_for_form(form):
             label = f"{form} recipe {recipe['name']}"
             if recipe["capability"] not in info["capabilities"]:
                 err(f"{label}: needs {recipe['capability']}, which the form does not offer")
@@ -2997,12 +3456,45 @@ def check_industrial_forms():
             targets = [petro.result_tank(i, r) for i, r in enumerate(recipe.get("fluid_results", []))]
             if len(set(targets)) != len(targets) or any(t >= len(info["output_tanks"]) for t in targets):
                 err(f"{label}: its results need distinct output tanks the form has")
-            if sum(r[1] for r in recipe.get("fluid_results", [])) > sum(mb for _, mb in recipe.get("fluids", [])):
+            source = recipe.get("source", 0)
+            if source < 0 or (source and not recipe.get("items")):
+                err(f"{label}: fluid released from items needs a consumed solid feed")
+            liquid_gases = {"jugcraft:liquid_oxygen", "jugcraft:liquid_methane", "jugcraft:liquid_hydrogen"}
+            volume = lambda fluid, mb: mb * (4 if fluid in liquid_gases else 1)
+            if sum(volume(r[0],r[1]) for r in recipe.get("fluid_results", [])) > sum(volume(f,mb) for f, mb in recipe.get("fluids", [])) + source:
                 err(f"{label}: makes more fluid than it takes")
             if recipe["ticks"] <= 0:
                 err(f"{label}: takes no time")
         if len(tanks) != len(set(tanks)):
             err(f"{form}: two tanks share a role")
+    # Methanation pays for its hydrogen as well as its processing. Treat CO/CO2 as free here for a conservative
+    # bound; gasification instead pays a finite carbon item. Speed never reduces total energy per batch.
+    hydrogen_cost = cheapest_electrolysis("jugcraft:hydrogen")
+    methane_value = max((v for info in industrial_forms.FORMS.values()
+                         for f, v, _ in info.get("fuels", []) if f == "jugcraft:methane"), default=0)
+    if methane_value is not None:
+        import math
+        for form, recipe in ((form, recipe) for form in industrial_forms.FORMS
+                             for recipe in industrial_forms.recipes_for_form(form)):
+            if recipe.get("capability") != industrial_forms.NICKEL_METHANATION:
+                continue  # Phase conversion consumes existing methane; it is not methanation.
+            made = sum(r[1] for r in recipe.get("fluid_results", []) if r[0] == "jugcraft:methane")
+            if not made:
+                continue
+            hydrogen = sum(mb for fluid, mb in recipe["fluids"] if fluid == "jugcraft:hydrogen")
+            # Upgrading consumes already-burnable mixed gas, including its original methane.
+            # Count its actual Bio-Generator opportunity cost, not a free feed or a second fuel award.
+            bio_values = {f: v for f, v, _ in industrial_forms.FORMS.get("bio_generator", {}).get("fuels", [])}
+            feed_energy = sum(mb * bio_values.get(fluid, 0) for fluid, mb in recipe["fluids"])
+            card_counts = range(5) if industrial_forms.FORMS[form]["upgrades"] else range(1)
+            for speed in card_counts:
+                for efficiency in card_counts:
+                    ticks = math.ceil(recipe["ticks"] / (1 + .5 * speed))
+                    base_use = recipe.get("energy_per_tick", 0) or machines_stats(industrial_forms.FORMS[form]["family"])["use_per_tick"]
+                    upgraded = max(1, math.floor(base_use * (1 + .5 * speed) * (1 + .25 * speed) * .8**efficiency + .5))
+                    draw = industrial_forms.form_energy(form, upgraded)
+                    if hydrogen_cost is None or hydrogen * hydrogen_cost + ticks * draw + feed_energy <= made * methane_value:
+                        err(f"{form}/{recipe['name']}: methanation can profit from electrolytic hydrogen")
     # The Separator's construction: the owner's selected 20 steel plates, counting the Steel Tanks' own.
     pattern, key = industrial_forms.FORMS["electrolytic_separator"]["recipe"]
     tank = load(DATA / MOD / "recipe" / "steel_tank.json") or {}
@@ -3012,6 +3504,166 @@ def check_industrial_forms():
               + plates_per_tank * sum(row.count(ch) for row in pattern for ch, ref in key.items() if ref == f"{MOD}:steel_tank"))
     if plates != 20:
         err(f"The Electrolytic Separator costs {plates} steel plates, not the owner's selected 20")
+
+
+# The plan's electrolysis energy floor (docs/features/industrial-electrolytic-separator.md): an expanded or bulk form
+# that makes hydrogen from electricity alone spends at least this many JE a millibucket, cards and profile saving
+# included. The entry Separator, which has no profile saving, is not held to it.
+ELECTROLYSIS_FLOOR = 256
+
+
+def electrolysis_floor_breaches():
+    """Expanded or bulk forms whose recipes make hydrogen from electricity alone below ELECTROLYSIS_FLOOR: (form, recipe,
+    JE per mB). Inputs other than water count at their own cheapest electrolysis; recipes using items are not
+    electricity routes."""
+    import machines
+    hydrogen = f"{MOD}:hydrogen"
+    breaches = []
+    for form, info in industrial_forms.FORMS.items():
+        recipes = industrial_forms.recipes_for_form(form)
+        if not recipes:
+            continue
+        if info["profile"] == "ENTRY":
+            continue
+        use = machines.STATS[info["family"]]["use_per_tick"]
+        for recipe in recipes:
+            base_use = recipe.get("energy_per_tick", 0) or use
+            carded = max(1, int(base_use * 0.8 ** 4 + 0.5)) if info["upgrades"] else base_use
+            per_tick = industrial_forms.form_energy(form, carded)
+            if recipe.get("items"):
+                continue
+            made = sum(result[1] for result in recipe.get("fluid_results", []) if result[0] == hydrogen)
+            if not made:
+                continue
+            spent = 0.0
+            for source, mb in recipe.get("fluids", []):
+                if not source.startswith("minecraft:"):
+                    cost = cheapest_electrolysis(source, {hydrogen})
+                    spent = None if cost is None or spent is None else spent + cost * mb
+            if spent is None:
+                continue
+            per_mb = (recipe["ticks"] * per_tick + spent) / made
+            if per_mb < ELECTROLYSIS_FLOOR:
+                breaches.append((form, recipe["name"], per_mb))
+    return breaches
+
+
+def check_electrolysis_floor():
+    """No expanded or bulk form makes hydrogen from electricity alone for less than the plan's floor, so a larger
+    Separator can never undercut the entry one into a cheap hydrogen battery or a loop with a generator bonus."""
+    for form, recipe, per_mb in electrolysis_floor_breaches():
+        err(f"{form} recipe {recipe}: makes hydrogen from electricity for {per_mb:.1f} JE/mB with every card and its "
+            f"profile saving, below the {ELECTROLYSIS_FLOOR} JE/mB electrolysis floor")
+
+
+def check_self_output_gates():
+    """No machine's construction needs an item that only that machine can make (docs/features/
+    industrial-copper-entry-aluminum.md): for every machine that runs recipes, each ingredient of its crafting recipe,
+    tags resolved, must be reachable from the world and vanilla items through recipes some other machine or crafting
+    runs. Items no recipe makes (ores, crops, mob drops) and vanilla items count as found in the world."""
+    import recipe_view
+    recipe_dir = DATA / MOD / "recipe"
+
+    def outputs(data):
+        found = []
+        result = data.get("result")
+        if isinstance(result, dict) and "id" in result:
+            found.append(result["id"])
+        elif isinstance(result, str):
+            found.append(result)
+        found += [r["id"] for r in data.get("results", []) or [] if isinstance(r, dict) and "id" in r]
+        if isinstance(data.get("output"), str):
+            found.append(data["output"])
+        return found
+
+    def refs(value):
+        if isinstance(value, str):
+            return [value]
+        if isinstance(value, list):
+            return [ref for item in value for ref in refs(item)]
+        if isinstance(value, dict):
+            if "tag" in value:
+                return ["#" + value["tag"]]
+            for key in ("item", "ingredient", "id"):
+                if key in value:
+                    return refs(value[key])
+        return []
+
+    def ingredients(data):
+        found = [ref for value in data.get("key", {}).values() for ref in refs(value)]
+        for key in ("ingredients", "items", "inputs"):
+            found += [ref for item in data.get(key, []) or [] for ref in refs(item)]
+        for key in ("input", "ingredient", "tool"):
+            if key in data:
+                found += refs(data[key])
+        return found
+
+    type_blocks = {}
+    for block, (_, kind) in recipe_view.LISTS.items():
+        type_blocks.setdefault(f"{MOD}:{kind}", set()).add(f"{MOD}:{block}")
+    for name, spec in petro.FLUID_MACHINES.items():
+        if spec.get("recipe_type"):
+            type_blocks.setdefault(f"{MOD}:{spec['recipe_type']}", set()).add(f"{MOD}:{name}")
+    capability_blocks = {}
+    for form, info in industrial_forms.FORMS.items():
+        for capability in info["capabilities"]:
+            capability_blocks.setdefault(capability, set()).add(f"{MOD}:{form}")
+    recipes = []
+    for path in recipe_dir.rglob("*.json"):
+        data = load(path) or {}
+        kind = data.get("type", "")
+        if data.get("capability"):
+            makers = capability_blocks.get(data["capability"], {"?"})
+        else:
+            makers = type_blocks.get(kind, {kind or "?"})
+        made = outputs(data)
+        if made:
+            recipes.append((makers, ingredients(data), made, path.relative_to(recipe_dir).as_posix()))
+    produced = {item for _, _, made, _ in recipes for item in made}
+    tag_cache = {}
+
+    def tag_values(tag, seen=()):
+        if tag in tag_cache:
+            return tag_cache[tag]
+        namespace, _, path = tag[1:].partition(":")
+        values = []
+        for folder in ("item", "items"):
+            file = DATA / namespace / "tags" / folder / f"{path}.json"
+            if file.is_file():
+                for value in (load(file) or {}).get("values", []):
+                    value = value["id"] if isinstance(value, dict) else value
+                    values += (tag_values(value, seen + (tag,)) if value not in seen else []) if value.startswith("#") else [value]
+        tag_cache[tag] = values
+        return values
+
+    def available(ref, reached):
+        if ref.startswith("#"):
+            values = tag_values(ref)
+            return not values or any(available(value, reached) for value in values)
+        return ref.startswith("minecraft:") or ref not in produced or ref in reached
+
+    def reachable_without(block):
+        reached, changed = set(), True
+        while changed:
+            changed = False
+            for makers, needs, made, _ in recipes:
+                if makers - {block} and all(available(ref, reached) for ref in needs):
+                    for item in made:
+                        if item not in reached:
+                            reached.add(item)
+                            changed = True
+        return reached
+
+    crafting = {"minecraft:crafting_shaped", "minecraft:crafting_shapeless"}
+    for block in sorted(set().union(*type_blocks.values(), *capability_blocks.values())):
+        builds = [r for r in recipes if block in r[2] and r[0] & crafting]
+        if not builds:
+            continue
+        reached = reachable_without(block)
+        for _, needs, _, name in builds:
+            gated = [ref for ref in needs if not available(ref, reached)]
+            if gated:
+                err(f"{block}: its recipe {name} needs {gated}, which only it can make: a self-output gate")
 
 
 def check_large_machines():
@@ -3165,6 +3817,49 @@ def check_handbook(registered):
             err(f"handbook: unknown item {ref}")
 
 
+def check_encyclopedia_routes(registered):
+    """The Jugcraft Encyclopedia (tools/encyclopedia_routes.py): both routes are there, every Jugcraft item it shows exists,
+    every link opens a real handbook page or codex category, and its screen's words are translated."""
+    data = load(ASSETS / "encyclopedia" / "en_us.json")
+    if data is None:
+        err("assets/jugcraft/encyclopedia/en_us.json is missing")
+        return
+    book = load(ASSETS / "handbook" / "en_us.json") or {"chapters": []}
+    codex = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "categories"
+    routes = {route["id"]: route for route in data["routes"]}
+    if set(routes) != {"technology", "magic"}:
+        err(f"encyclopedia: routes {sorted(routes)} must be the technology and the magic route")
+    for route in data["routes"]:
+        name = f"encyclopedia {route['id']}"
+        if not route["summary"] or not route["milestones"] or not route["chapters"]:
+            err(f"{name}: needs an overview, milestones and chapters")
+        if not re.fullmatch(r"[0-9A-F]{6}", route["accent"]):
+            err(f"{name}: accent {route['accent']} must be RRGGBB")
+        for entry in [route] + route["milestones"] + route["chapters"]:
+            ref = entry["icon"]
+            if split(ref)[0] == MOD and split(ref)[1] not in registered:
+                err(f"{name}: unknown item {ref}")
+        for entry in route["milestones"] + route["chapters"]:
+            link = entry["link"]
+            if link["type"] == "handbook":
+                chapters = book["chapters"]
+                if not 0 <= link["chapter"] < len(chapters) or not 0 <= link["page"] < len(chapters[link["chapter"]]["pages"]):
+                    err(f"{name}: {entry['title']} links to a missing handbook page {link}")
+            elif link["type"] == "codex":
+                if split(link["category"])[0] != MOD or not (codex / f"{split(link['category'])[1]}.json").exists():
+                    err(f"{name}: {entry['title']} links to a missing codex category {link['category']}")
+            elif link["type"] != "journal":
+                err(f"{name}: {entry['title']} has a link of unknown type {link['type']}")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    java = "".join((CLIENT_JAVA_ROOT / name).read_text(encoding="utf-8")
+                   for name in ("EncyclopediaRoutesScreen.java",))
+    # Whole keys in the Java, and the link descriptions it builds from "...opens." and the link's type.
+    keys = {key for key in re.findall(r'"((?:key|screen)\.jugcraft\.routes[a-z_.]*)"', java) if not key.endswith(".")}
+    keys |= {f"screen.jugcraft.routes.opens.{kind}" for kind in ("handbook", "codex", "journal")}
+    for key in sorted(keys - set(lang)):
+        err(f"encyclopedia: untranslated {key}")
+
+
 VANILLA_ADVANCEMENT_ROOTS = {"minecraft:story/root", "minecraft:nether/root", "minecraft:end/root", "minecraft:adventure/root",
                              "minecraft:husbandry/root"}
 
@@ -3177,8 +3872,17 @@ def check_advancements(registered):
     for path in sorted(folder.glob("*.json")):
         data = load(path)
         text = path.read_text(encoding="utf-8")
+        # Effect predicates are registry references, not inventory items.
+        import nouveau_content
+        effects = {split(effect)[1] for criterion in data.get("criteria", {}).values()
+                   if criterion.get("trigger") == "minecraft:effects_changed"
+                   for effect in criterion.get("conditions", {}).get("effects", {})
+                   if effect.startswith("jugcraft:")}
+        for effect in effects:
+            if effect not in nouveau_content.EFFECT_IDS:
+                err(f"advancement {path.stem}: unknown effect jugcraft:{effect}")
         for name in re.findall(r'"jugcraft:([a-z_]+)"', text):
-            if name not in registered and name not in names and not name.startswith("block/"):
+            if name not in registered and name not in names and name not in effects and not name.startswith("block/"):
                 err(f"advancement {path.stem}: unknown item jugcraft:{name}")
         if data["display"]["title"]["translate"] not in lang:
             err(f"advancement {path.stem}: untranslated title")
@@ -3224,10 +3928,49 @@ def check_tower():
     if modules != list(tower.MODULES):
         err("JugcraftTower.MODULES differs from tools/tower.py")
     for block in tower.FURNITURE:
-        if f'furniture("{block}"' not in java:
+        if f'furniture("{block}"' not in java and f'block("{block}",' not in java:
             err(f"JugcraftTower does not register furniture {block}")
     if not (ROOT / "src" / "main" / "resources" / "data" / "jugcraft" / "drone_tower" / "tower.json.gz").exists():
         err("missing tower data: run tools/drone_tower.py")
+
+
+def check_power_lines():
+    """powerline/LineKind.java and client/LineRenderer.java match tools/power_lines.py, and the frame block has its data."""
+    import power_lines
+    kinds = re.findall(r'^\s+[A-Z_]+\("([a-z_]+)", Family\.([A-Z]+), (\d+), (\d+), (\d+), ([\d_]+)\)',
+                       (JAVA_ROOT / "powerline" / "LineKind.java").read_text(encoding="utf-8"), re.M)
+    found = {k: (f.lower(), int(t), int(c.replace("_", "")), int(h), int(r)) for k, f, t, h, r, c in kinds}
+    expected = {k: (fam, tier, cap, h, r) for k, (_, fam, tier, cap, h, r) in power_lines.KINDS.items()}
+    if list(found) != list(expected):
+        err(f"LineKind.java kinds {list(found)} != tools/power_lines.py {list(expected)}")
+    for kind, values in expected.items():
+        if kind in found and found[kind] != values:
+            err(f"LineKind {kind}: {found[kind]} in Java, {values} in tools/power_lines.py")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
+                / "LineRenderer.java").read_text(encoding="utf-8")
+    for name in power_lines.MATERIALS:
+        col, row = power_lines.slot(name)
+        if f"static final float[] {name.upper()} = region({col}, {row});" not in renderer:
+            err(f"LineRenderer.java: material {name.upper()} is not region({col}, {row})")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    frame = power_lines.FRAME
+    if f"block.{MOD}.{frame}" not in lang:
+        err(f"Missing name for block {frame}")
+    state = load(ASSETS / "blockstates" / f"{frame}.json")
+    if state:
+        for variant in state.get("variants", {}).values():
+            model(variant["model"])
+    if not (DATA / MOD / "loot_table" / "blocks" / f"{frame}.json").is_file():
+        err(f"Missing loot table for {frame}")
+    if not (DATA / MOD / "damage_type" / "electrocution.json").is_file():
+        err("Missing damage type jugcraft:electrocution")
+    for key in power_lines.LANG:
+        if key not in lang:
+            err(f"Missing lang {key}")
+    java = "".join(p.read_text(encoding="utf-8") for p in (JAVA_ROOT / "powerline").glob("*.java"))
+    for key in set(re.findall(r'"((?:message|tooltip)\.jugcraft\.power_line\.[a-z_]+)"', java)):
+        if key not in lang:
+            err(f"powerline/ uses lang key {key} that is not generated")
 
 
 def check_drones():
@@ -3361,6 +4104,22 @@ def check_agriculture():
         items[name] = ("seeds", int(n), float(sat), compost.lower(), crop)
     for name, compost in re.findall(r'\bplain\("([a-z_]+)", COMPOST_(\w+)\)', main):
         items[name] = ("plain", None, None, compost.lower(), None)
+    # Plain noncompostable ingredients (for example dragonblood resin) must still match the data exactly.
+    for name in re.findall(r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, None, None)
+    # Bottled nonfood ingredients keep their shell without acquiring drink behavior.
+    for name, remainder, limit in re.findall(
+            r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.craftRemainder\(Items\.(\w+)\)\.stacksTo\((\d+)\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, None, None)
+            if ag.ITEMS[name].get("craft_remainder") != "minecraft:" + remainder.lower() or ag.ITEMS[name].get("stack_size") != int(limit):
+                err(f"JugcraftAgriculture.java {name}: container or stack limit differs from agriculture data")
+    # Decorative ingredients can use a different creative tab while retaining the same plain-item properties.
+    for name, compost in re.findall(
+            r'\bregisterItem\("([a-z_]+)", Item::new, new Item\.Properties\(\)\.compostable\(COMPOST_(\w+)\), \w+_TAB\)', main):
+        if name in ag.ITEMS:
+            items[name] = ("plain", None, None, compost.lower(), None)
     for name, n, sat, compost in re.findall(r'\bcob\("([a-z_]+)", (\d+), ([\d.]+)F, COMPOST_(\w+)\)', main):
         items[name] = ("cob", int(n), float(sat), compost.lower(), None)
     for name, compost in re.findall(r'\bthrown\("([a-z_]+)", COMPOST_(\w+)\)', main):
@@ -3522,7 +4281,7 @@ def check_agriculture():
             err(f"Missing crop texture {texture}")
 
     # Cooking Pot recipes: one file each, known items, room in the pot, and no two with the same ingredients.
-    registered = set(ag.all_items()) | set(all_items()) | set(all_blocks())
+    registered = set(ag.all_items()) | set(all_items()) | set(all_blocks()) | set(petro.petro_items())
     folder = DATA / MOD / "recipe" / "pot_cooking"
     if sorted(path.stem for path in folder.glob("*.json")) != sorted(ag.POT_RECIPES):
         err("recipe/pot_cooking/ files differ from POT_RECIPES in tools/agriculture.py")
@@ -3542,6 +4301,10 @@ def check_agriculture():
         if recipe.get("type") != f"{MOD}:pot_cooking" or not recipe.get("fabric:load_conditions"):
             err(f"pot_cooking/{result}: wrong type or missing feature switch condition")
 
+    check_agriculture_recipe_loops()
+
+
+def check_agriculture_recipe_loops():
     # No recipe loop among agriculture items: every conversion leads away from where it started. Unpacking a storage block
     # (tools/agriculture.py UNPACKING: tools/rice.py's and tools/soil.py's) only gives back what packed it, so it is left out.
     edges = {}
@@ -3554,7 +4317,18 @@ def check_agriculture():
         for ref in recipe["inputs"]:
             edge(ref, recipe["result"])
     for recipe in ag.SHAPED:
+        # This paid, one-for-one upgrade keeps the item ID but sets its bucket state.
+        # Match the complete recipe, not just its ID or the presence of components:
+        # a changed cost, output count or state must go through normal loop detection.
+        tap_upgrade = recipe == {
+            "id": "tree_tap_bucket", "pattern": ["TB"],
+            "key": {"T": "jugcraft:tree_tap", "B": "minecraft:bucket"},
+            "result": "jugcraft:tree_tap", "count": 1, "category": "misc", "switch": "agriculture",
+            "components": {"minecraft:block_state": {"upgraded": "true"}},
+        }
         for ref in recipe["key"].values():
+            if tap_upgrade and ref == "jugcraft:tree_tap":
+                continue  # Retain bucket -> tap, so any route back to buckets still forms a cycle.
             edge(ref, recipe["result"])
     for result, info in ag.POT_RECIPES.items():
         for ref in info["inputs"]:
@@ -4202,9 +4976,16 @@ def check_cakes():
     wanted = [(cake.upper(), cake, str(info["food"][0]), str(info["food"][1]), f"{info['color']:06X}") for cake, info in cakes.CAKES.items()]
     if [(c, i, f, s_, col.upper()) for c, i, f, s_, col in declared] != wanted:
         err(f"PieFilling.java's cakes {declared} differ from tools/cakes.py CAKES (ID, slice food, colour, in order)")
-    last_pie = max((filling.find(f'"{ag.pie_name(f)}"') for f in ag.PIES["fillings"]), default=-1)
-    if declared and filling.find(f'"{next(iter(cakes.CAKES))}"') < last_pie:
-        err("PieFilling.java must list the cakes after the pies: the Hearth Oven saves a filling by its place")
+    # Ordinals are saved by HearthOvenBlockEntity. New round pies may follow the old cakes/tarts,
+    # but none of the 26 already released fillings may move.
+    saved_prefix = ("APPLE", "PUMPKIN_CREAM", "CRANBERRY", "SWEET_POTATO", "CHESTNUT", "CHOCOLATE",
+                    "SWEET_BERRY", "PEACH", "LEMON", "CARROT_CAKE", "BIRTHDAY_CAKE", "ICE_CREAM_CAKE",
+                    "RED_VELVET_CAKE", "CHEESECAKE", "COFFEE_CAKE", "APPLE_CAKE", "STRAWBERRY_PIE",
+                    "BLUEBERRY_TART", "PLUM_PIE", "BANOFFEE_PIE", "SWEET_BERRY_TART", "LEMON_TART",
+                    "WHIPPED_PUMPKIN_PIE", "PORK_PIE", "STRAWBERRY_TART", "COFFEE_TART")
+    actual_order = re.findall(r'^\t([A-Z_]+)\(', filling, re.M)
+    if tuple(actual_order[:len(saved_prefix)]) != saved_prefix:
+        err("PieFilling.java changed an existing saved filling ordinal; append new fillings instead")
     block = java.get("CakeBlock", "")
     height = re.search(r"\bint HEIGHT = (\d+);", block)
     if not height or int(height.group(1)) != cakes.HEIGHT:
@@ -4438,8 +5219,7 @@ def check_orchard():
         if (feature.get("trunk_provider", {}).get("id") != orchard.log(tree)
                 or feature.get("foliage_placer", {}).get("type") != placer
                 or feature.get("foliage_provider", {}).get("id") != f"{MOD}:{leaves}"
-                or feature.get("trunk_placer", {}).get("base_height") != info["trunk"]["base_height"]
-                or feature.get("trunk_placer", {}).get("height_rand_a") != info["trunk"]["height_rand_a"]
+                or feature.get("trunk_placer") != orchard_trunk_placer({"type": "straight", **info["trunk"]})
                 or feature.get("foliage_placer", {}).get("radius") != info["foliage"]["radius"]
                 or feature.get("foliage_placer", {}).get("height") != info["foliage"]["height"]):
             err(f"worldgen/feature/{orchard.feature(tree)}.json differs from tools/orchard.py TREES[{tree!r}]")
@@ -4451,14 +5231,16 @@ def check_orchard():
         if bm.PLACED_TREES.get(orchard.checked(tree)) != (f"{MOD}:{orchard.feature(tree)}", f"{MOD}:{sapling}"):
             err(f"tools/biomes.py PLACED_TREES must place {orchard.checked(tree)} where the {tree} sapling could stand")
         for biome, share in info["regions"].items():
-            if [f"{MOD}:{orchard.checked(tree)}", share] not in bm.BIOMES[biome]["trees"]["picks"]:
+            if not (share == 1 and bm.BIOMES[biome]["trees"]["default"] == f"{MOD}:{orchard.checked(tree)}") and not any(ref == f"{MOD}:{orchard.checked(tree)}" and abs(chance - share) < 1e-9 for ref, chance in bm.BIOMES[biome]["trees"]["picks"]):
                 err(f"tools/biomes.py {biome} must pick {orchard.checked(tree)} ({share})")
     # The banana's stem: a pillar block (registered, with its item) that is a log to its fronds and to an axe, but no fuel.
     stem = orchard.BANANA_STEM["block"]
     if f'registerBlock("{stem}", RotatedPillarBlock::new' not in main:
         err(f"JugcraftAgriculture must register {stem} as a RotatedPillarBlock")
-    if any(tree_info.get("log", f"{MOD}:{stem}") != f"{MOD}:{stem}" for tree_info in orchard.TREES.values()):
-        err("tools/orchard.py: a tree's own log must be the banana's stem, the only one registered")
+    for tree in orchard.TREES:
+        expected_log = {"pear": "jugcraft:fruitwood_log", "peach": "minecraft:cherry_log", "banana": "jugcraft:banana_stem"}.get(tree, "minecraft:oak_log")
+        if orchard.log(tree) != expected_log:
+            err(f"{tree}: orchard log must be {expected_log}")
     state = load(ASSETS / "blockstates" / f"{stem}.json") or {}
     if set(state.get("variants", {})) != {"axis=x", "axis=y", "axis=z"}:
         err(f"{stem}: blockstate does not cover every axis")
@@ -4517,7 +5299,7 @@ def check_kitchen():
 
     # The knives tag: every kitchen knife and the Carving Knife.
     tag = load(DATA / MOD / "tags" / "item" / f"{kitchen.KNIFE_TAG.split(':')[1]}.json") or {}
-    if set(tag.get("values", [])) != {f"{MOD}:{knife}" for knife in list(kitchen.KNIVES) + ["carving_knife"]}:
+    if set(tag.get("values", [])) != {f"{MOD}:{knife}" for knife in list(kitchen.KNIVES) + ["carving_knife", "household_knife"]}:
         err(f"The item tag {kitchen.KNIFE_TAG} should hold every kitchen knife and the Carving Knife")
 
     # Cutting recipes: one file each, the right type, tool and results, and never more food than the whole.
@@ -4570,7 +5352,7 @@ def check_kitchen():
             err(f"Missing lang key {key}")
     used = "\n".join(java.get(source, "") for source in ("KitchenStoveBlock", "SkilletBlock", "CuttingBoardBlock", "KitchenCabinetBlockEntity"))
     for key in kitchen.TEXT:
-        if f'"{key}"' not in used:
+        if f'"{key}"' not in used and not (key == 'container.jugcraft.kitchen_cabinet' and 'getBlockState().getBlock().getDescriptionId()' in used):
             err(f"tools/kitchen.py TEXT {key} is not used by the kitchen's Java")
 
 
@@ -4599,11 +5381,39 @@ def check_festival(java, main):
     for block in [b for b in ag.TREE_BLOCKS if b not in tree_blocks] + list(ag.DECOR) + [ag.CRANBERRY["block"]]:
         if f'registerBlock("{block}"' not in main:
             err(f"JugcraftAgriculture.java does not register {block}")
-    for tree, info in ag.TREES.items():  # registerTree registers the sapling, the leaves and the wood set
+    for tree, info in ag.TREES.items():
         base = info["base"].upper()
-        if not re.search(rf'registerTree\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
-                         rf'{tree.upper() + "_LEAVES" if info["season"] else "null"}, Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
+        own_wood = ag.timber(tree) == tree and "trunk_block" not in info
+        composed = "fruit" in info and info["season"] is not None
+        call = "registerTree" if own_wood and not composed else "registerFoliage"
+        schedule = (tree.upper() + "_LEAVES" if info["season"] else "null") + ", " if call == "registerTree" else ""
+        if not re.search(rf'{call}\("{tree}", "{info["leaves"]}", {tree.upper()}_GROWER, '
+                         rf'{schedule}Blocks\.{base}_SAPLING, Blocks\.{base}_LEAVES,', main):
             err(f"JugcraftAgriculture.java does not register the {tree} tree as TREES in tools/agriculture.py says")
+        if composed:
+            edge_fruiting = ", true" if info["fruit"].get("exposed_sides") else ""
+            factory = f'props -> new SeasonalFruitLeavesBlock({tree.upper()}_LEAVES, "{info["fruit"]["item"]}", props{edge_fruiting})'
+            if tree == "walnut":
+                factory = "WalnutLeavesBlock::new"
+                walnut_java = (JAVA_ROOT / "agriculture/WalnutLeavesBlock.java").read_text(encoding="utf-8")
+                if 'super(SCHEDULE, "ecology_walnut", properties)' not in walnut_java or "SCHEDULE = JugcraftAgriculture.WALNUT_LEAVES" not in walnut_java:
+                    err("Walnut leaves must use the shared schedule and recovered raw nut")
+            registration = re.search(rf'registerFoliage\("{tree}",.*?;', main, re.S)
+            if registration is None or factory not in registration.group():
+                err(f"{tree} must register its own seasonal fruit schedule and fruit item")
+            if own_wood and f'registerWoodSet("{tree}",' not in main:
+                err(f"{tree} seasonal fruit tree must register its own timber separately")
+        if not own_wood:
+            if tree in ag.WOOD_SETS or f'registerWoodSet("{tree}",' in main:
+                err(f"{tree} shares timber and must not register a wood set")
+            for suffix in ("log", "wood", "planks", "stairs", "slab", "fence", "fence_gate"):
+                if (ASSETS / "blockstates" / f"{tree}_{suffix}.json").exists():
+                    err(f"Phantom timber block {tree}_{suffix}")
+        if "sapling_shapes" in info:
+            choices = info["sapling_shapes"]
+            expected = f'{tree.upper()}_GROWER = weightedGrower(' + ", ".join([f'"{shape}"' for shape in choices] + [str(w) for w in choices.values()]) + ")"
+            if expected not in main:
+                err(f"{tree} grower weights differ from sapling_shapes")
     for wood in ag.WOOD_SETS:  # registerWoodSet registers every block in agriculture.wood_blocks
         if f'registerWoodSet("{wood}",' not in main and wood not in ag.TREES:
             err(f"JugcraftAgriculture.java does not register the {wood} wood set")
@@ -4616,6 +5426,12 @@ def check_festival(java, main):
     expected_states[ag.CHESTNUT["leaves"]] = {f"fruit={f}" for f in range(3)}
     for tree, info in ag.TREES.items():
         expected_states[info["leaves"]] = {f"season={state}" for state in ag.SEASON_STATES} if info["season"] else {""}
+        if "clip_sprig" in info:
+            expected_states[info["leaves"]] = {f"clipped={clipped},{season}" for season in expected_states[info["leaves"]] for clipped in ("false", "true")}
+        if "fruit" in info:
+            expected_states[info["leaves"]] = {
+                f"fruit={fruit}" + (f",{season}" if season else "")
+                for season in expected_states[info["leaves"]] for fruit in range(3)}
     for block, variants in expected_states.items():
         if set((load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})) != variants:
             err(f"{block}: blockstate does not cover every stage")
@@ -4647,8 +5463,18 @@ def check_seasonal_trees(main, leaves):
             return "gold" if day >= gold_from else "green"
         for mode, day in modes.items():
             seen = {look((day - 1 + shift) % 365 + 1) for shift in range(-ag.JITTER, ag.JITTER + 1)}
-            if seen != {wanted[mode]}:
-                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, not only {wanted[mode]}")
+            # Evergreen holly uses these states for berries, not leaf loss. Its approved late-autumn
+            # berry date and early-spring fade straddle the fixed mode dates within positional jitter.
+            expected_looks = ({"spring": {"green", "bare"}, "summer": {"green"},
+                               "autumn": {"green", "gold"}, "winter": {"bare"}}[mode]
+                              if tree == "holly" else {wanted[mode]})
+            if tree == "walnut":
+                # The approved late leaf-out/early leaf-fall dates straddle the
+                # fixed April 15 and October 20 modes. Audit those exact sets.
+                expected_looks = {"spring": {"bare", "green"}, "summer": {"green"},
+                                  "autumn": {"bare", "gold"}, "winter": {"bare"}}[mode]
+            if seen != expected_looks:
+                err(f"/jugcraft season set {mode} (day {day}) shows {tree} leaves {sorted(seen)}, expected {sorted(expected_looks)}")
 
 
 def check_carving(java, main):
@@ -5980,7 +6806,7 @@ def check_ferris_wheel(java, number, lang):
 
 
 def check_pinata(java, number, lang):
-    """Fall addition 28: the piñatas match tools/pinata.py (slots, drop, a charged swing, the stick's hits, each kind's
+    """Fall addition 28: the piﾃｱatas match tools/pinata.py (slots, drop, a charged swing, the stick's hits, each kind's
     hits and item); the items, entity and Blindfold are registered and drawn from the quads; the Blindfold's view and
     worn band exist; their words, recipes and advancements exist."""
     pn = pinata.PINATA
@@ -6004,7 +6830,7 @@ def check_pinata(java, number, lang):
             err(f"JugcraftAgriculture.java must call {call}")
     client_dir = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
     if "JugcraftAgriculture.PINATA, PinataRenderer::new" not in (client_dir / "JugcraftClient.java").read_text(encoding="utf-8"):
-        err("JugcraftClient.java must draw the piñatas")
+        err("JugcraftClient.java must draw the piﾃｱatas")
     if '"pinata_quads.json"' not in (client_dir / "DecorQuads.java").read_text(encoding="utf-8"):
         err("DecorQuads must read pinata_quads.json")
     quads = load(ASSETS / "pinata_quads.json") or {}
@@ -6017,16 +6843,16 @@ def check_pinata(java, number, lang):
                 break
     for item, display in pinata.displays().items():
         if lang.get(f"item.{MOD}.{item}") != display:
-            err(f"The piñata party has no words for item.{MOD}.{item}")
+            err(f"The piﾃｱata party has no words for item.{MOD}.{item}")
     for key in ("full", "no_room", "filled"):
         if f"message.{MOD}.pinata.{key}" not in lang:
-            err(f"The piñata party has no words for message.{MOD}.pinata.{key}")
+            err(f"The piﾃｱata party has no words for message.{MOD}.pinata.{key}")
     for path in [DATA / MOD / "advancement" / f"{a}.json" for a in pinata.ADVANCEMENTS] + [
             DATA / MOD / "recipe" / f"{r['id']}.json" for r in pinata.SHAPED + pinata.SHAPELESS] + [
             ASSETS / "textures" / "misc" / "blindfold.png", ASSETS / "textures" / "entity" / "equipment" / "humanoid" / "blindfold.png",
             ASSETS / "equipment" / "blindfold.json"] + [ASSETS / "items" / f"{i}.json" for i in pinata.items()]:
         if not path.exists():
-            err(f"The piñata party needs {path.relative_to(ROOT)}")
+            err(f"The piﾃｱata party needs {path.relative_to(ROOT)}")
 
 
 def check_hot_air_balloon(java, number, lang):
@@ -7894,7 +8720,7 @@ def check_pies(java, main):
 
 
 def check_spirit_board(java, main):
-    """The Spirit Board: the Java matches SPIRIT_BOARD in tools/agriculture.py (the séance's ranges, hands, letter times,
+    """The Spirit Board: the Java matches SPIRIT_BOARD in tools/agriculture.py (the sﾃｩance's ranges, hands, letter times,
     rest, watch range and a spirit's reward; the names; the wishes, in order); its words, YES, NO and GOODBYE sit on the
     face where tools/spirit_board_textures.py draws them; the block is registered; its model, textures (the face at its
     size), words, tags, recipe, loot and advancements exist."""
@@ -8360,25 +9186,38 @@ def check_model_uvs():
 
 def check_lairs():
     """The lairs (tools/lairs.py, tools/hollow_acre.py, tools/spindle_loft.py, tools/glacier_hall.py,
-    tools/cinder_kiln.py, docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
-    docs/features/cinder-kiln.md): the Java's numbers are the tables' and the layouts', every lair has its dimension,
-    dimension type, biome (no spawns), template and words for coming in, the rituals' blocks, items, recipes and tags are
-    there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts and snow heights and the
-    Cinder Kiln's slag, troughs and sluices are the tables', every server option has its default, every message the Java
-    sends has its words, and the Glacier Hall and the Cinder Kiln are laid out as their records say (check_glacier_hall,
-    check_cinder_kiln)."""
+    tools/cinder_kiln.py, tools/lantern_fen.py, tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py,
+    docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
+    docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md,
+    docs/features/foundry-trench.md, docs/features/moonlit-ring.md): the Java's numbers are the tables' and the layouts',
+    every lair has its dimension, dimension type, biome (no spawns), template and words for coming in, the rituals' blocks,
+    items, recipes and tags are there, the Spindle Loft's lace patterns and thread colours, the Glacier Hall's icicle parts
+    and snow heights, the Cinder Kiln's slag, troughs and sluices, the Lantern Fen's lamps, the Archive of Last Names'
+    names, stones, seals, lectern and phylactery, the Foundry Trench's pylons, crowns, breakers and terminals and the
+    Moonlit Ring's bells are the tables', every server option has its default, every message the Java sends has its
+    words, and the Glacier Hall, the Cinder Kiln, the Lantern Fen, the Archive of Last Names, the Foundry Trench and the
+    Moonlit Ring are laid out as their records say (check_glacier_hall, check_cinder_kiln, check_lantern_fen,
+    check_crypt_archive, check_foundry_trench, check_moonlit_ring)."""
     import cinder_kiln as ck
+    import crypt_archive as ca
+    import foundry_trench as ft
+    import cydonian_sanctum as cs
     import glacier_hall as gh
     import hollow_acre as ha
     import lair_data as ld
     import lairs as la
+    import lantern_fen as lf
+    import moonlit_ring as mr
     import spindle_loft as sl
     folder = JAVA_ROOT / "lair"
     lair = (folder / "Lair.java").read_text(encoding="utf-8")
     # Each lair's line in Lair.java, from its layout: size, arrival and its facing, centre, bounds, floor and moon.
     for name, layout, centre, moon in (("hollow_acre", ha, ha.ISLAND["centre"], (ha.MOON, ha.MOON_RADIUS)),
                                        ("spindle_loft", sl, sl.CENTRE, None), ("glacier_hall", gh, gh.CENTRE, None),
-                                       ("cinder_kiln", ck, ck.CENTRE, None)):
+                                       ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
+                                       ("crypt_archive", ca, ca.CENTRE, None), ("foundry_trench", ft, ft.CENTRE, None),
+                                       ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS)),
+                                       ("cydonian_sanctum", cs, cs.CENTRE, None)):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -8411,7 +9250,8 @@ def check_lairs():
     for block in la.LAIR_BLOCKS:
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
-    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", la.GATE["entity"]):
+    for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
+                 "sealed_orders", "howling_totem", "altar_keystone", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -8460,6 +9300,142 @@ def check_lairs():
     for land in la.SEAL_LANDS:
         if not (DATA / MOD / "worldgen" / "biome" / f"{land.split(':')[1]}.json").is_file():
             err(f"tools/lairs.py SEAL_LANDS names {land}, which is no biome of Jugcraft's")
+    # The Lantern Fen's: the Hag Stone's rest and reach, its ground and lands, and the lamps' light.
+    stone = (folder / "HagStoneRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(stone, name, la.STONE[key]):
+            err(f"HagStoneRite.{name} is not tools/lairs.py STONE {key} ({la.STONE[key]})")
+    stone_ground = (load(DATA / MOD / "tags" / "block" / "hag_stone_ground.json") or {}).get("values", [])
+    if sorted(stone_ground) != sorted(la.STONE_GROUND):
+        err(f"#jugcraft:hag_stone_ground is not tools/lairs.py STONE_GROUND: {stone_ground}")
+    stone_lands = (load(DATA / MOD / "tags" / "worldgen" / "biome" / "hag_stone_lands.json") or {}).get("values", [])
+    if sorted(stone_lands) != sorted(la.STONE_LANDS):
+        err(f"#jugcraft:hag_stone_lands is not tools/lairs.py STONE_LANDS: {stone_lands}")
+    for land in la.STONE_LANDS:
+        ns, path = split(land.lstrip("#"))
+        found = tag_exists("worldgen/biome", land[1:]) if land.startswith("#") else \
+            ns == "minecraft" or (DATA / ns / "worldgen" / "biome" / f"{path}.json").is_file()
+        if not found:
+            err(f"tools/lairs.py STONE_LANDS names {land}, which is no biome or biome tag")
+    if f'fixture("fen_lamp", FenLampBlock::new, MapColor.COLOR_BLACK, SoundType.LANTERN, -{la.FEN_LAMP["light"]},' not in registry:
+        err(f"JugcraftLairs does not register the fen lamp burning at tools/lairs.py FEN_LAMP light {la.FEN_LAMP['light']}")
+    # The Archive of Last Names': the writ's rest and reach and the tombs it is served on; the names and their runes, the
+    # stones' glows and light, the lectern's rest, the phylactery's light, and the fixtures' registrations.
+    writ = (folder / "ExhumationRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(writ, name, la.WRIT[key]):
+            err(f"ExhumationRite.{name} is not tools/lairs.py WRIT {key} ({la.WRIT[key]})")
+    tombs = (load(DATA / MOD / "tags" / "block" / "writ_tombs.json") or {}).get("values", [])
+    if sorted(tombs) != sorted(la.WRIT_TOMBS):
+        err(f"#jugcraft:writ_tombs is not tools/lairs.py WRIT_TOMBS: {tombs}")
+    for tomb in la.WRIT_TOMBS:
+        if not (ASSETS / "blockstates" / f"{tomb.split(':')[1]}.json").is_file():
+            err(f"tools/lairs.py WRIT_TOMBS names {tomb}, which is no block of Jugcraft's")
+    stone_java = (folder / "NameStoneBlock.java").read_text(encoding="utf-8")
+    runes = re.search(r"enum Rune implements StringRepresentable \{\s*([^;]+);", stone_java)
+    found = re.findall(r'([A-Z_]+)\("([a-z_]+)"\)', runes.group(1)) if runes else []
+    if [(rune.lower(), title) for rune, title in found] != [(rune, title) for title, rune in la.NAMES.items()]:
+        err(f"NameStoneBlock.Rune is not tools/lairs.py NAMES {la.NAMES} in order: {found}")
+    glows = re.search(r"enum Glow implements StringRepresentable \{\s*([A-Z_, ]+);", stone_java)
+    if not glows or tuple(g.strip().lower() for g in glows.group(1).split(",")) != la.NAME_GLOWS:
+        err(f"NameStoneBlock.Glow is not tools/lairs.py NAME_GLOWS {la.NAME_GLOWS}")
+    for cls, name, value in (("NameStoneBlock", "LIGHT", la.NAME_STONE["light"]), ("PhylacteryBlock", "LIGHT", la.PHYLACTERY["light"]),
+                             ("ArchiveLecternBlock", "REST", la.LECTERN["cooldown"])):
+        if not java_number((folder / f"{cls}.java").read_text(encoding="utf-8"), name, value):
+            err(f"{cls}.{name} is not tools/lairs.py's {value}")
+    for line in ('fixture("name_stone", p -> new NameStoneBlock(p.lightLevel(NameStoneBlock::light))',
+                 'fixture("phylactery", p -> new PhylacteryBlock(p.lightLevel(PhylacteryBlock::light))',
+                 'fixture("grave_seal", GraveSealBlock::new', 'fixture("archive_lectern", ArchiveLecternBlock::new'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in ("sexton", "crowned", "scribe"):
+        if f"lair.{MOD}.crypt_archive.name.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Crypt Lich's name {name}")
+    if "ExhumationRite.register();" not in registry or "output.accept(EXHUMATION_WRIT);" not in registry:
+        err("JugcraftLairs does not register the Writ of Exhumation's rite or put the writ in the creative tab")
+    # The Foundry Trench's: the orders' rest, reach and trench, the bell, the trench works, the fixtures' light and rest and
+    # their registrations, and the pylons' names.
+    orders = (folder / "OrdersRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("LINE_RANGE", "line_range"), ("TRENCH_RANGE", "trench_range"),
+                      ("TRENCH_BLOCKS", "trench_blocks"), ("BELL_TICKS", "bell_ticks")):
+        if not java_number(orders, name, la.ORDERS[key]):
+            err(f"OrdersRite.{name} is not tools/lairs.py ORDERS {key} ({la.ORDERS[key]})")
+    works = (load(DATA / MOD / "tags" / "block" / "trench_works.json") or {}).get("values", [])
+    if sorted(works) != sorted(la.TRENCH_WORKS):
+        err(f"#jugcraft:trench_works is not tools/lairs.py TRENCH_WORKS: {works}")
+    for block in la.TRENCH_WORKS:
+        if not (ASSETS / "blockstates" / f"{block.split(':')[1]}.json").is_file():
+            err(f"tools/lairs.py TRENCH_WORKS names {block}, which is no block of Jugcraft's")
+    for cls, name, value in (("PylonCrownBlock", "LIGHT", la.PYLON_CROWN["light"]), ("DischargeBreakerBlock", "LIGHT", la.BREAKER["light"]),
+                             ("DischargeBreakerBlock", "REST", la.BREAKER["rest"]), ("GroundTerminalBlock", "LIGHT", la.TERMINAL["light"])):
+        if not java_number((folder / f"{cls}.java").read_text(encoding="utf-8"), name, value):
+            err(f"{cls}.{name} is not tools/lairs.py's {value}")
+    for line in ('fixture("pylon_lattice", Block::new', 'fixture("pylon_crown", p -> new PylonCrownBlock(p.lightLevel(PylonCrownBlock::light))',
+                 'fixture("discharge_breaker", p -> new DischargeBreakerBlock(p.lightLevel(DischargeBreakerBlock::light))',
+                 'fixture("ground_terminal", p -> new GroundTerminalBlock(p.lightLevel(GroundTerminalBlock::light))'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in la.PYLON_NAMES:
+        if f"lair.{MOD}.foundry_trench.pylon.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Foundry Trench's {name} pylon")
+    if "OrdersRite.register();" not in registry or "output.accept(SEALED_ORDERS);" not in registry:
+        err("JugcraftLairs does not register Sealed Orders' rite or put the orders in the creative tab")
+    # The Moonlit Ring's: the totem's rest and reach and the pelts it takes, the bells' swing, the fixtures' registrations,
+    # the bells' names, and the gate's follow into the ring.
+    totem = (folder / "HowlingTotemRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range")):
+        if not java_number(totem, name, la.TOTEM[key]):
+            err(f"HowlingTotemRite.{name} is not tools/lairs.py TOTEM {key} ({la.TOTEM[key]})")
+    if not java_number((folder / "WardenBellBlock.java").read_text(encoding="utf-8"), "SWING_TICKS", la.WARDEN_BELL["swing_ticks"]):
+        err(f"WardenBellBlock.SWING_TICKS is not tools/lairs.py WARDEN_BELL swing_ticks ({la.WARDEN_BELL['swing_ticks']})")
+    if sorted(la.WEREWOLF_PELTS) != sorted([f"{MOD}:{pelt}" for pelt in ag.WEREWOLF_PELTS] + [f"{MOD}:alpha_pelt"]):
+        err(f"tools/lairs.py WEREWOLF_PELTS {la.WEREWOLF_PELTS} are not every werewolf kind's pelt {ag.WEREWOLF_PELTS} "
+            "and the Alpha's")
+    pelts = (load(DATA / MOD / "tags" / "item" / "werewolf_pelts.json") or {}).get("values", [])
+    if sorted(pelts) != sorted(la.WEREWOLF_PELTS):
+        err(f"#jugcraft:werewolf_pelts is not tools/lairs.py WEREWOLF_PELTS: {pelts}")
+    for line in ('fixture("moonwood_leaves", Block::new, MapColor.PLANT, SoundType.GRASS, 0, Fit.SEE_THROUGH)',
+                 'fixture("warden_bell", WardenBellBlock::new'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in la.BELL_NAMES:
+        if f"lair.{MOD}.moonlit_ring.bell.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Moonlit Ring's {name} bell")
+    if "output.accept(HOWLING_TOTEM);" not in registry:
+        err("JugcraftLairs does not put the Howling Totem in the creative tab")
+    gate = re.sub(r"\s+", " ", (folder / "MistGateEntity.java").read_text(encoding="utf-8"))
+    if "open.lair == Lair.MOONLIT_RING) { HowlingTotemRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Moonlit Ring by the totem's way (HowlingTotemRite.follow)")
+    # The Cydonian Sanctum's: the keystone's rest, reach and kindling, the altars it kindles (as part 1's knoll stacks
+    # them), its recipes, and the fixtures' registrations.
+    keystone = (folder / "AltarKeystoneRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range"), ("KINDLE_TICKS", "kindle_ticks"),
+                      ("REACH_BLOCKS", "reach_blocks")):
+        if not java_number(keystone, name, la.KEYSTONE[key]):
+            err(f"AltarKeystoneRite.{name} is not tools/lairs.py KEYSTONE {key} ({la.KEYSTONE[key]})")
+    altars = "ALTARS = {{{}}};".format(", ".join("{{{}, {}}}".format(*a) for a in la.KEYSTONE_ALTARS))
+    if altars not in keystone:
+        err(f"AltarKeystoneRite.ALTARS is not tools/lairs.py KEYSTONE_ALTARS: expected {altars}")
+    import adam_ondi_ahman as aa
+    stacked = tuple((len(aa.TIERS) - k, aa.TIERS[k][0]) for k in range(len(aa.TIERS)))
+    if tuple(la.KEYSTONE_ALTARS) != stacked or aa.ALTAR_POS[1] != aa.CROWN_Y + len(aa.TIERS) + 1:
+        err(f"tools/lairs.py KEYSTONE_ALTARS {la.KEYSTONE_ALTARS} are not the altars tools/adam_ondi_ahman.py stacks under the "
+            f"Ancient Altar {stacked}")
+    flat = re.sub(r"\s+", " ", registry)
+    for line in ('fixture("red_mist", LairExitBlock::new', 'fixture("star_dial", StarDialBlock::new',
+                 'fixture("star_door", p -> new StarDoorBlock(p.lightLevel(StarDoorBlock::light))', 'fixture("star_stone", Block::new',
+                 'fixture("dust_vent", Block::new', "AltarKeystoneRite.register();", "CydonianSanctum.register();",
+                 "output.accept(ALTAR_KEYSTONE);"):
+        if line not in flat:
+            err(f"JugcraftLairs does not have {line}")
+    for name, recipe in la.RECIPES.items():
+        data = load(DATA / MOD / "recipe" / f"{name}.json") or {}
+        if data.get("result", {}).get("id") != f"{MOD}:{recipe.get('result', name)}":
+            err(f"The recipe {name} does not make {recipe.get('result', name)}")
+        features = [c.get("feature") for c in data.get("fabric:load_conditions", [])]
+        for feature in (la.FEATURE, *recipe.get("features", [])):
+            if feature not in features:
+                err(f"The recipe {name} does not load only with the {feature} feature")
     spindle = (folder / "SpindleRite.java").read_text(encoding="utf-8")
     if f"int WAKING_TICKS = {la.SPINDLE['waking_ticks']};" not in spindle:
         err(f"SpindleRite.WAKING_TICKS is not tools/lairs.py SPINDLE waking_ticks ({la.SPINDLE['waking_ticks']})")
@@ -8509,6 +9485,186 @@ def check_lairs():
             err(f"No words for coming into the lair {name} (message.{MOD}.lair.enter.{name})")
     check_glacier_hall(gh)
     check_cinder_kiln(ck)
+    check_lantern_fen(lf)
+    check_crypt_archive(ca)
+    check_foundry_trench(ft)
+    check_moonlit_ring(mr)
+    check_cydonian_sanctum(cs)
+
+
+def check_cydonian_sanctum(cs):
+    """The Cydonian Sanctum as tools/cydonian_sanctum.py builds it is the Sanctum its record describes
+    (docs/features/cydonian-sanctum.md), and where the Java looks for its parts (CydonianSanctum.java, StarDialBlock.java,
+    StarDoorBlock.java) is where the layout puts them: the arrival stands on the gate chamber's floor with room overhead,
+    the Red Mist fills the arch behind it, the Star Door fills the gallery's north end with its three constellations in
+    its middle row, each star dial stands in the gallery's wall facing into it, and the dust vents lie across its floor in
+    their lines; a walk from the arrival, never climbing more than a block, reaches the door, the front of each dial, and
+    (the door open) the crater's floor, its plinth and every standing stone; the crater's floor is open over its sand and
+    each standing stone stands whole with a star stone in the middle of each face; the moons hang over the north rim;
+    light flooded from the hidden lights, as the game floods it, is at least GALLERY_LIGHT_LEAST on every open cell of the
+    gallery's floor; sand always lies on something; and nothing in it changes by itself once placed."""
+    from collections import deque
+    blocks = cs.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    folder = JAVA_ROOT / "lair"
+    java = re.sub(r"\s+", " ", (folder / "CydonianSanctum.java").read_text(encoding="utf-8"))
+    gx, gz = cs.GALLERY["x"], cs.GALLERY["z"]
+    lines = sorted(cs.VENT_LINES)
+    for jname, value in (("PAVE", cs.PAVE), ("STAND", cs.STAND), ("CENTRE_X", cs.CENTRE[0]), ("CENTRE_Z", cs.CENTRE[1]),
+                         ("CRATER", cs.CRATER), ("DOOR_Z", cs.DOOR_Z), ("DOOR_WEST", gx[0]), ("DOOR_EAST", gx[1]),
+                         ("DOOR_HEIGHT", cs.GALLERY_HEIGHT), ("DOOR_FIGURE_Y", cs.DOOR_FIGURE_Y), ("VENT_WEST", gx[0]),
+                         ("VENT_EAST", gx[1]), ("VENT_PERIOD", cs.VENT["period"]), ("VENT_HISS", cs.VENT["hiss"]),
+                         ("VENT_PUFF", cs.VENT["puff"]), ("VENT_DAMAGE", cs.VENT["damage"]), ("VENT_PUSH", cs.VENT["push"]),
+                         ("VENT_LIFT", cs.VENT["lift"]), ("EXIT_WEST", cs.EXIT["x"][0]), ("EXIT_EAST", cs.EXIT["x"][1]),
+                         ("EXIT_Z", cs.EXIT["z"]), ("JUMP_AMPLIFIER", cs.AIR["jump_amplifier"]), ("FALL_DAMAGE", cs.AIR["fall_damage"])):
+        if not java_number(java, jname, value):
+            err(f"CydonianSanctum.{jname} is not tools/cydonian_sanctum.py's {value}")
+    expected = "FIGURE_X = {{{}}};".format(", ".join(str(x) for x in cs.DOOR_FIGURES.values()))
+    if expected not in java:
+        err(f"CydonianSanctum.FIGURE_X is not tools/cydonian_sanctum.py DOOR_FIGURES' columns: expected {expected}")
+    if "FIGURE_X[figure.ordinal() - 1]" not in java:
+        err("CydonianSanctum.figure must index FIGURE_X by the figure's place after PLAIN (FIGURE_X[figure.ordinal() - 1])")
+    expected = "DIALS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*d["pos"]) for d in cs.DIALS))
+    if expected not in java:
+        err(f"CydonianSanctum.DIALS is not tools/cydonian_sanctum.py DIALS: expected {expected}")
+    for jname, values in (("VENT_LINES", lines), ("VENT_PHASES", [cs.VENT_LINES[z] for z in lines])):
+        expected = "{} = {{{}}};".format(jname, ", ".join(str(v) for v in values))
+        if expected not in java:
+            err(f"CydonianSanctum.{jname} is not tools/cydonian_sanctum.py VENT_LINES: expected {expected}")
+    door_java = (folder / "StarDoorBlock.java").read_text(encoding="utf-8")
+    for jname, value in (("LIGHT", cs.DOOR_LIGHT), ("FIRST_ROW_TICKS", cs.DOOR_FIRST_ROW_TICKS), ("ROW_TICKS", cs.DOOR_ROW_TICKS)):
+        if not java_number(door_java, jname, value):
+            err(f"StarDoorBlock.{jname} is not tools/cydonian_sanctum.py's {value}")
+    figures = re.search(r"enum Figure implements StringRepresentable \{\s*([A-Z_, ]+);", door_java)
+    if not figures or [f.strip().lower() for f in figures.group(1).split(",")] != ["plain", *cs.DOOR_FIGURES]:
+        err(f"StarDoorBlock.Figure is not plain and tools/cydonian_sanctum.py DOOR_FIGURES {list(cs.DOOR_FIGURES)}")
+    stars = re.search(r"enum Stars implements StringRepresentable \{\s*([A-Z_, ]+);",
+                      (folder / "StarDialBlock.java").read_text(encoding="utf-8"))
+    if not stars or tuple(s.strip().lower() for s in stars.group(1).split(",")) != cs.CONSTELLATIONS:
+        err(f"StarDialBlock.Stars is not tools/cydonian_sanctum.py CONSTELLATIONS {cs.CONSTELLATIONS}")
+    if not set(cs.DOOR_FIGURES) <= set(cs.CONSTELLATIONS) or any(d["stars"] in cs.DOOR_FIGURES for d in cs.DIALS):
+        err("Every door figure must be a constellation a dial shows, and no dial may start on one")
+
+    passable = {None, "minecraft:light"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = cs.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) not in ("minecraft:cut_red_sandstone", "minecraft:smooth_red_sandstone") \
+            or not free(feet) or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The Sanctum's arrival at {feet} does not stand on the gate chamber's floor with room overhead")
+    for pos in cs.exit_cells():
+        if name(pos) != "jugcraft:red_mist":
+            err(f"No Red Mist in the gate chamber's arch at {pos}")
+    figure_at = {pos: figure for figure, pos in cs.figure_cells().items()}
+    for pos in cs.door_cells():
+        if name(pos) != "jugcraft:star_door" or props(pos).get("figure") != figure_at.get(pos, "plain") \
+                or props(pos).get("lit") != "false" or props(pos).get("opening") != "false":
+            err(f"The Star Door at {pos} is not a dark {figure_at.get(pos, 'plain')} block of it")
+    steps = {"east": (1, 0), "west": (-1, 0), "north": (0, -1), "south": (0, 1)}
+    fronts = []
+    for dial in cs.DIALS:
+        pos = tuple(dial["pos"])
+        dx, dz = steps[dial["facing"]]
+        front = (pos[0] + dx, cs.STAND, pos[2] + dz)
+        fronts.append(front)
+        if name(pos) != "jugcraft:star_dial" or props(pos).get("stars") != dial["stars"] or props(pos).get("facing") != dial["facing"] \
+                or not (gx[0] <= front[0] <= gx[1] and gz[0] <= front[2] <= gz[1]):
+            err(f"The star dial at {pos} does not stand in the gallery's wall facing into it, showing {dial['stars']}")
+    for pos in cs.vent_cells():
+        if name(pos) != "jugcraft:dust_vent" or not free((pos[0], pos[1] + 1, pos[2])) or not free((pos[0], pos[1] + 2, pos[2])):
+            err(f"No dust vent in the gallery's floor with room over it at {pos}")
+
+    # The walk, the door taken as open: from the arrival, a block up or down to three at a time, onto anything solid.
+    opened = lambda pos: free(pos) or name(pos) == "jugcraft:star_door"
+    solid = lambda pos: pos in blocks and name(pos) not in ("minecraft:light", "jugcraft:red_mist", "jugcraft:star_door")
+    standable = lambda x, y, z: solid((x, y - 1, z)) and opened((x, y, z)) and opened((x, y + 1, z))
+    seen, queue = {feet}, deque([feet])
+    while queue:
+        x, y, z = queue.popleft()
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dy in (1, 0, -1, -2, -3):
+                n = (x + dx, y + dy, z + dz)
+                if 0 <= n[0] < cs.SIZE[0] and 0 <= n[2] < cs.SIZE[2] and n not in seen and standable(*n) \
+                        and (dy <= 0 or opened((x, y + 2, z))):
+                    seen.add(n)
+                    queue.append(n)
+                    break
+    targets = {"the door": (36, cs.STAND, cs.DOOR_Z + 1), "the crater's middle": (int(cs.CENTRE[0]), cs.STAND, int(cs.CENTRE[1])),
+               "the plinth": (int(cs.WAIT[0]), int(cs.WAIT[1]), int(cs.WAIT[2]))}
+    for i, front in enumerate(fronts):
+        targets[f"star dial {i}"] = front
+    for i, (sx, sz) in enumerate(cs.STONES):
+        targets[f"standing stone {i}"] = (sx + cs.STONE_SIZE // 2 + 1, cs.STAND, sz)
+    for what, target in targets.items():
+        if target not in seen:
+            err(f"A walk from the Sanctum's arrival does not reach {what} at {target}")
+
+    # The crater's floor: sand (or a pit's rock) with room over it, but where the standing stones stand.
+    for x in range(cs.SIZE[0]):
+        for z in range(cs.SIZE[2]):
+            if not cs.in_crater(x, z) or cs.in_stone(x, z):
+                continue
+            top = cs.PAVE - (1 if cs.in_pit(x, z) else 0)
+            if not solid((x, top, z)) or not free((x, top + 1, z)) or not free((x, top + 2, z)):
+                err(f"The crater's floor is not open over solid ground at {(x, z)}")
+                break
+    for stone in cs.STONES:
+        cx, cz = stone
+        half = cs.STONE_SIZE // 2
+        for x, z in cs.stone_cells(stone):
+            for y in range(cs.STAND, cs.STAND + cs.STONE_HEIGHT):
+                face_middle = (x == cx) != (z == cz)
+                # Its core, closed in on every side, is left out of the template (nobody sees it); its faces and top are whole.
+                surface = abs(x - cx) == half or abs(z - cz) == half or y == cs.STAND + cs.STONE_HEIGHT - 1
+                wanted = "jugcraft:star_stone" if y == cs.STAND + cs.STONE_STAR and face_middle else None
+                if surface and not solid((x, y, z)) or wanted and name((x, y, z)) != wanted:
+                    err(f"The standing stone at {stone} is not whole, with a star stone in the middle of each face, at {(x, y, z)}")
+    north = cs.CENTRE[1] - cs.CRATER
+    for moon in (cs.PHOBOS, cs.DEIMOS):
+        cells = cs.moon_cells(moon)
+        # Its middle, closed in on every side, is left out of the template.
+        if not any(name(c) for c in cells) or any(name(c) not in ("minecraft:tuff", "minecraft:packed_mud", None) for c in cells) \
+                or moon[0][2] >= north \
+                or moon[0][1] < cs.STAND + 30:
+            err(f"The moon at {moon[0]} does not hang high over the north rim")
+
+    # The light down the gallery, flooded as the game floods block light.
+    through = passable | {"jugcraft:red_mist"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        if state[0] == "minecraft:light":
+            light[pos] = int(dict(state[1])["level"])
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and 0 <= n[1] < cs.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    gallery = sorted((light.get((x, cs.STAND, z), 0), (x, cs.STAND, z)) for x in range(gx[0], gx[1] + 1)
+                     for z in range(gz[0], gz[1] + 1))
+    if not gallery or gallery[0][0] < cs.GALLERY_LIGHT_LEAST:
+        dark = [cell for level, cell in gallery if level < cs.GALLERY_LIGHT_LEAST]
+        err(f"{len(dark)} open cells of the Dust Gallery have less block light than GALLERY_LIGHT_LEAST "
+            f"{cs.GALLERY_LIGHT_LEAST}, the darkest {gallery[0] if gallery else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CydonianSanctumClientGameTests.java"
+    text = client.read_text(encoding="utf-8") if client.is_file() else ""
+    for jname, value in (("GALLERY_LIGHT", cs.GALLERY_LIGHT_LEAST), ("GALLERY_WEST", gx[0]), ("GALLERY_EAST", gx[1]),
+                         ("GALLERY_NORTH", gz[0]), ("GALLERY_SOUTH", gz[1])):
+        if not java_number(text, jname, value):
+            err(f"CydonianSanctumClientGameTests.{jname} is not tools/cydonian_sanctum.py's {value}")
+
+    # Sand lies on something, and nothing changes by itself once placed.
+    for (x, y, z), state in blocks.items():
+        if state[0] == "minecraft:red_sand" and not solid((x, y - 1, z)):
+            err(f"The Sanctum's sand at {(x, y, z)} lies on nothing, and would fall")
+            break
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                                                        "minecraft:grass_block", "minecraft:magma_block"):
+            err(f"The Sanctum has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
 
 
 def check_glacier_hall(gh):
@@ -8576,8 +9732,9 @@ def check_cinder_kiln(ck):
     in, and the channel is slag from the slag fall over the forge's lip down to it; the lip has room over it; each
     sluice's gate is whole and faces into the kiln, the walk SluiceGateBlock makes from any of its blocks finds all of it
     and nothing of another's, and the walk from under it finds all of its trough and no other; each shelf is a raised
-    step inside the bowl with room over it, more than SPILL blocks from the slag; no magma lies where anyone stands; and
-    nothing in it burns."""
+    step inside the bowl with room over it, more than SPILL blocks from the slag; no magma lies where anyone stands;
+    nothing in it burns; and the light, flooded from its hidden lights, slag and magma as the game floods it, is at least
+    BOWL_LIGHT on every cell of the bowl's floor (the client test reads the same in the game)."""
     import math
     from collections import deque
     import lairs as la
@@ -8741,12 +9898,690 @@ def check_cinder_kiln(ck):
     if burns:
         err(f"The Cinder Kiln has {burns}: only its stone, slag, troughs, gates and mist (nothing that burns)")
 
+    # The light, as the game floods it: a level less for each block on from a hidden light (its level), the slag (10) or
+    # magma (3), through the kiln's open cells and what light passes (the mist, the gates and the stair's slabs); stone
+    # stops it. Every cell of the bowl's floor has at least BOWL_LIGHT, so the Tyrant and whoever fights him are seen.
+    gives = {"jugcraft:molten_slag": 10, "minecraft:magma_block": 3}
+    through = {None, "minecraft:light", "jugcraft:lair_exit", "jugcraft:sluice_gate", "minecraft:polished_blackstone_slab"}
+    lit, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else gives.get(state[0], 0)
+        if level:
+            lit[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = lit[(x, y, z)] - 1
+        for dx, dy, dz in six:
+            n = (x + dx, y + dy, z + dz)
+            if level > lit.get(n, 0) and n in cavern and name(n) in through:
+                lit[n] = level
+                queue.append(n)
+    floor = sorted((lit.get((x, ck.BOWL + 1, z), 0), (x, z)) for x, z in bowl)
+    if floor and floor[0][0] < ck.BOWL_LIGHT:
+        dark = [cell for level, cell in floor if level < ck.BOWL_LIGHT]
+        err(f"The Cinder Kiln's bowl is lit at only {floor[0][0]} at {floor[0][1]} ({len(dark)} cells of its floor under "
+            f"BOWL_LIGHT {ck.BOWL_LIGHT})")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CinderKilnClientGameTests.java"
+    if not java_number(client.read_text(encoding="utf-8"), "BOWL_LIGHT", ck.BOWL_LIGHT):
+        err(f"CinderKilnClientGameTests does not read the bowl's light against BOWL_LIGHT {ck.BOWL_LIGHT}")
+
 
 def java_number(source, name, value):
     """Whether `source` declares `name` = `value` as an int, float (F) or double constant."""
     if isinstance(value, int) and not isinstance(value, bool):
         return re.search(rf"\bint {name} = {value};", source) is not None
     return re.search(rf"\b(?:float|double) {name} = {float(value)}F?;", source) is not None
+
+
+def check_lantern_fen(lf):
+    """The Lantern Fen as tools/lantern_fen.py builds it is the fen its record describes (docs/features/lantern-fen.md):
+    the arrival stands on the jetty's planks with room overhead, and the Grey Mist hangs between the willows; a walk along
+    the boardwalks and banks from the arrival, never stepping more than half a block nor into the water, reaches every
+    lamp's platform and the porch where the Hag waits; the water is one block deep on mud wherever the layout says, and
+    held in on every side, so none of it can flow; each lamp burns on its willow post; the porch has room for her, and
+    her cauldron stands on it; light flooded from the hidden lights, the lamps, the lanterns and the cauldron, as the game
+    floods it, is at least MARSH_LIGHT on every open cell of the marsh; and nothing in it changes by itself once placed
+    (the templates are placed without updates: no leaves, which would decay, no vines, which spread, no grass under a
+    whole block, which would turn to dirt, and nothing that burns or flows)."""
+    from collections import deque
+    import agriculture as agt
+    import decor15
+    import lairs as la
+    blocks = lf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    # What anyone can be in: nothing, or a block with no collision.
+    passable = {None, "minecraft:light", "jugcraft:lair_exit", "minecraft:short_grass", "minecraft:fern",
+                "jugcraft:ghost_fern", "jugcraft:withered_grass", "jugcraft:deadly_nightshade", "jugcraft:cattail",
+                "jugcraft:shroud_moss", "jugcraft:creeping_ivy", "minecraft:dead_bush", "minecraft:hanging_roots"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = lf.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "jugcraft:willow_planks" or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The Lantern Fen's arrival at {feet} does not stand on the jetty's planks with room overhead")
+    for pos in lf.exit_mist():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist between the Lantern Fen's willows at {pos}")
+
+    # Where anyone can stand out of the water, column by column: on a whole block, or on either half of a stair.
+    ground = {"jugcraft:willow_planks", "jugcraft:dead_planks", "minecraft:grass_block", "minecraft:moss_block",
+              "minecraft:podzol", "minecraft:packed_mud"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if not (free((x, y + 1, z)) and free((x, y + 2, z))):
+            continue
+        if state[0] in ground:
+            stands.setdefault((x, z), []).append(y + 1.0)
+        elif state[0] == "minecraft:mud":
+            stands.setdefault((x, z), []).append(y + 14 / 16)
+        elif state[0] == "jugcraft:willow_stairs":
+            stands.setdefault((x, z), []).extend((y + 0.5, y + 1.0))
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    wx, wy, wz, _ = lf.WAIT
+    wait = (int(wx), int(wy), int(wz))
+    if (wait[0], wait[2], float(wy)) not in seen:
+        err("No walk from the Lantern Fen's arrival to the porch where the Hag waits, along the boardwalks and the stair "
+            "without a step of more than half a block")
+    if name((wait[0], wait[1] - 1, wait[2])) != "jugcraft:dead_planks" \
+            or not all(free((wait[0], wait[1] + dy, wait[2])) for dy in range(3)):
+        err(f"The Hag has no room to wait on the Lantern Fen's porch at {wait}")
+    if name(lf.CAULDRON) != "jugcraft:bubbling_cauldron":
+        err(f"The Hag's cauldron is not on the Lantern Fen's porch at {lf.CAULDRON}")
+    for x, y, z in lf.lamp_blocks():
+        if name((x, y, z)) != "jugcraft:fen_lamp" or props((x, y, z)).get("lit") != "true":
+            err(f"No lit fen lamp at {(x, y, z)}")
+        if any(name((x, post, z)) != "jugcraft:willow_fence" for post in range(lf.STAND, y)):
+            err(f"The fen lamp at {(x, y, z)} does not stand on its willow post")
+        if not any(abs(nx - x) <= lf.PLATFORM and abs(nz - z) <= lf.PLATFORM and nh == float(lf.STAND)
+                   for nx, nz, nh in seen):
+            err(f"No walk from the Lantern Fen's arrival reaches the platform of the lamp at {(x, y, z)}")
+
+    # The water: one block deep on mud wherever the layout puts it (but where a stump, a stilt, a stair's support or the
+    # punt's sunk stern stands in it), and held in on every side and below.
+    holds = {"minecraft:water", "minecraft:seagrass", "minecraft:mud", "minecraft:packed_mud", "minecraft:dirt",
+             "minecraft:rooted_dirt", "minecraft:clay", "minecraft:grass_block", "minecraft:moss_block",
+             "minecraft:podzol", "jugcraft:willow_planks", "jugcraft:dead_planks", "jugcraft:willow_log",
+             "jugcraft:stripped_willow_log", "jugcraft:dead_log", "jugcraft:dead_slab"}
+    for x in range(lf.SIZE[0]):
+        for z in range(lf.SIZE[2]):
+            if not lf.is_water(x, z):
+                continue
+            if name((x, lf.WATER, z)) not in ("minecraft:water", "minecraft:seagrass", "jugcraft:dead_log",
+                                              "jugcraft:stripped_willow_log", "jugcraft:willow_planks", "jugcraft:dead_slab") \
+                    or name((x, lf.MUD, z)) not in ("minecraft:mud", "minecraft:packed_mud") \
+                    or name((x, lf.STAND, z)) == "minecraft:water":
+                err(f"The Lantern Fen's water is not one block deep on mud at {(x, z)}")
+                break
+    for (x, y, z), state in blocks.items():
+        if state[0] in ("minecraft:water", "minecraft:seagrass"):
+            leak = [n for n in ((x + 1, y, z), (x - 1, y, z), (x, y, z + 1), (x, y, z - 1), (x, y - 1, z))
+                    if name(n) not in holds]
+            if leak:
+                err(f"The Lantern Fen's water at {(x, y, z)} would flow into {leak[0]} ({name(leak[0])})")
+                break
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"jugcraft:fen_lamp": la.FEN_LAMP["light"], "jugcraft:witchs_lantern": decor15.WITCHS_LANTERN["light"],
+            "jugcraft:bubbling_cauldron": agt.CAULDRON["light"]}
+    through = passable | {"minecraft:water", "minecraft:seagrass", "minecraft:lily_pad", "jugcraft:duckweed",
+                          "jugcraft:willow_fence", "jugcraft:dead_fence", "minecraft:skeleton_skull",
+                          "minecraft:moss_carpet", "jugcraft:fen_lamp", "jugcraft:witchs_lantern", "jugcraft:bramble"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if state[0] == "jugcraft:fen_lamp" and dict(state[1]).get("lit") != "true":
+            level = 0
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and -1 <= n[1] <= lf.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    marsh = sorted((light.get((x, lf.STAND, z), 0), (x, lf.STAND, z)) for x in range(lf.SIZE[0]) for z in range(lf.SIZE[2])
+                   if lf.in_marsh(x, z) and lf.on_island(x, z) and name((x, lf.STAND, z)) in through)
+    if not marsh or marsh[0][0] < lf.MARSH_LIGHT:
+        dark = [cell for level, cell in marsh if level < lf.MARSH_LIGHT]
+        err(f"{len(dark)} open cells of the Lantern Fen's marsh have less block light than MARSH_LIGHT {lf.MARSH_LIGHT}, "
+            f"the darkest {marsh[0] if marsh else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "LanternFenClientGameTests.java"
+    if not client.is_file() or not java_number(client.read_text(encoding="utf-8"), "MARSH_LIGHT", lf.MARSH_LIGHT):
+        err(f"LanternFenClientGameTests does not read the marsh's light against MARSH_LIGHT {lf.MARSH_LIGHT}")
+
+    # Nothing that changes by itself once placed.
+    covers = {"jugcraft:willow_planks", "jugcraft:dead_planks", "jugcraft:willow_log", "jugcraft:stripped_willow_log",
+              "jugcraft:dead_log", "minecraft:mud", "minecraft:packed_mud", "minecraft:dirt", "minecraft:moss_block"}
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire",
+                                                        "minecraft:magma_block"):
+            err(f"The Lantern Fen has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+        if state[0] == "minecraft:grass_block" and name((x, y + 1, z)) in covers:
+            err(f"The Lantern Fen's grass at {(x, y, z)} is under {name((x, y + 1, z))} and would turn to dirt")
+            break
+
+
+def check_crypt_archive(ca):
+    """The Archive of Last Names as tools/crypt_archive.py builds it is the archive its record describes
+    (docs/features/crypt-archive.md), and where the Java looks for its parts (CryptArchive.java) is where the layout puts
+    them: the arrival stands on the landing with room overhead, and the Grey Mist fills the stair's way back up; a walk
+    from the arrival, never stepping more than half a block, goes down the stair to every open cell of the hall's floor,
+    up the throne's apse, and within reach of each name's grave seal and of the Lectern of Last Names; the four lanes are
+    open and paved; each ledger stone lies in the floor with room over it; the pillars stand; each alcove's sarcophagus,
+    whole seal and dark name-stone carry its name's rune and face the hall, against their wall; the throne, the lectern and
+    the whole phylactery stand where they should; light flooded from the hidden lights, the soul lanterns and the
+    phylactery, as the game floods it, is at least HALL_LIGHT on every open cell of the hall's floor; and nothing in it
+    changes by itself once placed."""
+    from collections import deque
+    import lairs as la
+    blocks = ca.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CryptArchive.java").read_text(encoding="utf-8"))
+    for jname, value in (("STAND", ca.STAND), ("APSE_STAND", ca.APSE_STAND), ("LANDING_STAND", ca.LANDING_STAND),
+                         ("HALL_WEST", ca.HALL["x"][0]), ("HALL_EAST", ca.HALL["x"][1]), ("HALL_NORTH", ca.HALL["z"][0]),
+                         ("HALL_SOUTH", ca.HALL["z"][1])):
+        if not java_number(java, jname, value):
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's {value}")
+    for jname, pos in (("LECTERN", ca.LECTERN), ("PHYLACTERY", ca.PHYLACTERY), ("THRONE", ca.THRONE)):
+        if "{} = new BlockPos({}, {}, {});".format(jname, *pos) not in java:
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's {pos}")
+    order = list(la.NAMES)
+    for jname, cells in (("SEALS", ca.seal_cells()), ("STONES", ca.stone_cells())):
+        expected = "{} = {{{}}};".format(jname, ", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in order))
+        if expected not in java:
+            err(f"CryptArchive.{jname} is not tools/crypt_archive.py's, in the order of tools/lairs.py NAMES: expected {expected}")
+
+    passable = {None, "minecraft:light", "minecraft:cobweb"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = ca.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name((feet[0], feet[1] - 1, feet[2])) != "minecraft:deepslate_tiles" or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])):
+        err(f"The archive's arrival at {feet} does not stand on the landing with room overhead")
+    for pos in ca.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the archive's way back up at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block, on a slab, or on either half of a stair.
+    whole = {"minecraft:deepslate_tiles", "minecraft:cracked_deepslate_tiles", "minecraft:polished_deepslate",
+             "minecraft:bone_block", "minecraft:deepslate_bricks", "jugcraft:chiseled_crypt_stone", "jugcraft:crypt_stone"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        if not (free((x, y + 1, z)) and free((x, y + 2, z))):
+            continue
+        if state[0] in whole:
+            stands.setdefault((x, z), []).append(y + 1.0)
+        elif state[0] == "minecraft:polished_blackstone_slab":
+            stands.setdefault((x, z), []).append(y + 0.5)
+        elif state[0] == "minecraft:deepslate_brick_stairs":
+            stands.setdefault((x, z), []).extend((y + 0.5, y + 1.0))
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    floor = {(x, z) for x, z, h in seen if h == float(ca.STAND)}
+    stranded = [(x, z) for (x, z), heights in stands.items() if ca.in_hall(x, z) and float(ca.STAND) in heights
+                and (x, z) not in floor]
+    if stranded:
+        err(f"{len(stranded)} cells of the archive's hall floor cannot be walked to from the arrival, e.g. {stranded[0]}")
+
+    def within(target, reach):
+        tx, ty, tz = (c + 0.5 for c in target)
+        return any(((x + 0.5 - tx) ** 2 + (h + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach for x, z, h in seen)
+
+    for rune_name, pos in ca.seal_cells().items():
+        if not within(pos, 4.0):
+            err(f"No walk from the archive's arrival comes within reach of the {rune_name}'s grave seal at {pos}")
+    if not within(ca.LECTERN, 3.5):
+        err(f"No walk from the archive's arrival comes within reach of the Lectern of Last Names at {ca.LECTERN}")
+    if not any(h == float(ca.APSE_STAND) for x, z, h in seen if ca.in_alcove("crowned", x, z)):
+        err("No walk from the archive's arrival climbs into the throne's apse")
+
+    # The lanes, open and paved; the ledger stones in the floor with room over them; the pillars standing.
+    for lane in ca.LANES:
+        for x, z in sorted(ca.lane_cells(lane)):
+            if name((x, ca.PAVE, z)) not in ("minecraft:polished_deepslate", "minecraft:bone_block") \
+                    or not all(free((x, y, z)) for y in range(ca.STAND, ca.STAND + 3)):
+                err(f"The archive's {lane} lane is not open and paved at {(x, z)}")
+                break
+    for x, z in sorted(ca.grave_cells()):
+        if name((x, ca.PAVE, z)) != "jugcraft:chiseled_crypt_stone" or not free((x, ca.STAND, z)) \
+                or not free((x, ca.STAND + 1, z)):
+            err(f"The archive's ledger stone at {(x, z)} is not in the floor with room over it")
+    for x, z in sorted(ca.pillar_cells()):
+        if any(free((x, y, z)) for y in range(ca.STAND, ca.STAND + 3)):
+            err(f"The archive's pillar at {(x, z)} does not stand from the floor")
+            break
+
+    # The fixtures.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    seals, stones = ca.seal_cells(), ca.stone_cells()
+    for rune_name, info in ca.ALCOVES.items():
+        rune, face = la.NAMES[rune_name], info["face"]
+        if info["rune"] != rune:
+            err(f"tools/crypt_archive.py gives the {rune_name} the rune {info['rune']}, not tools/lairs.py's {rune}")
+        for pos, block, extra, word in ((seals[rune_name], "jugcraft:grave_seal", ("broken", "false"), "whole"),
+                                        (stones[rune_name], "jugcraft:name_stone", ("glow", "dark"), "dark")):
+            state = props(pos)
+            if name(pos) != block or state.get("rune") != rune or state.get("facing") != face or state.get(extra[0]) != extra[1]:
+                err(f"No {word} {block} with the rune {rune} facing {face} at {pos}")
+            dx, dz = steps[face]
+            if free((pos[0] - dx, pos[1], pos[2] - dz)):
+                err(f"The {block} at {pos} hangs on no wall")
+        for part in ("head", "foot"):
+            px, pz = info[part]
+            state = props((px, info["stand"], pz))
+            if name((px, info["stand"], pz)) != "jugcraft:deepslate_sarcophagus" or state.get("part") != part \
+                    or state.get("facing") != info["facing"] or state.get("open") != "false":
+                err(f"The {rune_name}'s sarcophagus has no shut {part} facing {info['facing']} at {(px, info['stand'], pz)}")
+    tx, ty, tz = ca.THRONE
+    if props(ca.THRONE).get("half") != "lower" or props((tx, ty + 1, tz)).get("half") != "upper" \
+            or name(ca.THRONE) != "jugcraft:bone_throne":
+        err(f"No bone throne in the archive's apse at {ca.THRONE}")
+    if name(ca.LECTERN) != "jugcraft:archive_lectern" or props(ca.LECTERN).get("facing") != "south":
+        err(f"No Lectern of Last Names facing the stair at {ca.LECTERN}")
+    if name(ca.PHYLACTERY) != "jugcraft:phylactery" or props(ca.PHYLACTERY).get("cracked") != "false" \
+            or name(ca.PLINTH) != "jugcraft:chiseled_crypt_stone":
+        err(f"No whole phylactery on its plinth at {ca.PHYLACTERY}")
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"minecraft:soul_lantern": 10, "jugcraft:phylactery": la.PHYLACTERY["light"]}
+    through = passable | {"minecraft:soul_lantern", "minecraft:iron_chain", "jugcraft:candle_skull",
+                          "jugcraft:skeleton_hand_sconce", "jugcraft:bone_pile", "jugcraft:phylactery", "jugcraft:archive_lectern",
+                          "jugcraft:name_stone", "jugcraft:grave_seal", "jugcraft:lair_exit"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and 0 <= n[1] < ca.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    hall = sorted((light.get((x, ca.STAND, z), 0), (x, ca.STAND, z)) for x, z in floor if ca.in_hall(x, z))
+    if not hall or hall[0][0] < ca.HALL_LIGHT:
+        dark = [cell for level, cell in hall if level < ca.HALL_LIGHT]
+        err(f"{len(dark)} open cells of the archive's hall have less block light than HALL_LIGHT {ca.HALL_LIGHT}, "
+            f"the darkest {hall[0] if hall else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CryptArchiveClientGameTests.java"
+    if not client.is_file() or not java_number(client.read_text(encoding="utf-8"), "HALL_LIGHT", ca.HALL_LIGHT):
+        err(f"CryptArchiveClientGameTests does not read the hall's light against HALL_LIGHT {ca.HALL_LIGHT}")
+
+    # Nothing that changes by itself once placed.
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                                                        "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
+            err(f"The archive has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+
+
+def check_foundry_trench(ft):
+    """The Foundry Trench as tools/foundry_trench.py builds it is the trench its record describes
+    (docs/features/foundry-trench.md), and where the Java looks for its parts (FoundryTrench.java) is where the layout puts
+    them: the arrival stands on the dugout's duckboards with room overhead, and the Grey Mist fills its back doorway; a
+    walk from the arrival, never stepping more than half a block, goes up the dugout's steps, along the fire trench, down
+    the ramp and to every open cell of the pit's floor, and within reach of each pylon's breaker; each pylon stands on its
+    footing, its lattice up to a dark crown, its breaker open and dark facing the pit against the footing, its terminal
+    dark in the floor before it; the lanes are open and paved; the cover stands; each service gantry has its catwalk,
+    railing and a ladder up at either end; the dugout's telephone stands on its table; light flooded from the hidden
+    lights, the lamps and the searchlights, as the game floods it, is at least PIT_LIGHT on every open cell of the pit's
+    floor; and nothing in it changes by itself once placed."""
+    from collections import deque
+    import lairs as la
+    blocks = ft.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "FoundryTrench.java").read_text(encoding="utf-8"))
+    for jname, value in (("PAVE", ft.PAVE), ("STAND", ft.STAND), ("GROUND", ft.GROUND), ("TRENCH_STAND", ft.TRENCH_STAND),
+                         ("DUGOUT_STAND", ft.DUGOUT_STAND), ("PIT_WEST", ft.PIT["x"][0]), ("PIT_EAST", ft.PIT["x"][1]),
+                         ("PIT_NORTH", ft.PIT["z"][0]), ("PIT_SOUTH", ft.PIT["z"][1]), ("CENTRE_X", ft.CENTRE[0]),
+                         ("CENTRE_Z", ft.CENTRE[1]), ("WAIT_X", ft.WAIT[0]), ("WAIT_Y", float(ft.WAIT[1])), ("WAIT_Z", ft.WAIT[2]),
+                         ("EXIT_WEST", ft.GANTRY_EXIT["x"][0]), ("EXIT_EAST", ft.GANTRY_EXIT["x"][1]),
+                         ("EXIT_Z", ft.GANTRY_EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"FoundryTrench.{jname} is not tools/foundry_trench.py's {value}")
+    if "TELEPHONE = new BlockPos({}, {}, {});".format(*ft.TELEPHONE) not in java:
+        err(f"FoundryTrench.TELEPHONE is not tools/foundry_trench.py's {ft.TELEPHONE}")
+    for jname, cells in (("BREAKERS", ft.breaker_cells()), ("CROWNS", ft.crown_cells()), ("TERMINALS", ft.terminal_cells())):
+        expected = "{} = {{{}}};".format(jname, ", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in la.PYLON_NAMES))
+        if expected not in java:
+            err(f"FoundryTrench.{jname} is not tools/foundry_trench.py's, in the order of tools/lairs.py PYLON_NAMES: "
+                f"expected {expected}")
+    lanes = []
+    for pylon in la.PYLON_NAMES:
+        axis, fixed, lo, hi = ft.LANES[pylon]
+        lanes.append((lo, hi, fixed - 1, fixed + 1) if axis == "x" else (fixed - 1, fixed + 1, lo, hi))
+    if "LANES = {{{}}};".format(", ".join("{{{}, {}, {}, {}}}".format(*lane) for lane in lanes)) not in java:
+        err(f"FoundryTrench.LANES is not tools/foundry_trench.py's lanes {lanes}, in the order of tools/lairs.py PYLON_NAMES")
+    pylons = re.search(r"enum Pylon \{\s*([A-Z_, ]+);", java)
+    if not pylons or tuple(p.strip().lower() for p in pylons.group(1).split(",")) != la.PYLON_NAMES:
+        err(f"FoundryTrench.Pylon is not tools/lairs.py PYLON_NAMES {la.PYLON_NAMES}")
+    if tuple(ft.PYLONS) != la.PYLON_NAMES:
+        err(f"tools/foundry_trench.py's PYLONS {tuple(ft.PYLONS)} are not tools/lairs.py PYLON_NAMES {la.PYLON_NAMES}")
+
+    passable = {None, "minecraft:light", "minecraft:rail", "jugcraft:barbed_wire", "jugcraft:lair_exit"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = ft.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    if name(feet) != "jugcraft:duckboard" or abs(ay - (ft.DUGOUT_STAND + ft.DUCK)) > 1e-9 \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not free((feet[0], feet[1] + 2, feet[2])):
+        err(f"The trench's arrival at {ft.ARRIVAL[:3]} does not stand on the dugout's duckboards with room overhead")
+    for pos in ft.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist in the dugout's back doorway at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block, on mud, on duckboards, on a top slab or on either half of
+    # a stair.
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:gravel", "minecraft:gray_concrete",
+             "minecraft:light_gray_concrete", "minecraft:black_concrete", "jugcraft:bastion_concrete", "jugcraft:hazard_plating",
+             "jugcraft:riveted_black_plate", "jugcraft:steel_armor_plate", "jugcraft:sandbags", "jugcraft:timber_revetment",
+             "jugcraft:ground_terminal", "jugcraft:corrugated_iron", "minecraft:bricks"}
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        heights = {"minecraft:mud": (y + 0.875,), "jugcraft:duckboard": (y + ft.DUCK,), "jugcraft:rust_grating_slab": (y + 1.0,),
+                   "jugcraft:sandbags_stairs": (y + 0.5, y + 1.0)}.get(state[0], (y + 1.0,) if state[0] in whole else ())
+        if heights and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).extend(heights)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x, z), (x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    pit_floor = {(x, z) for x, z, h in seen if h == float(ft.STAND) and ft.in_pit(x, z)}
+    stranded = [(x, z) for (x, z), heights in stands.items() if ft.in_pit(x, z) and float(ft.STAND) in heights
+                and (x, z) not in pit_floor]
+    if stranded:
+        err(f"{len(stranded)} cells of the trench's pit floor cannot be walked to from the arrival, e.g. {stranded[0]}")
+    if not any(ft.in_trench(x, z) and abs(h - (ft.TRENCH_STAND + ft.DUCK)) < 1e-9 for x, z, h in seen):
+        err("No walk from the trench's arrival comes up into the fire trench")
+
+    def within(target, reach):
+        tx, ty, tz = (c + 0.5 for c in target)
+        return any(((x + 0.5 - tx) ** 2 + (h + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach for x, z, h in seen)
+
+    # The pylons: footing, lattice, dark crown, open dark breaker facing the pit against the footing, dark terminal.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    breakers, crowns, terminals = ft.breaker_cells(), ft.crown_cells(), ft.terminal_cells()
+    for pylon, info in ft.PYLONS.items():
+        px, pz = info["at"]
+        if any(name((cx, ft.STAND, cz)) != "jugcraft:bastion_concrete" for cx, cz in ft.footing_cells(pylon)):
+            err(f"The {pylon} pylon has no concrete footing round {info['at']}")
+        if any(name((px, y, pz)) != "jugcraft:pylon_lattice" for y in range(ft.STAND + 1, ft.STAND + 1 + ft.LATTICE)):
+            err(f"The {pylon} pylon's lattice does not stand from its footing to its crown")
+        if name(crowns[pylon]) != "jugcraft:pylon_crown" or props(crowns[pylon]).get("live") != "false":
+            err(f"No dark crown on the {pylon} pylon at {crowns[pylon]}")
+        state = props(breakers[pylon])
+        if name(breakers[pylon]) != "jugcraft:discharge_breaker" or state.get("facing") != info["face"] \
+                or (state.get("thrown"), state.get("live"), state.get("fouled")) != ("false", "false", "false"):
+            err(f"No open, dark, clear breaker facing {info['face']} at the {pylon} pylon's foot {breakers[pylon]}")
+        dx, dz = steps[info["face"]]
+        bx, by, bz = breakers[pylon]
+        if (bx - dx, bz - dz) not in ft.footing_cells(pylon):
+            err(f"The {pylon} pylon's breaker at {breakers[pylon]} does not stand against its footing")
+        if (bx + dx, bz + dz) != info["terminal"]:
+            err(f"The {pylon} pylon's terminal {info['terminal']} is not before its breaker")
+        if name(terminals[pylon]) != "jugcraft:ground_terminal" or props(terminals[pylon]).get("live") != "false":
+            err(f"No dark ground terminal in the floor at {terminals[pylon]}")
+        if not within(breakers[pylon], 4.0):
+            err(f"No walk from the trench's arrival comes within reach of the {pylon} pylon's breaker at {breakers[pylon]}")
+    for pylon in ft.LANES:
+        for x, z in sorted(ft.lane_cells(pylon)):
+            if name((x, ft.PAVE, z)) not in ("minecraft:light_gray_concrete", "jugcraft:hazard_plating", "jugcraft:ground_terminal") \
+                    or not all(free((x, y, z)) for y in range(ft.STAND, ft.STAND + 3)):
+                err(f"The trench's lane to the {pylon} pylon is not open and paved at {(x, z)}")
+                break
+    # The cover: no hole in its top, and its edge standing whole from the floor (its inside is hollowed, out of sight).
+    cover = ft.cover_cells()
+    for x, z in sorted(cover):
+        edge = any(n not in cover for n in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)))
+        top = ft.STAND + (ft.WRECK["height"] if (x, z) in ft.wreck_cells() else ft.BASTION_HEIGHT) - 1
+        if free((x, top, z)) and free((x, top + 1, z)) or edge and any(free((x, y, z)) for y in range(ft.STAND, top + 1)):
+            err(f"The trench's cover at {(x, z)} does not stand whole from the floor to its top")
+            break
+    for side, info in ft.CATWALKS.items():
+        for z in range(ft.CATWALK_Z[0], ft.CATWALK_Z[1] + 1):
+            if any(name((x, ft.CATWALK_Y, z)) != "jugcraft:rust_grating_slab" for x in range(info["x"][0], info["x"][1] + 1)) \
+                    or name((info["rail"], ft.CATWALK_Y + 1, z)) != "jugcraft:railing":
+                err(f"The {side} service gantry has no catwalk and railing at z {z}")
+                break
+        # Each ladder against the wall, from the floor to the catwalk; its foot walked to, its top beside the catwalk.
+        front = 1 if info["face"] == "east" else -1
+        for z in ft.LADDER_Z:
+            beside = z + 1 if z < ft.CATWALK_Z[0] else z - 1
+            if any(name((info["ladder"], y, z)) != "jugcraft:steel_ladder" for y in range(ft.STAND, ft.CATWALK_Y + 1)) \
+                    or (info["ladder"] + front, z) not in pit_floor \
+                    or name((info["ladder"], ft.CATWALK_Y, beside)) != "jugcraft:rust_grating_slab":
+                err(f"No ladder up from the pit's floor to the {side} service gantry at z {z}")
+    if name(ft.TELEPHONE) != "jugcraft:field_telephone" or name((ft.TELEPHONE[0], ft.TELEPHONE[1] - 1, ft.TELEPHONE[2])) \
+            != "jugcraft:map_table":
+        err(f"No telephone on the dugout's map table at {ft.TELEPHONE}")
+
+    # The light, flooded as the game floods block light: a level less a block, through whatever lets light through.
+    emit = {"jugcraft:searchlight": 15, "jugcraft:bunker_lamp": 14, "minecraft:campfire": 15, "jugcraft:lair_exit": 6}
+    through = passable | {"minecraft:iron_chain", "jugcraft:railing", "jugcraft:steel_ladder", "jugcraft:pylon_lattice",
+                          "jugcraft:pylon_crown", "jugcraft:discharge_breaker", "jugcraft:searchlight", "jugcraft:bunker_lamp",
+                          "jugcraft:field_telephone", "jugcraft:map_table", "jugcraft:bunker_bunk", "jugcraft:trench_periscope",
+                          "jugcraft:blast_door", "jugcraft:duckboard"}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) in through and level > light.get(n, 0) and 0 <= n[1] < ft.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    pit = sorted((light.get((x, ft.STAND, z), 0), (x, ft.STAND, z)) for x, z in pit_floor)
+    if not pit or pit[0][0] < ft.PIT_LIGHT:
+        dark = [cell for level, cell in pit if level < ft.PIT_LIGHT]
+        err(f"{len(dark)} open cells of the trench's pit have less block light than PIT_LIGHT {ft.PIT_LIGHT}, "
+            f"the darkest {pit[0] if pit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "FoundryTrenchClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "PIT_LIGHT", ft.PIT_LIGHT) or not java_number(source, "PIT_CELLS", len(pit_floor)):
+        err(f"FoundryTrenchClientGameTests does not read the pit's light against PIT_LIGHT {ft.PIT_LIGHT} on its "
+            f"{len(pit_floor)} open cells (PIT_CELLS)")
+
+    # Nothing that changes by itself once placed (the stacks' signal fires burn on for good, in no weather).
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water",
+                                                        "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
+            err(f"The trench has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+
+def check_moonlit_ring(mr):
+    """The Moonlit Ring as tools/moonlit_ring.py builds it is the ring its record describes (docs/features/moonlit-ring.md),
+    and where the Java looks for its parts (MoonlitRing.java) is where the layout puts them: the arrival stands on the
+    camp's floor with room overhead, and the Grey Mist fills the end of the trail behind it; a walk from the arrival,
+    never stepping more than half a block, reaches every open cell of the clearing and of each bell clearing, and comes
+    within reach of each bell; each bell hangs at rest facing the ring under its frame (a post either side, a beam over it,
+    a ridge over that), with room to stand under it; the Howling Stone stands three high at the centre with room on its
+    top where the Alpha waits, and from his eyes there the moon is seen over the northern trees; light flooded from the
+    hidden lights, the lantern and the mist, as the game floods it, is at least RING_LIGHT on every open cell of the
+    clearing and the bell clearings; and nothing in it changes by itself once placed."""
+    import math
+    from collections import deque
+    import lairs as la
+    blocks = mr.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "MoonlitRing.java").read_text(encoding="utf-8"))
+    for jname, value in (("SOIL", mr.SOIL), ("STAND", mr.STAND), ("CENTRE_X", mr.CENTRE[0]), ("CENTRE_Z", mr.CENTRE[1]),
+                         ("RING", mr.RING), ("GLADE_AT", mr.GLADE_AT), ("GLADE_RADIUS", mr.GLADE_RADIUS),
+                         ("CAMP_WEST", mr.CAMP["x"][0]), ("CAMP_EAST", mr.CAMP["x"][1]), ("CAMP_NORTH", mr.CAMP["z"][0]),
+                         ("CAMP_SOUTH", mr.CAMP["z"][1]), ("WAIT_X", mr.WAIT[0]), ("WAIT_Y", float(mr.WAIT[1])),
+                         ("WAIT_Z", mr.WAIT[2]), ("EXIT_WEST", mr.EXIT["x"][0]), ("EXIT_EAST", mr.EXIT["x"][1]),
+                         ("EXIT_Z", mr.EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"MoonlitRing.{jname} is not tools/moonlit_ring.py's {value}")
+    if tuple(mr.BELLS) != la.BELL_NAMES:
+        err(f"tools/moonlit_ring.py's BELLS {tuple(mr.BELLS)} are not tools/lairs.py BELL_NAMES {la.BELL_NAMES}")
+    cells = mr.bell_cells()
+    expected = "BELLS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in la.BELL_NAMES))
+    if expected not in java:
+        err(f"MoonlitRing.BELLS is not tools/moonlit_ring.py's, in the order of tools/lairs.py BELL_NAMES: expected {expected}")
+    ways = ", ".join("{}({}, {})".format(n.upper(), *mr.BELLS[n]["way"]) for n in la.BELL_NAMES)
+    if f"enum Bell {{ {ways};" not in java:
+        err(f"MoonlitRing.Bell is not tools/lairs.py BELL_NAMES with tools/moonlit_ring.py's ways: expected {ways}")
+
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:fern", "jugcraft:lair_exit", "jugcraft:werewolf_rug"}
+    free = lambda pos: name(pos) in passable
+    ax, ay, az, _ = mr.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:rooted_dirt", "minecraft:moss_block",
+             "minecraft:stone", "minecraft:andesite", "minecraft:mossy_cobblestone"}
+    if name((feet[0], feet[1] - 1, feet[2])) not in whole or ay != float(mr.STAND) or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not mr.in_camp(feet[0], feet[2]):
+        err(f"The ring's arrival at {mr.ARRIVAL[:3]} does not stand on the camp's floor with room overhead")
+    for pos in mr.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist at the end of the trail behind the camp at {pos}")
+
+    # Where anyone can stand, column by column: on a whole block or on trodden earth (a sixteenth lower).
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        height = y + 1.0 if state[0] in whole else y + 15 / 16 if state[0] == "minecraft:dirt_path" else None
+        if height is not None and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).append(height)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    walked = {(x, z) for x, z, h in seen if mr.SOIL < h <= mr.STAND}
+    open_cells = sorted((x, z) for x in range(mr.SIZE[0]) for z in range(mr.SIZE[2]) if (mr.in_ring(x, z) or mr.in_glade(x, z))
+                        and free((x, mr.STAND, z)) and free((x, mr.STAND + 1, z)))
+    stranded = [cell for cell in open_cells if cell not in walked]
+    if stranded:
+        err(f"{len(stranded)} open cells of the clearing and the bell clearings cannot be walked to from the arrival, "
+            f"e.g. {stranded[0]}")
+    for bell in la.BELL_NAMES:
+        gx, gz = mr.glade_middle(bell)
+        if not any(math.hypot(x + 0.5 - gx, z + 0.5 - gz) <= mr.GLADE_RADIUS for x, z in walked):
+            err(f"No walk from the ring's arrival comes into the {bell} bell's clearing")
+
+    def within(target, reach):
+        tx, ty, tz = (c + 0.5 for c in target)
+        return any(((x + 0.5 - tx) ** 2 + (h + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach for x, z, h in seen)
+
+    # The bells: at rest, facing the ring, under their frames, with room to stand under them.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    for bell, info in mr.BELLS.items():
+        x, y, z = cells[bell]
+        wx, wz = info["way"]
+        state = props((x, y, z))
+        if name((x, y, z)) != "jugcraft:warden_bell" or state.get("facing") != info["face"] or state.get("ringing") != "false":
+            err(f"No Warden Bell at rest facing {info['face']} at the {bell} clearing's {(x, y, z)}")
+        if steps[info["face"]] != (-wx, -wz):
+            err(f"The {bell} bell faces {info['face']}, not back toward the ring")
+        if not mr.in_glade(x, z):
+            err(f"The {bell} bell at {(x, y, z)} does not hang in its clearing")
+        for px, pz in mr.frame_posts(bell):
+            if any(name((px, py, pz)) != "minecraft:spruce_log" for py in range(mr.STAND, mr.BEAM_Y)):
+                err(f"The {bell} bell's frame has no post standing at {(px, pz)}")
+        if name((x, mr.BEAM_Y, z)) != "minecraft:spruce_log" or name((x, mr.ROOF_Y, z)) != "minecraft:spruce_slab":
+            err(f"The {bell} bell hangs from no beam under a ridge")
+        if y != mr.BEAM_Y - 1 or not free((x, mr.STAND, z)) or not free((x, mr.STAND + 1, z)):
+            err(f"The {bell} bell does not hang from its beam with room to stand under it")
+        if not within((x, y, z), 4.0):
+            err(f"No walk from the ring's arrival comes within reach of the {bell} bell at {(x, y, z)}")
+
+    # The Howling Stone, and the moon over the northern trees from where the Alpha waits (his eyes 3.2 over his feet).
+    wx_, wy_, wz_, _ = mr.WAIT
+    top = (int(wx_), int(wy_) - 1, int(wz_))
+    if mr.stone_height(mr.CX, mr.CZ) != 3 or wy_ != mr.STAND + 3 or name(top) not in whole \
+            or not free((top[0], top[1] + 1, top[2])) or not free((top[0], top[1] + 2, top[2])):
+        err(f"The Howling Stone does not stand three high at the centre with room on its top at {mr.WAIT[:3]}")
+    eye = (wx_, wy_ + 3.2, wz_)
+    moon = tuple(c + 0.5 for c in mr.MOON)
+    if mr.MOON[2] >= 0:
+        err(f"The moon at {mr.MOON} is not north of the ring")
+    steps_ = 400
+    for i in range(1, steps_):
+        t = i / steps_
+        p = tuple(eye[k] + (moon[k] - eye[k]) * t for k in range(3))
+        cell = tuple(int(c // 1) for c in p)
+        if 0 <= cell[0] < mr.SIZE[0] and 0 <= cell[1] < mr.SIZE[1] and 0 <= cell[2] < mr.SIZE[2] and not free(cell):
+            err(f"From the Howling Stone the moon is hidden by {name(cell)} at {cell}")
+            break
+
+    # The light, flooded as the game floods block light: a level less a block, through anything but whole opaque blocks
+    # (leaves, plants, the bells, the fences and the lantern let it through).
+    opaque = whole | {"minecraft:dirt_path", "minecraft:cobblestone", "minecraft:dark_oak_log", "minecraft:oak_log",
+                      "minecraft:spruce_log", "minecraft:stripped_spruce_log", "minecraft:brown_wool", "minecraft:spruce_planks",
+                      "minecraft:spruce_slab", "minecraft:spruce_stairs", "minecraft:cobblestone_slab"}
+    emit = {"minecraft:lantern": 15, "jugcraft:lair_exit": 6}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) not in opaque and level > light.get(n, 0) and 0 <= n[1] < mr.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    lit = sorted((light.get((x, mr.STAND, z), 0), (x, mr.STAND, z)) for x, z in open_cells)
+    if not lit or lit[0][0] < mr.RING_LIGHT:
+        dark = [cell for level, cell in lit if level < mr.RING_LIGHT]
+        err(f"{len(dark)} open cells of the clearing and the bell clearings have less block light than RING_LIGHT "
+            f"{mr.RING_LIGHT}, the darkest {lit[0] if lit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "MoonlitRingClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "RING_LIGHT", mr.RING_LIGHT) or not java_number(source, "RING_CELLS", len(open_cells)):
+        err(f"MoonlitRingClientGameTests does not read the light against RING_LIGHT {mr.RING_LIGHT} on the clearing's and the "
+            f"bell clearings' {len(open_cells)} open cells (RING_CELLS)")
+
+    # Nothing that changes by itself once placed: Moonwood Leaves never fall, and nothing in the ring is lit or grows.
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") and state[0] != "jugcraft:moonwood_leaves" \
+                or state[0] in ("minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water", "minecraft:grass_block",
+                                "minecraft:snow", "minecraft:soul_fire") \
+                or state[0] == "minecraft:campfire" and dict(state[1]).get("lit") != "false":
+            err(f"The ring has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
 
 
 def check_vesperine():
@@ -9617,6 +11452,1860 @@ def check_cinder_tyrant():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def check_mire_hag():
+    """The Mire Hag (tools/mire_hag.py, docs/features/mire-hag.md): every number the Java uses is the table's; her
+    attacks are the table's, and her rule can be played (the marsh's middle lies beyond every lamp's light and the little
+    way her Likenesses keep from it, so they have somewhere to walk; every step a Likeness takes passes keepDark, so none
+    walks into a lamp's light of its own accord; her Likenesses' places round her foe never meet behind it; the Root Knot
+    gives players time to cut it down; her roots never hold anyone longer than her Root Lanes take to come round again;
+    her brew reaches its farthest mark well within its life, and her pools poison again before the last poisoning wears
+    off); where her fight looks for the Lantern Fen's parts (LanternFen.java) is where tools/lantern_fen.py builds them:
+    she waits on the porch with room over her, comes down into open water, the Grey Mist she leaves opens in water with
+    air over it, the Root Knot crawls the ring on its boards (or through a drowned stump), and each lamp is the fen lamp
+    on its post; her brews leave from where her model's left hand is as she throws; her Likenesses are she to look at
+    (her model, her clips and her sheet, her size and her name), but cast no shadow while she does; whoever her roots
+    hold has no speed left and no jump, until a tick of the server lets them go; every entity is registered, named and
+    drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the
+    sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no
+    bone is animated by both of her controllers; her loot table is the table's and her trophies are Arms VII's; her
+    recipes (none of which makes Hagmoss), tags and advancement are there; the Hag's Eye is held in the offhand and
+    looked at on the server; every message she sends has its words; and nothing of hers loads a chunk or leaves its
+    dimension."""
+    import math
+    import arms_variants
+    import lantern_fen as lf
+    import mire_hag as mh
+    import mire_hag_models as hm
+    folder = JAVA_ROOT / "lair" / "hag"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/hag: no Java")
+        return
+    for cls, table in (("MireHagEntity", mh.MIRE_HAG), ("HagLikenessEntity", mh.LIKENESS), ("RootKnotEntity", mh.ROOT_KNOT),
+                       ("PoisonBrewEntity", mh.BREW), ("HagRootsEntity", {"SINK": mh.SINK}), ("HagsEye", mh.EYE)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/mire_hag.py's {value}")
+    boss = sources.get("MireHagEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, lure, drowned) in mh.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(lure).lower()}, {str(drowned).lower()})")
+        if expected not in boss:
+            err(f"MireHagEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"MireHagEntity does not scale as every lair boss does ({call})")
+    h = mh.MIRE_HAG
+    if not 0.0 < h["LAST_AT"] < h["DARK_AT"] < 1.0:
+        err("tools/mire_hag.py: the Last Light (LAST_AT) must come after Lights Out (DARK_AT)")
+    if not 0.0 < h["LAST_COOLDOWN"] < 1.0:
+        err("tools/mire_hag.py: the Last Light must make her cooldowns shorter (0 < LAST_COOLDOWN < 1)")
+    if not 0 < h["LIKENESSES"] <= h["DARK_LIKENESSES"]:
+        err("tools/mire_hag.py: more Likenesses walk with her after Lights Out than before, and some before")
+    if h["LIKENESS_SPREAD"] * ((h["DARK_LIKENESSES"] + 1) // 2) >= 180.0:
+        err("tools/mire_hag.py: her Likenesses' places round her foe (LIKENESS_SPREAD apart, either side) would meet behind it")
+    centre = lf.CENTRE
+    for x, z in lf.LAMPS:
+        if math.hypot(x + 0.5 - centre[0], z + 0.5 - centre[1]) <= h["LAMP_REACH"] + mh.LIKENESS["SHY"]:
+            err(f"The lamp at ({x}, {z}) lights the marsh's middle (LAMP_REACH, and the Likenesses' SHY): her Likenesses "
+                "would have nowhere to walk")
+    if not 0.0 < mh.LIKENESS["SHY"] < 1.0:
+        err("tools/mire_hag.py LIKENESS SHY: a Likeness keeps a little way (more than nothing, less than a block) from a "
+            "lamp's light")
+    likeness = sources.get("HagLikenessEntity", "")
+    walk = likeness.split("protected void customServerAiStep(", 1)[-1].split("\n\t}\n", 1)[0]
+    if ("step = keepDark(level, found, step);" not in walk
+            or walk.find("step = keepDark(") > walk.find("setDeltaMovement(step.x")
+            or "then <= MireHagEntity.LAMP_REACH + SHY;" not in likeness):
+        err("HagLikenessEntity: a Likeness's every step must pass keepDark before it is taken, so it never walks into a "
+            "lamp's light of its own accord")
+    if (mh.ROOT_KNOT["START"] - mh.ROOT_KNOT["REACH"]) / mh.ROOT_KNOT["SPEED"] < 100:
+        err("tools/mire_hag.py: the Root Knot must give players five seconds at least to cut it down")
+    if h["ROOT_HOLD"] >= mh.ATTACKS["ROOT_LANES"][3]:
+        err("tools/mire_hag.py: her roots must let go before her Root Lanes can come round again (ROOT_HOLD)")
+    if h["POISON_TICKS"] <= h["POOL_EVERY"]:
+        err("tools/mire_hag.py: her pools must poison again before the last poisoning wears off (POISON_TICKS > POOL_EVERY)")
+    if mh.ATTACKS["POISON_BREW"][5] / mh.BREW["SPEED"] >= mh.BREW["LIFE"]:
+        err("tools/mire_hag.py: a brew must reach her farthest mark within its LIFE")
+    if hm.HAND_Z != -16 * mh.BREW["HAND_AHEAD"] or hm.HAND_Y != 16 * mh.BREW["HAND_UP"]:
+        err("tools/mire_hag.py BREW HAND_AHEAD and HAND_UP must be where tools/mire_hag_models.py's left hand is as she "
+            f"throws: {-hm.HAND_Z / 16} and {hm.HAND_Y / 16}")
+    # Where her fight looks for the Lantern Fen's parts is where tools/lantern_fen.py builds them.
+    fen = re.sub(r"\s+", " ", sources.get("LanternFen", ""))
+    wx, wy, wz, _ = lf.WAIT
+    for name, value in (("CENTRE_X", float(centre[0])), ("CENTRE_Z", float(centre[1])), ("MARSH_RADIUS", lf.MARSH_RADIUS),
+                        ("MUD", lf.MUD), ("WATER", lf.WATER), ("STAND", lf.STAND), ("RING_INNER", lf.RING[0]),
+                        ("RING_OUTER", lf.RING[1]), ("WAIT_X", float(wx)), ("WAIT_Y", float(wy)), ("WAIT_Z", float(wz)),
+                        ("WOKE_X", float(lf.WOKE[0])), ("WOKE_Z", float(lf.WOKE[1])), ("EXIT_WEST", lf.MIDDLE_EXIT["x"][0]),
+                        ("EXIT_EAST", lf.MIDDLE_EXIT["x"][1]), ("EXIT_Z", lf.MIDDLE_EXIT["z"])):
+        if not java_number(fen, name, value):
+            err(f"LanternFen.{name} is not {value} (tools/lantern_fen.py)")
+    if "MUD_TOP = 14.0 / 16.0;" not in fen:
+        err("LanternFen.MUD_TOP must be mud's height, 14/16 of a block")
+    lamps = ", ".join(f"new BlockPos({x}, {y}, {z})" for x, y, z in lf.lamp_blocks())
+    if f"LAMPS = List.of({lamps});" not in fen:
+        err(f"LanternFen.LAMPS are not tools/lantern_fen.py's lamps: {lamps}")
+    blocks = lf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light")
+    cell = (math.floor(wx), int(wy), math.floor(wz))
+    if name((cell[0], cell[1] - 1, cell[2])) != "jugcraft:dead_planks" or not all(
+            free((cell[0], cell[1] + dy, cell[2])) for dy in range(3)):
+        err(f"Where the Mire Hag waits, {cell}, is not on the porch's planks with room for her over them")
+    wokex, wokez = (math.floor(v) for v in lf.WOKE)
+    if math.hypot(lf.WOKE[0] - centre[0], lf.WOKE[1] - centre[1]) > lf.MARSH_RADIUS - 1.0 or name((wokex, lf.MUD, wokez)) != "minecraft:mud" \
+            or name((wokex, lf.WATER, wokez)) != "minecraft:water" or not all(free((wokex, lf.STAND + dy, wokez)) for dy in range(2)):
+        err(f"Where the Mire Hag comes down, ({wokex}, {wokez}), is not open water on mud in the marsh, with air over it")
+    for x in lf.MIDDLE_EXIT["x"]:
+        z = lf.MIDDLE_EXIT["z"]
+        if name((x, lf.WATER, z)) != "minecraft:water" or not free((x, lf.STAND, z)) or name((x, lf.MUD, z)) != "minecraft:mud":
+            err(f"The Grey Mist she leaves at ({x}, {z}) must open in the marsh's water on mud, with air over it")
+    ring = (lf.RING[0] + lf.RING[1]) / 2.0
+    if "RING = (LanternFen.RING_INNER + LanternFen.RING_OUTER) / 2.0;" not in sources.get("RootKnotEntity", ""):
+        err("RootKnotEntity must crawl the ring's middle, between LanternFen.RING_INNER and RING_OUTER")
+    stumps = {(x, z) for x, z, _ in lf.STUMPS}
+    for degrees in range(360):
+        angle = math.radians(degrees)
+        x, z = math.floor(centre[0] + math.cos(angle) * ring), math.floor(centre[1] + math.sin(angle) * ring)
+        if name((x, lf.DECK, z)) != "jugcraft:willow_planks" and (x, z) not in stumps:
+            err(f"The Root Knot's way round the ring crosses ({x}, {z}), which is no boardwalk ({name((x, lf.DECK, z))})")
+            break
+    for x, y, z in lf.lamp_blocks():
+        if name((x, y, z)) != "jugcraft:fen_lamp":
+            err(f"No fen lamp at {(x, y, z)}")
+    # Her Likenesses are she to look at: her model under their name, her clips, her sheet and glowmask; her size and name.
+    gecko = ASSETS / "geckolib"
+    hag_geo = load(gecko / "models" / "entity" / "mire_hag.geo.json") or {}
+    likeness_geo = load(gecko / "models" / "entity" / "hag_likeness.geo.json") or {}
+    strip = lambda geo: json.dumps([{**g, "description": {**g.get("description", {}), "identifier": None}}
+                                    for g in geo.get("minecraft:geometry", [])], sort_keys=True)
+    if mh.GECKO.get("hag_likeness") != "mire_hag" or strip(hag_geo) != strip(likeness_geo):
+        err("hag_likeness.geo.json must be the Mire Hag's model under the Likeness's name")
+    if (load(gecko / "animations" / "entity" / "mire_hag.animation.json")
+            != load(gecko / "animations" / "entity" / "hag_likeness.animation.json")):
+        err("hag_likeness.animation.json must be the Mire Hag's clips")
+    for suffix in ("", "_glowmask"):
+        sheets = [ASSETS / "textures" / "entity" / f"{who}{suffix}.png" for who in ("mire_hag", "hag_likeness")]
+        if all(sheet.is_file() for sheet in sheets) and sheets[0].read_bytes() != sheets[1].read_bytes():
+            with Image.open(sheets[0]) as a, Image.open(sheets[1]) as b:
+                if a.convert("RGBA").tobytes() != b.convert("RGBA").tobytes():
+                    err(f"textures/entity/hag_likeness{suffix}.png must be the Mire Hag's")
+    registry = sources.get("JugcraftHag", "")
+    sizes = {who: re.search(rf'entity\("{who}",.*?\.sized\(([0-9.F, ]+)\)\.eyeHeight\(([0-9.F]+)\)', registry, re.S)
+             for who in ("mire_hag", "hag_likeness")}
+    if None in sizes.values() or sizes["mire_hag"].groups() != sizes["hag_likeness"].groups():
+        err("JugcraftHag: the Likeness must be the Mire Hag's size")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    if lang.get(f"entity.{MOD}.hag_likeness") != lang.get(f"entity.{MOD}.mire_hag"):
+        err("The Likeness must go by the Mire Hag's name")
+    client = (CLIENT_JAVA_ROOT / "MireHagClient.java").read_text(encoding="utf-8")
+    def drawn(entity):
+        start = client.find(f"register(JugcraftHag.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if "shadowRadius = 0.0F;" not in drawn("hag_likeness") or "shadowRadius = SHADOW;" not in drawn("mire_hag") \
+            or not re.search(r"float SHADOW = 0\.[1-9][0-9]*F;", client):
+        err("MireHagClient: the Mire Hag casts a shadow (SHADOW) and her Likenesses none")
+    likeness = sources.get("HagLikenessEntity", "")
+    for needed, why in (("MireHagEntity.BODY[action.ordinal()]", "plays her clips"), ("MireHagEntity.FLAME[", "plays her lantern"),
+                        ("found.burst(level, this)", "bursts when struck"), ("found.took(player,", "counts who struck it"),
+                        ("MireHagEntity.wade(this,", "wades as she does")):
+        if needed not in likeness:
+            err(f"HagLikenessEntity must be she to look at: it {why} ({needed})")
+    # Held fast: no speed left (Slowness takes 15% a level) and no jump, given back by the server's tick.
+    roots = sources.get("HagRootsEntity", "")
+    held = re.search(r"int HELD_AMPLIFIER = (\d+);", roots)
+    if held is None or (int(held.group(1)) + 1) * 0.15 < 1.0:
+        err("HagRootsEntity.HELD_AMPLIFIER must take all of a player's speed ((amplifier + 1) x 15% >= 100%)")
+    for needed in ("Attributes.JUMP_STRENGTH", "addTransientModifier(", "ServerTickEvents.END_SERVER_TICK.register(HagRootsEntity::release)",
+                   "ServerLifecycleEvents.SERVER_STOPPED"):
+        if needed not in roots:
+            err(f"HagRootsEntity must hold players fast with a transient jump modifier the server's tick takes off ({needed})")
+    if "HagRootsEntity.register();" not in registry:
+        err("JugcraftHag must register HagRootsEntity's release")
+    loot_java = sources.get("MireHagLoot", "")
+    if f'ADVANCEMENT = "{mh.ADVANCEMENT["key"]}";' not in loot_java:
+        err("MireHagLoot's advancement differs from tools/mire_hag.py")
+    for entity in mh.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftHag does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != mh.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {mh.ENTITIES[entity]!r}")
+        if f"JugcraftHag.{entity.upper()}," not in client:
+            err(f"MireHagClient draws no {entity}")
+    for item in mh.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftHag does not register {item}")
+    if "Lairs.onPlaced(Lair.LANTERN_FEN, MireHagEntity::summon)" not in registry:
+        err("JugcraftHag must seat the Mire Hag on the porch of every Lantern Fen as it is placed")
+    if "FenLampBlock.onLitByHand(JugcraftHag::lampLit)" not in registry or "hag.lampLit(level, lamp, player)" not in registry:
+        err("JugcraftHag must tell the Mire Hag when a player lights one of her lamps again")
+    lamp_block = (JAVA_ROOT / "lair" / "FenLampBlock.java").read_text(encoding="utf-8")
+    if "level instanceof ServerLevel server && light(level, pos)" not in lamp_block:
+        err("FenLampBlock must tell its listeners on the server only, and only when the lamp was out")
+    # The GeckoLib bodies.
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    # Her body's clips are named from a prefix (MireHagEntity's BODY table).
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("mire_hag", set()).add(f"animation.mire_hag.{clip}")
+    for entity, body in mh.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in hm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        # A body with a glow layer has a glowmask; one without has none (it would be a texture nothing draws).
+        glows = entity in mh.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"MireHagClient: the {entity}'s glow layer must match tools/mire_hag.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * hm.TEXTURE_SCALE, height * hm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * hm.TEXTURE_SCALE}x{height * hm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # Her controllers own their bones: the body's clips never key her lantern's flame, nor the lantern's a body bone.
+    owned = {bone: controller for controller, bones in hm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in hm.ANIMATIONS["mire_hag"]()["animations"].items():
+        controller = "lantern" if clip_name.split(".")[-1].startswith("lantern_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"mire_hag: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for cls in ("MireHagEntity", "HagLikenessEntity"):
+        for controller in ("body", *hm.CONTROLLERS):
+            if f'new AnimationController<{cls}>("{controller}"' not in sources.get(cls, ""):
+                err(f"{cls} has no {controller} controller (tools/mire_hag_models.py CONTROLLERS)")
+    # Her loot, and her trophies: Arms VII's, as her bosses/mire_hag table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "mire_hag.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/mire_hag.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"hagmoss": mh.HAGMOSS, **{item: mh.TROPHY_CHANCE for item in mh.TROPHIES}, **mh.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/mire_hag.json gives {found_loot}, not tools/mire_hag.py's {expected}")
+    if tuple(arms_variants.trophies("mire_hag")) != tuple(mh.TROPHIES):
+        err(f"tools/mire_hag.py TROPHIES {mh.TROPHIES} are not Arms VII's: {arms_variants.trophies('mire_hag')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "mire_hag.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in mh.TROPHIES]:
+        err(f"loot_table/bosses/mire_hag.json holds {held_items}, not her trophies {mh.TROPHIES}")
+    for table_id in ("entities/mire_hag", "bosses/mire_hag"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"MireHagLoot must roll loot_table/{table_id}.json")
+    for trophy in mh.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftHag must find the {trophy} (Arms VII registers it)")
+    for key, recipe in mh.RECIPES.items():
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Hagmoss comes only from her: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:hagmoss":
+            err(f"recipe/{path.name} makes Hagmoss, which only the Mire Hag gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in mh.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{mh.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{mh.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in mh.MESSAGES:
+        if f'"message.jugcraft.mire_hag.{key}"' not in sent:
+            err(f"tools/mire_hag.py MESSAGES has {key}, which the Java never sends")
+    # The Hag's Eye sees what hides: held in the offhand, looked at on the server's tick.
+    eye = sources.get("HagsEye", "")
+    if "getOffhandItem().is(JugcraftHag.HAGS_EYE)" not in eye or "ServerTickEvents.END_SERVER_TICK" not in eye \
+            or "HagsEye.register();" not in registry:
+        err("HagsEye must look at each player's offhand on the server's tick")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+def check_acquisition(registered):
+    """Concordance Chunk A, unit 4 (tools/acquisition.py, docs/features/concordance-first-loadout.md): JEI's pages on
+    where the things only a ritual or a lair boss gives come from are the generator's, and each is tied to the files on
+    disk. Each page is shown for a registered item, has its words and says it describes the default data. The loot table
+    a boss's loot class rolls gives each of her things at the chance or count its page states, and every Jugcraft item
+    in it has a page; the Halloween extra and the first victory's trophy are still the loot class's. Nothing else gives
+    them: no other loot table (but the thing's own block and its arms-variants trophy table, which nothing rolls), shop,
+    villager trade, commission or project; and nothing makes a thing whose page says it is not crafted (a recipe's
+    result, results or byproducts, a bench working, a ritual other than the page's own, the Assayer's Scale's
+    catalogue), while the hood's page names its own recipe. The Adept's Attunement makes the Adept's Wand from what its
+    page lists. The JEI plugin shows the rows. Every piece of the first loadout is made by a recipe or a bench working on
+    disk, and the server test that loads those recipes names each; none of those sources gives the owner's armour tiers
+    the record keeps creative-only. Only data is read: what Java alone gives (a creature's drops coded in its class) is
+    not seen. (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
+    import acquisition as aq
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    pages = aq.pages()
+    if (load(ASSETS / "recipe_view.json") or {}).get("acquisition_info") != aq.rows():
+        err("recipe_view.json acquisition_info is not tools/acquisition.py's rows(): run tools/generate_material_data.py")
+    for key, text in pages.items():
+        if key not in registered:
+            err(f"acquisition: the JEI page for {MOD}:{key} names no registered item")
+        if lang.get(f"{aq.PREFIX}.{key}") != text:
+            err(f"lang {aq.PREFIX}.{key} is not tools/acquisition.py's page: run tools/generate_material_data.py")
+        if aq.DEFAULT not in text.lower():
+            err(f"acquisition: the JEI page for {key} must say it describes the default data ({aq.DEFAULT!r})")
+    plugin_path = CLIENT_JAVA_ROOT / "compat" / "JugcraftJeiPlugin.java"
+    plugin = plugin_path.read_text(encoding="utf-8") if plugin_path.is_file() else ""
+    if '"acquisition_info"' not in plugin or f'"{aq.PREFIX}." + ' not in plugin:
+        err("JugcraftJeiPlugin must show recipe_view.json's acquisition_info rows as information pages")
+    # What gives things, on disk: every item a recipe makes (each {"id": ...} object in a recipe file: its result, its
+    # results and its byproducts' results; no input here uses one), a bench working's result, a ritual's
+    # transformation, what the Assayer's Scale can form (its catalogue); every Jugcraft item a loot table names; and what
+    # the town's shops sell, villager trades give, the Conclave's commissions pay and its projects reward. What Java alone
+    # gives (a creature's drops coded in its class, such as creatures/scary/ScaryDrops) is not seen here.
+    made, dropped, given = {}, {}, {}
+    def outputs(value):
+        if isinstance(value, dict):
+            found = [value["id"]] if isinstance(value.get("id"), str) else []
+            return found + [ref for child in value.values() for ref in outputs(child)]
+        return [ref for child in value for ref in outputs(child)] if isinstance(value, list) else []
+    for path in sorted(DATA.glob("*/recipe/**/*.json")):
+        body = load(path) or {}
+        refs = set(outputs(body)) | ({body["result"]} if isinstance(body.get("result"), str) else set())
+        for ref in refs:
+            made.setdefault(ref, []).append(path)
+    for folder, result in (("working", lambda body: body.get("result")),
+                           ("ritual", lambda body: ((body.get("result") or {}).get("transform") or {}).get("into")),
+                           ("material", lambda body: body.get("item") if body.get("form", True) else None)):
+        for path in sorted(DATA.glob(f"*/concordance/{folder}/*.json")):
+            ref = result(load(path) or {})
+            if isinstance(ref, str):
+                made.setdefault(ref, []).append(path)
+    for path in sorted(DATA.glob("*/loot_table/**/*.json")):
+        for ref in set(re.findall(rf'"({MOD}:[a-z0-9_/]+)"', path.read_text(encoding="utf-8"))):
+            dropped.setdefault(ref, []).append(path)
+    for shop, info in ((load(DATA / MOD / "town" / "shops.json") or {}).get("shops") or {}).items():
+        for offer in info.get("sells", []):
+            given.setdefault(offer.get("item"), []).append(f"the town's {info.get('name', shop)}")
+    for path in sorted(DATA.glob("*/villager_trade/**/*.json")):
+        given.setdefault(((load(path) or {}).get("gives") or {}).get("id"), []).append(str(path.relative_to(DATA)))
+    for folder in ("commission", "project"):
+        for path in sorted((DATA / MOD / "concordance" / folder).glob("*.json")):
+            given.setdefault((load(path) or {}).get("reward"), []).append(str(path.relative_to(DATA)))
+    # Each boss: her loot class rolls the table her pages describe, and it gives what they say.
+    tables_for = {key: set() for key in pages}
+    for boss, info in aq.BOSSES.items():
+        loot_path = JAVA_ROOT / "lair" / boss / f"{boss.capitalize()}Loot.java"
+        loot_java = loot_path.read_text(encoding="utf-8") if loot_path.is_file() else ""
+        if f'Jugcraft.id("{info["table"]}")' not in loot_java:
+            err(f"lair/{boss}/{loot_path.name} does not roll loot_table/{info['table']}.json, which its JEI pages describe")
+        rolled = {}
+        for pool in (load(DATA / MOD / "loot_table" / f"{info['table']}.json") or {}).get("pools", []):
+            chance = pool.get("condition", {}).get("chance")
+            for entry in pool.get("entries", []):
+                namespace, item = split(entry.get("name", ":"))
+                count = entry.get("modifier", {}).get("count", {})
+                if namespace == MOD:
+                    rolled[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+        for item in rolled:
+            if item not in pages:
+                err(f"loot_table/{info['table']}.json gives {item}, which has no JEI page (tools/acquisition.py)")
+                continue
+            tables_for[item] |= {DATA / MOD / "loot_table" / f"{info['table']}.json",
+                                 DATA / MOD / "loot_table" / "bosses" / f"{boss}.json",
+                                 DATA / MOD / "loot_table" / "blocks" / f"{item}.json"}
+        item = info["count"][0]
+        count = rolled.get(item)
+        if not isinstance(count, tuple) or f"holds {count[0]} to {count[1]}" not in pages.get(item, ""):
+            err(f"acquisition: {item}'s JEI page does not say each share holds what loot_table/{info['table']}.json gives")
+        for thing in info["chances"]:
+            chance = rolled.get(thing)
+            if not isinstance(chance, (int, float)) or f"a {aq.pct(chance)} chance of it" not in pages.get(thing, ""):
+                err(f"acquisition: {thing}'s JEI page does not give loot_table/{info['table']}.json's chance ({chance})")
+        thing = info["event"][0]
+        event = re.search(r"\bEVENT_[A-Z]+_CHANCE = ([0-9.]+)F;", loot_java)
+        if not event or f"another {aq.pct(float(event.group(1)))} chance" not in pages.get(thing, ""):
+            err(f"acquisition: {thing}'s JEI page does not give {loot_path.name}'s Halloween chance")
+        first = info["first"]
+        method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
+        if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{method}\(\)\)\);", loot_java) \
+                or "first victory over her always brings it" not in pages.get(first, ""):
+            err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
+    # Nothing else gives them (no other loot table, shop, villager trade, commission or project), and what a page says is
+    # never crafted is not.
+    for key, text in pages.items():
+        ref = f"{MOD}:{key}"
+        for path in dropped.get(ref, []):
+            if path not in tables_for[key]:
+                err(f"{path.relative_to(DATA)} gives {key}, which its JEI page (tools/acquisition.py) does not name")
+        own = {DATA / MOD / "concordance" / "ritual" / f"{aq.RITUALS[key]}.json"} if key in aq.RITUALS else set()
+        makers = [path for path in made.get(ref, []) if path not in own]
+        if text.startswith("Not crafted") and makers:
+            err(f"{makers[0].relative_to(DATA)} makes {key}, whose JEI page says it is not crafted")
+        if given.get(ref):
+            why = ("whose JEI page says it is not traded" if "or traded" in text
+                   else "which its JEI page (tools/acquisition.py) does not name")
+            err(f"{given[ref][0]} gives {key}, {why}")
+    for item, (recipe, ingredient, count, name) in aq.CRAFTED.items():
+        path = DATA / MOD / "recipe" / f"{recipe}.json"
+        body = (load(path) or {}) if path.is_file() else {}
+        symbols = [symbol for symbol, ref in body.get("key", {}).items() if ref == f"{MOD}:{ingredient}"]
+        uses = sum(row.count(symbol) for row in body.get("pattern", []) for symbol in symbols)
+        if (body.get("result") or {}).get("id") != f"{MOD}:{item}" or uses != count \
+                or not pages.get(item, "").startswith(f"Crafted from {count} {name}."):
+            err(f"acquisition: {item}'s JEI page must name recipe/{recipe}.json ({count} {name})")
+    # The Adept's Wand: the ritual on disk makes it from what its page offers, for the Focus, steps and research it states.
+    for item, ritual in aq.RITUALS.items():
+        path = DATA / MOD / "concordance" / "ritual" / f"{ritual}.json"
+        body = (load(path) or {}) if path.is_file() else {}
+        text = pages.get(item, "")
+        if ((body.get("result") or {}).get("transform") or {}).get("into") != f"{MOD}:{item}":
+            err(f"concordance/ritual/{ritual}.json does not make {item}, as its JEI page says")
+        research = aq.rituals.RESEARCH.get(split(body.get("research", ":"))[1], {}).get("name")
+        said = [f"{body.get('focus')} Focus", f"{body.get('steps')} steps", f"{research} {body.get('stage')}"]
+        for offering in body.get("offerings", []):
+            try:
+                said.append(f"{offering['count']} {aq.rituals._item_name(offering['item'])}")
+            except KeyError:
+                said.append(str(offering.get("item")))
+        for words in said:
+            if words not in text:
+                err(f"acquisition: {item}'s JEI page does not say {words!r}, as concordance/ritual/{ritual}.json does")
+    # The first loadout is made in survival as it is: by the recipe of its own name, or by a bench working; and the
+    # server test that loads those recipes names every one.
+    tests_path = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordanceGameTests.java"
+    tests = tests_path.read_text(encoding="utf-8") if tests_path.is_file() else ""
+    named = re.search(r"FIRST_LOADOUT_RECIPES = List\.of\(([^)]*)\)", tests)
+    recipes = {item for item, how in {**aq.LOADOUT, **aq.OPTIONAL}.items() if how == "recipe"}
+    if "public void theFirstLoadoutIsMadeInSurvival(" not in tests or not named \
+            or set(re.findall(r'"([a-z_]+)"', named.group(1))) != recipes:
+        err("ConcordanceGameTests.theFirstLoadoutIsMadeInSurvival must load the recipe of every first-loadout piece "
+            f"(FIRST_LOADOUT_RECIPES: {sorted(recipes)})")
+    for item, how in {**aq.LOADOUT, **aq.OPTIONAL}.items():
+        if item not in registered:
+            err(f"acquisition: the first loadout's {item} is not registered")
+        if how == "recipe":
+            # The recipe's own result, not just a mention anywhere in the file (made counts every id object).
+            recipe = DATA / MOD / "recipe" / f"{item}.json"
+            result = ((load(recipe) or {}) if recipe.is_file() else {}).get("result")
+            if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
+                err(f"acquisition: recipe/{item}.json does not make the first loadout's {item} (its own result)")
+        else:
+            working = DATA / MOD / "concordance" / "working" / f"{how.split(':', 1)[1]}.json"
+            if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
+                err(f"acquisition: concordance/working/{working.name} does not make the first loadout's {item}")
+    # The owner's armour tiers the record keeps creative-only: nothing gives them.
+    for tier in aq.CREATIVE_ONLY:
+        for piece in gear.ARMOR:
+            ref = f"{MOD}:{tier}_{piece}"
+            sources = [str(path.relative_to(DATA)) for path in made.get(ref, []) + dropped.get(ref, [])] + given.get(ref, [])
+            if sources:
+                err(f"{sources[0]} gives {tier}_{piece}, which docs/features/concordance-first-loadout.md keeps "
+                    "creative-only: once the owner settles how a tier is won, take it out of CREATIVE_ONLY "
+                    "(tools/acquisition.py) and the record's creative-only table")
+
+
+def check_crypt_lich():
+    """The Crypt Lich (tools/crypt_lich.py, docs/features/crypt-lich.md): every number the Java uses is the table's; his
+    attacks are the table's, and his rule can be played (the Erasure comes before the Last Name; his exposure outlasts
+    its stagger; the chains reforge a seal at a time within the reforging; a scraped name burns back by itself; he never
+    raises more dead at once than the cap; his Grave Pull's bones reach less far than its ring, so its dark part is a way
+    out; his bolt reaches its farthest foe within its life, and leaves from his model's left hand); where his fight looks
+    for the archive's parts (CryptArchive.java) is where tools/crypt_archive.py builds them: he waits at the throne, comes
+    down to open floor on the north lane, his dead rise on open floor over the ledger stones and at each sarcophagus's
+    foot, the lanes he calls are the three alcoves' (never the lectern's), the Grey Mist he leaves opens on the dais where
+    the phylactery stood, and every cell of the hall's floor lies within his leash; his chains turn every blow aside, a
+    seal is answered only by the fight it belongs to, and the lectern's reading reaches him; every entity is registered,
+    named and drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions
+    inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut
+    out; no bone is animated by two of his controllers; his loot table is the table's and his trophies are Arms VII's; his
+    recipes (none of which makes Grave Dust), tags and advancement are there; the Emptied Phylactery is held in the
+    offhand and looked at on the server; every message he sends has its words; and nothing of his loads a chunk or leaves
+    its dimension."""
+    import math
+    import arms_variants
+    import crypt_archive as ca
+    import crypt_lich as cl
+    import crypt_lich_models as lm
+    import lairs
+    folder = JAVA_ROOT / "lair" / "lich"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/lich: no Java")
+        return
+    for cls, table in (("CryptLichEntity", cl.CRYPT_LICH), ("RestlessDeadEntity", cl.RESTLESS_DEAD), ("SoulBoltEntity", cl.BOLT),
+                       ("LichBonesEntity", {"SINK": cl.SINK})):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/crypt_lich.py's {value}")
+    boss = sources.get("CryptLichEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, warded, unwritten) in cl.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(warded).lower()}, {str(unwritten).lower()})")
+        if expected not in boss:
+            err(f"CryptLichEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"CryptLichEntity does not scale as every lair boss does ({call})")
+    c = cl.CRYPT_LICH
+    names = list(lairs.NAMES)
+    if not 0.0 < c["LAST_AT"] < c["ERASE_AT"] < 1.0:
+        err("tools/crypt_lich.py: the Last Name (LAST_AT) must come after the Erasure (ERASE_AT)")
+    if not 0.0 < c["LAST_COOLDOWN"] < 1.0:
+        err("tools/crypt_lich.py: the Last Name must make his cooldowns shorter (0 < LAST_COOLDOWN < 1)")
+    if not 0 < c["STAGGER_TICKS"] < c["EXPOSED_TICKS"]:
+        err("tools/crypt_lich.py: his exposure must outlast the stagger it begins with (STAGGER_TICKS < EXPOSED_TICKS)")
+    if (len(names) - 1) * c["REFORGE_STEP"] >= c["REFORGE_TICKS"]:
+        err("tools/crypt_lich.py: every seal must mend within the reforging ((names - 1) x REFORGE_STEP < REFORGE_TICKS)")
+    if c["SCRAPED_TICKS"] <= 0 or c["SCRAPED_TICKS"] >= c["ABANDON_TICKS"] * 10:
+        err("tools/crypt_lich.py: a scraped name must burn back by itself, in good time (0 < SCRAPED_TICKS)")
+    if not 0 < c["RAISED"] <= c["DEAD_CAP"]:
+        err("tools/crypt_lich.py: Raise the Dead raises no more than his cap of dead (RAISED <= DEAD_CAP)")
+    if not c["PULL_REACH"] < c["PULL_RADIUS"] or not 0.0 < c["PULL_DARK"] < 180.0:
+        err("tools/crypt_lich.py: the Grave Pull's bones must reach less far than its ring, and its dark part be a part")
+    if cl.ATTACKS["SOUL_BOLT"][5] / cl.BOLT["SPEED"] >= cl.BOLT["LIFE"]:
+        err("tools/crypt_lich.py: a Soul Bolt must reach his farthest foe within its LIFE")
+    if cl.ATTACKS["GRAVE_PULL"][1] != c["PULL_BURST"]:
+        err("tools/crypt_lich.py: the Grave Pull's bones burst as its active ticks end (PULL_BURST)")
+    if cl.ATTACKS["SOUL_DRAIN"][1] % c["DRAIN_EVERY"] != 0:
+        err("tools/crypt_lich.py: the Soul Drain's active ticks must be whole draughts (DRAIN_EVERY)")
+    if lm.HAND_Z != -16 * cl.BOLT["HAND_AHEAD"] or lm.HAND_Y != 16 * cl.BOLT["HAND_UP"]:
+        err("tools/crypt_lich.py BOLT HAND_AHEAD and HAND_UP must be where tools/crypt_lich_models.py's left hand is as he "
+            f"looses it: {-lm.HAND_Z / 16} and {lm.HAND_Y / 16}")
+    # Where his fight looks for the archive's parts is where tools/crypt_archive.py builds them.
+    archive = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CryptArchive.java").read_text(encoding="utf-8"))
+    wx, wy, wz, _ = ca.WAIT
+    for name, value in (("CENTRE_X", float(ca.CENTRE[0])), ("CENTRE_Z", float(ca.CENTRE[1])), ("WAIT_X", float(wx)),
+                        ("WAIT_Y", float(wy)), ("WAIT_Z", float(wz)), ("WOKE_X", float(cl.WOKE[0])), ("WOKE_Z", float(cl.WOKE[1])),
+                        ("EXIT_WEST", ca.DAIS_EXIT["x"][0]), ("EXIT_EAST", ca.DAIS_EXIT["x"][1]), ("EXIT_Z", ca.DAIS_EXIT["z"])):
+        if not java_number(archive, name, value):
+            err(f"CryptArchive.{name} is not {value} (tools/crypt_archive.py, tools/crypt_lich.py)")
+    lane_of = {name: lane for lane, name in cl.LANE_NAMES.items()}
+    if sorted(cl.LANE_NAMES.values()) != sorted(names) or "south" in cl.LANE_NAMES:
+        err("tools/crypt_lich.py LANE_NAMES: he calls each name's lane, and never the lectern's (south)")
+    rects = []
+    for name in names:
+        cells = ca.lane_cells(lane_of.get(name, "south"))
+        xs, zs = [x for x, _ in cells], [z for _, z in cells]
+        rects.append(f"{{{min(xs)}, {max(xs)}, {min(zs)}, {max(zs)}}}")
+    if f"LANES = {{{', '.join(rects)}}};" not in archive:
+        err(f"CryptArchive.LANES are not tools/crypt_archive.py's lanes to the alcoves, in NAMES order: {{{', '.join(rects)}}}")
+    graves = ", ".join(f"{{{x}, {z}}}" for x, z in ca.FLOOR_GRAVES)
+    if f"GRAVES = {{{graves}}};" not in archive:
+        err(f"CryptArchive.GRAVES are not tools/crypt_archive.py's FLOOR_GRAVES: {{{graves}}}")
+    dead = ", ".join(f"{{{float(x)}, {float(z)}}}" for x, z in (cl.SARCOPHAGUS_DEAD[name] for name in names))
+    if f"SARCOPHAGUS_DEAD = {{{dead}}};" not in archive:
+        err(f"CryptArchive.SARCOPHAGUS_DEAD are not tools/crypt_lich.py's, in NAMES order: {{{dead}}}")
+    if "for (int y = STAND + 1; y <= STAND + 2; y++)" not in archive:
+        err("CryptArchive.exitCells: the Grey Mist on the dais is two high, from over the dais (STAND + 1)")
+    blocks = ca.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light", "minecraft:cave_air", "minecraft:air")
+    solid = lambda pos: name(pos) is not None and not free(pos)
+    throne = (math.floor(wx), int(wy), math.floor(wz))
+    if throne != tuple(ca.THRONE):
+        err(f"Where the Crypt Lich waits, {throne}, is not his throne {ca.THRONE}")
+    wokex, wokez = (math.floor(v) for v in cl.WOKE)
+    if not ca.HALL["x"][0] <= wokex <= ca.HALL["x"][1] or not ca.HALL["z"][0] <= wokez <= ca.HALL["z"][1] \
+            or (wokex, wokez) not in ca.lane_cells("north") or not solid((wokex, ca.PAVE, wokez)) \
+            or not all(free((wokex, ca.STAND + dy, wokez)) for dy in range(3)):
+        err(f"Where the Crypt Lich comes down, ({wokex}, {wokez}), is not open floor on the north lane, three high")
+    for x, z in ca.FLOOR_GRAVES:
+        for dz in (0, 1):
+            if not solid((x, ca.PAVE, z + dz)) or not all(free((x, ca.STAND + dy, z + dz)) for dy in range(2)):
+                err(f"His dead cannot rise from the ledger stone at ({x}, {z + dz}): no floor, or no room over it")
+    for nm, (dx, dz) in cl.SARCOPHAGUS_DEAD.items():
+        info = ca.ALCOVES.get(nm, {})
+        cell = (math.floor(dx), info.get("stand", ca.STAND), math.floor(dz))
+        foot = info.get("foot", (0, 0))
+        if not ca.in_alcove(nm, cell[0], cell[2]) or not solid((cell[0], cell[1] - 1, cell[2])) \
+                or not all(free((cell[0], cell[1] + dy, cell[2])) for dy in range(2)) \
+                or max(abs(cell[0] - foot[0]), abs(cell[2] - foot[1])) > 2:
+            err(f"The {nm}'s dead cannot climb out at {cell}: not open floor in the alcove by the sarcophagus's foot")
+    plinth = tuple(ca.PLINTH)
+    for x in range(ca.DAIS_EXIT["x"][0], ca.DAIS_EXIT["x"][1] + 1):
+        for y in (ca.STAND + 1, ca.STAND + 2):
+            pos = (x, y, ca.DAIS_EXIT["z"])
+            if not free(pos) and pos != tuple(ca.PHYLACTERY):
+                err(f"The Grey Mist he leaves on the dais would replace {name(pos)} at {pos}")
+    if tuple(ca.PHYLACTERY) not in [(x, ca.STAND + 1, ca.DAIS_EXIT["z"]) for x in range(ca.DAIS_EXIT["x"][0], ca.DAIS_EXIT["x"][1] + 1)] \
+            or plinth != (ca.PHYLACTERY[0], ca.PHYLACTERY[1] - 1, ca.PHYLACTERY[2]):
+        err("The Grey Mist he leaves must rise where the phylactery stood, on its plinth")
+    for x in range(ca.HALL["x"][0], ca.HALL["x"][1] + 1):
+        for z in range(ca.HALL["z"][0], ca.HALL["z"][1] + 1):
+            if free((x, ca.STAND, z)) and math.hypot(x + 0.5 - ca.CENTRE[0], z + 0.5 - ca.CENTRE[1]) > c["LEASH"]:
+                err(f"The hall's floor at ({x}, {z}) lies beyond his leash")
+    # His rule: warded, every blow is turned aside; a seal is answered only by its own fight; the lectern reaches him.
+    if not re.search(r"if \(warded\(\)\) \{\s*turnAside\(level, source\);\s*return false;", boss):
+        err("CryptLichEntity.hurtServer must turn every blow aside while his chains hold")
+    if "if (!seal(rune).equals(pos)) {" not in boss:
+        err("CryptLichEntity.sealUsed must answer only his own archive's seals")
+    registry = sources.get("JugcraftLich", "")
+    for needed, why in (("Lairs.onPlaced(Lair.CRYPT_ARCHIVE, CryptLichEntity::summon)", "seat him on the throne of every archive"),
+                        ("GraveSealBlock.onUsed(JugcraftLich::sealUsed)", "answer the grave seals"),
+                        ("ArchiveLecternBlock.onRead(JugcraftLich::read)", "hear the lectern read"),
+                        ("lich.lecternRead(level, player, restored)", "tell him who read which names back"),
+                        ("EmptiedPhylactery.register();", "look at the Emptied Phylactery")):
+        if needed not in registry:
+            err(f"JugcraftLich must {why} ({needed})")
+    dead_java = sources.get("RestlessDeadEntity", "")
+    if "master.took(player, amount)" not in dead_java or "crumble(level)" not in dead_java:
+        err("RestlessDeadEntity: whoever hurts one takes part, and it crumbles when he is gone")
+    bolt = sources.get("SoulBoltEntity", "")
+    if "reflect(level, player);" not in bolt or "lich.boltReturned(level, this," not in bolt or "public boolean isPickable()" not in bolt:
+        err("SoulBoltEntity must be struck back by a blow or an arrow and turn on the Lich")
+    if not re.search(r"if \(warded\(\)\) \{\s*stagger\(BOLT_STAGGER\);", boss):
+        err("CryptLichEntity.boltReturned must stagger him while warded")
+    phylactery = sources.get("EmptiedPhylactery", "")
+    if "getOffhandItem().is(JugcraftLich.EMPTIED_PHYLACTERY)" not in phylactery or "ServerTickEvents.END_SERVER_TICK" not in phylactery \
+            or "source.is(DamageTypes.WITHER)" not in phylactery:
+        err("EmptiedPhylactery must look at each player's offhand on the server's tick, and turn the Wither's harm aside")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    client = (CLIENT_JAVA_ROOT / "CryptLichClient.java").read_text(encoding="utf-8")
+    if "CryptLichClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register CryptLichClient")
+    if "lair.lich.JugcraftLich.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftLich")
+    def drawn(entity):
+        start = client.find(f"register(JugcraftLich.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("CryptLichLoot", "")
+    if f'ADVANCEMENT = "{cl.ADVANCEMENT["key"]}";' not in loot_java:
+        err("CryptLichLoot's advancement differs from tools/crypt_lich.py")
+    for entity in cl.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftLich does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != cl.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {cl.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"CryptLichClient draws no {entity}")
+    for item in cl.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftLich does not register {item}")
+    # The GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("crypt_lich", set()).add(f"animation.crypt_lich.{clip}")
+    for entity, body in cl.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in lm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in cl.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"CryptLichClient: the {entity}'s glow layer must match tools/crypt_lich.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * lm.TEXTURE_SCALE, height * lm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * lm.TEXTURE_SCALE}x{height * lm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key his crown's fire or the skull in his hand.
+    owned = {bone: controller for controller, bones in lm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in lm.ANIMATIONS["crypt_lich"]()["animations"].items():
+        short = clip_name.split(".")[-1]
+        controller = "crown" if short.startswith("crown_") else "hand" if short.startswith("hand_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"crypt_lich: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *lm.CONTROLLERS):
+        if f'new AnimationController<CryptLichEntity>("{controller}"' not in boss:
+            err(f"CryptLichEntity has no {controller} controller (tools/crypt_lich_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/crypt_lich table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "crypt_lich.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/crypt_lich.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"grave_dust": cl.GRAVE_DUST, **{item: cl.TROPHY_CHANCE for item in cl.TROPHIES}, **cl.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/crypt_lich.json gives {found_loot}, not tools/crypt_lich.py's {expected}")
+    if tuple(arms_variants.trophies("crypt_lich")) != tuple(cl.TROPHIES):
+        err(f"tools/crypt_lich.py TROPHIES {cl.TROPHIES} are not Arms VII's: {arms_variants.trophies('crypt_lich')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "crypt_lich.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in cl.TROPHIES]:
+        err(f"loot_table/bosses/crypt_lich.json holds {held_items}, not his trophies {cl.TROPHIES}")
+    for table_id in ("entities/crypt_lich", "bosses/crypt_lich"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"CryptLichLoot must roll loot_table/{table_id}.json")
+    for trophy in cl.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftLich must find the {trophy} (Arms VII registers it)")
+    for key in cl.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Grave Dust comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:grave_dust":
+            err(f"recipe/{path.name} makes Grave Dust, which only the Crypt Lich gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in cl.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{cl.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{cl.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in cl.MESSAGES:
+        if f'"message.jugcraft.crypt_lich.{key}"' not in sent:
+            err(f"tools/crypt_lich.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
+def check_iron_dreadnought():
+    """The Iron Dreadnought (tools/iron_dreadnought.py, docs/features/iron-dreadnought.md): every number the Java uses is
+    the table's; his attacks are the table's, and his rule can be played (the Torn Plate comes before Red Line; Red Line
+    makes him quicker; his plating lets some of a blow through; his overload outlasts its stagger; Red Line's charges come
+    sooner than the Advance's, and each charge ends before the next is due; he never drops more Sparkers than his cap; his
+    Trench Charge can run its whole range in its active ticks; a rivet reaches the farthest Rivet Fan target within its
+    life; his shell lands as its flight clip ends; his rivets, shells and arcs leave from where his model's battery, mortar
+    and coils are); where his fight looks for the trench's parts (FoundryTrench.java) is where tools/foundry_trench.py
+    builds them: he waits in the gantry with room for his body, steps down to open floor out of its mouth along a clear
+    way, every open cell of the pit's floor lies within his leash, a sprinting player anywhere on it can come within reach
+    of the breaker nearest them before his charge ends, and the Grey Mist he leaves opens in open cells of the gantry; his
+    plating takes three quarters of a blow while his vents are shut, a breaker is answered only by the fight it belongs to,
+    and the trench's breakers reach him; the Grounding Strap's hook is registered and its damage tag holds his arcs; every
+    entity is registered, named and drawn; each GeckoLib body has its model, clips (every clip the Java names) and sheet,
+    its box-UV regions inside the sheet without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model
+    declares and cut out; no bone is animated by two of his controllers; his loot table is the table's and his trophies
+    are Arms VII's; his recipes (none of which makes Salvaged Coil), tags and advancement are there; every message he
+    sends has its words; and nothing of his loads a chunk or leaves its dimension."""
+    import heapq
+    import math
+    import arms_variants
+    import foundry_trench as ft
+    import iron_dreadnought as dn
+    import iron_dreadnought_models as dm
+    folder = JAVA_ROOT / "lair" / "dreadnought"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/dreadnought: no Java")
+        return
+    for cls, table in (("IronDreadnoughtEntity", dn.IRON_DREADNOUGHT), ("IronDreadnoughtEntity", dn.COILS),
+                       ("SparkerEntity", dn.SPARKER), ("HotRivetEntity", dn.RIVET), ("MortarShellEntity", dn.SHELL),
+                       ("GroundingStrap", {"SHARE": dn.STRAP_SHARE})):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/iron_dreadnought.py's {value}")
+    boss = sources.get("IronDreadnoughtEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, advance, overcharge) in dn.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(advance).lower()}, {str(overcharge).lower()})")
+        if expected not in boss:
+            err(f"IronDreadnoughtEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"IronDreadnoughtEntity does not scale as every lair boss does ({call})")
+    d = dn.IRON_DREADNOUGHT
+    if not 0.0 < d["RED_AT"] < d["TORN_AT"] < 1.0:
+        err("tools/iron_dreadnought.py: Red Line (RED_AT) must come after the Torn Plate (TORN_AT)")
+    if not 0.0 < d["RED_COOLDOWN"] < 1.0:
+        err("tools/iron_dreadnought.py: Red Line must make his cooldowns shorter (0 < RED_COOLDOWN < 1)")
+    if not 0.0 < d["PLATED"] < 1.0:
+        err("tools/iron_dreadnought.py: his plating must let some of a blow through, and turn some (0 < PLATED < 1)")
+    if not 0 < d["OVERLOAD_STAGGER"] < d["OVERLOAD_TICKS"]:
+        err("tools/iron_dreadnought.py: his overload must outlast the stagger it begins with (OVERLOAD_STAGGER < OVERLOAD_TICKS)")
+    if not 0 < d["DISCHARGE_TICKS"] < d["RED_DISCHARGE_EVERY"] < d["DISCHARGE_EVERY"]:
+        err("tools/iron_dreadnought.py: each charge must end before the next is due, and Red Line's come sooner "
+            "(DISCHARGE_TICKS < RED_DISCHARGE_EVERY < DISCHARGE_EVERY)")
+    if not 0 < d["DROPPED"] <= d["SPARKER_CAP"] or d["CLEAR_USES"] < 1:
+        err("tools/iron_dreadnought.py: he drops no more Sparkers than his cap, and a fouled breaker can be cleared")
+    charge = dn.ATTACKS["TRENCH_CHARGE"]
+    if charge[1] * d["CHARGE_SPEED"] < d["CHARGE_RANGE"] or charge[5] > d["CHARGE_RANGE"]:
+        err("tools/iron_dreadnought.py: his Trench Charge must run its whole range within its active ticks, and he must "
+            "charge only foes within it")
+    if dn.ATTACKS["RIVET_FAN"][5] / dn.RIVET["SPEED"] >= dn.RIVET["LIFE"]:
+        err("tools/iron_dreadnought.py: a rivet must reach his farthest Rivet Fan target within its LIFE")
+    shell_clip = dm.mortar_shell_animations()["animations"]["animation.mortar_shell.flight"]["animation_length"]
+    if round(shell_clip * 20) != d["SHELL_FLIGHT"]:
+        err(f"tools/iron_dreadnought.py SHELL_FLIGHT must be the shell's flight clip ({shell_clip} s)")
+    tear_clip = dm.iron_dreadnought_animations()["animations"]["animation.iron_dreadnought.tear"]["animation_length"]
+    if round(tear_clip * 20) != d["TORN_TICKS"]:
+        err(f"tools/iron_dreadnought.py TORN_TICKS must be the Torn Plate's clip ({tear_clip} s)")
+    wake_clip = dm.iron_dreadnought_animations()["animations"]["animation.iron_dreadnought.wake"]["animation_length"]
+    if round(wake_clip * 20) != d["WAKE_TICKS"]:
+        err(f"tools/iron_dreadnought.py WAKE_TICKS must be his waking clip ({wake_clip} s)")
+    for value, model, what in ((dn.RIVET["BATTERY_AHEAD"], -dm.BATTERY_Z, "RIVET BATTERY_AHEAD"),
+                               (dn.RIVET["BATTERY_SIDE"], dm.BATTERY_X, "RIVET BATTERY_SIDE"),
+                               (dn.RIVET["BATTERY_UP"], dm.BATTERY_Y, "RIVET BATTERY_UP"),
+                               (dn.SHELL["MORTAR_UP"], dm.HATCH_Y, "SHELL MORTAR_UP"),
+                               (dn.SHELL["MORTAR_BACK"], dm.MORTAR_Z, "SHELL MORTAR_BACK"),
+                               (dn.COILS["COIL_SIDE"], dm.COIL_X, "COILS COIL_SIDE"),
+                               (dn.COILS["COIL_UP"], dm.COIL_TOP, "COILS COIL_UP")):
+        if abs(value * 16 - model) > 1.0E-6:
+            err(f"tools/iron_dreadnought.py {what} must be where tools/iron_dreadnought_models.py puts it: {model / 16}")
+    # Where his fight looks for the trench's parts is where tools/foundry_trench.py builds them.
+    trench = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "FoundryTrench.java").read_text(encoding="utf-8"))
+    for name, value in (("WOKE_X", float(dn.WOKE[0])), ("WOKE_Z", float(dn.WOKE[1])), ("GANTRY_WEST", ft.GANTRY["x"][0]),
+                        ("GANTRY_EAST", ft.GANTRY["x"][1]), ("GANTRY_NORTH", ft.GANTRY["z"][0]),
+                        ("GANTRY_SOUTH", ft.GANTRY["z"][1]), ("INTRUDER_UP", float(dn.INTRUDER_UP))):
+        if not java_number(trench, name, value):
+            err(f"FoundryTrench.{name} is not {value} (tools/foundry_trench.py, tools/iron_dreadnought.py)")
+    blocks = ft.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light", "minecraft:cave_air", "minecraft:air")
+    solid = lambda pos: name(pos) is not None and not free(pos)
+    width, height = 3.5, 5.5    # his box (JugcraftDreadnought: sized(3.5F, 5.5F))
+    registry = sources.get("JugcraftDreadnought", "")
+    if f"sized({width}F, {height}F)" not in registry:
+        err(f"JugcraftDreadnought: his box must be {width} by {height}, as the audit measures his room")
+    tall = math.ceil(height)
+
+    def room(x, z):
+        """Whether his box fits standing at (x, z) on the floor at STAND."""
+        for cx in range(math.floor(x - width / 2), math.floor(x + width / 2 - 1.0E-6) + 1):
+            for cz in range(math.floor(z - width / 2), math.floor(z + width / 2 - 1.0E-6) + 1):
+                if not solid((cx, ft.PAVE, cz)) or not all(free((cx, ft.STAND + dy, cz)) for dy in range(tall)):
+                    return False
+        return True
+    wx, wy, wz, _ = ft.WAIT
+    if wy != ft.STAND or not ft.in_gantry(math.floor(wx), math.floor(wz)) or not room(wx, wz):
+        err(f"Where the Iron Dreadnought waits, ({wx}, {wz}), is not open gantry floor with room for him")
+    if not room(*dn.WOKE) or not (ft.PIT["z"][0] <= math.floor(dn.WOKE[1]) <= ft.PIT["z"][1]):
+        err(f"Where the Iron Dreadnought steps down to, {dn.WOKE}, is not open pit floor with room for him")
+    steps = 40
+    for i in range(steps + 1):
+        x = wx + (dn.WOKE[0] - wx) * i / steps
+        z = wz + (dn.WOKE[1] - wz) * i / steps
+        if not room(x, z):
+            err(f"His way down out of the gantry is blocked at ({x:.2f}, {z:.2f})")
+            break
+    floor = [(x, z) for x in range(ft.PIT["x"][0], ft.PIT["x"][1] + 1) for z in range(ft.PIT["z"][0], ft.PIT["z"][1] + 1)
+             if solid((x, ft.PAVE, z)) and free((x, ft.STAND, z)) and free((x, ft.STAND + 1, z))]
+    cx, cz = ft.CENTRE
+    for x, z in floor:
+        if math.hypot(x + 0.5 - cx, z + 0.5 - cz) > d["LEASH"]:
+            err(f"The pit's floor at ({x}, {z}) lies beyond his leash")
+    # A sprinting player anywhere on the pit's floor can come within reach of the breaker nearest them before the charge
+    # ends: the walk is measured over open floor cells, never cutting a corner of cover.
+    cells = set(floor)
+    reach = {}
+    for info in ft.PYLONS.values():
+        bx, bz = info["breaker"]
+        dist = {c: 0.0 for c in cells if math.hypot(c[0] - bx, c[1] - bz) <= dn.REACH}
+        queue = [(0.0, c) for c in dist]
+        while queue:
+            dd, (x, z) = heapq.heappop(queue)
+            if dd > dist[(x, z)]:
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in cells or (dx and dz and ((x + dx, z) not in cells or (x, z + dz) not in cells)):
+                    continue
+                nd = dd + (math.sqrt(2.0) if dx and dz else 1.0)
+                if nd < dist.get(n, math.inf):
+                    dist[n] = nd
+                    heapq.heappush(queue, (nd, n))
+        for c in cells:
+            reach[c] = min(reach.get(c, math.inf), dist.get(c, math.inf))
+    farthest = max(reach.items(), key=lambda kv: kv[1]) if reach else ((0, 0), 0.0)
+    if farthest[1] / dn.SPRINT > d["DISCHARGE_TICKS"]:
+        err(f"From the pit's floor at {farthest[0]} a sprinting player cannot come within reach of a breaker before his "
+            f"charge ends ({farthest[1]:.1f} blocks; DISCHARGE_TICKS {d['DISCHARGE_TICKS']})")
+    for x in range(ft.GANTRY_EXIT["x"][0], ft.GANTRY_EXIT["x"][1] + 1):
+        for y in (ft.STAND, ft.STAND + 1):
+            if not free((x, y, ft.GANTRY_EXIT["z"])) or not ft.in_gantry(x, ft.GANTRY_EXIT["z"]):
+                err(f"The Grey Mist he leaves in the gantry would replace {name((x, y, ft.GANTRY_EXIT['z']))} at "
+                    f"{(x, y, ft.GANTRY_EXIT['z'])}")
+    # His rule: plated, three quarters of a blow is turned; a breaker is answered only by its own fight; the breakers reach
+    # him; the Grounding Strap's hook is registered and its tag holds his arcs.
+    if not re.search(r"if \(!ventsOpen\(\)\) \{\s*dealt = amount \* PLATED;", boss):
+        err("IronDreadnoughtEntity.hurtServer must let only PLATED of a blow through while his vents are shut")
+    if "Pylon pylon = FoundryTrench.breakerAt(origin, pos);" not in boss:
+        err("IronDreadnoughtEntity.breakerUsed must answer only his own trench's breakers")
+    if "return phase == Phase.RED_LINE ? RED_DISCHARGE_EVERY : DISCHARGE_EVERY;" not in boss \
+            or "return phase == Phase.ADVANCE ? 1 : 2;" not in boss:
+        err("IronDreadnoughtEntity: Red Line charges every RED_DISCHARGE_EVERY, and two pylons light from the Torn Plate on")
+    for needed, why in (("Lairs.onPlaced(Lair.FOUNDRY_TRENCH, IronDreadnoughtEntity::summon)", "stand him in the gantry of every trench"),
+                        ("DischargeBreakerBlock.onUsed(JugcraftDreadnought::breakerUsed)", "answer the breakers"),
+                        ("dreadnought.breakerUsed(level, pos, state, player)", "tell him who used which breaker")):
+        if needed not in registry:
+            err(f"JugcraftDreadnought must {why} ({needed})")
+    sparker = sources.get("SparkerEntity", "")
+    if "master.took(player, amount)" not in sparker or "burnOut(level)" not in sparker:
+        err("SparkerEntity: whoever hurts one takes part, and it burns out when he is gone")
+    for cls in ("IronDreadnoughtEntity", "SparkerEntity"):
+        if "GroundingStrap.arc(level," not in sources.get(cls, ""):
+            err(f"{cls}: his arcs must be electric harm (GroundingStrap.arc), which the Grounding Strap halves")
+    strap = sources.get("GroundingStrap", "")
+    if 'Jugcraft.id("electric")' not in strap or f'Jugcraft.id("{dn.ARC}")' not in strap \
+            or "getOffhandItem().is(JugcraftDreadnought.GROUNDING_STRAP)" not in strap:
+        err("GroundingStrap must halve #jugcraft:electric harm for whoever holds it in their offhand")
+    mixin = (JAVA_ROOT / "mixin" / "GroundingStrapMixin.java")
+    mixins = load(RES / "jugcraft.mixins.json") or {}
+    if not mixin.is_file() or "GroundingStrap.scale(" not in mixin.read_text(encoding="utf-8") \
+            or "GroundingStrapMixin" not in mixins.get("mixins", []):
+        err("The Grounding Strap's hook (mixin/GroundingStrapMixin.java) must be written and registered in jugcraft.mixins.json")
+    electric = load(DATA / MOD / "tags" / "damage_type" / "electric.json") or {}
+    if sorted(electric.get("values", [])) != sorted(dn.ELECTRIC):
+        err(f"tags/damage_type/electric.json must hold {dn.ELECTRIC}")
+    if not (DATA / MOD / "damage_type" / f"{dn.ARC}.json").is_file():
+        err(f"damage_type/{dn.ARC}.json is missing")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"death.attack.{MOD}.{dn.ARC}", f"death.attack.{MOD}.{dn.ARC}.player"):
+        if key not in lang:
+            err(f"{key} has no words in en_us.json")
+    client = (CLIENT_JAVA_ROOT / "IronDreadnoughtClient.java").read_text(encoding="utf-8")
+    if "IronDreadnoughtClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register IronDreadnoughtClient")
+    if "lair.dreadnought.JugcraftDreadnought.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftDreadnought")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftDreadnought.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("IronDreadnoughtLoot", "")
+    if f'ADVANCEMENT = "{dn.ADVANCEMENT["key"]}";' not in loot_java:
+        err("IronDreadnoughtLoot's advancement differs from tools/iron_dreadnought.py")
+    for entity in dn.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftDreadnought does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != dn.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {dn.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"IronDreadnoughtClient draws no {entity}")
+    for item in dn.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftDreadnought does not register {item}")
+    # The GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("iron_dreadnought", set()).add(f"animation.iron_dreadnought.{clip}")
+    for entity, body in dn.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in dm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        sheet_w = definition.get("description", {}).get("texture_width", 0)
+        sheet_h = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, dd = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + dd), v + dd + h_)
+                if region[2] > sheet_w or region[3] > sheet_h:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {sheet_w}x{sheet_h} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in dn.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"IronDreadnoughtClient: the {entity}'s glow layer must match tools/iron_dreadnought.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (sheet_w * dm.TEXTURE_SCALE, sheet_h * dm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {sheet_w * dm.TEXTURE_SCALE}x{sheet_h * dm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key his eye's shutter, his vents' flaps or his coils' arcs.
+    owned = {bone: controller for controller, bones in dm.CONTROLLERS.items() for bone in bones}
+    prefixes = {"eye": "eye_", "vents": "vents_", "coils": "coils_"}
+    for clip_name, clip in dm.ANIMATIONS["iron_dreadnought"]()["animations"].items():
+        short = clip_name.split(".")[-1]
+        controller = next((c for c, p in prefixes.items() if short.startswith(p)), "body")
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"iron_dreadnought: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *dm.CONTROLLERS):
+        if f'new AnimationController<IronDreadnoughtEntity>("{controller}"' not in boss:
+            err(f"IronDreadnoughtEntity has no {controller} controller (tools/iron_dreadnought_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/iron_dreadnought table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "iron_dreadnought.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/iron_dreadnought.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"salvaged_coil": dn.SALVAGED_COIL, **{item: dn.TROPHY_CHANCE for item in dn.TROPHIES}, **dn.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/iron_dreadnought.json gives {found_loot}, not tools/iron_dreadnought.py's {expected}")
+    if tuple(arms_variants.trophies("iron_dreadnought")) != tuple(dn.TROPHIES):
+        err(f"tools/iron_dreadnought.py TROPHIES {dn.TROPHIES} are not Arms VII's: {arms_variants.trophies('iron_dreadnought')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "iron_dreadnought.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in dn.TROPHIES]:
+        err(f"loot_table/bosses/iron_dreadnought.json holds {held_items}, not his trophies {dn.TROPHIES}")
+    for table_id in ("entities/iron_dreadnought", "bosses/iron_dreadnought"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"IronDreadnoughtLoot must roll loot_table/{table_id}.json")
+    for trophy in dn.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftDreadnought must find the {trophy} (Arms VII registers it)")
+    for key in dn.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # Salvaged Coil comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:salvaged_coil":
+            err(f"recipe/{path.name} makes Salvaged Coil, which only the Iron Dreadnought gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in dn.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{dn.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{dn.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in dn.MESSAGES:
+        if f'"message.jugcraft.iron_dreadnought.{key}"' not in sent:
+            err(f"tools/iron_dreadnought.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
+
+def check_cydonian_sentinel():
+    """The Cydonian Sentinel (tools/cydonian_sentinel.py, docs/features/cydonian-sentinel.md): every number the Java uses
+    is the table's; its attacks are the table's, and its fight can be played (the Shell Cracks before the Unbound Core
+    before the Red Giant; the Red Giant shortens its cooldowns; a storm's tell and its blowing fit between storms; its
+    sentries rise within their cap; its Hammerfall hurts within the ring it throws back; its lances burn in whole beats;
+    a meteor starts falling within the Starfall's wind-up; every shard reaches its farthest foe, or crosses the crater,
+    within its life); its lances leave from where tools/cydonian_sentinel_models.py puts its core; where its fight looks
+    for the Sanctum's parts (CydonianSanctum.java) is where tools/cydonian_sanctum.py builds them: it waits on the
+    plinth, comes down to open floor with room for it, its sentries rise from the small craters, the Red Mist it leaves
+    opens on open floor in the crater's middle, and every cell of the crater's floor lies within its leash; its rule is
+    fair: from every cell of the crater's floor a sheltered place (rock within LEE upwind) lies within SHELTER_REACH,
+    whichever way the storm blows; its plates open double the core's harm and a strong blow in the lance's wind-up
+    staggers it, and it is unhurt while it wakes, cracks or bursts; every entity is registered, named and drawn; each
+    GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet without
+    overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is animated
+    by two of its controllers; its loot table is the table's and its trophies are Arms VII's; its recipes (none of which
+    makes Cydonian Shards), tags, damage type and advancement are there; the Lowfall Core is held in the offhand and
+    looked at on the server; every message it sends has its words; and nothing of its loads a chunk or leaves its
+    dimension."""
+    import math
+    import arms_variants
+    import cydonian_sanctum as cs
+    import cydonian_sentinel as cn
+    import cydonian_sentinel_models as sm
+    folder = JAVA_ROOT / "lair" / "sentinel"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/sentinel: no Java")
+        return
+    lowfall = {"TICKS": cn.LOWFALL_TICKS, "REFRESH": cn.LOWFALL_REFRESH}
+    for cls, table in (("CydonianSentinelEntity", {**cn.SENTINEL, **cn.LANCE}), ("ShardSentryEntity", cn.SENTRY),
+                       ("RustShardEntity", cn.SHARD), ("QuakeSpikeEntity", {"SINK": cn.SINK}), ("LowfallCore", lowfall)):
+        for name, value in table.items():
+            if not java_number(sources.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/cydonian_sentinel.py's {value}")
+    boss = sources.get("CydonianSentinelEntity", "")
+    for attack, (windup, active, recovery, cooldown, near, far, sentinel, storm, core) in cn.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(sentinel).lower()}, {str(storm).lower()}, {str(core).lower()})")
+        if expected not in boss:
+            err(f"CydonianSentinelEntity.Attack: expected {expected}")
+    winds = ", ".join(f"{side.upper()}({dx}, {dz})" for side, (dx, dz) in cn.WINDS.items())
+    if f"{winds};" not in boss:
+        err(f"CydonianSentinelEntity.Wind: expected {winds} (tools/cydonian_sentinel.py WINDS)")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"CydonianSentinelEntity does not scale as every lair boss does ({call})")
+    s = cn.SENTINEL
+    a = {name: dict(zip(("windup", "active", "recovery", "cooldown", "near", "far"), row)) for name, row in cn.ATTACKS.items()}
+    if not 0.0 < s["GIANT_AT"] < s["UNBOUND_AT"] < s["CRACK_AT"] < 1.0:
+        err("tools/cydonian_sentinel.py: the Shell Cracks, then the Unbound Core, then the Red Giant (0 < GIANT_AT < UNBOUND_AT < CRACK_AT < 1)")
+    if not 0.0 < s["GIANT_COOLDOWN"] < 1.0:
+        err("tools/cydonian_sentinel.py: the Red Giant must make its cooldowns shorter (0 < GIANT_COOLDOWN < 1)")
+    for every in ("STORM_FIRST", "STORM_EVERY", "STORM_EVERY_STORM", "STORM_EVERY_UNBOUND", "STORM_EVERY_GIANT"):
+        if s[every] <= s["STORM_TELL"] + s["STORM_TICKS"]:
+            err(f"tools/cydonian_sentinel.py: a storm's tell and its blowing must fit between storms ({every})")
+    if not s["STORM_EVERY"] >= s["STORM_EVERY_STORM"] >= s["STORM_EVERY_UNBOUND"] >= s["STORM_EVERY_GIANT"]:
+        err("tools/cydonian_sentinel.py: its storms come no less often as the fight goes on")
+    if not 0 < s["STORM_SHARD_AT"] < s["STORM_TICKS"] or s["STORM_TICKS"] < s["STORM_HIT_EVERY"]:
+        err("tools/cydonian_sentinel.py: the storm's shards fly, and it strikes, while it blows")
+    if not 0 < s["SENTRIES_RISE"] <= s["SENTRY_CAP"]:
+        err("tools/cydonian_sentinel.py: no more sentries rise at once than its cap (SENTRIES_RISE <= SENTRY_CAP)")
+    if not s["HAMMER_REACH"] <= s["HAMMER_KNOCK"] or a["HAMMERFALL"]["far"] > s["HAMMER_AHEAD"] + s["HAMMER_REACH"]:
+        err("tools/cydonian_sentinel.py: the Hammerfall hurts within the ring it throws back, and reaches whoever it is used on")
+    for attack in ("CORE_LANCE", "SWEEPING_LANCE"):
+        if a[attack]["active"] % s["LANCE_EVERY"] != 0:
+            err(f"tools/cydonian_sentinel.py: the {attack}'s active ticks must be whole beats (LANCE_EVERY)")
+    if a["CORE_LANCE"]["far"] > s["LANCE_LENGTH"] or a["SWEEPING_LANCE"]["far"] > s["LANCE_LENGTH"]:
+        err("tools/cydonian_sentinel.py: its lances reach whoever they are used on (far <= LANCE_LENGTH)")
+    if a["QUAKE_LINE"]["far"] > s["QUAKE_LENGTH"] or s["QUAKE_STEP"] > 2 * s["QUAKE_WIDTH"] + 0.6:
+        err("tools/cydonian_sentinel.py: the Quake Line reaches whoever it is used on, and its spikes stand close enough to show it")
+    if not 0 < s["METEOR_FALL"] <= a["STARFALL"]["windup"]:
+        err("tools/cydonian_sentinel.py: a meteor starts falling within the Starfall's wind-up (METEOR_FALL)")
+    if not 0 < s["STAGGER_TICKS"] or not 0 < s["STAGGER_DAMAGE"] or a["CORE_LANCE"]["windup"] <= 0:
+        err("tools/cydonian_sentinel.py: the Core Lance's wind-up is the moment to stagger it")
+    for reach, speed, why in ((a["SHARD_VOLLEY"]["far"], "VOLLEY_SPEED", "the Shard Volley's farthest foe"),
+                              (2 * cs.CRATER, "STORM_SPEED", "across the crater"),
+                              (a["SHARD_BURST"]["far"], "BURST_SPEED", "the Shard Burst's farthest foe"),
+                              (cn.SENTRY["RANGE"], "SENTRY_SPEED", "a sentry's farthest foe")):
+        if reach / cn.SHARD[speed] >= cn.SHARD["LIFE"]:
+            err(f"tools/cydonian_sentinel.py: a shard at {speed} must reach {why} within its LIFE")
+    if cn.LOWFALL_REFRESH >= cn.LOWFALL_TICKS:
+        err("tools/cydonian_sentinel.py: the Lowfall Core's Slow Falling must be renewed before it lapses")
+    # Its lances leave from its model's core: in its chest, and unbound.
+    for name, value in (("CORE_UP", sm.CORE_Y / 16), ("CORE_AHEAD", -sm.CORE_FRONT / 16), ("UNBOUND_UP", sm.UNBOUND_CORE_Y / 16)):
+        if cn.LANCE[name] != value:
+            err(f"tools/cydonian_sentinel.py LANCE {name} must be where tools/cydonian_sentinel_models.py puts its core: {value}")
+    # Where its fight looks for the Sanctum's parts is where tools/cydonian_sanctum.py builds them.
+    sanctum = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "CydonianSanctum.java").read_text(encoding="utf-8"))
+    wx, wy, wz, _ = cs.WAIT
+    for name, value in (("WAIT_X", float(wx)), ("WAIT_Y", float(wy)), ("WAIT_Z", float(wz)), ("WOKE_X", float(cn.WOKE[0])),
+                        ("WOKE_Z", float(cn.WOKE[1])), ("RIM_WALL", float(cs.RIM["wall"])), ("STONE_SIZE", cs.STONE_SIZE),
+                        ("STONE_HEIGHT", cs.STONE_HEIGHT), ("CRATER_MIST_WEST", cn.CRATER_MIST["x"][0]),
+                        ("CRATER_MIST_EAST", cn.CRATER_MIST["x"][1]), ("CRATER_MIST_Z", cn.CRATER_MIST["z"])):
+        if not java_number(sanctum, name, value):
+            err(f"CydonianSanctum.{name} is not {value} (tools/cydonian_sanctum.py, tools/cydonian_sentinel.py)")
+    for name, cells in (("STONES", cs.STONES), ("PITS", cs.PITS)):
+        listed = ", ".join(f"{{{x}, {z}}}" for x, z in cells)
+        if f"{name} = {{{listed}}};" not in sanctum:
+            err(f"CydonianSanctum.{name} are not tools/cydonian_sanctum.py's: {{{listed}}}")
+    if not re.search(r"craterMistCells\(BlockPos origin\) \{ List<BlockPos> out = new ArrayList<>\(\); "
+                     r"for \(int y = STAND; y < STAND \+ 3; y\+\+\)", sanctum):
+        err("CydonianSanctum.craterMistCells: the Red Mist it leaves is three high, from the floor (STAND)")
+    blocks = cs.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    free = lambda pos: name(pos) in (None, "minecraft:light", "minecraft:cave_air", "minecraft:air")
+    solid = lambda pos: not free(pos)
+    plinth = (math.floor(wx), int(wy), math.floor(wz))
+    if not cs.in_box(cs.PLINTH, plinth[0], plinth[2]) or not solid((plinth[0], plinth[1] - 1, plinth[2])) \
+            or not all(free((x, plinth[1] + dy, z)) for x in range(plinth[0] - 1, plinth[0] + 2)
+                       for z in range(plinth[2] - 1, plinth[2] + 2) for dy in range(4)):
+        err(f"Where the Cydonian Sentinel waits, {plinth}, is not on its plinth with room for it, four high")
+    wokex, wokez = (math.floor(v) for v in cn.WOKE)
+    if not cs.in_crater(wokex, wokez) or cs.in_pit(wokex, wokez) or any(cs.in_stone(x, z) for x in range(wokex - 1, wokex + 2)
+                                                                          for z in range(wokez - 1, wokez + 2)) \
+            or not all(solid((x, cs.PAVE, z)) and all(free((x, cs.STAND + dy, z)) for dy in range(4))
+                       for x in range(wokex - 1, wokex + 2) for z in range(wokez - 1, wokez + 2)):
+        err(f"Where the Cydonian Sentinel comes down, ({wokex}, {wokez}), is not open crater floor with room for it, four high")
+    for px, pz in cs.PITS:
+        if not cs.in_crater(px, pz) or not cs.in_pit(px, pz) or not solid((px, cs.PAVE - 1, pz)) \
+                or not all(free((px, cs.STAND + dy, pz)) for dy in range(4)):
+            err(f"A sentry cannot rise from the small crater at ({px}, {pz}): not a pit in the crater with room over it")
+    for x in range(cn.CRATER_MIST["x"][0], cn.CRATER_MIST["x"][1] + 1):
+        z = cn.CRATER_MIST["z"]
+        if not cs.in_crater(x, z) or not solid((x, cs.PAVE, z)) or not all(free((x, cs.STAND + dy, z)) for dy in range(3)):
+            err(f"The Red Mist it leaves at ({x}, {z}) would not stand on open crater floor")
+    floor = [(x, z) for x in range(cs.SIZE[0]) for z in range(cs.SIZE[2]) if cs.in_crater(x, z) and not cs.in_stone(x, z)]
+    for x, z in floor:
+        if cs.distance(x, z) > s["LEASH"]:
+            err(f"The crater's floor at ({x}, {z}) lies beyond its leash")
+    # Its rule is fair: whichever way the storm blows, a sheltered place is near. Sheltered, as the Java decides: rock
+    # stands within LEE upwind of the chest (a block over where they stand).
+    def stand(x, z):
+        y = cs.STAND
+        while solid((x, y, z)):
+            y += 1
+        while not solid((x, y - 1, z)):
+            y -= 1
+        return y
+
+    def sheltered(x, z, dx, dz):
+        y = stand(x, z) + 1
+        steps = int(s["LEE"] * 20)
+        return any(solid((math.floor(x + 0.5 - dx * i / 20), y, math.floor(z + 0.5 - dz * i / 20))) for i in range(steps + 1))
+
+    for side, (dx, dz) in cn.WINDS.items():
+        lee = [(x, z) for x, z in floor if sheltered(x, z, dx, dz)]
+        for x, z in floor:
+            if not lee or min(math.hypot(x - lx, z - lz) for lx, lz in lee) > s["SHELTER_REACH"]:
+                err(f"From ({x}, {z}) on the crater's floor no shelter from a storm from the {side} lies within SHELTER_REACH")
+                break
+    if not re.search(r"new ClipContext\(chest, upwind, ClipContext\.Block\.COLLIDER", boss) \
+            or "chest.subtract(from.blows().scale(LEE))" not in boss:
+        err("CydonianSentinelEntity.sheltered must look LEE blocks upwind for rock, as the audit does")
+    # Its weak point and its pauses.
+    if "dealt = amount * CORE_MULTIPLIER;" not in boss \
+            or "attack == Attack.CORE_LANCE && attackTicks < Attack.CORE_LANCE.windup && amount >= STAGGER_DAMAGE" not in boss:
+        err("CydonianSentinelEntity.hurtServer: its open plates double the core's harm, and a strong blow in the lance's wind-up staggers it")
+    if not re.search(r"if \(phase == Phase\.WAKING \|\| phase == Phase\.CRACKING \|\| phase == Phase\.BURSTING\) \{\s*return false;", boss):
+        err("CydonianSentinelEntity.hurtServer: it is unhurt while it wakes, cracks or bursts")
+    if not re.search(r"private void breakOff\(\) \{\s*if \(attack == Attack\.CORE_LANCE\) \{\s*shut\(\);", boss) \
+            or len(re.findall(r"breakOff\(\);", boss)) < 4:
+        err("CydonianSentinelEntity: an attack broken off (its foe gone, drawn back, its storm, another begun) must shut a "
+            "Core Lance's plates (breakOff)")
+    if "case RED_STORM, BURSTING -> STORM_EVERY_STORM;" not in boss:
+        err("CydonianSentinelEntity.stormEvery must use the table's STORM_EVERY_* for each phase")
+    registry = sources.get("JugcraftSentinel", "")
+    for needed, why in (("Lairs.onPlaced(Lair.CYDONIAN_SANCTUM, CydonianSentinelEntity::summon)", "set it on the plinth of every Sanctum"),
+                        ("LowfallCore.register();", "look at the Lowfall Core")):
+        if needed not in registry:
+            err(f"JugcraftSentinel must {why} ({needed})")
+    sentry = sources.get("ShardSentryEntity", "")
+    if "master.took(player, amount)" not in sentry or "crumble(level)" not in sentry:
+        err("ShardSentryEntity: whoever hurts one takes part, and it crumbles when the Sentinel is gone")
+    core = sources.get("LowfallCore", "")
+    if "getOffhandItem().is(JugcraftSentinel.LOWFALL_CORE)" not in core or "ServerTickEvents.END_SERVER_TICK" not in core \
+            or "player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, TICKS," not in core:
+        err("LowfallCore must look at each player's offhand on the server's tick, and keep them falling slowly")
+    damage = load(DATA / MOD / "damage_type" / "red_storm.json") or {}
+    if any(damage.get(key) != cn.DAMAGE_TYPE[key] for key in ("message_id", "exhaustion", "scaling")):
+        err(f"damage_type/red_storm.json is not tools/cydonian_sentinel.py's DAMAGE_TYPE: {damage}")
+    if 'Jugcraft.id("red_storm")' not in boss:
+        err("CydonianSentinelEntity's storm must deal jugcraft:red_storm")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for key in (f"death.attack.{cn.DAMAGE_TYPE['message_id']}", f"death.attack.{cn.DAMAGE_TYPE['message_id']}.player"):
+        if key not in lang:
+            err(f"The Red Storm's death message {key} has no words")
+    for side in cn.WINDS:
+        if lang.get(f"message.{MOD}.cydonian_sentinel.wind.{side}") != cn.WIND_NAMES.get(side):
+            err(f"The storm's side {side} has no words (message.{MOD}.cydonian_sentinel.wind.{side})")
+    client = (CLIENT_JAVA_ROOT / "CydonianSentinelClient.java").read_text(encoding="utf-8")
+    if "CydonianSentinelClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register CydonianSentinelClient")
+    if "lair.sentinel.JugcraftSentinel.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftSentinel")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftSentinel.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    loot_java = sources.get("SentinelLoot", "")
+    if f'ADVANCEMENT = "{cn.ADVANCEMENT["key"]}";' not in loot_java:
+        err("SentinelLoot's advancement differs from tools/cydonian_sentinel.py")
+    for entity in cn.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftSentinel does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != cn.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {cn.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"CydonianSentinelClient draws no {entity}")
+    for item in cn.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftSentinel does not register {item}")
+    # The GeckoLib bodies.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("cydonian_sentinel", set()).add(f"animation.cydonian_sentinel.{clip}")
+    for entity, body in cn.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in sm.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        width = definition.get("description", {}).get("texture_width", 0)
+        height = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, d = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + d), v + d + h_)
+                if region[2] > width or region[3] > height:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, first in enumerate(regions):
+            for second in regions[i + 1:]:
+                if first[0] < second[2] and second[0] < first[2] and first[1] < second[3] and second[1] < first[3]:
+                    err(f"{entity}.geo.json: UV regions {first} and {second} overlap")
+        glows = entity in cn.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"CydonianSentinelClient: the {entity}'s glow layer must match tools/cydonian_sentinel.py GLOWING")
+        if not glows and (ASSETS / "textures" / "entity" / f"{entity}_glowmask.png").is_file():
+            err(f"textures/entity/{entity}_glowmask.png: the {entity} has no glow layer, so no glowmask")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (width * sm.TEXTURE_SCALE, height * sm.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {width * sm.TEXTURE_SCALE}x{height * sm.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # Its controllers own their bones: the body's clips never key its core's light, its plates or its form.
+    owned = {bone: controller for controller, bones in sm.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in sm.ANIMATIONS["cydonian_sentinel"]()["animations"].items():
+        controller = sm.controller_of(clip_name)
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"cydonian_sentinel: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *sm.CONTROLLERS):
+        if f'new AnimationController<CydonianSentinelEntity>("{controller}"' not in boss:
+            err(f"CydonianSentinelEntity has no {controller} controller (tools/cydonian_sentinel_models.py CONTROLLERS)")
+    # Its loot, and its trophies: Arms VII's, as its bosses/cydonian_sentinel table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "cydonian_sentinel.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/cydonian_sentinel.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            item = entry.get("name", "").split(":")[-1]
+            chance = pool.get("condition", {}).get("chance")
+            count = entry.get("modifier", {}).get("count", {})
+            found_loot[item] = chance if chance is not None else (count.get("min"), count.get("max"))
+    expected = {"cydonian_shard": cn.SHARDS, **{item: cn.TROPHY_CHANCE for item in cn.TROPHIES}, **cn.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/cydonian_sentinel.json gives {found_loot}, not tools/cydonian_sentinel.py's {expected}")
+    if tuple(arms_variants.trophies("cydonian_sentinel")) != tuple(cn.TROPHIES):
+        err(f"tools/cydonian_sentinel.py TROPHIES {cn.TROPHIES} are not Arms VII's: {arms_variants.trophies('cydonian_sentinel')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "cydonian_sentinel.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in cn.TROPHIES]:
+        err(f"loot_table/bosses/cydonian_sentinel.json holds {held_items}, not its trophies {cn.TROPHIES}")
+    for table_id in ("entities/cydonian_sentinel", "bosses/cydonian_sentinel"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"SentinelLoot must roll loot_table/{table_id}.json")
+    for trophy in cn.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftSentinel must find the {trophy} (Arms VII registers it)")
+    for key in cn.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    for key in cn.CRUSHING:
+        crushing = load(DATA / MOD / "recipe" / "crushing" / f"{key}.json") or {}
+        if crushing.get("result", {}).get("id") != cn.CRUSHING[key]["result"]:
+            err(f"recipe/crushing/{key}.json must crush it into {cn.CRUSHING[key]['result']}")
+    # Cydonian Shards come only from it: no recipe makes them, so nothing turns back into them.
+    for path in (DATA / MOD / "recipe").rglob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:cydonian_shard":
+            err(f"recipe/{path.relative_to(DATA / MOD / 'recipe')} makes Cydonian Shards, which only the Cydonian Sentinel gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in cn.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{cn.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{cn.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in cn.MESSAGES:
+        if f'"message.jugcraft.cydonian_sentinel.{key}"' not in sent:
+            err(f"tools/cydonian_sentinel.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
+
+def check_alpha_werewolf():
+    """The Alpha Werewolf (tools/alpha_werewolf.py, docs/features/alpha-werewolf.md): every number the Java uses is the
+    table's; his attacks are the table's, and his rule can be played (the Pack Gathers before the Last Hunt; his hide
+    turns some of a blow and a flush opens it; his hunts come sooner as he weakens, and each ends before the next is due;
+    the shadow spreads before he springs; in the Last Hunt he slips and arrives before the shadow spreads; the Tree
+    Leap's wind-up is its time in the trees and its shadow; each attack's reach is its range; his trail outlasts his
+    ambush); his clips last as long as the Java waits on them; where his fight looks for the ring's parts
+    (MoonlitRing.java) is where tools/moonlit_ring.py builds them: he waits on the stone's top with room for his body,
+    leaps down onto open floor, hides in each bell clearing's middle, staggers out onto open floor within his leash, his
+    pack lopes out of the trees onto open path, he lurks in the canopy, he bounds over the stone at its steps' heights,
+    and the Grey Mist he leaves opens in open cells on the stone's top; every floor he runs over in the clearing, its
+    spokes and its bell clearings is one his claws tear (so his trail always shows); a sprinting player anywhere in the
+    clearing comes within reach of any bell before he springs, and in the Last Hunt one at the stone's foot who sets off
+    as he slips comes within reach of any bell before he springs; his hide lets half of a plain blow through, silver
+    and a flush more; a bell is answered only by the fight it belongs to; every entity is registered, named and drawn;
+    his GeckoLib body has its model, clips (every clip the Java names) and sheet, its box-UV regions inside the sheet
+    without overlapping, its sheet and glowmask TEXTURE_SCALE times the size the model declares and cut out; no bone is
+    animated by both his controllers; his loot table is the table's and his trophies are Arms VII's; his recipe (and
+    none that makes the Alpha Pelt), tags and advancement are there; every message he sends has its words; and nothing
+    of his loads a chunk or leaves its dimension."""
+    import heapq
+    import math
+    import arms_variants
+    import alpha_werewolf as aw
+    import alpha_werewolf_models as am
+    import moonlit_ring as mr
+    import lairs as la
+    folder = JAVA_ROOT / "lair" / "alpha"
+    sources = {path.stem: path.read_text(encoding="utf-8") for path in folder.glob("*.java")}
+    if not sources:
+        err("lair/alpha: no Java")
+        return
+    raked_java = (JAVA_ROOT / "lair" / "RakedTurfBlock.java").read_text(encoding="utf-8")
+    sources_all = {**sources, "RakedTurfBlock": raked_java}
+    for cls, table in (("AlphaWerewolfEntity", aw.ALPHA_WEREWOLF), ("AlphaWerewolfEntity", {"PACK_RADIUS": aw.PACK_RADIUS}),
+                       ("PackmateEntity", aw.PACKMATE), ("RakedTurfBlock", aw.RAKED), ("JugcraftAlpha", aw.CHARM)):
+        for name, value in table.items():
+            if not java_number(sources_all.get(cls, ""), name, value):
+                err(f"{cls}.{name} is not tools/alpha_werewolf.py's {value}")
+    boss = sources.get("AlphaWerewolfEntity", "")
+    angles = "PACK_ANGLES = {" + ", ".join(str(float(a)) for a in aw.PACK_ANGLES) + "};"
+    if angles not in boss:
+        err(f"AlphaWerewolfEntity.PACK_ANGLES is not tools/alpha_werewolf.py's: expected {angles}")
+    turfs = "new Block[] {" + ", ".join("Blocks." + t.split(":")[1].upper() for t in aw.TURFS) + "}"
+    if turfs not in raked_java or f'IntegerProperty.create("turf", 0, {len(aw.TURFS) - 1})' not in raked_java:
+        err(f"RakedTurfBlock's floors are not tools/alpha_werewolf.py TURFS, in order: expected {turfs}")
+    for attack, (windup, active, recovery, cooldown, near, far, chase, fury) in aw.ATTACKS.items():
+        expected = (f"{attack}({windup}, {active}, {recovery}, {cooldown}, {float(near)}, {float(far)}, "
+                    f"{str(chase).lower()}, {str(fury).lower()})")
+        if expected not in boss:
+            err(f"AlphaWerewolfEntity.Attack: expected {expected}")
+    for call in ("LairBosses.damage(base)", "LairBosses.partyScale(players, PARTY_STEP, PARTY_MAX)"):
+        if call not in boss:
+            err(f"AlphaWerewolfEntity does not scale as every lair boss does ({call})")
+    d = aw.ALPHA_WEREWOLF
+    if not 0.0 < d["LAST_AT"] < d["GATHER_AT"] < 1.0:
+        err("tools/alpha_werewolf.py: the Last Hunt (LAST_AT) must come after the Pack Gathers (GATHER_AT)")
+    if not 0.0 < d["HIDE"] < 1.0 or d["FLUSHED_SILVER"] <= 1.0:
+        err("tools/alpha_werewolf.py: his hide must let some of a blow through and turn some, and a flush must let silver bite deeper")
+    hunt = d["MARK_TICKS"] + d["RUN_TICKS"] + d["AMBUSH_TICKS"]
+    if not hunt < d["LAST_HUNT_EVERY"] < d["FURY_HUNT_EVERY"] < d["HUNT_EVERY"]:
+        err("tools/alpha_werewolf.py: his hunts must come sooner as he weakens, and each must end before the next is due "
+            f"(MARK_TICKS + RUN_TICKS + AMBUSH_TICKS {hunt} < LAST_HUNT_EVERY < FURY_HUNT_EVERY < HUNT_EVERY)")
+    if not 0 < d["SPRING_TICKS"] < d["SHADOW_TICKS"] < d["AMBUSH_TICKS"]:
+        err("tools/alpha_werewolf.py: the shadow must spread before he springs (SPRING_TICKS < SHADOW_TICKS < AMBUSH_TICKS)")
+    if not 0 < d["SWITCH_AT"] and d["SWITCH_AT"] + d["RUN_TICKS"] < d["AMBUSH_TICKS"] - d["SHADOW_TICKS"]:
+        err("tools/alpha_werewolf.py: in the Last Hunt he must reach his second clearing before the shadow spreads "
+            "(SWITCH_AT + RUN_TICKS < AMBUSH_TICKS - SHADOW_TICKS)")
+    if not 0 < d["STAGGER_TICKS"] < d["FLUSHED_TICKS"] or not 0 < d["COWER_TICKS"] <= d["FLUSHED_TICKS"]:
+        err("tools/alpha_werewolf.py: a flush must outlast his stagger, and his pack must cower no longer than it")
+    leap = aw.ATTACKS["TREE_LEAP"]
+    if leap[0] != d["TREE_TICKS"] + d["SHADOW_TICKS"] or d["SPRING_TICKS"] > d["SHADOW_TICKS"]:
+        err("tools/alpha_werewolf.py: the Tree Leap's wind-up must be his time in the trees and its shadow "
+            "(TREE_LEAP windup = TREE_TICKS + SHADOW_TICKS), and he must drop within the shadow's time")
+    if aw.ATTACKS["CLAW_RAKE"][1] <= d["RAKE_GAP"]:
+        err("tools/alpha_werewolf.py: both rakes of the Claw Rake must fall in its active ticks (RAKE_GAP < active)")
+    for attack, reach in (("CLAW_RAKE", d["RAKE_REACH"]), ("POUNCE", d["POUNCE_RANGE"]), ("RENDING_HOWL", d["HOWL_REACH"]),
+                          ("HAMSTRING_BITE", d["BITE_REACH"])):
+        if aw.ATTACKS[attack][5] != reach:
+            err(f"tools/alpha_werewolf.py: he must use {attack} only on a foe within its reach ({reach})")
+    if len(aw.PACK_ANGLES) != d["PACK_SIZE"]:
+        err("tools/alpha_werewolf.py: PACK_ANGLES must give each of his PACK_SIZE Packmates a place")
+    if aw.RAKED["KNIT_TICKS"] < d["RUN_TICKS"] + d["AMBUSH_TICKS"]:
+        err("tools/alpha_werewolf.py: his trail must last as long as his run and his ambush (KNIT_TICKS)")
+    clips = am.alpha_werewolf_animations()["animations"]
+    for clip, ticks in (("wake", d["WAKE_TICKS"]), ("gather", d["GATHER_TICKS"]), ("mark", d["MARK_TICKS"]),
+                        ("rake_windup", aw.ATTACKS["CLAW_RAKE"][0]), ("pounce_windup", aw.ATTACKS["POUNCE"][0]),
+                        ("howl_windup", aw.ATTACKS["RENDING_HOWL"][0]), ("bite_windup", aw.ATTACKS["HAMSTRING_BITE"][0])):
+        length = clips.get(f"animation.alpha_werewolf.{clip}", {}).get("animation_length", 0)
+        if round(length * 20) != ticks:
+            err(f"tools/alpha_werewolf_models.py: his {clip} clip ({length} s) must last {ticks} ticks, as the Java waits on it")
+
+    # Where his fight looks for the ring's parts is where tools/moonlit_ring.py builds them.
+    ring_java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "MoonlitRing.java").read_text(encoding="utf-8"))
+    for jname, value in (("STONE_CORE", mr.STONE[0][0]), ("STONE_STEP", mr.STONE[1][0]), ("STONE_FOOT", mr.STONE[2][0]),
+                         ("STONE_EXIT_WEST", mr.STONE_EXIT["x"][0]), ("STONE_EXIT_EAST", mr.STONE_EXIT["x"][1]),
+                         ("STONE_EXIT_Y", mr.STONE_EXIT["y"]), ("STONE_EXIT_Z", mr.STONE_EXIT["z"])):
+        if not java_number(ring_java, jname, value):
+            err(f"MoonlitRing.{jname} is not tools/moonlit_ring.py's {value}")
+    if [h for _, h in mr.STONE] != [3, 2, 1] or "return from <= STONE_CORE ? 3 : from <= STONE_STEP ? 2 : from <= STONE_FOOT ? 1 : 0;" not in ring_java:
+        err("MoonlitRing.stoneHeight must step the Howling Stone as tools/moonlit_ring.py STONE does")
+    blocks = mr.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:fern", "jugcraft:lair_exit", "jugcraft:werewolf_rug"}
+    free = lambda pos: name(pos) in passable
+    solid = lambda pos: not free(pos) and name(pos) not in ("minecraft:moss_carpet",)
+    registry = sources.get("JugcraftAlpha", "")
+    size = re.search(r'entity\("alpha_werewolf".*?sized\(([\d.]+)F, ([\d.]+)F\)', registry, re.S)
+    width, height = (float(size.group(1)), float(size.group(2))) if size else (0.0, 0.0)
+    if not size:
+        err("JugcraftAlpha: no box for the Alpha Werewolf (sized(...)), which the audit measures his room by")
+    tall = math.ceil(height)
+
+    def room(x, z, floor_y, wide=None, high=None):
+        """Whether a box `wide` across and `high` tall (his, by default) fits standing at (x, z) on the floor at floor_y."""
+        w = width if wide is None else wide
+        t = tall if high is None else math.ceil(high)
+        for bx in range(math.floor(x - w / 2), math.floor(x + w / 2 - 1.0E-6) + 1):
+            for bz in range(math.floor(z - w / 2), math.floor(z + w / 2 - 1.0E-6) + 1):
+                if not solid((bx, floor_y - 1, bz)) or not all(free((bx, floor_y + dy, bz)) for dy in range(t)):
+                    return False
+        return True
+    wx, wy, wz, _ = mr.WAIT
+    if not room(wx, wz, wy):
+        err(f"Where the Alpha waits on the stone, ({wx}, {wy}, {wz}), has no room for him")
+    cx, cz = mr.CENTRE
+    for x, z in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+        down = (cx + x * d["DOWN_AT"], cz + z * d["DOWN_AT"])
+        if not room(*down, mr.STAND):
+            err(f"Where he leaps down off the stone, {down}, is not open floor with room for him")
+    for bell in la.BELL_NAMES:
+        gx, gz = mr.glade_middle(bell)
+        if not room(gx, gz, mr.STAND):
+            err(f"The middle of the {bell} bell's clearing, where he hides, has no room for him")
+        way = mr.BELLS[bell]["way"]
+        out = (cx + way[0] * d["FLUSHED_TO"], cz + way[1] * d["FLUSHED_TO"])
+        if not room(*out, mr.STAND) or not mr.in_ring(math.floor(out[0]), math.floor(out[1])) or d["FLUSHED_TO"] > d["LEASH"]:
+            err(f"Where he staggers out of the {bell} bell's clearing, {out}, is not open floor in the clearing within his leash")
+    pack_wide, pack_high = 0.9 * aw.PACKMATE["SCALE"], 2.4 * aw.PACKMATE["SCALE"]
+    if "sized(0.9F, 2.4F)" not in registry:
+        err("JugcraftAlpha: a Packmate's box must be a werewolf's (0.9 by 2.4), as the audit measures its room")
+    for angle in aw.PACK_ANGLES:
+        rad = math.radians(angle)
+        spot = (cx + math.sin(rad) * aw.PACK_RADIUS, cz - math.cos(rad) * aw.PACK_RADIUS)
+        if not room(*spot, mr.STAND, pack_wide, pack_high) or not mr.PATH[0] - 0.5 <= aw.PACK_RADIUS <= mr.PATH[1] + 0.5:
+            err(f"Where a Packmate lopes out of the trees, {spot}, is not open path with room for it")
+    if not (mr.CANOPY_LOW <= mr.STAND + d["TREE_UP"] <= mr.CANOPY_HIGH and mr.CANOPY_INNER + mr.CANOPY_RAG < d["TREE_AT"]):
+        err("tools/alpha_werewolf.py: where he lurks in the Tree Leap (TREE_AT, TREE_UP) must be in the canopy")
+    for (x, y, z) in mr.stone_exit_cells():
+        bottom = y == mr.STONE_EXIT["y"]
+        if not free((x, y, z)) or bottom and (not solid((x, y - 1, z)) or mr.stone_height(x, z) != y - mr.STAND):
+            err(f"The Grey Mist he leaves on the stone would not stand on its top in the open at {(x, y, z)}")
+    # Every floor he runs over is one his claws tear, so his trail always shows.
+    tearable = set(aw.TURFS)
+    for x in range(mr.SIZE[0]):
+        for z in range(mr.SIZE[2]):
+            if (mr.in_ring(x, z) or mr.in_glade(x, z)) and free((x, mr.STAND, z)) and name((x, mr.SOIL, z)) not in tearable \
+                    and mr.stone_height(x, z) == 0:
+                err(f"His claws would not tear the floor at {(x, mr.SOIL, z)} ({name((x, mr.SOIL, z))}): his trail would not show there")
+                break
+    # A sprinting player reaches a bell in time: from anywhere in the clearing before he springs, and in the Last Hunt
+    # from the stone's foot, setting off as he slips. The walk is over open floor cells, never cutting a corner.
+    floors = tearable | {"minecraft:dirt"}
+    cells = {(x, z) for x in range(mr.SIZE[0]) for z in range(mr.SIZE[2])
+             if math.hypot(x + 0.5 - cx, z + 0.5 - cz) <= mr.GLADE_AT + mr.GLADE_RADIUS + 2 and not mr.in_camp(x, z)
+             and name((x, mr.SOIL, z)) in floors and free((x, mr.STAND, z)) and free((x, mr.STAND + 1, z))}
+    ring = [c for c in cells if mr.in_ring(*c)]
+    foot = [c for c in ring if math.hypot(c[0] + 0.5 - cx, c[1] + 0.5 - cz) <= mr.STONE[-1][0] + 2.5]
+    if not ring or not foot:
+        err("The audit found no open floor in the clearing to walk")
+    for bell, (bx, by, bz) in mr.bell_cells().items():
+        def near(c):
+            return math.dist((c[0] + 0.5, mr.STAND + 1.62, c[1] + 0.5), (bx + 0.5, by + 0.5, bz + 0.5)) <= aw.REACH
+        dist = {c: 0.0 for c in cells if near(c)}
+        queue = [(0.0, c) for c in dist]
+        while queue:
+            dd, (x, z) = heapq.heappop(queue)
+            if dd > dist[(x, z)]:
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in cells or (dx and dz and ((x + dx, z) not in cells or (x, z + dz) not in cells)):
+                    continue
+                nd = dd + (math.sqrt(2.0) if dx and dz else 1.0)
+                if nd < dist.get(n, math.inf):
+                    dist[n] = nd
+                    heapq.heappush(queue, (nd, n))
+        far = max(ring, key=lambda c: dist.get(c, math.inf)) if ring else (0, 0)
+        if dist.get(far, math.inf) / aw.SPRINT > d["AMBUSH_TICKS"] - d["SPRING_TICKS"]:
+            err(f"From the clearing at {far} a sprinting player cannot come within reach of the {bell} bell before he springs "
+                f"({dist.get(far, math.inf):.1f} blocks)")
+        far = max(foot, key=lambda c: dist.get(c, math.inf)) if foot else (0, 0)
+        if dist.get(far, math.inf) / aw.SPRINT > d["AMBUSH_TICKS"] - d["SPRING_TICKS"] - d["SWITCH_AT"]:
+            err(f"In the Last Hunt, from the stone's foot at {far} a sprinting player setting off as he slips cannot come "
+                f"within reach of the {bell} bell before he springs ({dist.get(far, math.inf):.1f} blocks)")
+
+    # His rule: his hide, the flush, and the bells.
+    if not re.search(r"\} else \{\s*dealt = amount \* HIDE;", boss) or "dealt = silver ? amount * FLUSHED_SILVER : amount;" not in boss:
+        err("AlphaWerewolfEntity.hurtServer must let HIDE of a plain blow through his hide, and a flush let it all through "
+            "(silver FLUSHED_SILVER times)")
+    if "Bell bell = MoonlitRing.bellAt(origin, pos);" not in boss or "if (hunt == Hunt.HIDE && glade == bell) {" not in boss:
+        err("AlphaWerewolfEntity.bellRung must answer only his own ring's bells, and flush him only from the clearing he hides in")
+    if "if (phase == Phase.WAKING || phase == Phase.GATHERING || hidden()) {" not in boss:
+        err("AlphaWerewolfEntity.hurtServer: waking, gathering his pack and hidden, no blow may reach him")
+    for needed, why in (("Lairs.onPlaced(Lair.MOONLIT_RING, AlphaWerewolfEntity::summon)", "crouch him on the stone of every ring"),
+                        ("WardenBellBlock.onRung(JugcraftAlpha::bellRung)", "answer the bells"),
+                        ("alpha.bellRung(level, pos, player)", "tell him who rang which bell"),
+                        ("getOffhandItem().is(PACKFINDER_CHARM)", "make the Packfinder Charm work from the offhand")):
+        if needed not in registry:
+            err(f"JugcraftAlpha must {why} ({needed})")
+    packmate = sources.get("PackmateEntity", "")
+    if "master.took(player, dealt)" not in packmate or "meltAway(level)" not in packmate or "amount * SILVER" not in packmate:
+        err("PackmateEntity: whoever hurts one takes part, silver bites deeper, and it melts away when he is gone")
+    if "level.scheduleTick(pos, this, KNIT_TICKS)" not in raked_java:
+        err("RakedTurfBlock must knit back by itself (a tick scheduled as it is torn)")
+    if 'fixture("raked_turf", RakedTurfBlock::new' not in (JAVA_ROOT / "lair" / "JugcraftLairs.java").read_text(encoding="utf-8"):
+        err("JugcraftLairs must register raked turf as one of the ring's fixtures")
+    client = (CLIENT_JAVA_ROOT / "AlphaWerewolfClient.java").read_text(encoding="utf-8")
+    if "AlphaWerewolfClient.register();" not in (CLIENT_JAVA_ROOT / "JugcraftClient.java").read_text(encoding="utf-8"):
+        err("JugcraftClient must register AlphaWerewolfClient")
+    if "lair.alpha.JugcraftAlpha.register();" not in (JAVA_ROOT / "Jugcraft.java").read_text(encoding="utf-8"):
+        err("Jugcraft must register JugcraftAlpha")
+
+    def drawn(entity):
+        start = client.find(f"register(JugcraftAlpha.{entity.upper()},")
+        end = client.find("EntityRendererRegistry.register(", start + 1)
+        return client[start:end if end >= 0 else len(client)] if start >= 0 else ""
+    if "new WerewolfModel(context.bakeLayer(WerewolfModel.LAYER))" not in client:
+        err("AlphaWerewolfClient must draw his Packmates as the werewolves are (WerewolfModel)")
+    loot_java = sources.get("AlphaWerewolfLoot", "")
+    if f'ADVANCEMENT = "{aw.ADVANCEMENT["key"]}";' not in loot_java:
+        err("AlphaWerewolfLoot's advancement differs from tools/alpha_werewolf.py")
+    lang = load(ASSETS / "lang" / "en_us.json") or {}
+    for entity in aw.ENTITIES:
+        if f'entity("{entity}"' not in registry:
+            err(f"JugcraftAlpha does not register the {entity} entity")
+        if lang.get(f"entity.{MOD}.{entity}") != aw.ENTITIES[entity]:
+            err(f"The {entity} entity is not named {aw.ENTITIES[entity]!r}")
+        if not drawn(entity):
+            err(f"AlphaWerewolfClient draws no {entity}")
+    for item in aw.items():
+        if f'"{item}"' not in registry:
+            err(f"JugcraftAlpha does not register {item}")
+    # His GeckoLib body.
+    gecko = ASSETS / "geckolib"
+    clips_named = {}
+    for text in sources.values():
+        for clip in re.findall(r'"(animation\.[a-z_]+\.[a-z_]+)"', text):
+            clips_named.setdefault(clip.split(".")[1], set()).add(clip)
+    for clip in re.findall(r'prefix \+ "([a-z_]+)"', boss):
+        clips_named.setdefault("alpha_werewolf", set()).add(f"animation.alpha_werewolf.{clip}")
+    for entity, body in aw.GECKO.items():
+        geo = load(gecko / "models" / "entity" / f"{entity}.geo.json") or {}
+        animations = load(gecko / "animations" / "entity" / f"{entity}.animation.json") or {}
+        definition = (geo.get("minecraft:geometry") or [{}])[0]
+        if not definition:
+            err(f"{entity}: no GeckoLib model")
+            continue
+        clips = animations.get("animations", {})
+        for clip in clips_named.get(body, set()):
+            if clip not in clips:
+                err(f"{entity}: the Java plays {clip}, which is not in {entity}.animation.json")
+        for clip in am.CLIPS[body]:
+            if f"animation.{body}.{clip}" not in clips:
+                err(f"{entity}.animation.json: missing animation.{body}.{clip}")
+        sheet_w = definition.get("description", {}).get("texture_width", 0)
+        sheet_h = definition.get("description", {}).get("texture_height", 0)
+        bones = {bone["name"] for bone in definition.get("bones", [])}
+        for clip in clips.values():
+            for bone in clip.get("bones", {}):
+                if bone not in bones:
+                    err(f"{entity}.animation.json: animates unknown bone {bone}")
+        regions = set()
+        for bone in definition.get("bones", []):
+            for cube in bone.get("cubes", []):
+                w, h_, dd = cube["size"]
+                u, v = cube["uv"]
+                region = (u, v, u + 2 * (w + dd), v + dd + h_)
+                if region[2] > sheet_w or region[3] > sheet_h:
+                    err(f"{entity}.geo.json: a cube in {bone['name']} maps outside the {sheet_w}x{sheet_h} sheet")
+                regions.add(region)
+        regions = sorted(regions)
+        for i, a in enumerate(regions):
+            for b in regions[i + 1:]:
+                if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+                    err(f"{entity}.geo.json: UV regions {a} and {b} overlap")
+        glows = entity in aw.GLOWING
+        part = drawn(entity)
+        if not part or ("AutoGlowingGeoLayer" in part) != glows:
+            err(f"AlphaWerewolfClient: the {entity}'s glow layer must match tools/alpha_werewolf.py GLOWING")
+        for name_ in (entity, f"{entity}_glowmask") if glows else (entity,):
+            sheet = ASSETS / "textures" / "entity" / f"{name_}.png"
+            if not sheet.is_file():
+                err(f"{entity}: missing textures/entity/{name_}.png")
+                continue
+            with Image.open(sheet) as image:
+                if image.size != (sheet_w * am.TEXTURE_SCALE, sheet_h * am.TEXTURE_SCALE):
+                    err(f"textures/entity/{name_}.png must be {sheet_w * am.TEXTURE_SCALE}x{sheet_h * am.TEXTURE_SCALE}")
+                if any(image.convert("RGBA").getchannel("A").histogram()[1:255]):
+                    err(f"textures/entity/{name_}.png has half-transparent pixels (it is drawn cut out)")
+    # His controllers own their bones: the body's clips never key his eyes.
+    owned = {bone: controller for controller, bones in am.CONTROLLERS.items() for bone in bones}
+    for clip_name, clip in clips.items() if aw.GECKO else ():
+        short = clip_name.split(".")[-1]
+        controller = "eyes" if short.startswith("eyes_") else "body"
+        for bone in clip.get("bones", {}):
+            if owned.get(bone, "body") != controller:
+                err(f"alpha_werewolf: {clip_name} ({controller}) animates {bone}, which the {owned.get(bone, 'body')} controller owns")
+    for controller in ("body", *am.CONTROLLERS):
+        if f'new AnimationController<AlphaWerewolfEntity>("{controller}"' not in boss:
+            err(f"AlphaWerewolfEntity has no {controller} controller (tools/alpha_werewolf_models.py CONTROLLERS)")
+    # His loot, and his trophies: Arms VII's, as his bosses/werewolf_alpha table holds them.
+    table = load(DATA / MOD / "loot_table" / "entities" / "alpha_werewolf.json") or {}
+    if table.get("type") != "minecraft:gift":
+        err("loot_table/entities/alpha_werewolf.json must be a gift table (rolled for each participant)")
+    found_loot = {}
+    for pool in table.get("pools", []):
+        for entry in pool.get("entries", []):
+            found_loot[entry.get("name", "").split(":")[-1]] = pool.get("condition", {}).get("chance", 1.0)
+    expected = {"alpha_pelt": 1.0, **{item: aw.TROPHY_CHANCE for item in aw.TROPHIES}, **aw.CHANCES}
+    if found_loot != expected:
+        err(f"loot_table/entities/alpha_werewolf.json gives {found_loot}, not tools/alpha_werewolf.py's {expected}")
+    if tuple(arms_variants.trophies("werewolf_alpha")) != tuple(aw.TROPHIES):
+        err(f"tools/alpha_werewolf.py TROPHIES {aw.TROPHIES} are not Arms VII's: {arms_variants.trophies('werewolf_alpha')}")
+    trophies = load(DATA / MOD / "loot_table" / "bosses" / "werewolf_alpha.json") or {}
+    held_items = [entry.get("name") for pool in trophies.get("pools", []) for entry in pool.get("entries", [])]
+    if held_items != [f"{MOD}:{item}" for item in aw.TROPHIES]:
+        err(f"loot_table/bosses/werewolf_alpha.json holds {held_items}, not his trophies {aw.TROPHIES}")
+    for table_id in ("entities/alpha_werewolf", "bosses/werewolf_alpha"):
+        if f'Jugcraft.id("{table_id}")' not in loot_java:
+            err(f"AlphaWerewolfLoot must roll loot_table/{table_id}.json")
+    for trophy in aw.TROPHIES:
+        if f'Jugcraft.id("{trophy}")' not in registry:
+            err(f"JugcraftAlpha must find the {trophy} (Arms VII registers it)")
+    for key in aw.RECIPES:
+        if not (DATA / MOD / "recipe" / f"{key}.json").is_file():
+            err(f"recipe/{key}.json is missing")
+    # The Alpha Pelt comes only from him: no recipe makes it, so nothing turns back into it.
+    for path in (DATA / MOD / "recipe").glob("*.json"):
+        result = (load(path) or {}).get("result", {})
+        if isinstance(result, dict) and result.get("id") == f"{MOD}:alpha_pelt":
+            err(f"recipe/{path.name} makes the Alpha Pelt, which only the Alpha Werewolf gives")
+    costumes = json.dumps(load(DATA / MOD / "tags" / "item" / "trick_or_treat_costumes.json") or {})
+    for item in aw.COSTUMES:
+        if f"{MOD}:{item}" not in costumes:
+            err(f"{item} must count as a costume (tags/item/trick_or_treat_costumes.json)")
+    advancement = load(DATA / MOD / "advancement" / f"{aw.ADVANCEMENT['key']}.json") or {}
+    if advancement.get("criteria", {}).get("done", {}).get("trigger") != "minecraft:impossible":
+        err(f"advancement/{aw.ADVANCEMENT['key']}.json must be granted from code (an impossible \"done\")")
+    sent = "".join(sources.values())
+    for key in aw.MESSAGES:
+        if f'"message.jugcraft.alpha_werewolf.{key}"' not in sent:
+            err(f"tools/alpha_werewolf.py MESSAGES has {key}, which the Java never sends")
+    for cls, text in sources_all.items():
+        for key in re.findall(r'"((?:message|tooltip|entity)\.jugcraft\.[a-z_.]+[a-z_])"', text):
+            if key not in lang:
+                err(f"{cls}.java sends {key}, which has no words in en_us.json")
+        for banned, why in (("setChunkForced", "loads a chunk"), ("addRegionTicket", "loads a chunk"),
+                            ("TicketType", "loads a chunk"), ("changeDimension", "crosses dimensions"),
+                            ("TeleportTransition", "crosses dimensions")):
+            if banned in text:
+                err(f"{cls}.java {why} ({banned})")
+
+
 def check_material_sets():
     """The material sets (tools/material_icons.py, docs/MATERIAL_SETS.md): every map loads, every texture they draw is the
     committed PNG (CI does not re-run tools/generate_textures.py), every ore overlay is a clean cut-out, every ore model
@@ -9872,12 +13561,116 @@ def check_deposits():
     for item in (info["yield"] for info in deposits.DEPOSITS.values()):
         if split(item)[0] == MOD and split(item)[1] not in all_items():
             err(f"Deposit yield {item} is not a Jugcraft item")
+    for family, (chance, biomes) in deposits.UNDERGROUND.items():
+        name = f"underground_{family}_deposit"
+        configured = json.loads((DATA / MOD / "worldgen" / "feature" / f"{name}.json").read_text(encoding="utf-8"))
+        placed = json.loads((DATA / MOD / "worldgen" / "placed_feature" / f"{name}.json").read_text(encoding="utf-8"))
+        tag = json.loads((DATA / MOD / "tags" / "worldgen" / "biome" / "has_bulk_deposit" / f"{family}.json").read_text(encoding="utf-8"))
+        if configured != {"type": "jugcraft:underground_deposit", "family": family, "surface_biomes": f"jugcraft:has_bulk_deposit/{family}"}:
+            err(f"{name}: configured surface-biome policy drift")
+        if placed["placement"] != [{"type": "minecraft:rarity_filter", "chance": chance}, {"type": "minecraft:in_square"}]:
+            err(f"{name}: rarity drift or cave-biome filter introduced")
+        if tag["values"] != biomes:
+            err(f"{name}: eligibility drift")
     stats = STATS["deposit_drill"]
     kinds = MACHINE_JAVA.read_text(encoding="utf-8")
     for key, constant in (("ticks", "DEPOSIT_TICKS"), ("units", "DEPOSIT_UNITS"), ("reach", "DEPOSIT_REACH"),
                           ("depth", "DEPOSIT_DEPTH")):
         if f"int {constant} = {stats[key]};" not in kinds:
             err(f"MachineKind.{constant} is not {stats[key]} as in tools/machines.py")
+
+
+def check_nuclear():
+    """client/HazmatLayer.java reads the suit sheet from tools/nuclear.py's slots, and the Java registers its items."""
+    import nuclear
+    layer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "HazmatLayer.java").read_text(encoding="utf-8")
+    found = {name.lower(): (int(c), int(r)) for name, c, r in re.findall(r"static final float\[\] (\w+) = region\((\d), (\d)\);", layer)}
+    for name in nuclear.HAZMAT_MATERIALS:
+        if found.get(name) != nuclear.slot(name):
+            err(f"HazmatLayer.java region for {name} is {found.get(name)}, tools/nuclear.py has {nuclear.slot(name)}")
+    java = (JAVA_ROOT / "nuclear" / "JugcraftNuclear.java").read_text(encoding="utf-8")
+    for item in nuclear.ITEMS + ["shielding_concrete"]:
+        if f'"{item}"' not in java:
+            err(f"JugcraftNuclear.java does not register {item}")
+    kinds = (JAVA_ROOT / "nuclear" / "EquipmentKind.java").read_text(encoding="utf-8")
+    found = [(i, int(w), int(d), int(h)) for i, w, d, h in re.findall(r'[A-Z_]+\("([a-z_]+)", (\d+), (\d+), (\d+)\)', kinds)]
+    expected = [(k, w, d, h) for k, (_, w, d, h) in nuclear.EQUIPMENT.items()]
+    if found != expected:
+        err(f"EquipmentKind.java {found} != tools/nuclear.py EQUIPMENT {expected}")
+    pipes = re.findall(r'[A-Z_]+\("([a-z_]+)", (\d+)\)', (JAVA_ROOT / "nuclear" / "PipeKind.java").read_text(encoding="utf-8"))
+    if [(p, int(n)) for p, n in pipes] != [(k, v[1]) for k, v in nuclear.PIPES.items()]:
+        err(f"PipeKind.java {pipes} != tools/nuclear.py PIPES")
+    # The cooling tower controller's kinds name the tower blueprints it checks itself against, and the plume heights
+    # match the towers tools/nuclear_plants.py draws (top of the shell above the controller).
+    towers = re.findall(r'[A-Z]+\("(\w+)", "(\w+)", [\d.]+, (\d+), \d+, new int', (JAVA_ROOT / "nuclear" / "CoolingTowerBlock.java").read_text(encoding="utf-8"))
+    large = (ROOT / "src" / "main" / "resources" / "data" / MOD / "blueprint" / "large.txt").read_text(encoding="utf-8").split()
+    if [t[0] for t in towers] != nuclear.TOWERS:
+        err(f"CoolingTowerBlock.Tower {[t[0] for t in towers]} != tools/nuclear.py TOWERS {nuclear.TOWERS}")
+    for kind, blueprint, height in towers:
+        if blueprint not in large:
+            err(f"CoolingTowerBlock.Tower {kind} checks blueprint {blueprint}, which is not a built-in")
+            continue
+        data = json.loads((ROOT / "src" / "main" / "resources" / "data" / MOD / "blueprint" / f"{blueprint}.jugbp.json").read_text(encoding="utf-8"))
+        tops = [y for y, rows in enumerate(data["layers"]) if any(rows)]
+        controller_y = 0  # the controller is in the bottom layer, under the basin floor
+        if int(height) != max(tops) - controller_y:
+            err(f"CoolingTowerBlock.Tower {kind} plume height {height} != tower top {max(tops)} - controller {controller_y}")
+    renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "NuclearRenderer.java").read_text(encoding="utf-8")
+    regions = {name.lower(): (int(c), int(r)) for name, c, r in re.findall(r"static final float\[\] (\w+) = region\((\d), (\d)\);", renderer)}
+    for name in nuclear.EQ_MATERIALS:
+        if regions.get(name) != nuclear.eq_slot(name):
+            err(f"NuclearRenderer.java region for {name} is {regions.get(name)}, tools/nuclear.py has {nuclear.eq_slot(name)}")
+    # The control room's boards (tools/control_boards.py, client/ControlBoards.java): the client looks their materials
+    # up by name, every board is equipment, and no two of a board's faces overlap in one plane.
+    import gzip
+    import control_boards
+    sheet = re.search(r"static final String\[\] SHEET = \{(.*?)\};", renderer, re.S)
+    if not sheet or re.findall(r'"(\w+)"', sheet.group(1)) != nuclear.EQ_MATERIALS:
+        err("NuclearRenderer.java SHEET is not tools/nuclear.py EQ_MATERIALS, in order")
+    boards = json.loads(gzip.open(ASSETS / "control_boards.json.gz").read()) if (ASSETS / "control_boards.json.gz").is_file() else {}
+    if set(boards) != set(control_boards.SECTIONS):
+        err(f"control_boards.json.gz has {sorted(boards)}, not tools/control_boards.py's boards")
+    for name, ops in boards.items():
+        if name not in nuclear.EQUIPMENT:
+            err(f"control board {name} is not equipment (tools/nuclear.py EQUIPMENT)")
+        drawn = {k: v for k, v in ops.items() if k != "live"}
+        names = set(re.findall(r'"([a-z_]+)"', json.dumps(drawn))) - {"b", "o", "q", "c", "still", "lit", "blink", "core", "states"} - set(ops.get("states", {}))
+        if names - set(nuclear.EQ_MATERIALS):
+            err(f"control board {name} uses materials not on the sheet: {sorted(names - set(nuclear.EQ_MATERIALS))}")
+        if name == "switchgear_lineup":
+            # The load centre's live parts (round 25): its breakers in the game's order (nuclear/Switchgear.java NAMES),
+            # their lamps and flags, and its meters as client/NuclearRenderer.java reads them.
+            live = ops.get("live", {})
+            java_names = re.findall(r'"([A-Z0-9 ]+)"', (re.search(r"NAMES = \{(.*?)\};", (JAVA_ROOT / "nuclear" / "Switchgear.java").read_text(encoding="utf-8"), re.S) or [None, ""])[1])
+            if java_names != ["MAIN BKR"] + control_boards.LC_FEEDERS:
+                err(f"control board switchgear_lineup: its feeders {control_boards.LC_FEEDERS} are not nuclear/Switchgear.java NAMES {java_names}")
+            if len(live.get("breakers", [])) != len(java_names) or any(len(b.get("lamps", [])) != 2 or len(b.get("flag", [])) != 4 for b in live.get("breakers", [])):
+                err("control board switchgear_lineup: needs a live lamp pair and flag for each of its 11 breakers")
+            if [m.get("kind") for m in live.get("meters", [])] != ["charge", "volts"] + ["amps"] * 10:
+                err("control board switchgear_lineup: its live meters must be the charge, the volts, then each feeder's amps in order")
+        if name == "mcc_lineup":
+            # The motor control centre's live parts (round 26): a unit for each breaker in the game's order
+            # (nuclear/MotorControlCenter.java NAMES), its door where the game finds a click (DOORS), its lamps and its
+            # handle up and down; its meters the charge and the volts.
+            live = ops.get("live", {})
+            src = (JAVA_ROOT / "nuclear" / "MotorControlCenter.java").read_text(encoding="utf-8")
+            java_names = re.findall(r'"([A-Z0-9 ]+)"', (re.search(r"NAMES = \{(.*?)\};", src, re.S) or [None, ""])[1])
+            units = sorted((u for u in control_boards.mcc_units() if u[7] is not None), key=lambda u: u[7])
+            if java_names != [u[5] for u in units]:
+                err(f"control board mcc_lineup: its units {[u[5] for u in units]} are not nuclear/MotorControlCenter.java NAMES {java_names}")
+            doors = [[float(v) for v in re.findall(r"[-0-9.]+", row)] for row in re.findall(r"\{([-0-9., ]+)\}", (re.search(r"DOORS = \{(.*?)\};", src, re.S) or [None, ""])[1])]
+            if doors != [[round(v, 3) for v in u[1:5]] for u in units]:
+                err(f"control board mcc_lineup: nuclear/MotorControlCenter.java DOORS {doors} are not its unit doors")
+            breakers = live.get("breakers", [])
+            if len(breakers) != len(java_names) or any(len(b.get("lamps", [])) != 2 or not b.get("on") or not b.get("off") for b in breakers):
+                err("control board mcc_lineup: needs a live lamp pair and a handle up and down for each breaker")
+            if [m.get("kind") for m in live.get("meters", [])] != ["charge", "volts"]:
+                err("control board mcc_lineup: its live meters must be the charge and the volts")
+        if name == "remote_shutdown_panel" and set(ops.get("states", {})) != {"mcr", "rsp"}:
+            err("control board remote_shutdown_panel: its transfer switches need both states, mcr and rsp (client/NuclearRenderer.java)")
+        bad = control_boards.overlaps(ops)
+        if bad:
+            err(f"control board {name}: {len(bad)} pairs of faces overlap in one plane (z-fighting), e.g. {bad[:2]}")
 
 
 def check_diagonal_connections():
@@ -9930,11 +13723,15 @@ def check_diagonal_connections():
         if f"{MOD}:{diagonal}" not in walls:
             err(f"{MOD}:{diagonal} is not in #minecraft:walls, so walls, gates and bars would not join it")
     for path in sorted((ASSETS / "blockstates").glob("*.json")):
+        # Household furniture and candy poles use custom cardinal joining, not FenceBlock/WallBlock.
+        if path.stem.startswith('household_') or path.stem in ('cavern_candy_cane_pole','cavern_stripped_candy_cane_pole'):
+            continue
         if path.stem.startswith(dg.DIAGONAL_WALL.format("")):
             continue
         parts = (load(path) or {}).get("multipart", [])
         sides = {next(iter(p["when"])) for p in parts if len(p.get("when", {})) == 1 and list(p["when"].values()) == ["true"]}
-        if {"north", "east", "south", "west"} <= sides and not sides & {"up", "down"} and f"{MOD}:{path.stem}" not in tag:
+        if {"north", "east", "south", "west"} <= sides and not sides & {"up", "down"} and f"{MOD}:{path.stem}" not in tag \
+                and f"{MOD}:{path.stem}" not in STRAIGHT_ONLY:
             err(f"{MOD}:{path.stem} joins like a fence but is not in #{dg.TAG}; add it to tools/diagonal_connections.py")
         heights = {next(iter(p["when"])) for p in parts
                    if len(p.get("when", {})) == 1 and list(p["when"].values())[0] in ("low", "tall")}
@@ -10264,7 +14061,10 @@ def check_concordance(registered):
     check_progression(co, root, lang, registered, research)
     check_spire(co, root, lang, registered, research)
     check_journal(co, root, lang)
+    check_composer(co, root, lang)
+    check_encyclopedia(root, lang)
     check_signs(co, root, lang)
+    check_cast_poses()
     check_authority(root, lang)
     check_economy(root)
     check_persistence(root)
@@ -10282,7 +14082,7 @@ def check_composition(co, root, lang, registered, research):
         path = root / name
         return path.read_text(encoding="utf-8") if path.exists() else ""
     for name, values in (("compose/Grammar.java", co.COMPOSE_LIMITS), ("effect/EffectSpec.java", co.EFFECT_LIMITS),
-                         ("ConcordanceCommand.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
+                         ("Composing.java", {"COMPOSE_RATE_TICKS": co.COMPOSE_RATE_TICKS})):
         text = java(name)
         for const, value in values.items():
             if not re.search(rf"\bint {const} = {value};", text):
@@ -10321,7 +14121,7 @@ def check_composition(co, root, lang, registered, research):
                 err(f"{where}: unknown effect, intent or Principle")
             if effect == "damage" and body.get("school") != co.PRINCIPLES[body["principle"]]["school"]:
                 err(f"{where}: damage must use its Principle's Spell Power school")
-            if (effect == "status") != ("status" in body):
+            if (effect in {"status", "nouveau", "nouveau_block", "nouveau_creature"}) != ("status" in body):
                 err(f"{where}: a status effect (and only a status effect) names a status")
             if body.get("magnitude", 0) > co.EFFECT_LIMITS["MAX_MAGNITUDE"] or body.get("duration", 0) > co.EFFECT_LIMITS["MAX_DURATION"]:
                 err(f"{where}: beyond the effect limits")
@@ -10332,7 +14132,7 @@ def check_composition(co, root, lang, registered, research):
                 err(f"{where}: only damage naming its school scales with Spell Power, by 0..{co.INVOCATION_SCALING_MAX}")
         if info.get("authored") and slot == "modifier":
             err(f"{where}: a modifier cannot be authored (tunings are how players change invocations)")
-        if slot == "modifier" and not (body["aspect"] in ("magnitude", "duration", "radius", "range")
+        if slot == "modifier" and not (body["aspect"] in ({"magnitude", "duration", "radius", "range"} | {v[0] for v in __import__("nouveau_spells").MODIFIERS.values()})
                                        and 1 <= body["amount"] <= limits["MAX_MODIFIER_AMOUNT"]):
             err(f"{where}: modifier out of the grammar")
         if slot == "termination" and not (1 <= body["pulses"] <= limits["MAX_PULSES"] and (
@@ -10522,6 +14322,12 @@ def check_invocations(co, root, lang, research):
                 err(f"concordance/{name}: missing lang {key}")
 
 
+# Blocks that join like a fence but never diagonally, on purpose: the plant safety railing (nuclear/RailingBlock, a
+# CrossCollisionBlock, not a FenceBlock) joins only railings and railing gates, so a blueprint's railing comes out
+# exactly as drawn.
+STRAIGHT_ONLY = {f"{MOD}:railing"}
+
+
 def check_game_test_entrypoints():
     """Every game test class is registered, or its tests silently never run (Fabric finds them only through the
     gametest source set's fabric.mod.json entrypoints)."""
@@ -10529,7 +14335,7 @@ def check_game_test_entrypoints():
     listed = {cls for classes in mod.get("entrypoints", {}).values() for cls in classes}
     for path in sorted((ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test").glob("*.java")):
         text = path.read_text(encoding="utf-8")
-        if ("@GameTest" in text or "ClientGameTest" in text) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
+        if ("@GameTest" in text or re.search(r"\bimplements\b[^{]+\bFabricClientGameTest\b", text)) and f"io.github.jimbozoomer.jugcraft.test.{path.stem}" not in listed:
             err(f"src/gametest/{path.name}: has game tests but is not a fabric-gametest or fabric-client-gametest entrypoint")
 
 
@@ -11092,7 +14898,16 @@ def check_wayfaring(co, root, lang):
     for slot in tr.GRANTED_SLOTS:
         group, name = slot.split("/")
         held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
-        if held != {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}:
+        expected = {f"{MOD}:{item}" for item, worn_in in tr.TRINKETS.items() if worn_in == slot}
+        if slot == tr.CHARM_SLOT:
+            expected.add(f"{MOD}:repair_talisman")
+            import concordance_elemental_gear
+            expected.update(f"{MOD}:{item}" for item in concordance_elemental_gear.AMULETS)
+            import concordance_ee_artifacts
+            expected.update(f"{MOD}:{item}" for item in concordance_ee_artifacts.CHARMS)
+        if slot == "legs/belt":
+            expected.update({"jugcraft:nouveau_belt_of_levitation", "jugcraft:nouveau_belt_of_unstable_gifts"})
+        if held != expected:
             err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
     # Two items with one English name cannot be told apart (the kinetic belt is the Drive Belt for this reason).
     names = {}
@@ -12305,8 +16120,8 @@ def check_relics(co, root, lang, registered, research):
 def check_equivalence(co, root, lang, registered, research):
     """Roadmap step 21: the Java mirrors tools/concordance_equivalence.py (the markup, limits, cap, eligibility rules and
     the scale's numbers); the catalogue and graph on disk are the generator's; Python's own audit finds no unvalued
-    item, no recipe that gains value and no profitable cycle (sources apart), and every round trip through the scale
-    loses; nothing catalogued is excluded or scarce; every reason and message has its text; the icon is its map."""
+    item, no recipe that gains value and no profitable cycle (sources apart), and no round trip through the scale
+    gains; the historical restricted catalogue excludes scarce items; every reason and message has its text; the icon is its map."""
     eq = co.equivalence
     def java(name, base=root):
         path = base / name
@@ -12364,7 +16179,8 @@ def check_equivalence(co, root, lang, registered, research):
     transmutations = {p.stem: load(p) or {} for p in (folder / "transmutation").glob("*.json")}
     if set(transmutations) != set(eq.TRANSMUTATIONS):
         err(f"concordance/transmutation: {sorted(transmutations)} differ from TRANSMUTATIONS")
-    # Python's own audit: no unvalued item, no gaining recipe, no profitable cycle; every round trip loses.
+    # Historical restricted graph: no unvalued item, gaining recipe or profitable cycle.
+    # Universal values are separately covered by test_alchemy_values and AlchemyPlayabilityGameTests.
     for problem in eq.audit():
         err(f"equivalence: {problem}")
     for item, (grains, per, dissolve, form) in eq.MATERIALS.items():
@@ -12374,8 +16190,8 @@ def check_equivalence(co, root, lang, registered, research):
             for n in (1, 7, 64):
                 paid = (grains * n) // per
                 cost = -(-(grains * n * eq.FORM_MARKUP.numerator) // (per * eq.FORM_MARKUP.denominator))
-                if cost <= paid:
-                    err(f"material {item}: forming {n} must cost more than dissolving {n} pays")
+                if cost < paid:
+                    err(f"material {item}: forming {n} must never cost less than dissolving {n} pays")
     excluded = set(eq.EXCLUDED)
     for item in eq.MATERIALS:
         if item in excluded or item in ("minecraft:diamond", "minecraft:emerald", "minecraft:netherite_ingot", "minecraft:ancient_debris"):
@@ -12383,6 +16199,10 @@ def check_equivalence(co, root, lang, registered, research):
     tag = load(DATA / MOD / "tags" / "item" / "equivalence" / "excluded.json") or {}
     if sorted(tag.get("values", [])) != sorted(eq.EXCLUDED):
         err("tags/item/equivalence/excluded.json differs from EXCLUDED")
+    # Every instrument is beyond the scale, as the record says of wands: it carries what is inscribed and tuned on it.
+    for instrument in co.INSTRUMENTS:
+        if f"{MOD}:{instrument}" not in excluded:
+            err(f"equivalence: the instrument {MOD}:{instrument} must be in EXCLUDED (tools/concordance_equivalence.py)")
     for thing in eq.EXCLUDED:
         if thing.startswith(f"{MOD}:") and split(thing)[1] not in registered:
             err(f"equivalence: the excluded {thing} is not registered")
@@ -12853,6 +16673,12 @@ def check_progression(co, root, lang, registered, research):
                 made = load(DATA / MOD / "recipe" / f"{split(recipe)[1]}.json") or {}
                 result = made.get("result", {})
                 shown.setdefault(result.get("id") if isinstance(result, dict) else result, []).append((entry, page))
+    # Native workshop inputs are shown in generated acquisition entries and in the server recipe picker.
+    import nouveau_guide
+    for (_, name), info in nouveau_guide.acquisition_entries().items():
+        entry=entries.get("nouveau/"+name)
+        if entry and any(page.get("type")=="modonomicon:text" for page in entry.get("pages",[])):
+            shown.setdefault(info["icon"],[]).append((entry,{}))
     for key in sorted(alone):
         item = key[len("item:"):] if key.startswith(f"item:{MOD}:") else None
         if item is None or item in pg.JUGCRAFT_SOURCES:
@@ -13068,7 +16894,8 @@ def check_crimson(co, root, lang, registered, research):
     surge and blade numbers); every rite gives no more Vitae than the health it takes and can be made from full health;
     an hour of offering is bounded whatever heals the giver, and a surge never turns Vitae into more Focus; health is
     taken in exactly one place; mastery comes from the blade's growth; every word has its text; the icons are their maps;
-    the offering gesture exists and skips players whose arms ArmsMotion poses."""
+    the offering gesture exists and skips players whose arms a gun or ArmsMotion poses (check_cast_poses), and the
+    server sends it at the end of the tick, after the player's own tick has sent what they now hold."""
     cr = co.crimson
     def java(name, base=root):
         path = base / name
@@ -13149,8 +16976,14 @@ def check_crimson(co, root, lang, registered, research):
     gesture = re.search(r'GESTURE = Jugcraft\.id\("([a-z_]+)"\)', client)
     if not gesture or not (ASSETS / "player_animations" / f"{gesture.group(1)}.json").is_file():
         err("VigilClient: the offering gesture needs its clip in assets/jugcraft/player_animations")
-    if "instanceof ArmItem" not in client:
-        err("VigilClient: the offering gesture must skip players whose arms ArmsMotion poses (ArmItem)")
+    if "CastPoses.gesturesYield(player)" not in client:
+        err("VigilClient: the offering gesture must skip players whose arms a gun or ArmsMotion poses (CastPoses.gesturesYield)")
+    server = java("Vigil.java", vigil)
+    queued = re.search(r"private static void gesture\(ServerPlayer player\) \{(.*?)\n\t\}", server, re.S)
+    if "ServerTickEvents.END_SERVER_TICK.register(Vigil::sendGestures);" not in server or not queued \
+            or "ServerPlayNetworking.send" in queued.group(1):
+        err("Vigil: the offering gesture must be sent at the end of the server tick (Vigil.sendGestures), after the "
+            "player's own tick has sent what they hold, or other clients judge it by what they held before")
     import item_icons
     for icon in ("crimson_chalice", "thornheart_blade"):
         texture = ASSETS / "textures" / "item" / f"{icon}.png"
@@ -13166,15 +16999,23 @@ def KINDLE_MOTE_STEPS_FIT(co):
     return 0 < co.KINDLE_MOTE_STEPS <= 15
 
 
-def main():
+def registered_items():
+    import vehicle_bays
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
-                  | set(deposits.DEPOSITS) | set(guide_books.BOOKS) | set(tank_display.BLOCKS)
+                  | set(deposits.all_blocks()) | set(guide_books.BOOKS) | set(tank_display.BLOCKS) | set(exchange_blocks.BLOCKS) | set(exchange_poker.BLOCKS) | set(exchange_casino.BLOCKS) | set(exchange_casino.ITEMS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
                   | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
+    import starter_workshop
+    registered |= menagerie.entries() | set(vehicle_bays.BLOCKS) | set(starter_workshop.NAMES)
+    return registered
+
+
+def main():
+    registered=registered_items()
     check_assets(sorted(registered))
     check_model_textures()
     check_petro()
@@ -13183,6 +17024,8 @@ def main():
     check_machine_recipe_files(registered)
     check_fluid_recipes(registered)
     check_industrial_forms()
+    check_electrolysis_floor()
+    check_self_output_gates()
     check_tags()
     check_worldgen()
     check_java()
@@ -13191,6 +17034,7 @@ def main():
     check_thallite_gear()
     check_arms()
     check_item_icons()
+    check_nuclear_sounds()
     check_arms_variants()
     check_mesh_models()
     check_arms_motion()
@@ -13212,6 +17056,7 @@ def main():
     check_zeppelin()
     check_walker()
     check_armoured_walker()
+    check_howitzer_walker()
     check_landship()
     check_artillery()
     check_tower_guns()
@@ -13224,6 +17069,7 @@ def main():
     check_plastic()
     check_seasons()
     check_alpine()
+    check_adam_ondi_ahman()
     check_biomes()
     check_wood_switches()
     check_machines(registered)
@@ -13232,8 +17078,11 @@ def main():
     check_machine_rotors()
     check_drones()
     check_tower()
+    check_power_lines()
+    check_nuclear()
     check_guide_books()
     check_handbook(registered)
+    check_encyclopedia_routes(registered)
     check_agriculture()
     check_kitchen()
     check_feasts()
@@ -13248,17 +17097,27 @@ def main():
     check_milkshakes()
     check_recipe_categories()
     check_advancements(registered)
+    import check_nouveau_resources
+    for problem in check_nouveau_resources.check()[0]:err(problem)
     check_model_uvs()
     check_lairs()
     check_vesperine()
     check_tatterlace()
     check_yeti()
     check_cinder_tyrant()
+    check_mire_hag()
+
+    check_acquisition(registered)
+    check_crypt_lich()
+    check_iron_dreadnought()
+    check_alpha_werewolf()
+    check_cydonian_sentinel()
     check_material_sets()
     check_art()
     check_pixel_hollows()
     check_town()
     check_diagonal_connections()
+    check_aluminum_bootstrap()
     check_concordance(registered)
     for path in RES.rglob("*.json"):
         load(path)
@@ -13266,6 +17125,130 @@ def main():
         print("\n".join(errors), file=sys.stderr)
         sys.exit(1)
     print(f"PASS: {len(registered)} material IDs, data files and recipe audit. No Minecraft build or game test performed.")
+
+
+# The first aluminum line (docs/features/aluminum-bootstrap-check.md): the machines that make aluminum from bauxite, and
+# the machine that makes their lye, built from these crafting recipes.
+ALUMINUM_ENTRY = ("electrolytic_separator", "bauxite_digester", "aluminate_filter_press", "alumina_calciner",
+                  "aluminum_reduction_cell", "arc_furnace_controller", "arc_furnace_casing")
+# What the line consumes besides bauxite and water.
+ALUMINUM_REAGENTS = ("jugcraft:lye", "jugcraft:coke")
+# Not aluminum metal: the line's own intermediate and its own machine.
+NOT_ALUMINUM_METAL = {"jugcraft:aluminum_hydroxide", "jugcraft:aluminum_reduction_cell"}
+
+
+def check_aluminum_bootstrap():
+    """Industrial chemistry: aluminum is never needed to start making aluminum. With aluminum metal withheld (every
+    jugcraft item named "aluminum", bar the hydroxide and the reduction cell itself), a thing counts as reachable when
+    no recipe makes it (a mined or vanilla thing) or some recipe makes it from reachable things. Every machine of the
+    first line and every reagent it uses must stay reachable. Ingredient trees only: the machines that run each
+    process step are not followed, apart from those listed here."""
+    def tag_members(ref, seen=frozenset()):
+        ns, path = split(ref)
+        if ref in seen:
+            return set()
+        values = None
+        for kind in ("item", "fluid"):
+            data = load(DATA / ns / "tags" / kind / f"{path}.json") if (DATA / ns / "tags" / kind / f"{path}.json").is_file() else None
+            if data is not None:
+                values = (values or []) + data.get("values", [])
+        if values is None:
+            return None
+        members = set()
+        for value in values:
+            value = value.get("id") if isinstance(value, dict) else value
+            if value.startswith("#"):
+                members |= tag_members(value[1:], seen | {ref}) or set()
+            else:
+                members.add(value)
+        return members
+
+    def alternatives(spec):
+        """One ingredient slot as a set of choices ("#tag" or an id)."""
+        if isinstance(spec, str):
+            return {spec}
+        if isinstance(spec, list):
+            out = set()
+            for part in spec:
+                out |= alternatives(part)
+            return out
+        if isinstance(spec, dict):
+            for key in ("ingredient", "item", "id", "fluid"):
+                if key in spec:
+                    return alternatives(spec[key])
+            if "tag" in spec:
+                return {"#" + spec["tag"]}
+        return set()
+
+    def outputs(recipe):
+        found = []
+        result = recipe.get("result")
+        if isinstance(result, str):
+            found.append(result)
+        elif isinstance(result, dict):
+            found.append(result.get("id") or result.get("item"))
+        for part in recipe.get("results", []) or []:
+            if isinstance(part, dict):
+                found.append(part.get("id") or part.get("item"))
+        for part in recipe.get("fluid_results", []) or []:
+            found.append(part.get("fluid"))
+        return [ref for ref in found if ref]
+
+    def slots(recipe):
+        found = []
+        key = recipe.get("key")
+        if isinstance(key, dict):
+            found += [alternatives(spec) for spec in key.values()]
+        for field in ("ingredients", "items", "fluids"):
+            for spec in recipe.get(field, []) or []:
+                found.append(alternatives(spec))
+        for field in ("ingredient", "input", "base", "addition", "template"):
+            if field in recipe:
+                found.append(alternatives(recipe[field]))
+        return [choices for choices in found if choices]
+
+    producers = {}
+    for path in DATA.glob("*/recipe/**/*.json"):
+        recipe = load(path)
+        if not isinstance(recipe, dict):
+            continue
+        needs = slots(recipe)
+        for out in outputs(recipe):
+            producers.setdefault(out, []).append(needs)
+
+    def withheld(ref):
+        ns, path = split(ref)
+        return ns == MOD and "aluminum" in path and ref not in NOT_ALUMINUM_METAL
+
+    tags = {}
+    reachable = set()
+
+    def ok(choice):
+        if choice.startswith("#"):
+            if choice not in tags:
+                tags[choice] = tag_members(choice[1:])
+            members = tags[choice]
+            return members is None or any(member in reachable or (member not in producers and not withheld(member)) for member in members)
+        return choice in reachable or (choice not in producers and not withheld(choice))
+
+    changed = True
+    while changed:
+        changed = False
+        for out, recipes in producers.items():
+            if out in reachable or withheld(out):
+                continue
+            if any(all(any(ok(choice) for choice in slot) for slot in needs) for needs in recipes):
+                reachable.add(out)
+                changed = True
+    for name in ALUMINUM_ENTRY:
+        ref = f"{MOD}:{name}"
+        if ref not in producers:
+            err(f"aluminum bootstrap: no recipe makes {ref}")
+        elif ref not in reachable:
+            err(f"aluminum bootstrap: {ref} cannot be made without aluminum")
+    for ref in ALUMINUM_REAGENTS:
+        if ref not in reachable:
+            err(f"aluminum bootstrap: {ref} cannot be made without aluminum")
 
 
 def check_journal(co, root, lang):
@@ -13316,6 +17299,316 @@ def check_journal(co, root, lang):
     request = text(root / "journal" / "JournalRequestPayload.java")
     if "StreamCodec.unit(" not in request:
         err("journal/JournalRequestPayload.java: a request carries nothing (the server decides what a player sees)")
+
+
+def check_composer(co, root, lang):
+    """Chunk A (A-01 to A-03): the composer screen and the compose command are one service. Composing asks its questions
+    in the command's order (the Concordance on, an instrument in hand, still the one a screen showed, the shared rate,
+    then the compiler) and is the only writer of a composed inscription; the composer's server side answers through it,
+    writes nothing itself, bounds its request and rate-limits opening; every UI entry point opens the shared
+    constellation editor without text entry or client-side validation authority."""
+    cm = co.composer
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    composing = text(root / "Composing.java")
+    compose = composing[composing.find("public static Result compose("):]
+    order = ["JugcraftConfig.isFeatureEnabled(", "ComposedSpells.instrument(player)", "shown.holds(player)",
+             "RateGate.allow(player, RATE_ACTION, COMPOSE_RATE_TICKS)", "ComposedSpells.compile(", ".set(JugcraftConcordance.INSCRIPTION"]
+    places = [compose.find(needle) for needle in order]
+    if not compose or -1 in places or places != sorted(places):
+        err("concordance/Composing.java: compose asks feature, instrument, the screen's view, the shared rate, then compiles, "
+            "and only then writes")
+    for path in sorted(root.rglob("*.java")):
+        relative = path.relative_to(root).as_posix()
+        if relative != "Composing.java" and "new Inscription(" in text(path):
+            err(f"concordance/{relative}: only Composing makes a composed inscription (a ritual may copy one whole)")
+    command = text(root / "ConcordanceCommand.java")
+    for needle in ("Composing.compose(player, text, inscribe, null)", "Composing.show(player)", "Composing.clear(player)"):
+        if needle not in command:
+            err(f"concordance/ConcordanceCommand.java: the compose commands are adapters of Composing ({needle})")
+    composer = text(root / "composer" / "Composer.java")
+    for needle in ("Composing.compose(player, request.text(), false, null)", "Composing.compose(player, request.text(), true, session.held)",
+                   "Composing.clear(player, session.held)", "RateGate.allow(player, OPEN_ACTION, OPEN_TICKS)",
+                   "ServerPlayNetworking.canSend(player, payload.type())"):
+        if needle not in composer:
+            err(f"concordance/composer/Composer.java: answers through Composing, rate-limits opening, sends only to a game "
+                f"that can receive it ({needle})")
+    for path in sorted((root / "composer").glob("*.java")):
+        if "INSCRIPTION" in text(path) or "Compiler.compile(" in text(path):
+            err(f"concordance/composer/{path.name}: the composer writes and compiles nothing itself (Composing does)")
+    request = text(root / "composer" / "ComposerRequestPayload.java")
+    if "MAX_TEXT = 4 * Grammar.MAX_TEXT;" not in request or "ByteBufCodecs.stringUtf8(MAX_TEXT)" not in request:
+        err("concordance/composer/ComposerRequestPayload.java: the request's text decodes to a bounded length")
+    if "composer.Composer.register();" not in text(root / "JugcraftConcordance.java"):
+        err("concordance/JugcraftConcordance.java: registers the composer's server side")
+    client = text(CLIENT_JAVA_ROOT / "ComposerClient.java")
+    screens = client + text(CLIENT_JAVA_ROOT / "ComposerScreen.java") + text(CLIENT_JAVA_ROOT / "JournalScreen.java")
+    workspace_path = ROOT / "src" / "client" / "kotlin" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client" / "ComposerWorkspace.kt"
+    workspace = text(workspace_path)
+    if 'new ComposerScreen(parent)' not in client or 'ComposerClient.open(Minecraft.getInstance(), parent)' not in workspace:
+        err("composer: every entry point opens the shared narrated constellation editor")
+    visual = text(CLIENT_JAVA_ROOT / "ComposerScreen.java")
+    for forbidden in ('new EditBox(', 'Compiler.compile(', '.set(JugcraftConcordance.INSCRIPTION'):
+        if forbidden in visual:
+            err(f"composer: constellation view must not require text entry or decide server state ({forbidden})")
+    for required in ('ComposerClient.inscribable()', 'ComposerClient::inscribe', 'ComposerClient.edited()', 'ConcordanceClientOptions.reducedMotion()'):
+        if required not in visual:
+            err(f"composer: visual editor retains validation, inscription and accessibility ({required})")
+    for source, name in ((screens, "the composer's screens"), (workspace, "ComposerWorkspace.kt")):
+        for key in re.findall(r'"((?:screen|key|compose|message)\.jugcraft\.[a-z_.]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    slots = re.findall(r"^\t([A-Z]+)[,;]", text(root / "compose" / "Slot.java"), re.M)
+    if [slot.lower() for slot in slots] != list(cm.SLOTS):
+        err(f"compose/Slot.java: SLOTS in tools/concordance_composer.py must name every slot, in order ({slots})")
+    for slot in cm.SLOTS:
+        if f"screen.{MOD}.composer.slot.{slot}" not in lang:
+            err(f"composer: missing lang screen.{MOD}.composer.slot.{slot}")
+
+
+def check_encyclopedia(root, lang):
+    """Chunk A (A-04): the Jugcraft Encyclopedia. Its pages, the route's states and weights, the First Light route's
+    steps (their order, weights and what each waits for), the recipes, sales and codex entries the route and the lair
+    dossiers name, and the Keys page's keys are tools/encyclopedia.py's; every recipe named exists, every sale is one a
+    shop sells, no required step needs a boss's loot, and every codex link is gated as its entry is; the pages only read;
+    the request is rate-limited, carries no text and is answered only to a game that can receive it; the key works only
+    from the game, the inventory's button closes the inventory first and needs no mixin; every word has its text; and
+    the record's route table is the tool's."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import encyclopedia as en
+    import concordance_journey as jr
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    guide = JAVA_ROOT / "guide" / "encyclopedia"
+    pages_java = JAVA_ROOT / "concordance" / "encyclopedia"
+    service = text(guide / "Encyclopedia.java")
+    payload = text(guide / "EncyclopediaPayload.java")
+    route = text(pages_java / "FirstLightRoute.java")
+    dossiers = text(JAVA_ROOT / "lair" / "LairDossiers.java")
+    builders = {"concordance/encyclopedia/FirstLightRoute.java": route,
+                "concordance/encyclopedia/SpellcraftPage.java": text(pages_java / "SpellcraftPage.java"),
+                "concordance/encyclopedia/InspectPage.java": text(pages_java / "InspectPage.java"),
+                "lair/LairDossiers.java": dossiers}
+    for path in sorted(guide.glob("*.java")):
+        builders[f"guide/encyclopedia/{path.name}"] = text(path)
+    client_files = {name: text(CLIENT_JAVA_ROOT / name) for name in (
+        "EncyclopediaClient.java", "EncyclopediaScreen.java", "EncyclopediaWidgets.java", "EncyclopediaKeys.java",
+        "EncyclopediaInventoryButton.java")}
+    client_files["compat/CodexLinks.java"] = text(CLIENT_JAVA_ROOT / "compat" / "CodexLinks.java")
+
+    # The pages, in order, each with its title; each builder's PAGE is its id.
+    pages = re.findall(r'page\("([a-z_]+)", ', service)
+    if pages != en.SERVER_PAGES or [p for p in en.PAGES if p not in en.SERVER_PAGES] != ["keys"]:
+        err(f"guide/encyclopedia/Encyclopedia.java: pages {pages} differ from SERVER_PAGES in tools/encyclopedia.py")
+    for page, source in (("discover", route), ("spellcraft", builders["concordance/encyclopedia/SpellcraftPage.java"]),
+                         ("expedition", dossiers), ("inspect", builders["concordance/encyclopedia/InspectPage.java"]),
+                         ("keys", client_files["EncyclopediaKeys.java"])):
+        if f'PAGE = "{page}";' not in source:
+            err(f"encyclopedia: the {page} page's builder must name itself PAGE = \"{page}\"")
+    for page in en.PAGES:
+        if f"encyclopedia.{MOD}.page.{page}" not in lang:
+            err(f"encyclopedia: missing lang encyclopedia.{MOD}.page.{page}")
+    if "Encyclopedia.register();" not in text(JAVA_ROOT / "guide" / "JugcraftGuide.java"):
+        err("guide/JugcraftGuide.java: registers the encyclopedia's server side")
+    if "EncyclopediaClient.register();" not in text(CLIENT_JAVA_ROOT / "JugcraftClient.java"):
+        err("client/JugcraftClient.java: registers the encyclopedia's client side")
+
+    # The states and weights a row may carry.
+    for enum, table, name in (("StepState", en.STATES, "STATES"), ("EdgeKind", en.EDGES, "EDGES")):
+        body = re.search(rf"public enum {enum} \{{(.*?)public String id\(\)", payload, re.S)
+        found = [c.lower() for c in re.findall(r"^\t\t([A-Z_]+)[,;]?\s*$", body.group(1), re.M)] if body else []
+        if found[:1] != ["none"] or found[1:] != list(table):
+            err(f"guide/encyclopedia/EncyclopediaPayload.java: {enum} {found} must be NONE then {name} in tools/encyclopedia.py")
+        kind = "state" if enum == "StepState" else "edge"
+        for key in ["none", *table]:
+            if f"encyclopedia.{MOD}.{kind}.{key}" not in lang:
+                err(f"encyclopedia: missing lang encyclopedia.{MOD}.{kind}.{key}")
+
+    # The First Light route: its steps in order, each step's weight and what it waits for.
+    steps = re.findall(r'route\(out, "([a-z_]+)"', route)
+    if steps != [step["id"] for step in en.FIRST_ROUTE]:
+        err(f"concordance/encyclopedia/FirstLightRoute.java: steps {steps} differ from FIRST_ROUTE in tools/encyclopedia.py")
+    declared = {}
+    for sid, edge, body in re.findall(r'route\.add\(new Step\("([a-z_]+)", EdgeKind\.([A-Z_]+),(.*?)\)\);', route, re.S):
+        lists = re.findall(r"List\.of\(([^()]*)\)", body)
+        declared[sid] = (edge.lower(), re.findall(r'"([a-z_]+)"', lists[-1]) if lists else None)
+    for step in en.FIRST_ROUTE:
+        if declared.get(step["id"]) != (step["edge"], step["after"]):
+            err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} is {declared.get(step['id'])}, "
+                f"not ({step['edge']}, {step['after']}) as FIRST_ROUTE says")
+    research = load(DATA / MOD / "concordance" / "research" / "first_light.json") or {}
+    stations = {rule.get("station") for rule in research.get("states", {}).get("understood", {}).get("any", [])
+                if rule.get("type") == "study"}
+    loot_items = set()
+    for boss in ("vesperine", "tatterlace"):
+        loot_items |= set(re.findall(r'"name": "(jugcraft:[a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
+    # Each step's own source: from its route(out, "<id>" call to the next one's (the last to the end of steps()), with
+    # the helper it calls (understanding for understand, equipment for equip).
+    marks = [(found.start(), found.group(1)) for found in re.finditer(r'route\(out, "([a-z_]+)"', route)]
+    steps_end = route.find("private static Map<String, StepState> states(")
+    def method(name):
+        found = re.search(rf"private static void {name}\(.*?\n\t\}}\n", route, re.S)
+        return found.group(0) if found else ""
+    helpers = {"understand": method("understanding"), "equip": method("equipment")}
+    bodies = {sid: route[start:(marks[i + 1][0] if i + 1 < len(marks) else steps_end)] + helpers.get(sid, "")
+              for i, (start, sid) in enumerate(marks)}
+    for step in en.FIRST_ROUTE:
+        body = bodies.get(step["id"], "")
+        for edge, recipe in step.get("named", []):
+            path = recipe.split(":", 1)[1]
+            if not (DATA / MOD / "recipe" / f"{path}.json").is_file():
+                err(f"tools/encyclopedia.py: step {step['id']} names recipe {recipe}, which does not exist")
+            if f'"{path}"' not in helpers.get(step["id"], ""):
+                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must name {recipe}'s set when it exists")
+        for edge, recipe in step["recipes"]:
+            path = recipe.split(":", 1)[1]
+            file = DATA / MOD / "recipe" / f"{path}.json"
+            if not file.is_file():
+                err(f"tools/encyclopedia.py: step {step['id']} names recipe {recipe}, which does not exist")
+                continue
+            # A grid, with its edge, written in the step's own source (the bench: the rules' study station).
+            shown = (f"out.recipe(EdgeKind.{edge.upper()}, recipe," in body if recipe in stations
+                     else f'out.recipe(EdgeKind.{edge.upper()}, Jugcraft.id("{path}")' in body)
+            if not shown:
+                err(f"concordance/encyclopedia/FirstLightRoute.java: step {step['id']} must show recipe {recipe} as a "
+                    f"{edge} grid (out.recipe), or the rules' study station must be it")
+            if edge == "required":
+                for ingredient in re.findall(r'"(jugcraft:[a-z_]+)"', file.read_text(encoding="utf-8")):
+                    if ingredient in loot_items:
+                        err(f"tools/encyclopedia.py: required recipe {recipe} needs {ingredient}, a boss's loot")
+
+    # Sales the route and the dossiers name: each on sale in its shop (never only bought there).
+    shops = (load(DATA / MOD / "town" / "shops.json") or {}).get("shops", {})
+    trades = [(step["id"], shop, item) for step in en.FIRST_ROUTE for shop, item in step["trades"]]
+    trades += [(boss, shop, item) for boss, dossier in en.DOSSIERS.items() for shop, item in dossier["trades"]]
+    for owner, shop, item in trades:
+        if item not in [offer.get("item") for offer in shops.get(shop, {}).get("sells", [])]:
+            err(f"tools/encyclopedia.py: {owner} names {item} on sale at the {shop} shop, which does not sell it")
+    if "out.sales(" not in route or "out.sales(" not in dossiers:
+        err("encyclopedia: the route's and the dossiers' sales come from PageWriter.sales (a town that stands, today's offers)")
+
+    # The dossiers: each boss's tokens, rite, loot and after-win recipes are the tool's, exist, and her loot table is hers.
+    for boss, dossier in en.DOSSIERS.items():
+        for field in ("tokens", "rite", "loot", "after_win", "made_from"):
+            for name in dossier[field]:
+                if f'"{name}"' not in dossiers:
+                    err(f"lair/LairDossiers.java: {boss}'s {field} must name {name} (DOSSIERS in tools/encyclopedia.py)")
+        for recipe in dossier["rite"] + dossier["after_win"] + dossier["made_from"]:
+            if not (DATA / MOD / "recipe" / f"{recipe}.json").is_file():
+                err(f"tools/encyclopedia.py: {boss} names recipe {recipe}, which does not exist")
+        table = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "entities" / f"{boss}.json")))
+        if table != set(dossier["loot"]):
+            err(f"tools/encyclopedia.py: {boss}'s loot {sorted(dossier['loot'])} is not her table's {sorted(table)}")
+        for name in dossier["loot"]:
+            if f"jei.{MOD}.acquire.{name}" not in lang:
+                err(f"encyclopedia: missing lang jei.{MOD}.acquire.{name} (the dossier shows each loot's acquisition text)")
+        for key in (f"lair.{MOD}.{dossier['lair']}", f"encyclopedia.{MOD}.dossier.{dossier['lair']}.leave",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.credit",
+                    f"encyclopedia.{MOD}.dossier.{dossier['lair']}.rite", f"advancements.{MOD}.{dossier['advancement']}.title",
+                    f"entity.{MOD}.{boss}"):
+            if key not in lang:
+                err(f"encyclopedia: missing lang {key}")
+
+    # Codex links: each names an entry of the Arcane Concordance whose own unlock is the one given.
+    entries = DATA / MOD / "modonomicon" / "books" / "arcane_concordance" / "entries"
+    linked = set()
+    for source_name, source in builders.items():
+        for entry, research_id, state in re.findall(
+                r'codex\("([a-z_]+/[a-z_]+)", (?:null|"(jugcraft:[a-z_]+)"), (?:null|ResearchState\.([A-Z]+))\)', source):
+            linked.add((entry, research_id or None, state or None))
+            data = load(entries / f"{entry}.json")
+            if data is None:
+                err(f"{source_name}: codex link {entry} names no entry of the Arcane Concordance")
+                continue
+            condition = data.get("condition") or {"type": "modonomicon:none"}
+            if research_id:
+                want = f"{MOD}:concordance/{research_id.split(':', 1)[1]}_{state.lower()}"
+                if condition.get("type") != "modonomicon:research_node_unlocked" or condition.get("node_id") != want:
+                    err(f"{source_name}: codex link {entry} is offered at {research_id} {state.lower()}, but the entry unlocks at {condition}")
+            elif condition.get("type") != "modonomicon:none":
+                err(f"{source_name}: codex link {entry} is offered to everyone, but the entry unlocks at {condition}")
+            if f"book.{MOD}.arcane_concordance.{entry.replace('/', '.')}.name" not in lang:
+                err(f"{source_name}: codex link {entry} has no name in lang")
+        if source.count("out.codex(") != len(re.findall(r'out\.codex\("[a-z_]+/[a-z_]+", (?:null|"jugcraft:[a-z_]+"), (?:null|ResearchState\.[A-Z]+)\)', source)):
+            err(f"{source_name}: every codex link names its entry, research and state as literals (so this audit can read them)")
+    route_codex = {(entry, research_id, state) for step in en.FIRST_ROUTE for entry, research_id, state in step["codex"]}
+    found_route = {link for link in re.findall(r'codex\("([a-z_]+/[a-z_]+)", (?:null|"(jugcraft:[a-z_]+)"), (?:null|ResearchState\.([A-Z]+))\)', route)}
+    found_route = {(entry, research_id or None, state or None) for entry, research_id, state in found_route}
+    if found_route != route_codex:
+        err(f"concordance/encyclopedia/FirstLightRoute.java: codex links {sorted(found_route, key=str)} differ from FIRST_ROUTE's")
+
+    # The pages only read.
+    forbidden = re.compile(r"setAttached\(|removeAttached\(|\.award\(|ConcordanceProgress\.(record|grant|setFocus|award|spendFocus)\(|"
+                           r"Composing\.(compose|clear)\(|\.set\(JugcraftConcordance\.INSCRIPTION|StructureValidator\.check\(|"
+                           r"new Inscription\(|\.setItem\(|\.shrink\(|LairRewards\.(owe|pay|handOver)\(")
+    for name, source in builders.items():
+        if forbidden.search(source):
+            err(f"{name}: the encyclopedia only reads ({forbidden.search(source).group(0)})")
+
+    # The request: rate-limited, answered only to a game that can receive it, carrying no text.
+    for needle in ("RateGate.allow(player, RATE_ACTION, REQUEST_TICKS)", "ServerPlayNetworking.canSend(player, EncyclopediaPayload.TYPE)"):
+        if needle not in service:
+            err(f"guide/encyclopedia/Encyclopedia.java: requests are rate-limited and answered only to a game that can receive them ({needle})")
+    request = text(guide / "EncyclopediaRequestPayload.java")
+    if not request or re.search(r"stringUtf8|STRING_UTF8|ByteBufCodecs\.list", request):
+        err("guide/encyclopedia/EncyclopediaRequestPayload.java: a request names no page and carries no text")
+    if "player.distanceToSqr(Vec3.atCenterOf(pos)) > reach * reach" not in builders["concordance/encyclopedia/InspectPage.java"] \
+            or "level.isLoaded(pos)" not in builders["concordance/encyclopedia/InspectPage.java"]:
+        err("concordance/encyclopedia/InspectPage.java: the looked-at block is checked on the server: loaded and within reach")
+
+    # The keys: every Jugcraft key has its name and its help on the Keys page.
+    keys = set()
+    for path in CLIENT_JAVA_ROOT.rglob("*.java"):
+        keys.update(re.findall(r'new KeyMapping\("key\.jugcraft\.([a-z_]+)"', text(path)))
+    if keys != set(en.KEY_HELP):
+        err(f"tools/encyclopedia.py: KEY_HELP {sorted(en.KEY_HELP)} must name every Jugcraft key {sorted(keys)}")
+    for key in keys:
+        for wanted in (f"key.{MOD}.{key}", f"encyclopedia.{MOD}.key.{key}"):
+            if wanted not in lang:
+                err(f"encyclopedia: missing lang {wanted}")
+
+    # The ways in: the key only from the game; the inventory's button closes the inventory first, without a mixin.
+    client = client_files["EncyclopediaClient.java"]
+    loop = client[client.find("while (open.consumeClick())"):]
+    if "client.gui.screen() == null" not in loop[:400]:
+        err("client/EncyclopediaClient.java: the key opens the encyclopedia only from the game (no screen open)")
+    from_inventory = client[client.find("public static void openFromInventory("):]
+    if not from_inventory or from_inventory.find("closeContainer()") < 0 or from_inventory.find("closeContainer()") > from_inventory.find("open(client"):
+        err("client/EncyclopediaClient.java: the inventory's button closes the inventory (closeContainer) before opening")
+    if "ScreenEvents.AFTER_INIT" not in client_files["EncyclopediaInventoryButton.java"]:
+        err("client/EncyclopediaInventoryButton.java: the button is added through Fabric's screen events")
+    mixins = load(ROOT / "src" / "client" / "resources" / "jugcraft.client.mixins.json") or {}
+    for mixin in mixins.get("client", []) + mixins.get("mixins", []):
+        source = text(ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin" / "client" / f"{mixin}.java")
+        if re.search(r"@Mixin\([^)]*(InventoryScreen|AbstractContainerScreen|CreativeModeInventoryScreen|RecipeBook)", source):
+            err(f"mixin/client/{mixin}.java: the encyclopedia's button needs no mixin on the inventory screens")
+    if 'Jugcraft.id("encyclopedia/inventory_button")' not in client_files["EncyclopediaInventoryButton.java"] \
+            or "textures/gui/sprites/encyclopedia/inventory_button.png" not in en.OWNER_FILES:
+        err("client/EncyclopediaInventoryButton.java: the button's sprite is the owner's, imported by tools/owner_art.py")
+    for name, source in client_files.items():
+        if "JournalWorkspace" in source or "ComposerWorkspace" in source:
+            err(f"client/{name}: the encyclopedia opens the journal and the composer through their clients")
+
+    # Every word has its text.
+    for name, source in [*builders.items(), *client_files.items()]:
+        for key in re.findall(r'"((?:encyclopedia|jei|screen|key|compose|journal|message)\.jugcraft\.[a-z_.]+)"', source):
+            if not key.endswith(".") and key not in lang:
+                err(f"{name}: missing lang {key}")
+    for set_name in ("pyromancers", "pyromaniacs"):
+        if f"encyclopedia.{MOD}.route.equip.{set_name}" not in lang:
+            err(f"encyclopedia: missing lang encyclopedia.{MOD}.route.equip.{set_name}")
+
+    # The record's route table, and the tests it names.
+    tests = jr.game_tests()
+    for step in en.FIRST_ROUTE:
+        for test in step["tests"]:
+            if test not in tests:
+                err(f"tools/encyclopedia.py: step {step['id']} names game test {test}, which does not exist")
+    path = ROOT / "docs" / "features" / "arcane-concordance-first-route.md"
+    record = text(path)
+    block = re.search(r"<!-- first-route:start -->\n(.*?)\n<!-- first-route:end -->", record, re.S)
+    if not block or block.group(1).strip() != "\n".join(en.route_table()).strip():
+        err("docs/features/arcane-concordance-first-route.md: its route table is not tools/encyclopedia.py's (run it and paste)")
 
 
 def check_signs(co, root, lang):
@@ -13373,6 +17666,44 @@ def check_signs(co, root, lang):
             err(f"sign: missing lang {key}")
 
 
+def check_cast_poses():
+    """Concordance Chunk A, ticket A-07: one owner for a player's arms. A gun or an arm in the main hand owns them
+    (client/CastPoses.armsOwned); at the end of every client tick, for every player the client sees, CastPoses stops
+    Spell Engine's casting and release clips on such a player, and the Vigil's gesture where the gestures yield (owned
+    arms, or an arm in the off hand); ConcordanceClient registers it; and the circle's gesture asks the same before it
+    plays (the Vigil's is checked with the Vigil, in check_crimson)."""
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    poses = text(CLIENT_JAVA_ROOT / "CastPoses.java")
+    if not poses:
+        err("client/CastPoses.java is missing: a cast's pose would play over a gun or an arm")
+        return
+
+    def body(signature):
+        found = re.search(re.escape(signature) + r" \{(.*?)\n\t\}", poses, re.S)
+        return found.group(1) if found else ""
+    owned = body("public static boolean armsOwned(Player player)")
+    if not all(part in owned for part in ("getMainHandItem()", "instanceof GunItem", "instanceof ArmItem")):
+        err("CastPoses.armsOwned: a gun (GunPose) or an arm (ArmsMotion) in the main hand owns the arms")
+    yields = body("static boolean gesturesYield(Player player)")
+    if "armsOwned(player)" not in yields or "getOffhandItem().getItem() instanceof ArmItem" not in yields:
+        err("CastPoses.gesturesYield: the gestures give way to owned arms and to an arm in the off hand")
+    tick = body("private static void tick(Minecraft client)")
+    for call in ("level.players()", "stop(player, SpellAnimationStack.CASTING_ID);", "stop(player, SpellAnimationStack.RELEASE_ID);",
+                 "stop(player, VigilClient.LAYER);"):
+        if call not in tick:
+            err(f"CastPoses.tick: missing {call} (every player this client sees gives a cast's pose up to a gun or an arm)")
+    stop = body("private static void stop(Player player, Identifier layer)")
+    if "controller.stopTriggeredAnimation();" not in stop or "controller.stop();" not in stop:
+        err("CastPoses.stop: clear the triggered clip, so it does not start again, and stop the layer at once")
+    if "ClientTickEvents.END_CLIENT_TICK.register(CastPoses::tick);" not in poses:
+        err("CastPoses must run at the end of every client tick")
+    if "CastPoses.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("ConcordanceClient.register() must call CastPoses.register()")
+    if "!CastPoses.gesturesYield(player)" not in text(CLIENT_JAVA_ROOT / "CircleClient.java"):
+        err("CircleClient: the circle's gesture must give way where CastPoses.gesturesYield says (a gun or an arm in hand)")
+
+
 # Where Fabric's permission events are asked as questions rather than raised by vanilla: the Concordance's Authority,
 # and the arms, guns and walkers that ask for the actual player's permission (relative to JAVA_ROOT).
 PERMISSION_QUERIES = {
@@ -13403,7 +17734,8 @@ def check_authority(root, lang):
     audit found asks concordance/Authority at the moment of the change; nothing asks with nobody behind it; the stand-in
     that may answer for an absent owner (Fabric's FakePlayer) is made only in Authority; Fabric's permission events are
     asked as questions only where Jugcraft already asks them; absent owners' devices wait unless the server says
-    otherwise (the option defaults to false); the Spire Heart gives nothing out through a face; and the new words
+    otherwise (the option defaults to false). Owner-authorized loaded alchemy factories have a separate buffer-only
+    Authority route, also tested with current claims. The Spire Heart gives nothing out through a face; and the new words
     exist."""
     def text(path):
         return path.read_text(encoding="utf-8") if path.exists() else ""
@@ -13524,7 +17856,8 @@ def check_persistence(root):
 def check_journey():
     """Roadmap step 31: tools/concordance_journey.py's three routes each reach the Architect stage for one player alone
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
-    data's; every game test the routes name exists; and the record's routes are the tool's."""
+    data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
+    other research; every game test the routes name exists; and the record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():

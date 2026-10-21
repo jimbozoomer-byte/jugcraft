@@ -1,7 +1,8 @@
 # Arcane Concordance: the player journey
 
-Status: the automated parts are implemented on branch `claude/concordance-steps-26-32`. **The human playtest has not
-been run**; see Verification for what has.
+Status: the automated parts are merged to main ([#250](https://github.com/jimbozoomer-byte/jugcraft/pull/250), from
+branch `claude/concordance-steps-26-32`, integrated by [#263](https://github.com/jimbozoomer-byte/jugcraft/pull/263) on
+8 October 2026). **The human playtest has not been run**; see Verification for what has.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.
@@ -101,7 +102,7 @@ This route goes to the Nether as well as the Overworld.
 
 1. **Practitioner.** Understand Circle Lore; raise Ley Pylons, fill them from lanterns or Jugcraft Energy and build a circle the anchor checks part by part. Tests: `aPylonFillsFromLightAndElectricity`, `theCircleIsCheckedPartByPart`.
 2. **Adept.** Master First Light (Kindle in eight different chunks) with Circle Lore understood: the attuned route; the Adept's Attunement then makes an Adept's Wand. Tests: `attunementCompletesOnce`, `eachRouteClimbsItsOwnWay`.
-3. **Adept.** Forge Resonant Rings at the Artificer's Bench; weigh and dissolve matter at the Assayer's Scale and form it again at a loss. Tests: `aRingIsForgedAndSavedBeforeItIsShown`, `gemsRunesAndBondsKeepTheirRules`, `aStackIsWeighedThenDissolved`, `formingCostsMoreThanDissolvingPays`.
+3. **Adept.** Forge Resonant Rings at the Artificer's Bench; weigh and dissolve matter at the Assayer's Scale and form it again at its essence value. Tests: `aRingIsForgedAndSavedBeforeItIsShown`, `gemsRunesAndBondsKeepTheirRules`, `aStackIsWeighedThenDissolved`, `formingSpendsExactValueWithoutSurcharge`.
 4. **Adept.** Key a Clockwork Porter to a Courier Post; requests are fetched and delivered under reservations. Tests: `aRequestIsFetchedAndDelivered`, `simultaneousRequestsNeverClaimTheSameItems`, `aPorterSaysWhyItStops`.
 5. **Master.** Master Circle Lore (rituals in three different chunks), Runesmithing (three different enhancements), the Assay (five different materials dissolved) and the Binding Arts (served once by each kind of worker): five entries mastered (the specialist's route). Tests: `eachRouteClimbsItsOwnWay`.
 6. **Architect.** Found a Lantern Spire and raise it; its upkeep can come by courier; its field lights the dark open air so nothing hostile spawns there. Tests: `phasesFinishInOrderAndTheSpireIsRaised`, `theHeartAsksACourierForItsUpkeep`, `eachConfigurationsFieldDoesItsWork`.

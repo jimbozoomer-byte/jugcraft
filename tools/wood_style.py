@@ -65,6 +65,26 @@ WOOD = {
     # off vanilla spruce (dE 9.6 to 10.0) and our cypress (8.2 to 10.6); docs/features/trees-batch-1.md. Appended last,
     # so every other wood keeps its seeds.
     "cedar": ("2:0", "725543"),
+    # Initial batch-2 fallback; owner_art replaces pine with the owner's originals (15 October).
+    # Keep this slot so future woods retain their deterministic seeds.
+    "pine": (6, "a49a84"),
+    "yew": ("2:7", "654135"),
+    "bald_cypress": (23, "9c9391"),
+    "magnolia": ("2:1", "807d55"),
+    "fruitwood": (7, "ab7d76"),
+    "persimmon": (18, "3d3733"),
+    "juniper": (20, "8b4654"),
+    "holly": (10, "b6baa1"),
+    "olive": (3, "9c9951"),
+    "tamarisk": ("2:6", "a06f7e"),
+    "yucca": ("2:3", "68654e"),
+    "dragonblood": (12, "689db2"),
+    "baobab": (21, "bb9b8e"),
+    "fig": (8, "7f6f63"),
+    "mango": ("2:4", "938167"),
+    # Owner bank's black walnut, cooled away from cedar/yew for batch 13.
+    # Append to preserve every earlier wood's deterministic seeds.
+    "walnut": ("2:2", "5a4b41"),
 }
 # The owner's second set of painted woods (5 October 2026: "you can use these and use them to recolor for future wood"):
 # eight full woods (bark, ends, stripped, planks). Row 6's wood is the jacaranda's and row 0's (western red cedar) the
@@ -87,6 +107,18 @@ EUCALYPTUS_FLECKS = pal("e8a578", "e3a0a0", "9cc0d8", "e6c87a", "f0e0c0")
 
 # Each tree's bark: its colour (dark to light) and its character.
 BARK = {
+    "walnut": (OWNER_BANK["black_walnut"][2], "furrowed"),
+    "fig": (pal("4f4d4a", "686561", "817d79", "989592", "b0adab"), "stringy"),
+    "mango": (pal("312d2b", "413c39", "514b48", "615a56", "716965"), "furrowed"),
+    "baobab": (pal("61524c", "7b6861", "937e77", "a69691", "baafab"), "plated"),
+    "dragonblood": (pal("2f3237", "444950", "5a6068", "6f7680", "878e96"), "streaked"),
+    "tamarisk": (pal("312022", "483032", "5e4043", "745153", "896165"), "furrowed"),
+    "yucca": (pal("5f5a42", "7c7556", "98906b", "aca688", "c0bca5"), "stringy"),
+    "olive": (pal("474a3b", "616451", "7b7f66", "93987e", "aaad99"), "furrowed"),
+    "holly": (pal("5e655a", "717a6c", "858e7f", "99a094", "acb2a9"), "plated"),
+    "juniper": (pal("372625", "4c3533", "624341", "7a5452", "936562"), "stringy"),
+    "persimmon": (pal("141416", "1b1c1f", "232528", "2c2e32", "36383c"), "plated"),
+    "yew": (OWNER_BANK["yew"][2], OWNER_BANK["yew"][3]),
     "chestnut": (pal("3a3226", "4c4232", "5e5341", "706552", "857a66"), "furrowed"),
     "larch": (pal("2e1914", "44241a", "5c3222", "74422c", "8e5638"), "plated"),
     "maple": (pal("3a3330", "4d4540", "615751", "776b63", "8c8077"), "furrowed"),
@@ -105,6 +137,10 @@ BARK = {
     # (dE 14 from the wood; as painted 17; the painted bark beside the darkened wood would be 10, the least of any wood).
     # Stringy, as cedar bark peels in long fibrous strips. docs/features/trees-batch-1.md.
     "cedar": (pal("3e2b24", "463229", "4a352a", "573f32", "5d4437"), "stringy"),
+    "pine": (pal("2d2521", "43312a", "5f4433", "805a3d", "9c6c48"), "plated"),
+    "bald_cypress": (pal("392d28", "4e3e37", "624e46", "7a6157", "927468"), "stringy"),
+    "magnolia": (pal("3b3a30", "515043", "686755", "7e7d67", "95947e"), "plated"),
+    "fruitwood": (pal("2e2928", "655a58", "7b6d6b", "90817f", "a39695"), "marked"),
 }
 EUCALYPTUS_STREAKS = pal("d07a2e", "9a4f9e", "4f7fb8", "c9a63a", "5ea06a")
 
@@ -131,7 +167,13 @@ LEAVES = {
     # The cedar's flat sprays of scale-leaves: a muted sage green (hue 84), yellower than the cypress's blue-green and
     # the fir's (mean dE 14.8 and 16.1); evergreen. Appended last, so every other look keeps its seed.
     "cedar_leaves": (pal("27301a", "343f22", "43522c", "536539", "657a46", "7d9657"), "needles"),
+    "yew_needles": (pal("111a12", "182419", "1f3021", "2b3d2d", "354c38", "425f45"), "needles"),
+    "bald_cypress_needles": (pal("333d19", "485523", "5e702d", "73883a", "8da647", "a2b866"), "needles"),
+    "bald_cypress_needles_gold": (pal("392014", "502d1b", "683b24", "7f492f", "9b5a39", "b56e4a"), "needles"),
+    "magnolia_leaves": (pal("122c12", "1a3d19", "225020", "2b612a", "357733", "438c40"), "leaves"),
 }
+LEAF_OPTIONS = {"yew_needles": {"gap_threshold": 0.15}, "bald_cypress_needles": {"gap_threshold": 0.2},
+                "bald_cypress_needles_gold": {"gap_threshold": 0.2}, "magnolia_leaves": {"gap_threshold": 0.18}}
 # Logs of their own that are no wood set (no planks), drawn as the woods are: the Cinnamon Tree's (tools/spices.py
 # CINNAMON). Each: its stripped side's colour and its bark, as in WOOD and BARK. The cinnamon's stripped side is its inner
 # bark, which is the spice, so it takes the spice's colour, not one of the owner's paintings; its bark is the smooth
@@ -139,7 +181,7 @@ LEAVES = {
 LOGS = {"cinnamon": ("b8743a", (pal("3a302a", "4e433b", "62564c", "776a5e", "8c7e70"), "plated"))}
 # Bare deciduous leaves (twigs in the bark's colour), and the chestnut's fruit.
 BARE = {"larch_needles_bare": "larch", "maple_leaves_bare": "maple", "aspen_leaves_bare": "aspen",
-        "willow_leaves_bare": "willow"}
+        "willow_leaves_bare": "willow", "bald_cypress_needles_bare": "bald_cypress"}
 LEAF_GREEN = pal("1f3b16", "2b501d", "3a6826", "4c8231", "659c40", "86b85a")
 BUR = pal("5a7a20", "7c9c2c", "a2bc3e", "d0d86a")
 BUR_DRY = pal("6a4e22", "8c6a30", "b08a44", "d2b064")
@@ -159,6 +201,8 @@ def bark_of(wood):
 
 def bark(wood, seed):
     """A log's side: vertical furrows in the bark's darkest tones, ridges between, tiling top to bottom."""
+    if wood == "yucca":
+        return yucca_bark(seed)
     p, kind = bark_of(wood)
     rng = random.Random(seed)
     c = Canvas()
@@ -194,7 +238,7 @@ def bark(wood, seed):
         # Rainbow eucalyptus: long streaks of colour where the bark has peeled.
         for _ in range(6):
             x0, y0, length = rng.randrange(16), rng.randrange(16), rng.randint(4, 9)
-            col = rng.choice(EUCALYPTUS_STREAKS)
+            col = rng.choice(pal("462a2a", "583232", "683a36") if wood == "dragonblood" else EUCALYPTUS_STREAKS)
             for i in range(length):
                 c.px(x0, (y0 + i) % 16, col)
                 if i % 3 == 1:
@@ -206,6 +250,70 @@ def bark(wood, seed):
             c.px(x, y, p[4])
             if rng.random() < 0.5:
                 c.px(x, (y + 1) % 16, p[4 if kind == "stringy" else 3])
+    if wood in ("olive", "fig", "walnut"):
+        return bark_details(c.img, p, seed + 11000)
+    return c.img
+
+
+def bark_details(image, palette, seed):
+    """Small broken ridges within existing bark bands, retaining the species palette."""
+    rng = random.Random(seed)
+    c = Canvas()
+    c.img = image.copy()
+    # Short, narrow patches interrupt broad flat strips without crossing a furrow.
+    # Use the original pixels as the mask so marks cannot grow into noisy clusters.
+    for _ in range(22):
+        x, y0 = rng.randrange(16), rng.randrange(16)
+        tone = palette.index(image.getpixel((x, y0))[:3])
+        if tone == 0:
+            continue
+        shade = max(1, min(4, tone + rng.choice((-1, 1))))
+        for dy in range(rng.randint(2, 4)):
+            y = (y0 + dy) % 16
+            if image.getpixel((x, y))[:3] != palette[tone]:
+                break
+            c.px(x, y, palette[shade])
+    # Pair a few recessed nicks with a raised edge, staggered around the tile.
+    for x0, y0 in ((2, 3), (7, 10), (12, 5), (5, 15)):
+        for dy in range(2):
+            x, y = (x0 + dy) % 16, (y0 + dy) % 16
+            tone = palette.index(image.getpixel((x, y))[:3])
+            if tone < 2:
+                continue
+            c.px(x, y, palette[tone - 1])
+            edge = (x + 1) % 16
+            if image.getpixel((edge, y))[:3] == palette[tone]:
+                c.px(edge, y, palette[min(4, tone + 1)])
+    return c.img
+
+
+def yucca_bark(seed):
+    """Short, overlapping dry fibers with shaded creases and raised pale edges."""
+    p = pal("4d4938", "6d674e", "898267", "a39c7d", "b4ae92", "c8c3ac")
+    rng = random.Random(seed)
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.px(x, y, p[3])
+    # Stagger the fiber ends and wrap each plate across the texture boundary.
+    # Narrow stepped creases give depth without unbroken dark vertical stripes.
+    for x0, width in ((0, 3), (3, 3), (6, 4), (10, 3), (13, 3)):
+        y0 = rng.randrange(16)
+        lengths = rng.choice(((5, 4, 7), (6, 6, 4), (4, 7, 5)))
+        for length in lengths:
+            tone = rng.choice((2, 3, 3, 4))
+            step = rng.choice((1, length - 2, length - 1))
+            for dy in range(length):
+                y = (y0 + dy) % 16
+                for dx in range(width):
+                    c.px(x0 + dx, y, p[tone])
+                crease = x0 + (1 if dy >= step else 0)
+                c.px(crease, y, p[1 if dy in (0, length - 1) else 0])
+                if crease + 1 < x0 + width:
+                    c.px(crease + 1, y, p[2 if dy >= length - 2 else 4])
+                if 1 <= dy < length - 2:
+                    c.px(x0 + width - 1, y, p[5 if tone >= 3 else 3])
+            y0 += length
     return c.img
 
 
@@ -315,21 +423,26 @@ def planks(wood, seed):
 def leaves(name, seed):
     """Vanilla's speckle: one- and two-pixel leaves in four tones, light on top of each clump, with gaps."""
     p, kind = LEAVES[name]
-    return paint_leaves(p, kind, seed)
+    return paint_leaves(p, kind, seed, **LEAF_OPTIONS.get(name, {}))
 
 
-def paint_leaves(p, kind, seed):
+def paint_leaves(p, kind, seed, *, gap_threshold=None, edge_green=None, under_gap=None,
+                 flower_coverage=None, midrib_count=3, midrib_length=8, midrib_angle=None):
     """Leaves of six tones `p` (dark to light) in the manner `kind` ("leaves", "needles", "blossom" or "fronds"), as
     leaves() paints each tree's; the orchards' fruit trees (tools/orchard_textures.py) are painted with it too."""
     rng = random.Random(seed)
     c = Canvas()
     for y in range(16):
         for x in range(16):
-            c.img.putpixel((x, y), p[0] + (0,))
+            c.img.putpixel((x, y), (under_gap or p[0]) + (0,))
     noise = [[rng.random() for _ in range(16)] for _ in range(16)]
     field = [[0.55 * noise[y][x] + 0.45 * (noise[(y - 1) % 16][x] + noise[y][(x - 1) % 16]) / 2 for x in range(16)]
              for y in range(16)]
-    gaps = {"leaves": 0.2, "needles": 0.16, "blossom": 0.18, "fronds": 0.22}[kind]
+    gaps = {"leaves": 0.2, "needles": 0.16, "blossom": 0.18, "fronds": 0.22}[kind] if gap_threshold is None else gap_threshold
+    if not 0 <= gaps <= 1 or (flower_coverage is not None and not 0 <= flower_coverage <= 1):
+        raise ValueError("Leaf gap threshold and flower coverage must be between zero and one")
+    if midrib_count < 0 or midrib_length < 1:
+        raise ValueError("Invalid frond midrib count or length")
     for y in range(16):
         for x in range(16):
             v = field[y][x]
@@ -353,21 +466,28 @@ def paint_leaves(p, kind, seed):
             c.px((x0 + 1) % 16, y0, p[1])
     elif kind == "blossom":
         # Blossom over a little green: clumps of flowers, the leaves showing at the edges.
+        green = edge_green or LEAF_GREEN[2:4]
+        opaque = sorted(field[y][x] for y in range(16) for x in range(16) if not c.empty(x, y))
+        edge_cutoff = .34 if flower_coverage is None else (float("inf") if flower_coverage == 0 else
+            opaque[min(len(opaque) - 1, int(len(opaque) * (1 - flower_coverage)))] if opaque else 0)
         for y in range(16):
             for x in range(16):
-                if not c.empty(x, y) and field[y][x] < 0.34:
-                    c.px(x, y, LEAF_GREEN[2 + (1 if field[y][x] > 0.27 else 0)])
+                if not c.empty(x, y) and field[y][x] < edge_cutoff:
+                    c.px(x, y, green[1 if field[y][x] > edge_cutoff - .07 else 0])
     elif kind == "fronds":
         # Long leaflets crossing the tile on a lit midrib.
-        for _ in range(3):
+        for _ in range(midrib_count):
             x0, y0 = rng.randrange(16), rng.randrange(16)
-            for i in range(8):
-                c.px((x0 + i) % 16, (y0 + i // 2) % 16, p[4])
+            for i in range(midrib_length):
+                dx, dy = (i, i // 2) if midrib_angle is None else (round(i * math.cos(math.radians(midrib_angle))), round(i * math.sin(math.radians(midrib_angle))))
+                c.px((x0 + dx) % 16, (y0 + dy) % 16, p[4])
     return c.img
 
 
 def bare(name, seed):
     """Bare twigs in the bark's colour, crossing and branching, the rest open."""
+    if name == "bald_cypress_needles_bare":
+        return cypress_bare(seed)
     p = BARK[BARE[name]][0]
     rng = random.Random(seed)
     c = Canvas()
@@ -388,6 +508,38 @@ def bare(name, seed):
             x += math.cos(angle)
             y += math.sin(angle)
             angle += rng.uniform(-0.3, 0.3)
+    return c.img
+
+
+def cypress_bare(seed, palette=None):
+    """One joined, tapering branch network; shared edge anchors connect neighbouring faces/tiles."""
+    p = BARK["bald_cypress"][0] if palette is None else palette
+    c = Canvas()
+    for y in range(16):
+        for x in range(16):
+            c.img.putpixel((x, y), p[0] + (0,))
+    paths = [
+        ([(8, 16), (8, 12), (7, 9), (9, 5), (8, 1), (8, -1)], (-1, 0)),
+        ([(-1, 8), (3, 7), (6, 8), (8, 8), (12, 9), (16, 8)], (0, -1)),
+        ([(8, 12), (4, 10), (2, 5), (1, 2)], (-1, 0)),
+        ([(8, 8), (12, 5), (13, 2), (15, 1)], (0, 1)),
+        ([(8, 4), (5, 3), (3, 1)], (0, 1)),
+        ([(3, 7), (1, 10), (1, 13)], (1, 0)),
+        ([(12, 9), (13, 12), (11, 14)], (-1, 0)),
+    ]
+    for points, (dx, dy) in paths:
+        for a, b in zip(points, points[1:]):
+            c.line(a[0] + dx, a[1] + dy, b[0] + dx, b[1] + dy, p[1])
+            c.line(*a, *b, p[2])
+    rng = random.Random(seed)
+    for y in range(1, 15):
+        for x in range(1, 15):
+            if not c.empty(x, y) and rng.random() < .16:
+                c.px(x, y, p[3])
+    # Identical two-pixel ports on all four edges join around corners as well as across a wall.
+    for i in range(16):
+        for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
+            c.img.putpixel((x, y), (p[2] + (255,)) if i in (7, 8) else p[0] + (0,))
     return c.img
 
 
@@ -432,9 +584,36 @@ def wood_textures():
         out[("block", f"stripped_{wood}_log")] = stripped_side(wood, 880 + index)
         out[("block", f"stripped_{wood}_log_top")] = stripped_top(wood, 890 + index)
     for index, name in enumerate(LEAVES):
-        out[("block", name)] = leaves(name, 800 + index)
+        # The new cypress keeps exactly the same needle arrangement through its colour change.
+        seed = 800 + list(LEAVES).index("bald_cypress_needles") if name.startswith("bald_cypress_needles") else 800 + index
+        out[("block", name)] = leaves(name, seed)
     for index, name in enumerate(BARE):
         out[("block", name)] = bare(name, 840 + index)
+    from tree_roster_textures import textures as roster_textures
+    out.update(roster_textures(out))
+    from seasonal_fruit_textures import textures as seasonal_fruit_textures
+    out.update(seasonal_fruit_textures())
+    from hawthorn_persimmon_textures import textures as hawthorn_persimmon_textures
+    out.update(hawthorn_persimmon_textures())
+    from evergreen_scrub_textures import textures as evergreen_scrub_textures
+    out.update(evergreen_scrub_textures())
+    from holly_textures import textures as holly_textures
+    out.update(holly_textures())
+    from olive_textures import textures as olive_textures, figure
+    out.update(olive_textures())
+    from dry_country_textures import textures as dry_country_textures
+    out.update(dry_country_textures())
+    from fungal_trees_textures import textures as fungal_textures
+    out.update(fungal_textures())
+    from hanging_fruit_textures import textures as hanging_textures
+    out.update(hanging_textures())
+    from tropical_tree_textures import textures as tropical_textures
+    out.update(tropical_textures())
+    from rainforest_textures import textures as rainforest_textures
+    out.update(rainforest_textures())
+    from walnut_textures import textures as walnut_textures
+    out.update(walnut_textures())
+    out["block", "olive_planks"] = figure(out["block", "olive_planks"])
     chestnut = out[("block", "chestnut_leaves")]
     out[("block", "chestnut_leaves_burs")] = chestnut_fruit(chestnut, 1)
     out[("block", "chestnut_leaves_ripe")] = chestnut_fruit(chestnut, 2)

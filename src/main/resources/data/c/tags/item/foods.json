@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:pine_nuts",
+    "jugcraft:roasted_pine_nuts",
     "jugcraft:roasted_corn",
     "jugcraft:popcorn",
     "jugcraft:roasted_sunflower_seeds",
@@ -13,6 +15,7 @@
     "jugcraft:roasted_acorns",
     "jugcraft:raw_turkey",
     "jugcraft:turkey_slice",
+    "jugcraft:roasted_walnuts",
     "jugcraft:roasted_chestnuts",
     "jugcraft:baked_acorn_squash",
     "jugcraft:squash_pie",
@@ -119,11 +122,17 @@
     "jugcraft:chicken_curry",
     "jugcraft:saffron_rice",
     "jugcraft:vanilla_custard",
+    "jugcraft:sea_grape_jelly",
+    "jugcraft:mango_chutney",
+    "jugcraft:haw_jelly",
+    "jugcraft:persimmon_preserve",
+    "jugcraft:rowan_jelly",
     "jugcraft:sweet_berry_jam",
     "jugcraft:apple_butter",
     "jugcraft:pumpkin_butter",
     "jugcraft:cranberry_preserves",
     "jugcraft:glow_berry_jelly",
+    "jugcraft:pickled_olives",
     "jugcraft:pickled_beets",
     "jugcraft:pickled_peppers",
     "jugcraft:corn_relish",
@@ -134,7 +143,9 @@
     "jugcraft:blueberry_jam",
     "jugcraft:plum_jam",
     "jugcraft:dill_pickles",
+    "jugcraft:osmanthus_mooncake",
     "jugcraft:red_bean_mooncake",
+    "jugcraft:walnut_mooncake",
     "jugcraft:chestnut_mooncake",
     "jugcraft:pumpkin_mooncake",
     "jugcraft:apple_pie_slice",
@@ -146,6 +157,7 @@
     "jugcraft:sweet_berry_cheesecake_slice",
     "jugcraft:peach_pie_slice",
     "jugcraft:lemon_meringue_pie_slice",
+    "jugcraft:persimmon_pie_slice",
     "jugcraft:carrot_cake_slice",
     "jugcraft:birthday_cake_slice",
     "jugcraft:ice_cream_cake_slice",
@@ -162,6 +174,7 @@
     "jugcraft:whipped_pumpkin_pie_slice",
     "jugcraft:pork_pie_slice",
     "jugcraft:strawberry_tart_slice",
-    "jugcraft:coffee_tart_slice"
+    "jugcraft:coffee_tart_slice",
+    "#jugcraft:nouveau_magic_food"
   ]
 }

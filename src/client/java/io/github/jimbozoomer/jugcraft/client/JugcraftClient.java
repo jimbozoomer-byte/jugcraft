@@ -41,18 +41,39 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
  * pumpkin boats to theirs, gravestones to the renderer of their engravings, and Halloween's night creatures,
  * thrown pumpkins and landing markers to theirs; the Harvest Moon's state to the pumpkins' sparks; the drone
  * depot's renderers (drones, pickup lift, control room screen) and terminal screen, and the server's season to
- * grass and foliage colours, and the Party key to the Party screen; and the mesh item models the Runebound arms are
- * drawn with (MeshItemModels).
+ * grass and foliage colours, the Party key to the Party screen, and the Encyclopedia key and inventory button to the
+ * Encyclopedia; and the mesh item models the Runebound arms are drawn with (MeshItemModels).
  */
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		AcademyAtmosphere.register();
 		MeshItemModels.register();
+		StructureItemRenderers.register();
 		new io.github.jimbozoomer.jugcraft.client.scary.ScaryClient().onInitializeClient();
+		// Chima the lion cub (docs/features/chima.md).
+		ModelLayerRegistry.registerModelLayer(io.github.jimbozoomer.jugcraft.client.chima.ChimaModel.LAYER,
+				io.github.jimbozoomer.jugcraft.client.chima.ChimaModel::createLayer);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.creatures.chima.ChimaMod.CHIMA,
+				io.github.jimbozoomer.jugcraft.client.chima.ChimaRenderer::new);
 		for (MachineKind kind : MachineKind.values()) {
 			MenuScreens.register(JugcraftMachines.menuType(kind), MachineScreen::new);
 		}
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.PlantInterior.SIGN_ENTITY, PlantSignRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.PlantInterior.STATUS_ENTITY, StatusScreenRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.PlantInterior.LIVE_PANEL_ENTITY, LivePanelRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.PlantInterior.LOCKER_ENTITY, LockerRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.PlantInterior.RACK_ENTITY, StorageRackRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.PlantInterior.ROLLER_ENTITY, RollerDoorRenderer::new);
+		SpeedGateRenderer.register();
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.PORT_ENTITY, StorageTankRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.GATE_ENTITY, RailingGateRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.HATCH_ENTITY, StorageTankHatchRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.machine.form.JugcraftForms.MENU, FormMachineScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.workshop.JugcraftWorkshop.MENU, WorkshopScreen::new);
+		WorkshopScreen.registerOverlayCompatibility();
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.MENU, VehicleBayScreen::new);
+		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.ENTITY, VehicleBayRenderer::new);
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.machine.form.IndustrialForms.ENTITY, FormMachineRenderer::new);
 		MenuScreens.register(JugcraftAgriculture.COOKING_POT_MENU, CookingPotScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD_MENU, RocketPadScreen::new);
@@ -66,12 +87,25 @@ public final class JugcraftClient implements ClientModInitializer {
 		TatterlaceClient.register();
 		YetiKingClient.register();
 		CinderTyrantClient.register();
+		LanternFenClient.register();
+		MireHagClient.register();
+		CryptLichClient.register();
+		IronDreadnoughtClient.register();
+		AlphaWerewolfClient.register();
+		CydonianSentinelClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftLogistics.CONVEYOR_ENTITY, ConveyorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftTools.CHARGING_STATION_ENTITY, ChargingStationRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.powerline.JugcraftPowerLines.ANCHOR_ENTITY, context -> new LineRenderer());
+		// Every MBS item shows a see-through copy of what it would place (the power lines' preview among them).
+		MbsPreview.register();
+		WallRunModel.register();
+		io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.openScreen = pos -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(new StorageTankScreen(pos));
+		WallRunOverlay.register();
 		RocketPackClient.register();
+		FinanceClient.register();
 		BroomstickClient.register();
 		BalloonClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
@@ -87,6 +121,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		ZeppelinClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, DieselWalkerRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, ArmouredWalkerRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.HOWITZER_WALKER, HowitzerWalkerRenderer::new);
 		WalkerClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, LandshipRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.SHELL, ThrownItemRenderer::new);
@@ -113,6 +148,10 @@ public final class JugcraftClient implements ClientModInitializer {
 				io.github.jimbozoomer.jugcraft.client.arms.ThrownArmRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
+		HazmatLayer.register();
+		UniformLayer.register();
+		RadiationHud.register();
+		RadiationNeedle.register();
 		GhostSheetLayer.register();
 		CostumeLayer.register();
 		FacePaintLayer.register();
@@ -124,7 +163,19 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftSolar.SOLAR_TRACKER_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftSolar.HELIOSTAT_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.STEAM_ENGINE_ENTITY, KineticRotorRenderer::new);
+		// An MBS's longer placing reach while in the main hand (placement/StructureReach.java), set at once on the
+		// client too so the crosshair reaches as soon as the item is in the hand.
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (client.player != null) {
+				io.github.jimbozoomer.jugcraft.placement.StructureReach.update(client.player);
+			}
+		});
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
+			int side = io.github.jimbozoomer.jugcraft.placement.StructureReach.longestSide(stack, true);
+			if (side > 0) {
+				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.structure_reach", 2 * side)
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
 			StoredFluid stored = stack.get(JugcraftFluids.STORED_FLUID);
 			if (stored != null) {
 				lines.add(stored.describe());
@@ -142,9 +193,13 @@ public final class JugcraftClient implements ClientModInitializer {
 		io.github.jimbozoomer.jugcraft.gear.TraitTooltips.details = () -> Minecraft.getInstance().hasShiftDown();
 		SeasonColors.register();
 		WoodColors.register();
+		TreeLeafColors.register();
 		PartyClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();
+		JugcraftKeyBindings.register();
+		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).
+		EncyclopediaClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
@@ -230,6 +285,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PANTRY_SHELF_ENTITY, PantryShelfRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPICE_RACK_ENTITY, SpiceRackRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
+		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SNOWPETAL, net.minecraft.client.particle.FallingLeavesParticle.CherryProvider::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SPOOKY_SPARK, SpookySparkParticle::provider);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_LAUNCHER_ENTITY, ShowLauncherRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_ROCKET, context -> new ThrownItemRenderer<>(context, 1.0F, true));
@@ -271,6 +327,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(JugcraftAgriculture.FLYING_PUMPKIN, context -> new ThrownItemRenderer<>(context, 1.5F, false));
 		EntityRendererRegistry.register(JugcraftAgriculture.FLAMING_PUMPKIN, context -> new ThrownItemRenderer<>(context, 1.5F, true));
 		EntityRendererRegistry.register(JugcraftAgriculture.BOWLING_PUMPKIN, BowlingPumpkinRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.DOOR_WREATH, DoorWreathRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TOILET_PAPER_ROLL, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.TOSS_RING, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.ROTTEN_TOMATO, ThrownItemRenderer::new);
@@ -292,6 +349,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		});
 		BlockEntityRenderers.register(JugcraftDrones.TERMINAL_ENTITY, context -> new DroneDepotRenderer());
 		DroneSounds.register();
+		DieselSounds.register();
+		SoundOcclusion.register();
 		BlockEntityRenderers.register(JugcraftDrones.SCREEN_ENTITY, ControlScreenRenderer::new);
 		BlockEntityRenderers.register(JugcraftDrones.HOLO_ENTITY, context -> new HoloMapRenderer());
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.blueprint.JugcraftBlueprints.STAKE_ENTITY, context -> new SurveyStakeRenderer());
@@ -309,5 +368,11 @@ public final class JugcraftClient implements ClientModInitializer {
 		io.github.jimbozoomer.jugcraft.drone.GuideBooks.openScreen = book -> Minecraft.getInstance().gui.setScreen(new GuideBookScreen(book));
 		DroneTerminalBlock.openScreen = pos -> Minecraft.getInstance().gui.setScreen(new DroneTerminalScreen(pos));
 		io.github.jimbozoomer.jugcraft.tower.TowerCoreBlock.openScreen = pos -> Minecraft.getInstance().gui.setScreen(new TowerScreen(pos));
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.JugcraftNuclear.EQUIPMENT_ENTITY, NuclearRenderer::new);
+		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.JugcraftNuclear.COOLING_TOWER_ENTITY, CoolingTowerRenderer::new);
+		io.github.jimbozoomer.jugcraft.nuclear.EquipmentPlacement.openConsole = pos -> Minecraft.getInstance().gui.setScreen(new ReactorConsoleScreen(pos));
+		io.github.jimbozoomer.jugcraft.nuclear.EquipmentPlacement.openShutdownPanel = pos -> Minecraft.getInstance().gui.setScreen(new RemoteShutdownScreen(pos));
+		net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry.getInstance().register(
+				io.github.jimbozoomer.jugcraft.nuclear.JugcraftNuclear.COOLING_PLUME, CoolingPlumeParticle.Provider::new);
 	}
 }

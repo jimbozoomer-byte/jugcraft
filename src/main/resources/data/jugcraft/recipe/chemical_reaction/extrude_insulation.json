@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:polymer_extrusion",
+  "items": [
+    {
+      "ingredient": "jugcraft:rubber",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:cable_insulation",
+      "count": 6
+    }
+  ],
+  "tool": "jugcraft:insulation_extrusion_die",
+  "energy_per_tick": 24,
+  "time": 160
+}
