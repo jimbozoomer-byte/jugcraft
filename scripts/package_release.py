@@ -14,6 +14,7 @@ import sys
 import zipfile
 
 import package_modrinth as pack
+import package_server_join as join
 
 # Modrinth's published Windows installer records InstallLocation; passing a local
 # .mrpack to its executable triggers its native RunMRPack import flow.
@@ -118,6 +119,7 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
             pack.verify_bytes(library, (cache / library['filename']).read_bytes())
     pack.require(not output.exists() or not any(output.iterdir()),
                  'Release output must be empty; never overwrite an existing release')
+    server = join.load_settings(root) if (root / 'distribution/server-project.json').exists() else None
     output.mkdir(parents=True, exist_ok=True)
     mrpack = pack.build_pack(lock, jar, output, version, root)
     # Separate the pack listing from the standalone mod's dependency metadata.
@@ -132,7 +134,8 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
         'minecraft': lock['minecraft'], 'fabricLoader': lock['fabricLoader'], 'java': lock['java'],
         'frameworkLockSha512': hashlib.sha512(pack.json_bytes(lock)).hexdigest(),
         'updateMethod': 'Modrinth Server Project linked pack; launcher confirmation required',
-        'serverAddress': None, 'modrinthServerProject': None,
+        'serverAddress': server['serverAddress'] if server else None,
+        'modrinthServerProject': server['projectUrl'] if server else None,
     }
     host = output / ('JUGCRAFT-server-' + version + '.zip')
     installed = []
@@ -175,8 +178,11 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
         ).encode())
     online = output / ('Install-JUGCRAFT-' + version + '.cmd')
     online.write_bytes(online_installer(version, mrpack.name, sha512(mrpack)))
+    artifacts = [mrpack, host, player, online]
+    if server:
+        artifacts.append(join.build_join(output, root))
     manifest['artifacts'] = [{'name': path.name, 'size': path.stat().st_size, 'sha512': sha512(path)}
-                             for path in (mrpack, host, player, online)]
+                             for path in artifacts]
     (output / 'release-manifest.json').write_bytes(pack.json_bytes(manifest))
     (output / 'SHA512SUMS.txt').write_text(''.join(
         f'{entry["sha512"]}  {entry["name"]}\n' for entry in manifest['artifacts']), encoding='utf-8')

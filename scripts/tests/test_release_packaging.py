@@ -107,6 +107,16 @@ class ReleasePackagingTests(unittest.TestCase):
         self.assertNotIn('/latest/', script)
         self.assertLess(max(map(len, script.splitlines())), 8191)
 
+    def test_configured_server_is_recorded_and_join_bundle_checksummed(self):
+        settings = {'projectUrl': 'https://modrinth.com/server/jugcraft-server',
+                    'serverAddress': 'jugcraft.modrinth.gg'}
+        (self.root / 'distribution/server-project.json').write_text(json.dumps(settings))
+        result = self.build()
+        self.assertEqual(result['serverAddress'], settings['serverAddress'])
+        self.assertEqual(result['modrinthServerProject'], settings['projectUrl'])
+        entry = next(x for x in result['artifacts'] if x['name'] == 'JUGCRAFT-Join.zip')
+        self.assertEqual(entry['sha512'], release.sha512(self.root / 'out' / entry['name']))
+
 
 if __name__ == '__main__':
     unittest.main()

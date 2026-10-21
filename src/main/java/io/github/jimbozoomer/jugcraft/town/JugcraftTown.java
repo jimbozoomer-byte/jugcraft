@@ -53,6 +53,7 @@ public final class JugcraftTown {
 
 		TownProtection.register();
 		TownBuilder.register();
+        TownUpgrades.register();
 		TownPlanner.register();
 		TownDecor.register();
 		TownsfolkCare.register();

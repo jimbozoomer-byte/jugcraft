@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.town.TownState;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import io.github.jimbozoomer.jugcraft.town.TownsfolkCare;
 import io.github.jimbozoomer.jugcraft.town.TownWayfinding;
+import io.github.jimbozoomer.jugcraft.town.TownUpgrades;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -195,6 +196,67 @@ public class TownGameTests {
 		helper.succeed();
 	}
 
+    private static net.minecraft.world.entity.decoration.ItemFrame exerciseUpgrade(GameTestHelper h, ServerLevel level, BlockPos origin, List<ChunkPos> chunks) {
+        TownData old = TownUpgrades.historical(1), next = TownData.get();
+        var changed = new java.util.LinkedHashMap<BlockPos,BlockState>();
+        for (var chunk : chunks) {
+            for (int x=(chunk.x()<<4)-origin.getX();x<((chunk.x()<<4)-origin.getX())+16;x++)
+                for (int z=(chunk.z()<<4)-origin.getZ();z<((chunk.z()<<4)-origin.getZ())+16;z++)
+                    for (int y=next.yMin;y<next.yMin+next.height;y++) {
+                        int a=old.index(x,y,z),b=next.index(x,y,z);
+                        if (a==TownData.KEEP || b==TownData.KEEP || old.state(a)==next.state(b)) continue;
+                        BlockPos at=origin.offset(x,y,z);
+                        changed.put(at,next.state(b)); TownBuilder.set(level,at,old.state(a));
+                    }
+        }
+        h.assertTrue(changed.size()>20,"Regression includes real old kiosk/building differences");
+        // Initialize the old generated text at retired kiosk signs.
+        for (var entry : old.signs) {
+            BlockPos at=origin.offset(entry.pos());
+            if (!chunks.contains(ChunkPos.containing(at)) || !(level.getBlockEntity(at) instanceof SignBlockEntity sign)) continue;
+            var lines=entry.lines().stream().map(net.minecraft.network.chat.Component::literal).map(c->(net.minecraft.network.chat.Component)c).toList();
+            for(var slot:SignTextSlot.values())sign.setText(new net.minecraft.world.level.block.entity.SignText(lines,lines,net.minecraft.world.item.DyeColor.WHITE,false),slot);
+        }
+        BlockPos edited=changed.keySet().stream().filter(at->level.getBlockEntity(at)==null).findFirst().orElseThrow();
+        TownBuilder.set(level,edited,Blocks.GOLD_BLOCK.defaultBlockState());
+        var roster=new java.util.HashMap<Integer,UUID>();
+        for(var spot:next.spots) {var id=TownState.get(level).townsperson(spot.index()); if(id!=null)roster.put(spot.index(),id);}
+        var board=old.mapBoards.getFirst();
+        var frame=new net.minecraft.world.entity.decoration.ItemFrame(level,origin.offset(board.pos()),board.facing());
+        frame.setItem(TownWayfinding.map(level));frame.setPermanentlyInvulnerable(true);level.addFreshEntity(frame);
+        for(var chunk:chunks)TownUpgrades.applyChunk(level,chunk);
+        h.assertTrue(level.getBlockState(edited).is(Blocks.GOLD_BLOCK),"Upgrade preserves an operator-edited block");
+        for(var entry:changed.entrySet())if(!entry.getKey().equals(edited))h.assertTrue(level.getBlockState(entry.getKey())==entry.getValue(),"Old town changed in place at "+entry.getKey());
+        for(var entry:roster.entrySet())h.assertTrue(entry.getValue().equals(TownState.get(level).townsperson(entry.getKey())),"NPC identity preserved during refresh");
+        for(var chunk:chunks) {
+            h.assertTrue(TownUpgrades.version(level,chunk.pack())==TownUpgrades.CURRENT,"Chunk migration saved");
+            TownUpgrades.applyChunk(level,chunk);
+        }
+        h.assertTrue(level.getBlockState(edited).is(Blocks.GOLD_BLOCK),"Repeated upgrade is idempotent");
+        var encoded=TownUpgrades.Progress.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE,TownUpgrades.progress(level)).getOrThrow();
+        var restored=TownUpgrades.Progress.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE,encoded).getOrThrow();
+        h.assertTrue(encoded.equals(TownUpgrades.Progress.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE,restored).getOrThrow()),"Upgrade progress/conflicts survive save round trip");
+        TownBuilder.set(level,edited,changed.get(edited));
+        h.assertTrue(!Townsfolk.bedtime(13000)&&!Townsfolk.bedtime(17999)&&Townsfolk.bedtime(18000)
+            &&Townsfolk.bedtime(23999)&&!Townsfolk.bedtime(24000),"Residents stay up until midnight, then wake at dawn");
+        h.assertTrue(next.beds.size()==26 && next.beds.values().stream().distinct().count()==26,"All civilians have separate beds");
+        for(var spot:next.spots)if(spot.role().equals("guard"))h.assertTrue(!next.beds.containsKey(spot.index()),"Guards stay on duty");
+        return frame;
+    }
+
+    @GameTest
+    public void upgradeNeverErasesContainersOrEditedBlocks(GameTestHelper h) {
+        var level=h.getLevel();var at=h.absolutePos(new BlockPos(1,2,1));
+        TownBuilder.set(level,at,Blocks.CHEST.defaultBlockState());
+        var chest=(net.minecraft.world.level.block.entity.ChestBlockEntity)level.getBlockEntity(at);
+        chest.setItem(0,new ItemStack(Items.DIAMOND,3));
+        h.assertTrue(!TownUpgrades.replaceAuthored(level,at,level.getBlockState(at),Blocks.AIR.defaultBlockState()),"Container replacement rejected");
+        h.assertTrue(chest.getItem(0).getCount()==3,"Contents preserved");
+        TownBuilder.set(level,at.above(),Blocks.GOLD_BLOCK.defaultBlockState());
+        h.assertTrue(!TownUpgrades.replaceAuthored(level,at.above(),Blocks.STONE.defaultBlockState(),Blocks.AIR.defaultBlockState()),"Unexpected live state is preserved");
+        h.succeed();
+    }
+
 	/**
 	 * A test town far away: its square's chunks are built straight from the data and checked block by block, its
 	 * townsfolk come out, a survival player can neither break nor place there, an explosion and a fire leave it as it
@@ -222,7 +284,8 @@ public class TownGameTests {
 			TownDecor.chunkBuilt(level, pos);
 			TownsfolkCare.chunkBuilt(level, pos);
 		}
-		// Block for block: every block the data sets in these chunks is there (decor sites aside).
+		var retiredMap = exerciseUpgrade(helper, level, origin, chunks);
+        // Block for block: every block the data sets in these chunks is there (decor sites aside).
 		Set<Long> sites = new HashSet<>();
 		for (TownData.Site site : data.sites) {
 			for (int[] b : site.blocks()) {
@@ -286,6 +349,9 @@ public class TownGameTests {
 			var sign = (SignBlockEntity)level.getBlockEntity(signPos);
 			helper.assertTrue(sign.isWaxed() && sign.getText(SignTextSlot.FRONT).getMessages(false).getFirst().getString()
 					.equals(entry.lines().get(0)), "Sign is labelled and waxed");
+            helper.assertTrue(sign.getText(SignTextSlot.FRONT).hasGlowingText()
+                && sign.getText(SignTextSlot.FRONT).getColor() == net.minecraft.world.item.DyeColor.WHITE,
+                "Sign text is bright white");
 		}
 
 		BlockPos paving = origin.offset(96, 0, 100);
@@ -329,7 +395,8 @@ public class TownGameTests {
 			// Fire on the square goes out before it can burn anything.
 			level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
 			helper.runAfterDelay(80, () -> {
-				boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
+				helper.assertTrue(retiredMap.isRemoved(), "Old map frame is removed even when its entities load after the chunk upgrade");
+                boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
 				// The town stays as built once its chunks tick: no water spreading from the fountain or wells, no blocks
 				// falling or leaves decaying (decor sites aside). Only air and fluid are compared, since random ticks may
 				// rightly change other states (grass under a block, a crop's age).
@@ -348,6 +415,19 @@ public class TownGameTests {
 					boolean hurt = someone.hurtServer(level, level.damageSources().playerAttack(player), 100.0F);
 					unhurt = !hurt && someone.getHealth() == someone.getMaxHealth() && someone.isAlive();
 				}
+                if (!people.isEmpty()) {
+                    Townsfolk resident = people.getFirst();
+                    UUID original = resident.getUUID(), unloaded = UUID.randomUUID();
+                    helper.assertTrue(level.isPositionEntityTicking(resident.home()), "Resident home is ticking for unloaded-UUID regression");
+                    state.setTownsperson(resident.spot(), unloaded);
+                    TownsfolkCare.checkResidents(level);
+                    helper.assertTrue(unloaded.equals(state.townsperson(resident.spot())), "An unloaded resident is never replaced");
+                    state.setTownsperson(resident.spot(), original);
+                    resident.discard();
+                    helper.assertTrue(state.townsperson(resident.spot()) == null, "Known destruction releases the roster slot");
+                    TownsfolkCare.checkResidents(level);
+                    helper.assertTrue(state.townsperson(resident.spot()) != null && !original.equals(state.townsperson(resident.spot())), "Known removed resident is restored once");
+                }
 				state.forget();
 				for (ChunkPos pos : chunks) {
 					level.setChunkForced(pos.x(), pos.z(), false);

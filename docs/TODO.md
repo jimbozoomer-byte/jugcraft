@@ -1,5 +1,15 @@
 # Jugcraft TODO
 
+## Living spawn city — October 21 local work
+
+- [x] Add explicit, resumable existing-town blueprint upgrades; preserve edited blocks, inventories and NPC identities. [Scope and operator commands](features/living-town-upgrades.md).
+- [x] Church of Notch, Priest of Notch, altar-facing pews, white glowing shop signs, retired map kiosk, twelve guards and late-night civilian beds.
+- [x] Replace idle airborne hovering with flight/landing/rest behavior.
+- [x] Pass local validation: all 2,233 required server GameTests, 11 town architecture checks and repository checks.
+- [ ] Owner visual playtest and hosted multiplayer check before deploying this city revision.
+- [ ] **MUST: audit seasonal content against every newer biome collection** (landscape, ecology/grove, caves and custom dimensions). Check season eligibility, foliage/grass tint, temperature/snow/rain, crop growth, wildlife spawns, Halloween/December encounters and town decorations. Add explicit biome tags/rules and regressions where missing; preserve earned seasonal items and existing builds. Determine which systems need adaptation before deciding on a larger seasonal rewrite.
+- [ ] Add a separately versioned migration for future Styx observatory-district redesigns and any town footprint expansion; core-town upgrades must not regenerate those areas.
+
 ## Overnight integration — October 21
 
 - [x] Combine starter workshop and Frostward College M0 with main; reconcile older tech drafts with canonical packages. [Exact scope](features/remaining-release-oct21.md).

@@ -3,12 +3,53 @@
 The player-facing pack name is **JUGCRAFT**. Minecraft 26.3, Fabric Loader 0.19.5
 and Java 25 remain pinned. No downloader runs inside Minecraft.
 
+## Player launch setup (21 October 2026)
+
+The owner selected the new town/church/bird build for the first player release
+and authorized installing it on the hosted server. The intended launch is
+`0.1.0-alpha.20261021.2`, replacing the earlier hosted `.1` build.
+
+- Server: `jugcraft.modrinth.gg`.
+- Stable linked-server page: <https://modrinth.com/server/jugcraft-server>.
+- [Checked-in server settings](../distribution/server-project.json) keep future
+  release bundles pointing at the same project. Do not create a new project per release.
+- `JUGCRAFT-Join.zip` is the small Discord handout. Its Internet shortcut opens
+  the official server page; players click Play and accept installation in Modrinth.
+  macOS/Linux users open the URL directly. The shortcut contains no downloader.
+- A linked server instance is required for automatic pre-launch update prompts.
+  The downloadable `.mrpack` and versioned installer remain manual fallback tools.
+- The new Server Project requires Modrinth moderation before non-members can use
+  it. Creation/upload does not mean approval or a verified end-to-end update.
+  Do not announce its link as live until approval and a linked installation are verified.
+
+The older `modrinth.com/modpack/jugcraft` listing is the separate 1.21.1/NeoForge
+Summer pack. Do not point current players at that pack or change its old versions.
+
+### Sending the next update
+
+Prepare a uniquely versioned pack from tested source with the existing GitHub
+release workflow. Back up the server, deploy its matching files, and verify startup
+before promoting the player update. In the **same** Server Project, open
+Settings > Server > Compatibility and replace its custom pack with that exact
+`.mrpack`, then save. That compatibility change is the release action which
+prompts every linked player to update on their next launch. Do not publish a
+player compatibility version before the matching server is ready.
+
+The release workflow automates assembly and checksums. Linked-instance prompts
+are native Modrinth behavior. Live server deployment and compatibility promotion
+remain explicit owner release actions; no publishing credential or unattended
+deployment has been configured. A commit to main alone never updates players.
+
+Before a wider launch, verify a fresh linked install, a join and an old-linked-
+instance update. Preserve the previous pack and matching world backup for rollback.
+
 ## Prepared files
 
 `scripts/package_release.py` assembles matching files from a tested JAR:
 
 | File | Purpose |
 |---|---|
+| `JUGCRAFT-Join.zip` | Recommended Discord handout: stable server Play link and instructions for linked updates. Requires approved Server Project. |
 | `jugcraft-complete-VERSION.mrpack` | Direct Modrinth import; internal name JUGCRAFT. Filename retained for tooling compatibility. |
 | `JUGCRAFT-player-VERSION.zip` | Pack, Windows `Install-JUGCRAFT.cmd` and instructions. |
 | `Install-JUGCRAFT-VERSION.cmd` | Single-file Windows installer: downloads the exact published GitHub pack, verifies its embedded hash, then opens Modrinth import. |
