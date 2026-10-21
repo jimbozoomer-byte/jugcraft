@@ -11,6 +11,7 @@
       "io.github.jimbozoomer.jugcraft.test.TestForms"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.QuartzSiliconGameTests",
       "io.github.jimbozoomer.jugcraft.test.AcademyGameTests",
       "io.github.jimbozoomer.jugcraft.test.UndergroundDepositGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarterWorkshopGameTests",
@@ -294,6 +295,7 @@
       "io.github.jimbozoomer.jugcraft.finance.ExchangeIntegrationGameTests"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.QuartzSiliconClientGameTests",
       "io.github.jimbozoomer.jugcraft.finance.ExchangeClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AcademyClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.UndergroundDepositClientGameTests",

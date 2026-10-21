@@ -65,6 +65,9 @@ def build():
             if index == 2:
                 retained = [len(inputs), len(inputs)+1]
                 inputs += [['jugcraft:basic_ceramic_lining',1],['jugcraft:ceramic_crucible',1]]
+            if r.get('high_heat'):
+                retained += [len(inputs),len(inputs)+1]
+                inputs += [['jugcraft:crucible_heat_insert',1],['jugcraft:crucible_bellows',1]]
             rows.append(dict(items=inputs, fluids=[], fluid_results=[], results=[[r['result']['id'],r['result']['count']]],
                 ticks=r['time'], tool=r.get('tool',{}).get('id',''), retained_inputs=retained, energy_per_tick=0))
         fluid_machines.append(dict(block='jugcraft:'+station,type='starter_'+station,recipes=rows))
