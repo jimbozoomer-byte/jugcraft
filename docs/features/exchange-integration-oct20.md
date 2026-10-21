@@ -38,6 +38,10 @@ No new dependency or world generation is introduced.
 - Scratch cards issued by a kiosk carry a saved, single-use paid ticket ID. Alchemy
   blanks and cloned ticket data cannot generate winnings; ordinary item conversion stays available.
 
+- Diorama's minimap is suppressed only while an Exchange screen is open, preventing
+  it from covering the Market Chest prices. Closing the screen restores normal map rendering
+  without changing the player's map preferences; Diorama remains optional.
+
 ## Verification
 
 Local combined common/client/GameTest compilation passed. All 12 new Exchange server

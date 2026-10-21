@@ -23,6 +23,21 @@ public final class FinanceClient {
 	}
 
 	public static void register() {
+        // Diorama normally draws over container screens; keep Market Chest prices readable.
+        // Wrap its registered HUD element only after every client initializer has run.
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("diorama")) {
+                net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.replaceElement(
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("diorama", "minimap"), original -> (graphics, delta) -> {
+                        var screen=client.gui.screen();
+                        if (!(screen instanceof MarketChestScreen || screen instanceof ExchangeScreen
+                            || screen instanceof ExchangeGuideScreen || screen instanceof CasinoScreen
+                            || screen instanceof PokerScreen || screen instanceof ScratchScreen)) {
+                            original.extractRenderState(graphics, delta);
+                        }
+                    });
+            }
+        });
 		// The Derby Table's horses, raced in the world for everyone nearby.
 		net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.register(
 				io.github.jimbozoomer.jugcraft.finance.ExchangeBlocks.CASINO_ENTITY, DerbyRenderer::new);
