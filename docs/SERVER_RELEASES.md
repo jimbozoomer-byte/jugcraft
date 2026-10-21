@@ -11,17 +11,25 @@ and Java 25 remain pinned. No downloader runs inside Minecraft.
 |---|---|
 | `jugcraft-complete-VERSION.mrpack` | Direct Modrinth import; internal name JUGCRAFT. Filename retained for tooling compatibility. |
 | `JUGCRAFT-player-VERSION.zip` | Pack, Windows `Install-JUGCRAFT.cmd` and instructions. |
+| `Install-JUGCRAFT-VERSION.cmd` | Single-file Windows installer: downloads the exact published GitHub pack, verifies its embedded hash, then opens Modrinth import. |
 | `JUGCRAFT-server-VERSION.zip` | Server-compatible mods, config defaults, managed-file inventory and host instructions. Client-only libraries are excluded. |
 | `release-manifest.json`, `SHA512SUMS.txt` | Source commit, separate pack/mod versions, platform and integrity checksums. |
 | `modrinth-pack-version.json` | Pack-version fields for publication. Project ID is deliberately not invented. |
 
-On Windows, extract the player ZIP and run the helper. It verifies the included
+On Windows, run the standalone versioned installer after the GitHub release is
+published, or extract the player ZIP and run its offline helper. The standalone
+file downloads only its pinned pack into a new temporary folder, checks its hash
+before opening it, and cannot fetch unpublished drafts for ordinary players.
+It never follows a moving `latest` release. The offline helper verifies the included
 pack's SHA-512 and asks Windows to open its registered `.mrpack` handler. Choose
 Modrinth App and confirm the import. If association is missing, install
 [Modrinth App](https://modrinth.com/app) and use Create instance > From file.
 macOS/Linux can import the pack directly. Microsoft/Minecraft sign-in stays in
 the launcher. This helper does not silently install the launcher, change security
-settings, replace existing profiles/worlds or launch Minecraft. Actual launcher
+settings, replace existing profiles/worlds or launch Minecraft. It prefers the
+registered Modrinth installation, with the `.mrpack` association as fallback.
+The import behavior is documented in [Modrinth's app source](https://github.com/modrinth/code/blob/main/apps/app-frontend/src/App.vue).
+Actual launcher
 import needs a separate human check; it is not a zero-click updater.
 
 ## Recommended update flow

@@ -15,6 +15,19 @@ import zipfile
 
 import package_modrinth as pack
 
+# Modrinth's published Windows installer records InstallLocation; passing a local
+# .mrpack to its executable triggers its native RunMRPack import flow.
+OPEN_MODRINTH = (
+    "$app=Get-ItemProperty 'HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/*',"
+    "'HKLM:/Software/Microsoft/Windows/CurrentVersion/Uninstall/*',"
+    "'HKLM:/Software/WOW6432Node/Microsoft/Windows/CurrentVersion/Uninstall/*' -ErrorAction SilentlyContinue "
+    "| Where-Object { $_.DisplayName -eq 'Modrinth App' -and $_.InstallLocation } | Select-Object -First 1; "
+    "if ($app) { $exe=Join-Path $app.InstallLocation.Trim([char]34) 'Modrinth App.exe'; "
+    "if (!(Test-Path -LiteralPath $exe -PathType Leaf)) { throw 'Modrinth App executable was not found.' }; "
+    "Start-Process -FilePath $exe -ArgumentList (''+[char]34+$p+[char]34) } "
+    "else { Start-Process -FilePath $p }"
+)
+
 
 def sha512(path: Path) -> str:
     digest = hashlib.sha512()
@@ -37,7 +50,32 @@ if errorlevel 1 (pause & exit /b 1)
 echo Choose Modrinth App if Windows asks, then confirm the import as JUGCRAFT.
 echo No existing profiles or worlds have been changed by this helper.
 pause
-'''.replace('PACK_NAME', pack_name).replace('PACK_HASH', digest).replace('\n', '\r\n')).encode('utf-8')
+'''.replace('PACK_NAME', pack_name).replace('PACK_HASH', digest)
+        .replace('Start-Process -FilePath $p', OPEN_MODRINTH).replace('\n', '\r\n')).encode('utf-8')
+
+
+def online_installer(version: str, pack_name: str, digest: str) -> bytes:
+    """One downloadable file, pinned to an immutable published release and hash."""
+    url = f'https://github.com/jimbozoomer-byte/jugcraft/releases/download/pack-{version}/{pack_name}'
+    command = (
+        "$ErrorActionPreference='Stop'; try { "
+        "$d=Join-Path ([IO.Path]::GetTempPath()) ('JUGCRAFT-'+[guid]::NewGuid().ToString('N')); "
+        "New-Item -ItemType Directory -Path $d | Out-Null; "
+        f"$p=Join-Path $d '{pack_name}'; "
+        "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; "
+        f"Invoke-WebRequest -UseBasicParsing -Uri '{url}' -OutFile $p; "
+        f"if ((Get-FileHash -LiteralPath $p -Algorithm SHA512).Hash -ne '{digest}') "
+        "{ throw 'Downloaded pack failed verification. Nothing will be installed.' }; "
+        + OPEN_MODRINTH +
+        " } catch { Write-Host $_.Exception.Message; "
+        "Write-Host 'This requires a published GitHub release and Modrinth App (https://modrinth.com/app). "
+        "You can also download the player ZIP and import its .mrpack manually.'; exit 1 }"
+    )
+    return ('@echo off\r\nsetlocal DisableDelayedExpansion\r\ntitle Install JUGCRAFT\r\n'
+            f'echo Downloading verified JUGCRAFT {version}...\r\n'
+            f'powershell.exe -NoProfile -Command "{command}"\r\n'
+            'if errorlevel 1 (pause & exit /b 1)\r\n'
+            'echo Confirm the JUGCRAFT import in Modrinth App.\r\npause\r\n').encode('utf-8')
 
 
 def server_entries(lock: dict, jar: Path, cache: Path, root: Path):
@@ -135,8 +173,10 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
             'pack so Modrinth can prompt you for the required update before launch.\n'
             'No launch, profile replacement, world changes or security-setting changes are automated.\n'
         ).encode())
+    online = output / ('Install-JUGCRAFT-' + version + '.cmd')
+    online.write_bytes(online_installer(version, mrpack.name, sha512(mrpack)))
     manifest['artifacts'] = [{'name': path.name, 'size': path.stat().st_size, 'sha512': sha512(path)}
-                             for path in (mrpack, host, player)]
+                             for path in (mrpack, host, player, online)]
     (output / 'release-manifest.json').write_bytes(pack.json_bytes(manifest))
     (output / 'SHA512SUMS.txt').write_text(''.join(
         f'{entry["sha512"]}  {entry["name"]}\n' for entry in manifest['artifacts']), encoding='utf-8')

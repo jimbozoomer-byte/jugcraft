@@ -94,6 +94,19 @@ class ReleasePackagingTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 release.build_release(self.lock, self.jar, self.cache, self.root / 'out', version, commit, self.root)
 
+    def test_online_installer_is_pinned_and_verifies_before_opening(self):
+        result = self.build()
+        record = next(x for x in result['artifacts'] if x['name'].endswith('.cmd'))
+        script = (self.root/'out'/record['name']).read_text()
+        pack_record = next(x for x in result['artifacts'] if x['name'].endswith('.mrpack'))
+        self.assertIn('/releases/download/pack-0.1.0-test.1/'+pack_record['name'], script)
+        self.assertIn(pack_record['sha512'], script)
+        self.assertLess(script.index('Get-FileHash'), script.index('Start-Process'))
+        self.assertIn("DisplayName -eq 'Modrinth App'", script)
+        self.assertNotIn('ExecutionPolicy', script)
+        self.assertNotIn('/latest/', script)
+        self.assertLess(max(map(len, script.splitlines())), 8191)
+
 
 if __name__ == '__main__':
     unittest.main()
