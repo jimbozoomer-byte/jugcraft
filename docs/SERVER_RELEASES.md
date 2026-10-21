@@ -3,7 +3,31 @@
 The player-facing pack name is **JUGCRAFT**. Minecraft 26.3, Fabric Loader 0.19.5
 and Java 25 remain pinned. No downloader runs inside Minecraft.
 
-## Player launch setup (21 October 2026)
+## Current distribution: our installer, no public Modrinth listing
+
+The owner chose direct Discord/GitHub distribution on 21 October. Use
+`JUGCRAFT-Installer.zip` and the [direct updater guide](features/direct-player-updater.md).
+Players import once, bind that instance and copy its command into the instance's
+Pre-launch hook. Future checks prompt before updating the same folder; settings,
+saves and unrelated files remain untouched. This first installer is Windows-only.
+
+The Modrinth Server Project below remains an unpublished draft; do not submit it
+for review or distribute its old `JUGCRAFT-Join.zip`. `enabled: false` in
+`distribution/server-project.json` stops future release assembly from generating
+that shortcut. Server hosting and direct mod-file updates continue independently.
+
+After testing/deploying the server, explicitly promote the candidate channel:
+
+```sh
+python scripts/promote_player_update.py --candidate build/release/stable.json --server-version VERSION --publish
+```
+
+Omit `--publish` for a dry run. The server version is the operator's verified
+deployment declaration. The tool validates public release metadata; it does not
+probe server health. Publishing a release or merging main never promotes the
+channel automatically. Clients verify the channel's manifest and each payload.
+
+## Initial deployment and superseded linked-project setup (21 October 2026)
 
 The owner selected the new town/church/bird build for the first player release
 and authorized installing it on the hosted server. Version
@@ -103,7 +127,7 @@ The import behavior is documented in [Modrinth's app source](https://github.com/
 Actual launcher
 import needs a separate human check; it is not a zero-click updater.
 
-## Recommended update flow
+## Historical linked-project alternative (not selected)
 
 Create a **Modrinth Server Project** and configure Compatibility to use JUGCRAFT
 (a published pack version or a custom pack upload). Give viewers its Play link.
@@ -132,9 +156,10 @@ release announcements remain manual.
 4. Schedule maintenance, back up world/player data/configs and old managed mods,
    then stop the server. Select the exact Minecraft/Fabric/Java pins in the host
    panel and apply the tested files. Handle EULA acceptance yourself if required.
-5. Publish the GitHub prerelease, upload/select its exact `.mrpack` in the Server
-   Project Compatibility section, and reopen the server. Announce its version
-   and changelog. Neither source merges nor this workflow deploy automatically.
+5. Publish the GitHub prerelease and verify its direct updater payloads. After the
+   matching server starts successfully, promote `stable.json` using the command
+   above. Announce its version and changelog. Neither source merges nor this
+   workflow deploy or promote automatically.
 
 For first installation upload `mods/`, `config/` and `defaultconfigs/` through the
 host file manager/SFTP, or use a compatible pack importer. The ZIP is an upload
@@ -162,8 +187,8 @@ GitHub workflow enforces that gate. Changed source needs new validation/version.
 
 ## Remaining release checks
 
-- Modrinth review of the configured Server Project, plus an actual linked install
-  and old-version update; an uploaded custom pack alone is not proof of either.
+- Fresh player installation and a native Modrinth pre-launch update check with
+  the JUGCRAFT helper. Modrinth listing review is no longer part of this plan.
 - Deployment/startup/migration results are recorded with the particular release.
 - Custom JUGCRAFT title screen and main server Play button, explicitly deferred.
 - Two-account hosted-server testing.

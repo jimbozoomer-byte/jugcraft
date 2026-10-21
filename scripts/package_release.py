@@ -12,9 +12,12 @@ from pathlib import Path
 import re
 import sys
 import zipfile
+import tempfile
+import shutil
 
 import package_modrinth as pack
 import package_server_join as join
+import package_player_update as direct
 
 # Modrinth's published Windows installer records InstallLocation; passing a local
 # .mrpack to its executable triggers its native RunMRPack import flow.
@@ -133,9 +136,9 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
         'modVersion': metadata['version'], 'sourceCommit': commit,
         'minecraft': lock['minecraft'], 'fabricLoader': lock['fabricLoader'], 'java': lock['java'],
         'frameworkLockSha512': hashlib.sha512(pack.json_bytes(lock)).hexdigest(),
-        'updateMethod': 'Modrinth Server Project linked pack; launcher confirmation required',
+        'updateMethod': 'JUGCRAFT updater and per-instance Modrinth pre-launch hook; owner-promoted GitHub channel',
         'serverAddress': server['serverAddress'] if server else None,
-        'modrinthServerProject': server['projectUrl'] if server else None,
+        'modrinthServerProject': server['projectUrl'] if server and server.get('enabled', True) else None,
     }
     host = output / ('JUGCRAFT-server-' + version + '.zip')
     installed = []
@@ -171,15 +174,24 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
             'from https://modrinth.com/app and use Create instance > From file with the included .mrpack.\n'
             'macOS/Linux: import the .mrpack directly in Modrinth App.\n'
             'The profile name is JUGCRAFT. Microsoft/Minecraft sign-in remains inside the launcher.\n'
-            'This standalone file does not subscribe to automatic updates. For ongoing server play,\n'
-            'use the owner\'s Modrinth Server Project Play link once it is configured; accept its linked\n'
-            'pack so Modrinth can prompt you for the required update before launch.\n'
+            'Import only ONCE. For updates use the JUGCRAFT updater supplied by the owner.\n'
+            'Select this existing instance in that updater and copy its command into this instance\n'
+            'Settings > Launch hooks > Pre-launch. Do not set a global hook.\n'
+            'Play checks the owner-promoted GitHub release and asks before updating the SAME folder.\n'
+            'No public Modrinth listing or approval is needed. Plain file imports alone do not update.\n'
             'No launch, profile replacement, world changes or security-setting changes are automated.\n'
         ).encode())
     online = output / ('Install-JUGCRAFT-' + version + '.cmd')
     online.write_bytes(online_installer(version, mrpack.name, sha512(mrpack)))
     artifacts = [mrpack, host, player, online]
-    if server:
+    with tempfile.TemporaryDirectory() as temp:
+        staged = Path(temp) / 'direct-update'
+        direct.build(mrpack, staged, commit)
+        for name in ('player-update.json', 'jugcraft-client.jar', 'stable.json'):
+            target = output / name
+            shutil.copyfile(staged / name, target)
+            artifacts.append(target)
+    if server and server.get('enabled', True):
         artifacts.append(join.build_join(output, root))
     manifest['artifacts'] = [{'name': path.name, 'size': path.stat().st_size, 'sha512': sha512(path)}
                              for path in artifacts]

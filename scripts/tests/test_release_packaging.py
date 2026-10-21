@@ -117,6 +117,18 @@ class ReleasePackagingTests(unittest.TestCase):
         entry = next(x for x in result['artifacts'] if x['name'] == 'JUGCRAFT-Join.zip')
         self.assertEqual(entry['sha512'], release.sha512(self.root / 'out' / entry['name']))
 
+    def test_disabled_listing_uses_direct_inventory_without_join_shortcut(self):
+        (self.root/'distribution/server-project.json').write_text(json.dumps({
+            'enabled':False,'projectUrl':'https://modrinth.com/server/jugcraft-server',
+            'serverAddress':'jugcraft.modrinth.gg'}))
+        result=self.build()
+        self.assertIsNone(result['modrinthServerProject'])
+        self.assertNotIn('JUGCRAFT-Join.zip',[a['name'] for a in result['artifacts']])
+        manifest=json.loads((self.root/'out/player-update.json').read_text())
+        self.assertEqual(manifest['sourceCommit'],'a'*40)
+        self.assertEqual(len(manifest['files']),len(self.lock['dependencies'])+1)
+        self.assertEqual((self.root/'out/jugcraft-client.jar').read_bytes(),self.jar.read_bytes())
+
 
 if __name__ == '__main__':
     unittest.main()
