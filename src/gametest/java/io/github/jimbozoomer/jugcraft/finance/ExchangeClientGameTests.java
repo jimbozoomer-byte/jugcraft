@@ -14,6 +14,7 @@ public class ExchangeClientGameTests implements FabricClientGameTest {
     private static void check(boolean value,String why) {if(!value)throw new AssertionError(why);}
     @Override public void runTest(ClientGameTestContext context) {
         try(var server=context.worldBuilder().createServer()) {
+            long expectedBalance;
             try(var connection=server.connect()) {
                 connection.waitForChunksRender();server.runCommand("time set noon");server.runCommand("weather clear");
                 server.runCommand("gamerule minecraft:spawn_mobs false");
@@ -52,6 +53,19 @@ public class ExchangeClientGameTests implements FabricClientGameTest {
                     server.computeOnServer(mc->{var p=mc.getPlayerList().getPlayers().getFirst();((CasinoBlockEntity)mc.overworld().getBlockEntity(at)).open(p);return true;});
                     context.waitFor(c->c.gui.screen() instanceof CasinoScreen,200);context.waitTicks(5);
                     context.takeScreenshot("jugcraft_exchange_screen_"+game.id);context.runOnClient(c->c.gui.setScreen(null));
+                    if(game==CasinoBlock.Game.LOTTERY) {
+                        for(var card:ShowGames.ScratchCard.values()) {
+                            server.computeOnServer(mc->{var p=mc.getPlayerList().getPlayers().getFirst();
+                                check(((CasinoBlockEntity)mc.overworld().getBlockEntity(at)).buyScratch(p,card.ordinal()).ok(),"buy paid scratch card");
+                                var item=ExchangeBlocks.SCRATCH_CARDS.get(card);
+                                ItemStack ticket=ItemStack.EMPTY;for(int slot=0;slot<36;slot++)if(p.getInventory().getItem(slot).is(item)){ticket=p.getInventory().getItem(slot).copy();break;}
+                                check(!ticket.isEmpty(),"paid ticket delivered");
+                                p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND,ticket);
+                                ((ScratchCardItem)item).use(mc.overworld(),p,net.minecraft.world.InteractionHand.MAIN_HAND);return true;});
+                            context.waitForScreen(ScratchScreen.class);context.waitTicks(5);context.takeScreenshot("jugcraft_exchange_scratch_"+card.ordinal());
+                            context.runOnClient(c->c.gui.setScreen(null));
+                        }
+                    }
                     server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x-5,y,z-12,x+9,y+8,z));
                 }
                 for(var design:PokerTableBlock.Design.values()) {
@@ -65,12 +79,12 @@ public class ExchangeClientGameTests implements FabricClientGameTest {
                     context.runOnClient(c->c.gui.setScreen(null));
                     server.runCommand("fill %d %d %d %d %d %d minecraft:air".formatted(x-5,y,z-12,x+9,y+8,z));
                 }
-                server.computeOnServer(mc->{var p=mc.getPlayerList().getPlayers().getFirst();var ledger=Ledger.get(mc);ledger.book().grant(p.getUUID(),123,FinanceService.day(mc));ledger.setDirty();return true;});
+                expectedBalance=server.computeOnServer(mc->{var p=mc.getPlayerList().getPlayers().getFirst();var ledger=Ledger.get(mc);ledger.book().grant(p.getUUID(),123,FinanceService.day(mc));ledger.setDirty();return ledger.book().cash(p.getUUID());});
             }
             io.github.jimbozoomer.jugcraft.test.InProcessServerConfigs.beforeReconnect(server);
             try(var connection=server.connect()) {
                 connection.waitForChunksRender();context.getInput().pressKey(FinanceClient.openExchange);context.waitForScreen(ExchangeScreen.class);
-                check(server.computeOnServer(mc->Ledger.get(mc).book().cash(mc.getPlayerList().getPlayers().getFirst().getUUID())>=123),"balance survived reconnect");
+                check(server.computeOnServer(mc->Ledger.get(mc).book().cash(mc.getPlayerList().getPlayers().getFirst().getUUID())==expectedBalance),"exact balance survived reconnect");
                 context.takeScreenshot("jugcraft_exchange_reconnected");context.runOnClient(c->c.gui.setScreen(null));
             }
         }

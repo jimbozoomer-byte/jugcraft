@@ -872,6 +872,10 @@ public final class FinanceService {
 					c.amount, c.period.ordinal(), FinanceBook.clean(c.note, 120), c.nextDay, c.active));
 		}
 		List<String> history = new ArrayList<>();
+        long awaiting=book.prizeDebts().stream().filter(d->id.equals(d.player())).mapToLong(FinanceBook.PrizeDebt::amount).sum();
+        long owing=book.prizeDebts().stream().filter(d->id.equals(d.house())).mapToLong(FinanceBook.PrizeDebt::amount).sum();
+        if(awaiting>0) history.add("Saved winnings awaiting funding: "+book.format(awaiting)+". Paid automatically when funded.");
+        if(owing>0) history.add("Your house owes saved prizes: "+book.format(owing)+". New covered bets are paused until paid.");
 		for (FinanceBook.Entry entry : book.historyOf(id, HISTORY_LINES)) {
 			history.add("Day " + entry.day() + ": " + FinanceBook.clean(entry.text(), 220));
 		}
