@@ -1,6 +1,6 @@
 # Starter workshop — Batch 1
 
-Status: implemented and locally validated; draft PR #442 awaiting owner preview approval.
+Status: owner-approved preview; PR #442 ready for review.
 AI assistance: OpenAI Codex (GPT-6).
 
 ## Scope
@@ -74,3 +74,13 @@ The direct recipe now yields four copper cables from two copper ingots and one t
 Manual tool sounds now play once when the server commits a new batch, including successive batches while Start Work remains enabled. Volume rises from 0.12 to 0.5 on the Blocks slider. Only the operating player receives the cue. A paused or saved partial batch retains its work and does not replay the sound on resumption. Failed starts, missing ingredients and blocked output remain silent. The earlier three-cue client schedule is removed. No new audio assets or dependencies are added; the same vanilla anvil, shearing and extinguishing events remain in use.
 
 Revision validation: all 10 workshop server tests passed, including actual crafting-grid selection for all three cable recipes. All three workshop Python tests and eight recipe-loop regressions passed. The cable recipes and handbook match their generators; the tower cost audit and whitespace checks pass. The focused workshop client run exercised the sound packet path, start/stop, completion and save/reopen successfully. Listening preference remains for owner review; no full game-test suite was run.
+
+## PR #442 CI corrections (20 October 2026)
+
+Foundation failed its authored-item alchemy coverage check because the committed catalog predated the 12 new workshop item definitions. Regenerated `data/jugcraft/alchemy/values.json` with `tools/build_alchemy_values.py` and the pinned Minecraft 26.3 extracted server JAR. All 12 additions have recipe-derived records; the same generator also refreshes 511 existing records against the current recipes, including the approved cable outputs. No seeds, valuation rules or conservation assertions were changed.
+
+Build run 39520358008 exhausted the mod job's 30-minute wall-clock budget: generation and data checks consumed about 11 minutes before compilation/testing, and the server suite reached its final 24-test batch with three tests still waiting at cancellation. Those were the Rainforest tap scheduling, partial-progress and stopped-tap restart tests, whose original callbacks waited 1,205 or 2,410 ticks. The log reported a 216-second tick backlog; it did not report a failed gameplay assertion. Client checks and the optional-integrations-absent job passed.
+
+The tap tests now inspect the actual chunk scheduler for exactly one tick at the production deadline, check that upgrades and bottling retain that exact deadline, then reschedule only their own verified fixture tick eight ticks ahead. Normal server dispatch still performs filling and restart, with early-fill, exact quantity, bottle consumption, partial progress and full-tap stopping assertions retained. No global clock, gameplay interval, CI timeout or test selection was changed. Batch 2 remains excluded.
+
+Focused validation: `python -m unittest discover -s scripts/tests -p test_alchemy_values.py -v` passed all 10 tests. `runGameTest` filtered to `jugcraft-test:rainforest_game_tests*` passed all 13 tests in 4.889 seconds of game-test execution, using the pinned Complete-pack dependencies and regenerated catalog. The full server suite and rendered client suite were not rerun locally; the fresh CI run must confirm the full job finishes within its existing budget.
