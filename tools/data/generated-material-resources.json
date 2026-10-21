@@ -20112,6 +20112,8 @@
   "data/jugcraft/recipe/alloying/neodymium_magnet_from_ferroboron.json",
   "data/jugcraft/recipe/alloying/solder_ingot.json",
   "data/jugcraft/recipe/alloying/structural_aluminum_magnesium.json",
+  "data/jugcraft/recipe/alloys_aluminum_cladding.json",
+  "data/jugcraft/recipe/alloys_aluminum_propeller_sets.json",
   "data/jugcraft/recipe/alloys_bulk_chemical_reactor.json",
   "data/jugcraft/recipe/alloys_howitzer_walker.json",
   "data/jugcraft/recipe/alloys_lightweight_frames.json",
