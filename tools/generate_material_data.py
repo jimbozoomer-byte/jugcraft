@@ -953,7 +953,7 @@ def ore_drop(block, item, low=1, high=1, fortune=True):
     functions.append({"type": "minecraft:explosion_decay"})
     return loot(block, [{"type": "minecraft:alternatives", "children": [
         {"type": "minecraft:item", "condition": SILK, "name": rid(block)},
-        {"type": "minecraft:item", "modifier": functions, "name": rid(item)},
+        {"type": "minecraft:item", "modifier": functions, "name": item if ":" in item else rid(item)},
     ]}])
 
 
@@ -1185,7 +1185,7 @@ def loot_tables():
     for mineral, info in MINERALS.items():
         low, high = info["drops"]
         for block in mineral_blocks(mineral):
-            table = ore_drop(block, mineral, low, high, fortune=info.get("fortune", True)) if block.endswith("_ore") else self_drop(block)
+            table = ore_drop(block, info.get("vanilla_item", mineral), low, high, fortune=info.get("fortune", True)) if block.endswith("_ore") else self_drop(block)
             write(out / f"{block}.json", table)
     for block in machine_blocks():
         if block in TANKS:
@@ -1295,7 +1295,8 @@ def recipes():
                       cooking(feature, kind, f"#c:ores/{metal}", ingot, info["xp"]))
 
     for mineral, info in MINERALS.items():
-        compaction(out, info["feature"], rid(mineral), mineral, f"{mineral}_block")
+        if not info.get("vanilla_item"):
+            compaction(out, info["feature"], rid(mineral), mineral, f"{mineral}_block")
 
     for result, (pattern, key, count) in CRAFTING.items():
         features = [MACHINE_FEATURE] + sorted({
@@ -1534,7 +1535,8 @@ def tags():
     for mineral, info in MINERALS.items():
         rate = "singular" if info["drops"] == [1, 1] else "dense"
         ore_tags(tags, mineral, f"{mineral}_ore", f"deepslate_{mineral}_ore", info["tool"], rate)
-        storage_tags(tags, mineral, f"{mineral}_block", "none")
+        if not info.get("vanilla_item"):
+            storage_tags(tags, mineral, f"{mineral}_block", "none")
         if mineral in MINERAL_TAGS:
             tags.add("item", f"c:{MINERAL_TAGS[mineral]}", rid(mineral))
             tags.add("item", "c:dusts", f"#c:{MINERAL_TAGS[mineral]}")
@@ -1692,6 +1694,7 @@ def worldgen():
                     "ore": {"size": gen["size"], "discard_chance_on_air_exposure": 0.0, "targets": targets},
                     "surface_biomes": rid(f"has_surface_ore/{placed}"),
                     "outcrop": rid(f"{name}_ore"), "outcrop_chance": gen["outcrop_chance"],
+                    **({"outcrop_max":gen["outcrop_max"]} if "outcrop_max" in gen else {}),
                     **({"outcrop_biomes": rid(f"has_outcrop/{placed}")} if "outcrop_surface_biomes" in gen else {}),
                 })
             else:

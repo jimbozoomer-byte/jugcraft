@@ -7732,6 +7732,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:crucible"
     },
+    "jugcraft:crucible_bellows": {
+      "numerator": 67,
+      "denominator": 2,
+      "source": "recipe jugcraft:starter_workshop/crucible_bellows"
+    },
+    "jugcraft:crucible_heat_insert": {
+      "numerator": 192,
+      "denominator": 1,
+      "source": "recipe jugcraft:starter_workshop/crucible_heat_insert"
+    },
     "jugcraft:crude_oil_bucket": {
       "numerator": 1,
       "denominator": 1,
@@ -8136,6 +8146,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:deepslate_quartz_ore": {
+      "numerator": 1024,
+      "denominator": 1,
+      "source": "local quartz mining/Fortune accounting"
     },
     "jugcraft:deepslate_salt_ore": {
       "numerator": 1,
@@ -23961,6 +23976,11 @@
       "numerator": 384,
       "denominator": 1,
       "source": "recipe jugcraft:pyromaniacs_tunic"
+    },
+    "jugcraft:quartz_ore": {
+      "numerator": 1024,
+      "denominator": 1,
+      "source": "local quartz mining/Fortune accounting"
     },
     "jugcraft:radiation_control_board": {
       "numerator": 49247,

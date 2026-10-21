@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "scope": "All registered Jugcraft items from the game-test snapshot.",
-  "registry_snapshot": "docs\\audits\\survival-item-registry.json",
+  "registry_snapshot": "docs/audits/survival-item-registry.json",
   "unregistered_model_definitions": [
     "jugcraft:arcane_concordance",
     "jugcraft:companion_roly_pack",
@@ -20,16 +20,16 @@
     "Reachability is qualitative; energy, quantities, research and encounter difficulty require playtesting."
   ],
   "summary": {
-    "chain_with_acquisition_evidence": 3203,
-    "recipe_chain_reachable": 1545,
-    "natural_or_interaction_source": 566,
+    "chain_with_acquisition_evidence": 2969,
+    "recipe_chain_reachable": 1793,
+    "natural_or_interaction_source": 568,
     "loot_only": 291,
     "deferred_acquisition_design": 78,
     "intentional_noncraftable": 329
   },
   "recipe_types": {
-    "minecraft:crafting_shaped": 2770,
-    "minecraft:crafting_shapeless": 1040,
+    "minecraft:crafting_shaped": 2778,
+    "minecraft:crafting_shapeless": 1046,
     "jugcraft:alloying": 10,
     "minecraft:blasting": 40,
     "jugcraft:arc_smelting": 16,
@@ -48,7 +48,7 @@
     "minecraft:stonecutting": 221,
     "jugcraft:circuit_assembly": 7,
     "jugcraft:coking": 1,
-    "jugcraft:crushing": 46,
+    "jugcraft:crushing": 48,
     "jugcraft:cutting": 85,
     "jugcraft:distillation": 9,
     "jugcraft:electrolysis": 9,
@@ -72,11 +72,12 @@
     "jugcraft:ore_washing": 23,
     "jugcraft:polymerization": 4,
     "jugcraft:pot_cooking": 82,
-    "jugcraft:pressing": 25,
+    "jugcraft:pressing": 26,
     "jugcraft:pulverizing": 57,
     "jugcraft:rocket_assembly": 22,
     "jugcraft:sawing": 45,
     "jugcraft:sifting": 3,
+    "jugcraft:starter_working": 16,
     "jugcraft:steelmaking": 1,
     "jugcraft:tree_growing": 50,
     "jugcraft:water_treatment": 4,
@@ -232,7 +233,7 @@
     },
     {
       "item": "jugcraft:access_floor_tile",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -311,7 +312,7 @@
     },
     {
       "item": "jugcraft:acoustic_wall_panel",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -388,7 +389,7 @@
     },
     {
       "item": "jugcraft:aed_cabinet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -754,8 +755,9 @@
       "item": "jugcraft:aluminum_cladding",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
+        "src/main/resources/data/jugcraft/recipe/alloys_aluminum_cladding.json",
         "src/main/resources/data/jugcraft/recipe/aluminum_cladding.json"
       ],
       "evidence": [],
@@ -882,8 +884,9 @@
       "item": "jugcraft:aluminum_propeller_set",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
+        "src/main/resources/data/jugcraft/recipe/alloys_aluminum_propeller_sets.json",
         "src/main/resources/data/jugcraft/recipe/aluminum_propeller_set.json"
       ],
       "evidence": [],
@@ -924,7 +927,7 @@
     },
     {
       "item": "jugcraft:amber_cage_lamp",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -1301,7 +1304,7 @@
     },
     {
       "item": "jugcraft:ashfall_pistol",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2244,12 +2247,24 @@
       "blocked_by": []
     },
     {
-      "item": "jugcraft:basic_circuit",
-      "status": "chain_with_acquisition_evidence",
+      "item": "jugcraft:basic_ceramic_lining",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/circuit_assembly/basic_circuit.json"
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_lining.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:basic_circuit",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/circuit_assembly/basic_circuit.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/basic_circuit.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -2290,7 +2305,7 @@
     },
     {
       "item": "jugcraft:bastion_concrete",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2301,7 +2316,7 @@
     },
     {
       "item": "jugcraft:bastion_concrete_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2312,7 +2327,7 @@
     },
     {
       "item": "jugcraft:bastion_concrete_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2323,7 +2338,7 @@
     },
     {
       "item": "jugcraft:bastion_concrete_wall",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2334,7 +2349,7 @@
     },
     {
       "item": "jugcraft:bastion_embrasure",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2356,7 +2371,7 @@
     },
     {
       "item": "jugcraft:bastion_parapet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2367,7 +2382,7 @@
     },
     {
       "item": "jugcraft:bastion_parapet_corner",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -2378,7 +2393,7 @@
     },
     {
       "item": "jugcraft:bastion_rifle",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -5981,7 +5996,7 @@
     },
     {
       "item": "jugcraft:black_lacquer_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -5992,7 +6007,7 @@
     },
     {
       "item": "jugcraft:black_lacquer_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6003,7 +6018,7 @@
     },
     {
       "item": "jugcraft:black_lacquer_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6116,7 +6131,7 @@
     },
     {
       "item": "jugcraft:blastproof_concrete",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6127,7 +6142,7 @@
     },
     {
       "item": "jugcraft:blastproof_concrete_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6138,7 +6153,7 @@
     },
     {
       "item": "jugcraft:blastproof_concrete_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6472,7 +6487,7 @@
     },
     {
       "item": "jugcraft:bonecarved_dagger",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6483,7 +6498,7 @@
     },
     {
       "item": "jugcraft:bonecarved_flail",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6494,7 +6509,7 @@
     },
     {
       "item": "jugcraft:bonecarved_glaive",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6505,7 +6520,7 @@
     },
     {
       "item": "jugcraft:bonecarved_labrys",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6582,7 +6597,7 @@
     },
     {
       "item": "jugcraft:borer",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -6836,11 +6851,12 @@
       "item": "jugcraft:brass_ingot",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 3,
+      "route_count": 4,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/alloying/brass_ingot.json",
         "src/main/resources/data/jugcraft/recipe/brass_ingot_from_brass_block.json",
-        "src/main/resources/data/jugcraft/recipe/brass_ingot_from_nuggets.json"
+        "src/main/resources/data/jugcraft/recipe/brass_ingot_from_nuggets.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/brass_ingot.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -6871,9 +6887,10 @@
       "item": "jugcraft:brass_plate",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/pressing/brass_ingot.json"
+        "src/main/resources/data/jugcraft/recipe/pressing/brass_ingot.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/brass_plate.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -7259,13 +7276,14 @@
       "item": "jugcraft:bronze_ingot",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 5,
+      "route_count": 6,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/alloying/bronze_ingot.json",
         "src/main/resources/data/jugcraft/recipe/bronze_ingot_from_blasting_bronze_blend.json",
         "src/main/resources/data/jugcraft/recipe/bronze_ingot_from_bronze_block.json",
         "src/main/resources/data/jugcraft/recipe/bronze_ingot_from_nuggets.json",
-        "src/main/resources/data/jugcraft/recipe/bronze_ingot_from_smelting_bronze_blend.json"
+        "src/main/resources/data/jugcraft/recipe/bronze_ingot_from_smelting_bronze_blend.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/bronze_ingot.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -7484,9 +7502,10 @@
       "item": "jugcraft:bronze_plate",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/pressing/bronze_ingot.json"
+        "src/main/resources/data/jugcraft/recipe/pressing/bronze_ingot.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/bronze_plate.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -7707,7 +7726,7 @@
     },
     {
       "item": "jugcraft:building_sign",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -8008,7 +8027,7 @@
     },
     {
       "item": "jugcraft:cable_tray",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -20933,7 +20952,7 @@
     },
     {
       "item": "jugcraft:ceiling_light_panel",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -21056,13 +21075,25 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:ceramic_crucible",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_crucible.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:ceramic_insulator",
       "status": "recipe_chain_reachable",
       "reason": "",
-      "route_count": 2,
+      "route_count": 3,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/ceramic_insulator.json",
-        "src/main/resources/data/jugcraft/recipe/ceramics_placed_insulators.json"
+        "src/main/resources/data/jugcraft/recipe/ceramics_placed_insulators.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_insulators.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -21429,7 +21460,7 @@
     },
     {
       "item": "jugcraft:chitin_smg",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -21624,7 +21655,7 @@
     },
     {
       "item": "jugcraft:cinder_repeater",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -22845,7 +22876,7 @@
     },
     {
       "item": "jugcraft:concrete_column",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -22955,7 +22986,7 @@
     },
     {
       "item": "jugcraft:conference_table",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -22988,7 +23019,7 @@
     },
     {
       "item": "jugcraft:control_cable_drop",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23054,7 +23085,7 @@
     },
     {
       "item": "jugcraft:control_tray",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23065,7 +23096,7 @@
     },
     {
       "item": "jugcraft:control_tray_cross",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23076,7 +23107,7 @@
     },
     {
       "item": "jugcraft:control_tray_firestop",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23087,7 +23118,7 @@
     },
     {
       "item": "jugcraft:control_tray_hanger",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23098,7 +23129,7 @@
     },
     {
       "item": "jugcraft:control_tray_tee",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23109,7 +23140,7 @@
     },
     {
       "item": "jugcraft:control_tray_waterfall",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23120,7 +23151,7 @@
     },
     {
       "item": "jugcraft:control_tray_waterfall_hanger",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23142,7 +23173,7 @@
     },
     {
       "item": "jugcraft:conveyor",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23153,7 +23184,7 @@
     },
     {
       "item": "jugcraft:conveyor_slope",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23308,11 +23339,12 @@
       "item": "jugcraft:copper_cable",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 3,
+      "route_count": 4,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/ceramics_copper_cable.json",
         "src/main/resources/data/jugcraft/recipe/copper_cable.json",
-        "src/main/resources/data/jugcraft/recipe/insulated_copper_cable.json"
+        "src/main/resources/data/jugcraft/recipe/insulated_copper_cable.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/insulated_copper_cable.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -23333,7 +23365,7 @@
     },
     {
       "item": "jugcraft:copper_dome_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23344,7 +23376,7 @@
     },
     {
       "item": "jugcraft:copper_dome_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23355,7 +23387,7 @@
     },
     {
       "item": "jugcraft:copper_dome_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23381,21 +23413,23 @@
     },
     {
       "item": "jugcraft:copper_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/pressing/copper_ingot.json"
+        "src/main/resources/data/jugcraft/recipe/pressing/copper_ingot.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/copper_plate.json"
       ],
       "evidence": [],
       "blocked_by": []
     },
     {
       "item": "jugcraft:copper_wire",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/copper_wire.json",
         "src/main/resources/data/jugcraft/recipe/wire_drawing/copper_ingot.json"
       ],
       "evidence": [],
@@ -23740,7 +23774,7 @@
     },
     {
       "item": "jugcraft:crackling",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -23982,6 +24016,28 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/crucible.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:crucible_bellows",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_bellows.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:crucible_heat_insert",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_heat_insert.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -24545,7 +24601,7 @@
     },
     {
       "item": "jugcraft:dc_cable_riser",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -24556,7 +24612,7 @@
     },
     {
       "item": "jugcraft:dc_cable_riser_sense",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -24567,7 +24623,7 @@
     },
     {
       "item": "jugcraft:dc_cable_riser_top",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -24578,7 +24634,7 @@
     },
     {
       "item": "jugcraft:dc_cable_riser_top_sense",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -24589,7 +24645,7 @@
     },
     {
       "item": "jugcraft:dc_cable_tray",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -24600,7 +24656,7 @@
     },
     {
       "item": "jugcraft:dc_cable_tray_bend",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -24611,7 +24667,7 @@
     },
     {
       "item": "jugcraft:dc_cable_tray_tee",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -24941,6 +24997,24 @@
         {
           "kind": "worldgen_reference",
           "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_phosphate.json"
+        }
+      ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:deepslate_quartz_ore",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz.json"
+        },
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz_secondary.json"
         }
       ],
       "blocked_by": []
@@ -25449,7 +25523,7 @@
     },
     {
       "item": "jugcraft:dock_plating",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -25789,7 +25863,7 @@
     },
     {
       "item": "jugcraft:drone_motor",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -28156,7 +28230,7 @@
     },
     {
       "item": "jugcraft:emergency_light",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -28167,7 +28241,7 @@
     },
     {
       "item": "jugcraft:emergency_light_conduit",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -29471,7 +29545,7 @@
     },
     {
       "item": "jugcraft:field_telephone",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -29565,7 +29639,7 @@
     },
     {
       "item": "jugcraft:filing_cabinet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -29576,7 +29650,7 @@
     },
     {
       "item": "jugcraft:filing_cabinet_open",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -29587,7 +29661,7 @@
     },
     {
       "item": "jugcraft:filing_cabinet_tall",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -29598,7 +29672,7 @@
     },
     {
       "item": "jugcraft:filing_cabinet_tall_open",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -29795,7 +29869,7 @@
     },
     {
       "item": "jugcraft:fire_control_wire",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -30583,7 +30657,7 @@
     },
     {
       "item": "jugcraft:fridge",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -30864,7 +30938,7 @@
     },
     {
       "item": "jugcraft:fume_hood",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31433,7 +31507,7 @@
     },
     {
       "item": "jugcraft:gilded_halberd",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31444,7 +31518,7 @@
     },
     {
       "item": "jugcraft:gilded_longsword",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31455,7 +31529,7 @@
     },
     {
       "item": "jugcraft:gilded_rapier",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31466,7 +31540,7 @@
     },
     {
       "item": "jugcraft:gilded_sabre",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31488,7 +31562,7 @@
     },
     {
       "item": "jugcraft:gilt_frieze",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31499,7 +31573,7 @@
     },
     {
       "item": "jugcraft:gilt_trimmed_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31510,7 +31584,7 @@
     },
     {
       "item": "jugcraft:gilt_trimmed_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31521,7 +31595,7 @@
     },
     {
       "item": "jugcraft:gilt_trimmed_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31584,7 +31658,7 @@
     },
     {
       "item": "jugcraft:glass_desk",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -31842,7 +31916,7 @@
     },
     {
       "item": "jugcraft:goldbristle_carbine",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -32030,7 +32104,7 @@
     },
     {
       "item": "jugcraft:graphene_lattice",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -32041,7 +32115,7 @@
     },
     {
       "item": "jugcraft:graphene_lattice_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -32052,7 +32126,7 @@
     },
     {
       "item": "jugcraft:graphene_lattice_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -34139,7 +34213,7 @@
     },
     {
       "item": "jugcraft:hermit_rifle",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -34164,7 +34238,7 @@
     },
     {
       "item": "jugcraft:high_bay_light",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -34230,7 +34304,7 @@
     },
     {
       "item": "jugcraft:highball_rifle",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40329,7 +40403,7 @@
     },
     {
       "item": "jugcraft:hv_damper",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40340,7 +40414,7 @@
     },
     {
       "item": "jugcraft:hv_duct",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40351,7 +40425,7 @@
     },
     {
       "item": "jugcraft:hv_duct_elbow",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40362,7 +40436,7 @@
     },
     {
       "item": "jugcraft:hv_duct_elbow_down",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40373,7 +40447,7 @@
     },
     {
       "item": "jugcraft:hv_duct_elbow_up",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40384,7 +40458,7 @@
     },
     {
       "item": "jugcraft:hv_duct_hanger",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40395,7 +40469,7 @@
     },
     {
       "item": "jugcraft:hv_duct_label_filtered",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40406,7 +40480,7 @@
     },
     {
       "item": "jugcraft:hv_duct_label_oa",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40417,7 +40491,7 @@
     },
     {
       "item": "jugcraft:hv_duct_label_return",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40428,7 +40502,7 @@
     },
     {
       "item": "jugcraft:hv_duct_label_supply",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40439,7 +40513,7 @@
     },
     {
       "item": "jugcraft:hv_duct_riser",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40450,7 +40524,7 @@
     },
     {
       "item": "jugcraft:hv_duct_riser_fd",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40461,7 +40535,7 @@
     },
     {
       "item": "jugcraft:hv_duct_riser_label_return",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40472,7 +40546,7 @@
     },
     {
       "item": "jugcraft:hv_duct_riser_label_supply",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40483,7 +40557,7 @@
     },
     {
       "item": "jugcraft:hv_duct_sleeve",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40494,7 +40568,7 @@
     },
     {
       "item": "jugcraft:hv_duct_tee",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40505,7 +40579,7 @@
     },
     {
       "item": "jugcraft:hv_duct_tee_down",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40538,7 +40612,7 @@
     },
     {
       "item": "jugcraft:hv_filter_rack",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40549,7 +40623,7 @@
     },
     {
       "item": "jugcraft:hv_plenum",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40560,7 +40634,7 @@
     },
     {
       "item": "jugcraft:hv_plenum_base",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40571,7 +40645,7 @@
     },
     {
       "item": "jugcraft:hv_plenum_detector",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40582,7 +40656,7 @@
     },
     {
       "item": "jugcraft:hv_plenum_door_a",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40593,7 +40667,7 @@
     },
     {
       "item": "jugcraft:hv_plenum_door_b",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40604,7 +40678,7 @@
     },
     {
       "item": "jugcraft:hv_plenum_outlet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40615,7 +40689,7 @@
     },
     {
       "item": "jugcraft:hv_plenum_top",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40626,7 +40700,7 @@
     },
     {
       "item": "jugcraft:hv_plenum_top_outlet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40659,7 +40733,7 @@
     },
     {
       "item": "jugcraft:hv_refrig_sensor",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40670,7 +40744,7 @@
     },
     {
       "item": "jugcraft:hv_return_grille",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40692,7 +40766,7 @@
     },
     {
       "item": "jugcraft:hv_supply_diffuser",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -40926,7 +41000,7 @@
     },
     {
       "item": "jugcraft:imperial_crest",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41267,7 +41341,7 @@
     },
     {
       "item": "jugcraft:iron_gear",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41300,11 +41374,12 @@
     },
     {
       "item": "jugcraft:iron_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/pressing/iron_ingot.json"
+        "src/main/resources/data/jugcraft/recipe/pressing/iron_ingot.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/iron_plate.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -41388,7 +41463,7 @@
     },
     {
       "item": "jugcraft:item_crate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41870,7 +41945,7 @@
     },
     {
       "item": "jugcraft:kaiser_boots",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41881,7 +41956,7 @@
     },
     {
       "item": "jugcraft:kaiser_chestplate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41892,7 +41967,7 @@
     },
     {
       "item": "jugcraft:kaiser_helmet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41903,7 +41978,7 @@
     },
     {
       "item": "jugcraft:kaiser_leggings",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41914,7 +41989,7 @@
     },
     {
       "item": "jugcraft:kaiser_pattern",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -41980,7 +42055,7 @@
     },
     {
       "item": "jugcraft:kestrel_rifle",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -42199,7 +42274,7 @@
     },
     {
       "item": "jugcraft:lab_bench",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -42221,7 +42296,7 @@
     },
     {
       "item": "jugcraft:lab_sink",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -42243,7 +42318,7 @@
     },
     {
       "item": "jugcraft:ladder_tray",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -42254,7 +42329,7 @@
     },
     {
       "item": "jugcraft:ladder_tray_bend",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -42331,7 +42406,7 @@
     },
     {
       "item": "jugcraft:ladder_tray_hanger",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -42353,7 +42428,7 @@
     },
     {
       "item": "jugcraft:lament_rifle",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -50010,9 +50085,10 @@
       "item": "jugcraft:lead_plate",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/pressing/lead_ingot.json"
+        "src/main/resources/data/jugcraft/recipe/pressing/lead_ingot.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/lead_plate.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -50628,7 +50704,7 @@
     },
     {
       "item": "jugcraft:locker",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -50650,7 +50726,7 @@
     },
     {
       "item": "jugcraft:locker_open",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -50661,7 +50737,7 @@
     },
     {
       "item": "jugcraft:locker_security",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -51685,7 +51761,7 @@
     },
     {
       "item": "jugcraft:medicine_cabinet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -52514,7 +52590,7 @@
     },
     {
       "item": "jugcraft:murmur_smg",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -58545,7 +58621,7 @@
     },
     {
       "item": "jugcraft:operator_chair",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -58844,7 +58920,7 @@
     },
     {
       "item": "jugcraft:oval_table",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -59300,7 +59376,7 @@
     },
     {
       "item": "jugcraft:patina_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -59311,7 +59387,7 @@
     },
     {
       "item": "jugcraft:patina_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -59322,7 +59398,7 @@
     },
     {
       "item": "jugcraft:patina_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -59517,7 +59593,7 @@
     },
     {
       "item": "jugcraft:perforated_patina_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -62057,7 +62133,7 @@
     },
     {
       "item": "jugcraft:porthole_window",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -62880,6 +62956,24 @@
         "src/main/resources/data/jugcraft/recipe/pyromaniacs_tunic.json"
       ],
       "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:quartz_ore",
+      "status": "natural_or_interaction_source",
+      "reason": "",
+      "route_count": 0,
+      "routes": [],
+      "evidence": [
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz.json"
+        },
+        {
+          "kind": "worldgen_reference",
+          "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_quartz_secondary.json"
+        }
+      ],
       "blocked_by": []
     },
     {
@@ -63780,7 +63874,7 @@
     },
     {
       "item": "jugcraft:rebar",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -63846,7 +63940,7 @@
     },
     {
       "item": "jugcraft:red_iron_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -63857,7 +63951,7 @@
     },
     {
       "item": "jugcraft:red_iron_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -63868,7 +63962,7 @@
     },
     {
       "item": "jugcraft:red_iron_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64399,7 +64493,7 @@
     },
     {
       "item": "jugcraft:reinforced_concrete",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64410,7 +64504,7 @@
     },
     {
       "item": "jugcraft:reinforced_concrete_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64421,7 +64515,7 @@
     },
     {
       "item": "jugcraft:reinforced_concrete_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64571,7 +64665,7 @@
     },
     {
       "item": "jugcraft:reverb",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64582,7 +64676,7 @@
     },
     {
       "item": "jugcraft:ribbed_patina_pillar",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64593,7 +64687,7 @@
     },
     {
       "item": "jugcraft:ribbed_rust_pillar",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64731,7 +64825,7 @@
     },
     {
       "item": "jugcraft:riveted_band_block",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64742,7 +64836,7 @@
     },
     {
       "item": "jugcraft:riveted_black_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64753,7 +64847,7 @@
     },
     {
       "item": "jugcraft:riveted_black_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64764,7 +64858,7 @@
     },
     {
       "item": "jugcraft:riveted_black_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64775,7 +64869,7 @@
     },
     {
       "item": "jugcraft:riveted_rust_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64786,7 +64880,7 @@
     },
     {
       "item": "jugcraft:riveted_rust_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -64797,7 +64891,7 @@
     },
     {
       "item": "jugcraft:riveted_rust_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -65150,7 +65244,7 @@
     },
     {
       "item": "jugcraft:room_sign",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -65640,7 +65734,7 @@
     },
     {
       "item": "jugcraft:rust_plate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -65651,7 +65745,7 @@
     },
     {
       "item": "jugcraft:rust_plate_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -65662,7 +65756,7 @@
     },
     {
       "item": "jugcraft:rust_plate_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -66808,10 +66902,11 @@
       "item": "jugcraft:silicon",
       "status": "recipe_chain_reachable",
       "reason": "",
-      "route_count": 2,
+      "route_count": 3,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/arc_smelting/quartz.json",
-        "src/main/resources/data/jugcraft/recipe/silicon_from_blasting_quartz.json"
+        "src/main/resources/data/jugcraft/recipe/silicon_from_blasting_quartz.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/silicon.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -67207,7 +67302,7 @@
     },
     {
       "item": "jugcraft:sledge",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -67333,6 +67428,28 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/slot_machine_treasure.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:small_ceramic_kiln",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/small_ceramic_kiln.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:small_crucible_furnace",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/small_crucible_furnace.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -67553,11 +67670,12 @@
       "item": "jugcraft:solder_ingot",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 3,
+      "route_count": 4,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/alloying/solder_ingot.json",
         "src/main/resources/data/jugcraft/recipe/solder_ingot_from_nuggets.json",
-        "src/main/resources/data/jugcraft/recipe/solder_ingot_from_solder_block.json"
+        "src/main/resources/data/jugcraft/recipe/solder_ingot_from_solder_block.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/solder_ingot.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -67569,6 +67687,17 @@
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/solder_nugget.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:soldering_tool",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/soldering_tool.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -68060,7 +68189,7 @@
     },
     {
       "item": "jugcraft:squall_rifle",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68253,7 +68382,7 @@
     },
     {
       "item": "jugcraft:station_tiles",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68264,7 +68393,7 @@
     },
     {
       "item": "jugcraft:station_tiles_slab",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68275,7 +68404,7 @@
     },
     {
       "item": "jugcraft:station_tiles_stairs",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68385,7 +68514,7 @@
     },
     {
       "item": "jugcraft:steel_arbalest",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68429,7 +68558,7 @@
     },
     {
       "item": "jugcraft:steel_axe",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68440,7 +68569,7 @@
     },
     {
       "item": "jugcraft:steel_battle_axe",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68451,7 +68580,7 @@
     },
     {
       "item": "jugcraft:steel_battleblade",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68462,7 +68591,7 @@
     },
     {
       "item": "jugcraft:steel_bayonet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68473,7 +68602,7 @@
     },
     {
       "item": "jugcraft:steel_bill",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68484,7 +68613,7 @@
     },
     {
       "item": "jugcraft:steel_block",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68495,7 +68624,7 @@
     },
     {
       "item": "jugcraft:steel_boots",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 2,
       "routes": [
@@ -68507,7 +68636,7 @@
     },
     {
       "item": "jugcraft:steel_brazier_mace",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68518,7 +68647,7 @@
     },
     {
       "item": "jugcraft:steel_chakram",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68529,7 +68658,7 @@
     },
     {
       "item": "jugcraft:steel_chestplate",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 2,
       "routes": [
@@ -68541,7 +68670,7 @@
     },
     {
       "item": "jugcraft:steel_dagger",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68552,7 +68681,7 @@
     },
     {
       "item": "jugcraft:steel_door",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68563,7 +68692,7 @@
     },
     {
       "item": "jugcraft:steel_earthbreaker",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68574,7 +68703,7 @@
     },
     {
       "item": "jugcraft:steel_estoc",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68585,7 +68714,7 @@
     },
     {
       "item": "jugcraft:steel_executioner",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68596,7 +68725,7 @@
     },
     {
       "item": "jugcraft:steel_flail",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68607,7 +68736,7 @@
     },
     {
       "item": "jugcraft:steel_flanged_mace",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68632,7 +68761,7 @@
     },
     {
       "item": "jugcraft:steel_foundry",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68643,7 +68772,7 @@
     },
     {
       "item": "jugcraft:steel_francisca",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68670,7 +68799,7 @@
     },
     {
       "item": "jugcraft:steel_girder",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68681,7 +68810,7 @@
     },
     {
       "item": "jugcraft:steel_glaive",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68692,7 +68821,7 @@
     },
     {
       "item": "jugcraft:steel_greatsword",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68703,7 +68832,7 @@
     },
     {
       "item": "jugcraft:steel_halberd",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68714,7 +68843,7 @@
     },
     {
       "item": "jugcraft:steel_harpoon",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68725,7 +68854,7 @@
     },
     {
       "item": "jugcraft:steel_heater_shield",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68736,7 +68865,7 @@
     },
     {
       "item": "jugcraft:steel_helmet",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 2,
       "routes": [
@@ -68748,7 +68877,7 @@
     },
     {
       "item": "jugcraft:steel_hoe",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68770,7 +68899,7 @@
     },
     {
       "item": "jugcraft:steel_ingot",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 3,
       "routes": [
@@ -68783,7 +68912,7 @@
     },
     {
       "item": "jugcraft:steel_javelin",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68794,7 +68923,7 @@
     },
     {
       "item": "jugcraft:steel_kama",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68805,7 +68934,7 @@
     },
     {
       "item": "jugcraft:steel_katana",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68816,7 +68945,7 @@
     },
     {
       "item": "jugcraft:steel_katar",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68827,7 +68956,7 @@
     },
     {
       "item": "jugcraft:steel_knife",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68838,7 +68967,7 @@
     },
     {
       "item": "jugcraft:steel_kusarigama",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68849,7 +68978,7 @@
     },
     {
       "item": "jugcraft:steel_labrys",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68871,7 +69000,7 @@
     },
     {
       "item": "jugcraft:steel_lance",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68882,7 +69011,7 @@
     },
     {
       "item": "jugcraft:steel_leggings",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 2,
       "routes": [
@@ -68894,7 +69023,7 @@
     },
     {
       "item": "jugcraft:steel_longbow",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68905,7 +69034,7 @@
     },
     {
       "item": "jugcraft:steel_longsword",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68916,7 +69045,7 @@
     },
     {
       "item": "jugcraft:steel_maul",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68938,7 +69067,7 @@
     },
     {
       "item": "jugcraft:steel_moonblade",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68949,7 +69078,7 @@
     },
     {
       "item": "jugcraft:steel_nodachi",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68960,7 +69089,7 @@
     },
     {
       "item": "jugcraft:steel_nugget",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68971,7 +69100,7 @@
     },
     {
       "item": "jugcraft:steel_paxel",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68982,7 +69111,7 @@
     },
     {
       "item": "jugcraft:steel_pickaxe",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -68993,7 +69122,7 @@
     },
     {
       "item": "jugcraft:steel_pike",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69024,7 +69153,7 @@
     },
     {
       "item": "jugcraft:steel_quarterstaff",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69035,7 +69164,7 @@
     },
     {
       "item": "jugcraft:steel_rapier",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69046,7 +69175,7 @@
     },
     {
       "item": "jugcraft:steel_sabre",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69057,7 +69186,7 @@
     },
     {
       "item": "jugcraft:steel_scythe",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69079,7 +69208,7 @@
     },
     {
       "item": "jugcraft:steel_shovel",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69090,7 +69219,7 @@
     },
     {
       "item": "jugcraft:steel_spear",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69101,7 +69230,7 @@
     },
     {
       "item": "jugcraft:steel_sword",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69124,7 +69253,7 @@
     },
     {
       "item": "jugcraft:steel_tower_shield",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69135,7 +69264,7 @@
     },
     {
       "item": "jugcraft:steel_twinblade",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69146,7 +69275,7 @@
     },
     {
       "item": "jugcraft:steel_war_fork",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69157,7 +69286,7 @@
     },
     {
       "item": "jugcraft:steel_war_hammer",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69168,7 +69297,7 @@
     },
     {
       "item": "jugcraft:steel_war_pick",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69179,7 +69308,7 @@
     },
     {
       "item": "jugcraft:steel_zweihander",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -69337,7 +69466,7 @@
     },
     {
       "item": "jugcraft:storage_rack",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -70315,7 +70444,7 @@
     },
     {
       "item": "jugcraft:structural_module",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -71401,7 +71530,7 @@
     },
     {
       "item": "jugcraft:theremin",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -71685,9 +71814,10 @@
       "item": "jugcraft:tin_plate",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/pressing/tin_ingot.json"
+        "src/main/resources/data/jugcraft/recipe/pressing/tin_ingot.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/tin_plate.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -72376,7 +72506,7 @@
     },
     {
       "item": "jugcraft:tsc_plan_file",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -72387,7 +72517,7 @@
     },
     {
       "item": "jugcraft:tsc_procedure_shelf",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -72613,7 +72743,7 @@
     },
     {
       "item": "jugcraft:tusker",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -72685,11 +72815,44 @@
     },
     {
       "item": "jugcraft:undertone_rifle",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/undertone_rifle.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:unfired_ceramic_crucible",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/unfired_ceramic_crucible.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:unfired_ceramic_lining",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/unfired_ceramic_lining.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:unfired_insulator",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/unfired_insulator.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -73400,7 +73563,7 @@
     },
     {
       "item": "jugcraft:warning_light",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -73660,7 +73823,7 @@
     },
     {
       "item": "jugcraft:water_cooler",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -73967,7 +74130,7 @@
     },
     {
       "item": "jugcraft:whiteboard",
-      "status": "chain_with_acquisition_evidence",
+      "status": "recipe_chain_reachable",
       "reason": "",
       "route_count": 1,
       "routes": [
@@ -76771,6 +76934,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:wire_cutters",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/wire_cutters.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:wire_drawer",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -77019,6 +77193,28 @@
       "routes": [
         "src/main/resources/data/jugcraft/recipe/wool_socks_dyed.json",
         "src/main/java/io/github/jimbozoomer/jugcraft/agriculture/KnittingNeedlesItem.java"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:workshop_bench",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/workshop_bench.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:workshop_hammer",
+      "status": "recipe_chain_reachable",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/workshop_hammer.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -77458,6 +77654,18 @@
           "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_zinc.json"
         }
       ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:zinc_plate",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 2,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/pressing/zinc_ingot.json",
+        "src/main/resources/data/jugcraft/recipe/starter_workshop/zinc_plate.json"
+      ],
+      "evidence": [],
       "blocked_by": []
     },
     {
@@ -78455,6 +78663,51 @@
       ],
       "outputs": [
         "jugcraft:aluminum_magnesium_ingot"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/alloys_aluminum_cladding.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ],
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ],
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ],
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aluminum_cladding"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/alloys_aluminum_propeller_sets.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ],
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ],
+        [
+          "minecraft:stick"
+        ],
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ],
+        [
+          "jugcraft:aluminum_magnesium_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:aluminum_propeller_set"
       ]
     },
     {
@@ -118400,6 +118653,21 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/crushing/deepslate_quartz_ore.json",
+      "type": "jugcraft:crushing",
+      "inputs": [
+        [
+          "jugcraft:deepslate_quartz_ore"
+        ],
+        [
+          "jugcraft:crusher"
+        ]
+      ],
+      "outputs": [
+        "minecraft:quartz"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/crushing/deepslate_salt_ore.json",
       "type": "jugcraft:crushing",
       "inputs": [
@@ -118697,6 +118965,21 @@
       ],
       "outputs": [
         "jugcraft:phosphate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/crushing/quartz_ore.json",
+      "type": "jugcraft:crushing",
+      "inputs": [
+        [
+          "jugcraft:quartz_ore"
+        ],
+        [
+          "jugcraft:crusher"
+        ]
+      ],
+      "outputs": [
+        "minecraft:quartz"
       ]
     },
     {
@@ -204036,6 +204319,21 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/pressing/zinc_ingot.json",
+      "type": "jugcraft:pressing",
+      "inputs": [
+        [
+          "jugcraft:zinc_ingot"
+        ],
+        [
+          "jugcraft:metal_press"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:zinc_plate"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/pressurizer.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -219629,6 +219927,968 @@
       ],
       "outputs": [
         "jugcraft:star_pinata"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/basic_circuit.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:silicon"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:solder_ingot"
+        ],
+        [
+          "jugcraft:soldering_tool"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:basic_circuit"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/brass_ingot.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "jugcraft:zinc_ingot"
+        ],
+        [
+          "jugcraft:small_crucible_furnace"
+        ],
+        [
+          "jugcraft:basic_ceramic_lining"
+        ],
+        [
+          "jugcraft:ceramic_crucible"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:brass_ingot"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/brass_plate.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:brass_ingot"
+        ],
+        [
+          "jugcraft:workshop_hammer"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:brass_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/bronze_ingot.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "jugcraft:tin_ingot"
+        ],
+        [
+          "jugcraft:small_crucible_furnace"
+        ],
+        [
+          "jugcraft:basic_ceramic_lining"
+        ],
+        [
+          "jugcraft:ceramic_crucible"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:bronze_ingot"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/bronze_plate.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:bronze_ingot"
+        ],
+        [
+          "jugcraft:workshop_hammer"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:bronze_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/copper_plate.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "jugcraft:workshop_hammer"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:copper_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/copper_wire.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "jugcraft:wire_cutters"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:copper_wire"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_bellows.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "minecraft:leather"
+        ],
+        [
+          "jugcraft:iron_shaft"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_bellows"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/crucible_heat_insert.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "jugcraft:basic_ceramic_lining"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_heat_insert"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_crucible.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:unfired_ceramic_crucible"
+        ],
+        [
+          "jugcraft:small_ceramic_kiln"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:ceramic_crucible"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_insulators.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:unfired_insulator"
+        ],
+        [
+          "jugcraft:small_ceramic_kiln"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:ceramic_insulator"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_lining.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:unfired_ceramic_lining"
+        ],
+        [
+          "jugcraft:small_ceramic_kiln"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:basic_ceramic_lining"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/insulated_copper_cable.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:tin_ingot"
+        ],
+        [
+          "jugcraft:ceramic_insulator"
+        ],
+        [
+          "jugcraft:ceramic_insulator"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:copper_cable"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/iron_plate.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "jugcraft:workshop_hammer"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:iron_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/lead_plate.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:lead_ingot"
+        ],
+        [
+          "jugcraft:workshop_hammer"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:lead_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/silicon.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:quartz"
+        ],
+        [
+          "minecraft:charcoal"
+        ],
+        [
+          "jugcraft:small_crucible_furnace"
+        ],
+        [
+          "jugcraft:basic_ceramic_lining"
+        ],
+        [
+          "jugcraft:ceramic_crucible"
+        ],
+        [
+          "jugcraft:crucible_heat_insert"
+        ],
+        [
+          "jugcraft:crucible_bellows"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:silicon"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/small_ceramic_kiln.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:furnace"
+        ],
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:bricks"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:small_ceramic_kiln"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/small_crucible_furnace.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:bricks"
+        ],
+        [
+          "minecraft:furnace"
+        ],
+        [
+          "minecraft:bricks"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:small_crucible_furnace"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/solder_ingot.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:tin_ingot"
+        ],
+        [
+          "jugcraft:lead_ingot"
+        ],
+        [
+          "jugcraft:small_crucible_furnace"
+        ],
+        [
+          "jugcraft:basic_ceramic_lining"
+        ],
+        [
+          "jugcraft:ceramic_crucible"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:solder_ingot"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/soldering_tool.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "minecraft:copper_ingot"
+        ],
+        [
+          "minecraft:stick"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:soldering_tool"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/tin_plate.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:tin_ingot"
+        ],
+        [
+          "jugcraft:workshop_hammer"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:tin_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/unfired_ceramic_crucible.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:unfired_ceramic_crucible"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/unfired_ceramic_lining.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ],
+        [
+          "minecraft:clay_ball"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:unfired_ceramic_lining"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/unfired_insulator.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "minecraft:clay_ball"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:unfired_insulator"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/wire_cutters.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:stick"
+        ],
+        [
+          "minecraft:stick"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:wire_cutters"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/workshop_bench.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "minecraft:crafting_table"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ],
+        [
+          "minecraft:cobblestone"
+        ],
+        [
+          "minecraft:cobblestone"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:workshop_bench"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/workshop_hammer.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "minecraft:stick"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:workshop_hammer"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/zinc_plate.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "jugcraft:zinc_ingot"
+        ],
+        [
+          "jugcraft:workshop_hammer"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:zinc_plate"
       ]
     },
     {
@@ -261190,6 +262450,18 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/crucible_bellows.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:crucible_bellows"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:crucible_bellows"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/crusher.json",
       "type": "block_drop",
       "inputs": [
@@ -261896,6 +263168,19 @@
       "outputs": [
         "jugcraft:deepslate_phosphate_ore",
         "jugcraft:phosphate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/deepslate_quartz_ore.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:deepslate_quartz_ore"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:deepslate_quartz_ore",
+        "minecraft:quartz"
       ]
     },
     {
@@ -287192,6 +288477,19 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/quartz_ore.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:quartz_ore"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:quartz_ore",
+        "minecraft:quartz"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/radiation_control_board.json",
       "type": "block_drop",
       "inputs": [
@@ -289347,6 +290645,30 @@
       ],
       "outputs": [
         "jugcraft:slot_machine_treasure"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/small_ceramic_kiln.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:small_ceramic_kiln"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:small_ceramic_kiln"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/small_crucible_furnace.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:small_crucible_furnace"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:small_crucible_furnace"
       ]
     },
     {
@@ -294311,6 +295633,18 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/loot_table/blocks/workshop_bench.json",
+      "type": "block_drop",
+      "inputs": [
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:workshop_bench"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/loot_table/blocks/wrought_iron_lattice.json",
       "type": "block_drop",
       "inputs": [
@@ -298478,30 +299812,6 @@
         ]
       ],
       "outputs": [
-        "jugcraft:hard_candy"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/syrup",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ]
-      ],
-      "outputs": [
         "jugcraft:burnt_sugar"
       ]
     },
@@ -298526,31 +299836,7 @@
         ]
       ],
       "outputs": [
-        "jugcraft:caramel"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/syrup",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:candy_corn"
+        "jugcraft:salt_water_taffy"
       ]
     },
     {
@@ -298598,7 +299884,55 @@
         ]
       ],
       "outputs": [
-        "jugcraft:salt_water_taffy"
+        "jugcraft:candy_corn"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/syrup",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:caramel"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/syrup",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:hard_candy"
       ]
     },
     {
@@ -298652,7 +299986,7 @@
         ]
       ],
       "outputs": [
-        "jugcraft:fudge"
+        "jugcraft:burnt_sugar"
       ]
     },
     {
@@ -298679,7 +300013,7 @@
         ]
       ],
       "outputs": [
-        "jugcraft:burnt_sugar"
+        "jugcraft:fudge"
       ]
     },
     {

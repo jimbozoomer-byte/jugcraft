@@ -581,6 +581,34 @@
         {
           "in": [
             [
+              "jugcraft:quartz_ore",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:quartz",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
+              "jugcraft:deepslate_quartz_ore",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:quartz",
+            2
+          ],
+          "extra": [],
+          "ticks": 160
+        },
+        {
+          "in": [
+            [
               "minecraft:sulfur",
               1
             ]
@@ -15973,6 +16001,51 @@
           "retained_inputs": [
             2,
             3
+          ],
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "minecraft:quartz",
+              1
+            ],
+            [
+              "minecraft:charcoal",
+              1
+            ],
+            [
+              "jugcraft:basic_ceramic_lining",
+              1
+            ],
+            [
+              "jugcraft:ceramic_crucible",
+              1
+            ],
+            [
+              "jugcraft:crucible_heat_insert",
+              1
+            ],
+            [
+              "jugcraft:crucible_bellows",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:silicon",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "retained_inputs": [
+            2,
+            3,
+            4,
+            5
           ],
           "energy_per_tick": 0
         }
