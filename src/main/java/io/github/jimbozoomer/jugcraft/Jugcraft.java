@@ -137,6 +137,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.creatures.chima.ChimaMod.register();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
 		io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.register();
+		io.github.jimbozoomer.jugcraft.academy.JugcraftAcademy.register();
 		io.github.jimbozoomer.jugcraft.nouveau.JugNouveau.register();
 		io.github.jimbozoomer.jugcraft.menagerie.Menagerie.register();
 		io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls.register();

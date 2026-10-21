@@ -181,6 +181,8 @@ def assets():
     agriculture_data.assets(ASSETS, write, lang)
     pixel_hollows_assets(lang)
     town_assets.assets(ASSETS, write, lang)
+    import academy_data
+    academy_data.assets(ASSETS, write, lang)
     import styx
     styx.write_all(write, ASSETS, DATA / MOD, lang)
     import deposits
