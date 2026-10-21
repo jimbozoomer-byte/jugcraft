@@ -1,5 +1,16 @@
 # Jugcraft TODO
 
+## Next coordinated release batch — October 21
+
+Owner requests larger update batches: prepare and test locally, then deploy the
+server and promote its matching client update only when the owner says ready.
+Do not promote each small addition separately. [Release sequence](SERVER_RELEASES.md#coordinated-release-batches).
+
+- [x] Include Resourcify for in-game resource-pack/shader browsing and default Diorama's minimap off for fresh installs. Preserve existing player settings. [Implementation](features/pack-browser-and-map-defaults.md).
+- [ ] Finish the selected batch, combined validation and owner playtest; record one exact release version/source commit.
+- [ ] Prepare matching client pack, managed-mod update manifest and changed-files server bundle; keep the public channel unchanged during preparation.
+- [ ] When the owner says ready: back up the world, deploy the server's changed files, verify startup/join, then promote the matching client manifest and share release notes.
+
 ## Player updater — October 21
 
 - [x] Replace the EXE/hook player flow with a single `.mrpack` import and in-game update consent. Locate the active instance automatically and preserve settings, saves and extra mods. [Implementation and validation](features/direct-player-updater.md).

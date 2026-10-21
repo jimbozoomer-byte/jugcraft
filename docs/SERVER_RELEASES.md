@@ -27,6 +27,22 @@ deployment declaration. The tool validates public release metadata; it does not
 probe server health. Publishing a release or merging main never promotes the
 channel automatically. Clients verify the channel's manifest and each payload.
 
+## Coordinated release batches
+
+Owner direction, 21 October 2026: accumulate larger updates locally and hold
+deployment/channel promotion until the owner says the batch is ready. Keep the
+current player channel and live server unchanged while preparing individual
+features. Track the pending batch in [TODO](TODO.md).
+
+Build the client pack, update manifest and changed-files server bundle from the
+same reviewed source commit and release version. Test the combined batch before
+rollout. At rollout, back up and update the server first, preserving world and
+configuration files, then verify startup and a client join. Only then promote
+that release's candidate manifest. This is one coordinated release, with the
+server ready before clients are prompted; it is not an atomic simultaneous
+deployment across independent player computers. If server verification fails,
+restore the server backup and leave the player channel unchanged.
+
 ## Initial deployment and superseded linked-project setup (21 October 2026)
 
 The owner selected the new town/church/bird build for the first player release

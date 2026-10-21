@@ -167,6 +167,13 @@ tasks.matching { it.name in ["runClient", "runServer", "runGameTest", "runClient
 				destination.bytes = file("distribution/overrides/${relative}").bytes
 			}
 		}
+		if (name in ["runClient", "runClientGameTest"]) {
+			File destination = new File(runDirectory, "diorama/config.json")
+			if (!destination.exists()) {
+				destination.parentFile.mkdirs()
+				destination.bytes = file("distribution/client-overrides/diorama/config.json").bytes
+			}
+		}
 	}
 }
 

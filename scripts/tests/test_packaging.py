@@ -81,6 +81,23 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "needs missing project"):
             packaging.validate_lock(self.lock)
 
+    def test_browser_and_quiet_map_are_client_only_pack_defaults(self):
+        repository = Path(__file__).resolve().parents[2]
+        pack = packaging.build_pack(self.lock, self.jar(), self.root / "browser", root=repository)
+        with zipfile.ZipFile(pack) as archive:
+            self.assertEqual(json.loads(archive.read("client-overrides/diorama/config.json")),
+                             {"minimap": False})
+            self.assertNotIn("overrides/diorama/config.json", archive.namelist())
+            library = next(x for x in self.lock["dependencies"] if x["key"] == "resourcify")
+            entry = next(x for x in json.loads(archive.read("modrinth.index.json"))["files"]
+                         if x["path"] == "mods/" + library["filename"])
+            self.assertEqual(entry["env"], {"client": "required", "server": "unsupported"})
+            self.assertFalse(library["requiredByJugcraft"])
+            self.assertEqual(entry["downloads"], library["downloads"])
+        self.lock["dependencies"] = [x for x in self.lock["dependencies"] if x["key"] != "fabric-language-kotlin"]
+        with self.assertRaisesRegex(ValueError, "needs missing project"):
+            packaging.validate_lock(self.lock)
+
     def test_wrong_exact_dependency_is_rejected(self):
         sodium = next(x for x in self.lock["dependencies"] if x["key"] == "sodium")
         sodium["modrinthVersion"] = "different"

@@ -527,7 +527,8 @@
       "io.github.jimbozoomer.jugcraft.test.ChemistryIntegrationClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AdamOndiAhmanClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CydonianSanctumClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.CydonianSentinelClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.CydonianSentinelClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PackBrowserClientGameTests"
     ]
   },
   "depends": {

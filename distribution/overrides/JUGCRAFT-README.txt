@@ -12,13 +12,17 @@ framework and testing documents for the actual verification status.
 Jade and JEI provide inspection and recipe support. Other libraries are available
 for development; their presence does not mean every Jugcraft model, spell, or
 screen already uses them. Iris is included without a shader pack. Choose a
-compatible shader pack separately if desired.
+compatible shader pack with Resourcify if desired: open Resource Packs or the
+Iris Shader Packs screen and use the + button to browse and download. No shader
+is automatically selected or downloaded for you.
 
 Diorama is installed automatically on clients: M opens the map, comma creates a
 waypoint, U lists waypoints. B remains the Jugcraft encyclopedia. Older saved
 Diorama bindings are preserved; set New Waypoint to comma in Controls if needed.
 N opens the backpack.
-Diorama is not needed on dedicated servers.
+The minimap is off by default on new installs; the fullscreen map still works.
+You can re-enable the minimap in Diorama settings. Existing choices are preserved.
+Diorama and Resourcify are not needed on dedicated servers.
 
 Use a launcher/server installer that honors the pack's client/server file flags.
 Client-only libraries are not required on a dedicated server. Opening the website
