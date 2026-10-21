@@ -1,6 +1,6 @@
 # Peepo and Jughead player guide
 
-Current controls and behavior on the `peepo-companion` branch, updated 9 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
+Current controls and behavior on the `peepo-companion` branch, updated 21 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
 
 ## Quick start
 
@@ -12,6 +12,18 @@ Current controls and behavior on the `peepo-companion` branch, updated 9 October
 6. Assign another container, then right-click that same container again to change it from Supply to **Output**.
 7. Open the companion's **Supplies** page to check its containers and job links. For a job that needs a tool, either put it in **Hand** or mark its Supply container **Tools**.
 8. Keep walkways clear, give the companion food, and leave space in Output. Hover the job row to see what is stopping it if work does not begin.
+
+## Starter workshops, fertilizer blends and land claims
+
+Assign a **Workshop Bench**, **Small Ceramic Kiln** or **Small Crucible Furnace** with the Planner, including either part of a two-block station. Link Supply/Output normally. The **Filter** funnel in the companion menu accepts up to nine finished products; leaving it empty allows any available supported recipe.
+
+Put ingredients, ordinary furnace fuel and the required reusable workshop tools/ceramics in Supply. Peepo operates the bench at normal speed using 4 reserve JE per productive tick. The kiln and crucible cook automatically while Peepo handles deliveries. The crucible requires a **Basic Ceramic Lining** and **Ceramic Crucible**. Obsolete bench tools return through Output before a replacement is installed, so leave room for them as well as products. Workshop tools are installed in the station, not the companion's Hand slot.
+
+Garden Auto fertilizing now accepts **Nitrogen Field Fertilizer**, **Triple Superphosphate** and **Mixed-farm Fertilizer** with the existing carry limits and cooldowns. Sprinklers accept these blends through Supply too; an already loaded blend must run out or be removed manually before a different blend can be loaded.
+
+Companions respect their owner's current personal/company land permissions, including trust, while the owner is offline. Party command access alone does not grant permission to another player's claim. Revoking access stops work and storage transfers; cargo is retained. Land claims currently apply in the Overworld, matching the Exchange land system.
+
+See [workshop and compatibility details](features/companion-starter-workshop.md).
 
 ## Inventory and commands
 
@@ -37,7 +49,7 @@ Each companion can have **one home, four work assignments, one lunch source, fou
 | Right-click a tamed companion | Selects it. The Planner name shows the selection. |
 | Right-click a companion bed/bunk or vanilla bed | Sets or replaces its one home. |
 | Right-click a supported workstation | Adds a work assignment, up to four. |
-| Shift-right-click Planner → Farmland / Orchard | Select two opposite ground corners to assign a zone. |
+| Shift-right-click Planner â†’ Farmland / Orchard | Select two opposite ground corners to assign a zone. |
 | Right-click a sheep, cow or chicken | Assigns a fixed shearing, milking or egg-collection area at the ground beneath it. |
 | Right-click a lunch crate or lunch cover | Assigns its separate lunch source. |
 | Right-click a new ordinary container | Adds the next Supply, or an Output once all four Supplies are assigned. |
@@ -80,7 +92,7 @@ Deliveries can use all available cargo slots and normal stack sizes, including d
 
 ### Supply and Output controls on each job
 
-Each job has separate **Supply** and **Output** buttons cycling **Auto → On → Off**:
+Each job has separate **Supply** and **Output** buttons cycling **Auto â†’ On â†’ Off**:
 
 - **Auto:** allows companion transport unless supported machine automation is detected for that direction.
 - **On:** explicitly requests companion transport even when external automation is detected.
@@ -90,7 +102,7 @@ Unsupported directions remain unavailable. Use On if you want Peepo to back up c
 
 ## Workstation Filters
 
-On a recipe-capable job row, click the **funnel icon** (hover label **Filter**) to open a **3×3 grid of nine ghost slots** in the companion GUI.
+On a recipe-capable job row, click the **funnel icon** (hover label **Filter**) to open a **3Ã—3 grid of nine ghost slots** in the companion GUI.
 
 - Click a slot with a finished output item on your cursor to allow that output. Your real item is not consumed.
 - Right-click a slot, or click it with an empty cursor, to clear it.
@@ -116,7 +128,7 @@ Filters are available for Cooking Pots, supported standard processors, Hearth Ov
 | Composter | Supply compostable items; Output takes ready bone meal. Normal compost yields and maturation apply. Use a dedicated supply to avoid composting wanted crops. |
 | Vanilla Crafter | Manually seed its complete grid, then assign and supply matching ingredients. Peepo remembers the pattern, refills it and collects results/remainders. A normal redstone clock is still required. |
 | Coal Generator / Steam Generator / Large Steam Engine | Supply the machine's accepted solid fuels. Boilers can also receive water buckets; Output returns empty buckets. Pipes/source-water operation still works. No production boost. |
-| Auto-Crafter | Seed the real 3×3 grid with one item in each required slot. Supply replenishes that pattern; Output collects products and container remainders. Normal energy/redstone rules apply. |
+| Auto-Crafter | Seed the real 3Ã—3 grid with one item in each required slot. Supply replenishes that pattern; Output collects products and container remainders. Normal energy/redstone rules apply. |
 | Electroplating Bath | Supply a compatible damageable item and nickel, silver or gold ingots; pipe in sulfuric acid. Output takes the actual plated/repaired item, preserving its other components. |
 | Cooking Pot | Provide heat and the recipe's ingredients/containers. Peepo brings balanced bulk ingredient loads, then stirs at **+50% cooking speed** until ingredients run out or the pot's result slots fill, before collecting and delivering the finished batch. Supply and Output use the existing links and controls. |
 | Cutting Board | Provide a knife and valid cutting inputs. Peepo stands at the board and makes a two-handed chop. The knife loses durability; all recipe results are retained for Output. |
@@ -215,7 +227,7 @@ A wheel acting as a cursed portal pauses companion input and work. This job spin
 
 ### Gardens
 
-Select your companion, shift-right-click the Planner, choose **Farmland: select two corners**, then right-click two opposite ground corners. Both corners are included, up to **16×16 blocks**, with up to three blocks of ground-height difference. One zone uses one of the four shared job slots. Peepo discovers farmland and planter boxes within those bounds, including newly tilled soil, without reassigning the zone. Gaps and paths are allowed. Existing saved eight-cell plots keep their exact boundaries, crop selection and Supply/Output links; remove and redraw them to use the new zones. Left-click either zone corner with the Planner, or remove its Jobs row, to delete it.
+Select your companion, shift-right-click the Planner, choose **Farmland: select two corners**, then right-click two opposite ground corners. Both corners are included, up to **16Ã—16 blocks**, with up to three blocks of ground-height difference. One zone uses one of the four shared job slots. Peepo discovers farmland and planter boxes within those bounds, including newly tilled soil, without reassigning the zone. Gaps and paths are allowed. Existing saved eight-cell plots keep their exact boundaries, crop selection and Supply/Output links; remove and redraw them to use the new zones. Left-click either zone corner with the Planner, or remove its Jobs row, to delete it.
 
 Use the garden row's ghost slot to choose a seed or supported raw crop; right-click/empty-cursor clears it to Automatic planting. Put real seeds in cargo or linked Supplies. Existing young crops finish growing before replacement. Harvests keep replanting material as needed and deliver surplus through Output.
 
@@ -226,7 +238,7 @@ Planter boxes share the Farmland zone and Supply/Output controls. Include plante
 
 ### Orchards
 
-For orchard harvesting, choose **Orchard: select two corners** in the Planner and click opposite ground corners. The 16×16 footprint includes fruit-bearing leaves up to **eight blocks above the higher corner**. Peepo picks ripe apples, chestnuts, pears, peaches, lemons, oranges, plums and bananas using the trees' normal yields, then leaves the foliage intact to regrow fruit. He works from safe ground below or beside the cluster, with an unobstructed overhead reach of up to eight blocks; fruit behind a trunk, floor or another canopy layer is skipped. Leave walkable space below the fruit-bearing leaves.
+For orchard harvesting, choose **Orchard: select two corners** in the Planner and click opposite ground corners. The 16Ã—16 footprint includes fruit-bearing leaves up to **eight blocks above the higher corner**. Peepo picks ripe apples, chestnuts, pears, peaches, lemons, oranges, plums and bananas using the trees' normal yields, then leaves the foliage intact to regrow fruit. He works from safe ground below or beside the cluster, with an unobstructed overhead reach of up to eight blocks; fruit behind a trunk, floor or another canopy layer is skipped. Leave walkable space below the fruit-bearing leaves.
 
 Orchards use the same real eight-slot cargo, job priorities and linked Output containers. Supply can stay linked, but this harvest-only job consumes no seeds, saplings or tools. It does not plant trees, cut logs, accelerate growth or collect unrelated ground items. Picking takes **80 ticks at 4 JE/t (320 JE)** plus hauling; a hoe gives no orchard bonus and suffers no wear. Full cargo leaves fruit on the tree until space is available.
 
@@ -244,7 +256,7 @@ Use the existing **Farmland: select two corners** option for sugar cane, bamboo,
 | Sweet berries | Picks fully mature bushes using normal harvesting loot, leaving bushes to regrow. Does not walk through them. |
 | Glow berries | Picks berries without cutting their vines. Replants remembered missing vine positions only when their support still permits it. No bone meal is used. |
 | Cocoa | Harvests mature pods and spends one bean from the harvest, or cargo, to replant on the same log face. With no bean available, the remembered position waits for Supply. |
-| Cranberries | Picks ripe bushes for their normal 2–3 cranberries and leaves them flowering in water. Planting uses cranberries in shallow source water above bog soil. |
+| Cranberries | Picks ripe bushes for their normal 2â€“3 cranberries and leaves them flowering in water. Planting uses cranberries in shallow source water above bog soil. |
 | Rice | Supply **Rice** for planting. Mature plants give **Rice Panicles**, reset to their native regrowth stage and keep their flooded base. Even replacing a ripe rice plant with a different selected crop leaves the water intact. |
 
 For a mixed garden with **Automatic planting**, plant the special crops once so Peepo discovers and remembers their positions. Up to 256 special planting positions per zone persist with the companion, including cocoa faces and vine locations. Existing bushes/stalks remain planted during picking. Clearing a remembered plant allows Peepo to replace it; remove/reassign the zone to forget its planting positions. Clearing the crop selector does not erase these positions.
@@ -319,7 +331,7 @@ The magic feature must be enabled, and beds/devices must be awake. Companions us
 
 ### Animal pens
 
-For a combined **Livestock Management** zone, select your companion, shift-right-click with the Planner, choose **Livestock Management: select two corners**, then right-click two opposite ground corners. Both corners count toward the **16×16** maximum. Corners can differ by up to three blocks in height; the zone covers the space above the lower corner through three blocks above the higher corner. Each zone consumes **one work slot**, with Shearing, Milking and Eggs enabled initially. Open that job's **gear (Zone options)** button, and turn individual tasks On or Off. Breeding and Slaughter start **Off**. Turning all five tasks Off pauses new work; any overflow products already on the ground can still be recovered. Remove it through its job row or by left-clicking the first corner with the Planner.
+For a combined **Livestock Management** zone, select your companion, shift-right-click with the Planner, choose **Livestock Management: select two corners**, then right-click two opposite ground corners. Both corners count toward the **16Ã—16** maximum. Corners can differ by up to three blocks in height; the zone covers the space above the lower corner through three blocks above the higher corner. Each zone consumes **one work slot**, with Shearing, Milking and Eggs enabled initially. Open that job's **gear (Zone options)** button, and turn individual tasks On or Off. Breeding and Slaughter start **Off**. Turning all five tasks Off pauses new work; any overflow products already on the ground can still be recovered. Remove it through its job row or by left-clicking the first corner with the Planner.
 
 The enabled tasks take turns as work becomes available. Supply provides empty buckets; a linked Supply with **Tools** enabled provides shears. Output receives wool, milk and collected eggs. Missing equipment pauses that activity without stopping another ready activity. Existing action costs, milk cooldowns, inventory limits and gate handling still apply.
 

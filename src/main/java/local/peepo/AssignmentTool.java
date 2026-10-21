@@ -38,7 +38,7 @@ public final class AssignmentTool extends Item {
         var first=firstCorner(stack);var tag=data(stack);
         if(first==null){if(!CompanionJobs.permitted(npc,pos) || pos.distToCenterSqr(npc.position())>4096 || npc.level().getBlockState(pos).isAir())return;tag.putBoolean("HasCorner",true);tag.putLong("Corner",pos.asLong());CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);player.sendOverlayMessage(Component.literal("First corner set. Click the opposite ground corner (maximum 16 x 16)."));return;}
         if(!AnimalCareZone.valid(first,pos)){player.sendOverlayMessage(Component.literal("Zone must be at most 16 x 16, with at most 3 blocks of ground-height difference. Choose a closer second corner."));return;}
-        if(!player.level().hasChunkAt(first) || !player.level().mayInteract(player,first) || TownProtection.denies(player,player.level(),first))return;
+        if(!player.level().hasChunkAt(first) || !player.level().mayInteract(player,first) || (TownProtection.denies(player,player.level(),first) || !io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player,player.level(),first)))return;
         int before=npc.assignments.loadedStations().size();String result=zoneKind(stack)==1?npc.assignments.assignZone(first,pos):npc.assignments.assignGardenZone(first,pos,zoneKind(stack)==3);player.sendOverlayMessage(Component.literal(result));
         if(npc.assignments.loadedStations().size()>before){tag.putInt("ZoneKind",0);tag.remove("ZoneMode");tag.remove("HasCorner");tag.remove("Corner");CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);}
     }
@@ -86,9 +86,9 @@ public final class AssignmentTool extends Item {
         if(level.isClientSide() || player.isSpectator())return InteractionResult.SUCCESS;
         if(player.getCooldowns().isOnCooldown(stack))return InteractionResult.SUCCESS;
         player.getCooldowns().addCooldown(stack,5);
-        if(!level.hasChunkAt(pos)||player.distanceToSqr(Vec3.atCenterOf(pos))>49 || !level.mayInteract(player,pos)||TownProtection.denies(player,level,pos))return InteractionResult.FAIL;
+        if(!level.hasChunkAt(pos)||player.distanceToSqr(Vec3.atCenterOf(pos))>49 || !level.mayInteract(player,pos)||(TownProtection.denies(player,level,pos) || !io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player,level,pos)))return InteractionResult.FAIL;
         var root=CompanionAssignments.canonical(level,pos);
-        if(!level.hasChunkAt(root) || !level.mayInteract(player,root) || TownProtection.denies(player,level,root))return InteractionResult.FAIL;
+        if(!level.hasChunkAt(root) || !level.mayInteract(player,root) || (TownProtection.denies(player,level,root) || !io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player,level,root)))return InteractionResult.FAIL;
         var npc=selected(level,stack);
         if(npc==null){player.sendOverlayMessage(Component.literal("Select a loaded companion in this dimension first."));return InteractionResult.SUCCESS;}
         if(!npc.orders.allowed(player)){player.sendOverlayMessage(Component.literal("Only the owner or an allowed party member can assign this companion."));return InteractionResult.SUCCESS;}
@@ -111,7 +111,7 @@ public final class AssignmentTool extends Item {
                 if(level.isClientSide() || player.isSpectator())return InteractionResult.SUCCESS;
                 if(player.getCooldowns().isOnCooldown(stack))return InteractionResult.SUCCESS;
                 player.getCooldowns().addCooldown(stack,5);
-                if(player.distanceToSqr(animal)>36 || !level.mayInteract(player,animal.blockPosition()) || TownProtection.denies(player,level,animal.blockPosition()))return InteractionResult.FAIL;
+                if(player.distanceToSqr(animal)>36 || !level.mayInteract(player,animal.blockPosition()) || (TownProtection.denies(player,level,animal.blockPosition()) || !io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player,level,animal.blockPosition())))return InteractionResult.FAIL;
                 var selected=selected(level,stack);
                 player.sendOverlayMessage(Component.literal(selected==null?"Select a loaded companion first.":!selected.orders.allowed(player)?"You cannot assign this companion.":selected.distanceToSqr(player)>128*128?"Move closer to the companion.":selected.assignments.assignAnimal(animal)));
                 return InteractionResult.SUCCESS;

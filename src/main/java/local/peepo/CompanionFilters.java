@@ -13,6 +13,7 @@ public final class CompanionFilters {
         if(block instanceof io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity maw)return maw.companionFilter;
         if(block instanceof FarmStandBlockEntity stand)return stand.companion.filter;
         if(block instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity crucible)return crucible.companion.filter;
+        if(block instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.companion.filter;
         var vanilla=VanillaCompanionPort.of(block);if(vanilla!=null)return vanilla.filter;
         if(block instanceof CandyKettleBlockEntity kettle)return kettle.companion.filter;
         if(block instanceof CiderBarrelBlockEntity barrel)return barrel.filter();
@@ -24,7 +25,9 @@ public final class CompanionFilters {
     public static boolean set(BlockEntity block,int slot,ItemStack icon){
         if(slot<0 || slot>=9 || !(block.getLevel() instanceof ServerLevel level))return false;
         ItemStack value=icon;
-        if(block instanceof VanillaCompanionAccess access){if(!access.peepo$port().acceptsFilter(icon))return false;
+        if(block instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop){
+            if(!workshop.companion.acceptsFilter(icon))return false;
+        }else if(block instanceof VanillaCompanionAccess access){if(!access.peepo$port().acceptsFilter(icon))return false;
         }else if(block instanceof io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity){
             if(!icon.isEmpty() && io.github.jimbozoomer.jugcraft.concordance.garden.Garden.mulch(icon)<=0)return false;
         }else if(ServingCompanion.of(block) instanceof ServingCompanion serving){

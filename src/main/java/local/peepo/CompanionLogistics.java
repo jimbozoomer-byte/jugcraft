@@ -46,6 +46,7 @@ public final class CompanionLogistics {
             public Storage<ItemVariant> inputs(){return Storage.empty();}
             public Storage<ItemVariant> outputs(){return Storage.empty();} // Collected guano is already marked cargo.
         };
+        if(be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.companion.accessible(npc)?workshop.companion.forCompanion(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity sprinkler)return sprinkler.companion.forCompanion(npc);
         var serving=ServingCompanion.of(be);if(serving!=null)return serving.forCompanion(npc);
         var magic=MagicGardenCompanion.of(npc,be);if(magic!=null)return magic;

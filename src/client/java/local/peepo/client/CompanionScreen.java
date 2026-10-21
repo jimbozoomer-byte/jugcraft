@@ -410,6 +410,11 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         if(menu.filterRow()>=0){
             var companion=npc();var target=companion==null?null:companion.assignments.view().get(menu.filterRow()+1);
             g.text(font,"Filter: "+(target==null?"Workstation":fit(companion.assignments.label(menu.filterRow()+1),200)),105,82,0xFF404040,false);
+            if(menu.value(25+menu.filterRow())==14){
+                g.text(font,"Choose finished products. Empty allows any.",105,174,0xFF404040,false);
+                g.text(font,"Supply ingredients, fuel and reusable tools.",105,187,0xFF404040,false);
+                g.text(font,"Crucible furnace also needs ceramic parts.",105,200,0xFF404040,false);return;
+            }
             if(menu.value(25+menu.filterRow())==12){
                 g.text(font,"Choose compostable inputs for the Mulch Maw.",105,174,0xFF404040,false);
                 g.text(font,"Keeps up to 16 items; pauses when beds are full.",105,187,0xFF404040,false);

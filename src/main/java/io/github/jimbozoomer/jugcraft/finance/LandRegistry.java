@@ -209,23 +209,24 @@ public final class LandRegistry extends SavedData {
 		if (level.isClientSide() || level.dimension() != Level.OVERWORLD || !(player instanceof ServerPlayer server)) {
 			return true;
 		}
-		MinecraftServer mc = level.getServer();
-		if (mc == null) {
-			return true;
-		}
-		LandRegistry land = get(mc);
-		Claim claim = land.claims.get(keyOf(pos));
-		if (claim == null || actsFor(mc, player.getUUID(), claim.owner)) {
-			return true;
-		}
-		// Corporation land: the controlling shareholder's trusted players may build too.
-		Equities.Corporation corp = Equities.get(mc).byTreasury(claim.owner);
-		UUID boss = corp == null ? claim.owner : Equities.get(mc).controller(corp);
-		if (boss != null && land.trustedBy(boss).contains(player.getUUID())) {
-			return true;
-		}
-		return FinanceService.isAdmin(server);
-	}
+        return mayBuildFor(player.getUUID(), level, pos) || FinanceService.isAdmin(server);
+    }
+
+    /** Automation uses its owner's identity without requiring an online player or inheriting operator bypasses. */
+    public static boolean mayBuildFor(UUID owner, Level level, BlockPos pos) {
+        if (level.isClientSide() || level.dimension() != Level.OVERWORLD) return true;
+        MinecraftServer server = level.getServer();
+        if (server == null) return false;
+        LandRegistry land = get(server);
+        Claim claim = land.claims.get(keyOf(pos));
+        if (claim == null) return true;
+        if (owner == null) return false;
+        if (actsFor(server, owner, claim.owner)) return true;
+        Equities equities = Equities.get(server);
+        Equities.Corporation corp = equities.byTreasury(claim.owner);
+        UUID boss = corp == null ? claim.owner : equities.controller(corp);
+        return boss != null && land.trustedBy(boss).contains(owner);
+    }
 
 	/** True when {@code player} owns the land of {@code owner}: it is them, or a corporation they control. */
 	public static boolean actsFor(MinecraftServer server, UUID player, UUID owner) {

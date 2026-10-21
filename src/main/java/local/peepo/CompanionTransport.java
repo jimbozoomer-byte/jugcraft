@@ -330,6 +330,9 @@ public final class CompanionTransport extends Goal {
         var points=new ArrayList<BlockPos>(12);
         var targetState=npc.level().getBlockState(target.at().pos());
         boolean oven=targetState.getBlock() instanceof HearthOvenBlock;
+        boolean bench=StarterWorkshopJob.bench(targetState);
+        if(bench && npc.level().getBlockEntity(target.at().pos()) instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)
+            points.addAll(StarterWorkshopJob.frontEntrances(npc,workshop));
         if(target.carriesProduce()){
             var floors=new LinkedHashSet<BlockPos>();
             for(var soil:target.livestock()?List.of(target.at().pos()):npc.garden.cells(target))if((target.livestock()?CompanionJobs.permitted(npc,soil):npc.garden.accessible(target,soil))){
@@ -345,7 +348,7 @@ public final class CompanionTransport extends Goal {
                 if(npc.level().getFluidState(floor.above()).isEmpty() && CompanionHazards.safeAt(npc,p) && npc.level().noCollision(new AABB(p.x-r,p.y+.001,p.z-r,p.x+r,p.y+npc.getBbHeight(),p.z+r)))points.add(floor.above());
             }
         }
-        if(!CompanionGarden.hanging(target))for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
+        if(!bench && !CompanionGarden.hanging(target))for(var side:Direction.Plane.HORIZONTAL)for(int dy=0;dy>=-1;dy--){
             // The pie must enter the mouth, with a standing surface at the oven's level.
             if(oven && (side!=targetState.getValue(HearthOvenBlock.FACING) || dy!=0))continue;
             var pos=target.at().pos().relative(side).offset(0,dy,0);var p=Vec3.atBottomCenterOf(pos);var floor=pos.below();

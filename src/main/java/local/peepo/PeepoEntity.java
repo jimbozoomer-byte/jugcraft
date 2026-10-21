@@ -150,7 +150,7 @@ public final class PeepoEntity extends PathfinderMob {
         holdForSettings();
     }
     void closeSettings(CompanionMenu menu){settingsMenus.remove(menu);}
-    private boolean editingSettings(){return !settingsMenus.isEmpty();}
+    boolean editingSettings(){return !settingsMenus.isEmpty();}
     private void holdForSettings(){
         getNavigation().stop();setSpeed(0);
         var movement=getDeltaMovement();setDeltaMovement(0,movement.y,0);
@@ -518,7 +518,7 @@ public final class PeepoEntity extends PathfinderMob {
         FindFoodGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK)); }
         private boolean valid(ItemEntity item) {
             return item!=null && item.isAlive() && !item.hasPickUpDelay() && isEdible(item.getItem())
-                && distanceToSqr(item)<64 && orders.food(item.position());
+                && distanceToSqr(item)<64 && orders.food(item.position()) && CompanionJobs.permitted(PeepoEntity.this,item.blockPosition());
         }
         @Override public boolean canUse() {
             if (!needsAutomaticFood() || isEating() || food.meals()>0 || level().getGameTime()<nextSearch || !CompanionBudget.search(PeepoEntity.this)) return false;

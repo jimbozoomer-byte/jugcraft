@@ -35,7 +35,7 @@ public final class CompanionJobDetails {
             case NEEDS_CONTAINERS -> "Needs empty bottles, buckets or a refillable canteen; "+transport(npc,row,true,source)+".";
             case NO_SEEDS -> "Needs suitable planting items; "+transport(npc,row,true,source)+".";
             case NO_BUNDLES -> "Needs ready-made herb bundles; "+transport(npc,row,true,source)+".";
-            case NEEDS_FERTILIZER -> "Needs bone meal, guano or Fertilizer; "+transport(npc,row,true,source)+".";
+            case NEEDS_FERTILIZER -> "Needs bone meal, guano or a fertilizer blend; "+transport(npc,row,true,source)+".";
             case NEEDS_BREEDING_FOOD -> "Needs food accepted by the selected animals; "+transport(npc,row,true,source)+".";
             case NO_POWER -> "Machine lacks power; check its energy supply and connections.";
             case NO_HEAT -> "Station lacks heat; check fuel or the heat source below it.";
@@ -62,7 +62,10 @@ public final class CompanionJobDetails {
             case STOCK_SETUP -> "Stock the Farm Stand sale slots first to set their restock items.";
             case SERVING_SETUP -> "Serve the desired dishes manually once to set restock items.";
             case MACHINE_UNFORMED -> "Complete the machine structure and keep all its parts loaded.";
-            case MACHINE_TOOL -> "Install the required tool in the machine's tool socket.";
+            case NEEDS_CERAMICS -> "Supply or install a Basic Ceramic Lining and Ceramic Crucible; both are reusable.";
+            case MACHINE_TOOL -> npc.level().getBlockEntity(target.at().pos()) instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity
+                ? "Supply or install the recipe's workshop tool; Output returns a tool that needs replacing."
+                : "Install the required tool in the machine's tool socket.";
             case MACHINE_PAUSED -> "Machine is paused; resume it using its own controls.";
             case DORMANT_GARDEN -> "Awaken the assigned magic bed/device through its native progression.";
             case NEEDS_VERDANCE -> "Magic device lacks Verdance; check its native supply.";

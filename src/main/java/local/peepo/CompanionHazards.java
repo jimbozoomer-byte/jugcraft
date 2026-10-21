@@ -21,8 +21,12 @@ final class CompanionHazards {
         double radius=npc.getBbWidth()/2+.01;
         var min=BlockPos.containing(point.x-radius,point.y-.01,point.z-radius);
         var max=BlockPos.containing(point.x+radius,point.y+npc.getBbHeight()-.001,point.z+radius);
-        for(var pos:BlockPos.betweenClosed(min,max))
-            if(!npc.level().hasChunkAt(pos) || harmful(npc,npc.level().getBlockState(pos)))return false;
+        for(var pos:BlockPos.betweenClosed(min,max)){
+            if(!npc.level().hasChunkAt(pos))return false;
+            var state=npc.level().getBlockState(pos);
+            // The empty space under the tabletop is not a usable standing/delivery position.
+            if(harmful(npc,state) || StarterWorkshopJob.bench(state))return false;
+        }
         return true;
     }
 }
