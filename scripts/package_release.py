@@ -1,6 +1,6 @@
 """Offline release assembly from a built JAR and the verified dependency cache.
 
-Produces a player pack, Windows import helper and hosting upload bundle. Never
+Produces a player pack, plain instruction ZIP and hosting upload bundle. Never
 starts Minecraft, edits a launcher profile, downloads code or deploys a server.
 """
 from __future__ import annotations
@@ -136,7 +136,7 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
         'modVersion': metadata['version'], 'sourceCommit': commit,
         'minecraft': lock['minecraft'], 'fabricLoader': lock['fabricLoader'], 'java': lock['java'],
         'frameworkLockSha512': hashlib.sha512(pack.json_bytes(lock)).hexdigest(),
-        'updateMethod': 'JUGCRAFT updater and per-instance Modrinth pre-launch hook; owner-promoted GitHub channel',
+        'updateMethod': 'In-game JUGCRAFT update menu; explicit download/apply after exit; owner-promoted GitHub channel',
         'serverAddress': server['serverAddress'] if server else None,
         'modrinthServerProject': server['projectUrl'] if server and server.get('enabled', True) else None,
     }
@@ -166,24 +166,18 @@ def build_release(lock: dict, jar: Path, cache: Path, output: Path, version: str
     player = output / ('JUGCRAFT-player-' + version + '.zip')
     with zipfile.ZipFile(player, 'w') as archive:
         pack.add_entry(archive, mrpack.name, mrpack.read_bytes())
-        pack.add_entry(archive, 'Install-JUGCRAFT.cmd', installer(mrpack.name, sha512(mrpack)))
         pack.add_entry(archive, 'READ-ME.txt', (
-            f'JUGCRAFT {version}\nWindows: extract this entire ZIP, then run Install-JUGCRAFT.cmd.\n'
-            'It verifies the pack and opens its import screen using the registered .mrpack application.\n'
-            'Choose Modrinth App and confirm the import. If no association exists, install Modrinth App\n'
-            'from https://modrinth.com/app and use Create instance > From file with the included .mrpack.\n'
-            'macOS/Linux: import the .mrpack directly in Modrinth App.\n'
+            f'JUGCRAFT {version}\nOpen the included .mrpack in Modrinth App and confirm the import.\n'
+            'Or use Create instance > From file and select it. No installer program is needed.\n'
             'The profile name is JUGCRAFT. Microsoft/Minecraft sign-in remains inside the launcher.\n'
-            'Import only ONCE. For updates use the JUGCRAFT updater supplied by the owner.\n'
-            'Select this existing instance in that updater and copy its command into this instance\n'
-            'Settings > Launch hooks > Pre-launch. Do not set a global hook.\n'
-            'Play checks the owner-promoted GitHub release and asks before updating the SAME folder.\n'
-            'No public Modrinth listing or approval is needed. Plain file imports alone do not update.\n'
+            'Import only ONCE. The JUGCRAFT Updates button in the Minecraft title menu checks updates.\n'
+            'Choose Download update, then Apply update & quit. Wait a moment, then press Play again.\n'
+            'It automatically uses this same instance and preserves your settings and worlds.\n'
+            'No EXE, folder selection, launch hook or public Modrinth listing is needed.\n'
+            'If you tested the earlier EXE, remove its per-instance pre-launch hook before using this pack.\n'
             'No launch, profile replacement, world changes or security-setting changes are automated.\n'
         ).encode())
-    online = output / ('Install-JUGCRAFT-' + version + '.cmd')
-    online.write_bytes(online_installer(version, mrpack.name, sha512(mrpack)))
-    artifacts = [mrpack, host, player, online]
+    artifacts = [mrpack, host, player]
     with tempfile.TemporaryDirectory() as temp:
         staged = Path(temp) / 'direct-update'
         direct.build(mrpack, staged, commit)

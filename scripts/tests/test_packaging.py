@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import io
 import json
 from pathlib import Path
 import sys
@@ -109,6 +110,23 @@ class PackagingTests(unittest.TestCase):
     def test_nested_third_party_jars_cannot_be_packaged(self):
         with self.assertRaisesRegex(ValueError, "must not bundle"):
             packaging.build_pack(self.lock, self.jar(nested=True), self.root / "output", root=self.root)
+
+    def test_game_updater_baseline_matches_initial_pack_without_circular_hash(self):
+        jar = self.jar()
+        helper = io.BytesIO()
+        with zipfile.ZipFile(helper, 'w') as z:
+            z.writestr('META-INF/MANIFEST.MF', 'Main-Class: io.github.jimbozoomer.jugcraft.update.UpdateApplier\n')
+            z.writestr('io/github/jimbozoomer/jugcraft/update/UpdateApplier.class', b'fixture')
+        with zipfile.ZipFile(jar, 'a') as z:
+            z.writestr('jugcraft/updater-helper.jar', helper.getvalue())
+        result = packaging.build_pack(self.lock, jar, self.root / 'game-update', root=self.root)
+        with zipfile.ZipFile(result) as z:
+            baseline = json.loads(z.read('client-overrides/JUGCRAFT-UPDATE.json'))
+            self.assertEqual(baseline['releaseVersion'], '0.1.0-test')
+            own = next(f for f in baseline['files'] if f['path'] == 'mods/jugcraft.jar')
+            self.assertEqual(own['sha512'], hashlib.sha512(jar.read_bytes()).hexdigest())
+            self.assertEqual(len(baseline['files']), len(self.lock['dependencies']) + 1)
+            self.assertNotIn('pack', baseline)
 
     def test_jade_remains_optional_in_standalone_publication(self):
         jade = next(x for x in self.lock["dependencies"] if x["key"] == "jade")

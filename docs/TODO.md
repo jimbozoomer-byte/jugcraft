@@ -1,5 +1,13 @@
 # Jugcraft TODO
 
+## Player updater — October 21
+
+- [x] Replace the EXE/hook player flow with a single `.mrpack` import and in-game update consent. Locate the active instance automatically and preserve settings, saves and extra mods. [Implementation and validation](features/direct-player-updater.md).
+- [x] Stage/verify changed managed mods; use a bundled Java helper after Minecraft exits, with journal recovery and a relaunch guard.
+- [ ] Complete the real-player Modrinth import, download, Apply & quit and relaunch acceptance cycle before promoting this updater to the public channel. Remove the old per-instance EXE hook on early test installations.
+- [ ] Validate macOS/Linux launcher and filesystem behavior; only Windows is locally tested.
+- [ ] Keep the public pack listing disabled; promote GitHub updates only after the corresponding server deployment is verified.
+
 ## Living spawn city — October 21 local work
 
 - [x] Add explicit, resumable existing-town blueprint upgrades; preserve edited blocks, inventories and NPC identities. [Scope and operator commands](features/living-town-upgrades.md).

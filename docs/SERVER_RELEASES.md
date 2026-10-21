@@ -1,15 +1,15 @@
 # JUGCRAFT installation and updates
 
 The player-facing pack name is **JUGCRAFT**. Minecraft 26.3, Fabric Loader 0.19.5
-and Java 25 remain pinned. No downloader runs inside Minecraft.
+and Java 25 remain pinned. Player updates are offered in the Minecraft title menu.
 
-## Current distribution: our installer, no public Modrinth listing
+## Current distribution: one pack import, in-game updates
 
-The owner chose direct Discord/GitHub distribution on 21 October. Use
-`JUGCRAFT-Installer.zip` and the [direct updater guide](features/direct-player-updater.md).
-Players import once, bind that instance and copy its command into the instance's
-Pre-launch hook. Future checks prompt before updating the same folder; settings,
-saves and unrelated files remain untouched. This first installer is Windows-only.
+Share the versioned `.mrpack` directly; see the [in-game updater guide](features/direct-player-updater.md).
+Players import once in Modrinth App. The title-menu updater finds that same
+instance automatically, offers verified downloads, then applies after the player
+chooses to quit. Settings and saves stay in place. No EXE, manual folder binding,
+launcher hook or public pack listing is needed. The older Windows helper is legacy.
 
 The Modrinth Server Project below remains an unpublished draft; do not submit it
 for review or distribute its old `JUGCRAFT-Join.zip`. `enabled: false` in
@@ -55,21 +55,11 @@ Summer pack. Do not point current players at that pack or change its old version
 
 ### Sending the next update
 
-Prepare a uniquely versioned pack from tested source with the existing GitHub
-release workflow. Back up the server, deploy its matching files, and verify startup
-before promoting the player update. In the **same** Server Project, open
-Settings > Server > Compatibility and replace its custom pack with that exact
-`.mrpack`, then save. That compatibility change is the release action which
-prompts every linked player to update on their next launch. Do not publish a
-player compatibility version before the matching server is ready.
-
-The release workflow automates assembly and checksums. Linked-instance prompts
-are native Modrinth behavior. Live server deployment and compatibility promotion
-remain explicit owner release actions; no publishing credential or unattended
-deployment has been configured. A commit to main alone never updates players.
-
-Before a wider launch, verify a fresh linked install, a join and an old-linked-
-instance update. Preserve the previous pack and matching world backup for rollback.
+Use the direct GitHub channel promotion described above and in the
+[in-game updater guide](features/direct-player-updater.md). The earlier linked
+Server Project procedure is superseded; do not submit that draft for review.
+Verify a fresh import, a join and an in-place update before a wider launch.
+Preserve the previous payload and matching world backup for rollback.
 
 ### Routine updates preserve the live world
 
@@ -95,7 +85,7 @@ server's files or assume a manifest reflects manual changes made outside release
 
 Replacing the JAR still uploads that whole JAR; this is file-level updating, not
 a binary-delta protocol. The large initial player pack is separate from the host
-update. Modrinth manages linked client updates; no forced update runs inside Minecraft.
+update. The in-game updater offers client changes with consent; it never modifies the running game.
 
 ## Prepared files
 

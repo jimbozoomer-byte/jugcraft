@@ -30,6 +30,10 @@ https://github.com/jimbozoomer-byte/jugcraft/blob/main/docs/FRAMEWORKS.md
 https://github.com/jimbozoomer-byte/jugcraft/blob/main/docs/DISTRIBUTION.md
 https://github.com/jimbozoomer-byte/jugcraft/blob/main/docs/SERVER_RELEASES.md
 
-Updates: a standalone file import does not subscribe to future releases. For
-ongoing server play use the owner's Modrinth Server Project Play link once it is
-configured; its linked pack prompts for required updates before launch.
+Updates: new packs with JUGCRAFT-UPDATE.json check the owner's release channel
+at the Minecraft title menu. Choose JUGCRAFT Updates > Download update, then
+Apply update & quit. Wait a moment and press Play again in Modrinth. The same
+instance is updated; controls, settings, worlds and extra mods stay in place.
+No EXE, launch hook or public Modrinth pack listing is needed. If you tested the
+old EXE, remove its instance Pre-launch hook. Older packs need initial migration;
+importing a historical pack does not add the new updater retroactively.

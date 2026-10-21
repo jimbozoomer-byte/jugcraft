@@ -295,6 +295,7 @@
       "io.github.jimbozoomer.jugcraft.finance.ExchangeIntegrationGameTests"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.UpdateMenuClientGameTests",
       "io.github.jimbozoomer.jugcraft.finance.ExchangeClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AcademyClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.UndergroundDepositClientGameTests",

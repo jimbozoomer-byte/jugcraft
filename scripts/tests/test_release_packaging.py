@@ -68,17 +68,14 @@ class ReleasePackagingTests(unittest.TestCase):
             self.build()
         self.assertFalse((self.root / 'out').exists())
 
-    def test_player_helper_verifies_exact_pack_and_never_changes_security_policy(self):
+    def test_player_handout_contains_pack_and_instructions_without_executable(self):
         result = self.build()
         player = next(x for x in result['artifacts'] if '-player-' in x['name'])
         with zipfile.ZipFile(self.root / 'out' / player['name']) as archive:
             name = next(n for n in archive.namelist() if n.endswith('.mrpack'))
-            script = archive.read('Install-JUGCRAFT.cmd').decode()
-            self.assertIn(hashlib.sha512(archive.read(name)).hexdigest(), script)
-            self.assertIn('Get-FileHash -LiteralPath', script)
-            self.assertNotIn('ExecutionPolicy', script)
-            self.assertNotIn('Remove-Item', script)
-            self.assertIn('set "JUGCRAFT_PACK=%~dp0', script)
+            self.assertEqual(set(archive.namelist()), {name, 'READ-ME.txt'})
+            self.assertIn('Apply update & quit', archive.read('READ-ME.txt').decode())
+        self.assertFalse(any(x['name'].endswith(('.cmd', '.exe', '.ps1')) for x in result['artifacts']))
         with zipfile.ZipFile(self.root / 'out' / name) as archive:
             self.assertEqual(json.loads(archive.read('modrinth.index.json'))['name'], 'JUGCRAFT')
 
@@ -95,10 +92,9 @@ class ReleasePackagingTests(unittest.TestCase):
                 release.build_release(self.lock, self.jar, self.cache, self.root / 'out', version, commit, self.root)
 
     def test_online_installer_is_pinned_and_verifies_before_opening(self):
-        result = self.build()
-        record = next(x for x in result['artifacts'] if x['name'].endswith('.cmd'))
-        script = (self.root/'out'/record['name']).read_text()
-        pack_record = next(x for x in result['artifacts'] if x['name'].endswith('.mrpack'))
+        # Legacy utility remains readable/tested, but new releases do not ship it.
+        pack_record = {'name': 'jugcraft-complete-0.1.0-test.1.mrpack', 'sha512': 'a' * 128}
+        script = release.online_installer('0.1.0-test.1', pack_record['name'], pack_record['sha512']).decode()
         self.assertIn('/releases/download/pack-0.1.0-test.1/'+pack_record['name'], script)
         self.assertIn(pack_record['sha512'], script)
         self.assertLess(script.index('Get-FileHash'), script.index('Start-Process'))

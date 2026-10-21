@@ -1,3 +1,9 @@
+LEGACY WINDOWS HELPER — SUPERSEDED FOR NEW PLAYER PACKS
+
+New players should import the .mrpack once and use JUGCRAFT Updates inside
+Minecraft. No EXE or launch hook is needed. These instructions are retained
+for early installations; remove their instance hook when migrating.
+
 JUGCRAFT — ONE INSTALLATION, YOUR SETTINGS KEPT
 
 Windows 10/11. Requires the official Modrinth App and your own Minecraft account.

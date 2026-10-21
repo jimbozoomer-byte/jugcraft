@@ -47,6 +47,7 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		io.github.jimbozoomer.jugcraft.client.update.JugcraftUpdates.register();
 		AcademyAtmosphere.register();
 		MeshItemModels.register();
 		StructureItemRenderers.register();
