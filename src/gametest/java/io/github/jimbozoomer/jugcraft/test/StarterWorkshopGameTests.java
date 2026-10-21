@@ -68,8 +68,11 @@ public class StarterWorkshopGameTests {
     }
 
     @GameTest public void starterWorkshopCraftingPatternsSelectTheirIntendedProducts(GameTestHelper h) {
-        for(String name:List.of("workshop_bench","workshop_hammer","wire_cutters","soldering_tool","small_ceramic_kiln","small_crucible_furnace","unfired_ceramic_lining","unfired_ceramic_crucible","unfired_insulator","insulated_copper_cable")) {
-            try(var in=getClass().getResourceAsStream("/data/jugcraft/recipe/starter_workshop/"+name+".json")) {
+        var recipes=new ArrayList<String>();
+        for(String name:List.of("workshop_bench","workshop_hammer","wire_cutters","soldering_tool","small_ceramic_kiln","small_crucible_furnace","unfired_ceramic_lining","unfired_ceramic_crucible","unfired_insulator","insulated_copper_cable")) recipes.add("starter_workshop/"+name);
+        recipes.addAll(List.of("copper_cable","insulated_copper_cable"));
+        for(String name:recipes) {
+            try(var in=getClass().getResourceAsStream("/data/jugcraft/recipe/"+name+".json")) {
                 var json=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in,java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
                 var slots=new ArrayList<ItemStack>();int width=3,height;
                 var ops=net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE,h.getLevel().registryAccess());

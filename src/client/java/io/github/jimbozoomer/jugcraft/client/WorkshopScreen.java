@@ -7,8 +7,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
 
 /** A recipe picker, actual inventory, recipe preview and toggleable Work button. */
@@ -24,7 +22,6 @@ public final class WorkshopScreen extends AbstractContainerScreen<WorkshopMenu> 
                 }));
     }
     private boolean working;
-    private int workSoundsRemaining, workSoundDelay;
     private Button work, cancel;
     private final ArrayList<Button> recipes = new ArrayList<>();
     public WorkshopScreen(WorkshopMenu menu, Inventory inventory, Component title) {
@@ -41,7 +38,6 @@ public final class WorkshopScreen extends AbstractContainerScreen<WorkshopMenu> 
         }
         work = addRenderableWidget(Button.builder(Component.translatable("screen.jugcraft.workshop.work"), b -> {
             working = !working;
-            workSoundsRemaining = working ? 3 : 0; workSoundDelay = 0;
             press(working ? WorkshopMenu.PULSE : WorkshopMenu.RELEASE);
         })
             .bounds(leftPos + 8, topPos + 188, 105, 20).build());
@@ -54,23 +50,9 @@ public final class WorkshopScreen extends AbstractContainerScreen<WorkshopMenu> 
     @Override protected void containerTick() {
         super.containerTick();
         if (working) press(WorkshopMenu.PULSE);
-        tickWorkSounds();
         for (int i = 0; i < recipes.size(); i++) recipes.get(i).active = !menu.busy() && i != menu.data(5);
         cancel.active = menu.busy();
         work.setMessage(Component.translatable(working ? "screen.jugcraft.workshop.working" : "screen.jugcraft.workshop.work"));
-    }
-    private void tickWorkSounds() {
-        // A short opening phrase per explicit Start click, never a production loop.
-        // Wait for server-confirmed work so missing tools, fuel or inputs stay quiet.
-        if (!working || workSoundsRemaining == 0 || menu.data(4) != 0 || !menu.busy() || minecraft.player == null) return;
-        if (workSoundDelay > 0) { workSoundDelay--; return; }
-        var tool = menu.slots.get(WorkshopBlockEntity.TOOL).getItem();
-        var sound = tool.is(JugcraftWorkshop.ITEMS.get("wire_cutters")) ? SoundEvents.SHEEP_SHEAR
-            : tool.is(JugcraftWorkshop.ITEMS.get("soldering_tool")) ? SoundEvents.FIRE_EXTINGUISH : SoundEvents.ANVIL_HIT;
-        var player = minecraft.player;
-        player.level().playLocalSound(player.getX(), player.getEyeY(), player.getZ(), sound,
-            SoundSource.BLOCKS, 0.12F, tool.is(JugcraftWorkshop.ITEMS.get("soldering_tool")) ? 1.6F : 1.15F, false);
-        workSoundsRemaining--; workSoundDelay = 15;
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float delta) {
         extractBackground(g, mx, my, delta); super.extractRenderState(g, mx, my, delta); extractTooltip(g, mx, my);

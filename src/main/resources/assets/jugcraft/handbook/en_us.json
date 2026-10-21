@@ -480,7 +480,7 @@
           "title": "Connecting the first machine",
           "icon": "jugcraft:copper_cable",
           "text": [
-            "Six wires, a tin ingot and two fired insulators make six copper cables. Existing direct-ingot cable and bronze-blend recipes remain available. Starter ceramics need the machines feature, not drones.",
+            "Six wires, a tin ingot and two fired insulators make eight copper cables. Two copper ingots and one tin make four directly; adding molded cable insulation makes sixteen. The bronze-blend recipe remains available. Starter ceramics need the machines feature, not drones.",
             "Use these same alloys and components for existing casings, generators, shafts and powered machines. Nothing here requires a circuit just to make the first furnace, kiln or bench. Advanced ceramics, bellows and mechanical expansion remain separate."
           ]
         }
@@ -1062,7 +1062,7 @@
               null
             ],
             "result": "jugcraft:copper_cable",
-            "count": 6
+            "count": 4
           }
         },
         {

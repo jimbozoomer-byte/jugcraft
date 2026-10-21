@@ -114,7 +114,7 @@ def write_all(write, assets, data, lang):
     shaped('unfired_ceramic_lining',['CCC',' C '],dict(C='minecraft:clay_ball'))
     shaped('unfired_ceramic_crucible',['C C','C C','CCC'],dict(C='minecraft:clay_ball'))
     craft('unfired_insulator',['minecraft:clay_ball'],count=2)
-    craft('insulated_copper_cable',['jugcraft:copper_wire']*6+['jugcraft:tin_ingot']+['jugcraft:ceramic_insulator']*2,result='copper_cable',count=6)
+    craft('insulated_copper_cable',['jugcraft:copper_wire']*6+['jugcraft:tin_ingot']+['jugcraft:ceramic_insulator']*2,result='copper_cable',count=8)
     for name, recipe in processes(): write(data/'recipe'/f'starter_workshop/{name}.json',recipe)
     for name, label in NAMES.items():
         lang[('block.' if name in STATIONS else 'item.')+'jugcraft.'+name]=label
@@ -164,5 +164,5 @@ def chapter():
             'Choose a recipe on the left, follow the preview, insert ingredients and the matching tool, then click Start Work. Click Stop Work or leave the bench menu to pause; hoppers cannot work for you. One ingot makes one iron, copper, tin, zinc, lead, bronze or brass plate in 5 seconds. One copper ingot makes three wires in 5 seconds.',
             'For a basic circuit, use existing silicon, three wires and one solder ingot with the soldering tool and fuel. A circuit takes 10 seconds. Work remains enabled until you click Stop Work or leave the menu. Powered machines keep the same yields and can run without a player at the bench. Silicon still comes from existing processing; a later batch will add the local quartz and upgraded-heat route.']),
         dict(title='Connecting the first machine',icon='jugcraft:copper_cable',text=[
-            'Six wires, a tin ingot and two fired insulators make six copper cables. Existing direct-ingot cable and bronze-blend recipes remain available. Starter ceramics need the machines feature, not drones.',
+            'Six wires, a tin ingot and two fired insulators make eight copper cables. Two copper ingots and one tin make four directly; adding molded cable insulation makes sixteen. The bronze-blend recipe remains available. Starter ceramics need the machines feature, not drones.',
             'Use these same alloys and components for existing casings, generators, shafts and powered machines. Nothing here requires a circuit just to make the first furnace, kiln or bench. Advanced ceramics, bellows and mechanical expansion remain separate.'])])

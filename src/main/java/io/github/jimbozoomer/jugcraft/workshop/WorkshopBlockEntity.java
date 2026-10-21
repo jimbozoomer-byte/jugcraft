@@ -6,10 +6,14 @@ import io.github.jimbozoomer.jugcraft.machine.form.WorkLane;
 import java.util.*;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.*;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.*;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.*;
 import net.minecraft.world.inventory.*;
@@ -118,6 +122,15 @@ public final class WorkshopBlockEntity extends BaseContainerBlockEntity implemen
                 requiredTool = recipe.toolStack(); heated = recipe.heated(); selected = choice.id();
                 lane = new WorkLane(choice.id(), reserved, List.of(), List.of(new WorkLane.ItemPart(OUTPUT, recipe.result().create())),
                     List.of(), recipe.time(), requiredTool.isEmpty() ? -1 : TOOL, false, 0);
+                // One cue for each newly committed manual batch, never for resuming partial work.
+                if (station() == 0 && worker != null) {
+                    boolean soldering = requiredTool.is(JugcraftWorkshop.ITEMS.get("soldering_tool"));
+                    var sound = requiredTool.is(JugcraftWorkshop.ITEMS.get("wire_cutters")) ? SoundEvents.SHEEP_SHEAR
+                        : soldering ? SoundEvents.FIRE_EXTINGUISH : SoundEvents.ANVIL_HIT;
+                    worker.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound),
+                        SoundSource.BLOCKS, worker.getX(), worker.getEyeY(), worker.getZ(), 0.5F,
+                        soldering ? 1.6F : 1.15F, server.getRandom().nextLong()));
+                }
             }
             if (!heated || spendHeat()) {
                 lane.advance(1);

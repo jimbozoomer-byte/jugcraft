@@ -1,5 +1,6 @@
 """Starter progression must bootstrap from vanilla clay/metals and retain powered yields."""
 import sys
+import json
 import unittest
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'tools'))
@@ -7,6 +8,12 @@ import starter_workshop as workshop
 from audit_survival_recipes import build, reachable
 
 class StarterWorkshopTests(unittest.TestCase):
+    def test_cable_routes_reward_processing(self):
+        recipes=Path(__file__).resolve().parents[2]/'src/main/resources/data/jugcraft/recipe'
+        for name, count in [('copper_cable',4),('starter_workshop/insulated_copper_cable',8),('insulated_copper_cable',16)]:
+            result=json.loads((recipes/(name+'.json')).read_text())['result']
+            self.assertEqual({'id':'jugcraft:copper_cable','count':count},result,name)
+
     def test_approved_recipes_only_and_equal_material_yields(self):
         rows=dict(workshop.processes())
         self.assertEqual(15,len(rows))

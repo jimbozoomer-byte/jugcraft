@@ -16,7 +16,7 @@ Construction follows the accepted provisional costs: bench = crafting table, fou
 - Manual basic circuit: existing silicon, three copper wires and solder to one circuit, 200 active-work ticks with ordinary heating fuel.
 - Kiln: two insulator blanks in 200 ticks; lining in 400 ticks; crucible in 600 ticks.
 - Furnace: three copper and one tin to four bronze, or three copper and one zinc to four brass, in 200 ticks; one tin and one lead to two solder in 120 ticks.
-- Preserve machine yields and existing powered recipes, bronze-blend fallback, current copper cable and silicon routes. Add six wires, one tin and two insulators to six copper cables as an alternate starter recipe.
+- Preserve machine yields and existing powered recipes, bronze-blend fallback, current copper cable and silicon routes. Add six wires, one tin and two insulators to eight copper cables as an alternate starter recipe.
 
 Select a recipe, insert ingredients and click Start Work for manual production. Work stays enabled until Stop Work is clicked or the player leaves the bench menu. Server-validated presence still prevents work after closing, disconnecting or moving out of reach. Fuel credit, committed ingredients and partial progress survive saves; blocked output or missing requirements spend no fuel. Inventory automation never supplies player work or removes a tool during an active batch. Installed lining and crucible are reusable.
 
@@ -61,8 +61,16 @@ The owner requested click-to-toggle manual work: Start Work remains active throu
 
 Revision validation: all 10 focused workshop server tests and both workshop Python tests passed. Recipe, handbook, JEI timing and toggle-label generator comparisons passed. The focused real-client test and JAR build passed: clicking enabled work after mouse release, clicking again paused it, closing the menu stopped it, reopening left it disabled, and save/reopen retained partial progress, fuel and completed bronze. The refreshed inspection export preserves 91 files, with 2,563 saved region records checked during removal of unused test metadata from its separate delivery copy. The full test suite was not rerun for this revision.
 
-## Owner revision: restrained manual-work sounds
+## Initial sound revision (superseded below)
 
 Each explicit Start Work click arms at most three quiet tool cues, spaced 16 active client ticks apart. The screen waits for server-confirmed active work; missing ingredients, tools or heat and blocked output stay quiet. Stop, cancellation or leaving the screen prevents further cues. Successive batches do not restart the phrase. Hammering uses vanilla anvil hits, wire cutting uses shearing snips, and soldering uses a higher-pitched extinguishing hiss, all at 0.12 volume on the Blocks sound slider and audible only to the operating client. The shared owner-library catalog was searched for suitable workshop audio; this change references existing vanilla sound events and adds no audio files or dependencies. Cable recipe quantities are unchanged pending owner balance selection.
 
 Validation: client compilation and the existing focused `StarterWorkshopClientGameTests` run passed with the sound calls active, covering manual start/stop, menu closure, completion and save/reopen. No server behavior or recipe data changed, so the server suite was not rerun. Perceived loudness and sound preference remain for owner listening review.
+
+## Owner revision: cable balance and one sound per batch
+
+The direct recipe now yields four copper cables from two copper ingots and one tin ingot. The workshop route now yields eight cables from six copper wires, one tin and two ceramic insulators; the cable-insulation route yields sixteen. This explicitly supersedes the earlier promise to preserve the direct recipe quantity. The tower recipe-cost audit passes without changing its tolerances or tower costs.
+
+Manual tool sounds now play once when the server commits a new batch, including successive batches while Start Work remains enabled. Volume rises from 0.12 to 0.5 on the Blocks slider. Only the operating player receives the cue. A paused or saved partial batch retains its work and does not replay the sound on resumption. Failed starts, missing ingredients and blocked output remain silent. The earlier three-cue client schedule is removed. No new audio assets or dependencies are added; the same vanilla anvil, shearing and extinguishing events remain in use.
+
+Revision validation: all 10 workshop server tests passed, including actual crafting-grid selection for all three cable recipes. All three workshop Python tests and eight recipe-loop regressions passed. The cable recipes and handbook match their generators; the tower cost audit and whitespace checks pass. The focused workshop client run exercised the sound packet path, start/stop, completion and save/reopen successfully. Listening preference remains for owner review; no full game-test suite was run.
