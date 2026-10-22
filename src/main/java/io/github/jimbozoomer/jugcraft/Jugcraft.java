@@ -35,6 +35,7 @@ import io.github.jimbozoomer.jugcraft.weapons.JugcraftWeapons;
 import io.github.jimbozoomer.jugcraft.world.AlpineSpawn;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
+import io.github.jimbozoomer.jugcraft.world.RetroTraderJam;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
@@ -128,6 +129,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.drone.CreativeSupplyCrateBlock.register();
 		PixelHollows.register();
 		RetroTrader.register();
+		RetroTraderJam.register();
 		AlpineSpawn.register();
 		io.github.jimbozoomer.jugcraft.world.AdamOndiAhman.register();
 		JugcraftRegions.register();

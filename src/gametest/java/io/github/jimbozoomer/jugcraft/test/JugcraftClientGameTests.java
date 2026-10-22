@@ -34,6 +34,7 @@ import io.github.jimbozoomer.jugcraft.tools.JugcraftTools;
 import io.github.jimbozoomer.jugcraft.world.ArcadeCabinetBlock;
 import io.github.jimbozoomer.jugcraft.world.PixelHollows;
 import io.github.jimbozoomer.jugcraft.world.RetroTrader;
+import io.github.jimbozoomer.jugcraft.world.RetroTraderJam;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
@@ -791,6 +792,14 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 			context.waitTicks(20);
 			singleplayer.getConnection().waitForChunksRender();
 			context.takeScreenshot("jugcraft_retro_trader");
+			// His stomp-clap, started as a trade and a closed screen would (chance forced): a shout on the first stomp,
+			// then his hands together on the first clap (RetroTraderJam's timeline, after its client delay).
+			server.runOnServer(minecraft -> startRetroTraderJams(minecraft.overworld()));
+			context.waitTicks(RetroTraderJam.CLIENT_DELAY + RetroTraderJam.INTRO + 2);
+			context.takeScreenshot("jugcraft_retro_trader_jam_stomp");
+			context.waitTicks(RetroTraderJam.BEAT - 2);
+			context.takeScreenshot("jugcraft_retro_trader_jam_clap");
+			context.waitTicks(RetroTraderJam.LENGTH);
 
 			// The Retro Game Shop as a village places it (its floor replaces the ground layer).
 			server.runCommand("place template jugcraft:village/plains/retro_game_shop %d %d %d".formatted(x - 8, y - 1, z + 24));
@@ -916,6 +925,19 @@ public class JugcraftClientGameTests implements FabricClientGameTest {
 		var trader = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(RetroTrader.PROFESSION);
 		for (Villager villager : level.getEntities(EntityTypeTest.forClass(Villager.class), villager -> villager.isNoAi())) {
 			villager.setVillagerData(villager.getVillagerData().withProfession(trader).withLevel(2));
+		}
+	}
+
+	/** Starts every test Retro Trader's stomp-clap as a completed trade and a closed screen would, the chance forced. */
+	private static void startRetroTraderJams(ServerLevel level) {
+		RetroTraderJam.alwaysForTests = true;
+		try {
+			for (Villager villager : level.getEntities(EntityTypeTest.forClass(Villager.class), villager -> villager.isNoAi())) {
+				RetroTraderJam.traded(villager);
+				RetroTraderJam.stoppedTrading(villager);
+			}
+		} finally {
+			RetroTraderJam.alwaysForTests = false;
 		}
 	}
 
