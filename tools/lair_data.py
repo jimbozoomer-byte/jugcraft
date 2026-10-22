@@ -779,6 +779,7 @@ def assets(root, write, lang):
         f"message.{MOD}.lair.protected": "Nothing in a lair can be changed",
         f"message.{MOD}.lair.grave_goods.kept": "Your belongings are gathered up as Grave Goods",
         f"message.{MOD}.lair.grave_goods.returned": "Your Grave Goods are returned to you",
+        f"message.{MOD}.lair.belongings_kept": "You fell in the lair, but kept everything you carried and all your experience",
         f"message.{MOD}.lair.reward.kept": "Your share of the spoils is kept for you until you are back on your feet",
         f"message.{MOD}.lair.reward.returned": "You are handed your share of the spoils",
         f"commands.{MOD}.lair.not_inside": "You are not in a lair",

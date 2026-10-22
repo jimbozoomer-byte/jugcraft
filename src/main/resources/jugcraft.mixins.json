@@ -54,7 +54,8 @@
     "NouveauGrowthMixin",
     "NouveauFireworkMixin",
     "NouveauContainerNameAccess",
-    "NouveauPickupMixin"
+    "NouveauPickupMixin",
+    "LairKeepInventoryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -39,7 +39,7 @@ A vast cavern in the heart of a glacier, 80 blocks across, 44 high and 88 long, 
 - **Overhead:** **giant icicles** hang from the vault, some in clusters, none lower than 15 blocks above the lake. A crack runs across the vault's crown, open to the pale sky.
 - **The light:** hidden light blocks, as if the daylight soaked through the ice: brightest under the crack and at the arrival. Snowflakes drift in the air.
 
-Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-the-shared-rules)): an instance per opening, at most eight; at most four players; nothing can be built or broken; the mist's toll at the edges; Grave Goods on death; closing after 30 seconds empty.
+Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-the-shared-rules)): an instance per opening, at most eight; at most four players; nothing can be built or broken; the mist's toll at the edges; nothing lost on death; closing after 30 seconds empty.
 
 ## Changes from the plan
 
@@ -150,6 +150,6 @@ The Glacier Hall is its own dimension, so nothing here changes the Overworld but
 
 ## Rollout and open questions
 
-The shared framework's defaults hold: four players and eight instances, Grave Goods on death.
+The shared framework's defaults hold: four players and eight instances, nothing lost on death.
 
 Part 2, the Yeti King, adds the fight on the lake (his Ground Slam bares the drift snow to glare ice, never the trampled snow), his whelps from the dens, his loot (Yeti Fur, the Glacier Maul and Rimeclaw, the Yeti Mitten, his crown), and Yeti Fur in a cheaper horn.
