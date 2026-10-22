@@ -153,13 +153,8 @@ jobs:
           cache: gradle
       - name: Install Mesa (software rendering)
         if: env.CLASSES != ''
-        timeout-minutes: 10
-        run: |
-          # A stalled Ubuntu mirror must not consume the entire client-test job.
-          # Keep normal signed repositories and fail if the required packages cannot be installed.
-          apt_options=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
-          sudo apt-get "${apt_options[@]}" update
-          sudo apt-get "${apt_options[@]}" install -y mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 mesa-utils xvfb
+        timeout-minutes: 12
+        run: bash scripts/install_client_graphics.sh
       - name: Prepare run directory
         if: env.CLASSES != ''
         run: |
