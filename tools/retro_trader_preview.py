@@ -11,9 +11,13 @@ nose, is a flat tone. A preview, not a screenshot: it does not show the game's l
 """
 import argparse
 import math
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from retro_trader_look import BEANIE  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 TEX = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures" / "entity"
@@ -128,9 +132,12 @@ def rot(p, x=0.0, y=0.0, z=0.0):
     return px, py, pz
 
 
-def faces(origin, size, uv, grow=0.0, mirror=False):
-    (x, y, z), (w, h, d), (u, v) = origin, size, uv
-    x0, y0, z0, x1, y1, z1 = x - grow, y - grow, z - grow, x + w + grow, y + h + grow, z + d + grow
+def faces(origin, size, uv, grow=0.0, mirror=False, tex=None):
+    """A box's faces; tex gives the texture's whole-pixel size where it differs from the box's size."""
+    (x, y, z), (u, v) = origin, uv
+    x0, y0, z0 = x - grow, y - grow, z - grow
+    x1, y1, z1 = x + size[0] + grow, y + size[1] + grow, z + size[2] + grow
+    w, h, d = tex or size
     out = [((x0, y0, z0), (x1 - x0, 0, 0), (0, y1 - y0, 0), (u + d, v + d, w, h)),
            ((x1, y0, z1), (x0 - x1, 0, 0), (0, y1 - y0, 0), (u + 2 * d + w, v + d, w, h))]
     right = ((x0, y0, z1), (0, 0, z0 - z1), (0, y1 - y0, 0))
@@ -191,6 +198,9 @@ def model(skin, sheet, pose):
         quads += texels(skin, faces((-8, -2, -2), (4, 8, 4), (44, 22)), arms_part)
         quads += texels(skin, faces((4, -2, -2), (4, 8, 4), (44, 22), mirror=True), arms_part, mirror=True)
         quads += texels(skin, faces((-4, 2, -2), (8, 4, 4), (40, 38)), arms_part)
+    # The beanie (RetroTraderLayer draws it on the head).
+    for _, origin, size, tex, uv in BEANIE:
+        quads += texels(sheet, faces(origin, size, uv, tex=tex), head)
     # The face, a hair in front of the head's front.
     e, m = EYES.index(pose["eyes"]), MOUTHS.index(pose["mouth"])
     z = -4.03

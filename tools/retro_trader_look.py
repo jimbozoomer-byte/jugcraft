@@ -11,7 +11,8 @@ expression sheet (textures/entity/retro_trader/expressions.png) is read by the c
 - eye frames, 8x7 each: the head's front rows 0-6 (forehead, brows, glasses and eyes), drawn over the face;
 - mouth frames, 8x3 each: the head's front rows 7-9 (moustache, mouth and beard);
 - two free arms for the stomp-clap (4x10x4 boxes in the model's UV layout), which stand in for the villager's
-  folded arms while he claps.
+  folded arms while he claps;
+- his beanie (three boxes: cuff, crown and dome), which the layer draws on his head.
 
 The face on the overlay itself is the neutral face (EYES_OPEN, MOUTH_NEUTRAL), so he looks the same wherever
 the layer is not drawn (his zombie form uses the same overlay).
@@ -27,7 +28,7 @@ LASH = (40, 26, 18)
 FRAME = [(20, 20, 24), (44, 44, 52)]
 EYE_WHITE, EYE_GREEN, PUPIL = (238, 238, 230), (52, 150, 64), (24, 52, 28)
 MOUTH, TONGUE, TEETH, LIP = (58, 20, 22), (150, 60, 66), (240, 238, 228), (176, 98, 86)
-BEANIE = [(78, 20, 30), (118, 32, 44), (150, 50, 62)]  # burgundy, well away from any hair colour
+BEANIE_COLOURS = [(78, 20, 30), (118, 32, 44), (150, 50, 62)]  # burgundy, well away from any hair colour
 CUFF = [(96, 24, 36), (166, 62, 74)]  # the turned-up cuff's ribs
 FLANNEL = [(44, 92, 60), (30, 62, 44), (26, 32, 56), (200, 162, 64)]
 TEE = [(66, 68, 76), (54, 56, 64)]
@@ -44,6 +45,12 @@ MOUTHS = ["neutral", "smile", "grin", "talk", "shout", "ooh", "frown"]
 EYE_CELL, MOUTH_CELL = (8, 7), (8, 3)
 MOUTH_ROW = 16  # sheet y of the first mouth frame
 ARMS = {"right": (0, 32), "left": (16, 32)}  # texture offsets of the free arms (4x10x4 boxes)
+# The beanie, in head space (pixels; y down, his front towards -z): a ribbed cuff standing just off his hairline, a
+# knit crown above the head and a smaller dome on top, the crown and dome set back a little so it slouches. Each box:
+# name, origin, size, texture size (whole pixels, the sheet's box layout) and texture offset.
+BEANIE = [("cuff", (-4.5, -10.0, -4.5), (9.0, 2.0, 9.0), (9, 2, 9), (0, 20)),
+          ("crown", (-4.3, -12.4, -4.0), (8.6, 2.4, 8.6), (9, 3, 9), (0, 48)),
+          ("dome", (-3.5, -13.2, -3.0), (7.0, 0.8, 7.0), (7, 1, 7), (36, 20))]
 
 
 def put(img, x, y, color):
@@ -68,8 +75,8 @@ def fill(img, rect, color_at):
 def knit(x, y):
     """Stockinette: little V stitches in columns (light on the left leg of each V), a dark purl ridge every third row."""
     if y % 3 == 2:
-        return BEANIE[0]
-    return BEANIE[2] if (x + y) % 2 == 0 else BEANIE[1]
+        return BEANIE_COLOURS[0]
+    return BEANIE_COLOURS[2] if (x + y) % 2 == 0 else BEANIE_COLOURS[1]
 
 
 def rib(x, y):
@@ -125,15 +132,12 @@ def lens(eye, x, y, inner):
 
 
 def brows(eye):
-    """Brow pixels {(x, y)} for an eye frame: raised for wide eyes, knitted together for a frown."""
-    if eye == "wide":
-        return {(1, 1), (2, 1), (5, 1), (6, 1)}
-    if eye == "frown":
-        return {(2, 2), (3, 2), (4, 2), (5, 2), (1, 1), (6, 1)}
-    if eye == "squeeze":
+    """Brow pixels {(x, y)} for an eye frame, all on row 2 (the beanie's cuff covers rows 0-1): short and lifted at
+    the outer ends for wide or happy eyes, knitted together for a frown or a squeeze."""
+    if eye in ("wide", "happy"):
+        return {(1, 2), (6, 2)}
+    if eye in ("frown", "squeeze"):
         return {(1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2)}
-    if eye == "happy":
-        return {(1, 1), (2, 2), (5, 2), (6, 1)}
     return {(1, 2), (2, 2), (5, 2), (6, 2)}
 
 
@@ -220,24 +224,8 @@ def overlay():
     fill(img, head["right"], side(True))
     fill(img, head["left"], side(False))
 
-    # Hat layer (32,0): the beanie, a burgundy knit. A ribbed cuff band runs all the way round: across the hairline at
-    # the front (row 0), over the ears at the sides (rows 1-2, rising towards the front) and low at the back (rows 2-3).
-    # Above the cuff, the knit body; the top is all knit.
-    hat = box_faces(32, 0, 8, 10, 8)
-    fill(img, hat["top"], knit)
-    fill(img, hat["front"], lambda x, y: rib(x, y) if y == 0 else None)
-
-    def beanie_side(front_at_high_u):
-        def paint(x, y):
-            toward_front = x if front_at_high_u else 7 - x
-            cuff_bottom = 1 if toward_front >= 5 else 2  # the cuff dips from the hairline to over the ear
-            if y > cuff_bottom:
-                return None
-            return rib(x, y) if y >= cuff_bottom - 1 else knit(x, y)
-        return paint
-    fill(img, hat["right"], beanie_side(True))
-    fill(img, hat["left"], beanie_side(False))
-    fill(img, hat["back"], lambda x, y: (rib(x, y) if y >= 2 else knit(x, y)) if y <= 3 else None)
+    # Hat layer (32,0): left empty. His beanie is a small model of its own (BEANIE, above), drawn on his head by the
+    # client's RetroTraderLayer, so it has a beanie's shape; his zombie form, which has no such layer, shows his hair.
 
     # Nose (24,0; 2x4x2): the moustache along its underside.
     nose = box_faces(24, 0, 2, 4, 2)
@@ -358,4 +346,10 @@ def expressions():
         fill(img, (x0, y0, *MOUTH_CELL), lambda x, y, mouth=mouth: mouth_at(mouth, x, y))
     free_arm(img, *ARMS["right"], watch=False)
     free_arm(img, *ARMS["left"], watch=True)
+    for name, _, _, (w, h, d), (u, v) in BEANIE:
+        faces = box_faces(u, v, w, h, d)
+        for side in ("front", "back", "right", "left"):
+            fill(img, faces[side], rib if name == "cuff" else knit)
+        fill(img, faces["top"], (lambda x, y: BEANIE_COLOURS[2] if (x + y) % 3 else BEANIE_COLOURS[1]) if name == "dome" else knit)
+        fill(img, faces["bottom"], lambda x, y: BEANIE_COLOURS[0])
     return img
