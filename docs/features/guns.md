@@ -1,4 +1,4 @@
-# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C), the frontier guns (slices 13A to 13D), the brass sidearms (slice 14A), the brass carbines (slice 14B) and the brass quick-firers (slice 14C)
+# Guns: the scrap guns (slice 1), the iron set (slice 2), the lever set (slice 3), the black powder guns (slice 4), the attachments (slices 5 and 7), the guns in use (slice 6), the scopes (slice 7b), the hand guns (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C), the energy weapons (slice 8D), the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C), the pump shotguns (slice 9D), the tactical grip and laser sight (slice 9E), the aiming polish (slice 9F), the Trench Lobber's grenades (slice 9G), the launchers (slice 10A), coil and plasma (slice 10B), the double-barrels (slice 10C), the sculk guns (slice 10D), the Cell Rack (slice 10E), enemies with guns (slice 10F), two guns at once (slice 10G), the Nether guns (slices 11A and 11B), the End guns (slice 12A), the copper guns (slice 12B), the lone guns (slice 12C), the frontier guns (slices 13A to 13D), the brass sidearms (slice 14A), the brass carbines (slice 14B), the brass quick-firers (slice 14C) and a crossbow-gun, a molten rifle and a drum gun (slice 14D)
 
 Status:
 - **Slices 1 to 12C are in `main`:** 10A to 11B with #320 on 11 October 2026; 12A to 12C with #352 on 13 October 2026, which closed their own pull requests (#332, #338 and #344). The lines below say where each was built.
@@ -40,6 +40,7 @@ Status:
 - **Slice 14A** (the brass sidearms: the Holler Pistol, Minuet Pistol and Half-Crown Revolver; [below](#slice-14a-the-brass-sidearms)): implemented on `claude/guns-14a`, stacked on slice 13D, awaiting review.
 - **Slice 14B** (the brass carbines: the Holler Carbine, Minuet Carbine and Grange Carbine; [below](#slice-14b-the-brass-carbines)): implemented on `claude/guns-14b`, stacked on slice 14A, awaiting review.
 - **Slice 14C** (the brass quick-firers: the Sprocket Gun, Navvy Shotgun and Freeholder Rifle; [below](#slice-14c-the-brass-quick-firers)): implemented on `claude/guns-14c`, stacked on slice 14B, awaiting review.
+- **Slice 14D** (a crossbow-gun, a molten rifle and a drum gun: the Quarrel Carbine, Hinterland Rifle and Cloudburst Gun; [below](#slice-14d-a-crossbow-gun-a-molten-rifle-and-a-drum-gun)): implemented on `claude/guns-14d`, from `main`, awaiting review. Its CI has not run yet.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -2071,7 +2072,7 @@ The reload times and the rates are the owner's animations': the Lookout Rifle's 
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
 ## Slice 13B: more frontier guns
-The next of the owner's guns, taken up after slice 13A (on 14 October 2026, with slice 13A up for review, the owner asked "Ok lets continue and do the next thing or what should we do?"): three more of the guns whose item models name plain stone as their base texture, the Fencer Carabine, the Callwell Terminal and the Saketini. A lever-action carbine loaded through its stock, a lever-action shotgun and a single-shot rifle, they follow slice 13A's frontier guns. Their fourth, the Fencer Thumper, waits ([below](#the-fencer-thumper-waits)).
+The next of the owner's guns, taken up after slice 13A (on 14 October 2026, with slice 13A up for review, the owner asked "Ok lets continue and do the next thing or what should we do?"): three more of the guns whose item models name plain stone as their base texture, the Fencer Carabine, the Callwell Terminal and the Saketini. A lever-action carbine loaded through its stock, a lever-action shotgun and a single-shot rifle, they follow slice 13A's frontier guns. Their fourth, the Fencer Thumper, waited ([below](#the-fencer-thumper)).
 
 | | Fencepost Carbine | Waystation Shotgun | Highball Rifle |
 |---|---|---|---|
@@ -2151,8 +2152,8 @@ The reload times and the rates are the owner's animations'.
 - **The Fencepost Carbine's right arm at the end of a reload:** as the lever is worked, it passes close to the eye. For about three hundredths of a second it covers much of the view, as it did with the first choice of arm.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
-### The Fencer Thumper waits
-The owner's other Fencer gun is a revolving gun whose cylinder turns with each shot. Its animations cue the turn ("rotate_cylinder") for the owner's mod to make in code, and nothing here turns a cylinder from a cue yet; built now, its cylinder would stand still. It can follow as its own slice, with that turn added.
+### The Fencer Thumper
+The owner's other Fencer gun is a revolving gun whose cylinder turns with each shot. Its animations cue the turn ("rotate_cylinder") for the owner's mod to make in code, and nothing here turned a cylinder from a cue then, so it waited. Slice 13D built it as the Fencepost Thumper, with that turn drawn from code ([below](#slice-13d-a-revolving-launcher-a-carbine-revolver-and-a-musket-of-light)).
 
 ## Slice 13C: a punt gun, a repeater and a heavier rifle
 The next of the owner's guns, taken up after slice 13B (on 14 October 2026, with slice 13B up for review, the owner asked "What could we work on next?" and, offered this set among others, answered "continue"): three more of the guns whose item models name plain stone as their base texture, the Big Bore, the Repeating Musket and the Winnie Millend. A punt gun, a flintlock repeater and a heavier lever-action rifle, they follow slices 13A's and 13B's frontier guns.
@@ -2564,6 +2565,87 @@ The reload times are the owner's animations'. The Navvy Shotgun takes no scope: 
 - **The Freeholder Rifle's bolt does not show:** its model has no part for it.
 - **The Sprocket Gun's seal:** its shot and inspection sway a bone the model has no part for; it holds nothing.
 - **Where each gun turns is chosen here:** the model's origin, from previews, not the owner's own pivots.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
+## Slice 14D: a crossbow-gun, a molten rifle and a drum gun
+Three more of the owner's treated-brass guns, taken up after the seasonal audit (on 22 October 2026, offered this and other work, the owner answered "Lets do the seasonal audit then lets do Guns Slice 14D"): the Niami, the Terra Incognita and the Thunderhead. They are not one family as slice 14C's were: a repeating crossbow-gun and a rifle of molten stone, each with animations of its own, and a drum-fed automatic whose animations are of the Gattaler's family (slice 8C's Thresher).
+
+| | Quarrel Carbine | Hinterland Rifle | Cloudburst Gun |
+|---|---|---|---|
+| The owner's gun | Niami | Terra Incognita | Thunderhead |
+| What it is | a crossbow-gun: a bow across its middle, its two strings running back from the bow's tips to the top of its receiver, a magazine under the bow, a pistol grip and a small rear sight | a long gun of cracked black stone glowing red in its cracks: two prongs at its muzzle, two lids on its top, a magazine on its left side, a ring sight off its left side and a long tube behind its grip | the Gattaler's receiver (the Thresher's, slice 8C) with two barrels, a drum under it, a spade grip at its back and a hoop-handle on its top |
+| Held | in both hands: the right on the grip, the left under the fore-end | in both hands: the right on the pistol grip behind the trigger, the left on the handle in the front plate | in both hands, as the Thresher: the right at the spade grip, the left on the front plate's left side |
+| What it fires | Rifle Rounds, a pull a shot | Rifle Rounds, a pull a shot; each sets what it hurts alight | Rifle Rounds, as long as the trigger is held |
+| Damage | 9 | 7, and fire | 5 |
+| Rate | 2 a second (every 10 ticks) | 2.5 a second (every 8 ticks) | 5 a second (every 4 ticks) |
+| Holds | 8 | 10 | 30 |
+| Reload | 2.55 s, the magazine | 2.55 s, the magazine | 3.9 s, the drum |
+| Spread, hip / aimed | 2° / 0.2° | 2.5° / 0.35° | 4.5° / 2° |
+| Range | 112 blocks | 96 | 72 |
+| The view aimed | narrowed to 0.8 | 0.85 | 0.9 (no sights: aimed, it stays at the hip) |
+| Takes | the Extended and Speed Magazines, the three stocks and the four sights | the Medium Scope and the Reflex Sight | nothing |
+
+The reload times are the owner's animations'. The Quarrel Carbine takes every attachment the owner made for it. The Hinterland Rifle goes without the Long Scope and the Laser Sight: its atlas has room for only two sights' pieces (its model, below). The owner made no attachment for the Cloudburst Gun.
+
+**Crafting** (a crafting table; the guns switch, as every gun): steel, brass and a lever, as slices 14A to 14C's.
+- **Quarrel Carbine:** two steel ingots and a crossbow over a brass ingot, a lever and a brass ingot: the crossbow is for its bow.
+- **Hinterland Rifle:** three steel ingots over a magma block, a lever and a brass ingot: the magma is for its molten stone.
+- **Cloudburst Gun:** three steel ingots over a steel ingot, a lever and a lightning rod, over two brass ingots: the lightning rod is for its name.
+
+**How they fire:** as the other bullet guns; the Cloudburst Gun as long as the trigger is held, as the automatic guns. The Hinterland Rifle's bullets set each creature they hurt alight for four seconds, as the Nether guns' do (slice 11A, `INCENDIARY`): fire's own damage, which fireproof creatures shrug off and water puts out. No block is set alight.
+
+**What you see:** the owner's animations.
+- **Quarrel Carbine:** each shot snaps the strings forward about the bow's tips and draws them again, and kicks the gun. To reload, it is tipped up, the magazine drops out below and is brought back. Its reload and inspection work a bolt it has no part for (the sounds play; nothing moves).
+- **Hinterland Rifle:** each shot kicks it and flicks its two lids open and shut: the rear lid is open as the shot goes and shuts, then opens again until the gun settles; the front lid lifts just after and falls back. To reload, it is rolled over, the magazine slides back out of its side and goes, and a new one slides in.
+- **Cloudburst Gun:** each shot kicks it and its barrels recoil. To reload, it is turned up, the left hand pulls the drum off below and brings it back, and the hoop-handle is worked forward and back like a lever.
+- **Spent rounds:** the Quarrel Carbine throws a case at each shot (its animation's cue). The Hinterland Rifle and the Cloudburst Gun throw none: their animations have no cue for it.
+- **Sounds:** the owner's airgun shot (the Squall Rifle's) for the Quarrel Carbine, their heavy rifle shot (the Longhorn Rifle's and the Lookout Rifle's) for the Hinterland Rifle, and their new rifle shot (the Thresher's and the Highball Rifle's) for the Cloudburst Gun. None carries a tag naming another source. Each animation's own cues play as they name: the magazine out and in, the bolt, the lever.
+
+**How the models were built:**
+- **Quarrel Carbine:**
+  - **Where it turns:** about the model's origin (owner point (8, 0, 8)), as slices 14A to 14C's guns.
+  - **Strings:** each of the bow's two strings (the main part's 11th and 12th elements) is its own bone, `stringleft` and `stringright`, turning about the bow's tip it hangs from.
+  - **Magazine and grip:** the owner's; a fitted stock takes the grip's place, as on the owner's other guns with a grip part.
+  - **Empty bones:** the `bolt`, `default_mag`, `magazine_2` and `scriptures` bones hold nothing: the model has no part for them.
+  - **Sights:** the small post at the back of its top.
+  - **Aiming:** held 2 px further out (`"eye_relief"`): the top of its grip came within 0.9 px of the eye through its aimed shot. Held there, it is 2.9 px away.
+- **Hinterland Rifle:**
+  - **Where it turns:** about the model's origin. Its reload rolls it on the `gun_body2` bone, under the rest, about a line under the gun, which keeps the left hand's handle nearly still.
+  - **Lids:** the two top lids (the main part's 17th and 18th elements, and its 33rd to 35th), each hinged at its front edge, so that each shot lifts its back; the rear lid's slanted lip rises with it. Hinged at its back, as first placed, the rear lid's front sank into the body: both of the owner's lid turns lift the back of a lid hinged at the front.
+  - **Magazine:** the elements the owner named Mag, on its left side.
+  - **Empty bones:** the `gun_body3`, `bolt` and `flame` bones hold nothing.
+  - **Texture:** the owner's is two frames, one above the other, its cracks glowing brighter and dimmer. The gun takes the first frame (`FRAMED`).
+  - **Atlas:** beside its own 128 px texture there is room for the pieces of only two of the four sights, so it takes the Medium Scope and the Reflex Sight; the Long Scope's and the Laser Sight's `"not_on"` name it.
+  - **Sights:** the owner's ring off the left side of its body, aimed through its middle (the owner's point at its centre).
+  - **Aiming:** held 2 px further out. The tube behind its grip reaches 11.6 px past the eye, at the hip and aimed, where the owner's first-person placement puts it; the near plane cuts it, and it stands as a dark wall at the right of the view. More eye relief only showed its open end.
+- **Cloudburst Gun:**
+  - **Built as the Thresher:** its receiver, spade grip and hoop-handle are the Gattaler's, under the same first-person placement, and its animations are of the Gattaler's family. So it takes the Thresher's choices, which slice 8C's in-game shots chose: the body turns about the spade grip in the right hand (owner point (8, 9, 16.4)), the left hand holds the front plate's left side, the arms run as the Thresher's, and it has no sights: its knob and handle stand on the line of any sight, so aiming only steadies it and narrows the view. Its third-person transform is the Gattaler's too, made for an arm hanging at the hip, so seen from outside its holder's arms hang lower as the Thresher's do (`GunLooks.TILT`).
+  - **Barrels:** the owner's barrel part, which recoils with each shot.
+  - **Drum:** the four elements the owner named octagon, under the receiver, turning about its middle.
+  - **Handle:** the hoop on its top (the 2nd to 5th and 16th elements), the owner's "grip", worked about its feet.
+- **The arms:** chosen in first-person previews, with the game's rule that leaves an arm out while any of it is within a tenth of a block of the eye, to cover as little of the screen as they can through each gun's hold, shot, reload and inspection (the Cloudburst Gun's are the Thresher's).
+- **Checked** in first-person, side and orthographic previews: idle, aimed, fired, through each reload and inspection; the Quarrel Carbine's strings; the Hinterland Rifle's lids, roll and magazine; the Cloudburst Gun's barrels, drum and handle; and the nearest point of each gun to the eye through its aimed shot.
+
+**Connections:**
+- **Rounds:** the Rifle Round; nothing new.
+- **Parts:** steel, brass and a lever; the Quarrel Carbine a crossbow, the Hinterland Rifle a magma block, the Cloudburst Gun a lightning rod.
+- **Their place:** past steel. The Quarrel Carbine and the Hinterland Rifle with the rifles fired a pull at a time, the Hinterland Rifle with the Nether guns that set alight; the Cloudburst Gun with the automatic rifles.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a load and its reload.
+- **Quarrel Carbine:** 9 a shot; about 11.9 a second, between the Patchwork Carbine's (11.8) and the Holler Carbine's (12.2).
+- **Hinterland Rifle:** 7 a shot; about 11.4 a second from the bullets, and each creature hurt burns for four seconds besides. The Bastion Rifle, the Nether rifle that sets alight, does about 8.3.
+- **Cloudburst Gun:** 5 a shot; about 15.5 a second, the least of the automatic guns that fire rifle rounds, below the Hermit Rifle's (15.8), and the widest of them from the hip.
+- **A round:** each spends one a shot; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:quarrel_carbine`, `hinterland_rifle` and `cloudburst_gun`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Hinterland Rifle's tube fills the right of the view:** the owner's first-person placement carries the gun's back past the eye.
+- **The Hinterland Rifle takes no Long Scope or Laser Sight:** its atlas has room for only two sights' pieces.
+- **The Hinterland Rifle's glow does not pulse:** it takes its texture's first frame.
+- **The Cloudburst Gun has no sights:** aiming only steadies it and narrows the view, as the Thresher's.
+- **The Quarrel Carbine's bolt does not show:** its inspection works one the model has no part for.
+- **Where each gun and lid turns, and where the hands hold, are chosen here:** from previews, not the owner's own pivots.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
 ## Connections
@@ -4207,6 +4289,38 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | freeholder_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | freeholder_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | freeholder_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| quarrel_carbine | `Guns/models/item/niami.json` | `ca192fcb75dd02db` |
+| quarrel_carbine | `Guns/item/niami.png` | `4d7a96410d06d085` |
+| quarrel_carbine | `Guns/item/niami.animation.json` | `1f7bc146c203eac8` |
+| quarrel_carbine | `Guns/models/special/niami/main.json` | `f0b679c9fd6b7a13` |
+| quarrel_carbine | `Guns/models/special/niami/stan_grip.json` | `fe2bc8b67fe7a861` |
+| quarrel_carbine | `Guns/models/special/niami/light_stock.json` | `01780b76dc1c3197` |
+| quarrel_carbine | `Guns/models/special/niami/heavy_stock.json` | `c492a147930f66cb` |
+| quarrel_carbine | `Guns/models/special/niami/wooden_stock.json` | `c44a2ad3df99cfd0` |
+| quarrel_carbine | `Guns/models/special/niami/sights.json` | `8829a0a55764cd38` |
+| quarrel_carbine | `Guns/models/special/niami/stan_mag.json` | `cead0c74205cd4e5` |
+| quarrel_carbine | `Guns/models/special/niami/ext_mag.json` | `84711b0eb59e44cc` |
+| quarrel_carbine | `Guns/models/special/niami/speed_mag.json` | `856ffe96e53cb249` |
+| quarrel_carbine | `Guns/sounds/item/airgun/fire.ogg` | `ee6701ec0f70a3fc` |
+| quarrel_carbine | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| quarrel_carbine | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| quarrel_carbine | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| quarrel_carbine | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| quarrel_carbine | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| hinterland_rifle | `Guns/models/item/terra_incognita.json` | `36c4d4d800823a2b` |
+| hinterland_rifle | `Guns/item/terra_incognita.png` | `e7ab66030475cd19` |
+| hinterland_rifle | `Guns/item/terra_incognita.animation.json` | `7ee393e219cc7011` |
+| hinterland_rifle | `Guns/models/special/terra_incognita/main.json` | `25b715ef070bf99c` |
+| hinterland_rifle | `Guns/models/special/terra_incognita/sights.json` | `428e5e03fb57777a` |
+| hinterland_rifle | `Guns/sounds/item/heavy_rifle/fire.ogg` | `389a087108dc1565` |
+| hinterland_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| hinterland_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| cloudburst_gun | `Guns/models/item/thunderhead.json` | `b4aac1e450e71519` |
+| cloudburst_gun | `Guns/item/thunderhead.png` | `4c7f451c87024770` |
+| cloudburst_gun | `Guns/item/thunderhead.animation.json` | `01faaab4742c544d` |
+| cloudburst_gun | `Guns/models/special/thunderhead/main.json` | `4a404c1ef15ced7d` |
+| cloudburst_gun | `Guns/models/special/thunderhead/barrel.json` | `7f24f3f3d96a44a0` |
+| cloudburst_gun | `Guns/sounds/item/new_rifle/fire.ogg` | `267e176ad9bae07a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -5209,13 +5323,26 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - **Inspection:** each turned to be looked over at the right.
     - **Attachments:** the Laser Sight sits on the Sprocket Gun's pan and on the Freeholder Rifle, and stands to the right of the crosshair aimed, as on the earlier guns; the Navvy Shotgun's bayonet sits under its muzzle; the Extended Magazine shows thirty rounds on the Freeholder Rifle and twelve shells on the Navvy Shotgun. At the hip the muzzle attachments point away from the view and the stocks are behind it, so they show little.
     - **Third person:** each raised and flashing as it fires.
+- **Slice 14D, run locally (22 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and textures (their shots are sounds already copied); every other gun's files came out unchanged. Its first runs stopped on the Hinterland Rifle: the sights' pieces did not fit beside its texture until the Long Scope's and the Laser Sight's `"not_on"` named it. `--check` passed after the last run.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as on `main`.)
+  - `python3 tools/check_mod_data.py`: its first run failed: `GunLooks.TILT` lacked the Cloudburst Gun, whose third-person transform is the Gattaler's. With it: PASS (6243 material IDs).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' grids matches another.
+- **Slice 14D game tests (not run yet; CI runs them):**
+  - `BrassGunsIVGameTests`:
+    - `brassGunsIVAreRegistered`: each is registered with its numbers, its recipe loads, and it fires rifle rounds from a magazine, held in both hands. The Quarrel Carbine fires a pull at a time, eight a magazine, and takes both magazines, the three stocks and the four sights; the Hinterland Rifle a pull at a time, ten a magazine, the only one of the three that sets alight, and takes the Medium Scope and the Reflex Sight only; the Cloudburst Gun as long as the trigger is held, thirty a drum, and takes nothing.
+    - `hinterlandRifleSetsWhatItHitsAlight`: a Hinterland Rifle's shot sets its pig alight and the fire hurts it again within two seconds; a Quarrel Carbine's does neither. No block catches fire.
+    - `cloudburstGunChangesItsDrum`: an empty Cloudburst Gun with forty Rifle Rounds loads nothing before its reload's time and thirty after it, leaving ten; a shot then spends one and takes its damage from the pig.
+  - `GunsGameTests` counts 87 guns. `TacticalAttachmentsGameTests`: the Laser Sight fits every gun that takes the scopes but the Breacher, the Trench Lobber, the Earthmover and the Hinterland Rifle. `NetherGunsGameTests`: no gun but the Nether guns and the Hinterland Rifle sets alight.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -5225,6 +5352,5 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the jam the Gnat's sound suggests;
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
-  - the Fencer Thumper, which waits for its cylinder to turn with each shot ([above](#the-fencer-thumper-waits));
   - the guns beyond these sets.
 - **Balance:** the numbers are starting points for the owner to set.

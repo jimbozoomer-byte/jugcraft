@@ -1400,6 +1400,33 @@
       }
     ]
   },
+  "guns.quarrel_carbine.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/airgun_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.hinterland_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavy_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.cloudburst_gun.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/new_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "nouveau.empty": {
     "sounds": []
   },
