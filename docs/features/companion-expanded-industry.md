@@ -1,0 +1,29 @@
+# Expanded industrial companion support
+
+Owner-requested 22 October 2026. Implemented with OpenAI Codex (GPT-6), extending the existing industrial companion host, job scheduler and Supply/Output routes. No new dependencies or assets.
+
+## Player behavior
+
+The 40 registered recipe-processing industrial forms are explicitly opted into the existing two-helper system. Assign any structural part with the Planner. Each companion contributes up to 25% extra progress, for 50% together, using existing machine work clips. Each occupied machine still costs one work assignment per companion.
+
+Supported families include entry and bulk electrolysis, chemical infusing/oxidizing, fermentation, digestion and gas cleaning; chemical distillation and mashing; aluminum, magnesium and titanium processing; polymer molding, polymerization, extrusion and reclamation; acids, fluorochemicals and PTFE; precision finishing and wet processing. This adds 39 processors to the existing Separator integration. Gas/bio generators, the Combined Cycle Plant and the Coastal Seawater Intake are excluded. The intake has a dedicated pumping cycle rather than native recipe lanes.
+
+Existing Supply/Output links deliver positional recipe inputs and reusable socket tools, including catalyst beds, molds, inserts, dies and finishing heads. Deliveries buffer up to eight balanced batches, bounded by stack capacity. All solid output slots, including byproducts, are collected. An idle tool that conflicts with the chosen recipe can be sent to Output before its replacement is inserted. Tools used by a running lane, upgrade cards and escrowed ingredients cannot be taken. Idle ingredients excluded by the current filter/native recipe lock can also be returned through Output.
+
+The existing nine-entry Filter accepts finished solid items and bucket items representing fluid outputs. Empty allows any native recipe. A bucket in Filter is only a ghost selection: fluids still enter and leave through pipes, and no fluid hauling is added. The machine's own manual recipe lock, automation priorities and stock targets remain authoritative. Filters affect new batches; existing escrowed work finishes normally. Supplies are selected only when the required piped fluids and a complete batch of ingredients/tool are available. A filter or native lock change invalidates an incompatible delivery, allowing the normal return-supplies route.
+
+Auto Supply/Output notices active native ports, connected enabled hoppers and active extractors. Successful committed pipe/conveyor transfers suppress the matching companion route for ten seconds; simulations/aborts and companion deliveries do not. Force On overrides this, and Off disables the route. Sockets stay inaccessible to pipes/hoppers, so force Supply On when companion tool restocking must coexist with automated ingredient input.
+
+## Power, safety and server cost
+
+Helpers retain machine-based reserve effort. Chemical Reactor, Synthesis Converter and Distillation Tower families cost 10 reserve JE per helper per productive tick **per assisted lane**; Electrolytic Cell costs 16. Entry/Expanded/Bulk forms run up to one/two/four lanes. Thus a fully active bulk electrolyzer costs each helper 64 reserve JE/t; a four-lane chemical machine costs 40. Existing regeneration, food and rest rules remain separate. Paused, blocked, unformed or underpowered machines do not pay for unproductive assistance.
+
+Native electricity is charged separately at each lane's actual recipe/profile/upgrade price. Extra progress never runs an entire machine tick twice. This extension fixes the former single `lanePrice` assumption when different recipes occupy different lanes: headroom is the sum of eligible lane prices, and every bonus step pays its own lane price.
+
+Full-footprint owner/claim and town permissions are checked before helper contributions and inventory mutations, without loading chunks. Geometry is cached per facing, and chunk-wide claims are checked once per distinct chunk rather than once per casing; ownership/trust decisions themselves are never cached. Large-machine deliveries use bounded exterior ground positions rather than a controller-adjacent block that could be inside the machine. Existing path budgets, collision/fire checks, recovery and route failure memory apply. Catalog scans occur in the existing budgeted delivery planner, with a 256-candidate cap; delivery demand validates the selected entry against the reload-aware catalog rather than rescanning recipes. Native processing's filtered catalog is cached until the filter revision or recipe catalog identity changes. No global workstation or NPC scans are introduced.
+
+## Validation
+
+`runClientGameTest -PclientTests=PeepoIndustrialClientTests` passed **1,886 assertions** on 22 October 2026, including the final filter-cache optimization. It covers all 40 explicitly enabled forms, positional supplies and tools, transaction rollback, output/byproduct collection, filters/save-load and native recipe locks, filter-cache invalidation, four orientations, exterior approach points, paused supply, native automation/Auto handoff, and cross-chunk claims with immediate trust revocation. A live Polymer Extruder completes the chest-to-machine-to-chest route and retains its die. Two real companions assist all four Bulk Separator lanes at 50% extra progress with 64 JE/t reserve cost each; a mixed-price escrow fixture verifies every normal/bonus step pays that lane's own electricity rate. Pause stops progress and reserve debit. No unrelated test suites were run. This is targeted game-test evidence, not a large multiplayer load benchmark.
+
+The final focused-test/JAR build passed in 3m29s. The complete Modrinth distribution was rebuilt with the existing 21 locked libraries; its embedded JAR matches the final compiled integration. Launcher import and a large-server performance test were not performed.

@@ -84,6 +84,7 @@ public final class CompanionAssignments {
         if(target==null)return false;
         int row=workPriority(target.at.pos());if(row>4 || !target.equals(targets[row]))return false;
         int mode=transportMode(row,supply);if(mode==2)return false;if(mode==1)return true;
+        if(target.present(npc.level()) && npc.level().getBlockEntity(target.at.pos()) instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return !form.companionAutomation.external(supply);
         return !target.present(npc.level()) || !(npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine) || !machine.itemAutomation.external(supply);
     }
     /** Menu-only status: 0 available, 1 off, 2 external automation, 3 unsupported, 4 unavailable, 5 no recipe. */
@@ -93,6 +94,7 @@ public final class CompanionAssignments {
         else {
             var port=CompanionLogistics.resolve(npc,target);
             if(port==null)reason=3;
+            else if(npc.level().getBlockEntity(target.at.pos()) instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form && (supply?!form.companionPort.supportsSupply():!form.companionPort.supportsOutput()))reason=3;
             else if(!target.livestock() && npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine
                 && (supply?!machine.companionPort.supportsSupply():!machine.companionPort.supportsOutput()))reason=3;
             else if(!supply && (npc.level().getBlockEntity(target.at.pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity || ServingCompanion.of(npc.level().getBlockEntity(target.at.pos())) instanceof ServingCompanion serving && !serving.hasOutput()))reason=3;

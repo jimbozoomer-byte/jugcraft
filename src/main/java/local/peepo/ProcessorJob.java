@@ -134,7 +134,7 @@ public final class ProcessorJob implements CompanionJob {
     private CompanionStatus status(PeepoEntity npc,boolean planning){
         if(!availableTo(npc))return CompanionStatus.OCCUPIED;
         if(host.companionLocked() || !npc.orders.tamed() || !npc.assignments.assignedWork(stationPosition())
-            || !CompanionJobs.permitted(npc,stationPosition()))return CompanionStatus.FORBIDDEN;
+            || !host.companionPermitted(npc))return CompanionStatus.FORBIDDEN;
         if(!roomFor(npc))return CompanionStatus.BLOCKED;
         return planning?CompanionReadiness.shared(machine,host::companionStatus):host.companionStatus();
     }
@@ -171,7 +171,7 @@ public final class ProcessorJob implements CompanionJob {
         if(npc==null || lastSpent==now || requested<now-1 || requested>now || !isOccupant(npc)
             || !npc.isUsingJobAt(stationPosition()) || !npc.orders.tamed() || !npc.orders.station(this)
             || !npc.assignments.assignedWork(stationPosition()) || !roomFor(npc)
-            || !npc.preferences.canWork() || host.companionLocked() || !CompanionJobs.permitted(npc,stationPosition()))return 0;
+            || !npc.preferences.canWork() || host.companionLocked() || !host.companionPermitted(npc))return 0;
         int quarters=host.companionHelperCount()==2?1:2;
         int cost=quarters*Math.clamp(effortPerQuarter,1,
             io.github.jimbozoomer.jugcraft.machine.MachineCompanionEffort.MAX_PER_QUARTER)*Math.clamp(workUnits,1,4);

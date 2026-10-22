@@ -410,6 +410,11 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         if(menu.filterRow()>=0){
             var companion=npc();var target=companion==null?null:companion.assignments.view().get(menu.filterRow()+1);
             g.text(font,"Filter: "+(target==null?"Workstation":fit(companion.assignments.label(menu.filterRow()+1),200)),105,82,0xFF404040,false);
+            if(menu.value(25+menu.filterRow())==15){
+                g.text(font,"Choose products or fluid output buckets.",105,174,0xFF404040,false);
+                g.text(font,"Supply items/tools; fluids still use pipes.",105,187,0xFF404040,false);
+                g.text(font,"Machine recipe locks still apply.",105,200,0xFF404040,false);return;
+            }
             if(menu.value(25+menu.filterRow())==14){
                 g.text(font,"Choose finished products. Empty allows any.",105,174,0xFF404040,false);
                 g.text(font,"Supply ingredients, fuel and reusable tools.",105,187,0xFF404040,false);
