@@ -71,7 +71,11 @@ This adds no dependencies, assets or mixins. It reuses the shared keep-inventory
 | Structure and links | `python scripts/check_repository.py` | passed | locally, before pushing |
 | Material data and recipe audit | `python tools/check_mod_data.py` | passed | locally, before pushing |
 | Syntax of the changed Java files | the session's parse helper (javac's parser, no Minecraft classes) | passed | locally |
-| Compilation, server game tests and rendered-client tests | `./gradlew build` and `./gradlew runClientGameTest` | not run locally: the game only compiles in CI, so CI on this draft PR is the evidence | in CI |
+| Compilation and headless server game tests (including `PlayerRulesGameTests`) | `./gradlew build` (CI job `mod`) | passed | CI run 39821173207, commit f836db854 |
+| Core without optional integrations | CI job `optional integrations absent` | passed | same run |
+| Rendered-client game tests | `./gradlew runClientGameTest` (CI job `client`, 16 shards) | passed: all 236 client test classes ran, because a shared mixin changed; `LairClientGameTests` ran in shard 10 | same run |
+
+The game is not compiled locally (its toolchain downloads are blocked there), so CI is the evidence for the three rows above. The first push, 182d143ee, failed to compile the test: in 26.3 the open screen is `client.gui.screen()`, not a field of `Minecraft`. f836db854 fixed that.
 
 The rendered-client test (`LairClientGameTests`, step 4) covers a real death in the Hollow Acre in survival:
 1. Setup: a helmet worn, a shield in the offhand, an amethyst shard in the Trinkets spell-focus slot, 9 emeralds in hotbar slot 5 (selected), 5 bread in slot 21, and about 500 experience.
