@@ -1,6 +1,6 @@
 # Seasonal biome audit
 
-Status: implemented on `claude/seasonal-audit`, awaiting review. Its CI has not run yet. **Not yet played.**
+Status: implemented on `claude/seasonal-audit` ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)), awaiting review. Its CI passed (below). **Not yet played.**
 Proposal issue: none. This is the TODO list's "MUST: audit seasonal content against every newer biome collection" ([TODO](../TODO.md#living-spawn-city--october-21-local-work)). On 22 October 2026, offered it as the next work, the owner answered "Lets do the seasonal audit then lets do Guns Slice 14D".
 Owner: @jimbozoomer-byte
 Target milestone and tier: seasonal delivery alongside world generation; no tier.
@@ -94,7 +94,7 @@ No new dependencies or art.
     - the kind tags and `#jugcraft:wisp_haunts` match `tools/`, and `Wisps.java` reads the tag.
   - `python3 scripts/check_repository.py`.
   - **Java:** a syntax parse only. Compilation and the game tests run in CI.
-- **Game tests** (`SeasonalBiomeGameTests`, not run yet; CI runs them):
+- **Game tests** (`SeasonalBiomeGameTests`, all passed in CI, below):
   - `landscapeBiomesFollowTheSeasons`:
     - temperate landscape biomes have seasons and winter snow;
     - mild ones have seasons without snow;
@@ -102,6 +102,11 @@ No new dependencies or art.
     - across the whole biome registry, every seasonal biome rains and lies between 0.15 and 0.9, and every winter-snow biome rains.
   - `landscapeCreaturesFindTheirHaunts`: the werewolves', snow and shadow werewolves', squirrels', turkeys' and wisps' tags hold the landscape biomes they should, and not the others (prairie, tropics, steppe, the snowy lowlands, desert, fields).
   - `wispsComeOutOverLandscapeSwamps`: over a landscape bayou (made with `/fillbiome`), under the open sky and away from corn, a wisp may appear; over a landscape field it may not.
+- **In CI** ([run 39845833481](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39845833481), on d9741317a): every check passed, the `mod` job on its second attempt.
+  - **First attempt:** one server game test failed, `LaboratoryLarderDiningGameTests.clockKeepsTheHour` ("The pulse ends on tick 12"). That test reads the grandfather clock 12 ticks after it starts. The clock pulses whenever the shared world clock's hour changes, so it fails when the hour rolls over in its last few ticks. It touches nothing this change does, and it passed on `main`. The [PR comment](https://github.com/jimbozoomer-byte/jugcraft/pull/454#issuecomment-6350982008) gives the cause and a proposed fix for that test.
+  - **Re-run of the failed jobs:** all 2263 required server game tests passed, `SeasonalBiomeGameTests` among them. The job without the optional integrations passed on the first attempt.
+  - **Client game tests:** the one class chosen for the changed files, `NightClientGameTests` (the wisps' and the other night creatures'), passed.
+  - **The repository check:** passed.
 - **Not run:** the client by hand (the colours in a landscape biome through the year), a dedicated server and play.
 
 ## World and event applicability
