@@ -7,7 +7,7 @@
     "minecraft:lever",
     "minecraft:crafting_table",
     "#minecraft:beds",
-    "jugcraft:atm",
-    "minecraft:ender_chest"
+    "minecraft:ender_chest",
+    "jugcraft:atm"
   ]
 }
