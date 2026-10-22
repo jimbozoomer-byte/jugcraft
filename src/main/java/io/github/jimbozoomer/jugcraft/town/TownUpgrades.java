@@ -22,7 +22,7 @@ import net.minecraft.world.phys.AABB;
 
 /** Explicit, resumable blueprint migrations. Never call the terrain builder for an existing chunk. */
 public final class TownUpgrades {
-    public static final int CURRENT = 2;
+    public static final int CURRENT = 3;
     private static final Map<Integer, TownData> HISTORY = new HashMap<>();
     private TownUpgrades() {}
     public static void register() {
@@ -132,6 +132,11 @@ public final class TownUpgrades {
         TownData old = historical(version), next = TownData.get();
         if (old.size != next.size) throw new IllegalStateException("Town footprint changes require an explicit expansion migration");
         Map<BlockPos, BlockState> oldDecor = decorations(old, town.theme()), nextDecor = decorations(next, town.theme());
+        Set<BlockPos> defenseCells = new HashSet<>();
+        for (var spot : next.spots) if (spot.role().equals("flak_guard")) {
+            for (int dx=-1; dx<=1; dx++) for (int dz=-1; dz<=1; dz++) for (int dy=-1; dy<=3; dy++)
+                defenseCells.add(spot.pos().offset(dx,dy,dz));
+        }
         int conflicts = 0;
         Set<BlockPos> placedSigns = new HashSet<>();
         for (int wx = chunk.x()<<4; wx < (chunk.x()<<4)+16; wx++) for (int wz = chunk.z()<<4; wz < (chunk.z()<<4)+16; wz++) {
@@ -141,6 +146,7 @@ public final class TownUpgrades {
                     || town.styxDistrict() && io.github.jimbozoomer.jugcraft.styx.StyxTownDistrict.contains(x,z)) continue;
             for (int y = Math.min(old.yMin,next.yMin); y < Math.max(old.yMin+old.height,next.yMin+next.height); y++) {
                 BlockPos relative = new BlockPos(x,y,z), at = origin.offset(relative);
+                if (defenseCells.contains(relative)) continue;
                 int before = old.index(x,y,z), after = next.index(x,y,z);
                 if (before == TownData.KEEP || after == TownData.KEEP) continue;
                 BlockState expected = oldDecor.getOrDefault(relative,old.state(before));
@@ -149,6 +155,20 @@ public final class TownUpgrades {
                 if (!replaceAuthored(level, at, expected, wanted)) conflicts++;
                 else if (wanted.getBlock() instanceof net.minecraft.world.level.block.SignBlock) placedSigns.add(at);
             }
+        }
+        // Tower tops protrude into the terrain-blending ring. Migrate only the
+        // tightly authored gun footprint there, never the surrounding landscape.
+        // Old KEEP cells may receive supports only if they are actually empty.
+        for (var relative : defenseCells) {
+            BlockPos at = origin.offset(relative);
+            if (!ChunkPos.containing(at).equals(chunk)) continue;
+            if (town.styxDistrict() && io.github.jimbozoomer.jugcraft.styx.StyxTownDistrict.contains(relative.getX(), relative.getZ())) continue;
+            int before=old.index(relative.getX(),relative.getY(),relative.getZ());
+            int after=next.index(relative.getX(),relative.getY(),relative.getZ());
+            if (after==TownData.KEEP) continue;
+            BlockState expected=oldDecor.getOrDefault(relative,before==TownData.KEEP?Blocks.AIR.defaultBlockState():old.state(before));
+            BlockState wanted=next.state(after);
+            if (expected!=wanted && !replaceAuthored(level,at,expected,wanted)) conflicts++;
         }
         // Text is its own migration: preserve operator-edited signs, update both vanilla faces.
         for (var entry : next.signs) {
@@ -186,6 +206,15 @@ public final class TownUpgrades {
         if (actual == wanted) return true;
         if (actual != expected) return false;
         if (level.getBlockEntity(pos) != null) {
+            if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.BannerBlockEntity banner) {
+                // Plain authored tower flags can retire. Player-named or patterned
+                // banners remain untouched, just like other edited town scenery.
+                if (!wanted.isAir() || banner.getCustomName() != null || !banner.getPatterns().layers().isEmpty()) return false;
+                BlockPos origin = TownState.get(level).origin();
+                if (origin == null || historical(version(level,ChunkPos.containing(pos).pack())).sites.stream()
+                        .filter(site -> site.kind().equals("tower_flag"))
+                        .noneMatch(site -> java.util.Arrays.stream(site.blocks()).anyMatch(b -> origin.offset(b[0],b[1],b[2]).equals(pos)))) return false;
+            } else {
             // Retired generated signposts may be removed only if their text still matches the old blueprint.
             if (!(level.getBlockEntity(pos) instanceof SignBlockEntity sign) || !wanted.isAir()) return false;
             BlockPos origin = TownState.get(level).origin();
@@ -194,14 +223,20 @@ public final class TownUpgrades {
             if (entry.isEmpty()) return false;
             for (var slot : SignTextSlot.values()) for (int i=0;i<4;i++)
                 if (!sign.getText(slot).getMessages(false).get(i).getString().equals(entry.get().lines().get(i))) return false;
+            }
         }
         TownBuilder.set(level,pos,wanted);
         return true;
     }
     private static Map<BlockPos,BlockState> decorations(TownData data,String theme) {
         Map<BlockPos,BlockState> result = new HashMap<>();
-        for (var site : data.sites) for (var b : site.blocks())
-            result.put(new BlockPos(b[0],b[1],b[2]),TownDecor.stateFor(data,site,theme.isEmpty()?TownDecor.theme():theme,b[3]));
+        for (var site : data.sites) {
+            // Retired sites keep their saved identity, but the new blueprint now
+            // owns these cells (including the solid gun pedestal).
+            if (site.kind().equals("retired")) continue;
+            for (var b : site.blocks())
+                result.put(new BlockPos(b[0],b[1],b[2]),TownDecor.stateFor(data,site,theme.isEmpty()?TownDecor.theme():theme,b[3]));
+        }
         return result;
     }
 }

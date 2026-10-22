@@ -75,7 +75,7 @@ public final class TownsfolkCare {
                 continue;
             }
             if (TownUpgrades.version(level, ChunkPos.containing(pos).pack()) < TownUpgrades.CURRENT
-                && place.index() >= TownUpgrades.historical(1).spots.size()) continue;
+                && place.index() >= TownUpgrades.historical(TownUpgrades.version(level, ChunkPos.containing(pos).pack())).spots.size()) continue;
             adoptOrSpawn(level, state, place, pos);
         }
 	}
@@ -89,7 +89,7 @@ public final class TownsfolkCare {
     }
 
 	private static void spawn(ServerLevel level, TownState state, TownData.Spot place, BlockPos pos) {
-		Townsfolk person = JugcraftTown.TOWNSFOLK.create(level, EntitySpawnReason.STRUCTURE);
+		Townsfolk person = (place.role().equals("mecha_guard") ? JugcraftTown.GUARD_MECHA : JugcraftTown.TOWNSFOLK).create(level, EntitySpawnReason.STRUCTURE);
 		if (person == null) {
 			return;
 		}

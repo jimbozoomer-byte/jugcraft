@@ -159,13 +159,14 @@ public class Townsfolk extends PathfinderMob {
 	}
 
 	public boolean isGuard() {
-		return role.equals("guard");
+		return role.equals("guard") || role.equals("flak_guard") || role.equals("mecha_guard");
 	}
 
 	/** How far from their place a role wanders. */
 	public int range() {
 		return switch (role) {
-			case "guard" -> 20;
+			case "guard", "mecha_guard" -> 20;
+            case "flak_guard" -> 0;
 			case "townsfolk" -> 70;
 			case "decorator" -> DECORATOR_REACH;
 			default -> 2;
@@ -189,6 +190,7 @@ public class Townsfolk extends PathfinderMob {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+        if (tickCount % 100 == 0) TownDefense.crew(level, this);
 		if (tickCount % 100 == 0) {
 			// A townsperson the town has since replaced (after it went missing) steps aside.
 			UUID recorded = spot < 0 ? null : TownState.get(level).townsperson(spot);
@@ -245,6 +247,7 @@ public class Townsfolk extends PathfinderMob {
 
 	/** Which set of lines a role speaks: guards and decorators have their own, everyone else the town's. */
 	private String roleKey() {
+        if (isGuard()) return "guard";
 		return switch (role) {
 			case "guard", "decorator", "priest", "mayor" -> role;
 			default -> "townsfolk";

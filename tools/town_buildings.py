@@ -922,6 +922,8 @@ def bank(rng):
     p.site("banner", "north", [(W - 2, 6, -2, 0)])
     p.door = (mid, -2)
     town_refinement.bank(p)
+    v.set(2, 1, 3, S("ender_chest", facing="east", waterlogged="false"))
+    v.set(2, 2, 3, S("air"))
     return p
 
 

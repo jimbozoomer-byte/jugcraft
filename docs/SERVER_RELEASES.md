@@ -1,9 +1,49 @@
 # JUGCRAFT installation and updates
 
 The player-facing pack name is **JUGCRAFT**. Minecraft 26.3, Fabric Loader 0.19.5
-and Java 25 remain pinned. No downloader runs inside Minecraft.
+and Java 25 remain pinned. Player updates are offered in the Minecraft title menu.
 
-## Player launch setup (21 October 2026)
+## Current distribution: one pack import, in-game updates
+
+Share the versioned `.mrpack` directly; see the [in-game updater guide](features/direct-player-updater.md).
+Players import once in Modrinth App. The title-menu updater finds that same
+instance automatically, offers verified downloads, then applies after the player
+chooses to quit. Settings and saves stay in place. No EXE, manual folder binding,
+launcher hook or public pack listing is needed. The older Windows helper is legacy.
+
+The Modrinth Server Project below remains an unpublished draft; do not submit it
+for review or distribute its old `JUGCRAFT-Join.zip`. `enabled: false` in
+`distribution/server-project.json` stops future release assembly from generating
+that shortcut. Server hosting and direct mod-file updates continue independently.
+
+After testing/deploying the server, explicitly promote the candidate channel:
+
+```sh
+python scripts/promote_player_update.py --candidate build/release/stable.json --server-version VERSION --publish
+```
+
+Omit `--publish` for a dry run. The server version is the operator's verified
+deployment declaration. The tool validates public release metadata; it does not
+probe server health. Publishing a release or merging main never promotes the
+channel automatically. Clients verify the channel's manifest and each payload.
+
+## Coordinated release batches
+
+Owner direction, 21 October 2026: accumulate larger updates locally and hold
+deployment/channel promotion until the owner says the batch is ready. Keep the
+current player channel and live server unchanged while preparing individual
+features. Track the pending batch in [TODO](TODO.md).
+
+Build the client pack, update manifest and changed-files server bundle from the
+same reviewed source commit and release version. Test the combined batch before
+rollout. At rollout, back up and update the server first, preserving world and
+configuration files, then verify startup and a client join. Only then promote
+that release's candidate manifest. This is one coordinated release, with the
+server ready before clients are prompted; it is not an atomic simultaneous
+deployment across independent player computers. If server verification fails,
+restore the server backup and leave the player channel unchanged.
+
+## Initial deployment and superseded linked-project setup (21 October 2026)
 
 The owner selected the new town/church/bird build for the first player release
 and authorized installing it on the hosted server. Version
@@ -31,21 +71,11 @@ Summer pack. Do not point current players at that pack or change its old version
 
 ### Sending the next update
 
-Prepare a uniquely versioned pack from tested source with the existing GitHub
-release workflow. Back up the server, deploy its matching files, and verify startup
-before promoting the player update. In the **same** Server Project, open
-Settings > Server > Compatibility and replace its custom pack with that exact
-`.mrpack`, then save. That compatibility change is the release action which
-prompts every linked player to update on their next launch. Do not publish a
-player compatibility version before the matching server is ready.
-
-The release workflow automates assembly and checksums. Linked-instance prompts
-are native Modrinth behavior. Live server deployment and compatibility promotion
-remain explicit owner release actions; no publishing credential or unattended
-deployment has been configured. A commit to main alone never updates players.
-
-Before a wider launch, verify a fresh linked install, a join and an old-linked-
-instance update. Preserve the previous pack and matching world backup for rollback.
+Use the direct GitHub channel promotion described above and in the
+[in-game updater guide](features/direct-player-updater.md). The earlier linked
+Server Project procedure is superseded; do not submit that draft for review.
+Verify a fresh import, a join and an in-place update before a wider launch.
+Preserve the previous payload and matching world backup for rollback.
 
 ### Routine updates preserve the live world
 
@@ -71,7 +101,7 @@ server's files or assume a manifest reflects manual changes made outside release
 
 Replacing the JAR still uploads that whole JAR; this is file-level updating, not
 a binary-delta protocol. The large initial player pack is separate from the host
-update. Modrinth manages linked client updates; no forced update runs inside Minecraft.
+update. The in-game updater offers client changes with consent; it never modifies the running game.
 
 ## Prepared files
 
@@ -103,7 +133,7 @@ The import behavior is documented in [Modrinth's app source](https://github.com/
 Actual launcher
 import needs a separate human check; it is not a zero-click updater.
 
-## Recommended update flow
+## Historical linked-project alternative (not selected)
 
 Create a **Modrinth Server Project** and configure Compatibility to use JUGCRAFT
 (a published pack version or a custom pack upload). Give viewers its Play link.
@@ -132,9 +162,10 @@ release announcements remain manual.
 4. Schedule maintenance, back up world/player data/configs and old managed mods,
    then stop the server. Select the exact Minecraft/Fabric/Java pins in the host
    panel and apply the tested files. Handle EULA acceptance yourself if required.
-5. Publish the GitHub prerelease, upload/select its exact `.mrpack` in the Server
-   Project Compatibility section, and reopen the server. Announce its version
-   and changelog. Neither source merges nor this workflow deploy automatically.
+5. Publish the GitHub prerelease and verify its direct updater payloads. After the
+   matching server starts successfully, promote `stable.json` using the command
+   above. Announce its version and changelog. Neither source merges nor this
+   workflow deploy or promote automatically.
 
 For first installation upload `mods/`, `config/` and `defaultconfigs/` through the
 host file manager/SFTP, or use a compatible pack importer. The ZIP is an upload
@@ -162,8 +193,8 @@ GitHub workflow enforces that gate. Changed source needs new validation/version.
 
 ## Remaining release checks
 
-- Modrinth review of the configured Server Project, plus an actual linked install
-  and old-version update; an uploaded custom pack alone is not proof of either.
+- Fresh player installation and a native Modrinth pre-launch update check with
+  the JUGCRAFT helper. Modrinth listing review is no longer part of this plan.
 - Deployment/startup/migration results are recorded with the particular release.
 - Custom JUGCRAFT title screen and main server Play button, explicitly deferred.
 - Two-account hosted-server testing.
