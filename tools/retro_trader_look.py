@@ -1,6 +1,6 @@
 """The Retro Trader's look: his 64x64 villager overlay and his expression sheet (called from pixel_hollows_textures.py).
 
-A bearded millennial who runs the village's retro game shop: a mustard knit beanie, thick black glasses over
+A bearded millennial who runs the village's retro game shop: a burgundy knit beanie, thick black glasses over
 green eyes, a full brown beard, a forest-green tartan flannel open over a charcoal tee with a little pixel
 gamepad on it, sleeves rolled up to show a calculator watch, light cuffed jeans and red canvas high-tops.
 Everything is original pixel art drawn here; nothing is read, traced or recoloured from Mojang's textures.
@@ -27,7 +27,8 @@ LASH = (40, 26, 18)
 FRAME = [(20, 20, 24), (44, 44, 52)]
 EYE_WHITE, EYE_GREEN, PUPIL = (238, 238, 230), (52, 150, 64), (24, 52, 28)
 MOUTH, TONGUE, TEETH, LIP = (58, 20, 22), (150, 60, 66), (240, 238, 228), (176, 98, 86)
-BEANIE = [(170, 122, 30), (200, 150, 44), (226, 182, 72)]
+BEANIE = [(78, 20, 30), (118, 32, 44), (150, 50, 62)]  # burgundy, well away from any hair colour
+CUFF = [(96, 24, 36), (166, 62, 74)]  # the turned-up cuff's ribs
 FLANNEL = [(44, 92, 60), (30, 62, 44), (26, 32, 56), (200, 162, 64)]
 TEE = [(66, 68, 76), (54, 56, 64)]
 PRINT = {"W": (236, 236, 240), "C": (60, 214, 226), "M": (232, 76, 170), "G": (150, 152, 162)}
@@ -65,10 +66,15 @@ def fill(img, rect, color_at):
 
 
 def knit(x, y):
-    """Ribbed knit: alternate columns light and dark, a purl row every third."""
+    """Stockinette: little V stitches in columns (light on the left leg of each V), a dark purl ridge every third row."""
     if y % 3 == 2:
         return BEANIE[0]
-    return BEANIE[2] if x % 2 == 0 else BEANIE[1]
+    return BEANIE[2] if (x + y) % 2 == 0 else BEANIE[1]
+
+
+def rib(x, y):
+    """The cuff's vertical ribbing: alternate raised (light) and sunken (dark) columns."""
+    return CUFF[1] if x % 2 == 0 else CUFF[0]
 
 
 def tartan(x, y):
@@ -214,13 +220,24 @@ def overlay():
     fill(img, head["right"], side(True))
     fill(img, head["left"], side(False))
 
-    # Hat layer (32,0): the beanie. Front: only its turned-up cuff on the hairline. Sides lower, the back lower still.
+    # Hat layer (32,0): the beanie, a burgundy knit. A ribbed cuff band runs all the way round: across the hairline at
+    # the front (row 0), over the ears at the sides (rows 1-2, rising towards the front) and low at the back (rows 2-3).
+    # Above the cuff, the knit body; the top is all knit.
     hat = box_faces(32, 0, 8, 10, 8)
     fill(img, hat["top"], knit)
-    fill(img, hat["front"], lambda x, y: shade(BEANIE[1], -18) if y == 0 else None)
-    fill(img, hat["right"], lambda x, y: (shade(BEANIE[1], -18) if y == 1 + (x < 4) else knit(x, y)) if y <= 1 + (x < 4) else None)
-    fill(img, hat["left"], lambda x, y: (shade(BEANIE[1], -18) if y == 1 + (x >= 4) else knit(x, y)) if y <= 1 + (x >= 4) else None)
-    fill(img, hat["back"], lambda x, y: (shade(BEANIE[1], -18) if y == 3 else knit(x, y)) if y <= 3 else None)
+    fill(img, hat["front"], lambda x, y: rib(x, y) if y == 0 else None)
+
+    def beanie_side(front_at_high_u):
+        def paint(x, y):
+            toward_front = x if front_at_high_u else 7 - x
+            cuff_bottom = 1 if toward_front >= 5 else 2  # the cuff dips from the hairline to over the ear
+            if y > cuff_bottom:
+                return None
+            return rib(x, y) if y >= cuff_bottom - 1 else knit(x, y)
+        return paint
+    fill(img, hat["right"], beanie_side(True))
+    fill(img, hat["left"], beanie_side(False))
+    fill(img, hat["back"], lambda x, y: (rib(x, y) if y >= 2 else knit(x, y)) if y <= 3 else None)
 
     # Nose (24,0; 2x4x2): the moustache along its underside.
     nose = box_faces(24, 0, 2, 4, 2)
