@@ -23,6 +23,9 @@ final class LandProtection {
 	}
 
 	static void register() {
+        net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DAMAGE.register((target, source, amount) ->
+                target instanceof Player || !(source.getEntity() instanceof Player player)
+                || LandRegistry.mayBuild(player, target.level(), target.blockPosition()));
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> allowed(player, level, pos));
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) ->
 				allowed(player, level, pos) ? InteractionResult.PASS : InteractionResult.FAIL);

@@ -102,3 +102,10 @@ tree breaking/durability and non-tree rejection. `ClaimProtectionGameTests` cove
 opt-in sharing, kick/transfer revocation, save/load, real explosions, fluids,
 pistons and fire, plus the free allowance surviving save/load, being returned on
 abandonment and not being resold or transferred for profit.
+
+## Follow-up claim and defense audit
+
+The [server defense and clock record](server-defense-and-clock.md) tracks the new
+weapon, bucket, machinery and artillery guards, simulated two-player regressions,
+automatic defense setup and current validation. Keep the hosted two-account
+acceptance distinct from automated server simulations.

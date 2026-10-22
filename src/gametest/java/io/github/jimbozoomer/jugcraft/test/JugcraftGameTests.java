@@ -1785,16 +1785,14 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
-	/**
-	 * Batch 57: raiders find and go for the people they hunt by themselves: a grunt hunts a townsperson down to striking
-	 * distance, and a grenadier lobs grenades at them. (A townsperson stands in for a player: the test server's mock
-	 * player is always in creative mode, and no hostile mob targets a creative player. Townsfolk cannot be hurt, so the
-	 * test checks the grunt closes in rather than that the blow lands; the fist itself is vanilla's.)
-	 */
+	/** Raiders still acquire and pursue a real survival player; town residents are now protected. */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 400, skyAccess = true)
 	public void raidersHuntOnTheirOwn(GameTestHelper helper) {
 		raiderFloor(helper);
-		var victim = helper.spawnWithNoFreeWill(io.github.jimbozoomer.jugcraft.town.JugcraftTown.TOWNSFOLK, new Vec3(20.5, 1, 20.5));
+		var victim = ConnectedAlchemyGameTests.player(helper);
+        victim.snapTo(helper.absoluteVec(new Vec3(20.5,1,20.5)));
+        victim.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
+        victim.setHealth(1000);
 		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(16.5, 1, 20.5));
 		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(20.5, 1, 8.5));
 		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
@@ -1805,9 +1803,10 @@ public class JugcraftGameTests {
 			closed[0] |= grunt.getTarget() == victim && grunt.distanceTo(victim) < 2.0F;
 		});
 		helper.succeedWhen(() -> {
-			helper.assertTrue(grunt.getTarget() == victim, "The grunt should hunt the townsperson, not " + grunt.getTarget());
+			helper.assertTrue(grunt.getTarget() == victim, "The grunt should hunt the survival player, not " + grunt.getTarget());
 			helper.assertTrue(closed[0], "The grunt should close to striking distance, but is " + grunt.distanceTo(victim) + " away");
-			helper.assertTrue(threw[0], "The grenadier should have thrown at the townsperson (it hunts " + grenadier.getTarget() + ")");
+			helper.assertTrue(threw[0], "The grenadier should have thrown at the survival player (it hunts " + grenadier.getTarget() + ")");
+            helper.getLevel().getServer().getPlayerList().remove(victim);victim.discard();
 		});
 	}
 

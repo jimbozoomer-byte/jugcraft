@@ -54,7 +54,9 @@ public final class Blast {
 				2.0F, 1.2F + level.getRandom().nextFloat() * 0.2F);
 		DamageSource source = level.damageSources().explosion(direct, owner);
 		List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius),
-				target -> target.isAlive() && !target.isSpectator() && target.getType() != EntityTypes.ARMOR_STAND && !spare.test(target));
+				target -> target.isAlive() && !target.isSpectator() && target.getType() != EntityTypes.ARMOR_STAND && !spare.test(target)
+                && (!(direct instanceof io.github.jimbozoomer.jugcraft.artillery.ArtilleryShell shell)
+                    || !shell.isAutomatedDefense() || io.github.jimbozoomer.jugcraft.artillery.AutomatedDefense.hostile(target)));
 		int hurt = 0;
 		for (LivingEntity target : targets) {
 			double distance = Math.sqrt(target.distanceToSqr(center));

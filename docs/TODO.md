@@ -1,5 +1,12 @@
 # Jugcraft TODO
 
+## Local transmutation economy follow-up — October 21
+
+- [x] Implement and automatically test convenience-only tablet, condenser and density-gem outputs; preserve saved valuables and balances, and import the supplied Exchange interface. See [feature record](features/convenience-transmutation.md).
+- [ ] Owner-playtest the imported interface and convenience economy; keep out of the public update channel until the combined release is ready.
+- [ ] Before public economy release, audit recipe conversions, collector fuel upgrades and NPC buy/sell prices. Tablets, condensers and density gems now share convenience-only output restrictions; ordinary supplies still feed crafting and trade chains.
+
+
 ## Next coordinated release batch — October 21
 
 Owner requests larger update batches: prepare and test locally, then deploy the
@@ -9,7 +16,9 @@ Do not promote each small addition separately. [Release sequence](SERVER_RELEASE
 - [x] Include Resourcify for in-game resource-pack/shader browsing and default Diorama's minimap off for fresh installs. Preserve existing player settings. [Implementation](features/pack-browser-and-map-defaults.md).
 - [x] Repair Candy Cavity terrain, supplied landmark/template placement and soda rivers; complete generation tests and local visual review. New chunks only, with no automatic rewriting of existing caves. [Implementation](features/candy-cavity-generation.md).
 - [x] Add crouch/axe tree felling, persistent personal keep-inventory commands, four reusable free starter chunks, explicit party land sharing and native claim damage/boundary protections. Combined automated tests pass; dedicated player acceptance and indirect-interaction abuse audit remain below. [Implementation and remaining policy decisions](features/viewer-server-tools.md).
-- [ ] Complete two-account claim acceptance and indirect-interaction abuse checks (buckets, custom weapons and automated machines). [Scope](features/viewer-server-tools.md).
+- [x] Pass the local two-simulated-player weapon/automation regressions and extended native boundary guards in the 2,254-test combined server run. [Scope](features/server-defense-and-clock.md).
+- [x] Pass local tests for the 2x daylight / 2/3 night clock, villager anti-mob targeting (Pillager exception), and claim-aware automated defenses with friendly-fire protection and redstone emergency stop. [Implementation and setup](features/server-defense-and-clock.md).
+- [ ] Complete a real two-account hosted claim/defense acceptance check before release.
 - [ ] Finish the selected batch, combined validation and owner playtest; record one exact release version/source commit.
 - [ ] Prepare matching client pack, managed-mod update manifest and changed-files server bundle; keep the public channel unchanged during preparation.
 - [ ] When the owner says ready: back up the world, deploy the server's changed files, verify startup/join, then promote the matching client manifest and share release notes.

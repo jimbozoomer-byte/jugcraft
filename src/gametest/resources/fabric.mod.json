@@ -295,7 +295,8 @@
       "io.github.jimbozoomer.jugcraft.test.FinanceGameTests",
       "io.github.jimbozoomer.jugcraft.finance.ExchangeIntegrationGameTests",
       "io.github.jimbozoomer.jugcraft.test.PlayerRulesGameTests",
-      "io.github.jimbozoomer.jugcraft.finance.ClaimProtectionGameTests"
+      "io.github.jimbozoomer.jugcraft.finance.ClaimProtectionGameTests",
+      "io.github.jimbozoomer.jugcraft.finance.ServerDefenseGameTests"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.CandyCavityClientGameTests",
@@ -532,7 +533,8 @@
       "io.github.jimbozoomer.jugcraft.test.AdamOndiAhmanClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CydonianSanctumClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CydonianSentinelClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.PackBrowserClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.PackBrowserClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConvenienceTabletClientGameTests"
     ]
   },
   "depends": {

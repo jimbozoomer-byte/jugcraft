@@ -24,6 +24,17 @@ import net.minecraft.world.phys.Vec3;
  */
 public class ArtilleryShell extends ThrowableItemProjectile {
 	private static final int HEAVY_LIFETIME = 600;
+    private boolean automatedDefense;
+    public void setAutomatedDefense(boolean value) { automatedDefense = value; }
+    public boolean isAutomatedDefense() { return automatedDefense; }
+    @Override protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putBoolean("jugcraft_automated_defense", automatedDefense);
+    }
+    @Override protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        automatedDefense = input.getBooleanOr("jugcraft_automated_defense", false);
+    }
 
 	public ArtilleryShell(EntityType<? extends ArtilleryShell> type, Level level) {
 		super(type, level);

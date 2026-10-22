@@ -318,7 +318,7 @@ public abstract class CrewedGun extends Entity {
 	/** An uncrewed gun working to its table's orders. */
 	private void directed(ServerLevel level, Vec3 pivot) {
 		FireControlTableBlock.Entity table = director(level);
-		if (table == null) {
+		if (table == null || !table.mayOperate(level, blockPosition()) || table.sentryDisabled()) {
 			salvoOrdered = false;
 			sentryTarget = null;
 			return;
@@ -346,7 +346,8 @@ public abstract class CrewedGun extends Entity {
 			}
 		} else if (mode == FireControlTableBlock.Mode.SENTRY) {
 			salvoOrdered = false;
-			if (sentryTarget != null && (!sentryTarget.isAlive() || sentryTarget.isRemoved())) {
+			if (sentryTarget != null && (!AutomatedDefense.hostile(sentryTarget) || sentryTarget.isRemoved() || !table.inSector(sentryTarget.position())
+                    || sentryTarget.distanceToSqr(pivot) > (double) FireControl.SENTRY_RANGE * FireControl.SENTRY_RANGE)) {
 				sentryTarget = null;
 			}
 			if (tickCount % FireControl.SENTRY_SCAN == 0) {
@@ -379,7 +380,7 @@ public abstract class CrewedGun extends Entity {
 	private @Nullable LivingEntity pickTarget(ServerLevel level, FireControlTableBlock.Entity table, Vec3 pivot) {
 		double min = (double) FireControl.SENTRY_MIN_RANGE * FireControl.SENTRY_MIN_RANGE;
 		List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class, new AABB(pivot, pivot).inflate(FireControl.SENTRY_RANGE),
-				e -> e instanceof Enemy && e.isAlive() && !(e instanceof Player) && e.getRootVehicle() != this);
+				e -> AutomatedDefense.hostile(e) && e.getRootVehicle() != this);
 		candidates.sort(Comparator.comparingDouble(e -> e.distanceToSqr(pivot)));
 		int tried = 0;
 		for (LivingEntity candidate : candidates) {
@@ -421,8 +422,7 @@ public abstract class CrewedGun extends Entity {
 	/** Check fire: never shell a point with a player within {@value FireControl#CHECK_FIRE} blocks of it. */
 	private static boolean clearToFire(ServerLevel level, Vec3 point) {
 		double r = FireControl.CHECK_FIRE;
-		return level.getEntitiesOfClass(Player.class, new AABB(point, point).inflate(r),
-				p -> !p.isSpectator() && p.distanceToSqr(point) <= r * r).isEmpty();
+		return AutomatedDefense.clearToFire(level, point, r);
 	}
 
 	private AABB rackReach() {
@@ -507,6 +507,7 @@ public abstract class CrewedGun extends Entity {
 			}
 			Vec3 muzzle = pivot.add(across.scale(offset)).add(dir.scale(barrelLength()));
 			ArtilleryShell shell = gunner == null ? new ArtilleryShell(shellType(), level) : new ArtilleryShell(shellType(), level, gunner);
+			if (gunner == null) shell.setAutomatedDefense(true);
 			shell.setPos(muzzle);
 			shell.shoot(dir.x, dir.y, dir.z, (float) shellSpeed(), 0.0F);
 			level.addFreshEntity(shell);
@@ -574,6 +575,8 @@ public abstract class CrewedGun extends Entity {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        if (source.getEntity() instanceof net.minecraft.world.entity.player.Player attacker
+                && !io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(attacker, level, blockPosition())) return false;
 		if (isRemoved() || !(source.getEntity() instanceof Player player) || player.getRootVehicle() == this) {
 			return false;
 		}

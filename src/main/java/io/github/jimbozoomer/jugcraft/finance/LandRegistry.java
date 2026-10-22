@@ -140,6 +140,12 @@ public final class LandRegistry extends SavedData {
 		}
 	}
 
+	private long revision;
+    @Override public void setDirty() { super.setDirty(); revision++; }
+    public static long revision(Level level) {
+        return level.getServer() == null ? 0 : get(level.getServer()).revision;
+    }
+
 	public static LandRegistry get(MinecraftServer server) {
 		return server.overworld().getDataStorage().computeIfAbsent(TYPE);
 	}

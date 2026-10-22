@@ -35,7 +35,7 @@ ITEMS = {"fire_control_wire": "Fire Control Wire"}
 TOOLTIPS = {
     "fire_control_table": "Lays every linked gun that has nobody at its controls. Use empty-handed to change mode (hold, "
                           "converge, parallel, creeping barrage, sentry), sneak to change the sector, with a Range Finder to set the target. "
-                          "A redstone pulse fires one round from each gun.",
+                          "A redstone pulse fires one round from each gun in fire-mission modes. In Sentry mode, a powered table is an emergency stop; remove power to defend automatically. Supply ammunition through ready racks.",
     "fire_control_wire": "Use on a fire control table, then on a gun nearby, to link (or unlink) it. Sneak-use on a table "
                          "to cut every link.",
 }

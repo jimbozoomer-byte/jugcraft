@@ -58,7 +58,13 @@
     "PlayerKeepInventoryMixin",
     "ServerPlayerKeepInventoryMixin",
     "ClaimFluidMixin",
-    "TrinketKeepInventoryMixin"
+    "TrinketKeepInventoryMixin",
+    "ResidentTargetMixin",
+    "ResidentMobTargetMixin",
+    "ClaimBucketMixin",
+    "ClaimHopperMixin",
+    "ClaimDisplayDamageMixin",
+    "ClaimDispenserMixin"
   ],
   "injectors": {
     "defaultRequire": 1
