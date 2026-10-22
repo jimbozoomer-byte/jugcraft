@@ -54,7 +54,11 @@
     "NouveauGrowthMixin",
     "NouveauFireworkMixin",
     "NouveauContainerNameAccess",
-    "NouveauPickupMixin"
+    "NouveauPickupMixin",
+    "PlayerKeepInventoryMixin",
+    "ServerPlayerKeepInventoryMixin",
+    "ClaimFluidMixin",
+    "TrinketKeepInventoryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

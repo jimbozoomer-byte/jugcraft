@@ -15,7 +15,8 @@ import net.minecraft.world.level.Level;
 /**
  * Keeps other players out of claimed land: breaking, placing, using blocks (doors, chests, machines) and hitting or
  * using entities (animals, item frames, armour stands). Owners, players they trust and operators are let through.
- * Explosions, fluids, fire and pistons are not stopped yet (see docs/features/finance-exchange.md).
+ * Explosions/fire are shielded and fluid/piston ownership boundaries are enforced by the native mixins.
+ * Explicit party sharing is checked through LandRegistry.
  */
 final class LandProtection {
 	private LandProtection() {

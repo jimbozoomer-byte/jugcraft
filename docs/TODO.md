@@ -7,6 +7,9 @@ server and promote its matching client update only when the owner says ready.
 Do not promote each small addition separately. [Release sequence](SERVER_RELEASES.md#coordinated-release-batches).
 
 - [x] Include Resourcify for in-game resource-pack/shader browsing and default Diorama's minimap off for fresh installs. Preserve existing player settings. [Implementation](features/pack-browser-and-map-defaults.md).
+- [x] Repair Candy Cavity terrain, supplied landmark/template placement and soda rivers; complete generation tests and local visual review. New chunks only, with no automatic rewriting of existing caves. [Implementation](features/candy-cavity-generation.md).
+- [x] Add crouch/axe tree felling, persistent personal keep-inventory commands, four reusable free starter chunks, explicit party land sharing and native claim damage/boundary protections. Combined automated tests pass; dedicated player acceptance and indirect-interaction abuse audit remain below. [Implementation and remaining policy decisions](features/viewer-server-tools.md).
+- [ ] Complete two-account claim acceptance and indirect-interaction abuse checks (buckets, custom weapons and automated machines). [Scope](features/viewer-server-tools.md).
 - [ ] Finish the selected batch, combined validation and owner playtest; record one exact release version/source commit.
 - [ ] Prepare matching client pack, managed-mod update manifest and changed-files server bundle; keep the public channel unchanged during preparation.
 - [ ] When the owner says ready: back up the world, deploy the server's changed files, verify startup/join, then promote the matching client manifest and share release notes.
