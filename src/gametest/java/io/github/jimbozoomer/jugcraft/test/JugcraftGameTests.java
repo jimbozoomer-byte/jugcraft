@@ -1195,16 +1195,18 @@ public class JugcraftGameTests {
 		for (double distance : new double[] {30, 60, 100}) {
 			for (double rise : new double[] {0, -4, 6}) {
 				for (boolean high : new boolean[] {false, true}) {
-					Float pitch = io.github.jimbozoomer.jugcraft.artillery.Ballistics.solve(speed, gravity, distance, rise, high, -5.0F, 85.0F);
+					Float pitch = io.github.jimbozoomer.jugcraft.artillery.Ballistics.solve(speed, gravity, distance, rise, high, -15.0F, 89.0F);
 					helper.assertTrue(pitch != null, "No elevation for " + distance + " blocks (rise " + rise + ", high " + high + ")");
-					double landed = io.github.jimbozoomer.jugcraft.artillery.Ballistics.range(speed, gravity, pitch, rise);
-					helper.assertTrue(Math.abs(landed - distance) < 1.0, "Aimed at " + distance + " but landed at " + landed);
+					double landed = io.github.jimbozoomer.jugcraft.artillery.Ballistics.heightAtDistance(speed, gravity, pitch, distance);
+					helper.assertTrue(Math.abs(landed - rise) < 0.1, "At distance " + distance + " expected height " + rise + " but got " + landed);
 					helper.assertTrue(high == pitch > 45.0F, "The " + (high ? "high" : "low") + " arc chose " + pitch + " degrees");
 				}
 			}
 		}
-		helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.Ballistics.solve(speed, gravity, 400, 0, true, 45.0F, 85.0F) == null,
+		helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.Ballistics.solve(speed, gravity, 400, 0, true, 45.0F, 89.0F) == null,
 				"400 blocks should be out of reach");
+        helper.assertTrue(io.github.jimbozoomer.jugcraft.artillery.Ballistics.solve(speed, gravity, 30, -4, false, -5, 89) == null,
+                "The faster charge cannot hit close downhill targets outside its depression limit");
 		helper.succeed();
 	}
 
@@ -1785,14 +1787,11 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
-	/** Raiders still acquire and pursue a real survival player; town residents are now protected. */
+	/** Raiders still acquire and pursue a city guard while players are protected. */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 400, skyAccess = true)
 	public void raidersHuntOnTheirOwn(GameTestHelper helper) {
 		raiderFloor(helper);
-		var victim = ConnectedAlchemyGameTests.player(helper);
-        victim.snapTo(helper.absoluteVec(new Vec3(20.5,1,20.5)));
-        victim.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000);
-        victim.setHealth(1000);
+		var victim = CityDefenseGameTests.guard(helper, new Vec3(20.5,1,20.5));
 		var grunt = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, new Vec3(16.5, 1, 20.5));
 		var grenadier = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, new Vec3(20.5, 1, 8.5));
 		net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
@@ -1803,10 +1802,10 @@ public class JugcraftGameTests {
 			closed[0] |= grunt.getTarget() == victim && grunt.distanceTo(victim) < 2.0F;
 		});
 		helper.succeedWhen(() -> {
-			helper.assertTrue(grunt.getTarget() == victim, "The grunt should hunt the survival player, not " + grunt.getTarget());
+			helper.assertTrue(grunt.getTarget() == victim, "The grunt should hunt the city guard, not " + grunt.getTarget());
 			helper.assertTrue(closed[0], "The grunt should close to striking distance, but is " + grunt.distanceTo(victim) + " away");
-			helper.assertTrue(threw[0], "The grenadier should have thrown at the survival player (it hunts " + grenadier.getTarget() + ")");
-            helper.getLevel().getServer().getPlayerList().remove(victim);victim.discard();
+			helper.assertTrue(threw[0], "The grenadier should have thrown at the city guard (it hunts " + grenadier.getTarget() + ")");
+            victim.discard();
 		});
 	}
 
@@ -1815,7 +1814,7 @@ public class JugcraftGameTests {
 	public void blimpCruisesOverItsQuarry(GameTestHelper helper) {
 		raiderFloor(helper);
 		var blimp = helper.spawn(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BLIMP, new Vec3(30.5, 2, 30.5));
-		var pig = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(20.5, 1, 20.5));
+		var pig = CityDefenseGameTests.guard(helper, new Vec3(20.5, 1, 20.5));
 		double start = blimp.getY();
 		helper.succeedWhen(() -> {
 			if (blimp.getTarget() == null) {

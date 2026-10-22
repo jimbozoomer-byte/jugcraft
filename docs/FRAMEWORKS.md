@@ -31,6 +31,8 @@ The machine-readable source of truth is [frameworks.lock.json](../distribution/f
 | [Diorama](https://modrinth.com/mod/diorama-map) | 0.1.1+26.3 | Client-only; installed by default in Complete, optional to standalone Jugcraft | Fullscreen exploration map and waypoints; minimap off by default |
 | [Resourcify](https://modrinth.com/mod/resourcify) | 1.8.7 for Fabric 26.3 | Client-only; installed by default in Complete, optional to standalone Jugcraft | Browse/download resource packs and Iris shaders inside Minecraft |
 
+The October 22 local batch also pins Lithium 0.26.2+mc26.3, FerriteCore 9.0.0 and Krypton 0.3.2 on both sides, and ImmediatelyFast 1.17.1+26.3 on clients. See [city defense and performance](features/city-defense-and-performance.md).
+
 All selected client files are installed by Jugcraft Complete. "Optional" means the standalone mod does not require them to load. It does not mean the complete pack silently omits them. Dedicated-server installs omit files marked client-only.
 
 ## Use the libraries deliberately

@@ -32,6 +32,8 @@ public final class ViewerWorldRules {
     }
 
     public static boolean blocksAttack(LivingEntity attacker, LivingEntity target) {
+        if (attacker instanceof io.github.jimbozoomer.jugcraft.raiders.Raider)
+            return !io.github.jimbozoomer.jugcraft.raiders.RaiderTargets.allowed(target);
         return attacker instanceof Mob && !(attacker instanceof Pillager) && protectedResident(target);
     }
 

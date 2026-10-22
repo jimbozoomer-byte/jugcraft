@@ -100,6 +100,9 @@ public class TownGameTests {
 						}
 					}
 					helper.assertTrue(filled > 10, "The square's centrepiece shows something for " + theme + ": " + filled + " blocks");
+				} else if (site.kind().equals("retired")) {
+                    helper.assertTrue(TownDecor.stateFor(data, site, theme, site.blocks()[0][3]).isAir(),
+                            "Retired flags have no seasonal replacement");
 				} else {
 					BlockState state = TownDecor.stateFor(data, site, theme, site.blocks()[0][3]);
 					helper.assertTrue(!state.isAir(), "A " + site.kind() + " site shows something for " + theme);
@@ -210,6 +213,27 @@ public class TownGameTests {
                     }
         }
         h.assertTrue(changed.size()>20,"Regression includes real old kiosk/building differences");
+        for (var spot : next.spots) if (spot.role().equals("flak_guard")) {
+            for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++) {
+                var relative=spot.pos().offset(dx,-1,dz);var at=origin.offset(relative);
+                if(!chunks.contains(ChunkPos.containing(at)))continue;
+                int before=old.index(relative.getX(),relative.getY(),relative.getZ());
+                TownBuilder.set(level,at,before==TownData.KEEP?Blocks.AIR.defaultBlockState():old.state(before));
+                changed.put(at,Blocks.POLISHED_ANDESITE.defaultBlockState());
+            }
+        }
+        // Existing towns have seasonal flag blocks here, not the undecorated
+        // blueprint's air. They must migrate to supported flak platforms.
+        for (var site : old.sites) if (site.kind().equals("tower_flag")) {
+            for (var b : site.blocks()) {
+                var relative=new BlockPos(b[0],b[1],b[2]);
+                var at=origin.offset(relative);
+                if (!chunks.contains(ChunkPos.containing(at))) continue;
+                String theme=TownState.get(level).theme();
+                TownBuilder.set(level,at,TownDecor.stateFor(old,site,theme.isEmpty()?TownDecor.theme():theme,b[3]));
+                changed.put(at,next.state(next.index(b[0],b[1],b[2])));
+            }
+        }
         // Initialize the old generated text at retired kiosk signs.
         for (var entry : old.signs) {
             BlockPos at=origin.offset(entry.pos());
@@ -276,6 +300,9 @@ public class TownGameTests {
 				chunks.add(new ChunkPos(cx, cz));
 			}
 		}
+		var flakPlace = data.spots.stream().filter(s -> s.role().equals("flak_guard")).findFirst().orElseThrow();
+        var flakChunk = ChunkPos.containing(origin.offset(flakPlace.pos()));
+        if (!chunks.contains(flakChunk)) chunks.add(flakChunk);
 		for (ChunkPos pos : chunks) {
 			level.setChunkForced(pos.x(), pos.z(), true);
 			LevelChunk chunk = level.getChunk(pos.x(), pos.z());
@@ -285,6 +312,12 @@ public class TownGameTests {
 			TownsfolkCare.chunkBuilt(level, pos);
 		}
 		var retiredMap = exerciseUpgrade(helper, level, origin, chunks);
+        var platform = origin.offset(flakPlace.pos()).below();
+        helper.assertTrue(level.getBlockState(platform).is(Blocks.POLISHED_ANDESITE), "Old seasonal flag becomes a solid flak platform");
+        TownDecor.force("december");
+        for (var site : data.sites) if (site.kind().equals("retired")) TownDecor.apply(level, site.index());
+        TownDecor.force(null);
+        helper.assertTrue(level.getBlockState(platform).is(Blocks.POLISHED_ANDESITE), "Seasonal decorators do not erase a retired site's platform");
         // Block for block: every block the data sets in these chunks is there (decor sites aside).
 		Set<Long> sites = new HashSet<>();
 		for (TownData.Site site : data.sites) {
@@ -305,6 +338,9 @@ public class TownGameTests {
 						if (index == TownData.KEEP || sites.contains(BlockPos.asLong(x, y, z))) {
 							continue;
 						}
+                        // Exterior towers share columns with the natural slope;
+                        // blendColumn intentionally leaves blueprint air as terrain.
+                        if (data.mask(x,z) != TownData.INSIDE && data.state(index).isAir()) continue;
 						checked++;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
 						if (found != data.state(index)) {
@@ -463,6 +499,9 @@ public class TownGameTests {
 							continue;
 						}
 						BlockState want = data.state(index);
+                        // The exterior blending ring retains natural terrain in
+                        // blueprint-air cells; it is not part of the authored room.
+                        if (data.mask(x,z) != TownData.INSIDE && want.isAir()) continue;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
 						if (want.isAir() != found.isAir() || want.getFluidState().isEmpty() != found.getFluidState().isEmpty()) {
 							drifted++;

@@ -30,15 +30,22 @@ public final class PlayerRulesGameTests {
             p.snapTo(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(1,2,1))));
             p.getInventory().setItem(0,new ItemStack(Items.DIAMOND,7));p.setItemSlot(EquipmentSlot.HEAD,new ItemStack(Items.IRON_HELMET));
             p.setItemSlot(EquipmentSlot.OFFHAND,new ItemStack(Items.SHIELD));p.giveExperiencePoints(100);
-            var trinket=TrinketsApi.getAttachment(p).getInventory("chest/back");
-            trinket.setItem(0,new ItemStack(Items.EMERALD)); // Exercises slot death handling independently of optional backpacks.
+            // The focus slot belongs to Jugcraft; the back slot exists only when
+            // the optional backpack is installed. Exercise both when available.
+            var slots=new ArrayList<String>();slots.add("chest/spell_focus");
+            if(TrinketsApi.getAttachment(p).getInventory("chest/back")!=null)slots.add("chest/back");
+            for(var slot:slots) {
+                var inventory=TrinketsApi.getAttachment(p).getInventory(slot);
+                h.assertTrue(inventory!=null,"Core accessory slot exists without optional backpack mods");
+                inventory.setItem(0,new ItemStack(Items.EMERALD));
+            }
             rules.set(p.getUUID(),keep);p.setHealth(0);p.die(level.damageSources().genericKill());
             h.assertTrue(p.getInventory().countItem(Items.DIAMOND)==(keep?7:0),"Death drops only unflagged inventory");
-            h.assertTrue(trinket.getItem(0).getCount()==(keep?1:0),"Accessory/backpack slot follows the personal rule");
+            for(var slot:slots)h.assertTrue(TrinketsApi.getAttachment(p).getInventory(slot).getItem(0).getCount()==(keep?1:0),"Accessory/backpack slot follows the personal rule");
             var respawn=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,p.getGameProfile(),net.minecraft.server.level.ClientInformation.createDefault());
             respawn.connection=p.connection;
             respawn.restoreFrom(p,false);
-            h.assertTrue(TrinketsApi.getAttachment(respawn).getInventory("chest/back").getItem(0).getCount()==(keep?1:0),"Worn slot is copied on respawn only when retained");
+            for(var slot:slots)h.assertTrue(TrinketsApi.getAttachment(respawn).getInventory(slot).getItem(0).getCount()==(keep?1:0),"Worn slot is copied on respawn only when retained");
             h.assertTrue(respawn.getInventory().countItem(Items.DIAMOND)==(keep?7:0),"Native respawn restores exactly seven diamonds without duplication");
             h.assertTrue(respawn.getItemBySlot(EquipmentSlot.HEAD).isEmpty()!=keep&&respawn.getOffhandItem().isEmpty()!=keep,"Armour and offhand survive only for the selected player");
             h.assertTrue(respawn.totalExperience==(keep?100:0),"XP follows native keep-inventory semantics");

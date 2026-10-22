@@ -52,7 +52,7 @@ LINK_RANGE = 64
 SHEAF_SPACING = 6
 # Sentry: how far round each gun it looks for hostile mobs, how close it will not fire, how near a player must not be
 # to its mark, and how often (ticks) it picks a target.
-SENTRY_RANGE = 96
+SENTRY_RANGE = 250
 SENTRY_MIN_RANGE = 12
 CHECK_FIRE = 8
 SENTRY_SCAN = 10

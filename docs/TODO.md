@@ -1,5 +1,17 @@
 # Jugcraft TODO
 
+## City defense and performance — October 22
+
+- [x] Implement city-only raider targeting, combat-invulnerable guard crews/walkers, six tower flak stations, 250-block mounted-weapon targeting and the usable bank Ender Chest. [Implementation](features/city-defense-and-performance.md).
+- [x] Pin compatible Lithium, FerriteCore, Krypton and ImmediatelyFast releases in the shared pack/server dependency lock.
+- [x] Add read-only Candy Cavity chunk survey and [safe refresh procedure](CANDY_CAVERN_REFRESH.md).
+- [x] Run combined server sweeps, repair the discovered issues, pass focused regressions with optional mods present/absent, and review both town client runs. Exact coverage/limits are in the feature record.
+- [ ] Owner visual playtest, hosted multiplayer acceptance and existing-world upgrade rehearsal before the coordinated client/server update.
+- [ ] Review exact old-cave coordinates, claims/builds and a consistent backup; test any approved refresh on a copy first.
+- [ ] Design opt-in/progression triggers for player-directed raids later; do not restore equipment-blind random attacks.
+- [ ] Benchmark server tick time, memory and client frame times under representative player load.
+
+
 ## Local transmutation economy follow-up — October 21
 
 - [x] Implement and automatically test convenience-only tablet, condenser and density-gem outputs; preserve saved valuables and balances, and import the supplied Exchange interface. See [feature record](features/convenience-transmutation.md).

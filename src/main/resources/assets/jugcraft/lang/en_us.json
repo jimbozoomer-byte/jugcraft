@@ -12157,7 +12157,7 @@
   "message.jugcraft.power_line.upgraded": "Upgraded",
   "message.jugcraft.power_line.wired": "Wired",
   "message.jugcraft.pump": "Energy %s / %s JE, holding %s mB",
-  "message.jugcraft.raid.coming": "Raiders are coming! Their engines rumble to the %s.",
+  "message.jugcraft.raid.coming": "Raiders are approaching the city from the %s! The city guard is defending.",
   "message.jugcraft.raid.dir.east": "east",
   "message.jugcraft.raid.dir.north": "north",
   "message.jugcraft.raid.dir.south": "south",
@@ -12165,7 +12165,7 @@
   "message.jugcraft.raid.withdrawn": "The raiders withdraw.",
   "message.jugcraft.raid.won": "The raid is beaten off. The next will be stronger.",
   "message.jugcraft.raid_horn.dimension": "Only the Overworld's raiders answer the horn",
-  "message.jugcraft.raid_horn.no_room": "The raiders found nowhere near to gather",
+  "message.jugcraft.raid_horn.no_room": "No loaded gathering ground near the city; the horn was kept",
   "message.jugcraft.raid_horn.off": "Raids are switched off on this server",
   "message.jugcraft.raid_horn.peaceful": "No raiders come in peaceful",
   "message.jugcraft.raid_horn.under_way": "A raid is already under way",
@@ -14548,9 +14548,9 @@
   "tooltip.jugcraft.pyromaniacs_pants": "The Pyromaniac's regalia: half a point of fire Spell Power. Four pieces together add a point to Cinderbolt and Hearthflare.",
   "tooltip.jugcraft.pyromaniacs_shoes": "The Pyromaniac's regalia: half a point of fire Spell Power. Four pieces together add a point to Cinderbolt and Hearthflare.",
   "tooltip.jugcraft.pyromaniacs_tunic": "The Pyromaniac's regalia: half a point of fire Spell Power. Four pieces together add a point to Cinderbolt and Hearthflare.",
-  "tooltip.jugcraft.raid_horn": "Blow it to call a raid on your base now, at the world's raid level. Used up when it brings one.",
+  "tooltip.jugcraft.raid_horn": "Blow it near the city to call a guard-defense raid at the world's raid level. Used up only when raiders gather; player bases are not targeted.",
   "tooltip.jugcraft.raider_insignia": "Torn from a raider officer's sleeve: proof of a raid beaten off. Three make a Raider War Horn.",
-  "tooltip.jugcraft.range_finder": "Use to mark the block you look at, up to 256 blocks away, as a target for your guns and any gunner nearby. Sneak and use to clear your mark.",
+  "tooltip.jugcraft.range_finder": "Use to mark the block you look at, up to 250 blocks away, as a target for your guns and any gunner nearby. Sneak and use to clear your mark.",
   "tooltip.jugcraft.range_module": "The drill's area mode mines 5×5 (drill only)",
   "tooltip.jugcraft.reactor_link_card": "Use on a reactor vessel, then on a Reactor Control Console to link them",
   "tooltip.jugcraft.ready_rack": "Holds shells beside a gun. A gunner with no shells draws from any ready rack next to their gun. Use with shells to stock it, empty-handed to take a stack back.",
@@ -20380,5 +20380,6 @@
   "screen.jugcraft.automation.target_4": "Output: Ladders",
   "screen.jugcraft.automation.target_blocked": "Choose supplies",
   "screen.jugcraft.pattern.economy_building": "Building supplies",
-  "screen.jugcraft.pattern.economy_convenience": "Convenience only"
+  "screen.jugcraft.pattern.economy_convenience": "Convenience only",
+  "entity.jugcraft.town_guard_mecha": "City Guard Walker"
 }

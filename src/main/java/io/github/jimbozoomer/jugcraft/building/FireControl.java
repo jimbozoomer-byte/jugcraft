@@ -52,7 +52,7 @@ public final class FireControl {
 	 * Sentry: how far round each gun it looks for hostile mobs, how close to the gun it will not fire, how near a player
 	 * must not be to its mark, and how often (ticks) it picks a target.
 	 */
-	public static final int SENTRY_RANGE = 96;
+	public static final int SENTRY_RANGE = 250;
 	public static final int SENTRY_MIN_RANGE = 12;
 	public static final int CHECK_FIRE = 8;
 	public static final int SENTRY_SCAN = 10;
@@ -115,6 +115,7 @@ public final class FireControl {
 
 	/** Using the wire on a gun: links it to the player's table, or unlinks it if it is linked there already. */
 	public static InteractionResult link(Player player, CrewedGun gun) {
+        if (gun.townStation() != null) return InteractionResult.FAIL;
 		if (!(gun.level() instanceof ServerLevel level)) {
 			return InteractionResult.SUCCESS;
 		}

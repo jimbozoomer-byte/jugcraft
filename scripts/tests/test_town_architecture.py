@@ -80,13 +80,31 @@ class TownArchitectureTests(unittest.TestCase):
         self.assertEqual(self.town.map_boards, [])
         self.assertFalse(any("MAP" in line for sign in self.town.signs for line in sign["lines"]))
         self.assertEqual(len(self.town.houses), 44)
-        self.assertEqual(len(self.town.spots), 38)
+        self.assertEqual(len(self.town.spots), 48)
         self.assertEqual(sum(s["role"] == "guard" for s in self.town.spots), 12)
         previous = json.loads(gzip.decompress((ROOT / "src/main/resources/data/jugcraft/town/revisions/1.json.gz").read_bytes()))
         for old, new in zip(previous["spots"], self.town.spots):
             for key in ("pos", "role", "skin", "shop"):
                 self.assertEqual(old.get(key), new.get(key), f"Resident {old['name']} keeps their identity")
         self.assertEqual(len(self.town.atms), 4)
+
+    def test_new_defenses_preserve_revision_two_roster_and_have_clear_space(self):
+        previous = json.loads(gzip.decompress((ROOT / "src/main/resources/data/jugcraft/town/revisions/2.json.gz").read_bytes()))
+        self.assertEqual(previous['spots'], self.town.spots[:len(previous['spots'])])
+        self.assertEqual(len(previous['sites']), len(self.town.sites))
+        for old,new in zip(previous['sites'],self.town.sites):
+            if old['kind']=='tower_flag':
+                self.assertEqual(new['kind'],'retired');self.assertEqual(old['blocks'],new['blocks'])
+            else:self.assertEqual(old,new)
+        for spot in self.town.spots[len(previous['spots']):]:
+            x,y,z=spot['pos']
+            for dx in (-1,0,1):
+                for dz in (-1,0,1):
+                    for dy in range(4):
+                        self.assertIn(self.town.v.get(x+dx,y+dy,z+dz),(None,S('air')),str(spot))
+        bank=buildings.bank(random.Random(1))
+        self.assertEqual(block_name(bank.v.get(2,1,3)), 'ender_chest')
+        self.assertEqual(block_name(bank.v.get(2,2,3)), 'air')
 
     def test_pews_face_altar_and_priest_is_named(self):
         from town_voxels import parse
@@ -117,7 +135,7 @@ class TownArchitectureTests(unittest.TestCase):
                     seen.add(at);queue.append(at)
         beds=[]
         for person in self.town.spots:
-            if person['role']=='guard':
+            if person['role'] in ('guard','flak_guard','mecha_guard'):
                 self.assertNotIn('bed', person);continue
             bed=tuple(person['bed']);beds.append(bed)
             x,y,z=bed

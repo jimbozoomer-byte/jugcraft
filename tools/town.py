@@ -604,6 +604,24 @@ class Town:
             beds.remove(bed)
             spot["bed"] = bed
 
+    def defenses(self):
+        """Append city crews after old identities/beds; keep towers' stonework and access ladders."""
+        flags = [site for site in self.sites if site["kind"] == "tower_flag"]
+        for i, site in enumerate(flags):
+            x, _, z, _ = site["blocks"][0]
+            site["kind"] = "retired"  # Keep all saved seasonal-site indices stable.
+            # A solid raised gun pedestal clears the crenellations, with no floating parts.
+            for dx in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    self.v.set(x+dx, TOWER_TOP+1, z+dz, S("polished_andesite"))
+                    for y in range(TOWER_TOP+2, TOWER_TOP+6):
+                        self.v.set(x+dx, y, z+dz, S("air"))
+            self.spots.append({"role": "flak_guard", "pos": [x, TOWER_TOP+2, z],
+                               "name": f"City Flak Guard {i+1}", "skin": "guard_blue"})
+        for i, (x, z) in enumerate(((78, 94), (114, 94), (96, 116), (98, 88))):
+            self.spots.append({"role": "mecha_guard", "pos": [x, 1, z],
+                               "name": f"City Guard Walker {i+1}", "skin": "guard_blue"})
+
     def townsfolk(self):
         """Places where townsfolk and decorators first stand: street spots spread over the town."""
         rng = self.rng
@@ -651,6 +669,7 @@ class Town:
             self.spots.append({"role": "guard", "pos": [x, 1, z]})
         self.name_everyone()
         self.bedrooms()
+        self.defenses()
         town_wayfinding.boards(self)
         for x, y, z, facing in self.atms:
             self.v.set(x, y, z, S("jugcraft:atm", facing=facing))
