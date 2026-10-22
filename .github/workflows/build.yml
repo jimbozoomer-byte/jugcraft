@@ -153,7 +153,9 @@ jobs:
           cache: gradle
       - name: Install Mesa (software rendering)
         if: env.CLASSES != ''
-        timeout-minutes: 12
+        # Two mirrors: 2m indexes + 5m downloads each, then 2m installation,
+        # plus kill grace and command overhead. The overall job remains 60m.
+        timeout-minutes: 18
         run: bash scripts/install_client_graphics.sh
       - name: Prepare run directory
         if: env.CLASSES != ''

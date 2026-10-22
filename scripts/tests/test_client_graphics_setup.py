@@ -15,7 +15,8 @@ if os.name == "nt" and Path("C:/Program Files/Git/bin/bash.exe").is_file():
 # source generation, branching, exit propagation and cleanup, runs as in CI.
 HARNESS = r'''
 sudo() {
-  [[ "$1 $2 $3 $4" == 'timeout --kill-after=10s 120s apt-get' ]] || return 90
+  [[ "$1 $2 $4" == 'timeout --kill-after=10s apt-get' ]] || return 90
+  local duration=$3
   shift 4
   local args=" $* " source_file='' arg
   [[ "$args" == *' Dir::Etc::sourceparts=- '* ]] || return 91
@@ -27,16 +28,27 @@ sudo() {
   [[ $(wc -l < "$source_file") -eq 4 ]] || return 94
   [[ $(grep -c 'signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg' "$source_file") -eq 4 ]] || return 95
   local mirror=primary phase=update
-  grep -q 'https://azure.archive.ubuntu.com' "$source_file" && mirror=fallback
+  if grep -q 'azure.archive.ubuntu.com' "$source_file"; then
+    # Catch the inaccessible HTTPS fallback that mocked success previously missed.
+    [[ $(grep -c 'http://azure.archive.ubuntu.com/ubuntu ' "$source_file") -eq 4 ]] || return 97
+    mirror=fallback
+  else
+    [[ $(grep -c 'https://archive.ubuntu.com/ubuntu ' "$source_file") -eq 4 ]] || return 98
+  fi
   [[ "$args" == *' --download-only '* ]] && phase=download
   [[ "$args" == *' --no-download '* ]] && phase=install
+  if [[ "$phase" == download ]]; then
+    [[ "$duration" == 300s ]] || return 99
+  else
+    [[ "$duration" == 120s ]] || return 99
+  fi
   echo "CALL $mirror $phase"
   if [[ "$phase" != update ]]; then
     [[ "$args" == *' mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 mesa-utils xvfb '* ]] || return 96
   fi
   case "$CASE:$mirror:$phase" in
     update_failure:primary:update|both_fail:*:update) return 100;;
-    download_timeout:primary:download) return 124;;
+    download_timeout:primary:download|both_downloads_timeout:*:download) return 124;;
     install_failure:*:install) return 42;;
   esac
   return 0
@@ -66,6 +78,9 @@ class ClientGraphicsSetupTests(unittest.TestCase):
 
     def test_no_healthy_mirror_fails(self):
         self.run_case("both_fail", 1, ["primary update", "fallback update"])
+
+    def test_both_downloads_timing_out_still_fails(self):
+        self.run_case("both_downloads_timeout", 1, ["primary update", "primary download", "fallback update", "fallback download"])
 
     def test_install_error_is_not_retried_or_hidden(self):
         self.run_case("install_failure", 42, ["primary update", "primary download", "primary install"])
