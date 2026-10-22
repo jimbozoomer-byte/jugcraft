@@ -5330,6 +5330,8 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - `python3 scripts/check_repository.py`: PASS.
   - **Java:** a syntax parse only: 0 errors in the changed files.
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' grids matches another.
+  - **Alchemy values** (`data/jugcraft/alchemy/values.json`, which `scripts/tests/test_alchemy_values.py` requires for every item): the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them. That tool needs a Minecraft jar, which isn't available here; the same rule gives slice 14C's three records exactly. CI's repository check failed on the first push without them.
+  - `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
 - **Slice 14D game tests (not run yet; CI runs them):**
   - `BrassGunsIVGameTests`:
     - `brassGunsIVAreRegistered`: each is registered with its numbers, its recipe loads, and it fires rifle rounds from a magazine, held in both hands. The Quarrel Carbine fires a pull at a time, eight a magazine, and takes both magazines, the three stocks and the four sights; the Hinterland Rifle a pull at a time, ten a magazine, the only one of the three that sets alight, and takes the Medium Scope and the Reflex Sight only; the Cloudburst Gun as long as the trigger is held, thirty a drum, and takes nothing.

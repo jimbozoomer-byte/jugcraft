@@ -6797,6 +6797,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:rocket_assembly/cloud_seeding_rocket"
     },
+    "jugcraft:cloudburst_gun": {
+      "numerator": 1171,
+      "denominator": 2,
+      "source": "recipe jugcraft:cloudburst_gun"
+    },
     "jugcraft:clover": {
       "numerator": 1,
       "denominator": 1,
@@ -12081,6 +12086,11 @@
       "numerator": 417,
       "denominator": 2,
       "source": "recipe jugcraft:highwayman"
+    },
+    "jugcraft:hinterland_rifle": {
+      "numerator": 929,
+      "denominator": 4,
+      "source": "recipe jugcraft:hinterland_rifle"
     },
     "jugcraft:holler_carbine": {
       "numerator": 401,
@@ -23961,6 +23971,11 @@
       "numerator": 384,
       "denominator": 1,
       "source": "recipe jugcraft:pyromaniacs_tunic"
+    },
+    "jugcraft:quarrel_carbine": {
+      "numerator": 1251,
+      "denominator": 2,
+      "source": "recipe jugcraft:quarrel_carbine"
     },
     "jugcraft:radiation_control_board": {
       "numerator": 49247,
