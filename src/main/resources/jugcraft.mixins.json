@@ -55,7 +55,16 @@
     "NouveauFireworkMixin",
     "NouveauContainerNameAccess",
     "NouveauPickupMixin",
-    "LairKeepInventoryMixin"
+    "PlayerKeepInventoryMixin",
+    "ServerPlayerKeepInventoryMixin",
+    "ClaimFluidMixin",
+    "TrinketKeepInventoryMixin",
+    "ResidentTargetMixin",
+    "ResidentMobTargetMixin",
+    "ClaimBucketMixin",
+    "ClaimHopperMixin",
+    "ClaimDisplayDamageMixin",
+    "ClaimDispenserMixin"
   ],
   "injectors": {
     "defaultRequire": 1

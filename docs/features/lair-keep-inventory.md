@@ -13,6 +13,7 @@ A boss fight is meant to be a fight you can try again, not one that costs your k
 - **You respawn outside the lair** as before, with:
   - every inventory slot as it was;
   - armour still worn and the offhand still held;
+  - Trinkets slots (rings, charms, spell foci, a backpack on your back) still worn;
   - the same hotbar slot selected;
   - all your experience, its level and progress.
   
@@ -46,9 +47,13 @@ A boss fight is meant to be a fight you can try again, not one that costs your k
 
 ## Multiplayer and persistence
 
-- **Server authority:** everything happens on the server.
-  - `Player.dropEquipment` and `Player.getBaseExperienceReward` are cut short (`LairKeepInventoryMixin`) only when the dying player's level is a lair (`Lairs.keepsBelongings`).
-  - Fabric's `ServerPlayerEvents.COPY_FROM` copies the slots and experience onto the respawned player (`Lairs.keep`). It runs after vanilla's own copy, with the same fields vanilla copies for keepInventory.
+- **Server authority:** everything happens on the server, through the shared per-player keep-inventory rule (`server/PlayerRules`, from #450). No separate system is added.
+  - `PlayerRules.keeps(player)` is now also true when the player is in a lair (`Lairs.keepsBelongings`). Its existing hooks then treat the death as keepInventory:
+    - `PlayerKeepInventoryMixin` covers `Player.dropEquipment` and the experience reward;
+    - `TrinketKeepInventoryMixin` covers the Trinkets drop rule;
+    - `ServerPlayerKeepInventoryMixin` covers vanilla's own respawn restore, `ServerPlayer.restoreFrom`.
+  - The respawn restore now asks about the player who died rather than the respawned one. They share a UUID, so the personal rule answers the same, but only the one who died is in the lair.
+  - The world's keepInventory game rule is never changed.
 - **Logging out on the death screen:** a player who leaves while dead in a lair, or whose server restarts, comes back still dead where they fell.
   - `Lairs.joined` now leaves dead players alone, as `Lairs.check` already did. They are not sent home while dead, so their respawn still sees that they fell in a lair and keeps everything.
   - Their items are saved with them as with any player.
@@ -57,7 +62,7 @@ A boss fight is meant to be a fight you can try again, not one that costs your k
 
 ## Dependencies and assets
 
-This adds no dependencies and no assets. It uses one new mixin, `LairKeepInventoryMixin`, with two cancellable HEAD injections on `Player`. A mixin is needed because neither Fabric API nor the game offers a per-dimension keepInventory hook.
+This adds no dependencies, assets or mixins. It reuses the shared keep-inventory mixins from #450, and Trinkets is the already-required library.
 
 ## Verification
 
@@ -69,10 +74,10 @@ This adds no dependencies and no assets. It uses one new mixin, `LairKeepInvento
 | Compilation, server game tests and rendered-client tests | `./gradlew build` and `./gradlew runClientGameTest` | not run locally: the game only compiles in CI, so CI on this draft PR is the evidence | in CI |
 
 The rendered-client test (`LairClientGameTests`, step 4) covers a real death in the Hollow Acre in survival:
-1. Setup: a helmet worn, a shield in the offhand, 9 emeralds in hotbar slot 5 (selected), 5 bread in slot 21, and about 500 experience.
+1. Setup: a helmet worn, a shield in the offhand, an amethyst shard in the Trinkets spell-focus slot, 9 emeralds in hotbar slot 5 (selected), 5 bread in slot 21, and about 500 experience.
 2. The player is killed with `genericKill`. No item entities or experience orbs are left within 8 blocks, there are no Grave Goods, and the visit has ended.
 3. The client presses respawn. The respawned player is outside the lair, with:
-   - the helmet and shield still worn;
+   - the helmet, shield and spell-focus slot still worn;
    - the emeralds and bread in their own slots;
    - slot 5 still selected;
    - the same experience level, progress and total;
@@ -89,4 +94,4 @@ This applies in every lair dimension and nowhere else. It does not depend on sea
 ## Rollout and open questions
 
 - Known limit: a mod that moves items out of the inventory at death by some route other than `dropEquipment` (a grave mod, say) works as that mod decides.
-- Rollout is reversible: removing the mixin and `Lairs.keep` restores the old Grave Goods behaviour, with no saved data to migrate.
+- Rollout is reversible: removing the lair line from `PlayerRules.keeps` restores the old Grave Goods behaviour, with no saved data to migrate.

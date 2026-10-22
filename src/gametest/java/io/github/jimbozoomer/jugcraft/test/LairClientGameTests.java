@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import eu.pb4.trinkets.api.TrinketsApi;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.HeadstoneBlock;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
@@ -114,9 +115,9 @@ public class LairClientGameTests implements FabricClientGameTest {
 	 * over the grave and takes the ringer in, unable to build;</li>
 	 * <li>building and using blocks are refused, the lair's exit is not;</li>
 	 * <li>straying past the edge throws the player back for 4 damage, never below half a heart;</li>
-	 * <li>dying there drops nothing: the player respawns outside with every slot as it was (armour and offhand worn),
-	 * the same held slot and all their experience, and goes back in; anything still dropped (by another mod, say) is
-	 * gathered as Grave Goods, handed back on respawning;</li>
+	 * <li>dying there drops nothing: the player respawns outside with every slot as it was (armour, offhand and a
+	 * Trinkets slot worn), the same held slot and all their experience, and goes back in; anything still dropped (by
+	 * another mod, say) is gathered as Grave Goods, handed back on respawning;</li>
 	 * <li>the gate takes the player back in, and leaving takes them back to exactly where they stood, facing the same
 	 * way, able to build again;</li>
 	 * <li>a full party lets nobody else in;</li>
@@ -205,6 +206,7 @@ public class LairClientGameTests implements FabricClientGameTest {
 			player.getInventory().setItem(4, new ItemStack(Items.EMERALD, 9));
 			player.getInventory().setItem(20, new ItemStack(Items.BREAD, 5));
 			player.getInventory().setSelectedSlot(4);
+			TrinketsApi.getAttachment(player).getInventory("chest/spell_focus").setItem(0, new ItemStack(Items.AMETHYST_SHARD));
 			player.giveExperiencePoints(500);
 			experience.set(new float[] {player.experienceLevel, player.experienceProgress, player.totalExperience});
 			check(player.experienceLevel > 0, "No experience to keep");
@@ -235,6 +237,8 @@ public class LairClientGameTests implements FabricClientGameTest {
 					&& player.getInventory().getItem(20).is(Items.BREAD) && player.getInventory().getItem(20).getCount() == 5,
 					"The inventory did not come back slot for slot");
 			check(player.getInventory().getSelectedSlot() == 4, "The held slot was not kept: " + player.getInventory().getSelectedSlot());
+			check(TrinketsApi.getAttachment(player).getInventory("chest/spell_focus").getItem(0).is(Items.AMETHYST_SHARD),
+					"The worn Trinkets slot was not kept");
 			float[] kept = experience.get();
 			check(player.experienceLevel == (int) kept[0] && player.experienceProgress == kept[1] && player.totalExperience == (int) kept[2],
 					"The experience was not kept: level " + player.experienceLevel + ", total " + player.totalExperience);
