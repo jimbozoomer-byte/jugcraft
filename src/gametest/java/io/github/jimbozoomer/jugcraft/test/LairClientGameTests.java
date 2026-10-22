@@ -224,8 +224,8 @@ public class LairClientGameTests implements FabricClientGameTest {
 		server.waitFor(minecraft -> player(minecraft) != fallen.get() && player(minecraft).isAlive(), 200);
 		context.waitTicks(40);
 		context.runOnClient(client -> {
-			if (client.screen instanceof DeathScreen) {
-				client.setScreen(null);
+			if (client.gui.screen() instanceof DeathScreen) {
+				client.gui.setScreen(null);
 			}
 		});
 		server.runOnServer(minecraft -> {
