@@ -10,6 +10,7 @@ import io.github.jimbozoomer.jugcraft.guns.GunItem;
 import io.github.jimbozoomer.jugcraft.guns.GunSpec;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -41,6 +42,12 @@ public final class GunAnimations {
 	static final String CARBINE = "carbine_";
 	private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
 	private static final RawAnimation CARBINE_IDLE = RawAnimation.begin().thenLoop(CARBINE + "idle");
+	/**
+	 * Slice 14D: the guns the owner made a shoot for and no aim_shoot (tools/guns.py shoot_aimed()), both held at the hip.
+	 * Aimed, they play their shoot: an aim_shoot GeckoLib cannot find plays only the idle, and the arms then eased toward
+	 * their bones' rest pose, one arm's sleeve across the left of the view (a CI screenshot of 22 October 2026).
+	 */
+	static final Set<String> SHOOT_AIMED = Set.of("borer", "cloudburst_gun");
 	/** Animation sound keyframes that play another event's sound (tools/guns.py EVENT_SOUNDS: "rustle" is a rustle). */
 	public static final Map<String, String> SOUND_ALIASES = Map.of("rustle", "gun_rustle");
 	/**
@@ -95,7 +102,8 @@ public final class GunAnimations {
 		for (String as : JugcraftGuns.CARBINES.contains(gun.name()) ? new String[] {"", CARBINE} : new String[] {""}) {
 			String idle = as + "idle";
 			for (String name : new String[] {"draw", "shoot", "aim_shoot", "inspect"}) {
-				controller.triggerableAnim(as + name, once(as + name, idle));
+				String played = name.equals("aim_shoot") && SHOOT_AIMED.contains(gun.name()) ? "shoot" : name;
+				controller.triggerableAnim(as + name, once(as + played, idle));
 			}
 			controller.triggerableAnim(idle, RawAnimation.begin().thenLoop(idle));
 			if (spec.byShell()) {

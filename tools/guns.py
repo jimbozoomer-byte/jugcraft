@@ -3634,6 +3634,14 @@ CARBINES = ("parley_revolver", "half_crown_revolver")
 CARBINE_ANIMATIONS = ("draw", "idle", "shoot", "aim_shoot", "inspect")
 
 
+def shoot_aimed():
+    """Slice 14D: the guns whose owner's animations have a shoot but no aim_shoot (the Borer and the Cloudburst Gun,
+    both held at the hip). Aimed, they play their shoot (GunAnimations.SHOOT_AIMED): a triggered aim_shoot GeckoLib
+    cannot find plays only the idle, and in a CI screenshot of 22 October 2026 the arms then eased toward their bones'
+    rest pose, one arm's sleeve across the left of the view."""
+    return [gun for gun in GUNS if "shoot" in (names := animations(gun)["animations"]) and "aim_shoot" not in names]
+
+
 # ------------------------------------------------------------------ the Nether guns' fire (slices 11A and 11B)
 
 # Each creature a Nether gun's bullet or pellets hurt is set alight for BURN_SECONDS, as the Stoker's flame sets it

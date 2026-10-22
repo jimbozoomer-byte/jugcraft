@@ -40,7 +40,7 @@ Status:
 - **Slice 14A** (the brass sidearms: the Holler Pistol, Minuet Pistol and Half-Crown Revolver; [below](#slice-14a-the-brass-sidearms)): implemented on `claude/guns-14a`, stacked on slice 13D, awaiting review.
 - **Slice 14B** (the brass carbines: the Holler Carbine, Minuet Carbine and Grange Carbine; [below](#slice-14b-the-brass-carbines)): implemented on `claude/guns-14b`, stacked on slice 14A, awaiting review.
 - **Slice 14C** (the brass quick-firers: the Sprocket Gun, Navvy Shotgun and Freeholder Rifle; [below](#slice-14c-the-brass-quick-firers)): implemented on `claude/guns-14c`, stacked on slice 14B, awaiting review.
-- **Slice 14D** (a crossbow-gun, a molten rifle and a drum gun: the Quarrel Carbine, Hinterland Rifle and Cloudburst Gun; [below](#slice-14d-a-crossbow-gun-a-molten-rifle-and-a-drum-gun)): implemented on `claude/guns-14d`, from `main`, awaiting review. Its CI has not run yet.
+- **Slice 14D** (a crossbow-gun, a molten rifle and a drum gun: the Quarrel Carbine, Hinterland Rifle and Cloudburst Gun; [below](#slice-14d-a-crossbow-gun-a-molten-rifle-and-a-drum-gun)): implemented on `claude/guns-14d`, from `main`, awaiting review. Its CI passed ([below](#verification)); the fix for an aimed shot without the owner's aim_shoot, made after it, has not been through CI yet.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -2597,9 +2597,11 @@ The reload times are the owner's animations'. The Quarrel Carbine takes every at
 **What you see:** the owner's animations.
 - **Quarrel Carbine:** each shot snaps the strings forward about the bow's tips and draws them again, and kicks the gun. To reload, it is tipped up, the magazine drops out below and is brought back. Its reload and inspection work a bolt it has no part for (the sounds play; nothing moves).
 - **Hinterland Rifle:** each shot kicks it and flicks its two lids open and shut: the rear lid is open as the shot goes and shuts, then opens again until the gun settles; the front lid lifts just after and falls back. To reload, it is rolled over, the magazine slides back out of its side and goes, and a new one slides in.
-- **Cloudburst Gun:** each shot kicks it and its barrels recoil. To reload, it is turned up, the left hand pulls the drum off below and brings it back, and the hoop-handle is worked forward and back like a lever.
+- **Cloudburst Gun:** each shot kicks it and its barrels recoil. To reload, it is turned up, the left hand pulls the drum off below and brings it back, and the hoop-handle is worked forward and back like a lever. Aimed, it fires with the same shot: the owner made it no aim_shoot (below).
 - **Spent rounds:** the Quarrel Carbine throws a case at each shot (its animation's cue). The Hinterland Rifle and the Cloudburst Gun throw none: their animations have no cue for it.
 - **Sounds:** the owner's airgun shot (the Squall Rifle's) for the Quarrel Carbine, their heavy rifle shot (the Longhorn Rifle's and the Lookout Rifle's) for the Hinterland Rifle, and their new rifle shot (the Thresher's and the Highball Rifle's) for the Cloudburst Gun. None carries a tag naming another source. Each animation's own cues play as they name: the magazine out and in, the bolt, the lever.
+
+**An aimed shot without the owner's aim_shoot** (`GunAnimations.SHOOT_AIMED`, from `tools/guns.py` `shoot_aimed()`): the Cloudburst Gun and slice 12A's Borer are the only guns whose animations have a shoot and no aim_shoot. An aimed shot triggers aim_shoot; GeckoLib, not finding it, played only the idle, and for that moment the arms eased toward their bones' rest pose (a first-person preview of the arms at rest puts the left one where the screenshot shows it). In CI's screenshot of the Cloudburst Gun fired aimed, one arm's sleeve stood across the left of the view, and the Borer's has shown the same in every run since slice 12A's. Of the guns' first-person screenshots fired aimed in slice 14A's run, which took every gun, only the Borer's shows it. Now these two guns play their shoot when aimed. `tools/check_mod_data.py` checks the list against the animations.
 
 **How the models were built:**
 - **Quarrel Carbine:**
@@ -2641,6 +2643,7 @@ The reload times are the owner's animations'. The Quarrel Carbine takes every at
 
 **Known limits:**
 - **The Hinterland Rifle's tube fills the right of the view:** the owner's first-person placement carries the gun's back past the eye.
+- **The Hinterland Rifle's inspection fills the view:** the owner's inspection brings the gun up across the eye, and CI's screenshot is dark from edge to edge.
 - **The Hinterland Rifle takes no Long Scope or Laser Sight:** its atlas has room for only two sights' pieces.
 - **The Hinterland Rifle's glow does not pulse:** it takes its texture's first frame.
 - **The Cloudburst Gun has no sights:** aiming only steadies it and narrows the view, as the Thresher's.
@@ -5332,12 +5335,23 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three guns' grids matches another.
   - **Alchemy values** (`data/jugcraft/alchemy/values.json`, which `scripts/tests/test_alchemy_values.py` requires for every item): the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them. That tool needs a Minecraft jar, which isn't available here; the same rule gives slice 14C's three records exactly. CI's repository check failed on the first push without them.
   - `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
-- **Slice 14D game tests (not run yet; CI runs them):**
+- **Slice 14D game tests (all passed in CI, below):**
   - `BrassGunsIVGameTests`:
     - `brassGunsIVAreRegistered`: each is registered with its numbers, its recipe loads, and it fires rifle rounds from a magazine, held in both hands. The Quarrel Carbine fires a pull at a time, eight a magazine, and takes both magazines, the three stocks and the four sights; the Hinterland Rifle a pull at a time, ten a magazine, the only one of the three that sets alight, and takes the Medium Scope and the Reflex Sight only; the Cloudburst Gun as long as the trigger is held, thirty a drum, and takes nothing.
     - `hinterlandRifleSetsWhatItHitsAlight`: a Hinterland Rifle's shot sets its pig alight and the fire hurts it again within two seconds; a Quarrel Carbine's does neither. No block catches fire.
     - `cloudburstGunChangesItsDrum`: an empty Cloudburst Gun with forty Rifle Rounds loads nothing before its reload's time and thirty after it, leaving ten; a shot then spends one and takes its damage from the pig.
   - `GunsGameTests` counts 87 guns. `TacticalAttachmentsGameTests`: the Laser Sight fits every gun that takes the scopes but the Breacher, the Trench Lobber, the Earthmover and the Hinterland Rifle. `NetherGunsGameTests`: no gun but the Nether guns and the Hinterland Rifle sets alight.
+- **Slice 14D in CI** ([run 39855683711](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39855683711), on 8965531f4): every check passed. (The run on 33ade9afa failed the repository check, for the alchemy values above, and the push after it cancelled the rest.)
+  - **Server game tests:** 2263 in the `mod` job, all passed, `BrassGunsIVGameTests`, `GunsGameTests`, `TacticalAttachmentsGameTests` and `NetherGunsGameTests` among them.
+  - **The job without the optional integrations** and **the repository check:** passed.
+  - **Client game tests:** every shard passed. `GunsClientGameTests` took each new gun through holding, aiming, firing at the husk, reloading from the inventory, inspection and its attachments, and its checks passed for each.
+  - **Screenshots** (from the guns shard's log):
+    - **Quarrel Carbine:** held at the lower right pointing at the husk; aimed and fired, raised to the middle, its rear post on the crosshair under the husk and its bow across the view; reloading, tipped up at the upper right with the left arm at the magazine; inspected, turned at the right.
+    - **Hinterland Rifle:** held, aimed and fired, the tube behind its grip a dark wall over the right of the view, about two fifths of it, the husk clear at the left (known limits). In the reloading screenshot, rolled over at the lower right, the husk it hit is burning. Inspected, it fills the view (known limits).
+    - **Cloudburst Gun:** held and aimed at the hip at the lower right, as the Thresher; reloading, turned up at the lower middle; inspected, turned at the right. **Fired aimed:** an arm's sleeve across the left of the view, the fault fixed above.
+    - **Attachments:** the Quarrel Carbine's Extended Magazine shows twelve rounds; its stocks are behind the view; its Laser Sight sits on top and stands beside the crosshair aimed, its beam toward the husk. The Hinterland Rifle's two sights and the Cloudburst Gun are in none of the test's attachment sets.
+    - **Third person:** each raised and flashing as it fires; the Cloudburst Gun carried low, as the Thresher.
+- **Slice 14D's aimed-shot fix, run locally (22 October 2026):** `python3 tools/guns.py --check`: PASS; `shoot_aimed()` finds the Borer and the Cloudburst Gun. `python3 tools/check_mod_data.py`: PASS (6243 material IDs); the new check, given a list without the Borer or with a gun too many, reports `SHOOT_AIMED differs`. **Java:** a syntax parse only: 0 errors in `GunAnimations.java`.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
