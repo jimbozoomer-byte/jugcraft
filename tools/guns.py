@@ -805,6 +805,35 @@ GUNS = {
         "damage": 6.0, "pellets": 1, "interval": 5, "auto": False, "capacity": 20,
         "reload": 53, "spread": (2.5, 0.3), "range": 104, "ammo": "rifle_round",
     },
+    # Slice 14D, three more of the owner's treated-brass guns: the Niami, a repeating crossbow-gun whose bow limbs
+    # throw each round, its strings snapping forward and drawn again; the Terra Incognita, a molten rifle with two
+    # prongs at its muzzle, whose two top lids flick open with each shot and whose magazine sits on its left side; and
+    # the Thunderhead, a drum-fed twin-barrelled automatic held by its spade grip and its fore-end, cocked by a
+    # lever-handle on its top.
+    "quarrel_carbine": {
+        "display": "Quarrel Carbine",
+        "source": "niami",
+        "tooltip": "A repeating crossbow-gun: its bow throws each round from a magazine of eight, its strings snapping "
+                   "forward and drawn again. Fires rifle rounds.",
+        "damage": 9.0, "pellets": 1, "interval": 10, "auto": False, "capacity": 8,
+        "reload": 51, "spread": (2.0, 0.2), "range": 112, "ammo": "rifle_round",
+    },
+    "hinterland_rifle": {
+        "display": "Hinterland Rifle",
+        "source": "terra_incognita",
+        "tooltip": "A two-pronged rifle of cracked black stone, still molten inside: its shots set what they hit "
+                   "alight. Fed from a magazine on its left side. Fires rifle rounds.",
+        "damage": 7.0, "pellets": 1, "interval": 8, "auto": False, "capacity": 10,
+        "reload": 51, "spread": (2.5, 0.35), "range": 96, "ammo": "rifle_round",
+    },
+    "cloudburst_gun": {
+        "display": "Cloudburst Gun",
+        "source": "thunderhead",
+        "tooltip": "A twin-barrelled automatic fed from a drum of thirty, cocked by the lever-handle on its top: it "
+                   "fires as long as the trigger is held. Fires rifle rounds.",
+        "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 30,
+        "reload": 78, "spread": (4.5, 2.0), "range": 72, "ammo": "rifle_round",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -1047,6 +1076,15 @@ RECIPES = {
     "navvy_shotgun": (["SBS", " LB"], {"S": "#c:ingots/steel", "B": "#c:ingots/brass", "L": "minecraft:lever"}),
     "freeholder_rifle": (["SSE", "BLB"], {"S": "#c:ingots/steel", "E": "minecraft:emerald", "B": "#c:ingots/brass",
                                           "L": "minecraft:lever"}),
+    # Slice 14D: steel, brass and a lever, as slices 14A to 14C; the Quarrel Carbine a crossbow for its bow, the
+    # Hinterland Rifle a magma block for its molten core, the Cloudburst Gun a lightning rod for its thunder and a
+    # steel ingot more for its second barrel.
+    "quarrel_carbine": (["SSC", "BLB"], {"S": "#c:ingots/steel", "C": "minecraft:crossbow", "B": "#c:ingots/brass",
+                                         "L": "minecraft:lever"}),
+    "hinterland_rifle": (["SSS", "MLB"], {"S": "#c:ingots/steel", "M": "minecraft:magma_block", "B": "#c:ingots/brass",
+                                          "L": "minecraft:lever"}),
+    "cloudburst_gun": (["SSS", "SLR", "BB "], {"S": "#c:ingots/steel", "R": "minecraft:lightning_rod", "B": "#c:ingots/brass",
+                                               "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2614,6 +2652,67 @@ BUILDS = {
         "sight": (8.0, 7.0, 13.39),
         "eye_relief": 2.0,
     },
+    # Slice 14D. The Niami's strings are the 11th and 12th elements of its main part, each on its own bone turning about
+    # the tip of its bow limb, as the owner's groups have them: a shot snaps them forward and draws them again. Its
+    # bolt, magazine_2, default_mag and scriptures bones hold nothing: its model has no part for them.
+    "quarrel_carbine": {
+        "bones": [
+            ("gun_body", None, ["main-#10,11", "sights", "stan_grip"], (8.0, 0.0, 8.0)),
+            ("stringleft", "gun_body", ["main#10"], (2.25, 4.775, 8.35)),
+            ("stringright", "gun_body", ["main#11"], (13.75, 4.775, 8.35)),
+            ("bolt", "gun_body", [], (8.0, 5.0, 12.0)),
+            ("magazine", "gun_body", ["stan_mag"], (8.0, 1.6, 8.9)),
+            ("default_mag", "magazine", [], (8.0, 1.6, 8.9)),
+            ("magazine_2", "gun_body", [], (8.0, 1.6, 8.9)),
+            ("scriptures", "gun_body", [], (8.0, 5.0, 8.0)),
+        ],
+        "hands": {"right": (8.0, 2.0, 15.8), "left": (8.0, 2.0, 3.5)},
+        "arms": {"right": (0.1069, -0.5534, 0.826), "left": (0.8557, -0.054, 0.5146)},
+        "muzzle": (8.0, 5.0, 0.9),
+        "sight": (8.0, 6.75, 14.15),
+        "eye_relief": 2.0,
+    },
+    # The Terra Incognita's main part holds it all: its two top lids (the 17th and 18th elements, the 33rd to 35th),
+    # each hinged at its front edge so a shot lifts its back (the rear lid's slanted lip rises with it), and its
+    # magazine on its left side (the elements the owner named Mag). Its reload rolls the gun on the gun_body2 bone,
+    # under the rest. Its gun_body3, bolt and flame bones hold nothing: its model has no part for them.
+    "hinterland_rifle": {
+        "bones": [
+            ("gun_body2", None, [], (8.0, 0.0, 8.0)),
+            ("gun_body", "gun_body2", ["main-#16,17,29,30,31,32,33,34", "sights"], (8.0, 0.0, 8.0)),
+            ("Lid1", "gun_body", ["main#16,17"], (8.04, 11.87, 8.64)),
+            ("Lid2", "gun_body", ["main#32,33,34"], (8.04, 10.97, 1.44)),
+            ("mag", "gun_body", ["main@Mag"], (5.6, 8.3, 5.0)),
+            ("gun_body3", "gun_body", [], (8.0, 6.0, 8.0)),
+            ("bolt", "gun_body", [], (8.0, 6.0, 8.0)),
+            ("flame", "gun_body", [], (8.0, 6.0, -13.6)),
+        ],
+        "hands": {"right": (8.0, 3.2, 10.3), "left": (6.5, 2.0, 2.2)},
+        "arms": {"right": (0.3044, -0.3967, 0.866), "left": (0.5677, -0.4031, 0.7178)},
+        "muzzle": (8.04, 6.09, -13.64),
+        "sight": (4.3, 8.45, 4.98),
+        "eye_relief": 2.0,
+    },
+    # The Thunderhead's receiver is the Gattaler's (the Thresher's, slice 8C) less one side piece, with two barrels and
+    # its drum under it, and its animations are of the Gattaler's family. Its barrel is the owner's barrel
+    # part, which recoils with each shot; its drum is the four elements the owner named octagon, the magazine, which the
+    # left hand takes off below and puts back in the reload; its grip is the hoop-handle on its top (the 2nd to 5th and
+    # 16th elements), which the reload works like a lever about its feet. As the Thresher's: the body turns about the
+    # rear grip in the right hand, the left hand holds the front plate's left side, the arms run as the Thresher's
+    # in-game shots chose, and it has no sights (its knob and handle stand on the line of any sight; aiming only steadies
+    # it and narrows the view).
+    "cloudburst_gun": {
+        "bones": [
+            ("gun_body", None, ["main-#1,2,3,4,15,17,18,19,20"], (8.0, 9.0, 16.4)),
+            ("barrel", "gun_body", ["barrel"], (8.0, 7.9, -1.0)),
+            ("magazine", "gun_body", ["main@octagon"], (8.0, 3.16, 7.2)),
+            ("grip", "gun_body", ["main#1,2,3,4,15"], (8.0, 8.66, 11.5)),
+        ],
+        "hands": {"right": (8.0, 9.0, 16.4), "left": (5.5, 7.0, 9.8)},
+        "arms": {"right": (-0.0946, -0.1812, 0.9789), "left": (0.2172, -0.6757, 0.7044)},
+        "muzzle": (8.0, 7.9, -6.75),
+        "sight": None,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2811,11 +2910,12 @@ ATTACHMENTS = {
     # the two magnifying ones are clumsy from the hip.
     # "not_on" (slice 14A): the Holler Pistol's own texture is as big as the largest atlas, and beside it there is room
     # for the pieces of only three of the four sights; it goes without the marksman's long scope. So does slice 14C's
-    # Freeholder Rifle, for the same reason.
+    # Freeholder Rifle, for the same reason. Slice 14D's Hinterland Rifle has room for only two: it goes without the
+    # long scope and the Laser Sight.
     "long_scope": {
         "display": "Long Scope", "slot": "optic", "mount": True, "parts": [], "replaces": True,
         "effects": {"aim_spread": 0.5, "hip_spread": 1.25}, "model": "long_scope", "texture": "long_scope",
-        "not_on": ["holler_pistol", "freeholder_rifle"],
+        "not_on": ["holler_pistol", "freeholder_rifle", "hinterland_rifle"],
         "zoom": 0.3, "view": {"reticle": "long_scope_reticle2", "vignette": "scope_vignette"},
         "tooltip": "A long blackened-steel scope: a far closer view down the sights, clumsy from the hip.",
     },
@@ -2838,7 +2938,8 @@ ATTACHMENTS = {
     # (client/guns/GunLaser), and aimed, its dot is on the middle of the screen as the Reflex Sight's. "not_on": the
     # guns that do not take it although they take scopes. The Breacher's atlas, holding three scopes' pieces, has no
     # room left for its pieces. The Trench Lobber's has none either, and its grenades arc below a straight laser. On
-    # the Earthmover's rail, off the left side of its body (slice 10A), its housing would run into the drum.
+    # the Earthmover's rail, off the left side of its body (slice 10A), its housing would run into the drum. Slice 14D's
+    # Hinterland Rifle's atlas has room for only two sights' pieces (the long scope's "not_on").
     "tactical_grip": {
         "display": "Tactical Grip", "slot": "grip", "parts": ["tact_grip"], "replaces": False,
         "effects": {"hip_spread": 0.9, "kick": 0.8}, "model": "vertical_grip", "model_elements": [1, 3, 4],
@@ -2848,7 +2949,7 @@ ATTACHMENTS = {
     "laser_sight": {
         "display": "Laser Sight", "slot": "optic", "mount": True, "parts": [], "replaces": True,
         "effects": {"hip_spread": 0.7}, "model": "laser_sight", "texture": "laser_sight",
-        "more_textures": {"scguns:item/laser": "laser_beam"}, "not_on": ["breacher", "trench_lobber", "earthmover"],
+        "more_textures": {"scguns:item/laser": "laser_beam"}, "not_on": ["breacher", "trench_lobber", "earthmover", "hinterland_rifle"],
         "zoom": 0.9, "view": {"dot": "red_dot_reticle"},
         "tooltip": "A laser on the gun's top: a red dot marks where it points, so it is much steadier from the hip.",
     },
@@ -3145,6 +3246,7 @@ ZOOM = {
     "holler_carbine": 0.85, "minuet_carbine": 0.88, "grange_carbine": 0.85,
     # Slice 14C: an automatic rifle, an automatic shotgun and a rifle.
     "sprocket_gun": 0.85, "navvy_shotgun": 0.9, "freeholder_rifle": 0.8,
+    "quarrel_carbine": 0.8, "hinterland_rifle": 0.85, "cloudburst_gun": 0.9,
 }
 
 
@@ -3387,6 +3489,9 @@ SHOT_SOUNDS = {
     "sprocket_gun": "item/scorched_rifle/fire.ogg",
     "navvy_shotgun": "item/combat_shotgun/fire.ogg",
     "freeholder_rifle": "item/scorched_sniper/fire.ogg",
+    "quarrel_carbine": "item/airgun/fire.ogg",
+    "hinterland_rifle": "item/heavy_rifle/fire.ogg",
+    "cloudburst_gun": "item/new_rifle/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3529,12 +3634,21 @@ CARBINES = ("parley_revolver", "half_crown_revolver")
 CARBINE_ANIMATIONS = ("draw", "idle", "shoot", "aim_shoot", "inspect")
 
 
+def shoot_aimed():
+    """Slice 14D: the guns whose owner's animations have a shoot but no aim_shoot (the Borer and the Cloudburst Gun,
+    both held at the hip). Aimed, they play their shoot (GunAnimations.SHOOT_AIMED): a triggered aim_shoot GeckoLib
+    cannot find plays only the idle, and in a CI screenshot of 22 October 2026 the arms then eased toward their bones'
+    rest pose, one arm's sleeve across the left of the view."""
+    return [gun for gun in GUNS if "shoot" in (names := animations(gun)["animations"]) and "aim_shoot" not in names]
+
+
 # ------------------------------------------------------------------ the Nether guns' fire (slices 11A and 11B)
 
 # Each creature a Nether gun's bullet or pellets hurt is set alight for BURN_SECONDS, as the Stoker's flame sets it
 # alight (slice 8C, GunShots.BURN_SECONDS): fire's own damage, one a second, which fireproof creatures shrug off and
 # water puts out. No block is set alight (JugcraftGuns.INCENDIARY).
-INCENDIARY = ("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling")
+INCENDIARY = ("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling",
+              "hinterland_rifle")
 BURN_SECONDS = 4
 
 
@@ -3934,7 +4048,9 @@ FRAMED = {"scguns:item/rocket_rifle",
           # Slice 12C: the Forlorn Hope's whole texture, seven frames.
           "scguns:item/forlorn_hope",
           # Slice 13D: the Laser Musket's glowing core, three frames.
-          "scguns:item/animated_laser_musket"}
+          "scguns:item/animated_laser_musket",
+          # Slice 14D: the Hinterland Rifle's whole texture, two frames, its cracks glowing brighter and dimmer.
+          "scguns:item/terra_incognita"}
 
 
 def texture_size(texture):
