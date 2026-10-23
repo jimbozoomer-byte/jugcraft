@@ -11,6 +11,12 @@ import io.github.jimbozoomer.jugcraft.town.TownShops;
 import io.github.jimbozoomer.jugcraft.town.TownState;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import io.github.jimbozoomer.jugcraft.town.TownsfolkCare;
+import io.github.jimbozoomer.jugcraft.town.TownWayfinding;
+import io.github.jimbozoomer.jugcraft.town.TownUpgrades;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +53,68 @@ public class TownGameTests {
 	private static final Logger LOGGER = LoggerFactory.getLogger("jugcraft-town-tests");
 	/** The test town's corner: far from every other test's area. */
 	private static final int FAR = 48_000;
+
+	private static void publicAmenities(GameTestHelper h, BlockPos at) {
+		var level = h.getLevel();
+		// Vanilla's in-level mock hardcodes its mode; use a real connected player for permissions.
+		var profile = new com.mojang.authlib.GameProfile(UUID.randomUUID(), "town-visitor-test");
+		var player = new ServerPlayer(level.getServer(), level, profile, net.minecraft.server.level.ClientInformation.createDefault());
+		var connection = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+		new io.netty.channel.embedded.EmbeddedChannel(connection);
+		level.getServer().getPlayerList().placeNewPlayer(connection, player, net.minecraft.server.network.CommonListenerCookie.createInitial(profile, false));
+		player.setGameMode(GameType.SURVIVAL);
+		h.assertTrue(!player.isCreative() && !player.isSpectator(), "Public amenities are tested by a real survival visitor");
+		var old = level.getBlockState(at); var below = level.getBlockState(at.below()); var above = level.getBlockState(at.above());
+		var hit = new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false);
+		java.util.function.Supplier<net.minecraft.world.InteractionResult> click = () ->
+			net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.invoker().interact(player, level, InteractionHand.MAIN_HAND, hit);
+		try {
+			player.snapTo(at.getX()+.5, at.getY()+1, at.getZ()+1.5, 0, 0);
+			level.setBlockAndUpdate(at.below(), Blocks.STONE.defaultBlockState());
+			level.setBlockAndUpdate(at.above(), Blocks.AIR.defaultBlockState());
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COBBLESTONE, 4));
+			level.setBlockAndUpdate(at, Blocks.OAK_DOOR.defaultBlockState());
+			level.setBlockAndUpdate(at.above(), Blocks.OAK_DOOR.defaultBlockState().setValue(net.minecraft.world.level.block.DoorBlock.HALF, net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER));
+			h.assertTrue(click.get().consumesAction() && level.getBlockState(at).getValue(net.minecraft.world.level.block.DoorBlock.OPEN), "Visitor opens a town door with a held item");
+			level.setBlockAndUpdate(at.above(), Blocks.AIR.defaultBlockState());
+			level.setBlockAndUpdate(at, Blocks.OAK_TRAPDOOR.defaultBlockState());
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WATER_BUCKET));
+			h.assertTrue(click.get().consumesAction() && level.getBlockState(at).getValue(net.minecraft.world.level.block.TrapDoorBlock.OPEN), "Visitor opens a trapdoor");
+			h.assertTrue(!level.getBlockState(at).getValue(net.minecraft.world.level.block.TrapDoorBlock.WATERLOGGED) && player.getMainHandItem().is(Items.WATER_BUCKET), "Held bucket cannot waterlog the public trapdoor");
+			for (var block : List.of(Blocks.OAK_FENCE_GATE, Blocks.LEVER, Blocks.NOTE_BLOCK)) {
+				level.setBlockAndUpdate(at, block.defaultBlockState()); var before = level.getBlockState(at);
+				h.assertTrue(click.get().consumesAction() && level.getBlockState(at) != before, "Public control works: " + block);
+			}
+			for (var block : List.of(Blocks.CRAFTING_TABLE, Blocks.STONECUTTER, Blocks.SMITHING_TABLE, Blocks.GRINDSTONE, Blocks.ANVIL, Blocks.ENCHANTING_TABLE, Blocks.ENDER_CHEST, io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM)) {
+				level.setBlockAndUpdate(at, block.defaultBlockState()); player.closeContainer();
+				h.assertTrue(click.get().consumesAction() && player.containerMenu != player.inventoryMenu, "Public workstation/personal ender chest opens: " + block);
+				player.closeContainer();
+			}
+			for (var block : List.of(Blocks.CHEST, Blocks.BARREL, Blocks.FURNACE, Blocks.HOPPER, Blocks.SHULKER_BOX, Blocks.BREWING_STAND, Blocks.LECTERN, Blocks.JUKEBOX,
+					io.github.jimbozoomer.jugcraft.menagerie.Menagerie.BLOCKS.get("household_oak_storage_cabinet"))) {
+				level.setBlockAndUpdate(at, block.defaultBlockState());
+				var entity = level.getBlockEntity(at);
+				if (entity instanceof net.minecraft.world.Container container) container.setItem(0, new ItemStack(Items.DIAMOND, 3));
+				h.assertTrue(click.get() == net.minecraft.world.InteractionResult.FAIL && player.containerMenu == player.inventoryMenu, "Town inventory stays closed: " + block);
+				if (entity instanceof net.minecraft.world.Container container) { h.assertTrue(container.getItem(0).getCount() == 3, "Stored items untouched"); container.clearContent(); }
+			}
+			level.setBlockAndUpdate(at, io.github.jimbozoomer.jugcraft.menagerie.Menagerie.BLOCKS.get("household_oak_chair").defaultBlockState());
+			h.assertTrue(click.get().consumesAction() && player.isPassenger(), "Visitor can sit on town furniture"); player.stopRiding();
+			level.setBlockAndUpdate(at, Blocks.STONE.defaultBlockState());
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COBBLESTONE,4)); player.setShiftKeyDown(true);
+			player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);
+			h.assertTrue(level.getBlockState(at.above()).isAir() && player.getMainHandItem().getCount() == 4, "Sneaking does not enable placement fallthrough");
+			h.assertTrue(!player.gameMode.destroyBlock(at) && level.getBlockState(at).is(Blocks.STONE), "Public use never grants breaking permission");
+			player.setShiftKeyDown(false); player.setGameMode(GameType.SPECTATOR);
+			level.setBlockAndUpdate(at, Blocks.OAK_TRAPDOOR.defaultBlockState());
+			h.assertTrue(click.get() == net.minecraft.world.InteractionResult.FAIL && !level.getBlockState(at).getValue(net.minecraft.world.level.block.TrapDoorBlock.OPEN), "Spectators cannot mutate public amenities");
+		} finally {
+			player.setGameMode(GameType.SURVIVAL);
+			player.setShiftKeyDown(false); player.stopRiding(); player.closeContainer();
+			level.setBlockAndUpdate(at, old); level.setBlockAndUpdate(at.below(), below); level.setBlockAndUpdate(at.above(), above);
+			level.getServer().getPlayerList().remove(player);
+		}
+	}
 
 	@GameTest
 	public void townPumpkinsAtUnloadedChunkEdgeStayDecorations(GameTestHelper helper) {
@@ -94,6 +162,9 @@ public class TownGameTests {
 						}
 					}
 					helper.assertTrue(filled > 10, "The square's centrepiece shows something for " + theme + ": " + filled + " blocks");
+				} else if (site.kind().equals("retired")) {
+                    helper.assertTrue(TownDecor.stateFor(data, site, theme, site.blocks()[0][3]).isAir(),
+                            "Retired flags have no seasonal replacement");
 				} else {
 					BlockState state = TownDecor.stateFor(data, site, theme, site.blocks()[0][3]);
 					helper.assertTrue(!state.isAir(), "A " + site.kind() + " site shows something for " + theme);
@@ -190,6 +261,88 @@ public class TownGameTests {
 		helper.succeed();
 	}
 
+    private static net.minecraft.world.entity.decoration.ItemFrame exerciseUpgrade(GameTestHelper h, ServerLevel level, BlockPos origin, List<ChunkPos> chunks) {
+        TownData old = TownUpgrades.historical(1), next = TownData.get();
+        var changed = new java.util.LinkedHashMap<BlockPos,BlockState>();
+        for (var chunk : chunks) {
+            for (int x=(chunk.x()<<4)-origin.getX();x<((chunk.x()<<4)-origin.getX())+16;x++)
+                for (int z=(chunk.z()<<4)-origin.getZ();z<((chunk.z()<<4)-origin.getZ())+16;z++)
+                    for (int y=next.yMin;y<next.yMin+next.height;y++) {
+                        int a=old.index(x,y,z),b=next.index(x,y,z);
+                        if (a==TownData.KEEP || b==TownData.KEEP || old.state(a)==next.state(b)) continue;
+                        BlockPos at=origin.offset(x,y,z);
+                        changed.put(at,next.state(b)); TownBuilder.set(level,at,old.state(a));
+                    }
+        }
+        h.assertTrue(changed.size()>20,"Regression includes real old kiosk/building differences");
+        for (var spot : next.spots) if (spot.role().equals("flak_guard")) {
+            for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++) {
+                var relative=spot.pos().offset(dx,-1,dz);var at=origin.offset(relative);
+                if(!chunks.contains(ChunkPos.containing(at)))continue;
+                int before=old.index(relative.getX(),relative.getY(),relative.getZ());
+                TownBuilder.set(level,at,before==TownData.KEEP?Blocks.AIR.defaultBlockState():old.state(before));
+                changed.put(at,Blocks.POLISHED_ANDESITE.defaultBlockState());
+            }
+        }
+        // Existing towns have seasonal flag blocks here, not the undecorated
+        // blueprint's air. They must migrate to supported flak platforms.
+        for (var site : old.sites) if (site.kind().equals("tower_flag")) {
+            for (var b : site.blocks()) {
+                var relative=new BlockPos(b[0],b[1],b[2]);
+                var at=origin.offset(relative);
+                if (!chunks.contains(ChunkPos.containing(at))) continue;
+                String theme=TownState.get(level).theme();
+                TownBuilder.set(level,at,TownDecor.stateFor(old,site,theme.isEmpty()?TownDecor.theme():theme,b[3]));
+                changed.put(at,next.state(next.index(b[0],b[1],b[2])));
+            }
+        }
+        // Initialize the old generated text at retired kiosk signs.
+        for (var entry : old.signs) {
+            BlockPos at=origin.offset(entry.pos());
+            if (!chunks.contains(ChunkPos.containing(at)) || !(level.getBlockEntity(at) instanceof SignBlockEntity sign)) continue;
+            var lines=entry.lines().stream().map(net.minecraft.network.chat.Component::literal).map(c->(net.minecraft.network.chat.Component)c).toList();
+            for(var slot:SignTextSlot.values())sign.setText(new net.minecraft.world.level.block.entity.SignText(lines,lines,net.minecraft.world.item.DyeColor.WHITE,false),slot);
+        }
+        BlockPos edited=changed.keySet().stream().filter(at->level.getBlockEntity(at)==null).findFirst().orElseThrow();
+        TownBuilder.set(level,edited,Blocks.GOLD_BLOCK.defaultBlockState());
+        var roster=new java.util.HashMap<Integer,UUID>();
+        for(var spot:next.spots) {var id=TownState.get(level).townsperson(spot.index()); if(id!=null)roster.put(spot.index(),id);}
+        var board=old.mapBoards.getFirst();
+        var frame=new net.minecraft.world.entity.decoration.ItemFrame(level,origin.offset(board.pos()),board.facing());
+        frame.setItem(TownWayfinding.map(level));frame.setPermanentlyInvulnerable(true);level.addFreshEntity(frame);
+        for(var chunk:chunks)TownUpgrades.applyChunk(level,chunk);
+        h.assertTrue(level.getBlockState(edited).is(Blocks.GOLD_BLOCK),"Upgrade preserves an operator-edited block");
+        for(var entry:changed.entrySet())if(!entry.getKey().equals(edited))h.assertTrue(level.getBlockState(entry.getKey())==entry.getValue(),"Old town changed in place at "+entry.getKey());
+        for(var entry:roster.entrySet())h.assertTrue(entry.getValue().equals(TownState.get(level).townsperson(entry.getKey())),"NPC identity preserved during refresh");
+        for(var chunk:chunks) {
+            h.assertTrue(TownUpgrades.version(level,chunk.pack())==TownUpgrades.CURRENT,"Chunk migration saved");
+            TownUpgrades.applyChunk(level,chunk);
+        }
+        h.assertTrue(level.getBlockState(edited).is(Blocks.GOLD_BLOCK),"Repeated upgrade is idempotent");
+        var encoded=TownUpgrades.Progress.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE,TownUpgrades.progress(level)).getOrThrow();
+        var restored=TownUpgrades.Progress.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE,encoded).getOrThrow();
+        h.assertTrue(encoded.equals(TownUpgrades.Progress.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE,restored).getOrThrow()),"Upgrade progress/conflicts survive save round trip");
+        TownBuilder.set(level,edited,changed.get(edited));
+        h.assertTrue(!Townsfolk.bedtime(13000)&&!Townsfolk.bedtime(17999)&&Townsfolk.bedtime(18000)
+            &&Townsfolk.bedtime(23999)&&!Townsfolk.bedtime(24000),"Residents stay up until midnight, then wake at dawn");
+        h.assertTrue(next.beds.size()==26 && next.beds.values().stream().distinct().count()==26,"All civilians have separate beds");
+        for(var spot:next.spots)if(spot.role().equals("guard"))h.assertTrue(!next.beds.containsKey(spot.index()),"Guards stay on duty");
+        return frame;
+    }
+
+    @GameTest
+    public void upgradeNeverErasesContainersOrEditedBlocks(GameTestHelper h) {
+        var level=h.getLevel();var at=h.absolutePos(new BlockPos(1,2,1));
+        TownBuilder.set(level,at,Blocks.CHEST.defaultBlockState());
+        var chest=(net.minecraft.world.level.block.entity.ChestBlockEntity)level.getBlockEntity(at);
+        chest.setItem(0,new ItemStack(Items.DIAMOND,3));
+        h.assertTrue(!TownUpgrades.replaceAuthored(level,at,level.getBlockState(at),Blocks.AIR.defaultBlockState()),"Container replacement rejected");
+        h.assertTrue(chest.getItem(0).getCount()==3,"Contents preserved");
+        TownBuilder.set(level,at.above(),Blocks.GOLD_BLOCK.defaultBlockState());
+        h.assertTrue(!TownUpgrades.replaceAuthored(level,at.above(),Blocks.STONE.defaultBlockState(),Blocks.AIR.defaultBlockState()),"Unexpected live state is preserved");
+        h.succeed();
+    }
+
 	/**
 	 * A test town far away: its square's chunks are built straight from the data and checked block by block, its
 	 * townsfolk come out, a survival player can neither break nor place there, an explosion and a fire leave it as it
@@ -209,6 +362,9 @@ public class TownGameTests {
 				chunks.add(new ChunkPos(cx, cz));
 			}
 		}
+		var flakPlace = data.spots.stream().filter(s -> s.role().equals("flak_guard")).findFirst().orElseThrow();
+        var flakChunk = ChunkPos.containing(origin.offset(flakPlace.pos()));
+        if (!chunks.contains(flakChunk)) chunks.add(flakChunk);
 		for (ChunkPos pos : chunks) {
 			level.setChunkForced(pos.x(), pos.z(), true);
 			LevelChunk chunk = level.getChunk(pos.x(), pos.z());
@@ -217,7 +373,14 @@ public class TownGameTests {
 			TownDecor.chunkBuilt(level, pos);
 			TownsfolkCare.chunkBuilt(level, pos);
 		}
-		// Block for block: every block the data sets in these chunks is there (decor sites aside).
+		var retiredMap = exerciseUpgrade(helper, level, origin, chunks);
+        var platform = origin.offset(flakPlace.pos()).below();
+        helper.assertTrue(level.getBlockState(platform).is(Blocks.POLISHED_ANDESITE), "Old seasonal flag becomes a solid flak platform");
+        TownDecor.force("december");
+        for (var site : data.sites) if (site.kind().equals("retired")) TownDecor.apply(level, site.index());
+        TownDecor.force(null);
+        helper.assertTrue(level.getBlockState(platform).is(Blocks.POLISHED_ANDESITE), "Seasonal decorators do not erase a retired site's platform");
+        // Block for block: every block the data sets in these chunks is there (decor sites aside).
 		Set<Long> sites = new HashSet<>();
 		for (TownData.Site site : data.sites) {
 			for (int[] b : site.blocks()) {
@@ -237,6 +400,9 @@ public class TownGameTests {
 						if (index == TownData.KEEP || sites.contains(BlockPos.asLong(x, y, z))) {
 							continue;
 						}
+                        // Exterior towers share columns with the natural slope;
+                        // blendColumn intentionally leaves blueprint air as terrain.
+                        if (data.mask(x,z) != TownData.INSIDE && data.state(index).isAir()) continue;
 						checked++;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
 						if (found != data.state(index)) {
@@ -262,6 +428,30 @@ public class TownGameTests {
 		// A survival player can't break or place, or pour water.
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.setGameMode(GameType.SURVIVAL);
+		ItemStack townMap = TownWayfinding.map(level);
+		var mapId = townMap.get(DataComponents.MAP_ID);
+		var mapData = MapItem.getSavedData(townMap, level);
+		helper.assertTrue(mapData != null && mapData.locked && mapData.centerX == origin.getX() + 96
+				&& mapData.centerZ == origin.getZ() + 96, "Town plan is locked and centred on its real coordinates");
+		TownWayfinding.giveMap(player);
+		TownWayfinding.giveMap(player);
+		helper.assertTrue(player.getInventory().countItem(Items.FILLED_MAP) == 1, "Guard gives one carried copy");
+		helper.assertTrue(mapId.equals(TownWayfinding.map(level).get(DataComponents.MAP_ID)), "Copies reuse the saved map ID");
+		var encodedTown = TownState.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, state).getOrThrow();
+		helper.assertTrue(TownState.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, encodedTown).getOrThrow().townMap()
+				== state.townMap(), "Map ID survives saved-state round trip");
+		for (var entry : data.signs) {
+			BlockPos signPos = origin.offset(entry.pos());
+			if (!chunks.contains(ChunkPos.containing(signPos))) continue;
+			helper.assertTrue(level.getBlockEntity(signPos) instanceof SignBlockEntity, "Sign exists at " + signPos);
+			var sign = (SignBlockEntity)level.getBlockEntity(signPos);
+			helper.assertTrue(sign.isWaxed() && sign.getText(SignTextSlot.FRONT).getMessages(false).getFirst().getString()
+					.equals(entry.lines().get(0)), "Sign is labelled and waxed");
+            helper.assertTrue(sign.getText(SignTextSlot.FRONT).hasGlowingText()
+                && sign.getText(SignTextSlot.FRONT).getColor() == net.minecraft.world.item.DyeColor.WHITE,
+                "Sign text is bright white");
+		}
+
 		BlockPos paving = origin.offset(96, 0, 100);
 		BlockState pavingState = level.getBlockState(paving);
 		player.snapTo(paving.getX() + 0.5, paving.getY() + 1, paving.getZ() + 0.5, 0.0F, 0.0F);
@@ -275,6 +465,8 @@ public class TownGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WATER_BUCKET));
 		player.gameMode.useItem(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND);
 		helper.assertTrue(player.getMainHandItem().is(Items.WATER_BUCKET), "A survival player can't empty a bucket in the town");
+		publicAmenities(helper, paving.above(70));
+		player.snapTo(paving.getX() + .5, paving.getY() + 1, paving.getZ() + .5, 0, 0);
 		// An explosion in the square leaves it as it was.
 		BlockPos fountain = origin.offset(88, 1, 104);
 		BlockState fountainState = level.getBlockState(fountain);
@@ -303,7 +495,8 @@ public class TownGameTests {
 			// Fire on the square goes out before it can burn anything.
 			level.setBlock(fire, Blocks.FIRE.defaultBlockState(), 3);
 			helper.runAfterDelay(80, () -> {
-				boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
+				helper.assertTrue(retiredMap.isRemoved(), "Old map frame is removed even when its entities load after the chunk upgrade");
+                boolean out = !level.getBlockState(fire).is(Blocks.FIRE);
 				// The town stays as built once its chunks tick: no water spreading from the fountain or wells, no blocks
 				// falling or leaves decaying (decor sites aside). Only air and fluid are compared, since random ticks may
 				// rightly change other states (grass under a block, a crop's age).
@@ -322,6 +515,19 @@ public class TownGameTests {
 					boolean hurt = someone.hurtServer(level, level.damageSources().playerAttack(player), 100.0F);
 					unhurt = !hurt && someone.getHealth() == someone.getMaxHealth() && someone.isAlive();
 				}
+                if (!people.isEmpty()) {
+                    Townsfolk resident = people.getFirst();
+                    UUID original = resident.getUUID(), unloaded = UUID.randomUUID();
+                    helper.assertTrue(level.isPositionEntityTicking(resident.home()), "Resident home is ticking for unloaded-UUID regression");
+                    state.setTownsperson(resident.spot(), unloaded);
+                    TownsfolkCare.checkResidents(level);
+                    helper.assertTrue(unloaded.equals(state.townsperson(resident.spot())), "An unloaded resident is never replaced");
+                    state.setTownsperson(resident.spot(), original);
+                    resident.discard();
+                    helper.assertTrue(state.townsperson(resident.spot()) == null, "Known destruction releases the roster slot");
+                    TownsfolkCare.checkResidents(level);
+                    helper.assertTrue(state.townsperson(resident.spot()) != null && !original.equals(state.townsperson(resident.spot())), "Known removed resident is restored once");
+                }
 				state.forget();
 				for (ChunkPos pos : chunks) {
 					level.setChunkForced(pos.x(), pos.z(), false);
@@ -357,6 +563,9 @@ public class TownGameTests {
 							continue;
 						}
 						BlockState want = data.state(index);
+                        // The exterior blending ring retains natural terrain in
+                        // blueprint-air cells; it is not part of the authored room.
+                        if (data.mask(x,z) != TownData.INSIDE && want.isAir()) continue;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
 						if (want.isAir() != found.isAir() || want.getFluidState().isEmpty() != found.getFluidState().isEmpty()) {
 							drifted++;

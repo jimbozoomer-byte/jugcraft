@@ -43,7 +43,7 @@ TREE = {
     "kaiser_armor": ("steel_armor", ["kaiser_helmet", "kaiser_chestplate", "kaiser_leggings", "kaiser_boots"],
                      "On Parade", "Smith a Kaiser Pattern onto a piece of steel armor", "task"),
     "paxel": ("steel", [f"{tier}_paxel" for tier in ("wood", "stone", "iron", "gold", "diamond", "netherite", "bronze",
-                                                      "steel")], "Jack of All Trades", "Make a paxel", "task"),
+                                                      "steel", "titanium")], "Jack of All Trades", "Make a paxel", "task"),
     # Batch 42: the arms, in bronze from the bronze age on.
     "arms": ("bronze", [f"{metal}_{kind}" for metal in ("bronze", "steel") for kind in (
         "longsword", "greatsword", "rapier", "flanged_mace", "war_hammer", "glaive", "halberd", "spear", "lance")],
@@ -174,6 +174,14 @@ TREE = {
     "survey_rocket": ("rocket_workshop", "survey_rocket", "Eye in the Sky", "Assemble a survey rocket", "task"),
     "hydroponic_bay": ("crop_harvester", "hydroponic_bay", "Soil Optional", "Build a hydroponic bay", "task"),
     "crop_harvester": ("steel", "crop_harvester", "Reaping What You Sow", "Build a crop harvester", "goal"),
+    # The industrial factory's big milestones (docs/features/industrial-factory-payoffs.md): only the landmarks, not
+    # every machine.
+    "anaerobic_digester": ("bioethanol", "anaerobic_digester", "Something Rotten",
+                           "Build the Anaerobic Digester, six blocks high, and turn waste into gas", "goal"),
+    "vanadium_contact_bed": ("sulfuric_acid", "vanadium_contact_bed", "Contact Process",
+                             "Make a vanadium contact bed and double the acid from your sulfur", "goal"),
+    "combined_cycle_power_plant": ("heat_recovery_unit", "combined_cycle_power_plant", "Power Station",
+                                   "Build the Combined Cycle Power Plant: 2,048 JE/t from one machine", "challenge"),
 }
 # Background of the tab (a block texture), shown behind the tree.
 BACKGROUND = "jugcraft:block/dp_gunmetal"

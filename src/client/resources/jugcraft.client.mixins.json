@@ -14,11 +14,14 @@
     "GunFovMixin",
     "GunMouseMixin",
     "JeiRegistryBootstrapMixin",
+    "ResourcifyWorkerMixin",
     "SoundEngineAccessor",
     "SoundEngineMixin",
     "SoundManagerAccessor",
     "HowitzerPilotHandsMixin",
-    "HowitzerPilotRendererMixin"
+    "HowitzerPilotRendererMixin",
+    "NouveauScryPlayerMixin",
+    "JugcraftKeyMappingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

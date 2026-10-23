@@ -99,10 +99,10 @@ public class ChemicalInfuserGameTests {
 			try (Transaction transaction = Transaction.openOuter()) {
 				helper.assertTrue(hydrogen.insert(FluidVariant.of(PetroFluids.CHLORINE.fluid()), FluidConstants.BUCKET, transaction) == 0,
 						facing + ": the left inlet refuses chlorine");
-				helper.assertTrue(reactant.insert(FluidVariant.of(PetroFluids.HYDROGEN.fluid()), FluidConstants.BUCKET, transaction) == 0,
-						facing + ": the right inlet refuses hydrogen");
-				helper.assertTrue(reactant.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction) == 0,
-						facing + ": the right inlet refuses water");
+				helper.assertTrue(reactant.insert(FluidVariant.of(PetroFluids.ARGON.fluid()), FluidConstants.BUCKET, transaction) == 0,
+						facing + ": the right inlet refuses argon");
+				helper.assertTrue(reactant.insert(FluidVariant.of(Fluids.LAVA), FluidConstants.BUCKET, transaction) == 0,
+						facing + ": the right inlet refuses lava");
 				helper.assertTrue(product.insert(FluidVariant.of(PetroFluids.HYDROGEN.fluid()), FluidConstants.BUCKET, transaction) == 0,
 						facing + ": nothing goes in at an outlet");
 				transaction.abort();
@@ -203,6 +203,28 @@ public class ChemicalInfuserGameTests {
 			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(PRODUCT), PetroFluids.METHANE.fluid()) == 100
 					&& amount(machine.tanks().output(WATER), Fluids.WATER) == 200, "100 mB of methane and 200 mB of water");
 			helper.assertTrue(used(machine, supplied) == 150 * DRAW, "Paid " + used(machine, supplied) + " JE");
+		});
+	}
+
+	/**
+	 * The optional ruthenium bed: the same 400 mB of hydrogen and 100 mB of carbon dioxide give the same 100 mB of methane
+	 * and 400 mB of water in half methanation's time, so for half its energy, and the bed stays.
+	 */
+	@GameTest(maxTicks = 300)
+	public void theRutheniumBedMethanatesInHalfTheTime(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
+		long[] supplied = supply(helper, machine);
+		int socket = machine.form().firstSocketSlot();
+		machine.container().setItem(socket, stack("ruthenium_catalyst_bed"));
+		insert(helper, port(helper, machine, "hydrogen_in"), PetroFluids.HYDROGEN.fluid(), 400);
+		insert(helper, port(helper, machine, "reactant_in"), PetroFluids.CARBON_DIOXIDE.fluid(), 100);
+		helper.runAfterDelay(METHANATION_TICKS / 2 + 20, () -> {
+			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(PRODUCT), PetroFluids.METHANE.fluid()) == 100
+					&& amount(machine.tanks().output(WATER), Fluids.WATER) == 400, "100 mB of methane and 400 mB of water, already: " + machine.status());
+			long used = used(machine, supplied);
+			helper.assertTrue(used == METHANATION_TICKS / 2 * DRAW, "Paid " + used + " JE, not " + METHANATION_TICKS / 2 * DRAW);
+			helper.assertTrue(machine.container().getItem(socket).is(item("ruthenium_catalyst_bed")), "The bed was not used up");
+			helper.succeed();
 		});
 	}
 
@@ -344,8 +366,9 @@ public class ChemicalInfuserGameTests {
 	public void itRunsItsOwnRecipeAndIsBuiltFromTheStarterBill(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(2, 1, 2), Direction.NORTH);
-		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
-		helper.assertTrue(own.size() == 11 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_biogas_upgrading"))
+		List<FluidRecipes.Entry> own = machine.recipes(level.getServer()).stream()
+                .filter(e -> !e.id().getPath().startsWith("gas_synthesis/synthetic_")).toList();
+		helper.assertTrue(own.size() == 14 && own.get(0).id().equals(Jugcraft.id("gas_synthesis/infuser_biogas_upgrading"))
 				&& own.get(0).recipe().time() == METHANATION_TICKS && own.get(0).recipe().tool().isPresent()
 				&& own.get(1).id().equals(Jugcraft.id("gas_synthesis/infuser_carbon_dioxide_methanation"))
 				&& own.get(1).recipe().time() == METHANATION_TICKS && own.get(1).recipe().tool().isPresent()
@@ -355,8 +378,14 @@ public class ChemicalInfuserGameTests {
 				&& own.get(3).recipe().tool().isEmpty()
 				&& own.get(4).id().equals(Jugcraft.id("gas_synthesis/infuser_hydrogen_chloride")) && own.get(4).recipe().time() == TICKS
 				&& own.get(4).recipe().tool().isEmpty()
-				&& own.get(5).id().equals(Jugcraft.id("gas_synthesis/infuser_sulfur_trioxide")) && own.get(5).recipe().time() == 100
-				&& own.get(5).recipe().tool().isPresent(), "Six original plus five expanded recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
+				&& own.get(5).id().equals(Jugcraft.id("gas_synthesis/infuser_ruthenium_biogas_upgrading"))
+				&& own.get(5).recipe().time() == METHANATION_TICKS / 2 && own.get(5).recipe().tool().isPresent()
+				&& own.get(6).id().equals(Jugcraft.id("gas_synthesis/infuser_ruthenium_carbon_dioxide_methanation"))
+				&& own.get(6).recipe().time() == METHANATION_TICKS / 2
+				&& own.get(7).id().equals(Jugcraft.id("gas_synthesis/infuser_ruthenium_carbon_monoxide_methanation"))
+				&& own.get(7).recipe().time() == 75
+				&& own.get(8).id().equals(Jugcraft.id("gas_synthesis/infuser_sulfur_trioxide")) && own.get(8).recipe().time() == 100
+				&& own.get(8).recipe().tool().isPresent(), "Nine original plus five expanded recipes: " + own.stream().map(FluidRecipes.Entry::id).toList());
 		long converter = FluidRecipes.recipes(level.getServer(), MachineKind.SYNTHESIS_CONVERTER).stream()
 				.filter(recipe -> recipe.fluidResults().stream().anyMatch(result -> result.fluid() == PetroFluids.HYDROGEN_CHLORIDE.fluid()))
 				.count();

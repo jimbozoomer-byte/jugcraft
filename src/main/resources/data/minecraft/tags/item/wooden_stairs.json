@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:aged_pine_stairs",
+    "jugcraft:aged_maple_stairs",
     "jugcraft:chestnut_stairs",
     "jugcraft:larch_stairs",
     "jugcraft:maple_stairs",
@@ -14,6 +16,24 @@
     "jugcraft:redwood_stairs",
     "jugcraft:eucalyptus_stairs",
     "jugcraft:mahogany_stairs",
-    "jugcraft:cedar_stairs"
+    "jugcraft:cedar_stairs",
+    "jugcraft:pine_stairs",
+    "jugcraft:yew_stairs",
+    "jugcraft:bald_cypress_stairs",
+    "jugcraft:magnolia_stairs",
+    "jugcraft:fruitwood_stairs",
+    "jugcraft:persimmon_stairs",
+    "jugcraft:juniper_stairs",
+    "jugcraft:holly_stairs",
+    "jugcraft:olive_stairs",
+    "jugcraft:tamarisk_stairs",
+    "jugcraft:yucca_stairs",
+    "jugcraft:dragonblood_stairs",
+    "jugcraft:baobab_stairs",
+    "jugcraft:fig_stairs",
+    "jugcraft:mango_stairs",
+    "jugcraft:walnut_stairs",
+    "jugcraft:nouveau_archwood_stairs",
+    "jugcraft:ecology_walnut_stairs"
   ]
 }

@@ -4,6 +4,11 @@
     "jugcraft:chlorine",
     "jugcraft:thermite",
     "jugcraft:flame",
-    "jugcraft:zap"
+    "jugcraft:zap",
+    "jugcraft:red_storm",
+    {
+      "id": "jugcraft:nouveau_sourceberry_bush",
+      "required": false
+    }
   ]
 }

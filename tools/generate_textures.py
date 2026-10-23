@@ -1035,6 +1035,9 @@ def gui():
     # The themed machine screens (batch 22).
     import gui_textures
     gui_textures.draw_all(lambda image, name: image.save(TEX / "gui" / f"{name}.png", optimize=True))
+    # The Exchange's emblem (finance).
+    import exchange_textures
+    exchange_textures.draw_all(lambda image, name: image.save(TEX / "gui" / f"{name}.png", optimize=True))
 
 
 def solar_top():
@@ -1358,6 +1361,14 @@ def machines():
     gas_storage.draw_all(save)
     import concordance_art
     concordance_art.draw_all(save)
+    import exchange_textures
+    exchange_textures.draw_items(save)
+    import exchange_casino
+    exchange_casino.draw_textures(lambda image, name, meta: save(image, "block", name))
+    exchange_casino.draw_item_textures(lambda image, name: save(image, "item", name))
+    import exchange_poker
+    exchange_poker.draw_textures(lambda image, name, meta: save(image, "block", name,
+                                                                animation=meta["animation"] if meta else None))
     import control_electronics
     control_electronics.draw_all(save)
     import rocketry
@@ -1565,6 +1576,33 @@ def main():
     # draws over them.
     import owner_art
     owner_art.write_all()
+
+    import ceramics_art
+    ceramics_art.draw_all(save)
+
+    import structural_alloys_art
+    structural_alloys_art.draw_all(save)
+    import battery_expansion
+    battery_expansion.draw_all(save)
+    import advanced_electronics
+    advanced_electronics.draw_all(save)
+    import phosphate_processing
+    phosphate_processing.draw_all(save)
+    import cryogenic_fuels
+    cryogenic_fuels.draw_all(save)
+    import synthetic_fuels
+    synthetic_fuels.draw_all(save)
+    import walnut_furniture
+    walnut_furniture.write_all()
+
+
+def fluorite_assets(assets):
+    from pathlib import Path
+    import shutil
+    import material_icons
+    source=Path(__file__).resolve().parents[1]/"art/owner-library/originals/Blocks/block_fluorite.png"
+    shutil.copyfile(source,assets/"textures/block/fluorite_block.png")
+    material_icons.draw("raw",material_icons.tones(material_icons.ORE_RAMPS["fluorite"])).save(assets/"textures/item/fluorite.png")
 
 
 def fluorite_assets(assets):

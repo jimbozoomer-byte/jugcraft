@@ -8,14 +8,16 @@ needs machines that do not exist yet. Until they do, the hard steps use the vani
 blast furnace as a clearly marked stand-in, and liquid crude oil is not added.
 """
 
+from mineral_sands import SANDS
+
 MOD = "jugcraft"
 
 # Feature switches (config/jugcraft.properties). Order is the config file order.
 FEATURES = ["tin", "zinc", "lead", "silver", "nickel", "tungsten", "uranium", "titanium", "thallite", "aluminum",
-            "salt", "phosphate", "lithium", "rare_earths", "fluorite", "sulfur", "silicon", "crude_oil", "machines", "deposits",
+            "salt", "phosphate", "lithium", "rare_earths", "fluorite", "mineral_sands", "vanadium", "sulfur", "silicon", "crude_oil", "machines", "deposits",
             "explosives", "agriculture", "parties", "drones",
             "pixel_hollows", "retro_trader", "alpine_spawn", "biomes", "town", "diagonal_connections", "raiders",
-            "concordance", "guns"]
+            "concordance", "guns", "adam_ondi_ahman"]
 
 # Metals use the vanilla form set. "mined" adds ore, deepslate ore, raw item and raw block.
 # cook: which vanilla cookers can smelt the ore/raw form. tool: minimum pickaxe tier.
@@ -57,6 +59,9 @@ METALS = {
     "solder": {"mined": False, "display": "Solder", "feature": "lead"},
     # Iron refined with coke in the steel foundry (tools/machines.py STEEL_FOUNDRY): the second tier.
     "steel": {"mined": False, "display": "Steel", "feature": "machines"},
+    "ferrochromium": {"mined": False, "display": "Ferrochromium", "feature": "machines"},
+    "stainless_steel": {"mined": False, "display": "Stainless Steel", "feature": "nickel"},
+    "aluminum_magnesium": {"mined": False, "display": "Aluminum-Magnesium Alloy", "feature": "aluminum"},
 }
 
 # Non-metal ores: <name>_ore, deepslate_<name>_ore, item <name>, storage block <name>_block.
@@ -81,6 +86,34 @@ MINERALS = {
                   "outcrop_chance": 4, "surface_biomes": [
                       "jugcraft:shield", "jugcraft:highland", "jugcraft:basin", "minecraft:windswept_hills",
                       "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_peaks"]}},
+    "vanadium_iron": {"display": "Raw Vanadium-bearing Iron", "ore_display": "Vanadium-bearing Iron",
+                     "feature": "vanadium", "drops": [1, 1], "fortune": False, "tool": "iron",
+                     "gen": {"size": 40, "rarity": 24, "min_y": -48, "max_y": 32,
+                             "outcrop_chance": 3, "surface_biomes": [
+                                 "jugcraft:highland", "jugcraft:basin", "minecraft:windswept_hills",
+                                 "minecraft:windswept_gravelly_hills", "minecraft:windswept_forest", "minecraft:stony_peaks"]},
+                     "rich_gen": {"size": 48, "rarity": 12, "min_y": -48, "max_y": 32,
+                                  "outcrop_chance": 3, "surface_biomes": ["jugcraft:shield", "jugcraft:volcano"],
+                                  "outcrop_surface_biomes": ["jugcraft:shield"]}},
+}
+
+# Chromite's host province is selected at the surface, so cave biomes do not cut holes
+# out of the ore province. Existing chunks are never rewritten.
+MINERALS['chromite'] = {
+    'display': 'Chromite', 'ore_display': 'Chromite', 'feature': 'machines',
+    'drops': [1, 1], 'tool': 'iron',
+    'gen': {'size': 32, 'rarity': 10, 'min_y': -32, 'max_y': 64, 'outcrop_chance': 4,
+            'surface_biomes': ['minecraft:windswept_hills', 'minecraft:windswept_gravelly_hills',
+                              'minecraft:windswept_forest', 'minecraft:stony_peaks',
+                              'minecraft:stony_shore', 'jugcraft:shield', 'jugcraft:highland']},
+}
+
+# Separate primary cobalt feed, available before synthetic fuel. Surface host province, new chunks only.
+MINERALS['cobaltite'] = {
+    'display':'Cobaltite', 'ore_display':'Cobaltite', 'feature':'machines', 'drops':[1,1], 'tool':'iron',
+    'gen':{'size':24,'rarity':12,'min_y':-48,'max_y':32,'outcrop_chance':4,
+           'surface_biomes':['minecraft:windswept_hills','minecraft:windswept_gravelly_hills',
+                             'minecraft:windswept_forest','minecraft:stony_peaks','jugcraft:shield','jugcraft:highland']},
 }
 
 # Surface rocks with their own blocks. copy: vanilla block whose properties are copied.
@@ -98,6 +131,9 @@ ROCKS = {
                "gen": {"size": 14, "count": 2, "min_y": 55, "max_y": 100, "target": "minecraft:sand",
                        "biomes": ["IS_DESERT", "IS_BADLANDS"]}},
 }
+
+ROCKS.update({name: {"display": info["display"], "feature": "mineral_sands", "copy": "SAND",
+                          "tool": "shovel", "drop": None} for name, info in SANDS.items()})
 
 # Plain items: display name, feature, optional c: tag path.
 ITEMS = {
@@ -122,8 +158,8 @@ EXTRA_NAMES = {"bronze_blend": "Bronze Blend"}
 # Metal content per item in nugget units; the checker uses these to audit recipes.
 PART_UNITS = {"plate": 9, "gear": 36, "wire": 3, "dust": 9}
 COMPONENTS = {
-    "plate": ["copper", "iron", "tin", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel",
-              "titanium", "thallite"],
+    "plate": ["copper", "iron", "tin", "zinc", "bronze", "brass", "invar", "aluminum", "nickel", "lead", "tungsten", "steel",
+              "titanium", "thallite", "stainless_steel", "aluminum_magnesium"],
     "gear": ["iron", "bronze", "brass", "invar", "steel"],
     "wire": ["copper", "silver", "aluminum"],
     # Pulverizer output (see tools/machines.py); one dust smelts back into one ingot.
@@ -235,6 +271,14 @@ def all_items():
 
 def feature_of(entry_id):
     """The feature switch that owns a registered ID."""
+    if entry_id == "deep_drilling_assembly":
+        return "machines"
+    import vehicle_bays
+    if entry_id in vehicle_bays.BLOCKS:
+        return "machines"
+    import menagerie_registry
+    if entry_id in menagerie_registry.entries():
+        return menagerie_registry.feature()
     for metal, info in METALS.items():
         if entry_id in metal_blocks(metal) + metal_items(metal):
             return info["feature"]
@@ -310,6 +354,12 @@ def feature_of(entry_id):
     import zeppelin
     if entry_id in zeppelin.ITEMS:
         return "machines"
+    import exchange_poker  # the Exchange's poker tables go with the town
+    if entry_id in exchange_poker.BLOCKS:
+        return exchange_poker.FEATURE
+    import exchange_casino
+    if entry_id in exchange_casino.BLOCKS:
+        return exchange_casino.FEATURE
     import mech
     if entry_id in mech.ITEMS:
         return "machines"
@@ -328,6 +378,10 @@ def feature_of(entry_id):
     import bunkerworks
     if entry_id in bunkerworks.blocks():
         return "machines"
+    import aged_wood
+    # Aged pine and maple come from the biomes branch's trees.
+    if entry_id in aged_wood.blocks():
+        return "biomes"
     import fire_control
     if entry_id in fire_control.blocks() + fire_control.items():
         return "machines"

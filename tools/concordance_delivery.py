@@ -28,6 +28,37 @@ SOURCES = [ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java", ROO
 # key in the lock: (what the Concordance does with it, what happens without it, the game tests, what is still limited).
 # Tests name a game test method, or a client game test class (whose single test is its runTest).
 MATRIX = {
+    "lithium": (
+        "General tick, AI and physics optimization; no Concordance-specific API integration",
+        "Jugcraft gameplay remains available without the optimization",
+        ["TownClientGameTests"],
+        "Compatibility covered by combined tests; representative hosted performance benchmarking remains outstanding"),
+    "ferrite-core": (
+        "Memory reductions in block-state and model storage; no Concordance-specific API integration",
+        "Jugcraft gameplay remains available without the optimization",
+        ["TownClientGameTests"],
+        "Compatibility covered by combined tests; representative hosted performance benchmarking remains outstanding"),
+    "krypton": (
+        "Network transport optimization; no Concordance-specific API integration",
+        "Jugcraft gameplay remains available without the optimization",
+        ["TownClientGameTests"],
+        "Compatibility covered by combined tests; representative hosted performance benchmarking remains outstanding"),
+    "immediatelyfast": (
+        "Client immediate-mode rendering optimization; no Concordance-specific API integration",
+        "Jugcraft gameplay remains available without the optimization",
+        ["TownClientGameTests"],
+        "Compatibility covered by combined tests; representative hosted performance benchmarking remains outstanding"),
+
+    "resourcify": (
+        "No Concordance-specific behavior; Complete adds in-game resource-pack and shader browsing with a guarded worker-thread shutdown fix",
+        "browser buttons are absent; normal pack selection and gameplay are unchanged",
+        ["PackBrowserClientGameTests"],
+        "Catalog screens and clean shutdown tested locally; installing a downloaded pack and third-party shader compatibility need player testing"),
+    "diorama": (
+        "Launcher-installed client minimap, world map and waypoints; no Concordance progression hook",
+        "map and waypoint controls are absent; server gameplay is unchanged",
+        ["DioramaClientGameTests"],
+        "Client screen and key tests cover the pinned pack; exploration performance still needs playtesting"),
     "fabric-api": (
         "Attachments for every player record, and each wearer's worn trinkets choice, sent to everyone who sees them; item "
         "components; the rules' reload listener; menus; commands; networking (the journal and its request, signs, the "
@@ -174,6 +205,17 @@ MATRIX = {
         ["ConcordanceJournalClientGameTests", "ConcordanceComposerClientGameTests"],
         "No ritual-schematic, crucible or observatory screen is built; the workspaces have no narration (the plain "
         "screens do); keyboard use not tried by a person"),
+    "travelers-backpack": (
+        "No Concordance-specific behavior; Complete adds portable storage through the Trinkets Back slot and "
+        "Jugcraft industrial recipes, with variant abilities disabled",
+        "no backpack integration; Concordance progression is unchanged",
+        ["recipesUseIndustrialMaterialsAndRemoveBypasses", "backSlotAndPlacedAutomationRemainAvailable", "BackpackClientGameTests"],
+        "No essence tanks, magical upgrades or automatic resizing of existing bags"),
+    "forge-config-api-port": (
+        "No Concordance-specific behavior; loads and synchronizes Traveler's Backpack settings",
+        "Traveler's Backpack also must be absent; Concordance progression is unchanged",
+        ["sequentialSmithingPreservesContentsAndUsesApprovedCapacities"],
+        "Existing world config overrides and saved backpack slot counts require owner-managed changes"),
 }
 
 # Libraries the Concordance does not use: their mod ids must not appear in Jugcraft's code.

@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "biomes",
+      "or": [
+        "agriculture"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "wooden_stairs",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": "jugcraft:fruitwood_planks"
+  },
+  "result": {
+    "id": "jugcraft:fruitwood_stairs",
+    "count": 4
+  }
+}

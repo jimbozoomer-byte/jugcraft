@@ -39,6 +39,16 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 import arms_pixel  # noqa: E402
+import concordance_workshops
+import jug_nouveau
+import concordance_ee_equipment
+import concordance_ee_machines
+import concordance_ee_storage
+import concordance_ee_artifacts
+import concordance_ee_expansion
+import concordance_elemental_gear
+import concordance_dark_matter
+import concordance_alchemical_gear
 import concordance_ember  # noqa: E402
 import concordance_rime  # noqa: E402
 import concordance_rime_kit  # noqa: E402
@@ -64,6 +74,15 @@ def imports():
     out = []
     out.append(("block/transport_crate_wood", "biomes and tree blocks/origin_oak_planks"))
     out.append(("block/fluorite_block", "block_fluorite"))
+    out.append(("block/bramble_bush_leaves", "biomes and tree blocks/bramble_leaves"))
+    from mineral_sands import SANDS
+    out.extend(("block/" + name, info["texture"]) for name, info in SANDS.items())
+    # Owner's 15 October pine correction: use the supplied wood textures unchanged.
+    for name in ("pine_log", "pine_log_top", "stripped_pine_log", "stripped_pine_log_top", "pine_planks"):
+        out.append((f"block/{name}", f"biomes and tree blocks/{name}"))
+    out += [("block/pine_needles", "biomes and tree blocks/pine_leaves"),
+            ("block/pine_needles_overlay", "biomes and tree blocks/pine_leaves_overlay"),
+            ("block/pine_sapling", "biomes and tree blocks/pine_sapling")]
     for table in (kitchen.TEXTURES, feasts.TEXTURES, menu.TEXTURES, rice.TEXTURES, soil.TEXTURES, garden.TEXTURES):
         for target, source in table.items():
             out.append((target, f"{FOOD}/{source}"))
@@ -74,8 +93,13 @@ def magic_imports():
     """(runtime path under assets/jugcraft, library path under Magic/) for every copied magic-collection file. Two slices
     may not import different files to one path."""
     merged = {}
-    for table in (concordance_ember.OWNER_FILES, concordance_trinkets.OWNER_FILES, encyclopedia.OWNER_FILES,
-                  concordance_rime.OWNER_FILES, concordance_strata.OWNER_FILES, concordance_rime_kit.OWNER_FILES):
+    for table in (jug_nouveau.OWNER_FILES, concordance_ee_equipment.OWNER_FILES, concordance_ee_machines.OWNER_FILES,
+                  concordance_ee_storage.OWNER_FILES, concordance_ee_expansion.OWNER_FILES,
+                  concordance_ee_artifacts.OWNER_FILES, concordance_workshops.OWNER_FILES,
+                  concordance_elemental_gear.OWNER_FILES, concordance_dark_matter.OWNER_FILES,
+                  concordance_alchemical_gear.OWNER_FILES, concordance_ember.OWNER_FILES,
+                  concordance_trinkets.OWNER_FILES, encyclopedia.OWNER_FILES, concordance_rime.OWNER_FILES,
+                  concordance_strata.OWNER_FILES, concordance_rime_kit.OWNER_FILES):
         for target, source in table.items():
             if merged.setdefault(target, source) != source:
                 raise SystemExit(f"tools/owner_art.py: two slices import different files to {target}")

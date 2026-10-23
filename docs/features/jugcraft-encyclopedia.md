@@ -1,5 +1,7 @@
 # Jugcraft Encyclopedia
 
+**16 October local UI revision:** the owner requested a constellation composer with no typing and a simple illustrated field guide. See the [current redesign record](constellation-and-field-guide.md); earlier screen descriptions below document the prior implementation.
+
 Status: owner-approved feature direction, recorded 6 October 2026. First slice implemented for Concordance Chunk A
 (unit 4: both ways in, one plain screen, and the First Light route; [its record](arcane-concordance-first-route.md)); integrated with the community technology/magic route directory from PR #322. The route canvas, search and quests remain future work.
 Proposal issue: direct owner request during progression planning; this feature is independently documented and tracked in the [TODO list](../TODO.md#jugcraft-encyclopedia).
@@ -188,3 +190,11 @@ edge beside a scroll bar: that is the scrolling. In that run's previews `_home_e
 its link whole, "Open Magic: the Arcane Concordance ›" wrapped onto two lines, and `_home_scale1` both cards whole with
 each link on one line and no scroll bar to be seen. The
 stacked layout (a GUI narrower than 384) is not exercised. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
+
+**Merge note (23 October 2026).** Merging main f904df3fd (#415's book-style guides directory) into Chunk B replaced
+these cards; the card fix (`d22a55830`), its `check_mod_data` check and the `_home_end`/`_home_scale1` shots were dropped
+in the merge, and the paragraph above is history. On main's directory the home is two title tabs and a route's overview
+is a wrapped paragraph in a scrolling page; `check_encyclopedia_routes` now requires that scrolling page and paragraph.
+Known limit, calculated and not yet seen in a screenshot: the home tab (`BookArt.Tab`) cuts its label with "…", and at
+CI's 427×240 GUI it leaves 134 pixels for a title, so "Magic: the Arcane Concordance" (about 158 by the font's widths)
+will be cut there.

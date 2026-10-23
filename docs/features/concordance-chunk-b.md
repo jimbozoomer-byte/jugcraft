@@ -852,6 +852,7 @@ and the dossier's read-only fact; in `weapons`, only the FROST case's call to `R
     to "Open Magic: the Arcane Concorda…", and the body's last line is clipped above it (the Machinery card's body also
     stops mid-line). First recorded as a Chunk A defect; the screen is #322's guide directory
     (`EncyclopediaRoutesScreen`), on main through #352, not Chunk A's. Fixed in unit 5 (`d22a55830`, B-P58).
+    Merging main f904df3fd (#415's book-style guides directory) on 23 October 2026 replaced these cards; see [Known defects and limits](#known-defects-and-limits).
   - The Water Bangle's shot (`jugcraft_rime_kit_bangle_brace`, run 38549876709, shard 4): the advancement toasts the
     test's research grant raises cover the top right, so Braced's icon is not seen. `ConcordanceWinterClientGameTests`
     should clear the toasts before its HUD shots, as `ConcordanceRimeStrataClientGameTests` does. A unit 4 test defect;
@@ -880,6 +881,9 @@ it passed in CI (run 38591108210); what the shots show is under
   `jugcraft_encyclopedia_home_scale1`. At CI's size `jugcraft_encyclopedia_home` will still show text cut at the
   scrolling body's lower edge beside a scroll bar: that is the scrolling, and `_home_end` and the logged numbers are the
   evidence.
+  Merging main f904df3fd (#415's book-style guides directory) on 23 October 2026 replaced these cards; the card fix
+  (`d22a55830`), its `check_mod_data` check and the `_home_end`/`_home_scale1` shots were dropped in the merge, and
+  `RouteCard`, `homeCards()` and `HomeCard` no longer exist; see [Known defects and limits](#known-defects-and-limits).
 - **The Yeti charging into a column and reeling** (`YetiKingClientGameTests`): in the real Glacier Hall, his Avalanche
   Charge baited into the north-west ice column, running (`jugcraft_yeti_king_charge_column`) and reeling at z 28.8
   (`jugcraft_yeti_king_reeling`); the column is checked as the real player's deed.
@@ -931,7 +935,7 @@ it passed in CI (run 38591108210); what the shots show is under
   knockback. As built in unit 5: `YetiKingEntity.push` is an instance method that every push of his goes through
   (`Brace.spend`, then `braced` for the caster's deed), `YetiKingEntity.RIMEBOUND_WINDUP` and `rimeHold()` (a read-out
   for tests); `Rime.column`; and, outside Chunk B's own code, `EncyclopediaRoutesScreen.homeCards()` and `HomeCard` (a
-  read-out for tests; B-11). Unit 3's interfaces for later units: `Brace.spend`, `Brace.caster`, `Rimebind.RIME_THAW`
+  read-out for tests; B-11; dropped when merging main f904df3fd, #415, on 23 October 2026). Unit 3's interfaces for later units: `Brace.spend`, `Brace.caster`, `Rimebind.RIME_THAW`
   and `Rime.MAX_HOLD_TICKS`. Unit 4's: `Frostward.STATUS`, `Frostward.FROSTWARD` and `Frostward.warded`;
   `RimeGear.holdTicks` (which `Rime.preserve` asks), `RimeGear.bangle` and `RimeGear.brace`; `Rimebind.restrains`
   (restraint's targets, shared with `Rime.frostBoon`); `Rime.frostBoon` and its key, `Rime.KEY_ELECTIVE` since unit 5
@@ -1047,6 +1051,7 @@ B-05 cannot start on its own.
     scrolling body's lower edge; `_home_end` and the logged numbers are the evidence. The stacked layout (a GUI narrower
     than 384) is not exercised. The Magic title's width is estimated from glyph widths, not read; if the title check
     fails, the fallback is to wrap it into the card's top. The title check passed (run 38591108210).
+    Merging main f904df3fd (#415's book-style guides directory) on 23 October 2026 replaced these cards; see [Known defects and limits](#known-defects-and-limits).
   - *The client step's crash point* (z 28.8) relies on the hall generator's geometry, not the template file; if it
     fails, the check may need a band (28.8 to 29.5). The exact check passed (run 38591108210).
   - *Shard time:* client shard 3 took 53m33s and 53m06s in runs 38519234934 and 38543250503 against the job's
@@ -1240,7 +1245,7 @@ test class):
   `scripts/check_repository.py`, `tools/owner_art.py --check` and `git diff --check` pass. `./gradlew build` and
   `./gradlew runClientGameTest` run in CI only.
 - Unit 5's own fixes: the two on B-11's list, each found in the units' CI and each seen fixed in this run: the
-  encyclopedia home's route cards (`d22a55830`, B-P58) and the advancement toasts cleared before the Water Bangle's
+  encyclopedia home's route cards (`d22a55830`, B-P58; dropped when merging main f904df3fd, #415, on 23 October 2026) and the advancement toasts cleared before the Water Bangle's
   shot (`fc9b404dd`); and the unit review's text fixes (`25644502a`: what lessens his throws and which wind-up a binding
   holds, in the codex, the player guide and the records). The candidate's CI found no fault in unit 5.
 
@@ -1286,7 +1291,7 @@ the evidence of behaviour.
 | The foci and bangle in their slots | `jugcraft_rime_kit_slots` (4) | The survival inventory: the paper doll in the player's own skin (the test took the armour off before), the four armour slots empty, and to the doll's right a column of four slots showing grey outline icons, the last the offhand's shield. No item shows in any of them, so the shot shows neither the Focus of Water nor the Water Bangle, as the record warned Trinkets may draw one slot of a group until it is hovered. `wearKit`'s check and the focus's hold (`FOCUS_HOLD_TICKS`) remain the proof that both are slotted |
 | The Yeti charging into a column and reeling | `jugcraft_yeti_king_charge_column`, `jugcraft_yeti_king_reeling` (2) | Running: from the lake's edge, blue ice in the foreground, he is small and grey on the snow left of the centre, leaning into his run; the north-west column rises to the vault right of the centre, with the sandy ramp at the right edge and icicles hanging from the vault. Reeling: closer and low, he stands grey and leaning beside the column's stepped blue foot, with small orange star-shaped sparks above him (his stun's crit particles, which the code sends 3.6 blocks above him) and a few snowflakes; at this size his head and crown cannot be made out. The test's checks (the crash at (26.5, 28.8), the player's deed) passed |
 | The two dossiers (useful) | `jugcraft_encyclopedia_expedition_glacier_hall`, `_cinder_kiln` (3) | Not seen: shard 3 took 1124 shots, and the part of its log that could be read (its last 1500 lines) holds only shots 644 to 1123. The test, which scrolls Expeditions to each heading and checks it is shown, passed |
-| The home's route cards (B-P58) | `jugcraft_encyclopedia_home`, `_home_end`, `_home_scale1` (1) | `_home`: both cards' text runs to the scrolling body's lower edge and is cut there, with a scroll bar at the right: the scrolling, as expected. `_home_end`: scrolled to the end, each card's last paragraph and link are whole, "Open Machinery and Technology ›" on one line and "Open Magic: the Arcane Concordance ›" wrapped onto two. `_home_scale1`: both cards whole, with no scroll bar to be seen, each with its three paragraphs and its link on one line |
+| The home's route cards (B-P58) | `jugcraft_encyclopedia_home`, `_home_end`, `_home_scale1` (1) | `_home`: both cards' text runs to the scrolling body's lower edge and is cut there, with a scroll bar at the right: the scrolling, as expected. `_home_end`: scrolled to the end, each card's last paragraph and link are whole, "Open Machinery and Technology ›" on one line and "Open Magic: the Arcane Concordance ›" wrapped onto two. `_home_scale1`: both cards whole, with no scroll bar to be seen, each with its three paragraphs and its link on one line. Merging main f904df3fd (#415's book-style guides directory) on 23 October 2026 replaced these cards; see [Known defects and limits](#known-defects-and-limits). |
 
 The same shard's `jugcraft_encyclopedia_technology` and `_magic` show the top of each guide, its milestones' second row
 cut at the scrolling body's lower edge beside a scroll bar; the chapter lists lie below and are not in view.
@@ -1321,7 +1326,15 @@ shows a hold); whether the longer codex pages fit Modonomicon's pages (no audit 
   `_magic` previews show only the top of each page (#322's code, outside Chunk B).
 - Outside Chunk B, found by this run: the nuclear site clash on main (`reactorBuildingsKeepRadiationIn` and
   `mediumPlantRelayRoomReadsTheReactor` at one offset) and the intermittent `PeepoDeliveryClientTests.foodBreak`
-  (open #357).
+  (#357, since merged into main and this branch, fixes it).
+- **The home's route cards merged out (23 October 2026):** merging main f904df3fd (#415's book-style guides directory)
+  replaced the B-11 home cards; the card fix (`d22a55830`), its `check_mod_data` check and the `_home_end` and
+  `_home_scale1` shots were dropped in the merge. On main's directory the home is two title tabs, and a route's overview
+  is a wrapped paragraph in a scrolling page, which `check_encyclopedia_routes` now requires. Calculated, not yet seen
+  in a screenshot: the home tab (`BookArt.Tab`) cuts its label with "…", and at CI's 427×240 GUI it leaves 134 pixels
+  for a title, so "Magic: the Arcane Concordance" (about 158 by the font's widths) will be cut there. The dossier
+  test (`EncyclopediaClientGameTests`) now opens Expeditions with `showPage` and each dossier's section with
+  `showSectionContaining` before scrolling to it, as main's sectioned book requires.
 
 ### Where to resume
 
@@ -1379,7 +1392,7 @@ on unit 1's dossiers ([its record](arcane-concordance-winter.md#checks-run-for-t
 and screenshots; its bangle shot was covered by toasts, on B-11's list, and since unit 5 shows Braced). Unit 5 (B-09 and B-11), in four commits, its
 records and the review's fixes, passed in run 38591108210: Brace and Rimebind against the Yeti King (`25be6e227`); his
 column as Rimekeeping's elective cold work, one kind with the Frost boon's slow (`9cb934ec7`, B-P56); the encyclopedia
-home's route cards shown whole (`d22a55830`); and the client evidence, with the bangle shot's toasts cleared
+home's route cards shown whole (`d22a55830`; dropped when merging main f904df3fd, #415, on 23 October 2026); and the client evidence, with the bangle shot's toasts cleared
 (`fc9b404dd`); see B-09 and B-11 as built and its evidence section. Next: the owner's checkpoint, reported to the owner
 and not kept here, which asks about movement feel, difficulty (B-P59), the spell bar's place (B-P60) and the next
 school (Chunk C or Tempest). Open for the owner: B-P2 to B-P5; B-P10; B-P30 to B-P34 and "Stonebrace" as Brace's
@@ -1454,7 +1467,7 @@ A-D14 is Superseded and A-D16 Open (`concordance-chunk-a.md:164-181`).
 | B-P55 | 14 October 2026 | The Brace deed needs no earlier part; its caster must be in his fight and able to fight him; the key is `brace <braced player> <game time>`, so two pushes in one tick are one deed; a Brace on oneself, the Water Bangle's (nobody's cast) and one whose caster a relog forgot credit no one. The dossier shows the deed count (`share.deeds()` in `LairDossiers.share`), so Brace deeds raise the number shown there; that is cosmetic, as qualifying is a yes or no (`Encounter.Share.qualifies`) | Proposed (built in unit 5; `aBraceOnAFriendIsTheCastersDeed` passed in CI, run 38591108210) | B-09 |
 | B-P56 | 14 October 2026 | Rimekeeping's electives share one key, `elective` (Java `Rime.KEY_ELECTIVE`; unit 4's `frost_boon`, renamed before any release): a Frost boon arm's slow (B-P53), and the Yeti King's charge broken on an ice column, recorded for the player its column deed names whenever the deed's conditions hold (`YetiKingEntity.baited` → `Rime.column`), gated by Rimekeeping understood (the practice's gate, as B-P53; 02:137 says only "elective field evidence") and the Concordance switch. Together they stand for at most one kind: after either the other adds nothing, and with Rimebind's restraint they make two, so every mastery needs a Preserve, so the Alembic Arts, and the bench (or someone's notes) stays mandatory, as unit 3's review asked, and the progression graph's `rimework` route still asks for the Alembic Arts. The alternative, for the owner: each elective its own kind, which lets restraint and the two electives master Rimekeeping without Preserve or the Alembic Arts. A world saved by unit 4's unmerged build keeps a `frost_boon` key as a kind of its own (not migrated) | Proposed (built in unit 5; `check_rime`, `check_winter_links` and `YetiKingGameTests.aColumnIsElectiveRimeworkForItsBaiterOnce`, passed in CI, run 38591108210) | B-05, B-09, B-10 |
 | B-P57 | 14 October 2026 | The texts name the counters: the Glacier Hall dossier's credit line (bracing a friend who then takes one of his throws), an "Against the Yeti King" page in the Braced and Rimebound codex entries, and the column in the Rimekeeping entry's Understood page and the Rimekeeper advancement; the player guide's Yeti advice by hand | Proposed (built in unit 5) | B-02, B-09 |
-| B-P58 | 14 October 2026 | The encyclopedia home's route cards are sized to their whole overview and link; the link wraps; they scroll in the shared `ComposerScroll` when the window is too small; Tab shows a card from its top; larger windows unchanged | Proposed (built in unit 5, `d22a55830`; `EncyclopediaRoutesClientGameTests` passed in CI, run 38591108210) | B-11 |
+| B-P58 | 14 October 2026 | The encyclopedia home's route cards are sized to their whole overview and link; the link wraps; they scroll in the shared `ComposerScroll` when the window is too small; Tab shows a card from its top; larger windows unchanged | Proposed (built in unit 5, `d22a55830`; `EncyclopediaRoutesClientGameTests` passed in CI, run 38591108210). Superseded: merging main f904df3fd (#415's book-style guides directory) on 23 October 2026 replaced the cards and dropped `d22a55830` | B-11 |
 | B-P59 | 14 October 2026 | Four or more players: keep the party scale and the game's 1024 cap on a creature's health (the Yeti King asks 1050, the Cinder Tyrant 1100) until four people have fought them. The alternative, 2.3 times (966 and 1012), is a tuning change made only on the owner's word, with a test | Proposed (for the owner's checkpoint: difficulty) | B-01 |
 | B-P60 | 14 October 2026 | The spell bar's place: Jugcraft changes no Spell Engine configuration now. The recommendation for the owner: a Jugcraft default that keeps 9 slots on screen; the alternative: each player's own Spell Engine HUD setting ([unit 3's record](arcane-concordance-rime-strata.md#rollout-and-open-questions)) | Proposed (for the owner; named in the checkpoint's pointer line) | B-06 |
 

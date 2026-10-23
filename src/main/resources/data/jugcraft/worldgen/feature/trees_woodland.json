@@ -7,12 +7,32 @@
       "feature": "minecraft:fancy_oak_leaf_litter"
     },
     {
-      "chance": 0.1,
+      "chance": 0.05333333333333334,
+      "feature": "jugcraft:hawthorn_bush_checked"
+    },
+    {
+      "chance": 0.04929577464788733,
       "feature": "jugcraft:oak_bush_checked"
     },
     {
       "chance": 0.03,
       "feature": "minecraft:fallen_oak_tree"
+    },
+    {
+      "chance": 0.06109201985490645,
+      "feature": "jugcraft:elder_checked"
+    },
+    {
+      "chance": 0.06506710044733631,
+      "feature": "jugcraft:holly_checked"
+    },
+    {
+      "chance": 0.0556763810352327,
+      "feature": "jugcraft:walnut_checked"
+    },
+    {
+      "chance": 0.014739751266697373,
+      "feature": "jugcraft:large_walnut_checked"
     }
   ]
 }

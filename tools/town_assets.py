@@ -119,14 +119,16 @@ def assets(assets_dir, write, lang):
     tex = assets_dir / "textures" / "block"
     tex.mkdir(parents=True, exist_ok=True)
     for name, img in textures().items():
-        img.save(tex / f"{name}.png", optimize=True)
+        img.save(tex / f"{name}.png", optimize=False, compress_level=0)
     write(assets_dir / "models" / "block" / "atm.json", model())
     rotations = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 270}}
     write(assets_dir / "blockstates" / "atm.json", {"variants": {
         f"facing={facing}": {"model": rid("block/atm"), **rot} for facing, rot in rotations.items()}})
     write(assets_dir / "items" / "atm.json", {"model": {"type": "minecraft:model", "model": rid("block/atm")}})
     lang.update(town_lang.lang())
+    lang["entity.jugcraft.town_guard_mecha"] = "City Guard Walker"
 
 
-USABLE = ["#minecraft:wooden_doors", "#minecraft:fence_gates", "#minecraft:buttons", "minecraft:lever",
-          "minecraft:crafting_table", "#minecraft:beds", rid("atm")]
+USABLE = ["#minecraft:doors", "#minecraft:trapdoors", "#minecraft:fence_gates", "#minecraft:buttons", "minecraft:lever",
+          "minecraft:crafting_table", "#minecraft:beds", "minecraft:bell", "minecraft:enchanting_table",
+          "minecraft:ender_chest", rid("atm")]

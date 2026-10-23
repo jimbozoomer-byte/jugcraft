@@ -36,8 +36,6 @@ import org.jspecify.annotations.Nullable;
  * numbers: everything that fires, loads or shows the gun reads them through {@link #spec(ItemStack)}.
  */
 public class GunItem extends Item implements GeoItem {
-	/** The ammunition gauge's colour: brass. */
-	private static final int BAR_COLOR = 0xFFD8A848;
 	private final String name;
 	private final GunSpec spec;
 	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -192,9 +190,20 @@ public class GunItem extends Item implements GeoItem {
 		return InteractionResult.CONSUME;
 	}
 
-	/** Whether this is a gun held in one hand (slice 10G, {@link JugcraftGuns#ONE_HANDED}). */
+	/**
+	 * Whether this is a gun held in one hand (slice 10G, {@link JugcraftGuns#ONE_HANDED}); not one held in both as a
+	 * carbine (slice 13D, {@link #carbine}).
+	 */
 	public static boolean oneHanded(ItemStack stack) {
-		return stack.getItem() instanceof GunItem gun && JugcraftGuns.ONE_HANDED.contains(gun.name);
+		return stack.getItem() instanceof GunItem gun && JugcraftGuns.ONE_HANDED.contains(gun.name) && !carbine(stack);
+	}
+
+	/**
+	 * Whether this is a one-handed gun held in both hands as a carbine, a stock fitted to it (slice 13D,
+	 * {@link JugcraftGuns#CARBINES}): it plays the owner's carbine_ animations.
+	 */
+	public static boolean carbine(ItemStack stack) {
+		return stack.getItem() instanceof GunItem gun && JugcraftGuns.CARBINES.contains(gun.name) && inSlot(stack, "stock") != null;
 	}
 
 	/**
@@ -232,19 +241,10 @@ public class GunItem extends Item implements GeoItem {
 		return !(oldStack.is(this) && newStack.is(this));
 	}
 
+	/** Ammunition is shown by the held-gun HUD, never as item durability. */
 	@Override
 	public boolean isBarVisible(ItemStack stack) {
-		return true;
-	}
-
-	@Override
-	public int getBarWidth(ItemStack stack) {
-		return Math.min(13, Math.round(13.0F * loaded(stack) / spec(stack).capacity()));
-	}
-
-	@Override
-	public int getBarColor(ItemStack stack) {
-		return BAR_COLOR;
+		return false;
 	}
 
 	@Override
@@ -261,8 +261,8 @@ public class GunItem extends Item implements GeoItem {
 		tooltip.accept(Component.translatable("tooltip.jugcraft.guns.stats", String.format(Locale.ROOT, "%.1f", fitted.damage()),
 				fitted.pellets(), String.format(Locale.ROOT, "%.1f", 20.0F / fitted.interval()), fitted.range())
 				.withStyle(ChatFormatting.BLUE));
-		if (JugcraftGuns.ONE_HANDED.contains(name)) {
-			// Slice 10G: it pairs with another in the other hand.
+		if (oneHanded(stack)) {
+			// Slice 10G: it pairs with another in the other hand (slice 13D: not as a carbine).
 			tooltip.accept(Component.translatable("tooltip.jugcraft.guns.one_handed").withStyle(ChatFormatting.DARK_GREEN));
 		}
 		int charge = JugcraftGuns.charge(this);
