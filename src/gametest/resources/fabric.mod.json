@@ -146,6 +146,7 @@
       "io.github.jimbozoomer.jugcraft.test.BlueprintGameTests",
       "io.github.jimbozoomer.jugcraft.test.PixelHollowsGameTests",
       "io.github.jimbozoomer.jugcraft.test.SeasonGameTests",
+      "io.github.jimbozoomer.jugcraft.test.SeasonalBiomeGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlpineGameTests",
       "io.github.jimbozoomer.jugcraft.test.BiomeGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownGameTests",

@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.season.SeasonalKinds;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags;
 import net.minecraft.core.BlockPos;
@@ -103,7 +104,7 @@ public final class Wisps {
 		if (!level.getBlockState(spot).isAir() || !openSky(level, spot)) {
 			return false;
 		}
-		if (level.getBiome(spot).is(ConventionalBiomeTags.IS_SWAMP)) {
+		if (SeasonalKinds.is(level.getBiome(spot), ConventionalBiomeTags.IS_SWAMP)) {
 			return true;
 		}
 		for (BlockPos pos : BlockPos.betweenClosed(spot.offset(-CORN_RADIUS, -4, -CORN_RADIUS), spot.offset(CORN_RADIUS, 0, CORN_RADIUS))) {

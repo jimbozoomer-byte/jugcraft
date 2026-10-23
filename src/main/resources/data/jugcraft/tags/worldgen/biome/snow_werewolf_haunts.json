@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#c:is_snowy"
+    "#c:is_snowy",
+    "#jugcraft:seasonal_kinds/is_snowy"
   ]
 }

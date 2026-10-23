@@ -1114,11 +1114,13 @@ BROOMSTICK = {"item": "flying_broomstick", "display": "Flying Broomstick", "char
 WEREWOLF = {"entity": "werewolf", "display": "Werewolf", "size": [0.9, 2.4], "hide_factor": 0.5, "silver_factor": 2.5,
             "regen_ticks": 40, "silver_wound_ticks": 100, "shun_ticks": 200, "spawn_ticks": 200, "spawn_chance": 0.3,
             "min_distance": 24, "max_distance": 40, "near_cap": 2, "level_cap": 8, "ward_reach": 6,
-            "haunts": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:grove"],
+            # The newer biomes (tools/seasonal_kinds.py) are in no vanilla tag: their forests and taigas by their kinds.
+            "haunts": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:grove", "#jugcraft:seasonal_kinds/is_forest", "#jugcraft:seasonal_kinds/is_taiga"],
             # Which kind comes out: a snow werewolf in snowy biomes; a shadow werewolf `shadow_haunt_chance` of the time
             # in its haunts and `shadow_chance` elsewhere; otherwise a brown one.
-            "snow_haunts": ["#c:is_snowy"],
-            "shadow_haunts": ["minecraft:dark_forest", "minecraft:pale_garden", "jugcraft:gloomweald", "jugcraft:ghost_forest"],
+            "snow_haunts": ["#c:is_snowy", "#jugcraft:seasonal_kinds/is_snowy"],
+            "shadow_haunts": ["minecraft:dark_forest", "minecraft:pale_garden", "jugcraft:gloomweald", "jugcraft:ghost_forest",
+                              "#jugcraft:seasonal_kinds/is_spooky"],
             "shadow_chance": 0.08, "shadow_haunt_chance": 0.5,
             # Three kinds, three tiers of danger: their attributes, the experience they give and what they drop.
             "kinds": {
@@ -1162,7 +1164,7 @@ SQUIRRELS = {"entity": "squirrel", "display": "Squirrel", "health": 6, "speed": 
              "spawn_chance": 0.25, "min_distance": 20, "max_distance": 40, "near_cap": 6, "level_cap": 30, "seek_range": 10,
              "bury_ticks": 200, "sapling_chance": 0.25, "sapling_space": 3, "acorn_chance": 0.05,
              "acorn_leaves": ["oak_leaves", "dark_oak_leaves"], "acorn": "acorn", "acorn_display": "Acorn", "roasted": "roasted_acorns",
-             "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga"],
+             "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", "#jugcraft:seasonal_kinds/is_forest", "#jugcraft:seasonal_kinds/is_taiga"],
              "food": ["jugcraft:acorn", "jugcraft:chestnut", "jugcraft:roasted_chestnuts", "jugcraft:pine_nuts", "jugcraft:roasted_pine_nuts", "jugcraft:ecology_walnut", "jugcraft:roasted_walnuts"]}
 # The Pumpkling (Pumpkling): a hand-carved pumpkin woken by a spark into a pet; follows past `follow_start`, stops at
 # `follow_stop`, comes to its owner past `teleport`; treats heal `treat_heal`.
@@ -2018,7 +2020,8 @@ TURKEYS = {"entity": "turkey", "display": "Wild Turkey", "health": 8, "speed": 0
            "strut_range": 6, "strut_ticks": 80, "strut_chance": 200, "egg_min": 6000, "egg_max": 12000,
            "spawn_ticks": 400, "spawn_chance": 0.25, "min_distance": 24, "max_distance": 48, "flock": [3, 5], "near_cap": 10,
            "near_range": 64, "level_cap": 40, "habitat_tag": "jugcraft:turkey_habitat",
-           "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow"],
+           "habitat": ["#minecraft:is_forest", "#minecraft:is_taiga", "minecraft:plains", "minecraft:sunflower_plains", "minecraft:meadow",
+                       "#jugcraft:seasonal_kinds/is_forest", "#jugcraft:seasonal_kinds/is_taiga", "#jugcraft:seasonal_kinds/is_plains"],
            "table": "entities/turkey", "feathers": [1, 3], "raw": "raw_turkey", "raw_food": [3, 0.3], "roast": "roast_turkey",
            "roast_display": "Roast Turkey", "slice": "turkey_slice", "servings": 6, "serving": [3, 0.6]}
 

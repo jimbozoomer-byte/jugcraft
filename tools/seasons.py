@@ -1,7 +1,8 @@
 """Seasons: which biomes change with the server's date, and the seasonal snow block.
 
 #jugcraft:has_seasons: grass and foliage change colour (client/SeasonColors, season/SeasonPalette). Every
-biome with four seasons: temperate grassland, forest, taiga, hills and swamp. Not the tropics (jungle,
+biome with four seasons: temperate grassland, forest, taiga, hills and swamp, Jugcraft's own (tools/biomes.py "seasons")
+and the newer collections' (tools/seasonal_kinds.py: the landscape biomes and the Alpine Spawn). Not the tropics (jungle,
 mangrove swamp), the arid lands (desert, savanna, badlands), the always-frozen biomes (snowy plains, ice spikes,
 the peaks, grove), oceans, beaches, caves or rivers (a river runs through jungles and deserts too, and its banks
 would turn autumn-gold there). The pale garden keeps its fixed grey; birch, spruce, cherry and
@@ -18,14 +19,16 @@ BIOMES = [
     "minecraft:taiga", "minecraft:old_growth_pine_taiga", "minecraft:old_growth_spruce_taiga",
     "minecraft:windswept_forest", "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills",
     "minecraft:swamp",
-    "jugcraft:alpine_spawn",
-] + [f"jugcraft:{name}" for name, info in __import__("biomes").BIOMES.items() if info["seasons"]]
+] + [f"jugcraft:{name}" for name, info in __import__("biomes").BIOMES.items() if info["seasons"]] \
+    + __import__("seasonal_kinds").seasonal_biomes()
 
 TAG = "jugcraft:has_seasons"
 
-# Jugcraft biomes with mild winters ("winter_snow": False in tools/biomes.py) keep their seasonal colours but no snow.
-WINTER_SNOW = [biome for biome in BIOMES
-               if __import__("biomes").BIOMES.get(biome.removeprefix("jugcraft:"), {}).get("winter_snow", True)] + ["minecraft:pale_garden"]
+# Jugcraft biomes with mild winters ("winter_snow": False in tools/biomes.py, or mild() in tools/seasonal_kinds.py) keep
+# their seasonal colours but no snow.
+_MILD = {biome for biome, info in __import__("seasonal_kinds").table().items() if not info["winter_snow"]}
+WINTER_SNOW = [biome for biome in BIOMES if biome not in _MILD
+               and __import__("biomes").BIOMES.get(biome.removeprefix("jugcraft:"), {}).get("winter_snow", True)] + ["minecraft:pale_garden"]
 
 WINTER_SNOW_TAG = "jugcraft:has_winter_snow"
 

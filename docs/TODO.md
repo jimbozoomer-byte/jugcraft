@@ -60,7 +60,8 @@ Do not promote each small addition separately. [Release sequence](SERVER_RELEASE
 - [x] Replace idle airborne hovering with flight/landing/rest behavior.
 - [x] Pass local validation: all 2,233 required server GameTests, 11 town architecture checks and repository checks.
 - [ ] Owner visual playtest and hosted multiplayer check before deploying this city revision.
-- [ ] **MUST: audit seasonal content against every newer biome collection** (landscape, ecology/grove, caves and custom dimensions). Check season eligibility, foliage/grass tint, temperature/snow/rain, crop growth, wildlife spawns, Halloween/December encounters and town decorations. Add explicit biome tags/rules and regressions where missing; preserve earned seasonal items and existing builds. Determine which systems need adaptation before deciding on a larger seasonal rewrite.
+- [x] **MUST: audit seasonal content against every newer biome collection** (landscape, ecology/grove, caves and custom dimensions). Check season eligibility, foliage/grass tint, temperature/snow/rain, crop growth, wildlife spawns, Halloween/December encounters and town decorations. Add explicit biome tags/rules and regressions where missing; preserve earned seasonal items and existing builds. Determine which systems need adaptation before deciding on a larger seasonal rewrite. [Audit, kinds and what is left](features/seasonal-biome-audit.md).
+- [ ] Owner decision: fold the newer biomes into the conventional and vanilla biome tags (Menagerie wildlife, the other wild crops, ores, raider camps, structures), or keep them to the seasonal kinds. [Open question](features/seasonal-biome-audit.md#rollout-and-open-questions).
 - [ ] Add a separately versioned migration for future Styx observatory-district redesigns and any town footprint expansion; core-town upgrades must not regenerate those areas.
 
 ## Overnight integration — October 21

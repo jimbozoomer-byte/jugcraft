@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:landscape_coniferous_forest",
+    "jugcraft:landscape_redwood_forest",
+    "jugcraft:landscape_snowy_coniferous_forest",
+    "jugcraft:landscape_birch_taiga",
+    "jugcraft:landscape_fir_clearing",
+    "jugcraft:landscape_siberian_grove",
+    "jugcraft:landscape_siberian_taiga",
+    "jugcraft:landscape_yellowstone",
+    "jugcraft:landscape_yosemite_cliffs",
+    "jugcraft:landscape_yosemite_lowlands",
+    "jugcraft:landscape_alpine_grove",
+    "jugcraft:landscape_snowy_fir_clearing",
+    "jugcraft:landscape_snowy_shield"
+  ]
+}

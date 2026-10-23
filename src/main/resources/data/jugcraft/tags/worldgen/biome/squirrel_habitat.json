@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "#minecraft:is_forest",
-    "#minecraft:is_taiga"
+    "#minecraft:is_taiga",
+    "#jugcraft:seasonal_kinds/is_forest",
+    "#jugcraft:seasonal_kinds/is_taiga"
   ]
 }

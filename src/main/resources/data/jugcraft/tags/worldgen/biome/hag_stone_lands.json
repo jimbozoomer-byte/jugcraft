@@ -5,6 +5,7 @@
     "minecraft:swamp",
     "minecraft:mangrove_swamp",
     "jugcraft:floodplain",
-    "jugcraft:muskeg"
+    "jugcraft:muskeg",
+    "#jugcraft:seasonal_kinds/is_swamp"
   ]
 }

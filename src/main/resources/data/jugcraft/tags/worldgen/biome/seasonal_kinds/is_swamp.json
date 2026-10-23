@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:landscape_bayou",
+    "jugcraft:landscape_bog",
+    "jugcraft:landscape_marsh",
+    "jugcraft:landscape_wetland",
+    "jugcraft:landscape_ice_marsh",
+    "jugcraft:landscape_orchid_swamp"
+  ]
+}

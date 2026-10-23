@@ -5,6 +5,9 @@
     "#minecraft:is_taiga",
     "minecraft:plains",
     "minecraft:sunflower_plains",
-    "minecraft:meadow"
+    "minecraft:meadow",
+    "#jugcraft:seasonal_kinds/is_forest",
+    "#jugcraft:seasonal_kinds/is_taiga",
+    "#jugcraft:seasonal_kinds/is_plains"
   ]
 }

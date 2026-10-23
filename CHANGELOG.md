@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Seasonal biome audit (the newer biomes take the seasons and the fall)
+- **The newer biomes turn with the seasons.** 58 landscape biomes now change colour with the date, among them the maple woods, the Pumpkin Patch, the Ominous Woods, the Siberian taiga and the sakura groves. The Alpine Spawn already did, and still does. 54 of the 59 take winter snow with `seasons.snow=on`; the bayou, floodplain, lavender field, Mediterranean forest and redwood forest have mild winters. The tropics, dry lands, frozen lands and fixed-colour mystical biomes stay the same all year.
+- **The fall grows there and its creatures go there.** The 19 fall and Halloween wild patches grow in the newer biomes of their kinds: mandrake, gourds, cranberries, chestnut trees, heirloom pumpkins, mums, autumn mushrooms and wolfsbane. So do the graveyard flowers. Werewolves, squirrels, turkeys, the Howling Totem's ground, the Hag Stone and Halloween's swamp wisps reach them too. There are still no werewolves at the start.
+- Every Jugcraft biome is now classified (`tools/seasonal_kinds.py`), and the data audit fails on any new biome that is not, so later collections cannot miss the seasons. Only the seasonal and fall systems read the new kind tags; ores, raider camps, the Menagerie and the other wild crops are as they were, pending the owner's choice. Record: [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md).
+
 ### Unmerged: The Exchange (bank, markets, land and shares, in Jugs)
 - Press **N** (or `/jugcraft exchange`) for the **Exchange**, a walnut-and-brass ledger with seven tabs. It deals only in **Jugs**, the town's credit: no new currency.
 - **Banking and loans:** a one-time **starter loan** (100 Jugs) for new players, a flat 10% fee, due in 10 days. While you owe, a quarter of your market earnings repays the bank; overdue borrowers may sell but not buy. Paying off on time raises your credit limit.
