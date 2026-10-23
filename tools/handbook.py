@@ -1274,4 +1274,6 @@ def build():
     chapters.append(dict(title='Advanced Electronics and Automation', icon='jugcraft:advanced_chip', pages=advanced_electronics.GUIDE_PAGES))
     import starter_workshop
     chapters.insert(1, starter_workshop.chapter())
+    import storage_crates
+    chapters.insert(2, storage_crates.chapter())
     return {"chapters": chapters}
