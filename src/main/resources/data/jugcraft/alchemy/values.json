@@ -22032,6 +22032,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:old_grange_carbine": {
+      "numerator": 449,
+      "denominator": 4,
+      "source": "recipe jugcraft:old_grange_carbine"
+    },
     "jugcraft:olive_bush_sapling": {
       "numerator": 32,
       "denominator": 1,
