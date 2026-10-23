@@ -2758,7 +2758,7 @@
       "source": "recipe jugcraft:bonecarvers_pattern"
     },
     "jugcraft:bookcase": {
-      "numerator": 339,
+      "numerator": 371,
       "denominator": 8,
       "source": "recipe jugcraft:bookcase"
     },
@@ -3838,9 +3838,9 @@
       "source": "recipe jugcraft:cavern_burrowing_arrow"
     },
     "jugcraft:cavern_cake_layer": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 7,
+      "denominator": 4,
+      "source": "recipe jugcraft:survival_completion/cavern_cake_layer"
     },
     "jugcraft:cavern_candy_cane": {
       "numerator": 1,
@@ -7428,9 +7428,9 @@
       "source": "recipe jugcraft:cooling_tower_fill"
     },
     "jugcraft:copper_busbar": {
-      "numerator": 1,
+      "numerator": 128,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "recipe jugcraft:copper_busbar"
     },
     "jugcraft:copper_cable": {
       "numerator": 259,
@@ -8018,7 +8018,7 @@
       "source": "recipe jugcraft:dc_ground_detector"
     },
     "jugcraft:dc_switchboard": {
-      "numerator": 10795,
+      "numerator": 10323,
       "denominator": 8,
       "source": "recipe jugcraft:dc_switchboard"
     },
@@ -9388,12 +9388,12 @@
       "source": "recipe jugcraft:edg_battery_rack"
     },
     "jugcraft:edg_engine_panel": {
-      "numerator": 5683,
+      "numerator": 7955,
       "denominator": 8,
       "source": "recipe jugcraft:edg_engine_panel"
     },
     "jugcraft:edg_generator_panel": {
-      "numerator": 10795,
+      "numerator": 12879,
       "denominator": 8,
       "source": "recipe jugcraft:edg_generator_panel"
     },
@@ -10113,8 +10113,8 @@
       "source": "reference tag minecraft:logs"
     },
     "jugcraft:filing_cabinet": {
-      "numerator": 1024,
-      "denominator": 1,
+      "numerator": 9508,
+      "denominator": 9,
       "source": "recipe jugcraft:filing_cabinet"
     },
     "jugcraft:filing_cabinet_open": {
@@ -10123,8 +10123,8 @@
       "source": "recipe jugcraft:filing_cabinet_open"
     },
     "jugcraft:filing_cabinet_tall": {
-      "numerator": 768,
-      "denominator": 1,
+      "numerator": 7076,
+      "denominator": 9,
       "source": "recipe jugcraft:filing_cabinet_tall"
     },
     "jugcraft:filing_cabinet_tall_open": {
@@ -11498,7 +11498,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:h2_monitor": {
-      "numerator": 10795,
+      "numerator": 15923,
       "denominator": 8,
       "source": "recipe jugcraft:h2_monitor"
     },
@@ -11703,8 +11703,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:haunted_dining_chair": {
-      "numerator": 40,
-      "denominator": 1,
+      "numerator": 405,
+      "denominator": 8,
       "source": "recipe jugcraft:haunted_dining_chair"
     },
     "jugcraft:haunted_hayride": {
@@ -11978,8 +11978,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:herbal_pumpkling_seeds": {
-      "numerator": 37,
-      "denominator": 2,
+      "numerator": 9,
+      "denominator": 10,
       "source": "recipe jugcraft:herbal_pumpkling_seeds"
     },
     "jugcraft:herbal_pumpkling_spawn_egg": {
@@ -14688,7 +14688,7 @@
       "source": "recipe jugcraft:hv_chw_elbow"
     },
     "jugcraft:hv_chw_elbow_down": {
-      "numerator": 88,
+      "numerator": 84,
       "denominator": 1,
       "source": "recipe jugcraft:hv_chw_elbow_down"
     },
@@ -14698,8 +14698,8 @@
       "source": "recipe jugcraft:hv_chw_elbow_up"
     },
     "jugcraft:hv_chw_label_chwr": {
-      "numerator": 545,
-      "denominator": 8,
+      "numerator": 1089,
+      "denominator": 16,
       "source": "recipe jugcraft:hv_chw_label_chwr"
     },
     "jugcraft:hv_chw_label_chws": {
@@ -14733,7 +14733,7 @@
       "source": "recipe jugcraft:hv_chw_riser"
     },
     "jugcraft:hv_chw_tee": {
-      "numerator": 88,
+      "numerator": 84,
       "denominator": 1,
       "source": "recipe jugcraft:hv_chw_tee"
     },
@@ -14763,7 +14763,7 @@
       "source": "recipe jugcraft:hv_duct_elbow_down"
     },
     "jugcraft:hv_duct_elbow_up": {
-      "numerator": 384,
+      "numerator": 256,
       "denominator": 1,
       "source": "recipe jugcraft:hv_duct_elbow_up"
     },
@@ -14773,22 +14773,22 @@
       "source": "recipe jugcraft:hv_duct_hanger"
     },
     "jugcraft:hv_duct_label_filtered": {
-      "numerator": 513,
+      "numerator": 453,
       "denominator": 2,
       "source": "recipe jugcraft:hv_duct_label_filtered"
     },
     "jugcraft:hv_duct_label_oa": {
-      "numerator": 513,
-      "denominator": 2,
+      "numerator": 10777,
+      "denominator": 48,
       "source": "recipe jugcraft:hv_duct_label_oa"
     },
     "jugcraft:hv_duct_label_return": {
-      "numerator": 513,
-      "denominator": 2,
+      "numerator": 1797,
+      "denominator": 8,
       "source": "recipe jugcraft:hv_duct_label_return"
     },
     "jugcraft:hv_duct_label_supply": {
-      "numerator": 513,
+      "numerator": 453,
       "denominator": 2,
       "source": "recipe jugcraft:hv_duct_label_supply"
     },
@@ -14803,12 +14803,12 @@
       "source": "recipe jugcraft:hv_duct_riser_fd"
     },
     "jugcraft:hv_duct_riser_label_return": {
-      "numerator": 385,
-      "denominator": 2,
+      "numerator": 1541,
+      "denominator": 8,
       "source": "recipe jugcraft:hv_duct_riser_label_return"
     },
     "jugcraft:hv_duct_riser_label_supply": {
-      "numerator": 385,
+      "numerator": 389,
       "denominator": 2,
       "source": "recipe jugcraft:hv_duct_riser_label_supply"
     },
@@ -14883,7 +14883,7 @@
       "source": "recipe jugcraft:hv_plenum_top_outlet"
     },
     "jugcraft:hv_rad_monitor": {
-      "numerator": 10795,
+      "numerator": 12331,
       "denominator": 8,
       "source": "recipe jugcraft:hv_rad_monitor"
     },
@@ -15568,7 +15568,7 @@
       "source": "recipe jugcraft:ladder_tray"
     },
     "jugcraft:ladder_tray_bend": {
-      "numerator": 384,
+      "numerator": 160,
       "denominator": 1,
       "source": "recipe jugcraft:ladder_tray_bend"
     },
@@ -18793,7 +18793,7 @@
       "source": "recipe jugcraft:locker"
     },
     "jugcraft:locker_bench": {
-      "numerator": 620,
+      "numerator": 740,
       "denominator": 27,
       "source": "recipe jugcraft:locker_bench"
     },
@@ -22768,8 +22768,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:plant_display_wall": {
-      "numerator": 30889,
-      "denominator": 8,
+      "numerator": 740605,
+      "denominator": 128,
       "source": "recipe jugcraft:plant_display_wall"
     },
     "jugcraft:plant_map_screen": {
@@ -23018,8 +23018,8 @@
       "source": "recipe jugcraft:pocket_brewing_stand_pet"
     },
     "jugcraft:pocket_pet_cheetah": {
-      "numerator": 235520,
-      "denominator": 9,
+      "numerator": 78208,
+      "denominator": 3,
       "source": "recipe jugcraft:pocket_pet_cheetah"
     },
     "jugcraft:pocket_pet_chest": {
@@ -23168,8 +23168,8 @@
       "source": "recipe jugcraft:pocket_pet_menorah"
     },
     "jugcraft:pocket_pet_meta": {
-      "numerator": 235520,
-      "denominator": 9,
+      "numerator": 80896,
+      "denominator": 3,
       "source": "recipe jugcraft:pocket_pet_meta"
     },
     "jugcraft:pocket_pet_mickerson": {
@@ -23198,8 +23198,8 @@
       "source": "recipe jugcraft:pocket_nether_portal_pet"
     },
     "jugcraft:pocket_pet_ocelot": {
-      "numerator": 235520,
-      "denominator": 9,
+      "numerator": 78016,
+      "denominator": 3,
       "source": "recipe jugcraft:pocket_pet_ocelot"
     },
     "jugcraft:pocket_pet_pacman": {
@@ -23283,8 +23283,8 @@
       "source": "recipe jugcraft:pocket_snow_golem_pet"
     },
     "jugcraft:pocket_pet_spider": {
-      "numerator": 235520,
-      "denominator": 9,
+      "numerator": 78208,
+      "denominator": 3,
       "source": "recipe jugcraft:pocket_pet_spider"
     },
     "jugcraft:pocket_pet_sponge": {
@@ -23293,8 +23293,8 @@
       "source": "recipe jugcraft:pocket_sponge_pet"
     },
     "jugcraft:pocket_pet_squid": {
-      "numerator": 235520,
-      "denominator": 9,
+      "numerator": 77872,
+      "denominator": 3,
       "source": "recipe jugcraft:pocket_pet_squid"
     },
     "jugcraft:pocket_pet_sun": {
@@ -23488,7 +23488,7 @@
       "source": "recipe jugcraft:film_cushioned_housing"
     },
     "jugcraft:polymer_molding_press": {
-      "numerator": 1428,
+      "numerator": 1492,
       "denominator": 1,
       "source": "recipe jugcraft:polymer_molding_press"
     },
@@ -23523,8 +23523,8 @@
       "source": "recipe jugcraft:popcorn"
     },
     "jugcraft:popcorn_ball": {
-      "numerator": 4,
-      "denominator": 3,
+      "numerator": 1,
+      "denominator": 1,
       "source": "recipe jugcraft:popcorn_ball"
     },
     "jugcraft:porcelain_batch": {
@@ -23638,8 +23638,8 @@
       "source": "recipe jugcraft:ceramics_precision_bearing"
     },
     "jugcraft:precision_finisher": {
-      "numerator": 1428,
-      "denominator": 1,
+      "numerator": 2897,
+      "denominator": 2,
       "source": "recipe jugcraft:precision_finisher"
     },
     "jugcraft:precision_shaft": {
@@ -23958,7 +23958,7 @@
       "source": "recipe jugcraft:pyromaniacs_shoes"
     },
     "jugcraft:pyromaniacs_tunic": {
-      "numerator": 384,
+      "numerator": 368,
       "denominator": 1,
       "source": "recipe jugcraft:pyromaniacs_tunic"
     },
@@ -24843,8 +24843,8 @@
       "source": "recipe jugcraft:roasted_porcini"
     },
     "jugcraft:roasted_pumpkin_seeds": {
-      "numerator": 36,
-      "denominator": 1,
+      "numerator": 4,
+      "denominator": 5,
       "source": "recipe jugcraft:roasted_pumpkin_seeds"
     },
     "jugcraft:roasted_sunflower_seeds": {
@@ -25608,18 +25608,18 @@
       "source": "recipe jugcraft:sign_relay_row_a"
     },
     "jugcraft:sign_relay_row_b": {
-      "numerator": 236,
-      "denominator": 9,
+      "numerator": 809,
+      "denominator": 36,
       "source": "recipe jugcraft:sign_relay_row_b"
     },
     "jugcraft:sign_relay_row_c": {
-      "numerator": 236,
-      "denominator": 9,
+      "numerator": 665,
+      "denominator": 36,
       "source": "recipe jugcraft:sign_relay_row_c"
     },
     "jugcraft:sign_relay_row_d": {
-      "numerator": 236,
-      "denominator": 9,
+      "numerator": 665,
+      "denominator": 36,
       "source": "recipe jugcraft:sign_relay_row_d"
     },
     "jugcraft:signal_flare": {
@@ -25678,7 +25678,7 @@
       "source": "recipe jugcraft:silk_cocoon"
     },
     "jugcraft:silk_spool_stack": {
-      "numerator": 168,
+      "numerator": 27,
       "denominator": 1,
       "source": "recipe jugcraft:silk_spool_stack"
     },
@@ -25978,7 +25978,7 @@
       "source": "recipe jugcraft:solder_nugget"
     },
     "jugcraft:soldering_tool": {
-      "numerator": 132,
+      "numerator": 148,
       "denominator": 1,
       "source": "recipe jugcraft:starter_workshop/soldering_tool"
     },
@@ -26748,7 +26748,7 @@
       "source": "reference tag minecraft:saplings"
     },
     "jugcraft:stonemasons_chisel": {
-      "numerator": 260,
+      "numerator": 264,
       "denominator": 1,
       "source": "recipe jugcraft:stonemasons_chisel"
     },
@@ -27968,7 +27968,7 @@
       "source": "recipe jugcraft:toss_ring"
     },
     "jugcraft:training_screen": {
-      "numerator": 82175,
+      "numerator": 83743,
       "denominator": 128,
       "source": "recipe jugcraft:training_screen"
     },
@@ -28098,8 +28098,8 @@
       "source": "recipe jugcraft:tsc_nrc_desk"
     },
     "jugcraft:tsc_plan_file": {
-      "numerator": 2052,
-      "denominator": 1,
+      "numerator": 16420,
+      "denominator": 9,
       "source": "recipe jugcraft:tsc_plan_file"
     },
     "jugcraft:tsc_procedure_shelf": {
@@ -31003,8 +31003,8 @@
       "source": "reference"
     },
     "minecraft:cake": {
-      "numerator": 31,
-      "denominator": 1,
+      "numerator": 133,
+      "denominator": 4,
       "source": "recipe jugcraft:cavern_cake_from_cake_layer"
     },
     "minecraft:calcite": {
@@ -34538,9 +34538,9 @@
       "source": "recipe jugcraft:pumpkin_pie_from_heirloom_pumpkins"
     },
     "minecraft:pumpkin_seeds": {
-      "numerator": 36,
-      "denominator": 1,
-      "source": "recipe minecraft:pumpkin_seeds"
+      "numerator": 4,
+      "denominator": 5,
+      "source": "recipe jugcraft:household/slicing/pumpkin_seeds_from_pumpkin"
     },
     "minecraft:purple_banner": {
       "numerator": 292,
@@ -36078,7 +36078,7 @@
       "source": "recipe peepo_companion:magenta_companion_bed"
     },
     "peepo_companion:mob_transport_crate": {
-      "numerator": 48,
+      "numerator": 78,
       "denominator": 1,
       "source": "recipe peepo_companion:mob_transport_crate"
     },

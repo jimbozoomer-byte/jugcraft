@@ -1644,6 +1644,11 @@ def tags():
         tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{colour}_companion_bed")
     for block in ("wooden_stool", "lunch_crate", "lunch_cover"):
         tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{block}")
+    # Citrus belongs to acid extraction in the compact reactor. Other fermenters keep
+    # the broad crop tag; quantities alone must never choose the compact product.
+    for crop in tags.entries[("item", f"{MOD}:fermentable")]:
+        if crop not in {rid("lemon"), rid("orange")}:
+            tags.add("item", f"{MOD}:compact_fermentable", crop)
     tags.write()
 
 
@@ -1800,8 +1805,6 @@ def main():
     write(ASSETS / "handbook" / "en_us.json", book)
     import encyclopedia_routes
     write(ASSETS / "encyclopedia" / "en_us.json", encyclopedia_routes.build(book))
-    import recipe_view
-    write(ASSETS / "recipe_view.json", recipe_view.build())
     loot_tables()
     recipes()
     tags()
@@ -1828,6 +1831,9 @@ def main():
     walnut_data.reconcile(write)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
+    # Include finished server recipes after removing obsolete generated recipes.
+    import recipe_view
+    write(ASSETS / "recipe_view.json", recipe_view.build())
     RESOURCE_MANIFEST.write_text(json.dumps(sorted(WRITTEN_RESOURCES), indent=2) + "\n", encoding="utf-8")
 
 
