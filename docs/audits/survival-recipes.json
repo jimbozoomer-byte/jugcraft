@@ -126484,6 +126484,9 @@
         ],
         [
           "minecraft:black_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -127164,6 +127167,9 @@
         ],
         [
           "minecraft:blue_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -127320,6 +127326,9 @@
         ],
         [
           "minecraft:brown_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -128725,6 +128734,9 @@
         ],
         [
           "minecraft:cyan_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -130543,6 +130555,9 @@
         ],
         [
           "minecraft:gray_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -130657,6 +130672,9 @@
         ],
         [
           "minecraft:green_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -131451,6 +131469,9 @@
         ],
         [
           "minecraft:light_blue_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -131565,6 +131586,9 @@
         ],
         [
           "minecraft:light_gray_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -131679,6 +131703,9 @@
         ],
         [
           "minecraft:lime_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -131793,6 +131820,9 @@
         ],
         [
           "minecraft:magenta_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -133129,6 +133159,9 @@
         ],
         [
           "minecraft:orange_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -133425,6 +133458,9 @@
         ],
         [
           "minecraft:pink_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -133943,6 +133979,9 @@
         ],
         [
           "minecraft:purple_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -134141,6 +134180,9 @@
         ],
         [
           "minecraft:red_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -139439,6 +139481,9 @@
         ],
         [
           "minecraft:yellow_wool"
+        ],
+        [
+          "minecraft:string"
         ]
       ],
       "outputs": [
@@ -324132,54 +324177,6 @@
         ]
       ],
       "outputs": [
-        "jugcraft:hard_candy"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/syrup",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:salt_water_taffy"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/syrup",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ]
-      ],
-      "outputs": [
         "jugcraft:candy_corn"
       ]
     },
@@ -324228,6 +324225,54 @@
         ]
       ],
       "outputs": [
+        "jugcraft:caramel"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/syrup",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:hard_candy"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/syrup",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ]
+      ],
+      "outputs": [
         "jugcraft:rock_candy"
       ]
     },
@@ -324252,7 +324297,61 @@
         ]
       ],
       "outputs": [
-        "jugcraft:caramel"
+        "jugcraft:salt_water_taffy"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/cream",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ],
+        [
+          "minecraft:milk_bucket"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:toffee"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/cream",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ],
+        [
+          "minecraft:milk_bucket"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:fudge"
       ]
     },
     {
@@ -324307,60 +324406,6 @@
       ],
       "outputs": [
         "jugcraft:burnt_sugar"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/cream",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ],
-        [
-          "minecraft:milk_bucket"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:fudge"
-      ]
-    },
-    {
-      "source": "tools/agriculture.py:CANDY/cream",
-      "type": "candy_temperature",
-      "inputs": [
-        [
-          "jugcraft:candy_kettle"
-        ],
-        [
-          "jugcraft:candy_tray"
-        ],
-        [
-          "minecraft:sugar"
-        ],
-        [
-          "minecraft:water_bucket"
-        ],
-        [
-          "minecraft:campfire"
-        ],
-        [
-          "minecraft:milk_bucket"
-        ]
-      ],
-      "outputs": [
-        "jugcraft:toffee"
       ]
     },
     {

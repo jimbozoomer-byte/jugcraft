@@ -15,10 +15,13 @@ import net.minecraft.world.phys.Vec3;
 
 public class OwnerFurnitureAircraftGameTests {
     @GameTest public void sheetsUseThreadAndDoNotReplaceBackpackSleepingBags(GameTestHelper h){
-        var grid=java.util.List.of(new ItemStack(Items.WOOL.white()),new ItemStack(Items.WOOL.white()),new ItemStack(Items.WOOL.white()),new ItemStack(Items.STRING),ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY);
+        for(var color:net.minecraft.world.item.DyeColor.values()){
+        var wool=net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse("minecraft:"+color.getName()+"_wool"));
+        var grid=java.util.List.of(new ItemStack(wool),new ItemStack(wool),new ItemStack(wool),new ItemStack(Items.STRING),ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY,ItemStack.EMPTY);
         var input=net.minecraft.world.item.crafting.CraftingInput.of(3,3,grid);
         var result=h.getLevel().recipeAccess().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING,input,h.getLevel()).orElseThrow().value().assemble(input);
-        h.assertTrue(result.is(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(io.github.jimbozoomer.jugcraft.Jugcraft.id("crafted_white_sheet")))&&result.getCount()==8,"Wool and thread produces eight furniture sheets");h.succeed();
+        h.assertTrue(result.is(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(io.github.jimbozoomer.jugcraft.Jugcraft.id("crafted_"+color.getName()+"_sheet")))&&result.getCount()==8,"Wool and thread produces eight "+color+" furniture sheets");}
+        h.succeed();
     }
     @GameTest public void everyAircraftFliesOnPaidPowerAndUnpoweredCraftDescends(GameTestHelper h){
         var level=h.getLevel();

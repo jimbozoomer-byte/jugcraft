@@ -7813,8 +7813,8 @@
       "source": "recipe jugcraft:crafted/acacia_drawer"
     },
     "jugcraft:crafted_acacia_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/acacia_fancy_bed"
     },
     "jugcraft:crafted_acacia_nightstand": {
@@ -7898,8 +7898,8 @@
       "source": "recipe jugcraft:crafted/bamboo_drawer"
     },
     "jugcraft:crafted_bamboo_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/bamboo_fancy_bed"
     },
     "jugcraft:crafted_bamboo_nightstand": {
@@ -7988,8 +7988,8 @@
       "source": "recipe jugcraft:crafted/birch_drawer"
     },
     "jugcraft:crafted_birch_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/birch_fancy_bed"
     },
     "jugcraft:crafted_birch_nightstand": {
@@ -8023,8 +8023,8 @@
       "source": "recipe jugcraft:crafted/black_cushion"
     },
     "jugcraft:crafted_black_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/black_sheet"
     },
     "jugcraft:crafted_blackstone_corner_trim": {
@@ -8088,8 +8088,8 @@
       "source": "recipe jugcraft:crafted/blue_plate"
     },
     "jugcraft:crafted_blue_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/blue_sheet"
     },
     "jugcraft:crafted_bricks_corner_trim": {
@@ -8108,8 +8108,8 @@
       "source": "recipe jugcraft:crafted/brown_cushion"
     },
     "jugcraft:crafted_brown_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/brown_sheet"
     },
     "jugcraft:crafted_calcite_corner_trim": {
@@ -8168,8 +8168,8 @@
       "source": "recipe jugcraft:crafted/cherry_drawer"
     },
     "jugcraft:crafted_cherry_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/cherry_fancy_bed"
     },
     "jugcraft:crafted_cherry_nightstand": {
@@ -8248,8 +8248,8 @@
       "source": "recipe jugcraft:crafted/crimson_drawer"
     },
     "jugcraft:crafted_crimson_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/crimson_fancy_bed"
     },
     "jugcraft:crafted_crimson_nightstand": {
@@ -8283,8 +8283,8 @@
       "source": "recipe jugcraft:crafted/cyan_cushion"
     },
     "jugcraft:crafted_cyan_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/cyan_sheet"
     },
     "jugcraft:crafted_dark_oak_bench": {
@@ -8333,8 +8333,8 @@
       "source": "recipe jugcraft:crafted/dark_oak_drawer"
     },
     "jugcraft:crafted_dark_oak_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/dark_oak_fancy_bed"
     },
     "jugcraft:crafted_dark_oak_nightstand": {
@@ -8453,8 +8453,8 @@
       "source": "recipe jugcraft:crafted/gray_cushion"
     },
     "jugcraft:crafted_gray_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/gray_sheet"
     },
     "jugcraft:crafted_green_cushion": {
@@ -8463,8 +8463,8 @@
       "source": "recipe jugcraft:crafted/green_cushion"
     },
     "jugcraft:crafted_green_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/green_sheet"
     },
     "jugcraft:crafted_hammer": {
@@ -8518,8 +8518,8 @@
       "source": "recipe jugcraft:crafted/jungle_drawer"
     },
     "jugcraft:crafted_jungle_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/jungle_fancy_bed"
     },
     "jugcraft:crafted_jungle_nightstand": {
@@ -8563,8 +8563,8 @@
       "source": "recipe jugcraft:crafted/light_blue_cushion"
     },
     "jugcraft:crafted_light_blue_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/light_blue_sheet"
     },
     "jugcraft:crafted_light_gray_cushion": {
@@ -8573,8 +8573,8 @@
       "source": "recipe jugcraft:crafted/light_gray_cushion"
     },
     "jugcraft:crafted_light_gray_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/light_gray_sheet"
     },
     "jugcraft:crafted_lime_cushion": {
@@ -8583,8 +8583,8 @@
       "source": "recipe jugcraft:crafted/lime_cushion"
     },
     "jugcraft:crafted_lime_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/lime_sheet"
     },
     "jugcraft:crafted_magenta_cushion": {
@@ -8593,8 +8593,8 @@
       "source": "recipe jugcraft:crafted/magenta_cushion"
     },
     "jugcraft:crafted_magenta_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/magenta_sheet"
     },
     "jugcraft:crafted_mangrove_bench": {
@@ -8643,8 +8643,8 @@
       "source": "recipe jugcraft:crafted/mangrove_drawer"
     },
     "jugcraft:crafted_mangrove_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/mangrove_fancy_bed"
     },
     "jugcraft:crafted_mangrove_nightstand": {
@@ -8718,8 +8718,8 @@
       "source": "recipe jugcraft:crafted/oak_drawer"
     },
     "jugcraft:crafted_oak_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/oak_fancy_bed"
     },
     "jugcraft:crafted_oak_nightstand": {
@@ -8753,8 +8753,8 @@
       "source": "recipe jugcraft:crafted/orange_cushion"
     },
     "jugcraft:crafted_orange_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/orange_sheet"
     },
     "jugcraft:crafted_oven": {
@@ -8778,8 +8778,8 @@
       "source": "recipe jugcraft:crafted/pink_cushion"
     },
     "jugcraft:crafted_pink_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/pink_sheet"
     },
     "jugcraft:crafted_pufferfish_trophy": {
@@ -8793,8 +8793,8 @@
       "source": "recipe jugcraft:crafted/purple_cushion"
     },
     "jugcraft:crafted_purple_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/purple_sheet"
     },
     "jugcraft:crafted_quartz_corner_trim": {
@@ -8823,8 +8823,8 @@
       "source": "recipe jugcraft:crafted/red_sandstone_pillar_trim"
     },
     "jugcraft:crafted_red_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/red_sheet"
     },
     "jugcraft:crafted_salmon_trophy": {
@@ -8908,8 +8908,8 @@
       "source": "recipe jugcraft:crafted/spruce_drawer"
     },
     "jugcraft:crafted_spruce_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/spruce_fancy_bed"
     },
     "jugcraft:crafted_spruce_nightstand": {
@@ -9048,8 +9048,8 @@
       "source": "recipe jugcraft:crafted/warped_drawer"
     },
     "jugcraft:crafted_warped_fancy_bed": {
-      "numerator": 173,
-      "denominator": 1,
+      "numerator": 349,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/warped_fancy_bed"
     },
     "jugcraft:crafted_warped_nightstand": {
@@ -9123,8 +9123,8 @@
       "source": "recipe jugcraft:crafted/white_plate"
     },
     "jugcraft:crafted_white_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/white_sheet"
     },
     "jugcraft:crafted_witch_trophy": {
@@ -9188,8 +9188,8 @@
       "source": "recipe jugcraft:crafted/yellow_plate"
     },
     "jugcraft:crafted_yellow_sheet": {
-      "numerator": 18,
-      "denominator": 1,
+      "numerator": 39,
+      "denominator": 2,
       "source": "recipe jugcraft:crafted/yellow_sheet"
     },
     "jugcraft:cranberries": {

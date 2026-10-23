@@ -4,7 +4,8 @@
   "ingredients": [
     "minecraft:purple_wool",
     "minecraft:purple_wool",
-    "minecraft:purple_wool"
+    "minecraft:purple_wool",
+    "minecraft:string"
   ],
   "result": {
     "count": 8,

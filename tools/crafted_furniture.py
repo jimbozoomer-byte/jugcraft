@@ -186,7 +186,7 @@ def main():
         if 'ingredients' in d: d['ingredients'] = [ingredient(v) for v in d['ingredients']]
         d = adapt(d)
         # Three wool alone belongs to the installed backpack sleeping bag.
-        if p.stem == 'white_sheet': d['ingredients'].append('minecraft:string')
+        if p.stem.endswith('_sheet'): d['ingredients'].append('minecraft:string')
         write(DATA / 'recipe/crafted' / p.relative_to(SOURCE / 'data/handcrafted/recipe'), d)
     for p in (SOURCE / 'data/handcrafted/tags').rglob('*.json'):
         rel = p.relative_to(SOURCE / 'data/handcrafted/tags')
