@@ -2466,7 +2466,7 @@ SHAPED = [
      "result": "trebuchet", "count": 1, "category": "misc"},
     # Halloween decorations: an iron hook for string lights; a bowl of orange terracotta; a plank coffin lined in red
     # around a chest; a fog machine of iron with a bucket for its tank, copper heaters and a grille nozzle.
-    {"id": "string_light_hook", "pattern": ["N", "I"], "key": {"N": "minecraft:iron_nugget", "I": "#c:ingots/iron"},
+    {"id": "string_light_hook", "pattern": ["NS", "I "], "key": {"N": "minecraft:iron_nugget", "I": "#c:ingots/iron", "S": "minecraft:string"},
      "result": "string_light_hook", "count": 4, "category": "building"},
     {"id": "candy_bowl", "pattern": ["T T", " T "], "key": {"T": "minecraft:orange_terracotta"}, "result": "candy_bowl", "count": 1,
      "category": "misc"},

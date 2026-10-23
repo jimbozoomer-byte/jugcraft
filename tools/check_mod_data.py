@@ -392,7 +392,7 @@ def item_units(ref):
     # metal-recovery recipe. Acquiring them consumes inputs; none yields ingots.
     if ns == MOD and path in menagerie.entries() or ref == '#c:eggs':
         return {}
-    if ref.startswith('#') and ns == MOD and path.startswith(('cavern_','beast_','household_','ecology_','fauna_','mutant_','landscape_','walnut_compat/')):
+    if ref.startswith('#') and ns == MOD and (path == 'compact_fermentable' or path.startswith(('cavern_','beast_','household_','ecology_','fauna_','mutant_','landscape_','walnut_compat/'))):
         tag = load(DATA / MOD / 'tags' / 'item' / (path+'.json')) or {}
         values = [v if isinstance(v,str) else v['id'] for v in tag.get('values',[])]
         # Ingredients select one member. Conservatively use the least valuable

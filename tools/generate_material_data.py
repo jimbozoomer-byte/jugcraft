@@ -1644,6 +1644,11 @@ def tags():
         tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{colour}_companion_bed")
     for block in ("wooden_stool", "lunch_crate", "lunch_cover"):
         tags.add("block", "minecraft:mineable/axe", f"peepo_companion:{block}")
+    # Citrus belongs to acid extraction in the compact reactor. Other fermenters keep
+    # the broad crop tag; quantities alone must never choose the compact product.
+    for crop in tags.entries[("item", f"{MOD}:fermentable")]:
+        if crop not in {rid("lemon"), rid("orange")}:
+            tags.add("item", f"{MOD}:compact_fermentable", crop)
     tags.write()
 
 

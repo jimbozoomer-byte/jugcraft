@@ -153,6 +153,11 @@ public final class JugcraftJeiStations {
     }
 
     public static void addInformation(mezz.jei.api.registration.IRecipeRegistration registration) {
+        info(registration, "chemical_reactor", "Citrus makes Citric Acid in the compact reactor, even with a full stack of fruit and water. Use non-citrus fermentable crops for direct Bioethanol. Citrus still works through the Mashing Station, Industrial Fermenter and Chemical Distillation Station.");
+        info(registration, "precision_finisher", "Alumina blanks and the Diamond Abrasive Head can make plates or bearing balls. Open Recipes, choose the intended product and Lock recipe before automating. Automatic prefers plates when both jobs fit. The head and cooling water are reusable.");
+        info(registration, "coal_gasifier", "Gasification has alternative gas products for the same coal, charcoal or coke. Open Recipes and Lock recipe to select the desired outputs. Automatic prefers the established route; expanded starter routes have lower priority. Leave room for every output.");
+        info(registration, "chemical_infuser", "Hydrogen Chloride and methanation each have established and starter variants. Open Recipes to compare their costs and times, then Lock recipe for the desired route. Automatic prefers the established route. Methanation requires its reusable catalyst.");
+        info(registration, "anaerobic_digester", "Shared farm feed can produce Biogas with Bone Meal, or Raw Biogas with Digestate. Open Recipes and Lock recipe for the desired products. Automatic prefers the established Biogas route; Raw Biogas needs further cleaning. Empty incompatible output fluids before switching jobs.");
         info(registration, "skillet", "Cooks campfire recipes with heat below it, in one third of the campfire time shown by JEI.");
         for (String block : List.of("kitchen_stove", "halloween_bonfire")) info(registration, block,
             "Cooks campfire recipes in half the campfire time shown by JEI. The stove must be fueled and its grill unobstructed; the bonfire must be lit.");
