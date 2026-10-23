@@ -24,6 +24,8 @@ RES = ROOT / "src" / "main" / "resources"
 ASSETS = RES / "assets" / MOD
 DATA = RES / "data"
 PACKS = RES / "resourcepacks"
+WRITTEN_RESOURCES = set()
+RESOURCE_MANIFEST = ROOT / "tools/data/generated-material-resources.json"
 
 GENERATED_DIRS = [
     DATA / MOD / "advancement", ASSETS / "blockstates", ASSETS / "items", ASSETS / "models", ASSETS / "lang", ASSETS / "handbook",
@@ -31,6 +33,8 @@ GENERATED_DIRS = [
     DATA / MOD / "loot_table", DATA / MOD / "recipe", DATA / MOD / "worldgen",
     # The lairs' dimensions and templates (tools/lair_data.py).
     DATA / MOD / "dimension", DATA / MOD / "dimension_type", DATA / MOD / "structure" / "lair",
+    # Adam-ondi-Ahman's knoll (tools/adam_ondi_ahman_data.py).
+    DATA / MOD / "structure" / "adam_ondi_ahman",
     DATA / "c" / "tags", DATA / "minecraft" / "tags", RES / MOD, PACKS,
     DATA / MOD / "villager_trade", DATA / MOD / "trade_set", DATA / MOD / "tags" / "villager_trade",
     RES / "assets" / "minecraft",
@@ -96,7 +100,9 @@ NUCLEAR_CLOSED_MODELS = (
 
 
 def write(path, obj):
-    if isinstance(obj, dict) and obj.get("elements"):
+    if path.is_relative_to(RES):
+        WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
+    if isinstance(obj, dict) and obj.get("elements") and "models" in path.parts:
         if any(path.stem == name or path.stem.startswith(name + "_") for name in NUCLEAR_CLOSED_MODELS):
             model_writer.finish_closed(obj["elements"])
         else:
@@ -175,6 +181,8 @@ def assets():
     agriculture_data.assets(ASSETS, write, lang)
     pixel_hollows_assets(lang)
     town_assets.assets(ASSETS, write, lang)
+    import academy_data
+    academy_data.assets(ASSETS, write, lang)
     import styx
     styx.write_all(write, ASSETS, DATA / MOD, lang)
     import deposits
@@ -207,6 +215,8 @@ def assets():
     concordance.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     concordance.advancements(DATA, write, lang)
     lang.update(concordance.write_data(write, RES))
+    import jug_nouveau
+    jug_nouveau.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     # JEI's pages on where the things only a ritual or a lair boss gives come from (rows in recipe_view.json).
     import acquisition
     acquisition.lang_entries(lang)
@@ -224,6 +234,10 @@ def assets():
     fortifications.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import bunkerworks
     bunkerworks.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
+    import aluminum_roles
+    aluminum_roles.write_all(write, DATA / MOD, condition)
+    import aged_wood
+    aged_wood.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import fire_control
     fire_control.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import raiders
@@ -278,6 +292,14 @@ def assets():
     lang.update(diesel_sounds.LANG)
     import guide_books
     guide_books.write_assets(write, rid, ASSETS, DATA, lang)
+    import exchange_guide
+    exchange_guide.write_assets(write, rid, ASSETS, DATA, lang)
+    import exchange_blocks
+    exchange_blocks.write_assets(write, rid, ASSETS, DATA, lang)
+    import exchange_poker
+    exchange_poker.write_assets(write, rid, ASSETS, DATA, lang)
+    import exchange_casino
+    exchange_casino.write_assets(write, rid, ASSETS, DATA, lang)
     seasons_assets(lang)
     import alpine_data
     alpine_data.lang(lang)
@@ -288,6 +310,8 @@ def assets():
     diagonal_connections.write_all(write, ASSETS, RES / "assets" / "minecraft")
     import scary_data
     scary_data.write_all(write, RES, lang)
+    import chima_data
+    chima_data.write_all(write, RES, lang)
     import vanilla_logs
     vanilla_logs.write_all(write, ASSETS)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
@@ -744,6 +768,8 @@ def machine_assets(lang):
     powered_tools(lang)
     petro_assets(lang)
     lang[f"message.{MOD}.hand_crank"] = "Turning for %s more seconds"
+    # The Exchange (finance/): its key, in the Jugcraft controls category that tools/party.py names.
+    lang[f"key.{MOD}.exchange"] = "Open the Exchange"
     lang[f"message.{MOD}.steam_engine"] = "Steam engine: %s fuel, %s / %s mB water"
     lang[f"message.{MOD}.dynamo"] = "Dynamo: %s / %s JE"
     lang[f"message.{MOD}.electric_motor"] = "Electric motor: %s / %s JE"
@@ -918,12 +944,13 @@ def self_drop(block):
     return loot(block, [{"type": "minecraft:item", "name": rid(block)}], explosion_condition=True)
 
 
-def ore_drop(block, item, low=1, high=1):
+def ore_drop(block, item, low=1, high=1, fortune=True):
     functions = []
     if (low, high) != (1, 1):
         functions.append({"type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}})
-    functions += [{"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"},
-                  {"type": "minecraft:explosion_decay"}]
+    if fortune:
+        functions.append({"type": "minecraft:apply_bonus", "enchantment": "minecraft:fortune", "formula": "minecraft:ore_drops"})
+    functions.append({"type": "minecraft:explosion_decay"})
     return loot(block, [{"type": "minecraft:alternatives", "children": [
         {"type": "minecraft:item", "condition": SILK, "name": rid(block)},
         {"type": "minecraft:item", "modifier": functions, "name": rid(item)},
@@ -1121,7 +1148,7 @@ def petro_assets(lang):
 # Tanks that keep their fluid when broken (batch 10): the drop copies the block entity's jugcraft:stored_fluid. The
 # multi-block ones drop only from their master block (part 0), which holds the block entity; breaking any other part
 # breaks the master too (machine/LargeMachineBlock).
-TANKS = {"fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
+TANKS = {"insulated_fluid_tank": False, "vacuum_insulated_tank": False, "fluid_tank": False, "steel_tank": True, "gas_holder": True, "flow_battery": True, "chemical_reactor": True}
 
 
 def tank_drop(block):
@@ -1158,7 +1185,7 @@ def loot_tables():
     for mineral, info in MINERALS.items():
         low, high = info["drops"]
         for block in mineral_blocks(mineral):
-            table = ore_drop(block, mineral, low, high) if block.endswith("_ore") else self_drop(block)
+            table = ore_drop(block, mineral, low, high, fortune=info.get("fortune", True)) if block.endswith("_ore") else self_drop(block)
             write(out / f"{block}.json", table)
     for block in machine_blocks():
         if block in TANKS:
@@ -1300,6 +1327,27 @@ def recipes():
         write(out / f"{name}.json", recipe)
     drone_recipes(out)
 
+    # Food chemistry (docs/features/sour-candy.md): a bottle of glucose syrup crafts into three sugar, leaving the bottle.
+    syrup = shapeless(MACHINE_FEATURE, [rid("glucose_syrup")], "glucose_syrup", 3)
+    syrup["result"]["id"] = "minecraft:sugar"
+    syrup["fabric:load_conditions"] = [c for f in ("agriculture", MACHINE_FEATURE) for c in condition(f)]
+    write(out / "sugar_from_glucose_syrup.json", syrup)
+    # PVAc wood glue (docs/features/pvac-glue.md): it binds three paper into a book without leather, and makes a piston
+    # sticky without slime.
+    glue = [c for f in ("agriculture", MACHINE_FEATURE) for c in condition(f)]
+    for name, ingredients, result in (("book_from_pvac_glue", ["minecraft:paper"] * 3 + [rid("pvac_glue")], "minecraft:book"),
+                                      ("sticky_piston_from_pvac_glue", ["minecraft:piston", rid("pvac_glue")],
+                                       "minecraft:sticky_piston")):
+        recipe = shapeless(MACHINE_FEATURE, ingredients, "pvac_glue", 1, "redstone" if "piston" in name else "misc")
+        recipe["result"]["id"] = result
+        recipe["fabric:load_conditions"] = glue
+        write(out / f"{name}.json", recipe)
+    # Boron in solar cells (docs/features/boron-solar.md): two silicon fired with a boric acid dope into two
+    # boron-doped silicon, for the Advanced Solar Panel.
+    doped = shapeless(MACHINE_FEATURE, ["#c:silicon", "#c:silicon", rid("boric_acid")], "boron_doped_silicon", 2)
+    doped["fabric:load_conditions"] = [c for f in (MACHINE_FEATURE, "silicon", "sulfur") for c in condition(f)]
+    write(out / "boron_doped_silicon.json", doped)
+
     # Explosive weapons (batch 18): grenades and the launcher, behind the explosives switch.
     boom = [c for f in (MACHINE_FEATURE, "explosives") for c in condition(f)]
     for name, recipe in (
@@ -1414,6 +1462,15 @@ def tags():
     tags = Tags()
     import wall_runs
     wall_runs.write_tags(tags, rid)
+    # The Exchange's Market Chest is a wooden counter (tools/exchange_blocks.py).
+    tags.add("block", "minecraft:mineable/axe", rid("market_chest"))
+    import exchange_poker
+    for block in exchange_poker.BLOCKS:
+        tags.add("block", "minecraft:mineable/axe", rid(block))
+    import exchange_casino  # wooden tables take an axe, the slot machines' metal cabinets a pickaxe
+    for design in exchange_casino.DESIGNS:
+        tool = "pickaxe" if design.height > 1 else "axe"
+        tags.add("block", f"minecraft:mineable/{tool}", rid(design.block))
     import petro
     for crop in petro.FERMENTABLE:
         tags.add("item", f"{MOD}:fermentable", crop)
@@ -1443,6 +1500,8 @@ def tags():
     tags.add("block", "minecraft:mineable/pickaxe", rid(guns.RACK))
     import bunkerworks
     bunkerworks.add_tags(tags)
+    import aged_wood
+    aged_wood.add_tags(tags)
     import fire_control
     fire_control.add_tags(tags)
     import raiders
@@ -1470,6 +1529,8 @@ def tags():
             storage_tags(tags, f"raw_{metal}", f"raw_{metal}_block", tool)
             ore_tags(tags, metal, f"{metal}_ore", f"deepslate_{metal}_ore", tool, "singular")
 
+    tags.add("item", "c:ingots/cobalt", rid("cobalt_ingot"))
+    tags.add("item", "c:ingots", "#c:ingots/cobalt")
     for mineral, info in MINERALS.items():
         rate = "singular" if info["drops"] == [1, 1] else "dense"
         ore_tags(tags, mineral, f"{mineral}_ore", f"deepslate_{mineral}_ore", info["tool"], rate)
@@ -1480,6 +1541,8 @@ def tags():
 
     for rock, info in ROCKS.items():
         tags.add("block", f"minecraft:mineable/{info['tool']}", rid(rock))
+    import mineral_sands
+    mineral_sands.tags(tags)
     # Veins placed only in some biomes (a "biomes" key on a metal's or mineral's worldgen entry): the biome tag that
     # JugcraftWorldgen places them in.
     for name, info in list(METALS.items()) + list(MINERALS.items()):
@@ -1488,6 +1551,8 @@ def tags():
                 tags.add("worldgen/biome", f"{MOD}:has_ore/{placed}", biome)
             for biome in gen.get("surface_biomes", []):
                 tags.add("worldgen/biome", f"{MOD}:has_surface_ore/{placed}", biome)
+            for biome in gen.get("outcrop_surface_biomes", []):
+                tags.add("worldgen/biome", f"{MOD}:has_outcrop/{placed}", biome)
 
     for block in machine_blocks():
         if block not in CROPS:
@@ -1546,7 +1611,7 @@ def tags():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     # Deposits break (slowly, for nothing) with a pickaxe; only a deposit drill gets their ore.
     import deposits
-    for block in deposits.DEPOSITS:
+    for block in deposits.all_blocks():
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     import tank_display
     for block in tank_display.BLOCKS:
@@ -1627,11 +1692,16 @@ def worldgen():
                     "ore": {"size": gen["size"], "discard_chance_on_air_exposure": 0.0, "targets": targets},
                     "surface_biomes": rid(f"has_surface_ore/{placed}"),
                     "outcrop": rid(f"{name}_ore"), "outcrop_chance": gen["outcrop_chance"],
+                    **({"outcrop_biomes": rid(f"has_outcrop/{placed}")} if "outcrop_surface_biomes" in gen else {}),
                 })
             else:
                 ore_feature(placed, gen["size"], targets)
             placed_feature(placed, gen)
+    import mineral_sands
+    mineral_sands.worldgen(write, DATA / MOD)
     for rock, info in ROCKS.items():
+        if rock in mineral_sands.SANDS:
+            continue
         gen = info["gen"]
         ore_feature(rock, gen["size"], [{"target": {"predicate_type": "minecraft:tag_match", "tag": gen["target"]},
                                          "state": rid(rock)}])
@@ -1718,10 +1788,12 @@ def retro_trader_trades():
             "random_sequence": rid(f"trade_set/retro_trader/level_{level}")})
 
 
+
 def main():
-    for directory in GENERATED_DIRS:
-        if directory.exists():
-            shutil.rmtree(directory)
+    # Imported, authored and generated resources share namespaces. Delete only
+    # stale files this generator previously owned, never whole resource folders.
+    previous = set(json.loads(RESOURCE_MANIFEST.read_text(encoding="utf-8"))) if RESOURCE_MANIFEST.exists() else set()
+    WRITTEN_RESOURCES.clear()
     assets()
     import handbook
     book = handbook.build()
@@ -1738,9 +1810,25 @@ def main():
     for key, advancement in advancements.generate(MOD)[0].items():
         write(DATA / MOD / "advancement" / f"{key}.json", advancement)
     agriculture_data.advancements(DATA, write)
+    # Run the owner-data adapter after shared tags/worldgen so neither pass overwrites the other.
+    import nouveau_data
+    language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
+    nouveau_data.write_all(write, ASSETS, DATA / MOD, language)
+    import starter_workshop
+    starter_workshop.write_all(write, ASSETS, DATA / MOD, language)
+    write(ASSETS / "lang/en_us.json", language)
     import town
     for problem in town.write():
         print("town:", problem)
+    import vehicle_bays
+    vehicle_bays.write()
+    import owner_resource_patches
+    owner_resource_patches.apply()
+    import walnut_data
+    walnut_data.reconcile(write)
+    from generated_resource_cleanup import prune
+    prune(RES, previous, WRITTEN_RESOURCES)
+    RESOURCE_MANIFEST.write_text(json.dumps(sorted(WRITTEN_RESOURCES), indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

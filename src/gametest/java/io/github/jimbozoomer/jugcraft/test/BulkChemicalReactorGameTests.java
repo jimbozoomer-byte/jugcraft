@@ -98,8 +98,8 @@ public class BulkChemicalReactorGameTests {
 				helper.assertTrue(hatch.insert(ItemVariant.of(Items.COBBLESTONE), 1, transaction) == 0, facing + ": the hatch refuses cobblestone");
 				helper.assertTrue(liquid.insert(FluidVariant.of(PetroFluids.HYDROGEN.fluid()), FluidConstants.BUCKET, transaction) == 0,
 						facing + ": the side inlet refuses hydrogen");
-				helper.assertTrue(gas.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction) == 0,
-						facing + ": the lid inlet refuses water");
+				helper.assertTrue(gas.insert(FluidVariant.of(PetroFluids.ARGON.fluid()), FluidConstants.BUCKET, transaction) == 0,
+						facing + ": the lid inlet refuses argon");
 				helper.assertTrue(port(helper, machine, "product_out").insert(FluidVariant.of(Fluids.WATER), FluidConstants.BUCKET, transaction) == 0,
 						facing + ": nothing goes in at the outlet");
 				transaction.abort();
@@ -153,7 +153,10 @@ public class BulkChemicalReactorGameTests {
 		});
 	}
 
-	/** An iron ore and 250 mB of hydrochloric acid: four washed iron ores out of the chute at the front, as sulfuric acid gives. */
+	/**
+	 * An iron ore and 250 mB of hydrochloric acid: four washed iron ores out of the chute at the front, as sulfuric acid
+	 * gives, in 80 ticks: half the Chemical Reactor's 160.
+	 */
 	@GameTest(structure = ARENA, maxTicks = 300)
 	public void hydrochloricAcidLeachesOre(GameTestHelper helper) {
 		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
@@ -163,40 +166,42 @@ public class BulkChemicalReactorGameTests {
 			transaction.commit();
 		}
 		machine.tanks().input(0).fill(PetroFluids.HYDROCHLORIC_ACID.source(), 250);
-		helper.succeedWhen(() -> {
-			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0, "The acid used");
+		// 80 paid ticks and a little slack: by the Chemical Reactor's 160 it would still be leaching.
+		helper.runAtTickTime(100, () -> {
+			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0, "The acid used: " + machine.status());
 			helper.assertTrue(extractItems(helper, itemPort(helper, machine, "items_out"), item("washed_iron_ore")) == 4,
 					"Four washed iron ores leave at the chute");
+			helper.succeed();
 		});
 	}
 
 	/**
-	 * The contact process's absorption: 250 mB of sulfur trioxide in 500 mB of water make 500 mB of sulfuric acid, 100
-	 * ticks at 87 JE.
+	 * The contact process's absorption: 250 mB of sulfur trioxide in 750 mB of water make a bucket of sulfuric acid, 100
+	 * ticks at 87 JE: twice the acid a sulfur dust gives in the Chemical Reactor.
 	 */
 	@GameTest(structure = ARENA, maxTicks = 300)
 	public void sulfurTrioxideDissolvesIntoSulfuricAcid(GameTestHelper helper) {
 		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
 		long[] supplied = supply(helper, machine);
-		insert(helper, port(helper, machine, "liquid_in"), Fluids.WATER, 500);
+		insert(helper, port(helper, machine, "liquid_in"), Fluids.WATER, 750);
 		insert(helper, port(helper, machine, "gas_in"), PetroFluids.SULFUR_TRIOXIDE.fluid(), 250);
 		helper.succeedWhen(() -> {
-			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(0), PetroFluids.SULFURIC_ACID.source()) == 500,
-					"500 mB of sulfuric acid made");
+			helper.assertTrue(machine.lane(0) == null && amount(machine.tanks().output(0), PetroFluids.SULFURIC_ACID.source()) == 1000,
+					"1,000 mB of sulfuric acid made");
 			helper.assertTrue(used(machine, supplied) == TICKS * DRAW, "Paid " + used(machine, supplied) + " JE");
 		});
 	}
 
 	/**
-	 * The contact bed's vanadium: four washed iron ores roasted with 500 mB of lye give a vanadium pentoxide at the chute,
+	 * The contact bed's vanadium: four vanadium-bearing concentrates roasted with 500 mB of lye give a vanadium pentoxide at the chute,
 	 * and that oxide on two bricks crafts the vanadium contact bed.
 	 */
 	@GameTest(structure = ARENA, maxTicks = 400)
-	public void washedIronOreGivesTheContactBedsVanadium(GameTestHelper helper) {
+	public void vanadiumConcentrateGivesTheContactBedsVanadium(GameTestHelper helper) {
 		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
 		supply(helper, machine);
 		try (Transaction transaction = Transaction.openOuter()) {
-			itemPort(helper, machine, "feed_in").insert(ItemVariant.of(item("washed_iron_ore")), 4, transaction);
+			itemPort(helper, machine, "feed_in").insert(ItemVariant.of(item("vanadium_iron_concentrate")), 4, transaction);
 			transaction.commit();
 		}
 		machine.tanks().input(0).fill(PetroFluids.LYE.source(), 500);
@@ -240,6 +245,33 @@ public class BulkChemicalReactorGameTests {
 		});
 	}
 
+	/**
+	 * Ruthenium for the faster methanation bed: eight washed nickel ores in a bucket of hydrochloric acid under 250 mB of
+	 * chlorine leave one ruthenium powder at the chute, and the powder on a nickel bed crafts the ruthenium bed.
+	 */
+	@GameTest(structure = ARENA, maxTicks = 600)
+	public void washedNickelOreGivesRuthenium(GameTestHelper helper) {
+		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
+		supply(helper, machine);
+		try (Transaction transaction = Transaction.openOuter()) {
+			itemPort(helper, machine, "feed_in").insert(ItemVariant.of(item("washed_nickel_ore")), 8, transaction);
+			transaction.commit();
+		}
+		machine.tanks().input(0).fill(PetroFluids.HYDROCHLORIC_ACID.source(), 1000);
+		machine.tanks().input(1).fill(PetroFluids.CHLORINE.fluid(), 250);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(machine.lane(0) == null && machine.tanks().input(0).millibuckets() == 0
+					&& machine.tanks().input(1).millibuckets() == 0, "The acid and the chlorine used");
+			helper.assertTrue(extractItems(helper, itemPort(helper, machine, "items_out"), item("ruthenium_powder")) == 1,
+					"A ruthenium powder leaves at the chute");
+			RecipeManager.CachedCheck<CraftingInput, CraftingRecipe> crafting = RecipeManager.createCheck(RecipeType.CRAFTING);
+			CraftingInput bed = CraftingInput.of(2, 1, List.of(stack("nickel_catalyst_bed"), stack("ruthenium_powder")));
+			Optional<RecipeHolder<CraftingRecipe>> built = crafting.getRecipeFor(bed, helper.getLevel());
+			helper.assertTrue(built.isPresent() && built.get().value().assemble(bed).is(item("ruthenium_catalyst_bed")),
+					"The powder on a nickel bed makes the ruthenium bed");
+		});
+	}
+
 	/** While it works every part shows lit, but only the controller gives off light; paused, it goes dark. */
 	@GameTest(structure = ARENA, maxTicks = 200)
 	public void everyPartLightsWhileItWorks(GameTestHelper helper) {
@@ -265,7 +297,8 @@ public class BulkChemicalReactorGameTests {
 	public void itRunsItsOwnRecipesAndIsBuiltFromItsBill(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
-		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
+		List<FluidRecipes.Entry> own = machine.recipes(level.getServer()).stream()
+                .filter(e -> e.id().getPath().startsWith("chemical_reaction/bulk_")).toList();
 		List<Identifier> ids = own.stream().map(FluidRecipes.Entry::id).toList();
 		helper.assertTrue(ids.contains(Jugcraft.id("chemical_reaction/bulk_hydrochloric_acid"))
 				&& ids.contains(Jugcraft.id("chemical_reaction/bulk_chloride_iron_ore"))

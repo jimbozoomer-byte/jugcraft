@@ -1,0 +1,15 @@
+{
+  "type": "jugcraft:landscape_detail",
+  "shape": "patch",
+  "primary": {
+    "id": "jugcraft:cavern_small_peppermint",
+    "properties": {
+      "facing": "up"
+    }
+  },
+  "secondary": {
+    "id": "minecraft:air"
+  },
+  "radius": 1,
+  "height": 1
+}

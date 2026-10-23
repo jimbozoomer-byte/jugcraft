@@ -4,6 +4,7 @@
     "jugcraft:bronze_chestplate",
     "jugcraft:steel_chestplate",
     "jugcraft:thallite_chestplate",
+    "jugcraft:titanium_chestplate",
     "jugcraft:steampunk_chestplate",
     "jugcraft:kaiser_chestplate",
     "jugcraft:earthbound_thallite_chestplate",
@@ -33,6 +34,10 @@
     "jugcraft:aquamancers_robes",
     "jugcraft:winterguards_chestplate",
     "jugcraft:exosuit_chestplate",
-    "jugcraft:ronin_exosuit_chestplate"
+    "jugcraft:ronin_exosuit_chestplate",
+    "jugcraft:dark_matter_chestplate",
+    "jugcraft:red_matter_chestplate",
+    "jugcraft:gem_chestplate",
+    "#jugcraft:nouveau_magic_robe"
   ]
 }

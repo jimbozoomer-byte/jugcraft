@@ -51,6 +51,11 @@ public final class TownData {
 	public record Spot(int index, String role, @Nullable String shop, String name, String skin, BlockPos pos) {
 	}
 
+	public record Sign(BlockPos pos, List<String> lines) {}
+	public record MapBoard(BlockPos pos, Direction facing) {}
+	public final List<Sign> signs;
+	public final List<MapBoard> mapBoards;
+
 	private static @Nullable TownData instance;
 
 	public final int size;
@@ -66,6 +71,7 @@ public final class TownData {
 	private final short[] surface;
 	public final List<Site> sites;
 	public final List<Spot> spots;
+	public final Map<Integer, BlockPos> beds = new HashMap<>();
 	public final List<BlockPos> atms;
 	public final List<String> themes;
 	/** kind -> theme -> slots -> choices (state text with "{facing}" and "{rotation}"). */
@@ -107,6 +113,10 @@ public final class TownData {
 		for (JsonElement e : root.getAsJsonArray("spots")) {
 			JsonObject o = e.getAsJsonObject();
 			JsonArray p = o.getAsJsonArray("pos");
+            if (o.has("bed")) {
+                JsonArray b = o.getAsJsonArray("bed");
+                beds.put(spots.size(), new BlockPos(b.get(0).getAsInt(), b.get(1).getAsInt(), b.get(2).getAsInt()));
+            }
 			spots.add(new Spot(spots.size(), o.get("role").getAsString(), o.has("shop") ? o.get("shop").getAsString() : null,
 					o.get("name").getAsString(), o.get("skin").getAsString(),
 					new BlockPos(p.get(0).getAsInt(), p.get(1).getAsInt(), p.get(2).getAsInt())));
@@ -118,6 +128,21 @@ public final class TownData {
 			atms.add(new BlockPos(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt()));
 		}
 		this.atms = List.copyOf(atms);
+		List<Sign> signs = new ArrayList<>();
+		for (JsonElement e : root.has("signs") ? root.getAsJsonArray("signs") : new JsonArray()) {
+			JsonObject o = e.getAsJsonObject();
+			List<String> lines = new ArrayList<>();
+			for (JsonElement line : o.getAsJsonArray("lines")) lines.add(line.getAsString());
+			if (lines.size() != 4) throw new IllegalStateException("Town sign needs four lines");
+			signs.add(new Sign(position(o), List.copyOf(lines)));
+		}
+		this.signs = List.copyOf(signs);
+		List<MapBoard> boards = new ArrayList<>();
+		for (JsonElement e : root.has("map_boards") ? root.getAsJsonArray("map_boards") : new JsonArray()) {
+			JsonObject o = e.getAsJsonObject();
+			boards.add(new MapBoard(position(o), direction(o.get("facing").getAsString())));
+		}
+		this.mapBoards = List.copyOf(boards);
 		JsonObject decorRoot = root.getAsJsonObject("decor");
 		List<String> themes = new ArrayList<>();
 		for (JsonElement e : decorRoot.getAsJsonArray("themes")) {
@@ -154,13 +179,16 @@ public final class TownData {
 
 	public static synchronized TownData get() {
 		if (instance == null) {
-			instance = load();
+			instance = load("/data/jugcraft/town/town.json.gz");
 		}
 		return instance;
 	}
 
-	private static TownData load() {
-		String path = "/data/jugcraft/town/town.json.gz";
+	public static TownData revision(int version) {
+        return version == TownUpgrades.CURRENT ? get() : load("/data/jugcraft/town/revisions/" + version + ".json.gz");
+    }
+
+    private static TownData load(String path) {
 		try (InputStream raw = TownData.class.getResourceAsStream(path)) {
 			if (raw == null) {
 				throw new IllegalStateException("missing " + path);
@@ -231,6 +259,11 @@ public final class TownData {
 	private static Direction direction(String name) {
 		Direction d = Direction.byName(name);
 		return d == null ? Direction.NORTH : d;
+	}
+
+	private static BlockPos position(JsonObject o) {
+		JsonArray a = o.getAsJsonArray("pos");
+		return new BlockPos(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt());
 	}
 
 	private static short[] shorts(String base64, int expected) {

@@ -86,8 +86,10 @@ def biome(name):
         spawns["creature"] = [spawn(entry) for entry in info["creatures"]]
     if "monsters" in info:
         spawns["monster"] = [spawn(entry) for entry in info["monsters"]]
+    costs = copy.deepcopy(base.get("spawn_costs", {}))
+    costs.update(copy.deepcopy(info.get("spawn_costs", {})))
     attributes = {"minecraft:gameplay/natural_mob_spawns": {"argument": {
-        "spawn_costs": copy.deepcopy(base.get("spawn_costs", {})), "spawns_by_category": spawns}, "modifier": "overlay"}}
+        "spawn_costs": costs, "spawns_by_category": spawns}, "modifier": "overlay"}}
     if "sky_color" in base:
         attributes["minecraft:visual/sky_color"] = base["sky_color"]
     if "music" in base:
@@ -198,11 +200,11 @@ def material(block):
     return {"type": "minecraft:block", "result_state": block}
 
 
-def floor_rule(surface):
+def floor_rule(surface, layer="floor", patches="patches"):
     rules = [{"type": "minecraft:condition", "if_true": {"type": "minecraft:noise_threshold", "noise": "minecraft:surface",
                                                          "min_threshold": low, "max_threshold": high}, "then_run": material(block)}
-             for low, high, block in surface.get("patches", [])]
-    rules.append(material(surface["floor"]))
+             for low, high, block in surface.get(patches, [])]
+    rules.append(material(surface[layer]))
     return rules[0] if len(rules) == 1 else {"type": "minecraft:sequence", "sequence": rules}
 
 
@@ -215,7 +217,7 @@ def surface_rule():
             continue
         parts = [{"type": "minecraft:condition", "if_true": "minecraft:on_floor", "then_run": floor_rule(surface)}]
         if "under" in surface:
-            parts.append({"type": "minecraft:condition", "if_true": "minecraft:under_floor", "then_run": material(surface["under"])})
+            parts.append({"type": "minecraft:condition", "if_true": "minecraft:under_floor", "then_run": floor_rule(surface, "under", "under_patches")})
         rules.append({"type": "minecraft:condition", "if_true": {"type": "minecraft:biome", "biome_is": rid(name)},
                       "then_run": {"type": "minecraft:sequence", "sequence": parts}})
     return {"type": "minecraft:sequence", "sequence": rules}

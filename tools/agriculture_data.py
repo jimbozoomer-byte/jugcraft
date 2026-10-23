@@ -54,12 +54,16 @@ import leaf_blower_data
 import decor15_data
 import decor16_data
 import decor17_data
+import adam_ondi_ahman_data
 import lair_data
 import tatterlace_data
 import yeti_king_data
 import cinder_tyrant_data
 import mire_hag_data
 import crypt_lich_data
+import iron_dreadnought_data
+import alpha_werewolf_data
+import cydonian_sentinel_data
 import vesperine_data
 import decor18_data
 import decor19_data
@@ -70,6 +74,9 @@ import regatta_data
 import flora_data
 import plants_data
 import trees_data
+import fungal_trees_data
+import hanging_fruit_data
+import rainforest_data
 import kitchen_data
 import feasts_data
 import menu_data
@@ -229,6 +236,9 @@ def assets(root, write, lang):
 
     festival_data.assets(root, write, lang)
     trees_data.assets(root, write)
+    fungal_trees_data.assets(root, write, lang)
+    hanging_fruit_data.assets(root, write, lang)
+    rainforest_data.assets(root, write, lang)
     plants_data.assets(root, write, lang)
     carving_data.assets(root, write, lang)
     halloween_data.assets(root, write, lang)
@@ -297,12 +307,16 @@ def assets(root, write, lang):
     decor19_data.assets(root, write, lang)
     decor20_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
+    adam_ondi_ahman_data.assets(root, write, lang)
     vesperine_data.assets(root, write, lang)
     tatterlace_data.assets(root, write, lang)
     yeti_king_data.assets(root, write, lang)
     cinder_tyrant_data.assets(root, write, lang)
     mire_hag_data.assets(root, write, lang)
     crypt_lich_data.assets(root, write, lang)
+    iron_dreadnought_data.assets(root, write, lang)
+    alpha_werewolf_data.assets(root, write, lang)
+    cydonian_sentinel_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
     kitchen_data.assets(root, write, lang)
@@ -414,6 +428,9 @@ def loot(data, write):
         write(out / f"{block}.json", table(block, pool(entry(block), condition={"type": "minecraft:survives_explosion"}), decay=False))
     festival_data.loot(out, write)
     trees_data.loot(out, write)
+    fungal_trees_data.loot(out, write)
+    hanging_fruit_data.loot(out, write)
+    rainforest_data.loot(out, write)
     plants_data.loot(out, write)
     carving_data.loot(out, write)
     halloween_data.loot(out, write)
@@ -455,12 +472,16 @@ def loot(data, write):
     decor19_data.loot(out, write)
     decor20_data.loot(out, write)
     lair_data.loot(out, write)
+    adam_ondi_ahman_data.loot(out, write)
     vesperine_data.loot(out, write)
     tatterlace_data.loot(out, write)
     yeti_king_data.loot(out, write)
     cinder_tyrant_data.loot(out, write)
     mire_hag_data.loot(out, write)
     crypt_lich_data.loot(out, write)
+    iron_dreadnought_data.loot(out, write)
+    alpha_werewolf_data.loot(out, write)
+    cydonian_sentinel_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -489,7 +510,7 @@ def recipes(out, write):
     for result, info in COOKING.items():
         for kind, time in COOK_TIMES.items():
             name = result if kind == "smelting" else f"{result}_from_{kind}"
-            write(out / f"{name}.json", {"fabric:load_conditions": conditions(), "type": f"minecraft:{kind}",
+            write(out / f"{name}.json", {"fabric:load_conditions": conditions(switch=info.get("switch", FEATURE)), "type": f"minecraft:{kind}",
                                          "category": info.get("category", "food"),
                                          "ingredient": rid(info["input"]), "result": {"id": rid(result)},
                                          "experience": info["xp"], "cookingtime": time})
@@ -546,6 +567,9 @@ def recipes(out, write):
     cinder_tyrant_data.recipes(out, write, conditions)
     mire_hag_data.recipes(out, write, conditions)
     crypt_lich_data.recipes(out, write, conditions)
+    iron_dreadnought_data.recipes(out, write, conditions)
+    alpha_werewolf_data.recipes(out, write, conditions)
+    cydonian_sentinel_data.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
 
 
@@ -570,6 +594,9 @@ def tags(tags):
             tags.add("block", LEGUME_TAG, rid(info["block"]))
     festival_data.tags(tags)
     trees_data.tags(tags)
+    fungal_trees_data.tags(tags)
+    hanging_fruit_data.tags(tags)
+    rainforest_data.tags(tags)
     plants_data.tags(tags)
     carving_data.tags(tags)
     halloween_data.tags(tags)
@@ -584,12 +611,16 @@ def tags(tags):
     decor19_data.tags(tags)
     decor20_data.tags(tags)
     lair_data.tags(tags)
+    adam_ondi_ahman_data.tags(tags)
     vesperine_data.tags(tags)
     tatterlace_data.tags(tags)
     yeti_king_data.tags(tags)
     cinder_tyrant_data.tags(tags)
     mire_hag_data.tags(tags)
     crypt_lich_data.tags(tags)
+    iron_dreadnought_data.tags(tags)
+    alpha_werewolf_data.tags(tags)
+    cydonian_sentinel_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)
@@ -649,12 +680,17 @@ def advancements(data, write):
     cinder_tyrant_data.advancements(data, write)
     mire_hag_data.advancements(data, write)
     crypt_lich_data.advancements(data, write)
+    iron_dreadnought_data.advancements(data, write)
+    iron_dreadnought_data.damage_types(data, write)
+    alpha_werewolf_data.advancements(data, write)
+    cydonian_sentinel_data.advancements(data, write)
 
 
 def worldgen(data, write):
     festival_data.worldgen(data, write)
     cider_data.worldgen(data, write)
     trees_data.worldgen(data, write)
+    fungal_trees_data.worldgen(data, write)
     plants_data.worldgen(data, write)
     halloween_data.worldgen(data, write)
     foraging_data.worldgen(data, write)
@@ -685,3 +721,5 @@ def worldgen(data, write):
             ],
         })
     lair_data.worldgen(data, write)
+    adam_ondi_ahman_data.worldgen(data, write)
+    cydonian_sentinel_data.worldgen(data, write)

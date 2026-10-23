@@ -67,6 +67,9 @@ public class TownClientGameTests implements FabricClientGameTest {
 			// 37076304887, waiting over the south edge, built only 96 of 144); then over the town from the south.
 			fly(context, server, origin, 96, 60, 96, 180, 90);
 			int size = TownData.get().size;
+			if (TownData.get().unknownStates() != 0) {
+				throw new AssertionError("The town contains an unknown block state");
+			}
 			int chunks = (size / 16) * (size / 16);
 			int built = 0;
 			for (int wait = 0; wait < 90; wait++) {
@@ -77,6 +80,9 @@ public class TownClientGameTests implements FabricClientGameTest {
 				}
 			}
 			LOGGER.info("Town, seed {}: {} of {} chunks built", SEED, built, chunks);
+			if (built < chunks) {
+				throw new AssertionError("Only " + built + " of " + chunks + " town chunks built");
+			}
 			// Up to 90 blocks over the town's floor but under the clouds (about y 192; run 37078631445's town in Alpine Spawn,
 			// floor at y 106, was shot from above them), looking down at the square.
 			int up = Math.max(20, Math.min(90, 180 - origin.getY()));
@@ -145,15 +151,88 @@ public class TownClientGameTests implements FabricClientGameTest {
 			if (!shop || !atm) {
 				throw new AssertionError("The town's seasonal stall keeper or its ATM is missing (shop " + shop + ", ATM " + atm + ")");
 			}
+			// Architectural review in a disposable world, not the owner's manual save.
+			server.runCommand("time set noon");
+			server.runCommand("gamerule minecraft:advance_time false");
+			setHudHidden(context, true);
+			int[][] views = {{96, 8, 119, 180, -18}, {96, 2, 77, 180, -8},
+					{116, 23, 62, 90, 15}, {96, 19, 30, 0, 10},
+					{98, 13, 107, 270, 5}, {90, 12, 107, 90, 12}, {152, 5, 96, 90, -7}};
+			String[] names = {"church_front", "church_nave", "church_side", "church_rear",
+					"town_hall", "bank", "houses"};
+			for (int i = 0; i < views.length; i++) {
+				int[] view = views[i];
+				fly(context, server, origin, view[0], view[1], view[2], view[3], view[4]);
+				singleplayer.getConnection().waitForChunksRender();
+				context.takeScreenshot("jugcraft_refined_" + names[i]);
+			}
+			server.runOnServer(minecraft -> {
+				var level = minecraft.overworld();
+				for (var entry : TownData.get().signs) {
+					var be = level.getBlockEntity(origin.offset(entry.pos()));
+					if (!(be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign)
+							|| !sign.isWaxed() || !sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT)
+							.getMessages(false).getFirst().getString().equals(entry.lines().get(0))) {
+						throw new AssertionError("Town sign missing or changed after seasonal updates: " + entry.pos());
+					}
+				}
+				var frames = level.getEntitiesOfClass(net.minecraft.world.entity.decoration.ItemFrame.class,
+						new AABB(origin.offset(88, 2, 112)).inflate(1));
+				if (!frames.isEmpty()) throw new AssertionError("Retired town map must stay absent");
+				var player = minecraft.getPlayerList().getPlayers().getFirst();
+				// The owner retired town maps; signs remain.
+				LOGGER.info("Wayfinding: {} waxed signs, retired map absent", TownData.get().signs.size());
+			});
+			context.runOnClient(client -> {
+				for (var entry : TownData.get().signs) for (String line : entry.lines()) {
+					if (client.font.width(line) > 90) throw new AssertionError("Sign text would clip: " + line);
+				}
+			});
+			fly(context, server, origin, 88, 1, 109, 0, 0);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_town_directory");
+			fly(context, server, origin, 80, 1, 101, 90, 0);
+			singleplayer.getConnection().waitForChunksRender();
+			context.takeScreenshot("jugcraft_town_keeper_skin");
+
+            var flakSpot=TownData.get().spots.stream().filter(s -> s.role().equals("flak_guard")).findFirst().orElseThrow().pos();
+            fly(context, server, origin, flakSpot.getX()+6, flakSpot.getY()+3, flakSpot.getZ()+8, 143, 15);
+            singleplayer.getConnection().waitForChunksRender();
+            context.takeScreenshot("jugcraft_city_flak_crew");
+            server.runOnServer(minecraft -> {
+                var level=minecraft.overworld();
+                var crews=level.getEntitiesOfClass(Townsfolk.class, townBox(origin,TownData.get().size), p->p.role().equals("flak_guard"));
+                if(crews.isEmpty() || crews.stream().anyMatch(p->!(p.getVehicle() instanceof io.github.jimbozoomer.jugcraft.artillery.FlakGun)))
+                    throw new AssertionError("Every loaded tower crew must actually be seated on its gun");
+                var walkers=level.getEntitiesOfClass(io.github.jimbozoomer.jugcraft.town.TownGuardMecha.class,townBox(origin,TownData.get().size));
+                if(walkers.isEmpty())throw new AssertionError("City guard walkers missing");
+                var walker=walkers.getFirst();walker.setNoAi(true);walker.snapTo(origin.getX()+78.5,origin.getY()+1,origin.getZ()+94.5,0,0);
+            });
+            fly(context,server,origin,84,3,102,143,8);
+            singleplayer.getConnection().waitForChunksRender();context.takeScreenshot("jugcraft_city_guard_walker");
+			// Leave the exported copy at the square, ready for owner-controlled play.
+			setHudHidden(context, false);
+			fly(context, server, origin, 96, 1, 89, 180, -12);
+			server.runCommand("save-all flush");
 		}
 	}
 
-	/** Puts the player at a town position (x, floor + up, z) looking along `yaw`, `pitch`, on a barrier if in the air. */
+	private static void setHudHidden(ClientGameTestContext context, boolean hidden) {
+		context.runOnClient(client -> {
+			if (client.gui.hud.isHidden() != hidden) {
+				client.gui.hud.toggle();
+			}
+		});
+	}
+
+	/** Flies the disposable test camera without leaving invisible barriers in the saved town. */
 	private static void fly(ClientGameTestContext context, TestServerContext server, BlockPos origin, int x, int up, int z, int yaw, int pitch) {
 		BlockPos at = origin.offset(x, up, z);
-		// Something to stand on when in the air (only where there is nothing: never over a block of the world).
-		server.runCommand("execute if block %d %d %d minecraft:air run setblock %d %d %d minecraft:barrier".formatted(
-				at.getX(), at.getY() - 1, at.getZ(), at.getX(), at.getY() - 1, at.getZ()));
+		server.runOnServer(minecraft -> {
+			ServerPlayer player = minecraft.getPlayerList().getPlayers().get(0);
+			player.getAbilities().flying = true;
+			player.onUpdateAbilities();
+		});
 		server.runCommand(String.format(Locale.ROOT, "tp @p %d.5 %d %d.5 %d %d", at.getX(), at.getY(), at.getZ(), yaw, pitch));
 		context.waitTicks(40);
 	}

@@ -1,0 +1,8 @@
+{
+  "type": "jugcraft:candy_landmark",
+  "biomes": "jugcraft:cavern_candy_cavity",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "template": "jugcraft:cavern_licowitch_tower"
+}

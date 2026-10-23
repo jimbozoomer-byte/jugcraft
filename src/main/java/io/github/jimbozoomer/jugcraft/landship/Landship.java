@@ -46,12 +46,12 @@ public class Landship extends Entity {
 	public static final double SPEED = 0.15;
 	public static final float TURN = 2.5F;
 	public static final int CANNON_COOLDOWN = 40;
-	public static final double SHELL_SPEED = 2.5;
+	public static final double SHELL_SPEED = 5.0;
 	public static final double SHELL_RADIUS = 3.5;
 	public static final float SHELL_DAMAGE = 22F;
 	public static final int GUN_INTERVAL = 10;
 	public static final float GUN_DAMAGE = 4F;
-	public static final int GUN_RANGE = 24;
+	public static final int GUN_RANGE = 250;
 	public static final float CRUSH_DAMAGE = 4F;
 	public static final int FUEL_TANK = 6000;
 	public static final int FUEL_PER_BUCKET = 1000;
@@ -76,6 +76,8 @@ public class Landship extends Entity {
 	private static final EntityDataAccessor<Boolean> GUNS = SynchedEntityData.defineId(Landship.class, EntityDataSerializers.BOOLEAN);
 
 	private int fuel;
+	public io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout fitout = io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout.STANDARD;
+	private int fuelPayments;
 	private int forward;
 	private int turn;
 	private int cannon;
@@ -207,6 +209,7 @@ public class Landship extends Entity {
 		double yaw = Math.toRadians(getYRot());
 		Vec3 heading = new Vec3(-Math.sin(yaw), 0, Math.cos(yaw));
 		double speed = !fuelled ? 0 : f > 0 ? SPEED : f < 0 ? -SPEED / 2 : 0;
+		speed *= fitout.speed();
 		Vec3 motion = getDeltaMovement();
 		double vy = motion.y - 0.08;
 		if (onGround()) {
@@ -243,7 +246,7 @@ public class Landship extends Entity {
 
 		boolean working = speed != 0 || t != 0;
 		if (working && fuelled && tickCount % (20 / FUEL_PER_SECOND) == 0) {
-			fuel--;
+			fuel = Math.max(0, fuel - fitout.fuelCost(++fuelPayments));
 			if (fuel == 0 && driver instanceof Player player) {
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.landship.empty"));
 			}
@@ -372,6 +375,8 @@ public class Landship extends Entity {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        if (source.getEntity() instanceof net.minecraft.world.entity.player.Player attacker
+                && !io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(attacker, level, blockPosition())) return false;
 		if (isRemoved() || !(source.getEntity() instanceof Player player) || player.getRootVehicle() == this) {
 			return false;
 		}
@@ -380,8 +385,8 @@ public class Landship extends Entity {
 			return true;
 		}
 		damage += amount;
-		if (damage >= HEALTH) {
-			spawnAtLocation(level, new ItemStack(JugcraftLandships.LANDSHIP_ITEM));
+		if (damage >= HEALTH * fitout.toughness()) {
+			spawnAtLocation(level, fitout.write(new ItemStack(JugcraftLandships.LANDSHIP_ITEM), fuel));
 			discard();
 		}
 		return true;
@@ -396,10 +401,13 @@ public class Landship extends Entity {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		fuel = Mth.clamp(input.getInt("fuel").orElse(0), 0, FUEL_TANK);
+		fitout = new io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout(input.getIntOr("BayArmor", 0), input.getIntOr("BayDrive", 0));
+		fuelPayments = input.getIntOr("BayPayments", 0);
 	}
 
 	@Override
 	protected void addAdditionalSaveData(ValueOutput output) {
 		output.putInt("fuel", fuel);
+		output.putInt("BayArmor", fitout.armor()); output.putInt("BayDrive", fitout.drive()); output.putInt("BayPayments", fuelPayments);
 	}
 }

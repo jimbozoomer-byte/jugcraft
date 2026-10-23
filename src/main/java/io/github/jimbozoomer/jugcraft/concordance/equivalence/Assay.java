@@ -8,16 +8,16 @@ import java.util.Map;
 /**
  * What an Assayer's Scale pays and charges (roadmap step 21), conservatively rounded: dissolving gives the exact value
  * of the whole batch rounded down once; forming costs {@value #FORM_NUMERATOR}/{@value #FORM_DENOMINATOR} of the exact
- * value rounded up once. So a batch dissolved and formed again always loses, and splitting a batch never earns more
+ * value rounded up once. So a batch dissolved and formed again never gains, and splitting a batch never earns more
  * than the whole. A player's grains are capped at {@value #MAX_BALANCE}.
  */
 public final class Assay {
 	/** The pseudo-item the audit uses for grains of Prima Materia: one grain is worth one. */
 	public static final String PRIMA = "jugcraft:prima_materia";
-	public static final long FORM_NUMERATOR = 5;
-	public static final long FORM_DENOMINATOR = 4;
+	public static final long FORM_NUMERATOR = 1;
+	public static final long FORM_DENOMINATOR = 1;
 	/** The most grains one player's ledger holds. */
-	public static final long MAX_BALANCE = 1_000_000L;
+	public static final long MAX_BALANCE = 2_000_000_000L;
 	/** The most items one dissolving or forming moves. */
 	public static final int MAX_BATCH = 64;
 
@@ -44,9 +44,12 @@ public final class Assay {
 		List<Transmutation> scale = new ArrayList<>();
 		for (Material material : catalog.materials().values()) {
 			if (material.dissolvable()) {
-				long batch = material.value().denominator();
-				scale.add(new Transmutation("scale/dissolve/" + material.item(), Transmutation.Kind.RECIPE, "scale",
-						Map.of(material.item(), (int) Math.min(Integer.MAX_VALUE, batch)), Map.of(PRIMA, (int) Math.min(Integer.MAX_VALUE, dissolve(material, batch))),
+				// Audit a realizable batch. Independently clamping huge denominators and payouts
+				// invents a profitable conversion which the real scale never performs.
+				long batch = Math.min(MAX_BATCH, material.value().denominator());
+				long payout = dissolve(material, batch);
+				if (payout > 0) scale.add(new Transmutation("scale/dissolve/" + material.item(), Transmutation.Kind.RECIPE, "scale",
+						Map.of(material.item(), (int) batch), Map.of(PRIMA, (int) Math.min(Integer.MAX_VALUE, payout)),
 						Map.of(), Map.of(), Map.of(), List.of(), Map.of()));
 			}
 			if (material.formable()) {

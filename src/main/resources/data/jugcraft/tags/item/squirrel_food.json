@@ -1,8 +1,12 @@
 {
   "replace": false,
   "values": [
+    "jugcraft:pine_nuts",
+    "jugcraft:roasted_pine_nuts",
     "jugcraft:acorn",
     "jugcraft:chestnut",
-    "jugcraft:roasted_chestnuts"
+    "jugcraft:roasted_chestnuts",
+    "jugcraft:ecology_walnut",
+    "jugcraft:roasted_walnuts"
   ]
 }

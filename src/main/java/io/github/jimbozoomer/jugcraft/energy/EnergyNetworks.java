@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.energy;
 
+import io.github.jimbozoomer.jugcraft.finance.ClaimTransfers;
+import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ public final class EnergyNetworks {
 				break;
 			}
 			BlockPos neighbor = pos.relative(side);
+            if (!ClaimTransfers.allowed(level, pos, neighbor)) continue;
 			if (level.getBlockState(neighbor).getBlock() instanceof CableBlock cable) {
 				Network network = network(level, neighbor);
 				moved += network.distribute(level, pos, source, Math.min(budget, network.rate));
@@ -60,7 +63,7 @@ public final class EnergyNetworks {
 
 	/** Moves up to {@code maxAmount} between two storages; either the whole move commits or nothing changes. */
 	public static long move(EnergyStorage from, EnergyStorage to, long maxAmount) {
-		if (!from.supportsExtraction() || !to.supportsInsertion() || maxAmount <= 0) {
+		if (from.transferIdentity() == to.transferIdentity() || !from.supportsExtraction() || !to.supportsInsertion() || maxAmount <= 0) {
 			return 0;
 		}
 		// Simulate both sides (transactions are aborted when not committed), then move the exact amount.
@@ -97,10 +100,11 @@ public final class EnergyNetworks {
 	private static Network network(Level level, BlockPos cablePos) {
 		Map<BlockPos, Network> networks = CACHE.computeIfAbsent(level, l -> new HashMap<>());
 		Network cached = networks.get(cablePos);
-		if (cached != null) {
+		if (cached != null && cached.revision == LandRegistry.revision(level) && cached.cables.stream().allMatch(level::hasChunkAt)) {
 			return cached;
 		}
 		Network network = Network.discover(level, cablePos);
+        network.revision = LandRegistry.revision(level);
 		for (BlockPos cable : network.cables) {
 			networks.put(cable, network);
 		}
@@ -113,6 +117,7 @@ public final class EnergyNetworks {
 		private final List<Endpoint> endpoints = new ArrayList<>();
 		/** JE per push: the slowest cable tier in the network sets it. */
 		private long rate = Long.MAX_VALUE;
+        private long revision;
 
 		static Network discover(Level level, BlockPos start) {
 			Network network = new Network();
@@ -127,6 +132,7 @@ public final class EnergyNetworks {
 				}
 				for (Direction direction : Direction.values()) {
 					BlockPos next = cable.relative(direction).immutable();
+                    if (!ClaimTransfers.allowed(level, cable, next)) continue;
 					if (level.getBlockState(next).getBlock() instanceof CableBlock) {
 						if (network.cables.add(next)) {
 							queue.add(next);
@@ -142,26 +148,32 @@ public final class EnergyNetworks {
 		/** Splits energy evenly across every storage that can accept it (each counted once), except the source. */
 		long distribute(Level level, BlockPos sourcePos, EnergyStorage source, long budget) {
 			List<EnergyStorage> receivers = new ArrayList<>();
+			Set<Object> identities = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
 			for (Endpoint endpoint : endpoints) {
+                if (!ClaimTransfers.allowed(level, sourcePos, endpoint.pos)) continue;
 				if (endpoint.pos.equals(sourcePos)) {
 					continue;
 				}
 				EnergyStorage storage = EnergyStorage.SIDED.find(level, endpoint.pos, endpoint.side);
-				if (storage != null && storage.supportsInsertion() && storage != source
-						&& !receivers.contains(storage)) {
+				if (storage != null && storage.supportsInsertion() && storage.transferIdentity() != source.transferIdentity()
+						&& identities.add(storage.transferIdentity())) {
 					receivers.add(storage);
 				}
 			}
 
 			long moved = 0;
-			// Two passes: an even share first, then leftovers to whoever still has room.
-			for (int pass = 0; pass < 2 && moved < budget && !receivers.isEmpty(); pass++) {
-				long share = Math.max(1, (budget - moved) / receivers.size());
+			// Stable priority groups, each retaining the existing fair-share then spill pass.
+			for (int priority = 1; priority >= -1 && moved < budget; priority--) {
+				List<EnergyStorage> group = new ArrayList<>();
 				for (EnergyStorage receiver : receivers) {
-					if (moved >= budget) {
-						break;
+					if (Math.clamp(receiver.chargePriority(), -1, 1) == priority) group.add(receiver);
+				}
+				for (int pass = 0; pass < 2 && moved < budget && !group.isEmpty(); pass++) {
+					long share = Math.max(1, (budget - moved) / group.size());
+					for (EnergyStorage receiver : group) {
+						if (moved >= budget) break;
+						moved += move(source, receiver, Math.min(share, budget - moved));
 					}
-					moved += move(source, receiver, Math.min(share, budget - moved));
 				}
 			}
 			return moved;

@@ -12,7 +12,11 @@
     },
     {
       "chance": 0.15,
-      "feature": "minecraft:oak_checked"
+      "feature": "jugcraft:mahogany_checked"
+    },
+    {
+      "chance": 0.13840830449826994,
+      "feature": "jugcraft:huge_glowcap"
     }
   ]
 }

@@ -15,6 +15,22 @@
     "jugcraft:eucalyptus_log",
     "jugcraft:mahogany_log",
     "jugcraft:cedar_log",
-    "jugcraft:cinnamon_log"
+    "jugcraft:pine_log",
+    "jugcraft:yew_log",
+    "jugcraft:bald_cypress_log",
+    "jugcraft:magnolia_log",
+    "jugcraft:fruitwood_log",
+    "jugcraft:persimmon_log",
+    "jugcraft:juniper_log",
+    "jugcraft:holly_log",
+    "jugcraft:olive_log",
+    "jugcraft:tamarisk_log",
+    "jugcraft:yucca_log",
+    "jugcraft:baobab_log",
+    "jugcraft:fig_log",
+    "jugcraft:mango_log",
+    "jugcraft:walnut_log",
+    "jugcraft:cinnamon_log",
+    "jugcraft:ecology_walnut_log"
   ]
 }

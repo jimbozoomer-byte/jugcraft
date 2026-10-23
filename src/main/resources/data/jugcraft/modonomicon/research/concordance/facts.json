@@ -178,5 +178,17 @@
   },
   {
     "id": "jugcraft:concordance/stratawrighting_mastered"
+  },
+  {
+    "id": "jugcraft:concordance/nouveau_arcana_encountered"
+  },
+  {
+    "id": "jugcraft:concordance/nouveau_arcana_observed"
+  },
+  {
+    "id": "jugcraft:concordance/nouveau_arcana_understood"
+  },
+  {
+    "id": "jugcraft:concordance/nouveau_arcana_mastered"
   }
 ]

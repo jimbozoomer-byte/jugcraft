@@ -11,6 +11,8 @@ they said: "All the wood looks so so good now ... take note of how you did that 
 for how we want any additional wood or natural textures to look ingame". This page is that note. The code that does it
 is `tools/wood_style.py`; read it beside this page.
 
+**15 October pine exception:** the owner requested and approved the original pine wood textures from the shared library. Pine logs, ends and planks therefore use their local originals without recolouring. Its grayscale needle layer takes a fixed evergreen tint at render time; the original brown twig overlay remains untinted. See [tree batch 2](features/trees-batch-2.md).
+
 ## The owner's own textures are used as drawn
 
 These rules are for textures Jugcraft draws. Textures the owner drew themselves, in the shared library
@@ -68,7 +70,7 @@ Seen among vanilla trees, ours look like more of the same world, not a different
 ### 3. Colours from the owner's paintings, kept within vanilla's range
 - **Take a new wood's colour from the owner's paintings** (`WOOD`: which painting, and the colour sampled from its
   painted side). If there is no painting, ask for one, or pick a colour the owner approves.
-- **Check it beside vanilla's woods:** oak, spruce, birch, jungle, acacia, dark oak, mangrove, cherry and pale oak. It
+- **Check it beside vanilla's woods:** oak, spruce, birch, jungle, acacia, dark oak, mangrove, cherry, pale oak, bamboo, crimson and warped. It
   should be no brighter, no more saturated and no more contrasting than they are. It should also differ from the
   nearest of them in hue, so the wood is worth having.
 

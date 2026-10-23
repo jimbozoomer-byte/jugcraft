@@ -30,6 +30,9 @@ public final class JugcraftMaterials {
 	public static MetalFamily INVAR;
 	public static MetalFamily SOLDER;
 	public static MetalFamily STEEL;
+	public static MetalFamily FERROCHROMIUM;
+	public static MetalFamily STAINLESS_STEEL;
+	public static MetalFamily ALUMINUM_MAGNESIUM;
 
 	public static MineralFamily SALT;
 	public static MineralFamily PHOSPHATE;
@@ -37,10 +40,14 @@ public final class JugcraftMaterials {
 	public static MineralFamily MONAZITE;
 	public static MineralFamily FLUORITE;
 	public static MineralFamily SPODUMENE;
+	public static MineralFamily CHROMITE;
+	public static MineralFamily COBALTITE;
+	public static MineralFamily VANADIUM_IRON;
 
 	public static Block BAUXITE;
 	public static Block OIL_SAND;
 	public static Block TINCAL;
+	public static Block TITANIUM_SAND, ZIRCON_SAND, RARE_EARTH_SAND, GARNET_SAND;
 
 	public static Item BITUMEN;
 	/** Glass chemistry (batch 16). */
@@ -73,6 +80,9 @@ public final class JugcraftMaterials {
 		INVAR = MetalFamily.builder("invar").build();
 		SOLDER = MetalFamily.builder("solder").build();
 		STEEL = MetalFamily.builder("steel").build();
+		FERROCHROMIUM = MetalFamily.builder("ferrochromium").build();
+		STAINLESS_STEEL = MetalFamily.builder("stainless_steel").build();
+		ALUMINUM_MAGNESIUM = MetalFamily.builder("aluminum_magnesium").build();
 
 		SALT = MineralFamily.register("salt");
 		PHOSPHATE = MineralFamily.register("phosphate");
@@ -80,10 +90,17 @@ public final class JugcraftMaterials {
 		MONAZITE = MineralFamily.register("monazite");
 		FLUORITE = MineralFamily.register("fluorite");
 		SPODUMENE = MineralFamily.register("spodumene");
+		VANADIUM_IRON = MineralFamily.register("vanadium_iron");
+		CHROMITE = MineralFamily.register("chromite");
+		COBALTITE = MineralFamily.register("cobaltite");
 
 		BAUXITE = JugcraftRegistry.block("bauxite", Blocks.GRANITE);
 		OIL_SAND = JugcraftRegistry.block("oil_sand", Blocks.SAND);
 		TINCAL = JugcraftRegistry.block("tincal", Blocks.SANDSTONE);
+		TITANIUM_SAND = JugcraftRegistry.block("titanium_sand", Blocks.SAND);
+		ZIRCON_SAND = JugcraftRegistry.block("zircon_sand", Blocks.SAND);
+		RARE_EARTH_SAND = JugcraftRegistry.block("rare_earth_sand", Blocks.SAND);
+		GARNET_SAND = JugcraftRegistry.block("garnet_sand", Blocks.SAND);
 
 		BITUMEN = JugcraftRegistry.item("bitumen");
 		SULFUR_DUST = JugcraftRegistry.item("sulfur_dust");
@@ -100,8 +117,8 @@ public final class JugcraftMaterials {
 	}
 
 	private static void registerCreativeTabs() {
-		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, THALLITE, BRONZE, ALUMINUM, BRASS, INVAR, SOLDER, STEEL};
-		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE, FLUORITE, SPODUMENE};
+		MetalFamily[] metals = {TIN, ZINC, LEAD, SILVER, NICKEL, TUNGSTEN, URANIUM, TITANIUM, THALLITE, BRONZE, ALUMINUM, BRASS, INVAR, SOLDER, STEEL, FERROCHROMIUM, STAINLESS_STEEL, ALUMINUM_MAGNESIUM};
+		MineralFamily[] minerals = {SALT, PHOSPHATE, LEPIDOLITE, MONAZITE, FLUORITE, SPODUMENE, VANADIUM_IRON, CHROMITE, COBALTITE};
 
 		List<ItemLike> natural = new ArrayList<>();
 		List<ItemLike> ingredients = new ArrayList<>();
@@ -128,6 +145,7 @@ public final class JugcraftMaterials {
 		natural.add(BAUXITE);
 		natural.add(OIL_SAND);
 		natural.add(TINCAL);
+		natural.addAll(List.of(TITANIUM_SAND, ZIRCON_SAND, RARE_EARTH_SAND, GARNET_SAND));
 		ingredients.addAll(List.of(BITUMEN, SULFUR_DUST, SILICON, LITHIUM_CARBONATE, RARE_EARTH_OXIDE, COKE, BORAX,
 				BOROSILICATE_GLASS, OPTICAL_FIBRE, FERROBORON));
 

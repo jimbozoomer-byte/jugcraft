@@ -166,15 +166,16 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 	private static void theKey(ClientGameTestContext context) {
 		KeyMapping key = EncyclopediaClient.key();
 		String clash = context.computeOnClient(client -> Arrays.stream(client.options.keyMappings)
-				.filter(other -> other != key && other.getCategory() != KeyMapping.Category.DEBUG && other.getDefaultKey().equals(key.getDefaultKey()))
+				.filter(other -> other != key && other.getCategory() != KeyMapping.Category.DEBUG && other.same(key))
 				.map(KeyMapping::getName).toList().toString());
 		// Every loaded default outside the debug keys, so one run shows which keys a new default could still take.
 		String taken = context.computeOnClient(client -> Arrays.stream(client.options.keyMappings)
 				.filter(other -> other.getCategory() != KeyMapping.Category.DEBUG && !other.getDefaultKey().equals(InputConstants.UNKNOWN))
 				.map(other -> other.getDefaultKey().getName() + "=" + other.getName()).sorted().toList().toString());
 		Jugcraft.LOGGER.info("[encyclopedia-check] loaded defaults: {}", taken);
-		Jugcraft.LOGGER.info("[encyclopedia-check] the default key {}; other keys with that default: {}", key.getDefaultKey().getName(), clash);
-		check(!key.isUnbound() && clash.equals("[]"), "The encyclopedia's default key should be bound and shared with no other key: " + clash);
+		// Complete supplies options.txt overrides (Traveler's Backpack uses N instead of its upstream B).
+		Jugcraft.LOGGER.info("[encyclopedia-check] the configured key {}; other keys with that binding: {}", key.saveString(), clash);
+		check(!key.isUnbound() && clash.equals("[]"), "The encyclopedia's configured key should be bound and shared with no other key: " + clash);
 
 		context.getInput().pressKey(key);
 		context.waitForScreen(EncyclopediaScreen.class);
@@ -184,7 +185,14 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		EncyclopediaPayload.StepState find = step(context, "find");
 		Jugcraft.LOGGER.info("[encyclopedia-check] opened by its key: page {}, find {}", page, find);
 		check(page.equals("discover") && find == EncyclopediaPayload.StepState.NEXT, "A newcomer should open on Discover with find next: " + page + " " + find);
-		context.takeScreenshot("jugcraft_encyclopedia_discover_new");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_discover_new");
+        check(context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).isHome()), "The guide should open on the simple contents spread");
+        context.clickScreenButton("ui.jugcraft.book.discover");
+        context.waitTicks(3);
+        check(context.computeOnClient(client -> !((EncyclopediaScreen) client.gui.screen()).isHome()), "First steps should open the topic directory");
+        context.takeScreenshot("jugcraft_field_guide_first_steps");
 
 		context.getInput().pressKey(key);
 		context.waitForScreen(null);
@@ -220,7 +228,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		String placed = context.computeOnClient(EncyclopediaClientGameTests::placement);
 		Jugcraft.LOGGER.info("[encyclopedia-check] the inventory button: {}", placed);
 		check(placed.startsWith("ok"), "The inventory button should stand right of the recipe-book button over nothing else: " + placed);
-		context.takeScreenshot("jugcraft_encyclopedia_inventory_button");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_inventory_button");
 
 		// The recipe book opened: the button follows its button.
 		context.runOnClient(client -> ((Button) EncyclopediaInventoryButton.anchor(client.gui.screen())).onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, 0)));
@@ -228,7 +238,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		String moved = context.computeOnClient(EncyclopediaClientGameTests::placement);
 		Jugcraft.LOGGER.info("[encyclopedia-check] with the recipe book open: {}", moved);
 		check(moved.startsWith("ok"), "With the recipe book open the button should follow its button: " + moved);
-		context.takeScreenshot("jugcraft_encyclopedia_recipe_book");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_recipe_book");
 		context.runOnClient(client -> ((Button) EncyclopediaInventoryButton.anchor(client.gui.screen())).onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, 0)));
 		context.waitTicks(5);
 
@@ -302,7 +314,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		EncyclopediaPayload.StepState dark = step(context, "dark");
 		Jugcraft.LOGGER.info("[encyclopedia-check] examined in the dark: dark {}, understand {}", dark, step(context, "understand"));
 		check(dark == EncyclopediaPayload.StepState.DONE, "Examined in the dark, the dark step should be done: " + dark);
-		context.takeScreenshot("jugcraft_encyclopedia_discover_route");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_discover_route");
 
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = first(minecraft);
@@ -310,20 +324,26 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND));
 		});
 		context.waitTicks(15);
-		context.getInput().pressKey(InputConstants.KEY_R);
+		context.getInput().pressKey(InputConstants.KEY_F6);
 		answered(context);
 		EncyclopediaPayload.StepState cast = step(context, "cast");
 		check(cast == EncyclopediaPayload.StepState.NEXT, "Understood with a wand in hand, casting comes next: " + cast);
 		context.runOnClient(client -> {
-			EncyclopediaClient.navigator().go("spellcraft");
+			((EncyclopediaScreen) client.gui.screen()).showPage("spellcraft");
 			EncyclopediaClient.changed();
 		});
 		context.waitTicks(5);
-		context.takeScreenshot("jugcraft_encyclopedia_spellcraft");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_spellcraft");
 
 		// The composer's link opens the Spell Composer (a screen or, with GuiLib, its workspace); its Esc comes back here.
 		context.runOnClient(client -> {
-			AbstractWidget link = ((EncyclopediaScreen) client.gui.screen()).find(Component.translatable("encyclopedia.jugcraft.link.composer"));
+			((EncyclopediaScreen) client.gui.screen()).showSectionContaining(Component.translatable("encyclopedia.jugcraft.link.composer"));
+            });
+            context.waitTicks(3);
+            context.runOnClient(client -> {
+                AbstractWidget link = ((EncyclopediaScreen) client.gui.screen()).find(Component.translatable("encyclopedia.jugcraft.link.composer"));
 			((Button) link).onPress(new MouseButtonInfo(InputConstants.MOUSE_BUTTON_LEFT, 0));
 		});
 		context.waitFor(client -> client.gui.screen() != null && !(client.gui.screen() instanceof EncyclopediaScreen), WAIT);
@@ -339,7 +359,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			server.runOnServer(minecraft -> first(minecraft).setItemInHand(InteractionHand.MAIN_HAND,
 					new ItemStack(held.equals("kindled_lantern") ? JugcraftConcordance.KINDLED_LANTERN : JugcraftConcordance.ADEPT_WAND)));
 			context.waitTicks(10);
-			context.takeScreenshot("jugcraft_first_loadout_" + held);
+			context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_first_loadout_" + held);
 		}
 		server.runOnServer(minecraft -> first(minecraft).setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND)));
 		context.waitTicks(5);
@@ -373,7 +395,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		});
 		Jugcraft.LOGGER.info("[encyclopedia-check] looking at an anchor: page {}, lines {}", page, shown);
 		check(page.equals("inspect") && shown.equals(report), "Looking at an anchor, the Inspect page should be its own report: " + shown + " vs " + report);
-		context.takeScreenshot("jugcraft_encyclopedia_inspect");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_inspect");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
 		context.getInput().lookAt(0.0F, 30.0F);
@@ -860,14 +884,17 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		open(context);
 		context.waitFor(client -> EncyclopediaClient.navigator().pages().stream().anyMatch(page -> page.id().equals("expedition")), WAIT);
 		context.runOnClient(client -> {
-			EncyclopediaClient.navigator().go("expedition");
+			((EncyclopediaScreen) client.gui.screen()).showPage("expedition");
 			EncyclopediaClient.changed();
 		});
 		context.waitTicks(5);
-		context.takeScreenshot("jugcraft_encyclopedia_expedition");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_expedition");
 
 		// Concordance Chunk B (B-11): the Glacier Hall's and the Cinder Kiln's dossiers (their tokens carried, their keepers
-		// beaten), each scrolled to the top of the page's body.
+		// beaten), each opened as its own section of the book (each dossier starts with a heading named after its lair)
+		// and scrolled to the top of the page's body.
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = first(minecraft);
 			player.getInventory().add(new ItemStack(JugcraftLairs.FROST_HORN));
@@ -880,11 +907,13 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.waitForScreen(null);
 		open(context);
 		context.runOnClient(client -> {
-			EncyclopediaClient.navigator().go("expedition");
+			((EncyclopediaScreen) client.gui.screen()).showPage("expedition");
 			EncyclopediaClient.changed();
 		});
 		context.waitTicks(5);
 		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN)) {
+			context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).showSectionContaining(LairDossiers.name(lair)));
+			context.waitTicks(3);
 			String placed = context.computeOnClient(client -> scrollTo(client, LairDossiers.name(lair)));
 			Jugcraft.LOGGER.info("[encyclopedia-check] the {} dossier on the Expeditions page: {}", lair.id, placed);
 			check(placed.startsWith("ok"), "The Expeditions page does not show the " + lair.id + " dossier: " + placed);
@@ -894,7 +923,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		}
 
 		context.runOnClient(client -> {
-			EncyclopediaClient.navigator().go("keys");
+			((EncyclopediaScreen) client.gui.screen()).showPage("keys");
 			EncyclopediaClient.changed();
 		});
 		context.waitTicks(5);
@@ -911,7 +940,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		});
 		Jugcraft.LOGGER.info("[encyclopedia-check] Jugcraft keys missing from the Keys page: {}", missing);
 		check(missing.isEmpty(), "The Keys page should list every Jugcraft key: missing " + missing);
-		context.takeScreenshot("jugcraft_encyclopedia_keys");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_keys");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
 	}
@@ -953,7 +984,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		});
 		Jugcraft.LOGGER.info("[encyclopedia-check] the creative Survival Inventory tab: {}", placed);
 		check(placed.startsWith("ok"), "On the creative Survival Inventory tab the button should show over nothing else: " + placed);
-		context.takeScreenshot("jugcraft_encyclopedia_creative_button");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_creative_button");
 		context.runOnClient(client -> ((FabricCreativeModeInventoryScreen) client.gui.screen()).setSelectedTab(CreativeModeTabs.getDefaultTab()));
 		context.waitTicks(5);
 		boolean hidden = context.computeOnClient(client -> {
@@ -975,7 +1008,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			client.resizeGui();
 		});
 		context.waitTicks(10);
-		context.takeScreenshot("jugcraft_encyclopedia_scale4");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_scale4");
 		context.runOnClient(client -> {
 			client.options.guiScale().set(scale);
 			client.resizeGui();
@@ -983,7 +1018,9 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		// Last, a small window (the runner restores the window's size after each test).
 		context.getInput().resizeWindow(640, 360);
 		context.waitTicks(10);
-		context.takeScreenshot("jugcraft_encyclopedia_small");
+		context.runOnClient(client -> client.gui.toastManager().clear());
+                context.waitTicks(2);
+                context.takeScreenshot("jugcraft_encyclopedia_small");
 		context.setScreen(() -> null);
 	}
 

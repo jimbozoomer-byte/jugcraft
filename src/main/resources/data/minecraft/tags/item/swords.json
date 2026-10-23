@@ -4,6 +4,7 @@
     "jugcraft:bronze_sword",
     "jugcraft:steel_sword",
     "jugcraft:thallite_sword",
+    "jugcraft:titanium_sword",
     "jugcraft:power_katana",
     "jugcraft:silver_dagger",
     "jugcraft:ronin_katana",
@@ -52,6 +53,10 @@
     "jugcraft:hades_scythe",
     "jugcraft:sentinel_longsword",
     "jugcraft:frost_knight_greatsword",
-    "jugcraft:wight_king_zweihander"
+    "jugcraft:wight_king_zweihander",
+    "jugcraft:dark_matter_sword",
+    "jugcraft:red_matter_sword",
+    "jugcraft:red_matter_katar",
+    "jugcraft:nouveau_enchanters_sword"
   ]
 }
