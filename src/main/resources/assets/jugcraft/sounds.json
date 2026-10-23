@@ -1454,6 +1454,33 @@
       }
     ]
   },
+  "guns.vesper_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/heavier_rifle_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.onrush_smg.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/greaser_smg_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "guns.gallant_rifle.fire": {
+    "subtitle": "subtitles.jugcraft.guns.fire",
+    "sounds": [
+      {
+        "name": "jugcraft:guns/bruiser_silenced_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
   "nouveau.empty": {
     "sounds": []
   },

@@ -1,6 +1,6 @@
 # Guns
 
-3,809 supplied files.
+3,812 supplied files.
 
 [Library guide](../../README.md) · [Original folder](../../originals/Blocks/Guns)
 
@@ -8,7 +8,7 @@ The [models](../../originals/Blocks/Guns/models) folder (added 7 October 2026, f
 
 The [effect](../../originals/Blocks/Guns/effect) folder (added 8 October 2026, files 354–371) holds the scope reticles and lens vignettes the scope models draw (`effect/...`), and muzzle flash frames; see the [library guide](../../README.md#effect-textures-8-october-2026).
 
-The [geo](../../originals/Blocks/Guns/geo) folder (added 23 October 2026, file 3809) holds the Grandle OG's GeckoLib geometry, `geo/item/gun/grandle_og.geo.json`, from the owner's re-sent gun collection: the one gun whose body has no Java model under `models/special/`. See the [library guide](../../README.md#gun-geometry-23-october-2026).
+The [geo](../../originals/Blocks/Guns/geo) folder (added 23 October 2026, files 3809–3812) holds GeckoLib geometry from the owner's re-sent gun collection: the Grandle OG's (`geo/item/gun/grandle_og.geo.json`), the one gun whose body has no Java model under `models/special/`, and the MAS 55's, the Prush Gun's and the Valora's (`mas_55`, `prush_gun`, `valora`), the owner's later edits of those guns. See the [library guide](../../README.md#gun-geometry-23-october-2026).
 
 - [Files 1–250](page-001.md)
 - [Files 251–500](page-002.md)
@@ -25,4 +25,4 @@ The [geo](../../originals/Blocks/Guns/geo) folder (added 23 October 2026, file 3
 - [Files 3001–3250](page-013.md)
 - [Files 3251–3500](page-014.md)
 - [Files 3501–3750](page-015.md)
-- [Files 3751–3809](page-016.md)
+- [Files 3751–3812](page-016.md)

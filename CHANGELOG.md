@@ -8,6 +8,12 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Guns, slice 15A (the first diamond-steel guns)
+- **Three guns** from the owner's own GeckoLib models and animations, the first of their diamond-steel guns, each held in both hands and fed from a box magazine: the **Vesper Rifle**, a heavy marksman's rifle of eight rifle rounds that hits hard and reaches 144 blocks; the **Onrush SMG**, a submachine gun of twenty-three light rounds, ten a second; and the **Gallant Rifle**, an automatic rifle of seventeen, silenced the length of its barrel. The Vesper and the Gallant carry a wax seal and a strip of scripture that swing as they fire.
+- Made from stainless steel, a diamond and a lever (Jugcraft has no diamond steel); planks for the Vesper and the Onrush, a Baffled Silencer for the Gallant. Each takes the magazines, stocks, grips, bayonets and scopes the owner made for it; the Gallant no barrel attachment, the Vesper no Medium Scope.
+- The owner's GeckoLib models of the three are added to the library. The guns' converter now draws a GeckoLib model's parts from that model's own texture.
+- Record: [guns.md, slice 15A](docs/features/guns.md#slice-15a-the-first-diamond-steel-guns).
+
 ### Unmerged: Guns, slice 14F (the Old Grange Carbine)
 - **One gun** from the owner's own GeckoLib model and animations, the last of their treated-brass guns: the **Old Grange Carbine**, the Grange Carbine's older make, with a longer barrel, loaded from the top with a stripper clip of seven rifle rounds. Slower than the Grange Carbine, it hits harder, reaches further and aims straighter. Held in both hands.
 - Made from steel, brass, a lever and planks. It takes the Grange Carbine's attachments but the magazines; its scopes stand on its own rail ahead of the receiver.
