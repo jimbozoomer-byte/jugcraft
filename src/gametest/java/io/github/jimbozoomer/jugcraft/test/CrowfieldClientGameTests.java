@@ -213,7 +213,8 @@ public class CrowfieldClientGameTests implements FabricClientGameTest {
 		BlockPos stand = scarecrow.south(2);
 		int[][] spots = {{-2, -2}, {0, -3}, {2, -2}, {3, 0}, {2, 2}, {-2, 2}, {-3, 0}, {-3, -1}};
 
-		// 1. Refused bare-headed, then among too little harvest, then by day, off-season and under a roof.
+		// 1. Refused bare-headed, then among too little harvest, then by day, off-season and under a roof. The roofed scarecrow
+		// has no harvest of its own: the roof is checked first, and pumpkins round it would count toward the other's.
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = player(minecraft);
 			ServerLevel overworld = minecraft.overworld();
@@ -222,7 +223,6 @@ public class CrowfieldClientGameTests implements FabricClientGameTest {
 			for (int i = 0; i < spots.length - 1; i++) {
 				overworld.setBlock(scarecrow.offset(spots[i][0], 0, spots[i][1]), i % 2 == 0 ? Blocks.PUMPKIN.defaultBlockState()
 						: JugcraftAgriculture.block("white_pumpkin").defaultBlockState(), 3);
-				overworld.setBlock(roofed.offset(spots[i][0], 0, spots[i][1]), Blocks.PUMPKIN.defaultBlockState(), 3);
 			}
 			player.teleportTo(overworld, stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, Set.of(), 180.0F, 0.0F, true);
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftLairs.HARVEST_CROWN, 2));
@@ -236,7 +236,6 @@ public class CrowfieldClientGameTests implements FabricClientGameTest {
 					"Among too little harvest, the crown was not refused, or was used up: " + crowning + ", " + player.getMainHandItem());
 			int[] last = spots[spots.length - 1];
 			overworld.setBlock(scarecrow.offset(last[0], 0, last[1]), JugcraftAgriculture.block("warty_gourd").defaultBlockState(), 3);
-			overworld.setBlock(roofed.offset(last[0], 0, last[1]), Blocks.PUMPKIN.defaultBlockState(), 3);
 		});
 		server.runCommand("time set noon");
 		context.waitTicks(10);
@@ -301,7 +300,9 @@ public class CrowfieldClientGameTests implements FabricClientGameTest {
 			ServerLevel lair = minecraft.getLevel(FIELD.dimension);
 			check(lair != null && lair.getMinY() == 0, "The Crowfield's dimension: from y 0");
 			BlockPos o = instance.origin();
-			check(lair.getBlockState(o.offset(UNDER_ARRIVAL)).isFaceSturdy(lair, o.offset(UNDER_ARRIVAL), Direction.UP), "No yard floor under the arrival");
+			// The arrival stands on the trodden path through the yard, a sixteenth short of a whole block: floor, not a full face.
+			check(!lair.getBlockState(o.offset(UNDER_ARRIVAL)).getCollisionShape(lair, o.offset(UNDER_ARRIVAL)).isEmpty(),
+					"No yard floor under the arrival");
 			for (BlockPos mist : Crowfield.exitCells()) {
 				check(lair.getBlockState(o.offset(mist)).is(JugcraftLairs.LAIR_EXIT), "No Grey Mist at the end of the lane at " + mist);
 			}
@@ -402,10 +403,10 @@ public class CrowfieldClientGameTests implements FabricClientGameTest {
 		return scarecrow;
 	}
 
-	/** Whether a player could stand in {@code cell}: nothing in it, or nothing to collide with. */
+	/** Whether a player could stand in {@code cell}: nothing in it, nothing to collide with, or a carpet of moss on the floor. */
 	private static boolean standable(ServerLevel level, BlockPos cell) {
 		BlockState state = level.getBlockState(cell);
-		return state.isAir() || state.is(Blocks.LIGHT) || state.getCollisionShape(level, cell).isEmpty();
+		return state.isAir() || state.is(Blocks.LIGHT) || state.is(Blocks.MOSS_CARPET) || state.getCollisionShape(level, cell).isEmpty();
 	}
 
 	private static ServerPlayer player(MinecraftServer minecraft) {
