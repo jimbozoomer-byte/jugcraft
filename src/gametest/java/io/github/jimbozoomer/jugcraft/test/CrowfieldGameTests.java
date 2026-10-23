@@ -89,7 +89,7 @@ public class CrowfieldGameTests {
 		for (int i = 0; i < count; i++) {
 			BlockPos at = SCARECROW.offset(spots[i][0], 0, spots[i][1]);
 			helper.setBlock(at.below(), Blocks.GRASS_BLOCK.defaultBlockState());
-			helper.setBlock(at, crops[i % crops.size()]);
+			helper.setBlock(at, crops.get(i % crops.size()));
 		}
 	}
 
