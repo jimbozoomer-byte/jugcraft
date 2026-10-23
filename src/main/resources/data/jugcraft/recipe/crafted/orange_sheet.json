@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:orange_wool",
+    "minecraft:orange_wool",
+    "minecraft:orange_wool"
+  ],
+  "result": {
+    "count": 8,
+    "id": "jugcraft:crafted_orange_sheet"
+  }
+}

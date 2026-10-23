@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:black_wool",
+    "minecraft:black_wool",
+    "minecraft:black_wool"
+  ],
+  "result": {
+    "count": 8,
+    "id": "jugcraft:crafted_black_sheet"
+  }
+}

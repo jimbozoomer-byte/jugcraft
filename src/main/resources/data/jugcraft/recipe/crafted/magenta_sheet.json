@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:magenta_wool",
+    "minecraft:magenta_wool",
+    "minecraft:magenta_wool"
+  ],
+  "result": {
+    "count": 8,
+    "id": "jugcraft:crafted_magenta_sheet"
+  }
+}

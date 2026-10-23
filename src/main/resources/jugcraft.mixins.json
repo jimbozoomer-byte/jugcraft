@@ -64,7 +64,9 @@
     "ClaimBucketMixin",
     "ClaimHopperMixin",
     "ClaimDisplayDamageMixin",
-    "ClaimDispenserMixin"
+    "ClaimDispenserMixin",
+    "DeathGraveMixin",
+    "AircraftArrowMixin"
   ],
   "injectors": {
     "defaultRequire": 1

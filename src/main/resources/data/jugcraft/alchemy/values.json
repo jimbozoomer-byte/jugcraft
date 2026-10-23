@@ -137,6 +137,141 @@
       "denominator": 16,
       "source": "recipe jugcraft:air_separation_unit"
     },
+    "jugcraft:aircraft_airship": {
+      "numerator": 6182,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/airship"
+    },
+    "jugcraft:aircraft_bamboo_hopper": {
+      "numerator": 19402,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/bamboo_hopper"
+    },
+    "jugcraft:aircraft_biplane": {
+      "numerator": 7054,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/biplane"
+    },
+    "jugcraft:aircraft_boiler": {
+      "numerator": 904,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/boiler"
+    },
+    "jugcraft:aircraft_bomb_bay": {
+      "numerator": 1988,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/bomb_bay"
+    },
+    "jugcraft:aircraft_cargo_airship": {
+      "numerator": 7398,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/cargo_airship"
+    },
+    "jugcraft:aircraft_eco_engine": {
+      "numerator": 9150,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/eco_engine"
+    },
+    "jugcraft:aircraft_engine": {
+      "numerator": 2894,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/engine"
+    },
+    "jugcraft:aircraft_enhanced_propeller": {
+      "numerator": 1792,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/enhanced_propeller"
+    },
+    "jugcraft:aircraft_gyrodyne": {
+      "numerator": 3656,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/gyrodyne"
+    },
+    "jugcraft:aircraft_gyroscope": {
+      "numerator": 2014,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/gyroscope"
+    },
+    "jugcraft:aircraft_gyroscope_dials": {
+      "numerator": 26915,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/gyroscope_dials"
+    },
+    "jugcraft:aircraft_gyroscope_hud": {
+      "numerator": 611315,
+      "denominator": 72,
+      "source": "recipe jugcraft:aircraft/gyroscope_hud"
+    },
+    "jugcraft:aircraft_heavy_crossbow": {
+      "numerator": 592,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/heavy_crossbow"
+    },
+    "jugcraft:aircraft_hull": {
+      "numerator": 960,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/hull"
+    },
+    "jugcraft:aircraft_hull_reinforcement": {
+      "numerator": 4416,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/hull_reinforcement"
+    },
+    "jugcraft:aircraft_improved_landing_gear": {
+      "numerator": 1280,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/improved_landing_gear"
+    },
+    "jugcraft:aircraft_industrial_gears": {
+      "numerator": 1157,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/industrial_gears"
+    },
+    "jugcraft:aircraft_nether_engine": {
+      "numerator": 63314,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/nether_engine"
+    },
+    "jugcraft:aircraft_propeller": {
+      "numerator": 1280,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/propeller"
+    },
+    "jugcraft:aircraft_quadrocopter": {
+      "numerator": 8142,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/quadrocopter"
+    },
+    "jugcraft:aircraft_rotary_cannon": {
+      "numerator": 1404,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/rotary_cannon"
+    },
+    "jugcraft:aircraft_sail": {
+      "numerator": 228,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/sail"
+    },
+    "jugcraft:aircraft_steel_boiler": {
+      "numerator": 3987,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/steel_boiler"
+    },
+    "jugcraft:aircraft_sturdy_pipes": {
+      "numerator": 896,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/sturdy_pipes"
+    },
+    "jugcraft:aircraft_telescope": {
+      "numerator": 385,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/telescope"
+    },
+    "jugcraft:aircraft_warship": {
+      "numerator": 17679,
+      "denominator": 1,
+      "source": "recipe jugcraft:aircraft/warship"
+    },
     "jugcraft:alarm": {
       "numerator": 10381,
       "denominator": 40,
@@ -481,6 +616,16 @@
       "numerator": 1092,
       "denominator": 1,
       "source": "recipe jugcraft:artificer_bench"
+    },
+    "jugcraft:artisan_furniture": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:artisans_workstation": {
+      "numerator": 584,
+      "denominator": 1,
+      "source": "recipe jugcraft:artisans_workstation"
     },
     "jugcraft:ashfall_pistol": {
       "numerator": 1,
@@ -7622,6 +7767,1431 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:crafted_acacia_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_bench"
+    },
+    "jugcraft:crafted_acacia_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_chair"
+    },
+    "jugcraft:crafted_acacia_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_corner_trim"
+    },
+    "jugcraft:crafted_acacia_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/acacia_couch"
+    },
+    "jugcraft:crafted_acacia_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/acacia_counter"
+    },
+    "jugcraft:crafted_acacia_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/acacia_cupboard"
+    },
+    "jugcraft:crafted_acacia_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_desk"
+    },
+    "jugcraft:crafted_acacia_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_dining_bench"
+    },
+    "jugcraft:crafted_acacia_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_drawer"
+    },
+    "jugcraft:crafted_acacia_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_fancy_bed"
+    },
+    "jugcraft:crafted_acacia_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_nightstand"
+    },
+    "jugcraft:crafted_acacia_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_pillar_trim"
+    },
+    "jugcraft:crafted_acacia_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_shelf"
+    },
+    "jugcraft:crafted_acacia_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_side_table"
+    },
+    "jugcraft:crafted_acacia_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/acacia_table"
+    },
+    "jugcraft:crafted_andesite_corner_trim": {
+      "numerator": 20,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/andesite_corner_trim"
+    },
+    "jugcraft:crafted_andesite_pillar_trim": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/andesite_pillar_trim"
+    },
+    "jugcraft:crafted_bamboo_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_bench"
+    },
+    "jugcraft:crafted_bamboo_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_chair"
+    },
+    "jugcraft:crafted_bamboo_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_corner_trim"
+    },
+    "jugcraft:crafted_bamboo_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/bamboo_couch"
+    },
+    "jugcraft:crafted_bamboo_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/bamboo_counter"
+    },
+    "jugcraft:crafted_bamboo_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/bamboo_cupboard"
+    },
+    "jugcraft:crafted_bamboo_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_desk"
+    },
+    "jugcraft:crafted_bamboo_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_dining_bench"
+    },
+    "jugcraft:crafted_bamboo_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_drawer"
+    },
+    "jugcraft:crafted_bamboo_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_fancy_bed"
+    },
+    "jugcraft:crafted_bamboo_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_nightstand"
+    },
+    "jugcraft:crafted_bamboo_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_pillar_trim"
+    },
+    "jugcraft:crafted_bamboo_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_shelf"
+    },
+    "jugcraft:crafted_bamboo_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_side_table"
+    },
+    "jugcraft:crafted_bamboo_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bamboo_table"
+    },
+    "jugcraft:crafted_bear_trophy": {
+      "numerator": 128,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bear_trophy"
+    },
+    "jugcraft:crafted_bench": {
+      "numerator": 1088,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bench"
+    },
+    "jugcraft:crafted_berry_jam_jar": {
+      "numerator": 17,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/berry_jam_jar"
+    },
+    "jugcraft:crafted_birch_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_bench"
+    },
+    "jugcraft:crafted_birch_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_chair"
+    },
+    "jugcraft:crafted_birch_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_corner_trim"
+    },
+    "jugcraft:crafted_birch_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/birch_couch"
+    },
+    "jugcraft:crafted_birch_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/birch_counter"
+    },
+    "jugcraft:crafted_birch_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/birch_cupboard"
+    },
+    "jugcraft:crafted_birch_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_desk"
+    },
+    "jugcraft:crafted_birch_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_dining_bench"
+    },
+    "jugcraft:crafted_birch_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_drawer"
+    },
+    "jugcraft:crafted_birch_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_fancy_bed"
+    },
+    "jugcraft:crafted_birch_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_nightstand"
+    },
+    "jugcraft:crafted_birch_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_pillar_trim"
+    },
+    "jugcraft:crafted_birch_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_shelf"
+    },
+    "jugcraft:crafted_birch_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_side_table"
+    },
+    "jugcraft:crafted_birch_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/birch_table"
+    },
+    "jugcraft:crafted_black_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/black_cushion"
+    },
+    "jugcraft:crafted_black_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/black_sheet"
+    },
+    "jugcraft:crafted_blackstone_corner_trim": {
+      "numerator": 5,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blackstone_corner_trim"
+    },
+    "jugcraft:crafted_blackstone_pillar_trim": {
+      "numerator": 3,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blackstone_pillar_trim"
+    },
+    "jugcraft:crafted_blaze_trophy": {
+      "numerator": 1600,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blaze_trophy"
+    },
+    "jugcraft:crafted_blue_bowl": {
+      "numerator": 80,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blue_bowl"
+    },
+    "jugcraft:crafted_blue_crockery_combo": {
+      "numerator": 368,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/blue_crockery_combo"
+    },
+    "jugcraft:crafted_blue_cup": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/blue_cup"
+    },
+    "jugcraft:crafted_blue_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blue_cushion"
+    },
+    "jugcraft:crafted_blue_glazed_medium_pot": {
+      "numerator": 194,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blue_glazed_medium_pot"
+    },
+    "jugcraft:crafted_blue_glazed_thick_pot": {
+      "numerator": 646,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/blue_glazed_thick_pot"
+    },
+    "jugcraft:crafted_blue_glazed_thin_pot": {
+      "numerator": 454,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/blue_glazed_thin_pot"
+    },
+    "jugcraft:crafted_blue_glazed_wide_pot": {
+      "numerator": 518,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/blue_glazed_wide_pot"
+    },
+    "jugcraft:crafted_blue_plate": {
+      "numerator": 80,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blue_plate"
+    },
+    "jugcraft:crafted_blue_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/blue_sheet"
+    },
+    "jugcraft:crafted_bricks_corner_trim": {
+      "numerator": 80,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bricks_corner_trim"
+    },
+    "jugcraft:crafted_bricks_pillar_trim": {
+      "numerator": 48,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/bricks_pillar_trim"
+    },
+    "jugcraft:crafted_brown_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/brown_cushion"
+    },
+    "jugcraft:crafted_brown_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/brown_sheet"
+    },
+    "jugcraft:crafted_calcite_corner_trim": {
+      "numerator": 40,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/calcite_corner_trim"
+    },
+    "jugcraft:crafted_calcite_pillar_trim": {
+      "numerator": 24,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/calcite_pillar_trim"
+    },
+    "jugcraft:crafted_cherry_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_bench"
+    },
+    "jugcraft:crafted_cherry_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_chair"
+    },
+    "jugcraft:crafted_cherry_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_corner_trim"
+    },
+    "jugcraft:crafted_cherry_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/cherry_couch"
+    },
+    "jugcraft:crafted_cherry_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/cherry_counter"
+    },
+    "jugcraft:crafted_cherry_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/cherry_cupboard"
+    },
+    "jugcraft:crafted_cherry_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_desk"
+    },
+    "jugcraft:crafted_cherry_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_dining_bench"
+    },
+    "jugcraft:crafted_cherry_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_drawer"
+    },
+    "jugcraft:crafted_cherry_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_fancy_bed"
+    },
+    "jugcraft:crafted_cherry_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_nightstand"
+    },
+    "jugcraft:crafted_cherry_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_pillar_trim"
+    },
+    "jugcraft:crafted_cherry_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_shelf"
+    },
+    "jugcraft:crafted_cherry_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_side_table"
+    },
+    "jugcraft:crafted_cherry_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cherry_table"
+    },
+    "jugcraft:crafted_creeper_trophy": {
+      "numerator": 261,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/creeper_trophy"
+    },
+    "jugcraft:crafted_crimson_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_bench"
+    },
+    "jugcraft:crafted_crimson_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_chair"
+    },
+    "jugcraft:crafted_crimson_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_corner_trim"
+    },
+    "jugcraft:crafted_crimson_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/crimson_couch"
+    },
+    "jugcraft:crafted_crimson_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/crimson_counter"
+    },
+    "jugcraft:crafted_crimson_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/crimson_cupboard"
+    },
+    "jugcraft:crafted_crimson_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_desk"
+    },
+    "jugcraft:crafted_crimson_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_dining_bench"
+    },
+    "jugcraft:crafted_crimson_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_drawer"
+    },
+    "jugcraft:crafted_crimson_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_fancy_bed"
+    },
+    "jugcraft:crafted_crimson_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_nightstand"
+    },
+    "jugcraft:crafted_crimson_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_pillar_trim"
+    },
+    "jugcraft:crafted_crimson_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_shelf"
+    },
+    "jugcraft:crafted_crimson_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_side_table"
+    },
+    "jugcraft:crafted_crimson_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/crimson_table"
+    },
+    "jugcraft:crafted_cyan_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cyan_cushion"
+    },
+    "jugcraft:crafted_cyan_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/cyan_sheet"
+    },
+    "jugcraft:crafted_dark_oak_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_bench"
+    },
+    "jugcraft:crafted_dark_oak_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_chair"
+    },
+    "jugcraft:crafted_dark_oak_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_corner_trim"
+    },
+    "jugcraft:crafted_dark_oak_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/dark_oak_couch"
+    },
+    "jugcraft:crafted_dark_oak_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/dark_oak_counter"
+    },
+    "jugcraft:crafted_dark_oak_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/dark_oak_cupboard"
+    },
+    "jugcraft:crafted_dark_oak_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_desk"
+    },
+    "jugcraft:crafted_dark_oak_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_dining_bench"
+    },
+    "jugcraft:crafted_dark_oak_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_drawer"
+    },
+    "jugcraft:crafted_dark_oak_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_fancy_bed"
+    },
+    "jugcraft:crafted_dark_oak_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_nightstand"
+    },
+    "jugcraft:crafted_dark_oak_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_pillar_trim"
+    },
+    "jugcraft:crafted_dark_oak_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_shelf"
+    },
+    "jugcraft:crafted_dark_oak_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_side_table"
+    },
+    "jugcraft:crafted_dark_oak_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dark_oak_table"
+    },
+    "jugcraft:crafted_deepslate_corner_trim": {
+      "numerator": 5,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/deepslate_corner_trim"
+    },
+    "jugcraft:crafted_deepslate_pillar_trim": {
+      "numerator": 3,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/deepslate_pillar_trim"
+    },
+    "jugcraft:crafted_diorite_corner_trim": {
+      "numerator": 20,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/diorite_corner_trim"
+    },
+    "jugcraft:crafted_diorite_pillar_trim": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/diorite_pillar_trim"
+    },
+    "jugcraft:crafted_dripstone_corner_trim": {
+      "numerator": 80,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dripstone_corner_trim"
+    },
+    "jugcraft:crafted_dripstone_pillar_trim": {
+      "numerator": 48,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/dripstone_pillar_trim"
+    },
+    "jugcraft:crafted_evoker_trophy": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:crafted_fancy_painting": {
+      "numerator": 2128,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/fancy_painting"
+    },
+    "jugcraft:crafted_fox_trophy": {
+      "numerator": 80,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/fox_trophy"
+    },
+    "jugcraft:crafted_frozen_bench": {
+      "numerator": 1089,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/frozen_bench"
+    },
+    "jugcraft:crafted_goat_trophy": {
+      "numerator": 256,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/goat_trophy"
+    },
+    "jugcraft:crafted_golden_medium_pot": {
+      "numerator": 18560,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/golden_medium_pot"
+    },
+    "jugcraft:crafted_golden_thick_pot": {
+      "numerator": 55744,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/golden_thick_pot"
+    },
+    "jugcraft:crafted_golden_thin_pot": {
+      "numerator": 55552,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/golden_thin_pot"
+    },
+    "jugcraft:crafted_golden_wide_pot": {
+      "numerator": 55616,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/golden_wide_pot"
+    },
+    "jugcraft:crafted_granite_corner_trim": {
+      "numerator": 20,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/granite_corner_trim"
+    },
+    "jugcraft:crafted_granite_pillar_trim": {
+      "numerator": 12,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/granite_pillar_trim"
+    },
+    "jugcraft:crafted_gray_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/gray_cushion"
+    },
+    "jugcraft:crafted_gray_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/gray_sheet"
+    },
+    "jugcraft:crafted_green_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/green_cushion"
+    },
+    "jugcraft:crafted_green_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/green_sheet"
+    },
+    "jugcraft:crafted_hammer": {
+      "numerator": 520,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/hammer"
+    },
+    "jugcraft:crafted_jungle_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_bench"
+    },
+    "jugcraft:crafted_jungle_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_chair"
+    },
+    "jugcraft:crafted_jungle_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_corner_trim"
+    },
+    "jugcraft:crafted_jungle_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/jungle_couch"
+    },
+    "jugcraft:crafted_jungle_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/jungle_counter"
+    },
+    "jugcraft:crafted_jungle_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/jungle_cupboard"
+    },
+    "jugcraft:crafted_jungle_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_desk"
+    },
+    "jugcraft:crafted_jungle_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_dining_bench"
+    },
+    "jugcraft:crafted_jungle_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_drawer"
+    },
+    "jugcraft:crafted_jungle_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_fancy_bed"
+    },
+    "jugcraft:crafted_jungle_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_nightstand"
+    },
+    "jugcraft:crafted_jungle_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_pillar_trim"
+    },
+    "jugcraft:crafted_jungle_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_shelf"
+    },
+    "jugcraft:crafted_jungle_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_side_table"
+    },
+    "jugcraft:crafted_jungle_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/jungle_table"
+    },
+    "jugcraft:crafted_kitchen_hood": {
+      "numerator": 864,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/kitchen_hood"
+    },
+    "jugcraft:crafted_kitchen_hood_pipe": {
+      "numerator": 576,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/kitchen_hood_pipe"
+    },
+    "jugcraft:crafted_light_blue_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/light_blue_cushion"
+    },
+    "jugcraft:crafted_light_blue_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/light_blue_sheet"
+    },
+    "jugcraft:crafted_light_gray_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/light_gray_cushion"
+    },
+    "jugcraft:crafted_light_gray_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/light_gray_sheet"
+    },
+    "jugcraft:crafted_lime_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/lime_cushion"
+    },
+    "jugcraft:crafted_lime_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/lime_sheet"
+    },
+    "jugcraft:crafted_magenta_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/magenta_cushion"
+    },
+    "jugcraft:crafted_magenta_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/magenta_sheet"
+    },
+    "jugcraft:crafted_mangrove_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_bench"
+    },
+    "jugcraft:crafted_mangrove_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_chair"
+    },
+    "jugcraft:crafted_mangrove_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_corner_trim"
+    },
+    "jugcraft:crafted_mangrove_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/mangrove_couch"
+    },
+    "jugcraft:crafted_mangrove_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/mangrove_counter"
+    },
+    "jugcraft:crafted_mangrove_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/mangrove_cupboard"
+    },
+    "jugcraft:crafted_mangrove_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_desk"
+    },
+    "jugcraft:crafted_mangrove_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_dining_bench"
+    },
+    "jugcraft:crafted_mangrove_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_drawer"
+    },
+    "jugcraft:crafted_mangrove_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_fancy_bed"
+    },
+    "jugcraft:crafted_mangrove_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_nightstand"
+    },
+    "jugcraft:crafted_mangrove_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_pillar_trim"
+    },
+    "jugcraft:crafted_mangrove_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_shelf"
+    },
+    "jugcraft:crafted_mangrove_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_side_table"
+    },
+    "jugcraft:crafted_mangrove_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/mangrove_table"
+    },
+    "jugcraft:crafted_oak_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_bench"
+    },
+    "jugcraft:crafted_oak_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_chair"
+    },
+    "jugcraft:crafted_oak_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_corner_trim"
+    },
+    "jugcraft:crafted_oak_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/oak_couch"
+    },
+    "jugcraft:crafted_oak_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/oak_counter"
+    },
+    "jugcraft:crafted_oak_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/oak_cupboard"
+    },
+    "jugcraft:crafted_oak_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_desk"
+    },
+    "jugcraft:crafted_oak_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_dining_bench"
+    },
+    "jugcraft:crafted_oak_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_drawer"
+    },
+    "jugcraft:crafted_oak_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_fancy_bed"
+    },
+    "jugcraft:crafted_oak_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_nightstand"
+    },
+    "jugcraft:crafted_oak_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_pillar_trim"
+    },
+    "jugcraft:crafted_oak_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_shelf"
+    },
+    "jugcraft:crafted_oak_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_side_table"
+    },
+    "jugcraft:crafted_oak_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oak_table"
+    },
+    "jugcraft:crafted_orange_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/orange_cushion"
+    },
+    "jugcraft:crafted_orange_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/orange_sheet"
+    },
+    "jugcraft:crafted_oven": {
+      "numerator": 344,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/oven"
+    },
+    "jugcraft:crafted_phantom_trophy": {
+      "numerator": 3440,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/phantom_trophy"
+    },
+    "jugcraft:crafted_pillager_trophy": {
+      "numerator": 431,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/pillager_trophy"
+    },
+    "jugcraft:crafted_pink_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/pink_cushion"
+    },
+    "jugcraft:crafted_pink_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/pink_sheet"
+    },
+    "jugcraft:crafted_pufferfish_trophy": {
+      "numerator": 128,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/pufferfish_trophy"
+    },
+    "jugcraft:crafted_purple_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/purple_cushion"
+    },
+    "jugcraft:crafted_purple_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/purple_sheet"
+    },
+    "jugcraft:crafted_quartz_corner_trim": {
+      "numerator": 1280,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/quartz_corner_trim"
+    },
+    "jugcraft:crafted_quartz_pillar_trim": {
+      "numerator": 768,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/quartz_pillar_trim"
+    },
+    "jugcraft:crafted_red_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/red_cushion"
+    },
+    "jugcraft:crafted_red_sandstone_corner_trim": {
+      "numerator": 5,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/red_sandstone_corner_trim"
+    },
+    "jugcraft:crafted_red_sandstone_pillar_trim": {
+      "numerator": 3,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/red_sandstone_pillar_trim"
+    },
+    "jugcraft:crafted_red_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/red_sheet"
+    },
+    "jugcraft:crafted_salmon_trophy": {
+      "numerator": 128,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/salmon_trophy"
+    },
+    "jugcraft:crafted_sandstone_corner_trim": {
+      "numerator": 5,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/sandstone_corner_trim"
+    },
+    "jugcraft:crafted_sandstone_pillar_trim": {
+      "numerator": 3,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/sandstone_pillar_trim"
+    },
+    "jugcraft:crafted_silverfish_trophy": {
+      "numerator": 65,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/silverfish_trophy"
+    },
+    "jugcraft:crafted_skeleton_horse_trophy": {
+      "numerator": 256,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/skeleton_horse_trophy"
+    },
+    "jugcraft:crafted_skeleton_trophy": {
+      "numerator": 261,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/skeleton_trophy"
+    },
+    "jugcraft:crafted_spider_trophy": {
+      "numerator": 192,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spider_trophy"
+    },
+    "jugcraft:crafted_spruce_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_bench"
+    },
+    "jugcraft:crafted_spruce_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_chair"
+    },
+    "jugcraft:crafted_spruce_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_corner_trim"
+    },
+    "jugcraft:crafted_spruce_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/spruce_couch"
+    },
+    "jugcraft:crafted_spruce_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/spruce_counter"
+    },
+    "jugcraft:crafted_spruce_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/spruce_cupboard"
+    },
+    "jugcraft:crafted_spruce_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_desk"
+    },
+    "jugcraft:crafted_spruce_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_dining_bench"
+    },
+    "jugcraft:crafted_spruce_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_drawer"
+    },
+    "jugcraft:crafted_spruce_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_fancy_bed"
+    },
+    "jugcraft:crafted_spruce_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_nightstand"
+    },
+    "jugcraft:crafted_spruce_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_pillar_trim"
+    },
+    "jugcraft:crafted_spruce_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_shelf"
+    },
+    "jugcraft:crafted_spruce_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_side_table"
+    },
+    "jugcraft:crafted_spruce_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/spruce_table"
+    },
+    "jugcraft:crafted_stackable_book": {
+      "numerator": 49,
+      "denominator": 4,
+      "source": "recipe jugcraft:crafted/stackable_book"
+    },
+    "jugcraft:crafted_stone_corner_trim": {
+      "numerator": 5,
+      "denominator": 4,
+      "source": "recipe jugcraft:crafted/stone_corner_trim"
+    },
+    "jugcraft:crafted_stone_pillar_trim": {
+      "numerator": 3,
+      "denominator": 4,
+      "source": "recipe jugcraft:crafted/stone_pillar_trim"
+    },
+    "jugcraft:crafted_terracotta_bowl": {
+      "numerator": 64,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/terracotta_bowl"
+    },
+    "jugcraft:crafted_terracotta_crockery_combo": {
+      "numerator": 320,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/terracotta_crockery_combo"
+    },
+    "jugcraft:crafted_terracotta_cup": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/terracotta_cup"
+    },
+    "jugcraft:crafted_terracotta_medium_pot": {
+      "numerator": 128,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/terracotta_medium_pot"
+    },
+    "jugcraft:crafted_terracotta_plate": {
+      "numerator": 64,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/terracotta_plate"
+    },
+    "jugcraft:crafted_terracotta_thick_pot": {
+      "numerator": 448,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/terracotta_thick_pot"
+    },
+    "jugcraft:crafted_terracotta_thin_pot": {
+      "numerator": 256,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/terracotta_thin_pot"
+    },
+    "jugcraft:crafted_terracotta_wide_pot": {
+      "numerator": 320,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/terracotta_wide_pot"
+    },
+    "jugcraft:crafted_tropical_fish_trophy": {
+      "numerator": 128,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/tropical_fish_trophy"
+    },
+    "jugcraft:crafted_vindicator_trophy": {
+      "numerator": 781,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/vindicator_trophy"
+    },
+    "jugcraft:crafted_warped_bench": {
+      "numerator": 26,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_bench"
+    },
+    "jugcraft:crafted_warped_chair": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_chair"
+    },
+    "jugcraft:crafted_warped_corner_trim": {
+      "numerator": 10,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_corner_trim"
+    },
+    "jugcraft:crafted_warped_couch": {
+      "numerator": 147,
+      "denominator": 2,
+      "source": "recipe jugcraft:crafted/warped_couch"
+    },
+    "jugcraft:crafted_warped_counter": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/warped_counter"
+    },
+    "jugcraft:crafted_warped_cupboard": {
+      "numerator": 128,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/warped_cupboard"
+    },
+    "jugcraft:crafted_warped_desk": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_desk"
+    },
+    "jugcraft:crafted_warped_dining_bench": {
+      "numerator": 14,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_dining_bench"
+    },
+    "jugcraft:crafted_warped_drawer": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_drawer"
+    },
+    "jugcraft:crafted_warped_fancy_bed": {
+      "numerator": 173,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_fancy_bed"
+    },
+    "jugcraft:crafted_warped_nightstand": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_nightstand"
+    },
+    "jugcraft:crafted_warped_pillar_trim": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_pillar_trim"
+    },
+    "jugcraft:crafted_warped_shelf": {
+      "numerator": 52,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_shelf"
+    },
+    "jugcraft:crafted_warped_side_table": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_side_table"
+    },
+    "jugcraft:crafted_warped_table": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/warped_table"
+    },
+    "jugcraft:crafted_white_bowl": {
+      "numerator": 385,
+      "denominator": 6,
+      "source": "recipe jugcraft:crafted/white_bowl"
+    },
+    "jugcraft:crafted_white_crockery_combo": {
+      "numerator": 641,
+      "denominator": 6,
+      "source": "recipe jugcraft:crafted/white_crockery_combo"
+    },
+    "jugcraft:crafted_white_cup": {
+      "numerator": 257,
+      "denominator": 6,
+      "source": "recipe jugcraft:crafted/white_cup"
+    },
+    "jugcraft:crafted_white_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/white_cushion"
+    },
+    "jugcraft:crafted_white_glazed_medium_pot": {
+      "numerator": 9217,
+      "denominator": 48,
+      "source": "recipe jugcraft:crafted/white_glazed_medium_pot"
+    },
+    "jugcraft:crafted_white_glazed_thick_pot": {
+      "numerator": 10241,
+      "denominator": 48,
+      "source": "recipe jugcraft:crafted/white_glazed_thick_pot"
+    },
+    "jugcraft:crafted_white_glazed_thin_pot": {
+      "numerator": 7169,
+      "denominator": 48,
+      "source": "recipe jugcraft:crafted/white_glazed_thin_pot"
+    },
+    "jugcraft:crafted_white_glazed_wide_pot": {
+      "numerator": 2731,
+      "denominator": 16,
+      "source": "recipe jugcraft:crafted/white_glazed_wide_pot"
+    },
+    "jugcraft:crafted_white_plate": {
+      "numerator": 385,
+      "denominator": 6,
+      "source": "recipe jugcraft:crafted/white_plate"
+    },
+    "jugcraft:crafted_white_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/white_sheet"
+    },
+    "jugcraft:crafted_witch_trophy": {
+      "numerator": 6,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/witch_trophy"
+    },
+    "jugcraft:crafted_wither_skeleton_trophy": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:crafted_wolf_trophy": {
+      "numerator": 208,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/wolf_trophy"
+    },
+    "jugcraft:crafted_wood_bowl": {
+      "numerator": 16,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/wood_bowl"
+    },
+    "jugcraft:crafted_wood_crockery_combo": {
+      "numerator": 8,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/wood_crockery_combo"
+    },
+    "jugcraft:crafted_wood_cup": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/wood_cup"
+    },
+    "jugcraft:crafted_wood_plate": {
+      "numerator": 4,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/wood_plate"
+    },
+    "jugcraft:crafted_yellow_bowl": {
+      "numerator": 80,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/yellow_bowl"
+    },
+    "jugcraft:crafted_yellow_crockery_combo": {
+      "numerator": 368,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/yellow_crockery_combo"
+    },
+    "jugcraft:crafted_yellow_cup": {
+      "numerator": 176,
+      "denominator": 3,
+      "source": "recipe jugcraft:crafted/yellow_cup"
+    },
+    "jugcraft:crafted_yellow_cushion": {
+      "numerator": 27,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/yellow_cushion"
+    },
+    "jugcraft:crafted_yellow_plate": {
+      "numerator": 80,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/yellow_plate"
+    },
+    "jugcraft:crafted_yellow_sheet": {
+      "numerator": 18,
+      "denominator": 1,
+      "source": "recipe jugcraft:crafted/yellow_sheet"
+    },
     "jugcraft:cranberries": {
       "numerator": 1,
       "denominator": 1,
@@ -10666,6 +12236,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:furniture_material": {
+      "numerator": 5,
+      "denominator": 2,
+      "source": "recipe jugcraft:furniture_material"
     },
     "jugcraft:galefeather": {
       "numerator": 1,

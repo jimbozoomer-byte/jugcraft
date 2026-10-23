@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:purple_wool",
+    "minecraft:purple_wool",
+    "minecraft:purple_wool"
+  ],
+  "result": {
+    "count": 8,
+    "id": "jugcraft:crafted_purple_sheet"
+  }
+}
