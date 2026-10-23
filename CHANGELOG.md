@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The Crowfield and the Harvest Crown (the Pumpkin King, part 1)
+- **The Harvest Crown:** three heirloom pumpkins over two gold ingots and a hay bale. Use it at night on a scarecrow that wears a head, out under the sky, with at least 8 pumpkins or gourds growing round it: the crows burst up crying and Grey Mist takes you to the Crowfield. The scarecrow and the crops are left as they were. Like the Witching Season's rituals it works any night of the year, unless the server keeps it to Halloween (`lairs.off_season=off`).
+- **The Crowfield:** a pumpkin field at dusk, walled all round with corn too thick to pass, under a vast harvest moon. Arrive in a farmyard behind a fence and farm gate; rows of pumpkins and heirlooms lie across the field, with hay stacks and a tipped cart for cover, and eight King's Gourds grow on hills in a ring round the King's Post, where the Pumpkin King will hang (part 2).
+- **King's Gourds:** green until the King ripens them (part 2); any player may pick one while it ripens. Record: [crowfield.md](docs/features/crowfield.md); his plan is in [BOSSES.md](docs/branches/BOSSES.md#the-pumpkin-king-the-plan-being-built).
+
 ### Unmerged: The Exchange (bank, markets, land and shares, in Jugs)
 - Press **N** (or `/jugcraft exchange`) for the **Exchange**, a walnut-and-brass ledger with seven tabs. It deals only in **Jugs**, the town's credit: no new currency.
 - **Banking and loans:** a one-time **starter loan** (100 Jugs) for new players, a flat 10% fee, due in 10 days. While you owe, a quarter of your market earnings repays the bank; overdue borrowers may sell but not buy. Paying off on time raises your credit limit.
