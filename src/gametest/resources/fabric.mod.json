@@ -8,9 +8,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness",
       "io.github.jimbozoomer.jugcraft.test.TestForms"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateGameTests",
       "io.github.jimbozoomer.jugcraft.test.CityDefenseGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyCavityGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownLifeGameTests",
@@ -300,6 +302,8 @@
       "io.github.jimbozoomer.jugcraft.finance.ServerDefenseGameTests"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyCavityClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.UpdateMenuClientGameTests",
       "io.github.jimbozoomer.jugcraft.finance.ExchangeClientGameTests",

@@ -320,6 +320,13 @@
     "jugcraft:waste_drum",
     "jugcraft:lead_door",
     "jugcraft:lead_glass",
-    "jugcraft:warning_beacon"
+    "jugcraft:warning_beacon",
+    "jugcraft:bronze_crate",
+    "jugcraft:steel_crate",
+    "jugcraft:invar_crate",
+    "jugcraft:stainless_steel_crate",
+    "jugcraft:aluminum_crate",
+    "jugcraft:titanium_crate",
+    "jugcraft:tungsten_crate"
   ]
 }

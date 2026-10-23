@@ -487,6 +487,75 @@
       ]
     },
     {
+      "title": "Storage Crates",
+      "icon": "jugcraft:bronze_crate",
+      "pages": [
+        {
+          "title": "Bronze Storage Crate",
+          "icon": "jugcraft:bronze_crate",
+          "text": [
+            "54 mixed-item slots in one block: 2 single chests. Normal stack limits, no power. Scroll through the grid or search by item name or ID; search does not move items. Hoppers, pipes and comparators access the whole inventory.",
+            "Craft four bronze plates around an empty ordinary chest.",
+            "Crates open beneath solid blocks. Breaking spills their contents; they are not portable filled containers. Search hides empty slots: clear it for manual placement, or shift-click to store across the whole crate."
+          ]
+        },
+        {
+          "title": "Steel Storage Crate",
+          "icon": "jugcraft:steel_crate",
+          "text": [
+            "108 mixed-item slots in one block: 4 single chests. Normal stack limits, no power. Scroll through the grid or search by item name or ID; search does not move items. Hoppers, pipes and comparators access the whole inventory.",
+            "Craft four steel plates around an empty Bronze Storage Crate. Or craft eight plates around an ordinary chest to build this tier directly. Four plates around an iron nugget make an upgrade kit: use it on a placed Bronze Storage Crate to preserve its contents and name.",
+            "Crates open beneath solid blocks. Breaking spills their contents; they are not portable filled containers. Search hides empty slots: clear it for manual placement, or shift-click to store across the whole crate."
+          ]
+        },
+        {
+          "title": "Invar Storage Crate",
+          "icon": "jugcraft:invar_crate",
+          "text": [
+            "162 mixed-item slots in one block: 6 single chests. Normal stack limits, no power. Scroll through the grid or search by item name or ID; search does not move items. Hoppers, pipes and comparators access the whole inventory.",
+            "Craft four invar plates around an empty Steel Storage Crate. Or craft eight plates around an ordinary chest to build this tier directly. Four plates around an iron nugget make an upgrade kit: use it on a placed Steel Storage Crate to preserve its contents and name.",
+            "Crates open beneath solid blocks. Breaking spills their contents; they are not portable filled containers. Search hides empty slots: clear it for manual placement, or shift-click to store across the whole crate."
+          ]
+        },
+        {
+          "title": "Stainless Steel Storage Crate",
+          "icon": "jugcraft:stainless_steel_crate",
+          "text": [
+            "216 mixed-item slots in one block: 8 single chests. Normal stack limits, no power. Scroll through the grid or search by item name or ID; search does not move items. Hoppers, pipes and comparators access the whole inventory.",
+            "Craft four stainless steel plates around an empty Invar Storage Crate. Or craft eight plates around an ordinary chest to build this tier directly. Four plates around an iron nugget make an upgrade kit: use it on a placed Invar Storage Crate to preserve its contents and name.",
+            "Crates open beneath solid blocks. Breaking spills their contents; they are not portable filled containers. Search hides empty slots: clear it for manual placement, or shift-click to store across the whole crate."
+          ]
+        },
+        {
+          "title": "Aluminum Storage Crate",
+          "icon": "jugcraft:aluminum_crate",
+          "text": [
+            "270 mixed-item slots in one block: 10 single chests. Normal stack limits, no power. Scroll through the grid or search by item name or ID; search does not move items. Hoppers, pipes and comparators access the whole inventory.",
+            "Craft four aluminum plates around an empty Stainless Steel Storage Crate. Or craft eight plates around an ordinary chest to build this tier directly. Four plates around an iron nugget make an upgrade kit: use it on a placed Stainless Steel Storage Crate to preserve its contents and name.",
+            "Crates open beneath solid blocks. Breaking spills their contents; they are not portable filled containers. Search hides empty slots: clear it for manual placement, or shift-click to store across the whole crate."
+          ]
+        },
+        {
+          "title": "Titanium Storage Crate",
+          "icon": "jugcraft:titanium_crate",
+          "text": [
+            "324 mixed-item slots in one block: 12 single chests. Normal stack limits, no power. Scroll through the grid or search by item name or ID; search does not move items. Hoppers, pipes and comparators access the whole inventory.",
+            "Craft four titanium plates around an empty Aluminum Storage Crate. Or craft eight plates around an ordinary chest to build this tier directly. Four plates around an iron nugget make an upgrade kit: use it on a placed Aluminum Storage Crate to preserve its contents and name.",
+            "Crates open beneath solid blocks. Breaking spills their contents; they are not portable filled containers. Search hides empty slots: clear it for manual placement, or shift-click to store across the whole crate."
+          ]
+        },
+        {
+          "title": "Tungsten Storage Crate",
+          "icon": "jugcraft:tungsten_crate",
+          "text": [
+            "378 mixed-item slots in one block: 14 single chests. Normal stack limits, no power. Scroll through the grid or search by item name or ID; search does not move items. Hoppers, pipes and comparators access the whole inventory.",
+            "Craft four tungsten plates around an empty Titanium Storage Crate. Or craft eight plates around an ordinary chest to build this tier directly. Four plates around an iron nugget make an upgrade kit: use it on a placed Titanium Storage Crate to preserve its contents and name.",
+            "Crates open beneath solid blocks. Breaking spills their contents; they are not portable filled containers. Search hides empty slots: clear it for manual placement, or shift-click to store across the whole crate."
+          ]
+        }
+      ]
+    },
+    {
       "title": "Getting Started",
       "icon": "jugcraft:engineers_handbook",
       "pages": [
