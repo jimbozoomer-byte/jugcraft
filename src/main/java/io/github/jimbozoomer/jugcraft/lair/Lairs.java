@@ -97,6 +97,9 @@ public final class Lairs {
 		});
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
 			if (!alive) {
+				if (keepsBelongings(oldPlayer)) {
+					newPlayer.sendSystemMessage(Component.translatable("message.jugcraft.lair.belongings_kept"));
+				}
 				handBack(newPlayer);
 			}
 		});
@@ -401,6 +404,9 @@ public final class Lairs {
 	}
 
 	private static void joined(ServerPlayer player) {
+		if (!player.isAlive()) {
+			return; // logged out on the death screen: they respawn outside, keeping their belongings (keepsBelongings)
+		}
 		LairVisit visit = player.getAttached(VISIT);
 		if (!isLair(player.level())) {
 			if (visit != null) {
@@ -423,8 +429,18 @@ public final class Lairs {
 	// ---------------------------------------------------------------- death
 
 	/**
-	 * A player has died in a lair: what they dropped (this tick's items and experience round them) is gathered up at
-	 * once as their Grave Goods, to be handed back when they respawn outside. Their visit is over.
+	 * Whether dying where the player is now costs nothing: in a lair (a boss fight) a death keeps everything, as the
+	 * keepInventory rule does, there only. The shared per-player rule (server/PlayerRules.keeps) asks this, so its
+	 * keep-inventory hooks drop nothing (items, experience or Trinkets slots) and the respawn restores it all.
+	 */
+	public static boolean keepsBelongings(Player player) {
+		return isLair(player.level());
+	}
+
+	/**
+	 * A player has died in a lair. They keep what they carry (keepsBelongings); anything still dropped this tick round
+	 * them (by another mod, say) is gathered up at once as their Grave Goods, to be handed back when they respawn
+	 * outside. Their visit is over.
 	 */
 	public static void died(ServerPlayer player) {
 		if (!(player.level() instanceof ServerLevel level) || !isLair(level)) {

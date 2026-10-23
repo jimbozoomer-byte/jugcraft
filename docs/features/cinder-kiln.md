@@ -45,7 +45,7 @@ A kiln hollowed out of a volcano's roots, 72 blocks across, 46 high and 80 long.
 - **The shelves:** four raised shelves of smooth basalt, rimmed with polished basalt, round the bowl (north-west, north-east, south-west and south-east), a step up. The slag never reaches them.
 - **The light:** hidden light blocks, and the slag's own glow. A staggered lattice of lights at full strength hangs two blocks over the floor, so the Tyrant and whoever fights him are seen anywhere in the bowl: every cell of its floor has light 8 or more, 13 under a light. Another lattice lights the dome, and single lights hang over the bowl's middle, under the crown, on the ledge, before each sluice and in the forge.
 
-Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-the-shared-rules)): an instance per opening, at most eight; at most four players; nothing can be built or broken (the sluice gates are the kiln's one fixture besides the Grey Mist); the mist's toll at the edges; Grave Goods on death; closing after 30 seconds empty.
+Everything else is the shared framework ([hollow-acre.md](hollow-acre.md#lairs-the-shared-rules)): an instance per opening, at most eight; at most four players; nothing can be built or broken (the sluice gates are the kiln's one fixture besides the Grey Mist); the mist's toll at the edges; nothing lost on death; closing after 30 seconds empty.
 
 ## Changes from the plan
 
@@ -190,7 +190,7 @@ The Cinder Kiln is its own dimension, so nothing here changes the Overworld or t
 
 ## Rollout and open questions
 
-The shared framework's defaults hold: four players and eight instances, Grave Goods on death.
+The shared framework's defaults hold: four players and eight instances, nothing lost on death.
 
 Part 2, the Cinder Tyrant, adds:
 - the fight in the bowl: hot, he takes half damage until his Body Slam lands in a flooded trough and quenches him;
