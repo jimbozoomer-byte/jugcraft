@@ -71,7 +71,7 @@ The JSON keeps the original `scguns:` resource namespace in its references, as s
 
 The owner supplied **MAGIC ITEMS BLOCKS TEXTURES SOUNDS MODELS I MADE.rar** and explicitly instructed contributors to use its files freely without needing to change them. The original archive and all 7,909 extracted files are preserved with SHA-256 checksums. The [magic guide](MAGIC_ASSETS.md) documents direct use, necessary technical integration steps, and supplied format/companion-file issues. No runtime content is registered by this import.
 
-The combined searchable library now contains **26,965 source files**, excluding the six preview sheets and the preserved archive. The [global CSV](catalog/files.csv) and [summary](catalog/summary.json) include every upload.
+The combined searchable library now contains **26,966 source files**, excluding the six preview sheets and the preserved archive. The [global CSV](catalog/files.csv) and [summary](catalog/summary.json) include every upload.
 
 ### Effect textures (8 October 2026)
 
@@ -87,3 +87,11 @@ Two of the effect files carry embedded Photoshop metadata (XMP), which [summary.
 - `muzzle_flash.png`: created in Photoshop CC 2019 on 12 February 2021.
 
 Shown this and asked what the scopes should use, the owner answered that they made these files and to use them. Asked the same day about the "Big Cannons and Mounted Guns" folder, whose muzzle flash frames the guns use, they confirmed it is theirs. (It holds a file named `wariumlogo.png`; Warium is also the name of another weapons mod.)
+
+### Gun geometry (23 October 2026)
+
+On 23 October 2026, told that the Grandle OG's body had no model in the library, the owner re-sent their gun collection (`Jimbos Heavily Edited Guns.rar`, 18,411,320 bytes, SHA-256 `d381c075e40a35b93082a40c7292cd7c819a0bab944d106e4580b41986370b83`) with the message: "Here are the files again these are all ok to use and put in it has remenant names and stuff from what I used to heavily edit this is how we've been doing all of them just use the models that I created from here".
+- **Kept here:** the Grandle OG's GeckoLib geometry, [originals/Blocks/Guns/geo/item/gun/grandle_og.geo.json](originals/Blocks/Guns/geo/item/gun/grandle_og.geo.json) (60,919 bytes, SHA-256 `136305c294647d5402ac14a58bb657bc0e60413f08eefb760bb53ac7a8136821`), copied byte-for-byte. Guns slice 14F builds the gun from it (see [docs/features/guns.md](../../docs/features/guns.md)).
+- **Already here:** the archive's 2,589 gun models, 143 gun animations and 112 sounds are byte-identical to the files above; 978 of its textures are too.
+- **Not imported yet:** the archive's other GeckoLib geometry (159 files: the other 142 guns and armor), about 200 textures not in the library (armor, effects, paintings, mob effects), language files, particles and data (the original guns' stat files, recipes). Its `top` folder holds 1,449 compiled Java classes of the original mod; they are code, not the owner's assets, and are not kept.
+- **Sounds:** the archive's `sounds/SOUND-LICENSE.txt` reads: "All sounds are licensed under Creative Commons 0 https://creativecommons.org/publicdomain/zero/1.0/".

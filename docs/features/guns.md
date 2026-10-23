@@ -2730,6 +2730,59 @@ The reload times are the owner's animations'. The Harrow takes the three stocks 
 - **Where each part turns, and where the Harrow's hands hold, are chosen here:** from previews, not the owner's own pivots.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 14F: the Old Grange Carbine
+The last of the owner's treated-brass guns, the Grandle OG: an earlier make of slice 14B's Grandle (the Grange Carbine), with a longer barrel and loaded from the top with a stripper clip. Taken up after slice 14E (on 23 October 2026 the owner answered "Lets start Grandle OG and then suggest what we should do next"). The library held its animations, its item model's display and some of its attachments, but not its body. Asked, the owner uploaded their GeckoLib models of the guns the same day ("these are all ok to use ... just use the models that I created from here"), and this gun is built from their model of it ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)).
+
+| | Old Grange Carbine |
+|---|---|
+| The owner's gun | Grandle OG |
+| What it is | the Grange Carbine's body, sights and bolt, with a barrel 3 px longer and no magazine: it is loaded from the top with a stripper clip |
+| Held | in both hands, as the Grange Carbine: the right at the wrist of its stock, the left under its handguard |
+| What it fires | Rifle Rounds, a pull a shot |
+| Damage | 8 |
+| Rate | about 2.2 a second (every 9 ticks) |
+| Holds | 7, a clip |
+| Reload | 1.95 s |
+| Spread, hip / aimed | 2° / 0.25° |
+| Range | 112 blocks |
+| Ammunition | Rifle Round |
+| The view aimed | narrowed to 0.85, as the Grange Carbine's |
+| Takes | the Grange Carbine's attachments but its two magazines: the barrels' four, the three stocks, the Light Grip and the Tactical Grip, the four bayonets, the three scopes and the Laser Sight |
+
+**Its numbers** follow the owner's own for the two guns, in the gun data of the same upload (the Grandle OG fires every 5 ticks to the Grandle's 4, hits for 9.5 to 8.5, its damage falling off out to 65 blocks to the Grandle's 55, and holds 7): the Grange Carbine's, scaled by those ratios. The reload is the owner's animation's.
+
+**Crafting** (a crafting table; it switches with the guns): three steel ingots over a lever and planks, over a brass ingot. That is the Grange Carbine's grid with planks for its first brass ingot: the owner's recipe for the Grandle OG takes planks too.
+
+**How it fires:** as the Grange Carbine: each pull fires a round along the look, strayed by the spread.
+
+**What you see:** the owner's animations. Each shot kicks it and works the bolt. To reload, the bolt is drawn back and the gun tipped, and the left hand brings a stripper clip up from below and presses its rounds into the top of the receiver; then the clip is gone and the bolt is closed. The clip shows only then, from a third of a second into the reload to 1.4 s. Its shot is the owner's new_rifle sound (the Cloudburst Gun's), as their data for it names; the reload's cues play the bolt and the round going in.
+
+**How the model was built:**
+- **From the owner's GeckoLib model:** `grandle_og.geo.json`, now in the library (`Guns/geo/item/gun/`). Its bones are the parts (`GEO_PARTS` in `tools/guns.py`): each bone's cubes are turned back into the item-model elements the converter makes cubes from (`geo_element()`: corners, turn and the UV at each corner, step 1 below run backwards), so they are built and checked face for face as every other gun's parts are. The model stands 8.15 px lower, 1 px forward and 1/160 px across from the item models' frame (`GEO_OFFSETS`).
+- **Checked against the owner's Grandle:** converted, the model's body, sights, bolt, three stocks and two grips are the Grandle's item-model parts element for element, at the same places, with the same turns and the same UV at each corner; its silencers, muzzle brake and three of its bayonets are the Grandle's moved 3 px forward (`GEO_TWINS`): 14 bones, 103 elements, checked by `tools/guns.py --check`. A wrong offset fails all of them. Its barrel, Extended Barrel, Iron Bayonet, scope rail and clip are its own.
+- **Its texture:** the owner's `grandle_og.png` (kept with their GeckoLib models, in `Guns/animated/gun/`), which draws every face of the model, the scopes' and the Laser Sight's textures packed beside it.
+- **Bones:** the model's own, turning about the model's own pivots (checked): `gun_body3` > `gun_body2` > `gun_body`, which tip the gun in the reload; `bolt`; `left_arm2` > `clip`. The `magazine` and `magazine_2` bones its animations name hold nothing.
+- **The library's item-model parts for it** (`Guns/models/special/grandle_og/`) are an earlier make: the Grandle's barrel and barrel attachments moved 2 px forward, where the model's stand 3 px forward, and the barrel no longer than the Grandle's. The model's are used.
+- **Hands:** the Grange Carbine's, so it is held as the Grange Carbine at the hip and aimed. The left hand hangs under `left_arm2` with the clip, so it carries the clip: placed in that bone's frame so that the idle brings it to the handguard (`carry()`), it holds the clip within a pixel from its showing until it goes into the gun.
+- **The left arm:** the Grange Carbine's way ran the arm up across the view as the hand presses the clip in. Its own way, chosen in first-person previews of the reload, keeps it rising from below the screen there, and at the hip runs it down and to the left.
+- **Scopes:** on the owner's rail ahead of the receiver (the model's `no_sights`), midway along it as on every gun, so the clip goes in just behind them. It clears the Medium Scope and the Reflex Sight; the Long Scope's eyepiece reaches back over it by a quarter pixel.
+- **Checked** in first-person, aimed and orthographic previews: idle, fired, aimed through the ring and through each scope, through the reload and inspection, with every attachment.
+
+**Connections:**
+- **Rounds:** the Rifle Round; nothing new.
+- **Parts:** steel, brass, a lever and planks.
+- **Its place:** past steel, beside the Grange Carbine.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a clip and its reload. 8 a shot, 7 a clip: about 12.0 a second, against the Grange Carbine's 13.8. It trades rate and rounds for a harder hit, a longer reach and a steadier aim. Each shot spends a round; nothing converts back.
+
+**Save compatibility:** a new item, `jugcraft:old_grange_carbine`; nothing saved changes. `guns.enabled=false` turns its recipe off; the item stays registered.
+
+**Known limits:**
+- **The clip push fills the view:** the reload brings the left hand over the receiver near the eye, so for about half a second the arm covers much of the lower middle of the screen. It is the owner's animation; the arm's way only keeps it coming from below.
+- **The clip grazes the Long Scope:** going in, it passes a quarter pixel into the back of the Long Scope's eyepiece, for about half a second. The scopes stand where the owner's rail puts them.
+- **The hands are chosen here,** the Grange Carbine's; the bones' pivots are the owner's.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2836,6 +2889,7 @@ The owner supplied each gun's parts as Blockbench Java item models (`Guns/models
    - **Gun body:** turns about the right hand's grip.
 3. **Copies the files unchanged:** the atlases (the Thunderpipe's with the shell added), the animations (byte for byte) and the sounds. One part is moved as it is read: the Whistler's light stock, which stands off the gun ([slice 9A](#slice-9a-the-marksman-rifles)).
 4. **Checks the result:** it re-bakes every model the way GeckoLib 5.5.7 does (`GeometryCube`, `VertexSet`, `GeometryQuadUvs`) and compares each face with the owner's. Run `python3 tools/guns.py --check`; `tools/check_mod_data.py` runs it too. It was shown to fail on a flipped UV, a moved cube and a turned face.
+5. **Reads a gun the owner modelled in GeckoLib** (slice 14F, the Old Grange Carbine): its parts are the bones of the owner's own model (`Guns/geo/item/gun/`), turned back into item-model elements by step 1 run backwards (`geo_element()`), and built and checked as above. The check also converts the model's bones that are another gun's item-model parts and compares them element for element (`GEO_TWINS`), and holds the gun's bones to the model's pivots ([slice 14F](#slice-14f-the-old-grange-carbine)).
 
 The animations' sound cues map to the library's sounds as follows:
 - `gun_rustle` and `rustle`: gun_rustle
@@ -4419,6 +4473,16 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | harrow | `Guns/models/special/scratches/wooden_stock.json` | `011b6ded6b061113` |
 | harrow | `Guns/sounds/item/brass_shotgun/fire.ogg` | `95eee6d27b87d35a` |
 | harrow | `Guns/item/spitfire_flame.png` | `c81c31bd15a64d7c` |
+| old_grange_carbine | `Guns/models/item/grandle_og.json` | `c66593ffde7a056b` |
+| old_grange_carbine | `Guns/animated/gun/grandle_og.png` | `43a891d0298f9bc8` |
+| old_grange_carbine | `Guns/item/grandle_og.animation.json` | `0a68b6ac95367051` |
+| old_grange_carbine | `Guns/geo/item/gun/grandle_og.geo.json` | `136305c294647d54` |
+| old_grange_carbine | `Guns/sounds/item/new_rifle/fire.ogg` | `267e176ad9bae07a` |
+| old_grange_carbine | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| old_grange_carbine | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| old_grange_carbine | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| old_grange_carbine | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| old_grange_carbine | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -5483,13 +5547,26 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 - **Slice 14D's ease, merged, in CI** ([run 39893842247](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39893842247), on f0bfa6d6b): every check passed, the job without the optional integrations on its re-run.
   - **Its first attempt** failed only `LaboratoryLarderDiningGameTests.clockKeepsTheHour` ("The pulse ends on tick 12"), the flaky clock test also seen on slices 14D's and the seasonal audit's pull requests. It touches no gun code ([comment](https://github.com/jimbozoomer-byte/jugcraft/pull/459#issuecomment-6356648041)); the one re-run passed.
   - **Fired aimed, no sleeve:** the Firedrake's flame bursts at the husk with the view clear, and the Cloudburst Gun kicks up at the lower right. The Harrow's shot and reload look as before.
+- **Slice 14F, run locally (23 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the gun's model, animation and atlas; every other gun's files came out unchanged. The converter check passes on the owner's model (`GEO_TWINS`: 14 bones, 103 elements), and fails on every one of them with the model's offset 0.1 px out, and on a bone turned about another point than the model's.
+  - `python3 tools/generate_material_data.py`: wrote the gun's item model, definition, recipe, name and sound. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (6246 material IDs).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Recipe:** every shaped recipe in the mod's data compared, mirrors included: its grid matches no other.
+  - **Alchemy value:** its record in `data/jugcraft/alchemy/values.json`, priced from its recipe as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here; the same rule gives the Grange Carbine's record exactly). `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+- **Slice 14F game tests (not run yet; CI runs them):**
+  - `BrassGunsVIGameTests`:
+    - `oldGrangeCarbineIsRegistered`: it is registered with its numbers and its recipe loads, held in both hands, firing plain bullets; a clip of seven rifle rounds, a pull a shot; slower than the Grange Carbine, harder hitting, further reaching and straighter aimed; it takes the Grange Carbine's attachments but the two magazines.
+    - `oldGrangeCarbineLoadsAClip`: an empty one with ten rounds loads nothing before its reload's time and seven after it, leaving three; a shot takes its damage from the pig; a second pull at once fires nothing, and one after its interval fires.
+  - `GunsGameTests` counts 90 guns; `TacticalAttachmentsGameTests` the thirty-three guns the Tactical Grip fits, the Old Grange Carbine among them.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -5499,5 +5576,6 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - the jam the Gnat's sound suggests;
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
-  - the guns beyond these sets.
+  - the guns beyond these sets;
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's is in the library so far ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)).
 - **Balance:** the numbers are starting points for the owner to set.
