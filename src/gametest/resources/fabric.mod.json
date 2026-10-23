@@ -332,6 +332,7 @@
       "local.peepo.PeepoCookingBatchClientTests",
       "local.peepo.PeepoWorkshopClientTests",
       "local.peepo.PeepoIndustrialClientTests",
+      "local.peepo.PeepoTreeTapClientTests",
       "local.peepo.PeepoActionClientTests",
       "local.peepo.PeepoWorkSessionClientTests",
       "local.peepo.PeepoHarvestClientTests",

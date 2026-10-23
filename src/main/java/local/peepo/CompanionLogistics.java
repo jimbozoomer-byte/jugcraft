@@ -36,6 +36,7 @@ public final class CompanionLogistics {
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
         if(target.water())return npc.water.port(target);
+        if(target.treeTap())return npc.treeTaps.port(target);
         if(target.garden())return npc.garden.port(target);
         if(target.livestock())return npc.livestock.port(target);
         if(npc.level() instanceof net.minecraft.server.level.ServerLevel server && npc.level().getBlockState(target.at().pos()).getBlock() instanceof net.minecraft.world.level.block.ComposterBlock)return new ComposterCompanionPort(server,target.at().pos());

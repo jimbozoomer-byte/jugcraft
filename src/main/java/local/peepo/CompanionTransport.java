@@ -402,9 +402,9 @@ public final class CompanionTransport extends Goal {
             if(supply && !returning){clearPiePose();returning=true;approach=null;nextPath=0;}
             // Already collected outputs finish their delivery; unused supplies return to their source.
         }
-        // Animal-zone and water-source inputs are used from cargo; these anchors are not containers to stock.
-        // Finish the handoff where supplies were collected, then navigate to the actual animal.
-        if(supply && !returning && !manifest.isEmpty() && (workstation.livestock() || workstation.water())){
+        // Animal-zone, water-source and tree-tap inputs are used from cargo, not stocked into the anchor.
+        // Finish the handoff where supplies were collected, then navigate to the work target.
+        if(supply && !returning && !manifest.isEmpty() && (workstation.livestock() || workstation.water() || workstation.treeTap())){
             if(!loaded()){fail(CompanionStatus.FORBIDDEN);return;}
             deliver();return;
         }

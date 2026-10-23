@@ -58,6 +58,7 @@ public final class CompanionJobDetails {
             case AGING -> "Waiting for the selected cider stage; check Filter for Sparkling/Aged.";
             case DRYING -> "Herb bundles are drying; collection begins when ready.";
             case COOLING, CANDY_SETTING -> "Waiting for the station's cooling/setting step to finish.";
+            case LATEX_WAIT -> "No full bottle ready; the rubber tree fills its tap naturally.";
             case GUANO_WAIT -> "No guano ready; resident bats produce it naturally.";
             case STOCK_SETUP -> "Stock the Farm Stand sale slots first to set their restock items.";
             case SERVING_SETUP -> "Serve the desired dishes manually once to set restock items.";
@@ -69,7 +70,7 @@ public final class CompanionJobDetails {
             case MACHINE_PAUSED -> "Machine is paused; resume it using its own controls.";
             case DORMANT_GARDEN -> "Awaken the assigned magic bed/device through its native progression.";
             case NEEDS_VERDANCE -> "Magic device lacks Verdance; check its native supply.";
-            case MAGIC_DISABLED, BAT_HOUSE_DISABLED, GARDEN_DISABLED -> "Disabled by server/game rules; this job cannot run until enabled.";
+            case MAGIC_DISABLED, BAT_HOUSE_DISABLED, GARDEN_DISABLED, TAPS_DISABLED -> "Disabled by server/game rules; this job cannot run until enabled.";
             case SPOILED_INPUT -> "Remove spoiled jars and supply fresh ingredients.";
             case UNSUPPORTED -> "This target has no supported companion job; reassign it.";
             case READY -> npc.orders.mode()!=3?"Ready; select Work to perform assigned jobs.":"Ready; follows job priority, energy and Routine settings.";

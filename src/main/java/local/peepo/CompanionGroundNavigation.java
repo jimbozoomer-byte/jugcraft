@@ -18,6 +18,8 @@ final class CompanionGroundNavigation extends GroundPathNavigation {
                     // Small companions must route around mechanisms and bench legs, not under/over them.
                     if(context.getBlockState(pos).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlock
                         || context.getBlockState(pos.below()).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlock
+                        || context.getBlockState(pos).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.TreeTapBlock
+                        || context.getBlockState(pos.below()).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.TreeTapBlock
                         || StarterWorkshopJob.bench(context.getBlockState(pos))
                         || StarterWorkshopJob.bench(context.getBlockState(pos.below())))return PathType.FENCE;
                     if(CompanionHazards.harmful(npc,context.getBlockState(pos))

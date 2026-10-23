@@ -1,10 +1,10 @@
 # Peepo and Jughead player guide
 
-Current controls and behavior on the `peepo-companion` branch, updated 21 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
+Current controls and behavior on the `peepo-companion` branch, updated 23 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
 
 ## Quick start
 
-1. Find a companion and right-click it with edible food once to tame it. Peepo's main habitats are swamps, lush swamps and bayous; Jughead's are beaches, dune beaches and overgrown beaches. Natural spawns are in the Overworld.
+1. Find a companion and right-click it with edible food once to tame it. Peepo's main habitats are swamps, lush swamps and bayous; Jughead's are beaches, dune beaches and overgrown beaches. Natural spawns are in the Overworld. Both use weight 12 in main habitats and 8 in secondary habitats, groups of 1–4, and a maximum of six naturally spawned companions of each type within 128 blocks. The normal passive-creature cap still applies.
 2. Shift-right-click the companion without the Planner to open its inventory and commands. It pauses while you edit.
 3. Craft a **Companion Planner**: an iron nugget above a row of three paper, with a stick below the paper. Right-click your companion with it to select that companion.
 4. Right-click a bed to set its home, then right-click a supported workstation to assign work. Assigning work selects **Work** mode.
@@ -123,6 +123,7 @@ Filters are available for Cooking Pots, supported standard processors, Hearth Ov
 | Furnace / Smoker / Blast Furnace | Supply valid cooking inputs and ordinary furnace fuel. Output collects results and spent fuel containers; normal cooking speed is unchanged. |
 | Brewing Stand | Choose final potion(s) in Filter. Supply water bottles or other base potions, all intermediate reagents and brewing fuel. Peepo plans up to eight brewing steps, keeps intermediate potions in the stand, and delivers the finished batch to Output. Empty Filter performs any available single step. |
 | Beehive / Bee Nest | Choose Honey or Honeycomb in Filter. A full hive and campfire smoke are required. Honey uses empty glass bottles from Supply; Honeycomb uses equipped shears or a Tools chest. Results go to Output. |
+| Tree Tap | Fetches empty glass bottles, collects ready latex in batches, and delivers latex bottles to Output. Bucket upgrades stay manual. |
 | Bat House | Collects accumulated guano into normal cargo and delivers it to linked Output. No tools or Supply needed; bats and production timing stay unchanged. |
 | Campfire / Soul Campfire | Light it first. Supply brings up to four compatible cooking inputs and Output collects saved cooked results. Keep safe space beside the fire. |
 | Composter | Supply compostable items; Output takes ready bone meal. Normal compost yields and maturation apply. Use a dedicated supply to avoid composting wanted crops. |
@@ -291,6 +292,14 @@ Supply **glass bottles**, **empty buckets**, or **empty/partly filled Gourd Cant
 Bottles become ordinary water potions; canteens refill to all three charges and keep their custom components. Both preserve the source. Buckets use normal Minecraft pickup and **remove the source block**: use a renewable/infinite-water pool for continuous bucket filling. Flowing water, cauldrons and waterlogged blocks are not collection targets. A missing source pauses the assignment without losing already-filled cargo; it resumes when source water returns. Full cargo or Output pauses collection rather than discarding containers.
 
 A collection Output chest can also be Supply for brewing, cooking or another job. This collects portable water containers; it does not irrigate crops or fill machine tanks directly. Mob-griefing, town protection, job priorities, resting and settings-menu pauses apply. See the [water collection feature record](features/companion-water-collection.md).
+
+### Tree Tap collection
+
+Select a companion with the Planner and right-click a placed **Tree Tap**. Each tap takes one work slot. Link **Supply** containing empty glass bottles and **Output**, then select Work. The companion keeps up to eight unreserved empty bottles in cargo and uses the general interaction animation to collect all currently fitting complete bottles in a batch: one from an ordinary full tap, up to eight from a bucket-upgraded tap. Partial bottle progress stays in the tap.
+
+Collection takes **40 ticks / 2 seconds at 4 reserve JE/t (160 JE per batch)** plus normal delivery effort. Leave clear ground in front of or beside the tap; reachable raised taps can be serviced from below. Empty taps show **Waiting for latex**; missing bottles and full cargo have their own statuses. Full or missing Output retains collected latex in cargo. The existing Supply/Output Auto/On/Off controls apply. Supply may also be provided directly in the eight cargo slots.
+
+Companions do not install bucket upgrades, grow rubber trees or speed up the native fill timer. Native tree requirements remain unchanged. Only one helper works at a tap at a time; claims, mob griefing, feature settings and live storage capacity are checked before collection. See the [tree-tap feature record](features/companion-tree-taps.md).
 
 ### Bat House collection
 

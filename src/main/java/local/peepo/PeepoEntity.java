@@ -139,6 +139,7 @@ public final class PeepoEntity extends PathfinderMob {
     public final CompanionFood food=new CompanionFood(this);
     public final CompanionGarden garden=new CompanionGarden(this);
     public final CompanionWater water=new CompanionWater(this);
+    public final CompanionTreeTap treeTaps=new CompanionTreeTap(this);
     public final CompanionLivestock livestock=new CompanionLivestock(this);
     public final CompanionSocial social=new CompanionSocial(this);
     public final CompanionOrders orders=new CompanionOrders(this);
