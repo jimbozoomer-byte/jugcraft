@@ -432,6 +432,26 @@
       "denominator": 1,
       "source": "recipe jugcraft:apple_seeds"
     },
+    "jugcraft:aquamancers_boots": {
+      "numerator": 1824,
+      "denominator": 1,
+      "source": "recipe jugcraft:aquamancers_boots"
+    },
+    "jugcraft:aquamancers_hat": {
+      "numerator": 1056,
+      "denominator": 1,
+      "source": "recipe jugcraft:aquamancers_hat"
+    },
+    "jugcraft:aquamancers_leggings": {
+      "numerator": 1152,
+      "denominator": 1,
+      "source": "recipe jugcraft:aquamancers_leggings"
+    },
+    "jugcraft:aquamancers_robes": {
+      "numerator": 1200,
+      "denominator": 1,
+      "source": "recipe jugcraft:aquamancers_robes"
+    },
     "jugcraft:arc_furnace_casing": {
       "numerator": 544,
       "denominator": 1,
@@ -18607,6 +18627,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:lesser_fire_focus"
     },
+    "jugcraft:lesser_water_focus": {
+      "numerator": 4154,
+      "denominator": 1,
+      "source": "recipe jugcraft:lesser_water_focus"
+    },
     "jugcraft:lettuce": {
       "numerator": 1,
       "denominator": 1,
@@ -19751,6 +19776,26 @@
       "numerator": 515,
       "denominator": 4,
       "source": "recipe jugcraft:alloying/neodymium_magnet_from_ferroboron"
+    },
+    "jugcraft:nereids_hood": {
+      "numerator": 193,
+      "denominator": 1,
+      "source": "recipe jugcraft:nereids_hood"
+    },
+    "jugcraft:nereids_pants": {
+      "numerator": 289,
+      "denominator": 1,
+      "source": "recipe jugcraft:nereids_pants"
+    },
+    "jugcraft:nereids_shoes": {
+      "numerator": 98,
+      "denominator": 1,
+      "source": "recipe jugcraft:nereids_shoes"
+    },
+    "jugcraft:nereids_tunic": {
+      "numerator": 337,
+      "denominator": 1,
+      "source": "recipe jugcraft:nereids_tunic"
     },
     "jugcraft:nether_salad": {
       "numerator": 70,
@@ -28632,10 +28677,20 @@
       "denominator": 1,
       "source": "recipe jugcraft:watch_of_flowing_time"
     },
+    "jugcraft:water_bangle": {
+      "numerator": 8228,
+      "denominator": 1,
+      "source": "recipe jugcraft:water_bangle"
+    },
     "jugcraft:water_cooler": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:water_focus": {
+      "numerator": 24634,
+      "denominator": 1,
+      "source": "recipe jugcraft:water_focus"
     },
     "jugcraft:water_wheel": {
       "numerator": 4363,
@@ -29816,6 +29871,26 @@
       "numerator": 2,
       "denominator": 1,
       "source": "recipe jugcraft:winged_skull_headstone_from_stonecutting"
+    },
+    "jugcraft:winterguards_boots": {
+      "numerator": 1028,
+      "denominator": 1,
+      "source": "recipe jugcraft:winterguards_boots"
+    },
+    "jugcraft:winterguards_chestplate": {
+      "numerator": 2052,
+      "denominator": 1,
+      "source": "recipe jugcraft:winterguards_chestplate"
+    },
+    "jugcraft:winterguards_helmet": {
+      "numerator": 1284,
+      "denominator": 1,
+      "source": "recipe jugcraft:winterguards_helmet"
+    },
+    "jugcraft:winterguards_leggings": {
+      "numerator": 1796,
+      "denominator": 1,
+      "source": "recipe jugcraft:winterguards_leggings"
     },
     "jugcraft:wire_cutters": {
       "numerator": 520,
