@@ -291,6 +291,11 @@ public final class ScreenKit {
 		return font.plainSubstrByWidth(text, Math.max(0, width - font.width("…"))) + "…";
 	}
 
+	/** How bright a colour looks, 0 to 255. */
+	static int luminance(int color) {
+		return (((color >> 16) & 0xFF) * 299 + ((color >> 8) & 0xFF) * 587 + (color & 0xFF) * 114) / 1000;
+	}
+
 	/** A colour faded towards black by {@code amount} (0 to 255). */
 	static int darken(int color, int amount) {
 		int r = Math.max(0, ((color >> 16) & 0xFF) - amount);
@@ -328,10 +333,12 @@ public final class ScreenKit {
 			int h = height;
 			boolean hover = active && (isHovered() || isFocused());
 			int face = theme.buttonFace();
+			// A lit key darkens a light face (the industrial look's green) and lightens a dark one, so its label stays clear.
+			boolean light = luminance(face) > 96;
 			if (selected) {
-				face = MachineSkin.lighten(face, 40);
+				face = light ? darken(face, 45) : MachineSkin.lighten(face, 40);
 			} else if (hover) {
-				face = MachineSkin.lighten(face, 24);
+				face = MachineSkin.lighten(face, light ? 16 : 24);
 			} else if (!active) {
 				face = darken(face, 50);
 			}
@@ -343,6 +350,9 @@ public final class ScreenKit {
 				g.fill(x, y, x + w, y + h, rim);
 				g.fill(x + 1, y + 1, x + w - 1, y + h - 1, face);
 				g.fill(x + 1, y + 1, x + w - 1, y + 2, "lab".equals(theme.shape()) ? MachineSkin.lighten(face, 60) : theme.buttonLight());
+				if (selected && !"lab".equals(theme.shape())) {
+					g.outline(x + 1, y + 1, w - 2, h - 2, theme.buttonLight());
+				}
 			}
 			if (selected) {
 				g.fill(x + 3, y + h - 3, x + w - 3, y + h - 2, theme.ok());
