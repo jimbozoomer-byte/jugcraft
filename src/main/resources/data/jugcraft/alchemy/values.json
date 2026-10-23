@@ -7752,6 +7752,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:crucible"
     },
+    "jugcraft:crucible_stand": {
+      "numerator": 1793,
+      "denominator": 1,
+      "source": "recipe jugcraft:crucible_stand"
+    },
     "jugcraft:crude_oil_bucket": {
       "numerator": 1,
       "denominator": 1,
@@ -24986,6 +24991,11 @@
       "numerator": 513,
       "denominator": 8,
       "source": "recipe jugcraft:room_sign"
+    },
+    "jugcraft:rooted_thallite_foundation": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:rosemary": {
       "numerator": 1,

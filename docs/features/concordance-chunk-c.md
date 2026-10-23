@@ -40,8 +40,8 @@ for the owner's review in Chunk C's pull request. Chunk C is developed on branch
 base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in; CI run 38617471274 on that base passed
 every job (see The merge and its CI run). Since then it has been merged with the updated Chunk B, which carries main
 `f904df3fd` (`b234b8967`; not yet run in CI), and the commit after the merge brings the Assayer's Scale tests and
-records to main's Scale (see C-P40). Open: regenerating `src/main/resources/data/jugcraft/alchemy/values.json` and
-`docs/audits/survival-item-registry.json`, which need the game jar (Where to resume). Not merged. Chunk B, beneath it,
+records to main's Scale (see C-P40). `src/main/resources/data/jugcraft/alchemy/values.json` and
+`docs/audits/survival-item-registry.json` now know Chunk B's and Chunk C's items (Where to resume). Not merged. Chunk B, beneath it,
 is not merged either; as C-D8 decides, Chunk B's pull request is against main and Chunk C's against Chunk B's branch.
 Proposal: the owner chose Chunk C on 14 October 2026 ("ok begin chunk c"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 5,
@@ -2442,12 +2442,15 @@ against main, Chunk C's against Chunk B's branch). The load budget (C-P19 in C-P
 C-D0b, C-D1 to C-D3 and C-D5 to C-D8 are the owner's; C-D4 and C-P1 to C-P70 are Proposed. Chunk C has since been merged
 with Chunk B carrying main `f904df3fd` (`b234b8967`), and the commit after it brings the Assayer's Scale tests and
 records to main's Scale (C-P40). Before more work:
-1. regenerate `src/main/resources/data/jugcraft/alchemy/values.json` (`tools/build_alchemy_values.py --minecraft-jar
-   <the pinned jar>`) and `docs/audits/survival-item-registry.json` (`tools/audit_survival_recipes.py --registry <a
-   SurvivalRecipeGameTests registry export> --write`), which need the game jar: until then `scripts/tests` fails two
-   tests (no value for the stand, the foundation and Chunk B's 15 items; no registry entry for `lesser_water_focus` and
-   `rooted_thallite_foundation`). If the foundation, made by a ritual, lands at the fallback value or with no documented
-   route, declare its route rather than editing the outputs by hand;
+1. done on 23 October 2026: `src/main/resources/data/jugcraft/alchemy/values.json` regenerated with
+   `tools/build_alchemy_values.py`, its `--minecraft-jar` input a zip of vanilla 26.3's `data/minecraft/recipe` and
+   `data/minecraft/tags/item` from the decompiled reference (the same input rebuilds main's own file byte for byte;
+   nothing of it is committed): the Crucible Stand is valued from its recipe (1,793), and the Rooted Thallite
+   Foundation, made by a ritual, sits at the generator's labelled fallback of 1, below every route's cost, never formed
+   (C-P40). `docs/audits/survival-item-registry.json` is main's exported registry plus the 17 items Chunks B and C
+   register (every registered jugcraft item on main has an `assets/jugcraft/items` definition, and each added one is
+   registered in Java); a game run's export (`SurvivalRecipeGameTests`) can replace it. The audit's derived JSON and CSV
+   are left as main has them (main's own copies do not reproduce on main). `scripts/tests` passes, 195 tests;
 2. refresh main and the open pull requests (#369 for the Peepo files; #357 is merged in main as `40381834a`; the hot
    shared files: lang, the gametest `fabric.mod.json`, `check_mod_data.py`, `CHANGELOG.md`, `docs/TESTING.md`,
    `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and merge main again if it has moved past

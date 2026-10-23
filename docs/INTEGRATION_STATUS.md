@@ -28,8 +28,8 @@ run 38720814268, passed all but client shard 0, which failed on a defect in the 
 `9098c06b1` (every job passed in run 38731825181); the merge of units 3 and 4 (`1c7dc577c`) passed every job in run
 38726242149, unit 4's first. The owner answered the checkpoint on 23 October 2026 (C-D5 to C-D8). Since merged with
 Chunk B carrying main `f904df3fd` (`b234b8967`), not yet run in CI;
-`src/main/resources/data/jugcraft/alchemy/values.json` and `docs/audits/survival-item-registry.json` are still to be
-regenerated with the game jar. Not played by hand or with two clients ([the chunk's evidence and
+`src/main/resources/data/jugcraft/alchemy/values.json` and `docs/audits/survival-item-registry.json` now know Chunk B's
+and Chunk C's items. Not played by hand or with two clients ([the chunk's evidence and
 handoff](features/concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10)).
 
 | Area | Implemented change | Record |
