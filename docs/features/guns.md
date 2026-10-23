@@ -41,7 +41,7 @@ Status:
 - **Slice 14B** (the brass carbines: the Holler Carbine, Minuet Carbine and Grange Carbine; [below](#slice-14b-the-brass-carbines)): implemented on `claude/guns-14b`, stacked on slice 14A, awaiting review.
 - **Slice 14C** (the brass quick-firers: the Sprocket Gun, Navvy Shotgun and Freeholder Rifle; [below](#slice-14c-the-brass-quick-firers)): implemented on `claude/guns-14c`, stacked on slice 14B, awaiting review.
 - **Slice 14D** (a crossbow-gun, a molten rifle and a drum gun: the Quarrel Carbine, Hinterland Rifle and Cloudburst Gun; [below](#slice-14d-a-crossbow-gun-a-molten-rifle-and-a-drum-gun)): implemented on `claude/guns-14d`, from `main`, awaiting review. Its CI passed ([below](#verification)), and again with the fix for an aimed shot without the owner's aim_shoot.
-- **Slice 14E** (a flamethrower and a fire shotgun: the Firedrake and the Harrow; [below](#slice-14e-a-flamethrower-and-a-fire-shotgun)): implemented on `claude/guns-14e`, on slice 14D's branch, awaiting review. Its CI has not run yet.
+- **Slice 14E** (a flamethrower and a fire shotgun: the Firedrake and the Harrow; [below](#slice-14e-a-flamethrower-and-a-fire-shotgun)): implemented on `claude/guns-14e`, on slice 14D's branch, awaiting review. Its first CI run failed only the guns' client test, whose husk the guns' shots together had killed; the fix (each gun fires at it at full health) waits on CI.
 - **Not yet played:** the Java compiles only in CI, and the game tests there are the only runs.
 Proposal issue: none. The owner asked on 7 October 2026: "I want to start working on the Guns plugin which I want to base off of the Mod Scorched Guns 2 I have models and animations that I have created already on the github in the "Blocks" folder for that part". The owner's answers:
 - on the files: "the files in the blocks folder are all mine I made all of them myself and have all the rights to them they are inspired by scorched guns 2 but I made all of them including the animations";
@@ -5459,6 +5459,10 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `harrowSetsWhatItHitsAlight`: a shot at a pig three blocks ahead lands most of its pellets, sets the pig alight, and the fire hurts it again within two seconds; it spends its shell; no block catches fire.
     - `harrowChangesItsCan`: an empty Harrow with ten shells loads nothing before its reload's time and eight after it, leaving two.
   - `GunsGameTests` counts 89 guns. `NetherGunsGameTests`: no gun but the Nether guns, the Hinterland Rifle and the Harrow sets alight.
+- **Slice 14E in CI** ([run 39885099461](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39885099461), on bc678ebf8): every check passed but `GunsClientGameTests`.
+  - **Passed:** the `mod` job (the build and every server game test, `BrassGunsVGameTests`, `GunsGameTests` and `NetherGunsGameTests` among them), the job without the optional integrations, the repository check and fifteen of the sixteen client shards.
+  - **Failed:** the guns' client shard, after its Steel Bayonet screenshot: the stab found no husk to hurt. Every gun fires one shot at the same husk, of 1000 health (a creature has no more than 1024). With every pellet landing, the 89 guns' shots come to 1000.5 before any fire, and the Harrow, the last, killed it. Its own check passed: a husk that has died reads as hurt.
+  - **The fix:** the husk is healed to its full health before each gun fires at it (`GunsClientGameTests.heal`), so the guns' shots no longer add up. Each gun's check still measures its own shot.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
