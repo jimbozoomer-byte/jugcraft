@@ -1,6 +1,6 @@
 # The Crowfield
 
-Status: implemented in source; not yet run in CI (its results and the client test's pictures will be added here when they are). Part 1 of the Pumpkin King, in the [bosses plan](../branches/BOSSES.md#the-pumpkin-king-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Crowfield, a lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Harvest Crown that opens it. The Pumpkin King, his Jacks and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
+Status: implemented in source; CI passes on commit `6d125baa7` (below). The client test's ten pictures are in that run's `client-screenshots-5` artifact only: this environment cannot download CI artifacts, so they are not yet in `docs/images/` and the field's look counts as **not verified** until someone looks at them. Part 1 of the Pumpkin King, in the [bosses plan](../branches/BOSSES.md#the-pumpkin-king-the-plan-being-built), built by [the boss playbook](../branches/BOSS_PLAYBOOK.md): the Crowfield, a lair on the shared framework ([hollow-acre.md](hollow-acre.md)), and the Harvest Crown that opens it. The Pumpkin King, his Jacks and his loot are part 2, in their own pull request. It has not been played by hand, and the two-client dedicated-server playtest is still to do.
 Proposal issue: none. On 23 October 2026 the owner asked what Halloween work should come next and chose the Pumpkin King, after the seasonal biome audit ("yes"), on the branch they named ("yes use that branch").
 Owner: @jimbozoomer-byte
 Target milestone and tier: Discovery tier, as the Halloween harvest is ([halloween-harvest.md](halloween-harvest.md)). The crown takes heirloom pumpkins (grown from seeds), gold and hay; the scarecrow it is used on is the agriculture branch's.
@@ -101,7 +101,13 @@ Nothing is renamed.
 
 ## Verification
 
-CI: not yet run. Its results, and the client test's pictures, will be added here.
+CI (23 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
+
+| Commit | What ran | Result |
+| --- | --- | --- |
+| `44209e862` | Build, data audit, game tests, client game tests | **Failed to compile** the game tests: `CrowfieldClientGameTests` indexed its list of test crops as an array (`crops[i % crops.size()]`), which only a full compile catches |
+| `16d8be1ca` | The same, the list indexed with `get` | **One failure.** Everything compiled and every game test passed; client shard 5 failed `CrowfieldClientGameTests` on its own setup: "Among too little harvest, the crown was not refused", because the pumpkins laid round the roofed scarecrow, a few blocks off, were counted in the bare one's harvest |
+| `6d125baa7` | The same, the roofed scarecrow's pumpkins taken away, the arrival's floor checked as dirt path (not face-sturdy) and moss carpet counted as standing room | **All pass:** all 2267 required game tests, `CrowfieldGameTests` among them, and the client test classes `tools/select_client_tests.py` picked, `CrowfieldClientGameTests` among them: the Harvest Crown passed end to end, and the game's own block light was at least 8 on all 1,890 of the field's open cells (the darkest at 8, at 12, 5, 24, against the 7 the test asks). It took the ten pictures (`0000_jugcraft_harvest_crown_mist` to `0009_jugcraft_crowfield_exit`, 480x270), uploaded as artifact `client-screenshots-5` of run 40036507233; they have not been looked at |
 
 Run locally (23 October 2026):
 
