@@ -120,7 +120,13 @@ def write_all(write, assets, data, lang):
     for tag in ['mineable/pickaxe', 'needs_stone_tool']:
         path = data.parent/'minecraft/tags/block'/f'{tag}.json'
         obj = json.loads(path.read_text()) if path.exists() else dict(values=[])
-        obj['values'] += ['jugcraft:'+m+'_crate' for m,_ in TIERS if 'jugcraft:'+m+'_crate' not in obj['values']]
+        crates = ['jugcraft:'+m+'_crate' for m,_ in TIERS]
+        obj['values'] = [value for value in obj['values'] if value not in crates]
+        # Vehicle bays run after storage in the full generator. Preserve that order
+        # when this writer is called alone against an already generated tag.
+        index = next((i for i, value in enumerate(obj['values'])
+                      if value in ('jugcraft:mecha_workbench', 'jugcraft:tank_workbench')), len(obj['values']))
+        obj['values'][index:index] = crates
         write(path, obj)
     lang.update({
         'config.jade.plugin_jugcraft.storage_crate':'Storage crate capacity',

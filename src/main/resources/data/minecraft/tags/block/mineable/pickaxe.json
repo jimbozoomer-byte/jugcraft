@@ -917,14 +917,14 @@
     "jugcraft:nouveau_smooth_gilded_sourcestone_small_bricks_slab",
     "jugcraft:small_ceramic_kiln",
     "jugcraft:small_crucible_furnace",
-    "jugcraft:mecha_workbench",
-    "jugcraft:tank_workbench",
     "jugcraft:bronze_crate",
     "jugcraft:steel_crate",
     "jugcraft:invar_crate",
     "jugcraft:stainless_steel_crate",
     "jugcraft:aluminum_crate",
     "jugcraft:titanium_crate",
-    "jugcraft:tungsten_crate"
+    "jugcraft:tungsten_crate",
+    "jugcraft:mecha_workbench",
+    "jugcraft:tank_workbench"
   ]
 }
