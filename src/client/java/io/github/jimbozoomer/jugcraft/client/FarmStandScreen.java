@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.client;
 import io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.FarmStandMenu;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -58,6 +59,7 @@ public class FarmStandScreen extends AbstractContainerScreen<FarmStandMenu> impl
 						}));
 				pick.active = crate != picked;
 				pick.setSelected(crate == picked);
+				pick.setTooltip(Tooltip.create(Component.translatable("gui.jugcraft.farm_stand.pick_help")));
 			} else {
 				addRenderableWidget(new ScreenKit.TextButton(x, topPos + BUTTON_Y, 24, 14, theme, Component.translatable("gui.jugcraft.farm_stand.buy"),
 						b -> click(id)));

@@ -128,11 +128,13 @@ public class CarvingScreen extends Screen implements ScreenKit.Fitted {
 			toolButtons[i].active = freeDraw;
 		}
 		int half = (column - 2) / 2;
-		ScreenKit.TextButton brushButton = addRenderableWidget(key(x, y + 20, half, brushLabel(), button -> {
+		// Brush and Mirror share a row; Mirror's label is the longer.
+		int brushWidth = Math.min(half, 46);
+		ScreenKit.TextButton brushButton = addRenderableWidget(key(x, y + 20, brushWidth, brushLabel(), button -> {
 			brushIndex = (brushIndex + 1) % brushes.length;
 			button.setMessage(brushLabel());
 		}));
-		mirrorButton = addRenderableWidget(key(x + half + 2, y + 20, half, mirrorLabel(), button -> {
+		mirrorButton = addRenderableWidget(key(x + brushWidth + 2, y + 20, column - brushWidth - 2, mirrorLabel(), button -> {
 			mirror = !mirror;
 			button.setMessage(mirrorLabel());
 		}));
