@@ -1626,11 +1626,9 @@ def tags():
         tags.add("worldgen/biome", seasons.TAG, biome)
     for biome in seasons.WINTER_SNOW:
         tags.add("worldgen/biome", seasons.WINTER_SNOW_TAG, biome)
-    # The newer biomes' kinds, as the seasonal and fall systems read them (tools/seasonal_kinds.py).
-    import seasonal_kinds
-    for tag_id, members in seasonal_kinds.kind_tags().items():
-        for biome in members:
-            tags.add("worldgen/biome", tag_id, biome)
+    # The landscape collection's kinds, which the werewolves, squirrels, turkeys and wisps read (tools/landscape_kinds.py).
+    import landscape_kinds
+    landscape_kinds.tags(tags)
     import alpine_data
     alpine_data.tags(tags)
     import biomes_data

@@ -1,96 +1,124 @@
-# Seasonal biome audit (the newer biomes and the seasons)
+# Seasonal biome audit
 
-Status: implemented on branch `claude/seasonal-biome-audit`. Passes the repository and mod data audits locally; CI (compile, server and client game tests) runs on the pull request. **Not yet played.**
-Proposal issue: none. Owner-directed: this closes the MUST in [docs/TODO.md](../TODO.md) to audit seasonal content against every newer biome collection, done first in the Halloween work (owner, 23 October 2026), before the Pumpkin King.
+Status: implemented on `claude/seasonal-audit` ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)), awaiting review. Its CI passed (below). **Not yet played.**
+Proposal issue: none. This is the TODO list's "MUST: audit seasonal content against every newer biome collection" ([TODO](../TODO.md#living-spawn-city--october-21-local-work)). On 22 October 2026, offered it as the next work, the owner answered "Lets do the seasonal audit then lets do Guns Slice 14D".
 Owner: @jimbozoomer-byte
-Target milestone and tier: none; world atmosphere and seasonal content for every tier.
-Primary specialty and supported player role: exploration, farming and foraging, seasonal events.
+Target milestone and tier: seasonal delivery alongside world generation; no tier.
+Primary specialty and supported player role: exploration and the Halloween and autumn content; every player meets them.
+
+## What the audit found
+Every seasonal or date-dependent system was checked against the biome collections that came after the seasons:
+- **The landscape collection** (the owner's 18 October collections, `tools/landscape_content.py`): 159 biomes.
+  - Its overworld biomes take part of every Jugcraft region (`menagerie/LandscapeBiomes`).
+  - Its Nether and End biomes join those dimensions.
+  - Its caves lie underground.
+- **The caverns:** six cave biomes, the Candy Cavity among them, and the Pixel Hollows.
+- **The lairs' and pocket dimensions' own biomes:** the Cinder Kiln, Crypt Archive, Cydonian Sanctum, Foundry Trench, Glacier Hall, Hollow Acre, Lantern Fen, Moonlit Ring, Spindle Loft and the Nouveau jar.
+- **The newer biomes of `tools/biomes.py`**, from the tree batches, the wonders batch and the Adam-ondi-Ahman valley.
+
+| System | When | Where it looks | Newer collections, before this change | Now |
+|---|---|---|---|---|
+| Grass and leaf colours | the season day | `#jugcraft:has_seasons` | None of the 159 landscape biomes had seasons, though about a third are temperate woods, fields and swamps (the Landscape Seasonal Forest, Maple Woods and Pumpkin Patch among them) | 54 landscape biomes have seasons (below) |
+| Winter snow (`seasons.snow=on`) | winter, while it rains | `#jugcraft:has_winter_snow` | as above | 47 of them; the 7 mild ones keep their colours' turn but get no snow |
+| Will-o'-wisps | Halloween nights | `#c:is_swamp`, or within 2 blocks of corn | The landscape swamps (Bayou, Bog, Marsh, Wetland and others) carry no common tags, so wisps came out there only by corn | Wisps read `#jugcraft:wisp_haunts`: the common swamps and the 7 landscape swamps |
+| Werewolves, and the Alpha Werewolf's Howling Totem rite | full-moon nights (not the date) | `#jugcraft:werewolf_haunts`, `#jugcraft:snow_werewolf_haunts`, `#jugcraft:shadow_werewolf_haunts` | The landscape woods carry no `#minecraft:is_forest` or `#minecraft:is_taiga`, so no werewolf came there | Their haunts add the 31 landscape woods, the 23 snowy landscape biomes (snow werewolves) and the Ominous Woods (shadow werewolves) |
+| Squirrels | by day | `#jugcraft:squirrel_habitat` | as werewolves | The 31 landscape woods |
+| Wild turkeys | by day | `#jugcraft:turkey_habitat` | as werewolves; landscape fields too | The landscape woods and its 18 open grasslands (not the snowy ones) |
+| Scary creatures | Halloween nights | every overworld biome but mushroom fields, outdoors | Included already (the open-sky rule keeps them out of caverns) | Unchanged |
+| Harvest Moon (crops grow twice as fast) | the Harvest Moon night | everywhere | Included already | Unchanged |
+| Trick-or-treating, costumes, the peddler, the carving contest | Halloween | no biome check | Included already | Unchanged |
+| Headless Horseman, witching-season lairs | Halloween midnight; any night by default | the overworld, open sky | Included already | Unchanged |
+| Town decorations, shop stock, townsfolk | December, then Halloween, then the Harvest Feast, then the season | the town only | Biome-independent | Unchanged |
+| Concordance sky and celestial patterns | the season and the Harvest Moon | the overworld, open sky | Biome-independent | Unchanged |
+| Seasonal tree leaves (maple, aspen, larch, willow, rowan, elder, bald cypress, walnut and the rest) | the season day | the species, anywhere | The Snowy Forest, Muskeg, Snowpetal Grove and Webwood grow these trees without having seasons: their leaves turn and their grass does not | Unchanged, deliberately: these species are deciduous wherever they stand, as a planted sapling's tree is |
+| Lair event loot (Vesperine, Tatterlace) | Halloween, with `lairs.event_loot=on` | the lairs | Biome-independent | Unchanged |
+
+**No date dependence** was found in fishing, the menagerie's animal spawns or any loot-table condition. The Christmas pocket pet and the Harvest Feast meal score are not date-gated.
+
+**The seasons do not need a larger rewrite.** One calendar drives the colours, snow and town events; one Halloween window drives the Halloween content; placement is by biome tags. The gaps came from newer biomes that the tags never named. The data check (below) now fails on any new biome that has no seasons decision, so the next collection cannot miss them silently.
 
 ## Player experience
-The newer biomes came after the seasons and the fall content. These are the landscape collection (`jugcraft:landscape_*`, [tools/landscape_content.py](../../tools/landscape_content.py)), the Alpine Spawn, the caverns and the lairs. They are in no vanilla or conventional biome tag, so everything that picks biomes by tag passed them over. A landscape maple wood never turned gold or took winter snow; no chestnut tree, heirloom pumpkin or chanterelle grew there; and no werewolf, squirrel or turkey lived there. After this change:
-
-- **Seasons and winter snow.** 58 newer biomes turn with the date: temperate grassland, forests, taiga, hills, cliffs and swamps. Examples are the maple woods, the Pumpkin Patch, the Ominous Woods, the Siberian taiga and the sakura groves. The Alpine Spawn already did, and still does.
-  - 54 of the 59 take winter snow with `seasons.snow=on`.
-  - The bayou, floodplain, lavender field, Mediterranean forest and redwood forest have mild winters, so they keep the seasons' colours but get no snow.
-  - Unchanged all year (as the vanilla ones are): the tropics, the dry lands, the always-frozen lands, waters and shores, caves, the End and the Nether. So are the biomes whose fixed colour is their look: the mystical ones, the Alpha islands, and the four Skylands, each of which is one season already.
-- **The fall harvest grows wild there.** Each newer biome now carries the fall and Halloween wild patches of its kinds. There are 19 in all: wild mandrake, the gourds and squashes, cranberries, chestnut trees, the heirloom pumpkins, bottle gourds, mums, the autumn mushrooms and wolfsbane. A landscape maple wood grows chestnut trees, chanterelles and acorn squash; the Pumpkin Patch and Ominous Woods grow mandrake, red kuri pumpkins and jack-o'-lantern mushrooms. The graveyard flowers' wild patches (spider lilies, ghost pipes and the rest) follow too.
-- **The fall's creatures go there.**
-  - Brown werewolves: 39 newer forests and taigas, the Howling Totem's ground included.
-  - Snow werewolves: 22 always-snowy lands.
-  - Shadow werewolves: the Pumpkin Patch and the Ominous Woods.
-  - Squirrels: the 39 forests and taigas.
-  - Turkeys: 64 forests, taigas and plains, the Alpine Spawn included.
-  - The Hag Stone: 6 swamps, bogs and marshes.
-  - Halloween nights' wisps ([halloween-nights.md](halloween-nights.md)): over the newer swamps, as over vanilla's.
-- **No werewolves at the start.** The Alpine Spawn counts as open grassland: it has turkeys and plains pumpkins, but no werewolves.
+- **In about a quarter of each Jugcraft region** (where the landscape biomes are), grass and leaves now turn with the year, as they already did elsewhere:
+  - fresh green in spring;
+  - gold, orange and red in autumn;
+  - grey-brown in winter, under snow where the operator has it on.
+- **The 54 landscape biomes with seasons:** the temperate woods (forest and taiga kinds), open country, hills and swamps where it rains and is neither frozen nor tropical (temperature 0.15 to 0.9, the range of the seasonal vanilla and Jugcraft biomes). These include:
+  - the Seasonal Forest, Maple Woods, Pumpkin Patch, Birch Taiga, Coniferous Forest, Redwood Forest;
+  - the Field, Prairie, Pasture, Steppe and Tundra;
+  - the Highlands, Wetland, Marsh and Bog.
+- **The 7 mild ones, no winter snow:** the Mediterranean Forest, the three lavender biomes, the Redwood Forest, the Hot Shrubland and the Orchid Swamp, as their Jugcraft namesakes.
+- **No seasons, and why** (each kind's biomes are listed in `tools/landscape_kinds.py`):
+  - **Frozen land**, where snow falls all year (below 0.15): the wintry, snowy and Siberian biomes, the alpine grove, the ice marsh, the muskeg and the Scarlet Mountains.
+  - **Tropics**, at 0.95 or warmer: the jungles, rainforests, tropics, subtropics, Floodplain, Jade Cliffs and the Bayou.
+  - **Arid land:** deserts, badlands, savannas and dry shrubland.
+  - **Magic, with fixed colours**, as the Elder Vale and the Glimmer Grove: the Mirage Isles, Moonlight Grove and Valley, Mystic Grove, Amethyst biomes, Auroral Garden, the Alpha Islands and the Origin Valleys.
+  - **The Skylands:** one biome for each season, which keep their own.
+  - **The Ominous Woods**, gloomy all year as the Gloomweald.
+  - **The rest:** volcanoes, coastal cliffs, beaches, the warm ocean and river, caves, and the Nether and End biomes.
+- **Halloween nights** (20 October to 3 November by default): wisps rise over the landscape swamps.
+- **Full moons:** werewolves stalk the landscape woods; snow werewolves stalk its snowy land, shadow werewolves the Ominous Woods. The Howling Totem rite works there too.
+- **By day:** squirrels come to the landscape woods and turkeys to its woods and open country.
 
 ## Connections
-- Existing input producer: world generation (the landscape collection and the Alpine Spawn) and the server's season clock ([seasons.md](seasons.md)).
-- Existing output consumer: the seasons' colours and snow. Also the agriculture branch's fall harvest ([festival-crops.md](festival-crops.md), [halloween-harvest.md](halloween-harvest.md), [more-fall-additions.md](more-fall-additions.md), [graveyard-flora.md](graveyard-flora.md)). Also the turkeys ([more-fall-additions.md](more-fall-additions.md)), the werewolves and squirrels ([even-more-fall-additions.md](even-more-fall-additions.md)), the Alpha Werewolf's Howling Totem ([alpha-werewolf.md](alpha-werewolf.md)), and the Mire Hag's Hag Stone ([mire-hag.md](mire-hag.md)).
-- Technology connection: none new.
-- Magic connection: none new.
-- Reachable entry path: the newer biomes are common in Jugcraft regions. Nothing is gated on them; they are more places to find what was already found elsewhere.
-- Required vs optional: nothing here is required. Every crop, creature and lair stays where it already was, and these biomes are more of the same.
-- The audit, `tools/seasonal_kinds.py`, holds every Jugcraft biome that `tools/biomes.py` does not: 177 of the 278. Each entry records:
-  - whether it has four seasons;
-  - whether winter rain falls there as snow;
-  - its **kinds**, the conventional tags it would be in (`c:is_forest`, `c:is_taiga`, ...).
-- The 37 landscape biomes that share a name with one of `tools/biomes.py` take that biome's seasons and tags, so the two read alike. The rest are classified by hand from each biome's climate and what grows there.
-- The kinds become 14 tags, `#jugcraft:seasonal_kinds/is_<kind>`. Each holds the newer biomes of that kind, and only the seasonal and fall systems read them:
-  - `season/SeasonalKinds` pairs each conventional tag with its kind's tag;
-  - `JugcraftAgriculture.fallPatch` places the 19 fall patches through the pairs;
-  - the graveyard flowers' patches and the wisps read the pairs too;
-  - the generated habitat tags list the kind tags: `werewolf_haunts`, `snow_werewolf_haunts`, `shadow_werewolf_haunts`, `squirrel_habitat`, `turkey_habitat` and `hag_stone_lands`.
-- The conventional and vanilla tags are left as they were. Ores, raider camps, the Menagerie's wildlife and the other wild crops read those, and folding the newer biomes into them changes far more than the seasons (see Rollout and open questions).
+- **Input producer:** the season clock and the Halloween window, both already present.
+- **Output consumer:** the biome tags that the client colours, the winter snow and the creature spawners read.
+- **Technology and magic:** none new. The Alpha Werewolf's Howling Totem rite reads the werewolves' haunts, so it gains the landscape woods.
+- **Shared tags:** `tools/landscape_kinds.py` gives each landscape biome a kind. From the kinds it writes four Jugcraft tags for other content to use beside the vanilla and common biome-kind tags:
+  - `#jugcraft:landscape_kind/woods`
+  - `#jugcraft:landscape_kind/grasslands`
+  - `#jugcraft:landscape_kind/swamps`
+  - `#jugcraft:landscape_kind/snowy`
 
 ## Balance and automation
-- No recipe, item, drop rate or patch rarity changes. The newer biomes get the same patches, at the same rarity, as the vanilla biomes of their kind, and the same spawn weights.
-- More of the world now has the fall's wild crops and creatures. It is the same content over more ground, not a new source.
-- Looks (colours and snow) are cosmetic, as in [seasons.md](seasons.md).
+No item, recipe, cost or reward changes. More places host the same creatures, with the same per-player and per-world caps (werewolves 2 near a player and 8 in the world; squirrels 6 and 30; turkeys 10 and 40; wisps 4 and 64), so no more of them are about at once than before.
 
 ## Multiplayer and persistence
-- Server authority: world generation, spawning and the season clock are the server's. The kind tags are data that every client and server loads alike.
-- Existing worlds:
-  - Colours and winter snow change at once in every newer biome that now has seasons. Snow follows the `seasons.snow` rules in [seasons.md](seasons.md): it settles over the winter months and melts in spring.
-  - Wild patches and the Hag Stone's placement apply to new chunks only; chunks already generated keep what they have.
-  - Creature spawns and the Howling Totem and Hag Stone's ground follow the tags from the first start with this version.
-- No block, item or saved data changes. Removing this would only stop new chunks gaining the patches and the newer biomes' seasons; nothing earned is lost.
-- Disable behaviour as before: `seasons.mode=off`, `seasons.snow=off` and the agriculture switch work as they did. The kind tags and `SeasonalKinds` are always registered.
+- Nothing new is saved and nothing is sent between client and server. Biome tags reach clients with the server's tags, as before.
+- Seasonal snow in the newly tagged biomes falls only with `seasons.snow=on`, and melts in spring, as everywhere.
+- Existing builds, items and earned seasonal rewards are untouched. Generated terrain does not change; colours and spawns follow the tags at once, in old chunks too.
 
 ## Dependencies and assets
-- None new. Fabric API's conventional biome tags (`ConventionalBiomeTags`) and biome modification API, already used.
-- No textures or models. The tags are generated by `tools/generate_material_data.py` from `tools/seasonal_kinds.py`.
+No new dependencies or art.
+- **Data:** `tools/landscape_kinds.py` (new) and `tools/seasons.py` (`BIOMES`, `WINTER_SNOW` and `OTHER`), from which `tools/generate_material_data.py` writes the seasons and kind tags.
+- **Creature lists:** `tools/agriculture.py` adds the kind tags to the werewolf, squirrel and turkey lists, and gives `WISPS` its haunts. `tools/night_data.py` writes `#jugcraft:wisp_haunts`.
+- **Java:** `agriculture/Wisps.java` reads `#jugcraft:wisp_haunts` instead of `#c:is_swamp`.
 
 ## Verification
-- `tools/check_mod_data.py` (`check_seasonal_kinds`, from `check_seasons`) checks:
-  - every Jugcraft biome is in `tools/biomes.py` or the audit, never both, and the audit names no biome that does not exist, so a new biome collection cannot ship unclassified;
-  - kinds are known, and winter snow implies seasons;
-  - the season tags and the kind tags equal the table;
-  - `SeasonalKinds` pairs each conventional tag with its own kind and reads both;
-  - all 19 fall patches, and only they, are placed with `fallPatch`, and `fallPatch` reads the pairs;
-  - the graveyard flowers' patches and the wisps read the pairs, and each habitat tag lists its kinds.
-- The older patch checks parse both `wildPatch` and `fallPatch` calls, so the fall patches keep their biome and gating checks.
-- Deliberate breaks, each in a scratch copy of the tree: 24, all caught by the audit. They covered an unclassified biome, a made-up one, a double entry, an unknown kind, snow without seasons, stale season or kind tags, a mispaired or missing Java kind, the selectors reading one tag, a fall patch placed the old way, another crop sent through the kinds, the graveyard flowers or the wisps reading one tag, and each habitat losing its kind.
-- Server game tests (`SeasonalBiomeGameTests`):
-  - `newerBiomesTakeTheSeasonsByTheirKinds`: the maple woods and Pumpkin Patch have seasons, snow and their kinds; the desert canyon and wintry forest have neither seasons nor snow; the canyon has no kind; vanilla biomes still read through the conventional tags; an unpaired tag is refused.
-  - `newerBiomesReachTheFallsCreatures`: newer biomes are in the werewolf, squirrel, turkey and Hag Stone tags; the Alpine Spawn is in the turkeys' but not the werewolves'; the desert canyon is in none.
-
-### Results
-- Run locally on this branch:
-  - `python3 scripts/check_repository.py`: passed.
-  - `python3 tools/check_mod_data.py`: passed.
-  - `python3 -m unittest discover -s scripts/tests`: passed.
-  - The 24 breaks: all caught.
-  - `javac` parse (syntax only) of the changed and new Java: passed.
-- CI (compile and the server and client game tests): pending on the pull request.
-- Not run: the client and a world. Nobody has seen a newer biome turn gold, a chestnut tree in a landscape maple wood, or a werewolf there. The game tests check the tags and kinds, not where features land: the game-test world is not a generated Overworld. A two-client dedicated-server check is also not run; nothing here is per-player.
+- **Run locally:**
+  - `python3 tools/generate_material_data.py`: regenerated the tags.
+  - `python3 tools/check_mod_data.py`: its new `check_seasonal_biomes` checks that:
+    - every Jugcraft biome has a seasons decision: a `"seasons"` flag in `tools/biomes.py`, a landscape kind, or an entry in `seasons.OTHER`;
+    - the landscape `SEASONS` and `SNOWY` lists follow their rules against each biome file's own climate;
+    - every seasonal Jugcraft biome rains and lies between 0.15 and 0.9;
+    - winter snow falls only where it rains;
+    - the kind tags and `#jugcraft:wisp_haunts` match `tools/`, and `Wisps.java` reads the tag.
+  - `python3 scripts/check_repository.py`.
+  - **Java:** a syntax parse only. Compilation and the game tests run in CI.
+- **Game tests** (`SeasonalBiomeGameTests`, all passed in CI, below):
+  - `landscapeBiomesFollowTheSeasons`:
+    - temperate landscape biomes have seasons and winter snow;
+    - mild ones have seasons without snow;
+    - one of every other kind has neither, as do the caverns and the lairs' and pocket dimensions' biomes;
+    - across the whole biome registry, every seasonal biome rains and lies between 0.15 and 0.9, and every winter-snow biome rains.
+  - `landscapeCreaturesFindTheirHaunts`: the werewolves', snow and shadow werewolves', squirrels', turkeys' and wisps' tags hold the landscape biomes they should, and not the others (prairie, tropics, steppe, the snowy lowlands, desert, fields).
+  - `wispsComeOutOverLandscapeSwamps`: over a landscape bayou (made with `/fillbiome`), under the open sky and away from corn, a wisp may appear; over a landscape field it may not.
+- **In CI** ([run 39845833481](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/39845833481), on d9741317a): every check passed, the `mod` job on its second attempt.
+  - **First attempt:** one server game test failed, `LaboratoryLarderDiningGameTests.clockKeepsTheHour` ("The pulse ends on tick 12"). That test reads the grandfather clock 12 ticks after it starts. The clock pulses whenever the shared world clock's hour changes, so it fails when the hour rolls over in its last few ticks. It touches nothing this change does, and it passed on `main`. The [PR comment](https://github.com/jimbozoomer-byte/jugcraft/pull/454#issuecomment-6350982008) gives the cause and a proposed fix for that test.
+  - **Re-run of the failed jobs:** all 2263 required server game tests passed, `SeasonalBiomeGameTests` among them. The job without the optional integrations passed on the first attempt.
+  - **Client game tests:** the one class chosen for the changed files, `NightClientGameTests` (the wisps' and the other night creatures'), passed.
+  - **The repository check:** passed.
+- **Not run:** the client by hand (the colours in a landscape biome through the year), a dedicated server and play.
 
 ## World and event applicability
-- Halloween and the Witching Season: the wild patches and creatures above keep their own rules (their hours, nights and dates) in the newer biomes, as elsewhere. Nothing new is seasonal-only, and nothing earned depends on an event.
-- The Horseman's summoning, trick-or-treating, the Witching Season bosses, December and the Harvest Feast read no biome tag, so they work in the newer biomes as anywhere.
-- Town decorations: the town is in the Alpine Spawn, which already had seasons.
-- Caves, lairs, caverns and custom dimensions: no seasons (no sky, or a fixed hour), and no kinds.
+- Seasonal and Halloween content; nothing generates differently.
+- Earned items and builds are kept after events end, as before.
+- Not covered here, and why:
+  - **The wild Halloween harvest patches and wolfsbane:** permanent worldgen, not date-gated. They read the vanilla and common kind tags, which the landscape biomes lack. Adding those tags to the landscape biomes would also change wildlife spawns and wild crops in new chunks, a broader decision recorded below.
 
 ## Rollout and open questions
-- **The owner's choice: the wider tags.** The newer biomes are still in no `minecraft:` or `c:` tag (not even `#minecraft:is_overworld`), which leaves gaps outside the seasons. The Menagerie's wildlife skips them, and so do the other wild crops, the orchards' trees, ores that pick by biome tag, the raider camps, and the Cinder Kiln's volcanic lands (the landscape volcanoes). Villages and mineshafts would need `has_structure` tags. Folding the kinds into the conventional tags would fix all of these at once, but it changes spawn, ore and structure placement across the whole world and needs its own review. This audit changes only the seasonal and fall systems.
-- The classification is a judgement from each biome's climate and plants: `tools/seasonal_kinds.py` is the one place to change it.
+- **Owner choices to confirm,** each one line in `tools/landscape_kinds.py`:
+  - which landscape biomes count as magic or one-season (no seasons);
+  - the Pumpkin Patch having seasons (it is a field);
+  - the Scarlet Mountains going without (snow falls there all year).
+- **Follow-up, not seasonal:** the landscape biomes have none of the vanilla or common biome-kind tags (`#minecraft:is_forest`, `#c:is_swamp` and the like). Wildlife (13 species read `#c:is_swamp` alone), wild crops and other mods' content therefore skip them. Giving them those tags is a separate change, because it alters spawns and new-chunk generation across those biomes.
+- **Owner visual check:** a landscape wood in autumn and in winter.

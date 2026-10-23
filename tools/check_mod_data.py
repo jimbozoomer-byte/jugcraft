@@ -2737,68 +2737,6 @@ def check_nested_features():
         walk(load(path) or {}, path.name)
 
 
-def check_seasonal_kinds():
-    """The newer biomes (tools/seasonal_kinds.py, docs/features/seasonal-biome-audit.md): every Jugcraft biome is either
-    one of tools/biomes.py's or classified in the table, so a new biome collection cannot ship unseen by the seasonal and
-    fall systems; the kinds' tags hold what the table says; the Java reads the same kinds; every fall and Halloween wild
-    patch goes through them and the graveyard flowers' patches name only kinds there are; and the newer biomes reach the
-    werewolves, the squirrels, the turkeys and the Hag Stone through the kinds."""
-    import seasonal_kinds as sk
-    table = sk.table()
-    root = DATA / MOD / "worldgen" / "biome"
-    files = {f"{MOD}:" + path.relative_to(root).with_suffix("").as_posix() for path in root.rglob("*.json")}
-    own = {f"{MOD}:{name}" for name in bm.BIOMES}
-    for biome in sorted(files - own - set(table)):
-        err(f"{biome} is in neither tools/biomes.py nor tools/seasonal_kinds.py: say whether it has seasons and what it is")
-    for biome in sorted(set(table) - files):
-        err(f"tools/seasonal_kinds.py classifies {biome}, which is no biome")
-    for biome in sorted(set(table) & own):
-        err(f"{biome} is in both tools/biomes.py and tools/seasonal_kinds.py")
-    for biome, info in table.items():
-        if not set(info["kinds"]) <= set(sk.KINDS):
-            err(f"tools/seasonal_kinds.py gives {biome} kinds outside KINDS: {info['kinds']}")
-        if info["winter_snow"] and not info["seasons"]:
-            err(f"tools/seasonal_kinds.py: {biome} has winter snow but no seasons")
-    for tag_id, members in sk.kind_tags().items():
-        ns, path = split(tag_id)
-        tag = load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}
-        if tag.get("values") != members:
-            err(f"#{tag_id} {tag.get('values')} != tools/seasonal_kinds.py {members}")
-    java = (SEASON_JAVA / "SeasonalKinds.java").read_text(encoding="utf-8")
-    pairs = re.findall(r"ConventionalBiomeTags\.IS_([A-Z_]+), of\(\"is_([a-z_]+)\"\)", java)
-    if [a.lower() for a, _ in pairs] != list(sk.KINDS) or [b for _, b in pairs] != list(sk.KINDS):
-        err(f"SeasonalKinds.KINDS {pairs} is not tools/seasonal_kinds.py KINDS {sk.KINDS}")
-    for needed in (f'Jugcraft.id("{sk.FOLDER}/" + path)', "BiomeSelectors.tag(conventional).or(BiomeSelectors.tag(of(conventional)))",
-                   "biome.is(conventional) || biome.is(of(conventional))"):
-        if needed not in java:
-            err(f"SeasonalKinds must read each conventional tag and its kind's tag together: no {needed}")
-    agriculture = (JAVA_ROOT / "agriculture" / "JugcraftAgriculture.java").read_text(encoding="utf-8")
-    for name in sk.FALL_PATCHES:
-        if f'fallPatch("{name}",' not in agriculture:
-            err(f"JugcraftAgriculture must place the {name} patch with fallPatch, so the newer biomes of its kinds get it")
-    if len(re.findall(r'fallPatch\("', agriculture)) != len(sk.FALL_PATCHES):
-        err("JugcraftAgriculture's fallPatch calls are not tools/seasonal_kinds.py FALL_PATCHES")
-    body = re.search(r"private static void fallPatch\(String name, TagKey<Biome>\.\.\. biomes\) \{(.*?)\n\t\}", agriculture, re.S)
-    if not body or any(part not in body.group(1) for part in ("SeasonalKinds.selector(biomes[0])", "selector.or(SeasonalKinds.selector(biomes[i]))",
-                                                              "placePatch(name, selector)")):
-        err("JugcraftAgriculture.fallPatch must place its patch in each kind's conventional biomes and the newer ones (SeasonalKinds.selector)")
-    if "BiomeSelectors.tag(SeasonalKinds.of(field))" not in agriculture:
-        err("JugcraftAgriculture: the graveyard flowers' patches must reach the newer biomes of their kinds")
-    for name, info in plants.PLANTS.items():
-        for field in info.get("patch", {}).get("biomes", []):
-            if field.lower().removeprefix("is_") not in sk.KINDS:
-                err(f"tools/plants.py {name} patches into c:{field.lower()}, which has no seasonal kind")
-    if "SeasonalKinds.is(level.getBiome(spot), ConventionalBiomeTags.IS_SWAMP)" not in (JAVA_ROOT / "agriculture" / "Wisps.java").read_text(encoding="utf-8"):
-        err("Wisps must rise over the newer biomes' swamps too")
-    for tag_file, kinds in (("werewolf_haunts", ("forest", "taiga")), ("snow_werewolf_haunts", ("snowy",)),
-                            ("shadow_werewolf_haunts", ("spooky",)), ("squirrel_habitat", ("forest", "taiga")),
-                            ("turkey_habitat", ("forest", "taiga", "plains")), ("hag_stone_lands", ("swamp",))):
-        values = (load(DATA / MOD / "tags" / "worldgen" / "biome" / f"{tag_file}.json") or {}).get("values", [])
-        for kind in kinds:
-            if f"#{sk.tag(kind)}" not in values:
-                err(f"#jugcraft:{tag_file} does not reach the newer biomes' {kind} (#{sk.tag(kind)})")
-
-
 def check_seasons():
     """The seasons biome tags match tools/seasons.py, seasonal snow is registered as data says, and the palette and
     calendar days are in the year."""
@@ -2812,7 +2750,6 @@ def check_seasons():
             err(f"JugcraftSeasons does not read #{tag_id}")
     if not set(seasons.WINTER_SNOW) - {"minecraft:pale_garden"} <= set(seasons.BIOMES):
         err("Every winter-snow biome but the pale garden must have seasons")
-    check_seasonal_kinds()
     snow = (SEASON_JAVA / "SeasonalSnow.java").read_text(encoding="utf-8")
     if f'ID = "{seasons.SNOW_BLOCK}"' not in snow:
         err(f"SeasonalSnow.ID is not {seasons.SNOW_BLOCK}")
@@ -2832,6 +2769,54 @@ def check_seasons():
                    "harvest_feast", "harvest_feast.days", "december"):
         if f'"{option}"' not in options:
             err(f"JugcraftConfig.TEXT_OPTIONS has no {option}")
+    check_seasonal_biomes()
+
+
+def check_seasonal_biomes():
+    """The seasonal biome audit (docs/features/seasonal-biome-audit.md): every Jugcraft biome is decided (tools/biomes.py's
+    "seasons" flag, its landscape kind or seasons.OTHER), the landscape decisions follow their rule against each biome's
+    own climate, every seasonal Jugcraft biome rains and is neither frozen nor tropical, winter snow falls only where it
+    rains, and the landscape kind tags and the wisps' haunts are written as tools/ says."""
+    import landscape_kinds as lk
+    root = DATA / MOD / "worldgen" / "biome"
+    files = {path.relative_to(root).with_suffix("").as_posix(): load(path) or {} for path in sorted(root.rglob("*.json"))}
+    for biome in files:
+        if biome not in bm.BIOMES and biome not in lk.KINDS and biome not in seasons.OTHER:
+            err(f"Biome {MOD}:{biome} has no seasons decision: give it a \"seasons\" flag (tools/biomes.py), a landscape "
+                "kind (tools/landscape_kinds.py) or an entry in seasons.OTHER")
+    for biome in list(lk.KINDS) + list(seasons.OTHER):
+        if biome not in files:
+            err(f"tools/ decides seasons for {MOD}:{biome}, which has no biome file")
+    climate = {biome: (data.get("temperature", 0.5), bool(data.get("has_precipitation"))) for biome, data in files.items()}
+    for name, rule, listed in (("SEASONS", lk.seasonal, lk.SEASONS), ("SNOWY", lk.snowy, lk.SNOWY)):
+        expected = sorted(b for b, kind in lk.KINDS.items() if b in climate and rule(kind, *climate[b]))
+        if expected != sorted(listed):
+            err(f"landscape_kinds.{name} differs from its rule: add {sorted(set(expected) - set(listed))}, "
+                f"drop {sorted(set(listed) - set(expected))}")
+    if not set(lk.MILD) <= set(lk.SEASONS):
+        err(f"landscape_kinds.MILD names biomes without seasons: {sorted(set(lk.MILD) - set(lk.SEASONS))}")
+    low, high = lk.SEASON_TEMPERATURE
+    for biome in seasons.BIOMES:
+        ns, path = split(biome)
+        if ns == MOD and path in climate:
+            temperature, rains = climate[path]
+            if not rains or not low <= temperature <= high:
+                err(f"{biome} has seasons but its climate is {temperature}, rain {rains} (seasons need rain and {low} to {high})")
+    for biome in seasons.WINTER_SNOW:
+        ns, path = split(biome)
+        if ns == MOD and path in climate and not climate[path][1]:
+            err(f"{biome} gets winter snow but has no precipitation")
+    for tag_id, biomes in lk.KIND_TAGS.items():
+        ns, path = split(tag_id)
+        values = (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values")
+        if values != [f"{MOD}:{biome}" for biome in biomes]:
+            err(f"#{tag_id} differs from tools/landscape_kinds.py")
+    wisps = ag.WISPS
+    ns, path = split(wisps["haunts_tag"])
+    if (load(DATA / ns / "tags" / "worldgen" / "biome" / f"{path}.json") or {}).get("values") != wisps["haunts"]:
+        err(f"#{wisps['haunts_tag']} differs from tools/agriculture.py WISPS['haunts']")
+    if f'Jugcraft.id("{path}")' not in (JAVA_ROOT / "agriculture" / "Wisps.java").read_text(encoding="utf-8"):
+        err(f"Wisps does not read #{wisps['haunts_tag']}")
 
 
 def check_region_rules():
@@ -2989,8 +2974,8 @@ def check_wood_switches():
                       r"(.*?)\n\t\}\n", agriculture, re.S)
     if not gated:
         err("JugcraftAgriculture.registerWorldgen() not found, or not gated by the agriculture switch first")
-    inside = set(re.findall(r'(?:wildPatch|fallPatch)\("([a-z_]+)"', gated.group(1))) if gated else set()
-    for name in re.findall(r'(?:wildPatch|fallPatch)\("([a-z_]+)"', agriculture):
+    inside = set(re.findall(r'wildPatch\("([a-z_]+)"', gated.group(1))) if gated else set()
+    for name in re.findall(r'wildPatch\("([a-z_]+)"', agriculture):
         patch = load(DATA / MOD / "worldgen" / "placed_feature" / f"patch_{name}.json")
         if patch is not None:
             placed_by(patch["feature"], ag.FEATURE if name in inside else f"(patch_{name}, outside registerWorldgen)")
@@ -4240,7 +4225,7 @@ def check_agriculture():
         if not feature.is_file() or not patch.is_file():
             err(f"{wild}: registered wild crop must retain its generated feature and placed patch")
     patches = {name: re.findall(r"ConventionalBiomeTags\.(\w+)", biomes)
-               for name, biomes in re.findall(r'(?:wildPatch|fallPatch)\("([a-z_]+)", ([^;]*)\);', main)}
+               for name, biomes in re.findall(r'wildPatch\("([a-z_]+)", ([^;]*)\);', main)}
     expected = {name: info["biomes"] for name, info in ag.WILD_CROPS.items()}
     expected.update({name: info["biomes"] for name, info in ag.FOUND_WILD.items()})
     expected["chestnut_tree"] = ag.CHESTNUT_TREES["biomes"]

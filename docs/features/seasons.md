@@ -46,10 +46,10 @@ Primary specialty and supported player role: exploration and building (looks), s
   - forest, flower forest, birch forest, old growth birch forest, dark forest, dappled forest and cherry grove;
   - taiga, old growth pine taiga and old growth spruce taiga;
   - windswept forest, windswept hills and windswept gravelly hills;
-  - swamp;
-  - Jugcraft's own biomes as `tools/biomes.py` gives them, and the newer biomes (the landscape collection and the Alpine Spawn) as the [seasonal biome audit](seasonal-biome-audit.md) classifies them: 59 of these, from the landscape maple woods to the Pumpkin Patch.
+  - swamp.
   - Not rivers: a river runs through jungles and deserts too, and its banks would turn autumn-gold there.
-- **Winter snow biomes** (`#jugcraft:has_winter_snow`): the same biomes, plus the pale garden. The mild-wintered ones keep their colours but get no snow; among the newer biomes, these are the bayou, floodplain, lavender field, Mediterranean forest and redwood forest.
+  - Jugcraft's four-season biomes (their `"seasons"` flag in `tools/biomes.py`) and the landscape collection's temperate woods, open country, hills and swamps (by their kind, `tools/landscape_kinds.py`; see the [seasonal biome audit](seasonal-biome-audit.md)). A new Jugcraft biome with no seasons decision fails the data check.
+- **Winter snow biomes** (`#jugcraft:has_winter_snow`): the same biomes, plus the pale garden, but for those with mild winters.
 - **Unchanged all year:**
   - the tropics (jungles, mangrove swamp);
   - dry lands (deserts, savannas, badlands);

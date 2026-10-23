@@ -153,10 +153,8 @@ STONE = {
 }
 # What may be stood on instead of shallow water: mud, in it or on it.
 STONE_GROUND = ["minecraft:mud", "minecraft:muddy_mangrove_roots"]
-# The wetlands: every swamp (#c:is_swamp, Jugcraft's own and vanilla's, and the newer biomes' by their kinds,
-# tools/seasonal_kinds.py), the Floodplain and the Muskeg.
-STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "jugcraft:floodplain", "jugcraft:muskeg",
-               "#jugcraft:seasonal_kinds/is_swamp"]
+# The wetlands: every swamp (#c:is_swamp, Jugcraft's own and vanilla's), the Floodplain and the Muskeg.
+STONE_LANDS = ["#c:is_swamp", "minecraft:swamp", "minecraft:mangrove_swamp", "jugcraft:floodplain", "jugcraft:muskeg"]
 
 # The Lantern Fen's lamps: lit, they burn at this light level; one gone out is lit again by using it.
 FEN_LAMP = {"light": 15}
