@@ -5558,7 +5558,7 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 - **Slice 14F game tests (not run yet; CI runs them):**
   - `BrassGunsVIGameTests`:
     - `oldGrangeCarbineIsRegistered`: it is registered with its numbers and its recipe loads, held in both hands, firing plain bullets; a clip of seven rifle rounds, a pull a shot; slower than the Grange Carbine, harder hitting, further reaching and straighter aimed; it takes the Grange Carbine's attachments but the two magazines.
-    - `oldGrangeCarbineLoadsAClip`: an empty one with ten rounds loads nothing before its reload's time and seven after it, leaving three; a shot takes its damage from the pig; a second pull at once fires nothing, and one after its interval fires.
+    - `oldGrangeCarbineLoadsAClip`: an empty one with ten rounds loads nothing before its reload's time and seven after it, leaving three; a shot takes its damage from the pig. The trigger holds two shots at most (`GunShots.BURST`): a second pull at once fires, a third does not, and one after its interval does.
   - `GunsGameTests` counts 90 guns; `TacticalAttachmentsGameTests` the thirty-three guns the Tactical Grip fits, the Old Grange Carbine among them.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 

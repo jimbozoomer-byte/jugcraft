@@ -60,8 +60,9 @@ public class BrassGunsVIGameTests {
 
 	/**
 	 * An empty Old Grange Carbine with ten rifle rounds in the inventory loads a clip: nothing is in before its reload's
-	 * time, seven rounds after it, and three are left. A shot then takes its damage from the pig; a second pull at once
-	 * fires nothing, and one after its interval fires.
+	 * time, seven rounds after it, and three are left. A shot then takes its damage from the pig. The trigger holds two
+	 * shots at most ({@code GunShots.BURST}): a second pull at once fires, a third does not, and one after its interval
+	 * does.
 	 */
 	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 120)
 	public void oldGrangeCarbineLoadsAClip(GameTestHelper helper) {
@@ -81,11 +82,12 @@ public class BrassGunsVIGameTests {
 			helper.assertTrue(GunShots.fire(shooter), "The loaded Old Grange Carbine did not fire");
 			helper.assertTrue(Math.abs(200.0F - pig.getHealth() - spec.damage()) < 1.0E-3F,
 					"The shot took " + (200.0F - pig.getHealth()) + ", not " + spec.damage());
-			helper.assertFalse(GunShots.fire(shooter), "The Old Grange Carbine fired again in the same tick");
+			helper.assertTrue(GunShots.fire(shooter), "The Old Grange Carbine did not fire its second shot at once");
+			helper.assertFalse(GunShots.fire(shooter), "The Old Grange Carbine fired a third shot in the same tick");
 		});
 		helper.runAfterDelay(spec.reload() + 3 + spec.interval(), () -> {
 			helper.assertTrue(GunShots.fire(shooter), "The Old Grange Carbine did not fire after its interval");
-			helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 5, "Two shots did not leave five rounds");
+			helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 4, "Three shots did not leave four rounds");
 			helper.succeed();
 		});
 	}
