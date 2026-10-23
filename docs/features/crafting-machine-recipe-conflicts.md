@@ -122,3 +122,21 @@ fixture's output and quantity against every loaded crafting recipe, including mi
 and translated inputs. The reactor test checks 4/8/64 citrus at 250/1,000/8,000 mB,
 the actual compact lookup, continued citrus mash acceptance and the direct ethanol
 minimum input/yield.
+
+## PR #462 CI follow-up (23 October 2026)
+
+OpenAI Codex (GPT-6) investigated the two failed checks at `086f44521`.
+The generated-resource check found three stale Handbook crafting grids: the Polymer
+Molding Press still displayed a steel gear instead of its housing mold, and both
+Precision Finisher pages still displayed a steel gear instead of a grindstone.
+Regenerating the resources updates those grids from the existing recipe sources.
+The optional-integrations-absent build completed 2,280 server GameTests with one
+failure: the coastal construction fixture still supplied a steel gear for the press.
+That fixture now supplies the approved housing mold and retains its actual
+RecipeManager/output assertion. No production recipe, assertion, test selection or
+CI requirement is relaxed by this follow-up.
+
+The full resource generator completed with only those three expected Handbook
+ingredient changes. All 11 focused food, crafting/machine and coastal-layout Python
+checks pass, as do the repository documentation and whitespace checks. The PR's
+validation section records the subsequent complete build/data-check results.
