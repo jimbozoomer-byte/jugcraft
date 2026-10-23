@@ -2778,7 +2778,7 @@ The last of the owner's treated-brass guns, the Grandle OG: an earlier make of s
 **Save compatibility:** a new item, `jugcraft:old_grange_carbine`; nothing saved changes. `guns.enabled=false` turns its recipe off; the item stays registered.
 
 **Known limits:**
-- **The clip push fills the view:** the reload brings the left hand over the receiver near the eye, so for about half a second the arm covers much of the lower middle of the screen. It is the owner's animation; the arm's way only keeps it coming from below.
+- **The clip push fills the view:** the reload brings the left hand over the receiver near the eye, so for about half a second the hand and the clip cover much of the middle right of the screen and hide the gun (CI's reload screenshot shows it). It is the owner's animation; the arm's way only keeps it coming from below.
 - **The clip grazes the Long Scope:** going in, it passes a quarter pixel into the back of the Long Scope's eyepiece, for about half a second. The scopes stand where the owner's rail puts them.
 - **The hands are chosen here,** the Grange Carbine's; the bones' pivots are the owner's.
 - **Not played:** none of it has been played yet. The numbers want play to set.
