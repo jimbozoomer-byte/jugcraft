@@ -1,5 +1,19 @@
 # Jugcraft TODO
 
+## Jimtafacts collection — October 23 local integration
+
+- [x] Preserve and SHA-256 verify all 17,598 supplied files; index named content, namespaces, legacy class generations and source-format issues.
+- [x] Implement and validate the first 28 accessory/food item behaviors: native slots, cooldowns, acquisition, party protection and grave interactions. Source-parity and worn-model work remains below.
+- [ ] Complete the other accessories, mimic/campsites, source wearable models/animations and source-behavior parity.
+- [ ] Integrate spellbooks, spells, equipment, enemies/bosses and structures through the shared magic systems.
+- [ ] Integrate Applied Energentics storage networks, terminals, cells, crafting, automation and security.
+- [ ] Integrate IndustrialCraft processing, equipment, power, agriculture and nuclear systems, consolidating overlapping machines.
+- [ ] Integrate BuildCraft transport, gates, pumps, quarry/builders, engines and robotics with claims and existing logistics.
+- [ ] Integrate computers, terminals, disks, peripherals and turtles with bounded execution and persistent state.
+- [ ] Finish combined survival, economy, visuals, multiplayer, save/restart and performance checks; prepare the local owner playtest before release.
+
+[Scope, supplied files, implemented behavior and pending parity](features/jimtafacts-integration.md). Preserved content is not automatically playable content.
+
 ## Planes, furniture and graves — October 22 candidate
 
 - [x] Integrate seven supplied aircraft with equipment/cargo, fuel, repair, ownership, weapons and retained models/animations. Correct grounded model/seat/weapon offsets.

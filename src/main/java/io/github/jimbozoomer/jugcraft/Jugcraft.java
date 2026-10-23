@@ -142,6 +142,7 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.academy.JugcraftAcademy.register();
 		io.github.jimbozoomer.jugcraft.nouveau.JugNouveau.register();
 		io.github.jimbozoomer.jugcraft.menagerie.Menagerie.register();
+		io.github.jimbozoomer.jugcraft.jimtafacts.Jimtafacts.register();
 		io.github.jimbozoomer.jugcraft.diagonal.DiagonalWalls.register();
 		io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.register();
 		FeatureEnabledCondition.register();

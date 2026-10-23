@@ -1826,6 +1826,8 @@ def main():
     owner_resource_patches.apply()
     import owner_workshop_shared
     owner_workshop_shared.apply()
+    import jimtafacts
+    jimtafacts.generate()
     import walnut_data
     walnut_data.reconcile(write)
     from generated_resource_cleanup import prune

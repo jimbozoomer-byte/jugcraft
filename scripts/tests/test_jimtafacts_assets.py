@@ -1,0 +1,55 @@
+"""Owner texture fidelity, modern model references and nondestructive resource regeneration."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'tools'))
+import jimtafacts
+
+
+class JimtafactsAssetsTests(unittest.TestCase):
+    def test_copied_icons_match_the_supplied_files(self):
+        copies = json.loads((ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/runtime-copies.json').read_text())
+        self.assertEqual(len(copies), len(jimtafacts.ACCESSORIES) + len(jimtafacts.FOOD))
+        for row in copies:
+            with self.subTest(row['runtime']):
+                original = (ROOT / row['source']).read_bytes()
+                self.assertEqual((ROOT / row['runtime']).read_bytes(), original)
+                self.assertEqual(hashlib.sha256(original).hexdigest(), row['sha256'])
+
+    def test_every_modern_item_model_resolves_to_a_real_texture(self):
+        res = ROOT / 'src/main/resources'
+        for name in set(jimtafacts.ACCESSORIES) | set(jimtafacts.FOOD):
+            with self.subTest(name):
+                item = json.loads((res / f'assets/jugcraft/items/jimta_{name}.json').read_text())
+                model_id = item['model']['model'].split(':')[1]
+                model = json.loads((res / f'assets/jugcraft/models/{model_id}.json').read_text())
+                texture = model['textures']['layer0'].split(':')[1]
+                self.assertTrue((res / f'assets/jugcraft/textures/{texture}.png').is_file())
+
+    def test_regeneration_preserves_existing_shared_tags_and_language(self):
+        res = ROOT / 'src/main/resources'
+        lang = res / 'assets/jugcraft/lang/en_us.json'
+        paths = [lang] + sorted((res / 'data/trinkets/tags/item').rglob('*.json'))
+        before = {p:json.loads(p.read_text(encoding='utf-8')) for p in paths}
+        try:
+            jimtafacts.generate()
+            for p, previous in before.items():
+                self.assertEqual(json.loads(p.read_text(encoding='utf-8')), previous, str(p))
+        finally:
+            # Restore exact pre-test semantic contents even if an assertion fails.
+            for p, previous in before.items(): p.write_text(json.dumps(previous,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+
+    def test_equipped_tags_link_without_replacing_existing_equipment(self):
+        res = ROOT / 'src/main/resources'
+        for name, (slot, _, _) in jimtafacts.ACCESSORIES.items():
+            shared = json.loads((res / f'data/trinkets/tags/item/{slot}.json').read_text())
+            own = json.loads((res / f'data/jugcraft/tags/item/jimtafacts/{slot}.json').read_text())
+            self.assertFalse(shared['replace'])
+            self.assertIn('#jugcraft:jimtafacts/' + slot, shared['values'])
+            self.assertIn('jugcraft:jimta_' + name, own['values'])
+
+if __name__ == '__main__': unittest.main()

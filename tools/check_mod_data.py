@@ -97,6 +97,7 @@ import town_assets
 import graveyard as gy
 import diagonal_connections as dg
 import menagerie_registry as menagerie
+import jimtafacts
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -386,6 +387,8 @@ def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
     import vehicle_bays
     ns, path = split(ref.lstrip("#"))
+    if ns == MOD and path in {'jimta_' + name for name in jimtafacts.FOOD}:
+        return {}  # Reusable food; neither cooking route contains or recovers metal.
     if ns == MOD and path == "deep_drilling_assembly":
         return {}  # Assembled machinery: no ingot-recovery recipe, like the deposit drill itself.
     if ns == MOD and path in vehicle_bays.BLOCKS:
@@ -733,6 +736,7 @@ def check_tags():
         known = set(known)
         if registry == 'block': known.update(starter_workshop.STATIONS)
         if registry == 'item': known.update(starter_workshop.NAMES)
+        if registry == 'item': known.update(jimtafacts.items())
         if registry in {'item', 'block'}: known.update(vehicle_bays.BLOCKS)
         if registry in {'item','block'}:known.update(menagerie.entries())
         if registry == 'entity_type':known.update(menagerie.entities())
@@ -14691,7 +14695,7 @@ def check_ember_regalia(co, root, lang):
         if f"textures/gui/sprites/container/slots/{info['icon']}.png" not in em.OWNER_FILES:
             err(f"slot {slot}: its icon is not the owner's (OWNER_FILES)")
         held = set((load(DATA / "trinkets" / "tags" / "item" / group / f"{name}.json") or {}).get("values", []))
-        if held != {f"{MOD}:{item}" for item, worn in em.TRINKETS.items() if worn == slot}:
+        if held != ({f"{MOD}:{item}" for item, worn in em.TRINKETS.items() if worn == slot} | jimtafacts.slot_links(slot)):
             err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
         if f"trinkets.slot.{group}.{name}" not in lang:
             err(f"slot {slot}: missing lang trinkets.slot.{group}.{name}")
@@ -14909,6 +14913,7 @@ def check_wayfaring(co, root, lang):
             expected.update(f"{MOD}:{item}" for item in concordance_ee_artifacts.CHARMS)
         if slot == "legs/belt":
             expected.update({"jugcraft:nouveau_belt_of_levitation", "jugcraft:nouveau_belt_of_unstable_gifts"})
+        expected.update(jimtafacts.slot_links(slot))
         if held != expected:
             err(f"data/trinkets/tags/item/{slot}.json holds {sorted(held)}")
     # Two items with one English name cannot be told apart (the kinetic belt is the Drive Belt for this reason).
@@ -17013,6 +17018,7 @@ def registered_items():
                   | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     import starter_workshop
     registered |= menagerie.entries() | set(vehicle_bays.BLOCKS) | set(starter_workshop.NAMES)
+    registered |= set(jimtafacts.items())
     return registered
 
 

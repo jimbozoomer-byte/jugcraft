@@ -271,6 +271,9 @@ def all_items():
 
 def feature_of(entry_id):
     """The feature switch that owns a registered ID."""
+    import jimtafacts
+    if entry_id in jimtafacts.items():
+        return "concordance"
     if entry_id == "deep_drilling_assembly":
         return "machines"
     import vehicle_bays

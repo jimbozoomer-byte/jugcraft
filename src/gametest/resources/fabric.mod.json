@@ -11,6 +11,7 @@
       "io.github.jimbozoomer.jugcraft.test.TestForms"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.JimtafactsGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArtisanFurnitureGameTests",
       "io.github.jimbozoomer.jugcraft.test.OwnerFurnitureAircraftGameTests",
       "io.github.jimbozoomer.jugcraft.test.DeathGraveGameTests",
@@ -303,6 +304,7 @@
       "io.github.jimbozoomer.jugcraft.finance.ServerDefenseGameTests"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.JimtafactsClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArtisanClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.OwnerBatchClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyCavityClientGameTests",
