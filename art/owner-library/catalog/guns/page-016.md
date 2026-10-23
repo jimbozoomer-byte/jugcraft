@@ -65,3 +65,6 @@ Paths preserve the supplied collection. Follow the [reuse guide](../../README.md
 | [Guns/sounds/mass_production.ogg](../../originals/Blocks/Guns/sounds/mass_production.ogg) | sound | — | — |
 | [Guns/sounds/ui/weapon/attach.ogg](../../originals/Blocks/Guns/sounds/ui/weapon/attach.ogg) | sound | — | — |
 | [Guns/geo/item/gun/grandle_og.geo.json](../../originals/Blocks/Guns/geo/item/gun/grandle_og.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/mas_55.geo.json](../../originals/Blocks/Guns/geo/item/gun/mas_55.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/prush_gun.geo.json](../../originals/Blocks/Guns/geo/item/gun/prush_gun.geo.json) | model JSON | — | — |
+| [Guns/geo/item/gun/valora.geo.json](../../originals/Blocks/Guns/geo/item/gun/valora.geo.json) | model JSON | — | — |

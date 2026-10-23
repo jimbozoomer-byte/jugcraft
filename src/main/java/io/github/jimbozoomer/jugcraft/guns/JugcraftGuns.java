@@ -106,6 +106,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * hit alight ({@link #INCENDIARY}).</li>
  * <li>Slice 14F, the last treated-brass gun: the Old Grange Carbine, the Grange Carbine's older make, with a longer
  * barrel, loaded from the top with a stripper clip of seven.</li>
+ * <li>Slice 15A, the first diamond-steel guns: the Vesper Rifle, a heavy marksman's rifle; the Onrush SMG, a
+ * submachine gun; and the Gallant Rifle, an automatic rifle silenced the length of its barrel.</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -207,6 +209,9 @@ public final class JugcraftGuns {
 		SPECS.put("firedrake", new GunSpec(1.5F, 1, 2, true, 64, 78, 0, 0, 0, 12.0F, 8.0F, 6, "minecraft:blaze_powder"));
 		SPECS.put("harrow", new GunSpec(4.5F, 4, 11, false, 8, 60, 0, 0, 0, 3.5F, 2.0F, 32, "buckshot_shell"));
 		SPECS.put("old_grange_carbine", new GunSpec(8.0F, 1, 9, false, 7, 39, 0, 0, 0, 2.0F, 0.25F, 112, "rifle_round"));
+		SPECS.put("vesper_rifle", new GunSpec(13.0F, 1, 14, false, 8, 51, 0, 0, 0, 2.0F, 0.15F, 144, "rifle_round"));
+		SPECS.put("onrush_smg", new GunSpec(3.5F, 1, 2, true, 23, 51, 0, 0, 0, 5.0F, 2.5F, 48, "light_round"));
+		SPECS.put("gallant_rifle", new GunSpec(6.0F, 1, 5, true, 17, 43, 0, 0, 0, 3.0F, 1.0F, 80, "rifle_round"));
 	}
 
 	/**
@@ -486,6 +491,17 @@ public final class JugcraftGuns {
 		ACCEPTS.put("old_grange_carbine", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
 				"light_stock", "weighted_stock", "wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet",
 				"netherite_bayonet", "long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("vesper_rifle", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "netherite_bayonet", "long_scope", "reflex_sight", "tactical_grip",
+				"laser_sight"));
+		ACCEPTS.put("onrush_smg", List.of("silencer", "baffled_silencer", "muzzle_brake", "extended_barrel",
+				"extended_magazine", "speed_magazine", "light_stock", "weighted_stock", "wooden_stock", "light_grip",
+				"iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet", "long_scope", "medium_scope",
+				"reflex_sight", "tactical_grip", "laser_sight"));
+		ACCEPTS.put("gallant_rifle", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
+				"wooden_stock", "light_grip", "iron_bayonet", "steel_bayonet", "diamond_bayonet", "netherite_bayonet",
+				"long_scope", "medium_scope", "reflex_sight", "tactical_grip", "laser_sight"));
 	}
 
 	/** The rounds. */

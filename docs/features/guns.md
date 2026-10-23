@@ -2783,6 +2783,64 @@ The last of the owner's treated-brass guns, the Grandle OG: an earlier make of s
 - **The hands are chosen here,** the Grange Carbine's; the bones' pivots are the owner's.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
+## Slice 15A: the first diamond-steel guns
+The first three of the owner's diamond-steel guns, taken up after slice 14F (on 23 October 2026, asked which set came next, the owner chose "Diamond-steel guns (Recommended)"). Of the fifteen, these three are box-magazine guns that need nothing the guns cannot already do: the MAS 55, the Prush Gun and the Valora. Each is built from the owner's own GeckoLib model of it, from the upload of the same day ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)): the owner's later edits of these guns, which in places differ from their item-model parts in the library.
+
+| | Vesper Rifle | Onrush SMG | Gallant Rifle |
+|---|---|---|---|
+| The owner's gun | MAS 55 | Prush Gun | Valora |
+| What it is | a heavy marksman's rifle: a long barrel, a ring rear sight, a wax seal with a strip of scripture on its left side | a submachine gun: a perforated shroud over its barrel, a long magazine below, a wax seal on its left side | an automatic rifle silenced the length of its barrel, a wax seal and scripture on its left side |
+| Held | in both hands: the right on the grip, the left on the handguard | in both hands: the right on the grip, the left under the shroud | in both hands: the right on the grip, the left under the receiver |
+| What it fires | Rifle Rounds, a pull a shot | Light Rounds, as long as the trigger is held | Rifle Rounds, as long as the trigger is held |
+| Damage | 13 | 3.5 | 6 |
+| Rate | about 1.4 a second (every 14 ticks) | 10 a second (every 2 ticks) | 4 a second (every 5 ticks) |
+| Holds | 8 | 23 | 17 |
+| Reload | 2.55 s | 2.55 s | 2.15 s |
+| Spread, hip / aimed | 2° / 0.15° | 5° / 2.5° | 3° / 1° |
+| Range | 144 blocks | 48 blocks | 80 blocks |
+| The view aimed | 0.75 | 0.9 | 0.85 |
+| Takes | the barrels' four, the magazines, the stocks, both grips, three bayonets (the owner's model has no diamond one), the Long Scope, the Reflex Sight and the Laser Sight | the barrels' four, the magazines, the stocks, both grips, the four bayonets, the three scopes and the Laser Sight | the magazines, the stocks, both grips, the four bayonets, the three scopes and the Laser Sight; no barrel attachment: it is silenced its length |
+
+**Their numbers** start from the owner's own for the three guns, in the gun data of the same upload, set beside the guns already built: the MAS 55 is their slow, heavy rifle of eight (20 a shot, every 11 ticks), the Prush Gun their submachine gun of 23 (every 2 ticks), the Valora their silenced automatic of 17. The reloads are the owner's animations'.
+
+**Crafting** (a crafting table; they switch with the guns): Jugcraft has no diamond steel, so stainless steel and a diamond, with a lever.
+- **Vesper Rifle:** three stainless steel ingots over a diamond, a lever and planks, over a stainless steel ingot (the owner's recipe gives it wooden furniture too).
+- **Onrush SMG:** two stainless steel ingots over a diamond, a lever and planks, over a stainless steel ingot.
+- **Gallant Rifle:** a Baffled Silencer and two stainless steel ingots over a diamond and a lever, over a stainless steel ingot: the owner's recipe for the Valora takes an advanced silencer.
+
+**How they fire:** as the guns before them: each round flies along the look, strayed by the spread.
+
+**What you see:** the owner's animations. Each shot kicks the gun and works the bolt, and the seal and its scripture swing. To reload, the left hand takes the magazine out below and brings the full one in: on the Vesper and the Gallant the left arm hangs under the magazine in the owner's models, so the hand carries it out and back (`carry()`, slice 14F). The Vesper tips up steeply to the right as it is reloaded, its seal toward the eye. Sounds: the heavier rifle's shot (the Bulldog Pistol's), the greaser SMG's (the Riveter SMG's) and the bruiser's silenced shot, as the owner's data for each names.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slice 14F's (`GEO_PARTS`): each gun's parts are the bones of its model, its standard magazine, stock and barrel the bones the owner named `default_mag`, `standard_grip` and `standard_barrel`. Their textures are the models' own (`Guns/animated/gun/`), which the owner laid out anew: the guns' item textures in `Guns/item/` draw the earlier item-model parts.
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the MAS 55 13 bones (71 elements), on the Prush Gun 14 (69), on the Valora 8 (29). Their UVs differ by the new layout, so they are not compared (`GEO_RELAID`). Where the owner reshaped a part (the Prush Gun's body, sights, silencer and grips; every gun's body and magazines in places), the model's is used.
+- **Bones:** the models' own, turning about the models' pivots (checked): `gun_body`; `bolt`; `seal` (and `scriptures` under it on the MAS 55 and the Valora); `magazine` (and an empty `default_mag` on the MAS 55, which its reload names but never moves); an empty `magazine_2`.
+- **Hands:** placed from the owner's own arm bones, by the offsets that place the Old Grange Carbine's hands from its model's, whose arms the idle turns the same way. The arms' ways were chosen in first-person previews, to cover as little of the screen as they can through the hold, shot, reload and inspection.
+- **Sights:** the Vesper's ring at the back, the Onrush's ring, the Gallant's notch between the two posts at the back of its receiver. Aimed, each is held further out (`"eye_relief"`) so that nothing comes within 2.3 px of the eye through its aimed shot: the Vesper 4 px (held at the hip's depth, its recoil would bring its back 1.6 px past the eye), the others 1 px.
+- **Scopes:** on the Vesper and the Onrush, where their iron sights stand. The Gallant has no sights part: a scope stands on the flat of its receiver's top, ahead of its rear sight (`MOUNTS`). The Vesper's texture has room for three of the four sights' pieces: it goes without the Medium Scope (the medium scope's `"not_on"`).
+- **Checked** in first-person, aimed and orthographic previews: idle, fired, through each reload and inspection, aimed through each sight and scope, and with each attachment.
+
+**Connections:**
+- **Rounds:** the Rifle Round and the Light Round; nothing new.
+- **Parts:** stainless steel, a diamond and a lever; planks for the Vesper and the Onrush, a Baffled Silencer for the Gallant.
+- **Their place:** past stainless steel, the guns' first beyond steel and brass.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Vesper Rifle:** 13 a shot; about 14.0 a second, against the Kestrel Rifle's 12.2 and the Lament Rifle's 12.4, the marksman's rifles before it. It reaches 144 blocks and strays 0.15° aimed.
+- **Onrush SMG:** about 16.9 a second, against the Murmur SMG's 15.3 and the Riveter SMG's 11.4.
+- **Gallant Rifle:** about 16.6 a second, beside the Garrison Rifle's 17.1, near-silent.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:vesper_rifle`, `onrush_smg` and `gallant_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **The Gallant is silent only by its sound:** its shot is the owner's silenced one; nothing else about it is quieter (a shot shows a muzzle flash, as CI's third-person screenshot shows), and the Silencer does not fit it.
+- **The Vesper goes without the Medium Scope:** its atlas has no room for that scope's pieces.
+- **The Vesper's reload fills the right of the view:** the owner's animation tips it up toward the eye.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them; the hands and the arms' ways are chosen here.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
 - **Existing output consumer:** combat. The guns kill what drops loot for every branch.
@@ -2889,7 +2947,7 @@ The owner supplied each gun's parts as Blockbench Java item models (`Guns/models
    - **Gun body:** turns about the right hand's grip.
 3. **Copies the files unchanged:** the atlases (the Thunderpipe's with the shell added), the animations (byte for byte) and the sounds. One part is moved as it is read: the Whistler's light stock, which stands off the gun ([slice 9A](#slice-9a-the-marksman-rifles)).
 4. **Checks the result:** it re-bakes every model the way GeckoLib 5.5.7 does (`GeometryCube`, `VertexSet`, `GeometryQuadUvs`) and compares each face with the owner's. Run `python3 tools/guns.py --check`; `tools/check_mod_data.py` runs it too. It was shown to fail on a flipped UV, a moved cube and a turned face.
-5. **Reads a gun the owner modelled in GeckoLib** (slice 14F, the Old Grange Carbine): its parts are the bones of the owner's own model (`Guns/geo/item/gun/`), turned back into item-model elements by step 1 run backwards (`geo_element()`), and built and checked as above. The check also converts the model's bones that are another gun's item-model parts and compares them element for element (`GEO_TWINS`), and holds the gun's bones to the model's pivots ([slice 14F](#slice-14f-the-old-grange-carbine)).
+5. **Reads a gun the owner modelled in GeckoLib** (slice 14F, the Old Grange Carbine; slice 15A's three): its parts are the bones of the owner's own model (`Guns/geo/item/gun/`), turned back into item-model elements by step 1 run backwards (`geo_element()`), drawn from the model's own texture (`Guns/animated/gun/`), and built and checked as above. The check also converts the model's bones that are item-model parts and compares them element for element (`GEO_TWINS`; corner for corner only where the owner laid the texture out anew, `GEO_RELAID`), and holds the gun's bones to the model's pivots ([slice 14F](#slice-14f-the-old-grange-carbine), [slice 15A](#slice-15a-the-first-diamond-steel-guns)).
 
 The animations' sound cues map to the library's sounds as follows:
 - `gun_rustle` and `rustle`: gun_rustle
@@ -4483,6 +4541,35 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
 | old_grange_carbine | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
 | old_grange_carbine | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
 | old_grange_carbine | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| vesper_rifle | `Guns/models/item/mas_55.json` | `78366bcbcca6fbb7` |
+| vesper_rifle | `Guns/animated/gun/mas_55.png` | `7ef5740e2f456ae8` |
+| vesper_rifle | `Guns/item/mas_55.animation.json` | `2f6b2754ae9a8330` |
+| vesper_rifle | `Guns/geo/item/gun/mas_55.geo.json` | `f279de6b94a2c214` |
+| vesper_rifle | `Guns/sounds/item/heavier_rifle/fire.ogg` | `4e17f5a1b2891ee7` |
+| vesper_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| vesper_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| vesper_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| vesper_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| onrush_smg | `Guns/models/item/prush_gun.json` | `92bf5d75b0bdc4e6` |
+| onrush_smg | `Guns/animated/gun/prush_gun.png` | `435d543ec67fa230` |
+| onrush_smg | `Guns/item/prush_gun.animation.json` | `1a068f8265f8f0df` |
+| onrush_smg | `Guns/geo/item/gun/prush_gun.geo.json` | `732ff89ffbd2be80` |
+| onrush_smg | `Guns/sounds/item/greaser_smg/fire.ogg` | `201fd4258dea84a2` |
+| onrush_smg | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| onrush_smg | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| onrush_smg | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| onrush_smg | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| onrush_smg | `Guns/item/laser.png` | `aac5f06e892e350a` |
+| gallant_rifle | `Guns/models/item/valora.json` | `4f7ece012aa2da9f` |
+| gallant_rifle | `Guns/animated/gun/valora.png` | `f6564378ce984558` |
+| gallant_rifle | `Guns/item/valora.animation.json` | `b9ecf48da4b64834` |
+| gallant_rifle | `Guns/geo/item/gun/valora.geo.json` | `2e5540135051e6a4` |
+| gallant_rifle | `Guns/sounds/item/bruiser/silenced_fire.ogg` | `3be86fbae0e17704` |
+| gallant_rifle | `Guns/item/long_scope_texture.png` | `e69191017eb081ad` |
+| gallant_rifle | `Guns/item/medium_scope.png` | `543abecf859783be` |
+| gallant_rifle | `Guns/item/relex_sight.png` | `c8a38dbce7c266b0` |
+| gallant_rifle | `Guns/item/laser_sight.png` | `1e0a3342068bc5df` |
+| gallant_rifle | `Guns/item/laser.png` | `aac5f06e892e350a` |
 
 - **The bolt sound's tag:** `bolt.ogg` carries Vorbis tags naming another source ("All Epic Infantry Assault Rifle Reload Sounds (Fortnite)"). The owner, asked about the eight tagged sounds in the library, answered "I have the rights", so it is used like the rest. None of the other sounds used here carries such a tag.
 - **The scopes' reticles and lens rims (slice 7b):** the owner uploaded them on 8 October 2026 ("heres reticles and vignette"). Two files in that upload carry embedded Photoshop metadata:
@@ -5566,13 +5653,33 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
   - **Reloading** (a little under a second in): the left hand, the clip on top of it, fills the middle right of the view and hides the gun. This is the clip push in known limits, as the previews show it at that time.
   - **Fitted:** with each of its four sets, held as plain and aimed along the sights (a fitted stock left out, as the test checks); the Laser Sight's red housing stands on its rail beside the line of sight.
   - **Third person:** carried raised at the shoulder; fired, a flash at its muzzle.
+- **Slice 15A, run locally (23 October 2026):**
+  - `python3 tools/guns.py`: PASS. It wrote the three guns' models, animations and atlases and copied the bruiser's silenced shot; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: 35 bones, 169 elements, corner for corner).
+  - **Found and fixed while previewing:** the converter took a GeckoLib model's texture to be `item/<gun>.png` where the library has both that and `animated/gun/<gun>.png`, as it has for these three (not for the Grandle OG), so their first previews drew the earlier item texture's pixels on the new layout. A model's parts now name its texture outright (`scguns:animated/gun/<gun>`); the Old Grange Carbine's files come out unchanged, and each of the four atlases keeps every pixel of its model's texture.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json`, unrelated; that file is left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (6249 material IDs).
+  - `python3 scripts/check_repository.py`: PASS.
+  - **Java:** a syntax parse only: 0 errors in the changed files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: no gun's grid matches another.
+  - **Alchemy values:** the three guns' records in `data/jugcraft/alchemy/values.json`, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here). `python3 -m unittest discover -s scripts/tests`: 191 tests passed; `python3 scripts/package_modrinth.py check`: PASS.
+- **Slice 15A game tests (not run yet; CI runs them):**
+  - `DiamondSteelGunsGameTests`:
+    - `diamondSteelGunsAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands, firing plain bullets a magazine at a time. The Vesper Rifle is eight rifle rounds, a pull a shot, harder hitting, further reaching and straighter aimed than the Old Grange Carbine, taking the Long Scope, the Reflex Sight and the Laser Sight but not the Medium Scope; the Onrush SMG twenty-three light rounds as long as the trigger is held, every second tick, taking the four sights; the Gallant Rifle seventeen rifle rounds as long as the trigger is held, taking no barrel attachment and the four sights.
+    - `vesperRifleChangesItsMagazine`, `onrushSmgChangesItsMagazine`, `gallantRifleChangesItsMagazine`: an empty gun with more rounds than a magazine loads nothing before its reload's time and a full magazine after it, leaving the rest; two pulls at once both fire (the trigger's bank), the first taking its damage, a third does not, and one after the interval does.
+  - `GunsGameTests` counts 93 guns; `TacticalAttachmentsGameTests` the thirty-six guns the Tactical Grip fits, these three among them.
+- **Slice 15A in CI** ([run 40032578602](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40032578602), on 3011c4eb1): every check passed on its first run: the `mod` job (the build and every server game test, `DiamondSteelGunsGameTests` among them), the job without the optional integrations, the repository check and all sixteen client shards.
+  - **Vesper Rifle** (first person, from the guns shard's log): held at the lower right, its red seal at the back of the receiver; aimed, it looks along its sights with the front post on the husk; fired, the same, a round spent. Reloading, it is tipped up to fill the right of the view (known limits); inspected, turned up at the left of the middle, the left arm across the view to the right.
+  - **Onrush SMG:** held at the lower right. Aimed and fired, it looks down its receiver, a square tube the owner's model turns 45° about the barrel, so it shows end on as a diamond with the husk at the crosshair above it, as the previews have it. Reloading, turned toward the left at the lower right; inspected, turned up toward the middle in both hands.
+  - **Gallant Rifle:** held at the lower right, its seal red at the back; aimed and fired, it looks along its back with the husk at the crosshair. Reloading, tipped up at the lower right with the left hand at its magazine; inspected, turned toward the left in both hands.
+  - **Fitted:** each with each of its four sets, held and aimed. The Extended Magazine takes the counts to 12, 35 and 26. The Laser Sight's housing stands large at the upper right of the view held, beside the line of sight aimed.
+  - **Third person:** each carried raised at the shoulder; fired, a flash at its muzzle, the Gallant's too (known limits).
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -5583,5 +5690,6 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
-  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's is in the library so far ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)).
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's, the MAS 55's, the Prush Gun's and the Valora's are in the library so far ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
+  - the other twelve diamond-steel guns.
 - **Balance:** the numbers are starting points for the owner to set.
