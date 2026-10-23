@@ -101,6 +101,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * <li>Slice 14D, three more treated-brass guns: the Quarrel Carbine, a repeating crossbow-gun whose bow throws each
  * round; the Hinterland Rifle, a two-pronged rifle of molten stone whose shots set what they hit alight
  * ({@link #INCENDIARY}); and the Cloudburst Gun, a drum-fed twin-barrelled automatic.</li>
+ * <li>Slice 14E, two more treated-brass guns: the Firedrake, a short flamethrower with two fuel tanks slung under
+ * it ({@link #FLAME}); and the Harrow, four barrels before a drum, whose four pellets and burst of flame set what they
+ * hit alight ({@link #INCENDIARY}).</li>
  * <li>Attachments ({@link #ATTACHMENTS}), one a slot, are fitted in a crafting grid ({@link GunAttachmentRecipe}) and
  * held in {@link #FITTED}; they change the gun's numbers ({@link GunItem#spec(ItemStack)}) and show on its model.
  * Slice 9E adds the Tactical Grip and the Laser Sight, whose red dot the client draws where the gun points.</li>
@@ -199,6 +202,8 @@ public final class JugcraftGuns {
 		SPECS.put("quarrel_carbine", new GunSpec(9.0F, 1, 10, false, 8, 51, 0, 0, 0, 2.0F, 0.2F, 112, "rifle_round"));
 		SPECS.put("hinterland_rifle", new GunSpec(7.0F, 1, 8, false, 10, 51, 0, 0, 0, 2.5F, 0.35F, 96, "rifle_round"));
 		SPECS.put("cloudburst_gun", new GunSpec(5.0F, 1, 4, true, 30, 78, 0, 0, 0, 4.5F, 2.0F, 72, "rifle_round"));
+		SPECS.put("firedrake", new GunSpec(1.5F, 1, 2, true, 64, 78, 0, 0, 0, 12.0F, 8.0F, 6, "minecraft:blaze_powder"));
+		SPECS.put("harrow", new GunSpec(4.5F, 4, 11, false, 8, 60, 0, 0, 0, 3.5F, 2.0F, 32, "buckshot_shell"));
 	}
 
 	/**
@@ -207,7 +212,7 @@ public final class JugcraftGuns {
 	 * line; {@link #ARC}, a bolt that leaps from creature to creature; {@link #ROCKET} (slice 10A), a High-Explosive Rocket
 	 * ({@link GunShots}).
 	 */
-	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"));
+	public static final Map<String, String> SHOTS = Map.ofEntries(Map.entry("trench_lobber", "grenade"), Map.entry("stoker", "flame"), Map.entry("beam_pistol", "beam"), Map.entry("stormlock_rifle", "arc"), Map.entry("linesman", "arc"), Map.entry("spikedriver", "beam"), Map.entry("seam_cutter", "beam"), Map.entry("caisson_pistol", "arc"), Map.entry("earthmover", "rocket"), Map.entry("skylark_rifle", "rocket"), Map.entry("bullfrog", "grenade"), Map.entry("solenoid_rifle", "beam"), Map.entry("votive_rifle", "beam"), Map.entry("glowmouth", "arc"), Map.entry("fencepost_thumper", "grenade"), Map.entry("lantern_musket", "beam"), Map.entry("firedrake", "flame"));
 	public static final String GRENADE = "grenade";
 	public static final String FLAME = "flame";
 	public static final String BEAM = "beam";
@@ -253,9 +258,9 @@ public final class JugcraftGuns {
 	/**
 	 * Slices 11A and 11B, the Nether guns: the guns whose bullets set each creature they hurt alight, for
 	 * {@link GunShots#BURN_SECONDS} as the Stoker's flame does (tools/guns.py INCENDIARY). Slice 14D adds the
-	 * Hinterland Rifle.
+	 * Hinterland Rifle, slice 14E the Harrow.
 	 */
-	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling", "hinterland_rifle");
+	public static final Set<String> INCENDIARY = Set.of("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling", "hinterland_rifle", "harrow");
 	/**
 	 * Slice 12A, the End guns: the guns whose bullets make each creature they hurt float, for {@link GunShots#LIFT_TICKS}
 	 * as a shulker's bullet does (tools/guns.py LEVITATING).
@@ -474,6 +479,7 @@ public final class JugcraftGuns {
 		ACCEPTS.put("quarrel_carbine", List.of("extended_magazine", "speed_magazine", "light_stock", "weighted_stock",
 				"wooden_stock", "long_scope", "medium_scope", "reflex_sight", "laser_sight"));
 		ACCEPTS.put("hinterland_rifle", List.of("medium_scope", "reflex_sight"));
+		ACCEPTS.put("harrow", List.of("light_stock", "weighted_stock", "wooden_stock"));
 	}
 
 	/** The rounds. */

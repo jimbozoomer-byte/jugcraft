@@ -834,6 +834,27 @@ GUNS = {
         "damage": 5.0, "pellets": 1, "interval": 4, "auto": True, "capacity": 30,
         "reload": 78, "spread": (4.5, 2.0), "range": 72, "ammo": "rifle_round",
     },
+    # Slice 14E, two more of the owner's treated-brass guns, the last but the Grandle OG (an earlier make of slice 14B's
+    # Grandle): the Spitfire, a short flamethrower with two fuel tanks slung under it, a perforated shroud over its
+    # nozzle and a pilot flame burning at its mouth, held by a raised rear handle and its side, with the Gattaler's
+    # animations; and the Scratches, four barrels before a drum, a can under them and a crank on its left side, with
+    # the Kiln Gun's: each shot throws a burst of flame from its muzzle.
+    "firedrake": {
+        "display": "Firedrake",
+        "source": "spitfire",
+        "tooltip": "A short flamethrower with two fuel tanks slung under it and a pilot flame always lit at its mouth: "
+                   "a wide, close jet that sets creatures alight and never a block. Each blaze powder is four bursts.",
+        "damage": 1.5, "pellets": 1, "interval": 2, "auto": True, "capacity": 64,
+        "reload": 78, "spread": (12.0, 8.0), "range": 6, "ammo": "minecraft:blaze_powder", "shot": "flame",
+    },
+    "harrow": {
+        "display": "Harrow",
+        "source": "scratches",
+        "tooltip": "Four barrels before a drum: each pull throws four pellets in a close group with a burst of flame, "
+                   "and what they hit is set alight. Fed from a can of eight. Fires buckshot shells.",
+        "damage": 4.5, "pellets": 4, "interval": 11, "auto": False, "capacity": 8,
+        "reload": 60, "spread": (3.5, 2.0), "range": 32, "ammo": "buckshot_shell",
+    },
 }
 
 # What a gun fires: bullets, or a slice 8C or 8D gun's "shot".
@@ -1085,6 +1106,12 @@ RECIPES = {
                                           "L": "minecraft:lever"}),
     "cloudburst_gun": (["SSS", "SLR", "BB "], {"S": "#c:ingots/steel", "R": "minecraft:lightning_rod", "B": "#c:ingots/brass",
                                                "L": "minecraft:lever"}),
+    # Slice 14E: steel, brass and a lever again, with a fire charge for each gun's fire; the Firedrake two buckets for
+    # its two fuel tanks, the Harrow five steel ingots for its four barrels and drum.
+    "firedrake": (["SSF", "BLB", "K K"], {"S": "#c:ingots/steel", "F": "minecraft:fire_charge", "B": "#c:ingots/brass",
+                                          "L": "minecraft:lever", "K": "minecraft:bucket"}),
+    "harrow": (["SSS", "SFS", "BLB"], {"S": "#c:ingots/steel", "F": "minecraft:fire_charge", "B": "#c:ingots/brass",
+                                       "L": "minecraft:lever"}),
 }
 # The switches beyond "guns" a gun's recipe needs (separate load conditions, all of which must hold): the energy weapons
 # and their cells are useless without the Charging Station, so they need the machines too (as the leaf blower does).
@@ -2713,6 +2740,51 @@ BUILDS = {
         "muzzle": (8.0, 7.9, -6.75),
         "sight": None,
     },
+    # Slice 14E. The Spitfire's animations are the Gattaler's family's, as the Thunderhead's are, and its first-person
+    # placement is the Gattaler's raised 5 px: its hoop (the main part's 3rd to 6th and 33rd elements) is the
+    # Gattaler's hoop 4.91 px lower, its feet at the same depth. So it is held as the Thresher is, 4.91 px lower: the
+    # right hand at the back of its body, where its raised rear handle rises, the left on the back of its left fuel tank,
+    # the arms as the Thresher's. Its magazine is its two fuel tanks (the 12th to 14th, 18th and 29th to 32nd elements),
+    # which the left hand takes off below and puts back, turning about the point the owner turned their elements about;
+    # its grip is the hoop, which the reload works like a lever about its feet. Its pilot flame (the 35th and 36th
+    # elements, the owner's spitfire_flame) burns at the nozzle's mouth on the body. No sights: aiming only steadies it
+    # and narrows the view.
+    "firedrake": {
+        "bones": [
+            ("gun_body", None, ["main-#2,3,4,5,11,12,13,17,28,29,30,31,32"], (8.0, 4.09, 16.4)),
+            ("magazine", "gun_body", ["main#11,12,13,17,28,29,30,31"], (8.0, 0.706, 7.8)),
+            ("grip", "gun_body", ["main#2,3,4,5,32"], (8.0, 4.37, 10.88)),
+        ],
+        "hands": {"right": (8.0, 4.09, 16.4), "left": (5.5, 2.09, 9.8)},
+        "arms": {"right": (-0.0946, -0.1812, 0.9789), "left": (0.2172, -0.6757, 0.7044)},
+        "muzzle": (8.0, 3.7, -0.75),
+        "sight": None,
+    },
+    # The Scratches' animations are the Kiln Gun's family's (the Stoker's, slice 8C). Its can is its magazine (the
+    # main part's 2nd, 3rd, 6th to 8th and 35th elements), which the left hand swings out and brings back; the knob
+    # behind it (the 31st and 33rd elements) is mag2, turned an eighth about the gun's line to let the can go; its drum
+    # (the 21st to 26th elements) is the cylinder_magazine, which no animation moves; the crank on its left side (the
+    # 36th to 38th elements) is the grip, swung about the point the owner turned it about. Each shot's burst of flame is
+    # the flame bone, as the Stoker's: a prop of the owner's pilot flame, slid 5.5 px back to the muzzle at twice its
+    # size, then out and shrinking. Its bolt bone holds nothing. Aimed, it looks along the rib on its drum's top, held
+    # 3 px further out: the top of its body came within 0.7 px of the eye; held there, it is 2.3 px away.
+    "harrow": {
+        "bones": [
+            ("gun_body", None, ["main-#1,2,5,6,7,20,21,22,23,24,25,30,32,34,35,36,37", "barrels"],
+             (8.0, 3.45, 7.9)),
+            ("cylinder_magazine", "gun_body", ["main#20,21,22,23,24,25"], (8.0, 7.95, 2.9)),
+            ("magazine", "gun_body", ["main#1,2,5,6,7,34"], (8.0, 2.14, -0.85)),
+            ("mag2", "gun_body", ["main#30,32"], (8.0, 2.05, 2.7)),
+            ("grip", "gun_body", ["main#35,36,37"], (4.825, 5.479, 1.146)),
+            ("bolt", "gun_body", [], (8.0, 5.0, 8.0)),
+            ("flame", "gun_body", ["@flame"], (8.0, 7.95, -15.6)),
+        ],
+        "hands": {"right": (8.0, 3.45, 7.9), "left": (8.0, 4.7, -3.35)},
+        "arms": {"right": (0.2706, -0.2706, 0.9239), "left": (0.733, -0.3036, 0.6088)},
+        "muzzle": (8.0, 7.95, -10.1),
+        "sight": (8.0, 11.2, 4.0),
+        "eye_relief": 3.0,
+    },
 }
 
 # Props the animations move on bones that had no part ("@<name>" in a bone's parts): the rounds a reload carries in,
@@ -2795,6 +2867,9 @@ PROPS = {
                                "texture_at": (120, 120)}},
     "windlass_musket": {"flash": {"kind": "flash", "from": (8.7, 3.4, 12.8), "size": (1.0, 1.0, 1.0),
                                   "texture_at": (56, 56)}},
+    # Slice 14E: the Harrow's burst of flame, as the Stoker's: its back end at the flame bone's pivot, 5.5 px before the
+    # muzzle, which the shot's first offset brings to the muzzle.
+    "harrow": {"flame": {"kind": "flame", "from": (6.0, 5.95, -23.6), "size": (4.0, 4.0, 8.0), "texture_at": (120, 112)}},
 }
 # The owner's pilot flame (Guns/item/spitfire_flame.png): three 8 x 8 frames, one above the other; the first frame's
 # flame is 4 px wide (columns 2 to 5) and 8 tall, its tip at the top.
@@ -3247,6 +3322,8 @@ ZOOM = {
     # Slice 14C: an automatic rifle, an automatic shotgun and a rifle.
     "sprocket_gun": 0.85, "navvy_shotgun": 0.9, "freeholder_rifle": 0.8,
     "quarrel_carbine": 0.8, "hinterland_rifle": 0.85, "cloudburst_gun": 0.9,
+    # Slice 14E: a flamethrower and a shotgun.
+    "firedrake": 0.95, "harrow": 0.9,
 }
 
 
@@ -3492,6 +3569,10 @@ SHOT_SOUNDS = {
     "quarrel_carbine": "item/airgun/fire.ogg",
     "hinterland_rifle": "item/heavy_rifle/fire.ogg",
     "cloudburst_gun": "item/new_rifle/fire.ogg",
+    # Slice 14E: the longer of the two flamethrower sounds (the Stoker has the short burst) and the brass shotgun shot
+    # (the Coach Gun's, the Crackling's and the Waystation Shotgun's).
+    "firedrake": "item/flamethrower/fire.ogg",
+    "harrow": "item/brass_shotgun/fire.ogg",
 }
 SUBTITLES = {
     "fire": "Gun fires",
@@ -3648,7 +3729,7 @@ def shoot_aimed():
 # alight (slice 8C, GunShots.BURN_SECONDS): fire's own damage, one a second, which fireproof creatures shrug off and
 # water puts out. No block is set alight (JugcraftGuns.INCENDIARY).
 INCENDIARY = ("tusker", "cinder_repeater", "bastion_rifle", "ashfall_pistol", "goldbristle_carbine", "crackling",
-              "hinterland_rifle")
+              "hinterland_rifle", "harrow")
 BURN_SECONDS = 4
 
 
