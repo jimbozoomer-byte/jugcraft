@@ -44,10 +44,17 @@ public final class GunAnimations {
 	private static final RawAnimation CARBINE_IDLE = RawAnimation.begin().thenLoop(CARBINE + "idle");
 	/**
 	 * Slice 14D: the guns the owner made a shoot for and no aim_shoot (tools/guns.py shoot_aimed()), both held at the hip.
-	 * Aimed, they play their shoot: an aim_shoot GeckoLib cannot find plays only the idle, and the arms then eased toward
-	 * their bones' rest pose, one arm's sleeve across the left of the view (a CI screenshot of 22 October 2026).
+	 * Aimed, they play their shoot: GeckoLib skips an aim_shoot it cannot find, and they fired with no shot played.
 	 */
 	static final Set<String> SHOOT_AIMED = Set.of("borer", "cloudburst_gun");
+	/**
+	 * How long a gun eases from one animation into the next, in ticks: not at all. The owner's animations begin and end
+	 * at the gun's idle pose, so an ease has nothing to smooth; and an ease GeckoLib begins with no animation point to
+	 * come from runs from the bones' rest pose, where the arms stand away from the gun. On a gun held at the hip, for
+	 * that tick, the left arm's sleeve crossed the left of the view as it fired: the Borer's aimed shot in CI's screenshots
+	 * since slice 12A, the Cloudburst Gun's in slice 14D's and the Firedrake's in slice 14E's (23 October 2026).
+	 */
+	static final int TRANSITION_TICKS = 0;
 	/** Animation sound keyframes that play another event's sound (tools/guns.py EVENT_SOUNDS: "rustle" is a rustle). */
 	public static final Map<String, String> SOUND_ALIASES = Map.of("rustle", "gun_rustle");
 	/**
@@ -96,7 +103,7 @@ public final class GunAnimations {
 	}
 
 	public static void register(GunItem gun, AnimatableManager.ControllerRegistrar registrar) {
-		AnimationController<GunItem> controller = new AnimationController<GunItem>(CONTROLLER, 1,
+		AnimationController<GunItem> controller = new AnimationController<GunItem>(CONTROLLER, TRANSITION_TICKS,
 				test -> test.setAndContinue(test.getDataOrDefault(GunRenderer.CARBINE, false) ? CARBINE_IDLE : IDLE));
 		GunSpec spec = gun.spec();
 		for (String as : JugcraftGuns.CARBINES.contains(gun.name()) ? new String[] {"", CARBINE} : new String[] {""}) {
