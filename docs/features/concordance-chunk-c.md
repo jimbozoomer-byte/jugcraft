@@ -31,10 +31,15 @@ Units 1 to 5 are built and recorded on this branch. In CI:
   re-run of client shard 1 for main's cow-breeding flake again ([Unit 5: evidence and
   handoff](#unit-5-evidence-and-handoff-c-10)).
 
-The As built notes of C-01 to C-09 were written before these runs. The owner's checkpoint is awaited. Chunk C is
-developed on branch `claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0` with main
-`4d38e9712` merged in; CI run 38617471274 on that base passed every job (see The merge and its CI run). Not merged; no
-pull request. Chunk B, beneath it, is not merged and has no pull request either.
+The As built notes of C-01 to C-09 were written before these runs. The owner answered the checkpoint on 23 October 2026
+(C-D5 to C-D8, see Decisions): the balance of hands-on preparation and automation stays as built, the next product
+family is Gloam Ink (to be scheduled with the owner), the Crucible Stand's look fits and the foundation's icon stays, and
+Chunks B and C are reviewed as two stacked pull requests. The load budget (C-P19 in C-P67's form) and the workflow
+change (`bfb08770b`, the manual-only `load_card` input and job) remain for the owner's review in Chunk C's pull request.
+Chunk C is developed on branch `claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0`
+with main `4d38e9712` merged in; CI run 38617471274 on that base passed every job (see The merge and its CI run). Not
+merged. Chunk B, beneath it, is not merged either; as C-D8 decides, Chunk B's pull request is against main and Chunk C's
+against Chunk B's branch.
 Proposal: the owner chose Chunk C on 14 October 2026 ("ok begin chunk c"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 5,
 C1 to C4), with [workshops, ecology and pacts](../plans/concordance-expansion-2026-10-10/03-workshops-ecology-and-pacts.md),
@@ -2281,10 +2286,12 @@ Every row is at the Practitioner stage. The tests named passed in CI (above).
   fresh.
 - **Commands and results:** the CI runs above; the local checks in each unit's row of the Units table; screenshots in
   each run's `client-screenshots-<shard>` artifacts; the load card's lines in its job's log and notice.
-- **Decisions:** C-D0, C-D0b and C-D1 to C-D3 accepted by the owner; C-D4 and C-P1 to C-P70 Proposed; the checkpoint's
-  questions open.
-- **Next smallest complete outcome:** if the owner picks Gloam Ink, one formula from a mixed bed's Gloamcap with one
-  existing consumer (Research Notes); otherwise Chunk D's first unit.
+- **Decisions:** C-D0, C-D0b and C-D1 to C-D3 accepted by the owner, and at the checkpoint on 23 October 2026 C-D5 to
+  C-D8 (hands-on and automation as built; Gloam Ink next; the stand's look and the foundation's icon kept; two stacked
+  pull requests); C-D4 and C-P1 to C-P70 Proposed. The load budget (C-P19 in C-P67's form) and the workflow change
+  (`bfb08770b`, the manual-only `load_card` input and job) remain for the owner's review in Chunk C's pull request.
+- **Next smallest complete outcome:** Gloam Ink (C-D6), when the owner schedules it: one formula from a mixed bed's
+  Gloamcap with one existing consumer (Research Notes).
 
 ## Deferrals
 
@@ -2341,6 +2348,10 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-D2 | 14 October 2026 | "Root and Rivet (Recommended)": turns a Thallite plate into a Rooted Thallite Foundation, the base the Crucible Stand is built on; uses the existing ritual engine (Transform result) and pylon economics, with a declared stage and payment table | Accepted (owner) | C-03, C-04, C-05 |
 | C-D3 | 14 October 2026 | "Crucible Stand (Recommended)": under the Alembic Crucible, on the rooted foundation; turns JE into the heat the running formula's next stir needs (starting rates about 8, 16 and 32 JE/t for warm, hot and searing), while an Electric Pump pipes water into the crucible's tank; manual heat sources still work | Accepted (owner) | C-05, C-06, C-10 |
 | C-D4 | 14 October 2026 | Both carriers, one demand: the crucible's formula shortage, served by a Peepo through the existing `CrucibleCompanion` port and by a Clockwork Porter through a courier request the crucible files (09:136 names both `MachineCompanionPort` and `CourierLedger`). Not asked; the session's default | Proposed | C-06 |
+| C-D5 | 23 October 2026 | At the checkpoint, the balance of hands-on preparation and automation (09:144): keep it as built. The campfire crucible and carrying by hand stay a complete route; the Crucible Stand and the couriers stay optional conveniences paid in JE (the stand's heat; a porter's Ley Charge, which electricity can give) | Accepted (owner) | C-05, C-06, C-10 |
+| C-D6 | 23 October 2026 | At the checkpoint, the next product family (09:144): Gloam Ink (03:27-37: Gloamcap and an approved Hollow carrier, by covered extraction, for research notes, safe links and ward inscriptions; excess contamination yields an unusable sludge, recoverable through a mundane route). When it is built is to be scheduled with the owner | Accepted (owner) | the next work (Deferrals; Where to resume) |
+| C-D7 | 23 October 2026 | At the checkpoint, the workshop's look (09:144): the Crucible Stand's look fits. The Rooted Thallite Foundation's icon was not asked to be redrawn and stays | Accepted (owner) | C-04, C-05 |
+| C-D8 | 23 October 2026 | The review route (Open pull requests and the review route): Chunks B and C are reviewed as two stacked pull requests, Chunk B's against main and Chunk C's against Chunk B's branch | Accepted (owner) | C-00, every unit |
 | C-P1 | 14 October 2026 | A formula's identity is its canonical text (the Peepo plan id hashes it); the rules' revision is `ConcordanceData.revision()`, process-local, so not 03:46's stable version (a recorded deviation); no new formula save key; an incompatibility is re-derived after a load or reload; an unreadable saved program is kept as text and reported. As built in unit 1: `incompatibility()` replays the formula once per revision and after a load, and names the refused step; an unreadable program is kept under `program` (see C-P23) | Proposed | C-01 |
 | C-P2 | 14 October 2026 | Products are generated data; a brew matching one is named on the stack with vanilla's item name, recognised by what it carries, never its name; Winter Brine is named the same way. Alternative: JEI and codex names only. As built in unit 1, for the Stillroot Poultice, the Kiln Draught and Winter Brine; how a stack is matched is C-P29 | Proposed | C-02 |
 | C-P3 | 14 October 2026 | A crucible's Inspect page: spoon level and an ungated risk line (a harmful outcome or a searing step) for anyone; glass level with the Alembic Arts understood and an Assay Glass carried; the outcome and replay preview for a master; within the player's block reach, not 16 blocks. As built in unit 1, refined by C-P25 (the risk line's words) and C-P26 (the reach's allowance, and the glass carried at every level above the spoon's) | Proposed | C-01 |
@@ -2415,16 +2426,17 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 ## Where to resume
 
 Units 1 to 5 (C-01 to C-10) are built and recorded, and the candidate `bb856f873` passed every CI job in run
-38774859294 (the status at the top; [Unit 5](#unit-5-evidence-and-handoff-c-10)). Nothing is merged and there is no
-pull request. The owner's checkpoint is awaited: 09:144's three questions (the balance of hands-on and automated work,
-the next product family, whether the workshop's look fits), with the review route for Chunk B and Chunk C as a question
-and the load budget (C-P19 in C-P67's form) and the Build workflow's `load_card` input (`bfb08770b`) at merge review.
-C-D0, C-D0b and C-D1 to C-D3 are the owner's; C-D4 and C-P1 to C-P70 are Proposed. Before more work:
+38774859294 (the status at the top; [Unit 5](#unit-5-evidence-and-handoff-c-10)). Nothing is merged. The owner
+answered the checkpoint on 23 October 2026 (C-D5 to C-D8): hands-on and automated work as built, Gloam Ink next (to be
+scheduled with the owner), the workshop's look kept, and Chunks B and C reviewed as two stacked pull requests (Chunk B's
+against main, Chunk C's against Chunk B's branch). The load budget (C-P19 in C-P67's form) and the workflow change
+(`bfb08770b`, the manual-only `load_card` input and job) remain for the owner's review in Chunk C's pull request.
+C-D0, C-D0b, C-D1 to C-D3 and C-D5 to C-D8 are the owner's; C-D4 and C-P1 to C-P70 are Proposed. Before more work:
 1. refresh main and the open pull requests (#357 for the Peepo flake and #369 for the Peepo files; the hot shared files:
    lang, the gametest `fabric.mod.json`, `check_mod_data.py`, `CHANGELOG.md`, `docs/TESTING.md`, `WHAT_EXISTS.md` with
    #366, `INTEGRATION_STATUS.md` with #361 to #365), and merge main again if it moved;
-2. after the owner's answers, the next smallest outcome: one Gloam Ink formula from a mixed bed's Gloamcap with Research
-   Notes as its consumer, if the owner picks it; otherwise Chunk D's first unit.
+2. the next smallest outcome, when the owner schedules it (C-D6): one Gloam Ink formula from a mixed bed's Gloamcap with
+   Research Notes as its consumer.
 
 ## How this contract was checked
 
