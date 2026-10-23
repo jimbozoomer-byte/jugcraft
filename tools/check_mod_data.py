@@ -9197,8 +9197,9 @@ def check_lairs():
     Moonlit Ring's bells are the tables', every server option has its default, every message the Java sends has its
     words, and the Glacier Hall, the Cinder Kiln, the Lantern Fen, the Archive of Last Names, the Foundry Trench and the
     Moonlit Ring are laid out as their records say (check_glacier_hall, check_cinder_kiln, check_lantern_fen,
-    check_crypt_archive, check_foundry_trench, check_moonlit_ring)."""
+    check_crypt_archive, check_foundry_trench, check_moonlit_ring, check_crowfield)."""
     import cinder_kiln as ck
+    import crowfield as cf
     import crypt_archive as ca
     import foundry_trench as ft
     import cydonian_sanctum as cs
@@ -9217,7 +9218,8 @@ def check_lairs():
                                        ("cinder_kiln", ck, ck.CENTRE, None), ("lantern_fen", lf, lf.CENTRE, None),
                                        ("crypt_archive", ca, ca.CENTRE, None), ("foundry_trench", ft, ft.CENTRE, None),
                                        ("moonlit_ring", mr, mr.CENTRE, (mr.MOON, mr.MOON_RADIUS)),
-                                       ("cydonian_sanctum", cs, cs.CENTRE, None)):
+                                       ("cydonian_sanctum", cs, cs.CENTRE, None),
+                                       ("crowfield", cf, cf.CENTRE, (cf.MOON, cf.MOON_RADIUS))):
         ax, ay, az, yaw = layout.ARRIVAL
         sky = "null, 0" if moon is None else "new BlockPos({}, {}, {}), {}".format(*moon[0], moon[1])
         expected = (f'{name.upper()}("{name}", {layout.SIZE[0]}, {layout.SIZE[1]}, {layout.SIZE[2]}, new Vec3({float(ax)}, '
@@ -9251,7 +9253,7 @@ def check_lairs():
         if f'fixture("{block}",' not in registry:
             err(f"JugcraftLairs does not register the lair block {block}")
     for name in ("mourning_wreath", "death_knell", "cursed_spindle", "frost_horn", "kiln_seal", "hag_stone", "exhumation_writ",
-                 "sealed_orders", "howling_totem", "altar_keystone", la.GATE["entity"]):
+                 "sealed_orders", "howling_totem", "altar_keystone", "harvest_crown", la.GATE["entity"]):
         if f'Jugcraft.id("{name}")' not in registry:
             err(f"JugcraftLairs does not register {name}")
     if f"float GLARE_FRICTION = {la.GLARE_FRICTION}F;" not in registry:
@@ -9406,6 +9408,44 @@ def check_lairs():
     gate = re.sub(r"\s+", " ", (folder / "MistGateEntity.java").read_text(encoding="utf-8"))
     if "open.lair == Lair.MOONLIT_RING) { HowlingTotemRite.follow(server, open);" not in gate:
         err("MistGateEntity does not take followers into the Moonlit Ring by the totem's way (HowlingTotemRite.follow)")
+    # The Crowfield's: the crown's rest, reach and harvest, the harvest it counts, the gourds' stages and light, the
+    # fixtures' registrations, the hills' names, and the gate's follow into the field.
+    crown = (folder / "HarvestCrownRite.java").read_text(encoding="utf-8")
+    for name, key in (("COOLDOWN", "cooldown"), ("MIST_RANGE", "mist_range"), ("HARVEST_REACH", "harvest_reach"),
+                      ("HARVEST_RISE", "harvest_rise"), ("HARVEST_MIN", "harvest_min")):
+        if not java_number(crown, name, la.CROWN[key]):
+            err(f"HarvestCrownRite.{name} is not tools/lairs.py CROWN {key} ({la.CROWN[key]})")
+    if 'Jugcraft.id("crowfield_harvest")' not in crown:
+        err("HarvestCrownRite does not count #jugcraft:crowfield_harvest")
+    harvest = (load(DATA / MOD / "tags" / "block" / "crowfield_harvest.json") or {}).get("values", [])
+    if harvest != la.CROWFIELD_HARVEST:
+        err(f"#jugcraft:crowfield_harvest is not tools/lairs.py CROWFIELD_HARVEST: {harvest}")
+    for block in la.CROWFIELD_HARVEST:
+        ns, path = split(block)
+        if ns == MOD and not (ASSETS / "blockstates" / f"{path}.json").is_file():
+            err(f"tools/lairs.py CROWFIELD_HARVEST names {block}, which is no block")
+    gourd = re.sub(r"\s+", " ", (folder / "KingsGourdBlock.java").read_text(encoding="utf-8"))
+    stages = {"GREEN": 0, "SWELLING": la.KINGS_GOURD["ripening"][0], "RIPENING": la.KINGS_GOURD["ripening"][1],
+              "LIT": la.KINGS_GOURD["lit"], "PICKED": la.KINGS_GOURD["picked"]}
+    for name, value in stages.items():
+        if not java_number(gourd, name, value):
+            err(f"KingsGourdBlock.{name} is not tools/lairs.py KINGS_GOURD's stage {value}")
+    if la.KINGS_GOURD["stages"] != la.KINGS_GOURD["picked"] + 1 or "IntegerProperty.create(\"stage\", GREEN, PICKED)" not in gourd:
+        err("KingsGourdBlock.STAGE does not run from GREEN to PICKED, tools/lairs.py KINGS_GOURD's stages")
+    lights = "LIGHT = {{{}}};".format(", ".join(str(v) for v in la.KINGS_GOURD["light"]))
+    if lights not in gourd:
+        err(f"KingsGourdBlock.LIGHT is not tools/lairs.py KINGS_GOURD light: expected {lights}")
+    for line in ('fixture("crowfield_corn", CrowfieldCornBlock::new, MapColor.COLOR_YELLOW, SoundType.CROP, 0, Fit.SEE_THROUGH)',
+                 'fixture("kings_gourd", p -> new KingsGourdBlock(p.lightLevel(KingsGourdBlock::light))'):
+        if line not in re.sub(r"\s+", " ", registry):
+            err(f"JugcraftLairs does not register {line}")
+    for name in la.HILL_NAMES:
+        if f"lair.{MOD}.crowfield.hill.{name}" not in (load(ASSETS / "lang" / "en_us.json") or {}):
+            err(f"No words for the Crowfield's {name} hill")
+    if "output.accept(HARVEST_CROWN);" not in registry:
+        err("JugcraftLairs does not put the Harvest Crown in the creative tab")
+    if "open.lair == Lair.CROWFIELD) { HarvestCrownRite.follow(server, open);" not in gate:
+        err("MistGateEntity does not take followers into the Crowfield by the crown's way (HarvestCrownRite.follow)")
     # The Cydonian Sanctum's: the keystone's rest, reach and kindling, the altars it kindles (as part 1's knoll stacks
     # them), its recipes, and the fixtures' registrations.
     keystone = (folder / "AltarKeystoneRite.java").read_text(encoding="utf-8")
@@ -9490,6 +9530,7 @@ def check_lairs():
     check_foundry_trench(ft)
     check_moonlit_ring(mr)
     check_cydonian_sanctum(cs)
+    check_crowfield(cf)
 
 
 def check_cydonian_sanctum(cs):
@@ -10422,6 +10463,230 @@ def check_foundry_trench(ft):
                                                         "minecraft:soul_fire", "minecraft:grass_block", "minecraft:magma_block"):
             err(f"The trench has {state[0]} at {(x, y, z)}, which would change once placed")
             break
+
+def check_crowfield(cf):
+    """The Crowfield as tools/crowfield.py builds it is the field its record describes (docs/features/crowfield.md), and
+    where the Java looks for its parts (Crowfield.java) is where the layout puts them: the arrival stands on the
+    farmyard's floor with room overhead, and the Grey Mist fills the end of the lane behind it; the fence runs between
+    the field and the yard with the farm gate open in it; a walk from the arrival, never stepping more than half a block,
+    goes through the gate and reaches every open cell of the field and the yard, and comes within reach of each King's
+    Gourd; the eight gourds grow green on their hills in ring order, each facing the post; from every open cell of the
+    field a sprinting player reaches the three gourds of any harvest in time (RIPEN_SECONDS, HARVEST_SHARE); the King's
+    Post stands on its mound with room in front of it where he hangs, and from there the moon is seen over the northern
+    corn; the corn walls the field all round; light flooded from the hidden lights, the jack-o'-lanterns, the lantern and
+    the mist, as the game floods it, is at least FIELD_LIGHT on every open cell of the field; and nothing in it changes by
+    itself once placed."""
+    import heapq
+    import math
+    from collections import deque
+    import lairs as la
+    blocks = cf.build()
+    name = lambda pos: blocks[pos][0] if pos in blocks else None
+    props = lambda pos: dict(blocks[pos][1]) if pos in blocks else {}
+    java = re.sub(r"\s+", " ", (JAVA_ROOT / "lair" / "Crowfield.java").read_text(encoding="utf-8"))
+    for jname, value in (("SOIL", cf.SOIL), ("STAND", cf.STAND), ("CENTRE_X", cf.CENTRE[0]), ("CENTRE_Z", cf.CENTRE[1]),
+                         ("FIELD_WEST", cf.FIELD["x"][0]), ("FIELD_EAST", cf.FIELD["x"][1]), ("FIELD_NORTH", cf.FIELD["z"][0]),
+                         ("FIELD_SOUTH", cf.FIELD["z"][1]), ("HILL_SPACING", cf.HILL_SPACING), ("YARD_WEST", cf.YARD["x"][0]),
+                         ("YARD_EAST", cf.YARD["x"][1]), ("YARD_NORTH", cf.YARD["z"][0]), ("YARD_SOUTH", cf.YARD["z"][1]),
+                         ("FENCE_Z", cf.FENCE_Z), ("GATE_WEST", cf.GATE[0]), ("GATE_EAST", cf.GATE[1]), ("WAIT_X", cf.WAIT[0]),
+                         ("WAIT_Y", float(cf.WAIT[1])), ("WAIT_Z", cf.WAIT[2]), ("EXIT_WEST", cf.EXIT["x"][0]),
+                         ("EXIT_EAST", cf.EXIT["x"][1]), ("EXIT_Z", cf.EXIT["z"]), ("POST_EXIT_WEST", cf.POST_EXIT["x"][0]),
+                         ("POST_EXIT_EAST", cf.POST_EXIT["x"][1]), ("POST_EXIT_Y", cf.POST_EXIT["y"]),
+                         ("POST_EXIT_Z", cf.POST_EXIT["z"])):
+        if not java_number(java, jname, value):
+            err(f"Crowfield.{jname} is not tools/crowfield.py's {value}")
+    if tuple(cf.HILLS) != la.HILL_NAMES:
+        err(f"tools/crowfield.py's HILLS {tuple(cf.HILLS)} are not tools/lairs.py HILL_NAMES {la.HILL_NAMES}")
+    cells = cf.hill_cells()
+    expected = "HILLS = {{{}}};".format(", ".join("new BlockPos({}, {}, {})".format(*cells[n]) for n in la.HILL_NAMES))
+    if expected not in java:
+        err(f"Crowfield.HILLS is not tools/crowfield.py's, in the order of tools/lairs.py HILL_NAMES: expected {expected}")
+    grid = ", ".join("{}({}, {})".format(n.upper(), *cf.HILLS[n]) for n in la.HILL_NAMES)
+    if f"enum Hill {{ {grid};" not in java:
+        err(f"Crowfield.Hill is not tools/lairs.py HILL_NAMES with tools/crowfield.py's grid: expected {grid}")
+    # Ring order: each hill is HILL_SPACING from the next, all the way round.
+    ring = [cells[n] for n in la.HILL_NAMES]
+    for i, (x, _, z) in enumerate(ring):
+        nx, _, nz = ring[(i + 1) % len(ring)]
+        if abs(x - nx) + abs(z - nz) != cf.HILL_SPACING:
+            err(f"The hills {la.HILL_NAMES[i]} and the next round the ring are not {cf.HILL_SPACING} apart")
+
+    passable = {None, "minecraft:light", "minecraft:short_grass", "minecraft:dead_bush", "minecraft:moss_carpet",
+                "jugcraft:lair_exit", "minecraft:spruce_fence_gate"}
+    free = lambda pos: name(pos) in passable and (name(pos) != "minecraft:spruce_fence_gate" or props(pos).get("open") == "true")
+    ax, ay, az, _ = cf.ARRIVAL
+    feet = (int(ax), int(ay), int(az))
+    whole = {"minecraft:dirt", "minecraft:coarse_dirt", "minecraft:podzol", "minecraft:rooted_dirt", "minecraft:hay_block",
+             "minecraft:spruce_planks"}
+    if name((feet[0], feet[1] - 1, feet[2])) not in whole | {"minecraft:dirt_path"} or ay != float(cf.STAND) or not free(feet) \
+            or not free((feet[0], feet[1] + 1, feet[2])) or not cf.in_yard(feet[0], feet[2]):
+        err(f"The Crowfield's arrival at {cf.ARRIVAL[:3]} does not stand on the farmyard's floor with room overhead")
+    for pos in cf.exit_cells():
+        if name(pos) != "jugcraft:lair_exit":
+            err(f"No Grey Mist at the end of the lane behind the farmyard at {pos}")
+    for x in range(cf.FENCE_X[0], cf.FENCE_X[1] + 1):
+        state = name((x, cf.STAND, cf.FENCE_Z))
+        wanted = "minecraft:spruce_fence_gate" if cf.GATE[0] <= x <= cf.GATE[1] else "minecraft:spruce_fence"
+        if state != wanted or wanted.endswith("gate") and props((x, cf.STAND, cf.FENCE_Z)).get("open") != "true":
+            err(f"The farmyard's fence at x {x} is {state}, not {wanted}{' (open)' if wanted.endswith('gate') else ''}")
+
+    # Where anyone can stand, column by column: on a whole block or on trodden earth (a sixteenth lower).
+    stands = {}
+    for (x, y, z), state in blocks.items():
+        height = y + 1.0 if state[0] in whole else y + 15 / 16 if state[0] == "minecraft:dirt_path" else None
+        if height is not None and free((x, y + 1, z)) and free((x, y + 2, z)):
+            stands.setdefault((x, z), []).append(height)
+    start = (feet[0], feet[2], float(ay))
+    seen, queue = {start}, deque([start])
+    while queue:
+        x, z, h = queue.popleft()
+        for nx, nz in ((x + 1, z), (x - 1, z), (x, z + 1), (x, z - 1)):
+            for nh in stands.get((nx, nz), ()):
+                node = (nx, nz, nh)
+                if abs(nh - h) <= 0.5 + 1e-9 and node not in seen:
+                    seen.add(node)
+                    queue.append(node)
+    walked = {(x, z) for x, z, h in seen if cf.SOIL < h <= cf.STAND}
+    field_cells = sorted((x, z) for x in range(cf.SIZE[0]) for z in range(cf.SIZE[2]) if cf.in_field(x, z)
+                         and free((x, cf.STAND, z)) and free((x, cf.STAND + 1, z)))
+    open_cells = field_cells + sorted((x, z) for x in range(cf.SIZE[0]) for z in range(cf.SIZE[2]) if cf.in_yard(x, z)
+                                      and free((x, cf.STAND, z)) and free((x, cf.STAND + 1, z)))
+    stranded = [cell for cell in open_cells if cell not in walked]
+    if stranded:
+        err(f"{len(stranded)} open cells of the field and the farmyard cannot be walked to from the arrival, e.g. {stranded[0]}")
+
+    def near(cell, target, reach):
+        x, z = cell
+        tx, ty, tz = (c + 0.5 for c in target)
+        return ((x + 0.5 - tx) ** 2 + (cf.STAND + 1.62 - ty) ** 2 + (z + 0.5 - tz) ** 2) ** 0.5 <= reach
+
+    # The gourds: green on their hills, facing the post (their faces turned toward it), each within reach of the walk.
+    toward = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    for hill, (x, y, z) in cells.items():
+        state = props((x, y, z))
+        fx, fz = toward.get(state.get("facing"), (0, 0))
+        if name((x, y, z)) != "jugcraft:kings_gourd" or state.get("stage") != "0" or fx * (cf.CX - x) + fz * (cf.CZ - z) <= 0:
+            err(f"No green King's Gourd facing the post on the {hill} hill at {(x, y, z)}: {state}")
+        if name((x, y - 1, z)) != "minecraft:podzol":
+            err(f"The {hill} hill's gourd does not grow on its dark loam")
+        if not any(near(cell, (x, y, z), cf.REACH) for cell in walked):
+            err(f"No walk from the Crowfield's arrival comes within reach of the {hill} hill's gourd at {(x, y, z)}")
+
+    # The harvest's walk: from every open cell of the field, round the cover, to within reach of each of the three gourds
+    # called round the ring from the nearest, either way round, in time.
+    def distances(sources):
+        """Walking distance (eight ways, a diagonal step only where both its sides are open) from any of `sources`."""
+        best = {cell: 0.0 for cell in sources}
+        heap = [(0.0, cell) for cell in sources]
+        while heap:
+            d, (x, z) = heapq.heappop(heap)
+            if d > best.get((x, z), math.inf):
+                continue
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                n = (x + dx, z + dz)
+                if n not in walked or not cf.in_field(*n) or dx and dz and ((x + dx, z) not in walked or (x, z + dz) not in walked):
+                    continue
+                nd = d + (1.4142 if dx and dz else 1.0)
+                if nd < best.get(n, math.inf):
+                    best[n] = nd
+                    heapq.heappush(heap, (nd, n))
+        return best
+
+    field_walked = [cell for cell in field_cells if cell in walked]
+    reach_of = {hill: [cell for cell in field_walked if near(cell, cells[hill], cf.REACH)] for hill in la.HILL_NAMES}
+    from_hill = {hill: distances(reach_of[hill]) for hill in la.HILL_NAMES}
+    hop = {}
+    for i, hill in enumerate(la.HILL_NAMES):
+        for step in (1, -1):
+            other = la.HILL_NAMES[(i + step) % len(la.HILL_NAMES)]
+            hop[(hill, other)] = min((from_hill[other].get(cell, math.inf) for cell in reach_of[hill]), default=math.inf)
+    limit = cf.SPRINT * cf.RIPEN_SECONDS * cf.HARVEST_SHARE
+    worst = (0.0, None)
+    for cell in field_walked:
+        first = min(la.HILL_NAMES, key=lambda hill: math.hypot(cell[0] + 0.5 - cells[hill][0] - 0.5, cell[1] + 0.5 - cells[hill][2] - 0.5))
+        i = la.HILL_NAMES.index(first)
+        for step in (1, -1):
+            route = [la.HILL_NAMES[(i + k * step) % len(la.HILL_NAMES)] for k in range(cf.CALLED)]
+            walk = from_hill[first].get(cell, math.inf) + sum(hop[(a, b)] for a, b in zip(route, route[1:]))
+            if walk > worst[0]:
+                worst = (walk, cell)
+    if worst[0] > limit:
+        err(f"From {worst[1]} a harvest of {cf.CALLED} gourds is a walk of {worst[0]:.1f} blocks, more than a sprint of "
+            f"{cf.SPRINT} a second covers in {cf.HARVEST_SHARE} of {cf.RIPEN_SECONDS} s ({limit:.1f})")
+
+    # The King's Post: on its mound, the post and crossbar, and room in front of it where he hangs (six high); and the moon
+    # over the northern corn, seen from the arrival looking north into the field.
+    wx_, wy_, wz_, _ = cf.WAIT
+    mound = (int(wx_), int(wy_) - 1, int(wz_))
+    if name(mound) != "minecraft:hay_block" or wy_ != cf.STAND + 1 or not cf.on_mound(mound[0], mound[2]):
+        err(f"The King does not hang over the hay mound at {cf.WAIT[:3]}")
+    if any(not free((mound[0], y, mound[2])) for y in range(cf.STAND + 1, cf.STAND + 7)):
+        err(f"No room six high in front of the post where the King hangs at {cf.WAIT[:3]}")
+    if any(name((cf.CX, y, cf.CZ)) != "minecraft:stripped_dark_oak_log" for y in range(cf.STAND + 1, cf.POST_TOP + 1)) \
+            or name((cf.CX - 1, cf.CROSSBAR_Y, cf.CZ)) != "minecraft:stripped_dark_oak_log":
+        err("The King's Post does not stand on its mound with its crossbar")
+    for pos in cf.post_exit_cells():
+        if not free(pos) or pos[1] == cf.STAND and (pos[0], pos[2]) not in walked:
+            err(f"The Grey Mist's place at the post, {pos}, is not open floor")
+    eye = (ax, ay + 1.62, az)
+    moon = tuple(c + 0.5 for c in cf.MOON)
+    if cf.MOON[2] >= 0:
+        err(f"The moon at {cf.MOON} is not north of the field")
+    for i in range(1, 400):
+        t = i / 400
+        q = tuple(eye[k] + (moon[k] - eye[k]) * t for k in range(3))
+        cell = tuple(int(c // 1) for c in q)
+        if 0 <= cell[0] < cf.SIZE[0] and 0 <= cell[1] < cf.SIZE[1] and 0 <= cell[2] < cf.SIZE[2] and not free(cell):
+            err(f"From the farmyard's arrival the moon is hidden by {name(cell)} at {cell}")
+            break
+
+    # The corn walls the field: every cell next to the field that is not the field or the gate is corn (or the fence).
+    for x in range(cf.FIELD["x"][0] - 1, cf.FIELD["x"][1] + 2):
+        for z in range(cf.FIELD["z"][0] - 1, cf.FIELD["z"][1] + 2):
+            if cf.in_field(x, z) or cf.on_fence(x, z):
+                continue
+            if any(name((x, y, z)) != "jugcraft:crowfield_corn" for y in range(cf.STAND, cf.STAND + cf.CORN_HIGH)):
+                err(f"The corn does not wall the field at {(x, z)}")
+                break
+
+    # The light, flooded as the game floods block light: a level less a block, through anything but whole opaque blocks
+    # (the corn, the plants, the fences, the gourds, the cauldrons and the lantern let it through).
+    opaque = whole | {"minecraft:dirt_path", "minecraft:stripped_dark_oak_log", "minecraft:spruce_slab", "minecraft:pumpkin",
+                      "minecraft:carved_pumpkin", "minecraft:jack_o_lantern"} | {f"jugcraft:{h}" for h in cf.HEIRLOOMS}
+    emit = {"minecraft:lantern": 15, "minecraft:jack_o_lantern": 15, "jugcraft:lair_exit": 6}
+    light, queue = {}, deque()
+    for pos, state in blocks.items():
+        level = int(dict(state[1])["level"]) if state[0] == "minecraft:light" else emit.get(state[0], 0)
+        if level:
+            light[pos] = level
+            queue.append(pos)
+    while queue:
+        x, y, z = queue.popleft()
+        level = light[(x, y, z)] - 1
+        for n in ((x + 1, y, z), (x - 1, y, z), (x, y + 1, z), (x, y - 1, z), (x, y, z + 1), (x, y, z - 1)):
+            if name(n) not in opaque and level > light.get(n, 0) and 0 <= n[1] < cf.SIZE[1]:
+                light[n] = level
+                queue.append(n)
+    lit = sorted((light.get((x, cf.STAND, z), 0), (x, cf.STAND, z)) for x, z in field_cells)
+    if not lit or lit[0][0] < cf.FIELD_LIGHT:
+        dark = [cell for level, cell in lit if level < cf.FIELD_LIGHT]
+        err(f"{len(dark)} open cells of the field have less block light than FIELD_LIGHT {cf.FIELD_LIGHT}, the darkest "
+            f"{lit[0] if lit else None}")
+    client = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "CrowfieldClientGameTests.java"
+    source = client.read_text(encoding="utf-8") if client.is_file() else ""
+    if not java_number(source, "FIELD_LIGHT", cf.FIELD_LIGHT) or not java_number(source, "FIELD_CELLS", len(field_cells)):
+        err(f"CrowfieldClientGameTests does not read the light against FIELD_LIGHT {cf.FIELD_LIGHT} on the field's "
+            f"{len(field_cells)} open cells (FIELD_CELLS)")
+
+    # Nothing that changes by itself once placed: no farmland, crops, stems, grass or vanilla leaves, nothing that burns
+    # or flows; the corn and the gourds are lair blocks.
+    for (x, y, z), state in blocks.items():
+        if state[0].endswith("_leaves") or state[0].endswith("_stem") or state[0] in (
+                "minecraft:farmland", "minecraft:wheat", "minecraft:carrots", "minecraft:potatoes", "minecraft:grass_block",
+                "minecraft:vine", "minecraft:lava", "minecraft:fire", "minecraft:water", "minecraft:snow", "minecraft:campfire"):
+            err(f"The Crowfield has {state[0]} at {(x, y, z)}, which would change once placed")
+            break
+
 
 def check_moonlit_ring(mr):
     """The Moonlit Ring as tools/moonlit_ring.py builds it is the ring its record describes (docs/features/moonlit-ring.md),
