@@ -16,8 +16,8 @@ fixes unit 3's unloaded-crucible client check (`9098c06b1`). Unit 5 (C-10) built
 that makes the load card compile (`bb856f873`, the candidate); the commit after the candidate changes only records.
 Units 1 to 5 are built and recorded on this branch. In CI:
 - unit 1 (through `0b1039312`) passed every job in run 38684732031, after one re-run of client shard 1, whose failure
-  was main's `PeepoPopulationClientTests` cow-breeding flake (two cows wandered apart; open PR #357 fixes it in main's
-  Peepo code, which this branch does not edit);
+  was main's `PeepoPopulationClientTests` cow-breeding flake (two cows wandered apart; PR #357, since merged in main as
+  `40381834a`, fixes it in main's Peepo code, which this branch does not edit);
 - unit 2 (`23f28b90e`) passed every job in run 38693262154 on its first attempt;
 - unit 3 (`2f13fed54`), run 38720814268: `mod` (every server game test), `optional integrations absent` and client
   shards 1 to 4 passed; shard 0 failed on `CompanionAutomationChecks` "an unloaded crucible", a test defect fixed in
@@ -33,13 +33,16 @@ Units 1 to 5 are built and recorded on this branch. In CI:
 
 The As built notes of C-01 to C-09 were written before these runs. The owner answered the checkpoint on 23 October 2026
 (C-D5 to C-D8, see Decisions): the balance of hands-on preparation and automation stays as built, the next product
-family is Gloam Ink (to be scheduled with the owner), the Crucible Stand's look fits and the foundation's icon stays, and
-Chunks B and C are reviewed as two stacked pull requests. The load budget (C-P19 in C-P67's form) and the workflow
-change (`bfb08770b`, the manual-only `load_card` input and job) remain for the owner's review in Chunk C's pull request.
-Chunk C is developed on branch `claude/chunk-c-living-workshop`, whose base `e079ad4a3` is Chunk B's head `ec06f16e0`
-with main `4d38e9712` merged in; CI run 38617471274 on that base passed every job (see The merge and its CI run). Not
-merged. Chunk B, beneath it, is not merged either; as C-D8 decides, Chunk B's pull request is against main and Chunk C's
-against Chunk B's branch.
+family is Gloam Ink (when it is built is not yet decided), the Crucible Stand's look fits (the owner did not ask for the
+foundation's icon to be redrawn, so it stays), and Chunks B and C are reviewed as two stacked pull requests. The load
+budget (C-P19 in C-P67's form) and the workflow change (`bfb08770b`, the manual-only `load_card` input and job) remain
+for the owner's review in Chunk C's pull request. Chunk C is developed on branch `claude/chunk-c-living-workshop`, whose
+base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in; CI run 38617471274 on that base passed
+every job (see The merge and its CI run). Since then it has been merged with the updated Chunk B, which carries main
+`f904df3fd` (`b234b8967`; not yet run in CI), and the commit after the merge brings the Assayer's Scale tests and
+records to main's Scale (see C-P40). Open: regenerating `src/main/resources/data/jugcraft/alchemy/values.json` and
+`docs/audits/survival-item-registry.json`, which need the game jar (Where to resume). Not merged. Chunk B, beneath it,
+is not merged either; as C-D8 decides, Chunk B's pull request is against main and Chunk C's against Chunk B's branch.
 Proposal: the owner chose Chunk C on 14 October 2026 ("ok begin chunk c"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 5,
 C1 to C4), with [workshops, ecology and pacts](../plans/concordance-expansion-2026-10-10/03-workshops-ecology-and-pacts.md),
@@ -282,10 +285,11 @@ crucible, Peepo's crucible port or `CompanionLogistics`, the Jade provider or cl
 | #370 | Adam-ondi-Ahman, part 1 (draft) | `CHANGELOG.md`, `check_mod_data.py`, `fabric.mod.json`, lang | Its part 2 keystone "has a Concordance recipe", planned only *(survey)* |
 | #371 | KV-1/W walker: model, textures and animation clips (owner, ready, head `36e35b509`) | none: seven new files under `art/kv_walker/`, `docs/images/` and `tools/` (`blockbench_export.py`, `box_preview.py`, `kv_walker.py`) | None today |
 
-**How Chunk C will be reviewed is open.** Chunk B has no pull request, so a Chunk C pull request against main would show
-Chunk B's 260 changed files (`git diff --shortstat 4d38e9712 e079ad4a3`: 260 files, the restored `CHANGELOG.md` history
-among them) and Chunk C together: the "single enormous unreviewable PR" the pack rules out (SH:48; 09:3 asks for
-reviewable units). This is a question for the owner's checkpoint, not one of the decisions below:
+**How Chunk C will be reviewed was open** (decided 23 October 2026, C-D8: two stacked pull requests). Chunk B has no
+pull request, so a Chunk C pull request against main would show Chunk B's 260 changed files (`git diff --shortstat
+4d38e9712 e079ad4a3`: 260 files, the restored `CHANGELOG.md` history among them) and Chunk C together: the "single
+enormous unreviewable PR" the pack rules out (SH:48; 09:3 asks for reviewable units). This is a question for the owner's
+checkpoint, not one of the decisions below:
 - either Chunk B's pull request is opened first and Chunk C's targets Chunk B's branch. For Chunk C's diff to show only
   its own work there, Chunk B's branch would first take the same main merge (`e079ad4a3` holds only Chunk B and main);
   that is the owner's step to approve;
@@ -537,7 +541,10 @@ outcome changes.
     reward route, not a loop (C-P9): the draught makes no Kiln Seal (`kiln_seal_from_scales`, `LairDossiers.java:71-73`)
     and no scale, and magma cream has vanilla sources. A second route: the Crypt Lich's Grave Dust makes 2 bone meal
     (`recipe/bone_meal_from_grave_dust.json`), and bone meal goes into Mendvetch. Both are declared in
-    `PRODUCT_REWARD_ROUTES` and found by recipes alone, not through the Assayer's Scale (C-P32);
+    `PRODUCT_REWARD_ROUTES` and found by recipes alone, not through the Assayer's Scale (C-P32). Since the merge with
+    main `f904df3fd` (`b234b8967`), two tool-only routes are declared there too: Tatterlace's Gossamer Silk and the Iron
+    Dreadnought's Salvaged Coil reach Mendvetch and sugar only through a knife (main's household knife; a bronze knife
+    by way of red matter's hoe and sticks) that a cutting recipe keeps, which `_made_from` counts as an input;
   - **Vitae:** health is not a modelled resource; the Vigil offering stays bounded by `HOURLY_VITAE_BOUND` = 60
     whatever heals the giver (`check_mod_data.py:15597, 15652-15653`).
 - **Records:** `arcane-concordance-alchemy.md:164` rewritten to name the consumers and these checks;
@@ -1865,8 +1872,8 @@ after the first path (09:16).
 
 ## Risks
 
-- **Base and review:** Chunk C stacks on Chunk B, which has no pull request, plus a main merge; how it is reviewed is
-  open (above). A change to Chunk B in review, or a new main, means another merge.
+- **Base and review:** Chunk C stacks on Chunk B, which has no pull request, plus a main merge; how it is reviewed was
+  open (above; decided 23 October 2026, C-D8). A change to Chunk B in review, or a new main, means another merge.
 - **Shared hot files** with open pull requests: lang, the gametest `fabric.mod.json`, `check_mod_data.py`,
   `CHANGELOG.md`, `recipe_view.json`, `tools/owner_art.py` (#351, #354), `docs/WHAT_EXISTS.md` (#366),
   `docs/INTEGRATION_STATUS.md` (#361 to #365).
@@ -2101,8 +2108,8 @@ after the first path (09:16).
   workflow_dispatch of the Build workflow with `load_card` ticked, in two attempts; every job passed by the second.
   The commit after the candidate changes only records.
 - Attempt 1: every job passed except client shard 1, which failed on main's `PeepoPopulationClientTests` cow-breeding
-  flake, the same that failed unit 1's run 38684732031 (open PR #357 fixes it in main's Peepo code, which this branch
-  does not edit).
+  flake, the same that failed unit 1's run 38684732031 (PR #357, since merged in main as `40381834a`, fixes it in main's
+  Peepo code, which this branch does not edit).
 - Attempt 2 re-ran client shard 1 alone, and it passed, so every job passed.
 - The jobs, start to end:
   - `mod`: "1836 GAME TESTS COMPLETE IN 5.493 min" and "All 1836 required tests passed"; the job took 18 min 38 s. No
@@ -2157,7 +2164,7 @@ fresh structure; only the journey test walks one player through the whole worksh
 | Interruption | `aDryPylonStopsRootAndRivetAndKeepsTheOfferings`, `theInterruptionReasonIsKept` |
 | Save and reload | `aRestartJustBeforeOutputBottlesOnce`, `rootAndRivetSavedMidRunLapses`, `theCrucibleStandKeepsItsEnergyAndSettingThroughASave`, `theCrucibleKeepsItsRequestThroughASave`, `anOlderBedLoadsWithoutItsNewKeys`, `strainSurvivesASave`, `aGraftSurvivesEveryHarvestPathAndASave` |
 | Full destination and unloaded target (09:136) | Server: `aCourierFillsACrucibleUntilItIsFull`, `anUnloadedCrucibleWaitsAndLosesNothing`, `aBrokenCrucibleTurnsItsRequestBack`. Client: `PeepoIntegrationClientTests` (crucible demand), `CompanionAutomationChecks` through `PeepoCompanionClientTests` (a full crucible; an unloaded one, "delivered once, none lost or doubled") |
-| No profit loop | `workshopProductsAreNeverWeighed`, `theFoundationIsNeverWeighed`, `productsNeverFeedTheCrucible`, `aStandTurnsElectricityIntoHeatOnly`, `theBonusSpendsNoExtraNutrientAndMintsNone`; `check_workshop_products`, `check_economy` |
+| No profit loop | `workshopProductsAreNeverWeighed`, `theFoundationIsNeverWeighed` (since the merge with main `f904df3fd`, `theFoundationIsNeverFormed`, not yet run), `productsNeverFeedTheCrucible`, `aStandTurnsElectricityIntoHeatOnly`, `theBonusSpendsNoExtraNutrientAndMintsNone`; `check_workshop_products`, `check_economy` |
 | Poultice credit | the eight tests unit 1 added to `LairEncounterGameTests` |
 | Garden | the 21 tests unit 4 added to `ConcordanceGardenGameTests` (33 in the class) |
 | Load (C-10) | `ConcordanceWorkshopLoadGameTests.loadCard` (below); `ConcordanceWorkloadGameTests.gleanersHeartSearch` (C-10's As built notes) |
@@ -2223,7 +2230,7 @@ shows presentation; the tests' checks are the evidence of behaviour.
 | The crucible's Inspect page on its stand | `jugcraft_encyclopedia_inspect_crucible_stand` (same) | Viewed. It reads: "Alembic Crucible at 7, -59, 11 / 62 degrees (Warm) / Crucible Stand beneath heats it towards 65 degrees / 2 of 6 parts / Its tank holds 3 of 3 parts of water / Formula: step 3 of 9: Mendvetch, as it comes / Waiting to go in: 3 Mendvetch / Bottles and bowls: 2 Bowl" |
 | Root and Rivet under way: spent apart from held, its stage table | `jugcraft_encyclopedia_inspect_root_and_rivet`, `_scale4` (same) | Not viewed; its shard passed |
 | Root and Rivet in Jade | `jugcraft_concordance_anchor_root_and_rivet_jade` (same) | Viewed: the circle with its anchor; no Jade box is visible at the 480×270 size. The test's Jade snapshot assertion passed |
-| The foundation's icon | `jugcraft_rooted_thallite_foundation` (`EncyclopediaClientGameTests`) | Not viewed; its shard passed. The icon itself was viewed separately: a green Thallite plate with copper rivets and roots beneath; the roots may read as legs. It awaits the owner's review |
+| The foundation's icon | `jugcraft_rooted_thallite_foundation` (`EncyclopediaClientGameTests`) | Not viewed; its shard passed. The icon itself was viewed separately: a green Thallite plate with copper rivets and roots beneath; the roots may read as legs. The owner did not ask for it to be redrawn at the checkpoint (C-D7) |
 | The crucible's Inspect pages (unit 1) | `jugcraft_encyclopedia_inspect_crucible`, `_scale4`, `_inspect_poultice`, `jugcraft_concordance_crucible_jade` (`EncyclopediaClientGameTests`) | Not viewed; its shard passed |
 | The anchor's readiness (unit 2) | `jugcraft_encyclopedia_inspect_readiness`, `jugcraft_concordance_anchor_gathering_jade` (same) | Not viewed; its shard passed |
 | The stand's workshop (unit 3) | `jugcraft_concordance_crucible_stand_workshop`, `jugcraft_concordance_crucible_stand_jade` (same) | Not viewed; its shard passed |
@@ -2247,8 +2254,8 @@ encyclopedia's reply traffic; JEI's pages in a client; `runServer`; the larger w
 - An offline setter's unclaimed request holds its post's queue (C-P53).
 - Jade's overlay has not been seen: the one Jade shot viewed shows no Jade box at the preview's size.
 - The codex pages' lengths have not been seen in a client.
-- Outside Chunk C: main's `PeepoPopulationClientTests` cow-breeding flake (open #357) failed client shard 1 in runs
-  38684732031 and 38774859294, each passing on its re-run.
+- Outside Chunk C: main's `PeepoPopulationClientTests` cow-breeding flake (#357, merged in main as `40381834a`) failed
+  client shard 1 in runs 38684732031 and 38774859294, each passing on its re-run.
 - The other as-built limits of units 1 to 5 are under Risks above.
 
 ### Record fields (CLAUDE.md)
@@ -2261,7 +2268,7 @@ Every row is at the Practitioner stage. The tests named passed in CI (above).
 | Stillroot Poultice (C-02) | Mendvetch (a bed's harvest, or wheat seeds, bone meal and an amethyst shard for 2), water, a bowl | healing; a friend in a lair fight (credit) | 2 Mendvetch, a part of water, a bowl (returned), 4 warm stirs | nothing | a dirty batch heals less, predicted | the product tests and `LairEncounterGameTests`' credit tests |
 | Kiln Draught (C-02) | magma cream (a Tyrant Scale gives 2) or 2 sugar | the Kiln's slag, his flame | 1 cream or 2 sugar, a part, a bottle, 2 hot stirs | nothing | the wrong heat waits | `aKilnDraughtCarriesItsDrinkerAcrossTheSlag`, `theCinderKilnsRiteNamesTheKilnDraught` |
 | Readiness (C-03) | the circle | the reader, the start | none | nothing | warns for a run short; marks faults | C-03's tests in `ConcordanceRitualGameTests`, `theInspectPageShowsARitesReadinessAndPayments` |
-| Root and Rivet (C-04) | a Thallite plate (Metal Press or 2 Thallite ingots; `machines` and `thallite` switches), 4 copper, 4 Mendvetch; Ley from Radiance, Verdance or JE | the stand's recipe; a Strata foundation elective | 6 Focus; 32 Ley Charge (48 Radiance, 48 Verdance or 32,000 JE); 8 s | the stand | an interruption keeps the offerings, in one line; backlash 4 | C-04's tests in `ConcordanceRitualGameTests`, `theFoundationIsNeverWeighed` |
+| Root and Rivet (C-04) | a Thallite plate (Metal Press or 2 Thallite ingots; `machines` and `thallite` switches), 4 copper, 4 Mendvetch; Ley from Radiance, Verdance or JE | the stand's recipe; a Strata foundation elective | 6 Focus; 32 Ley Charge (48 Radiance, 48 Verdance or 32,000 JE); 8 s | the stand | an interruption keeps the offerings, in one line; backlash 4 | C-04's tests in `ConcordanceRitualGameTests`, `theFoundationIsNeverWeighed` (now `theFoundationIsNeverFormed`) |
 | Crucible Stand (C-05) | the foundation, 6 iron, 2 copper; JE | the crucible's heat | 8, 16 or 32 JE a tick only for a stir; a 640 JE store | nothing | dark while the crucible waits on anything else; its JE lost when broken | the stand's alchemy tests, `aStandTurnsElectricityIntoHeatOnly`, the persistence test, `ConcordanceWorkshopClientGameTests` |
 | Two carriers (C-06) | the crucible's shortage | its buffer | a porter trip (2 Ley Charge, 1 integrity); 16 requests a setter | nothing | full keeps cargo aboard; unloaded waits; turned back when cleared | the 10 tests unit 3 added to `ConcordanceLogisticsGameTests`, the persistence test, the Peepo checks |
 | Habitat (C-07) | a bed's sample | the reader | a canteen sip | nothing | a dormant bed is not read; a gone plant's verdict is forgotten | `ConcordanceGardenGameTests`, `theInspectPageReadsABedAndACrop`, `gardenInspection` |
@@ -2287,11 +2294,12 @@ Every row is at the Practitioner stage. The tests named passed in CI (above).
 - **Commands and results:** the CI runs above; the local checks in each unit's row of the Units table; screenshots in
   each run's `client-screenshots-<shard>` artifacts; the load card's lines in its job's log and notice.
 - **Decisions:** C-D0, C-D0b and C-D1 to C-D3 accepted by the owner, and at the checkpoint on 23 October 2026 C-D5 to
-  C-D8 (hands-on and automation as built; Gloam Ink next; the stand's look and the foundation's icon kept; two stacked
-  pull requests); C-D4 and C-P1 to C-P70 Proposed. The load budget (C-P19 in C-P67's form) and the workflow change
-  (`bfb08770b`, the manual-only `load_card` input and job) remain for the owner's review in Chunk C's pull request.
-- **Next smallest complete outcome:** Gloam Ink (C-D6), when the owner schedules it: one formula from a mixed bed's
-  Gloamcap with one existing consumer (Research Notes).
+  C-D8 (hands-on and automation as built; Gloam Ink next; the stand's look fits, and the foundation's icon, which the
+  owner did not ask to be redrawn, stays; two stacked pull requests); C-D4 and C-P1 to C-P70 Proposed. The load budget
+  (C-P19 in C-P67's form) and the workflow change (`bfb08770b`, the manual-only `load_card` input and job) remain for
+  the owner's review in Chunk C's pull request.
+- **Next smallest complete outcome:** Gloam Ink (C-D6; when it is built is not yet decided): one formula from a mixed
+  bed's Gloamcap with one existing consumer (Research Notes).
 
 ## Deferrals
 
@@ -2349,7 +2357,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-D3 | 14 October 2026 | "Crucible Stand (Recommended)": under the Alembic Crucible, on the rooted foundation; turns JE into the heat the running formula's next stir needs (starting rates about 8, 16 and 32 JE/t for warm, hot and searing), while an Electric Pump pipes water into the crucible's tank; manual heat sources still work | Accepted (owner) | C-05, C-06, C-10 |
 | C-D4 | 14 October 2026 | Both carriers, one demand: the crucible's formula shortage, served by a Peepo through the existing `CrucibleCompanion` port and by a Clockwork Porter through a courier request the crucible files (09:136 names both `MachineCompanionPort` and `CourierLedger`). Not asked; the session's default | Proposed | C-06 |
 | C-D5 | 23 October 2026 | At the checkpoint, the balance of hands-on preparation and automation (09:144): keep it as built. The campfire crucible and carrying by hand stay a complete route; the Crucible Stand and the couriers stay optional conveniences paid in JE (the stand's heat; a porter's Ley Charge, which electricity can give) | Accepted (owner) | C-05, C-06, C-10 |
-| C-D6 | 23 October 2026 | At the checkpoint, the next product family (09:144): Gloam Ink (03:27-37: Gloamcap and an approved Hollow carrier, by covered extraction, for research notes, safe links and ward inscriptions; excess contamination yields an unusable sludge, recoverable through a mundane route). When it is built is to be scheduled with the owner | Accepted (owner) | the next work (Deferrals; Where to resume) |
+| C-D6 | 23 October 2026 | At the checkpoint, the next product family (09:144): Gloam Ink (03:27-37: Gloamcap and an approved Hollow carrier, by covered extraction, for research notes, safe links and ward inscriptions; excess contamination yields an unusable sludge, recoverable through a mundane route). (A note, not the owner's answer: when it is built is not yet decided.) | Accepted (owner) | the next work (Deferrals; Where to resume) |
 | C-D7 | 23 October 2026 | At the checkpoint, the workshop's look (09:144): the Crucible Stand's look fits. The Rooted Thallite Foundation's icon was not asked to be redrawn and stays | Accepted (owner) | C-04, C-05 |
 | C-D8 | 23 October 2026 | The review route (Open pull requests and the review route): Chunks B and C are reviewed as two stacked pull requests, Chunk B's against main and Chunk C's against Chunk B's branch | Accepted (owner) | C-00, every unit |
 | C-P1 | 14 October 2026 | A formula's identity is its canonical text (the Peepo plan id hashes it); the rules' revision is `ConcordanceData.revision()`, process-local, so not 03:46's stable version (a recorded deviation); no new formula save key; an incompatibility is re-derived after a load or reload; an unreadable saved program is kept as text and reported. As built in unit 1: `incompatibility()` replays the formula once per revision and after a load, and names the refused step; an unreadable program is kept under `program` (see C-P23) | Proposed | C-01 |
@@ -2383,7 +2391,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P29 | 14 October 2026 | A product is any brew of its form carrying its status and nothing harmful (judged by the server); a sweet-berry Regeneration salve is therefore a Stillroot Poultice; a brew matching two products stays unnamed | Proposed | C-02 |
 | C-P30 | 14 October 2026 | Poultice credit is read from Regeneration's own time left at each tick's end, each blow and each Concordance heal, at most one health a heal. One note per patient; a later poultice that takes replaces it; it ends when the Regeneration is no longer the poultice's or the patient leaves the fight. The helper is credited wherever they stand, as a ward's caster is | Proposed | C-02 |
 | C-P31 | 14 October 2026 | The Kiln Draught's dossier fact says it also turns the Tyrant's flame (breath, waves, patches), as Fire Resistance already does | Proposed | C-02 |
-| C-P32 | 14 October 2026 | Grave Dust → bone meal → Mendvetch is a second declared reward route; boss routes are audited by recipes alone, not through the Assayer's Scale | Proposed | C-02 |
+| C-P32 | 14 October 2026 | Grave Dust → bone meal → Mendvetch is a second declared reward route; boss routes are audited by recipes alone, not through the Assayer's Scale. Since the merge with main `f904df3fd` (`b234b8967`), Gossamer Silk and Salvaged Coil are declared too, as two tool-only routes to Mendvetch and sugar (through a knife a cutting recipe keeps, which `_made_from` counts as an input) | Proposed | C-02 |
 | C-P33 | 14 October 2026 | Rites use the shared codes. An offering short is `missing_ingredient`, its words made general for crucible and anchor. `unavailable_power` takes (what, held, needed) as lines and `incomplete_pattern` takes (structure, faults to mend); both are first raised here. `not_lent`, `needs_focus`, `too_bright`, `too_far` and `participants` are appended after unit 1's codes | Proposed | C-03, C-05 |
 | C-P34 | 14 October 2026 | Readiness judges its reader as the rite's leader. Nothing offered chooses no rite. A fully matched rite the reader has not learned is never named on the Inspect page or in Jade; the start's refusal still names it, as before. Before a start, the other participants appear as the stage table's gather row; during a gathering, as `participants`. As built in unit 2, where a joined participant who has walked away is not listed while the rite runs: the next step's own check finds them | Proposed | C-03 |
 | C-P35 | 14 October 2026 | An empty-hand or command reading marks every faulted part where it stands, at most once a second a player: shape faults with their interruption's sign, and a channel short of a step or unlent for the reader with WANT (since the unit review, not one only warned short of the run). A refused start marks the refusing check's faults with that refusal's sign. The Inspect page and Jade never mark | Proposed | C-03 |
@@ -2391,7 +2399,7 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 | C-P37 | 14 October 2026 | An interruption is told in one line: why, where the offerings are, and the Focus and Ley Charge the attempt lost, every participant's Focus together (without the loss when the rules no longer know the rite). It is kept in memory for the Inspect page until the next start or a load, never saved. TAMPERED's line under-counts its last draw | Proposed | C-03 |
 | C-P38 | 14 October 2026 | Jade on an anchor shows the participants it needs, who is channelling, the first three offerings and "+n", and, while gathering or channelling, the Focus and Ley Charge spent and the offerings held. Never the rite, anyone's Focus held or research | Proposed | C-03 |
 | C-P39 | 14 October 2026 | Every rite's stage and payment table is worded from its data on the Inspect page, for a reader who knows the rite; the codex states Root and Rivet's in its own words (`_payment_text`, for a transforming rite; C-04) | Proposed | C-03, C-04 |
-| C-P40 | 14 October 2026 | The Rooted Thallite Foundation is a plain described item in the Ingredients tab. The Assayer's Scale never weighs it, nothing turns it back, and the economy models it as a sink of 32 Ley Charge and 6 Focus a run. Its icon is drawn fresh, because nothing in the owner's library fitted, and awaits the owner's review | Proposed | C-04, C-05 |
+| C-P40 | 14 October 2026 | The Rooted Thallite Foundation is a plain described item in the Ingredients tab. The Assayer's Scale never weighs it, nothing turns it back, and the economy models it as a sink of 32 Ley Charge and 6 Focus a run. Its icon is drawn fresh, because nothing in the owner's library fitted, and awaits the owner's review. Since the merge with main `f904df3fd` (`b234b8967` and the commit after it): main's Scale values every default item, so the foundation can be weighed and dissolved at its catalogued worth (the one-essence fallback while `values.json` has no record for it), but it is no tablet output, so it is never formed; `theFoundationIsNeverWeighed` is renamed `theFoundationIsNeverFormed`, and the codex says the Scale will not form it. At the checkpoint the owner did not ask for the icon to be redrawn (C-D7) | Proposed | C-04, C-05 |
 | C-P41 | 14 October 2026 | A rite's offerings may need feature switches beside the Concordance's. The generator states them (`"switches"`) and `check_rituals` holds that statement to the recipes, one step down, an offering that is a tag through its members (since the unit review, a machine recipe's `{"ingredient", "count"}` entries followed too, and a condition with `"or"` alternatives counted as needing none of its switches alone). Concordance data carries no load condition. Any recipe that makes an offering counts as its way to make it | Proposed | C-04 |
 | C-P42 | 14 October 2026 | The codex's first `entry://` link (Stratawrighting's Understood page to Root and Rivet). Every codex link is audited to an entry on disk (since the unit review, its `@anchor` to a page id and its `#n` to a page of the entry), since a broken link stops Modonomicon opening the book (as read from its source by the C-04 design; not seen in a client) | Proposed | C-04 |
 | C-P43 | 15 October 2026 | A Crucible Stand pays its band's rate on a tick only when all of these hold: the Concordance is on; a crucible stands directly above; no Preserve hold; the crucible waits for nothing or for heat alone (`WRONG_HEAT`, or a `HELD` left by a hold now over: the hold itself is judged from the crucible's clock); there is a band; and the crucible is no hotter than the band's target. Otherwise it pays nothing, is dark, and the crucible cools by the usual rule. Refines C-P12's "only while the formula can proceed": coasting down to a cooler band costs nothing. Amended by the unit review: fed less than its rate (JE in within the last 20 ticks), a tick it cannot pay holds the crucible where it is while the crucible is below the band, and, following a formula, at the band's lowest degree, so a trickle reaches the band for the same JE a degree and a pulse finds the crucible in it; inside the band such a tick cools as before, so holding a band still costs C-D3's rates. Short of JE, it goes dark only after 10 such ticks in a row, and a crucible over it reads it as out exactly when it gave nothing | Proposed | C-05 |
@@ -2425,18 +2433,27 @@ contract, lines 1390-1462). At most three decisions go to the owner at Chunk C's
 
 ## Where to resume
 
-Units 1 to 5 (C-01 to C-10) are built and recorded, and the candidate `bb856f873` passed every CI job in run
-38774859294 (the status at the top; [Unit 5](#unit-5-evidence-and-handoff-c-10)). Nothing is merged. The owner
-answered the checkpoint on 23 October 2026 (C-D5 to C-D8): hands-on and automated work as built, Gloam Ink next (to be
-scheduled with the owner), the workshop's look kept, and Chunks B and C reviewed as two stacked pull requests (Chunk B's
+Units 1 to 5 (C-01 to C-10) are built and recorded, and the candidate `bb856f873` passed every CI job in run 38774859294
+(the status at the top; [Unit 5](#unit-5-evidence-and-handoff-c-10)). Nothing is merged. The owner answered the
+checkpoint on 23 October 2026 (C-D5 to C-D8): hands-on and automated work as built, Gloam Ink next (when it is built is
+not yet decided), the Crucible Stand's look kept, and Chunks B and C reviewed as two stacked pull requests (Chunk B's
 against main, Chunk C's against Chunk B's branch). The load budget (C-P19 in C-P67's form) and the workflow change
-(`bfb08770b`, the manual-only `load_card` input and job) remain for the owner's review in Chunk C's pull request.
-C-D0, C-D0b, C-D1 to C-D3 and C-D5 to C-D8 are the owner's; C-D4 and C-P1 to C-P70 are Proposed. Before more work:
-1. refresh main and the open pull requests (#357 for the Peepo flake and #369 for the Peepo files; the hot shared files:
-   lang, the gametest `fabric.mod.json`, `check_mod_data.py`, `CHANGELOG.md`, `docs/TESTING.md`, `WHAT_EXISTS.md` with
-   #366, `INTEGRATION_STATUS.md` with #361 to #365), and merge main again if it moved;
-2. the next smallest outcome, when the owner schedules it (C-D6): one Gloam Ink formula from a mixed bed's Gloamcap with
-   Research Notes as its consumer.
+(`bfb08770b`, the manual-only `load_card` input and job) remain for the owner's review in Chunk C's pull request. C-D0,
+C-D0b, C-D1 to C-D3 and C-D5 to C-D8 are the owner's; C-D4 and C-P1 to C-P70 are Proposed. Chunk C has since been merged
+with Chunk B carrying main `f904df3fd` (`b234b8967`), and the commit after it brings the Assayer's Scale tests and
+records to main's Scale (C-P40). Before more work:
+1. regenerate `src/main/resources/data/jugcraft/alchemy/values.json` (`tools/build_alchemy_values.py --minecraft-jar
+   <the pinned jar>`) and `docs/audits/survival-item-registry.json` (`tools/audit_survival_recipes.py --registry <a
+   SurvivalRecipeGameTests registry export> --write`), which need the game jar: until then `scripts/tests` fails two
+   tests (no value for the stand, the foundation and Chunk B's 15 items; no registry entry for `lesser_water_focus` and
+   `rooted_thallite_foundation`). If the foundation, made by a ritual, lands at the fallback value or with no documented
+   route, declare its route rather than editing the outputs by hand;
+2. refresh main and the open pull requests (#369 for the Peepo files; #357 is merged in main as `40381834a`; the hot
+   shared files: lang, the gametest `fabric.mod.json`, `check_mod_data.py`, `CHANGELOG.md`, `docs/TESTING.md`,
+   `WHAT_EXISTS.md` with #366, `INTEGRATION_STATUS.md` with #361 to #365), and merge main again if it has moved past
+   `f904df3fd`;
+3. the next smallest outcome (C-D6; when it is built is not yet decided): one Gloam Ink formula from a mixed bed's
+   Gloamcap with Research Notes as its consumer.
 
 ## How this contract was checked
 

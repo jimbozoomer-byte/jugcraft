@@ -518,7 +518,7 @@ def codex(initiate):
                  "A **Rooted Thallite Foundation** is a Thallite plate riveted with copper and bound with Mendvetch roots: "
                  "a base that holds still under living work. It is the base of a **Crucible Stand** (Alembic). Nothing "
                  "turns it back into a plate, Ley Charge or Focus, and "
-                 "the Assayer's Scale will not weigh it.\\\n\\\nCompleting Root and Rivet counts towards "
+                 "the Assayer's Scale will not form it.\\\n\\\nCompleting Root and Rivet counts towards "
                  "**Stratawrighting**'s mastery, as any completed ritual does."),
             ],
         },

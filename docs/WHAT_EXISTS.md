@@ -312,7 +312,7 @@ diagnostics and honest reload, its Inspect page and Jade lines, the Stillroot Po
 its Peepo port) and unit 4 (a garden's habitat on the Inspect page and in Jade, the canteen on Verdant Beds, the
 compost pages, the mixed bed, harvest strain and the Dewlit graft) and unit 5 (the measured workshop, the workshop's
 route from a manual start and the client evidence) are not merged; all five pass their tests in CI (run 38774859294
-on `bb856f873`) and wait for the owner's checkpoint; the earlier runs are in
+on `bb856f873`), and the owner answered the checkpoint on 23 October 2026 (C-D5 to C-D8); the earlier runs are in
 [the chunk's contract](features/concordance-chunk-c.md). Contract and
 vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),

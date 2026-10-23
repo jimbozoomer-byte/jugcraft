@@ -16619,10 +16619,12 @@ def check_poultice_credit(co, lang):
     folders = [JAVA_ROOT / "mixin", ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "mixin"]
     for path in sorted(p for folder in folders if folder.is_dir() for p in folder.rglob("*.java")):
         text = path.read_text(encoding="utf-8")
-        # A mixin on heal() is the poultice's only when it touches the fight's credit: main's NouveauThreadMixin (merged
-        # with main f904df3fd) scales every heal for Nouveau statuses, and the credit counts the health that rose.
-        if re.search(r'RegenerationMobEffect|MobEffectInstance|tickEffects', text) \
-                or re.search(r'"heal', text) and re.search(r'\b(Encounter|BrewItem|Mending|mended|poultice|Poultice)\b', text):
+        # One heal() mixin is allowed: main's NouveauThreadMixin (merged with main f904df3fd) only rescales a heal's amount
+        # for Nouveau statuses, and the credit counts at most the health that rose (Encounter.readMending, held above). It
+        # stays allowed only while it does not touch the fight's credit; any other heal() mixin is refused.
+        nouveau = path.name == "NouveauThreadMixin.java" \
+            and not re.search(r'\b(Encounter|BrewItem|Mending|mended|poultice|Poultice)\b', text)
+        if re.search(r'RegenerationMobEffect|MobEffectInstance|tickEffects', text) or re.search(r'"heal', text) and not nouveau:
             err(f"{path.relative_to(ROOT)}: no mixin for the poultice's credit (CLAUDE.md; C-02 reads Regeneration's own time)")
     keeper = _java_body(dossiers, "private static void keeper(")
     if '"encyclopedia.jugcraft.dossier.credit.poultice"' not in keeper or "if (poultices())" not in keeper \

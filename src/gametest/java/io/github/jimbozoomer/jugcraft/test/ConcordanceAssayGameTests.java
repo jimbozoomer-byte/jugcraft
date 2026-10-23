@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
 import io.github.jimbozoomer.jugcraft.concordance.assay.Assaying;
+import io.github.jimbozoomer.jugcraft.concordance.assay.TabletOutputs;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.Assay;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.CycleAudit;
 import io.github.jimbozoomer.jugcraft.concordance.equivalence.EquivalenceCatalog;
@@ -47,7 +48,8 @@ import net.minecraft.world.level.GameType;
  * pays, so a round trip loses; only plain catalogued matter is weighed (named, filled, bound, enchanted, magical and
  * excluded things are refused with their reason, and nothing changes); the ledger never passes its cap; the declared
  * conversion graph is the game's own recipes; and the catalogue is balanced. Since Concordance Chunk C (C-02), the
- * workshop's products are never weighed, and since C-04 neither is Root and Rivet's Rooted Thallite Foundation.
+ * workshop's products are never weighed, and since C-04 Root and Rivet's Rooted Thallite Foundation is never formed
+ * (with main's universal Scale, merged at main f904df3fd, it is weighed and dissolved at its catalogued worth).
  */
 public class ConcordanceAssayGameTests {
 	private static ServerPlayer assayer(GameTestHelper helper) {
@@ -220,8 +222,10 @@ public class ConcordanceAssayGameTests {
 
 	/**
 	 * Concordance Chunk C (C-02, C-P2): the workshop's products (the Stillroot Poultice, the Kiln Draught and Winter Brine)
-	 * carry a Jugcraft brew, so the scale refuses them as magical before their name is looked at: weighed and dissolved
-	 * they change nothing, and as a pattern nothing is formed from them. A bare draught or salve is not catalogued.
+	 * carry a Jugcraft brew, a component their item does not have by default, so the scale refuses them as stateful before
+	 * their name is looked at: weighed and dissolved they change nothing, and as a pattern nothing is formed from them. A
+	 * bare draught or salve is valued like every default item (main's universal Scale), but it is no tablet output, so it
+	 * is never formed.
 	 */
 	@GameTest(maxTicks = 20)
 	public void workshopProductsAreNeverWeighed(GameTestHelper helper) {
@@ -236,7 +240,7 @@ public class ConcordanceAssayGameTests {
 		for (ItemStack product : products) {
 			helper.assertTrue(Alchemy.product(product) != null, "It is a workshop product: " + product);
 			String reason = Assaying.eligibility(product);
-			helper.assertTrue(reason.equals("magical"), product + " is refused as magical, not " + reason);
+			helper.assertTrue(reason.equals("stateful"), product + " is refused as stateful, not " + reason);
 			int count = product.getCount();
 			use(player, level, product, ItemStack.EMPTY);
 			Assaying.use(player, level, player.getMainHandItem(), player.getOffhandItem());
@@ -248,24 +252,31 @@ public class ConcordanceAssayGameTests {
 		}
 		for (Item form : List.of(JugcraftConcordance.DRAUGHT, JugcraftConcordance.SALVE)) {
 			String id = BuiltInRegistries.ITEM.getKey(form).toString();
-			helper.assertTrue(Assaying.eligibility(new ItemStack(form)).equals("uncatalogued") && Assaying.catalog().material(id) == null,
-					"A bare " + id + " is not catalogued: " + Assaying.eligibility(new ItemStack(form)));
+			helper.assertTrue(Assaying.eligibility(new ItemStack(form)).isEmpty() && !new ItemStack(form).is(TabletOutputs.ALLOWED),
+					"A bare " + id + " is valued but never formed: " + Assaying.eligibility(new ItemStack(form)));
 		}
 		helper.succeed();
 	}
 
-	/** Concordance Chunk C, C-04: the Rooted Thallite Foundation is excluded: never weighed, dissolved or formed. */
+	/**
+	 * Concordance Chunk C, C-04: the Rooted Thallite Foundation is never formed. It stays in the excluded tag, but main's
+	 * universal Scale (merged at main f904df3fd) values every default item, so it is weighed and dissolved at no more than
+	 * its catalogued worth; it is no tablet output, so nothing is formed from it.
+	 */
 	@GameTest(maxTicks = 20)
-	public void theFoundationIsNeverWeighed(GameTestHelper helper) {
+	public void theFoundationIsNeverFormed(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		ServerPlayer player = assayer(helper);
 		Item foundation = item("jugcraft:rooted_thallite_foundation");
 		ItemStack stack = new ItemStack(foundation, 2);
-		helper.assertTrue(foundation != Items.AIR && stack.is(Assaying.EXCLUDED) && Assaying.eligibility(stack).equals("excluded")
-				&& Assaying.catalog().material("jugcraft:rooted_thallite_foundation") == null, "excluded: " + Assaying.eligibility(stack));
+		helper.assertTrue(foundation != Items.AIR && stack.is(Assaying.EXCLUDED) && !stack.is(TabletOutputs.ALLOWED),
+				"excluded and no tablet output: " + Assaying.eligibility(stack));
+		Material material = Assaying.catalog().material("jugcraft:rooted_thallite_foundation");
+		helper.assertTrue(material != null, "valued like every default item");
 		use(player, level, stack, ItemStack.EMPTY);
 		Assaying.use(player, level, player.getMainHandItem(), player.getOffhandItem());
-		helper.assertTrue(player.getMainHandItem().getCount() == 2 && Assaying.balance(player) == 0, "nothing dissolved");
+		helper.assertTrue(Assaying.balance(player) <= Assay.dissolve(material, 2),
+				"dissolved for no more than its worth: " + Assaying.balance(player));
 		Assaying.setBalance(player, 10_000L);
 		use(player, level, ItemStack.EMPTY, new ItemStack(foundation));
 		helper.assertTrue(Assaying.balance(player) == 10_000L && player.getMainHandItem().isEmpty() && player.getOffhandItem().getCount() == 1,

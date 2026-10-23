@@ -82,11 +82,13 @@ The **Adept's Wand** is the second instrument: a capacity of 12 (the Initiate's 
 **Root and Rivet** (Concordance Chunk C, C-04; the owner's choice C-D2, with C-P11's numbers as starting values) is the
 first workshop rite, at the same Practitioner stage and taught by the same Circle Lore understood. A Thallite plate,
 riveted with copper and bound with Mendvetch, becomes a **Rooted Thallite Foundation**: the base of the
-[Crucible Stand](crucible-stand.md) (C-05, unit 3; not merged), its one consumer. Nothing turns the foundation
-back into a plate, Ley Charge or Focus, and the Assayer's Scale never weighs it. The plate comes from a Metal Press or, by hand, from two thallite ingots; every
-route to it needs the server's `machines` and `thallite` feature switches. With either off the rite stays known, but its
-plate cannot be made (its codex entry says so). Completing it lays a Stratawright's `foundation` for each participant
-present, as any completed ritual does. Its stages and what each pays, as its codex entry and the Inspect page state them:
+[Crucible Stand](crucible-stand.md) (C-05, unit 3; not merged), its one consumer. Nothing turns the foundation back into
+a plate, Ley Charge or Focus, and the Assayer's Scale never forms it: it is no tablet output. Since the merge with main
+`f904df3fd`, whose Scale values every default item, the foundation can be weighed and dissolved at its catalogued worth.
+The plate comes from a Metal Press or, by hand, from two thallite ingots; every route to it needs the server's
+`machines` and `thallite` feature switches. With either off the rite stays known, but its plate cannot be made (its
+codex entry says so). Completing it lays a Stratawright's `foundation` for each participant present, as any completed
+ritual does. Its stages and what each pays, as its codex entry and the Inspect page state them:
 
 | Stage | When | Paid at this stage | Still held | Spent so far | If broken off |
 |---|---|---|---|---|---|
@@ -345,7 +347,8 @@ which were viewed is below).
     11 items beating Root and Rivet's 9) and `rootAndRivetIsStrataFoundationWork` (a bystander who took no part lays no
     foundation).
 - `EncyclopediaGameTests.theInspectPageShowsARitesReadinessAndPayments` (21 in all).
-- `ConcordanceAssayGameTests.theFoundationIsNeverWeighed` (8 in all).
+- `ConcordanceAssayGameTests.theFoundationIsNeverWeighed` (8 in all; renamed `theFoundationIsNeverFormed` at the merge
+  with main `f904df3fd`, whose Scale weighs the foundation, and not yet run under that name).
 - `ConcordanceProgressionGameTests.theLiveGraphIsWhole`: the node `ritual:jugcraft:root_and_rivet`, reachable by one
   player alone.
 - Client shots in `EncyclopediaClientGameTests`: `jugcraft_encyclopedia_inspect_readiness` (the Inspect page on an
