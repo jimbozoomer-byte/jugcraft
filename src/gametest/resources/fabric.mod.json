@@ -11,6 +11,7 @@
       "io.github.jimbozoomer.jugcraft.test.TestForms"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.FoodRecipeConflictGameTests",
       "io.github.jimbozoomer.jugcraft.test.CityDefenseGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyCavityGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownLifeGameTests",

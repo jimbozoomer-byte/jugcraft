@@ -19394,26 +19394,6 @@
           "notes": []
         },
         {
-          "id": "household/slicing/pumpkin_seeds_from_pumpkin",
-          "inputs": [
-            {
-              "ingredient": "minecraft:pumpkin",
-              "count": 1
-            }
-          ],
-          "outputs": [
-            {
-              "count": 5,
-              "id": "minecraft:pumpkin_seeds"
-            }
-          ],
-          "tools": [
-            "#jugcraft:knives"
-          ],
-          "ticks": 0,
-          "notes": []
-        },
-        {
           "id": "household/slicing/red_dye_from_poppy",
           "inputs": [
             {
@@ -19535,7 +19515,7 @@
           "id": "household/slicing/stick_from_dead_bush",
           "inputs": [
             {
-              "ingredient": "minecraft:dead_bush",
+              "ingredient": "jugcraft:landscape_dead_branch",
               "count": 1
             }
           ],
@@ -19829,26 +19809,6 @@
             {
               "id": "minecraft:glass_bottle",
               "count": 1
-            }
-          ],
-          "tools": [
-            "#jugcraft:knives"
-          ],
-          "ticks": 0,
-          "notes": []
-        },
-        {
-          "id": "survival_completion/cavern_cake_layer",
-          "inputs": [
-            {
-              "ingredient": "minecraft:cake",
-              "count": 1
-            }
-          ],
-          "outputs": [
-            {
-              "id": "jugcraft:cavern_cake_layer",
-              "count": 4
             }
           ],
           "tools": [
@@ -30875,6 +30835,23 @@
           ],
           "tools": [],
           "ticks": 400,
+          "notes": []
+        },
+        {
+          "id": "wildlife_cooked_egg",
+          "inputs": [
+            {
+              "ingredient": "#c:eggs",
+              "count": 1
+            }
+          ],
+          "outputs": [
+            {
+              "id": "jugcraft:wildlife_cooked_egg"
+            }
+          ],
+          "tools": [],
+          "ticks": 200,
           "notes": []
         }
       ],
