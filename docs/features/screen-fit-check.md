@@ -61,7 +61,11 @@ Local, without Gradle or a game:
 - `python tools/generate_material_data.py` added the two strings and nothing else of this change's.
 - The other checks and the Java syntax parse: see the PR.
 
-CI: pending.
+CI, [run 40023529126](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40023529126) on 14dfb9938: green, all 21 checks. The 34 client classes it chose include `ScreenFitClientGameTests`, which passed: every screen fits the 320 × 240 GUI. Its shots (`jugcraft_fit_*`) showed two faults on the recipe page, fixed in the next commit:
+- the recipe's name and the INPUTS and OUTPUTS headings were in the look's label colour, which in the industrial look is the dark grey meant for titles on the casing, so they could not be seen on the glass. Headings (and the scroll bar) now use the look's bright accent;
+- a lit key that cannot be pressed (Automatic while the machine already chooses its own jobs) had its label in the dim colour on the lit face, so it could not be read. A lit key now keeps its label whole; keys that cannot be pressed have it half faded and a darker face (all screens using `ScreenKit` keys).
+
+The re-run with these fixes: see the PR.
 
 Not run:
 - a human using the recipe page;

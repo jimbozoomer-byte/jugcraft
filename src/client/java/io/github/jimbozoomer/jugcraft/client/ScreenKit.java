@@ -333,7 +333,7 @@ public final class ScreenKit {
 			} else if (hover) {
 				face = MachineSkin.lighten(face, 24);
 			} else if (!active) {
-				face = darken(face, 20);
+				face = darken(face, 50);
 			}
 			if (theme.outlined() && !"lab".equals(theme.shape())) {
 				int edge = selected || hover ? theme.buttonLight() : active ? theme.buttonEdge() : theme.dim();
@@ -347,7 +347,11 @@ public final class ScreenKit {
 			if (selected) {
 				g.fill(x + 3, y + h - 3, x + w - 3, y + h - 2, theme.ok());
 			}
-			int color = !active ? theme.dim() : "lab".equals(theme.shape()) ? 0xFFF0F0F0 : theme.buttonIcon();
+			// A key that cannot be pressed has its label half faded; one that is lit (the state it is in) keeps it whole.
+			int color = "lab".equals(theme.shape()) ? 0xFFF0F0F0 : theme.buttonIcon();
+			if (!active && !selected) {
+				color = (color & 0x00FFFFFF) | 0x80000000;
+			}
 			String text = fit(font, getMessage().getString(), w - 4);
 			Component shown = text.equals(getMessage().getString()) ? getMessage() : Component.literal(text).setStyle(getMessage().getStyle());
 			g.text(font, shown, x + (w - font.width(text)) / 2, y + (h - 8) / 2, color, false);

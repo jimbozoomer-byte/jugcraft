@@ -157,7 +157,8 @@ public final class MachineRecipeScreen extends Screen implements ScreenKit.Fitte
     }
     private List<Line> preview() {
         var lines = new ArrayList<Line>();
-        int text = theme.text(), dim = theme.dim(), heading = theme.label();
+        // Headings in the look's bright accent: its label colour is for the casing, and some looks' is dark.
+        int text = theme.text(), dim = theme.dim(), heading = theme.progress();
         if (filtered.isEmpty()) { text(lines, tr(menu.catalog().isEmpty() ? "no_recipes" : "no_recipe_matches"), dim); return lines; }
         var r = menu.catalog().get(selected).recipe();
         text(lines, name(selected), heading);
@@ -254,7 +255,7 @@ public final class MachineRecipeScreen extends Screen implements ScreenKit.Fitte
         if(total>bottom-py) {
             int track=bottom-py, thumb=Math.max(12,track*track/total);
             int sy=py+(track-thumb)*detailScroll/Math.max(1,total-track);
-            g.fill(left+panelWidth-11,sy,left+panelWidth-9,sy+thumb,theme.label());
+            g.fill(left+panelWidth-11,sy,left+panelWidth-9,sy+thumb,theme.progress());
         }
     }
 }
