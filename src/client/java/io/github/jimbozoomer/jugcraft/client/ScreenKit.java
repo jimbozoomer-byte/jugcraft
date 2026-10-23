@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -25,7 +26,19 @@ public final class ScreenKit {
 	/** Where the title strip puts the lamp and the title, from the body's corner; panes start under it. */
 	public static final int TITLE_HEIGHT = 13;
 
+	/** The smallest GUI Minecraft's automatic scale gives (a 640 x 480 window at scale 2): every machine screen fits it. */
+	public static final int SMALLEST_GUI_WIDTH = 320;
+	public static final int SMALLEST_GUI_HEIGHT = 240;
+
 	private ScreenKit() {
+	}
+
+	/**
+	 * A machine screen that says where it draws its panel, in GUI pixels after any scaling to fit, so the screen fit test
+	 * (ScreenFitClientGameTests) can check that it fits the window at the smallest GUI.
+	 */
+	public interface Fitted {
+		ScreenRectangle panelArea();
 	}
 
 	// ------------------------------------------------------------------ bodies and panes
