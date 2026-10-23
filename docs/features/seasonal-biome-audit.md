@@ -1,6 +1,6 @@
 # Seasonal biome audit
 
-Status: implemented on `claude/seasonal-audit` ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)), awaiting review. Its CI passed (below). **Not yet played.**
+Status: implemented on `claude/seasonal-audit` ([#454](https://github.com/jimbozoomer-byte/jugcraft/pull/454)), awaiting review. Its CI passed (below). **Not yet played.** A follow-up, stacked on it, takes the fall's wild patches, the graveyard flowers and the Hag Stone to the landscape biomes through the same kinds ([below](#follow-up-the-falls-wild-patches-the-graveyard-flowers-and-the-hag-stone)).
 Proposal issue: none. This is the TODO list's "MUST: audit seasonal content against every newer biome collection" ([TODO](../TODO.md#living-spawn-city--october-21-local-work)). On 22 October 2026, offered it as the next work, the owner answered "Lets do the seasonal audit then lets do Guns Slice 14D".
 Owner: @jimbozoomer-byte
 Target milestone and tier: seasonal delivery alongside world generation; no tier.
@@ -32,6 +32,9 @@ Every seasonal or date-dependent system was checked against the biome collection
 | Concordance sky and celestial patterns | the season and the Harvest Moon | the overworld, open sky | Biome-independent | Unchanged |
 | Seasonal tree leaves (maple, aspen, larch, willow, rowan, elder, bald cypress, walnut and the rest) | the season day | the species, anywhere | The Snowy Forest, Muskeg, Snowpetal Grove and Webwood grow these trees without having seasons: their leaves turn and their grass does not | Unchanged, deliberately: these species are deciduous wherever they stand, as a planted sapling's tree is |
 | Lair event loot (Vesperine, Tatterlace) | Halloween, with `lairs.event_loot=on` | the lairs | Biome-independent | Unchanged |
+| The fall's wild patches: the festival gourds and cranberries, chestnut trees, the heirloom pumpkins, mums, the autumn mushrooms, wild mandrake and wolfsbane (follow-up) | always (worldgen, new chunks) | the common kind tags (`#c:is_forest`, `#c:is_swamp` and the like) | None in the landscape biomes | Each also grows in the landscape biomes of its kind: woods, grasslands, swamps, snowy land and the dark woods (`tools/landscape_kinds.py` BESIDE) |
+| The graveyard flowers' wild patches: spider lilies, ghost pipes, snowdrops and the rest (follow-up) | always (worldgen, new chunks) | the common kind tags | as above | as above |
+| The Hag Stone, the Mire Hag's rite (follow-up) | any night | `#jugcraft:hag_stone_lands`: the common swamps, the Floodplain and the Muskeg | The landscape swamps were not wetland to it | It takes the 7 landscape swamps (`#jugcraft:landscape_kind/swamps`) |
 
 **No date dependence** was found in fishing, the menagerie's animal spawns or any loot-table condition. The Christmas pocket pet and the Harvest Feast meal score are not date-gated.
 
@@ -113,7 +116,35 @@ No new dependencies or art.
 - Seasonal and Halloween content; nothing generates differently.
 - Earned items and builds are kept after events end, as before.
 - Not covered here, and why:
-  - **The wild Halloween harvest patches and wolfsbane:** permanent worldgen, not date-gated. They read the vanilla and common kind tags, which the landscape biomes lack. Adding those tags to the landscape biomes would also change wildlife spawns and wild crops in new chunks, a broader decision recorded below.
+  - **The wild Halloween harvest patches and wolfsbane** were left out at first: permanent worldgen, reading the vanilla and common kind tags, which the landscape biomes lack. The follow-up below reaches them through the landscape kinds instead, without those tags, so wildlife and the other wild crops are as they were.
+
+## Follow-up: the fall's wild patches, the graveyard flowers and the Hag Stone
+
+On 23 October 2026 the owner closed the duplicate audit, [#464](https://github.com/jimbozoomer-byte/jugcraft/pull/464), and asked for what it added beyond this one as a follow-up on this audit's kinds ("close 464 and do the follow-up").
+
+- **The fall's wild patches** (the 19 in `tools/landscape_kinds.py` FALL_PATCHES) also grow in the landscape biomes of their kinds. A landscape maple wood grows chestnut trees, chanterelles and acorn squash; a landscape bog grows cranberries; a landscape pasture grows butternut squash, Cinderella pumpkins and puffballs; the Ominous Woods grow wild mandrake and jack-o'-lantern mushrooms.
+  - `JugcraftAgriculture.fallPatch` places them; beside each common kind tag a patch reads it also selects that kind's landscape tag (`LANDSCAPE_KINDS`, from `BESIDE`):
+
+    | Common tag | Landscape tag |
+    | --- | --- |
+    | `#c:is_forest`, `#c:is_taiga`, `#c:is_birch_forest` | `#jugcraft:landscape_kind/woods` |
+    | `#c:is_plains` | `#jugcraft:landscape_kind/grasslands` |
+    | `#c:is_swamp` | `#jugcraft:landscape_kind/swamps` |
+    | `#c:is_snowy` | `#jugcraft:landscape_kind/snowy` |
+    | `#c:is_spooky` | `#jugcraft:landscape_kind/dark_woods` (new: the Ominous Woods) |
+
+  - The savanna, jungle, hills, floral, windswept, river and badlands tags have no landscape counterpart. The landscape kinds there (arid, tropical, hills) are broader than any one common kind, and would put a savanna's pumpkins in a desert. So the bottle gourd (jungle and savanna) and the Jarrahdale pumpkin (savanna and windswept hills) still grow only in vanilla's and Jugcraft's own biomes.
+  - Every other wild crop keeps to the common tags (`wildPatch`), so the landscape biomes' farming is as it was.
+- **The graveyard flowers' wild patches** (`tools/plants.py` "patch") read the same kinds.
+- **The Hag Stone** opens the Lantern Fen in the landscape swamps too: `#jugcraft:hag_stone_lands` takes `#jugcraft:landscape_kind/swamps`.
+- **New chunks only** for the patches, as for any worldgen; the Hag Stone and the tags apply at once.
+- **Checks:**
+  - `check_landscape_patches` (from `check_seasons`) holds the Java's `LANDSCAPE_KINDS` to `BESIDE`; checks that every `FALL_PATCHES` name, and only they, is placed with `fallPatch`, which reads both tags; that the graveyard flowers' loop reads both; that every flower's patch kind has a landscape counterpart; and that the Hag Stone's lands hold the landscape swamps.
+  - The older patch checks (each patch's biomes against `tools/agriculture.py`, and the agriculture switch's gating) parse `fallPatch` as well as `wildPatch`.
+  - 12 deliberate breaks, each in a scratch copy of the tree, all caught.
+- **Game test** `SeasonalBiomeGameTests.landscapeBiomesTakeTheFallsPatches`: whenever a vanilla forest, taiga, plains or swamp carries one of these patches in the test world, its landscape counterpart (maple woods, woodland, Siberian taiga, pasture, bog) carries it too, and the bog has no wild rice (no fall patch). It logs how many of the vanilla biomes carried theirs. The landscape swamps are in the Hag Stone's lands and a landscape field is not; the Ominous Woods are in the dark woods tag.
+- **Run locally** on the follow-up: `python3 tools/generate_material_data.py`, `python3 tools/check_mod_data.py`, `python3 scripts/check_repository.py` and `python3 -m unittest discover -s scripts/tests` passed; the Java was parsed only (syntax). Compilation and the game tests run in CI on its pull request.
+- **Not run:** a world. Nobody has seen a chestnut tree in a landscape maple wood.
 
 ## Rollout and open questions
 - **Owner choices to confirm,** each one line in `tools/landscape_kinds.py`:

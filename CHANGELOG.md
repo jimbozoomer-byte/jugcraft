@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: The fall's wild harvest in the landscape biomes (follow-up to the seasonal biome audit)
+- **The fall grows wild in the landscape biomes too.** The 19 fall and Halloween wild patches grow in the landscape biomes of their kinds: chestnut trees, chanterelles and acorn squash in its woods, cranberries in its swamps, butternut squash and Cinderella pumpkins in its fields, wild mandrake in the Ominous Woods. So do the graveyard flowers. The bottle gourd and the Jarrahdale pumpkin (savanna, jungle and windswept kinds) do not, and every other wild crop is as it was.
+- **The Hag Stone** opens the Lantern Fen from the landscape swamps (the Bayou, Bog, Marsh, Wetland and the rest).
+- Built on the seasonal biome audit's landscape kinds, with one more, the dark woods. Record: [seasonal-biome-audit.md](docs/features/seasonal-biome-audit.md#follow-up-the-falls-wild-patches-the-graveyard-flowers-and-the-hag-stone).
+
 ### Unmerged: Seasonal biome audit
 - **The landscape biomes now have seasons:** in the 54 temperate landscape woods, fields, hills and swamps, grass and leaves turn with the year as in Jugcraft's own biomes. 47 of them take winter snow when `seasons.snow` is on; the 7 mild ones (Mediterranean, lavender, redwood, warm shrub, orchid swamp) do not.
 - **Halloween and autumn creatures reach them too:** wisps rise over the landscape swamps on Halloween nights. On full moons, werewolves stalk the landscape woods, snow werewolves its snowy land and shadow werewolves the Ominous Woods, where the Howling Totem rite also works. Squirrels and wild turkeys come to its woods and open country.

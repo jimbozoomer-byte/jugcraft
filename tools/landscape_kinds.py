@@ -19,7 +19,8 @@ From the kinds and the climate (checked against each biome's file by tools/check
 - MILD: of those, the ones with mild winters (Mediterranean, lavender, redwood, warm shrub and orchid swamp, as their
   Jugcraft namesakes), which keep their colours' turn but get no winter snow;
 - SNOWY: the land where snow falls all year (raining, temperature below 0.15);
-- the kind tags below, which the werewolves, squirrels, turkeys and wisps read beside the vanilla and common tags.
+- the kind tags below, which the werewolves, squirrels, turkeys and wisps read beside the vanilla and common tags,
+  as do the fall's wild patches, the graveyard flowers and the Hag Stone (BESIDE, FALL_PATCHES, tools/lairs.py).
 """
 
 MOD = "jugcraft"
@@ -113,11 +114,27 @@ KIND_TAGS = {
     f"{MOD}:landscape_kind/grasslands": [b for b, kind in KINDS.items() if kind == "grassland" and b not in SNOWY],
     f"{MOD}:landscape_kind/swamps": [b for b, kind in KINDS.items() if kind == "swamp"],
     f"{MOD}:landscape_kind/snowy": list(SNOWY),
+    f"{MOD}:landscape_kind/dark_woods": [b for b, kind in KINDS.items() if kind == "dark_woods"],
 }
 WOODS_TAG = "#" + f"{MOD}:landscape_kind/woods"
 GRASSLANDS_TAG = "#" + f"{MOD}:landscape_kind/grasslands"
 SWAMPS_TAG = "#" + f"{MOD}:landscape_kind/swamps"
 SNOWY_TAG = "#" + f"{MOD}:landscape_kind/snowy"
+DARK_WOODS_TAG = "#" + f"{MOD}:landscape_kind/dark_woods"
+
+# The fall's wild patches and the graveyard flowers (agriculture/JugcraftAgriculture.java fallPatch and the plants'
+# "patch", tools/plants.py) reach the landscape biomes too: beside each common kind tag they read stands the landscape
+# kind tag here, and its biomes get the patch as well. The rest (savanna, jungle, hills, floral, windswept, river,
+# badlands) have no landscape counterpart: the landscape kinds there (arid, tropical, hills) are broader than any one
+# common kind, and would put a savanna's pumpkins in a desert.
+BESIDE = {"IS_FOREST": WOODS_TAG, "IS_TAIGA": WOODS_TAG, "IS_BIRCH_FOREST": WOODS_TAG, "IS_PLAINS": GRASSLANDS_TAG,
+          "IS_SWAMP": SWAMPS_TAG, "IS_SNOWY": SNOWY_TAG, "IS_SPOOKY": DARK_WOODS_TAG}
+# Those wild patches: the fall and Halloween harvest, the autumn mushrooms and wolfsbane. Every other wild crop keeps to
+# the common tags (wildPatch).
+FALL_PATCHES = ("wild_mandrake", "butternut_squash", "acorn_squash", "warty_gourd", "cranberry_bush", "chestnut_tree",
+                "white_pumpkin", "jarrahdale_pumpkin", "cinderella_pumpkin", "red_kuri_pumpkin", "kabocha_pumpkin",
+                "bottle_gourd", "mums", "chanterelle", "porcini", "puffball", "fly_agaric", "jack_o_lantern_mushroom",
+                "wolfsbane")
 
 
 def seasonal(kind, temperature, precipitation):
