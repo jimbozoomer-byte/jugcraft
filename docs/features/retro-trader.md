@@ -143,4 +143,19 @@ Contributed as a community prototype (draft PR from a fork). Cosmetic only: no i
 
 **Verification (this branch).** See the PR for what ran and what did not.
 - Game test `retroTraderJamsAfterTrading`, with the chance forced. Through the game's own `Villager#setTradingPlayer`: closing the screen without a trade starts nothing; the jam waits for the screen to close after a trade, then starts; a second trade within the cooldown does not start another; a farmer never jams. It also checks the timeline (2 + 2 alternating stomps, 4 claps, a finale, nothing outside the routine).
-- **Not yet played:** the look, faces and routine in a running game. The client tick sounds, the arm and face rendering with Sodium and Iris, and two clients watching one trader on a dedicated server are also unchecked.
+- Client game test `RetroTraderClientGameTests` (run alone with `./gradlew runClientGameTest -PclientTests=RetroTraderClientGameTests`): **passed locally** (22 October 2026, Windows 11, Temurin JDK 25.0.4, the development client with the complete optional set).
+  - It screenshots his look, his face up close and a three-quarter view.
+  - It then starts the jam as a trade would and screenshots the first stomp, the first clap, the ta-da and the end.
+  - Looked at:
+    - the modelled beanie (cuff, crown, dome) sits on his head;
+    - the face quads show the smile while the player is near;
+    - on the stomp, his shouting face and unfolded arms;
+    - on the clap, his hands together in front of his chest;
+    - at the ta-da, his arms flung wide;
+    - at the end, his folded arms back.
+  - The small light patch on his belt in these shots is the vanilla profession level badge.
+- **Not yet checked:**
+  - hearing the stomp and clap sounds in a running game (the test cannot judge audio);
+  - the face and arms with Iris shaders;
+  - two clients watching one trader on a dedicated server;
+  - a real trade by a human player.
