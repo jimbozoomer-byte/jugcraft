@@ -2835,7 +2835,7 @@ The first three of the owner's diamond-steel guns, taken up after slice 14F (on 
 **Save compatibility:** new items `jugcraft:vesper_rifle`, `onrush_smg` and `gallant_rifle`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
 
 **Known limits:**
-- **The Gallant is silent only by its sound:** its shot is the owner's silenced one; nothing else about it is quieter, and the Silencer does not fit it.
+- **The Gallant is silent only by its sound:** its shot is the owner's silenced one; nothing else about it is quieter (a shot shows a muzzle flash, as CI's third-person screenshot shows), and the Silencer does not fit it.
 - **The Vesper goes without the Medium Scope:** its atlas has no room for that scope's pieces.
 - **The Vesper's reload fills the right of the view:** the owner's animation tips it up toward the eye.
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them; the hands and the arms' ways are chosen here.
@@ -5667,6 +5667,12 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `diamondSteelGunsAreRegistered`: each is registered with its numbers and its recipe loads, held in both hands, firing plain bullets a magazine at a time. The Vesper Rifle is eight rifle rounds, a pull a shot, harder hitting, further reaching and straighter aimed than the Old Grange Carbine, taking the Long Scope, the Reflex Sight and the Laser Sight but not the Medium Scope; the Onrush SMG twenty-three light rounds as long as the trigger is held, every second tick, taking the four sights; the Gallant Rifle seventeen rifle rounds as long as the trigger is held, taking no barrel attachment and the four sights.
     - `vesperRifleChangesItsMagazine`, `onrushSmgChangesItsMagazine`, `gallantRifleChangesItsMagazine`: an empty gun with more rounds than a magazine loads nothing before its reload's time and a full magazine after it, leaving the rest; two pulls at once both fire (the trigger's bank), the first taking its damage, a third does not, and one after the interval does.
   - `GunsGameTests` counts 93 guns; `TacticalAttachmentsGameTests` the thirty-six guns the Tactical Grip fits, these three among them.
+- **Slice 15A in CI** ([run 40032578602](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40032578602), on 3011c4eb1): every check passed on its first run: the `mod` job (the build and every server game test, `DiamondSteelGunsGameTests` among them), the job without the optional integrations, the repository check and all sixteen client shards.
+  - **Vesper Rifle** (first person, from the guns shard's log): held at the lower right, its red seal at the back of the receiver; aimed, it looks along its sights with the front post on the husk; fired, the same, a round spent. Reloading, it is tipped up to fill the right of the view (known limits); inspected, turned up at the left of the middle, the left arm across the view to the right.
+  - **Onrush SMG:** held at the lower right. Aimed and fired, it looks down its receiver, a square tube the owner's model turns 45° about the barrel, so it shows end on as a diamond with the husk at the crosshair above it, as the previews have it. Reloading, turned toward the left at the lower right; inspected, turned up toward the middle in both hands.
+  - **Gallant Rifle:** held at the lower right, its seal red at the back; aimed and fired, it looks along its back with the husk at the crosshair. Reloading, tipped up at the lower right with the left hand at its magazine; inspected, turned toward the left in both hands.
+  - **Fitted:** each with each of its four sets, held and aimed. The Extended Magazine takes the counts to 12, 35 and 26. The Laser Sight's housing stands large at the upper right of the view held, beside the line of sight aimed.
+  - **Third person:** each carried raised at the shoulder; fired, a flash at its muzzle, the Gallant's too (known limits).
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
