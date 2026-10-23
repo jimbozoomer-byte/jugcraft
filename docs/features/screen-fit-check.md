@@ -66,7 +66,7 @@ CI, [run 40023529126](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/
 - the recipe's name and the INPUTS and OUTPUTS headings were in the look's label colour, which in the industrial look is the dark grey meant for titles on the casing, so they could not be seen on the glass. Headings (and the scroll bar) now use the look's bright accent;
 - a lit key that cannot be pressed (Automatic while the machine already chooses its own jobs) had its label in the dim colour on the lit face, so it could not be read. A lit key now keeps its label whole; keys that cannot be pressed have it half faded and a darker face (all screens using `ScreenKit` keys).
 
-The re-run with these fixes: see the PR.
+CI, [run on 72a85ee98](https://github.com/jimbozoomer-byte/jugcraft/pull/469) with those fixes: green, all 21 checks. The headings could now be read. The lit Automatic key still could not: in the industrial look the keys are a light green, and lighting it made the face lighter still. A lit key now darkens a light face (and lightens a dark one, as before) and has an inner outline in the look's highlight. The job line under the title, on the steel casing, is now in the casing's title colour instead of the glass's green. The re-run with this: see the PR.
 
 Not run:
 - a human using the recipe page;

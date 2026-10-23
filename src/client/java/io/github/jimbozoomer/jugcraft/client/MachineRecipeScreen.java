@@ -233,7 +233,8 @@ public final class MachineRecipeScreen extends Screen implements ScreenKit.Fitte
         ScreenKit.title(g, font, theme, left, top, tr("recipes_of", parent.getTitle()), lamp, panelWidth - 118);
         Component state = menu.catalogStale() ? tr("catalog_stale") : choice == 0 ? tr("automatic_hint")
                 : locked ? tr("locked_recipe",name(choice-1)) : tr("lock_unavailable");
-        g.text(font,ScreenKit.fit(font,state.getString(),panelWidth-16),left+8,top+17,menu.catalogStale()||(choice>0&&!locked)?theme.warn():theme.text(),false);
+        // On the casing, so in its title colour (or the warning colour).
+        g.text(font,ScreenKit.fit(font,state.getString(),panelWidth-16),left+8,top+17,menu.catalogStale()||(choice>0&&!locked)?theme.warn():theme.label(),false);
         if (mx>=left && mx<left+panelWidth && my>=top+15 && my<top+27) g.setTooltipForNextFrame(font,state,mx,my);
         int paneBottom = top + panelHeight - KEYS_HEIGHT;
         String count = tr("recipe_count", filtered.size()).getString();
