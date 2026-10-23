@@ -154,6 +154,7 @@ Contributed as a community prototype (draft PR from a fork). Cosmetic only: no i
     - at the ta-da, his arms flung wide;
     - at the end, his folded arms back.
   - The small light patch on his belt in these shots is the vanilla profession level badge.
+  - His nose is raised 2 pixels (`RetroTraderPose.NOSE_RAISE`, applied in `RetroTraderModelMixin`), so it sits under his glasses instead of hanging past his chin. His mouth is drawn on the row just below it, and the screenshots show it there.
 - **Not yet checked:**
   - hearing the stomp and clap sounds in a running game (the test cannot judge audio);
   - the face and arms with Iris shaders;

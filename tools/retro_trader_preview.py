@@ -30,6 +30,7 @@ FINALE = INTRO + BEATS * BEAT
 LENGTH = FINALE + 18
 FOLDED, READY, CLAP, TA_DA = (-0.8, -0.75, 0.0), (-1.15, -0.22, 0.0), (-1.3, -0.58, 0.0), (-0.35, 0.0, 2.0)
 LIFT = 3.2
+NOSE_RAISE = 2.0  # RetroTraderPose.NOSE_RAISE
 EYES = ["open", "half", "closed", "look_left", "look_right", "happy", "wide", "squeeze", "frown"]
 MOUTHS = ["neutral", "smile", "grin", "talk", "shout", "ooh", "frown"]
 
@@ -181,7 +182,7 @@ def model(skin, sheet, pose):
     quads = []
     quads += texels(skin, faces((-4, -10, -4), (8, 10, 8), (0, 0)), head)
     quads += texels(skin, faces((-4, -10, -4), (8, 10, 8), (32, 0), 0.51), head)
-    quads += texels(skin, faces((-1, -1, -6), (2, 4, 2), (24, 0)), part((0, -2, 0), parent=head))
+    quads += texels(skin, faces((-1, -1, -6), (2, 4, 2), (24, 0)), part((0, -2 - NOSE_RAISE, 0), parent=head))
     quads += texels(skin, faces((-4, 0, -3), (8, 12, 6), (16, 20)), body)
     quads += texels(skin, faces((-4, 0, -3), (8, 20, 6), (0, 38), 0.5), body)
     for side, x in (("right", -2), ("left", 2)):

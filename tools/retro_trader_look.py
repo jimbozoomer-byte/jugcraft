@@ -27,7 +27,7 @@ BROW = (52, 32, 18)
 LASH = (40, 26, 18)
 FRAME = [(20, 20, 24), (44, 44, 52)]
 EYE_WHITE, EYE_GREEN, PUPIL = (238, 238, 230), (52, 150, 64), (24, 52, 28)
-MOUTH, TONGUE, TEETH, LIP = (58, 20, 22), (150, 60, 66), (240, 238, 228), (176, 98, 86)
+MOUTH, TONGUE, TEETH, LIP, LIP_SHADOW = (58, 20, 22), (150, 60, 66), (240, 238, 228), (176, 98, 86), (112, 64, 50)
 BEANIE_COLOURS = [(78, 20, 30), (118, 32, 44), (150, 50, 62)]  # burgundy, well away from any hair colour
 CUFF = [(96, 24, 36), (166, 62, 74)]  # the turned-up cuff's ribs
 FLANNEL = [(44, 92, 60), (30, 62, 44), (26, 32, 56), (200, 162, 64)]
@@ -159,36 +159,39 @@ def eyes_at(eye, x, y):
 
 
 def mouth_at(mouth, x, y):
-    """The head's front, rows 7-9 (y 0-2 here): moustache, mouth and beard. The nose hides columns 3 and 4."""
+    """The head's front, rows 7-9 (y 0-2 here): beard, moustache and mouth.
+
+    His nose is raised two pixels (RetroTraderModelMixin), so it covers columns 3 and 4 of rows 5-8 and ends just above
+    row 9: the moustache runs along row 8 beside it and the mouth is row 9, right under the nose, across the face.
+    """
     beard = strand(BEARD[:2], x, y)
-    sides = x in (1, 2, 5, 6)
+    inner = 2 <= x <= 5  # the mouth's width
+    centre = x in (3, 4)
     corner = x in (1, 6)
     if y == 0:
+        return beard
+    if y == 1:
         if mouth in ("smile", "grin") and corner:
             return LIP  # the corners of a smile lifting into the moustache
+        if mouth == "shout" and inner:
+            return TEETH  # the top teeth under the moustache
         return BEARD[2] if 1 <= x <= 6 else beard  # the moustache
+    if not inner:
+        return beard
     if mouth == "neutral":
-        return shade(BEARD[2], 10) if y == 1 and sides else beard
+        return LIP_SHADOW
     if mouth == "smile":
-        return LIP if (y == 1 and x in (2, 5)) else beard
+        return LIP
     if mouth == "grin":
-        if y == 1 and sides:
-            return TEETH
-        return MOUTH if (y == 2 and x in (2, 5)) else beard
+        return TEETH
     if mouth == "talk":
-        if y == 1 and x in (2, 5):
-            return MOUTH
-        return TONGUE if (y == 2 and x in (2, 5)) else beard
+        return MOUTH if centre else LIP
     if mouth == "shout":
-        if y == 1 and sides:
-            return TEETH if not corner else MOUTH
-        return (TONGUE if x in (2, 5) else MOUTH) if (y == 2 and sides) else beard
+        return TONGUE if centre else MOUTH
     if mouth == "ooh":
-        return MOUTH if (y >= 1 and x in (2, 5)) else beard
+        return MOUTH if centre else BEARD[2]
     if mouth == "frown":
-        if y == 1 and x in (2, 5):
-            return LIP
-        return LIP if (y == 2 and corner) else beard
+        return MOUTH if not centre else LIP  # the corners dark, pulled down
     raise ValueError(mouth)
 
 

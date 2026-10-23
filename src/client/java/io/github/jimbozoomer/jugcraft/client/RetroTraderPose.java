@@ -42,6 +42,8 @@ public final class RetroTraderPose {
 	static final float[] READY = {-1.15F, -0.22F, 0.0F};
 	static final float[] CLAP = {-1.3F, -0.58F, 0.0F};
 	static final float[] TA_DA = {-0.35F, 0.0F, 2.0F};
+	/** How far his nose sits above a villager's, in pixels (so it ends above his mouth instead of below his chin). */
+	public static final float NOSE_RAISE = 2.0F;
 	/** How high a stomping foot rises, in pixels. */
 	static final float LIFT = 3.2F;
 

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Poses a Retro Trader during his stomp-clap ({@link RetroTraderPose}): hides the folded arms while RetroTraderLayer
+ * Raises a Retro Trader's nose, and poses him during his stomp-clap ({@link RetroTraderPose}): hides the folded arms while RetroTraderLayer
  * draws his free ones, lifts and slams his feet, dips his body on the beat and nods his head. Runs for every villager
  * model the renderer poses with his state (the base model and the profession layer's), so the layers stay together.
  * The model is shared between villagers, so the folded arms are shown again for everyone else.
@@ -36,7 +36,13 @@ public abstract class RetroTraderModelMixin {
 	private void jugcraft$retroTraderJam(VillagerRenderState state, CallbackInfo info) {
 		RetroTraderPose pose = ((RetroTraderPose.Holder) state).jugcraft$retroTrader();
 		arms.visible = pose == null || !pose.freeArms;
-		if (pose == null || !pose.jamming) {
+		if (pose == null) {
+			return;
+		}
+		// His nose sits higher than a villager's, under his glasses, so it no longer hangs past his chin and his mouth
+		// shows beneath it (the face frames in tools/retro_trader_look.py are drawn for this).
+		head.getChild("nose").y -= RetroTraderPose.NOSE_RAISE;
+		if (!pose.jamming) {
 			return;
 		}
 		ModelPart body = ((VillagerModel) (Object) this).root().getChild("body");
