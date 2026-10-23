@@ -98,7 +98,7 @@ and lifetime. Nether repairs were tested in that older broad local batch; they a
 - The same run successfully assembled `build/libs/jugcraft-0.1.0-alpha.jar` as a local development artifact. It is not a player release and has not been installed into the owner's Modrinth profile, uploaded to the server or promoted to the updater.
 
 
-### Isolated October 22 candidate validation (in progress)
+### Isolated October 22–23 candidate validation
 
 - All 46 focused combined server tests passed, including workstation payment/refusal, saved cabinet contents and break drops, custom furniture/aircraft grave recovery, aircraft cargo/ammo, keep-inventory exemptions and lair recovery.
 - The three-class rendered run passed: artisan editor save/build/delete and storage sync, all 267 ready-made furniture blocks, all seven aircraft/equipment screens, scaled cargo interaction and real lair death/respawn. Screenshot review then corrected aircraft cockpit-origin ground offsets; the final visual rerun follows that correction.
@@ -109,3 +109,9 @@ and lifetime. Nether repairs were tested in that older broad local batch; they a
 
 - Final focused server run passes all **51 required tests**, including all 16 sheet/sleeping-bag recipe pairs, seven-aircraft powered/unpowered flight, artisan, graves, town and lair regressions (`combined-final-focused.log`). The preceding full sweep passed 2,281 of 2,282 tests; its sole failing sleeping-bag case is fixed and covered by this focused rerun.
 - Final economy/acquisition regression checks pass all **15 tests**; acquisition reports still show zero invalid ingredients. The earlier full packaging/Python suite passed all 195 tests and Windows updater helper checks passed 79 assertions.
+
+- The corrected ground offsets passed the three-class client rerun (`combined-final-client.log`). Screenshot review then found an omitted artisan atlas directory. That registration is fixed; the focused editor rerun (`artisan-final-atlas.log`) passes and renders the actual built cabinet, workstation and lamps without the artisan missing-texture warnings.
+- Canonical regeneration originally removed the new language, aircraft sound, mining-tag and atlas additions. `owner_workshop_shared.py` now reapplies narrowly scoped metadata after shared generation, rejects conflicting entries and is idempotent. A full canonical generation followed by reconciliation reproduced all five expected resource objects; only the intended artisan atlas addition differs from the prior commit.
+- Existing-world rehearsal on a **copy of the earlier local test world**, bound only to `127.0.0.1:25574`, loaded, saved, stopped and restarted successfully. A drawer retained exactly seven diamonds, and its workstation and cargo airship persisted. Evidence: `workshop-world-first-start.log` and `workshop-world-restart.log`. This is not a hosted-world/two-account test. Nineteen of 21 pre-existing config files stayed byte-identical; Jugcraft rewrote its timestamp without changing settings, and RPG Series regenerated its diagnostic loot report.
+- All 16 GitHub client shards and the full optional-integrations-absent server build passed on `1b76341b1b`. The remaining mod job stopped at the shared-regeneration check, now fixed. The final branch push must complete its own CI before merging; these earlier results do not substitute for that gate.
+- The final candidate is prepared locally as `0.1.0-alpha.20261022.4`; publication, channel promotion, hosted two-account acceptance and the owner-confirmed live restart remain separate release steps. No world reset is included.

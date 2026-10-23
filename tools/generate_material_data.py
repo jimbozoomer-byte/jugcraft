@@ -1824,6 +1824,8 @@ def main():
     vehicle_bays.write()
     import owner_resource_patches
     owner_resource_patches.apply()
+    import owner_workshop_shared
+    owner_workshop_shared.apply()
     import walnut_data
     walnut_data.reconcile(write)
     from generated_resource_cleanup import prune

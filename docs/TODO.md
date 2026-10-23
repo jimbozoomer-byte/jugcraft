@@ -6,7 +6,8 @@
 - [x] Integrate 267 ready-made furniture blocks, 18 related items, 28 paintings and 317 recipes using supplied art and native seating, beds, storage and cooking.
 - [x] Implement the bounded artisan editor, paid crafting/recycling and local design library; retain supplied workstation art.
 - [x] Implement persistent owner-recoverable death graves with personal/global keep-inventory, totem and boss-lair exclusions.
-- [ ] Complete final combined build, rendered checks and existing-world rehearsal; package the matching update.
+- [x] Complete combined regression and rendered checks plus an isolated existing-world save/restart rehearsal; fix all sheet/sleeping-bag collisions and generator/atlas omissions.
+- [ ] Complete final CI and prepare/publish the matching client/server update; do not promote before hosted startup.
 - [ ] Owner confirms restart; warn players for 30 seconds, back up, deploy, verify, then promote the client channel.
 - [ ] Hosted two-account acceptance and owner flight/editor feedback. Future editor extensions: rotated/oversized parts, more materials, per-design inventory preview.
 

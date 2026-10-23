@@ -177,6 +177,11 @@
       "type": "minecraft:directory",
       "source": "aircraft/item",
       "prefix": "aircraft/item/"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "artisan",
+      "prefix": "artisan/"
     }
   ]
 }
