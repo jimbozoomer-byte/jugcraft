@@ -114,7 +114,7 @@ public class EncyclopediaGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
 
 	private static ServerPlayer player(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos at = helper.absolutePos(new BlockPos(1, 2, 1));
 		player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);

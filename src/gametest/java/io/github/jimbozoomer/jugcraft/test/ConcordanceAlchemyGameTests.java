@@ -127,7 +127,7 @@ public class ConcordanceAlchemyGameTests {
 	}
 
 	private static ServerPlayer alembist(GameTestHelper helper, ResearchState state) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
 		if (state != ResearchState.NONE) {

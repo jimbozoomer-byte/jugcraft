@@ -201,7 +201,7 @@ public class ConcordanceGardenGameTests {
 
 	/** A survival player at the test, with Verdant Husbandry understood when {@code greenwarden}, and no recent use. */
 	private static ServerPlayer gardener(GameTestHelper helper, boolean greenwarden) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		if (greenwarden) {
 			ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
@@ -283,7 +283,7 @@ public class ConcordanceGardenGameTests {
 	 */
 	@GameTest(maxTicks = 40)
 	public void aGreenwardenWakesTheBeds(GameTestHelper helper) {
-		ServerPlayer novice = helper.makeMockServerPlayerInLevel();
+		ServerPlayer novice = TestPlayers.mock(helper);
 		novice.setGameMode(GameType.SURVIVAL);
 		List<BlockPos> row = List.of(new BlockPos(1, 1, 1), new BlockPos(2, 1, 1), new BlockPos(3, 1, 1));
 		BlockPos apart = new BlockPos(6, 1, 1);
@@ -295,7 +295,7 @@ public class ConcordanceGardenGameTests {
 		helper.assertTrue(!first.awake() && first.keeper() != null, "A novice's bed is dormant and remembers who placed it");
 		helper.setBlock(row.get(0).above(), Garden.SUNPETAL_CROP);
 		helper.assertTrue(grow(helper, row.get(0).above()) == OrganismCropBlock.Growth.DORMANT, "Nothing grows in a dormant bed");
-		ServerPlayer greenwarden = helper.makeMockServerPlayerInLevel();
+		ServerPlayer greenwarden = TestPlayers.mock(helper);
 		greenwarden.setGameMode(GameType.SURVIVAL);
 		ConcordanceProgress.grant(greenwarden, "jugcraft:first_light", ResearchState.UNDERSTOOD);
 		ConcordanceProgress.grant(greenwarden, Garden.RESEARCH, ResearchState.UNDERSTOOD);
@@ -550,7 +550,7 @@ public class ConcordanceGardenGameTests {
 	@GameTest(maxTicks = 40)
 	public void theGleanerHarvestsForVerdance(GameTestHelper helper) {
 		ServerLevel level = level(helper);
-		ServerPlayer keeper = helper.makeMockServerPlayerInLevel();
+		ServerPlayer keeper = TestPlayers.mock(helper);
 		BlockPos crop = new BlockPos(2, 2, 2);
 		bed(helper, crop.below(), 10);
 		helper.setBlock(crop, ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE));
@@ -563,7 +563,7 @@ public class ConcordanceGardenGameTests {
 		BlockPos stranger = new BlockPos(7, 2, 5);
 		helper.setBlock(stranger, Garden.GLEANER);
 		GleanerBlockEntity theirs = entity(helper, stranger);
-		theirs.awaken(helper.makeMockServerPlayerInLevel().getUUID());
+		theirs.awaken(TestPlayers.mock(helper).getUUID());
 		helper.assertTrue(theirs.glean(level).equals("no_verdance") && heart.verdance() == 5,
 				"A stranger's Gleaner may not draw on the Heart");
 		BlockPos at = new BlockPos(3, 2, 3);
@@ -825,7 +825,7 @@ public class ConcordanceGardenGameTests {
 		BlockPos at = new BlockPos(2, 1, 2);
 		BlockPos second = new BlockPos(4, 1, 2);
 		helper.setBlock(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, 0));
-		ServerPlayer gardener = helper.makeMockServerPlayerInLevel();
+		ServerPlayer gardener = TestPlayers.mock(helper);
 		gardener.setGameMode(GameType.SURVIVAL);
 		ItemStack sips = canteen(3);
 		helper.assertTrue(handUse(helper, gardener, at, sips, false).consumesAction(), "A plain use pours: the bed passes a held item on");

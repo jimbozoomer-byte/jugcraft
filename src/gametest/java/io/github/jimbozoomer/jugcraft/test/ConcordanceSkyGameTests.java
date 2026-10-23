@@ -50,7 +50,7 @@ public class ConcordanceSkyGameTests {
 	private static final Function<Pattern, String> ONLY_MOON = pattern -> pattern.id().equals(FULL_MOON) ? null : "no_sky";
 
 	private static ServerPlayer player(GameTestHelper helper, ResearchState state) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		if (state != ResearchState.NONE) {
 			ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);

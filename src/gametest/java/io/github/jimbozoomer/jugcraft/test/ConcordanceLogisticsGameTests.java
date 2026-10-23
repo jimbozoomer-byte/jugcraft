@@ -76,7 +76,7 @@ public class ConcordanceLogisticsGameTests {
 	private static final long NIGHT = 18000L;
 
 	private static ServerPlayer keeper(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
 		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);

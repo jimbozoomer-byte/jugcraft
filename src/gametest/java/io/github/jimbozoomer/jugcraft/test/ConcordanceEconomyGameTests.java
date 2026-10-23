@@ -41,7 +41,7 @@ import net.minecraft.world.phys.AABB;
  */
 public class ConcordanceEconomyGameTests {
 	private static ServerPlayer player(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		return player;
 	}

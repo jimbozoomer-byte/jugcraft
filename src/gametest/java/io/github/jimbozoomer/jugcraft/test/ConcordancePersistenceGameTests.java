@@ -320,7 +320,7 @@ public class ConcordancePersistenceGameTests {
 		BlockPos at = new BlockPos(2, 1, 2);
 		helper.setBlock(at, JugcraftConcordance.CRUCIBLE_STAND);
 		CrucibleStandBlockEntity stand = helper.getBlockEntity(at, CrucibleStandBlockEntity.class);
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		for (int i = 0; i < 2; i++) {
 			RateGate.forget(player.getUUID());
@@ -360,7 +360,7 @@ public class ConcordancePersistenceGameTests {
 		ServerLevel level = helper.getLevel();
 		String twoGlow = "water 2; add minecraft:glowstone_dust jugcraft:raw; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot";
 		// The setter is here: a crucible files only while its setter answers (C-P53).
-		ServerPlayer setter = helper.makeMockServerPlayerInLevel();
+		ServerPlayer setter = TestPlayers.mock(helper);
 		UUID owner = setter.getUUID();
 		BlockPos postAt = new BlockPos(4, 2, 2);
 		helper.setBlock(postAt, Couriers.COURIER_POST);

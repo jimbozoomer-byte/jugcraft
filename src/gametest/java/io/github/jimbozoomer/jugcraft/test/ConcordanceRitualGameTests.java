@@ -156,7 +156,7 @@ public class ConcordanceRitualGameTests {
 
 	/** A survival player standing inside the circle who understands Circle Lore and has full Focus. */
 	private static ServerPlayer practitioner(GameTestHelper helper, BlockPos standAt) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos absolute = helper.absolutePos(standAt);
 		player.snapTo(absolute.getX() + 0.5, absolute.getY(), absolute.getZ() + 0.5, 0.0F, 0.0F);
@@ -346,7 +346,7 @@ public class ConcordanceRitualGameTests {
 	public void aBreakerAnswersForTheBacklash(GameTestHelper helper) {
 		CircleAnchorBlockEntity anchor = build(helper, 64);
 		ServerPlayer player = startAttunement(helper, anchor);
-		ServerPlayer vandal = helper.makeMockServerPlayerInLevel();
+		ServerPlayer vandal = TestPlayers.mock(helper);
 		vandal.setGameMode(GameType.SURVIVAL);
 		boolean mayHarm = vandal.canHarmPlayer(player);
 		helper.runAfterDelay(PAST_SPAWN_GRACE, () -> vandal.gameMode.destroyBlock(helper.absolutePos(first(StructurePattern.Role.BOUNDARY))));
@@ -595,7 +595,7 @@ public class ConcordanceRitualGameTests {
 	@GameTest(maxTicks = 40)
 	public void refusalsTakeNothing(GameTestHelper helper) {
 		CircleAnchorBlockEntity anchor = build(helper, 64);
-		ServerPlayer novice = helper.makeMockServerPlayerInLevel();
+		ServerPlayer novice = TestPlayers.mock(helper);
 		novice.setGameMode(GameType.SURVIVAL);
 		BlockPos stand = helper.absolutePos(STAND);
 		novice.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0F, 0.0F);
@@ -1061,7 +1061,7 @@ public class ConcordanceRitualGameTests {
 	public void unknownRitesStayUnnamed(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		CircleAnchorBlockEntity anchor = build(helper, 64);
-		ServerPlayer novice = helper.makeMockServerPlayerInLevel();
+		ServerPlayer novice = TestPlayers.mock(helper);
 		novice.setGameMode(GameType.SURVIVAL);
 		snapTo(novice, helper.absolutePos(STAND));
 		ConcordanceProgress.grant(novice, "jugcraft:first_light", ResearchState.UNDERSTOOD);

@@ -117,7 +117,7 @@ public class ConcordanceWorkloadGameTests {
 	@GameTest(maxTicks = 20)
 	public void gleanersHeartSearch(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
-		ServerPlayer keeper = helper.makeMockServerPlayerInLevel();
+		ServerPlayer keeper = TestPlayers.mock(helper);
 		BlockPos at = new BlockPos(4, 2, 4);
 		helper.setBlock(at, Garden.GLEANER);
 		GleanerBlockEntity gleaner = helper.getBlockEntity(at, GleanerBlockEntity.class);

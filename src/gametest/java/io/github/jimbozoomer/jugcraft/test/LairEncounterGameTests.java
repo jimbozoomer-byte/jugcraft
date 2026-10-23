@@ -66,7 +66,7 @@ public class LairEncounterGameTests {
 	private static final EffectSpec WARD = EffectSpec.of(EffectKind.PROTECTION, Intent.HELPFUL, 4, 200);
 
 	private static ServerPlayer player(GameTestHelper helper, int x, int z) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos at = helper.absolutePos(new BlockPos(x, 2, z));
 		player.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0F, 0.0F);

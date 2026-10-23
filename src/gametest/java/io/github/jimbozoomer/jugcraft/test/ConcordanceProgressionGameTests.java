@@ -59,7 +59,7 @@ import net.minecraft.world.level.block.Blocks;
  */
 public class ConcordanceProgressionGameTests {
 	private static ServerPlayer fresh(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		RateGate.forget(player.getUUID());
 		return player;

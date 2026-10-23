@@ -53,7 +53,7 @@ import net.minecraft.world.level.GameType;
  */
 public class ConcordanceAssayGameTests {
 	private static ServerPlayer assayer(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
 		ConcordanceProgress.grant(player, Assaying.RESEARCH, ResearchState.UNDERSTOOD);

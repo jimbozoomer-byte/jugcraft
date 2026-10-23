@@ -41,7 +41,10 @@ base `e079ad4a3` is Chunk B's head `ec06f16e0` with main `4d38e9712` merged in; 
 every job (see The merge and its CI run). Since then it has been merged with the updated Chunk B, which carries main
 `f904df3fd` (`b234b8967`; not yet run in CI), and the commit after the merge brings the Assayer's Scale tests and
 records to main's Scale (see C-P40). `src/main/resources/data/jugcraft/alchemy/values.json` and
-`docs/audits/survival-item-registry.json` now know Chunk B's and Chunk C's items (Where to resume). Not merged. Chunk B, beneath it,
+`docs/audits/survival-item-registry.json` now know Chunk B's and Chunk C's items (Where to resume). The first CI run of
+this pull request's head (run 40003960812) ran the server game tests out of heap: 1,428 mock players were still logged in,
+since the game's `makeMockServerPlayerInLevel` never logs one out. The Concordance's server tests now make theirs through
+`TestPlayers.mock`, which logs each out when its test passes or fails. Not merged. Chunk B, beneath it,
 is not merged either; as C-D8 decides, Chunk B's pull request is against main and Chunk C's against Chunk B's branch.
 Proposal: the owner chose Chunk C on 14 October 2026 ("ok begin chunk c"), from
 [the expansion plan's delivery chunks](../plans/concordance-expansion-2026-10-10/09-claude-delivery-chunks.md) (section 5,

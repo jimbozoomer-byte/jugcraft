@@ -145,7 +145,7 @@ public class ConcordanceJourneyGameTests {
 
 	private static void climb(GameTestHelper helper, Journey journey, BlockPos at) {
 		ServerLevel level = helper.getLevel();
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		RateGate.forget(player.getUUID());
 		for (String specimen : List.of("minecraft:amethyst_shard", "minecraft:glow_berries", "minecraft:glow_ink_sac")) {
@@ -312,7 +312,7 @@ public class ConcordanceJourneyGameTests {
 	 * tools/concordance_journey.py WORKSHOP's steps say.
 	 */
 	private static ServerPlayer workshopper(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		ServerPlayer player = TestPlayers.mock(helper);
 		player.setGameMode(GameType.SURVIVAL);
 		BlockPos feet = helper.absolutePos(IN_CIRCLE);
 		player.snapTo(feet.getX() + 0.5, feet.getY(), feet.getZ() + 0.5, 0.0F, 0.0F);
@@ -516,7 +516,7 @@ public class ConcordanceJourneyGameTests {
 			helper.assertTrue(product != null && Alchemy.STILLROOT_POULTICE.equals(product.id()) && new Brew(List.of(new Brew.Dose("minecraft:regeneration", 1, 450,
 					false)), "minecraft:regeneration@1").equals(salve.get(JugcraftConcordance.BREW)), "By hand, a Stillroot Poultice of Regeneration II: " + salve);
 			handMade.set(salve.copy());
-			ServerPlayer friend = helper.makeMockServerPlayerInLevel();
+			ServerPlayer friend = TestPlayers.mock(helper);
 			friend.setGameMode(GameType.SURVIVAL);
 			friend.setHealth(10.0F);
 			player.setItemInHand(InteractionHand.MAIN_HAND, salve);
