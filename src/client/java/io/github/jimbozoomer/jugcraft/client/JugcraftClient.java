@@ -287,6 +287,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPICE_RACK_ENTITY, SpiceRackRenderer::new);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.FOG, FogParticle::provider);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SNOWPETAL, net.minecraft.client.particle.FallingLeavesParticle.CherryProvider::new);
+		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.ACADEMY_LEAF, AcademyLeafParticle::provider);
 		ParticleProviderRegistry.getInstance().register(JugcraftAgriculture.SPOOKY_SPARK, SpookySparkParticle::provider);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_LAUNCHER_ENTITY, ShowLauncherRenderer::new);
 		EntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_ROCKET, context -> new ThrownItemRenderer<>(context, 1.0F, true));
