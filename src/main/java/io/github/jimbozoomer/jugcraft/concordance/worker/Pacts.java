@@ -129,6 +129,20 @@ public final class Pacts {
 		return null;
 	}
 
+	/**
+	 * Concordance Chunk D, D-04: {@code holder}'s record with {@code counterpart} that carries a pact (one a holder, D-S10),
+	 * or null; namespaces normalised.
+	 */
+	public static @Nullable BoundWill pactWith(BoundWillLedger ledger, UUID holder, String counterpart) {
+		String wanted = counterpart(counterpart);
+		for (BoundWill record : ledger.heldBy(holder)) {
+			if (record.pact() != null && counterpart(record.counterpart()).equals(wanted)) {
+				return record;
+			}
+		}
+		return null;
+	}
+
 	/** Upkeep terms only (clock unset): what a definition, or a test, seals with. */
 	public static BoundWill.Upkeep terms(String offering, int count, long period, long grace, int cap) {
 		return new BoundWill.Upkeep(offering, count, period, grace, cap, 0L, BoundWill.Upkeep.NOT_WARNED, 0L);

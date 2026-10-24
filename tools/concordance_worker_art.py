@@ -1,8 +1,8 @@
 """Textures for roadmap step 17, spirits, familiars and constructs (tools/concordance_worker_models.py): the 64x64
 GeckoLib sheets of the Hearthling, the Gathering Shade and the Clockwork Porter, and the Spirit Anchor's two block
-faces. The four item icons (the Bonding Charm, the Spirit Anchor, the Clockwork Porter and the Porter Key) are 16x16
-maps in tools/item_icons/ (docs/ITEM_ICONS.md), drawn here by item_icons.draw. tools/concordance_art.py includes these
-in its textures().
+faces. The five item icons (the Bonding Charm, the Spirit Anchor, the Clockwork Porter, the Porter Key and, since
+Concordance Chunk D, the Pact Perch) are 16x16 maps in tools/item_icons/ (docs/ITEM_ICONS.md), drawn here by
+item_icons.draw. tools/concordance_art.py includes these in its textures().
 
 Provenance: every colour on the three sheets and the two block faces is one the owner painted, read (colours only; no
 pixel, shape or layout is copied) from these files in their library, art/owner-library/originals/Blocks/:
@@ -410,7 +410,7 @@ def anchor_top():
 
 # ------------------------------------------------------------------------------------------------- all of them
 
-ICONS = ["bonding_charm", "spirit_anchor", "clockwork_porter", "porter_key"]
+ICONS = ["bonding_charm", "spirit_anchor", "clockwork_porter", "porter_key", "pact_perch"]
 SHEETS = {"hearthling": hearthling_sheet, "gathering_shade": shade_sheet, "clockwork_porter": porter_sheet}
 
 

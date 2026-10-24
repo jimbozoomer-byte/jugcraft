@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.google.gson.JsonParser;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Allocator;
@@ -18,10 +19,13 @@ import io.github.jimbozoomer.jugcraft.concordance.resource.ResourceType;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Transfers;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactCatalog;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -30,8 +34,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
  * Roadmap step 7, the typed resource rules (concordance/resource), run on the test server so CI checks them: typed
  * containers and their overflow, transfers (type, portability, ownership, rate, capacity), conversions that always
  * lose, deterministic allocation of a short supply, Bound Will records, once-only Astral claims and Prima Materia's
- * rounding, and (Concordance Chunk D, D-02) one pact record's pure rules. These use no world; the loaded data is checked
- * against them in {@link #loadedConversionsDriveTheChannel}.
+ * rounding, and (Concordance Chunk D, D-02) one pact record's pure rules, and (D-04) a pact definition read strictly. These
+ * use no world; the loaded data is checked against them in {@link #loadedConversionsDriveTheChannel}.
  */
 public class ConcordanceResourceGameTests {
 	private static final ResourceType LEY = ResourceType.of(ResourceKind.LEY_CHARGE);
@@ -214,6 +218,40 @@ public class ConcordanceResourceGameTests {
 			history = Pacts.departed(history, new Pacts.Departure(new UUID(5, i), "a", "b", Pacts.ENDED, i, null));
 		}
 		helper.assertTrue(history.size() == Pacts.HISTORY && history.getFirst().time() == 2L && history.getLast().time() == 9L, "The last eight departures are kept");
+		helper.succeed();
+	}
+
+	/** D-04 (D-S23): a pact definition within bounds reads exactly; an unknown field, a newer schema, an unknown work, a cap past four, resonance past an astrolabe's, four beats, unknown beneficiaries or missing research are each refused and reported; a missing required definition is reported, but not by empty rules. */
+	@GameTest(maxTicks = 20)
+	public void thePactDefinitionParsesStrictly(GameTestHelper helper) {
+		Set<String> research = Set.of("jugcraft:stolas_regard");
+		String valid = """
+				{"schema": 1, "agreement": "jugcraft:stolas_pact", "research": "jugcraft:stolas_regard",
+				 "service": {"work": "star_reckoning", "radius": 8, "from": 0, "to": 24000, "quota": 1},
+				 "upkeep": {"offering": "jugcraft:stolas_offerings", "count": 1, "period_days": 7, "grace_days": 1, "cap": 4},
+				 "beneficiaries": "personal", "compact": {"items": [{"item": "minecraft:amethyst_shard", "count": 2}], "resonance": 8},
+				 "beats": ["greeting", "service", "price"]}""";
+		PactCatalog read = PactCatalog.parse(Map.of(PactDefinition.STOLAS, JsonParser.parseString(valid)), research);
+		PactDefinition stolas = read.get(PactDefinition.STOLAS);
+		helper.assertTrue(read.problems().isEmpty() && stolas != null && stolas.period() == 7 * Pacts.DAY && stolas.grace() == Pacts.DAY && stolas.cap() == 4
+				&& stolas.resonance() == 8 && stolas.compact().equals(List.of(new PactDefinition.Cost("minecraft:amethyst_shard", 2))) && stolas.beats().size() == 3,
+				"A definition within bounds reads exactly: " + read.problems());
+		Map<String, String> faults = Map.of(
+				"an unknown field", valid.replace("\"beats\"", "\"surprise\": 1, \"beats\""),
+				"a newer schema", valid.replace("\"schema\": 1", "\"schema\": 99"),
+				"an unknown work", valid.replace("star_reckoning", "ore_finding"),
+				"a cap past four", valid.replace("\"cap\": 4", "\"cap\": 5"),
+				"resonance past an astrolabe's", valid.replace("\"resonance\": 8", "\"resonance\": 33"),
+				"four beats", valid.replace("\"price\"]", "\"price\", \"more\"]"),
+				"unknown beneficiaries", valid.replace("\"personal\"", "\"everyone\""),
+				"research that does not exist", valid.replace("jugcraft:stolas_regard", "jugcraft:nothing"));
+		faults.forEach((what, json) -> {
+			PactCatalog bad = PactCatalog.parse(Map.of(PactDefinition.STOLAS, JsonParser.parseString(json)), research);
+			helper.assertTrue(bad.get(PactDefinition.STOLAS) == null && bad.problems().stream().anyMatch(p -> p.startsWith("pact jugcraft:stolas")),
+					what + " is refused and reported: " + bad.problems());
+		});
+		helper.assertTrue(PactCatalog.parse(Map.of(), research).problems().stream().anyMatch(p -> p.contains("no definition loaded"))
+				&& PactCatalog.parse(Map.of(), Set.of()).problems().isEmpty(), "A missing required definition is reported, but not by empty rules");
 		helper.succeed();
 	}
 }

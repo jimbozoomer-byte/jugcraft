@@ -83,10 +83,148 @@ JOURNAL = {
 }
 
 
+# ------------------------------------------------------------------------------------------- D-04: the pact perch
+
+# Java: worker/PactParser.java (check_pacts compares).
+PARSER = {"MAX_COMPACT_ITEMS": 4, "MAX_COMPACT_COUNT": 64, "MAX_RESONANCE": 32, "MAX_BEATS": 3}
+WORK = ["star_reckoning"]
+# Java: spirits/PactStatePayload.java (MAX_*), PactSessions.java (TIMEOUT_TICKS), PactMenu.java (RATE_TICKS),
+# PactPerchBlockEntity.java (LOOK_TICKS), PactKeeping.java (MAX_OFFERINGS).
+STATE_LIMITS = {"MAX_BEATS": 3, "MAX_TERMS": 16, "MAX_NOTES": 12, "MAX_CHOICES": 8, "MAX_COMPACT": 8, "MAX_KEY": 64}
+SESSION = {"TIMEOUT_TICKS": 6000, "RATE_TICKS": 4, "LOOK_TICKS": 20, "MAX_OFFERINGS": 8}
+# Sent as numbers or ids (PactRequestPayload.ACTIONS, PactStatePayload's modes and TERMS, PactMenu's own reasons): append only.
+ACTIONS = ["choose", "accept", "decline", "recall", "deposit", "suspend", "resume", "end", "seat"]
+MODES = ["negotiate", "keep", "seat", "closed"]
+TERMS = ["service", "hours", "area", "quota", "upkeep", "grace", "suspension", "duration", "breach", "ending", "returns", "perch",
+         "beneficiaries", "compact"]
+ANSWERS = ["changed", "too_fast", "not_offered", "sealed", "declined", "disabled", "no_definition", "missing_evidence",
+           "no_observation", "deposited", "nothing_deposited"]
+# The offerings (D-S3): the three Styx flowers and, reachable without Styx, an amethyst shard. The tag ships with the
+# definition (D-04); D-05's upkeep consumes it.
+OFFERINGS_TAG = rid("stolas_offerings")
+OFFERINGS = [rid("stolas_starflower"), rid("ravenquill_lupine"), rid("amethyst_mourningbell"), "minecraft:amethyst_shard"]
+# Stolas's offer (data/jugcraft/concordance/pact/stolas.json; Java: worker/PactParser.java). Starting values, recorded in the
+# As built note: 8 blocks round the perch, any hour, once a game day; one offering every 7 game days, a day of grace, up to
+# four ahead (D-S3); the Open Hand Compact two amethyst shards, three feathers and 8 Astral Resonance (D-S13). Ending a
+# pact and sealing it anew could give a second Star-reckoning in one game day, but only for a whole new compact (its
+# materials and resonance) each time, which makes nothing: no positive-gain loop (critique 10; the balance note says so).
+PACTS = {
+    "stolas": {
+        "agreement": rid("stolas_pact"),
+        "research": rid("stolas_regard"),
+        "service": {"work": "star_reckoning", "radius": 8, "from": 0, "to": 24000, "quota": 1},
+        "upkeep": {"offering": OFFERINGS_TAG, "count": 1, "period_days": 7, "grace_days": 1, "cap": 4},
+        "beneficiaries": "personal",
+        "compact": {"items": [{"item": "minecraft:amethyst_shard", "count": 2}, {"item": "minecraft:feather", "count": 3}],
+                    "resonance": 8},
+        "beats": ["greeting", "service", "price"],
+    },
+}
+BLOCKS = {"pact_perch": {"name": "Pact Perch"}}
+ENTITY_NAMES = {"stolas": "Stolas"}
+PERCH_TOOLTIP = ("Use: invite Stolas, once you understand Stolas's Regard and have observed a star; or keep the pact seated "
+                 "here. Break it and the pact stays yours, without its perch.")
+# Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
+# concordance_progression.VANILLA_SOURCES).
+RECIPE = {"type": "minecraft:crafting_shaped", "category": "misc", "pattern": ["SAS", " L ", " D "],
+          "key": {"S": "minecraft:stick", "A": "minecraft:amethyst_shard", "L": "minecraft:dark_oak_log",
+                  "D": "minecraft:polished_deepslate"},
+          "result": {"id": rid("pact_perch"), "count": 1}}
+
+
+def _box(lo, hi, texture):
+    return {"from": lo, "to": hi, "faces": {d: {"texture": f"#{texture}"} for d in ("north", "east", "south", "west", "up", "down")}}
+
+
+# The block's shape is PactPerchBlock.SHAPE: a stone foot, a post and a crossbar (Jugcraft's own bench wood and anchor
+# stone; provisional, D-06 may refine).
+PERCH_MODEL = {"parent": "minecraft:block/block",
+               "textures": {"particle": rid("block/lampwright_bench_wood"), "wood": rid("block/lampwright_bench_wood"),
+                            "stone": rid("block/spirit_anchor_top")},
+               "elements": [_box([3, 0, 3], [13, 2, 13], "stone"), _box([7, 2, 7], [9, 14, 9], "wood"),
+                            _box([2, 14, 7], [14, 16, 9], "wood")]}
+
+MESSAGES.update({
+    "pact.perch_refused": "A pact perch stands only where you may build, placed by your own hand, and never in Styx's home",
+    # Stolas's three beats (provisional words; his character is a checkpoint question).
+    "pact.stolas.beat.greeting": "A raven settles on the perch and studies you with one bright eye. \"You have watched the sky "
+                                 "and asked the flowers. I am Stolas. I teach the stars to those who keep their word.\"",
+    "pact.stolas.beat.service": "\"Once a day, at this perch, I will turn the heavens back for you: any pattern you have seen "
+                                "with your own eyes, recalled through your astrolabe.\"",
+    "pact.stolas.beat.price": "\"In return, an offering every seven days, kept for me ahead. Miss one and I wait; I do not "
+                              "punish. And now, the compact: an open hand.\"",
+    # Each term's value (D-S15); the screen labels them (screen.jugcraft.pact.term.<key>).
+    "pact.term.service.star_reckoning": "Star-reckoning: once a game day at this perch you recall any sky pattern you have "
+                                        "observed yourself, paying its recall cost in Astral Resonance from your astrolabe",
+    "pact.term.hours.any": "Any hour of the day or night",
+    "pact.term.hours": "From %s to %s",
+    "pact.term.area": "Within %s blocks of the perch",
+    "pact.term.quota": "%s a game day",
+    "pact.term.upkeep": "%s × %s every %s game days, paid ahead into the pact's keeping, at most %s periods; the Open Hand "
+                        "Compact pays the first",
+    "pact.term.grace": "A missed offering: a warning, then %s game day of grace",
+    "pact.term.suspension": "The service stops; nothing is taken, nothing is lost, nothing accrues; an offering resumes it. "
+                            "Time you are away never counts",
+    "pact.term.duration": "Until you end it",
+    "pact.term.breach": "Only a missed offering suspends it; nothing else breaches it, and it never ends by itself",
+    "pact.term.ending": "At the perch, or from your roster",
+    "pact.term.returns": "The offerings kept for it come back to you, once",
+    "pact.term.perch": "If the perch is broken or blown up, the pact and its offerings stay yours: seat it at a new perch, or end it",
+    "pact.term.beneficiaries.personal": "You alone",
+    "pact.term.beneficiaries.party": "You and your party",
+    "pact.term.compact": "Paid as you accept: %s Astral Resonance from your astrolabe, and %s",
+    "pact.term.compact_item": "%s × %s",
+    "pact.term.compact_paid": "Paid when the pact was sealed",
+    # What is missing.
+    "pact.missing.owner": "Only this perch's owner may invite Stolas here",
+    "pact.missing.prerequisite": "Not yet: first understand %s",
+    "pact.missing.step": "Not yet: %s, %s: %s",
+    "pact.missing.observation": "Not yet: Stolas wants a star you have seen yourself. Record one at an observatory while a "
+                                "pattern is up",
+    "pact.missing.held": "You already keep a pact with Stolas",
+    # Readings.
+    "pact.reading.taken": "This perch keeps another's pact",
+    "pact.reading.unreadable": "This perch's pact cannot be read by this version; it is kept as it was",
+    "pact.seat.offer": "Your pact with Stolas is without its perch: seat it here, or end it",
+    "pact.unavailable": "Stolas's terms could not be read on this server (the pact's definition did not load); nothing can be "
+                        "agreed until it does",
+    "pact.ended_here": "The pact is ended. Use the perch again to invite Stolas anew",
+    # Answers.
+    "pact.answer.sealed": "The pact is sealed: Stolas keeps this perch",
+    "pact.answer.declined": "You decline; Stolas leaves. Nothing was spent",
+    "pact.answer.changed": "The terms changed since you read them; read them again. Nothing was agreed or spent",
+    "pact.answer.too_fast": "One moment",
+    "pact.answer.not_offered": "That cannot be done here now",
+    "pact.answer.missing_evidence": "Stolas will not agree yet: see what is missing. Nothing was spent",
+    "pact.answer.cannot_afford": "The Open Hand Compact asks for the materials listed and %s Astral Resonance in one astrolabe; you "
+                                 "are short. Nothing was spent",
+    # Keeping (PactKeeping).
+    "pact.deposited": "%s %s paid ahead (%s of at most %s periods now held)",
+    "pact.deposit_none": "Nothing was taken: the escrow holds all it may, or you carry none of that offering",
+    "pact.departed": "%s departs (%s); %s offerings came back to you",
+    "pact.returned": "%s returns to the perch; nothing was spent",
+    "pact.row.state.active": "The pact is active",
+    "pact.row.state.suspended": "Suspended by you: Stolas reckons nothing and nothing falls due until you resume it",
+    "pact.row.state.upkeep_due": "An offering is due: give %s %s within %s game days, or the pact is suspended (nothing is lost)",
+    "pact.row.state.upkeep_held": "Suspended for its upkeep: nothing is taken and nothing accrues; %s %s resumes it",
+    "pact.row.lost": "%s is not at the perch: he returns while you are near it, if your roster (at most %s) has room",
+    "pact.row.next": "Next offering: %s %s in %s game days (time away is never counted)",
+    "pact.row.escrow": "Paid ahead: %s of at most %s periods",
+    "pact.row.area": "At this perch, within %s blocks, from %s to %s",
+    "pact.row.area_any": "At this perch, within %s blocks, at any hour",
+    "pact.row.end": "Ending returns what is paid ahead to you, once, and Stolas departs; breaking the perch ends nothing",
+})
+
+
 def lang_entries(lang):
     lang[f"tag.item.{STOLAS_SPECIMEN_TAG.replace(':', '.')}"] = "Things Stolas Regards"
     for key, text in JOURNAL.items():
         lang[f"journal.{MOD}.{key}"] = text
+    for key, name in ENTITY_NAMES.items():
+        lang[f"entity.{MOD}.{key}"] = name
+    lang[f"container.{MOD}.pact_perch"] = BLOCKS["pact_perch"]["name"]
+    lang[f"tooltip.{MOD}.pact_perch"] = PERCH_TOOLTIP
+    lang[f"tag.item.{OFFERINGS_TAG.replace(':', '.')}"] = "Stolas's Offerings"
 
 
 def codex():
@@ -115,13 +253,53 @@ def codex():
              "Observatory** while a pattern is up and visible there. It is not research, so your journal's **Pacts** "
              "section names it apart. An observation made long ago still counts; nothing is recorded for a sky you did "
              f"not watch. The Lantern Star comes round {when('lantern_star')}, the New Moon {when('new_moon')}."),
-            ("text", "Understood", "Stolas will hear an invitation now: build a **pact perch** where you may build, and "
-             "use it. He names his terms before anything is spent.", (research, "understood")),
+            ("text", "Understood", "Stolas will hear an invitation now: build a "
+             "[pact perch](entry://jugcraft:arcane_concordance/binding/stolas_pact) where you may build, and use it. He names "
+             "his terms before anything is spent.", (research, "understood")),
             ("text", "Mastered", "You kept your pact's first obligation.", (research, "mastered")),
         ]}}
+    pact = PACTS["stolas"]
+    service, upkeep, compact = pact["service"], pact["upkeep"], pact["compact"]
+    entries[("binding", "stolas_pact")] = {
+        "name": "Stolas's Pact", "x": 2, "y": 4, "icon": rid("pact_perch"),
+        "condition": (research, "understood"), "description": "The pact perch, Stolas's terms and the Open Hand Compact",
+        "pages": [
+            ("crafting_recipe", "Pact Perch", "Build it where you may build, at your own base (never in Styx's home), and use "
+             "it to invite Stolas. It holds nothing: what you pay ahead is kept with the pact, and breaking the perch never "
+             "ends it.", rid("pact_perch")),
+            ("text", "His Terms",
+             f"Stolas's screen gives his three words, then every term before anything is spent: his service, any hour, within "
+             f"{service['radius']} blocks of the perch, {service['quota']} a game day; one offering every "
+             f"{upkeep['period_days']} game days, up to {upkeep['cap']} paid ahead, a warning and {upkeep['grace_days']} game "
+             "day of grace, then suspension with nothing lost; until you end it; the offerings back to you, once. **Decline**, "
+             "or any refusal, spends nothing and names why."),
+            ("text", "The Open Hand Compact",
+             f"**Accept** pays the compact in the same moment the pact is sealed: {compact['resonance']} Astral Resonance from "
+             "an astrolabe you carry, and " + ", ".join(f"{c['count']} × {c['item'].split(':')[1].replace('_', ' ')}"
+                                                         for c in compact["items"])
+             + ". It counts as the first offering. Only this perch's owner may accept here, and one pact with Stolas a holder."),
+        ]}
     return entries
 
 
 def tags(tags):
     for ref in {**STYX_SPECIMENS, **PLAIN_SPECIMENS}:
         tags.add("item", STOLAS_SPECIMEN_TAG, ref)
+    for ref in OFFERINGS:
+        tags.add("item", OFFERINGS_TAG, ref)
+    tags.add("block", "minecraft:mineable/axe", rid("pact_perch"))
+
+
+def write_all(write, assets, data, lang, condition, self_drop):
+    write(assets / "models" / "block" / "pact_perch.json", PERCH_MODEL)
+    write(assets / "blockstates" / "pact_perch.json", {"variants": {"": {"model": rid("block/pact_perch")}}})
+    write(assets / "items" / "pact_perch.json", {"model": {"type": "minecraft:model", "model": rid("item/pact_perch")}})
+    write(assets / "models" / "item" / "pact_perch.json",
+          {"parent": "minecraft:item/generated", "textures": {"layer0": rid("item/pact_perch")}})
+    write(data / "loot_table" / "blocks" / "pact_perch.json", self_drop("pact_perch"))
+    write(data / "recipe" / "pact_perch.json", dict({"fabric:load_conditions": condition("concordance")}, **RECIPE))
+
+
+def write_data(write, data):
+    for key, info in PACTS.items():
+        write(data / "concordance" / "pact" / f"{key}.json", dict({"schema": 1}, **info))

@@ -520,6 +520,7 @@ ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
 # Concordance Chunk D (tools/concordance_pacts.py): Stolas's Regard (D-03), the pact perch and Stolas (D-04, D-05).
 import concordance_pacts as pacts  # noqa: E402
 RESEARCH.update(pacts.RESEARCH)
+BLOCKS.update(pacts.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
@@ -1872,6 +1873,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     celestial.write_all(write, assets, data, lang, condition, self_drop)
     crimson.write_all(write, assets, data, lang, condition, self_drop)
     workers.write_all(write, assets, data, lang, condition, self_drop)
+    pacts.write_all(write, assets, data, lang, condition, self_drop)
     logistics.write_all(write, assets, data, lang, condition, self_drop)
     artifice.write_all(write, assets, data, lang, condition, self_drop)
     relics.write_all(write, assets, data, lang, condition, self_drop)
@@ -2032,6 +2034,7 @@ def write_data(write, res):
     celestial.write_data(write, data)
     crimson.write_data(write, data)
     workers.write_data(write, data)
+    pacts.write_data(write, data)
     logistics.write_data(write, data)
     artifice.write_data(write, data)
     relics.write_data(write, data)

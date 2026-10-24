@@ -23,12 +23,18 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.EvidenceRule;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Transfers;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
@@ -69,7 +75,7 @@ import org.jspecify.annotations.Nullable;
  * instructions to another without carrying their observation or mastery, and the Lumen Sconce takes Radiance only
  * through the typed transfer rules (what fits, at the rate allowed, drawn back only by its owner); and (Concordance Chunk
  * D, D-02) a copied Spirit Anchor gives nothing and releases nothing, an anchor from before Chunk D claims its record only
- * at its own place, and ending a pact twice returns its escrow once.
+ * at its own place, and ending a pact twice returns its escrow once; and (D-04) a copied pact perch is inert.
  */
 public class ConcordanceSharingGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -444,6 +450,51 @@ public class ConcordanceSharingGameTests {
 		helper.assertValueEqual(AgreementHolder.end(level, null, holder, record, Pacts.ENDED, now + 20), AgreementHolder.Ended.NOTHING, "Ending again finds nothing");
 		helper.assertTrue(inventory.countItem(Items.WHITE_WOOL) == 64 && wool(helper, feet) == 2 && PactHistory.of(level.getServer()).history(holder.getUUID()).size() == 1,
 				"and nothing more comes back, by the copy's breaking or the second end");
+		helper.succeed();
+	}
+
+	/** D-04 (E3, 10:52, D-S9): a perch's data copied to a second place is inert: its screen reads CONFLICTING_AGREEMENT; accepting, depositing, suspending, ending, seating and recalling there change nothing; its upkeep looks at nothing; no visitor comes; breaking it releases and unseats nothing; the original keeps its pact. */
+	@GameTest(maxTicks = 20)
+	public void aCopiedPerchIsInert(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = ConcordanceWorkerGameTests.ready(level, player(helper, new BlockPos(4, 1, 4)));
+		ConcordanceWorkerGameTests.pocket(holder, 1, AstrolabeItem.CAPACITY); // a survival player pays the Open Hand Compact
+		BlockPos originalAt = new BlockPos(2, 1, 2);
+		BlockPos copyAt = new BlockPos(6, 1, 2);
+		PactPerchBlockEntity original = ConcordanceWorkerGameTests.perch(helper, originalAt, holder);
+		PactMenu sealing = ConcordanceWorkerGameTests.open(helper, holder, original);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.send(holder, sealing, PactRequestPayload.ACCEPT, 0), PactMenu.SEALED),
+				"Sealed at the original");
+		holder.closeContainer();
+		long now = level.getGameTime();
+		BoundWill sealed = ConcordanceWorkerGameTests.recordOf(level, holder);
+		helper.assertValueEqual(original.holder().deposit(level, holder, new ItemStack(Items.AMETHYST_SHARD, 2), now), 2, "two offerings kept");
+		BoundWill record = BoundWills.of(level.getServer()).ledger().get(sealed.id());
+		StolasEntity presence = (StolasEntity) level.getEntity(record.pact().presence());
+		helper.setBlock(copyAt, Workers.PACT_PERCH);
+		PactPerchBlockEntity copy = helper.getBlockEntity(copyAt, PactPerchBlockEntity.class);
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), original.saveWithoutMetadata(level.registryAccess())));
+		helper.assertTrue(copy.holder().verify(level, now) == AgreementHolder.Standing.ELSEWHERE && original.holder().verify(level, now) == AgreementHolder.Standing.VALID,
+				"The copy is not the record's; the original is");
+		PactMenu menu = ConcordanceWorkerGameTests.open(helper, holder, copy);
+		helper.assertTrue(menu.lastSent().mode() == PactStatePayload.CLOSED
+				&& ConcordanceWorkerGameTests.keys(menu.lastSent().notes()).contains("compose.jugcraft.diagnostic.conflicting_agreement")
+				&& copy.visitor() == null && ConcordanceWorkerGameTests.stolases(helper).size() == 1, "Its screen says another agreement covers it; no visitor");
+		for (int action : List.of(PactRequestPayload.ACCEPT, PactRequestPayload.DEPOSIT, PactRequestPayload.SUSPEND, PactRequestPayload.RESUME,
+				PactRequestPayload.END, PactRequestPayload.SEAT, PactRequestPayload.RECALL)) {
+			PactStatePayload answer = ConcordanceWorkerGameTests.send(holder, menu, action, 0);
+			helper.assertTrue(answer != null && answer.result().isPresent() && !answer.result().get().done()
+					&& record.equals(BoundWills.of(level.getServer()).ledger().get(record.id()))
+					&& ConcordanceWorkerGameTests.escrowed(level, record.id()) == 2, "At the copy, action " + action + " changes nothing: " + answer);
+		}
+		helper.assertTrue(copy.holder().look(level, now + 7 * Agreement.DAY) == Pacts.Event.NONE, "Its upkeep looks at nothing");
+		holder.closeContainer();
+		helper.setBlock(copyAt, Blocks.AIR);
+		helper.assertTrue(record.equals(BoundWills.of(level.getServer()).ledger().get(record.id())) && !presence.isRemoved()
+				&& WorkerRoster.of(level.getServer()).workers(holder.getUUID()).containsKey(presence.getUUID())
+				&& ConcordanceWorkerGameTests.escrowed(level, record.id()) == 2, "Broken, the copy releases and unseats nothing");
+		helper.assertTrue(original.holder().verify(level, now) == AgreementHolder.Standing.VALID && presence.think(level, 0L, now) != Status.FINISHED
+				&& BoundWills.of(level.getServer()).problems().isEmpty(), "The original keeps its pact and its Stolas");
 		helper.succeed();
 	}
 }

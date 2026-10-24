@@ -72,6 +72,8 @@ PACT = {"ABSENT_TICKS": 1200, "WRITE_TICKS": 200, "REACH": 64, "HISTORY": 8, "MA
         "MAX_PERIOD": 672000, "MAX_GRACE": 168000}
 PACT_HOLDS = ["none", "holder", "upkeep"]
 PACT_DEPARTURES = ["ended", "broken"]
+# Concordance Chunk D, D-04/D-05 (D-S6): a pact without its place seated again (Java: AgreementHolder.Seat). Append only.
+SEAT_OUTCOMES = ["seated", "disabled", "not_holder", "nothing", "not_permitted", "taken", "roster_full", "unavailable"]
 
 STATUSES = {
     "following": "following its person",
@@ -226,6 +228,15 @@ MESSAGES = {
     "workers.upkeep_resumed": "Its upkeep is paid: the agreement is resumed",
     "workers.departed.ended": "ended by its holder",
     "workers.departed.broken": "released: its place was broken",
+    # Concordance Chunk D, D-04 (D-S6): the roster's pact kind, and a pact without its place seated again.
+    "workers.kind.pact": "Pact",
+    "workers.seat_seated": "The pact is seated here: its presence returns, and nothing was spent",
+    "workers.seat_not_holder": "Only the pact's holder, in person, may seat it",
+    "workers.seat_nothing": "You keep no pact without its place to seat here",
+    "workers.seat_not_permitted": "Only this place's owner may seat a pact here, and only where they may build",
+    "workers.seat_taken": "This place already keeps an agreement",
+    "workers.seat_roster_full": "Your roster already keeps %s workers, the most it may: release one, then seat the pact",
+    "workers.seat_unavailable": "No spirit answers now; nothing was seated",
 }
 
 TOOLTIPS = {

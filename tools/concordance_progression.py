@@ -555,6 +555,10 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
                                  research_node(rid("alembic_arts"), "understood")]]
             elif key == "anchoring":
                 alternatives = [[f"invocation:{rid('brace')}"]]
+            elif key == "pact_service":
+                # Concordance Chunk D, D-04/D-05: the pact's first obligation, an observation at an observatory while a pact
+                # kept at a pact perch is active (spirits/StarReckoning.observed).
+                alternatives = [[items.item(rid("observatory")), items.item(rid("pact_perch"))]]
             for encounter in encounters:
                 nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
                 needs.append(f"encounter:{encounter}")
