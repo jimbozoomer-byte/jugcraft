@@ -1232,7 +1232,7 @@ public class ConcordanceWorkerGameTests {
 		List<Long> ids = List.of(id);
 		SpiritAnchorBlockEntity anchor = WorkshopHands.anchor(helper, holder, WorkshopHands.ANCHOR);
 		helper.assertTrue(WorkshopHands.use(helper, holder, WorkshopHands.keyFor(helper, holder, WorkshopHands.POST), WorkshopHands.ANCHOR) == InteractionResult.SUCCESS
-				&& anchor.post() != null, "Binding an anchor to one's own post asks no mastery");
+				&& anchor.post() != null, "Binding an anchor to one's own post asks no mastery" + WorkshopHands.why(helper, holder, WorkshopHands.ANCHOR, WorkshopHands.POST));
 		for (ResearchState regard : new ResearchState[] {ResearchState.NONE, ResearchState.UNDERSTOOD}) {
 			if (regard != ResearchState.NONE) {
 				ConcordanceProgress.grant(holder, WorkshopHandEntity.REGARD, regard);

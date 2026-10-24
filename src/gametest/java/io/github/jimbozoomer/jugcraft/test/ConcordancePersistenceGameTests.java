@@ -781,7 +781,7 @@ public class ConcordancePersistenceGameTests {
 		WorkshopHands.post(helper, owner, WorkshopHands.POST);
 		SpiritAnchorBlockEntity anchor = WorkshopHands.anchor(helper, owner, WorkshopHands.ANCHOR);
 		helper.assertTrue(WorkshopHands.use(helper, owner, WorkshopHands.keyFor(helper, owner, WorkshopHands.POST), WorkshopHands.ANCHOR) == InteractionResult.SUCCESS,
-				"The anchor is bound to its owner's post");
+				"The anchor is bound to its owner's post" + WorkshopHands.why(helper, owner, WorkshopHands.ANCHOR, WorkshopHands.POST));
 		GlobalPos post = GlobalPos.of(level.dimension(), helper.absolutePos(WorkshopHands.POST));
 		CompoundTag saved = anchor.saveWithoutMetadata(level.registryAccess());
 		SpiritAnchorBlockEntity read = loadAnchor(level, anchor, saved);

@@ -491,7 +491,7 @@ public class ConcordanceAuthorityGameTests {
 		}
 		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "nothing bound", chest, post);
 		helper.assertTrue(WorkshopHands.use(helper, owner, handed, WorkshopHands.ANCHOR) == InteractionResult.SUCCESS && owners.equals(ownersAnchor.post()),
-				"Its owner binds it to their post");
+				"Its owner binds it to their post" + WorkshopHands.why(helper, owner, WorkshopHands.ANCHOR, WorkshopHands.POST));
 		helper.assertTrue(WorkshopHands.use(helper, stranger, WorkshopHands.keyFor(helper, stranger, strangersPostAt), WorkshopHands.ANCHOR) == InteractionResult.FAIL
 				&& owners.equals(ownersAnchor.post()), "A stranger cannot re-bind it");
 		helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, stranger, ownersAnchor)), "message.jugcraft.concordance.workers.seal_not_permitted",

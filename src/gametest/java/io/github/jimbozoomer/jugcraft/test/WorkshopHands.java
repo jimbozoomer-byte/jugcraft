@@ -166,6 +166,29 @@ final class WorkshopHands {
 		return helper.getBlockEntity(at, SpiritAnchorBlockEntity.class);
 	}
 
+	/**
+	 * Why {@code player} could or could not bind the anchor at {@code anchorAt} to the post at {@code postAt} now: each of
+	 * PorterKeyItem.bind's conditions, read without changing anything, for a failed binding's message.
+	 */
+	static String why(GameTestHelper helper, ServerPlayer player, BlockPos anchorAt, BlockPos postAt) {
+		ServerLevel level = helper.getLevel();
+		BlockPos at = helper.absolutePos(anchorAt);
+		SpiritAnchorBlockEntity anchor = level.getBlockEntity(at) instanceof SpiritAnchorBlockEntity found ? found : null;
+		WorkerDefinition.Spirit terms = WorkshopHandEntity.terms();
+		net.minecraft.core.GlobalPos post = net.minecraft.core.GlobalPos.of(level.dimension(), helper.absolutePos(postAt));
+		net.minecraft.world.level.block.state.BlockState state = level.getBlockState(at);
+		return " [enabled " + Workers.enabled() + ", terms " + terms + ", anchor " + (anchor != null)
+				+ (anchor == null ? "" : ", owner " + player.getUUID().equals(anchor.holder().owner()) + " (" + anchor.holder().owner() + ")"
+						+ ", standing " + anchor.holder().verify(level, level.getGameTime()) + ", maySeal " + anchor.holder().maySeal(level, player, true))
+				+ ", creative " + player.isCreative() + ", standIn " + io.github.jimbozoomer.jugcraft.concordance.Authority.isStandIn(player)
+				+ ", mayChange " + io.github.jimbozoomer.jugcraft.concordance.Authority.mayChange(level, player, at)
+				+ ", mayInteract " + level.mayInteract(player, at) + ", mayUseItemAt " + player.mayUseItemAt(at, Direction.UP, ItemStack.EMPTY)
+				+ ", town " + io.github.jimbozoomer.jugcraft.town.TownProtection.denies(player, level, at)
+				+ ", breakAllowed " + net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, at, state, level.getBlockEntity(at))
+				+ ", mayServe " + (terms != null && WorkshopHandEntity.mayServe(level, at, post, player.getUUID(), terms.radius()))
+				+ ", shift " + player.isShiftKeyDown() + "]";
+	}
+
 	/** A Porter Key {@code player} has used on the post at {@code post}: it names the post only if they may use it. */
 	static ItemStack keyFor(GameTestHelper helper, ServerPlayer player, BlockPos post) {
 		ItemStack key = new ItemStack(Workers.PORTER_KEY);
@@ -196,7 +219,7 @@ final class WorkshopHands {
 		SpiritAnchorBlockEntity anchor = anchor(helper, holder, anchorAt);
 		helper.assertTrue(use(helper, holder, keyFor(helper, holder, postAt), anchorAt) == InteractionResult.SUCCESS
 				&& net.minecraft.core.GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(postAt)).equals(anchor.post()),
-				"The holder binds their anchor to the post");
+				"The holder binds their anchor to the post" + why(helper, holder, anchorAt, postAt));
 		helper.assertValueEqual(key(seal(helper, holder, anchor)), SEALED, "and seals a workshop hand there");
 		return answered(helper, holder, anchor);
 	}
@@ -205,7 +228,8 @@ final class WorkshopHands {
 	static WorkshopHandEntity handUnder(GameTestHelper helper, ServerPlayer holder, WorkerDefinition.Spirit terms, long now) {
 		ServerLevel level = helper.getLevel();
 		SpiritAnchorBlockEntity anchor = anchor(helper, holder, ANCHOR);
-		helper.assertTrue(use(helper, holder, keyFor(helper, holder, POST), ANCHOR) == InteractionResult.SUCCESS, "The holder binds their anchor to the post");
+		helper.assertTrue(use(helper, holder, keyFor(helper, holder, POST), ANCHOR) == InteractionResult.SUCCESS,
+				"The holder binds their anchor to the post" + why(helper, holder, ANCHOR, POST));
 		helper.assertValueEqual(anchor.holder().seal(level, holder, anchor.handSealing(terms), now).outcome(), Pacts.Outcome.DONE,
 				"A hand sealed there under test terms");
 		return answered(helper, holder, anchor);
