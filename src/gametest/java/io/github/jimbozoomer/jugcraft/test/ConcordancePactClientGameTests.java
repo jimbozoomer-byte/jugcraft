@@ -1,11 +1,16 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.geckolib.animatable.manager.AnimatableManager;
+import com.geckolib.animation.AnimationController;
+import com.geckolib.animation.RawAnimation;
+import com.geckolib.animation.state.AnimationPoint;
 import com.geckolib.renderer.GeoEntityRenderer;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
@@ -13,30 +18,43 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundEngine;
+import net.minecraft.client.sounds.SoundEventListener;
+import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
@@ -49,9 +67,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Concordance Chunk D, D-04 and D-05 (unit 2): the pact perch's screen in a real client, on the game's own dedicated server,
- * and Stolas's provisional body. One client. Results are logged with the prefix "[pact-check]". The player is in survival, so
- * what is spent is spent.
+ * Concordance Chunk D, D-04 and D-05 (unit 2) and D-06 (unit 3): the pact perch's screen in a real client, on the game's
+ * own dedicated server, and Stolas's body. One client. Results are logged with the prefix "[pact-check]". The player is in
+ * survival, so what is spent is spent.
  * <ul>
  * <li><b>The conversation</b>: with Stolas's Regard understood and two patterns observed, the owner's perch is used; Stolas
  * arrives and speaks his three beats, then his terms, reached by Enter alone, the keyboard on their first line, never on
@@ -61,10 +79,14 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Acceptance by keyboard</b>: Accept without the compact's materials is refused as cannot_afford and spends nothing
  * ({@code jugcraft_pact_refused}); given them, Accept seals once and spends once ({@code jugcraft_pact_kept}).</li>
  * <li><b>His body</b>: the screen closed and the pact kept; Stolas on his perch drawn by GeckoLib ({@code jugcraft_pact_stolas}).</li>
+ * <li>(D-06) <b>His body</b>: each loop as the server's state drives it and each gesture as the server fires it, frozen inside its telling pose ({@code jugcraft_stolas_*}); his real arrival and departure play their gestures.</li>
+ * <li>(D-06) <b>His cues</b>: his refusal and assent are fired by the server with their subtitles (seen only on a machine
+ * with a sound device), each answer marked with a tick or a cross; Jade's readings of him and his perch, and their overlays
+ * with Jade loaded ({@code jugcraft_pact_perch_jade}, {@code jugcraft_pact_stolas_jade}).</li>
  * <li>(D-05) <b>His service</b>: the Lantern Star recalled at its cost under the shared recall claim; an amethyst shard paid
  * ahead ({@code jugcraft_pact_service}).</li>
- * <li>(D-05) <b>The end</b>: End asks first ({@code jugcraft_pact_end_confirm}); Esc keeps the pact; yes ends it once, the
- * offering back in the holder's inventory, Stolas gone ({@code jugcraft_pact_ended}).</li>
+ * <li>(D-05) <b>The end</b>: End asks first ({@code jugcraft_pact_end_confirm}), the keyboard on Keep it (D-06); Esc keeps
+ * the pact; yes ends it once, the offering back in the holder's inventory, Stolas gone ({@code jugcraft_pact_ended}).</li>
  * </ul>
  * The perch is opened by the server's use of it (no aimed click), and each step that opens it waits for a menu newer than
  * the one open before, with its first state. The narrator is not heard, and one client is not two.
@@ -78,6 +100,12 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
 	private static final String FULL_MOON = "jugcraft:full_moon";
 	private static final String LANTERN_STAR = "jugcraft:lantern_star";
+	// D-06: the worker's own controller and his loops' clips (tools/concordance_pacts.py LOOPS; check_stolas_body).
+	private static final String MAIN = "main";
+	private static final String IDLE = "animation.stolas.idle";
+	private static final String LISTEN = "animation.stolas.listen";
+	private static final String WAITING = "animation.stolas.waiting";
+	private static final String SUSPENDED = "animation.stolas.suspended";
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -102,8 +130,12 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				});
 				conversation(context, server, perch);
 				sizes(context);
+				Hearing hearing = hear(context); // D-06
 				acceptance(context, server);
+				heard(context, server, hearing, perch); // D-06
 				body(context, server, connection, perch);
+				poses(context, server, perch); // D-06
+				jade(context, server, perch); // D-06
 				service(context, server, perch); // D-05
 				ending(context, server, perch); // D-05
 				context.runOnClient(client -> {
@@ -147,6 +179,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		open(context, server, perch);
 		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.NEGOTIATE
 				&& stolas(client, perch) != null, WAIT);
+		check(StolasEntity.Gesture.ARRIVE.animation.equals(context.computeOnClient(client -> gestured(client, perch))),
+				"Invited, he arrives at the perch with his gesture (D-06)");
 		String shown = context.computeOnClient(client -> describe(PactClient.state()));
 		Jugcraft.LOGGER.info("[pact-check] invited: {}", shown);
 		check(context.computeOnClient(client -> PactClient.state().beats().size() == 3 && PactClient.state().notes().isEmpty()
@@ -211,6 +245,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				"Without the compact's materials Accept is refused with its reason: " + refused.reason());
 		check(!server.computeOnServer(ConcordancePactClientGameTests::held)
 				&& server.computeOnServer(ConcordancePactClientGameTests::charge) == AstrolabeItem.CAPACITY, "A refusal records and spends nothing");
+		// D-06: the screen rebuilds on its next tick; the refusal carries its mark, a cross, not colour alone (waited for: critique 4).
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
 		shot(context, "jugcraft_pact_refused");
 		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
 				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
@@ -227,6 +263,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				+ cost.stream().mapToInt(line -> player(minecraft).getInventory().countItem(stack(line).getItem())).sum());
 		Jugcraft.LOGGER.info("[pact-check] sealed: held, astrolabe, materials left = {}", spent);
 		check(spent.equals("true " + (AstrolabeItem.CAPACITY - resonance) + " 0"), "Sealed once, materials and resonance spent once: " + spent);
+		// D-06: sealed, the answer carries the tick, once the screen has rebuilt for it (critique 4).
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
 		fits(context, "the kept pact at GUI scale 2");
 		named(context);
 		shot(context, "jugcraft_pact_kept");
@@ -240,7 +278,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		check(context.computeOnClient(client -> {
 			Entity stolas = stolas(client, perch);
 			return stolas != null && client.getEntityRenderDispatcher().getRenderer(stolas) instanceof GeoEntityRenderer<?, ?>;
-		}), "Stolas stays on his perch, drawn by GeckoLib (his provisional body, D-S5)");
+		}), "Stolas stays on his perch, drawn by GeckoLib (his raven body, D-06)");
 		boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
 		context.runOnClient(client -> {
 			if (!client.gui.hud.isHidden()) {
@@ -302,6 +340,9 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 	private static void ending(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		press(context, "end");
 		context.waitForScreen(ConfirmScreen.class);
+		check(context.computeOnClient(client -> client.gui.screen().getFocused() instanceof AbstractWidget keep
+				&& keep.getMessage().getString().equals(Component.translatable("screen.jugcraft.pact.end.no").getString())),
+				"End asks first, the keyboard on Keep it (D-06)");
 		shot(context, "jugcraft_pact_end_confirm");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(PactScreen.class);
@@ -311,6 +352,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		context.waitForScreen(ConfirmScreen.class);
 		tabToLabel(context, Component.translatable("screen.jugcraft.pact.end.yes").getString());
 		PactStatePayload.Result ended = answer(context);
+		check(StolasEntity.Gesture.DEPART.animation.equals(context.computeOnClient(client -> gestured(client, perch))),
+				"Ending, he makes his departing gesture before he leaves the world (D-06)");
 		String after = server.computeOnServer(minecraft -> held(minecraft) + " " + player(minecraft).getInventory().countItem(Items.AMETHYST_SHARD));
 		Jugcraft.LOGGER.info("[pact-check] ended: {}, held and shards = {}", ended.reason(), after);
 		check(ended.done() && "ended".equals(ended.reason()) && after.equals("false 1")
@@ -320,6 +363,240 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		shot(context, "jugcraft_pact_ended");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
+	}
+
+	// D-06
+	/**
+	 * His body (D-06, D-S5), the pact kept and its holder facing him from two and a half blocks: each loop as the server's
+	 * state drives it (perched; listening while his perch's screen is open; hunched while the pact is suspended; standing
+	 * and waiting while the Concordance is off), and each gesture as the server fires it, caught inside its telling pose.
+	 * Each is checked on the client's own animation controller with the world frozen there (CinderTyrantClientGameTests'
+	 * pattern), and photographed with the HUD hidden. His gestures change nothing. His astir loop (the owner's
+	 * idle.flapping, while an offering is due) is not posed: making one due here would change the upkeep the later steps
+	 * read (a recorded deviation; tools/concordance_pacts.py BODY_SHOTS).
+	 */
+	private static void poses(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+		context.runOnClient(client -> {
+			if (!client.gui.hud.isHidden()) {
+				client.gui.hud.toggle();
+			}
+		});
+		loopPose(context, server, perch, IDLE, "jugcraft_stolas_idle", false);
+		open(context, server, perch);
+		context.waitFor(client -> stolas(client, perch) instanceof StolasEntity stolas && stolas.listening(), WAIT);
+		loopPose(context, server, perch, LISTEN, "jugcraft_stolas_listen", true);
+		context.waitFor(client -> IDLE.equals(drawing(client, perch, MAIN)), WAIT);
+		check(server.computeOnServer(minecraft -> PactKeeping.suspend(minecraft.overworld(), player(minecraft), holder(minecraft, perch),
+				minecraft.overworld().getGameTime())) == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends the pact");
+		loopPose(context, server, perch, SUSPENDED, "jugcraft_stolas_suspended", false);
+		check(server.computeOnServer(minecraft -> PactKeeping.resume(minecraft.overworld(), player(minecraft), holder(minecraft, perch),
+				minecraft.overworld().getGameTime())) == AgreementHolder.Toggle.RESUMED, "and resumes it");
+		context.waitFor(client -> IDLE.equals(drawing(client, perch, MAIN)), WAIT);
+		boolean on = server.computeOnServer(minecraft -> JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE));
+		server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false));
+		try {
+			loopPose(context, server, perch, WAITING, "jugcraft_stolas_waiting", false);
+		} finally {
+			server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on));
+		}
+		context.waitFor(client -> IDLE.equals(drawing(client, perch, MAIN)), WAIT);
+		gesturePose(context, server, perch, StolasEntity.Gesture.INSPECT, 0.40, 1.10, "jugcraft_stolas_inspect");
+		gesturePose(context, server, perch, StolasEntity.Gesture.ASSENT, 0.45, 1.25, "jugcraft_stolas_assent");
+		gesturePose(context, server, perch, StolasEntity.Gesture.REFUSE, 0.50, 1.30, "jugcraft_stolas_refuse");
+		// He leaves (depart holds its last frame, nothing of him drawn) and comes back (his arrival replaces it).
+		gesturePose(context, server, perch, StolasEntity.Gesture.DEPART, 0.30, 0.80, "jugcraft_stolas_depart");
+		gesturePose(context, server, perch, StolasEntity.Gesture.ARRIVE, 0.70, 1.20, "jugcraft_stolas_arrive");
+		context.waitFor(client -> drawing(client, perch, StolasEntity.GESTURE_CONTROLLER).isEmpty() && IDLE.equals(drawing(client, perch, MAIN)), WAIT);
+		check(server.computeOnServer(ConcordancePactClientGameTests::held) && server.computeOnServer(minecraft -> presence(minecraft, perch).isAlive()),
+				"His gestures change nothing: the pact is kept and he is on his perch");
+		context.runOnClient(client -> {
+			if (client.gui.hud.isHidden() != hidden) {
+				client.gui.hud.toggle();
+			}
+		});
+	}
+
+	// D-06
+	/** Waits until his main controller draws {@code clip} past its blend, freezes the world, closes the screen if asked, checks and photographs it, thaws it. */
+	private static void loopPose(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, String clip, String name,
+			boolean closeScreen) {
+		context.waitFor(client -> clip.equals(drawing(client, perch, MAIN)) && !blending(client, perch, MAIN), WAIT);
+		server.runCommand("tick freeze");
+		if (closeScreen) {
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+		}
+		context.waitTicks(5);
+		check(context.computeOnClient(client -> clip.equals(drawing(client, perch, MAIN))), "Frozen while he draws " + clip);
+		shot(context, name);
+		server.runCommand("tick unfreeze");
+	}
+
+	// D-06
+	/**
+	 * The server fires {@code gesture}; the world is frozen at the middle of its telling pose ({@code from} to {@code to}
+	 * seconds into it), where the client's gesture controller must be drawing it; photographed, thawed, and played out.
+	 */
+	private static void gesturePose(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, StolasEntity.Gesture gesture,
+			double from, double to, String name) {
+		int middle = (int) Math.round((from + to) * 10.0);
+		server.runOnServer(minecraft -> presence(minecraft, perch).gesture(gesture));
+		context.waitTicks(middle);
+		server.runCommand("tick freeze");
+		context.waitTicks(5);
+		double at = context.computeOnClient(client -> gesture.clip().equals(drawing(client, perch, StolasEntity.GESTURE_CONTROLLER))
+				? controller(client, perch, StolasEntity.GESTURE_CONTROLLER).getCurrentAnimationTime() : -1.0);
+		Jugcraft.LOGGER.info("[pact-check] his {} frozen {} s into its clip", gesture.id, at);
+		check(at >= from && at <= to, "His " + gesture.id + " is caught in its telling pose, " + from + " to " + to + " s into it: " + at);
+		shot(context, name);
+		server.runCommand("tick unfreeze");
+		context.waitTicks(gesture.ticks - middle + 5);
+	}
+
+	// D-06
+	private static @Nullable AnimationController<StolasEntity> controller(Minecraft client, BlockPos perch, String name) {
+		if (!(stolas(client, perch) instanceof StolasEntity stolas)) {
+			return null;
+		}
+		AnimatableManager<StolasEntity> manager = stolas.getAnimatableInstanceCache().getManagerForId(stolas.getId());
+		return manager.getAnimationControllers().get(name);
+	}
+
+	// D-06
+	/** The clip one of his controllers is drawing now ("" when it draws nothing). */
+	private static String drawing(Minecraft client, BlockPos perch, String name) {
+		AnimationController<StolasEntity> controller = controller(client, perch, name);
+		AnimationPoint point = controller == null || !controller.isAnimatingBones() ? null : controller.getCurrentAnimationPoint();
+		return point == null ? "" : point.animation().name();
+	}
+
+	// D-06
+	private static boolean blending(Minecraft client, BlockPos perch, String name) {
+		AnimationController<StolasEntity> controller = controller(client, perch, name);
+		return controller != null && controller.isTransitioning();
+	}
+
+	// D-06
+	/** The gesture last triggered on him (it stays set after it plays). */
+	private static @Nullable RawAnimation gestured(Minecraft client, BlockPos perch) {
+		AnimationController<StolasEntity> gestures = controller(client, perch, StolasEntity.GESTURE_CONTROLLER);
+		return gestures == null ? null : gestures.getCurrentRawAnimation();
+	}
+
+	// D-06
+	/** Stolas at {@code perch} on the server (the presence, else the visitor; never one leaving). */
+	private static StolasEntity presence(MinecraftServer minecraft, BlockPos perch) {
+		StolasEntity stolas = ((PactPerchBlockEntity) minecraft.overworld().getBlockEntity(perch)).stolas(minecraft.overworld());
+		check(stolas != null, "Stolas is on his perch");
+		return stolas;
+	}
+
+	// D-06
+	private static AgreementHolder holder(MinecraftServer minecraft, BlockPos perch) {
+		return ((AgreementHolder.Holds) minecraft.overworld().getBlockEntity(perch)).holder();
+	}
+
+	// D-06
+	private record Hearing(List<String> heard, SoundEventListener listener, boolean sounding, boolean subtitles) {
+	}
+
+	// D-06
+	/** Subtitles shown and a listener on the sound manager before the refusal and the acceptance (03:159). */
+	private static Hearing hear(ClientGameTestContext context) {
+		List<String> heard = new CopyOnWriteArrayList<>();
+		SoundEventListener listener = (sound, events, range) -> {
+			Component subtitle = events.getSubtitle();
+			if (subtitle != null) {
+				heard.add(subtitle.getString());
+			}
+		};
+		boolean subtitles = context.computeOnClient(client -> client.options.showSubtitles().get());
+		boolean sounding = context.computeOnClient(client -> {
+			client.options.showSubtitles().set(true);
+			client.getSoundManager().addListener(listener);
+			// The sound engine starts only with a sound device; without one (CI's runners) nothing plays and no subtitle shows.
+			return client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F)) != SoundEngine.PlayResult.NOT_STARTED;
+		});
+		return new Hearing(heard, listener, sounding, subtitles);
+	}
+
+	// D-06
+	/** His refuse and assent fired by the server, their subtitles his; heard where the machine can play sound. */
+	private static void heard(ClientGameTestContext context, TestDedicatedServerContext server, Hearing hearing, BlockPos perch) {
+		String refuse = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.stolas.refuse").getString());
+		String assent = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.stolas.assent").getString());
+		check(!refuse.startsWith("subtitles.") && !assent.startsWith("subtitles.")
+				&& context.computeOnClient(client -> refuse.equals(subtitle(client, "stolas.refuse")) && assent.equals(subtitle(client, "stolas.assent"))),
+				"His refuse and assent have their subtitles in the client's sounds: " + refuse + ", " + assent);
+		List<String> cues = server.computeOnServer(minecraft -> presence(minecraft, perch).cues());
+		Jugcraft.LOGGER.info("[pact-check] Stolas's cues so far: {}", cues);
+		check(cues.contains("refuse") && "assent".equals(cues.getLast()), "The server fired his refusal, then his assent: " + cues);
+		try {
+			if (hearing.sounding()) {
+				context.waitFor(client -> hearing.heard().contains(refuse) && hearing.heard().contains(assent), WAIT);
+				Jugcraft.LOGGER.info("[pact-check] subtitles heard: {}", hearing.heard());
+			} else {
+				Jugcraft.LOGGER.info("[pact-check] no sound device: the sound engine is off, so no subtitle can show; checked as defined and as fired");
+			}
+		} finally {
+			context.runOnClient(client -> {
+				client.getSoundManager().removeListener(hearing.listener());
+				client.options.showSubtitles().set(hearing.subtitles());
+			});
+		}
+	}
+
+	// D-06
+	/** Jade's readings of Stolas and his perch (PactReading, read on the server: no Jade class); with Jade loaded, their overlays. */
+	private static void jade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		String readings = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			CompoundTag ofPerch = PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime());
+			CompoundTag ofHim = PactReading.stolas(level, presence(minecraft, perch), level.getGameTime());
+			String both = ofPerch + " " + ofHim;
+			boolean right = "kept".equals(ofPerch.getStringOr("standing", "")) && STOLAS.equals(ofPerch.getStringOr("counterpart", ""))
+					&& "star_reckoning".equals(ofPerch.getStringOr("service", "")) && "active".equals(ofPerch.getStringOr("state", ""))
+					&& ofPerch.getIntOr("due_days", -1) == 7 && "kept".equals(ofHim.getStringOr("standing", ""))
+					&& PactReading.KEYS.containsAll(ofPerch.keySet()) && PactReading.KEYS.containsAll(ofHim.keySet())
+					&& !both.contains(player(minecraft).getUUID().toString()) && !both.contains(player(minecraft).getName().getString());
+			return (right ? "ok " : "bad ") + both;
+		});
+		Jugcraft.LOGGER.info("[pact-check] Jade's readings of the perch and of Stolas: {}", readings);
+		check(readings.startsWith("ok"), "Jade's readings: the pact, service, state and next offering, naming no player: " + readings);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", perch.getX() + 0.5, perch.getY(), perch.getZ() - 2.5));
+				context.waitTicks(10);
+				context.getInput().lookAt(perch);
+				context.waitTicks(20);
+				shot(context, "jugcraft_pact_perch_jade");
+				context.getInput().lookAt(perch.above());
+				context.waitTicks(20);
+				shot(context, "jugcraft_pact_stolas_jade");
+			} finally {
+				context.runOnClient(client -> {
+					if (client.gui.hud.isHidden() != hidden) {
+						client.gui.hud.toggle();
+					}
+				});
+			}
+		} else {
+			Jugcraft.LOGGER.info("[pact-check] Jade is not loaded: no Jade shot of Stolas or his perch");
+		}
+	}
+
+	// D-06
+	private static String subtitle(Minecraft client, String event) {
+		WeighedSoundEvents events = client.getSoundManager().getSoundEvent(Jugcraft.id(event));
+		Component subtitle = events == null ? null : events.getSubtitle();
+		return subtitle == null ? "" : subtitle.getString();
 	}
 
 	/**

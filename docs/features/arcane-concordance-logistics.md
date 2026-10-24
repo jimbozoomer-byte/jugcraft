@@ -7,7 +7,9 @@ files its own requests, and a Peepo at its port brings only what no courier is b
 contract](concordance-chunk-c.md)), not merged; its tests passed in CI (runs 38731825181 and 38774859294; see
 Verification). Extended by Concordance Chunk D, unit 4 (D-08; [the chunk's contract](concordance-chunk-d.md)), not
 merged: a Workshop Hand, a spirit, carries a post's requests with the porter's own decision, now `spirits/CourierWork`,
-shared; its tests passed in CI run 40085012234 on `86c4e7127` (see Verification).
+shared; its tests passed in CI run 40085012234 on `86c4e7127` (see Verification). Extended by Concordance Chunk D,
+unit 3 (D-07: [the roster screen](arcane-concordance-workers.md#the-roster-screen-concordance-chunk-d-d-07) cancels a
+request and recovers stranded cargo), not merged; its tests have not run in CI yet.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 18) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 10, Practitioner stage (Jugcraft Workshops). Roadmap step 18.
@@ -38,6 +40,9 @@ A courier broken, unloaded or lost in a restart leaves its cargo **stranded** at
 there, or you take it yourself (`/jugcraft concordance logistics recover <number>`). Cancel a request
 (`... cancel <number>`) and anything picked up is taken back to its chest first (or into the post if the chest has no
 room); a broken post does the same for every request bound for it. Nothing is ever dropped or deleted on the way.
+The roster (Concordance Chunk D, D-07; not merged) cancels and recovers too, by the same rules and the commands' own
+gate; it recovers only cargo the ledger holds stranded, never from a container, and refuses a reader who is not alive
+(the command does not).
 Since Concordance Chunk C (C-06), a request's notes name where it was going ("where it was going is full", "where it was
 going was broken"), since a crucible can fill or break as a post can.
 
@@ -358,6 +363,18 @@ one re-run of a client shard for main's `PeepoPopulationClientTests` cow-breedin
   `git diff --check`; `python3 tools/select_client_tests.py --base 97e1facd4 --head HEAD` chooses every client class
   (239). **Not run where it was written:** `./gradlew build` and the game tests (run by CI, above); any client by hand,
   two clients, a real restart and real walking.
+
+**Concordance Chunk D, unit 3: D-07** (commits `a3ee00822` and `66b741868` on the local `wip/chunk-d-u3`; [the chunk's
+contract](concordance-chunk-d.md), D-07's As built note; not merged). **Not yet run in CI:** nothing of it has been
+compiled.
+- `ConcordanceLogisticsGameTests` +2 (30 in all): `recoveryNeverTakesCargoOutOfAnUnloadedContainer` (a request reserved
+  at a container that is not loaded, and one aboard a courier waiting on an unloaded destination, offer Cancel, not
+  Recover, and a recovery forced on either moves nothing; once the courier is gone the stranded cargo comes to its
+  requester once, from the ledger, and the chest keeps its own) and `theRosterEndsAHandAndRecoversItsCargoOnce` (a
+  Workshop Hand shown as its holder's agreement, its request as its task; ended from the roster with cargo aboard, it
+  departs and the cargo is stranded at its post; the roster then recovers it once, from the ledger).
+- `check_roster` holds the roster to `CourierLedger.cancel` and `recover` (never a container's own move) and to the
+  logistics commands' gate.
 
 ## World and event applicability
 

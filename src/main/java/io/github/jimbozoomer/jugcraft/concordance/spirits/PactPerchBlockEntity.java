@@ -51,6 +51,19 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		return visitor;
 	}
 
+	/**
+	 * Stolas at this perch now (D-06): the presence of the pact kept here if he is in the world and perched here, else the
+	 * visitor while one waits; null when neither is, or the one there is leaving (StolasEntity.gone). A copy of this perch
+	 * names the original's presence, who is perched at the original: never this perch's.
+	 */
+	public @Nullable StolasEntity stolas(ServerLevel level) {
+		UUID id = holder.spirit();
+		if (id != null && level.getEntity(id) instanceof StolasEntity presence && !presence.gone() && getBlockPos().equals(presence.perch())) {
+			return presence;
+		}
+		return unbound(level);
+	}
+
 	/** Stolas's offer in force (data/jugcraft/concordance/pact/stolas.json), or null while it did not load. */
 	public static @Nullable PactDefinition definition() {
 		return ConcordanceData.rules().pacts().get(PactDefinition.STOLAS);
@@ -92,8 +105,25 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		return summon(level, who);
 	}
 
+	/** D-06: a conversation opens here: he attends (StolasEntity.listen); at a copy, nobody (stolas()). */
+	void heard(ServerLevel level) {
+		StolasEntity stolas = stolas(level);
+		if (stolas != null) {
+			stolas.listen();
+		}
+	}
+
+	/** D-06: he answers a screen's action with its gesture and sound (StolasEntity.reaction), fired here, on the server. */
+	void react(ServerLevel level, int action, String reason, boolean done) {
+		StolasEntity.Gesture gesture = StolasEntity.reaction(action, reason, done);
+		StolasEntity stolas = gesture == null ? null : stolas(level);
+		if (stolas != null) {
+			stolas.gesture(gesture);
+		}
+	}
+
 	private @Nullable StolasEntity unbound(ServerLevel level) {
-		return visitor != null && level.getEntity(visitor) instanceof StolasEntity guest && !guest.isRemoved() && guest.owner() == null ? guest : null;
+		return visitor != null && level.getEntity(visitor) instanceof StolasEntity guest && !guest.gone() && guest.owner() == null ? guest : null;
 	}
 
 	private @Nullable StolasEntity summon(ServerLevel level, @Nullable UUID who) {
@@ -105,7 +135,13 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 		stolas.setOwner(who);
 		stolas.setPerch(pos);
 		stolas.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.0F, 0.0F);
-		return level.addFreshEntity(stolas) ? stolas : null;
+		if (!level.addFreshEntity(stolas)) {
+			return null;
+		}
+		// D-06: he alights on the perch. Everyone in range already tracks him (ChunkMap pairs a new entity at once), so all of
+		// them see the whole arrival; one who comes later sees him perched.
+		stolas.gesture(StolasEntity.Gesture.ARRIVE);
+		return stolas;
 	}
 
 	/** Its ticker (server only): its pact, once a second, spread by position. */

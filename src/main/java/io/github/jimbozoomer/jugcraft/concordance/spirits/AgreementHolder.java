@@ -378,6 +378,28 @@ public final class AgreementHolder {
 	}
 
 	/**
+	 * Concordance Chunk D, D-06: how its terms stand now, read only (Jade's readings): verify's answer without its writes,
+	 * so nothing is claimed, forgotten, moved or marked changed. A record from before Chunk D not yet claimed counts here if
+	 * its terms were sealed here (verify would claim it).
+	 */
+	public Standing peek(ServerLevel level) {
+		if (agreement == null) {
+			return Standing.NONE;
+		}
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(agreement.record());
+		if (record == null) {
+			return wills.unreadable(agreement.record()) ? Standing.UNREADABLE : Standing.NONE;
+		}
+		if (!record.holder().equals(agreement.holder())) {
+			return Standing.ELSEWHERE;
+		}
+		BoundWill.Pact pact = record.pact();
+		Place kept = pact == null ? new Place(agreement.dimension(), agreement.x(), agreement.y(), agreement.z()) : pact.place();
+		return place(level).equals(kept) ? Standing.VALID : Standing.ELSEWHERE;
+	}
+
+	/**
 	 * Whether its presence is lost (D-S18): not loaded and not removed here, and struck off its holder's roster (a killed
 	 * shade strikes itself off). One that is only unloaded keeps its roster entry and is not lost.
 	 */

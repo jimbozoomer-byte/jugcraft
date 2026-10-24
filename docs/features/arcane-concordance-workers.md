@@ -10,7 +10,9 @@ carrying a Courier Post's requests; [The Workshop Hand](#the-workshop-hand-conco
 2 and not merged; compiled in CI, and its tests passed in run 40085012234 on `86c4e7127` (both server jobs and every
 client class; see Verification). Extended by Concordance Chunk D, unit 2
 (D-03 to D-05: [Stolas's pact](stolas-pact.md), a pact kept at a Pact Perch), not merged; none of its tests has run in
-CI yet.
+CI yet. Extended by Concordance Chunk D, unit 3 (D-06: Stolas's character; D-07: [the roster
+screen](#the-roster-screen-concordance-chunk-d-d-07)), built on its own local branch and not merged; nothing of it has
+been compiled, and none of its tests has run in CI yet.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -129,7 +131,11 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   not_holder, nothing, not_permitted, taken, roster_full, unavailable);
 - `StarReckoning`, Stolas's service: once a game day at the perch, a pattern its holder observed recalled through the
   one recall path (`AstrolabeItem.recall`), and the pact's first obligation (`practice jugcraft:pact_service`, never
-  `worker_service`, so the Binding Arts' mastery keeps its three kinds).
+  `worker_service`, so the Binding Arts' mastery keeps its three kinds);
+- since unit 3 (D-06): Stolas's raven body, his loops and the gestures the server fires on a second GeckoLib controller,
+  his sounds with subtitles and Jade's lines ([Stolas's character](stolas-pact.md#stolass-character-d-06)). His
+  presence's departure lingers 40 ticks for its gesture: struck off the roster at once, never saved meanwhile, and never
+  a perch's visitor or presence again (`gone()`, D-P97).
 
 ## Connections
 
@@ -163,9 +169,10 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
 - Server authority: binding, sealing, routing, repair and every decision are the server's; the client draws the synced
   status. Uses of the charm and the anchor are rate-limited.
 - Permissions: only a familiar's person commands it; only the anchor's owner or their party seal at it, never a
-  stand-in; only a shade's holder suspends it, calls another and ends it (`AgreementHolder.end`; since Chunk D unit 2
-  the pact perch's screen calls it for Stolas's pact, while a shade's agreement waits for D-07's roster, and until then
-  breaking the anchor ends it in game); only a perch's owner, in person, seals a pact there, and only a pact's holder
+  stand-in; only a shade's holder suspends it, calls another and ends it (`AgreementHolder.end`: since Chunk D unit 2
+  the pact perch's screen calls it for Stolas's pact, and since unit 3 the roster (D-07) for every agreement and pact
+  its reader holds; breaking the anchor still ends a shade's agreement in game); only a perch's owner, in person,
+  seals a pact there, and only a pact's holder
   reckons, pays, suspends, ends or seats it; anyone may read its terms; breaking
   the anchor needs the right to break it; only a porter's keeper's party routes or repairs it.
 - A shade whose holder is away (offline, dead or in another dimension) keeps its agreement but waits at its anchor and
@@ -191,13 +198,15 @@ No new dependency. Framework use:
 - **SmartBrainLib**: the workers' brains (a players sensor, look and walk behaviours, the walk-target and can't-reach
   memories). Decisions stay in Jugcraft's own models; the brain only moves the body.
 - **GeckoLib**: three original entity models with their animations, one looping clip per status group.
-- **Jade (optional)**: worker status, bond, load, integrity and charge.
+- **Jade (optional)**: worker status, bond, load, integrity and charge; since Concordance Chunk D, unit 3, a pact
+  perch's and a Spirit Anchor's agreement (`PactDataProvider`) and Stolas's pact, naming no player and nothing of the
+  escrow.
 - **Shared effect system**: the familiar's mending goes through `ConcordanceEffects` like any spell, so protections,
   stacking and attribution apply once.
 - **Modonomicon**: a new **Binding** codex category (the Binding Arts, familiars, spirits, constructs, and every
   reason a worker can give).
 - **GuiLib**: not used. The management controls are the charm, the anchor, the key, an empty hand on a worker and the
-  `workers` command; an optional management screen is an open item.
+  `workers` command and the roster screen (Concordance Chunk D, D-07), a native screen.
 
 Art: three original GeckoLib entity models (64x64 sheets, one looping clip per status group) by
 `tools/concordance_worker_models.py`, and their sheets, the Spirit Anchor's faces and four 16x16 item icon maps by
@@ -360,6 +369,20 @@ D-05's parts), `check_pact_screen`, and `check_workers` covering `StolasEntity` 
 loading, no dimension crossing, no brain memories). The local checks, the parse check, the pure harnesses and the 80
 audit mutations are reported in the contract's D-05 As built note.
 
+**Concordance Chunk D, unit 3: D-06 and D-07** (commits `9805a9a7c`, `773b85aba`, `a3ee00822`, `66b741868` and the
+records' commit "Concordance Chunk D: unit 3's records", on the local `wip/chunk-d-u3` from `92868ff82`;
+[Stolas's pact](stolas-pact.md) and the [contract](concordance-chunk-d.md)'s D-06 and D-07 As built notes, proposals
+D-P90 to D-P121; not merged). **Not yet run in CI:** nothing of it has been compiled. In this record's suites:
+`ConcordanceWorkerGameTests` +14 (D-06's seven, D-07's six and `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`;
+63 in all), with unit 2's tests that read Stolas leaving now reading `gone()`; the client classes
+`ConcordancePactClientGameTests` (extended) and `ConcordanceRosterClientGameTests` (new). Audits: `check_stolas_body`,
+`check_pacts` (D-06's block and the hand's roster rule), `check_roster` and `check_roster_screen`. Run and passed
+locally: `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+`python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
+`node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
+`git diff --check`; 104 audit mutations, each reported. **Not run:** `./gradlew build` (with or without the optional
+integrations), the server and client game tests, two clients.
+
 ## The Workshop Hand (Concordance Chunk D, D-08)
 
 Not merged; built beside Chunk D's unit 2 ([the chunk's contract](concordance-chunk-d.md), D-08's As built note and
@@ -422,6 +445,63 @@ the Clockwork Porter's own decision ([logistics](arcane-concordance-logistics.md
 | Two hands, one request | One claims it; the other may neither claim (`CLAIMED`), reserve nor pick up for it (`NOT_YOURS`) | `twoHandsCannotHoldOneRequest` |
 | The Concordance switched off | `DISABLED`: its claim, cargo and lease untouched; on again within its lease, it delivers once | `theConcordanceOffHoldsTheHand` |
 
+## The roster screen (Concordance Chunk D, D-07)
+
+Not merged; built in Chunk D's unit 3 on its own local branch (commits `a3ee00822`, the server side and the journal's
+pacts, and `66b741868`, the screen; [the chunk's contract](concordance-chunk-d.md), D-07's As built note and proposals
+D-P105 to D-P121). One native, narrated screen for everything a player keeps: their familiars, spirits and constructs,
+their pacts and agreements, and their courier requests.
+
+- **Tier:** none of its own; it shows what the player already has, from their first familiar on.
+- **Input producer:** the worker roster (`WorkerRoster`), the player's Bound Wills (`BoundWills`) and the courier ledger
+  (`CourierLedger`), read again each time it is asked, from what is loaded only.
+- **Output consumer:** the existing authorities only: `AgreementHolder.toggle` and `end`, `CourierLedger.cancel` and
+  `recover`.
+- **Costs and unlocks:** none; a key, "Concordance Roster" (`key.jugcraft.concordance_roster`), not bound at first
+  (Controls; listed on the encyclopedia's Keys page), opening it from the game only (D-P112).
+- **Rows** (D-P105): the reader's own Bound Wills first, in the order sealed (a pact without its place, a record kept at
+  a place that keeps it no longer, or one not yet claimed by its place, included; each with its presence in the same
+  row), then the courier requests they filed, oldest first, then the other workers on their roster. At most 64 rows;
+  the rest are counted, and the journal and the `workers` and `logistics` commands list everything. Each row shows its
+  portrait, kind, service, place and whether it is loaded (a worker not loaded: as it last reported), its current task,
+  its next obligation and why it waits, each state in words beside a drawn mark of its own (12 marks, and one for a
+  loaded or unloaded place), never colour alone (D-P119).
+- **Ars Nouveau's helpers** are named by their kind (Drygmy, Whirlisprig, Wixie, Amethyst Golem, Alakarkinos): G13 is
+  closed, for the `workers` command too (D-P113).
+- **Actions and their authorities** (D-P106 to D-P110, D-P114): Suspend and Resume (offered by the record's hold, so a
+  stale screen never toggles the wrong way) and End through `AgreementHolder`, by record id, so they work while the place
+  is unloaded; End returns the escrow once, into the living reader's inventory, and the presence departs. Cancel and
+  Recover through `CourierLedger`: only the requester; a request reserved or aboard offers Cancel only; Recover hands
+  over only cargo the ledger holds stranded, never anything a container holds, loaded or not. Each request names a row
+  the server listed to this reader and that row's revision; the server checks both again, with the holder or requester,
+  before acting. A stand-in's request is dropped and a dead reader refused. Suspend, Resume and End share the Spirit
+  Anchor's rate gate, Cancel and Recover the logistics commands'. Switched off, the rows are listed, none offers an
+  action, and an action is answered "disabled".
+- **Keep it first** (D-P117): End asks first through `KeepFirstConfirmScreen`, with the server's own words and the
+  keyboard starting on Keep it; Esc keeps. The pact perch's End uses it too. Cancel and Recover do not ask.
+- **The screen:** eight rows a page (Page Up and Page Down turn; the page scrolls within; D-P116); each row a focusable
+  card with its actions under it; each answer, a refusal included, shown with a tick or a cross and read aloud; it asks
+  again every 40 client ticks while open (D-P118), fits the smallest GUI (320×240, D-P120) and draws subtitles over
+  itself.
+- **Portraits** (D-P115): the worker's own creature, drawn still and never added to a level or ticked (at most 16, all
+  forgotten on leaving a world); a request's item; for an unloaded spirit (a Gathering Shade's and a Workshop Hand's
+  kind are both `spirit`) or anything that cannot be made, the Spirit Anchor's icon. The icon is drawn only when the
+  creature cannot be made; whether GeckoLib draws in the GUI is shown only by the client test's shots (its `drawn`
+  records the attempt, not pixels).
+- **No second inventory:** the screen keeps nothing and decides nothing; its requests carry four fields (sequence,
+  action, row id, revision), no player id, text or total. Roster sessions are memory only, forgotten when their reader
+  leaves or the server stops; no saved data.
+- **The journal** (D-P111): the Pacts section lists every pact and agreement held, with where it is kept, its next
+  obligation and why it waits, and the last eight departures.
+- **Test evidence (none yet run in CI):** server game tests `theRosterEndsOnlyWhatTheReaderHolds`,
+  `aRequestNamingAnotherPlayersRecordIsRefused`, `theRosterListsAPactWithoutItsPerch`,
+  `endingAnOrphanReturnsItsEscrowOnce`, `aStaleRosterRevisionIsRefused`, `theRosterStopsAt64Rows`
+  (`ConcordanceWorkerGameTests`), `recoveryNeverTakesCargoOutOfAnUnloadedContainer`,
+  `theRosterEndsAHandAndRecoversItsCargoOnce` (`ConcordanceLogisticsGameTests`) and
+  `thePactsSectionListsPactsOnlyAfterTheBindingArts` (`ConcordanceJournalGameTests`); the client test
+  `ConcordanceRosterClientGameTests` (ten shots) and the roster in `ScreenFitClientGameTests`. Audits `check_roster`
+  and `check_roster_screen`, run and passing.
+
 ## World and event applicability
 
 Works in every dimension; a shade's agreement and a porter's route belong to the dimension they were made in. No
@@ -450,15 +530,20 @@ Since Concordance Chunk D, unit 2 (not merged): entity `jugcraft:stolas`; block,
 saved `owner`, `agreement` and `spirit` and Stolas's `perch` and `record` (stamps 1). [Stolas's pact](stolas-pact.md)
 lists the rest.
 
+Since Concordance Chunk D, unit 3 (not merged): the payload types `jugcraft:concordance_roster_request` and
+`jugcraft:concordance_roster_state` (the roster's actions and icons travel as indices, so append only), the key
+`key.jugcraft.concordance_roster`, Stolas's sound events `jugcraft:stolas.*` and Jade's providers `jugcraft:pact_perch`
+and `jugcraft:spirit_anchor`. No saved data, block, item or entity.
+
 Open items:
 
 - A spirit agrees to one kind of work (gathering, or since Chunk D's unit 4 a courier's); more kinds each need their own
   server behaviour.
 - An agreement's terms come from the definition; letting a holder choose narrower hours or a smaller area needs a
-  management screen (GuiLib, step 26) or more anchor controls.
+  terms control added to the roster (D-07) or more anchor controls.
 - A familiar waits rather than following through a portal, and the charm recalls it only within the same dimension.
-- Ending an agreement without breaking its anchor has its method (`AgreementHolder.end`) but no in-game action until
-  D-07's roster (Concordance Chunk D, unit 3); since unit 2 the pact perch's screen ends Stolas's pact, and a pact
-  without its perch is ended from any perch keeping nothing. A shade's Bound Will left without its place can be ended
-  only by code until D-07's roster.
+- Ending an agreement without breaking its anchor (`AgreementHolder.end`): since unit 2 the pact perch's screen ends
+  Stolas's pact, and a pact without its perch is ended from any perch keeping nothing (or from the roster, D-07); since
+  unit 3 the roster ends any agreement or pact its reader holds, a shade's Bound Will left without its place included.
+  Not yet run in game (unit 3's tests have not run in CI).
 - Workers have not walked real terrain in a test: navigation failure is tested in the harness, not in game.

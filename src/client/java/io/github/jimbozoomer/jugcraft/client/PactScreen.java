@@ -15,12 +15,13 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -38,7 +39,9 @@ import org.jspecify.annotations.Nullable;
  * offerings the holder carries (each paid into the pact's keeping), Suspend or Resume, and End, which asks first. A pact
  * without its perch can be seated here or ended.
  * <p>
- * The server's answer, a refusal with its reason included, is shown and read aloud. Every word is a focusable, narrated
+ * The server's answer, a refusal with its reason included, is shown and read aloud. Each answer carries its mark (a tick
+ * or a cross), and Stolas's subtitles draw over the screen (D-06); ending asks first, the keyboard on Keep it
+ * (KeepFirstConfirmScreen). Every word is a focusable, narrated
  * paragraph and every control a button: Tab and Shift+Tab move, Enter or Space presses, Esc leaves. The screen fits any
  * window down to 320x180 scaled pixels and scrolls its body. Nothing in it decides: each button sends one bounded request
  * through {@link PactClient}. No text box, chat command, vanilla Dialog or GuiLib.
@@ -265,8 +268,18 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		if (PactClient.waiting()) {
 			say(ui("waiting"), DIM, "result");
 		} else {
-			state.result().ifPresent(result -> say(result.message(), result.done() ? GOOD : WARN, "result"));
+			state.result().ifPresent(result -> verdict(result.message(), result.done()));
 		}
+	}
+
+	/** D-06: the answer, marked done or refused (Verdict), in its colour, under the key "result" (as say would put it). */
+	private void verdict(Component text, boolean done) {
+		int colour = done ? GOOD : WARN;
+		Verdict line = new Verdict(text.copy().withColor(colour & 0xFFFFFF), done, font, body.getWidth() - 8, colour);
+		line.setX(body.getX() + 3);
+		body.add(line, at);
+		at += line.getHeight() + 3;
+		controls.put("result", line);
 	}
 
 	private void turn(int to) {
@@ -293,11 +306,14 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		dirty = true;
 	}
 
-	/** Ending asks first, through vanilla's confirmation; only its yes sends END, and Esc keeps the pact. */
+	/**
+	 * Ending asks first, through vanilla's confirmation with the keyboard on Keep it (KeepFirstConfirmScreen, D-06); only its
+	 * yes sends END, and Esc keeps the pact.
+	 */
 	private void confirmEnd() {
 		PactStatePayload state = PactClient.state(menu);
 		Component speaker = state == null ? title : state.speaker();
-		minecraft.gui.setScreen(new ConfirmScreen(yes -> {
+		minecraft.gui.setScreen(new KeepFirstConfirmScreen(yes -> {
 			minecraft.gui.setScreen(this);
 			if (yes) {
 				PactClient.request(menu, PactRequestPayload.END, 0);
@@ -415,6 +431,8 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 		g.text(font, BookArt.fit(font, (state == null ? title : state.speaker()).getString(), w - 44 - right), x + 28, y + 10, GOLD, false);
 		g.text(font, heading, x + w - 10 - right, y + 10, DIM, false);
 		g.fill(x + 8, y + TOP - 3, x + w - 8, y + TOP - 2, 0xFF344158);
+		// D-06 (03:159): his sounds' subtitles over this screen (deferred to here, as vanilla's Screen.extractBackground does).
+		minecraft.gui.hud.extractDeferredSubtitles();
 	}
 
 	@Override
@@ -431,6 +449,12 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 	@Override
 	public boolean isPauseScreen() {
 		return false;
+	}
+
+	@Override
+	public boolean isInGameUi() {
+		// D-06: an in-game screen, as a chest's: the HUD defers its subtitles to extractBackground (Hud.extractSubtitleOverlay).
+		return true;
 	}
 
 	@Override
@@ -487,6 +511,65 @@ public class PactScreen extends Screen implements MenuAccess<PactMenu> {
 			}
 		}
 		return out;
+	}
+
+	/**
+	 * Concordance Chunk D, D-06 (03:159): the answer to the last request with its mark, a tick when it was done, a cross when
+	 * it was refused, drawn before its words, so the outcome never rests on colour alone nor on his gesture or its sound being
+	 * seen or heard. Focusable and narrated ("Done: ..." or "Refused: ..."), as BookArt.Paragraph is. The roster uses it too.
+	 */
+	public static final class Verdict extends AbstractWidget {
+		private static final int MARK = 9;
+		private final Font font;
+		private final List<FormattedCharSequence> lines;
+		private final int colour;
+		private final boolean refused;
+
+		Verdict(Component text, boolean done, Font font, int width, int colour) {
+			super(0, 0, Math.max(30, width), 1, text);
+			this.font = font;
+			this.colour = colour;
+			this.refused = !done;
+			lines = font.split(text, getWidth() - MARK - 6);
+			setHeight(Math.max(MARK + 4, Math.max(1, lines.size()) * (font.lineHeight + 2) + 2));
+		}
+
+		/** Whether its mark is the refusal's cross (tests). */
+		public boolean refused() {
+			return refused;
+		}
+
+		@Override
+		protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+			int mx = getX() + 1;
+			int my = getY() + 2;
+			if (refused) {
+				for (int i = 0; i < MARK; i++) {
+					g.fill(mx + i, my + i, mx + i + 1, my + i + 1, colour);
+					g.fill(mx + MARK - 1 - i, my + i, mx + MARK - i, my + i + 1, colour);
+				}
+			} else {
+				for (int i = 0; i < 3; i++) {
+					g.fill(mx + i, my + 4 + i, mx + i + 1, my + 6 + i, colour);
+				}
+				for (int i = 0; i < 6; i++) {
+					g.fill(mx + 3 + i, my + 6 - i, mx + 4 + i, my + 8 - i, colour);
+				}
+			}
+			int ty = getY() + 1;
+			for (FormattedCharSequence line : lines) {
+				g.text(font, line, getX() + MARK + 5, ty, colour, false);
+				ty += font.lineHeight + 2;
+			}
+			if (isFocused()) {
+				g.outline(getX(), getY(), width, height, colour);
+			}
+		}
+
+		@Override
+		protected void updateWidgetNarration(NarrationElementOutput output) {
+			output.add(NarratedElementType.TITLE, ui(refused ? "result.refused" : "result.done", getMessage()));
+		}
 	}
 
 	/** The compact's materials, as icons with their counts; its term's line says them in words, so this takes no focus. */

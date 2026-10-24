@@ -62,6 +62,26 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("ConcordancePactClientGameTests", chosen)
         self.assertIn("ConcordancePactClientGameTests", selection.WEIGHTS)
 
+    def test_stolas_glowmask_selects_the_pact_client_test(self):
+        # Concordance Chunk D unit 3 (D-06): his glowmask is shown by the pact's client class ("stolas_glowmask" starts with stolas).
+        chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/entity/stolas_glowmask.png"], self.tests, set())
+        self.assertIn("ConcordancePactClientGameTests", chosen)
+
+    def test_stolas_renderer_and_jade_provider_select_the_pact_client_test(self):
+        # Concordance Chunk D unit 3's review (D2): neither is named by a client test, and the pact's class shows both.
+        for path in ("src/client/java/io/github/jimbozoomer/jugcraft/client/WorkerClient.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/compat/jade/PactDataProvider.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordancePactClientGameTests", chosen)
+
+    def test_roster_screen_selects_the_roster_client_test(self):
+        # Concordance Chunk D unit 3 (D-07): the roster screen is shown by its own client class and by the screen fit check.
+        chosen, _ = selection.select(["src/client/java/io/github/jimbozoomer/jugcraft/client/RosterScreen.java"], self.tests, set())
+        self.assertIn("ConcordanceRosterClientGameTests", chosen)
+        self.assertIn("ScreenFitClientGameTests", chosen)
+        self.assertIn("ConcordanceRosterClientGameTests", selection.WEIGHTS)
+
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)

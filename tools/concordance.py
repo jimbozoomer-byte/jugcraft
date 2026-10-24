@@ -521,6 +521,9 @@ ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
 import concordance_pacts as pacts  # noqa: E402
 RESEARCH.update(pacts.RESEARCH)
 BLOCKS.update(pacts.BLOCKS)
+# Concordance Chunk D, D-07 (tools/concordance_roster.py): the roster's words, limits and icons, the journal's pacts lines
+# and the Ars Nouveau helpers' roster kinds (G13).
+import concordance_roster as roster  # noqa: E402
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
@@ -1552,14 +1555,18 @@ SOUND_EVENTS.update(signs.SOUND_EVENTS)
 SOUND_EVENTS.update(ember.SOUND_EVENTS)
 SOUND_EVENTS.update(rime.SOUND_EVENTS)
 SOUND_EVENTS.update(strata.SOUND_EVENTS)
-# Events that play the owner's recordings instead of a drawn cue: event -> sound files (copied by tools/owner_art.py).
-SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES}
+# Concordance Chunk D, D-06 (D-S5): Stolas's cues (tools/concordance_pacts.py), played from runtime files.
+SOUND_EVENTS.update(pacts.SOUND_EVENTS)
+# Events that play the owner's recordings (copied by tools/owner_art.py), or runtime files, instead of a drawn cue:
+# event -> sound files.
+SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES, **pacts.SOUND_FILES}
 
 
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
-    (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), one picked at random. The Exchange
-    artifacts' events are tools/concordance_ee_artifacts.py's."""
+    (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), or, for Stolas's cues, runtime files
+    (tools/concordance_pacts.py's), one picked at random. The Exchange artifacts' events are
+    tools/concordance_ee_artifacts.py's."""
     return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
                        "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
                                   for name in SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
@@ -1639,6 +1646,7 @@ MESSAGES = {
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
+    **roster.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1898,6 +1906,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     signs.lang_entries(lang)
     diagnostics.lang_entries(lang)
     pacts.lang_entries(lang)
+    roster.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})

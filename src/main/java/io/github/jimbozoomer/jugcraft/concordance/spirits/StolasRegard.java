@@ -134,19 +134,20 @@ public final class StolasRegard {
 
 	/**
 	 * The journal's pacts section (D-03 begins it; D-07 adds the pacts): Stolas's Regard's next step with its state, and the
-	 * sky step apart, with the number of patterns observed. Nothing when the rules hold no Stolas's Regard.
+	 * sky step apart, with the number of patterns observed (none of these when the rules hold no Stolas's Regard); then each
+	 * pact and agreement the player holds with its next obligation, and their departures (Roster.report, Concordance Chunk D, D-07).
 	 */
 	public static void report(ServerPlayer player, Journal.Report out) {
-		if (ConcordanceData.rules().research(RESEARCH) == null) {
-			return;
+		if (ConcordanceData.rules().research(RESEARCH) != null) {
+			Step step = step(player);
+			if (step != null) {
+				out.line(Component.translatable("journal.jugcraft.pacts.regard." + step.id), Component.translatable("journal.jugcraft.research.has",
+						Component.translatable("journal.jugcraft.state." + state(player).id())));
+			}
+			Map<String, Long> seen = observed(player);
+			out.line(Component.translatable(seen.isEmpty() ? "journal.jugcraft.pacts.sky_needed" : "journal.jugcraft.pacts.sky_recorded"),
+					Component.translatable("journal.jugcraft.pacts.sky_count", seen.size()));
 		}
-		Step step = step(player);
-		if (step != null) {
-			out.line(Component.translatable("journal.jugcraft.pacts.regard." + step.id), Component.translatable("journal.jugcraft.research.has",
-					Component.translatable("journal.jugcraft.state." + state(player).id())));
-		}
-		Map<String, Long> seen = observed(player);
-		out.line(Component.translatable(seen.isEmpty() ? "journal.jugcraft.pacts.sky_needed" : "journal.jugcraft.pacts.sky_recorded"),
-				Component.translatable("journal.jugcraft.pacts.sky_count", seen.size()));
+		Roster.report(player, out);
 	}
 }

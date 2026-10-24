@@ -27,6 +27,10 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Roster;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterRequestPayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
@@ -1649,6 +1653,137 @@ public class ConcordanceLogisticsGameTests {
 		WorkshopHands.conserved(helper, ids, iron, 20, 0, "recovered", far, post, holder.getInventory());
 		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, back),
 				List.of("filed", "claimed", "reserved", "picked_up", "stranded", "returning", "recovered"), "the post's history of it: the hand never claimed it");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D, D-07 (08:69-70, E4): the roster recovers only cargo the courier ledger holds stranded at a post,
+	 * never anything a container holds, loaded or not. A request reserved at a container whose chunk is not loaded, and one
+	 * whose cargo is aboard a courier waiting on an unloaded destination, each say why they wait and offer cancel, not
+	 * recovery; a recovery forced on either moves nothing; the reserved one cancelled closes, nothing handed over; once its
+	 * courier is gone the four stranded come to their requester once, from the ledger, and the chest keeps its six.
+	 */
+	@GameTest(maxTicks = 20)
+	public void recoveryNeverTakesCargoOutOfAnUnloadedContainer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = keeper(helper);
+		CourierPostBlockEntity post = post(helper, keeper, new BlockPos(2, 1, 2));
+		ChestBlockEntity chest = chest(helper, new BlockPos(1, 1, 2));
+		chest.setItem(0, new ItemStack(Items.GLOWSTONE_DUST, 10));
+		BlockPos farSource = helper.absolutePos(new BlockPos(1, 1, 2)).offset(100_000, 0, 0);
+		BlockPos farDestination = helper.absolutePos(new BlockPos(3, 1, 2)).offset(100_000, 0, 32);
+		helper.assertTrue(!level.isLoaded(farSource) && !level.isLoaded(farDestination), "Neither far place is loaded");
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		Place at = Couriers.place(level, post.getBlockPos());
+		long now = level.getGameTime() + 1_700_000L;
+		Logistics.Filed first = ledger.file(keeper.getUUID(), at, at, new ItemStack(Items.GLOWSTONE_DUST), 3, level.registryAccess(), now);
+		long reserved = first.id();
+		UUID away = UUID.randomUUID();
+		helper.assertTrue(first.outcome() == Logistics.Outcome.DONE && ledger.claim(reserved, away, now) == Logistics.Outcome.DONE
+				&& ledger.ledger().reserve(reserved, away, Couriers.place(level, farSource), 6, now) == Logistics.Outcome.DONE
+				&& ledger.ledger().get(reserved).progress().reserved() == 3, "Three reserved at a container whose chunk is not loaded");
+		Logistics.Filed second = ledger.file(keeper.getUUID(), at, Couriers.place(level, farDestination), new ItemStack(Items.GLOWSTONE_DUST), 4,
+				level.registryAccess(), now);
+		long aboard = second.id();
+		ClockworkPorterEntity porter = courier(helper, keeper, new BlockPos(2, 1, 2));
+		porter.think(level, NIGHT, now);
+		porter.think(level, NIGHT, now + 20);
+		helper.assertTrue(second.outcome() == Logistics.Outcome.DONE && porter.task() == aboard && ledger.ledger().get(aboard).progress().carried() == 4
+				&& ledger.ledger().get(aboard).progress().aboard() && matching(chest, PLAIN) == 6, "A porter picks up four for the unloaded destination");
+		helper.assertTrue(porter.think(level, NIGHT, now + 40) == Status.DESTINATION_UNLOADED, "and waits with them aboard");
+		List<Long> ids = List.of(reserved, aboard);
+		conserved(helper, ledger, ids, PLAIN, 10, "aboard", chest);
+		RosterStatePayload state = ConcordanceWorkerGameTests.roster(keeper);
+		RosterStatePayload.Row reservedRow = ConcordanceWorkerGameTests.rowOf(state, Roster.rowOf(reserved));
+		RosterStatePayload.Row aboardRow = ConcordanceWorkerGameTests.rowOf(state, Roster.rowOf(aboard));
+		helper.assertTrue(reservedRow != null && !reservedRow.loaded() && reservedRow.icon() == RosterStatePayload.UNLOADED
+				&& ConcordanceWorkerGameTests.key(reservedRow.waiting()).equals("message.jugcraft.concordance.roster.waiting.reserved_unloaded")
+				&& reservedRow.offers(RosterRequestPayload.CANCEL) && !reservedRow.offers(RosterRequestPayload.RECOVER),
+				"The reserved request says its container is not loaded and offers no recovery: " + reservedRow);
+		helper.assertTrue(aboardRow != null && !aboardRow.loaded() && aboardRow.icon() == RosterStatePayload.UNLOADED
+				&& ConcordanceWorkerGameTests.key(aboardRow.waiting()).equals("message.jugcraft.concordance.roster.waiting.destination_unloaded")
+				&& aboardRow.offers(RosterRequestPayload.CANCEL) && !aboardRow.offers(RosterRequestPayload.RECOVER),
+				"The request aboard says its destination is not loaded and offers no recovery: " + aboardRow);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.act(keeper, reservedRow, RosterRequestPayload.RECOVER), PactMenu.NOT_OFFERED)
+				&& Roster.act(keeper, Roster.REQUEST, Roster.rowOf(reserved), RosterRequestPayload.RECOVER, now + 50).reason().equals("wrong_state")
+				&& Roster.act(keeper, Roster.REQUEST, Roster.rowOf(aboard), RosterRequestPayload.RECOVER, now + 50).reason().equals("wrong_state"),
+				"A recovery asked of either is refused, by the screen and by the ledger");
+		helper.assertTrue(keeper.getInventory().countItem(Items.GLOWSTONE_DUST) == 0 && matching(chest, PLAIN) == 6
+				&& ledger.ledger().get(reserved).progress().reserved() == 3 && away.equals(ledger.ledger().get(reserved).progress().worker())
+				&& ledger.ledger().get(aboard).progress().carried() == 4 && ledger.ledger().get(aboard).progress().aboard(), "and nothing moved");
+		conserved(helper, ledger, ids, PLAIN, 10, "recovery refused", chest);
+		RosterStatePayload cancelled = ConcordanceWorkerGameTests.act(keeper, reservedRow, RosterRequestPayload.CANCEL);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(cancelled, "cancelled") && ledger.ledger().get(reserved) == null
+				&& keeper.getInventory().countItem(Items.GLOWSTONE_DUST) == 0,
+				"Cancelled from the roster, the reserved request closes; nothing comes out of the unloaded container");
+		porter.discard();
+		Request stranded = ledger.ledger().get(aboard);
+		helper.assertTrue(stranded != null && stranded.state() == RequestState.STRANDED && stranded.progress().carried() == 4,
+				"Its courier gone, the four are stranded at the post");
+		RosterStatePayload.Row strandedRow = ConcordanceWorkerGameTests.rowOf(ConcordanceWorkerGameTests.roster(keeper), Roster.rowOf(aboard));
+		helper.assertTrue(strandedRow != null && strandedRow.icon() == RosterStatePayload.STRANDED && strandedRow.offers(RosterRequestPayload.RECOVER),
+				"The roster now offers their recovery");
+		RosterStatePayload recovered = ConcordanceWorkerGameTests.act(keeper, strandedRow, RosterRequestPayload.RECOVER);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(recovered, "recovered") && keeper.getInventory().countItem(Items.GLOWSTONE_DUST) == 4
+				&& ledger.ledger().get(aboard) == null && matching(chest, PLAIN) == 6, "The requester recovers the four, from the ledger; the chest keeps its six");
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.act(keeper, strandedRow, RosterRequestPayload.RECOVER), Roster.NOT_LISTED)
+				&& Roster.act(keeper, Roster.REQUEST, Roster.rowOf(aboard), RosterRequestPayload.RECOVER, now + 60).reason().equals("not_found")
+				&& keeper.getInventory().countItem(Items.GLOWSTONE_DUST) == 4, "and never twice");
+		conserved(helper, ledger, ids, PLAIN, 10, "recovered", chest, keeper.getInventory());
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D, D-07 with D-08 (E4): the roster shows a workshop hand as its holder's agreement, the request it
+	 * carries as its task, and the crucible's request as its own row (cancel only while aboard); ended from the roster, the
+	 * hand departs and lets its claim go, the cargo stranded at the post; the roster then offers that cargo's recovery, which
+	 * hands the two over once, from the ledger.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theRosterEndsAHandAndRecoversItsCargoOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		ServerPlayer holder = shop.holder();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		UUID record = shop.anchor().agreement().record();
+		long now = WorkshopHands.morning(level, 3_300_000L);
+		long in = WorkshopHands.inHours();
+		hand.think(level, in, now);
+		hand.think(level, in, now + 20);
+		helper.assertTrue(ledger.ledger().get(id).progress().carried() == 2 && ledger.ledger().get(id).progress().aboard(), "The hand carries two");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "carried", shop.chest(), shop.crucible());
+		RosterStatePayload state = ConcordanceWorkerGameTests.roster(holder);
+		RosterStatePayload.Row handRow = ConcordanceWorkerGameTests.rowOf(state, record);
+		RosterStatePayload.Row requestRow = ConcordanceWorkerGameTests.rowOf(state, Roster.rowOf(id));
+		helper.assertTrue(handRow != null && !handRow.request() && "jugcraft:workshop_hand".equals(handRow.portrait())
+				&& WorkshopHands.key(handRow.kind()).equals("message.jugcraft.concordance.workers.kind.spirit")
+				&& WorkshopHands.key(handRow.name()).equals("entity.jugcraft.workshop_hand")
+				&& WorkshopHands.key(handRow.service()).equals("message.jugcraft.concordance.roster.service.courier")
+				&& WorkshopHands.key(handRow.task()).equals("message.jugcraft.concordance.roster.task.carrying")
+				&& Long.valueOf(id).equals(ConcordanceWorkerGameTests.arg(handRow.task(), 0))
+				&& handRow.offers(RosterRequestPayload.SUSPEND) && handRow.offers(RosterRequestPayload.END),
+				"The hand is its holder's agreement, carrying the request: " + handRow);
+		helper.assertTrue(ConcordanceWorkerGameTests.rowOf(state, hand.getUUID()) == null, "and has no second row");
+		helper.assertTrue(requestRow != null && requestRow.icon() == RosterStatePayload.IN_TRANSIT && requestRow.offers(RosterRequestPayload.CANCEL)
+				&& !requestRow.offers(RosterRequestPayload.RECOVER), "The crucible's request, aboard: cancel only: " + requestRow);
+		RosterStatePayload ended = ConcordanceWorkerGameTests.act(holder, handRow, RosterRequestPayload.END);
+		Request stranded = ledger.ledger().get(id);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ended, "ended") && hand.isRemoved() && stranded != null
+				&& stranded.state() == RequestState.STRANDED && stranded.progress().carried() == 2 && "agreement_ended".equals(stranded.progress().note())
+				&& BoundWills.of(level.getServer()).ledger().get(record) == null, "Ended from the roster: the hand departs, the two wait at the post");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "ended (nothing dropped)", shop.chest(), shop.crucible());
+		RosterStatePayload.Row strandedRow = ConcordanceWorkerGameTests.rowOf(ended, Roster.rowOf(id));
+		helper.assertTrue(ConcordanceWorkerGameTests.rowOf(ended, record) == null && strandedRow != null && strandedRow.icon() == RosterStatePayload.STRANDED
+				&& strandedRow.offers(RosterRequestPayload.RECOVER), "The roster now offers the stranded cargo's recovery");
+		RosterStatePayload recovered = ConcordanceWorkerGameTests.act(holder, strandedRow, RosterRequestPayload.RECOVER);
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(recovered, "recovered") && holder.getInventory().countItem(Items.GLOWSTONE_DUST) == 2
+				&& ledger.ledger().get(id) == null, "Its requester recovers the two");
+		helper.assertTrue(ConcordanceWorkerGameTests.answered(ConcordanceWorkerGameTests.act(holder, strandedRow, RosterRequestPayload.RECOVER), Roster.NOT_LISTED)
+				&& holder.getInventory().countItem(Items.GLOWSTONE_DUST) == 2, "and never twice");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "recovered", shop.chest(), shop.crucible(), holder.getInventory());
 		helper.succeed();
 	}
 }

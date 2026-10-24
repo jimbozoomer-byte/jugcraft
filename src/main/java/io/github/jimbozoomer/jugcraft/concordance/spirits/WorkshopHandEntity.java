@@ -113,6 +113,16 @@ public class WorkshopHandEntity extends WorkerEntity<WorkshopHandEntity> impleme
 		return "spirit";
 	}
 
+	/**
+	 * A hand joins its holder's roster only by its seal, its recall or its own decision as its anchor's current hand (the
+	 * shade's rule, unit 1's review fix 2); a change of status never puts one replaced, or loaded while the Concordance is off
+	 * or its anchor unloaded, back on it (Concordance Chunk D, D-07; the hand inherited true until then).
+	 */
+	@Override
+	protected boolean joinsRosterOnStatus() {
+		return false;
+	}
+
 	public @Nullable BlockPos anchor() {
 		return anchor;
 	}
