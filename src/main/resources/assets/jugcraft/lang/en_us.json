@@ -2870,7 +2870,7 @@
   "book.jugcraft.arcane_concordance.binding.familiars.name": "Familiars",
   "book.jugcraft.arcane_concordance.binding.familiars.p0.text": "Use it to bind a **Hearthling**: one familiar a person. It keeps within 8 blocks of you and, when you are badly hurt, mends you. Use the charm again to call it to your side; sneak to release it.",
   "book.jugcraft.arcane_concordance.binding.familiars.p0.title": "Bonding Charm",
-  "book.jugcraft.arcane_concordance.binding.familiars.p1.text": "The bond grows by time spent together, 1 a visit and at most 24 a day, and fades by 4 for each day you play away from it, here or in another dimension; time you are logged out never counts, nor time the Concordance is switched off. At 20 it mends you (at most once a minute); at 60, twice as often. It never follows you into another dimension and never waits in a place that is not loaded: it simply waits where it is.",
+  "book.jugcraft.arcane_concordance.binding.familiars.p1.text": "The bond grows by time spent together, 1 a visit and at most 24 a day, and fades by 4 for each day you play away from it, here or in another dimension; time you are logged out never counts, nor, while it is loaded, time you play with the Concordance switched off. At 20 it mends you (at most once a minute); at 60, twice as often. It never follows you into another dimension and never waits in a place that is not loaded: it simply waits where it is.",
   "book.jugcraft.arcane_concordance.binding.familiars.p1.title": "The Bond",
   "book.jugcraft.arcane_concordance.binding.name": "Binding",
   "book.jugcraft.arcane_concordance.binding.reasons.description": "What a worker can tell you",

@@ -36,7 +36,8 @@ import org.jspecify.annotations.Nullable;
  * another dimension or teleports into an unloaded place: when its person is offline it waits where it is ("owner
  * offline"), and when they are in another dimension it waits ("other dimension") until they come back or recall it.
  * Its bond fades only for its person's own play time away (Concordance Chunk D, D-S17), and not for play while the
- * Concordance is switched off.
+ * Concordance is switched off and it is loaded; one not loaded meanwhile counts that play at its first look once the
+ * switch is on (D-P13).
  */
 public class HearthlingEntity extends WorkerEntity<HearthlingEntity> {
 	public static final String DEFINITION = "jugcraft:hearthling";

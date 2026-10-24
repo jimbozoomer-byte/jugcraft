@@ -19,17 +19,19 @@ Spirit Anchor records who placed it, and only its owner or their party seal at i
 with one reason (SEAL_OUTCOMES) before anything is recorded, spent or called, and a new shade is on the roster at once; a
 killed shade's load goes home once and its holder calls another under the same agreement at no cost; only the holder ends
 an agreement, once (Java: worker/Pacts.java, spirits/AgreementHolder.java). A familiar's bond fades only for its
-person's own play time away, never for time they are logged out or the Concordance is switched off (D-S17; Java:
-worker/Bond.java, spirits/HearthlingEntity.java).
+person's own play time away (D-S17), never for time they are logged out, nor, while it is loaded, for play with the
+Concordance switched off; one not loaded meanwhile counts that play at its first look once the switch is on (D-P13;
+Java: worker/Bond.java, spirits/HearthlingEntity.java).
 
 Concordance Chunk D, unit 1 (D-02): one pact record. A Bound Will carries its pact: where it is kept, whether it is held
 and why (PACT_HOLDS), who benefits, the presence serving it, the service terms and day's count it was sealed with, and its
 upkeep, with the offerings paid ahead kept beside it in the world's record, never in a block. A copied anchor is inert and
 releases nothing; an anchor from before claims its record once, at its own place. Upkeep falls due on the Spire's model
 (PACT: looked at only with the Concordance on and the holder within REACH, at most one period a look, never owing time
-away or held), warns, gives a grace and holds the pact without loss; only its living holder ends it, once, and the last
-HISTORY departures of each holder are kept (PACT_DEPARTURES; Java: worker/Pacts.java, resource/BoundWill.java,
-spirits/AgreementHolder.java, spirits/BoundWills.java, spirits/PactHistory.java).
+away or held; a gap of at most ABSENT_TICKS is not an absence, so a due date or grace end inside it counts), warns,
+gives a grace and holds the pact without loss; only its living holder ends it, once, and the last HISTORY departures of
+each holder are kept (PACT_DEPARTURES; Java: worker/Pacts.java, resource/BoundWill.java, spirits/AgreementHolder.java,
+spirits/BoundWills.java, spirits/PactHistory.java).
 """
 
 MOD = "jugcraft"
@@ -287,9 +289,9 @@ def codex():
                 ("text", "The Bond",
                  f"The bond grows by time spent together, {BOND_GAIN} a visit and at most {BOND_DAILY_GAIN} a day, and "
                  f"fades by {BOND_NEGLECT} for each day you play away from it, here or in another dimension; time you are "
-                 f"logged out never counts, nor time the Concordance is switched off. At {BOND_FIRST} it mends you "
-                 f"(at most once a minute); at {BOND_SECOND}, twice as often. It never follows you into another "
-                 f"dimension and never waits in a place that is not loaded: it simply waits where it is."),
+                 f"logged out never counts, nor, while it is loaded, time you play with the Concordance switched off. At "
+                 f"{BOND_FIRST} it mends you (at most once a minute); at {BOND_SECOND}, twice as often. It never follows "
+                 f"you into another dimension and never waits in a place that is not loaded: it simply waits where it is."),
             ],
         },
         ("binding", "spirits"): {

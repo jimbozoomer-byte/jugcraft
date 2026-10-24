@@ -19,7 +19,7 @@ import net.minecraft.world.level.saveddata.SavedDataType;
 
 /**
  * Concordance Chunk D, D-02 (D-S6): each holder's last {@value Pacts#HISTORY} departures (an agreement ended by its holder,
- * or released by its place broken), saved with the world (data/jugcraft_pact_history.dat in the Overworld), read holder by
+ * or released by its place broken), saved with the world (data/jugcraft/pact_history.dat in the Overworld), read holder by
  * holder: a list that cannot be read is kept as written (roadmap step 30). A separate record because a non-UUID key in
  * the Bound Wills would be kept as unread and never updated.
  */

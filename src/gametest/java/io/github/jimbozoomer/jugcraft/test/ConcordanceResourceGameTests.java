@@ -202,8 +202,9 @@ public class ConcordanceResourceGameTests {
 				&& !Pacts.due(Pacts.suspend(paying, 2_000L), true, 0, 1_000L + 8 * Pacts.DAY).changed(),
 				"Nothing falls due with its holder away, or suspended by them");
 		BoundWill resumed = Pacts.resume(Pacts.suspend(paying, 2_000L), 2_000L + Pacts.DAY);
-		helper.assertTrue(resumed.pact().hold() == BoundWill.Hold.NONE && resumed.pact().upkeep().due() == 1_000L + 8 * Pacts.DAY,
-				"Resumed by its holder, its clock moves on by the time suspended");
+		helper.assertTrue(resumed.pact().hold() == BoundWill.Hold.NONE && resumed.pact().upkeep().due() == 1_000L + 8 * Pacts.DAY
+				&& resumed.pact().upkeep().lookedAt() == 1_000L + Pacts.DAY,
+				"Resumed by its holder, its clock and its last look move on by the time suspended (the unit review's fix 1)");
 		helper.assertTrue(Pacts.benefits(paying, holder, false) && !Pacts.benefits(paying, other, true)
 				&& Pacts.benefits(stolas.with(new BoundWill.Pact(here, BoundWill.Hold.NONE, 0L, Pacts.PARTY, null, null)), other, true),
 				"Only its holder benefits, and their party only when the pact says so");

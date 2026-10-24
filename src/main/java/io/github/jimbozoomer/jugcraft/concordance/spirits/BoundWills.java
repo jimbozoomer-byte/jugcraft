@@ -27,7 +27,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Every sealed agreement's Bound Will record (roadmap steps 7 and 17), saved with the world
- * (data/jugcraft_bound_wills.dat in the Overworld): an agreement with an identity, held by one player, never merged,
+ * (data/jugcraft/bound_wills.dat in the Overworld): an agreement with an identity, held by one player, never merged,
  * split or counted. Sealing adds one; its holder's end, or its place broken, removes it. Since Concordance Chunk D (D-02,
  * D-S6, D-S9) an entry also carries its record's pact and its escrow: the offerings paid ahead for its upkeep, exact
  * stacks kept here and never in a block, so no hopper, pipe, explosion or copied block reaches them; releasing a record

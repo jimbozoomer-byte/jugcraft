@@ -6,7 +6,8 @@ package io.github.jimbozoomer.jugcraft.concordance.worker;
  * and fades by {@value #NEGLECT} for each whole day of its person's own play time (the game's play-time statistic, which
  * grows only while they are in the game) spent away from it, online elsewhere in its level or another (Concordance Chunk
  * D, D-S17): days they are logged out never count, whether or not the familiar was loaded meanwhile, and neither does
- * play while the Concordance is switched off ({@link #restart}). Its strength decides the support it gives: none below
+ * play while the Concordance is switched off and the familiar is loaded ({@link #restart}; one not loaded meanwhile counts
+ * that play at its first look once the switch is on, D-P13). Its strength decides the support it gives: none below
  * {@value #FIRST}, a mending at {@value #FIRST}, and the mending more often at {@value #SECOND}. A familiar bonds to one
  * person; a person keeps one familiar.
  *

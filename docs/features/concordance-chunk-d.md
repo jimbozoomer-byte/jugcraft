@@ -113,7 +113,7 @@ completes the path. Nothing in units 3 and 4 comes before it.
 
 | Unit | Tickets | What it delivers | Record (proposed) | State |
 |---|---|---|---|---|
-| 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Built (not merged): D-01 and D-02 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`; commits `56a74f4be`, `7477efbcd`, `fa5360d0d` and the records' commit). Local checks run and passed, 45 of 46 audit mutations reported (D-02's As built); `./gradlew build`, the server and client game tests and CI not run |
+| 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Built (not merged): D-01 and D-02 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`; commits `56a74f4be`, `7477efbcd`, `fa5360d0d`, the records' `97e1facd4` and the unit review's fixes). Local checks run and passed, 52 of 53 audit mutations reported (D-02's As built); `./gradlew build`, the server and client game tests and CI not run |
 | 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | Not started |
 | 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Not started |
 | 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Not started |
@@ -378,7 +378,11 @@ another's anchor). The familiar's fix is a routine adjacent fix and not E2 evide
   - a shade's load goes into its anchor only when that anchor keeps its own holder's agreement, never into one sealed
     again by someone else (correction 12; D-P12 as built);
   - the shade's self-note is in `decide`, for its anchor's current spirit only, so a replaced or switched-off shade
-    never takes roster room (correction 11);
+    never takes roster room (correction 11; completed by the unit review's fix 2: a change of status only updates a
+    shade's existing roster entry, `WorkerEntity.joinsRosterOnStatus` being false for the shade, while familiars,
+    porters and Nouveau helpers still join on a change of status);
+  - a shade's load drops with `Containers.dropItemStack`, whatever the block-drop rule says (the unit review's fix 3;
+    the specification had `Block.popResource`, which spawns nothing with `block_drops` off);
   - a familiar whose person is online while the Concordance is off restarts its play-time count, so no fade accrues
     while off; one not loaded meanwhile counts that play at its first look after the switch is on (correction 13;
     D-P13); the play time is read through one helper, `played(person)`, which `check_workers` audits;
@@ -534,7 +538,12 @@ art.
     genuine anchor);
   - upkeep (D-P2 as built, correction 3): a due date that passed while nobody looked becomes the moment of return, and
     a pact resumed from an upkeep hold by an offering falls due a whole period from then, so neither time away nor time
-    held is charged;
+    held is charged; resumed by its holder, its last look moves on with its clock, so an absence before the hold still
+    counts (the unit review's fix 1); a look in the tick of the last one goes on, so an offering paid then resumes at
+    once (fix 7); a gap of at most `ABSENT_TICKS` (1,200 ticks) is not an absence, so a due date or grace end inside it
+    counts at the next look (fix 8);
+  - no definition revision is stored on a pact: a sealed pact keeps its copied terms, and D-04's terms revision is
+    checked per negotiation (the unit review's fix 11; D-P1);
   - breaking a holder block while the Concordance is off releases nothing (correction 5; D-P16);
   - suspend and resume by record id alone (`AgreementHolder.toggle(level, player, id, now)`) for D-07's roster while the
     place is unloaded (correction 9; D-P8); `end` has the same static form;
@@ -563,26 +572,61 @@ art.
   on the record; `end`'s order; `broken` while switched off; `toggle` by record; `look`; the anchor's
   `CONFLICTING_AGREEMENT`; the shade's `verify`); `ENTRY_BY_ENTRY` gains `PactHistory`; `AUTHORITY_ROUTES` gains
   `presentNear`.
-- **Commands** (run and passed before each of the unit's four commits): `python3 tools/owner_art.py --check`,
-  `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+- **Commands** (run and passed before each of the unit's five commits, the unit review's fixes included):
+  `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
   `python3 tools/concordance_journey.py --check` ("every route holds"), `python3 tools/check_icon_maps.py`,
   `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
-  `git diff --check`. For these notes: every changed Java file parse-checked (24 files, no syntax error); the pure
-  classes (`worker/Pacts`, `Agreement`, `Status`, `Bond`, `resource/BoundWill`, `BoundWillLedger`, `logistics/Place`)
-  compiled with JDK 21's `javac` against the jspecify jar, and two pure harnesses replaying the upkeep tests' traces and
-  `thePactRulesKeepTheirShape`'s rules passed; `python3 tools/select_client_tests.py --base a8c7cd770` chose every
+  `git diff --check`. For these notes: every changed Java file parse-checked (24 files, no syntax error; the fixes' 11
+  again); the pure classes (`worker/Pacts`, `Agreement`, `Status`, `Bond`, `resource/BoundWill`, `BoundWillLedger`,
+  `logistics/Place`) compiled with JDK 21's `javac` against the jspecify jar, and two pure harnesses replaying the
+  upkeep tests' traces and `thePactRulesKeepTheirShape`'s rules passed (with the fixes, the upkeep harness also replays
+  fixes 1 and 7, and fails on the code before them); `python3 tools/select_client_tests.py --base a8c7cd770` chose every
   client class (239: `TestPlayers.java` is a shared file, D-P11).
 - **Audit mutations** (run in place on the final tree, every file restored after each and the tree verified
-  unchanged): the specification's 30 (M1 to M12, M14 to M31) and 16 for the review's corrections (the cost asked after
-  the call and paid before the record, the cargo into any anchor, `cannot_afford` dropped from `SEAL_OUTCOMES`, a
-  renamed `theHolderEndsWithoutBreaking`, the play-time helper reading game time, no restart while switched off, the
-  fade counted only beyond the follow distance, a renamed `aFamiliarFadesWhileItsPersonPlaysElsewhere`, `broken`
-  releasing while switched off, the record `toggle` letting a stand-in through, `taskDone` counting only on the block,
-  `done_today` and `service` made required, the legacy claim copying nothing, the generator's `REACH` 32). 45 of the
-  46 are reported and the unchanged tree reports nothing. Not reported: counting the familiar's fade only beyond its
-  follow distance, as before Chunk D; `aFamiliarFadesWhileItsPersonPlaysElsewhere`'s last step catches it when it runs.
-  M5 (`ROSTER_FULL`'s id changed) is reported by the outcome checks, not by a missing lang key as the specification
-  expected: the lang check reads the generator's list.
+  unchanged; run again with the unit review's fixes): the specification's 30 (M1 to M12, M14 to M31), 16 for the
+  review's corrections (the cost asked after the call and paid before the record, the cargo into any anchor,
+  `cannot_afford` dropped from `SEAL_OUTCOMES`, a renamed `theHolderEndsWithoutBreaking`, the play-time helper reading
+  game time, no restart while switched off, the fade counted only beyond the follow distance, a renamed
+  `aFamiliarFadesWhileItsPersonPlaysElsewhere`, `broken` releasing while switched off, the record `toggle` letting a
+  stand-in through, `taskDone` counting only on the block, `done_today` and `service` made required, the legacy claim
+  copying nothing, the generator's `REACH` 32) and 7 for the unit review's fixes (M48 to M54: `recall` letting a
+  stand-in through, `deposit` taking anyone's offering, the shade's load by `Block.popResource`, the shade joining its
+  roster on any status, `setStatus` noting every worker, `resume` setting the last look to now, a look in the last
+  look's tick doing nothing). 52 of the 53 are reported and the unchanged tree reports nothing. Not reported: counting
+  the familiar's fade only beyond its follow distance, as before Chunk D; `aFamiliarFadesWhileItsPersonPlaysElsewhere`'s
+  last step catches it when it runs. M5 (`ROSTER_FULL`'s id changed) is reported by the outcome checks, not by a
+  missing lang key as the specification expected: the lang check reads the generator's list.
+- **The unit review's fixes** (commit "Chunk D unit 1: fixes from the unit review", after the records' commit
+  `97e1facd4`; 12 findings confirmed against the code, 24 rejected, no new proposal id):
+  1. resumed by its holder, a pact's last look moves on by the time held (never past now), so an absence before the
+     hold is still one: warned again with the whole grace, or paid once with the next a period from the return (D-P2).
+     Tested at the end of `aReturnAfterAbsenceGetsTheFullGrace` and in `thePactRulesKeepTheirShape`;
+  2. a change of status no longer puts a Gathering Shade on its holder's roster (`WorkerEntity.joinsRosterOnStatus`,
+     false for the shade only), so one replaced, or loading while switched off or away from its anchor, takes no room;
+     it joins only by its seal, its recall or its own decision (completing correction 11). Tested in
+     `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`. A released Hearthling that loads while switched off is still
+     noted back (since step 17; not changed here);
+  3. a shade's load drops with `Containers.dropItemStack`, so none is lost with the block-drop rule off;
+     `aKilledShadeAwayFromItsAnchorDropsWhereItFell` turns the rule off around the kill and gives it back in `finally`;
+  4. the codex page "The Bond" (regenerated), the generator's docstring and the `Bond` and `HearthlingEntity` Javadocs
+     say that play with the Concordance switched off does not count only while the familiar is loaded (D-P13);
+  5. `check_pacts` holds `recall`'s stand-in refusal and `deposit`'s holder check; in `aStandInNeverSeals` a stand-in
+     with the owner's identity is refused a recall and calls nothing, and in `onlyTheHolderEnds` a party member's
+     offering is refused;
+  6. "not yet pushed" is said as of the writing (CHANGELOG, INTEGRATION_STATUS);
+  7. a look in the tick of the last look goes on (`now < lookedAt`), so an offering paid in the tick of a ticker's look
+     resumes at once; `upkeepWarnsThenSuspendsAfterGraceAndResumes` looks in the offering's tick first;
+  8. a gap of at most `ABSENT_TICKS` (1,200 ticks) is not an absence, so a due date or grace end inside it counts:
+     recorded in D-P2, D-S16 and every record that said time away or switched off is never owed;
+  9. one escrow stack this version cannot read keeps its whole Bound Will unread (D-P1, the persistence record); unit 2
+     decides, before D-05's offerings, whether to decode escrow stack by stack;
+  10. D-P4's trade-off with a crash between a chunk save and the world data's save (D-P4, Risks);
+  11. no definition revision is stored on a pact (the departures above; D-P1);
+  12. the saved-data paths in the `PactHistory`, `BoundWills` and `WorkerRoster` Javadocs are `data/jugcraft/<name>.dat`
+      (`SavedDataStorage` resolves the id's namespace as a folder); the bond's `seen_played` is marked built in
+      Interfaces.
+  Beyond the findings, `check_pacts` also holds fixes 1, 2, 3 and 7 (M50 to M54 above), and `WorkerRoster`'s Javadoc
+  says a shade only updates an entry it has.
 - **Not run:** `./gradlew build` (with or without the optional integrations) and every server and client game test (CI
   is their first compile and run), any client, two clients, a real world saved before Chunk D, a server restart.
 - **Not confirmed until CI:** that DFU's `optionalFieldOf` fails on a present malformed value (so an unknown hold keeps
@@ -1069,7 +1113,7 @@ spirits codex entry regenerated. No payload, block, item, entity or art.
 - Network: two new payload pairs (the pact menu's, the roster's); a menu type for the perch.
 - Saved: optional Bound Will keys (as built, `pact` and `escrow`); `jugcraft:pact_history` (no `jugcraft:pacts`, D-P1);
   the anchor's optional `owner` (built in unit 1) and `post`;
-  the bond's optional `seen_played`; the perch's block entity; the entities' keys. Every stamp stays at 1.
+  the bond's optional `seen_played` (built in unit 1); the perch's block entity; the entities' keys. Every stamp stays at 1.
 
 ## Dependencies and order
 
@@ -1100,7 +1144,12 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   may narrow it at the checkpoint.
 - **Gentle upkeep's loophole:** a holder who leaves before each grace ends and returns later is warned again with a
   full grace each time, and is never suspended. Accepted as gentle (the offering is a renewable flower); the checkpoint's
-  strictness question covers it.
+  strictness question covers it. The other way, a gap between looks of at most `ABSENT_TICKS` (1,200 ticks, a minute)
+  is not an absence, so a due date or grace end inside it counts at the next look (D-P2 as built).
+- **A crash and the legacy suspension (D-P4, as built):** the anchor's chunk and the Bound Wills are saved at different
+  times, so a crash between them can lose a legacy claim after the anchor's flag was written false; the next verify
+  claims the record again with no hold, and a suspension made before Chunk D is lost once (its holder can suspend
+  again). Nothing else is lost.
 - **Practice side effects:** the Conclave hears every recorded practice (`ConcordanceProgress.java:101-127`;
   `starbound/Starbound.java:104`). `pact_service` is recorded once a pact, so its effect on Conclave projects is bounded;
   no commission names it.
@@ -1239,7 +1288,7 @@ D-P16 from its review), each with what was built; none is the owner's, and each 
 | D-S13 | 23 October 2026 | The Open Hand Compact is the acceptance cost (ordinary materials and astrolabe resonance), spent in the call that seals; not a rite. Spending tests use a survival test player: vanilla's mock reports creative whatever game mode is set on it, so setting survival on the mock is not enough (Facts; D-04) | Decided by the session under D-D2 (23 October 2026) | D-04 |
 | D-S14 | 23 October 2026 | A perch-bound menu (the `ShopMenu` pattern) with bounded actions and a terms revision, carried by one small client-to-server payload (container id, sequence, action, choice, revision); no free text, player ids, client totals, Dialog, chat commands, mixins or GuiLib; a native, narrated, keyboard-operable `PactScreen` (D-04) | Decided by the session under D-D2 (23 October 2026) | D-04, D-05 |
 | D-S15 | 23 October 2026 | The terms page shows service, hours, area, quota, upkeep and grace, what suspension does, duration, breach rules, how to end, what returns, beneficiaries and the compact's cost. The perch is placed only where the placer may build, never in Styx's protected district; one Stolas a holder is the entity cap (D-04) | Decided by the session under D-D2 (23 October 2026) | D-04 |
-| D-S16 | 23 October 2026 | With the Concordance disabled, no upkeep falls due and nothing suspends; Stolas waits (`DISABLED`); records and escrow untouched; tested (D-02, D-05) | Decided by the session under D-D2 (23 October 2026) | D-02, D-05 |
+| D-S16 | 23 October 2026 | With the Concordance disabled, no upkeep falls due and nothing suspends; Stolas waits (`DISABLED`); records and escrow untouched; tested (D-02, D-05). As built (unit 1): a switch-off, like any gap between looks, of at most `ABSENT_TICKS` (1,200 ticks) is not an absence, so a due date or grace end inside it counts at the first look after (D-P2; the unit review's fix 8) | Decided by the session under D-D2 (23 October 2026) | D-02, D-05 |
 | D-S17 | 23 October 2026 | The familiar's fade, an adjacent routine fix and not E2 evidence: the bond fades only for its person's own play time away, so offline days never count, even unloaded; days played in another dimension still count (D-01) | Decided by the session under D-D2 (23 October 2026) | D-01 |
 | D-S18 | 23 October 2026 | A shade's death: its load into the anchor's slots when the anchor is loaded, otherwise dropped where it fell; "lost" read from the roster, not from an absent entity; a re-call while the old shade is unloaded makes it leave once and deliver once (D-01) | Decided by the session under D-D2 (23 October 2026) | D-01 |
 | D-S19 | 23 October 2026 | Consumed offerings stay in equivalence; only pact items (the perch's item, any compact item) are excluded; the balance is documented (D-04, D-05) | Decided by the session under D-D2 (23 October 2026) | D-04, D-05 |
@@ -1247,10 +1296,10 @@ D-P16 from its review), each with what was built; none is the owner's, and each 
 | D-S21 | 23 October 2026 | Text comes from the generators; English only | Decided by the session under D-D2 (23 October 2026) | every ticket |
 | D-S22 | 23 October 2026 | #467's two-client harness is an unmerged fork contribution and is not imported; two-client checks are attempted only with what this branch has, otherwise recorded as not run (D-09) | Decided by the session under D-D2 (23 October 2026) | D-09 |
 | D-S23 | 23 October 2026 | An invalid or missing pact definition reports cleanly on reload, and sealed pacts keep the terms copied at sealing; a holder leaving a party or the perch's land changing hands never moves a pact to another player; both tested (D-04, D-05) | Decided by the session under D-D2 (23 October 2026) | D-04, D-05 |
-| D-P1 | 24 October 2026 | Pact data is `BoundWill.Pact`, an optional `pact` key, and the escrow an optional `escrow` key (an `ItemStack` list) of the same `jugcraft:bound_wills` entry, still version 1; there is no `jugcraft:pacts` (the ticket's `PactRecords`), so release removes a record and its escrow in one call. The departure history is `PactHistory` (`jugcraft:pact_history`, version 1, read holder by holder, 8 entries each). As built, the pact also keeps its service terms (`service`) and day's count (`window`, `done_today`) as optional keys (the review's correction 4), so a pact seated again keeps its terms and its day | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04, D-05, D-07 |
-| D-P2 | 24 October 2026 | Upkeep runs on game time, on the Spire's model. It is looked at only with the Concordance on and the holder present: online, alive, in the place's level, within `Pacts.REACH` = 64 blocks, never a stand-in. At most one period falls due a look. With none in escrow, a warning and the grace; the grace over, an `upkeep` hold; paying resumes the pact. After a gap of more than `ABSENT_TICKS` = 1,200 ticks without a look, a warned pact is warned again with the whole grace. The holder's own suspension pauses the clock: due date and grace move on by the time held. The last look is written at most every `WRITE_TICKS` = 200 ticks. As built (correction 3): paid, the next falls a period after the due date, or a period from now if that has passed; after an absence a passed due date becomes the moment of return; resumed from an upkeep hold by an offering, the next falls a whole period from then. Neither time away nor time held is charged | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-05 |
+| D-P1 | 24 October 2026 | Pact data is `BoundWill.Pact`, an optional `pact` key, and the escrow an optional `escrow` key (an `ItemStack` list) of the same `jugcraft:bound_wills` entry, still version 1; there is no `jugcraft:pacts` (the ticket's `PactRecords`), so release removes a record and its escrow in one call. The departure history is `PactHistory` (`jugcraft:pact_history`, version 1, read holder by holder, 8 entries each). As built, the pact also keeps its service terms (`service`) and day's count (`window`, `done_today`) as optional keys (the review's correction 4), so a pact seated again keeps its terms and its day. An entry is read whole: one escrow stack this version cannot read (an item or component from a removed mod) keeps the whole entry unread like an unreadable pact key, so its anchor waits, `end` finds nothing and it drops out of `heldBy` and the 32-record count, though nothing is lost; whether to decode escrow stack by stack is decided in unit 2, before D-05's offerings (the unit review's fix 9). No definition revision is stored on a pact: a sealed pact keeps its copied terms, and D-04's terms revision is checked per negotiation (fix 11) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04, D-05, D-07 |
+| D-P2 | 24 October 2026 | Upkeep runs on game time, on the Spire's model. It is looked at only with the Concordance on and the holder present: online, alive, in the place's level, within `Pacts.REACH` = 64 blocks, never a stand-in. At most one period falls due a look. With none in escrow, a warning and the grace; the grace over, an `upkeep` hold; paying resumes the pact. After a gap of more than `ABSENT_TICKS` = 1,200 ticks without a look, a warned pact is warned again with the whole grace; a shorter gap (the holder away, the place unloaded or the Concordance off) is not an absence, so a due date or grace end inside it counts at the next look (the unit review's fix 8). The holder's own suspension pauses the clock: due date and grace move on by the time held, and so does the last look (never past now), so an absence before the hold still counts (fix 1). The last look is written at most every `WRITE_TICKS` = 200 ticks; a look in the tick of the last one goes on, so an offering paid in the tick of a ticker's look resumes at once (fix 7). As built (correction 3): paid, the next falls a period after the due date, or a period from now if that has passed; after an absence a passed due date becomes the moment of return; resumed from an upkeep hold by an offering, the next falls a whole period from then. Neither time away nor time held is charged, beyond a gap of at most `ABSENT_TICKS` | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-05 |
 | D-P3 | 24 October 2026 | A record from before Chunk D is claimed only by the block whose agreement's own `dimension`, `x`, `y` and `z` are its place, and only while its spirit, if loaded, is seated there; a copy elsewhere never claims, whichever loads first (stricter than D-S9's "first claim wins"). A new seal or claim at a place still keeping an orphan record leaves that record without its place, its holder and escrow kept. As built, the claim also copies the block's service terms and day's count onto the record | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
-| D-P4 | 24 October 2026 | After the claim the block's `Agreement.suspended` is written false; the record's hold is the only authority. A downgrade is unsupported | Proposed (unit 1, reviewable at the checkpoint) | D-02 |
+| D-P4 | 24 October 2026 | After the claim the block's `Agreement.suspended` is written false; the record's hold is the only authority. A downgrade is unsupported. As built, the flag is kept for a downgrade's reading, not for crash safety: the anchor's chunk saves when it unloads and `jugcraft:bound_wills` at autosave, so a crash after the chunk (its flag now false) is saved and before the claim is loses the claim, and the next verify claims the record again with no hold; a suspension made before Chunk D is then lost once, and its holder can suspend again (the unit review's fix 10; Risks). Keeping the flag mirroring the record's holder hold would close this | Proposed (unit 1, reviewable at the checkpoint) | D-02 |
 | D-P5 | 24 October 2026 | `TAKEN` means the holder block already keeps terms, not that the ledger has some record at the place: safe with game-test structure clearing (flag 818 skips side effects) and with crash orphans | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
 | D-P6 | 24 October 2026 | Sealing an owned holder block needs its owner, or their party where the block lets parties seal, **and** `Authority.mayChange` at the block; an ownerless legacy anchor needs only `mayChange`; a stand-in never seals. As built: `Sealing.partySeals` (the anchor true; D-04's perch false, D-S8; correction 6); "the Binding Arts are not understood" stays the anchor's own check before sealing, worded as before, not a seal outcome | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04 |
 | D-P7 | 24 October 2026 | A block whose Bound Will is gone (and not merely unreadable) forgets its terms when it next verifies, and may be sealed again; its shade then departs, its load dropped at the anchor (which no longer keeps its holder's agreement, D-P12). An unreadable record makes the block and its shade wait | Proposed (unit 1, reviewable at the checkpoint) | D-02 |
@@ -1258,7 +1307,7 @@ D-P16 from its review), each with what was built; none is the owner's, and each 
 | D-P9 | 24 October 2026 | The anchor gets no server ticker: its definition has no upkeep. `AgreementHolder.look` is the rule's driver, called by D-04's perch ticker. `OnBreak.UNSEAT` (a broken perch leaves its pact without its place) arrives with D-04 | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
 | D-P10 | 24 October 2026 | Status ids `upkeep_due` and `upkeep_held` are appended (each a want sign) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-07 |
 | D-P11 | 24 October 2026 | `TestPlayers` gains `survivor`, `leave`, `again`, `played` and `play`. Editing `TestPlayers.java` makes `tools/select_client_tests.py` choose every client class (a shared file); accepted. As built: every class, 239 | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-02 |
-| D-P12 | 24 October 2026 | A departing or killed shade's load goes into the anchor at its seat when that anchor is loaded and keeps an agreement of the shade's own holder, whether or not it still names the shade; otherwise it drops at its anchor's place (departing) or where it fell (killed). The specification had any anchor at the seat; as built, never one sealed again by someone else (correction 12) | Proposed (unit 1, reviewable at the checkpoint) | D-01 |
+| D-P12 | 24 October 2026 | A departing or killed shade's load goes into the anchor at its seat when that anchor is loaded and keeps an agreement of the shade's own holder, whether or not it still names the shade; otherwise it drops at its anchor's place (departing) or where it fell (killed), whatever the block-drop rule says (`Containers.dropItemStack`, the unit review's fix 3). The specification had any anchor at the seat; as built, never one sealed again by someone else (correction 12) | Proposed (unit 1, reviewable at the checkpoint) | D-01 |
 | D-P13 | 24 October 2026 | Switched off, a loaded familiar whose person is online (in any level) restarts its play-time count at each look, so it fades for none of their play meanwhile (correction 13, D-S16). One not loaded while the Concordance was off counts its person's play meanwhile at its first look after the switch is on: no switch-off time is recorded. The residual case is accepted and said in the records | Proposed (unit 1, reviewable at the checkpoint) | D-01 |
 | D-P14 | 24 October 2026 | A seal may carry a cost (`Sealing.affords` and `pay`): asked after the refusals and before anything is called, refused as the appended outcome `CANNOT_AFFORD` (`seal_cannot_afford`, nothing spent), and paid in the same server call only once the Bound Will is recorded (correction 10, D-S13). The anchor's seal costs nothing; D-04's Open Hand Compact uses it | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04 |
 | D-P15 | 24 October 2026 | A holder block calls its presence by counterpart (`Holds.call(level, who, counterpart)`) and calls nothing (so `UNAVAILABLE`) for a counterpart it does not serve: the anchor serves only `jugcraft:gathering_shade`. Every presence (`AgreementHolder.Presence`) is a `WorkerEntity` subclass, unit 2's Stolas and unit 4's hand included, so each has a roster entry to note and strike (corrections 7 and 8) | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04, D-06, D-08 |
@@ -1276,8 +1325,8 @@ questions.
 
 ## Where to resume
 
-Unit 1 (D-01, D-02) is built on the local `wip/chunk-d` (four commits on `a8c7cd770`: `56a74f4be`, `7477efbcd`,
-`fa5360d0d` and the records' commit), not pushed when these notes were written, and nothing of it has run in CI. Before
+Unit 1 (D-01, D-02) is built on the local `wip/chunk-d` (five commits on `a8c7cd770`: `56a74f4be`, `7477efbcd`,
+`fa5360d0d`, the records' `97e1facd4` and the unit review's fixes), not pushed when these notes were written, and nothing of it has run in CI. Before
 more work:
 1. Push to `claude/chunk-d-pact-hall` and run the Build workflow by workflow_dispatch with every client class (CI is
    the unit's first compile); fix what fails and record each failure and fix in D-01's or D-02's As built notes, the

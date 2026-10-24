@@ -20,9 +20,10 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Every player's workers and the last thing each said (roadmap step 17), saved with the world
- * (data/jugcraft_worker_roster.dat in the Overworld), so the {@code workers} command can say where a worker is and what
+ * (data/jugcraft/worker_roster.dat in the Overworld), so the {@code workers} command can say where a worker is and what
  * it last reported even when its chunk is unloaded or it is in another dimension, without loading anything. A worker
- * writes its entry when its status changes; one that dies or departs is struck off.
+ * writes its entry when its status changes (a Gathering Shade only updates one it already has: it joins by its seal, its
+ * recall or its own decision, Concordance Chunk D); one that dies or departs is struck off.
  */
 public final class WorkerRoster extends SavedData {
 	/** The most workers one player's roster keeps (a familiar, and spirits and constructs). */

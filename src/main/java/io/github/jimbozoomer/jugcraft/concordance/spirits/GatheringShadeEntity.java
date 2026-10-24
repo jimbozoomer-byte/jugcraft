@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -22,7 +23,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
@@ -66,6 +66,16 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> imp
 	@Override
 	public String kind() {
 		return "spirit";
+	}
+
+	/**
+	 * A shade joins its holder's roster only by its seal, its recall or its own decision as its anchor's current spirit
+	 * (D-01, G5); a change of status never puts one replaced, switched off or away from its anchor back on it (the unit
+	 * review's fix 2, completing correction 11).
+	 */
+	@Override
+	protected boolean joinsRosterOnStatus() {
+		return false;
 	}
 
 	public @Nullable BlockPos anchor() {
@@ -240,7 +250,8 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> imp
 	/**
 	 * What it carries goes home, once: into {@code home}'s slots when that anchor keeps its own holder's agreement (what does
 	 * not fit drops at the anchor; critique 12: never into an anchor sealed again by someone else); otherwise all of it
-	 * drops at {@code elsewhere}. Nothing is left aboard to leave again.
+	 * drops at {@code elsewhere}. It drops whatever the block-drop rule says (the unit review's fix 3: what it carried is
+	 * its holder's, not something mined). Nothing is left aboard to leave again.
 	 */
 	private void unload(ServerLevel level, @Nullable SpiritAnchorBlockEntity home, BlockPos elsewhere) {
 		boolean ours = home != null && home.agreement() != null && owner != null && owner.equals(home.agreement().holder());
@@ -248,7 +259,7 @@ public class GatheringShadeEntity extends WorkerEntity<GatheringShadeEntity> imp
 		for (ItemStack stack : carried) {
 			ItemStack rest = ours ? home.deliver(stack) : stack;
 			if (!rest.isEmpty()) {
-				Block.popResource(level, drop, rest);
+				Containers.dropItemStack(level, drop.getX(), drop.getY(), drop.getZ(), rest);
 			}
 		}
 		carried.clear();

@@ -58,6 +58,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -393,7 +394,10 @@ public class ConcordanceWorkerGameTests {
 		});
 	}
 
-	/** D-01 (D-S18, D-S16): its anchor not loaded, a killed shade's load drops where it fell, once, even switched off. */
+	/**
+	 * D-01 (D-S18, D-S16): its anchor not loaded, a killed shade's load drops where it fell, once, even switched off and with
+	 * the block-drop rule off (the unit review's fix 3: its holder's things are not something mined).
+	 */
 	@GameTest(maxTicks = 20)
 	public void aKilledShadeAwayFromItsAnchorDropsWhereItFell(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -406,11 +410,18 @@ public class ConcordanceWorkerGameTests {
 		place(helper, shade, 6.5, 1.0, 6.5);
 		shade.setAnchor(helper.absolutePos(at).offset(100_000, 0, 0)); // as if its anchor's chunk were not loaded
 		BlockPos fell = shade.blockPosition();
-		off(() -> shade.remove(Entity.RemovalReason.KILLED));
+		GameRules rules = level.getGameRules();
+		boolean drops = rules.get(GameRules.BLOCK_DROPS);
+		rules.set(GameRules.BLOCK_DROPS, false, level.getServer());
+		try {
+			off(() -> shade.remove(Entity.RemovalReason.KILLED));
+		} finally {
+			rules.set(GameRules.BLOCK_DROPS, drops, level.getServer());
+		}
 		int near = level.getEntitiesOfClass(ItemEntity.class, new AABB(fell).inflate(1.5), item -> item.isAlive() && item.getItem().is(Items.WHEAT))
 				.stream().mapToInt(item -> item.getItem().getCount()).sum();
 		helper.assertTrue(near == 2 && wheat(anchor) == 0 && shade.carriedCount() == 0,
-				"Its anchor not loaded, its load drops where it fell, once, even switched off: " + near);
+				"Its anchor not loaded, its load drops where it fell, once, even switched off and with blocks dropping nothing: " + near);
 		helper.assertTrue(!WorkerRoster.of(level.getServer()).workers(holder.getUUID()).containsKey(shade.getUUID()) && anchor.holder().spiritLost(level),
 				"It is struck off its holder's roster, and its anchor knows it is lost");
 		helper.succeed();
@@ -471,7 +482,7 @@ public class ConcordanceWorkerGameTests {
 
 	/**
 	 * D-01 (D-S18, critique 22): unloaded is not lost; one missing from the roster is, and is replaced; the old one, loading
-	 * again, leaves its load in the anchor once and departs.
+	 * again, takes no roster room while switched off, and leaves its load in the anchor once and departs.
 	 */
 	@GameTest(maxTicks = 20)
 	public void anUnloadedShadeReplacedLeavesOnceAndDeliversOnce(GameTestHelper helper) {
@@ -499,6 +510,8 @@ public class ConcordanceWorkerGameTests {
 		GatheringShadeEntity back = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.LOAD);
 		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
 		helper.assertTrue(back.getUUID().equals(old.getUUID()) && back.carriedCount() == 3, "The old shade loads again with its load");
+		off(() -> helper.assertTrue(back.think(level, NIGHT, game + 20) == Status.DISABLED && !roster.workers(id).containsKey(old.getUUID()),
+				"Switched off, it waits and takes no roster room (the unit review's fix 2)"));
 		helper.assertTrue(back.think(level, NIGHT, game + 20) == Status.FINISHED && back.isRemoved() && back.carriedCount() == 0,
 				"finds another in its place and leaves");
 		helper.assertValueEqual(wheat(anchor), 3, "leaving its load in its anchor");
@@ -641,8 +654,8 @@ public class ConcordanceWorkerGameTests {
 
 	/**
 	 * D-02 (E2, D-S3): due with none held, a warning and a day of grace; its end, suspended for upkeep (nothing taken, nothing
-	 * accrues, its holder's word cannot lift it); an offering resumes it at once, a whole period from then (critique 3: the
-	 * time held is never charged); paid ahead, one period at a time.
+	 * accrues, its holder's word cannot lift it); an offering resumes it at once, even in the tick of a ticker's look, a whole
+	 * period from then (critique 3: the time held is never charged); paid ahead, one period at a time.
 	 */
 	@GameTest(maxTicks = 20)
 	public void upkeepWarnsThenSuspendsAfterGraceAndResumes(GameTestHelper helper) {
@@ -670,6 +683,8 @@ public class ConcordanceWorkerGameTests {
 				"Its holder's word does not lift an upkeep hold");
 		helper.assertTrue(will(level, anchor).pact().hold() == BoundWill.Hold.UPKEEP, "it stays held");
 		long t2 = t1 + 6 * DAY + 500L;
+		helper.assertTrue(anchor.holder().look(level, t2) == Pacts.Event.NONE && upkeep(level, anchor).lookedAt() == t2,
+				"A ticker's look in the offering's tick (the unit review's fix 7)");
 		ItemStack offered = new ItemStack(Items.WHITE_WOOL, 6);
 		helper.assertValueEqual(anchor.holder().deposit(level, holder, offered, t2), 4, "An offering fills its escrow to its cap");
 		helper.assertTrue(offered.getCount() == 2 && anchor.holder().held(level) == null && escrowed(level, id) == 3
@@ -685,7 +700,7 @@ public class ConcordanceWorkerGameTests {
 
 	/**
 	 * D-02 (E2, D-S3, critique 2a): a holder away while warned, or away past both due date and grace, is warned again at their
-	 * first look back with the whole grace; never suspended at once.
+	 * first look back with the whole grace; never suspended at once, even when they suspend and resume it before that look.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aReturnAfterAbsenceGetsTheFullGrace(GameTestHelper helper) {
@@ -718,6 +733,17 @@ public class ConcordanceWorkerGameTests {
 		long tr = t3 + 21 * DAY;
 		helper.assertValueEqual(other.holder().look(level, tr), Pacts.Event.WARNED, "Away past its due date and past a grace, the first look back warns");
 		helper.assertTrue(upkeep(level, other).graceUntil() == tr + DAY && other.holder().held(level) == null, "with the whole grace: never suspended at once");
+		UUID otherRecord = other.agreement().record();
+		TestPlayers.leave(again);
+		ServerPlayer later = taught(TestPlayers.again(helper, id));
+		beside(helper, later, second);
+		long ts = tr + 3 * DAY; // away past that grace too
+		helper.assertTrue(AgreementHolder.toggle(level, later, otherRecord, ts) == AgreementHolder.Toggle.SUSPENDED
+				&& AgreementHolder.toggle(level, later, otherRecord, ts + 100L) == AgreementHolder.Toggle.RESUMED,
+				"Back, before any look, they suspend it and resume it");
+		helper.assertTrue(other.holder().look(level, ts + 120L) == Pacts.Event.WARNED && upkeep(level, other).graceUntil() == ts + 120L + DAY
+				&& other.holder().held(level) == null,
+				"The absence before their hold still counts: warned again with the whole grace, never suspended at once (the unit review's fix 1)");
 		helper.succeed();
 	}
 
@@ -782,7 +808,10 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
-	/** D-02 (E1, E4, D-S6): its holder's party, a stand-in and a holder who is not alive cannot end it; the living holder ends it and the escrow comes back once. */
+	/**
+	 * D-02 (E1, E4, D-S6): its holder's party pays nothing into it; its holder's party, a stand-in and a holder who is not
+	 * alive cannot end it; the living holder ends it and the escrow comes back once.
+	 */
 	@GameTest(maxTicks = 20)
 	public void onlyTheHolderEnds(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -798,6 +827,8 @@ public class ConcordanceWorkerGameTests {
 			UUID record = anchor.agreement().record();
 			BoundWills wills = BoundWills.of(level.getServer());
 			helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WHITE_WOOL, 2), now), 2, "Two periods paid ahead");
+			helper.assertTrue(anchor.holder().deposit(level, friend, new ItemStack(Items.WHITE_WOOL, 1), now) == 0 && escrowed(level, record) == 2,
+					"Their party pays nothing into it (the unit review's fix 5)");
 			helper.assertValueEqual(anchor.holder().end(level, friend, now), AgreementHolder.Ended.NOT_HOLDER, "Their party may not end it");
 			FakePlayer standIn = FakePlayer.get(level, new GameProfile(holder.getUUID(), "[Concordance]"));
 			helper.assertValueEqual(anchor.holder().end(level, standIn, now), AgreementHolder.Ended.NOT_PERMITTED, "nor a stand-in with the holder's identity");

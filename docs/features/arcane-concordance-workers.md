@@ -42,10 +42,10 @@ carried and departs.
 Only the anchor's owner (who placed it) or their party may seal at it, and only where they may build; an anchor placed
 before Chunk D, whoever may build there; never a stand-in. A refused seal says why (not yours, the anchor already keeps
 one, you hold 32 agreements, your roster is full) and spends nothing. If the shade is killed, what it carried goes into
-the anchor (or drops where it fell, if the anchor is not loaded or keeps someone else's agreement), the anchor says it
-was lost, and its holder's next use calls another under the same agreement at no cost. A copy of an anchor (its data at
-another place) does nothing, says another agreement covers it, and breaking it releases nothing; nor does breaking an
-anchor while the Concordance is switched off.
+the anchor (or drops where it fell, whatever the block-drop rule says, if the anchor is not loaded or keeps someone
+else's agreement), the anchor says it was lost, and its holder's next use calls another under the same agreement at no
+cost. A copy of an anchor (its data at another place) does nothing, says another agreement covers it, and breaking it
+releases nothing; nor does breaking an anchor while the Concordance is switched off.
 
 **A construct: the Clockwork Porter.** Unfold one (copper, a barrel, redstone, iron) on a block; it is yours. Use a
 **Porter Key** on a container (its source), then on another (its target), then on the porter. It carries up to 16 items
@@ -88,7 +88,8 @@ trip energy and load. Each kind keeps its own model, saved with it and never in 
 status, dimension and place when its status changes, so the `workers` command answers for unloaded workers without
 loading them. A familiar its person released while it was unloaded strikes itself off when it next loads. A spirit
 sealed or called again is noted at once; one missing from the roster notes itself when it next thinks, if it is still
-its anchor's spirit; one killed is struck off, which is how its anchor knows it was lost.
+its anchor's spirit, and a change of status never notes one that is not on it, so a replaced or switched-off shade takes
+no room; one killed is struck off, which is how its anchor knows it was lost.
 
 **Movement** is SmartBrainLib's: `WorkerEntity` is a `SmartBrainOwner` with a nearby-players sensor and two core
 behaviours (`LookAtTarget`, `MoveToWalkTarget`). A decision sets the walk-target memory; SmartBrainLib walks there. When
@@ -221,10 +222,11 @@ been seen in game. The art has not been shown to the owner yet.
 Not yet run: any client (the models, animations, icons, Jade lines and codex pages in game), a two-client dedicated
 server, real walking over real terrain (the tests stand workers within reach), and a night of a shade's work.
 
-**Concordance Chunk D, unit 1: D-01 and D-02** (commits `56a74f4be` (D-01), `7477efbcd` (D-S17), `fa5360d0d` (D-02)
-and the records' commit "Concordance Chunk D: unit 1's records"; [the chunk's contract](concordance-chunk-d.md), its As
-built notes and proposals D-P1 to D-P16; not merged). **Not yet run in CI:** there is no Minecraft build where it was
-written, so none of its Java has been compiled against Minecraft and none of the tests below has run.
+**Concordance Chunk D, unit 1: D-01 and D-02** (commits `56a74f4be` (D-01), `7477efbcd` (D-S17), `fa5360d0d` (D-02),
+the records' commit `97e1facd4` and "Chunk D unit 1: fixes from the unit review";
+[the chunk's contract](concordance-chunk-d.md), its As built notes and proposals D-P1 to D-P16; not merged). **Not yet
+run in CI:** there is no Minecraft build where it was written, so none of its Java has been compiled against Minecraft
+and none of the tests below has run.
 - New server game tests (29), none yet run in CI:
   - `ConcordanceWorkerGameTests` +17 (22 in all). D-01: `aKilledShadeLeavesItsLoadOnce` (into its loaded anchor once,
     struck off, a second removal gives nothing; 25 ticks), `aKilledShadeAwayFromItsAnchorDropsWhereItFell` (the anchor
@@ -248,6 +250,11 @@ written, so none of its Java has been compiled against Minecraft and none of the
   - `ConcordanceSharingGameTests` +3 (5): `aCopiedAnchorGivesNothingAndReleasesNothing`,
     `aLegacyAnchorClaimsItsPlaceOnce`, `endingTwiceReturnsOnce`.
   - `ConcordanceResourceGameTests` +1: `thePactRulesKeepTheirShape`.
+  - Extended by the unit review's fixes, not yet run either: `aReturnAfterAbsenceGetsTheFullGrace` (an absence before
+    the holder's own suspension still counts), `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce` (switched off, the
+    old shade takes no roster room), `aKilledShadeAwayFromItsAnchorDropsWhereItFell` (with the block-drop rule off),
+    `upkeepWarnsThenSuspendsAfterGraceAndResumes` (a look in the offering's tick), `onlyTheHolderEnds` (a party
+    member's offering refused), `aStandInNeverSeals` (a stand-in refused a recall) and `thePactRulesKeepTheirShape`.
   - Extended, not yet run either: `aSpiritKeepsToItsAgreement` (suspended on its Bound Will, the anchor's flag false),
     `workersKeepTheirModelsThroughASave` (the bond's `seen_played`, an older, an unreadable and a forged one; a shade's
     anchor, holder and load, G10), `blockEntitiesStampTheirVersion` (the anchor) and
@@ -261,15 +268,16 @@ written, so none of its Java has been compiled against Minecraft and none of the
   reads `seen_played` leniently); `check_pacts` (new: the seal outcomes and their words, the refusal order, the cost
   asked before anything is called and paid once recorded, the stand-in and the owner, the cargo rule, the rules'
   numbers, holds and departure reasons, the Bound Will's optional keys, no item in a holder block, the copy check and
-  the legacy claim, the day's count on the record, ending, breaking while switched off, suspending by record, the
-  upkeep look, the unit's test names); `AUTHORITY_ROUTES` (the holder's whole sealing check and `presentNear`);
-  `ENTRY_BY_ENTRY` (`PactHistory`).
-- Audit mutations, run in place on the final tree with every file restored after each and the tree verified
-  unchanged: the unit specification's 30 (M1 to M12, M14 to M31) and 16 more for the review's corrections. 45 of the
-  46 are reported; the unchanged tree reports nothing. Not reported by the audits: counting the familiar's fade only
-  beyond its follow distance (as before Chunk D); `aFamiliarFadesWhileItsPersonPlaysElsewhere`'s last step catches it,
-  when it runs.
-- Commands run and passed before each of the four commits: `python3 tools/owner_art.py --check`,
+  the legacy claim, the day's count on the record, ending, breaking while switched off, suspending by record, the upkeep
+  look, the unit's test names; since the unit review's fixes, `recall`'s stand-in refusal, `deposit`'s holder check, the
+  shade's drop and roster rules and the resumed and same-tick upkeep looks); `AUTHORITY_ROUTES` (the holder's whole
+  sealing check and `presentNear`); `ENTRY_BY_ENTRY` (`PactHistory`).
+- Audit mutations, run in place on the final tree with every file restored after each and the tree verified unchanged:
+  the unit specification's 30 (M1 to M12, M14 to M31), 16 more for the review's corrections and 7 for the unit review's
+  fixes. 52 of the 53 are reported; the unchanged tree reports nothing. Not reported by the audits: counting the
+  familiar's fade only beyond its follow distance (as before Chunk D); `aFamiliarFadesWhileItsPersonPlaysElsewhere`'s
+  last step catches it, when it runs.
+- Commands run and passed before each of the five commits: `python3 tools/owner_art.py --check`,
   `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
   `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
   `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and

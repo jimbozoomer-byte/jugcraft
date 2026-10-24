@@ -20,7 +20,8 @@ import org.jspecify.annotations.Nullable;
  * on and the holder is present near it; at most one period falls due a look, and a due date that passed while nobody
  * looked becomes the moment they look again, so time away is never owed; none in escrow, a warning and a grace; the grace
  * over, held for its upkeep: nothing taken, nothing accrues, nothing lost, and an offering resumes it with a whole period
- * from then. After an absence (no look for ABSENT_TICKS) a warned pact is warned again with its whole grace (D-S3). A pact
+ * from then. After an absence (no look for more than ABSENT_TICKS) a warned pact is warned again with its whole grace
+ * (D-S3); a shorter gap is not an absence, so a due date or grace end inside it counts. A pact
  * never ends by itself; only its holder ends it, once; the last HISTORY departures of each holder are kept. Keep the
  * numbers, Outcome, holds and DEPARTURES equal to tools/concordance_workers.py (SEAL_OUTCOMES, PACT, PACT_HOLDS,
  * PACT_DEPARTURES; check_pacts).
@@ -169,7 +170,11 @@ public final class Pacts {
 		return pact == null || pact.hold() != BoundWill.Hold.NONE ? null : record.with(pact.held(BoundWill.Hold.HOLDER, now));
 	}
 
-	/** Its holder resumes what they suspended (null unless held by its holder): its clock moves on by the time held. */
+	/**
+	 * Its holder resumes what they suspended (null unless held by its holder): its clock moves on by the time held, and so does
+	 * its last look (never past now), so an absence before the hold still counts as one (the unit review's fix 1). Looks
+	 * return early while its holder holds it, so the last look is never after the hold began.
+	 */
 	public static @Nullable BoundWill resume(BoundWill record, long now) {
 		BoundWill.Pact pact = record.pact();
 		if (pact == null || pact.hold() != BoundWill.Hold.HOLDER) {
@@ -178,7 +183,8 @@ public final class Pacts {
 		BoundWill.Upkeep upkeep = pact.upkeep();
 		long held = Math.max(0L, now - pact.holdSince());
 		BoundWill.Upkeep moved = upkeep == null ? null
-				: upkeep.clock(upkeep.due() + held, upkeep.warned() ? upkeep.graceUntil() + held : BoundWill.Upkeep.NOT_WARNED, now);
+				: upkeep.clock(upkeep.due() + held, upkeep.warned() ? upkeep.graceUntil() + held : BoundWill.Upkeep.NOT_WARNED,
+						Math.min(now, upkeep.lookedAt() + held));
 		return record.with(pact.held(BoundWill.Hold.NONE, now).with(moved));
 	}
 
@@ -186,12 +192,13 @@ public final class Pacts {
 	 * One look at {@code record}'s upkeep at {@code now} (the caller checks the Concordance is on, D-S16). After an absence a
 	 * due date that has passed becomes now, so a holder back just before the next due date pays once, and the next falls a
 	 * whole period later; resumed from an upkeep hold by an offering, the next falls a whole period from now: neither time
-	 * away nor time held is ever charged (critique 3).
+	 * away nor time held is ever charged (critique 3). A gap of at most ABSENT_TICKS is not an absence. A second look in the
+	 * same tick goes on (the unit review's fix 7), so an offering paid in the tick of a ticker's look resumes at once.
 	 */
 	public static Due due(BoundWill record, boolean present, int periodsHeld, long now) {
 		BoundWill.Pact pact = record.pact();
 		BoundWill.Upkeep upkeep = pact == null ? null : pact.upkeep();
-		if (upkeep == null || !present || pact.hold() == BoundWill.Hold.HOLDER || now <= upkeep.lookedAt()) {
+		if (upkeep == null || !present || pact.hold() == BoundWill.Hold.HOLDER || now < upkeep.lookedAt()) {
 			return new Due(record, false, Event.NONE, false);
 		}
 		boolean returned = now - upkeep.lookedAt() > ABSENT_TICKS;

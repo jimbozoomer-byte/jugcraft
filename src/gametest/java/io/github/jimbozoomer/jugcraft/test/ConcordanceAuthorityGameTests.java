@@ -364,7 +364,7 @@ public class ConcordanceAuthorityGameTests {
 
 	/**
 	 * D-01 (D-S8, E1): a stand-in never seals, even with the owner's identity or the absent-owner option; it neither suspends
-	 * nor ends; placing an anchor it records no owner.
+	 * nor ends, nor calls a lost shade again (the unit review's fix 5); placing an anchor it records no owner.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aStandInNeverSeals(GameTestHelper helper) {
@@ -384,6 +384,11 @@ public class ConcordanceAuthorityGameTests {
 		helper.assertTrue(anchor.holder().toggle(level, standIn, now) == AgreementHolder.Toggle.NOT_HOLDER
 				&& anchor.holder().end(level, standIn, now) == AgreementHolder.Ended.NOT_PERMITTED && anchor.agreement() != null,
 				"and it neither suspends nor ends the agreement");
+		UUID lost = anchor.spirit();
+		level.getEntity(lost).remove(Entity.RemovalReason.KILLED);
+		helper.assertTrue(anchor.holder().spiritLost(level), "Its shade killed, its anchor knows it is lost");
+		helper.assertTrue(anchor.holder().recall(level, standIn, now) == AgreementHolder.Recall.NOT_HOLDER && lost.equals(anchor.spirit())
+				&& anchor.holder().spiritLost(level), "A stand-in with the owner's identity never calls another: nothing is called");
 		helper.assertTrue(placed(helper, new BlockPos(5, 2, 2), standIn).owner() == null, "A stand-in placing an anchor records no owner");
 		helper.succeed();
 	}

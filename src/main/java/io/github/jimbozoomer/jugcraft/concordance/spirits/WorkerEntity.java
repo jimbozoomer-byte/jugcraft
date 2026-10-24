@@ -95,7 +95,10 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 			entityData.set(STATUS, status.id);
 			if (!isRemoved() && level() instanceof ServerLevel server) {
 				if (owner != null) {
-					WorkerRoster.of(server.getServer()).note(owner, getUUID(), kind(), status, server.dimension().identifier().toString(), blockPosition());
+					WorkerRoster roster = WorkerRoster.of(server.getServer());
+					if (joinsRosterOnStatus() || roster.workers(owner).containsKey(getUUID())) {
+						roster.note(owner, getUUID(), kind(), status, server.dimension().identifier().toString(), blockPosition());
+					}
 				}
 				Sign sign = sign(status);
 				long now = server.getGameTime();
@@ -105,6 +108,16 @@ public abstract class WorkerEntity<T extends WorkerEntity<T>> extends Pathfinder
 				}
 			}
 		}
+	}
+
+	/**
+	 * Whether a change of status notes this worker on its owner's roster even when it is not on it (true: a familiar, a
+	 * porter or a helper whose roster had no room joins it once there is). A worker that joins only by its own rule (the
+	 * Gathering Shade: by its seal, its recall or its own decision, Concordance Chunk D) says false, and a change of status
+	 * then only updates an entry it already has.
+	 */
+	protected boolean joinsRosterOnStatus() {
+		return true;
 	}
 
 	/**

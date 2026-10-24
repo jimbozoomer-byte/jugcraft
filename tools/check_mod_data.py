@@ -17989,14 +17989,17 @@ def check_pacts(co, root, lang):
     docs/features/concordance-chunk-d.md): the agreements keep their promises, and each has one pact record.
     Pacts.Outcome is SEAL_OUTCOMES in order, refused with its first reason before anything is called or recorded, and
     each worded where the holder tells it; a seal's cost is asked before anything is called and paid only once its Bound
-    Will is recorded; a killed or departing shade's load goes only into an anchor keeping its own holder's agreement; the
-    anchor records who placed it (never a stand-in) and the holder saves its owner. D-02: the rules' numbers, holds and
-    departure reasons are the generator's; a Bound Will's pact and escrow are optional keys of its entry (read will by
-    will), and no holder block keeps an item; a holder counts its terms only as the record keeps them, and its day's count
-    is the record's; only a living holder, in person, with the Concordance on, ends a pact before its escrow is handed
-    back, and breaking a block releases nothing while the Concordance is off; upkeep is looked at only with the
-    Concordance on and its holder near; its holder suspends or resumes a pact by its record alone; a copy says
-    CONFLICTING_AGREEMENT; the shade serves only an anchor whose record keeps it there; and the unit's game tests exist."""
+    Will is recorded; a killed or departing shade's load goes only into an anchor keeping its own holder's agreement,
+    and otherwise drops whatever the block-drop rule says; a shade joins its roster only by its seal, its recall or its
+    own decision, never by a change of status; a stand-in never recalls; the anchor records who placed it (never a
+    stand-in) and the holder saves its owner. D-02: the rules' numbers, holds and departure reasons are the generator's;
+    resumed, a pact's last look moves on with its clock, and a look in the tick of the last one goes on; a Bound Will's
+    pact and escrow are optional keys of its entry (read will by will), and no holder block keeps an item; a holder
+    counts its terms only as the record keeps them, and its day's count is the record's; only a living holder, in
+    person, with the Concordance on, ends a pact before its escrow is handed back, and breaking a block releases nothing
+    while the Concordance is off; only its holder pays into its escrow; upkeep is looked at only with the Concordance on
+    and its holder near; its holder suspends or resumes a pact by its record alone; a copy says CONFLICTING_AGREEMENT;
+    the shade serves only an anchor whose record keeps it there; and the unit's game tests exist."""
     wk = co.workers
     def java(relative):
         path = root / relative
@@ -18036,12 +18039,32 @@ def check_pacts(co, root, lang):
     placed = _java_body(java("spirits/SpiritAnchorBlock.java"), "public void setPlacedBy(")
     if "holder().setOwner(player.getUUID())" not in placed or "Authority.isStandIn(player)" not in placed:
         err("spirits/SpiritAnchorBlock.java: the anchor records who placed it, never a stand-in (D-S8)")
-    if "owner.equals(home.agreement().holder())" not in _java_body(java("spirits/GatheringShadeEntity.java"), "private void unload("):
+    shade = java("spirits/GatheringShadeEntity.java")
+    unload = _java_body(shade, "private void unload(")
+    if "owner.equals(home.agreement().holder())" not in unload:
         err("spirits/GatheringShadeEntity.java: a shade's load goes only into an anchor keeping its own holder's agreement (D-S18)")
+    if "Containers.dropItemStack(" not in unload or "popResource(" in unload:
+        err("spirits/GatheringShadeEntity.java: a shade's load drops whatever the block-drop rule says (Containers.dropItemStack, "
+            "never Block.popResource; the unit review's fix 3)")
+    # The unit review's fix 2 (correction 11): a change of status never puts a shade back on its holder's roster.
+    status = _java_body(java("spirits/WorkerEntity.java"), "protected void setStatus(")
+    if "joinsRosterOnStatus() || roster.workers(owner).containsKey(getUUID())" not in status \
+            or not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", shade):
+        err("spirits/GatheringShadeEntity.java: a shade joins its roster only by its seal, its recall or its own decision, never by a "
+            "change of status (WorkerEntity.joinsRosterOnStatus false; the unit review's fix 2)")
+    recall = _java_body(holder, "public Recall recall(")
+    if not 0 <= recall.find("Authority.isStandIn(actor)") < recall.find("holds.call("):
+        err("AgreementHolder.recall: a stand-in, even one carrying its holder's identity, never calls a presence (D-S8, D-S18)")
     # D-02: one pact record.
     for const, value in wk.PACT.items():
         if not re.search(rf"\b(?:int|long) {const} = {value}L?;", pacts):
             err(f"concordance/worker/Pacts.java: {const} differs from tools/concordance_workers.py PACT ({value})")
+    # The unit review's fixes 1 and 7: resumed, the last look moves on with the clock, so an absence before the hold still
+    # counts; a look in the tick of the last one goes on, so an offering paid then resumes at once.
+    if "Math.min(now, upkeep.lookedAt() + held)" not in _java_body(pacts, "public static @Nullable BoundWill resume("):
+        err("concordance/worker/Pacts.java: resume moves the last look on by the time held, never past now (D-P2)")
+    if "now < upkeep.lookedAt()" not in _java_body(pacts, "public static Due due("):
+        err("concordance/worker/Pacts.java: a look in the tick of the last look goes on, so an offering paid then resumes at once (D-P2)")
     holds = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(java("resource/BoundWill.java"), "public enum Hold"), re.M)
     if [hid for _, hid in holds] != wk.PACT_HOLDS:
         err(f"concordance/resource/BoundWill.java: Hold {[hid for _, hid in holds]} differs from PACT_HOLDS in tools/concordance_workers.py (same order)")
@@ -18082,6 +18105,8 @@ def check_pacts(co, root, lang):
     toggled = _java_body(holder, "public static Toggle toggle(ServerLevel level, ServerPlayer player, UUID id, long now)")
     if not toggled or not 0 <= toggled.find("Workers.enabled()") < toggled.find("Authority.isStandIn(player)") < toggled.find("Pacts.suspend("):
         err("AgreementHolder.toggle: its holder suspends or resumes a pact by its record alone, switched on, never a stand-in (D-07's roster)")
+    if "record.holder().equals(player.getUUID())" not in _java_body(holder, "public int deposit("):
+        err("AgreementHolder.deposit: only its holder pays into a pact's escrow, so no one else lifts its upkeep hold (D-S6)")
     look = _java_body(holder, "public Pacts.Event look(")
     if not 0 <= look.find("Workers.enabled()") < look.find("Pacts.due(") \
             or "Authority.presentNear(level, record.holder(), block.getBlockPos(), Pacts.REACH)" not in look:

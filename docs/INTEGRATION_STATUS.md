@@ -18,16 +18,17 @@ Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer
 ## Not merged: Concordance Chunk D (pact hall)
 
 Stacked on Chunk C, on branch `claude/chunk-d-pact-hall` (local `wip/chunk-d`); not merged, no pull request. Unit 1
-(D-01, D-02) is built on the local branch, not yet pushed: its local checks ran and passed (the data and recipe audit,
-with 45 of its 46 audit mutations reported; the repository check; the owner-art, journey and icon-map checks; the World
-Designer and script tests), but none of its Java has been compiled against Minecraft and none of its 29 server game
-tests has run: `./gradlew build`, the game tests and CI have not run (CI is its first compile). Units 2 to 5 are not
-started. Not played by hand or with two clients ([the chunk's contract](features/concordance-chunk-d.md)).
+(D-01, D-02) is built on the branch (not yet pushed when this was written), with the unit review's fixes: its local
+checks ran and passed (the data and recipe audit, with 52 of its 53 audit mutations reported; the repository check; the
+owner-art, journey and icon-map checks; the World Designer and script tests), but none of its Java has been compiled
+against Minecraft and none of its 29 server game tests has run: `./gradlew build`, the game tests and CI have not run
+(CI is its first compile). Units 2 to 5 are not started. Not played by hand or with two clients
+([the chunk's contract](features/concordance-chunk-d.md)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
-| The agreements keep their promises (unit 1, D-01) | A killed Gathering Shade's load goes into its Spirit Anchor once (or where it fell, if the anchor is not loaded or keeps someone else's agreement), and its holder calls another under the same agreement at no cost; a refused seal says why and spends nothing; a new shade is on the roster at once; only an anchor's owner or their party seal it, where they may build, never a stand-in; the holder can end an agreement without breaking its anchor (the method; the in-game action comes with the pact screens); a familiar fades only for its person's own play time, never for time logged out, nor (while it is loaded) for play while the Concordance is switched off. Not yet run in CI | [workers](features/arcane-concordance-workers.md), [contract](features/concordance-chunk-d.md) |
-| One pact record (unit 1, D-02) | The Bound Will holds the pact (place, hold, beneficiaries, presence, upkeep, the service terms and day's count it was sealed with) and its escrow; a copied anchor is inert and releases nothing; an anchor from before claims its record once, at its own place; upkeep on the Spire's model (for the next units' pacts: the anchor has none), never owing time away, held or switched off; ending returns the escrow once to the living holder; breaking an anchor while switched off releases nothing; the last eight departures kept. Not yet run in CI | [contract](features/concordance-chunk-d.md), [persistence](features/arcane-concordance-persistence.md) |
+| The agreements keep their promises (unit 1, D-01) | A killed Gathering Shade's load goes into its Spirit Anchor once (or where it fell, if the anchor is not loaded or keeps someone else's agreement), and its holder calls another under the same agreement at no cost; a refused seal says why and spends nothing; a new shade is on the roster at once, and one replaced or switched off takes no room; only an anchor's owner or their party seal it, where they may build, never a stand-in; the holder can end an agreement without breaking its anchor (the method; the in-game action comes with the pact screens); a familiar fades only for its person's own play time, never for time logged out, nor (while it is loaded) for play while the Concordance is switched off. Not yet run in CI | [workers](features/arcane-concordance-workers.md), [contract](features/concordance-chunk-d.md) |
+| One pact record (unit 1, D-02) | The Bound Will holds the pact (place, hold, beneficiaries, presence, upkeep, the service terms and day's count it was sealed with) and its escrow; a copied anchor is inert and releases nothing; an anchor from before claims its record once, at its own place; upkeep on the Spire's model (for the next units' pacts: the anchor has none), never owing time away, held or switched off (a gap of 1,200 ticks or less is not an absence); ending returns the escrow once to the living holder; breaking an anchor while switched off releases nothing; the last eight departures kept. Not yet run in CI | [contract](features/concordance-chunk-d.md), [persistence](features/arcane-concordance-persistence.md) |
 
 ## Not merged: Concordance Chunk C (living workshop)
 
