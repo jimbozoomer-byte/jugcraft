@@ -78,23 +78,32 @@ public class SpiritAnchorBlock extends BaseEntityBlock {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** One use of the anchor (tests call this directly; the block asks RateGate first). Returns the last line it told the player. */
+	/**
+	 * One use of the anchor (tests call this directly; the block asks RateGate first). Returns the last line it told the
+	 * player. A hand's anchor (bound to a post with no agreement, or keeping a courier's) asks only the Workshop Hand's
+	 * definition, a shade's only the Gathering Shade's, so a data pack that drops one leaves the other's anchors working.
+	 */
 	public static Component use(ServerPlayer player, ServerLevel level, SpiritAnchorBlockEntity anchor, boolean sneaking) {
-		WorkerDefinition.Spirit terms = Workers.catalog().get(GatheringShadeEntity.DEFINITION, WorkerDefinition.Spirit.class);
-		if (!Workers.enabled() || terms == null) {
+		if (!Workers.enabled()) {
 			return overlay(player, Component.translatable("message.jugcraft.concordance.disabled"));
 		}
 		long now = level.getGameTime();
 		AgreementHolder holder = anchor.holder();
 		AgreementHolder.Standing standing = holder.verify(level, now);
 		Agreement agreement = holder.agreement();
+		boolean hand = agreement == null ? anchor.post() != null : WorkshopHandEntity.WORK.equals(agreement.work());
+		WorkerDefinition.Spirit terms = hand ? WorkshopHandEntity.terms()
+				: Workers.catalog().get(GatheringShadeEntity.DEFINITION, WorkerDefinition.Spirit.class);
+		if (terms == null) {
+			return overlay(player, Component.translatable("message.jugcraft.concordance.disabled"));
+		}
 		if (agreement == null) {
 			if (!Workers.knows(player)) {
 				return overlay(player, Component.translatable("message.jugcraft.concordance.workers.unknown"));
 			}
-			if (anchor.post() != null) {
+			if (hand) {
 				// Concordance Chunk D, D-08: an anchor bound to a Courier Post seals a Workshop Hand.
-				return sealHand(player, level, anchor, now);
+				return sealHand(player, level, anchor, terms, now);
 			}
 			AgreementHolder.Sealed sealed = anchor.seal(level, player, terms, now);
 			return say(player, sealed.outcome() == Pacts.Outcome.DONE ? Component.translatable("message.jugcraft.concordance.workers.sealed",
@@ -132,11 +141,7 @@ public class SpiritAnchorBlock extends BaseEntityBlock {
 	 * who may seal here (else the seal's own reason), and while the anchor's post is still one they may use, in this level,
 	 * loaded and inside a hand's area; any refusal seals, records, spends and calls nothing.
 	 */
-	private static Component sealHand(ServerPlayer player, ServerLevel level, SpiritAnchorBlockEntity anchor, long now) {
-		WorkerDefinition.Spirit hand = WorkshopHandEntity.terms();
-		if (hand == null) {
-			return overlay(player, Component.translatable("message.jugcraft.concordance.disabled"));
-		}
+	private static Component sealHand(ServerPlayer player, ServerLevel level, SpiritAnchorBlockEntity anchor, WorkerDefinition.Spirit hand, long now) {
 		if (!WorkshopHandEntity.regarded(player)) {
 			return overlay(player, Component.translatable("message.jugcraft.concordance.workers.hand_unknown"));
 		}

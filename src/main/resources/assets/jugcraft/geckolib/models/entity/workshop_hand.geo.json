@@ -214,7 +214,18 @@
                 38,
                 12
               ]
-            },
+            }
+          ]
+        },
+        {
+          "name": "pack_lid",
+          "parent": "pack",
+          "pivot": [
+            0,
+            18,
+            2
+          ],
+          "cubes": [
             {
               "origin": [
                 -2,

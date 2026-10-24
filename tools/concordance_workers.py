@@ -378,12 +378,14 @@ def codex():
                 ("text", "Its Terms",
                  f"It takes a request only for you or your party, bound for a place within {hand['radius']} blocks of its "
                  "anchor, and fetches only from containers inside that area that you and the requester could open by hand; "
-                 "other requests it leaves to other couriers. A request it has taken it finishes, even past its hours, "
-                 "suspended, or once its requester has left your party. What it carries is the post's ledger's, never "
-                 "its own: a full destination keeps the cargo in transit and an unloaded one is waited for. Killed, or "
-                 "its agreement ended, the cargo waits at the post for another courier or for its requester to "
-                 "**recover** once; killed, its holder calls another at the anchor at no cost. It needs no fuel and no "
-                 "repair. Outside its hours, its day's loads done or its holder away, it waits and says why."),
+                 "other requests it leaves to other couriers, and so it does cargo waiting at the post that is more than "
+                 f"it carries ({hand['carry']}) or must go back to a container beyond that area. A request it has taken it "
+                 "finishes, even past its hours, suspended, or once its requester has left your party. What it carries is "
+                 "the post's ledger's, never its own: a full destination keeps the cargo in transit and an unloaded one "
+                 "is waited for. Killed, or its agreement ended, the cargo waits at the post for another courier or for "
+                 "its requester to **recover** once; killed, its holder calls another at the anchor at no cost. It needs "
+                 "no fuel and no repair. Outside its hours, its day's loads done, its post gone or its holder away, it "
+                 "waits and says why."),
             ],
         },
     }

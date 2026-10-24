@@ -256,32 +256,37 @@ def porter_animations():
 # ------------------------------------------------------------------------------------------------- the Workshop Hand
 
 # Concordance Chunk D, D-08 (D-S2): the Gathering Shade's body at work, not a new identity: the same hooded wisp, its boxes
-# and regions unchanged, with a courier's wicker pack on its back (a box and the lid that overhangs it, on a bone of their
-# own on the body, in the sheet's free regions right of the arms).
+# and regions unchanged, with a courier's wicker pack on its back (a box on a bone of its own on the body, and the lid
+# that overhangs it on a bone of its own on the pack, hinged along its edge against the body; both in the sheet's free
+# regions right of the arms).
 HAND_UV = dict(SHADE_UV, pack=(38, 12), pack_lid=(50, 12))
 HAND_SIZES = dict(SHADE_SIZES, pack=(4, 5, 2), pack_lid=(4, 1, 3))
 
 
 def hand_geo():
-    """shade_geo's bones under the hand's own identifier, and the pack: a bone on the body, so a lean carries it."""
+    """shade_geo's bones under the hand's own identifier, and the pack: a bone on the body, so a lean carries it, and
+    its lid a bone on the pack, hinged at the top of the lid's edge against the body, so it lifts at the back."""
     uv, sizes = HAND_UV, HAND_SIZES
     geo = shade_geo()
     body = geo["minecraft:geometry"][0]
     body["description"]["identifier"] = "geometry.workshop_hand"
     body["bones"].append({"name": "pack", "parent": "body", "pivot": [0, 17, 3], "cubes": [
-        _cube(uv, sizes, "pack", [-2, 12, 2]), _cube(uv, sizes, "pack_lid", [-2, 17, 2])]})
+        _cube(uv, sizes, "pack", [-2, 12, 2])]})
+    body["bones"].append({"name": "pack_lid", "parent": "pack", "pivot": [0, 18, 2], "cubes": [
+        _cube(uv, sizes, "pack_lid", [-2, 17, 2])]})
     return geo
 
 
 def hand_animations():
     """shade_animations' five clips under the hand's names. Travelling, its pack sways; working, the reach ends with the
-    pack's lid lifting, as if what it took were stowed."""
+    pack's lid lifting at the back about its hinge (a positive x turn, against the arms' forward reach), as if what it
+    took were stowed; the pack itself stays on the body."""
     clips = {name.replace("animation.gathering_shade.", "animation.workshop_hand."): clip
              for name, clip in shade_animations()["animations"].items()}
     clips["animation.workshop_hand.travelling"]["bones"]["pack"] = {
         "rotation": _wave(2.0, 2, (0, 0, 0), (4, 0, 0), phase=0.25)}
-    clips["animation.workshop_hand.working"]["bones"]["pack"] = {
-        "rotation": {"0.0": [0, 0, 0], "0.5": [0, 0, 0], "0.8": [-12, 0, 0], "1.3": [0, 0, 0], "1.6": [0, 0, 0]}}
+    clips["animation.workshop_hand.working"]["bones"]["pack_lid"] = {
+        "rotation": {"0.0": [0, 0, 0], "0.5": [0, 0, 0], "0.8": [30, 0, 0], "1.3": [0, 0, 0], "1.6": [0, 0, 0]}}
     return _animations(clips)
 
 

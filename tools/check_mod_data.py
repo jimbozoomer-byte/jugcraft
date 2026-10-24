@@ -18183,13 +18183,16 @@ def check_logistics(co, root, lang, registered):
 def check_hand(co, root, lang, research):
     """Concordance Chunk D, unit 4 (D-08; D-S2, D-S12, D-S16, D-S20; docs/features/concordance-chunk-d.md): the porter's
     courier decision is one helper, spirits/CourierWork, called by the porter and the workshop hand, never copied (the
-    porter's choice of request and its reservations unchanged); its terms are asked only with no live claim. The hand is a
-    spirit whose service is a spirit's; it is sealed only by one who has mastered Stolas's Regard, asked before the anchor
-    seals; it takes only its beneficiaries' requests inside its area, from sources inside it, at most its carry a trip; a
-    load delivered in full is one task; ending lets its claim go, agreement_ended, killing worker_removed; it holds only its
-    claim's id. The anchor calls it by counterpart, records party beneficiaries and saves its post as an optional key; only
-    who may seal there binds it, rate-limited, before the key's container branch. Its sheet is the generator's; the unit's
-    tests exist, and so do the porter's."""
+    porter's choice of request and its reservations unchanged); its terms are asked only with no live claim; cargo goes
+    back only to a source the courier reaches; its post gone, a courier says why it waits. The hand is a spirit whose
+    service is a spirit's; it is sealed only by one who has mastered Stolas's Regard, asked before the anchor seals; it
+    takes only its beneficiaries' requests inside its area, from sources inside it, at most its carry a trip, and leaves
+    stranded cargo beyond its carry, or bound back to a source beyond its area, to others (D-P82); a load delivered in full
+    is one task; ending lets its claim go, agreement_ended, killing worker_removed; it holds only its claim's id. The
+    anchor asks only the definition of the worker it serves, calls it by counterpart, records party beneficiaries and saves
+    its post as an optional key; only who may seal there binds it, rate-limited, before the key's container branch. Its
+    lid is a bone of its own that working turns; its sheet is the generator's; the unit's tests exist, and so do the
+    porter's."""
     wk = co.workers
     spirits = root / "spirits"
     def java(relative, base=root):
@@ -18214,6 +18217,10 @@ def check_hand(co, root, lang, research):
     reserve = _java_body(work, "private Status reserve(")
     if "terms.reaches(pos)" not in reserve or "terms.load()" not in reserve:
         err("spirits/CourierWork.reserve: a courier reserves only where it reaches, at most its load (D-08)")
+    if "terms.reaches(from)" not in _java_body(work, "private Status takeBack("):
+        err("spirits/CourierWork.takeBack: cargo goes back only to a source the courier reaches, else into the post (D-08, D-P76)")
+    if "Status gone = terms.postGone();" not in serve or "return gone;" not in serve:
+        err("spirits/CourierWork.serve: its post gone, a courier says why it waits, as its terms say (D-08, D-P79)")
     porter = java("spirits/ClockworkPorterEntity.java")
     hand = java("spirits/WorkshopHandEntity.java")
     for name, text in (("ClockworkPorterEntity.java", porter), ("WorkshopHandEntity.java", hand)):
@@ -18228,6 +18235,8 @@ def check_hand(co, root, lang, research):
         err("tools/concordance_workers.py: the workshop hand is a spirit whose work is courier (D-S2)")
     if 'return "spirit";' not in _java_body(hand, "public String kind()"):
         err("spirits/WorkshopHandEntity.java: the workshop hand is a spirit")
+    if f'String WORK = "{info.get("work")}";' not in hand:
+        err("spirits/WorkshopHandEntity.WORK differs from the workshop hand's work in tools/concordance_workers.py")
     for path in sorted(spirits.glob("*.java")):
         for key in re.findall(r'Practiced\(Workers\.ACTIVITY, "([a-z_]+)"\)', path.read_text(encoding="utf-8")):
             if key not in ("familiar", "spirit", "construct"):
@@ -18246,9 +18255,13 @@ def check_hand(co, root, lang, research):
     if not 0 <= seal.find("WorkshopHandEntity.regarded(player)") < seal.find("maySeal(level, player, true)") \
             < seal.find("WorkshopHandEntity.mayServe(") < seal.find("anchor.holder().seal("):
         err("SpiritAnchorBlock.sealHand: Stolas's Regard, who may seal and a post still usable, before anything is sealed (D-S12)")
-    if not 0 <= _java_body(block, "public static Component use(").find("Workers.knows(player)") \
-            < _java_body(block, "public static Component use(").find("return sealHand(player, level, anchor, now);"):
+    use = _java_body(block, "public static Component use(")
+    if not 0 <= use.find("Workers.knows(player)") < use.find("return sealHand(player, level, anchor, terms, now);"):
         err("SpiritAnchorBlock.use: an anchor bound to a post seals a hand, after the Binding Arts are asked")
+    if "if (!Workers.enabled()) {" not in use \
+            or "boolean hand = agreement == null ? anchor.post() != null : WorkshopHandEntity.WORK.equals(agreement.work());" not in use \
+            or not 0 <= use.find("hand ? WorkshopHandEntity.terms()") < use.find("if (terms == null)"):
+        err("SpiritAnchorBlock.use: a hand's anchor asks only the hand's definition, a shade's only the shade's (D-08)")
     if "stack.is(Workers.PORTER_KEY) ? InteractionResult.PASS" not in block:
         err("SpiritAnchorBlock.useItemOn: a Porter Key is the key's to use on the anchor")
     # Its decision and its terms.
@@ -18265,6 +18278,20 @@ def check_hand(co, root, lang, research):
     if "Pacts.benefits(record, requester, JugcraftParties.sameParty(record.holder(), requester))" not in hand \
             or "agreement.within(to.x(), to.y(), to.z())" not in hand:
         err("WorkshopHandEntity.refusal: only its beneficiaries' requests, bound inside its area (D-S2)")
+    def term(start):
+        # One method of the anonymous Terms (to its closing brace at three tabs).
+        at = terms.find(start)
+        rest = terms[at:] if at >= 0 else ""
+        end = rest.find("\n\t\t\t}\n")
+        return rest[:end] if end >= 0 else rest
+    refuses = term("public @Nullable Status refuses(Request request)")
+    if not 0 <= refuses.find("request.progress().carried() > definition.carry()") < refuses.find("return refusal(record, agreement, request);"):
+        err("WorkshopHandEntity.courierTerms: stranded cargo beyond its carry is left to porters or its requester (D-08, D-P82)")
+    if "request.progress().returning() && source != null" not in refuses \
+            or "agreement.within(source.x(), source.y(), source.z())" not in refuses:
+        err("WorkshopHandEntity.courierTerms: cargo bound back to a source beyond its area is left to porters or its requester (D-08, D-P82)")
+    if "return Status.OUTSIDE_AGREEMENT;" not in term("public Status postGone()"):
+        err("WorkshopHandEntity.courierTerms: its post gone, the hand waits outside its agreement and says so (D-08, D-P79)")
     if 'courier.release(level, "agreement_ended")' not in _java_body(hand, "public void leave("):
         err("WorkshopHandEntity.leave: its agreement over, it lets its claim go, the cargo stranded at the post (D-08)")
     removed = _java_body(hand, "public void remove(RemovalReason reason)")
@@ -18291,6 +18318,12 @@ def check_hand(co, root, lang, research):
                                     "standing != AgreementHolder.Standing.NONE", "WorkshopHandEntity.mayServe(", "anchor.setPost(GlobalPos.of(")]
     if -1 in order or order != sorted(order):
         err("PorterKeyItem.bind: switched on; a copy binds nothing; only who may seal there; only while nothing is kept; only a usable post (D-08)")
+    # Its model: the lid is a bone of its own on the pack, and working turns only the lid (the unit review's finding 9).
+    import concordance_worker_models as worker_models
+    bones = {bone["name"]: bone for bone in worker_models.hand_geo()["minecraft:geometry"][0]["bones"]}
+    working = worker_models.hand_animations()["animations"].get("animation.workshop_hand.working", {}).get("bones", {})
+    if bones.get("pack_lid", {}).get("parent") != "pack" or "pack" in working or "pack_lid" not in working:
+        err("tools/concordance_worker_models.py: the hand's lid is a bone of its own on the pack, and working turns only the lid")
     # Its sheet is the generator's.
     import concordance_worker_art as worker_art
     sheet = ASSETS / "textures" / "entity" / "workshop_hand.png"
@@ -20487,7 +20520,8 @@ UNIT4_TESTS = {
                                       "aHandThatCannotFindItsWayStrandsItsCargoOnce", "anUnloadedDestinationKeepsTheHandWaiting",
                                       "aKilledHandStrandsItsCargoOnce", "anAbsentHolderStopsTheHand", "aBrokenSourceReleasesTheHandsClaim",
                                       "twoHandsCannotHoldOneRequest", "endingWithCargoAboardStrandsItOnce", "aHandServesOnlyItsBeneficiaries",
-                                      "aHandTakesOnlyFromInsideItsArea"],
+                                      "aHandTakesOnlyFromInsideItsArea", "aHandLeavesStrandedCargoBeyondItsCarry",
+                                      "aHandTakesCargoBackOnlyInsideItsArea"],
     "ConcordanceWorkerGameTests": ["aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason", "theHandNeedsStolasRegardMastered",
                                    "theConcordanceOffHoldsTheHand", "aHandsServiceIsASpiritsService", "anAnchorIsBoundOnlyWhileItKeepsNoAgreement"],
     "ConcordanceAuthorityGameTests": ["aStrangerCannotBindAHandToAnotherPlayersPost"],

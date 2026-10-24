@@ -57,14 +57,17 @@ a fourth page, "A Crucible's Own Requests".
 **A Workshop Hand** (Concordance Chunk D, D-08; not merged). Once you have mastered Stolas's Regard, use a Porter Key
 set on your Courier Post on a Spirit Anchor that keeps no agreement, within 12 blocks of the post (sneak to unbind it),
 then use the anchor: a Workshop Hand, a spirit, is sealed there as a Bound Will for you and your party (only the
-anchor's owner or their party may bind or seal it, never a stand-in). From 06:00 to 18:00, up to 32 loads a day of at
-most 64 items each, it carries the post's requests exactly as a porter does, a crucible's own among them, but only
-requests of yours or your party's that are bound for a place within 12 blocks of its anchor, and only from containers
-inside that area that you and the requester could open by hand; it leaves other requests to other couriers. Its hold
-(sneak and use the anchor), its hours and its day's loads stop only new claims: a load it has claimed it finishes, and a
-load claimed before its requester left your party too. Killed, or its agreement ended, its cargo waits at the post for
-another courier or for its requester to recover it once; killed, you call another at the anchor at no cost. It needs no
-fuel and no repair, and like every worker it says why it waits.
+anchor's owner or their party may bind or seal it, never a stand-in; an anchor placed before Chunk D, with no owner
+recorded: whoever may build there). From 06:00 to 18:00, up to 32 loads a day of at most 64 items each, it carries the
+post's requests exactly as a porter does, a crucible's own among them, but only requests of yours or your party's that
+are bound for a place within 12 blocks of its anchor, and only from containers inside that area that you and the
+requester could open by hand; it leaves other requests to other couriers, and so it does cargo stranded at the post that
+is more than it carries (a porter's, which has no cap of its own) or that must go back to a container beyond its area
+(D-P82). Its hold (sneak and use the anchor), its hours and its day's loads stop only new claims: a load it has claimed
+it finishes, and a load claimed before its requester left your party too. Killed, or its agreement ended, its cargo
+waits at the post for another courier or for its requester to recover it once; killed, you call another at the anchor at
+no cost. It needs no fuel and no repair, and like every worker it says why it waits (its post gone, outside its
+agreement).
 
 **Seeing it.** Use the post with an empty hand: how many requests are open and in transit, its free slots and its last
 eight steps (filed, claimed, reserved, picked up, delivered, stranded, taken up, taken back, cancelled, recovered, with
@@ -114,7 +117,8 @@ nothing is loaded to fetch from.
 shared by the Clockwork Porter and the Workshop Hand. It holds the claim's id (each courier saves it as `task`) and asks
 the courier's `Terms`: whether it may take a new claim now (`ready`, asked only with no live claim), whether it serves a
 request (`refuses`), whether it may take from a container (`reaches`), the most it reserves a trip (`load`), and what it
-does at its post (`atPost`), on each delivery (`delivered`) and when its post is gone (`postGone`).
+does at its post (`atPost`), on each delivery (`delivered`) and when its post is gone (`postGone`, which also says why
+it waits: a porter forgets its post and is idle, a hand waits outside its agreement).
 `Logistics.next(post, now, serves)` skips the requests a courier does not serve (`next(post, now)` serves every one),
 and `Logistics.reserve` and `CourierLedger.reserve` take a per-trip cap (`most`; the old signatures pass
 `Integer.MAX_VALUE`). A porter's terms are its body, every request, every container and no cap, a pylon at its post and
@@ -180,8 +184,8 @@ and loading none (the Spire's own copy is gone). The crucible (`CrucibleBlockEnt
   up later, and a request a Peepo fills before any courier has claimed it, which a porter then claims and picks up
   before the crucible's next pulse (cargo carried is always delivered, C-P51).
 - A Workshop Hand (Concordance Chunk D, D-08) needs no fuel, repair or upkeep and moves at most 32 loads of 64 items a
-  day (2,048), within its 12 blocks; it creates nothing, and its deliveries count toward the Binding Arts only as a
-  spirit's service.
+  day (2,048), within its 12 blocks; it never takes up cargo stranded at its post beyond its carry (D-P82), so no load
+  of its is larger; it creates nothing, and its deliveries count toward the Binding Arts only as a spirit's service.
 
 ## Multiplayer and persistence
 
@@ -206,11 +210,12 @@ and loading none (the Spire's own copy is gone). The crucible (`CrucibleBlockEnt
   requester left the party is finished, and their open requests are left to other couriers. It works only while its
   holder answers (`Authority.answering`, as a porter's keeper), and takes only from containers its holder and the
   requester could change. Only who may seal at a Spirit Anchor (its owner or their party, where they may build, never a
-  stand-in) binds it to a post, only to a post they may use, loaded, in the anchor's level and within 12 blocks, and
-  only while the anchor keeps no agreement; a copied anchor binds nothing, and the key's use on an anchor is
-  rate-limited. Saved: the hand's `anchor` and `task` (never cargo) and the anchor's optional `post` (an older anchor
-  has none and seals a shade); the ledger's format is unchanged. Switched off, a hand takes no step and lets nothing go;
-  its claim lapses by itself and the cargo waits at the post.
+  stand-in; an anchor placed before Chunk D, with no owner recorded: whoever may build there) binds it to a post, only
+  to a post they may use, loaded, in the anchor's level and within 12 blocks, and only while the anchor keeps no
+  agreement; a copied anchor binds nothing, and the key's use on an anchor is rate-limited. Saved: the hand's `anchor`
+  and `task` (never cargo) and the anchor's optional `post` (an older anchor has none and seals a shade); the ledger's
+  format is unchanged. Switched off, a hand takes no step and lets nothing go; its claim lapses by itself and the cargo
+  waits at the post.
 - PvP: nothing here harms anyone.
 - Disable behaviour: with `concordance.enabled=false` couriers stop (switched off) and nothing is filed; the ledger and
   everything in transit are kept.
@@ -319,10 +324,11 @@ transaction. `9098c06b1` fixes the check alone, and every job passed in run 3873
 
 **Concordance Chunk D, unit 4: D-08** (commits `023b681e8`, the shared courier decision, and `e51ef2b11`, the Workshop
 Hand, and the records' commit "Concordance Chunk D: unit 4's records and the schema review"; [the chunk's
-contract](concordance-chunk-d.md), its As built note and proposals D-P70 to D-P81; not merged). **Not yet run in CI:**
+contract](concordance-chunk-d.md), its As built note and proposals D-P70 to D-P83; not merged; and the unit review's
+fixes, commit "Chunk D unit 4: fixes from the unit review"). **Not yet run in CI:**
 there is no Minecraft build where it was written, so none of its Java has been compiled against Minecraft and none of
 the tests below has run.
-- `ConcordanceLogisticsGameTests` +11 (26 in all), none yet run in CI, each synchronous in one tick and checking
+- `ConcordanceLogisticsGameTests` +13 (28 in all), none yet run in CI, each synchronous in one tick and checking
   `problems()` and every item, in containers and carried, after every step: seven of 03:193's cases for the hand,
   `aHandFillsACrucibleUntilItIsFull` (a part delivery noted full, the rest delivered once, one task only when the load
   is delivered in full; a Peepo asks for none of it meanwhile), `aHandTakesNothingWhereItsHolderMayNot`,
@@ -330,16 +336,20 @@ the tests below has run.
   `aKilledHandStrandsItsCargoOnce`, `anAbsentHolderStopsTheHand` and `aBrokenSourceReleasesTheHandsClaim` (C-06 had no
   such test); and `twoHandsCannotHoldOneRequest`, `endingWithCargoAboardStrandsItOnce`,
   `aHandServesOnlyItsBeneficiaries` (a load claimed before its requester leaves the party is finished) and
-  `aHandTakesOnlyFromInsideItsArea` (a request for 100 is two loads, of 64 and 36). The server restart is
-  `ConcordancePersistenceGameTests.aHandsClaimSurvivesARestart`, as C-06's was. The porter's 15 tests are unchanged (the
-  diff of their file removes no line), and `check_hand` names each of them.
+  `aHandTakesOnlyFromInsideItsArea` (a request for 100 is two loads, of 64 and 36); and, from the unit review,
+  `aHandLeavesStrandedCargoBeyondItsCarry` (a porter's stranded 65 left for its requester's one recovery, a stranded 64
+  behind it taken up and delivered) and `aHandTakesCargoBackOnlyInsideItsArea` (a held load from a chest beyond the
+  area, cancelled, goes into the post, never to that chest; a stranded load bound back there is never claimed). The
+  server restart is `ConcordancePersistenceGameTests.aHandsClaimSurvivesARestart`, as C-06's was. The porter's 15 tests
+  are unchanged (the diff of their file removes no line), and `check_hand` names each of them.
 - Client, not yet run: `CompanionAutomationChecks.workshopHand` (`PeepoCompanionClientTests`): a Peepo serving a
   crucible subtracts a workshop hand's live claim.
 - Audits in `tools/check_mod_data.py`: `check_logistics` scans the release notes and item moves in `CourierWork` and the
   hand as well as the porter; `check_hand` (new) holds the one courier decision (`next` and `reserve` delegate,
   `serve`'s order, reservations within reach and load, neither courier repeating a ledger step), the hand's terms,
-  refusal and releases, and the unit's and the porter's test names; `AUTHORITY_ROUTES` follows the requester check into
-  `CourierWork`. Their audit mutations were all reported (the contract's D-08 As built).
+  refusal (since the unit review also its carry and the take-back area, `takeBack`'s area check and why it waits with
+  its post gone) and releases, and the unit's and the porter's test names; `AUTHORITY_ROUTES` follows the requester
+  check into `CourierWork`. Their audit mutations were all reported (the contract's D-08 As built).
 - Run and passed before each of the unit's commits: `python3 tools/owner_art.py --check`,
   `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
   `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
@@ -372,6 +382,8 @@ Open items:
   its requester leaves the party; like a porter it can hold a claim on a full destination until there is room or its
   holder ends the agreement (other couriers still claim the post's other requests).
 - Requests a hand does not serve (not its beneficiaries', or bound beyond its 12 blocks) wait for porters; a crucible
-  filing at a post up to 16 blocks away (`Couriers.FILING_REACH`) may lie outside a hand's area.
+  filing at a post up to 16 blocks away (`Couriers.FILING_REACH`) may lie outside a hand's area. So does cargo stranded
+  at the post beyond a hand's carry, or bound back to a container beyond its area (D-P82): at a post with no porter it
+  waits for its requester's one recovery.
 - An absent requester's request at the head of the queue holds a hand (`OWNER_OFFLINE`) as it holds porters (above);
   skipping it is left open at Chunk D's checkpoint (D-P81).

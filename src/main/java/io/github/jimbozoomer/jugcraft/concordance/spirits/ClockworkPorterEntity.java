@@ -275,7 +275,7 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 	 * The porter's part of the shared courier decision (Concordance Chunk D, D-08: CourierWork, extracted from here): its
 	 * body must be ready for a new claim; it serves every request at its post, from any container round it, with no cap of
 	 * its own; it fuels at a pylon there; each delivery is a trip that wears it and records a construct's service for its
-	 * keeper, present; its post gone, it forgets it.
+	 * keeper, present; its post gone, it forgets it and is idle.
 	 */
 	private CourierWork.Terms courierTerms(WorkerDefinition.Construct terms) {
 		return new CourierWork.Terms() {
@@ -313,8 +313,9 @@ public class ClockworkPorterEntity extends WorkerEntity<ClockworkPorterEntity> {
 			}
 
 			@Override
-			public void postGone() {
+			public Status postGone() {
 				post = null;
+				return Status.IDLE;
 			}
 		};
 	}

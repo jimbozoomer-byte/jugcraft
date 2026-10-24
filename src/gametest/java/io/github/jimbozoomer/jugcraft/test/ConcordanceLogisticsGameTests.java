@@ -1531,4 +1531,124 @@ public class ConcordanceLogisticsGameTests {
 		WorkshopHands.conserved(helper, ids, iron, 228, 0, "cancelled", near, far, post);
 		helper.succeed();
 	}
+
+	/**
+	 * D-08 (D-P82, the unit review): cargo stranded at the post beyond a hand's carry (a porter's, which reserves with no cap
+	 * of its own) is never taken up by the hand, so it never carries more than its carry a trip: it is left to porters or
+	 * to its requester's one recovery, while a stranded load within its carry, behind it, is taken up and delivered once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandLeavesStrandedCargoBeyondItsCarry(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		CourierPostBlockEntity post = WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity chest = chest(helper, WorkshopHands.CHEST);
+		chest.setItem(0, new ItemStack(Items.IRON_INGOT, 64));
+		chest.setItem(1, new ItemStack(Items.IRON_INGOT, 64));
+		chest.setItem(2, new ItemStack(Items.IRON_INGOT, 64));
+		WorkshopHandEntity hand = WorkshopHands.hand(helper, holder, WorkshopHands.ANCHOR, WorkshopHands.POST);
+		SpiritAnchorBlockEntity anchor = helper.getBlockEntity(WorkshopHands.ANCHOR, SpiritAnchorBlockEntity.class);
+		int carry = WorkshopHands.terms().carry();
+		Couriers.request(holder, level, post, new ItemStack(Items.IRON_INGOT), carry + 1);
+		long over = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		Couriers.request(holder, level, post, new ItemStack(Items.IRON_INGOT), carry);
+		long within = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		List<Long> ids = List.of(over, within);
+		Predicate<ItemStack> iron = stack -> stack.is(Items.IRON_INGOT);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 3_900_000L);
+		long in = WorkshopHands.inHours();
+		WorkshopHands.conserved(helper, ids, iron, 192, 0, "asked", chest, post, holder.getInventory());
+		UUID porter = new UUID(0xD08L, 2L);
+		Storage<ItemVariant> source = ItemStorage.SIDED.find(level, chest.getBlockPos(), null);
+		Place from = Couriers.place(level, chest.getBlockPos());
+		for (long id : ids) {
+			helper.assertTrue(ledger.claim(id, porter, now) == Logistics.Outcome.DONE && ledger.reserve(id, porter, from, source, now) == Logistics.Outcome.DONE
+					&& ledger.pickUp(id, porter, source, now) == Logistics.Outcome.DONE
+					&& ledger.release(id, porter, "worker_removed", false, now) == Logistics.Outcome.DONE,
+					"A porter, with no cap of its own, carries request " + id + " whole and is killed: its cargo is stranded at the post");
+			WorkshopHands.conserved(helper, ids, iron, 192, 0, "stranded " + id, chest, post, holder.getInventory());
+		}
+		helper.assertTrue(ledger.ledger().get(over).progress().carried() == carry + 1 && ledger.ledger().get(within).progress().carried() == carry
+				&& ledger.ledger().get(over).state() == RequestState.STRANDED && ledger.ledger().get(within).state() == RequestState.STRANDED,
+				"One stranded load beyond the hand's carry, and one within it behind it");
+		helper.assertTrue(hand.think(level, in, now + 20) == Status.WORKING && hand.task() == within && ledger.ledger().get(within).progress().aboard()
+				&& ledger.ledger().get(over).progress().worker() == null, "The hand passes the load beyond its carry and takes up the one within it");
+		WorkshopHands.conserved(helper, ids, iron, 192, 0, "the load within its carry taken up", chest, post, holder.getInventory());
+		helper.assertTrue(hand.think(level, in, now + 40) == Status.WORKING && ledger.ledger().get(within) == null && count(post, Items.IRON_INGOT) == carry
+				&& anchor.agreement().done(now + 40) == 1, "and delivers it, once: one load counted");
+		WorkshopHands.conserved(helper, ids, iron, 192, 0, "the load within its carry delivered", chest, post, holder.getInventory());
+		Status idle = hand.think(level, in, now + 60);
+		Request left = ledger.ledger().get(over);
+		helper.assertTrue(idle == Status.IDLE && hand.task() == 0L && left.progress().worker() == null && left.progress().carried() == carry + 1
+				&& !left.progress().aboard(), "The load beyond its carry it never takes: it is idle and the load waits, untouched: " + idle);
+		WorkshopHands.conserved(helper, ids, iron, 192, 0, "the load beyond its carry left", chest, post, holder.getInventory());
+		helper.assertTrue(ledger.recover(over, holder, now + 70) == Logistics.Outcome.DONE && holder.getInventory().countItem(Items.IRON_INGOT) == carry + 1,
+				"Its requester recovers it, once");
+		WorkshopHands.conserved(helper, ids, iron, 192, 0, "recovered", chest, post, holder.getInventory());
+		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, over), List.of("filed", "claimed", "reserved", "picked_up", "stranded", "recovered"),
+				"the post's history of the load beyond its carry: the hand never claimed it");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (D-P76, D-P82, the unit review): cargo a hand holds whose source lies beyond its area (here a test area of 3
+	 * blocks) goes back into the post when its requester cancels it, never to that source; cargo to be taken back to such a
+	 * source, stranded, the hand never claims (it is left to porters or to its requester's one recovery), so it never
+	 * claims cargo it could put back only into a post that may be full.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandTakesCargoBackOnlyInsideItsArea(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		CourierPostBlockEntity post = WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity far = chest(helper, new BlockPos(6, 1, 6));
+		far.setItem(0, new ItemStack(Items.IRON_INGOT, 20));
+		long now = WorkshopHands.morning(level, 4_000_000L);
+		WorkerDefinition.Spirit terms = WorkshopHands.terms();
+		WorkshopHandEntity hand = WorkshopHands.handUnder(helper, holder,
+				new WorkerDefinition.Spirit(WorkshopHandEntity.DEFINITION, terms.work(), 3, terms.from(), terms.to(), terms.quota(), terms.carry()), now);
+		Couriers.request(holder, level, post, new ItemStack(Items.IRON_INGOT), 10);
+		long held = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		Couriers.request(holder, level, post, new ItemStack(Items.IRON_INGOT), 10);
+		long back = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		List<Long> ids = List.of(held, back);
+		Predicate<ItemStack> iron = stack -> stack.is(Items.IRON_INGOT);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long in = WorkshopHands.inHours();
+		WorkshopHands.conserved(helper, ids, iron, 20, 0, "asked", far, post, holder.getInventory());
+		UUID porter = new UUID(0xD08L, 3L);
+		Storage<ItemVariant> source = ItemStorage.SIDED.find(level, far.getBlockPos(), null);
+		Place from = Couriers.place(level, far.getBlockPos());
+		for (long id : ids) {
+			helper.assertTrue(ledger.claim(id, porter, now) == Logistics.Outcome.DONE && ledger.reserve(id, porter, from, source, now) == Logistics.Outcome.DONE
+					&& ledger.pickUp(id, porter, source, now) == Logistics.Outcome.DONE
+					&& ledger.release(id, porter, "worker_removed", false, now) == Logistics.Outcome.DONE,
+					"A porter fetches request " + id + " from the chest beyond the hand's area and is killed: its cargo is stranded at the post");
+			WorkshopHands.conserved(helper, ids, iron, 20, 0, "stranded " + id, far, post, holder.getInventory());
+		}
+		helper.assertTrue(hand.think(level, in, now + 20) == Status.WORKING && hand.task() == held && ledger.ledger().get(held).progress().aboard()
+				&& from.equals(ledger.ledger().get(held).progress().source()), "The hand takes up the first stranded load, its source beyond the hand's area");
+		WorkshopHands.conserved(helper, ids, iron, 20, 0, "taken up", far, post, holder.getInventory());
+		helper.assertTrue(ledger.cancel(held, holder.getUUID(), now + 30) == Logistics.Outcome.DONE && ledger.ledger().get(held).progress().returning()
+				&& hand.getUUID().equals(ledger.ledger().get(held).progress().worker()), "Its requester cancels it while the hand holds it: it is to be taken back");
+		WorkshopHands.conserved(helper, ids, iron, 20, 0, "cancelled aboard", far, post, holder.getInventory());
+		Status returned = hand.think(level, in, now + 40);
+		helper.assertTrue(returned == Status.RETURNING && ledger.ledger().get(held) == null && count(post, Items.IRON_INGOT) == 10
+				&& count(far, Items.IRON_INGOT) == 0, "Its source beyond its area, the hand puts the cargo into the post, never into that chest: " + returned);
+		WorkshopHands.conserved(helper, ids, iron, 20, 0, "put into the post", far, post, holder.getInventory());
+		helper.assertTrue(ledger.cancel(back, holder.getUUID(), now + 50) == Logistics.Outcome.DONE && ledger.ledger().get(back).progress().returning()
+				&& ledger.ledger().get(back).progress().worker() == null, "The other stranded load is cancelled: it is to be taken back to the chest beyond the area");
+		WorkshopHands.conserved(helper, ids, iron, 20, 0, "the other cancelled", far, post, holder.getInventory());
+		Status idle = hand.think(level, in, now + 60);
+		helper.assertTrue(idle == Status.IDLE && hand.task() == 0L && ledger.ledger().get(back).progress().worker() == null
+				&& ledger.ledger().get(back).progress().carried() == 10, "Cargo bound back beyond its area the hand never claims: it is idle: " + idle);
+		WorkshopHands.conserved(helper, ids, iron, 20, 0, "the other left", far, post, holder.getInventory());
+		helper.assertTrue(ledger.recover(back, holder, now + 70) == Logistics.Outcome.DONE && holder.getInventory().countItem(Items.IRON_INGOT) == 10,
+				"Its requester recovers it, once");
+		WorkshopHands.conserved(helper, ids, iron, 20, 0, "recovered", far, post, holder.getInventory());
+		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, back),
+				List.of("filed", "claimed", "reserved", "picked_up", "stranded", "returning", "recovered"), "the post's history of it: the hand never claimed it");
+		helper.succeed();
+	}
 }

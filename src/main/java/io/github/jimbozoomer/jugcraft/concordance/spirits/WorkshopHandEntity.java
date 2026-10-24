@@ -40,8 +40,9 @@ import org.jspecify.annotations.Nullable;
  * it carries that post's exact requests through the courier ledger, an Alembic Crucible's own among them: only a
  * beneficiary's, bound for a place inside its area (both checked at each new claim; a load already claimed is finished),
  * taken only from containers inside its area that its holder and the requester could open, at most its definition's carry
- * a trip. Its hold, its hours and its day's loads gate only a new claim: a claim it holds it finishes, as a shade takes
- * its load home. It holds only its claim's id, never the items:
+ * a trip (stranded cargo beyond its carry, or bound back to a source beyond its area, it leaves to porters or its
+ * requester's recovery). Its hold, its hours and its day's loads gate only a new claim: a claim it holds it finishes, as a
+ * shade takes its load home. It holds only its claim's id, never the items:
  * ended, released, replaced or broken away it lets the claim go (agreement_ended), killed or discarded the same
  * (worker_removed), and the cargo waits at the post, in the ledger, for another courier or one recovery by its requester;
  * unloaded, offline or switched off it does nothing and the claim lapses by itself. Its service is a spirit's (the
@@ -49,6 +50,8 @@ import org.jspecify.annotations.Nullable;
  */
 public class WorkshopHandEntity extends WorkerEntity<WorkshopHandEntity> implements AgreementHolder.Presence {
 	public static final String DEFINITION = "jugcraft:workshop_hand";
+	/** Its definition's work, which its agreement keeps: an anchor keeping a courier's agreement is a hand's. */
+	public static final String WORK = "courier";
 	/** Stolas's Regard (Concordance Chunk D, D-S12; unit 2's research, named here only): mastered, its holder may seal a hand. */
 	public static final String REGARD = "jugcraft:stolas_regard";
 	/** How near it must be to a container or its post: the porter's reach. */
@@ -203,8 +206,10 @@ public class WorkshopHandEntity extends WorkerEntity<WorkshopHandEntity> impleme
 	/**
 	 * The hand's part of the shared courier decision: a new claim only while its Bound Will holds nothing and within its
 	 * hours and day's loads (the shade's rule, Agreement.permits); only its beneficiaries' requests bound inside its area;
-	 * sources inside its area; at most its definition's carry a trip; a load delivered in full is one of its day's tasks,
-	 * and each delivery a spirit's service for its holder, present.
+	 * sources inside its area; at most its definition's carry a trip, so cargo stranded at the post beyond its carry (a
+	 * porter's, which has no cap of its own) and cargo to be taken back to a source beyond its area are left to porters or
+	 * to their requester's one recovery (D-P82); a load delivered in full is one of its day's tasks, and each delivery a
+	 * spirit's service for its holder, present. Its post gone, it waits outside its agreement.
 	 */
 	private CourierWork.Terms courierTerms(ServerLevel level, SpiritAnchorBlockEntity home, Agreement agreement, BoundWill record,
 			WorkerDefinition.Spirit definition, long time, long gameTime) {
@@ -217,6 +222,15 @@ public class WorkshopHandEntity extends WorkerEntity<WorkshopHandEntity> impleme
 
 			@Override
 			public @Nullable Status refuses(Request request) {
+				// D-P82: never more than its carry aboard, and never cargo bound back to a source beyond its area.
+				if (request.progress().carried() > definition.carry()) {
+					return Status.IDLE;
+				}
+				Place source = request.progress().source();
+				if (request.progress().returning() && source != null
+						&& !(source.dimension().equals(agreement.dimension()) && agreement.within(source.x(), source.y(), source.z()))) {
+					return Status.IDLE;
+				}
 				return refusal(record, agreement, request);
 			}
 
@@ -245,7 +259,8 @@ public class WorkshopHandEntity extends WorkerEntity<WorkshopHandEntity> impleme
 			}
 
 			@Override
-			public void postGone() {
+			public Status postGone() {
+				return Status.OUTSIDE_AGREEMENT;
 			}
 		};
 	}

@@ -285,10 +285,11 @@ written, so none of its Java has been compiled against Minecraft and none of the
 - **Not run:** `./gradlew build` and every server and client game test (CI is their first compile and run), any
   client, two clients, a real world saved before Chunk D, a restart.
 
-**Concordance Chunk D, unit 4: D-08** (commits `023b681e8`, `e51ef2b11` and the records' commit "Concordance Chunk D:
-unit 4's records and the schema review"; [the chunk's contract](concordance-chunk-d.md); not merged). **Not yet run in
-CI:** none of its Java has been compiled against Minecraft and none of the tests below has run.
-- New server game tests (19), none yet run in CI: `ConcordanceLogisticsGameTests` +11 (26; listed in
+**Concordance Chunk D, unit 4: D-08** (commits `023b681e8`, `e51ef2b11`, the records' commit "Concordance Chunk D:
+unit 4's records and the schema review" and the commit "Chunk D unit 4: fixes from the unit review"; [the chunk's
+contract](concordance-chunk-d.md); not merged). **Not yet run in CI:** none of its Java has been compiled against
+Minecraft and none of the tests below has run.
+- New server game tests (21), none yet run in CI: `ConcordanceLogisticsGameTests` +13 (28; listed in
   [logistics](arcane-concordance-logistics.md#verification)); `ConcordanceWorkerGameTests` +5 (27):
   `aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason` (narrow test terms; a claim held past its hours is finished;
   suspended with a load claimed, it finishes it and claims nothing new; the day's two loads, then the next day),
@@ -306,14 +307,15 @@ CI:** none of its Java has been compiled against Minecraft and none of the tests
   renderer, model, clips and sheet are then checked as the others'); `check_hand` (new): the hand a spirit whose service
   is a spirit's, the Regard at MASTERED asked before the seal, its decision's order, its terms, refusal and releases, no
   item list, the anchor's optional `post`, `call` and party sealing, the key's order and binding, the sheet against the
-  generator, and the tests; `AUTHORITY_ROUTES` (the hand's `answering`, the key's `maySeal`). Its audit mutations and
-  the commands run are in the contract's D-08 As built; all passed. **Not run:** `./gradlew build`, any game test, any
-  client, two clients.
+  generator, and the tests; since the unit review also the hand's carry and take-back refusals (D-P82), why it waits
+  with its post gone and the anchor asking only the definition of the worker it serves (D-P83); `AUTHORITY_ROUTES` (the
+  hand's `answering`, the key's `maySeal`). Its audit mutations and the commands run are in the contract's D-08 As
+  built; all passed. **Not run:** `./gradlew build`, any game test, any client, two clients.
 
 ## The Workshop Hand (Concordance Chunk D, D-08)
 
 Not merged; built beside Chunk D's unit 2 ([the chunk's contract](concordance-chunk-d.md), D-08's As built note and
-proposals D-P70 to D-P81). A spirit of the Gathering Shade's kind, bound to carry: sealed at a Spirit Anchor that a
+proposals D-P70 to D-P83). A spirit of the Gathering Shade's kind, bound to carry: sealed at a Spirit Anchor that a
 Porter Key has bound to its holder's Courier Post, it carries that post's exact requests through the courier ledger with
 the Clockwork Porter's own decision ([logistics](arcane-concordance-logistics.md)).
 
@@ -324,26 +326,32 @@ the Clockwork Porter's own decision ([logistics](arcane-concordance-logistics.md
 - **Output consumer:** the post's nine slots, a crucible's buffer, any destination a request names inside its area.
 - **Costs:** a Spirit Anchor, a Porter Key and a Courier Post; one Bound Will (of 32) and one roster place (of 32). No
   fuel, repair or upkeep. At most 32 loads a day of at most 64 items each, from 06:00 to 18:00, within 12 blocks of its
-  anchor (`jugcraft:workshop_hand`, kind `spirit`, work `courier`).
+  anchor (`jugcraft:workshop_hand`, kind `spirit`, work `courier`); cargo stranded at its post beyond its carry, or
+  bound back to a container beyond its area, it leaves to porters or its requester's one recovery (D-P82).
 - **Unlocks:** nothing.
 - **Binding Arts:** each delivery records a spirit's service (`worker_service`, key `spirit`) for its holder, present;
   mastering the Binding Arts still needs a familiar's, a spirit's and a construct's (distinct 3), so a hand is no
   shortcut and no fourth kind.
 - **Binding and sealing:** a Porter Key set on a Courier Post, used on an anchor that keeps no agreement, binds it
   (sneaking unbinds it): only with the Concordance on, never at a copied anchor (`CONFLICTING_AGREEMENT`), only by the
-  anchor's owner or their party where they may build (never a stand-in), only to a post they may use, loaded, in the
-  anchor's level and within 12 blocks; the key's use there is rate-limited. An anchor bound to a post seals a hand (for
-  its holder and their party, recorded on the Bound Will); an unbound one seals a shade. Reading an anchor that keeps a
-  hand's agreement names its post, or says the post is gone.
+  anchor's owner or their party where they may build (never a stand-in; an anchor placed before Chunk D, with no owner
+  recorded: whoever may build there), only to a post they may use, loaded, in the anchor's level and within 12 blocks;
+  the key's use there is rate-limited. An anchor bound to a post seals a hand (for its holder and their party, recorded
+  on the Bound Will); an unbound one seals a shade. Reading an anchor that keeps a hand's agreement names its post, or
+  says the post is gone (the hand itself then says `outside_agreement`). The anchor asks only the definition of the
+  worker it serves, so a data pack that drops the shade's leaves hands' anchors working, and the other way round
+  (D-P83).
 - **Saves:** the hand's `anchor` and `task` (the claim's id, never cargo; stamp 1); the anchor's optional `post` (an
   older or unreadable one reads as none, the rest kept); the Bound Will's pact (`beneficiaries` `party`, `service` work
   `courier`), keys there since unit 1.
 - **Art provenance:** the Gathering Shade's model and sheet (`tools/concordance_worker_models.py`,
-  `tools/concordance_worker_art.py`), its boxes and regions unchanged, with a wicker pack and lid on a bone of their own
-  and five clips; its eyes lit like the owner's `Guns/block/treated_brass_lamp_lit.png`, its pack from
-  `farming and food textures/wooden_basket_side.png` with a buckle from `Guns/entity/cog_knight.png` (colours only, read
-  from `art/owner-library/originals/Blocks/`; nothing from Mojang's files). Generated; not seen in game.
-- **Test evidence:** none yet run in CI. 19 server game tests (Logistics +11, Worker +5, Authority +1, Persistence +2)
+  `tools/concordance_worker_art.py`), its boxes and regions unchanged, with a wicker pack on a bone of its own on the
+  body and its lid on a bone of its own on the pack, hinged along its edge against the body (working, the lid lifts at
+  the back; the pack itself stays on the body), and five clips; its eyes lit like the owner's
+  `Guns/block/treated_brass_lamp_lit.png`, its pack from `farming and food textures/wooden_basket_side.png` with a
+  buckle from `Guns/entity/cog_knight.png` (colours only, read from `art/owner-library/originals/Blocks/`; nothing from
+  Mojang's files). Generated; not seen in game.
+- **Test evidence:** none yet run in CI. 21 server game tests (Logistics +13, Worker +5, Authority +1, Persistence +2)
   and the client companion check `CompanionAutomationChecks.workshopHand`, listed in Verification above.
 
 **Failure behaviour** (03:193's eight cases, as C-06's table (CC:1127-1136), and the hand's own terms):
@@ -360,6 +368,8 @@ the Clockwork Porter's own decision ([logistics](arcane-concordance-logistics.md
 | The server restarts | The hand's `anchor` and `task`, the anchor's `post`, the Bound Will and the ledger survive a save; unloaded, it lets nothing go; read back, it delivers once | `ConcordancePersistenceGameTests.aHandsClaimSurvivesARestart` |
 | Suspended, past its hours, or its day's loads done | It finishes a load it has claimed and claims nothing new (`SUSPENDED`, `OUTSIDE_AGREEMENT`, `FINISHED`); resumed, or the next day, it serves again | `aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason` |
 | A request not its beneficiaries', or bound beyond its area | Skipped (`IDLE`), or refused (`OUTSIDE_AGREEMENT`), and left open for other couriers; it takes the requests behind it | `aHandServesOnlyItsBeneficiaries`, `aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason` |
+| Cargo stranded at the post beyond its carry (a porter's), or bound back to a container beyond its area | Skipped (`IDLE`), left to porters or its requester's one recovery; a stranded load within its carry is taken up past it; cargo it already holds whose source is beyond its area goes back into the post, never to that source (D-P82) | `aHandLeavesStrandedCargoBeyondItsCarry`, `aHandTakesCargoBackOnlyInsideItsArea` |
+| Its post broken | No ledger step; the claim lapses by itself and the cargo stays in the ledger; it says `OUTSIDE_AGREEMENT`, and the anchor's reading says the post is gone (D-P83) | not tested in game (the audit holds the status) |
 | Its agreement ended with cargo aboard | It lets its claim go (`agreement_ended`) and departs; the cargo is stranded at the post and recovered once; ending again moves nothing | `endingWithCargoAboardStrandsItOnce` |
 | Two hands, one request | One claims it; the other may neither claim (`CLAIMED`), reserve nor pick up for it (`NOT_YOURS`) | `twoHandsCannotHoldOneRequest` |
 | The Concordance switched off | `DISABLED`: its claim, cargo and lease untouched; on again within its lease, it delivers once | `theConcordanceOffHoldsTheHand` |

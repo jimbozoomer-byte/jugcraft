@@ -43,7 +43,10 @@ final class CourierWork {
 		/** Why it may take no new claim now (a porter's body; a hand's hold, hours and day's quota), or null. Never asked while it holds a live claim. */
 		@Nullable Status ready();
 
-		/** Why it does not serve {@code request} (a hand: IDLE, not its beneficiaries'; OUTSIDE_AGREEMENT, bound beyond its area), or null. */
+		/**
+		 * Why it does not serve {@code request} (a hand: IDLE, not its beneficiaries', more aboard than its carry or to be taken
+		 * back to a source beyond its area; OUTSIDE_AGREEMENT, bound beyond its area), or null.
+		 */
 		@Nullable Status refuses(Request request);
 
 		/** Whether it may take from, or take cargo back to, {@code pos} (a hand: inside its area). */
@@ -58,8 +61,8 @@ final class CourierWork {
 		/** A delivery put something in; {@code finished}: all it carried is delivered and its claim is over. */
 		void delivered(ServerLevel level, @Nullable ServerPlayer keeper, boolean finished, long now);
 
-		/** Its post is no longer there (a porter forgets it; a hand's anchor keeps it). */
-		void postGone();
+		/** Its post is no longer there (a porter forgets it and is idle; a hand's anchor keeps it, and the hand waits outside its agreement): why it waits. */
+		Status postGone();
 	}
 
 	private final WorkerEntity<?> worker;
@@ -106,11 +109,11 @@ final class CourierWork {
 			return Status.DESTINATION_UNLOADED;
 		}
 		if (!(level.getBlockEntity(at) instanceof CourierPostBlockEntity postEntity)) {
-			// Its post is gone: its claim lapses by itself and the ledger keeps any cargo.
+			// Its post is gone: its claim lapses by itself and the ledger keeps any cargo; the courier says why it waits.
 			task = 0L;
-			terms.postGone();
+			Status gone = terms.postGone();
 			worker.stop();
-			return Status.IDLE;
+			return gone;
 		}
 		UUID owner = worker.owner();
 		if (owner == null || !postEntity.mayUse(owner)) {
