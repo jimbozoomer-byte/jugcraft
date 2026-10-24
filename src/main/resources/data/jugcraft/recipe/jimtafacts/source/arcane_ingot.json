@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DDD",
+    "DWD",
+    "DDD"
+  ],
+  "key": {
+    "D": "jugcraft:jimta_spellbooks_arcane_essence",
+    "W": "#jugcraft:jimtafacts/spellbooks/arcane_ingot_base"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_arcane_ingot",
+    "count": 1
+  }
+}

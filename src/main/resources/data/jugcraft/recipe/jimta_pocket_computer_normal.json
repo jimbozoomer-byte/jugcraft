@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:jimta_computer_computer_normal",
+    "minecraft:stone_button"
+  ],
+  "result": {
+    "id": "jugcraft:jimta_pocket_computer_normal"
+  }
+}

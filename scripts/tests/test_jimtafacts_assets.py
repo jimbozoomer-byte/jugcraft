@@ -12,8 +12,8 @@ import jimtafacts
 
 class JimtafactsAssetsTests(unittest.TestCase):
     def test_copied_icons_match_the_supplied_files(self):
-        copies = json.loads((ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/runtime-copies.json').read_text())
-        self.assertEqual(len(copies), len(jimtafacts.ACCESSORIES) + len(jimtafacts.FOOD))
+        copies = json.loads((ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/runtime-copies.json').read_text(encoding='utf-8'))
+        self.assertEqual(len(copies), len(jimtafacts.items()) - 1)
         for row in copies:
             with self.subTest(row['runtime']):
                 original = (ROOT / row['source']).read_bytes()
@@ -24,11 +24,24 @@ class JimtafactsAssetsTests(unittest.TestCase):
         res = ROOT / 'src/main/resources'
         for name in set(jimtafacts.ACCESSORIES) | set(jimtafacts.FOOD):
             with self.subTest(name):
-                item = json.loads((res / f'assets/jugcraft/items/jimta_{name}.json').read_text())
+                item = json.loads((res / f'assets/jugcraft/items/jimta_{name}.json').read_text(encoding='utf-8'))
                 model_id = item['model']['model'].split(':')[1]
-                model = json.loads((res / f'assets/jugcraft/models/{model_id}.json').read_text())
+                model = json.loads((res / f'assets/jugcraft/models/{model_id}.json').read_text(encoding='utf-8'))
                 texture = model['textures']['layer0'].split(':')[1]
                 self.assertTrue((res / f'assets/jugcraft/textures/{texture}.png').is_file())
+
+    def test_original_umbrella_geometry_and_mimic_texture_are_preserved(self):
+        res = ROOT / 'src/main/resources'
+        source = jimtafacts.SOURCE / 'assets/artifacts'
+        for name in ('umbrella_held', 'umbrella_held_blocking'):
+            original=json.loads((source/f'models/item/{name}.json').read_text(encoding='utf-8'))
+            imported=json.loads((res/f'assets/jugcraft/models/item/jimtafacts/{name}.json').read_text(encoding='utf-8'))
+            self.assertEqual(original.get('elements'),imported.get('elements'))
+            self.assertEqual(original.get('display'),imported.get('display'))
+        self.assertEqual((source/'textures/entity/mimic.png').read_bytes(),(res/'assets/jugcraft/textures/entity/jimtafacts/mimic.png').read_bytes())
+        item=json.loads((res/'assets/jugcraft/items/jimta_umbrella.json').read_text(encoding='utf-8'))
+        self.assertIn('minecraft:using_item',json.dumps(item))
+        self.assertNotIn('artifacts:',json.dumps(item))
 
     def test_regeneration_preserves_existing_shared_tags_and_language(self):
         res = ROOT / 'src/main/resources'
@@ -46,8 +59,8 @@ class JimtafactsAssetsTests(unittest.TestCase):
     def test_equipped_tags_link_without_replacing_existing_equipment(self):
         res = ROOT / 'src/main/resources'
         for name, (slot, _, _) in jimtafacts.ACCESSORIES.items():
-            shared = json.loads((res / f'data/trinkets/tags/item/{slot}.json').read_text())
-            own = json.loads((res / f'data/jugcraft/tags/item/jimtafacts/{slot}.json').read_text())
+            shared = json.loads((res / f'data/trinkets/tags/item/{slot}.json').read_text(encoding='utf-8'))
+            own = json.loads((res / f'data/jugcraft/tags/item/jimtafacts/{slot}.json').read_text(encoding='utf-8'))
             self.assertFalse(shared['replace'])
             self.assertIn('#jugcraft:jimtafacts/' + slot, shared['values'])
             self.assertIn('jugcraft:jimta_' + name, own['values'])

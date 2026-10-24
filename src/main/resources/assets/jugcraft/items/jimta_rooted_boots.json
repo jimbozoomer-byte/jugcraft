@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_rooted_boots"
+    "model": "jugcraft:item/jimtafacts/rooted_boots"
   }
 }

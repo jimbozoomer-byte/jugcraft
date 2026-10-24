@@ -31,6 +31,9 @@ final class LandProtection {
 				allowed(player, level, pos) ? InteractionResult.PASS : InteractionResult.FAIL);
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			BlockPos clicked = hit.getBlockPos();
+			// Published vendors perform their own bounded trade/menu action. Never grant build/container access.
+			var shopUse=io.github.jimbozoomer.jugcraft.jimtafacts.industry.PersonalWorkshops.publicUse(player,level,clicked);
+			if(shopUse!=InteractionResult.PASS)return shopUse;
 			// Also the block beside it, where a placed block would go.
 			return allowed(player, level, clicked) && allowed(player, level, clicked.relative(hit.getDirection()))
 					? InteractionResult.PASS : InteractionResult.FAIL;

@@ -182,6 +182,21 @@
       "type": "minecraft:directory",
       "source": "artisan",
       "prefix": "artisan/"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "jimtafacts/computers/block",
+      "prefix": "jimtafacts/computers/block/"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "jimtafacts/computers/item",
+      "prefix": "jimtafacts/computers/item/"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "jimtafacts/computers/entity",
+      "prefix": "jimtafacts/computers/entity/"
     }
   ]
 }

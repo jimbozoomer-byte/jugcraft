@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FFF",
+    "FRF",
+    "FFF"
+  ],
+  "key": {
+    "F": "minecraft:chiseled_bookshelf",
+    "R": "jugcraft:jimta_spellbooks_arcane_essence"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_wisewood_chiseled_bookshelf",
+    "count": 8
+  }
+}

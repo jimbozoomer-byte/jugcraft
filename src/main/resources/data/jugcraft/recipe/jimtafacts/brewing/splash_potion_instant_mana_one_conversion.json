@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "minecraft:potion",
+    "potion_contents": {
+      "potions": "jugcraft:jimta_spellbooks_instant_mana_one"
+    }
+  },
+  "output": {
+    "id": "minecraft:splash_potion",
+    "components": {
+      "minecraft:potion_contents": {
+        "potion": "jugcraft:jimta_spellbooks_instant_mana_one"
+      }
+    }
+  },
+  "reagent": {
+    "item": "minecraft:gunpowder"
+  }
+}

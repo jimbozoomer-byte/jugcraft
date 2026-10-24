@@ -1,7 +1,17 @@
 {
+  "anglers_hat": {
+    "slot": "head/hat",
+    "description": "Adds one level of Lure and Luck of the Sea while fishing.",
+    "attributes": {}
+  },
   "antidote_vessel": {
     "slot": "legs/charm",
     "description": "Clears poison and wither once every ten seconds.",
+    "attributes": {}
+  },
+  "aqua_dashers": {
+    "slot": "feet/boots",
+    "description": "Sprint across water; stop sprinting or sneak to dive.",
     "attributes": {}
   },
   "bunny_hoppers": {
@@ -27,6 +37,23 @@
       "oxygen_bonus": 2
     }
   },
+  "chorus_totem": {
+    "slot": "legs/charm",
+    "description": "Consumed to rescue you from a lethal hit and teleport to nearby safe ground.",
+    "attributes": {}
+  },
+  "cloud_in_a_bottle": {
+    "slot": "legs/charm",
+    "description": "Press jump again while airborne for one extra jump.",
+    "attributes": {
+      "safe_fall_distance": 3
+    }
+  },
+  "cowboy_hat": {
+    "slot": "head/hat",
+    "description": "Your living mount moves 25% faster while you ride it.",
+    "attributes": {}
+  },
   "cross_necklace": {
     "slot": "chest/necklace",
     "description": "Extends the brief invulnerability after taking a hit.",
@@ -41,7 +68,7 @@
   },
   "digging_claws": {
     "slot": "offhand/glove",
-    "description": "Doubles block-breaking speed; your tool still determines harvest eligibility.",
+    "description": "Doubles block-breaking speed and harvests stone-tier pickaxe blocks with your claws.",
     "attributes": {
       "block_break_speed": 1
     }
@@ -84,9 +111,40 @@
       "water_movement_efficiency": 1
     }
   },
+  "golden_hook": {
+    "slot": "offhand/glove",
+    "description": "Mobs you defeat drop 50% more experience.",
+    "attributes": {}
+  },
+  "helium_flamingo": {
+    "slot": "legs/charm",
+    "description": "Hold sprint in midair to swim through the air for up to eight seconds. Recharges on the ground.",
+    "attributes": {}
+  },
+  "kitty_slippers": {
+    "slot": "feet/boots",
+    "description": "Nearby creepers and phantoms avoid you unless you attack them.",
+    "attributes": {}
+  },
+  "lucky_scarf": {
+    "slot": "chest/necklace",
+    "description": "Adds one level of Fortune to block drops.",
+    "attributes": {}
+  },
+  "mimic_spawn_egg": {
+    "slot": "",
+    "special": "mimic_spawn_egg",
+    "description": "Spawns a dormant treasure mimic.",
+    "attributes": {}
+  },
   "night_vision_goggles": {
     "slot": "head/hat",
     "description": "Night vision while worn; fades within twelve seconds after removal.",
+    "attributes": {}
+  },
+  "novelty_drinking_hat": {
+    "slot": "head/hat",
+    "description": "Eat and drink twice as quickly.",
     "attributes": {}
   },
   "obsidian_skull": {
@@ -94,9 +152,24 @@
     "description": "After fire hurts you, grants ten seconds of fire resistance. Thirty-second cooldown.",
     "attributes": {}
   },
+  "onion_ring": {
+    "slot": "hand/bracelet",
+    "description": "Eating while wearing this grants Haste for ten seconds per food point.",
+    "attributes": {}
+  },
   "panic_necklace": {
     "slot": "chest/necklace",
     "description": "Taking damage grants Speed II for five seconds. Ten-second cooldown.",
+    "attributes": {}
+  },
+  "pickaxe_heater": {
+    "slot": "legs/charm",
+    "description": "Automatically smelts mined drops using their furnace recipes.",
+    "attributes": {}
+  },
+  "plastic_drinking_hat": {
+    "slot": "head/hat",
+    "description": "Eat and drink twice as quickly.",
     "attributes": {}
   },
   "pocket_piston": {
@@ -115,7 +188,7 @@
   },
   "rooted_boots": {
     "slot": "feet/boots",
-    "description": "Standing still on grass restores one food every ten seconds.",
+    "description": "Standing still on grass restores food; eating encourages nearby plants to grow.",
     "attributes": {}
   },
   "running_shoes": {
@@ -138,16 +211,37 @@
     "description": "Breathe underwater while worn.",
     "attributes": {}
   },
+  "snowshoes": {
+    "slot": "feet/boots",
+    "description": "Walk over powder snow, resist freezing and move faster on snow.",
+    "attributes": {}
+  },
   "steadfast_spikes": {
     "slot": "feet/boots",
-    "description": "Strong knockback resistance while worn.",
+    "description": "Strong knockback resistance and firm footing on slippery ice.",
     "attributes": {
       "knockback_resistance": 0.8
     }
   },
+  "strider_shoes": {
+    "slot": "feet/boots",
+    "description": "Sneak to walk on lava; protects against hot floors.",
+    "attributes": {}
+  },
+  "superstitious_hat": {
+    "slot": "head/hat",
+    "description": "Adds one level of Looting to mobs you defeat.",
+    "attributes": {}
+  },
   "thorn_pendant": {
     "slot": "chest/necklace",
     "description": "Returns 2 damage to permitted melee attackers. Three-second cooldown.",
+    "attributes": {}
+  },
+  "umbrella": {
+    "slot": "",
+    "special": "umbrella",
+    "description": "A gliding umbrella that also blocks attacks.",
     "attributes": {}
   },
   "universal_attractor": {
@@ -158,6 +252,21 @@
   "vampiric_glove": {
     "slot": "offhand/glove",
     "description": "Melee hits heal 20% of damage, at most one heart per second.",
+    "attributes": {}
+  },
+  "villager_hat": {
+    "slot": "head/hat",
+    "description": "Villagers offer their friendly reputation discount while worn.",
+    "attributes": {}
+  },
+  "warp_drive": {
+    "slot": "legs/charm",
+    "description": "Throw ender pearls for two food points instead of consuming them; prevents pearl damage.",
+    "attributes": {}
+  },
+  "whoopee_cushion": {
+    "slot": "legs/charm",
+    "description": "Sneak to surprise everyone nearby with a familiar sound.",
     "attributes": {}
   },
   "withered_bracelet": {

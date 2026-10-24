@@ -120,6 +120,14 @@ public final class Authority {
 		return PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, state, level.getBlockEntity(pos));
 	}
 
+	/** Shared item/block hooks may run on both sides. Client approval only predicts the interaction;
+	 * the server always performs the complete claim/event checks above before changing anything. */
+	public static boolean mayChange(net.minecraft.world.level.Level level, @Nullable Player player, BlockPos pos) {
+		if (level instanceof ServerLevel server) return mayChange(server, player, pos);
+		return player != null && player.isAlive() && !player.isSpectator() && level.isInWorldBounds(pos)
+				&& level.getWorldBorder().isWithinBounds(pos);
+	}
+
 	/** Whether a device of {@code owner} may change the block at {@code pos} now, as whoever answers for them. */
 	public static boolean mayChangeFor(ServerLevel level, @Nullable UUID owner, BlockPos pos) {
 		return mayChange(level, answering(level, owner), pos);

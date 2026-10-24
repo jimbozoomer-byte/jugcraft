@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_running_shoes"
+    "model": "jugcraft:item/jimtafacts/running_shoes"
   }
 }

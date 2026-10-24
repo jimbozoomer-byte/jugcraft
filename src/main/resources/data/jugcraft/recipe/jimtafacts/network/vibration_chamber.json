@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IFI",
+    "LHL",
+    "ICI"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "L": "jugcraft:jimta_logic_processor",
+    "C": "jugcraft:jimta_fluix_glass_cable",
+    "H": "minecraft:furnace",
+    "F": "jugcraft:jimta_fluix_crystal"
+  },
+  "result": {
+    "id": "jugcraft:jimta_vibration_chamber",
+    "count": 1
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ]
+}

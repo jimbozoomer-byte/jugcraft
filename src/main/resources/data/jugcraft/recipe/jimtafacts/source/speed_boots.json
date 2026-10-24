@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " W ",
+    "FAF",
+    " D "
+  ],
+  "key": {
+    "A": "jugcraft:jimta_spellbooks_archevoker_boots",
+    "W": "jugcraft:jimta_spellbooks_mithril_weave",
+    "F": "minecraft:feather",
+    "D": "jugcraft:jimta_spellbooks_divine_soulshard"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_speed_boots",
+    "count": 1
+  }
+}

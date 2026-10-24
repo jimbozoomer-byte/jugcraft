@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_antidote_vessel"
+    "model": "jugcraft:item/jimtafacts/antidote_vessel"
   }
 }

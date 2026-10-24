@@ -1828,6 +1828,63 @@ def main():
     owner_workshop_shared.apply()
     import jimtafacts
     jimtafacts.generate()
+    import jimtafacts_wearables
+    jimtafacts_wearables.apply()
+    import jimtafacts_network
+    jimtafacts_network.generate()
+    import jimtafacts_industry
+    jimtafacts_industry.generate()
+    import jimtafacts_gear
+    jimtafacts_gear.generate()
+    import jimtafacts_robots
+    jimtafacts_robots.generate()
+    import jimtafacts_automation
+    jimtafacts_automation.generate()
+    import jimtafacts_transport
+    jimtafacts_transport.generate()
+    import jimtafacts_crops
+    jimtafacts_crops.generate()
+    import jimtafacts_production
+    jimtafacts_production.generate()
+    import jimtafacts_reactor
+    jimtafacts_reactor.generate()
+    import jimtafacts_matter
+    jimtafacts_matter.generate()
+    import jimtafacts_civil
+    jimtafacts_civil.generate()
+    import jimtafacts_infrastructure
+    jimtafacts_infrastructure.generate()
+    import jimtafacts_upgrades
+    jimtafacts_upgrades.generate()
+    import jimtafacts_construction
+    jimtafacts_construction.generate()
+    import jimtafacts_laser
+    jimtafacts_laser.generate()
+    import jimtafacts_heat
+    jimtafacts_heat.generate()
+    import jimtafacts_tables
+    jimtafacts_tables.generate()
+    import jimtafacts_utilities
+    jimtafacts_utilities.generate()
+    import jimtafacts_services
+    jimtafacts_services.generate()
+    import jimtafacts_personal
+    jimtafacts_personal.generate()
+    import jimtafacts_engines
+    jimtafacts_engines.generate()
+    import jimtafacts_factory
+    jimtafacts_factory.generate()
+    import jimtafacts_cables
+    jimtafacts_cables.generate()
+    import jimtafacts_terraforming
+    jimtafacts_terraforming.generate()
+    import jimtafacts_computers
+    jimtafacts_computers.apply()
+    import jimtafacts_spellbooks
+    spellbook_language = jimtafacts_spellbooks.generate()
+    language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
+    language.update(spellbook_language)
+    write(ASSETS / "lang/en_us.json", language)
     import walnut_data
     walnut_data.reconcile(write)
     from generated_resource_cleanup import prune

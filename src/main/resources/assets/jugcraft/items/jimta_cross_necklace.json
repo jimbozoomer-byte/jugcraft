@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_cross_necklace"
+    "model": "jugcraft:item/jimtafacts/cross_necklace"
   }
 }

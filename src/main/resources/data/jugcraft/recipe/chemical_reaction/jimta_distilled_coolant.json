@@ -1,0 +1,22 @@
+{
+  "type": "jugcraft:chemical_reaction",
+  "items": [
+    {
+      "ingredient": "minecraft:lapis_lazuli",
+      "count": 1
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "jugcraft:distilled_water",
+      "amount": 1000
+    }
+  ],
+  "fluid_results": [
+    {
+      "fluid": "jugcraft:jimta_coolant",
+      "amount": 1000
+    }
+  ],
+  "time": 100
+}

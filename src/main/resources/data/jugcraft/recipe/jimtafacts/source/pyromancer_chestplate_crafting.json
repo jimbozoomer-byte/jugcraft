@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#jugcraft:jimtafacts/spellbooks/wizard_base_chestplate",
+    "jugcraft:jimta_spellbooks_fire_rune",
+    "jugcraft:jimta_spellbooks_arcane_essence"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jugcraft:jimta_spellbooks_pyromancer_chestplate"
+  }
+}

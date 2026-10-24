@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:oak_planks",
+    "minecraft:oak_planks",
+    "minecraft:oak_planks"
+  ],
+  "result": {
+    "id": "jugcraft:jimta_wood_rotor_blade"
+  }
+}

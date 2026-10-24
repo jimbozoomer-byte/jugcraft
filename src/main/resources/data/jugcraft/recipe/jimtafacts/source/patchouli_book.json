@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:book",
+    "jugcraft:jimta_spellbooks_arcane_essence"
+  ],
+  "result": {
+    "id": "patchouli:guide_book",
+    "components": {
+      "patchouli:book": "irons_spellbooks:iss_guide_book"
+    },
+    "count": 1
+  }
+}

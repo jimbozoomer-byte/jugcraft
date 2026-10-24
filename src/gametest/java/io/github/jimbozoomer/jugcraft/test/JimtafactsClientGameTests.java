@@ -24,7 +24,7 @@ public final class JimtafactsClientGameTests implements FabricClientGameTest {
             context.waitTicks(15);
             context.runOnClient(mc -> {
                 if (!(mc.player.containerMenu instanceof ChestMenu menu)) throw new AssertionError("Accessory gallery not synchronized");
-                for (int i = 0; i < 28; i++) if (menu.getSlot(i).getItem().isEmpty()) throw new AssertionError("Missing accessory " + i);
+                for (int i = 0; i < 49; i++) if (menu.getSlot(i).getItem().isEmpty()) throw new AssertionError("Missing accessory " + i);
             });
             context.takeScreenshot("jimtafacts_supplied_accessory_icons");
             context.runOnClient(mc -> mc.player.closeContainer());

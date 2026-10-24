@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IFI",
+    " I "
+  ],
+  "key": {
+    "F": "minecraft:campfire",
+    "I": "#c:nuggets/iron"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_brazier",
+    "count": 1
+  }
+}

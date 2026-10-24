@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:oak_planks",
+    "jugcraft:jimta_spellbooks_arcane_essence"
+  ],
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_wisewood_planks",
+    "count": 4
+  }
+}

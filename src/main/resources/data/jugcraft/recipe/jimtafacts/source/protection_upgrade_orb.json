@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "O": "jugcraft:jimta_spellbooks_upgrade_orb",
+    "R": "jugcraft:jimta_spellbooks_protection_rune"
+  },
+  "pattern": [
+    "RRR",
+    "ROR",
+    "RRR"
+  ],
+  "result": {
+    "count": 1,
+    "id": "jugcraft:jimta_spellbooks_protection_upgrade_orb"
+  }
+}

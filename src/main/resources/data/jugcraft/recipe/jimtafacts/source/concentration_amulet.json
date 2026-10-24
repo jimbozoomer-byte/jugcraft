@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "M": "jugcraft:jimta_spellbooks_mithril_ingot",
+    "S": "minecraft:chain",
+    "X": "jugcraft:jimta_spellbooks_mithril_scrap"
+  },
+  "pattern": [
+    " S ",
+    "SXS",
+    " M "
+  ],
+  "result": {
+    "count": 1,
+    "id": "jugcraft:jimta_spellbooks_concentration_amulet"
+  }
+}

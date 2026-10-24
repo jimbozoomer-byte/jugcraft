@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_flippers"
+    "model": "jugcraft:item/jimtafacts/flippers"
   }
 }

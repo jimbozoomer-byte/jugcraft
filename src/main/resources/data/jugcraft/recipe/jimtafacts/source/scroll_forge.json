@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DDD",
+    " O ",
+    "OOO"
+  ],
+  "key": {
+    "D": "minecraft:polished_deepslate",
+    "O": "minecraft:crying_obsidian"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_scroll_forge",
+    "count": 1
+  }
+}

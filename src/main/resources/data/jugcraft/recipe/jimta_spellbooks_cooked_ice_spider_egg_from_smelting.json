@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": "jugcraft:jimta_spellbooks_prepared_ice_spider_egg",
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_cooked_ice_spider_egg"
+  }
+}

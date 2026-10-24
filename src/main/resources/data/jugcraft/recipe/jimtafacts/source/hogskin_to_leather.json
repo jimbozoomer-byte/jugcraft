@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:jimta_spellbooks_hogskin",
+    "jugcraft:jimta_spellbooks_hogskin",
+    "jugcraft:jimta_spellbooks_hogskin",
+    "jugcraft:jimta_spellbooks_hogskin"
+  ],
+  "result": {
+    "id": "minecraft:leather",
+    "count": 4
+  }
+}

@@ -5,6 +5,9 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 import jimtafacts
+import jimtafacts_network
+import jimtafacts_spellbooks
+import jimtafacts_computers
 
 ROOT = jimtafacts.ROOT
 SOURCE = jimtafacts.SOURCE
@@ -43,18 +46,29 @@ def main():
         if file.suffix in ('.json','.mcmeta'):
             try: json.loads(raw)
             except (UnicodeError, ValueError) as error: problems.append({'path':row['path'],'problem':str(error)[:240]})
-    native = set(jimtafacts.ACCESSORIES) | set(jimtafacts.FOOD)
+    native = set(jimtafacts.items())
+    network_ids = set(jimtafacts_network.ids())
+    spellbook_ids = set(jimtafacts_spellbooks.items())
+    computer_ids = set(jimtafacts_computers.items()) | set(jimtafacts_computers.blocks())
     rows = []
     for (kind,ns,name),row in sorted(labels.items()):
-        row.update({'runtime_id':'jugcraft:jimta_'+name if ns=='artifacts' and name in native and kind=='item' else '',
-                    'status':'native_functional_slice' if ns=='artifacts' and name in native and kind=='item' else 'preserved_pending_port'})
+        candidate = ''
+        if ns == 'artifacts' and kind == 'item' and 'jimta_' + name in native: candidate = 'jimta_' + name
+        if ns == 'artifacts' and kind == 'entity' and name == 'mimic': candidate = 'jimta_mimic'
+        if ns == 'ae2' and kind in ('item', 'block') and 'jimta_' + name in network_ids: candidate = 'jimta_' + name
+        if ns == 'irons_spellbooks' and kind in ('item', 'block') and 'jimta_spellbooks_' + name in spellbook_ids: candidate = 'jimta_spellbooks_' + name
+        if ns == 'computercraft':
+            value = ('jimta_computer_' if kind == 'block' else 'jimta_') + name
+            if value in computer_ids: candidate = value
+        row.update({'runtime_id':'jugcraft:' + candidate if candidate else '',
+                    'status':'native_local_pending_combined_validation' if candidate else 'preserved_pending_port'})
         rows.append(row)
     with (OUT/'content.csv').open('w',newline='',encoding='utf-8') as stream:
         writer=csv.DictWriter(stream,fieldnames=['kind','source_id','label','group','source','runtime_id','status']);writer.writeheader();writer.writerows(rows)
     overlaps = []
     for row in rows:
         name = row['source_id'].split(':', 1)[1]
-        if row['kind'] in ('item', 'block') and row['status'] != 'native_functional_slice' and (ROOT / f'src/main/resources/assets/jugcraft/items/{name}.json').is_file():
+        if row['kind'] in ('item', 'block') and not row['runtime_id'] and (ROOT / f'src/main/resources/assets/jugcraft/items/{name}.json').is_file():
             overlaps.append({'source_id': row['source_id'], 'existing_item': 'jugcraft:' + name,
                 'decision': 'Review shared function/recipe mapping before registering a duplicate; name alone is not compatibility proof.'})
     jimtafacts.dump(OUT/'existing-name-overlaps.json', overlaps)

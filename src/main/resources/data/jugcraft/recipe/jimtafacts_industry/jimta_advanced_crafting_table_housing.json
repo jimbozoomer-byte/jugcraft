@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:auto_crafter"
+  ],
+  "result": {
+    "id": "jugcraft:jimta_advanced_crafting_table",
+    "count": 1
+  }
+}

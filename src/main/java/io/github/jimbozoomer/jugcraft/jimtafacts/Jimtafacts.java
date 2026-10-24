@@ -72,6 +72,8 @@ public final class Jimtafacts {
     private Jimtafacts() {}
 
     public static void register() {
+        JimtaMimic.register();
+        JimtaAbilities.register();
         JsonObject catalog;
         try (var in = Jimtafacts.class.getResourceAsStream("/jugcraft/jimtafacts/accessories.json")) {
             if (in == null) throw new IllegalStateException("Missing Jimtafacts accessory catalog");
@@ -81,7 +83,9 @@ public final class Jimtafacts {
             String name = entry.getKey(); var data = entry.getValue().getAsJsonObject();
             var key = ResourceKey.create(Registries.ITEM, Jugcraft.id("jimta_" + name));
             var properties = new Item.Properties().setId(key).stacksTo(1).rarity(Rarity.RARE);
-            Item item = data.has("nutrition") ? new EndlessFood(properties, data.get("nutrition").getAsInt(), data.get("saturation").getAsFloat())
+            if (name.equals("onion_ring")) properties.food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(2).build());
+            Item item = name.equals("mimic_spawn_egg") ? new SpawnEggItem(properties.spawnEgg(JimtaMimic.TYPE))
+                    : name.equals("umbrella") ? new JimtaUmbrella(properties) : data.has("nutrition") ? new EndlessFood(properties, data.get("nutrition").getAsInt(), data.get("saturation").getAsFloat())
                     : new Accessory(properties, name, data.get("slot").getAsString(), data.getAsJsonObject("attributes"));
             ITEMS.put(name, Registry.register(BuiltInRegistries.ITEM, key, item));
         });
@@ -96,7 +100,7 @@ public final class Jimtafacts {
             if (!source.isBuiltin() || !CHESTS.contains(key.identifier().toString())) return;
             var pool = LootPool.lootPool().setRolls(Holder.direct(new ConstantValue(1)))
                     .when(LootItemRandomChanceCondition.randomChance(.2f));
-            ITEMS.forEach((name, item) -> { if (!name.equals("eternal_steak")) pool.add(LootItem.lootTableItem(item)); });
+            ITEMS.forEach((name, item) -> { if (!name.equals("eternal_steak") && !name.equals("mimic_spawn_egg")) pool.add(LootItem.lootTableItem(item)); });
             table.withPool(pool);
         });
     }
@@ -105,20 +109,21 @@ public final class Jimtafacts {
     public static Set<String> worn(LivingEntity wearer) {
         Set<String> result = new HashSet<>();
         TrinketsApi.getAttachment(wearer).forEach((slot, stack) -> {
-            if (!slot.cosmetic() && slot.canApplyEffects() && stack.getItem() instanceof Accessory accessory) result.add(accessory.name);
+            if (!slot.cosmetic() && slot.canApplyEffects() && stack.getItem() instanceof Accessory accessory && !JimtaAbilities.disabled(stack)) result.add(accessory.name);
         });
         return result;
     }
 
-    private static boolean ready(ServerPlayer player, String effect, int ticks) {
+    static boolean ready(ServerPlayer player, String effect, int ticks) {
         var state = STATES.computeIfAbsent(player, p -> new State()); long now = player.level().getGameTime();
         if (state.ready.getOrDefault(effect, Long.MIN_VALUE) > now) return false;
         state.ready.put(effect, now + ticks); return true;
     }
 
     public static void tick(ServerPlayer player) {
-        if (!player.isAlive()) return;
+        if (!player.isAlive()) { JimtaAbilities.release(player); return; }
         var equipped = worn(player);
+        JimtaAbilities.tick(player, equipped);
         sprintModifier(player, Attributes.MOVEMENT_SPEED, RUN_SPEED, .25, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
                 equipped.contains("running_shoes") && player.isSprinting());
         sprintModifier(player, Attributes.STEP_HEIGHT, RUN_STEP, .4, AttributeModifier.Operation.ADD_VALUE,
@@ -141,7 +146,7 @@ public final class Jimtafacts {
         if (!equipped.contains("rooted_boots") || !player.onGround() || !stationary || !player.level().getBlockState(player.blockPosition().below()).is(Blocks.GRASS_BLOCK)) state.rootedSince = -1;
         else if (state.rootedSince < 0) state.rootedSince = player.level().getGameTime();
         else if (player.level().getGameTime() - state.rootedSince >= 200) {
-            if (player.getFoodData().needsFood()) player.getFoodData().eat(1, 0);
+            if (player.getFoodData().needsFood()) { player.getFoodData().eat(1, 0); JimtaAbilities.growNearby(player); }
             state.rootedSince = player.level().getGameTime();
         }
     }
@@ -210,12 +215,22 @@ public final class Jimtafacts {
             super(properties); this.name = name; this.slot = slot;
             values.entrySet().forEach(entry -> attributes.put(entry.getKey(), entry.getValue().getAsDouble()));
         }
+        @Override public InteractionResult use(Level level, Player player, InteractionHand hand) {
+            if (!player.isShiftKeyDown()) return super.use(level, player, hand);
+            if (!level.isClientSide()) {
+                ItemStack stack = player.getItemInHand(hand); boolean disabled = !JimtaAbilities.disabled(stack);
+                net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean("jimtafacts_disabled", disabled));
+                player.sendOverlayMessage(Component.literal(disabled ? "Accessory disabled" : "Accessory enabled"));
+            }
+            return InteractionResult.SUCCESS;
+        }
         @Override public boolean canEquip(ItemStack stack, TrinketSlotAccess slot, LivingEntity wearer) { return wearer instanceof Player; }
         @Override public TrinketDropRule getDropRule(ItemStack stack, TrinketSlotAccess slot, LivingEntity wearer) {
             return slot.cosmetic() ? TrinketDropRule.KEEP : TrinketCallback.super.getDropRule(stack, slot, wearer);
         }
         @Override public void forEachTrinketModifier(ItemStack stack, TrinketSlotAccess slot, LivingEntity wearer, Identifier slotId,
                 BiConsumer<Holder<Attribute>, AttributeModifier> out) {
+            if (JimtaAbilities.disabled(stack)) return;
             attributes.forEach((id, amount) -> BuiltInRegistries.ATTRIBUTE.get(Identifier.withDefaultNamespace(id)).ifPresent(attribute ->
                     out.accept(attribute, new AttributeModifier(Jugcraft.id("jimtafacts/" + name + "/" + id), amount, AttributeModifier.Operation.ADD_VALUE))));
         }
@@ -227,7 +242,7 @@ public final class Jimtafacts {
 
     public static final class EndlessFood extends Item {
         private final int nutrition; private final float saturation;
-        EndlessFood(Properties properties, int nutrition, float saturation) { super(properties); this.nutrition = nutrition; this.saturation = saturation; }
+        EndlessFood(Properties properties, int nutrition, float saturation) { super(properties.food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).build())); this.nutrition = nutrition; this.saturation = saturation; }
         @Override public InteractionResult use(Level level, Player player, InteractionHand hand) {
             if (!player.getFoodData().needsFood() || player.getCooldowns().isOnCooldown(player.getItemInHand(hand))) return InteractionResult.FAIL;
             player.startUsingItem(hand); return InteractionResult.CONSUME;

@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_withered_bracelet"
+    "model": "jugcraft:item/jimtafacts/withered_bracelet"
   }
 }

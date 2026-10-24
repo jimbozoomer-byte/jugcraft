@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:blasting",
+  "cookingtime": 200,
+  "experience": 0.0,
+  "ingredient": "jugcraft:jimta_spellbooks_pyrium_ingot",
+  "result": {
+    "id": "minecraft:ancient_debris",
+    "count": 5
+  }
+}

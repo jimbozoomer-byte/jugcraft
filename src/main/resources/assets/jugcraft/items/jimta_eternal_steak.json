@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_eternal_steak"
+    "model": "jugcraft:item/jimtafacts/eternal_steak"
   }
 }

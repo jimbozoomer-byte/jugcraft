@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "minecraft:stone",
+    "minecraft:iron_ingot",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "id": "jugcraft:jimta_computer_disk_drive"
+  }
+}

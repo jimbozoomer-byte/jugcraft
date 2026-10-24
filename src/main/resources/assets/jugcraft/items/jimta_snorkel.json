@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_snorkel"
+    "model": "jugcraft:item/jimtafacts/snorkel"
   }
 }

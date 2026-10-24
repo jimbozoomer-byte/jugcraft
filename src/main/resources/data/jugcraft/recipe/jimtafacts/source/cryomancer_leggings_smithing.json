@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "jugcraft:jimta_spellbooks_arcane_essence",
+  "base": "#jugcraft:jimtafacts/spellbooks/wizard_base_leggings",
+  "result": {
+    "count": 1,
+    "id": "jugcraft:jimta_spellbooks_cryomancer_leggings"
+  },
+  "template": "jugcraft:jimta_spellbooks_ice_rune"
+}

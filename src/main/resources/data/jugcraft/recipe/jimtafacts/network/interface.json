@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IGI",
+    "LHL",
+    "ICI"
+  ],
+  "key": {
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "L": "jugcraft:jimta_logic_processor",
+    "C": "jugcraft:jimta_fluix_glass_cable",
+    "H": "minecraft:chest"
+  },
+  "result": {
+    "id": "jugcraft:jimta_interface",
+    "count": 1
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ]
+}

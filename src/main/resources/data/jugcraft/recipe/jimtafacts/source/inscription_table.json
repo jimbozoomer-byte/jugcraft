@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  B",
+    "TTT",
+    "L L"
+  ],
+  "key": {
+    "B": "minecraft:book",
+    "T": "#minecraft:wooden_slabs",
+    "L": "#minecraft:wooden_fences"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_inscription_table",
+    "count": 1
+  }
+}

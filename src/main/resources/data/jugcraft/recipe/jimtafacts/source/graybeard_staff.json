@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "  E",
+    " S ",
+    "I  "
+  ],
+  "key": {
+    "S": "minecraft:wooden_shovel",
+    "I": "#c:ingots/iron",
+    "E": "jugcraft:jimta_spellbooks_arcane_essence"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_graybeard_staff",
+    "count": 1
+  }
+}

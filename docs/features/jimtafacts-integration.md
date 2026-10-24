@@ -1,5 +1,10 @@
 # Jimtafacts collection integration
 
+## October 23 continuation status (local, unvalidated)
+
+The current continuation adds native transport/gate variants, four-bank Emzuli filtering, heat/rotor/reactor devices, laser tables, 32 independently saved cable attachment types, item/fluid cell fill/empty and partitions, paid spatial anchors, joined plane geometry, asynchronous crafting reservations/cancellation, and the native computer/turtle/peripheral system. Original asset pixels and supplied meshes are retained where available; programmatic source geometry is adapted explicitly. The earlier encounter and 236-template/nine-structure implementations are also local, with their explicit asset/behavior limitations. No builds or tests have run for this continuation, per the owner's combined-test request. Earlier validation results below apply only to their named earlier slices. The full collection is not yet complete: larger/entity spatial migration, Lua/CraftOS compatibility and remaining industrial mappings remain open in the linked feature records.
+
+
 Owner-approved scope, 23 October 2026: integrate all supplied Jimtafacts content into the single Jugcraft mod, retaining the edited assets and adapting platform-specific behavior. This is a multi-package port, not installation of the old binaries. AI assistance: OpenAI Codex (GPT-6).
 
 ## Source inventory and boundaries
@@ -9,6 +14,14 @@ The [verified collection](../../art/owner-library/catalog/edited-2026-10-23-jimt
 The branch starts from the planes/furniture/graves candidate `c459523ddac9fa1488c2802b140f41a4be20f441`. That preceding candidate and PR #461 remain independently testable. This collection has not been released, merged, uploaded to the live server or promoted to the client updater.
 
 ## Functional accessory slice
+
+### October 23 continuation — implementation only
+
+The current working tree goes beyond the previously validated 28-item slice below. All 49 supplied accessory/item IDs and the mimic/campsite code are now implemented locally, with original wearable geometry, 62 copied wearable textures/sidecars, source-derived poses and movement animation. The source defaults disable accessory damage/breakage, so adding durability is not a missing requirement. See [wearable fidelity](jimtafacts-wearables.md).
+
+The continuation also adds [digital storage/workshops](jimtafacts-network.md), native [workshop computers](jimtafacts-computers.md), 14 industrial machines and 81 mapped recipes, and an expanding spellbook/armor/workshop port. The machine port reuses shared JE, recipe selection/locking, automation, heat and persistence. Original source art is retained; distinct unsupported mechanics remain explicitly tracked rather than represented by inert item registrations.
+
+**All continuation builds and tests are deferred at the owner's request until the combined implementation is finished.** The validation numbers later in this record belong only to the earlier accessory commit; they do not validate this working tree. The complete six-collection port is still in progress.
 
 Stable IDs use `jugcraft:jimta_<source_name>` to avoid clashes with existing Concordance relics. The data and concise player descriptions live in `jugcraft/jimtafacts/accessories.json`; `tools/jimtafacts.py` is their source of truth.
 
@@ -22,7 +35,7 @@ Stable IDs use `jugcraft:jimta_<source_name>` to avoid clashes with existing Con
 
 Acquisition: a 20% chance of one item in new dungeon, mineshaft, desert/jungle temple, stronghold corridor, mansion, ancient-city and End City chest loot. Existing opened/generated loot is not rewritten. Eternal Steak comes from cooking Everlasting Beef. These are exploration rewards, not new ores or currencies. They support farming/exploration/workshop use and are not added to convenience transmutation outputs.
 
-The slice has 28 registered items and uses the supplied icons byte-for-byte. **It is not full parity with every source accessory:** source durability/breakage, secondary harvest-tier/slip/plant-growth effects, client toggles, worn model geometry and animations still need integration. The other 21 source items (including the mimic egg) remain unregistered until their behavior is implemented. Do not label this as the entire Artifacts collection finished.
+The previously validated slice had 28 registered items and supplied icons copied byte-for-byte. The continuation above supersedes its old missing-item/model inventory, but has not superseded its test evidence. Do not label the complete Jimtafacts collection finished.
 
 ## Remaining integration packages
 
@@ -45,3 +58,25 @@ The slice has 28 registered items and uses the supplied icons byte-for-byte. **I
 - Git's staged blobs were verified against every original file: 17,597 byte-identical files, with only the documented third-party JAR intentionally excluded from Git. The local original remains preserved.
 - Two-account dedicated-server gameplay, load/performance measurement, reconnect persistence and full collection parity remain untested. No hosted test or release readiness is claimed.
 - No server restart or client updater promotion is authorized by this implementation checkpoint. Obtain the owner's confirmation before any later live restart and warn players for a full 30 seconds.
+
+### Latest local continuation — fluid reactors and workshop lasers
+
+Added native coolant/steam/finite RT heat, full vessel/port formation, industrial heat screens and original-art laser/integration tables. See [exact scope and remaining differences](jimtafacts-industry.md#october-23-continuation-fluid-heat-vessel-and-laser-tables). These changes are uncompiled and untested; tests are authored for the final combined batch. Nothing was pushed or deployed. Tool: OpenAI Codex, user-selected Astra High.
+
+### Latest local continuation — transport, gates and workshop systems
+
+Added 32 original-texture native transport/control variants, removable source-capacity gate modifiers with a button-only parameter editor, five gate expansions and animated source icons, incremental network dependencies across real machine jobs, wired inventory/fluid peripherals, paginated printing, advanced-monitor color/touch and linked pocket terminals. Exact native behavior and outstanding source differences are recorded in the industry, network and computer feature records. Asset generators ran to write resources; **no compilation, tests or game launch ran**. No commit, push, release, deployment or restart occurred. Tool: OpenAI Codex, user-selected Astra High.
+
+### Further local implementation — specialized pipes and persisted workshop jobs
+
+The transport roster is now 39: collection, stripes placement/breaking, filtered extraction and color-aware routes are implemented with original textures. Native superheated steam feeds a two-stage turbine/condensate chain. Network jobs have physical ingredient escrow, reordered prerequisites and saved cancellation acknowledgements for disconnected providers. The supplied creative-cell model has Creative-only configuration and no survival acquisition recipe.
+
+Computers gained virtual saved programs, integer registers/branches and stock sensors; original-font 48×24 cell monitors; finite DFPWM speaker clips; loaded cross-dimensional advanced modems; and operator-only Command Computers. Original renderer/audio sources were inspected statically. No supplied executable or ROM script was run.
+
+Resource generators wrote the new local files. The static industry registry inventory now distinguishes duplicate pipe aliases and two unused source declarations. It records 612 families: 47 consolidated native, 286 native adaptations, 277 unresolved families and two unused declarations. Families are not a count of distinct missing machines; unresolved entries still require source-by-source work, not a blanket completion label.
+
+New conservation, cancellation, gate-parameter, pipe-routing, program-storage and steam-chain tests are **authored but not run**. No build or game launch has occurred for this continuation. The broader collection still has genuine gaps, including arbitrary multipart coexistence, large/entity spatial migration and full Lua/CraftOS behavior. Everything remains local; no release, updater change or server operation occurred.
+
+### Further local continuation
+
+Thirty-two supplied network attachment types now share six cable faces with separate real settings/inventories, original face models, owner/party protection, per-face provider job cancellation and stale-access invalidation. Monitors retain their item/count display; planes use their source edge-joining geometry; P2P inherited chassis render once. Item/fluid I/O ports fill or empty finite cells, fluid cells accept bucket-based partitions, and spatial anchors use bounded paid expiring chunk tickets. Emzuli has all four filter/color banks. Turtles gain real hoe farming, cargo comparison/rearrangement, block inspection and programmatic refueling. Additional scenarios are authored for the eventual combined batch; **no builds/tests have run**. The older multipart limitation above is superseded for these 32 native types, not for arbitrary external multipart APIs. AI assistance: OpenAI Codex, user-selected Astra High.

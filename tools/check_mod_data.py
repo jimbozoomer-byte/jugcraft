@@ -98,6 +98,32 @@ import graveyard as gy
 import diagonal_connections as dg
 import menagerie_registry as menagerie
 import jimtafacts
+import jimtafacts_network
+import jimtafacts_robots
+import jimtafacts_gear
+import jimtafacts_automation
+import jimtafacts_transport
+import jimtafacts_crops
+import jimtafacts_production
+import jimtafacts_reactor
+import jimtafacts_matter
+import jimtafacts_civil
+import jimtafacts_infrastructure
+import jimtafacts_upgrades
+import jimtafacts_construction
+import jimtafacts_heat
+import jimtafacts_laser
+import jimtafacts_tables
+import jimtafacts_utilities
+import jimtafacts_services
+import jimtafacts_personal
+import jimtafacts_engines
+import jimtafacts_factory
+import jimtafacts_cables
+import jimtafacts_terraforming
+import jimtafacts_spellbooks
+import jimtafacts_industry
+import jimtafacts_computers
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "src" / "main" / "resources"
@@ -737,6 +763,50 @@ def check_tags():
         if registry == 'block': known.update(starter_workshop.STATIONS)
         if registry == 'item': known.update(starter_workshop.NAMES)
         if registry == 'item': known.update(jimtafacts.items())
+        if registry == 'item': known.update(jimtafacts_network.ids()); known.update(jimtafacts_spellbooks.items()); known.update(jimtafacts_industry.items())
+        if registry == 'block': known.update('jimta_' + n for n in jimtafacts_network.BLOCKS); known.update(jimtafacts_spellbooks.blocks()); known.update(jimtafacts_industry.blocks())
+        if registry == 'entity_type': known.update({'jimta_mimic', 'jimta_tiny_tnt'})
+        if registry == 'entity_type': known.add('jimta_workshop_robot')
+        if registry == 'entity_type': known.update('jimta_'+kind+'_boat' for kind in ('rubber','carbon','electric'))
+        if registry == 'item': known.update(jimtafacts_robots.items())
+        if registry == 'item': known.update(jimtafacts_gear.items()); known.update(jimtafacts_crops.items()); known.update(jimtafacts_production.items())
+        if registry == 'block': known.update(jimtafacts_crops.blocks())
+        if registry == 'block': known.update(jimtafacts_reactor.blocks())
+        if registry == 'item': known.update(jimtafacts_reactor.items())
+        if registry == 'item': known.update(jimtafacts_infrastructure.items())
+        if registry == 'item': known.update(jimtafacts_upgrades.items())
+        if registry == 'item': known.update(jimtafacts_construction.items())
+        if registry == 'block': known.update(jimtafacts_construction.blocks()); known.update(jimtafacts_heat.blocks()); known.update(jimtafacts_laser.blocks())
+        if registry == 'item': known.update(jimtafacts_heat.items()); known.update(jimtafacts_laser.items())
+        if registry == 'item': known.update(jimtafacts_tables.items()); known.update(jimtafacts_utilities.items())
+        if registry == 'block': known.update(jimtafacts_tables.blocks()); known.update(jimtafacts_utilities.blocks())
+        if registry == 'block': known.update(jimtafacts_services.blocks())
+        if registry == 'item': known.update(jimtafacts_services.items())
+        if registry == 'fluid': known.update(jimtafacts_services.fluids())
+        if registry == 'block': known.update(jimtafacts_personal.blocks())
+        if registry == 'item': known.update(jimtafacts_personal.items())
+        if registry == 'block': known.update(jimtafacts_engines.blocks())
+        if registry == 'item': known.update(jimtafacts_engines.items())
+        if registry == 'block': known.update(jimtafacts_factory.blocks())
+        if registry == 'item': known.update(jimtafacts_factory.items())
+        if registry == 'item': known.update(jimtafacts_cables.items())
+        if registry == 'block': known.update(jimtafacts_cables.blocks())
+        if registry == 'item': known.update(jimtafacts_terraforming.items())
+        if registry == 'block': known.update(jimtafacts_terraforming.blocks())
+        if registry == 'block': known.update(jimtafacts_infrastructure.blocks())
+        if registry == 'item': known.update(jimtafacts_civil.items())
+        if registry == 'block': known.update(jimtafacts_civil.blocks())
+        if registry == 'item': known.update(jimtafacts_matter.items())
+        if registry == 'block': known.update(jimtafacts_matter.blocks())
+        if registry == 'fluid': known.update(jimtafacts_matter.fluids()); known.update(jimtafacts_heat.fluids())
+        if registry == 'item': known.update(jimtafacts_automation.items())
+        if registry == 'block': known.update(jimtafacts_automation.blocks())
+        if registry == 'item': known.update(jimtafacts_transport.items())
+        if registry == 'block': known.update(jimtafacts_transport.blocks())
+        if registry == 'mob_effect': known.update(jimtafacts_spellbooks.effects())
+        if registry == 'entity_type': known.update(jimtafacts_spellbooks.entities())
+        if registry == 'item': known.update(jimtafacts_computers.items()); known.update(jimtafacts_computers.blocks())
+        if registry == 'block': known.update(jimtafacts_computers.blocks())
         if registry in {'item', 'block'}: known.update(vehicle_bays.BLOCKS)
         if registry in {'item','block'}:known.update(menagerie.entries())
         if registry == 'entity_type':known.update(menagerie.entities())
@@ -17019,6 +17089,26 @@ def registered_items():
     import starter_workshop
     registered |= menagerie.entries() | set(vehicle_bays.BLOCKS) | set(starter_workshop.NAMES)
     registered |= set(jimtafacts.items())
+    registered |= set(jimtafacts_network.ids()) | set(jimtafacts_spellbooks.items()) | set(jimtafacts_industry.items())
+    registered |= set(jimtafacts_robots.items())
+    registered |= set(jimtafacts_gear.items()) | set(jimtafacts_crops.items()) | set(jimtafacts_production.items())
+    registered |= set(jimtafacts_automation.items())
+    registered |= set(jimtafacts_transport.items())
+    registered |= set(jimtafacts_reactor.items())
+    registered |= set(jimtafacts_matter.items())
+    registered |= set(jimtafacts_civil.items())
+    registered |= set(jimtafacts_infrastructure.items())
+    registered |= set(jimtafacts_upgrades.items())
+    registered |= set(jimtafacts_construction.items())
+    registered |= set(jimtafacts_heat.items()) | jimtafacts_laser.items()
+    registered |= jimtafacts_tables.items() | jimtafacts_utilities.items()
+    registered |= jimtafacts_services.items()
+    registered |= jimtafacts_personal.items()
+    registered |= jimtafacts_engines.items()
+    registered |= jimtafacts_factory.items()
+    registered |= jimtafacts_cables.items()
+    registered |= jimtafacts_terraforming.items()
+    registered |= set(jimtafacts_computers.items()) | set(jimtafacts_computers.blocks())
     return registered
 
 

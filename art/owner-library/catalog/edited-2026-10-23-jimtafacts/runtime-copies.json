@@ -1,8 +1,20 @@
 [
   {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/anglers_hat.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/anglers_hat.png",
+    "sha256": "8fa7761a279cce70329ce3aa6ffa78d08737b9f887f7ee648b2d731c94a7e68f",
+    "changes": "None; byte-identical texture."
+  },
+  {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/antidote_vessel.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/antidote_vessel.png",
     "sha256": "d3e1404bf9e424201e257cc42db91ceeb62c84569f0f8ffb392af6f5bfbff51d",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/aqua_dashers.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/aqua_dashers.png",
+    "sha256": "afbb201efba71ba86a4c66e40175e901a658983166c05fe8874f4bfc268cdf32",
     "changes": "None; byte-identical texture."
   },
   {
@@ -21,6 +33,24 @@
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/charm_of_sinking.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/charm_of_sinking.png",
     "sha256": "7a470f1ffdcfb9d7caadc047ea83ead326caa0df4006931fd35cd8048dbfc224",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/chorus_totem.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/chorus_totem.png",
+    "sha256": "fb51266f8683d7dd01c5be8ac13f7f906b13af3093d48dfd82d162a950d55d31",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/cloud_in_a_bottle.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/cloud_in_a_bottle.png",
+    "sha256": "877423600cd193e5b56192093b208b57884c0b9db2bd8094ea7ff8240829e605",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/cowboy_hat.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/cowboy_hat.png",
+    "sha256": "6a1ce2406987a0a0c7bace59386f97b2e0377e32e10d6a32deab1e16ecfc6270",
     "changes": "None; byte-identical texture."
   },
   {
@@ -78,9 +108,39 @@
     "changes": "None; byte-identical texture."
   },
   {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/golden_hook.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/golden_hook.png",
+    "sha256": "a4df37e6379d14baf2cb0e20d9e5987a3a582b5137ebbe766851392556e6a70c",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/helium_flamingo.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/helium_flamingo.png",
+    "sha256": "1c4d951bf6dbbdea503c6cadd1465e056499c1c47ccf76ce0be0cd2ed4a687ae",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/kitty_slippers.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/kitty_slippers.png",
+    "sha256": "df0a20fed5e34021e715140248bc13acb95cc55466730d3e968ef4684cee5fb9",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/lucky_scarf.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/lucky_scarf.png",
+    "sha256": "39b5395654f1fdfe3432116f1fe76d0d25310a256256b72ff91fbf46336efdb0",
+    "changes": "None; byte-identical texture."
+  },
+  {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/night_vision_goggles.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/night_vision_goggles.png",
     "sha256": "16310df524bc27b42eaeef3d3d0e925baf7fc1c9cda2e9ff3afc545cb0eafa4e",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/novelty_drinking_hat.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/novelty_drinking_hat.png",
+    "sha256": "58e1cc7880b9b74b6b666bc25123b21c3798ef8e24a132554af706db468d86e8",
     "changes": "None; byte-identical texture."
   },
   {
@@ -90,9 +150,27 @@
     "changes": "None; byte-identical texture."
   },
   {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/onion_ring.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/onion_ring.png",
+    "sha256": "c1b1c9ee8337701dd906c2bab391b18ed7063d6f1c5efb1ef33b6899e6b76cb5",
+    "changes": "None; byte-identical texture."
+  },
+  {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/panic_necklace.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/panic_necklace.png",
     "sha256": "23eb243b79b2bb6b180b98304aa4a5435a1cbda39715e603f0f37076668239e7",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/pickaxe_heater.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/pickaxe_heater.png",
+    "sha256": "19c7b8afa5865e5dd47c7f1113f2074f9ff5c8068054f1952a781e1429275366",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/plastic_drinking_hat.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/plastic_drinking_hat.png",
+    "sha256": "db5b7c6be7cc54a99b7677aee77629126f556206f4615b5d9b9eafa52e4314f0",
     "changes": "None; byte-identical texture."
   },
   {
@@ -138,15 +216,39 @@
     "changes": "None; byte-identical texture."
   },
   {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/snowshoes.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/snowshoes.png",
+    "sha256": "a072b55d3e883c78529bf52c024cc1ab0762743bc6faac7e2a38674974a4646f",
+    "changes": "None; byte-identical texture."
+  },
+  {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/steadfast_spikes.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/steadfast_spikes.png",
     "sha256": "47feb709ce67c79bedb1bef874be0890eb0017cd515842e12d07a2744b8aa79c",
     "changes": "None; byte-identical texture."
   },
   {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/strider_shoes.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/strider_shoes.png",
+    "sha256": "824d6aeb0cc78f3802531c4cafb19816074f19bb23ab1abd43f3c4e8d8f9853e",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/superstitious_hat.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/superstitious_hat.png",
+    "sha256": "287016e333502a5623c338ba2d94418fb647d7d8f8151f8cdbcd119ba3b74113",
+    "changes": "None; byte-identical texture."
+  },
+  {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/thorn_pendant.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/thorn_pendant.png",
     "sha256": "3fa5808923df7e9de8637d8dde94fd324bc72a540d76b33ce1192326b54f9cd2",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/umbrella.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/umbrella.png",
+    "sha256": "02e595b8efc5091f8d794658e163278908d5ecbf0914142f2e8adf57330176eb",
     "changes": "None; byte-identical texture."
   },
   {
@@ -159,6 +261,24 @@
     "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/vampiric_glove.png",
     "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/vampiric_glove.png",
     "sha256": "e7fc15497a8ee6ee7c7679e724e8b311c34d7d8eb918031075cc58b0d63f329f",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/villager_hat.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/villager_hat.png",
+    "sha256": "690c2780cfd79105fec0456586c7d54d4af4deb983f460639e7477ac8145516c",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/warp_drive.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/warp_drive.png",
+    "sha256": "769677f9505492547987b79171c1b8c7431d96bb4493544f076a541d7024d81c",
+    "changes": "None; byte-identical texture."
+  },
+  {
+    "source": "art/owner-library/originals/Oct23/Jimtafacts/assets/artifacts/textures/item/whoopee_cushion.png",
+    "runtime": "src/main/resources/assets/jugcraft/textures/item/jimtafacts/whoopee_cushion.png",
+    "sha256": "562ed3a6536f6b9ce5373a7da463d063419cc340e21eedd17b6b104689cffa99",
     "changes": "None; byte-identical texture."
   },
   {

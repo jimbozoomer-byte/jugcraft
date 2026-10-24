@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MCM",
+    "CMC",
+    "MCM"
+  ],
+  "key": {
+    "M": "#c:ingots/mithril",
+    "C": "minecraft:chain"
+  },
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_mithril_weave",
+    "count": 1
+  }
+}

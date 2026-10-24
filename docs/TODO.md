@@ -2,14 +2,24 @@
 
 ## Jimtafacts collection — October 23 local integration
 
+**Current direction:** test and repair the existing combined candidate, then
+prepare the coordinated release. Further implementation is tracked in
+[Jimtafacts remaining work](features/jimtafacts-remaining.md). Earlier requests to
+defer tests are superseded by the owner's October 23 release request. No test or
+deployment is considered passed until its evidence is recorded.
+
 - [x] Preserve and SHA-256 verify all 17,598 supplied files; index named content, namespaces, legacy class generations and source-format issues.
 - [x] Implement and validate the first 28 accessory/food item behaviors: native slots, cooldowns, acquisition, party protection and grave interactions. Source-parity and worn-model work remains below.
-- [ ] Complete the other accessories, mimic/campsites, source wearable models/animations and source-behavior parity.
-- [ ] Integrate spellbooks, spells, equipment, enemies/bosses and structures through the shared magic systems.
-- [ ] Integrate Applied Energentics storage networks, terminals, cells, crafting, automation and security.
-- [ ] Integrate IndustrialCraft processing, equipment, power, agriculture and nuclear systems, consolidating overlapping machines.
-- [ ] Integrate BuildCraft transport, gates, pumps, quarry/builders, engines and robotics with claims and existing logistics.
-- [ ] Integrate computers, terminals, disks, peripherals and turtles with bounded execution and persistent state.
+- [ ] Validate the locally implemented 49 accessory/items, mimic/campsites, original wearable models and animations in the final combined batch. Source defaults intentionally disable durability.
+- [ ] Validate the locally implemented 113 named spells, source armor/models/animations, encounter behavior and 236 supplied templates across nine structures. Preserve the explicitly recorded missing statue assets and native spell-level adaptations; see [structures](features/jimtafacts-structures.md) and [encounters](features/jimtafacts-encounters.md). Implementation is not yet a test pass.
+- [ ] Finish network parity beyond the implemented P2P/cards, quantum storage, 32 cable attachment types, facade/anchor system, joined plane geometry, guide/card wallet, meteorites, bounded 2³/16³ spatial exchange and asynchronous dependencies. Physical ingredient escrow, per-face job-tree cancellation, original creative cell, item/fluid I/O fill/empty, fluid partitioning and bounded paid spatial anchors are local. Remaining: 128³/entity migration and the documented source/API differences. Validate all together at the end; see [exact network status](features/jimtafacts-network.md).
+- [ ] Finish IndustrialCraft mapping beyond 22 shared processor housings, rechargeable/fueled gear, 29 crop varieties/genetics, recycling and metal-former production; retain consolidated power/agriculture/nuclear systems and finish distinct process gaps.
+- [ ] Validate the local lathe, boats, luminator, fluid regulator/distributor, solar distiller/steam condenser, four transformers, magnetizer, personal safe, barter/charging stations, six animated engines/dynamo, original glass tank/pump and configurable chute. Original supplied art and recovered geometry are used; combined compilation/gameplay/visual tests have not run.
+- [ ] Validate original-art charging/programming tables, advanced crafting table, manual forge hammer/wire cutters, portable toolbox, finite brewing barrel, fourteen cable families, six terraformer plans, biogas jetpack and construction-foam backpack together. Implementation and conservation scenarios are local; no tests have run for this continuation.
+- [x] Implement the 39 native transport variants, including obsidian collection, stripes placement/breaking, resource-specific lapis/daizuli/emzuli routes and filtered wooden item/fluid extraction. Original textures, directional collars, cargo/sample separation and bounded scans are local. This is native instantaneous transport, not the source travelling-item simulation or arbitrary item-use API.
+- [ ] Validate the 39 transport variants (including four independent Emzuli banks), three gate modifiers/parameter editor and five expansions together with lasers, integration tables, 20 robot programs and recovered animated quarry rails/drill. New conservation/filter/parameter tests are authored, not run.
+- [ ] Validate the locally implemented construction/paint/scaffold system, seven machine upgrades and fourteen heat/kinetic devices with original wind/water rotors, coolant, two-stage superheated/ordinary steam, 5×5×5 reactor vessel/ports and laser tables. Native boiler headroom interlock replaces source pressure explosions; existing JE/KE systems remain authoritative.
+- [ ] Validate the 23 local computer/terminal/disk/peripheral/turtle entries, source models/animation, wired transfers, paginated printing, linked pockets, 48×24 monitors using the original terminal font, saved programs/integer control flow, bounded speaker clips, loaded cross-dimensional advanced modems and operator-only Command Computers. Full Lua/CraftOS compatibility remains unimplemented; native workshop instructions are explicitly labelled. See [computer scope](features/jimtafacts-computers.md).
 - [ ] Finish combined survival, economy, visuals, multiplayer, save/restart and performance checks; prepare the local owner playtest before release.
 
 [Scope, supplied files, implemented behavior and pending parity](features/jimtafacts-integration.md). Preserved content is not automatically playable content.

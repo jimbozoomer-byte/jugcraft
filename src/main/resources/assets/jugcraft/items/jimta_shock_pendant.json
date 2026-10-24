@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:item/jimta_shock_pendant"
+    "model": "jugcraft:item/jimtafacts/shock_pendant"
   }
 }

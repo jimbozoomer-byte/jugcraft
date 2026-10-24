@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "jugcraft:tin_ingot",
+    "jugcraft:tin_ingot",
+    "jugcraft:tin_ingot"
+  ],
+  "result": {
+    "id": "jugcraft:jimta_tin_cable",
+    "count": 6
+  }
+}

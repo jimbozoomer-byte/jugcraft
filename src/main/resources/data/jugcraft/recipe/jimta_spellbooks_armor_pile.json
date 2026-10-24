@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "jugcraft:jimta_spellbooks_arcane_essence"
+  ],
+  "result": {
+    "id": "jugcraft:jimta_spellbooks_armor_pile",
+    "count": 1
+  }
+}
