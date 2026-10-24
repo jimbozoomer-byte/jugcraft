@@ -222,13 +222,16 @@ public final class StyxGameTests {
 		ConcordanceProgress.grant(player,Workers.RESEARCH,ResearchState.UNDERSTOOD);
 		ConcordanceProgress.record(player,new Evidence.Practiced(Assaying.ACTIVITY,"minecraft:raw_iron"));
 		Knowledge before=ConcordanceProgress.knowledge(player);
+		var inventory=player.getInventory();var carried=new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
+		for(int i=0;i<inventory.getContainerSize();i++)carried.add(inventory.getItem(i).copy());
 		h.assertTrue(wizard.interact(player,InteractionHand.MAIN_HAND,Vec3.ZERO).consumesAction(),"He answers");
 		h.assertTrue(ConcordanceProgress.knowledge(player).equals(before),"Talking records nothing");
 		h.assertValueEqual(ConcordanceProgress.knowledge(player).state(StolasRegard.RESEARCH),ResearchState.NONE,"Stolas's Regard is not begun by talk");
 		AdvancementHolder begun=level.getServer().getAdvancements().get(ConcordanceProgress.advancementFor(StolasRegard.RESEARCH,ResearchState.ENCOUNTERED));
 		h.assertTrue(begun!=null && !player.getAdvancements().getOrStartProgress(begun).isDone(),"No codex page opens by talk");
 		h.assertTrue(AstralClaims.of(level.getServer()).observed(player.getUUID()).isEmpty(),"He records no sky observation");
-		h.assertTrue(player.getInventory().isEmpty(),"He gives nothing: the cuttings were given before");
+		boolean unchanged=true;for(int i=0;i<carried.size();i++)unchanged&=net.minecraft.world.item.ItemStack.matches(carried.get(i),inventory.getItem(i));
+		h.assertTrue(unchanged,"He gives nothing: the cuttings were given before (what they carry is as it was)");
 		boolean on=JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
 		try {
 			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE,false);

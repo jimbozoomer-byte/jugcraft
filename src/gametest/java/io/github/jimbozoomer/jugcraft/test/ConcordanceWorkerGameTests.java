@@ -1717,7 +1717,12 @@ public class ConcordanceWorkerGameTests {
 
 	/** Whether {@code player} carries exactly {@code times} compacts' materials. */
 	static boolean pocketed(ServerPlayer player, int times) {
-		for (PactDefinition.Cost cost : stolasOffer().compact()) {
+		return pocketed(player, times, stolasOffer());
+	}
+
+	/** Whether {@code player} carries exactly {@code times} of {@code offer}'s compacts' materials (an offer read before the rules change). */
+	static boolean pocketed(ServerPlayer player, int times, PactDefinition offer) {
+		for (PactDefinition.Cost cost : offer.compact()) {
 			if (count(player, cost.item()) != cost.count() * times) {
 				return false;
 			}
@@ -2304,6 +2309,8 @@ public class ConcordanceWorkerGameTests {
 		BlockPos fresh = new BlockPos(6, 1, 2);
 		PactPerchBlockEntity freshPerch = perch(helper, fresh, newcomer);
 		ConcordanceRules was = ConcordanceData.rules();
+		// Read while the shipped offer is loaded: the loop below runs with it refused or missing.
+		PactDefinition offer = stolasOffer();
 		JsonObject invalid = shipped(level);
 		invalid.addProperty("surprise", true);
 		PactCatalog broken = PactCatalog.parse(Map.of(PactDefinition.STOLAS, invalid), was.research().keySet());
@@ -2318,7 +2325,7 @@ public class ConcordanceWorkerGameTests {
 				helper.assertTrue(menu.lastSent().mode() == PactStatePayload.CLOSED && keys(menu.lastSent().notes()).contains(PACT_KEY + "unavailable")
 						&& freshPerch.visitor() == null, "New invitations are refused with the reason; Stolas does not come");
 				helper.assertTrue(answered(send(newcomer, menu, PactRequestPayload.ACCEPT, 0), PactMenu.NO_DEFINITION)
-						&& pocketed(newcomer, 1) && BoundWills.of(level.getServer()).ledger().heldBy(newcomer.getUUID()).isEmpty(), "accepting spends nothing");
+						&& pocketed(newcomer, 1, offer) && BoundWills.of(level.getServer()).ledger().heldBy(newcomer.getUUID()).isEmpty(), "accepting spends nothing");
 				newcomer.closeContainer();
 				beside(helper, holder, kept);
 				PactMenu theirs = open(helper, holder, keptPerch);
