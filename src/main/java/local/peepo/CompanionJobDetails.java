@@ -35,7 +35,7 @@ public final class CompanionJobDetails {
             case NEEDS_CONTAINERS -> "Needs empty bottles, buckets or a refillable canteen; "+transport(npc,row,true,source)+".";
             case NO_SEEDS -> "Needs suitable planting items; "+transport(npc,row,true,source)+".";
             case NO_BUNDLES -> "Needs ready-made herb bundles; "+transport(npc,row,true,source)+".";
-            case NEEDS_FERTILIZER -> "Needs bone meal, guano or Fertilizer; "+transport(npc,row,true,source)+".";
+            case NEEDS_FERTILIZER -> "Needs bone meal, guano or a fertilizer blend; "+transport(npc,row,true,source)+".";
             case NEEDS_BREEDING_FOOD -> "Needs food accepted by the selected animals; "+transport(npc,row,true,source)+".";
             case NO_POWER -> "Machine lacks power; check its energy supply and connections.";
             case NO_HEAT -> "Station lacks heat; check fuel or the heat source below it.";
@@ -58,15 +58,19 @@ public final class CompanionJobDetails {
             case AGING -> "Waiting for the selected cider stage; check Filter for Sparkling/Aged.";
             case DRYING -> "Herb bundles are drying; collection begins when ready.";
             case COOLING, CANDY_SETTING -> "Waiting for the station's cooling/setting step to finish.";
+            case LATEX_WAIT -> "No full bottle ready; the rubber tree fills its tap naturally.";
             case GUANO_WAIT -> "No guano ready; resident bats produce it naturally.";
             case STOCK_SETUP -> "Stock the Farm Stand sale slots first to set their restock items.";
             case SERVING_SETUP -> "Serve the desired dishes manually once to set restock items.";
             case MACHINE_UNFORMED -> "Complete the machine structure and keep all its parts loaded.";
-            case MACHINE_TOOL -> "Install the required tool in the machine's tool socket.";
+            case NEEDS_CERAMICS -> "Supply or install a Basic Ceramic Lining and Ceramic Crucible; both are reusable.";
+            case MACHINE_TOOL -> npc.level().getBlockEntity(target.at().pos()) instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity
+                ? "Supply or install the recipe's workshop tool; Output returns a tool that needs replacing."
+                : "Install the required tool in the machine's tool socket.";
             case MACHINE_PAUSED -> "Machine is paused; resume it using its own controls.";
             case DORMANT_GARDEN -> "Awaken the assigned magic bed/device through its native progression.";
             case NEEDS_VERDANCE -> "Magic device lacks Verdance; check its native supply.";
-            case MAGIC_DISABLED, BAT_HOUSE_DISABLED, GARDEN_DISABLED -> "Disabled by server/game rules; this job cannot run until enabled.";
+            case MAGIC_DISABLED, BAT_HOUSE_DISABLED, GARDEN_DISABLED, TAPS_DISABLED -> "Disabled by server/game rules; this job cannot run until enabled.";
             case SPOILED_INPUT -> "Remove spoiled jars and supply fresh ingredients.";
             case UNSUPPORTED -> "This target has no supported companion job; reassign it.";
             case READY -> npc.orders.mode()!=3?"Ready; select Work to perform assigned jobs.":"Ready; follows job priority, energy and Routine settings.";

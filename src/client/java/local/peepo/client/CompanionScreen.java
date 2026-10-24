@@ -273,6 +273,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             if(row>0 && row<5 && target!=null)text+=". Priority "+row+" (top is highest).";
             if(target!=null && target.garden())text+=target.gardenZone()!=null?(target.orchard()?" Orchard fruit picking, with linked Output. Leave safe access below the canopy.":" Garden zone: farmland, planters, awakened Verdant Beds, cane, bamboo, cactus, berries, cocoa, pumpkins, melons and flooded rice. Supply brings planting items; Output takes surplus. Select a crop to establish new ground plantings. The gear opens optional farmland repair and limited fertilizing."):CompanionGarden.hanging(target)?" Up to 8 saved hanging spots. Supply brings ready-made bundles; Output takes dried herbs. Fresh bundles dry naturally.":CompanionGarden.mushrooms(target)?" Up to 8 connected mushroom soil blocks. Shears or a knife in Hand are required for picking. Supply brings mushrooms; Output takes surplus harvests.":" Up to 8 connected farmland or planter boxes. A hoe in Hand halves work time. Supply brings seeds; Output takes surplus harvests.";
             if(target!=null && target.block().equals(local.peepo.PeepoMod.id("sprinkler")))text+=" Supply water buckets and Fertilizer; Output receives empty buckets. Keeps up to four fertilizer stocked. Uses one work slot; pipe and hopper inputs still work.";
+            if(target!=null && target.treeTap())text+=" Supply empty glass bottles; Output receives latex bottles. Leave safe ground in front of the tap. Bucket upgrades remain manual.";
             if(target!=null && target.water())text+=" Supply empty bottles, buckets or partly filled gourd canteens; Output receives filled containers. Leave a dry bank. Buckets remove source water: use an infinite-water pool for repeated filling.";
             if(target!=null && target.care())text+=" Tasks can be enabled independently using this job's Zone options button. Uses the outlined rectangular area; missing shears or buckets do not stop other tasks.";
             if(target!=null && target.shearing())text+=" Adult woolly sheep within 8 blocks. Give shears in Hand or a Tools supply; Output receives wool.";
@@ -410,6 +411,16 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         if(menu.filterRow()>=0){
             var companion=npc();var target=companion==null?null:companion.assignments.view().get(menu.filterRow()+1);
             g.text(font,"Filter: "+(target==null?"Workstation":fit(companion.assignments.label(menu.filterRow()+1),200)),105,82,0xFF404040,false);
+            if(menu.value(25+menu.filterRow())==15){
+                g.text(font,"Choose products or fluid output buckets.",105,174,0xFF404040,false);
+                g.text(font,"Supply items/tools; fluids still use pipes.",105,187,0xFF404040,false);
+                g.text(font,"Machine recipe locks still apply.",105,200,0xFF404040,false);return;
+            }
+            if(menu.value(25+menu.filterRow())==14){
+                g.text(font,"Choose finished products. Empty allows any.",105,174,0xFF404040,false);
+                g.text(font,"Supply ingredients, fuel and reusable tools.",105,187,0xFF404040,false);
+                g.text(font,"Crucible furnace also needs ceramic parts.",105,200,0xFF404040,false);return;
+            }
             if(menu.value(25+menu.filterRow())==12){
                 g.text(font,"Choose compostable inputs for the Mulch Maw.",105,174,0xFF404040,false);
                 g.text(font,"Keeps up to 16 items; pauses when beds are full.",105,187,0xFF404040,false);

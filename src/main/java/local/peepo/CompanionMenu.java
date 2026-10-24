@@ -140,15 +140,18 @@ public final class CompanionMenu extends AbstractContainerMenu {
         var target=npc.assignments.get(row+1);
         if(target==null || !target.present(npc.level()) || target.at().pos().distToCenterSqr(npc.position())>64*64
             || !CompanionJobs.permitted(npc,target.at().pos())
+            || !io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(playerInventory.player,npc.level(),target.at().pos())
             || io.github.jimbozoomer.jugcraft.town.TownProtection.denies(playerInventory.player,npc.level(),target.at().pos()))return null;
         return target;
     }
     private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
         var target=recipeTarget(row);if(target==null || target.livestock() || target.garden())return null;
         var be=npc.level().getBlockEntity(target.at().pos());
+        if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.companionPort.accessible(npc) && form.companionPort.playerMayEdit(playerInventory.player) && form.companionPort.selectable()?be:null;
         var serving=ServingCompanion.of(be);if(serving!=null)return !serving.hasOutput() && serving.allowed(npc)?be:null;
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity stand)return stand.isOwner(playerInventory.player) && npc.orders.foodAccess(stand.owner(),false)?be:null;
         if(be instanceof io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity maw)return playerInventory.player instanceof net.minecraft.server.level.ServerPlayer player && maw.mayChange(player) && MagicGardenCompanion.keeperAccess(npc,maw.keeper())?be:null;
+        if(be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.companion.accessible(npc) && ((io.github.jimbozoomer.jugcraft.workshop.WorkshopBlock)workshop.getBlockState().getBlock()).mayUse(npc.level(),workshop.getBlockPos(),workshop.getBlockState(),playerInventory.player)?be:null;
         return be instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity || KitchenCompanionPort.of(be)!=null || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CandyKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderBarrelBlockEntity || be instanceof HearthOvenBlockEntity || be instanceof CookingPotBlockEntity pot && !pot.isLocked()
             || VanillaCompanionPort.supports(be) && (!(be instanceof net.minecraft.world.level.block.entity.BaseContainerBlockEntity container) || !container.isLocked())
             || be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine && !machine.isLocked() && (machine.companionPort.selectable() || machine.companionPort.locked())?be:null;
@@ -163,7 +166,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
             var oven=station instanceof HearthOvenBlockEntity o?o:null;
             var machine=station instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity m?m:null;
             var target=recipeTarget(row);boolean garden=target!=null && target.garden() && !target.orchard();
-            recipeEnabled[row]=ServingCompanion.of(station)!=null?13:station instanceof io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity?12:station instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity?11:station instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity?10:station instanceof net.minecraft.world.level.block.entity.BeehiveBlockEntity?9:VanillaCompanionPort.supports(station)?8:station instanceof io.github.jimbozoomer.jugcraft.agriculture.CandyKettleBlockEntity?7:station instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderBarrelBlockEntity?6:garden?4:KitchenCompanionPort.of(station)!=null?5:machine!=null?3:oven!=null?2:pot!=null?1:0;
+            recipeEnabled[row]=station instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity?15:station instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity?14:ServingCompanion.of(station)!=null?13:station instanceof io.github.jimbozoomer.jugcraft.concordance.garden.MulchMawBlockEntity?12:station instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity?11:station instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity?10:station instanceof net.minecraft.world.level.block.entity.BeehiveBlockEntity?9:VanillaCompanionPort.supports(station)?8:station instanceof io.github.jimbozoomer.jugcraft.agriculture.CandyKettleBlockEntity?7:station instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderBarrelBlockEntity?6:garden?4:KitchenCompanionPort.of(station)!=null?5:machine!=null?3:oven!=null?2:pot!=null?1:0;
             var icon=ItemStack.EMPTY;
             if(garden){var seed=npc.assignments.gardenSeed(target);if(seed!=null)icon=new ItemStack(seed);}
             if(!ItemStack.matches(recipeIcons.getItem(row),icon))recipeIcons.setItem(row,icon);

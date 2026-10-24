@@ -36,6 +36,7 @@ public final class CompanionLogistics {
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !npc.assignments.assignedWork(target.at().pos()) || !CompanionJobs.permitted(npc,target.at().pos()))return null;
         if(target.water())return npc.water.port(target);
+        if(target.treeTap())return npc.treeTaps.port(target);
         if(target.garden())return npc.garden.port(target);
         if(target.livestock())return npc.livestock.port(target);
         if(npc.level() instanceof net.minecraft.server.level.ServerLevel server && npc.level().getBlockState(target.at().pos()).getBlock() instanceof net.minecraft.world.level.block.ComposterBlock)return new ComposterCompanionPort(server,target.at().pos());
@@ -46,6 +47,8 @@ public final class CompanionLogistics {
             public Storage<ItemVariant> inputs(){return Storage.empty();}
             public Storage<ItemVariant> outputs(){return Storage.empty();} // Collected guano is already marked cargo.
         };
+        if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.companionPort.accessible(npc)?form.companionPort.forCompanion(npc):null;
+        if(be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.companion.accessible(npc)?workshop.companion.forCompanion(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity sprinkler)return sprinkler.companion.forCompanion(npc);
         var serving=ServingCompanion.of(be);if(serving!=null)return serving.forCompanion(npc);
         var magic=MagicGardenCompanion.of(npc,be);if(magic!=null)return magic;

@@ -32,8 +32,9 @@ public final class CompanionAssignments {
         public AABB animalBox(){return zone!=null?zone.box():new AABB(at.pos().above()).inflate(CompanionLivestock.RADIUS,3,CompanionLivestock.RADIUS);}
         public boolean animalContains(Vec3 point){return zone!=null?zone.contains(point):Math.abs(point.y-at.pos().getY()-1)<=3 && point.distanceToSqr(Vec3.atBottomCenterOf(at.pos().above()))<=CompanionLivestock.RADIUS*CompanionLivestock.RADIUS;}
         public boolean water(){return block.equals(CompanionWater.WATER);}
+        public boolean treeTap(){return block.equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("tree_tap"));}
         public boolean batHouse(){return block.equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("bat_house"));}
-        public boolean carriesProduce(){return garden() || livestock() || batHouse() || water();}
+        public boolean carriesProduce(){return garden() || livestock() || batHouse() || water() || treeTap();}
         public String name(){return water()?"Water collection":gardenZone!=null?(orchard()?"Orchard":"Farmland")+" ("+gardenZone.width()+" x "+gardenZone.depth()+")":care()?"Livestock Management"+(zone==null?"":" ("+zone.width()+" x "+zone.depth()+")"):shearing()?"Shearing (8-block radius)":milking()?"Milking (8-block radius)":eggs()?"Egg collection (8-block radius)":garden()?(CompanionGarden.hanging(this)?"Herb drying (":CompanionGarden.mushrooms(this)?"Mushroom garden (":"Garden (")+plot.size()+" blocks)":BuiltInRegistries.BLOCK.getValue(block).getName().getString();}
         public boolean local(Level level){return at.dimension().equals(level.dimension());}
         public boolean present(Level level){return local(level)&&level.hasChunkAt(at.pos())&&(!care() || zone!=null)&&(water() || gardenZone!=null || livestock() || BuiltInRegistries.BLOCK.getKey(level.getBlockState(at.pos()).getBlock()).equals(block));}
@@ -84,6 +85,7 @@ public final class CompanionAssignments {
         if(target==null)return false;
         int row=workPriority(target.at.pos());if(row>4 || !target.equals(targets[row]))return false;
         int mode=transportMode(row,supply);if(mode==2)return false;if(mode==1)return true;
+        if(target.present(npc.level()) && npc.level().getBlockEntity(target.at.pos()) instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return !form.companionAutomation.external(supply);
         return !target.present(npc.level()) || !(npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine) || !machine.itemAutomation.external(supply);
     }
     /** Menu-only status: 0 available, 1 off, 2 external automation, 3 unsupported, 4 unavailable, 5 no recipe. */
@@ -93,6 +95,7 @@ public final class CompanionAssignments {
         else {
             var port=CompanionLogistics.resolve(npc,target);
             if(port==null)reason=3;
+            else if(npc.level().getBlockEntity(target.at.pos()) instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form && (supply?!form.companionPort.supportsSupply():!form.companionPort.supportsOutput()))reason=3;
             else if(!target.livestock() && npc.level().getBlockEntity(target.at.pos()) instanceof MachineBlockEntity machine
                 && (supply?!machine.companionPort.supportsSupply():!machine.companionPort.supportsOutput()))reason=3;
             else if(!supply && (npc.level().getBlockEntity(target.at.pos()) instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity || ServingCompanion.of(npc.level().getBlockEntity(target.at.pos())) instanceof ServingCompanion serving && !serving.hasOutput()))reason=3;
@@ -159,13 +162,14 @@ public final class CompanionAssignments {
         }
         if(state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE)==ChestType.RIGHT)return pos.relative(ChestBlock.getConnectedDirection(state));
         if(state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlock stand)return stand.masterPos(pos,state);
+        if(state.getBlock() instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlock workshop)return workshop.master(pos,state);
         if(state.getBlock() instanceof WheelBlock)return WheelBlock.master(pos,state);
         if(state.getBlock() instanceof MachineBlock machine)return machine.masterPos(pos,state);
         if(state.getBlock() instanceof BedBlock && state.getValue(BlockStateProperties.BED_PART)==BedPart.FOOT)return pos.relative(state.getValue(BlockStateProperties.HORIZONTAL_FACING));
         return pos;
     }
     public static boolean bed(Level level,BlockPos pos){var b=level.getBlockState(pos).getBlock();return b instanceof CompanionBedBlock || b instanceof BedBlock;}
-    public static boolean work(Level level,BlockPos pos){if(CompanionWater.source(level,pos))return true;if(CompanionGarden.gardenAnchor(level,pos) || level.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.ComposterBlock)return true;var be=level.getBlockEntity(pos);if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.form().companionAssistance();return be instanceof io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity || ServingCompanion.of(be)!=null || MagicGardenCompanion.supports(be) || be instanceof io.github.jimbozoomer.jugcraft.agriculture.BatHouseBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity || VanillaCompanionPort.supports(be) || KitchenCompanionPort.of(be)!=null || be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderBarrelBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CandyKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
+    public static boolean work(Level level,BlockPos pos){if(CompanionWater.source(level,pos) || level.getBlockState(pos).getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.TreeTapBlock)return true;if(CompanionGarden.gardenAnchor(level,pos) || level.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.ComposterBlock)return true;var be=level.getBlockEntity(pos);if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.form().companionAssistance();return be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity || ServingCompanion.of(be)!=null || MagicGardenCompanion.supports(be) || be instanceof io.github.jimbozoomer.jugcraft.agriculture.BatHouseBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity || VanillaCompanionPort.supports(be) || KitchenCompanionPort.of(be)!=null || be instanceof WheelBlockEntity || be instanceof MachineBlockEntity || be instanceof CookingPotBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderPressBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CiderBarrelBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CandyKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.SpinningWheelBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.CanningKettleBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity || be instanceof io.github.jimbozoomer.jugcraft.kinetic.HandCrankBlockEntity;}
     public String assignContainer(Level level,BlockPos clicked,Direction face,boolean output){
         var pos=canonical(level,clicked);
         if(!level.hasChunkAt(pos) || pos.distToCenterSqr(npc.position())>64*64)return "Keep a loaded container within 64 blocks of the companion.";
@@ -194,6 +198,7 @@ public final class CompanionAssignments {
     public String assign(Level level,BlockPos clicked){
         var pos=canonical(level,clicked);
         if(!level.hasChunkAt(pos))return "That target is not loaded.";
+        if(!CompanionJobs.permitted(npc,clicked) || !CompanionJobs.permitted(npc,pos))return "The companion owner cannot access this claim.";
         if(ServingCompanion.of(level.getBlockEntity(pos)) instanceof ServingCompanion serving && !serving.allowed(npc))return "This serving station does not allow this companion.";
         if(level.getBlockEntity(pos) instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity stand && !npc.orders.foodAccess(stand.owner(),false))return "Only the Farm Stand owner's companion can restock it.";
         if(level.getBlockEntity(pos) instanceof io.github.jimbozoomer.jugcraft.concordance.garden.LivingDeviceBlockEntity device && MagicGardenCompanion.supports(device) && !MagicGardenCompanion.keeperAccess(npc,device.keeper()))return "Only the keeper or their party can assign this garden device.";
