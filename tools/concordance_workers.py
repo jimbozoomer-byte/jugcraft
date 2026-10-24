@@ -80,6 +80,8 @@ PACT = {"ABSENT_TICKS": 1200, "WRITE_TICKS": 200, "REACH": 64, "HISTORY": 8, "MA
         "MAX_PERIOD": 672000, "MAX_GRACE": 168000}
 PACT_HOLDS = ["none", "holder", "upkeep"]
 PACT_DEPARTURES = ["ended", "broken"]
+# Concordance Chunk D, D-04/D-05 (D-S6): a pact without its place seated again (Java: AgreementHolder.Seat). Append only.
+SEAT_OUTCOMES = ["seated", "disabled", "not_holder", "nothing", "not_permitted", "taken", "roster_full", "unavailable"]
 
 STATUSES = {
     "following": "following its person",
@@ -252,6 +254,15 @@ MESSAGES = {
     "workers.post_unusable": "That Courier Post cannot be this anchor's: it must be one you may use, loaded, in this dimension and "
                              "within %s blocks of the anchor",
     "workers.key_no_post": "Use the key on your Courier Post first, then on the anchor (sneak to unbind it)",
+    # Concordance Chunk D, D-04 (D-S6): the roster's pact kind, and a pact without its place seated again.
+    "workers.kind.pact": "Pact",
+    "workers.seat_seated": "The pact is seated here: its presence returns, and nothing was spent",
+    "workers.seat_not_holder": "Only the pact's holder, in person, may seat it",
+    "workers.seat_nothing": "You keep no pact without its place to seat here",
+    "workers.seat_not_permitted": "Only this place's owner may seat a pact here, and only where they may build",
+    "workers.seat_taken": "This place already keeps an agreement",
+    "workers.seat_roster_full": "Your roster already keeps %s workers, the most it may: release one, then seat the pact",
+    "workers.seat_unavailable": "No spirit answers now; nothing was seated",
 }
 
 TOOLTIPS = {
@@ -300,7 +311,8 @@ def codex():
                 ("text", "Understood",
                  "A familiar, a spirit and a construct will answer you now. To **master** the Binding Arts, be served "
                  "by each once: a familiar's mending, a spirit's delivery (a Workshop Hand's is a spirit's) and a "
-                 "construct's trip.", (art, "understood")),
+                 "construct's trip. Stolas, a raven among the spirits, may take notice of you as well: "
+                 "[Stolas's Regard](entry://jugcraft:arcane_concordance/binding/stolas_regard).", (art, "understood")),
                 ("text", "Mastered", "You keep many, and each keeps its own terms.", (art, "mastered")),
             ],
         },
@@ -371,7 +383,8 @@ def codex():
             "description": "A spirit that carries a Courier Post's requests",
             "pages": [
                 ("text", "Workshop Hand",
-                 f"A spirit of the shade's kind, bound to carry. Once you have **mastered Stolas's Regard**, use a **Porter "
+                 f"A spirit of the shade's kind, bound to carry. Once you have **mastered** "
+                 f"[Stolas's Regard](entry://jugcraft:arcane_concordance/binding/stolas_regard), use a **Porter "
                  f"Key** set on your **Courier Post** on a Spirit Anchor that keeps no agreement, within {hand['radius']} "
                  f"blocks of the post (sneak to unbind it), then use the anchor: a Workshop Hand is sealed there as a Bound "
                  f"Will, for you and your party. From {clock(hand['from'])} to {clock(hand['to'])}, up to {hand['quota']} "

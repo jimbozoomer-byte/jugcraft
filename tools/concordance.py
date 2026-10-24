@@ -517,12 +517,16 @@ INVOCATIONS.update(strata.INVOCATIONS)
 import concordance_rime_kit as rime_kit  # noqa: E402
 ITEMS.update(rime_kit.ITEMS)
 ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
+# Concordance Chunk D (tools/concordance_pacts.py): Stolas's Regard (D-03), the pact perch and Stolas (D-04, D-05).
+import concordance_pacts as pacts  # noqa: E402
+RESEARCH.update(pacts.RESEARCH)
+BLOCKS.update(pacts.BLOCKS)
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
                  artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
                  hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG,
-                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG]
+                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -1062,6 +1066,7 @@ def codex():
         **celestial.codex(),
         **crimson.codex(),
         **workers.codex(),
+        **pacts.codex(),
         **jug_nouveau.codex(),
         **logistics.codex(),
         **artifice.codex(),
@@ -1630,6 +1635,7 @@ MESSAGES = {
     **ember.MESSAGES,
     **rime.MESSAGES,
     **strata.MESSAGES,
+    **pacts.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
@@ -1681,6 +1687,7 @@ TOOLTIPS = {
     **conclave.TOOLTIPS,
     **spire.TOOLTIPS,
     **rime.TOOLTIPS,
+    **pacts.TOOLTIPS,
 }
 
 
@@ -1866,6 +1873,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     celestial.write_all(write, assets, data, lang, condition, self_drop)
     crimson.write_all(write, assets, data, lang, condition, self_drop)
     workers.write_all(write, assets, data, lang, condition, self_drop)
+    pacts.write_all(write, assets, data, lang, condition, self_drop)
     logistics.write_all(write, assets, data, lang, condition, self_drop)
     artifice.write_all(write, assets, data, lang, condition, self_drop)
     relics.write_all(write, assets, data, lang, condition, self_drop)
@@ -1889,6 +1897,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     composer.lang_entries(lang)
     signs.lang_entries(lang)
     diagnostics.lang_entries(lang)
+    pacts.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -2025,6 +2034,7 @@ def write_data(write, res):
     celestial.write_data(write, data)
     crimson.write_data(write, data)
     workers.write_data(write, data)
+    pacts.write_data(write, data)
     logistics.write_data(write, data)
     artifice.write_data(write, data)
     relics.write_data(write, data)
@@ -2061,6 +2071,7 @@ def tags(tags):
     rime.tags(tags)
     rime_kit.tags(tags)
     strata.tags(tags)
+    pacts.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)
     spire.tags(tags)

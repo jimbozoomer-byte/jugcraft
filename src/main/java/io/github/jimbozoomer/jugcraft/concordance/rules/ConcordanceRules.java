@@ -51,6 +51,7 @@ import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireConfiguration;
 import io.github.jimbozoomer.jugcraft.concordance.wonder.SpireDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.wonder.WonderCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.wonder.WonderParser;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerParser;
@@ -86,7 +87,7 @@ public final class ConcordanceRules {
 	public static final ConcordanceRules EMPTY = new ConcordanceRules(Map.of(), Map.of(), Map.of(), ConversionTable.EMPTY, Catalog.EMPTY,
 			Map.of(), Map.of(), Map.of(), AlchemyCatalog.EMPTY, EcologyCatalog.EMPTY, CelestialCatalog.EMPTY, CrimsonCatalog.EMPTY, WorkerCatalog.EMPTY, ArtificeCatalog.EMPTY,
 			RelicCatalog.EMPTY, EquivalenceCatalog.EMPTY, HexCatalog.EMPTY, ConclaveCatalog.EMPTY, ProgressionCatalog.EMPTY,
-			WonderCatalog.EMPTY, List.of());
+			WonderCatalog.EMPTY, PactCatalog.EMPTY, List.of());
 
 	private final Map<String, Definitions.Research> research;
 	private final Map<String, Definitions.Invocation> invocations;
@@ -108,6 +109,7 @@ public final class ConcordanceRules {
 	private final ConclaveCatalog conclave;
 	private final ProgressionCatalog progression;
 	private final WonderCatalog wonders;
+	private final PactCatalog pacts;
 	private final List<String> problems;
 	private final Map<String, Definitions.Invocation> bySpell = new HashMap<>();
 
@@ -116,7 +118,7 @@ public final class ConcordanceRules {
 			Map<String, Map<String, Authored>> authored, Map<String, StructurePattern> structures, Map<String, RitualDefinition> rituals,
 			AlchemyCatalog alchemy, EcologyCatalog ecology, CelestialCatalog celestial, CrimsonCatalog crimson, WorkerCatalog workers,
 			ArtificeCatalog artifice, RelicCatalog relics, EquivalenceCatalog equivalence, HexCatalog hexes, ConclaveCatalog conclave,
-			ProgressionCatalog progression, WonderCatalog wonders, List<String> problems) {
+			ProgressionCatalog progression, WonderCatalog wonders, PactCatalog pacts, List<String> problems) {
 		this.research = research;
 		this.invocations = invocations;
 		this.workings = workings;
@@ -137,6 +139,7 @@ public final class ConcordanceRules {
 		this.conclave = conclave;
 		this.progression = progression;
 		this.wonders = wonders;
+		this.pacts = pacts;
 		this.problems = problems;
 		for (Definitions.Invocation invocation : invocations.values()) {
 			bySpell.put(invocation.spell(), invocation);
@@ -255,6 +258,24 @@ public final class ConcordanceRules {
 		return wonders;
 	}
 
+	/** Concordance Chunk D, D-04: the pacts' offers (data/<ns>/concordance/pact). */
+	public PactCatalog pacts() {
+		return pacts;
+	}
+
+	/** These rules with {@code replacement} as their pacts (game tests stand for a reload this way); its problems replace the pacts'. */
+	public ConcordanceRules withPacts(PactCatalog replacement) {
+		List<String> kept = new ArrayList<>();
+		for (String problem : problems) {
+			if (!problem.startsWith("pact ")) {
+				kept.add(problem);
+			}
+		}
+		kept.addAll(replacement.problems());
+		return new ConcordanceRules(research, invocations, workings, conversions, catalog, authored, structures, rituals, alchemy, ecology,
+				celestial, crimson, workers, artifice, relics, equivalence, hexes, conclave, progression, wonders, replacement, List.copyOf(kept));
+	}
+
 	public List<String> problems() {
 		return problems;
 	}
@@ -318,6 +339,7 @@ public final class ConcordanceRules {
 		Map<String, Rite> rites = new TreeMap<>();
 		WorkerParser workerParser = new WorkerParser();
 		Map<String, WorkerDefinition> workerDefinitions = new TreeMap<>();
+		Map<String, JsonElement> pactFiles = new TreeMap<>();
 		ArtificeParser artificeParser = new ArtificeParser();
 		Map<String, Substrate> substrates = new TreeMap<>();
 		Map<String, Gem> gems = new TreeMap<>();
@@ -470,6 +492,7 @@ public final class ConcordanceRules {
 						workerDefinitions.put(worker.id(), worker);
 					}
 				}
+				case "pact" -> pactFiles.put(source.id(), source.json());
 				case "substrate" -> {
 					Substrate substrate = artificeParser.substrate(source.id(), source.json());
 					if (substrate != null) {
@@ -557,7 +580,7 @@ public final class ConcordanceRules {
 				default -> problems.add(source.id() + ": unknown kind of Concordance file \"" + source.kind()
 						+ "\" (expected research, invocation, working, conversion, component, instrument, structure, ritual, ingredient, "
 						+ "preparation, property, product, organism, disturbance, graft, pattern, offering, worker, substrate, gem, rune, affix, relic, material, transmutation, "
-						+ "curse, commission, project, stage, practice, wonder or wonder_configuration)");
+						+ "curse, commission, project, stage, practice, pact, wonder or wonder_configuration)");
 			}
 		}
 		problems.addAll(0, parser.problems());
@@ -804,6 +827,10 @@ public final class ConcordanceRules {
 		problems.addAll(wonderParser.problems());
 		problems.addAll(WonderParser.check(wonderDefinitions, wonderConfigurations.values(), structures, rituals, research, practices.keySet(),
 				stages.keySet()));
+		// Concordance Chunk D, D-04 (D-S23): the pacts' offers, each naming research that exists; a pact the perch offers that
+		// did not load is reported (new invitations are refused; sealed pacts keep the terms copied at sealing).
+		PactCatalog pacts = PactCatalog.parse(pactFiles, research.keySet());
+		problems.addAll(pacts.problems());
 		return new ConcordanceRules(Collections.unmodifiableMap(new LinkedHashMap<>(research)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(invocations)),
 				Collections.unmodifiableMap(new LinkedHashMap<>(workings)), conversions, catalog,
@@ -812,7 +839,7 @@ public final class ConcordanceRules {
 				new WorkerCatalog(workerDefinitions), new ArtificeCatalog(substrates, gems, runes, affixes),
 				new RelicCatalog(relicDefinitions), new EquivalenceCatalog(EquivalenceParser.byItem(materials), transmutations, equivalenceProblems),
 				new HexCatalog(curses), new ConclaveCatalog(commissions, projects), new ProgressionCatalog(stages, practices, graph),
-				new WonderCatalog(wonderDefinitions, wonderConfigurations), List.copyOf(problems));
+				new WonderCatalog(wonderDefinitions, wonderConfigurations), pacts, List.copyOf(problems));
 	}
 
 	/**

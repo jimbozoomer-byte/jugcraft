@@ -448,6 +448,7 @@
       "io.github.jimbozoomer.jugcraft.test.ConcordanceWinterClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceWayfaringClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ConcordanceWorkshopClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ConcordancePactClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArmorTiersClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StyxClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StyxTownClientGameTests",

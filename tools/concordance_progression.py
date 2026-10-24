@@ -79,6 +79,9 @@ PRACTICES = {
     "winter_survey": ("rimekeepers", "first_light", [], []),
     "rimework": ("rimekeepers", "rimekeeping", [], []),
     "anchoring": ("stratawrights", "stratawrighting", [], []),
+    # Concordance Chunk D, D-03 (D-S12, critique 11): a pact's first obligation, a sky observation while it holds (recorded
+    # by the pact alone, D-05). Its gate ships with Stolas's Regard; D-04 adds the perch to its graph (graph()).
+    "pact_service": ("spiritbinders", "stolas_regard", ["observatory"], ["night", "open_sky"]),
 }
 
 # Milestones features record (roadmap step 25), each with what it needs (its gate: research, and a stage reached first)
@@ -258,6 +261,10 @@ JUGCRAFT_SOURCES = {
     rid("jack_o_lantern_mushroom"): ("renewable", "spreads from its patch like other wild mushrooms", "", ""),
     rid("raw_thallite"): ("gathered", "thallite ore in stone and deepslate (the thallite switch)", "ordinary stone serves instead", ""),
     rid("yeti_fur"): ("found", "the Yeti King's loot, in the Glacier Hall", "the plain Frost Horn recipe needs none", ""),
+    # Concordance Chunk D, D-03: Styx's flowers are his gift, once a player (bone meal renews a grown one), so never relied
+    # on: a feather is Stolas's Regard's specimen for a world without him (G12).
+    **{rid(flower): ("found", "Styxhexenhammer's cuttings, once a player; bone meal on a grown one gives another",
+                     "a feather serves instead", "") for flower in ("stolas_starflower", "ravenquill_lupine", "amethyst_mourningbell")},
 }
 
 # Tags from Minecraft or the common namespace that recipes use: (how it is had, what it holds). Jugcraft's own tags are
@@ -548,6 +555,10 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
                                  research_node(rid("alembic_arts"), "understood")]]
             elif key == "anchoring":
                 alternatives = [[f"invocation:{rid('brace')}"]]
+            elif key == "pact_service":
+                # Concordance Chunk D, D-04/D-05: the pact's first obligation, an observation at an observatory while a pact
+                # kept at a pact perch is active (spirits/StarReckoning.observed).
+                alternatives = [[items.item(rid("observatory")), items.item(rid("pact_perch"))]]
             for encounter in encounters:
                 nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
                 needs.append(f"encounter:{encounter}")

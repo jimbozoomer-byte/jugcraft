@@ -14290,7 +14290,9 @@ def check_concordance(registered):
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
-    check_pacts(co, root, lang)
+    check_pacts(co, root, lang, registered, research)
+    check_stolas_regard(co, root, lang, research)
+    check_pact_screen(co, lang)
     check_logistics(co, root, lang, registered)
     check_hand(co, root, lang, research)
     check_crucible_supply(co, root)
@@ -17257,14 +17259,24 @@ def check_winter_links(co, root):
         err(f"Rime.column is called only where the column deed is earned (lair/yeti/YetiKingEntity.java), not {found}")
 
 
-def check_geckolib(name, java_text, uvs, sizes, kind="block"):
-    """A GeckoLib block's (or entity's) assets agree: every animation the Java names exists, every animated bone exists,
-    and every cube's box-UV region lies inside the sheet without overlapping another's; the sheet is the size the model
-    says."""
+def _box_faces(u, v, w, h, d):
+    """The faces a box-UV cube draws on its sheet, as (u0, v0, u1, v1), those with area only: GeckoLib's layout
+    (GeometryQuadUvs.ofBoxUv), top and bottom over the four sides."""
+    faces = ((u + d, v, u + d + w, v + d), (u + d + w, v, u + d + 2 * w, v + d),
+             (u, v + d, u + d, v + d + h), (u + d, v + d, u + d + w, v + d + h),
+             (u + d + w, v + d, u + 2 * d + w, v + d + h), (u + 2 * d + w, v + d, u + 2 * d + 2 * w, v + d + h))
+    return [f for f in faces if f[2] > f[0] and f[3] > f[1]]
+
+
+def check_geckolib(name, java_text, uvs, sizes, kind="block", faces=False):
+    """A GeckoLib block's (or entity's) assets agree: every animation the Java names (a loop, or a clip played and held)
+    exists, every animated bone exists, and every cube's box-UV region lies inside the sheet without overlapping another's;
+    the sheet is the size the model says. With faces (an owner's rig copied as drawn: Stolas's, Concordance Chunk D,
+    D-S5), two cubes clash only where faces they draw share texels."""
     geo = load(ASSETS / "geckolib" / "models" / kind / f"{name}.geo.json") or {}
     animations = load(ASSETS / "geckolib" / "animations" / kind / f"{name}.animation.json") or {}
     clips = set(animations.get("animations", {}))
-    for clip in re.findall(r'thenLoop\("([^"]+)"\)', java_text):
+    for clip in re.findall(r'then(?:Loop|PlayAndHold)\("([^"]+)"\)', java_text):
         if clip not in clips:
             err(f"{name}: animation {clip} is not in {name}.animation.json")
     definition = (geo.get("minecraft:geometry") or [{}])[0]
@@ -17283,10 +17295,10 @@ def check_geckolib(name, java_text, uvs, sizes, kind="block"):
             region = (u, v, u + 2 * (w + d), v + d + h)
             if region[2] > width or region[3] > height:
                 err(f"{name}.geo.json: a cube in {bone['name']} maps outside the {width}x{height} sheet")
-            regions.append(region)
-    for i, a in enumerate(regions):
-        for b in regions[i + 1:]:
-            if a != b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]:
+            regions.append((region, _box_faces(u, v, w, h, d) if faces else [region]))
+    for i, (a, drawn_a) in enumerate(regions):
+        for b, drawn_b in regions[i + 1:]:
+            if a != b and any(p[0] < q[2] and q[0] < p[2] and p[1] < q[3] and q[1] < p[3] for p in drawn_a for q in drawn_b):
                 err(f"{name}.geo.json: UV regions {a} and {b} overlap")
     sheet = ASSETS / "textures" / kind / f"{name}.png"
     if not sheet.is_file():
@@ -17986,7 +17998,7 @@ def check_workers(co, root, lang, registered, research):
                 err(f"workers: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
 
 
-def check_pacts(co, root, lang):
+def check_pacts(co, root, lang, registered, research):
     """Concordance Chunk D, unit 1 (D-01, D-02; D-S3, D-S6, D-S8, D-S9, D-S11, D-S13, D-S16, D-S18;
     docs/features/concordance-chunk-d.md): the agreements keep their promises, and each has one pact record.
     Pacts.Outcome is SEAL_OUTCOMES in order, refused with its first reason before anything is called or recorded, and
@@ -18001,7 +18013,22 @@ def check_pacts(co, root, lang):
     person, with the Concordance on, ends a pact before its escrow is handed back, and breaking a block releases nothing
     while the Concordance is off; only its holder pays into its escrow; upkeep is looked at only with the Concordance on
     and its holder near; its holder suspends or resumes a pact by its record alone; a copy says CONFLICTING_AGREEMENT;
-    the shade serves only an anchor whose record keeps it there; and the unit's game tests exist."""
+    the shade serves only an anchor whose record keeps it there; and the unit's game tests exist.
+    D-04 (D-S6, D-S7, D-S8, D-S13, D-S14, D-S15, D-S19, D-S23): the pact definition's parser, data, offerings and words are
+    tools/concordance_pacts.py's; the screen's two messages are bounded numbers in and bounded lists out, every check made
+    before any action; the menu has no slots; the compact is checked and spent by the seal itself; the perch holds no
+    item, records its owner, is placed only where its placer may build and never ends a pact when broken; a pact is seated
+    again only by its owner; Stolas is MISC, hurt only past invulnerability, and leaves without a record or a live
+    conversation; the perch is a pact item, never weighed; and D-04's game tests exist. D-05 (D-S1, D-S3, D-S12, D-S23):
+    Pacts.Reckoning is RECKONING, its rules one reason in order and each worded; Star-reckoning asks, in order, the switch,
+    the place's record, its holder in person, the pact's rules, a pattern they observed and the paying astrolabe, and
+    recalls only through AstrolabeItem.recall, the one recall (one key, one cost, one duration), which a master's recall
+    shares; the menu reckons only what it last offered; an observation keeps an active pact's first obligation once; and
+    D-05's game tests exist, unit 1's upkeep tests shown on Stolas's pact too. Unit 2's unit review: a warning given
+    before an absence keeps the grace left (D-P50); a perch that records no owner seals for nobody; a choice's id is
+    bounded only as any string; a work that serves its holder alone is personal; a stranded pact keeps no obligation; a
+    visitor no conversation waits on leaves whether or not the switch is on; and a decline is answered on the action
+    bar, never as a state for a closed menu."""
     wk = co.workers
     def java(relative):
         path = root / relative
@@ -18017,6 +18044,8 @@ def check_pacts(co, root, lang):
     order = [refusal.find(f"Outcome.{name}") for name in ("NOT_PERMITTED", "TAKEN", "ALREADY_HELD", "HOLDER_FULL", "ROSTER_FULL")]
     if -1 in order or order != sorted(order):
         err("concordance/worker/Pacts.java: refusal() names one reason, in order: permission, the place, the counterpart, the Bound Wills, the roster")
+    if "upkeep.warned() ? upkeep.graceUntil() + (now - upkeep.lookedAt()) : now + upkeep.grace()" not in _java_body(pacts, "public static Due due("):
+        err("Pacts.due: after an absence a warning given before it keeps the grace left, its end moved on by the time away (D-P50)")
     holder = java("spirits/AgreementHolder.java")
     told = _java_body(holder, "public static Component told(Pacts.Outcome outcome)")
     for oid in wk.SEAL_OUTCOMES:
@@ -18054,6 +18083,10 @@ def check_pacts(co, root, lang):
             or not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", shade):
         err("spirits/GatheringShadeEntity.java: a shade joins its roster only by its seal, its recall or its own decision, never by a "
             "change of status (WorkerEntity.joinsRosterOnStatus false; the unit review's fix 2)")
+    # The same for Stolas (unit 2, at its merge): he joins only by his seal, his call again or his seating.
+    if not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", java("spirits/StolasEntity.java")):
+        err("spirits/StolasEntity.java: Stolas joins his holder's roster only by his seal, his call again or his seating, never by a "
+            "change of status (joinsRosterOnStatus false; unit 1's review fix 2)")
     recall = _java_body(holder, "public Recall recall(")
     if not 0 <= recall.find("Authority.isStandIn(actor)") < recall.find("holds.call("):
         err("AgreementHolder.recall: a stand-in, even one carrying its holder's identity, never calls a presence (D-S8, D-S18)")
@@ -18119,12 +18152,479 @@ def check_pacts(co, root, lang):
     if "home.holder().verify(level, gameTime)" not in java("spirits/GatheringShadeEntity.java"):
         err("spirits/GatheringShadeEntity.java: it serves only an anchor whose record keeps it there (D-S9)")
     tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    # --- Concordance Chunk D, D-04 (D-S6, D-S7, D-S8, D-S13, D-S14, D-S15, D-S23): the perch, Stolas and the pact menu ---
+    pa = co.pacts
+    parser = java("worker/PactParser.java")
+    for const, value in pa.PARSER.items():
+        if not re.search(rf"\bint {const} = {value};", parser):
+            err(f"concordance/worker/PactParser.java: {const} differs from tools/concordance_pacts.py PARSER ({value})")
+    listed = re.search(r"WORK = List\.of\(([^)]*)\)", parser)
+    if not listed or re.findall(r'"([a-z_]+)"', listed.group(1)) != pa.WORK:
+        err("concordance/worker/PactParser.java: WORK differs from tools/concordance_pacts.py WORK")
+    holder_only = re.search(r"HOLDER_ONLY = List\.of\(([^)]*)\)", parser)
+    if not holder_only or re.findall(r'"([a-z_]+)"', holder_only.group(1)) != pa.HOLDER_ONLY or pa.RECKONING_WORK not in pa.HOLDER_ONLY \
+            or "HOLDER_ONLY.contains(work) && !Pacts.PERSONAL.equals(beneficiaries)" not in parser:
+        err("concordance/worker/PactParser.java: a work that serves its holder alone (HOLDER_ONLY, with Star-reckoning) is refused unless "
+            "its beneficiaries are personal (the unit review)")
+    for name, info in pa.PACTS.items():
+        if info["service"]["work"] in pa.HOLDER_ONLY and info["beneficiaries"] != "personal":
+            err(f"tools/concordance_pacts.py PACTS {name}: {info['service']['work']} serves its holder alone, so its beneficiaries are personal")
+    if f"int CAPACITY = {pa.PARSER['MAX_RESONANCE']};" not in java("sky/AstrolabeItem.java"):
+        err("PactParser.MAX_RESONANCE is an astrolabe's capacity (sky/AstrolabeItem.CAPACITY)")
+    for name, info in pa.PACTS.items():
+        if load(DATA / MOD / "concordance" / "pact" / f"{name}.json") != dict({"schema": 1}, **info):
+            err(f"concordance/pact/{name}.json differs from tools/concordance_pacts.py PACTS (run tools/generate_material_data.py)")
+        if info["research"].split(":", 1)[1] not in research:
+            err(f"pact {name}: its research {info['research']} does not exist")
+        offering = info["upkeep"]["offering"]
+        tag = (load(DATA / MOD / "tags" / "item" / f"{offering.split(':', 1)[1]}.json") or {}).get("values", [])
+        if sorted(tag) != sorted(pa.OFFERINGS) or not any(v.startswith("minecraft:") for v in tag):
+            err(f"pact {name}: #{offering} is OFFERINGS, one of them reachable without Styx (G12)")
+        for ref in tag:
+            if ref in co.equivalence.EXCLUDED:
+                err(f"equivalence: {ref} is an offering Stolas consumes; consumed offerings stay in equivalence (D-S19)")
+        for cost in info["compact"]["items"]:
+            namespace, item = cost["item"].split(":", 1)
+            if namespace == MOD and item not in registered:
+                err(f"pact {name}: its compact names {cost['item']}, which is not registered")
+        for beat in info["beats"]:
+            if f"message.{MOD}.concordance.pact.{name}.beat.{beat}" not in lang:
+                err(f"pact {name}: missing lang for its beat {beat}")
+        if f"entity.{MOD}.{name}" not in lang:
+            err(f"pact {name}: missing lang entity.{MOD}.{name}")
+    for key in [f"term.service.{w}" for w in pa.WORK] + ["term.beneficiaries.personal", "term.beneficiaries.party", "term.hours.any"] \
+            + [f"term.{t}" for t in ("suspension", "duration", "breach", "ending", "returns", "perch")]:
+        if f"message.{MOD}.concordance.pact.{key}" not in lang:
+            err(f"pacts: missing lang message.{MOD}.concordance.pact.{key}")
+    prefix = f"message.{MOD}.concordance.pact."
+    for rel in ("spirits/PactMenu.java", "spirits/PactPerchBlock.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java"):
+        source = java(rel)
+        named = re.findall(r'\bline\("([a-z_.]+)"', source) + [k[len(prefix):] for k in re.findall(r'"(message\.jugcraft\.concordance\.pact\.[a-z_.]+)"', source)]
+        for key in named:
+            if not key.endswith(".") and prefix + key not in lang:
+                err(f"{rel}: missing lang {prefix}{key}")
+    # The protocol: five whole numbers in, bounded lists out, every check before any action (08:95-111, D-S14).
+    request = java("spirits/PactRequestPayload.java")
+    fields = re.findall(r"ByteBufCodecs\.(\w+), PactRequestPayload::(\w+)", request)
+    if fields != [("VAR_INT", f) for f in ("containerId", "sequence", "action", "choice", "revision")] \
+            or re.search(r"stringUtf8|STRING_UTF8|UUID|ItemStack|Component|BlockPos|GameProfile", request):
+        err("spirits/PactRequestPayload.java: a request is five bounded numbers: no text, ids, players, items or totals (08:99, D-S14)")
+    actions = re.search(r"ACTIONS = List\.of\(([^)]*)\)", request)
+    if not actions or re.findall(r'"([a-z_]+)"', actions.group(1)) != pa.ACTIONS:
+        err("spirits/PactRequestPayload.java: ACTIONS differs from tools/concordance_pacts.py ACTIONS (same order)")
+    for index, action in enumerate(pa.ACTIONS):
+        if not re.search(rf"\b{action.upper()} = {index}[,;]", request):
+            err(f"spirits/PactRequestPayload.java: {action.upper()} must be {index}, its index in ACTIONS")
+    state = java("spirits/PactStatePayload.java")
+    for const, value in pa.STATE_LIMITS.items():
+        if not re.search(rf"\bint {const} = {value};", state):
+            err(f"spirits/PactStatePayload.java: {const} differs from tools/concordance_pacts.py STATE_LIMITS ({value})")
+    if "ByteBufCodecs.stringUtf8(MAX_ID), Choice::id" not in state:
+        err("spirits/PactStatePayload.java: a choice's id, which data names, is encoded up to MAX_ID, never a key's bound (the unit review)")
+    modes = sorted((int(v), n.lower()) for n, v in re.findall(r"public static final int (NEGOTIATE|KEEP|SEAT|CLOSED) = (\d+);", state))
+    if [n for _, n in modes] != pa.MODES or [v for v, _ in modes] != list(range(len(pa.MODES))):
+        err("spirits/PactStatePayload.java: its modes differ from tools/concordance_pacts.py MODES")
+    terms = re.search(r"TERMS = List\.of\(([^)]*)\)", state)
+    if not terms or re.findall(r'"([a-z_]+)"', terms.group(1)) != pa.TERMS:
+        err("spirits/PactStatePayload.java: TERMS differs from tools/concordance_pacts.py TERMS (D-S15, same order)")
+    for const, rel in (("TIMEOUT_TICKS", "spirits/PactSessions.java"), ("RATE_TICKS", "spirits/PactMenu.java"),
+                       ("LOOK_TICKS", "spirits/PactPerchBlockEntity.java"), ("MAX_OFFERINGS", "spirits/PactKeeping.java")):
+        if not re.search(rf"\b(?:int|long) {const} = {pa.SESSION[const]}L?;", java(rel)):
+            err(f"{rel}: {const} differs from tools/concordance_pacts.py SESSION ({pa.SESSION[const]})")
+    menu = java("spirits/PactMenu.java")
+    answers = re.findall(r'public static final String ([A-Z_]+) = "([a-z_]+)";', menu)
+    if sorted(a for _, a in answers) != sorted(pa.ANSWERS) or any(n != a.upper() for n, a in answers):
+        err("spirits/PactMenu.java: its own reasons differ from tools/concordance_pacts.py ANSWERS (each named after its id)")
+    receive = _java_body(menu, "public static @Nullable PactStatePayload receive(")
+    order = [receive.find(n) for n in ("Authority.isStandIn(player)", "menu.containerId != request.containerId()", "!menu.stillValid(player)",
+                                       "request.sequence() <= menu.sequence", "RateGate.allow(player, gate, RATE_TICKS)",
+                                       "request.revision() != menu.revision", "menu.act(", "player.inventoryMenu.broadcastChanges()")]
+    if -1 in order or order != sorted(order):
+        err("PactMenu.receive: a stand-in, another menu's container, a stale menu or an old sequence is dropped; then the rate gate and the revision; only then an action, then the inventory synced")
+    if not 0 <= receive.find("player.inventoryMenu.broadcastChanges()") < receive.find("player.containerMenu != menu") \
+            or "player.sendOverlayMessage(done.said())" not in receive or "menu.state(" not in receive:
+        err("PactMenu.receive: an action that closed the menu (Decline) is answered on the action bar and its state returned, never sent to a closed menu (the unit review)")
+    if "addSlot(" in menu or "return ItemStack.EMPTY;" not in _java_body(menu, "public ItemStack quickMoveStack(") \
+            or "return false;" not in _java_body(menu, "public boolean clickMenuButton("):
+        err("PactMenu: no slots and no button ids: deposits are server actions (D-S6, critique 21)")
+    for needle in ("PayloadTypeRegistry.serverboundPlay().register(PactRequestPayload.TYPE, PactRequestPayload.CODEC)",
+                   "PayloadTypeRegistry.clientboundPlay().register(PactStatePayload.TYPE, PactStatePayload.CODEC)",
+                   "ServerPlayNetworking.canSend(player, PactStatePayload.TYPE)", "END_DATA_PACK_RELOAD"):
+        if needle not in menu:
+            err(f"spirits/PactMenu.java: {needle}")
+    accept = _java_body(menu, "private Answered accept(")
+    if not 0 <= accept.find("Workers.enabled()") < accept.find("perch.holder().maySeal(level, player, false)") < accept.find("perch.holder().seal(") \
+            or "PactCompact.affords(" not in accept or "PactCompact.pay(" not in accept:
+        err("PactMenu.accept: switched on, the perch's owner only, the compact checked and spent by the seal itself (D-S8, D-S13)")
+    compact = java("spirits/PactCompact.java")
+    if "player.hasInfiniteMaterials()" not in _java_body(compact, "public static void pay(") or "AstrolabeItem.setCharge(" not in compact:
+        err("spirits/PactCompact.java: the compact takes materials and an astrolabe's resonance and makes none (D-S13)")
+    # The perch holds nothing, records its owner, never ends a pact when broken, is refused where its placer may not build.
+    perch = java("spirits/PactPerchBlockEntity.java")
+    if re.search(r"implements[^{]*\b(Container|WorldlyContainer)\b", perch) or re.search(r"(NonNullList|List)<ItemStack>", perch):
+        err("spirits/PactPerchBlockEntity.java: the perch holds no item (D-S6)")
+    for needle in ("new AgreementHolder(this, AgreementHolder.OnBreak.UNSEAT, true)", "Saved.stamp(output, 1)", "PactKeeping.tick(",
+                   "Math.floorMod(server.getGameTime() + pos.asLong(), LOOK_TICKS) == 0", "visitor = null;"):
+        if needle not in perch:
+            err(f"spirits/PactPerchBlockEntity.java: {needle}")
+    block = java("spirits/PactPerchBlock.java")
+    placed = _java_body(block, "public void setPlacedBy(")
+    if "holder().setOwner(player.getUUID())" not in placed or "Authority.isStandIn(player)" not in placed:
+        err("spirits/PactPerchBlock.java: the perch records who placed it, never a stand-in (D-S8)")
+    if "mayPlace(level, context.getPlayer(), context.getClickedPos())" not in _java_body(block, "public @Nullable BlockState getStateForPlacement("):
+        err("spirits/PactPerchBlock.java: placing asks mayPlace (D-S15)")
+    if "return !ownerRequired;" not in _java_body(holder, "public boolean maySeal("):
+        err("AgreementHolder.maySeal: a perch that records no owner (set by a machine) seals and seats for nobody (D-S8, D-P24)")
+    broken = _java_body(holder, "public void broken(")
+    if not 0 <= broken.find("Workers.enabled()") < broken.find("onBreak == OnBreak.UNSEAT") or "unseat(level)" not in broken:
+        err("AgreementHolder.broken: with the Concordance on, a perch broken or blown up leaves its pact without its place, never ends it (D-S6, D-S16)")
+    if "Pacts.unseat(record)" not in _java_body(holder, "private void unseat("):
+        err("AgreementHolder.unseat: the record stays its holder's, without its place")
+    seats = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(holder, "public enum Seat"), re.M)
+    if [oid for _, oid in seats] != wk.SEAT_OUTCOMES:
+        err("spirits/AgreementHolder.java: Seat differs from SEAT_OUTCOMES in tools/concordance_workers.py (same order)")
+    seat = _java_body(holder, "public Seat seat(")
+    order = [seat.find(n) for n in ("Workers.enabled()", "Authority.isStandIn(player)", "stranded(server, record)",
+                                    "maySeal(level, player, false)", "agreement != null", "roster.full(", "holds.call(level")]
+    if -1 in order or order != sorted(order):
+        err("AgreementHolder.seat: switched on, in person, a stranded pact, its owner alone, a free place and roster, before anything is called")
+    told_s = _java_body(holder, "public static Component told(Seat seat)")
+    for oid in wk.SEAT_OUTCOMES:
+        if oid == "disabled":
+            continue
+        key = f"message.{MOD}.concordance.workers.seat_{oid}"
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+        if f'"{key}"' not in told_s:
+            err(f"spirits/AgreementHolder.java: a seating that ends {oid} is told as {key}")
+    keeping = java("spirits/PactKeeping.java")
+    tick = _java_body(keeping, "public static void tick(")
+    if not 0 <= tick.find("Workers.enabled()") < tick.find("holder.look(level, now)") < tick.find("holder.recall(level, present, now)") \
+            or "Authority.presentNear(level, record.holder(), at, Pacts.REACH)" not in tick:
+        err("PactKeeping.tick: switched on, upkeep looked at, a lost presence called back only for its holder near (D-S3, D-S7, D-S16)")
+    deposit = _java_body(keeping, "public static int deposit(")
+    if "holder.deposit(level, player, stack, now)" not in deposit or "BoundWills.of(" in deposit:
+        err("PactKeeping.deposit: offerings enter the escrow only through AgreementHolder.deposit (its holder, near, switched on)")
+    # Stolas.
+    if 'entity("stolas", EntityType.Builder.<StolasEntity>of(StolasEntity::new, MobCategory.MISC)' not in java("spirits/Workers.java"):
+        err("spirits/Workers.java: Stolas is MISC, so transport crates refuse him (D-S7)")
+    stolas = java("spirits/StolasEntity.java")
+    if "extends WorkerEntity<StolasEntity> implements AgreementHolder.Presence" not in stolas:
+        err("spirits/StolasEntity.java: a worker (check_workers' bans) and a presence (AgreementHolder)")
+    if "source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && super.hurtServer(" not in _java_body(stolas, "public boolean hurtServer("):
+        err("spirits/StolasEntity.java: only damage past invulnerability harms him (D-S7)")
+    decide = _java_body(stolas, "private Status decide(")
+    for needle in ("PactSessions.live(", "home.visitor()", "home.holder().verify(level, gameTime)", "leave(level, home, perch)",
+                   "home.holder().state(level)"):
+        if needle not in decide:
+            err(f"StolasEntity.decide: he leaves without a record or a live conversation, and says his pact's state ({needle})")
+    if not 0 <= decide.find("owner == null && record == null && !awaited(level, gameTime)") < decide.find("Workers.enabled()") \
+            or "PactSessions.live(" not in _java_body(stolas, "private boolean awaited("):
+        err("StolasEntity.decide: a visitor no live conversation waits on leaves before the switch is asked, so one loaded while it is off leaves (the unit review)")
+    if f"message.{MOD}.concordance.workers.kind.pact" not in lang:
+        err("pacts: missing lang for the roster kind pact")
+    # The perch item.
+    if f"{MOD}:pact_perch" not in co.equivalence.EXCLUDED:
+        err("pact_perch: a pact item is never weighed (tools/concordance_equivalence.py EXCLUDED, D-S19)")
+    if "pact_perch" not in registered:
+        err("pact_perch: not registered")
+    for path in (DATA / MOD / "recipe" / "pact_perch.json", DATA / MOD / "loot_table" / "blocks" / "pact_perch.json",
+                 ASSETS / "blockstates" / "pact_perch.json", ASSETS / "items" / "pact_perch.json",
+                 ASSETS / "models" / "item" / "pact_perch.json", ASSETS / "models" / "block" / "pact_perch.json"):
+        if not path.is_file():
+            err(f"pact_perch: missing {path.relative_to(ROOT)}")
+    for key in (f"block.{MOD}.pact_perch", f"tooltip.{MOD}.pact_perch", f"container.{MOD}.pact_perch", f"tag.item.{MOD}.stolas_offerings"):
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+    import item_icons
+    texture = ASSETS / "textures" / "item" / "pact_perch.png"
+    if not item_icons.has("pact_perch") or not texture.is_file():
+        err("pact_perch: needs its map tools/item_icons/pact_perch.txt and its texture")
+    else:
+        with Image.open(texture) as img:
+            if img.size != (16, 16) or img.convert("RGBA").tobytes() != item_icons.draw("pact_perch").tobytes():
+                err("pact_perch: textures/item/pact_perch.png differs from its map: run tools/generate_textures.py")
+    mine = load(DATA / MOD / "recipe" / "pact_perch.json") or {}
+    for path in sorted(DATA.glob("*/recipe/*.json")):
+        other = load(path) or {}
+        if path.stem != "pact_perch" and other.get("type") == "minecraft:crafting_shaped" \
+                and other.get("pattern") == mine.get("pattern") and other.get("key") == mine.get("key"):
+            err(f"pact_perch: its grid is also {path.relative_to(DATA)}'s")
+    if "public static boolean covers(ServerLevel level, BlockPos pos)" not in (JAVA_ROOT / "styx" / "StyxConservatory.java").read_text(encoding="utf-8"):
+        err("styx/StyxConservatory.java: covers (no perch in Styx's home, D-S15)")
+    # --- Concordance Chunk D, D-05 (D-S1, D-S12): Star-reckoning, the one recall, the first obligation ---
+    reckoning = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(pacts, "public enum Reckoning"), re.M)
+    if [oid for _, oid in reckoning] != pa.RECKONING or any(n != oid.upper() for n, oid in reckoning):
+        err("concordance/worker/Pacts.java: Reckoning differs from RECKONING in tools/concordance_pacts.py (same order, each named after its id)")
+    serves = _java_body(pacts, "public static @Nullable Reckoning serves(")
+    order = [serves.find(f"Reckoning.{n}") for n in ("NOTHING", "SUSPENDED", "UPKEEP_HELD", "OUTSIDE_AREA", "OUTSIDE_HOURS", "QUOTA_SPENT")]
+    if -1 in order or order != sorted(order):
+        err("Pacts.serves: one reason, in order: no service, suspended, held for upkeep, outside the area, outside the hours, the day's quota")
+    star = java("spirits/StarReckoning.java")
+    told_r = _java_body(star, "public static Component told(Pacts.Reckoning reckoning")
+    for oid in pa.RECKONING:
+        if oid in ("disabled", "conflicting"):
+            continue
+        key = f"message.{MOD}.concordance.pact.reckoning.{oid}"
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+        if f'"{key}"' not in told_r:
+            err(f"spirits/StarReckoning.java: a reckoning that ends {oid} is told as {key}")
+    reckon = _java_body(star, "public static Pacts.Reckoning reckon(")
+    steps = [reckon.find(n) for n in ("Workers.enabled()", "holder.verify(level, gameTime)", "Authority.isStandIn(player)", "Pacts.serves(",
+                                      ".observed(player.getUUID())", "PactCompact.astrolabe(player, pattern.recallCost())",
+                                      "AstrolabeItem.recall(player, level, astrolabe, pattern, time, gameTime)", "holder.taskDone(level, gameTime)")]
+    if -1 in steps or steps != sorted(steps):
+        err("StarReckoning.reckon: switched on, this place's record, its holder in person, the pact's rules, a pattern they observed, the paying astrolabe, the one recall, then the day's count")
+    for needle in (".claim(", "setCharge(", "Sky.ATTUNEMENT", "RECALL_TICKS", '"recall:'):
+        if needle in star:
+            err(f"spirits/StarReckoning.java: Star-reckoning claims, spends and attunes only through AstrolabeItem.recall ({needle}; D-S1)")
+    if f'String WORK = "{pa.RECKONING_WORK}";' not in star or f"int MAX_CHOICES = {pa.RECKONING_CHOICES};" not in star \
+            or pa.RECKONING_CHOICES != pa.STATE_LIMITS["MAX_CHOICES"] or pa.PACTS["stolas"]["service"]["work"] != pa.RECKONING_WORK \
+            or pa.RECKONING_WORK not in pa.WORK:
+        err("spirits/StarReckoning.java: WORK and MAX_CHOICES are tools/concordance_pacts.py's (Stolas's service; the screen's bound)")
+    astro = java("sky/AstrolabeItem.java")
+    recall = _java_body(astro, "public static Recall recall(")
+    for needle in ("recallKey(pattern)", "Calendar.occurrence(pattern, time)", "Calendar.minGap(pattern)",
+                   "setCharge(astrolabe, held - pattern.recallCost())", "new Attunement(pattern.id(), gameTime + Calendar.RECALL_TICKS, true)"):
+        if needle not in recall:
+            err(f"AstrolabeItem.recall: the one recall claims once an occurrence, at the recall cost, for RECALL_TICKS ({needle})")
+    if "recall(player, level, astrolabe, recalled, time, gameTime)" not in _java_body(astro, "Function<Pattern, @Nullable String> sky) {"):
+        err("AstrolabeItem.attune: a master's recall goes through AstrolabeItem.recall (one recall path, D-S1)")
+    may = _java_body(astro, "public static boolean mayRecall(")
+    if ".ledger(player.getUUID())" not in may or "setCharge(" in may or "AstralClaims.of(level.getServer()).claim(" in may:
+        err("AstrolabeItem.mayRecall: asks a copy of the ledger; claims, spends and attaches nothing")
+    for path in sorted(JAVA_ROOT.rglob("*.java")):
+        source = path.read_text(encoding="utf-8")
+        relative = path.relative_to(JAVA_ROOT).as_posix()
+        recalled = re.findall(r"new Attunement\([^;]*, true\)", source)
+        if relative == "concordance/sky/AstrolabeItem.java":
+            if source.count('"recall:"') != 1 or len(recalled) != 1:
+                err("sky/AstrolabeItem.java: the recall key and a recalled attunement are written once, in recallKey and recall")
+        elif '"recall:"' in source or recalled:
+            err(f"{relative}: a recall is made only by AstrolabeItem.recall (one claim, one cost, one duration; D-S1)")
+    menu_recall = _java_body(menu, "private Answered recall(")
+    if "choice >= patternIds.size()" not in menu_recall \
+            or "StarReckoning.reckon(level, player, perch.holder(), id, Sky.time(level), now)" not in menu_recall \
+            or "AstrolabeItem.mayRecall(level, player, pattern, time, now)" not in _java_body(menu, "private View kept("):
+        err("PactMenu: RECALL reckons the pattern this menu last offered; each offered pattern says whether it can be recalled")
+    page = _java_body(keeping, "public static Page page(")
+    if "StarReckoning.choices(server, player.getUUID())" not in page or "StarReckoning.kept(player)" not in page:
+        err("PactKeeping.page: offers the patterns the holder observed and names the first obligation (D-05)")
+    observe = _java_body(java("sky/ObservatoryBlockEntity.java"), "public int observe(")
+    if not 0 <= observe.find("ConcordanceProgress.record(player, new Evidence.Practiced(Sky.ACTIVITY") < observe.find("StarReckoning.observed(player)"):
+        err("ObservatoryBlockEntity.observe: an observation it records keeps the observer's pact's first obligation (StarReckoning.observed)")
+    obliged = _java_body(star, "public static void observed(")
+    if not 0 <= obliged.find("Workers.enabled()") < obliged.find("Pacts.serving(record)") < obliged.find("ConcordanceProgress.record(") \
+            or not 0 <= obliged.find("AgreementHolder.stranded(server, record)") < obliged.find("ConcordanceProgress.record(") \
+            or "kept(player)" not in obliged or "StolasRegard.ACTIVITY" not in obliged:
+        err("StarReckoning.observed: switched on, the pact active and kept at its perch, never once kept, before pact_service is recorded (D-S12)")
+    for name in ("spirits/StarReckoning.java", "spirits/PactKeeping.java", "spirits/StolasEntity.java"):
+        if "Workers.ACTIVITY" in java(name):
+            err(f"concordance/{name}: Stolas's service never records worker_service (Don't 7)")
+    for key in sorted(set(re.findall(r'"(message\.jugcraft\.concordance\.pact\.[a-z_.]*[a-z_])"', star))):
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+    for cls, wanted in D05_TESTS.items():
+        path = tests / f"{cls}.java"
+        source = path.read_text(encoding="utf-8") if path.exists() else ""
+        for name in wanted:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing Concordance Chunk D, D-05 game test {name}")
+    worker_tests = (tests / "ConcordanceWorkerGameTests.java").read_text(encoding="utf-8")
+    for name in D05_ON_STOLAS:
+        if "stolasPact(" not in _java_body(worker_tests, f"public void {name}(GameTestHelper helper)"):
+            err(f"ConcordanceWorkerGameTests.{name}: shows its rule on Stolas's own pact too (E2; D-05)")
+    if "StarReckoning.reckon(" not in _java_body((tests / "ConcordanceAuthorityGameTests.java").read_text(encoding="utf-8"),
+                                                 "public void aChangeOfOwnerMovesNoPact(GameTestHelper helper)"):
+        err("ConcordanceAuthorityGameTests.aChangeOfOwnerMovesNoPact: the perch's new owner is not served (D-S23)")
+    for cls, names in D04_TESTS.items():
+        path = tests / f"{cls}.java"
+        source = path.read_text(encoding="utf-8") if path.exists() else ""
+        for name in names:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing Concordance Chunk D, D-04 game test {name}")
+    authority = tests / "ConcordanceAuthorityGameTests.java"
+    if "stolasPact(" not in _java_body(authority.read_text(encoding="utf-8") if authority.exists() else "",
+                                       "public void aChangeOfOwnerMovesNoPact(GameTestHelper helper)"):
+        err("ConcordanceAuthorityGameTests.aChangeOfOwnerMovesNoPact: shows its rule at a pact perch too (D-S23)")
     for cls, wanted in UNIT1_TESTS.items():
         path = tests / f"{cls}.java"
         source = path.read_text(encoding="utf-8") if path.exists() else ""
         for name in wanted:
             if f"public void {name}(GameTestHelper helper)" not in source:
                 err(f"{cls}: missing Concordance Chunk D unit 1 game test {name}")
+
+
+def check_stolas_regard(co, root, lang, research):
+    """Concordance Chunk D, D-03 (D-S12; docs/features/concordance-chunk-d.md, docs/features/stolas-pact.md): Stolas's
+    Regard is found through Styx or without him. Its research is the generator's: the Spiritbinders' practitioner entry,
+    begun after the Binding Arts are understood by examining a thing Stolas regards, observed by cultivation, understood by
+    assay and mastered by the pact's first obligation, with no state taking notes; its specimens hold a thing anyone has
+    without Styx, and Styx's flowers are never relied on; the Java names the generator's ids and steps; Styx and the journal
+    name each step and the sky step apart and only read (talking teaches nothing); the pacts section waits for the Binding
+    Arts; examination and the client tooltip know the specimens; the codex entry opens with the Binding Arts understood and
+    names every specimen; and the ticket's game tests exist."""
+    pa = co.pacts
+    import styx
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    regard = research.get("stolas_regard", {})
+    if regard != co.research_json("stolas_regard", pa.RESEARCH["stolas_regard"]):
+        err("concordance/research/stolas_regard.json differs from tools/concordance_pacts.py: run tools/generate_material_data.py")
+    if regard.get("requires") != [{"research": f"{MOD}:binding_arts", "state": "understood"}] \
+            or (regard.get("tradition"), regard.get("stage"), regard.get("principle")) != ("spiritbinders", "practitioner", "tether"):
+        err("research stolas_regard: the Spiritbinders' practitioner entry, after the Binding Arts understood and nothing else (D-S12)")
+    wanted = {"encountered": ("examine", f"#{pa.STOLAS_SPECIMEN_TAG}"), "observed": ("practice", pa.CULTIVATION),
+              "understood": ("practice", pa.ASSAY), "mastered": ("practice", pa.PACT_SERVICE)}
+    for state, (kind, what) in wanted.items():
+        rules = regard.get("states", {}).get(state, {}).get("any", [])
+        if [(rule.get("type"), rule.get("specimens") or rule.get("activity")) for rule in rules] != [(kind, what)]:
+            err(f"research stolas_regard/{state}: one way only, {kind} {what} (D-S12): {rules}")
+    if any(rule.get("type") == "notes" for block in regard.get("states", {}).values() for rule in block.get("any", [])):
+        err("research stolas_regard: notes never stand in for Stolas's evidence (03:132)")
+    tag = (load(DATA / MOD / "tags" / "item" / "stolas_specimens.json") or {}).get("values", [])
+    if tag != list({**pa.STYX_SPECIMENS, **pa.PLAIN_SPECIMENS}):
+        err(f"tags/item/stolas_specimens.json {tag} is not tools/concordance_pacts.py's: run tools/generate_material_data.py")
+    plain = [ref for ref in tag if ref not in pa.STYX_SPECIMENS]
+    if not plain or any(co.progression.VANILLA_SOURCES.get(ref, ("",))[0] not in ("craftable", "renewable") for ref in plain):
+        err("#jugcraft:stolas_specimens must hold a thing anyone has without Styx, craftable or renewable (G12)")
+    if f"#{pa.STOLAS_SPECIMEN_TAG}" not in (load(DATA / MOD / "tags" / "item" / "concordance_specimens.json") or {}).get("values", []):
+        err("#jugcraft:concordance_specimens must hold #jugcraft:stolas_specimens, or examination never sees them")
+    for ref in pa.STYX_SPECIMENS:
+        if co.progression.JUGCRAFT_SOURCES.get(ref, ("",))[0] != "found":
+            err(f"tools/concordance_progression.py JUGCRAFT_SOURCES: {ref} is Styx's gift (found), never relied on")
+    java = text(root / "spirits" / "StolasRegard.java")
+    for const, value in (("RESEARCH", pa.REGARD), ("ACTIVITY", pa.PACT_SERVICE)):
+        if f'String {const} = "{value}";' not in java:
+            err(f"spirits/StolasRegard.java: {const} differs from tools/concordance_pacts.py ({value})")
+    if f'Jugcraft.id("{split(pa.STOLAS_SPECIMEN_TAG)[1]}")' not in java:
+        err("spirits/StolasRegard.java: SPECIMENS is #jugcraft:stolas_specimens")
+    steps = [sid for _, sid in re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(java, "public enum Step"), re.M)]
+    if steps != pa.STEPS or list(styx.STOLAS_LINES) != pa.STEPS:
+        err(f"StolasRegard.Step {steps} and tools/styx.py STOLAS_LINES {list(styx.STOLAS_LINES)} differ from STEPS in "
+            "tools/concordance_pacts.py (same order)")
+    for sid in pa.STEPS:
+        for key in (f"message.{MOD}.styx.stolas.{sid}", f"journal.{MOD}.pacts.regard.{sid}"):
+            if key not in lang:
+                err(f"Stolas's Regard: missing lang {key}")
+    for key in (f"message.{MOD}.styx.stolas.sky", f"journal.{MOD}.pacts.sky_needed", f"journal.{MOD}.pacts.sky_recorded",
+                f"journal.{MOD}.pacts.sky_count", f"message.{MOD}.concordance.examine.regard",
+                f"tooltip.{MOD}.concordance.stolas_specimen", f"tag.item.{MOD}.stolas_specimens"):
+        if key not in lang:
+            err(f"Stolas's Regard: missing lang {key}")
+    # The whole file, so every helper the hint and the report call (both step overloads, state, observed, skySeen) is read
+    # too (the unit review).
+    if re.search(r"ConcordanceProgress\.(record|grant|award|reset|setFocus)\(|\.observe\(|\.claim\(|setAttached\(|\.put\(", java):
+        err("spirits/StolasRegard.java: its steps, hint, report and every helper they call only read (talking and reading teach nothing, D-S12)")
+    if "ResearchEngine.explain(" not in java or "Workers.enabled()" not in _java_body(java, "public static List<Component> hint("):
+        err("spirits/StolasRegard.java: the hint is the listener's own explain, and nothing with the Concordance off (D-S16)")
+    wizard = text(JAVA_ROOT / "styx" / "Styxhexenhammer.java")
+    says = _java_body(wizard, "public List<Component> says(")
+    if "StolasRegard.hint(listener)" not in says or "message.jugcraft.styx.line." not in says \
+            or "if(!giveCuttings(server)) says(server)" not in wizard:
+        err("styx/Styxhexenhammer.java: he keeps his gift and his line, and adds the listener's own hint (says)")
+    if re.search(r"ConcordanceProgress\.|AstralClaims\.", wizard):
+        err("styx/Styxhexenhammer.java: talking records and grants nothing; the hint is StolasRegard's to read")
+    if 'contribute("pacts", Workers::knows, StolasRegard::report)' not in text(root / "journal" / "Journal.java"):
+        err("journal/Journal.java: the pacts section waits for the Binding Arts understood and is StolasRegard's report")
+    examination = text(root / "Examination.java")
+    at = examination.find("stack.is(StolasRegard.SPECIMENS)")
+    if at < 0 or not at < examination.find("} else if (!stack.is(JugcraftConcordance.LUMINOUS))") \
+            or '"message.jugcraft.concordance.examine.regard"' not in examination:
+        err("Examination.java: Stolas's specimens have their own line, before Circle Lore's form line")
+    if "stack.is(StolasRegard.SPECIMENS)" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client/ConcordanceClient.java: Stolas's specimens say they can be examined (the non-Styx route)")
+    entry = load(DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries" / "binding" / "stolas_regard.json") or {}
+    if entry.get("condition", {}).get("node_id") != f"{MOD}:concordance/binding_arts_understood":
+        err("codex binding/stolas_regard: the non-Styx route's reading opens with the Binding Arts understood")
+    first = lang.get(f"book.{MOD}.{co.BOOK}.binding.stolas_regard.p0.text", "")
+    for name in {**pa.STYX_SPECIMENS, **pa.PLAIN_SPECIMENS}.values():
+        if name not in first:
+            err(f"codex binding/stolas_regard: its first page names {name}")
+    for state in co.RESEARCH_STAGES:
+        if not (DATA / MOD / "advancement" / f"concordance_stolas_regard_{state}.json").is_file():
+            err(f"advancement concordance_stolas_regard_{state}: missing (run tools/generate_material_data.py)")
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    for cls, names in D03_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing Concordance Chunk D, D-03 game test {name}")
+
+
+def check_pact_screen(co, lang):
+    """Concordance Chunk D, unit 2 (D-04 client, D-05; D-S5, D-S14, D-S15, D-S21): the pact perch's screen and Stolas's
+    provisional body (the payloads are check_pacts'). Only PactClient sends, only for the open menu, and it drops a state
+    for any other. The screen is native (no text box, chat, command or vanilla Dialog) and narrated, ends a pact only from
+    a confirmation, and has words for every term D-S15 lists. Stolas is drawn by GeckoLib from the owner's Flashjack files,
+    copied under his name by tools/owner_art.py, at BODY_SCALE, playing only clips his animation file has. The client
+    class that shows all this is registered and takes its pictures."""
+    pa = co.pacts
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    if list(pa.TERM_LABELS) != pa.TERMS:
+        err("tools/concordance_pacts.py: TERM_LABELS labels every term of TERMS, in order (D-S15)")
+    for key in pa.TERMS:
+        if f"screen.{MOD}.pact.term.{key}" not in lang:
+            err(f"pact screen: missing lang screen.{MOD}.pact.term.{key}")
+    client = text(CLIENT_JAVA_ROOT / "PactClient.java")
+    screen = text(CLIENT_JAVA_ROOT / "PactScreen.java")
+    if "PactClient.register();" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client/ConcordanceClient.java: registers PactClient (the perch's screen and its state)")
+    for path in sorted(CLIENT_JAVA_ROOT.rglob("*.java")):
+        if path.name != "PactClient.java" and "new PactRequestPayload(" in text(path):
+            err(f"client/{path.name}: only PactClient sends a pact request (D-S14)")
+    for needle in ("new PactRequestPayload(menu.containerId, sequence, action, choice, shown.revision())",
+                   "menu.containerId != payload.containerId()", "getNarrator().saySystemNow(result.message())",
+                   "MenuScreens.register(Workers.PERCH_MENU, PactScreen::new)"):
+        if needle not in client:
+            err(f"client/PactClient.java: a request names the open menu, a rising sequence and the revision shown; a state for "
+                f"another menu is dropped; answers are read aloud; the perch's menu opens PactScreen ({needle})")
+    for forbidden in ("new EditBox(", "sendCommand(", "sendChat(", "server.dialog", "Component.literal("):
+        if forbidden in screen + client:
+            err(f"pact screen: native, command-free, its words the generator's (D-S14, D-S21): no {forbidden}")
+    for needle in ("implements MenuAccess<PactMenu>", "BookArt.Paragraph", "new ComposerScroll(", "protected Component getUsageNarration()",
+                   "minecraft.player.closeContainer()"):
+        if needle not in screen:
+            err(f"client/PactScreen.java: a native menu screen whose words are narrated paragraphs in a scroll ({needle})")
+    confirm = _java_body(screen, "private void confirmEnd(")
+    if "new ConfirmScreen(" not in confirm or "PactClient.request(menu, PactRequestPayload.END, 0)" not in confirm \
+            or screen.count("PactRequestPayload.END, 0)") != 1:
+        err("client/PactScreen.java: a pact is ended only from its confirmation's yes (confirmEnd)")
+    for key in re.findall(r'"((?:screen|key|message)\.jugcraft\.[a-z_.]+)"', screen + client):
+        if not key.endswith(".") and key not in lang:
+            err(f"pact screen: missing lang {key}")
+    for key in re.findall(r'\bui\("([a-z_.]+)"', screen):
+        if f"screen.{MOD}.pact.{key}" not in lang:
+            err(f"client/PactScreen.java: missing lang screen.{MOD}.pact.{key}")
+    # Stolas's provisional body (D-S5).
+    body = {"geckolib/models/entity/stolas.geo.json": "geo/flashjack.geo.json",
+            "geckolib/animations/entity/stolas.animation.json": "animations/flashjack.animation.json",
+            "textures/entity/stolas.png": "textures/entity/flashjack.png"}
+    for target, source in body.items():
+        if pa.OWNER_FILES.get(target) != "assets/ars_jymbaumental/" + source:
+            err(f"tools/concordance_pacts.py OWNER_FILES: {target} is the owner's Flashjack {source}, copied unchanged (D-S5)")
+    if not set(pa.OWNER_FILES) <= {target for target, _ in owner_art.magic_imports()}:
+        err("tools/owner_art.py: imports Stolas's body (concordance_pacts.OWNER_FILES in magic_imports)")
+    workers = text(CLIENT_JAVA_ROOT / "WorkerClient.java")
+    if "Workers.STOLAS" not in workers or f"STOLAS_SCALE = {pa.BODY_SCALE}F;" not in workers or ".withScale(STOLAS_SCALE)" not in workers:
+        err("client/WorkerClient.java: Stolas is drawn by GeckoLib at BODY_SCALE (tools/concordance_pacts.py)")
+    stolas = text(JAVA_ROOT / "concordance" / "spirits" / "StolasEntity.java")
+    for clip in pa.BODY_CLIPS.values():
+        if f'"{clip}"' not in stolas:
+            err(f"spirits/StolasEntity.java: his body plays {clip} (BODY_CLIPS)")
+    check_geckolib("stolas", stolas, None, None, kind="entity", faces=True)
+    # The client class that shows it.
+    entry = "io.github.jimbozoomer.jugcraft.test.ConcordancePactClientGameTests"
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if entry not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {entry} is a registered client game test")
+    shots = text(ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordancePactClientGameTests.java")
+    for name in pa.CLIENT_SHOTS:
+        if f'"{name}"' not in shots:
+            err(f"ConcordancePactClientGameTests: takes {name}")
 
 
 def check_logistics(co, root, lang, registered):
@@ -20395,6 +20895,14 @@ AUTHORITY_ROUTES = {
     # D-S3 (D-02): upkeep is looked at only with the holder present near the place, never a stand-in.
     "spirits/AgreementHolder.java": ["if (Authority.isStandIn(player) || !Authority.mayChange(level, player, block.getBlockPos()))",
                                      "Authority.presentNear(level, record.holder(), block.getBlockPos(), Pacts.REACH)"],
+    # Concordance Chunk D, D-04 (D-S8, D-S15, D-S3): the perch is placed by a player where they may build, never in Styx's
+    # home; its screen answers no stand-in and lets only the perch's owner seal; a lost presence comes back only for its
+    # holder near.
+    "spirits/PactPerchBlock.java": ["Authority.isStandIn(player)", "Authority.mayChange(level, player, at)", "StyxConservatory.covers(level, at)"],
+    "spirits/PactMenu.java": ["Authority.isStandIn(player)", "perch.holder().maySeal(level, player, false)"],
+    "spirits/PactKeeping.java": ["Authority.presentNear(level, record.holder(), at, Pacts.REACH)", "Authority.isStandIn(player)"],
+    # Concordance Chunk D, D-05: Star-reckoning is its holder's own, never a stand-in's.
+    "spirits/StarReckoning.java": ["Authority.isStandIn(player)"],
     "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)", "holder.maySeal(level, player, true)"],
     "spire/ConcordSpire.java": ["Authority.answering(level, state.keeper())", "Authority.mayChange(level, keeper, at)"],
     "sympathy/Sympathy.java": ["Authority.mayStrike(caster, target)", 'return "not_yours";'],
@@ -20461,7 +20969,9 @@ def check_economy(root):
     in it, no cycle of conversions across the systems (every crop's regrow-and-compost loop included, grown by time and
     hastened by a spire) may come back with as much as it started with, and the record's table must be the model's. Since
     Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it; since C-05, a crucible's heat
-    is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate."""
+    is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate; since Concordance Chunk D (D-05), a
+    recalled attunement is a sink too, modelled at the cheapest recall, and Stolas's upkeep, quota and offerings are his
+    definition's and tag's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_alchemy as al
     import concordance_economy as ec
@@ -20505,6 +21015,20 @@ def check_economy(root):
         err("economy: FOCUS_MAX is not FocusPool.MAX")
     if ec.VITAE_AN_HOUR != HOURLY_VITAE_BOUND:
         err("economy: VITAE_AN_HOUR is not check_crimson's HOURLY_VITAE_BOUND")
+    # Concordance Chunk D, D-05 (D-S1, D-S3, D-S19): Stolas's terms and offerings are the model's; a recall is a sink.
+    import concordance_pacts as pa
+    definition = load(DATA / MOD / "concordance" / "pact" / "stolas.json") or {}
+    upkeep, service = definition.get("upkeep", {}), definition.get("service", {})
+    if {key: upkeep.get(key) for key in ec.STOLAS_UPKEEP} != ec.STOLAS_UPKEEP or service.get("quota") != ec.RECKONING_QUOTA:
+        err("economy: Stolas's upkeep and quota are not concordance/pact/stolas.json's (tools/concordance_economy.py STOLAS_UPKEEP)")
+    offered = (load(DATA / MOD / "tags" / "item" / "stolas_offerings.json") or {}).get("values", [])
+    if sorted(offered) != sorted(ec.STOLAS_OFFERINGS) or ec.STOLAS_OFFERINGS != pa.OFFERINGS:
+        err("economy: #jugcraft:stolas_offerings is not STOLAS_OFFERINGS")
+    costs = sorted((load(p) or {}).get("attunement", {}).get("recall", 0) for p in (DATA / MOD / "concordance" / "pattern").glob("*.json"))
+    if not costs or (costs[0], costs[-1]) != ec.RECALL_COSTS:
+        err("economy: RECALL_COSTS are not the patterns' cheapest and dearest recall")
+    if any(source == "recalled_attunement" for source, _ in ec.edges()):
+        err("economy: a recalled attunement becomes nothing else")
     gaining = ec.gaining_cycles(ec.edges())
     if gaining:
         err(f"economy: a cycle of conversions gives back at least what it took, from {gaining}")
@@ -20557,6 +21081,39 @@ PORTER_LOGISTICS_TESTS = ["aRequestIsFetchedAndDelivered", "simultaneousRequests
                           "aClearedOrReplacedFormulaCancelsItsRequest", "aFullCourierQuotaWaitsAndBacksOff", "aBrokenCrucibleTurnsItsRequestBack",
                           "aCourierFillsACrucibleUntilItIsFull", "aCrucibleWithNoRoomAsksForNothing", "aPostTheSetterMayNotUseIsNeverAsked",
                           "anUnloadedCrucibleWaitsAndLosesNothing", "aDiscardedPorterStrandsItsCargoOnce", "anOfflineSetterPausesTheCourier"]
+# Concordance Chunk D, D-04's game tests (check_pacts).
+D04_TESTS = {
+    "ConcordanceWorkerGameTests": ["stolasExplainsBeforeAgreeing", "aStaleTermsRevisionIsRefused", "aRefusalSpendsNothing",
+                                   "acceptingSealsOnceAndSpendsOnce", "oneStolasPactPerHolder", "anotherPlayerCannotAcceptForTheHolder",
+                                   "twoNegotiationsAtOnePerchSealOnce", "aVisitingStolasLeavesWithoutARecord", "aCrateRefusesStolas",
+                                   "stolasTakesNoOrdinaryDamage", "aBrokenPactDefinitionIsReported", "thePactScreensMessagesAreBounded"],
+    "ConcordancePersistenceGameTests": ["aPerchKeepsItsOwnerAndPact", "thePerchHoldsNothing"],
+    "ConcordanceSharingGameTests": ["aCopiedPerchIsInert"],
+    "ConcordanceAuthorityGameTests": ["aPerchIsPlacedOnlyWhereItsPlacerMayBuild"],
+    "ConcordanceResourceGameTests": ["thePactDefinitionParsesStrictly"],
+}
+# Concordance Chunk D, D-05's game tests (check_pacts), and unit 1's upkeep tests shown on Stolas's pact too.
+D05_TESTS = {
+    "ConcordanceSkyGameTests": ["stolasRecallsAnObservedPatternOncePerOccurrence", "aMastersRecallAndStolassShareOneClaim",
+                                "aChangedClockGivesNoSecondRecall", "theHarvestMoonRecallsOutsideItsEvent", "anUnobservedPatternIsRefused"],
+    "ConcordanceWorkerGameTests": ["theObligationMastersTheEntryOnce", "aSuspendedPactRecallsNothing", "theQuotaAndTheAreaRefuseWithReasons",
+                                   "aStandInNeverAnswersForUpkeep", "endingReturnsTheEscrowOnce", "aDeadHolderIsNeverHandedTheEscrow",
+                                   "aBrokenPerchLeavesThePactWithoutItsPerch", "aPactIsSeatedAgainAtANewPerch",
+                                   "aLostPresenceIsCalledBackAndEndsNothing", "shortAbsencesNeverRenewTheGrace"],
+    "ConcordanceSharingGameTests": ["aCopiedPerchRecallsNothing", "anotherPlayerCannotUseTheHoldersService"],
+    "ConcordancePersistenceGameTests": ["thePactAndItsEscrowSurviveARestart", "aRestartWhileSuspendedStaysSuspended"],
+    "ConcordanceResourceGameTests": ["theServiceRulesKeepTheirShape"],
+}
+D05_ON_STOLAS = ["upkeepWarnsThenSuspendsAfterGraceAndResumes", "aReturnAfterAbsenceGetsTheFullGrace",
+                 "absentAndUnloadedTimeIsNeverOwed", "theConcordanceOffHoldsEveryClock"]
+# Concordance Chunk D, D-03's game tests (check_stolas_regard).
+D03_TESTS = {
+    "StyxGameTests": ["styxHintsByTheListenersOwnProgress", "talkingGrantsNoResearch", "styxNamesTheSkyStepUntilOneIsRecorded"],
+    "ConcordanceSharingGameTests": ["notesNeverStandInForStolasEvidence"],
+    "ConcordanceProgressionGameTests": ["stolasRegardIsReachable"],
+    "ConcordanceSkyGameTests": ["aRecordedObservationCountsWithoutAWindow", "aTurnedClockMakesNoNewClaim"],
+    "ConcordanceJournalGameTests": ["thePactsSectionNamesTheSkyStep", "thePactsSectionWaitsForTheBindingArts"],
+}
 
 
 def check_persistence(root):
@@ -20595,7 +21152,8 @@ def check_journey():
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
     data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
     other research; the living workshop (Concordance Chunk C, C-10) holds from a manual start, step by step (WORKSHOP);
-    every game test the routes name exists; and the record's routes are the tool's."""
+    every game test the routes name exists; Stolas's Regard (PACT, Concordance Chunk D) holds without Styx; and the
+    record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():

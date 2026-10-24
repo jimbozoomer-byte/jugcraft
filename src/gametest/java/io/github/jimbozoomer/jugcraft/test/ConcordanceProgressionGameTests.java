@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.conclave.Standing;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
+import io.github.jimbozoomer.jugcraft.concordance.progression.PracticeGate;
 import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.progression.ProgressionGraph;
 import io.github.jimbozoomer.jugcraft.concordance.progression.Route;
@@ -20,9 +21,12 @@ import io.github.jimbozoomer.jugcraft.concordance.progression.StageDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.progression.Stages;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeSurvey;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
 import io.github.jimbozoomer.jugcraft.concordance.starbound.Starbound;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
@@ -340,6 +344,46 @@ public class ConcordanceProgressionGameTests {
 				"three kinds of cold work master it: " + ConcordanceProgress.knowledge(player).progress(Rime.RESEARCH).evidence().keySet());
 		StageProgress.refresh(player);
 		helper.assertValueEqual(stage(player), "adept", "two entries mastered make an Adept");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D, D-03 (D-S12, critique 11): Stolas's Regard is in the live graph and one player alone reaches all of
+	 * it. It begins after the Binding Arts are understood; it is observed by cultivation, understood by assay and mastered by
+	 * the pact's first obligation, whose gate ships with it and needs it understood; no state takes notes; and the graph
+	 * finds nothing unprovided.
+	 */
+	@GameTest(maxTicks = 20)
+	public void stolasRegardIsReachable(GameTestHelper helper) {
+		ProgressionCatalog catalog = ConcordanceData.rules().progression();
+		ProgressionGraph graph = catalog.graph();
+		helper.assertTrue(graph != null && graph.problems().isEmpty(), "the graph is whole: " + (graph == null ? "none" : graph.problems()));
+		PracticeGate gate = catalog.practices().get(StolasRegard.ACTIVITY);
+		helper.assertTrue(gate != null && gate.tradition().equals("spiritbinders")
+				&& gate.requires().equals(List.of(new Definitions.Requirement(StolasRegard.RESEARCH, ResearchState.UNDERSTOOD))),
+				"the obligation's gate ships with the research: " + gate);
+		String understood = ProgressionGraph.research(StolasRegard.RESEARCH, ResearchState.UNDERSTOOD);
+		Map<String, List<List<String>>> ways = Map.of(
+				ProgressionGraph.research(StolasRegard.RESEARCH, ResearchState.ENCOUNTERED), List.of(List.of()),
+				ProgressionGraph.research(StolasRegard.RESEARCH, ResearchState.OBSERVED), List.of(List.of("practice:jugcraft:cultivation")),
+				understood, List.of(List.of("practice:jugcraft:assay")),
+				ProgressionGraph.research(StolasRegard.RESEARCH, ResearchState.MASTERED), List.of(List.of("practice:" + StolasRegard.ACTIVITY)));
+		for (Map.Entry<String, List<List<String>>> way : ways.entrySet()) {
+			ProgressionGraph.Node node = graph.nodes().get(way.getKey());
+			helper.assertTrue(node != null && node.any().equals(way.getValue()), way.getKey() + " is reached only by " + way.getValue() + ": " + node);
+		}
+		ProgressionGraph.Node begun = graph.nodes().get(ProgressionGraph.research(StolasRegard.RESEARCH, ResearchState.ENCOUNTERED));
+		helper.assertTrue(begun.all().equals(List.of(ProgressionGraph.research(Workers.RESEARCH, ResearchState.UNDERSTOOD))),
+				"it begins after the Binding Arts: " + begun.all());
+		ProgressionGraph.Node obligation = graph.nodes().get("practice:" + StolasRegard.ACTIVITY);
+		helper.assertTrue(obligation != null && obligation.all().equals(List.of(understood)), "the obligation needs it understood: " + obligation);
+		Set<String> alone = graph.reachable(true);
+		for (ResearchState state : List.of(ResearchState.ENCOUNTERED, ResearchState.OBSERVED, ResearchState.UNDERSTOOD, ResearchState.MASTERED)) {
+			helper.assertTrue(alone.contains(ProgressionGraph.research(StolasRegard.RESEARCH, state)), "one player alone reaches " + state);
+		}
+		Definitions.Research regard = ConcordanceData.rules().research(StolasRegard.RESEARCH);
+		helper.assertTrue(regard != null && regard.tradition().equals("spiritbinders") && regard.stage().equals("practitioner")
+				&& regard.unlocks().isEmpty(), "the Spiritbinders' practitioner entry, unlocking nothing by data (D-08 checks mastery in code): " + regard);
 		helper.succeed();
 	}
 }

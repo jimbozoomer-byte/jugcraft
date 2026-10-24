@@ -10,7 +10,9 @@ Rime's and Strata's (tools/concordance_rime.py, tools/concordance_strata.py OWNE
 Rimebind, Preserve and Brace, at their own sizes, and Brace's four earth recordings; unit 4 adds Frostward's status icon
 and the travel kit's icons, worn sheets and heavy model (tools/concordance_rime_kit.py OWNER_FILES). Concordance Chunk C,
 unit 3 adds the Crucible Stand's treated iron and copper coil from the Blocks folder (tools/concordance_alchemy.py
-OWNER_BLOCKS_FILES). Two tables may not import different files to one path.
+OWNER_BLOCKS_FILES). Concordance Chunk D, unit 2 adds Stolas's provisional body (tools/concordance_pacts.py OWNER_FILES):
+the owner's Flashjack model, animations and skin, copied unchanged under his name. Two tables may not import different
+files to one path.
 
 On 7 October 2026 the owner asked for their farming and food textures to be used ("I have already made a ton of custom
 textures and food ... I made all of the textures in there myself its all mine"). Each imported texture is a byte-for-byte
@@ -52,6 +54,7 @@ import concordance_elemental_gear
 import concordance_dark_matter
 import concordance_alchemical_gear
 import concordance_ember  # noqa: E402
+import concordance_pacts  # noqa: E402
 import concordance_rime  # noqa: E402
 import concordance_rime_kit  # noqa: E402
 import concordance_strata  # noqa: E402
@@ -101,7 +104,7 @@ def magic_imports():
                   concordance_elemental_gear.OWNER_FILES, concordance_dark_matter.OWNER_FILES,
                   concordance_alchemical_gear.OWNER_FILES, concordance_ember.OWNER_FILES,
                   concordance_trinkets.OWNER_FILES, encyclopedia.OWNER_FILES, concordance_rime.OWNER_FILES,
-                  concordance_strata.OWNER_FILES, concordance_rime_kit.OWNER_FILES):
+                  concordance_strata.OWNER_FILES, concordance_rime_kit.OWNER_FILES, concordance_pacts.OWNER_FILES):
         for target, source in table.items():
             if merged.setdefault(target, source) != source:
                 raise SystemExit(f"tools/owner_art.py: two slices import different files to {target}")

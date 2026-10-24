@@ -82,6 +82,7 @@ The table is rendered by `python3 tools/concordance_economy.py`, and `check_econ
 | Lumen Sconce | 20 Radiance | light 15 | a measure every 1200 ticks; a measure begun is spent | light |
 | Reliquary Shrine recharging | 2,400 Ley Charge | 9,600 relic charge | 8 charge a second | none; relic charge never becomes Ley Charge again |
 | Crimson Surge | 120 Vitae | 120 Focus | one every 1200 ticks | health given (offering exhaustion) |
+| Stolas's pact, kept and served every day | 1 offering every 7 game days (a Styx flower, which one bone meal grows back, or an amethyst shard), and 6 to 16 Astral Resonance a recall | 1 recalled attunement a game day, 2,400 ticks long | 1 a game day a pact; one recall an occurrence of each pattern, shared with a master's; at most 4 offerings held ahead | none; an offering paid becomes nothing, and no resonance is made |
 | Root and Rivet, worked again and again at one Lesser Circle | 4,800 Ley Charge, 900 Focus, and 1 Thallite Plate, 4 Copper Ingot and 4 Mendvetch a run | 150 Rooted Thallite Foundations | one run every 160 ticks; one player's Focus, back 1 every 40 ticks, pays for 100 runs | none; a foundation never becomes Ley Charge, Focus or a plate again |
 | Verdant Spire, kept | 8 bone meal and 6 Ley Charge | 1,440 crop steps | 6 a pulse, a pulse every 100 ticks | Concordance crops pay their beds |
 | Star Spire, kept | 2 glow ink sacs and 8 Ley Charge | 240 Focus a player | 6 a pulse, a pulse every 100 ticks | hostile creatures revealed |
@@ -106,6 +107,10 @@ The table is rendered by `python3 tools/concordance_economy.py`, and `check_econ
 | sunpetal, grown | 4 | 8 |
 | sunpetal, hastened | 4 | 8 |
 <!-- economy:end -->
+
+Since Concordance Chunk D (D-05; not merged; [Stolas's pact](stolas-pact.md#costs-balance-and-automation)):
+Star-reckoning is a sink of resonance (modelled at the cheapest recall, 6), and Stolas's offerings are a sink of at most
+1/7 of an offering a day a pact. `tools/concordance_economy.py` still reports "gaining cycles: none".
 
 ## Interactions tested
 

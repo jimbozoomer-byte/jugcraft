@@ -36,13 +36,18 @@ import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
@@ -50,6 +55,7 @@ import io.github.jimbozoomer.jugcraft.concordance.starbound.ConclaveProjects;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -59,9 +65,11 @@ import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
@@ -76,18 +84,25 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Roadmap step 30, persistence and migration (docs/features/arcane-concordance-persistence.md): every format the
@@ -99,8 +114,10 @@ import net.minecraft.world.level.storage.TagValueOutput;
  * Bed saved before harvest strain reads unstrained (C-08), and one saved before grafts ungrafted (C-09); a Spirit Anchor
  * keeps its owner and agreement through a save (Concordance Chunk D, D-01); a Bound Will saved before pacts reads without
  * one, a pact record and its escrow round-trip, the pact history keeps eight, and an anchor from before Chunk D moves its
- * suspension onto its Bound Will once (D-02). D-08: a workshop hand saves only its claim's id and its anchor, the anchor
- * its post, and a claim in progress survives a restart.
+ * suspension onto its Bound Will once (D-02); a pact perch keeps its owner and pact through a save, and holds nothing a
+ * hopper, an explosion or the switch can take (D-04); and a pact, its escrow and the day's reckoning survive a restart, a
+ * suspended or upkeep-held pact staying held with its clock (D-05). D-08: a workshop hand saves only its claim's id and its
+ * anchor, the anchor its post, and a claim in progress survives a restart.
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -223,7 +240,7 @@ public class ConcordancePersistenceGameTests {
 	/**
 	 * A Concordance block entity's save carries its version, for a later format to read. The crucible's stays 1 with
 	 * Preserve's optional hold (Concordance Chunk B, unit 3); the Crucible Stand's is 1 (Concordance Chunk C, C-05); the
-	 * Spirit Anchor's is 1, with its optional owner (Concordance Chunk D).
+	 * Spirit Anchor's is 1, with its optional owner (Concordance Chunk D); the pact perch's is 1 (Concordance Chunk D, D-04).
 	 */
 	@GameTest(maxTicks = 20)
 	public void blockEntitiesStampTheirVersion(GameTestHelper helper) {
@@ -233,12 +250,14 @@ public class ConcordancePersistenceGameTests {
 		BlockPos crucible = new BlockPos(5, 1, 1);
 		BlockPos stand = new BlockPos(1, 1, 3);
 		BlockPos anchor = new BlockPos(3, 1, 3);
+		BlockPos perchAt = new BlockPos(5, 1, 3);
 		helper.setBlock(pylon, JugcraftConcordance.LEY_PYLON);
 		helper.setBlock(sconce, JugcraftConcordance.LUMEN_SCONCE);
 		helper.setBlock(crucible, JugcraftConcordance.CRUCIBLE);
 		helper.setBlock(stand, JugcraftConcordance.CRUCIBLE_STAND);
 		helper.setBlock(anchor, Workers.SPIRIT_ANCHOR);
-		for (BlockPos at : List.of(pylon, sconce, crucible, stand, anchor)) {
+		helper.setBlock(perchAt, Workers.PACT_PERCH);
+		for (BlockPos at : List.of(pylon, sconce, crucible, stand, anchor, perchAt)) {
 			BlockEntity entity = level.getBlockEntity(helper.absolutePos(at));
 			CompoundTag saved = entity.saveWithoutMetadata(level.registryAccess());
 			helper.assertValueEqual(saved.getIntOr(Saved.VERSION, 0), 1, entity.getType() + " stamps its version");
@@ -672,6 +691,181 @@ public class ConcordancePersistenceGameTests {
 		helper.succeed();
 	}
 
+	/** D-04 (D-S6, D-S8): a perch saves who placed it, the pact's terms as sealed there and its presence, at version 1, and no item or visitor; read back exactly; one set without a placer writes no owner; Stolas saves his perch and record, at version 1. */
+	@GameTest(maxTicks = 20)
+	public void aPerchKeepsItsOwnerAndPact(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = ConcordanceWorkerGameTests.ready(level, TestPlayers.mock(helper));
+		BlockPos at = new BlockPos(2, 1, 2);
+		ConcordanceWorkerGameTests.acceptedAt(helper, owner, at);
+		owner.closeContainer();
+		PactPerchBlockEntity perch = helper.getBlockEntity(at, PactPerchBlockEntity.class);
+		CompoundTag saved = perch.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.contains("owner") && saved.contains("agreement") && saved.contains("spirit")
+				&& !saved.contains("Items") && !saved.contains("items") && !saved.contains("escrow") && !saved.contains("visitor"),
+				"Saved: owner, terms as sealed here and presence, at version 1; no item, no visitor: " + saved);
+		PactPerchBlockEntity read = new PactPerchBlockEntity(perch.getBlockPos(), perch.getBlockState());
+		read.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		helper.assertTrue(owner.getUUID().equals(read.holder().owner()) && perch.holder().agreement().equals(read.holder().agreement())
+				&& perch.holder().spirit().equals(read.holder().spirit()) && read.visitor() == null, "and read back exactly");
+		CompoundTag unowned = ConcordanceWorkerGameTests.perch(helper, new BlockPos(5, 1, 2), null).saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(!unowned.contains("owner") && !unowned.contains("agreement") && unowned.getIntOr(Saved.VERSION, 0) == 1, "A perch set without a placer writes no owner");
+		StolasEntity presence = (StolasEntity) level.getEntity(perch.holder().spirit());
+		presence.think(level, 0L, level.getGameTime());
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		presence.saveWithoutId(out);
+		CompoundTag body = out.buildResult();
+		StolasEntity copy = Workers.STOLAS.create(level, EntitySpawnReason.LOAD);
+		copy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
+		helper.assertTrue(body.getIntOr(Saved.VERSION, 0) == 1 && presence.perch().equals(copy.perch()) && presence.record().equals(copy.record())
+				&& owner.getUUID().equals(copy.owner()), "Stolas saves his perch, record and holder at version 1");
+		helper.succeed();
+	}
+
+	/** D-04 (D-S6, G15, D-S16): the perch is no container: no face offers storage and a hopper beneath takes nothing; an explosion takes the perch but not the pact (without its perch; escrow, hold and clock untouched; only the perch's item and blocks' own drops fall, no offering; nothing ended); broken while switched off, its record is untouched and stranded, nothing released. */
+	@GameTest(maxTicks = 60)
+	public void thePerchHoldsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = ConcordanceWorkerGameTests.ready(level, TestPlayers.mock(helper));
+		BlockPos at = new BlockPos(2, 2, 2);
+		helper.setBlock(at.below(), Blocks.HOPPER);
+		ConcordanceWorkerGameTests.acceptedAt(helper, owner, at);
+		owner.closeContainer();
+		PactPerchBlockEntity perch = helper.getBlockEntity(at, PactPerchBlockEntity.class);
+		BoundWill record = ConcordanceWorkerGameTests.recordOf(level, owner);
+		helper.assertValueEqual(perch.holder().deposit(level, owner, new ItemStack(Items.AMETHYST_SHARD, 3), level.getGameTime()), 3, "Three offerings kept");
+		helper.assertTrue(!(perch instanceof Container), "The perch is no container");
+		for (Direction side : Direction.values()) {
+			helper.assertTrue(ItemStorage.SIDED.find(level, helper.absolutePos(at), side) == null, "no face offers storage: " + side);
+		}
+		ServerPlayer other = ConcordanceWorkerGameTests.ready(level, TestPlayers.mock(helper));
+		BlockPos second = new BlockPos(7, 2, 7); // beyond a power-3 blast's reach from (2, 2, 2)
+		ConcordanceWorkerGameTests.acceptedAt(helper, other, second);
+		other.closeContainer();
+		BoundWill otherRecord = ConcordanceWorkerGameTests.recordOf(level, other);
+		helper.runAtTickTime(40, () -> {
+			HopperBlockEntity hopper = helper.getBlockEntity(at.below(), HopperBlockEntity.class);
+			helper.assertTrue(hopper.isEmpty() && ConcordanceWorkerGameTests.escrowed(level, record.id()) == 3, "The hopper beneath took nothing");
+			BoundWill before = BoundWills.of(level.getServer()).ledger().get(record.id());
+			StolasEntity presence = (StolasEntity) level.getEntity(before.pact().presence());
+			BlockPos absolute = helper.absolutePos(at);
+			level.explode(null, absolute.getX() + 0.5, absolute.getY() + 0.5, absolute.getZ() + 0.5, 3.0F, Level.ExplosionInteraction.TNT);
+			BoundWill after = BoundWills.of(level.getServer()).ledger().get(record.id());
+			helper.assertTrue(!level.getBlockState(absolute).is(Workers.PACT_PERCH), "The explosion takes the perch");
+			helper.assertTrue(after != null && !Pacts.seated(after) && after.pact().presence() == null && owner.getUUID().equals(after.holder())
+					&& after.pact().hold() == before.pact().hold() && after.pact().upkeep().due() == before.pact().upkeep().due()
+					&& ConcordanceWorkerGameTests.escrowed(level, record.id()) == 3, "not the pact: kept without its perch, its escrow and clock untouched");
+			helper.assertTrue(presence == null || presence.isRemoved(), "Stolas leaves the world");
+			helper.assertTrue(level.getEntitiesOfClass(ItemEntity.class, new AABB(absolute).inflate(6.0), item -> item.isAlive() && item.getItem().is(Items.AMETHYST_SHARD)).isEmpty(),
+					"and no offering drops: the block held none");
+			List<ItemEntity> loose = level.getEntitiesOfClass(ItemEntity.class, helper.getBounds(), ItemEntity::isAlive);
+			helper.assertTrue(loose.stream().filter(item -> item.getItem().is(Workers.PACT_PERCH_ITEM)).mapToInt(item -> item.getItem().getCount()).sum() >= 1
+					&& loose.stream().allMatch(item -> item.getItem().getItem() instanceof BlockItem),
+					"The explosion drops only the perch's item, and the blocks it broke their own: nothing the perch kept for the pact: " + loose);
+			BoundWill unbroken = BoundWills.of(level.getServer()).ledger().get(otherRecord.id());
+			boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+			try {
+				helper.setBlock(second, Blocks.AIR);
+			} finally {
+				JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+			}
+			BoundWill kept = BoundWills.of(level.getServer()).ledger().get(otherRecord.id());
+			helper.assertTrue(kept != null && kept.equals(unbroken) && Pacts.seated(kept) && AgreementHolder.stranded(level.getServer(), kept),
+					"Broken while switched off: the record is untouched (its vanished place kept), stranded, nothing released");
+			helper.assertTrue(PactHistory.of(level.getServer()).history(owner.getUUID()).isEmpty() && PactHistory.of(level.getServer()).history(other.getUUID()).isEmpty()
+					&& BoundWills.of(level.getServer()).problems().isEmpty(), "Nothing ended; the records are sound");
+			helper.succeed();
+		});
+	}
+
+	/** D-05 (E4, D-S6): a pact record (place, presence, service, today's count, upkeep clock) and its escrow (exact stacks, names and all) read back exactly; the perch keeps owner, terms and presence; after a restart the day's quota is still spent. */
+	@GameTest(maxTicks = 20)
+	public void thePactAndItsEscrowSurviveARestart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		ServerPlayer keeper = ConcordanceWorkerGameTests.regarded(helper);
+		long g0 = ConcordanceWorkerGameTests.dayStart(level, 100);
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.stolasPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		UUID id = perch.holder().agreement().record();
+		ConcordanceWorkerGameTests.observed(level, keeper, ConcordanceWorkerGameTests.FULL_MOON, ConcordanceWorkerGameTests.LANTERN_STAR);
+		ConcordanceWorkerGameTests.holding(keeper, AstrolabeItem.CAPACITY);
+		helper.assertValueEqual(StarReckoning.reckon(level, keeper, perch.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, g0), Pacts.Reckoning.RECALLED, "Today's reckoning made");
+		ItemStack named = new ItemStack(ConcordanceWorkerGameTests.starflower());
+		named.set(DataComponents.CUSTOM_NAME, Component.literal("For Stolas"));
+		ConcordanceWorkerGameTests.give(keeper, new ItemStack(Items.AMETHYST_SHARD, 2));
+		ConcordanceWorkerGameTests.give(keeper, named.copy());
+		helper.assertTrue(PactKeeping.deposit(level, keeper, perch.holder(), Items.AMETHYST_SHARD, g0) == 2
+				&& PactKeeping.deposit(level, keeper, perch.holder(), named.getItem(), g0) == 1, "Three offerings paid ahead, one named");
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(id);
+		List<ItemStack> escrow = wills.escrow(id);
+		BoundWills read = reread(ops, wills);
+		helper.assertTrue(read != null && record.equals(read.ledger().get(id)), "The record reads back exactly: place, presence, service, today's count, upkeep: " + record);
+		List<ItemStack> back = read.escrow(id);
+		helper.assertTrue(back.size() == 2 && ItemStack.matches(back.get(0), escrow.get(0)) && ItemStack.matches(back.get(1), escrow.get(1))
+				&& back.get(1).has(DataComponents.CUSTOM_NAME), "and its escrow, exact stacks and their names");
+		helper.assertTrue(Pacts.done(read.ledger().get(id).pact(), g0) == 1 && Pacts.done(read.ledger().get(id).pact(), g0 + Pacts.DAY) == 0,
+				"Today's reckoning is remembered; tomorrow's is free");
+		CompoundTag saved = perch.saveWithoutMetadata(level.registryAccess());
+		PactPerchBlockEntity reloaded = loadPerch(level, perch, saved);
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && keeper.getUUID().equals(reloaded.holder().owner())
+				&& perch.holder().agreement().equals(reloaded.holder().agreement()) && perch.holder().spirit().equals(reloaded.holder().spirit()),
+				"The perch keeps its owner, terms and presence, and no item");
+		helper.assertValueEqual(StarReckoning.reckon(level, keeper, reloaded.holder(), ConcordanceWorkerGameTests.LANTERN_STAR, 24006L + 1000L, g0 + 100),
+				Pacts.Reckoning.QUOTA_SPENT, "After the restart, the same game day's quota is still spent");
+		helper.succeed();
+	}
+
+	/** D-05 (E2, D-S9): a pact suspended by its holder, or held for its upkeep, reads back held, with its clock as it was; reloaded, the perch still says so and Stolas reckons nothing; held time is never owed. */
+	@GameTest(maxTicks = 20)
+	public void aRestartWhileSuspendedStaysSuspended(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		long day = Pacts.DAY;
+		long period = 7 * day;
+		ServerPlayer keeper = ConcordanceWorkerGameTests.regarded(helper);
+		long g0 = ConcordanceWorkerGameTests.dayStart(level, 100);
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.stolasPact(helper, keeper, new BlockPos(2, 1, 2), g0);
+		UUID id = perch.holder().agreement().record();
+		ConcordanceWorkerGameTests.observed(level, keeper, ConcordanceWorkerGameTests.FULL_MOON);
+		ConcordanceWorkerGameTests.holding(keeper, AstrolabeItem.CAPACITY);
+		long s = g0 + 500L;
+		helper.assertValueEqual(PactKeeping.suspend(level, keeper, perch.holder(), s), AgreementHolder.Toggle.SUSPENDED, "Its holder suspends it");
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill suspended = wills.ledger().get(id);
+		BoundWills read = reread(ops, wills);
+		helper.assertTrue(read != null && suspended.equals(read.ledger().get(id)) && read.ledger().get(id).pact().hold() == BoundWill.Hold.HOLDER
+				&& read.ledger().get(id).pact().holdSince() == s, "Read back suspended by its holder, and since when");
+		PactPerchBlockEntity reloaded = loadPerch(level, perch, perch.saveWithoutMetadata(level.registryAccess()));
+		helper.assertTrue(reloaded.holder().held(level) == Status.SUSPENDED
+				&& StarReckoning.reckon(level, keeper, reloaded.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, s + 20) == Pacts.Reckoning.SUSPENDED,
+				"After the restart it is still suspended: Stolas reckons nothing");
+		helper.assertTrue(perch.holder().look(level, g0 + 3 * period) == Pacts.Event.NONE && wills.ledger().get(id).equals(suspended), "Held by its holder, nothing falls due");
+		long r = g0 + 20 * day;
+		helper.assertValueEqual(PactKeeping.resume(level, keeper, perch.holder(), r), AgreementHolder.Toggle.RESUMED, "Resumed twenty days on");
+		helper.assertValueEqual(wills.ledger().get(id).pact().upkeep().due(), suspended.pact().upkeep().due() + (r - s), "its due date moves on by the time held");
+		ServerPlayer other = ConcordanceWorkerGameTests.regarded(helper);
+		long u0 = ConcordanceWorkerGameTests.dayStart(level, 300);
+		PactPerchBlockEntity second = ConcordanceWorkerGameTests.stolasPact(helper, other, new BlockPos(5, 1, 5), u0);
+		UUID otherId = second.holder().agreement().record();
+		helper.assertTrue(ConcordanceWorkerGameTests.stay(level, second.holder(), u0 + 1_000L, u0 + period - 1_000L).isEmpty()
+				&& second.holder().look(level, u0 + period) == Pacts.Event.WARNED
+				&& ConcordanceWorkerGameTests.stay(level, second.holder(), u0 + period + 1_000L, u0 + period + day - 1_000L).isEmpty()
+				&& second.holder().look(level, u0 + period + day) == Pacts.Event.SUSPENDED, "Another pact, unpaid past its grace, is held for upkeep");
+		BoundWill held = wills.ledger().get(otherId);
+		BoundWills again = reread(ops, wills);
+		helper.assertTrue(again != null && held.equals(again.ledger().get(otherId)) && Pacts.status(again.ledger().get(otherId)) == Status.UPKEEP_HELD,
+				"read back held for upkeep, its clock as it was");
+		helper.assertTrue(second.holder().look(level, u0 + period + day + 5 * period) == Pacts.Event.NONE
+				&& wills.ledger().get(otherId).pact().upkeep().due() == held.pact().upkeep().due(), "Held, nothing accrues while time passes");
+		ConcordanceWorkerGameTests.give(other, new ItemStack(Items.AMETHYST_SHARD, 1));
+		long paidAt = u0 + period + day + 5 * period + 500L;
+		helper.assertTrue(PactKeeping.deposit(level, other, second.holder(), Items.AMETHYST_SHARD, paidAt) == 1
+				&& wills.ledger().get(otherId).pact().upkeep().due() == paidAt + period, "An offering resumes it, the next a week on");
+		helper.succeed();
+	}
+
 	/** An anchor's save from before Chunk D: its agreement sealed at {@code at}, its spirit, no owner (shared with ConcordanceSharingGameTests). */
 	static CompoundTag olderAnchor(ServerLevel level, UUID record, UUID holder, BlockPos at, UUID spirit, boolean suspended) {
 		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
@@ -795,5 +989,16 @@ public class ConcordancePersistenceGameTests {
 		SpiritAnchorBlockEntity kept = loadAnchor(level, anchor, unreadable);
 		helper.assertTrue(kept.post() == null && owner.getUUID().equals(kept.owner()), "One that cannot be read has none; the rest is kept");
 		helper.succeed();
+	}
+
+	private static PactPerchBlockEntity loadPerch(ServerLevel level, PactPerchBlockEntity like, CompoundTag saved) {
+		PactPerchBlockEntity copy = new PactPerchBlockEntity(like.getBlockPos(), like.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
+	}
+
+	private static @Nullable BoundWills reread(DynamicOps<JsonElement> ops, BoundWills wills) {
+		JsonElement written = BoundWills.CODEC.encodeStart(ops, wills).result().orElse(null);
+		return written == null ? null : BoundWills.CODEC.parse(ops, written).result().orElse(null);
 	}
 }

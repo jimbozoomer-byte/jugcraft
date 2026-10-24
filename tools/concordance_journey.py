@@ -34,6 +34,9 @@ Nothing here is generated into the game. tools/check_mod_data.py (check_journey)
   Concordance's; every thing named is a row of tools/acquisition.py WORKSHOP or FACTORY and every row is named; and each
   product is brewed by its named process, from things the same player has, over a heat whose degrees lie in the band it
   stirs at;
+- Stolas's Regard (PACT, Concordance Chunk D) holds without Styx: one player alone, in the Overworld alone, with no
+  structure loot, nothing else mastered and nothing past the Practitioner stage, reaches each step with the research it
+  names, and each step needs that research;
 - every game test a step names exists;
 - the record's table is the one table() renders.
 
@@ -222,6 +225,45 @@ WORKSHOP = {
          "tests": ["theLivingWorkshopFromAManualStart", "aBedSaysWhatItsPlantNeedsAndHowFar",
                    "aMixedBedGrowsFasterOnlyForAnotherKind", "restCompostAndTendingEaseStrain",
                    "aGraftTakesOnceAndConsumesItsDonor"]},
+    ],
+}
+
+# Concordance Chunk D, D-03 (D-S12): Stolas's Regard, found through Styx or without him. Not a stage route: what one
+# player alone does in the Overworld alone, with the research each step names understood (its own needed: without it the
+# step is out of reach), nothing else mastered, nothing past the Practitioner stage and no structure loot (Styx's flowers
+# are his gift, so a feather stands in). Each step: the research it adds, what the player does, the graph nodes it
+# reaches and the server game tests that exercise it. The sky step is no research state: it is the invitation's
+# precondition, had through an observatory under an open night sky. D-05's step: the perch, the pact and its first obligation.
+PACT = {
+    "name": "Stolas's Regard",
+    "steps": [
+        {"research": ["first_light", "binding_arts"],
+         "text": "With the Binding Arts understood, examine a feather (or a Stolas Starflower, Ravenquill Lupine or "
+                 "Amethyst Mourningbell, Styxhexenhammer's cuttings); Styx, where the world has him, tells each listener "
+                 "their own next step and teaches nothing",
+         "reaches": [f"research:{rid('stolas_regard')}@encountered"],
+         "tests": ["styxHintsByTheListenersOwnProgress", "talkingGrantsNoResearch", "notesNeverStandInForStolasEvidence"]},
+        {"research": ["verdant_husbandry"],
+         "text": "With Verdant Husbandry understood, harvest a ripe organism crop by hand",
+         "reaches": [f"research:{rid('stolas_regard')}@observed"],
+         "tests": ["styxHintsByTheListenersOwnProgress", "stolasRegardIsReachable"]},
+        {"research": ["assay"],
+         "text": "With the Assay understood, dissolve a sample at an Assayer's Scale: Stolas's Regard is understood",
+         "reaches": [f"research:{rid('stolas_regard')}@understood"],
+         "tests": ["notesNeverStandInForStolasEvidence", "stolasRegardIsReachable"]},
+        {"research": [],
+         "text": "Record a sky observation at an Orrery Observatory while a pattern is up and visible: the invitation's "
+                 "precondition, no research, which Styx and the journal name apart",
+         "reaches": [f"item:{rid('observatory')}", "encounter:night", "encounter:open_sky"],
+         "tests": ["styxNamesTheSkyStepUntilOneIsRecorded", "aRecordedObservationCountsWithoutAWindow",
+                   "aTurnedClockMakesNoNewClaim", "thePactsSectionNamesTheSkyStep"]},
+        {"research": [],
+         "text": "Build a Pact Perch where you may build and invite Stolas; accept his terms with the Open Hand Compact, then "
+                 "record a sky observation at an observatory while the pact is active (its first obligation): Stolas's "
+                 "Regard is mastered, and once a game day at the perch he recalls a pattern you observed",
+         "reaches": [f"item:{rid('pact_perch')}", f"practice:{rid('pact_service')}", f"research:{rid('stolas_regard')}@mastered"],
+         "tests": ["acceptingSealsOnceAndSpendsOnce", "theObligationMastersTheEntryOnce",
+                   "stolasRecallsAnObservedPatternOncePerOccurrence"]},
     ],
 }
 
@@ -433,6 +475,38 @@ def workshop_problems(pg, research, invocations, rituals, at_hand):
     return found
 
 
+def pact_walk(pg, research, invocations, rituals, at_hand, understood):
+    """What one player alone reaches in the Overworld alone, with no structure loot and nothing past the Practitioner stage,
+    with only the research entries {understood} understood and nothing mastered, Stolas's Regard aside (its states are
+    what the route reaches)."""
+    nodes = pg.graph(research, invocations, rituals, at_hand)
+    without = {pg.research_node(rid(key), state) for key in research for state in pg.RESEARCH_STATES
+               if key != "stolas_regard" and (state == "mastered" or key not in understood)}
+    return pg.reachable(nodes, research, cap="practitioner", dimensions={""}, without=without)
+
+
+def pact_problems(pg, research, invocations, rituals, at_hand):
+    """What is wrong with Stolas's Regard's route (PACT): an empty list when it holds."""
+    found = []
+    understood = []
+    for number, step in enumerate(PACT["steps"], 1):
+        for key in step["research"]:
+            if key not in research:
+                found.append(f"journey pact step {number}: {key} is not a research entry")
+        understood = understood + [key for key in step["research"] if key not in understood]
+        reached = pact_walk(pg, research, invocations, rituals, at_hand, understood)
+        for want in step["reaches"]:
+            if want not in reached:
+                found.append(f"journey pact step {number}: one player alone in the Overworld, with {understood} understood, "
+                             f"nothing else mastered, no structure loot and nothing past the Practitioner stage, does not "
+                             f"reach {want}")
+        for key in step["research"]:
+            lost = pact_walk(pg, research, invocations, rituals, at_hand, [k for k in understood if k != key])
+            if all(want in lost for want in step["reaches"]):
+                found.append(f"journey pact step {number}: nothing it reaches needs {key}")
+    return found
+
+
 def problems():
     """What is wrong with the journey: an empty list when every route holds (see the module's description)."""
     found = []
@@ -500,6 +574,8 @@ def problems():
                          "the Nether or the End")
     # The living workshop (Concordance Chunk C, C-10).
     found.extend(workshop_problems(pg, research, invocations, rituals, at_hand))
+    # Stolas's Regard (Concordance Chunk D, D-03).
+    found.extend(pact_problems(pg, research, invocations, rituals, at_hand))
     # Every game test named exists.
     tests = game_tests()
     named = list(FIRST_SUCCESS["tests"])
@@ -507,6 +583,8 @@ def problems():
         for _stage, _text, names in route["steps"]:
             named += names
     for step in WORKSHOP["steps"]:
+        named += step["tests"]
+    for step in PACT["steps"]:
         named += step["tests"]
     for _text, names in COOPERATIVE:
         named += names
@@ -560,6 +638,13 @@ def table():
                          if item in items)
         lines.append(f"| {number}. {step['text']} | {STAGE_NAMES[step['stage']]} | {names(step['research']) or 'nothing new'} "
                      f"| {', '.join(step['switches'])} | {made} | {tests(step['tests'])} |")
+    lines += ["", f"### {PACT['name']}", "",
+              "Stolas found through Styx or without him (Concordance Chunk D, D-03). No stage route: one player alone does "
+              "each step in the Overworld, with the research understood so far, nothing else mastered and no structure "
+              "loot (a feather stands in for Styx's flowers).", "",
+              "| Step | Understands | Server game tests |", "|---|---|---|"]
+    for number, step in enumerate(PACT["steps"], 1):
+        lines.append(f"| {number}. {step['text']} | {names(step['research']) or 'nothing new'} | {tests(step['tests'])} |")
     lines += ["", "### Cooperative play", "", "| Shared, and what stays one player's | Server game tests |", "|---|---|"]
     for text, listed in COOPERATIVE:
         lines.append(f"| {text} | {tests(listed)} |")

@@ -20,8 +20,9 @@ import org.jspecify.annotations.Nullable;
  * on and the holder is present near it; at most one period falls due a look, and a due date that passed while nobody
  * looked becomes the moment they look again, so time away is never owed; none in escrow, a warning and a grace; the grace
  * over, held for its upkeep: nothing taken, nothing accrues, nothing lost, and an offering resumes it with a whole period
- * from then. After an absence (no look for more than ABSENT_TICKS) a warned pact is warned again with its whole grace
- * (D-S3); a shorter gap is not an absence, so a due date or grace end inside it counts. A pact
+ * from then. After an absence (no look for more than ABSENT_TICKS) a pact due is warned on return: a first warning with
+ * its whole grace (D-S3), one given before the absence again with the grace it had left, its end moved on by the time
+ * away (D-P50); a shorter gap is not an absence, so a due date or grace end inside it counts. A pact
  * never ends by itself; only its holder ends it, once; the last HISTORY departures of each holder are kept. Keep the
  * numbers, Outcome, holds and DEPARTURES equal to tools/concordance_workers.py (SEAL_OUTCOMES, PACT, PACT_HOLDS,
  * PACT_DEPARTURES; check_pacts).
@@ -130,6 +131,20 @@ public final class Pacts {
 		return null;
 	}
 
+	/**
+	 * Concordance Chunk D, D-04: {@code holder}'s record with {@code counterpart} that carries a pact (one a holder, D-S10),
+	 * or null; namespaces normalised.
+	 */
+	public static @Nullable BoundWill pactWith(BoundWillLedger ledger, UUID holder, String counterpart) {
+		String wanted = counterpart(counterpart);
+		for (BoundWill record : ledger.heldBy(holder)) {
+			if (record.pact() != null && counterpart(record.counterpart()).equals(wanted)) {
+				return record;
+			}
+		}
+		return null;
+	}
+
 	/** Upkeep terms only (clock unset): what a definition, or a test, seals with. */
 	public static BoundWill.Upkeep terms(String offering, int count, long period, long grace, int cap) {
 		return new BoundWill.Upkeep(offering, count, period, grace, cap, 0L, BoundWill.Upkeep.NOT_WARNED, 0L);
@@ -193,7 +208,9 @@ public final class Pacts {
 	 * due date that has passed becomes now, so a holder back just before the next due date pays once, and the next falls a
 	 * whole period later; resumed from an upkeep hold by an offering, the next falls a whole period from now: neither time
 	 * away nor time held is ever charged (critique 3). A gap of at most ABSENT_TICKS is not an absence. A second look in the
-	 * same tick goes on (the unit review's fix 7), so an offering paid in the tick of a ticker's look resumes at once.
+	 * same tick goes on (the unit review's fix 7), so an offering paid in the tick of a ticker's look resumes at once. A
+	 * holder warned before an absence is warned again on return with the grace they had left, its end moved on by the time
+	 * away (unit 2's unit review, D-P50): time away is never charged, and leaving for a minute never renews it.
 	 */
 	public static Due due(BoundWill record, boolean present, int periodsHeld, long now) {
 		BoundWill.Pact pact = record.pact();
@@ -216,9 +233,11 @@ public final class Pacts {
 				return new Due(record.with(pact.with(paid)), true, Event.PAID, true);
 			}
 			if (!upkeep.warned() || returned) {
-				// The first warning; and after an absence (the holder away, the place unloaded or the Concordance off) the
-				// warning again, with the whole grace from this first look (D-S3, critique 2a).
-				return new Due(record.with(pact.with(upkeep.clock(dueAt, now + upkeep.grace(), now))), true, Event.WARNED, false);
+				// The first warning, with the whole grace from this look; and after an absence (the holder away, the place
+				// unloaded or the Concordance off) the warning again: the whole grace for a first warning (D-S3, critique 2a),
+				// the grace left for one given before the absence, its end moved on by the time away (the unit review).
+				long graceUntil = upkeep.warned() ? upkeep.graceUntil() + (now - upkeep.lookedAt()) : now + upkeep.grace();
+				return new Due(record.with(pact.with(upkeep.clock(dueAt, graceUntil, now))), true, Event.WARNED, false);
 			}
 			if (now >= upkeep.graceUntil()) {
 				return new Due(record.with(pact.held(BoundWill.Hold.UPKEEP, now).with(upkeep.clock(dueAt, upkeep.graceUntil(), now))),
@@ -353,5 +372,75 @@ public final class Pacts {
 
 	public static List<Departure> bounded(List<Departure> history) {
 		return List.copyOf(history.subList(Math.max(0, history.size() - HISTORY), history.size()));
+	}
+
+	/**
+	 * How a pact's service went (Concordance Chunk D, D-05, D-S1): its holder's Star-reckoning at the perch. After RECALLED,
+	 * in the order checked: the server's (switched off; nothing kept here; a copy; not its holder in person), the pact's
+	 * ({@link #serves}), then the pattern's, the astrolabe's and the claim's. Worded as
+	 * message.jugcraft.concordance.pact.reckoning.<id> (DISABLED as the switch's, CONFLICTING as the diagnostic's); equal to
+	 * tools/concordance_pacts.py RECKONING (check_pacts). Append only.
+	 */
+	public enum Reckoning {
+		RECALLED("recalled"),
+		DISABLED("disabled"),
+		NOTHING("nothing"),
+		CONFLICTING("conflicting"),
+		NOT_HOLDER("not_holder"),
+		SUSPENDED("suspended"),
+		UPKEEP_HELD("upkeep_held"),
+		OUTSIDE_AREA("outside_area"),
+		OUTSIDE_HOURS("outside_hours"),
+		QUOTA_SPENT("quota_spent"),
+		NOT_OBSERVED("not_observed"),
+		NO_ASTROLABE("no_astrolabe"),
+		TOO_LITTLE("too_little"),
+		RECALLED_ALREADY("recalled_already");
+
+		public final String id;
+
+		Reckoning(String id) {
+			this.id = id;
+		}
+	}
+
+	/**
+	 * The first reason {@code record}'s pact serves nobody now, in this order, or null: no service or no place (NOTHING);
+	 * held by its holder (SUSPENDED); held for upkeep (UPKEEP_HELD); {@code who} outside its area or in another dimension
+	 * (OUTSIDE_AREA); outside its hours by the world's clock {@code time} (OUTSIDE_HOURS); the quota of the game day of
+	 * {@code gameTime} spent (QUOTA_SPENT: game time only runs forward, so moving the clock cannot reset it). An offering
+	 * due still serves through its grace.
+	 */
+	public static @Nullable Reckoning serves(BoundWill record, Place who, long time, long gameTime) {
+		BoundWill.Pact pact = record.pact();
+		BoundWill.Service service = pact == null ? null : pact.service();
+		if (service == null || pact.place() == null) {
+			return Reckoning.NOTHING;
+		}
+		if (pact.hold() == BoundWill.Hold.HOLDER) {
+			return Reckoning.SUSPENDED;
+		}
+		if (pact.hold() == BoundWill.Hold.UPKEEP) {
+			return Reckoning.UPKEEP_HELD;
+		}
+		if (!pact.place().within(who, service.radius())) {
+			return Reckoning.OUTSIDE_AREA;
+		}
+		if (!inHours(service, time)) {
+			return Reckoning.OUTSIDE_HOURS;
+		}
+		return done(pact, gameTime) >= service.quota() ? Reckoning.QUOTA_SPENT : null;
+	}
+
+	/** Whether the world clock's hour allows its service; the hours may run past midnight (as Agreement.inHours). */
+	public static boolean inHours(BoundWill.Service service, long time) {
+		int tick = (int) Math.floorMod(time, DAY);
+		return service.from() <= service.to() ? tick >= service.from() && tick < service.to() : tick >= service.from() || tick < service.to();
+	}
+
+	/** Whether {@code record}'s pact is active (D-05): kept at its place and held by nobody (an offering due still serves). */
+	public static boolean serving(BoundWill record) {
+		BoundWill.Pact pact = record.pact();
+		return pact != null && pact.place() != null && pact.hold() == BoundWill.Hold.NONE;
 	}
 }

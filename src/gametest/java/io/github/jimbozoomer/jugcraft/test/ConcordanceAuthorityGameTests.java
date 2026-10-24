@@ -17,15 +17,25 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlock;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy;
@@ -37,7 +47,10 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
 import io.github.jimbozoomer.jugcraft.party.PartyManager;
+import io.github.jimbozoomer.jugcraft.styx.StyxConservatory;
+import io.github.jimbozoomer.jugcraft.styx.StyxState;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -53,6 +66,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -61,9 +75,11 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -75,7 +91,8 @@ import org.jspecify.annotations.Nullable;
  * taken by touch, a porter's trip, a device whose owner is away (and the same with the server's explicit option that
  * lets a stand-in answer for them), a hopper under a Spire Heart, and a link used by someone who did not take it; and a
  * Spirit Anchor sealed only by its owner's side where they may build, never by a stand-in (Concordance Chunk D, D-01),
- * and a pact no change of owner moves (D-02).
+ * and a pact no change of owner moves (D-02), at a pact perch too; and a pact perch placed only where its placer may
+ * build, never in Styx's home (D-04).
  */
 public class ConcordanceAuthorityGameTests {
 	private static final long NIGHT = 18000L;
@@ -401,7 +418,8 @@ public class ConcordanceAuthorityGameTests {
 
 	/**
 	 * D-02 (D-S23, E1): the holder leaving the party, or the anchor changing hands, never moves a pact; the owner cannot end
-	 * or suspend another's, by the anchor or by its Bound Will alone; nobody else benefits.
+	 * or suspend another's, by the anchor or by its Bound Will alone; nobody else benefits. At a pact perch too (D-04, D-05):
+	 * its new owner reads, does and is served nothing of another's pact, whose holder is still served there.
 	 */
 	@GameTest(maxTicks = 20)
 	public void aChangeOfOwnerMovesNoPact(GameTestHelper helper) {
@@ -437,6 +455,84 @@ public class ConcordanceAuthorityGameTests {
 				"By its Bound Will alone, as from the roster, the owner suspends nothing and its holder resumes it");
 		helper.assertTrue(!Pacts.benefits(wills.ledger().get(record), owner.getUUID(), JugcraftParties.sameParty(holder.getUUID(), owner.getUUID())),
 				"and nobody else benefits from it");
+		// Concordance Chunk D, D-04 (D-S23): at a pact perch too, the land changing hands moves no pact; its new owner reads only
+		// that another's pact is kept there, and every action of theirs there is refused.
+		ServerPlayer keeper = ConcordanceWorkerGameTests.regarded(helper);
+		BlockPos perchAt = new BlockPos(5, 2, 5);
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.stolasPact(helper, keeper, perchAt, now);
+		UUID pact = perch.holder().agreement().record();
+		perch.holder().setOwner(stranger.getUUID());
+		ConcordanceWorkerGameTests.ready(level, stranger);
+		ConcordanceWorkerGameTests.beside(helper, stranger, perchAt);
+		PactMenu menu = ConcordanceWorkerGameTests.open(helper, stranger, perch);
+		helper.assertTrue(menu.lastSent().mode() == PactStatePayload.CLOSED
+				&& ConcordanceWorkerGameTests.keys(menu.lastSent().notes()).contains(ConcordanceWorkerGameTests.PACT_KEY + "reading.taken"),
+				"The perch's new owner reads only that another's pact is kept there");
+		for (int action : List.of(PactRequestPayload.ACCEPT, PactRequestPayload.SUSPEND, PactRequestPayload.END, PactRequestPayload.SEAT)) {
+			PactStatePayload answer = ConcordanceWorkerGameTests.send(stranger, menu, action, 0);
+			helper.assertTrue(answer != null && answer.result().isPresent() && !answer.result().get().done()
+					&& keeper.getUUID().equals(wills.ledger().get(pact).holder()) && wills.ledger().get(pact).pact().hold() == BoundWill.Hold.NONE,
+					"and action " + action + " of theirs is refused");
+		}
+		stranger.closeContainer();
+		helper.assertTrue(wills.ledger().heldBy(stranger.getUUID()).isEmpty(), "Nothing became theirs");
+		// Concordance Chunk D, D-05 (D-S23): nor is its new owner served there; its holder still is.
+		ConcordanceWorkerGameTests.observed(level, keeper, ConcordanceWorkerGameTests.FULL_MOON);
+		ConcordanceWorkerGameTests.holding(keeper, AstrolabeItem.CAPACITY);
+		ConcordanceWorkerGameTests.holding(stranger, AstrolabeItem.CAPACITY);
+		ConcordanceWorkerGameTests.beside(helper, stranger, perchAt);
+		helper.assertTrue(StarReckoning.reckon(level, stranger, perch.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, now) == Pacts.Reckoning.NOT_HOLDER
+				&& PactKeeping.suspend(level, stranger, perch.holder(), now) == AgreementHolder.Toggle.NOT_HOLDER
+				&& perch.holder().seat(level, stranger, StolasEntity.COUNTERPART, now) == AgreementHolder.Seat.NOTHING
+				&& keeper.getUUID().equals(wills.ledger().get(pact).holder()), "The perch's new owner neither uses, suspends nor re-seats another's pact");
+		ConcordanceWorkerGameTests.beside(helper, keeper, perchAt);
+		helper.assertValueEqual(StarReckoning.reckon(level, keeper, perch.holder(), ConcordanceWorkerGameTests.FULL_MOON, 24006L, now), Pacts.Reckoning.RECALLED,
+				"Its holder is still served there");
+		helper.succeed();
+	}
+
+	private static InteractionResult placePerch(GameTestHelper helper, ServerPlayer player, BlockPos at) {
+		ItemStack perch = new ItemStack(Workers.PACT_PERCH_ITEM);
+		player.setItemInHand(InteractionHand.MAIN_HAND, perch);
+		BlockPos below = helper.absolutePos(at.below());
+		return perch.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(below).add(0.0, 0.5, 0.0), Direction.UP, below, false)));
+	}
+
+	/** D-04 (D-S15, D-S8): a perch is placed only where its placer may build (a neighbour's claim refuses it), never in Styx's home, never by a stand-in or a machine; placed, it records its owner. */
+	@GameTest(maxTicks = 20)
+	public void aPerchIsPlacedOnlyWhereItsPlacerMayBuild(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer placer = player(helper);
+		BlockPos claimed = new BlockPos(2, 2, 2);
+		BlockPos open = new BlockPos(4, 2, 2);
+		BlockPos styx = new BlockPos(6, 2, 6);
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(claimed), NEIGHBOUR);
+			helper.assertTrue(!placePerch(helper, placer, claimed).consumesAction() && !helper.getBlockState(claimed).is(Workers.PACT_PERCH), "In a neighbour's claim it is refused");
+		}
+		helper.assertTrue(placePerch(helper, placer, open).consumesAction() && helper.getBlockState(open).is(Workers.PACT_PERCH)
+				&& placer.getUUID().equals(helper.getBlockEntity(open, PactPerchBlockEntity.class).holder().owner()), "Where they may build it stands, recording its owner");
+		StyxState state = StyxState.get(level);
+		Optional<BlockPos> origin = state.origin;
+		int layout = state.layout;
+		boolean townHome = state.townHome;
+		try {
+			state.origin = Optional.of(helper.absolutePos(styx).offset(-10, -1, -10));
+			state.layout = StyxConservatory.CURRENT_LAYOUT;
+			state.townHome = false;
+			helper.assertTrue(StyxConservatory.covers(level, helper.absolutePos(styx)) && !StyxConservatory.covers(level, helper.absolutePos(styx).offset(-20, 0, 0)),
+					"Styx's home covers its footprint and nothing beside it");
+			helper.assertTrue(!placePerch(helper, placer, styx).consumesAction() && !helper.getBlockState(styx).is(Workers.PACT_PERCH), "In Styx's home it is refused");
+		} finally {
+			state.origin = origin;
+			state.layout = layout;
+			state.townHome = townHome;
+		}
+		FakePlayer standIn = FakePlayer.get(level, new GameProfile(placer.getUUID(), "[Concordance]"));
+		BlockPos spot = helper.absolutePos(new BlockPos(6, 2, 2));
+		helper.assertTrue(!PactPerchBlock.mayPlace(level, standIn, spot) && !PactPerchBlock.mayPlace(level, null, spot) && PactPerchBlock.mayPlace(level, placer, spot),
+				"A stand-in or a machine never places one; its player may");
 		helper.succeed();
 	}
 

@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.commands.CommandSourceStack;
@@ -46,7 +47,8 @@ import net.minecraft.world.level.material.PushReaction;
  * Shade's agreement (kept by its Spirit Anchor and sealed as a Bound Will) and the Clockwork Porter's body. Every worker
  * says what it is doing or why not; the {@code workers} command lists a player's workers from the saved roster,
  * loaded or not, without loading anything. Since Concordance Chunk D (D-08) a second spirit, the Workshop Hand, is sealed
- * at a Spirit Anchor bound to its holder's Courier Post and carries that post's requests.
+ * at a Spirit Anchor bound to its holder's Courier Post and carries that post's requests. Concordance Chunk D adds Stolas,
+ * the pact perch and its screen.
  */
 public final class Workers {
 	public static final String RESEARCH = "jugcraft:binding_arts";
@@ -67,6 +69,12 @@ public final class Workers {
 	public static Item PORTER_KEY;
 	/** A Porter Key's route. */
 	public static DataComponentType<ClockworkPorterEntity.Route> PORTER_ROUTE;
+	/** Concordance Chunk D, D-04: Stolas (a pact's presence, or a visitor during a conversation), the pact perch and its screen. */
+	public static EntityType<StolasEntity> STOLAS;
+	public static Block PACT_PERCH;
+	public static BlockEntityType<PactPerchBlockEntity> PERCH_ENTITY;
+	public static Item PACT_PERCH_ITEM;
+	public static ExtendedMenuType<PactMenu, PactMenu.Opening> PERCH_MENU;
 
 	private Workers() {
 	}
@@ -99,8 +107,23 @@ public final class Workers {
 		BONDING_CHARM = item("bonding_charm", BondingCharmItem::new, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
 		PORTER = item("clockwork_porter", ClockworkPorterItem::new, new Item.Properties().stacksTo(1));
 		PORTER_KEY = item("porter_key", PorterKeyItem::new, new Item.Properties().stacksTo(1));
+		// Concordance Chunk D, D-04 (D-S7): MISC as every worker is, so a transport crate refuses him (MobTransportCrate.friendly).
+		STOLAS = entity("stolas", EntityType.Builder.<StolasEntity>of(StolasEntity::new, MobCategory.MISC).sized(0.7F, 1.45F).eyeHeight(1.2F)
+				.fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(STOLAS, StolasEntity.createAttributes());
+		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
+		PACT_PERCH = Registry.register(BuiltInRegistries.BLOCK, perchKey, new PactPerchBlock(BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD).strength(1.5F, 3.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).setId(perchKey)));
+		PERCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pact_perch"),
+				FabricBlockEntityTypeBuilder.create(PactPerchBlockEntity::new, PACT_PERCH).build());
+		PACT_PERCH_ITEM = item("pact_perch", properties -> new SkyItem(PACT_PERCH, properties), new Item.Properties().useBlockDescriptionPrefix());
+		PERCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("pact_perch"), new ExtendedMenuType<>(PactMenu::new, PactMenu.Opening.STREAM_CODEC));
+		PactMenu.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(anchor));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> {
+			output.accept(anchor);
+			output.accept(PACT_PERCH_ITEM);
+		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			output.accept(BONDING_CHARM);
 			output.accept(PORTER);
