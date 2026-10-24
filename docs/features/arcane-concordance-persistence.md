@@ -164,7 +164,7 @@ No new dependency or asset.
   +5 (`anAnchorsAgreementRoundTrips`, `aBoundWillReadsItsOlderSave`, `aPactRecordRoundTrips`,
   `thePactHistoryKeepsEight`, `aSuspendedAnchorMigratesItsHold`), and `everyRecordReadsItsSaveFromBeforeVersions` and
   `blockEntitiesStampTheirVersion` extended (a Bound Will with a pact and escrow, the pact history, the Spirit Anchor);
-  `check_persistence` lists `PactHistory` as read entry by entry. None of these tests has run in CI yet.
+  `check_persistence` lists `PactHistory` as read entry by entry. They passed in CI run 40067977680 on `da185dd0d`.
 - Concordance Chunk D, unit 2 (not merged; [Stolas's pact](stolas-pact.md)): `ConcordancePersistenceGameTests` +4
   (`aPerchKeepsItsOwnerAndPact`, `thePerchHoldsNothing`, `thePactAndItsEscrowSurviveARestart`,
   `aRestartWhileSuspendedStaysSuspended`), and `blockEntitiesStampTheirVersion` extended (the perch). Not yet run in

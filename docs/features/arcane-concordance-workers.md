@@ -7,7 +7,8 @@ keep their promises, and a familiar fades only for its person's own play time; D
 contract](concordance-chunk-d.md)), not merged; its tests passed in CI with its unit review's fixes (run 40067977680 on
 `da185dd0d`; see Verification). Extended by Concordance Chunk D, unit 4 (D-08: the Workshop Hand, a second spirit,
 carrying a Courier Post's requests; [The Workshop Hand](#the-workshop-hand-concordance-chunk-d-d-08)), built beside unit
-2 and not merged; compiled in CI, where its hand tests have not yet passed. Extended by Concordance Chunk D, unit 2
+2 and not merged; compiled in CI, and its tests passed in run 40085012234 on `86c4e7127` (both server jobs and every
+client class; see Verification). Extended by Concordance Chunk D, unit 2
 (D-03 to D-05: [Stolas's pact](stolas-pact.md), a pact kept at a Pact Perch), not merged; none of its tests has run in
 CI yet.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
@@ -246,10 +247,10 @@ server, real walking over real terrain (the tests stand workers within reach), a
 
 **Concordance Chunk D, unit 1: D-01 and D-02** (commits `56a74f4be` (D-01), `7477efbcd` (D-S17), `fa5360d0d` (D-02),
 the records' commit `97e1facd4` and "Chunk D unit 1: fixes from the unit review";
-[the chunk's contract](concordance-chunk-d.md), its As built notes and proposals D-P1 to D-P16; not merged). **Not yet
-run in CI:** there is no Minecraft build where it was written, so none of its Java has been compiled against Minecraft
-and none of the tests below has run.
-- New server game tests (29), none yet run in CI:
+[the chunk's contract](concordance-chunk-d.md), its As built notes and proposals D-P1 to D-P16; not merged). **CI:**
+first compiled and run by CI; with the unit review's fixes and 26.3's white wool, run 40067977680 on `da185dd0d` passed
+every job.
+- New server game tests (29), passed in CI run 40067977680:
   - `ConcordanceWorkerGameTests` +17 (22 in all). D-01: `aKilledShadeLeavesItsLoadOnce` (into its loaded anchor once,
     struck off, a second removal gives nothing; 25 ticks), `aKilledShadeAwayFromItsAnchorDropsWhereItFell` (the anchor
     unloaded; switched off too), `aLostShadeIsCalledAgainUnderItsAgreement` (the same Bound Will, nothing spent; a full
@@ -272,12 +273,12 @@ and none of the tests below has run.
   - `ConcordanceSharingGameTests` +3 (5): `aCopiedAnchorGivesNothingAndReleasesNothing`,
     `aLegacyAnchorClaimsItsPlaceOnce`, `endingTwiceReturnsOnce`.
   - `ConcordanceResourceGameTests` +1: `thePactRulesKeepTheirShape`.
-  - Extended by the unit review's fixes, not yet run either: `aReturnAfterAbsenceGetsTheFullGrace` (an absence before
+  - Extended by the unit review's fixes, passed in the same run: `aReturnAfterAbsenceGetsTheFullGrace` (an absence before
     the holder's own suspension still counts), `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce` (switched off, the
     old shade takes no roster room), `aKilledShadeAwayFromItsAnchorDropsWhereItFell` (with the block-drop rule off),
     `upkeepWarnsThenSuspendsAfterGraceAndResumes` (a look in the offering's tick), `onlyTheHolderEnds` (a party
     member's offering refused), `aStandInNeverSeals` (a stand-in refused a recall) and `thePactRulesKeepTheirShape`.
-  - Extended, not yet run either: `aSpiritKeepsToItsAgreement` (suspended on its Bound Will, the anchor's flag false),
+  - Extended, passed in the same run: `aSpiritKeepsToItsAgreement` (suspended on its Bound Will, the anchor's flag false),
     `workersKeepTheirModelsThroughASave` (the bond's `seen_played`, an older, an unreadable and a forged one; a shade's
     anchor, holder and load, G10), `blockEntitiesStampTheirVersion` (the anchor) and
     `everyRecordReadsItsSaveFromBeforeVersions` (a Bound Will with a pact and escrow; the pact history).
@@ -309,8 +310,8 @@ and none of the tests below has run.
   with JDK 21's `javac` against the jspecify jar; two pure harnesses replaying the upkeep tests' traces and
   `thePactRulesKeepTheirShape`'s rules passed. `python3 tools/select_client_tests.py --base a8c7cd770` chooses every
   client class (239), as `TestPlayers.java` is a shared file.
-- **Not run:** `./gradlew build` and every server and client game test (CI is their first compile and run), any
-  client, two clients, a real world saved before Chunk D, a restart.
+- **Not run where it was written:** `./gradlew build` and the game tests (first run by CI, below); any client by hand,
+  two clients, a real world saved before Chunk D, a restart.
 - **CI since:** with the unit review's fixes and 26.3's white wool (`Items.WOOL.white()`), run 40067977680 on
   `da185dd0d` passed every job (the build, the server game tests with and without the optional integrations, every
   client class). Still not run: any client by hand, two clients, a real world saved before Chunk D.
@@ -319,8 +320,10 @@ and none of the tests below has run.
 unit 4's records and the schema review" and the commit "Chunk D unit 4: fixes from the unit review"; [the chunk's
 contract](concordance-chunk-d.md); not merged). **CI:** compiled in runs 40079227985 and 40082852322, which failed its
 twenty hand tests at their first step: a test helper compared `ItemStack.useOn`'s answer with the SUCCESS constant,
-which 26.3 never returns for an item's use (fixed in the helper, `WorkshopHands.use`); no run has yet passed them.
-- New server game tests (21), none yet passed in CI: `ConcordanceLogisticsGameTests` +13 (28; listed in
+which 26.3 never returns for an item's use (fixed in the helper, `WorkshopHands.use`); run 40085012234 on `86c4e7127`
+passed them (both server jobs), and every job, after one re-run of a client shard for main's
+`PeepoPopulationClientTests` cow-breeding flake.
+- New server game tests (21), passed in CI run 40085012234: `ConcordanceLogisticsGameTests` +13 (28; listed in
   [logistics](arcane-concordance-logistics.md#verification)); `ConcordanceWorkerGameTests` +5 (27):
   `aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason` (narrow test terms; a claim held past its hours is finished;
   suspended with a load claimed, it finishes it and claims nothing new; the day's two loads, then the next day),
@@ -333,7 +336,8 @@ which 26.3 never returns for an item's use (fixed in the helper, `WorkshopHands.
   `ConcordancePersistenceGameTests` +2 (17): `aHandsClaimSurvivesARestart`, `aBoundAnchorKeepsItsPost`. A
   `WorkshopHands` fixture (not a test class) seals hands under the definition's or narrower test terms through
   `anchor.handSealing`.
-- Client, not yet run: `CompanionAutomationChecks.workshopHand`, through `PeepoCompanionClientTests`.
+- Client, passed in CI run 40085012234 (client shard 1): `CompanionAutomationChecks.workshopHand`, through
+  `PeepoCompanionClientTests`.
 - Audits in `tools/check_mod_data.py`: `check_workers`' class map gains the hand (its definition, entity, name, GeckoLib
   renderer, model, clips and sheet are then checked as the others'); `check_hand` (new): the hand a spirit whose service
   is a spirit's, the Regard at MASTERED asked before the seal, its decision's order, its terms, refusal and releases, no
@@ -341,7 +345,8 @@ which 26.3 never returns for an item's use (fixed in the helper, `WorkshopHands.
   generator, and the tests; since the unit review also the hand's carry and take-back refusals (D-P82), why it waits
   with its post gone and the anchor asking only the definition of the worker it serves (D-P83); `AUTHORITY_ROUTES` (the
   hand's `answering`, the key's `maySeal`). Its audit mutations and the commands run are in the contract's D-08 As
-  built; all passed. **Not run:** `./gradlew build`, any game test, any client, two clients.
+  built; all passed. **Not run where it was written:** `./gradlew build` and the game tests (run by CI, above); any
+  client by hand, two clients.
 
 **Concordance Chunk D, unit 2: D-03 to D-05** (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the
 records' commit and the unit review's fixes; [Stolas's pact](stolas-pact.md) and the [contract](concordance-chunk-d.md)'s As built notes, proposals
@@ -394,7 +399,7 @@ the Clockwork Porter's own decision ([logistics](arcane-concordance-logistics.md
   `Guns/block/treated_brass_lamp_lit.png`, its pack from `farming and food textures/wooden_basket_side.png` with a
   buckle from `Guns/entity/cog_knight.png` (colours only, read from `art/owner-library/originals/Blocks/`; nothing from
   Mojang's files). Generated; not seen in game.
-- **Test evidence:** none yet passed in CI (compiled there; see Verification). 21 server game tests (Logistics +13, Worker +5, Authority +1, Persistence +2)
+- **Test evidence:** passed in CI run 40085012234 on `86c4e7127` (see Verification). 21 server game tests (Logistics +13, Worker +5, Authority +1, Persistence +2)
   and the client companion check `CompanionAutomationChecks.workshopHand`, listed in Verification above.
 
 **Failure behaviour** (03:193's eight cases, as C-06's table (CC:1127-1136), and the hand's own terms):

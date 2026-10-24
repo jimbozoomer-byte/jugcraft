@@ -7,7 +7,7 @@ files its own requests, and a Peepo at its port brings only what no courier is b
 contract](concordance-chunk-c.md)), not merged; its tests passed in CI (runs 38731825181 and 38774859294; see
 Verification). Extended by Concordance Chunk D, unit 4 (D-08; [the chunk's contract](concordance-chunk-d.md)), not
 merged: a Workshop Hand, a spirit, carries a post's requests with the porter's own decision, now `spirits/CourierWork`,
-shared; none of its tests has run in CI yet (see Verification).
+shared; its tests passed in CI run 40085012234 on `86c4e7127` (see Verification).
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 18) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 10, Practitioner stage (Jugcraft Workshops). Roadmap step 18.
@@ -325,10 +325,11 @@ transaction. `9098c06b1` fixes the check alone, and every job passed in run 3873
 **Concordance Chunk D, unit 4: D-08** (commits `023b681e8`, the shared courier decision, and `e51ef2b11`, the Workshop
 Hand, and the records' commit "Concordance Chunk D: unit 4's records and the schema review"; [the chunk's
 contract](concordance-chunk-d.md), its As built note and proposals D-P70 to D-P83; not merged; and the unit review's
-fixes, commit "Chunk D unit 4: fixes from the unit review"). **Not yet run in CI:**
-there is no Minecraft build where it was written, so none of its Java has been compiled against Minecraft and none of
-the tests below has run.
-- `ConcordanceLogisticsGameTests` +13 (28 in all), none yet run in CI, each synchronous in one tick and checking
+fixes, commit "Chunk D unit 4: fixes from the unit review"). **CI:** compiled
+in runs 40079227985 and 40082852322, which failed the twenty hand tests at their first step on a test helper's
+comparison (fixed in `86c4e7127`); run 40085012234 on `86c4e7127` passed every job, the tests below among them, after
+one re-run of a client shard for main's `PeepoPopulationClientTests` cow-breeding flake.
+- `ConcordanceLogisticsGameTests` +13 (28 in all), passed in CI run 40085012234, each synchronous in one tick and checking
   `problems()` and every item, in containers and carried, after every step: seven of 03:193's cases for the hand,
   `aHandFillsACrucibleUntilItIsFull` (a part delivery noted full, the rest delivered once, one task only when the load
   is delivered in full; a Peepo asks for none of it meanwhile), `aHandTakesNothingWhereItsHolderMayNot`,
@@ -342,8 +343,8 @@ the tests below has run.
   area, cancelled, goes into the post, never to that chest; a stranded load bound back there is never claimed). The
   server restart is `ConcordancePersistenceGameTests.aHandsClaimSurvivesARestart`, as C-06's was. The porter's 15 tests
   are unchanged (the diff of their file removes no line), and `check_hand` names each of them.
-- Client, not yet run: `CompanionAutomationChecks.workshopHand` (`PeepoCompanionClientTests`): a Peepo serving a
-  crucible subtracts a workshop hand's live claim.
+- Client, passed in CI run 40085012234 (client shard 1): `CompanionAutomationChecks.workshopHand`
+  (`PeepoCompanionClientTests`): a Peepo serving a crucible subtracts a workshop hand's live claim.
 - Audits in `tools/check_mod_data.py`: `check_logistics` scans the release notes and item moves in `CourierWork` and the
   hand as well as the porter; `check_hand` (new) holds the one courier decision (`next` and `reserve` delegate,
   `serve`'s order, reservations within reach and load, neither courier repeating a ledger step), the hand's terms,
@@ -355,8 +356,8 @@ the tests below has run.
   `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
   `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
   `git diff --check`; `python3 tools/select_client_tests.py --base 97e1facd4 --head HEAD` chooses every client class
-  (239). **Not run:** `./gradlew build`, every server and client game test, any client, two clients, a real restart and
-  real walking.
+  (239). **Not run where it was written:** `./gradlew build` and the game tests (run by CI, above); any client by hand,
+  two clients, a real restart and real walking.
 
 ## World and event applicability
 

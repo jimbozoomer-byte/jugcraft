@@ -5,9 +5,11 @@ unit review's fixes, is pushed and green in CI: run 40067977680 on `da185dd0d` p
 game tests with and without the optional integrations, every client class). Unit 4, with its unit review's fixes, was
 built on the local `wip/chunk-d-u4` beside unit 2 and merged here at `df3006850`; CI compiled it, and its twenty hand
 tests failed at their first step in runs 40079227985 and 40082852322 through a test helper's comparison (fixed in
-`86c4e7127`); no run has yet passed them. Unit 2, with its unit review's fixes, was built on the local `wip/chunk-d-u2`
-from unit 1's records commit and merged here after unit 4; its local checks run and passed, and the next CI run is its
-Java's first compile. Units 3 and 5 are not started. Chunk D is developed on branch
+`86c4e7127`); run 40085012234 on `86c4e7127` passed them in both server jobs, and every job, its client companion check
+among them, after one re-run of a client shard for main's `PeepoPopulationClientTests` cow-breeding flake. Unit 2,
+with its unit review's fixes, was built on the local `wip/chunk-d-u2` from unit 1's records commit and merged here
+after unit 4; its local checks run and passed, and the next CI run is its Java's first compile. Units 3 and 5 are not
+started. Chunk D is developed on branch
 `claude/chunk-d-pact-hall` (local `wip/chunk-d`), started from
 Chunk C's head `779851cdb` ([#466](https://github.com/jimbozoomer-byte/jugcraft/pull/466), itself stacked on Chunk B's
 [#465](https://github.com/jimbozoomer-byte/jugcraft/pull/465)); when it is ready it is reviewed as a third stacked pull
@@ -121,7 +123,7 @@ completes the path. Nothing in units 3 and 4 comes before it.
 | 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Built (not merged): D-01 and D-02 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`; commits `56a74f4be`, `7477efbcd`, `fa5360d0d`, the records' `97e1facd4`, the unit review's fixes `3775eac3b` and 26.3's white wool `da185dd0d`). Local checks run and passed, 52 of 53 audit mutations reported (D-02's As built). Green in CI: run 40067977680 on `da185dd0d` passed every job (the build, the server game tests with and without the optional integrations, every client class) |
 | 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | Built (not merged), merged here after unit 4; checkpoint pending: D-03, D-04 and D-05 on the local `wip/chunk-d-u2`, from unit 1's records commit `97e1facd4` (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records' `8f0635d9e` and the unit review's fixes `f6ef0b85d`; records: new `stolas-pact.md`, `styxhexenhammer.md`, `arcane-concordance-celestial.md`). Local checks run and passed, all 80 audit mutations reported (D-05's As built) and the unit review's 15; `./gradlew build`, the server and client game tests and CI not run: the next CI run is its Java's first compile |
 | 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Not started |
-| 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Built (not merged): D-08 on the local `wip/chunk-d-u4`, from unit 1's head `97e1facd4` beside unit 2, commits `023b681e8`, `e51ef2b11`, the records' commit and the unit review's fixes ("Chunk D unit 4: fixes from the unit review"); merged here at `df3006850`, with the test fixes `ca2957291` and `86c4e7127`. Local checks run and passed, all 42 audit mutations reported and the nine the fixes add (D-08's As built). Compiled in CI: runs 40079227985 and 40082852322 failed its twenty hand tests at their first step (a test helper compared an item's use with the SUCCESS constant, which 26.3's `ItemStack.useOn` never returns; fixed in `86c4e7127`); no run has yet passed its 21 server game tests or the client companion check |
+| 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Built (not merged): D-08 on the local `wip/chunk-d-u4`, from unit 1's head `97e1facd4` beside unit 2, commits `023b681e8`, `e51ef2b11`, the records' commit and the unit review's fixes ("Chunk D unit 4: fixes from the unit review"); merged here at `df3006850`, with the test fixes `ca2957291` and `86c4e7127`. Local checks run and passed, all 42 audit mutations reported and the nine the fixes add (D-08's As built). Compiled in CI: runs 40079227985 and 40082852322 failed its twenty hand tests at their first step (a test helper compared an item's use with the SUCCESS constant, which 26.3's `ItemStack.useOn` never returns; fixed in `86c4e7127`); run 40085012234 passed its 21 server game tests and the client companion check, every job passing after one client shard's re-run for main's `PeepoPopulationClientTests` cow-breeding flake |
 | 5 | D-09 | Combined fixes, the whole-path test, load, client evidence, the two-client attempt, records, the checkpoint and the handoff | this page; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
 
 The plan allows three to five units (09:3); this is five plus the baseline. The completion evidence E1 to E7 that every
@@ -265,7 +267,8 @@ it; no open pull request in these lists does).
    `python3 tools/owner_art.py --check` when the owner's files are imported; `git diff --check`.
 7. CI by workflow_dispatch of the Build workflow, every client class, as Chunks B and C did.
 
-Each is reported on its own as run and passed, run and failed, or not run. Nothing has been run for Chunk D.
+Each is reported on its own as run and passed, run and failed, or not run. Nothing had been run for Chunk D when this
+contract was written; what has run since is in the status line and the units table.
 
 ## Tickets
 
@@ -393,7 +396,7 @@ another's anchor). The familiar's fix is a routine adjacent fix and not E2 evide
     D-P13); the play time is read through one helper, `played(person)`, which `check_workers` audits;
   - G10's shade save is in `workersKeepTheirModelsThroughASave`; the anchor joins `blockEntitiesStampTheirVersion`
     (D-P11 for the test players).
-- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +10 (the eight above and the familiar pair),
+- **Tests (passed in CI run 40067977680):** `ConcordanceWorkerGameTests` +10 (the eight above and the familiar pair),
   `ConcordanceAuthorityGameTests.onlyTheOwnersSideSealsAnAnchor` and `aStandInNeverSeals`,
   `ConcordancePersistenceGameTests.anAnchorsAgreementRoundTrips`; extended: `aSpiritKeepsToItsAgreement`,
   `workersKeepTheirModelsThroughASave`, `blockEntitiesStampTheirVersion`.
@@ -561,7 +564,7 @@ art.
     7-day period, a day's grace, 4 ahead) until D-05; `look` has no production caller until D-04's perch ticker (D-P9);
   - the Gentle loophole stays (Risks); an unreadable record is tested inside `aBoundWillReadsItsOlderSave`;
     `aChangeOfOwnerMovesNoPact` and `thePactRulesKeepTheirShape` are new.
-- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +7 (`upkeepWarnsThenSuspendsAfterGraceAndResumes`,
+- **Tests (passed in CI run 40067977680):** `ConcordanceWorkerGameTests` +7 (`upkeepWarnsThenSuspendsAfterGraceAndResumes`,
   `aReturnAfterAbsenceGetsTheFullGrace`, `absentAndUnloadedTimeIsNeverOwed`, `onlyTheHolderEnds`,
   `twoPlayersCannotBothSealOnePlace`, `noOneBindsAnotherPlayer`, `theConcordanceOffHoldsEveryClock`),
   `ConcordanceAuthorityGameTests.aChangeOfOwnerMovesNoPact`, `ConcordancePersistenceGameTests` +4
@@ -1483,7 +1486,7 @@ points are the last item below).**
      and departures cells; the merge notes re-read against unit 2's head and against unit 1's review fixes (below).
   7. The codex's "Its Terms" page names what the hand leaves (cargo beyond its carry, or that must go back beyond its
      area) and its post gone among the reasons it waits; the lang regenerated.
-- **Tests (none yet run in CI):** 21 server game tests, each `maxTicks = 20` and synchronous in one tick, on a new
+- **Tests (passed in CI run 40085012234, after the helper fix):** 21 server game tests, each `maxTicks = 20` and synchronous in one tick, on a new
   `WorkshopHands` fixture (package-private, not a test class). The 19 that move cargo start at a game day's beginning
   and check `problems()`, the Bound Wills and the conserved count after every step; the two binding tests
   (`anAnchorIsBoundOnlyWhileItKeepsNoAgreement`, `aBoundAnchorKeepsItsPost`) move none:
@@ -1891,7 +1894,9 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 - **Two clients:** likely not available; E5 may stay unverified in multiplayer.
 - **Unit 4 has not run (as built):** none of its Java has been compiled against Minecraft, and none of its 21 server
   game tests or its client companion check has run; CI is their first compile. It was built beside unit 2 and has not
-  met it: the merge (D-08's As built) is where `check_hand` first checks the Regard's research.
+  met it: the merge (D-08's As built) is where `check_hand` first checks the Regard's research. Since run: CI compiled
+  it in runs 40079227985 and 40082852322, which failed the twenty hand tests at a test helper's comparison; with the
+  helper fixed, run 40085012234 on `86c4e7127` passed all 21 and the client companion check.
 - **Holds finish claims (D-P75):** a suspended hand, or one past its hours or its day's loads, finishes the load it has
   claimed. A claim on a full destination stays held until there is room or the holder ends the agreement; it blocks only
   its own request, and other couriers still claim the rest of the post's queue.
@@ -1922,6 +1927,9 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 - **The companion check** grants research to the client player in the disposable Peepo world.
 - **Client CI cost:** `WorkshopHands.java` and `CompanionAutomationChecks.java` are shared files, so every client class
   runs (239).
+- **Outside Chunk D:** main's `PeepoPopulationClientTests` cow-breeding wait (the flake Chunk C's runs met) timed out
+  in client shard 15 of run 40085012234's first attempt, though #357's fix (`40381834a`) is on this branch; the shard's
+  re-run passed. Chunk D does not edit that test or the Peepo code.
 
 ## Explicit don'ts
 
@@ -2123,13 +2131,15 @@ questions.
 Units 1 (D-01, D-02), 4 (D-08) and 2 (D-03, D-04, D-05) are on the local `wip/chunk-d` (pushed as
 `claude/chunk-d-pact-hall`): unit 1 with its unit review's fixes (`3775eac3b`) and 26.3's white wool (`da185dd0d`),
 green in CI (run 40067977680); unit 4 from `wip/chunk-d-u4`, merged at `df3006850` with the test fixes `ca2957291` and
-`86c4e7127`; unit 2 from `wip/chunk-d-u2` (six commits on `97e1facd4`: `9daf23ae1`, `832129b95`, `7da686ad4`,
-`ee82c1dc7`, the records' `8f0635d9e` and the unit review's fixes `f6ef0b85d`), merged after unit 4 by the commit
-"Merge Chunk D unit 2 (Stolas and the pact perch) into the pact hall", not pushed when these notes were written. Before
+`86c4e7127`, green in CI (run 40085012234, one client shard re-run for main's cow-breeding flake); unit 2 from
+`wip/chunk-d-u2` (six commits on `97e1facd4`: `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records'
+`8f0635d9e` and the unit review's fixes `f6ef0b85d`), merged after unit 4 by the commit "Merge Chunk D unit 2 (Stolas
+and the pact perch) into the pact hall", not pushed when these notes were written. Before
 more work:
 1. Push to `claude/chunk-d-pact-hall` and run the Build workflow by workflow_dispatch with every client class (CI is
-   unit 2's first compile, and the first run of unit 4's hand tests after the helper fix); fix what fails and record
-   each failure and fix in the ticket's As built notes, the units table and the records (the workers record for units 1
+   unit 2's first compile; unit 4's hand tests already passed after the helper fix, in run 40085012234); fix what
+   fails and record each failure and fix in the ticket's As built notes, the units table and the records (the workers
+   record for units 1
    and 4, [stolas-pact.md](stolas-pact.md) for unit 2).
 2. Refresh main and the open pull requests (REST, read only); merge main if it has moved past `f904df3fd`, and Chunk
    C's branch if it has moved in review.
@@ -2143,7 +2153,9 @@ more work:
 4. Still open from unit 1's review fix 2 (D-08's As built, the last item): the hand inherits `joinsRosterOnStatus()`
    true, so a replaced hand loading while switched off could take a roster place; give it the shade's `false`, extend
    `check_pacts`' needle to it and add the test named there. Stolas says `false` since the merge of unit 2 (he joins
-   only by his seal, his call again or his seating), held by `check_pacts`.
+   only by his seal, his call again or his seating), held by `check_pacts`. Also open from unit 4:
+   `docs/ARCANE_CONCORDANCE.md` lists unit 2's saved identifiers but not unit 4's (`jugcraft:workshop_hand` and the
+   Spirit Anchor's `post`).
 5. Keep this page's units table, decisions and evidence current as each unit lands, with an As built note per ticket.
    Then unit 3 (D-06, D-07: Stolas's own body, sounds and Jade on `StolasEntity`'s clips; the roster screen, which gives
    ending a pact without its perch an in-game route; decisions from D-P90) and unit 5 (D-09).
