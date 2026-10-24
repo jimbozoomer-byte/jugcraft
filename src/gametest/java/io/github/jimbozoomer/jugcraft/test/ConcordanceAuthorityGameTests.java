@@ -8,6 +8,9 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceEffects;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
+import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Cause;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectKind;
 import io.github.jimbozoomer.jugcraft.concordance.effect.EffectSpec;
@@ -24,6 +27,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.TaglockItem;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
@@ -43,11 +47,13 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -435,5 +441,72 @@ public class ConcordanceAuthorityGameTests {
 		ConcordanceProgress.grant(player, Sympathy.RESEARCH, ResearchState.UNDERSTOOD);
 		ConcordanceProgress.setFocus(player, 20);
 		return player;
+	}
+
+	/**
+	 * Concordance Chunk D, D-08 (E1, D-S8): a workshop hand serves only a post its holder may use, bound by its anchor's owner's
+	 * side. A stranger's key is never set to another's post; one the owner handed over binds no stranger's anchor; a stranger
+	 * binds or seals nothing at the owner's anchor, nor does a stand-in with the owner's identity, nor the owner under a
+	 * neighbour's claim; a key used on an anchor never takes it for a route's container. Only the owner's binding and seal give
+	 * a hand, and it serves the owner's request.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aStrangerCannotBindAHandToAnotherPlayersPost(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = WorkshopHands.holder(helper);
+		ServerPlayer stranger = WorkshopHands.holder(helper);
+		CourierPostBlockEntity post = WorkshopHands.post(helper, owner, WorkshopHands.POST);
+		ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+		Couriers.request(owner, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+		long id = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		List<Long> ids = List.of(id);
+		GlobalPos owners = GlobalPos.of(level.dimension(), helper.absolutePos(WorkshopHands.POST));
+		BlockPos strangersAnchorAt = new BlockPos(4, 1, 5);
+		BlockPos strangersPostAt = new BlockPos(6, 1, 2);
+		SpiritAnchorBlockEntity strangersAnchor = WorkshopHands.anchor(helper, stranger, strangersAnchorAt);
+		WorkshopHands.post(helper, stranger, strangersPostAt);
+		helper.assertTrue(WorkshopHands.keyFor(helper, stranger, WorkshopHands.POST).get(Couriers.KEY_POST) == null,
+				"A stranger's key is never set to another player's post");
+		ItemStack handed = WorkshopHands.keyFor(helper, owner, WorkshopHands.POST);
+		helper.assertTrue(owners.equals(handed.get(Couriers.KEY_POST)) && WorkshopHands.use(helper, stranger, handed, strangersAnchorAt) == InteractionResult.FAIL
+				&& strangersAnchor.post() == null && handed.get(Workers.PORTER_ROUTE) == null,
+				"A key the owner handed over binds no stranger's anchor to the owner's post, and an anchor is never taken for a route");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "a handed key refused", chest, post);
+		SpiritAnchorBlockEntity ownersAnchor = WorkshopHands.anchor(helper, owner, WorkshopHands.ANCHOR);
+		helper.assertTrue(WorkshopHands.use(helper, stranger, WorkshopHands.keyFor(helper, stranger, strangersPostAt), WorkshopHands.ANCHOR) == InteractionResult.FAIL
+				&& WorkshopHands.use(helper, stranger, handed, WorkshopHands.ANCHOR) == InteractionResult.FAIL && ownersAnchor.post() == null,
+				"A stranger binds the owner's anchor to no post, theirs or the owner's");
+		FakePlayer standIn = FakePlayer.get(level, new GameProfile(owner.getUUID(), "[Concordance]"));
+		helper.assertTrue(WorkshopHands.use(helper, standIn, handed, WorkshopHands.ANCHOR) == InteractionResult.FAIL && ownersAnchor.post() == null,
+				"nor does a stand-in with the owner's identity");
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(WorkshopHands.ANCHOR), NEIGHBOUR);
+			helper.assertTrue(WorkshopHands.use(helper, owner, handed, WorkshopHands.ANCHOR) == InteractionResult.FAIL && ownersAnchor.post() == null,
+					"Under a neighbour's claim, not even its owner binds it");
+		}
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "nothing bound", chest, post);
+		helper.assertTrue(WorkshopHands.use(helper, owner, handed, WorkshopHands.ANCHOR) == InteractionResult.SUCCESS && owners.equals(ownersAnchor.post()),
+				"Its owner binds it to their post");
+		helper.assertTrue(WorkshopHands.use(helper, stranger, WorkshopHands.keyFor(helper, stranger, strangersPostAt), WorkshopHands.ANCHOR) == InteractionResult.FAIL
+				&& owners.equals(ownersAnchor.post()), "A stranger cannot re-bind it");
+		helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, stranger, ownersAnchor)), "message.jugcraft.concordance.workers.seal_not_permitted",
+				"nor seal a hand at it, and is told why");
+		helper.assertTrue(ownersAnchor.agreement() == null && BoundWills.of(level.getServer()).ledger().heldBy(stranger.getUUID()).isEmpty(),
+				"Nothing is recorded for anyone");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "nothing sealed", chest, post);
+		helper.assertValueEqual(WorkshopHands.key(WorkshopHands.seal(helper, owner, ownersAnchor)), WorkshopHands.SEALED, "Its owner seals a workshop hand");
+		WorkshopHandEntity hand = (WorkshopHandEntity) level.getEntity(ownersAnchor.spirit());
+		WorkshopHands.stand(helper, hand, 2.5, 1.0, 3.5);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 3_700_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertTrue(hand.think(level, in, now) == Status.TRAVELLING && hand.task() == id, "and it takes its owner's request");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "claimed", chest, post);
+		helper.assertValueEqual(hand.think(level, in, now + 20), Status.WORKING, "it picks up");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "picked up", chest, post);
+		helper.assertTrue(hand.think(level, in, now + 40) == Status.WORKING && ledger.ledger().get(id) == null
+				&& WorkshopHands.matching(post, WorkshopHands.PLAIN) == 2, "delivering it, once");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "delivered", chest, post);
+		helper.succeed();
 	}
 }

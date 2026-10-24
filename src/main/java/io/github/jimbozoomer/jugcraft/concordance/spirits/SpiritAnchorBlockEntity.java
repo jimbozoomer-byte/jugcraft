@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +35,8 @@ import org.jspecify.annotations.Nullable;
  * empty. A copy of an anchor elsewhere is inert. Its holder may suspend or resume the agreement and calls another shade
  * when theirs is lost (AgreementHolder.end ends it without breaking the anchor); breaking the anchor with the Concordance
  * on releases it: the Bound Will is released, the shade leaves its load here, and everything here drops where the anchor
- * stood.
+ * stood. Since Concordance Chunk D (D-08) it may be bound to a Courier Post (an optional post): one so bound seals a
+ * Workshop Hand.
  */
 public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyContainer, AgreementHolder.Holds {
 	public static final int SLOTS = 9;
@@ -44,6 +46,7 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 
 	private NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 	private final AgreementHolder holder = new AgreementHolder(this);
+	private @Nullable GlobalPos post;
 
 	public SpiritAnchorBlockEntity(BlockPos pos, BlockState state) {
 		super(Workers.ANCHOR_ENTITY, pos, state);
@@ -87,21 +90,53 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 		return holder.seal(level, player, sealing(terms, null), gameTime);
 	}
 
-	/** Calls a Gathering Shade beside the anchor for {@code who}; the anchor calls no other counterpart (critique 7). */
+	/** The Courier Post this anchor is bound to (D-08), or null: a Workshop Hand sealed here carries that post's requests. */
+	public @Nullable GlobalPos post() {
+		return post;
+	}
+
+	/** Binds the anchor to {@code next}, or unbinds it (null). Only PorterKeyItem.bind calls this, having asked who may and where. */
+	void setPost(@Nullable GlobalPos next) {
+		post = next;
+		setChanged();
+	}
+
+	/**
+	 * What the anchor seals for a Workshop Hand (D-08, D-S2): its own agreement and counterpart, its terms, no upkeep, for
+	 * its holder and their party (the Courier Post's rule, recorded on the Bound Will), any number a holder, sealed by the
+	 * owner or their party, at no cost.
+	 */
+	public AgreementHolder.Sealing handSealing(WorkerDefinition.Spirit terms) {
+		return new AgreementHolder.Sealing(WorkshopHandEntity.DEFINITION, WorkshopHandEntity.DEFINITION, AgreementHolder.service(terms), null,
+				UseMode.PARTY, false, true, null, null);
+	}
+
+	/** Calls this anchor's presence for {@code who}: a Gathering Shade, or (D-08) a Workshop Hand; nothing for any other counterpart (critique 7). */
 	@Override
-	public @Nullable GatheringShadeEntity call(ServerLevel level, UUID who, String counterpart) {
-		if (!COUNTERPART.equals(Pacts.counterpart(counterpart))) {
-			return null;
-		}
-		GatheringShadeEntity shade = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.MOB_SUMMONED);
-		if (shade == null) {
-			return null;
-		}
+	public @Nullable WorkerEntity<?> call(ServerLevel level, UUID who, String counterpart) {
+		String wanted = Pacts.counterpart(counterpart);
 		BlockPos pos = getBlockPos();
-		shade.setOwner(who);
-		shade.setAnchor(pos);
-		shade.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.0F, 0.0F);
-		return level.addFreshEntity(shade) ? shade : null;
+		WorkerEntity<?> called;
+		if (COUNTERPART.equals(wanted)) {
+			GatheringShadeEntity shade = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (shade == null) {
+				return null;
+			}
+			shade.setAnchor(pos);
+			called = shade;
+		} else if (WorkshopHandEntity.DEFINITION.equals(wanted)) {
+			WorkshopHandEntity hand = Workers.WORKSHOP_HAND.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (hand == null) {
+				return null;
+			}
+			hand.setAnchor(pos);
+			called = hand;
+		} else {
+			return null;
+		}
+		called.setOwner(who);
+		called.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.0F, 0.0F);
+		return level.addFreshEntity(called) ? called : null;
 	}
 
 	/** Puts what fits of {@code stack} into the anchor; returns the rest. */
@@ -212,6 +247,7 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 		items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
 		holder.load(input);
+		post = input.read("post", GlobalPos.CODEC).orElse(null);
 	}
 
 	@Override
@@ -220,5 +256,8 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 		Saved.stamp(output, 1);
 		ContainerHelper.saveAllItems(output, items);
 		holder.save(output);
+		if (post != null) {
+			output.store("post", GlobalPos.CODEC, post);
+		}
 	}
 }

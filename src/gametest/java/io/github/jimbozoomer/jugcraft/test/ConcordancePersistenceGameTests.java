@@ -27,6 +27,8 @@ import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Request;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.RequestState;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
@@ -43,6 +45,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.starbound.ConclaveProjects;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
@@ -56,8 +59,10 @@ import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -71,6 +76,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -91,7 +99,8 @@ import net.minecraft.world.level.storage.TagValueOutput;
  * Bed saved before harvest strain reads unstrained (C-08), and one saved before grafts ungrafted (C-09); a Spirit Anchor
  * keeps its owner and agreement through a save (Concordance Chunk D, D-01); a Bound Will saved before pacts reads without
  * one, a pact record and its escrow round-trip, the pact history keeps eight, and an anchor from before Chunk D moves its
- * suspension onto its Bound Will once (D-02).
+ * suspension onto its Bound Will once (D-02). D-08: a workshop hand saves only its claim's id and its anchor, the anchor
+ * its post, and a claim in progress survives a restart.
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -695,5 +704,96 @@ public class ConcordancePersistenceGameTests {
 		CrucibleStandBlockEntity copy = new CrucibleStandBlockEntity(like.getBlockPos(), like.getBlockState());
 		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
 		return copy;
+	}
+
+	/**
+	 * D-08 (03:193 "server restarts"; E4): a hand carrying for a crucible saves only its claim's id and its anchor, never the
+	 * cargo, at version 1; the anchor saves its post; the Bound Will keeps who benefits and the courier terms; the ledger keeps
+	 * the claim, its lease, the exact item and the cargo. Unloaded, the hand lets nothing go; read back, it delivers once. A
+	 * save without a claim reads as none.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandsClaimSurvivesARestart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		CrucibleBlockEntity crucible = shop.crucible();
+		SpiritAnchorBlockEntity anchor = shop.anchor();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 3_800_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the crucible's request");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "claimed", shop.chest(), crucible);
+		hand.think(level, in, now + 20);
+		Request carrying = ledger.ledger().get(id);
+		helper.assertTrue(hand.task() == id && carrying.state() == RequestState.IN_TRANSIT && carrying.progress().carried() == 2
+				&& hand.getUUID().equals(carrying.progress().worker()), "A claim in progress: two glowstone in transit for the crucible");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "in transit", shop.chest(), crucible);
+		TagValueOutput handOut = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		hand.saveWithoutId(handOut);
+		CompoundTag handSaved = handOut.buildResult();
+		helper.assertTrue(handSaved.getIntOr(Saved.VERSION, 0) == 1 && handSaved.getLongOr("task", 0L) == id && handSaved.contains("anchor")
+				&& !handSaved.contains("carried"), "The hand saves its claim's id and its anchor, never the cargo, at version 1: " + handSaved);
+		CompoundTag anchorSaved = anchor.saveWithoutMetadata(level.registryAccess());
+		SpiritAnchorBlockEntity read = loadAnchor(level, anchor, anchorSaved);
+		helper.assertTrue(anchorSaved.getIntOr(Saved.VERSION, 0) == 1 && anchorSaved.contains("post") && anchor.post().equals(read.post())
+				&& anchor.agreement().equals(read.agreement()) && shop.holder().getUUID().equals(read.owner()) && hand.getUUID().equals(read.spirit()),
+				"The anchor saves its post beside its owner, agreement and hand, at version 1: " + anchorSaved);
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		BoundWills wills = BoundWills.of(level.getServer());
+		BoundWill record = wills.ledger().get(anchor.agreement().record());
+		BoundWills reread = BoundWills.CODEC.parse(ops, BoundWills.CODEC.encodeStart(ops, wills).result().orElseThrow()).result().orElse(null);
+		helper.assertTrue(reread != null && record.equals(reread.ledger().get(record.id())) && Pacts.PARTY.equals(record.pact().beneficiaries())
+				&& "courier".equals(record.pact().service().work()) && WorkshopHandEntity.DEFINITION.equals(record.counterpart()),
+				"Its Bound Will keeps who benefits (the holder's party) and its courier terms through a save: " + record);
+		TagValueOutput ledgerOut = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		ledgerOut.store("ledger", CourierLedger.CODEC, ledger);
+		CourierLedger restarted = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), ledgerOut.buildResult())
+				.read("ledger", CourierLedger.CODEC).orElseThrow();
+		helper.assertTrue(carrying.equals(restarted.ledger().get(id)) && ItemVariant.of(new ItemStack(Items.GLOWSTONE_DUST)).equals(restarted.item(id))
+				&& restarted.problems().isEmpty(), "The ledger keeps the claim, its lease, the exact item and the cargo, counted once");
+		UUID handId = hand.getUUID();
+		hand.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		helper.assertTrue(carrying.equals(ledger.ledger().get(id)), "Unloaded with the server, the hand lets nothing go");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "unloaded", shop.chest(), crucible);
+		WorkshopHandEntity back = Workers.WORKSHOP_HAND.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), handSaved));
+		helper.assertTrue(handId.equals(back.getUUID()) && back.task() == id && helper.absolutePos(WorkshopHands.ANCHOR).equals(back.seat())
+				&& shop.holder().getUUID().equals(back.owner()) && level.addFreshEntity(back), "Read back from its save: the same hand, its claim and its anchor");
+		helper.assertTrue(back.think(level, in, now + 40) == Status.WORKING && ledger.ledger().get(id) == null
+				&& WorkshopHands.matching(crucible, WorkshopHands.PLAIN) == 2, "Within its lease it carries on and delivers, once");
+		WorkshopHands.conserved(helper, ids, WorkshopHands.PLAIN, 10, 0, "delivered", shop.chest(), crucible);
+		CompoundTag before = handSaved.copy();
+		before.remove("task");
+		WorkshopHandEntity claimless = Workers.WORKSHOP_HAND.create(level, EntitySpawnReason.LOAD);
+		claimless.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), before));
+		helper.assertTrue(claimless.task() == 0L && helper.absolutePos(WorkshopHands.ANCHOR).equals(claimless.seat()), "A save without a claim reads as none");
+		helper.succeed();
+	}
+
+	/** D-08: an anchor saves the Courier Post it is bound to, at version 1; one saved before has none (it seals a shade); one that cannot be read has none, the rest kept. */
+	@GameTest(maxTicks = 20)
+	public void aBoundAnchorKeepsItsPost(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = WorkshopHands.holder(helper);
+		WorkshopHands.post(helper, owner, WorkshopHands.POST);
+		SpiritAnchorBlockEntity anchor = WorkshopHands.anchor(helper, owner, WorkshopHands.ANCHOR);
+		helper.assertTrue(WorkshopHands.use(helper, owner, WorkshopHands.keyFor(helper, owner, WorkshopHands.POST), WorkshopHands.ANCHOR) == InteractionResult.SUCCESS,
+				"The anchor is bound to its owner's post");
+		GlobalPos post = GlobalPos.of(level.dimension(), helper.absolutePos(WorkshopHands.POST));
+		CompoundTag saved = anchor.saveWithoutMetadata(level.registryAccess());
+		SpiritAnchorBlockEntity read = loadAnchor(level, anchor, saved);
+		helper.assertTrue(saved.contains("post") && saved.getIntOr(Saved.VERSION, 0) == 1 && post.equals(read.post()) && owner.getUUID().equals(read.owner())
+				&& read.agreement() == null, "Saved with its post at version 1, and read back exactly: " + saved);
+		CompoundTag older = saved.copy();
+		older.remove("post");
+		helper.assertTrue(loadAnchor(level, anchor, older).post() == null, "One saved before has none");
+		CompoundTag unreadable = saved.copy();
+		unreadable.putString("post", "nowhere");
+		SpiritAnchorBlockEntity kept = loadAnchor(level, anchor, unreadable);
+		helper.assertTrue(kept.post() == null && owner.getUUID().equals(kept.owner()), "One that cannot be read has none; the rest is kept");
+		helper.succeed();
 	}
 }

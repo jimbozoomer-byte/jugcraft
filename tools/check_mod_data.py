@@ -14292,6 +14292,7 @@ def check_concordance(registered):
     check_workers(co, root, lang, registered, research)
     check_pacts(co, root, lang)
     check_logistics(co, root, lang, registered)
+    check_hand(co, root, lang, research)
     check_crucible_supply(co, root)
     check_artifice(co, root, lang, registered, research)
     check_relics(co, root, lang, registered, research)
@@ -17908,7 +17909,8 @@ def check_workers(co, root, lang, registered, research):
         err(f"workers: the three kinds need a definition each, found {sorted(kinds)}")
     registry = java("Workers.java", spirits)
     client = java("WorkerClient.java", CLIENT_JAVA_ROOT)
-    classes = {"hearthling": "HearthlingEntity", "gathering_shade": "GatheringShadeEntity", "clockwork_porter": "ClockworkPorterEntity"}
+    classes = {"hearthling": "HearthlingEntity", "gathering_shade": "GatheringShadeEntity", "clockwork_porter": "ClockworkPorterEntity",
+               "workshop_hand": "WorkshopHandEntity"}
     for key, info in wk.WORKERS.items():
         if defined.get(key, {}).get("kind") != info["kind"]:
             err(f"concordance/worker/{key}.json: differs from WORKERS (run tools/generate_material_data.py)")
@@ -18176,6 +18178,141 @@ def check_logistics(co, root, lang, registered):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw("courier_post").tobytes() or img.size != (16, 16):
                 err("logistics: textures/item/courier_post.png differs from its map: run tools/generate_textures.py")
+
+
+def check_hand(co, root, lang, research):
+    """Concordance Chunk D, unit 4 (D-08; D-S2, D-S12, D-S16, D-S20; docs/features/concordance-chunk-d.md): the porter's
+    courier decision is one helper, spirits/CourierWork, called by the porter and the workshop hand, never copied (the
+    porter's choice of request and its reservations unchanged); its terms are asked only with no live claim. The hand is a
+    spirit whose service is a spirit's; it is sealed only by one who has mastered Stolas's Regard, asked before the anchor
+    seals; it takes only its beneficiaries' requests inside its area, from sources inside it, at most its carry a trip; a
+    load delivered in full is one task; ending lets its claim go, agreement_ended, killing worker_removed; it holds only its
+    claim's id. The anchor calls it by counterpart, records party beneficiaries and saves its post as an optional key; only
+    who may seal there binds it, rate-limited, before the key's container branch. Its sheet is the generator's; the unit's
+    tests exist, and so do the porter's."""
+    wk = co.workers
+    spirits = root / "spirits"
+    def java(relative, base=root):
+        path = base / relative
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    # One courier decision, shared.
+    ledger = java("logistics/Logistics.java")
+    if "public @Nullable Request next(Place post, long now, Predicate<Request> serves)" not in ledger \
+            or "return next(post, now, request -> true);" not in ledger:
+        err("logistics/Logistics.java: next(post, now) is next(post, now, serves) serving every request (D-08)")
+    if "return reserve(id, worker, source, available, Integer.MAX_VALUE, now);" not in ledger \
+            or "Math.min(Math.min(request.remaining(), most), available - reservedAt(source, request.ticket().item(), id))" not in ledger:
+        err("logistics/Logistics.java: reserve without a cap is reserve(..., Integer.MAX_VALUE, ...); a cap applies after other claims' reservations (D-08)")
+    work = java("spirits/CourierWork.java")
+    serve = _java_body(work, "Status serve(")
+    for needle in ("terms.ready()", "ledger.ledger().next(place, now)", "terms.refuses(first)",
+                   "Authority.answering(level, next.ticket().requester()) == null", "ledger.renew(task, worker.getUUID(), now)"):
+        if needle not in serve:
+            err(f"spirits/CourierWork.serve: the porter's courier decision, shared ({needle})")
+    if not 0 <= serve.find("request.claimedBy(worker.getUUID(), now)") < serve.find("terms.ready()") < serve.find("ledger.claim("):
+        err("spirits/CourierWork.serve: a courier's terms are asked only with no live claim, before it takes a new one (D-08)")
+    reserve = _java_body(work, "private Status reserve(")
+    if "terms.reaches(pos)" not in reserve or "terms.load()" not in reserve:
+        err("spirits/CourierWork.reserve: a courier reserves only where it reaches, at most its load (D-08)")
+    porter = java("spirits/ClockworkPorterEntity.java")
+    hand = java("spirits/WorkshopHandEntity.java")
+    for name, text in (("ClockworkPorterEntity.java", porter), ("WorkshopHandEntity.java", hand)):
+        if "new CourierWork(this, REACH)" not in text or "courier.serve(level, " not in text:
+            err(f"spirits/{name}: serves its post through the shared CourierWork (D-08), never its own copy")
+        for copied in (".claim(", ".reserve(", ".pickUp(", ".takeUp(", ".giveBack(", "getChunkNow(", ".next("):
+            if copied in text:
+                err(f"spirits/{name}: the courier decision is CourierWork's; this worker repeats it ({copied})")
+    # The hand: a spirit, sealed only by one who has mastered Stolas's Regard.
+    info = wk.WORKERS.get("workshop_hand", {})
+    if info.get("kind") != "spirit" or info.get("work") != "courier" or "courier" not in wk.WORK:
+        err("tools/concordance_workers.py: the workshop hand is a spirit whose work is courier (D-S2)")
+    if 'return "spirit";' not in _java_body(hand, "public String kind()"):
+        err("spirits/WorkshopHandEntity.java: the workshop hand is a spirit")
+    for path in sorted(spirits.glob("*.java")):
+        for key in re.findall(r'Practiced\(Workers\.ACTIVITY, "([a-z_]+)"\)', path.read_text(encoding="utf-8")):
+            if key not in ("familiar", "spirit", "construct"):
+                err(f"spirits/{path.name}: a worker's service is recorded under its kind, never '{key}' (the Binding Arts' distinct 3)")
+    if 'Practiced(Workers.ACTIVITY, "spirit")' not in hand:
+        err("spirits/WorkshopHandEntity.java: a hand's delivery is a spirit's service (the Binding Arts' distinct 3 unchanged)")
+    if f'String REGARD = "{wk.HAND_RESEARCH}";' not in hand or "state(REGARD).atLeast(ResearchState.MASTERED)" not in hand:
+        err("spirits/WorkshopHandEntity.java: a hand is sealed only by one who has mastered Stolas's Regard (D-S12)")
+    # Stolas's Regard is unit 2's research (D-03; tools/concordance_pacts.py). Unit 4 is built beside it and names only its
+    # id: once unit 2's tables are in the tree, the gate's research must exist with a mastered state, under that id.
+    if (ROOT / "tools" / "concordance_pacts.py").is_file():
+        if "mastered" not in research.get(split(wk.HAND_RESEARCH)[1], {}).get("states", {}):
+            err(f"concordance/research: {wk.HAND_RESEARCH}, the workshop hand's gate, must exist with a mastered state (Chunk D unit 2)")
+    block = java("spirits/SpiritAnchorBlock.java")
+    seal = _java_body(block, "private static Component sealHand(")
+    if not 0 <= seal.find("WorkshopHandEntity.regarded(player)") < seal.find("maySeal(level, player, true)") \
+            < seal.find("WorkshopHandEntity.mayServe(") < seal.find("anchor.holder().seal("):
+        err("SpiritAnchorBlock.sealHand: Stolas's Regard, who may seal and a post still usable, before anything is sealed (D-S12)")
+    if not 0 <= _java_body(block, "public static Component use(").find("Workers.knows(player)") \
+            < _java_body(block, "public static Component use(").find("return sealHand(player, level, anchor, now);"):
+        err("SpiritAnchorBlock.use: an anchor bound to a post seals a hand, after the Binding Arts are asked")
+    if "stack.is(Workers.PORTER_KEY) ? InteractionResult.PASS" not in block:
+        err("SpiritAnchorBlock.useItemOn: a Porter Key is the key's to use on the anchor")
+    # Its decision and its terms.
+    decide = _java_body(hand, "private Status decide(")
+    order = [decide.find(n) for n in ("Workers.enabled()", "home.holder().verify(level, gameTime)", "Authority.answering(level, owner) == null",
+                                      "courier.serve(level, ")]
+    if -1 in order or order != sorted(order):
+        err("WorkshopHandEntity.decide: switched off it waits; it serves only an anchor whose record keeps it; only while its holder answers; then the shared decision (D-08, D-S16)")
+    terms = _java_body(hand, "private CourierWork.Terms courierTerms(")
+    for needle in ("home.holder().held(level)", "agreement.permits(agreement.work(), agreement.dimension(), agreement.x(), agreement.y(), agreement.z(), time, gameTime)",
+                   "agreement.within(pos.getX(), pos.getY(), pos.getZ())", "definition.carry()", "if (finished)", "home.holder().taskDone(where, now)"):
+        if needle not in terms:
+            err(f"WorkshopHandEntity.courierTerms: a new claim only unheld, in its hours, under its loads; sources in its area; its carry; a full load a task ({needle})")
+    if "Pacts.benefits(record, requester, JugcraftParties.sameParty(record.holder(), requester))" not in hand \
+            or "agreement.within(to.x(), to.y(), to.z())" not in hand:
+        err("WorkshopHandEntity.refusal: only its beneficiaries' requests, bound inside its area (D-S2)")
+    if 'courier.release(level, "agreement_ended")' not in _java_body(hand, "public void leave("):
+        err("WorkshopHandEntity.leave: its agreement over, it lets its claim go, the cargo stranded at the post (D-08)")
+    removed = _java_body(hand, "public void remove(RemovalReason reason)")
+    if "shouldDestroy()" not in removed or 'courier.release(server, "worker_removed")' not in removed or ".remove(owner, getUUID())" not in removed:
+        err("WorkshopHandEntity.remove: killed or discarded, struck off its roster and its claim let go once (worker_removed)")
+    if re.search(r"(?:NonNullList|List)<(?:[\w.]+\.)?ItemStack>", hand):
+        err("spirits/WorkshopHandEntity.java: a hand holds only its claim's id; the cargo is the courier ledger's")
+    # The anchor and the key.
+    anchor = java("spirits/SpiritAnchorBlockEntity.java")
+    if 'input.read("post", GlobalPos.CODEC).orElse(null)' not in anchor or 'output.store("post", GlobalPos.CODEC, post)' not in anchor:
+        err("spirits/SpiritAnchorBlockEntity.java: an anchor's post is an optional key (an older anchor has none)")
+    call = _java_body(anchor, "public @Nullable WorkerEntity<?> call(")
+    if "WorkshopHandEntity.DEFINITION.equals(wanted)" not in call or "Workers.WORKSHOP_HAND.create(" not in call:
+        err("SpiritAnchorBlockEntity.call: the anchor calls a Workshop Hand for its counterpart (D-08)")
+    if "UseMode.PARTY" not in _java_body(anchor, "public AgreementHolder.Sealing handSealing("):
+        err("SpiritAnchorBlockEntity.handSealing: a hand serves its holder and their party, recorded on its Bound Will (D-S2)")
+    key = java("spirits/PorterKeyItem.java")
+    use_on = _java_body(key, "public InteractionResult useOn(")
+    if not 0 <= use_on.find("instanceof SpiritAnchorBlockEntity anchor") < use_on.find("instanceof Container)") \
+            or not 0 <= use_on.find('RateGate.allow(player, "workers", 4)') < use_on.find("bind(player, level, anchor"):
+        err("PorterKeyItem.useOn: an anchor is bound before the container branch, rate-limited first")
+    bind = _java_body(key, "public static Binding bind(")
+    order = [bind.find(n) for n in ("Workers.enabled()", "holder.verify(level, ", "Code.CONFLICTING_AGREEMENT", "holder.maySeal(level, player, true)",
+                                    "standing != AgreementHolder.Standing.NONE", "WorkshopHandEntity.mayServe(", "anchor.setPost(GlobalPos.of(")]
+    if -1 in order or order != sorted(order):
+        err("PorterKeyItem.bind: switched on; a copy binds nothing; only who may seal there; only while nothing is kept; only a usable post (D-08)")
+    # Its sheet is the generator's.
+    import concordance_worker_art as worker_art
+    sheet = ASSETS / "textures" / "entity" / "workshop_hand.png"
+    if sheet.is_file():
+        with Image.open(sheet) as img:
+            if img.convert("RGBA").tobytes() != worker_art.hand_sheet().tobytes():
+                err("textures/entity/workshop_hand.png differs from tools/concordance_worker_art.py: run tools/generate_textures.py")
+    # The unit's tests, the porter's, and the companion check.
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    for cls, wanted in UNIT4_TESTS.items():
+        source = java(f"{cls}.java", tests)
+        for name in wanted:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing Concordance Chunk D unit 4 game test {name}")
+    logistics = java("ConcordanceLogisticsGameTests.java", tests)
+    for name in PORTER_LOGISTICS_TESTS:
+        if f"public void {name}(GameTestHelper helper)" not in logistics:
+            err(f"ConcordanceLogisticsGameTests: the porter's test {name} is gone (D-08: the shared courier decision leaves the porter as it was)")
+    companion = java("CompanionAutomationChecks.java", ROOT / "src" / "gametest" / "java" / "local" / "peepo")
+    if "()->workshopHand(l,p));" not in companion or "private void workshopHand(ServerLevel l,ServerPlayer owner){" not in companion \
+            or "c.courierRemainder(shortage.add())==3" not in companion:
+        err("local/peepo/CompanionAutomationChecks.java: a Peepo's need subtracts a workshop hand's live claim (D-08, E6)")
 
 
 def check_artifice(co, root, lang, registered, research):
@@ -20194,11 +20331,13 @@ AUTHORITY_ROUTES = {
                                  "Authority.answering(level, next.ticket().requester()) == null",
                                  "Authority.mayChangeFor(level, worker.owner(), from)"],
     "spirits/GatheringShadeEntity.java": ["Authority.answering(level, agreement.holder()) == null"],
+    # Concordance Chunk D, D-08: a workshop hand works only while its holder answers, and only who may seal at an anchor binds it.
+    "spirits/WorkshopHandEntity.java": ["Authority.answering(level, owner) == null"],
     # Concordance Chunk D (D-S8): sealing asks at the place, as the sealer and never as a stand-in.
     # D-S3 (D-02): upkeep is looked at only with the holder present near the place, never a stand-in.
     "spirits/AgreementHolder.java": ["if (Authority.isStandIn(player) || !Authority.mayChange(level, player, block.getBlockPos()))",
                                      "Authority.presentNear(level, record.holder(), block.getBlockPos(), Pacts.REACH)"],
-    "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)"],
+    "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)", "holder.maySeal(level, player, true)"],
     "spire/ConcordSpire.java": ["Authority.answering(level, state.keeper())", "Authority.mayChange(level, keeper, at)"],
     "sympathy/Sympathy.java": ["Authority.mayStrike(caster, target)", 'return "not_yours";'],
     "sympathy/ScryingGlassItem.java": ["Sympathy.allowed(player, target)", "Hexes.MAX_RANGE"],
@@ -20341,6 +20480,24 @@ UNIT1_TESTS = {
     "ConcordanceSharingGameTests": ["aCopiedAnchorGivesNothingAndReleasesNothing", "aLegacyAnchorClaimsItsPlaceOnce", "endingTwiceReturnsOnce"],
     "ConcordanceResourceGameTests": ["thePactRulesKeepTheirShape"],
 }
+# Concordance Chunk D, unit 4's game tests (check_hand), and the porter's fifteen logistics tests, which the shared courier
+# decision leaves in place (D-08: the porter behaves as before).
+UNIT4_TESTS = {
+    "ConcordanceLogisticsGameTests": ["aHandFillsACrucibleUntilItIsFull", "aHandTakesNothingWhereItsHolderMayNot",
+                                      "aHandThatCannotFindItsWayStrandsItsCargoOnce", "anUnloadedDestinationKeepsTheHandWaiting",
+                                      "aKilledHandStrandsItsCargoOnce", "anAbsentHolderStopsTheHand", "aBrokenSourceReleasesTheHandsClaim",
+                                      "twoHandsCannotHoldOneRequest", "endingWithCargoAboardStrandsItOnce", "aHandServesOnlyItsBeneficiaries",
+                                      "aHandTakesOnlyFromInsideItsArea"],
+    "ConcordanceWorkerGameTests": ["aRequestOutsideTheHoursOrAreaIsRefusedWithItsReason", "theHandNeedsStolasRegardMastered",
+                                   "theConcordanceOffHoldsTheHand", "aHandsServiceIsASpiritsService", "anAnchorIsBoundOnlyWhileItKeepsNoAgreement"],
+    "ConcordanceAuthorityGameTests": ["aStrangerCannotBindAHandToAnotherPlayersPost"],
+    "ConcordancePersistenceGameTests": ["aHandsClaimSurvivesARestart", "aBoundAnchorKeepsItsPost"],
+}
+PORTER_LOGISTICS_TESTS = ["aRequestIsFetchedAndDelivered", "simultaneousRequestsNeverClaimTheSameItems", "fullStorageRemovalAndRestartLoseNothing",
+                          "cancellingAndRecoveringGiveItemsBack", "aBrokenPostSendsItsCargoBack", "aCrucibleAsksOnceForItsExactShortage",
+                          "aClearedOrReplacedFormulaCancelsItsRequest", "aFullCourierQuotaWaitsAndBacksOff", "aBrokenCrucibleTurnsItsRequestBack",
+                          "aCourierFillsACrucibleUntilItIsFull", "aCrucibleWithNoRoomAsksForNothing", "aPostTheSetterMayNotUseIsNeverAsked",
+                          "anUnloadedCrucibleWaitsAndLosesNothing", "aDiscardedPorterStrandsItsCargoOnce", "anOfflineSetterPausesTheCourier"]
 
 
 def check_persistence(root):

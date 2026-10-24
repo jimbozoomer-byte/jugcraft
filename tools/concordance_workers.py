@@ -30,6 +30,12 @@ releases nothing; an anchor from before claims its record once, at its own place
 away or held), warns, gives a grace and holds the pact without loss; only its living holder ends it, once, and the last
 HISTORY departures of each holder are kept (PACT_DEPARTURES; Java: worker/Pacts.java, resource/BoundWill.java,
 spirits/AgreementHolder.java, spirits/BoundWills.java, spirits/PactHistory.java).
+
+Concordance Chunk D, unit 4 (D-08, D-S2, D-S12): a second spirit definition, the Workshop Hand (work courier), sealed at a
+Spirit Anchor that a Porter Key bound to its holder's Courier Post, by one who has mastered Stolas's Regard (HAND_RESEARCH,
+asked in Java). It carries the post's requests with the porter's own decision (Java: spirits/CourierWork.java), for its
+holder and their party, within its hours, area, day's loads and carry. It is a spirit: its service is a spirit's, so the
+Binding Arts stay mastered by each kind's (distinct 3).
 """
 
 MOD = "jugcraft"
@@ -58,7 +64,7 @@ MAX_RADIUS = 12
 MAX_CARRY = 64
 MAX_QUOTA = 256
 MAX_SUPPORT_TICKS = 200
-WORK = ["gather"]
+WORK = ["gather", "courier"]
 # The roster (Java: spirits/WorkerRoster.java).
 ROSTER_MAX = 32
 # Concordance Chunk D, unit 1 (D-01; Java: worker/Pacts.java Outcome, same order; spirits/AgreementHolder.java told). How a
@@ -104,6 +110,7 @@ BINDING_SPECIMENS = {
     "minecraft:saddle": "Saddle", "minecraft:echo_shard": "Echo Shard",
 }
 SERVICE = rid("worker_service")  # Java: Workers.ACTIVITY
+HAND_RESEARCH = rid("stolas_regard")  # Java: WorkshopHandEntity.REGARD (Concordance Chunk D unit 2's research, named here only)
 
 # ------------------------------------------------------------------------------------------------- research
 
@@ -146,11 +153,14 @@ WORKERS = {
                    "support": {"effect": "minecraft:regeneration", "amplifier": 0, "duration": 100}},
     "gathering_shade": {"kind": "spirit", "work": "gather", "radius": 8, "from": 13000, "to": 23000, "quota": 64,
                         "carry": 16},
+    # Concordance Chunk D, D-08: the Workshop Hand (a courier: carry is the most it reserves at a source a trip).
+    "workshop_hand": {"kind": "spirit", "work": "courier", "radius": 12, "from": 0, "to": 12000, "quota": 32, "carry": 64},
     "clockwork_porter": {"kind": "construct", "integrity": 64, "wear": 1,
                          "repair": {"item": "minecraft:copper_ingot", "amount": 16}, "energy": 64, "trip_energy": 2,
                          "carry": 16},
 }
-ENTITY_NAMES = {"hearthling": "Hearthling", "gathering_shade": "Gathering Shade", "clockwork_porter": "Clockwork Porter"}
+ENTITY_NAMES = {"hearthling": "Hearthling", "gathering_shade": "Gathering Shade", "clockwork_porter": "Clockwork Porter",
+                "workshop_hand": "Workshop Hand"}
 
 # ------------------------------------------------------------------------------------------------- things
 
@@ -160,12 +170,14 @@ ITEMS = {
     "clockwork_porter": {"name": "Clockwork Porter",
                          "tooltip": "Use on a block: unfold a porter. Give it a route with a Porter Key."},
     "porter_key": {"name": "Porter Key",
-                   "tooltip": "Use on a container: the source, then the target. Use on a porter: give it the route."},
+                   "tooltip": "Use on a container: the source, then the target. Use on a Courier Post, then on a porter or a "
+                              "Spirit Anchor: bind it to the post (sneak on the anchor: unbind it)."},
 }
 BLOCKS = {"spirit_anchor": {"name": "Spirit Anchor"}}
 DEVICE_TOOLTIPS = {
-    "spirit_anchor": "Use: seal a Gathering Shade's agreement (its owner or their party), or call your lost shade again. "
-                     "Its holder, sneaking: suspend or resume. Break: release.",
+    "spirit_anchor": "Use: seal a Gathering Shade's agreement (its owner or their party), or, bound to your Courier Post by a "
+                     "Porter Key, a Workshop Hand's; call your lost one again. Its holder, sneaking: suspend or resume. Break: "
+                     "release.",
 }
 
 MESSAGES = {
@@ -226,6 +238,18 @@ MESSAGES = {
     "workers.upkeep_resumed": "Its upkeep is paid: the agreement is resumed",
     "workers.departed.ended": "ended by its holder",
     "workers.departed.broken": "released: its place was broken",
+    # Concordance Chunk D, D-08 (D-S2, D-S12): the Workshop Hand, and an anchor bound to a Courier Post.
+    "workers.hand_sealed": "Sealed: a Workshop Hand will carry the requests of the Courier Post at %s %s %s for you and your party, "
+                           "within %s blocks of the anchor, from %s to %s, up to %s loads a day of at most %s items each",
+    "workers.hand_unknown": "Only one who has mastered Stolas's Regard may seal a Workshop Hand (the codex says how)",
+    "workers.hand_post": "It carries the requests of the Courier Post at %s %s %s, for its holder and their party",
+    "workers.hand_no_post": "Its Courier Post is gone: it waits until a post its holder may use stands there again",
+    "workers.post_bound": "This anchor now serves the Courier Post at %s %s %s: a Workshop Hand sealed here carries its requests",
+    "workers.post_unbound": "This anchor serves no Courier Post now: sealed, it calls a Gathering Shade",
+    "workers.post_sealed": "An agreement is kept here: end it before binding the anchor anew",
+    "workers.post_unusable": "That Courier Post cannot be this anchor's: it must be one you may use, loaded, in this dimension and "
+                             "within %s blocks of the anchor",
+    "workers.key_no_post": "Use the key on your Courier Post first, then on the anchor (sneak to unbind it)",
 }
 
 TOOLTIPS = {
@@ -258,6 +282,7 @@ def clock(tick):
 def codex():
     art = "binding_arts"
     familiar, spirit, construct = WORKERS["hearthling"], WORKERS["gathering_shade"], WORKERS["clockwork_porter"]
+    hand = WORKERS["workshop_hand"]  # Concordance Chunk D, D-08
     specimens = "\\\n".join(f"- {name}" for name in BINDING_SPECIMENS.values())
     reasons = "\\\n".join(f"- **{key.replace('_', ' ')}**: {text}" for key, text in STATUSES.items())
     return {
@@ -272,7 +297,8 @@ def codex():
                  (art, "observed")),
                 ("text", "Understood",
                  "A familiar, a spirit and a construct will answer you now. To **master** the Binding Arts, be served "
-                 "by each once: a familiar's mending, a spirit's delivery and a construct's trip.", (art, "understood")),
+                 "by each once: a familiar's mending, a spirit's delivery (a Workshop Hand's is a spirit's) and a "
+                 "construct's trip.", (art, "understood")),
                 ("text", "Mastered", "You keep many, and each keeps its own terms.", (art, "mastered")),
             ],
         },
@@ -336,6 +362,28 @@ def codex():
                 ("text", "Why It Waits",
                  "Look at a worker (Jade), use it with an empty hand, or ask **/jugcraft concordance workers** "
                  "(which also lists workers that are not loaded, with what they last said):\\\n" + reasons),
+            ],
+        },
+        ("binding", "workshop_hand"): {
+            "name": "Workshop Hand", "x": 4, "y": 4, "icon": rid("porter_key"), "condition": (art, "understood"),
+            "description": "A spirit that carries a Courier Post's requests",
+            "pages": [
+                ("text", "Workshop Hand",
+                 f"A spirit of the shade's kind, bound to carry. Once you have **mastered Stolas's Regard**, use a **Porter "
+                 f"Key** set on your **Courier Post** on a Spirit Anchor that keeps no agreement, within {hand['radius']} "
+                 f"blocks of the post (sneak to unbind it), then use the anchor: a Workshop Hand is sealed there as a Bound "
+                 f"Will, for you and your party. From {clock(hand['from'])} to {clock(hand['to'])}, up to {hand['quota']} "
+                 f"loads a day of at most {hand['carry']} items each, it carries that post's exact requests, an Alembic "
+                 f"Crucible's own among them, from the containers round the post."),
+                ("text", "Its Terms",
+                 f"It takes a request only for you or your party, bound for a place within {hand['radius']} blocks of its "
+                 "anchor, and fetches only from containers inside that area that you and the requester could open by hand; "
+                 "other requests it leaves to other couriers. A request it has taken it finishes, even past its hours, "
+                 "suspended, or once its requester has left your party. What it carries is the post's ledger's, never "
+                 "its own: a full destination keeps the cargo in transit and an unloaded one is waited for. Killed, or "
+                 "its agreement ended, the cargo waits at the post for another courier or for its requester to "
+                 "**recover** once; killed, its holder calls another at the anchor at no cost. It needs no fuel and no "
+                 "repair. Outside its hours, its day's loads done or its holder away, it waits and says why."),
             ],
         },
     }

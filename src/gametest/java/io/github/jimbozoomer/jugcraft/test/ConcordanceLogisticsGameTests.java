@@ -20,11 +20,20 @@ import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Request;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.RequestState;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ConcordanceRules;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Navigation;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
@@ -39,7 +48,9 @@ import local.peepo.CompanionStatus;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -53,6 +64,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -71,6 +83,9 @@ import net.minecraft.world.phys.Vec3;
  * the ledger's cargo, exactly once ({@link CourierLedger#problems} and counted totals). Since Concordance Chunk C (C-06),
  * an Alembic Crucible files its own requests: one demand, its formula's shortage, served by a porter and a Peepo without
  * bringing it twice, through every failure case of plan 03:193.
+ * Since Concordance Chunk D (D-08) a workshop hand, a spirit sealed at a Spirit Anchor bound to its holder's post, serves
+ * the same requests with the same courier decision, within its sealed terms and for its beneficiaries, through every
+ * failure case of plan 03:193.
  */
 public class ConcordanceLogisticsGameTests {
 	private static final long NIGHT = 18000L;
@@ -936,6 +951,584 @@ public class ConcordanceLogisticsGameTests {
 		} finally {
 			parties.adminDisband(keeper.getUUID());
 		}
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- a workshop hand serves the post (Concordance Chunk D, D-08)
+
+	/**
+	 * D-08, 03:193's "destination fills": a full crucible takes what fits; the rest stays aboard, noted full, and the hand
+	 * says FULL; with room again it is delivered once, never into the bottle or output slots. While it holds the request a
+	 * Peepo asks for none of it; the load delivered in full is one of its day's tasks, the part delivery none.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandFillsACrucibleUntilItIsFull(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		CrucibleBlockEntity crucible = shop.crucible();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 2_100_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertTrue(hand.think(level, in, now) == Status.TRAVELLING && hand.task() == id && ledger.ledger().get(id).progress().reserved() == 2
+				&& crucible.courierRemainder(RAW) == 2 && crucible.companion.needed(new ItemStack(Items.GLOWSTONE_DUST)) == 0,
+				"The hand claims the crucible's request and reserves two: a Peepo now brings none of it");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed", shop.chest(), crucible);
+		helper.assertTrue(hand.think(level, in, now + 20) == Status.WORKING && ledger.ledger().get(id).progress().carried() == 2
+				&& matching(shop.chest(), PLAIN) == 8 && hand.carriedCount() == 2, "It picks up two");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "carried", shop.chest(), crucible);
+		for (int slot = 0; slot < 4; slot++) {
+			crucible.setItem(slot, new ItemStack(Items.SPIDER_EYE, 64));
+		}
+		crucible.setItem(4, new ItemStack(Items.GLOWSTONE_DUST, 63));
+		WorkshopHands.conserved(helper, ids, PLAIN, 73, 0, "filled", shop.chest(), crucible);
+		helper.assertTrue(hand.think(level, in, now + 40) == Status.WORKING, "It delivers what fits");
+		Request part = ledger.ledger().get(id);
+		helper.assertTrue(part != null && part.progress().delivered() == 1 && part.progress().carried() == 1 && part.progress().aboard()
+				&& "full".equals(part.progress().note()) && matching(crucible, PLAIN) == 64 && shop.anchor().agreement().done(now + 40) == 0,
+				"One fitted; one stays aboard, noted full; no load done yet: " + part);
+		WorkshopHands.conserved(helper, ids, PLAIN, 73, 0, "one fitted", shop.chest(), crucible);
+		helper.assertTrue(hand.think(level, in, now + 60) == Status.FULL && ledger.ledger().get(id).progress().carried() == 1,
+				"Full: it says so and keeps the rest aboard");
+		helper.assertTrue(crucible.getItem(CrucibleBlockEntity.BOTTLE_SLOT).isEmpty() && crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT).isEmpty(),
+				"Nothing went into its bottle or output slots");
+		WorkshopHands.conserved(helper, ids, PLAIN, 73, 0, "full", shop.chest(), crucible);
+		crucible.setItem(0, ItemStack.EMPTY);
+		helper.assertTrue(hand.think(level, in, now + 80) == Status.WORKING && ledger.ledger().get(id) == null && matching(crucible, PLAIN) == 65
+				&& shop.anchor().agreement().done(now + 80) == 1, "Room again: the last one delivered, the request closed, one load counted");
+		WorkshopHands.conserved(helper, ids, PLAIN, 73, 0, "delivered", shop.chest(), crucible);
+		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, id), List.of("filed", "claimed", "reserved", "picked_up", "delivered", "done"),
+				"the post's history of it");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08, 03:193's "player removes access": a source its holder may no longer open (a neighbour's claim) releases the claim
+	 * reserved there, blocked, and is never reserved again; a post its holder may no longer use is served by none of its
+	 * hands; access restored, the request is served once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandTakesNothingWhereItsHolderMayNot(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 2_200_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertTrue(hand.think(level, in, now) == Status.TRAVELLING && ledger.ledger().get(id).progress().reserved() == 2, "Claimed and reserved at the chest");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "reserved", shop.chest(), shop.crucible());
+		long retry = now + 20 + Logistics.RETRY_TICKS;
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(WorkshopHands.CHEST), WorkshopHands.NEIGHBOUR);
+			Status blocked = hand.think(level, in, now + 20);
+			Request released = ledger.ledger().get(id);
+			helper.assertTrue(blocked == Status.BLOCKED_BY_ACCESS && hand.task() == 0L && released.state() == RequestState.OPEN
+					&& released.progress().reserved() == 0 && "blocked".equals(released.progress().note()) && matching(shop.chest(), PLAIN) == 10,
+					"A neighbour's claim over its chest: the hand gives up its claim, blocked, and takes nothing: " + released);
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "blocked", shop.chest(), shop.crucible());
+			Status nowhere = hand.think(level, in, retry);
+			helper.assertTrue(nowhere == Status.WAITING_FOR_RESOURCES && hand.task() == 0L && "no_source".equals(ledger.ledger().get(id).progress().note())
+					&& matching(shop.chest(), PLAIN) == 10, "Tried again, it reserves nowhere its holder may not open: " + nowhere);
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "no source", shop.chest(), shop.crucible());
+		}
+		long barred = retry + Logistics.RETRY_TICKS;
+		shop.post().setOwner(WorkshopHands.NEIGHBOUR);
+		helper.assertTrue(hand.think(level, in, barred) == Status.BLOCKED_BY_ACCESS && hand.task() == 0L && ledger.ledger().get(id).progress().worker() == null,
+				"Its post barred to its holder, the hand serves none of its requests");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "post barred", shop.chest(), shop.crucible());
+		shop.post().setOwner(shop.holder().getUUID());
+		helper.assertTrue(hand.think(level, in, barred + 20) == Status.TRAVELLING && hand.task() == id, "Access restored, it claims the request again");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed again", shop.chest(), shop.crucible());
+		helper.assertTrue(hand.think(level, in, barred + 40) == Status.WORKING && matching(shop.chest(), PLAIN) == 8, "picks up two");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "picked up", shop.chest(), shop.crucible());
+		helper.assertTrue(hand.think(level, in, barred + 60) == Status.WORKING && ledger.ledger().get(id) == null && matching(shop.crucible(), PLAIN) == 2,
+				"and delivers them, once");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "delivered", shop.chest(), shop.crucible());
+		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, id),
+				List.of("filed", "claimed", "reserved", "released", "claimed", "released", "claimed", "reserved", "picked_up", "done"), "the post's history of it");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08, 03:193's "path fails three times": a hand that cannot reach the crucible gives up its claim at the third failed
+	 * walk; the cargo is stranded at the post, counted, never dropped; a Peepo may bring it all; its requester recovers it once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandThatCannotFindItsWayStrandsItsCargoOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+		CrucibleBlockEntity crucible = WorkshopHands.crucible(helper, new BlockPos(6, 1, 2), holder);
+		long id = crucible.request();
+		List<Long> ids = List.of(id);
+		WorkshopHandEntity hand = WorkshopHands.hand(helper, holder, WorkshopHands.ANCHOR, WorkshopHands.POST);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 2_300_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the crucible's request");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed", chest, crucible);
+		helper.assertTrue(hand.think(level, in, now + 20) == Status.WORKING && ledger.ledger().get(id).progress().carried() == 2,
+				"It picks up two for a crucible four blocks off, which it must walk to");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "carried", chest, crucible);
+		for (int attempt = 1; attempt <= Navigation.GIVE_UP; attempt++) {
+			long then = now + 20 + 20L * attempt;
+			hand.getBrain().setMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, then);
+			helper.assertTrue(hand.getBrain().hasMemoryValue(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE), "Its brain keeps failed walk " + attempt);
+			Status walking = hand.think(level, in, then);
+			boolean last = attempt == Navigation.GIVE_UP;
+			helper.assertTrue(last ? walking == Status.CANNOT_NAVIGATE && hand.task() == 0L : walking == Status.TRAVELLING && hand.task() == id,
+					"Failed walk " + attempt + " of " + Navigation.GIVE_UP + ": " + walking);
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "failed walk " + attempt, chest, crucible);
+		}
+		Request stranded = ledger.ledger().get(id);
+		helper.assertTrue(stranded.state() == RequestState.STRANDED && stranded.progress().carried() == 2 && "cannot_navigate".equals(stranded.progress().note()),
+				"The third failed walk gives up the claim: the two are stranded at the post, counted, never dropped: " + stranded);
+		helper.assertTrue(crucible.courierRemainder(RAW) == 0 && crucible.companion.needed(new ItemStack(Items.GLOWSTONE_DUST)) == 2,
+				"No courier holds it: a Peepo may bring both");
+		helper.assertTrue(ledger.recover(id, holder, now + 100) == Logistics.Outcome.DONE && holder.getInventory().countItem(Items.GLOWSTONE_DUST) == 2,
+				"Its requester recovers the two");
+		helper.assertTrue(ledger.recover(id, holder, now + 101) == Logistics.Outcome.NOT_FOUND && holder.getInventory().countItem(Items.GLOWSTONE_DUST) == 2,
+				"and never twice");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "recovered", chest, crucible, holder.getInventory());
+		helper.succeed();
+	}
+
+	/**
+	 * D-08, 03:193's "target chunk unloads": a hand carrying for a place whose chunk is not loaded waits, DESTINATION_UNLOADED,
+	 * no ledger step but its lease renewed; a restart keeps the cargo; cancelled, it goes back. Sealed under test terms whose
+	 * area reaches that far, so only the unloaded chunk stands in the way.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anUnloadedDestinationKeepsTheHandWaiting(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		CourierPostBlockEntity post = WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+		BlockPos away = helper.absolutePos(WorkshopHands.CRUCIBLE).offset(100_000, 0, 0);
+		helper.assertTrue(!level.isLoaded(away), "The destination's chunk is not loaded");
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		Logistics.Filed filed = ledger.file(holder.getUUID(), Couriers.place(level, post.getBlockPos()), Couriers.place(level, away), CrucibleBlockEntity.sample(RAW), 2,
+				level.registryAccess(), level.getGameTime());
+		helper.assertTrue(filed.outcome() == Logistics.Outcome.DONE, "Stands for a request filed while the place was loaded: " + filed);
+		long id = filed.id();
+		List<Long> ids = List.of(id);
+		long now = WorkshopHands.morning(level, 2_400_000L);
+		WorkerDefinition.Spirit terms = WorkshopHands.terms();
+		WorkshopHandEntity hand = WorkshopHands.handUnder(helper, holder,
+				new WorkerDefinition.Spirit(WorkshopHandEntity.DEFINITION, terms.work(), 100_008, terms.from(), terms.to(), terms.quota(), terms.carry()), now);
+		SpiritAnchorBlockEntity anchor = helper.getBlockEntity(WorkshopHands.ANCHOR, SpiritAnchorBlockEntity.class);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the request");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed", chest);
+		hand.think(level, in, now + 20);
+		helper.assertTrue(ledger.ledger().get(id).state() == RequestState.IN_TRANSIT && ledger.ledger().get(id).progress().carried() == 2
+				&& matching(chest, PLAIN) == 8, "Two picked up for it");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "in transit", chest);
+		for (int i = 1; i <= 2; i++) {
+			long then = now + 20 + 20L * i;
+			Status waits = hand.think(level, in, then);
+			Request held = ledger.ledger().get(id);
+			helper.assertTrue(waits == Status.DESTINATION_UNLOADED && held.progress().carried() == 2 && held.progress().delivered() == 0
+					&& held.progress().aboard() && held.progress().lease() == then + Logistics.LEASE_TICKS,
+					"It waits with the cargo aboard, its claim renewed, no step taken: " + waits + ", " + held.progress());
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "unloaded " + i, chest);
+		}
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		saved.store("ledger", CourierLedger.CODEC, ledger);
+		CourierLedger restarted = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult())
+				.read("ledger", CourierLedger.CODEC).orElseThrow();
+		helper.assertTrue(restarted.ledger().get(id) != null && restarted.ledger().get(id).state() == RequestState.IN_TRANSIT
+				&& restarted.ledger().get(id).progress().carried() == 2 && ItemVariant.of(new ItemStack(Items.GLOWSTONE_DUST)).equals(restarted.item(id))
+				&& restarted.problems().isEmpty(), "A restart keeps the cargo, counted once");
+		helper.assertTrue(ledger.cancel(id, holder.getUUID(), now + 70) == Logistics.Outcome.DONE && ledger.ledger().get(id).state() == RequestState.RETURNING,
+				"Cancelled by its requester: it is taken back");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "cancelled", chest);
+		hand.think(level, in, now + 80);
+		helper.assertTrue(ledger.ledger().get(id) == null && matching(chest, PLAIN) == 10 && anchor.agreement().done(now + 80) == 0,
+				"All ten back in the chest; no load counted");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "returned", chest);
+		helper.assertValueEqual(anchor.holder().end(level, holder, now + 90), AgreementHolder.Ended.ENDED, "Its far-reaching test terms end with the test");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08, 03:193's "entity dies" (E4, D-S18): a killed hand lets its claim go; the cargo is stranded at the post, counted,
+	 * nothing dropped; it is struck off its holder's roster and its agreement stands; its holder calls another under the same
+	 * Bound Will at no cost, which takes the cargo up and delivers it once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aKilledHandStrandsItsCargoOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		CrucibleBlockEntity crucible = shop.crucible();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		UUID holder = shop.holder().getUUID();
+		UUID record = shop.anchor().agreement().record();
+		long now = WorkshopHands.morning(level, 2_500_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the crucible's request");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed", shop.chest(), crucible);
+		hand.think(level, in, now + 20);
+		helper.assertTrue(ledger.ledger().get(id).progress().carried() == 2, "The hand carries two for the crucible");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "carried", shop.chest(), crucible);
+		UUID first = hand.getUUID();
+		hand.remove(Entity.RemovalReason.KILLED);
+		Request stranded = ledger.ledger().get(id);
+		helper.assertTrue(stranded != null && stranded.state() == RequestState.STRANDED && stranded.progress().carried() == 2
+				&& "worker_removed".equals(stranded.progress().note()), "Killed, its claim is let go: the two are stranded at the post, counted: " + stranded);
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "killed (nothing dropped where it fell)", shop.chest(), crucible);
+		helper.assertTrue(!WorkerRoster.of(level.getServer()).workers(holder).containsKey(first) && shop.anchor().holder().spiritLost(level)
+				&& BoundWills.of(level.getServer()).ledger().get(record) != null, "It is struck off its holder's roster; its agreement stands");
+		helper.assertTrue(crucible.courierRemainder(RAW) == 0 && crucible.companion.needed(new ItemStack(Items.GLOWSTONE_DUST)) == 2,
+				"No courier holds it: a Peepo may bring both");
+		helper.assertValueEqual(shop.anchor().holder().recall(level, shop.holder(), now + 30), AgreementHolder.Recall.RECALLED,
+				"Its holder calls another hand under the same agreement, at no cost");
+		WorkshopHandEntity second = level.getEntity(shop.anchor().spirit()) instanceof WorkshopHandEntity found ? found : null;
+		helper.assertTrue(second != null && !first.equals(second.getUUID()) && record.equals(shop.anchor().agreement().record())
+				&& BoundWills.of(level.getServer()).ledger().heldBy(holder).size() == 1, "A new hand, the same Bound Will");
+		WorkshopHands.stand(helper, second, 2.5, 1.0, 3.5);
+		helper.assertTrue(second.think(level, in, now + 40) == Status.WORKING && second.task() == id && ledger.ledger().get(id).progress().aboard()
+				&& crucible.companion.needed(new ItemStack(Items.GLOWSTONE_DUST)) == 0, "It takes the stranded two up at the post: a Peepo again brings none");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "taken up", shop.chest(), crucible);
+		helper.assertTrue(second.think(level, in, now + 60) == Status.WORKING && ledger.ledger().get(id) == null && matching(crucible, PLAIN) == 2,
+				"and delivers them, once");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "delivered", shop.chest(), crucible);
+		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, id),
+				List.of("filed", "claimed", "reserved", "picked_up", "stranded", "claimed", "taken_up", "done"), "the post's history of it");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08, 03:193's "owner logs out": its holder away, the hand takes no step and renews nothing; the lease runs out and the
+	 * cargo waits at the post, counted, nothing lost or owed; its holder back, it takes the cargo up and delivers it once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anAbsentHolderStopsTheHand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		CrucibleBlockEntity crucible = shop.crucible();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 2_600_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the crucible's request");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed", shop.chest(), crucible);
+		hand.think(level, in, now + 20);
+		Request carrying = ledger.ledger().get(id);
+		helper.assertTrue(carrying.progress().carried() == 2 && carrying.progress().lease() == now + 20 + Logistics.LEASE_TICKS, "It carries two, its claim renewed");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "carried", shop.chest(), crucible);
+		UUID holder = shop.holder().getUUID();
+		TestPlayers.leave(shop.holder());
+		helper.assertTrue(hand.think(level, in, now + 40) == Status.OWNER_OFFLINE && hand.task() == id && ledger.ledger().get(id).progress().equals(carrying.progress()),
+				"Its holder logged out, it waits: no ledger step, its claim not renewed");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "holder away", shop.chest(), crucible);
+		ledger.ledger().lapse(now + 21 + Logistics.LEASE_TICKS);
+		Request lapsed = ledger.ledger().get(id);
+		helper.assertTrue(lapsed.state() == RequestState.STRANDED && lapsed.progress().carried() == 2 && "lapsed".equals(lapsed.progress().note()),
+				"Its lease run out, the two wait at the post, counted: nothing lost and nothing owed: " + lapsed);
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "lapsed", shop.chest(), crucible);
+		helper.assertValueEqual(hand.think(level, in, now + 240), Status.OWNER_OFFLINE, "still away, it still waits");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "still away", shop.chest(), crucible);
+		ServerPlayer back = TestPlayers.again(helper, holder);
+		helper.assertTrue(holder.equals(back.getUUID()) && hand.think(level, in, now + 260) == Status.WORKING && hand.task() == id
+				&& ledger.ledger().get(id).progress().aboard(), "Its holder back, it takes the stranded two up at the post");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "taken up", shop.chest(), crucible);
+		helper.assertTrue(hand.think(level, in, now + 280) == Status.WORKING && ledger.ledger().get(id) == null && matching(crucible, PLAIN) == 2,
+				"and delivers them, once");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "delivered", shop.chest(), crucible);
+		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, id),
+				List.of("filed", "claimed", "reserved", "picked_up", "stranded", "claimed", "taken_up", "done"), "the post's history of it");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08, 03:193's "source is broken": the chest it reserved at is broken (its contents fall where it stood, vanilla's
+	 * rule); the hand gives up its claim, source_gone, and after its rest reserves at another chest and delivers once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aBrokenSourceReleasesTheHandsClaim(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		CrucibleBlockEntity crucible = shop.crucible();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long now = WorkshopHands.morning(level, 2_700_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertTrue(hand.think(level, in, now) == Status.TRAVELLING && ledger.ledger().get(id).progress().reserved() == 2, "Claimed and reserved at the chest");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "reserved", shop.chest(), crucible);
+		helper.setBlock(WorkshopHands.CHEST, Blocks.AIR);
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 10, "the chest broken: its ten lie where it stood", crucible);
+		Status gone = hand.think(level, in, now + 20);
+		Request released = ledger.ledger().get(id);
+		helper.assertTrue(gone == Status.WAITING_FOR_RESOURCES && hand.task() == 0L && released.state() == RequestState.OPEN && released.progress().reserved() == 0
+				&& released.progress().source() == null && "source_gone".equals(released.progress().note()),
+				"Its source broken, it gives up its claim, source_gone: " + released);
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 10, "released", crucible);
+		BlockPos spareAt = new BlockPos(1, 1, 3);
+		ChestBlockEntity spare = WorkshopHands.chest(helper, spareAt, 10);
+		WorkshopHands.conserved(helper, ids, PLAIN, 20, 10, "another chest", spare, crucible);
+		long retry = now + 20 + Logistics.RETRY_TICKS;
+		helper.assertTrue(hand.think(level, in, retry) == Status.TRAVELLING && hand.task() == id && ledger.ledger().get(id).progress().reserved() == 2
+				&& Couriers.place(level, helper.absolutePos(spareAt)).equals(ledger.ledger().get(id).progress().source()),
+				"After its rest it claims again and reserves at the other chest");
+		WorkshopHands.conserved(helper, ids, PLAIN, 20, 10, "reserved at the other chest", spare, crucible);
+		helper.assertTrue(hand.think(level, in, retry + 20) == Status.WORKING && matching(spare, PLAIN) == 8, "picks up two");
+		WorkshopHands.conserved(helper, ids, PLAIN, 20, 10, "picked up", spare, crucible);
+		helper.assertTrue(hand.think(level, in, retry + 40) == Status.WORKING && ledger.ledger().get(id) == null && matching(crucible, PLAIN) == 2,
+				"and delivers them, once");
+		WorkshopHands.conserved(helper, ids, PLAIN, 20, 10, "delivered", spare, crucible);
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (E5): two hands of two party members bound to one post, in one tick: one claims the crucible's request; the other
+	 * finds nothing to take and may neither claim (CLAIMED), reserve nor pick up for it (NOT_YOURS); one reservation, counted
+	 * once by the crucible; the first killed, the second takes the cargo up and delivers it once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void twoHandsCannotHoldOneRequest(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		ServerPlayer friend = WorkshopHands.holder(helper);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(holder.getUUID(), friend.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(friend.getUUID(), ms) == PartyManager.Result.OK, "The holder and a friend form a party");
+			WorkshopHands.post(helper, holder, WorkshopHands.POST);
+			ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+			CrucibleBlockEntity crucible = WorkshopHands.crucible(helper, WorkshopHands.CRUCIBLE, holder);
+			long id = crucible.request();
+			List<Long> ids = List.of(id);
+			WorkshopHandEntity mine = WorkshopHands.hand(helper, holder, WorkshopHands.ANCHOR, WorkshopHands.POST);
+			WorkshopHandEntity theirs = WorkshopHands.hand(helper, friend, new BlockPos(4, 1, 5), WorkshopHands.POST);
+			WorkshopHands.stand(helper, theirs, 3.5, 1.0, 3.5);
+			CourierLedger ledger = CourierLedger.of(level.getServer());
+			long now = WorkshopHands.morning(level, 2_800_000L);
+			long in = WorkshopHands.inHours();
+			Status first = mine.think(level, in, now);
+			Status second = theirs.think(level, in, now);
+			helper.assertTrue(first == Status.TRAVELLING && mine.task() == id && second == Status.IDLE && theirs.task() == 0L,
+					"Two hands of one post in one tick: one claims the crucible's request, the other finds nothing to take");
+			Storage<ItemVariant> source = ItemStorage.SIDED.find(level, chest.getBlockPos(), null);
+			helper.assertTrue(ledger.claim(id, theirs.getUUID(), now) == Logistics.Outcome.CLAIMED
+					&& ledger.reserve(id, theirs.getUUID(), Couriers.place(level, chest.getBlockPos()), source, now) == Logistics.Outcome.NOT_YOURS
+					&& ledger.pickUp(id, theirs.getUUID(), source, now) == Logistics.Outcome.NOT_YOURS,
+					"The claim is exclusive: CLAIMED for the second, and it may neither reserve nor pick up for it");
+			helper.assertTrue(mine.getUUID().equals(ledger.ledger().get(id).progress().worker()) && ledger.ledger().get(id).progress().reserved() == 2
+					&& crucible.courierRemainder(RAW) == 2 && crucible.companion.needed(new ItemStack(Items.GLOWSTONE_DUST)) == 0,
+					"One reservation of two, counted once by the crucible; a Peepo brings none");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed", chest, crucible);
+			mine.think(level, in, now + 20);
+			helper.assertTrue(theirs.think(level, in, now + 20) == Status.IDLE && theirs.task() == 0L && ledger.ledger().get(id).progress().carried() == 2
+					&& matching(chest, PLAIN) == 8, "Carried by the first; the second still holds nothing");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "carried", chest, crucible);
+			mine.remove(Entity.RemovalReason.KILLED);
+			helper.assertTrue(ledger.ledger().get(id).state() == RequestState.STRANDED && ledger.ledger().get(id).progress().worker() == null,
+					"The first gone, its claim let go: the cargo waits at the post");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "stranded", chest, crucible);
+			helper.assertTrue(theirs.think(level, in, now + 40) == Status.WORKING && theirs.task() == id && ledger.ledger().get(id).progress().aboard(),
+					"The second takes it up");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "taken up", chest, crucible);
+			helper.assertTrue(theirs.think(level, in, now + 60) == Status.WORKING && ledger.ledger().get(id) == null && matching(crucible, PLAIN) == 2,
+					"and delivers it, once");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "delivered", chest, crucible);
+			helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, id),
+					List.of("filed", "claimed", "reserved", "picked_up", "stranded", "claimed", "taken_up", "done"), "the post's history of it");
+		} finally {
+			parties.adminDisband(holder.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (E4, D-S6): its holder ends the agreement with cargo aboard: the hand departs and lets its claim go,
+	 * agreement_ended; the cargo is stranded at the post, nothing dropped; the Bound Will goes, the departure is kept; ending
+	 * again finds nothing and moves nothing; the requester recovers the cargo exactly once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void endingWithCargoAboardStrandsItOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		WorkshopHandEntity hand = shop.hand();
+		CrucibleBlockEntity crucible = shop.crucible();
+		ServerPlayer holder = shop.holder();
+		long id = shop.request();
+		List<Long> ids = List.of(id);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		UUID record = shop.anchor().agreement().record();
+		long now = WorkshopHands.morning(level, 2_900_000L);
+		long in = WorkshopHands.inHours();
+		helper.assertValueEqual(hand.think(level, in, now), Status.TRAVELLING, "The hand claims the crucible's request");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "claimed", shop.chest(), crucible);
+		hand.think(level, in, now + 20);
+		helper.assertTrue(ledger.ledger().get(id).progress().carried() == 2 && ledger.ledger().get(id).progress().aboard(), "The hand carries two");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "carried", shop.chest(), crucible);
+		UUID handId = hand.getUUID();
+		helper.assertValueEqual(shop.anchor().holder().end(level, holder, now + 30), AgreementHolder.Ended.ENDED, "Its holder ends the agreement with the cargo aboard");
+		Request stranded = ledger.ledger().get(id);
+		helper.assertTrue(hand.isRemoved() && stranded != null && stranded.state() == RequestState.STRANDED && stranded.progress().carried() == 2
+				&& "agreement_ended".equals(stranded.progress().note()), "The hand departs and lets its claim go: the two wait at the post: " + stranded);
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "ended (nothing dropped)", shop.chest(), crucible);
+		List<Pacts.Departure> history = PactHistory.of(level.getServer()).history(holder.getUUID());
+		helper.assertTrue(shop.anchor().agreement() == null && BoundWills.of(level.getServer()).ledger().get(record) == null
+				&& !WorkerRoster.of(level.getServer()).workers(holder.getUUID()).containsKey(handId) && !history.isEmpty()
+				&& history.getLast().record().equals(record) && Pacts.ENDED.equals(history.getLast().reason())
+				&& WorkshopHandEntity.DEFINITION.equals(history.getLast().counterpart()), "Its Bound Will gone, the hand off the roster, the departure kept");
+		helper.assertTrue(crucible.courierRemainder(RAW) == 0 && crucible.companion.needed(new ItemStack(Items.GLOWSTONE_DUST)) == 2,
+				"No courier holds it: a Peepo may bring both");
+		helper.assertTrue(shop.anchor().holder().end(level, holder, now + 31) == AgreementHolder.Ended.NOTHING
+				&& AgreementHolder.end(level, null, holder, record, Pacts.ENDED, now + 31) == AgreementHolder.Ended.NOTHING
+				&& ledger.ledger().get(id).progress().equals(stranded.progress()), "Ending again finds nothing and moves nothing");
+		helper.assertTrue(ledger.recover(id, holder, now + 40) == Logistics.Outcome.DONE && holder.getInventory().countItem(Items.GLOWSTONE_DUST) == 2,
+				"Its requester recovers the two");
+		helper.assertTrue(ledger.recover(id, holder, now + 41) == Logistics.Outcome.NOT_FOUND && holder.getInventory().countItem(Items.GLOWSTONE_DUST) == 2,
+				"and never twice");
+		WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "recovered", shop.chest(), crucible, holder.getInventory());
+		helper.assertValueEqual(WorkshopHands.story(helper, WorkshopHands.POST, id), List.of("filed", "claimed", "reserved", "picked_up", "stranded", "recovered"),
+				"the post's history of it");
+		helper.succeed();
+	}
+
+	/**
+	 * D-08 (E1, D-S2): a hand serves its holder and its holder's party, recorded on its Bound Will: a friend's request is
+	 * served; a stranger cannot even ask at the post. Who benefits is asked at each new claim (critique 5): a load claimed
+	 * before its requester left the party is finished, while their request still open is never touched (IDLE: left to other
+	 * couriers) and the holder's own is taken past it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandServesOnlyItsBeneficiaries(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		ServerPlayer friend = WorkshopHands.taught(TestPlayers.survivor(helper), null);
+		ServerPlayer stranger = WorkshopHands.taught(TestPlayers.survivor(helper), null);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(holder.getUUID(), friend.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(friend.getUUID(), ms) == PartyManager.Result.OK, "The holder and a friend form a party");
+			CourierPostBlockEntity post = WorkshopHands.post(helper, holder, WorkshopHands.POST);
+			ChestBlockEntity chest = WorkshopHands.chest(helper, WorkshopHands.CHEST, 10);
+			WorkshopHandEntity hand = WorkshopHands.hand(helper, holder, WorkshopHands.ANCHOR, WorkshopHands.POST);
+			SpiritAnchorBlockEntity anchor = helper.getBlockEntity(WorkshopHands.ANCHOR, SpiritAnchorBlockEntity.class);
+			BoundWill will = BoundWills.of(level.getServer()).ledger().get(anchor.agreement().record());
+			helper.assertTrue(Pacts.PARTY.equals(will.pact().beneficiaries()) && Pacts.benefits(will, friend.getUUID(), true)
+					&& !Pacts.benefits(will, stranger.getUUID(), false), "Its Bound Will names its beneficiaries: the holder and the holder's party");
+			CourierLedger ledger = CourierLedger.of(level.getServer());
+			long next = ledger.ledger().nextId();
+			Couriers.request(stranger, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+			helper.assertTrue(ledger.ledger().nextId() == next, "A stranger cannot ask at the holder's post at all");
+			Couriers.request(friend, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+			long theirs = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+			List<Long> ids = new ArrayList<>(List.of(theirs));
+			long now = WorkshopHands.morning(level, 3_000_000L);
+			long in = WorkshopHands.inHours();
+			helper.assertTrue(hand.think(level, in, now) == Status.TRAVELLING && hand.task() == theirs, "The friend's request is served: the party benefits");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the friend's claimed", chest, post);
+			helper.assertValueEqual(hand.think(level, in, now + 20), Status.WORKING, "it picks up");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the friend's picked up", chest, post);
+			helper.assertTrue(hand.think(level, in, now + 40) == Status.WORKING && ledger.ledger().get(theirs) == null && matching(post, PLAIN) == 2,
+					"delivered to the post");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the friend served", chest, post);
+			Couriers.request(friend, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+			long claimed = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+			ids.add(claimed);
+			helper.assertTrue(hand.think(level, in, now + 50) == Status.TRAVELLING && hand.task() == claimed, "The friend's next request is claimed");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the friend's next claimed", chest, post);
+			Couriers.request(friend, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+			long left = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+			ids.add(left);
+			helper.assertTrue(parties.leave(friend.getUUID()) == PartyManager.Result.OK && !JugcraftParties.sameParty(holder.getUUID(), friend.getUUID()),
+					"The friend leaves the party, one request of theirs claimed and one still open");
+			helper.assertTrue(hand.think(level, in, now + 54) == Status.WORKING && hand.task() == claimed
+					&& ledger.ledger().get(claimed).progress().carried() == 2, "A load claimed before they left is finished: it picks up");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the claimed load picked up", chest, post);
+			helper.assertTrue(hand.think(level, in, now + 57) == Status.WORKING && ledger.ledger().get(claimed) == null && matching(post, PLAIN) == 4,
+					"and delivers");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the claimed load delivered", chest, post);
+			helper.assertTrue(hand.think(level, in, now + 60) == Status.IDLE && hand.task() == 0L
+					&& ledger.ledger().get(left).state() == RequestState.OPEN && ledger.ledger().get(left).progress().worker() == null,
+					"No longer a beneficiary: the hand leaves it to other couriers and takes nothing");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "a former member's request skipped", chest, post);
+			Couriers.request(holder, level, post, new ItemStack(Items.GLOWSTONE_DUST), 2);
+			long mine = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+			ids.add(mine);
+			helper.assertTrue(hand.think(level, in, now + 80) == Status.TRAVELLING && hand.task() == mine, "Its holder's own request is taken past it");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the holder's claimed", chest, post);
+			helper.assertValueEqual(hand.think(level, in, now + 100), Status.WORKING, "it picks up");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the holder's picked up", chest, post);
+			helper.assertTrue(hand.think(level, in, now + 120) == Status.WORKING && ledger.ledger().get(mine) == null && matching(post, PLAIN) == 6
+					&& ledger.ledger().get(left).progress().worker() == null, "and delivered; the former member's is never touched");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "the holder served", chest, post);
+			helper.assertTrue(ledger.cancel(left, friend.getUUID(), now + 130) == Logistics.Outcome.DONE && ledger.ledger().get(left) == null,
+					"Its requester may still cancel it");
+			WorkshopHands.conserved(helper, ids, PLAIN, 10, 0, "cancelled", chest, post);
+		} finally {
+			parties.adminDisband(holder.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * D-08: a hand fetches only from containers inside its area (here a test area of 3 blocks), never one a porter of the
+	 * post would use beyond it, and reserves at most its carry a trip: a request for 100 is two loads of 64 and 36.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHandTakesOnlyFromInsideItsArea(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = WorkshopHands.holder(helper);
+		CourierPostBlockEntity post = WorkshopHands.post(helper, holder, WorkshopHands.POST);
+		ChestBlockEntity near = chest(helper, WorkshopHands.CHEST);
+		ChestBlockEntity far = chest(helper, new BlockPos(6, 1, 6));
+		far.setItem(0, new ItemStack(Items.IRON_INGOT, 64));
+		far.setItem(1, new ItemStack(Items.IRON_INGOT, 64));
+		long now = WorkshopHands.morning(level, 3_100_000L);
+		WorkerDefinition.Spirit terms = WorkshopHands.terms();
+		WorkshopHandEntity hand = WorkshopHands.handUnder(helper, holder,
+				new WorkerDefinition.Spirit(WorkshopHandEntity.DEFINITION, terms.work(), 3, terms.from(), terms.to(), terms.quota(), terms.carry()), now);
+		SpiritAnchorBlockEntity anchor = helper.getBlockEntity(WorkshopHands.ANCHOR, SpiritAnchorBlockEntity.class);
+		Couriers.request(holder, level, post, new ItemStack(Items.IRON_INGOT), 100);
+		long id = WorkshopHands.lastFiled(helper, WorkshopHands.POST);
+		List<Long> ids = List.of(id);
+		Predicate<ItemStack> iron = stack -> stack.is(Items.IRON_INGOT);
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		long in = WorkshopHands.inHours();
+		helper.assertTrue(hand.think(level, in, now) == Status.WAITING_FOR_RESOURCES && hand.task() == 0L
+				&& ledger.ledger().get(id).progress().worker() == null && "no_source".equals(ledger.ledger().get(id).progress().note())
+				&& count(far, Items.IRON_INGOT) == 128, "Only a chest beyond its area has iron: it reserves nowhere, the far chest untouched");
+		WorkshopHands.conserved(helper, ids, iron, 128, 0, "nothing reserved", near, far, post);
+		near.setItem(0, new ItemStack(Items.IRON_INGOT, 64));
+		near.setItem(1, new ItemStack(Items.IRON_INGOT, 36));
+		long retry = now + Logistics.RETRY_TICKS;
+		helper.assertTrue(hand.think(level, in, retry) == Status.TRAVELLING && hand.task() == id && ledger.ledger().get(id).progress().reserved() == terms.carry()
+				&& Couriers.place(level, near.getBlockPos()).equals(ledger.ledger().get(id).progress().source()),
+				"Iron inside its area: it reserves there, its carry and no more: " + ledger.ledger().get(id).progress());
+		WorkshopHands.conserved(helper, ids, iron, 228, 0, "reserved", near, far, post);
+		helper.assertTrue(hand.think(level, in, retry + 20) == Status.WORKING && ledger.ledger().get(id).progress().carried() == 64
+				&& count(near, Items.IRON_INGOT) == 36, "It picks up 64");
+		WorkshopHands.conserved(helper, ids, iron, 228, 0, "picked up", near, far, post);
+		helper.assertTrue(hand.think(level, in, retry + 40) == Status.WORKING && count(post, Items.IRON_INGOT) == 64 && ledger.ledger().get(id) != null
+				&& ledger.ledger().get(id).progress().worker() == null && ledger.ledger().get(id).progress().delivered() == 64
+				&& anchor.agreement().done(retry + 40) == 1, "It delivers 64 and lets the request go for its next load: one load counted");
+		WorkshopHands.conserved(helper, ids, iron, 228, 0, "first load delivered", near, far, post);
+		helper.assertTrue(hand.think(level, in, retry + 60) == Status.TRAVELLING && ledger.ledger().get(id).progress().reserved() == 36
+				&& Couriers.place(level, near.getBlockPos()).equals(ledger.ledger().get(id).progress().source()) && count(far, Items.IRON_INGOT) == 128,
+				"The next load: the rest at the near chest, never the far one");
+		WorkshopHands.conserved(helper, ids, iron, 228, 0, "second load reserved", near, far, post);
+		helper.assertTrue(ledger.cancel(id, holder.getUUID(), retry + 70) == Logistics.Outcome.DONE && ledger.ledger().get(id) == null, "Cancelled");
+		WorkshopHands.conserved(helper, ids, iron, 228, 0, "cancelled", near, far, post);
 		helper.succeed();
 	}
 }

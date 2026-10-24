@@ -17,6 +17,9 @@ pixel, shape or layout is copied) from these files in their library, art/owner-l
   Guns/entity/cog_knight.png; its copper band, head and legs from Big Cannons and Mounted
   Guns/textures/item/copperplate.png; its lens from Guns/block/light_blue_niter_glass_opaque.png; its basket from
   farming and food textures/wooden_basket_side.png;
+- the Workshop Hand (Concordance Chunk D, D-08): the Gathering Shade's sheet; its eyes lit like
+  Guns/block/treated_brass_lamp_lit.png; its pack from farming and food textures/wooden_basket_side.png, with a buckle
+  from Guns/entity/cog_knight.png;
 - the Spirit Anchor: its dark stone from biomes and tree blocks/blackstone_spines.png, with the darkest seams from
   biomes and tree blocks/blackstone_bulb.png and the lightest edge from Guns/block/treated_iron_block.png; its violet
   glow from the bulb of biomes and tree blocks/blackstone_bulb.png.
@@ -256,6 +259,37 @@ def shade_sheet():
     return img
 
 
+def hand_sheet():
+    """Concordance Chunk D, D-08: the Gathering Shade's sheet (the same regions, models.HAND_UV), its eyes lit amber like a
+    workshop lamp, and its pack woven wicker (over-and-under, a darker foot) with a brass buckle on the back and a lit rim
+    round the lid."""
+    uvs, sizes = models.HAND_UV, models.HAND_SIZES
+    img = shade_sheet()
+    for name in ("pack", "pack_lid"):
+        ecology_art._paint_box(img, uvs[name], sizes[name], WICKER, zlib.crc32(f"workshop_hand.{name}".encode()), 0.0)
+    pack = uvs["pack"], sizes["pack"]
+    for side in SIDES:
+        face = _face(*pack, side)
+        for y in range(face[3]):
+            for x in range(face[2]):
+                over = ((x // 2) + y) % 2 == 0
+                tone = WICKER[4] if over else WICKER[2]
+                if y == face[3] - 1:
+                    tone = WICKER[1] if over else WICKER[0]
+                _put(img, face, x, y, tone)
+    back = _face(*pack, "back")
+    _put(img, back, back[2] // 2 - 1, 1, BRASS[4])
+    _put(img, back, back[2] // 2, 1, BRASS[2])
+    lid = uvs["pack_lid"], sizes["pack_lid"]
+    for side in SIDES:
+        _row(img, _face(*lid, side), 0, WICKER[5])
+    front = _face(uvs["hood"], sizes["hood"], "front")
+    for x in (1, front[2] - 2):
+        _put(img, front, x, 3, GLOW[3])
+        _put(img, front, x, 4, GLOW[1])
+    return img
+
+
 # ------------------------------------------------------------------------------------------------- the Clockwork Porter
 
 def porter_sheet():
@@ -411,7 +445,8 @@ def anchor_top():
 # ------------------------------------------------------------------------------------------------- all of them
 
 ICONS = ["bonding_charm", "spirit_anchor", "clockwork_porter", "porter_key"]
-SHEETS = {"hearthling": hearthling_sheet, "gathering_shade": shade_sheet, "clockwork_porter": porter_sheet}
+SHEETS = {"hearthling": hearthling_sheet, "gathering_shade": shade_sheet, "clockwork_porter": porter_sheet,
+          "workshop_hand": hand_sheet}
 
 
 def textures():

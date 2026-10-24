@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Bond;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import net.minecraft.nbt.CompoundTag;
@@ -43,6 +44,8 @@ public enum WorkerDataProvider implements IServerDataProvider<EntityAccessor> {
 			snapshot.putInt("bond_max", Bond.MAX);
 		} else if (worker instanceof GatheringShadeEntity shade) {
 			snapshot.putInt("carried", shade.carriedCount());
+		} else if (worker instanceof WorkshopHandEntity hand) {
+			snapshot.putInt("carried", hand.carriedCount());
 		} else if (worker instanceof ClockworkPorterEntity porter) {
 			WorkerDefinition.Construct terms = ClockworkPorterEntity.terms();
 			snapshot.putInt("integrity", porter.body().integrity());
