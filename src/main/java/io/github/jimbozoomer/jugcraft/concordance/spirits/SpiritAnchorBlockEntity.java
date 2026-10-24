@@ -1,24 +1,19 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
-import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
-import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,105 +24,74 @@ import net.minecraft.world.level.storage.ValueOutput;
 import org.jspecify.annotations.Nullable;
 
 /**
- * The Spirit Anchor (roadmap step 17): where a spirit's agreement is kept and what it delivers to. Sealing an agreement
- * here records a Bound Will for its holder ({@link BoundWills}) and calls a Gathering Shade; the anchor holds the
- * agreement's terms and the day's tasks (the one authoritative copy), and nine slots the shade fills and hoppers below
- * may empty. Its holder may suspend or resume the agreement; breaking the anchor releases it: the Bound Will is
- * released, the shade departs, and everything here, and anything the shade carried, drops where the anchor stood.
+ * The Spirit Anchor (roadmap step 17): where a spirit's agreement is kept and what it delivers to. Its agreement is kept
+ * through an {@link AgreementHolder} (Concordance Chunk D, unit 1): placed, it records its owner, and its owner or their
+ * party seal a Gathering Shade's agreement here, recorded as a Bound Will for its holder ({@link BoundWills}); the anchor
+ * holds the terms as sealed here and the day's tasks, and nine slots the shade fills and hoppers below may empty. Its
+ * holder may suspend or resume the agreement and calls another shade when theirs is lost (AgreementHolder.end ends it
+ * without breaking the anchor); breaking the anchor with the Concordance on releases it: the Bound Will is released, the
+ * shade leaves its load here, and everything here drops where the anchor stood.
  */
-public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyContainer {
+public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyContainer, AgreementHolder.Holds {
 	public static final int SLOTS = 9;
 	private static final int[] ALL = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-	public static final Codec<Agreement> AGREEMENT_CODEC = RecordCodecBuilder.create(i -> i.group(
-			UUIDUtil.CODEC.fieldOf("record").forGetter(Agreement::record), UUIDUtil.CODEC.fieldOf("holder").forGetter(Agreement::holder),
-			Codec.STRING.fieldOf("work").forGetter(Agreement::work), Codec.STRING.fieldOf("dimension").forGetter(Agreement::dimension),
-			Codec.INT.fieldOf("x").forGetter(Agreement::x), Codec.INT.fieldOf("y").forGetter(Agreement::y), Codec.INT.fieldOf("z").forGetter(Agreement::z),
-			Codec.INT.fieldOf("radius").forGetter(Agreement::radius), Codec.INT.fieldOf("from").forGetter(Agreement::from),
-			Codec.INT.fieldOf("to").forGetter(Agreement::to), Codec.INT.fieldOf("quota").forGetter(Agreement::quota),
-			Codec.LONG.fieldOf("window").forGetter(Agreement::window), Codec.INT.fieldOf("done_today").forGetter(Agreement::doneToday),
-			Codec.BOOL.fieldOf("suspended").forGetter(Agreement::suspended)).apply(i, Agreement::new));
+	/** G9: new records name their counterpart with its namespace; older ones keep "gathering_shade". */
+	public static final String COUNTERPART = GatheringShadeEntity.DEFINITION;
 
 	private NonNullList<ItemStack> items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
-	private @Nullable Agreement agreement;
-	private @Nullable UUID spirit;
+	private final AgreementHolder holder = new AgreementHolder(this);
 
 	public SpiritAnchorBlockEntity(BlockPos pos, BlockState state) {
 		super(Workers.ANCHOR_ENTITY, pos, state);
 	}
 
+	@Override
+	public AgreementHolder holder() {
+		return holder;
+	}
+
 	public @Nullable Agreement agreement() {
-		return agreement;
+		return holder.agreement();
 	}
 
 	public @Nullable UUID spirit() {
-		return spirit;
+		return holder.spirit();
+	}
+
+	public @Nullable UUID owner() {
+		return holder.owner();
 	}
 
 	/** The spirit's own record of a finished task (the anchor keeps the day's count). */
 	public void taskDone(long gameTime) {
-		if (agreement != null) {
-			agreement = agreement.didTask(gameTime);
-			setChanged();
-		}
+		holder.taskDone(gameTime);
 	}
 
-	/**
-	 * Seals an agreement with {@code holder} under {@code terms}: a Bound Will record, the terms, and a Gathering Shade
-	 * called beside the anchor. Returns the shade, or null when one is already sealed here.
-	 */
-	public @Nullable GatheringShadeEntity seal(ServerLevel level, ServerPlayer holder, WorkerDefinition.Spirit terms, long gameTime) {
-		if (agreement != null) {
-			return null;
-		}
-		BlockPos pos = getBlockPos();
-		BoundWill record = new BoundWill(UUID.randomUUID(), GatheringShadeEntity.DEFINITION, "gathering_shade", holder.getUUID(), gameTime, false);
-		BoundWills wills = BoundWills.of(level.getServer());
-		BoundWillLedger.Change change = wills.seal(record);
-		if (change.outcome() != BoundWillLedger.Outcome.DONE) {
+	/** What the anchor seals: a Gathering Shade under {@code terms}, for its holder alone, sealed by its owner or their party, at no cost. */
+	public AgreementHolder.Sealing sealing(WorkerDefinition.Spirit terms) {
+		return new AgreementHolder.Sealing(GatheringShadeEntity.DEFINITION, COUNTERPART, AgreementHolder.Service.of(terms), false, true, null, null);
+	}
+
+	/** Seals a Gathering Shade's agreement for {@code player} under {@code terms}: DONE, or the one reason not. */
+	public AgreementHolder.Sealed seal(ServerLevel level, ServerPlayer player, WorkerDefinition.Spirit terms, long gameTime) {
+		return holder.seal(level, player, sealing(terms), gameTime);
+	}
+
+	/** Calls a Gathering Shade beside the anchor for {@code who}; the anchor calls no other counterpart (critique 7). */
+	@Override
+	public @Nullable GatheringShadeEntity call(ServerLevel level, UUID who, String counterpart) {
+		if (!COUNTERPART.equals(Pacts.counterpart(counterpart))) {
 			return null;
 		}
 		GatheringShadeEntity shade = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.MOB_SUMMONED);
 		if (shade == null) {
-			wills.release(record.id(), holder.getUUID());
 			return null;
 		}
-		agreement = new Agreement(record.id(), holder.getUUID(), terms.work(), level.dimension().identifier().toString(), pos.getX(), pos.getY(), pos.getZ(),
-				terms.radius(), terms.from(), terms.to(), terms.quota(), Long.MIN_VALUE, 0, false);
-		shade.setOwner(holder.getUUID());
+		BlockPos pos = getBlockPos();
+		shade.setOwner(who);
 		shade.setAnchor(pos);
 		shade.snapTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.0F, 0.0F);
-		level.addFreshEntity(shade);
-		spirit = shade.getUUID();
-		setChanged();
-		return shade;
-	}
-
-	/** The holder suspends or resumes the agreement; returns whether it is now suspended. */
-	public boolean toggleSuspended() {
-		if (agreement == null) {
-			return false;
-		}
-		agreement = agreement.suspended(!agreement.suspended());
-		setChanged();
-		return agreement.suspended();
-	}
-
-	/** Releases the agreement: its Bound Will is released and its shade departs (if it is loaded). */
-	public void release(ServerLevel level) {
-		if (agreement == null) {
-			return;
-		}
-		BoundWills.of(level.getServer()).release(agreement.record(), agreement.holder());
-		if (spirit != null) {
-			Entity found = level.getEntity(spirit);
-			if (found instanceof GatheringShadeEntity shade) {
-				shade.depart(level, getBlockPos());
-			}
-			WorkerRoster.of(level.getServer()).remove(agreement.holder(), spirit);
-		}
-		agreement = null;
-		spirit = null;
-		setChanged();
+		return level.addFreshEntity(shade) ? shade : null;
 	}
 
 	/** Puts what fits of {@code stack} into the anchor; returns the rest. */
@@ -150,11 +114,11 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 		return stack;
 	}
 
-	/** Broken: the agreement is released and everything here drops once. */
+	/** Broken: an agreement that counts here is released (with the Concordance on) and everything here, its shade's load among it, drops once. */
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
 		if (level instanceof ServerLevel server) {
-			release(server);
+			holder.broken(server, server.getGameTime());
 			Containers.dropContents(server, pos, this);
 		}
 	}
@@ -237,8 +201,7 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 		super.loadAdditional(input);
 		items = NonNullList.withSize(SLOTS, ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(input, items);
-		agreement = input.read("agreement", AGREEMENT_CODEC).orElse(null);
-		spirit = input.read("spirit", UUIDUtil.CODEC).orElse(null);
+		holder.load(input);
 	}
 
 	@Override
@@ -246,11 +209,6 @@ public class SpiritAnchorBlockEntity extends BlockEntity implements WorldlyConta
 		super.saveAdditional(output);
 		Saved.stamp(output, 1);
 		ContainerHelper.saveAllItems(output, items);
-		if (agreement != null) {
-			output.store("agreement", AGREEMENT_CODEC, agreement);
-		}
-		if (spirit != null) {
-			output.store("spirit", UUIDUtil.CODEC, spirit);
-		}
+		holder.save(output);
 	}
 }

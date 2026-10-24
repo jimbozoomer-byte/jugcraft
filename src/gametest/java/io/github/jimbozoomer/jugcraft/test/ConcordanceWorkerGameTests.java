@@ -1,11 +1,15 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.authlib.GameProfile;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.LeyPylonBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BondingCharmItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
@@ -18,12 +22,21 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Bond;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
+import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
@@ -32,6 +45,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -39,7 +53,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Roadmap step 17, spirits, familiars and constructs (docs/features/arcane-concordance-workers.md), on a real server.
@@ -48,7 +64,9 @@ import net.minecraft.world.phys.Vec3;
  * person is offline; a spirit's agreement is sealed as a Bound Will, it gathers and delivers within its terms, says it
  * is outside them at noon and suspended when suspended, and breaking its anchor releases it; a porter says it has no
  * route, is waiting for resources, carries and delivers, spends energy and wear, is full, needs repair and is fuelled
- * by a pylon; and each worker's model survives a save.
+ * by a pylon; and each worker's model survives a save. Concordance Chunk D, unit 1: a killed shade leaves its load once
+ * and its holder calls another under the same agreement; a sealed shade is on the roster at once; a refused seal says why
+ * and spends nothing; only the holder ends an agreement, once.
  */
 public class ConcordanceWorkerGameTests {
 	private static final long NIGHT = 18000L;
@@ -66,6 +84,60 @@ public class ConcordanceWorkerGameTests {
 	private static void place(GameTestHelper helper, Entity entity, double x, double y, double z) {
 		Vec3 at = helper.absoluteVec(new Vec3(x, y, z));
 		entity.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
+	}
+
+	private static WorkerDefinition.Spirit terms() {
+		return Workers.catalog().get(GatheringShadeEntity.DEFINITION, WorkerDefinition.Spirit.class);
+	}
+
+	private static String key(@Nullable Component line) {
+		return line != null && line.getContents() instanceof TranslatableContents contents ? contents.getKey() : "";
+	}
+
+	private static @Nullable Object arg(Component line, int index) {
+		return line.getContents() instanceof TranslatableContents contents && contents.getArgs().length > index ? contents.getArgs()[index] : null;
+	}
+
+	/** Drops {@code count} wheat on {@code shade} and has it gather at night; returns what it then carries. */
+	private static int gather(ServerLevel level, GatheringShadeEntity shade, long game, int count) {
+		ItemEntity dropped = new ItemEntity(level, shade.getX(), shade.getY(), shade.getZ(), new ItemStack(Items.WHEAT, count));
+		dropped.setPickUpDelay(0);
+		level.addFreshEntity(dropped);
+		shade.think(level, NIGHT, game);
+		return shade.carriedCount();
+	}
+
+	private static int wheat(SpiritAnchorBlockEntity anchor) {
+		return anchor.contents().stream().filter(stack -> stack.is(Items.WHEAT)).mapToInt(ItemStack::getCount).sum();
+	}
+
+	private static int loose(GameTestHelper helper, Item item) {
+		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds(), entity -> entity.isAlive() && entity.getItem().is(item))
+				.stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+	}
+
+	private static int shades(GameTestHelper helper, UUID holder) {
+		return helper.getLevel().getEntitiesOfClass(GatheringShadeEntity.class, helper.getBounds(), s -> s.isAlive() && holder.equals(s.owner())).size();
+	}
+
+	private static int held(ServerLevel level, UUID holder) {
+		return BoundWills.of(level.getServer()).ledger().heldBy(holder).size();
+	}
+
+	private static SpiritAnchorBlockEntity anchor(GameTestHelper helper, BlockPos at) {
+		helper.setBlock(at, Workers.SPIRIT_ANCHOR);
+		return helper.getBlockEntity(at, SpiritAnchorBlockEntity.class);
+	}
+
+	/** Runs {@code during} with the Concordance switched off, then puts the switch back, in the same tick. */
+	private static void off(Runnable during) {
+		boolean on = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
+		JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false);
+		try {
+			during.run();
+		} finally {
+			JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on);
+		}
 	}
 
 	// ---------------------------------------------------------------- familiars
@@ -135,10 +207,278 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(anchor.agreement().done(game + 20) == 1, "one task of its quota");
 		helper.assertTrue(shade.think(level, NOON, game + 40) == Status.OUTSIDE_AGREEMENT, "At noon it is outside its agreement");
 		SpiritAnchorBlock.use(holder, level, anchor, true);
-		helper.assertTrue(anchor.agreement().suspended() && shade.think(level, NIGHT, game + 60) == Status.SUSPENDED, "Suspended, it says so");
+		helper.assertTrue(anchor.holder().held(level) == Status.SUSPENDED && shade.think(level, NIGHT, game + 60) == Status.SUSPENDED,
+				"Suspended, it says so");
 		helper.setBlock(at, Blocks.AIR);
 		helper.assertTrue(shade.isRemoved() && BoundWills.of(level.getServer()).ledger().heldBy(holder.getUUID()).isEmpty(),
 				"The anchor broken, the agreement is released and the shade departs");
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (D-S18, G1): killed, a shade's load goes into its loaded anchor once; it is struck off; its agreement stays and its
+	 * anchor knows it is lost; a second removal leaves nothing more.
+	 */
+	@GameTest(maxTicks = 40)
+	public void aKilledShadeLeavesItsLoadOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		SpiritAnchorBlockEntity anchor = anchor(helper, new BlockPos(3, 1, 3));
+		SpiritAnchorBlock.use(holder, level, anchor, false);
+		UUID first = anchor.spirit();
+		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(first);
+		helper.assertValueEqual(gather(level, shade, level.getGameTime() + 200_000L, 3), 3, "At night it gathers three");
+		shade.kill(level);
+		helper.runAfterDelay(25, () -> {
+			helper.assertTrue(shade.isRemoved(), "Killed, it is gone once its death is over");
+			helper.assertTrue(wheat(anchor) == 3 && loose(helper, Items.WHEAT) == 0 && shade.carriedCount() == 0,
+					"What it carried is in its anchor, none loose: " + wheat(anchor) + ", " + loose(helper, Items.WHEAT));
+			helper.assertTrue(!WorkerRoster.of(level.getServer()).workers(holder.getUUID()).containsKey(first), "It is struck off its holder's roster");
+			helper.assertTrue(anchor.agreement() != null && first.equals(anchor.spirit()) && anchor.holder().spiritLost(level)
+					&& held(level, holder.getUUID()) == 1, "Its agreement and Bound Will stay, and its anchor knows it is lost");
+			shade.remove(Entity.RemovalReason.KILLED);
+			helper.assertTrue(wheat(anchor) == 3 && loose(helper, Items.WHEAT) == 0, "A second removal leaves nothing more");
+			helper.succeed();
+		});
+	}
+
+	/** D-01 (D-S18, D-S16): its anchor not loaded, a killed shade's load drops where it fell, once, even switched off. */
+	@GameTest(maxTicks = 20)
+	public void aKilledShadeAwayFromItsAnchorDropsWhereItFell(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		BlockPos at = new BlockPos(1, 1, 1);
+		SpiritAnchorBlockEntity anchor = anchor(helper, at);
+		SpiritAnchorBlock.use(holder, level, anchor, false);
+		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(anchor.spirit());
+		helper.assertValueEqual(gather(level, shade, level.getGameTime() + 200_000L, 2), 2, "It gathers two");
+		place(helper, shade, 6.5, 1.0, 6.5);
+		shade.setAnchor(helper.absolutePos(at).offset(100_000, 0, 0)); // as if its anchor's chunk were not loaded
+		BlockPos fell = shade.blockPosition();
+		off(() -> shade.remove(Entity.RemovalReason.KILLED));
+		int near = level.getEntitiesOfClass(ItemEntity.class, new AABB(fell).inflate(1.5), item -> item.isAlive() && item.getItem().is(Items.WHEAT))
+				.stream().mapToInt(item -> item.getItem().getCount()).sum();
+		helper.assertTrue(near == 2 && wheat(anchor) == 0 && shade.carriedCount() == 0,
+				"Its anchor not loaded, its load drops where it fell, once, even switched off: " + near);
+		helper.assertTrue(!WorkerRoster.of(level.getServer()).workers(holder.getUUID()).containsKey(shade.getUUID()) && anchor.holder().spiritLost(level),
+				"It is struck off its holder's roster, and its anchor knows it is lost");
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (D-S18): a lost shade is reported; switched off nothing is called; its holder's next use calls another, at no
+	 * cost; a full roster refuses.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aLostShadeIsCalledAgainUnderItsAgreement(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		ServerPlayer passer = binder(helper);
+		UUID id = holder.getUUID();
+		BlockPos at = new BlockPos(3, 1, 3);
+		SpiritAnchorBlockEntity anchor = anchor(helper, at);
+		SpiritAnchorBlock.use(holder, level, anchor, false);
+		UUID record = anchor.agreement().record();
+		UUID first = anchor.spirit();
+		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		level.getEntity(first).remove(Entity.RemovalReason.KILLED);
+		helper.assertTrue(anchor.holder().spiritLost(level), "Killed, its anchor knows its shade is lost");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(passer, level, anchor, false)), "message.jugcraft.concordance.workers.spirit_lost",
+				"and says so to anyone who reads it");
+		helper.assertTrue(first.equals(anchor.spirit()) && shades(helper, id) == 0, "who calls nothing");
+		off(() -> helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.disabled",
+				"Switched off, nothing is called"));
+		helper.assertTrue(first.equals(anchor.spirit()) && shades(helper, id) == 0, "and nothing changes");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.spirit_recalled",
+				"Its holder's next use calls another");
+		UUID second = anchor.spirit();
+		helper.assertTrue(second != null && !second.equals(first) && level.getEntity(second) instanceof GatheringShadeEntity shade
+				&& id.equals(shade.owner()) && helper.absolutePos(at).equals(shade.anchor()), "a new shade for the same holder at the same anchor");
+		helper.assertTrue(record.equals(anchor.agreement().record()) && held(level, id) == 1, "under the same agreement and Bound Will, at no cost");
+		helper.assertTrue(roster.workers(id).containsKey(second) && !roster.workers(id).containsKey(first), "on the roster at once, in the lost one's place");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.spirit",
+				"Used again, it reads its shade: no second call");
+		helper.assertTrue(second.equals(anchor.spirit()) && shades(helper, id) == 1, "one shade");
+		level.getEntity(second).remove(Entity.RemovalReason.KILLED);
+		String dimension = level.dimension().identifier().toString();
+		for (int i = 0; i < WorkerRoster.MAX_PER_PLAYER; i++) {
+			roster.note(id, UUID.randomUUID(), "construct", Status.IDLE, dimension, helper.absolutePos(at));
+		}
+		Component crowded = SpiritAnchorBlock.use(holder, level, anchor, false);
+		helper.assertTrue(key(crowded).equals("message.jugcraft.concordance.workers.recall_roster_full")
+				&& Integer.valueOf(WorkerRoster.MAX_PER_PLAYER).equals(arg(crowded, 0)), "A full roster refuses the call and says so: " + crowded);
+		helper.assertTrue(second.equals(anchor.spirit()) && shades(helper, id) == 0 && anchor.holder().spiritLost(level), "still lost; nothing called");
+		List.copyOf(roster.workers(id).keySet()).forEach(worker -> roster.remove(id, worker));
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (D-S18, critique 22): unloaded is not lost; one missing from the roster is, and is replaced; the old one, loading
+	 * again, leaves its load in the anchor once and departs.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anUnloadedShadeReplacedLeavesOnceAndDeliversOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		UUID id = holder.getUUID();
+		SpiritAnchorBlockEntity anchor = anchor(helper, new BlockPos(3, 1, 3));
+		SpiritAnchorBlock.use(holder, level, anchor, false);
+		GatheringShadeEntity old = (GatheringShadeEntity) level.getEntity(anchor.spirit());
+		long game = level.getGameTime() + 200_000L;
+		helper.assertValueEqual(gather(level, old, game, 3), 3, "It gathers three");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		old.saveWithoutId(saved);
+		old.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		helper.assertTrue(roster.workers(id).containsKey(old.getUUID()) && !anchor.holder().spiritLost(level),
+				"Unloaded is not lost: it keeps its place on the roster");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.spirit_away",
+				"and its anchor says it is away, calling nothing");
+		helper.assertTrue(old.getUUID().equals(anchor.spirit()) && shades(helper, id) == 0, "nothing called");
+		roster.remove(id, old.getUUID()); // as one sealed before its roster note, or while the roster was full
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.spirit_recalled",
+				"Missing from the roster it is lost, and its holder calls another");
+		UUID second = anchor.spirit();
+		GatheringShadeEntity back = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		helper.assertTrue(back.getUUID().equals(old.getUUID()) && back.carriedCount() == 3, "The old shade loads again with its load");
+		helper.assertTrue(back.think(level, NIGHT, game + 20) == Status.FINISHED && back.isRemoved() && back.carriedCount() == 0,
+				"finds another in its place and leaves");
+		helper.assertValueEqual(wheat(anchor), 3, "leaving its load in its anchor");
+		back.remove(Entity.RemovalReason.KILLED);
+		helper.assertTrue(wheat(anchor) == 3 && loose(helper, Items.WHEAT) == 0, "once: nothing more on a second removal");
+		helper.assertTrue(second.equals(anchor.spirit()) && roster.workers(id).containsKey(second) && !roster.workers(id).containsKey(old.getUUID())
+				&& held(level, id) == 1 && shades(helper, id) == 1, "the new shade keeps the agreement, alone");
+		helper.succeed();
+	}
+
+	/** D-01 (G5): a sealed shade is on its holder's roster before it has thought; one missing from it notes itself when it next thinks. */
+	@GameTest(maxTicks = 20)
+	public void aSealedShadeIsOnTheRosterAtOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		SpiritAnchorBlockEntity anchor = anchor(helper, new BlockPos(3, 1, 3));
+		SpiritAnchorBlock.use(holder, level, anchor, false);
+		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(anchor.spirit());
+		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		WorkerRoster.Entry entry = roster.workers(holder.getUUID()).get(shade.getUUID());
+		helper.assertTrue(entry != null && entry.kind().equals("spirit") && entry.status().equals(Status.IDLE.id)
+				&& entry.dimension().equals(level.dimension().identifier().toString()) && entry.pos() == shade.blockPosition().asLong(),
+				"Sealed, the shade is on its holder's roster before it has thought: " + entry);
+		roster.remove(holder.getUUID(), shade.getUUID());
+		helper.assertTrue(shade.think(level, NIGHT, level.getGameTime() + 200_000L) == Status.IDLE
+				&& roster.workers(holder.getUUID()).containsKey(shade.getUUID()), "One missing from it notes itself when it next thinks");
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (D-S11, G5): a full roster refuses the seal before anything is recorded and says why; with room it seals and the
+	 * shade takes the last place at once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFullRosterRefusesTheSeal(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		UUID id = holder.getUUID();
+		BlockPos at = new BlockPos(3, 1, 3);
+		SpiritAnchorBlockEntity anchor = anchor(helper, at);
+		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		String dimension = level.dimension().identifier().toString();
+		for (int i = 0; i < WorkerRoster.MAX_PER_PLAYER; i++) {
+			roster.note(id, UUID.randomUUID(), "construct", Status.IDLE, dimension, helper.absolutePos(at));
+		}
+		Component crowded = SpiritAnchorBlock.use(holder, level, anchor, false);
+		helper.assertTrue(key(crowded).equals("message.jugcraft.concordance.workers.seal_roster_full")
+				&& Integer.valueOf(WorkerRoster.MAX_PER_PLAYER).equals(arg(crowded, 0)), "A full roster refuses the seal and says why: " + crowded);
+		helper.assertTrue(anchor.agreement() == null && anchor.spirit() == null && held(level, id) == 0
+				&& roster.workers(id).size() == WorkerRoster.MAX_PER_PLAYER && shades(helper, id) == 0, "before anything is recorded or called");
+		roster.remove(id, roster.workers(id).keySet().iterator().next());
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.sealed", "With room, it seals");
+		helper.assertTrue(anchor.spirit() != null && roster.workers(id).containsKey(anchor.spirit())
+				&& roster.workers(id).size() == WorkerRoster.MAX_PER_PLAYER && held(level, id) == 1, "and the shade takes the last place at once");
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (G4, D-S13): a holder with the most Bound Wills is told so and nothing is sealed; a seal its sealer cannot pay for
+	 * is refused before anything is called, and one they can pay for is paid once, once sealed; a second seal at a kept
+	 * anchor is TAKEN and changes nothing.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aFullHolderIsToldWhy(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		UUID id = holder.getUUID();
+		SpiritAnchorBlockEntity anchor = anchor(helper, new BlockPos(3, 1, 3));
+		BoundWills wills = BoundWills.of(level.getServer());
+		List<UUID> kept = new ArrayList<>();
+		for (int i = 0; i < BoundWillLedger.MAX_PER_HOLDER; i++) {
+			BoundWill will = new BoundWill(UUID.randomUUID(), "jugcraft:test_pact", "jugcraft:test_spirit", id, 0L, false);
+			wills.seal(will);
+			kept.add(will.id());
+		}
+		Component full = SpiritAnchorBlock.use(holder, level, anchor, false);
+		helper.assertTrue(key(full).equals("message.jugcraft.concordance.workers.seal_holder_full")
+				&& Integer.valueOf(BoundWillLedger.MAX_PER_HOLDER).equals(arg(full, 0)), "Holding the most Bound Wills, they are told so: " + full);
+		helper.assertTrue(anchor.agreement() == null && anchor.spirit() == null && held(level, id) == BoundWillLedger.MAX_PER_HOLDER
+				&& WorkerRoster.of(level.getServer()).workers(id).isEmpty() && shades(helper, id) == 0, "and nothing is sealed, recorded or called");
+		kept.forEach(will -> wills.release(will, id));
+		long now = level.getGameTime();
+		int[] paid = {0};
+		AgreementHolder.Sealing plain = anchor.sealing(terms());
+		AgreementHolder.Sealing dear = new AgreementHolder.Sealing(plain.agreement(), plain.counterpart(), plain.service(), plain.onePerHolder(),
+				plain.partySeals(), player -> false, player -> paid[0]++);
+		helper.assertValueEqual(anchor.holder().seal(level, holder, dear, now).outcome(), Pacts.Outcome.CANNOT_AFFORD, "A seal they cannot pay for is refused");
+		helper.assertTrue(paid[0] == 0 && anchor.agreement() == null && held(level, id) == 0 && shades(helper, id) == 0
+				&& AgreementHolder.told(Pacts.Outcome.CANNOT_AFFORD).getContents() instanceof TranslatableContents why
+				&& why.getKey().equals("message.jugcraft.concordance.workers.seal_cannot_afford"), "and says so, before anything is spent, recorded or called");
+		SpiritAnchorBlockEntity other = anchor(helper, new BlockPos(5, 1, 5));
+		AgreementHolder.Sealing paying = new AgreementHolder.Sealing(plain.agreement(), plain.counterpart(), plain.service(), plain.onePerHolder(),
+				plain.partySeals(), player -> true, player -> paid[0]++);
+		helper.assertTrue(other.holder().seal(level, holder, paying, now).outcome() == Pacts.Outcome.DONE && paid[0] == 1 && held(level, id) == 1,
+				"One they can pay for is sealed and paid once");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.sealed", "With fewer, it seals");
+		ServerPlayer stranger = binder(helper);
+		UUID spirit = anchor.spirit();
+		helper.assertValueEqual(anchor.seal(level, stranger, terms(), level.getGameTime()).outcome(), Pacts.Outcome.TAKEN,
+				"A second seal at a kept anchor is refused as taken");
+		helper.assertTrue(spirit.equals(anchor.spirit()) && id.equals(anchor.agreement().holder()) && held(level, stranger.getUUID()) == 0
+				&& paid[0] == 1, "and changes nothing");
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (G6, E1, E4): neither another player, nor a stand-in, nor its holder while switched off ends it; its holder ends it
+	 * without breaking the anchor, once; the anchor may be sealed again.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theHolderEndsWithoutBreaking(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		ServerPlayer other = binder(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		SpiritAnchorBlockEntity anchor = anchor(helper, at);
+		SpiritAnchorBlock.use(holder, level, anchor, false);
+		GatheringShadeEntity shade = (GatheringShadeEntity) level.getEntity(anchor.spirit());
+		UUID spirit = shade.getUUID();
+		UUID record = anchor.agreement().record();
+		long now = level.getGameTime();
+		helper.assertValueEqual(gather(level, shade, now + 200_000L, 3), 3, "It gathers three");
+		helper.assertValueEqual(anchor.holder().end(level, other, now), AgreementHolder.Ended.NOT_HOLDER, "Another player cannot end it");
+		FakePlayer standIn = FakePlayer.get(level, new GameProfile(holder.getUUID(), "[Concordance]"));
+		helper.assertValueEqual(anchor.holder().end(level, standIn, now), AgreementHolder.Ended.NOT_PERMITTED, "nor a stand-in with its holder's identity");
+		off(() -> helper.assertValueEqual(anchor.holder().end(level, holder, now), AgreementHolder.Ended.DISABLED, "Switched off, not even its holder"));
+		helper.assertTrue(anchor.agreement() != null && !shade.isRemoved() && shade.carriedCount() == 3 && held(level, holder.getUUID()) == 1,
+				"So far nothing has changed");
+		helper.assertValueEqual(anchor.holder().end(level, holder, now), AgreementHolder.Ended.ENDED, "Its holder ends it without breaking the anchor");
+		helper.assertTrue(anchor.agreement() == null && anchor.spirit() == null && held(level, holder.getUUID()) == 0 && shade.isRemoved()
+				&& !WorkerRoster.of(level.getServer()).workers(holder.getUUID()).containsKey(spirit), "its Bound Will released, its shade gone and off the roster");
+		helper.assertTrue(wheat(anchor) == 3 && loose(helper, Items.WHEAT) == 0 && helper.getBlockState(at).is(Workers.SPIRIT_ANCHOR),
+				"what it carried left in the anchor, which stays");
+		helper.assertValueEqual(anchor.holder().end(level, holder, now), AgreementHolder.Ended.NOTHING, "A second end finds nothing");
+		helper.assertTrue(AgreementHolder.end(level, null, holder, record, Pacts.ENDED, now) == AgreementHolder.Ended.NOTHING
+				&& wheat(anchor) == 3 && loose(helper, Items.WHEAT) == 0, "and ending the record again returns nothing more");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(holder, level, anchor, false)), "message.jugcraft.concordance.workers.sealed", "The anchor may be sealed again");
 		helper.succeed();
 	}
 
@@ -202,7 +542,7 @@ public class ConcordanceWorkerGameTests {
 
 	// ---------------------------------------------------------------- saving
 
-	/** A familiar's bond, a porter's body, route and load, and a shade's anchor survive a save. */
+	/** A familiar's bond, a porter's body and route, and a shade's anchor, holder and load (G10) survive a save. */
 	@GameTest(maxTicks = 20)
 	public void workersKeepTheirModelsThroughASave(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -222,6 +562,22 @@ public class ConcordanceWorkerGameTests {
 		ClockworkPorterEntity porterCopy = Workers.CLOCKWORK_PORTER.create(level, EntitySpawnReason.LOAD);
 		porterCopy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
 		helper.assertTrue(porterCopy.body().equals(porter.body()) && porterCopy.route().equals(porter.route()), "The body and route are saved");
+		GatheringShadeEntity shade = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.LOAD);
+		shade.setOwner(new UUID(17L, 6L));
+		shade.setAnchor(new BlockPos(7, 8, 9));
+		TagValueOutput shadeOut = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		shade.saveWithoutId(shadeOut);
+		CompoundTag laden = shadeOut.buildResult();
+		laden.put("carried", ItemStack.CODEC.listOf().encodeStart(level.registryAccess().createSerializationContext(NbtOps.INSTANCE),
+				List.of(new ItemStack(Items.WHEAT, 5))).getOrThrow());
+		GatheringShadeEntity shadeCopy = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.LOAD);
+		shadeCopy.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), laden));
+		TagValueOutput again = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		shadeCopy.saveWithoutId(again);
+		GatheringShadeEntity shadeBack = Workers.GATHERING_SHADE.create(level, EntitySpawnReason.LOAD);
+		shadeBack.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), again.buildResult()));
+		helper.assertTrue(new BlockPos(7, 8, 9).equals(shadeBack.anchor()) && new UUID(17L, 6L).equals(shadeBack.owner())
+				&& shadeBack.carriedCount() == 5, "A shade's anchor, holder and load are saved: " + shadeBack.carriedCount());
 		helper.succeed();
 	}
 

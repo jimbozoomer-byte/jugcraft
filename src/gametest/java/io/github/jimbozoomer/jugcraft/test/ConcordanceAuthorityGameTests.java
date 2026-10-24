@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.authlib.GameProfile;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.concordance.Brew;
@@ -16,16 +17,25 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Stacking;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireHeartBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.TaglockItem;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Body;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.concordance.worker.WorkerDefinition;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
+import io.github.jimbozoomer.jugcraft.party.PartyManager;
 import java.util.List;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -34,6 +44,8 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
@@ -55,7 +67,8 @@ import org.jspecify.annotations.Nullable;
  * ({@link TestClaims}) claims blocks and creatures for someone else, as a claim mod would, and each test asks the
  * Concordance's indirect routes to change or harm them: a spell's light, a spell's and a forged salve's harm, a link
  * taken by touch, a porter's trip, a device whose owner is away (and the same with the server's explicit option that
- * lets a stand-in answer for them), a hopper under a Spire Heart, and a link used by someone who did not take it.
+ * lets a stand-in answer for them), a hopper under a Spire Heart, and a link used by someone who did not take it; and a
+ * Spirit Anchor sealed only by its owner's side where they may build, never by a stand-in (Concordance Chunk D, D-01).
  */
 public class ConcordanceAuthorityGameTests {
 	private static final long NIGHT = 18000L;
@@ -89,6 +102,35 @@ public class ConcordanceAuthorityGameTests {
 				"0/0/0", Vec3.atCenterOf(helper.absolutePos(new BlockPos(0, 2, 0))));
 		return target instanceof BlockPos pos ? ConcordanceEffects.apply(context, spec, helper.absolutePos(pos))
 				: ConcordanceEffects.apply(context, spec, (Mob) target);
+	}
+
+	private static ServerPlayer spiritbinder(GameTestHelper helper) {
+		ServerPlayer player = player(helper);
+		ConcordanceProgress.grant(player, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		return player;
+	}
+
+	private static String key(@Nullable Component line) {
+		return line != null && line.getContents() instanceof TranslatableContents contents ? contents.getKey() : "";
+	}
+
+	private static int held(ServerLevel level, ServerPlayer player) {
+		return BoundWills.of(level.getServer()).ledger().heldBy(player.getUUID()).size();
+	}
+
+	/** An anchor at {@code at}, placed by {@code placer} (null: set without a placer, as one from before owners). */
+	private static SpiritAnchorBlockEntity placed(GameTestHelper helper, BlockPos at, @Nullable ServerPlayer placer) {
+		helper.setBlock(at, Workers.SPIRIT_ANCHOR);
+		BlockPos absolute = helper.absolutePos(at);
+		if (placer != null) {
+			Workers.SPIRIT_ANCHOR.setPlacedBy(helper.getLevel(), absolute, helper.getLevel().getBlockState(absolute), placer, new ItemStack(Workers.SPIRIT_ANCHOR));
+		}
+		return helper.getBlockEntity(at, SpiritAnchorBlockEntity.class);
+	}
+
+	private static WorkerDefinition.Spirit shadeTerms() {
+		return Workers.catalog().get(GatheringShadeEntity.DEFINITION, WorkerDefinition.Spirit.class);
 	}
 
 	/** Runs {@code check} with the server's absent-owner option on, then puts it back. */
@@ -274,6 +316,74 @@ public class ConcordanceAuthorityGameTests {
 		helper.assertValueEqual(TaglockItem.curse(holder, level, taglock, cobweb), "not_yours", "handed on, it is not the holder's to use");
 		helper.assertTrue(cobweb.getCount() == 2 && ConcordanceProgress.currentFocus(holder) == 20, "and nothing was spent");
 		helper.assertValueEqual(TaglockItem.curse(maker, level, taglock, cobweb), "", "its maker still may");
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (D-S8, E1): a Spirit Anchor records who placed it; outside any claim a stranger may not seal at it and is told why;
+	 * its owner's party seals for themself; one set without a placer is sealed by whoever may change it (a neighbour's claim
+	 * refuses it).
+	 */
+	@GameTest(maxTicks = 20)
+	public void onlyTheOwnersSideSealsAnAnchor(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = spiritbinder(helper);
+		ServerPlayer stranger = spiritbinder(helper);
+		ServerPlayer member = spiritbinder(helper);
+		SpiritAnchorBlockEntity anchor = placed(helper, new BlockPos(2, 2, 2), owner);
+		helper.assertTrue(owner.getUUID().equals(anchor.owner()), "Placed, the anchor records who placed it");
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(stranger, level, anchor, false)), "message.jugcraft.concordance.workers.seal_not_permitted",
+				"Outside any claim, a stranger is told they may not seal at another's anchor");
+		helper.assertTrue(anchor.agreement() == null && held(level, stranger) == 0 && level.getEntitiesOfClass(GatheringShadeEntity.class, helper.getBounds(),
+				shade -> stranger.getUUID().equals(shade.owner())).isEmpty(), "and nothing is sealed or called");
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(owner.getUUID(), member.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(member.getUUID(), ms) == PartyManager.Result.OK, "The owner and a member form a party");
+			helper.assertValueEqual(key(SpiritAnchorBlock.use(member, level, anchor, false)), "message.jugcraft.concordance.workers.sealed", "The owner's party may seal");
+			helper.assertTrue(member.getUUID().equals(anchor.agreement().holder()) && held(level, member) == 1 && held(level, owner) == 0,
+					"for themself: the member holds it, not the owner");
+		} finally {
+			parties.adminDisband(owner.getUUID());
+		}
+		SpiritAnchorBlockEntity legacy = placed(helper, new BlockPos(5, 2, 2), null);
+		helper.assertTrue(legacy.owner() == null, "An anchor set without a placer, as one from before Chunk D, has no owner");
+		try (TestClaims claims = TestClaims.open()) {
+			claims.block(helper.absolutePos(new BlockPos(5, 2, 2)), NEIGHBOUR);
+			helper.assertValueEqual(key(SpiritAnchorBlock.use(stranger, level, legacy, false)), "message.jugcraft.concordance.workers.seal_not_permitted",
+					"In a neighbour's claim no one else may seal it");
+			helper.assertTrue(legacy.agreement() == null && held(level, stranger) == 0, "and nothing is sealed");
+		}
+		helper.assertValueEqual(key(SpiritAnchorBlock.use(stranger, level, legacy, false)), "message.jugcraft.concordance.workers.sealed",
+				"The claim lifted, whoever may change it seals it, as before Chunk D");
+		helper.succeed();
+	}
+
+	/**
+	 * D-01 (D-S8, E1): a stand-in never seals, even with the owner's identity or the absent-owner option; it neither suspends
+	 * nor ends; placing an anchor it records no owner.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aStandInNeverSeals(GameTestHelper helper) {
+		floor(helper);
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = spiritbinder(helper);
+		SpiritAnchorBlockEntity anchor = placed(helper, new BlockPos(2, 2, 2), owner);
+		FakePlayer standIn = FakePlayer.get(level, new GameProfile(owner.getUUID(), "[Concordance]"));
+		long now = level.getGameTime();
+		helper.assertValueEqual(anchor.seal(level, standIn, shadeTerms(), now).outcome(), Pacts.Outcome.NOT_PERMITTED, "A stand-in never seals, even with the owner's identity");
+		helper.assertTrue(anchor.agreement() == null && held(level, owner) == 0, "nothing is sealed");
+		withAbsentOwners(() -> helper.assertValueEqual(anchor.seal(level, standIn, shadeTerms(), now).outcome(), Pacts.Outcome.NOT_PERMITTED,
+				"not even when the server lets stand-ins answer for absent owners"));
+		helper.assertValueEqual(anchor.seal(level, owner, shadeTerms(), now).outcome(), Pacts.Outcome.DONE, "Its owner seals");
+		SpiritAnchorBlock.use(standIn, level, anchor, true);
+		helper.assertTrue(anchor.holder().held(level) == null, "A stand-in's sneaking use suspends nothing");
+		helper.assertTrue(anchor.holder().toggle(level, standIn, now) == AgreementHolder.Toggle.NOT_HOLDER
+				&& anchor.holder().end(level, standIn, now) == AgreementHolder.Ended.NOT_PERMITTED && anchor.agreement() != null,
+				"and it neither suspends nor ends the agreement");
+		helper.assertTrue(placed(helper, new BlockPos(5, 2, 2), standIn).owner() == null, "A stand-in placing an anchor records no owner");
 		helper.succeed();
 	}
 

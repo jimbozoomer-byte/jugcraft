@@ -13,6 +13,12 @@ navigate, outside its agreement, finished, owner offline, another dimension, des
 repair, no energy, full). None loads a chunk. The definitions are data (data/jugcraft/concordance/worker, read by
 Java's concordance/worker). tools/concordance.py merges these tables into its own; tools/check_mod_data.py checks the
 numbers the Java repeats.
+
+Concordance Chunk D, unit 1 (D-01; docs/features/concordance-chunk-d.md): the existing agreements keep their promises. A
+Spirit Anchor records who placed it, and only its owner or their party seal at it, never a stand-in; a seal is refused
+with one reason (SEAL_OUTCOMES) before anything is recorded, spent or called, and a new shade is on the roster at once; a
+killed shade's load goes home once and its holder calls another under the same agreement at no cost; only the holder ends
+an agreement, once (Java: worker/Pacts.java, spirits/AgreementHolder.java).
 """
 
 MOD = "jugcraft"
@@ -44,6 +50,11 @@ MAX_SUPPORT_TICKS = 200
 WORK = ["gather"]
 # The roster (Java: spirits/WorkerRoster.java).
 ROSTER_MAX = 32
+# Concordance Chunk D, unit 1 (D-01; Java: worker/Pacts.java Outcome, same order; spirits/AgreementHolder.java told). How a
+# seal can end: each id is worded as message.jugcraft.concordance.workers.seal_<id> ("disabled" as the switch's). Ids are
+# worded: append only.
+SEAL_OUTCOMES = ["done", "disabled", "not_permitted", "taken", "already_held", "holder_full", "roster_full", "unavailable",
+                 "cannot_afford"]
 
 STATUSES = {
     "following": "following its person",
@@ -133,7 +144,8 @@ ITEMS = {
 }
 BLOCKS = {"spirit_anchor": {"name": "Spirit Anchor"}}
 DEVICE_TOOLTIPS = {
-    "spirit_anchor": "Use: seal a Gathering Shade's agreement. Its holder, sneaking: suspend or resume. Break: release.",
+    "spirit_anchor": "Use: seal a Gathering Shade's agreement (its owner or their party), or call your lost shade again. "
+                     "Its holder, sneaking: suspend or resume. Break: release.",
 }
 
 MESSAGES = {
@@ -165,6 +177,24 @@ MESSAGES = {
     "workers.kind.familiar": "Familiar",
     "workers.kind.spirit": "Spirit",
     "workers.kind.construct": "Construct",
+    # Concordance Chunk D, D-01 (D-S8, D-S11, D-S13, D-S18): every seal says how it went; a lost spirit is called again;
+    # only its holder ends an agreement.
+    "workers.seal_done": "The agreement is sealed",
+    "workers.seal_not_permitted": "You may not seal an agreement here: it is not yours or your party's, or you could not build here",
+    "workers.seal_taken": "This place already keeps an agreement",
+    "workers.seal_already_held": "You already keep an agreement with this spirit",
+    "workers.seal_holder_full": "You already hold %s Bound Wills, the most one person may: end one first. Nothing was sealed",
+    "workers.seal_roster_full": "Your roster already keeps %s workers (familiars, spirits, constructs and helpers), the most it "
+                                "may: release one first. Nothing was sealed",
+    "workers.seal_unavailable": "No spirit answers now; nothing was sealed or spent",
+    "workers.seal_cannot_afford": "You cannot pay what sealing it costs; nothing was sealed or spent",
+    "workers.spirit_lost": "Its spirit was lost; its holder may use this place to call another under the same agreement",
+    "workers.spirit_recalled": "Another answers the same agreement; nothing was spent",
+    "workers.recall_roster_full": "Your roster already keeps %s workers, the most it may: release one, then call again",
+    "workers.ended": "The agreement is ended: its Bound Will is released and its spirit departs, leaving what it carried",
+    "workers.no_agreement": "No agreement is kept here",
+    "workers.not_holder": "Only the agreement's holder may do that",
+    "workers.end_not_permitted": "Only the agreement's holder, alive and in person, may end it",
 }
 
 TOOLTIPS = {
@@ -240,10 +270,17 @@ def codex():
                  f"{clock(spirit['to'])}, at most {spirit['quota']} times a day, carrying {spirit['carry']} at a time, "
                  f"and brings them to the anchor (hoppers below take them out).", rid("spirit_anchor")),
                 ("text", "Its Terms",
-                 "Outside its hours, its area or its work it waits at the anchor and says so; when its day's work is "
-                 "done it is finished until tomorrow. It never takes what you could not take yourself (a protected "
-                 "town). Sneak and use the anchor to **suspend** or resume it; break the anchor to **release** it: it "
-                 "leaves what it carried and departs."),
+                 "Only the anchor's owner (who placed it) or their party may seal an agreement at it, and only where "
+                 "they may build (an anchor placed before owners were recorded: whoever may build there). Outside its "
+                 "hours, its area or its work it waits at the anchor and says so; when its day's work is done it is "
+                 "finished until tomorrow. It never takes what you could not take yourself (a protected town). Sneak "
+                 "and use the anchor to **suspend** or resume it; break the anchor (with the Concordance on) to "
+                 "**release** it: it leaves what it carried and departs."),
+                ("text", "If It Is Lost",
+                 "A shade that is killed leaves what it carried in its anchor (or where it fell, if the anchor is not "
+                 "loaded or keeps someone else's agreement), and the anchor says it was lost: its holder uses it and "
+                 "another answers the same agreement, at no cost. A seal that is refused says why (not yours, already "
+                 "kept, too many Bound Wills, a full roster) and spends nothing."),
             ],
         },
         ("binding", "constructs"): {

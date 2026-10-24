@@ -9,6 +9,7 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
@@ -29,10 +30,14 @@ import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
 import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
+import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.starbound.ConclaveProjects;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
@@ -71,7 +76,8 @@ import net.minecraft.world.level.storage.TagValueInput;
  * exactly as written; block entities stamp their version; the crucible keeps Preserve's hold through a save (Concordance
  * Chunk B, unit 3); the Crucible Stand keeps its JE and setting (Concordance Chunk C, C-05); the crucible keeps its
  * formula's setter and its courier request (C-06); the circle index looks only at the chunks in reach; and a Verdant
- * Bed saved before harvest strain reads unstrained (C-08), and one saved before grafts ungrafted (C-09).
+ * Bed saved before harvest strain reads unstrained (C-08), and one saved before grafts ungrafted (C-09); a Spirit Anchor
+ * keeps its owner and agreement through a save (Concordance Chunk D, D-01).
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -186,7 +192,8 @@ public class ConcordancePersistenceGameTests {
 
 	/**
 	 * A Concordance block entity's save carries its version, for a later format to read. The crucible's stays 1 with
-	 * Preserve's optional hold (Concordance Chunk B, unit 3); the Crucible Stand's is 1 (Concordance Chunk C, C-05).
+	 * Preserve's optional hold (Concordance Chunk B, unit 3); the Crucible Stand's is 1 (Concordance Chunk C, C-05); the
+	 * Spirit Anchor's is 1, with its optional owner (Concordance Chunk D).
 	 */
 	@GameTest(maxTicks = 20)
 	public void blockEntitiesStampTheirVersion(GameTestHelper helper) {
@@ -195,11 +202,13 @@ public class ConcordancePersistenceGameTests {
 		BlockPos sconce = new BlockPos(3, 1, 1);
 		BlockPos crucible = new BlockPos(5, 1, 1);
 		BlockPos stand = new BlockPos(1, 1, 3);
+		BlockPos anchor = new BlockPos(3, 1, 3);
 		helper.setBlock(pylon, JugcraftConcordance.LEY_PYLON);
 		helper.setBlock(sconce, JugcraftConcordance.LUMEN_SCONCE);
 		helper.setBlock(crucible, JugcraftConcordance.CRUCIBLE);
 		helper.setBlock(stand, JugcraftConcordance.CRUCIBLE_STAND);
-		for (BlockPos at : List.of(pylon, sconce, crucible, stand)) {
+		helper.setBlock(anchor, Workers.SPIRIT_ANCHOR);
+		for (BlockPos at : List.of(pylon, sconce, crucible, stand, anchor)) {
 			BlockEntity entity = level.getBlockEntity(helper.absolutePos(at));
 			CompoundTag saved = entity.saveWithoutMetadata(level.registryAccess());
 			helper.assertValueEqual(saved.getIntOr(Saved.VERSION, 0), 1, entity.getType() + " stamps its version");
@@ -453,6 +462,55 @@ public class ConcordancePersistenceGameTests {
 				"A bed from before grafts reads ungrafted");
 		helper.assertTrue(!read.saveWithoutMetadata(level.registryAccess()).contains(VerdantBedBlockEntity.GRAFT), "and saves no graft");
 		helper.succeed();
+	}
+
+	/**
+	 * D-01 (D-S8, G10): an anchor saves who placed it beside its agreement (the day's task included) and spirit, at version 1;
+	 * one from before owners (stamped or not) reads as nobody's; one set without a placer writes neither.
+	 */
+	@GameTest(maxTicks = 20)
+	public void anAnchorsAgreementRoundTrips(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer owner = TestPlayers.mock(helper);
+		owner.setGameMode(GameType.SURVIVAL);
+		RateGate.forget(owner.getUUID());
+		ConcordanceProgress.grant(owner, "jugcraft:first_light", ResearchState.UNDERSTOOD);
+		ConcordanceProgress.grant(owner, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		BlockPos at = new BlockPos(2, 1, 2);
+		helper.setBlock(at, Workers.SPIRIT_ANCHOR);
+		BlockPos absolute = helper.absolutePos(at);
+		Workers.SPIRIT_ANCHOR.setPlacedBy(level, absolute, level.getBlockState(absolute), owner, new ItemStack(Workers.SPIRIT_ANCHOR));
+		SpiritAnchorBlockEntity anchor = helper.getBlockEntity(at, SpiritAnchorBlockEntity.class);
+		SpiritAnchorBlock.use(owner, level, anchor, false);
+		anchor.taskDone(level.getGameTime());
+		helper.assertTrue(owner.getUUID().equals(anchor.owner()) && anchor.agreement() != null && anchor.spirit() != null
+				&& anchor.agreement().done(level.getGameTime()) == 1, "Placed, sealed by its owner, one task done");
+		CompoundTag saved = anchor.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.contains("owner") && saved.contains("agreement") && saved.contains("spirit"),
+				"Saved: its owner beside its agreement and spirit, still at version 1: " + saved);
+		SpiritAnchorBlockEntity read = loadAnchor(level, anchor, saved);
+		helper.assertTrue(owner.getUUID().equals(read.owner()) && anchor.agreement().equals(read.agreement()) && anchor.spirit().equals(read.spirit()),
+				"and read back exactly");
+		CompoundTag before = saved.copy();
+		before.remove("owner");
+		CompoundTag unversioned = before.copy();
+		unversioned.remove(Saved.VERSION);
+		for (CompoundTag legacy : List.of(before, unversioned)) {
+			SpiritAnchorBlockEntity older = loadAnchor(level, anchor, legacy);
+			helper.assertTrue(older.owner() == null && anchor.agreement().equals(older.agreement()) && anchor.spirit().equals(older.spirit()),
+					"An anchor from before owners reads as nobody's, its agreement and spirit kept");
+		}
+		BlockPos freshAt = new BlockPos(4, 1, 2);
+		helper.setBlock(freshAt, Workers.SPIRIT_ANCHOR);
+		CompoundTag fresh = helper.getBlockEntity(freshAt, SpiritAnchorBlockEntity.class).saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(!fresh.contains("owner") && !fresh.contains("agreement"), "An anchor set without a placer writes no owner: " + fresh);
+		helper.succeed();
+	}
+
+	private static SpiritAnchorBlockEntity loadAnchor(ServerLevel level, SpiritAnchorBlockEntity like, CompoundTag saved) {
+		SpiritAnchorBlockEntity copy = new SpiritAnchorBlockEntity(like.getBlockPos(), like.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
 	}
 
 	private static VerdantBedBlockEntity loadBed(ServerLevel level, VerdantBedBlockEntity like, CompoundTag saved) {

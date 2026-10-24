@@ -14290,6 +14290,7 @@ def check_concordance(registered):
     check_celestial(co, root, lang, registered, research)
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
+    check_pacts(co, root, lang)
     check_logistics(co, root, lang, registered)
     check_crucible_supply(co, root)
     check_artifice(co, root, lang, registered, research)
@@ -17935,6 +17936,15 @@ def check_workers(co, root, lang, registered, research):
                 err(f"spirits/{path.name}: a worker only hops within its own level (teleportTo(x, y, z))")
         if "MemoryModuleType" in text and path.name != "WorkerEntity.java":
             err(f"spirits/{path.name}: only WorkerEntity talks to the brain; a worker's model never lives in its memories")
+    # Concordance Chunk D, D-01 (D-S18): a worker that carries things leaves them once and is struck off its holder's roster
+    # when killed or discarded; unloading is not that.
+    for path in sorted(spirits.glob("*.java")):
+        text = path.read_text(encoding="utf-8")
+        if "extends WorkerEntity<" in text and "List<ItemStack> carried" in text:
+            found = re.search(r"public void remove\(RemovalReason reason\) \{(.*?)\n\t\}", text, re.S)
+            body = found.group(1) if found else ""
+            if "shouldDestroy()" not in body or ".remove(owner, getUUID())" not in body or not ("carried" in body or "unload(" in body):
+                err(f"spirits/{path.name}: a worker that carries things leaves them once and is struck off its roster when killed (remove)")
     # Every word has its text.
     for path in sorted(spirits.glob("*.java")):
         for key in re.findall(r'"message\.jugcraft\.concordance\.(workers\.[a-z_]+)"', path.read_text(encoding="utf-8")):
@@ -17961,6 +17971,63 @@ def check_workers(co, root, lang, registered, research):
         with Image.open(texture) as img:
             if img.convert("RGBA").tobytes() != item_icons.draw(icon).tobytes() or img.size != (16, 16):
                 err(f"workers: textures/item/{icon}.png differs from its map: run tools/generate_textures.py")
+
+
+def check_pacts(co, root, lang):
+    """Concordance Chunk D, unit 1 (D-01; D-S8, D-S11, D-S13, D-S18; docs/features/concordance-chunk-d.md): the agreements
+    keep their promises. Pacts.Outcome is SEAL_OUTCOMES in order, refused with its first reason before anything is called
+    or recorded, and each worded where the holder tells it; a seal's cost is asked before anything is called and paid only
+    once its Bound Will is recorded; a killed or departing shade's load goes only into an anchor keeping its own holder's
+    agreement; the anchor records who placed it (never a stand-in) and the holder saves its owner; and the unit's game
+    tests exist."""
+    wk = co.workers
+    def java(relative):
+        path = root / relative
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    pacts = java("worker/Pacts.java")
+    outcomes = re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(pacts, "public enum Outcome"), re.M)
+    if [oid for _, oid in outcomes] != wk.SEAL_OUTCOMES:
+        err(f"concordance/worker/Pacts.java: Outcome {[oid for _, oid in outcomes]} differs from SEAL_OUTCOMES in tools/concordance_workers.py (same order)")
+    for name, oid in outcomes:
+        if name != oid.upper():
+            err(f"concordance/worker/Pacts.java: Outcome.{name} must be named after its id {oid}")
+    refusal = _java_body(pacts, "public static Outcome refusal(")
+    order = [refusal.find(f"Outcome.{name}") for name in ("NOT_PERMITTED", "TAKEN", "ALREADY_HELD", "HOLDER_FULL", "ROSTER_FULL")]
+    if -1 in order or order != sorted(order):
+        err("concordance/worker/Pacts.java: refusal() names one reason, in order: permission, the place, the counterpart, the Bound Wills, the roster")
+    holder = java("spirits/AgreementHolder.java")
+    told = _java_body(holder, "public static Component told(Pacts.Outcome outcome)")
+    for oid in wk.SEAL_OUTCOMES:
+        if oid == "disabled":
+            continue
+        key = f"message.{MOD}.concordance.workers.seal_{oid}"
+        if key not in lang:
+            err(f"pacts: missing lang {key}")
+        if f'"{key}"' not in told:
+            err(f"spirits/AgreementHolder.java: a seal that ends {oid} is told as {key} (told(Pacts.Outcome))")
+    seal = _java_body(holder, "public Sealed seal(")
+    if not 0 <= seal.find("Pacts.refusal(") < seal.find("holds.call(level") < seal.find("wills.seal(") \
+            or "WorkerRoster.of(server).full(holder)" not in seal:
+        err("AgreementHolder.seal: refused with its first reason, the roster asked, before anything is called or recorded (D-S11)")
+    if not 0 <= seal.find("Pacts.refusal(") < seal.find("sealing.affords()") < seal.find("holds.call(level") \
+            or not 0 <= seal.find("wills.seal(") < seal.find("sealing.pay()"):
+        err("AgreementHolder.seal: its cost is asked before anything is called and paid only once its Bound Will is recorded (D-S13)")
+    if "Authority.isStandIn(player)" not in _java_body(holder, "public boolean maySeal("):
+        err("AgreementHolder.maySeal: a stand-in never seals (D-S8)")
+    if 'output.store("owner", UUIDUtil.CODEC, owner)' not in holder or 'input.read("owner", UUIDUtil.CODEC)' not in holder:
+        err("spirits/AgreementHolder.java: a holder block saves and reads who placed it (D-S8)")
+    placed = _java_body(java("spirits/SpiritAnchorBlock.java"), "public void setPlacedBy(")
+    if "holder().setOwner(player.getUUID())" not in placed or "Authority.isStandIn(player)" not in placed:
+        err("spirits/SpiritAnchorBlock.java: the anchor records who placed it, never a stand-in (D-S8)")
+    if "owner.equals(home.agreement().holder())" not in _java_body(java("spirits/GatheringShadeEntity.java"), "private void unload("):
+        err("spirits/GatheringShadeEntity.java: a shade's load goes only into an anchor keeping its own holder's agreement (D-S18)")
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    for cls, wanted in UNIT1_TESTS.items():
+        path = tests / f"{cls}.java"
+        source = path.read_text(encoding="utf-8") if path.exists() else ""
+        for name in wanted:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing Concordance Chunk D unit 1 game test {name}")
 
 
 def check_logistics(co, root, lang, registered):
@@ -20050,6 +20117,8 @@ AUTHORITY_ROUTES = {
                                            "Authority.mayChangeFor(level, owner, target)",
                                            "Authority.mayChangeFor(level, request.ticket().requester(), pos)"],
     "spirits/GatheringShadeEntity.java": ["Authority.answering(level, agreement.holder()) == null"],
+    # Concordance Chunk D (D-S8): sealing asks at the place, as the sealer and never as a stand-in.
+    "spirits/AgreementHolder.java": ["if (Authority.isStandIn(player) || !Authority.mayChange(level, player, block.getBlockPos()))"],
     "spirits/PorterKeyItem.java": ["Authority.mayChange(level, player, pos)"],
     "spire/ConcordSpire.java": ["Authority.answering(level, state.keeper())", "Authority.mayChange(level, keeper, at)"],
     "sympathy/Sympathy.java": ["Authority.mayStrike(caster, target)", 'return "not_yours";'],
@@ -20178,6 +20247,15 @@ STAMPING_BASES = ("LivingDeviceBlockEntity", "WorkerEntity")
 # The records whose entries are independent, read entry by entry (an unreadable one kept as written).
 ENTRY_BY_ENTRY = {"spire/SpireRecord.java", "spirits/BoundWills.java", "spirits/WorkerRoster.java", "sky/AstralClaims.java",
                   "starbound/ConclaveProjects.java"}
+# Concordance Chunk D, unit 1's game tests (check_pacts): D-01's; D-S17's and D-02's join with their commits.
+UNIT1_TESTS = {
+    "ConcordanceWorkerGameTests": ["aKilledShadeLeavesItsLoadOnce", "aKilledShadeAwayFromItsAnchorDropsWhereItFell",
+                                   "aLostShadeIsCalledAgainUnderItsAgreement", "anUnloadedShadeReplacedLeavesOnceAndDeliversOnce",
+                                   "aSealedShadeIsOnTheRosterAtOnce", "aFullRosterRefusesTheSeal", "aFullHolderIsToldWhy",
+                                   "theHolderEndsWithoutBreaking"],
+    "ConcordanceAuthorityGameTests": ["onlyTheOwnersSideSealsAnAnchor", "aStandInNeverSeals"],
+    "ConcordancePersistenceGameTests": ["anAnchorsAgreementRoundTrips"],
+}
 
 
 def check_persistence(root):

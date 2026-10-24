@@ -82,6 +82,11 @@ public final class WorkerRoster extends SavedData {
 		}
 	}
 
+	/** Whether {@code owner}'s roster keeps its limit, so it takes no new worker (Concordance Chunk D, D-S11: a seal is refused first). */
+	public boolean full(UUID owner) {
+		return workers(owner).size() >= MAX_PER_PLAYER;
+	}
+
 	public Map<UUID, Entry> workers(UUID owner) {
 		return entries.getOrDefault(owner, Map.of());
 	}
