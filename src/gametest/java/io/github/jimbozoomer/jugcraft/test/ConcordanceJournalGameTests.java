@@ -2,22 +2,32 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.journal.Journal;
 import io.github.jimbozoomer.jugcraft.concordance.journal.JournalLine;
 import io.github.jimbozoomer.jugcraft.concordance.journal.JournalPayload;
 import io.github.jimbozoomer.jugcraft.concordance.journal.JournalSection;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
 import io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil;
+import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.netty.buffer.Unpooled;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
@@ -147,6 +157,44 @@ public class ConcordanceJournalGameTests {
 		helper.assertTrue(section(Journal.build(player), "pacts") == null, "none while the Binding Arts are only observed");
 		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
 		helper.assertTrue(section(Journal.build(player), "pacts") != null, "there once they are understood");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D, D-07 (D-S11): a pact kept by a player who has not understood the Binding Arts shows no pacts section,
+	 * nor while they are only observed; understood, the section gives Stolas's Regard's step, the sky step, then the pact kept:
+	 * named, without its perch, with its next offering, and why it waits as the exact.
+	 */
+	@GameTest(maxTicks = 20)
+	public void thePactsSectionListsPactsOnlyAfterTheBindingArts(GameTestHelper helper) {
+		ServerPlayer player = TestPlayers.mock(helper);
+		ServerLevel level = helper.getLevel();
+		long now = level.getGameTime();
+		BoundWill.Pact pact = Pacts.sealed(Couriers.place(level, helper.absolutePos(new BlockPos(1, 1, 1))), Pacts.PERSONAL, null,
+				new BoundWill.Service("star_reckoning", 8, 0, 24000, 1), Pacts.terms("jugcraft:stolas_offerings", 1, 7 * Pacts.DAY, Pacts.DAY, 4), now);
+		BoundWill record = Pacts.unseat(new BoundWill(UUID.randomUUID(), "jugcraft:stolas_pact", StolasEntity.COUNTERPART, player.getUUID(), now, false, pact));
+		BoundWills wills = BoundWills.of(level.getServer());
+		helper.assertTrue(wills.seal(record).outcome() == BoundWillLedger.Outcome.DONE, "A pact without its perch is kept for the player");
+		try {
+			helper.assertTrue(section(Journal.build(player), "pacts") == null, "No pacts section before the Binding Arts are understood, though a pact is kept");
+			ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.OBSERVED);
+			helper.assertTrue(section(Journal.build(player), "pacts") == null, "nor while they are only observed");
+			ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+			JournalSection pacts = section(Journal.build(player), "pacts");
+			helper.assertValueEqual(pacts == null ? List.of() : pacts.lines().stream().map(line -> key(line.text())).toList(),
+					List.of("journal.jugcraft.pacts.regard.examine", "journal.jugcraft.pacts.sky_needed", "journal.jugcraft.pacts.kept"),
+					"Understood: Stolas's Regard's step, the sky step, then the pact kept");
+			JournalLine kept = pacts.lines().get(2);
+			Object[] args = ((TranslatableContents) kept.text().getContents()).getArgs();
+			helper.assertTrue(args[0] instanceof Component name && key(name).equals("entity.jugcraft.stolas")
+					&& args[1] instanceof Component place && key(place).equals("message.jugcraft.concordance.roster.place.none")
+					&& args[2] instanceof Component next && key(next).equals("message.jugcraft.concordance.roster.next.offering"),
+					"Named, without its perch, with its next offering: " + Arrays.toString(args));
+			helper.assertTrue(kept.exact().isPresent() && key(kept.exact().get()).equals("message.jugcraft.concordance.roster.waiting.without_place"),
+					"and why it waits");
+		} finally {
+			wills.release(record.id(), player.getUUID());
+		}
 		helper.succeed();
 	}
 }

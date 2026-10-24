@@ -14306,6 +14306,7 @@ def check_concordance(registered):
     check_spire(co, root, lang, registered, research)
     check_journal(co, root, lang)
     check_composer(co, root, lang)
+    check_roster(co, root, lang)
     check_encyclopedia(root, lang)
     check_signs(co, root, lang)
     check_cast_poses()
@@ -18088,6 +18089,15 @@ def check_pacts(co, root, lang, registered, research):
     if not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", java("spirits/StolasEntity.java")):
         err("spirits/StolasEntity.java: Stolas joins his holder's roster only by his seal, his call again or his seating, never by a "
             "change of status (joinsRosterOnStatus false; unit 1's review fix 2)")
+    # And for the workshop hand (D-08's As built, its last item; closed with D-07): one replaced, or loading while the
+    # Concordance is off or its anchor unloaded, takes no roster place by a change of status; its game test exists.
+    hand_test = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordanceWorkerGameTests.java"
+    if not re.search(r"boolean joinsRosterOnStatus\(\) \{\s*return false;", java("spirits/WorkshopHandEntity.java")) \
+            or "public void aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster(GameTestHelper helper)" not in \
+            (hand_test.read_text(encoding="utf-8") if hand_test.is_file() else ""):
+        err("spirits/WorkshopHandEntity.java: a hand joins its holder's roster only by its seal, its recall or its own decision, never "
+            "by a change of status (joinsRosterOnStatus false; unit 1's review fix 2), with its game test "
+            "aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster")
     recall = _java_body(holder, "public Recall recall(")
     if not 0 <= recall.find("Authority.isStandIn(actor)") < recall.find("holds.call("):
         err("AgreementHolder.recall: a stand-in, even one carrying its holder's identity, never calls a presence (D-S8, D-S18)")
@@ -20536,6 +20546,130 @@ def check_aluminum_bootstrap():
             err(f"aluminum bootstrap: {ref} cannot be made without aluminum")
 
 
+def check_roster(co, root, lang):
+    """Concordance Chunk D, D-07 (D-S11; docs/features/concordance-chunk-d.md, arcane-concordance-workers.md): the roster's
+    server side. Its numbers, actions, row types, icons, portraits and gates are tools/concordance_roster.py's; its request
+    is a sequence, an action, a listed row and its revision, no text, list, item or player; its state holds at most MAX_ROWS
+    rows and no row type; it is registered; it drops a stand-in and a request not newer than the last, then asks the gate
+    its action shares with the anchor's use or the logistics commands, the listing, the row's revision and its offer, in that
+    order; its actions go only through AgreementHolder (toggle and end by record id) and CourierLedger (cancel and recover),
+    as the reader alone, alive and in person, and open no container; listing and the journal's lines only read and load
+    nothing; the journal's pacts section calls it; Ars Nouveau's helpers have their kind (G13); every word exists; the
+    ticket's game tests exist. The client's key and screen are check_roster_screen's."""
+    ro = co.roster
+
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    spirits = root / "spirits"
+    roster, request, state = (text(spirits / f"{name}.java") for name in ("Roster", "RosterRequestPayload", "RosterStatePayload"))
+    if not (roster and request and state):
+        err("spirits/Roster.java, RosterRequestPayload.java and RosterStatePayload.java: the roster's server side (D-07)")
+        return
+
+    def listed(java, name):
+        found = re.search(name + r" = List\.of\(([^)]*)\)", java)
+        return re.findall(r'"([a-z_]+)"', found.group(1)) if found else None
+
+    if listed(request, "ACTIONS") != ro.ACTIONS:
+        err(f"RosterRequestPayload.ACTIONS {listed(request, 'ACTIONS')} differ from tools/concordance_roster.py ACTIONS {ro.ACTIONS}")
+    for index, action in enumerate(ro.ACTIONS):
+        if not re.search(rf"\b{action.upper()} = {index}\b", request):
+            err(f"RosterRequestPayload.{action.upper()} is {index}, its index in ACTIONS")
+    if listed(state, "ICONS") != ro.ICONS:
+        err(f"RosterStatePayload.ICONS {listed(state, 'ICONS')} differ from tools/concordance_roster.py ICONS {ro.ICONS}")
+    for index, icon in enumerate(ro.ICONS):
+        if not re.search(rf"\b{icon.upper()} = {index}\b", state):
+            err(f"RosterStatePayload.{icon.upper()} is {index}, its index in ICONS")
+    if re.search(r"\bicon = \d", roster) or re.search(r'\bicon = "', roster):
+        err("spirits/Roster.java: a row's icon is one of RosterStatePayload's numbers, never a bare number or a word")
+    for index, kind in enumerate(ro.TYPES):
+        if f"public static final int {kind.upper()} = {index};" not in roster:
+            err(f"spirits/Roster.java: {kind.upper()} is {index}, its index in TYPES")
+    if re.search(r"\b(?:RECORD|REQUEST|WORKER)\b|Row::type", state):
+        err("RosterStatePayload: a row's type never travels; it stays in Roster's session (D-P106)")
+    # A spirit's portrait is "" (a shade's kind and a hand's are both spirit: the client draws the Spirit Anchor; critique 8).
+    portraits = re.search(r"KIND_PORTRAITS = Map\.of\(([^;]*)\);", roster)
+    pairs = re.findall(r'"([a-z_:]+)", "([a-z_:]*)"', portraits.group(1)) if portraits else []
+    if dict(pairs) != ro.KIND_PORTRAITS or ro.KIND_PORTRAITS.get("spirit") != "":
+        err(f"spirits/Roster.java KIND_PORTRAITS {dict(pairs)} differ from tools/concordance_roster.py KIND_PORTRAITS "
+            "(a spirit has none of its own)")
+    if f"public static final int MAX_ROWS = {ro.MAX_ROWS};" not in state or "Row.STREAM_CODEC.apply(ByteBufCodecs.list(MAX_ROWS))" not in state \
+            or "rows = List.copyOf(rows.subList(0, Math.min(rows.size(), MAX_ROWS)));" not in state:
+        err(f"RosterStatePayload: at most {ro.MAX_ROWS} rows, cut before it is sent and refused past that when read (critique 17)")
+    if "public record RosterRequestPayload(int sequence, int action, UUID row, int revision)" not in request \
+            or re.search(r"stringUtf8|ByteBufCodecs\.list|ItemStack|GameProfile|ComponentSerialization", request):
+        err("RosterRequestPayload: a sequence, an action, a listed row and its revision only: no free text, list, item, player or total (08:99)")
+    if "spirits.Roster.register();" not in text(root / "JugcraftConcordance.java") \
+            or "PayloadTypeRegistry.serverboundPlay().register(RosterRequestPayload.TYPE, RosterRequestPayload.CODEC)" not in roster \
+            or "PayloadTypeRegistry.clientboundPlay().register(RosterStatePayload.TYPE, RosterStatePayload.CODEC)" not in roster:
+        err("spirits/Roster.java: registered by JugcraftConcordance, with its two payloads")
+    for prefix, gate in (("OPEN", "roster"), ("AGREEMENT", "workers"), ("COURIER", "logistics")):
+        if f'{prefix}_ACTION = "{gate}";' not in roster or f"{prefix}_TICKS = {ro.GATES[gate]};" not in roster:
+            err(f'spirits/Roster.java: {prefix}_ACTION is "{gate}" once every {ro.GATES[gate]} ticks (tools/concordance_roster.py GATES)')
+    if f'RateGate.allow(server, "workers", {ro.GATES["workers"]})' not in text(spirits / "SpiritAnchorBlock.java"):
+        err("spirits/SpiritAnchorBlock.java: its use's gate is the one the roster's suspend, resume and end share (D-P107)")
+    if text(root / "courier" / "Couriers.java").count(f'RateGate.allow(player, "logistics", {ro.GATES["logistics"]})') != 3:
+        err("courier/Couriers.java: the logistics commands' gate is the one the roster's cancel and recover share")
+    receive = _java_body(roster, "public static @Nullable RosterStatePayload receive(")
+    order = ["Authority.isStandIn(player)", "request.sequence() <= session.sequence",
+             "RateGate.allow(player, courier ? COURIER_ACTION : AGREEMENT_ACTION", "session.listed.get(request.row())",
+             "current.revision() != request.revision()", "!current.offers(action)", "act(player, type, request.row(), action, now)"]
+    at = [receive.find(step) for step in order]
+    if -1 in at or at != sorted(at):
+        err("spirits/Roster.java receive: drops a stand-in and a request not newer than the last, then asks the shared gate, the "
+            "listing, the row's revision and its offer, in that order, before it acts")
+    if "Workers.enabled() ? notOffered() : disabled()" not in receive:
+        err("spirits/Roster.java receive: switched off, an action the row does not offer is answered disabled (D-P110)")
+    acting = "".join(_java_body(roster, start) for start in (
+        "public static PactMenu.Answered act(", "private static PactMenu.Answered record(",
+        "private static PactMenu.Answered end(", "private static PactMenu.Answered request("))
+    for needle in ("Authority.isStandIn(player) || !player.isAlive()", "!record.holder().equals(player.getUUID())",
+                   "AgreementHolder.toggle(level, player, id, now)", "AgreementHolder.end(level, null, player, record.id(), Pacts.ENDED, now)",
+                   "ledger.cancel(id, player.getUUID(), now)", "ledger.recover(id, player, now)"):
+        if needle not in acting:
+            err(f"spirits/Roster.java: its actions go through the existing authorities, as the reader alone, alive and in person ({needle})")
+    if re.search(r"\.release\(|\.update\(|\.deposit\(|\.take\(|\.seal\(|placeItemBackInInventory|getInventory\(\)\.add|\.pickUp\(|"
+                 r"\.giveBack\(|\.deliver\(|\.extract\(|\.insert\(|getBlockEntity\(", acting):
+        err("spirits/Roster.java: records, escrow and cargo reach the reader only through AgreementHolder.end and CourierLedger.recover; "
+            "it opens no container (08:69-70)")
+    reading = "".join(_java_body(roster, start) for start in (
+        "public static Listing list(", "public static void report(", "private static RosterStatePayload.Row recordRow(",
+        "private static Component next(", "private static RosterStatePayload.Row requestRow(",
+        "private static RosterStatePayload.Row workerRow("))
+    # A request's progress has a note() to read; a roster's note(...) writes (WorkerRoster.note takes its worker).
+    if re.search(r"setDirty|\.note\((?!\))|\.remove\(|\.seal\(|\.update\(|\.release\(|\.claim\(|\.cancel\(|\.recover\(|\.file\(|"
+                 r"ConcordanceProgress\.(record|grant)", reading):
+        err("spirits/Roster.java: the roster and the journal's pacts lines only read")
+    if re.search(r"getChunk\(|getChunkAt\(|setChunkForced|addRegionTicket|ChunkPos", roster):
+        err("spirits/Roster.java: it loads nothing; it reads only what is loaded")
+    if "Roster.report(player, out);" not in _java_body(text(spirits / "StolasRegard.java"), "public static void report("):
+        err("spirits/StolasRegard.java report: the journal's pacts section lists the pacts kept and the departures (Roster.report, D-07)")
+    found = re.search(r'for\(String name:List\.of\(([^)]*)\)\)', text(JAVA_ROOT / "nouveau" / "NouveauHelpers.java"))
+    species = re.findall(r'"([a-z_]+)"', found.group(1)) if found else []
+    if not species or sorted(f"nouveau_{name}" for name in species) != sorted(ro.HELPER_KINDS):
+        err(f"tools/concordance_roster.py HELPER_KINDS {sorted(ro.HELPER_KINDS)} name every helper NouveauHelpers registers ({species}) (G13)")
+    for kind in ["familiar", "spirit", "construct", "pact", "starbuncle", *ro.HELPER_KINDS]:
+        if f"message.{MOD}.concordance.workers.kind.{kind}" not in lang:
+            err(f"roster: missing lang for the kind {kind}")
+    works = set(co.workers.WORK) | set(co.pacts.WORK)
+    if not works <= set(ro.SERVICES):
+        err(f"tools/concordance_roster.py SERVICES {sorted(ro.SERVICES)} word every service a record can hold {sorted(works)}")
+    keys = set(re.findall(r'"((?:answer|kind|service|place|task|next|waiting|confirm|request)\.[a-z_]+|request|place)"', roster))
+    keys |= {f"service.{work}" for work in ro.SERVICES} | {f"kind_service.{kind}" for kind in ro.KIND_SERVICES}
+    for key in sorted(keys):
+        if f"message.{MOD}.concordance.roster.{key}" not in lang:
+            err(f"spirits/Roster.java: missing lang message.{MOD}.concordance.roster.{key}")
+    for key in ("journal.jugcraft.pacts.kept", "journal.jugcraft.pacts.departed"):
+        if key not in lang:
+            err(f"roster: missing lang {key}")
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    for cls, names in D07_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if f"public void {name}(GameTestHelper helper)" not in source:
+                err(f"{cls}: missing Concordance Chunk D, D-07 game test {name}")
+
+
 def check_journal(co, root, lang):
     """Roadmap step 26: the Concordance Journal's sections are tools/concordance_journal.py's, in its order, each with a
     title; every word the journal, the stage report and the journal's screens use has its text (the states, the rule
@@ -21313,6 +21447,14 @@ PORTER_LOGISTICS_TESTS = ["aRequestIsFetchedAndDelivered", "simultaneousRequests
                           "aClearedOrReplacedFormulaCancelsItsRequest", "aFullCourierQuotaWaitsAndBacksOff", "aBrokenCrucibleTurnsItsRequestBack",
                           "aCourierFillsACrucibleUntilItIsFull", "aCrucibleWithNoRoomAsksForNothing", "aPostTheSetterMayNotUseIsNeverAsked",
                           "anUnloadedCrucibleWaitsAndLosesNothing", "aDiscardedPorterStrandsItsCargoOnce", "anOfflineSetterPausesTheCourier"]
+# Concordance Chunk D, D-07's game tests (check_roster).
+D07_TESTS = {
+    "ConcordanceWorkerGameTests": ["theRosterEndsOnlyWhatTheReaderHolds", "aRequestNamingAnotherPlayersRecordIsRefused",
+                                   "theRosterListsAPactWithoutItsPerch", "endingAnOrphanReturnsItsEscrowOnce",
+                                   "aStaleRosterRevisionIsRefused", "theRosterStopsAt64Rows"],
+    "ConcordanceLogisticsGameTests": ["recoveryNeverTakesCargoOutOfAnUnloadedContainer", "theRosterEndsAHandAndRecoversItsCargoOnce"],
+    "ConcordanceJournalGameTests": ["thePactsSectionListsPactsOnlyAfterTheBindingArts"],
+}
 # Concordance Chunk D, D-04's game tests (check_pacts).
 D04_TESTS = {
     "ConcordanceWorkerGameTests": ["stolasExplainsBeforeAgreeing", "aStaleTermsRevisionIsRefused", "aRefusalSpendsNothing",

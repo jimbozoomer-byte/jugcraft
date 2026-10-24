@@ -16,6 +16,9 @@ import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.journal.Journal;
+import io.github.jimbozoomer.jugcraft.concordance.journal.JournalSection;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.RequestState;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
@@ -43,6 +46,9 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSessions;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PorterKeyItem;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Roster;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterRequestPayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
@@ -3054,6 +3060,404 @@ public class ConcordanceWorkerGameTests {
 				&& perch.holder().agreement() != null,
 				"Its record gone, the reading says none, no visit (its presence is not its visitor, critique 7), and forgets nothing: " + released);
 		helper.assertTrue(perch.holder().verify(level, g0) == AgreementHolder.Standing.NONE && perch.holder().agreement() == null, "only verifying forgets");
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Concordance Chunk D, D-07: the roster
+
+	/** {@code player}'s roster as the key opens it, its gate forgotten first: the state the server answered. */
+	static RosterStatePayload roster(ServerPlayer player) {
+		RateGate.forget(player.getUUID());
+		RosterStatePayload state = Roster.receive(player, new RosterRequestPayload(Roster.lastSequence(player) + 1, RosterRequestPayload.OPEN,
+				RosterRequestPayload.NO_ROW, 0));
+		if (state == null) {
+			throw new IllegalStateException("The roster did not open for " + player.getName().getString());
+		}
+		return state;
+	}
+
+	/** As the screen sends {@code action} on {@code row}: the next sequence and the revision it showed. */
+	static @Nullable RosterStatePayload act(ServerPlayer player, RosterStatePayload.@Nullable Row row, int action) {
+		RateGate.forget(player.getUUID());
+		if (row == null) {
+			throw new IllegalStateException("No such row on the roster");
+		}
+		return Roster.receive(player, new RosterRequestPayload(Roster.lastSequence(player) + 1, action, row.id(), row.revision()));
+	}
+
+	static RosterStatePayload.@Nullable Row rowOf(@Nullable RosterStatePayload state, UUID id) {
+		return state == null ? null : state.rows().stream().filter(row -> row.id().equals(id)).findFirst().orElse(null);
+	}
+
+	static boolean answered(@Nullable RosterStatePayload state, String reason) {
+		return state != null && state.result().isPresent() && state.result().get().reason().equals(reason);
+	}
+
+	static @Nullable Component result(@Nullable RosterStatePayload state) {
+		return state == null ? null : state.result().map(PactStatePayload.Result::message).orElse(null);
+	}
+
+	/**
+	 * D-07 (E1, E4, D-S11): the roster lists only its reader's own: their agreement, its shade in the same row, nothing of
+	 * another's; suspended and resumed from it (a second suspend not offered, so nothing toggles back), ended from it: the
+	 * escrow back once, the shade gone and off the roster, the anchor forgets it; the other's agreement, escrow and shade are
+	 * untouched and still on their own roster.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theRosterEndsOnlyWhatTheReaderHolds(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer reader = binder(helper);
+		ServerPlayer other = binder(helper);
+		long now = level.getGameTime() + 4_400_000L;
+		SpiritAnchorBlockEntity mine = sealed(helper, reader, new BlockPos(1, 1, 1), UPKEEP, now);
+		SpiritAnchorBlockEntity theirs = sealed(helper, other, new BlockPos(5, 1, 1), UPKEEP, now);
+		UUID record = mine.agreement().record();
+		UUID otherRecord = theirs.agreement().record();
+		UUID shade = mine.spirit();
+		UUID otherShade = theirs.spirit();
+		beside(helper, reader, new BlockPos(1, 1, 1));
+		helper.assertValueEqual(mine.holder().deposit(level, reader, new ItemStack(Items.WOOL.white(), 2), now), 2, "The reader pays two ahead");
+		helper.assertValueEqual(theirs.holder().deposit(level, other, new ItemStack(Items.WOOL.white(), 1), now), 1, "The other pays one ahead");
+		RosterStatePayload state = roster(reader);
+		List<UUID> ids = state.rows().stream().map(RosterStatePayload.Row::id).toList();
+		helper.assertValueEqual(ids, List.of(record), "The reader's roster: their own agreement, its shade in the same row, nothing of the other's");
+		RosterStatePayload.Row row = state.rows().getFirst();
+		helper.assertTrue(!row.request() && "jugcraft:gathering_shade".equals(row.portrait())
+				&& key(row.kind()).equals("message.jugcraft.concordance.workers.kind.spirit")
+				&& key(row.name()).equals("entity.jugcraft.gathering_shade") && key(row.service()).equals("message.jugcraft.concordance.roster.service.gather")
+				&& row.loaded() && row.icon() == RosterStatePayload.ACTIVE && row.offers(RosterRequestPayload.SUSPEND) && row.offers(RosterRequestPayload.END)
+				&& !row.offers(RosterRequestPayload.RESUME) && !row.offers(RosterRequestPayload.CANCEL) && !row.offers(RosterRequestPayload.RECOVER),
+				"Its row: a spirit gathering, loaded, active; suspend and end offered: " + row);
+		BoundWills wills = BoundWills.of(level.getServer());
+		RosterStatePayload suspended = act(reader, row, RosterRequestPayload.SUSPEND);
+		helper.assertTrue(answered(suspended, "suspended") && wills.ledger().get(record).pact().hold() == BoundWill.Hold.HOLDER
+				&& wills.ledger().get(otherRecord).pact().hold() == BoundWill.Hold.NONE, "Suspended from the roster; the other's is not");
+		RosterStatePayload.Row held = rowOf(suspended, record);
+		helper.assertTrue(held != null && held.offers(RosterRequestPayload.RESUME) && !held.offers(RosterRequestPayload.SUSPEND)
+				&& held.icon() == RosterStatePayload.SUSPENDED, "Now it offers resume, not suspend");
+		RosterStatePayload again = act(reader, held, RosterRequestPayload.SUSPEND);
+		helper.assertTrue(answered(again, PactMenu.NOT_OFFERED) && wills.ledger().get(record).pact().hold() == BoundWill.Hold.HOLDER,
+				"A second suspend is not offered: nothing toggles back");
+		RosterStatePayload resumed = act(reader, rowOf(again, record), RosterRequestPayload.RESUME);
+		helper.assertTrue(answered(resumed, "resumed") && wills.ledger().get(record).pact().hold() == BoundWill.Hold.NONE, "and resumed");
+		RosterStatePayload ended = act(reader, rowOf(resumed, record), RosterRequestPayload.END);
+		helper.assertTrue(answered(ended, "ended") && wool(reader) == 2 && wills.ledger().get(record) == null && wills.escrow(record).isEmpty(),
+				"Ended from the roster: the escrow comes back once: " + key(result(ended)));
+		Entity gone = level.getEntity(shade);
+		helper.assertTrue((gone == null || gone.isRemoved()) && !WorkerRoster.of(level.getServer()).workers(reader.getUUID()).containsKey(shade)
+				&& mine.agreement() == null && PactHistory.of(level.getServer()).history(reader.getUUID()).size() == 1 && ended.rows().isEmpty(),
+				"Its shade departs, off the roster; the anchor forgets it; one departure kept; the roster is empty");
+		Entity still = level.getEntity(otherShade);
+		helper.assertTrue(wills.ledger().get(otherRecord) != null && escrowed(level, otherRecord) == 1 && wool(other) == 0 && still != null
+				&& !still.isRemoved() && theirs.agreement() != null && PactHistory.of(level.getServer()).history(other.getUUID()).isEmpty()
+				&& rowOf(roster(other), otherRecord) != null, "The other's agreement, escrow and shade are untouched, and on their own roster");
+		helper.succeed();
+	}
+
+	/**
+	 * D-07 (E1, 08:99): another player naming the holder's record or request, with its true revision, is answered not_listed;
+	 * below the listing the authorities refuse as well (not_holder, not_yours); a party member's roster lists none of it and
+	 * may not end it; a stand-in with the holder's identity is dropped and ends nothing; nothing of the holder's changes; the
+	 * holder cancels their own request.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRequestNamingAnotherPlayersRecordIsRefused(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		ServerPlayer other = binder(helper);
+		long now = level.getGameTime() + 4_500_000L;
+		SpiritAnchorBlockEntity anchor = sealed(helper, holder, new BlockPos(3, 1, 3), UPKEEP, now);
+		UUID record = anchor.agreement().record();
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 2), now), 2, "Two periods paid ahead");
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		Place post = Couriers.place(level, helper.absolutePos(new BlockPos(1, 1, 1)));
+		Logistics.Filed filed = ledger.file(holder.getUUID(), post, post, new ItemStack(Items.STONE), 4, level.registryAccess(), now);
+		helper.assertTrue(filed.outcome() == Logistics.Outcome.DONE, "The holder files a request");
+		RosterStatePayload mine = roster(holder);
+		RosterStatePayload.Row theirs = rowOf(mine, record);
+		RosterStatePayload.Row theirRequest = rowOf(mine, Roster.rowOf(filed.id()));
+		helper.assertTrue(theirs != null && theirRequest != null, "Both are on the holder's roster");
+		helper.assertTrue(theirRequest.request() && "minecraft:stone".equals(theirRequest.portrait()) && !theirs.request(),
+				"A request's row is drawn as its item; the record's is not a request");
+		helper.assertTrue(roster(other).rows().isEmpty(), "Another player's roster lists nothing of the holder's");
+		for (int action : new int[] {RosterRequestPayload.SUSPEND, RosterRequestPayload.END}) {
+			helper.assertTrue(answered(act(other, theirs, action), Roster.NOT_LISTED), "Named by another, not listed: " + RosterRequestPayload.ACTIONS.get(action));
+		}
+		for (int action : new int[] {RosterRequestPayload.CANCEL, RosterRequestPayload.RECOVER}) {
+			helper.assertTrue(answered(act(other, theirRequest, action), Roster.NOT_LISTED), "Named by another, not listed: " + RosterRequestPayload.ACTIONS.get(action));
+		}
+		helper.assertValueEqual(Roster.act(other, Roster.RECORD, record, RosterRequestPayload.END, now).reason(), "not_holder", "Ending another's record");
+		helper.assertValueEqual(Roster.act(other, Roster.RECORD, record, RosterRequestPayload.SUSPEND, now).reason(), "not_holder", "suspending it");
+		helper.assertValueEqual(Roster.act(other, Roster.REQUEST, Roster.rowOf(filed.id()), RosterRequestPayload.CANCEL, now).reason(), "not_yours",
+				"cancelling another's request");
+		helper.assertValueEqual(Roster.act(other, Roster.REQUEST, Roster.rowOf(filed.id()), RosterRequestPayload.RECOVER, now).reason(), "not_yours",
+				"recovering it");
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(holder.getUUID(), other.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(other.getUUID(), ms) == PartyManager.Result.OK, "They form a party");
+			helper.assertTrue(roster(other).rows().isEmpty()
+					&& Roster.act(other, Roster.RECORD, record, RosterRequestPayload.END, now).reason().equals("not_holder"),
+					"A party member's roster lists none of it, and they may not end it");
+		} finally {
+			parties.adminDisband(holder.getUUID());
+		}
+		FakePlayer standIn = FakePlayer.get(level, new GameProfile(holder.getUUID(), "[Concordance]"));
+		helper.assertTrue(Roster.receive(standIn, new RosterRequestPayload(1, RosterRequestPayload.OPEN, RosterRequestPayload.NO_ROW, 0)) == null
+				&& Roster.receive(standIn, new RosterRequestPayload(Roster.lastSequence(holder) + 1, RosterRequestPayload.END, record, theirs.revision())) == null
+				&& Roster.act(standIn, Roster.RECORD, record, RosterRequestPayload.END, now).reason().equals(Roster.NOT_PERMITTED),
+				"A stand-in with the holder's identity is dropped and ends nothing");
+		BoundWills wills = BoundWills.of(level.getServer());
+		helper.assertTrue(wills.ledger().get(record) != null && wills.ledger().get(record).pact().hold() == BoundWill.Hold.NONE && escrowed(level, record) == 2
+				&& wool(other) == 0 && ledger.ledger().get(filed.id()) != null && ledger.ledger().get(filed.id()).state() == RequestState.OPEN,
+				"Nothing of the holder's was ended, suspended, cancelled or handed over");
+		helper.assertTrue(answered(act(holder, theirRequest, RosterRequestPayload.CANCEL), "cancelled") && ledger.ledger().get(filed.id()) == null,
+				"Its own requester cancels it from the roster");
+		helper.succeed();
+	}
+
+	/**
+	 * D-07 (D-S11, critique 17): with the roster's 32 full, a pact whose perch was broken and a record from before Chunk D not yet
+	 * claimed are still listed, first: without its place, or unclaimed; each offers only its end. Kept at the perch, the pact's
+	 * row carries Stolas and offers suspend. A construct not loaded is drawn as its kind's creature.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theRosterListsAPactWithoutItsPerch(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = regarded(helper);
+		long now = level.getGameTime() + 4_100_000L;
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = stolasPact(helper, holder, at, now);
+		UUID record = perch.holder().agreement().record();
+		StolasEntity stolas = stolas(level, perch);
+		RosterStatePayload kept = roster(holder);
+		RosterStatePayload.Row seated = rowOf(kept, record);
+		helper.assertTrue(stolas != null && seated != null && rowOf(kept, stolas.getUUID()) == null
+				&& key(seated.kind()).equals("message.jugcraft.concordance.workers.kind.pact") && key(seated.name()).equals("entity.jugcraft.stolas")
+				&& "jugcraft:stolas".equals(seated.portrait())
+				&& seated.loaded() && seated.offers(RosterRequestPayload.SUSPEND) && seated.offers(RosterRequestPayload.END),
+				"Kept at the perch: one row, Stolas in it, suspend and end offered: " + seated);
+		helper.setBlock(at, Blocks.AIR);
+		helper.assertTrue(stolas.gone() && BoundWills.of(level.getServer()).ledger().get(record).pact().place() == null,
+				"The perch broken, the pact is without it; Stolas leaves");
+		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		String dimension = level.dimension().identifier().toString();
+		while (roster.workers(holder.getUUID()).size() < WorkerRoster.MAX_PER_PLAYER) {
+			roster.note(holder.getUUID(), UUID.randomUUID(), "construct", Status.IDLE, dimension, helper.absolutePos(at));
+		}
+		UUID legacy = UUID.randomUUID();
+		helper.assertValueEqual(BoundWills.of(level.getServer()).seal(new BoundWill(legacy, GatheringShadeEntity.DEFINITION, "gathering_shade",
+				holder.getUUID(), now + 1, false)).outcome(), BoundWillLedger.Outcome.DONE, "A record from before Chunk D, not yet claimed");
+		RosterStatePayload state = roster(holder);
+		helper.assertTrue(state.rows().size() == WorkerRoster.MAX_PER_PLAYER + 2 && state.more() == 0
+				&& state.rows().get(0).id().equals(record) && state.rows().get(1).id().equals(legacy),
+				"With the roster's 32 full, both records are listed, first: " + state.rows().size());
+		RosterStatePayload.Row orphan = state.rows().get(0);
+		RosterStatePayload.Row unclaimed = state.rows().get(1);
+		helper.assertTrue(orphan.icon() == RosterStatePayload.WITHOUT_PLACE && key(orphan.place()).equals("message.jugcraft.concordance.roster.place.none")
+				&& key(orphan.waiting()).equals("message.jugcraft.concordance.roster.waiting.without_place") && !orphan.loaded()
+				&& orphan.offers(RosterRequestPayload.END) && !orphan.offers(RosterRequestPayload.SUSPEND) && !orphan.offers(RosterRequestPayload.RESUME),
+				"The pact without its perch: without its place, only its end offered: " + orphan);
+		helper.assertTrue(unclaimed.icon() == RosterStatePayload.UNCLAIMED && "jugcraft:gathering_shade".equals(unclaimed.portrait())
+				&& key(unclaimed.name()).equals("entity.jugcraft.gathering_shade")
+				&& unclaimed.offers(RosterRequestPayload.END) && !unclaimed.offers(RosterRequestPayload.SUSPEND),
+				"The unclaimed record: only its end offered: " + unclaimed);
+		RosterStatePayload.Row construct = state.rows().get(2);
+		helper.assertTrue(!construct.loaded() && "jugcraft:clockwork_porter".equals(construct.portrait()) && construct.actions() == 0,
+				"A construct not loaded is drawn as its kind's creature and offers nothing: " + construct);
+		helper.succeed();
+	}
+
+	/**
+	 * D-07 (E4, D-S6, D-S16): a pact without its perch, ended from the roster, gives its escrow back once to its living
+	 * reader: switched off it is listed but nothing is offered or ended, and the screen's end is answered disabled; a reader
+	 * who is not alive ends nothing and is handed nothing; alive, it ends, the two offerings come back once and the departure
+	 * is kept with no place; ended again (an old row, or by its id) it finds nothing; the journal's pacts section names the
+	 * departure.
+	 */
+	@GameTest(maxTicks = 20)
+	public void endingAnOrphanReturnsItsEscrowOnce(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = regarded(helper);
+		long now = level.getGameTime() + 4_200_000L;
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = stolasPact(helper, holder, at, now);
+		UUID record = perch.holder().agreement().record();
+		helper.assertValueEqual(perch.holder().deposit(level, holder, new ItemStack(Items.AMETHYST_SHARD, 2), now), 2, "Two offerings paid ahead");
+		helper.setBlock(at, Blocks.AIR);
+		BoundWills wills = BoundWills.of(level.getServer());
+		helper.assertTrue(wills.ledger().get(record).pact().place() == null && escrowed(level, record) == 2, "Without its perch, the escrow kept");
+		RosterStatePayload.Row orphan = rowOf(roster(holder), record);
+		helper.assertTrue(orphan != null && key(orphan.confirm()).equals("message.jugcraft.concordance.roster.confirm.end")
+				&& Integer.valueOf(2).equals(arg(orphan.confirm(), 1)), "Its confirmation says two offerings come back");
+		off(() -> {
+			RosterStatePayload closed = roster(holder);
+			RosterStatePayload.Row offRow = rowOf(closed, record);
+			helper.assertTrue(!closed.enabled() && offRow != null && offRow.actions() == 0 && offRow.icon() == RosterStatePayload.DISABLED
+					&& answered(act(holder, offRow, RosterRequestPayload.END), PactMenu.DISABLED)
+					&& Roster.act(holder, Roster.RECORD, record, RosterRequestPayload.END, level.getGameTime()).reason().equals(PactMenu.DISABLED)
+					&& BoundWills.of(level.getServer()).ledger().get(record) != null && escrowed(level, record) == 2,
+					"Switched off, it is listed, nothing is offered, the screen's end is answered disabled and nothing ends (D-S16, D-P110)");
+		});
+		holder.setHealth(0.0F);
+		RosterStatePayload refused = act(holder, orphan, RosterRequestPayload.END);
+		helper.assertTrue(answered(refused, Roster.NOT_PERMITTED) && wills.ledger().get(record) != null && escrowed(level, record) == 2
+				&& holder.getInventory().countItem(Items.AMETHYST_SHARD) == 0, "A reader who is not alive ends nothing and is handed nothing");
+		holder.setHealth(holder.getMaxHealth());
+		RosterStatePayload ended = act(holder, rowOf(refused, record), RosterRequestPayload.END);
+		helper.assertTrue(answered(ended, "ended") && key(result(ended)).equals("message.jugcraft.concordance.pact.departed")
+				&& Integer.valueOf(2).equals(arg(result(ended), 2)), "Ended: Stolas's departure, two offerings back: " + result(ended));
+		helper.assertTrue(wills.ledger().get(record) == null && wills.escrow(record).isEmpty() && holder.getInventory().countItem(Items.AMETHYST_SHARD) == 2
+				&& rowOf(ended, record) == null, "The record and its escrow go; the two come back once; it is off the roster");
+		List<Pacts.Departure> history = PactHistory.of(level.getServer()).history(holder.getUUID());
+		helper.assertTrue(history.size() == 1 && history.getFirst().record().equals(record) && Pacts.ENDED.equals(history.getFirst().reason())
+				&& history.getFirst().place() == null, "One departure kept, ended, with no place: " + history);
+		helper.assertTrue(answered(act(holder, orphan, RosterRequestPayload.END), Roster.NOT_LISTED)
+				&& Roster.act(holder, Roster.RECORD, record, RosterRequestPayload.END, now).reason().equals("nothing")
+				&& holder.getInventory().countItem(Items.AMETHYST_SHARD) == 2 && PactHistory.of(level.getServer()).history(holder.getUUID()).size() == 1
+				&& wills.problems().isEmpty(), "Ended again it finds nothing, and nothing more comes back");
+		JournalSection pacts = Journal.build(holder).stream().filter(section -> section.id().equals("pacts")).findFirst().orElse(null);
+		helper.assertTrue(pacts != null && !pacts.lines().isEmpty() && key(pacts.lines().getLast().text()).equals("journal.jugcraft.pacts.departed")
+				&& arg(pacts.lines().getLast().text(), 0) instanceof Component who && key(who).equals("entity.jugcraft.stolas")
+				&& arg(pacts.lines().getLast().text(), 2) instanceof Component why && key(why).equals("message.jugcraft.concordance.workers.departed.ended")
+				&& pacts.lines().stream().noneMatch(line -> key(line.text()).equals("journal.jugcraft.pacts.kept")),
+				"The journal's pacts section names the departure and keeps no pact");
+		helper.succeed();
+	}
+
+	/**
+	 * D-07 (08:99): an end on a row read before its escrow changed is answered changed, nothing ended or handed back, with the
+	 * row again at its new revision; a request not newer than the last is dropped; read afresh, it ends and both come back once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aStaleRosterRevisionIsRefused(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = binder(helper);
+		long now = level.getGameTime() + 4_300_000L;
+		SpiritAnchorBlockEntity anchor = sealed(helper, holder, new BlockPos(3, 1, 3), UPKEEP, now);
+		UUID record = anchor.agreement().record();
+		BoundWills wills = BoundWills.of(level.getServer());
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 1), now), 1, "One period paid ahead");
+		RosterStatePayload.Row seen = rowOf(roster(holder), record);
+		helper.assertTrue(seen != null && Integer.valueOf(1).equals(arg(seen.confirm(), 1)), "Read: one offering would come back");
+		helper.assertValueEqual(anchor.holder().deposit(level, holder, new ItemStack(Items.WOOL.white(), 1), now), 1, "Then a second is paid ahead");
+		RosterStatePayload stale = act(holder, seen, RosterRequestPayload.END);
+		helper.assertTrue(answered(stale, PactMenu.CHANGED) && wills.ledger().get(record) != null && escrowed(level, record) == 2 && wool(holder) == 0,
+				"An end on what was read before is refused: nothing ended, nothing handed back");
+		RosterStatePayload.Row fresh = rowOf(stale, record);
+		helper.assertTrue(fresh != null && fresh.revision() != seen.revision() && Integer.valueOf(2).equals(arg(fresh.confirm(), 1)),
+				"The answer reads it again: two would come back");
+		RateGate.forget(holder.getUUID());
+		helper.assertTrue(Roster.receive(holder, new RosterRequestPayload(Roster.lastSequence(holder), RosterRequestPayload.END, record, fresh.revision())) == null
+				&& wills.ledger().get(record) != null, "A request not newer than the last is dropped");
+		RosterStatePayload ended = act(holder, fresh, RosterRequestPayload.END);
+		helper.assertTrue(answered(ended, "ended") && wool(holder) == 2 && wills.ledger().get(record) == null, "Read afresh, it ends; both come back, once");
+		helper.succeed();
+	}
+
+	/**
+	 * D-07 (critique 17): 32 Bound Wills, 16 courier requests and 32 workers are 80: the roster sends 64, records first in the
+	 * order sealed, then requests oldest first, then workers, and counts the 16 left out; a request is drawn as its item and a
+	 * construct not loaded as its kind's creature; the 64 cross whole; no payload holds a 65th.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theRosterStopsAt64Rows(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer reader = binder(helper);
+		UUID me = reader.getUUID();
+		long now = level.getGameTime() + 4_600_000L;
+		BoundWills wills = BoundWills.of(level.getServer());
+		List<UUID> records = new ArrayList<>();
+		for (int i = 0; i < BoundWillLedger.MAX_PER_HOLDER; i++) {
+			BoundWill.Pact pact = new BoundWill.Pact(null, BoundWill.Hold.NONE, now, Pacts.PERSONAL, null, null);
+			BoundWill record = new BoundWill(UUID.randomUUID(), GatheringShadeEntity.DEFINITION, GatheringShadeEntity.DEFINITION, me, now + i, false, pact);
+			helper.assertTrue(wills.seal(record).outcome() == BoundWillLedger.Outcome.DONE, "record " + i);
+			records.add(record.id());
+		}
+		CourierLedger ledger = CourierLedger.of(level.getServer());
+		Place post = Couriers.place(level, helper.absolutePos(new BlockPos(1, 1, 1)));
+		List<Long> requests = new ArrayList<>();
+		for (int i = 0; i < Logistics.MAX_OPEN_PER_PLAYER; i++) {
+			Logistics.Filed filed = ledger.file(me, post, post, new ItemStack(Items.STONE), 1, level.registryAccess(), now);
+			helper.assertTrue(filed.outcome() == Logistics.Outcome.DONE, "request " + i + ": " + filed);
+			requests.add(filed.id());
+		}
+		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		String dimension = level.dimension().identifier().toString();
+		for (int i = 0; i < WorkerRoster.MAX_PER_PLAYER; i++) {
+			roster.note(me, UUID.randomUUID(), "construct", Status.IDLE, dimension, helper.absolutePos(new BlockPos(1, 1, 1)));
+		}
+		try {
+			RosterStatePayload state = roster(reader);
+			int all = BoundWillLedger.MAX_PER_HOLDER + Logistics.MAX_OPEN_PER_PLAYER + WorkerRoster.MAX_PER_PLAYER;
+			helper.assertTrue(state.rows().size() == RosterStatePayload.MAX_ROWS && state.more() == all - RosterStatePayload.MAX_ROWS,
+					"At most 64 rows, the rest counted: " + state.rows().size() + ", " + state.more());
+			List<UUID> ids = state.rows().stream().map(RosterStatePayload.Row::id).toList();
+			int r = records.size();
+			int q = requests.size();
+			helper.assertValueEqual(ids.subList(0, r), records, "Every record first, in the order sealed");
+			helper.assertValueEqual(ids.subList(r, r + q), requests.stream().map(Roster::rowOf).toList(), "then every request, oldest first");
+			List<UUID> workers = new ArrayList<>(roster.workers(me).keySet());
+			helper.assertValueEqual(ids.subList(r + q, RosterStatePayload.MAX_ROWS), workers.subList(0, RosterStatePayload.MAX_ROWS - r - q),
+					"then the roster's workers as far as room allows");
+			helper.assertTrue(state.rows().get(r).request() && "minecraft:stone".equals(state.rows().get(r).portrait())
+					&& !state.rows().get(r + q).request() && "jugcraft:clockwork_porter".equals(state.rows().get(r + q).portrait()),
+					"A request is drawn as its item, a construct not loaded as its kind's creature");
+			RosterStatePayload.Row first = state.rows().getFirst();
+			helper.assertTrue(first.offers(RosterRequestPayload.END) && !first.offers(RosterRequestPayload.SUSPEND) && first.icon() == RosterStatePayload.WITHOUT_PLACE,
+					"A record without its place offers only its end");
+			RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), level.registryAccess());
+			RosterStatePayload.CODEC.encode(buffer, state);
+			RosterStatePayload received = RosterStatePayload.CODEC.decode(buffer);
+			helper.assertTrue(received.rows().size() == RosterStatePayload.MAX_ROWS && received.more() == state.more()
+					&& received.rows().getFirst().id().equals(first.id()) && received.rows().getFirst().revision() == first.revision()
+					&& received.rows().getFirst().actions() == first.actions() && received.rows().getFirst().portrait().equals(first.portrait())
+					&& received.rows().getFirst().icon() == first.icon(), "The 64 rows cross whole");
+			List<RosterStatePayload.Row> many = new ArrayList<>(state.rows());
+			many.add(first);
+			helper.assertValueEqual(new RosterStatePayload(0, true, many, 0, Optional.empty()).rows().size(), RosterStatePayload.MAX_ROWS,
+					"No payload holds a 65th row");
+		} finally {
+			requests.forEach(id -> ledger.cancel(id, me, now));
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * D-07, closing D-08's As built (its last item; unit 1's review fix 2, for the hand): a workshop hand unloaded and
+	 * replaced, loading again while the Concordance is off, takes no roster place by a change of status; on again, it finds
+	 * another hand in its place and leaves, and the new hand keeps the agreement and its roster place.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorkshopHands.Workshop shop = WorkshopHands.workshop(helper);
+		ServerPlayer holder = shop.holder();
+		UUID id = holder.getUUID();
+		WorkshopHandEntity old = shop.hand();
+		UUID first = old.getUUID();
+		WorkerRoster roster = WorkerRoster.of(level.getServer());
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		old.saveWithoutId(saved);
+		old.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		helper.assertTrue(roster.workers(id).containsKey(first) && !shop.anchor().holder().spiritLost(level),
+				"Unloaded is not lost: the hand keeps its roster place");
+		roster.remove(id, first); // as one sealed before its roster note, or while the roster was full
+		long now = WorkshopHands.morning(level, 3_500_000L);
+		helper.assertValueEqual(shop.anchor().holder().recall(level, holder, now), AgreementHolder.Recall.RECALLED,
+				"Missing from the roster it is lost, and its holder calls another hand");
+		UUID second = shop.anchor().spirit();
+		WorkshopHandEntity back = Workers.WORKSHOP_HAND.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		helper.assertTrue(back.getUUID().equals(first) && second != null && !first.equals(second), "The old hand loads again, a new one in its place");
+		long in = WorkshopHands.inHours();
+		off(() -> helper.assertTrue(back.think(level, in, now + 20) == Status.DISABLED && !roster.workers(id).containsKey(first),
+				"Switched off, it waits and takes no roster place (joinsRosterOnStatus false, as the shade's and Stolas's)"));
+		helper.assertTrue(back.think(level, in, now + 40) == Status.FINISHED && back.isRemoved() && !roster.workers(id).containsKey(first),
+				"On again, it finds another hand in its place and leaves, off the roster");
+		helper.assertTrue(second.equals(shop.anchor().spirit()) && roster.workers(id).containsKey(second)
+				&& BoundWills.of(level.getServer()).ledger().heldBy(id).size() == 1, "The new hand keeps the agreement and its roster place");
 		helper.succeed();
 	}
 }
