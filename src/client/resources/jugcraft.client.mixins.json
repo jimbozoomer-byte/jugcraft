@@ -21,6 +21,9 @@
     "HowitzerPilotHandsMixin",
     "HowitzerPilotRendererMixin",
     "NouveauScryPlayerMixin",
+    "RetroTraderModelMixin",
+    "RetroTraderRendererMixin",
+    "RetroTraderRenderStateMixin",
     "JugcraftKeyMappingMixin"
   ],
   "injectors": {
