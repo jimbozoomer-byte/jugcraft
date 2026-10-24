@@ -31,6 +31,8 @@
       "io.github.jimbozoomer.jugcraft.test.ArtisanFurnitureGameTests",
       "io.github.jimbozoomer.jugcraft.test.OwnerFurnitureAircraftGameTests",
       "io.github.jimbozoomer.jugcraft.test.DeathGraveGameTests",
+      "io.github.jimbozoomer.jugcraft.test.RecipeConflictGameTests",
+      "io.github.jimbozoomer.jugcraft.test.FoodRecipeConflictGameTests",
       "io.github.jimbozoomer.jugcraft.test.CityDefenseGameTests",
       "io.github.jimbozoomer.jugcraft.test.CandyCavityGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownLifeGameTests",
@@ -331,7 +333,9 @@
       "io.github.jimbozoomer.jugcraft.test.JimtaHeatGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaWorkshopTableGameTests"
     ],
-    "jei_mod_plugin": ["io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"],
+    "jei_mod_plugin": [
+      "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
+    ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.JimtafactsClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtafactsWearablesClientGameTests",
