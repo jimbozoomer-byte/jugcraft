@@ -79,7 +79,7 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Acceptance by keyboard</b>: Accept without the compact's materials is refused as cannot_afford and spends nothing
  * ({@code jugcraft_pact_refused}); given them, Accept seals once and spends once ({@code jugcraft_pact_kept}).</li>
  * <li><b>His body</b>: the screen closed and the pact kept; Stolas on his perch drawn by GeckoLib ({@code jugcraft_pact_stolas}).</li>
- * <li>(D-06) <b>His body</b>: each loop as the server's state drives it and each gesture as the server fires it, frozen inside its telling pose ({@code jugcraft_stolas_*}); his real arrival and departure play their gestures.</li>
+ * <li>(D-06) <b>His body</b>: each loop as the server's state drives it and each gesture as the server fires it, frozen inside its telling pose ({@code jugcraft_stolas_*}); his real arrival and departure play their gestures. (D-09) A timed sequence through his refusal ({@code jugcraft_stolas_refuse_seq_1} to {@code _4}); every body shot is taken from his front, south of his perch (D-P133).</li>
  * <li>(D-06) <b>His cues</b>: his refusal and assent are fired by the server with their subtitles (seen only on a machine
  * with a sound device), each answer marked with a tick or a cross; Jade's readings of him and his perch, and their overlays
  * with Jade loaded ({@code jugcraft_pact_perch_jade}, {@code jugcraft_pact_stolas_jade}).</li>
@@ -106,6 +106,11 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 	private static final String LISTEN = "animation.stolas.listen";
 	private static final String WAITING = "animation.stolas.waiting";
 	private static final String SUSPENDED = "animation.stolas.suspended";
+	// D-09 (D-P134): the times (seconds into his refusal) its timed sequence is frozen at, and its shots
+	// (tools/concordance_pacts.py REFUSAL_SEQUENCE, SEQUENCE_SHOTS).
+	private static final double[] REFUSAL_TIMES = {0.25, 0.65, 1.05, 1.45};
+	private static final String[] REFUSAL_SHOTS = {"jugcraft_stolas_refuse_seq_1", "jugcraft_stolas_refuse_seq_2", "jugcraft_stolas_refuse_seq_3",
+			"jugcraft_stolas_refuse_seq_4"};
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -153,7 +158,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		ServerPlayer player = player(minecraft);
 		ServerLevel level = minecraft.overworld();
 		for (int dx = -2; dx <= 2; dx++) {
-			for (int dz = -1; dz <= 4; dz++) {
+			for (int dz = -1; dz <= 6; dz++) {
 				level.setBlockAndUpdate(stand.offset(dx, -1, dz), Blocks.STONE.defaultBlockState());
 				for (int dy = 0; dy <= 3; dy++) {
 					level.setBlockAndUpdate(stand.offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
@@ -285,7 +290,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				client.gui.hud.toggle();
 			}
 		});
-		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", perch.getX() + 0.5, perch.getY(), perch.getZ() - 2.5));
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0));
 		context.waitTicks(30);
 		connection.waitForChunksRender();
 		server.runCommand("tick freeze");
@@ -367,7 +372,8 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 
 	// D-06
 	/**
-	 * His body (D-06, D-S5), the pact kept and its holder facing him from two and a half blocks: each loop as the server's
+	 * His body (D-06, D-S5), the pact kept and its holder before him, two and a half blocks south of his perch (he is
+	 * summoned facing south, so each pose shows his face: D-P133): each loop as the server's
 	 * state drives it (perched; listening while his perch's screen is open; hunched while the pact is suspended; standing
 	 * and waiting while the Concordance is off), and each gesture as the server fires it, caught inside its telling pose.
 	 * Each is checked on the client's own animation controller with the world frozen there (CinderTyrantClientGameTests'
@@ -404,6 +410,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		gesturePose(context, server, perch, StolasEntity.Gesture.INSPECT, 0.40, 1.10, "jugcraft_stolas_inspect");
 		gesturePose(context, server, perch, StolasEntity.Gesture.ASSENT, 0.45, 1.25, "jugcraft_stolas_assent");
 		gesturePose(context, server, perch, StolasEntity.Gesture.REFUSE, 0.50, 1.30, "jugcraft_stolas_refuse");
+		refusalSequence(context, server, perch); // D-09
 		// He leaves (depart holds its last frame, nothing of him drawn) and comes back (his arrival replaces it).
 		gesturePose(context, server, perch, StolasEntity.Gesture.DEPART, 0.30, 0.80, "jugcraft_stolas_depart");
 		gesturePose(context, server, perch, StolasEntity.Gesture.ARRIVE, 0.70, 1.20, "jugcraft_stolas_arrive");
@@ -452,6 +459,40 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 		shot(context, name);
 		server.runCommand("tick unfreeze");
 		context.waitTicks(gesture.ticks - middle + 5);
+	}
+
+	// D-09
+	/**
+	 * A timed sequence through his refusal (08:176; D-P134), the tell a player most needs to read without words (03:159): the
+	 * server fires it once, and the world is frozen at each of REFUSAL_TIMES, where the client's gesture controller must be
+	 * drawing it, later into the clip than the frame before; each frame's time is logged and photographed. It changes nothing.
+	 */
+	private static void refusalSequence(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		StolasEntity.Gesture refuse = StolasEntity.Gesture.REFUSE;
+		server.runOnServer(minecraft -> presence(minecraft, perch).gesture(refuse));
+		double last = -1.0;
+		int waited = 0;
+		for (int i = 0; i < REFUSAL_TIMES.length; i++) {
+			int at = (int) Math.round(REFUSAL_TIMES[i] * 20.0);
+			context.waitTicks(at - waited);
+			waited = at;
+			server.runCommand("tick freeze");
+			try {
+				context.waitTicks(5);
+				double time = context.computeOnClient(client -> refuse.clip().equals(drawing(client, perch, StolasEntity.GESTURE_CONTROLLER))
+						? controller(client, perch, StolasEntity.GESTURE_CONTROLLER).getCurrentAnimationTime() : -1.0);
+				Jugcraft.LOGGER.info("[pact-check] his refusal frozen {} s into its clip (frame {} of {}, asked {} s)", time, i + 1, REFUSAL_TIMES.length,
+						REFUSAL_TIMES[i]);
+				check(time > last && time >= 0.0 && time < refuse.ticks / 20.0,
+						"His refusal's frame " + (i + 1) + " lies inside its clip, after the one before: " + time);
+				last = time;
+				shot(context, REFUSAL_SHOTS[i]);
+			} finally {
+				// The world thaws whatever failed (a shared switch).
+				server.runCommand("tick unfreeze");
+			}
+		}
+		context.waitTicks(refuse.ticks - waited + 5);
 	}
 
 	// D-06
@@ -572,7 +613,7 @@ public class ConcordancePactClientGameTests implements FabricClientGameTest {
 				}
 			});
 			try {
-				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", perch.getX() + 0.5, perch.getY(), perch.getZ() - 2.5));
+				server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0));
 				context.waitTicks(10);
 				context.getInput().lookAt(perch);
 				context.waitTicks(20);

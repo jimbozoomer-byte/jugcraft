@@ -14328,6 +14328,7 @@ def check_concordance(registered):
     check_stolas_regard(co, root, lang, research)
     check_pact_screen(co, lang)
     check_stolas_body(co)
+    check_pact_network(co)
     check_roster_screen(co, lang)
     check_logistics(co, root, lang, registered)
     check_hand(co, root, lang, research)
@@ -19034,6 +19035,57 @@ def check_stolas_body(co):
     for needle in ("StolasEntity.Gesture.ARRIVE.animation.equals(", "StolasEntity.Gesture.DEPART.animation.equals("):
         if needle not in shots:
             err(f"ConcordancePactClientGameTests: his real arrival and departure play their gestures ({needle})")
+    # D-09: photographed from his front, and a timed sequence through his refusal, rising inside its clip. The camera stands
+    # south of his perch facing north (yaw 180), in the body's shots and in Jade's (at least twice; the unit 5 critique).
+    front = '"tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0)'
+    if shots.count(front) < 2 or "perch.getZ() - 2.5" in shots:
+        err("ConcordancePactClientGameTests: Stolas is photographed from his front, south of his perch, facing him (D-P133)")
+    length = pa.GESTURE_TIMES["refuse"][0]
+    times = list(pa.REFUSAL_SEQUENCE)
+    if times != sorted(set(times)) or not all(0 < t < length for t in times) or len(times) != len(pa.SEQUENCE_SHOTS):
+        err(f"tools/concordance_pacts.py REFUSAL_SEQUENCE: rising times inside his refusal's {length} s, one a shot: {times}")
+    wanted = "private static final double[] REFUSAL_TIMES = {" + ", ".join(str(t) for t in times) + "};"
+    if wanted not in shots or "refusalSequence(context, server, perch);" not in shots:
+        err(f"ConcordancePactClientGameTests: his refusal is photographed as a timed sequence ({wanted})")
+    for name in pa.SEQUENCE_SHOTS:
+        if f'"{name}"' not in shots:
+            err(f"ConcordancePactClientGameTests: takes {name}")
+
+
+def check_pact_network(co):
+    """Concordance Chunk D, D-09 (D-S22, D-P136, D-P137): the two-client attempt. ConcordancePactNetworkTests is a
+    registered client game test that starts a second client JVM on this branch's own pattern (OwnerCollectionsNetworkTests,
+    #435), never #467's harness; the second client is a stranger at the holder's perch whose Accept, End and roster End are
+    refused with their reasons while the holder's pact seals and ends once; it takes its pictures; its evidence directory is
+    the one the client shards upload. The opt-in run without the optional integrations runs only when a manual run asks."""
+    pa = co.pacts
+    path = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test" / "ConcordancePactNetworkTests.java"
+    code = path.read_text(encoding="utf-8") if path.exists() else ""
+    entry = "io.github.jimbozoomer.jugcraft.test.ConcordancePactNetworkTests"
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if entry not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {entry} is a registered client game test (D-09)")
+    for name in pa.NETWORK_SHOTS:
+        if f'"{name}"' not in code:
+            err(f"ConcordancePactNetworkTests: takes {name}")
+    for needle in ("Pacts.Outcome.NOT_PERMITTED.id", "AgreementHolder.Ended.NOT_HOLDER", "Roster.NOT_LISTED", "ConnectScreen.startConnecting(",
+                   'Path.of("owner-network-evidence", "pact-"', "net.fabricmc.loader.impl.launch.knot.KnotClient"):
+        if needle not in code:
+            err(f"ConcordancePactNetworkTests: a second client JVM, refused with each reason, its evidence uploaded ({needle})")
+    if "StorageCrateMultiplayer" in code or "storage-crate-multiplayer" in code:
+        err("ConcordancePactNetworkTests: #467's harness is not imported (D-S22)")
+    workflow = re.sub(r"^[ \t]*#[^\n]*\n", "", (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8"), flags=re.M)
+    shards = re.search(r"^  client-shard:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    if not shards or "**/owner-network-evidence/**/peer.log" not in shards.group(1):
+        err(".github/workflows/build.yml: the client shards upload the second clients' logs (owner-network-evidence)")
+    job = re.search(r"^  pact-clients-without-optional:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    classes = re.findall(r"-PclientTests=([\w,]+)", job.group(1)) if job else []
+    if not job or not re.search(r"^    if: github\.event_name == 'workflow_dispatch' && inputs\.clients_without_optional[ \t]*$", job.group(1), re.M) \
+            or "-PjugcraftOptionalIntegrations=false" not in job.group(1) \
+            or classes != ["ConcordancePactClientGameTests,ConcordanceRosterClientGameTests,ConcordancePactNetworkTests"]:
+        err(".github/workflows/build.yml: the job pact-clients-without-optional runs ConcordancePactClientGameTests, "
+            "ConcordanceRosterClientGameTests and ConcordancePactNetworkTests without the optional integrations, only when a manual "
+            f"run asks (D-P137): {classes}")
 
 
 def check_roster_screen(co, lang):
@@ -19122,6 +19174,14 @@ def check_roster_screen(co, lang):
     for name in ro.CLIENT_SHOTS:
         if f'"{name}"' not in shots:
             err(f"ConcordanceRosterClientGameTests: takes {name}")
+    # D-09 (D-P135; the unit 5 critique): the hand at work is walked in the run itself, after the recovery and the cancel and
+    # before the full roster (which files all sixteen of the holder's open requests).
+    run = _java_body(shots, "public void runTest(")
+    steps = [run.find(call) for call in ("recoverAndCancel(context, server, setup);", "handAtWork(context, server, stand);",
+                                         "full(context, server, setup);")]
+    if min(steps) < 0 or not steps[0] < steps[1] < steps[2]:
+        err("ConcordanceRosterClientGameTests: runTest calls handAtWork(context, server, stand) after recoverAndCancel and before full "
+            "(the workshop hand at work, D-P135)")
 
 
 def check_logistics(co, root, lang, registered):
@@ -21045,6 +21105,9 @@ def check_composer(co, root, lang):
     for forbidden in ('new EditBox(', 'Compiler.compile(', '.set(JugcraftConcordance.INSCRIPTION'):
         if forbidden in visual:
             err(f"composer: constellation view must not require text entry or decide server state ({forbidden})")
+    # Concordance Chunk D, D-09 (D-P122): the composer draws the HUD's subtitles over itself, as the pact and roster screens do.
+    if "@Override public boolean isInGameUi() { return true; }" not in visual or "minecraft.gui.hud.extractDeferredSubtitles();" not in visual:
+        err("composer: an in-game screen that draws subtitles over itself (isInGameUi, extractDeferredSubtitles; 03:159)")
     for required in ('ComposerClient.inscribable()', 'ComposerClient::inscribe', 'ComposerClient.edited()', 'ConcordanceClientOptions.reducedMotion()'):
         if required not in visual:
             err(f"composer: visual editor retains validation, inscription and accessibility ({required})")

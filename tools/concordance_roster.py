@@ -183,6 +183,8 @@ CLIENT = {
 CLIENT_SHOTS = ["jugcraft_roster_empty", "jugcraft_roster", "jugcraft_roster_scale4", "jugcraft_roster_small",
                 "jugcraft_roster_suspended", "jugcraft_roster_end_confirm", "jugcraft_roster_ended", "jugcraft_roster_recovered",
                 "jugcraft_roster_full", "jugcraft_roster_full_small"]
+# D-09 (D-P135): the workshop hand at work, in the same class.
+CLIENT_SHOTS += ["jugcraft_workshop_hand_at_work"]
 
 
 def lang_entries(lang):

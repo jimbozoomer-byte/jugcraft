@@ -13,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.courier.CourierPostBlockEntity
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Logistics;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.Place;
+import io.github.jimbozoomer.jugcraft.concordance.logistics.Request;
 import io.github.jimbozoomer.jugcraft.concordance.logistics.RequestState;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWillLedger;
@@ -46,6 +47,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerCon
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -59,10 +61,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -81,6 +86,8 @@ import org.jspecify.annotations.Nullable;
  * the agreement; Tab and Enter on End it end the shade's agreement once ({@code jugcraft_roster_ended}).</li>
  * <li><b>Recover and cancel</b>: the stranded glowstone into the inventory, once ({@code jugcraft_roster_recovered}); the
  * open request cancelled.</li>
+ * <li>(D-09) <b>The workshop hand at work</b>: three copper ingots carried across the yard, frozen with its cargo aboard
+ * ({@code jugcraft_workshop_hand_at_work}), then delivered once.</li>
  * <li><b>Full</b>: 32 roster entries, 32 Bound Wills and 16 requests: 64 rows listed and the rest counted, eight pages turned
  * with Page Down ({@code jugcraft_roster_full}, {@code jugcraft_roster_full_small}).</li>
  * </ul>
@@ -95,6 +102,8 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	private static final String HAND = "jugcraft:workshop_hand";
 	/** The key the test binds the roster to (it is not bound at first). */
 	private static final int TEST_KEY = InputConstants.KEY_F7;
+	/** D-09: ticks the workshop hand may take to claim, carry and deliver one request. */
+	private static final int WORK_WAIT = 1200;
 
 	private record Setup(BlockPos second, BlockPos destination, UUID pact, UUID shade, UUID shadeBody, long stranded, long open) {
 	}
@@ -137,6 +146,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 					suspendAndResume(context, server, setup);
 					keyboardEnd(context, server, setup);
 					recoverAndCancel(context, server, setup);
+					handAtWork(context, server, stand); // D-09
 					full(context, server, setup);
 				} finally {
 					// The window, its GUI scale and the key go back as they were, whatever failed.
@@ -391,6 +401,91 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		PactStatePayload.Result cancelled = answer(context);
 		check(cancelled.done() && "cancelled".equals(cancelled.reason())
 				&& server.computeOnServer(m -> CourierLedger.of(m).ledger().get(setup.open()) == null), "Cancel closes the open request: " + cancelled.reason());
+	}
+
+	/** D-09: the workshop hand at work and the request it carries. */
+	private record Work(UUID hand, long request) {
+	}
+
+	// D-09
+	/**
+	 * Concordance Chunk D, D-09 (08:169-181; D-P135): the workshop hand at work. Its holder files one request at the hand's
+	 * post: three copper ingots, from a chest at one end of the yard to a chest at the other, both inside the hand's area.
+	 * The hand claims it, takes the three and walks them over; while they are aboard the world is frozen, the ledger and the
+	 * hand's synced status are read, and it is photographed from beside its path, aimed at, with the HUD shown (Jade's
+	 * overlay of it when Jade is loaded) ({@code jugcraft_workshop_hand_at_work}). Thawed, it delivers all three once and the
+	 * request closes, so the full roster below still files its sixteen.
+	 */
+	private static void handAtWork(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos stand) {
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		BlockPos source = stand.offset(6, 0, 8);
+		BlockPos destination = stand.offset(-1, 0, 8);
+		Work work = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			level.setBlockAndUpdate(source, Blocks.CHEST.defaultBlockState());
+			level.setBlockAndUpdate(destination, Blocks.CHEST.defaultBlockState());
+			((ChestBlockEntity) level.getBlockEntity(source)).setItem(0, new ItemStack(Items.COPPER_INGOT, 3));
+			UUID hand = ((SpiritAnchorBlockEntity) level.getBlockEntity(stand.offset(3, 0, 3))).spirit();
+			check(hand != null && level.getEntity(hand) instanceof WorkshopHandEntity, "The workshop hand serves at its anchor");
+			Logistics.Filed filed = CourierLedger.of(minecraft).file(player(minecraft).getUUID(), Couriers.place(level, stand.offset(3, 0, 6)),
+					Couriers.place(level, destination), new ItemStack(Items.COPPER_INGOT), 3, level.registryAccess(), level.getGameTime());
+			check(filed.outcome() == Logistics.Outcome.DONE, "Its holder files three copper ingots at the hand's post: " + filed.outcome());
+			return new Work(hand, filed.id());
+		});
+		server.waitFor(minecraft -> minecraft.overworld().getEntity(work.hand()) instanceof WorkshopHandEntity hand && hand.task() == work.request()
+				&& hand.carriedCount() > 0 && hand.status() == Status.TRAVELLING, WORK_WAIT);
+		server.runCommand("tick freeze");
+		try {
+			String carrying = server.computeOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				WorkshopHandEntity hand = (WorkshopHandEntity) level.getEntity(work.hand());
+				Request request = CourierLedger.of(minecraft).ledger().get(work.request());
+				boolean aboard = request != null && request.progress().aboard() && hand.getUUID().equals(request.progress().worker());
+				return hand.carriedCount() + " " + aboard + " " + ((ChestBlockEntity) level.getBlockEntity(source)).countItem(Items.COPPER_INGOT);
+			});
+			BlockPos at = server.computeOnServer(minecraft -> minecraft.overworld().getEntity(work.hand()).blockPosition());
+			server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", at.getX() + 0.5, at.getY(), at.getZ() - 2.0));
+			context.waitFor(client -> client.player.position().distanceTo(Vec3.atBottomCenterOf(at)) < 3.0 && seen(client, work.hand()) != null, WAIT);
+			float[] aim = context.computeOnClient(client -> {
+				WorkshopHandEntity hand = seen(client, work.hand());
+				Vec3 eye = client.player.getEyePosition();
+				Vec3 to = hand.position().add(0.0, hand.getBbHeight() * 0.5, 0.0);
+				double dx = to.x - eye.x, dy = to.y - eye.y, dz = to.z - eye.z;
+				return new float[] {(float) (Mth.atan2(dz, dx) * Mth.RAD_TO_DEG) - 90.0F,
+						(float) -(Mth.atan2(dy, Math.sqrt(dx * dx + dz * dz)) * Mth.RAD_TO_DEG)};
+			});
+			context.getInput().lookAt(aim[0], aim[1]);
+			context.waitFor(client -> client.hitResult instanceof EntityHitResult hit && hit.getEntity().getUUID().equals(work.hand()), WAIT);
+			boolean travelling = context.computeOnClient(client -> seen(client, work.hand()) instanceof WorkshopHandEntity hand
+					&& hand.status() == Status.TRAVELLING);
+			Jugcraft.LOGGER.info("[roster-check] the hand at work: carried, aboard on its own claim, left at the source = {}; seen travelling {}; Jade {}",
+					carrying, travelling, FabricLoader.getInstance().isModLoaded("jade") ? "loaded" : "not loaded");
+			check(carrying.equals("3 true 0") && travelling,
+					"The hand carries the three aboard on its own claim, the source empty, and the client sees it travelling: " + carrying);
+			context.waitTicks(10);
+			shot(context, "jugcraft_workshop_hand_at_work");
+		} finally {
+			server.runCommand("tick unfreeze");
+		}
+		server.waitFor(minecraft -> CourierLedger.of(minecraft).ledger().get(work.request()) == null, WORK_WAIT);
+		String delivered = server.computeOnServer(minecraft -> ((ChestBlockEntity) minecraft.overworld().getBlockEntity(destination)).countItem(Items.COPPER_INGOT)
+				+ " " + ((ChestBlockEntity) minecraft.overworld().getBlockEntity(source)).countItem(Items.COPPER_INGOT));
+		Jugcraft.LOGGER.info("[roster-check] the hand delivered: destination and source = {}", delivered);
+		check(delivered.equals("3 0"), "It delivers all three once and the request closes: " + delivered);
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 0 0", stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5));
+		context.waitTicks(10);
+		openByKey(context);
+	}
+
+	// D-09
+	private static @Nullable WorkshopHandEntity seen(Minecraft client, UUID hand) {
+		if (client.level == null || client.player == null) {
+			return null;
+		}
+		List<WorkshopHandEntity> found = client.level.getEntitiesOfClass(WorkshopHandEntity.class, client.player.getBoundingBox().inflate(16.0),
+				entity -> entity.getUUID().equals(hand));
+		return found.isEmpty() ? null : found.getFirst();
 	}
 
 	private static void full(ClientGameTestContext context, TestDedicatedServerContext server, Setup setup) {

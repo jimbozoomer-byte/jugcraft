@@ -9,6 +9,10 @@ on:
         description: Also run the Concordance load cards, the workshop's and the pact hall's (docs/TESTING.md); ordinary runs never do
         type: boolean
         default: false
+      clients_without_optional:
+        description: Also run Chunk D's pact, roster and two-client tests without the optional integrations (docs/TESTING.md); ordinary runs never do
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -127,6 +131,57 @@ jobs:
           if [ -s pacthall.txt ]; then
             echo "::notice title=Pact hall load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' pacthall.txt)"
           fi
+
+  # Concordance Chunk D, D-09 (08:175; D-P137): the pact's client tests in a build without the optional integrations (Jade
+  # among them), only when a manual run asks for it.
+  pact-clients-without-optional:
+    name: pact clients without optional integrations
+    if: github.event_name == 'workflow_dispatch' && inputs.clients_without_optional
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      LIBGL_ALWAYS_SOFTWARE: 'true'
+      SDL_VIDEO_FORCE_EGL: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+      - name: Install Mesa (software rendering)
+        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libgl1-mesa-dri libglx-mesa0 libegl1 libegl-mesa0 mesa-utils xvfb
+      - name: Prepare run directory
+        run: |
+          mkdir -p run
+          echo "eula=true" > run/eula.txt
+      - name: Run the pact client tests without optional integrations
+        run: ./gradlew runClientGameTest --no-daemon -PjugcraftOptionalIntegrations=false "-PclientTests=ConcordancePactClientGameTests,ConcordanceRosterClientGameTests,ConcordancePactNetworkTests"
+      - name: Print small previews of the screenshots
+        if: always()
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          import base64, glob, io, os
+          from PIL import Image
+          for path in sorted(glob.glob("**/screenshots/*.png", recursive=True)):
+              image = Image.open(path).convert("RGB")
+              image.thumbnail((480, 270))
+              buffer = io.BytesIO()
+              image.save(buffer, "JPEG", quality=60)
+              print(f"=== SCREENSHOT {os.path.basename(path)} {image.size}")
+              print(base64.b64encode(buffer.getvalue()).decode())
+              print("=== END")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: client-screenshots-without-optional
+          path: |
+            **/screenshots/*.png
+            **/owner-network-evidence/**/peer.log
 
   # Which client game test classes to run, shared out between sixteen client jobs (tools/select_client_tests.py).
   # A pull request runs the classes that show what it changed; main and a manual run of this workflow run them all.
