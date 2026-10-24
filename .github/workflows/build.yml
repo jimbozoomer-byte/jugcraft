@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       load_card:
-        description: Also run the Concordance workshop load card (docs/TESTING.md); ordinary runs never do
+        description: Also run the Concordance load cards, the workshop's and the pact hall's (docs/TESTING.md); ordinary runs never do
         type: boolean
         default: false
 permissions:
@@ -84,8 +84,10 @@ jobs:
 
   # Concordance Chunk C, C-10 (C-P20, C-P66): the measured small workshop, only when a manual run asks for it. Fabric's
   # filter makes it the only server game test in its own job; its lines are repeated as one notice on the run.
+  # Concordance Chunk D, D-09 (D-P128): the pact hall's card runs after it in the same job, in a server of its own (a
+  # second runGameTest with its own filter), whether or not the workshop's passed; its lines are a notice of their own.
   load-card:
-    name: workshop load card
+    name: Concordance load cards
     if: github.event_name == 'workflow_dispatch' && inputs.load_card
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -110,6 +112,20 @@ jobs:
           grep -F 'Concordance load card |' gametest.out | sed 's/^.*Concordance load card | //' > card.txt || true
           if [ -s card.txt ]; then
             echo "::notice title=Concordance load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' card.txt)"
+          fi
+      - name: Run the pact hall load card
+        if: ${{ !cancelled() }}
+        env:
+          JAVA_TOOL_OPTIONS: -Dfabric-api.gametest.filter=jugcraft-test:concordance_pact_hall_load_game_tests_load_card
+        run: |
+          set -o pipefail
+          ./gradlew runGameTest --no-daemon 2>&1 | tee pacthall.out
+      - name: Show the pact hall load card as a notice
+        if: always()
+        run: |
+          grep -F 'Pact hall load card |' pacthall.out | sed 's/^.*Pact hall load card | //' > pacthall.txt || true
+          if [ -s pacthall.txt ]; then
+            echo "::notice title=Pact hall load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' pacthall.txt)"
           fi
 
   # Which client game test classes to run, shared out between sixteen client jobs (tools/select_client_tests.py).
