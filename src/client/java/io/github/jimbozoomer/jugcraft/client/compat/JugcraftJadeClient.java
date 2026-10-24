@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.client.compat;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 import io.github.jimbozoomer.jugcraft.compat.jade.JugcraftJadePlugin;
 import io.github.jimbozoomer.jugcraft.compat.jade.MachineDataProvider;
+import io.github.jimbozoomer.jugcraft.compat.jade.PactDataProvider;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.CircleAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.ComposeText;
@@ -11,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.CrucibleStandBlock;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
 import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Factor;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
@@ -27,6 +29,8 @@ import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlock;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlock;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlock;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.compat.jade.WorkerDataProvider;
 import io.github.jimbozoomer.jugcraft.compat.jade.CourierDataProvider;
@@ -77,6 +81,9 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 		registration.registerBlockComponent(ShrineTooltip.INSTANCE, ReliquaryShrineBlock.class);
 		registration.registerBlockComponent(SpireTooltip.INSTANCE, SpireHeartBlock.class);
 		registration.registerBlockComponent(CropTooltip.INSTANCE, OrganismCropBlock.class);
+		// Concordance Chunk D, D-06 (G11): the pact perch and the Spirit Anchor.
+		registration.registerBlockComponent(AgreementTooltip.PERCH, PactPerchBlock.class);
+		registration.registerBlockComponent(AgreementTooltip.ANCHOR, SpiritAnchorBlock.class);
 	}
 
 	/** A growth word as the server noted it: a pace, dormant, or waiting for a reading. */
@@ -114,7 +121,82 @@ public final class JugcraftJadeClient implements JugcraftJadePlugin.ClientRegist
 				if (carried > 0) {
 					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.carried", carried));
 				}
+				// Concordance Chunk D, D-06: Stolas's pact: its service, state, next offering and grace (PactReading).
+				data.getCompound("pact").ifPresent(pact -> pactLines(tooltip, pact));
 			});
+		}
+	}
+
+	/**
+	 * Concordance Chunk D, D-06: a pact's or agreement's reading (spirits/PactReading, read on the server), in words: whether
+	 * one is kept and with whom, its service, its state, the next offering or the grace, why its presence waits; a visit or a
+	 * departure. It names no player and shows nothing of the escrow, because the reading carries neither.
+	 */
+	private static void pactLines(ITooltip tooltip, CompoundTag data) {
+		if (data.getBooleanOr("departing", false)) {
+			tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.departing"));
+		}
+		switch (data.getStringOr("standing", "")) {
+			case "disabled" -> tooltip.add(Component.translatable("message.jugcraft.concordance.disabled"));
+			case "none" -> tooltip.add(Component.translatable(data.getBooleanOr("visiting", false) ? "tooltip.jugcraft.concordance.jade.pact.visiting"
+					: "tooltip.jugcraft.concordance.jade.pact.none"));
+			// The diagnostic's own words, named, not worked out here (this client works out no diagnostic: check_signs, C-01).
+			case "copy" -> tooltip.add(ComposeText.show(Text.of(Diagnostic.PREFIX + Code.CONFLICTING_AGREEMENT.id)));
+			case "unreadable" -> tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.unreadable"));
+			case "kept" -> {
+				// Stolas's own reading names no counterpart (he is it): an empty id would parse as "minecraft:" and show a raw key.
+				String named = data.getStringOr("counterpart", "");
+				Identifier counterpart = named.isEmpty() ? null : Identifier.tryParse(named);
+				if (counterpart != null) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.keeps",
+							Component.translatable("entity." + counterpart.getNamespace() + "." + counterpart.getPath())));
+				}
+				String service = data.getStringOr("service", "");
+				if (!service.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.service",
+							Component.translatable("tooltip.jugcraft.concordance.jade.pact.service." + service)));
+				}
+				tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.state." + data.getStringOr("state", "active")));
+				int due = data.getIntOr("due_days", -1);
+				if (due >= 0) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.next", due));
+				}
+				int grace = data.getIntOr("grace_days", -1);
+				if (grace >= 0) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.grace", grace));
+				}
+				String waiting = data.getStringOr("waiting", "");
+				if (waiting.equals("lost")) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.lost"));
+				} else if (!waiting.isEmpty()) {
+					tooltip.add(Component.translatable("tooltip.jugcraft.concordance.jade.pact.waiting",
+							Component.translatable("compose.jugcraft.worker.status." + waiting)));
+				}
+			}
+			default -> {
+			}
+		}
+	}
+
+	/** Concordance Chunk D, D-06 (G11): a pact perch or a Spirit Anchor: the agreement it keeps and how it stands; no player, no escrow. */
+	private enum AgreementTooltip implements IBlockComponentProvider {
+		PERCH(PactDataProvider.PERCH),
+		ANCHOR(PactDataProvider.ANCHOR);
+
+		private final PactDataProvider provider;
+
+		AgreementTooltip(PactDataProvider provider) {
+			this.provider = provider;
+		}
+
+		@Override
+		public Identifier getUid() {
+			return provider.id;
+		}
+
+		@Override
+		public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+			accessor.getServerData().getCompound(provider.dataKey).ifPresent(data -> pactLines(tooltip, data));
 		}
 	}
 

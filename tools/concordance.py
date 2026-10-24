@@ -517,12 +517,19 @@ INVOCATIONS.update(strata.INVOCATIONS)
 import concordance_rime_kit as rime_kit  # noqa: E402
 ITEMS.update(rime_kit.ITEMS)
 ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
+# Concordance Chunk D (tools/concordance_pacts.py): Stolas's Regard (D-03), the pact perch and Stolas (D-04, D-05).
+import concordance_pacts as pacts  # noqa: E402
+RESEARCH.update(pacts.RESEARCH)
+BLOCKS.update(pacts.BLOCKS)
+# Concordance Chunk D, D-07 (tools/concordance_roster.py): the roster's words, limits and icons, the journal's pacts lines
+# and the Ars Nouveau helpers' roster kinds (G13).
+import concordance_roster as roster  # noqa: E402
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
                  artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
                  hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG,
-                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG]
+                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -1062,6 +1069,7 @@ def codex():
         **celestial.codex(),
         **crimson.codex(),
         **workers.codex(),
+        **pacts.codex(),
         **jug_nouveau.codex(),
         **logistics.codex(),
         **artifice.codex(),
@@ -1547,14 +1555,18 @@ SOUND_EVENTS.update(signs.SOUND_EVENTS)
 SOUND_EVENTS.update(ember.SOUND_EVENTS)
 SOUND_EVENTS.update(rime.SOUND_EVENTS)
 SOUND_EVENTS.update(strata.SOUND_EVENTS)
-# Events that play the owner's recordings instead of a drawn cue: event -> sound files (copied by tools/owner_art.py).
-SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES}
+# Concordance Chunk D, D-06 (D-S5): Stolas's cues (tools/concordance_pacts.py), played from runtime files.
+SOUND_EVENTS.update(pacts.SOUND_EVENTS)
+# Events that play the owner's recordings (copied by tools/owner_art.py), or runtime files, instead of a drawn cue:
+# event -> sound files.
+SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES, **pacts.SOUND_FILES}
 
 
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
-    (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), one picked at random. The Exchange
-    artifacts' events are tools/concordance_ee_artifacts.py's."""
+    (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), or, for Stolas's cues, runtime files
+    (tools/concordance_pacts.py's), one picked at random. The Exchange artifacts' events are
+    tools/concordance_ee_artifacts.py's."""
     return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
                        "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
                                   for name in SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
@@ -1630,9 +1642,11 @@ MESSAGES = {
     **ember.MESSAGES,
     **rime.MESSAGES,
     **strata.MESSAGES,
+    **pacts.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
+    **roster.MESSAGES,
 }
 
 SCREEN_TEXT = {
@@ -1681,6 +1695,7 @@ TOOLTIPS = {
     **conclave.TOOLTIPS,
     **spire.TOOLTIPS,
     **rime.TOOLTIPS,
+    **pacts.TOOLTIPS,
 }
 
 
@@ -1866,6 +1881,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     celestial.write_all(write, assets, data, lang, condition, self_drop)
     crimson.write_all(write, assets, data, lang, condition, self_drop)
     workers.write_all(write, assets, data, lang, condition, self_drop)
+    pacts.write_all(write, assets, data, lang, condition, self_drop)
     logistics.write_all(write, assets, data, lang, condition, self_drop)
     artifice.write_all(write, assets, data, lang, condition, self_drop)
     relics.write_all(write, assets, data, lang, condition, self_drop)
@@ -1889,6 +1905,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     composer.lang_entries(lang)
     signs.lang_entries(lang)
     diagnostics.lang_entries(lang)
+    pacts.lang_entries(lang)
+    roster.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -2025,6 +2043,7 @@ def write_data(write, res):
     celestial.write_data(write, data)
     crimson.write_data(write, data)
     workers.write_data(write, data)
+    pacts.write_data(write, data)
     logistics.write_data(write, data)
     artifice.write_data(write, data)
     relics.write_data(write, data)
@@ -2061,6 +2080,7 @@ def tags(tags):
     rime.tags(tags)
     rime_kit.tags(tags)
     strata.tags(tags)
+    pacts.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)
     spire.tags(tags)

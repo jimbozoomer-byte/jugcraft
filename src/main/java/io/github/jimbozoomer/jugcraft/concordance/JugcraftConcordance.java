@@ -312,6 +312,8 @@ public final class JugcraftConcordance {
 		io.github.jimbozoomer.jugcraft.concordance.journal.Journal.register();
 		// Chunk A: the composer screen's server side, answered by the service the compose command uses (Composing).
 		io.github.jimbozoomer.jugcraft.concordance.composer.Composer.register();
+		// Concordance Chunk D, D-07: the roster screen's server side (its payloads, gates and sessions; spirits/Roster).
+		io.github.jimbozoomer.jugcraft.concordance.spirits.Roster.register();
 		io.github.jimbozoomer.jugcraft.concordance.sign.Signs.register();
 		BENCH_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("lampwright_bench"),
 				new ExtendedMenuType<>((containerId, inventory, pos) -> new LampwrightBenchMenu(containerId, inventory), BlockPos.STREAM_CODEC.cast()));

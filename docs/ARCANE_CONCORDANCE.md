@@ -496,3 +496,17 @@ the crucible's saved `formula_owner` and `request`, and an unreadable `program` 
 ids (`concordance/diagnostic/Code`, `missing_ingredient` to `participants`, then `no_crucible`), which Jade's
 snapshots carry; codex entries `alembic/stillroot_poultice`, `alembic/kiln_draught`, `alembic/crucible_stand` and
 `circles/root_and_rivet`. Unit 4's garden identifiers are listed with milestone 6 above.
+
+Since Concordance Chunk D (unit 2, [Stolas's pact](features/stolas-pact.md#rollout-and-open-questions); not merged):
+block, item, block entity and menu `jugcraft:pact_perch` (saved `owner`, `agreement` and `spirit`, stamp 1); entity
+`jugcraft:stolas` (saved `perch` and `record`); research `jugcraft:stolas_regard`; practice `jugcraft:pact_service`;
+item tags `jugcraft:stolas_offerings` and `jugcraft:stolas_specimens`; the pact definition
+`data/jugcraft/concordance/pact/stolas.json` (data folder `concordance/pact`, schema 1); payload types
+`jugcraft:concordance_pact_request` and `jugcraft:concordance_pact_state`; the roster kind `pact`; codex entries
+`binding/stolas_regard` and `binding/stolas_pact`.
+
+Since Concordance Chunk D (unit 3, [Stolas's pact](features/stolas-pact.md#rollout-and-open-questions); not merged): the
+sound events `jugcraft:stolas.arrive`, `.listen`, `.inspect`, `.assent`, `.refuse` and `.depart`; payload types
+`jugcraft:concordance_roster_request` and `jugcraft:concordance_roster_state` (the roster's actions and icons travel as
+indices, so append only); the key `key.jugcraft.concordance_roster`; Jade's providers `jugcraft:pact_perch` and
+`jugcraft:spirit_anchor`. No saved data.

@@ -81,6 +81,7 @@ import net.minecraft.network.protocol.BundlePacket;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.GameProtocols;
@@ -123,6 +124,8 @@ import net.minecraft.world.phys.Vec3;
  * (GameTestServer.waitUntilNextTick runs tasks without waiting), so the figures are each tick's work as any server
  * measures it, on this runner only. The yard starts {@value #OFF} blocks in, clear of the default structure's barrier
  * walls, and its chunks are force-loaded: the game test server sets no simulation distance, so only forced chunks tick.
+ * Its Measure, Traffic and Stats, and its static helpers, are shared with the pact hall's card
+ * (ConcordancePactHallLoadGameTests, Concordance Chunk D, D-09), which measures with the same spans.
  */
 public class ConcordanceWorkshopLoadGameTests {
 	/** Fabric's id for loadCard: the test mod's id, then the class and method in snake case (TestAnnotationLocator). */
@@ -256,7 +259,7 @@ public class ConcordanceWorkshopLoadGameTests {
 	}
 
 	/** One measured span. */
-	private static final class Measure {
+	static final class Measure {
 		final String name;
 		final long[] raw = new long[MEASURED];
 		final long[] net = new long[MEASURED];
@@ -280,13 +283,16 @@ public class ConcordanceWorkshopLoadGameTests {
 	}
 
 	/** What the one test player is sent: packets, and their bytes as the play protocol writes them (uncompressed, unframed). */
-	private static final class Traffic {
+	static final class Traffic {
 		final Map<String, long[]> kinds = new HashMap<>();
 		long packets;
 		long bytes;
 		long unsized;
 		long signs;
 		long signBytes;
+		/** Payloads a test player never declares, sized as a client that declared them would receive them (the pact hall's card). */
+		long payloads;
+		long payloadBytes;
 
 		void add(Packet<?> packet, StreamCodec<ByteBuf, Packet<? super ClientGamePacketListener>> codec) {
 			if (packet instanceof BundlePacket<?> bundle) {
@@ -308,6 +314,12 @@ public class ConcordanceWorkshopLoadGameTests {
 			signs++;
 			signBytes += size(new ClientboundCustomPayloadPacket(new SignPayload(shown.sign().ordinal(), shown.at(),
 					Optional.ofNullable(shown.from()))), codec);
+		}
+
+		/** A payload the server sends only to a client that declared it (Concordance Chunk D, D-09): counted and sized, never sent. */
+		void payload(CustomPacketPayload payload, StreamCodec<ByteBuf, Packet<? super ClientGamePacketListener>> codec) {
+			payloads++;
+			payloadBytes += size(new ClientboundCustomPayloadPacket(payload), codec);
 		}
 
 		private static String kind(Packet<?> packet) {
@@ -341,7 +353,7 @@ public class ConcordanceWorkshopLoadGameTests {
 		}
 	}
 
-	private record Stats(double median, double p95, double mean, double max, int over50, double windowMedian, double windowP95) {
+	record Stats(double median, double p95, double mean, double max, int over50, double windowMedian, double windowP95) {
 		static Stats of(long[] nanos) {
 			long[] sorted = nanos.clone();
 			Arrays.sort(sorted);

@@ -30,7 +30,7 @@ public enum Code {
 	INCOMPLETE_PATTERN("incomplete_pattern", Kind.BLOCKED),
 	/** parameters fixed by their first user (C-06 raises neither: the porter's Status and the Peepo's CompanionStatus say so at their own edges) */
 	UNAVAILABLE_WORKER("unavailable_worker", Kind.SHORTAGE),
-	/** parameters fixed by its first user */
+	/** () Concordance Chunk D, D-02: a holder block whose Bound Will is kept at another place or for someone else (a copy): it does nothing and releases nothing */
 	CONFLICTING_AGREEMENT("conflicting_agreement", Kind.BLOCKED),
 	/** parameters fixed by its first user */
 	DORMANT_OCCURRENCE("dormant_occurrence", Kind.CONDITION),
