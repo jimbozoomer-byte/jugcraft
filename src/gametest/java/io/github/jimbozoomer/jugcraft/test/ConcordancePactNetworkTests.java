@@ -256,16 +256,21 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 				+ PactClient.state().notes().stream().anyMatch(note -> note.getString().equals(owner)));
 		check(shown.equals(PactStatePayload.NEGOTIATE + " false true"),
 				"The stranger is told only the perch's owner may invite him, and is offered no Accept: " + shown);
-		PactStatePayload.Result accept = ask(context, PactRequestPayload.ACCEPT);
-		mark("accept.txt", accept.reason());
-		check(!accept.done() && Pacts.Outcome.NOT_PERMITTED.id.equals(accept.reason()),
-				"The stranger's Accept, sent all the same, is refused as not permitted: " + accept.reason());
-		// The refusal is shown under his terms: turn to them and bring the answer into view before the picture.
+		// His terms first: turning to them asks to hear them (CHOOSE), and that answer's state carries no result, so the Accept
+		// is sent after it has come, and its refusal is the answer shown under them (run 40137136287 turned after, and lost it).
+		PactStatePayload beforeTerms = context.computeOnClient(client -> PactClient.state());
 		tabTo(context, "next");
 		for (int beat = 0; beat < 3; beat++) {
 			context.getInput().pressKey(InputConstants.KEY_RETURN);
 			context.waitTicks(3);
 		}
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen screen && screen.page() == PactScreen.TERMS_PAGE
+				&& PactClient.state() != null && PactClient.state() != beforeTerms, WAIT);
+		PactStatePayload.Result accept = ask(context, PactRequestPayload.ACCEPT);
+		mark("accept.txt", accept.reason());
+		check(!accept.done() && Pacts.Outcome.NOT_PERMITTED.id.equals(accept.reason()),
+				"The stranger's Accept, sent all the same, is refused as not permitted: " + accept.reason());
+		// The refusal, under his terms, brought into view by the keyboard before the picture.
 		tabTo(context, "result");
 		check(context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen && screen.page() == PactScreen.TERMS_PAGE
 				&& screen.control("result") instanceof PactScreen.Verdict verdict && verdict.refused()),
