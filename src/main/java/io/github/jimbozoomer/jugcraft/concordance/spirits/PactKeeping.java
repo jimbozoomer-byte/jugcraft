@@ -28,7 +28,7 @@ import org.jspecify.annotations.Nullable;
  * lost presence never ends a pact). Its holder pays offerings into the escrow by kind, server-side (the menu has no
  * slots); suspends and resumes it (idempotent, so a stale screen never toggles the wrong way); ends it (the escrow back
  * once into their inventory, the rest at their feet; Stolas departs; the reason told and kept), here or, for a pact
- * without its perch, from a perch of theirs that keeps nothing; and reads its page. Nothing here is rate-gated: the
+ * without its perch, from any perch that keeps nothing; and reads its page. Nothing here is rate-gated: the
  * menu asks RateGate before every action (D-P8). Work a second: one ledger lookup, one player lookup.
  */
 public final class PactKeeping {

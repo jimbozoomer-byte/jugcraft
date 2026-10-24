@@ -239,6 +239,14 @@ public class PactMenu extends AbstractContainerMenu {
 		}
 		Answered done = menu.act(level, player, request.action(), request.choice(), now);
 		player.inventoryMenu.broadcastChanges();
+		if (player.containerMenu != menu) {
+			// Declined: the menu closed in this call and its client drops a state for a closed menu, so the answer is shown
+			// on the action bar instead and the state only returned (the unit review).
+			if (done != null) {
+				player.sendOverlayMessage(done.said());
+			}
+			return menu.state(level, player, done, request.sequence(), now);
+		}
 		return menu.answer(level, player, done, request.sequence(), now);
 	}
 
@@ -526,17 +534,22 @@ public class PactMenu extends AbstractContainerMenu {
 	}
 
 	private PactStatePayload answer(ServerLevel level, ServerPlayer player, @Nullable Answered answered, int answering, long now) {
-		View view = view(level, player, now);
-		patternIds = view.patternIds();
-		offeringItems = view.offeringItems();
-		PactStatePayload state = new PactStatePayload(containerId, revision, view.mode(), PactKeeping.name(PactDefinition.STOLAS), view.beats(),
-				view.terms(), view.notes(), view.patterns(), view.offerings(), view.compact(), view.resonance(), view.actions(),
-				Optional.ofNullable(answered).map(done -> new PactStatePayload.Result(answering, done.reason(), done.done(), done.said())));
+		PactStatePayload state = state(level, player, answered, answering, now);
 		lastSent = state;
 		if (ServerPlayNetworking.canSend(player, PactStatePayload.TYPE)) {
 			ServerPlayNetworking.send(player, state);
 		}
 		return state;
+	}
+
+	/** The state this menu shows {@code player} now, answering request {@code answering}: built, not sent. */
+	private PactStatePayload state(ServerLevel level, ServerPlayer player, @Nullable Answered answered, int answering, long now) {
+		View view = view(level, player, now);
+		patternIds = view.patternIds();
+		offeringItems = view.offeringItems();
+		return new PactStatePayload(containerId, revision, view.mode(), PactKeeping.name(PactDefinition.STOLAS), view.beats(),
+				view.terms(), view.notes(), view.patterns(), view.offerings(), view.compact(), view.resonance(), view.actions(),
+				Optional.ofNullable(answered).map(done -> new PactStatePayload.Result(answering, done.reason(), done.done(), done.said())));
 	}
 
 	private static void refreshAll(MinecraftServer server) {

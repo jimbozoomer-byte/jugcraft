@@ -815,11 +815,14 @@ dialogue (09:158).
 - **Built:**
   - `concordance/spirits/PactPerchBlock` and `PactPerchBlockEntity` (new; `jugcraft:pact_perch` is the block, item,
     block entity and menu): placed only by a player in person where `Authority.mayChange` allows, never in Styx's home
-    (`StyxConservatory.covers`, new; D-P31) and never by a stand-in or a machine; it records its placer (D-P24), keeps
-    its pact through an `AgreementHolder` built with `OnBreak.UNSEAT`, holds no item and stamps version 1. Its ticker
-    looks once a second, spread by position (`PactKeeping.tick`: the upkeep look, and a lost presence called back
-    while its holder is within 64 blocks; D-P28). While a conversation is open and nothing is kept there, one visiting
-    Stolas waits on it (never saved).
+    (`StyxConservatory.covers`, new; D-P31) and never by a stand-in; it records its placer (D-P24), keeps its pact
+    through an `AgreementHolder` built with `OnBreak.UNSEAT` and an owner required (the unit review: a perch a machine
+    sets, through a blueprint stake or a drone build, which never asks `getStateForPlacement` or `setPlacedBy`, records
+    nobody and so seals and seats for nobody), holds no item and stamps version 1. Its ticker looks once a second,
+    spread by position (`PactKeeping.tick`: the upkeep look, and a lost presence called back while its holder is within
+    64 blocks; D-P28). While a conversation is open and nothing is kept there, one visiting Stolas waits on it. The
+    perch never saves its visitor; the visitor himself is written with his chunk (`perch` only) and leaves at his first
+    think after a load (`aVisitingStolasLeavesWithoutARecord`), with the Concordance on or off (the unit review).
   - `AgreementHolder` (unit 1's) gains `OnBreak` (`RELEASE` for the anchor, its body unit 1's exactly; `UNSEAT` for the
     perch: the record kept without its place, its presence struck off the roster and sent away), `seat` with its `Seat`
     outcomes (worded `workers.seat_*` from `SEAT_OUTCOMES`; D-P45), `stranded` (D-P25) and `told(Seat)`; `offeringName`
@@ -859,7 +862,8 @@ dialogue (09:158).
     perch stays excluded from equivalence); `docs/audits/survival-item-registry.json` gains `jugcraft:pact_perch`, as
     Chunk C's `24a23db1a` added its items: no game export was run, and `survival-recipes.json` and `.csv` were not
     regenerated.
-- **Departures from this ticket and from the unit's specification** (proposals D-P18 and D-P22 to D-P37 in Decisions):
+- **Departures from this ticket and from the unit's specification** (proposals D-P18, D-P22 to D-P37 and D-P45 to D-P48
+  in Decisions):
   - the terms are 14 rows: the ticket's 13 and "perch" (what breaking it does);
   - seating a pact without its perch is `AgreementHolder.seat`, shared by every holder block, with its own outcomes;
     the perch part's `Pacts.unseated` was not added;
@@ -894,8 +898,9 @@ dialogue (09:158).
   equivalence); the perch holding no item, recording its placer and asking `mayPlace`; `broken`, `unseat` and `seat`
   in order; Stolas MISC, a worker and a presence, hurt only past invulnerability; the perch excluded, registered,
   modelled and its icon its map; `StyxConservatory.covers`; the D-04 test names.
-- **Audit mutations:** the specification's 26 (D4-M1 to D4-M26, the slab recipe among them, which gave 9 reports) were
-  each reported; the unchanged tree (D4-M27) reported nothing.
+- **Audit mutations:** the specification's 26 (D4-M1 to D4-M26, the slab recipe among them, which gave 12 reports) were
+  each reported; the unchanged tree (D4-M27) reported nothing. D4-M16 (`setPlacedBy` without its stand-in check) gave
+  one report, the owner check's; the specification expected `AUTHORITY_ROUTES` to report it too, and it did not.
 
 **As built, client (unit 2: commit `7da686ad4`; record: [stolas-pact.md](stolas-pact.md#the-pact-screen-d-04)).**
 - **Built:**
@@ -1062,9 +1067,10 @@ this ticket.
   `ConcordanceResourceGameTests.theServiceRulesKeepTheirShape`: 19. Extended: unit 1's
   `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`,
   `absentAndUnloadedTimeIsNeverOwed` and `theConcordanceOffHoldsEveryClock`, each also on Stolas's own pact (E2), and
-  `aChangeOfOwnerMovesNoPact` (the perch's new owner is not served). With D-03's and D-04's, the unit adds 45 server
-  game tests (Styx 7 to 10, Sharing 5 to 9, Progression 8 to 9, Sky 6 to 13, Journal 5 to 7, Worker 22 to 43,
-  Persistence 15 to 19, Authority 8 to 9, Resource 5 to 7) and one client test class.
+  `aChangeOfOwnerMovesNoPact` (the perch's new owner is not served). With D-03's and D-04's, and the unit review's
+  `shortAbsencesNeverRenewTheGrace`, the unit adds 46 server game tests (Styx 7 to 10, Sharing 5 to 9, Progression 8
+  to 9, Sky 6 to 13, Journal 5 to 7, Worker 22 to 44, Persistence 15 to 19, Authority 8 to 9, Resource 5 to 7) and one
+  client test class.
 - **Audits:** `check_pacts`' D-05 part (`Reckoning` and `serves` against the generator; `reckon`'s order; claims,
   spending and attunements only through `AstrolabeItem.recall`, which `attune` calls and `mayRecall` never claims
   through; the obligation from `observe`, after its practice, once, never `worker_service`; the page and RECALL; the
@@ -1102,6 +1108,66 @@ this ticket.
   translation in the D-03 tests; vanilla `ConfirmScreen`'s Esc and Tab order; that a Fabric `FakePlayer`'s messages are
   harmless; `TownProtection` near spawn in a fresh client-test world (if Accept is refused there as not permitted, the
   test's stand moves away from spawn); that `StolasEntity.remove(KILLED)` strikes the roster at once.
+
+**Unit 2's unit review (the commit "Chunk D unit 2: fixes from the unit review"; none of it yet run in CI).** Sixteen
+findings were confirmed and fixed:
+- **Upkeep (D-P50, amending D-S3; a checkpoint question):** a holder warned before an absence is warned again on return
+  with the grace they had left, its end moved on by the time away, instead of a whole new day (`Pacts.due`, unit 1's
+  code: the unit 1 merge must carry it). Time away is still never charged, and the first warning after an absence
+  still gives the whole grace, so `aReturnAfterAbsenceGetsTheFullGrace` holds exactly. Before it, a warned holder who
+  left for over a minute (beyond 64 blocks, or logged out) at least every 20 minutes was never suspended, and
+  Star-reckoning kept serving. `shortAbsencesNeverRenewTheGrace` (new) shows a holder away 61 seconds after every
+  1,000 ticks present suspended after one game day present. A second route stays open and is left to the owner:
+  suspend, recall and resume once a day, since each resume moves the due date on by the time held, so the 7-day
+  period counts only a few ticks of active time a day.
+- **A perch a machine sets (D-P24 corrected):** `AgreementHolder` takes an owner-required flag (the perch's; the
+  anchor keeps its ownerless legacy rule), so a perch that records no owner seals and seats for nobody (`maySeal`).
+  `twoNegotiationsAtOnePerchSealOnce` is rewritten on a perch its first player owns: the other player is refused
+  `not_permitted` and spends nothing (`TAKEN` stays shown by `acceptingSealsOnceAndSpendsOnce`), and a perch no player
+  placed brings no Stolas and seals for nobody. Machines are not stopped from setting a perch (`Blueprint.FORBIDDEN` is
+  unchanged); such a perch is inert until broken and placed by hand.
+- **A choice's id** (an offering's or a pattern's, both named by data) is encoded up to 32,767 characters
+  (`PactStatePayload.MAX_ID`, in `STATE_LIMITS`), so a long id can no longer fail to encode and disconnect its holder;
+  `thePactScreensMessagesAreBounded` sends one of 209 characters.
+- **The first obligation** is no longer kept by a pact stranded while the Concordance was off (`StarReckoning.observed`
+  asks `AgreementHolder.stranded`); `theObligationMastersTheEntryOnce` breaks the perch while switched off, observes,
+  seats the pact at a new perch and observes again.
+- **The parser** refuses `"party"` beneficiaries for a work that serves its holder alone (`PactParser.HOLDER_ONLY`,
+  Star-reckoning; `check_pacts` pins it); `thePactDefinitionParsesStrictly` gains the case.
+- **A visitor** with no conversation waiting on him leaves whether or not the Concordance is on, so one saved with his
+  chunk and loaded while it is off no longer stays; `aVisitingStolasLeavesWithoutARecord` loads one while off.
+- **Decline:** the menu closes in the same call, so its answer is no longer sent as a state the client drops: it is
+  shown on the action bar (which the narrator reads) and the state only returned.
+- **Audits:** the read-only audit of Stolas's Regard scans the whole file (the helpers `hint` and `report` call
+  included); the perch's holder is pinned with its owner flag and `maySeal`'s rule; the obligation's audit asks for the
+  stranded check.
+- **Records:** the balance statement (the once-a-day quota is the only hard limit; 2.09 and 3.59 resonance a day are
+  one keeper's averages), the persistence record, the slab mutation's count (12), the visitor's save, `WHAT_EXISTS`,
+  the stable-identifier registry, the D-04 departures' decision range, the superseded codex entry name and the
+  `PactKeeping` Javadoc.
+- **Audit mutations** (run in place on the focused Concordance audit and restored; the tree's digest equal before and
+  after): RV-M1 to RV-M15 were each reported: `Pacts.due` renewing the whole grace again, the perch's holder without its
+  owner flag, `maySeal` letting anyone seal at an ownerless block, `MAX_ID` at 64, a choice's id encoded with `MAX_KEY`,
+  the obligation kept by a stranded pact (removed, or asked after the practice is recorded), the parser's check removed
+  or `HOLDER_ONLY` emptied, the generator's Stolas offering his party (2 reports), a helper of the hint that writes (which
+  the audit before this fix did not report), the new test removed, a visitor waiting while switched off, a decline's
+  state sent to a closed menu, and a decline said nowhere. The unchanged tree (RV-M16) reported nothing.
+- **Pure harness** (javac against the jspecify jar; scratch, not committed): `Pacts.due` replayed for
+  `aReturnAfterAbsenceGetsTheFullGrace`'s three absences (each grace end exact) and for 61-second absences after every
+  1,000 ticks present: suspended at 24,000 ticks present after 23 returns; unit 1's `Pacts.due` never suspended them in
+  100 cycles. The parser read the shipped offer, and refused `"party"` and `"everyone"` with their reasons.
+- **Commands** (all passed on the final tree): `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py`,
+  `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`, `python3 tools/check_icon_maps.py`,
+  `node --test tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and
+  `git diff --check`; every changed Java file parse-checked (12, no syntax error). No generator was needed: the
+  generator's new numbers (`STATE_LIMITS["MAX_ID"]`, `HOLDER_ONLY`) are read only by the audit.
+- **Not run:** `./gradlew build`, the server game tests (the new and changed ones included) and the client test: CI is
+  their first compile and run.
+- **Rejected by the unit review, unchanged:** the perch's level against the player's, a test listener in a static
+  initializer, the decision numbering, offer data against the parser's bounds, the economy figure, the clip mapping,
+  the shot names, list sizes against the screen's bounds, figures in player text, the perch's icon against its model,
+  save effects never read back, the celestial status line, and two wordings ("their own astrolabe", "ended from the
+  roster").
 
 ### D-06. Stolas's character: body, gestures, sounds, subtitles, Jade (unit 3)
 
@@ -1280,7 +1346,7 @@ change, two observatories).
 | E2 | "Upkeep can suspend without hidden offline punishment" | D-02 (the rules), D-05 (Stolas) | `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`, `absentAndUnloadedTimeIsNeverOwed`, `aStandInNeverAnswersForUpkeep`, `theConcordanceOffHoldsEveryClock`, `aRestartWhileSuspendedStaysSuspended` |
 | E3 | "Agreement copying does not multiply benefits" | D-02, D-03, D-04, D-05 | `aCopiedAnchorGivesNothingAndReleasesNothing`, `aLegacyAnchorClaimsItsPlaceOnce`, `aCopiedPerchIsInert`, `aCopiedPerchRecallsNothing`, `aMastersRecallAndStolassShareOneClaim`, `aChangedClockGivesNoSecondRecall`, `notesNeverStandInForStolasEvidence` |
 | E4 | "End/death/unload/restart returns appropriate property once" | D-01, D-02, D-04, D-05, D-06, D-07, D-08 | `aKilledShadeLeavesItsLoadOnce`, `aKilledShadeAwayFromItsAnchorDropsWhereItFell`, `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`, `endingTwiceReturnsOnce`, `thePerchHoldsNothing`, `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`, `thePactAndItsEscrowSurviveARestart`, `killingStolasIsNeverTheFastestRoute`, `recoveryNeverTakesCargoOutOfAnUnloadedContainer`, `endingWithCargoAboardStrandsItOnce`, 03:193's eight cases |
-| E5 | "Two users cannot both own a unique reserved service instance accidentally" | D-02, D-04, D-08, D-09 | `twoPlayersCannotBothSealOnePlace`, `twoNegotiationsAtOnePerchSealOnce`, `oneStolasPactPerHolder`, `twoHandsCannotHoldOneRequest`; the two-client attempt (D-09), or not run |
+| E5 | "Two users cannot both own a unique reserved service instance accidentally" | D-02, D-04, D-08, D-09 | `twoPlayersCannotBothSealOnePlace`, `twoNegotiationsAtOnePerchSealOnce`, `acceptingSealsOnceAndSpendsOnce`, `oneStolasPactPerHolder`, `twoHandsCannotHoldOneRequest`; the two-client attempt (D-09), or not run |
 | E6 | Extend `ConcordanceWorkerGameTests`, `ConcordanceLogisticsGameTests`, `ConcordanceSharingGameTests`, `ConcordancePersistenceGameTests` and the relevant client companion tests (09:172) | every ticket | the four suites above; `CompanionAutomationChecks` through `PeepoCompanionClientTests` (D-08); `ConcordancePactClientGameTests` (D-04, D-06, D-07) |
 | E7 | The checkpoint: "a complete conversation-to-service-to-departure sequence" (09:174) | D-09 | the whole-path server test; the client sequence of the conversation, a recall and the departure |
 
@@ -1334,7 +1400,8 @@ and `tools/check_mod_data.py` (`check_stolas_regard`, `check_pacts`, `check_pact
 - Data: `concordance/pact/stolas.json`; `concordance/research/stolas_regard.json`; `concordance/practice/pact_service.json`;
   `concordance/worker/workshop_hand.json`; the tags `stolas_specimens` (joined to `concordance_specimens`) and
   `stolas_offerings`; four advancements; the Modonomicon research facts, nodes and hooks; the codex entry
-  `entries/binding/stolas.json` (and the hand's); the perch's recipe, loot table, blockstate and models; `equivalence/excluded`.
+  `entries/binding/stolas.json` (superseded in unit 2 by `binding/stolas_regard.json` and `binding/stolas_pact.json`,
+  D-P18; and the hand's); the perch's recipe, loot table, blockstate and models; `equivalence/excluded`.
 - Assets: Stolas's and the hand's GeckoLib models, animations and textures; the perch's art and icon; `sounds.json`
   entries through the generator; lang through the generators.
 - Tools: a new `tools/concordance_pacts.py` (definition, research, tags, lang, sounds, codex), merged by
@@ -1383,7 +1450,9 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   may narrow it at the checkpoint.
 - **Gentle upkeep's loophole:** a holder who leaves before each grace ends and returns later is warned again with a
   full grace each time, and is never suspended. Accepted as gentle (the offering is a renewable flower); the checkpoint's
-  strictness question covers it.
+  strictness question covers it. Unit 2's unit review showed that a minute away (beyond 64 blocks, or logged out) at
+  least every 20 minutes was enough; D-P50 proposes closing it (the grace left carries over, its end moved on by the
+  time away). Suspending, recalling and resuming once a day stays open (the checkpoint's question 2).
 - **Practice side effects:** the Conclave hears every recorded practice (`ConcordanceProgress.java:101-127`;
   `starbound/Starbound.java:104`). `pact_service` is recorded once a pact, so its effect on Conclave projects is bounded;
   no commission names it.
@@ -1402,15 +1471,19 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
   first), and the familiar and upkeep tests rely on the test world's player and statistics files being written and
   read back (`TestPlayers.leave` and `again`). If CI shows the Nether is unavailable, the Nether steps can be dropped:
   the rules are still shown 20 and 70 blocks away.
-- **Unit 2 has not run (as built):** none of its 45 server game tests or its client test has run; CI is their first
+- **Unit 2 has not run (as built):** none of its 46 server game tests or its client test has run; CI is their first
   compile. Points to watch there: the client test's Accept near spawn (if `TownProtection` refuses it as not permitted
   in a fresh client-test world, its stand moves away from spawn); the explosion in `thePerchHoldsNothing` (a power-3
   blast against the perch's resistance of 3.0); the pinned GeckoLib's `thenPlayAndHold` and Flashjack's Molang loops;
   the test-only listener counting recorded `pact_service` practices stays registered for the test server's life (it only
   reads). The full list is D-05's "Not confirmed until CI".
-- **Unit 2's balance (D-S1):** a holder who is not a master may recall the Harvest Moon daily and the Winter Crown every
-  other day, bounded by resonance (about one Harvest Moon recall in 5.7 days from the year-round patterns); a checkpoint
-  question, stated in [stolas-pact.md](stolas-pact.md#costs-balance-and-automation).
+- **Unit 2's balance (D-S1):** a holder who is not a master may recall the Harvest Moon (Hero of the Village, with its
+  trade discounts) daily and the Winter Crown every other day. The once-a-day quota is the only hard limit: resonance
+  is paid from any carried astrolabe that holds enough, claims are each keeper's own, and astrolabes can be stockpiled,
+  handed over or filled at a keeper's observatory by party members, so one keeper's averages (about 2.09 resonance a
+  day from the year-round patterns, 3.59 with the Winter Crown, which is observable all year with seasons off) bound
+  only a player who relies on their own observatory alone; a master holding the pact also gains a free choice of any
+  observed pattern. A checkpoint question, stated in [stolas-pact.md](stolas-pact.md#costs-balance-and-automation).
 - **The Spirit Anchor keeps its own rules:** hoppers below still take its deliveries, and an explosion still ends a
   shade's agreement and drops its contents once (G15). Claims shield explosions; unclaimed land does not. Changing that
   is not in this chunk.
@@ -1508,8 +1581,8 @@ CC:2444-2445). D-D decisions are the owner's. D-S decisions are the session's un
 asked not to be asked, so they are recorded here as the session's choices, never as accepted by the owner, and stay
 reviewable at the checkpoint (10:162). D-P decisions are the units' proposals: choices the session made in building a
 unit where the tickets above left room or had to be corrected (D-P1 to D-P12 from unit 1's specification, D-P13 to
-D-P16 from its review; D-P17 to D-P49 from unit 2's specification and its review, numbered on from unit 1's), each with
-what was built; none is the owner's, and each is reviewable at the checkpoint.
+D-P16 from its review; D-P17 to D-P49 from unit 2's specification and its review, numbered on from unit 1's; D-P50
+from unit 2's unit review), each with what was built; none is the owner's, and each is reviewable at the checkpoint.
 
 | ID | Date | Decision | Status | Affects |
 |---|---|---|---|---|
@@ -1519,7 +1592,7 @@ what was built; none is the owner's, and each is reviewable at the checkpoint.
 | D-002 | prior owner direction (10:155) | "Stolas first, then all 72 distinct spirits" | Accepted direction (carried from the pack) | D and later cohorts |
 | D-S1 | 23 October 2026 | Stolas's service is Star-reckoning: once a game day a pact, the holder at the perch recalls any pattern they observed, with their astrolabe's resonance, at its existing recall cost, under the shared `recall:<pattern>` claim, for 2,400 ticks; one recall path shared with a master's; non-masters may recall the Harvest Moon and Winter Crown as often as the quota allows (D-05) | Decided by the session under D-D2 (23 October 2026) | D-04, D-05 |
 | D-S2 | 23 October 2026 | The contrasting service is the workshop hand: its own worker definition, entity, lang and model (a variant of the shade's body); a Spirit Anchor bound to the holder's Courier Post; the post's exact requests within its hours, area and quota; beneficiaries the holder and party; unlocked by mastering Stolas's Regard; the porter's courier decision extracted and shared (D-08) | Decided by the session under D-D2 (23 October 2026) | D-08 |
-| D-S3 | 23 October 2026 | Strictness is Gentle: one offering in 7 game days from escrow (`#jugcraft:stolas_offerings`: three Styx flowers, amethyst shard), up to 4 prepaid, the first by the compact; looked at only with the perch loaded and the holder online, alive, in its level and within 64 blocks, never a stand-in; deadlines reschedule from the first look after an absence; warning, 1 game day of grace, suspension, resumption on paying; never ends by itself; E2 shown on Stolas's upkeep (D-02, D-05) | Decided by the session under D-D2 (23 October 2026) | D-02, D-05 |
+| D-S3 | 23 October 2026 | Strictness is Gentle: one offering in 7 game days from escrow (`#jugcraft:stolas_offerings`: three Styx flowers, amethyst shard), up to 4 prepaid, the first by the compact; looked at only with the perch loaded and the holder online, alive, in its level and within 64 blocks, never a stand-in; deadlines reschedule from the first look after an absence; warning, 1 game day of grace, suspension, resumption on paying; never ends by itself; E2 shown on Stolas's upkeep (D-02, D-05). Unit 2's unit review found two routes around it: a warned holder away over a minute at least every 20 minutes got the whole grace again at each return (D-P50 proposes the grace they had left instead); and suspending, recalling and resuming once a day moves the due date on by the time held, so the period counts only a few ticks of active time a day (left to the owner) | Decided by the session under D-D2 (23 October 2026) | D-02, D-05 |
 | D-S4 | 23 October 2026 | Gloam Ink is not part of Chunk D; it stays a separate small outcome. Research Notes never count as Stolas's evidence | Decided by the session under D-D2 (23 October 2026) | Deferrals |
 | D-S5 | 23 October 2026 | Stolas's body adapts the library's Flashjack rig into a raven-form runtime copy with authored clips; originals intact; provenance recorded; sounds are new `jugcraft:stolas.*` events through the generator, bound to runtime files, each with a subtitle; no voice. Appearance stays a checkpoint question (D-06) | Decided by the session under D-D2 (23 October 2026) | D-06 |
 | D-S6 | 23 October 2026 | Escrow and terms live in a world record; the perch is a place marker holding nothing; deposits are server-side actions; breaking or blowing up the perch never ends the pact ("without its perch"); ending returns the escrow once to the living holder, overflow at their feet; a bounded history of 8 departures in a separate saved record (D-02, D-04, D-05) | Decided by the session under D-D2 (23 October 2026) | D-02, D-04, D-05 |
@@ -1541,7 +1614,7 @@ what was built; none is the owner's, and each is reviewable at the checkpoint.
 | D-S22 | 23 October 2026 | #467's two-client harness is an unmerged fork contribution and is not imported; two-client checks are attempted only with what this branch has, otherwise recorded as not run (D-09) | Decided by the session under D-D2 (23 October 2026) | D-09 |
 | D-S23 | 23 October 2026 | An invalid or missing pact definition reports cleanly on reload, and sealed pacts keep the terms copied at sealing; a holder leaving a party or the perch's land changing hands never moves a pact to another player; both tested (D-04, D-05) | Decided by the session under D-D2 (23 October 2026) | D-04, D-05 |
 | D-P1 | 24 October 2026 | Pact data is `BoundWill.Pact`, an optional `pact` key, and the escrow an optional `escrow` key (an `ItemStack` list) of the same `jugcraft:bound_wills` entry, still version 1; there is no `jugcraft:pacts` (the ticket's `PactRecords`), so release removes a record and its escrow in one call. The departure history is `PactHistory` (`jugcraft:pact_history`, version 1, read holder by holder, 8 entries each). As built, the pact also keeps its service terms (`service`) and day's count (`window`, `done_today`) as optional keys (the review's correction 4), so a pact seated again keeps its terms and its day | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04, D-05, D-07 |
-| D-P2 | 24 October 2026 | Upkeep runs on game time, on the Spire's model. It is looked at only with the Concordance on and the holder present: online, alive, in the place's level, within `Pacts.REACH` = 64 blocks, never a stand-in. At most one period falls due a look. With none in escrow, a warning and the grace; the grace over, an `upkeep` hold; paying resumes the pact. After a gap of more than `ABSENT_TICKS` = 1,200 ticks without a look, a warned pact is warned again with the whole grace. The holder's own suspension pauses the clock: due date and grace move on by the time held. The last look is written at most every `WRITE_TICKS` = 200 ticks. As built (correction 3): paid, the next falls a period after the due date, or a period from now if that has passed; after an absence a passed due date becomes the moment of return; resumed from an upkeep hold by an offering, the next falls a whole period from then. Neither time away nor time held is charged | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-05 |
+| D-P2 | 24 October 2026 | Upkeep runs on game time, on the Spire's model. It is looked at only with the Concordance on and the holder present: online, alive, in the place's level, within `Pacts.REACH` = 64 blocks, never a stand-in. At most one period falls due a look. With none in escrow, a warning and the grace; the grace over, an `upkeep` hold; paying resumes the pact. After a gap of more than `ABSENT_TICKS` = 1,200 ticks without a look, a warned pact is warned again with the whole grace (amended by D-P50, proposed in unit 2's unit review: with the grace left, its end moved on by the time away). The holder's own suspension pauses the clock: due date and grace move on by the time held. The last look is written at most every `WRITE_TICKS` = 200 ticks. As built (correction 3): paid, the next falls a period after the due date, or a period from now if that has passed; after an absence a passed due date becomes the moment of return; resumed from an upkeep hold by an offering, the next falls a whole period from then. Neither time away nor time held is charged | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-05 |
 | D-P3 | 24 October 2026 | A record from before Chunk D is claimed only by the block whose agreement's own `dimension`, `x`, `y` and `z` are its place, and only while its spirit, if loaded, is seated there; a copy elsewhere never claims, whichever loads first (stricter than D-S9's "first claim wins"). A new seal or claim at a place still keeping an orphan record leaves that record without its place, its holder and escrow kept. As built, the claim also copies the block's service terms and day's count onto the record | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
 | D-P4 | 24 October 2026 | After the claim the block's `Agreement.suspended` is written false; the record's hold is the only authority. A downgrade is unsupported | Proposed (unit 1, reviewable at the checkpoint) | D-02 |
 | D-P5 | 24 October 2026 | `TAKEN` means the holder block already keeps terms, not that the ledger has some record at the place: safe with game-test structure clearing (flag 818 skips side effects) and with crash orphans | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
@@ -1563,7 +1636,7 @@ what was built; none is the owner's, and each is reviewable at the checkpoint.
 | D-P21 | 24 October 2026 | The journal's `pacts` section comes right after `logistics`, shown from the Binding Arts understood; D-07 adds the pacts kept | Proposed (unit 2, reviewable at the checkpoint) | D-03, D-07 |
 | D-P22 | 24 October 2026 | The `pact_service` practice gate's graph needs an observatory **and** a pact perch, under night and open sky (the gate's file ships with D-03; the perch joins its graph in D-04) | Proposed (unit 2, reviewable at the checkpoint) | D-03, D-04 |
 | D-P23 | 24 October 2026 | The terms revision counts the offer only. Every request names it, and a mismatch is answered `changed` with the terms again, nothing spent. A reload that changes the offer moves it; a perch being taken does not, so a second ACCEPT is `taken` (D-S8) | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
-| D-P24 | 24 October 2026 | A perch records its placer. It is placed only by a player in person (never a stand-in or a machine) where they may build (`Authority.mayChange`), never in Styx's home. An ownerless perch (a command or a structure) follows `maySeal`'s ownerless rule | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
+| D-P24 | 24 October 2026 | A perch records its placer. It is placed by hand only by a player in person (never a stand-in) where they may build (`Authority.mayChange`), never in Styx's home. As corrected by the unit review: a perch set without a placer (a blueprint stake, a drone build, a command or a structure) records no owner and seals and seats for nobody (`AgreementHolder`'s owner flag); the anchor keeps the ownerless legacy rule | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
 | D-P25 | 24 October 2026 | Breaking or blowing up a perch unseats its pact only with the Concordance on (`OnBreak.UNSEAT`). Switched off, the record keeps its vanished place (D-S16, D-P16) and is "stranded" (`AgreementHolder.stranded`: no place, its level gone, or its place loaded and keeping other terms or none), so it can be seated again; one whose old place stays unloaded cannot be seated until it loads, though it can be ended | Proposed (unit 2, reviewable at the checkpoint) | D-04, D-05 |
 | D-P26 | 24 October 2026 | A player with infinite materials (creative) pays no compact, as vanilla's crafting does; spending is shown with `TestPlayers.survivor` | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
 | D-P27 | 24 October 2026 | Conversations are one a player, bound to the open menu, ended after 6,000 ticks without a request, memory only; forgotten when the player leaves the player list, on disconnect and at server stop (the review's correction 9). One visitor a perch, who comes only for an invitable owner and waits while any conversation at that perch is live, the owner's or another's | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
@@ -1571,7 +1644,7 @@ what was built; none is the owner's, and each is reviewable at the checkpoint.
 | D-P29 | 24 October 2026 | Pact definitions are a new Concordance data kind, `pact` (`PactCatalog` on `ConcordanceRules`, read by the strict `PactParser`, schema 1). An invalid file is refused with a reason; a missing required definition is reported, except by empty rules | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
 | D-P30 | 24 October 2026 | `#jugcraft:stolas_offerings` ships with the definition (D-04); D-05's upkeep consumes it | Proposed (unit 2, reviewable at the checkpoint) | D-04, D-05 |
 | D-P31 | 24 October 2026 | "Styx's protected district" is `StyxConservatory.covers`: the conservatory's footprint for any layout, plus a town-built home's district and road | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
-| D-P32 | 24 October 2026 | The perch's recipe uses polished deepslate, not a slab, so the progression graph can follow it (simulated: a slab gave 3 problems; as a mutation, 9 reports) | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
+| D-P32 | 24 October 2026 | The perch's recipe uses polished deepslate, not a slab, so the progression graph can follow it (simulated: a slab gave 3 problems; as a mutation, 12 reports) | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
 | D-P33 | 24 October 2026 | One state shape: four modes (negotiate, keep, seat, closed); terms as (key, value) rows; pattern and offering choices whose ids the server keeps; the compact's stacks; `Result(sequence, reason, done, message)`. CHOOSE is answered with the state and no result | Proposed (unit 2, reviewable at the checkpoint) | D-04, D-05 |
 | D-P34 | 24 October 2026 | ACCEPT is offered only when nothing is missing; a forced ACCEPT is still answered with its reason, spending nothing | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
 | D-P35 | 24 October 2026 | CHOOSE has its own rate-gate key (`pact_choose`), so hearing the terms never blocks the next press; opening the perch has `pact_open` and every other action `pact` | Proposed (unit 2, reviewable at the checkpoint) | D-04 |
@@ -1589,12 +1662,15 @@ what was built; none is the owner's, and each is reviewable at the checkpoint.
 | D-P47 | 24 October 2026 | Deposits are by kind, in slot order, through `AgreementHolder.deposit` (its holder, near, switched on; up to the cap) | Proposed (unit 2, reviewable at the checkpoint) | D-04, D-05 |
 | D-P48 | 24 October 2026 | The departure line names who left, why, and how many offerings came back | Proposed (unit 2, reviewable at the checkpoint) | D-04, D-05 |
 | D-P49 | 24 October 2026 | Economy: Star-reckoning is a sink (`astral_resonance` → `recalled_attunement`, modelled at the cheapest recall) and Stolas's offerings are a sink of at most 1/7 of an offering a day a pact; the gaining cycles stay none. Ending and sealing anew could give a second Star-reckoning in a game day only for a whole new compact: no positive-gain loop (the review's correction 10) | Proposed (unit 2, reviewable at the checkpoint) | D-05 |
+| D-P50 | 24 October 2026 | Amends D-S3: a holder warned before an absence is warned again on return with the grace they had left, its end moved on by the time away (`Pacts.due`: `graceUntil` becomes the old end plus `now - lookedAt`), never a whole new grace; a first warning after an absence still gives the whole grace. Time away is never charged. It changes unit 1's `Pacts.due`, so the unit 1 merge carries it. Tested by `shortAbsencesNeverRenewTheGrace`; `aReturnAfterAbsenceGetsTheFullGrace` holds exactly. The second route (suspend, recall, resume once a day) is left to the owner | Proposed (unit 2's unit review, reviewable at the checkpoint) | D-02, D-05 |
 
 **The checkpoint's three questions** (09:174; at most three, 09:18):
 1. Stolas's personality and appearance: the Flashjack-derived raven, his three dialogue beats and two memorable details
    (03:168, 03:174).
 2. How strict pacts should feel after play: the period, the grace, the offering, and whether a pact should ever end
-   after missed offerings.
+   after missed offerings; and the two routes around upkeep the unit review found: leaving for over a minute at least
+   every 20 minutes renewed the grace (closed by D-P50, if accepted), and suspending, recalling and resuming once a day
+   leaves the period counting only a few ticks of active time a day (open).
 3. Which six-spirit cohort follows, from the twelve of 03:165.
 
 The session's decisions are listed for review beside them in the checkpoint's technical handoff, not as further
@@ -1603,8 +1679,9 @@ questions.
 ## Where to resume
 
 Unit 1 (D-01, D-02) is built on the local `wip/chunk-d` (four commits on `a8c7cd770`: `56a74f4be`, `7477efbcd`,
-`fa5360d0d` and the records' commit), and unit 2 (D-03, D-04, D-05) on the local `wip/chunk-d-u2` (five commits on
-`97e1facd4`: `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7` and the records' commit); neither was pushed when these
+`fa5360d0d` and the records' commit), and unit 2 (D-03, D-04, D-05) on the local `wip/chunk-d-u2` (six commits on
+`97e1facd4`: `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records' commit `8f0635d9e` and the unit
+review's fixes); neither was pushed when these
 notes were written, and nothing of either has run in CI. Before more work:
 1. Push to `claude/chunk-d-pact-hall` and run the Build workflow by workflow_dispatch with every client class (CI is
    the units' first compile); fix what fails and record each failure and fix in the ticket's As built notes, the units

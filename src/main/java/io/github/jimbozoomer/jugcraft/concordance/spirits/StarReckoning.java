@@ -108,14 +108,15 @@ public final class StarReckoning {
 	 * observation by {@code player}: if their pact with Stolas is active and the Concordance on, it records the practice
 	 * jugcraft:pact_service keyed by its counterpart, which masters Stolas's Regard. Once a player: never again after the
 	 * key is recorded or the entry mastered, so the Conclave hears it once. Another's observation, or one while the pact is
-	 * suspended or without its perch, keeps nothing.
+	 * suspended or without its perch (unseated, or stranded: its perch broken while the Concordance was off), keeps nothing.
 	 */
 	public static void observed(ServerPlayer player) {
 		if (!Workers.enabled() || Authority.isStandIn(player) || kept(player)) {
 			return;
 		}
-		BoundWill record = Pacts.pactWith(BoundWills.of(player.level().getServer()).ledger(), player.getUUID(), StolasEntity.COUNTERPART);
-		if (record == null || !Pacts.serving(record)) {
+		MinecraftServer server = player.level().getServer();
+		BoundWill record = Pacts.pactWith(BoundWills.of(server).ledger(), player.getUUID(), StolasEntity.COUNTERPART);
+		if (record == null || !Pacts.serving(record) || AgreementHolder.stranded(server, record)) {
 			return;
 		}
 		ResearchEngine.Result result = ConcordanceProgress.record(player, new Evidence.Practiced(StolasRegard.ACTIVITY, Pacts.counterpart(record.counterpart())));

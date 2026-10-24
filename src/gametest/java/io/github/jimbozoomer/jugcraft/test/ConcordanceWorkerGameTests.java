@@ -844,6 +844,50 @@ public class ConcordanceWorkerGameTests {
 	}
 
 	/**
+	 * D-05 (D-S3, as the unit review proposes): leaving for a minute never renews a warning. Warned, then away beyond 64
+	 * blocks for 61 seconds after every 1,000 ticks present, the holder is warned again at each return with the grace they
+	 * had left, its end moved on by the time away (never charged); after one game day present the pact is suspended.
+	 */
+	@GameTest(maxTicks = 20)
+	public void shortAbsencesNeverRenewTheGrace(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = regarded(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		long s0 = level.getGameTime() + 1_000_000L;
+		PactPerchBlockEntity perch = stolasPact(helper, keeper, at, s0);
+		helper.assertTrue(stay(level, perch.holder(), s0 + 1_000L, s0 + PERIOD_7 - 1_000L).isEmpty(), "Nothing falls due before its week");
+		long now = s0 + PERIOD_7;
+		helper.assertValueEqual(perch.holder().look(level, now), Pacts.Event.WARNED, "Due with none paid ahead: a warning and a day of grace");
+		Vec3 far = helper.absoluteVec(new Vec3(at.getX() + 70.5, at.getY(), at.getZ() + 0.5));
+		long present = 0L;
+		int returns = 0;
+		Pacts.Event seen = Pacts.Event.NONE;
+		while (seen == Pacts.Event.NONE && present < 2 * Pacts.DAY) {
+			for (int look = 0; look < 5 && seen == Pacts.Event.NONE; look++) {
+				now += 200L;
+				present += 200L;
+				seen = perch.holder().look(level, now);
+			}
+			if (seen != Pacts.Event.NONE) {
+				break;
+			}
+			keeper.snapTo(far.x, far.y, far.z, 0.0F, 0.0F);
+			helper.assertValueEqual(perch.holder().look(level, now + 600L), Pacts.Event.NONE, "Away beyond 64 blocks, nothing is looked at");
+			now += 1_220L;
+			beside(helper, keeper, at);
+			BoundWill.Upkeep before = pactOf(level, perch).pact().upkeep();
+			helper.assertValueEqual(perch.holder().look(level, now), Pacts.Event.WARNED, "Back after 61 seconds, warned again");
+			helper.assertValueEqual(pactOf(level, perch).pact().upkeep().graceUntil(), before.graceUntil() + (now - before.lookedAt()),
+					"with the grace they had left, its end moved on by the time away");
+			returns++;
+		}
+		helper.assertTrue(seen == Pacts.Event.SUSPENDED && present == Pacts.DAY && returns == 23
+				&& pactOf(level, perch).pact().hold() == BoundWill.Hold.UPKEEP,
+				"After one game day present the pact is suspended for upkeep: " + seen + " after " + present + " ticks present and " + returns + " returns");
+		helper.succeed();
+	}
+
+	/**
 	 * D-02 (E2, critique 2b): logged out, online beyond 64 blocks, in another dimension, or away while the server lets
 	 * stand-ins answer for absent owners, nothing is looked at; back, at most one period falls due, and a due date that
 	 * passed while nobody looked becomes the moment of return (critique 3): no debt. With no ticker in unit 1, "unloaded" is
@@ -1758,7 +1802,12 @@ public class ConcordanceWorkerGameTests {
 		helper.succeed();
 	}
 
-	/** D-04 (D-S8, E5; the revision counts the offer): two conversations at one ownerless perch share one visitor; the first acceptance seals; the second, on the same unchanged terms, is taken and spends nothing. */
+	/**
+	 * D-04 (D-S8, E5): two conversations at one perch share one visitor; its owner's acceptance seals, and the other player,
+	 * not its owner, is not permitted and spends nothing (a second acceptance by a permitted player is TAKEN:
+	 * acceptingSealsOnceAndSpendsOnce). A perch no player placed (set by a machine or a command) seals for nobody: Stolas
+	 * does not come and accepting is not permitted (the unit review).
+	 */
 	@GameTest(maxTicks = 20)
 	public void twoNegotiationsAtOnePerchSealOnce(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -1767,24 +1816,37 @@ public class ConcordanceWorkerGameTests {
 		pocket(first, 1, AstrolabeItem.CAPACITY);
 		pocket(second, 1, AstrolabeItem.CAPACITY);
 		BlockPos at = new BlockPos(3, 1, 3);
-		PactPerchBlockEntity perch = perch(helper, at, null);
+		PactPerchBlockEntity perch = perch(helper, at, first);
 		beside(helper, first, at);
 		beside(helper, second, at);
 		PactMenu one = open(helper, first, perch);
 		PactMenu two = open(helper, second, perch);
-		helper.assertTrue(stolases(helper).size() == 1 && perch.visitor() != null, "Two conversations at one perch: one visitor");
-		helper.assertTrue(answered(send(first, one, PactRequestPayload.ACCEPT, 0), PactMenu.SEALED), "The first accepts: sealed");
+		helper.assertTrue(stolases(helper).size() == 1 && perch.visitor() != null && keys(two.lastSent().notes()).contains(PACT_KEY + "missing.owner"),
+				"Two conversations at one perch: one visitor, and the player who is not its owner told so");
+		helper.assertTrue(answered(send(first, one, PactRequestPayload.ACCEPT, 0), PactMenu.SEALED), "Its owner accepts: sealed");
 		PactStatePayload late = send(second, two, PactRequestPayload.ACCEPT, 0);
-		helper.assertTrue(answered(late, Pacts.Outcome.TAKEN.id) && said(late).equals("message.jugcraft.concordance.workers.seal_taken")
-				&& late.mode() == PactStatePayload.CLOSED && keys(late.notes()).contains(PACT_KEY + "reading.taken"), "The second is refused as taken, and shown so");
+		helper.assertTrue(answered(late, Pacts.Outcome.NOT_PERMITTED.id) && said(late).equals("message.jugcraft.concordance.workers.seal_not_permitted"),
+				"The other player is not permitted");
 		helper.assertTrue(pocketed(second, 1) && resonance(second) == AstrolabeItem.CAPACITY
 				&& BoundWills.of(level.getServer()).ledger().heldBy(second.getUUID()).isEmpty() && pocketed(first, 0)
-				&& recordOf(level, first) != null && stolases(helper).size() == 1, "Only the first spent and holds; one Stolas");
+				&& recordOf(level, first) != null && stolases(helper).size() == 1, "Only the owner spent and holds; one Stolas");
+		BlockPos built = new BlockPos(6, 1, 6);
+		PactPerchBlockEntity unowned = perch(helper, built, null);
+		beside(helper, second, built);
+		PactMenu three = open(helper, second, unowned);
+		helper.assertTrue(unowned.holder().owner() == null && unowned.visitor() == null && stolases(helper).size() == 1
+				&& keys(three.lastSent().notes()).contains(PACT_KEY + "missing.owner") && !three.lastSent().offers(PactRequestPayload.ACCEPT),
+				"At a perch no player placed, Stolas does not come");
+		PactStatePayload refused = send(second, three, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(answered(refused, Pacts.Outcome.NOT_PERMITTED.id) && pocketed(second, 1) && resonance(second) == AstrolabeItem.CAPACITY
+				&& unowned.holder().agreement() == null && BoundWills.of(level.getServer()).ledger().heldBy(second.getUUID()).isEmpty(),
+				"and it seals for nobody, spending nothing");
+		second.closeContainer();
 		helper.assertTrue(BoundWills.of(level.getServer()).problems().isEmpty(), "no place keeps two");
 		helper.succeed();
 	}
 
-	/** D-04 (D-S7, D-S9): a visitor with no pact leaves when its conversation ends: declined, closed, timed out, its player gone, or after a restart (no session or visitor is saved). Nothing is recorded or noted. */
+	/** D-04 (D-S7, D-S9): a visitor with no pact leaves when its conversation ends: declined, closed, timed out, its player gone, or after a restart (no session is saved; a visitor saved with his chunk is no perch's visitor when he loads, and leaves, with the Concordance on or off). Nothing is recorded or noted. */
 	@GameTest(maxTicks = 20)
 	public void aVisitingStolasLeavesWithoutARecord(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -1824,6 +1886,10 @@ public class ConcordanceWorkerGameTests {
 		reloaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
 		helper.assertTrue(saved.perch().visitor() == null && reloaded.think(level, 0L, now) == Status.FINISHED && reloaded.isRemoved()
 				&& saved.visitor().think(level, 0L, now) == Status.FINISHED, "After a restart the perch knows no visitor, and he leaves");
+		StolasEntity loadedOff = Workers.STOLAS.create(level, EntitySpawnReason.LOAD);
+		loadedOff.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), body));
+		off(() -> helper.assertTrue(loadedOff.think(level, 0L, now) == Status.FINISHED && loadedOff.isRemoved(),
+				"Loaded while the Concordance is off, a visitor leaves all the same"));
 		for (Visit each : List.of(declined, closed, idle, gone, saved)) {
 			helper.assertTrue(BoundWills.of(level.getServer()).ledger().heldBy(each.player().getUUID()).isEmpty()
 					&& WorkerRoster.of(level.getServer()).workers(each.player().getUUID()).isEmpty() && each.perch().holder().agreement() == null, "Nothing recorded or noted");
@@ -1927,7 +1993,8 @@ public class ConcordanceWorkerGameTests {
 	/**
 	 * D-04 (D-S14): the pact screen's two messages are bounded both ways. A state's lists are cut to their limits (an empty
 	 * stack dropped) before anything is sent, and it reads back as written; a request is its five numbers and nothing more;
-	 * a term's key past its bound cannot be encoded, so it is never sent.
+	 * a term's key past its bound cannot be encoded, so it is never sent; a choice's id, which data names, encodes at any
+	 * length data may give it (the unit review: a long offering id never drops its player).
 	 */
 	@GameTest(maxTicks = 20)
 	public void thePactScreensMessagesAreBounded(GameTestHelper helper) {
@@ -1971,12 +2038,19 @@ public class ConcordanceWorkerGameTests {
 			refused = true;
 		}
 		helper.assertTrue(refused, "A key past its bound cannot be encoded, so it is never sent");
+		PactStatePayload.Choice longId = new PactStatePayload.Choice("jugcraft:" + "o".repeat(200), Component.literal("a long offering"), 3, true);
+		RegistryFriendlyByteBuf wide = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
+		PactStatePayload.CODEC.encode(wide, new PactStatePayload(7, 3, PactStatePayload.KEEP, Component.literal("Stolas"), List.of(), List.of(),
+				List.of(), List.of(longId), List.of(longId), List.of(), 0, 0, Optional.empty()));
+		PactStatePayload read = PactStatePayload.CODEC.decode(wide);
+		helper.assertTrue(read.patterns().equals(List.of(longId)) && read.offerings().equals(List.of(longId)) && wide.readableBytes() == 0,
+				"A choice's id longer than a key, as data may name one, is sent and read back");
 		helper.succeed();
 	}
 
 	// ---------------------------------------------------------------- Concordance Chunk D, D-05: Star-reckoning, the first obligation and keeping
 
-	/** D-05 (D-S12): an observation at an observatory while the pact is active keeps its first obligation: pact_service, once, which masters Stolas's Regard; nothing before a pact, while it is suspended, again, or for a second pact. */
+	/** D-05 (D-S12): an observation at an observatory while the pact is active keeps its first obligation: pact_service, once, which masters Stolas's Regard; nothing before a pact, while it is suspended, while its perch, broken with the Concordance off, keeps nothing of it, again, or for a second pact. */
 	@GameTest(maxTicks = 20)
 	public void theObligationMastersTheEntryOnce(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
@@ -1990,6 +2064,16 @@ public class ConcordanceWorkerGameTests {
 		helper.assertTrue(observatory.observe(keeper, level, NIGHT_ZERO, g0 + 20, ONLY_MOON) == 1 && regard(keeper) == ResearchState.UNDERSTOOD && served(keeper) == 0,
 				"Suspended, an observation keeps nothing");
 		helper.assertValueEqual(PactKeeping.resume(level, keeper, perch.holder(), g0 + 40), AgreementHolder.Toggle.RESUMED, "and resumes it");
+		UUID pact = perch.holder().agreement().record();
+		off(() -> helper.setBlock(new BlockPos(3, 1, 3), Blocks.AIR));
+		BoundWill left = BoundWills.of(level.getServer()).ledger().get(pact);
+		helper.assertTrue(Pacts.serving(left) && AgreementHolder.stranded(level.getServer(), left),
+				"Broken while switched off, its record still names the vanished place, which keeps nothing of it");
+		helper.assertTrue(observatory.observe(keeper, level, NIGHT_ZERO, g0 + 50, ONLY_MOON) == 1 && regard(keeper) == ResearchState.UNDERSTOOD && served(keeper) == 0,
+				"Its perch broken while the Concordance was off, the pact keeps nothing there: an observation keeps nothing");
+		PactPerchBlockEntity seated = perch(helper, new BlockPos(6, 1, 3), keeper);
+		beside(helper, keeper, new BlockPos(6, 1, 3));
+		helper.assertValueEqual(seated.holder().seat(level, keeper, StolasEntity.COUNTERPART, g0 + 55), AgreementHolder.Seat.SEATED, "Seated at a new perch");
 		helper.assertTrue(observatory.observe(keeper, level, NIGHT_ZERO, g0 + 60, ONLY_MOON) == 1 && regard(keeper) == ResearchState.MASTERED && served(keeper) == 1,
 				"Active, the observation keeps the first obligation: Stolas's Regard is mastered");
 		helper.assertTrue(ConcordanceProgress.knowledge(keeper).progress(StolasRegard.RESEARCH).evidence().containsKey(StarReckoning.OBLIGATION_KEY)
@@ -1997,7 +2081,7 @@ public class ConcordanceWorkerGameTests {
 				"recorded as the practice jugcraft:pact_service of jugcraft:stolas, with its advancement");
 		helper.assertTrue(observatory.observe(keeper, level, NIGHT_ZERO + 8 * Pacts.DAY, g0 + 80, ONLY_MOON) == 1 && served(keeper) == 1,
 				"A second observation records nothing more: the Conclave hears it once");
-		helper.assertValueEqual(perch.holder().end(level, keeper, g0 + 100), AgreementHolder.Ended.ENDED, "Ended");
+		helper.assertValueEqual(seated.holder().end(level, keeper, g0 + 100), AgreementHolder.Ended.ENDED, "Ended");
 		stolasPact(helper, keeper, new BlockPos(5, 1, 5), g0 + 120);
 		helper.assertTrue(observatory.observe(keeper, level, NIGHT_ZERO, g0 + 140, ONLY_MOON) == 1 && served(keeper) == 1, "nor for a second pact");
 		helper.succeed();

@@ -34,7 +34,7 @@ public class PactPerchBlockEntity extends BlockEntity implements AgreementHolder
 	/** How often the perch looks at its pact: once a second, spread by position (tools/concordance_pacts.py SESSION). */
 	public static final int LOOK_TICKS = 20;
 
-	private final AgreementHolder holder = new AgreementHolder(this, AgreementHolder.OnBreak.UNSEAT);
+	private final AgreementHolder holder = new AgreementHolder(this, AgreementHolder.OnBreak.UNSEAT, true);
 	private @Nullable UUID visitor;
 
 	public PactPerchBlockEntity(BlockPos pos, BlockState state) {

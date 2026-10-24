@@ -162,18 +162,25 @@ public final class AgreementHolder {
 	private final BlockEntity block;
 	private final Holds holds;
 	private final OnBreak onBreak;
+	private final boolean ownerRequired;
 	private @Nullable UUID owner;
 	private @Nullable Agreement agreement;
 	private @Nullable UUID spirit;
 
 	public <B extends BlockEntity & Holds> AgreementHolder(B block) {
-		this(block, OnBreak.RELEASE);
+		this(block, OnBreak.RELEASE, false);
 	}
 
-	public <B extends BlockEntity & Holds> AgreementHolder(B block, OnBreak onBreak) {
+	/**
+	 * A holder for {@code block}: {@code onBreak} says what breaking it does; with {@code ownerRequired}, a block that records
+	 * no owner seals and seats for nobody (D-04's perch, placed only by a player in person: one a machine set, by a blueprint
+	 * stake or a drone, records nobody; the unit review), where the anchor keeps the ownerless legacy rule (D-S8).
+	 */
+	public <B extends BlockEntity & Holds> AgreementHolder(B block, OnBreak onBreak, boolean ownerRequired) {
 		this.block = block;
 		this.holds = block;
 		this.onBreak = onBreak;
+		this.ownerRequired = ownerRequired;
 	}
 
 	public @Nullable UUID owner() {
@@ -228,14 +235,18 @@ public final class AgreementHolder {
 	/**
 	 * Whether {@code player} may seal here (D-S8): never a stand-in, whoever's identity it carries; only where they could
 	 * change the block (Authority.mayChange: the world, spawn protection, towns, claims); and only its owner, or their party
-	 * where {@code partySeals} (the Courier Post's rule, CourierPostBlockEntity.mayUse), unless it records no owner (placed
-	 * before Chunk D).
+	 * where {@code partySeals} (the Courier Post's rule, CourierPostBlockEntity.mayUse). A block that records no owner lets
+	 * anyone who may change it seal (an anchor placed before Chunk D), unless this holder requires an owner (the perch: then
+	 * nobody). Seating asks the same.
 	 */
 	public boolean maySeal(ServerLevel level, ServerPlayer player, boolean partySeals) {
 		if (Authority.isStandIn(player) || !Authority.mayChange(level, player, block.getBlockPos())) {
 			return false;
 		}
-		return owner == null || owner.equals(player.getUUID()) || partySeals && JugcraftParties.sameParty(owner, player.getUUID());
+		if (owner == null) {
+			return !ownerRequired;
+		}
+		return owner.equals(player.getUUID()) || partySeals && JugcraftParties.sameParty(owner, player.getUUID());
 	}
 
 	/**

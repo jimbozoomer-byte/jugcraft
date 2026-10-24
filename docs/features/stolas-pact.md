@@ -12,7 +12,7 @@ of the Ars Goetia who teaches the stars, gives its holder a chosen recall of a s
 Builds on [spirits, familiars and constructs](arcane-concordance-workers.md) (the shared agreement holder, the Bound
 Will's pact and escrow from unit 1), [celestial cycles](arcane-concordance-celestial.md) (observations, the astrolabe
 and its recall) and [Styxhexenhammer](styxhexenhammer.md). Session decisions D-S1 to D-S23 and this unit's proposals
-D-P17 to D-P49 are in the [contract](concordance-chunk-d.md#decisions); none is the owner's.
+D-P17 to D-P50 are in the [contract](concordance-chunk-d.md#decisions); none is the owner's.
 
 ## Player experience
 
@@ -85,17 +85,31 @@ of cuttings are unchanged.
     taken or lost; an offering resumes it;
   - looked at only while the perch is loaded and its holder is online, alive, in its level and within 64 blocks, never
     through a stand-in; time away, unloaded or switched off is never owed;
+  - after an absence (over 1,200 ticks without a look) the holder is warned again: a first warning gives the whole
+    grace, and one given before the absence gives the grace they had left, its end moved on by the time away (D-P50,
+    the unit review's proposal amending D-S3);
+  - two routes around it, found by the unit review (checkpoint question 2): before D-P50, a warned holder away for over
+    a minute at least every 20 minutes got the whole grace again at each return and was never suspended, while
+    Star-reckoning kept serving (closed by D-P50); and suspending, recalling and resuming once a day moves the due date
+    on by the time held, so the 7-day period counts only a few ticks of active time a day (open, left to the owner);
   - a pact never ends by itself.
 - **Star-reckoning:** the pattern's own recall cost (6 to 16 resonance), 1 a game day a pact, within 8 blocks of the
   perch at any hour, for patterns the holder observed; one recall an occurrence of each pattern, shared with a master's
   recall under the same `recall:<pattern>` claim. The effect lasts 2,400 ticks whatever the sky or the season.
 - **Balance, stated plainly (a checkpoint question):**
-  - a holder who is not a master and once observed the Harvest Moon may recall it (Hero of the Village) any game day,
-    and the Winter Crown (Fire Resistance) every other day, outside their event and season;
-  - resonance bounds it: an observatory gathers about 2.09 a day from the four year-round patterns (3.59 in winter, with
-    the Winter Crown), so about one Harvest Moon recall (12) every 5.7 days, or every 3.3 days in winter, if every
-    pattern is seen; an astrolabe holds 32;
-  - a master holding the pact gains no second recall of an occurrence: both routes claim the same key;
+  - a holder who is not a master and once observed the Harvest Moon may recall it (Hero of the Village, with its
+    villager trade discounts) any game day, and the Winter Crown (Fire Resistance) every other day, outside their event
+    and season;
+  - the once-a-day quota is the only hard limit. Resonance does not bound it: Star-reckoning pays from any carried
+    astrolabe that holds enough (`PactCompact.astrolabe`), claims are each keeper's own
+    (`ObservatoryBlockEntity`), and astrolabes can be stockpiled, handed over or filled at a keeper's observatory by
+    their party, so stockpiled or traded astrolabes allow a recall every day;
+  - one keeper's averages, for a player relying on their own observatory alone: it gathers about 2.09 resonance a day
+    from the four year-round patterns, 3.59 with the Winter Crown (in winter, or all year with seasons off, when the
+    Winter Crown can be observed in any season), so about one Harvest Moon recall (12) every 5.7 days, or every 3.3
+    days with the Winter Crown, if every pattern is seen; an astrolabe holds 32;
+  - a master holding the pact gains no second recall of an occurrence (both routes claim the same key), but gains a
+    free choice of any pattern they observed, where a master's own recall takes only the last one;
   - ending a pact and sealing a new one could give a second Star-reckoning in the same game day, but only for a whole
     new compact (its materials and resonance) each time: no positive-gain loop (review correction 10).
 - **Economy (D-P49):** Star-reckoning is a sink (`astral_resonance` → `recalled_attunement`, no way out), modelled at
@@ -113,7 +127,15 @@ of cuttings are unchanged.
   - only the perch's owner, in person, may accept there (never their party, never a stand-in);
   - only the pact's holder, in person, may reckon, pay, suspend, resume, end or seat it;
   - a stand-in never answers for upkeep, and pays, reckons, ends and suspends nothing for its player.
-- One pact with Stolas a holder; a second acceptance at one perch is refused as taken and spends nothing.
+- One pact with Stolas a holder; a second acceptance at one perch is refused as taken and spends nothing, and a
+  player who is not the perch's owner is refused as not permitted. A perch set by a machine (a blueprint stake or a
+  drone build, which never ask the placement rules) records no owner and seals and seats for nobody (D-P24, as
+  corrected by the unit review); break it and place it by hand. Its screen says only its owner may invite Stolas.
+- Decline closes the screen in the same call, so its answer is shown on the action bar (which the narrator reads), not
+  as a state for a screen that has closed (the unit review).
+- A definition whose work serves its holder alone (Star-reckoning) must name `"personal"` beneficiaries; `"party"` is
+  refused with a reason (`PactParser.HOLDER_ONLY`, the unit review), so the screen never promises a party a service
+  that serves only its holder.
 - A stale terms revision is answered "changed" with the terms again, and nothing is spent (D-P23). Every refusal
   names its reason; Accept is offered only when nothing stands in the way, and a forced Accept is still answered with
   its reason (D-P34).
@@ -131,14 +153,18 @@ of cuttings are unchanged.
 - **Conversations** live in memory only: one a player, bound to the open screen, ending after 6,000 ticks without a
   request, when the screen closes or when the player leaves (cleared on leaving the player list and on disconnect;
   D-P27). A visiting Stolas waits while any conversation at his perch is live, the owner's or anyone else's, and leaves
-  when none is (review correction 9).
+  when none is (review correction 9), with the Concordance on or off (the unit review).
+- **The first obligation** is kept only while the pact is active and kept at its perch: not while it is suspended, held,
+  without its perch, or stranded at a perch broken while the Concordance was off (the unit review).
 - **Switched off** (`concordance.enabled=false`): every clock waits; nothing is reckoned, paid, ended or seated, and the
   screen says the Concordance is off. Records, escrow and registrations are untouched.
 - **Saves:**
   - the perch's block entity: `owner`, `agreement` (the terms as sealed there) and `spirit` (its presence), stamped
     version 1; no items, and no visitor;
-  - Stolas: `perch` and `record`, with `WorkerEntity`'s stamp;
-  - the Bound Will's pact and escrow, and the history: unit 1's keys, no new key;
+  - Stolas: `perch` and `record`, with `WorkerEntity`'s stamp. A visiting Stolas is written with his chunk too, with
+    `perch` only; he is no perch's visitor when he loads, and leaves at his first think, with the Concordance on or off;
+  - the Bound Will's pact and escrow, and the history: unit 1's keys, no new key; a pact without its perch is saved with
+    no `place` and no `presence` (both optional);
   - recall claims: `recall:<pattern>` on the player's astral ledger, the format unchanged, so a master's recalls before
     and after D-05 share one ledger;
   - conversations: memory only;
@@ -200,7 +226,7 @@ Flashjack rig, copied byte for byte under his name by `tools/owner_art.py` from 
 
 Each entry is what actually ran. No server or client game test of this feature has run: CI is their first run.
 
-- **Server game tests (45 new, none yet run in CI):**
+- **Server game tests (46 new, none yet run in CI):**
   - D-03 (9): `StyxGameTests` `styxHintsByTheListenersOwnProgress`, `talkingGrantsNoResearch`,
     `styxNamesTheSkyStepUntilOneIsRecorded`; `ConcordanceSharingGameTests.notesNeverStandInForStolasEvidence`;
     `ConcordanceProgressionGameTests.stolasRegardIsReachable`; `ConcordanceSkyGameTests`
@@ -215,12 +241,13 @@ Each entry is what actually ran. No server or client game test of this feature h
     `ConcordanceAuthorityGameTests.aPerchIsPlacedOnlyWhereItsPlacerMayBuild`;
     `ConcordanceResourceGameTests.thePactDefinitionParsesStrictly`. Extended: `blockEntitiesStampTheirVersion` (the
     perch) and `aChangeOfOwnerMovesNoPact` (a perch whose land changes hands).
-  - D-05 (19): `ConcordanceSkyGameTests` `stolasRecallsAnObservedPatternOncePerOccurrence`,
+  - D-05 (20): `ConcordanceSkyGameTests` `stolasRecallsAnObservedPatternOncePerOccurrence`,
     `aMastersRecallAndStolassShareOneClaim`, `aChangedClockGivesNoSecondRecall`, `theHarvestMoonRecallsOutsideItsEvent`,
     `anUnobservedPatternIsRefused`; `ConcordanceWorkerGameTests` `theObligationMastersTheEntryOnce`,
     `aSuspendedPactRecallsNothing`, `theQuotaAndTheAreaRefuseWithReasons`, `aStandInNeverAnswersForUpkeep`,
     `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`,
-    `aPactIsSeatedAgainAtANewPerch`, `aLostPresenceIsCalledBackAndEndsNothing`; `ConcordanceSharingGameTests`
+    `aPactIsSeatedAgainAtANewPerch`, `aLostPresenceIsCalledBackAndEndsNothing`, and the unit review's
+    `shortAbsencesNeverRenewTheGrace`; `ConcordanceSharingGameTests`
     `aCopiedPerchRecallsNothing`, `anotherPlayerCannotUseTheHoldersService`; `ConcordancePersistenceGameTests`
     `thePactAndItsEscrowSurviveARestart`, `aRestartWhileSuspendedStaysSuspended`;
     `ConcordanceResourceGameTests.theServiceRulesKeepTheirShape`. Extended: unit 1's
@@ -228,6 +255,11 @@ Each entry is what actually ran. No server or client game test of this feature h
     `absentAndUnloadedTimeIsNeverOwed` and `theConcordanceOffHoldsEveryClock`, each now shown on Stolas's own pact too,
     and `aChangeOfOwnerMovesNoPact` (the perch's new owner is not served).
   - Spending is shown with `TestPlayers.survivor`; vanilla's mock players are creative and pay nothing (D-P26).
+  - Changed by the unit review: `twoNegotiationsAtOnePerchSealOnce` (the other player is not permitted; a perch no
+    player placed seals for nobody), `theObligationMastersTheEntryOnce` (a stranded pact keeps nothing),
+    `aVisitingStolasLeavesWithoutARecord` (a visitor loaded while switched off leaves), `thePactScreensMessagesAreBounded`
+    (a 209-character choice id is sent and read back) and `thePactDefinitionParsesStrictly` (`"party"` for
+    Star-reckoning is refused).
 - **Client game test (not yet run):** `ConcordancePactClientGameTests`, twelve shots: the conversation, the terms at
   three sizes, acceptance refused (`cannot_afford`) and then sealed by keyboard, Stolas on his perch, a recall and an
   offering, the end's confirmation and the ended pact. One client on the game's dedicated server; no two-client
@@ -238,7 +270,8 @@ Each entry is what actually ran. No server or client game test of this feature h
   and recall costs against the data), `check_geckolib` (his model by face), `AUTHORITY_ROUTES` (Star-reckoning),
   `concordance_journey --check`, `owner_art --check` and the icon maps.
 - **Audit mutations** (run in place on scratch edits and restored, per code commit): D-03's 18, D-04's 26, the client
-  commit's 17 and D-05's 19 were each reported, and each commit's unchanged tree reported nothing.
+  commit's 17 and D-05's 19 were each reported, and each commit's unchanged tree reported nothing. The unit review's
+  are listed in the [contract](concordance-chunk-d.md#d-05-star-reckoning-the-obligation-upkeep-renew-suspend-and-end-unit-2).
 - **Design-pass simulations** (scratch copies, before the build): the progression graph with the perch had 0 problems;
   a slab in the perch's recipe gave 3 (hence polished deepslate, D-P32); the journey's fifth step was reached; the
   perch's icon map had no errors.
@@ -249,7 +282,8 @@ Each entry is what actually ran. No server or client game test of this feature h
 
 - The perch is placed in any dimension where its placer may build (claims, spawn and town protection apply), never in
   Styx's home (`StyxConservatory.covers`: the conservatory's footprint, and a town-built home's district and road,
-  D-P31), and never by a stand-in or a machine (D-P24). Star-reckoning's patterns are observed only in the Overworld.
+  D-P31), and never by a stand-in. A perch a machine sets records no owner and seals and seats for nobody (D-P24, as
+  corrected by the unit review). Star-reckoning's patterns are observed only in the Overworld.
 - No structure loot, biome or boss dependency.
 - The Harvest Moon is observed only on the Halloween event's Harvest Moon nights and the Winter Crown only in winter (or
   any season with seasons off); the earned pact and observations persist after the event and the season.
@@ -263,13 +297,17 @@ Known limits:
 - The first obligation counts once a player, not once a pact (D-P44), which is stricter than the contract's wording.
 - A pact broken while switched off whose old place stays unloaded cannot be seated until that place loads; it can
   still be ended.
+- A perch set by a machine is inert (no owner) and its screen says only its owner may invite Stolas; it does not say
+  that it has none.
+- Suspending, recalling and resuming once a day keeps the upkeep period counting only a few ticks of active time a day
+  (checkpoint question).
 
 Checkpoint questions:
 - Stolas's character and words (D-06);
 - the provisional look and its licence label;
-- the Harvest Moon balance for non-masters;
+- the Harvest Moon balance for non-masters (the quota is the only hard limit);
 - once-a-player versus once-a-pact obligation (D-P44);
-- the compact's numbers and the upkeep's strictness.
+- the compact's numbers and the upkeep's strictness, with the two routes around upkeep (D-P50 closes one).
 
 Ids are stable once released: `jugcraft:pact_perch` (block, item, block entity and menu), `jugcraft:stolas` (entity),
 `jugcraft:stolas_regard` (research), `jugcraft:pact_service` (practice), `#jugcraft:stolas_offerings` and

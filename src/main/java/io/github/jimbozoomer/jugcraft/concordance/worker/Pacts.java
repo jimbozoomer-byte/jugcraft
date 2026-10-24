@@ -200,7 +200,9 @@ public final class Pacts {
 	 * One look at {@code record}'s upkeep at {@code now} (the caller checks the Concordance is on, D-S16). After an absence a
 	 * due date that has passed becomes now, so a holder back just before the next due date pays once, and the next falls a
 	 * whole period later; resumed from an upkeep hold by an offering, the next falls a whole period from now: neither time
-	 * away nor time held is ever charged (critique 3).
+	 * away nor time held is ever charged (critique 3). A holder warned before an absence is warned again on return with the
+	 * grace they had left, its end moved on by the time away (proposed in the unit review): time away is never charged, and
+	 * leaving for a minute never renews it.
 	 */
 	public static Due due(BoundWill record, boolean present, int periodsHeld, long now) {
 		BoundWill.Pact pact = record.pact();
@@ -223,9 +225,11 @@ public final class Pacts {
 				return new Due(record.with(pact.with(paid)), true, Event.PAID, true);
 			}
 			if (!upkeep.warned() || returned) {
-				// The first warning; and after an absence (the holder away, the place unloaded or the Concordance off) the
-				// warning again, with the whole grace from this first look (D-S3, critique 2a).
-				return new Due(record.with(pact.with(upkeep.clock(dueAt, now + upkeep.grace(), now))), true, Event.WARNED, false);
+				// The first warning, with the whole grace from this look; and after an absence (the holder away, the place
+				// unloaded or the Concordance off) the warning again: the whole grace for a first warning (D-S3, critique 2a),
+				// the grace left for one given before the absence, its end moved on by the time away (the unit review).
+				long graceUntil = upkeep.warned() ? upkeep.graceUntil() + (now - upkeep.lookedAt()) : now + upkeep.grace();
+				return new Due(record.with(pact.with(upkeep.clock(dueAt, graceUntil, now))), true, Event.WARNED, false);
 			}
 			if (now >= upkeep.graceUntil()) {
 				return new Due(record.with(pact.held(BoundWill.Hold.UPKEEP, now).with(upkeep.clock(dueAt, upkeep.graceUntil(), now))),

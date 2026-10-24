@@ -40,6 +40,11 @@ public record PactStatePayload(int containerId, int revision, int mode, Componen
 	public static final int MAX_CHOICES = 8;
 	public static final int MAX_COMPACT = 8;
 	public static final int MAX_KEY = 64;
+	/**
+	 * A choice's id: a pattern's or an offering's, both from data (the item tag, the pattern files), so bounded only as any
+	 * string is (vanilla's 32,767), never a length that could fail to encode and drop its player (the unit review).
+	 */
+	public static final int MAX_ID = 32767;
 	/** Every term the terms page shows, in order (D-S15 and the perch's own; tools/concordance_pacts.py TERMS). */
 	public static final List<String> TERMS = List.of("service", "hours", "area", "quota", "upkeep", "grace", "suspension", "duration",
 			"breach", "ending", "returns", "perch", "beneficiaries", "compact");
@@ -56,7 +61,7 @@ public record PactStatePayload(int containerId, int revision, int mode, Componen
 	/** One thing to choose: its id, its name, a number (a recall's cost, how many are carried) and whether it can be chosen now. */
 	public record Choice(String id, Component name, int amount, boolean ready) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, Choice> STREAM_CODEC = StreamCodec.composite(
-				ByteBufCodecs.stringUtf8(MAX_KEY), Choice::id,
+				ByteBufCodecs.stringUtf8(MAX_ID), Choice::id,
 				ComponentSerialization.TRUSTED_STREAM_CODEC, Choice::name,
 				ByteBufCodecs.VAR_INT, Choice::amount,
 				ByteBufCodecs.BOOL, Choice::ready,

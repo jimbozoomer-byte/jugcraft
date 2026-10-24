@@ -435,7 +435,8 @@ public class ConcordanceSkyGameTests {
 				"Day 2: recalled again, a new occurrence each day");
 		helper.assertTrue(AstrolabeItem.charge(held) == AstrolabeItem.CAPACITY - 2 * harvest.recallCost()
 				&& reckon(level, holder, perch, HARVEST_MOON, 3 * DAY + 6000, g0 + 2 * DAY) == Pacts.Reckoning.TOO_LITTLE
-				&& AstrolabeItem.charge(held) == AstrolabeItem.CAPACITY - 2 * harvest.recallCost(), "Day 3: bounded by the resonance an astrolabe holds");
+				&& AstrolabeItem.charge(held) == AstrolabeItem.CAPACITY - 2 * harvest.recallCost(),
+				"Day 3: refused, this astrolabe holding too little (the quota is the only hard limit: another astrolabe would pay)");
 		AstrolabeItem.setCharge(held, AstrolabeItem.CAPACITY);
 		ConcordanceWorkerGameTests.observed(level, holder, WINTER_CROWN);
 		Pattern crown = Sky.catalog().pattern(WINTER_CROWN);

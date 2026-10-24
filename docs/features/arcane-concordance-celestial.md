@@ -55,7 +55,8 @@ minutes, and is allowed once each time that pattern comes round.
 Since Concordance Chunk D (D-05; not merged) every recall goes through `AstrolabeItem.recall`: a master's fallback, and
 Stolas's Star-reckoning for his pact's holder at the perch, under one `recall:<pattern>` claim, so one rising pays one
 recall whichever route asks first. Non-masters with the pact may recall any pattern they observed: the Harvest Moon as
-often as daily, the Winter Crown every other day, bounded by resonance
+often as daily, the Winter Crown every other day. The once-a-day quota is the only hard limit: stockpiled or traded
+astrolabes pay too, and one keeper's own observatory averages about 2.09 resonance a day (3.59 with the Winter Crown)
 ([Stolas's pact](stolas-pact.md#costs-balance-and-automation)). An observation while the pact is active keeps its first
 obligation.
 
@@ -118,7 +119,9 @@ not the world clock, ends it, so moving the clock neither stretches nor renews i
   8, needs mastery and the pattern's last observation, and is allowed once per occurrence. Since Concordance Chunk D
   (D-05; not merged), a holder of Stolas's pact may also recall, at the perch once a game day, any pattern they
   observed, mastery or not, under the same once-per-occurrence claim: the Harvest Moon daily and the Winter Crown every
-  other day, outside their nights and season, a balance question for the owner's checkpoint.
+  other day, outside their nights and season. The once-a-day quota is the only hard limit (stockpiled or traded
+  astrolabes pay too; one keeper's own observatory averages about 2.09 resonance a day, 3.59 with the Winter Crown,
+  which with seasons off is observable all year); a balance question for the owner's checkpoint.
 - Effects are vanilla potion effects at level I, no longer than vanilla's longest potion (8 minutes), only while the
   pattern is up; recalls 2 minutes.
 - Resonance: an observatory and an astrolabe hold 32 each. The rarest pattern (the comet, every 19 days) pays 8.

@@ -21,10 +21,14 @@ import org.jspecify.annotations.Nullable;
  *  "beneficiaries": "personal", "compact": {"items": [{"item": "minecraft:amethyst_shard", "count": 2}], "resonance": 8},
  *  "beats": ["greeting", "service", "price"]}
  * </pre>
- * Keep WORK and the numbers equal to tools/concordance_pacts.py (WORK, PARSER; check_pacts).
+ * A work in {@link #HOLDER_ONLY} serves its holder alone, so its beneficiaries must be personal (the unit review: the screen
+ * would otherwise promise a party what the service refuses). Keep WORK, HOLDER_ONLY and the numbers equal to
+ * tools/concordance_pacts.py (WORK, HOLDER_ONLY, PARSER; check_pacts).
  */
 public final class PactParser {
 	public static final List<String> WORK = List.of("star_reckoning");
+	/** The works that serve only their holder (StarReckoning refuses anyone else): their beneficiaries must be personal. */
+	public static final List<String> HOLDER_ONLY = List.of("star_reckoning");
 	public static final int MAX_COMPACT_ITEMS = 4;
 	public static final int MAX_COMPACT_COUNT = 64;
 	/** An astrolabe's capacity (sky/AstrolabeItem.CAPACITY; check_pacts compares). */
@@ -74,13 +78,18 @@ public final class PactParser {
 			if (beats.isEmpty() || beats.size() > MAX_BEATS) {
 				throw new Json.Invalid("\"beats\" lists 1 to " + MAX_BEATS + " lines");
 			}
+			String work = Json.choice(service, "work", WORK.toArray(String[]::new));
+			String beneficiaries = Json.choice(object, "beneficiaries", Pacts.PERSONAL, Pacts.PARTY);
+			if (HOLDER_ONLY.contains(work) && !Pacts.PERSONAL.equals(beneficiaries)) {
+				throw new Json.Invalid("\"beneficiaries\" must be \"" + Pacts.PERSONAL + "\": " + work + " serves its holder alone");
+			}
 			return new PactDefinition(id, Json.id(object, "agreement"), Json.id(object, "research"),
-					Json.choice(service, "work", WORK.toArray(String[]::new)), Json.range(service, "radius", 1, WorkerParser.MAX_RADIUS),
+					work, Json.range(service, "radius", 1, WorkerParser.MAX_RADIUS),
 					Json.range(service, "from", 0, 23999), Json.range(service, "to", 0, 24000), Json.range(service, "quota", 1, WorkerParser.MAX_QUOTA),
 					Json.id(upkeep, "offering"), Json.range(upkeep, "count", 1, Pacts.MAX_COUNT),
 					Json.range(upkeep, "period_days", 1, (int) (Pacts.MAX_PERIOD / Pacts.DAY)) * Pacts.DAY,
 					Json.range(upkeep, "grace_days", 0, (int) (Pacts.MAX_GRACE / Pacts.DAY)) * Pacts.DAY,
-					Json.range(upkeep, "cap", 1, Pacts.MAX_CAP), Json.choice(object, "beneficiaries", Pacts.PERSONAL, Pacts.PARTY),
+					Json.range(upkeep, "cap", 1, Pacts.MAX_CAP), beneficiaries,
 					costs, Json.range(compact, "resonance", 0, MAX_RESONANCE), beats);
 		} catch (Json.Invalid | IllegalStateException | UnsupportedOperationException | IllegalArgumentException problem) {
 			problems.add("pact " + id + ": " + problem.getMessage());

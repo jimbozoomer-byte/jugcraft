@@ -26,11 +26,12 @@ import org.jspecify.annotations.Nullable;
  * Concordance Chunk D, D-04 (D-S7): Stolas, a worker (here in spirits/, so check_workers' bans on chunk loading,
  * dimension changes and brain memories cover him; MISC, so transport crates refuse him). While a conversation is open at
  * his perch and nothing is kept there he is a visitor, bound to no one and on no roster; he leaves when he has neither a
- * pact nor a live conversation (declined, closed, timed out, its player gone, a restart). Once a pact is sealed he is its
- * one presence; he leaves when the pact is ended, kept elsewhere or answered by another. Only damage that bypasses
- * invulnerability harms him (Styx's rule); if he is lost all the same, the pact is not: its holder calls him again at no
- * cost. He keeps to his perch. Provisional body (D-S5, unit 2): the owner's Flashjack rig under his name; D-06 gives him
- * his own.
+ * pact nor a live conversation (declined, closed, timed out, its player gone, a restart), with the Concordance on or off:
+ * a visitor is saved with his chunk (his perch only) and leaves at his first think after it loads. Once a pact is sealed
+ * he is its one presence; he leaves when the pact is ended, kept elsewhere or answered by another. Only damage that
+ * bypasses invulnerability harms him (Styx's rule); if he is lost all the same, the pact is not: its holder calls him
+ * again at no cost. He keeps to his perch. Provisional body (D-S5, unit 2): the owner's Flashjack rig under his name;
+ * D-06 gives him his own.
  */
 public class StolasEntity extends WorkerEntity<StolasEntity> implements AgreementHolder.Presence {
 	/** His pacts' counterpart (the pact definition's id). */
@@ -98,6 +99,12 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 	}
 
 	private Status decide(ServerLevel level, long gameTime) {
+		if (owner == null && record == null && !awaited(level, gameTime)) {
+			// A visitor no conversation waits on leaves whether or not the Concordance is on: he holds no record, and one
+			// saved with his chunk is no perch's visitor when it loads (the unit review).
+			leave(level, null, blockPosition());
+			return Status.FINISHED;
+		}
 		if (!Workers.enabled()) {
 			stop();
 			return Status.DISABLED;
@@ -143,6 +150,12 @@ public class StolasEntity extends WorkerEntity<StolasEntity> implements Agreemen
 			return state;
 		}
 		return Authority.presentNear(level, owner, perch, Pacts.REACH) == null ? Status.OWNER_OFFLINE : Status.IDLE;
+	}
+
+	/** Whether a conversation still waits on this visitor: his perch loaded, he its visitor, a conversation there live. */
+	private boolean awaited(ServerLevel level, long gameTime) {
+		return perch != null && level.isLoaded(perch) && level.getBlockEntity(perch) instanceof PactPerchBlockEntity home
+				&& getUUID().equals(home.visitor()) && PactSessions.live(level.getServer(), GlobalPos.of(level.dimension(), perch), gameTime);
 	}
 
 	/** Pushed or led off his perch, he is back on it (within his own level, check_workers). */

@@ -222,7 +222,7 @@ public class ConcordanceResourceGameTests {
 		helper.succeed();
 	}
 
-	/** D-04 (D-S23): a pact definition within bounds reads exactly; an unknown field, a newer schema, an unknown work, a cap past four, resonance past an astrolabe's, four beats, unknown beneficiaries or missing research are each refused and reported; a missing required definition is reported, but not by empty rules. */
+	/** D-04 (D-S23): a pact definition within bounds reads exactly; an unknown field, a newer schema, an unknown work, a cap past four, resonance past an astrolabe's, four beats, unknown beneficiaries, a party for Star-reckoning (which serves its holder alone) or missing research are each refused and reported; a missing required definition is reported, but not by empty rules. */
 	@GameTest(maxTicks = 20)
 	public void thePactDefinitionParsesStrictly(GameTestHelper helper) {
 		Set<String> research = Set.of("jugcraft:stolas_regard");
@@ -245,6 +245,7 @@ public class ConcordanceResourceGameTests {
 				"resonance past an astrolabe's", valid.replace("\"resonance\": 8", "\"resonance\": 33"),
 				"four beats", valid.replace("\"price\"]", "\"price\", \"more\"]"),
 				"unknown beneficiaries", valid.replace("\"personal\"", "\"everyone\""),
+				"a party for a service its holder alone receives", valid.replace("\"personal\"", "\"party\""),
 				"research that does not exist", valid.replace("jugcraft:stolas_regard", "jugcraft:nothing"));
 		faults.forEach((what, json) -> {
 			PactCatalog bad = PactCatalog.parse(Map.of(PactDefinition.STOLAS, JsonParser.parseString(json)), research);
