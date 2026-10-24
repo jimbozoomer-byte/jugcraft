@@ -11877,7 +11877,9 @@ def check_acquisition(registered):
     each; none of those sources gives the owner's armour tiers the record keeps creative-only. The living workshop's rows
     (tools/acquisition.py WORKSHOP and FACTORY; Concordance Chunk C, C-10) are each registered and made as they say (a
     recipe of their own result, a bench working, or a rite RITUALS pages), every item Chunk C registered is a WORKSHOP
-    row, and the journey's server test loads every recipe they name. Only data is read, and
+    row, and the journey's server test loads every recipe they name; the pact hall's rows (PACT_HALL; Concordance Chunk D,
+    D-09) likewise, every item Chunk D registered (CHUNK_D_ITEMS, which is tools/concordance_pacts.py's BLOCKS) a PACT_HALL
+    row, and the same test class loads their recipes (PACT_HALL_RECIPES). Only data is read, and
     the loot classes' few lines named above: what Java alone gives (a creature's drops coded in its class) is not seen.
     (check_arms_variants forbids the trophies' recipes on its own; nothing here relaxes it.)"""
     import acquisition as aq
@@ -12122,25 +12124,47 @@ def check_acquisition(registered):
     for item in aq.CHUNK_C_ITEMS:
         if item not in aq.WORKSHOP:
             err(f"acquisition: {item}, registered by Concordance Chunk C, is no row of WORKSHOP (tools/acquisition.py)")
-    for item, how in rows.items():
-        if item not in registered:
-            err(f"acquisition: the workshop's {item} is not registered")
-        recipe = aq.recipe_file(item, how)
-        kind, _, name = how.partition(":")
-        if recipe is not None:
-            path = DATA / MOD / "recipe" / f"{recipe}.json"
-            result = ((load(path) or {}) if path.is_file() else {}).get("result")
-            if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
-                err(f"acquisition: recipe/{recipe}.json does not make the workshop's {item} (its own result)")
-        elif kind == "working":
-            working = DATA / MOD / "concordance" / "working" / f"{name}.json"
-            if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
-                err(f"acquisition: concordance/working/{name}.json does not make the workshop's {item}")
-        elif kind == "ritual":
-            if item in aq.FACTORY or aq.RITUALS.get(item) != name:
-                err(f"acquisition: the workshop's {item} is made by the ritual {name}: RITUALS must page it for {item}")
-        else:
-            err(f"acquisition: the workshop's {item} is made by {how!r}, not a recipe, a working or a ritual")
+
+    def made_as(table, what, factory=()):
+        """Each row of {table} is registered and made as it says: by a crafting recipe whose own result it is, a bench
+        working that makes it, or a ritual RITUALS pages for it (never a factory part)."""
+        for item, how in table.items():
+            if item not in registered:
+                err(f"acquisition: {what}'s {item} is not registered")
+            recipe = aq.recipe_file(item, how)
+            kind, _, name = how.partition(":")
+            if recipe is not None:
+                path = DATA / MOD / "recipe" / f"{recipe}.json"
+                result = ((load(path) or {}) if path.is_file() else {}).get("result")
+                if (result.get("id") if isinstance(result, dict) else result) != f"{MOD}:{item}":
+                    err(f"acquisition: recipe/{recipe}.json does not make {what}'s {item} (its own result)")
+            elif kind == "working":
+                working = DATA / MOD / "concordance" / "working" / f"{name}.json"
+                if not working.is_file() or (load(working) or {}).get("result") != f"{MOD}:{item}":
+                    err(f"acquisition: concordance/working/{name}.json does not make {what}'s {item}")
+            elif kind == "ritual":
+                if item in factory or aq.RITUALS.get(item) != name:
+                    err(f"acquisition: {what}'s {item} is made by the ritual {name}: RITUALS must page it for {item}")
+            else:
+                err(f"acquisition: {what}'s {item} is made by {how!r}, not a recipe, a working or a ritual")
+    made_as(rows, "the workshop", aq.FACTORY)
+    # Concordance Chunk D (D-09): the pact hall's rows (tools/acquisition.py PACT_HALL) likewise; every item Chunk D
+    # registered (CHUNK_D_ITEMS: the blocks tools/concordance_pacts.py registers) is a PACT_HALL row; and the journey's
+    # server test loads every recipe they name (PACT_HALL_RECIPES).
+    import concordance_pacts as pacts_tables
+    if sorted(aq.CHUNK_D_ITEMS) != sorted(pacts_tables.BLOCKS):
+        err(f"acquisition: CHUNK_D_ITEMS {sorted(aq.CHUNK_D_ITEMS)} must be every item Concordance Chunk D registers "
+            f"(tools/concordance_pacts.py BLOCKS: {sorted(pacts_tables.BLOCKS)})")
+    for item in aq.CHUNK_D_ITEMS:
+        if item not in aq.PACT_HALL:
+            err(f"acquisition: {item}, registered by Concordance Chunk D, is no row of PACT_HALL (tools/acquisition.py)")
+    listed = re.search(r"PACT_HALL_RECIPES = List\.of\(([^)]*)\)", journey)
+    wanted = {aq.recipe_file(item, how) for item, how in aq.PACT_HALL.items()} - {None}
+    if "public void thePactHallsRecipesLoad(" not in journey or not listed \
+            or set(re.findall(r'"([a-z_]+)"', listed.group(1))) != wanted:
+        err("ConcordanceJourneyGameTests.thePactHallsRecipesLoad must load the recipe of every pact-hall row "
+            f"(PACT_HALL_RECIPES: {sorted(wanted)})")
+    made_as(aq.PACT_HALL, "the pact hall")
     # The owner's armour tiers the record keeps creative-only: nothing gives them.
     for tier in aq.CREATIVE_ONLY:
         for piece in gear.ARMOR:
@@ -14213,6 +14237,16 @@ def check_concordance(registered):
         for key in re.findall(r'"(book\.[a-z_.0-9]+|research_node\.[a-z_.0-9]+)"', text):
             if key not in lang:
                 err(f"codex {path.relative_to(book)}: missing lang {key}")
+    # Concordance Chunk D, D-09 (unit 4's review, Data 2): no two entries of one category share a place on its map, where
+    # Modonomicon would draw one over the other (units 2 and 4 placed Binding entries by hand: (0,4), (2,4) and (4,4)).
+    places = {}
+    for path in sorted((book / "entries").rglob("*.json")):
+        entry = load(path) or {}
+        place = (entry.get("category"), entry.get("x"), entry.get("y"))
+        if place in places:
+            err(f"codex {path.relative_to(book)}: drawn at {place[1]},{place[2]} of {place[0]}, where {places[place]} is")
+        else:
+            places[place] = entry.get("id")
     # A codex link (Modonomicon's entry://) names an entry of this book (Concordance Chunk C, C-04, C-P42). Modonomicon
     # will not open a book with a broken link (allow_open_book_with_invalid_links defaults to false), so one stale link
     # would close the whole codex.
@@ -21666,8 +21700,9 @@ def check_journey():
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
     data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
     other research; the living workshop (Concordance Chunk C, C-10) holds from a manual start, step by step (WORKSHOP);
-    every game test the routes name exists; Stolas's Regard (PACT, Concordance Chunk D) holds without Styx; and the
-    record's routes are the tool's."""
+    every game test the routes name exists; the pact hall (PACT, Concordance Chunk D) holds without Styx, step by step,
+    to the workshop hand, its things PACT_HALL's rows; the routes' "each kind of worker" is the Binding Arts' mastery; and
+    the record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():

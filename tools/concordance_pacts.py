@@ -283,7 +283,8 @@ def codex():
              "or any refusal, spends nothing and names why."),
             ("text", "The Open Hand Compact",
              f"**Accept** pays the compact in the same moment the pact is sealed: {compact['resonance']} Astral Resonance from "
-             "an astrolabe you carry, and " + ", ".join(f"{c['count']} × {c['item'].split(':')[1].replace('_', ' ')}"
+             "an astrolabe you carry (an Orrery Observatory fills it for its keeper's party, and only a Starwatcher, who "
+             "understands Celestial Attunement, keeps one), and " + ", ".join(f"{c['count']} × {c['item'].split(':')[1].replace('_', ' ')}"
                                                          for c in compact["items"])
              + ". It counts as the first offering. Only this perch's owner may accept here, and one pact with Stolas a holder."),
         ]}

@@ -112,6 +112,14 @@ PRODUCERS = {
 LEY_SOURCES = [[f"item:{rid('kindled_lantern')}"],
                [f"item:{rid('verdant_heart')}", f"research:{rid('verdant_husbandry')}@understood"]]
 
+# Where Astral Resonance comes from (Concordance Chunk D, D-09): an Orrery Observatory gathers it, once an occurrence of
+# each pattern up and visible under the open night sky, only for its keeper, and fills only its keeper's party's
+# Astrolabe (sky/ObservatoryBlockEntity gather and fill); only a Starwatcher becomes a keeper (ObservatoryBlockEntity
+# placedBy and use: Sky.knows, Celestial Attunement understood). Nothing else charges an Astrolabe. A pact's Open Hand
+# Compact pays its resonance from one.
+RESONANCE_SOURCES = [[f"item:{rid('observatory')}", f"item:{rid('astrolabe')}", f"research:{rid('celestial_attunement')}@understood",
+                      "encounter:night", "encounter:open_sky"]]
+
 # Every vanilla item a required step can need: (how it is had, how, recovery, dimension). How it is had: "craftable" (a
 # vanilla recipe from other listed things), "renewable" (farmed, bred, dropped by creatures that keep spawning, traded or
 # grown), "gathered" (a finite world material: its recovery says how to have it once the world's supply is gone, used or
@@ -359,7 +367,7 @@ def load_at_hand(data):
                 for path in sorted((data / MOD / "concordance" / name).glob("*.json"))}
     return {"recipes": recipes, "tags": tags, "structures": folder("structure"), "commissions": folder("commission"),
             "projects": folder("project"), "workings": folder("working"), "wonders": folder("wonder"),
-            "wonder_configurations": folder("wonder_configuration")}
+            "wonder_configurations": folder("wonder_configuration"), "pacts": folder("pact")}
 
 
 class _Items:
@@ -404,6 +412,17 @@ class _Items:
             self.nodes[node_id]["all"] = [research_node(working["research"], working["stage"]), self.item(working["station"]),
                                           self.item(working["work"]), self.item(working["specimen"])]
         return node_id
+
+    def resonance(self):
+        """Astral Resonance in an Astrolabe: from an observatory whose keeper the player is (RESONANCE_SOURCES)."""
+        if "resource:astral_resonance" not in self.nodes:
+            for encounter in ("night", "open_sky"):
+                self.nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
+            self.nodes["resource:astral_resonance"] = node("", kind="resource")
+            self.nodes["resource:astral_resonance"]["any"] = [
+                [self.item(need[len("item:"):]) if need.startswith("item:") else need for need in source]
+                for source in RESONANCE_SOURCES]
+        return "resource:astral_resonance"
 
     def ley(self):
         """Ley Charge to draw: from a Kindled Lantern poured into a pylon, or a Verdant Heart beside one (LEY_SOURCES)."""
@@ -558,7 +577,15 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
             elif key == "pact_service":
                 # Concordance Chunk D, D-04/D-05: the pact's first obligation, an observation at an observatory while a pact
                 # kept at a pact perch is active (spirits/StarReckoning.observed).
-                alternatives = [[items.item(rid("observatory")), items.item(rid("pact_perch"))]]
+                # D-09: kept only by a pact, which is sealed with the Open Hand Compact: its materials and, from an
+                # Astrolabe, its resonance (data/jugcraft/concordance/pact/stolas.json; PactCompact).
+                stolas = at_hand.get("pacts", {}).get("stolas")
+                compact = (stolas or {}).get("compact", {})
+                group = [items.item(rid("observatory")), items.item(rid("pact_perch"))]
+                group += [items.item(cost["item"]) for cost in compact.get("items", [])]
+                if compact.get("resonance", 0) > 0:
+                    group.append(items.resonance())
+                alternatives = [group] if stolas else [[f"missing:{rid('stolas')}"]]
             for encounter in encounters:
                 nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
                 needs.append(f"encounter:{encounter}")
