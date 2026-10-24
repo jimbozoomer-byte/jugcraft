@@ -196,14 +196,19 @@ final class WorkshopHands {
 		return key;
 	}
 
-	/** {@code player} uses {@code held} on the block at {@code at} from above, as a click does, with no rate limit in the way; the item's answer. */
+	/**
+	 * {@code player} uses {@code held} on the block at {@code at} from above, as a click does, with no rate limit in the way;
+	 * the item's answer, any success read as SUCCESS (26.3's ItemStack.useOn hands back a new Success for an item's
+	 * interaction, never the constant itself).
+	 */
 	static InteractionResult use(GameTestHelper helper, ServerPlayer player, ItemStack held, BlockPos at) {
 		RateGate.forget(player.getUUID());
 		BlockPos absolute = helper.absolutePos(at);
 		ItemStack before = player.getItemInHand(InteractionHand.MAIN_HAND);
 		player.setItemInHand(InteractionHand.MAIN_HAND, held);
 		try {
-			return held.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false)));
+			InteractionResult answer = held.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false)));
+			return answer instanceof InteractionResult.Success ? InteractionResult.SUCCESS : answer;
 		} finally {
 			player.setItemInHand(InteractionHand.MAIN_HAND, before);
 		}
