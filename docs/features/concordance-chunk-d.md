@@ -8,8 +8,10 @@ tests failed at their first step in runs 40079227985 and 40082852322 through a t
 `86c4e7127`); run 40085012234 on `86c4e7127` passed them in both server jobs, and every job, its client companion check
 among them, after one re-run of a client shard for main's `PeepoPopulationClientTests` cow-breeding flake. Unit 2,
 with its unit review's fixes, was built on the local `wip/chunk-d-u2` from unit 1's records commit and merged here
-after unit 4; its local checks run and passed, and the next CI run is its Java's first compile. Units 3 and 5 are not
-started. Chunk D is developed on branch
+after unit 4; its local checks run and passed, and the next CI run is its Java's first compile. Unit 3 (D-06, D-07)
+is built on the local `wip/chunk-d-u3`, from this branch at `92868ff82` (units 1, 4 and 2 merged, with their review
+fixes); not merged here, nothing of it compiled locally, and its game tests and CI not run. Unit 5 is not started.
+Chunk D is developed on branch
 `claude/chunk-d-pact-hall` (local `wip/chunk-d`), started from
 Chunk C's head `779851cdb` ([#466](https://github.com/jimbozoomer-byte/jugcraft/pull/466), itself stacked on Chunk B's
 [#465](https://github.com/jimbozoomer-byte/jugcraft/pull/465)); when it is ready it is reviewed as a third stacked pull
@@ -122,7 +124,7 @@ completes the path. Nothing in units 3 and 4 comes before it.
 |---|---|---|---|---|
 | 1 | D-01, D-02 | The existing agreements keep their promises (shade death and re-call, seal refusals, the roster at once, anchor ownership, the familiar's fade, ending without breaking); one pact record: the agreement holder extracted from the Spirit Anchor and shared, a place on the Bound Will, one source of truth for suspension, the upkeep rules, the departure history, the copy check and the offline, restart and feature-disable policy | `arcane-concordance-workers.md`; this contract | Built (not merged): D-01 and D-02 on `claude/chunk-d-pact-hall` (local `wip/chunk-d`; commits `56a74f4be`, `7477efbcd`, `fa5360d0d`, the records' `97e1facd4`, the unit review's fixes `3775eac3b` and 26.3's white wool `da185dd0d`). Local checks run and passed, 52 of 53 audit mutations reported (D-02's As built). Green in CI: run 40067977680 on `da185dd0d` passed every job (the build, the server game tests with and without the optional integrations, every client class) |
 | 2 | D-03, D-04, D-05 | The first end-to-end path: Styx and the codex to Stolas's Regard and its evidence, the perch, Stolas's arrival, the conversation and terms, acceptance with the Open Hand Compact, Star-reckoning, the first obligation, upkeep, suspension, ending. A provisional body for Stolas is acceptable here | new `stolas-pact.md`; `styxhexenhammer.md`; `arcane-concordance-celestial.md` | Built (not merged), merged here after unit 4; checkpoint pending: D-03, D-04 and D-05 on the local `wip/chunk-d-u2`, from unit 1's records commit `97e1facd4` (commits `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records' `8f0635d9e` and the unit review's fixes `f6ef0b85d`; records: new `stolas-pact.md`, `styxhexenhammer.md`, `arcane-concordance-celestial.md`). Local checks run and passed, all 80 audit mutations reported (D-05's As built) and the unit review's 15; `./gradlew build`, the server and client game tests and CI not run: the next CI run is its Java's first compile |
-| 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Not started |
+| 3 | D-06, D-07 | Stolas's character: the Flashjack-derived raven body, arrive, listen, inspect, assent, refuse and depart, sounds with subtitles, Jade; the roster screen with suspend, end, cancel and recovery, and the journal's pacts section | `stolas-pact.md`; `arcane-concordance-workers.md` | Built (not merged): D-06 and D-07 on the local `wip/chunk-d-u3`, from `92868ff82`, commits `9805a9a7c` (Stolas's raven body), `773b85aba` (his presence, sounds, subtitles and Jade), `a3ee00822` (the roster's server side and the journal's pacts), `66b741868` (the roster screen and its client test) and the records' commit "Concordance Chunk D: unit 3's records". Local checks run and passed, all 104 audit mutations reported (D-06's and D-07's As built); `./gradlew build` (with or without the optional integrations), the server and client game tests and CI not run: the next CI run is its Java's first compile |
 | 4 | D-08 | The workshop hand (a courier agreement carrying a post's exact requests) and the schema review | `arcane-concordance-logistics.md`; `arcane-concordance-workers.md`; this contract | Built (not merged): D-08 on the local `wip/chunk-d-u4`, from unit 1's head `97e1facd4` beside unit 2, commits `023b681e8`, `e51ef2b11`, the records' commit and the unit review's fixes ("Chunk D unit 4: fixes from the unit review"); merged here at `df3006850`, with the test fixes `ca2957291` and `86c4e7127`. Local checks run and passed, all 42 audit mutations reported and the nine the fixes add (D-08's As built). Compiled in CI: runs 40079227985 and 40082852322 failed its twenty hand tests at their first step (a test helper compared an item's use with the SUCCESS constant, which 26.3's `ItemStack.useOn` never returns; fixed in `86c4e7127`); run 40085012234 passed its 21 server game tests and the client companion check, every job passing after one client shard's re-run for main's `PeepoPopulationClientTests` cow-breeding flake |
 | 5 | D-09 | Combined fixes, the whole-path test, load, client evidence, the two-client attempt, records, the checkpoint and the handoff | this page; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
 
@@ -1227,7 +1229,8 @@ hall"; not yet run in CI):
   step and the Stolas step, both exact under D-P50: each holder was warned as they left, so the grace left is all of it.
 - Stolas, like the shade, joins his holder's roster only by his seal, his call again or his seating
   (`joinsRosterOnStatus()` false; unit 1's fix 2), so one replaced, or loaded while the Concordance is off, takes no
-  roster place; `check_pacts` holds it. (The hand still inherits true: D-08's As built, last item.)
+  roster place; `check_pacts` holds it. (The hand still inherited true until unit 3 gave it the same rule: D-07's As
+  built.)
 - The hand's codex page links `binding/stolas_regard`, and `check_hand` now checks the Regard's mastered state.
 - 26.3's lessons from CI, checked in unit 2's tests: none names `Items.WHITE_WOOL`, and none compares an item use's raw
   `ItemStack.useOn` answer with the SUCCESS constant (the perch's placing helper asks `consumesAction()`).
@@ -1294,6 +1297,100 @@ presentation bundle (08:169-181).
 
 **Review boundary:** presentation over D-04 and D-05's state. The look is for the owner's checkpoint.
 
+**As built (unit 3: commits `9805a9a7c`, the body, and `773b85aba`, the presence; records:
+[stolas-pact.md](stolas-pact.md#stolass-character-d-06) in the records' commit "Concordance Chunk D: unit 3's records").**
+- **Built:**
+  - **The body (D-P90 to D-P93):** the geometry stays the owner's file byte for byte (`OWNER_FILES`); the skin, an eye
+    glowmask and the animation file are adapted from Flashjack's own files by the new `tools/stolas_body.py`, which
+    `tools/owner_art.py` writes and checks (`concordance_pacts.ADAPTED`) and marks in `--provenance`: each texel
+    recoloured in place by part and hue (plumage black, markings blue-black, beak, legs and toes dark horn, eyes amber,
+    crest and breast glyph old gold; shading and alpha kept, nothing drawn); the glowmask the four eye texels (9,10),
+    (9,11), (14,10), (14,11), drawn by `AutoGlowingGeoLayer`; the animation file Flashjack's five clips unchanged plus
+    nine `animation.stolas.*` clips (56,789 bytes, SHA-256 `59ae566b17451085…`). The owner library is unchanged and
+    nothing in it is executed; the provenance table is in `stolas-pact.md`. `WorkerClient` draws him at 1.4× with a
+    wider culling box.
+  - **The controllers (D-P94):** `StolasEntity.Loop` (idle, listen, waiting, suspended, and the owner's `idle.flapping`
+    as astir) on the worker's own controller, for what the server synced; `StolasEntity.Gesture` (arrive 40 ticks,
+    inspect 50, assent 40, refuse 40, depart 40, held) as triggerable clips on a second controller, `gesture`, fired by
+    `gesture()` on the server.
+  - **Listening (D-P95):** a synced flag set at once by `listen()` when a conversation opens at his perch
+    (`PactMenu.begin` → `PactPerchBlockEntity.heard`) and recomputed every think.
+  - **Arrival (D-P96)** in `PactPerchBlockEntity.summon` (an invitation, a presence called back, a pact seated), right
+    after the entity is added.
+  - **Departure (D-P97):** `departing()` and `gone()`; leaving plays DEPART and he is discarded 40 ticks later, struck off
+    at once, never saved meanwhile (`shouldBeSaved`), refused as a visitor by `unbound()`; `stolas(level)` gives the
+    presence seated at this perch (`getBlockPos().equals(presence.perch())`, the unit's critique 6), else the visitor,
+    never one leaving.
+  - **Reactions (D-P99):** `StolasEntity.reaction` maps each answered pact-screen action to its gesture;
+    `PactMenu.receive` calls `PactPerchBlockEntity.react` once an action is answered.
+  - **Cues (D-P100, D-P101):** `SOUND_IDS`, `CUE_TICKS` = 10, `registerSounds()` (one line in `Workers`), `cueing()`
+    inside `gesture()` and `listen()`, `cues()` for tests; six `jugcraft:stolas.*` events in `tools/concordance_pacts.py`,
+    merged by `tools/concordance.py` into `SOUND_EVENTS` and `SOUND_FILES` and written to `sounds.json` by
+    `tools/generate_material_data.py`, bound to runtime `.ogg` files (no new audio).
+  - **Jade (D-P102; G11 closed):** `AgreementHolder.peek` (verify's answer without its writes); new `spirits/PactReading`
+    (read only; no player, no escrow); behind Jade's entrypoints only, new `compat/jade/PactDataProvider` (the perch and
+    the Spirit Anchor, uids `jugcraft:pact_perch` and `jugcraft:spirit_anchor`), a Stolas branch in `WorkerDataProvider`,
+    and the client's `AgreementTooltip` and `pactLines` in `JugcraftJadeClient`. A perch keeping nothing reads
+    "visiting" only while its own visitor waits there (critique 7).
+  - **Marks and subtitles (D-P103, D-P104):** `PactScreen.Verdict` (a drawn tick or cross, narrated "Done:" or
+    "Refused:"), `isInGameUi()` true and the deferred subtitles drawn over the screen; new `KeepFirstConfirmScreen` for
+    End, the keyboard starting on Keep it (D-P117, refining unit 2's D-P40).
+  - **Reconciliation** (the unit's specification, R5 to R13): the body's structure with the presence's `Loop`, cues
+    inside `gesture()`; one `stolas(level)` lookup used by `heard` and `react`; one departure test; one client helper;
+    selection weights 150 to 200 to 230; both screens in-game with subtitles; one answer mark; one safe confirmation;
+    every `isRemoved()` that meant "he has left" now `gone()`.
+  - **Audits:** `check_geckolib` also pins clips played once; `check_pact_screen`'s body block moved into the new
+    `check_stolas_body`, and it pins `KeepFirstConfirmScreen`; `check_pacts`' D-06 block (`D06_TESTS`, the cue table,
+    the reactions, the Jade readings, needles for critiques 6 and 7); `check_rime_strata_assets` counts Stolas's sound
+    files.
+- **Departures from this ticket and from the unit's specification:**
+  - "additive" gestures became a second controller (D-P94): GeckoLib's additive path subtracts the base rotations;
+  - the ticket's "a frozen-tick pose for each clip": his astir loop (`idle.flapping`, while an offering is due) is not
+    posed, since making an offering due in the client test would change the upkeep its later steps read (the unit's
+    critique 11); recorded in `tools/concordance_pacts.py`, the test and `stolas-pact.md`;
+  - the ticket's "the refuse and assent subtitles visible": CI has no sound device, so they are checked as defined and
+    fired, and seen only where one exists (D-P104);
+  - Jade's client words a copy with the diagnostic's own key (`Diagnostic.PREFIX` with `ComposeText.show`), not through
+    `Diagnostic.of`, which `check_signs` (Chunk C, C-01) forbids in `JugcraftJadeClient`; the same words;
+  - `tooltip.jugcraft.concordance.jade.pact.waiting` reads "Its presence: %s", not "Waiting: %s", since the status words
+    already begin "waiting: ...";
+  - added beyond the specification: needles for critiques 6 and 7 and for `KeepFirstConfirmScreen`, the client test's
+    subtitle and HUD switches put back in `finally` blocks, and the sharing test's `aCopiedPerchIsInert` reading
+    `gone()` (critique 12).
+  None of the ticket's behaviour was dropped.
+- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +7 (`D06_TESTS`): `aDepartingStolasIsNeverAVisitorAgain`
+  (commit 1; its cue checks in commit 2), `stolasGesturesAndSoundsFollowTheirTable`,
+  `stolasAnswersEachActionWithItsGesture`, `aRemovedStolasNeverEndsThePact`, `onePresencePerPact`,
+  `killingStolasIsNeverTheFastestRoute` and `theJadeReadingsNameNoPlayerAndChangeNothing` (with `copy.stolas(level) ==
+  null` and no visit read after a release). Changed to `gone()`: `thePerchHoldsNothing` (Persistence),
+  `aCopiedPerchIsInert` (Sharing), `aVisitingStolasLeavesWithoutARecord`, `endingReturnsTheEscrowOnce`,
+  `aBrokenPerchLeavesThePactWithoutItsPerch` and the helpers `stolas` and `stolases` (Worker).
+  `ConcordancePactClientGameTests`: his four loops of his own and five gestures frozen in their telling poses (nine
+  shots), his real arrival and departure, his refusal and assent with their subtitles, each answer's mark awaited
+  before it is checked (critique 4), Keep it holding the keyboard, Jade's readings and, with Jade loaded, two Jade
+  shots: 23 shots with Jade, 21 without. Selection: weight 150 to 230; `test_client_test_selection.py` checks that the
+  glowmask selects it.
+- **Audit mutations:** the body's 22 (B1 to B22) and the presence's 29 (P1 to P29: the specification's 25 and four for
+  the critiques and the Jade rule) were each reported by the audits; each commit's unchanged tree reported nothing.
+- **Commands** (each run and passed before its commit): `python3 tools/owner_art.py --check`,
+  `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py
+  --check`, `python3 tools/check_icon_maps.py`, `node --test tools/world-designer/model.test.cjs`,
+  `python3 -m unittest discover -s scripts/tests` (197 tests) and `git diff --check`; every changed Java file
+  parse-checked. Generators run one at a time: `python3 tools/owner_art.py` (commit 1 wrote the three adapted files),
+  then `python3 -B tools/generate_material_data.py` (lang and `sounds.json`).
+- **Not run:** `./gradlew build` (with or without the optional integrations), the server game tests and the client
+  test: nothing of unit 3 has been compiled, and CI is its first compile and run.
+- **Not confirmed until CI:** that the pinned GeckoLib's trigger packets reach `TestPlayers`' connections (the server
+  tests assert the server's state and `cues()`, not a client's clip); `level.playSound` for an entity not in a level
+  (believed a no-op send); that `tick freeze` holds a triggered clip exactly; Jade's overlays in client screenshots;
+  generic inference in `PactReading` and the Jade providers; clip timing under CI load (the log prints each frozen
+  time).
+
+**Findings for other units:**
+- Unit 2's tests that asserted `isRemoved()` for Stolas leaving were changed to `gone()` in commit `9805a9a7c` (above);
+  `aLostPresenceIsCalledBackAndEndsNothing`'s `first.isRemoved()` stays, since he is removed with `KILLED` there.
+- Chunk A's `ComposerScreen` draws subtitles under its own fill, as `PactScreen` did before D-P103; left for unit 5.
+
 ### D-07. The roster screen, with cancel and recovery (unit 3)
 
 **What the player sees (D-S11).**
@@ -1329,6 +1426,107 @@ presentation bundle (08:169-181).
 **Saves:** none.
 
 **Review boundary:** an interface over authoritative state; the screen owns no second inventory.
+
+**As built (unit 3: commits `a3ee00822`, the server side and the journal's pacts, and `66b741868`, the screen and its
+client test; records: [stolas-pact.md](stolas-pact.md#the-roster-d-07) and
+[the workers record](arcane-concordance-workers.md#the-roster-screen-concordance-chunk-d-d-07) in the records' commit).**
+- **Built:**
+  - **The request (R1):** the contract's `RosterRequestPayload` (`jugcraft:concordance_roster_request`): a sequence, an
+    action (`open`, `suspend`, `resume`, `end`, `cancel`, `recover`, by index), a row id (a Bound Will's, a worker's, or
+    `UUID(0, request id)`) and that row's revision; nothing else (no player id, text or total). `RosterStatePayload`
+    (`jugcraft:concordance_roster_state`): at most 64 `Row`s of 14 fields (id, portrait, kind, name, service, place,
+    loaded, task, next, waiting, an int icon from 12 `ICONS`, revision, actions, the end's confirmation words), whether
+    the Concordance is on, how many more, and the answer; the row's type stays on the server (D-P105, D-P106).
+  - **`spirits/Roster`** (registered by `JugcraftConcordance`): lists the reader's Bound Wills (in the order sealed, a
+    pact without its place or a record not yet claimed included, its presence in the same row), then their courier
+    requests (oldest first), then the other workers on their roster; drops a stand-in's request, one out of bounds or
+    one not newer than the last; then asks the gate its action shares (D-P107), the listing (`not_listed`), the row's
+    current revision (`changed`, with the roster again) and its offer (`not_offered`, or `disabled` while switched off,
+    D-P110); acts only through `AgreementHolder.toggle` and `end` and `CourierLedger.cancel` and `recover`, as the
+    reader alone, alive and in person (D-P108, D-P109, D-P114). Opening has its own gate, served by the server tick
+    once allowed (D-P118). Sessions are memory only, dropped on leaving and at server stop. Revisions are per row
+    (`Objects.hash` of a record's place, hold, presence, upkeep dates and escrow count; of a request's state, counts,
+    courier and source).
+  - **The journal (D-P111):** `StolasRegard.report` calls `Roster.report`: every pact and agreement held (its name, where
+    it is kept or "Without its place", its next obligation, why it waits as the exact figure) and the last eight
+    departures, newest first, behind D-03's Binding Arts gate.
+  - **G13 closed (D-P113):** the Ars Nouveau helpers' kinds have their words (`HELPER_KINDS`, checked against
+    `NouveauHelpers`' species), for the `workers` command too.
+  - **The workshop hand's roster rule** (D-08's As built, last item): `WorkshopHandEntity.joinsRosterOnStatus()` is false,
+    as the shade's and Stolas's, so a replaced hand loading while switched off takes no roster place; `check_pacts`
+    pins it and `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster` shows it.
+  - **The client:** new `client/RosterClient` (the key "Concordance Roster", `key.jugcraft.concordance_roster`, not bound
+    at first and listed on the encyclopedia's Keys page, opening from the game only, D-P112; the last roster sent;
+    requests of four fields for a listed row; one action waiting at a time, at most 100 client ticks; a refresh every
+    40 client ticks while open; answers narrated; all forgotten on leaving a world) and `client/RosterScreen`
+    (`ScreenKit.Fitted`, in-game UI with subtitles; rows as focusable narrated cards with their actions under them;
+    `PactScreen.Verdict` for answers; `KeepFirstConfirmScreen` for End with the server's own words, D-P117; a drawn mark
+    for each icon and for a loaded or unloaded place, D-P119; eight rows a page, Page Up and Page Down, D-P116;
+    portraits as visual-only creatures, at most 16, never added to a level or ticked, else the item or the Spirit
+    Anchor's icon, D-P115). `ConcordanceClient` registers it.
+  - **Generators:** new `tools/concordance_roster.py` (limits, actions, types, icons, gates, answers, service and kind
+    words, portraits, the helpers' kinds; the screen's words, `ROWS_PER_PAGE`, `REFRESH_TICKS`, `CLIENT_SHOTS`), merged
+    by `tools/concordance.py`; `tools/encyclopedia.py`'s `KEY_HELP` names the key; lang regenerated (116 keys added).
+  - **Audits:** new `check_roster` (the server side, payloads, journal, gates, G13 and `D07_TESTS`) and
+    `check_roster_screen` (client only: the classes, the key, the client test); `check_pacts` pins the hand's rule.
+  - G6's roster action is done: a holder ends an agreement, a pact without its perch or a record not yet claimed from
+    the roster, as well as at its block.
+- **Departures from this ticket and from the unit's specification:**
+  - portraits (the unit's critique 8): `KIND_PORTRAITS` maps `spirit` to none, so an unloaded spirit is drawn as the
+    Spirit Anchor's icon, since a Gathering Shade's kind and a Workshop Hand's are both `spirit`; the generator, the audit
+    and a mutation pin it (D-P115 as built);
+  - `check_roster`'s read-only scan matches `note(...)` with arguments only: the specification's `\.note\(` flagged its
+    own `Progress.note()` read in `requestRow`; a roster write is still caught (S10);
+  - `Roster.act` RESUME on a record not yet claimed answers `nothing`, not `resumed` (direct calls only; the screen never
+    offers it);
+  - critique 3: the client test checks each row's portrait one at a time, after Tab has brought the row into view (the
+    scroll body draws only what is inside it), waiting for the row to be drawn rather than a fixed two ticks;
+  - critique 9: no fallback was needed: `ScreenKit.Fitted`, `panelArea()` and the screen fit line are in this branch
+    (D-P121);
+  - the client test also puts the window size back in its `finally` block, with the key and the GUI scale;
+    `check_roster_screen` finds a roster request made with a qualified class name too (mutation C24 slipped past the
+    plain needle);
+  - the D-07 tests use `Items.WOOL.white()` (26.3 has no `WHITE_WOOL`, critique 1), int icons, portraits, `gone()` for
+    Stolas and `disabled` through the screen; the nine tests are the roster part's text, normative for this unit
+    (critique 2).
+  None of the ticket's behaviour was dropped. The vanilla `ConfirmScreen` the ticket names is used through its subclass
+  `KeepFirstConfirmScreen`.
+- **Tests (none yet run in CI):** `ConcordanceWorkerGameTests` +7 (`theRosterEndsOnlyWhatTheReaderHolds`,
+  `aRequestNamingAnotherPlayersRecordIsRefused`, `theRosterListsAPactWithoutItsPerch`, `endingAnOrphanReturnsItsEscrowOnce`,
+  `aStaleRosterRevisionIsRefused`, `theRosterStopsAt64Rows` and `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`),
+  `ConcordanceLogisticsGameTests` +2 (`recoveryNeverTakesCargoOutOfAnUnloadedContainer`,
+  `theRosterEndsAHandAndRecoversItsCargoOnce`), `ConcordanceJournalGameTests` +1
+  (`thePactsSectionListsPactsOnlyAfterTheBindingArts`). With D-06's seven, unit 3 adds 17 server game tests (Worker 49
+  to 63, Logistics 28 to 30, Journal 7 to 8). Client: new `ConcordanceRosterClientGameTests` (one client on the game's
+  dedicated server: empty, rows, three sizes, suspend and resume, an end asked first and kept by Esc, then ended by
+  keyboard, a recovery and a cancel, 64 rows on eight pages; ten shots; registered in the gametest `fabric.mod.json`,
+  weight 140); `ScreenFitClientGameTests` opens the roster at 320×240; a selection unit test checks that the screen
+  selects both classes. The D-07 helpers (`roster`, `act`, `rowOf`, `answered`, `result`) are package-private statics
+  in `ConcordanceWorkerGameTests`, which the logistics tests call: no new helper file (unit 2's D-P37).
+- **Audit mutations:** the server side's 28 (S1 to S22 from the specification and S23 to S28: `disabled` for an action
+  not offered while switched off, the hand's override and test, the journal test, recovery through the ledger, the
+  spirit portrait) and the screen's 25 (C1 to C18 and C19 to C25: the refresh period, the key over another screen, a
+  state word, the fitted panel, the portraits, a second sender, a text box) were each reported by `check_roster`,
+  `check_pacts`, `check_roster_screen`, the key audit or the selection unit test; each unchanged and restored tree
+  reported nothing.
+- **Commands** (each run and passed before its commit): as D-06's, with `python3 -m unittest discover -s scripts/tests`
+  at 197 tests, then 198; every changed Java file parse-checked.
+- **The records' commit** ("Concordance Chunk D: unit 3's records"; records only): run and passed on its tree,
+  `python3 tools/owner_art.py --check`, `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`,
+  `python3 tools/concordance_journey.py --check` ("every route holds"), `python3 tools/check_icon_maps.py`,
+  `node --test tools/world-designer/model.test.cjs` (12), `python3 -m unittest discover -s scripts/tests` (198) and
+  `git diff --check`; `python3 tools/select_client_tests.py --base 92868ff82 --head HEAD` chooses 52 of 242 client
+  classes, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` among
+  them. Its mutations: a broken link in each of the ten records it changes and `stolas-pact.md` removed (each reported
+  by `scripts/check_repository.py`), trailing whitespace in this page (reported by `git diff --check`), and seven of
+  the code commits' (B7, B21, P5, P15, S9, C13, C17) again on the final tree against the Concordance audit alone (each
+  reported); the unchanged tree reported nothing.
+- **Not run:** `./gradlew build` (with or without the optional integrations), the server game tests and the client
+  tests: CI is their first compile and run. Two clients; the narrator heard.
+- **Not confirmed until CI:** generic inference for the 14-field `Row` codec with `UUIDUtil.STREAM_CODEC`; that a
+  GeckoLib creature draws through the GUI's entity picture (the client test's portrait check would fail visibly, and
+  the Spirit Anchor's icon is the fallback); that `setHealth(0)` on a test player leaves it not alive for one
+  synchronous test; the keyboard's Tab focus scrolling a card into view at every size.
 
 ### D-08. The contrasting service: the workshop hand (unit 4)
 
@@ -1625,7 +1823,9 @@ points are the last item below).**
     `DESTINATION_UNLOADED` and take one of its holder's 32 roster places again; `check_pacts`' needle covers only the
     shade. At the merge: add `@Override protected boolean joinsRosterOnStatus() { return false; }` to
     `WorkshopHandEntity`, extend `check_pacts`' needle to the hand, and add a test that a replaced hand loading while
-    switched off stays off the roster. It cannot be done in this tree, which has no such method.
+    switched off stays off the roster. It cannot be done in this tree, which has no such method. Done in unit 3
+    (`a3ee00822`, D-07's As built): the hand's override, `check_pacts`' needle and
+    `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`.
 
 ### D-09. Combined fixes, evidence, the checkpoint and the handoff (unit 5)
 
@@ -1653,12 +1853,12 @@ change, two observatories).
 
 | Code | Requirement | Tickets | Tests |
 |---|---|---|---|
-| E1 | "No one can bind another player" | D-01, D-02, D-04, D-05, D-07 | `onlyTheOwnersSideSealsAnAnchor`, `aStandInNeverSeals`, `noOneBindsAnotherPlayer`, `anotherPlayerCannotAcceptForTheHolder`, `anotherPlayerCannotUseTheHoldersService`, `aRequestNamingAnotherPlayersRecordIsRefused`, `aChangeOfOwnerMovesNoPact`, `aStrangerCannotBindAHandToAnotherPlayersPost`, `aHandServesOnlyItsBeneficiaries`, `anAnchorIsBoundOnlyWhileItKeepsNoAgreement` |
+| E1 | "No one can bind another player" | D-01, D-02, D-04, D-05, D-07 | `onlyTheOwnersSideSealsAnAnchor`, `aStandInNeverSeals`, `noOneBindsAnotherPlayer`, `anotherPlayerCannotAcceptForTheHolder`, `anotherPlayerCannotUseTheHoldersService`, `aRequestNamingAnotherPlayersRecordIsRefused`, `theRosterEndsOnlyWhatTheReaderHolds`, `aChangeOfOwnerMovesNoPact`, `aStrangerCannotBindAHandToAnotherPlayersPost`, `aHandServesOnlyItsBeneficiaries`, `anAnchorIsBoundOnlyWhileItKeepsNoAgreement` |
 | E2 | "Upkeep can suspend without hidden offline punishment" | D-02 (the rules), D-05 (Stolas) | `upkeepWarnsThenSuspendsAfterGraceAndResumes`, `aReturnAfterAbsenceGetsTheFullGrace`, `absentAndUnloadedTimeIsNeverOwed`, `aStandInNeverAnswersForUpkeep`, `theConcordanceOffHoldsEveryClock`, `aRestartWhileSuspendedStaysSuspended` |
 | E3 | "Agreement copying does not multiply benefits" | D-02, D-03, D-04, D-05 | `aCopiedAnchorGivesNothingAndReleasesNothing`, `aLegacyAnchorClaimsItsPlaceOnce`, `aCopiedPerchIsInert`, `aCopiedPerchRecallsNothing`, `aMastersRecallAndStolassShareOneClaim`, `aChangedClockGivesNoSecondRecall`, `notesNeverStandInForStolasEvidence` |
-| E4 | "End/death/unload/restart returns appropriate property once" | D-01, D-02, D-04, D-05, D-06, D-07, D-08 | `aKilledShadeLeavesItsLoadOnce`, `aKilledShadeAwayFromItsAnchorDropsWhereItFell`, `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`, `endingTwiceReturnsOnce`, `thePerchHoldsNothing`, `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`, `thePactAndItsEscrowSurviveARestart`, `killingStolasIsNeverTheFastestRoute`, `recoveryNeverTakesCargoOutOfAnUnloadedContainer`, `endingWithCargoAboardStrandsItOnce`, `aHandFillsACrucibleUntilItIsFull`, `aHandTakesNothingWhereItsHolderMayNot`, `aHandThatCannotFindItsWayStrandsItsCargoOnce`, `anUnloadedDestinationKeepsTheHandWaiting`, `aKilledHandStrandsItsCargoOnce`, `anAbsentHolderStopsTheHand`, `aBrokenSourceReleasesTheHandsClaim`, `aHandsClaimSurvivesARestart`, `aHandLeavesStrandedCargoBeyondItsCarry`, `aHandTakesCargoBackOnlyInsideItsArea` |
+| E4 | "End/death/unload/restart returns appropriate property once" | D-01, D-02, D-04, D-05, D-06, D-07, D-08 | `aKilledShadeLeavesItsLoadOnce`, `aKilledShadeAwayFromItsAnchorDropsWhereItFell`, `anUnloadedShadeReplacedLeavesOnceAndDeliversOnce`, `endingTwiceReturnsOnce`, `thePerchHoldsNothing`, `endingReturnsTheEscrowOnce`, `aDeadHolderIsNeverHandedTheEscrow`, `aBrokenPerchLeavesThePactWithoutItsPerch`, `thePactAndItsEscrowSurviveARestart`, `killingStolasIsNeverTheFastestRoute`, `aRemovedStolasNeverEndsThePact`, `onePresencePerPact`, `aDepartingStolasIsNeverAVisitorAgain`, `endingAnOrphanReturnsItsEscrowOnce`, `recoveryNeverTakesCargoOutOfAnUnloadedContainer`, `theRosterEndsAHandAndRecoversItsCargoOnce`, `endingWithCargoAboardStrandsItOnce`, `aHandFillsACrucibleUntilItIsFull`, `aHandTakesNothingWhereItsHolderMayNot`, `aHandThatCannotFindItsWayStrandsItsCargoOnce`, `anUnloadedDestinationKeepsTheHandWaiting`, `aKilledHandStrandsItsCargoOnce`, `anAbsentHolderStopsTheHand`, `aBrokenSourceReleasesTheHandsClaim`, `aHandsClaimSurvivesARestart`, `aHandLeavesStrandedCargoBeyondItsCarry`, `aHandTakesCargoBackOnlyInsideItsArea` |
 | E5 | "Two users cannot both own a unique reserved service instance accidentally" | D-02, D-04, D-08, D-09 | `twoPlayersCannotBothSealOnePlace`, `twoNegotiationsAtOnePerchSealOnce`, `acceptingSealsOnceAndSpendsOnce`, `oneStolasPactPerHolder`, `twoHandsCannotHoldOneRequest`; the two-client attempt (D-09), or not run |
-| E6 | Extend `ConcordanceWorkerGameTests`, `ConcordanceLogisticsGameTests`, `ConcordanceSharingGameTests`, `ConcordancePersistenceGameTests` and the relevant client companion tests (09:172) | every ticket | the four suites above; `CompanionAutomationChecks.workshopHand` through `PeepoCompanionClientTests` (D-08); `ConcordancePactClientGameTests` (D-04, D-06, D-07) |
+| E6 | Extend `ConcordanceWorkerGameTests`, `ConcordanceLogisticsGameTests`, `ConcordanceSharingGameTests`, `ConcordancePersistenceGameTests` and the relevant client companion tests (09:172) | every ticket | the four suites above; `CompanionAutomationChecks.workshopHand` through `PeepoCompanionClientTests` (D-08); `ConcordancePactClientGameTests` (D-04, D-05, D-06); `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` (D-07, as built in unit 3) |
 | E7 | The checkpoint: "a complete conversation-to-service-to-departure sequence" (09:174) | D-09 | the whole-path server test; the client sequence of the conversation, a recall and the departure |
 
 ## Schema review (D-08; 09:164-166, 03:177)
@@ -1766,6 +1966,22 @@ hand drawn by GeckoLib); `compat/jade/WorkerDataProvider` (its carried count). `
 `jugcraft:workshop_hand`. No `Agreement` field, payload, block, item or saved-data id. The unit review's fixes add
 `WorkshopHandEntity.WORK`, make `CourierWork.Terms.postGone()` return a `Status` (both couriers' terms follow), pass
 the definition to `SpiritAnchorBlock.sealHand` and give the hand's model a `pack_lid` bone.
+
+**As built in unit 3** (D-06, D-07; see their As built notes): new `tools/stolas_body.py`, `spirits/PactReading`,
+`compat/jade/PactDataProvider`, `client/KeepFirstConfirmScreen`, `spirits/Roster`, `RosterRequestPayload`
+(`jugcraft:concordance_roster_request`), `RosterStatePayload` (`jugcraft:concordance_roster_state`),
+`client/RosterClient`, `client/RosterScreen`, `tools/concordance_roster.py`, and the audits `check_stolas_body`,
+`check_roster` and `check_roster_screen`; edited `StolasEntity` (loops, gestures, listening, departure, cues),
+`PactPerchBlockEntity` (`stolas`, `heard`, `react`; `unbound` and `summon`), `PactMenu` (two lines), `AgreementHolder.peek`,
+`Workers` (one line), `JugcraftConcordance` (one line), `StolasRegard.report`, `WorkshopHandEntity`
+(`joinsRosterOnStatus`), `PactScreen`, `WorkerClient`, `JugcraftJadePlugin`, `WorkerDataProvider`,
+`JugcraftJadeClient`, `ConcordanceClient`, `tools/owner_art.py` (`ADAPTED`), `tools/concordance_pacts.py`,
+`tools/concordance.py`, `tools/encyclopedia.py`, `tools/select_client_tests.py` and `tools/check_mod_data.py`
+(`check_geckolib`, `check_pact_screen`, `check_pacts`, `check_rime_strata_assets`). Generated: Stolas's skin, glowmask
+and animation file, `sounds.json` (six `jugcraft:stolas.*` events) and lang. Tests: the Worker, Persistence, Sharing,
+Logistics and Journal suites, `ConcordancePactClientGameTests`, the new `ConcordanceRosterClientGameTests`,
+`ScreenFitClientGameTests`, the gametest `fabric.mod.json` and `scripts/tests/test_client_test_selection.py`. New
+registrations: the six sound events, two payload types and a key mapping. No saved-data key, block, item or entity.
 
 **Existing files edited:**
 
@@ -1930,6 +2146,28 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 - **Outside Chunk D:** main's `PeepoPopulationClientTests` cow-breeding wait (the flake Chunk C's runs met) timed out
   in client shard 15 of run 40085012234's first attempt, though #357's fix (`40381834a`) is on this branch; the shard's
   re-run passed. Chunk D does not edit that test or the Peepo code.
+- **Unit 3 has not run (as built):** nothing of it has been compiled against Minecraft, and none of its 17 server game
+  tests, its new client class or its additions to `ConcordancePactClientGameTests` and `ScreenFitClientGameTests` has
+  run; CI is their first compile. Generic inference (the 14-field `Row` codec with `UUIDUtil.STREAM_CODEC`, the Jade
+  providers, nested lambdas in the client tests' `computeOnClient`) may need small fixes at the first build.
+- **Its base (resolved):** unit 3 needed `55b3ca698` (`ScreenKit.Fitted`) and units 2 and 4 together; it was built on
+  `92868ff82`, which has all three, so the specification's fallback (no `ScreenKit.Fitted`, no screen fit line) was not
+  used. Unit 2's commits after `ee82c1dc7`, where its specification read unit 2 (its records `8f0635d9e` and its unit
+  review's fixes `f6ef0b85d`), are in that base, so unit 3 was built on them.
+- **Gesture timing:** each telling-pose window is at least half a second and the client test freezes inside it; CI
+  load could drift a clip, and the test's log prints each frozen time.
+- **Departure lingering** changes what "gone" means for every caller: a missed `isRemoved()` on a Stolas fails a test,
+  not a player (the 40 ticks are never saved). Unit 2's assertions were changed to `gone()`.
+- **Portraits** through GeckoLib in the GUI are unverified; the Spirit Anchor's icon is the fallback, and the client
+  test's portrait check would then fail visibly (one line to change).
+- **Revision collisions** (`Objects.hash`): an action could pass on a stale view, but every action re-checks the holder
+  and the record, so at worst it acts on the current state.
+- **Shared gates:** a roster action within 4 ticks of a Spirit Anchor's use (or 10 of a logistics command) answers "One
+  moment".
+- **Truncation:** 80 possible rows become 64 (`more` says so); the journal and the commands list everything.
+- **Sound on CI:** the client runners have no sound device, so Stolas's subtitles are proven defined and fired there,
+  never seen (D-P104); an OpenAL null driver is left to unit 5 or the owner.
+- **Open pull request #467** touches `JugcraftJadeClient`, which unit 3 edits; refresh before landing.
 
 ## Explicit don'ts
 
@@ -1987,7 +2225,7 @@ The smallest first step is D-01: no new id, block, entity or art; it closes G1 a
 |---|---|---|---|---|
 | 1 | Worker, Authority, Sharing, Persistence, Resource | none | `check_workers`, `check_persistence`, the pact `problems()` audit, `check_repository`, `gradlew build` | an older Bound Will; an anchor's agreement; a legacy `suspended`; an unreadable record kept; stamps |
 | 2 | Worker, Sharing, Persistence, Sky, Styx, Progression, Journal, Authority, Resource | `ConcordancePactClientGameTests` (conversation, terms, keyboard, service, ending) | `check_stolas_regard`, `check_pacts`, `check_pact_screen`, `check_economy`, `owner_art --check`, `concordance_journey --check`, `check_acquisition`, the icon maps, the recipe-conflict fixture if #462 has merged | the perch; the escrow and clock; a restart while suspended; a reload with a broken definition |
-| 3 | Worker (presence), Journal, Logistics (recovery) | poses, subtitles, Jade, the roster; the build without optional integrations | `check_geckolib` (triggerables), `owner_art --check`, client-test selection | the entity's keys |
+| 3 | Worker (presence), Journal, Logistics (recovery). As built: Worker +14, Logistics +2, Journal +1, written, not run (CI is their first run) | poses, subtitles, Jade, the roster; the build without optional integrations. As built: `ConcordancePactClientGameTests` extended, `ConcordanceRosterClientGameTests` new, `ScreenFitClientGameTests` extended; none run, and the build with or without the optional integrations not run | `check_geckolib` (triggerables), `owner_art --check`, client-test selection. As built, run and passed: `owner_art --check`, `check_mod_data.py` (with `check_stolas_body`, `check_roster`, `check_roster_screen` and the D-06 block of `check_pacts`; 104 audit mutations reported), `check_repository.py`, `concordance_journey.py --check`, `check_icon_maps.py`, the World Designer and script tests, `git diff --check`, the Java parse check; `select_client_tests.py --base 92868ff82` chooses 52 of 242 client classes, the three above among them | the entity's keys. As built: no saved-data change (the departure and the listening flag are never saved; roster sessions are memory only) |
 | 4 | Logistics (seven of 03:193's cases and four more), Worker (five), Authority (one), Persistence (two) | `PeepoCompanionClientTests` / `CompanionAutomationChecks` | `check_workers` (`WORK`, the class map), `check_hand`, the logistics audit | a claim across a restart; an anchor's post |
 | 5 | the whole path; load | the evidence bundle; the two-client attempt | every check | none |
 
@@ -2018,7 +2256,8 @@ from its review; D-P17 to D-P49 from unit 2's specification and its review, numb
 2's unit review), each with what was built; none is the owner's, and each is reviewable at the checkpoint. Unit 4's are
 numbered from D-P70, a block reserved for it so that units built in parallel never collide (unit 2 takes the numbers
 after unit 1's): D-P70 to D-P80 from its specification (its D-P60 to D-P70, renumbered), D-P81 from its specification's
-review and D-P82 and D-P83 from the unit review's fixes. Unit 3 takes D-P90 upward.
+review and D-P82 and D-P83 from the unit review's fixes. Unit 3 takes D-P90 upward: D-P90 to D-P121 from its
+reconciled specification (its four part designs' numbers, renumbered), as corrected by the specification's critique.
 
 | ID | Date | Decision | Status | Affects |
 |---|---|---|---|---|
@@ -2056,7 +2295,7 @@ review and D-P82 and D-P83 from the unit review's fixes. Unit 3 takes D-P90 upwa
 | D-P5 | 24 October 2026 | `TAKEN` means the holder block already keeps terms, not that the ledger has some record at the place: safe with game-test structure clearing (flag 818 skips side effects) and with crash orphans | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
 | D-P6 | 24 October 2026 | Sealing an owned holder block needs its owner, or their party where the block lets parties seal, **and** `Authority.mayChange` at the block; an ownerless legacy anchor needs only `mayChange`; a stand-in never seals. As built: `Sealing.partySeals` (the anchor true; D-04's perch false, D-S8; correction 6); "the Binding Arts are not understood" stays the anchor's own check before sealing, worded as before, not a seal outcome | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04 |
 | D-P7 | 24 October 2026 | A block whose Bound Will is gone (and not merely unreadable) forgets its terms when it next verifies, and may be sealed again; its shade then departs, its load dropped at the anchor (which no longer keeps its holder's agreement, D-P12). An unreadable record makes the block and its shade wait | Proposed (unit 1, reviewable at the checkpoint) | D-02 |
-| D-P8 | 24 October 2026 | `end`, `toggle`, `recall` and `deposit` are not rate-gated themselves; the anchor's use keeps `RateGate.allow(server, "workers", 4)`. D-04's and D-07's menus and roster actions must call `RateGate.allow` before `end`, `toggle`, `deposit` and `recall` (a later `check_pacts` needle can hold it at their payload handlers). As built: suspend and resume by record id alone (`AgreementHolder.toggle(level, player, id, now)`), for D-07's roster while the place is unloaded (correction 9); `end` has the same static form | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04, D-07 |
+| D-P8 | 24 October 2026 | `end`, `toggle`, `recall` and `deposit` are not rate-gated themselves; the anchor's use keeps `RateGate.allow(server, "workers", 4)`. D-04's and D-07's menus and roster actions must call `RateGate.allow` before `end`, `toggle`, `deposit` and `recall` (a later `check_pacts` needle can hold it at their payload handlers). As built: suspend and resume by record id alone (`AgreementHolder.toggle(level, player, id, now)`), for D-07's roster while the place is unloaded (correction 9); `end` has the same static form. As built in unit 3: the roster's suspend, resume and end ask the anchor's gate (`workers`, 4 ticks) before `toggle` and `end`, and its cancel and recover the logistics commands' (D-P107); ended from the roster (D-07) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04, D-07 |
 | D-P9 | 24 October 2026 | The anchor gets no server ticker: its definition has no upkeep. `AgreementHolder.look` is the rule's driver, called by D-04's perch ticker. `OnBreak.UNSEAT` (a broken perch leaves its pact without its place) arrives with D-04 | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-04 |
 | D-P10 | 24 October 2026 | Status ids `upkeep_due` and `upkeep_held` are appended (each a want sign) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-07 |
 | D-P11 | 24 October 2026 | `TestPlayers` gains `survivor`, `leave`, `again`, `played` and `play`. Editing `TestPlayers.java` makes `tools/select_client_tests.py` choose every client class (a shared file); accepted. As built: every class, 239 | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-02 |
@@ -2064,7 +2303,7 @@ review and D-P82 and D-P83 from the unit review's fixes. Unit 3 takes D-P90 upwa
 | D-P13 | 24 October 2026 | Switched off, a loaded familiar whose person is online (in any level) restarts its play-time count at each look, so it fades for none of their play meanwhile (correction 13, D-S16). One not loaded while the Concordance was off counts its person's play meanwhile at its first look after the switch is on: no switch-off time is recorded. The residual case is accepted and said in the records | Proposed (unit 1, reviewable at the checkpoint) | D-01 |
 | D-P14 | 24 October 2026 | A seal may carry a cost (`Sealing.affords` and `pay`): asked after the refusals and before anything is called, refused as the appended outcome `CANNOT_AFFORD` (`seal_cannot_afford`, nothing spent), and paid in the same server call only once the Bound Will is recorded (correction 10, D-S13). The anchor's seal costs nothing; D-04's Open Hand Compact uses it | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04 |
 | D-P15 | 24 October 2026 | A holder block calls its presence by counterpart (`Holds.call(level, who, counterpart)`) and calls nothing (so `UNAVAILABLE`) for a counterpart it does not serve: the anchor serves only `jugcraft:gathering_shade`. Every presence (`AgreementHolder.Presence`) is a `WorkerEntity` subclass, unit 2's Stolas and unit 4's hand included, so each has a roster entry to note and strike (corrections 7 and 8) | Proposed (unit 1, reviewable at the checkpoint) | D-01, D-04, D-06, D-08 |
-| D-P16 | 24 October 2026 | Breaking a holder block while the Concordance is off releases nothing: its record stays kept at that place with its escrow, no departure is written and its shade is not sent away (correction 5, D-S16). Once the switch is on, the shade finds no anchor and departs, its load dropped where the anchor stood; the next seal there leaves the record without its place; its holder can end it (by code until D-07's roster) | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-07 |
+| D-P16 | 24 October 2026 | Breaking a holder block while the Concordance is off releases nothing: its record stays kept at that place with its escrow, no departure is written and its shade is not sent away (correction 5, D-S16). Once the switch is on, the shade finds no anchor and departs, its load dropped where the anchor stood; the next seal there leaves the record without its place; its holder can end it (by code until D-07's roster). As built in unit 3: ended from the roster (D-07), which lists a record left without its place, or kept at a place that keeps it no longer, and offers End | Proposed (unit 1, reviewable at the checkpoint) | D-02, D-07 |
 | D-P17 | 24 October 2026 | Only the Binding Arts gate Stolas's Regard in code (its `requires`). Verdant Husbandry and the Assay are asked only by the progression graph's practice gates, so the graph asks more than the game, never less (`rules/ResearchEngine.java:41-43`; a Verdant Bed wakes only for a Greenwarden). As built: `stolas_regard.json` requires the Binding Arts understood and nothing else | Proposed (unit 2, reviewable at the checkpoint) | D-03 |
 | D-P18 | 24 October 2026 | Two codex entries in the Binding category: `binding/stolas_regard` (the research, at (0,4), from the Binding Arts understood; the Binding Arts' Understood page links it, and its own Understood page links the pact's) and `binding/stolas_pact` (the perch's recipe, his terms, the Open Hand Compact, Star-reckoning, upkeep, ending and moving; at (2,4), from Stolas's Regard understood). There is no `binding/stolas.json` | Proposed (unit 2, reviewable at the checkpoint) | D-03, D-04, D-05 |
 | D-P19 | 24 October 2026 | The three Styx flowers are "found" sources in `tools/concordance_progression.py` (his gift, once a player; "a feather serves instead"), so the progression graph never relies on them; the feather carries the route | Proposed (unit 2, reviewable at the checkpoint) | D-03 |
@@ -2113,6 +2352,38 @@ review and D-P82 and D-P83 from the unit review's fixes. Unit 3 takes D-P90 upwa
 | D-P81 | 24 October 2026 | An absent requester's request at the head of a hand's queue holds the hand (`OWNER_OFFLINE`), as it holds porters: the review's optional correction 9 (skip such requests in the hand's own terms, so it serves those behind them) is not taken, so the two couriers keep one rule for absent requesters; recorded as a risk and left open at the checkpoint | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
 | D-P82 | 24 October 2026 | A hand never takes up cargo stranded at its post that is more than its definition's carry (a porter's, which has no cap of its own; or its own after a data pack lowered its carry), and never claims cargo to be taken back to a source beyond its area (it could put that only into the post, and with the post full would claim and strand it again at each decision): both refused (`IDLE`) in its terms before the beneficiary and area check, and left to porters or to the requester's one recovery. Cargo it already holds whose source is beyond its area still goes into the post when cancelled, never to that source (D-P76). The unit review's findings 1 and 6 | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
 | D-P83 | 24 October 2026 | A courier whose post is gone says why it waits: `CourierWork.Terms.postGone()` returns the status (a porter, which forgets its post, `IDLE` as before; a hand, whose anchor keeps it, `OUTSIDE_AGREEMENT`, as with no post). The anchor's use asks the switch alone, then only the definition of the worker it serves (a hand's for an anchor bound to a post with no agreement or keeping a `courier` agreement, `WorkshopHandEntity.WORK`; the shade's otherwise), so a data pack that drops one leaves the other's anchors working. The unit review's findings 7 and 8 | Proposed (unit 4, reviewable at the checkpoint) | D-08 |
+| D-P90 | 24 October 2026 | Stolas's geometry stays the owner's file byte for byte (`OWNER_FILES`); "scaled up" is the renderer's `withScale(1.4F)` (unit 2's D-P41), the hitbox 0.7×1.45 | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P91 | 24 October 2026 | His skin, glowmask and animation file are adapted from Flashjack's own files by `tools/stolas_body.py`, written and checked by `tools/owner_art.py` (`ADAPTED`): each texel recoloured in place by part (from the geometry's box-UV faces) and kind (by hue), shading and alpha kept, nothing drawn: plumage black, markings blue-black, beak, legs and toes dark horn, eyes amber, crest and breast glyph old gold. The recolour serves D-S5's raven form, not originality | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P92 | 24 October 2026 | His eyes alone glow (`AutoGlowingGeoLayer`, the four eye texels) | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P93 | 24 October 2026 | His animation file is Flashjack's five clips unchanged plus nine of his own (`animation.stolas.*`): loops idle, listen, waiting and suspended (and the owner's `idle.flapping` as astir); gestures arrive, inspect, assent, refuse and depart. `attack`, `idle.air`, `idle.ground` and `idle.sitting` are kept, unplayed | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P94 | 24 October 2026 | Gestures play on a second controller (`gesture`, a STOP handler, no transition ticks, after the worker's own), not additively (GeckoLib's additive path subtracts the base rotations); each starts and ends on his listening pose. The server fires them, so a late joiner sees his state, never a replay | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P95 | 24 October 2026 | He listens while any conversation is open at his perch: a synced flag set at once when one opens (`listen()`), recomputed every think from the live conversations | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P96 | 24 October 2026 | He arrives when summoned (ARRIVE right after the entity is added: an invitation, a presence called back, a pact seated); the trigger reaches whoever tracks him then | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P97 | 24 October 2026 | Leaving takes DEPART's 40 ticks: struck off at once, never saved meanwhile (`shouldBeSaved`); `gone()` (removed or departing) replaces `isRemoved()` wherever "he has left" is meant; the clip holds its last frame. As built, `stolas(level)` also asks that the presence is seated at this perch, so a copied perch moves nobody (the unit's critique 6) | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P98 | 24 October 2026 | The waiting pose is photographed by switching the Concordance off in process (`JugcraftConfig.setFeatureEnabled`), restored in `finally` | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P99 | 24 October 2026 | Reactions: ACCEPT sealed, assent, refused, refuse; RECALL done, inspect, refused, refuse; DEPOSIT done, inspect; RESUME done, assent; none for the menu's own `not_offered`, CHOOSE, SUSPEND, DECLINE, END or SEAT. The first obligation (at an observatory) has no gesture | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P100 | 24 October 2026 | At most one cue of a kind every `CUE_TICKS` = 10 a Stolas; listening is not voiced within 10 ticks of his arrival; no cue while the Concordance is off, except his departure | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P101 | 24 October 2026 | Sounds `jugcraft:stolas.{arrive,listen,inspect,assent,refuse,depart}` through the generator, entity-attached, NEUTRAL, heard within 16 blocks, bound to runtime files (wing flaps, page turns, a book opening, the doorbell chime, the crow's call shared with `beast_crow`, the ghost's weep); no new audio, no voice | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P102 | 24 October 2026 | Jade names no player, shows no escrow, and reads through `AgreementHolder.peek` (no writes). The perch and the Spirit Anchor get one provider each; anchors show their counterpart and service, so the workshop hand is shown without a branch of its own. As built, a perch keeping nothing reads "visiting" only while its own visitor waits there (critique 7) | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P103 | 24 October 2026 | Each answer on the pact screen and the roster carries a drawn tick or cross, narrated "Done:" or "Refused:"; both screens are in-game screens and draw subtitles over themselves | Proposed (unit 3, reviewable at the checkpoint) | D-06, D-07 |
+| D-P104 | 24 October 2026 | Subtitle evidence: CI has no sound device; the client test checks subtitles as defined and fired and never claims them seen there (an OpenAL null driver is left to unit 5 or the owner) | Proposed (unit 3, reviewable at the checkpoint) | D-06 |
+| D-P105 | 24 October 2026 | Roster rows: the reader's Bound Wills in the order sealed (each with its presence in the same row), then the courier requests they filed (oldest first), then roster workers not already shown; at most 64; `more` counts the rest; the journal and the `workers` and `logistics` commands list everything | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P106 | 24 October 2026 | A roster request names a row by id (a record's, a worker's, or `UUID(0, request id)`) and that row's revision: it must be listed to this reader in the last state (else `not_listed`), at its current revision (else `changed`, with the roster again), and offer the action (else `not_offered`). The row's type never travels | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P107 | 24 October 2026 | Gates: suspend, resume and end share the Spirit Anchor's `workers`, 4 ticks; cancel and recover share the logistics commands' `logistics`, 10 ticks; opening has `roster`, 10 ticks, served by the server tick once allowed | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P108 | 24 October 2026 | Suspend and resume from the roster are offered by the record's hold and are idempotent (a second suspend is not offered; resume on an upkeep hold answers `held_for_upkeep`). As built, a direct RESUME on a record not yet claimed answers `nothing` (the screen never offers it) | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P109 | 24 October 2026 | Every roster action drops a stand-in's request and refuses a dead reader (`not_permitted`), recovery included (the logistics command does not check life) | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P110 | 24 October 2026 | Switched off: rows listed, none offered, and an action answered `disabled`; records, escrow and requests untouched (D-S16) | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P111 | 24 October 2026 | The journal's pacts section, after the Regard's lines, lists each Bound Will held (name, place, next obligation; why it waits as the exact figure) and the last 8 departures, newest first, behind D-03's Binding Arts gate | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P112 | 24 October 2026 | The roster key `key.jugcraft.concordance_roster` ("Concordance Roster") is not bound at first and is listed on the encyclopedia's Keys page | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P113 | 24 October 2026 | Ars Nouveau helper kinds get their roster words (`HELPER_KINDS`, checked against `NouveauHelpers`' species): G13 closed, for the `workers` command too | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P114 | 24 October 2026 | A request row's "loaded" is the place its next step needs; a reserved or aboard request offers cancel only; recovery only of cargo the ledger holds stranded (08:69-70) | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P115 | 24 October 2026 | Portraits: a visual-only creature per entity type the server names (never added to a level or ticked, at most 16, forgotten on a world change), still; an item's icon otherwise. A record's row names its counterpart, a loaded worker its own type, an unloaded worker its kind's (`Roster.KIND_PORTRAITS`: familiar, the Hearthling; construct, the Clockwork Porter; pact, Stolas; any other kind `jugcraft:<kind>`), a request its item. As built, a `spirit` has none, so the Spirit Anchor's icon is drawn, since a Gathering Shade and a Workshop Hand share that kind (critique 8) | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P116 | 24 October 2026 | Pages of 8 rows; Page Up and Page Down turn them; the page scrolls within; rows past 64 counted on the last page | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P117 | 24 October 2026 | Ending asks first through `KeepFirstConfirmScreen` (vanilla's confirmation with the keyboard on Keep it; Esc keeps); the pact screen's End uses it too, refining D-P40. Cancel and recover do not ask (nothing is lost by either); the Cancel action's hint carries the server's words | Proposed (unit 3, reviewable at the checkpoint) | D-06, D-07 |
+| D-P118 | 24 October 2026 | The open roster asks again every 40 client ticks; an open too soon is served later by the server, never answered "too fast"; a refresh that changes nothing rebuilds nothing | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P119 | 24 October 2026 | State and place marks are drawn shapes, one for each icon, always beside its word; no new texture | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P120 | 24 October 2026 | The roster is in the screen fit check (320×240) | Proposed (unit 3, reviewable at the checkpoint) | D-07 |
+| D-P121 | 24 October 2026 | Unit 3 builds on the merge of `wip/chunk-d`, unit 2 and unit 4. As built, on `92868ff82` (units 1, 4 and 2 merged with their review fixes), so the specification's fallback was not needed (critique 9) | Proposed (unit 3, reviewable at the checkpoint) | D-06, D-07 |
 
 **The checkpoint's three questions** (09:174; at most three, 09:18):
 1. Stolas's personality and appearance: the Flashjack-derived raven, his three dialogue beats and two memorable details
@@ -2134,8 +2405,10 @@ green in CI (run 40067977680); unit 4 from `wip/chunk-d-u4`, merged at `df300685
 `86c4e7127`, green in CI (run 40085012234, one client shard re-run for main's cow-breeding flake); unit 2 from
 `wip/chunk-d-u2` (six commits on `97e1facd4`: `9daf23ae1`, `832129b95`, `7da686ad4`, `ee82c1dc7`, the records'
 `8f0635d9e` and the unit review's fixes `f6ef0b85d`), merged after unit 4 by the commit "Merge Chunk D unit 2 (Stolas
-and the pact perch) into the pact hall", not pushed when these notes were written. Before
-more work:
+and the pact perch) into the pact hall", not pushed when these notes were written. Unit 3 (D-06, D-07) is on the local
+`wip/chunk-d-u3`, five commits on `92868ff82` (`9805a9a7c`, `773b85aba`, `a3ee00822`, `66b741868` and the records'
+commit "Concordance Chunk D: unit 3's records"), not merged here and not pushed; its owner checkpoint (his look, gestures
+and sounds, Jade's words, the roster's key and portraits) is pending. Before more work:
 1. Push to `claude/chunk-d-pact-hall` and run the Build workflow by workflow_dispatch with every client class (CI is
    unit 2's first compile; unit 4's hand tests already passed after the helper fix, in run 40085012234); fix what
    fails and record each failure and fix in the ticket's As built notes, the units table and the records (the workers
@@ -2150,15 +2423,17 @@ more work:
    action (D-P8, D-P35). Its owner checkpoint (the look, the Harvest Moon balance, the obligation once a player) is
    pending. Unit 4's hand now finds unit 2's research: `check_hand` checks `jugcraft:stolas_regard`'s mastered state,
    and the hand's codex entry links `binding/stolas_regard`.
-4. Still open from unit 1's review fix 2 (D-08's As built, the last item): the hand inherits `joinsRosterOnStatus()`
-   true, so a replaced hand loading while switched off could take a roster place; give it the shade's `false`, extend
-   `check_pacts`' needle to it and add the test named there. Stolas says `false` since the merge of unit 2 (he joins
-   only by his seal, his call again or his seating), held by `check_pacts`. Also open from unit 4:
+4. Unit 1's review fix 2 for the hand (D-08's As built, the last item) is done in unit 3 (`a3ee00822`): the hand's
+   `joinsRosterOnStatus()` is false, as the shade's and Stolas's, held by `check_pacts` and
+   `aReplacedHandLoadingWhileSwitchedOffStaysOffTheRoster`. Still open from unit 4:
    `docs/ARCANE_CONCORDANCE.md` lists unit 2's saved identifiers but not unit 4's (`jugcraft:workshop_hand` and the
    Spirit Anchor's `post`).
 5. Keep this page's units table, decisions and evidence current as each unit lands, with an As built note per ticket.
-   Then unit 3 (D-06, D-07: Stolas's own body, sounds and Jade on `StolasEntity`'s clips; the roster screen, which gives
-   ending a pact without its perch an in-game route; decisions from D-P90) and unit 5 (D-09).
+   Merge unit 3 here (its records and this page by union; lang and `sounds.json` regenerated, never hand-merged), run CI
+   with every client class (unit 3's first compile: its 17 server game tests, `ConcordancePactClientGameTests`,
+   `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests`, and the build without the optional integrations),
+   and record each failure and fix in D-06's and D-07's As built notes. Then unit 5 (D-09), which also takes Chunk A's
+   `ComposerScreen` subtitle finding (D-06's Findings for other units).
 
 ## How this contract was checked
 
@@ -2245,3 +2520,13 @@ more work:
   1's review fixes at `da185dd0d` (`WorkerEntity.setStatus` and `joinsRosterOnStatus`, `check_pacts`' needle and the
   files both change), read only. Run: the parse check, the generator, the nine new mutations and four old ones, and the
   fixes commit's local checks (D-08's As built).
+- **For unit 3's As built notes and proposals (24 October 2026):** re-read at the unit's code head `66b741868`: the four
+  code commits' messages and diffs against the reconciled specification, its critique's twelve corrections and the
+  nine roster tests it names; `StolasEntity` (loops, gestures, departure, cues, `reaction`, `loop`),
+  `PactPerchBlockEntity` (`stolas`, `heard`, `react`, `summon`), `PactReading`, `PactDataProvider`, `Roster` (its
+  Javadoc, gates, answers, listing, record rows and revisions), the payloads' ids and limits, `RosterClient`'s key,
+  `RosterScreen`'s pages, `Workers.STOLAS`, `WorkerClient`, the generator tables (`tools/concordance_pacts.py`'s D-06
+  sections, `tools/concordance_roster.py` whole), `D06_TESTS` and `D07_TESTS`, the test classes' `@GameTest` counts and
+  the generated files' SHA-256 (`tools/owner_art.py --provenance pacts` and `sha256sum`); unit 2's records at
+  `8f0635d9e` and its merge fixes at `92868ff82`. Run for these notes: the records commit's local checks and its
+  mutations (D-07's As built, the records' commit).

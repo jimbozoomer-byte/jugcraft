@@ -504,3 +504,9 @@ item tags `jugcraft:stolas_offerings` and `jugcraft:stolas_specimens`; the pact 
 `data/jugcraft/concordance/pact/stolas.json` (data folder `concordance/pact`, schema 1); payload types
 `jugcraft:concordance_pact_request` and `jugcraft:concordance_pact_state`; the roster kind `pact`; codex entries
 `binding/stolas_regard` and `binding/stolas_pact`.
+
+Since Concordance Chunk D (unit 3, [Stolas's pact](features/stolas-pact.md#rollout-and-open-questions); not merged): the
+sound events `jugcraft:stolas.arrive`, `.listen`, `.inspect`, `.assent`, `.refuse` and `.depart`; payload types
+`jugcraft:concordance_roster_request` and `jugcraft:concordance_roster_state` (the roster's actions and icons travel as
+indices, so append only); the key `key.jugcraft.concordance_roster`; Jade's providers `jugcraft:pact_perch` and
+`jugcraft:spirit_anchor`. No saved data.
