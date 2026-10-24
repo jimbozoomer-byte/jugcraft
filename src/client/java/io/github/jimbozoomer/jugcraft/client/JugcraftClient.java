@@ -120,6 +120,9 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.BOMB, ThrownItemRenderer::new);
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(RaiderModel.LAYER, TownsfolkModel::createLayer);
 		ZeppelinClient.register();
+		AircraftClient.register();
+        io.github.jimbozoomer.jugcraft.furniture.ArtisanFurniture.openEditor = pos -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(new ArtisanScreen(pos));
+        net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.furniture.ArtisanFurniture.ENTITY, DesignedFurnitureRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.DIESEL_WALKER, DieselWalkerRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, ArmouredWalkerRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.HOWITZER_WALKER, HowitzerWalkerRenderer::new);

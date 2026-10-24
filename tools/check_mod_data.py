@@ -163,6 +163,7 @@ def tag_exists(registry, ref):
 @cache
 def texture(ref):
     ns, path = split(ref)
+    if ref == 'jugcraft:crafted/vanilla_bow': return  # Alias of vanilla's bow sprite in the blocks atlas.
     if ns == "minecraft":
         return
     png = RES / "assets" / ns / "textures" / f"{path}.png"
@@ -181,6 +182,7 @@ def texture(ref):
         width, height = img.size
         if not animated and ref == "jugcraft:menagerie/rotten/block/treasure_chest" and img.size == (48, 32):
             return  # Supplied chest atlas; its original block-model UVs are normalized to 0..16.
+        if not animated and ref.startswith("jugcraft:crafted/") and all(0 < v <= 1024 for v in img.size): return  # Authored rectangular trophy skins retain their supplied UV dimensions.
         if not animated and ref.startswith(("jugcraft:household/", "jugcraft:menagerie/")) and all(v > 0 and v <= 1024 and v & (v-1) == 0 for v in img.size):
             return  # supplied model atlases use rectangular UV sheets
         if animated and not (width in (16, 32, 48, 64) and height % width == 0 and height > width):

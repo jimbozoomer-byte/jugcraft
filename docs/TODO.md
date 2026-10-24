@@ -1,11 +1,24 @@
 # Jugcraft TODO
 
+## Planes, furniture and graves — October 22 candidate
+
+- [x] Integrate seven supplied aircraft with equipment/cargo, fuel, repair, ownership, weapons and retained models/animations. Correct grounded model/seat/weapon offsets.
+- [x] Integrate 267 ready-made furniture blocks, 18 related items, 28 paintings and 317 recipes using supplied art and native seating, beds, storage and cooking.
+- [x] Implement the bounded artisan editor, paid crafting/recycling and local design library; retain supplied workstation art.
+- [x] Implement persistent owner-recoverable death graves with personal/global keep-inventory, totem and boss-lair exclusions.
+- [x] Complete combined regression and rendered checks plus an isolated existing-world save/restart rehearsal; fix all sheet/sleeping-bag collisions and generator/atlas omissions.
+- [ ] Complete final CI and prepare/publish the matching client/server update; do not promote before hosted startup.
+- [ ] Owner confirms restart; warn players for 30 seconds, back up, deploy, verify, then promote the client channel.
+- [ ] Hosted two-account acceptance and owner flight/editor feedback. Future editor extensions: rotated/oversized parts, more materials, per-design inventory preview.
+
+[Scope, native-port limits and test evidence](features/owner-graves-aircraft-furniture.md).
+
 ## Town maintenance and updater rollout — October 22
 
 - [x] Allow public doors, trapdoors, controls, seating and inventory-free workstations in Spawn City while protecting shared containers, stored resources, building and breaking. Preserve personal bank Ender Chest access.
 - [x] Stop sleeping townsfolk from travelling; prevent city flak from using near-vertical fallback shots at unreachable ground targets; animate guard-walker movement and render seated guard pilots.
 - [x] Include the merged Windows updater lock-handoff fix from PR #456.
-- [ ] Validate and publish the isolated combined town/updater release, back up and replace the live server's managed JAR, verify startup, then promote the matching client channel.
+- [x] Publish/deploy town/updater `0.1.0-alpha.20261022.3` from main `f904df3fd`: hosted startup verified and matching client channel promoted.
 - [ ] Owner checks the real launcher update/relaunch and hosted town visuals. On October 22 the owner explicitly authorized rollout without the blocked launcher click-through; this is an outstanding acceptance check, not a test pass.
 
 See [town release scope and evidence](features/town-updater-release-oct22.md).

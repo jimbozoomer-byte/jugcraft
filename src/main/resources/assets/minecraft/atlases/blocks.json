@@ -162,6 +162,26 @@
       "type": "minecraft:directory",
       "source": "menagerie/rotten/item",
       "prefix": "menagerie/rotten/item/"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "crafted",
+      "prefix": "crafted/"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:item/bow",
+      "sprite": "jugcraft:crafted/vanilla_bow"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "aircraft/item",
+      "prefix": "aircraft/item/"
+    },
+    {
+      "type": "minecraft:directory",
+      "source": "artisan",
+      "prefix": "artisan/"
     }
   ]
 }

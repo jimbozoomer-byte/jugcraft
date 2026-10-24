@@ -82,6 +82,8 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.building.Kaiserworks.register();
 		io.github.jimbozoomer.jugcraft.building.Trenchworks.register();
 		io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.register();
+		io.github.jimbozoomer.jugcraft.aircraft.JugcraftAircraft.register();
+        io.github.jimbozoomer.jugcraft.furniture.ArtisanFurniture.register();
 		io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.register();
 		io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.register();
 		io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery.register();
@@ -146,6 +148,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftWorldgen.register();
 		JugcraftParties.register();
         io.github.jimbozoomer.jugcraft.server.PlayerRules.register();
+        io.github.jimbozoomer.jugcraft.grave.DeathGraves.register();
         io.github.jimbozoomer.jugcraft.server.ViewerWorldRules.register();
 		registerMachineStylePack();
 		// Higher-priority data overrides only exist when the optional backpack mod is installed.
