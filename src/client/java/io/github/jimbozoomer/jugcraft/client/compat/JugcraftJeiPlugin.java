@@ -48,7 +48,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 	private static final int TEXT = 0xFF404040;
 
 	/** One recipe: input slots (a tag shows all its items), the result, byproducts with chances, and time. */
-	public record ViewRecipe(List<List<ItemStack>> inputs, ItemStack output, List<ItemStack> extras, List<Float> chances, int ticks) {
+	public record ViewRecipe(List<List<ItemStack>> inputs, ItemStack output, List<ItemStack> extras, List<Float> chances, int ticks, int minimumHeat) {
 	}
 
 	private record Machine(Item block, IRecipeType<ViewRecipe> type, List<ViewRecipe> recipes) {
@@ -373,7 +373,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 			extras.add(new ItemStack(item(values.get(0).getAsString()), values.get(1).getAsInt()));
 			chances.add(values.get(2).getAsFloat());
 		}
-		return new ViewRecipe(inputs, output, extras, chances, row.get("ticks").getAsInt());
+		return new ViewRecipe(inputs, output, extras, chances, row.get("ticks").getAsInt(),
+				row.has("minimum_heat") ? row.get("minimum_heat").getAsInt() : 0);
 	}
 
 	private static Item item(String id) {
@@ -424,7 +425,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 		@Override
 		public int getHeight() {
-			return 38;
+			return machine.recipes().stream().anyMatch(r -> r.minimumHeat() > 0) ? 52 : 38;
 		}
 
 		@Override
@@ -452,6 +453,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		public void draw(ViewRecipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
 			var font = Minecraft.getInstance().font;
 			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0), 0, 28, TEXT, false);
+			if (recipe.minimumHeat() > 0) graphics.text(font,
+					Component.translatable("jei.jugcraft.minimum_heat", recipe.minimumHeat()), 0, 40, TEXT, false);
 			for (int i = 0; i < recipe.chances().size(); i++) {
 				String chance = Math.round(recipe.chances().get(i) * 100) + "%";
 				graphics.text(font, chance, 118 + i * 24 + 9 - font.width(chance) / 2, 28, TEXT, false);

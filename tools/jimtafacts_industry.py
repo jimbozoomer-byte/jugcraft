@@ -177,6 +177,12 @@ def recipes():
     'key':{'I':'jugcraft:steel_plate','P':material,'C':'jugcraft:copper_wire','M':'jugcraft:machine_casing'},'result':{'id':'jugcraft:'+id}}
  return result
 
+TAGLINES = {'jimta_compressor':'Compress complete batches into blocks and carbon components.',
+    'jimta_extractor':'Extract rubber, reclaim materials and remove wool dye. Empty bottles return to the upper output slots.',
+    'jimta_thermal_centrifuge':'Heat washed ore to its required temperature, then separate nine-unit batches. Keep both outputs clear.',
+    'jimta_recycler':'Convert six pieces of permitted scrap material into one reusable scrap.',
+    'jimta_metal_cutter':'Cut metal sheets into the shared wiring components.'}
+
 def generate(shared=True):
  lang={}; manifest=[]
  def copy(source,dest):
@@ -188,11 +194,7 @@ def generate(shared=True):
   lang['block.jugcraft.'+id]=label
   if native is None:
    lang['container.jugcraft.'+id]=label
-   lang['container.jugcraft.tagline.'+id]={'jimta_compressor':'Compress complete batches into blocks and carbon components.',
-    'jimta_extractor':'Extract rubber, reclaim materials and remove wool dye. Empty bottles return to the upper output slots.',
-    'jimta_thermal_centrifuge':'Heat washed ore to its required temperature, then separate nine-unit batches. Keep both outputs clear.',
-    'jimta_recycler':'Convert six pieces of permitted scrap material into one reusable scrap.',
-    'jimta_metal_cutter':'Cut metal sheets into the shared wiring components.'}[id]
+   lang['container.jugcraft.tagline.'+id]=TAGLINES[id]
   states={}
   for active in (False,True):
    model=id+('_active' if active else '')
@@ -249,7 +251,9 @@ def generate(shared=True):
    if ref not in value['values']:value['values'].append(ref)
    dump(path,value)
   path=RES/'assets/jugcraft/lang/en_us.json';value=json.loads(path.read_text(encoding='utf-8'));value.update(lang)
-  value['container.jugcraft.industrial_heat']='Heat: %s / %s';dump(path,value)
+  value['container.jugcraft.industrial_heat']='Heat: %s / %s'
+  value['jei.jugcraft.minimum_heat']='Minimum heat: %s'
+  dump(path,value)
  dump(ROOT/'art/owner-library/catalog/edited-2026-10-23-jimtafacts/industry-runtime-copies.json',manifest)
  return catalog
 

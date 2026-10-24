@@ -6,5 +6,11 @@
     "count": 1,
     "id": "jugcraft:jimta_spellbooks_archevoker_helmet"
   },
-  "template": "jugcraft:jimta_spellbooks_evocation_rune"
+  "template": "jugcraft:jimta_spellbooks_evocation_rune",
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

@@ -8,5 +8,11 @@
   "result": {
     "id": "jugcraft:jimta_spellbooks_hogskin",
     "count": 1
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

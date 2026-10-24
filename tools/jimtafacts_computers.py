@@ -16,6 +16,8 @@ ITEMS = ('disk', 'treasure_disk', 'pocket_computer_normal', 'pocket_computer_adv
 def blocks(): return ['jimta_computer_' + n for n in (*DEVICES, 'cable')]
 def items(): return ['jimta_' + n for n in ITEMS]
 def dump(path, data):
+    if 'recipe' in path.parts and isinstance(data,dict) and 'type' in data:
+        data.setdefault('fabric:load_conditions',[{'condition':'jugcraft:feature_enabled','feature':'machines'}])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 

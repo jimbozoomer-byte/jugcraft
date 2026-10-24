@@ -7,11 +7,11 @@
     "IFI"
   ],
   "key": {
-    "P": "minecraft:piston",
+    "F": "jugcraft:jimta_fluix_crystal",
     "E": "jugcraft:jimta_engineering_processor",
-    "I": "minecraft:iron_ingot",
     "B": "minecraft:crafting_table",
-    "F": "jugcraft:jimta_fluix_crystal"
+    "I": "minecraft:iron_ingot",
+    "P": "minecraft:piston"
   },
   "result": {
     "id": "jugcraft:jimta_molecular_assembler",

@@ -47,12 +47,29 @@ class StationRecipes(unittest.TestCase):
         self.assertEqual(len(row['tools']), 3)
         self.assertEqual(row['outputs'], [{'id': 'jugcraft:nouveau_abjuration_essence', 'count': 1}])
 
+    def test_industrial_view_preserves_counted_batches_heat_and_byproducts(self):
+        catalog = json.loads((stations.RES / 'assets/jugcraft/recipe_view.json').read_text(encoding='utf-8'))
+        groups = {g['type']: g['recipes'] for g in catalog['machines']}
+        for path in (stations.RES / 'data/jugcraft/recipe/jimtafacts_industry').glob('*.json'):
+            recipe = json.loads(path.read_text(encoding='utf-8'))
+            kind = recipe['type'].removeprefix('jugcraft:')
+            if not kind.startswith('jimta_'): continue
+            matches = [r for r in groups[kind]
+                       if r['in'] == [[recipe['ingredient'], recipe.get('input_count', 1)]]
+                       and r['out'] == [recipe['result']['id'], recipe['result'].get('count', 1)]]
+            self.assertTrue(matches, path.name)
+            self.assertTrue(any(r['minimum_heat'] == recipe.get('minimum_heat', 0)
+                and r['ticks'] == recipe['time']
+                and r['extra'] == [[b['result']['id'], b['result'].get('count', 1), b['chance']]
+                                  for b in recipe.get('byproducts', [])] for r in matches), path.name)
+
     def test_no_unaccounted_custom_processor_type(self):
         catalog = json.loads((stations.RES / 'assets/jugcraft/recipe_view.json').read_text(encoding='utf-8'))
         covered = {'jugcraft:' + g['type'] for group in ('machines', 'fluid_machines', 'stations') for g in catalog[group]}
         # Non-processor crafting serializers and the workshop's per-station categories.
         covered |= {'jugcraft:' + x for x in ('starter_working', 'gun_attachment', 'gun_attachment_removal',
-            'key_copying', 'beast_bison_upgrade', 'beast_mimicream_repair', 'household_door_mat_copy')}
+            'key_copying', 'beast_bison_upgrade', 'beast_mimicream_repair', 'household_door_mat_copy',
+            'jimta_cable_anchors', 'jimta_facade', 'jimta_compact_part')}
         for path in (stations.RES / 'data/jugcraft/recipe').rglob('*.json'):
             kind = json.loads(path.read_text(encoding='utf-8'))['type']
             if kind.startswith('jugcraft:'):

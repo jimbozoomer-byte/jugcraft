@@ -6,5 +6,11 @@
     "count": 1,
     "id": "jugcraft:jimta_spellbooks_legionnaire_flamberge"
   },
-  "template": "jugcraft:jimta_spellbooks_timeless_slurry"
+  "template": "jugcraft:jimta_spellbooks_timeless_slurry",
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

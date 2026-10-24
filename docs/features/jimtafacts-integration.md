@@ -21,7 +21,7 @@ The current working tree goes beyond the previously validated 28-item slice belo
 
 The continuation also adds [digital storage/workshops](jimtafacts-network.md), native [workshop computers](jimtafacts-computers.md), 14 industrial machines and 81 mapped recipes, and an expanding spellbook/armor/workshop port. The machine port reuses shared JE, recipe selection/locking, automation, heat and persistence. Original source art is retained; distinct unsupported mechanics remain explicitly tracked rather than represented by inert item registrations.
 
-**All continuation builds and tests are deferred at the owner's request until the combined implementation is finished.** The validation numbers later in this record belong only to the earlier accessory commit; they do not validate this working tree. The complete six-collection port is still in progress.
+**October 23 release preparation:** the owner authorized testing and publishing the implemented portion. Combined validation is now underway; the older validation numbers below still apply only to their named accessory slice. The complete six-collection port remains in progress. See [remaining work and release gates](jimtafacts-remaining.md) for the current limitations, including nine explicitly deferred survival acquisitions.
 
 Stable IDs use `jugcraft:jimta_<source_name>` to avoid clashes with existing Concordance relics. The data and concise player descriptions live in `jugcraft/jimtafacts/accessories.json`; `tools/jimtafacts.py` is their source of truth.
 
@@ -80,3 +80,28 @@ New conservation, cancellation, gate-parameter, pipe-routing, program-storage an
 ### Further local continuation
 
 Thirty-two supplied network attachment types now share six cable faces with separate real settings/inventories, original face models, owner/party protection, per-face provider job cancellation and stale-access invalidation. Monitors retain their item/count display; planes use their source edge-joining geometry; P2P inherited chassis render once. Item/fluid I/O ports fill or empty finite cells, fluid cells accept bucket-based partitions, and spatial anchors use bounded paid expiring chunk tickets. Emzuli has all four filter/color banks. Turtles gain real hoe farming, cargo comparison/rearrangement, block inspection and programmatic refueling. Additional scenarios are authored for the eventual combined batch; **no builds/tests have run**. The older multipart limitation above is superseded for these 32 native types, not for arbitrary external multipart APIs. AI assistance: OpenAI Codex, user-selected Astra High.
+
+### Combined release validation in progress — 23 October 2026
+
+The owner requested testing the current scope and preparing a coordinated release.
+Unfinished systems and nine deferred acquisition placements are recorded in
+[jimtafacts-remaining.md](jimtafacts-remaining.md); earlier untested continuation
+notes above are historical checkpoints.
+
+The local candidate incorporates ready PRs #460–#463 alongside the Jimtafacts
+continuation. Repairs include Minecraft 26.3 loot/worldgen schema and registry IDs,
+counted industrial inputs and recipe-view pages, coolant recipe consolidation,
+shared equipment tags, bounded original-mesh face repairs, and source-backed
+survival acquisition edges. Charged-creeper lightning capture consumes the charge
+once and respects claims. Supplied original files remain unchanged.
+
+At this checkpoint common, client and test sources compile; 41 Jimtafacts asset
+tests, six recipe-view checks, 11 world-designer tests and verification of all 26
+locked libraries pass. The broader Python run had 257 passes and one recipe-view
+coverage failure, subsequently fixed and rerun in the six passing viewer checks.
+World-loading tests found two remaining legacy loot IDs; both are corrected and
+the combined server suite is being rerun. These are not full-suite or deployment
+claims. Final runtime, packaged-client and exact release results must be appended
+before promotion. No live restart or client-channel promotion has occurred.
+
+AI assistance: OpenAI Codex, user-selected Astra High.

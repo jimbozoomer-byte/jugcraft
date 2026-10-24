@@ -295,7 +295,8 @@
             {
               "count": {
                 "min": 10,
-                "max": 20
+                "max": 20,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }

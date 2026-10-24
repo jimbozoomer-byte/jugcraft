@@ -2,21 +2,6 @@
   "schema": 1,
   "fallback": 1,
   "items": {
-    "hand_crank": {
-      "numerator": 1033,
-      "denominator": 1,
-      "source": "recipe jugcraft:jimtafacts_industry/lathed_hand_crank"
-    },
-    "jimta_industrial_drill": {
-      "numerator": 8365,
-      "denominator": 6,
-      "source": "recipe jugcraft:jimtafacts_industry/lathed_drill"
-    },
-    "jimta_manual_kinetic_generator": {
-      "numerator": 7,
-      "denominator": 1,
-      "source": "recipe jugcraft:jimtafacts_industry/lathed_manual_generator"
-    },
     "jugcraft:abrasive_head": {
       "numerator": 8451,
       "denominator": 1,
@@ -18043,7 +18028,7 @@
       "source": "recipe jugcraft:jimtafacts_cables/detector"
     },
     "jugcraft:jimta_diamond_drill": {
-      "numerator": 119273,
+      "numerator": 114373,
       "denominator": 6,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_diamond_drill"
     },
@@ -18813,9 +18798,9 @@
       "source": "recipe jugcraft:jimtafacts_gear/jimta_industrial_chainsaw"
     },
     "jugcraft:jimta_industrial_drill": {
-      "numerator": 13265,
+      "numerator": 8365,
       "denominator": 6,
-      "source": "recipe jugcraft:jimtafacts_gear/jimta_industrial_drill"
+      "source": "recipe jugcraft:jimtafacts_industry/lathed_drill"
     },
     "jugcraft:jimta_industrial_night_vision_goggles": {
       "numerator": 23113,
@@ -18878,7 +18863,7 @@
       "source": "recipe jugcraft:jimtafacts/network/io_port"
     },
     "jugcraft:jimta_iridium_drill": {
-      "numerator": 471047,
+      "numerator": 466147,
       "denominator": 6,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_iridium_drill"
     },
@@ -19218,9 +19203,9 @@
       "source": "recipe jugcraft:jimtafacts_infrastructure/magnetizer"
     },
     "jugcraft:jimta_manual_kinetic_generator": {
-      "numerator": 5534,
-      "denominator": 3,
-      "source": "recipe jugcraft:jimtafacts_heat/manual_kinetic_generator"
+      "numerator": 7,
+      "denominator": 1,
+      "source": "recipe jugcraft:jimtafacts_industry/lathed_manual_generator"
     },
     "jugcraft:jimta_mass_fabricator": {
       "numerator": 10770,
@@ -20544,7 +20529,7 @@
     },
     "jugcraft:jimta_seed_pumpkin": {
       "numerator": 44,
-      "denominator": 1,
+      "denominator": 5,
       "source": "recipe jugcraft:jimtafacts_crops/seed_pumpkin"
     },
     "jugcraft:jimta_seed_red_mushroom": {
@@ -20853,9 +20838,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_spellbooks_amethyst_rapier": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 89260,
+      "denominator": 9,
+      "source": "recipe jugcraft:jimtafacts/source/amethyst_rapier"
     },
     "jugcraft:jimta_spellbooks_amethyst_resonance_charm": {
       "numerator": 1,
@@ -21032,11 +21017,6 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
-    "jugcraft:jimta_spellbooks_chronicle": {
-      "numerator": 26673,
-      "denominator": 4,
-      "source": "recipe jugcraft:jimtafacts/source/chronicle"
-    },
     "jugcraft:jimta_spellbooks_cinder_essence": {
       "numerator": 1,
       "denominator": 1,
@@ -21068,9 +21048,9 @@
       "source": "recipe jugcraft:jimta_spellbooks_common_ink"
     },
     "jugcraft:jimta_spellbooks_concentration_amulet": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 2831,
+      "denominator": 3,
+      "source": "recipe jugcraft:jimtafacts/source/concentration_amulet"
     },
     "jugcraft:jimta_spellbooks_conjurers_talisman": {
       "numerator": 293,
@@ -21418,9 +21398,9 @@
       "source": "recipe jugcraft:jimta_spellbooks_grimy_tiles"
     },
     "jugcraft:jimta_spellbooks_heavy_chain_necklace": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 11273,
+      "denominator": 9,
+      "source": "recipe jugcraft:jimtafacts/source/heavy_chain_necklace"
     },
     "jugcraft:jimta_spellbooks_hellrazor": {
       "numerator": 3,
@@ -21493,9 +21473,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_spellbooks_infernal_sorcerer_chestplate": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 324181,
+      "denominator": 9,
+      "source": "recipe jugcraft:jimtafacts/source/infernal_sorcerer_chestplate"
     },
     "jugcraft:jimta_spellbooks_inscription_table": {
       "numerator": 611,
@@ -21613,9 +21593,9 @@
       "source": "recipe jugcraft:jimtafacts/source/mithril_scrap_from_ore"
     },
     "jugcraft:jimta_spellbooks_mithril_weave": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 11444,
+      "denominator": 9,
+      "source": "recipe jugcraft:jimtafacts/source/mithril_weave"
     },
     "jugcraft:jimta_spellbooks_music_disc_dead_king_lullaby": {
       "numerator": 1,
@@ -21873,9 +21853,9 @@
       "source": "recipe jugcraft:jimta_spellbooks_scroll_angel_wings"
     },
     "jugcraft:jimta_spellbooks_scroll_arcane_shackle": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 156229,
+      "denominator": 18,
+      "source": "recipe jugcraft:jimta_spellbooks_scroll_arcane_shackle"
     },
     "jugcraft:jimta_spellbooks_scroll_arrow_volley": {
       "numerator": 4199941,
@@ -22453,8 +22433,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_spellbooks_speed_boots": {
-      "numerator": 141924,
-      "denominator": 1,
+      "numerator": 1288751,
+      "denominator": 9,
       "source": "recipe jugcraft:jimtafacts/source/speed_boots"
     },
     "jugcraft:jimta_spellbooks_spellbreaker": {
@@ -37040,7 +37020,7 @@
     "jugcraft:wildlife_cooked_egg": {
       "numerator": 1,
       "denominator": 1,
-      "source": "recipe jugcraft:wildlife_cooked_egg"
+      "source": "fallback (balance pending)"
     },
     "jugcraft:wildlife_cooked_fish_fillet": {
       "numerator": 1,
@@ -43811,11 +43791,6 @@
       "numerator": 177,
       "denominator": 4,
       "source": "recipe jugcraft:arcane_concordance"
-    },
-    "patchouli:guide_book": {
-      "numerator": 1329,
-      "denominator": 4,
-      "source": "recipe jugcraft:jimtafacts/source/patchouli_book"
     },
     "peepo_companion:black_companion_bed": {
       "numerator": 112,

@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "M": "jugcraft:jimta_spellbooks_mithril_ingot",
-    "S": "minecraft:chain",
+    "S": "minecraft:iron_chain",
     "X": "jugcraft:jimta_spellbooks_mithril_scrap"
   },
   "pattern": [
@@ -14,5 +14,11 @@
   "result": {
     "count": 1,
     "id": "jugcraft:jimta_spellbooks_concentration_amulet"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

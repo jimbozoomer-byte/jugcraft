@@ -7246,6 +7246,1368 @@
           "ticks": 400
         }
       ]
+    },
+    {
+      "block": "jugcraft:jimta_compressor",
+      "type": "jimta_compressing",
+      "recipes": [
+        {
+          "in": [
+            [
+              "minecraft:gold_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_gold_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:obsidian",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_obsidian_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:lapis_lazuli",
+              4
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_lapis_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_copper_casing",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:copper_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_tin_casing",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:tin_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_bronze_casing",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:bronze_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_gold_casing",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_gold_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_iron_casing",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:iron_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_steel_casing",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:steel_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_lead_casing",
+              2
+            ]
+          ],
+          "out": [
+            "jugcraft:lead_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:copper_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_copper_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:tin_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_tin_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:bronze_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_bronze_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_gold_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_gold_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:iron_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_iron_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:steel_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_steel_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:lead_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_lead_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_obsidian_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_obsidian_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_lapis_plate",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_dense_lapis_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:clay_ball",
+              4
+            ]
+          ],
+          "out": [
+            "minecraft:clay",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:brick",
+              4
+            ]
+          ],
+          "out": [
+            "minecraft:bricks",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:glowstone_dust",
+              4
+            ]
+          ],
+          "out": [
+            "minecraft:glowstone",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:snowball",
+              4
+            ]
+          ],
+          "out": [
+            "minecraft:snow_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:snow_block",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:ice",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:sand",
+              4
+            ]
+          ],
+          "out": [
+            "minecraft:sandstone",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:red_sand",
+              4
+            ]
+          ],
+          "out": [
+            "minecraft:red_sandstone",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:nether_brick",
+              4
+            ]
+          ],
+          "out": [
+            "minecraft:nether_bricks",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:blaze_powder",
+              5
+            ]
+          ],
+          "out": [
+            "minecraft:blaze_rod",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:iron_ingot",
+              9
+            ]
+          ],
+          "out": [
+            "minecraft:iron_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:gold_ingot",
+              9
+            ]
+          ],
+          "out": [
+            "minecraft:gold_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:copper_ingot",
+              9
+            ]
+          ],
+          "out": [
+            "minecraft:copper_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:tin_ingot",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:tin_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:lead_ingot",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:lead_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:bronze_ingot",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:bronze_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:steel_ingot",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:steel_block",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_carbon_mesh",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_carbon_plate",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_coal_ball",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_compressed_coal_ball",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_coal_chunk",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:diamond",
+            1
+          ],
+          "extra": [],
+          "ticks": 800,
+          "minimum_heat": 0
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:jimta_extractor",
+      "type": "jimta_extracting",
+      "recipes": [
+        {
+          "in": [
+            [
+              "minecraft:bricks",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:brick",
+            4
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:nether_bricks",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:nether_brick",
+            4
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:clay",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:clay_ball",
+            4
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:snow_block",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:snowball",
+            4
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:gunpowder",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:sulfur_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rubber_log",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:rubber",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:rubber_tree_sapling",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:rubber",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:latex_bottle",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:rubber",
+            3
+          ],
+          "extra": [
+            [
+              "minecraft:glass_bottle",
+              1,
+              1
+            ]
+          ],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:orange_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:magenta_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:light_blue_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:yellow_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:lime_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:pink_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:gray_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:light_gray_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:cyan_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:purple_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:blue_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:brown_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:green_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:red_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "minecraft:black_wool",
+              1
+            ]
+          ],
+          "out": [
+            "minecraft:white_wool",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 0
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:jimta_recycler",
+      "type": "jimta_recycling",
+      "recipes": [
+        {
+          "in": [
+            [
+              "#jugcraft:jimta_recyclable",
+              6
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_scrap",
+            1
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:jimta_metal_cutter",
+      "type": "jimta_metal_cutting",
+      "recipes": [
+        {
+          "in": [
+            [
+              "jugcraft:copper_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_copper_casing",
+            2
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:tin_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_tin_casing",
+            2
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:bronze_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_bronze_casing",
+            2
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_gold_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_gold_casing",
+            2
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:iron_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_iron_casing",
+            2
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:steel_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_steel_casing",
+            2
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:lead_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_lead_casing",
+            2
+          ],
+          "extra": [],
+          "ticks": 120,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_copper_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:copper_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_tin_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:tin_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_bronze_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:bronze_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_gold_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_gold_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_iron_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:iron_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_steel_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:steel_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_lead_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:lead_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_obsidian_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_obsidian_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:jimta_dense_lapis_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_lapis_plate",
+            9
+          ],
+          "extra": [],
+          "ticks": 400,
+          "minimum_heat": 0
+        },
+        {
+          "in": [
+            [
+              "jugcraft:copper_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:copper_wire",
+            2
+          ],
+          "extra": [],
+          "ticks": 160,
+          "minimum_heat": 0
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:jimta_thermal_centrifuge",
+      "type": "jimta_thermal_centrifuging",
+      "recipes": [
+        {
+          "in": [
+            [
+              "jugcraft:washed_iron_ore",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:iron_dust",
+            9
+          ],
+          "extra": [
+            [
+              "jugcraft:gold_dust",
+              1,
+              1
+            ]
+          ],
+          "ticks": 900,
+          "minimum_heat": 1500
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_gold_ore",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:gold_dust",
+            9
+          ],
+          "extra": [
+            [
+              "jugcraft:silver_dust",
+              1,
+              1
+            ]
+          ],
+          "ticks": 900,
+          "minimum_heat": 2000
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_copper_ore",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:copper_dust",
+            9
+          ],
+          "extra": [
+            [
+              "jugcraft:tin_dust",
+              1,
+              1
+            ]
+          ],
+          "ticks": 900,
+          "minimum_heat": 500
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_tin_ore",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:tin_dust",
+            9
+          ],
+          "extra": [
+            [
+              "jugcraft:iron_dust",
+              1,
+              1
+            ]
+          ],
+          "ticks": 900,
+          "minimum_heat": 1000
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_lead_ore",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:lead_dust",
+            9
+          ],
+          "extra": [
+            [
+              "jugcraft:copper_dust",
+              1,
+              1
+            ]
+          ],
+          "ticks": 900,
+          "minimum_heat": 2000
+        },
+        {
+          "in": [
+            [
+              "jugcraft:washed_silver_ore",
+              9
+            ]
+          ],
+          "out": [
+            "jugcraft:silver_dust",
+            9
+          ],
+          "extra": [
+            [
+              "jugcraft:lead_dust",
+              1,
+              1
+            ]
+          ],
+          "ticks": 900,
+          "minimum_heat": 1000
+        },
+        {
+          "in": [
+            [
+              "minecraft:cobblestone",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:jimta_stone_dust",
+            1
+          ],
+          "extra": [],
+          "ticks": 200,
+          "minimum_heat": 100
+        }
+      ]
     }
   ],
   "fluid_machines": [

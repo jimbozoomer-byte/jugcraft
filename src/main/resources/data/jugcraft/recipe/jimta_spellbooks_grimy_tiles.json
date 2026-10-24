@@ -8,5 +8,11 @@
   "result": {
     "id": "jugcraft:jimta_spellbooks_grimy_tiles",
     "count": 4
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

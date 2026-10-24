@@ -126,11 +126,6 @@
       "result": "jugcraft:jimta_spellbooks_wisewood_chiseled_bookshelf"
     },
     {
-      "source": "data/irons_spellbooks/recipe/chronicle.json",
-      "type": "minecraft:crafting_shapeless",
-      "result": "jugcraft:jimta_spellbooks_chronicle"
-    },
-    {
       "source": "data/irons_spellbooks/recipe/cinderous_soulcaller.json",
       "type": "minecraft:crafting_shaped",
       "result": "jugcraft:jimta_spellbooks_cinderous_soulcaller"
@@ -589,11 +584,6 @@
       "source": "data/irons_spellbooks/recipe/paladin_chestplate.json",
       "type": "minecraft:crafting_shaped",
       "result": "jugcraft:jimta_spellbooks_paladin_chestplate"
-    },
-    {
-      "source": "data/irons_spellbooks/recipe/patchouli_book.json",
-      "type": "minecraft:crafting_shapeless",
-      "result": "patchouli:guide_book"
     },
     {
       "source": "data/irons_spellbooks/recipe/pedestal.json",

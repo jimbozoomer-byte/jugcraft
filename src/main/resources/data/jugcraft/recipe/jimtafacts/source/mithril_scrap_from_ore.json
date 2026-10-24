@@ -5,5 +5,11 @@
   "ingredient": "jugcraft:jimta_spellbooks_raw_mithril",
   "result": {
     "id": "jugcraft:jimta_spellbooks_mithril_scrap"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

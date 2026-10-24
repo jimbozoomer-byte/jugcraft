@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -13,7 +14,9 @@ import jimtafacts
 class JimtafactsAssetsTests(unittest.TestCase):
     def test_copied_icons_match_the_supplied_files(self):
         copies = json.loads((ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/runtime-copies.json').read_text(encoding='utf-8'))
-        self.assertEqual(len(copies), len(jimtafacts.items()) - 1)
+        icons=[row for row in copies if '/textures/item/' in row['runtime']]
+        self.assertEqual(len(icons), len(jimtafacts.items()) - 1)
+        self.assertEqual(len(copies)-len(icons),1)  # Supplied mimic entity skin.
         for row in copies:
             with self.subTest(row['runtime']):
                 original = (ROOT / row['source']).read_bytes()
@@ -48,13 +51,11 @@ class JimtafactsAssetsTests(unittest.TestCase):
         lang = res / 'assets/jugcraft/lang/en_us.json'
         paths = [lang] + sorted((res / 'data/trinkets/tags/item').rglob('*.json'))
         before = {p:json.loads(p.read_text(encoding='utf-8')) for p in paths}
-        try:
+        written={}
+        with patch.object(jimtafacts,'dump',side_effect=lambda p,v:written.__setitem__(p,v)), patch.object(jimtafacts.shutil,'copyfile'):
             jimtafacts.generate()
             for p, previous in before.items():
-                self.assertEqual(json.loads(p.read_text(encoding='utf-8')), previous, str(p))
-        finally:
-            # Restore exact pre-test semantic contents even if an assertion fails.
-            for p, previous in before.items(): p.write_text(json.dumps(previous,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+                self.assertEqual(written.get(p,previous), previous, str(p))
 
     def test_equipped_tags_link_without_replacing_existing_equipment(self):
         res = ROOT / 'src/main/resources'

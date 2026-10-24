@@ -105,6 +105,8 @@ SCHOOL = {'holy': 'healing', 'nature': 'arcane', 'ender': 'arcane', 'evocation':
           'lightning': 'lightning', 'fire': 'fire', 'ice': 'frost', 'blood': 'soul', 'arcane': 'arcane', 'eldritch': 'arcane'}
 
 def dump(path, obj):
+    if 'recipe' in path.parts and isinstance(obj,dict) and 'type' in obj:
+        obj.setdefault('fabric:load_conditions',[{'condition':'jugcraft:feature_enabled','feature':'concordance'}])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
@@ -364,6 +366,7 @@ def generate():
     copy(ART/'player_animations/casting_animations.json',RES/'assets/jugcraft/player_animations/jimtafacts_casting.json')
     texture('irons_spellbooks:entity/horse/spectral_steed')
     lang['entity.jugcraft.jimtafacts_spectral_steed']='Spectral Steed'
+    lang['item.jugcraft.jimta_spellbooks_pumpkin_helmet']='Scarecrow Mage Hat'
     dump(RES / 'jugcraft/jimtafacts_spellbooks/lang.json', lang)
     source_spells=sorted(source_info)
     source_runtime={name:('angel_wings' if name=='angel_wing' else name) for name in source_spells}
@@ -371,7 +374,7 @@ def generate():
         'native_workings': sorted(SPELLS), 'not_yet_ported': [name for name in source_spells if source_runtime[name] not in SPELLS],
         'source_inventory':{name:{**row,'native_id':source_runtime[name] if source_runtime[name] in SPELLS else None,'status':'native level-one adaptation; final combined tests pending' if source_runtime[name] in SPELLS else 'remaining'} for name,row in source_info.items()},
         'source_parity': 'Native level-one workings with shared Focus and economy balancing. Original player animation keyframes, armor geometry/textures and Root/Wisp clips retained. Bespoke encounters and structures remain separate work.',
-        'armor': list(ARMOR), 'model_rule':'Original cube geometry, UVs and texture bytes; no replacement meshes.'})
+        'armor': list(ARMOR), 'model_rule':'Supplied meshes and byte-identical textures; bounded face separation, closure and UV repairs are listed in tools/jimtafacts_model_repairs.py. No replacement meshes.'})
     dump(ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/spellbooks-runtime-copies.json', copies)
     source_recipes.generate(dump,RES,SOURCE)
     # Translate removed/loader-specific tags to equivalent registered 26.3 members.
@@ -382,6 +385,7 @@ def generate():
         '#c:ingots/gold':['minecraft:gold_ingot'],
         '#curios:spellbook':[j(name) for name in BOOKS],
         'jugcraft:jimta_spellbooks_chronicle':[],
+        'jugcraft:jimtafacts/spellbooks/portal_frame':['jugcraft:jimta_spellbooks_portal_frame'],
     }
     for tag_path in (RES/'data/jugcraft/tags').rglob('*.json'):
         if 'jimtafacts' not in tag_path.parts:continue

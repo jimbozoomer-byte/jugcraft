@@ -8,5 +8,11 @@
   ],
   "result": {
     "id": "jugcraft:jimta_computer_wired_modem"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ]
 }

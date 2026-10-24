@@ -7,9 +7,9 @@
     "IFI"
   ],
   "key": {
+    "F": "jugcraft:jimta_fluix_crystal",
     "E": "jugcraft:jimta_engineering_processor",
-    "I": "minecraft:iron_ingot",
-    "F": "jugcraft:jimta_fluix_crystal"
+    "I": "minecraft:iron_ingot"
   },
   "result": {
     "id": "jugcraft:jimta_controller",

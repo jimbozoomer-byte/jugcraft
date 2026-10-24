@@ -2,8 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "M": "minecraft:chain",
-    "S": "minecraft:chain",
+    "M": "minecraft:iron_chain",
+    "S": "minecraft:iron_chain",
     "X": "jugcraft:jimta_spellbooks_mithril_scrap"
   },
   "pattern": [
@@ -14,5 +14,11 @@
   "result": {
     "count": 1,
     "id": "jugcraft:jimta_spellbooks_heavy_chain_necklace"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

@@ -14,5 +14,11 @@
   "result": {
     "id": "jugcraft:jimta_spellbooks_twilight_gale",
     "count": 1
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

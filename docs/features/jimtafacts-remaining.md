@@ -55,6 +55,23 @@ not certify that every source recipe exists in the native game.
 
 ## Required before this candidate ships
 
+### Explicit acquisition follow-up
+
+The combined acquisition audit identified nine implemented preview items whose
+survival placement/reward is not finished. They are recorded as **deferred
+acquisition**, not counted as obtainable: Arcane Debris generation; the two
+Archevoker logbooks and translation interaction; Ancient Furled Map rewards;
+Legendary Spell Book, Lurker Ring, Tarnished Helmet and Whispers of Ice disc
+rewards; and Unchained Book placement. Do not replace boss rewards with generic
+crafting recipes merely to clear the audit. The exact list is maintained in
+`tools/survival_jimtafacts_routes.py` and checked by the acquisition tests.
+
+The loose Paint block is a presentation state: use the Color Applicator and
+paint balls to create splotches in the world. Creative engines, creative storage,
+command computers and the developer crown are intentionally not survival items.
+
+### Release gate
+
 - Compile common, client and test sources; fix integration failures.
 - Validate source asset copies, models, recipes, IDs and survival acquisition.
 - Run combined server tests and relevant rendered client tests, including

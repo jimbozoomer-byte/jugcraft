@@ -5,7 +5,7 @@
     "minecraft:paper",
     "jugcraft:jimta_spellbooks_common_ink",
     "jugcraft:jimta_spellbooks_ender_rune",
-    "minecraft:chain"
+    "minecraft:iron_chain"
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_scroll_arcane_shackle",

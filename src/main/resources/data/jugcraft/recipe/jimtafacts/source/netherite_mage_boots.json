@@ -6,5 +6,11 @@
     "count": 1,
     "id": "jugcraft:jimta_spellbooks_netherite_mage_boots"
   },
-  "template": "minecraft:netherite_upgrade_smithing_template"
+  "template": "minecraft:netherite_upgrade_smithing_template",
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

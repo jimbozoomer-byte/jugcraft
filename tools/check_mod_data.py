@@ -685,12 +685,17 @@ def check_fluid_recipes(registered):
             err(f"MachineKind.recipeType() has no \"{spec['recipe_type']}\" for {machine}")
         if spec["recipe_type"] in RECIPE_TYPES.values():
             err(f"Fluid recipe type {spec['recipe_type']} is also an item machine's")
+    import jimtafacts_fluid_recipes
+    collection_recipes = jimtafacts_fluid_recipes.recipes()
+    for name, recipe in collection_recipes.items():
+        if load(DATA / MOD / 'recipe/chemical_reaction' / (name+'.json')) != recipe:
+            err(f'{name}: shared reactor recipe differs from its canonical finite-fluid definition')
     expected = (sum(len(r) for r in petro.FLUID_RECIPES.values()) + sum(len(r) for r in drones.DRONE_FLUID_RECIPES.values())
-                + sum(len(r) for r in industrial_forms.FORM_RECIPES.values()))
+                + sum(len(r) for r in industrial_forms.FORM_RECIPES.values()) + len(collection_recipes))
     types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values() if spec["recipe_type"]}
     files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
     if len(files) != expected:
-        err(f"{len(files)} fluid recipe files, but tools/petro.py, tools/drones.py and tools/industrial_forms.py define {expected}")
+        err(f"{len(files)} fluid recipe files, but the canonical petro/drone/form/collection recipes define {expected}")
     for machine, recipes in petro.FLUID_RECIPES.items():
         spec = petro.FLUID_MACHINES[machine]
         for recipe in recipes:

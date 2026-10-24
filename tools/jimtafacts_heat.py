@@ -77,7 +77,8 @@ def generate(shared=True):
  for ext in ('.png','.png.mcmeta'):
   copy(SOURCE/f'textures/blocks/fluids/superheatedsteam_still{ext}',RES/f'assets/jugcraft/textures/block/jimta_superheated_steam_still{ext}')
  lang['fluid.jugcraft.jimta_superheated_steam']='Superheated Steam'
- dump(RES/'data/jugcraft/recipe/chemical_reaction/jimta_coolant.json',{'type':'jugcraft:chemical_reaction','items':[{'ingredient':'minecraft:lapis_lazuli','count':2}],'fluids':[{'fluid':'minecraft:water','amount':1000}],'fluid_results':[{'fluid':'jugcraft:jimta_coolant','amount':1000}],'time':100})
+ from jimtafacts_fluid_recipes import recipes as coolant_recipes
+ dump(RES/'data/jugcraft/recipe/chemical_reaction/jimta_coolant.json',coolant_recipes()['jimta_coolant'])
  if shared:
   path=RES/'assets/jugcraft/lang/en_us.json';data=json.loads(path.read_text(encoding='utf-8'));data.update(lang);dump(path,data)
   for name in ('mineable/pickaxe','needs_stone_tool'):

@@ -11,7 +11,8 @@
             {
               "count": {
                 "min": 2,
-                "max": 10
+                "max": 10,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }
@@ -199,7 +200,8 @@
     {
       "rolls": {
         "min": 1,
-        "max": 4
+        "max": 4,
+        "type": "minecraft:uniform"
       },
       "entries": [
         {

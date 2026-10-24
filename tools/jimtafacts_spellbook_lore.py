@@ -8,6 +8,9 @@ def generate(copy,definition,texture,dump,RES,ART,lang):
  source=ART.parents[1]/'data/irons_spellbooks';texts=json.loads((ART/'lang/en_us.json').read_text(encoding='utf-8'))
  for n in (*MATERIALS,*SPECIAL):
   dump(RES/f'assets/jugcraft/items/jimta_spellbooks_{n}.json',definition('irons_spellbooks:item/'+n,'jimta_spellbooks_'+n));lang['item.jugcraft.jimta_spellbooks_'+n]=texts.get('item.irons_spellbooks.'+n,n.replace('_',' ').title())
+ lang['item.jugcraft.jimta_spellbooks_archevoker_logbook_untranslated']="Untranslated Archevoker's Logbook"
+ for name in ('dead_king_lullaby','flame_still_burns','whispers_of_ice'):
+  lang['item.jugcraft.jimta_spellbooks_music_disc_'+name]='Music Disc — '+name.replace('_',' ').title()
  for k,v in texts.items():
   if k.startswith('item.irons_spellbooks.archevoker_log.'):lang[k.replace('item.irons_spellbooks.','item.jugcraft.jimta_spellbooks_')]=v
  dump(RES/'jugcraft/jimtafacts_spellbooks/lore.json',{'materials':list(MATERIALS),'special':list(SPECIAL),'potions':list(POTIONS)})

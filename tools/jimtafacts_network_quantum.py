@@ -8,6 +8,8 @@ def generate(source, assets, res, model, texture, dump, recipe):
     def cube(lo, hi, ref, emission=0):
         return {'from':lo,'to':hi,'light_emission':emission,'faces':{f:{'texture':'#'+ref} for f in faces}}
     def mesh(name, elements):
+        from model_writer import fit_uvs
+        fit_uvs(elements)
         path='block/jimtafacts/ae2/quantum_'+name
         dump(assets/f'models/{path}.json',{'parent':'minecraft:block/block','textures':dict(refs,particle=refs['ring']),'elements':elements})
         return 'jugcraft:'+path

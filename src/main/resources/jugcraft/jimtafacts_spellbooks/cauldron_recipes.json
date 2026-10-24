@@ -7,7 +7,7 @@
         "id": "irons_spellbooks:rare_ink"
       },
       "input": {
-        "tag": "c:ingots/gold"
+        "item": "minecraft:gold_ingot"
       },
       "results": [
         {
@@ -161,7 +161,7 @@
         "id": "irons_spellbooks:epic_ink"
       },
       "input": {
-        "tag": "c:gems/amethyst"
+        "item": "minecraft:amethyst_shard"
       },
       "results": [
         {
@@ -201,7 +201,7 @@
         "id": "irons_spellbooks:uncommon_ink"
       },
       "input": {
-        "tag": "c:ingots/iron"
+        "item": "minecraft:iron_ingot"
       },
       "results": [
         {
@@ -241,7 +241,7 @@
         "id": "irons_spellbooks:common_ink"
       },
       "input": {
-        "tag": "c:ingots/copper"
+        "item": "minecraft:copper_ingot"
       },
       "results": [
         {

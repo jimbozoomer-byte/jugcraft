@@ -33,6 +33,11 @@ for id,label,icon,behavior in [('industrial_wrench','Industrial Wrench','itemToo
 for kind,icon in [('pickaxe','Pickaxe'),('axe','Axe'),('shovel','Spade'),('hoe','Hoe'),('sword','Sword')]:add('industrial_bronze_'+kind,'Industrial Bronze '+kind.title(),'itemToolBronze'+icon,'bronze_tool',kind=kind)
 
 def items():return set(GEAR)
+def item_tags():
+ out={kind+'s':['jugcraft:jimta_industrial_bronze_'+kind] for kind in ('hoe','axe','pickaxe','shovel','sword')}
+ out['hoes'].append('jugcraft:jimta_electric_hoe')
+ out['swords'].append('jugcraft:jimta_nano_saber')
+ return out
 def dump(path,obj):path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(obj,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
 def recipes():
  out={}
@@ -95,11 +100,8 @@ def generate(shared=True):
  dump(RES/'jugcraft/jimtafacts/gear.json',GEAR);dump(ROOT/'art/owner-library/catalog/edited-2026-10-23-jimtafacts/gear-runtime-copies.json',manifest)
  if shared:
   path=RES/'assets/jugcraft/lang/en_us.json';current=json.loads(path.read_text(encoding='utf-8'));current.update(lang);dump(path,current)
-  for type in ('hoe','axe','pickaxe','shovel','sword'):
-   path=RES/f'data/minecraft/tags/item/{type}s.json';current=json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'replace':False,'values':[]}
-   ids=['jugcraft:jimta_industrial_bronze_'+type]
-   if type=='hoe':ids.append('jugcraft:jimta_electric_hoe')
-   if type=='sword':ids.append('jugcraft:jimta_nano_saber')
+  for tag,ids in item_tags().items():
+   path=RES/f'data/minecraft/tags/item/{tag}.json';current=json.loads(path.read_text(encoding='utf-8')) if path.exists() else {'replace':False,'values':[]}
    for id in ids:
     if id not in current['values']:current['values'].append(id)
    dump(path,current)

@@ -7,10 +7,10 @@
     "ILI"
   ],
   "key": {
-    "L": "jugcraft:jimta_logic_processor",
-    "I": "minecraft:iron_ingot",
     "C": "jugcraft:jimta_fluix_glass_cable",
-    "H": "minecraft:chest"
+    "I": "minecraft:iron_ingot",
+    "H": "minecraft:chest",
+    "L": "jugcraft:jimta_logic_processor"
   },
   "result": {
     "id": "jugcraft:jimta_drive",

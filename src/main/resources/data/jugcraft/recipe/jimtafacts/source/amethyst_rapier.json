@@ -7,11 +7,17 @@
   ],
   "key": {
     "A": "minecraft:amethyst_shard",
-    "C": "minecraft:chain",
+    "C": "minecraft:iron_chain",
     "W": "jugcraft:jimta_spellbooks_weapon_parts"
   },
   "result": {
     "id": "jugcraft:jimta_spellbooks_amethyst_rapier",
     "count": 1
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

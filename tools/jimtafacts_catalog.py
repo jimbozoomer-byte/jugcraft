@@ -71,7 +71,10 @@ def original_inward_shell(path, elements):
         if 'elements' in data:break
         parent=data.get('parent','')
         if not parent.startswith('irons_spellbooks:'):return False
-        data=json.loads((jimtafacts_spellbooks.ART/'models'/(parent.split(':',1)[1]+'.json')).read_text(encoding='utf-8'))
-    original=data.get('elements',[])
+        source=jimtafacts_spellbooks.ART/'models'/(parent.split(':',1)[1]+'.json')
+        data=json.loads(source.read_text(encoding='utf-8'))
+    from jimtafacts_model_repairs import repair
+    ref='jimtafacts/spellbooks/'+source.relative_to(jimtafacts_spellbooks.ART/'models').with_suffix('').as_posix()
+    original=repair(ref,data).get('elements',[])
     return len(original)==len(elements) and all(
         all(a.get(k)==b.get(k) for k in ('from','to','rotation')) for a,b in zip(original,elements))

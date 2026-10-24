@@ -7,9 +7,9 @@
     "IGI"
   ],
   "key": {
-    "G": "minecraft:glass",
+    "F": "jugcraft:jimta_fluix_crystal",
     "I": "minecraft:iron_ingot",
-    "F": "jugcraft:jimta_fluix_crystal"
+    "G": "minecraft:glass"
   },
   "result": {
     "id": "jugcraft:jimta_energy_acceptor",

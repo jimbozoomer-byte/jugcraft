@@ -6,5 +6,11 @@
   ],
   "result": {
     "id": "jugcraft:jimta_spellbooks_wandering_magician_helmet"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

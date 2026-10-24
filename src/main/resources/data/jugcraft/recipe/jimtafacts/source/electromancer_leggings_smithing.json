@@ -6,5 +6,11 @@
     "count": 1,
     "id": "jugcraft:jimta_spellbooks_electromancer_leggings"
   },
-  "template": "jugcraft:jimta_spellbooks_lightning_rune"
+  "template": "jugcraft:jimta_spellbooks_lightning_rune",
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

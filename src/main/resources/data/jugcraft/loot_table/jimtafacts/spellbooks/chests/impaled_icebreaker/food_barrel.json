@@ -4,7 +4,8 @@
     {
       "rolls": {
         "min": 2,
-        "max": 4
+        "max": 4,
+        "type": "minecraft:uniform"
       },
       "entries": [
         {
@@ -26,7 +27,7 @@
             {
               "effects": [
                 {
-                  "type": "jugcraft:jimta_spellbooks_chilled",
+                  "type": "jugcraft:jimtafacts_chilled",
                   "duration": 30
                 }
               ],
@@ -73,7 +74,8 @@
             {
               "count": {
                 "min": 5,
-                "max": 9
+                "max": 9,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }
@@ -91,7 +93,8 @@
             {
               "count": {
                 "min": 3,
-                "max": 6
+                "max": 6,
+                "type": "minecraft:uniform"
               },
               "add": false,
               "type": "minecraft:set_count"

@@ -63,7 +63,8 @@ def generate(shared=True):
   'steam_condenser':['jugcraft:jimta_heat_conductor']*2+['jugcraft:jimta_copper_boiler','jugcraft:machine_casing','jugcraft:jimta_tin_casing']}
  for name,ingredients in recipes.items():dump(RES/f'data/jugcraft/recipe/jimtafacts_services/{name}.json',{'type':'minecraft:crafting_shapeless','category':'redstone','ingredients':ingredients,'result':{'id':'jugcraft:jimta_'+name}})
  # Distillation has a real downstream use and can rejoin the shared finite steam loop.
- dump(RES/'data/jugcraft/recipe/chemical_reaction/jimta_distilled_coolant.json',{'type':'jugcraft:chemical_reaction','items':[{'ingredient':'minecraft:lapis_lazuli','count':1}],'fluids':[{'fluid':'jugcraft:distilled_water','amount':1000}],'fluid_results':[{'fluid':'jugcraft:jimta_coolant','amount':1000}],'time':100})
+ from jimtafacts_fluid_recipes import recipes as coolant_recipes
+ dump(RES/'data/jugcraft/recipe/chemical_reaction/jimta_distilled_coolant.json',coolant_recipes()['jimta_distilled_coolant'])
  dump(ROOT/'art/owner-library/catalog/edited-2026-10-23-jimtafacts/service-runtime-copies.json',{'copies':manifest,'adaptation':'Original pixels retained; six-face atlases referenced by UV. GUI replaces obsolete source container widgets with native tank controls. No supplied program executed.'})
  if shared:
   path=RES/'assets/jugcraft/lang/en_us.json';values=json.loads(path.read_text(encoding='utf-8'));values.update(lang);dump(path,values)

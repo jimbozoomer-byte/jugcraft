@@ -24,22 +24,58 @@
       "light_emission": 15,
       "faces": {
         "west": {
-          "texture": "#light"
+          "texture": "#light",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "east": {
-          "texture": "#light"
+          "texture": "#light",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "north": {
-          "texture": "#light"
+          "texture": "#light",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "south": {
-          "texture": "#light"
+          "texture": "#light",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "down": {
-          "texture": "#light"
+          "texture": "#light",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         },
         "up": {
-          "texture": "#light"
+          "texture": "#light",
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ]
         }
       }
     }

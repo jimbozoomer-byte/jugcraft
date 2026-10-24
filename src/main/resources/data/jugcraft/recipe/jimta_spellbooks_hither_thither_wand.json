@@ -11,5 +11,11 @@
   "result": {
     "id": "jugcraft:jimta_spellbooks_hither_thither_wand",
     "count": 1
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

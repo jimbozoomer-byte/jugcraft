@@ -8,6 +8,22 @@ import net.minecraft.world.level.GameType;
 
 /** Deferred until the final combined suite, as requested by the owner. */
 public final class JimtaEncounterGameTests {
+    @GameTest public void chargedCreeperBottlingConsumesChargeAndRespectsClaims(GameTestHelper h){
+        var c=h.spawn(EntityTypes.CREEPER,2,2,2);c.setNoAi(true);
+        var p=h.makeMockServerPlayerInLevel();p.setGameMode(GameType.SURVIVAL);p.setPos(c.position());
+        var hand=net.minecraft.world.InteractionHand.MAIN_HAND;
+        p.setItemInHand(hand,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE));
+        c.getEntityData().set(io.github.jimbozoomer.jugcraft.mixin.JimtaCreeperAccessor.jugcraft$charge(),true);
+        try(var claim=TestClaims.open().block(c.blockPosition(),java.util.UUID.randomUUID())){
+            JimtaWorkshops.captureLightning(p,hand,c);
+            h.assertTrue(c.isPowered()&&p.getItemInHand(hand).is(net.minecraft.world.item.Items.GLASS_BOTTLE),"Claim denial preserves both charge and bottle");
+        }
+        JimtaWorkshops.captureLightning(p,hand,c);
+        h.assertTrue(!c.isPowered()&&p.getItemInHand(hand).is(JimtaSpellbooks.ITEMS.get("lightning_bottle")),"One bottle captures one lightning charge");
+        p.setItemInHand(hand,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GLASS_BOTTLE));
+        JimtaWorkshops.captureLightning(p,hand,c);
+        h.assertTrue(p.getItemInHand(hand).is(net.minecraft.world.item.Items.GLASS_BOTTLE),"Discharged creeper cannot be bottled twice");h.succeed();
+    }
     @GameTest public void predatorsRespectVillagersAndClaimedAnimals(GameTestHelper h){
         var spider=h.spawn(JimtaEncounterCreatures.ICE_SPIDER,2,2,2);var keeper=h.spawn(JimtaEncounterCreatures.KEEPER,4,2,2);
         var villager=h.spawn(net.minecraft.world.entity.EntityTypes.VILLAGER,2,2,4);var cow=h.spawn(net.minecraft.world.entity.EntityTypes.COW,4,2,4);

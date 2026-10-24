@@ -7,5 +7,11 @@
   ],
   "result": {
     "id": "jugcraft:jimta_treasure_disk"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ]
 }

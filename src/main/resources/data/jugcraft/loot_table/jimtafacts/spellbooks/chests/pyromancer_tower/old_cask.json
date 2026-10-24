@@ -3,7 +3,8 @@
     {
       "rolls": {
         "min": 1,
-        "max": 3
+        "max": 3,
+        "type": "minecraft:uniform"
       },
       "entries": [
         {
@@ -13,7 +14,8 @@
             {
               "count": {
                 "min": 1,
-                "max": 2
+                "max": 2,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }
@@ -30,7 +32,8 @@
             {
               "count": {
                 "min": 3,
-                "max": 8
+                "max": 8,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }
@@ -43,7 +46,8 @@
             {
               "count": {
                 "min": 2,
-                "max": 4
+                "max": 4,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }
@@ -56,7 +60,8 @@
             {
               "count": {
                 "min": 2,
-                "max": 4
+                "max": 4,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }
@@ -74,7 +79,8 @@
             {
               "count": {
                 "min": 8,
-                "max": 24
+                "max": 24,
+                "type": "minecraft:uniform"
               },
               "type": "minecraft:set_count"
             }

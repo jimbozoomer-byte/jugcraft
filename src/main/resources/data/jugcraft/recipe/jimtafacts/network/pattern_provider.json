@@ -8,10 +8,10 @@
   ],
   "key": {
     "L": "jugcraft:jimta_logic_processor",
-    "C": "jugcraft:jimta_fluix_glass_cable",
-    "I": "minecraft:iron_ingot",
     "B": "minecraft:crafting_table",
-    "H": "minecraft:chest"
+    "I": "minecraft:iron_ingot",
+    "H": "minecraft:chest",
+    "C": "jugcraft:jimta_fluix_glass_cable"
   },
   "result": {
     "id": "jugcraft:jimta_pattern_provider",

@@ -16,5 +16,11 @@
   },
   "reagent": {
     "item": "minecraft:amethyst_shard"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

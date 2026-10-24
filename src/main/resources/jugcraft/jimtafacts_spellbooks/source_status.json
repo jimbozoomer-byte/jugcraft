@@ -1601,5 +1601,5 @@
     "pumpkin",
     "netherite_mage"
   ],
-  "model_rule": "Original cube geometry, UVs and texture bytes; no replacement meshes."
+  "model_rule": "Supplied meshes and byte-identical textures; bounded face separation, closure and UV repairs are listed in tools/jimtafacts_model_repairs.py. No replacement meshes."
 }

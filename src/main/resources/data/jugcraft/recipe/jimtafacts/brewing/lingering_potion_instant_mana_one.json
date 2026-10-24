@@ -16,5 +16,11 @@
   },
   "reagent": {
     "item": "jugcraft:jimta_spellbooks_arcane_essence"
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

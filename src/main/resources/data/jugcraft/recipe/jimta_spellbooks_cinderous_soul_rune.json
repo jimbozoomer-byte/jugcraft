@@ -8,5 +8,11 @@
   "result": {
     "id": "jugcraft:jimta_spellbooks_cinderous_soul_rune",
     "count": 1
-  }
+  },
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "concordance"
+    }
+  ]
 }

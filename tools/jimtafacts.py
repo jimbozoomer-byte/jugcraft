@@ -187,6 +187,10 @@ def generate():
             src=SOURCE/f'assets/artifacts/sounds/{file}.ogg';dest=RES/f'assets/jugcraft/sounds/jimtafacts/{file}.ogg';dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
     dump(soundfile,sounddata)
     dest=RES/'assets/jugcraft/textures/entity/jimtafacts/mimic.png';dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(SOURCE/'assets/artifacts/textures/entity/mimic.png',dest)
+    copies.append({'source':(SOURCE/'assets/artifacts/textures/entity/mimic.png').relative_to(ROOT).as_posix(),
+                   'runtime':dest.relative_to(ROOT).as_posix(),
+                   'sha256':hashlib.sha256((SOURCE/'assets/artifacts/textures/entity/mimic.png').read_bytes()).hexdigest(),
+                   'changes':'None; original entity atlas retained.'})
     lang_path=RES/'assets/jugcraft/lang/en_us.json';existing=json.loads(lang_path.read_text(encoding='utf-8'));existing['entity.jugcraft.jimta_mimic']='Chest Mimic';existing['item.jugcraft.jimta_mimic_spawn_egg']='Chest Mimic Spawn Egg';dump(lang_path,existing)
     dump(ROOT / 'art/owner-library/catalog/edited-2026-10-23-jimtafacts/runtime-copies.json', copies)
     return catalog

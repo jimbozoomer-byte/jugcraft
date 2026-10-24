@@ -7,6 +7,7 @@ def generate(dump,RES,ART,SPELLS):
  def ident(value):return value.replace('irons_spellbooks:','jugcraft:jimta_spellbooks_')
  def adapt(value):
   if isinstance(value,list):return [adapt(x) for x in value]
+  if value=='minecraft:chain':return 'minecraft:iron_chain'
   if not isinstance(value,dict):return value
   value=dict(value)
   if set(value)=={'min','max'}:value['type']='minecraft:uniform'
@@ -19,7 +20,8 @@ def generate(dump,RES,ART,SPELLS):
   if value.get('function')=='irons_spellbooks:set_furled_map':return {'function':'jugcraft:jimtafacts_furled_map','destination':value['destination'].split(':')[-1]}
   for k,v in list(value.items()):
    if isinstance(v,str) and v.startswith('irons_spellbooks:'):
-    if k=='value' or k=='name' and value.get('type')=='minecraft:loot_table':value[k]='jugcraft:jimtafacts/spellbooks/'+v.split(':')[-1]
+    if k=='type' and v=='irons_spellbooks:chilled':value[k]='jugcraft:jimtafacts_chilled'
+    elif k=='value' or k=='name' and value.get('type')=='minecraft:loot_table':value[k]='jugcraft:jimtafacts/spellbooks/'+v.split(':')[-1]
     elif k=='name' and value.get('type')=='minecraft:tag':value[k]='jugcraft:jimtafacts/spellbooks/'+v.split(':')[-1]
     else:value[k]=ident(v)
    else:value[k]=adapt(v)

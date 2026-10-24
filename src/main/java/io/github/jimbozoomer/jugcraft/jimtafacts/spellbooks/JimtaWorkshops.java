@@ -57,6 +57,19 @@ public final class JimtaWorkshops {
         }
         NODE=Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,Jugcraft.id("jimtafacts_spell_workshop"),FabricBlockEntityTypeBuilder.create(Node::new,BLOCKS.values().stream().filter(b->b instanceof EntityBlock).toArray(Block[]::new)).build());
         for(var e:JimtaSpellbooks.data("cauldron_recipes").getAsJsonArray("recipes"))RECIPES.add(e.getAsJsonObject());
+        net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player,world,hand,target,hit)->captureLightning(player,hand,target));
+    }
+    /** Capture the charged-creeper lightning described by the supplied item guide. */
+    public static InteractionResult captureLightning(Player player,InteractionHand hand,Entity target){
+        if(!JimtaSpellbooks.enabled()||player.isSpectator()||!player.isAlive()
+                ||!player.getItemInHand(hand).is(Items.GLASS_BOTTLE)
+                ||!(target instanceof net.minecraft.world.entity.monster.Creeper creeper)||!creeper.isAlive()||!creeper.isPowered())return InteractionResult.PASS;
+        if(!(player instanceof ServerPlayer p))return InteractionResult.SUCCESS;
+        if(p.distanceToSqr(creeper)>36||!Authority.mayChange(p.level(),p,creeper.blockPosition()))return InteractionResult.FAIL;
+        // Discharge before awarding; repeated interactions cannot duplicate the charge.
+        creeper.getEntityData().set(io.github.jimbozoomer.jugcraft.mixin.JimtaCreeperAccessor.jugcraft$charge(),false);
+        p.setItemInHand(hand,ItemUtils.createFilledResult(p.getItemInHand(hand),p,new ItemStack(JimtaSpellbooks.ITEMS.get("lightning_bottle"))));
+        return InteractionResult.SUCCESS;
     }
     private static void material(String name,boolean drink){var key=ResourceKey.create(Registries.ITEM,Jugcraft.id(JimtaSpellbooks.PREFIX+name));var p=new Item.Properties().setId(key);JimtaSpellbooks.ITEMS.put(name,Registry.register(BuiltInRegistries.ITEM,key,drink?new Elixir(p.stacksTo(4),name):new Item(p)));}
     public static String nativeId(String id){return id.startsWith("irons_spellbooks:")?"jugcraft:"+JimtaSpellbooks.PREFIX+id.substring(id.indexOf(':')+1):id;}

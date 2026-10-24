@@ -28,7 +28,9 @@ def generate(copy,definition,model,texture,dump,RES,ART,lang):
   elif not (ART/f'models/item/{name}.json').exists():dump(RES/f'assets/jugcraft/items/jimta_spellbooks_{name}.json',{'model':{'type':'minecraft:model','model':model('irons_spellbooks:block/'+('grimy_tiles_01' if name=='grimy_tiles' else name))}})
   else:dump(RES/f'assets/jugcraft/items/jimta_spellbooks_{name}.json',definition('irons_spellbooks:item/'+name,'jimta_spellbooks_'+name))
   lang['block.jugcraft.jimta_spellbooks_'+name]=source_lang.get('block.irons_spellbooks.'+name,name.replace('_',' ').title())
-  if name in ('bone_vault','cinderous_vault'):continue
+  if name in ('bone_vault','cinderous_vault'):
+   dump(RES/f'data/jugcraft/loot_table/blocks/jimta_spellbooks_{name}.json',{'type':'minecraft:block','pools':[]})
+   continue
   drop='raw_mithril' if 'mithril_ore' in name else 'pyrium_ingot' if name=='arcane_debris' else name
   dump(RES/f'data/jugcraft/loot_table/blocks/jimta_spellbooks_{name}.json',{'type':'minecraft:block','pools':[{'rolls':1,'entries':[{'type':'minecraft:item','name':j(drop)}],'condition':{'type':'minecraft:survives_explosion'}}]})
  for name in (*MATERIALS,*ELIXIRS):
@@ -39,6 +41,11 @@ def generate(copy,definition,model,texture,dump,RES,ART,lang):
  recipes=[]
  for path in sorted((source/'recipe/alchemist_cauldron').glob('*.json')):
   data=json.loads(path.read_text(encoding='utf-8'));data['source_recipe']=path.stem
+  # Source loader's old common tags do not exist on the pinned Fabric runtime.
+  aliases={'c:ingots/gold':'minecraft:gold_ingot','c:ingots/iron':'minecraft:iron_ingot',
+           'c:ingots/copper':'minecraft:copper_ingot','c:gems/amethyst':'minecraft:amethyst_shard'}
+  if data.get('input',{}).get('tag') in aliases:
+   data['input']={'item':aliases[data['input']['tag']]}
   recipes.append(data)
  dump(RES/'jugcraft/jimtafacts_spellbooks/cauldron_recipes.json',{'recipes':recipes})
  dump(RES/'jugcraft/jimtafacts_spellbooks/workshops.json',{'blocks':list(BLOCKS),'materials':list(MATERIALS),'elixirs':list(ELIXIRS)})

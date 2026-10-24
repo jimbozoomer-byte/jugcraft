@@ -7,10 +7,10 @@
     " C "
   ],
   "key": {
-    "P": "minecraft:piston",
+    "C": "jugcraft:jimta_fluix_glass_cable",
     "I": "minecraft:iron_ingot",
     "Q": "jugcraft:jimta_certus_quartz_crystal",
-    "C": "jugcraft:jimta_fluix_glass_cable"
+    "P": "minecraft:piston"
   },
   "result": {
     "id": "jugcraft:jimta_import_bus",

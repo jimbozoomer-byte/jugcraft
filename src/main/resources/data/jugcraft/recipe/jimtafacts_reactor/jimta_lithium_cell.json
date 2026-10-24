@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    "jugcraft:lithium_ingot",
+    "jugcraft:lithium_carbonate",
     "jugcraft:jimta_empty_fuel_rod"
   ],
   "result": {

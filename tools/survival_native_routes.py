@@ -207,4 +207,6 @@ def extend(root, edge, evidence, items):
     if 'jugcraft:artisan_furniture' in items:
         route(java + 'furniture/ArtisanFurniture.java', ['artisans_workstation', 'furniture_material'],
               ['artisan_furniture'], 'design_at_workstation_and_pay_server_computed_material_cost')
+    from survival_jimtafacts_routes import extend as collection_routes
+    exclusions.update(collection_routes(root, edge, evidence, items))
     return exclusions
