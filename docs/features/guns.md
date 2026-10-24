@@ -1781,7 +1781,7 @@ The reload times are the owner's animations'.
 - **Borer:** three steel ingots over a lever between two shulker shells, over a purpur block.
 
 **How they fire:** as the other bullet guns: each bullet goes from the eye along the look, strayed by the spread, to the first creature or block in its way. A magazine loads at the end of its reload.
-- **Float:** each creature their bullets hurt floats for 1 second (`GunShots.LIFT_TICKS`, 20 ticks): the game's own Levitation at its first level, as a shulker's bullet gives it (a shulker's lasts 10 seconds). It rises about three quarters of a block in that second. Each hit starts it again, so under steady fire it goes on rising, nearly a block a second. When it ends the creature falls, and a fall of more than 3 blocks hurts it, as any fall does. A longer spell of Levitation already on it is kept.
+- **Float:** each creature their bullets hurt, except the Yeti King and his whelps, who refuse all Levitation ([yeti-king.md](yeti-king.md)), floats for 1 second (`GunShots.LIFT_TICKS`, 20 ticks): the game's own Levitation at its first level, as a shulker's bullet gives it (a shulker's lasts 10 seconds). It rises about three quarters of a block in that second. Each hit starts it again, so under steady fire it goes on rising, nearly a block a second. When it ends the creature falls, and a fall of more than 3 blocks hurts it, as any fall does. A longer spell of Levitation already on it is kept.
 - **Only where the shot may strike:** a creature the shooter may not hurt (`GunShots.allowed`) is neither hurt nor lifted.
 - The server works it out with the shot (`JugcraftGuns.LEVITATING`); nothing new is sent to clients, which show the effect as the game always does.
 

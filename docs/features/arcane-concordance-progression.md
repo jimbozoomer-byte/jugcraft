@@ -92,7 +92,11 @@ a stage needs. This table is the graph's (`tools/check_mod_data.py` fails if it 
 | Architect | nothing new | `jugcraft:lampwright_bench`, `#minecraft:planks` | nothing new | nothing new | nothing new |
 <!-- mandatory: end -->
 
-Everything else has an alternative: another specimen, another tradition, another route.
+Everything else has an alternative: another specimen, another tradition, another route. Rimekeeping's Glacier Hall
+route (Concordance Chunk B, unit 3) understands Rimekeeping without a study, but its mastery does not avoid the bench:
+Preserve counts only a crucible holding a mixture, a crucible takes water by hand only from someone who understands the
+Alembic Arts, and they are understood at the bench (or from someone's notes). So the Lampwright's Bench stays
+unavoidable at Adept.
 
 ## Recovery routes
 

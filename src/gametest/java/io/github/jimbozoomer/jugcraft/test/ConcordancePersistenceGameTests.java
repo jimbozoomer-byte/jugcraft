@@ -9,11 +9,14 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.Rituals;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import io.github.jimbozoomer.jugcraft.concordance.courier.CourierLedger;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rime;
+import io.github.jimbozoomer.jugcraft.concordance.rime.RimeGear;
 import io.github.jimbozoomer.jugcraft.concordance.ritual.StructurePattern;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
@@ -28,18 +31,28 @@ import java.util.UUID;
 import java.util.function.UnaryOperator;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.TagValueInput;
 
 /**
  * Roadmap step 30, persistence and migration (docs/features/arcane-concordance-persistence.md): every format the
  * Concordance saves in a world reads its own saves from before versions began, is written with its version, brings an
  * older version forward step by step and reads what it can of a newer one; a record keeps an entry it cannot read
- * exactly as written; block entities stamp their version; and the circle index looks only at the chunks in reach.
+ * exactly as written; block entities stamp their version; the crucible keeps Preserve's hold through a save (Concordance
+ * Chunk B, unit 3); and the circle index looks only at the chunks in reach.
  */
 public class ConcordancePersistenceGameTests {
 	private static JsonElement json(String text) {
@@ -152,15 +165,20 @@ public class ConcordancePersistenceGameTests {
 		return element;
 	}
 
-	/** A Concordance block entity's save carries its version, for a later format to read. */
+	/**
+	 * A Concordance block entity's save carries its version, for a later format to read. The crucible's stays 1 with
+	 * Preserve's optional hold (Concordance Chunk B, unit 3).
+	 */
 	@GameTest(maxTicks = 20)
 	public void blockEntitiesStampTheirVersion(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		BlockPos pylon = new BlockPos(1, 1, 1);
 		BlockPos sconce = new BlockPos(3, 1, 1);
+		BlockPos crucible = new BlockPos(5, 1, 1);
 		helper.setBlock(pylon, JugcraftConcordance.LEY_PYLON);
 		helper.setBlock(sconce, JugcraftConcordance.LUMEN_SCONCE);
-		for (BlockPos at : List.of(pylon, sconce)) {
+		helper.setBlock(crucible, JugcraftConcordance.CRUCIBLE);
+		for (BlockPos at : List.of(pylon, sconce, crucible)) {
 			BlockEntity entity = level.getBlockEntity(helper.absolutePos(at));
 			CompoundTag saved = entity.saveWithoutMetadata(level.registryAccess());
 			helper.assertValueEqual(saved.getIntOr(Saved.VERSION, 0), 1, entity.getType() + " stamps its version");
@@ -189,5 +207,90 @@ public class ConcordancePersistenceGameTests {
 		helper.assertValueEqual(Rituals.loaded(level), loaded, "removed and placed again, it is indexed once");
 		helper.assertValueEqual(Rituals.near(level, anchor).stream().filter(anchor::equals).count(), 1L, "and found once");
 		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B, unit 3: a crucible saves Preserve's hold as an optional field and keeps version 1. A hold
+	 * round-trips exactly, a water focus's two minutes (unit 4, B-P50) too; a save without the field (one from before the
+	 * unit), with or without its version, reads as not held and keeps its heat; a crucible not held writes no field; and a
+	 * hold read from a save further ahead than any hold may be is cut to the longest within two ticks.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theCrucibleKeepsPreservesHoldThroughASave(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos relative = new BlockPos(2, 2, 2);
+		helper.setBlock(relative.below(), Blocks.STONE);
+		helper.setBlock(relative, JugcraftConcordance.CRUCIBLE);
+		CrucibleBlockEntity crucible = (CrucibleBlockEntity) level.getBlockEntity(helper.absolutePos(relative));
+		crucible.setTemperature(120);
+		long now = level.getGameTime();
+		crucible.hold(now, Rime.HOLD_TICKS);
+		CompoundTag saved = crucible.saveWithoutMetadata(level.registryAccess());
+		helper.assertTrue(saved.getIntOr(Saved.VERSION, 0) == 1 && saved.getLongOr(CrucibleBlockEntity.HELD_UNTIL, 0L) == now + Rime.HOLD_TICKS,
+				"The hold is saved, still at version 1: " + saved);
+		helper.assertTrue(load(level, crucible, saved).heldUntil() == now + Rime.HOLD_TICKS, "and read back exactly");
+		BlockPos focusAt = new BlockPos(4, 2, 2);
+		helper.setBlock(focusAt.below(), Blocks.STONE);
+		helper.setBlock(focusAt, JugcraftConcordance.CRUCIBLE);
+		CrucibleBlockEntity focused = (CrucibleBlockEntity) level.getBlockEntity(helper.absolutePos(focusAt));
+		focused.hold(now, RimeGear.FOCUS_HOLD_TICKS);
+		long focusHeld = load(level, focused, focused.saveWithoutMetadata(level.registryAccess())).heldUntil();
+		helper.assertTrue(focusHeld == now + RimeGear.FOCUS_HOLD_TICKS, "A Focus of Water's two-minute hold is read back whole: "
+				+ (focusHeld - now));
+		CompoundTag before = saved.copy();
+		before.remove(CrucibleBlockEntity.HELD_UNTIL);
+		CompoundTag unversioned = before.copy();
+		unversioned.remove(Saved.VERSION);
+		for (CompoundTag legacy : List.of(before, unversioned)) {
+			CrucibleBlockEntity read = load(level, crucible, legacy);
+			helper.assertTrue(read.heldUntil() == 0L && read.temperature() == 120, "A save from before reads as not held, its heat kept: "
+					+ read.heldUntil() + ", " + read.temperature());
+		}
+		crucible.hold(now, 0);
+		helper.assertTrue(!crucible.saveWithoutMetadata(level.registryAccess()).contains(CrucibleBlockEntity.HELD_UNTIL),
+				"A crucible not held writes no hold");
+		CompoundTag forged = saved.copy();
+		forged.putLong(CrucibleBlockEntity.HELD_UNTIL, now + 1_000_000L);
+		crucible.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), forged));
+		helper.runAfterDelay(2, () -> {
+			long later = level.getGameTime();
+			helper.assertTrue(crucible.heldUntil() > later && crucible.heldUntil() <= later + Rime.MAX_HOLD_TICKS,
+					"A hold too far ahead is cut to the longest: " + (crucible.heldUntil() - later));
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * Concordance Chunk B, unit 4 (B-10): each of the travel kit's fifteen items survives a save as it was, a worn piece
+	 * damaged and enchanted, a focus or bangle named (vanilla stacks; no format of the kit's own). The bangle's count is
+	 * never saved, so a relog gives no free Brace (B-P49).
+	 */
+	@GameTest(maxTicks = 20)
+	public void theTravelKitSurvivesASave(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		var ops = level.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		var protection = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.PROTECTION);
+		List<String> ids = new ArrayList<>(List.of("lesser_water_focus", "water_focus", "water_bangle"));
+		ids.addAll(RimeGear.ARMOR.keySet());
+		helper.assertTrue(ids.size() == 15, "The kit is fifteen items: " + ids);
+		for (String id : ids) {
+			ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(io.github.jimbozoomer.jugcraft.Jugcraft.id(id)));
+			if (stack.isDamageableItem()) {
+				stack.setDamageValue(7);
+				stack.enchant(protection, 2);
+			} else {
+				stack.set(DataComponents.CUSTOM_NAME, Component.literal("Rimekeeper's " + id));
+			}
+			ItemStack copy = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, stack).getOrThrow()).getOrThrow();
+			helper.assertTrue(!stack.isEmpty() && ItemStack.matches(stack, copy), id + " does not survive a save: " + stack + " / " + copy);
+		}
+		helper.assertTrue(!RimeGear.BANGLE_LAST.isPersistent(), "The Water Bangle's count is not saved");
+		helper.succeed();
+	}
+
+	private static CrucibleBlockEntity load(ServerLevel level, CrucibleBlockEntity like, CompoundTag saved) {
+		CrucibleBlockEntity copy = new CrucibleBlockEntity(like.getBlockPos(), like.getBlockState());
+		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved));
+		return copy;
 	}
 }

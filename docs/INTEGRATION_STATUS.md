@@ -15,6 +15,23 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
+## Not merged: Concordance Chunk B (winter and stone)
+
+On branch `claude/chunk-b-winter-stone`, not merged. Units 1 to 5 pass their tests in CI: run 38591108210 on
+`25644502a` passed every job on its second attempt (all 1682 required server game tests, with and without the optional
+integrations, and every client test class); its first attempt failed two tests outside Chunk B (a nuclear plant's
+radiation reading, a Peepo delivery client test), which passed when re-run. Units 1 to 4 also passed run 38549876709
+on `b012875ab`. The evidence is recorded and the owner's checkpoint is awaited; Chunk C has not started. Not played by
+hand or with two clients ([the chunk's contract](features/concordance-chunk-b.md),
+[its evidence](features/concordance-chunk-b.md#unit-5-evidence-and-handoff-b-09-b-11)).
+
+| Area | Implemented change | Record |
+| --- | --- | --- |
+| Boss rewards and guidance | The Yeti King and the Cinder Tyrant on the lairs' shared encounter credit: support (healing, wards and, against the Yeti, baiting his charge into a column) earns a share, kept across death and disconnect and paid once; the Glacier Hall's and the Cinder Kiln's dossiers in the encyclopedia, and JEI pages for both keepers' loot (unit 1) | [encounter credit](features/lair-encounter-credit.md), [Yeti](features/yeti-king.md), [Tyrant](features/cinder-tyrant.md) |
+| The Glacier Hall and the Yeti fight | Tests for the hall's access in ordinary and designed worlds, refusals, exit and restart, and for his fight against the chunk's completion evidence; three fixes to the fight: End-gun Levitation lifts neither him nor his whelps, a charge into a column's foot stuns him, and his ice and whelps last only while he counts them his (unit 2) | [Glacier Hall](features/glacier-hall.md), [Yeti](features/yeti-king.md) |
+| Winter magic | Rimekeeping and Stratawrighting; Rimebind, Brace and Preserve (unit 3). Winter Brine and its Frostward at the Alembic Crucible, the timed answer to the Yeti King's frost beside his Mitten; the Rimekeeper's travel kit from the owner's water sets (Nereid's, Aquamancer's, Winterguard's), water foci and Water Bangle; a Frost boon slow as Rimekeeping practice, with no Thallite or trophy number changed (unit 4) | [Rime and Strata](features/arcane-concordance-rime-strata.md), [winter workshop and travel kit](features/arcane-concordance-winter.md) |
+| The Yeti counters and the combined fixes | Optional, neither needed to win: only a Brace now lessens the Yeti King's throws, halving the next; a Brace put on another player that takes one is its caster's share; Rimebind does not slow his steps but holds his wind-up (the one under way unless it is about to strike, else his next) 4 ticks (untuned), once each thaw; drawing his charge into an ice column is Rimekeeping's elective cold work, one kind with the Frost boon's slow. The encyclopedia guides' home showed each route card whole and scrolled in a small window (merging main f904df3fd, #415's book-style guides directory, replaced these cards on 23 October 2026; the card fix `d22a55830`, its check and the `_home_end`/`_home_scale1` shots were dropped in the merge, and main's home tab is calculated, not yet seen, to cut "Magic: the Arcane Concordance" at CI's 427×240 GUI); the client tests picture the charge into a column, the spell bar at GUI scale 1, the foci and bangle slotted (the shot shows neither; the server's checks are the proof) and both new dossiers (unit 5; passed in CI, run 38591108210) | [Yeti](features/yeti-king.md), [encounter credit](features/lair-encounter-credit.md), [encyclopedia](features/jugcraft-encyclopedia.md), [the contract](features/concordance-chunk-b.md) |
+
 ## October 11 additions
 
 The 20 source PRs below are combined on `integrate/oct11-ready-content` for validation against current main. The integration PR's merge state determines whether this batch has reached main. Individual feature records retain their earlier branch test evidence; the combined PR records the final tested commit and results.

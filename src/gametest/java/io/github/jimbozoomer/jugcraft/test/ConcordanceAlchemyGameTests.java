@@ -1,5 +1,9 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.concordance.Alchemy;
 import io.github.jimbozoomer.jugcraft.concordance.Brew;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -7,15 +11,22 @@ import io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.Reagent;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.AlchemyCatalog;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Axis;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Band;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Formula;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.alchemy.Mixture;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Operation;
+import io.github.jimbozoomer.jugcraft.concordance.alchemy.Outcome;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Frostward;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sign.Sign;
+import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.logistics.JugcraftLogistics;
 import io.github.jimbozoomer.jugcraft.logistics.PneumaticExtractorBlock;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
@@ -30,6 +41,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
@@ -39,6 +51,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
@@ -52,10 +65,13 @@ import net.minecraft.world.phys.AABB;
  * understands the Alembic Arts may work one; the mortar prepares ingredients; a bowl makes a salve for a creature; a
  * recorded formula is followed by another crucible fed by pipe and hopper, making the same draught; real machinery (a
  * hopper, a campfire and a Pneumatic Extractor) runs a formula twice; a broken crucible drops its items; and a crucible
- * saves its mixture and formula.
+ * saves its mixture and formula. Since Concordance Chunk B (B-08), Winter Brine: Rime brews Frostward only stirred cold,
+ * bottles made before keep their Resistance, a Rime formula written before brews Frostward, and nothing makes Frostward
+ * cheaper than its snow.
  */
 public class ConcordanceAlchemyGameTests {
 	private static final String GLOW = "minecraft:glowstone_dust";
+	private static final String SNOW = "minecraft:snowball";
 	/** A stir may follow another only after this many ticks (CrucibleBlockEntity.STIR_TICKS, plus one). */
 	private static final int NEXT_STIR = CrucibleBlockEntity.STIR_TICKS + 1;
 
@@ -83,6 +99,42 @@ public class ConcordanceAlchemyGameTests {
 
 	private static ItemStack waterBottle() {
 		return PotionContents.createItemStack(Items.POTION, Potions.WATER);
+	}
+
+	private static CrucibleBlockEntity crucible(GameTestHelper helper, BlockPos at, Block beneath) {
+		helper.setBlock(at.below(), beneath);
+		helper.setBlock(at, JugcraftConcordance.CRUCIBLE);
+		return (CrucibleBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(at));
+	}
+
+	/**
+	 * Winter Brine's process (tools/concordance_alchemy.py WINTER_BRINE): three snowballs as they come in {@code water}
+	 * parts, stirred three times at {@code band}.
+	 */
+	private static Mixture threeSnowballs(int water, Band band) {
+		List<Operation> process = new ArrayList<>(List.of(new Operation.Water(water)));
+		for (int i = 0; i < 3; i++) {
+			process.add(new Operation.Add(SNOW, "jugcraft:raw"));
+		}
+		for (int i = 0; i < 3; i++) {
+			process.add(new Operation.Stir(band));
+		}
+		return ((Mixture.Applied) new Formula(process).replay(Alchemy.catalog())).mixture();
+	}
+
+	/** What the first bottle drawn from {@code mixture} would do, as the crucible bottles it. */
+	private static Outcome bottled(Mixture mixture) {
+		Mixture.Bottled bottled = mixture.bottle();
+		return Outcome.of(bottled.dose(), bottled.contaminant(), Alchemy.catalog(), mixture.history());
+	}
+
+	/** Three snowballs in a bottle of water, then a stir: by hand, as an alembist does it. */
+	private static void startWinterBrine(CrucibleBlockEntity crucible, ServerPlayer player) {
+		use(crucible, player, waterBottle());
+		for (int i = 0; i < 3; i++) {
+			use(crucible, player, new ItemStack(Items.SNOWBALL));
+		}
+		use(crucible, player, new ItemStack(Items.STICK));
 	}
 
 	/** Water, one glowstone dust as it comes, and the crucible held hot: then two stirs, a little apart. */
@@ -369,6 +421,175 @@ public class ConcordanceAlchemyGameTests {
 			signs.close();
 			helper.succeed();
 		});
+	}
+
+	// ---------------------------------------------------------------- Winter Brine (Concordance Chunk B, B-08)
+
+	/**
+	 * Rime brews Frostward, and Rime is cold's own: each stir above the cold band keeps only part of the Rime already
+	 * dissolved. On paper, three snowballs as they come in one part of water, stirred three times, keep what
+	 * tools/concordance_alchemy.py winter_brine says at each band (check_mod_data holds the two to each other): cold, a
+	 * draught of Frostward I for 48.75 s; warm, too weak, naming the stirs that thawed it; searing, only the fouling's
+	 * Nausea. A warm stir before any snowball went in thaws nothing and is not named. By hand, one crucible over stone and
+	 * one over a magma block: the cold one's draught drunk gives Frostward and no Resistance; the warm one's does nothing.
+	 */
+	@GameTest(maxTicks = 60)
+	public void winterBrineNeedsTheColdBand(GameTestHelper helper) {
+		AlchemyCatalog catalog = Alchemy.catalog();
+		helper.assertTrue(catalog.property(Axis.RIME.id) != null && Frostward.STATUS.equals(catalog.property(Axis.RIME.id).status()),
+				"Rime brews Frostward: " + catalog.property(Axis.RIME.id));
+		long[] kept = {813, 685, 211, 0};
+		for (int i = 0; i < kept.length; i++) {
+			Band band = Band.values()[i];
+			long rime = threeSnowballs(1, band).dissolved().get(Axis.RIME);
+			helper.assertTrue(rime == kept[i], "Three " + band.id + " stirs keep " + kept[i] + " Rime, not " + rime);
+		}
+		Outcome cold = bottled(threeSnowballs(1, Band.COLD));
+		helper.assertTrue(cold.key().equals("jugcraft:frostward@0") && cold.effects().size() == 1 && cold.effects().get(0).ticks() == 975,
+				"Stirred cold: Frostward I for 975 ticks: " + cold);
+		Outcome warm = bottled(threeSnowballs(1, Band.WARM));
+		helper.assertTrue(warm.effects().isEmpty() && warm.reasons().stream().anyMatch(reason -> reason.key().equals("alchemy.too_weak")
+				&& reason.args().stream().anyMatch(arg -> arg.toString().contains("thawed"))),
+				"Stirred warm: too weak, and the warm stirs named as what thawed it: " + warm.reasons());
+		List<Operation> stirredFirst = new ArrayList<>(List.of(new Operation.Water(1), new Operation.Stir(Band.WARM)));
+		for (int i = 0; i < 3; i++) {
+			stirredFirst.add(new Operation.Add(SNOW, "jugcraft:raw"));
+		}
+		for (int i = 0; i < 3; i++) {
+			stirredFirst.add(new Operation.Stir(Band.COLD));
+		}
+		Outcome early = bottled(((Mixture.Applied) new Formula(stirredFirst).replay(catalog)).mixture());
+		helper.assertTrue(early.key().equals("jugcraft:frostward@0") && early.reasons().stream()
+						.noneMatch(reason -> reason.args().stream().anyMatch(arg -> arg.toString().contains("thawed"))),
+				"A warm stir before any Rime went in thaws nothing and is not named: " + early.reasons());
+		Outcome searing = bottled(threeSnowballs(1, Band.SEARING));
+		helper.assertTrue(searing.key().equals("minecraft:nausea@0"), "Stirred searing: no Rime left, only the fouling: " + searing.key());
+
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		CrucibleBlockEntity cool = crucible(helper, new BlockPos(1, 2, 1), Blocks.STONE);
+		CrucibleBlockEntity warmed = crucible(helper, new BlockPos(4, 2, 1), Blocks.MAGMA_BLOCK);
+		warmed.setTemperature(60);
+		startWinterBrine(cool, player);
+		startWinterBrine(warmed, player);
+		helper.runAfterDelay(NEXT_STIR, () -> {
+			use(cool, player, new ItemStack(Items.STICK));
+			use(warmed, player, new ItemStack(Items.STICK));
+			helper.runAfterDelay(NEXT_STIR, () -> {
+				use(cool, player, new ItemStack(Items.STICK));
+				use(warmed, player, new ItemStack(Items.STICK));
+				helper.assertTrue(cool.band() == Band.COLD && warmed.band() == Band.WARM, "Over stone it stays cold, over magma warm: "
+						+ cool.temperature() + ", " + warmed.temperature());
+				helper.assertTrue(cool.mixture().dissolved().get(Axis.RIME) == 813 && warmed.mixture().dissolved().get(Axis.RIME) == 685,
+						"By hand, the same Rime as on paper: " + cool.mixture() + " / " + warmed.mixture());
+				use(cool, player, new ItemStack(Items.GLASS_BOTTLE));
+				ItemStack brine = take(player, JugcraftConcordance.DRAUGHT);
+				use(warmed, player, new ItemStack(Items.GLASS_BOTTLE));
+				Brew thawed = take(player, JugcraftConcordance.DRAUGHT).get(JugcraftConcordance.BREW);
+				helper.assertTrue(thawed != null && thawed.effects().isEmpty(), "Stirred warm, the draught does nothing: " + thawed);
+				brine.getItem().finishUsingItem(brine, helper.getLevel(), player);
+				MobEffectInstance ward = player.getEffect(Frostward.FROSTWARD);
+				helper.assertTrue(ward != null && ward.getDuration() == 975 && ward.getAmplifier() == 0 && !player.hasEffect(MobEffects.RESISTANCE),
+						"Drunk, Winter Brine gives Frostward I for 975 ticks and no Resistance: " + ward);
+				helper.succeed();
+			});
+		});
+	}
+
+	/**
+	 * A save test: a Rime draught bottled before Winter Brine (Resistance I for 487 ticks: 0.813 a part at 600 ticks a
+	 * unit) reads, writes and reads again as it was, and drunk still gives Resistance, never Frostward: a bottle keeps
+	 * what it was bottled with.
+	 */
+	@GameTest(maxTicks = 20)
+	public void oldRimeBottlesStillGiveResistance(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		DynamicOps<JsonElement> ops = level.registryAccess().createSerializationContext(JsonOps.INSTANCE);
+		JsonElement saved = JsonParser.parseString("{\"id\":\"jugcraft:draught\",\"count\":1,\"components\":{\"jugcraft:brew\":"
+				+ "{\"effects\":[{\"status\":\"minecraft:resistance\",\"amplifier\":0,\"ticks\":487}],\"outcome\":\"minecraft:resistance@0\"}}}");
+		ItemStack old = ItemStack.CODEC.parse(ops, saved).getOrThrow();
+		Brew brew = old.get(JugcraftConcordance.BREW);
+		helper.assertTrue(old.is(JugcraftConcordance.DRAUGHT) && brew != null && brew.effects().size() == 1
+				&& brew.effects().get(0).status().equals("minecraft:resistance"), "The old draught reads as it was: " + brew);
+		ItemStack again = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, old).getOrThrow()).getOrThrow();
+		helper.assertTrue(brew.equals(again.get(JugcraftConcordance.BREW)), "Written and read again it is the same: " + again.get(JugcraftConcordance.BREW));
+		ServerPlayer player = alembist(helper, ResearchState.NONE);
+		old.getItem().finishUsingItem(old, level, player);
+		MobEffectInstance resistance = player.getEffect(MobEffects.RESISTANCE);
+		helper.assertTrue(resistance != null && resistance.getDuration() == 487 && resistance.getAmplifier() == 0,
+				"Drunk, it still gives Resistance I for 487 ticks: " + resistance);
+		helper.assertTrue(!Frostward.warded(player), "and no Frostward");
+		helper.succeed();
+	}
+
+	/**
+	 * A Rime formula written before Winter Brine (three snowballs, three cold stirs) still reads, is set on a crucible,
+	 * and run from its tank and buffer now bottles Frostward I for 975 ticks, using exactly its snow and water.
+	 */
+	@GameTest(maxTicks = 300)
+	public void aRimeFormulaWrittenBeforeBrewsFrostward(GameTestHelper helper) {
+		String text = "water 1; add minecraft:snowball jugcraft:raw; add minecraft:snowball jugcraft:raw; "
+				+ "add minecraft:snowball jugcraft:raw; stir cold; stir cold; stir cold";
+		helper.assertTrue(Formula.parse(text) != null, "The formula still reads");
+		CrucibleBlockEntity crucible = crucible(helper, new BlockPos(2, 2, 2), Blocks.STONE);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		ItemStack written = new ItemStack(JugcraftConcordance.FORMULA_ITEM);
+		written.set(JugcraftConcordance.FORMULA, text);
+		helper.assertTrue(use(crucible, player, written).consumesAction() && crucible.program() != null, "The formula is set");
+		try (Transaction transaction = Transaction.openOuter()) {
+			crucible.water.insert(FluidVariant.of(Fluids.WATER), FluidConstants.BOTTLE, transaction);
+			transaction.commit();
+		}
+		crucible.setItem(0, new ItemStack(Items.SNOWBALL, 3));
+		crucible.setItem(CrucibleBlockEntity.BOTTLE_SLOT, new ItemStack(Items.GLASS_BOTTLE));
+		Brew expected = new Brew(List.of(new Brew.Dose(Frostward.STATUS, 0, 975, false)), "jugcraft:frostward@0");
+		helper.succeedWhen(() -> {
+			ItemStack made = crucible.getItem(CrucibleBlockEntity.OUTPUT_SLOT);
+			helper.assertTrue(expected.equals(made.get(JugcraftConcordance.BREW)), "Waiting for Frostward: step " + crucible.step() + ", "
+					+ crucible.mixture() + ", output " + made.get(JugcraftConcordance.BREW));
+			helper.assertTrue(crucible.getItem(0).isEmpty() && crucible.water.amount == 0, "It used exactly its three snowballs and its water");
+		});
+	}
+
+	/**
+	 * Economy (06:146-158): Frostward is never cheaper than its snow. Yeti Fur, the Frost Horn, wool and brews are no
+	 * ingredients: the crucible will not take fur by hand or by hopper, and the mortar will not grind it. Two parts of
+	 * water make more bottles but no more Frostward (each too weak); and two draughts drunk one after the other last as
+	 * long as one.
+	 */
+	@GameTest(maxTicks = 20)
+	public void frostwardIsNeverCheaperThanItsSnow(GameTestHelper helper) {
+		AlchemyCatalog catalog = Alchemy.catalog();
+		for (String thing : List.of("jugcraft:yeti_fur", "jugcraft:frost_horn", "minecraft:white_wool", "jugcraft:draught", "jugcraft:salve")) {
+			helper.assertTrue(catalog.ingredient(thing) == null, thing + " is no alchemical ingredient");
+		}
+		CrucibleBlockEntity crucible = crucible(helper, new BlockPos(2, 2, 2), Blocks.STONE);
+		ServerPlayer player = alembist(helper, ResearchState.UNDERSTOOD);
+		use(crucible, player, waterBottle());
+		Mixture before = crucible.mixture();
+		ItemStack fur = new ItemStack(JugcraftYeti.YETI_FUR, 2);
+		helper.assertTrue(use(crucible, player, fur) == InteractionResult.TRY_WITH_EMPTY_HAND && fur.getCount() == 2
+				&& crucible.mixture().equals(before), "The crucible takes no Yeti Fur: " + crucible.mixture());
+		helper.assertTrue(!crucible.canPlaceItem(0, fur), "nor from a hopper");
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.MORTAR));
+		player.setItemInHand(InteractionHand.OFF_HAND, fur);
+		RateGate.forget(player.getUUID());
+		helper.assertTrue(JugcraftConcordance.MORTAR.use(helper.getLevel(), player, InteractionHand.MAIN_HAND) == InteractionResult.FAIL
+				&& player.getOffhandItem().getCount() == 2 && take(player, JugcraftConcordance.REAGENT_ITEM).isEmpty(),
+				"The mortar grinds no Yeti Fur");
+		Mixture diluted = threeSnowballs(2, Band.COLD);
+		Mixture.Bottled first = diluted.bottle();
+		Outcome weak = Outcome.of(first.dose(), first.contaminant(), catalog, diluted.history());
+		helper.assertTrue(first.dose().get(Axis.RIME) == 406 && weak.effects().isEmpty(),
+				"Three snowballs in two parts: 0.406 a part, too weak for Frostward: " + first.dose());
+		Outcome cold = bottled(threeSnowballs(1, Band.COLD));
+		ItemStack one = Alchemy.brew(JugcraftConcordance.DRAUGHT, cold);
+		ItemStack two = Alchemy.brew(JugcraftConcordance.DRAUGHT, cold);
+		ServerPlayer drinker = alembist(helper, ResearchState.NONE);
+		one.getItem().finishUsingItem(one, helper.getLevel(), drinker);
+		two.getItem().finishUsingItem(two, helper.getLevel(), drinker);
+		MobEffectInstance ward = drinker.getEffect(Frostward.FROSTWARD);
+		helper.assertTrue(ward != null && ward.getDuration() == 975, "Two draughts last as long as one, not their sum: " + ward);
+		helper.succeed();
 	}
 
 	/** Roadmap step 28: only an alembist may stop a crucible's formula, as only one may set it. */

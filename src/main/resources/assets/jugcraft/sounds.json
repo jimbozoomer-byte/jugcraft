@@ -410,6 +410,63 @@
       }
     ]
   },
+  "concordance.rime_gather": {
+    "subtitle": "subtitles.jugcraft.concordance.rime_gather",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/rime_gather",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.rimebind": {
+    "subtitle": "subtitles.jugcraft.concordance.rimebind",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/rimebind",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.preserve": {
+    "subtitle": "subtitles.jugcraft.concordance.preserve",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/preserve",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.strata_gather": {
+    "subtitle": "subtitles.jugcraft.concordance.strata_gather",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/strata_gather",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "concordance.brace": {
+    "subtitle": "subtitles.jugcraft.concordance.brace",
+    "sounds": [
+      {
+        "name": "jugcraft:concordance/gaia_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:concordance/gaia_2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:concordance/gaia_3",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "jugcraft:concordance/gaia_4",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "alchemy_chargetick": {
     "sounds": [
       "jugcraft:alchemy/chargetick"

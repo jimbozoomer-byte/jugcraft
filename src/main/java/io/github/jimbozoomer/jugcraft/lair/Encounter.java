@@ -23,17 +23,19 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * One fight with a lair boss (Concordance Chunk A, A-05): who took part and how, kept by the boss while it lives. A
- * player qualifies for the boss's reward by any one of these:
+ * One fight with a lair boss (Concordance Chunk A, A-05; the Yeti King's and the Cinder Tyrant's since Chunk B): who
+ * took part and how, kept by the boss while it lives. A player qualifies for the boss's reward by any one of these:
  * <ul>
  * <li><b>damage</b>: any blow to the boss or a creature that counts for it (Vesperine's skulls and harvest souls, Madame
- * Tatterlace's egg sacs and spiderlings; not Vesperine's Grave Thralls), as before Chunk A, or by a creature they
- * tamed;</li>
+ * Tatterlace's egg sacs and spiderlings, the Yeti King's whelps, the Cinder Tyrant's Cinderlings; not Vesperine's Grave
+ * Thralls), as before Chunk A, or by a creature they tamed;</li>
  * <li><b>healing</b>: at least {@value #HEALING} health given back to other players the fight had hurt, counting no
  * more than the hurt not yet healed;</li>
  * <li><b>warding</b>: at least {@value #WARDING} of the fight's damage soaked by a ward they put on another player;</li>
- * <li><b>an objective</b>: a deed the boss names, such as a ward relit in Vesperine's Harvest or a fellow player cut
- * from Madame Tatterlace's thread, each counted once a fight.</li>
+ * <li><b>an objective</b>: a deed the boss names, such as a ward relit in Vesperine's Harvest, a fellow player cut from
+ * Madame Tatterlace's thread, the Yeti King's charge baited into an ice column by one already in his fight, or a Brace
+ * one player put on another that meets his push (B-09); each key counts once a fight (a Brace's names the braced player
+ * and the tick, so each Brace that meets his push is its own deed).</li>
  * </ul>
  * Healing yourself, healing hurt the fight did not do (a fall, another player's blow), healing past full health, a ward
  * that soaks nothing and a deed done again all count for nothing; past qualifying, more of anything adds nothing. The

@@ -81,7 +81,7 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 				&& accessor.getLevel() instanceof ServerLevel level) {
 			data.put(dataKey, snapshot(anchor, level));
 		} else if (this == CRUCIBLE && accessor.getBlockEntity() instanceof CrucibleBlockEntity crucible) {
-			data.put(dataKey, snapshot(crucible));
+			data.put(dataKey, snapshot(crucible, now));
 		} else if (this == BED && accessor.getBlockEntity() instanceof VerdantBedBlockEntity bed && accessor.getLevel() instanceof ServerLevel level) {
 			data.put(dataKey, bedSnapshot(bed, level));
 		} else if (accessor.getBlockEntity() instanceof LivingDeviceBlockEntity device
@@ -136,13 +136,18 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 	}
 
 	/**
-	 * The crucible: temperature and band, volume, and, following a formula, its step and what it waits for (the next
-	 * operation's text). Never the mixture's makeup: that takes sampling.
+	 * The crucible: temperature and band, the seconds Preserve still holds the band (Chunk B unit 3), volume, and,
+	 * following a formula, its step and what it waits for (the next operation's text). Never the mixture's makeup: that
+	 * takes sampling.
 	 */
-	public static CompoundTag snapshot(CrucibleBlockEntity crucible) {
+	public static CompoundTag snapshot(CrucibleBlockEntity crucible, long now) {
 		CompoundTag snapshot = new CompoundTag();
 		snapshot.putInt("temperature", crucible.temperature());
 		snapshot.putString("band", crucible.band().id);
+		int held = crucible.held(now);
+		if (held > 0) {
+			snapshot.putInt("held", (held + 19) / 20);
+		}
 		snapshot.putInt("parts", crucible.parts());
 		Formula program = crucible.program();
 		if (program != null) {

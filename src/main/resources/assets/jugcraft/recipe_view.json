@@ -16248,8 +16248,16 @@
       "key": "adept_wand"
     },
     {
+      "item": "jugcraft:cinderbrand",
+      "key": "cinderbrand"
+    },
+    {
       "item": "jugcraft:dirge_skull",
       "key": "dirge_skull"
+    },
+    {
+      "item": "jugcraft:glacier_maul",
+      "key": "glacier_maul"
     },
     {
       "item": "jugcraft:golden_thimble",
@@ -16258,6 +16266,10 @@
     {
       "item": "jugcraft:gossamer_silk",
       "key": "gossamer_silk"
+    },
+    {
+      "item": "jugcraft:magmaw",
+      "key": "magmaw"
     },
     {
       "item": "jugcraft:needle_rapier",
@@ -16276,12 +16288,40 @@
       "key": "requiem_skull"
     },
     {
+      "item": "jugcraft:rimeclaw",
+      "key": "rimeclaw"
+    },
+    {
+      "item": "jugcraft:salamander_charm",
+      "key": "salamander_charm"
+    },
+    {
       "item": "jugcraft:tatterlace_headdress",
       "key": "tatterlace_headdress"
     },
     {
+      "item": "jugcraft:tyrant_crest",
+      "key": "tyrant_crest"
+    },
+    {
+      "item": "jugcraft:tyrant_scale",
+      "key": "tyrant_scale"
+    },
+    {
       "item": "jugcraft:vesper_scythe",
       "key": "vesper_scythe"
+    },
+    {
+      "item": "jugcraft:yeti_fur",
+      "key": "yeti_fur"
+    },
+    {
+      "item": "jugcraft:yeti_king_crown",
+      "key": "yeti_king_crown"
+    },
+    {
+      "item": "jugcraft:yeti_mitten",
+      "key": "yeti_mitten"
     }
   ]
 }

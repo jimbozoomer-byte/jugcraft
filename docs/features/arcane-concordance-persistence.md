@@ -81,7 +81,8 @@ Simulation pauses; nothing models what an unloaded place would have done:
 - a lingering spell pulse whose place is unloaded is skipped;
 - a ritual whose circle is partly unloaded stops as unloaded;
 - a cursed creature that unloads leaves the curse index and returns when it loads;
-- a dream's wisps gather only where creatures are live.
+- a dream's wisps gather only where creatures are live;
+- a Preserve hold runs on the world clock: a crucible unloaded while held finds its minute over when it loads.
 
 No Concordance code forces, tickets or synchronously loads a chunk.
 

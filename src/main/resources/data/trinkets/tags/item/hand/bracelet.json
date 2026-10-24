@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "jugcraft:fire_bangle"
+    "jugcraft:fire_bangle",
+    "jugcraft:water_bangle"
   ]
 }

@@ -10,8 +10,12 @@ import io.github.jimbozoomer.jugcraft.concordance.effect.Intent;
 import io.github.jimbozoomer.jugcraft.concordance.effect.Ledger;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.LairRewards;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
+import io.github.jimbozoomer.jugcraft.lair.tyrant.JugcraftTyrant;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.JugcraftVesperine;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineLoot;
+import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
+import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -24,6 +28,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -36,8 +41,9 @@ import net.minecraft.world.phys.Vec3;
  * healing yourself, a friend's blow, a fall and a ward that soaks nothing count for nothing; a tamed creature's blow
  * is its owner's; a fight left forgets who took part; one who left the game and came back is paid like anyone else;
  * and a reward kept for a player is paid once, whether it waited with them or in the world while they were away, and
- * survives a save either way. The bosses' own deeds and falls are in {@link VesperineGameTests} and
- * {@link TatterlaceGameTests}.
+ * survives a save either way, and is paid by its boss's payer. The bosses' own deeds and falls are in
+ * {@link VesperineGameTests} and {@link TatterlaceGameTests}, and since Concordance Chunk B {@link YetiKingGameTests} and
+ * {@link CinderTyrantGameTests}.
  */
 public class LairEncounterGameTests {
 	/**
@@ -353,5 +359,42 @@ public class LairEncounterGameTests {
 			data.take(away);
 		}
 		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk B: a reward kept from {@code boss}'s fall is saved with the player and read back the same, and the
+	 * boss's payer pays it once: at least {@code fewest} of {@code material}, and the experience share.
+	 */
+	private static void keptRewardIsSavedAndPaid(GameTestHelper helper, String boss, Item material, int fewest) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer fallen = player(helper, 1, 1);
+		Vec3 origin = Vec3.atCenterOf(helper.absolutePos(new BlockPos(2, 2, 2)));
+		LairRewards.Due due = new LairRewards.Due(boss, UUID.randomUUID(), origin, 75);
+		LairRewards.owe(fallen, due);
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		fallen.saveWithoutId(out);
+		ServerPlayer again = new ServerPlayer(level.getServer(), level, fallen.getGameProfile(), fallen.clientInformation());
+		again.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
+		// Making it bound the player's advancements to it; they go back to the player in the level.
+		level.getServer().getPlayerList().getPlayerAdvancements(fallen);
+		LairRewards.Owed owed = again.getAttached(LairRewards.OWED);
+		helper.assertTrue(owed != null && owed.due().equals(List.of(due)), "Saved and loaded, it is not owed once under " + boss + ": " + owed);
+		int before = fallen.totalExperience;
+		helper.assertTrue(LairRewards.handOver(fallen) && fallen.getInventory().countItem(material) >= fewest
+				&& fallen.totalExperience - before == 75 && !fallen.hasAttached(LairRewards.OWED), boss + "'s payer did not pay it");
+		helper.assertTrue(!LairRewards.handOver(fallen), "It was paid twice");
+		helper.succeed();
+	}
+
+	/** Concordance Chunk B: a kept Yeti King reward survives a save and is paid by his payer. */
+	@GameTest(maxTicks = 20)
+	public void aKeptYetiKingRewardIsSavedAndPaid(GameTestHelper helper) {
+		keptRewardIsSavedAndPaid(helper, YetiKingLoot.BOSS, JugcraftYeti.YETI_FUR, 4);
+	}
+
+	/** Concordance Chunk B: a kept Cinder Tyrant reward survives a save and is paid by his payer. */
+	@GameTest(maxTicks = 20)
+	public void aKeptCinderTyrantRewardIsSavedAndPaid(GameTestHelper helper) {
+		keptRewardIsSavedAndPaid(helper, CinderTyrantLoot.BOSS, JugcraftTyrant.TYRANT_SCALE, 3);
 	}
 }

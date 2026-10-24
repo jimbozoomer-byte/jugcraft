@@ -9,7 +9,8 @@ import java.util.Set;
 /**
  * What a dose does, worked out from what it carries, with a reason for each effect a player can check against their
  * own process: which property, how much of it a part holds against the threshold, and which ingredients (or searing
- * stirs) put it there. Below a threshold the property is named as too weak, so nothing is mysterious.
+ * stirs, or, for Rime, the warmer stirs that thawed it) put it there. Below a threshold the property is named as too
+ * weak, so nothing is mysterious.
  */
 public record Outcome(List<Effect> effects, List<Text> reasons) {
 	public Outcome {
@@ -52,18 +53,33 @@ public record Outcome(List<Effect> effects, List<Text> reasons) {
 				Vector.units(amount), Vector.units(property.threshold()), sources));
 	}
 
-	/** The items whose ingredients carry {@code axis}, in the order they first went in. */
+	/**
+	 * The items whose ingredients carry {@code axis}, in the order they first went in; for Rime, then the stirs above the
+	 * cold band that thawed some of it (B-08): only a stir after something carrying Rime went in, since a stir thaws only
+	 * Rime already in the mixture (Mixture.apply).
+	 */
 	private static List<Text.Ref> sources(Axis axis, AlchemyCatalog catalog, List<Operation> history) {
 		Set<String> items = new LinkedHashSet<>();
+		boolean rimeIn = false;
+		boolean thawed = false;
 		for (Operation operation : history) {
 			if (operation instanceof Operation.Add add) {
 				Ingredient ingredient = catalog.ingredient(add.item());
 				if (ingredient != null && ingredient.properties().get(axis) > 0) {
 					items.add(add.item());
 				}
+				if (ingredient != null && ingredient.properties().get(Axis.RIME) > 0) {
+					rimeIn = true;
+				}
+			} else if (axis == Axis.RIME && rimeIn && operation instanceof Operation.Stir stir && Mixture.rimeKeep(stir.band()) < 1000L) {
+				thawed = true;
 			}
 		}
-		return refs(items, false);
+		List<Text.Ref> out = refs(items, false);
+		if (thawed) {
+			out.add(new Text.Ref("alchemy", "thawed"));
+		}
+		return out;
 	}
 
 	/** What fouled it: ingredients that bring contaminant, and searing stirs. */

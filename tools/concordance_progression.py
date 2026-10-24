@@ -74,6 +74,11 @@ PRACTICES = {
     "ritual": ("circlewrights", "circle_lore", ["circle_anchor"], []),
     "sympathy": ("hexweavers", "sympathy", ["taglock"], ["creatures"]),
     "worker_service": ("spiritbinders", "binding_arts", ["bonding_charm", "spirit_anchor", "porter_key"], ["days"]),
+    # Rimekeeping's survey: the Glacier Hall, or a Rime brew bottled at a crucible (see graph()); First Light's gate, so
+    # it can come before Rimekeeping is understood (02:136).
+    "winter_survey": ("rimekeepers", "first_light", [], []),
+    "rimework": ("rimekeepers", "rimekeeping", [], []),
+    "anchoring": ("stratawrights", "stratawrighting", [], []),
 }
 
 # Milestones features record (roadmap step 25), each with what it needs (its gate: research, and a stage reached first)
@@ -224,6 +229,18 @@ VANILLA_SOURCES = {
     # Wayfaring's belt, boots and charms (tools/concordance_trinkets.py).
     "minecraft:leather": ("renewable", "cows, horses and llamas; rabbit hide", "", ""),
     "minecraft:golden_apple": ("craftable", "an apple and gold ingots", "", ""),
+    # Specimens: Rimekeeping's and Stratawrighting's (tools/concordance_rime.py, tools/concordance_strata.py), and the
+    # Frost Horn that takes a player to the Glacier Hall (Rimekeeping's survey).
+    "minecraft:snowball": ("renewable", "snow golems; snow in cold biomes, dug with a shovel", "", ""),
+    "minecraft:snow_block": ("craftable", "four snowballs", "", ""),
+    "minecraft:ice": ("renewable", "still water freezes again in cold biomes; mined with Silk Touch", "", ""),
+    "minecraft:packed_ice": ("craftable", "nine ice", "", ""),
+    "minecraft:blue_ice": ("craftable", "nine packed ice", "", ""),
+    "minecraft:goat_horn": ("renewable", "goats ram solid blocks and shed their horns; goats breed", "", ""),
+    "minecraft:granite": ("gathered", "stone veins everywhere underground", "another kind of stone serves instead", ""),
+    "minecraft:diorite": ("gathered", "stone veins everywhere underground", "another kind of stone serves instead", ""),
+    "minecraft:andesite": ("gathered", "stone veins everywhere underground", "another kind of stone serves instead", ""),
+    "minecraft:tuff": ("gathered", "stone veins below Y 0", "another kind of stone serves instead", ""),
 }
 
 # Jugcraft things the world grows rather than a recipe makes, by the same rules as VANILLA_SOURCES.
@@ -232,6 +249,8 @@ JUGCRAFT_SOURCES = {
                      "glowstone dust, glow berries or glow lichen serve instead", ""),
     rid("glimmerbloom"): ("gathered", "frozen gardens and twilight groves", "glowstone dust or glow berries serve instead", ""),
     rid("jack_o_lantern_mushroom"): ("renewable", "spreads from its patch like other wild mushrooms", "", ""),
+    rid("raw_thallite"): ("gathered", "thallite ore in stone and deepslate (the thallite switch)", "ordinary stone serves instead", ""),
+    rid("yeti_fur"): ("found", "the Yeti King's loot, in the Glacier Hall", "the plain Frost Horn recipe needs none", ""),
 }
 
 # Tags from Minecraft or the common namespace that recipes use: (how it is had, what it holds). Jugcraft's own tags are
@@ -509,6 +528,18 @@ def graph(research, invocations, rituals, at_hand=None, problems=None):
                 # Hearthspark kindles the hearths: campfires and candles, both made from what the world renews.
                 spark = f"invocation:{rid('hearthspark')}"
                 alternatives = [[spark, items.item("minecraft:campfire")], [spark, items.tag("minecraft:candles", "item")]]
+            elif key == "winter_survey":
+                # Arriving in the Glacier Hall (a Frost Horn blown at night), or a Rime brew bottled at a crucible.
+                nodes.setdefault("encounter:night", node("", kind="encounter"))
+                alternatives = [[items.item(rid("frost_horn")), "encounter:night"],
+                                [items.item(rid("crucible")), research_node(rid("alembic_arts"), "understood")]]
+            elif key == "rimework":
+                # Preserve counts only a crucible holding a mixture, and only an alembist fills one by hand
+                # (tools/concordance_rime.py RIMEWORK_KEYS; check_rime holds the two together).
+                alternatives = [[f"invocation:{rid('preserve')}", f"invocation:{rid('rimebind')}", items.item(rid("crucible")),
+                                 research_node(rid("alembic_arts"), "understood")]]
+            elif key == "anchoring":
+                alternatives = [[f"invocation:{rid('brace')}"]]
             for encounter in encounters:
                 nodes.setdefault(f"encounter:{encounter}", node("", kind="encounter"))
                 needs.append(f"encounter:{encounter}")
