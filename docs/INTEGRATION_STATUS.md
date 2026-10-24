@@ -21,13 +21,17 @@ Stacked on Chunk C, on branch `claude/chunk-d-pact-hall` (local `wip/chunk-d`); 
 (D-01, D-02) is built on the local branch, not yet pushed: its local checks ran and passed (the data and recipe audit,
 with 45 of its 46 audit mutations reported; the repository check; the owner-art, journey and icon-map checks; the World
 Designer and script tests), but none of its Java has been compiled against Minecraft and none of its 29 server game
-tests has run: `./gradlew build`, the game tests and CI have not run (CI is its first compile). Units 2 to 5 are not
+tests has run: `./gradlew build`, the game tests and CI have not run (CI is its first compile). Unit 4 (D-08) is built
+on another local branch from unit 1's head, beside unit 2 (which is built in parallel; the two are not yet joined), not
+pushed: its local checks ran and passed (the same checks, with all 42 of its audit mutations reported), but none of its
+Java has been compiled and none of its 19 server game tests or its client companion check has run. Units 3 and 5 are not
 started. Not played by hand or with two clients ([the chunk's contract](features/concordance-chunk-d.md)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
 | The agreements keep their promises (unit 1, D-01) | A killed Gathering Shade's load goes into its Spirit Anchor once (or where it fell, if the anchor is not loaded or keeps someone else's agreement), and its holder calls another under the same agreement at no cost; a refused seal says why and spends nothing; a new shade is on the roster at once; only an anchor's owner or their party seal it, where they may build, never a stand-in; the holder can end an agreement without breaking its anchor (the method; the in-game action comes with the pact screens); a familiar fades only for its person's own play time, never for time logged out, nor (while it is loaded) for play while the Concordance is switched off. Not yet run in CI | [workers](features/arcane-concordance-workers.md), [contract](features/concordance-chunk-d.md) |
 | One pact record (unit 1, D-02) | The Bound Will holds the pact (place, hold, beneficiaries, presence, upkeep, the service terms and day's count it was sealed with) and its escrow; a copied anchor is inert and releases nothing; an anchor from before claims its record once, at its own place; upkeep on the Spire's model (for the next units' pacts: the anchor has none), never owing time away, held or switched off; ending returns the escrow once to the living holder; breaking an anchor while switched off releases nothing; the last eight departures kept. Not yet run in CI | [contract](features/concordance-chunk-d.md), [persistence](features/arcane-concordance-persistence.md) |
+| The workshop hand (unit 4, D-08) | Once Stolas's Regard is mastered, a Porter Key binds a Spirit Anchor to its owner's Courier Post and the anchor seals a Workshop Hand, a spirit that carries the post's exact requests (an Alembic Crucible's own shortage among them) through the courier ledger with the porter's own decision, now shared (`CourierWork`; the porter unchanged): for its holder and their party only, within 12 blocks, 06:00 to 18:00, 32 loads a day of at most 64; its hold, hours and day's loads stop only new claims; killed or ended, its cargo waits at the post for another courier or one recovery; each delivery a spirit's service. Not yet run in CI | [logistics](features/arcane-concordance-logistics.md), [workers](features/arcane-concordance-workers.md), [contract](features/concordance-chunk-d.md) |
 
 ## Not merged: Concordance Chunk C (living workshop)
 
