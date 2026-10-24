@@ -19037,15 +19037,17 @@ def check_stolas_body(co):
             err(f"ConcordancePactClientGameTests: his real arrival and departure play their gestures ({needle})")
     # D-09: photographed from his front, and a timed sequence through his refusal, rising inside its clip. The camera stands
     # south of his perch facing north (yaw 180), in the body's shots and in Jade's (at least twice; the unit 5 critique).
+    # Read without comments, so a step commented out no longer counts (the unit 5 review).
     front = '"tp @a %.1f %d %.1f 180 0", perch.getX() + 0.5, perch.getY(), perch.getZ() + 3.0)'
-    if shots.count(front) < 2 or "perch.getZ() - 2.5" in shots:
+    code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", shots, flags=re.S)
+    if code.count(front) < 2 or "perch.getZ() - 2.5" in code:
         err("ConcordancePactClientGameTests: Stolas is photographed from his front, south of his perch, facing him (D-P133)")
     length = pa.GESTURE_TIMES["refuse"][0]
     times = list(pa.REFUSAL_SEQUENCE)
     if times != sorted(set(times)) or not all(0 < t < length for t in times) or len(times) != len(pa.SEQUENCE_SHOTS):
         err(f"tools/concordance_pacts.py REFUSAL_SEQUENCE: rising times inside his refusal's {length} s, one a shot: {times}")
     wanted = "private static final double[] REFUSAL_TIMES = {" + ", ".join(str(t) for t in times) + "};"
-    if wanted not in shots or "refusalSequence(context, server, perch);" not in shots:
+    if wanted not in code or "refusalSequence(context, server, perch);" not in code:
         err(f"ConcordancePactClientGameTests: his refusal is photographed as a timed sequence ({wanted})")
     for name in pa.SEQUENCE_SHOTS:
         if f'"{name}"' not in shots:
@@ -19175,8 +19177,9 @@ def check_roster_screen(co, lang):
         if f'"{name}"' not in shots:
             err(f"ConcordanceRosterClientGameTests: takes {name}")
     # D-09 (D-P135; the unit 5 critique): the hand at work is walked in the run itself, after the recovery and the cancel and
-    # before the full roster (which files all sixteen of the holder's open requests).
-    run = _java_body(shots, "public void runTest(")
+    # before the full roster (which files all sixteen of the holder's open requests). Read without comments, so a step
+    # commented out no longer counts (the unit 5 review).
+    run = _java_body(re.sub(r"//[^\n]*|/\*.*?\*/", " ", shots, flags=re.S), "public void runTest(")
     steps = [run.find(call) for call in ("recoverAndCancel(context, server, setup);", "handAtWork(context, server, stand);",
                                          "full(context, server, setup);")]
     if min(steps) < 0 or not steps[0] < steps[1] < steps[2]:
