@@ -7,6 +7,8 @@ import io.github.jimbozoomer.jugcraft.concordance.journal.JournalLine;
 import io.github.jimbozoomer.jugcraft.concordance.journal.JournalPayload;
 import io.github.jimbozoomer.jugcraft.concordance.journal.JournalSection;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
+import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
 import io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil;
 import io.netty.buffer.Unpooled;
@@ -45,7 +47,7 @@ public class ConcordanceJournalGameTests {
 		int entries = ConcordanceData.rules().research().size();
 		helper.assertValueEqual(((TranslatableContents) research.lines().get(0).text().getContents()).getArgs()[0], entries,
 				"every entry is still unknown");
-		for (String hidden : List.of("vitae", "sky", "workers", "logistics", "relics", "hexes", "conclave", "spires", "assay")) {
+		for (String hidden : List.of("vitae", "sky", "workers", "logistics", "pacts", "relics", "hexes", "conclave", "spires", "assay")) {
 			helper.assertTrue(section(sections, hidden) == null, "no " + hidden + " section before its research is met");
 		}
 		helper.succeed();
@@ -114,6 +116,37 @@ public class ConcordanceJournalGameTests {
 						"exact " + j + " of " + a.id());
 			}
 		}
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D, D-03: from the Binding Arts understood, the pacts section names Stolas's Regard's next step and,
+	 * apart from it (it is no research), the sky step until an observation is recorded; then says it is recorded.
+	 */
+	@GameTest(maxTicks = 20)
+	public void thePactsSectionNamesTheSkyStep(GameTestHelper helper) {
+		ServerPlayer player = TestPlayers.mock(helper);
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		JournalSection pacts = section(Journal.build(player), "pacts");
+		helper.assertTrue(pacts != null, "the pacts section once the Binding Arts are understood");
+		helper.assertValueEqual(pacts.lines().stream().map(line -> key(line.text())).toList(),
+				List.of("journal.jugcraft.pacts.regard.examine", "journal.jugcraft.pacts.sky_needed"), "the next step, and the sky step apart");
+		helper.assertTrue(pacts.lines().stream().noneMatch(line -> line.text().getString().contains("jugcraft:")), "no ids in the words");
+		AstralClaims.of(helper.getLevel().getServer()).observe(player.getUUID(), "jugcraft:full_moon", helper.getLevel().getGameTime());
+		helper.assertValueEqual(section(Journal.build(player), "pacts").lines().stream().map(line -> key(line.text())).toList(),
+				List.of("journal.jugcraft.pacts.regard.examine", "journal.jugcraft.pacts.sky_recorded"), "the observation recorded");
+		helper.succeed();
+	}
+
+	/** Concordance Chunk D, D-03: no pacts section for a newcomer, nor while the Binding Arts are only observed. */
+	@GameTest(maxTicks = 20)
+	public void thePactsSectionWaitsForTheBindingArts(GameTestHelper helper) {
+		ServerPlayer player = TestPlayers.mock(helper);
+		helper.assertTrue(section(Journal.build(player), "pacts") == null, "none for a newcomer");
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.OBSERVED);
+		helper.assertTrue(section(Journal.build(player), "pacts") == null, "none while the Binding Arts are only observed");
+		ConcordanceProgress.grant(player, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		helper.assertTrue(section(Journal.build(player), "pacts") != null, "there once they are understood");
 		helper.succeed();
 	}
 }

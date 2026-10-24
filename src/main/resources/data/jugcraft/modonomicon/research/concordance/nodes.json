@@ -360,6 +360,30 @@
     ]
   },
   {
+    "id": "jugcraft:concordance/stolas_regard_encountered",
+    "required_facts": [
+      "jugcraft:concordance/stolas_regard_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/stolas_regard_observed",
+    "required_facts": [
+      "jugcraft:concordance/stolas_regard_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/stolas_regard_understood",
+    "required_facts": [
+      "jugcraft:concordance/stolas_regard_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/stolas_regard_mastered",
+    "required_facts": [
+      "jugcraft:concordance/stolas_regard_mastered"
+    ]
+  },
+  {
     "id": "jugcraft:concordance/nouveau_arcana_encountered",
     "required_facts": [
       "jugcraft:concordance/nouveau_arcana_encountered"

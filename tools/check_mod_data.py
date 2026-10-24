@@ -14291,6 +14291,7 @@ def check_concordance(registered):
     check_crimson(co, root, lang, registered, research)
     check_workers(co, root, lang, registered, research)
     check_pacts(co, root, lang)
+    check_stolas_regard(co, root, lang, research)
     check_logistics(co, root, lang, registered)
     check_crucible_supply(co, root)
     check_artifice(co, root, lang, registered, research)
@@ -18100,6 +18101,103 @@ def check_pacts(co, root, lang):
                 err(f"{cls}: missing Concordance Chunk D unit 1 game test {name}")
 
 
+def check_stolas_regard(co, root, lang, research):
+    """Concordance Chunk D, D-03 (D-S12; docs/features/concordance-chunk-d.md, docs/features/stolas-pact.md): Stolas's
+    Regard is found through Styx or without him. Its research is the generator's: the Spiritbinders' practitioner entry,
+    begun after the Binding Arts are understood by examining a thing Stolas regards, observed by cultivation, understood by
+    assay and mastered by the pact's first obligation, with no state taking notes; its specimens hold a thing anyone has
+    without Styx, and Styx's flowers are never relied on; the Java names the generator's ids and steps; Styx and the journal
+    name each step and the sky step apart and only read (talking teaches nothing); the pacts section waits for the Binding
+    Arts; examination and the client tooltip know the specimens; the codex entry opens with the Binding Arts understood and
+    names every specimen; and the ticket's game tests exist."""
+    pa = co.pacts
+    import styx
+    def text(path):
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    regard = research.get("stolas_regard", {})
+    if regard != co.research_json("stolas_regard", pa.RESEARCH["stolas_regard"]):
+        err("concordance/research/stolas_regard.json differs from tools/concordance_pacts.py: run tools/generate_material_data.py")
+    if regard.get("requires") != [{"research": f"{MOD}:binding_arts", "state": "understood"}] \
+            or (regard.get("tradition"), regard.get("stage"), regard.get("principle")) != ("spiritbinders", "practitioner", "tether"):
+        err("research stolas_regard: the Spiritbinders' practitioner entry, after the Binding Arts understood and nothing else (D-S12)")
+    wanted = {"encountered": ("examine", f"#{pa.STOLAS_SPECIMEN_TAG}"), "observed": ("practice", pa.CULTIVATION),
+              "understood": ("practice", pa.ASSAY), "mastered": ("practice", pa.PACT_SERVICE)}
+    for state, (kind, what) in wanted.items():
+        rules = regard.get("states", {}).get(state, {}).get("any", [])
+        if [(rule.get("type"), rule.get("specimens") or rule.get("activity")) for rule in rules] != [(kind, what)]:
+            err(f"research stolas_regard/{state}: one way only, {kind} {what} (D-S12): {rules}")
+    if any(rule.get("type") == "notes" for block in regard.get("states", {}).values() for rule in block.get("any", [])):
+        err("research stolas_regard: notes never stand in for Stolas's evidence (03:132)")
+    tag = (load(DATA / MOD / "tags" / "item" / "stolas_specimens.json") or {}).get("values", [])
+    if tag != list({**pa.STYX_SPECIMENS, **pa.PLAIN_SPECIMENS}):
+        err(f"tags/item/stolas_specimens.json {tag} is not tools/concordance_pacts.py's: run tools/generate_material_data.py")
+    plain = [ref for ref in tag if ref not in pa.STYX_SPECIMENS]
+    if not plain or any(co.progression.VANILLA_SOURCES.get(ref, ("",))[0] not in ("craftable", "renewable") for ref in plain):
+        err("#jugcraft:stolas_specimens must hold a thing anyone has without Styx, craftable or renewable (G12)")
+    if f"#{pa.STOLAS_SPECIMEN_TAG}" not in (load(DATA / MOD / "tags" / "item" / "concordance_specimens.json") or {}).get("values", []):
+        err("#jugcraft:concordance_specimens must hold #jugcraft:stolas_specimens, or examination never sees them")
+    for ref in pa.STYX_SPECIMENS:
+        if co.progression.JUGCRAFT_SOURCES.get(ref, ("",))[0] != "found":
+            err(f"tools/concordance_progression.py JUGCRAFT_SOURCES: {ref} is Styx's gift (found), never relied on")
+    java = text(root / "spirits" / "StolasRegard.java")
+    for const, value in (("RESEARCH", pa.REGARD), ("ACTIVITY", pa.PACT_SERVICE)):
+        if f'String {const} = "{value}";' not in java:
+            err(f"spirits/StolasRegard.java: {const} differs from tools/concordance_pacts.py ({value})")
+    if f'Jugcraft.id("{split(pa.STOLAS_SPECIMEN_TAG)[1]}")' not in java:
+        err("spirits/StolasRegard.java: SPECIMENS is #jugcraft:stolas_specimens")
+    steps = [sid for _, sid in re.findall(r'^\t\t([A-Z_]+)\("([a-z_]+)"\)[,;]', _java_body(java, "public enum Step"), re.M)]
+    if steps != pa.STEPS or list(styx.STOLAS_LINES) != pa.STEPS:
+        err(f"StolasRegard.Step {steps} and tools/styx.py STOLAS_LINES {list(styx.STOLAS_LINES)} differ from STEPS in "
+            "tools/concordance_pacts.py (same order)")
+    for sid in pa.STEPS:
+        for key in (f"message.{MOD}.styx.stolas.{sid}", f"journal.{MOD}.pacts.regard.{sid}"):
+            if key not in lang:
+                err(f"Stolas's Regard: missing lang {key}")
+    for key in (f"message.{MOD}.styx.stolas.sky", f"journal.{MOD}.pacts.sky_needed", f"journal.{MOD}.pacts.sky_recorded",
+                f"journal.{MOD}.pacts.sky_count", f"message.{MOD}.concordance.examine.regard",
+                f"tooltip.{MOD}.concordance.stolas_specimen", f"tag.item.{MOD}.stolas_specimens"):
+        if key not in lang:
+            err(f"Stolas's Regard: missing lang {key}")
+    reading = _java_body(java, "public static @Nullable Step step(") + _java_body(java, "public static List<Component> hint(") \
+        + _java_body(java, "public static void report(")
+    if re.search(r"ConcordanceProgress\.(record|grant|award|reset|setFocus)\(|\.observe\(|\.claim\(|setAttached\(|\.put\(", reading):
+        err("spirits/StolasRegard.java: its step, hint and report only read (talking and reading teach nothing, D-S12)")
+    if "ResearchEngine.explain(" not in java or "Workers.enabled()" not in _java_body(java, "public static List<Component> hint("):
+        err("spirits/StolasRegard.java: the hint is the listener's own explain, and nothing with the Concordance off (D-S16)")
+    wizard = text(JAVA_ROOT / "styx" / "Styxhexenhammer.java")
+    says = _java_body(wizard, "public List<Component> says(")
+    if "StolasRegard.hint(listener)" not in says or "message.jugcraft.styx.line." not in says \
+            or "if(!giveCuttings(server)) says(server)" not in wizard:
+        err("styx/Styxhexenhammer.java: he keeps his gift and his line, and adds the listener's own hint (says)")
+    if re.search(r"ConcordanceProgress\.|AstralClaims\.", wizard):
+        err("styx/Styxhexenhammer.java: talking records and grants nothing; the hint is StolasRegard's to read")
+    if 'contribute("pacts", Workers::knows, StolasRegard::report)' not in text(root / "journal" / "Journal.java"):
+        err("journal/Journal.java: the pacts section waits for the Binding Arts understood and is StolasRegard's report")
+    examination = text(root / "Examination.java")
+    at = examination.find("stack.is(StolasRegard.SPECIMENS)")
+    if at < 0 or not at < examination.find("} else if (!stack.is(JugcraftConcordance.LUMINOUS))") \
+            or '"message.jugcraft.concordance.examine.regard"' not in examination:
+        err("Examination.java: Stolas's specimens have their own line, before Circle Lore's form line")
+    if "stack.is(StolasRegard.SPECIMENS)" not in text(CLIENT_JAVA_ROOT / "ConcordanceClient.java"):
+        err("client/ConcordanceClient.java: Stolas's specimens say they can be examined (the non-Styx route)")
+    entry = load(DATA / MOD / "modonomicon" / "books" / co.BOOK / "entries" / "binding" / "stolas_regard.json") or {}
+    if entry.get("condition", {}).get("node_id") != f"{MOD}:concordance/binding_arts_understood":
+        err("codex binding/stolas_regard: the non-Styx route's reading opens with the Binding Arts understood")
+    first = lang.get(f"book.{MOD}.{co.BOOK}.binding.stolas_regard.p0.text", "")
+    for name in {**pa.STYX_SPECIMENS, **pa.PLAIN_SPECIMENS}.values():
+        if name not in first:
+            err(f"codex binding/stolas_regard: its first page names {name}")
+    for state in co.RESEARCH_STAGES:
+        if not (DATA / MOD / "advancement" / f"concordance_stolas_regard_{state}.json").is_file():
+            err(f"advancement concordance_stolas_regard_{state}: missing (run tools/generate_material_data.py)")
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    for cls, names in D03_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing Concordance Chunk D, D-03 game test {name}")
+
+
 def check_logistics(co, root, lang, registered):
     """Roadmap step 18: the Java ledger and post numbers equal tools/concordance_logistics.py; the request states are
     the generator's, in order; every event kind, note and refusal the Java can name has its text; the post has its
@@ -20334,6 +20432,14 @@ UNIT1_TESTS = {
     "ConcordanceSharingGameTests": ["aCopiedAnchorGivesNothingAndReleasesNothing", "aLegacyAnchorClaimsItsPlaceOnce", "endingTwiceReturnsOnce"],
     "ConcordanceResourceGameTests": ["thePactRulesKeepTheirShape"],
 }
+# Concordance Chunk D, D-03's game tests (check_stolas_regard).
+D03_TESTS = {
+    "StyxGameTests": ["styxHintsByTheListenersOwnProgress", "talkingGrantsNoResearch", "styxNamesTheSkyStepUntilOneIsRecorded"],
+    "ConcordanceSharingGameTests": ["notesNeverStandInForStolasEvidence"],
+    "ConcordanceProgressionGameTests": ["stolasRegardIsReachable"],
+    "ConcordanceSkyGameTests": ["aRecordedObservationCountsWithoutAWindow", "aTurnedClockMakesNoNewClaim"],
+    "ConcordanceJournalGameTests": ["thePactsSectionNamesTheSkyStep", "thePactsSectionWaitsForTheBindingArts"],
+}
 
 
 def check_persistence(root):
@@ -20372,7 +20478,8 @@ def check_journey():
     with only their own research, need their own Spire's practice and differ from one another; the first success is the
     data's; one player makes the first loadout (Concordance Chunk A) in the Overworld with First Light understood and no
     other research; the living workshop (Concordance Chunk C, C-10) holds from a manual start, step by step (WORKSHOP);
-    every game test the routes name exists; and the record's routes are the tool's."""
+    every game test the routes name exists; Stolas's Regard (PACT, Concordance Chunk D) holds without Styx; and the
+    record's routes are the tool's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_journey as jr
     for problem in jr.problems():

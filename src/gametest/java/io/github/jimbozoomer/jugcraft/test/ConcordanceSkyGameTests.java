@@ -8,11 +8,14 @@ import io.github.jimbozoomer.jugcraft.concordance.celestial.Attunement;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Calendar;
 import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
 import io.github.jimbozoomer.jugcraft.concordance.resource.AstralLedger;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
+import java.util.Set;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -253,6 +256,56 @@ public class ConcordanceSkyGameTests {
 		copy.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), tag));
 		helper.assertTrue(copy.resonance() == observatory.resonance() && starwatcher.getUUID().equals(copy.keeper())
 				&& copy.status().equals(observatory.status()), "The observatory keeps its resonance, keeper and status");
+		helper.succeed();
+	}
+
+	// ---------------------------------------------------------------- Concordance Chunk D, D-03: the sky step
+
+	/**
+	 * Concordance Chunk D, D-03: the sky step (the invitation's precondition) is the server's record of an observation, not a
+	 * window, and asks no research. A novice has none; looking when nothing is up records nothing; once the full moon is
+	 * observed, the step holds at noon with nothing up, and through a save of the claims.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRecordedObservationCountsWithoutAWindow(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer novice = player(helper, ResearchState.NONE);
+		ObservatoryBlockEntity observatory = observatory(helper, new BlockPos(1, 1, 1), novice);
+		long noon = DAY + 6000;
+		helper.assertTrue(!StolasRegard.skySeen(novice), "No observation, no sky step");
+		helper.assertTrue(observatory.observe(novice, level, noon, 5_000_000L, ONLY_MOON) == 0 && !StolasRegard.skySeen(novice),
+				"Nothing up: nothing recorded");
+		helper.assertTrue(observatory.observe(novice, level, NIGHT_ZERO, 5_000_000L, ONLY_MOON) == 1
+				&& StolasRegard.observed(novice).containsKey(FULL_MOON), "A novice observes the full moon: no research asked");
+		helper.assertTrue(Sky.up(noon).isEmpty() && StolasRegard.skySeen(novice), "Read at noon, with nothing up, it still counts");
+		AstralClaims claims = AstralClaims.of(level.getServer());
+		AstralClaims loaded = AstralClaims.CODEC.parse(NbtOps.INSTANCE, AstralClaims.CODEC.encodeStart(NbtOps.INSTANCE, claims).getOrThrow()).getOrThrow();
+		helper.assertTrue(!loaded.observed(novice.getUUID()).isEmpty(), "And through a save of the claims");
+		helper.succeed();
+	}
+
+	/**
+	 * Concordance Chunk D, D-03 (10:53): turning the clock gives nothing new. An observation and a gathering made, the clock
+	 * turned back a week and the moon watched again from a second observatory adds no pattern, no research evidence and no
+	 * resonance: the ledger holds the occurrence once.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aTurnedClockMakesNoNewClaim(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer starwatcher = player(helper, ResearchState.UNDERSTOOD);
+		ObservatoryBlockEntity first = observatory(helper, new BlockPos(1, 1, 1), starwatcher);
+		ObservatoryBlockEntity second = observatory(helper, new BlockPos(4, 1, 1), starwatcher);
+		long game = 6_000_000L;
+		helper.assertTrue(first.observe(starwatcher, level, NIGHT_ZERO, game, ONLY_MOON) == 1
+				&& first.gather(level, NIGHT_ZERO, game, ONLY_MOON).equals("gathering"), "Observed and gathered once");
+		Knowledge knowledge = ConcordanceProgress.knowledge(starwatcher);
+		long resonance = first.resonance();
+		helper.assertTrue(second.observe(starwatcher, level, NIGHT_ZERO - 8 * DAY, game + 100, ONLY_MOON) == 1,
+				"The clock turned back a week: the moon is up again");
+		helper.assertValueEqual(StolasRegard.observed(starwatcher).keySet(), Set.of(FULL_MOON), "No new pattern");
+		helper.assertTrue(ConcordanceProgress.knowledge(starwatcher).equals(knowledge), "No new research evidence");
+		helper.assertTrue(second.gather(level, NIGHT_ZERO - 8 * DAY, game + 100, ONLY_MOON).equals("gathered") && second.resonance() == 0
+				&& first.resonance() == resonance, "No second claim of the occurrence");
 		helper.succeed();
 	}
 }

@@ -2,7 +2,9 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.serialization.JsonOps;
 import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
+import io.github.jimbozoomer.jugcraft.concordance.ConcordanceData;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
+import io.github.jimbozoomer.jugcraft.concordance.Examination;
 import io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance;
 import io.github.jimbozoomer.jugcraft.concordance.KindledLanternItem;
 import io.github.jimbozoomer.jugcraft.concordance.LanternCharge;
@@ -11,9 +13,13 @@ import io.github.jimbozoomer.jugcraft.concordance.LumenSconceBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.RateGate;
 import io.github.jimbozoomer.jugcraft.concordance.ResearchNotes;
 import io.github.jimbozoomer.jugcraft.concordance.ResearchNotesItem;
+import io.github.jimbozoomer.jugcraft.concordance.assay.Assaying;
 import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.rules.Definitions;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.rules.EvidenceRule;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Knowledge;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.resource.Transfers;
@@ -23,6 +29,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerRoster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Agreement;
@@ -155,6 +162,51 @@ public class ConcordanceSharingGameTests {
 		helper.assertTrue(reader.getMainHandItem().getItem().use(level, reader, InteractionHand.MAIN_HAND) == InteractionResult.FAIL,
 				"A second request at once is ignored");
 		helper.assertTrue(reader.getMainHandItem().has(JugcraftConcordance.RESEARCH_NOTES), "Reading does not use the sheet up");
+		helper.succeed();
+	}
+
+	private static ResearchState stolas(ServerPlayer player) {
+		return ConcordanceProgress.knowledge(player).state(StolasRegard.RESEARCH);
+	}
+
+	/**
+	 * Concordance Chunk D, D-03 (E1, E3): Stolas's Regard takes no notes. An author who has mastered it writes it down; a
+	 * reader with the Binding Arts understood reads the sheet and gains nothing toward it, not even kept evidence. The reader
+	 * earns each state only by their own examination, harvest and assay, and reading again after that adds nothing.
+	 */
+	@GameTest(maxTicks = 20)
+	public void notesNeverStandInForStolasEvidence(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Definitions.Research regard = ConcordanceData.rules().research(StolasRegard.RESEARCH);
+		helper.assertTrue(regard != null && regard.states().values().stream().flatMap(List::stream)
+				.noneMatch(rule -> rule.kind() == EvidenceRule.Kind.NOTES), "No state of Stolas's Regard takes notes: " + regard);
+		ServerPlayer author = player(helper, new BlockPos(1, 2, 1));
+		ServerPlayer reader = player(helper, new BlockPos(3, 2, 1));
+		for (ServerPlayer each : List.of(author, reader)) {
+			ConcordanceProgress.grant(each, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+			ConcordanceProgress.grant(each, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+		}
+		ConcordanceProgress.grant(author, StolasRegard.RESEARCH, ResearchState.MASTERED);
+		author.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM));
+		ResearchNotesItem.write(author, InteractionHand.MAIN_HAND, author.getMainHandItem());
+		ResearchNotes notes = writtenNotes(author).get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(notes != null && notes.entries().get(StolasRegard.RESEARCH) == ResearchState.UNDERSTOOD,
+				"The author's notes name Stolas's Regard, understood: " + notes);
+		ResearchNotesItem.read(reader, notes);
+		Knowledge.Progress read = ConcordanceProgress.knowledge(reader).progress(StolasRegard.RESEARCH);
+		helper.assertTrue(read.state() == ResearchState.NONE && read.evidence().isEmpty(),
+				"Read, the notes give Stolas's Regard nothing, not even kept evidence: " + read);
+		Examination.forget(reader.getUUID());
+		reader.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.FEATHER));
+		Examination.examine(reader, level, reader.getMainHandItem());
+		helper.assertValueEqual(stolas(reader), ResearchState.ENCOUNTERED, "Their own examination of a feather begins it");
+		ConcordanceProgress.record(reader, new Evidence.Practiced(Garden.ACTIVITY, "jugcraft:sunpetal"));
+		ConcordanceProgress.record(reader, new Evidence.Practiced(Assaying.ACTIVITY, "minecraft:raw_iron"));
+		helper.assertValueEqual(stolas(reader), ResearchState.UNDERSTOOD, "Their own harvest and assay understand it");
+		Knowledge.Progress earned = ConcordanceProgress.knowledge(reader).progress(StolasRegard.RESEARCH);
+		ResearchNotesItem.read(reader, notes);
+		helper.assertTrue(ConcordanceProgress.knowledge(reader).progress(StolasRegard.RESEARCH).equals(earned)
+				&& earned.evidence().keySet().stream().noneMatch(key -> key.startsWith("notes:")), "Reading again adds nothing: " + earned);
 		helper.succeed();
 	}
 

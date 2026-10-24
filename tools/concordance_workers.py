@@ -272,7 +272,9 @@ def codex():
                  (art, "observed")),
                 ("text", "Understood",
                  "A familiar, a spirit and a construct will answer you now. To **master** the Binding Arts, be served "
-                 "by each once: a familiar's mending, a spirit's delivery and a construct's trip.", (art, "understood")),
+                 "by each once: a familiar's mending, a spirit's delivery and a construct's trip. Stolas, a raven among "
+                 "the spirits, may take notice of you as well: "
+                 "[Stolas's Regard](entry://jugcraft:arcane_concordance/binding/stolas_regard).", (art, "understood")),
                 ("text", "Mastered", "You keep many, and each keeps its own terms.", (art, "mastered")),
             ],
         },

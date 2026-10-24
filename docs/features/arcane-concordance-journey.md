@@ -132,6 +132,17 @@ From a manual start to a powered crucible a porter supplies, and the garden's mi
 | 4. With the Binding Arts understood, set down a Clockwork Porter and key it to a Courier Post beside a lantern-filled pylon, which fuels it: the crucible asks the post for its formula's exact shortage, which the porter brings from a chest by the post (a Peepo serves through its crucible port as well) | Practitioner | Binding Arts | concordance | Courier Post, Clockwork Porter, Porter Key | `theLivingWorkshopFromAManualStart`, `aCrucibleAsksOnceForItsExactShortage`, `aCourierFillsACrucibleUntilItIsFull`, `anUnloadedCrucibleWaitsAndLosesNothing` |
 | 5. With Verdant Husbandry understood (five entries in five traditions: the generalist's Adept), lay Verdant Beds, grow Dewmoss beside Gloamcap (a mixed bed) and graft Dewlit onto a Sunpetal's bed with a Dewmoss | Adept | Verdant Husbandry | concordance | Verdant Bed, Sunpetal, Dewmoss, Gloamcap | `theLivingWorkshopFromAManualStart`, `aBedSaysWhatItsPlantNeedsAndHowFar`, `aMixedBedGrowsFasterOnlyForAnotherKind`, `restCompostAndTendingEaseStrain`, `aGraftTakesOnceAndConsumesItsDonor` |
 
+### Stolas's Regard
+
+Stolas found through Styx or without him (Concordance Chunk D, D-03). No stage route: one player alone does each step in the Overworld, with the research understood so far, nothing else mastered and no structure loot (a feather stands in for Styx's flowers).
+
+| Step | Understands | Server game tests |
+|---|---|---|
+| 1. With the Binding Arts understood, examine a feather (or a Stolas Starflower, Ravenquill Lupine or Amethyst Mourningbell, Styxhexenhammer's cuttings); Styx, where the world has him, tells each listener their own next step and teaches nothing | First Light, Binding Arts | `styxHintsByTheListenersOwnProgress`, `talkingGrantsNoResearch`, `notesNeverStandInForStolasEvidence` |
+| 2. With Verdant Husbandry understood, harvest a ripe organism crop by hand | Verdant Husbandry | `styxHintsByTheListenersOwnProgress`, `stolasRegardIsReachable` |
+| 3. With the Assay understood, dissolve a sample at an Assayer's Scale: Stolas's Regard is understood | Assay | `notesNeverStandInForStolasEvidence`, `stolasRegardIsReachable` |
+| 4. Record a sky observation at an Orrery Observatory while a pattern is up and visible: the invitation's precondition, no research, which Styx and the journal name apart | nothing new | `styxNamesTheSkyStepUntilOneIsRecorded`, `aRecordedObservationCountsWithoutAWindow`, `aTurnedClockMakesNoNewClaim`, `thePactsSectionNamesTheSkyStep` |
+
 ### Cooperative play
 
 | Shared, and what stays one player's | Server game tests |

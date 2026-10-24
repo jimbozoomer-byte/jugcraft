@@ -18,6 +18,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.FocusPool;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.reliquary.Reliquary;
 import io.github.jimbozoomer.jugcraft.concordance.smithy.Artificery;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.sympathy.Sympathy;
 import io.github.jimbozoomer.jugcraft.concordance.vigil.Vigil;
@@ -126,6 +127,9 @@ final class ConcordanceClient {
 		}
 		if (stack.is(Workers.SPECIMENS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.binding_specimen").withStyle(ChatFormatting.DARK_AQUA));
+		}
+		if (stack.is(StolasRegard.SPECIMENS)) {
+			lines.add(Component.translatable("tooltip.jugcraft.concordance.stolas_specimen").withStyle(ChatFormatting.DARK_AQUA));
 		}
 		if (stack.is(Artificery.SPECIMENS)) {
 			lines.add(Component.translatable("tooltip.jugcraft.concordance.artifice_specimen").withStyle(ChatFormatting.DARK_AQUA));
