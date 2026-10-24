@@ -25,7 +25,8 @@ LISTS = {"crusher": ("crusher", "crushing"), "arc_furnace_controller": ("arc_fur
          "pulverizer": ("pulverizer", "pulverizing"), "ore_washer": ("ore_washer", "ore_washing"),
          "sieve": ("sieve", "sifting"), "sawmill": ("sawmill", "sawing"), "coke_oven": ("coke_oven", "coking"),
          "steel_foundry": ("steel_foundry", "steelmaking"), "tree_farm": ("tree_farm", "tree_growing"),
-         "hydroponic_bay": ("hydroponic_bay", "hydroponics"), "rocket_workshop": ("rocket_workshop", "rocket_assembly")}
+         "hydroponic_bay": ("hydroponic_bay", "hydroponics"), "rocket_workshop": ("rocket_workshop", "rocket_assembly"),
+         "gas_centrifuge_cascade": ("gas_centrifuge_cascade", "enrichment"), "fuel_fabricator": ("fuel_fabricator", "fuel_fabrication")}
 
 
 def build():
@@ -70,6 +71,8 @@ def build():
         fluid_machines.append(dict(block='jugcraft:'+station,type='starter_'+station,recipes=rows))
     import concordance
     import acquisition
+    import station_recipe_view
     return {"machines": machines, "fluid_machines": fluid_machines, "concordance": concordance.recipe_view(),
+            "stations": station_recipe_view.build(),
             "concordance_stations": concordance.recipe_stations(),
             "alchemy_ingredients": concordance.alchemy.recipe_ingredients(), "acquisition_info": acquisition.rows()}
